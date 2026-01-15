@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Responsive by Default
+- **Sparkline** and **MiniArea** now automatically fill their container width when `width` prop is omitted
+  ```tsx
+  // Just works - fills parent container
+  <div style={{ width: '100%' }}>
+    <Sparkline data={data} theme="midnight" />
+  </div>
+  ```
+
 #### Developer Experience Improvements (based on community feedback)
 - **Responsive Mode** - Added `responsive` prop to MonitorLine for automatic width sizing
   ```tsx
