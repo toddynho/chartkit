@@ -1,0 +1,87 @@
+{
+  "name": "@derpdaderp/chartkit",
+  "version": "0.1.0",
+  "description": "Lightweight, zero-dependency charting library for React and Next.js. Beautiful SVG charts with 17 themes.",
+  "author": "Todd Garland",
+  "homepage": "https://chartkit.dev",
+  "bugs": {
+    "url": "https://github.com/toddynho/chartkit/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./themes": {
+      "import": {
+        "types": "./dist/themes/index.d.ts",
+        "default": "./dist/themes/index.js"
+      },
+      "require": {
+        "types": "./dist/themes/index.d.cts",
+        "default": "./dist/themes/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^5.1.2",
+    "jsdom": "^27.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^3.2.4"
+  },
+  "keywords": [
+    "react",
+    "charts",
+    "nextjs",
+    "sparkline",
+    "monitoring",
+    "dashboard",
+    "visualization",
+    "svg",
+    "typescript",
+    "line-chart",
+    "bar-chart",
+    "donut-chart",
+    "gauge",
+    "heatmap",
+    "themes"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toddynho/chartkit"
+  }
+}
