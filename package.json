@@ -11,8 +11,10 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace=chartkit-docs",
-    "build": "npm run build --workspace=@chartkit/core",
+    "build": "npm run build --workspace=@derpdaderp/chartkit && npm run build --workspace=chartkit-docs",
+    "build:lib": "npm run build --workspace=@derpdaderp/chartkit",
     "build:docs": "npm run build --workspace=chartkit-docs",
+    "start": "npm run start --workspace=chartkit-docs",
     "clean": "rm -rf packages/*/dist docs/.next node_modules"
   },
   "devDependencies": {
