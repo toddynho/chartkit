@@ -1,8 +1,8 @@
-import { useState, useMemo, type CSSProperties, type ReactNode } from 'react';
+import { useState, useMemo, useRef, useEffect, type CSSProperties, type ReactNode } from 'react';
 import { themes, type ThemeName } from '../themes';
 import { linearScale, interpolateY } from '../utils';
-import { useUniqueId, useMouseTracking } from '../hooks';
-import type { DataPointClickEvent, TooltipRenderProps, Annotation } from './types';
+import { useUniqueId, useMouseTracking, useResizeObserver } from '../hooks';
+import type { DataPointClickEvent, TooltipRenderProps, Annotation, GridOptions } from './types';
 import { Annotations } from './Annotations';
 
 export interface SeriesConfig {
@@ -17,14 +17,20 @@ export interface SeriesConfig {
 export interface MonitorLineProps<T extends Record<string, unknown>> {
   /** Data array with time and series values */
   data: T[];
-  /** Series configuration */
-  series: SeriesConfig[];
-  /** Chart width in pixels */
+  /** Series configuration (can omit if using dataKey for single series) */
+  series?: SeriesConfig[];
+  /** Single series data key (simplified API for single-series charts) */
+  dataKey?: keyof T;
+  /** Label for single series (used with dataKey) */
+  label?: string;
+  /** Chart width in pixels (ignored if responsive=true) */
   width?: number;
   /** Chart height in pixels */
   height?: number;
   /** Theme name */
   theme: ThemeName;
+  /** Enable responsive width (fills parent container) */
+  responsive?: boolean;
   /** Key for time/x-axis values */
   timeKey?: keyof T;
   /** Unit label for values (e.g., "ms", "req/s") */
@@ -41,6 +47,8 @@ export interface MonitorLineProps<T extends Record<string, unknown>> {
   renderTooltip?: (props: TooltipRenderProps<T>) => ReactNode;
   /** Reference lines and areas */
   annotations?: Annotation[];
+  /** Grid customization options (or false to disable) */
+  grid?: GridOptions | boolean;
   /** Additional CSS class */
   className?: string;
   /** Custom styles for container */
@@ -106,10 +114,13 @@ function calculateMargins(width: number, maxYLabel: string, fontSize: number) {
  */
 export function MonitorLine<T extends Record<string, unknown>>({
   data,
-  series,
-  width = 600,
+  series: seriesProp,
+  dataKey,
+  label,
+  width: widthProp = 600,
   height = 260,
   theme,
+  responsive = false,
   timeKey = 'time' as keyof T,
   unit = 'ms',
   glow = false,
@@ -118,15 +129,37 @@ export function MonitorLine<T extends Record<string, unknown>>({
   onDataPointClick,
   renderTooltip,
   annotations = [],
+  grid = true,
   className,
   style,
 }: MonitorLineProps<T>) {
   const t = themes[theme];
   const glowId = useUniqueId('monitor-glow');
 
+  // Responsive sizing
+  const { ref: containerRef, size: containerSize, ready: containerReady } = useResizeObserver<HTMLDivElement>();
+  const width = responsive ? (containerSize.width || widthProp) : widthProp;
+
+  // Support simplified single-series API
+  const series: SeriesConfig[] = useMemo(() => {
+    if (seriesProp) return seriesProp;
+    if (dataKey) {
+      return [{
+        key: String(dataKey),
+        label: label || String(dataKey),
+      }];
+    }
+    return [];
+  }, [seriesProp, dataKey, label]);
+
   const [visibleSeries, setVisibleSeries] = useState<Record<string, boolean>>(() =>
     series.reduce((acc, s) => ({ ...acc, [s.key]: true }), {})
   );
+  
+  // Update visible series when series changes
+  useEffect(() => {
+    setVisibleSeries(series.reduce((acc, s) => ({ ...acc, [s.key]: true }), {}));
+  }, [series]);
 
   const toggleSeries = (key: string) => {
     setVisibleSeries((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -254,13 +287,22 @@ export function MonitorLine<T extends Record<string, unknown>>({
     overflow: 'hidden',
     padding: `${containerPad}px`,
     boxSizing: 'border-box',
-    width: `${width}px`,
+    width: responsive ? '100%' : `${width}px`,
     height: `${height}px`,
     ...style,
   };
 
+  // For responsive mode, wait until container is measured
+  if (responsive && !containerReady) {
+    return (
+      <div ref={containerRef} className={className} style={containerStyle}>
+        {/* Placeholder while measuring */}
+      </div>
+    );
+  }
+
   return (
-    <div className={className} style={containerStyle}>
+    <div ref={responsive ? containerRef : undefined} className={className} style={containerStyle}>
       {/* Legend / Toggle buttons */}
       <div
         style={{
@@ -349,17 +391,32 @@ export function MonitorLine<T extends Record<string, unknown>>({
         )}
 
         <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
-          {/* Grid lines */}
-          {yTicks.map((tick, i) => (
+          {/* Horizontal Grid lines */}
+          {grid !== false && (typeof grid !== 'object' || grid.horizontal !== false) && yTicks.map((tick, i) => (
             <line
-              key={i}
+              key={`h-${i}`}
               x1={0}
               y1={yScale(tick)}
               x2={chartWidth}
               y2={yScale(tick)}
-              stroke={t.gridLine}
-              strokeWidth={1}
-              strokeDasharray="4,4"
+              stroke={typeof grid === 'object' && grid.color ? grid.color : t.gridLine}
+              strokeWidth={typeof grid === 'object' && grid.strokeWidth ? grid.strokeWidth : 1}
+              strokeDasharray={typeof grid === 'object' && grid.strokeDasharray ? grid.strokeDasharray : "4,4"}
+              opacity={typeof grid === 'object' && grid.opacity !== undefined ? grid.opacity : 1}
+            />
+          ))}
+          {/* Vertical Grid lines */}
+          {grid !== false && typeof grid === 'object' && grid.vertical && xLabels.map(({ index }) => (
+            <line
+              key={`v-${index}`}
+              x1={xScale(index)}
+              y1={0}
+              x2={xScale(index)}
+              y2={chartHeight}
+              stroke={grid.color || t.gridLine}
+              strokeWidth={grid.strokeWidth || 1}
+              strokeDasharray={grid.strokeDasharray || "4,4"}
+              opacity={grid.opacity !== undefined ? grid.opacity : 1}
             />
           ))}
 

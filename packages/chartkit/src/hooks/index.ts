@@ -17,3 +17,7 @@ export {
   type AnimationConfig,
   type UseAnimatedMountResult,
 } from './useAnimatedMount';
+export {
+  useAutoTheme,
+  type UseAutoThemeOptions,
+} from './useAutoTheme';

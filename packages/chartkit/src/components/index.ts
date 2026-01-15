@@ -32,4 +32,5 @@ export type {
   ReferenceLine,
   ReferenceArea,
   Annotation,
+  GridOptions,
 } from './types';

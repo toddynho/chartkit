@@ -122,3 +122,19 @@ export interface ReferenceArea {
 }
 
 export type Annotation = ReferenceLine | ReferenceArea;
+
+/** Grid configuration options */
+export interface GridOptions {
+  /** Show horizontal grid lines (default: true) */
+  horizontal?: boolean;
+  /** Show vertical grid lines (default: false) */
+  vertical?: boolean;
+  /** Dash pattern for grid lines (e.g., "4,4" or "3 3") */
+  strokeDasharray?: string;
+  /** Grid line color (overrides theme) */
+  color?: string;
+  /** Grid line opacity (0-1) */
+  opacity?: number;
+  /** Grid line width */
+  strokeWidth?: number;
+}

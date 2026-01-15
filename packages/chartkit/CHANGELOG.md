@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-01-15
+
+### Added
+
+#### Developer Experience Improvements (based on community feedback)
+- **Responsive Mode** - Added `responsive` prop to MonitorLine for automatic width sizing
+  ```tsx
+  <MonitorLine responsive height={200} data={data} series={series} theme="neon" />
+  ```
+- **useAutoTheme Hook** - Automatic dark/light theme switching based on DOM class or system preference
+  ```tsx
+  const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
+  ```
+- **Simplified Single-Series API** - New `dataKey` and `label` props for single-series charts
+  ```tsx
+  <MonitorLine data={data} dataKey="connections" label="Active Connections" theme="neon" />
+  ```
+- **Grid Customization** - New `grid` prop for fine-grained control over grid lines
+  ```tsx
+  <MonitorLine 
+    grid={{ horizontal: true, vertical: false, strokeDasharray: "3 3", color: "rgba(255,255,255,0.1)" }}
+  />
+  ```
+- **GridOptions Type** - Exported for TypeScript users
+
+### Changed
+- MonitorLine now uses internal resize observer when `responsive={true}`
+- Series prop is now optional when using `dataKey` for single-series charts
+
+---
+
 ## [0.1.0] - 2024-01-15
 
 ### Added
