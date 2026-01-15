@@ -13,7 +13,7 @@ const generateData = () => Array.from({ length: 30 }, () => ({ value: Math.rando
 const props = [
   { name: 'data', type: 'T[] | number[]', description: 'Data array', required: true },
   { name: 'dataKey', type: 'keyof T', default: '"value"', description: 'Key for numeric values' },
-  { name: 'width', type: 'number', default: '160', description: 'Chart width' },
+  { name: 'width', type: 'number', default: 'auto', description: 'Chart width (auto-fills container if not set)' },
   { name: 'height', type: 'number', default: '40', description: 'Chart height' },
   { name: 'theme', type: 'ThemeName', description: 'Theme name', required: true },
   { name: 'color', type: 'string', description: 'Override color' },
@@ -50,17 +50,17 @@ export default function MiniAreaPage() {
       />
 
       <h2 id="usage">Usage</h2>
+      <p>The chart automatically fills its container width:</p>
 
       <CodeBlock
         language="tsx"
         code={`import { MiniArea } from '@derpdaderp/chartkit';
 
-<MiniArea
-  data={data}
-  theme="${themeName}"
-  width={160}
-  height={40}
-/>`}
+// Responsive - fills container width automatically
+<MiniArea data={data} theme="${themeName}" />
+
+// Fixed width
+<MiniArea data={data} theme="${themeName}" width={160} height={40} />`}
       />
 
       <h2 id="props">Props</h2>

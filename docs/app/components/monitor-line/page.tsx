@@ -28,13 +28,17 @@ function generateMultiSeriesData() {
 
 const props = [
   { name: 'data', type: 'T[]', description: 'Data array with time and series values', required: true },
-  { name: 'series', type: 'SeriesConfig[]', description: 'Series configuration array', required: true },
-  { name: 'width', type: 'number', default: '600', description: 'Chart width in pixels' },
+  { name: 'series', type: 'SeriesConfig[]', description: 'Series configuration (optional if using dataKey)' },
+  { name: 'dataKey', type: 'keyof T', description: 'Single series data key (simplified API)' },
+  { name: 'label', type: 'string', description: 'Label for single series (used with dataKey)' },
+  { name: 'width', type: 'number', default: '600', description: 'Chart width (ignored if responsive=true)' },
   { name: 'height', type: 'number', default: '260', description: 'Chart height in pixels' },
+  { name: 'responsive', type: 'boolean', default: 'false', description: 'Auto-fill container width' },
   { name: 'theme', type: 'ThemeName', description: 'Theme name', required: true },
   { name: 'timeKey', type: 'keyof T', default: '"time"', description: 'Key for time/x-axis values' },
   { name: 'unit', type: 'string', default: '"ms"', description: 'Unit label for values' },
   { name: 'glow', type: 'boolean', default: 'false', description: 'Enable glow effect on lines' },
+  { name: 'grid', type: 'GridOptions | boolean', default: 'true', description: 'Grid line configuration' },
   { name: 'className', type: 'string', description: 'Additional CSS class' },
   { name: 'style', type: 'CSSProperties', description: 'Custom styles for container' },
 ];
@@ -158,29 +162,55 @@ const series = [
 
       <h2 id="responsive">Responsive Width</h2>
       <p>
-        Use the <code>useContainerWidth</code> hook to make the chart responsive:
+        Use the <code>responsive</code> prop to automatically fill the container width:
       </p>
 
       <CodeBlock
         language="tsx"
-        code={`import { MonitorLine, useContainerWidth } from '@derpdaderp/chartkit';
+        code={`<MonitorLine
+  data={data}
+  series={series}
+  theme="${themeName}"
+  responsive
+  height={300}
+/>`}
+      />
 
-function ResponsiveMonitor({ data, series }) {
-  const { ref, width } = useContainerWidth<HTMLDivElement>();
-  
-  return (
-    <div ref={ref} style={{ width: '100%' }}>
-      {width > 0 && (
-        <MonitorLine
-          data={data}
-          series={series}
-          width={width}
-          theme="${themeName}"
-        />
-      )}
-    </div>
-  );
-}`}
+      <h2 id="single-series">Single Series (Simplified API)</h2>
+      <p>
+        For single-series charts, use <code>dataKey</code> and <code>label</code> instead of the <code>series</code> array:
+      </p>
+
+      <CodeBlock
+        language="tsx"
+        code={`// Instead of series={[{ key: 'connections', label: 'Active Connections' }]}
+<MonitorLine
+  data={data}
+  dataKey="connections"
+  label="Active Connections"
+  theme="${themeName}"
+  responsive
+/>`}
+      />
+
+      <h2 id="grid-options">Grid Customization</h2>
+      <p>
+        Customize the grid lines with the <code>grid</code> prop:
+      </p>
+
+      <CodeBlock
+        language="tsx"
+        code={`<MonitorLine
+  data={data}
+  series={series}
+  theme="${themeName}"
+  grid={{
+    horizontal: true,
+    vertical: false,
+    strokeDasharray: "3 3",
+    color: "rgba(255,255,255,0.1)",
+  }}
+/>`}
       />
 
       <h2 id="props">Props</h2>

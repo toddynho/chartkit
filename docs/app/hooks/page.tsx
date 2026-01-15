@@ -10,6 +10,40 @@ export default function HooksPage() {
         ChartKit exports several utility hooks for building responsive and animated charts.
       </p>
 
+      <h2 id="use-auto-theme">useAutoTheme</h2>
+      <p>
+        Automatically switches chart themes based on your app&apos;s dark/light mode. Works with next-themes, Tailwind dark mode, or system preferences.
+      </p>
+      <CodeBlock
+        language="tsx"
+        code={`import { MonitorLine, useAutoTheme } from '@derpdaderp/chartkit';
+
+function Chart({ data, series }) {
+  // Automatically switches between themes based on dark mode
+  const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
+  
+  return <MonitorLine data={data} series={series} theme={theme} />;
+}
+
+// Or use system preference instead of DOM class
+const theme = useAutoTheme({ 
+  light: 'sunset', 
+  dark: 'midnight',
+  useSystemPreference: true 
+});`}
+      />
+
+      <h3>Options</h3>
+      <PropsTable
+        props={[
+          { name: 'light', type: 'ThemeName', description: 'Theme for light mode', required: true },
+          { name: 'dark', type: 'ThemeName', description: 'Theme for dark mode', required: true },
+          { name: 'selector', type: 'string', default: '"html"', description: 'DOM selector to observe for class changes' },
+          { name: 'darkClass', type: 'string', default: '"dark"', description: 'Class that indicates dark mode' },
+          { name: 'useSystemPreference', type: 'boolean', default: 'false', description: 'Use system preference instead of DOM class' },
+        ]}
+      />
+
       <h2 id="use-container-width">useContainerWidth</h2>
       <p>
         A hook for making charts responsive by tracking their container width.

@@ -14,7 +14,7 @@ const generateData = (count: number = 30) =>
 const props = [
   { name: 'data', type: 'T[] | number[]', description: 'Data array - can be objects or plain numbers', required: true },
   { name: 'dataKey', type: 'keyof T', default: '"value"', description: 'Key to extract numeric value when data contains objects' },
-  { name: 'width', type: 'number', default: '120', description: 'Chart width in pixels' },
+  { name: 'width', type: 'number', default: 'auto', description: 'Chart width in pixels (auto-fills container if not set)' },
   { name: 'height', type: 'number', default: '32', description: 'Chart height in pixels' },
   { name: 'theme', type: 'ThemeName', description: 'Theme name', required: true },
   { name: 'color', type: 'string', description: 'Override line color' },
@@ -73,7 +73,7 @@ export default function SparklinePage() {
       />
 
       <h2 id="usage">Usage</h2>
-      <p>Import the component and pass your data:</p>
+      <p>Import the component and pass your data. The chart automatically fills its container width:</p>
 
       <CodeBlock
         language="tsx"
@@ -87,12 +87,11 @@ const data = [
   { value: 22 },
 ];
 
-<Sparkline
-  data={data}
-  theme="${themeName}"
-  width={120}
-  height={32}
-/>`}
+// Responsive - fills container width automatically
+<Sparkline data={data} theme="${themeName}" />
+
+// Fixed width
+<Sparkline data={data} theme="${themeName}" width={120} height={32} />`}
       />
 
       <h2 id="with-plain-numbers">With Plain Numbers</h2>

@@ -6,6 +6,8 @@ A lightweight, zero-dependency charting library for React and Next.js. Built wit
 
 - **14 Chart Components** - Lines, bars, areas, scatter, gauges, and more
 - **17 Beautiful Themes** - Dark and light themes inspired by popular tools
+- **Responsive by Default** - Sparkline & MiniArea auto-fill containers
+- **Auto Theme Switching** - `useAutoTheme` hook for dark/light mode
 - **Zero Dependencies** - Pure SVG, no D3 or heavy charting libraries
 - **TypeScript First** - Full type safety with comprehensive types
 - **Server Component Ready** - Works with React Server Components
@@ -24,29 +26,25 @@ pnpm add @derpdaderp/chartkit
 ## Quick Start
 
 ```tsx
-import { MonitorLine, ThemeProvider } from '@derpdaderp/chartkit'
+import { Sparkline, MonitorLine, useAutoTheme } from '@derpdaderp/chartkit'
 
-const data = [
-  { timestamp: '2024-01-01', cpu: 45, memory: 62 },
-  { timestamp: '2024-01-02', cpu: 52, memory: 58 },
-  { timestamp: '2024-01-03', cpu: 48, memory: 65 },
-  // ...
-]
+// Sparkline - responsive by default, fills container
+<Sparkline data={[10, 25, 15, 30, 22]} theme="midnight" />
 
-function Dashboard() {
-  return (
-    <ThemeProvider theme="midnight">
-      <MonitorLine
-        data={data}
-        xKey="timestamp"
-        series={[
-          { key: 'cpu', name: 'CPU %', color: 'primary' },
-          { key: 'memory', name: 'Memory %', color: 'secondary' },
-        ]}
-        height={300}
-      />
-    </ThemeProvider>
-  )
+// MonitorLine with responsive mode
+<MonitorLine
+  data={data}
+  dataKey="cpu"
+  label="CPU Usage"
+  theme="neon"
+  responsive
+  height={300}
+/>
+
+// Auto dark/light theme switching
+function Chart({ data }) {
+  const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
+  return <MonitorLine data={data} dataKey="value" theme={theme} responsive />;
 }
 ```
 
