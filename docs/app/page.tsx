@@ -1,11 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Zap, Palette, Box, Code } from 'lucide-react';
+import { ArrowRight, Zap, Palette, Box, Code, Package, Download, FileCode, Bot } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { KpiCard } from '@derpdaderp/chartkit';
 import { useMemo } from 'react';
 import { useChartTheme, themeColors } from '@/components/ChartThemeProvider';
+
+const PACKAGE_VERSION = '0.2.0';
+const BUNDLE_SIZE = '~15KB';
 
 // Generate sample data
 function generateData(count: number = 20) {
@@ -62,9 +65,40 @@ export default function HomePage() {
             Beautiful charts for{' '}
             <span style={{ color: accentColor }} className="transition-colors duration-300">Next.js</span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
             Lightweight, theme-aware charting library with components inspired by monitoring dashboards like Vercel, Turso, and Cloudflare.
           </p>
+          
+          {/* Stats bar */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-10 text-sm">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted border border-border">
+              <Package className="h-3.5 w-3.5" />
+              v{PACKAGE_VERSION}
+            </span>
+            <a
+              href="https://www.npmjs.com/package/@derpdaderp/chartkit"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted border border-border hover:border-accent/50 transition-colors"
+            >
+              <Download className="h-3.5 w-3.5" />
+              npm
+            </a>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted border border-border">
+              <FileCode className="h-3.5 w-3.5" />
+              {BUNDLE_SIZE} gzipped
+            </span>
+            <a
+              href="/llms.txt"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted border border-border hover:border-accent/50 transition-colors"
+            >
+              <Bot className="h-3.5 w-3.5" />
+              AI-ready
+            </a>
+          </div>
+
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/getting-started"

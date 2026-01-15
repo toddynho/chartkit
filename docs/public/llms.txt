@@ -1,0 +1,147 @@
+# ChartKit - AI Assistant Reference
+
+> Lightweight React charting library. Zero dependencies, pure SVG, 17 themes.
+
+## Installation
+```bash
+npm install @derpdaderp/chartkit
+```
+
+## Quick Examples
+
+### Sparkline (responsive by default)
+```tsx
+import { Sparkline } from '@derpdaderp/chartkit';
+<Sparkline data={[10, 25, 15, 30, 22]} theme="midnight" />
+```
+
+### Line Chart with Auto Theme
+```tsx
+import { MonitorLine, useAutoTheme } from '@derpdaderp/chartkit';
+
+const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
+
+<MonitorLine
+  data={data}
+  dataKey="value"
+  label="Metric"
+  theme={theme}
+  responsive
+  height={200}
+/>
+```
+
+### Bar Chart
+```tsx
+import { BarChart } from '@derpdaderp/chartkit';
+
+<BarChart
+  data={[{ month: 'Jan', value: 100 }, { month: 'Feb', value: 150 }]}
+  dataKey="value"
+  categoryKey="month"
+  theme="midnight"
+/>
+```
+
+### KPI Card
+```tsx
+import { KpiCard } from '@derpdaderp/chartkit';
+
+<KpiCard
+  label="Revenue"
+  value={125000}
+  delta={12.5}
+  data={sparklineData}
+  theme="sunset"
+  format={(v) => `$${(v/1000).toFixed(0)}K`}
+/>
+```
+
+## All Components
+
+### Charts
+| Component | Description | Key Props |
+|-----------|-------------|-----------|
+| Sparkline | Inline trend line | `data`, `theme`, `height?`, `glow?`, `fill?` |
+| MiniArea | Small area chart | `data`, `theme`, `height?`, `color?` |
+| MonitorLine | Multi-series line chart | `data`, `series` or `dataKey`, `theme`, `responsive?`, `height?`, `glow?` |
+| StackedArea | Stacked area chart | `data`, `series`, `theme`, `width?`, `height?` |
+| BarChart | Grouped bar chart | `data`, `dataKey`, `categoryKey`, `theme` |
+| DonutChart | Pie/donut chart | `data`, `dataKey`, `labelKey`, `theme` |
+| ScatterChart | Scatter/bubble | `data`, `xKey`, `yKey`, `theme`, `sizeKey?` |
+| ComboChart | Mixed chart types | `data`, `xKey`, `leftAxis`, `rightAxis?`, `theme` |
+| Heatmap | Activity grid | `data`, `theme` |
+| SpikeChart | Event spikes | `data`, `theme` |
+| KpiCard | Metric card | `label`, `value`, `delta?`, `data`, `theme`, `format?` |
+| ProgressRing | Circular progress | `value`, `theme`, `size?`, `showValue?` |
+| GaugeChart | Semicircular gauge | `value`, `min?`, `max?`, `theme`, `ranges?` |
+
+### Utilities
+| Component | Description |
+|-----------|-------------|
+| Legend | Standalone legend |
+| ResponsiveChart | Auto-sizing wrapper |
+
+## Themes
+
+### Dark (13)
+midnight, emerald, mono, slate, arctic, orchid, obsidian, neon, mocha, owl, retro, copper, rose
+
+### Light (4)
+sunset, silver, pearl, latte
+
+## Hooks
+
+### useAutoTheme
+Auto-switch themes based on dark/light mode:
+```tsx
+const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
+```
+
+### useContainerWidth
+Get container width for responsive charts:
+```tsx
+const { ref, width } = useContainerWidth();
+```
+
+## Common Patterns
+
+### Responsive Chart
+```tsx
+<MonitorLine data={data} dataKey="value" theme="midnight" responsive height={200} />
+```
+
+### Dark/Light Mode
+```tsx
+const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
+<Sparkline data={data} theme={theme} />
+```
+
+### Custom Tooltip
+```tsx
+<MonitorLine
+  data={data}
+  series={series}
+  theme="midnight"
+  renderTooltip={({ data, series }) => (
+    <div>{series[0].label}: {series[0].value}</div>
+  )}
+/>
+```
+
+### With Annotations
+```tsx
+<MonitorLine
+  data={data}
+  series={series}
+  theme="midnight"
+  annotations={[
+    { type: 'line', axis: 'y', value: 80, label: 'Threshold' }
+  ]}
+/>
+```
+
+## Links
+- Docs: https://chartkit.dev
+- npm: https://www.npmjs.com/package/@derpdaderp/chartkit
+- GitHub: https://github.com/toddynho/chartkit
