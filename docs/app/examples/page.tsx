@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { DocsLayout } from '@/components/layout/DocsLayout';
 import {
   KpiCard,
-  MonitorLine,
+  LineChart,
   BarChart,
   DonutChart,
   Heatmap,
@@ -223,7 +223,7 @@ function MonitoringDashboard({ theme }: { theme: string }) {
           <h4 className="text-sm font-medium mb-3" style={{ color: t.textSecondary }}>Response Time (24h)</h4>
           <ResponsiveChart aspectRatio={16 / 7}>
             {({ width, height }) => (
-              <MonitorLine
+              <LineChart
                 data={latencyData}
                 series={[
                   { key: 'p50', label: 'p50', displayValue: '1.8ms' },
@@ -234,6 +234,7 @@ function MonitoringDashboard({ theme }: { theme: string }) {
                 width={width}
                 height={height}
                 unit="ms"
+                curve="monotone"
                 annotations={[
                   { type: 'line', value: 5, axis: 'y', label: 'SLA', color: '#ef4444', labelPosition: 'end' },
                   { type: 'area', start: 0, end: 3, axis: 'y', color: '#22c55e', opacity: 0.05 },

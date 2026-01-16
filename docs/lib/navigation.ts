@@ -17,7 +17,7 @@ export const navigation: NavItem[] = [
       // Time Series
       { title: 'Sparkline', href: '/components/sparkline' },
       { title: 'MiniArea', href: '/components/mini-area' },
-      { title: 'MonitorLine', href: '/components/monitor-line' },
+      { title: 'LineChart', href: '/components/line-chart' },
       { title: 'StackedArea', href: '/components/stacked-area' },
       // Categorical
       { title: 'BarChart', href: '/components/bar-chart' },

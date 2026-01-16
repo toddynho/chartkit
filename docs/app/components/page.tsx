@@ -38,9 +38,9 @@ const components = [
     ),
   },
   {
-    name: 'MonitorLine',
-    href: '/components/monitor-line',
-    description: 'Multi-series line charts with interactive legend toggles.',
+    name: 'LineChart',
+    href: '/components/line-chart',
+    description: 'Multi-series line charts with dual Y-axis, curve types, and area fills.',
     category: 'Time Series',
     preview: () => (
       <div className="text-xs text-center text-muted-foreground">

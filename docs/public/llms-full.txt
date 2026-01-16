@@ -1,6 +1,6 @@
 # ChartKit - Complete API Reference for AI Assistants
 
-> @derpdaderp/chartkit v0.2.0
+> @derpdaderp/chartkit v0.3.0
 > Lightweight React charting library with 14 components and 17 themes.
 > Zero dependencies, pure SVG, ~15KB gzipped.
 
@@ -59,18 +59,18 @@ import { MiniArea } from '@derpdaderp/chartkit';
 
 ---
 
-### MonitorLine
-Multi-series line chart with legend toggles and tooltips.
+### LineChart
+Feature-rich line chart with dual Y-axis, curve types, and area fills.
 
 ```tsx
-import { MonitorLine } from '@derpdaderp/chartkit';
+import { LineChart } from '@derpdaderp/chartkit';
 
-<MonitorLine
+<LineChart
   data={T[]}                 // Required. Data array
   theme={ThemeName}          // Required
   
   // Series config - use ONE of these approaches:
-  series={SeriesConfig[]}    // Multi-series: [{ key, label, displayValue? }]
+  series={SeriesConfig[]}    // Multi-series config
   // OR
   dataKey={keyof T}          // Single-series: just the data key
   label={string}             // Single-series: display label
@@ -79,21 +79,50 @@ import { MonitorLine } from '@derpdaderp/chartkit';
   width={number}             // Default: 600. Ignored if responsive=true
   height={number}            // Default: 260
   timeKey={keyof T}          // Default: "time". X-axis key
-  unit={string}              // Default: "ms". Y-axis unit label
-  glow={boolean}             // Default: false
-  connectNulls={boolean}     // Default: true
+  unit={string}              // Y-axis unit (shorthand for yAxisLeft.unit)
+  
+  // Dual Y-axis
+  yAxisLeft={YAxisConfig}    // Left Y-axis configuration
+  yAxisRight={YAxisConfig}   // Right Y-axis (enables dual-axis mode)
+  
+  // Curve and styling
+  curve={CurveType}          // Default: "linear". Line interpolation
+  showDots={boolean}         // Default: false. Show data point dots
+  dotSize={number}           // Default: 3. Dot radius
+  glow={boolean}             // Default: false. Glow effect
+  showLegend={boolean}       // Default: true
+  
   grid={GridOptions|boolean} // Default: true. Grid configuration
   annotations={Annotation[]} // Optional. Reference lines/areas
+  connectNulls={boolean}     // Default: true
   onDataPointClick={fn}      // Optional. Click handler
   renderTooltip={fn}         // Optional. Custom tooltip renderer
 />
 
 // SeriesConfig
 interface SeriesConfig {
-  key: string;           // Data property key
-  label: string;         // Display label
-  displayValue?: string; // Badge value in legend
+  key: string;               // Data property key
+  label: string;             // Display label
+  displayValue?: string;     // Badge value in legend
+  yAxisId?: 'left'|'right';  // Y-axis assignment (default: 'left')
+  area?: boolean;            // Fill area under line
+  areaOpacity?: number;      // Area fill opacity (default: 0.15)
+  color?: string;            // Custom line color
+  strokeDasharray?: string;  // Dash pattern (e.g., "5,5")
+  strokeWidth?: number;      // Line width (default: 2)
 }
+
+// YAxisConfig
+interface YAxisConfig {
+  unit?: string;             // Unit label (e.g., "ms", "req/s")
+  min?: number;              // Minimum value (auto if not set)
+  max?: number;              // Maximum value (auto if not set)
+  tickCount?: number;        // Number of ticks (default: 3)
+  format?: (v: number) => string; // Custom tick formatter
+}
+
+// CurveType
+type CurveType = 'linear' | 'monotone' | 'step' | 'stepBefore' | 'stepAfter';
 
 // GridOptions
 interface GridOptions {
@@ -106,29 +135,53 @@ interface GridOptions {
 }
 ```
 
-Example - Multi-series:
+Example - Basic:
 ```tsx
-<MonitorLine
+<LineChart
+  data={data}
+  dataKey="value"
+  label="Revenue"
+  theme="midnight"
+  responsive
+/>
+```
+
+Example - Multi-series with smooth curves:
+```tsx
+<LineChart
   data={data}
   series={[
     { key: 'p50', label: 'p50', displayValue: '1.8ms' },
     { key: 'p99', label: 'p99', displayValue: '5.2ms' },
   ]}
   theme="neon"
+  curve="monotone"
   responsive
   height={300}
-  glow
 />
 ```
 
-Example - Single-series:
+Example - Dual Y-axis:
 ```tsx
-<MonitorLine
+<LineChart
   data={data}
-  dataKey="connections"
-  label="Active Connections"
+  series={[
+    { key: 'requests', label: 'Requests', yAxisId: 'left' },
+    { key: 'latency', label: 'Latency', yAxisId: 'right', strokeDasharray: '5,5' },
+  ]}
+  yAxisLeft={{ unit: 'req/s' }}
+  yAxisRight={{ unit: 'ms' }}
   theme="midnight"
-  responsive
+/>
+```
+
+Example - Area chart:
+```tsx
+<LineChart
+  data={data}
+  series={[{ key: 'value', label: 'Sales', area: true }]}
+  curve="monotone"
+  theme="emerald"
 />
 ```
 
@@ -367,7 +420,7 @@ const theme = useAutoTheme({
 Example:
 ```tsx
 const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
-<MonitorLine data={data} theme={theme} responsive />
+<LineChart data={data} dataKey="value" theme={theme} responsive />
 ```
 
 ---

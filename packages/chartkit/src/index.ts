@@ -1,17 +1,17 @@
 // Components
 export {
-  // Original Chart Components
+  // Chart Components
+  LineChart,
+  MonitorLine, // deprecated alias
   Sparkline,
   MiniArea,
   KpiCard,
-  MonitorLine,
   SpikeChart,
   BarChart,
   DonutChart,
   StackedArea,
   Heatmap,
   ResponsiveChart,
-  // New Chart Components (Phase 2)
   ScatterChart,
   ComboChart,
   ProgressRing,
@@ -21,11 +21,13 @@ export {
   Legend,
   Annotations,
   // Types
+  type LineChartProps,
+  type MonitorLineProps, // deprecated alias
+  type YAxisConfig,
+  type SeriesConfig,
   type SparklineProps,
   type MiniAreaProps,
   type KpiCardProps,
-  type MonitorLineProps,
-  type SeriesConfig,
   type SpikeChartProps,
   type BarChartProps,
   type DonutChartProps,
@@ -51,6 +53,7 @@ export {
   type ReferenceLine,
   type ReferenceArea,
   type Annotation,
+  type GridOptions,
 } from './components';
 
 // Themes
@@ -65,11 +68,14 @@ export {
   padExtent,
   interpolateY,
   linePath,
+  linePathFromPoints,
   areaPath,
+  areaPathFromLine,
   generateTicks,
   type ScaleFunction,
   type Extent,
   type InterpolatedPoint,
+  type CurveType,
 } from './utils';
 
 // Hooks

@@ -7,7 +7,7 @@ import { KpiCard } from '@derpdaderp/chartkit';
 import { useMemo } from 'react';
 import { useChartTheme, themeColors } from '@/components/ChartThemeProvider';
 
-const PACKAGE_VERSION = '0.2.0';
+const PACKAGE_VERSION = '0.3.0';
 const BUNDLE_SIZE = '~15KB';
 
 // Generate sample data
@@ -41,7 +41,7 @@ const features = [
 ];
 
 const components = [
-  { name: 'MonitorLine', href: '/components/monitor-line', description: 'Multi-series line charts with tooltips' },
+  { name: 'LineChart', href: '/components/line-chart', description: 'Multi-series line charts with dual Y-axis' },
   { name: 'BarChart', href: '/components/bar-chart', description: 'Grouped bar charts with annotations' },
   { name: 'ComboChart', href: '/components/combo-chart', description: 'Mixed line, bar, area with dual Y-axis' },
   { name: 'ScatterChart', href: '/components/scatter-chart', description: 'Scatter and bubble charts' },

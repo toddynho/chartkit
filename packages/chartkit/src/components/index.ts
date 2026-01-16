@@ -2,7 +2,9 @@
 export { Sparkline, type SparklineProps } from './Sparkline';
 export { MiniArea, type MiniAreaProps } from './MiniArea';
 export { KpiCard, type KpiCardProps } from './KpiCard';
-export { MonitorLine, type MonitorLineProps, type SeriesConfig } from './MonitorLine';
+export { LineChart, MonitorLine, type LineChartProps, type SeriesConfig, type YAxisConfig } from './LineChart';
+/** @deprecated Use LineChartProps instead */
+export type MonitorLineProps<T extends Record<string, unknown>> = import('./LineChart').LineChartProps<T>;
 export { SpikeChart, type SpikeChartProps } from './SpikeChart';
 export { BarChart, type BarChartProps } from './BarChart';
 export { DonutChart, type DonutChartProps } from './DonutChart';

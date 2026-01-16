@@ -3,7 +3,7 @@
 import { DocsLayout } from '@/components/layout/DocsLayout';
 import { PropsTable } from '@/components/docs/PropsTable';
 import { CodeBlock } from '@/components/docs/CodeBlock';
-import { MonitorLine, ScatterChart } from '@derpdaderp/chartkit';
+import { LineChart, ScatterChart } from '@derpdaderp/chartkit';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 import { useMemo } from 'react';
 
@@ -56,7 +56,7 @@ export default function AnnotationsPage() {
       <h2 id="reference-lines">Reference Lines</h2>
       <p>Draw horizontal or vertical lines at specific values:</p>
       <div className="not-prose my-6 p-4 rounded-lg border border-border">
-        <MonitorLine
+        <LineChart
           data={lineData}
           series={[{ key: 'latency', label: 'Latency' }]}
           theme={themeName}
@@ -72,7 +72,7 @@ export default function AnnotationsPage() {
 
       <CodeBlock
         language="tsx"
-        code={`<MonitorLine
+        code={`<LineChart
   data={data}
   series={[{ key: 'latency', label: 'Latency' }]}
   theme="${themeName}"
@@ -86,7 +86,7 @@ export default function AnnotationsPage() {
       <h2 id="reference-areas">Reference Areas</h2>
       <p>Highlight ranges with filled areas:</p>
       <div className="not-prose my-6 p-4 rounded-lg border border-border">
-        <MonitorLine
+        <LineChart
           data={lineData}
           series={[{ key: 'latency', label: 'Latency' }]}
           theme={themeName}
@@ -103,7 +103,7 @@ export default function AnnotationsPage() {
 
       <CodeBlock
         language="tsx"
-        code={`<MonitorLine
+        code={`<LineChart
   data={data}
   series={[{ key: 'latency', label: 'Latency' }]}
   theme="${themeName}"
@@ -137,7 +137,7 @@ export default function AnnotationsPage() {
       <h2 id="label-position">Label Positioning</h2>
       <p>Control where labels appear with <code>labelPosition</code>:</p>
       <div className="not-prose my-6 p-4 rounded-lg border border-border">
-        <MonitorLine
+        <LineChart
           data={lineData}
           series={[{ key: 'latency', label: 'Latency' }]}
           theme={themeName}
@@ -155,7 +155,7 @@ export default function AnnotationsPage() {
       <h2 id="supported-charts">Supported Charts</h2>
       <p>Annotations are supported in the following chart components:</p>
       <ul>
-        <li><code>MonitorLine</code> - via <code>annotations</code> prop</li>
+        <li><code>LineChart</code> - via <code>annotations</code> prop</li>
         <li><code>BarChart</code> - via <code>annotations</code> prop</li>
         <li><code>ScatterChart</code> - via <code>annotations</code> prop</li>
         <li><code>ComboChart</code> - via <code>annotations</code> prop</li>

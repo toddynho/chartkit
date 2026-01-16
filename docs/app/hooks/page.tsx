@@ -16,13 +16,13 @@ export default function HooksPage() {
       </p>
       <CodeBlock
         language="tsx"
-        code={`import { MonitorLine, useAutoTheme } from '@derpdaderp/chartkit';
+        code={`import { LineChart, useAutoTheme } from '@derpdaderp/chartkit';
 
 function Chart({ data, series }) {
   // Automatically switches between themes based on dark mode
   const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
   
-  return <MonitorLine data={data} series={series} theme={theme} />;
+  return <LineChart data={data} series={series} theme={theme} />;
 }
 
 // Or use system preference instead of DOM class
@@ -50,7 +50,7 @@ const theme = useAutoTheme({
       </p>
       <CodeBlock
         language="tsx"
-        code={`import { MonitorLine, useContainerWidth } from '@derpdaderp/chartkit';
+        code={`import { LineChart, useContainerWidth } from '@derpdaderp/chartkit';
 
 function ResponsiveChart({ data, series }) {
   const { ref, width } = useContainerWidth<HTMLDivElement>();
@@ -58,7 +58,7 @@ function ResponsiveChart({ data, series }) {
   return (
     <div ref={ref} style={{ width: '100%' }}>
       {width > 0 && (
-        <MonitorLine
+        <LineChart
           data={data}
           series={series}
           width={width}

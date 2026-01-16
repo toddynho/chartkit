@@ -17,16 +17,17 @@ import { Sparkline } from '@derpdaderp/chartkit';
 
 ### Line Chart with Auto Theme
 ```tsx
-import { MonitorLine, useAutoTheme } from '@derpdaderp/chartkit';
+import { LineChart, useAutoTheme } from '@derpdaderp/chartkit';
 
 const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
 
-<MonitorLine
+<LineChart
   data={data}
   dataKey="value"
   label="Metric"
   theme={theme}
   responsive
+  curve="monotone"
   height={200}
 />
 ```
@@ -64,7 +65,7 @@ import { KpiCard } from '@derpdaderp/chartkit';
 |-----------|-------------|-----------|
 | Sparkline | Inline trend line | `data`, `theme`, `height?`, `glow?`, `fill?` |
 | MiniArea | Small area chart | `data`, `theme`, `height?`, `color?` |
-| MonitorLine | Multi-series line chart | `data`, `series` or `dataKey`, `theme`, `responsive?`, `height?`, `glow?` |
+| LineChart | Multi-series line chart | `data`, `series` or `dataKey`, `theme`, `responsive?`, `curve?`, `yAxisRight?`, `area?` |
 | StackedArea | Stacked area chart | `data`, `series`, `theme`, `width?`, `height?` |
 | BarChart | Grouped bar chart | `data`, `dataKey`, `categoryKey`, `theme` |
 | DonutChart | Pie/donut chart | `data`, `dataKey`, `labelKey`, `theme` |
@@ -108,7 +109,7 @@ const { ref, width } = useContainerWidth();
 
 ### Responsive Chart
 ```tsx
-<MonitorLine data={data} dataKey="value" theme="midnight" responsive height={200} />
+<LineChart data={data} dataKey="value" theme="midnight" responsive height={200} />
 ```
 
 ### Dark/Light Mode
@@ -119,7 +120,7 @@ const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
 
 ### Custom Tooltip
 ```tsx
-<MonitorLine
+<LineChart
   data={data}
   series={series}
   theme="midnight"
@@ -131,13 +132,37 @@ const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
 
 ### With Annotations
 ```tsx
-<MonitorLine
+<LineChart
   data={data}
   series={series}
   theme="midnight"
   annotations={[
     { type: 'line', axis: 'y', value: 80, label: 'Threshold' }
   ]}
+/>
+```
+
+### Dual Y-Axis
+```tsx
+<LineChart
+  data={data}
+  series={[
+    { key: 'requests', label: 'Requests', yAxisId: 'left' },
+    { key: 'latency', label: 'Latency', yAxisId: 'right' },
+  ]}
+  yAxisLeft={{ unit: 'req/s' }}
+  yAxisRight={{ unit: 'ms' }}
+  theme="midnight"
+/>
+```
+
+### Area Fill with Smooth Curves
+```tsx
+<LineChart
+  data={data}
+  series={[{ key: 'value', label: 'Sales', area: true }]}
+  curve="monotone"
+  theme="emerald"
 />
 ```
 

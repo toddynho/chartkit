@@ -72,7 +72,7 @@ export default function ThemesPage() {
         language="tsx"
         code={`<Sparkline data={data} theme="midnight" />
 <KpiCard data={data} theme="mono" />
-<MonitorLine data={data} theme="slate" />`}
+<LineChart data={data} theme="slate" />`}
       />
 
       <h2 id="accessing-theme-colors">Accessing Theme Colors</h2>

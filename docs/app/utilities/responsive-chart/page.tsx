@@ -3,7 +3,7 @@
 import { DocsLayout } from '@/components/layout/DocsLayout';
 import { PropsTable } from '@/components/docs/PropsTable';
 import { CodeBlock } from '@/components/docs/CodeBlock';
-import { ResponsiveChart, MonitorLine, BarChart } from '@derpdaderp/chartkit';
+import { ResponsiveChart, LineChart, BarChart } from '@derpdaderp/chartkit';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 import { useMemo } from 'react';
 
@@ -55,7 +55,7 @@ export default function ResponsiveChartPage() {
       <div className="not-prose my-6 rounded-lg border border-border overflow-hidden">
         <ResponsiveChart aspectRatio={16 / 9}>
           {({ width, height }) => (
-            <MonitorLine
+            <LineChart
               data={lineData}
               series={[
                 { key: 'p50', label: 'p50' },
@@ -72,11 +72,11 @@ export default function ResponsiveChartPage() {
 
       <CodeBlock
         language="tsx"
-        code={`import { ResponsiveChart, MonitorLine } from '@derpdaderp/chartkit';
+        code={`import { ResponsiveChart, LineChart } from '@derpdaderp/chartkit';
 
 <ResponsiveChart aspectRatio={16 / 9}>
   {({ width, height }) => (
-    <MonitorLine
+    <LineChart
       data={data}
       series={series}
       theme="${themeName}"
@@ -132,7 +132,7 @@ export default function ResponsiveChartPage() {
       <div className="not-prose my-6 rounded-lg border border-border overflow-hidden">
         <ResponsiveChart height={250}>
           {({ width, height }) => (
-            <MonitorLine
+            <LineChart
               data={lineData}
               series={[
                 { key: 'p50', label: 'p50' },
@@ -151,7 +151,7 @@ export default function ResponsiveChartPage() {
         language="tsx"
         code={`<ResponsiveChart height={250}>
   {({ width, height }) => (
-    <MonitorLine
+    <LineChart
       data={data}
       series={series}
       theme="${themeName}"
@@ -174,7 +174,7 @@ export default function ResponsiveChartPage() {
   maxHeight={500}
 >
   {({ width, height }) => (
-    <MonitorLine
+    <LineChart
       data={data}
       series={series}
       theme="${themeName}"
@@ -212,7 +212,7 @@ export default function ResponsiveChartPage() {
         code={`<div style={{ height: '400px' }}>
   <ResponsiveChart>
     {({ width, height }) => (
-      <MonitorLine
+      <LineChart
         data={data}
         series={series}
         theme="${themeName}"

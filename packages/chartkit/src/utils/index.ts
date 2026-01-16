@@ -10,4 +10,4 @@ export {
 
 export { interpolateY, type InterpolatedPoint } from './interpolation';
 
-export { linePath, areaPath, generateTicks } from './path';
+export { linePath, linePathFromPoints, areaPath, areaPathFromLine, generateTicks, type CurveType } from './path';

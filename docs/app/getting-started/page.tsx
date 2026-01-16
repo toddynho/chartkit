@@ -37,7 +37,7 @@ export default function GettingStartedPage() {
       <CodeBlock
         language="tsx"
         filename="app/dashboard/page.tsx"
-        code={`import { Sparkline, KpiCard, MonitorLine } from '@derpdaderp/chartkit';
+        code={`import { Sparkline, KpiCard, LineChart } from '@derpdaderp/chartkit';
 
 // Sample data
 const data = [
@@ -107,7 +107,7 @@ console.log(t.bg);     // '#0c0c0c'`}
 
       <CodeBlock
         language="tsx"
-        code={`import { MonitorLine, useContainerWidth } from '@derpdaderp/chartkit';
+        code={`import { LineChart, useContainerWidth } from '@derpdaderp/chartkit';
 
 function ResponsiveChart({ data }) {
   const { ref, width } = useContainerWidth<HTMLDivElement>();
@@ -115,11 +115,11 @@ function ResponsiveChart({ data }) {
   return (
     <div ref={ref} style={{ width: '100%' }}>
       {width > 0 && (
-        <MonitorLine
+        <LineChart
           data={data}
           series={series}
           width={width}
-        theme="midnight"
+          theme="midnight"
         />
       )}
     </div>

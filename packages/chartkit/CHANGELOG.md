@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-01-15
+
+### Breaking Changes
+
+- **Renamed `MonitorLine` to `LineChart`** - The component has been renamed to follow standard charting library conventions. `MonitorLine` is still exported as a deprecated alias for backward compatibility.
+  ```tsx
+  // Before
+  import { MonitorLine } from '@derpdaderp/chartkit';
+  
+  // After
+  import { LineChart } from '@derpdaderp/chartkit';
+  ```
+
+### Added
+
+#### LineChart Enhancements
+
+- **Dual Y-Axis Support** - Display series with different scales using `yAxisLeft`, `yAxisRight`, and `yAxisId` per series
+  ```tsx
+  <LineChart
+    data={data}
+    series={[
+      { key: 'requests', label: 'Requests', yAxisId: 'left' },
+      { key: 'latency', label: 'Latency', yAxisId: 'right' },
+    ]}
+    yAxisLeft={{ unit: 'req/s' }}
+    yAxisRight={{ unit: 'ms' }}
+    theme="midnight"
+  />
+  ```
+
+- **Curve Types** - Choose from 5 interpolation methods: `linear`, `monotone`, `step`, `stepBefore`, `stepAfter`
+  ```tsx
+  <LineChart data={data} series={series} curve="monotone" theme="midnight" />
+  ```
+
+- **Area Fill** - Fill the area under lines with `area` and `areaOpacity` per series
+  ```tsx
+  <LineChart
+    data={data}
+    series={[{ key: 'value', label: 'Sales', area: true, areaOpacity: 0.2 }]}
+    theme="emerald"
+  />
+  ```
+
+- **Show/Hide Dots** - Control data point visibility with `showDots`, `dotSize`, and `dotsOnHover`
+
+- **Custom Series Styling** - Override colors and stroke patterns per series with `color`, `strokeDasharray`, and `strokeWidth`
+
+- **YAxisConfig Type** - New type for Y-axis configuration with `unit`, `min`, `max`, `tickCount`, and `format`
+
+- **CurveType Export** - Exported for TypeScript users
+
+### Changed
+
+- LineChart now uses `system-ui` font instead of JetBrains Mono for better cross-platform rendering
+
+---
+
 ## [0.2.0] - 2026-01-15
 
 ### Added
