@@ -109,8 +109,14 @@ export default function HomePage() {
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/components"
+              href="/demo"
               className="inline-flex items-center gap-2 bg-muted px-6 py-3 rounded-lg font-medium hover:bg-muted/80 transition-colors"
+            >
+              Live Demo
+            </Link>
+            <Link
+              href="/components"
+              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground px-4 py-3 transition-colors"
             >
               View Components
             </Link>

@@ -55,4 +55,9 @@ export const navigation: NavItem[] = [
     title: 'Examples',
     href: '/examples',
   },
+  {
+    title: 'Live Demo',
+    href: '/demo',
+    badge: 'New',
+  },
 ];
