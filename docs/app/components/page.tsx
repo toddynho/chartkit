@@ -160,6 +160,18 @@ const components = [
       </div>
     ),
   },
+  // Financial
+  {
+    name: 'CandlestickChart',
+    href: '/components/candlestick-chart',
+    description: 'OHLC candlestick charts for stocks and crypto.',
+    category: 'Financial',
+    preview: () => (
+      <div className="text-xs text-center text-muted-foreground">
+        See full demo
+      </div>
+    ),
+  },
 ];
 
 export default function ComponentsPage() {
@@ -170,7 +182,7 @@ export default function ComponentsPage() {
     <DocsLayout showToc={false}>
       <h1 id="components">Components</h1>
       <p className="lead">
-        ChartKit provides 14 chart components designed for monitoring dashboards and
+        ChartKit provides 15 chart components designed for monitoring dashboards and
         data visualization.
       </p>
 

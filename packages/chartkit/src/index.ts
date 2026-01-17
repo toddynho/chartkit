@@ -17,6 +17,7 @@ export {
   ProgressRing,
   ProgressCircle,
   GaugeChart,
+  CandlestickChart,
   // Utility Components
   Legend,
   Annotations,
@@ -40,6 +41,9 @@ export {
   type ComboSeriesConfig,
   type ProgressRingProps,
   type GaugeChartProps,
+  type CandlestickChartProps,
+  type CandlestickDataPoint,
+  type CandlestickTooltipProps,
   type LegendProps,
   type AnnotationsProps,
   // Shared Types

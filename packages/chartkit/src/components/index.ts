@@ -17,6 +17,7 @@ export { ScatterChart, type ScatterChartProps } from './ScatterChart';
 export { ComboChart, type ComboChartProps, type ComboSeriesConfig } from './ComboChart';
 export { ProgressRing, ProgressCircle, type ProgressRingProps } from './ProgressRing';
 export { GaugeChart, type GaugeChartProps } from './GaugeChart';
+export { CandlestickChart, type CandlestickChartProps, type CandlestickDataPoint, type CandlestickTooltipProps } from './CandlestickChart';
 
 // Utility Components
 export { Legend, type LegendProps } from './Legend';

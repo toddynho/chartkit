@@ -11,6 +11,7 @@ import {
   GaugeChart,
   ProgressRing,
   Heatmap,
+  CandlestickChart,
   ResponsiveChart,
   themes,
   type HeatmapDataPoint,
@@ -132,6 +133,37 @@ function generateRecentErrors() {
     { id: 4, message: 'AuthError: Token expired', count: 421, lastSeen: '18 min ago', trend: 'up' },
     { id: 5, message: 'TimeoutError: Request timeout after 30s', count: 234, lastSeen: '25 min ago', trend: 'down' },
   ];
+}
+
+function generateStockData() {
+  const data = [];
+  let price = 185;
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 30);
+
+  for (let i = 0; i < 30; i++) {
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + i);
+    
+    const change = (Math.random() - 0.48) * 6;
+    const open = price;
+    const close = price + change;
+    const high = Math.max(open, close) + Math.random() * 2.5;
+    const low = Math.min(open, close) - Math.random() * 2.5;
+    const volume = Math.floor(50000000 + Math.random() * 30000000);
+    
+    data.push({
+      time: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      open: Math.round(open * 100) / 100,
+      high: Math.round(high * 100) / 100,
+      low: Math.round(low * 100) / 100,
+      close: Math.round(close * 100) / 100,
+      volume,
+    });
+    
+    price = close;
+  }
+  return data;
 }
 
 // ============================================
@@ -269,6 +301,7 @@ export default function DemoPage() {
   const assetData = useMemo(() => generateAssetData(), []);
   const heatmapData = useMemo(() => generateHeatmapData(), []);
   const recentErrors = useMemo(() => generateRecentErrors(), []);
+  const stockData = useMemo(() => generateStockData(), []);
   const kpiData = useMemo(() => Array.from({ length: 20 }, () => ({ value: Math.random() * 100 })), []);
 
   // Release annotations for throughput chart
@@ -534,6 +567,37 @@ export default function DemoPage() {
               orientation="horizontal"
             />
           </div>
+        </div>
+
+        {/* Stock Chart */}
+        <div className="rounded-xl border p-4" style={{ backgroundColor: theme.bgCard, borderColor: theme.border }}>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-semibold" style={{ color: theme.text }}>ACME Corp (ACME)</h3>
+              <p className="text-xs" style={{ color: theme.textMuted }}>NASDAQ - 30 Day Price History</p>
+            </div>
+            <div className="text-right">
+              <div className="text-xl font-bold" style={{ color: stockData[stockData.length - 1]?.close >= stockData[0]?.open ? theme.positive : theme.negative }}>
+                ${stockData[stockData.length - 1]?.close.toFixed(2)}
+              </div>
+              <div className="text-xs" style={{ color: stockData[stockData.length - 1]?.close >= stockData[0]?.open ? theme.positive : theme.negative }}>
+                {stockData[stockData.length - 1]?.close >= stockData[0]?.open ? '+' : ''}
+                {((stockData[stockData.length - 1]?.close - stockData[0]?.open) / stockData[0]?.open * 100).toFixed(2)}%
+              </div>
+            </div>
+          </div>
+          <ResponsiveChart aspectRatio={16 / 7}>
+            {({ width, height }) => (
+              <CandlestickChart
+                data={stockData}
+                theme={themeName as any}
+                width={width}
+                height={height}
+                showVolume
+                formatY={(v) => `$${v.toFixed(0)}`}
+              />
+            )}
+          </ResponsiveChart>
         </div>
 
         {/* Performance Gauges */}

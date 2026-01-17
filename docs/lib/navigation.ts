@@ -32,6 +32,8 @@ export const navigation: NavItem[] = [
       { title: 'KpiCard', href: '/components/kpi-card' },
       { title: 'ProgressRing', href: '/components/progress-ring' },
       { title: 'GaugeChart', href: '/components/gauge-chart' },
+      // Financial
+      { title: 'CandlestickChart', href: '/components/candlestick-chart', badge: 'New' },
     ],
   },
   {
