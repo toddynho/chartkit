@@ -54,6 +54,11 @@ const props = [
   { name: 'grid', type: 'GridOptions | boolean', default: 'true', description: 'Grid line configuration' },
   { name: 'formatY', type: '(value: number) => string', description: 'Y-axis value formatter' },
   { name: 'renderTooltip', type: 'function', description: 'Custom tooltip renderer' },
+  { name: 'enableZoom', type: 'boolean', default: 'true', description: 'Enable zoom and pan interactions' },
+  { name: 'showZoomControls', type: 'boolean', default: 'true', description: 'Show +/- zoom control buttons' },
+  { name: 'minVisibleCandles', type: 'number', default: '10', description: 'Minimum candles visible when zoomed in' },
+  { name: 'initialRange', type: '[number, number]', description: 'Initial visible range [startIndex, endIndex]' },
+  { name: 'onRangeChange', type: '(range: [number, number]) => void', description: 'Callback when visible range changes' },
 ];
 
 const dataPointProps = [
@@ -74,23 +79,29 @@ export default function CandlestickChartPage() {
       <h1 id="candlestick-chart">CandlestickChart</h1>
       <p className="lead">
         Financial OHLC candlestick chart for visualizing stock prices, crypto markets, 
-        and other time-series price data. Supports volume bars and interactive tooltips.
+        and other time-series price data. Supports volume bars, interactive tooltips,
+        zoom and pan, and crosshair cursor.
       </p>
 
       <h2 id="playground">Playground</h2>
       <p>
         Hover over candles to see OHLC values. Green candles indicate price increase 
-        (close &gt; open), red candles indicate price decrease.
+        (close &gt; open), red candles indicate price decrease. Use mouse wheel to zoom
+        and drag to pan. A crosshair follows your cursor for precise value reading.
       </p>
 
       <Playground
         name="CandlestickChart"
         defaultProps={{
           showVolume: true,
+          enableZoom: true,
+          showZoomControls: true,
         }}
         aspectRatio={16 / 10}
         controls={[
           { label: 'showVolume', type: 'boolean' },
+          { label: 'enableZoom', type: 'boolean' },
+          { label: 'showZoomControls', type: 'boolean' },
         ]}
         render={(p, dimensions) => (
           <CandlestickChart
@@ -99,6 +110,8 @@ export default function CandlestickChartPage() {
             width={dimensions?.width ?? 700}
             height={dimensions?.height ?? 400}
             showVolume={p.showVolume as boolean}
+            enableZoom={p.enableZoom as boolean}
+            showZoomControls={p.showZoomControls as boolean}
           />
         )}
       />
@@ -197,6 +210,48 @@ const data = [
 />`}
       />
 
+      <h2 id="zoom-pan">Zoom and Pan</h2>
+      <p>
+        CandlestickChart supports interactive zoom and pan out of the box, making it easy 
+        to explore large datasets. This is enabled by default.
+      </p>
+
+      <h3>Interactions</h3>
+      <ul>
+        <li><strong>Mouse wheel</strong> - Scroll to zoom in/out (zooms toward cursor position)</li>
+        <li><strong>Click and drag</strong> - Pan left/right through the data</li>
+        <li><strong>Zoom controls</strong> - Use the +/- buttons in the top-right corner</li>
+        <li><strong>Reset button</strong> - Click &quot;Reset&quot; to show all data</li>
+        <li><strong>Crosshair</strong> - A crosshair follows your cursor for precise value reading</li>
+      </ul>
+
+      <CodeBlock
+        language="tsx"
+        code={`// Zoom and pan enabled by default
+<CandlestickChart
+  data={data}
+  theme="${themeName}"
+  enableZoom        // default: true
+  showZoomControls  // default: true
+  minVisibleCandles={10}
+/>
+
+// Disable zoom for static charts
+<CandlestickChart
+  data={data}
+  theme="${themeName}"
+  enableZoom={false}
+/>
+
+// Control visible range programmatically
+<CandlestickChart
+  data={data}
+  theme="${themeName}"
+  initialRange={[0, 30]}  // Show first 30 candles
+  onRangeChange={(range) => console.log('Visible:', range)}
+/>`}
+      />
+
       <h2 id="responsive">Responsive</h2>
       <p>Use the <code>responsive</code> prop to auto-fill container width:</p>
 
@@ -220,11 +275,12 @@ const data = [
 
       <h2 id="reading-candles">Reading Candlestick Charts</h2>
       <ul>
-        <li><strong>Green/hollow candles</strong> - Bullish (close &gt; open), price went up</li>
-        <li><strong>Red/filled candles</strong> - Bearish (close &lt; open), price went down</li>
+        <li><strong>Green candles</strong> - Bullish (close &gt; open), price went up</li>
+        <li><strong>Red candles</strong> - Bearish (close &lt; open), price went down</li>
         <li><strong>Wick (thin line)</strong> - Shows the high and low prices</li>
-        <li><strong>Body (thick part)</strong> - Shows the open and close prices</li>
+        <li><strong>Body (thick rectangle)</strong> - Shows the open and close prices</li>
         <li><strong>Volume bars</strong> - Trading activity, higher = more trades</li>
+        <li><strong>Crosshair</strong> - Guides your eye to exact values on hover</li>
       </ul>
     </DocsLayout>
   );
