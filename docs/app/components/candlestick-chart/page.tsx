@@ -71,7 +71,7 @@ const dataPointProps = [
 ];
 
 export default function CandlestickChartPage() {
-  const data = useMemo(() => generateStockData(30), []);
+  const data = useMemo(() => generateStockData(300), []);
   const { themeName, theme } = useChartTheme();
 
   return (

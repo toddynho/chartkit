@@ -5,7 +5,7 @@ import { useTheme } from 'next-themes';
 import { Sun, Moon, Github, Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ThemeSwitcher } from '../ThemeSwitcher';
-import { useChartTheme, themeColors } from '../ChartThemeProvider';
+import { Logo, Wordmark } from '../Logo';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -15,16 +15,20 @@ interface HeaderProps {
 export function Header({ onMenuToggle, menuOpen }: HeaderProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const chartTheme = useChartTheme();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const logoColor = mounted ? themeColors[chartTheme.themeName] : '#22d3ee';
-
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header 
+      className="sticky top-0 z-50 w-full backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      style={{ 
+        backgroundColor: 'var(--ck-bg)', 
+        borderBottom: '1px solid var(--ck-border)',
+        opacity: 0.98
+      }}
+    >
       <div className="flex h-14 items-center px-4 md:px-6">
         {/* Mobile menu button */}
         <button
@@ -37,13 +41,8 @@ export function Header({ onMenuToggle, menuOpen }: HeaderProps) {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 mr-6">
-          <span 
-            className="text-xl transition-colors duration-300"
-            style={{ color: logoColor }}
-          >
-            ●
-          </span>
-          <span className="font-semibold text-lg">ChartKit</span>
+          <Logo size={28} />
+          <Wordmark className="text-lg" />
         </Link>
 
         {/* Spacer */}

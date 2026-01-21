@@ -24,10 +24,39 @@ const config: Config = {
           DEFAULT: 'hsl(var(--accent))',
           foreground: 'hsl(var(--accent-foreground))',
         },
+        // ChartKit brand colors
+        ck: {
+          // Dark mode
+          'dark-bg': '#0f172a',
+          'dark-surface': '#1e293b',
+          'dark-elevated': '#334155',
+          'dark-text': '#f1f5f9',
+          'dark-muted': '#94a3b8',
+          'dark-border': '#334155',
+          'dark-primary': '#38bdf8',
+          // Light mode
+          'light-bg': '#ffffff',
+          'light-surface': '#f8fafc',
+          'light-elevated': '#f1f5f9',
+          'light-text': '#0f172a',
+          'light-muted': '#64748b',
+          'light-border': '#e2e8f0',
+          'light-primary': '#0ea5e9',
+          // Shared
+          'violet': '#8b5cf6',
+          'violet-light': '#7c3aed',
+          'success': '#10b981',
+          'warning': '#f59e0b',
+          'error': '#f43f5e',
+        }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['var(--font-space-grotesk)', 'Space Grotesk', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['var(--font-jetbrains-mono)', 'JetBrains Mono', 'Fira Code', 'monospace'],
+      },
+      backgroundImage: {
+        'ck-gradient-dark': 'linear-gradient(135deg, #38bdf8 0%, #8b5cf6 100%)',
+        'ck-gradient-light': 'linear-gradient(135deg, #0ea5e9 0%, #7c3aed 100%)',
       },
       typography: {
         DEFAULT: {
@@ -73,6 +102,15 @@ const config: Config = {
               borderLeftColor: 'hsl(var(--border))',
             },
           },
+        },
+      },
+      animation: {
+        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+      },
+      keyframes: {
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         },
       },
     },

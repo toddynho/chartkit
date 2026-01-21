@@ -36,4 +36,5 @@ export type {
   ReferenceArea,
   Annotation,
   GridOptions,
+  AreaGradientOptions,
 } from './types';

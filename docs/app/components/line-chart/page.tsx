@@ -57,6 +57,7 @@ const props = [
   { name: 'dotsOnHover', type: 'boolean', default: 'true', description: 'Show dots only on hover' },
   { name: 'glow', type: 'boolean', default: 'false', description: 'Enable glow effect on lines' },
   { name: 'grid', type: 'GridOptions | boolean', default: 'true', description: 'Grid line configuration' },
+  { name: 'areaGradient', type: 'AreaGradientOptions', description: 'Customize area gradient: { from, to, direction }' },
   { name: 'showLegend', type: 'boolean', default: 'true', description: 'Show/hide legend' },
   { name: 'annotations', type: 'Annotation[]', description: 'Reference lines and areas' },
   { name: 'connectNulls', type: 'boolean', default: 'true', description: 'Connect lines through null values' },
@@ -71,8 +72,8 @@ const seriesConfigProps = [
   { name: 'label', type: 'string', description: 'Display label', required: true },
   { name: 'displayValue', type: 'string', description: 'Current/summary value shown in legend badge' },
   { name: 'yAxisId', type: "'left' | 'right'", default: "'left'", description: 'Y-axis assignment for dual-axis charts' },
-  { name: 'area', type: 'boolean', default: 'false', description: 'Fill area under the line' },
-  { name: 'areaOpacity', type: 'number', default: '0.15', description: 'Area fill opacity (0-1)' },
+  { name: 'area', type: 'boolean', default: 'false', description: 'Fill area under the line (gradient fill)' },
+  { name: 'areaOpacity', type: 'number', default: '0.4', description: 'Area gradient start opacity (fades to 0.05)' },
   { name: 'color', type: 'string', description: 'Custom line color (overrides theme)' },
   { name: 'strokeDasharray', type: 'string', description: 'Dash pattern (e.g., "5,5")' },
   { name: 'strokeWidth', type: 'number', default: '2', description: 'Line stroke width' },
@@ -269,9 +270,10 @@ const series = [
 />`}
       />
 
-      <h2 id="area-fill">Area Fill</h2>
+      <h2 id="area-chart">Area Chart</h2>
       <p>
-        Enable area fills under lines with the <code>area</code> property on series:
+        Create beautiful area charts by adding <code>area: true</code> to your series.
+        The gradient automatically fades from the line color to transparent.
       </p>
 
       <div 
@@ -280,8 +282,42 @@ const series = [
         <LineChart
           data={data.slice(0, 30)}
           series={[
-            { key: 'p50', label: 'p50', area: true, areaOpacity: 0.2 },
-            { key: 'p95', label: 'p95', area: true, areaOpacity: 0.15 },
+            { key: 'p50', label: 'Revenue', area: true },
+          ]}
+          theme={themeName}
+          width={800}
+          height={280}
+          curve="monotone"
+          unit="$"
+          showLegend={false}
+        />
+      </div>
+
+      <CodeBlock
+        language="tsx"
+        code={`// Simple area chart
+<LineChart
+  data={data}
+  series={[{ key: 'value', label: 'Revenue', area: true }]}
+  theme="${themeName}"
+  curve="monotone"
+  unit="$"
+/>`}
+      />
+
+      <h3 id="area-opacity">Customizing Area Opacity</h3>
+      <p>
+        Control the gradient intensity with <code>areaOpacity</code> (default: 0.4 at top, fading to 0.05 at bottom):
+      </p>
+
+      <div 
+        className="not-prose my-6 rounded-lg border border-border overflow-hidden transition-colors duration-300"
+      >
+        <LineChart
+          data={data.slice(0, 30)}
+          series={[
+            { key: 'p50', label: 'Light fill', area: true, areaOpacity: 0.2 },
+            { key: 'p95', label: 'Heavy fill', area: true, areaOpacity: 0.6 },
           ]}
           theme={themeName}
           width={800}
@@ -293,11 +329,12 @@ const series = [
 
       <CodeBlock
         language="tsx"
-        code={`<LineChart
+        code={`// Multiple areas with different opacities
+<LineChart
   data={data}
   series={[
     { key: 'p50', label: 'p50', area: true, areaOpacity: 0.2 },
-    { key: 'p95', label: 'p95', area: true, areaOpacity: 0.15 },
+    { key: 'p95', label: 'p95', area: true, areaOpacity: 0.6 },
   ]}
   theme="${themeName}"
   curve="monotone"

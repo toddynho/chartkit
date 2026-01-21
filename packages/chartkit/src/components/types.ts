@@ -129,12 +129,22 @@ export interface GridOptions {
   horizontal?: boolean;
   /** Show vertical grid lines (default: false) */
   vertical?: boolean;
-  /** Dash pattern for grid lines (e.g., "4,4" or "3 3") */
+  /** Dash pattern for grid lines (e.g., "4,4"). Default: solid lines */
   strokeDasharray?: string;
   /** Grid line color (overrides theme) */
   color?: string;
-  /** Grid line opacity (0-1) */
+  /** Grid line opacity (0-1, default: 0.4) */
   opacity?: number;
-  /** Grid line width */
+  /** Grid line width (default: 1) */
   strokeWidth?: number;
+}
+
+/** Area gradient configuration */
+export interface AreaGradientOptions {
+  /** Starting opacity at top (default: 0.4) */
+  from?: number;
+  /** Ending opacity at bottom (default: 0.05) */
+  to?: number;
+  /** Gradient direction: 'vertical' (top to bottom) or 'horizontal' */
+  direction?: 'vertical' | 'horizontal';
 }

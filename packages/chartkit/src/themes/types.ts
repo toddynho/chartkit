@@ -20,8 +20,10 @@ export interface ChartTheme {
   border: string;
   /** Grid line color */
   gridLine: string;
-  /** Array of chart series colors */
+  /** Array of chart series colors (legacy, use for backwards compatibility) */
   colors: string[];
+  /** Extended series colors - harmonious palette for multi-series charts */
+  series?: string[];
   /** Accent color for highlights */
   accent: string;
   /** Positive/success indicator color */

@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, type CSSProperties, type ReactNode } from
 import { themes, type ThemeName } from '../themes';
 import { linearScale, interpolateY, linePathFromPoints, areaPathFromLine, type CurveType } from '../utils';
 import { useUniqueId, useMouseTracking, useResizeObserver } from '../hooks';
-import type { DataPointClickEvent, TooltipRenderProps, Annotation, GridOptions } from './types';
+import type { DataPointClickEvent, TooltipRenderProps, Annotation, GridOptions, AreaGradientOptions } from './types';
 import { Annotations } from './Annotations';
 
 export interface SeriesConfig {
@@ -16,7 +16,7 @@ export interface SeriesConfig {
   yAxisId?: 'left' | 'right';
   /** Fill area under the line */
   area?: boolean;
-  /** Area fill opacity (0-1, default 0.15) */
+  /** Area fill opacity (0-1, default 0.4) - top of gradient */
   areaOpacity?: number;
   /** Custom line color (overrides theme) */
   color?: string;
@@ -86,6 +86,8 @@ export interface LineChartProps<T extends Record<string, unknown>> {
   annotations?: Annotation[];
   /** Grid customization options (or false to disable) */
   grid?: GridOptions | boolean;
+  /** Area gradient customization for area fills */
+  areaGradient?: AreaGradientOptions;
   /** Show/hide legend (default true) */
   showLegend?: boolean;
   /** Additional CSS class */
@@ -223,6 +225,7 @@ export function LineChart<T extends Record<string, unknown>>({
   renderTooltip,
   annotations = [],
   grid = true,
+  areaGradient,
   showLegend = true,
   className,
   style,
@@ -368,7 +371,7 @@ export function LineChart<T extends Record<string, unknown>>({
         points,
         color,
         area: s.area,
-        areaOpacity: s.areaOpacity ?? 0.15,
+        areaOpacity: s.areaOpacity ?? areaGradient?.from ?? 0.4,
         strokeDasharray: s.strokeDasharray,
         strokeWidth: s.strokeWidth ?? 2,
         yAxisId: s.yAxisId ?? 'left',
@@ -514,9 +517,16 @@ export function LineChart<T extends Record<string, unknown>>({
           )}
           {/* Area gradients for each series */}
           {paths.map((p, i) => p?.area && (
-            <linearGradient key={`grad-${p.key}`} id={`${areaGradientId}-${i}`} x1="0" y1="0" x2="0" y2="1">
+            <linearGradient 
+              key={`grad-${p.key}`} 
+              id={`${areaGradientId}-${i}`} 
+              x1="0" 
+              y1={areaGradient?.direction === 'horizontal' ? '0' : '0'} 
+              x2={areaGradient?.direction === 'horizontal' ? '1' : '0'} 
+              y2={areaGradient?.direction === 'horizontal' ? '0' : '1'}
+            >
               <stop offset="0%" stopColor={p.color} stopOpacity={p.areaOpacity} />
-              <stop offset="100%" stopColor={p.color} stopOpacity={0} />
+              <stop offset="100%" stopColor={p.color} stopOpacity={areaGradient?.to ?? 0.05} />
             </linearGradient>
           ))}
         </defs>
@@ -532,8 +542,8 @@ export function LineChart<T extends Record<string, unknown>>({
               y2={yScaleLeft(tick)}
               stroke={typeof grid === 'object' && grid.color ? grid.color : t.gridLine}
               strokeWidth={typeof grid === 'object' && grid.strokeWidth ? grid.strokeWidth : 1}
-              strokeDasharray={typeof grid === 'object' && grid.strokeDasharray ? grid.strokeDasharray : "4,4"}
-              opacity={typeof grid === 'object' && grid.opacity !== undefined ? grid.opacity : 1}
+              strokeDasharray={typeof grid === 'object' ? grid.strokeDasharray : undefined}
+              opacity={typeof grid === 'object' && grid.opacity !== undefined ? grid.opacity : 0.4}
             />
           ))}
 
@@ -547,8 +557,8 @@ export function LineChart<T extends Record<string, unknown>>({
               y2={chartHeight}
               stroke={grid.color || t.gridLine}
               strokeWidth={grid.strokeWidth || 1}
-              strokeDasharray={grid.strokeDasharray || "4,4"}
-              opacity={grid.opacity !== undefined ? grid.opacity : 1}
+              strokeDasharray={grid.strokeDasharray}
+              opacity={grid.opacity !== undefined ? grid.opacity : 0.4}
             />
           ))}
 
@@ -739,15 +749,16 @@ export function LineChart<T extends Record<string, unknown>>({
               position: 'absolute',
               top: MARGIN.top + 10,
               left: tooltipLeft,
-              backgroundColor: t.bgCard,
-              border: `1px solid ${t.border}`,
-              borderRadius: '8px',
-              padding: `${tooltipPadding}px`,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-              pointerEvents: 'none',
-              zIndex: 10,
-              minWidth: `${tooltipW}px`,
-              transition: 'left 0.05s ease-out, opacity 0.1s ease',
+            backgroundColor: t.bgCard,
+            border: `1px solid ${t.border}`,
+            borderRadius: '10px',
+            padding: `${tooltipPadding}px`,
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 10px 20px -2px rgba(0, 0, 0, 0.25)',
+            pointerEvents: 'none',
+            zIndex: 10,
+            minWidth: `${tooltipW}px`,
+            transition: 'left 0.05s ease-out, opacity 0.1s ease',
+            backdropFilter: 'blur(8px)',
             }}
           >
             {tooltipData.map((s, i) => {

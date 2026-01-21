@@ -250,7 +250,7 @@ export function BarChart<T extends Record<string, unknown>>({
                   y2={y}
                   stroke={t.gridLine}
                   strokeWidth={1}
-                  strokeDasharray={i === 0 ? undefined : '4,4'}
+                  opacity={i === 0 ? 0.6 : 0.4}
                 />
               );
             })
@@ -267,7 +267,7 @@ export function BarChart<T extends Record<string, unknown>>({
                   y2={chartHeight}
                   stroke={t.gridLine}
                   strokeWidth={1}
-                  strokeDasharray={i === 0 ? undefined : '4,4'}
+                  opacity={i === 0 ? 0.6 : 0.4}
                 />
               );
             })
@@ -435,12 +435,13 @@ export function BarChart<T extends Record<string, unknown>>({
             left: tooltipLeft,
             backgroundColor: t.bgCard,
             border: `1px solid ${t.border}`,
-            borderRadius: '8px',
+            borderRadius: '10px',
             padding: '12px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 10px 20px -2px rgba(0, 0, 0, 0.25)',
             pointerEvents: 'none',
             zIndex: 10,
             minWidth: '100px',
+            backdropFilter: 'blur(8px)',
           }}
         >
           <div

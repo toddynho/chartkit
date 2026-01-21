@@ -132,12 +132,16 @@ export function CandlestickChart({
   const { ref: resizeRef, size: containerSize, ready: containerReady } = useResizeObserver<HTMLDivElement>();
   const width = responsive ? (containerSize.width || widthProp) : widthProp;
 
-  // Zoom/pan state
+  // Zoom/pan state - use floating point for smooth transitions
   const [visibleRange, setVisibleRange] = useState<[number, number]>(() => 
     initialRange || [0, data.length - 1]
   );
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<{ x: number; range: [number, number] } | null>(null);
+  const dragRef = useRef<{ startX: number; startRange: [number, number] } | null>(null);
+  
+  // For smooth wheel zoom accumulation
+  const wheelAccumulator = useRef(0);
+  const wheelTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Tooltip state
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -153,19 +157,29 @@ export function CandlestickChart({
     }
   }, [data.length, initialRange]);
 
-  // Notify parent of range changes
+  // Notify parent of range changes (debounced to integer values)
+  const lastReportedRange = useRef<[number, number]>([0, 0]);
   useEffect(() => {
-    onRangeChange?.(visibleRange);
+    const intRange: [number, number] = [Math.round(visibleRange[0]), Math.round(visibleRange[1])];
+    if (intRange[0] !== lastReportedRange.current[0] || intRange[1] !== lastReportedRange.current[1]) {
+      lastReportedRange.current = intRange;
+      onRangeChange?.(intRange);
+    }
   }, [visibleRange, onRangeChange]);
 
   // Format function
   const format = formatY || ((v: number) => v.toFixed(2));
 
-  // Get visible data slice
+  // Get visible data slice - use floor/ceil for smooth sub-candle panning
   const visibleData = useMemo(() => {
     const [start, end] = visibleRange;
-    return data.slice(Math.max(0, start), Math.min(data.length, end + 1));
+    const startIdx = Math.max(0, Math.floor(start));
+    const endIdx = Math.min(data.length - 1, Math.ceil(end));
+    return data.slice(startIdx, endIdx + 1);
   }, [data, visibleRange]);
+  
+  // Calculate the fractional offset for smooth panning
+  const startOffset = visibleRange[0] - Math.floor(visibleRange[0]);
 
   // Calculate price range for visible data
   const { minPrice, maxPrice, maxVolume } = useMemo(() => {
@@ -198,11 +212,14 @@ export function CandlestickChart({
   const volumeChartHeight = showVolume ? (height - MARGIN.top - MARGIN.bottom) * volumeHeight : 0;
   const priceChartHeight = height - MARGIN.top - MARGIN.bottom - volumeChartHeight - (showVolume ? 8 : 0);
 
-  // Scales
+  // Scales - include fractional offset for smooth sub-candle panning
+  const visibleCount = visibleRange[1] - visibleRange[0];
+  const candleSpacing = chartWidth / Math.max(1, visibleCount);
+  
   const xScale = useCallback((index: number) => {
-    const candleSpacing = chartWidth / visibleData.length;
-    return candleSpacing * index + candleSpacing / 2;
-  }, [chartWidth, visibleData.length]);
+    // Offset by the fractional start position for smooth panning
+    return (index - startOffset) * candleSpacing + candleSpacing / 2;
+  }, [candleSpacing, startOffset]);
 
   const yScale = useMemo(() => 
     linearScale([minPrice, maxPrice], [priceChartHeight, 0]),
@@ -221,38 +238,71 @@ export function CandlestickChart({
     return Array.from({ length: tickCount }, (_, i) => minPrice + step * i);
   }, [minPrice, maxPrice]);
 
-  // Candle width in pixels
-  const candlePixelWidth = Math.max(2, (chartWidth / visibleData.length) * candleWidth);
+  // Candle width in pixels - based on visible range, not data array length
+  const candlePixelWidth = Math.max(2, candleSpacing * candleWidth);
 
-  // Zoom handler
+  // Smooth wheel zoom handler - TradingView-style
   const handleWheel = useCallback((e: React.WheelEvent) => {
     if (!enableZoom) return;
     e.preventDefault();
     
-    const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9; // Zoom out : Zoom in
     const [start, end] = visibleRange;
     const currentLength = end - start;
-    const newLength = Math.max(minVisibleCandles - 1, Math.min(data.length - 1, currentLength * zoomFactor));
     
-    // Get mouse position to zoom towards it
+    // Get mouse position for zoom anchor point
     const rect = e.currentTarget.getBoundingClientRect();
     const mouseX = e.clientX - rect.left - MARGIN.left;
     const mouseRatio = clamp(mouseX / chartWidth, 0, 1);
     
-    const lengthDiff = newLength - currentLength;
-    const newStart = Math.max(0, start - lengthDiff * mouseRatio);
-    const newEnd = Math.min(data.length - 1, newStart + newLength);
+    // Detect pinch-to-zoom (trackpad) vs scroll wheel
+    // Pinch gestures set ctrlKey and have smaller, more frequent deltas
+    const isPinch = e.ctrlKey;
     
-    setVisibleRange([Math.floor(newStart), Math.ceil(newEnd)]);
+    // Normalize delta - different browsers/devices report different values
+    // deltaMode: 0 = pixels, 1 = lines, 2 = pages
+    let delta = e.deltaY;
+    if (e.deltaMode === 1) delta *= 20; // lines to pixels
+    if (e.deltaMode === 2) delta *= 400; // pages to pixels
+    
+    // Use much smaller zoom factor for smooth, controllable zoom
+    // Pinch gestures need even smaller factor since they fire rapidly
+    const sensitivity = isPinch ? 0.008 : 0.0015;
+    const zoomAmount = delta * sensitivity;
+    
+    // Calculate new length with exponential zoom for natural feel
+    // Positive delta = zoom out (increase length), negative = zoom in
+    const scaleFactor = Math.exp(zoomAmount);
+    const newLength = clamp(
+      currentLength * scaleFactor,
+      minVisibleCandles - 1,
+      data.length - 1
+    );
+    
+    // Calculate new range, anchoring zoom to mouse position
+    const lengthDiff = newLength - currentLength;
+    let newStart = start - lengthDiff * mouseRatio;
+    let newEnd = newStart + newLength;
+    
+    // Clamp to data bounds
+    if (newStart < 0) {
+      newStart = 0;
+      newEnd = newLength;
+    }
+    if (newEnd > data.length - 1) {
+      newEnd = data.length - 1;
+      newStart = Math.max(0, newEnd - newLength);
+    }
+    
+    setVisibleRange([newStart, newEnd]);
   }, [enableZoom, visibleRange, data.length, minVisibleCandles, chartWidth, MARGIN.left]);
 
-  // Pan handlers
+  // Pan handlers - smooth floating-point dragging
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!enableZoom) return;
     if (e.button !== 0) return; // Only left click
     
     setIsDragging(true);
-    setDragStart({ x: e.clientX, range: visibleRange });
+    dragRef.current = { startX: e.clientX, startRange: [...visibleRange] as [number, number] };
   }, [enableZoom, visibleRange]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -267,26 +317,34 @@ export function CandlestickChart({
       setCrosshairY(null);
     }
     
-    // Handle dragging for pan
-    if (isDragging && dragStart) {
-      const dx = e.clientX - dragStart.x;
-      const candlesPerPixel = (dragStart.range[1] - dragStart.range[0]) / chartWidth;
-      const candlesDelta = Math.round(-dx * candlesPerPixel);
+    // Handle dragging for pan - smooth floating-point
+    if (isDragging && dragRef.current) {
+      const dx = e.clientX - dragRef.current.startX;
+      const rangeLength = dragRef.current.startRange[1] - dragRef.current.startRange[0];
       
-      const rangeLength = dragStart.range[1] - dragStart.range[0];
-      let newStart = clamp(dragStart.range[0] + candlesDelta, 0, data.length - 1 - rangeLength);
-      let newEnd = newStart + rangeLength;
+      // Convert pixel delta to candle delta (floating-point for smoothness)
+      const candlesPerPixel = rangeLength / chartWidth;
+      const candlesDelta = -dx * candlesPerPixel;
       
+      // Calculate new range with floating-point precision
+      let newStart = dragRef.current.startRange[0] + candlesDelta;
+      let newEnd = dragRef.current.startRange[1] + candlesDelta;
+      
+      // Clamp to data bounds
+      if (newStart < 0) {
+        newStart = 0;
+        newEnd = rangeLength;
+      }
       if (newEnd > data.length - 1) {
         newEnd = data.length - 1;
-        newStart = newEnd - rangeLength;
+        newStart = Math.max(0, newEnd - rangeLength);
       }
       
-      setVisibleRange([Math.floor(newStart), Math.ceil(newEnd)]);
+      setVisibleRange([newStart, newEnd]);
       return;
     }
     
-    // Tooltip tracking
+    // Tooltip tracking - use floating-point range for accurate indexing
     const chartX = x - MARGIN.left;
     
     if (chartX < 0 || chartX > chartWidth) {
@@ -295,18 +353,18 @@ export function CandlestickChart({
       return;
     }
     
-    const candleSpacing = chartWidth / visibleData.length;
-    const localIndex = Math.floor(chartX / candleSpacing);
-    const clampedLocalIndex = Math.max(0, Math.min(visibleData.length - 1, localIndex));
-    const globalIndex = visibleRange[0] + clampedLocalIndex;
+    // Calculate which candle we're hovering based on current visible range
+    const rangeLength = visibleRange[1] - visibleRange[0];
+    const candleAtCursor = visibleRange[0] + (chartX / chartWidth) * rangeLength;
+    const globalIndex = Math.round(clamp(candleAtCursor, 0, data.length - 1));
     
     setHoveredIndex(globalIndex);
     setTooltipPos({ x, y });
-  }, [isDragging, dragStart, chartWidth, MARGIN.left, MARGIN.top, priceChartHeight, visibleData.length, visibleRange, data.length]);
+  }, [isDragging, chartWidth, MARGIN.left, MARGIN.top, priceChartHeight, visibleRange, data.length]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-    setDragStart(null);
+    dragRef.current = null;
   }, []);
 
   const handleMouseLeave = useCallback(() => {
@@ -314,28 +372,50 @@ export function CandlestickChart({
     setTooltipPos(null);
     setCrosshairY(null);
     setIsDragging(false);
-    setDragStart(null);
+    dragRef.current = null;
   }, []);
 
-  // Zoom control handlers
+  // Zoom control handlers - smooth floating-point
   const handleZoomIn = useCallback(() => {
     const [start, end] = visibleRange;
     const currentLength = end - start;
-    const newLength = Math.max(minVisibleCandles - 1, currentLength * 0.7);
+    const newLength = Math.max(minVisibleCandles - 1, currentLength * 0.75);
     const center = (start + end) / 2;
-    const newStart = Math.max(0, center - newLength / 2);
-    const newEnd = Math.min(data.length - 1, newStart + newLength);
-    setVisibleRange([Math.floor(newStart), Math.ceil(newEnd)]);
+    let newStart = center - newLength / 2;
+    let newEnd = center + newLength / 2;
+    
+    // Clamp to bounds
+    if (newStart < 0) {
+      newStart = 0;
+      newEnd = newLength;
+    }
+    if (newEnd > data.length - 1) {
+      newEnd = data.length - 1;
+      newStart = Math.max(0, newEnd - newLength);
+    }
+    
+    setVisibleRange([newStart, newEnd]);
   }, [visibleRange, minVisibleCandles, data.length]);
 
   const handleZoomOut = useCallback(() => {
     const [start, end] = visibleRange;
     const currentLength = end - start;
-    const newLength = Math.min(data.length - 1, currentLength * 1.4);
+    const newLength = Math.min(data.length - 1, currentLength * 1.35);
     const center = (start + end) / 2;
-    const newStart = Math.max(0, center - newLength / 2);
-    const newEnd = Math.min(data.length - 1, newStart + newLength);
-    setVisibleRange([Math.floor(newStart), Math.ceil(newEnd)]);
+    let newStart = center - newLength / 2;
+    let newEnd = center + newLength / 2;
+    
+    // Clamp to bounds
+    if (newStart < 0) {
+      newStart = 0;
+      newEnd = Math.min(data.length - 1, newLength);
+    }
+    if (newEnd > data.length - 1) {
+      newEnd = data.length - 1;
+      newStart = Math.max(0, newEnd - newLength);
+    }
+    
+    setVisibleRange([newStart, newEnd]);
   }, [visibleRange, data.length]);
 
   const handleReset = useCallback(() => {
@@ -357,7 +437,9 @@ export function CandlestickChart({
 
   const hoveredData = hoveredIndex !== null ? data[hoveredIndex] : null;
   const hoveredIsUp = hoveredData ? hoveredData.close >= hoveredData.open : false;
-  const hoveredLocalIndex = hoveredIndex !== null ? hoveredIndex - visibleRange[0] : null;
+  // Calculate local index relative to visible data array for rendering crosshair
+  const startIdx = Math.floor(visibleRange[0]);
+  const hoveredLocalIndex = hoveredIndex !== null ? hoveredIndex - startIdx : null;
 
   return (
     <div 
@@ -396,8 +478,8 @@ export function CandlestickChart({
               y2={yScale(tick)}
               stroke={typeof grid === 'object' && grid.color ? grid.color : t.gridLine}
               strokeWidth={typeof grid === 'object' && grid.strokeWidth ? grid.strokeWidth : 1}
-              strokeDasharray={typeof grid === 'object' && grid.strokeDasharray ? grid.strokeDasharray : "4,4"}
-              opacity={typeof grid === 'object' && grid.opacity !== undefined ? grid.opacity : 0.5}
+              strokeDasharray={typeof grid === 'object' ? grid.strokeDasharray : undefined}
+              opacity={typeof grid === 'object' && grid.opacity !== undefined ? grid.opacity : 0.4}
             />
           ))}
 
@@ -425,7 +507,7 @@ export function CandlestickChart({
               const bodyTop = yScale(Math.max(d.open, d.close));
               const bodyBottom = yScale(Math.min(d.open, d.close));
               const bodyHeight = Math.max(1, bodyBottom - bodyTop);
-              const globalIndex = visibleRange[0] + i;
+              const globalIndex = startIdx + i;
               const isHovered = hoveredIndex === globalIndex;
               
               return (
@@ -493,7 +575,7 @@ export function CandlestickChart({
               const color = isUp ? bullishColor : bearishColor;
               const x = xScale(i);
               const barHeight = d.volume ? volumeChartHeight - volumeScale(d.volume) : 0;
-              const globalIndex = visibleRange[0] + i;
+              const globalIndex = startIdx + i;
               const isHovered = hoveredIndex === globalIndex;
               
               return (
@@ -619,12 +701,13 @@ export function CandlestickChart({
             left: Math.min(tooltipPos.x + 10, width - 160),
             backgroundColor: t.bgCard,
             border: `1px solid ${t.border}`,
-            borderRadius: '8px',
+            borderRadius: '10px',
             padding: '12px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 10px 20px -2px rgba(0, 0, 0, 0.25)',
             pointerEvents: 'none',
             zIndex: 10,
             minWidth: '140px',
+            backdropFilter: 'blur(8px)',
           }}
         >
           {renderTooltip ? (
