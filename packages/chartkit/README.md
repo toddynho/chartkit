@@ -1,17 +1,15 @@
 # @derpdaderp/chartkit
 
-A lightweight, zero-dependency charting library for React and Next.js. Built with pure SVG for minimal bundle size and maximum performance.
+Beautiful charts for React. Zero config.
 
-## Features
+[![npm version](https://img.shields.io/npm/v/@derpdaderp/chartkit.svg)](https://www.npmjs.com/package/@derpdaderp/chartkit)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@derpdaderp/chartkit)](https://bundlephobia.com/package/@derpdaderp/chartkit)
 
-- **14 Chart Components** - Lines, bars, areas, scatter, gauges, and more
-- **17 Beautiful Themes** - Dark and light themes for any design system
-- **Dual Y-Axis** - Display multiple scales in LineChart
-- **5 Curve Types** - Linear, smooth (monotone), step, and more
-- **Area Fills** - Gradient fills under line charts
-- **Zero Dependencies** - Pure SVG, no D3 or heavy libraries
-- **TypeScript First** - Full type safety with comprehensive types
-- **~15KB gzipped** - Tiny bundle for the entire library
+**[Documentation](https://chartkit.dev)** | **[Demo](https://chartkit.dev/demo)** | **[GitHub](https://github.com/toddynho/chartkit)**
+
+---
+
+A lightweight React charting library for dashboards that look as good as they perform. 14 components, 17 themes, ~15KB gzipped, zero dependencies.
 
 ## Installation
 
@@ -22,78 +20,89 @@ npm install @derpdaderp/chartkit
 ## Quick Start
 
 ```tsx
-import { Sparkline, LineChart, KpiCard, useAutoTheme } from '@derpdaderp/chartkit';
+import { LineChart, KpiCard } from '@derpdaderp/chartkit';
 
-// Sparkline - responsive by default
-<Sparkline data={[10, 25, 15, 30, 22]} theme="midnight" />
-
-// LineChart with smooth curves
-<LineChart
-  data={data}
-  dataKey="revenue"
-  label="Revenue"
-  theme="emerald"
-  curve="monotone"
-  responsive
-/>
-
-// Auto dark/light theme switching
-function Chart({ data }) {
-  const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
-  return <LineChart data={data} dataKey="value" theme={theme} responsive />;
+function Dashboard({ data }) {
+  return (
+    <div>
+      <KpiCard
+        label="Revenue"
+        value={284500}
+        delta={12.5}
+        data={data}
+        theme="midnight"
+        format={(v) => `$${(v / 1000).toFixed(0)}K`}
+      />
+      
+      <LineChart
+        data={data}
+        series={[{ key: 'value', label: 'Sales', area: true }]}
+        theme="midnight"
+        curve="monotone"
+        responsive
+      />
+    </div>
+  );
 }
 ```
 
+## Features
+
+- **14 Chart Components** - Lines, bars, areas, donuts, gauges, heatmaps, candlesticks, and more
+- **17 Curated Themes** - Dark and light themes that look great out of the box
+- **~15KB gzipped** - Tiny bundle, zero dependencies, pure SVG
+- **TypeScript First** - Full type safety with autocomplete
+- **Dual Y-Axis** - Display multiple scales in LineChart
+- **Responsive** - Charts automatically resize to fit their container
+
 ## Components
 
-### Line & Area Charts
-- **LineChart** - Multi-series with dual Y-axis, curve types, area fills
-- **Sparkline** - Minimal inline trend charts
-- **MiniArea** - Small area charts with gradient fills
-- **StackedArea** - Stacked area charts with legend
-
-### Bar Charts
-- **BarChart** - Grouped and stacked bar charts
-
-### Circular Charts
-- **DonutChart** - Donut/pie charts with center content
-- **ProgressRing** - Circular progress indicators
-- **GaugeChart** - Semicircular gauges with ranges
-
-### Specialized Charts
+### Charts
+- **LineChart** - Multi-series with dual Y-axis, curves, area fills
+- **BarChart** - Vertical and horizontal bars
+- **DonutChart** - Donut/pie with center content
+- **StackedArea** - Stacked areas with legend
 - **ScatterChart** - Scatter and bubble charts
 - **ComboChart** - Combined line, bar, and area
 - **Heatmap** - GitHub-style activity heatmaps
-- **SpikeChart** - Event/activity spike visualization
-- **KpiCard** - Metric cards with sparklines and deltas
+- **CandlestickChart** - Financial OHLC with zoom/pan
 
-## LineChart Examples
+### Indicators
+- **KpiCard** - Metric cards with sparklines
+- **Sparkline** - Minimal inline trends
+- **MiniArea** - Small area charts
+- **GaugeChart** - Semicircular gauges
+- **ProgressRing** - Circular progress
+- **SpikeChart** - Event visualization
 
-### Basic Line Chart
+## Themes
+
+**Dark:** `midnight`, `emerald`, `mono`, `slate`, `arctic`, `orchid`, `obsidian`, `neon`, `mocha`, `owl`, `retro`, `copper`, `rose`
+
+**Light:** `sunset`, `silver`, `pearl`, `latte`
 
 ```tsx
-<LineChart
-  data={data}
-  dataKey="value"
-  label="Revenue"
-  theme="midnight"
-  responsive
-/>
+import { useAutoTheme } from '@derpdaderp/chartkit';
+
+// Auto dark/light switching
+const theme = useAutoTheme({ light: 'sunset', dark: 'midnight' });
 ```
 
-### Multi-Series with Smooth Curves
+## Examples
+
+### Multi-Series Line Chart
 
 ```tsx
 <LineChart
   data={data}
   series={[
     { key: 'p50', label: 'p50' },
-    { key: 'p95', label: 'p95' },
-    { key: 'p99', label: 'p99' },
+    { key: 'p95', label: 'p95', strokeDasharray: '4,2' },
   ]}
-  theme="neon"
+  theme="midnight"
   curve="monotone"
   unit="ms"
+  responsive
 />
 ```
 
@@ -104,7 +113,7 @@ function Chart({ data }) {
   data={data}
   series={[
     { key: 'requests', label: 'Requests', yAxisId: 'left' },
-    { key: 'latency', label: 'Latency', yAxisId: 'right', strokeDasharray: '5,5' },
+    { key: 'latency', label: 'Latency', yAxisId: 'right' },
   ]}
   yAxisLeft={{ unit: 'req/s' }}
   yAxisRight={{ unit: 'ms' }}
@@ -117,78 +126,19 @@ function Chart({ data }) {
 ```tsx
 <LineChart
   data={data}
-  series={[
-    { key: 'value', label: 'Sales', area: true, areaOpacity: 0.2 },
-  ]}
+  series={[{ key: 'value', label: 'Sales', area: true, areaOpacity: 0.3 }]}
   curve="monotone"
   theme="emerald"
 />
 ```
 
-### Curve Types
+## Documentation
 
-```tsx
-// Smooth curves (Catmull-Rom spline)
-<LineChart data={data} series={series} curve="monotone" theme="midnight" />
+Full docs at **[chartkit.dev](https://chartkit.dev)**
 
-// Step function
-<LineChart data={data} series={series} curve="step" theme="midnight" />
+## Author
 
-// Available: 'linear' | 'monotone' | 'step' | 'stepBefore' | 'stepAfter'
-```
-
-## Themes
-
-17 built-in themes:
-
-**Dark (13):** `midnight`, `emerald`, `mono`, `slate`, `arctic`, `orchid`, `obsidian`, `neon`, `mocha`, `owl`, `retro`, `copper`, `rose`
-
-**Light (4):** `sunset`, `silver`, `pearl`, `latte`
-
-```tsx
-// Use any theme
-<LineChart data={data} series={series} theme="neon" />
-
-// Auto-switch based on dark mode
-const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
-```
-
-## Annotations
-
-Add reference lines and areas:
-
-```tsx
-<LineChart
-  data={data}
-  series={series}
-  theme="midnight"
-  annotations={[
-    { type: 'line', axis: 'y', value: 80, label: 'Warning', color: '#f59e0b' },
-    { type: 'area', axis: 'y', start: 0, end: 50, color: '#22c55e', opacity: 0.1 },
-  ]}
-/>
-```
-
-## TypeScript
-
-All components are fully typed:
-
-```tsx
-import type {
-  LineChartProps,
-  SeriesConfig,
-  YAxisConfig,
-  CurveType,
-  ThemeName,
-  Annotation,
-} from '@derpdaderp/chartkit';
-```
-
-## Links
-
-- [Documentation](https://chartkit.dev)
-- [GitHub](https://github.com/toddynho/chartkit)
-- [AI/LLM Reference](https://chartkit.dev/llms.txt)
+Created by [@toddo](https://x.com/toddo)
 
 ## License
 

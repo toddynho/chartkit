@@ -4,21 +4,69 @@ import Link from 'next/link';
 import { ArrowRight, Sparkles, Palette, Zap, Code2, Copy, Check } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Logo, Wordmark } from '@/components/Logo';
-import { LineChart, KpiCard, DonutChart, BarChart } from '@derpdaderp/chartkit';
+import { LineChart, KpiCard, DonutChart, BarChart, ResponsiveChart } from '@derpdaderp/chartkit';
 import { useMemo, useState } from 'react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 
-// Generate smooth wave-like data for hero chart
+// Generate revenue + users data for hero chart
 function generateHeroData() {
   return Array.from({ length: 50 }, (_, i) => ({
-    time: `${i}`,
-    value: 50 + Math.sin(i / 5) * 25 + Math.sin(i / 2) * 10 + Math.random() * 5,
-    value2: 40 + Math.cos(i / 4) * 20 + Math.sin(i / 3) * 8 + Math.random() * 5,
+    time: `Day ${i + 1}`,
+    value: 150000 + Math.sin(i / 5) * 40000 + Math.sin(i / 2) * 15000 + Math.random() * 10000,
+    value2: 120000 + Math.cos(i / 4) * 35000 + Math.sin(i / 3) * 12000 + Math.random() * 8000,
   }));
 }
 
 function generateKpiData() {
   return Array.from({ length: 20 }, () => ({ value: Math.random() * 100 }));
+}
+
+// Throughput data - requests per minute throughout the day
+function generateThroughputData() {
+  const data = [];
+  const baseTime = new Date();
+  baseTime.setHours(5, 0, 0, 0);
+  
+  for (let i = 0; i < 72; i++) {
+    const time = new Date(baseTime.getTime() + i * 10 * 60 * 1000);
+    const hour = time.getHours();
+    const baseRequests = (hour >= 9 && hour <= 17) ? 85 : 45;
+    const noise = Math.random() * 20 - 10;
+    const releaseSpike = (i === 25 || i === 52) ? 25 : 0;
+    
+    data.push({
+      time: time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+      requests: Math.max(20, baseRequests + noise + releaseSpike),
+      index: i,
+    });
+  }
+  return data;
+}
+
+// Duration data - response time percentiles
+function generateDurationData() {
+  const data = [];
+  const baseTime = new Date();
+  baseTime.setHours(5, 0, 0, 0);
+  
+  for (let i = 0; i < 48; i++) {
+    const time = new Date(baseTime.getTime() + i * 15 * 60 * 1000);
+    const hour = time.getHours();
+    const isPeak = hour >= 10 && hour <= 16;
+    
+    const p50Base = isPeak ? 180 : 120;
+    const p75Base = isPeak ? 450 : 280;
+    const p95Base = isPeak ? 1200 : 600;
+    
+    data.push({
+      time: time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+      p50: p50Base + Math.random() * 50,
+      p75: p75Base + Math.random() * 100,
+      p95: p95Base + Math.random() * 400,
+      index: i,
+    });
+  }
+  return data;
 }
 
 const features = [
@@ -50,10 +98,14 @@ const chartTypes = [
   'MiniArea', 'ProgressRing', 'SpikeChart', 'CandlestickChart',
 ];
 
+// 14 chart components (excludes utilities: Legend, Annotations, ResponsiveChart)
+
 export default function HomePage() {
-  const { themeName } = useChartTheme();
+  const { themeName, theme } = useChartTheme();
   const heroData = useMemo(() => generateHeroData(), []);
   const kpiData = useMemo(() => generateKpiData(), []);
+  const throughputData = useMemo(() => generateThroughputData(), []);
+  const durationData = useMemo(() => generateDurationData(), []);
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = () => {
@@ -67,29 +119,35 @@ export default function HomePage() {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-        {/* Background Chart - Full bleed, anchored to bottom, fully visible */}
+      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden" style={{ borderBottom: '1px solid var(--ck-border)' }}>
+        {/* Background Chart - Full bleed, anchored to bottom, x-axis pushed below border */}
         <div 
           className="absolute"
           style={{ 
             left: '-60px', 
             right: '-60px', 
-            bottom: '-40px',
+            bottom: '-80px',
             opacity: 0.5,
           }}
         >
           <LineChart
             data={heroData}
             series={[
-              { key: 'value', label: 'Revenue', area: true, areaOpacity: 0.7 },
-              { key: 'value2', label: 'Users', area: true, areaOpacity: 0.5 },
+              { key: 'value', label: 'Revenue', area: true, areaOpacity: 0.7, yAxisId: 'left' },
+              { key: 'value2', label: 'Users', area: true, areaOpacity: 0.5, yAxisId: 'right' },
             ]}
             theme={themeName}
-            height={350}
+            height={700}
             responsive
             showLegend={false}
             curve="monotone"
             grid={false}
+            yAxisLeft={{
+              format: (v) => `$${(v / 1000).toFixed(0)}K`,
+            }}
+            yAxisRight={{
+              format: (v) => `${(v / 1000).toFixed(0)}K`,
+            }}
           />
         </div>
 
@@ -125,7 +183,7 @@ export default function HomePage() {
               style={{ color: 'var(--ck-text-muted)' }}
             >
               The React chart library for dashboards that look as good as they perform. 
-              15 components, 17 themes, ~15KB.
+              14 components, 17 themes, ~15KB.
             </p>
             
             {/* CTAs */}
@@ -140,7 +198,7 @@ export default function HomePage() {
             </div>
 
             {/* Install command */}
-            <div className="flex items-center justify-center gap-2 animate-in animate-in-delay-4">
+            <div className="flex items-center justify-center animate-in animate-in-delay-4">
               <div 
                 className="flex items-center gap-3 px-4 py-2.5 rounded-md font-mono text-sm"
                 style={{ 
@@ -163,29 +221,15 @@ export default function HomePage() {
                   )}
                 </button>
               </div>
-              <a
-                href="https://www.npmjs.com/package/@derpdaderp/chartkit"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2.5 rounded-md text-sm transition-colors hover:opacity-80"
-                style={{ 
-                  backgroundColor: 'var(--ck-surface)', 
-                  border: '1px solid var(--ck-border)',
-                  color: 'var(--ck-text-muted)'
-                }}
-              >
-                npm
-                <ArrowRight className="h-3.5 w-3.5" />
-              </a>
             </div>
           </div>
         </div>
       </section>
 
       {/* Live Preview Section */}
-      <section className="py-20 px-6" style={{ backgroundColor: 'var(--ck-surface)' }}>
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
+      <section className="pt-16 pb-16 px-6" style={{ backgroundColor: 'var(--ck-bg)' }}>
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
             <h2 className="text-3xl font-semibold mb-4" style={{ color: 'var(--ck-text)' }}>
               See it in action
             </h2>
@@ -194,116 +238,140 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* KPI Cards */}
-            <div className="space-y-4">
-              <KpiCard
-                label="Monthly Revenue"
-                value={284500}
-                delta={12.5}
-                data={kpiData}
-                theme={themeName}
-                format={(v) => `$${(v / 1000).toFixed(0)}K`}
-              />
-              <KpiCard
-                label="Active Users"
-                value={18420}
-                delta={8.2}
-                data={kpiData}
-                theme={themeName}
-                format={(v) => v.toLocaleString()}
-              />
+          {/* Throughput + Duration Charts Side by Side */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Throughput */}
+            <div 
+              className="p-5"
+              style={{ backgroundColor: theme.bgCard, border: `1px solid ${theme.border}`, borderRadius: '12px' }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-semibold" style={{ color: theme.text }}>Throughput</h3>
+                  <p className="text-xs" style={{ color: theme.textMuted }}>Requests per minute</p>
+                </div>
+              </div>
+              <ResponsiveChart aspectRatio={16 / 9}>
+                {({ width, height }) => (
+                  <LineChart
+                    data={throughputData}
+                    dataKey="requests"
+                    label="Requests/min"
+                    theme={themeName}
+                    width={width}
+                    height={height}
+                    unit="/min"
+                    curve="monotone"
+                    showLegend={false}
+                  />
+                )}
+              </ResponsiveChart>
             </div>
 
-            {/* Line Chart */}
+            {/* Duration Percentiles */}
             <div 
-              className="md:col-span-2 rounded-md p-4"
-              style={{ backgroundColor: 'var(--ck-bg)', border: '1px solid var(--ck-border)' }}
+              className="p-5"
+              style={{ backgroundColor: theme.bgCard, border: `1px solid ${theme.border}`, borderRadius: '12px' }}
             >
-              <LineChart
-                data={heroData.slice(0, 30)}
-                series={[
-                  { key: 'value', label: 'This month', area: true },
-                  { key: 'value2', label: 'Last month', strokeDasharray: '4,4' },
-                ]}
-                theme={themeName}
-                height={250}
-                responsive
-                curve="monotone"
-                unit=""
-              />
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-semibold" style={{ color: theme.text }}>Duration</h3>
+                  <p className="text-xs" style={{ color: theme.textMuted }}>Response time percentiles</p>
+                </div>
+              </div>
+              <ResponsiveChart aspectRatio={16 / 9}>
+                {({ width, height }) => (
+                  <LineChart
+                    data={durationData}
+                    series={[
+                      { key: 'p50', label: 'p50' },
+                      { key: 'p75', label: 'p75' },
+                      { key: 'p95', label: 'p95', strokeDasharray: '4,2' },
+                    ]}
+                    theme={themeName}
+                    width={width}
+                    height={height}
+                    unit="ms"
+                    curve="monotone"
+                    yAxisLeft={{ 
+                      unit: 'ms',
+                      format: (v) => v >= 1000 ? `${(v/1000).toFixed(1)}s` : `${v.toFixed(0)}ms`
+                    }}
+                  />
+                )}
+              </ResponsiveChart>
             </div>
+          </div>
+          
+          {/* Link to full demo */}
+          <div className="text-center mt-8">
+            <Link 
+              href="/demo" 
+              className="inline-flex items-center gap-2 font-medium"
+              style={{ color: 'var(--ck-primary)' }}
+            >
+              See all charts in action
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-semibold mb-4" style={{ color: 'var(--ck-text)' }}>
-              Why ChartKit?
-            </h2>
-            <p style={{ color: 'var(--ck-text-muted)' }}>
-              Built for developers who want great charts without the complexity.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, i) => (
-              <div key={feature.title} className="text-center">
-                <div 
-                  className="inline-flex items-center justify-center w-14 h-14 rounded-md mb-4"
-                  style={{ backgroundColor: 'var(--ck-surface)', border: '1px solid var(--ck-border)' }}
-                >
-                  <feature.icon className="h-6 w-6" style={{ color: 'var(--ck-primary)' }} />
-                </div>
-                <h3 className="font-semibold mb-2" style={{ color: 'var(--ck-text)' }}>
-                  {feature.title}
-                </h3>
-                <p className="text-sm" style={{ color: 'var(--ck-text-muted)' }}>
-                  {feature.description}
+      <section className="py-20 px-6" style={{ borderTop: '1px solid var(--ck-border)' }}>
+        <div className="max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-16">
+            <div>
+              <h2 className="text-2xl font-semibold mb-6" style={{ color: 'var(--ck-text)' }}>
+                Why ChartKit?
+              </h2>
+              <div className="space-y-4" style={{ color: 'var(--ck-text-muted)' }}>
+                <p>
+                  <strong style={{ color: 'var(--ck-text)' }}>Beautiful by default.</strong>{' '}
+                  Every chart looks polished out of the box. No design skills required.
+                </p>
+                <p>
+                  <strong style={{ color: 'var(--ck-text)' }}>Incredibly light.</strong>{' '}
+                  ~15KB gzipped with zero dependencies. Just React.
+                </p>
+                <p>
+                  <strong style={{ color: 'var(--ck-text)' }}>TypeScript first.</strong>{' '}
+                  Full type safety with autocomplete for every prop.
+                </p>
+                <p>
+                  <strong style={{ color: 'var(--ck-text)' }}>17 curated themes.</strong>{' '}
+                  Dark and light themes inspired by Vercel, GitHub, Linear, and more.
                 </p>
               </div>
-            ))}
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold mb-6" style={{ color: 'var(--ck-text)' }}>
+                14 Components
+              </h2>
+              <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm" style={{ color: 'var(--ck-text-muted)' }}>
+                {chartTypes.map((type) => (
+                  <Link 
+                    key={type}
+                    href={`/components/${type.replace(/([A-Z])/g, '-$1').toLowerCase().slice(1)}`}
+                    className="hover:underline"
+                    style={{ color: 'var(--ck-text-secondary)' }}
+                  >
+                    {type}
+                  </Link>
+                ))}
+              </div>
+              <div className="mt-6">
+                <Link 
+                  href="/components" 
+                  className="inline-flex items-center gap-2 text-sm font-medium"
+                  style={{ color: 'var(--ck-primary)' }}
+                >
+                  View all components
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
-
-      {/* Chart Types Section */}
-      <section className="py-20 px-6" style={{ borderTop: '1px solid var(--ck-border)' }}>
-        <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-3xl font-semibold mb-4" style={{ color: 'var(--ck-text)' }}>
-            15 Chart Components
-          </h2>
-          <p className="mb-10" style={{ color: 'var(--ck-text-muted)' }}>
-            Everything you need for dashboards, analytics, and data visualization.
-          </p>
-          
-          <div className="flex flex-wrap justify-center gap-2 mb-10">
-            {chartTypes.map((type) => (
-              <span 
-                key={type}
-                className="px-3 py-1.5 rounded-md text-sm"
-                style={{ 
-                  backgroundColor: 'var(--ck-surface)', 
-                  border: '1px solid var(--ck-border)',
-                  color: 'var(--ck-text-secondary)'
-                }}
-              >
-                {type}
-              </span>
-            ))}
-          </div>
-
-          <Link 
-            href="/components" 
-            className="inline-flex items-center gap-2 font-medium"
-            style={{ color: 'var(--ck-primary)' }}
-          >
-            Explore all components
-            <ArrowRight className="h-4 w-4" />
-          </Link>
         </div>
       </section>
 
@@ -387,12 +455,29 @@ export function Dashboard({ data }) {
       {/* Footer */}
       <footer className="py-10 px-6" style={{ borderTop: '1px solid var(--ck-border)' }}>
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm" style={{ color: 'var(--ck-text-muted)' }}>
-          <div className="flex items-center gap-2">
-            <Logo size={24} />
-            <Wordmark />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Logo size={24} />
+              <Wordmark />
+            </div>
+            <span className="hidden sm:inline">·</span>
+            <span className="hidden sm:inline">
+              by{' '}
+              <a
+                href="https://x.com/toddo"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+                style={{ color: 'var(--ck-text-secondary)' }}
+              >
+                @toddo
+              </a>
+            </span>
           </div>
-          <div>
-            Built with Next.js. Open source on{' '}
+          <div className="flex items-center gap-4">
+            <Link href="/about" className="hover:underline">
+              About
+            </Link>
             <a
               href="https://github.com/toddynho/chartkit"
               className="hover:underline"
@@ -400,7 +485,6 @@ export function Dashboard({ data }) {
             >
               GitHub
             </a>
-            .
           </div>
         </div>
       </footer>

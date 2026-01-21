@@ -137,7 +137,7 @@
 
 /* ========== COMPONENTS ========== */
 .btn-primary {
-  background: var(--ck-gradient);
+  background: var(--ck-primary);
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 0.375rem;
@@ -145,12 +145,11 @@
   font-size: 0.875rem;
   border: none;
   cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.2s;
+  transition: background 0.15s ease;
 }
 
 .btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+  background: var(--ck-primary-hover);
 }
 
 .btn-secondary {

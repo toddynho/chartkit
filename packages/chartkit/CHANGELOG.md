@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-01-21
+
+### Added
+
+#### CandlestickChart
+- **New Component** - Financial OHLC candlestick charts for stock/crypto data
+- **Zoom & Pan** - Mouse wheel zoom and drag-to-pan with smooth animations
+- **Crosshair** - Precise cursor tracking with crosshair lines
+- **Volume Bars** - Optional volume histogram below price chart
+- **Custom Formatting** - `formatY` prop for price axis labels
+
+#### Visual Polish
+- **Improved Area Gradients** - Smoother fade from 0.4 to 0.05 opacity for LineChart and StackedArea
+- **Better Grid Styling** - Solid lines (not dashed) with 0.4 opacity default
+- **Enhanced Tooltips** - Softer shadows, backdrop blur, 10px border radius
+- **Theme Series Colors** - Added `series` color array to all themes for multi-series charts
+
+### Changed
+- Improved default grid appearance across all chart types
+- Better tooltip positioning and styling
+
+---
+
 ## [0.3.0] - 2026-01-15
 
 ### Breaking Changes

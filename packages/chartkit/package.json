@@ -1,6 +1,6 @@
 {
   "name": "@derpdaderp/chartkit",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Lightweight, zero-dependency charting library for React and Next.js. Beautiful SVG charts with 17 themes.",
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev",
