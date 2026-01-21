@@ -342,6 +342,10 @@ export default function HomePage() {
                   <strong style={{ color: 'var(--ck-text)' }}>17 curated themes.</strong>{' '}
                   Dark and light themes inspired by Vercel, GitHub, Linear, and more.
                 </p>
+                <p>
+                  <strong style={{ color: 'var(--ck-text)' }}>LLM-ready.</strong>{' '}
+                  <a href="/llms.txt" style={{ color: 'var(--ck-primary)' }} className="hover:underline">llms.txt</a> included for AI-assisted development.
+                </p>
               </div>
             </div>
             <div>
@@ -478,6 +482,9 @@ export function Dashboard({ data }) {
             <Link href="/about" className="hover:underline">
               About
             </Link>
+            <a href="/llms.txt" className="hover:underline">
+              llms.txt
+            </a>
             <a
               href="https://github.com/toddynho/chartkit"
               className="hover:underline"

@@ -1,6 +1,6 @@
 # ChartKit - Complete API Reference for AI Assistants
 
-> @derpdaderp/chartkit v0.3.0
+> @derpdaderp/chartkit v0.4.0
 > Lightweight React charting library with 14 components and 17 themes.
 > Zero dependencies, pure SVG, ~15KB gzipped.
 
@@ -395,6 +395,59 @@ import { SpikeChart } from '@derpdaderp/chartkit';
   width={number}
   height={number}
   baseline={number}
+/>
+```
+
+---
+
+### CandlestickChart
+Financial OHLC candlestick chart with zoom, pan, and optional volume.
+
+```tsx
+import { CandlestickChart } from '@derpdaderp/chartkit';
+
+<CandlestickChart
+  data={T[]}                 // Required. Array with OHLC data
+  theme={ThemeName}          // Required
+  width={number}             // Default: 800
+  height={number}            // Default: 400
+  timeKey={keyof T}          // Default: "time". X-axis key
+  openKey={keyof T}          // Default: "open"
+  highKey={keyof T}          // Default: "high"
+  lowKey={keyof T}           // Default: "low"
+  closeKey={keyof T}         // Default: "close"
+  volumeKey={keyof T}        // Default: "volume"
+  showVolume={boolean}       // Default: false. Show volume bars
+  formatY={(v) => string}    // Optional. Y-axis formatter
+  upColor={string}           // Optional. Bullish candle color
+  downColor={string}         // Optional. Bearish candle color
+/>
+```
+
+Data format:
+```tsx
+const stockData = [
+  { time: 'Jan 1', open: 100, high: 105, low: 98, close: 103, volume: 1000000 },
+  { time: 'Jan 2', open: 103, high: 108, low: 102, close: 106, volume: 1200000 },
+  // ...
+];
+```
+
+Features:
+- Mouse wheel to zoom in/out
+- Click and drag to pan
+- Crosshair cursor on hover
+- Optional volume histogram
+
+Example:
+```tsx
+<CandlestickChart
+  data={stockData}
+  theme="midnight"
+  width={800}
+  height={400}
+  showVolume
+  formatY={(v) => `$${v.toFixed(2)}`}
 />
 ```
 

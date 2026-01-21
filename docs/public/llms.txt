@@ -1,6 +1,7 @@
 # ChartKit - AI Assistant Reference
 
-> Lightweight React charting library. Zero dependencies, pure SVG, 17 themes.
+> @derpdaderp/chartkit v0.4.0
+> Lightweight React charting library. Zero dependencies, pure SVG, 17 themes, ~15KB.
 
 ## Installation
 ```bash
@@ -71,6 +72,7 @@ import { KpiCard } from '@derpdaderp/chartkit';
 | DonutChart | Pie/donut chart | `data`, `dataKey`, `labelKey`, `theme` |
 | ScatterChart | Scatter/bubble | `data`, `xKey`, `yKey`, `theme`, `sizeKey?` |
 | ComboChart | Mixed chart types | `data`, `xKey`, `leftAxis`, `rightAxis?`, `theme` |
+| CandlestickChart | Financial OHLC chart | `data`, `theme`, `width?`, `height?`, `showVolume?`, `formatY?` |
 | Heatmap | Activity grid | `data`, `theme` |
 | SpikeChart | Event spikes | `data`, `theme` |
 | KpiCard | Metric card | `label`, `value`, `delta?`, `data`, `theme`, `format?` |
@@ -163,6 +165,21 @@ const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
   series={[{ key: 'value', label: 'Sales', area: true }]}
   curve="monotone"
   theme="emerald"
+/>
+```
+
+### Candlestick Chart (Financial)
+```tsx
+import { CandlestickChart } from '@derpdaderp/chartkit';
+
+// Data needs: time, open, high, low, close, volume (optional)
+<CandlestickChart
+  data={stockData}
+  theme="midnight"
+  width={800}
+  height={400}
+  showVolume
+  formatY={(v) => `$${v.toFixed(2)}`}
 />
 ```
 
