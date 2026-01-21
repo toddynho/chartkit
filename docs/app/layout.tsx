@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ChartThemeProvider } from '@/components/ChartThemeProvider';
@@ -55,6 +56,20 @@ export default function RootLayout({
             {children}
           </ChartThemeProvider>
         </ThemeProvider>
+        <Script
+          id="fullres-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(){
+                var fullres = document.createElement('script');
+                fullres.async = true;
+                fullres.src = 'https://t.fullres.net/chartkit.js?'+(new Date()-new Date()%43200000);
+                document.head.appendChild(fullres);
+              })();
+            `,
+          }}
+        />
       </body>
     </html>
   );
