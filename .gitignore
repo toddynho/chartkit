@@ -29,5 +29,5 @@ coverage/
 *.tgz
 .turbo/
 
-# Docs site (managed separately)
-docs/
+# Internal docs (continuation prompts, notes)
+docs/docs/
