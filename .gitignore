@@ -28,3 +28,6 @@ coverage/
 # Misc
 *.tgz
 .turbo/
+
+# Docs site (managed separately)
+docs/
