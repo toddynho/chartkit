@@ -384,6 +384,47 @@ interface ComboSeriesConfig {
 
 ---
 
+### StackedArea
+Stacked area chart with interactive legend.
+
+```tsx
+import { StackedArea } from '@derpdaderp/chartkit';
+
+<StackedArea
+  data={T[]}                 // Required. Data array
+  series={SeriesConfig[]}    // Required. Series definitions
+  theme={ThemeName}          // Required
+  width={number}             // Default: 600
+  height={number}            // Default: 300
+  timeKey={keyof T}          // Default: "time". X-axis key
+  curve={CurveType}          // Default: "monotone"
+  showLegend={boolean}       // Default: true
+/>
+
+// SeriesConfig for StackedArea
+interface SeriesConfig {
+  key: string;               // Data property key
+  label: string;             // Display label
+  color?: string;            // Optional custom color
+}
+```
+
+Example:
+```tsx
+<StackedArea
+  data={data}
+  series={[
+    { key: 'mobile', label: 'Mobile' },
+    { key: 'desktop', label: 'Desktop' },
+    { key: 'tablet', label: 'Tablet' },
+  ]}
+  theme="midnight"
+  curve="monotone"
+/>
+```
+
+---
+
 ### Heatmap
 GitHub-style activity grid.
 
@@ -391,11 +432,18 @@ GitHub-style activity grid.
 import { Heatmap } from '@derpdaderp/chartkit';
 
 <Heatmap
-  data={HeatmapDataPoint[]}  // Required. { date, value }
+  data={HeatmapDataPoint[]}  // Required. { date: string, value: number }
   theme={ThemeName}          // Required
-  width={number}
-  height={number}
+  weeks={number}             // Default: 52. Number of weeks to show
+  cellSize={number}          // Default: 10. Size of each cell
+  cellGap={number}           // Default: 2. Gap between cells
 />
+
+// HeatmapDataPoint
+interface HeatmapDataPoint {
+  date: string;              // ISO date string (YYYY-MM-DD)
+  value: number;             // Activity value (0 = empty)
+}
 ```
 
 ---
@@ -466,6 +514,67 @@ Example:
   height={400}
   showVolume
   formatY={(v) => `$${v.toFixed(2)}`}
+/>
+```
+
+---
+
+## UTILITY COMPONENTS
+
+### ResponsiveChart
+Auto-sizing wrapper that provides width/height to children.
+
+```tsx
+import { ResponsiveChart } from '@derpdaderp/chartkit';
+
+<ResponsiveChart aspectRatio={16/9}>
+  {({ width, height }) => (
+    <LineChart
+      data={data}
+      series={series}
+      theme="midnight"
+      width={width}
+      height={height}
+    />
+  )}
+</ResponsiveChart>
+```
+
+### Legend
+Standalone interactive legend component.
+
+```tsx
+import { Legend } from '@derpdaderp/chartkit';
+
+<Legend
+  items={LegendItem[]}       // Required. Legend items
+  theme={ThemeName}          // Required
+  onItemClick={fn}           // Optional. Toggle handler
+/>
+
+// LegendItem
+interface LegendItem {
+  key: string;
+  label: string;
+  color: string;
+  visible?: boolean;
+}
+```
+
+### Annotations
+Reference lines and areas overlay (used internally, can be standalone).
+
+```tsx
+// Annotations are typically passed as props to charts:
+<LineChart
+  data={data}
+  series={series}
+  theme="midnight"
+  annotations={[
+    { type: 'line', axis: 'y', value: 80, label: 'Warning', color: '#f59e0b' },
+    { type: 'line', axis: 'x', value: 25, label: 'Release', color: '#8b5cf6', strokeDasharray: '4,4' },
+    { type: 'area', axis: 'y', start: 0, end: 50, color: '#22c55e', opacity: 0.1 },
+  ]}
 />
 ```
 
