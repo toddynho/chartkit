@@ -35,8 +35,8 @@ export const themes: ThemeRegistry = {
     bgSecondary: '#141414',
     bgCard: '#1a1a1a',
     text: '#ffffff',
-    textSecondary: '#6b6b6b',
-    textMuted: '#404040',
+    textSecondary: '#8a8a8a', // WCAG AA: 5.67:1 against bg, 5.04:1 against bgCard
+    textMuted: '#666666', // WCAG AA: 3.41:1 against bg, 3.03:1 against bgCard
     border: '#262626',
     gridLine: '#1f1f1f',
     colors: ['#4ade80', '#38bdf8', '#a78bfa', '#fb923c', '#f472b6'],
