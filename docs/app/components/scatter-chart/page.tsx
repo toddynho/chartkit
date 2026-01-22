@@ -29,6 +29,8 @@ const props = [
   { name: 'theme', type: 'ThemeName', description: 'Theme name', required: true },
   { name: 'xLabel', type: 'string', description: 'X-axis label' },
   { name: 'yLabel', type: 'string', description: 'Y-axis label' },
+  { name: 'xScaleType', type: "'linear' | 'log'", default: "'linear'", description: 'X-axis scale type' },
+  { name: 'yScaleType', type: "'linear' | 'log'", default: "'linear'", description: 'Y-axis scale type' },
   { name: 'minSize', type: 'number', default: '6', description: 'Minimum point size' },
   { name: 'maxSize', type: 'number', default: '30', description: 'Maximum point size' },
   { name: 'opacity', type: 'number', default: '0.7', description: 'Point opacity' },
@@ -39,6 +41,15 @@ const props = [
   { name: 'renderTooltip', type: '(props: TooltipRenderProps) => ReactNode', description: 'Custom tooltip renderer' },
   { name: 'annotations', type: 'Annotation[]', description: 'Reference lines and areas' },
 ];
+
+// Generate data with exponential distribution for log scale demo
+const generateLogScaleData = () => {
+  return Array.from({ length: 30 }, (_, i) => ({
+    revenue: Math.pow(10, 2 + Math.random() * 4), // 100 to 1,000,000
+    employees: Math.pow(10, 1 + Math.random() * 3), // 10 to 10,000
+    valuation: Math.pow(10, 4 + Math.random() * 4), // 10K to 100M
+  }));
+};
 
 export default function ScatterChartPage() {
   const data = useMemo(() => generateScatterData(), []);
@@ -162,6 +173,44 @@ export default function ScatterChartPage() {
           ]}
         />
       </div>
+
+      <h2 id="log-scale">Logarithmic Scale</h2>
+      <p>
+        Use <code>xScaleType="log"</code> and/or <code>yScaleType="log"</code> for data with exponential distributions.
+        This is ideal for visualizing data like revenue vs employees, where values span multiple orders of magnitude.
+      </p>
+      <div className="not-prose my-6 p-4 rounded-lg border border-border">
+        <ScatterChart
+          data={generateLogScaleData()}
+          xKey="revenue"
+          yKey="employees"
+          sizeKey="valuation"
+          xScaleType="log"
+          yScaleType="log"
+          theme={themeName}
+          width={600}
+          height={400}
+          xLabel="Revenue ($)"
+          yLabel="Employees"
+          formatX={(v) => v >= 1000000 ? `$${(v/1000000).toFixed(1)}M` : v >= 1000 ? `$${(v/1000).toFixed(0)}K` : `$${v.toFixed(0)}`}
+          formatY={(v) => v >= 1000 ? `${(v/1000).toFixed(1)}K` : v.toFixed(0)}
+        />
+      </div>
+
+      <CodeBlock
+        language="tsx"
+        code={`<ScatterChart
+  data={companies}
+  xKey="revenue"
+  yKey="employees"
+  sizeKey="valuation"
+  xScaleType="log"
+  yScaleType="log"
+  theme="${themeName}"
+  xLabel="Revenue ($)"
+  yLabel="Employees"
+/>`}
+      />
 
       <h2 id="click-events">Click Events</h2>
       <p>Handle clicks on data points:</p>
