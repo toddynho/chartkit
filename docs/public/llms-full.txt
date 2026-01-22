@@ -1,6 +1,6 @@
 # ChartKit - Complete API Reference for AI Assistants
 
-> @derpdaderp/chartkit v0.4.0
+> @derpdaderp/chartkit v0.4.1
 > Lightweight React charting library with 14 components and 17 themes.
 > Zero dependencies, pure SVG, ~15KB gzipped.
 
@@ -314,7 +314,7 @@ interface GaugeRange {
 ---
 
 ### ScatterChart
-Scatter plot with optional bubble sizing.
+Scatter plot with optional bubble sizing and logarithmic scales.
 
 ```tsx
 import { ScatterChart } from '@derpdaderp/chartkit';
@@ -326,8 +326,26 @@ import { ScatterChart } from '@derpdaderp/chartkit';
   theme={ThemeName}          // Required
   sizeKey={keyof T}          // Optional. Bubble size key
   categoryKey={keyof T}      // Optional. Category for colors
+  xScaleType={ScaleType}     // Default: 'linear'. Options: 'linear' | 'log'
+  yScaleType={ScaleType}     // Default: 'linear'. Options: 'linear' | 'log'
   width={number}             // Default: 500
   height={number}            // Default: 400
+/>
+
+// ScaleType
+type ScaleType = 'linear' | 'log';
+```
+
+Example with log scales (great for exponential data):
+```tsx
+<ScatterChart
+  data={companies}
+  xKey="revenue"
+  yKey="employees"
+  sizeKey="valuation"
+  xScaleType="log"
+  yScaleType="log"
+  theme="midnight"
 />
 ```
 

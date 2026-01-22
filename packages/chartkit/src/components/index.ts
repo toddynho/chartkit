@@ -13,7 +13,7 @@ export { Heatmap, type HeatmapProps, type HeatmapDataPoint } from './Heatmap';
 export { ResponsiveChart, type ResponsiveChartProps } from './ResponsiveChart';
 
 // New Chart Components (Phase 2)
-export { ScatterChart, type ScatterChartProps } from './ScatterChart';
+export { ScatterChart, type ScatterChartProps, type ScaleType } from './ScatterChart';
 export { ComboChart, type ComboChartProps, type ComboSeriesConfig } from './ComboChart';
 export { ProgressRing, ProgressCircle, type ProgressRingProps } from './ProgressRing';
 export { GaugeChart, type GaugeChartProps } from './GaugeChart';

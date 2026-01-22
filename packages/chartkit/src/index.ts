@@ -37,6 +37,7 @@ export {
   type HeatmapDataPoint,
   type ResponsiveChartProps,
   type ScatterChartProps,
+  type ScaleType,
   type ComboChartProps,
   type ComboSeriesConfig,
   type ProgressRingProps,
@@ -67,6 +68,9 @@ export { themes, getTheme, type ChartTheme, type ThemeName, type ThemeRegistry }
 export {
   linearScale,
   inverseLinearScale,
+  logScale,
+  inverseLogScale,
+  logTicks,
   clamp,
   extent,
   padExtent,

@@ -1,6 +1,6 @@
 # ChartKit - AI Assistant Reference
 
-> @derpdaderp/chartkit v0.4.0
+> @derpdaderp/chartkit v0.4.1
 > Lightweight React charting library. Zero dependencies, pure SVG, 17 themes, ~15KB.
 
 ## Installation
@@ -70,7 +70,7 @@ import { KpiCard } from '@derpdaderp/chartkit';
 | StackedArea | Stacked area chart | `data`, `series`, `theme`, `width?`, `height?` |
 | BarChart | Grouped bar chart | `data`, `dataKey`, `categoryKey`, `theme` |
 | DonutChart | Pie/donut chart | `data`, `dataKey`, `labelKey`, `theme` |
-| ScatterChart | Scatter/bubble | `data`, `xKey`, `yKey`, `theme`, `sizeKey?` |
+| ScatterChart | Scatter/bubble | `data`, `xKey`, `yKey`, `theme`, `sizeKey?`, `xScaleType?`, `yScaleType?` |
 | ComboChart | Mixed chart types | `data`, `xKey`, `leftAxis`, `rightAxis?`, `theme` |
 | CandlestickChart | Financial OHLC chart | `data`, `theme`, `width?`, `height?`, `showVolume?`, `formatY?` |
 | Heatmap | Activity grid | `data`, `theme` |
@@ -180,6 +180,22 @@ import { CandlestickChart } from '@derpdaderp/chartkit';
   height={400}
   showVolume
   formatY={(v) => `$${v.toFixed(2)}`}
+/>
+```
+
+### Scatter/Bubble Chart with Log Scale
+```tsx
+import { ScatterChart } from '@derpdaderp/chartkit';
+
+// Log scale is great for data with exponential distributions
+<ScatterChart
+  data={companies}
+  xKey="revenue"
+  yKey="employees"
+  sizeKey="valuation"
+  xScaleType="log"
+  yScaleType="log"
+  theme="midnight"
 />
 ```
 

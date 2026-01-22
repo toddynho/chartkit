@@ -1,8 +1,10 @@
 import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { themes, type ThemeName } from '../themes';
-import { linearScale, padExtent, extent, type Extent } from '../utils';
+import { linearScale, logScale, logTicks, padExtent, extent, type Extent } from '../utils';
 import type { DataPointClickEvent, TooltipRenderer, Annotation } from './types';
 import { Annotations } from './Annotations';
+
+export type ScaleType = 'linear' | 'log';
 
 export interface ScatterChartProps<T extends Record<string, unknown>> {
   /** Data array */
@@ -25,6 +27,10 @@ export interface ScatterChartProps<T extends Record<string, unknown>> {
   xLabel?: string;
   /** Y-axis label */
   yLabel?: string;
+  /** X-axis scale type (linear or log) */
+  xScaleType?: ScaleType;
+  /** Y-axis scale type (linear or log) */
+  yScaleType?: ScaleType;
   /** Min point size */
   minSize?: number;
   /** Max point size */
@@ -98,6 +104,8 @@ export function ScatterChart<T extends Record<string, unknown>>({
   theme,
   xLabel,
   yLabel,
+  xScaleType = 'linear',
+  yScaleType = 'linear',
   minSize = 6,
   maxSize = 30,
   opacity = 0.7,
@@ -128,13 +136,26 @@ export function ScatterChart<T extends Record<string, unknown>>({
     const xValues = data.map((d) => Number(d[xKey]) || 0);
     const yValues = data.map((d) => Number(d[yKey]) || 0);
     
-    const xExtent = padExtent(extent(xValues), 0.1);
-    const yExtent = padExtent(extent(yValues), 0.1);
+    // For log scale, ensure positive values and don't pad into negative
+    const xRawExtent = extent(xValues);
+    const yRawExtent = extent(yValues);
+    
+    const xExtent: Extent = xScaleType === 'log' 
+      ? [Math.max(xRawExtent[0], 1e-10), xRawExtent[1]]
+      : padExtent(xRawExtent, 0.1);
+    const yExtent: Extent = yScaleType === 'log'
+      ? [Math.max(yRawExtent[0], 1e-10), yRawExtent[1]]
+      : padExtent(yRawExtent, 0.1);
 
-    const xS = linearScale(xExtent, [0, chartWidth]);
-    const yS = linearScale(yExtent, [chartHeight, 0]);
+    // Create appropriate scale functions
+    const xS = xScaleType === 'log' 
+      ? logScale(xExtent, [0, chartWidth])
+      : linearScale(xExtent, [0, chartWidth]);
+    const yS = yScaleType === 'log'
+      ? logScale(yExtent, [chartHeight, 0])
+      : linearScale(yExtent, [chartHeight, 0]);
 
-    // Size scale for bubbles
+    // Size scale for bubbles (always linear)
     let sizeS = (_: number) => minSize;
     if (sizeKey) {
       const sizeValues = data.map((d) => Number(d[sizeKey]) || 0);
@@ -145,12 +166,17 @@ export function ScatterChart<T extends Record<string, unknown>>({
     // Generate ticks
     const xTickCount = 5;
     const yTickCount = 5;
-    const xTicksArr = Array.from({ length: xTickCount }, (_, i) => 
-      xExtent[0] + (xExtent[1] - xExtent[0]) * (i / (xTickCount - 1))
-    );
-    const yTicksArr = Array.from({ length: yTickCount }, (_, i) => 
-      yExtent[0] + (yExtent[1] - yExtent[0]) * (i / (yTickCount - 1))
-    );
+    
+    const xTicksArr = xScaleType === 'log'
+      ? logTicks(xExtent, xTickCount)
+      : Array.from({ length: xTickCount }, (_, i) => 
+          xExtent[0] + (xExtent[1] - xExtent[0]) * (i / (xTickCount - 1))
+        );
+    const yTicksArr = yScaleType === 'log'
+      ? logTicks(yExtent, yTickCount)
+      : Array.from({ length: yTickCount }, (_, i) => 
+          yExtent[0] + (yExtent[1] - yExtent[0]) * (i / (yTickCount - 1))
+        );
 
     return {
       xScale: xS,
@@ -159,7 +185,7 @@ export function ScatterChart<T extends Record<string, unknown>>({
       xTicks: xTicksArr,
       yTicks: yTicksArr,
     };
-  }, [data, xKey, yKey, sizeKey, chartWidth, chartHeight, minSize, maxSize]);
+  }, [data, xKey, yKey, sizeKey, chartWidth, chartHeight, minSize, maxSize, xScaleType, yScaleType]);
 
   const handlePointHover = (
     d: T,

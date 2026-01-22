@@ -1,6 +1,9 @@
 export {
   linearScale,
   inverseLinearScale,
+  logScale,
+  inverseLogScale,
+  logTicks,
   clamp,
   extent,
   padExtent,
