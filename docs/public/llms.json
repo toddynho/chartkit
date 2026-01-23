@@ -1,0 +1,174 @@
+{
+  "$schema": "https://chartkit.dev/llms-schema.json",
+  "name": "@derpdaderp/chartkit",
+  "version": "0.4.1",
+  "description": "Lightweight React charting library. Zero dependencies, pure SVG, 17 themes, ~15KB gzipped.",
+  "homepage": "https://chartkit.dev",
+  "repository": "https://github.com/toddynho/chartkit",
+  "npm": "https://www.npmjs.com/package/@derpdaderp/chartkit",
+  "license": "MIT",
+  "installation": "npm install @derpdaderp/chartkit",
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "exports": {
+    "components": [
+      "Sparkline",
+      "MiniArea",
+      "LineChart",
+      "StackedArea",
+      "BarChart",
+      "DonutChart",
+      "ScatterChart",
+      "ComboChart",
+      "Heatmap",
+      "SpikeChart",
+      "KpiCard",
+      "ProgressRing",
+      "GaugeChart",
+      "CandlestickChart",
+      "Legend",
+      "ResponsiveChart"
+    ],
+    "hooks": [
+      "useAutoTheme",
+      "useContainerWidth",
+      "useResizeObserver",
+      "useAnimatedMount",
+      "useMouseTracking",
+      "useUniqueId"
+    ],
+    "utilities": [
+      "themes",
+      "linearScale",
+      "logScale",
+      "generatePath",
+      "generateTicks"
+    ]
+  },
+  "themes": {
+    "dark": ["midnight", "emerald", "mono", "slate", "arctic", "orchid", "obsidian", "neon", "mocha", "owl", "retro", "copper", "rose"],
+    "light": ["sunset", "silver", "pearl", "latte"]
+  },
+  "components": {
+    "Sparkline": {
+      "description": "Minimal inline trend chart, responsive by default",
+      "requiredProps": ["data", "theme"],
+      "commonProps": ["height", "glow", "fill", "color"],
+      "example": "<Sparkline data={[10, 25, 15, 30]} theme=\"midnight\" />"
+    },
+    "MiniArea": {
+      "description": "Small area chart with gradient fill",
+      "requiredProps": ["data", "theme"],
+      "commonProps": ["height", "color"],
+      "example": "<MiniArea data={data} theme=\"midnight\" height={40} />"
+    },
+    "LineChart": {
+      "description": "Feature-rich line chart with dual Y-axis, curves, and areas",
+      "requiredProps": ["data", "theme"],
+      "commonProps": ["series", "dataKey", "label", "responsive", "height", "curve", "unit", "showDots", "glow"],
+      "example": "<LineChart data={data} dataKey=\"value\" label=\"Revenue\" theme=\"midnight\" responsive />",
+      "features": ["dual-y-axis", "area-fill", "multiple-series", "annotations", "custom-tooltip"]
+    },
+    "StackedArea": {
+      "description": "Stacked area chart for composition over time",
+      "requiredProps": ["data", "series", "theme"],
+      "commonProps": ["height", "width", "curve", "showLegend"],
+      "example": "<StackedArea data={data} series={[{key:'a',label:'A'},{key:'b',label:'B'}]} theme=\"midnight\" />"
+    },
+    "BarChart": {
+      "description": "Grouped bar chart with annotations",
+      "requiredProps": ["data", "dataKey", "categoryKey", "theme"],
+      "commonProps": ["height", "width", "orientation", "showValues"],
+      "example": "<BarChart data={data} dataKey=\"value\" categoryKey=\"month\" theme=\"midnight\" />"
+    },
+    "DonutChart": {
+      "description": "Pie/donut chart with optional center content",
+      "requiredProps": ["data", "dataKey", "labelKey", "theme"],
+      "commonProps": ["innerRadius", "showLegend", "centerContent"],
+      "example": "<DonutChart data={data} dataKey=\"value\" labelKey=\"name\" theme=\"midnight\" />"
+    },
+    "ScatterChart": {
+      "description": "Scatter plot with optional bubble sizing and log scales",
+      "requiredProps": ["data", "xKey", "yKey", "theme"],
+      "commonProps": ["sizeKey", "categoryKey", "xScaleType", "yScaleType"],
+      "example": "<ScatterChart data={data} xKey=\"x\" yKey=\"y\" theme=\"midnight\" />"
+    },
+    "ComboChart": {
+      "description": "Combined line, bar, and area chart",
+      "requiredProps": ["data", "xKey", "leftAxis", "theme"],
+      "commonProps": ["rightAxis", "height", "width"],
+      "example": "<ComboChart data={data} xKey=\"month\" leftAxis={{series:[{key:'value',label:'Value',type:'bar'}]}} theme=\"midnight\" />"
+    },
+    "Heatmap": {
+      "description": "GitHub-style activity grid",
+      "requiredProps": ["data", "theme"],
+      "commonProps": ["weeks", "cellSize", "cellGap"],
+      "dataFormat": "Array of {date: 'YYYY-MM-DD', value: number}",
+      "example": "<Heatmap data={activityData} theme=\"midnight\" />"
+    },
+    "SpikeChart": {
+      "description": "Event spike visualization",
+      "requiredProps": ["data", "dataKey", "theme"],
+      "commonProps": ["height", "width", "baseline"],
+      "example": "<SpikeChart data={data} dataKey=\"events\" theme=\"midnight\" />"
+    },
+    "KpiCard": {
+      "description": "Metric card with sparkline and delta indicator",
+      "requiredProps": ["label", "value", "data", "theme"],
+      "commonProps": ["delta", "format", "sparklineColor"],
+      "example": "<KpiCard label=\"Revenue\" value={125000} delta={12.5} data={history} theme=\"sunset\" format={(v) => `$${v}`} />"
+    },
+    "ProgressRing": {
+      "description": "Circular progress indicator",
+      "requiredProps": ["value", "theme"],
+      "commonProps": ["size", "strokeWidth", "showValue", "color"],
+      "example": "<ProgressRing value={75} theme=\"midnight\" size={100} />"
+    },
+    "GaugeChart": {
+      "description": "Semicircular gauge with ranges",
+      "requiredProps": ["value", "theme"],
+      "commonProps": ["min", "max", "label", "unit", "ranges"],
+      "example": "<GaugeChart value={72} theme=\"midnight\" min={0} max={100} />"
+    },
+    "CandlestickChart": {
+      "description": "Financial OHLC chart with zoom/pan and volume",
+      "requiredProps": ["data", "theme"],
+      "commonProps": ["width", "height", "showVolume", "formatY"],
+      "dataFormat": "Array of {time, open, high, low, close, volume?}",
+      "example": "<CandlestickChart data={stockData} theme=\"midnight\" showVolume />"
+    }
+  },
+  "hooks": {
+    "useAutoTheme": {
+      "description": "Auto-switch themes based on dark/light mode",
+      "parameters": ["light: ThemeName", "dark: ThemeName", "selector?: string", "darkClass?: string"],
+      "returns": "ThemeName",
+      "example": "const theme = useAutoTheme({ light: 'sunset', dark: 'midnight' });"
+    },
+    "useContainerWidth": {
+      "description": "Track container width for responsive charts",
+      "returns": "{ ref: RefObject, width: number }",
+      "example": "const { ref, width } = useContainerWidth();"
+    },
+    "useResizeObserver": {
+      "description": "Track container dimensions",
+      "returns": "{ ref: RefObject, size: { width, height }, ready: boolean }",
+      "example": "const { ref, size, ready } = useResizeObserver();"
+    }
+  },
+  "commonPatterns": {
+    "responsive": "Use `responsive` prop or wrap with ResponsiveChart",
+    "darkMode": "Use useAutoTheme hook for automatic theme switching",
+    "dualAxis": "Pass yAxisLeft and yAxisRight configs, set yAxisId on series",
+    "areaFill": "Add `area: true` to series config",
+    "customTooltip": "Use renderTooltip prop with custom React component",
+    "annotations": "Pass annotations array with line/area configs"
+  },
+  "resources": {
+    "docs": "https://chartkit.dev",
+    "llmsTxt": "https://chartkit.dev/llms.txt",
+    "llmsFullTxt": "https://chartkit.dev/llms-full.txt",
+    "llmsJson": "https://chartkit.dev/llms.json"
+  }
+}

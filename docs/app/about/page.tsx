@@ -1,11 +1,9 @@
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Logo, Wordmark } from '@/components/Logo';
+import { createMetadata, pageMetadata } from '@/lib/metadata';
 
-export const metadata = {
-  title: 'About - ChartKit',
-  description: 'About ChartKit and its creator.',
-};
+export const metadata = createMetadata(pageMetadata.about);
 
 export default function AboutPage() {
   return (

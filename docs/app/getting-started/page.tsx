@@ -1,10 +1,8 @@
 import { DocsLayout } from '@/components/layout/DocsLayout';
 import { CodeBlock } from '@/components/docs/CodeBlock';
+import { createMetadata, pageMetadata } from '@/lib/metadata';
 
-export const metadata = {
-  title: 'Getting Started',
-  description: 'Get started with ChartKit in minutes.',
-};
+export const metadata = createMetadata(pageMetadata.gettingStarted);
 
 export default function GettingStartedPage() {
   return (
