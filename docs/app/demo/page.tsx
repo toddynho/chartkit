@@ -650,6 +650,21 @@ export default function DemoPage() {
             </Link>
             {' '}- Lightweight React charting library
           </p>
+          <div className="flex items-center justify-center gap-4 mt-3 text-sm" style={{ color: theme.textMuted }}>
+            <a
+              href="https://www.npmjs.com/package/@derpdaderp/chartkit"
+              className="hover:underline"
+            >
+              npm
+            </a>
+            <a
+              href="https://github.com/toddynho/chartkit"
+              className="hover:underline"
+              style={{ color: theme.accent }}
+            >
+              GitHub
+            </a>
+          </div>
         </div>
       </main>
     </div>

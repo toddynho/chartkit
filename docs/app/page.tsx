@@ -486,6 +486,12 @@ export function Dashboard({ data }) {
               llms.txt
             </a>
             <a
+              href="https://www.npmjs.com/package/@derpdaderp/chartkit"
+              className="hover:underline"
+            >
+              npm
+            </a>
+            <a
               href="https://github.com/toddynho/chartkit"
               className="hover:underline"
               style={{ color: 'var(--ck-primary)' }}
