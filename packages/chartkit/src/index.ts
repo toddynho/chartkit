@@ -93,6 +93,7 @@ export {
   useResizeObserver,
   useContainerWidth,
   useAnimatedMount,
+  useAutoTheme,
   estimatePathLength,
   type MouseTrackingState,
   type UseMouseTrackingOptions,
@@ -101,4 +102,5 @@ export {
   type UseResizeObserverResult,
   type AnimationConfig,
   type UseAnimatedMountResult,
+  type UseAutoThemeOptions,
 } from './hooks';
