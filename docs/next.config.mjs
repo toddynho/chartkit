@@ -6,6 +6,25 @@ const nextConfig = {
   experimental: {
     mdxRs: true,
   },
+  // Collapse the www and http host variants onto https://chartkit.dev so
+  // every page has a single URL. The host offers no dashboard-level
+  // redirects, so this is the only place they can live.
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.chartkit.dev' }],
+        destination: 'https://chartkit.dev/:path*',
+        permanent: true,
+      },
+      {
+        source: '/:path*',
+        has: [{ type: 'header', key: 'x-forwarded-proto', value: 'http' }],
+        destination: 'https://chartkit.dev/:path*',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
