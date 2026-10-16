@@ -84,6 +84,40 @@ function entry(name, body) {
   return path;
 }
 
+const rendererNames = [
+  "cartesian",
+  "donut",
+  "scatter",
+  "heatmap",
+  "gauge",
+  "kpi",
+  "progress-ring",
+  "spike",
+  "candlestick",
+];
+
+const perRenderer = {};
+const rendererCode = {};
+for (const name of rendererNames) {
+  const file = join(srcDir, "renderers", `${name}.ts`);
+  const outfile = join(tmpdir(), `chartkit-bench-renderer-${name}.mjs`);
+  await build({
+    entryPoints: [file],
+    bundle: true,
+    minify: true,
+    format: "esm",
+    platform: "node",
+    outfile,
+    logLevel: "silent",
+  });
+  const code = readFileSync(outfile);
+  rendererCode[name] = code.toString("utf8");
+  perRenderer[name] = {
+    minBytes: code.length,
+    gzipBytes: gzipSync(code, { level: 9 }).length,
+  };
+}
+
 const sizes = {
   source: {
     core: await bundle(join(srcDir, "index.ts")),
@@ -94,6 +128,14 @@ const sizes = {
     core: await bundle(entry("dist-core.mjs", `export { validate, render } from ${JSON.stringify(dist)};\n`)),
     validate: await bundle(entry("dist-validate.mjs", `export { validate } from ${JSON.stringify(dist)};\n`)),
     render: await bundle(entry("dist-render.mjs", `export { render } from ${JSON.stringify(dist)};\n`)),
+  },
+  perRenderer,
+  isolation: {
+    note: "True when the minified module does not contain a string literal that only the other renderer writes.",
+    cartesianOmitsCandleMark: !rendererCode.cartesian.includes('data-ck-mark="candle"'),
+    candlestickOmitsDonutFillRule: !rendererCode.candlestick.includes('fill-rule="evenodd"'),
+    donutOmitsCandleMark: !rendererCode.donut.includes('data-ck-mark="candle"'),
+    heatmapOmitsCandleMark: !rendererCode.heatmap.includes('data-ck-mark="candle"'),
   },
 };
 
@@ -125,7 +167,9 @@ const report = {
     bundle:
       "esbuild --bundle --minify, gzip -9, zero externals. source/* bundles the TS modules directly (tree-shaken). dist/* bundles packages/core/dist/index.js, which is what the package exports.",
     throughput:
-      "warmup 50, then performance.now() around validate(); examples loop validates all 12 specs per iteration. Runtime is the bundled TS entry, not a separate implementation.",
+      "warmup 50, then performance.now() around validate(); examples loop validates every example spec per iteration. Runtime is the bundled TS entry, not a separate implementation.",
+    perRenderer:
+      "esbuild --bundle --minify of each renderer module alone, gzip -9. A renderer bundle includes the helpers it imports (theme, svg, format) and not sibling renderers.",
   },
   bundle: sizes,
   validate: {

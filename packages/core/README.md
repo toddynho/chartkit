@@ -4,7 +4,7 @@ Framework-free ChartKit core. Zero runtime dependencies.
 
 - `schema/chartkit.schema.json` — ChartKit spec v1 (`$id`: `https://chartkit.dev/schema/v1.json`)
 - `validate(spec)` — structural and data-aware diagnostics (`CK1001`…`CK4004`)
-- `render(spec, target?)` — SVG string for line, bar, and area (including `stacked-area`). Other types return a placeholder and do not throw.
+- `render(spec, target?)` — SVG for all 14 chart types. Each renderer is its own module. Invalid specs return an error SVG and do not throw.
 
 Theme colors are CSS variables (`var(--ck-series-1, …)`, `--ck-text`, `--ck-background`, and the rest) so a host stylesheet wins.
 

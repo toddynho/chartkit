@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -76,5 +76,78 @@ describe("render SVG", () => {
     const svg = render({ ...area, mark: { area: true, curve: "monotone", innerRadius: 0.2 } });
     expect(svg).toContain("<path");
     expect(svg).not.toContain("ck-chart-error");
+  });
+});
+
+const typed = [
+  ["04-donut.json", "donut", "<path"],
+  ["06-scatter.json", "scatter", "<circle"],
+  ["08-heatmap.json", "heatmap", "<rect"],
+  ["09-gauge.json", "gauge", "<path"],
+  ["10-kpi.json", "kpi", "125K"],
+  ["11-candlestick.json", "candlestick", 'data-ck-mark="candle"'],
+  ["14-spike.json", "spike", "<line"],
+  ["15-progress-ring.json", "progress-ring", "<path"],
+] as const;
+
+describe("remaining chart renderers", () => {
+  for (const [file, type, mark] of typed) {
+    it(`draws ${type}`, () => {
+      const svg = render(spec(file));
+      expect(svg).toContain(`data-ck-type="${type}"`);
+      expect(svg).toContain(`data-ck-renderer="${type}"`);
+      expect(svg).not.toContain('data-ck-renderer="pending"');
+      expect(svg).toContain('role="img"');
+      expect(svg).toContain("<title>");
+      expect(svg).toContain("<desc>");
+      expect(svg).toContain("var(--ck-");
+      expect(svg).toContain(mark);
+      expect(svg).toMatchSnapshot();
+    });
+  }
+
+  it("draws a grid heatmap", () => {
+    const svg = render({
+      version: "1",
+      type: "heatmap",
+      title: "Load",
+      data: [
+        { hour: "9", row: "Mon", load: 1 },
+        { hour: "10", row: "Mon", load: 5 },
+        { hour: "9", row: "Tue", load: 3 },
+        { hour: "10", row: "Tue", load: 2 },
+      ],
+      encoding: { x: "hour", y: "row", color: { field: "load", type: "quantitative" } },
+      mark: { layout: "grid", cornerRadius: 4 },
+      locale: "en-US",
+      a11y: { alt: "Monday at 10 is the busiest hour." },
+    });
+    expect(svg).toContain('data-ck-renderer="heatmap"');
+    expect(svg).toContain("Mon");
+    expect(svg).toContain("Tue");
+    expect(svg).toContain('aria-label="10, Mon: 5"');
+    expect(svg).toMatchSnapshot();
+  });
+
+  it("colors a falling candle with the negative token", () => {
+    const svg = render({
+      version: "1",
+      type: "candlestick",
+      data: [{ date: "2026-01-03", open: 12, high: 12, low: 8, close: 9 }],
+      encoding: { x: "date", open: "open", high: "high", low: "low", close: "close" },
+      locale: "en-US",
+      a11y: { alt: "The session closed below the open." },
+    });
+    expect(svg).toContain("var(--ck-negative,");
+    expect(svg).not.toContain('data-ck-renderer="pending"');
+  });
+
+  it("keeps each renderer module free of its siblings", () => {
+    const dir = join(dirname(fileURLToPath(import.meta.url)), "../renderers");
+    for (const name of readdirSync(dir)) {
+      if (!name.endsWith(".ts")) continue;
+      const text = readFileSync(join(dir, name), "utf8");
+      expect(text, name).not.toMatch(/from "\.\/(?!\.)/);
+    }
   });
 });

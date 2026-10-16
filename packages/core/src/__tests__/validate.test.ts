@@ -28,10 +28,28 @@ const ajv = new Ajv2020({
 addFormats(ajv);
 const ajvValidate = ajv.compile(schema);
 
+const CHART_TYPES = [
+  "line",
+  "bar",
+  "donut",
+  "stacked-area",
+  "scatter",
+  "combo",
+  "heatmap",
+  "gauge",
+  "kpi",
+  "sparkline",
+  "mini-area",
+  "progress-ring",
+  "spike",
+  "candlestick",
+];
+
 describe("example specs", () => {
   const names = files(examplesDir);
-  it("covers the 12 v1 examples", () => {
-    expect(names).toHaveLength(12);
+  it("includes an example for every chart type", () => {
+    const types = names.map((name) => (load(examplesDir, name) as { type: string }).type);
+    expect([...new Set(types)].sort()).toEqual([...CHART_TYPES].sort());
   });
 
   for (const name of names) {
