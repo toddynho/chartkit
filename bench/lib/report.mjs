@@ -1,3 +1,5 @@
+import { recordedAgentSection } from "./recorded-agent.mjs";
+
 function bytes(value) {
   return value == null ? "—" : String(value);
 }
@@ -96,13 +98,18 @@ export function renderReport(result) {
   lines.push("");
   lines.push(agentSection(result.agent));
   lines.push("");
+  const recorded = recordedAgentSection();
+  if (recorded) {
+    lines.push(recorded);
+    lines.push("");
+  }
   lines.push("## Reproduce");
   lines.push("");
   lines.push("```bash");
   lines.push("npm run bench");
   lines.push("```");
   lines.push("");
-  lines.push("Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model.");
+  lines.push("Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` and `BENCH_CHARTKIT_CONTEXT` limit a run. A failed validate, render, compile, or library-use check is sent back once.");
   lines.push("");
   return lines.join("\n");
 }
@@ -171,26 +178,41 @@ function ssrVerdict(rows) {
 }
 
 function agentSection(agent) {
+  const protocol = "A code-library pass must import that library and return markup the library produced, or set `meta.unsupported` when the library cannot draw the chart. Chart.js runs in Playwright. ECharts code that touches `document` runs in Playwright; `echarts.init(null, …, { ssr: true })` stays in Node. Validator errors, render errors, compile errors, and library-use failures are fed back once. The first-try column ignores that repair.";
   if (!agent || agent.status !== "ok") {
     return [
-      `Status: **${agent?.status ?? "not yet run"}**.`,
+      `Fair-scoring protocol on this branch: ${protocol}`,
+      "",
+      `Status of a fair-scoring run: **${agent?.status ?? "not yet run"}**.`,
       "",
       agent?.reason ?? "No model was called.",
       "",
-      `The fixed set has ${agent?.taskCount ?? "—"} tasks covering all 14 chart types. The runner asks for a ChartKit JSON spec and for Recharts, ECharts, and Chart.js modules, then checks validation or compilation, render, chart type, and fields. Chart.js and Recharts have no candlestick, gauge, heatmap, or KPI card; a correct reply for those is \`meta.unsupported\`. Nothing in this section is a model score.`,
+      `The fixed set has ${agent?.taskCount ?? "—"} tasks covering all 14 chart types.`,
     ].join("\n");
   }
+  const lines = [
+    `Fair-scoring protocol: ${protocol}`,
+    "",
+    `Provider **${agent.provider}**, model **${agent.model}**. First try ${agent.passed} / ${agent.attempts}.`,
+  ];
+  if (agent.repair) {
+    lines.push(`Repair: ${agent.repair.retried} retried, ${agent.repair.recovered} recovered, ${agent.repair.passedWithinTwo} / ${agent.attempts} passed within two tries.`);
+  }
+  lines.push("");
+  lines.push("| Library | First try | Second try recovered | Honest unsupported |");
+  lines.push("|---|---:|---:|---:|");
   const byLib = new Map();
   for (const row of agent.results) {
-    const bucket = byLib.get(row.library) ?? { pass: 0, fail: 0, unsupported: 0 };
+    const bucket = byLib.get(row.library) ?? { pass: 0, fail: 0, unsupported: 0, recovered: 0, n: 0 };
+    bucket.n += 1;
     if (row.ok && row.status === "unsupported") bucket.unsupported += 1;
     else if (row.ok) bucket.pass += 1;
     else bucket.fail += 1;
+    if (!row.ok && row.second?.ok) bucket.recovered += 1;
     byLib.set(row.library, bucket);
   }
-  const lines = [`Provider **${agent.provider}**, model **${agent.model}**. ${agent.passed} / ${agent.attempts} checks passed.`, ""];
   for (const [library, bucket] of byLib) {
-    lines.push(`- ${library}: ${bucket.pass} passed, ${bucket.fail} failed, ${bucket.unsupported} honest unsupported`);
+    lines.push(`| ${library} | ${bucket.pass + bucket.unsupported} / ${bucket.n} | ${bucket.recovered} | ${bucket.unsupported} |`);
   }
   return lines.join("\n");
 }

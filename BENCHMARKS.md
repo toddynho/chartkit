@@ -129,11 +129,54 @@ Server render succeeded for ChartKit minimal (1.80 ms mean), ECharts (5.15 ms me
 
 ## Agent first-try eval
 
-Status: **not yet run**.
+Fair-scoring protocol on this branch: A code-library pass must import that library and return markup the library produced, or set `meta.unsupported` when the library cannot draw the chart. Chart.js runs in Playwright. ECharts code that touches `document` runs in Playwright; `echarts.init(null, …, { ssr: true })` stays in Node. Validator errors, render errors, compile errors, and library-use failures are fed back once. The first-try column ignores that repair.
+
+Status of a fair-scoring run: **not yet run**.
 
 Skipped with --skip-agent. Set OPENAI_API_KEY or ANTHROPIC_API_KEY and run without that flag.
 
-The fixed set has 42 tasks covering all 14 chart types. The runner asks for a ChartKit JSON spec and for Recharts, ECharts, and Chart.js modules, then checks validation or compilation, render, chart type, and fields. Chart.js and Recharts have no candlestick, gauge, heatmap, or KPI card; a correct reply for those is `meta.unsupported`. Nothing in this section is a model score.
+The fixed set has 42 tasks covering all 14 chart types.
+
+### Recorded run: claude-sonnet-4-5, published protocol
+
+One run, temperature 0, max_tokens 4096, one attempt per task, no repair loop. Model **claude-sonnet-4-5** via Anthropic. The checker in that run did not require a library import: `render()` only had to return a string, and `meta.values` is written by the model. Those code-library rates are inflated. Raw rows are in `bench/results/agent/sonnet-4-5/`. The fair-scoring rerun (import and library markup required, Chart.js and browser-only ECharts in Playwright, one repair try) has not been run.
+
+Recorded **2026-10-16T18:27:03.774Z**, Node **v20.19.2**, **linux 6.12.94+ x64**, CPU **Intel(R) Xeon(R) Processor**, **8** CPUs. This is a different machine from the browser table above.
+
+| Library | First-try pass | Rate | Honest unsupported included | Passes that import the library | Hand-written SVG passes | Strict (import, or correct unsupported) |
+|---|---:|---:|---:|---:|---:|---:|
+| chartkit | 1 / 42 | 2.4% | 0 | — | — | 1 / 42 |
+| recharts | 41 / 42 | 97.6% | 18 | 3 | 20 | 21 / 42 (50%) |
+| echarts | 33 / 42 | 78.6% | 6 | 5 | 22 | 11 / 42 (26%) |
+| chartjs | 30 / 42 | 71.4% | 18 | 0 | 12 | 18 / 42 (43%) |
+
+Supported tasks in this set: recharts 24, echarts 36, chartjs 24. Chart.js strict passes are all correct `meta.unsupported` answers (0 imported the library).
+
+| Failure | chartkit | recharts | echarts | chartjs |
+|---|---:|---:|---:|---:|
+| Invalid spec | 41 | 0 | 0 | 0 |
+| Render error | 0 | 0 | 9 | 12 |
+| Missing or wrong values | 0 | 1 | 0 | 0 |
+
+ChartKit first-try passes: candle-up.
+
+Tokens: 20737 input, 59853 output. At the list price noted with the run ($3/M input, $15/M output) that is $0.96.
+
+### Supplementary runs, same model, ChartKit only, docs prepended
+
+These are not the published protocol. The context files were not part of the checker.
+
+| Context | ChartKit pass | Failures |
+|---|---:|---|
+| None (the run above) | 1 / 42 | Vega-Lite-shaped specs |
+| `docs/public/llms.txt` as shipped (recorded as 5.9 KB) | 18 / 42 | donut ×3, combo ×3, heatmap ×3, gauge ×3, kpi ×3, sparkline ×3, mini-area ×3, progress-ring ×3 |
+| the 15 `packages/core/examples/*.json` files (recorded as 6.2 KB, plus one hint sentence) | 40 / 42 | heatmap ×2 |
+
+supp-llms.json failures: donut-traffic, donut-budget, donut-survey, combo-margin, combo-orders, combo-weather, heat-load, heat-commits, heat-sales, gauge-done, gauge-cpu, gauge-nps, kpi-revenue, kpi-errors, kpi-uptime, spark-latency, spark-sales, spark-queue, mini-balance, mini-cpu, mini-signups, ring-uptime, ring-storage, ring-tasks. supp-llms.json: 92434 input tokens, 6805 output tokens, about $0.38 at the same list price. supp-examples.json failures: heat-load, heat-sales. supp-examples.json: 92098 input tokens, 6283 output tokens, about $0.37 at the same list price.
+
+With the examples in the prompt, heat-load and heat-sales still failed: `validate` passed and `render` did not. The heatmap renderer uses the calendar layout unless `mark.layout` is `"grid"`, and calendar mode does not draw a non-date x. That is a product bug, not a harness bug. It is not fixed on this branch.
+
+Second-try column: not measured on this run. The harness now feeds validator errors, render errors, compile errors, and library-use failures back once. That column stays empty until the fair-scoring rerun.
 
 ## Reproduce
 
@@ -141,4 +184,4 @@ The fixed set has 42 tasks covering all 14 chart types. The runner asks for a Ch
 npm run bench
 ```
 
-Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model.
+Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` and `BENCH_CHARTKIT_CONTEXT` limit a run. A failed validate, render, compile, or library-use check is sent back once.

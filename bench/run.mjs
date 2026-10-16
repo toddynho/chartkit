@@ -91,7 +91,7 @@ async function loadRunAgent() {
     format: "esm",
     platform: "node",
     outfile,
-    external: ["esbuild"],
+    external: ["esbuild", "playwright"],
     logLevel: "silent",
   });
   const suite = await import(`${pathToFileURL(outfile).href}?t=${Date.now()}`);

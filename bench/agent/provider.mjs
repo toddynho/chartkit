@@ -23,41 +23,72 @@ export async function askModel(selected, prompt) {
   throw new Error(`No client for ${selected.provider}`);
 }
 
+function isTransient(label, error) {
+  const status = Number(String(error?.message ?? "").match(new RegExp(`^${label} (\\d+)`))?.[1]);
+  if (status === 429 || status >= 500) return true;
+  const message = String(error?.message ?? error);
+  return /fetch failed|ECONNRESET|ETIMEDOUT|EAI_AGAIN|socket hang up|overloaded/i.test(message);
+}
+
+async function withRetry(label, fn) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (!isTransient(label, error) || attempt >= 5) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 2000 * 2 ** attempt));
+    }
+  }
+}
+
 async function askOpenAI(model, prompt, key) {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-    body: JSON.stringify({
-      model,
-      temperature: 0,
-      messages: [
-        { role: "system", content: "You produce only the requested chart artifact. No prose." },
-        { role: "user", content: prompt },
-      ],
-    }),
+  return withRetry("OpenAI", async () => {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+      body: JSON.stringify({
+        model,
+        temperature: 0,
+        messages: [
+          { role: "system", content: "You produce only the requested chart artifact. No prose." },
+          { role: "user", content: prompt },
+        ],
+      }),
+    });
+    if (!response.ok) throw new Error(`OpenAI ${response.status}: ${(await response.text()).slice(0, 300)}`);
+    const body = await response.json();
+    return {
+      text: body.choices?.[0]?.message?.content ?? "",
+      usage: {
+        input_tokens: body.usage?.prompt_tokens ?? 0,
+        output_tokens: body.usage?.completion_tokens ?? 0,
+      },
+    };
   });
-  if (!response.ok) throw new Error(`OpenAI ${response.status}: ${(await response.text()).slice(0, 300)}`);
-  const body = await response.json();
-  return body.choices?.[0]?.message?.content ?? "";
 }
 
 async function askAnthropic(model, prompt, key) {
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": key,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: 4096,
-      temperature: 0,
-      system: "You produce only the requested chart artifact. No prose.",
-      messages: [{ role: "user", content: prompt }],
-    }),
+  return withRetry("Anthropic", async () => {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 4096,
+        temperature: 0,
+        system: "You produce only the requested chart artifact. No prose.",
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+    if (!response.ok) throw new Error(`Anthropic ${response.status}: ${(await response.text()).slice(0, 300)}`);
+    const body = await response.json();
+    return {
+      text: body.content?.map((part) => part.text ?? "").join("\n") ?? "",
+      usage: { input_tokens: body.usage?.input_tokens ?? 0, output_tokens: body.usage?.output_tokens ?? 0 },
+    };
   });
-  if (!response.ok) throw new Error(`Anthropic ${response.status}: ${(await response.text()).slice(0, 300)}`);
-  const body = await response.json();
-  return body.content?.map((part) => part.text ?? "").join("\n") ?? "";
 }

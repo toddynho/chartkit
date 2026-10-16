@@ -7,7 +7,7 @@ It compares a ChartKit line, bar, and donut (minimal entry and `/all`) with pinn
 - Bundle: esbuild minify, gzip level 9, brotli quality 11.
 - Browser: Playwright Chromium, line charts at 1k, 10k, 100k, and 1M points. Same `makeSeries` data, 640×360. Each cell is the median of 5 fresh pages. ChartKit uses `mark.sampling: "auto"`.
 - SSR: Node, no jsdom and no node-canvas.
-- Agent eval: 42 tasks. Runs only when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. Otherwise the report says `not yet run`.
+- Agent eval: 42 tasks. Runs only when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. A code-library pass must import and use that library, or correctly decline. Chart.js and browser-only ECharts run in Playwright. Validator, render, compile, and library-use errors are fed back once. The recorded claude-sonnet-4-5 run in `bench/results/agent/sonnet-4-5/` used the older checker and is labeled as inflated. A fair-scoring rerun has not been run.
 
 ```bash
 npm run bench
