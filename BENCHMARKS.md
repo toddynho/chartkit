@@ -174,7 +174,7 @@ These are not the published protocol. The context files were not part of the che
 
 supp-llms.json failures: donut-traffic, donut-budget, donut-survey, combo-margin, combo-orders, combo-weather, heat-load, heat-commits, heat-sales, gauge-done, gauge-cpu, gauge-nps, kpi-revenue, kpi-errors, kpi-uptime, spark-latency, spark-sales, spark-queue, mini-balance, mini-cpu, mini-signups, ring-uptime, ring-storage, ring-tasks. supp-llms.json: 92434 input tokens, 6805 output tokens, about $0.38 at the same list price. supp-examples.json failures: heat-load, heat-sales. supp-examples.json: 92098 input tokens, 6283 output tokens, about $0.37 at the same list price.
 
-With the examples in the prompt, heat-load and heat-sales still failed: `validate` passed and `render` did not. The heatmap renderer uses the calendar layout unless `mark.layout` is `"grid"`, and calendar mode does not draw a non-date x. That is a product bug, not a harness bug. It is not fixed on this branch.
+With the examples in the prompt, heat-load and heat-sales still failed: `validate` passed and `render` did not. At the time of that run the heatmap renderer used the calendar layout unless `mark.layout` was `"grid"`, and calendar mode does not draw a non-date x. The core this branch sits on now infers grid when `encoding.y` is set. That recorded failure is unchanged. The `llms.txt` score above is for the React-centric file that was in the prompt, not the JSON-spec file on this branch.
 
 Second-try column: not measured on this run. The harness now feeds validator errors, render errors, compile errors, and library-use failures back once. That column stays empty until the fair-scoring rerun.
 
