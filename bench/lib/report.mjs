@@ -141,7 +141,7 @@ export function renderReport(result) {
   lines.push("npm run bench");
   lines.push("```");
   lines.push("");
-  lines.push("Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` limits a run. `BENCH_DOCS=none` (the default) is the no-docs condition: one paragraph per library. `BENCH_DOCS=official` prepends that library's own doc. A finished run is also written to `bench/results/agent/conditions/no-docs.json` or `with-docs.json`. A failed validate, render, compile, or library-use check is sent back once.");
+  lines.push("Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` limits a run. `BENCH_DOCS=none` (the default) is the no-docs condition: one paragraph per library. `BENCH_DOCS=official` prepends that library's own doc. A finished run is also written to `bench/results/agent/conditions/`, which is gitignored local scratch and is not the published scoreboard. A failed validate, render, compile, or library-use check is sent back once.");
   lines.push("");
   return lines.join("\n");
 }
@@ -271,19 +271,11 @@ function agentSection(agent) {
   return lines.join("\n");
 }
 
-const conditionsDir = join(dirname(fileURLToPath(import.meta.url)), "../results/agent/conditions");
-
-function loadCondition(name) {
-  const path = join(conditionsDir, name);
-  if (!existsSync(path)) return null;
-  const parsed = JSON.parse(readFileSync(path, "utf8"));
-  return parsed.agent?.status === "ok" ? parsed.agent : parsed.status === "ok" ? parsed : null;
-}
-
 const round5Dir = join(dirname(fileURLToPath(import.meta.url)), "../results/agent/round-5");
+const round6Dir = join(dirname(fileURLToPath(import.meta.url)), "../results/agent/round-6");
 
-function loadRound5(name) {
-  const path = join(round5Dir, name);
+function loadRound(dir, name) {
+  const path = join(dir, name);
   if (!existsSync(path)) return null;
   const parsed = JSON.parse(readFileSync(path, "utf8"));
   return parsed.agent?.status === "ok" ? parsed.agent : parsed.status === "ok" ? parsed : null;
@@ -313,8 +305,8 @@ function scoreCounts(rows, library) {
 }
 
 function round5Section() {
-  const none = loadRound5("no-docs.json");
-  const official = loadRound5("official.json");
+  const none = loadRound(round5Dir, "no-docs.json");
+  const official = loadRound(round5Dir, "official.json");
   const lines = [];
   lines.push("Round 5 was run outside this repo at bench `bc7ee8e`, plus a full-pixel Chart.js ink scan. A 32 by 32 sample had missed a thin line. One model, claude-sonnet-4-5, temperature 0, one run, 2026-10-16. Code-library passes include a correct unsupported answer. The raw rows are `bench/results/agent/round-5/`. These scores are that protocol. They are not the drawn-shape column.");
   lines.push("");
@@ -338,21 +330,34 @@ function round5Section() {
   return lines.join("\n");
 }
 
-function conditionCell(run, library, which) {
-  if (!run?.results) return "not yet run";
-  const rows = run.results.filter((row) => row.library === library);
-  if (rows.length === 0) return "not yet run";
-  const first = rows.filter((row) => row.ok).length;
-  const within = first + rows.filter((row) => !row.ok && row.second?.ok).length;
-  const value = which === "first" ? first : within;
-  return `${value} / ${rows.length}`;
+function round6Section() {
+  const none = loadRound(round6Dir, "no-docs.json");
+  const official = loadRound(round6Dir, "official.json");
+  const lines = [];
+  lines.push("Round 6 is the current scoreboard. It was run outside this repo at bench `5a026be`. One model, claude-sonnet-4-5, temperature 0, one run, 2026-10-16. The checker required drawn ChartKit shapes, including bars inside the plot. Raw rows are `bench/results/agent/round-6/`. A later change counts one rect per row per bar series. Every bar task in this run is a single series, so these scores stay the same. `bench/results/agent/conditions/` is gitignored local scratch and is not this scoreboard.");
+  lines.push("");
+  if (!none?.results || !official?.results) {
+    lines.push("Round 6 rows were not found under `bench/results/agent/round-6/`.");
+    return lines.join("\n");
+  }
+  lines.push("| Library | Round 6 no docs first | Round 6 no docs within two | Round 6 official first | Round 6 official within two | Round 6 no docs mean first-try output tokens, all / supported | Round 6 official mean first-try output tokens, all / supported |");
+  lines.push("|---|---:|---:|---:|---:|---:|---:|");
+  for (const library of ["chartkit", "recharts", "echarts", "chartjs"]) {
+    const left = scoreCounts(none.results, library);
+    const right = scoreCounts(official.results, library);
+    lines.push(`| ${library} | ${left.first} / ${left.n} | ${left.within} / ${left.n} | ${right.first} / ${right.n} | ${right.within} / ${right.n} | ${left.allMean} / ${left.supportedMean} | ${right.allMean} / ${right.supportedMean} |`);
+  }
+  lines.push("");
+  lines.push("Mean first-try output tokens are `usage.output_tokens` on the first answer. The second try is not included. Supported drops a correct unsupported answer. Recharts, ECharts, and Chart.js have no `repair()` step.");
+  const check = currentCheck();
+  const noDocsRepair = chartkitAfterRepair(none.results, check.tasks, check.repair, check.checkChartKit);
+  const officialRepair = chartkitAfterRepair(official.results, check.tasks, check.repair, check.checkChartKit);
+  lines.push(`ChartKit \`repair()\`, scored with \`checkChartKit\` on the first try and no model call: no docs ${noDocsRepair.passed} / ${noDocsRepair.checked}${noDocsRepair.misses.length ? ` (still ${noDocsRepair.misses.join(", ")})` : ""}, official ${officialRepair.passed} / ${officialRepair.checked}${officialRepair.misses.length ? ` (still ${officialRepair.misses.join(", ")})` : ""}.`);
+  return lines.join("\n");
 }
 
 function fairConditionsSection(agent) {
-  const liveNone = agent?.status === "ok" && agent.docs === "none" ? agent : null;
-  const liveOfficial = agent?.status === "ok" && agent.docs === "official" ? agent : null;
-  const none = loadCondition("no-docs.json") ?? liveNone;
-  const official = loadCondition("with-docs.json") ?? liveOfficial;
+  void agent;
   const lines = [];
   lines.push("### Doc conditions");
   lines.push("");
@@ -368,7 +373,7 @@ function fairConditionsSection(agent) {
   lines.push("| echarts | 42 / 42 | 42 / 42 | 40 / 42 | 41 / 42 |");
   lines.push("| chartjs | 39 / 42 | 42 / 42 | 42 / 42 | 42 / 42 |");
   lines.push("");
-  lines.push("Round 4 was run outside this repo at bench `38282f2`, plus the detached-container search, the 2.5 s Recharts pie wait, and Chart.js scatter x+y capture. Model claude-sonnet-4-5, temperature 0. Recharts, ECharts, and Chart.js were verified drawn. Code-library passes include a correct unsupported answer. The supported / unsupported split was Recharts 24 / 18, ECharts 36 / 6, Chart.js 24 / 18. These scores are that protocol. Round 5, below, is the later run.");
+  lines.push("Round 4 was run outside this repo at bench `38282f2`, plus the detached-container search, the 2.5 s Recharts pie wait, and Chart.js scatter x+y capture. Model claude-sonnet-4-5, temperature 0. Recharts, ECharts, and Chart.js were verified drawn. Code-library passes include a correct unsupported answer. The supported / unsupported split was Recharts 24 / 18, ECharts 36 / 6, Chart.js 24 / 18. These scores are that protocol. Round 5 and round 6 follow. Round 6 is the current scoreboard.");
   lines.push("");
   lines.push("| Library | Round 4 no docs first | Round 4 no docs within two | Round 4 official first | Round 4 official within two | Round 4 no docs mean first-try output tokens | Round 4 official mean first-try output tokens |");
   lines.push("|---|---:|---:|---:|---:|---:|---:|");
@@ -381,22 +386,9 @@ function fairConditionsSection(agent) {
   lines.push("");
   lines.push(round5Section());
   lines.push("");
-  lines.push("The table under this paragraph is the next protocol. It adds the ChartKit drawn-shape check (bars inside the plot, and a mark count for the chart type) on top of round 5. Those cells stay \"not yet run\" until that run is saved under `bench/results/agent/conditions/`.");
+  lines.push(round6Section());
   lines.push("");
-  lines.push("| Library | Old protocol first | Old protocol within two | no docs first | no docs within two | with docs first | with docs within two |");
-  lines.push("|---|---:|---:|---:|---:|---:|---:|");
-  const old = {
-    chartkit: ["1 / 42", "11 / 42"],
-    recharts: ["42 / 42", "42 / 42"],
-    echarts: ["42 / 42", "42 / 42"],
-    chartjs: ["39 / 42", "42 / 42"],
-  };
-  for (const library of ["chartkit", "recharts", "echarts", "chartjs"]) {
-    const [first, within] = old[library];
-    lines.push(`| ${library} | ${first} | ${within} | ${conditionCell(none, library, "first")} | ${conditionCell(none, library, "within")} | ${conditionCell(official, library, "first")} | ${conditionCell(official, library, "within")} |`);
-  }
-  lines.push("");
-  lines.push("`no docs` gives every library one paragraph of similar length: how to produce a drawn chart, and where the fields go. The paragraphs are the whole hint. They are not official docs, and ChartKit's paragraph does not add channel shapes the others do not get. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`. A pass requires drawn output. Recharts needs an SVG with data marks (Playwright, `createRoot` and `flushSync`; a detached container counts). Chart.js needs every canvas pixel scanned; a 32 by 32 sample is not enough. The chart type is read from the rendered chart. `meta.type` and `meta.values` are not evidence. ChartKit values are compared as numbers, and ChartKit bars have to sit inside the plot with the mark count the chart type implies. The no-docs and with-docs cells in the table above stay \"not yet run\" until a run of this protocol is saved under `bench/results/agent/conditions/`.");
+  lines.push("`no docs` gives every library one paragraph of similar length: how to produce a drawn chart, and where the fields go. The paragraphs are the whole hint. They are not official docs, and ChartKit's paragraph does not add channel shapes the others do not get. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`. A pass requires drawn output. Recharts needs an SVG with data marks (Playwright, `createRoot` and `flushSync`; a detached container counts). Chart.js needs every canvas pixel scanned; a 32 by 32 sample is not enough. The chart type is read from the rendered chart. `meta.type` and `meta.values` are not evidence. ChartKit values are compared as numbers, and ChartKit bars have to sit inside the plot, one rect per row per bar series.");
   lines.push("");
   lines.push("| Library | no docs hint | with docs | Bytes | Source |");
   lines.push("|---|---|---|---:|---|");
@@ -410,13 +402,13 @@ function fairConditionsSection(agent) {
     lines.push(`| ${doc.library} | ${doc.noDocsHint.replaceAll("|", "/")} | ${doc.title} | ${doc.bytes} | ${doc.url}.${also}${index} ${doc.note} |`);
   }
   lines.push("");
-  lines.push("Run `BENCH_DOCS=none` and `BENCH_DOCS=official` separately. A cell stays \"not yet run\" until that run is saved under `bench/results/agent/conditions/`.");
+  lines.push("Run `BENCH_DOCS=none` and `BENCH_DOCS=official` separately. A local run writes `bench/results/agent/conditions/`, which is gitignored and is not the published scoreboard.");
   lines.push("");
-  lines.push(efficiencySection(none, official));
+  lines.push(efficiencySection());
   return lines.join("\n");
 }
 
-function efficiencySection(none, official) {
+function efficiencySection() {
   const lines = [];
   lines.push("### Efficiency");
   lines.push("");
@@ -431,19 +423,17 @@ function efficiencySection(none, official) {
     lines.push(efficiencyTable(recorded));
   }
   lines.push("");
-  lines.push("Round 5 token means are in the doc-conditions section above. The two lines below are the next protocol, which also checks ChartKit drawn shapes.");
+  lines.push("Round 6 token means and the `checkChartKit` repair rate are in the current scoreboard above. `repair().ok` on the same first-try outputs, with no drawn-shape check:");
   lines.push("");
-  const live = [
-    ["Drawn-shape protocol, no docs", none],
-    ["Drawn-shape protocol, with docs", official],
-  ];
-  for (const [label, run] of live) {
+  const none = loadRound(round6Dir, "no-docs.json");
+  const official = loadRound(round6Dir, "official.json");
+  for (const [label, run] of [["Round 6 no docs", none], ["Round 6 official", official]]) {
     const rows = run?.results;
     if (!rows) {
-      lines.push(`${label}: not yet run.`);
+      lines.push(`${label}: rows not found.`);
       continue;
     }
-    lines.push(`${label}, computed from the saved rows:`);
+    lines.push(`${label}, one model, one run, computed from \`bench/results/agent/round-6/\`:`);
     lines.push("");
     lines.push(efficiencyTable(efficiencyFromRows(rows, currentRepair())));
     lines.push("");

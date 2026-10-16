@@ -28,6 +28,7 @@ coverage/
 bench/last-run.json
 bench/.out/
 bench/results/partial.json
+bench/results/agent/conditions/
 
 # Misc
 *.tgz

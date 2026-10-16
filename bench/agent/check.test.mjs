@@ -566,6 +566,53 @@ test("chartkit drawn shapes reject bars outside the plot", () => {
   assert.equal(good.stages.marks.ok, true, JSON.stringify(good.stages.marks));
 });
 
+test("grouped bars count one rect per row per series", () => {
+  const task = {
+    id: "bar-grouped",
+    type: "bar",
+    data: [
+      { month: "Jan", free: 1, pro: 2 },
+      { month: "Feb", free: 3, pro: 4 },
+    ],
+    expect: { type: "bar", x: "month", y: ["free", "pro"], values: [1, 2, 3, 4] },
+  };
+  const spec = {
+    version: "1",
+    type: "bar",
+    data: task.data,
+    encoding: { x: "month", y: ["free", "pro"] },
+    a11y: { alt: "Free and pro both rose." },
+  };
+  const result = suite.checkChartKit(spec, task);
+  assert.equal(result.ok, true, JSON.stringify(result.stages));
+  const combo = {
+    id: "combo-two-bars",
+    type: "combo",
+    data: [
+      { month: "Jan", free: 4, pro: 2, rate: 0.2 },
+      { month: "Feb", free: 5, pro: 3, rate: 0.4 },
+    ],
+    expect: { type: "combo", x: "month", y: ["free", "pro", "rate"], values: [4, 2, 0.2, 5, 3, 0.4] },
+  };
+  const comboSpec = {
+    version: "1",
+    type: "combo",
+    data: combo.data,
+    encoding: {
+      x: "month",
+      y: [
+        { field: "free", mark: "bar" },
+        { field: "pro", mark: "bar" },
+        { field: "rate", mark: "line", axis: "y2" },
+      ],
+    },
+    axes: { y2: true },
+    a11y: { alt: "Free and pro rose, and the rate rose." },
+  };
+  const comboResult = suite.checkChartKit(comboSpec, combo);
+  assert.equal(comboResult.ok, true, JSON.stringify(comboResult.stages));
+});
+
 test("a valid spec for every task passes the drawn-shape check", () => {
   for (const task of suite.tasks) {
     const result = suite.checkChartKit(specFor(task), task);

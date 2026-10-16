@@ -284,6 +284,15 @@ function rowCount(spec, task) {
   return 0;
 }
 
+/** One rect per row per bar series. A combo line on the other axis is not a bar. */
+function barSeriesCount(spec, type) {
+  const y = spec?.encoding?.y;
+  const items = Array.isArray(y) ? y : y == null ? [] : [y];
+  if (type === "bar") return Math.max(1, items.length);
+  const marked = items.filter((item) => item && typeof item === "object" && item.mark === "bar").length;
+  return marked > 0 ? marked : 1;
+}
+
 /**
  * Drawn-shape check for a ChartKit SVG. Bars must sit inside the plot clip.
  * Mark counts follow the chart type, so a combo that clips its bars fails.
@@ -303,7 +312,8 @@ export function chartGeometry(svg, task, spec) {
   if (type === "bar" || type === "combo") {
     const bars = rectsFrom(plot);
     if (!clip) note("missing plot clip");
-    if (bars.length !== rows) note(`expected ${rows} bars, found ${bars.length}`);
+    const expected = rows * barSeriesCount(spec, type);
+    if (bars.length !== expected) note(`expected ${expected} bars, found ${bars.length}`);
     if (clip && bars.some((bar) => !insideBox(bar, clip))) note("a bar is outside the plot");
     if (type === "combo" && !/<path\b[^>]*\bfill="none"/.test(plot)) note("expected a line");
   } else if (type === "line" || type === "sparkline") {
