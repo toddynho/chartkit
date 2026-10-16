@@ -772,6 +772,16 @@
           "default": "monotone",
           "description": "Line interpolation. Applies to: line, stacked-area, combo, sparkline, mini-area."
         },
+        "sampling": {
+          "enum": [
+            "auto",
+            "none",
+            "lttb",
+            "minmax"
+          ],
+          "default": "auto",
+          "description": "Downsample the path when a series is longer than twice the plot width in pixels. 'auto' and 'minmax' keep the minimum and maximum original point in each pixel bucket (spikes stay). 'lttb' is largest-triangle-three-buckets and also keeps original points. 'none' draws every point. Applies to: line, stacked-area, combo (line and area series only), sparkline, mini-area, spike. Scatter, candlestick, bar, donut, heatmap, gauge, kpi, and progress-ring ignore it (CK3010). Axis extents and a11y.alt always use the full series. Hover vertices map back to those original indexes."
+        },
         "points": {
           "enum": [
             "none",

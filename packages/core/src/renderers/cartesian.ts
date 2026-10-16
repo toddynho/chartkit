@@ -1,4 +1,5 @@
 import { readData } from "../data";
+import { readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import { clamp, esc, font, hash, isRecord, linear, n, niceDomain, niceNum, round } from "../svg";
 import { cssVar, paint, resolvePreset, type PresetTokens } from "../theme";
 
@@ -66,6 +67,7 @@ interface PlotModel {
   x: (number | null)[] | null;
   series: Series[];
   curve: Curve;
+  sampling: SamplingMode;
   stack: "none" | "stack" | "percent";
   orientation: "vertical" | "horizontal";
   fillOpacity: number;
@@ -154,6 +156,7 @@ function toModel(spec: Record<string, unknown>): PlotModel | null {
 
   const stack = stackMode(type, mark.stack);
   const curve = curveOf(mark.curve);
+  const sampling = readSamplingMode(mark.sampling);
   const size = isRecord(spec.size) ? spec.size : {};
   const width = typeof size.width === "number" ? size.width : 640;
   const responsive = size.width === undefined || size.width === "auto";
@@ -175,6 +178,7 @@ function toModel(spec: Record<string, unknown>): PlotModel | null {
     x: type === "bar" || type === "combo" ? null : x,
     series,
     curve,
+    sampling,
     stack,
     orientation: mark.orientation === "horizontal" ? "horizontal" : "vertical",
     fillOpacity: typeof mark.fillOpacity === "number" ? mark.fillOpacity : 0.28,
@@ -266,34 +270,17 @@ function drawLines(
   xScale: XScale,
   yScale: (value: number) => number,
   y2Scale: (value: number) => number,
-  _plot: { left: number; top: number; right: number; bottom: number },
+  plot: { left: number; top: number; right: number; bottom: number },
   _horizontal: boolean,
 ): string {
   const stackMode = model.stack === "none" ? null : model.stack;
   const layers = stackMode ? stackLayers(model.series, stackMode) : null;
   const out: string[] = [];
+  const plotWidth = Math.max(1, plot.right - plot.left);
+  const shared = sharedSample(model, layers, plotWidth);
   model.series.forEach((series, index) => {
     if (series.mark === "bar") return;
-    const scale = series.axis === "y2" ? y2Scale : yScale;
-    const points = pointsFor(series, index, layers, xScale, scale, model);
-    if (series.area || model.type === "stacked-area") {
-      const bottoms = bottomPoints(series, index, layers, xScale, scale, model);
-      const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
-      for (const [top, bottom] of pairSegments(points, bottoms, model.connectNulls)) {
-        out.push(`<path d="${areaPath(top, bottom, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillOpacity}" stroke="none" />`);
-      }
-    }
-    for (const segment of segments(points, model.connectNulls)) {
-      out.push(
-        `<path d="${linePath(segment, model.curve)}" fill="none" stroke="${series.color}" stroke-width="${model.strokeWidth}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
-      );
-    }
-    if (model.points === "always") {
-      for (const point of points) {
-        if (!point) continue;
-        out.push(`<circle cx="${n(point.x)}" cy="${n(point.y)}" r="${n(model.pointSize)}" fill="${series.color}" />`);
-      }
-    }
+    appendLineSeries(out, model, series, index, layers, xScale, series.axis === "y2" ? y2Scale : yScale, plotWidth, shared);
   });
   return out.join("");
 }
@@ -332,6 +319,8 @@ function drawCombo(
   const layers = stackMode ? stackLayers(model.series, stackMode) : null;
   const out: string[] = [];
   const barSeries = model.series.filter((series) => series.mark === "bar");
+  const plotWidth = Math.max(1, plot.right - plot.left);
+  const shared = sharedSample(model, layers, plotWidth);
   model.series.forEach((series, index) => {
     const scale = series.axis === "y2" ? y2Scale : yScale;
     if (series.mark === "bar") {
@@ -339,27 +328,90 @@ function drawCombo(
       out.push(bars(model, series, index, barSeries.length, layers, xScale, scale, plot, horizontal, barIndex));
       return;
     }
-    const points = pointsFor(series, index, layers, xScale, scale, model);
-    if (series.area || model.type === "stacked-area") {
-      const bottoms = bottomPoints(series, index, layers, xScale, scale, model);
-      const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
-      for (const [top, bottom] of pairSegments(points, bottoms, model.connectNulls)) {
-        out.push(`<path d="${areaPath(top, bottom, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillOpacity}" stroke="none" />`);
-      }
-    }
-    for (const segment of segments(points, model.connectNulls)) {
-      out.push(
-        `<path d="${linePath(segment, model.curve)}" fill="none" stroke="${series.color}" stroke-width="${model.strokeWidth}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
-      );
-    }
-    if (model.points === "always") {
-      for (const point of points) {
-        if (!point) continue;
-        out.push(`<circle cx="${n(point.x)}" cy="${n(point.y)}" r="${n(model.pointSize)}" fill="${series.color}" />`);
-      }
-    }
+    appendLineSeries(out, model, series, index, layers, xScale, scale, plotWidth, shared);
   });
   return out.join("");
+}
+
+function sharedSample(model: PlotModel, layers: Layers | null, plotWidth: number): ReturnType<typeof sampleSeries> | null {
+  if (!layers || model.series.length === 0) return null;
+  const top = layers.top[layers.top.length - 1];
+  return sampleSeries(model.sampling, model.x, top, top.length, plotWidth, true);
+}
+
+function appendLineSeries(
+  out: string[],
+  model: PlotModel,
+  series: Series,
+  index: number,
+  layers: Layers | null,
+  xScale: XScale,
+  yScale: (value: number) => number,
+  plotWidth: number,
+  shared: ReturnType<typeof sampleSeries> | null,
+): void {
+  const ys = layers ? layers.top[index] : series.values;
+  const sampled = shared ?? sampleSeries(model.sampling, model.x, ys, series.values.length, plotWidth, model.connectNulls);
+  if (!sampled.reduced) {
+    appendFullLine(out, model, series, index, layers, xScale, yScale);
+    return;
+  }
+  const area = series.area || model.type === "stacked-area";
+  for (const run of sampled.runs) {
+    const points: Pt[] = new Array(run.length);
+    const bottoms: Pt[] = area ? new Array(run.length) : [];
+    for (let k = 0; k < run.length; k++) {
+      const i = run[k];
+      const x = xScale.center(i);
+      const y = layers ? layers.top[index][i] : (series.values[i] ?? 0);
+      points[k] = { x, y: yScale(y) };
+      if (area) bottoms[k] = { x, y: yScale(layers ? layers.bottom[index][i] : 0) };
+    }
+    const indexAttr = ` data-ck-sample="${sampled.mode}" data-ck-i="${run.join(" ")}"`;
+    if (area) {
+      const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
+      out.push(`<path d="${areaPath(points, bottoms, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillOpacity}" stroke="none"${indexAttr} />`);
+    }
+    out.push(
+      `<path d="${linePath(points, model.curve)}" fill="none" stroke="${series.color}" stroke-width="${model.strokeWidth}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)}${indexAttr} />`,
+    );
+    if (model.points === "always") {
+      for (let k = 0; k < run.length; k++) {
+        const point = points[k];
+        out.push(`<circle cx="${n(point.x)}" cy="${n(point.y)}" r="${n(model.pointSize)}" fill="${series.color}" data-ck-i="${run[k]}" />`);
+      }
+    }
+  }
+}
+
+function appendFullLine(
+  out: string[],
+  model: PlotModel,
+  series: Series,
+  index: number,
+  layers: Layers | null,
+  xScale: XScale,
+  yScale: (value: number) => number,
+): void {
+  const points = pointsFor(series, index, layers, xScale, yScale, model);
+  if (series.area || model.type === "stacked-area") {
+    const bottoms = bottomPoints(series, index, layers, xScale, yScale, model);
+    const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
+    for (const [top, bottom] of pairSegments(points, bottoms, model.connectNulls)) {
+      out.push(`<path d="${areaPath(top, bottom, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillOpacity}" stroke="none" />`);
+    }
+  }
+  for (const segment of segments(points, model.connectNulls)) {
+    out.push(
+      `<path d="${linePath(segment, model.curve)}" fill="none" stroke="${series.color}" stroke-width="${model.strokeWidth}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
+    );
+  }
+  if (model.points === "always") {
+    for (const point of points) {
+      if (!point) continue;
+      out.push(`<circle cx="${n(point.x)}" cy="${n(point.y)}" r="${n(model.pointSize)}" fill="${series.color}" />`);
+    }
+  }
 }
 
 function bars(
@@ -492,9 +544,20 @@ function xPosition(
       band: (index) => ({ start: spanStart + size * index, size }),
     };
   }
-  const values = model.x.filter((value): value is number => value !== null);
-  const min = values.length ? Math.min(...values) : 0;
-  const max = values.length ? Math.max(...values) : 1;
+  let min = Infinity;
+  let max = -Infinity;
+  let seen = false;
+  for (let i = 0; i < model.x.length; i++) {
+    const value = model.x[i];
+    if (value === null || !Number.isFinite(value)) continue;
+    seen = true;
+    if (value < min) min = value;
+    if (value > max) max = value;
+  }
+  if (!seen) {
+    min = 0;
+    max = 1;
+  }
   const scale = linear(min, max, spanStart, spanEnd);
   return {
     center: (index) => scale(model.x?.[index] ?? min),
@@ -579,24 +642,33 @@ function padding(model: PlotModel): { top: number; right: number; bottom: number
 }
 
 function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
-  const values: number[] = [];
+  let min = Infinity;
+  let max = -Infinity;
+  let seen = false;
+  const consider = (value: number) => {
+    if (!Number.isFinite(value)) return;
+    seen = true;
+    if (value < min) min = value;
+    if (value > max) max = value;
+  };
   if (model.stack !== "none" && axis === "y") {
     const layers = stackLayers(model.series, model.stack === "percent" ? "percent" : "stack");
     for (let s = 0; s < model.series.length; s++) {
       if (model.series[s].axis !== "y") continue;
-      for (const value of layers.top[s]) values.push(value);
-      for (const value of layers.bottom[s]) values.push(value);
+      for (const value of layers.top[s]) consider(value);
+      for (const value of layers.bottom[s]) consider(value);
     }
   } else {
     for (const series of model.series) {
       if (series.axis !== axis) continue;
-      for (const value of series.values) if (value !== null) values.push(value);
+      for (let i = 0; i < series.values.length; i++) {
+        const value = series.values[i];
+        if (value !== null) consider(value);
+      }
     }
   }
-  if (model.zero || model.stack !== "none") values.push(0);
-  if (values.length === 0) return [0, 1];
-  let min = Math.min(...values);
-  let max = Math.max(...values);
+  if (model.zero || model.stack !== "none") consider(0);
+  if (!seen) return [0, 1];
   if (min === max) {
     min -= Math.abs(min) || 1;
     max += Math.abs(max) || 1;

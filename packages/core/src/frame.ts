@@ -180,11 +180,26 @@ export function wantsZero(channel: unknown, fallback: boolean): boolean {
   return fallback;
 }
 
-export function resolveDomain(values: number[], channel: unknown, zero: boolean): [number, number] {
-  const finite = values.filter((value) => Number.isFinite(value));
-  if (zero) finite.push(0);
-  let min = finite.length ? Math.min(...finite) : 0;
-  let max = finite.length ? Math.max(...finite) : 1;
+export function resolveDomain(values: ArrayLike<number>, channel: unknown, zero: boolean): [number, number] {
+  let min = Infinity;
+  let max = -Infinity;
+  let seen = false;
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i];
+    if (!Number.isFinite(value)) continue;
+    seen = true;
+    if (value < min) min = value;
+    if (value > max) max = value;
+  }
+  if (zero) {
+    seen = true;
+    if (0 < min) min = 0;
+    if (0 > max) max = 0;
+  }
+  if (!seen) {
+    min = 0;
+    max = 1;
+  }
   if (min === max) {
     min -= Math.abs(min) || 1;
     max += Math.abs(max) || 1;

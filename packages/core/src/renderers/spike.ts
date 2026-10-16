@@ -10,6 +10,7 @@ import {
   readTable,
   resolveDomain,
 } from "../frame";
+import { readSamplingMode, sampleSeries } from "../sampling";
 import { closeChart, esc, font, linear, n, openChart, ticks } from "../svg";
 
 /** Thin vertical spikes from mark.baseline (default 0) across x. */
@@ -51,16 +52,32 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
   parts.push(
     `<line x1="${n(plot.left)}" y1="${n(baseY)}" x2="${n(plot.right)}" y2="${n(baseY)}" stroke="${cssVar("axis", frame.preset.axis)}" stroke-width="1.5" />`,
   );
-  values.forEach((value, index) => {
-    if (value === null) return;
+  const plotWidth = Math.max(1, plot.right - plot.left);
+  const sampled = sampleSeries(readSamplingMode(frame.mark.sampling), null, values, values.length, plotWidth, false);
+  const drawSpike = (value: number, index: number, sampledAttr: string) => {
     const x = plot.left + slot * index + slot / 2;
     const y = yScale(value);
     const name = labels[index] ? `${labels[index]}: ` : "";
     const label = `${name}${formatValue(value, yFormat, frame.locale)}`;
     parts.push(
-      `<line x1="${n(x)}" y1="${n(baseY)}" x2="${n(x)}" y2="${n(y)}" stroke="${color}" stroke-width="${n(width)}" stroke-linecap="round" stroke-opacity="${n(opacity)}" aria-label="${esc(label)}"><title>${esc(label)}</title></line>`,
+      `<line x1="${n(x)}" y1="${n(baseY)}" x2="${n(x)}" y2="${n(y)}" stroke="${color}" stroke-width="${n(width)}" stroke-linecap="round" stroke-opacity="${n(opacity)}" aria-label="${esc(label)}"${sampledAttr}><title>${esc(label)}</title></line>`,
     );
-  });
+  };
+  if (!sampled.reduced) {
+    values.forEach((value, index) => {
+      if (value === null) return;
+      drawSpike(value, index, "");
+    });
+  } else {
+    for (const run of sampled.runs) {
+      for (let k = 0; k < run.length; k++) {
+        const index = run[k];
+        const value = values[index];
+        if (value === null) continue;
+        drawSpike(value, index, ` data-ck-sample="${sampled.mode}" data-ck-i="${index}"`);
+      }
+    }
+  }
   if (showY) {
     for (const tick of yTicks) {
       parts.push(text(plot.left - 6, yScale(tick) + 4, formatValue(tick, yFormat, frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "end"));

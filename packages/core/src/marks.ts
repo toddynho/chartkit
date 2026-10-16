@@ -1,6 +1,7 @@
 /** Mark options and the chart types they apply to. Others warn as CK3010. */
 export const MARK_APPLIES: Record<string, readonly string[]> = {
   curve: ["line", "stacked-area", "combo", "sparkline", "mini-area"],
+  sampling: ["line", "stacked-area", "combo", "sparkline", "mini-area", "spike"],
   points: ["line", "combo"],
   pointSize: ["line", "combo", "scatter"],
   area: ["line", "sparkline"],

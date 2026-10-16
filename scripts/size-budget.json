@@ -1,6 +1,6 @@
 {
-  "line": 7139,
-  "all": 19117,
+  "line": 8800,
+  "all": 20879,
   "validate": 11339,
-  "note": "gzip -9 byte budgets. Measured 2026-10-16: line 6610, all 17701, validate 10499. Headroom is 8 percent."
+  "note": "gzip -9 byte budgets, 8 percent above the measurement. 2026-10-16 after mark.sampling: line 8148 (+1538 vs 6610), all 19332 (+1631 vs 17701), validate 10524 (+25 vs 10499). The line entry grew because minmax and LTTB ship with that renderer. Validate stayed inside the previous budget."
 }

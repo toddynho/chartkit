@@ -38,6 +38,8 @@ import { line } from "@chartkitdev/core/charts/line";
 const render = createRenderer([line]);
 ```
 
+`mark.sampling` defaults to `"auto"`: line, area, sparkline, mini-area, stacked-area, combo lines, and spike charts downsample above twice the plot width. See [SPEC.md](./SPEC.md).
+
 TypeScript types in `src/generated/schema.ts` are generated from the schema (`npm run generate:types`). Do not edit that file by hand.
 
 Not published yet. See [docs/migrate.md](../../docs/migrate.md).
