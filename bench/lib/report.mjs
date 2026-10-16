@@ -31,7 +31,7 @@ export function renderReport(result) {
   lines.push("");
   lines.push("ChartKit's minimal entry is the registry, one chart, and the midnight theme. The `/all` entry is every chart and every theme, without the validator. React libraries are measured twice: React included, and React external for an app that already ships it. ECharts is the modular import (`echarts/core` plus one series), not the full bundle. uPlot's CSS is a second response. Observable Plot and uPlot have no donut, so those cells are unsupported rather than a fake chart.");
   lines.push("");
-  lines.push("ChartKit is SVG-only. `mark.sampling` defaults to `auto` and uses minmax once a line is longer than twice the plot width. ECharts `sampling` was left off so the other libraries draw every point.");
+  lines.push("ChartKit is SVG-only. The ChartKit row uses `mark.sampling: \"auto\"` (minmax once a line is longer than twice the plot width). ChartKit sampling none is the same line with `mark.sampling: \"none\"`, measured only at 100,000 and 1,000,000 points. ECharts `sampling` stays off. Every update timer waits for that library's own completion and then the same two animation frames. ECharts completion is the `finished` event, and those two frames come after it.");
   lines.push("");
   lines.push("## Bundle size");
   lines.push("");
@@ -100,11 +100,11 @@ export function renderReport(result) {
     lines.push(`| ${points} | ${initial.toFixed(2)} / ${update.toFixed(2)} | ${afterCell} |`);
   }
   lines.push("");
-  lines.push("On a cold page, constructing `Intl.NumberFormat` for the tick labels was about 10 ms, and `Array.from` on a 100k Float64 column was about 6 ms. This run keeps those columns in place and formats `en-US` ticks without `Intl`. Replacing `innerHTML` with the sampled SVG measured 0.2 ms, and the next animation frames matched a mutation that did nothing. Writing the path `d` attribute in place matched `innerHTML`. A canvas renderer was not added: the sampled SVG is not what the 10k update time is waiting on. That wait is the harness's two animation frames after a synchronous paint. ECharts is timed on its `finished` event instead.");
+  lines.push("On a cold page, constructing `Intl.NumberFormat` for the tick labels was about 10 ms, and `Array.from` on a 100k Float64 column was about 6 ms. This run keeps those columns in place and formats `en-US` ticks without `Intl`. Replacing `innerHTML` with the sampled SVG measured 0.2 ms, and the next animation frames matched a mutation that did nothing. Writing the path `d` attribute in place matched `innerHTML`. A canvas renderer was not added. The earlier 10k update gap was partly the timer: ChartKit waited for two animation frames and ECharts waited only for `finished`. This run gives every library the same two frames after its own completion.");
   lines.push("");
   lines.push("### Canvas");
   lines.push("");
-  lines.push("Not measured. This run downsamples ChartKit with `mark.sampling: \"auto\"` (minmax above twice the 572px plot width, so 1,000 points stay complete and 10k, 100k, and 1M do not). A Canvas renderer would draw the sampled points without an SVG path node. ECharts `sampling` stayed off.");
+  lines.push("Not measured. The ChartKit row still downsamples with `mark.sampling: \"auto\"` (minmax above twice the 572px plot width, so 1,000 points stay complete and 10k, 100k, and 1M do not). The ChartKit sampling none row draws every point at 100k and 1M. ECharts `sampling` stayed off.");
   lines.push("");
   lines.push("## Server render");
   lines.push("");
@@ -135,7 +135,7 @@ export function renderReport(result) {
   lines.push("npm run bench");
   lines.push("```");
   lines.push("");
-  lines.push("Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` limits a run. `BENCH_DOCS=none` (the default) is the no-docs condition. `BENCH_DOCS=official` is the with-docs condition. A finished run is also written to `bench/results/agent/conditions/no-docs.json` or `with-docs.json`. A failed validate, render, compile, or library-use check is sent back once.");
+  lines.push("Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` limits a run. `BENCH_DOCS=none` (the default) is the no-docs condition: one paragraph per library. `BENCH_DOCS=official` prepends that library's own doc. A finished run is also written to `bench/results/agent/conditions/no-docs.json` or `with-docs.json`. A failed validate, render, compile, or library-use check is sent back once.");
   lines.push("");
   return lines.join("\n");
 }
@@ -204,7 +204,7 @@ function ssrVerdict(rows) {
 }
 
 function agentSection(agent) {
-  const protocol = "A code-library pass must import that library and return markup the library produced, or set `meta.unsupported` when the library cannot draw the chart. Chart.js runs in Playwright. ECharts code that touches `document` runs in Playwright; `echarts.init(null, …, { ssr: true })` stays in Node. Validator errors, render errors, compile errors, and library-use failures are fed back once. The first-try column ignores that repair.";
+  const protocol = "A code-library pass must import that library and return a drawn chart, or set `meta.unsupported` when the library cannot draw the chart. Recharts and Chart.js run in Playwright. A Recharts pass needs an SVG with data marks. A Chart.js pass needs painted canvas pixels. ECharts code that touches `document` runs in Playwright; `echarts.init(null, …, { ssr: true })` stays in Node and the SVG must contain marks. Data values come from the rendered chart, not from `meta`. Validator errors, render errors, compile errors, and library-use failures are fed back once. The first-try column ignores that repair.";
   if (!agent || agent.status !== "ok") {
     return [
       `Fair-scoring protocol on this branch: ${protocol}`,
@@ -273,6 +273,16 @@ function fairConditionsSection(agent) {
   lines.push("");
   lines.push("Round 2 was run outside this repo at bench `055196d`, model claude-sonnet-4-5, temperature 0. That protocol gave ChartKit the two-line rule and no how-to-render hint. Recharts, ECharts, and Chart.js got an API hint and no official docs. Those scores are the old-protocol row. A ChartKit-only follow-up prepended `llms.txt` and scored 41 / 42 on the first try and 41 / 42 within two; the miss was `heat-sales`, and the checker now accepts either axis orientation for that task. That follow-up did not give the other libraries their docs, so it is not the with-docs row.");
   lines.push("");
+  lines.push("Round 3 was run outside this repo at bench `ee0b474`, same model and temperature. No-docs hints were one line each, and ChartKit's line also named the spec shape. Recharts passed on an empty `recharts-wrapper` because the checker matched `/recharts-/` and trusted `meta.values`. Re-executing those answers found 0 / 24 supported charts with an SVG. The corrected row counts only the 18 tasks that library correctly declined. ECharts Node SSR answers in the official run returned SVG with marks. Chart.js passed when a canvas element existed, without a pixel check. Those scores are the round-3 protocol. They are not the equal-hint, drawn-output column below.");
+  lines.push("");
+  lines.push("| Library | Round 3 no docs first | Round 3 no docs within two | Round 3 official first | Round 3 official within two |");
+  lines.push("|---|---:|---:|---:|---:|");
+  lines.push("| chartkit | 31 / 42 | 41 / 42 | 42 / 42 | 42 / 42 |");
+  lines.push("| recharts as scored | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 |");
+  lines.push("| recharts corrected | 18 / 42 | 18 / 42 | 18 / 42 | 18 / 42 |");
+  lines.push("| echarts | 42 / 42 | 42 / 42 | 40 / 42 | 41 / 42 |");
+  lines.push("| chartjs | 39 / 42 | 42 / 42 | 42 / 42 | 42 / 42 |");
+  lines.push("");
   lines.push("| Library | Old protocol first | Old protocol within two | no docs first | no docs within two | with docs first | with docs within two |");
   lines.push("|---|---:|---:|---:|---:|---:|---:|");
   const old = {
@@ -286,7 +296,7 @@ function fairConditionsSection(agent) {
     lines.push(`| ${library} | ${first} | ${within} | ${conditionCell(none, library, "first")} | ${conditionCell(none, library, "within")} | ${conditionCell(official, library, "first")} | ${conditionCell(official, library, "within")} |`);
   }
   lines.push("");
-  lines.push("`no docs` gives every library one how-to-render line and nothing else. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`.");
+  lines.push("`no docs` gives every library one paragraph of similar length: how to produce a drawn chart, and where the fields go. The paragraphs are the whole hint. They are not official docs, and ChartKit's paragraph does not add channel shapes the others do not get. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`. A pass requires drawn output. Recharts needs an SVG with data marks (Playwright, `createRoot` and `flushSync`). Chart.js needs painted canvas pixels. Values are read from the chart the library drew. `meta.values` is not evidence. The no-docs and with-docs cells below stay \"not yet run\" until a run of this protocol is saved under `bench/results/agent/conditions/`.");
   lines.push("");
   lines.push("| Library | no docs hint | with docs | Bytes | Source |");
   lines.push("|---|---|---|---:|---|");

@@ -28,7 +28,8 @@ async function timed(n, render, update) {
 }
 `;
 
-const chartkit = prelude + `
+function chartkitSource(sampling, library) {
+  return prelude + `
 import { createRenderer } from "../../packages/core/src/render.ts";
 import { line } from "../../packages/core/src/charts/line.ts";
 const render = createRenderer([line]);
@@ -38,14 +39,14 @@ function spec(xs, ys) {
     type: "line",
     data: { columns: { x: xs, y: ys } },
     encoding: { x: "x", y: "y" },
-    mark: { curve: "linear", points: "none", sampling: "auto" },
+    mark: { curve: "linear", points: "none", sampling: ${JSON.stringify(sampling)} },
     size: { width: 640, height: 360 },
     locale: "en-US",
     a11y: { alt: "Indexed line of one series." },
   };
 }
 globalThis.__bench = {
-  library: "ChartKit",
+  library: ${JSON.stringify(library)},
   renderer: "svg",
   async run(n) {
     const host = document.createElement("div");
@@ -61,6 +62,7 @@ globalThis.__bench = {
   },
 };
 `;
+}
 
 const uplot = prelude + `
 import uPlot from "uplot";
@@ -168,10 +170,12 @@ globalThis.__bench = {
       const done = settle(chart);
       chart.setOption(option(data), true);
       await done;
+      await frames();
     }, async (data) => {
       const done = settle(chart);
       chart.setOption(option(data), true);
       await done;
+      await frames();
     });
   },
 };
@@ -264,7 +268,8 @@ globalThis.__bench = {
 `;
 
 export const browserAdapters = [
-  { id: "chartkit", source: chartkit },
+  { id: "chartkit", source: chartkitSource("auto", "ChartKit") },
+  { id: "chartkit-full", source: chartkitSource("none", "ChartKit sampling none"), sizes: [100_000, 1_000_000] },
   { id: "uplot", source: uplot },
   { id: "chartjs", source: chartjs },
   { id: "echarts", source: echarts },

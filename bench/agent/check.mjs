@@ -22,6 +22,7 @@ import { progressRing } from "../../packages/core/src/charts/progress-ring.ts";
 import { spike } from "../../packages/core/src/charts/spike.ts";
 import { candlestick } from "../../packages/core/src/charts/candlestick.ts";
 import { ACCEPTED } from "./capabilities.mjs";
+import { libraryCapturePlugin, numbersFromOption } from "./capture.mjs";
 import { noDocsHint, officialReference } from "./docs.mjs";
 
 const render = createRenderer([
@@ -112,9 +113,9 @@ export function libraryUse(source, library) {
   return { imports, uses, bindings };
 }
 
-/** Chart.js always needs a document. ECharts needs one unless it uses the Node SSR init. */
+/** Chart.js and Recharts draw in a document. ECharts needs one unless it uses the Node SSR init. */
 export function needsBrowser(library, source) {
-  if (library === "chartjs") return true;
+  if (library === "chartjs" || library === "recharts") return true;
   if (library !== "echarts") return false;
   if (/\bdocument\b|\bwindow\b|\bHTMLElement\b/.test(source)) return true;
   if (/\.init\(\s*(?:null|undefined)\b/.test(source)) return false;
@@ -122,14 +123,45 @@ export function needsBrowser(library, source) {
   return false;
 }
 
+function svgHasMarks(text) {
+  return /<svg[\s>]/i.test(text) && /<(?:path|rect|circle|polygon|polyline)\b/i.test(text);
+}
+
 export function renderedWithLibrary(library, rendered, facts = {}) {
   const text = String(rendered ?? "");
-  if (library === "recharts") return /recharts-/.test(text);
-  if (library === "echarts") return /xmlns:xlink|_echarts_instance_/.test(text) || (facts.echartsNodes ?? 0) > 0;
-  if (library === "chartjs") {
-    return (facts.canvases ?? 0) > 0 || /data:image\/png|<canvas[\s>]/.test(text);
+  if (library === "recharts") {
+    return (facts.rechartsMarks ?? 0) > 0 && (/<svg[\s>]/i.test(text) || (facts.rechartsSurface ?? 0) > 0);
   }
+  if (library === "echarts") {
+    if (svgHasMarks(text)) return true;
+    return (facts.echartsNodes ?? 0) > 0 && facts.canvasDrawn === true;
+  }
+  if (library === "chartjs") return facts.canvasDrawn === true;
   return false;
+}
+
+function textNumbers(rendered) {
+  const text = String(rendered ?? "").replace(/<[^>]*>/g, " ");
+  const out = [];
+  for (const match of text.matchAll(/[-+]?(?:\d+\.\d+|\d+)(?:[eE][-+]?\d+)?/g)) {
+    const value = Number(match[0]);
+    if (Number.isFinite(value)) out.push(value);
+  }
+  return out;
+}
+
+function evidenceNumbers(rendered, facts) {
+  const plotted = Array.isArray(facts?.plotted) ? facts.plotted.filter((value) => typeof value === "number" && Number.isFinite(value)) : [];
+  if (plotted.length > 0) return plotted;
+  const drawn = svgHasMarks(rendered) || facts?.canvasDrawn === true || (facts?.rechartsMarks ?? 0) > 0;
+  if (!drawn) return [];
+  return textNumbers(rendered);
+}
+
+function containsValue(evidence, value) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return false;
+  const tolerance = 1e-6 * Math.max(1, Math.abs(value));
+  return evidence.some((item) => Math.abs(item - value) <= tolerance);
 }
 
 function channelField(value) {
@@ -255,9 +287,9 @@ export function scoreModule(mod, task, library, context = {}) {
   }
   const type = mod.meta?.type;
   const typeOk = typeof type === "string" && accepted.includes(type);
-  const blob = `${rendered}\n${JSON.stringify(mod.meta ?? {})}`;
+  const evidence = evidenceNumbers(rendered, context.facts);
   const values = task.expect.values ?? (task.expect.metric !== undefined ? [task.expect.metric] : []);
-  const valuesOk = values.every((value) => blob.includes(String(value)));
+  const valuesOk = values.every((value) => containsValue(evidence, value));
   const stages = {
     render: { ok: rendered.length > 0 && !/error\[CK/.test(rendered) },
     type: { ok: typeOk, actual: type ?? null, accepted },
@@ -271,7 +303,11 @@ export function scoreModule(mod, task, library, context = {}) {
         ok: false,
         imports: true,
         uses: true,
-        reason: `render() did not return markup produced by ${LIBRARY_LABEL[library] ?? library}.`,
+        reason: library === "recharts"
+          ? "Recharts 3 renderToStaticMarkup returns an empty recharts-wrapper. Mount with createRoot and flushSync so the SVG contains data marks."
+          : library === "chartjs"
+            ? "The canvas has no painted pixels. A canvas tag or a data URL of a blank canvas does not pass."
+            : `render() did not return markup produced by ${LIBRARY_LABEL[library] ?? library}.`,
       };
   }
   return { ok: Object.values(stages).every((stage) => stage.ok), status: "checked", stages };
@@ -292,6 +328,7 @@ export async function importModule(source) {
     define: { "process.env.NODE_ENV": '"production"' },
     jsx: "automatic",
     packages: "external",
+    plugins: [libraryCapturePlugin()],
     logLevel: "silent",
   });
   return import(`${pathToFileURL(outfile).href}?t=${Date.now()}`);
@@ -316,13 +353,15 @@ export async function renderInBrowser(browser, source) {
       outfile,
       jsx: "automatic",
       define: { "process.env.NODE_ENV": '"production"' },
+      plugins: [libraryCapturePlugin()],
       logLevel: "silent",
     });
     const code = readFileSync(outfile, "utf8");
     const page = await browser.newPage();
     try {
       await page.setContent("<!doctype html><html><body></body></html>");
-      const result = await page.evaluate(async (bundled) => {
+      const result = await page.evaluate(async ({ bundled, readOption }) => {
+        const numbersFromOption = new Function(`return (${readOption})`)();
         const url = URL.createObjectURL(new Blob([bundled], { type: "text/javascript" }));
         const mod = await import(url);
         let rendered = "";
@@ -332,16 +371,96 @@ export async function renderInBrowser(browser, source) {
         } catch (err) {
           error = err && err.message ? err.message : String(err);
         }
+        for (const canvas of document.querySelectorAll("canvas")) {
+          const chart = canvas.__ckChart;
+          if (chart && typeof chart.stop === "function") {
+            try { chart.stop(); chart.update("none"); } catch { /* a canvas that is not a chart stays blank */ }
+          }
+        }
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const plotted = [];
+        const add = (option) => {
+          for (const value of numbersFromOption(option)) plotted.push(value);
+        };
+        for (const canvas of document.querySelectorAll("canvas")) {
+          const chart = canvas.__ckChart;
+          if (chart?.data?.datasets) add({ series: chart.data.datasets.map((dataset) => ({ data: dataset.data })) });
+          if (typeof chart?.getOption === "function") add(chart.getOption());
+        }
+        for (const node of document.querySelectorAll("[_echarts_instance_]")) {
+          if (typeof node.__ckChart?.getOption === "function") add(node.__ckChart.getOption());
+        }
+        const seen = new Set();
+        for (const node of document.querySelectorAll("*")) {
+          const key = Object.keys(node).find((name) => name.startsWith("__reactFiber$") || name.startsWith("__reactContainer$"));
+          if (!key) continue;
+          const root = node[key];
+          const stack = [root.current || root];
+          while (stack.length) {
+            const fiber = stack.pop();
+            if (!fiber || seen.has(fiber)) continue;
+            seen.add(fiber);
+            const data = fiber.memoizedProps?.data;
+            if (data != null) add({ series: [{ data }] });
+            if (fiber.child) stack.push(fiber.child);
+            if (fiber.sibling) stack.push(fiber.sibling);
+          }
+        }
+        for (const option of globalThis.__ckPlotted ?? []) add(option);
+        function canvasHasInk(canvas) {
+          if (!canvas || canvas.width < 2 || canvas.height < 2) return false;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return false;
+          const stepX = Math.max(1, Math.floor(canvas.width / 32));
+          const stepY = Math.max(1, Math.floor(canvas.height / 32));
+          let ink = 0;
+          for (let y = 0; y < canvas.height; y += stepY) {
+            let row;
+            try { row = ctx.getImageData(0, y, canvas.width, 1).data; } catch { return false; }
+            for (let x = 0; x < canvas.width; x += stepX) {
+              const i = x * 4;
+              if (row[i + 3] < 12) continue;
+              if (row[i] > 245 && row[i + 1] > 245 && row[i + 2] > 245) continue;
+              ink += 1;
+              if (ink >= 6) return true;
+            }
+          }
+          return false;
+        }
+        let canvasDrawn = [...document.querySelectorAll("canvas")].some(canvasHasInk);
+        if (!canvasDrawn) {
+          const dataUrl = rendered.match(/data:image\/png;base64,[A-Za-z0-9+/=]+/);
+          if (dataUrl) {
+            const image = new Image();
+            image.src = dataUrl[0];
+            try {
+              await image.decode();
+              const copy = document.createElement("canvas");
+              copy.width = image.width;
+              copy.height = image.height;
+              copy.getContext("2d").drawImage(image, 0, 0);
+              canvasDrawn = canvasHasInk(copy);
+            } catch { /* a data URL that does not decode is not a drawn chart */ }
+          }
+        }
+        const surface = document.querySelectorAll("svg.recharts-surface");
+        const markSel = ".recharts-line-curve, .recharts-area-area, .recharts-area-curve, .recharts-bar-rectangle, .recharts-rectangle, .recharts-pie-sector, .recharts-sector, .recharts-radial-bar-sector, .recharts-scatter-symbol, .recharts-curve, .recharts-polygon";
+        let rechartsMarks = 0;
+        for (const svg of surface) rechartsMarks += svg.querySelectorAll(markSel).length;
         return {
           rendered,
           meta: mod.meta ?? null,
           error,
           facts: {
             canvases: document.querySelectorAll("canvas").length,
+            canvasDrawn,
             echartsNodes: document.querySelectorAll("[_echarts_instance_]").length,
+            rechartsSurface: surface.length,
+            rechartsMarks,
+            plotted,
           },
         };
-      }, code);
+      }, { bundled: code, readOption: numbersFromOption.toString() });
       return {
         mod: { meta: result.meta, render() { return result.rendered; } },
         rendered: result.rendered,
@@ -362,8 +481,11 @@ export async function executeAnswer(source, library, getBrowser) {
   try {
     const mod = await importModule(source);
     try {
+      globalThis.__ckPlotted = [];
       const rendered = String(await mod.render());
-      return { mod, rendered, facts: {} };
+      const plotted = [];
+      for (const option of globalThis.__ckPlotted ?? []) plotted.push(...numbersFromOption(option));
+      return { mod, rendered, facts: { plotted } };
     } catch (error) {
       if (library === "echarts" && isDomError(error)) return inBrowser();
       return { mod, rendered: "", renderError: error, facts: {} };

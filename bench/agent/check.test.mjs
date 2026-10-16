@@ -85,8 +85,8 @@ test("code libraries must admit a chart they cannot draw", () => {
 test("a compiled module scores a supported chart", () => {
   const task = suite.tasks.find((item) => item.id === "line-revenue");
   const result = suite.scoreModule({
-    meta: { type: "LineChart", values: [120, 150, 132] },
-    render() { return "<svg>120 150 132</svg>"; },
+    meta: { type: "LineChart", values: [1] },
+    render() { return '<svg><path d="M0 0" /><text>120</text><text>150</text><text>132</text></svg>'; },
   }, task, "recharts");
   assert.equal(result.ok, true, JSON.stringify(result.stages));
 });
@@ -153,13 +153,31 @@ test("a hand-written SVG does not pass for a code library", () => {
   assert.equal(result.stages.library.ok, false);
 });
 
-test("recharts markup from an import counts as a pass", () => {
+test("an empty recharts wrapper does not pass", () => {
   const task = suite.tasks.find((item) => item.id === "line-revenue");
   const source = 'import { LineChart } from "recharts";\nexport function render(){ return LineChart; }\nexport const meta = { type: "LineChart", values: [120, 150, 132] };';
+  const rendered = '<div class="recharts-wrapper">120 150 132</div>';
   const result = suite.scoreModule({
     meta: { type: "LineChart", values: [120, 150, 132] },
-    render() { return '<div class="recharts-wrapper">120 150 132</div>'; },
-  }, task, "recharts", { source, rendered: '<div class="recharts-wrapper">120 150 132</div>' });
+    render() { return rendered; },
+  }, task, "recharts", { source, rendered, facts: { plotted: [] } });
+  assert.equal(result.ok, false, JSON.stringify(result.stages));
+  assert.equal(result.stages.library.ok, false);
+  assert.equal(result.stages.values.ok, false);
+});
+
+test("recharts passes from drawn marks and plotted data, not meta", () => {
+  const task = suite.tasks.find((item) => item.id === "line-revenue");
+  const source = 'import { LineChart } from "recharts";\nexport function render(){ return LineChart; }\n';
+  const rendered = '<div class="recharts-wrapper"><svg class="recharts-surface"><path class="recharts-line-curve" /></svg></div>';
+  const result = suite.scoreModule({
+    meta: { type: "LineChart", values: [1, 2, 3] },
+    render() { return rendered; },
+  }, task, "recharts", {
+    source,
+    rendered,
+    facts: { rechartsMarks: 1, rechartsSurface: 1, plotted: [120, 150, 132] },
+  });
   assert.equal(result.ok, true, JSON.stringify(result.stages));
 });
 
@@ -167,7 +185,7 @@ test("chart.js needs a browser and echarts SSR init does not", () => {
   assert.equal(suite.needsBrowser("chartjs", 'import Chart from "chart.js/auto";\nnew Chart();\n'), true);
   assert.equal(suite.needsBrowser("echarts", 'echarts.init(null, null, { renderer: "svg", ssr: true })'), false);
   assert.equal(suite.needsBrowser("echarts", 'echarts.init(document.getElementById("c"))'), true);
-  assert.equal(suite.needsBrowser("recharts", 'import { LineChart } from "recharts";'), false);
+  assert.equal(suite.needsBrowser("recharts", 'import { LineChart } from "recharts";'), true);
 });
 
 test("validator errors are fed back once", async () => {
@@ -248,9 +266,10 @@ test("a recharts JSX module resolves from bench/node_modules", async () => {
   ].join("\n");
   const mod = await suite.importModule(source);
   const rendered = String(mod.render());
-  assert.match(rendered, /recharts-/);
-  const result = suite.scoreModule(mod, task, "recharts", { source, rendered });
-  assert.equal(result.ok, true, JSON.stringify(result.stages));
+  assert.match(rendered, /recharts-wrapper/);
+  assert.doesNotMatch(rendered, /<svg[\s>]/);
+  const result = suite.scoreModule(mod, task, "recharts", { source, rendered, facts: {} });
+  assert.equal(result.stages.library.ok, false, JSON.stringify(result.stages));
 });
 
 test("heat-sales accepts either axis orientation and heat-load does not", () => {
@@ -279,14 +298,20 @@ test("heat-sales accepts either axis orientation and heat-load does not", () => 
   assert.equal(suite.checkChartKit(flipped, load).stages.fields.ok, false);
 });
 
-test("no-docs prompts name the npm package and give ChartKit a render hint", () => {
+test("no-docs prompts name the npm package and give each library one paragraph", () => {
   const task = suite.tasks.find((item) => item.id === "line-revenue");
   const chartkit = suite.chartkitPrompt(task);
-  assert.match(chartkit, /metric: \{ value, min, max/);
+  assert.match(chartkit, /encoding\.x/);
+  assert.doesNotMatch(chartkit, /metric: \{ value, min, max/);
   assert.doesNotMatch(chartkit, /Official reference/);
   const chartjs = suite.codePrompt(task, "chartjs");
   assert.match(chartjs, /npm package "chart\.js"/);
+  assert.match(chartjs, /painted pixels/);
+  assert.match(chartjs, /register every scale/);
   assert.doesNotMatch(chartjs, /using chartjs\b/);
+  const recharts = suite.codePrompt(task, "recharts");
+  assert.match(recharts, /flushSync/);
+  assert.match(recharts, /renderToStaticMarkup/);
   const official = suite.promptFor(task, "echarts", "official");
   assert.match(official, /Official reference/);
   assert.match(official, /renderToSVGString/);
@@ -294,11 +319,16 @@ test("no-docs prompts name the npm package and give ChartKit a render hint", () 
   assert.doesNotMatch(plain, /Official reference/);
   const manifest = suite.docsManifest();
   const byName = Object.fromEntries(manifest.map((item) => [item.library, item]));
+  const lengths = [];
   for (const library of ["chartkit", "recharts", "echarts", "chartjs"]) {
     assert.ok(byName[library].bytes > 1000, library);
     assert.ok(byName[library].url, library);
     assert.ok(byName[library].bytes <= byName.chartkit.bytes, `${library} ${byName[library].bytes}`);
+    lengths.push(byName[library].noDocsHint.length);
   }
+  const longest = Math.max(...lengths);
+  const shortest = Math.min(...lengths);
+  assert.ok(longest / shortest < 1.35, lengths.join(","));
 });
 
 test("chart.js runs in Playwright and a canvas counts as use", { timeout: 120000 }, async () => {
@@ -319,6 +349,8 @@ test("chart.js runs in Playwright and a canvas counts as use", { timeout: 120000
     const executed = await suite.renderInBrowser(browser, source);
     assert.equal(executed.renderError, null, executed.renderError?.message);
     assert.ok(executed.facts.canvases > 0, JSON.stringify(executed.facts));
+    assert.equal(executed.facts.canvasDrawn, true, JSON.stringify(executed.facts));
+    assert.ok(executed.facts.plotted.includes(100), JSON.stringify(executed.facts.plotted));
     assert.match(executed.rendered, /<canvas/);
     const task = suite.tasks.find((item) => item.id === "bar-signups");
     const result = suite.scoreModule(executed.mod, task, "chartjs", {
@@ -328,7 +360,85 @@ test("chart.js runs in Playwright and a canvas counts as use", { timeout: 120000
     });
     assert.equal(result.stages.library.ok, true, JSON.stringify(result.stages));
     assert.equal(result.stages.render.ok, true);
+    const blank = suite.scoreModule(executed.mod, task, "chartjs", {
+      source,
+      rendered: "<canvas></canvas>",
+      facts: { canvases: 1, canvasDrawn: false, plotted: [100, 180, 150] },
+    });
+    assert.equal(blank.stages.library.ok, false);
   } finally {
     await browser.close();
   }
+});
+
+test("recharts draws an SVG in Playwright and an empty wrapper does not", { timeout: 120000 }, async () => {
+  const { chromium } = await import("playwright");
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const source = [
+      'import { createElement } from "react";',
+      'import { flushSync } from "react-dom";',
+      'import { createRoot } from "react-dom/client";',
+      'import { LineChart, Line, XAxis, YAxis } from "recharts";',
+      "export function render() {",
+      '  const host = document.createElement("div");',
+      "  document.body.appendChild(host);",
+      "  const root = createRoot(host);",
+      "  flushSync(() => root.render(createElement(LineChart, { width: 320, height: 180, data: [{ month: \"Jan\", revenue: 120 }, { month: \"Feb\", revenue: 150 }, { month: \"Mar\", revenue: 132 }] },",
+      '    createElement(XAxis, { dataKey: "month" }),',
+      "    createElement(YAxis),",
+      '    createElement(Line, { dataKey: "revenue", isAnimationActive: false })',
+      "  )));",
+      "  return host.innerHTML;",
+      "}",
+      'export const meta = { type: "LineChart", values: [1, 2, 3] };',
+    ].join("\n");
+    const executed = await suite.renderInBrowser(browser, source);
+    assert.equal(executed.renderError, null, executed.renderError?.message);
+    assert.ok(executed.facts.rechartsMarks > 0, JSON.stringify(executed.facts));
+    assert.match(executed.rendered, /<svg[\s>]/);
+    const task = suite.tasks.find((item) => item.id === "line-revenue");
+    const result = suite.scoreModule(executed.mod, task, "recharts", {
+      source,
+      rendered: executed.rendered,
+      facts: executed.facts,
+    });
+    assert.equal(result.ok, true, JSON.stringify(result.stages));
+  } finally {
+    await browser.close();
+  }
+});
+
+test("echarts node SVG keeps series numbers off meta", async () => {
+  const source = [
+    'import * as echarts from "echarts";',
+    "export function render() {",
+    '  const chart = echarts.init(null, null, { renderer: "svg", ssr: true, width: 320, height: 180 });',
+    "  chart.setOption({ animation: false, xAxis: { type: \"category\", data: [\"Jan\", \"Feb\", \"Mar\"] }, yAxis: { type: \"value\" }, series: [{ type: \"bar\", data: [120, 150, 132] }] });",
+    "  return chart.renderToSVGString();",
+    "}",
+    'export const meta = { type: "bar", values: [1] };',
+  ].join("\n");
+  globalThis.__ckPlotted = [];
+  const mod = await suite.importModule(source);
+  globalThis.__ckPlotted = [];
+  const rendered = String(mod.render());
+  assert.match(rendered, /<svg[\s>]/);
+  assert.match(rendered, /<(?:path|rect)\b/);
+  const plotted = [];
+  for (const option of globalThis.__ckPlotted ?? []) {
+    const series = option.series ?? [];
+    for (const item of series) {
+      for (const value of item.data ?? []) if (typeof value === "number") plotted.push(value);
+    }
+  }
+  assert.deepEqual(plotted, [120, 150, 132]);
+  const task = suite.tasks.find((item) => item.id === "line-revenue");
+  const result = suite.scoreModule(mod, task, "echarts", {
+    source,
+    rendered,
+    facts: { plotted },
+  });
+  assert.equal(result.stages.library.ok, true, JSON.stringify(result.stages));
+  assert.equal(result.stages.values.ok, true, JSON.stringify(result.stages));
 });

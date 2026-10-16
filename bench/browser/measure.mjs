@@ -20,11 +20,18 @@ function median(values) {
   return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 }
 
-function timeoutFor(n) {
+function timeoutFor(n, id) {
+  if (id === "chartkit-full" && n >= 1_000_000) return 180_000;
+  if (id === "chartkit-full" && n >= 100_000) return 90_000;
   if (n >= 1_000_000) return 90_000;
   if (n >= 100_000) return 45_000;
   if (n >= 10_000) return 20_000;
   return 15_000;
+}
+
+function sizesFor(adapter) {
+  const limit = adapter.sizes ?? SIZES;
+  return SIZES.filter((points) => limit.includes(points));
 }
 
 const html = `<!doctype html><html><head><meta charset="utf-8"></head><body><div id="root" style="width:640px;height:360px"></div></body></html>`;
@@ -50,7 +57,7 @@ async function bundleAdapters() {
       define: { "process.env.NODE_ENV": '"production"' },
       logLevel: "silent",
     });
-    files.push({ id: adapter.id, outfile });
+    files.push({ id: adapter.id, outfile, sizes: sizesFor(adapter) });
   }
   return files;
 }
@@ -64,7 +71,7 @@ export async function measureBrowser() {
   try {
     for (const file of files) {
       let skipLarger = false;
-      for (const points of SIZES) {
+      for (const points of file.sizes) {
         if (skipLarger) {
           rows.push({
             id: file.id,
@@ -75,7 +82,7 @@ export async function measureBrowser() {
           continue;
         }
         console.log(`browser ${file.id} ${points}`);
-        const timeout = timeoutFor(points);
+        const timeout = timeoutFor(points, file.id);
         const samples = [];
         let failed = null;
         let info = { library: file.id, renderer: null };
@@ -136,7 +143,7 @@ export async function measureBrowser() {
     await browser.close();
   }
   return {
-    method: `Playwright Chromium. Each sample is a fresh page. Reported times are the median of ${SAMPLES} samples. Data is makeSeries(n, seed) generated inside the page and excluded from the timer. x[i] = i. Initial render and one full update (seed 2) are timed, then two animation frames. ChartKit replaces innerHTML with a new SVG (curve linear, points none, sampling auto, which is minmax above twice the plot width). An error SVG (ck-chart-error) fails that sample. uPlot uses setData. Chart.js uses update('none') and {x,y} points. ECharts uses setOption on a canvas renderer with sampling left off, and waits for the finished event. Recharts and Nivo use flushSync. Observable Plot replaces the SVG node. Width 640, height 360. Memory is the median performance.memory.usedJSHeapSize when Chromium exposes it. A failed size skips larger sizes for that library.`,
+    method: `Playwright Chromium. Each sample is a fresh page. Reported times are the median of ${SAMPLES} samples. Data is makeSeries(n, seed) generated inside the page and excluded from the timer. x[i] = i. Every library does its own update, then waits for the same two animation frames. ECharts also waits for its finished event before those frames. ChartKit replaces innerHTML with a new SVG (curve linear, points none, sampling auto, which is minmax above twice the plot width). ChartKit sampling none is the same line with mark.sampling none, measured only at 100k and 1M. An error SVG (ck-chart-error) fails that sample. uPlot uses setData. Chart.js uses update('none') and {x,y} points. ECharts uses setOption on a canvas renderer with sampling left off. Recharts and Nivo use flushSync. Observable Plot replaces the SVG node. Width 640, height 360. Memory is the median performance.memory.usedJSHeapSize when Chromium exposes it. A failed size skips larger sizes for that library.`,
     samples: SAMPLES,
     sizes: SIZES,
     rows,

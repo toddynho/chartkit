@@ -18,14 +18,17 @@ const repoRoot = findRepoRoot(here) ?? findRepoRoot(process.cwd());
 if (!repoRoot) throw new Error("ChartKit repo root not found from the agent docs loader");
 const sources = JSON.parse(readFileSync(join(repoRoot, "bench/agent/docs/sources.json"), "utf8"));
 
+// One paragraph each: how to produce a drawn chart, and where the fields go.
+// Same job and similar length. ChartKit does not get extra channel shapes here.
 const NO_DOCS_HINT = {
   chartkit:
-    'How to render: return one JSON object. "version" is "1". "type" is the chart name. "data" is the row array. "a11y.alt" is one sentence. encoding.x and encoding.y are field names. Gauge, kpi, and progress-ring use metric: { value, min, max, label?, delta? }.',
-  recharts: "Use renderToStaticMarkup from react-dom/server and return that string. JSX is allowed.",
+    'Return one JSON object. version is "1". type is the chart name. data is the rows, or a number array when the chart is a single series. a11y.alt is one sentence. encoding.x is the category or date field and encoding.y is the measure. The renderer draws that object.',
+  recharts:
+    "render() runs in a browser. renderToStaticMarkup returns an empty recharts-wrapper in Recharts 3.10.1 and draws nothing. Mount with react-dom/client createRoot and react-dom flushSync. Use a fixed width and height; ResponsiveContainer stays 0px. Put rows on data and field names on dataKey, and return the mounted markup.",
   echarts:
-    'In Node, use echarts.init(null, null, { renderer: "svg", ssr: true, width, height }) and return chart.renderToSVGString(). Code that touches document runs in a browser instead.',
+    'In Node, call echarts.init(null, null, { renderer: "svg", ssr: true, width, height }) and return chart.renderToSVGString(). The SVG has to include the series marks. Put the numbers in series.data. Code that touches document or window runs in a browser instead.',
   chartjs:
-    "render() runs in a browser document. document and canvas exist. Create a canvas, construct the chart, and return the canvas markup or a data URL.",
+    "render() runs in a browser document. Create a canvas, register every scale and controller you construct, and leave that canvas in the document. A canvas tag or a data URL with no painted pixels does not pass. Put the numbers in the dataset data.",
 };
 
 function readCapped(file, cap) {
