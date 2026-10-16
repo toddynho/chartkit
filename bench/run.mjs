@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { build } from "esbuild";
+import { build, stop } from "esbuild";
 import { tasks } from "./agent/tasks.mjs";
 import { measureBrowser } from "./browser/measure.mjs";
 import { measureBundles } from "./bundle/measure.mjs";
@@ -81,6 +81,7 @@ if (!result.bundle || !result.browser || !result.ssr) {
   writeFileSync(join(repoRoot, "BENCHMARKS.md"), markdown);
   console.log("wrote BENCHMARKS.md and bench/results/latest.json");
 }
+await stop();
 
 async function loadRunAgent() {
   const outfile = join(benchRoot, ".out/agent-suite.mjs");

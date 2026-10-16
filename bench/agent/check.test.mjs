@@ -2,9 +2,10 @@ import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { test } from "node:test";
+import { after, test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { build } from "esbuild";
+import { efficiencyFromRows } from "../lib/efficiency.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const outfile = join(here, "../.out/agent-suite.mjs");
@@ -82,13 +83,59 @@ test("code libraries must admit a chart they cannot draw", () => {
   assert.equal(invented.ok, false);
 });
 
-test("a compiled module scores a supported chart", () => {
+test("a compiled module scores a supported chart from the rendered type", () => {
   const task = suite.tasks.find((item) => item.id === "line-revenue");
   const result = suite.scoreModule({
-    meta: { type: "LineChart", values: [1] },
+    meta: { type: "BarChart", values: [1] },
     render() { return '<svg><path d="M0 0" /><text>120</text><text>150</text><text>132</text></svg>'; },
-  }, task, "recharts");
+  }, task, "recharts", { facts: { chartTypes: ["LineChart"] } });
   assert.equal(result.ok, true, JSON.stringify(result.stages));
+  assert.equal(result.stages.type.actual, "LineChart");
+});
+
+test("meta.type does not satisfy the type stage", () => {
+  const task = suite.tasks.find((item) => item.id === "line-revenue");
+  const svg = '<svg><path d="M0 0" /><text>120</text><text>150</text><text>132</text></svg>';
+  const unread = suite.scoreModule({
+    meta: { type: "LineChart" },
+    render() { return svg; },
+  }, task, "recharts", { facts: { rechartsMarks: 1, plotted: [120, 150, 132] } });
+  assert.equal(unread.stages.type.ok, false);
+  assert.equal(unread.stages.type.actual, null);
+  const wrong = suite.scoreModule({
+    meta: { type: "LineChart" },
+    render() { return svg; },
+  }, task, "recharts", { facts: { chartTypes: ["BarChart"], rechartsMarks: 1, plotted: [120, 150, 132] } });
+  assert.equal(wrong.stages.type.ok, false);
+  assert.equal(wrong.stages.type.actual, "BarChart");
+});
+
+test("chartkit values match as numbers, not substrings", () => {
+  const task = suite.tasks.find((item) => item.id === "line-revenue");
+  const spec = {
+    version: "1",
+    type: "line",
+    data: [{ month: "Jan", revenue: 12 }, { month: "Feb", revenue: 100 }, { month: "Mar", revenue: 132 }],
+    encoding: { x: "month", y: "revenue" },
+    a11y: { alt: "Revenue is not the digit 1." },
+  };
+  const narrowed = { ...task, expect: { ...task.expect, values: [1, 120, 150] } };
+  const result = suite.checkChartKit(spec, narrowed);
+  assert.equal(result.stages.values.ok, false);
+  const gauge = suite.tasks.find((item) => item.id === "gauge-done");
+  const wide = suite.checkChartKit({
+    version: "1",
+    type: "gauge",
+    metric: { value: 720, min: 0, max: 100 },
+    a11y: { alt: "Completion is not 72." },
+  }, gauge);
+  assert.equal(wide.stages.values.ok, false);
+  assert.equal(suite.checkChartKit({
+    version: "1",
+    type: "gauge",
+    metric: { value: 72, min: 0, max: 100 },
+    a11y: { alt: "Completion is 72 percent." },
+  }, gauge).stages.values.ok, true);
 });
 
 test("a module that throws fails the render stage", () => {
@@ -176,7 +223,7 @@ test("recharts passes from drawn marks and plotted data, not meta", () => {
   }, task, "recharts", {
     source,
     rendered,
-    facts: { rechartsMarks: 1, rechartsSurface: 1, plotted: [120, 150, 132] },
+    facts: { rechartsMarks: 1, rechartsSurface: 1, plotted: [120, 150, 132], chartTypes: ["LineChart"] },
   });
   assert.equal(result.ok, true, JSON.stringify(result.stages));
 });
@@ -360,6 +407,8 @@ test("chart.js runs in Playwright and a canvas counts as use", { timeout: 120000
     });
     assert.equal(result.stages.library.ok, true, JSON.stringify(result.stages));
     assert.equal(result.stages.render.ok, true);
+    assert.equal(result.stages.type.ok, true, JSON.stringify(result.stages.type));
+    assert.ok(executed.facts.chartTypes.includes("bar"), JSON.stringify(executed.facts.chartTypes));
     const blank = suite.scoreModule(executed.mod, task, "chartjs", {
       source,
       rendered: "<canvas></canvas>",
@@ -404,6 +453,7 @@ test("recharts draws an SVG in Playwright and an empty wrapper does not", { time
       facts: executed.facts,
     });
     assert.equal(result.ok, true, JSON.stringify(result.stages));
+    assert.ok(executed.facts.chartTypes.includes("LineChart"), JSON.stringify(executed.facts.chartTypes));
   } finally {
     await browser.close();
   }
@@ -425,20 +475,76 @@ test("echarts node SVG keeps series numbers off meta", async () => {
   const rendered = String(mod.render());
   assert.match(rendered, /<svg[\s>]/);
   assert.match(rendered, /<(?:path|rect)\b/);
+  const { typesFromOption } = await import("./capture.mjs");
   const plotted = [];
+  const chartTypes = [];
   for (const option of globalThis.__ckPlotted ?? []) {
     const series = option.series ?? [];
     for (const item of series) {
       for (const value of item.data ?? []) if (typeof value === "number") plotted.push(value);
     }
+    for (const type of typesFromOption(option)) {
+      if (!chartTypes.includes(type)) chartTypes.push(type);
+    }
   }
   assert.deepEqual(plotted, [120, 150, 132]);
+  assert.deepEqual(chartTypes, ["bar"]);
   const task = suite.tasks.find((item) => item.id === "line-revenue");
   const result = suite.scoreModule(mod, task, "echarts", {
     source,
     rendered,
-    facts: { plotted },
+    facts: { plotted, chartTypes },
   });
   assert.equal(result.stages.library.ok, true, JSON.stringify(result.stages));
   assert.equal(result.stages.values.ok, true, JSON.stringify(result.stages));
+  assert.equal(result.stages.type.ok, false, JSON.stringify(result.stages.type));
+  assert.equal(result.stages.type.actual, "bar");
+});
+
+test("scatter points keep both x and y", async () => {
+  const { numbersFromOption } = await import("./capture.mjs");
+  assert.deepEqual(
+    numbersFromOption({ series: [{ data: [{ x: 1, y: 2 }, { x: 3, y: 4 }] }] }),
+    [1, 2, 3, 4],
+  );
+  assert.deepEqual(numbersFromOption({ series: [{ data: [100, 180] }] }), [100, 180]);
+});
+
+test("efficiency uses first-try output tokens and repairs only ChartKit", () => {
+  const rows = [
+    {
+      library: "chartkit",
+      usage: { output_tokens: 10 },
+      output: JSON.stringify({
+        version: "1",
+        type: "gauge",
+        data: { value: 40, min: 0, max: 80 },
+        a11y: { alt: "Load is 40 out of 80." },
+      }),
+    },
+    {
+      library: "chartkit",
+      usage: { output_tokens: 30 },
+      second: { usage: { output_tokens: 900 } },
+      output: "not json",
+    },
+    { library: "recharts", usage: { output_tokens: 20 }, output: "x" },
+    { library: "echarts", output: "x" },
+    { library: "chartjs", usage: { output_tokens: 40 }, output: "x" },
+  ];
+  const stats = Object.fromEntries(efficiencyFromRows(rows, suite.repair).map((row) => [row.library, row]));
+  assert.equal(stats.chartkit.meanOutput, 20);
+  assert.equal(stats.chartkit.repairPassed, 1);
+  assert.equal(stats.chartkit.repairChecked, 2);
+  assert.equal(stats.recharts.repairLabel, "no repair()");
+  assert.equal(stats.echarts.meanOutput, null);
+  assert.equal(stats.echarts.tokenRows, 0);
+});
+
+after(async () => {
+  // Registered after the top-level await so it runs once every test is done.
+  // esbuild's service and the worker's stdout socket otherwise keep the loop open.
+  // package.json passes --test-force-exit so the runner still exits if stop() does not.
+  const { stop } = await import("esbuild");
+  await Promise.race([stop(), new Promise((resolve) => setTimeout(resolve, 500))]);
 });

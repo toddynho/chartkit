@@ -70,7 +70,11 @@ export function numbersFromOption(option) {
     else if (Array.isArray(value)) value.forEach(push);
     else if (value && typeof value === "object") {
       if (typeof value.value === "number" || Array.isArray(value.value)) push(value.value);
-      else if (typeof value.y === "number") nums.push(value.y);
+      else if (typeof value.y === "number") {
+        // Chart.js scatter/bubble points are { x, y }; both are plotted values.
+        if (typeof value.x === "number" && Number.isFinite(value.x)) nums.push(value.x);
+        nums.push(value.y);
+      }
       else {
         for (const item of Object.values(value)) {
           if (typeof item === "number" && Number.isFinite(item)) nums.push(item);
@@ -89,6 +93,17 @@ export function numbersFromOption(option) {
     if (Array.isArray(dataset?.source)) push(dataset.source);
   }
   return nums;
+}
+
+/** Series types on an ECharts option. Chart.js scatter points are not a series type. */
+export function typesFromOption(option) {
+  const types = [];
+  const series = option?.series;
+  const list = Array.isArray(series) ? series : series ? [series] : [];
+  for (const item of list) {
+    if (typeof item?.type === "string" && item.type) types.push(item.type);
+  }
+  return types;
 }
 
 const CAPTURED = /^(?:chart\.js(?:\/auto)?|echarts(?:\/core)?)$/;

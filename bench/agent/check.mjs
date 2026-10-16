@@ -6,7 +6,7 @@ import { pathToFileURL, fileURLToPath } from "node:url";
 import { randomBytes } from "node:crypto";
 import { build } from "esbuild";
 import { createRenderer } from "../../packages/core/src/render.ts";
-import { validate } from "../../packages/core/src/validate.ts";
+import { repair, validate } from "../../packages/core/src/validate.ts";
 import { line } from "../../packages/core/src/charts/line.ts";
 import { bar } from "../../packages/core/src/charts/bar.ts";
 import { donut } from "../../packages/core/src/charts/donut.ts";
@@ -22,12 +22,26 @@ import { progressRing } from "../../packages/core/src/charts/progress-ring.ts";
 import { spike } from "../../packages/core/src/charts/spike.ts";
 import { candlestick } from "../../packages/core/src/charts/candlestick.ts";
 import { ACCEPTED } from "./capabilities.mjs";
-import { libraryCapturePlugin, numbersFromOption } from "./capture.mjs";
+import { libraryCapturePlugin, numbersFromOption, typesFromOption } from "./capture.mjs";
 import { noDocsHint, officialReference } from "./docs.mjs";
 
 const render = createRenderer([
   line, bar, donut, stackedArea, scatter, combo, heatmap, gauge, kpi, sparkline, miniArea, progressRing, spike, candlestick,
 ]);
+
+export { repair };
+
+function observedChartTypes(facts) {
+  if (!Array.isArray(facts?.chartTypes)) return [];
+  const seen = new Set();
+  const types = [];
+  for (const item of facts.chartTypes) {
+    if (typeof item !== "string" || !item || seen.has(item)) continue;
+    seen.add(item);
+    types.push(item);
+  }
+  return types;
+}
 
 /** How prompts and feedback name each library: display name plus the real npm package. "chartjs" is only an internal key. */
 export const LIBRARY_LABEL = {
@@ -161,7 +175,23 @@ function evidenceNumbers(rendered, facts) {
 function containsValue(evidence, value) {
   if (typeof value !== "number" || !Number.isFinite(value)) return false;
   const tolerance = 1e-6 * Math.max(1, Math.abs(value));
-  return evidence.some((item) => Math.abs(item - value) <= tolerance);
+  return evidence.some((item) => typeof item === "number" && Number.isFinite(item) && Math.abs(item - value) <= tolerance);
+}
+
+function specNumbers(spec) {
+  const out = [];
+  collectNumbers(spec?.data, out);
+  collectNumbers(spec?.metric, out);
+  return out;
+}
+
+function collectNumbers(value, out) {
+  if (typeof value === "number" && Number.isFinite(value)) out.push(value);
+  else if (Array.isArray(value)) {
+    for (const item of value) collectNumbers(item, out);
+  } else if (value && typeof value === "object") {
+    for (const item of Object.values(value)) collectNumbers(item, out);
+  }
 }
 
 function channelField(value) {
@@ -221,11 +251,11 @@ export function checkChartKit(spec, task) {
   const encoding = spec?.encoding ?? {};
   stages.fields = { ok: fieldsMatch(encoding, task.expect) };
 
-  const blob = JSON.stringify(spec?.data ?? spec?.metric ?? spec);
   const values = task.expect.values ?? (task.expect.metric !== undefined ? [task.expect.metric] : []);
-  const valuesOk = values.every((value) => blob.includes(String(value)));
-  const metricOk = task.expect.metric === undefined || spec?.metric?.value === task.expect.metric;
-  const deltaOk = task.expect.delta === undefined || spec?.metric?.delta === task.expect.delta;
+  const evidence = specNumbers(spec);
+  const valuesOk = values.every((value) => containsValue(evidence, value));
+  const metricOk = task.expect.metric === undefined || containsValue([spec?.metric?.value], task.expect.metric);
+  const deltaOk = task.expect.delta === undefined || containsValue([spec?.metric?.delta], task.expect.delta);
   stages.values = { ok: valuesOk && metricOk && deltaOk };
 
   const ok = Object.values(stages).every((stage) => stage.ok);
@@ -285,14 +315,14 @@ export function scoreModule(mod, task, library, context = {}) {
       };
     }
   }
-  const type = mod.meta?.type;
-  const typeOk = typeof type === "string" && accepted.includes(type);
+  const observed = observedChartTypes(context.facts);
+  const typeOk = observed.some((item) => accepted.includes(item));
   const evidence = evidenceNumbers(rendered, context.facts);
   const values = task.expect.values ?? (task.expect.metric !== undefined ? [task.expect.metric] : []);
   const valuesOk = values.every((value) => containsValue(evidence, value));
   const stages = {
     render: { ok: rendered.length > 0 && !/error\[CK/.test(rendered) },
-    type: { ok: typeOk, actual: type ?? null, accepted },
+    type: { ok: typeOk, actual: observed.length ? observed.join(",") : null, accepted },
     values: { ok: valuesOk },
   };
   if (context.source != null) {
@@ -304,7 +334,7 @@ export function scoreModule(mod, task, library, context = {}) {
         imports: true,
         uses: true,
         reason: library === "recharts"
-          ? "Recharts 3 renderToStaticMarkup returns an empty recharts-wrapper. Mount with createRoot and flushSync so the SVG contains data marks."
+          ? "No Recharts SVG with data marks was found. Recharts 3 renderToStaticMarkup returns an empty recharts-wrapper; mount with createRoot and flushSync and return the container's HTML."
           : library === "chartjs"
             ? "The canvas has no painted pixels. A canvas tag or a data URL of a blank canvas does not pass."
             : `render() did not return markup produced by ${LIBRARY_LABEL[library] ?? library}.`,
@@ -362,6 +392,24 @@ export async function renderInBrowser(browser, source) {
       await page.setContent("<!doctype html><html><body></body></html>");
       const result = await page.evaluate(async ({ bundled, readOption }) => {
         const numbersFromOption = new Function(`return (${readOption})`)();
+        // Answers often draw into an element they never attach (createRoot on a detached div,
+        // a detached canvas). Remember created elements so detached charts are inspected too.
+        const created = [];
+        const createElement = document.createElement.bind(document);
+        document.createElement = (...args) => {
+          const el = createElement(...args);
+          created.push(el);
+          return el;
+        };
+        const qsa = (selector) => {
+          const found = new Set(document.querySelectorAll(selector));
+          for (const el of created) {
+            if (el.isConnected) continue;
+            if (el.matches?.(selector)) found.add(el);
+            for (const child of el.querySelectorAll?.(selector) ?? []) found.add(child);
+          }
+          return [...found];
+        };
         const url = URL.createObjectURL(new Blob([bundled], { type: "text/javascript" }));
         const mod = await import(url);
         let rendered = "";
@@ -371,27 +419,47 @@ export async function renderInBrowser(browser, source) {
         } catch (err) {
           error = err && err.message ? err.message : String(err);
         }
-        for (const canvas of document.querySelectorAll("canvas")) {
+        for (const canvas of qsa("canvas")) {
           const chart = canvas.__ckChart;
           if (chart && typeof chart.stop === "function") {
             try { chart.stop(); chart.update("none"); } catch { /* a canvas that is not a chart stays blank */ }
           }
         }
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        // Recharts animates by default (Pie: 400 ms delay + 1500 ms). Let the entry animation finish
+        // so a default animated pie is judged on its final sectors, as a user would see it.
+        if (qsa("svg.recharts-surface").length > 0) await new Promise((resolve) => setTimeout(resolve, 2500));
         const plotted = [];
+        const chartTypes = [];
+        const seenTypes = new Set();
+        const noteType = (name) => {
+          if (typeof name !== "string" || !name || seenTypes.has(name)) return;
+          seenTypes.add(name);
+          chartTypes.push(name);
+        };
+        const noteOption = (option) => {
+          const series = option?.series;
+          const list = Array.isArray(series) ? series : series ? [series] : [];
+          for (const item of list) if (typeof item?.type === "string") noteType(item.type);
+        };
         const add = (option) => {
           for (const value of numbersFromOption(option)) plotted.push(value);
+          noteOption(option);
         };
-        for (const canvas of document.querySelectorAll("canvas")) {
+        for (const canvas of qsa("canvas")) {
           const chart = canvas.__ckChart;
+          if (typeof chart?.config?.type === "string") noteType(chart.config.type);
           if (chart?.data?.datasets) add({ series: chart.data.datasets.map((dataset) => ({ data: dataset.data })) });
-          if (typeof chart?.getOption === "function") add(chart.getOption());
+          if (typeof chart?.getOption === "function") {
+            const option = chart.getOption();
+            add(option);
+          }
         }
-        for (const node of document.querySelectorAll("[_echarts_instance_]")) {
+        for (const node of qsa("[_echarts_instance_]")) {
           if (typeof node.__ckChart?.getOption === "function") add(node.__ckChart.getOption());
         }
         const seen = new Set();
-        for (const node of document.querySelectorAll("*")) {
+        for (const node of qsa("*")) {
           const key = Object.keys(node).find((name) => name.startsWith("__reactFiber$") || name.startsWith("__reactContainer$"));
           if (!key) continue;
           const root = node[key];
@@ -400,7 +468,10 @@ export async function renderInBrowser(browser, source) {
             const fiber = stack.pop();
             if (!fiber || seen.has(fiber)) continue;
             seen.add(fiber);
-            const data = fiber.memoizedProps?.data;
+            const props = fiber.memoizedProps;
+            const chartName = props?.chartName;
+            if (chartName === "LineChart" || chartName === "BarChart" || chartName === "AreaChart" || chartName === "PieChart" || chartName === "ScatterChart" || chartName === "ComposedChart" || chartName === "RadarChart" || chartName === "RadialBarChart") noteType(chartName);
+            const data = props?.data;
             if (data != null) add({ series: [{ data }] });
             if (fiber.child) stack.push(fiber.child);
             if (fiber.sibling) stack.push(fiber.sibling);
@@ -427,7 +498,7 @@ export async function renderInBrowser(browser, source) {
           }
           return false;
         }
-        let canvasDrawn = [...document.querySelectorAll("canvas")].some(canvasHasInk);
+        let canvasDrawn = qsa("canvas").some(canvasHasInk);
         if (!canvasDrawn) {
           const dataUrl = rendered.match(/data:image\/png;base64,[A-Za-z0-9+/=]+/);
           if (dataUrl) {
@@ -443,7 +514,7 @@ export async function renderInBrowser(browser, source) {
             } catch { /* a data URL that does not decode is not a drawn chart */ }
           }
         }
-        const surface = document.querySelectorAll("svg.recharts-surface");
+        const surface = qsa("svg.recharts-surface");
         const markSel = ".recharts-line-curve, .recharts-area-area, .recharts-area-curve, .recharts-bar-rectangle, .recharts-rectangle, .recharts-pie-sector, .recharts-sector, .recharts-radial-bar-sector, .recharts-scatter-symbol, .recharts-curve, .recharts-polygon";
         let rechartsMarks = 0;
         for (const svg of surface) rechartsMarks += svg.querySelectorAll(markSel).length;
@@ -452,12 +523,13 @@ export async function renderInBrowser(browser, source) {
           meta: mod.meta ?? null,
           error,
           facts: {
-            canvases: document.querySelectorAll("canvas").length,
+            canvases: qsa("canvas").length,
             canvasDrawn,
-            echartsNodes: document.querySelectorAll("[_echarts_instance_]").length,
+            echartsNodes: qsa("[_echarts_instance_]").length,
             rechartsSurface: surface.length,
             rechartsMarks,
             plotted,
+            chartTypes,
           },
         };
       }, { bundled: code, readOption: numbersFromOption.toString() });
@@ -484,8 +556,14 @@ export async function executeAnswer(source, library, getBrowser) {
       globalThis.__ckPlotted = [];
       const rendered = String(await mod.render());
       const plotted = [];
-      for (const option of globalThis.__ckPlotted ?? []) plotted.push(...numbersFromOption(option));
-      return { mod, rendered, facts: { plotted } };
+      const chartTypes = [];
+      for (const option of globalThis.__ckPlotted ?? []) {
+        plotted.push(...numbersFromOption(option));
+        for (const type of typesFromOption(option)) {
+          if (!chartTypes.includes(type)) chartTypes.push(type);
+        }
+      }
+      return { mod, rendered, facts: { plotted, chartTypes } };
     } catch (error) {
       if (library === "echarts" && isDomError(error)) return inBrowser();
       return { mod, rendered: "", renderError: error, facts: {} };

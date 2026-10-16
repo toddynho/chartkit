@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { docsManifest } from "../agent/docs.mjs";
+import { currentRepair, efficiencyFromRows, formatMean, loadRecordedRows } from "./efficiency.mjs";
 import { recordedAgentSection } from "./recorded-agent.mjs";
 
 function bytes(value) {
@@ -230,7 +231,7 @@ function ssrVerdict(rows) {
 }
 
 function agentSection(agent) {
-  const protocol = "A code-library pass must import that library and return a drawn chart, or set `meta.unsupported` when the library cannot draw the chart. Recharts and Chart.js run in Playwright. A Recharts pass needs an SVG with data marks. A Chart.js pass needs painted canvas pixels. ECharts code that touches `document` runs in Playwright; `echarts.init(null, …, { ssr: true })` stays in Node and the SVG must contain marks. Data values come from the rendered chart, not from `meta`. Validator errors, render errors, compile errors, and library-use failures are fed back once. The first-try column ignores that repair.";
+  const protocol = "A code-library pass must import that library and return a drawn chart, or set `meta.unsupported` when the library cannot draw the chart. Recharts and Chart.js run in Playwright. A Recharts pass needs an SVG with data marks. A Chart.js pass needs painted canvas pixels. ECharts code that touches `document` runs in Playwright; `echarts.init(null, …, { ssr: true })` stays in Node and the SVG must contain marks. The chart type is read from that rendered chart (Chart.js `config.type`, ECharts series type, Recharts `chartName`). `meta.type` is not evidence. Data values come from the rendered chart, not from `meta`. ChartKit values are compared as numbers. Validator errors, render errors, compile errors, and library-use failures are fed back once. The first-try column ignores that repair.";
   if (!agent || agent.status !== "ok") {
     return [
       `Fair-scoring protocol on this branch: ${protocol}`,
@@ -309,6 +310,17 @@ function fairConditionsSection(agent) {
   lines.push("| echarts | 42 / 42 | 42 / 42 | 40 / 42 | 41 / 42 |");
   lines.push("| chartjs | 39 / 42 | 42 / 42 | 42 / 42 | 42 / 42 |");
   lines.push("");
+  lines.push("Round 4 was run outside this repo at bench `38282f2`, plus the detached-container search, the 2.5 s Recharts pie wait, and Chart.js scatter x+y capture. Model claude-sonnet-4-5, temperature 0. Recharts, ECharts, and Chart.js were verified drawn. Code-library passes include a correct unsupported answer. The supported / unsupported split was Recharts 24 / 18, ECharts 36 / 6, Chart.js 24 / 18. These scores are that protocol. They are not the round-5 column: this branch now reads the chart type from the rendered chart and compares ChartKit values as numbers.");
+  lines.push("");
+  lines.push("| Library | Round 4 no docs first | Round 4 no docs within two | Round 4 official first | Round 4 official within two | Round 4 no docs mean first-try output tokens | Round 4 official mean first-try output tokens |");
+  lines.push("|---|---:|---:|---:|---:|---:|---:|");
+  lines.push("| chartkit | 21 / 42 | 33 / 42 | 42 / 42 | 42 / 42 | 139 | 132 |");
+  lines.push("| recharts | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 221 | 236 |");
+  lines.push("| echarts | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 329 | 364 |");
+  lines.push("| chartjs | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 293 | 259 |");
+  lines.push("");
+  lines.push("Those token means are the averages reported with the round-4 run. The first-try specs were not saved in this repo, so the pass rate after `repair()` was not recomputed here. Recharts, ECharts, and Chart.js have no `repair()` step. All 9 ChartKit no-docs misses were gauge, kpi, and progress-ring.");
+  lines.push("");
   lines.push("| Library | Old protocol first | Old protocol within two | no docs first | no docs within two | with docs first | with docs within two |");
   lines.push("|---|---:|---:|---:|---:|---:|---:|");
   const old = {
@@ -322,7 +334,7 @@ function fairConditionsSection(agent) {
     lines.push(`| ${library} | ${first} | ${within} | ${conditionCell(none, library, "first")} | ${conditionCell(none, library, "within")} | ${conditionCell(official, library, "first")} | ${conditionCell(official, library, "within")} |`);
   }
   lines.push("");
-  lines.push("`no docs` gives every library one paragraph of similar length: how to produce a drawn chart, and where the fields go. The paragraphs are the whole hint. They are not official docs, and ChartKit's paragraph does not add channel shapes the others do not get. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`. A pass requires drawn output. Recharts needs an SVG with data marks (Playwright, `createRoot` and `flushSync`). Chart.js needs painted canvas pixels. Values are read from the chart the library drew. `meta.values` is not evidence. The no-docs and with-docs cells below stay \"not yet run\" until a run of this protocol is saved under `bench/results/agent/conditions/`.");
+  lines.push("`no docs` gives every library one paragraph of similar length: how to produce a drawn chart, and where the fields go. The paragraphs are the whole hint. They are not official docs, and ChartKit's paragraph does not add channel shapes the others do not get. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`. A pass requires drawn output. Recharts needs an SVG with data marks (Playwright, `createRoot` and `flushSync`; a detached container counts). Chart.js needs painted canvas pixels. The chart type is read from the rendered chart. `meta.type` and `meta.values` are not evidence. ChartKit values are compared as numbers. The no-docs and with-docs cells in the table above stay \"not yet run\" until a run of this protocol is saved under `bench/results/agent/conditions/`.");
   lines.push("");
   lines.push("| Library | no docs hint | with docs | Bytes | Source |");
   lines.push("|---|---|---|---:|---|");
@@ -337,5 +349,46 @@ function fairConditionsSection(agent) {
   }
   lines.push("");
   lines.push("Run `BENCH_DOCS=none` and `BENCH_DOCS=official` separately. A cell stays \"not yet run\" until that run is saved under `bench/results/agent/conditions/`.");
+  lines.push("");
+  lines.push(efficiencySection(none, official));
+  return lines.join("\n");
+}
+
+function efficiencySection(none, official) {
+  const lines = [];
+  lines.push("### Efficiency");
+  lines.push("");
+  lines.push("Mean first-try output tokens are the average of `usage.output_tokens` on the first answer. The second try is not included. `repair()` is ChartKit only: parse the first-try JSON and apply `repair()` from `@chartkitdev/core/validate`, with no model call. The other libraries have no `repair()` step.");
+  lines.push("");
+  const recorded = efficiencyFromRows(loadRecordedRows(), currentRepair());
+  if (recorded.length === 0) {
+    lines.push("No raw rows were found under `bench/results/agent/sonnet-4-5/`.");
+  } else {
+    lines.push("Computed from `bench/results/agent/sonnet-4-5/` (claude-sonnet-4-5, one attempt, no repair loop). That checker did not require a library import, so these rates are not round 4 and not round 5. The ChartKit column is how many of those first-try specs `repair()` accepts now.");
+    lines.push("");
+    lines.push(efficiencyTable(recorded));
+  }
+  lines.push("");
+  const live = [
+    ["Round 5 no docs", none],
+    ["Round 5 with docs", official],
+  ];
+  for (const [label, run] of live) {
+    const rows = run?.results;
+    if (!rows) {
+      lines.push(`${label}: not yet run.`);
+      continue;
+    }
+    lines.push(`${label}, computed from the saved rows:`);
+    lines.push("");
+    lines.push(efficiencyTable(efficiencyFromRows(rows, currentRepair())));
+    lines.push("");
+  }
+  return lines.join("\n");
+}
+
+function efficiencyTable(stats) {
+  const lines = ["| Library | Mean first-try output tokens | After repair(), no model |", "|---|---:|---|"];
+  for (const stat of stats) lines.push(`| ${stat.library} | ${formatMean(stat)} | ${stat.repairLabel} |`);
   return lines.join("\n");
 }

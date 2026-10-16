@@ -5,7 +5,7 @@
   "description": "Reproducible ChartKit comparisons. Pinned libraries, esbuild minify, gzip -9, brotli q11.",
   "scripts": {
     "bench": "node run.mjs",
-    "test": "node --test agent/check.test.mjs"
+    "test": "node --test --test-force-exit agent/check.test.mjs"
   },
   "dependencies": {
     "@nivo/bar": "0.99.0",
