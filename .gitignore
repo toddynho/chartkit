@@ -26,6 +26,8 @@ npm-debug.log*
 # Testing
 coverage/
 bench/last-run.json
+bench/.out/
+bench/results/partial.json
 
 # Misc
 *.tgz

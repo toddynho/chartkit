@@ -1,0 +1,26 @@
+{
+  "name": "chartkit-bench",
+  "private": true,
+  "type": "module",
+  "description": "Reproducible ChartKit comparisons. Pinned libraries, esbuild minify, gzip -9, brotli q11.",
+  "scripts": {
+    "bench": "node run.mjs",
+    "test": "node --test agent/check.test.mjs"
+  },
+  "dependencies": {
+    "@nivo/bar": "0.99.0",
+    "@nivo/line": "0.99.0",
+    "@nivo/pie": "0.99.0",
+    "@observablehq/plot": "0.6.17",
+    "chart.js": "4.5.1",
+    "echarts": "6.1.0",
+    "esbuild": "0.25.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "recharts": "3.10.1",
+    "uplot": "1.6.32"
+  },
+  "devDependencies": {
+    "playwright": "1.64.1"
+  }
+}
