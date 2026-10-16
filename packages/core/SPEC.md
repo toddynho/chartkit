@@ -44,7 +44,8 @@ These are errors with a JSON Patch in `fix`. Applying the patch is the correctio
 | CK1009 | `encoding.x.axis` is an object or `null` | `x` has no `axis`. The title moves to `axes.x.title` and `axis` is removed. |
 | CK1009 | `value`, `min`, `max`, `delta`, or `label` on a gauge, kpi, or progress-ring | Move them into `metric: { value, min, max, label?, delta? }`. The same object is built from a one-row `data` array or from those encoding channels. |
 | CK1009 | Donut `encoding` uses `theta`, `angle`, `label`, or `value` | Only when `type` is `donut` or `mark` is `arc`. `x` is the slice label and `y` is the number. |
-| CK1009 | `layer`, `marks`, `mark` array, or `encoding.y2` | Combo: `encoding.y` is `[{ field, mark: "bar" }, { field, mark: "line", axis: "y2" }]`. |
+| CK1009 | Heatmap `encoding.value`, `encoding.date`, or a calendar numeric `y` | The measure moves to `encoding.color`. `encoding.date` moves to `encoding.x` when `x` is missing. A numeric `y` moves to `color` only when the layout is calendar. A grid keeps `y` as the row category. |
+| CK1009 | `layer`, `layers`, `marks` (array or object), `mark` array, `encoding.y2`, `encoding.bar`, `encoding.line`, or `encoding.area` | Combo: `encoding.y` is `[{ field, mark: "bar" }, { field, mark: "line", axis: "y2" }]`. |
 | CK1009 | `chartType` and no usable `type` | Move it to `type`. |
 | CK1005 | `type: "pie"` or `"arc"` | `donut`. `pie` also sets `mark.innerRadius` 0. |
 | CK1005 | `type: "point"`, `"circle"`, or `"square"` | `scatter`. |
@@ -53,6 +54,7 @@ These are errors with a JSON Patch in `fix`. Applying the patch is the correctio
 | CK1005 | `type: "metric"` | `gauge` when min/max are present, otherwise `kpi`. Both use `metric: { value, min, max, label?, delta? }`. |
 | CK1005 | `type: "rule"` or `"tick"` | `spike`. |
 | CK1005 | `type: "grid-heat"` | `heatmap`. A grid uses `encoding.x`, `encoding.y`, and `encoding.color`. |
+| CK1005 | `type: "grid-heatmap"` or `"calendar-heatmap"` | `heatmap`, and `mark.layout` is `"grid"` or `"calendar"`. |
 | CK1007 | field `type: "categorical"` | `nominal`. Field types are `quantitative`, `temporal`, `ordinal`, and `nominal`. |
 | CK1007 | `mark.points: true` | `"always"`. `false` is `"none"`. |
 | CK1007 | format `".2f"` | `{ "style": "number", "decimals": 2 }`. |

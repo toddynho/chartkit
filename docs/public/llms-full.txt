@@ -16,9 +16,9 @@ The JSON spec is the agent interface. The React section at the bottom is a diffe
 - Donut encoding is `x` (label) and `y` (value). `theta`, `angle`, and `label` are CK1009.
 - `axis` on a y series is `"y"` or `"y2"`, never `{ "title": "..." }`. Titles belong in `axes.y.title` or `axes.y2.title` (CK1009).
 - Field `type` is `quantitative`, `temporal`, `ordinal`, or `nominal`. `categorical` means `nominal` (CK1007).
-- Unknown chart types (CK1005): `pie` → `donut` with `mark.innerRadius` 0; `arc` → `donut`; `point`, `circle`, and `square` → `scatter`; `rect` → `heatmap`; `area` → `stacked-area` when `y` lists two or more fields, otherwise `mini-area` (a full-size fill is `type: "line"` and `mark.area: true`); `metric` → `gauge` or `kpi`; `rule` and `tick` → `spike`; `grid-heat` → `heatmap`.
-- Heatmap: `encoding.y` with no `mark.layout` renders a grid. Calendar is a date `x` plus `color`, or `mark.layout: "calendar"`.
-- Combo is one spec. `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. `layer`, `marks`, and `encoding.y2` are CK1009.
+- Unknown chart types (CK1005): `pie` → `donut` with `mark.innerRadius` 0; `arc` → `donut`; `point`, `circle`, and `square` → `scatter`; `rect` → `heatmap`; `area` → `stacked-area` when `y` lists two or more fields, otherwise `mini-area` (a full-size fill is `type: "line"` and `mark.area: true`); `metric` → `gauge` or `kpi`; `rule` and `tick` → `spike`; `grid-heat` → `heatmap`; `grid-heatmap` and `calendar-heatmap` → `heatmap` with `mark.layout` `"grid"` or `"calendar"`.
+- Heatmap: `encoding.y` with no `mark.layout` renders a grid. Calendar is a date `x` plus `color`, or `mark.layout: "calendar"`. The measure is `encoding.color`. `encoding.value` moves there (CK1009). A numeric `y` moves to `color` only on a calendar.
+- Combo is one spec. `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. `layer`, `layers`, `marks`, `encoding.bar`, `encoding.line`, and `encoding.y2` are CK1009.
 - `encoding.x.axis` is not a channel. A title goes in `axes.x.title` (CK1009). `mark.points: true` means `"always"` (CK1007).
 
 ## Repair loop

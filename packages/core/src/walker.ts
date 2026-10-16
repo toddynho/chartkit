@@ -307,7 +307,10 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
       noteCombo(value, ctx);
       noteMetricHoist(value, ctx);
     }
-    if (path === "/encoding") noteDonutChannels(value, ctx);
+    if (path === "/encoding") {
+      noteDonutChannels(value, ctx);
+      noteHeatmapChannels(value, ctx);
+    }
     if (node.minProperties !== undefined && Object.keys(value).length < node.minProperties) {
       emit(ctx, {
         code: "CK1006",
@@ -694,6 +697,7 @@ interface Alias {
   type: string;
   note: string;
   kind: "pie" | "rename";
+  layout?: "grid" | "calendar";
 }
 
 function aliasFor(value: string, root: unknown): Alias | undefined {
@@ -724,6 +728,22 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   }
   if (value === "grid-heat" || value === "gridheat" || value === "grid_heat") {
     return { type: "heatmap", note: "A grid uses encoding.x, encoding.y, and encoding.color.", kind: "rename" };
+  }
+  if (value === "grid-heatmap") {
+    return {
+      type: "heatmap",
+      note: 'A grid heatmap is type "heatmap" with mark.layout "grid". The number is encoding.color.',
+      kind: "rename",
+      layout: "grid",
+    };
+  }
+  if (value === "calendar-heatmap") {
+    return {
+      type: "heatmap",
+      note: 'A calendar heatmap is type "heatmap" with mark.layout "calendar". The date is encoding.x and the number is encoding.color.',
+      kind: "rename",
+      layout: "calendar",
+    };
   }
   return undefined;
 }
@@ -767,15 +787,91 @@ function noteChartType(spec: Record<string, unknown>, ctx: Ctx): void {
   });
 }
 
+function noteHeatmapChannels(encoding: Record<string, unknown>, ctx: Ctx): void {
+  const root = isPlainObject(ctx.rootValue) ? ctx.rootValue : {};
+  const intent = heatmapIntent(root);
+  if (!intent) return;
+  const fix: JsonPatchOperation[] = [];
+  if (encoding.value !== undefined) {
+    ctx.skipUnknown.add("/encoding/value");
+    if (encoding.color === undefined) {
+      fix.push({ op: "move", from: "/encoding/value", path: "/encoding/color" });
+      ctx.skipMissing.add("/encoding|color");
+    } else {
+      fix.push({ op: "remove", path: "/encoding/value" });
+    }
+  }
+  if (encoding.date !== undefined && encoding.x === undefined) {
+    ctx.skipUnknown.add("/encoding/date");
+    fix.push({ op: "move", from: "/encoding/date", path: "/encoding/x" });
+    ctx.skipMissing.add("/encoding|x");
+  } else if (encoding.date !== undefined) {
+    ctx.skipUnknown.add("/encoding/date");
+    fix.push({ op: "remove", path: "/encoding/date" });
+  }
+  if (
+    intent === "calendar" &&
+    encoding.color === undefined &&
+    encoding.value === undefined &&
+    encoding.y !== undefined &&
+    channelValuesAreNumbers(root, encoding.y)
+  ) {
+    fix.push({ op: "move", from: "/encoding/y", path: "/encoding/color" });
+    ctx.skipMissing.add("/encoding|color");
+  }
+  if (fix.length === 0) return;
+  emit(ctx, {
+    code: "CK1009",
+    severity: "error",
+    message: "heatmap encodes the number with encoding.color",
+    path: "/encoding",
+    hint: 'encoding.color is the measure. encoding.value is not a channel. A calendar uses encoding.x for the date. A grid uses encoding.y for the row category.',
+    fix,
+  });
+}
+
+function heatmapIntent(root: Record<string, unknown>): "grid" | "calendar" | "heatmap" | undefined {
+  if (root.type === "calendar-heatmap") return "calendar";
+  if (root.type === "grid-heatmap") return "grid";
+  if (root.type !== "heatmap") return undefined;
+  const mark = isPlainObject(root.mark) ? root.mark : undefined;
+  if (mark?.layout === "calendar") return "calendar";
+  if (mark?.layout === "grid") return "grid";
+  return "heatmap";
+}
+
+function channelValuesAreNumbers(root: Record<string, unknown>, channel: unknown): boolean {
+  const field = fieldName(channel);
+  if (!field || !Array.isArray(root.data)) return false;
+  let saw = false;
+  for (const row of root.data) {
+    if (!isPlainObject(row)) continue;
+    const cell = row[field];
+    if (cell === undefined || cell === null) continue;
+    if (typeof cell !== "number") return false;
+    saw = true;
+  }
+  return saw;
+}
+
 function noteCombo(spec: Record<string, unknown>, ctx: Ctx): void {
   if (ctx.skipUnknown.has("/$combo")) return;
   const enc = isPlainObject(spec.encoding) ? spec.encoding : undefined;
-  const layer = Array.isArray(spec.layer) ? spec.layer : Array.isArray(spec.marks) ? spec.marks : undefined;
+  const marksArray = Array.isArray(spec.marks) ? spec.marks : undefined;
+  const marksObject = marksArray ? undefined : isPlainObject(spec.marks) ? spec.marks : undefined;
+  const layer = Array.isArray(spec.layer)
+    ? spec.layer
+    : marksArray ?? (Array.isArray(spec.layers) ? spec.layers : undefined);
   const markList = Array.isArray(spec.mark) ? spec.mark : undefined;
   const hasY2 = enc?.y2 !== undefined;
-  if (!layer && !markList && !hasY2) return;
+  const channelSeries = seriesFromMarkChannels(enc);
+  if (!layer && !markList && !hasY2 && channelSeries.length === 0 && !marksObject) return;
   ctx.skipUnknown.add("/$combo");
-  const built = comboSeries(spec, layer, markList, enc);
+  const built = channelSeries.length > 0
+    ? { series: channelSeries, x: fieldName(enc?.x) }
+    : marksObject
+      ? { series: seriesFromMarksObject(marksObject), x: fieldName(enc?.x) }
+      : comboSeries(spec, layer, markList, enc);
   const fix: JsonPatchOperation[] = [];
   if (spec.type !== "combo") {
     fix.push({ op: typeof spec.type === "string" ? "replace" : "add", path: "/type", value: "combo" });
@@ -800,13 +896,24 @@ function noteCombo(spec: Record<string, unknown>, ctx: Ctx): void {
     fix.push({ op: "remove", path: "/layer" });
     ctx.skipUnknown.add("/layer");
   }
-  if (Array.isArray(spec.marks)) {
+  if (spec.marks !== undefined && (marksArray || marksObject)) {
     fix.push({ op: "remove", path: "/marks" });
     ctx.skipUnknown.add("/marks");
+  }
+  if (Array.isArray(spec.layers)) {
+    fix.push({ op: "remove", path: "/layers" });
+    ctx.skipUnknown.add("/layers");
   }
   if (markList) {
     fix.push({ op: "remove", path: "/mark" });
     ctx.skipUnknown.add("/mark");
+  }
+  if (enc) {
+    for (const name of ["bar", "line", "area"] as const) {
+      if (enc[name] === undefined) continue;
+      fix.push({ op: "remove", path: `/encoding/${name}` });
+      ctx.skipUnknown.add(`/encoding/${name}`);
+    }
   }
   if (built.series.some((series) => series.axis === "y2")) {
     const axes = isPlainObject(spec.axes) ? spec.axes : undefined;
@@ -818,7 +925,7 @@ function noteCombo(spec: Record<string, unknown>, ctx: Ctx): void {
     severity: "error",
     message: "combo is one spec; each series is an item of encoding.y",
     path: "/type",
-    hint: 'A second measure is encoding.y: [{ field, mark: "bar" }, { field, mark: "line", axis: "y2" }]. layer, marks, and encoding.y2 are not spec keys.',
+    hint: 'A second measure is encoding.y: [{ field, mark: "bar" }, { field, mark: "line", axis: "y2" }]. layer, layers, marks, encoding.bar, encoding.line, and encoding.y2 are not spec keys.',
     fix,
   });
 }
@@ -866,6 +973,44 @@ function comboSeries(
     return { series, x: fieldName(enc?.x) };
   }
   return { series: [], x: fieldName(enc?.x) ?? fieldName(isPlainObject(spec.encoding) ? spec.encoding.x : undefined) };
+}
+
+function seriesFromMarkChannels(enc: Record<string, unknown> | undefined): Record<string, unknown>[] {
+  if (!enc) return [];
+  const series: Record<string, unknown>[] = [];
+  for (const mark of ["bar", "line", "area"] as const) {
+    if (enc[mark] === undefined) continue;
+    pushSeries(series, mark, enc[mark]);
+  }
+  return series;
+}
+
+function seriesFromMarksObject(marks: Record<string, unknown>): Record<string, unknown>[] {
+  const series: Record<string, unknown>[] = [];
+  const keys = Object.keys(marks);
+  if (keys.some((key) => key === "bar" || key === "line" || key === "area")) {
+    for (const mark of ["bar", "line", "area"] as const) {
+      if (marks[mark] !== undefined) pushSeries(series, mark, marks[mark]);
+    }
+    return series;
+  }
+  for (const [field, raw] of Object.entries(marks)) {
+    const name = typeof raw === "string" ? raw : isPlainObject(raw) && typeof raw.type === "string" ? raw.type : undefined;
+    if (name !== "bar" && name !== "line" && name !== "area") continue;
+    pushSeries(series, name, field);
+  }
+  return series;
+}
+
+function pushSeries(series: Record<string, unknown>[], mark: "line" | "bar" | "area", raw: unknown): void {
+  const items = Array.isArray(raw) ? raw : [raw];
+  for (const item of items) {
+    const field = fieldName(item);
+    if (!field) continue;
+    const entry: Record<string, unknown> = { field, mark };
+    if (series.length > 0) entry.axis = "y2";
+    series.push(entry);
+  }
 }
 
 function fieldName(channel: unknown): string | undefined {
@@ -918,7 +1063,13 @@ function aliasFix(root: unknown, alias: Alias): JsonPatchOperation[] {
       { op: "add", path: "/mark", value: { innerRadius: 0 } },
     ];
   }
-  return [{ op: "replace", path: "/type", value: alias.type }];
+  const fix: JsonPatchOperation[] = [{ op: "replace", path: "/type", value: alias.type }];
+  if (!alias.layout) return fix;
+  const rawMark = spec.mark;
+  if (rawMark === undefined) fix.push({ op: "add", path: "/mark", value: { layout: alias.layout } });
+  else if (isPlainObject(rawMark) && rawMark.layout === undefined) fix.push({ op: "add", path: "/mark/layout", value: alias.layout });
+  else if (isPlainObject(rawMark)) fix.push({ op: "replace", path: "/mark/layout", value: alias.layout });
+  return fix;
 }
 
 function emitUnknownProp(name: string, path: string, props: Record<string, JsonSchema>, ctx: Ctx): void {

@@ -16,8 +16,8 @@ This file describes the JSON spec. React component props are in the last section
 - Donut uses `encoding.x` (slice label) and `encoding.y` (slice value). Not `theta`, `angle`, or `label`.
 - `encoding.*.axis` is the string `"y"` or `"y2"`. Titles go in `axes.y.title` or `axes.y2.title`.
 - Field types are `quantitative`, `temporal`, `ordinal`, or `nominal`. Not `categorical`.
-- A heatmap with `encoding.x`, `encoding.y`, and `encoding.color` is a grid. A calendar heatmap is a date `x` plus `color`, or `mark.layout: "calendar"`.
-- Combo is one spec. `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. Not `layer` or `encoding.y2`.
+- A heatmap with `encoding.x`, `encoding.y`, and `encoding.color` is a grid. A calendar heatmap is a date `x` plus `color`, or `mark.layout: "calendar"`. The measure is `encoding.color`, not `encoding.value`. `grid-heatmap` and `calendar-heatmap` are `heatmap` plus `mark.layout`.
+- Combo is one spec. `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. Not `layer`, `layers`, `marks`, or `encoding.bar` / `encoding.line`.
 
 ## Repair loop
 

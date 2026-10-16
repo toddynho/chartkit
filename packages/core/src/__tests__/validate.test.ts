@@ -508,6 +508,144 @@ describe("diagnostic codes", () => {
     expect(repair(spec).ok).toBe(true);
   });
 
+  it("CK1009 maps donut label and value onto x and y", () => {
+    const spec = {
+      version: "1",
+      type: "donut",
+      data: [
+        { wood: "Oak", boards: 8 },
+        { wood: "Pine", boards: 5 },
+      ],
+      encoding: { label: "wood", value: "boards" },
+      a11y: { alt: "Oak is the larger share." },
+    };
+    const repaired = repair(spec);
+    expect(repaired.ok).toBe(true);
+    expect((repaired.spec as { encoding: unknown }).encoding).toEqual({ x: "wood", y: "boards" });
+  });
+
+  it("CK1005 maps grid-heatmap and calendar-heatmap and keeps the measure in color", () => {
+    const grid = {
+      version: "1",
+      type: "grid-heatmap",
+      data: [
+        { bin: "a", row: "r", level: 1 },
+        { bin: "b", row: "r", level: 4 },
+      ],
+      encoding: { x: "bin", y: "row", color: "level" },
+      a11y: { alt: "The second bin is higher." },
+    };
+    const gridRepaired = repair(grid);
+    expect(gridRepaired.ok).toBe(true);
+    expect((gridRepaired.spec as { type: string; mark: unknown }).type).toBe("heatmap");
+    expect((gridRepaired.spec as { mark: { layout: string } }).mark.layout).toBe("grid");
+
+    const calendar = {
+      version: "1",
+      type: "calendar-heatmap",
+      data: [
+        { day: "2024-01-01", count: 3 },
+        { day: "2024-01-02", count: 5 },
+      ],
+      encoding: { date: "day", value: "count" },
+      a11y: { alt: "The second day is higher." },
+    };
+    const hinted = validate(calendar);
+    expect(JSON.stringify(hinted.errors)).not.toContain("volume");
+    const calendarRepaired = repair(calendar);
+    expect(calendarRepaired.ok).toBe(true);
+    expect(calendarRepaired.spec).toMatchObject({
+      type: "heatmap",
+      mark: { layout: "calendar" },
+      encoding: { x: "day", color: "count" },
+    });
+  });
+
+  it("CK1009 moves a calendar numeric y to color and leaves a grid category y", () => {
+    const calendar = repair({
+      version: "1",
+      type: "heatmap",
+      mark: { layout: "calendar" },
+      data: [
+        { day: "2024-01-01", count: 3 },
+        { day: "2024-01-02", count: 5 },
+      ],
+      encoding: { x: "day", y: "count" },
+      a11y: { alt: "The second day is higher." },
+    });
+    expect(calendar.ok).toBe(true);
+    expect((calendar.spec as { encoding: unknown }).encoding).toEqual({ x: "day", color: "count" });
+
+    const grid = repair({
+      version: "1",
+      type: "heatmap",
+      mark: { layout: "grid" },
+      data: [
+        { bin: "a", hour: 1, level: 2 },
+        { bin: "b", hour: 2, level: 4 },
+      ],
+      encoding: { x: "bin", y: "hour" },
+      a11y: { alt: "Levels differ by bin." },
+    });
+    expect(grid.ok).toBe(false);
+    expect((grid.spec as { encoding: { y: string } }).encoding.y).toBe("hour");
+    expect(grid.errors.some((item) => item.message.includes("color"))).toBe(true);
+  });
+
+  it("CK1009 builds combo series from encoding.bar, encoding.line, marks, and layers", () => {
+    const channels = repair({
+      version: "1",
+      type: "combo",
+      data: [
+        { month: "Jan", revenue: 10, cost: 4 },
+        { month: "Feb", revenue: 12, cost: 5 },
+      ],
+      encoding: { x: "month", bar: "revenue", line: "cost" },
+      a11y: { alt: "Revenue stayed above cost." },
+    });
+    expect(channels.ok).toBe(true);
+    expect((channels.spec as { encoding: { y: unknown }; axes: unknown }).encoding.y).toEqual([
+      { field: "revenue", mark: "bar" },
+      { field: "cost", mark: "line", axis: "y2" },
+    ]);
+    expect((channels.spec as { axes: { y2: boolean } }).axes.y2).toBe(true);
+
+    const marks = repair({
+      version: "1",
+      type: "combo",
+      data: [
+        { month: "Jan", revenue: 10, cost: 4 },
+        { month: "Feb", revenue: 12, cost: 5 },
+      ],
+      encoding: { x: "month" },
+      marks: { bar: "revenue", line: "cost" },
+      a11y: { alt: "Revenue stayed above cost." },
+    });
+    expect(marks.ok).toBe(true);
+    expect((marks.spec as { marks?: unknown }).marks).toBeUndefined();
+
+    const layers = repair({
+      version: "1",
+      data: [
+        { month: "Jan", revenue: 10, cost: 4 },
+        { month: "Feb", revenue: 12, cost: 5 },
+      ],
+      layers: [
+        { mark: "bar", encoding: { x: "month", y: "revenue" } },
+        { mark: "line", encoding: { x: "month", y: "cost" } },
+      ],
+      a11y: { alt: "Revenue stayed above cost." },
+    });
+    expect(layers.ok).toBe(true);
+    expect((layers.spec as { type: string }).type).toBe("combo");
+  });
+
+  it("CK1005 repairs a single-series area to mini-area", () => {
+    const repaired = repair({ ...base, type: "area" });
+    expect(repaired.ok).toBe(true);
+    expect((repaired.spec as { type: string }).type).toBe("mini-area");
+  });
+
   it("repair applies data.values and leaves the input alone", () => {
     const spec = { ...base, data: { values: base.data } };
     const repaired = repair(spec);
