@@ -31,3 +31,21 @@ The threshold is `2 * floor(plotWidth)`, where plot width is the pixel width ins
 - **Hover.** Every sampled vertex is an original row, not an average. The path carries `data-ck-sample` and `data-ck-i` (original indexes, in order) only when the series was actually reduced. A tooltip resolves the nearest vertex, then reads that index. Spike lines carry `data-ck-i` of that one row. `mark.points: "always"` draws markers only at those indexes.
 
 Sampling assumes each series is already ordered by x. Nulls stay as gaps unless `mark.connectNulls` is true, in which case the finite points are sampled as one run.
+
+## Repairable shapes
+
+These are errors with a JSON Patch in `fix`. Applying the patch is the correction.
+
+| Code | Shape | What to do |
+|---|---|---|
+| CK1009 | `data: { values: [...] }` | Move `values` up so `data` is the array. Do not look for `columns`. |
+| CK1009 | `mark: "line"` and no `type` | `type` is the chart type. `mark` is an options object. The patch sets `type` and removes the string `mark`. |
+| CK1009 | `encoding.*.axis` is an object | `axis` is `"y"` or `"y2"`. Titles go in `axes.y.title` or `axes.y2.title`. |
+| CK1009 | `value`, `min`, `max`, `delta`, or `label` on a gauge, kpi, or progress-ring | Move them into `metric`. |
+| CK1009 | Donut `encoding` uses `theta`, `angle`, `label`, or `value` | `x` is the slice label and `y` is the number. |
+| CK1005 | `type: "pie"` | `donut`, with `mark.innerRadius` 0. |
+| CK1005 | `type: "area"` | Did-you-mean `mini-area`. A full-size filled line is `type: "line"` and `mark.area: true`. Stacked layers are `stacked-area`. |
+| CK1005 | `type: "grid-heat"` | `heatmap`. A grid uses `encoding.x`, `encoding.y`, and `encoding.color`. |
+| CK1007 | field `type: "categorical"` | `nominal`. Field types are `quantitative`, `temporal`, `ordinal`, and `nominal`. |
+
+A heatmap with `encoding.y` and no `mark.layout` renders as a grid. `mark.layout: "calendar"` is the date-by-weekday layout, and it is also the fallback when `y` is absent. `validate` accepts both.

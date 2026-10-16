@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { render } from "../all";
+import { validate } from "../validate";
 
 const examples = join(dirname(fileURLToPath(import.meta.url)), "../../examples");
 
@@ -106,6 +107,35 @@ describe("remaining chart renderers", () => {
       expect(svg).toMatchSnapshot();
     });
   }
+
+  it("infers a grid heatmap when encoding.y is set and layout is omitted", () => {
+    const svg = render({
+      version: "1",
+      type: "heatmap",
+      data: [
+        { bin: "A", band: "North", level: 2 },
+        { bin: "B", band: "North", level: 7 },
+        { bin: "A", band: "South", level: 4 },
+      ],
+      encoding: { x: "bin", y: "band", color: "level" },
+      a11y: { alt: "The north band is higher in bin B." },
+    });
+    expect(svg).toContain('data-ck-type="heatmap"');
+    expect(svg).not.toContain("ck-chart-error");
+    expect(svg).toContain("North");
+    expect(svg).toContain("South");
+    expect(validate({
+      version: "1",
+      type: "heatmap",
+      data: [
+        { bin: "A", band: "North", level: 2 },
+        { bin: "B", band: "North", level: 7 },
+        { bin: "A", band: "South", level: 4 },
+      ],
+      encoding: { x: "bin", y: "band", color: "level" },
+      a11y: { alt: "The north band is higher in bin B." },
+    }).ok).toBe(true);
+  });
 
   it("draws a grid heatmap", () => {
     const svg = render({

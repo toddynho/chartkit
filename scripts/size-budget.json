@@ -1,6 +1,6 @@
 {
   "line": 8800,
   "all": 20879,
-  "validate": 11339,
-  "note": "gzip -9 byte budgets, 8 percent above the measurement. 2026-10-16 after mark.sampling: line 8148 (+1538 vs 6610), all 19332 (+1631 vs 17701), validate 10524 (+25 vs 10499). The line entry grew because minmax and LTTB ship with that renderer. Validate stayed inside the previous budget."
+  "validate": 12674,
+  "note": "gzip -9 byte budgets, 8 percent above the measurement. 2026-10-16 after CK1009 repairs: line 8148 (unchanged), all 19364 (+32 vs 19332), validate 11735 (+1211 vs 10524). Validate grew because Vega-Lite repair hints and JSON Patch fixes ship in the checker. The line entry did not. All grew by the heatmap layout check and stayed inside the previous budget."
 }

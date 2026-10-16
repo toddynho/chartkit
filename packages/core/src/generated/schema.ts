@@ -19,7 +19,7 @@ export type ChartKitChartSpecV1 = {
    */
   version: "1";
   /**
-   * Chart type. 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; mark.innerRadius 0 gives a pie. Replaces DonutChart. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. mark.layout 'calendar' = GitHub-style activity grid from x (date) + color (value); 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not data. Replaces GaugeChart. 'kpi': Metric card: label, value, delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart.
+   * Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. mark.innerRadius 0 gives a pie. Replaces DonutChart. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart.
    */
   type:
     | "line"
@@ -70,7 +70,7 @@ export type ChartKitChartSpecV1 = {
   a11y: A11Y;
 };
 /**
- * The data to plot. Most commonly an array of row objects. Sparkline/mini-area/spike also accept a plain number array (x becomes the index). A columnar object is accepted for large data and maps directly to typed arrays.
+ * The data to plot. A plain array of row objects, not { values: [...] }. Sparkline, mini-area, and spike also accept a plain number array (x becomes the index). A columnar object { columns: { field: [...] } } is accepted for large data and maps directly to typed arrays.
  */
 export type Data =
   | {
@@ -132,7 +132,7 @@ export type YChannel =
        */
       mark?: "line" | "bar" | "area";
       /**
-       * Which y axis this series uses. 'y2' draws a second axis on the right.
+       * Which y axis this series uses. The string "y" or "y2", not an axis object. 'y2' draws a second axis on the right. Put titles in axes.y.title or axes.y2.title.
        */
       axis?: "y" | "y2";
       color?: Color;
@@ -398,7 +398,7 @@ export type Animation =
     };
 
 /**
- * Which data fields drive which visual channels. Same names for every chart type: x is the category or time axis, y is the measured value(s). Switching 'type' between line/bar/donut/stacked-area/combo needs no re-encoding.
+ * Which data fields drive which visual channels. Same names for every chart type: x is the category or time axis, y is the measured value(s). Donut uses x (slice label) and y (slice value), not theta, angle, or label. A y series axis is the string "y" or "y2". Switching 'type' between line/bar/donut/stacked-area/combo needs no re-encoding.
  */
 export interface Encoding {
   /**
@@ -651,7 +651,7 @@ export interface Scale {
   reverse?: boolean;
 }
 /**
- * Single-value content for gauge, progress-ring and kpi. Use instead of (kpi: in addition to) data.
+ * Single-value content for gauge, progress-ring and kpi. Put value, min, max, delta, and label here, not at the top level of the spec. Kpi may also set data for a sparkline.
  */
 export interface Metric {
   /**
@@ -744,7 +744,7 @@ export interface Metric {
   }[];
 }
 /**
- * Visual options for the marks. Each option lists the types it applies to; options that do not apply to the chosen type are ignored with warning CK3010.
+ * Visual options for the marks. An object, not the chart type (the type goes in type). Each option lists the types it applies to; options that do not apply to the chosen type are ignored with warning CK3010.
  */
 export interface Mark {
   /**
@@ -820,7 +820,7 @@ export interface Mark {
    */
   opacity?: number;
   /**
-   * Heatmap layout. 'calendar' = weeks by weekdays from a date x; 'grid' = x by y categories. Applies to: heatmap.
+   * Heatmap layout. Omit it when encoding.y is set: the renderer uses grid. 'calendar' = weeks by weekdays from a date x (also the fallback when y is absent). 'grid' = x by y categories. Applies to: heatmap.
    */
   layout?: "calendar" | "grid";
   /**

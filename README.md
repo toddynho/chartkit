@@ -1,50 +1,64 @@
 # ChartKit
 
-Charts for dashboards and for agents. One JSON spec, a framework-free core, and React components with the same API as 0.4.
+One JSON spec, a framework-free core, and optional React components. The spec is the agent interface. React props are a different API and are not keys in the spec.
 
-**[Documentation](https://chartkit.dev)** | **[Demo](https://chartkit.dev/demo)** | **[Components](https://chartkit.dev/components)** | **[Schema](https://chartkit.dev/schema/v1.json)**
+**[Documentation](https://chartkit.dev)** | **[Demo](https://chartkit.dev/demo)** | **[Components](https://chartkit.dev/components)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[llms.txt](docs/public/llms.txt)**
 
 ---
 
-ChartKit is a React charting library for dashboards: 14 components and 17 themes. `@chartkitdev/core` has zero runtime dependencies. `@chartkitdev/react` depends on that core and on React.
+`@chartkitdev/core` has zero runtime dependencies and renders SVG from the spec. `@chartkitdev/react` depends on that core and on React. One minimal valid spec for each of the 14 chart types is in [packages/core/README.md](packages/core/README.md) and [docs/public/llms.txt](docs/public/llms.txt).
 
 ## Installation
 
 ```bash
-npm install @chartkitdev/react
 npm install @chartkitdev/core
+npm install @chartkitdev/react
 ```
 
 `@derpdaderp/chartkit` remains as a compatibility shim (not published from this branch). See [docs/migrate.md](docs/migrate.md).
 
-## Quick Start
+## JSON spec
 
-```tsx
-import { LineChart, KpiCard } from '@chartkitdev/react';
+```ts
+import { render } from "@chartkitdev/core/all";
+import { validate } from "@chartkitdev/core/validate";
+```
 
-function Dashboard({ data }) {
-  return (
-    <div>
-      <KpiCard
-        label="Revenue"
-        value={284500}
-        delta={12.5}
-        data={data}
-        theme="midnight"
-        format={(v) => `$${(v / 1000).toFixed(0)}K`}
-      />
-      
-      <LineChart
-        data={data}
-        series={[{ key: 'value', label: 'Sales', area: true }]}
-        theme="midnight"
-        curve="monotone"
-        responsive
-      />
-    </div>
-  );
+Rules:
+
+- `version` is `"1"`. `a11y.alt` is one sentence and is required.
+- `data` is a plain array of row objects, not `{ "values": [...] }`. Sparkline, mini-area, and spike may use a plain number array.
+- The chart type goes in `type`. `mark` is an options object, not a string.
+- Gauge, kpi, and progress-ring put the number in `metric`.
+- Donut uses `encoding.x` (slice label) and `encoding.y` (slice value).
+- `encoding.*.axis` is `"y"` or `"y2"`. Titles go in `axes.y.title` or `axes.y2.title`.
+- Field types are `quantitative`, `temporal`, `ordinal`, or `nominal`.
+- A heatmap with `encoding.y` is a grid. Calendar is a date `x` plus `color`, or `mark.layout: "calendar"`.
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    { "quarter": "Q1", "units": 40 },
+    { "quarter": "Q2", "units": 55 }
+  ],
+  "encoding": { "x": "quarter", "y": "units" },
+  "a11y": { "alt": "Units rose from Q1 to Q2." }
 }
 ```
+
+## React components (not the JSON spec)
+
+```tsx
+import { Chart } from "@chartkitdev/react";
+
+function Panel({ spec }) {
+  return <Chart spec={spec} />;
+}
+```
+
+Dashboard components (`LineChart`, `KpiCard`, and the rest) take their own props. `dataKey`, `leftAxis`, and a top-level `value` on `GaugeChart` are not spec keys.
 
 ## Features
 

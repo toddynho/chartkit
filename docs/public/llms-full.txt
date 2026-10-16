@@ -1,730 +1,247 @@
-# ChartKit - Complete API Reference for AI Assistants
+# ChartKit JSON spec (full)
 
-> @chartkitdev/react v0.5.0 · @chartkitdev/core v0.5.0
-> Schema: https://chartkit.dev/schema/v1.json
-> Lightweight React charting library with 14 components and 17 themes.
-> Zero dependencies, pure SVG.
+> @chartkitdev/core v0.5.0 · schema https://chartkit.dev/schema/v1.json
+> `import { render } from "@chartkitdev/core/all"`
+> `import { validate } from "@chartkitdev/core/validate"`
 
-## Installation
-```bash
-npm install @chartkitdev/react
-```
+The JSON spec is the agent interface. The React section at the bottom is a different API. Do not copy React props (`dataKey`, `leftAxis`, `GaugeChart value`) into a spec.
 
----
+## Rules
 
-## COMPONENTS
+- `version` is `"1"`. `a11y.alt` is one required sentence. `validate()` returns CK1004 with a suggested sentence when it is missing.
+- `data` is a plain array of rows: `[{ "quarter": "Q1", "units": 40 }]`. It is not Vega-Lite `{ "values": [...] }` (CK1009 moves `values` up). Sparkline, mini-area, and spike accept a number array. 10k+ points may use `{ "columns": { "quarter": [], "units": [] } }`.
+- Chart type is `type`. `mark` is an object of options. `mark: "line"` is CK1009: move that string to `type`.
+- `mark.sampling` defaults to `"auto"` (minmax above twice the plot width) for line, stacked-area, combo lines, sparkline, mini-area, and spike.
+- Gauge, kpi, and progress-ring use `metric`. Top-level `value` / `min` / `max` / `delta` / `label` is CK1009.
+- Donut encoding is `x` (label) and `y` (value). `theta`, `angle`, and `label` are CK1009.
+- `axis` on a y series is `"y"` or `"y2"`, never `{ "title": "..." }`. Titles belong in `axes.y.title` or `axes.y2.title` (CK1009).
+- Field `type` is `quantitative`, `temporal`, `ordinal`, or `nominal`. `categorical` means `nominal` (CK1007).
+- Unknown chart types: `pie` → `donut` with `mark.innerRadius` 0; `area` → `mini-area` (a full-size fill is `type: "line"` and `mark.area: true`; layers are `stacked-area`); `grid-heat` → `heatmap` (CK1005).
+- Heatmap: `encoding.y` with no `mark.layout` renders a grid. Calendar is a date `x` plus `color`, or `mark.layout: "calendar"`.
 
-### Sparkline
-Minimal inline trend chart. Responsive by default.
+Each example below is a minimal valid spec.
 
-```tsx
-import { Sparkline } from '@chartkitdev/react';
+## line
 
-<Sparkline
-  data={T[] | number[]}      // Required. Array of objects or numbers
-  theme={ThemeName}          // Required. Theme name
-  dataKey={keyof T}          // Default: "value". Key for numeric value
-  width={number}             // Optional. Auto-fills container if omitted
-  height={number}            // Default: 32
-  color={string}             // Optional. Override theme color
-  glow={boolean}             // Default: false. Glow effect
-  fill={boolean}             // Default: false. Fill area under line
-  strokeWidth={number}       // Default: 1.5
-  className={string}         // Optional. CSS class
-/>
-```
-
-Example:
-```tsx
-<Sparkline data={[10, 25, 15, 30, 22]} theme="midnight" glow />
-```
-
----
-
-### MiniArea
-Small area chart with gradient fill. Responsive by default.
-
-```tsx
-import { MiniArea } from '@chartkitdev/react';
-
-<MiniArea
-  data={T[] | number[]}      // Required
-  theme={ThemeName}          // Required
-  dataKey={keyof T}          // Default: "value"
-  width={number}             // Optional. Auto-fills container if omitted
-  height={number}            // Default: 40
-  color={string}             // Optional
-  className={string}         // Optional
-/>
-```
-
----
-
-### LineChart
-Feature-rich line chart with dual Y-axis, curve types, and area fills.
-
-```tsx
-import { LineChart } from '@chartkitdev/react';
-
-<LineChart
-  data={T[]}                 // Required. Data array
-  theme={ThemeName}          // Required
-  
-  // Series config - use ONE of these approaches:
-  series={SeriesConfig[]}    // Multi-series config
-  // OR
-  dataKey={keyof T}          // Single-series: just the data key
-  label={string}             // Single-series: display label
-  
-  responsive={boolean}       // Default: false. Auto-fill container width
-  width={number}             // Default: 600. Ignored if responsive=true
-  height={number}            // Default: 260
-  timeKey={keyof T}          // Default: "time". X-axis key
-  unit={string}              // Y-axis unit (shorthand for yAxisLeft.unit)
-  
-  // Dual Y-axis
-  yAxisLeft={YAxisConfig}    // Left Y-axis configuration
-  yAxisRight={YAxisConfig}   // Right Y-axis (enables dual-axis mode)
-  
-  // Curve and styling
-  curve={CurveType}          // Default: "linear". Line interpolation
-  showDots={boolean}         // Default: false. Show data point dots
-  dotSize={number}           // Default: 3. Dot radius
-  glow={boolean}             // Default: false. Glow effect
-  showLegend={boolean}       // Default: true
-  
-  grid={GridOptions|boolean} // Default: true. Grid configuration
-  annotations={Annotation[]} // Optional. Reference lines/areas
-  connectNulls={boolean}     // Default: true
-  onDataPointClick={fn}      // Optional. Click handler
-  renderTooltip={fn}         // Optional. Custom tooltip renderer
-/>
-
-// SeriesConfig
-interface SeriesConfig {
-  key: string;               // Data property key
-  label: string;             // Display label
-  displayValue?: string;     // Badge value in legend
-  yAxisId?: 'left'|'right';  // Y-axis assignment (default: 'left')
-  area?: boolean;            // Fill area under line
-  areaOpacity?: number;      // Area fill opacity (default: 0.15)
-  color?: string;            // Custom line color
-  strokeDasharray?: string;  // Dash pattern (e.g., "5,5")
-  strokeWidth?: number;      // Line width (default: 2)
-}
-
-// YAxisConfig
-interface YAxisConfig {
-  unit?: string;             // Unit label (e.g., "ms", "req/s")
-  min?: number;              // Minimum value (auto if not set)
-  max?: number;              // Maximum value (auto if not set)
-  tickCount?: number;        // Number of ticks (default: 3)
-  format?: (v: number) => string; // Custom tick formatter
-}
-
-// CurveType
-type CurveType = 'linear' | 'monotone' | 'step' | 'stepBefore' | 'stepAfter';
-
-// GridOptions
-interface GridOptions {
-  horizontal?: boolean;      // Default: true
-  vertical?: boolean;        // Default: false
-  strokeDasharray?: string;  // Default: "4,4"
-  color?: string;            // Override theme grid color
-  opacity?: number;          // 0-1
-  strokeWidth?: number;      // Default: 1
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    { "quarter": "Q1", "units": 40 },
+    { "quarter": "Q2", "units": 55 },
+    { "quarter": "Q3", "units": 48 }
+  ],
+  "encoding": { "x": "quarter", "y": "units" },
+  "a11y": { "alt": "Units peaked in Q2." }
 }
 ```
 
-Example - Basic:
-```tsx
-<LineChart
-  data={data}
-  dataKey="value"
-  label="Revenue"
-  theme="midnight"
-  responsive
-/>
-```
+## bar
 
-Example - Multi-series with smooth curves:
-```tsx
-<LineChart
-  data={data}
-  series={[
-    { key: 'p50', label: 'p50', displayValue: '1.8ms' },
-    { key: 'p99', label: 'p99', displayValue: '5.2ms' },
-  ]}
-  theme="neon"
-  curve="monotone"
-  responsive
-  height={300}
-/>
-```
-
-Example - Dual Y-axis:
-```tsx
-<LineChart
-  data={data}
-  series={[
-    { key: 'requests', label: 'Requests', yAxisId: 'left' },
-    { key: 'latency', label: 'Latency', yAxisId: 'right', strokeDasharray: '5,5' },
-  ]}
-  yAxisLeft={{ unit: 'req/s' }}
-  yAxisRight={{ unit: 'ms' }}
-  theme="midnight"
-/>
-```
-
-Example - Area chart:
-```tsx
-<LineChart
-  data={data}
-  series={[{ key: 'value', label: 'Sales', area: true }]}
-  curve="monotone"
-  theme="emerald"
-/>
-```
-
----
-
-### BarChart
-Grouped bar chart with optional annotations.
-
-```tsx
-import { BarChart } from '@chartkitdev/react';
-
-<BarChart
-  data={T[]}                 // Required
-  dataKey={string|string[]}  // Required. Key(s) for values
-  categoryKey={keyof T}      // Required. Key for categories
-  theme={ThemeName}          // Required
-  width={number}             // Default: 500
-  height={number}            // Default: 300
-  orientation={'vertical'|'horizontal'} // Default: 'vertical'
-  showGrid={boolean}         // Default: true
-  showValues={boolean}       // Default: false
-  annotations={Annotation[]} // Optional
-  onBarClick={fn}            // Optional
-  renderTooltip={fn}         // Optional
-/>
-```
-
----
-
-### DonutChart
-Pie/donut chart with optional center content.
-
-```tsx
-import { DonutChart } from '@chartkitdev/react';
-
-<DonutChart
-  data={T[]}                 // Required
-  dataKey={keyof T}          // Required. Value key
-  labelKey={keyof T}         // Required. Label key
-  theme={ThemeName}          // Required
-  width={number}             // Default: 300
-  height={number}            // Default: 300
-  innerRadius={number}       // Default: 0.6 (60% of outer)
-  showLegend={boolean}       // Default: true
-  centerContent={ReactNode}  // Optional. Content in center
-/>
-```
-
----
-
-### KpiCard
-Metric card with sparkline and delta indicator.
-
-```tsx
-import { KpiCard } from '@chartkitdev/react';
-
-<KpiCard
-  label={string}             // Required. Metric label
-  value={number}             // Required. Current value
-  data={T[]}                 // Required. Sparkline data
-  theme={ThemeName}          // Required
-  delta={number}             // Optional. % change (positive=green, negative=red)
-  format={(v)=>string}       // Optional. Value formatter
-  sparklineColor={string}    // Optional. Override sparkline color
-/>
-```
-
-Example:
-```tsx
-<KpiCard
-  label="Revenue"
-  value={125000}
-  delta={12.5}
-  data={revenueHistory}
-  theme="sunset"
-  format={(v) => `$${(v/1000).toFixed(0)}K`}
-/>
-```
-
----
-
-### ProgressRing
-Circular progress indicator.
-
-```tsx
-import { ProgressRing } from '@chartkitdev/react';
-
-<ProgressRing
-  value={number}             // Required. 0-100
-  theme={ThemeName}          // Required
-  size={number}              // Default: 120
-  strokeWidth={number}       // Default: 8
-  showValue={boolean}        // Default: true
-  color={string}             // Optional. Override color
-  trackColor={string}        // Optional. Background track color
-  children={ReactNode}       // Optional. Custom center content
-/>
-```
-
----
-
-### GaugeChart
-Semicircular gauge with optional ranges.
-
-```tsx
-import { GaugeChart } from '@chartkitdev/react';
-
-<GaugeChart
-  value={number}             // Required
-  theme={ThemeName}          // Required
-  min={number}               // Default: 0
-  max={number}               // Default: 100
-  width={number}             // Default: 200
-  label={string}             // Optional. Label below value
-  unit={string}              // Optional. Unit suffix
-  showValue={boolean}        // Default: true
-  target={number}            // Optional. Target marker
-  ranges={GaugeRange[]}      // Optional. Colored ranges
-/>
-
-// GaugeRange
-interface GaugeRange {
-  min: number;
-  max: number;
-  color: string;
-  label?: string;
+```json
+{
+  "version": "1",
+  "type": "bar",
+  "data": [
+    { "lane": "A", "stops": 12 },
+    { "lane": "B", "stops": 7 },
+    { "lane": "C", "stops": 15 }
+  ],
+  "encoding": { "x": "lane", "y": "stops" },
+  "a11y": { "alt": "Lane C has the most stops." }
 }
 ```
 
----
+## donut
 
-### ScatterChart
-Scatter plot with optional bubble sizing and logarithmic scales.
-
-```tsx
-import { ScatterChart } from '@chartkitdev/react';
-
-<ScatterChart
-  data={T[]}                 // Required
-  xKey={keyof T}             // Required. X-axis key
-  yKey={keyof T}             // Required. Y-axis key
-  theme={ThemeName}          // Required
-  sizeKey={keyof T}          // Optional. Bubble size key
-  categoryKey={keyof T}      // Optional. Category for colors
-  xScaleType={ScaleType}     // Default: 'linear'. Options: 'linear' | 'log'
-  yScaleType={ScaleType}     // Default: 'linear'. Options: 'linear' | 'log'
-  width={number}             // Default: 500
-  height={number}            // Default: 400
-/>
-
-// ScaleType
-type ScaleType = 'linear' | 'log';
-```
-
-Example with log scales (great for exponential data):
-```tsx
-<ScatterChart
-  data={companies}
-  xKey="revenue"
-  yKey="employees"
-  sizeKey="valuation"
-  xScaleType="log"
-  yScaleType="log"
-  theme="midnight"
-/>
-```
-
----
-
-### ComboChart
-Combined line, bar, and area chart with dual Y-axes.
-
-```tsx
-import { ComboChart } from '@chartkitdev/react';
-
-<ComboChart
-  data={T[]}                 // Required
-  xKey={keyof T}             // Required. X-axis key
-  theme={ThemeName}          // Required
-  leftAxis={{                // Required
-    series: ComboSeriesConfig[],
-    label?: string,
-  }}
-  rightAxis={{               // Optional
-    series: ComboSeriesConfig[],
-    label?: string,
-  }}
-  width={number}
-  height={number}
-/>
-
-// ComboSeriesConfig
-interface ComboSeriesConfig {
-  key: string;
-  label: string;
-  type: 'line' | 'bar' | 'area';
-  color?: string;
+```json
+{
+  "version": "1",
+  "type": "donut",
+  "data": [
+    { "wood": "Oak", "boards": 8 },
+    { "wood": "Pine", "boards": 5 },
+    { "wood": "Maple", "boards": 3 }
+  ],
+  "encoding": { "x": "wood", "y": "boards" },
+  "a11y": { "alt": "Oak is the largest share of boards." }
 }
 ```
 
----
+## stacked-area
 
-### StackedArea
-Stacked area chart with interactive legend.
-
-```tsx
-import { StackedArea } from '@chartkitdev/react';
-
-<StackedArea
-  data={T[]}                 // Required. Data array
-  series={SeriesConfig[]}    // Required. Series definitions
-  theme={ThemeName}          // Required
-  width={number}             // Default: 600
-  height={number}            // Default: 300
-  timeKey={keyof T}          // Default: "time". X-axis key
-  curve={CurveType}          // Default: "monotone"
-  showLegend={boolean}       // Default: true
-/>
-
-// SeriesConfig for StackedArea
-interface SeriesConfig {
-  key: string;               // Data property key
-  label: string;             // Display label
-  color?: string;            // Optional custom color
+```json
+{
+  "version": "1",
+  "type": "stacked-area",
+  "data": [
+    { "year": "2022", "rail": 20, "road": 30 },
+    { "year": "2023", "rail": 24, "road": 28 }
+  ],
+  "encoding": { "x": "year", "y": ["rail", "road"] },
+  "a11y": { "alt": "Road stayed larger than rail." }
 }
 ```
 
-Example:
-```tsx
-<StackedArea
-  data={data}
-  series={[
-    { key: 'mobile', label: 'Mobile' },
-    { key: 'desktop', label: 'Desktop' },
-    { key: 'tablet', label: 'Tablet' },
-  ]}
-  theme="midnight"
-  curve="monotone"
-/>
-```
+## scatter
 
----
-
-### Heatmap
-GitHub-style activity grid.
-
-```tsx
-import { Heatmap } from '@chartkitdev/react';
-
-<Heatmap
-  data={HeatmapDataPoint[]}  // Required. { date: string, value: number }
-  theme={ThemeName}          // Required
-  weeks={number}             // Default: 52. Number of weeks to show
-  cellSize={number}          // Default: 10. Size of each cell
-  cellGap={number}           // Default: 2. Gap between cells
-/>
-
-// HeatmapDataPoint
-interface HeatmapDataPoint {
-  date: string;              // ISO date string (YYYY-MM-DD)
-  value: number;             // Activity value (0 = empty)
+```json
+{
+  "version": "1",
+  "type": "scatter",
+  "data": [
+    { "temp": 16, "yieldKg": 3 },
+    { "temp": 22, "yieldKg": 5 },
+    { "temp": 27, "yieldKg": 4 }
+  ],
+  "encoding": { "x": "temp", "y": "yieldKg" },
+  "a11y": { "alt": "Yield is highest at 22 degrees." }
 }
 ```
 
----
+## combo
 
-### SpikeChart
-Event spike visualization.
-
-```tsx
-import { SpikeChart } from '@chartkitdev/react';
-
-<SpikeChart
-  data={T[]}
-  dataKey={keyof T}
-  theme={ThemeName}
-  width={number}
-  height={number}
-  baseline={number}
-/>
-```
-
----
-
-### CandlestickChart
-Financial OHLC candlestick chart with zoom, pan, and optional volume.
-
-```tsx
-import { CandlestickChart } from '@chartkitdev/react';
-
-<CandlestickChart
-  data={T[]}                 // Required. Array with OHLC data
-  theme={ThemeName}          // Required
-  width={number}             // Default: 800
-  height={number}            // Default: 400
-  timeKey={keyof T}          // Default: "time". X-axis key
-  openKey={keyof T}          // Default: "open"
-  highKey={keyof T}          // Default: "high"
-  lowKey={keyof T}           // Default: "low"
-  closeKey={keyof T}         // Default: "close"
-  volumeKey={keyof T}        // Default: "volume"
-  showVolume={boolean}       // Default: false. Show volume bars
-  formatY={(v) => string}    // Optional. Y-axis formatter
-  upColor={string}           // Optional. Bullish candle color
-  downColor={string}         // Optional. Bearish candle color
-/>
-```
-
-Data format:
-```tsx
-const stockData = [
-  { time: 'Jan 1', open: 100, high: 105, low: 98, close: 103, volume: 1000000 },
-  { time: 'Jan 2', open: 103, high: 108, low: 102, close: 106, volume: 1200000 },
-  // ...
-];
-```
-
-Features:
-- Mouse wheel to zoom in/out
-- Click and drag to pan
-- Crosshair cursor on hover
-- Optional volume histogram
-
-Example:
-```tsx
-<CandlestickChart
-  data={stockData}
-  theme="midnight"
-  width={800}
-  height={400}
-  showVolume
-  formatY={(v) => `$${v.toFixed(2)}`}
-/>
-```
-
----
-
-## UTILITY COMPONENTS
-
-### ResponsiveChart
-Auto-sizing wrapper that provides width/height to children.
-
-```tsx
-import { ResponsiveChart } from '@chartkitdev/react';
-
-<ResponsiveChart aspectRatio={16/9}>
-  {({ width, height }) => (
-    <LineChart
-      data={data}
-      series={series}
-      theme="midnight"
-      width={width}
-      height={height}
-    />
-  )}
-</ResponsiveChart>
-```
-
-### Legend
-Standalone interactive legend component.
-
-```tsx
-import { Legend } from '@chartkitdev/react';
-
-<Legend
-  items={LegendItem[]}       // Required. Legend items
-  theme={ThemeName}          // Required
-  onItemClick={fn}           // Optional. Toggle handler
-/>
-
-// LegendItem
-interface LegendItem {
-  key: string;
-  label: string;
-  color: string;
-  visible?: boolean;
+```json
+{
+  "version": "1",
+  "type": "combo",
+  "data": [
+    { "week": "W1", "orders": 30, "rate": 0.4 },
+    { "week": "W2", "orders": 36, "rate": 0.55 }
+  ],
+  "encoding": {
+    "x": "week",
+    "y": [
+      { "field": "orders", "mark": "bar" },
+      { "field": "rate", "mark": "line", "axis": "y2" }
+    ]
+  },
+  "axes": { "y2": { "title": "Fill rate" } },
+  "a11y": { "alt": "Orders and the fill rate both rose." }
 }
 ```
 
-### Annotations
-Reference lines and areas overlay (used internally, can be standalone).
+## heatmap
 
-```tsx
-// Annotations are typically passed as props to charts:
-<LineChart
-  data={data}
-  series={series}
-  theme="midnight"
-  annotations={[
-    { type: 'line', axis: 'y', value: 80, label: 'Warning', color: '#f59e0b' },
-    { type: 'line', axis: 'x', value: 25, label: 'Release', color: '#8b5cf6', strokeDasharray: '4,4' },
-    { type: 'area', axis: 'y', start: 0, end: 50, color: '#22c55e', opacity: 0.1 },
-  ]}
-/>
-```
-
----
-
-## HOOKS
-
-### useAutoTheme
-Automatically switch themes based on dark/light mode.
-
-```tsx
-import { useAutoTheme } from '@chartkitdev/react';
-
-const theme = useAutoTheme({
-  light: ThemeName,          // Required. Theme for light mode
-  dark: ThemeName,           // Required. Theme for dark mode
-  selector?: string,         // Default: 'html'. DOM element to observe
-  darkClass?: string,        // Default: 'dark'. Class indicating dark mode
-  useSystemPreference?: boolean, // Default: false. Use OS preference instead
-});
-```
-
-Example:
-```tsx
-const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
-<LineChart data={data} dataKey="value" theme={theme} responsive />
-```
-
----
-
-### useContainerWidth
-Track container width for responsive sizing.
-
-```tsx
-import { useContainerWidth } from '@chartkitdev/react';
-
-const { ref, width } = useContainerWidth<HTMLDivElement>();
-
-return (
-  <div ref={ref}>
-    {width > 0 && <MyChart width={width} />}
-  </div>
-);
-```
-
----
-
-### useResizeObserver
-Track both width and height of container.
-
-```tsx
-import { useResizeObserver } from '@chartkitdev/react';
-
-const { ref, size, ready } = useResizeObserver<HTMLDivElement>();
-// size = { width: number, height: number }
-```
-
----
-
-## THEMES
-
-### Dark Themes (13)
-| Name | Description |
-|------|-------------|
-| midnight | Deep black, cyan accent |
-| emerald | Black, green accent |
-| mono | Pure black, white accent |
-| slate | Blue-gray, blue accent |
-| arctic | Cold blue palette |
-| orchid | Purple accent |
-| obsidian | Deep dark, blue accent |
-| neon | Vibrant city lights |
-| mocha | Warm pastel dark |
-| owl | Deep blue |
-| retro | 80s neon pink |
-| copper | Warm earth tones |
-| rose | Pink/rose accent |
-
-### Light Themes (4)
-| Name | Description |
-|------|-------------|
-| sunset | White, orange accent |
-| silver | White, blue accent |
-| pearl | Warm ivory |
-| latte | Creamy pastel |
-
----
-
-## TYPES
-
-### Annotation
-```tsx
-type Annotation = ReferenceLine | ReferenceArea;
-
-interface ReferenceLine {
-  type: 'line';
-  value: number;
-  axis: 'x' | 'y';
-  color?: string;
-  strokeDasharray?: string;
-  label?: string;
-}
-
-interface ReferenceArea {
-  type: 'area';
-  start: number;
-  end: number;
-  axis: 'x' | 'y';
-  color?: string;
-  opacity?: number;
-  label?: string;
+```json
+{
+  "version": "1",
+  "type": "heatmap",
+  "data": [
+    { "bin": "A", "band": "Low", "level": 1 },
+    { "bin": "B", "band": "Low", "level": 4 },
+    { "bin": "A", "band": "High", "level": 2 }
+  ],
+  "encoding": { "x": "bin", "y": "band", "color": "level" },
+  "a11y": { "alt": "Bin B in the low band is the darkest cell." }
 }
 ```
 
-### ThemeName
-```tsx
-type ThemeName = 
-  | 'midnight' | 'emerald' | 'mono' | 'slate' | 'arctic'
-  | 'orchid' | 'obsidian' | 'neon' | 'mocha' | 'owl'
-  | 'retro' | 'copper' | 'rose'
-  | 'sunset' | 'silver' | 'pearl' | 'latte';
+## gauge
+
+```json
+{
+  "version": "1",
+  "type": "gauge",
+  "metric": { "label": "Capacity", "value": 64, "min": 0, "max": 100 },
+  "a11y": { "alt": "Capacity is 64 out of 100." }
+}
 ```
 
----
+## kpi
 
-## CORE
-
-Framework-free SVG renderer and validator. Zero runtime dependencies.
-
-```ts
-import { render } from "@chartkitdev/core/all";
-import { validate } from "@chartkitdev/core/validate";
+```json
+{
+  "version": "1",
+  "type": "kpi",
+  "metric": { "label": "Tickets", "value": 18, "delta": -0.05 },
+  "a11y": { "alt": "Open tickets are 18, slightly down." }
+}
 ```
 
-Opt-in charts (an app that imports only `line` ships only `line`):
+## sparkline
 
-```ts
-import { createRenderer, register } from "@chartkitdev/core";
-import { line } from "@chartkitdev/core/charts/line";
-import { sunset } from "@chartkitdev/core/themes/sunset";
-
-const render = createRenderer([line]);
-register(line);
+```json
+{
+  "version": "1",
+  "type": "sparkline",
+  "data": [4, 6, 5, 9, 8],
+  "a11y": { "alt": "The sparkline ends higher than it starts." }
+}
 ```
 
-Subpaths: `@chartkitdev/core/all`, `@chartkitdev/core/validate`, `@chartkitdev/core/charts/<type>`, `@chartkitdev/core/themes/<name>`, `@chartkitdev/core/schema.json`. Midnight is built in. `<Chart spec render={...} />` from `@chartkitdev/react` uses `/all` unless you pass a renderer. `CK1010` means the chart type is not registered.
+## mini-area
 
-## LINKS
-- Documentation: https://chartkit.dev
-- npm: https://www.npmjs.com/package/@chartkitdev/react
-- GitHub: https://github.com/toddynho/chartkit
-- LLM Reference: https://chartkit.dev/llms.txt
+```json
+{
+  "version": "1",
+  "type": "mini-area",
+  "data": [2, 3, 3, 6, 5],
+  "a11y": { "alt": "The mini area rises, then eases." }
+}
+```
+
+## progress-ring
+
+```json
+{
+  "version": "1",
+  "type": "progress-ring",
+  "metric": { "label": "Done", "value": 3, "min": 0, "max": 8 },
+  "a11y": { "alt": "3 of 8 items are done." }
+}
+```
+
+## spike
+
+```json
+{
+  "version": "1",
+  "type": "spike",
+  "data": [
+    { "slot": "t1", "hits": 0 },
+    { "slot": "t2", "hits": 6 },
+    { "slot": "t3", "hits": 1 }
+  ],
+  "encoding": { "x": "slot", "y": "hits" },
+  "a11y": { "alt": "Hits spike at t2." }
+}
+```
+
+## candlestick
+
+```json
+{
+  "version": "1",
+  "type": "candlestick",
+  "data": [
+    { "day": "D1", "open": 5, "high": 7, "low": 4, "close": 6 },
+    { "day": "D2", "open": 6, "high": 6, "low": 3, "close": 4 }
+  ],
+  "encoding": { "x": "day", "open": "open", "high": "high", "low": "low", "close": "close" },
+  "a11y": { "alt": "The second session closed below its open." }
+}
+```
+
+## React components (not the JSON spec)
+
+`@chartkitdev/react` components take props. Those props are not the spec. Agents writing JSON should ignore this section. `<Chart spec={...} />` is the component that takes a spec.
+
+| Component | Notable props (not spec keys) |
+|---|---|
+| `LineChart` | `data`, `series` or `dataKey`, `theme`, `responsive`, `curve` |
+| `BarChart` | `data`, `dataKey`, `categoryKey`, `theme` |
+| `DonutChart` | `data`, `dataKey`, `labelKey`, `theme` |
+| `StackedArea` | `data`, `series`, `theme` |
+| `ScatterChart` | `data`, `xKey`, `yKey`, `sizeKey`, `theme` |
+| `ComboChart` | `data`, `xKey`, `leftAxis`, `rightAxis`, `theme` |
+| `Heatmap` | `data`, `theme` |
+| `GaugeChart` | `value`, `min`, `max`, `theme` |
+| `KpiCard` | `label`, `value`, `delta`, `data`, `theme` |
+| `Sparkline` | `data`, `theme`, `height` |
+| `MiniArea` | `data`, `theme`, `height` |
+| `ProgressRing` | `value`, `theme`, `size` |
+| `SpikeChart` | `data`, `theme` |
+| `CandlestickChart` | `data`, `theme`, `showVolume` |
+| `Chart` | `spec` (the JSON object above), optional `render` |

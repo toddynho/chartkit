@@ -36,6 +36,10 @@ interface Ctx {
   rootValue: unknown;
   out: Diagnostic[];
   depth: number;
+  /** "parentPath|property" required keys already explained by a repair patch. */
+  skipMissing: Set<string>;
+  /** JSON pointers whose unknown-property error is replaced by a repair patch. */
+  skipUnknown: Set<string>;
 }
 
 const CHART_TYPES = [
@@ -56,7 +60,14 @@ const CHART_TYPES = [
 ] as const;
 
 export function walkSchema(value: unknown, schema: JsonSchema, diagnostics: Diagnostic[]): void {
-  const ctx: Ctx = { rootSchema: schema, rootValue: value, out: diagnostics, depth: 0 };
+  const ctx: Ctx = {
+    rootSchema: schema,
+    rootValue: value,
+    out: diagnostics,
+    depth: 0,
+    skipMissing: new Set(),
+    skipUnknown: new Set(),
+  };
   check(value, schema, "", ctx);
 }
 
@@ -72,6 +83,10 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
   }
   ctx.depth += 1;
   const node = resolve(schema, ctx.rootSchema);
+  if (repairShape(value, path, ctx)) {
+    ctx.depth -= 1;
+    return;
+  }
 
   if (node.anyOf) {
     checkUnion(value, node.anyOf, path, ctx, "any");
@@ -134,8 +149,11 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
   if (node.enum && !node.enum.some((item) => item === value)) {
     if (path === "/type") {
       emitUnknownType(value, ctx);
+    } else if (path.endsWith("/axis") && isPlainObject(value) && node.enum.includes("y") && node.enum.includes("y2")) {
+      emitAxisObject(value, path, ctx);
     } else {
-      const closest = typeof value === "string" ? nearest(value, node.enum.map(String), 3) : undefined;
+      const alias = typeof value === "string" && node.enum.includes(FIELD_TYPE_ALIAS[value]) ? FIELD_TYPE_ALIAS[value] : undefined;
+      const closest = alias ?? (typeof value === "string" ? nearest(value, node.enum.map(String), 3) : undefined);
       emit(ctx, {
         code: "CK1007",
         severity: "error",
@@ -246,6 +264,8 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
   }
 
   if (isPlainObject(value)) {
+    if (path === "") noteMetricHoist(value, ctx);
+    if (path === "/encoding") noteDonutChannels(value, ctx);
     if (node.minProperties !== undefined && Object.keys(value).length < node.minProperties) {
       emit(ctx, {
         code: "CK1006",
@@ -363,6 +383,130 @@ function schemaExpects(schema: JsonSchema, value: unknown, ctx: Ctx): boolean {
   return true;
 }
 
+const FIELD_TYPE_ALIAS: Record<string, string> = {
+  categorical: "nominal",
+  category: "nominal",
+  qualitative: "nominal",
+};
+
+const METRIC_FIELDS = ["label", "value", "min", "max", "delta", "target"] as const;
+const DONUT_CHANNELS = ["label", "theta", "angle", "value"] as const;
+
+/** Shapes agents copy from Vega-Lite. One CK1009, with a patch, instead of a pile of missing-property errors. */
+function repairShape(value: unknown, path: string, ctx: Ctx): boolean {
+  if (path === "/data" && isPlainObject(value) && Array.isArray(value.values) && value.columns === undefined) {
+    emit(ctx, {
+      code: "CK1009",
+      severity: "error",
+      message: "data must be a plain array of rows, not { values }",
+      path: "/data",
+      hint: "ChartKit takes the rows directly: data: [...]. Move data.values up to data.",
+      fix: [{ op: "move", from: "/data/values", path: "/data" }],
+    });
+    return true;
+  }
+  if (path === "/mark" && typeof value === "string") {
+    const mapped = chartTypeName(value);
+    const root = isPlainObject(ctx.rootValue) ? ctx.rootValue : {};
+    const fix: JsonPatchOperation[] = [];
+    if (typeof root.type !== "string" && mapped) fix.push({ op: "add", path: "/type", value: mapped });
+    fix.push({ op: "remove", path: "/mark" });
+    emit(ctx, {
+      code: "CK1009",
+      severity: "error",
+      message: "mark is an options object; the chart type goes in type",
+      path: "/mark",
+      hint: mapped
+        ? `use type: ${JSON.stringify(mapped)}. mark is options such as curve and sampling, not a type name.`
+        : 'mark is an options object. Put the chart type in type, for example "line".',
+      fix,
+    });
+    if (mapped && typeof root.type !== "string") ctx.skipMissing.add("|type");
+    return true;
+  }
+  return false;
+}
+
+function noteMetricHoist(value: Record<string, unknown>, ctx: Ctx): void {
+  const type = value.type;
+  if (type !== "gauge" && type !== "kpi" && type !== "progress-ring") return;
+  if (isPlainObject(value.metric)) return;
+  const keys = METRIC_FIELDS.filter((key) => value[key] !== undefined);
+  if (keys.length === 0 || keys.every((key) => ctx.skipUnknown.has(`/${key}`))) return;
+  const metric: Record<string, unknown> = {};
+  for (const key of keys) metric[key] = value[key];
+  const fix: JsonPatchOperation[] = [{ op: "add", path: "/metric", value: metric }];
+  for (const key of keys) {
+    fix.push({ op: "remove", path: `/${key}` });
+    ctx.skipUnknown.add(`/${key}`);
+  }
+  ctx.skipMissing.add("|metric");
+  emit(ctx, {
+    code: "CK1009",
+    severity: "error",
+    message: "gauge, kpi, and progress-ring keep the number in metric",
+    path: "/metric",
+    hint: 'Move value, min, max, delta, and label into metric: { value, min, max }. They are not top-level keys.',
+    fix,
+  });
+}
+
+function noteDonutChannels(encoding: Record<string, unknown>, ctx: Ctx): void {
+  const present = DONUT_CHANNELS.filter((key) => encoding[key] !== undefined);
+  if (present.length === 0 || present.every((key) => ctx.skipUnknown.has(`/encoding/${key}`))) return;
+  const fix: JsonPatchOperation[] = [];
+  if (encoding.x === undefined && encoding.label !== undefined) {
+    fix.push({ op: "move", from: "/encoding/label", path: "/encoding/x" });
+  }
+  if (encoding.y === undefined) {
+    const source = encoding.value !== undefined ? "value" : encoding.theta !== undefined ? "theta" : encoding.angle !== undefined ? "angle" : undefined;
+    if (source) fix.push({ op: "move", from: `/encoding/${source}`, path: "/encoding/y" });
+  }
+  for (const key of present) {
+    if (!fix.some((op) => op.from === `/encoding/${key}`)) fix.push({ op: "remove", path: `/encoding/${key}` });
+    ctx.skipUnknown.add(`/encoding/${key}`);
+  }
+  if (fix.some((op) => op.path === "/encoding/x")) ctx.skipMissing.add("/encoding|x");
+  if (fix.some((op) => op.path === "/encoding/y")) ctx.skipMissing.add("/encoding|y");
+  emit(ctx, {
+    code: "CK1009",
+    severity: "error",
+    message: "donut uses encoding.x for the slice label and encoding.y for the value",
+    path: "/encoding",
+    hint: 'Donut does not use theta, angle, label, or value channels. encoding.x is the slice name and encoding.y is the number.',
+    fix,
+  });
+}
+
+function emitAxisObject(value: Record<string, unknown>, path: string, ctx: Ctx): void {
+  const side = value.orient === "right" || value.position === "right" ? "y2" : "y";
+  const fix: JsonPatchOperation[] = [{ op: "replace", path, value: side }];
+  if (typeof value.title === "string") {
+    const root = isPlainObject(ctx.rootValue) ? ctx.rootValue : {};
+    const axes = isPlainObject(root.axes) ? root.axes : undefined;
+    if (!axes) fix.push({ op: "add", path: "/axes", value: { [side]: { title: value.title } } });
+    else if (!isPlainObject(axes[side])) fix.push({ op: "add", path: `/axes/${side}`, value: { title: value.title } });
+    else if ((axes[side] as Record<string, unknown>).title === undefined) {
+      fix.push({ op: "add", path: `/axes/${side}/title`, value: value.title });
+    }
+  }
+  emit(ctx, {
+    code: "CK1009",
+    severity: "error",
+    message: 'axis is "y" or "y2", not an object',
+    path,
+    hint: 'axis is the string "y" or "y2". Put a title in axes.y.title or axes.y2.title.',
+    fix,
+  });
+}
+
+function chartTypeName(raw: string): string | undefined {
+  if (raw === "pie") return "donut";
+  if (raw === "area") return "mini-area";
+  if (raw === "grid-heat" || raw === "gridheat" || raw === "grid_heat") return "heatmap";
+  return (CHART_TYPES as readonly string[]).includes(raw) ? raw : undefined;
+}
+
 function emitUnknownType(value: unknown, ctx: Ctx): void {
   const raw = typeof value === "string" ? value : String(value);
   const kebab = raw.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`).replace(/^-/, "");
@@ -388,12 +532,21 @@ function emitUnknownType(value: unknown, ctx: Ctx): void {
 interface Alias {
   type: string;
   note: string;
-  kind: "pie" | "area";
+  kind: "pie" | "rename";
 }
 
 function aliasFor(value: string): Alias | undefined {
   if (value === "pie") return { type: "donut", note: '"pie" maps to type "donut" with mark.innerRadius 0.', kind: "pie" };
-  if (value === "area") return { type: "line", note: '"area" maps to type "line" with mark.area true.', kind: "area" };
+  if (value === "area") {
+    return {
+      type: "mini-area",
+      note: 'A full-size filled line is type "line" with mark.area true. Stacked layers are "stacked-area".',
+      kind: "rename",
+    };
+  }
+  if (value === "grid-heat" || value === "gridheat" || value === "grid_heat") {
+    return { type: "heatmap", note: "A grid uses encoding.x, encoding.y, and encoding.color.", kind: "rename" };
+  }
   return undefined;
 }
 
@@ -412,20 +565,12 @@ function aliasFix(root: unknown, alias: Alias): JsonPatchOperation[] {
       { op: "add", path: "/mark", value: { innerRadius: 0 } },
     ];
   }
-  if (mark) {
-    return [
-      { op: "replace", path: "/type", value: "line" },
-      { op: mark.area === undefined ? "add" : "replace", path: "/mark/area", value: true },
-    ];
-  }
-  return [
-    { op: "replace", path: "/type", value: "line" },
-    { op: "add", path: "/mark", value: { area: true } },
-  ];
+  return [{ op: "replace", path: "/type", value: alias.type }];
 }
 
 function emitUnknownProp(name: string, path: string, props: Record<string, JsonSchema>, ctx: Ctx): void {
   const pointer = join(path, name);
+  if (ctx.skipUnknown.has(pointer)) return;
   let hint: string | undefined;
   if (name === "colour") {
     hint = 'did you mean "theme.tokens" or "encoding.color"?';
@@ -445,6 +590,7 @@ function emitUnknownProp(name: string, path: string, props: Record<string, JsonS
 }
 
 function emitMissing(name: string, path: string, parent: Record<string, unknown>, ctx: Ctx): void {
+  if (ctx.skipMissing.has(`${path}|${name}`)) return;
   const pointer = name === "a11y" && path === "" ? "/a11y" : path;
   if ((path === "" && name === "a11y") || (path === "/a11y" && name === "alt")) {
     emitAltRequired(ctx);

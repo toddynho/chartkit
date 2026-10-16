@@ -232,16 +232,119 @@ describe("diagnostic codes", () => {
     expect(codes).toContain("CK3003");
   });
 
-  it("CK1005 maps area onto line plus mark.area", () => {
+  it("CK1005 maps area onto mini-area and names the full-size alternative", () => {
     const result = validate({ ...base, type: "area" });
     const error = result.errors.find((item) => item.code === "CK1005");
-    expect(error?.hint).toContain("line");
+    expect(error?.hint).toContain("mini-area");
+    expect(error?.hint).toContain("stacked-area");
+    expect(error?.fix).toEqual([{ op: "replace", path: "/type", value: "mini-area" }]);
+  });
+
+  it("CK1005 maps grid-heat onto heatmap", () => {
+    const result = validate({ ...base, type: "grid-heat" });
+    const error = result.errors.find((item) => item.code === "CK1005");
+    expect(error?.hint).toContain("heatmap");
+    expect(error?.fix).toEqual([{ op: "replace", path: "/type", value: "heatmap" }]);
+  });
+
+  it("CK1007 maps categorical onto nominal", () => {
+    const result = validate({
+      ...base,
+      encoding: { x: "month", y: { field: "revenue", type: "categorical" } },
+    });
+    const error = result.errors.find((item) => item.code === "CK1007");
+    expect(error?.path).toBe("/encoding/y/type");
+    expect(error?.hint).toContain("nominal");
+    expect(error?.fix).toEqual([{ op: "replace", path: "/encoding/y/type", value: "nominal" }]);
+  });
+
+  it("CK1009 unwraps Vega-Lite data.values and the patch validates", () => {
+    const spec = {
+      ...base,
+      data: { values: base.data },
+    };
+    const result = validate(spec);
+    const error = result.errors.find((item) => item.code === "CK1009");
+    expect(error?.path).toBe("/data");
+    expect(error?.hint).toContain("data: [...]");
+    expect(result.errors.some((item) => item.message.includes("columns"))).toBe(false);
+    expect(error?.fix).toEqual([{ op: "move", from: "/data/values", path: "/data" }]);
+    expect(validate({ ...spec, data: base.data }).ok).toBe(true);
+  });
+
+  it("CK1009 moves a string mark into type", () => {
+    const { type: _type, ...rest } = base;
+    const spec = { ...rest, mark: "line" };
+    const result = validate(spec);
+    const error = result.errors.find((item) => item.code === "CK1009");
+    expect(error?.path).toBe("/mark");
+    expect(error?.hint).toContain("type");
+    expect(result.errors.some((item) => item.code === "CK1003" && item.message.includes("type"))).toBe(false);
+    expect(error?.fix).toEqual([
+      { op: "add", path: "/type", value: "line" },
+      { op: "remove", path: "/mark" },
+    ]);
+  });
+
+  it("CK1009 explains an axis object and offers y or y2", () => {
+    const result = validate({
+      ...base,
+      encoding: { x: "month", y: { field: "revenue", axis: { title: "Units" } } },
+    });
+    const error = result.errors.find((item) => item.code === "CK1009");
+    expect(error?.path).toBe("/encoding/y/axis");
+    expect(error?.hint).toContain('"y"');
+    expect(error?.hint).toContain("y2");
+    expect(error?.fix?.[0]).toEqual({ op: "replace", path: "/encoding/y/axis", value: "y" });
     expect(error?.fix).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ path: "/type", value: "line" }),
-        expect.objectContaining({ path: "/mark", value: { area: true } }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ op: "add", path: "/axes", value: { y: { title: "Units" } } })]),
     );
+  });
+
+  it("CK1009 moves gauge value, min, and max into metric", () => {
+    const spec = {
+      version: "1",
+      type: "gauge",
+      value: 64,
+      min: 0,
+      max: 100,
+      label: "Capacity",
+      a11y: { alt: "Capacity is 64 out of 100." },
+    };
+    const result = validate(spec);
+    const error = result.errors.find((item) => item.code === "CK1009");
+    expect(error?.path).toBe("/metric");
+    expect(error?.hint).toContain("metric");
+    expect(result.errors.some((item) => item.code === "CK1002")).toBe(false);
+    expect(result.errors.some((item) => item.code === "CK1003" && item.message.includes("metric"))).toBe(false);
+    expect(validate({
+      version: "1",
+      type: "gauge",
+      metric: { value: 64, min: 0, max: 100, label: "Capacity" },
+      a11y: spec.a11y,
+    }).ok).toBe(true);
+  });
+
+  it("CK1009 maps donut theta and label onto y and x", () => {
+    const spec = {
+      version: "1",
+      type: "donut",
+      data: [
+        { name: "Oak", count: 8 },
+        { name: "Pine", count: 5 },
+      ],
+      encoding: { label: "name", theta: "count" },
+      a11y: { alt: "Oak is the larger share." },
+    };
+    const result = validate(spec);
+    const error = result.errors.find((item) => item.code === "CK1009");
+    expect(error?.hint).toContain("encoding.x");
+    expect(error?.hint).toContain("encoding.y");
+    expect(error?.fix).toEqual([
+      { op: "move", from: "/encoding/label", path: "/encoding/x" },
+      { op: "move", from: "/encoding/theta", path: "/encoding/y" },
+    ]);
+    expect(validate({ ...spec, encoding: { x: "name", y: "count" } }).ok).toBe(true);
   });
 
   it("CK2004 rejects empty data", () => {

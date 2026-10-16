@@ -5,10 +5,20 @@ import { closeChart, esc, font, n, openChart } from "../svg";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-/** Calendar (date × weekday) or grid (x × y) heatmap. Color encodes the value. */
+/**
+ * Calendar (date × weekday) or grid (x × y) heatmap. Color encodes the value.
+ * `mark.layout` wins when set. Otherwise encoding.y selects grid, and a missing y stays calendar.
+ */
 export function renderHeatmap(spec: Record<string, unknown>): string | null {
-  const layout = isRecord(spec.mark) && spec.mark.layout === "grid" ? "grid" : "calendar";
-  return layout === "grid" ? renderGrid(spec) : renderCalendar(spec);
+  return heatmapLayout(spec) === "grid" ? renderGrid(spec) : renderCalendar(spec);
+}
+
+function heatmapLayout(spec: Record<string, unknown>): "grid" | "calendar" {
+  const mark = isRecord(spec.mark) ? spec.mark : undefined;
+  if (mark?.layout === "grid" || mark?.layout === "calendar") return mark.layout;
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  if (encoding && encoding.y != null) return "grid";
+  return "calendar";
 }
 
 function renderCalendar(spec: Record<string, unknown>): string | null {
