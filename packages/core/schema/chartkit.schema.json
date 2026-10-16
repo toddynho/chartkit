@@ -1,0 +1,1754 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chartkit.dev/schema/v1.json",
+  "title": "ChartKit chart spec v1",
+  "description": "A complete, framework-agnostic description of one chart. The same JSON renders in React, Vue, Svelte, vanilla JS, web components, on the server (SVG/PNG), and through the ChartKit MCP server. Minimal line chart: {version, type, data, encoding:{x,y}, a11y:{alt}}. Everything else has sensible defaults.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "type",
+    "a11y"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://chartkit.dev/schema/v1.json",
+      "description": "Schema URL. Lets editors and agents autocomplete and validate."
+    },
+    "version": {
+      "type": "string",
+      "const": "1",
+      "description": "Spec major version. Always '1' for this schema."
+    },
+    "type": {
+      "enum": [
+        "line",
+        "bar",
+        "donut",
+        "stacked-area",
+        "scatter",
+        "combo",
+        "heatmap",
+        "gauge",
+        "kpi",
+        "sparkline",
+        "mini-area",
+        "progress-ring",
+        "spike",
+        "candlestick"
+      ],
+      "description": "Chart type. 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; mark.innerRadius 0 gives a pie. Replaces DonutChart. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. mark.layout 'calendar' = GitHub-style activity grid from x (date) + color (value); 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not data. Replaces GaugeChart. 'kpi': Metric card: label, value, delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+      "description": "Optional stable id (used for keys, events, test hooks)."
+    },
+    "title": {
+      "type": "string",
+      "description": "Visible chart title; also the accessible name."
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "Visible secondary line under the title."
+    },
+    "data": {
+      "$ref": "#/$defs/data"
+    },
+    "encoding": {
+      "$ref": "#/$defs/encoding"
+    },
+    "metric": {
+      "$ref": "#/$defs/metric"
+    },
+    "mark": {
+      "$ref": "#/$defs/mark"
+    },
+    "axes": {
+      "$ref": "#/$defs/axes"
+    },
+    "legend": {
+      "$ref": "#/$defs/legend"
+    },
+    "tooltip": {
+      "$ref": "#/$defs/tooltip"
+    },
+    "annotations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/annotation"
+      },
+      "description": "Reference rules, bands and text notes."
+    },
+    "theme": {
+      "$ref": "#/$defs/theme"
+    },
+    "size": {
+      "$ref": "#/$defs/size"
+    },
+    "interaction": {
+      "$ref": "#/$defs/interaction"
+    },
+    "animation": {
+      "$ref": "#/$defs/animation"
+    },
+    "locale": {
+      "type": "string",
+      "examples": [
+        "en-US",
+        "de-DE"
+      ],
+      "description": "BCP 47 locale for number/date formatting. Default: the host's locale."
+    },
+    "a11y": {
+      "$ref": "#/$defs/a11y"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "line",
+              "bar",
+              "donut",
+              "stacked-area",
+              "scatter",
+              "combo",
+              "heatmap",
+              "sparkline",
+              "mini-area",
+              "spike",
+              "candlestick"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "required": [
+          "data"
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "line",
+              "bar",
+              "donut",
+              "stacked-area",
+              "combo"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "required": [
+          "encoding"
+        ],
+        "properties": {
+          "encoding": {
+            "type": "object",
+            "required": [
+              "x",
+              "y"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "scatter"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "required": [
+          "encoding"
+        ],
+        "properties": {
+          "encoding": {
+            "type": "object",
+            "required": [
+              "x",
+              "y"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "heatmap"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "required": [
+          "encoding"
+        ],
+        "properties": {
+          "encoding": {
+            "type": "object",
+            "required": [
+              "x",
+              "color"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "candlestick"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "required": [
+          "encoding"
+        ],
+        "properties": {
+          "encoding": {
+            "type": "object",
+            "required": [
+              "x",
+              "open",
+              "high",
+              "low",
+              "close"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "gauge",
+              "progress-ring",
+              "kpi"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "required": [
+          "metric"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "fieldName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Name of a column in data (row key or columns key). Case-sensitive."
+    },
+    "color": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'."
+    },
+    "format": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "number",
+            "integer",
+            "compact",
+            "percent",
+            "percent-raw",
+            "currency",
+            "bytes",
+            "duration-ms",
+            "date",
+            "time",
+            "datetime",
+            "month",
+            "year",
+            "weekday"
+          ],
+          "description": "Preset. 'number' 1,234.5 · 'integer' 1,235 · 'compact' 1.2K · 'percent' treats 0.25 as 25% · 'percent-raw' treats 25 as 25% · 'currency' uses USD unless formatObject is used · 'bytes' 1.2 MB · 'duration-ms' 1.2s · 'date' Oct 16, 2026 · 'time' 08:42 · 'datetime' · 'month' Oct · 'year' 2026 · 'weekday' Fri."
+        },
+        {
+          "$ref": "#/$defs/formatObject"
+        }
+      ],
+      "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'."
+    },
+    "formatObject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "style"
+      ],
+      "properties": {
+        "style": {
+          "enum": [
+            "number",
+            "compact",
+            "percent",
+            "percent-raw",
+            "currency",
+            "bytes",
+            "duration-ms",
+            "date",
+            "time",
+            "datetime"
+          ],
+          "description": "Base format style."
+        },
+        "decimals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Fixed number of fraction digits."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "examples": [
+            "USD",
+            "EUR"
+          ],
+          "description": "ISO 4217 code when style is 'currency'."
+        },
+        "prefix": {
+          "type": "string",
+          "description": "Text placed before the value."
+        },
+        "suffix": {
+          "type": "string",
+          "description": "Text placed after the value, e.g. ' req/s'."
+        },
+        "signed": {
+          "type": "boolean",
+          "description": "Always show + for positive numbers (useful for deltas)."
+        }
+      },
+      "description": "Detailed format."
+    },
+    "scale": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "linear",
+            "log",
+            "sqrt",
+            "time",
+            "band",
+            "point"
+          ],
+          "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band."
+        },
+        "domain": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": [
+              "number",
+              "string",
+              "null"
+            ]
+          },
+          "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic."
+        },
+        "zero": {
+          "type": "boolean",
+          "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter."
+        },
+        "nice": {
+          "type": "boolean",
+          "description": "Round the domain to tidy tick values. Default true."
+        },
+        "reverse": {
+          "type": "boolean",
+          "description": "Flip the direction of the scale."
+        }
+      },
+      "description": "How data values map to positions or sizes. Usually inferred; set only to override."
+    },
+    "channel": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/fieldName"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "field"
+          ],
+          "properties": {
+            "field": {
+              "$ref": "#/$defs/fieldName"
+            },
+            "type": {
+              "enum": [
+                "quantitative",
+                "temporal",
+                "ordinal",
+                "nominal"
+              ],
+              "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal."
+            },
+            "title": {
+              "type": "string",
+              "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name."
+            },
+            "format": {
+              "$ref": "#/$defs/format"
+            },
+            "scale": {
+              "$ref": "#/$defs/scale"
+            }
+          },
+          "description": "Full channel definition."
+        }
+      ],
+      "description": "Maps a data field to a visual channel. Shorthand: a plain string is the field name."
+    },
+    "yChannel": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/fieldName"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "field"
+          ],
+          "properties": {
+            "field": {
+              "$ref": "#/$defs/fieldName"
+            },
+            "type": {
+              "enum": [
+                "quantitative",
+                "temporal",
+                "ordinal",
+                "nominal"
+              ],
+              "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal."
+            },
+            "title": {
+              "type": "string",
+              "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name."
+            },
+            "format": {
+              "$ref": "#/$defs/format"
+            },
+            "scale": {
+              "$ref": "#/$defs/scale"
+            },
+            "mark": {
+              "enum": [
+                "line",
+                "bar",
+                "area"
+              ],
+              "description": "Mark for this series. Only used by type 'combo' (default 'line')."
+            },
+            "axis": {
+              "enum": [
+                "y",
+                "y2"
+              ],
+              "default": "y",
+              "description": "Which y axis this series uses. 'y2' draws a second axis on the right."
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            },
+            "dash": {
+              "enum": [
+                "solid",
+                "dashed",
+                "dotted"
+              ],
+              "default": "solid",
+              "description": "Line style."
+            },
+            "area": {
+              "type": "boolean",
+              "description": "Fill under this line (line/combo)."
+            }
+          },
+          "description": "Full y series definition."
+        }
+      ],
+      "description": "A y series. Shorthand: a plain string is the field name."
+    },
+    "colorChannel": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/fieldName"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "field"
+          ],
+          "properties": {
+            "field": {
+              "$ref": "#/$defs/fieldName"
+            },
+            "type": {
+              "enum": [
+                "quantitative",
+                "temporal",
+                "ordinal",
+                "nominal"
+              ],
+              "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal."
+            },
+            "title": {
+              "type": "string",
+              "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name."
+            },
+            "format": {
+              "$ref": "#/$defs/format"
+            },
+            "scale": {
+              "$ref": "#/$defs/scale"
+            },
+            "range": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "$ref": "#/$defs/color"
+              },
+              "description": "Colors to use, in order (categorical) or low→high (sequential)."
+            }
+          },
+          "description": "Color by field."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "$ref": "#/$defs/color"
+            }
+          },
+          "description": "Constant color for every mark."
+        }
+      ],
+      "description": "Color by a field (categorical or sequential), or a constant color. Shorthand: a plain string is a field name."
+    },
+    "sizeChannel": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/fieldName"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "field"
+          ],
+          "properties": {
+            "field": {
+              "$ref": "#/$defs/fieldName"
+            },
+            "type": {
+              "enum": [
+                "quantitative",
+                "temporal",
+                "ordinal",
+                "nominal"
+              ],
+              "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal."
+            },
+            "title": {
+              "type": "string",
+              "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name."
+            },
+            "format": {
+              "$ref": "#/$defs/format"
+            },
+            "scale": {
+              "$ref": "#/$defs/scale"
+            },
+            "range": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "default": [
+                3,
+                24
+              ],
+              "description": "[min, max] point radius in px."
+            }
+          },
+          "description": "Size by field."
+        }
+      ],
+      "description": "Map a quantitative field to point area (bubble chart). Shorthand: a plain string is the field name."
+    },
+    "encoding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "$ref": "#/$defs/channel",
+          "description": "Horizontal position: time or category. For donut, the slice category. For heatmap calendar, the date. For bar with mark.orientation 'horizontal', it is still the category (drawn vertically)."
+        },
+        "y": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/yChannel"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/yChannel"
+              },
+              "description": "Multiple series, one per field."
+            }
+          ],
+          "description": "Measured value(s). One field, or a list of fields for multi-series 'wide' data (one column per series). For heatmap 'grid' layout, the row category."
+        },
+        "series": {
+          "$ref": "#/$defs/channel",
+          "description": "Split 'long' data into series by the values of this field (e.g. region). Alternative to listing several y fields. Do not combine with a y array."
+        },
+        "color": {
+          "$ref": "#/$defs/colorChannel",
+          "description": "Color by field or a constant. Heatmap: the value field. Scatter: category field. Defaults to series/theme palette."
+        },
+        "size": {
+          "$ref": "#/$defs/sizeChannel",
+          "description": "Scatter only: bubble size field."
+        },
+        "open": {
+          "$ref": "#/$defs/channel",
+          "description": "Candlestick only: opening price field."
+        },
+        "high": {
+          "$ref": "#/$defs/channel",
+          "description": "Candlestick only: high price field."
+        },
+        "low": {
+          "$ref": "#/$defs/channel",
+          "description": "Candlestick only: low price field."
+        },
+        "close": {
+          "$ref": "#/$defs/channel",
+          "description": "Candlestick only: closing price field."
+        },
+        "volume": {
+          "$ref": "#/$defs/channel",
+          "description": "Candlestick only: volume field; when present, a volume pane is drawn."
+        }
+      },
+      "description": "Which data fields drive which visual channels. Same names for every chart type: x is the category or time axis, y is the measured value(s). Switching 'type' between line/bar/donut/stacked-area/combo needs no re-encoding."
+    },
+    "data": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "number",
+                "string",
+                "boolean",
+                "null"
+              ]
+            }
+          },
+          "description": "Rows: one object per record, keys are field names. Values are numbers, strings (ISO 8601 dates are parsed on temporal fields), booleans or null (missing)."
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "description": "Plain numbers (sparkline, mini-area, spike only). Field name is 'value', x is the index."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "columns"
+          ],
+          "properties": {
+            "columns": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "null"
+                  ]
+                }
+              },
+              "description": "Map of field name to values."
+            }
+          },
+          "description": "Columnar: equal-length arrays keyed by field name. Preferred for 10k+ points. In JS, arrays may be typed arrays (Float64Array)."
+        }
+      ],
+      "description": "The data to plot. Most commonly an array of row objects. Sparkline/mini-area/spike also accept a plain number array (x becomes the index). A columnar object is accepted for large data and maps directly to typed arrays."
+    },
+    "mark": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "curve": {
+          "enum": [
+            "linear",
+            "monotone",
+            "step",
+            "step-before",
+            "step-after"
+          ],
+          "default": "monotone",
+          "description": "Line interpolation. Applies to: line, stacked-area, combo, sparkline, mini-area."
+        },
+        "points": {
+          "enum": [
+            "none",
+            "hover",
+            "always"
+          ],
+          "default": "hover",
+          "description": "Show point markers on lines. Applies to: line, combo."
+        },
+        "pointSize": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 40,
+          "description": "Point radius in px. Applies to: line, combo, scatter."
+        },
+        "area": {
+          "type": "boolean",
+          "description": "Fill under every line. Applies to: line, sparkline."
+        },
+        "fillOpacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Area/bar fill opacity, 0–1. Applies to: line, stacked-area, combo, mini-area, bar."
+        },
+        "gradient": {
+          "type": "boolean",
+          "default": true,
+          "description": "Fade area fills toward the baseline. Applies to: line, stacked-area, mini-area, sparkline."
+        },
+        "strokeWidth": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 40,
+          "description": "Line width in px. Applies to: line, stacked-area, combo, sparkline, mini-area, spike, progress-ring, gauge (arc width)."
+        },
+        "glow": {
+          "type": "boolean",
+          "default": false,
+          "description": "Soft glow behind lines (dark themes). Applies to: line, sparkline."
+        },
+        "connectNulls": {
+          "type": "boolean",
+          "default": false,
+          "description": "Draw through missing values instead of leaving gaps. Applies to: line, stacked-area, combo, sparkline, mini-area."
+        },
+        "stack": {
+          "enum": [
+            "none",
+            "stack",
+            "percent"
+          ],
+          "description": "Stacking for multiple series. 'percent' normalises each x to 100%. Applies to: bar, stacked-area (default 'stack'), combo bars."
+        },
+        "orientation": {
+          "enum": [
+            "vertical",
+            "horizontal"
+          ],
+          "default": "vertical",
+          "description": "Bar direction. Applies to: bar."
+        },
+        "cornerRadius": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 40,
+          "description": "Rounded corners in px. Applies to: bar, donut, heatmap."
+        },
+        "gap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.95,
+          "description": "Spacing between bars/cells as a 0–1 fraction of the band. Applies to: bar, combo, heatmap, candlestick."
+        },
+        "labels": {
+          "type": "boolean",
+          "default": false,
+          "description": "Draw value labels on bars/slices. Applies to: bar, donut."
+        },
+        "innerRadius": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.95,
+          "default": 0.6,
+          "description": "Hole size as a 0–0.95 fraction of the radius; 0 = pie. Applies to: donut."
+        },
+        "padAngle": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Gap between slices in degrees. Applies to: donut."
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Mark opacity 0–1. Applies to: scatter, spike."
+        },
+        "layout": {
+          "enum": [
+            "calendar",
+            "grid"
+          ],
+          "default": "calendar",
+          "description": "Heatmap layout. 'calendar' = weeks by weekdays from a date x; 'grid' = x by y categories. Applies to: heatmap."
+        },
+        "weeks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 104,
+          "default": 52,
+          "description": "Number of weeks shown in calendar layout. Applies to: heatmap."
+        },
+        "startAngle": {
+          "type": "number",
+          "minimum": -360,
+          "maximum": 360,
+          "description": "Arc start in degrees (0 = top, clockwise). Applies to: gauge, progress-ring."
+        },
+        "endAngle": {
+          "type": "number",
+          "minimum": -360,
+          "maximum": 360,
+          "description": "Arc end in degrees. Applies to: gauge, progress-ring."
+        },
+        "linecap": {
+          "enum": [
+            "butt",
+            "round",
+            "square"
+          ],
+          "default": "round",
+          "description": "Arc end style. Applies to: gauge, progress-ring."
+        },
+        "baseline": {
+          "type": "number",
+          "default": 0,
+          "description": "Value spikes rise from. Applies to: spike."
+        }
+      },
+      "description": "Visual options for the marks. Each option lists the types it applies to; options that do not apply to the chosen type are ignored with warning CK3010."
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "number",
+          "description": "The current value."
+        },
+        "label": {
+          "type": "string",
+          "description": "Short visible label, e.g. 'Revenue'."
+        },
+        "min": {
+          "type": "number",
+          "default": 0,
+          "description": "Lower bound of the scale (gauge, progress-ring)."
+        },
+        "max": {
+          "type": "number",
+          "default": 100,
+          "description": "Upper bound of the scale (gauge, progress-ring)."
+        },
+        "target": {
+          "type": "number",
+          "description": "Target marker value (gauge) or comparison value."
+        },
+        "delta": {
+          "type": "number",
+          "description": "Change vs previous period, as a fraction (0.125 = +12.5%) unless deltaFormat says otherwise (kpi)."
+        },
+        "deltaFormat": {
+          "$ref": "#/$defs/format",
+          "description": "Format for delta. Default 'percent' with signed: true."
+        },
+        "goodDirection": {
+          "enum": [
+            "up",
+            "down"
+          ],
+          "default": "up",
+          "description": "Which direction of delta is good (sets positive/negative color)."
+        },
+        "format": {
+          "$ref": "#/$defs/format",
+          "description": "Format for value."
+        },
+        "bands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "from",
+              "to"
+            ],
+            "properties": {
+              "from": {
+                "type": "number",
+                "description": "Start value."
+              },
+              "to": {
+                "type": "number",
+                "description": "End value."
+              },
+              "color": {
+                "$ref": "#/$defs/color"
+              },
+              "label": {
+                "type": "string",
+                "description": "Band label."
+              }
+            },
+            "description": "A colored range."
+          },
+          "description": "Colored ranges on the gauge, e.g. good/warn/bad."
+        }
+      },
+      "description": "Single-value content for gauge, progress-ring and kpi. Use instead of (kpi: in addition to) data."
+    },
+    "axes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "oneOf": [
+            {
+              "type": "boolean",
+              "description": "false hides the axis; true uses defaults."
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Axis title. Defaults to the channel title (none for time axes)."
+                },
+                "format": {
+                  "$ref": "#/$defs/format",
+                  "description": "Tick label format. Defaults to the channel format."
+                },
+                "ticks": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Approximate number of ticks."
+                },
+                "grid": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "enum": [
+                        "solid",
+                        "dashed",
+                        "dotted"
+                      ]
+                    }
+                  ],
+                  "description": "Grid lines from this axis."
+                },
+                "labels": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Show tick labels."
+                },
+                "position": {
+                  "enum": [
+                    "top",
+                    "bottom",
+                    "left",
+                    "right"
+                  ],
+                  "description": "Axis side. Defaults: x bottom, y left, y2 right."
+                }
+              },
+              "description": "Axis settings."
+            }
+          ],
+          "description": "Axis options. Set to false to hide the axis."
+        },
+        "y": {
+          "oneOf": [
+            {
+              "type": "boolean",
+              "description": "false hides the axis; true uses defaults."
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Axis title. Defaults to the channel title (none for time axes)."
+                },
+                "format": {
+                  "$ref": "#/$defs/format",
+                  "description": "Tick label format. Defaults to the channel format."
+                },
+                "ticks": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Approximate number of ticks."
+                },
+                "grid": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "enum": [
+                        "solid",
+                        "dashed",
+                        "dotted"
+                      ]
+                    }
+                  ],
+                  "description": "Grid lines from this axis."
+                },
+                "labels": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Show tick labels."
+                },
+                "position": {
+                  "enum": [
+                    "top",
+                    "bottom",
+                    "left",
+                    "right"
+                  ],
+                  "description": "Axis side. Defaults: x bottom, y left, y2 right."
+                }
+              },
+              "description": "Axis settings."
+            }
+          ],
+          "description": "Axis options. Set to false to hide the axis."
+        },
+        "y2": {
+          "oneOf": [
+            {
+              "type": "boolean",
+              "description": "false hides the axis; true uses defaults."
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Axis title. Defaults to the channel title (none for time axes)."
+                },
+                "format": {
+                  "$ref": "#/$defs/format",
+                  "description": "Tick label format. Defaults to the channel format."
+                },
+                "ticks": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Approximate number of ticks."
+                },
+                "grid": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "enum": [
+                        "solid",
+                        "dashed",
+                        "dotted"
+                      ]
+                    }
+                  ],
+                  "description": "Grid lines from this axis."
+                },
+                "labels": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Show tick labels."
+                },
+                "position": {
+                  "enum": [
+                    "top",
+                    "bottom",
+                    "left",
+                    "right"
+                  ],
+                  "description": "Axis side. Defaults: x bottom, y left, y2 right."
+                }
+              },
+              "description": "Axis settings."
+            }
+          ],
+          "description": "Second (right) y axis, used by y series with axis 'y2'."
+        }
+      },
+      "description": "Axis display. Scale domains live on encoding.<channel>.scale; this block is display-only."
+    },
+    "legend": {
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "show": {
+              "type": "boolean",
+              "description": "Show the legend."
+            },
+            "position": {
+              "enum": [
+                "top",
+                "right",
+                "bottom",
+                "left"
+              ],
+              "default": "top",
+              "description": "Placement."
+            },
+            "interactive": {
+              "type": "boolean",
+              "default": true,
+              "description": "Click a legend item to hide/show its series."
+            },
+            "values": {
+              "type": "boolean",
+              "default": false,
+              "description": "Show each series' value (last, or slice value for donut) next to its name."
+            }
+          },
+          "description": "Legend settings."
+        }
+      ],
+      "description": "Legend. true/false or settings. Default: shown when there is more than one series (or for donut)."
+    },
+    "tooltip": {
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "show": {
+              "type": "boolean",
+              "description": "Show the tooltip."
+            },
+            "mode": {
+              "enum": [
+                "index",
+                "nearest"
+              ],
+              "default": "index",
+              "description": "'index' shows all series at the hovered x; 'nearest' shows the closest point only."
+            },
+            "crosshair": {
+              "type": "boolean",
+              "default": true,
+              "description": "Draw a vertical guide line at the hovered x."
+            },
+            "fields": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/fieldName"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "field"
+                    ],
+                    "properties": {
+                      "field": {
+                        "$ref": "#/$defs/fieldName"
+                      },
+                      "title": {
+                        "type": "string",
+                        "description": "Label shown."
+                      },
+                      "format": {
+                        "$ref": "#/$defs/format"
+                      }
+                    },
+                    "description": "Field with label/format."
+                  }
+                ]
+              },
+              "description": "Extra or reordered fields to show. Strings are field names."
+            }
+          },
+          "description": "Tooltip settings."
+        }
+      ],
+      "description": "Hover tooltip. true/false or settings. Default on for interactive charts."
+    },
+    "annotation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "axis",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "const": "rule"
+            },
+            "axis": {
+              "enum": [
+                "x",
+                "y",
+                "y2"
+              ],
+              "description": "Axis the value is on."
+            },
+            "value": {
+              "type": [
+                "number",
+                "string"
+              ],
+              "description": "Position in data units (number, or date/category string on x)."
+            },
+            "dash": {
+              "enum": [
+                "solid",
+                "dashed",
+                "dotted"
+              ],
+              "default": "dashed",
+              "description": "Line style."
+            },
+            "labelPosition": {
+              "enum": [
+                "start",
+                "center",
+                "end"
+              ],
+              "default": "end",
+              "description": "Where along the line the label sits."
+            },
+            "label": {
+              "type": "string",
+              "description": "Text shown with the annotation."
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            }
+          },
+          "description": "Rule: a line at a value (target, threshold, deploy time)."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "axis",
+            "from",
+            "to"
+          ],
+          "properties": {
+            "type": {
+              "const": "band"
+            },
+            "axis": {
+              "enum": [
+                "x",
+                "y",
+                "y2"
+              ],
+              "description": "Axis the range is on."
+            },
+            "from": {
+              "type": [
+                "number",
+                "string"
+              ],
+              "description": "Start of range."
+            },
+            "to": {
+              "type": [
+                "number",
+                "string"
+              ],
+              "description": "End of range."
+            },
+            "opacity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.12,
+              "description": "Fill opacity 0–1."
+            },
+            "label": {
+              "type": "string",
+              "description": "Text shown with the annotation."
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            }
+          },
+          "description": "Band: a shaded range between two values."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "x",
+            "label"
+          ],
+          "properties": {
+            "type": {
+              "const": "text"
+            },
+            "x": {
+              "type": [
+                "number",
+                "string"
+              ],
+              "description": "x position in data units."
+            },
+            "y": {
+              "type": "number",
+              "description": "y position in data units. Omit to pin to the top of the plot."
+            },
+            "label": {
+              "type": "string",
+              "description": "Text shown with the annotation."
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            }
+          },
+          "description": "Text: a note pinned to a data coordinate."
+        }
+      ],
+      "description": "A reference mark drawn on the chart."
+    },
+    "theme": {
+      "oneOf": [
+        {
+          "enum": [
+            "auto",
+            "midnight",
+            "emerald",
+            "mono",
+            "slate",
+            "arctic",
+            "orchid",
+            "obsidian",
+            "neon",
+            "mocha",
+            "owl",
+            "retro",
+            "copper",
+            "rose",
+            "sunset",
+            "silver",
+            "pearl",
+            "latte"
+          ],
+          "description": "Preset name. 'auto' follows the host CSS variables and prefers-color-scheme."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "preset": {
+              "enum": [
+                "auto",
+                "midnight",
+                "emerald",
+                "mono",
+                "slate",
+                "arctic",
+                "orchid",
+                "obsidian",
+                "neon",
+                "mocha",
+                "owl",
+                "retro",
+                "copper",
+                "rose",
+                "sunset",
+                "silver",
+                "pearl",
+                "latte"
+              ],
+              "default": "auto",
+              "description": "Base preset."
+            },
+            "mode": {
+              "enum": [
+                "auto",
+                "light",
+                "dark"
+              ],
+              "default": "auto",
+              "description": "Force light or dark, or follow prefers-color-scheme."
+            },
+            "tokens": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "background": {
+                  "type": "string",
+                  "description": "Chart background. CSS value or var(--x)."
+                },
+                "surface": {
+                  "type": "string",
+                  "description": "Card/tooltip background. CSS value or var(--x)."
+                },
+                "text": {
+                  "type": "string",
+                  "description": "Primary text. CSS value or var(--x)."
+                },
+                "muted": {
+                  "type": "string",
+                  "description": "Secondary text, tick labels. CSS value or var(--x)."
+                },
+                "grid": {
+                  "type": "string",
+                  "description": "Grid lines. CSS value or var(--x)."
+                },
+                "axis": {
+                  "type": "string",
+                  "description": "Axis lines. CSS value or var(--x)."
+                },
+                "accent": {
+                  "type": "string",
+                  "description": "Highlight color (single-series default). CSS value or var(--x)."
+                },
+                "positive": {
+                  "type": "string",
+                  "description": "Good/up color (deltas, up candles). CSS value or var(--x)."
+                },
+                "negative": {
+                  "type": "string",
+                  "description": "Bad/down color. CSS value or var(--x)."
+                },
+                "fontFamily": {
+                  "type": "string",
+                  "description": "CSS font-family."
+                },
+                "fontSize": {
+                  "type": "number",
+                  "minimum": 6,
+                  "maximum": 32,
+                  "description": "Base font size in px."
+                },
+                "series": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 24,
+                  "items": {
+                    "$ref": "#/$defs/color"
+                  },
+                  "description": "Categorical series palette in order. CSS colors or var(--x). Default: var(--ck-series-1..12) falling back to the preset."
+                }
+              },
+              "description": "Override individual tokens."
+            }
+          },
+          "description": "Theme object."
+        }
+      ],
+      "description": "Look and feel. A preset name, or an object combining a preset, a light/dark mode and token overrides. Every token is also read from CSS variables --ck-<token> (and --ck-series-N) on the container, so host design systems (e.g. shadcn --chart-1..5) can theme charts with no JS. Default 'auto'."
+    },
+    "size": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 1
+            },
+            {
+              "const": "auto"
+            }
+          ],
+          "default": "auto",
+          "description": "Width in px, or 'auto' to fill the container and follow resizes."
+        },
+        "height": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 1
+            },
+            {
+              "const": "auto"
+            }
+          ],
+          "description": "Height in px, or 'auto' to derive from width × aspectRatio or the container height."
+        },
+        "aspectRatio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "width / height, used when height is 'auto' (e.g. 1.777 for 16:9)."
+        },
+        "minHeight": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Minimum height in px when responsive."
+        },
+        "padding": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "Per-side padding in px; omitted sides stay automatic.",
+              "properties": {
+                "top": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Top padding in px."
+                },
+                "right": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Right padding in px."
+                },
+                "bottom": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Bottom padding in px."
+                },
+                "left": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Left padding in px."
+                }
+              }
+            }
+          ],
+          "description": "Inner padding in px around the plot, a number or per-side object. Default: automatic from axis label sizes."
+        }
+      },
+      "description": "Dimensions. Default: fill container width, height by type (line/bar 240px, sparkline 32px, gauge 160px)."
+    },
+    "interaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hover": {
+          "type": "boolean",
+          "default": true,
+          "description": "Highlight hovered marks and drive the tooltip."
+        },
+        "select": {
+          "enum": [
+            "none",
+            "point",
+            "series"
+          ],
+          "default": "none",
+          "description": "Click selection emitted as 'pointclick' / 'seriesclick' events."
+        },
+        "zoom": {
+          "enum": [
+            "none",
+            "x",
+            "xy"
+          ],
+          "description": "Wheel/pinch zoom. Default 'x' for candlestick, otherwise 'none'."
+        },
+        "pan": {
+          "type": "boolean",
+          "description": "Drag to pan when zoomed."
+        },
+        "brush": {
+          "enum": [
+            "none",
+            "x"
+          ],
+          "default": "none",
+          "description": "Drag to select a range, emitted as 'rangechange'."
+        },
+        "initialRange": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "description": "Initially visible x range [from, to] in data units (zoomable charts)."
+        }
+      },
+      "description": "What the user can do. Adapters emit events (pointclick, legendtoggle, rangechange) for app code; JSON never contains functions."
+    },
+    "animation": {
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "duration": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5000,
+              "default": 400,
+              "description": "Milliseconds."
+            },
+            "easing": {
+              "enum": [
+                "linear",
+                "ease-out",
+                "ease-in-out",
+                "spring"
+              ],
+              "default": "ease-out",
+              "description": "Easing curve."
+            }
+          },
+          "description": "Animation settings."
+        }
+      ],
+      "description": "Entry/update animation. Always disabled when the user prefers reduced motion."
+    },
+    "a11y": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "alt"
+      ],
+      "properties": {
+        "alt": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 500,
+          "description": "Short text alternative with the key insight, e.g. 'Revenue rose 18% from Jan to Jun 2026, peaking in May.'"
+        },
+        "description": {
+          "type": "string",
+          "description": "Longer description (methodology, caveats). Exposed via aria-describedby."
+        },
+        "keyboard": {
+          "type": "boolean",
+          "default": true,
+          "description": "Arrow-key navigation between points with announcements."
+        },
+        "dataTable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Render a visually hidden data table for screen readers."
+        }
+      },
+      "description": "Accessibility. 'alt' is required: a one or two sentence description of what the chart shows and its key takeaway, used as the accessible name/description and for text-only renders (agents should always write it)."
+    }
+  }
+}

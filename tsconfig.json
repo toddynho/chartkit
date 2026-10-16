@@ -14,7 +14,7 @@
     "isolatedModules": true
   },
   "references": [
-    { "path": "./packages/chartkit" },
-    { "path": "./demo" }
+    { "path": "./packages/core" },
+    { "path": "./packages/react" }
   ]
 }

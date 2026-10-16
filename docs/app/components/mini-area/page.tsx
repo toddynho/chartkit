@@ -5,7 +5,7 @@ import { DocsLayout } from '@/components/layout/DocsLayout';
 import { Playground } from '@/components/playground/Playground';
 import { PropsTable } from '@/components/docs/PropsTable';
 import { CodeBlock } from '@/components/docs/CodeBlock';
-import { MiniArea } from '@derpdaderp/chartkit';
+import { MiniArea } from '@chartkitdev/react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 
 const generateData = () => Array.from({ length: 30 }, () => ({ value: Math.random() * 100 }));
@@ -54,7 +54,7 @@ export default function MiniAreaPage() {
 
       <CodeBlock
         language="tsx"
-        code={`import { MiniArea } from '@derpdaderp/chartkit';
+        code={`import { MiniArea } from '@chartkitdev/react';
 
 // Responsive - fills container width automatically
 <MiniArea data={data} theme="${themeName}" />

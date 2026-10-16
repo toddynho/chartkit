@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import { themes, type ThemeName, type ChartTheme } from '@derpdaderp/chartkit';
+import { themes, type ThemeName, type ChartTheme } from '@chartkitdev/react';
 
 interface ChartThemeContextValue {
   themeName: ThemeName;

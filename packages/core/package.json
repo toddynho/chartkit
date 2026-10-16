@@ -1,0 +1,68 @@
+{
+  "name": "@chartkitdev/core",
+  "version": "0.5.0",
+  "description": "Framework-agnostic ChartKit core: JSON schema, validator, and SVG renderer. Zero runtime dependencies.",
+  "author": "Todd Garland",
+  "homepage": "https://chartkit.dev",
+  "bugs": {
+    "url": "https://github.com/toddynho/chartkit/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./schema.json": "./schema/chartkit.schema.json"
+  },
+  "files": [
+    "dist",
+    "schema/chartkit.schema.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "generate:types": "node scripts/generate-types.mjs",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "json-schema-to-typescript": "^15.0.4",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^3.2.4"
+  },
+  "keywords": [
+    "chartkit",
+    "charts",
+    "json-schema",
+    "svg",
+    "validation",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toddynho/chartkit",
+    "directory": "packages/core"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

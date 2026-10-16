@@ -5,7 +5,7 @@ import { DocsLayout } from '@/components/layout/DocsLayout';
 import { Playground } from '@/components/playground/Playground';
 import { PropsTable } from '@/components/docs/PropsTable';
 import { CodeBlock } from '@/components/docs/CodeBlock';
-import { CandlestickChart } from '@derpdaderp/chartkit';
+import { CandlestickChart } from '@chartkitdev/react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 
 function generateStockData(days: number = 30) {
@@ -121,7 +121,7 @@ export default function CandlestickChartPage() {
 
       <CodeBlock
         language="tsx"
-        code={`import { CandlestickChart } from '@derpdaderp/chartkit';
+        code={`import { CandlestickChart } from '@chartkitdev/react';
 
 const data = [
   { time: 'Jan 1', open: 150.00, high: 155.50, low: 148.20, close: 153.80, volume: 2500000 },

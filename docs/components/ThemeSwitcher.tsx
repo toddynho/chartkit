@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { themes, type ThemeName } from '@derpdaderp/chartkit';
+import { themes, type ThemeName } from '@chartkitdev/react';
 import { useChartTheme, themeColors, darkThemes, lightThemes } from './ChartThemeProvider';
 import { cn } from '@/lib/utils';
 import { Check, Palette, Moon, Sun } from 'lucide-react';

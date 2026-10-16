@@ -4,7 +4,7 @@ import { DocsLayout } from '@/components/layout/DocsLayout';
 import { Playground } from '@/components/playground/Playground';
 import { PropsTable } from '@/components/docs/PropsTable';
 import { CodeBlock } from '@/components/docs/CodeBlock';
-import { ProgressRing } from '@derpdaderp/chartkit';
+import { ProgressRing } from '@chartkitdev/react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 
 const props = [

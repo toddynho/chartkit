@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "type": "sparkline",
+  "data": [10, 25, 15, 30, 22, 28],
+  "a11y": { "alt": "The sparkline trends upward from 10 to 28, with a dip in the middle." }
+}

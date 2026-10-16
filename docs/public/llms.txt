@@ -1,24 +1,38 @@
 # ChartKit - AI Assistant Reference
 
-> @derpdaderp/chartkit v0.4.1
-> Lightweight React charting library. Zero dependencies, pure SVG, 17 themes, ~15KB.
+> @chartkitdev/react v0.5.0 · @chartkitdev/core v0.5.0
+> Lightweight React charting library. Zero dependencies, pure SVG, 17 themes. JSON spec: https://chartkit.dev/schema/v1.json
 
 ## Installation
 ```bash
-npm install @derpdaderp/chartkit
+npm install @chartkitdev/react
+npm install @chartkitdev/core
+```
+
+`@chartkitdev/core` is framework-free (zero runtime dependencies). It exports `validate(spec)` and `render(spec, target)` for the v1 JSON spec (`https://chartkit.dev/schema/v1.json`). `@chartkitdev/react` keeps the existing component API and adds `<Chart spec={...} />`. The old package name `@derpdaderp/chartkit` is a compatibility shim.
+
+## Minimal spec
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [{ "month": "Jan", "revenue": 120 }, { "month": "Feb", "revenue": 150 }],
+  "encoding": { "x": "month", "y": "revenue" },
+  "a11y": { "alt": "Revenue rose from January to February." }
+}
 ```
 
 ## Quick Examples
 
 ### Sparkline (responsive by default)
 ```tsx
-import { Sparkline } from '@derpdaderp/chartkit';
+import { Sparkline } from '@chartkitdev/react';
 <Sparkline data={[10, 25, 15, 30, 22]} theme="midnight" />
 ```
 
 ### Line Chart with Auto Theme
 ```tsx
-import { LineChart, useAutoTheme } from '@derpdaderp/chartkit';
+import { LineChart, useAutoTheme } from '@chartkitdev/react';
 
 const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
 
@@ -35,7 +49,7 @@ const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
 
 ### Bar Chart
 ```tsx
-import { BarChart } from '@derpdaderp/chartkit';
+import { BarChart } from '@chartkitdev/react';
 
 <BarChart
   data={[{ month: 'Jan', value: 100 }, { month: 'Feb', value: 150 }]}
@@ -47,7 +61,7 @@ import { BarChart } from '@derpdaderp/chartkit';
 
 ### KPI Card
 ```tsx
-import { KpiCard } from '@derpdaderp/chartkit';
+import { KpiCard } from '@chartkitdev/react';
 
 <KpiCard
   label="Revenue"
@@ -170,7 +184,7 @@ const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
 
 ### Candlestick Chart (Financial)
 ```tsx
-import { CandlestickChart } from '@derpdaderp/chartkit';
+import { CandlestickChart } from '@chartkitdev/react';
 
 // Data needs: time, open, high, low, close, volume (optional)
 <CandlestickChart
@@ -185,7 +199,7 @@ import { CandlestickChart } from '@derpdaderp/chartkit';
 
 ### Scatter/Bubble Chart with Log Scale
 ```tsx
-import { ScatterChart } from '@derpdaderp/chartkit';
+import { ScatterChart } from '@chartkitdev/react';
 
 // Log scale is great for data with exponential distributions
 <ScatterChart
@@ -201,5 +215,5 @@ import { ScatterChart } from '@derpdaderp/chartkit';
 
 ## Links
 - Docs: https://chartkit.dev
-- npm: https://www.npmjs.com/package/@derpdaderp/chartkit
+- npm: https://www.npmjs.com/package/@chartkitdev/react
 - GitHub: https://github.com/toddynho/chartkit

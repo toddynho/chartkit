@@ -1,26 +1,23 @@
-# @derpdaderp/chartkit
+# @chartkitdev/react
 
 Beautiful charts for React. Zero config.
 
-[![npm version](https://img.shields.io/npm/v/@derpdaderp/chartkit.svg)](https://www.npmjs.com/package/@derpdaderp/chartkit)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@derpdaderp/chartkit)](https://bundlephobia.com/package/@derpdaderp/chartkit)
-
-**[Documentation](https://chartkit.dev)** | **[Demo](https://chartkit.dev/demo)** | **[GitHub](https://github.com/toddynho/chartkit)**
+**[Documentation](https://chartkit.dev)** | **[Demo](https://chartkit.dev/demo)** | **[GitHub](https://github.com/toddynho/chartkit)** | **[Schema](https://chartkit.dev/schema/v1.json)**
 
 ---
 
-A lightweight React charting library for dashboards that look as good as they perform. 14 components, 17 themes, ~15KB gzipped, zero dependencies.
+React components for ChartKit. 14 chart components and 17 themes. Depends on `@chartkitdev/core` and on React (peer). No other runtime dependencies.
 
 ## Installation
 
 ```bash
-npm install @derpdaderp/chartkit
+npm install @chartkitdev/react
 ```
 
 ## Quick Start
 
 ```tsx
-import { LineChart, KpiCard } from '@derpdaderp/chartkit';
+import { LineChart, KpiCard } from '@chartkitdev/react';
 
 function Dashboard({ data }) {
   return (
@@ -50,7 +47,7 @@ function Dashboard({ data }) {
 
 - **14 Chart Components** - Lines, bars, areas, donuts, gauges, heatmaps, candlesticks, and more
 - **17 Curated Themes** - Dark and light themes that look great out of the box
-- **~15KB gzipped** - Tiny bundle, zero dependencies, pure SVG
+- **Pure SVG** - Depends on `@chartkitdev/core`, not on a third-party chart library
 - **TypeScript First** - Full type safety with autocomplete
 - **Dual Y-Axis** - Display multiple scales in LineChart
 - **Responsive** - Charts automatically resize to fit their container
@@ -82,7 +79,7 @@ function Dashboard({ data }) {
 **Light:** `sunset`, `silver`, `pearl`, `latte`
 
 ```tsx
-import { useAutoTheme } from '@derpdaderp/chartkit';
+import { useAutoTheme } from '@chartkitdev/react';
 
 // Auto dark/light switching
 const theme = useAutoTheme({ light: 'sunset', dark: 'midnight' });

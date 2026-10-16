@@ -18,7 +18,7 @@ import {
   ProgressRing,
   GaugeChart,
   CandlestickChart,
-} from '@derpdaderp/chartkit';
+} from '@chartkitdev/react';
 import { useMemo } from 'react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 

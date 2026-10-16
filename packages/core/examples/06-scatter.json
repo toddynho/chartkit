@@ -1,0 +1,17 @@
+{
+  "version": "1",
+  "type": "scatter",
+  "data": [
+    { "revenue": 10, "employees": 4, "valuation": 8, "region": "NA" },
+    { "revenue": 18, "employees": 7, "valuation": 11, "region": "NA" },
+    { "revenue": 24, "employees": 12, "valuation": 20, "region": "EU" },
+    { "revenue": 40, "employees": 22, "valuation": 35, "region": "APAC" }
+  ],
+  "encoding": {
+    "x": { "field": "revenue", "type": "quantitative" },
+    "y": { "field": "employees", "type": "quantitative" },
+    "size": { "field": "valuation", "range": [4, 18] },
+    "color": "region"
+  },
+  "a11y": { "alt": "Larger companies by valuation also have more employees and revenue." }
+}

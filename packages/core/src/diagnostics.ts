@@ -1,0 +1,42 @@
+/** RFC 6902 JSON Patch operation. Agents can apply `fix` directly. */
+export interface JsonPatchOperation {
+  op: "add" | "remove" | "replace" | "move" | "copy" | "test";
+  path: string;
+  value?: unknown;
+  from?: string;
+}
+
+export type Severity = "error" | "warning";
+
+/**
+ * One diagnostic. Codes are stable (CK1xxx structure, CK2xxx data,
+ * CK3xxx semantics, CK4xxx design advice). Messages may improve; codes do not.
+ */
+export interface Diagnostic {
+  code: string;
+  severity: Severity;
+  message: string;
+  /** JSON pointer. Empty string is the document root. */
+  path: string;
+  hint?: string;
+  fix?: JsonPatchOperation[];
+}
+
+export interface ValidationResult {
+  /** True when there are no errors. Warnings do not fail validation. */
+  ok: boolean;
+  diagnostics: Diagnostic[];
+  errors: Diagnostic[];
+  warnings: Diagnostic[];
+}
+
+export function toResult(diagnostics: Diagnostic[]): ValidationResult {
+  const errors = diagnostics.filter((d) => d.severity === "error");
+  const warnings = diagnostics.filter((d) => d.severity === "warning");
+  return {
+    ok: errors.length === 0,
+    diagnostics,
+    errors,
+    warnings,
+  };
+}

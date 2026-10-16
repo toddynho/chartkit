@@ -16,7 +16,7 @@ export default function HooksPage() {
       </p>
       <CodeBlock
         language="tsx"
-        code={`import { LineChart, useAutoTheme } from '@derpdaderp/chartkit';
+        code={`import { LineChart, useAutoTheme } from '@chartkitdev/react';
 
 function Chart({ data, series }) {
   // Automatically switches between themes based on dark mode
@@ -50,7 +50,7 @@ const theme = useAutoTheme({
       </p>
       <CodeBlock
         language="tsx"
-        code={`import { LineChart, useContainerWidth } from '@derpdaderp/chartkit';
+        code={`import { LineChart, useContainerWidth } from '@chartkitdev/react';
 
 function ResponsiveChart({ data, series }) {
   const { ref, width } = useContainerWidth<HTMLDivElement>();
@@ -76,7 +76,7 @@ function ResponsiveChart({ data, series }) {
       </p>
       <CodeBlock
         language="tsx"
-        code={`import { useResizeObserver } from '@derpdaderp/chartkit';
+        code={`import { useResizeObserver } from '@chartkitdev/react';
 
 function AdaptiveChart() {
   const { ref, size, ready } = useResizeObserver<HTMLDivElement>();
@@ -106,7 +106,7 @@ function AdaptiveChart() {
       </p>
       <CodeBlock
         language="tsx"
-        code={`import { useAnimatedMount, estimatePathLength } from '@derpdaderp/chartkit';
+        code={`import { useAnimatedMount, estimatePathLength } from '@chartkitdev/react';
 
 function AnimatedPath({ pathD }) {
   const { getPathStyle, fadeStyle } = useAnimatedMount({
@@ -155,7 +155,7 @@ function AnimatedPath({ pathD }) {
       </p>
       <CodeBlock
         language="tsx"
-        code={`import { useUniqueId } from '@derpdaderp/chartkit';
+        code={`import { useUniqueId } from '@chartkitdev/react';
 
 function ChartWithGlow() {
   const glowId = useUniqueId('glow');
@@ -179,7 +179,7 @@ function ChartWithGlow() {
       </p>
       <CodeBlock
         language="tsx"
-        code={`import { useMouseTracking } from '@derpdaderp/chartkit';
+        code={`import { useMouseTracking } from '@chartkitdev/react';
 
 function InteractiveChart() {
   const { svgRef, mouse, handleMouseMove, handleMouseLeave } = useMouseTracking({

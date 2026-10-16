@@ -1,0 +1,42 @@
+{
+  "$schema": "https://chartkit.dev/schema/v1.json",
+  "version": "1",
+  "id": "revenue-cost",
+  "type": "line",
+  "title": "Revenue and cost",
+  "subtitle": "First half of 2026",
+  "data": [
+    { "month": "Jan", "revenue": 120, "cost": 80 },
+    { "month": "Feb", "revenue": 140, "cost": 84 },
+    { "month": "Mar", "revenue": 160, "cost": 90 },
+    { "month": "Apr", "revenue": 155, "cost": 92 },
+    { "month": "May", "revenue": 180, "cost": 97 },
+    { "month": "Jun", "revenue": 210, "cost": 110 }
+  ],
+  "encoding": {
+    "x": { "field": "month", "type": "ordinal", "title": "Month" },
+    "y": [
+      { "field": "revenue", "title": "Revenue", "type": "quantitative", "format": "compact", "color": "series-1" },
+      { "field": "cost", "title": "Cost", "type": "quantitative", "dash": "dashed", "color": "series-2" }
+    ]
+  },
+  "mark": { "curve": "monotone", "points": "always", "strokeWidth": 2 },
+  "axes": {
+    "x": { "title": "Month" },
+    "y": { "title": "USD", "grid": "dashed", "format": "compact" }
+  },
+  "legend": { "position": "top" },
+  "tooltip": { "fields": ["month", { "field": "revenue", "title": "Revenue" }] },
+  "annotations": [
+    { "type": "rule", "axis": "y", "value": 150, "label": "Target", "dash": "dotted" }
+  ],
+  "theme": "midnight",
+  "size": { "width": 640, "height": 240 },
+  "interaction": { "hover": true, "zoom": "none" },
+  "animation": { "duration": 400, "easing": "ease-out" },
+  "locale": "en-US",
+  "a11y": {
+    "alt": "Revenue rose from 120 in January to 210 in June, staying above cost.",
+    "description": "Monthly revenue and cost for the first half of 2026."
+  }
+}

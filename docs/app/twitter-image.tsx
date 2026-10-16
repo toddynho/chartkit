@@ -83,7 +83,7 @@ export default async function Image() {
             gap: 32,
           }}
         >
-          {['14 Charts', '17 Themes', '~15KB', 'Zero Deps'].map((feature) => (
+          {['14 Charts', '17 Themes', 'JSON spec', 'Zero Deps'].map((feature) => (
             <div
               key={feature}
               style={{

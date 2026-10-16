@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - unreleased
+
+### Changed
+
+- Package name is `@chartkitdev/react` (the old name is a compatibility shim).
+- The build entry starts with `"use client"` so Next.js server components can import it.
+- New `<Chart spec={...} />` renders a v1 spec through `@chartkitdev/core`. Existing components keep their props.
+
 ## [0.4.1] - 2026-01-22
 
 ### Added
@@ -57,10 +65,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Renamed `MonitorLine` to `LineChart`** - The component has been renamed to follow standard charting library conventions. `MonitorLine` is still exported as a deprecated alias for backward compatibility.
   ```tsx
   // Before
-  import { MonitorLine } from '@derpdaderp/chartkit';
+  import { MonitorLine } from '@chartkitdev/react';
   
   // After
-  import { LineChart } from '@derpdaderp/chartkit';
+  import { LineChart } from '@chartkitdev/react';
   ```
 
 ### Added

@@ -1,26 +1,26 @@
 # ChartKit
 
-Beautiful charts for React. Zero config.
+Charts for dashboards and for agents. One JSON spec, a framework-free core, and React components with the same API as 0.4.
 
-[![npm version](https://img.shields.io/npm/v/@derpdaderp/chartkit.svg)](https://www.npmjs.com/package/@derpdaderp/chartkit)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@derpdaderp/chartkit)](https://bundlephobia.com/package/@derpdaderp/chartkit)
-
-**[Documentation](https://chartkit.dev)** | **[Demo](https://chartkit.dev/demo)** | **[Components](https://chartkit.dev/components)**
+**[Documentation](https://chartkit.dev)** | **[Demo](https://chartkit.dev/demo)** | **[Components](https://chartkit.dev/components)** | **[Schema](https://chartkit.dev/schema/v1.json)**
 
 ---
 
-ChartKit is a lightweight React charting library for dashboards that look as good as they perform. 14 components, 17 themes, ~15KB gzipped, zero dependencies.
+ChartKit is a React charting library for dashboards: 14 components and 17 themes. `@chartkitdev/core` has zero runtime dependencies. `@chartkitdev/react` depends on that core and on React.
 
 ## Installation
 
 ```bash
-npm install @derpdaderp/chartkit
+npm install @chartkitdev/react
+npm install @chartkitdev/core
 ```
+
+`@derpdaderp/chartkit` remains as a compatibility shim (not published from this branch). See [docs/migrate.md](docs/migrate.md).
 
 ## Quick Start
 
 ```tsx
-import { LineChart, KpiCard } from '@derpdaderp/chartkit';
+import { LineChart, KpiCard } from '@chartkitdev/react';
 
 function Dashboard({ data }) {
   return (
@@ -50,7 +50,7 @@ function Dashboard({ data }) {
 
 - **14 Chart Components** - Lines, bars, areas, donuts, gauges, heatmaps, and more
 - **17 Curated Themes** - Dark and light themes that look great out of the box
-- **~15KB gzipped** - Tiny bundle size, zero dependencies
+- **No third-party runtime dependencies** - Pure SVG. The core package depends on nothing; the React package depends on the core.
 - **TypeScript First** - Full type safety with autocomplete for every prop
 - **Dual Y-Axis** - Display multiple scales in LineChart
 - **Responsive** - Charts automatically resize to fit their container
@@ -84,7 +84,7 @@ function Dashboard({ data }) {
 **Light:** `sunset`, `silver`, `pearl`, `latte`
 
 ```tsx
-import { useAutoTheme } from '@derpdaderp/chartkit';
+import { useAutoTheme } from '@chartkitdev/react';
 
 // Auto-switch based on system preference
 const theme = useAutoTheme({ light: 'sunset', dark: 'midnight' });

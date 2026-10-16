@@ -1,0 +1,66 @@
+# Manual publish only. Nothing here runs on push or tag.
+# Provenance requires GitHub Actions OIDC (id-token: write) and npm >= 9.
+# Trusted publishing can omit NPM_TOKEN once the npm org grants this repo access.
+# Otherwise set the NPM_TOKEN secret (automation token for the chartkitdev org,
+# plus rights to publish @derpdaderp/chartkit for the shim).
+
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Package to publish
+        type: choice
+        required: true
+        options:
+          - "@chartkitdev/core"
+          - "@chartkitdev/react"
+          - "@derpdaderp/chartkit"
+          - all
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build libraries
+        run: npm run build:lib
+
+      - name: Publish selected package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          publish() {
+            local name="$1"
+            echo "Publishing ${name} with provenance"
+            npm publish --workspace "${name}" --access public --provenance
+          }
+          case "${{ inputs.package }}" in
+            all)
+              publish "@chartkitdev/core"
+              publish "@chartkitdev/react"
+              publish "@derpdaderp/chartkit"
+              ;;
+            *)
+              publish "${{ inputs.package }}"
+              ;;
+          esac

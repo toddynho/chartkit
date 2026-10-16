@@ -4,7 +4,7 @@ const BASE_URL = 'https://chartkit.dev';
 
 export const siteConfig = {
   name: 'ChartKit',
-  description: '14 chart types. 17 themes. Zero dependencies. ~15KB. Charts that don\'t weigh you down.',
+  description: '14 chart types. 17 themes. Zero dependencies. Charts that don\'t weigh you down.',
   url: BASE_URL,
   ogImage: `${BASE_URL}/og.png`,
   twitter: '@toddo',
@@ -66,7 +66,7 @@ export function createMetadata({
 export const pageMetadata = {
   home: {
     title: 'ChartKit - Lightweight charts for React & Next.js',
-    description: 'Beautiful, lightweight React charts. 14 chart types, 17 themes, zero dependencies, ~15KB gzipped. Build stunning dashboards in minutes.',
+    description: 'Beautiful, lightweight React charts. 14 chart types, 17 themes, zero dependencies. Build stunning dashboards in minutes.',
     path: '',
   },
   gettingStarted: {

@@ -15,7 +15,7 @@ import {
   ResponsiveChart,
   themes,
   type HeatmapDataPoint,
-} from '@derpdaderp/chartkit';
+} from '@chartkitdev/react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 
 // ============================================
@@ -652,7 +652,7 @@ export default function DemoPage() {
           </p>
           <div className="flex items-center justify-center gap-4 mt-3 text-sm" style={{ color: theme.textMuted }}>
             <a
-              href="https://www.npmjs.com/package/@derpdaderp/chartkit"
+              href="https://www.npmjs.com/package/@chartkitdev/react"
               className="hover:underline"
             >
               npm

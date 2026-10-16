@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    { "month": "Jan", "revenue": 120 },
+    { "month": "Feb", "revenue": 150 },
+    { "month": "Mar", "revenue": 132 }
+  ],
+  "encoding": { "x": "month", "y": "revenue" },
+  "a11y": { "alt": "Revenue rose from January to February, then eased in March." }
+}

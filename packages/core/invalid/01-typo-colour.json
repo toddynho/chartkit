@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "type": "line",
+  "colour": "red",
+  "data": [
+    { "month": "Jan", "revenue": 10 },
+    { "month": "Feb", "revenue": 12 }
+  ],
+  "encoding": { "x": "month", "y": "revenue" },
+  "a11y": { "alt": "Revenue edged up from January to February." }
+}

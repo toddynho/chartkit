@@ -1,3 +1,5 @@
+"use client";
+
 // Components
 export {
   // Chart Components
@@ -104,3 +106,7 @@ export {
   type UseAnimatedMountResult,
   type UseAutoThemeOptions,
 } from './hooks';
+
+export { Chart, type ChartProps } from './Chart';
+export { validate, render, suggestAlt } from '@chartkitdev/core';
+export type { ChartSpec, Diagnostic, ValidationResult, JsonPatchOperation } from '@chartkitdev/core';

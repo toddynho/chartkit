@@ -1,7 +1,7 @@
 {
-  "name": "@derpdaderp/chartkit",
-  "version": "0.4.1",
-  "description": "Lightweight, zero-dependency charting library for React and Next.js. Beautiful SVG charts with 17 themes.",
+  "name": "@chartkitdev/react",
+  "version": "0.5.0",
+  "description": "React components for ChartKit. The existing component API, plus a thin Chart wrapper over @chartkitdev/core.",
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev",
   "bugs": {
@@ -37,13 +37,16 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && node scripts/banner.mjs",
     "dev": "tsup --watch",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@chartkitdev/core": "*"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
@@ -82,6 +85,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/toddynho/chartkit"
+    "url": "https://github.com/toddynho/chartkit",
+    "directory": "packages/react"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

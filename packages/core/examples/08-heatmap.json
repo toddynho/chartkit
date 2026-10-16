@@ -1,0 +1,15 @@
+{
+  "version": "1",
+  "type": "heatmap",
+  "data": [
+    { "date": "2026-01-01", "value": 1 },
+    { "date": "2026-01-02", "value": 4 },
+    { "date": "2026-01-03", "value": 2 }
+  ],
+  "encoding": {
+    "x": { "field": "date", "type": "temporal" },
+    "color": { "field": "value", "type": "quantitative" }
+  },
+  "mark": { "layout": "calendar", "weeks": 12 },
+  "a11y": { "alt": "Activity was highest on January 2 and quieter the day before and after." }
+}

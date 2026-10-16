@@ -1,12 +1,13 @@
 # ChartKit - Complete API Reference for AI Assistants
 
-> @derpdaderp/chartkit v0.4.1
+> @chartkitdev/react v0.5.0 · @chartkitdev/core v0.5.0
+> Schema: https://chartkit.dev/schema/v1.json
 > Lightweight React charting library with 14 components and 17 themes.
-> Zero dependencies, pure SVG, ~15KB gzipped.
+> Zero dependencies, pure SVG.
 
 ## Installation
 ```bash
-npm install @derpdaderp/chartkit
+npm install @chartkitdev/react
 ```
 
 ---
@@ -17,7 +18,7 @@ npm install @derpdaderp/chartkit
 Minimal inline trend chart. Responsive by default.
 
 ```tsx
-import { Sparkline } from '@derpdaderp/chartkit';
+import { Sparkline } from '@chartkitdev/react';
 
 <Sparkline
   data={T[] | number[]}      // Required. Array of objects or numbers
@@ -44,7 +45,7 @@ Example:
 Small area chart with gradient fill. Responsive by default.
 
 ```tsx
-import { MiniArea } from '@derpdaderp/chartkit';
+import { MiniArea } from '@chartkitdev/react';
 
 <MiniArea
   data={T[] | number[]}      // Required
@@ -63,7 +64,7 @@ import { MiniArea } from '@derpdaderp/chartkit';
 Feature-rich line chart with dual Y-axis, curve types, and area fills.
 
 ```tsx
-import { LineChart } from '@derpdaderp/chartkit';
+import { LineChart } from '@chartkitdev/react';
 
 <LineChart
   data={T[]}                 // Required. Data array
@@ -191,7 +192,7 @@ Example - Area chart:
 Grouped bar chart with optional annotations.
 
 ```tsx
-import { BarChart } from '@derpdaderp/chartkit';
+import { BarChart } from '@chartkitdev/react';
 
 <BarChart
   data={T[]}                 // Required
@@ -215,7 +216,7 @@ import { BarChart } from '@derpdaderp/chartkit';
 Pie/donut chart with optional center content.
 
 ```tsx
-import { DonutChart } from '@derpdaderp/chartkit';
+import { DonutChart } from '@chartkitdev/react';
 
 <DonutChart
   data={T[]}                 // Required
@@ -236,7 +237,7 @@ import { DonutChart } from '@derpdaderp/chartkit';
 Metric card with sparkline and delta indicator.
 
 ```tsx
-import { KpiCard } from '@derpdaderp/chartkit';
+import { KpiCard } from '@chartkitdev/react';
 
 <KpiCard
   label={string}             // Required. Metric label
@@ -267,7 +268,7 @@ Example:
 Circular progress indicator.
 
 ```tsx
-import { ProgressRing } from '@derpdaderp/chartkit';
+import { ProgressRing } from '@chartkitdev/react';
 
 <ProgressRing
   value={number}             // Required. 0-100
@@ -287,7 +288,7 @@ import { ProgressRing } from '@derpdaderp/chartkit';
 Semicircular gauge with optional ranges.
 
 ```tsx
-import { GaugeChart } from '@derpdaderp/chartkit';
+import { GaugeChart } from '@chartkitdev/react';
 
 <GaugeChart
   value={number}             // Required
@@ -317,7 +318,7 @@ interface GaugeRange {
 Scatter plot with optional bubble sizing and logarithmic scales.
 
 ```tsx
-import { ScatterChart } from '@derpdaderp/chartkit';
+import { ScatterChart } from '@chartkitdev/react';
 
 <ScatterChart
   data={T[]}                 // Required
@@ -355,7 +356,7 @@ Example with log scales (great for exponential data):
 Combined line, bar, and area chart with dual Y-axes.
 
 ```tsx
-import { ComboChart } from '@derpdaderp/chartkit';
+import { ComboChart } from '@chartkitdev/react';
 
 <ComboChart
   data={T[]}                 // Required
@@ -388,7 +389,7 @@ interface ComboSeriesConfig {
 Stacked area chart with interactive legend.
 
 ```tsx
-import { StackedArea } from '@derpdaderp/chartkit';
+import { StackedArea } from '@chartkitdev/react';
 
 <StackedArea
   data={T[]}                 // Required. Data array
@@ -429,7 +430,7 @@ Example:
 GitHub-style activity grid.
 
 ```tsx
-import { Heatmap } from '@derpdaderp/chartkit';
+import { Heatmap } from '@chartkitdev/react';
 
 <Heatmap
   data={HeatmapDataPoint[]}  // Required. { date: string, value: number }
@@ -452,7 +453,7 @@ interface HeatmapDataPoint {
 Event spike visualization.
 
 ```tsx
-import { SpikeChart } from '@derpdaderp/chartkit';
+import { SpikeChart } from '@chartkitdev/react';
 
 <SpikeChart
   data={T[]}
@@ -470,7 +471,7 @@ import { SpikeChart } from '@derpdaderp/chartkit';
 Financial OHLC candlestick chart with zoom, pan, and optional volume.
 
 ```tsx
-import { CandlestickChart } from '@derpdaderp/chartkit';
+import { CandlestickChart } from '@chartkitdev/react';
 
 <CandlestickChart
   data={T[]}                 // Required. Array with OHLC data
@@ -525,7 +526,7 @@ Example:
 Auto-sizing wrapper that provides width/height to children.
 
 ```tsx
-import { ResponsiveChart } from '@derpdaderp/chartkit';
+import { ResponsiveChart } from '@chartkitdev/react';
 
 <ResponsiveChart aspectRatio={16/9}>
   {({ width, height }) => (
@@ -544,7 +545,7 @@ import { ResponsiveChart } from '@derpdaderp/chartkit';
 Standalone interactive legend component.
 
 ```tsx
-import { Legend } from '@derpdaderp/chartkit';
+import { Legend } from '@chartkitdev/react';
 
 <Legend
   items={LegendItem[]}       // Required. Legend items
@@ -586,7 +587,7 @@ Reference lines and areas overlay (used internally, can be standalone).
 Automatically switch themes based on dark/light mode.
 
 ```tsx
-import { useAutoTheme } from '@derpdaderp/chartkit';
+import { useAutoTheme } from '@chartkitdev/react';
 
 const theme = useAutoTheme({
   light: ThemeName,          // Required. Theme for light mode
@@ -609,7 +610,7 @@ const theme = useAutoTheme({ light: 'sunset', dark: 'neon' });
 Track container width for responsive sizing.
 
 ```tsx
-import { useContainerWidth } from '@derpdaderp/chartkit';
+import { useContainerWidth } from '@chartkitdev/react';
 
 const { ref, width } = useContainerWidth<HTMLDivElement>();
 
@@ -626,7 +627,7 @@ return (
 Track both width and height of container.
 
 ```tsx
-import { useResizeObserver } from '@derpdaderp/chartkit';
+import { useResizeObserver } from '@chartkitdev/react';
 
 const { ref, size, ready } = useResizeObserver<HTMLDivElement>();
 // size = { width: number, height: number }
@@ -702,6 +703,6 @@ type ThemeName =
 
 ## LINKS
 - Documentation: https://chartkit.dev
-- npm: https://www.npmjs.com/package/@derpdaderp/chartkit
+- npm: https://www.npmjs.com/package/@chartkitdev/react
 - GitHub: https://github.com/toddynho/chartkit
 - LLM Reference: https://chartkit.dev/llms.txt

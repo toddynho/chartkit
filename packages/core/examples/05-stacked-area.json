@@ -1,0 +1,18 @@
+{
+  "version": "1",
+  "type": "stacked-area",
+  "data": [
+    { "month": "Jan", "free": 40, "pro": 20 },
+    { "month": "Feb", "free": 42, "pro": 28 },
+    { "month": "Mar", "free": 45, "pro": 36 }
+  ],
+  "encoding": {
+    "x": "month",
+    "y": [
+      { "field": "free", "title": "Free" },
+      { "field": "pro", "title": "Pro" }
+    ]
+  },
+  "locale": "en-US",
+  "a11y": { "alt": "Pro accounts grew faster than free accounts from January to March." }
+}

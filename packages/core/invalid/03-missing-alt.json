@@ -1,0 +1,10 @@
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    { "month": "Jan", "revenue": 10 },
+    { "month": "Feb", "revenue": 14 }
+  ],
+  "encoding": { "x": "month", "y": "revenue" },
+  "a11y": {}
+}

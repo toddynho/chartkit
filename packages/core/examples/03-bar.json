@@ -1,0 +1,17 @@
+{
+  "version": "1",
+  "type": "bar",
+  "title": "Signups by month",
+  "data": [
+    { "month": "Jan", "signups": 100 },
+    { "month": "Feb", "signups": 180 },
+    { "month": "Mar", "signups": 150 }
+  ],
+  "encoding": {
+    "x": "month",
+    "y": { "field": "signups", "type": "quantitative", "title": "Signups" }
+  },
+  "mark": { "cornerRadius": 3, "gap": 0.3 },
+  "locale": "en-US",
+  "a11y": { "alt": "Signups peaked in February at 180, after 100 in January." }
+}
