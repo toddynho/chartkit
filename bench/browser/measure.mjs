@@ -11,6 +11,14 @@ const outDir = join(benchRoot, ".out/browser");
 const SIZES = process.env.BENCH_POINTS
   ? process.env.BENCH_POINTS.split(",").map((value) => Number(value.trim())).filter((value) => value > 0)
   : [1_000, 10_000, 100_000, 1_000_000];
+const SAMPLES = Number(process.env.BENCH_SAMPLES || 5);
+
+function median(values) {
+  const sorted = values.filter((value) => value != null).sort((a, b) => a - b);
+  if (sorted.length === 0) return null;
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+}
 
 function timeoutFor(n) {
   if (n >= 1_000_000) return 90_000;
@@ -66,49 +74,70 @@ export async function measureBrowser() {
           });
           continue;
         }
-        const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
+        console.log(`browser ${file.id} ${points}`);
         const timeout = timeoutFor(points);
-        page.setDefaultTimeout(timeout);
-        let pageError = null;
-        page.on("pageerror", (error) => {
-          pageError = error instanceof Error ? error.message : String(error);
-        });
-        try {
-          await page.setContent(html);
-          await page.addScriptTag({ path: file.outfile, type: "module" });
-          const result = await page.evaluate((n) => globalThis.__bench.run(n), points);
-          const info = await page.evaluate(() => ({
-            library: globalThis.__bench.library,
-            renderer: globalThis.__bench.renderer,
-          }));
+        const samples = [];
+        let failed = null;
+        let info = { library: file.id, renderer: null };
+        for (let sample = 0; sample < SAMPLES && !failed; sample++) {
+          const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
+          page.setDefaultTimeout(timeout);
+          let pageError = null;
+          page.on("pageerror", (error) => {
+            pageError = error instanceof Error ? error.message : String(error);
+          });
+          try {
+            await page.setContent(html);
+            await page.addScriptTag({ path: file.outfile, type: "module" });
+            const result = await page.evaluate((n) => globalThis.__bench.run(n), points);
+            info = await page.evaluate(() => ({
+              library: globalThis.__bench.library,
+              renderer: globalThis.__bench.renderer,
+            }));
+            if (pageError) throw new Error(pageError);
+            samples.push(result);
+          } catch (error) {
+            const message = pageError || (error instanceof Error ? error.message : String(error));
+            failed = message.slice(0, 500);
+          } finally {
+            await page.close().catch(() => {});
+          }
+        }
+        if (failed || samples.length !== SAMPLES) {
           rows.push({
             id: file.id,
             library: info.library,
-            renderer: info.renderer,
             points,
-            status: "ok",
-            ...result,
-            pageError,
-          });
-        } catch (error) {
-          const message = pageError || (error instanceof Error ? error.message : String(error));
-          rows.push({
-            id: file.id,
-            points,
-            status: message.toLowerCase().includes("timeout") ? "timeout" : "error",
-            error: message.slice(0, 500),
+            status: (failed || "").toLowerCase().includes("timeout") ? "timeout" : "error",
+            error: failed || "A sample did not finish.",
+            samples: samples.length,
           });
           skipLarger = true;
-        } finally {
-          await page.close().catch(() => {});
+          continue;
         }
+        rows.push({
+          id: file.id,
+          library: info.library,
+          renderer: info.renderer,
+          points,
+          status: "ok",
+          samples: SAMPLES,
+          initialMs: median(samples.map((sample) => sample.initialMs)),
+          updateMs: median(samples.map((sample) => sample.updateMs)),
+          heapBefore: median(samples.map((sample) => sample.heapBefore)),
+          heapAfterRender: median(samples.map((sample) => sample.heapAfterRender)),
+          heapAfterUpdate: median(samples.map((sample) => sample.heapAfterUpdate)),
+          initialSamples: samples.map((sample) => sample.initialMs),
+          updateSamples: samples.map((sample) => sample.updateMs),
+        });
       }
     }
   } finally {
     await browser.close();
   }
   return {
-    method: "Playwright Chromium. Each library is a fresh page. Data is makeSeries(n, seed) generated inside the page and excluded from the timer. x[i] = i. Initial render and one full update (seed 2) are timed, then two animation frames. ChartKit replaces innerHTML with a new SVG (curve linear, points none). uPlot uses setData. Chart.js uses update('none') and {x,y} points. ECharts uses setOption on a canvas renderer with sampling left off, and waits for the finished event. Recharts and Nivo use flushSync. Observable Plot replaces the SVG node. Width 640, height 360. Memory is performance.memory.usedJSHeapSize when Chromium exposes it. A failed size skips larger sizes for that library.",
+    method: `Playwright Chromium. Each sample is a fresh page. Reported times are the median of ${SAMPLES} samples. Data is makeSeries(n, seed) generated inside the page and excluded from the timer. x[i] = i. Initial render and one full update (seed 2) are timed, then two animation frames. ChartKit replaces innerHTML with a new SVG (curve linear, points none, sampling auto, which is minmax above twice the plot width). An error SVG (ck-chart-error) fails that sample. uPlot uses setData. Chart.js uses update('none') and {x,y} points. ECharts uses setOption on a canvas renderer with sampling left off, and waits for the finished event. Recharts and Nivo use flushSync. Observable Plot replaces the SVG node. Width 640, height 360. Memory is the median performance.memory.usedJSHeapSize when Chromium exposes it. A failed size skips larger sizes for that library.`,
+    samples: SAMPLES,
     sizes: SIZES,
     rows,
   };

@@ -1,6 +1,6 @@
 {
   "machine": {
-    "measuredAt": "2026-10-16T15:19:52.560Z",
+    "measuredAt": "2026-10-16T15:40:22.418Z",
     "node": "v22.14.0",
     "platform": "linux 6.12.94+ x64",
     "cpu": "Intel(R) Xeon(R) Processor",
@@ -38,9 +38,9 @@
         "renderer": "svg",
         "react": "none",
         "status": "ok",
-        "minBytes": 17992,
-        "gzipBytes": 6739,
-        "brotliBytes": 6120,
+        "minBytes": 21971,
+        "gzipBytes": 8275,
+        "brotliBytes": 7507,
         "note": null
       },
       {
@@ -50,9 +50,9 @@
         "renderer": "svg",
         "react": "none",
         "status": "ok",
-        "minBytes": 16624,
-        "gzipBytes": 6285,
-        "brotliBytes": 5721,
+        "minBytes": 16815,
+        "gzipBytes": 6406,
+        "brotliBytes": 5831,
         "note": null
       },
       {
@@ -63,8 +63,8 @@
         "react": "none",
         "status": "ok",
         "minBytes": 13234,
-        "gzipBytes": 5126,
-        "brotliBytes": 4665,
+        "gzipBytes": 5128,
+        "brotliBytes": 4673,
         "note": null
       },
       {
@@ -74,9 +74,9 @@
         "renderer": "svg",
         "react": "none",
         "status": "ok",
-        "minBytes": 55731,
-        "gzipBytes": 17728,
-        "brotliBytes": 15514,
+        "minBytes": 59468,
+        "gzipBytes": 19364,
+        "brotliBytes": 17010,
         "note": "Same /all bundle for line, bar, and donut. It registers every chart and every theme and does not include the validator."
       },
       {
@@ -86,9 +86,9 @@
         "renderer": "svg",
         "react": "none",
         "status": "ok",
-        "minBytes": 55731,
-        "gzipBytes": 17728,
-        "brotliBytes": 15514,
+        "minBytes": 59468,
+        "gzipBytes": 19364,
+        "brotliBytes": 17010,
         "note": "Same /all bundle for line, bar, and donut."
       },
       {
@@ -98,9 +98,9 @@
         "renderer": "svg",
         "react": "none",
         "status": "ok",
-        "minBytes": 55731,
-        "gzipBytes": 17728,
-        "brotliBytes": 15514,
+        "minBytes": 59468,
+        "gzipBytes": 19364,
+        "brotliBytes": 17010,
         "note": "Same /all bundle for line, bar, and donut."
       },
       {
@@ -366,10 +366,10 @@
         "status": "ok",
         "points": 1000,
         "iterations": 8,
-        "meanMs": 2.83,
-        "medianMs": 2.53,
-        "minMs": 1.62,
-        "maxMs": 5.72,
+        "meanMs": 1.8,
+        "medianMs": 1.5,
+        "minMs": 0.73,
+        "maxMs": 3.69,
         "note": "Node, no jsdom and no node-canvas. 2 warmup calls, then 8 timed calls. The series is makeSeries(1000, 1)."
       },
       {
@@ -399,10 +399,10 @@
         "status": "ok",
         "points": 1000,
         "iterations": 8,
-        "meanMs": 5.18,
-        "medianMs": 5.6,
-        "minMs": 3.65,
-        "maxMs": 6.8,
+        "meanMs": 5.15,
+        "medianMs": 5.15,
+        "minMs": 3.59,
+        "maxMs": 7.42,
         "note": "Node, no jsdom and no node-canvas. 2 warmup calls, then 8 timed calls. The series is makeSeries(1000, 1)."
       },
       {
@@ -411,10 +411,10 @@
         "status": "ok",
         "points": 1000,
         "iterations": 8,
-        "meanMs": 59.7,
-        "medianMs": 56.75,
-        "minMs": 48.48,
-        "maxMs": 82.04,
+        "meanMs": 56.24,
+        "medianMs": 54.55,
+        "minMs": 51.08,
+        "maxMs": 68.36,
         "note": "Node, no jsdom and no node-canvas. 2 warmup calls, then 8 timed calls. The series is makeSeries(1000, 1)."
       },
       {
@@ -427,7 +427,8 @@
     ]
   },
   "browser": {
-    "method": "Playwright Chromium. Each library is a fresh page. Data is makeSeries(n, seed) generated inside the page and excluded from the timer. x[i] = i. Initial render and one full update (seed 2) are timed, then two animation frames. ChartKit replaces innerHTML with a new SVG (curve linear, points none). uPlot uses setData. Chart.js uses update('none') and {x,y} points. ECharts uses setOption on a canvas renderer with sampling left off, and waits for the finished event. Recharts and Nivo use flushSync. Observable Plot replaces the SVG node. Width 640, height 360. Memory is performance.memory.usedJSHeapSize when Chromium exposes it. A failed size skips larger sizes for that library.",
+    "method": "Playwright Chromium. Each sample is a fresh page. Reported times are the median of 5 samples. Data is makeSeries(n, seed) generated inside the page and excluded from the timer. x[i] = i. Initial render and one full update (seed 2) are timed, then two animation frames. ChartKit replaces innerHTML with a new SVG (curve linear, points none, sampling auto, which is minmax above twice the plot width). An error SVG (ck-chart-error) fails that sample. uPlot uses setData. Chart.js uses update('none') and {x,y} points. ECharts uses setOption on a canvas renderer with sampling left off, and waits for the finished event. Recharts and Nivo use flushSync. Observable Plot replaces the SVG node. Width 640, height 360. Memory is the median performance.memory.usedJSHeapSize when Chromium exposes it. A failed size skips larger sizes for that library.",
+    "samples": 5,
     "sizes": [
       1000,
       10000,
@@ -441,12 +442,26 @@
         "renderer": "svg",
         "points": 1000,
         "status": "ok",
-        "initialMs": 18.700000000186265,
-        "updateMs": 25.100000000558794,
-        "heapBefore": 1325654,
-        "heapAfterRender": 2573755,
-        "heapAfterUpdate": 2322051,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 21.800000000745058,
+        "updateMs": 31.799999998882413,
+        "heapBefore": 1355928,
+        "heapAfterRender": 2557205,
+        "heapAfterUpdate": 2200198,
+        "initialSamples": [
+          24,
+          21.800000000745058,
+          24.40000000037253,
+          17.40000000037253,
+          16.899999998509884
+        ],
+        "updateSamples": [
+          31.799999998882413,
+          33.40000000037253,
+          33.5,
+          26.59999999962747,
+          26.399999998509884
+        ]
       },
       {
         "id": "chartkit",
@@ -454,12 +469,26 @@
         "renderer": "svg",
         "points": 10000,
         "status": "ok",
-        "initialMs": 23.59999999962747,
-        "updateMs": 45.5,
-        "heapBefore": 1325654,
-        "heapAfterRender": 5082607,
-        "heapAfterUpdate": 5365519,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 17,
+        "updateMs": 28.800000000745058,
+        "heapBefore": 1355928,
+        "heapAfterRender": 3914580,
+        "heapAfterUpdate": 3267062,
+        "initialSamples": [
+          16.300000000745058,
+          17,
+          17,
+          24.5,
+          20.399999998509884
+        ],
+        "updateSamples": [
+          28.09999999962747,
+          28.800000000745058,
+          19.699999999254942,
+          31.40000000037253,
+          33.19999999925494
+        ]
       },
       {
         "id": "chartkit",
@@ -467,12 +496,26 @@
         "renderer": "svg",
         "points": 100000,
         "status": "ok",
-        "initialMs": 123.79999999981374,
-        "updateMs": 1202.300000000745,
-        "heapBefore": 1325654,
-        "heapAfterRender": 33317499,
-        "heapAfterUpdate": 46715575,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 35.100000001490116,
+        "updateMs": 21.100000001490116,
+        "heapBefore": 1355928,
+        "heapAfterRender": 3628256,
+        "heapAfterUpdate": 14128671,
+        "initialSamples": [
+          35.100000001490116,
+          38.69999999925494,
+          35.80000000074506,
+          35,
+          34.90000000037253
+        ],
+        "updateSamples": [
+          21,
+          34.09999999962747,
+          37.79999999888241,
+          21.100000001490116,
+          18.300000000745058
+        ]
       },
       {
         "id": "chartkit",
@@ -480,12 +523,26 @@
         "renderer": "svg",
         "points": 1000000,
         "status": "ok",
-        "initialMs": 260.80000000074506,
-        "updateMs": 239.69999999925494,
-        "heapBefore": 1325658,
-        "heapAfterRender": 134510587,
-        "heapAfterUpdate": 237122499,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 213.90000000037253,
+        "updateMs": 171.30000000074506,
+        "heapBefore": 1355932,
+        "heapAfterRender": 105056666,
+        "heapAfterUpdate": 211843636,
+        "initialSamples": [
+          213.69999999925494,
+          210.30000000074506,
+          225.7999999988824,
+          237.2000000011176,
+          213.90000000037253
+        ],
+        "updateSamples": [
+          159.09999999962747,
+          174.5,
+          176,
+          164.69999999925494,
+          171.30000000074506
+        ]
       },
       {
         "id": "uplot",
@@ -493,12 +550,26 @@
         "renderer": "canvas",
         "points": 1000,
         "status": "ok",
-        "initialMs": 11.099999999627471,
-        "updateMs": 28.200000000186265,
+        "samples": 5,
+        "initialMs": 18.300000000745058,
+        "updateMs": 33.100000001490116,
         "heapBefore": 1742703,
-        "heapAfterRender": 3020398,
-        "heapAfterUpdate": 3288122,
-        "pageError": null
+        "heapAfterRender": 3010966,
+        "heapAfterUpdate": 3279974,
+        "initialSamples": [
+          21.699999999254942,
+          16.800000000745058,
+          18.5,
+          18.09999999962747,
+          18.300000000745058
+        ],
+        "updateSamples": [
+          24.299999998882413,
+          33.30000000074506,
+          33.09999999962747,
+          33.5,
+          33.100000001490116
+        ]
       },
       {
         "id": "uplot",
@@ -506,12 +577,26 @@
         "renderer": "canvas",
         "points": 10000,
         "status": "ok",
-        "initialMs": 14.899999999441206,
-        "updateMs": 33.39999999944121,
+        "samples": 5,
+        "initialMs": 19.40000000037253,
+        "updateMs": 33.09999999962747,
         "heapBefore": 1742703,
-        "heapAfterRender": 2990322,
-        "heapAfterUpdate": 3554998,
-        "pageError": null
+        "heapAfterRender": 2396842,
+        "heapAfterUpdate": 2953258,
+        "initialSamples": [
+          18.5,
+          15.700000001117587,
+          19.40000000037253,
+          20.300000000745058,
+          20.09999999962747
+        ],
+        "updateSamples": [
+          33.09999999962747,
+          33.40000000037253,
+          33,
+          33,
+          33.100000001490116
+        ]
       },
       {
         "id": "uplot",
@@ -519,12 +604,26 @@
         "renderer": "canvas",
         "points": 100000,
         "status": "ok",
-        "initialMs": 16.09999999962747,
-        "updateMs": 30.700000000186265,
+        "samples": 5,
+        "initialMs": 17.09999999962747,
+        "updateMs": 30.59999999962747,
         "heapBefore": 1742703,
-        "heapAfterRender": 5081262,
-        "heapAfterUpdate": 5567430,
-        "pageError": null
+        "heapAfterRender": 4740310,
+        "heapAfterUpdate": 5541086,
+        "initialSamples": [
+          16.799999998882413,
+          18.300000000745058,
+          17.5,
+          17.09999999962747,
+          16.40000000037253
+        ],
+        "updateSamples": [
+          30.800000000745058,
+          15.5,
+          26.699999999254942,
+          30.59999999962747,
+          30.800000000745058
+        ]
       },
       {
         "id": "uplot",
@@ -532,12 +631,26 @@
         "renderer": "canvas",
         "points": 1000000,
         "status": "ok",
-        "initialMs": 26.200000000186265,
-        "updateMs": 17.700000000186265,
+        "samples": 5,
+        "initialMs": 23.09999999962747,
+        "updateMs": 24.90000000037253,
         "heapBefore": 1742707,
-        "heapAfterRender": 19326186,
-        "heapAfterUpdate": 34913961,
-        "pageError": null
+        "heapAfterRender": 19299362,
+        "heapAfterUpdate": 34831953,
+        "initialSamples": [
+          24.90000000037253,
+          22.799999998882413,
+          22.199999999254942,
+          23.09999999962747,
+          28.799999998882413
+        ],
+        "updateSamples": [
+          24.90000000037253,
+          25.399999998509884,
+          19.799999998882413,
+          25.700000001117587,
+          18.899999998509884
+        ]
       },
       {
         "id": "chartjs",
@@ -545,12 +658,26 @@
         "renderer": "canvas",
         "points": 1000,
         "status": "ok",
-        "initialMs": 28.5,
-        "updateMs": 20,
+        "samples": 5,
+        "initialMs": 35.79999999888241,
+        "updateMs": 22.5,
         "heapBefore": 2362321,
-        "heapAfterRender": 4648147,
-        "heapAfterUpdate": 3676843,
-        "pageError": null
+        "heapAfterRender": 4644831,
+        "heapAfterUpdate": 3654511,
+        "initialSamples": [
+          35.79999999888241,
+          45.80000000074506,
+          39.5,
+          26.40000000037253,
+          28.699999999254942
+        ],
+        "updateSamples": [
+          31.100000001490116,
+          20.40000000037253,
+          22.5,
+          25.700000001117587,
+          20.300000000745058
+        ]
       },
       {
         "id": "chartjs",
@@ -558,12 +685,26 @@
         "renderer": "canvas",
         "points": 10000,
         "status": "ok",
-        "initialMs": 32.799999999813735,
-        "updateMs": 27.799999999813735,
+        "samples": 5,
+        "initialMs": 32.5,
+        "updateMs": 17.5,
         "heapBefore": 2362321,
-        "heapAfterRender": 6644510,
-        "heapAfterUpdate": 6962838,
-        "pageError": null
+        "heapAfterRender": 5909242,
+        "heapAfterUpdate": 7012514,
+        "initialSamples": [
+          31.09999999962747,
+          33,
+          30.800000000745058,
+          34.600000001490116,
+          32.5
+        ],
+        "updateSamples": [
+          17.5,
+          30.300000000745058,
+          14.600000001490116,
+          31.100000001490116,
+          15.100000001490116
+        ]
       },
       {
         "id": "chartjs",
@@ -571,12 +712,26 @@
         "renderer": "canvas",
         "points": 100000,
         "status": "ok",
-        "initialMs": 60.90000000037253,
-        "updateMs": 31.399999999441206,
+        "samples": 5,
+        "initialMs": 61.09999999962747,
+        "updateMs": 33.09999999962747,
         "heapBefore": 2362321,
-        "heapAfterRender": 20066374,
-        "heapAfterUpdate": 29641250,
-        "pageError": null
+        "heapAfterRender": 20965330,
+        "heapAfterUpdate": 29675074,
+        "initialSamples": [
+          58.5,
+          61.09999999962747,
+          60.79999999888241,
+          61.5,
+          62.29999999888241
+        ],
+        "updateSamples": [
+          33.09999999962747,
+          30.299999998882413,
+          49,
+          29.299999998882413,
+          40.80000000074506
+        ]
       },
       {
         "id": "chartjs",
@@ -584,12 +739,26 @@
         "renderer": "canvas",
         "points": 1000000,
         "status": "ok",
-        "initialMs": 347.5,
-        "updateMs": 176.20000000018626,
+        "samples": 5,
+        "initialMs": 332.40000000037253,
+        "updateMs": 181.2000000011176,
         "heapBefore": 2362325,
-        "heapAfterRender": 154917871,
-        "heapAfterUpdate": 230830119,
-        "pageError": null
+        "heapAfterRender": 154925431,
+        "heapAfterUpdate": 230086387,
+        "initialSamples": [
+          332.40000000037253,
+          333.69999999925494,
+          346.2999999988824,
+          307.30000000074506,
+          299
+        ],
+        "updateSamples": [
+          181.2000000011176,
+          186.7999999988824,
+          174,
+          179.90000000037253,
+          187.19999999925494
+        ]
       },
       {
         "id": "echarts",
@@ -597,12 +766,26 @@
         "renderer": "canvas",
         "points": 1000,
         "status": "ok",
-        "initialMs": 27.5,
+        "samples": 5,
+        "initialMs": 24.700000001117587,
         "updateMs": 5.5,
-        "heapBefore": 5953262,
-        "heapAfterRender": 8795173,
-        "heapAfterUpdate": 8601361,
-        "pageError": null
+        "heapBefore": 5953266,
+        "heapAfterRender": 8886425,
+        "heapAfterUpdate": 8635725,
+        "initialSamples": [
+          40.79999999888241,
+          24.09999999962747,
+          24.40000000037253,
+          24.700000001117587,
+          25.09999999962747
+        ],
+        "updateSamples": [
+          5.700000001117587,
+          5.399999998509884,
+          5.5,
+          5.199999999254942,
+          6.400000000372529
+        ]
       },
       {
         "id": "echarts",
@@ -610,12 +793,26 @@
         "renderer": "canvas",
         "points": 10000,
         "status": "ok",
-        "initialMs": 34.59999999962747,
-        "updateMs": 12.700000000186265,
-        "heapBefore": 6027286,
-        "heapAfterRender": 12948042,
-        "heapAfterUpdate": 15236258,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 34.19999999925494,
+        "updateMs": 12,
+        "heapBefore": 5953278,
+        "heapAfterRender": 12899922,
+        "heapAfterUpdate": 15127862,
+        "initialSamples": [
+          33.90000000037253,
+          37.09999999962747,
+          34.19999999925494,
+          34.5,
+          33.40000000037253
+        ],
+        "updateSamples": [
+          12.400000000372529,
+          14.700000001117587,
+          12,
+          11.5,
+          12
+        ]
       },
       {
         "id": "echarts",
@@ -623,12 +820,26 @@
         "renderer": "canvas",
         "points": 100000,
         "status": "ok",
-        "initialMs": 100.90000000037253,
-        "updateMs": 66.30000000074506,
-        "heapBefore": 5953286,
-        "heapAfterRender": 54895319,
-        "heapAfterUpdate": 84539247,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 100.40000000037253,
+        "updateMs": 67.09999999962747,
+        "heapBefore": 5953282,
+        "heapAfterRender": 54841731,
+        "heapAfterUpdate": 84445983,
+        "initialSamples": [
+          100,
+          98.19999999925494,
+          101,
+          110.5,
+          100.40000000037253
+        ],
+        "updateSamples": [
+          65.59999999962747,
+          67.09999999962747,
+          68.59999999962747,
+          72.20000000111759,
+          64.80000000074506
+        ]
       },
       {
         "id": "echarts",
@@ -636,12 +847,26 @@
         "renderer": "canvas",
         "points": 1000000,
         "status": "ok",
-        "initialMs": 765.7000000001863,
-        "updateMs": 633.2000000001863,
-        "heapBefore": 5953290,
-        "heapAfterRender": 399420966,
-        "heapAfterUpdate": 567589198,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 640.3000000007451,
+        "updateMs": 572.9000000003725,
+        "heapBefore": 5953282,
+        "heapAfterRender": 399427414,
+        "heapAfterUpdate": 593428141,
+        "initialSamples": [
+          640.3000000007451,
+          688.5,
+          622.4000000003725,
+          608,
+          648.6999999992549
+        ],
+        "updateSamples": [
+          555.1999999992549,
+          573.5999999996275,
+          572.9000000003725,
+          560.8000000007451,
+          582
+        ]
       },
       {
         "id": "recharts",
@@ -649,12 +874,26 @@
         "renderer": "svg",
         "points": 1000,
         "status": "ok",
-        "initialMs": 66.5,
-        "updateMs": 15.200000000186265,
-        "heapBefore": 7066537,
-        "heapAfterRender": 20671960,
-        "heapAfterUpdate": 15254944,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 67.09999999962747,
+        "updateMs": 20.699999999254942,
+        "heapBefore": 7077581,
+        "heapAfterRender": 20681936,
+        "heapAfterUpdate": 15239640,
+        "initialSamples": [
+          75.39999999850988,
+          66,
+          66.20000000111759,
+          67.19999999925494,
+          67.09999999962747
+        ],
+        "updateSamples": [
+          19.199999999254942,
+          20.699999999254942,
+          12.199999999254942,
+          24.699999999254942,
+          23.5
+        ]
       },
       {
         "id": "recharts",
@@ -662,12 +901,26 @@
         "renderer": "svg",
         "points": 10000,
         "status": "ok",
-        "initialMs": 229.1000000005588,
-        "updateMs": 112.79999999981374,
-        "heapBefore": 7077541,
-        "heapAfterRender": 38562139,
-        "heapAfterUpdate": 41578695,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 229.30000000074506,
+        "updateMs": 112.40000000037253,
+        "heapBefore": 7077565,
+        "heapAfterRender": 39082203,
+        "heapAfterUpdate": 42862555,
+        "initialSamples": [
+          227,
+          233.5,
+          229.30000000074506,
+          226.80000000074506,
+          245.7000000011176
+        ],
+        "updateSamples": [
+          112.80000000074506,
+          107.19999999925494,
+          108.69999999925494,
+          112.40000000037253,
+          121.30000000074506
+        ]
       },
       {
         "id": "recharts",
@@ -675,12 +928,26 @@
         "renderer": "svg",
         "points": 100000,
         "status": "ok",
-        "initialMs": 1833.5999999996275,
-        "updateMs": 961.9000000003725,
-        "heapBefore": 7077569,
-        "heapAfterRender": 164616520,
-        "heapAfterUpdate": 272393315,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 1799.699999999255,
+        "updateMs": 965.5,
+        "heapBefore": 7077581,
+        "heapAfterRender": 165342108,
+        "heapAfterUpdate": 269611147,
+        "initialSamples": [
+          1844.5999999996275,
+          1836.5,
+          1799.699999999255,
+          1792.9000000003725,
+          1792
+        ],
+        "updateSamples": [
+          984.6999999992549,
+          966,
+          962.4000000003725,
+          965.5,
+          960.2999999988824
+        ]
       },
       {
         "id": "recharts",
@@ -688,12 +955,26 @@
         "renderer": "svg",
         "points": 1000000,
         "status": "ok",
-        "initialMs": 21868.799999999814,
-        "updateMs": 18815.299999999814,
-        "heapBefore": 7077569,
-        "heapAfterRender": 1352584169,
-        "heapAfterUpdate": 2611329913,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 19039.900000000373,
+        "updateMs": 10865,
+        "heapBefore": 7077585,
+        "heapAfterRender": 1350961005,
+        "heapAfterUpdate": 2629453665,
+        "initialSamples": [
+          20806.699999999255,
+          18920.199999999255,
+          19039.900000000373,
+          19022,
+          19237.199999999255
+        ],
+        "updateSamples": [
+          11010.199999999255,
+          10709.200000001118,
+          10599.299999998882,
+          11094.900000000373,
+          10865
+        ]
       },
       {
         "id": "nivo",
@@ -701,12 +982,26 @@
         "renderer": "svg",
         "points": 1000,
         "status": "ok",
-        "initialMs": 62.90000000037253,
-        "updateMs": 20.300000000745058,
-        "heapBefore": 6289326,
-        "heapAfterRender": 16871392,
-        "heapAfterUpdate": 11743824,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 39.59999999962747,
+        "updateMs": 16,
+        "heapBefore": 6289598,
+        "heapAfterRender": 16880309,
+        "heapAfterUpdate": 11720193,
+        "initialSamples": [
+          40.09999999962747,
+          38.40000000037253,
+          39.19999999925494,
+          39.79999999888241,
+          39.59999999962747
+        ],
+        "updateSamples": [
+          27.699999999254942,
+          15.099999999627471,
+          13.899999998509884,
+          21.5,
+          16
+        ]
       },
       {
         "id": "nivo",
@@ -714,12 +1009,26 @@
         "renderer": "svg",
         "points": 10000,
         "status": "ok",
-        "initialMs": 82.29999999981374,
-        "updateMs": 62.60000000055879,
-        "heapBefore": 6289714,
-        "heapAfterRender": 23886288,
-        "heapAfterUpdate": 38943063,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 75.69999999925494,
+        "updateMs": 54.09999999962747,
+        "heapBefore": 6289598,
+        "heapAfterRender": 26154298,
+        "heapAfterUpdate": 32777099,
+        "initialSamples": [
+          75.69999999925494,
+          73.59999999962747,
+          76.70000000111759,
+          71.20000000111759,
+          84.90000000037253
+        ],
+        "updateSamples": [
+          54.09999999962747,
+          59.69999999925494,
+          52.80000000074506,
+          71.10000000149012,
+          49.5
+        ]
       },
       {
         "id": "nivo",
@@ -727,25 +1036,34 @@
         "renderer": "svg",
         "points": 100000,
         "status": "ok",
-        "initialMs": 374.40000000037253,
-        "updateMs": 942.6000000005588,
+        "samples": 5,
+        "initialMs": 363.80000000074506,
+        "updateMs": 963.9000000003725,
         "heapBefore": 6290206,
-        "heapAfterRender": 132478274,
-        "heapAfterUpdate": 262306618,
-        "pageError": null
+        "heapAfterRender": 131194182,
+        "heapAfterUpdate": 257262718,
+        "initialSamples": [
+          424.7999999988824,
+          362.5,
+          377.19999999925494,
+          363.80000000074506,
+          358
+        ],
+        "updateSamples": [
+          978.6000000014901,
+          976.4000000003725,
+          948,
+          963.9000000003725,
+          951.9000000003725
+        ]
       },
       {
         "id": "nivo",
         "library": "Nivo",
-        "renderer": "svg",
         "points": 1000000,
-        "status": "ok",
-        "initialMs": 829.9000000003725,
-        "updateMs": 639.9000000003725,
-        "heapBefore": 6289718,
-        "heapAfterRender": 373053155,
-        "heapAfterUpdate": 357196933,
-        "pageError": "Maximum call stack size exceeded"
+        "status": "error",
+        "error": "Maximum call stack size exceeded",
+        "samples": 0
       },
       {
         "id": "plot",
@@ -753,12 +1071,26 @@
         "renderer": "svg",
         "points": 1000,
         "status": "ok",
-        "initialMs": 24.600000000558794,
-        "updateMs": 33.299999999813735,
+        "samples": 5,
+        "initialMs": 17.299999998882413,
+        "updateMs": 32.79999999888241,
         "heapBefore": 3566751,
-        "heapAfterRender": 8195599,
-        "heapAfterUpdate": 5420218,
-        "pageError": null
+        "heapAfterRender": 8188651,
+        "heapAfterUpdate": 5402370,
+        "initialSamples": [
+          17.5,
+          16.90000000037253,
+          17.299999998882413,
+          16.199999999254942,
+          17.5
+        ],
+        "updateSamples": [
+          34.5,
+          31.5,
+          32.79999999888241,
+          24.40000000037253,
+          33.59999999962747
+        ]
       },
       {
         "id": "plot",
@@ -766,12 +1098,26 @@
         "renderer": "svg",
         "points": 10000,
         "status": "ok",
-        "initialMs": 29,
-        "updateMs": 42,
+        "samples": 5,
+        "initialMs": 29.200000001117587,
+        "updateMs": 48.80000000074506,
         "heapBefore": 3566751,
-        "heapAfterRender": 10146499,
-        "heapAfterUpdate": 9268490,
-        "pageError": null
+        "heapAfterRender": 9499483,
+        "heapAfterUpdate": 8912018,
+        "initialSamples": [
+          29.59999999962747,
+          29.200000001117587,
+          29.200000001117587,
+          26.899999998509884,
+          26.59999999962747
+        ],
+        "updateSamples": [
+          53.29999999888241,
+          52.40000000037253,
+          45.59999999962747,
+          48.80000000074506,
+          42.19999999925494
+        ]
       },
       {
         "id": "plot",
@@ -779,12 +1125,26 @@
         "renderer": "svg",
         "points": 100000,
         "status": "ok",
-        "initialMs": 100.79999999981374,
-        "updateMs": 1593.5,
-        "heapBefore": 3566351,
-        "heapAfterRender": 33894154,
-        "heapAfterUpdate": 54499849,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 96,
+        "updateMs": 1523.5999999996275,
+        "heapBefore": 3566751,
+        "heapAfterRender": 33628450,
+        "heapAfterUpdate": 55139269,
+        "initialSamples": [
+          94,
+          97.39999999850988,
+          95.29999999888241,
+          96,
+          96.69999999925494
+        ],
+        "updateSamples": [
+          1557.0999999996275,
+          1523.5999999996275,
+          1492.5,
+          1507.4000000003725,
+          1558.2999999988824
+        ]
       },
       {
         "id": "plot",
@@ -792,12 +1152,26 @@
         "renderer": "svg",
         "points": 1000000,
         "status": "ok",
-        "initialMs": 831.4000000003725,
-        "updateMs": 25972.900000000373,
-        "heapBefore": 3566355,
-        "heapAfterRender": 260831507,
-        "heapAfterUpdate": 347538278,
-        "pageError": null
+        "samples": 5,
+        "initialMs": 744.3000000007451,
+        "updateMs": 26764.700000001118,
+        "heapBefore": 3566755,
+        "heapAfterRender": 249349515,
+        "heapAfterUpdate": 333194322,
+        "initialSamples": [
+          709.7000000011176,
+          744.3000000007451,
+          722.6999999992549,
+          767,
+          753.5
+        ],
+        "updateSamples": [
+          25381.599999999627,
+          26023.099999999627,
+          28495.099999999627,
+          27786.60000000149,
+          26764.700000001118
+        ]
       }
     ]
   },

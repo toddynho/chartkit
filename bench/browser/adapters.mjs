@@ -38,7 +38,7 @@ function spec(xs, ys) {
     type: "line",
     data: { columns: { x: xs, y: ys } },
     encoding: { x: "x", y: "y" },
-    mark: { curve: "linear", points: "none" },
+    mark: { curve: "linear", points: "none", sampling: "auto" },
     size: { width: 640, height: 360 },
     locale: "en-US",
     a11y: { alt: "Indexed line of one series." },
@@ -52,6 +52,9 @@ globalThis.__bench = {
     document.getElementById("root").replaceChildren(host);
     const paint = async (data) => {
       host.innerHTML = render(spec(data.xs, data.ys));
+      if (host.innerHTML.includes("ck-chart-error")) {
+        throw new Error(host.textContent.replace(/\\s+/g, " ").slice(0, 240));
+      }
       await frames();
     };
     return timed(n, paint, paint);

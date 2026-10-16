@@ -25,7 +25,7 @@ export function renderReport(result) {
   lines.push("");
   lines.push("ChartKit's minimal entry is the registry, one chart, and the midnight theme. The `/all` entry is every chart and every theme, without the validator. React libraries are measured twice: React included, and React external for an app that already ships it. ECharts is the modular import (`echarts/core` plus one series), not the full bundle. uPlot's CSS is a second response. Observable Plot and uPlot have no donut, so those cells are unsupported rather than a fake chart.");
   lines.push("");
-  lines.push("ChartKit is SVG-only today. Canvas libraries are expected to win once a line has hundreds of thousands of points. ECharts `sampling` was left off so every library draws every point.");
+  lines.push("ChartKit is SVG-only. `mark.sampling` defaults to `auto` and uses minmax once a line is longer than twice the plot width. ECharts `sampling` was left off so the other libraries draw every point.");
   lines.push("");
   lines.push("## Bundle size");
   lines.push("");
@@ -58,9 +58,27 @@ export function renderReport(result) {
   lines.push("");
   lines.push(browserVerdict(result.browser.rows));
   lines.push("");
-  lines.push("### What a Canvas path or downsampling would need");
+  lines.push("### ChartKit before and after sampling");
   lines.push("");
-  lines.push("Not measured. ChartKit's line renderer in this run builds one SVG path through every point (`curve: \"linear\"`, `points: \"none\"`) and the update replaces `innerHTML`. A Canvas renderer would draw those points without keeping a DOM path. Downsampling (min/max per pixel, or largest-triangle-three-buckets) would cap the path near two points per horizontal pixel of the 640px chart before that Canvas path exists. ECharts can do this with `sampling: \"lttb\"`; this run left it off.");
+  lines.push("Before is the single sample from 2026-10-16T15:19:52.560Z, when ChartKit drew every point (`sampling` did not exist). After is this run's median. The before 1,000,000-point row was an error SVG: `Math.min(...values)` threw `Maximum call stack size exceeded`, `render` caught it, and the harness treated the error SVG as a successful paint. A Node replay of that spec returned a 396-byte `ck-chart-error` in 257.5 ms. Those two timings are not a drawn million-point line.");
+  lines.push("");
+  lines.push("| Points | Before initial / update | After initial / update | Before note |");
+  lines.push("|---:|---:|---:|---|");
+  const before = [
+    [1000, 18.7, 25.1, "full path"],
+    [10000, 23.6, 45.5, "full path"],
+    [100000, 123.8, 1202.3, "full path; update was one sample and slower than the error-SVG 1M row"],
+    [1000000, 260.8, 239.7, "error SVG, not a chart"],
+  ];
+  for (const [points, initial, update, note] of before) {
+    const after = result.browser.rows.find((row) => (row.library === "ChartKit" || row.id === "chartkit") && row.points === points);
+    const afterCell = after && after.status === "ok" ? `${ms(after.initialMs)} / ${ms(after.updateMs)}` : after ? after.status : "—";
+    lines.push(`| ${points} | ${initial.toFixed(2)} / ${update.toFixed(2)} | ${afterCell} | ${note} |`);
+  }
+  lines.push("");
+  lines.push("### Canvas");
+  lines.push("");
+  lines.push("Not measured. This run downsamples ChartKit with `mark.sampling: \"auto\"` (minmax above twice the 572px plot width, so 1,000 points stay complete and 10k, 100k, and 1M do not). A Canvas renderer would draw the sampled points without an SVG path node. ECharts `sampling` stayed off.");
   lines.push("");
   lines.push("## Server render");
   lines.push("");
@@ -131,7 +149,10 @@ function browserVerdict(rows) {
     }
     const fastest = ok[0];
     const ours = ok.find((row) => row.library === "ChartKit" || row.id === "chartkit");
-    const failed = group.filter((row) => row.status !== "ok").map((row) => `${row.library ?? row.id} ${row.status}`);
+    const failed = group.filter((row) => row.status !== "ok").map((row) => {
+      const name = `${row.library ?? row.id} ${row.status}`;
+      return row.error ? `${name} (${row.error})` : name;
+    });
     const rank = ours ? ok.indexOf(ours) + 1 : null;
     sentences.push(
       `At ${points} points the fastest initial render is ${fastest.library} (${fastest.renderer}) at ${fastest.initialMs.toFixed(2)} ms.` +
