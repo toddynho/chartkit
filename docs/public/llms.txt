@@ -3,7 +3,7 @@
 > @chartkitdev/core v0.5.0
 > Schema: https://chartkit.dev/schema/v1.json
 > `import { render } from "@chartkitdev/core/all"`
-> `import { validate } from "@chartkitdev/core/validate"`
+> `import { repair, validate } from "@chartkitdev/core/validate"`
 
 This file describes the JSON spec. React component props are in the last section. They are not keys in the spec.
 
@@ -17,6 +17,17 @@ This file describes the JSON spec. React component props are in the last section
 - `encoding.*.axis` is the string `"y"` or `"y2"`. Titles go in `axes.y.title` or `axes.y2.title`.
 - Field types are `quantitative`, `temporal`, `ordinal`, or `nominal`. Not `categorical`.
 - A heatmap with `encoding.x`, `encoding.y`, and `encoding.color` is a grid. A calendar heatmap is a date `x` plus `color`, or `mark.layout: "calendar"`.
+- Combo is one spec. `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. Not `layer` or `encoding.y2`.
+
+## Repair loop
+
+Recommended agent loop:
+
+1. `const result = validate(spec)`.
+2. When `result.ok` is false, call `repair(spec)`. It applies the safe JSON Patch on each error (`fix`) and returns `{ spec, ok, errors, applied }`. The input spec is not mutated.
+3. Render `repair(spec).spec` when `ok` is true. When errors remain, follow those hints. A missing or unknown `type` is reported first, with a patch, and without every other chart type's required fields.
+
+`repair` only applies patches `validate` already produced. It does not invent data.
 
 ## line
 

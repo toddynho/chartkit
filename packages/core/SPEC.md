@@ -40,12 +40,23 @@ These are errors with a JSON Patch in `fix`. Applying the patch is the correctio
 |---|---|---|
 | CK1009 | `data: { values: [...] }` | Move `values` up so `data` is the array. Do not look for `columns`. |
 | CK1009 | `mark: "line"` and no `type` | `type` is the chart type. `mark` is an options object. The patch sets `type` and removes the string `mark`. |
-| CK1009 | `encoding.*.axis` is an object | `axis` is `"y"` or `"y2"`. Titles go in `axes.y.title` or `axes.y2.title`. |
-| CK1009 | `value`, `min`, `max`, `delta`, or `label` on a gauge, kpi, or progress-ring | Move them into `metric`. |
-| CK1009 | Donut `encoding` uses `theta`, `angle`, `label`, or `value` | `x` is the slice label and `y` is the number. |
-| CK1005 | `type: "pie"` | `donut`, with `mark.innerRadius` 0. |
-| CK1005 | `type: "area"` | Did-you-mean `mini-area`. A full-size filled line is `type: "line"` and `mark.area: true`. Stacked layers are `stacked-area`. |
+| CK1009 | `encoding.y.axis` is an object or `null` | `axis` is `"y"` or `"y2"`. Titles go in `axes.y.title` or `axes.y2.title`. `null` is removed. |
+| CK1009 | `encoding.x.axis` is an object or `null` | `x` has no `axis`. The title moves to `axes.x.title` and `axis` is removed. |
+| CK1009 | `value`, `min`, `max`, `delta`, or `label` on a gauge, kpi, or progress-ring | Move them into `metric: { value, min, max, label?, delta? }`. The same object is built from a one-row `data` array or from those encoding channels. |
+| CK1009 | Donut `encoding` uses `theta`, `angle`, `label`, or `value` | Only when `type` is `donut` or `mark` is `arc`. `x` is the slice label and `y` is the number. |
+| CK1009 | `layer`, `marks`, `mark` array, or `encoding.y2` | Combo: `encoding.y` is `[{ field, mark: "bar" }, { field, mark: "line", axis: "y2" }]`. |
+| CK1009 | `chartType` and no usable `type` | Move it to `type`. |
+| CK1005 | `type: "pie"` or `"arc"` | `donut`. `pie` also sets `mark.innerRadius` 0. |
+| CK1005 | `type: "point"`, `"circle"`, or `"square"` | `scatter`. |
+| CK1005 | `type: "rect"` | `heatmap`. |
+| CK1005 | `type: "area"` | `stacked-area` when `y` has two or more fields. Otherwise `mini-area`. A full-size filled line is `type: "line"` and `mark.area: true`. |
+| CK1005 | `type: "metric"` | `gauge` when min/max are present, otherwise `kpi`. Both use `metric: { value, min, max, label?, delta? }`. |
+| CK1005 | `type: "rule"` or `"tick"` | `spike`. |
 | CK1005 | `type: "grid-heat"` | `heatmap`. A grid uses `encoding.x`, `encoding.y`, and `encoding.color`. |
 | CK1007 | field `type: "categorical"` | `nominal`. Field types are `quantitative`, `temporal`, `ordinal`, and `nominal`. |
+| CK1007 | `mark.points: true` | `"always"`. `false` is `"none"`. |
+| CK1007 | format `".2f"` | `{ "style": "number", "decimals": 2 }`. |
+
+When `type` is missing or not a known chart type, per-type required fields (`metric`, `color`, `open`, `high`, `low`, `close`) are not reported. The type repair is the first error. `repair(spec)` from `@chartkitdev/core/validate` applies these patches and returns the spec plus whatever errors remain.
 
 A heatmap with `encoding.y` and no `mark.layout` renders as a grid. `mark.layout: "calendar"` is the date-by-weekday layout, and it is also the fallback when `y` is absent. `validate` accepts both.

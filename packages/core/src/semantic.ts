@@ -99,9 +99,16 @@ function checkEncoding(
       const hintParts = [`available fields: ${table.fields.join(", ") || "(none)"}`];
       if (resolved.caseMatch) hintParts.push(`did you mean ${JSON.stringify(resolved.caseMatch)}? (case differs)`);
       else if (resolved.closest) hintParts.push(`did you mean ${JSON.stringify(resolved.closest)}?`);
-      const fix: JsonPatchOperation[] | undefined = suggestion
+      let fix: JsonPatchOperation[] | undefined = suggestion
         ? [{ op: "replace", path: channel.fieldPath, value: suggestion }]
         : undefined;
+      if ((spec.type === "sparkline" || spec.type === "mini-area") && table.kind === "numbers" && channel.field === "data") {
+        hintParts.push('sparkline and mini-area take a plain number array and need no encoding. The number field is "value".');
+        fix = [{ op: "replace", path: channel.fieldPath, value: "value" }];
+      }
+      if (spec.type === "stacked-area" && channel.path === "/encoding/color") {
+        hintParts.push('stacked-area takes the layers as encoding.y: ["field", "field"] rather than a color field.');
+      }
       diagnostics.push({
         code: "CK2001",
         severity: "error",

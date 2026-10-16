@@ -80,7 +80,7 @@ export const TYPE_REQUIREMENTS: Record<string, string> = {
   "mini-area": "mini-area needs data",
   spike: "spike needs data",
   candlestick: "candlestick needs data and encoding.x, open, high, low, and close",
-  gauge: "gauge needs metric",
-  "progress-ring": "progress-ring needs metric",
-  kpi: "kpi needs metric",
+  gauge: "gauge needs metric: { value, min, max, label?, delta? }",
+  "progress-ring": "progress-ring needs metric: { value, min, max, label?, delta? }",
+  kpi: "kpi needs metric: { value, min, max, label?, delta? }",
 };

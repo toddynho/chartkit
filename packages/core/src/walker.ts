@@ -69,6 +69,11 @@ export function walkSchema(value: unknown, schema: JsonSchema, diagnostics: Diag
     skipUnknown: new Set(),
   };
   check(value, schema, "", ctx);
+  if (!hasKnownType(value)) {
+    for (let i = diagnostics.length - 1; i >= 0; i--) {
+      if (isTypeBranchNoise(diagnostics[i])) diagnostics.splice(i, 1);
+    }
+  }
 }
 
 function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void {
@@ -149,8 +154,41 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
   if (node.enum && !node.enum.some((item) => item === value)) {
     if (path === "/type") {
       emitUnknownType(value, ctx);
-    } else if (path.endsWith("/axis") && isPlainObject(value) && node.enum.includes("y") && node.enum.includes("y2")) {
-      emitAxisObject(value, path, ctx);
+    } else if (path.endsWith("/axis") && node.enum.includes("y") && node.enum.includes("y2") && (value === null || isPlainObject(value))) {
+      if (value === null) emitAxisNull(path, ctx);
+      else emitAxisObject(value, path, ctx);
+    } else if (path.endsWith("/points") && (value === true || value === false) && node.enum.includes("always")) {
+      const mapped = value === true ? "always" : "none";
+      emit(ctx, {
+        code: "CK1007",
+        severity: "error",
+        message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
+        path,
+        hint: `mark.points is "none", "hover", or "always". ${value === true ? "true" : "false"} means ${quote(mapped)}.`,
+        fix: [{ op: "replace", path: path || "/", value: mapped }],
+      });
+    } else if (typeof value === "string" && node.enum.includes("number") && node.enum.includes("percent")) {
+      const preset = formatPresetFix(value);
+      if (preset) {
+        emit(ctx, {
+          code: "CK1007",
+          severity: "error",
+          message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
+          path,
+          hint: preset.hint,
+          fix: [{ op: "replace", path: path || "/", value: preset.value }],
+        });
+      } else {
+        const closest = nearest(value, node.enum.map(String), 3);
+        emit(ctx, {
+          code: "CK1007",
+          severity: "error",
+          message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
+          path,
+          hint: closest ? `did you mean ${quote(closest)}?` : undefined,
+          fix: closest ? [{ op: "replace", path: path || "/", value: closest }] : undefined,
+        });
+      }
     } else {
       const alias = typeof value === "string" && node.enum.includes(FIELD_TYPE_ALIAS[value]) ? FIELD_TYPE_ALIAS[value] : undefined;
       const closest = alias ?? (typeof value === "string" ? nearest(value, node.enum.map(String), 3) : undefined);
@@ -264,7 +302,11 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
   }
 
   if (isPlainObject(value)) {
-    if (path === "") noteMetricHoist(value, ctx);
+    if (path === "") {
+      noteChartType(value, ctx);
+      noteCombo(value, ctx);
+      noteMetricHoist(value, ctx);
+    }
     if (path === "/encoding") noteDonutChannels(value, ctx);
     if (node.minProperties !== undefined && Object.keys(value).length < node.minProperties) {
       emit(ctx, {
@@ -283,6 +325,10 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
     if (node.additionalProperties === false) {
       for (const key of Object.keys(value)) {
         if (!Object.prototype.hasOwnProperty.call(props, key)) {
+          if (key === "axis" && isXChannel(path) && (value[key] === null || isPlainObject(value[key]))) {
+            emitXAxis(value[key], join(path, key), ctx);
+            continue;
+          }
           emitUnknownProp(key, path, props, ctx);
         }
       }
@@ -319,8 +365,11 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
   if (node.if) {
     const before = ctx.out.length;
     check(value, node.if, path, ctx);
-    const ifFailed = ctx.out.length > before;
+    let ifFailed = ctx.out.length > before;
     ctx.out.splice(before);
+    // A repair for a missing `type` skips the CK1003, which would otherwise make every
+    // type-conditional `if` look true and demand metric, OHLC, and color at once.
+    if (!ifFailed && path === "" && ifDemandsChartType(node.if, ctx) && !hasKnownType(value)) ifFailed = true;
     if (!ifFailed && node.then) check(value, node.then, path, ctx);
     else if (ifFailed && node.else) check(value, node.else, path, ctx);
   }
@@ -405,8 +454,9 @@ function repairShape(value: unknown, path: string, ctx: Ctx): boolean {
     });
     return true;
   }
+  if (path === "/mark" && Array.isArray(value) && ctx.skipUnknown.has("/mark")) return true;
   if (path === "/mark" && typeof value === "string") {
-    const mapped = chartTypeName(value);
+    const mapped = chartTypeName(value, ctx.rootValue);
     const root = isPlainObject(ctx.rootValue) ? ctx.rootValue : {};
     const fix: JsonPatchOperation[] = [];
     if (typeof root.type !== "string" && mapped) fix.push({ op: "add", path: "/type", value: mapped });
@@ -427,18 +477,25 @@ function repairShape(value: unknown, path: string, ctx: Ctx): boolean {
   return false;
 }
 
+const METRIC_SHAPE = "metric: { value, min, max, label?, delta? }";
+
 function noteMetricHoist(value: Record<string, unknown>, ctx: Ctx): void {
   const type = value.type;
   if (type !== "gauge" && type !== "kpi" && type !== "progress-ring") return;
-  if (isPlainObject(value.metric)) return;
-  const keys = METRIC_FIELDS.filter((key) => value[key] !== undefined);
-  if (keys.length === 0 || keys.every((key) => ctx.skipUnknown.has(`/${key}`))) return;
-  const metric: Record<string, unknown> = {};
-  for (const key of keys) metric[key] = value[key];
-  const fix: JsonPatchOperation[] = [{ op: "add", path: "/metric", value: metric }];
-  for (const key of keys) {
+  if (ctx.skipMissing.has("|metric")) return;
+  if (isPlainObject(value.metric) && typeof value.metric.value === "number") return;
+  const gathered = gatherMetric(value);
+  if (typeof gathered.metric.value !== "number") return;
+  const fix: JsonPatchOperation[] = [
+    { op: isPlainObject(value.metric) ? "replace" : "add", path: "/metric", value: gathered.metric },
+  ];
+  for (const key of gathered.topLevel) {
     fix.push({ op: "remove", path: `/${key}` });
     ctx.skipUnknown.add(`/${key}`);
+  }
+  for (const key of gathered.encoding) {
+    fix.push({ op: "remove", path: `/encoding/${key}` });
+    ctx.skipUnknown.add(`/encoding/${key}`);
   }
   ctx.skipMissing.add("|metric");
   emit(ctx, {
@@ -446,12 +503,88 @@ function noteMetricHoist(value: Record<string, unknown>, ctx: Ctx): void {
     severity: "error",
     message: "gauge, kpi, and progress-ring keep the number in metric",
     path: "/metric",
-    hint: 'Move value, min, max, delta, and label into metric: { value, min, max }. They are not top-level keys.',
+    hint: `${METRIC_SHAPE}. Move value, min, max, delta, and label into that object. They are not top-level keys or encoding channels.`,
     fix,
   });
 }
 
+function gatherMetric(spec: Record<string, unknown>): { metric: Record<string, unknown>; topLevel: string[]; encoding: string[] } {
+  const metric: Record<string, unknown> = {};
+  const topLevel: string[] = [];
+  const encoding: string[] = [];
+  if (isPlainObject(spec.metric)) {
+    for (const key of METRIC_FIELDS) {
+      if (spec.metric[key] !== undefined) metric[key] = spec.metric[key];
+    }
+  }
+  for (const key of METRIC_FIELDS) {
+    if (metric[key] !== undefined || spec[key] === undefined) continue;
+    const lifted = liftMetric(spec, spec[key], key);
+    if (lifted === undefined) continue;
+    metric[key] = lifted;
+    topLevel.push(key);
+  }
+  const enc = isPlainObject(spec.encoding) ? spec.encoding : undefined;
+  if (enc) {
+    for (const key of METRIC_FIELDS) {
+      if (metric[key] !== undefined || enc[key] === undefined) continue;
+      const lifted = liftMetric(spec, enc[key], key);
+      if (lifted === undefined) continue;
+      metric[key] = lifted;
+      encoding.push(key);
+    }
+  }
+  if (typeof metric.value !== "number") {
+    const fromData = metricFromData(spec.data);
+    if (fromData) {
+      for (const key of METRIC_FIELDS) {
+        if (metric[key] === undefined && fromData[key] !== undefined) metric[key] = fromData[key];
+      }
+    }
+  }
+  return { metric, topLevel, encoding };
+}
+
+function liftMetric(spec: Record<string, unknown>, raw: unknown, key: string): unknown {
+  if (typeof raw === "number") return raw;
+  if (key === "label" && typeof raw === "string" && !fieldOnFirstRow(spec, raw)) return raw;
+  const field = typeof raw === "string" ? raw : isPlainObject(raw) && typeof raw.field === "string" ? raw.field : undefined;
+  if (!field) return undefined;
+  const row = firstRow(spec.data);
+  if (!row || row[field] === undefined) return undefined;
+  const cell = row[field];
+  if (typeof cell === "number") return cell;
+  if (key === "label" && typeof cell === "string") return cell;
+  return undefined;
+}
+
+function fieldOnFirstRow(spec: Record<string, unknown>, name: string): boolean {
+  const row = firstRow(spec.data);
+  return row !== undefined && row[name] !== undefined;
+}
+
+function firstRow(data: unknown): Record<string, unknown> | undefined {
+  if (Array.isArray(data) && data.length === 1 && isPlainObject(data[0])) return data[0];
+  if (isPlainObject(data) && !isPlainObject(data.columns) && typeof data.value === "number") return data;
+  return undefined;
+}
+
+function metricFromData(data: unknown): Record<string, unknown> | undefined {
+  if (typeof data === "number") return { value: data };
+  const row = firstRow(data);
+  if (!row) return undefined;
+  const metric: Record<string, unknown> = {};
+  for (const key of METRIC_FIELDS) {
+    if (typeof row[key] === "number" || (key === "label" && typeof row[key] === "string")) metric[key] = row[key];
+  }
+  return typeof metric.value === "number" ? metric : undefined;
+}
+
 function noteDonutChannels(encoding: Record<string, unknown>, ctx: Ctx): void {
+  const root = isPlainObject(ctx.rootValue) ? ctx.rootValue : {};
+  const mark = root.mark;
+  const arc = mark === "arc" || (isPlainObject(mark) && mark.type === "arc");
+  if (root.type !== "donut" && !arc) return;
   const present = DONUT_CHANNELS.filter((key) => encoding[key] !== undefined);
   if (present.length === 0 || present.every((key) => ctx.skipUnknown.has(`/encoding/${key}`))) return;
   const fix: JsonPatchOperation[] = [];
@@ -481,15 +614,7 @@ function noteDonutChannels(encoding: Record<string, unknown>, ctx: Ctx): void {
 function emitAxisObject(value: Record<string, unknown>, path: string, ctx: Ctx): void {
   const side = value.orient === "right" || value.position === "right" ? "y2" : "y";
   const fix: JsonPatchOperation[] = [{ op: "replace", path, value: side }];
-  if (typeof value.title === "string") {
-    const root = isPlainObject(ctx.rootValue) ? ctx.rootValue : {};
-    const axes = isPlainObject(root.axes) ? root.axes : undefined;
-    if (!axes) fix.push({ op: "add", path: "/axes", value: { [side]: { title: value.title } } });
-    else if (!isPlainObject(axes[side])) fix.push({ op: "add", path: `/axes/${side}`, value: { title: value.title } });
-    else if ((axes[side] as Record<string, unknown>).title === undefined) {
-      fix.push({ op: "add", path: `/axes/${side}/title`, value: value.title });
-    }
-  }
+  pushAxisTitle(fix, ctx, side, value.title);
   emit(ctx, {
     code: "CK1009",
     severity: "error",
@@ -500,17 +625,53 @@ function emitAxisObject(value: Record<string, unknown>, path: string, ctx: Ctx):
   });
 }
 
-function chartTypeName(raw: string): string | undefined {
-  if (raw === "pie") return "donut";
-  if (raw === "area") return "mini-area";
-  if (raw === "grid-heat" || raw === "gridheat" || raw === "grid_heat") return "heatmap";
-  return (CHART_TYPES as readonly string[]).includes(raw) ? raw : undefined;
+function emitAxisNull(path: string, ctx: Ctx): void {
+  emit(ctx, {
+    code: "CK1009",
+    severity: "error",
+    message: 'axis is "y" or "y2", not null',
+    path,
+    hint: 'Omit axis, or set "y" or "y2". Titles go in axes.y.title or axes.y2.title.',
+    fix: [{ op: "remove", path }],
+  });
+}
+
+function emitXAxis(raw: unknown, path: string, ctx: Ctx): void {
+  const fix: JsonPatchOperation[] = [{ op: "remove", path }];
+  if (isPlainObject(raw)) pushAxisTitle(fix, ctx, "x", raw.title);
+  emit(ctx, {
+    code: "CK1009",
+    severity: "error",
+    message: "encoding.x has no axis field",
+    path,
+    hint: 'Remove encoding.x.axis. A title goes in axes.x.title. On a y series, axis is the string "y" or "y2".',
+    fix,
+  });
+}
+
+function pushAxisTitle(fix: JsonPatchOperation[], ctx: Ctx, side: string, title: unknown): void {
+  if (typeof title !== "string") return;
+  const root = isPlainObject(ctx.rootValue) ? ctx.rootValue : {};
+  const axes = isPlainObject(root.axes) ? root.axes : undefined;
+  if (!axes) fix.push({ op: "add", path: "/axes", value: { [side]: { title } } });
+  else if (!isPlainObject(axes[side])) fix.push({ op: "add", path: `/axes/${side}`, value: { title } });
+  else if ((axes[side] as Record<string, unknown>).title === undefined) {
+    fix.push({ op: "add", path: `/axes/${side}/title`, value: title });
+  }
+}
+
+function isXChannel(path: string): boolean {
+  return path === "/encoding/x" || path.endsWith("/x");
+}
+
+function chartTypeName(raw: string, root: unknown): string | undefined {
+  return aliasFor(raw, root)?.type ?? ((CHART_TYPES as readonly string[]).includes(raw) ? raw : undefined);
 }
 
 function emitUnknownType(value: unknown, ctx: Ctx): void {
   const raw = typeof value === "string" ? value : String(value);
   const kebab = raw.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`).replace(/^-/, "");
-  const alias = aliasFor(raw);
+  const alias = aliasFor(raw, ctx.rootValue);
   const closest = alias?.type ?? (CHART_TYPES as readonly string[]).find((t) => t === kebab) ?? nearest(raw, [...CHART_TYPES], 3);
   const hintParts = [
     closest ? `did you mean ${quote(closest)}?` : undefined,
@@ -535,19 +696,211 @@ interface Alias {
   kind: "pie" | "rename";
 }
 
-function aliasFor(value: string): Alias | undefined {
+function aliasFor(value: string, root: unknown): Alias | undefined {
   if (value === "pie") return { type: "donut", note: '"pie" maps to type "donut" with mark.innerRadius 0.', kind: "pie" };
-  if (value === "area") {
+  if (value === "arc") return { type: "donut", note: '"arc" maps to type "donut". encoding.x is the slice label and encoding.y is the value.', kind: "rename" };
+  if (value === "point" || value === "circle" || value === "square") {
+    return { type: "scatter", note: '"point", "circle", and "square" are type "scatter".', kind: "rename" };
+  }
+  if (value === "rect") return { type: "heatmap", note: "A colored grid is type \"heatmap\" with encoding.x, encoding.y, and encoding.color.", kind: "rename" };
+  if (value === "rule" || value === "tick") return { type: "spike", note: '"rule" and "tick" map to type "spike".', kind: "rename" };
+  if (value === "metric") {
+    const gauge = looksLikeGauge(root);
     return {
-      type: "mini-area",
-      note: 'A full-size filled line is type "line" with mark.area true. Stacked layers are "stacked-area".',
+      type: gauge ? "gauge" : "kpi",
+      note: 'A single number is "gauge" or "kpi", with metric: { value, min, max, label?, delta? }.',
       kind: "rename",
     };
+  }
+  if (value === "area") {
+    const stacked = yCount(root) >= 2;
+    return stacked
+      ? { type: "stacked-area", note: 'Two or more y fields are type "stacked-area" with encoding.y as a list of fields.', kind: "rename" }
+      : {
+          type: "mini-area",
+          note: 'A full-size filled line is type "line" with mark.area true. Stacked layers are "stacked-area".',
+          kind: "rename",
+        };
   }
   if (value === "grid-heat" || value === "gridheat" || value === "grid_heat") {
     return { type: "heatmap", note: "A grid uses encoding.x, encoding.y, and encoding.color.", kind: "rename" };
   }
   return undefined;
+}
+
+function looksLikeGauge(root: unknown): boolean {
+  if (!isPlainObject(root)) return false;
+  if (root.min !== undefined || root.max !== undefined || root.bands !== undefined || root.target !== undefined) return true;
+  if (isPlainObject(root.metric) && (root.metric.min !== undefined || root.metric.max !== undefined || root.metric.target !== undefined)) return true;
+  const enc = isPlainObject(root.encoding) ? root.encoding : undefined;
+  return enc !== undefined && (enc.min !== undefined || enc.max !== undefined);
+}
+
+function yCount(root: unknown): number {
+  if (!isPlainObject(root)) return 0;
+  const enc = isPlainObject(root.encoding) ? root.encoding : undefined;
+  if (!enc) return 0;
+  if (Array.isArray(enc.y)) return enc.y.length + (enc.y2 !== undefined ? 1 : 0);
+  let count = enc.y !== undefined ? 1 : 0;
+  if (enc.y2 !== undefined) count += 1;
+  return count;
+}
+
+function noteChartType(spec: Record<string, unknown>, ctx: Ctx): void {
+  if (ctx.skipUnknown.has("/chartType")) return;
+  if (typeof spec.chartType !== "string" || hasKnownType(spec)) return;
+  const mapped = chartTypeName(spec.chartType, spec);
+  if (!mapped) return;
+  const fix: JsonPatchOperation[] = [
+    { op: typeof spec.type === "string" ? "replace" : "add", path: "/type", value: mapped },
+    { op: "remove", path: "/chartType" },
+  ];
+  ctx.skipUnknown.add("/chartType");
+  ctx.skipMissing.add("|type");
+  emit(ctx, {
+    code: "CK1009",
+    severity: "error",
+    message: "chartType belongs in type",
+    path: "/chartType",
+    hint: `The chart type is type: ${JSON.stringify(mapped)}. chartType is not a spec key.`,
+    fix,
+  });
+}
+
+function noteCombo(spec: Record<string, unknown>, ctx: Ctx): void {
+  if (ctx.skipUnknown.has("/$combo")) return;
+  const enc = isPlainObject(spec.encoding) ? spec.encoding : undefined;
+  const layer = Array.isArray(spec.layer) ? spec.layer : Array.isArray(spec.marks) ? spec.marks : undefined;
+  const markList = Array.isArray(spec.mark) ? spec.mark : undefined;
+  const hasY2 = enc?.y2 !== undefined;
+  if (!layer && !markList && !hasY2) return;
+  ctx.skipUnknown.add("/$combo");
+  const built = comboSeries(spec, layer, markList, enc);
+  const fix: JsonPatchOperation[] = [];
+  if (spec.type !== "combo") {
+    fix.push({ op: typeof spec.type === "string" ? "replace" : "add", path: "/type", value: "combo" });
+    ctx.skipMissing.add("|type");
+  }
+  if (built.series.length > 0) {
+    if (!enc) {
+      const encoding: Record<string, unknown> = { y: built.series };
+      if (built.x) encoding.x = built.x;
+      fix.push({ op: "add", path: "/encoding", value: encoding });
+      ctx.skipMissing.add("|encoding");
+    } else {
+      if (built.x && enc.x === undefined) fix.push({ op: "add", path: "/encoding/x", value: built.x });
+      fix.push({ op: enc.y === undefined ? "add" : "replace", path: "/encoding/y", value: built.series });
+    }
+  }
+  if (hasY2) {
+    fix.push({ op: "remove", path: "/encoding/y2" });
+    ctx.skipUnknown.add("/encoding/y2");
+  }
+  if (Array.isArray(spec.layer)) {
+    fix.push({ op: "remove", path: "/layer" });
+    ctx.skipUnknown.add("/layer");
+  }
+  if (Array.isArray(spec.marks)) {
+    fix.push({ op: "remove", path: "/marks" });
+    ctx.skipUnknown.add("/marks");
+  }
+  if (markList) {
+    fix.push({ op: "remove", path: "/mark" });
+    ctx.skipUnknown.add("/mark");
+  }
+  if (built.series.some((series) => series.axis === "y2")) {
+    const axes = isPlainObject(spec.axes) ? spec.axes : undefined;
+    if (!axes) fix.push({ op: "add", path: "/axes", value: { y2: true } });
+    else if (axes.y2 === undefined) fix.push({ op: "add", path: "/axes/y2", value: true });
+  }
+  emit(ctx, {
+    code: "CK1009",
+    severity: "error",
+    message: "combo is one spec; each series is an item of encoding.y",
+    path: "/type",
+    hint: 'A second measure is encoding.y: [{ field, mark: "bar" }, { field, mark: "line", axis: "y2" }]. layer, marks, and encoding.y2 are not spec keys.',
+    fix,
+  });
+}
+
+function comboSeries(
+  spec: Record<string, unknown>,
+  layer: unknown[] | undefined,
+  markList: unknown[] | undefined,
+  enc: Record<string, unknown> | undefined,
+): { series: Record<string, unknown>[]; x?: string } {
+  if (layer) {
+    const series: Record<string, unknown>[] = [];
+    let x: string | undefined;
+    for (let i = 0; i < layer.length; i++) {
+      const item = layer[i];
+      if (!isPlainObject(item)) continue;
+      const itemEnc = isPlainObject(item.encoding) ? item.encoding : {};
+      const field = fieldName(itemEnc.y);
+      if (!field) continue;
+      x ??= fieldName(itemEnc.x);
+      const entry: Record<string, unknown> = { field, mark: comboMark(item.mark) };
+      if (series.length > 0) entry.axis = "y2";
+      series.push(entry);
+    }
+    return { series, x };
+  }
+  const yField = fieldName(enc?.y);
+  const y2Field = fieldName(enc?.y2);
+  if (yField && y2Field) {
+    const first = comboMark(markList?.[0] ?? "bar");
+    const second = comboMark(markList?.[1] ?? "line");
+    return {
+      series: [
+        { field: yField, mark: first },
+        { field: y2Field, mark: second, axis: "y2" },
+      ],
+      x: fieldName(enc?.x),
+    };
+  }
+  if (Array.isArray(enc?.y) && markList && markList.length === enc.y.length) {
+    const series = enc.y.map((item, index) => {
+      const field = fieldName(item);
+      return field ? { field, mark: comboMark(markList[index]) } : undefined;
+    }).filter((item): item is { field: string; mark: "line" | "bar" | "area" } => item !== undefined);
+    return { series, x: fieldName(enc?.x) };
+  }
+  return { series: [], x: fieldName(enc?.x) ?? fieldName(isPlainObject(spec.encoding) ? spec.encoding.x : undefined) };
+}
+
+function fieldName(channel: unknown): string | undefined {
+  if (typeof channel === "string") return channel;
+  if (isPlainObject(channel) && typeof channel.field === "string") return channel.field;
+  return undefined;
+}
+
+function comboMark(raw: unknown): "line" | "bar" | "area" {
+  const name = typeof raw === "string" ? raw : isPlainObject(raw) && typeof raw.type === "string" ? raw.type : "line";
+  if (name === "bar" || name === "area") return name;
+  return "line";
+}
+
+function hasKnownType(value: unknown): boolean {
+  return isPlainObject(value) && typeof value.type === "string" && (CHART_TYPES as readonly string[]).includes(value.type);
+}
+
+function ifDemandsChartType(schema: JsonSchema, ctx: Ctx): boolean {
+  const node = resolve(schema, ctx.rootSchema);
+  return node.required?.includes("type") === true && node.properties?.type?.enum !== undefined;
+}
+
+function isTypeBranchNoise(diagnostic: Diagnostic): boolean {
+  return diagnostic.code === "CK1003" && /"(metric|color|open|high|low|close)"/.test(diagnostic.message);
+}
+
+function formatPresetFix(value: string): { hint: string; value: unknown } | undefined {
+  const decimals = /^\.(\d+)f$/.exec(value);
+  if (!decimals) return undefined;
+  const n = Number(decimals[1]);
+  return {
+    hint: `did you mean "number"? ${n} decimal places is { "style": "number", "decimals": ${n} }.`,
+    value: { style: "number", decimals: n },
+  };
 }
 
 function aliasFix(root: unknown, alias: Alias): JsonPatchOperation[] {
@@ -594,6 +947,16 @@ function emitMissing(name: string, path: string, parent: Record<string, unknown>
   const pointer = name === "a11y" && path === "" ? "/a11y" : path;
   if ((path === "" && name === "a11y") || (path === "/a11y" && name === "alt")) {
     emitAltRequired(ctx);
+    return;
+  }
+  if (path === "" && name === "type") {
+    emit(ctx, {
+      code: "CK1003",
+      severity: "error",
+      message: `missing required property ${quote(name)}`,
+      path: "",
+      hint: `set type to one of: ${CHART_TYPES.join(", ")}. The chart type goes in type, not mark.`,
+    });
     return;
   }
   const type = isPlainObject(ctx.rootValue) && typeof ctx.rootValue.type === "string" ? ctx.rootValue.type : undefined;

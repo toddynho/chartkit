@@ -5,7 +5,7 @@ import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { describe, expect, it } from "vitest";
 import schema from "../../schema/chartkit.schema.json";
-import { suggestAlt, validate } from "../validate";
+import { repair, suggestAlt, validate } from "../validate";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const examplesDir = join(root, "examples");
@@ -345,6 +345,174 @@ describe("diagnostic codes", () => {
       { op: "move", from: "/encoding/theta", path: "/encoding/y" },
     ]);
     expect(validate({ ...spec, encoding: { x: "name", y: "count" } }).ok).toBe(true);
+  });
+
+  it("a missing type reports the repair and not every chart's required fields", () => {
+    const { type: _type, ...rest } = base;
+    const spec = { ...rest, mark: "bar" };
+    const result = validate(spec);
+    expect(result.errors[0]?.code).toBe("CK1009");
+    const blob = JSON.stringify(result.errors);
+    expect(blob).not.toContain("metric");
+    expect(blob).not.toContain("open");
+    expect(blob).not.toContain("high");
+    expect(blob).not.toContain("close");
+    const repaired = repair(spec);
+    expect(repaired.ok).toBe(true);
+    expect((repaired.spec as { type: string }).type).toBe("bar");
+    expect(spec.mark).toBe("bar");
+  });
+
+  it("CK1005 maps point, rect, multi-series area, and metric", () => {
+    const point = validate({ ...base, type: "point" });
+    expect(point.errors[0]?.hint).toContain("scatter");
+    expect(point.errors[0]?.fix).toEqual([{ op: "replace", path: "/type", value: "scatter" }]);
+
+    const rect = validate({ ...base, type: "rect" });
+    expect(rect.errors.find((item) => item.code === "CK1005")?.fix).toEqual([{ op: "replace", path: "/type", value: "heatmap" }]);
+
+    const stacked = {
+      ...base,
+      type: "area",
+      data: [
+        { month: "Jan", revenue: 10, cost: 4 },
+        { month: "Feb", revenue: 12, cost: 5 },
+      ],
+      encoding: { x: "month", y: ["revenue", "cost"] },
+    };
+    expect(validate(stacked).errors.find((item) => item.code === "CK1005")?.fix).toEqual([
+      { op: "replace", path: "/type", value: "stacked-area" },
+    ]);
+    expect(repair(stacked).ok).toBe(true);
+
+    const metric = validate({ ...base, type: "metric" });
+    const metricError = metric.errors.find((item) => item.code === "CK1005");
+    expect(metricError?.hint).toContain("gauge");
+    expect(metricError?.hint).toContain("kpi");
+    expect(metricError?.hint).toContain("metric: { value, min, max, label?, delta? }");
+    expect(metricError?.fix).toEqual([{ op: "replace", path: "/type", value: "kpi" }]);
+
+    const gauge = validate({
+      version: "1",
+      type: "metric",
+      min: 0,
+      max: 100,
+      value: 64,
+      a11y: { alt: "Capacity is 64 out of 100." },
+    });
+    expect(gauge.errors.find((item) => item.code === "CK1005")?.fix?.[0]).toMatchObject({ path: "/type", value: "gauge" });
+    expect(repair({
+      version: "1",
+      type: "metric",
+      min: 0,
+      max: 100,
+      value: 64,
+      a11y: { alt: "Capacity is 64 out of 100." },
+    }).ok).toBe(true);
+  });
+
+  it("CK1003 for a gauge shows the metric shape", () => {
+    const result = validate({ version: "1", type: "gauge", a11y: { alt: "This gauge is missing its metric value." } });
+    expect(result.errors.find((item) => item.code === "CK1003")?.hint).toContain("metric: { value, min, max, label?, delta? }");
+  });
+
+  it("CK1009 builds metric from a one-row encoding and does not call a gauge a donut", () => {
+    const spec = {
+      version: "1",
+      type: "gauge",
+      data: [{ value: 64, min: 0, max: 100 }],
+      encoding: { value: "value", min: "min", max: "max", theta: "value" },
+      a11y: { alt: "Capacity is 64 out of 100." },
+    };
+    const result = validate(spec);
+    expect(result.errors.some((item) => /donut/i.test(`${item.message} ${item.hint ?? ""}`))).toBe(false);
+    expect(result.errors.find((item) => item.code === "CK1009")?.hint).toContain("metric: { value, min, max, label?, delta? }");
+    expect(result.errors.find((item) => item.code === "CK1009")?.hint).toContain("metric: { value, min, max, label?, delta? }");
+    const { encoding: _encoding, ...rest } = spec;
+    const repaired = repair({ ...rest, encoding: { value: "value", min: "min", max: "max" } });
+    expect((repaired.spec as { metric: unknown }).metric).toEqual({ value: 64, min: 0, max: 100 });
+    expect(repaired.ok).toBe(true);
+  });
+
+  it("CK1009 moves an x axis title and drops a null y axis", () => {
+    const titled = validate({
+      ...base,
+      encoding: { x: { field: "month", axis: { title: "Month" } }, y: "revenue" },
+    });
+    const axis = titled.errors.find((item) => item.code === "CK1009");
+    expect(axis?.path).toBe("/encoding/x/axis");
+    expect(axis?.hint).toContain("axes.x.title");
+    expect(repair({
+      ...base,
+      encoding: { x: { field: "month", axis: { title: "Month" } }, y: "revenue" },
+    }).ok).toBe(true);
+
+    const nulled = validate({
+      ...base,
+      encoding: { x: "month", y: { field: "revenue", axis: null } },
+    });
+    expect(nulled.errors.find((item) => item.code === "CK1009")?.fix).toEqual([
+      { op: "remove", path: "/encoding/y/axis" },
+    ]);
+  });
+
+  it("CK1009 rewrites a Vega-Lite layer into combo series", () => {
+    const spec = {
+      version: "1",
+      data: [
+        { month: "Jan", revenue: 10, cost: 4 },
+        { month: "Feb", revenue: 12, cost: 5 },
+      ],
+      layer: [
+        { mark: "bar", encoding: { x: "month", y: "revenue" } },
+        { mark: "line", encoding: { x: "month", y: "cost" } },
+      ],
+      a11y: { alt: "Revenue stayed above cost." },
+    };
+    const result = validate(spec);
+    expect(result.errors[0]?.code).toBe("CK1009");
+    expect(result.errors[0]?.hint).toContain('axis: "y2"');
+    expect(result.errors.some((item) => item.message.includes("layer") && item.code === "CK1002")).toBe(false);
+    const repaired = repair(spec);
+    expect(repaired.ok).toBe(true);
+    expect((repaired.spec as { type: string }).type).toBe("combo");
+  });
+
+  it("CK1007 maps mark.points true to always and .2f to a number format", () => {
+    const points = validate({ ...base, mark: { points: true } });
+    expect(points.errors.find((item) => item.path === "/mark/points")?.fix).toEqual([
+      { op: "replace", path: "/mark/points", value: "always" },
+    ]);
+    expect(repair({ ...base, mark: { points: true } }).ok).toBe(true);
+
+    const formatted = validate({
+      ...base,
+      encoding: { x: "month", y: { field: "revenue", format: ".2f" } },
+    });
+    expect(formatted.errors.find((item) => item.path === "/encoding/y/format")?.fix?.[0]?.value).toEqual({
+      style: "number",
+      decimals: 2,
+    });
+  });
+
+  it("CK2001 tells a sparkline not to encode the number array", () => {
+    const spec = {
+      version: "1",
+      type: "sparkline",
+      data: [4, 6, 5],
+      encoding: { y: { field: "data" } },
+      a11y: { alt: "The line ends near where it starts." },
+    };
+    const result = validate(spec);
+    expect(result.errors.some((item) => item.hint?.includes("need no encoding"))).toBe(true);
+    expect(repair(spec).ok).toBe(true);
+  });
+
+  it("repair applies data.values and leaves the input alone", () => {
+    const spec = { ...base, data: { values: base.data } };
+    const repaired = repair(spec);
+    expect(repaired.ok).toBe(true);
+    expect(spec.data).toEqual({ values: base.data });
   });
 
   it("CK2004 rejects empty data", () => {
