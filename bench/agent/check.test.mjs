@@ -253,6 +253,54 @@ test("a recharts JSX module resolves from bench/node_modules", async () => {
   assert.equal(result.ok, true, JSON.stringify(result.stages));
 });
 
+test("heat-sales accepts either axis orientation and heat-load does not", () => {
+  const sales = suite.tasks.find((item) => item.id === "heat-sales");
+  const swapped = {
+    version: "1",
+    type: "heatmap",
+    data: sales.data,
+    encoding: { x: "city", y: "month", color: "sales" },
+    a11y: { alt: "Sales by city and month." },
+  };
+  assert.equal(suite.checkChartKit(swapped, sales).ok, true, JSON.stringify(suite.checkChartKit(swapped, sales).stages));
+  const named = {
+    ...swapped,
+    encoding: { x: "month", y: "city", color: "sales" },
+  };
+  assert.equal(suite.checkChartKit(named, sales).ok, true);
+  const load = suite.tasks.find((item) => item.id === "heat-load");
+  const flipped = {
+    version: "1",
+    type: "heatmap",
+    data: load.data,
+    encoding: { x: "day", y: "hour", color: "load" },
+    a11y: { alt: "Load by hour and weekday." },
+  };
+  assert.equal(suite.checkChartKit(flipped, load).stages.fields.ok, false);
+});
+
+test("no-docs prompts name the npm package and give ChartKit a render hint", () => {
+  const task = suite.tasks.find((item) => item.id === "line-revenue");
+  const chartkit = suite.chartkitPrompt(task);
+  assert.match(chartkit, /metric: \{ value, min, max/);
+  assert.doesNotMatch(chartkit, /Official reference/);
+  const chartjs = suite.codePrompt(task, "chartjs");
+  assert.match(chartjs, /npm package "chart\.js"/);
+  assert.doesNotMatch(chartjs, /using chartjs\b/);
+  const official = suite.promptFor(task, "echarts", "official");
+  assert.match(official, /Official reference/);
+  assert.match(official, /renderToSVGString/);
+  const plain = suite.promptFor(task, "echarts", "none");
+  assert.doesNotMatch(plain, /Official reference/);
+  const manifest = suite.docsManifest();
+  const byName = Object.fromEntries(manifest.map((item) => [item.library, item]));
+  for (const library of ["chartkit", "recharts", "echarts", "chartjs"]) {
+    assert.ok(byName[library].bytes > 1000, library);
+    assert.ok(byName[library].url, library);
+    assert.ok(byName[library].bytes <= byName.chartkit.bytes, `${library} ${byName[library].bytes}`);
+  }
+});
+
 test("chart.js runs in Playwright and a canvas counts as use", { timeout: 120000 }, async () => {
   const { chromium } = await import("playwright");
   const browser = await chromium.launch({ headless: true });

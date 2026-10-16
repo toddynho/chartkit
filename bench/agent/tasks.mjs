@@ -33,7 +33,7 @@ export const tasks = [
 
   task("heat-load", "heatmap", "Grid heatmap of load by hour and weekday.", [{ hour: "9", day: "Mon", load: 1 }, { hour: "10", day: "Mon", load: 5 }, { hour: "9", day: "Tue", load: 3 }], { x: "hour", y: "day", color: "load", values: [1, 5, 3] }),
   task("heat-commits", "heatmap", "Calendar heatmap of commits per day.", [{ date: "2026-01-01", commits: 1 }, { date: "2026-01-02", commits: 4 }, { date: "2026-01-03", commits: 2 }], { x: "date", color: "commits", values: [1, 4, 2] }),
-  task("heat-sales", "heatmap", "Grid heatmap of sales by city and month.", [{ city: "Austin", month: "Jan", sales: 12 }, { city: "Austin", month: "Feb", sales: 18 }, { city: "Denver", month: "Jan", sales: 9 }], { x: "month", y: "city", color: "sales", values: [12, 18, 9] }),
+  task("heat-sales", "heatmap", "Grid heatmap of sales by city and month.", [{ city: "Austin", month: "Jan", sales: 12 }, { city: "Austin", month: "Feb", sales: 18 }, { city: "Denver", month: "Jan", sales: 9 }], { x: "month", y: "city", color: "sales", values: [12, 18, 9], swapAxes: true }),
 
   task("gauge-done", "gauge", "Gauge of project completion at 72 out of 100.", { value: 72, min: 0, max: 100 }, { metric: 72 }),
   task("gauge-cpu", "gauge", "Gauge of CPU usage at 41 percent.", { value: 41, min: 0, max: 100 }, { metric: 41 }),

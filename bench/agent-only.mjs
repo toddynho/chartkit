@@ -27,8 +27,15 @@ writeFileSync(out, JSON.stringify({
   finished: new Date().toISOString(),
   env: {
     BENCH_LIBRARIES: process.env.BENCH_LIBRARIES ?? null,
-    BENCH_CHARTKIT_CONTEXT: process.env.BENCH_CHARTKIT_CONTEXT ?? null,
+    BENCH_DOCS: process.env.BENCH_DOCS ?? "none",
   },
   agent,
 }, null, 2));
+if (agent.status === "ok") {
+  const condition = join(benchRoot, "results/agent/conditions", agent.docs === "official" ? "with-docs.json" : "no-docs.json");
+  mkdirSync(dirname(condition), { recursive: true });
+  writeFileSync(condition, JSON.stringify({ started, finished: new Date().toISOString(), agent }, null, 2));
+}
 console.log(`wrote ${out}: ${agent.passed}/${agent.attempts}`);
+// Playwright can keep the event loop alive after browser.close(); exit once the report is written.
+process.exit(0);

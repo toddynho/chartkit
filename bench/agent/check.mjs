@@ -22,10 +22,18 @@ import { progressRing } from "../../packages/core/src/charts/progress-ring.ts";
 import { spike } from "../../packages/core/src/charts/spike.ts";
 import { candlestick } from "../../packages/core/src/charts/candlestick.ts";
 import { ACCEPTED } from "./capabilities.mjs";
+import { noDocsHint, officialReference } from "./docs.mjs";
 
 const render = createRenderer([
   line, bar, donut, stackedArea, scatter, combo, heatmap, gauge, kpi, sparkline, miniArea, progressRing, spike, candlestick,
 ]);
+
+/** How prompts and feedback name each library: display name plus the real npm package. "chartjs" is only an internal key. */
+export const LIBRARY_LABEL = {
+  recharts: 'Recharts (npm package "recharts")',
+  echarts: 'ECharts (npm package "echarts")',
+  chartjs: 'Chart.js (npm package "chart.js")',
+};
 
 const LIBRARY_PACKAGE = {
   recharts: /^recharts$/,
@@ -131,6 +139,21 @@ function channelField(value) {
   return undefined;
 }
 
+function fieldsMatch(encoding, expect) {
+  const matches = (expected) => {
+    for (const key of ["x", "y", "color", "open", "high", "low", "close"]) {
+      if (expected[key] === undefined) continue;
+      if (!sameField(channelField(encoding[key]), expected[key])) return false;
+    }
+    return true;
+  };
+  if (matches(expect)) return true;
+  if (expect.swapAxes && expect.x !== undefined && expect.y !== undefined) {
+    return matches({ ...expect, x: expect.y, y: expect.x });
+  }
+  return false;
+}
+
 function sameField(actual, expected) {
   if (Array.isArray(expected)) {
     const fields = Array.isArray(actual) ? actual : [actual];
@@ -164,12 +187,7 @@ export function checkChartKit(spec, task) {
   };
 
   const encoding = spec?.encoding ?? {};
-  let fieldsOk = true;
-  for (const key of ["x", "y", "color", "open", "high", "low", "close"]) {
-    if (task.expect[key] === undefined) continue;
-    if (!sameField(channelField(encoding[key]), task.expect[key])) fieldsOk = false;
-  }
-  stages.fields = { ok: fieldsOk };
+  stages.fields = { ok: fieldsMatch(encoding, task.expect) };
 
   const blob = JSON.stringify(spec?.data ?? spec?.metric ?? spec);
   const values = task.expect.values ?? (task.expect.metric !== undefined ? [task.expect.metric] : []);
@@ -209,7 +227,7 @@ export function scoreModule(mod, task, library, context = {}) {
             ok: false,
             imports: use.imports,
             uses: use.uses,
-            reason: `Import ${library} and call it. A hand-written SVG does not pass.`,
+            reason: `Import ${LIBRARY_LABEL[library] ?? library} and call it. A hand-written SVG does not pass.`,
           },
         },
       };
@@ -253,7 +271,7 @@ export function scoreModule(mod, task, library, context = {}) {
         ok: false,
         imports: true,
         uses: true,
-        reason: `render() did not return markup produced by ${library}.`,
+        reason: `render() did not return markup produced by ${LIBRARY_LABEL[library] ?? library}.`,
       };
   }
   return { ok: Object.values(stages).every((stage) => stage.ok), status: "checked", stages };
@@ -359,7 +377,8 @@ export async function executeAnswer(source, library, getBrowser) {
 export function chartkitPrompt(task) {
   return [
     "Write a ChartKit v1 JSON spec for this request. Output one JSON object and nothing else.",
-    'Rules: "version" is "1". "a11y.alt" is one sentence. Use encoding field names. Do not use a function formatter.',
+    noDocsHint("chartkit"),
+    "Do not use a function formatter.",
     `Request: ${task.prompt}`,
     `Data: ${JSON.stringify(task.data)}`,
   ].join("\n");
@@ -367,28 +386,31 @@ export function chartkitPrompt(task) {
 
 export function codePrompt(task, library) {
   const accepted = ACCEPTED[library][task.type];
+  const label = LIBRARY_LABEL[library] ?? library;
   const lines = [
-    `Write a JavaScript module for this chart using ${library}.`,
+    `Write a JavaScript module for this chart using ${label}.`,
     "Output only the module.",
-    `Import ${library} and render with it. A hand-written SVG that does not call the library fails.`,
+    `Import ${label} and render with it. A hand-written SVG that does not call the library fails.`,
     "export function render() { return the SVG or HTML string the library produced }",
     "export const meta = { type, values }",
+    noDocsHint(library),
   ];
-  if (library === "chartjs") {
-    lines.push("render() runs in a browser document. document and canvas exist. Create a canvas, construct the chart, and return the canvas markup or a data URL.");
-  }
-  if (library === "echarts") {
-    lines.push('In Node, use echarts.init(null, null, { renderer: "svg", ssr: true, width, height }) and return chart.renderToSVGString(). Code that touches document runs in a browser instead.');
-  }
-  if (library === "recharts") {
-    lines.push("Use renderToStaticMarkup from react-dom/server and return that string. JSX is allowed.");
-  }
   lines.push(
     accepted
       ? `meta.type must be one of: ${accepted.join(", ")}.`
-      : `${library} cannot draw a ${task.type} chart. export const meta = { unsupported: true, reason } and export function render(){ return "" }. Do not invent a substitute chart.`,
+      : `${label} cannot draw a ${task.type} chart. export const meta = { unsupported: true, reason } and export function render(){ return "" }. Do not invent a substitute chart.`,
     `Request: ${task.prompt}`,
     `Data: ${JSON.stringify(task.data)}`,
   );
   return lines.join("\n");
+}
+
+/** `none` is the minimal how-to hint. `official` prepends that library's own doc, cut to ChartKit llms.txt. */
+export function promptFor(task, library, docs = "none") {
+  const base = library === "chartkit" ? chartkitPrompt(task) : codePrompt(task, library);
+  if (docs !== "official") return base;
+  const doc = officialReference(library);
+  if (!doc) return base;
+  const where = [doc.url, ...doc.also].filter(Boolean).join(" ");
+  return `Official reference (${doc.title}, ${doc.bytes} bytes, ${where}):\n${doc.text}\n${base}`;
 }

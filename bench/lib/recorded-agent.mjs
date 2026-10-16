@@ -67,7 +67,7 @@ export function recordedAgentSection() {
   const lines = [];
   lines.push("### Recorded run: claude-sonnet-4-5, published protocol");
   lines.push("");
-  lines.push("One run, temperature 0, max_tokens 4096, one attempt per task, no repair loop. Model **claude-sonnet-4-5** via Anthropic. The checker in that run did not require a library import: `render()` only had to return a string, and `meta.values` is written by the model. Those code-library rates are inflated. Raw rows are in `bench/results/agent/sonnet-4-5/`. The fair-scoring rerun (import and library markup required, Chart.js and browser-only ECharts in Playwright, one repair try) has not been run.");
+  lines.push("One run, temperature 0, max_tokens 4096, one attempt per task, no repair loop. Model **claude-sonnet-4-5** via Anthropic. The checker in that run did not require a library import: `render()` only had to return a string, and `meta.values` is written by the model. Those code-library rates are inflated. Raw rows are in `bench/results/agent/sonnet-4-5/`. A later library-use run is the old-protocol row in the two-condition table below. It is not the no-docs column and not the with-docs column.");
   lines.push("");
   const machine = main.machine;
   if (machine) {

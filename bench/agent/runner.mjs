@@ -1,6 +1,7 @@
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { CODE_LIBRARIES } from "./capabilities.mjs";
-import { chartkitPrompt, checkChartKit, codePrompt, executeAnswer, extractJson, extractModule, libraryUse, scoreModule } from "./check.mjs";
+import { LIBRARY_LABEL, checkChartKit, executeAnswer, extractJson, extractModule, libraryUse, promptFor, scoreModule } from "./check.mjs";
+import { docsManifest } from "./docs.mjs";
 import { askModel, selectProvider } from "./provider.mjs";
 import { tasks as defaultTasks } from "./tasks.mjs";
 
@@ -54,11 +55,8 @@ export async function runAgent({ env = process.env, tasks = defaultTasks, ask = 
       done.set(`${row.id}|${row.library}`, row);
     }
   }
-  const context = env.BENCH_CHARTKIT_CONTEXT ? readFileSync(env.BENCH_CHARTKIT_CONTEXT, "utf8") : "";
-  const promptFor = (task, library) =>
-    library === "chartkit"
-      ? (context ? `ChartKit reference:\n${context}\n\n${chartkitPrompt(task)}` : chartkitPrompt(task))
-      : codePrompt(task, library);
+  const docs = env.BENCH_DOCS === "official" ? "official" : "none";
+  const promptForTask = (task, library) => promptFor(task, library, docs);
 
   let browserPromise;
   const getBrowser = () => {
@@ -72,7 +70,7 @@ export async function runAgent({ env = process.env, tasks = defaultTasks, ask = 
         results.push(...libs.map((library) => done.get(`${task.id}|${library}`)));
         continue;
       }
-      const row = await Promise.all(libs.map((library) => scoreOne(selected, task, library, promptFor(task, library), ask, getBrowser)));
+      const row = await Promise.all(libs.map((library) => scoreOne(selected, task, library, promptForTask(task, library), ask, getBrowser)));
       results.push(...row);
       if (log) for (const item of row) appendFileSync(log, `${JSON.stringify(item)}\n`);
       if (env.BENCH_VERBOSE) console.log(task.id, row.map((item) => `${item.library}:${item.ok ? "ok" : "FAIL"}`).join(" "));
@@ -87,6 +85,8 @@ export async function runAgent({ env = process.env, tasks = defaultTasks, ask = 
   const recovered = results.filter((row) => !row.ok && row.second?.ok).length;
   return {
     status: "ok",
+    docs,
+    references: docsManifest(),
     provider: selected.provider,
     model: selected.model,
     taskCount: tasks.length,
@@ -143,7 +143,7 @@ async function attempt(selected, task, library, prompt, ask, getBrowser) {
             ok: false,
             imports: use.imports,
             uses: use.uses,
-            reason: `Import ${library} and call it. A hand-written SVG does not pass.`,
+            reason: `Import ${LIBRARY_LABEL[library] ?? library} and call it. A hand-written SVG does not pass.`,
           },
         },
         diagnostics,

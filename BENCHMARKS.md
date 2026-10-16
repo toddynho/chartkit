@@ -152,7 +152,7 @@ The fixed set has 42 tasks covering all 14 chart types.
 
 ### Recorded run: claude-sonnet-4-5, published protocol
 
-One run, temperature 0, max_tokens 4096, one attempt per task, no repair loop. Model **claude-sonnet-4-5** via Anthropic. The checker in that run did not require a library import: `render()` only had to return a string, and `meta.values` is written by the model. Those code-library rates are inflated. Raw rows are in `bench/results/agent/sonnet-4-5/`. The fair-scoring rerun (import and library markup required, Chart.js and browser-only ECharts in Playwright, one repair try) has not been run.
+One run, temperature 0, max_tokens 4096, one attempt per task, no repair loop. Model **claude-sonnet-4-5** via Anthropic. The checker in that run did not require a library import: `render()` only had to return a string, and `meta.values` is written by the model. Those code-library rates are inflated. Raw rows are in `bench/results/agent/sonnet-4-5/`. A later library-use run is the old-protocol row in the two-condition table below. It is not the no-docs column and not the with-docs column.
 
 Recorded **2026-10-16T18:27:03.774Z**, Node **v20.19.2**, **linux 6.12.94+ x64**, CPU **Intel(R) Xeon(R) Processor**, **8** CPUs. This is a different machine from the browser table above.
 
@@ -191,10 +191,32 @@ With the examples in the prompt, heat-load and heat-sales still failed: `validat
 
 Second-try column: not measured on this run. The harness now feeds validator errors, render errors, compile errors, and library-use failures back once. That column stays empty until the fair-scoring rerun.
 
+### Doc conditions
+
+Round 2 was run outside this repo at bench `055196d`, model claude-sonnet-4-5, temperature 0. That protocol gave ChartKit the two-line rule and no how-to-render hint. Recharts, ECharts, and Chart.js got an API hint and no official docs. Those scores are the old-protocol row. A ChartKit-only follow-up prepended `llms.txt` and scored 41 / 42 on the first try and 41 / 42 within two; the miss was `heat-sales`, and the checker now accepts either axis orientation for that task. That follow-up did not give the other libraries their docs, so it is not the with-docs row.
+
+| Library | Old protocol first | Old protocol within two | no docs first | no docs within two | with docs first | with docs within two |
+|---|---:|---:|---:|---:|---:|---:|
+| chartkit | 1 / 42 | 11 / 42 | not yet run | not yet run | not yet run | not yet run |
+| recharts | 42 / 42 | 42 / 42 | not yet run | not yet run | not yet run | not yet run |
+| echarts | 42 / 42 | 42 / 42 | not yet run | not yet run | not yet run | not yet run |
+| chartjs | 39 / 42 | 42 / 42 | not yet run | not yet run | not yet run | not yet run |
+
+`no docs` gives every library one how-to-render line and nothing else. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`.
+
+| Library | no docs hint | with docs | Bytes | Source |
+|---|---|---|---:|---|
+| chartkit | How to render: return one JSON object. "version" is "1". "type" is the chart name. "data" is the row array. "a11y.alt" is one sentence. encoding.x and encoding.y are field names. Gauge, kpi, and progress-ring use metric: { value, min, max, label?, delta? }. | ChartKit llms.txt | 6335 | https://chartkit.dev/llms.txt. This file is the llms.txt. Full file. This length is the cap. The other libraries are cut to this many bytes. |
+| recharts | Use renderToStaticMarkup from react-dom/server and return that string. JSX is allowed. | Recharts getting started and quickstart | 6329 | https://mintlify.com/recharts/recharts/guides/getting-started.md. Also https://mintlify.com/recharts/recharts/quickstart.md. Official llms.txt index: https://mintlify.com/recharts/recharts/llms.txt. Recharts publishes an llms.txt index of links, not a spec. This excerpt is the official getting-started page plus the start of quickstart, cut to the ChartKit cap. The Mintlify index blurb at the top of each page was removed. |
+| echarts | In Node, use echarts.init(null, null, { renderer: "svg", ssr: true, width, height }) and return chart.renderToSVGString(). Code that touches document runs in a browser instead. | Apache ECharts handbook: Get Started and Import | 6077 | https://echarts.apache.org/handbook/en/get-started/. Also https://github.com/apache/echarts-handbook/blob/master/contents/en/basics/import.md. Official llms.txt index: https://echarts.apache.org/en/llms.txt. ECharts publishes an llms.txt index. The handbook link on that index is Get Started. This excerpt is that page plus Import ECharts, cut to the ChartKit cap. Apache License 2.0. |
+| chartjs | render() runs in a browser document. document and canvas exist. Create a canvas, construct the chart, and return the canvas markup or a data URL. | Chart.js getting started: installation and usage | 6327 | https://www.chartjs.org/docs/latest/getting-started/. Also https://github.com/chartjs/Chart.js/blob/master/docs/getting-started/installation.md, https://github.com/chartjs/Chart.js/blob/master/docs/getting-started/usage.md. No official llms.txt. Chart.js does not publish an llms.txt. This excerpt is the official installation page plus the start of the usage guide, from the Chart.js docs (MIT), cut to the ChartKit cap. |
+
+Run `BENCH_DOCS=none` and `BENCH_DOCS=official` separately. A cell stays "not yet run" until that run is saved under `bench/results/agent/conditions/`.
+
 ## Reproduce
 
 ```bash
 npm run bench
 ```
 
-Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` and `BENCH_CHARTKIT_CONTEXT` limit a run. A failed validate, render, compile, or library-use check is sent back once.
+Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` limits a run. `BENCH_DOCS=none` (the default) is the no-docs condition. `BENCH_DOCS=official` is the with-docs condition. A finished run is also written to `bench/results/agent/conditions/no-docs.json` or `with-docs.json`. A failed validate, render, compile, or library-use check is sent back once.

@@ -1,3 +1,7 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { docsManifest } from "../agent/docs.mjs";
 import { recordedAgentSection } from "./recorded-agent.mjs";
 
 function bytes(value) {
@@ -123,13 +127,15 @@ export function renderReport(result) {
     lines.push(recorded);
     lines.push("");
   }
+  lines.push(fairConditionsSection(result.agent));
+  lines.push("");
   lines.push("## Reproduce");
   lines.push("");
   lines.push("```bash");
   lines.push("npm run bench");
   lines.push("```");
   lines.push("");
-  lines.push("Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` and `BENCH_CHARTKIT_CONTEXT` limit a run. A failed validate, render, compile, or library-use check is sent back once.");
+  lines.push("Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` limits a run. `BENCH_DOCS=none` (the default) is the no-docs condition. `BENCH_DOCS=official` is the with-docs condition. A finished run is also written to `bench/results/agent/conditions/no-docs.json` or `with-docs.json`. A failed validate, render, compile, or library-use check is sent back once.");
   lines.push("");
   return lines.join("\n");
 }
@@ -234,5 +240,66 @@ function agentSection(agent) {
   for (const [library, bucket] of byLib) {
     lines.push(`| ${library} | ${bucket.pass + bucket.unsupported} / ${bucket.n} | ${bucket.recovered} | ${bucket.unsupported} |`);
   }
+  if (agent.docs) lines.push("", `This run's doc condition: **${agent.docs}**.`);
+  return lines.join("\n");
+}
+
+const conditionsDir = join(dirname(fileURLToPath(import.meta.url)), "../results/agent/conditions");
+
+function loadCondition(name) {
+  const path = join(conditionsDir, name);
+  if (!existsSync(path)) return null;
+  const parsed = JSON.parse(readFileSync(path, "utf8"));
+  return parsed.agent?.status === "ok" ? parsed.agent : parsed.status === "ok" ? parsed : null;
+}
+
+function conditionCell(run, library, which) {
+  if (!run?.results) return "not yet run";
+  const rows = run.results.filter((row) => row.library === library);
+  if (rows.length === 0) return "not yet run";
+  const first = rows.filter((row) => row.ok).length;
+  const within = first + rows.filter((row) => !row.ok && row.second?.ok).length;
+  const value = which === "first" ? first : within;
+  return `${value} / ${rows.length}`;
+}
+
+function fairConditionsSection(agent) {
+  const liveNone = agent?.status === "ok" && agent.docs === "none" ? agent : null;
+  const liveOfficial = agent?.status === "ok" && agent.docs === "official" ? agent : null;
+  const none = loadCondition("no-docs.json") ?? liveNone;
+  const official = loadCondition("with-docs.json") ?? liveOfficial;
+  const lines = [];
+  lines.push("### Doc conditions");
+  lines.push("");
+  lines.push("Round 2 was run outside this repo at bench `055196d`, model claude-sonnet-4-5, temperature 0. That protocol gave ChartKit the two-line rule and no how-to-render hint. Recharts, ECharts, and Chart.js got an API hint and no official docs. Those scores are the old-protocol row. A ChartKit-only follow-up prepended `llms.txt` and scored 41 / 42 on the first try and 41 / 42 within two; the miss was `heat-sales`, and the checker now accepts either axis orientation for that task. That follow-up did not give the other libraries their docs, so it is not the with-docs row.");
+  lines.push("");
+  lines.push("| Library | Old protocol first | Old protocol within two | no docs first | no docs within two | with docs first | with docs within two |");
+  lines.push("|---|---:|---:|---:|---:|---:|---:|");
+  const old = {
+    chartkit: ["1 / 42", "11 / 42"],
+    recharts: ["42 / 42", "42 / 42"],
+    echarts: ["42 / 42", "42 / 42"],
+    chartjs: ["39 / 42", "42 / 42"],
+  };
+  for (const library of ["chartkit", "recharts", "echarts", "chartjs"]) {
+    const [first, within] = old[library];
+    lines.push(`| ${library} | ${first} | ${within} | ${conditionCell(none, library, "first")} | ${conditionCell(none, library, "within")} | ${conditionCell(official, library, "first")} | ${conditionCell(official, library, "within")} |`);
+  }
+  lines.push("");
+  lines.push("`no docs` gives every library one how-to-render line and nothing else. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`.");
+  lines.push("");
+  lines.push("| Library | no docs hint | with docs | Bytes | Source |");
+  lines.push("|---|---|---|---:|---|");
+  for (const doc of docsManifest()) {
+    const also = doc.also?.length ? ` Also ${doc.also.join(", ")}.` : "";
+    const index = doc.library === "chartkit"
+      ? " This file is the llms.txt."
+      : doc.llmsTxt
+        ? ` Official llms.txt index: ${doc.llmsTxt}.`
+        : " No official llms.txt.";
+    lines.push(`| ${doc.library} | ${doc.noDocsHint.replaceAll("|", "/")} | ${doc.title} | ${doc.bytes} | ${doc.url}.${also}${index} ${doc.note} |`);
+  }
+  lines.push("");
+  lines.push("Run `BENCH_DOCS=none` and `BENCH_DOCS=official` separately. A cell stays \"not yet run\" until that run is saved under `bench/results/agent/conditions/`.");
   return lines.join("\n");
 }
