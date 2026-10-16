@@ -46,6 +46,8 @@ These are errors with a JSON Patch in `fix`. Applying the patch is the correctio
 | CK1009 | Donut `encoding` uses `theta`, `angle`, `label`, or `value` | Only when `type` is `donut` or `mark` is `arc`. `x` is the slice label and `y` is the number. |
 | CK1009 | Heatmap `encoding.value`, `encoding.date`, or a calendar numeric `y` | The measure moves to `encoding.color`. `encoding.date` moves to `encoding.x` when `x` is missing. A numeric `y` moves to `color` only when the layout is calendar. A grid keeps `y` as the row category. |
 | CK1009 | `layer`, `layers`, `marks` (array or object), `mark` array, `encoding.y2`, `encoding.bar`, `encoding.line`, or `encoding.area` | Combo: `encoding.y` is `[{ field, mark: "bar" }, { field, mark: "line", axis: "y2" }]`. |
+| CK1009 | `encoding.y.field` is an array of names | The list belongs on `encoding.y` (`["a", "b"]`). Other keys on that object are copied onto each field. |
+| CK1009 | Combo y item `type` is `"bar"`, `"line"`, or `"area"` | That value is `mark`. `type` on a y channel is quantitative, temporal, ordinal, or nominal. |
 | CK1009 | `chartType` and no usable `type` | Move it to `type`. |
 | CK1005 | `type: "pie"` or `"arc"` | `donut`. `pie` also sets `mark.innerRadius` 0. |
 | CK1005 | `type: "point"`, `"circle"`, or `"square"` | `scatter`. |

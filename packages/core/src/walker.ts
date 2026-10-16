@@ -164,6 +164,8 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
   if (node.enum && !node.enum.some((item) => item === value)) {
     if (path === "/type") {
       emitUnknownType(value, ctx);
+    } else if (comboSeriesMark(path, value, ctx)) {
+      // emitted
     } else if (path.endsWith("/axis") && node.enum.includes("y") && node.enum.includes("y2") && (value === null || isPlainObject(value))) {
       if (value === null) emitAxisNull(path, ctx);
       else emitAxisObject(value, path, ctx);
@@ -487,7 +489,101 @@ function repairShape(value: unknown, path: string, ctx: Ctx): boolean {
     if (mapped && typeof root.type !== "string") ctx.skipMissing.add("|type");
     return true;
   }
+  if (repairYFieldList(value, path, ctx)) return true;
   return false;
+}
+
+/** `encoding.y: { field: ["a", "b"] }` is the list form `encoding.y: ["a", "b"]`. */
+function repairYFieldList(value: unknown, path: string, ctx: Ctx): boolean {
+  if (path !== "/encoding/y") return false;
+  const replacement = yFieldReplacement(value);
+  if (replacement === undefined) return false;
+  emit(ctx, {
+    code: "CK1009",
+    severity: "error",
+    message: "a list of fields belongs on encoding.y, not on field",
+    path: "/encoding/y",
+    hint: "encoding.y is a field name or a list of field names. The array belongs on y, not on field.",
+    fix: [{ op: "replace", path: "/encoding/y", value: replacement }],
+  });
+  return true;
+}
+
+function yFieldReplacement(value: unknown): unknown {
+  if (isPlainObject(value)) return expandFieldList(value);
+  if (!Array.isArray(value)) return undefined;
+  let changed = false;
+  const out: unknown[] = [];
+  for (const item of value) {
+    if (!isPlainObject(item)) {
+      out.push(item);
+      continue;
+    }
+    const expanded = expandFieldList(item);
+    if (expanded === undefined) {
+      out.push(item);
+      continue;
+    }
+    changed = true;
+    if (Array.isArray(expanded)) out.push(...expanded);
+    else out.push(expanded);
+  }
+  return changed ? out : undefined;
+}
+
+function expandFieldList(channel: Record<string, unknown>): unknown {
+  const fields = stringList(channel.field);
+  if (!fields) return undefined;
+  const siblings: Record<string, unknown> = {};
+  for (const key of Object.keys(channel)) {
+    if (key !== "field") siblings[key] = channel[key];
+  }
+  if (Object.keys(siblings).length === 0) return fields;
+  return fields.map((field) => ({ field, ...siblings }));
+}
+
+function stringList(value: unknown): string[] | undefined {
+  if (!Array.isArray(value) || value.length === 0) return undefined;
+  const out: string[] = [];
+  for (const item of value) {
+    if (typeof item !== "string" || item.length === 0) return undefined;
+    out.push(item);
+  }
+  return out;
+}
+
+/** On a combo, `type: "bar"|"line"|"area"` inside a y item is the series mark. */
+function comboSeriesMark(path: string, value: unknown, ctx: Ctx): boolean {
+  if (value !== "bar" && value !== "line" && value !== "area") return false;
+  const match = /^\/encoding\/y(?:\/(\d+))?\/type$/.exec(path);
+  if (!match) return false;
+  const root = isPlainObject(ctx.rootValue) ? ctx.rootValue : undefined;
+  if (!root || root.type !== "combo") return false;
+  const parent = match[1] === undefined ? "/encoding/y" : `/encoding/y/${match[1]}`;
+  const node = pointer(root, parent);
+  const hasMark = isPlainObject(node) && Object.prototype.hasOwnProperty.call(node, "mark");
+  emit(ctx, {
+    code: "CK1009",
+    severity: "error",
+    message: `${quote(value)} is a combo series mark, not a field type`,
+    path,
+    hint: 'On a combo, "bar", "line", and "area" go in mark. type on a y channel is quantitative, temporal, ordinal, or nominal.',
+    fix: [
+      { op: hasMark ? "replace" : "add", path: `${parent}/mark`, value },
+      { op: "remove", path },
+    ],
+  });
+  return true;
+}
+
+function pointer(root: unknown, path: string): unknown {
+  let current: unknown = root;
+  if (path === "") return current;
+  for (const part of path.slice(1).split("/")) {
+    if (current === null || typeof current !== "object") return undefined;
+    current = (current as Record<string, unknown>)[part];
+  }
+  return current;
 }
 
 const METRIC_SHAPE = "metric: { value, min, max, label?, delta? }";
@@ -825,8 +921,11 @@ function yCount(root: unknown): number {
   if (!isPlainObject(root)) return 0;
   const enc = isPlainObject(root.encoding) ? root.encoding : undefined;
   if (!enc) return 0;
-  if (Array.isArray(enc.y)) return enc.y.length + (enc.y2 !== undefined ? 1 : 0);
-  let count = enc.y !== undefined ? 1 : 0;
+  const listed = yFieldReplacement(enc.y);
+  let count = 0;
+  if (Array.isArray(listed)) count = listed.length;
+  else if (Array.isArray(enc.y)) count = enc.y.length;
+  else if (enc.y !== undefined) count = 1;
   if (enc.y2 !== undefined) count += 1;
   return count;
 }

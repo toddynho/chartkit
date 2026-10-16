@@ -715,6 +715,105 @@ describe("diagnostic codes", () => {
     expect((layers.spec as { type: string }).type).toBe("combo");
   });
 
+  it("CK1009 moves a y field array onto y", () => {
+    const input = {
+      version: "1",
+      type: "stacked-area",
+      data: [
+        { month: "Jan", units: 2, returns: 3 },
+        { month: "Feb", units: 4, returns: 1 },
+      ],
+      encoding: { x: "month", y: { field: ["units", "returns"] } },
+      a11y: { alt: "Units and returns both changed." },
+    };
+    const result = validate(input);
+    const error = result.errors.find((item) => item.code === "CK1009" && item.path === "/encoding/y");
+    expect(error?.hint).toContain("encoding.y");
+    expect(error?.hint).not.toContain("columns");
+    expect(error?.fix).toEqual([{ op: "replace", path: "/encoding/y", value: ["units", "returns"] }]);
+    expect(result.errors.some((item) => item.code === "CK1006")).toBe(false);
+    const repaired = repair(input);
+    expect(repaired.ok).toBe(true);
+    expect((repaired.spec as { encoding: { y: unknown } }).encoding.y).toEqual(["units", "returns"]);
+    expect(input.encoding.y).toEqual({ field: ["units", "returns"] });
+  });
+
+  it("CK1009 keeps sibling keys when a y field array is expanded", () => {
+    const repaired = repair({
+      version: "1",
+      type: "line",
+      data: [
+        { month: "Jan", units: 2, returns: 3 },
+        { month: "Feb", units: 4, returns: 1 },
+      ],
+      encoding: { x: "month", y: { field: ["units", "returns"], type: "quantitative" } },
+      a11y: { alt: "Units and returns both changed." },
+    });
+    expect(repaired.ok).toBe(true);
+    expect((repaired.spec as { encoding: { y: unknown } }).encoding.y).toEqual([
+      { field: "units", type: "quantitative" },
+      { field: "returns", type: "quantitative" },
+    ]);
+  });
+
+  it("CK1009 turns type area plus a y field array into stacked-area", () => {
+    const repaired = repair({
+      version: "1",
+      type: "area",
+      data: [
+        { month: "Jan", units: 2, returns: 3 },
+        { month: "Feb", units: 4, returns: 1 },
+      ],
+      encoding: { x: "month", y: { field: ["units", "returns"] } },
+      a11y: { alt: "Units and returns both changed." },
+    });
+    expect(repaired.ok).toBe(true);
+    expect((repaired.spec as { type: string }).type).toBe("stacked-area");
+    expect((repaired.spec as { encoding: { y: unknown } }).encoding.y).toEqual(["units", "returns"]);
+  });
+
+  it("CK1009 maps combo y type bar and line onto mark", () => {
+    const input = {
+      version: "1",
+      type: "combo",
+      data: [
+        { month: "Jan", revenue: 10, cost: 4 },
+        { month: "Feb", revenue: 12, cost: 5 },
+      ],
+      encoding: {
+        x: "month",
+        y: [
+          { field: "revenue", type: "bar" },
+          { field: "cost", type: "line", axis: "y2" },
+        ],
+      },
+      axes: { y2: true },
+      a11y: { alt: "Revenue stayed above cost." },
+    };
+    const result = validate(input);
+    const marks = result.errors.filter((item) => item.code === "CK1009" && item.message.includes("series mark"));
+    expect(marks).toHaveLength(2);
+    expect(marks.every((item) => item.fix?.some((op) => op.op === "remove"))).toBe(true);
+    expect(result.errors.some((item) => item.code === "CK1007")).toBe(false);
+    const repaired = repair(input);
+    expect(repaired.ok).toBe(true);
+    expect((repaired.spec as { encoding: { y: unknown } }).encoding.y).toEqual([
+      { field: "revenue", mark: "bar" },
+      { field: "cost", mark: "line", axis: "y2" },
+    ]);
+    expect(input.encoding.y[0]).toEqual({ field: "revenue", type: "bar" });
+  });
+
+  it("does not turn a line chart y type into a bar mark", () => {
+    const repaired = repair({
+      ...base,
+      encoding: { x: "month", y: { field: "revenue", type: "bar" } },
+    });
+    expect(repaired.ok).toBe(false);
+    expect((repaired.spec as { encoding: { y: { mark?: string; type?: string } } }).encoding.y.mark).toBeUndefined();
+    expect((repaired.spec as { encoding: { y: { type?: string } } }).encoding.y.type).toBe("bar");
+  });
+
   it("CK1005 repairs a single-series area to mini-area", () => {
     const repaired = repair({ ...base, type: "area" });
     expect(repaired.ok).toBe(true);

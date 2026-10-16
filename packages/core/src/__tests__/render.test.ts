@@ -11,6 +11,36 @@ function spec(name: string): unknown {
   return JSON.parse(readFileSync(join(examples, name), "utf8")) as unknown;
 }
 
+function attrs(source: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const match of source.matchAll(/([\w:-]+)="([^"]*)"/g)) out[match[1]] = match[2];
+  return out;
+}
+
+function clipRect(svg: string): { x: number; y: number; width: number; height: number } {
+  const match = svg.match(/<clipPath[^>]*>\s*<rect\b([^>]*)\/?>/);
+  if (!match) throw new Error("missing clip rect");
+  const box = attrs(match[1]);
+  return { x: Number(box.x), y: Number(box.y), width: Number(box.width), height: Number(box.height) };
+}
+
+function dataRects(svg: string): { x: number; y: number; width: number; height: number }[] {
+  const body = svg.replace(/<defs>[\s\S]*?<\/defs>/, "");
+  const rects: { x: number; y: number; width: number; height: number }[] = [];
+  for (const match of body.matchAll(/<rect\b([^>]*)\/?>/g)) {
+    const box = attrs(match[1]);
+    if (box.width === "100%" || box.height === "100%") continue;
+    if (box.width === "10" && box.height === "10") continue;
+    rects.push({ x: Number(box.x), y: Number(box.y), width: Number(box.width), height: Number(box.height) });
+  }
+  return rects;
+}
+
+function tickTexts(svg: string, anchor: "start" | "end"): string[] {
+  const re = new RegExp(`<text\\b[^>]*text-anchor="${anchor}"[^>]*>([^<]*)</text>`, "g");
+  return [...svg.matchAll(re)].map((match) => match[1]);
+}
+
 const area = {
   version: "1",
   type: "line",
@@ -54,6 +84,81 @@ describe("render SVG", () => {
     expect(svg).toContain("var(--ck-series-1,");
     expect(svg.match(/<path /g)?.length).toBeGreaterThanOrEqual(2);
     expect(svg).toMatchSnapshot();
+  });
+
+  it("keeps combo bars inside the plot and distinguishes y2 ticks", () => {
+    const svg = render({
+      version: "1",
+      type: "combo",
+      data: [
+        { week: "W1", orders: 80, rate: 0.03 },
+        { week: "W2", orders: 110, rate: 0.04 },
+      ],
+      encoding: {
+        x: "week",
+        y: [
+          { field: "orders", mark: "bar" },
+          { field: "rate", mark: "line", axis: "y2" },
+        ],
+      },
+      axes: { y2: true },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "Orders and the rate both rose." },
+    });
+    const clip = clipRect(svg);
+    const bars = dataRects(svg);
+    expect(bars.length).toBe(2);
+    for (const bar of bars) {
+      expect(bar.y).toBeGreaterThanOrEqual(clip.y - 0.5);
+      expect(bar.y + bar.height).toBeLessThanOrEqual(clip.y + clip.height + 0.5);
+      expect(bar.x).toBeGreaterThanOrEqual(clip.x - 0.5);
+      expect(bar.x + bar.width).toBeLessThanOrEqual(clip.x + clip.width + 0.5);
+    }
+    const left = tickTexts(svg, "end");
+    const right = tickTexts(svg, "start");
+    expect(left).toContain("0");
+    expect(new Set(right).size).toBe(right.length);
+    expect(right).toContain("0.03");
+    expect(right).toContain("0.04");
+    expect(right.filter((label) => label === "0.03").length).toBe(1);
+  });
+
+  it("does not force zero on a combo made only of lines", () => {
+    const svg = render({
+      version: "1",
+      type: "combo",
+      data: [
+        { week: "W1", orders: 80, rate: 90 },
+        { week: "W2", orders: 110, rate: 100 },
+      ],
+      encoding: {
+        x: "week",
+        y: [
+          { field: "orders", mark: "line" },
+          { field: "rate", mark: "line", axis: "y2" },
+        ],
+      },
+      axes: { y2: true },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "Orders and the rate both rose." },
+    });
+    expect(tickTexts(svg, "end")).not.toContain("0");
+    expect(tickTexts(svg, "start")).not.toContain("0");
+    expect(dataRects(svg)).toHaveLength(0);
+  });
+
+  it("draws the published combo with a zero baseline", () => {
+    const svg = render(spec("07-combo.json"));
+    expect(svg).toContain('data-ck-type="combo"');
+    const clip = clipRect(svg);
+    const bars = dataRects(svg);
+    expect(bars.length).toBe(3);
+    for (const bar of bars) {
+      expect(bar.y + bar.height).toBeLessThanOrEqual(clip.y + clip.height + 0.5);
+    }
+    expect(tickTexts(svg, "end")).toContain("0");
+    const right = tickTexts(svg, "start");
+    expect(new Set(right).size).toBe(right.length);
   });
 
   it("draws a stacked area", () => {

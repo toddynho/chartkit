@@ -584,10 +584,11 @@ function yAxisLabels(
   model: PlotModel,
   right = false,
 ): string {
+  const digits = tickDigits(values);
   return values
     .map((tick) => {
       const pos = scale(tick);
-      const label = esc(formatNumber(tick, model.locale));
+      const label = esc(formatNumber(tick, model.locale, digits));
       if (horizontal) {
         return `<text x="${n(pos)}" y="${n(model.height - 8)}" text-anchor="middle" fill="${cssVar("muted", model.preset.muted)}" font-size="11" font-family="${font()}">${label}</text>`;
       }
@@ -675,7 +676,7 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
       }
     }
   }
-  if (model.zero || model.stack !== "none") consider(0);
+  if (axisIncludesZero(model, axis)) consider(0);
   if (!seen) return [0, 1];
   if (min === max) {
     min -= Math.abs(min) || 1;
@@ -804,6 +805,18 @@ function zeroDefault(type: string, mark: Record<string, unknown>, series: Series
   if (type === "bar" || type === "stacked-area" || type === "mini-area") return true;
   if (mark.area === true || series.some((item) => item.area)) return true;
   return false;
+}
+
+/** Bar and area marks include 0 on the axis they use. A combo line on the other axis does not. */
+function axisIncludesZero(model: PlotModel, axis: "y" | "y2"): boolean {
+  if (model.type === "bar" || model.type === "stacked-area" || model.type === "mini-area") return true;
+  if (model.stack !== "none" && axis === "y") return true;
+  for (let i = 0; i < model.series.length; i++) {
+    const item = model.series[i];
+    if (item.axis !== axis) continue;
+    if (item.mark === "bar" || item.mark === "area" || item.area) return true;
+  }
+  return model.zero && model.series.every((item) => item.axis === axis);
 }
 
 function heightOf(type: string, size: Record<string, unknown>, width: number): number {
@@ -936,25 +949,37 @@ function num(value: number | null): number {
   return value ?? 0;
 }
 
-function formatNumber(value: number, locale: string): string {
-  if (locale === "en-US") {
-    const text = formatEn(value);
-    if (text !== null) return text;
+function tickDigits(values: number[]): number {
+  let gap = Infinity;
+  for (let i = 1; i < values.length; i++) {
+    const step = Math.abs(values[i] - values[i - 1]);
+    if (step > 0 && step < gap) gap = step;
   }
-  return new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
+  if (gap === Infinity) return 0;
+  const digits = Math.ceil(-Math.log10(gap / 2));
+  if (!Number.isFinite(digits) || digits < 0) return 0;
+  return digits > 6 ? 6 : digits;
 }
 
-/** en-US, at most 2 fraction digits. Null sends huge or non-finite values to Intl. */
-function formatEn(value: number): string | null {
+function formatNumber(value: number, locale: string, digits = 2): string {
+  if (locale === "en-US") {
+    const text = formatEn(value, digits);
+    if (text !== null) return text;
+  }
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: digits }).format(value);
+}
+
+/** en-US, then strip trailing zeros. Null sends huge or non-finite values to Intl. */
+function formatEn(value: number, digits: number): string | null {
   if (!Number.isFinite(value)) return null;
   const neg = value < 0;
   const abs = Math.abs(value);
   if (abs >= 1e15) return null;
-  const fixed = abs.toFixed(2);
+  const fixed = abs.toFixed(digits);
   if (fixed.includes("e")) return null;
   const dot = fixed.indexOf(".");
-  const whole = fixed.slice(0, dot);
-  let frac = fixed.slice(dot + 1).replace(/0+$/, "");
+  const whole = dot === -1 ? fixed : fixed.slice(0, dot);
+  let frac = dot === -1 ? "" : fixed.slice(dot + 1).replace(/0+$/, "");
   let grouped = "";
   for (let i = 0; i < whole.length; i++) {
     if (i > 0 && (whole.length - i) % 3 === 0) grouped += ",";
