@@ -2,5 +2,5 @@
   "line": 8800,
   "all": 20879,
   "validate": 12674,
-  "note": "gzip -9 byte budgets, 8 percent above the measurement. 2026-10-16 after CK1009 repairs: line 8148 (unchanged), all 19364 (+32 vs 19332), validate 11735 (+1211 vs 10524). Validate grew because Vega-Lite repair hints and JSON Patch fixes ship in the checker. The line entry did not. All grew by the heatmap layout check and stayed inside the previous budget."
+  "note": "gzip -9 byte budgets, 8 percent above the measurement. 2026-10-16 after the typed-column path: line 8583 (was 8148), all 19824 (was 19364), validate 11783 (was 11735). Line grew because it keeps Float64 columns in place, samples them in a tight loop, and formats en-US ticks without Intl. All three stayed inside the existing budgets."
 }

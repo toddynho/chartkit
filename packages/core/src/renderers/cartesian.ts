@@ -1,4 +1,4 @@
-import { readData } from "../data";
+import { isTypedArray, readData } from "../data";
 import { readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import { clamp, esc, font, hash, isRecord, linear, n, niceDomain, niceNum, round } from "../svg";
 import { cssVar, paint, resolvePreset, type PresetTokens } from "../theme";
@@ -46,7 +46,7 @@ export function renderCombo(spec: Record<string, unknown>): string | null {
 
 interface Series {
   name: string;
-  values: (number | null)[];
+  values: ArrayLike<number | null>;
   color: string;
   axis: "y" | "y2";
   mark: "line" | "bar" | "area";
@@ -64,7 +64,7 @@ interface PlotModel {
   height: number;
   responsive: boolean;
   labels: string[];
-  x: (number | null)[] | null;
+  x: ArrayLike<number | null> | null;
   series: Series[];
   curve: Curve;
   sampling: SamplingMode;
@@ -103,19 +103,21 @@ function toModel(spec: Record<string, unknown>): PlotModel | null {
   const yChannels = readYChannels(encoding.y);
 
   let labels: string[] = [];
-  let x: (number | null)[] | null = null;
+  let x: ArrayLike<number | null> | null = null;
+  const continuousX = type === "line" || type === "stacked-area" || type === "sparkline" || type === "mini-area";
   if (table.kind === "numbers") {
-    labels = table.columns.value.map((_, index) => String(index));
-    x = table.columns.value.map((_, index) => index);
+    const count = table.length;
+    const indexes = new Float64Array(count);
+    for (let i = 0; i < count; i++) indexes[i] = i;
+    x = indexes;
   } else if (xChannel && table.columns[xChannel]) {
     const raw = table.columns[xChannel];
-    const numeric = raw.every((value) => value === null || typeof value === "number");
-    const temporal = raw.some((value) => typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value));
-    if ((numeric || temporal) && type !== "bar") {
-      x = raw.map((value) => toNumber(value));
-      labels = raw.map((value) => (value === null || value === undefined ? "" : String(value)));
+    if (continuousX && (isTypedArray(raw) || columnNumeric(raw))) {
+      x = raw as ArrayLike<number | null>;
     } else {
-      labels = raw.map((value) => (value === null || value === undefined ? "" : String(value)));
+      const temporal = !isTypedArray(raw) && columnTemporal(raw);
+      if (temporal && type !== "bar") x = mapNumbers(raw, toNumber);
+      labels = stringLabels(raw);
     }
   } else {
     labels = Array.from({ length: table.length }, (_, index) => String(index));
@@ -127,7 +129,7 @@ function toModel(spec: Record<string, unknown>): PlotModel | null {
     series = [
       {
         name: "value",
-        values: table.columns.value.map(toNullableNumber),
+        values: asNumbers(table.columns.value),
         color: paint(undefined, preset, 0),
         axis: "y",
         mark: type === "bar" ? "bar" : type === "mini-area" || type === "stacked-area" ? "area" : "line",
@@ -138,9 +140,7 @@ function toModel(spec: Record<string, unknown>): PlotModel | null {
   } else {
     series = yChannels.map((channel, index) => {
       const column = channel.field ? table.columns[channel.field] : undefined;
-      const values = column
-        ? column.map(toNullableNumber)
-        : Array.from({ length }, () => null);
+      const values = column ? asNumbers(column) : new Array<number | null>(length).fill(null);
       const markKind = seriesMark(type, channel.mark, mark.area === true || channel.area === true);
       return {
         name: channel.title || channel.field || `Series ${index + 1}`,
@@ -472,11 +472,14 @@ function pointsFor(
   yScale: (value: number) => number,
   model: PlotModel,
 ): (Pt | null)[] {
-  return series.values.map((value, i) => {
+  const out: (Pt | null)[] = new Array(series.values.length);
+  for (let i = 0; i < series.values.length; i++) {
+    const value = series.values[i];
     const plotted = layers ? layers.top[index][i] : value;
-    if (plotted === null || (value === null && !model.connectNulls && !layers)) return null;
-    return { x: xScale.center(i), y: yScale(plotted ?? 0) };
-  });
+    if (plotted === null || (value === null && !model.connectNulls && !layers)) out[i] = null;
+    else out[i] = { x: xScale.center(i), y: yScale(plotted ?? 0) };
+  }
+  return out;
 }
 
 function bottomPoints(
@@ -487,11 +490,16 @@ function bottomPoints(
   yScale: (value: number) => number,
   model: PlotModel,
 ): (Pt | null)[] {
-  return series.values.map((value, i) => {
-    if (value === null && !layers && !model.connectNulls) return null;
-    const baseline = layers ? layers.bottom[index][i] : 0;
-    return { x: xScale.center(i), y: yScale(baseline) };
-  });
+  const out: (Pt | null)[] = new Array(series.values.length);
+  for (let i = 0; i < series.values.length; i++) {
+    const value = series.values[i];
+    if (value === null && !layers && !model.connectNulls) out[i] = null;
+    else {
+      const baseline = layers ? layers.bottom[index][i] : 0;
+      out[i] = { x: xScale.center(i), y: yScale(baseline) };
+    }
+  }
+  return out;
 }
 
 interface Layers {
@@ -600,7 +608,7 @@ function xAxisLabels(
   const step = count > 8 ? Math.ceil(count / 6) : 1;
   const out: string[] = [];
   for (let i = 0; i < count; i += step) {
-    const label = model.labels[i] ?? "";
+    const label = tickLabel(model, i);
     if (!label) continue;
     if (horizontal) {
       out.push(`<text x="${n(plot.left - 6)}" y="${n(xScale.center(i) + 4)}" text-anchor="end" fill="${cssVar("muted", model.preset.muted)}" font-size="11" font-family="${font()}">${esc(label)}</text>`);
@@ -869,6 +877,48 @@ function dashAttr(dash: string): string {
   return "";
 }
 
+function tickLabel(model: PlotModel, index: number): string {
+  if (index < model.labels.length) return model.labels[index] ?? "";
+  const value = model.x?.[index];
+  return typeof value === "number" && Number.isFinite(value) ? String(value) : "";
+}
+
+function asNumbers(column: ArrayLike<unknown>): ArrayLike<number | null> {
+  if (isTypedArray(column)) return column as ArrayLike<number | null>;
+  return mapNumbers(column, toNullableNumber);
+}
+
+function mapNumbers(column: ArrayLike<unknown>, convert: (value: unknown) => number | null): (number | null)[] {
+  const out = new Array<number | null>(column.length);
+  for (let i = 0; i < column.length; i++) out[i] = convert(column[i]);
+  return out;
+}
+
+function stringLabels(column: ArrayLike<unknown>): string[] {
+  const out = new Array<string>(column.length);
+  for (let i = 0; i < column.length; i++) {
+    const value = column[i];
+    out[i] = value == null ? "" : String(value);
+  }
+  return out;
+}
+
+function columnNumeric(column: ArrayLike<unknown>): boolean {
+  for (let i = 0; i < column.length; i++) {
+    const value = column[i];
+    if (value !== null && typeof value !== "number") return false;
+  }
+  return true;
+}
+
+function columnTemporal(column: ArrayLike<unknown>): boolean {
+  for (let i = 0; i < column.length; i++) {
+    const value = column[i];
+    if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) return true;
+  }
+  return false;
+}
+
 function toNumber(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
@@ -887,6 +937,30 @@ function num(value: number | null): number {
 }
 
 function formatNumber(value: number, locale: string): string {
+  if (locale === "en-US") {
+    const text = formatEn(value);
+    if (text !== null) return text;
+  }
   return new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
+}
+
+/** en-US, at most 2 fraction digits. Null sends huge or non-finite values to Intl. */
+function formatEn(value: number): string | null {
+  if (!Number.isFinite(value)) return null;
+  const neg = value < 0;
+  const abs = Math.abs(value);
+  if (abs >= 1e15) return null;
+  const fixed = abs.toFixed(2);
+  if (fixed.includes("e")) return null;
+  const dot = fixed.indexOf(".");
+  const whole = fixed.slice(0, dot);
+  let frac = fixed.slice(dot + 1).replace(/0+$/, "");
+  let grouped = "";
+  for (let i = 0; i < whole.length; i++) {
+    if (i > 0 && (whole.length - i) % 3 === 0) grouped += ",";
+    grouped += whole[i];
+  }
+  const body = frac ? `${grouped}.${frac}` : grouped;
+  return neg ? `-${body}` : body;
 }
 

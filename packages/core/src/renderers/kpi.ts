@@ -44,12 +44,18 @@ export function renderKpi(spec: Record<string, unknown>): string | null {
   return parts.join("");
 }
 
+function hasNumber(values: ArrayLike<unknown> | undefined): boolean {
+  if (!values) return false;
+  for (let i = 0; i < values.length; i++) if (typeof values[i] === "number") return true;
+  return false;
+}
+
 function sparklineValues(spec: Record<string, unknown>): number[] | null {
   if (spec.data === undefined) return null;
   const table = readTable(spec);
   if (!table) return null;
   const frame = isRecord(spec.encoding) ? spec.encoding : {};
-  const field = fieldOf(frame.y) ?? (table.columns.value ? "value" : table.fields.find((name) => table.columns[name]?.some((value) => typeof value === "number")));
+  const field = fieldOf(frame.y) ?? (table.columns.value ? "value" : table.fields.find((name) => hasNumber(table.columns[name])));
   const values = column(table, field).map(asNumber).filter((value): value is number => value !== null);
   return values.length > 1 ? values : null;
 }

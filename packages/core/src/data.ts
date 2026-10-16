@@ -1,8 +1,11 @@
+/** A plain array or a typed array. Typed columns stay in place; callers must not use `.map`. */
+export type Column = ArrayLike<unknown> & Iterable<unknown>;
+
 export interface DataTable {
   kind: "rows" | "numbers" | "columns";
   fields: string[];
   length: number;
-  columns: Record<string, unknown[]>;
+  columns: Record<string, Column>;
 }
 
 export type ReadResult =
@@ -19,9 +22,8 @@ export function isTypedArray(value: unknown): value is ArrayLike<number> {
   return ArrayBuffer.isView(value) && !(value instanceof DataView);
 }
 
-function toValues(value: unknown): unknown[] | null {
-  if (Array.isArray(value)) return value;
-  if (isTypedArray(value)) return Array.from(value as ArrayLike<number>);
+function toValues(value: unknown): Column | null {
+  if (Array.isArray(value) || isTypedArray(value)) return value as Column;
   return null;
 }
 
@@ -30,8 +32,8 @@ export function readData(data: unknown): ReadResult {
     const list = toValues(data);
     if (!list) return { ok: false, reason: "invalid" };
     if (list.length === 0) return { ok: false, reason: "empty" };
-    const allScalarNumbers = list.every((item) => item === null || typeof item === "number");
-    const allObjects = list.every((item) => isPlainObject(item));
+    const allScalarNumbers = everyItem(list, (item) => item === null || typeof item === "number");
+    const allObjects = everyItem(list, (item) => isPlainObject(item));
     if (allScalarNumbers && !allObjects) {
       return {
         ok: true,
@@ -44,19 +46,22 @@ export function readData(data: unknown): ReadResult {
       };
     }
     if (!allObjects) return { ok: false, reason: "invalid" };
+    const rows = list as Record<string, unknown>[];
     const fields: string[] = [];
     const seen = new Set<string>();
-    for (const row of list) {
-      for (const key of Object.keys(row as Record<string, unknown>)) {
+    for (const row of rows) {
+      for (const key of Object.keys(row)) {
         if (!seen.has(key)) {
           seen.add(key);
           fields.push(key);
         }
       }
     }
-    const columns: Record<string, unknown[]> = {};
+    const columns: Record<string, Column> = {};
     for (const field of fields) {
-      columns[field] = list.map((row) => (row as Record<string, unknown>)[field]);
+      const column = new Array<unknown>(rows.length);
+      for (let i = 0; i < rows.length; i++) column[i] = rows[i][field];
+      columns[field] = column;
     }
     return {
       ok: true,
@@ -69,7 +74,7 @@ export function readData(data: unknown): ReadResult {
     if (entries.length === 0) return { ok: false, reason: "invalid" };
     let length: number | null = null;
     let a = "";
-    const columns: Record<string, unknown[]> = {};
+    const columns: Record<string, Column> = {};
     for (const [name, raw] of entries) {
       const values = toValues(raw);
       if (!values) return { ok: false, reason: "invalid" };
@@ -101,4 +106,9 @@ export function readData(data: unknown): ReadResult {
   }
 
   return { ok: false, reason: "invalid" };
+}
+
+function everyItem(list: Column, test: (item: unknown) => boolean): boolean {
+  for (let i = 0; i < list.length; i++) if (!test(list[i])) return false;
+  return true;
 }

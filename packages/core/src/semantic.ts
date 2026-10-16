@@ -152,7 +152,7 @@ function checkColumn(
   spec: Record<string, unknown>,
   channel: Channel,
   field: string,
-  values: unknown[],
+  values: ArrayLike<unknown>,
   table: DataTable,
   diagnostics: Diagnostic[],
 ): void {
@@ -366,7 +366,11 @@ function countSeries(spec: Record<string, unknown>, table: DataTable | undefined
   const series = readChannel(encoding.series, "/encoding/series");
   if (series?.field && table) {
     const values = table.columns[series.field];
-    if (values) return new Set(values.map((value) => String(value))).size;
+    if (values) {
+      const seen = new Set<string>();
+      for (let i = 0; i < values.length; i++) seen.add(String(values[i]));
+      return seen.size;
+    }
   }
   return encoding.y !== undefined ? 1 : 1;
 }
@@ -442,18 +446,26 @@ function temporalFix(x: unknown): JsonPatchOperation[] {
   return [{ op: "add", path: "/encoding/x/type", value: "temporal" }];
 }
 
-function inferType(values: unknown[]): "quantitative" | "temporal" | "nominal" {
-  const present = values.filter((value) => value !== null && value !== undefined);
-  if (present.length === 0) return "nominal";
-  if (present.every((value) => typeof value === "number" && Number.isFinite(value))) return "quantitative";
-  if (columnLooksLikeDates(present)) return "temporal";
+function inferType(values: ArrayLike<unknown>): "quantitative" | "temporal" | "nominal" {
+  let present = 0;
+  let numeric = 0;
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i];
+    if (value === null || value === undefined) continue;
+    present += 1;
+    if (typeof value === "number" && Number.isFinite(value)) numeric += 1;
+  }
+  if (present === 0) return "nominal";
+  if (numeric === present) return "quantitative";
+  if (columnLooksLikeDates(values)) return "temporal";
   return "nominal";
 }
 
-function hasMixedNumbers(values: unknown[]): boolean {
+function hasMixedNumbers(values: ArrayLike<unknown>): boolean {
   let numbers = 0;
   let others = 0;
-  for (const value of values) {
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i];
     if (value === null || value === undefined) continue;
     if (typeof value === "number" && Number.isFinite(value)) numbers += 1;
     else others += 1;
@@ -461,12 +473,16 @@ function hasMixedNumbers(values: unknown[]): boolean {
   return numbers > 0 && others > 0;
 }
 
-function columnLooksLikeDates(values: unknown[]): boolean {
-  const present = values.filter((value) => value !== null && value !== undefined);
-  if (present.length === 0) return false;
+function columnLooksLikeDates(values: ArrayLike<unknown>): boolean {
+  let present = 0;
   let hits = 0;
-  for (const value of present) if (looksLikeDate(value)) hits += 1;
-  return hits / present.length >= 0.8;
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i];
+    if (value === null || value === undefined) continue;
+    present += 1;
+    if (looksLikeDate(value)) hits += 1;
+  }
+  return present > 0 && hits / present >= 0.8;
 }
 
 function looksLikeDate(value: unknown): boolean {
@@ -475,7 +491,7 @@ function looksLikeDate(value: unknown): boolean {
   return /^\d{4}-\d{2}-\d{2}(?:[T ][\d:.]+(?:Z|[+-]\d{2}:?\d{2})?)?$/.test(value);
 }
 
-function isSorted(values: unknown[], type: string): boolean {
+function isSorted(values: ArrayLike<unknown>, type: string): boolean {
   return firstUnsorted(values, type) === -1;
 }
 
@@ -483,7 +499,7 @@ function asNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
-function firstUnsorted(values: unknown[], type: string): number {
+function firstUnsorted(values: ArrayLike<unknown>, type: string): number {
   let prev: number | undefined;
   for (let i = 0; i < values.length; i++) {
     const current = type === "temporal" ? timeValue(values[i]) : asNumber(values[i]);

@@ -133,7 +133,9 @@ export function channelFormat(value: unknown): unknown {
 
 export function column(table: DataTable, field: string | undefined): unknown[] {
   if (!field) return [];
-  return table.columns[field] ?? [];
+  const values = table.columns[field];
+  if (!values) return [];
+  return Array.isArray(values) ? values : Array.from(values);
 }
 
 export function asNumber(value: unknown): number | null {

@@ -103,7 +103,44 @@ function sampleDense(
   const len = end - start;
   const cap = Math.max(2, target);
   if (len <= cap) return copyRange(start, end);
+  if (mode === "minmax" && xs instanceof Float64Array && ys instanceof Float64Array) return minmaxFloat(xs, ys, start, end, cap);
   return mode === "lttb" ? lttbRange(xs, ys, start, end, cap) : minmaxRange(xs, ys, start, end, cap);
+}
+
+/** Min/max buckets for dense typed columns. Indexes increase, so an equal y keeps the earlier point. */
+function minmaxFloat(xs: Float64Array, ys: Float64Array, start: number, end: number, target: number): Int32Array {
+  const last = end - 1;
+  const buckets = Math.max(1, Math.floor((target - 2) / 2));
+  const minI = new Int32Array(buckets);
+  const maxI = new Int32Array(buckets);
+  minI.fill(-1);
+  const x0 = xs[start];
+  const span = xs[last] - x0;
+  const scale = span !== 0 ? buckets / span : 0;
+  for (let i = start + 1; i < last; i++) {
+    const y = ys[i];
+    let bucket = 0;
+    if (scale !== 0) {
+      bucket = Math.floor((xs[i] - x0) * scale);
+      if (bucket < 0) bucket = 0;
+      else if (bucket >= buckets) bucket = buckets - 1;
+    }
+    const lo = minI[bucket];
+    if (lo < 0 || y < ys[lo]) minI[bucket] = i;
+    const hi = maxI[bucket];
+    if (hi < 0 || y > ys[hi]) maxI[bucket] = i;
+  }
+  const raw = new Int32Array(2 + buckets * 2);
+  let n = 0;
+  raw[n++] = start;
+  for (let bucket = 0; bucket < buckets; bucket++) {
+    const a = minI[bucket];
+    const b = maxI[bucket];
+    if (a >= 0) raw[n++] = a;
+    if (b >= 0 && b !== a) raw[n++] = b;
+  }
+  raw[n++] = last;
+  return uniqueSorted(raw, n);
 }
 
 function minmaxRange(
