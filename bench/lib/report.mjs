@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { docsManifest } from "../agent/docs.mjs";
-import { currentRepair, efficiencyFromRows, formatMean, loadRecordedRows } from "./efficiency.mjs";
+import { chartkitAfterRepair, currentCheck, currentRepair, efficiencyFromRows, formatMean, loadRecordedRows } from "./efficiency.mjs";
 import { recordedAgentSection } from "./recorded-agent.mjs";
 
 function bytes(value) {
@@ -280,6 +280,64 @@ function loadCondition(name) {
   return parsed.agent?.status === "ok" ? parsed.agent : parsed.status === "ok" ? parsed : null;
 }
 
+const round5Dir = join(dirname(fileURLToPath(import.meta.url)), "../results/agent/round-5");
+
+function loadRound5(name) {
+  const path = join(round5Dir, name);
+  if (!existsSync(path)) return null;
+  const parsed = JSON.parse(readFileSync(path, "utf8"));
+  return parsed.agent?.status === "ok" ? parsed.agent : parsed.status === "ok" ? parsed : null;
+}
+
+function meanOutput(rows) {
+  const tokens = rows
+    .map((row) => row.usage?.output_tokens)
+    .filter((value) => typeof value === "number" && Number.isFinite(value));
+  if (tokens.length === 0) return "—";
+  const rounded = Math.round((tokens.reduce((sum, value) => sum + value, 0) / tokens.length) * 10) / 10;
+  return `${rounded.toFixed(1)} (n=${tokens.length})`;
+}
+
+function scoreCounts(rows, library) {
+  const list = (rows ?? []).filter((row) => row.library === library);
+  const first = list.filter((row) => row.ok).length;
+  const within = first + list.filter((row) => !row.ok && row.second?.ok).length;
+  const supported = list.filter((row) => row.status !== "unsupported");
+  return {
+    n: list.length,
+    first,
+    within,
+    allMean: meanOutput(list),
+    supportedMean: meanOutput(supported),
+  };
+}
+
+function round5Section() {
+  const none = loadRound5("no-docs.json");
+  const official = loadRound5("official.json");
+  const lines = [];
+  lines.push("Round 5 was run outside this repo at bench `bc7ee8e`, plus a full-pixel Chart.js ink scan. A 32 by 32 sample had missed a thin line. One model, claude-sonnet-4-5, temperature 0, one run, 2026-10-16. Code-library passes include a correct unsupported answer. The raw rows are `bench/results/agent/round-5/`. These scores are that protocol. They are not the drawn-shape column.");
+  lines.push("");
+  if (!none?.results || !official?.results) {
+    lines.push("Round 5 rows were not found under `bench/results/agent/round-5/`.");
+    return lines.join("\n");
+  }
+  lines.push("| Library | Round 5 no docs first | Round 5 no docs within two | Round 5 official first | Round 5 official within two | Round 5 no docs mean first-try output tokens, all / supported | Round 5 official mean first-try output tokens, all / supported |");
+  lines.push("|---|---:|---:|---:|---:|---:|---:|");
+  for (const library of ["chartkit", "recharts", "echarts", "chartjs"]) {
+    const left = scoreCounts(none.results, library);
+    const right = scoreCounts(official.results, library);
+    lines.push(`| ${library} | ${left.first} / ${left.n} | ${left.within} / ${left.n} | ${right.first} / ${right.n} | ${right.within} / ${right.n} | ${left.allMean} / ${left.supportedMean} | ${right.allMean} / ${right.supportedMean} |`);
+  }
+  lines.push("");
+  lines.push("Mean first-try output tokens are `usage.output_tokens` on the first answer. The second try is not included. Supported drops a correct unsupported answer. Recharts, ECharts, and Chart.js have no `repair()` step.");
+  const check = currentCheck();
+  const noDocsRepair = chartkitAfterRepair(none.results, check.tasks, check.repair, check.checkChartKit);
+  const officialRepair = chartkitAfterRepair(official.results, check.tasks, check.repair, check.checkChartKit);
+  lines.push(`ChartKit \`repair()\`, measured at \`bc7ee8e\` with \`checkChartKit\` before the y-field list and combo mark patches: no docs 40 / 42, official 42 / 42. The two no-docs specs that \`repair()\` did not fix were stack-queue (\`encoding.y.field\` was an array) and combo-weather (\`type: "bar"\` on a y item). Recomputed on these same first-try outputs with the current \`repair()\` and the drawn-shape check: no docs ${noDocsRepair.passed} / ${noDocsRepair.checked}${noDocsRepair.misses.length ? ` (still ${noDocsRepair.misses.join(", ")})` : ""}, official ${officialRepair.passed} / ${officialRepair.checked}${officialRepair.misses.length ? ` (still ${officialRepair.misses.join(", ")})` : ""}. The recomputed rate is not the round-5 score.`);
+  return lines.join("\n");
+}
+
 function conditionCell(run, library, which) {
   if (!run?.results) return "not yet run";
   const rows = run.results.filter((row) => row.library === library);
@@ -310,7 +368,7 @@ function fairConditionsSection(agent) {
   lines.push("| echarts | 42 / 42 | 42 / 42 | 40 / 42 | 41 / 42 |");
   lines.push("| chartjs | 39 / 42 | 42 / 42 | 42 / 42 | 42 / 42 |");
   lines.push("");
-  lines.push("Round 4 was run outside this repo at bench `38282f2`, plus the detached-container search, the 2.5 s Recharts pie wait, and Chart.js scatter x+y capture. Model claude-sonnet-4-5, temperature 0. Recharts, ECharts, and Chart.js were verified drawn. Code-library passes include a correct unsupported answer. The supported / unsupported split was Recharts 24 / 18, ECharts 36 / 6, Chart.js 24 / 18. These scores are that protocol. They are not the round-5 column: this branch now reads the chart type from the rendered chart and compares ChartKit values as numbers.");
+  lines.push("Round 4 was run outside this repo at bench `38282f2`, plus the detached-container search, the 2.5 s Recharts pie wait, and Chart.js scatter x+y capture. Model claude-sonnet-4-5, temperature 0. Recharts, ECharts, and Chart.js were verified drawn. Code-library passes include a correct unsupported answer. The supported / unsupported split was Recharts 24 / 18, ECharts 36 / 6, Chart.js 24 / 18. These scores are that protocol. Round 5, below, is the later run.");
   lines.push("");
   lines.push("| Library | Round 4 no docs first | Round 4 no docs within two | Round 4 official first | Round 4 official within two | Round 4 no docs mean first-try output tokens | Round 4 official mean first-try output tokens |");
   lines.push("|---|---:|---:|---:|---:|---:|---:|");
@@ -320,6 +378,10 @@ function fairConditionsSection(agent) {
   lines.push("| chartjs | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 293 | 259 |");
   lines.push("");
   lines.push("Those token means are the averages reported with the round-4 run. The first-try specs were not saved in this repo, so the pass rate after `repair()` was not recomputed here. Recharts, ECharts, and Chart.js have no `repair()` step. All 9 ChartKit no-docs misses were gauge, kpi, and progress-ring.");
+  lines.push("");
+  lines.push(round5Section());
+  lines.push("");
+  lines.push("The table under this paragraph is the next protocol. It adds the ChartKit drawn-shape check (bars inside the plot, and a mark count for the chart type) on top of round 5. Those cells stay \"not yet run\" until that run is saved under `bench/results/agent/conditions/`.");
   lines.push("");
   lines.push("| Library | Old protocol first | Old protocol within two | no docs first | no docs within two | with docs first | with docs within two |");
   lines.push("|---|---:|---:|---:|---:|---:|---:|");
@@ -334,7 +396,7 @@ function fairConditionsSection(agent) {
     lines.push(`| ${library} | ${first} | ${within} | ${conditionCell(none, library, "first")} | ${conditionCell(none, library, "within")} | ${conditionCell(official, library, "first")} | ${conditionCell(official, library, "within")} |`);
   }
   lines.push("");
-  lines.push("`no docs` gives every library one paragraph of similar length: how to produce a drawn chart, and where the fields go. The paragraphs are the whole hint. They are not official docs, and ChartKit's paragraph does not add channel shapes the others do not get. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`. A pass requires drawn output. Recharts needs an SVG with data marks (Playwright, `createRoot` and `flushSync`; a detached container counts). Chart.js needs painted canvas pixels. The chart type is read from the rendered chart. `meta.type` and `meta.values` are not evidence. ChartKit values are compared as numbers. The no-docs and with-docs cells in the table above stay \"not yet run\" until a run of this protocol is saved under `bench/results/agent/conditions/`.");
+  lines.push("`no docs` gives every library one paragraph of similar length: how to produce a drawn chart, and where the fields go. The paragraphs are the whole hint. They are not official docs, and ChartKit's paragraph does not add channel shapes the others do not get. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`. A pass requires drawn output. Recharts needs an SVG with data marks (Playwright, `createRoot` and `flushSync`; a detached container counts). Chart.js needs every canvas pixel scanned; a 32 by 32 sample is not enough. The chart type is read from the rendered chart. `meta.type` and `meta.values` are not evidence. ChartKit values are compared as numbers, and ChartKit bars have to sit inside the plot with the mark count the chart type implies. The no-docs and with-docs cells in the table above stay \"not yet run\" until a run of this protocol is saved under `bench/results/agent/conditions/`.");
   lines.push("");
   lines.push("| Library | no docs hint | with docs | Bytes | Source |");
   lines.push("|---|---|---|---:|---|");
@@ -369,9 +431,11 @@ function efficiencySection(none, official) {
     lines.push(efficiencyTable(recorded));
   }
   lines.push("");
+  lines.push("Round 5 token means are in the doc-conditions section above. The two lines below are the next protocol, which also checks ChartKit drawn shapes.");
+  lines.push("");
   const live = [
-    ["Round 5 no docs", none],
-    ["Round 5 with docs", official],
+    ["Drawn-shape protocol, no docs", none],
+    ["Drawn-shape protocol, with docs", official],
   ];
   for (const [label, run] of live) {
     const rows = run?.results;

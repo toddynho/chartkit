@@ -541,6 +541,72 @@ test("efficiency uses first-try output tokens and repairs only ChartKit", () => 
   assert.equal(stats.echarts.tokenRows, 0);
 });
 
+test("chartkit drawn shapes reject bars outside the plot", () => {
+  const task = suite.tasks.find((item) => item.id === "combo-orders");
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240"><defs><clipPath id="c"><rect x="52" y="34" width="536" height="174" /></clipPath></defs><g clip-path="url(#c)"><rect x="80" y="-200" width="40" height="500" /><rect x="200" y="40" width="40" height="80" /><path d="M0 0" fill="none" stroke="#000" /></g></svg>`;
+  const bad = suite.chartGeometry(svg, task, { data: task.data });
+  assert.equal(bad.ok, false, JSON.stringify(bad));
+  assert.ok(bad.issues.some((issue) => /outside the plot/.test(issue)));
+  const spec = {
+    version: "1",
+    type: "combo",
+    data: task.data,
+    encoding: {
+      x: "week",
+      y: [
+        { field: "orders", mark: "bar" },
+        { field: "conversion", mark: "line", axis: "y2" },
+      ],
+    },
+    axes: { y2: true },
+    a11y: { alt: "Orders rose and the rate rose." },
+  };
+  const good = suite.checkChartKit(spec, task);
+  assert.equal(good.ok, true, JSON.stringify(good.stages));
+  assert.equal(good.stages.marks.ok, true, JSON.stringify(good.stages.marks));
+});
+
+test("a valid spec for every task passes the drawn-shape check", () => {
+  for (const task of suite.tasks) {
+    const result = suite.checkChartKit(specFor(task), task);
+    assert.equal(result.ok, true, `${task.id} ${JSON.stringify(result.stages)}`);
+  }
+});
+
+function specFor(task) {
+  const base = { version: "1", type: task.type, a11y: { alt: "The chart shows the recorded values." } };
+  if (task.data && !Array.isArray(task.data) && task.data.value !== undefined) return { ...base, metric: task.data };
+  if (task.type === "sparkline" || task.type === "mini-area") return { ...base, data: task.data };
+  if (task.type === "candlestick") {
+    return {
+      ...base,
+      data: task.data,
+      encoding: { x: task.expect.x, open: "open", high: "high", low: "low", close: "close" },
+    };
+  }
+  if (task.type === "heatmap") {
+    const encoding = { x: task.expect.x, color: task.expect.color };
+    if (task.expect.y) encoding.y = task.expect.y;
+    return { ...base, data: task.data, encoding };
+  }
+  if (task.type === "combo") {
+    const [bars, line] = task.expect.y;
+    return {
+      ...base,
+      data: task.data,
+      encoding: {
+        x: task.expect.x,
+        y: [
+          { field: bars, mark: "bar" },
+          { field: line, mark: "line", axis: "y2" },
+        ],
+      },
+      axes: { y2: true },
+    };
+  }
+  return { ...base, data: task.data, encoding: { x: task.expect.x, y: task.expect.y } };
+}
+
 after(async () => {
   // Registered after the top-level await so it runs once every test is done.
   // esbuild's service and the worker's stdout socket otherwise keep the loop open.

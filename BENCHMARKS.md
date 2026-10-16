@@ -209,7 +209,7 @@ Round 3 was run outside this repo at bench `ee0b474`, same model and temperature
 | echarts | 42 / 42 | 42 / 42 | 40 / 42 | 41 / 42 |
 | chartjs | 39 / 42 | 42 / 42 | 42 / 42 | 42 / 42 |
 
-Round 4 was run outside this repo at bench `38282f2`, plus the detached-container search, the 2.5 s Recharts pie wait, and Chart.js scatter x+y capture. Model claude-sonnet-4-5, temperature 0. Recharts, ECharts, and Chart.js were verified drawn. Code-library passes include a correct unsupported answer. The supported / unsupported split was Recharts 24 / 18, ECharts 36 / 6, Chart.js 24 / 18. These scores are that protocol. They are not the round-5 column: this branch now reads the chart type from the rendered chart and compares ChartKit values as numbers.
+Round 4 was run outside this repo at bench `38282f2`, plus the detached-container search, the 2.5 s Recharts pie wait, and Chart.js scatter x+y capture. Model claude-sonnet-4-5, temperature 0. Recharts, ECharts, and Chart.js were verified drawn. Code-library passes include a correct unsupported answer. The supported / unsupported split was Recharts 24 / 18, ECharts 36 / 6, Chart.js 24 / 18. These scores are that protocol. Round 5, below, is the later run.
 
 | Library | Round 4 no docs first | Round 4 no docs within two | Round 4 official first | Round 4 official within two | Round 4 no docs mean first-try output tokens | Round 4 official mean first-try output tokens |
 |---|---:|---:|---:|---:|---:|---:|
@@ -220,6 +220,20 @@ Round 4 was run outside this repo at bench `38282f2`, plus the detached-containe
 
 Those token means are the averages reported with the round-4 run. The first-try specs were not saved in this repo, so the pass rate after `repair()` was not recomputed here. Recharts, ECharts, and Chart.js have no `repair()` step. All 9 ChartKit no-docs misses were gauge, kpi, and progress-ring.
 
+Round 5 was run outside this repo at bench `bc7ee8e`, plus a full-pixel Chart.js ink scan. A 32 by 32 sample had missed a thin line. One model, claude-sonnet-4-5, temperature 0, one run, 2026-10-16. Code-library passes include a correct unsupported answer. The raw rows are `bench/results/agent/round-5/`. These scores are that protocol. They are not the drawn-shape column.
+
+| Library | Round 5 no docs first | Round 5 no docs within two | Round 5 official first | Round 5 official within two | Round 5 no docs mean first-try output tokens, all / supported | Round 5 official mean first-try output tokens, all / supported |
+|---|---:|---:|---:|---:|---:|---:|
+| chartkit | 20 / 42 | 41 / 42 | 42 / 42 | 42 / 42 | 139.5 (n=42) / 139.5 (n=42) | 131.8 (n=42) / 131.8 (n=42) |
+| recharts | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 220.5 (n=42) / 340.6 (n=24) | 237.5 (n=42) / 329.5 (n=24) |
+| echarts | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 331.4 (n=42) / 373.0 (n=36) | 366.6 (n=42) / 414.1 (n=36) |
+| chartjs | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 294.3 (n=42) / 471.5 (n=24) | 265.7 (n=42) / 408.7 (n=24) |
+
+Mean first-try output tokens are `usage.output_tokens` on the first answer. The second try is not included. Supported drops a correct unsupported answer. Recharts, ECharts, and Chart.js have no `repair()` step.
+ChartKit `repair()`, measured at `bc7ee8e` with `checkChartKit` before the y-field list and combo mark patches: no docs 40 / 42, official 42 / 42. The two no-docs specs that `repair()` did not fix were stack-queue (`encoding.y.field` was an array) and combo-weather (`type: "bar"` on a y item). Recomputed on these same first-try outputs with the current `repair()` and the drawn-shape check: no docs 42 / 42, official 42 / 42. The recomputed rate is not the round-5 score.
+
+The table under this paragraph is the next protocol. It adds the ChartKit drawn-shape check (bars inside the plot, and a mark count for the chart type) on top of round 5. Those cells stay "not yet run" until that run is saved under `bench/results/agent/conditions/`.
+
 | Library | Old protocol first | Old protocol within two | no docs first | no docs within two | with docs first | with docs within two |
 |---|---:|---:|---:|---:|---:|---:|
 | chartkit | 1 / 42 | 11 / 42 | not yet run | not yet run | not yet run | not yet run |
@@ -227,11 +241,11 @@ Those token means are the averages reported with the round-4 run. The first-try 
 | echarts | 42 / 42 | 42 / 42 | not yet run | not yet run | not yet run | not yet run |
 | chartjs | 39 / 42 | 42 / 42 | not yet run | not yet run | not yet run | not yet run |
 
-`no docs` gives every library one paragraph of similar length: how to produce a drawn chart, and where the fields go. The paragraphs are the whole hint. They are not official docs, and ChartKit's paragraph does not add channel shapes the others do not get. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`. A pass requires drawn output. Recharts needs an SVG with data marks (Playwright, `createRoot` and `flushSync`; a detached container counts). Chart.js needs painted canvas pixels. The chart type is read from the rendered chart. `meta.type` and `meta.values` are not evidence. ChartKit values are compared as numbers. The no-docs and with-docs cells in the table above stay "not yet run" until a run of this protocol is saved under `bench/results/agent/conditions/`.
+`no docs` gives every library one paragraph of similar length: how to produce a drawn chart, and where the fields go. The paragraphs are the whole hint. They are not official docs, and ChartKit's paragraph does not add channel shapes the others do not get. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`. A pass requires drawn output. Recharts needs an SVG with data marks (Playwright, `createRoot` and `flushSync`; a detached container counts). Chart.js needs every canvas pixel scanned; a 32 by 32 sample is not enough. The chart type is read from the rendered chart. `meta.type` and `meta.values` are not evidence. ChartKit values are compared as numbers, and ChartKit bars have to sit inside the plot with the mark count the chart type implies. The no-docs and with-docs cells in the table above stay "not yet run" until a run of this protocol is saved under `bench/results/agent/conditions/`.
 
 | Library | no docs hint | with docs | Bytes | Source |
 |---|---|---|---:|---|
-| chartkit | Return one JSON object. version is "1". type is the chart name. data is the rows, or a number array when the chart is a single series. a11y.alt is one sentence. encoding.x is the category or date field and encoding.y is the measure. The renderer draws that object. | ChartKit llms.txt | 6557 | https://chartkit.dev/llms.txt. This file is the llms.txt. Full file. This length is the cap. The other libraries are cut to this many bytes. |
+| chartkit | Return one JSON object. version is "1". type is the chart name. data is the rows, or a number array when the chart is a single series. a11y.alt is one sentence. encoding.x is the category or date field and encoding.y is the measure. The renderer draws that object. | ChartKit llms.txt | 6679 | https://chartkit.dev/llms.txt. This file is the llms.txt. Full file. This length is the cap. The other libraries are cut to this many bytes. |
 | recharts | render() runs in a browser. renderToStaticMarkup returns an empty recharts-wrapper in Recharts 3.10.1 and draws nothing. Mount with react-dom/client createRoot and react-dom flushSync. Use a fixed width and height; ResponsiveContainer stays 0px. Put rows on data and field names on dataKey, and return the mounted markup. | Recharts getting started and quickstart | 6329 | https://mintlify.com/recharts/recharts/guides/getting-started.md. Also https://mintlify.com/recharts/recharts/quickstart.md. Official llms.txt index: https://mintlify.com/recharts/recharts/llms.txt. Recharts publishes an llms.txt index of links, not a spec. This excerpt is the official getting-started page plus the start of quickstart, cut to the ChartKit cap. The Mintlify index blurb at the top of each page was removed. |
 | echarts | In Node, call echarts.init(null, null, { renderer: "svg", ssr: true, width, height }) and return chart.renderToSVGString(). The SVG has to include the series marks. Put the numbers in series.data. Code that touches document or window runs in a browser instead. | Apache ECharts handbook: Get Started and Import | 6077 | https://echarts.apache.org/handbook/en/get-started/. Also https://github.com/apache/echarts-handbook/blob/master/contents/en/basics/import.md. Official llms.txt index: https://echarts.apache.org/en/llms.txt. ECharts publishes an llms.txt index. The handbook link on that index is Get Started. This excerpt is that page plus Import ECharts, cut to the ChartKit cap. Apache License 2.0. |
 | chartjs | render() runs in a browser document. Create a canvas, register every scale and controller you construct, and leave that canvas in the document. A canvas tag or a data URL with no painted pixels does not pass. Put the numbers in the dataset data. | Chart.js getting started: installation and usage | 6327 | https://www.chartjs.org/docs/latest/getting-started/. Also https://github.com/chartjs/Chart.js/blob/master/docs/getting-started/installation.md, https://github.com/chartjs/Chart.js/blob/master/docs/getting-started/usage.md. No official llms.txt. Chart.js does not publish an llms.txt. This excerpt is the official installation page plus the start of the usage guide, from the Chart.js docs (MIT), cut to the ChartKit cap. |
@@ -251,8 +265,10 @@ Computed from `bench/results/agent/sonnet-4-5/` (claude-sonnet-4-5, one attempt,
 | echarts | 392.1 (n=42) | no repair() |
 | chartjs | 355 (n=42) | no repair() |
 
-Round 5 no docs: not yet run.
-Round 5 with docs: not yet run.
+Round 5 token means are in the doc-conditions section above. The two lines below are the next protocol, which also checks ChartKit drawn shapes.
+
+Drawn-shape protocol, no docs: not yet run.
+Drawn-shape protocol, with docs: not yet run.
 
 ## Reproduce
 

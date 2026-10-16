@@ -231,6 +231,117 @@ function formatDiagnostic(error) {
   return `${error.code}${where}: ${error.message}${hint}${fix}`;
 }
 
+function viewBoxOf(svg) {
+  const match = svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
+  if (!match) return null;
+  return { x: 0, y: 0, width: Number(match[1]), height: Number(match[2]) };
+}
+
+function clipBoxOf(svg) {
+  const match = svg.match(/<clipPath\b[^>]*>\s*<rect\b([^>]*?)\/?>/);
+  if (!match) return null;
+  const box = rectFromAttrs(match[1]);
+  return Number.isFinite(box.width) ? box : null;
+}
+
+function clipGroup(svg) {
+  const match = svg.match(/<g clip-path="url\(#[^)]+\)">([\s\S]*?)<\/g>/);
+  return match?.[1] ?? "";
+}
+
+function rectFromAttrs(raw) {
+  const num = (name) => {
+    const found = new RegExp(`\\b${name}="(-?[\\d.]+)"`).exec(raw);
+    return found ? Number(found[1]) : NaN;
+  };
+  return { x: num("x"), y: num("y"), width: num("width"), height: num("height"), raw };
+}
+
+function rectsFrom(fragment) {
+  const out = [];
+  for (const match of fragment.matchAll(/<rect\b([^>]*?)\/?>/g)) {
+    const raw = match[1];
+    if (/width="100%"/.test(raw) || /height="100%"/.test(raw)) continue;
+    const box = rectFromAttrs(raw);
+    if (box.width === 10 && box.height === 10) continue;
+    if (!Number.isFinite(box.width) || !Number.isFinite(box.height)) continue;
+    out.push(box);
+  }
+  return out;
+}
+
+function insideBox(mark, box) {
+  const eps = 0.6;
+  return mark.x >= box.x - eps
+    && mark.y >= box.y - eps
+    && mark.x + mark.width <= box.x + box.width + eps
+    && mark.y + mark.height <= box.y + box.height + eps;
+}
+
+function rowCount(spec, task) {
+  if (Array.isArray(spec?.data)) return spec.data.length;
+  if (Array.isArray(task?.data)) return task.data.length;
+  return 0;
+}
+
+/**
+ * Drawn-shape check for a ChartKit SVG. Bars must sit inside the plot clip.
+ * Mark counts follow the chart type, so a combo that clips its bars fails.
+ */
+export function chartGeometry(svg, task, spec) {
+  if (typeof svg !== "string" || !svg.includes("<svg")) return { ok: false, issues: ["no svg"] };
+  const type = task?.expect?.type;
+  const rows = rowCount(spec, task);
+  const issues = [];
+  const view = viewBoxOf(svg);
+  const clip = clipBoxOf(svg);
+  const plot = clipGroup(svg);
+  const note = (issue) => {
+    if (!issues.includes(issue)) issues.push(issue);
+  };
+
+  if (type === "bar" || type === "combo") {
+    const bars = rectsFrom(plot);
+    if (!clip) note("missing plot clip");
+    if (bars.length !== rows) note(`expected ${rows} bars, found ${bars.length}`);
+    if (clip && bars.some((bar) => !insideBox(bar, clip))) note("a bar is outside the plot");
+    if (type === "combo" && !/<path\b[^>]*\bfill="none"/.test(plot)) note("expected a line");
+  } else if (type === "line" || type === "sparkline") {
+    if (!/<path\b/.test(plot || svg)) note("expected a line");
+  } else if (type === "mini-area") {
+    if (!/<path\b/.test(plot || svg)) note("expected an area");
+  } else if (type === "stacked-area") {
+    const series = Array.isArray(task?.expect?.y) ? task.expect.y.length : 1;
+    const areas = plot.match(/<path\b[^>]*\bfill="(?!none)/g) ?? [];
+    if (areas.length < series) note(`expected ${series} areas, found ${areas.length}`);
+  } else if (type === "donut") {
+    const slices = svg.match(/<path\b/g) ?? [];
+    if (slices.length < rows) note(`expected ${rows} slices, found ${slices.length}`);
+  } else if (type === "scatter") {
+    const points = svg.match(/<circle\b/g) ?? [];
+    if (points.length < rows) note(`expected ${rows} points, found ${points.length}`);
+  } else if (type === "heatmap") {
+    const cells = rectsFrom(svg).filter((rect) => /aria-label=/.test(rect.raw));
+    if (cells.length < rows) note(`expected at least ${rows} cells, found ${cells.length}`);
+    if (view && cells.some((cell) => !insideBox(cell, view))) note("a cell is outside the chart");
+  } else if (type === "candlestick") {
+    const candles = rectsFrom(svg).filter((rect) => /data-ck-mark="candle"/.test(rect.raw));
+    if (candles.length !== rows) note(`expected ${rows} candles, found ${candles.length}`);
+    if (view && candles.some((candle) => !insideBox(candle, view))) note("a candle is outside the chart");
+  } else if (type === "spike") {
+    const spikes = svg.match(/<line\b[^>]*aria-label=/g) ?? [];
+    if (spikes.length !== rows) note(`expected ${rows} spikes, found ${spikes.length}`);
+  } else if (type === "gauge" || type === "progress-ring") {
+    if (!/<path\b/.test(svg)) note("expected an arc");
+  } else if (type === "kpi") {
+    if (!/<text\b/.test(svg)) note("expected a value");
+  } else {
+    note("no drawn-shape check");
+  }
+
+  return { ok: issues.length === 0, issues };
+}
+
 export function checkChartKit(spec, task) {
   const stages = {};
   const validation = validate(spec);
@@ -243,6 +354,7 @@ export function checkChartKit(spec, task) {
   const svg = render(spec);
   const drew = typeof svg === "string" && svg.includes("data-ck-type=") && !svg.includes("ck-chart-error");
   stages.render = { ok: drew };
+  stages.marks = drew ? chartGeometry(svg, task, spec) : { ok: false, issues: ["no chart"] };
   stages.type = {
     ok: spec?.type === task.expect.type && typeof svg === "string" && svg.includes(`data-ck-type="${task.expect.type}"`),
     actual: spec?.type ?? null,
@@ -482,13 +594,12 @@ export async function renderInBrowser(browser, source) {
           if (!canvas || canvas.width < 2 || canvas.height < 2) return false;
           const ctx = canvas.getContext("2d");
           if (!ctx) return false;
-          const stepX = Math.max(1, Math.floor(canvas.width / 32));
-          const stepY = Math.max(1, Math.floor(canvas.height / 32));
+          // Scan every pixel: a 32x32 sample grid misses thin line charts on large canvases.
           let ink = 0;
-          for (let y = 0; y < canvas.height; y += stepY) {
+          for (let y = 0; y < canvas.height; y += 1) {
             let row;
             try { row = ctx.getImageData(0, y, canvas.width, 1).data; } catch { return false; }
-            for (let x = 0; x < canvas.width; x += stepX) {
+            for (let x = 0; x < canvas.width; x += 1) {
               const i = x * 4;
               if (row[i + 3] < 12) continue;
               if (row[i] > 245 && row[i + 1] > 245 && row[i + 2] > 245) continue;
