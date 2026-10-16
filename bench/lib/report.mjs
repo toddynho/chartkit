@@ -78,6 +78,26 @@ export function renderReport(result) {
     lines.push(`| ${points} | ${initial.toFixed(2)} / ${update.toFixed(2)} | ${afterCell} | ${note} |`);
   }
   lines.push("");
+  lines.push("### ChartKit before and after the typed-column path");
+  lines.push("");
+  lines.push("Before is the median of 5 from 2026-10-16T15:40:22.418Z, after sampling was added and before typed columns stayed in place. After is this run. The machines can differ; the library table above is the same-machine comparison.");
+  lines.push("");
+  lines.push("| Points | Before initial / update | After initial / update |");
+  lines.push("|---:|---:|---:|");
+  const columnBefore = [
+    [1000, 21.8, 31.8],
+    [10000, 17.0, 28.8],
+    [100000, 35.1, 21.1],
+    [1000000, 213.9, 171.3],
+  ];
+  for (const [points, initial, update] of columnBefore) {
+    const after = result.browser.rows.find((row) => (row.library === "ChartKit" || row.id === "chartkit") && row.points === points);
+    const afterCell = after && after.status === "ok" ? `${ms(after.initialMs)} / ${ms(after.updateMs)}` : after ? after.status : "—";
+    lines.push(`| ${points} | ${initial.toFixed(2)} / ${update.toFixed(2)} | ${afterCell} |`);
+  }
+  lines.push("");
+  lines.push("On a cold page, constructing `Intl.NumberFormat` for the tick labels was about 10 ms, and `Array.from` on a 100k Float64 column was about 6 ms. This run keeps those columns in place and formats `en-US` ticks without `Intl`. Replacing `innerHTML` with the sampled SVG measured 0.2 ms, and the next animation frames matched a mutation that did nothing. Writing the path `d` attribute in place matched `innerHTML`. A canvas renderer was not added: the sampled SVG is not what the 10k update time is waiting on. That wait is the harness's two animation frames after a synchronous paint. ECharts is timed on its `finished` event instead.");
+  lines.push("");
   lines.push("### Canvas");
   lines.push("");
   lines.push("Not measured. This run downsamples ChartKit with `mark.sampling: \"auto\"` (minmax above twice the 572px plot width, so 1,000 points stay complete and 10k, 100k, and 1M do not). A Canvas renderer would draw the sampled points without an SVG path node. ECharts `sampling` stayed off.");

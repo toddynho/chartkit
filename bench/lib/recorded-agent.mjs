@@ -145,7 +145,7 @@ export function recordedAgentSection() {
     ? rowsOf(examples).filter((row) => !row.ok && row.stages?.validate?.ok && row.stages?.render?.ok === false).map((row) => row.id)
     : [];
   if (renderFails.length) {
-    lines.push(`With the examples in the prompt, ${renderFails.join(" and ")} still failed: \`validate\` passed and \`render\` did not. The heatmap renderer uses the calendar layout unless \`mark.layout\` is \`"grid"\`, and calendar mode does not draw a non-date x. That is a product bug, not a harness bug. It is not fixed on this branch.`);
+    lines.push(`With the examples in the prompt, ${renderFails.join(" and ")} still failed: \`validate\` passed and \`render\` did not. At the time of that run the heatmap renderer used the calendar layout unless \`mark.layout\` was \`"grid"\`, and calendar mode does not draw a non-date x. The core this branch sits on now infers grid when \`encoding.y\` is set. That recorded failure is unchanged.`);
     lines.push("");
   }
   lines.push("Second-try column: not measured on this run. The harness now feeds validator errors, render errors, compile errors, and library-use failures back once. That column stays empty until the fair-scoring rerun.");
