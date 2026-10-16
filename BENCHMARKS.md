@@ -2,7 +2,7 @@
 
 Honest, reproducible numbers from `npm run bench`. This file is generated. Do not edit it by hand.
 
-Measured **2026-10-16T20:37:52.498Z**, Node **v22.14.0**, **linux 6.12.94+ x64**, CPU **Intel(R) Xeon(R) Processor**, **4** CPUs.
+Measured **2026-10-16T21:44:20.619Z**, Node **v22.14.0**, **linux 6.12.94+ x64**, CPU **Intel(R) Xeon(R) Processor**, **4** CPUs.
 
 Pinned libraries: @chartkitdev/core 0.5.0, uplot 1.6.32, chart.js 4.5.1, recharts 3.10.1, echarts 6.1.0, @nivo/line 0.99.0, @nivo/bar 0.99.0, @nivo/pie 0.99.0, @observablehq/plot 0.6.17, react 19.3.1, react-dom 19.3.1, esbuild 0.25.0, playwright 1.64.1.
 
@@ -10,7 +10,7 @@ Pinned libraries: @chartkitdev/core 0.5.0, uplot 1.6.32, chart.js 4.5.1, rechart
 
 ChartKit's minimal entry is the registry, one chart, and the midnight theme. The `/all` entry is every chart and every theme, without the validator. React libraries are measured twice: React included, and React external for an app that already ships it. ECharts is the modular import (`echarts/core` plus one series), not the full bundle. uPlot's CSS is a second response. Observable Plot and uPlot have no donut, so those cells are unsupported rather than a fake chart.
 
-ChartKit is SVG-only. `mark.sampling` defaults to `auto` and uses minmax once a line is longer than twice the plot width. ECharts `sampling` was left off so the other libraries draw every point.
+ChartKit is SVG-only. The ChartKit row uses `mark.sampling: "auto"` (minmax once a line is longer than twice the plot width). ChartKit sampling none is the same line with `mark.sampling: "none"`, measured only at 100,000 and 1,000,000 points. ECharts `sampling` stays off. Every update timer waits for that library's own completion and then the same two animation frames. ECharts completion is the `finished` event, and those two frames come after it.
 
 ## Bundle size
 
@@ -55,46 +55,50 @@ ChartKit /all line bundle is 19855 gzip.
 
 ## Browser render
 
-Playwright Chromium. Each sample is a fresh page. Reported times are the median of 5 samples. Data is makeSeries(n, seed) generated inside the page and excluded from the timer. x[i] = i. Initial render and one full update (seed 2) are timed, then two animation frames. ChartKit replaces innerHTML with a new SVG (curve linear, points none, sampling auto, which is minmax above twice the plot width). An error SVG (ck-chart-error) fails that sample. uPlot uses setData. Chart.js uses update('none') and {x,y} points. ECharts uses setOption on a canvas renderer with sampling left off, and waits for the finished event. Recharts and Nivo use flushSync. Observable Plot replaces the SVG node. Width 640, height 360. Memory is the median performance.memory.usedJSHeapSize when Chromium exposes it. A failed size skips larger sizes for that library.
+Playwright Chromium. Each sample is a fresh page. Reported times are the median of 5 samples. Data is makeSeries(n, seed) generated inside the page and excluded from the timer. x[i] = i. Every library does its own update, then waits for the same two animation frames. ECharts also waits for its finished event before those frames. ChartKit replaces innerHTML with a new SVG (curve linear, points none, sampling auto, which is minmax above twice the plot width). ChartKit sampling none is the same line with mark.sampling none, measured only at 100k and 1M. An error SVG (ck-chart-error) fails that sample. uPlot uses setData. Chart.js uses update('none') and {x,y} points. ECharts uses setOption on a canvas renderer with sampling left off. Recharts and Nivo use flushSync. Observable Plot replaces the SVG node. Width 640, height 360. Memory is the median performance.memory.usedJSHeapSize when Chromium exposes it. A failed size skips larger sizes for that library.
 
 | Library | Renderer | Points | Status | Initial ms | Update ms | Heap after render | Heap delta |
 |---|---|---:|---|---:|---:|---:|---:|
-| ChartKit | svg | 1000 | ok | 10.70 | 33.00 | 2351313 | 982621 |
-| ChartKit | svg | 10000 | ok | 10.10 | 33.20 | 2513512 | 1144820 |
-| ChartKit | svg | 100000 | ok | 11.20 | 26.80 | 4373128 | 3004436 |
-| ChartKit | svg | 1000000 | ok | 24.70 | 31.50 | 18938746 | 17570050 |
-| uPlot | canvas | 1000 | ok | 19.60 | 33.10 | 3014446 | 1271743 |
-| uPlot | canvas | 10000 | ok | 18.50 | 33.00 | 2393210 | 650507 |
-| uPlot | canvas | 100000 | ok | 15.60 | 30.70 | 4753390 | 3010687 |
-| uPlot | canvas | 1000000 | ok | 25.20 | 24.70 | 19410794 | 17668087 |
-| Chart.js | canvas | 1000 | ok | 26.40 | 23.10 | 4660215 | 2297894 |
-| Chart.js | canvas | 10000 | ok | 31.30 | 19.00 | 6625754 | 4263433 |
-| Chart.js | canvas | 100000 | ok | 57.10 | 38.00 | 20944186 | 18581865 |
-| Chart.js | canvas | 1000000 | ok | 335.30 | 185.50 | 154958011 | 152595686 |
-| ECharts | canvas | 1000 | ok | 24.80 | 5.50 | 9100769 | 3147507 |
-| ECharts | canvas | 10000 | ok | 33.10 | 12.50 | 12989942 | 7036652 |
-| ECharts | canvas | 100000 | ok | 98.30 | 64.60 | 54836691 | 48883413 |
-| ECharts | canvas | 1000000 | ok | 623.70 | 571.20 | 393332045 | 387378755 |
-| Recharts | svg | 1000 | ok | 65.60 | 26.00 | 20650068 | 13572503 |
-| Recharts | svg | 10000 | ok | 225.10 | 114.60 | 39301483 | 32223902 |
-| Recharts | svg | 100000 | ok | 1790.70 | 947.30 | 173245670 | 166168089 |
-| Recharts | svg | 1000000 | ok | 19482.30 | 11283.60 | 1351070949 | 1343993364 |
-| Nivo | svg | 1000 | ok | 39.40 | 19.10 | 16856133 | 10566419 |
-| Nivo | svg | 10000 | ok | 73.70 | 53.10 | 26179758 | 19890160 |
-| Nivo | svg | 100000 | ok | 359.80 | 949.70 | 131787230 | 125497632 |
+| ChartKit | svg | 1000 | ok | 22.30 | 33.10 | 2349885 | 981193 |
+| ChartKit | svg | 10000 | ok | 11.70 | 33.20 | 2502632 | 1133940 |
+| ChartKit | svg | 100000 | ok | 11.60 | 27.30 | 4285220 | 2916528 |
+| ChartKit | svg | 1000000 | ok | 24.90 | 31.90 | 18333690 | 16964994 |
+| ChartKit sampling none | svg | 100000 | ok | 66.80 | 1170.90 | 23505880 | 22137110 |
+| ChartKit sampling none | svg | 1000000 | ok | 505.20 | 21472.50 | 198788756 | 197419982 |
+| uPlot | canvas | 1000 | ok | 19.70 | 33.20 | 3011050 | 1268347 |
+| uPlot | canvas | 10000 | ok | 17.60 | 33.10 | 2392106 | 649403 |
+| uPlot | canvas | 100000 | ok | 16.50 | 30.80 | 4805722 | 3063019 |
+| uPlot | canvas | 1000000 | ok | 22.50 | 25.70 | 19378506 | 17635799 |
+| Chart.js | canvas | 1000 | ok | 26.30 | 25.40 | 4658491 | 2296170 |
+| Chart.js | canvas | 10000 | ok | 31.80 | 32.10 | 6638626 | 4276305 |
+| Chart.js | canvas | 100000 | ok | 56.30 | 40.10 | 20956206 | 18593885 |
+| Chart.js | canvas | 1000000 | ok | 321.70 | 173.70 | 154874227 | 152511902 |
+| ECharts | canvas | 1000 | ok | 37.90 | 19.10 | 14407234 | 8453280 |
+| ECharts | canvas | 10000 | ok | 94.60 | 74.00 | 16011895 | 10057937 |
+| ECharts | canvas | 100000 | ok | 2642.00 | 2574.40 | 61895012 | 55941066 |
+| ECharts | canvas | 1000000 | ok | 34051.10 | 33740.30 | 394724130 | 388770168 |
+| Recharts | svg | 1000 | ok | 65.70 | 15.30 | 20639468 | 13561887 |
+| Recharts | svg | 10000 | ok | 223.40 | 104.60 | 39248143 | 32170562 |
+| Recharts | svg | 100000 | ok | 1770.70 | 940.90 | 165170180 | 158092603 |
+| Recharts | svg | 1000000 | ok | 19790.70 | 11251.80 | 1351332137 | 1344254552 |
+| Nivo | svg | 1000 | ok | 39.20 | 17.10 | 16856696 | 10566982 |
+| Nivo | svg | 10000 | ok | 75.20 | 52.50 | 24279666 | 17989952 |
+| Nivo | svg | 100000 | ok | 343.30 | 954.90 | 131410102 | 125120388 |
 | Nivo | — | 1000000 | error | — | — | — | — |
-| Observable Plot | svg | 1000 | ok | 17.30 | 33.10 | 8181855 | 4615104 |
-| Observable Plot | svg | 10000 | ok | 28.80 | 47.60 | 9555439 | 5988688 |
-| Observable Plot | svg | 100000 | ok | 98.30 | 1484.10 | 33655970 | 30089219 |
-| Observable Plot | svg | 1000000 | ok | 730.20 | 25535.70 | 260573215 | 257006860 |
+| Observable Plot | svg | 1000 | ok | 18.00 | 33.40 | 8190739 | 4624600 |
+| Observable Plot | svg | 10000 | ok | 27.20 | 56.20 | 10112583 | 6546232 |
+| Observable Plot | svg | 100000 | ok | 93.60 | 1475.10 | 33575286 | 30009147 |
+| Observable Plot | svg | 1000000 | ok | 737.10 | 25647.10 | 259480175 | 255913808 |
 
-At 1000 points the fastest initial render is ChartKit (svg) at 10.70 ms. ChartKit initial render is 10.70 ms, rank 1 of 7.
+At 1000 points the fastest initial render is Observable Plot (svg) at 18.00 ms. ChartKit initial render is 22.30 ms, rank 3 of 7.
 
-At 10000 points the fastest initial render is ChartKit (svg) at 10.10 ms. ChartKit initial render is 10.10 ms, rank 1 of 7.
+At 10000 points the fastest initial render is ChartKit (svg) at 11.70 ms. ChartKit initial render is 11.70 ms, rank 1 of 7.
 
-At 100000 points the fastest initial render is ChartKit (svg) at 11.20 ms. ChartKit initial render is 11.20 ms, rank 1 of 7.
+At 100000 points the fastest initial render is ChartKit (svg) at 11.60 ms. ChartKit initial render is 11.60 ms, rank 1 of 8.
 
-At 1000000 points the fastest initial render is ChartKit (svg) at 24.70 ms. ChartKit initial render is 24.70 ms, rank 1 of 6. Failed or skipped: Nivo error (Maximum call stack size exceeded).
+At 1000000 points the fastest initial render is uPlot (canvas) at 22.50 ms. ChartKit initial render is 24.90 ms, rank 2 of 7. Failed or skipped: Nivo error (Maximum call stack size exceeded).
+
+At 10,000 points the fastest update is Chart.js at 32.10 ms. ChartKit update is 33.20 ms (samples 33.20, 33.40, 32.50, 33.20, 33.20). Those samples sit on the two-frame wait. The sampled SVG replacement is not a separate hotspot in that cell. ChartKit sampling none at 100,000 points is 66.80 ms initial and 1170.90 ms update. At 1,000,000 points with sampling none the status is ok (505.20 ms initial, 21472.50 ms update). ECharts at 100,000 points updates in 2574.40 ms; the shared frames now wait for that canvas to paint, which the old finished-only timer did not.
 
 ### ChartKit before and after sampling
 
@@ -102,10 +106,10 @@ Before is the single sample from 2026-10-16T15:19:52.560Z, when ChartKit drew ev
 
 | Points | Before initial / update | After initial / update | Before note |
 |---:|---:|---:|---|
-| 1000 | 18.70 / 25.10 | 10.70 / 33.00 | full path |
-| 10000 | 23.60 / 45.50 | 10.10 / 33.20 | full path |
-| 100000 | 123.80 / 1202.30 | 11.20 / 26.80 | full path; update was one sample and slower than the error-SVG 1M row |
-| 1000000 | 260.80 / 239.70 | 24.70 / 31.50 | error SVG, not a chart |
+| 1000 | 18.70 / 25.10 | 22.30 / 33.10 | full path |
+| 10000 | 23.60 / 45.50 | 11.70 / 33.20 | full path |
+| 100000 | 123.80 / 1202.30 | 11.60 / 27.30 | full path; update was one sample and slower than the error-SVG 1M row |
+| 1000000 | 260.80 / 239.70 | 24.90 / 31.90 | error SVG, not a chart |
 
 ### ChartKit before and after the typed-column path
 
@@ -113,16 +117,16 @@ Before is the median of 5 from 2026-10-16T15:40:22.418Z, after sampling was adde
 
 | Points | Before initial / update | After initial / update |
 |---:|---:|---:|
-| 1000 | 21.80 / 31.80 | 10.70 / 33.00 |
-| 10000 | 17.00 / 28.80 | 10.10 / 33.20 |
-| 100000 | 35.10 / 21.10 | 11.20 / 26.80 |
-| 1000000 | 213.90 / 171.30 | 24.70 / 31.50 |
+| 1000 | 21.80 / 31.80 | 22.30 / 33.10 |
+| 10000 | 17.00 / 28.80 | 11.70 / 33.20 |
+| 100000 | 35.10 / 21.10 | 11.60 / 27.30 |
+| 1000000 | 213.90 / 171.30 | 24.90 / 31.90 |
 
-On a cold page, constructing `Intl.NumberFormat` for the tick labels was about 10 ms, and `Array.from` on a 100k Float64 column was about 6 ms. This run keeps those columns in place and formats `en-US` ticks without `Intl`. Replacing `innerHTML` with the sampled SVG measured 0.2 ms, and the next animation frames matched a mutation that did nothing. Writing the path `d` attribute in place matched `innerHTML`. A canvas renderer was not added: the sampled SVG is not what the 10k update time is waiting on. That wait is the harness's two animation frames after a synchronous paint. ECharts is timed on its `finished` event instead.
+On a cold page, constructing `Intl.NumberFormat` for the tick labels was about 10 ms, and `Array.from` on a 100k Float64 column was about 6 ms. This run keeps those columns in place and formats `en-US` ticks without `Intl`. Replacing `innerHTML` with the sampled SVG measured 0.2 ms, and the next animation frames matched a mutation that did nothing. Writing the path `d` attribute in place matched `innerHTML`. A canvas renderer was not added. The earlier 10k update gap was partly the timer: ChartKit waited for two animation frames and ECharts waited only for `finished`. This run gives every library the same two frames after its own completion.
 
 ### Canvas
 
-Not measured. This run downsamples ChartKit with `mark.sampling: "auto"` (minmax above twice the 572px plot width, so 1,000 points stay complete and 10k, 100k, and 1M do not). A Canvas renderer would draw the sampled points without an SVG path node. ECharts `sampling` stayed off.
+Not measured. The ChartKit row still downsamples with `mark.sampling: "auto"` (minmax above twice the 572px plot width, so 1,000 points stay complete and 10k, 100k, and 1M do not). The ChartKit sampling none row draws every point at 100k and 1M. ECharts `sampling` stayed off.
 
 ## Server render
 
@@ -130,19 +134,19 @@ Same 1,000-point line (x[i] = i) for every library. Success means a chart was pr
 
 | Library | Renderer | Status | Mean ms | Median ms | Min ms | Error |
 |---|---|---|---:|---:|---:|---|
-| ChartKit minimal | svg | ok | 0.67 | 0.67 | 0.51 | — |
+| ChartKit minimal | svg | ok | 0.62 | 0.60 | 0.47 | — |
 | uPlot | canvas | unsupported | — | — | — | uPlot requires a DOM element. Node has no document. |
 | Chart.js | canvas | unsupported | — | — | — | Chart.js renders to a canvas element. This probe does not load a DOM or node-canvas. |
 | Recharts | svg | unsupported | — | — | — | Recharts renderToStaticMarkup returned 127 characters and no <svg>: <div width="640" height="360" class="recharts-wrapper" style="position:relative;cursor:default;width:640px;height:360px"></div> |
-| ECharts | svg | ok | 6.83 | 7.70 | 3.92 | — |
-| Nivo | svg | ok | 59.60 | 60.70 | 49.81 | — |
+| ECharts | svg | ok | 5.32 | 5.36 | 3.78 | — |
+| Nivo | svg | ok | 52.91 | 51.79 | 49.50 | — |
 | Observable Plot | svg | unsupported | — | — | — | Cannot read properties of undefined (reading 'documentElement') |
 
-Server render succeeded for ChartKit minimal (0.67 ms mean), ECharts (6.83 ms mean), Nivo (59.60 ms mean). No server render without a DOM: uPlot, Chart.js, Recharts, Observable Plot.
+Server render succeeded for ChartKit minimal (0.62 ms mean), ECharts (5.32 ms mean), Nivo (52.91 ms mean). No server render without a DOM: uPlot, Chart.js, Recharts, Observable Plot.
 
 ## Agent first-try eval
 
-Fair-scoring protocol on this branch: A code-library pass must import that library and return markup the library produced, or set `meta.unsupported` when the library cannot draw the chart. Chart.js runs in Playwright. ECharts code that touches `document` runs in Playwright; `echarts.init(null, …, { ssr: true })` stays in Node. Validator errors, render errors, compile errors, and library-use failures are fed back once. The first-try column ignores that repair.
+Fair-scoring protocol on this branch: A code-library pass must import that library and return a drawn chart, or set `meta.unsupported` when the library cannot draw the chart. Recharts and Chart.js run in Playwright. A Recharts pass needs an SVG with data marks. A Chart.js pass needs painted canvas pixels. ECharts code that touches `document` runs in Playwright; `echarts.init(null, …, { ssr: true })` stays in Node and the SVG must contain marks. Data values come from the rendered chart, not from `meta`. Validator errors, render errors, compile errors, and library-use failures are fed back once. The first-try column ignores that repair.
 
 Status of a fair-scoring run: **not yet run**.
 
@@ -195,6 +199,16 @@ Second-try column: not measured on this run. The harness now feeds validator err
 
 Round 2 was run outside this repo at bench `055196d`, model claude-sonnet-4-5, temperature 0. That protocol gave ChartKit the two-line rule and no how-to-render hint. Recharts, ECharts, and Chart.js got an API hint and no official docs. Those scores are the old-protocol row. A ChartKit-only follow-up prepended `llms.txt` and scored 41 / 42 on the first try and 41 / 42 within two; the miss was `heat-sales`, and the checker now accepts either axis orientation for that task. That follow-up did not give the other libraries their docs, so it is not the with-docs row.
 
+Round 3 was run outside this repo at bench `ee0b474`, same model and temperature. No-docs hints were one line each, and ChartKit's line also named the spec shape. Recharts passed on an empty `recharts-wrapper` because the checker matched `/recharts-/` and trusted `meta.values`. Re-executing those answers found 0 / 24 supported charts with an SVG. The corrected row counts only the 18 tasks that library correctly declined. ECharts Node SSR answers in the official run returned SVG with marks. Chart.js passed when a canvas element existed, without a pixel check. Those scores are the round-3 protocol. They are not the equal-hint, drawn-output column below.
+
+| Library | Round 3 no docs first | Round 3 no docs within two | Round 3 official first | Round 3 official within two |
+|---|---:|---:|---:|---:|
+| chartkit | 31 / 42 | 41 / 42 | 42 / 42 | 42 / 42 |
+| recharts as scored | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 |
+| recharts corrected | 18 / 42 | 18 / 42 | 18 / 42 | 18 / 42 |
+| echarts | 42 / 42 | 42 / 42 | 40 / 42 | 41 / 42 |
+| chartjs | 39 / 42 | 42 / 42 | 42 / 42 | 42 / 42 |
+
 | Library | Old protocol first | Old protocol within two | no docs first | no docs within two | with docs first | with docs within two |
 |---|---:|---:|---:|---:|---:|---:|
 | chartkit | 1 / 42 | 11 / 42 | not yet run | not yet run | not yet run | not yet run |
@@ -202,14 +216,14 @@ Round 2 was run outside this repo at bench `055196d`, model claude-sonnet-4-5, t
 | echarts | 42 / 42 | 42 / 42 | not yet run | not yet run | not yet run | not yet run |
 | chartjs | 39 / 42 | 42 / 42 | not yet run | not yet run | not yet run | not yet run |
 
-`no docs` gives every library one how-to-render line and nothing else. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`.
+`no docs` gives every library one paragraph of similar length: how to produce a drawn chart, and where the fields go. The paragraphs are the whole hint. They are not official docs, and ChartKit's paragraph does not add channel shapes the others do not get. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`. A pass requires drawn output. Recharts needs an SVG with data marks (Playwright, `createRoot` and `flushSync`). Chart.js needs painted canvas pixels. Values are read from the chart the library drew. `meta.values` is not evidence. The no-docs and with-docs cells below stay "not yet run" until a run of this protocol is saved under `bench/results/agent/conditions/`.
 
 | Library | no docs hint | with docs | Bytes | Source |
 |---|---|---|---:|---|
-| chartkit | How to render: return one JSON object. "version" is "1". "type" is the chart name. "data" is the row array. "a11y.alt" is one sentence. encoding.x and encoding.y are field names. Gauge, kpi, and progress-ring use metric: { value, min, max, label?, delta? }. | ChartKit llms.txt | 6335 | https://chartkit.dev/llms.txt. This file is the llms.txt. Full file. This length is the cap. The other libraries are cut to this many bytes. |
-| recharts | Use renderToStaticMarkup from react-dom/server and return that string. JSX is allowed. | Recharts getting started and quickstart | 6329 | https://mintlify.com/recharts/recharts/guides/getting-started.md. Also https://mintlify.com/recharts/recharts/quickstart.md. Official llms.txt index: https://mintlify.com/recharts/recharts/llms.txt. Recharts publishes an llms.txt index of links, not a spec. This excerpt is the official getting-started page plus the start of quickstart, cut to the ChartKit cap. The Mintlify index blurb at the top of each page was removed. |
-| echarts | In Node, use echarts.init(null, null, { renderer: "svg", ssr: true, width, height }) and return chart.renderToSVGString(). Code that touches document runs in a browser instead. | Apache ECharts handbook: Get Started and Import | 6077 | https://echarts.apache.org/handbook/en/get-started/. Also https://github.com/apache/echarts-handbook/blob/master/contents/en/basics/import.md. Official llms.txt index: https://echarts.apache.org/en/llms.txt. ECharts publishes an llms.txt index. The handbook link on that index is Get Started. This excerpt is that page plus Import ECharts, cut to the ChartKit cap. Apache License 2.0. |
-| chartjs | render() runs in a browser document. document and canvas exist. Create a canvas, construct the chart, and return the canvas markup or a data URL. | Chart.js getting started: installation and usage | 6327 | https://www.chartjs.org/docs/latest/getting-started/. Also https://github.com/chartjs/Chart.js/blob/master/docs/getting-started/installation.md, https://github.com/chartjs/Chart.js/blob/master/docs/getting-started/usage.md. No official llms.txt. Chart.js does not publish an llms.txt. This excerpt is the official installation page plus the start of the usage guide, from the Chart.js docs (MIT), cut to the ChartKit cap. |
+| chartkit | Return one JSON object. version is "1". type is the chart name. data is the rows, or a number array when the chart is a single series. a11y.alt is one sentence. encoding.x is the category or date field and encoding.y is the measure. The renderer draws that object. | ChartKit llms.txt | 6501 | https://chartkit.dev/llms.txt. This file is the llms.txt. Full file. This length is the cap. The other libraries are cut to this many bytes. |
+| recharts | render() runs in a browser. renderToStaticMarkup returns an empty recharts-wrapper in Recharts 3.10.1 and draws nothing. Mount with react-dom/client createRoot and react-dom flushSync. Use a fixed width and height; ResponsiveContainer stays 0px. Put rows on data and field names on dataKey, and return the mounted markup. | Recharts getting started and quickstart | 6329 | https://mintlify.com/recharts/recharts/guides/getting-started.md. Also https://mintlify.com/recharts/recharts/quickstart.md. Official llms.txt index: https://mintlify.com/recharts/recharts/llms.txt. Recharts publishes an llms.txt index of links, not a spec. This excerpt is the official getting-started page plus the start of quickstart, cut to the ChartKit cap. The Mintlify index blurb at the top of each page was removed. |
+| echarts | In Node, call echarts.init(null, null, { renderer: "svg", ssr: true, width, height }) and return chart.renderToSVGString(). The SVG has to include the series marks. Put the numbers in series.data. Code that touches document or window runs in a browser instead. | Apache ECharts handbook: Get Started and Import | 6077 | https://echarts.apache.org/handbook/en/get-started/. Also https://github.com/apache/echarts-handbook/blob/master/contents/en/basics/import.md. Official llms.txt index: https://echarts.apache.org/en/llms.txt. ECharts publishes an llms.txt index. The handbook link on that index is Get Started. This excerpt is that page plus Import ECharts, cut to the ChartKit cap. Apache License 2.0. |
+| chartjs | render() runs in a browser document. Create a canvas, register every scale and controller you construct, and leave that canvas in the document. A canvas tag or a data URL with no painted pixels does not pass. Put the numbers in the dataset data. | Chart.js getting started: installation and usage | 6327 | https://www.chartjs.org/docs/latest/getting-started/. Also https://github.com/chartjs/Chart.js/blob/master/docs/getting-started/installation.md, https://github.com/chartjs/Chart.js/blob/master/docs/getting-started/usage.md. No official llms.txt. Chart.js does not publish an llms.txt. This excerpt is the official installation page plus the start of the usage guide, from the Chart.js docs (MIT), cut to the ChartKit cap. |
 
 Run `BENCH_DOCS=none` and `BENCH_DOCS=official` separately. A cell stays "not yet run" until that run is saved under `bench/results/agent/conditions/`.
 
@@ -219,4 +233,4 @@ Run `BENCH_DOCS=none` and `BENCH_DOCS=official` separately. A cell stays "not ye
 npm run bench
 ```
 
-Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` limits a run. `BENCH_DOCS=none` (the default) is the no-docs condition. `BENCH_DOCS=official` is the with-docs condition. A finished run is also written to `bench/results/agent/conditions/no-docs.json` or `with-docs.json`. A failed validate, render, compile, or library-use check is sent back once.
+Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` limits a run. `BENCH_DOCS=none` (the default) is the no-docs condition: one paragraph per library. `BENCH_DOCS=official` prepends that library's own doc. A finished run is also written to `bench/results/agent/conditions/no-docs.json` or `with-docs.json`. A failed validate, render, compile, or library-use check is sent back once.

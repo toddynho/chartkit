@@ -64,6 +64,11 @@ export function renderReport(result) {
   lines.push("");
   lines.push(browserVerdict(result.browser.rows));
   lines.push("");
+  const frameNote = updateFrameNote(result.browser.rows);
+  if (frameNote) {
+    lines.push(frameNote);
+    lines.push("");
+  }
   lines.push("### ChartKit before and after sampling");
   lines.push("");
   lines.push("Before is the single sample from 2026-10-16T15:19:52.560Z, when ChartKit drew every point (`sampling` did not exist). After is this run's median. The before 1,000,000-point row was an error SVG: `Math.min(...values)` threw `Maximum call stack size exceeded`, `render` caught it, and the harness treated the error SVG as a successful paint. A Node replay of that spec returned a 396-byte `ck-chart-error` in 257.5 ms. Those two timings are not a drawn million-point line.");
@@ -194,6 +199,27 @@ function browserVerdict(rows) {
     );
   }
   return sentences.join("\n\n");
+}
+
+function updateFrameNote(rows) {
+  const group = rows.filter((row) => row.points === 10000 && row.status === "ok" && row.updateMs != null);
+  const ours = group.find((row) => row.library === "ChartKit");
+  if (!ours) return "";
+  const fastest = [...group].sort((a, b) => a.updateMs - b.updateMs)[0];
+  const samples = Array.isArray(ours.updateSamples) ? ours.updateSamples.map((value) => Number(value).toFixed(2)).join(", ") : "";
+  const full = rows.find((row) => row.library === "ChartKit sampling none" && row.points === 100000 && row.status === "ok");
+  const million = rows.find((row) => row.library === "ChartKit sampling none" && row.points === 1000000);
+  const fullCell = full
+    ? ` ChartKit sampling none at 100,000 points is ${full.initialMs.toFixed(2)} ms initial and ${full.updateMs.toFixed(2)} ms update.`
+    : "";
+  const millionCell = million
+    ? ` At 1,000,000 points with sampling none the status is ${million.status}${million.status === "ok" ? ` (${million.initialMs.toFixed(2)} ms initial, ${million.updateMs.toFixed(2)} ms update)` : million.error ? ` (${million.error})` : ""}.`
+    : "";
+  const echarts = rows.find((row) => row.library === "ECharts" && row.points === 100000 && row.status === "ok");
+  const echartsCell = echarts && echarts.updateMs > 500
+    ? ` ECharts at 100,000 points updates in ${echarts.updateMs.toFixed(2)} ms; the shared frames now wait for that canvas to paint, which the old finished-only timer did not.`
+    : "";
+  return `At 10,000 points the fastest update is ${fastest.library} at ${fastest.updateMs.toFixed(2)} ms. ChartKit update is ${ours.updateMs.toFixed(2)} ms${samples ? ` (samples ${samples})` : ""}. Those samples sit on the two-frame wait. The sampled SVG replacement is not a separate hotspot in that cell.${fullCell}${millionCell}${echartsCell}`;
 }
 
 function ssrVerdict(rows) {

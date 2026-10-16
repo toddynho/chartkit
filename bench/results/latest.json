@@ -1,6 +1,6 @@
 {
   "machine": {
-    "measuredAt": "2026-10-16T20:37:52.498Z",
+    "measuredAt": "2026-10-16T21:44:20.619Z",
     "node": "v22.14.0",
     "platform": "linux 6.12.94+ x64",
     "cpu": "Intel(R) Xeon(R) Processor",
@@ -366,10 +366,10 @@
         "status": "ok",
         "points": 1000,
         "iterations": 8,
-        "meanMs": 0.67,
-        "medianMs": 0.67,
-        "minMs": 0.51,
-        "maxMs": 0.84,
+        "meanMs": 0.62,
+        "medianMs": 0.6,
+        "minMs": 0.47,
+        "maxMs": 0.8,
         "note": "Node, no jsdom and no node-canvas. 2 warmup calls, then 8 timed calls. The series is makeSeries(1000, 1)."
       },
       {
@@ -399,10 +399,10 @@
         "status": "ok",
         "points": 1000,
         "iterations": 8,
-        "meanMs": 6.83,
-        "medianMs": 7.7,
-        "minMs": 3.92,
-        "maxMs": 8.62,
+        "meanMs": 5.32,
+        "medianMs": 5.36,
+        "minMs": 3.78,
+        "maxMs": 6.45,
         "note": "Node, no jsdom and no node-canvas. 2 warmup calls, then 8 timed calls. The series is makeSeries(1000, 1)."
       },
       {
@@ -411,10 +411,10 @@
         "status": "ok",
         "points": 1000,
         "iterations": 8,
-        "meanMs": 59.6,
-        "medianMs": 60.7,
-        "minMs": 49.81,
-        "maxMs": 77.38,
+        "meanMs": 52.91,
+        "medianMs": 51.79,
+        "minMs": 49.5,
+        "maxMs": 60.85,
         "note": "Node, no jsdom and no node-canvas. 2 warmup calls, then 8 timed calls. The series is makeSeries(1000, 1)."
       },
       {
@@ -427,7 +427,7 @@
     ]
   },
   "browser": {
-    "method": "Playwright Chromium. Each sample is a fresh page. Reported times are the median of 5 samples. Data is makeSeries(n, seed) generated inside the page and excluded from the timer. x[i] = i. Initial render and one full update (seed 2) are timed, then two animation frames. ChartKit replaces innerHTML with a new SVG (curve linear, points none, sampling auto, which is minmax above twice the plot width). An error SVG (ck-chart-error) fails that sample. uPlot uses setData. Chart.js uses update('none') and {x,y} points. ECharts uses setOption on a canvas renderer with sampling left off, and waits for the finished event. Recharts and Nivo use flushSync. Observable Plot replaces the SVG node. Width 640, height 360. Memory is the median performance.memory.usedJSHeapSize when Chromium exposes it. A failed size skips larger sizes for that library.",
+    "method": "Playwright Chromium. Each sample is a fresh page. Reported times are the median of 5 samples. Data is makeSeries(n, seed) generated inside the page and excluded from the timer. x[i] = i. Every library does its own update, then waits for the same two animation frames. ECharts also waits for its finished event before those frames. ChartKit replaces innerHTML with a new SVG (curve linear, points none, sampling auto, which is minmax above twice the plot width). ChartKit sampling none is the same line with mark.sampling none, measured only at 100k and 1M. An error SVG (ck-chart-error) fails that sample. uPlot uses setData. Chart.js uses update('none') and {x,y} points. ECharts uses setOption on a canvas renderer with sampling left off. Recharts and Nivo use flushSync. Observable Plot replaces the SVG node. Width 640, height 360. Memory is the median performance.memory.usedJSHeapSize when Chromium exposes it. A failed size skips larger sizes for that library.",
     "samples": 5,
     "sizes": [
       1000,
@@ -443,24 +443,24 @@
         "points": 1000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 10.700000001117587,
-        "updateMs": 33,
+        "initialMs": 22.300000000745058,
+        "updateMs": 33.100000001490116,
         "heapBefore": 1368692,
-        "heapAfterRender": 2351313,
-        "heapAfterUpdate": 1847006,
+        "heapAfterRender": 2349885,
+        "heapAfterUpdate": 1872654,
         "initialSamples": [
-          7.5,
-          23.300000000745058,
-          24.100000001490116,
-          8.800000000745058,
-          10.700000001117587
+          22.300000000745058,
+          25.300000000745058,
+          10.199999999254942,
+          11.100000001490116,
+          24.300000000745058
         ],
         "updateSamples": [
-          33,
-          32.90000000037253,
-          33,
-          33.59999999962747,
-          33
+          33.100000001490116,
+          33.099999997764826,
+          33.400000002235174,
+          33.600000001490116,
+          33.100000001490116
         ]
       },
       {
@@ -470,23 +470,23 @@
         "points": 10000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 10.099999999627471,
+        "initialMs": 11.699999999254942,
         "updateMs": 33.19999999925494,
         "heapBefore": 1368692,
-        "heapAfterRender": 2513512,
-        "heapAfterUpdate": 2308326,
+        "heapAfterRender": 2502632,
+        "heapAfterUpdate": 2308338,
         "initialSamples": [
-          8.700000001117587,
-          24.100000001490116,
-          12.199999999254942,
-          9.5,
-          10.099999999627471
+          10.399999998509884,
+          11.699999999254942,
+          13.100000001490116,
+          9.300000000745058,
+          12
         ],
         "updateSamples": [
-          32.69999999925494,
-          33,
           33.19999999925494,
-          33.30000000074506,
+          33.399999998509884,
+          32.5,
+          33.19999999925494,
           33.19999999925494
         ]
       },
@@ -497,24 +497,24 @@
         "points": 100000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 11.200000001117587,
-        "updateMs": 26.800000000745058,
+        "initialMs": 11.599999997764826,
+        "updateMs": 27.299999997019768,
         "heapBefore": 1368692,
-        "heapAfterRender": 4373128,
-        "heapAfterUpdate": 5641043,
+        "heapAfterRender": 4285220,
+        "heapAfterUpdate": 5684687,
         "initialSamples": [
-          11.5,
-          11.099999999627471,
-          15.5,
-          11.099999999627471,
-          11.200000001117587
+          10.800000000745058,
+          11.900000002235174,
+          11.300000000745058,
+          11.599999997764826,
+          14.900000002235174
         ],
         "updateSamples": [
-          24.800000000745058,
-          28.09999999962747,
-          25.799999998882413,
-          30.09999999962747,
-          26.800000000745058
+          28.900000002235174,
+          26.099999997764826,
+          23.800000000745058,
+          28.099999997764826,
+          27.299999997019768
         ]
       },
       {
@@ -524,375 +524,429 @@
         "points": 1000000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 24.700000001117587,
-        "updateMs": 31.5,
+        "initialMs": 24.899999998509884,
+        "updateMs": 31.899999998509884,
         "heapBefore": 1368696,
-        "heapAfterRender": 18938746,
-        "heapAfterUpdate": 34261148,
+        "heapAfterRender": 18333690,
+        "heapAfterUpdate": 34400140,
         "initialSamples": [
-          25.300000000745058,
-          28.699999999254942,
-          24.700000001117587,
-          24.300000000745058,
-          24.600000001490116
-        ],
-        "updateSamples": [
-          31.5,
-          35.80000000074506,
-          31.199999999254942,
-          34.40000000037253,
-          20.40000000037253
-        ]
-      },
-      {
-        "id": "uplot",
-        "library": "uPlot",
-        "renderer": "canvas",
-        "points": 1000,
-        "status": "ok",
-        "samples": 5,
-        "initialMs": 19.59999999962747,
-        "updateMs": 33.09999999962747,
-        "heapBefore": 1742703,
-        "heapAfterRender": 3014446,
-        "heapAfterUpdate": 3280718,
-        "initialSamples": [
-          14.799999998882413,
-          19.100000001490116,
-          19.59999999962747,
-          19.59999999962747,
-          20.199999999254942
-        ],
-        "updateSamples": [
-          33.09999999962747,
-          33,
-          33,
-          33.09999999962747,
-          33.09999999962747
-        ]
-      },
-      {
-        "id": "uplot",
-        "library": "uPlot",
-        "renderer": "canvas",
-        "points": 10000,
-        "status": "ok",
-        "samples": 5,
-        "initialMs": 18.5,
-        "updateMs": 33,
-        "heapBefore": 1742703,
-        "heapAfterRender": 2393210,
-        "heapAfterUpdate": 2943918,
-        "initialSamples": [
-          18.5,
-          17.299999998882413,
-          15,
-          20.09999999962747,
-          18.5
-        ],
-        "updateSamples": [
-          33.09999999962747,
-          33,
-          32.70000000111759,
-          33.09999999962747,
-          32.80000000074506
-        ]
-      },
-      {
-        "id": "uplot",
-        "library": "uPlot",
-        "renderer": "canvas",
-        "points": 100000,
-        "status": "ok",
-        "samples": 5,
-        "initialMs": 15.599999999627471,
-        "updateMs": 30.700000001117587,
-        "heapBefore": 1742703,
-        "heapAfterRender": 4753390,
-        "heapAfterUpdate": 5445246,
-        "initialSamples": [
-          15.599999999627471,
-          15.900000000372529,
-          15.300000000745058,
-          16.399999998509884,
-          14.699999999254942
-        ],
-        "updateSamples": [
-          30.700000001117587,
-          30.59999999962747,
-          31,
-          30.40000000037253,
-          30.899999998509884
-        ]
-      },
-      {
-        "id": "uplot",
-        "library": "uPlot",
-        "renderer": "canvas",
-        "points": 1000000,
-        "status": "ok",
-        "samples": 5,
-        "initialMs": 25.200000001117587,
-        "updateMs": 24.700000001117587,
-        "heapBefore": 1742707,
-        "heapAfterRender": 19410794,
-        "heapAfterUpdate": 34994681,
-        "initialSamples": [
-          25.299999998882413,
-          25.200000001117587,
-          22.700000001117587,
-          26.09999999962747,
-          23.100000001490116
-        ],
-        "updateSamples": [
-          24.600000001490116,
-          24.700000001117587,
-          24.90000000037253,
-          20.700000001117587,
-          25.199999999254942
-        ]
-      },
-      {
-        "id": "chartjs",
-        "library": "Chart.js",
-        "renderer": "canvas",
-        "points": 1000,
-        "status": "ok",
-        "samples": 5,
-        "initialMs": 26.399999998509884,
-        "updateMs": 23.09999999962747,
-        "heapBefore": 2362321,
-        "heapAfterRender": 4660215,
-        "heapAfterUpdate": 3674363,
-        "initialSamples": [
-          30.100000001490116,
-          26.399999998509884,
-          25.800000000745058,
-          29.199999999254942,
+          25.099999997764826,
+          27.300000000745058,
+          24.800000000745058,
+          23.800000000745058,
           24.899999998509884
         ],
         "updateSamples": [
-          19.09999999962747,
-          23.09999999962747,
-          23.90000000037253,
-          16.90000000037253,
-          27.09999999962747
+          31.899999998509884,
+          32,
+          20.600000001490116,
+          35,
+          19.599999997764826
         ]
       },
       {
-        "id": "chartjs",
-        "library": "Chart.js",
-        "renderer": "canvas",
-        "points": 10000,
-        "status": "ok",
-        "samples": 5,
-        "initialMs": 31.299999998882413,
-        "updateMs": 19,
-        "heapBefore": 2362321,
-        "heapAfterRender": 6625754,
-        "heapAfterUpdate": 7116722,
-        "initialSamples": [
-          31.09999999962747,
-          32.29999999888241,
-          31.699999999254942,
-          31.299999998882413,
-          30.700000001117587
-        ],
-        "updateSamples": [
-          19.699999999254942,
-          19,
-          18.59999999962747,
-          17.5,
-          19.09999999962747
-        ]
-      },
-      {
-        "id": "chartjs",
-        "library": "Chart.js",
-        "renderer": "canvas",
-        "points": 100000,
-        "status": "ok",
-        "samples": 5,
-        "initialMs": 57.09999999962747,
-        "updateMs": 38,
-        "heapBefore": 2362321,
-        "heapAfterRender": 20944186,
-        "heapAfterUpdate": 30056742,
-        "initialSamples": [
-          57.09999999962747,
-          56.09999999962747,
-          61.90000000037253,
-          53.5,
-          58.59999999962747
-        ],
-        "updateSamples": [
-          39.899999998509884,
-          38,
-          33.19999999925494,
-          39.5,
-          35.899999998509884
-        ]
-      },
-      {
-        "id": "chartjs",
-        "library": "Chart.js",
-        "renderer": "canvas",
-        "points": 1000000,
-        "status": "ok",
-        "samples": 5,
-        "initialMs": 335.30000000074506,
-        "updateMs": 185.5,
-        "heapBefore": 2362325,
-        "heapAfterRender": 154958011,
-        "heapAfterUpdate": 230609535,
-        "initialSamples": [
-          351.5,
-          335.30000000074506,
-          333.30000000074506,
-          328.19999999925494,
-          405.8999999985099
-        ],
-        "updateSamples": [
-          205.2999999988824,
-          185.5,
-          182.19999999925494,
-          175.80000000074506,
-          201.09999999962747
-        ]
-      },
-      {
-        "id": "echarts",
-        "library": "ECharts",
-        "renderer": "canvas",
-        "points": 1000,
-        "status": "ok",
-        "samples": 5,
-        "initialMs": 24.800000000745058,
-        "updateMs": 5.5,
-        "heapBefore": 5953262,
-        "heapAfterRender": 9100769,
-        "heapAfterUpdate": 8662137,
-        "initialSamples": [
-          28,
-          25.5,
-          24.199999999254942,
-          24.09999999962747,
-          24.800000000745058
-        ],
-        "updateSamples": [
-          5.900000000372529,
-          8.5,
-          5.5,
-          5.400000000372529,
-          5.300000000745058
-        ]
-      },
-      {
-        "id": "echarts",
-        "library": "ECharts",
-        "renderer": "canvas",
-        "points": 10000,
-        "status": "ok",
-        "samples": 5,
-        "initialMs": 33.09999999962747,
-        "updateMs": 12.5,
-        "heapBefore": 5953290,
-        "heapAfterRender": 12989942,
-        "heapAfterUpdate": 15064166,
-        "initialSamples": [
-          32.59999999962747,
-          37.59999999962747,
-          32.80000000074506,
-          33.59999999962747,
-          33.09999999962747
-        ],
-        "updateSamples": [
-          12.5,
-          12.199999999254942,
-          12.599999999627471,
-          13.199999999254942,
-          12.299999998882413
-        ]
-      },
-      {
-        "id": "echarts",
-        "library": "ECharts",
-        "renderer": "canvas",
-        "points": 100000,
-        "status": "ok",
-        "samples": 5,
-        "initialMs": 98.29999999888241,
-        "updateMs": 64.59999999962747,
-        "heapBefore": 5953278,
-        "heapAfterRender": 54836691,
-        "heapAfterUpdate": 84620011,
-        "initialSamples": [
-          98.5,
-          98.80000000074506,
-          97.39999999850988,
-          98.29999999888241,
-          97.5
-        ],
-        "updateSamples": [
-          65.40000000037253,
-          63.79999999888241,
-          65.10000000149012,
-          64.40000000037253,
-          64.59999999962747
-        ]
-      },
-      {
-        "id": "echarts",
-        "library": "ECharts",
-        "renderer": "canvas",
-        "points": 1000000,
-        "status": "ok",
-        "samples": 5,
-        "initialMs": 623.7000000011176,
-        "updateMs": 571.1999999992549,
-        "heapBefore": 5953290,
-        "heapAfterRender": 393332045,
-        "heapAfterUpdate": 716091665,
-        "initialSamples": [
-          623.7000000011176,
-          632.5,
-          645.2000000011176,
-          607.5,
-          609.5
-        ],
-        "updateSamples": [
-          621.1999999992549,
-          538.5999999996275,
-          515.4000000003725,
-          600.9000000003725,
-          571.1999999992549
-        ]
-      },
-      {
-        "id": "recharts",
-        "library": "Recharts",
+        "id": "chartkit-full",
+        "library": "ChartKit sampling none",
         "renderer": "svg",
-        "points": 1000,
+        "points": 100000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 65.60000000149012,
-        "updateMs": 26,
-        "heapBefore": 7077565,
-        "heapAfterRender": 20650068,
-        "heapAfterUpdate": 15232640,
+        "initialMs": 66.80000000074506,
+        "updateMs": 1170.9000000022352,
+        "heapBefore": 1368770,
+        "heapAfterRender": 23505880,
+        "heapAfterUpdate": 43762990,
         "initialSamples": [
-          68,
-          68.40000000037253,
           65.60000000149012,
-          65.5,
-          65.59999999962747
+          67.5,
+          75.39999999850988,
+          64.79999999701977,
+          66.80000000074506
         ],
         "updateSamples": [
+          1166.199999999255,
+          1144.300000000745,
+          1190.199999999255,
+          1170.9000000022352,
+          1200.5
+        ]
+      },
+      {
+        "id": "chartkit-full",
+        "library": "ChartKit sampling none",
+        "renderer": "svg",
+        "points": 1000000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 505.19999999925494,
+        "updateMs": 21472.5,
+        "heapBefore": 1368774,
+        "heapAfterRender": 198788756,
+        "heapAfterUpdate": 33597440,
+        "initialSamples": [
+          577.1999999992549,
+          502.30000000074506,
+          519.8999999985099,
+          505.19999999925494,
+          502.5
+        ],
+        "updateSamples": [
+          21864.60000000149,
+          21472.5,
+          21203.699999999255,
+          21918.199999999255,
+          20869.699999999255
+        ]
+      },
+      {
+        "id": "uplot",
+        "library": "uPlot",
+        "renderer": "canvas",
+        "points": 1000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 19.700000002980232,
+        "updateMs": 33.19999999925494,
+        "heapBefore": 1742703,
+        "heapAfterRender": 3011050,
+        "heapAfterUpdate": 3280046,
+        "initialSamples": [
+          13,
+          19.700000002980232,
+          18.200000002980232,
+          20.900000002235174,
+          20.5
+        ],
+        "updateSamples": [
+          33.5,
+          33.30000000074506,
+          33.19999999925494,
+          33.099999997764826,
+          32.899999998509884
+        ]
+      },
+      {
+        "id": "uplot",
+        "library": "uPlot",
+        "renderer": "canvas",
+        "points": 10000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 17.600000001490116,
+        "updateMs": 33.099999997764826,
+        "heapBefore": 1742703,
+        "heapAfterRender": 2392106,
+        "heapAfterUpdate": 2927254,
+        "initialSamples": [
+          20.099999997764826,
+          11.900000002235174,
+          17.600000001490116,
+          15.800000000745058,
+          17.900000002235174
+        ],
+        "updateSamples": [
+          32.80000000074506,
+          25.099999997764826,
+          33.30000000074506,
+          33.30000000074506,
+          33.099999997764826
+        ]
+      },
+      {
+        "id": "uplot",
+        "library": "uPlot",
+        "renderer": "canvas",
+        "points": 100000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 16.5,
+        "updateMs": 30.800000000745058,
+        "heapBefore": 1742703,
+        "heapAfterRender": 4805722,
+        "heapAfterUpdate": 5502182,
+        "initialSamples": [
+          16.5,
+          17.699999999254942,
+          14.900000002235174,
+          17.200000002980232,
+          13.899999998509884
+        ],
+        "updateSamples": [
+          30.800000000745058,
+          30.800000000745058,
+          30.800000000745058,
+          30.800000000745058,
+          30.400000002235174
+        ]
+      },
+      {
+        "id": "uplot",
+        "library": "uPlot",
+        "renderer": "canvas",
+        "points": 1000000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 22.5,
+        "updateMs": 25.699999999254942,
+        "heapBefore": 1742707,
+        "heapAfterRender": 19378506,
+        "heapAfterUpdate": 34914901,
+        "initialSamples": [
+          25.800000000745058,
+          24.600000001490116,
+          22.300000000745058,
+          21.400000002235174,
+          22.5
+        ],
+        "updateSamples": [
+          24.300000000745058,
+          23.399999998509884,
+          27.400000002235174,
+          26.100000001490116,
+          25.699999999254942
+        ]
+      },
+      {
+        "id": "chartjs",
+        "library": "Chart.js",
+        "renderer": "canvas",
+        "points": 1000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 26.300000000745058,
+        "updateMs": 25.400000002235174,
+        "heapBefore": 2362321,
+        "heapAfterRender": 4658491,
+        "heapAfterUpdate": 3657035,
+        "initialSamples": [
+          26.300000000745058,
+          24.899999998509884,
+          25.699999999254942,
+          28.899999998509884,
+          28.300000000745058
+        ],
+        "updateSamples": [
+          25.400000002235174,
           26,
-          18.699999999254942,
-          26.799999998882413,
-          18.100000001490116,
-          27.300000000745058
+          26.800000000745058,
+          23.199999999254942,
+          23.699999999254942
+        ]
+      },
+      {
+        "id": "chartjs",
+        "library": "Chart.js",
+        "renderer": "canvas",
+        "points": 10000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 31.800000000745058,
+        "updateMs": 32.100000001490116,
+        "heapBefore": 2362321,
+        "heapAfterRender": 6638626,
+        "heapAfterUpdate": 7118846,
+        "initialSamples": [
+          29.5,
+          33.69999999925494,
+          31.800000000745058,
+          31.299999997019768,
+          32.69999999925494
+        ],
+        "updateSamples": [
+          21.300000000745058,
+          32.899999998509884,
+          32.69999999925494,
+          32.100000001490116,
+          19.5
+        ]
+      },
+      {
+        "id": "chartjs",
+        "library": "Chart.js",
+        "renderer": "canvas",
+        "points": 100000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 56.30000000074506,
+        "updateMs": 40.099999997764826,
+        "heapBefore": 2362321,
+        "heapAfterRender": 20956206,
+        "heapAfterUpdate": 31040534,
+        "initialSamples": [
+          55.099999997764826,
+          57.69999999925494,
+          59.600000001490116,
+          56.100000001490116,
+          56.30000000074506
+        ],
+        "updateSamples": [
+          40.5,
+          37,
+          36.69999999925494,
+          40.099999997764826,
+          41.899999998509884
+        ]
+      },
+      {
+        "id": "chartjs",
+        "library": "Chart.js",
+        "renderer": "canvas",
+        "points": 1000000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 321.69999999925494,
+        "updateMs": 173.69999999925494,
+        "heapBefore": 2362325,
+        "heapAfterRender": 154874227,
+        "heapAfterUpdate": 229311535,
+        "initialSamples": [
+          321.69999999925494,
+          334.19999999925494,
+          270.4000000022352,
+          322,
+          278.69999999925494
+        ],
+        "updateSamples": [
+          175.69999999925494,
+          172.69999999925494,
+          173.69999999925494,
+          168.69999999925494,
+          180.10000000149012
+        ]
+      },
+      {
+        "id": "echarts",
+        "library": "ECharts",
+        "renderer": "canvas",
+        "points": 1000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 37.899999998509884,
+        "updateMs": 19.100000001490116,
+        "heapBefore": 5953954,
+        "heapAfterRender": 14407234,
+        "heapAfterUpdate": 9462878,
+        "initialSamples": [
+          41,
+          38.399999998509884,
+          37.600000001490116,
+          37.899999998509884,
+          37.100000001490116
+        ],
+        "updateSamples": [
+          11.899999998509884,
+          26.5,
+          19.100000001490116,
+          18.800000000745058,
+          19.300000000745058
+        ]
+      },
+      {
+        "id": "echarts",
+        "library": "ECharts",
+        "renderer": "canvas",
+        "points": 10000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 94.59999999776483,
+        "updateMs": 74,
+        "heapBefore": 5953958,
+        "heapAfterRender": 16011895,
+        "heapAfterUpdate": 16350119,
+        "initialSamples": [
+          94.59999999776483,
+          91.90000000223517,
+          94.80000000074506,
+          95.70000000298023,
+          92.5
+        ],
+        "updateSamples": [
+          64.90000000223517,
+          66.60000000149012,
+          78.5,
+          74,
+          81.20000000298023
+        ]
+      },
+      {
+        "id": "echarts",
+        "library": "ECharts",
+        "renderer": "canvas",
+        "points": 100000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 2642,
+        "updateMs": 2574.400000002235,
+        "heapBefore": 5953946,
+        "heapAfterRender": 61895012,
+        "heapAfterUpdate": 67264056,
+        "initialSamples": [
+          2642,
+          2569.10000000149,
+          2696.599999997765,
+          2621.800000000745,
+          2792.300000000745
+        ],
+        "updateSamples": [
+          2592.199999999255,
+          2574.400000002235,
+          2523.900000002235,
+          2521,
+          2609.699999999255
+        ]
+      },
+      {
+        "id": "echarts",
+        "library": "ECharts",
+        "renderer": "canvas",
+        "points": 1000000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 34051.10000000149,
+        "updateMs": 33740.300000000745,
+        "heapBefore": 5953962,
+        "heapAfterRender": 394724130,
+        "heapAfterUpdate": 615214077,
+        "initialSamples": [
+          34051.10000000149,
+          34134.699999999255,
+          32277.5,
+          33430.29999999702,
+          35055.400000002235
+        ],
+        "updateSamples": [
+          37424.89999999851,
+          33740.300000000745,
+          33976,
+          33056.300000000745,
+          33437.599999997765
+        ]
+      },
+      {
+        "id": "recharts",
+        "library": "Recharts",
+        "renderer": "svg",
+        "points": 1000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 65.69999999925494,
+        "updateMs": 15.300000000745058,
+        "heapBefore": 7077581,
+        "heapAfterRender": 20639468,
+        "heapAfterUpdate": 15205276,
+        "initialSamples": [
+          65.69999999925494,
+          67,
+          68.5,
+          64.39999999850988,
+          64.60000000149012
+        ],
+        "updateSamples": [
+          14.600000001490116,
+          20.899999998509884,
+          27.599999997764826,
+          15.300000000745058,
+          14.199999999254942
         ]
       },
       {
@@ -902,24 +956,24 @@
         "points": 10000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 225.09999999962747,
-        "updateMs": 114.59999999962747,
+        "initialMs": 223.40000000223517,
+        "updateMs": 104.60000000149012,
         "heapBefore": 7077581,
-        "heapAfterRender": 39301483,
-        "heapAfterUpdate": 42008795,
+        "heapAfterRender": 39248143,
+        "heapAfterUpdate": 42074935,
         "initialSamples": [
-          225.09999999962747,
-          226.2999999988824,
-          225.10000000149012,
-          224.59999999962747,
-          225.09999999962747
+          222.5,
+          223.40000000223517,
+          224.59999999776483,
+          223.40000000223517,
+          226.60000000149012
         ],
         "updateSamples": [
-          116.59999999962747,
-          110.5,
-          114.59999999962747,
-          111.90000000037253,
-          117.40000000037253
+          104.60000000149012,
+          103.90000000223517,
+          116.5,
+          102.89999999850988,
+          115.09999999776483
         ]
       },
       {
@@ -929,24 +983,24 @@
         "points": 100000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 1790.699999999255,
-        "updateMs": 947.3000000007451,
-        "heapBefore": 7077581,
-        "heapAfterRender": 173245670,
-        "heapAfterUpdate": 267255198,
+        "initialMs": 1770.7000000029802,
+        "updateMs": 940.8999999985099,
+        "heapBefore": 7077577,
+        "heapAfterRender": 165170180,
+        "heapAfterUpdate": 265044307,
         "initialSamples": [
-          1791.800000000745,
-          1790.699999999255,
-          1783.2000000011176,
-          1822.6000000014901,
-          1785.7000000011176
+          1751.4000000022352,
+          1770.7000000029802,
+          1761.699999999255,
+          1775.5,
+          1789.300000000745
         ],
         "updateSamples": [
-          941.5999999996275,
-          947.3000000007451,
-          940.7999999988824,
-          966.1999999992549,
-          966.0999999996275
+          940.8999999985099,
+          933.8999999985099,
+          932,
+          943.5,
+          948.8999999985099
         ]
       },
       {
@@ -956,24 +1010,24 @@
         "points": 1000000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 19482.300000000745,
-        "updateMs": 11283.599999999627,
+        "initialMs": 19790.699999999255,
+        "updateMs": 11251.800000000745,
         "heapBefore": 7077585,
-        "heapAfterRender": 1351070949,
-        "heapAfterUpdate": 2618474885,
+        "heapAfterRender": 1351332137,
+        "heapAfterUpdate": 2632379429,
         "initialSamples": [
-          21205,
-          20450.400000000373,
-          19106.300000000745,
-          19441.299999998882,
-          19482.300000000745
+          20710.39999999851,
+          20006.300000000745,
+          19790.699999999255,
+          19583.699999999255,
+          19698.300000000745
         ],
         "updateSamples": [
-          10777.699999999255,
-          11654.5,
-          10775.799999998882,
-          11607,
-          11283.599999999627
+          10693.800000000745,
+          10634.300000000745,
+          11794.39999999851,
+          12171.099999997765,
+          11251.800000000745
         ]
       },
       {
@@ -983,24 +1037,24 @@
         "points": 1000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 39.40000000037253,
-        "updateMs": 19.09999999962747,
+        "initialMs": 39.19999999925494,
+        "updateMs": 17.100000001490116,
         "heapBefore": 6289714,
-        "heapAfterRender": 16856133,
-        "heapAfterUpdate": 11694080,
+        "heapAfterRender": 16856696,
+        "heapAfterUpdate": 11647349,
         "initialSamples": [
-          42.40000000037253,
-          40.09999999962747,
-          39.40000000037253,
-          39.09999999962747,
-          39.30000000074506
+          42.19999999925494,
+          43.400000002235174,
+          39.19999999925494,
+          38.600000001490116,
+          38
         ],
         "updateSamples": [
-          26.59999999962747,
-          26.800000000745058,
-          13.900000000372529,
-          18.40000000037253,
-          19.09999999962747
+          13.699999999254942,
+          27.099999997764826,
+          17.100000001490116,
+          13.800000000745058,
+          22
         ]
       },
       {
@@ -1010,24 +1064,24 @@
         "points": 10000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 73.69999999925494,
-        "updateMs": 53.09999999962747,
-        "heapBefore": 6289598,
-        "heapAfterRender": 26179758,
-        "heapAfterUpdate": 32809574,
+        "initialMs": 75.20000000298023,
+        "updateMs": 52.5,
+        "heapBefore": 6289714,
+        "heapAfterRender": 24279666,
+        "heapAfterUpdate": 38127396,
         "initialSamples": [
-          72.20000000111759,
-          73.69999999925494,
-          70.29999999888241,
-          73.80000000074506,
-          81.40000000037253
+          75.20000000298023,
+          70.80000000074506,
+          69.69999999925494,
+          77.59999999776483,
+          77.59999999776483
         ],
         "updateSamples": [
-          49.80000000074506,
-          56.90000000037253,
-          52.09999999962747,
-          53.09999999962747,
-          53.70000000111759
+          51.5,
+          64.09999999776483,
+          56.69999999925494,
+          52.5,
+          51.600000001490116
         ]
       },
       {
@@ -1037,24 +1091,24 @@
         "points": 100000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 359.7999999988824,
-        "updateMs": 949.6999999992549,
-        "heapBefore": 6289598,
-        "heapAfterRender": 131787230,
-        "heapAfterUpdate": 254440036,
+        "initialMs": 343.30000000074506,
+        "updateMs": 954.8999999985099,
+        "heapBefore": 6289714,
+        "heapAfterRender": 131410102,
+        "heapAfterUpdate": 257355368,
         "initialSamples": [
-          357.80000000074506,
-          357.69999999925494,
-          375.69999999925494,
-          359.7999999988824,
-          364.2999999988824
+          350.20000000298023,
+          346.69999999925494,
+          338.69999999925494,
+          343.30000000074506,
+          343.19999999925494
         ],
         "updateSamples": [
-          974.5,
-          974.4000000003725,
-          949.6999999992549,
-          947.5,
-          946.9000000003725
+          928.0999999977648,
+          956.6000000014901,
+          954.8999999985099,
+          960.8999999985099,
+          932.0999999977648
         ]
       },
       {
@@ -1072,24 +1126,24 @@
         "points": 1000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 17.299999998882413,
-        "updateMs": 33.09999999962747,
-        "heapBefore": 3566751,
-        "heapAfterRender": 8181855,
-        "heapAfterUpdate": 5412974,
+        "initialMs": 18,
+        "updateMs": 33.399999998509884,
+        "heapBefore": 3566139,
+        "heapAfterRender": 8190739,
+        "heapAfterUpdate": 5399726,
         "initialSamples": [
-          23.800000000745058,
-          17.299999998882413,
-          17.90000000037253,
-          16.40000000037253,
-          16.800000000745058
+          18.400000002235174,
+          18,
+          17.100000001490116,
+          17.5,
+          18.800000000745058
         ],
         "updateSamples": [
-          32.09999999962747,
-          33.40000000037253,
-          33.30000000074506,
-          31.800000000745058,
-          33.09999999962747
+          24.699999999254942,
+          33.399999998509884,
+          32.399999998509884,
+          33.399999998509884,
+          33.5
         ]
       },
       {
@@ -1099,24 +1153,24 @@
         "points": 10000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 28.799999998882413,
-        "updateMs": 47.59999999962747,
-        "heapBefore": 3566751,
-        "heapAfterRender": 9555439,
-        "heapAfterUpdate": 8900978,
+        "initialMs": 27.199999999254942,
+        "updateMs": 56.19999999925494,
+        "heapBefore": 3566351,
+        "heapAfterRender": 10112583,
+        "heapAfterUpdate": 9242730,
         "initialSamples": [
-          29.299999998882413,
-          26.399999998509884,
-          31.09999999962747,
-          26.700000001117587,
-          28.799999998882413
+          24.800000000745058,
+          24.699999999254942,
+          27.199999999254942,
+          30.199999999254942,
+          28
         ],
         "updateSamples": [
-          51.80000000074506,
-          47.59999999962747,
-          46.30000000074506,
-          52.100000001490116,
-          44.30000000074506
+          45.5,
+          58.399999998509884,
+          56.899999998509884,
+          56.19999999925494,
+          43.600000001490116
         ]
       },
       {
@@ -1126,24 +1180,24 @@
         "points": 100000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 98.29999999888241,
-        "updateMs": 1484.0999999996275,
-        "heapBefore": 3566751,
-        "heapAfterRender": 33655970,
-        "heapAfterUpdate": 55177301,
+        "initialMs": 93.59999999776483,
+        "updateMs": 1475.0999999977648,
+        "heapBefore": 3566139,
+        "heapAfterRender": 33575286,
+        "heapAfterUpdate": 55114653,
         "initialSamples": [
-          95.5,
-          97.09999999962747,
-          98.70000000111759,
-          98.70000000111759,
-          98.29999999888241
+          95.89999999850988,
+          94,
+          90.19999999925494,
+          89.5,
+          93.59999999776483
         ],
         "updateSamples": [
-          1491.5999999996275,
-          1513.2000000011176,
-          1465.800000000745,
-          1457,
-          1484.0999999996275
+          1467.1000000014901,
+          1475.0999999977648,
+          1484,
+          1485.6000000014901,
+          1439.300000000745
         ]
       },
       {
@@ -1153,24 +1207,24 @@
         "points": 1000000,
         "status": "ok",
         "samples": 5,
-        "initialMs": 730.2000000011176,
-        "updateMs": 25535.699999999255,
-        "heapBefore": 3566355,
-        "heapAfterRender": 260573215,
-        "heapAfterUpdate": 339086010,
+        "initialMs": 737.0999999977648,
+        "updateMs": 25647.10000000149,
+        "heapBefore": 3566367,
+        "heapAfterRender": 259480175,
+        "heapAfterUpdate": 343158814,
         "initialSamples": [
-          700.2000000011176,
-          750.5,
-          685.0999999996275,
-          730.2000000011176,
-          732.4000000003725
+          702.1999999992549,
+          767,
+          737.0999999977648,
+          727.5,
+          771.1999999992549
         ],
         "updateSamples": [
-          25197.900000000373,
-          25535.699999999255,
-          25443.89999999851,
-          27727.599999999627,
-          26741.60000000149
+          24734.39999999851,
+          25352.5,
+          25895.800000000745,
+          26478.599999997765,
+          25647.10000000149
         ]
       }
     ]
