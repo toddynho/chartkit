@@ -74,7 +74,6 @@ function time(fn, iterations) {
 }
 
 const srcDir = join(core, "src");
-const dist = join(core, "dist/index.js");
 const tmpEntries = join(tmpdir(), "chartkit-bench-entries");
 mkdirSync(tmpEntries, { recursive: true });
 
@@ -84,23 +83,34 @@ function entry(name, body) {
   return path;
 }
 
-const rendererNames = [
-  "cartesian",
+const chartNames = [
+  "line",
+  "bar",
   "donut",
+  "stacked-area",
   "scatter",
+  "combo",
   "heatmap",
   "gauge",
   "kpi",
+  "sparkline",
+  "mini-area",
   "progress-ring",
   "spike",
   "candlestick",
 ];
 
+const minimalLine = entry(
+  "minimal-line.mjs",
+  `import { createRenderer } from ${JSON.stringify(join(srcDir, "render.ts"))};\nimport { line } from ${JSON.stringify(join(srcDir, "charts/line.ts"))};\nexport const render = createRenderer([line]);\n`,
+);
+
 const perRenderer = {};
 const rendererCode = {};
-for (const name of rendererNames) {
-  const file = join(srcDir, "renderers", `${name}.ts`);
-  const outfile = join(tmpdir(), `chartkit-bench-renderer-${name}.mjs`);
+for (const name of chartNames) {
+  const file = join(srcDir, "charts", `${name}.ts`);
+  const built = await bundle(file);
+  const outfile = join(tmpdir(), `chartkit-bench-chart-${name}.mjs`);
   await build({
     entryPoints: [file],
     bundle: true,
@@ -110,38 +120,61 @@ for (const name of rendererNames) {
     outfile,
     logLevel: "silent",
   });
-  const code = readFileSync(outfile);
-  rendererCode[name] = code.toString("utf8");
-  perRenderer[name] = {
-    minBytes: code.length,
-    gzipBytes: gzipSync(code, { level: 9 }).length,
-  };
+  rendererCode[name] = readFileSync(outfile, "utf8");
+  perRenderer[name] = built;
 }
+
+const lineCode = await (async () => {
+  const outfile = join(tmpdir(), "chartkit-bench-minimal-line.mjs");
+  await build({
+    entryPoints: [minimalLine],
+    bundle: true,
+    minify: true,
+    format: "esm",
+    platform: "node",
+    outfile,
+    logLevel: "silent",
+  });
+  return readFileSync(outfile, "utf8");
+})();
+
+const allCode = await (async () => {
+  const outfile = join(tmpdir(), "chartkit-bench-all.mjs");
+  await build({
+    entryPoints: [join(srcDir, "all.ts")],
+    bundle: true,
+    minify: true,
+    format: "esm",
+    platform: "node",
+    outfile,
+    logLevel: "silent",
+  });
+  return readFileSync(outfile, "utf8");
+})();
 
 const sizes = {
   source: {
-    core: await bundle(join(srcDir, "index.ts")),
+    minimalLine: await bundle(minimalLine),
+    all: await bundle(join(srcDir, "all.ts")),
     validate: await bundle(join(srcDir, "validate.ts")),
-    render: await bundle(join(srcDir, "render.ts")),
-  },
-  dist: {
-    core: await bundle(entry("dist-core.mjs", `export { validate, render } from ${JSON.stringify(dist)};\n`)),
-    validate: await bundle(entry("dist-validate.mjs", `export { validate } from ${JSON.stringify(dist)};\n`)),
-    render: await bundle(entry("dist-render.mjs", `export { render } from ${JSON.stringify(dist)};\n`)),
+    registry: await bundle(join(srcDir, "index.ts")),
   },
   perRenderer,
   isolation: {
-    note: "True when the minified module does not contain a string literal that only the other renderer writes.",
-    cartesianOmitsCandleMark: !rendererCode.cartesian.includes('data-ck-mark="candle"'),
+    note: "True when the minified minimal-line bundle omits strings that belong to other charts, themes, or the validator.",
+    lineOmitsCandleMark: !lineCode.includes('data-ck-mark="candle"'),
+    lineOmitsRetroAccent: !lineCode.includes("#ff7edb"),
+    lineOmitsCk1004: !lineCode.includes("CK1004"),
+    allIncludesRetroAccent: allCode.includes("#ff7edb"),
+    allIncludesCandleMark: allCode.includes('data-ck-mark="candle"'),
     candlestickOmitsDonutFillRule: !rendererCode.candlestick.includes('fill-rule="evenodd"'),
     donutOmitsCandleMark: !rendererCode.donut.includes('data-ck-mark="candle"'),
-    heatmapOmitsCandleMark: !rendererCode.heatmap.includes('data-ck-mark="candle"'),
   },
 };
 
 const outfile = join(tmpdir(), "chartkit-bench-runtime.mjs");
 await build({
-  entryPoints: [join(core, "src/index.ts")],
+  entryPoints: [join(core, "src/validate.ts")],
   bundle: true,
   format: "esm",
   platform: "node",
@@ -165,11 +198,11 @@ const report = {
   cpuCount: os.cpus().length,
   method: {
     bundle:
-      "esbuild --bundle --minify, gzip -9, zero externals. source/* bundles the TS modules directly (tree-shaken). dist/* bundles packages/core/dist/index.js, which is what the package exports.",
+      "esbuild --bundle --minify, gzip -9, zero externals. minimalLine is createRenderer([line]) (registry + line + midnight). all is src/all.ts. validate is src/validate.ts. perRenderer bundles each charts/* entry alone.",
     throughput:
-      "warmup 50, then performance.now() around validate(); examples loop validates every example spec per iteration. Runtime is the bundled TS entry, not a separate implementation.",
+      "warmup 50, then performance.now() around validate() from src/validate.ts; examples loop validates every example spec per iteration.",
     perRenderer:
-      "esbuild --bundle --minify of each renderer module alone, gzip -9. A renderer bundle includes the helpers it imports (theme, svg, format) and not sibling renderers.",
+      "esbuild --bundle --minify of each charts/* module, gzip -9. A chart bundle includes the helpers it imports (midnight theme, svg) and not sibling charts.",
   },
   bundle: sizes,
   validate: {

@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { render } from "../index";
+import { render } from "../all";
 
 const examples = join(dirname(fileURLToPath(import.meta.url)), "../../examples");
 
@@ -67,7 +67,8 @@ describe("render SVG", () => {
   it("writes the svg into a target and does not throw on errors", () => {
     const target = { innerHTML: "" };
     const svg = render({ version: "1", type: "not-a-chart" }, target);
-    expect(svg).toContain("CK1005");
+    expect(svg).toContain("CK1010");
+    expect(svg).toContain("@chartkitdev/core/all");
     expect(target.innerHTML).toBe(svg);
     expect(() => render(null)).not.toThrow();
   });

@@ -16,6 +16,7 @@
     "build:docs": "npm run build --workspace=chartkit-docs",
     "test": "npm run test:run --workspace=@chartkitdev/core && npm run test:run --workspace=@chartkitdev/react && npm run test:run --workspace=@derpdaderp/chartkit",
     "bench": "node scripts/bench.mjs",
+    "size": "node scripts/size.mjs",
     "start": "npm run start --workspace=chartkit-docs",
     "clean": "rm -rf packages/*/dist docs/.next node_modules"
   },

@@ -27,7 +27,17 @@ Update imports:
 
 ```ts
 import { LineChart, Chart } from "@chartkitdev/react";
-import { validate, render } from "@chartkitdev/core";
+import { render } from "@chartkitdev/core/all";
+import { validate } from "@chartkitdev/core/validate";
+```
+
+`import { render } from "@chartkitdev/core/all"` is the one-line quick start. To ship a single chart, register it yourself:
+
+```ts
+import { createRenderer } from "@chartkitdev/core";
+import { line } from "@chartkitdev/core/charts/line";
+
+const render = createRenderer([line]);
 ```
 
 `<Chart spec={...} />` renders a v1 spec. The existing components (`LineChart`, `BarChart`, and the rest) keep their props. `theme` stays required on those components. On a spec it is optional and defaults to `auto`.

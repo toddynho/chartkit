@@ -8,7 +8,12 @@
     "url": "https://github.com/toddynho/chartkit/issues"
   },
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/all.js",
+    "./dist/all.cjs",
+    "./dist/themes/*.js",
+    "./dist/themes/*.cjs"
+  ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,6 +26,46 @@
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./all": {
+      "import": {
+        "types": "./dist/all.d.ts",
+        "default": "./dist/all.js"
+      },
+      "require": {
+        "types": "./dist/all.d.cts",
+        "default": "./dist/all.cjs"
+      }
+    },
+    "./validate": {
+      "import": {
+        "types": "./dist/validate.d.ts",
+        "default": "./dist/validate.js"
+      },
+      "require": {
+        "types": "./dist/validate.d.cts",
+        "default": "./dist/validate.cjs"
+      }
+    },
+    "./charts/*": {
+      "import": {
+        "types": "./dist/charts/*.d.ts",
+        "default": "./dist/charts/*.js"
+      },
+      "require": {
+        "types": "./dist/charts/*.d.cts",
+        "default": "./dist/charts/*.cjs"
+      }
+    },
+    "./themes/*": {
+      "import": {
+        "types": "./dist/themes/*.d.ts",
+        "default": "./dist/themes/*.js"
+      },
+      "require": {
+        "types": "./dist/themes/*.d.cts",
+        "default": "./dist/themes/*.cjs"
       }
     },
     "./schema.json": "./schema/chartkit.schema.json"
@@ -38,6 +83,7 @@
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
     "generate:types": "node scripts/generate-types.mjs",
+    "strip:schema": "node scripts/strip-schema.mjs",
     "clean": "rm -rf dist"
   },
   "devDependencies": {

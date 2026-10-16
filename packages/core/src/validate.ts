@@ -1,7 +1,9 @@
-import schemaJson from "../schema/chartkit.schema.json";
+import schemaJson from "./generated/schema.runtime.json";
 import { toResult, type Diagnostic, type ValidationResult } from "./diagnostics";
 import { semanticChecks } from "./semantic";
 import { walkSchema } from "./walker";
+
+export { suggestAlt } from "./suggest";
 
 const schema = schemaJson as unknown as Parameters<typeof walkSchema>[1];
 
@@ -60,4 +62,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/**
+ * Runtime schema the walker checks against. Descriptions, titles, defaults, and
+ * examples are stripped; the annotated document is `@chartkitdev/core/schema.json`.
+ */
 export { schemaJson as schema };

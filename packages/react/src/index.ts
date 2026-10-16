@@ -108,5 +108,6 @@ export {
 } from './hooks';
 
 export { Chart, type ChartProps } from './Chart';
-export { validate, render, suggestAlt } from '@chartkitdev/core';
-export type { ChartSpec, Diagnostic, ValidationResult, JsonPatchOperation } from '@chartkitdev/core';
+export { validate, suggestAlt } from '@chartkitdev/core/validate';
+export { render, register, createRenderer } from '@chartkitdev/core/all';
+export type { ChartSpec, Diagnostic, ValidationResult, JsonPatchOperation, ChartRenderer, RenderTarget } from '@chartkitdev/core';

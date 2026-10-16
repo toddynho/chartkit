@@ -1,15 +1,5 @@
 import type { Diagnostic } from "./diagnostics";
 import { cssVar } from "./theme";
-import { validate } from "./validate";
-import { renderCandlestick } from "./renderers/candlestick";
-import { renderCartesian } from "./renderers/cartesian";
-import { renderDonut } from "./renderers/donut";
-import { renderGauge } from "./renderers/gauge";
-import { renderHeatmap } from "./renderers/heatmap";
-import { renderKpi } from "./renderers/kpi";
-import { renderProgressRing } from "./renderers/progress-ring";
-import { renderScatter } from "./renderers/scatter";
-import { renderSpike } from "./renderers/spike";
 import { esc, font, isRecord } from "./svg";
 
 /** A container element. `HTMLElement` satisfies this; tests can pass a plain object. */
@@ -17,30 +7,78 @@ export interface RenderTarget {
   innerHTML: string;
 }
 
-const BY_TYPE: Record<string, (spec: Record<string, unknown>) => string | null> = {
-  donut: renderDonut,
-  scatter: renderScatter,
-  heatmap: renderHeatmap,
-  gauge: renderGauge,
-  kpi: renderKpi,
-  "progress-ring": renderProgressRing,
-  spike: renderSpike,
-  candlestick: renderCandlestick,
+export interface ChartRenderer {
+  /** Import binding, such as `line` or `stackedArea`. */
+  name: string;
+  types: readonly string[];
+  render: (spec: Record<string, unknown>) => string | null;
+}
+
+const registry = new Map<string, ChartRenderer>();
+
+const IMPORT_NAME: Record<string, string> = {
+  line: "line",
+  bar: "bar",
+  donut: "donut",
+  "stacked-area": "stackedArea",
+  scatter: "scatter",
+  combo: "combo",
+  heatmap: "heatmap",
+  gauge: "gauge",
+  kpi: "kpi",
+  sparkline: "sparkline",
+  "mini-area": "miniArea",
+  "progress-ring": "progressRing",
+  spike: "spike",
+  candlestick: "candlestick",
 };
 
 /**
- * Render a spec to an SVG string. Never throws: validation errors become an inline error state.
- * Warnings still render. When `target` is set, its `innerHTML` is replaced with the SVG.
- *
- * Each chart type lives in its own module. This dispatcher is the only place that references
- * all of them, so bundling one renderer module does not pull the others in.
+ * Add chart types to the shared `render()` registry.
+ * Importing a chart module does not register it; call this or `createRenderer`.
+ */
+export function register(...charts: ChartRenderer[]): void {
+  for (const chart of charts) {
+    for (const type of chart.types) registry.set(type, chart);
+  }
+}
+
+/** A renderer that only knows the charts you pass. It does not touch the shared registry. */
+export function createRenderer(charts: readonly ChartRenderer[]): (spec: unknown, target?: RenderTarget | null) => string {
+  const map = new Map<string, ChartRenderer>();
+  for (const chart of charts) {
+    for (const type of chart.types) map.set(type, chart);
+  }
+  return (spec, target) => renderWith(map, spec, target);
+}
+
+/**
+ * Render with the shared registry. Does not validate and does not import the schema.
+ * Unknown or unregistered types return an error SVG and do not throw.
+ * When `target` is set, its `innerHTML` is replaced with the SVG.
  */
 export function render(spec: unknown, target?: RenderTarget | null): string {
+  return renderWith(registry, spec, target);
+}
+
+function renderWith(map: Map<string, ChartRenderer>, spec: unknown, target?: RenderTarget | null): string {
   let svg: string;
   try {
-    const result = validate(spec);
-    if (!result.ok) svg = errorSvg(result.errors);
-    else svg = draw(spec);
+    if (!isRecord(spec) || typeof spec.type !== "string") {
+      svg = errorSvg([
+        {
+          code: "CK1010",
+          severity: "error",
+          message: "chart spec must be an object with a string type",
+          path: "",
+          hint: 'import { render } from "@chartkitdev/core/all" registers every v1 chart.',
+        },
+      ]);
+    } else {
+      const chart = map.get(spec.type);
+      if (!chart) svg = errorSvg([unregistered(spec.type)]);
+      else svg = chart.render(spec) ?? errorSvg([undrawable(spec.type)]);
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     svg = errorSvg([
@@ -56,23 +94,30 @@ export function render(spec: unknown, target?: RenderTarget | null): string {
   return svg;
 }
 
-function draw(spec: unknown): string {
-  if (!isRecord(spec) || typeof spec.type !== "string") return errorSvg([]);
-  const cartesian = renderCartesian(spec);
-  if (cartesian) return cartesian;
-  const renderType = BY_TYPE[spec.type];
-  if (renderType) {
-    const svg = renderType(spec);
-    if (svg) return svg;
-  }
-  return pendingSvg(spec);
+function unregistered(type: string): Diagnostic {
+  return {
+    code: "CK1010",
+    severity: "error",
+    message: `no renderer registered for type "${type}"`,
+    path: "/type",
+    hint: hintFor(type),
+  };
 }
 
-function pendingSvg(spec: Record<string, unknown>): string {
-  const type = typeof spec.type === "string" ? spec.type : "chart";
-  const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : "";
-  const message = `SVG renderer for "${type}" is not in this build yet.`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="80" viewBox="0 0 640 80" role="img" aria-label="${esc(alt || message)}" class="ck-chart" data-ck-type="${esc(type)}" data-ck-renderer="pending"><title>${esc(alt || message)}</title><desc>${esc(alt)}</desc><text x="16" y="44" fill="${cssVar("text", "#111827")}" font-size="14" font-family="${font()}">${esc(message)}</text></svg>`;
+function undrawable(type: string): Diagnostic {
+  return {
+    code: "CK1006",
+    severity: "error",
+    message: `renderer for "${type}" could not draw this spec`,
+    path: "",
+    hint: 'import { validate } from "@chartkitdev/core/validate" to see why.',
+  };
+}
+
+function hintFor(type: string): string {
+  const binding = IMPORT_NAME[type];
+  if (!binding) return 'import { render } from "@chartkitdev/core/all" registers every v1 chart.';
+  return `import { ${binding} } from "@chartkitdev/core/charts/${type}"; register(${binding}); or import { render } from "@chartkitdev/core/all".`;
 }
 
 function errorSvg(errors: Diagnostic[]): string {

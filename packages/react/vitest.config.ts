@@ -5,9 +5,13 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: {
-      '@chartkitdev/core': path.resolve(__dirname, '../core/src/index.ts'),
-    },
+    alias: [
+      { find: '@chartkitdev/core/all', replacement: path.resolve(__dirname, '../core/src/all.ts') },
+      { find: '@chartkitdev/core/validate', replacement: path.resolve(__dirname, '../core/src/validate.ts') },
+      { find: '@chartkitdev/core/charts', replacement: path.resolve(__dirname, '../core/src/charts') },
+      { find: '@chartkitdev/core/themes', replacement: path.resolve(__dirname, '../core/src/themes') },
+      { find: '@chartkitdev/core', replacement: path.resolve(__dirname, '../core/src/index.ts') },
+    ],
   },
   test: {
     environment: 'jsdom',

@@ -11,7 +11,7 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   treeshake: true,
-  external: ['react', 'react-dom', '@chartkitdev/core'],
+  external: ['react', 'react-dom', /^@chartkitdev\/core(\/.*)?$/],
   esbuildOptions(options) {
     options.jsx = 'automatic';
   },

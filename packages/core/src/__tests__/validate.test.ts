@@ -5,7 +5,7 @@ import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { describe, expect, it } from "vitest";
 import schema from "../../schema/chartkit.schema.json";
-import { suggestAlt, validate } from "../index";
+import { suggestAlt, validate } from "../validate";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const examplesDir = join(root, "examples");

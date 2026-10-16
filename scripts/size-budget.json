@@ -1,0 +1,6 @@
+{
+  "line": 7139,
+  "all": 19117,
+  "validate": 11339,
+  "note": "gzip -9 byte budgets. Measured 2026-10-16: line 6610, all 17701, validate 10499. Headroom is 8 percent."
+}

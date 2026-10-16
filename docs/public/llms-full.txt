@@ -701,6 +701,28 @@ type ThemeName =
 
 ---
 
+## CORE
+
+Framework-free SVG renderer and validator. Zero runtime dependencies.
+
+```ts
+import { render } from "@chartkitdev/core/all";
+import { validate } from "@chartkitdev/core/validate";
+```
+
+Opt-in charts (an app that imports only `line` ships only `line`):
+
+```ts
+import { createRenderer, register } from "@chartkitdev/core";
+import { line } from "@chartkitdev/core/charts/line";
+import { sunset } from "@chartkitdev/core/themes/sunset";
+
+const render = createRenderer([line]);
+register(line);
+```
+
+Subpaths: `@chartkitdev/core/all`, `@chartkitdev/core/validate`, `@chartkitdev/core/charts/<type>`, `@chartkitdev/core/themes/<name>`, `@chartkitdev/core/schema.json`. Midnight is built in. `<Chart spec render={...} />` from `@chartkitdev/react` uses `/all` unless you pass a renderer. `CK1010` means the chart type is not registered.
+
 ## LINKS
 - Documentation: https://chartkit.dev
 - npm: https://www.npmjs.com/package/@chartkitdev/react

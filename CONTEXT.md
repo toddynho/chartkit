@@ -6,7 +6,7 @@
 
 **ChartKit** ships `@chartkitdev/core` (framework-free schema, `validate`, and SVG `render`) and `@chartkitdev/react` (the existing components plus `<Chart spec={...} />`). `@derpdaderp/chartkit` is a compatibility shim. The spec id is `https://chartkit.dev/schema/v1.json`. It prioritizes:
 
-- **Small core**: `@chartkitdev/core` has zero runtime dependencies. `npm run bench` prints bundle size and validate throughput.
+- **Small core**: `@chartkitdev/core` has zero runtime dependencies. Chart renderers and themes past midnight are opt-in imports. `npm run bench` prints bundle size and validate throughput. `npm run size` fails when the line, all-charts, or validate bundles grow past their budgets.
 - **Dependencies**: `@chartkitdev/core` has none. `@chartkitdev/react` depends on the core and peers React 18+
 - **Beautiful defaults**: 17 curated themes that work out of the box
 - **TypeScript-first**: Full type safety and autocomplete
@@ -16,7 +16,7 @@
 ```
 chartkit/
 ├── packages/
-│   ├── core/                 # @chartkitdev/core — schema, validate, render
+│   ├── core/                 # @chartkitdev/core — registry, charts/*, themes/*, validate
 │   ├── react/                # @chartkitdev/react — components, hooks, themes
 │   └── compat-derpdaderp/    # @derpdaderp/chartkit shim
 ├── docs/                     # Documentation site (Next.js) and docs/migrate.md
@@ -99,6 +99,9 @@ npm test
 
 # Bundle size and validate throughput
 npm run bench
+
+# Fail if line, all-charts, or validate gzip exceeds the budget
+npm run size
 ```
 
 ## Resources
@@ -114,7 +117,7 @@ npm run bench
 
 ## When Generating Code
 
-1. Prefer a v1 JSON spec (`version`, `type`, `data`, `encoding`, `a11y.alt`) rendered with `@chartkitdev/core` or `<Chart spec={...} />` from `@chartkitdev/react`
+1. Prefer a v1 JSON spec (`version`, `type`, `data`, `encoding`, `a11y.alt`). One-line quick start: `import { render } from "@chartkitdev/core/all"`. Validate with `import { validate } from "@chartkitdev/core/validate"`. For a smaller bundle, `createRenderer([line])` after `import { line } from "@chartkitdev/core/charts/line"`. `<Chart spec={...} />` from `@chartkitdev/react` uses every chart unless you pass `render`.
 2. Existing components still import from `@chartkitdev/react`. `theme` is required on those components — `"midnight"` is a solid default. It is optional on the JSON spec (default `auto`).
 3. For responsive charts, use the `responsive` prop or `ResponsiveChart` wrapper
 4. Use `useAutoTheme` hook when the app supports dark/light mode switching

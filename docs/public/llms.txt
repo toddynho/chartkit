@@ -9,7 +9,7 @@ npm install @chartkitdev/react
 npm install @chartkitdev/core
 ```
 
-`@chartkitdev/core` is framework-free (zero runtime dependencies). It exports `validate(spec)` and `render(spec, target)` for the v1 JSON spec (`https://chartkit.dev/schema/v1.json`). `@chartkitdev/react` keeps the existing component API and adds `<Chart spec={...} />`. The old package name `@derpdaderp/chartkit` is a compatibility shim.
+`@chartkitdev/core` is framework-free (zero runtime dependencies). One-line quick start: `import { render } from "@chartkitdev/core/all"`. Validate with `import { validate } from "@chartkitdev/core/validate"`. A smaller app registers only the charts it draws: `import { createRenderer } from "@chartkitdev/core"; import { line } from "@chartkitdev/core/charts/line"; const render = createRenderer([line]);`. Midnight is the built-in theme; other presets are `@chartkitdev/core/themes/<name>`. An unregistered chart type returns `CK1010` and names the import to add. `@chartkitdev/react` keeps the existing component API and adds `<Chart spec={...} />` (all charts by default, or pass `render`). The old package name `@derpdaderp/chartkit` is a compatibility shim.
 
 ## Minimal spec
 ```json

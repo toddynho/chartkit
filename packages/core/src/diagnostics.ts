@@ -10,7 +10,8 @@ export type Severity = "error" | "warning";
 
 /**
  * One diagnostic. Codes are stable (CK1xxx structure, CK2xxx data,
- * CK3xxx semantics, CK4xxx design advice). Messages may improve; codes do not.
+ * CK3xxx semantics, CK4xxx design advice). CK1010 means no renderer is registered
+ * for the spec type. Messages may improve; codes do not.
  */
 export interface Diagnostic {
   code: string;

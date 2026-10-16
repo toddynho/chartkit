@@ -1,14 +1,46 @@
 import { readData } from "../data";
+import { clamp, esc, font, hash, isRecord, linear, n, niceDomain, niceNum, round } from "../svg";
 import { cssVar, paint, resolvePreset, type PresetTokens } from "../theme";
 
-const DRAWN = new Set(["line", "bar", "stacked-area", "sparkline", "mini-area", "combo"]);
+type MarkDraw = (
+  model: PlotModel,
+  xScale: XScale,
+  yScale: (value: number) => number,
+  y2Scale: (value: number) => number,
+  plot: { left: number; top: number; right: number; bottom: number },
+  horizontal: boolean,
+) => string;
 
-/** Line, bar, area, stacked-area, sparkline, mini-area, and combo. Null for every other type. */
-export function renderCartesian(spec: Record<string, unknown>): string | null {
-  if (typeof spec.type !== "string" || !DRAWN.has(spec.type)) return null;
+function renderTyped(spec: Record<string, unknown>, type: string, draw: MarkDraw): string | null {
+  if (spec.type !== type) return null;
   const model = toModel(spec);
   if (!model) return null;
-  return modelToSvg(model);
+  return modelToSvg(model, draw);
+}
+
+/** Area is type "line" plus mark.area, so it stays in this entry. */
+export function renderLine(spec: Record<string, unknown>): string | null {
+  return renderTyped(spec, "line", drawLines);
+}
+
+export function renderBar(spec: Record<string, unknown>): string | null {
+  return renderTyped(spec, "bar", drawBars);
+}
+
+export function renderStackedArea(spec: Record<string, unknown>): string | null {
+  return renderTyped(spec, "stacked-area", drawLines);
+}
+
+export function renderSparkline(spec: Record<string, unknown>): string | null {
+  return renderTyped(spec, "sparkline", drawLines);
+}
+
+export function renderMiniArea(spec: Record<string, unknown>): string | null {
+  return renderTyped(spec, "mini-area", drawLines);
+}
+
+export function renderCombo(spec: Record<string, unknown>): string | null {
+  return renderTyped(spec, "combo", drawCombo);
 }
 
 interface Series {
@@ -165,7 +197,7 @@ function toModel(spec: Record<string, unknown>): PlotModel | null {
   };
 }
 
-function modelToSvg(model: PlotModel): string {
+function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   const pad = padding(model);
   const plot = {
     left: pad.left,
@@ -218,7 +250,7 @@ function modelToSvg(model: PlotModel): string {
   }
 
   parts.push(`<g clip-path="url(#${model.id}-clip)">`);
-  parts.push(marks(model, xScale, yScale, y2Scale, plot, horizontal));
+  parts.push(draw(model, xScale, yScale, y2Scale, plot, horizontal));
   parts.push(`</g>`);
 
   if (model.showY) parts.push(yAxisLabels(yTicks, yScale, plot.left, horizontal, model));
@@ -229,7 +261,66 @@ function modelToSvg(model: PlotModel): string {
   return parts.join("");
 }
 
-function marks(
+function drawLines(
+  model: PlotModel,
+  xScale: XScale,
+  yScale: (value: number) => number,
+  y2Scale: (value: number) => number,
+  _plot: { left: number; top: number; right: number; bottom: number },
+  _horizontal: boolean,
+): string {
+  const stackMode = model.stack === "none" ? null : model.stack;
+  const layers = stackMode ? stackLayers(model.series, stackMode) : null;
+  const out: string[] = [];
+  model.series.forEach((series, index) => {
+    if (series.mark === "bar") return;
+    const scale = series.axis === "y2" ? y2Scale : yScale;
+    const points = pointsFor(series, index, layers, xScale, scale, model);
+    if (series.area || model.type === "stacked-area") {
+      const bottoms = bottomPoints(series, index, layers, xScale, scale, model);
+      const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
+      for (const [top, bottom] of pairSegments(points, bottoms, model.connectNulls)) {
+        out.push(`<path d="${areaPath(top, bottom, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillOpacity}" stroke="none" />`);
+      }
+    }
+    for (const segment of segments(points, model.connectNulls)) {
+      out.push(
+        `<path d="${linePath(segment, model.curve)}" fill="none" stroke="${series.color}" stroke-width="${model.strokeWidth}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
+      );
+    }
+    if (model.points === "always") {
+      for (const point of points) {
+        if (!point) continue;
+        out.push(`<circle cx="${n(point.x)}" cy="${n(point.y)}" r="${n(model.pointSize)}" fill="${series.color}" />`);
+      }
+    }
+  });
+  return out.join("");
+}
+
+function drawBars(
+  model: PlotModel,
+  xScale: XScale,
+  yScale: (value: number) => number,
+  y2Scale: (value: number) => number,
+  plot: { left: number; top: number; right: number; bottom: number },
+  horizontal: boolean,
+): string {
+  const stackMode = model.stack === "none" ? null : model.stack;
+  const layers = stackMode ? stackLayers(model.series, stackMode) : null;
+  const out: string[] = [];
+  const barSeries = model.series.filter((series) => series.mark === "bar");
+  model.series.forEach((series, index) => {
+    if (series.mark !== "bar") return;
+    const scale = series.axis === "y2" ? y2Scale : yScale;
+    const barIndex = model.series.slice(0, index).filter((item) => item.mark === "bar").length;
+    out.push(bars(model, series, index, barSeries.length, layers, xScale, scale, plot, horizontal, barIndex));
+  });
+  return out.join("");
+}
+
+/** Combo paints each series in order so a line can sit between bars. */
+function drawCombo(
   model: PlotModel,
   xScale: XScale,
   yScale: (value: number) => number,
@@ -513,14 +604,6 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
   return niceDomain(min, max);
 }
 
-function niceDomain(min: number, max: number): [number, number] {
-  const span = niceNum(max - min, false);
-  const step = niceNum(span / 4, true) || 1;
-  const niceMin = Math.floor(min / step) * step;
-  const niceMax = Math.ceil(max / step) * step;
-  return [round(niceMin), round(niceMax === niceMin ? niceMin + step : niceMax)];
-}
-
 function ticks(min: number, max: number, count: number): number[] {
   if (!(max > min)) return [min];
   const step = niceNum((max - min) / (count - 1), true) || 1;
@@ -531,28 +614,6 @@ function ticks(min: number, max: number, count: number): number[] {
     if (out.length > 12) break;
   }
   return out.length > 0 ? out : [min, max];
-}
-
-function niceNum(range: number, roundTo: boolean): number {
-  if (!(range > 0) || !Number.isFinite(range)) return 1;
-  const exp = Math.floor(Math.log10(range));
-  const fraction = range / 10 ** exp;
-  let nice: number;
-  if (roundTo) {
-    if (fraction < 1.5) nice = 1;
-    else if (fraction < 3) nice = 2;
-    else if (fraction < 7) nice = 5;
-    else nice = 10;
-  } else if (fraction <= 1) nice = 1;
-  else if (fraction <= 2) nice = 2;
-  else if (fraction <= 5) nice = 5;
-  else nice = 10;
-  return nice * 10 ** exp;
-}
-
-function linear(d0: number, d1: number, r0: number, r1: number): (value: number) => number {
-  const span = d1 - d0 || 1;
-  return (value) => r0 + ((value - d0) / span) * (r1 - r0);
 }
 
 function linePath(points: Pt[], curve: Curve): string {
@@ -757,38 +818,3 @@ function formatNumber(value: number, locale: string): string {
   return new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
 }
 
-function font(): string {
-  return "var(--ck-font-family, ui-sans-serif)";
-}
-
-function hash(value: string): string {
-  let h = 5381;
-  for (let i = 0; i < value.length; i++) h = ((h << 5) + h) ^ value.charCodeAt(i);
-  return (h >>> 0).toString(36);
-}
-
-function n(value: number): string {
-  if (!Number.isFinite(value)) return "0";
-  const rounded = Math.round(value * 100) / 100;
-  return String(rounded);
-}
-
-function round(value: number): number {
-  return Math.round(value * 1e8) / 1e8;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
-}
-
-function esc(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}

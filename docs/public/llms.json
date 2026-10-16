@@ -14,6 +14,15 @@
   "npm": "https://www.npmjs.com/package/@chartkitdev/react",
   "license": "MIT",
   "installation": "npm install @chartkitdev/react",
+  "coreQuickStart": "import { render } from \"@chartkitdev/core/all\"",
+  "core": {
+    "quickStart": "import { render } from \"@chartkitdev/core/all\"",
+    "validate": "import { validate } from \"@chartkitdev/core/validate\"",
+    "optIn": "import { createRenderer } from \"@chartkitdev/core\"; import { line } from \"@chartkitdev/core/charts/line\"; const render = createRenderer([line]);",
+    "themes": "@chartkitdev/core/themes/<name> (midnight is built in)",
+    "schema": "@chartkitdev/core/schema.json",
+    "unregisteredType": "CK1010"
+  },
   "peerDependencies": {
     "react": ">=18.0.0"
   },

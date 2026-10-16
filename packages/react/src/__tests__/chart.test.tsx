@@ -21,4 +21,12 @@ describe("Chart", () => {
     expect(svg?.getAttribute("data-ck-type")).toBe("bar");
     expect(container.textContent).toContain("Jan");
   });
+
+  it("uses a custom renderer when one is passed", () => {
+    const { container } = render(
+      <Chart spec={spec} render={() => '<svg data-ck-type="custom"></svg>'} />,
+    );
+    expect(container.querySelector("svg")?.getAttribute("data-ck-type")).toBe("custom");
+    expect(container.textContent).not.toContain("Jan");
+  });
 });
