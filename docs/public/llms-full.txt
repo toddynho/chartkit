@@ -12,7 +12,7 @@ The JSON spec is the agent interface. The React section at the bottom is a diffe
 - `data` is a plain array of rows: `[{ "quarter": "Q1", "units": 40 }]`. It is not Vega-Lite `{ "values": [...] }` (CK1009 moves `values` up). Sparkline, mini-area, and spike accept a number array. 10k+ points may use `{ "columns": { "quarter": [], "units": [] } }`.
 - Chart type is `type`. `mark` is an object of options. `mark: "line"` is CK1009: move that string to `type`.
 - `mark.sampling` defaults to `"auto"` (minmax above twice the plot width) for line, stacked-area, combo lines, sparkline, mini-area, and spike.
-- Gauge, kpi, and progress-ring use `metric`. Top-level `value` / `min` / `max` / `delta` / `label` is CK1009.
+- Gauge, kpi, and progress-ring use `metric`. Top-level `value` / `min` / `max` / `delta` / `label` is CK1009. A `data` object of those fields moves into `metric` and `data` is removed.
 - Donut encoding is `x` (label) and `y` (value). `theta`, `angle`, and `label` are CK1009.
 - `axis` on a y series is `"y"` or `"y2"`, never `{ "title": "..." }`. Titles belong in `axes.y.title` or `axes.y2.title` (CK1009).
 - Field `type` is `quantitative`, `temporal`, `ordinal`, or `nominal`. `categorical` means `nominal` (CK1007).

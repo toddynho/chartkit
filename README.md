@@ -29,7 +29,7 @@ Rules:
 - `version` is `"1"`. `a11y.alt` is one sentence and is required.
 - `data` is a plain array of row objects, not `{ "values": [...] }`. Sparkline, mini-area, and spike may use a plain number array.
 - The chart type goes in `type`. `mark` is an options object, not a string.
-- Gauge, kpi, and progress-ring put the number in `metric`.
+- Gauge, kpi, and progress-ring put the number in `metric`. A `data` object of those fields moves into `metric`.
 - Donut uses `encoding.x` (slice label) and `encoding.y` (slice value).
 - `encoding.*.axis` is `"y"` or `"y2"`. Titles go in `axes.y.title` or `axes.y2.title`.
 - Field types are `quantitative`, `temporal`, `ordinal`, or `nominal`.

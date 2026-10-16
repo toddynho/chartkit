@@ -40,6 +40,10 @@ interface Ctx {
   skipMissing: Set<string>;
   /** JSON pointers whose unknown-property error is replaced by a repair patch. */
   skipUnknown: Set<string>;
+  /** JSON pointers the walker must not descend into. A repair already explains them. */
+  dropPaths: Set<string>;
+  /** `if` / `then` re-enters the root. The metric hoist must run once. */
+  metricNoted: boolean;
 }
 
 const CHART_TYPES = [
@@ -67,6 +71,8 @@ export function walkSchema(value: unknown, schema: JsonSchema, diagnostics: Diag
     depth: 0,
     skipMissing: new Set(),
     skipUnknown: new Set(),
+    dropPaths: new Set(),
+    metricNoted: false,
   };
   check(value, schema, "", ctx);
   if (!hasKnownType(value)) {
@@ -87,6 +93,10 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
     return;
   }
   ctx.depth += 1;
+  if (isDropped(path, ctx)) {
+    ctx.depth -= 1;
+    return;
+  }
   const node = resolve(schema, ctx.rootSchema);
   if (repairShape(value, path, ctx)) {
     ctx.depth -= 1;
@@ -485,30 +495,84 @@ const METRIC_SHAPE = "metric: { value, min, max, label?, delta? }";
 function noteMetricHoist(value: Record<string, unknown>, ctx: Ctx): void {
   const type = value.type;
   if (type !== "gauge" && type !== "kpi" && type !== "progress-ring") return;
-  if (ctx.skipMissing.has("|metric")) return;
-  if (isPlainObject(value.metric) && typeof value.metric.value === "number") return;
-  const gathered = gatherMetric(value);
-  if (typeof gathered.metric.value !== "number") return;
-  const fix: JsonPatchOperation[] = [
-    { op: isPlainObject(value.metric) ? "replace" : "add", path: "/metric", value: gathered.metric },
-  ];
-  for (const key of gathered.topLevel) {
-    fix.push({ op: "remove", path: `/${key}` });
-    ctx.skipUnknown.add(`/${key}`);
+  if (ctx.metricNoted) return;
+  ctx.metricNoted = true;
+  const dataKind = classifyMetricData(value.data);
+  const dropData = dataKind === "metric" || dataKind === "drop";
+  if (dropData) ctx.dropPaths.add("/data");
+
+  const metricReady = isPlainObject(value.metric) && typeof value.metric.value === "number";
+  if ((metricReady || ctx.skipMissing.has("|metric")) && !dropData) return;
+
+  const fix: JsonPatchOperation[] = [];
+  if (!metricReady && !ctx.skipMissing.has("|metric")) {
+    const gathered = gatherMetric(value);
+    if (typeof gathered.metric.value === "number") {
+      fix.push({ op: isPlainObject(value.metric) ? "replace" : "add", path: "/metric", value: gathered.metric });
+      ctx.skipMissing.add("|metric");
+      for (const key of gathered.topLevel) {
+        fix.push({ op: "remove", path: `/${key}` });
+        ctx.skipUnknown.add(`/${key}`);
+      }
+      for (const key of gathered.encoding) {
+        fix.push({ op: "remove", path: `/encoding/${key}` });
+        ctx.skipUnknown.add(`/encoding/${key}`);
+      }
+    }
   }
-  for (const key of gathered.encoding) {
-    fix.push({ op: "remove", path: `/encoding/${key}` });
-    ctx.skipUnknown.add(`/encoding/${key}`);
-  }
-  ctx.skipMissing.add("|metric");
+  if (dropData) fix.push({ op: "remove", path: "/data" });
+  if (fix.length === 0) return;
+
+  const moved = fix.some((op) => op.path === "/metric");
   emit(ctx, {
     code: "CK1009",
     severity: "error",
     message: "gauge, kpi, and progress-ring keep the number in metric",
-    path: "/metric",
-    hint: `${METRIC_SHAPE}. Move value, min, max, delta, and label into that object. They are not top-level keys or encoding channels.`,
+    path: moved ? "/metric" : "/data",
+    hint: dropData
+      ? `${METRIC_SHAPE}. Move a data object of those fields into metric and remove data. They are not data keys.`
+      : `${METRIC_SHAPE}. Move value, min, max, delta, and label into that object. They are not top-level keys or encoding channels.`,
     fix,
   });
+}
+
+/** A kpi may keep a real table for its sparkline. Anything else in data is the metric, misplaced. */
+function classifyMetricData(data: unknown): "absent" | "table" | "metric" | "drop" {
+  if (data === undefined) return "absent";
+  if (isMetricChartTable(data)) return "table";
+  if (metricFromData(data)) return "metric";
+  return "drop";
+}
+
+function isMetricChartTable(data: unknown): boolean {
+  if (Array.isArray(data) || isTypedArray(data)) {
+    const list = asList(data);
+    if (list.length === 0) return false;
+    if (list.every((item) => item === null || typeof item === "number")) return true;
+    if (!list.every((item) => isPlainObject(item))) return false;
+    if (list.length === 1 && isOnlyMetricFields(list[0] as Record<string, unknown>)) return false;
+    return true;
+  }
+  if (!isPlainObject(data)) return false;
+  // { values: [...] } is unwrapped by the Vega-Lite repair; don't treat it as the metric object.
+  if (Array.isArray(data.values) && data.columns === undefined) return true;
+  if (!isPlainObject(data.columns)) return false;
+  const columns = data.columns;
+  const keys = Object.keys(columns);
+  if (keys.length === 0) return false;
+  return keys.every((key) => Array.isArray(columns[key]) || isTypedArray(columns[key]));
+}
+
+function isOnlyMetricFields(row: Record<string, unknown>): boolean {
+  const keys = Object.keys(row);
+  return keys.length > 0 && keys.every((key) => (METRIC_FIELDS as readonly string[]).includes(key));
+}
+
+function isDropped(path: string, ctx: Ctx): boolean {
+  for (const prefix of ctx.dropPaths) {
+    if (path === prefix || path.startsWith(`${prefix}/`)) return true;
+  }
+  return false;
 }
 
 function gatherMetric(spec: Record<string, unknown>): { metric: Record<string, unknown>; topLevel: string[]; encoding: string[] } {
@@ -517,7 +581,8 @@ function gatherMetric(spec: Record<string, unknown>): { metric: Record<string, u
   const encoding: string[] = [];
   if (isPlainObject(spec.metric)) {
     for (const key of METRIC_FIELDS) {
-      if (spec.metric[key] !== undefined) metric[key] = spec.metric[key];
+      const raw = spec.metric[key];
+      if (key === "label" ? typeof raw === "string" : typeof raw === "number") metric[key] = raw;
     }
   }
   for (const key of METRIC_FIELDS) {

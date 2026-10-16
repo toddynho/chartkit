@@ -431,7 +431,82 @@ describe("diagnostic codes", () => {
     const { encoding: _encoding, ...rest } = spec;
     const repaired = repair({ ...rest, encoding: { value: "value", min: "min", max: "max" } });
     expect((repaired.spec as { metric: unknown }).metric).toEqual({ value: 64, min: 0, max: 100 });
+    expect((repaired.spec as { data?: unknown }).data).toBeUndefined();
     expect(repaired.ok).toBe(true);
+  });
+
+  it("CK1009 moves a metric data object into metric and drops data", () => {
+    const spec = {
+      version: "1",
+      type: "gauge",
+      data: { value: 40, min: 0, max: 80, label: "Load", note: "ignore" },
+      a11y: { alt: "Load is 40 out of 80." },
+    };
+    const result = validate(spec);
+    const error = result.errors.find((item) => item.code === "CK1009");
+    expect(result.errors.filter((item) => item.code === "CK1009")).toHaveLength(1);
+    expect(error?.path).toBe("/metric");
+    expect(error?.hint).toContain("metric: { value, min, max, label?, delta? }");
+    expect(error?.hint).toContain("remove data");
+    expect(error?.fix).toEqual([
+      { op: "add", path: "/metric", value: { value: 40, label: "Load", min: 0, max: 80 } },
+      { op: "remove", path: "/data" },
+    ]);
+    expect(result.errors.some((item) => item.code === "CK1002")).toBe(false);
+    expect(result.errors.some((item) => item.code === "CK1006")).toBe(false);
+    expect(result.errors.some((item) => item.message.includes("columns"))).toBe(false);
+    const repaired = repair(spec);
+    expect(repaired.ok).toBe(true);
+    expect((repaired.spec as { metric: unknown }).metric).toEqual({ value: 40, label: "Load", min: 0, max: 80 });
+    expect((repaired.spec as { data?: unknown }).data).toBeUndefined();
+    expect(spec.data).toEqual({ value: 40, min: 0, max: 80, label: "Load", note: "ignore" });
+  });
+
+  it("CK1009 removes a bad columns payload on gauge, kpi, and progress-ring", () => {
+    for (const type of ["gauge", "kpi", "progress-ring"] as const) {
+      const spec = {
+        version: "1",
+        type,
+        metric: type === "kpi" ? { value: 40, delta: 0.2, label: "Load" } : { value: 40, min: 0, max: 80 },
+        data: { columns: [] },
+        a11y: { alt: "Load is 40." },
+      };
+      const result = validate(spec);
+      expect(result.errors.map((item) => item.code)).toEqual(["CK1009"]);
+      expect(result.errors[0]?.fix).toEqual([{ op: "remove", path: "/data" }]);
+      expect(result.errors[0]?.hint).toContain("metric: { value, min, max, label?, delta? }");
+      expect(JSON.stringify(result.errors)).not.toContain("columns");
+      const repaired = repair(spec);
+      expect(repaired.ok).toBe(true);
+      expect((repaired.spec as { data?: unknown }).data).toBeUndefined();
+      expect((repaired.spec as { metric: { value: number } }).metric.value).toBe(40);
+    }
+  });
+
+  it("a kpi sparkline table stays beside metric", () => {
+    const spec = {
+      version: "1",
+      type: "kpi",
+      metric: { value: 40, label: "Load" },
+      data: [4, 6, 5, 9],
+      a11y: { alt: "Load is 40 and rising." },
+    };
+    expect(validate(spec).ok).toBe(true);
+
+    const columnar = validate({
+      ...spec,
+      data: { columns: { month: ["Jan", "Feb"], amount: [4, 6] } },
+    });
+    expect(columnar.ok).toBe(true);
+  });
+
+  it("a line chart still rejects a metric-shaped data object", () => {
+    const result = validate({
+      ...base,
+      data: { value: 40, min: 0, max: 80 },
+    });
+    expect(result.errors.some((item) => item.code === "CK1009" && item.path === "/metric")).toBe(false);
+    expect(result.errors.some((item) => item.message.includes("columns") || item.code === "CK1002")).toBe(true);
   });
 
   it("CK1009 moves an x axis title and drops a null y axis", () => {
