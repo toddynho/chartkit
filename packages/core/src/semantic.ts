@@ -24,6 +24,8 @@ const CHART_TYPES = new Set([
   "funnel",
   "treemap",
   "sankey",
+  "bullet",
+  "waterfall",
 ]);
 
 const SVG_BUDGET = 5000;

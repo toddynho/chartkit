@@ -31,12 +31,6 @@ const IMPORT_NAME: Record<string, string> = {
   "progress-ring": "progressRing",
   spike: "spike",
   candlestick: "candlestick",
-  histogram: "histogram",
-  boxplot: "boxplot",
-  radar: "radar",
-  funnel: "funnel",
-  treemap: "treemap",
-  sankey: "sankey",
 };
 
 /**

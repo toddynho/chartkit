@@ -1,5 +1,6 @@
 <script>
-  import { render as renderAll } from "@chartkitdev/core/all";
+  import { onMount } from "svelte";
+  import { attach, render as renderAll } from "@chartkitdev/core/extra";
 
   /** @type {import("@chartkitdev/core").ChartSpec} */
   export let spec;
@@ -10,7 +11,13 @@
    */
   export let render = renderAll;
 
+  let host;
+  onMount(() => {
+    const tip = attach(host);
+    return () => tip.destroy();
+  });
+
   $: svg = render(spec);
 </script>
 
-<div class={$$props.class} style={$$props.style}>{@html svg}</div>
+<div bind:this={host} class={$$props.class} style={$$props.style}>{@html svg}</div>

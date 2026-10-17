@@ -4,12 +4,13 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { histogram } from "../charts/histogram";
 import { line } from "../charts/line";
-import { render } from "../all";
+import { render as renderAll } from "../all";
+import { render } from "../extra";
 import { createRenderer } from "../render";
 import { repair, validate } from "../validate";
 
 const examples = join(dirname(fileURLToPath(import.meta.url)), "../../examples");
-const phase3 = ["16-histogram.json", "17-boxplot.json", "18-radar.json", "19-funnel.json", "20-treemap.json", "21-sankey.json"];
+const phase3 = ["16-histogram.json", "17-boxplot.json", "18-radar.json", "19-funnel.json", "20-treemap.json", "21-sankey.json", "22-bullet.json", "23-waterfall.json"];
 
 function load(name: string): Record<string, unknown> {
   return JSON.parse(readFileSync(join(examples, name), "utf8")) as Record<string, unknown>;
@@ -82,21 +83,39 @@ describe("phase 3 charts", () => {
     expect((hist.spec as { encoding: { x: string } }).encoding.x).toBe("value");
   });
 
-  it("bins raw histogram values and keeps the line entry free of them", () => {
+  it("bins raw histogram values and keeps them out of line and all", () => {
     const svg = render(load("16-histogram.json"));
     expect(svg).toContain('data-ck-count="3"');
     expect(svg).toContain('data-ck-count="1"');
+    expect(svg).toContain("<text");
     const onlyLine = createRenderer([line]);
     expect(onlyLine(load("16-histogram.json"))).toContain("CK1010");
+    expect(renderAll(load("16-histogram.json"))).toContain("CK1010");
     expect(createRenderer([line, histogram])(load("16-histogram.json"))).toContain('data-ck-type="histogram"');
   });
 
   it("draws the marks for each new geometry", () => {
-    expect(render(load("17-boxplot.json"))).toContain('data-ck-mark="box"');
-    expect(render(load("17-boxplot.json"))).toContain('data-ck-mark="outlier"');
-    expect(render(load("18-radar.json")).match(/data-ck-mark="polygon"/g)).toHaveLength(2);
-    expect(render(load("19-funnel.json")).match(/data-ck-mark="stage"/g)).toHaveLength(3);
-    expect(render(load("20-treemap.json")).match(/data-ck-mark="tile"/g)).toHaveLength(4);
-    expect(render(load("21-sankey.json")).match(/data-ck-mark="link"/g)).toHaveLength(3);
+    const box = render(load("17-boxplot.json"));
+    expect(box).toContain('data-ck-mark="box"');
+    expect(box).toContain('data-ck-mark="whisker"');
+    expect(box).toContain('data-ck-mark="median"');
+    expect(box).toContain('data-ck-mark="outlier"');
+    const radar = render(load("18-radar.json"));
+    expect(radar.match(/data-ck-mark="polygon"/g)).toHaveLength(2);
+    expect(radar).toContain('data-ck-mark="spoke"');
+    expect(radar).toContain("Speed");
+    const funnel = render(load("19-funnel.json"));
+    expect(funnel.match(/data-ck-mark="stage"/g)).toHaveLength(3);
+    expect(funnel).toContain("%");
+    const tiles = render(load("20-treemap.json"));
+    expect(tiles.match(/data-ck-mark="tile"/g)).toHaveLength(4);
+    expect(tiles).toContain("Oak");
+    const sankey = render(load("21-sankey.json"));
+    expect(sankey.match(/data-ck-mark="link"/g)).toHaveLength(3);
+    expect(sankey).toContain(" C");
+    expect(sankey).toContain("Mill");
+    expect(render(load("22-bullet.json"))).toContain('data-ck-mark="target"');
+    expect(render(load("23-waterfall.json"))).toContain('data-ck-mark="total"');
+    expect(render(load("23-waterfall.json"))).toContain('data-ck-mark="delta"');
   });
 });

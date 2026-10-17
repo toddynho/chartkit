@@ -1,5 +1,5 @@
 import type { ChartSpec } from "@chartkitdev/core";
-import { render as coreRender } from "@chartkitdev/core/all";
+import { render as coreRender } from "@chartkitdev/core/extra";
 
 export const lineSpec = {
   version: "1",

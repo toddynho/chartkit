@@ -1,5 +1,5 @@
 import type { ChartSpec } from "@chartkitdev/core";
-import { render as renderAll } from "@chartkitdev/core/all";
+import { attach, render as renderAll } from "@chartkitdev/core/extra";
 
 /** Anything with an `innerHTML` string. `HTMLElement` qualifies. */
 export interface MountElement {
@@ -33,6 +33,7 @@ export function mount(el: MountElement, spec: ChartSpec, options: MountOptions =
   };
 
   draw(spec);
+  const tip = canListen(el) ? attach(el) : undefined;
 
   return {
     update(next) {
@@ -42,9 +43,14 @@ export function mount(el: MountElement, spec: ChartSpec, options: MountOptions =
     destroy() {
       if (!alive) return;
       alive = false;
+      tip?.destroy();
       if (el.innerHTML !== "") el.innerHTML = "";
     },
   };
+}
+
+function canListen(el: MountElement): el is MountElement & EventTarget & { querySelector(selector: string): Element | null } {
+  return typeof (el as EventTarget).addEventListener === "function";
 }
 
 /** The SVG string `@chartkitdev/core` returns. No DOM and no extra wrapper. */

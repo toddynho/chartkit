@@ -20,6 +20,8 @@ export const navigation: NavItem[] = [
       { title: 'Funnel', href: '/spec/funnel' },
       { title: 'Treemap', href: '/spec/treemap' },
       { title: 'Sankey', href: '/spec/sankey' },
+      { title: 'Bullet', href: '/spec/bullet' },
+      { title: 'Waterfall', href: '/spec/waterfall' },
       { title: 'Gauge', href: '/spec/gauge' },
       { title: 'Calendar heatmap', href: '/spec/calendar-heatmap' },
     ],

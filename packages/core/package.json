@@ -11,6 +11,8 @@
   "sideEffects": [
     "./dist/all.js",
     "./dist/all.cjs",
+    "./dist/extra.js",
+    "./dist/extra.cjs",
     "./dist/themes/*.js",
     "./dist/themes/*.cjs"
   ],
@@ -36,6 +38,16 @@
       "require": {
         "types": "./dist/all.d.cts",
         "default": "./dist/all.cjs"
+      }
+    },
+    "./extra": {
+      "import": {
+        "types": "./dist/extra.d.ts",
+        "default": "./dist/extra.js"
+      },
+      "require": {
+        "types": "./dist/extra.d.cts",
+        "default": "./dist/extra.cjs"
       }
     },
     "./validate": {

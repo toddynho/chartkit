@@ -1,5 +1,5 @@
 import type { ChartRenderer } from "../render";
-import { renderBoxplot } from "../renderers/phase3";
+import { renderBoxplot } from "../renderers/extra/boxplot";
 
 export const boxplot: ChartRenderer = {
   name: "boxplot",

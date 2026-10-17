@@ -1,5 +1,5 @@
 import type { ChartRenderer } from "../render";
-import { renderSankey } from "../renderers/phase3";
+import { renderSankey } from "../renderers/extra/sankey";
 
 export const sankey: ChartRenderer = {
   name: "sankey",

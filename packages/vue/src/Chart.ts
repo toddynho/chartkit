@@ -1,6 +1,6 @@
-import { computed, defineComponent, h, type PropType } from "vue";
+import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref, type PropType } from "vue";
 import type { ChartSpec } from "@chartkitdev/core";
-import { render as renderAll } from "@chartkitdev/core/all";
+import { attach, render as renderAll } from "@chartkitdev/core/extra";
 
 export interface ChartProps {
   /** A v1 chart spec. The same object renders in every ChartKit adapter. */
@@ -22,7 +22,13 @@ export const Chart = defineComponent({
     render: { type: Function as PropType<(spec: ChartSpec) => string> },
   },
   setup(props, { attrs }) {
+    const el = ref<HTMLElement>();
+    let tip: { destroy(): void } | undefined;
     const svg = computed(() => (props.render ?? renderAll)(props.spec));
-    return () => h("div", { ...attrs, innerHTML: svg.value });
+    onMounted(() => {
+      if (el.value) tip = attach(el.value);
+    });
+    onBeforeUnmount(() => tip?.destroy());
+    return () => h("div", { ...attrs, ref: el, innerHTML: svg.value });
   },
 });

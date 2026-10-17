@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { ChartSpec } from "@chartkitdev/core";
-import { render as renderAll } from "@chartkitdev/core/all";
+import { attach, render as renderAll } from "@chartkitdev/core/extra";
 
 export interface ChartProps {
   /** A v1 chart spec. The same object renders in every ChartKit adapter. */
@@ -18,6 +18,13 @@ export interface ChartProps {
  * The existing chart components keep their props API; this is the spec-driven entry.
  */
 export function Chart({ spec, className, style, render = renderAll }: ChartProps) {
+  const ref = useRef<HTMLDivElement>(null);
   const svg = useMemo(() => render(spec), [spec, render]);
-  return <div className={className} style={style} dangerouslySetInnerHTML={{ __html: svg }} />;
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const tip = attach(el);
+    return () => tip.destroy();
+  }, [svg]);
+  return <div ref={ref} className={className} style={style} dangerouslySetInnerHTML={{ __html: svg }} />;
 }

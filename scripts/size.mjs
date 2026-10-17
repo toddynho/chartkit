@@ -89,6 +89,16 @@ for (const [name, built] of [["vue", vue], ["svelte", svelte], ["vanilla", vanil
   }
 }
 
+const extra = await gzipOf(join(src, "extra.ts"));
+const extraTypes = ["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall"];
+const chartSizes = {};
+for (const name of extraTypes) chartSizes[name] = await gzipOf(join(src, "charts", `${name}.ts`));
+if (all.code.includes('data-ck-renderer="histogram"') || all.code.includes('data-ck-mark="whisker"')) {
+  isolation.allOmitsExtra = false;
+} else {
+  isolation.allOmitsExtra = true;
+}
+
 const measured = {
   line: line.gzipBytes,
   all: all.gzipBytes,
@@ -96,10 +106,12 @@ const measured = {
   vue: vue.gzipBytes,
   svelte: svelte.gzipBytes,
   vanilla: vanilla.gzipBytes,
+  extra: extra.gzipBytes,
 };
+for (const name of extraTypes) measured[name] = chartSizes[name].gzipBytes;
 const budget = JSON.parse(readFileSync(join(root, "scripts/size-budget.json"), "utf8"));
 const failures = [];
-for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla"]) {
+for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "extra", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall"]) {
   if (typeof budget[key] !== "number") failures.push(`${key} budget missing`);
   else if (measured[key] > budget[key]) failures.push(`${key} gzip ${measured[key]} > budget ${budget[key]}`);
 }
@@ -117,6 +129,8 @@ console.log(JSON.stringify({
     vue: vue.minBytes,
     svelte: svelte.minBytes,
     vanilla: vanilla.minBytes,
+    extra: extra.minBytes,
+    ...Object.fromEntries(extraTypes.map((name) => [name, chartSizes[name].minBytes])),
   },
   isolation,
 }, null, 2));

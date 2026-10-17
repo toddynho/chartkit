@@ -67,6 +67,8 @@ const CHART_TYPES = [
   "funnel",
   "treemap",
   "sankey",
+  "bullet",
+  "waterfall",
 ] as const;
 
 export function walkSchema(value: unknown, schema: JsonSchema, diagnostics: Diagnostic[]): void {
@@ -919,6 +921,8 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   if (value === "funnel-chart") return { type: "funnel", note: "A funnel uses encoding.x for the stage and encoding.y for the value.", kind: "rename" };
   if (value === "tree-map") return { type: "treemap", note: "A treemap uses encoding.x, encoding.y, and optional encoding.color.", kind: "rename" };
   if (value === "sankey-diagram") return { type: "sankey", note: "A sankey uses encoding.source, encoding.target, and encoding.y.", kind: "rename" };
+  if (value === "bullet-chart") return { type: "bullet", note: "A bullet uses encoding.x, encoding.y, and optional encoding.target.", kind: "rename" };
+  if (value === "waterfall-chart") return { type: "waterfall", note: "A waterfall uses encoding.x for the step and encoding.y for the delta.", kind: "rename" };
   return undefined;
 }
 

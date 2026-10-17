@@ -1,7 +1,7 @@
 # ChartKit JSON spec (full)
 
 > @chartkitdev/core v0.5.0 · schema https://chartkit.dev/schema/v1.json
-> `import { render } from "@chartkitdev/core/all"`
+> `import { render } from "@chartkitdev/core/all"` for the core set, or `@chartkitdev/core/extra` for histogram, boxplot, radar, funnel, treemap, sankey, bullet, and waterfall
 > `import { repair, validate } from "@chartkitdev/core/validate"`
 
 The JSON spec is the agent interface. The React section at the bottom is a different API. Do not copy React props (`dataKey`, `leftAxis`, `GaugeChart value`) into a spec.
@@ -18,7 +18,7 @@ The JSON spec is the agent interface. The React section at the bottom is a diffe
 - Field `type` is `quantitative`, `temporal`, `ordinal`, or `nominal`. `categorical` means `nominal` (CK1007).
 - Unknown chart types (CK1005): `pie` → `donut` with `mark.innerRadius` 0; `arc` → `donut`; `point`, `circle`, and `square` → `scatter`; `rect` → `heatmap`; `area` → `stacked-area` when `y` lists two or more fields, otherwise `mini-area` (a full-size fill is `type: "line"` and `mark.area: true`); `metric` → `gauge` or `kpi`; `rule` and `tick` → `spike`; `grid-heat` → `heatmap`; `grid-heatmap` and `calendar-heatmap` → `heatmap` with `mark.layout` `"grid"` or `"calendar"`.
 - Heatmap: `encoding.y` with no `mark.layout` renders a grid. Calendar is a date `x` plus `color`, or `mark.layout: "calendar"`. The measure is `encoding.color`. `encoding.value` moves there (CK1009). A numeric `y` moves to `color` only on a calendar.
-- Histogram bins `encoding.x` (`mark.bins`, default 8). A pre-binned count is `encoding.y`. `hist` repairs to `histogram` (CK1005). Boxplot is `encoding.x` plus observation `encoding.y`; `box` and `box-plot` repair to `boxplot`. Radar is `encoding.x` and one `encoding.y` or a list. Funnel is stage `x` and value `y`. Treemap is label `x`, size `y`, optional group `color`; `name`, `size`, and `parent` repair onto those channels (CK1009). Sankey is `encoding.source`, `encoding.target`, and `encoding.y`; `from`, `to`, and `value` repair onto those channels. Per-type pages: https://chartkit.dev/spec/histogram and the same path for boxplot, radar, funnel, treemap, sankey, gauge, and calendar-heatmap.
+- Histogram bins `encoding.x` (`mark.bins` default 8, `mark.binWidth`, or `mark.bin` of count, width, sturges, sqrt, or fd). A pre-binned count is `encoding.y`. `hist` repairs to `histogram` (CK1005). Boxplot is `encoding.x` plus observation `encoding.y`; `box` and `box-plot` repair to `boxplot`. Radar is `encoding.x` and one `encoding.y` or a list. Funnel is stage `x` and value `y`. Treemap is label `x`, size `y`, optional group `color`; `name`, `size`, and `parent` repair onto those channels (CK1009). Sankey is `encoding.source`, `encoding.target`, and `encoding.y`; `from`, `to`, and `value` repair onto those channels. Bullet is label `x`, measure `y`, optional `target`, and `mark.ranges`. Waterfall is step `x` and delta `y`; `mark.total` names a boolean field for an absolute total. `bullet-chart` and `waterfall-chart` repair to those types. These eight types render from `@chartkitdev/core/extra` (or `@chartkitdev/core/charts/<type>`). Per-type pages: https://chartkit.dev/spec/histogram and the same path for boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gauge, and calendar-heatmap.
 - Combo is one spec. `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. `layer`, `layers`, `marks`, `encoding.bar`, `encoding.line`, and `encoding.y2` are CK1009. A list of fields goes on `encoding.y`, not on `field`. On a combo, `bar`, `line`, and `area` go in `mark`, not in `type`. A series with `"axis": "y2"` needs `axes.y2`; `repair` adds it when it is missing.
 - `encoding.x.axis` is not a channel. A title goes in `axes.x.title` (CK1009). `mark.points: true` means `"always"` (CK1007).
 - A bar splits series with `encoding.series`, or with `encoding.color` when that field is not `x`. `encoding.color` equal to `x` colours each bar and does not split series. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel is applied to the ticks. Rule, band, and text `annotations` are drawn. Tooltip, zoom, pan, brush, animation, `legend.interactive`, and `a11y.keyboard` / `a11y.dataTable` are valid; when one is turned on, `validate` warns CK3011 because the SVG does not draw it yet. The default theme is `auto` (Soft: `light-dark`, transparent plot, page scheme; optional card via `--ck-background`). `soft`, `refined`, and `editorial` are built in. `midnight` is opt-in. Other names stay midnight until imported. `--ck-*` or `--chart-N` still wins.
@@ -333,6 +333,35 @@ Each example below is a minimal valid spec.
   ],
   "encoding": { "source": "from", "target": "to", "y": "flow" },
   "a11y": { "alt": "The mill sends flow on to the shop." }
+}
+```
+
+## bullet
+
+```json
+{
+  "version": "1",
+  "type": "bullet",
+  "data": [{ "name": "Revenue", "value": 275, "target": 250, "good": 300 }],
+  "encoding": { "x": "name", "y": "value", "target": "target" },
+  "mark": { "ranges": ["good"] },
+  "a11y": { "alt": "Revenue is past its target." }
+}
+```
+
+## waterfall
+
+```json
+{
+  "version": "1",
+  "type": "waterfall",
+  "data": [
+    { "step": "Open", "amount": 120, "total": true },
+    { "step": "Won", "amount": 40 },
+    { "step": "Close", "amount": 160, "total": true }
+  ],
+  "encoding": { "x": "step", "y": "amount" },
+  "a11y": { "alt": "The close is 160." }
 }
 ```
 

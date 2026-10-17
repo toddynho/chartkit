@@ -4,6 +4,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve: {
     alias: [
+      { find: "@chartkitdev/core/extra", replacement: path.resolve(__dirname, "../core/src/extra.ts") },
       { find: "@chartkitdev/core/all", replacement: path.resolve(__dirname, "../core/src/all.ts") },
       { find: "@chartkitdev/core", replacement: path.resolve(__dirname, "../core/src/index.ts") },
     ],
