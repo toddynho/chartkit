@@ -12,8 +12,8 @@ export const MARK_APPLIES: Record<string, readonly string[]> = {
   connectNulls: ["line", "stacked-area", "combo", "sparkline", "mini-area"],
   stack: ["bar", "stacked-area", "combo"],
   orientation: ["bar"],
-  cornerRadius: ["bar", "donut", "heatmap"],
-  gap: ["bar", "combo", "heatmap", "candlestick"],
+  cornerRadius: ["bar", "donut", "heatmap", "histogram", "boxplot", "treemap", "sankey"],
+  gap: ["bar", "combo", "heatmap", "candlestick", "histogram", "boxplot", "funnel", "treemap"],
   labels: ["bar", "donut"],
   innerRadius: ["donut"],
   padAngle: ["donut"],
@@ -24,6 +24,7 @@ export const MARK_APPLIES: Record<string, readonly string[]> = {
   endAngle: ["gauge", "progress-ring"],
   linecap: ["gauge", "progress-ring"],
   baseline: ["spike"],
+  bins: ["histogram"],
 };
 
 /** Legacy component prop names → v1 spec paths, used by CK1002 hints. */
@@ -80,6 +81,12 @@ export const TYPE_REQUIREMENTS: Record<string, string> = {
   "mini-area": "mini-area needs data",
   spike: "spike needs data",
   candlestick: "candlestick needs data and encoding.x, open, high, low, and close",
+  histogram: "histogram needs data and encoding.x. mark.bins sets the bin count. encoding.y is a pre-binned count",
+  boxplot: "boxplot needs data and encoding.x + encoding.y observations",
+  radar: "radar needs data and encoding.x + encoding.y",
+  funnel: "funnel needs data and encoding.x + encoding.y",
+  treemap: "treemap needs data and encoding.x + encoding.y. encoding.color is an optional group",
+  sankey: "sankey needs data and encoding.source, encoding.target, and encoding.y",
   gauge: "gauge needs metric: { value, min, max, label?, delta? }",
   "progress-ring": "progress-ring needs metric: { value, min, max, label?, delta? }",
   kpi: "kpi needs metric: { value, min, max, label?, delta? }",

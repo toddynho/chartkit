@@ -22,6 +22,24 @@ describe("Chart", () => {
     expect(container.textContent).toContain("Jan");
   });
 
+  it("renders a histogram spec", () => {
+    const histogram = {
+      version: "1" as const,
+      type: "histogram" as const,
+      data: [
+        { score: 1 },
+        { score: 2 },
+        { score: 8 },
+      ],
+      encoding: { x: "score" },
+      mark: { bins: 2 },
+      a11y: { alt: "Scores cluster at the low end." },
+    };
+    const { container } = render(<Chart spec={histogram} />);
+    expect(container.querySelector("svg")?.getAttribute("data-ck-type")).toBe("histogram");
+    expect(container.querySelector("svg")?.getAttribute("aria-label")).toBe(histogram.a11y.alt);
+  });
+
   it("uses a custom renderer when one is passed", () => {
     const { container } = render(
       <Chart spec={spec} render={() => '<svg data-ck-type="custom"></svg>'} />,

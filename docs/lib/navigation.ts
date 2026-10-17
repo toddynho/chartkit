@@ -11,6 +11,20 @@ export const navigation: NavItem[] = [
     href: '/getting-started',
   },
   {
+    title: 'Spec',
+    href: '/spec',
+    items: [
+      { title: 'Histogram', href: '/spec/histogram' },
+      { title: 'Box plot', href: '/spec/boxplot' },
+      { title: 'Radar', href: '/spec/radar' },
+      { title: 'Funnel', href: '/spec/funnel' },
+      { title: 'Treemap', href: '/spec/treemap' },
+      { title: 'Sankey', href: '/spec/sankey' },
+      { title: 'Gauge', href: '/spec/gauge' },
+      { title: 'Calendar heatmap', href: '/spec/calendar-heatmap' },
+    ],
+  },
+  {
     title: 'Components',
     href: '/components',
     items: [

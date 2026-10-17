@@ -20,7 +20,7 @@ The threshold is `2 * floor(plotWidth)`, where plot width is the pixel width ins
 | `combo` | Line and area series only. Bars are drawn in full. `auto` uses minmax. |
 | `spike` | Vertical spikes. `auto` and `minmax` keep the min and max in each pixel bucket. `lttb` keeps the LTTB indexes. |
 
-`bar`, `scatter`, `candlestick`, `donut`, `heatmap`, `gauge`, `kpi`, and `progress-ring` do not sample. Scatter and candlestick need every point; the others are not point series.
+`bar`, `scatter`, `candlestick`, `donut`, `heatmap`, `gauge`, `kpi`, `progress-ring`, `histogram`, `boxplot`, `radar`, `funnel`, `treemap`, and `sankey` do not sample. Scatter and candlestick need every point; the others are not point series.
 
 `auto` uses minmax rather than LTTB because a metric chart has to keep spikes, and minmax is one pass over the series. Set `lttb` when a smoother silhouette matters more than the sharpest spike.
 

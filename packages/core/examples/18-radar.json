@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "type": "radar",
+  "data": [
+    { "spoke": "Speed", "car": 4, "bike": 2 },
+    { "spoke": "Cost", "car": 2, "bike": 5 },
+    { "spoke": "Ease", "car": 3, "bike": 4 }
+  ],
+  "encoding": { "x": "spoke", "y": ["car", "bike"] },
+  "a11y": { "alt": "The bike scores higher on cost and ease." }
+}

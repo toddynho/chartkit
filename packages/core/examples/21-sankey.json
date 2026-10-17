@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "type": "sankey",
+  "data": [
+    { "from": "Source", "to": "Mill", "flow": 10 },
+    { "from": "Source", "to": "Shop", "flow": 4 },
+    { "from": "Mill", "to": "Shop", "flow": 6 }
+  ],
+  "encoding": { "source": "from", "target": "to", "y": "flow" },
+  "a11y": { "alt": "Most of the flow reaches the shop through the mill." }
+}

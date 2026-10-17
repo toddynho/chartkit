@@ -15,6 +15,12 @@ const charts = [
   "progress-ring",
   "spike",
   "candlestick",
+  "histogram",
+  "boxplot",
+  "radar",
+  "funnel",
+  "treemap",
+  "sankey",
 ];
 
 const themes = [

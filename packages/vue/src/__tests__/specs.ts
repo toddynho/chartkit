@@ -42,7 +42,21 @@ export const heatmapSpec = {
   a11y: { alt: "The busiest cell is r1 c2." },
 } as const satisfies ChartSpec;
 
-export const specs = [lineSpec, comboSpec, heatmapSpec];
+export const histogramSpec = {
+  version: "1",
+  type: "histogram",
+  data: [
+    { score: 1 },
+    { score: 2 },
+    { score: 2 },
+    { score: 8 },
+  ],
+  encoding: { x: "score" },
+  mark: { bins: 2 },
+  a11y: { alt: "Scores cluster at the low end." },
+} as const satisfies ChartSpec;
+
+export const specs = [lineSpec, comboSpec, heatmapSpec, histogramSpec];
 
 export function svgOf(html: string): string {
   const start = html.indexOf("<svg");

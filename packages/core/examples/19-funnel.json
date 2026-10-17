@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "type": "funnel",
+  "data": [
+    { "stage": "Visit", "count": 80 },
+    { "stage": "Start", "count": 40 },
+    { "stage": "Pay", "count": 12 }
+  ],
+  "encoding": { "x": "stage", "y": "count" },
+  "a11y": { "alt": "12 of 80 visits pay." }
+}
