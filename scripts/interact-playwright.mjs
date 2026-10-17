@@ -17,7 +17,7 @@ mkdirSync(outDir, { recursive: true });
 const entry = join(tmpdir(), "chartkit-interact-page.mjs");
 writeFileSync(
   entry,
-  `import { render } from ${JSON.stringify(join(src, "all.ts"))};\nimport { attach, patchSvg, buildHoverIndex, lookupIndex } from ${JSON.stringify(join(src, "interact.ts"))};\nexport { render, attach, patchSvg, buildHoverIndex, lookupIndex };\n`,
+  `import { render } from ${JSON.stringify(join(src, "all.ts"))};\nimport { createRenderer } from ${JSON.stringify(join(src, "render.ts"))};\nimport { line } from ${JSON.stringify(join(src, "charts/line.ts"))};\nimport { attach, patchSvg, buildHoverIndex, lookupIndex } from ${JSON.stringify(join(src, "interact.ts"))};\nexport const renderLine = createRenderer([line]);\nexport { render, attach, patchSvg, buildHoverIndex, lookupIndex };\n`,
 );
 
 const bundle = join(outDir, "ck.js");
@@ -49,8 +49,8 @@ const html = `<!doctype html><meta charset="utf-8"><title>ChartKit interaction</
   section { padding: 16px 20px 28px; }
   h1 { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
   p { margin: 0 0 12px; font-size: 13px; color: #6e6e73; }
-  #dark { color-scheme: dark; background: #1c1c1e; color: #f5f5f7; }
-  #dark p { color: #a1a1a6; }
+  #dark, #kinds-dark { color-scheme: dark; background: #1c1c1e; color: #f5f5f7; }
+  #dark p, #kinds-dark p { color: #a1a1a6; }
   .host { width: 640px; height: 360px; }
 </style>
 <body>
@@ -63,6 +63,24 @@ const html = `<!doctype html><meta charset="utf-8"><title>ChartKit interaction</
   <h1>Soft dark</h1>
   <p>Same chart. Colours follow the section color-scheme.</p>
   <div id="dark-host" class="host"></div>
+</section>
+<section id="kinds-light">
+  <h1>Other tooltips, light</h1>
+  <p>Bar, stacked area, scatter, combo, and donut.</p>
+  <div id="bar-light" class="host"></div>
+  <div id="area-light" class="host"></div>
+  <div id="scatter-light" class="host"></div>
+  <div id="combo-light" class="host"></div>
+  <div id="donut-light" class="host"></div>
+</section>
+<section id="kinds-dark">
+  <h1>Other tooltips, dark</h1>
+  <p>Same charts under a dark color-scheme.</p>
+  <div id="bar-dark" class="host"></div>
+  <div id="area-dark" class="host"></div>
+  <div id="scatter-dark" class="host"></div>
+  <div id="combo-dark" class="host"></div>
+  <div id="donut-dark" class="host"></div>
 </section>
 <script src="${bundle}"></script>
 <script>
@@ -92,8 +110,73 @@ function mount(id) {
   host.addEventListener("rangechange", (event) => host._events.push(event.detail));
   CK.attach(host, spec, { render: (next) => CK.render(next) });
 }
+const months = ${JSON.stringify(months)};
+const plans = ${JSON.stringify(data)};
+const bar = { ...spec, type: "bar", title: "Plans, bars" };
+const area = { ...spec, type: "stacked-area", title: "Plans, stacked" };
+const scatter = {
+  version: "1",
+  type: "scatter",
+  title: "Sites",
+  data: [
+    { x: 1, y: 12, site: "North" },
+    { x: 2, y: 18, site: "North" },
+    { x: 3, y: 15, site: "North" },
+    { x: 4, y: 22, site: "North" },
+    { x: 1.4, y: 9, site: "South" },
+    { x: 2.2, y: 16, site: "South" },
+    { x: 3.1, y: 11, site: "South" },
+    { x: 3.8, y: 19, site: "South" }
+  ],
+  encoding: { x: { field: "x", type: "quantitative" }, y: { field: "y", type: "quantitative" }, color: "site" },
+  size: { width: 640, height: 360 },
+  a11y: { alt: "North and South sites." }
+};
+const combo = {
+  version: "1",
+  type: "combo",
+  title: "Orders",
+  data: [
+    { week: "W1", orders: 42, rate: 0.31 },
+    { week: "W2", orders: 48, rate: 0.36 },
+    { week: "W3", orders: 45, rate: 0.33 },
+    { week: "W4", orders: 53, rate: 0.41 }
+  ],
+  encoding: {
+    x: "week",
+    y: [
+      { field: "orders", title: "Orders", mark: "bar" },
+      { field: "rate", title: "Rate", mark: "line", axis: "y2" }
+    ]
+  },
+  axes: { y2: true },
+  size: { width: 640, height: 360 },
+  a11y: { alt: "Orders and rate across four weeks." }
+};
+const donut = {
+  version: "1",
+  type: "donut",
+  title: "Plans",
+  data: [
+    { plan: "Starter", total: 177 },
+    { plan: "Pro", total: 289 },
+    { plan: "Enterprise", total: 149 }
+  ],
+  encoding: { x: "plan", y: "total" },
+  size: { width: 640, height: 360 },
+  a11y: { alt: "Pro is the largest share of the plans." }
+};
+const kindSpecs = { bar, area, scatter, combo, donut };
+function mountKind(id, kind) {
+  const host = document.getElementById(id);
+  host.innerHTML = CK.render(kindSpecs[kind]);
+  CK.attach(host, kindSpecs[kind], { render: (next) => CK.render(next) });
+}
 mount("light-host");
 mount("dark-host");
+for (const theme of ["light", "dark"]) {
+  for (const kind of ["bar", "area", "scatter", "combo", "donut"]) mountKind(kind + "-" + theme, kind);
+}
 document.body.dataset.ckReady = "1";
 </script>
 </body>`;
@@ -136,7 +219,19 @@ if (staticSvg.includes("data-ck-tip") || staticSvg.includes("data-ck-interact"))
 async function plotPoint(hostId, fraction) {
   return page.evaluate(({ hostId, fraction }) => {
     const svg = document.querySelector(`#${hostId} svg`);
-    const rect = svg.querySelector("clipPath rect");
+    const rect = svg && svg.querySelector("clipPath rect");
+    if (!svg) throw new Error(`${hostId} has no svg`);
+    if (!rect) {
+      const circle = svg.querySelector("circle");
+      const vb = svg.getAttribute("viewBox").split(/[\s,]+/).map(Number);
+      const box = svg.getBoundingClientRect();
+      const x = circle ? Number(circle.getAttribute("cx")) : vb[2] / 2;
+      const y = circle ? Number(circle.getAttribute("cy")) : vb[3] / 2;
+      return {
+        x: box.left + (x / vb[2]) * box.width,
+        y: box.top + (y / vb[3]) * box.height,
+      };
+    }
     const vb = svg.getAttribute("viewBox").split(/[\s,]+/).map(Number);
     const box = svg.getBoundingClientRect();
     const x = Number(rect.getAttribute("x")) + Number(rect.getAttribute("width")) * fraction;
@@ -224,6 +319,67 @@ for (const hostId of ["light-host", "dark-host"]) {
   shots.push(`legend-${theme}.png`);
 }
 
+async function hoverHost(hostId, kind) {
+  if (kind === "donut") {
+    return page.evaluate((id) => {
+      const path = document.querySelector(`#${id} path[aria-label]`);
+      const pt = path.getPointAtLength(path.getTotalLength() * 0.5);
+      const ctm = path.getScreenCTM();
+      const point = new DOMPoint(pt.x, pt.y).matrixTransform(ctm);
+      return { x: point.x, y: point.y };
+    }, hostId);
+  }
+  const fraction = kind === "combo" ? 1.5 / 4 : kind === "scatter" ? 0.45 : 3.5 / 6;
+  return plotPoint(hostId, fraction);
+}
+
+for (const theme of ["light", "dark"]) {
+  for (const kind of ["bar", "area", "scatter", "combo", "donut"]) {
+    const hostId = `${kind}-${theme}`;
+    await page.locator(`#${hostId}`).scrollIntoViewIfNeeded();
+    const point = await hoverHost(hostId, kind);
+    await page.mouse.move(point.x, point.y);
+    if (kind === "donut") {
+      await page.evaluate(({ id, point }) => {
+        const path = document.querySelector(`#${id} path[aria-label]`);
+        path.dispatchEvent(new PointerEvent("pointermove", { clientX: point.x, clientY: point.y, bubbles: true }));
+      }, { id: hostId, point });
+    }
+    await page.waitForTimeout(200);
+    const tip = await page.evaluate((id) => {
+      const host = document.getElementById(id);
+      const node = host.querySelector("[data-ck-tip]");
+      const swatches = node ? [...node.querySelectorAll("i")].map((swatch) => getComputedStyle(swatch).backgroundColor) : [];
+      const dots = [...host.querySelectorAll("[data-ck-dot]")].map((dot) => dot.getAttribute("fill"));
+      return {
+        text: node ? node.textContent : "",
+        hidden: node ? node.hidden : true,
+        swatches,
+        dots: dots.length,
+        rows: node ? node.querySelectorAll(".ck-row").length : 0,
+      };
+    }, hostId);
+    if (tip.hidden) fail(`${hostId} tooltip stayed hidden`);
+    const unique = new Set(tip.swatches.filter(Boolean));
+    if (tip.rows > 1 && unique.size < 2) fail(`${hostId} swatches are not distinct: ${tip.swatches.join(" | ")}`);
+    if (kind === "donut") {
+      if (!tip.text.includes("Pro") && !tip.text.includes("Starter") && !tip.text.includes("Enterprise")) {
+        fail(`${hostId} donut tooltip ${tip.text}`);
+      }
+    } else if (tip.dots < 1) fail(`${hostId} has no hover dot`);
+    if (kind === "bar" || kind === "area") {
+      for (const needle of ["Apr", "Starter", "Pro"]) {
+        if (!tip.text.includes(needle)) fail(`${hostId} missing ${needle}: ${tip.text}`);
+      }
+    }
+    if (kind === "combo" && !tip.text.includes("Orders")) fail(`${hostId} combo tooltip ${tip.text}`);
+    await page.locator(`#${hostId}`).screenshot({ path: join(outDir, `tooltip-${kind}-${theme}.png`) });
+    shots.push(`tooltip-${kind}-${theme}.png`);
+    await page.mouse.move(4, 4);
+    await page.waitForTimeout(40);
+  }
+}
+
 const timing = await page.evaluate(async () => {
   function spec(rows, salt) {
     const data = [];
@@ -303,8 +459,62 @@ const timing = await page.evaluate(async () => {
   const lookupStart = performance.now();
   for (let i = 0; i < 1000; i++) CK.lookupIndex(index, i % 1000);
   const lookupMs = performance.now() - lookupStart;
+  function makeSeries(n, seed) {
+    const xs = new Float64Array(n);
+    const ys = new Float64Array(n);
+    let state = seed >>> 0;
+    for (let i = 0; i < n; i++) {
+      state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+      xs[i] = i;
+      ys[i] = (state / 4294967296) * 100 + Math.sin(i / 50) * 20;
+    }
+    return { xs, ys };
+  }
+  async function frames() {
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  }
+  const harness = [];
+  for (const mode of ["columns", "rows", "default"]) {
+    for (const rows of [1000, 10000, 100000]) {
+      const chart = {
+        version: "1",
+        type: "line",
+        data: [],
+        encoding: { x: "x", y: "y" },
+        size: { width: 640, height: 360 },
+        locale: "en-US",
+        a11y: { alt: "Indexed line of one series." },
+      };
+      if (mode !== "default") chart.mark = { curve: "linear", points: "none", sampling: "auto" };
+      const host = document.createElement("div");
+      document.body.append(host);
+      const samples = [];
+      for (let i = 0; i < 7; i++) {
+        const next = makeSeries(rows, i + 2);
+        chart.data = mode === "columns"
+          ? { columns: { x: next.xs, y: next.ys } }
+          : Array.from({ length: rows }, (_, index) => ({ x: next.xs[index], y: next.ys[index] }));
+        const t0 = performance.now();
+        const markup = CK.renderLine(chart);
+        const t1 = performance.now();
+        host.innerHTML = markup;
+        const t2 = performance.now();
+        await frames();
+        const t3 = performance.now();
+        samples.push({ render: t1 - t0, dom: t2 - t1, harness: t3 - t0 });
+      }
+      const mid = (key) => {
+        const sorted = samples.map((sample) => sample[key]).sort((a, b) => a - b);
+        return Number(sorted[3].toFixed(2));
+      };
+      harness.push({ mode, rows, renderMs: mid("render"), domMs: mid("dom"), updateMs: mid("harness") });
+      host.remove();
+    }
+  }
+
   return {
     updates,
+    harness,
     hover: {
       width: box.width,
       perOpMs: Number(median(samples).toFixed(3)),

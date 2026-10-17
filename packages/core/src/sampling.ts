@@ -28,6 +28,55 @@ export function resolveSampling(mode: SamplingMode, count: number, plotWidth: nu
   return mode === "lttb" ? "lttb" : "minmax";
 }
 
+const floatBits = new ArrayBuffer(8);
+const floatView = new Float64Array(floatBits);
+const floatWords = new Uint32Array(floatBits);
+let frameStamp = 0;
+const mixOnce = new WeakMap<object, { stamp: number; mix: number }>();
+
+/** Drop per-render mix hits. Call once at the start of a chart render. */
+export function beginFrame(): void {
+  frameStamp += 1;
+}
+
+/** FNV-style fold. `mix` starts at {@link MIX_SEED}. */
+export function foldMix(mix: number, index: number, value: number | null): number {
+  return mixStep(mix, index, value);
+}
+
+export const MIX_SEED = 2166136261;
+
+function mixStep(mix: number, index: number, value: number | null): number {
+  if (typeof value !== "number" || value !== value) return Math.imul(mix ^ 0x7fffffff ^ index, 16777619);
+  floatView[0] = value;
+  return Math.imul(Math.imul(mix ^ floatWords[0] ^ index, 16777619) ^ floatWords[1], 16777619);
+}
+
+/** Fingerprint of a column. Stable for the same values; one render reuses the hash. */
+export function columnMix(values: ArrayLike<number | null>, count = values.length): number {
+  if (typeof values === "object" && values !== null) {
+    const prev = mixOnce.get(values);
+    if (prev && prev.stamp === frameStamp) return prev.mix;
+  }
+  let mix = MIX_SEED;
+  for (let i = 0; i < count; i++) mix = mixStep(mix, i, values[i]);
+  mix |= 0;
+  if (typeof values === "object" && values !== null) mixOnce.set(values, { stamp: frameStamp, mix });
+  return mix;
+}
+
+interface SampleMemo {
+  xs: ArrayLike<number | null> | null;
+  requested: SamplingMode;
+  count: number;
+  plotWidth: number;
+  connectNulls: boolean;
+  mix: number;
+  hit: SampledRuns;
+}
+
+const sampleMemo = new WeakMap<object, SampleMemo>();
+
 export function sampleSeries(
   requested: SamplingMode,
   xs: ArrayLike<number | null> | null,
@@ -40,19 +89,42 @@ export function sampleSeries(
   if (requested === "none" || count <= samplingThreshold(plotWidth)) {
     return { reduced: false, mode: "none", runs: [] };
   }
+  const reusable = typeof ys === "object" && ys !== null ? sampleMemo.get(ys) : undefined;
+  if (
+    reusable &&
+    reusable.xs === xs &&
+    reusable.requested === requested &&
+    reusable.count === count &&
+    reusable.plotWidth === plotWidth &&
+    reusable.connectNulls === connectNulls &&
+    reusable.mix === columnMix(ys, count)
+  ) {
+    return reusable.hit;
+  }
   let finite = 0;
   let gaps = false;
+  let mix = MIX_SEED;
   for (let i = 0; i < count; i++) {
+    mix = mixStep(mix, i, ys[i]);
     if (finiteY(ys[i])) finite += 1;
     else gaps = true;
   }
+  mix |= 0;
   const mode = resolveSampling(requested, finite, plotWidth);
   if (mode === "none") return { reduced: false, mode, runs: [] };
 
   const target = samplingThreshold(plotWidth);
+  const remember = (hit: SampledRuns): SampledRuns => {
+    if (typeof ys === "object" && ys !== null) {
+      sampleMemo.set(ys, { xs, requested, count, plotWidth, connectNulls, mix, hit });
+      mixOnce.set(ys, { stamp: frameStamp, mix });
+    }
+    return hit;
+  };
+
   if (!gaps) {
     const run = sampleDense(mode, xs, ys, 0, count, Math.min(target, count));
-    return { reduced: run.length < count, mode, runs: run.length < count ? [run] : [] };
+    return remember({ reduced: run.length < count, mode, runs: run.length < count ? [run] : [] });
   }
 
   if (connectNulls) {
@@ -71,7 +143,7 @@ export function sampleSeries(
     const picked = sampleDense(mode, compactX, compactY, 0, n, Math.min(target, n));
     const mapped = new Int32Array(picked.length);
     for (let i = 0; i < picked.length; i++) mapped[i] = idx[picked[i]];
-    return { reduced: mapped.length < finite, mode, runs: mapped.length < finite ? [mapped] : [] };
+    return remember({ reduced: mapped.length < finite, mode, runs: mapped.length < finite ? [mapped] : [] });
   }
 
   const runs: Int32Array[] = [];
@@ -93,7 +165,7 @@ export function sampleSeries(
     }
   }
   if (start >= 0) emit(start, count);
-  return { reduced: kept < finite, mode, runs: kept < finite ? runs : [] };
+  return remember({ reduced: kept < finite, mode, runs: kept < finite ? runs : [] });
 }
 
 function sampleDense(

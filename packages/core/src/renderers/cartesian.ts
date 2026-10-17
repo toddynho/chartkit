@@ -1,7 +1,7 @@
 import { annotationLayers } from "../annotations";
 import { isTypedArray, readData, type DataTable } from "../data";
 import { formatValue } from "../format";
-import { readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
+import { MIX_SEED, beginFrame, columnMix, foldMix, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import { clamp, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
@@ -16,6 +16,7 @@ type MarkDraw = (
 
 function renderTyped(spec: Record<string, unknown>, type: string, draw: MarkDraw): string | null {
   if (spec.type !== type) return null;
+  beginFrame();
   const model = toModel(spec);
   if (!model) return null;
   return modelToSvg(model, draw);
@@ -445,7 +446,10 @@ function appendLineSeries(
     out.push(
       `<path d="${linePath(points, model.curve)}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokePaint}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)}${indexAttr} />`,
     );
-    if (model.dots !== "off") {
+    // Hidden circles exist so --ck-line-dots can reveal them. A downsampled line
+    // already has a vertex per pixel, and those circles dominate the SVG, so
+    // interact draws the hover dot from the path instead.
+    if (model.dots === "shown") {
       for (let k = 0; k < run.length; k++) {
         out.push(pointMark(points[k], model, series.color, ` data-ck-i="${run[k]}"`));
       }
@@ -496,15 +500,13 @@ function appendLinear(
   yScale: (value: number) => number,
 ): void {
   const values = series.values;
-  let path = "";
-  let open = false;
+  let parts: string[] = [];
   const flush = () => {
-    if (!path) return;
+    if (parts.length === 0) return;
     out.push(
-      `<path d="${path}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokePaint}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
+      `<path d="${parts.join(" ")}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokePaint}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
     );
-    path = "";
-    open = false;
+    parts = [];
   };
   for (let i = 0; i < values.length; i++) {
     const value = values[i];
@@ -512,11 +514,7 @@ function appendLinear(
       if (!model.connectNulls) flush();
       continue;
     }
-    const x = n(xScale.center(i));
-    const y = n(yScale(value));
-    if (!open) path = "M " + x + " " + y;
-    else path += " L " + x + " " + y;
-    open = true;
+    parts.push((parts.length === 0 ? "M " : "L ") + n(xScale.center(i)) + " " + n(yScale(value)));
   }
   flush();
 }
@@ -866,6 +864,27 @@ function padding(model: PlotModel, leftLabels: string[], rightLabels: string[]):
   };
 }
 
+interface ColumnStat {
+  mix: number;
+  min: number;
+  max: number;
+  above: number;
+  below: number;
+}
+
+const columnStat = new WeakMap<object, ColumnStat>();
+
+function statOf(values: ArrayLike<number | null>): ColumnStat | null {
+  if (typeof values !== "object" || values === null) return null;
+  const prev = columnStat.get(values);
+  if (!prev || prev.mix !== columnMix(values, values.length)) return null;
+  return prev;
+}
+
+function storeStat(values: ArrayLike<number | null>, stat: ColumnStat): void {
+  if (typeof values === "object" && values !== null) columnStat.set(values, stat);
+}
+
 function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
   let min = Infinity;
   let max = -Infinity;
@@ -886,10 +905,29 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
   } else {
     for (const series of model.series) {
       if (series.axis !== axis) continue;
+      const cached = statOf(series.values);
+      if (cached) {
+        consider(cached.min);
+        consider(cached.max);
+        continue;
+      }
+      let lo = Infinity;
+      let hi = -Infinity;
+      let mix = MIX_SEED;
+      let seenSeries = false;
       for (let i = 0; i < series.values.length; i++) {
         const value = series.values[i];
-        if (value !== null) consider(value);
+        mix = foldMix(mix, i, value);
+        if (value !== null) {
+          consider(value);
+          if (Number.isFinite(value)) {
+            seenSeries = true;
+            if (value < lo) lo = value;
+            if (value > hi) hi = value;
+          }
+        }
       }
+      if (seenSeries) storeStat(series.values, { mix: mix | 0, min: lo, max: hi, above: 0, below: 0 });
     }
   }
   const log = axis === "y2" ? model.y2Log : model.yLog;
@@ -945,28 +983,54 @@ function monotoneHeadroom(model: PlotModel, axis: "y" | "y2"): { above: number; 
   let below = 0;
   for (const series of model.series) {
     if (series.axis !== axis || series.mark === "bar") continue;
-    const values: number[] = [];
-    for (let i = 0; i < series.values.length; i++) {
-      const value = series.values[i];
-      if (value !== null && Number.isFinite(value)) values.push(value);
+    const src = series.values;
+    const count = src.length;
+    let finite = 0;
+    let gap = false;
+    let hi = -Infinity;
+    let lo = Infinity;
+    for (let i = 0; i < count; i++) {
+      const value = src[i];
+      if (value === null || !Number.isFinite(value)) {
+        gap = true;
+        continue;
+      }
+      finite += 1;
+      if (value > hi) hi = value;
+      if (value < lo) lo = value;
     }
-    if (values.length < 3) continue;
-    let hi = values[0];
-    let lo = values[0];
-    for (let i = 1; i < values.length; i++) {
-      if (values[i] > hi) hi = values[i];
-      if (values[i] < lo) lo = values[i];
+    if (finite < 3) continue;
+    if (!gap) {
+      for (let i = 0; i < count - 1; i++) {
+        const p0 = src[Math.max(0, i - 1)] as number;
+        const p1 = src[i] as number;
+        const p2 = src[i + 1] as number;
+        const p3 = src[Math.min(count - 1, i + 2)] as number;
+        const c1 = p1 + (p2 - p0) / 6;
+        const c2 = p2 - (p3 - p1) / 6;
+        if (c1 > hi) above = Math.max(above, c1 - hi);
+        if (c2 > hi) above = Math.max(above, c2 - hi);
+        if (c1 < lo) below = Math.max(below, lo - c1);
+        if (c2 < lo) below = Math.max(below, lo - c2);
+      }
+      continue;
+    }
+    const values: number[] = [];
+    for (let i = 0; i < count; i++) {
+      const value = src[i];
+      if (value !== null && Number.isFinite(value)) values.push(value);
     }
     for (let i = 0; i < values.length - 1; i++) {
       const p0 = values[Math.max(0, i - 1)];
       const p1 = values[i];
       const p2 = values[i + 1];
       const p3 = values[Math.min(values.length - 1, i + 2)];
-      const cps = [p1 + (p2 - p0) / 6, p2 - (p3 - p1) / 6];
-      for (let c = 0; c < cps.length; c++) {
-        if (cps[c] > hi) above = Math.max(above, cps[c] - hi);
-        if (cps[c] < lo) below = Math.max(below, lo - cps[c]);
-      }
+      const c1 = p1 + (p2 - p0) / 6;
+      const c2 = p2 - (p3 - p1) / 6;
+      if (c1 > hi) above = Math.max(above, c1 - hi);
+      if (c2 > hi) above = Math.max(above, c2 - hi);
+      if (c1 < lo) below = Math.max(below, lo - c1);
+      if (c2 < lo) below = Math.max(below, lo - c2);
     }
   }
   return { above, below };
@@ -989,7 +1053,9 @@ function linePath(points: Pt[], curve: Curve): string {
   if (points.length === 1) return `M ${n(points[0].x)} ${n(points[0].y)}`;
   if (curve === "monotone") return monotone(points);
   if (curve === "step" || curve === "step-before" || curve === "step-after") return step(points, curve);
-  return points.map((point, index) => `${index === 0 ? "M" : "L"} ${n(point.x)} ${n(point.y)}`).join(" ");
+  const parts = new Array<string>(points.length);
+  for (let i = 0; i < points.length; i++) parts[i] = (i === 0 ? "M " : "L ") + n(points[i].x) + " " + n(points[i].y);
+  return parts.join(" ");
 }
 
 function areaPath(top: Pt[], bottom: Pt[], curve: Curve): string {
@@ -1001,19 +1067,28 @@ function areaPath(top: Pt[], bottom: Pt[], curve: Curve): string {
 }
 
 function monotone(points: Pt[]): string {
-  let path = `M ${n(points[0].x)} ${n(points[0].y)}`;
+  const parts = new Array<string>(points.length);
+  parts[0] = "M " + n(points[0].x) + " " + n(points[0].y);
   for (let i = 0; i < points.length - 1; i++) {
     const p0 = points[Math.max(0, i - 1)];
     const p1 = points[i];
     const p2 = points[i + 1];
     const p3 = points[Math.min(points.length - 1, i + 2)];
-    const cp1x = p1.x + ((p2.x - p0.x) / 6);
-    const cp1y = p1.y + ((p2.y - p0.y) / 6);
-    const cp2x = p2.x - ((p3.x - p1.x) / 6);
-    const cp2y = p2.y - ((p3.y - p1.y) / 6);
-    path += ` C ${n(cp1x)} ${n(cp1y)}, ${n(cp2x)} ${n(cp2y)}, ${n(p2.x)} ${n(p2.y)}`;
+    parts[i + 1] =
+      "C " +
+      n(p1.x + (p2.x - p0.x) / 6) +
+      " " +
+      n(p1.y + (p2.y - p0.y) / 6) +
+      ", " +
+      n(p2.x - (p3.x - p1.x) / 6) +
+      " " +
+      n(p2.y - (p3.y - p1.y) / 6) +
+      ", " +
+      n(p2.x) +
+      " " +
+      n(p2.y);
   }
-  return path;
+  return parts.join(" ");
 }
 
 function step(points: Pt[], curve: Curve): string {

@@ -120,6 +120,39 @@ describe("attach", () => {
     expect(host.hasAttribute("data-ck-interact")).toBe(false);
   });
 
+  it("paints each series with its legend colour, right-aligns the value, and drops a hidden series", () => {
+    const spec = lineSpec({ legend: { interactive: true } });
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg")!;
+    const swatches = Array.from(svg.querySelectorAll("rect")).filter((node) => node.getAttribute("width") === "10");
+    const plot = svg.querySelector("clipPath rect")!;
+    const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.875;
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 80, bubbles: true }));
+    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+    expect(tip.innerHTML).toContain("ck-row");
+    expect(tip.innerHTML).toContain(swatches[0].getAttribute("fill"));
+    expect(tip.innerHTML).toContain(swatches[1].getAttribute("fill"));
+    expect(tip.innerHTML).not.toContain("var(--ck-series-1, light-dark(#007aff,#0a84ff))");
+    const dots = svg.querySelectorAll("[data-ck-dot]");
+    expect(dots.length).toBe(2);
+    expect(dots[0].getAttribute("fill")).toBe(swatches[0].getAttribute("fill"));
+    expect(dots[1].getAttribute("fill")).toBe(swatches[1].getAttribute("fill"));
+    expect(dots[0].getAttribute("cy")).not.toBe(dots[1].getAttribute("cy"));
+    const cost = Array.from(svg.querySelectorAll("text")).find((node) => node.textContent === "cost");
+    cost?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    const costAgain = Array.from(svg.querySelectorAll("text")).find((node) => node.textContent === "cost");
+    expect(costAgain?.getAttribute("opacity")).toBe("0.35");
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 80, bubbles: true }));
+    const next = host.querySelector("[data-ck-tip]") as HTMLElement;
+    expect(next.textContent).toContain("revenue");
+    expect(next.textContent).not.toContain("cost");
+    expect(svg.querySelectorAll("[data-ck-dot]").length).toBe(1);
+    svg.dispatchEvent(new PointerEvent("pointerleave", { bubbles: true }));
+    expect(svg.querySelector("[data-ck-dot]")).toBeNull();
+    ctl.destroy();
+  });
+
   it("stays quiet when tooltip is off", () => {
     const spec = lineSpec({ tooltip: false });
     const host = hostOf(spec);
@@ -147,10 +180,11 @@ describe("attach", () => {
     expect(cost()?.getAttribute("opacity")).toBe("1");
   });
 
-  it("zooms on the wheel, brushes a range, and resets on double-click", () => {
+  it("zooms on the wheel, brushes a range, and resets on double-click", async () => {
     const spec = lineSpec({ interaction: { zoom: "x", brush: "x", pan: true } });
     const host = hostOf(spec);
-    attach(host, spec, { render });
+    const ctl = attach(host, spec, { render });
+    await ctl.ready;
     const ranges: { start: number; end: number }[] = [];
     host.addEventListener("rangechange", ((event: CustomEvent) => {
       ranges.push(event.detail);
@@ -172,10 +206,11 @@ describe("attach", () => {
     expect(svg.querySelector("path")?.getAttribute("d")).toBe(before);
   });
 
-  it("pans a zoomed line and zooms a candlestick when zoom is omitted", () => {
+  it("pans a zoomed line and zooms a candlestick when zoom is omitted", async () => {
     const spec = lineSpec({ interaction: { zoom: "x", pan: true } });
     const host = hostOf(spec);
-    attach(host, spec, { render });
+    const ctl = attach(host, spec, { render });
+    await ctl.ready;
     const svg = host.querySelector("svg")!;
     svg.dispatchEvent(new WheelEvent("wheel", { clientX: 200, clientY: 100, deltaY: -400, bubbles: true, cancelable: true }));
     const zoomed = svg.querySelector("path")?.getAttribute("d");
@@ -199,7 +234,8 @@ describe("attach", () => {
       a11y: { alt: "The third session closed below its open." },
     };
     const candleHost = hostOf(candle);
-    attach(candleHost, candle, { render });
+    const candleCtl = attach(candleHost, candle, { render });
+    await candleCtl.ready;
     const candleSvg = candleHost.querySelector("svg")!;
     const mark = candleSvg.querySelector("[data-ck-mark]")?.getAttribute("d") || candleSvg.innerHTML.length;
     candleSvg.dispatchEvent(new WheelEvent("wheel", { clientX: 320, clientY: 120, deltaY: -500, bubbles: true, cancelable: true }));
@@ -253,13 +289,14 @@ describe("attach", () => {
     window.requestAnimationFrame = real;
   });
 
-  it("moves keyboard focus and toggles the data table", () => {
+  it("moves keyboard focus and toggles the data table", async () => {
     const spec = lineSpec({
       tooltip: true,
       a11y: { alt, keyboard: true, dataTable: true },
     });
     const host = hostOf(spec);
-    attach(host, spec, { render });
+    const ctl = attach(host, spec, { render });
+    await ctl.ready;
     const svg = host.querySelector("svg")!;
     expect(svg.getAttribute("tabindex")).toBe("0");
     svg.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
