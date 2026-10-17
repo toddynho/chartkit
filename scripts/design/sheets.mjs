@@ -495,14 +495,16 @@ body{width:1960px}
 .wrap{padding:18px 16px 24px}
 h1{font-size:20px;margin:0 0 4px}
 .lead{margin:0 0 12px;font-size:13px;color:#57534e}
-table{border-collapse:separate;border-spacing:8px 10px}
-th{font-weight:500;text-align:left;vertical-align:bottom;width:250px}
+table{border-collapse:separate;border-spacing:8px 10px;table-layout:fixed}
+th{font-weight:500;text-align:left;vertical-align:bottom;width:266px}
 th strong{display:block;font-size:14px}
 th span{display:block;font-size:11px;color:#57534e;max-width:250px}
-td{vertical-align:top;background:#fff;border-radius:12px;padding:8px;width:250px}
-.kind{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#78716c;margin-bottom:4px}
-td svg,.plot{width:250px;height:auto;display:block}
-canvas{display:block}
+td{vertical-align:top;background:#fff;border-radius:12px;padding:8px;width:250px;overflow:hidden}
+.slot{width:250px;height:208px;overflow:hidden}
+.kind{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#78716c;margin:0 0 4px;height:16px}
+.plot{width:250px;height:188px;overflow:hidden;position:relative}
+.plot > .recharts-wrapper,.plot > svg,.plot > canvas,svg.ck-chart{width:250px;height:188px;display:block}
+canvas{display:block;width:250px;height:188px}
 </style>
 <body>
 <div class="wrap">
@@ -535,6 +537,24 @@ async function shootCompare(html, png) {
   const ckError = await page.evaluate(() => document.body.dataset.ckError || "");
   if (ckError) errors.push(ckError);
   await page.waitForTimeout(300);
+  const overflow = await page.evaluate(() => {
+    const bad = [];
+    for (const slot of document.querySelectorAll("td .slot")) {
+      const box = slot.getBoundingClientRect();
+      for (const el of slot.querySelectorAll("svg, canvas, .recharts-wrapper")) {
+        const rect = el.getBoundingClientRect();
+        const id = el.id || el.getAttribute("class") || el.tagName;
+        if (rect.width > box.width + 8 || rect.height > box.height + 24) {
+          bad.push(`${id} ${Math.round(rect.width)}x${Math.round(rect.height)} in slot ${Math.round(box.width)}x${Math.round(box.height)}`);
+        }
+        if (rect.right > box.right + 8 || rect.bottom > box.bottom + 8 || rect.left < box.left - 8 || rect.top < box.top - 8) {
+          bad.push(`${id} outside slot by ${Math.round(rect.left - box.left)},${Math.round(rect.top - box.top)}`);
+        }
+      }
+    }
+    return bad;
+  });
+  if (overflow.length) errors.push(overflow.join("\n"));
   const height = await page.evaluate(() => document.documentElement.scrollHeight);
   await page.setViewportSize({ width: 1960, height: Math.max(1280, height) });
   const boxes = await page.evaluate(() => {
