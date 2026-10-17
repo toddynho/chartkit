@@ -81,7 +81,7 @@ function charts(look) {
   const mark = markOf(look);
   const size = { width: 340, height: 220 };
   const alt = "Sample chart for the default-look sheet.";
-  return [
+  const items = [
     {
       name: "Line",
       spec: {
@@ -298,6 +298,17 @@ function charts(look) {
       },
     },
   ];
+  return items.map((chart) => {
+    const slug = chart.name.toLowerCase().replace(/\s+/g, "-");
+    return {
+      ...chart,
+      spec: {
+        ...chart.spec,
+        id: `${look.id}-${slug}`,
+        a11y: { alt: `${look.title}, ${chart.name}.` },
+      },
+    };
+  });
 }
 
 function heatmap() {
@@ -388,6 +399,10 @@ await esbuild.build({
   outfile: compareBundle,
   jsx: "automatic",
   define: { "process.env.NODE_ENV": '"production"' },
+  alias: {
+    react: join(root, "bench/node_modules/react"),
+    "react-dom": join(root, "bench/node_modules/react-dom"),
+  },
   nodePaths: [join(root, "bench/node_modules")],
   logLevel: "silent",
 });
@@ -439,7 +454,7 @@ const compareColumns = [
 function compareSpec(look, kind) {
   const mark = markOf(look, kind === "area" ? { area: true } : {});
   const size = { width: 250, height: 188 };
-  const base = { version: "1", size, a11y: { alt: "Comparison chart." }, mark };
+  const base = { version: "1", size, id: `${look.id}-${kind}`, a11y: { alt: `${look.title} ${kind} comparison.` }, mark };
   if (kind === "line" || kind === "area") {
     return { ...base, type: "line", data: rows, encoding: { x: "month", y: ["Starter", "Pro", "Enterprise"] } };
   }
@@ -499,7 +514,66 @@ canvas{display:block}
 </body>`;
 
 const comparePng = join(outDir, "compare-defaults.png");
-shoot(compareHtml, comparePng, 1960, 1120);
+await shootCompare(compareHtml, comparePng);
 paths.push(comparePng);
 console.log("wrote", comparePng);
 console.log(paths.join("\n"));
+
+async function shootCompare(html, png) {
+  const file = png.replace(/\.png$/, ".html");
+  writeFileSync(file, html);
+  const { chromium } = await import(join(root, "bench/node_modules/playwright/index.mjs"));
+  const browser = await chromium.launch({ args: ["--no-sandbox", "--disable-dev-shm-usage"] });
+  const page = await browser.newPage({ viewport: { width: 1960, height: 1280 }, deviceScaleFactor: 1 });
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(String(error)));
+  page.on("console", (msg) => {
+    if (msg.type() === "error") errors.push(msg.text());
+  });
+  await page.goto(`file://${file}`, { waitUntil: "networkidle" });
+  await page.waitForFunction(() => document.body.dataset.ckReady === "1" || document.body.dataset.ckError, null, { timeout: 20000 });
+  const ckError = await page.evaluate(() => document.body.dataset.ckError || "");
+  if (ckError) errors.push(ckError);
+  await page.waitForTimeout(300);
+  const height = await page.evaluate(() => document.documentElement.scrollHeight);
+  await page.setViewportSize({ width: 1960, height: Math.max(1280, height) });
+  const boxes = await page.evaluate(() => {
+    return ["recharts", "chartjs", "echarts", "tremor"].flatMap((lib) =>
+      ["line", "bar", "donut", "area"].map((kind) => {
+        const el = document.getElementById(`${lib}-${kind}`);
+        const rect = el.getBoundingClientRect();
+        return { id: `${lib}-${kind}`, x: rect.x, y: rect.y, w: rect.width, h: rect.height };
+      }),
+    );
+  });
+  await page.screenshot({ path: png });
+  await browser.close();
+  if (errors.length) throw new Error(errors.join("\n"));
+  const check = join("/tmp", "ck-pixel-check.py");
+  writeFileSync(
+    check,
+    `import json, sys
+from PIL import Image
+boxes = json.loads(sys.argv[2])
+im = Image.open(sys.argv[1]).convert("RGB")
+print("png", im.size)
+fail = []
+for box in boxes:
+    x, y, w, h = [int(round(v)) for v in (box["x"], box["y"], box["w"], box["h"])]
+    crop = im.crop((x, y, min(im.width, x + w), min(im.height, y + h)))
+    ink = 0
+    px = crop.load()
+    for yy in range(crop.height):
+        for xx in range(crop.width):
+            r, g, b = px[xx, yy]
+            if abs(r - g) > 12 or abs(g - b) > 12 or abs(r - b) > 12 or min(r, g, b) < 236:
+                ink += 1
+    print(f"{box['id']} ink={ink} box={w:.0f}x{h:.0f}")
+    if ink < 40:
+        fail.append(box["id"])
+if fail:
+    raise SystemExit("blank cells: " + ", ".join(fail))
+`,
+  );
+  execFileSync("python3", [check, png, JSON.stringify(boxes)], { stdio: "inherit" });
+}

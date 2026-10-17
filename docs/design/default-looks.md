@@ -12,7 +12,7 @@ Studied as they ship, not as a custom theme on top: Tremor, shadcn/ui charts, Ob
 
 **Saturation.** Refined products keep chroma in a middle band. Neon (high chroma, high lightness) and pastel (high lightness, low chroma) both fail as defaults: neon vibrates on a white card, pastel disappears. Dark mode is the same hues, lifted in lightness, not a separate rainbow.
 
-**Contrast.** Gridlines are the quiet layer. shadcn and Vercel use a hairline at about 6–8% ink. Ticks are a muted gray that still clears roughly 4.5:1 as text (`#71717a` on white is 4.8:1). The data mark is the loud layer. WCAG non-text contrast is 3:1 against the adjacent background. A yellow that looks pleasant at `oklch` lightness 0.9 lands near 1.3:1 on white, so it cannot be a default series colour. Okabe–Ito’s yellow and sky blue fail this. The categorical colours below were held to 3:1 or better, which pushes them into a mid tone.
+**Contrast.** Gridlines are the quiet layer. shadcn and Vercel use a hairline at about 5–8% ink. Ticks are a muted gray that still clears roughly 4.5:1 as text (`#71717a` on white is 4.8:1). The data mark is the loud layer. Holding every series swatch to 3:1 on white pulled the first pass into desaturated mid tones. Fills can now be vivid 500-weight hues. The 3:1 floor stays on thin strokes (lines at or under 2px, via a darker `--ck-line-*` when the fill misses it) and on text-like marks (KPI deltas, muted ticks). Legends, direct labels, and a spread of lightness carry the rest.
 
 **Type.** System sans, 12–14px titles, 11px ticks, tabular numerals so columns of ticks align. Vercel, Stripe, and Linear use that stack (Inter or SF when the OS has it). Apple Stocks puts the number huge and the axis almost away. Titles are one weight heavier than subtitles, and the subtitle is the muted colour, not a second black line.
 
@@ -20,13 +20,13 @@ Studied as they ship, not as a custom theme on top: Tremor, shadcn/ui charts, Ob
 
 **Padding.** Dashboard cards are about 320×220, not a full-bleed 640×360. Title and subtitle sit inside the card, left aligned with the plot, with more air above the first gridline than below the last tick.
 
-**Bars.** shadcn and Tremor round the top of the bar (about 4–8px) and leave a clear gap between groups. Observable often uses square caps. A radius past 8px on a narrow bar turns the mark into a capsule and should stay on the “soft” look only.
+**Bars.** shadcn and Tremor round the top of the bar (about 4–8px) and leave the base square, with a clear gap between groups. Observable often uses square caps. A radius past 8px on a narrow bar turns the mark into a capsule and should stay on the “soft” look only. The renderer now rounds only the end away from the baseline.
 
 **Lines and areas.** Stroke around 1.75–2.25px, round caps and joins. Area fill is a vertical fade to transparent, not a flat 30% slab. Point markers are off or hover-only on dashboard lines (shadcn, Vercel, Apple). Observable and Chart.js keep small dots. Dots on every vertex fight a smooth curve at this size, so only the editorial candidate turns them on.
 
 **Legend.** A small rounded swatch and a 12px label, in a row under the title or under the plot. No framed legend box. Hidden when there is only one series.
 
-**Empty and edge.** Empty is a track, not an illustration and not a fake zero series. Heatmap cells with no value use the surface colour. Gauge and ring tracks use the grid colour. A missing point breaks the line (it is not dropped into a neighbour). Wide tick labels need margin; that is already how the renderer sizes the y axis. A single series does not grow a legend.
+**Empty and edge.** Empty is a track, not an illustration and not a fake zero series. Heatmap cells with no value use the surface colour. Gauge and ring tracks use `--ck-track`, and fall back to the grid colour when that variable is unset. A missing point breaks the line (it is not dropped into a neighbour). Wide tick labels need margin; that is already how the renderer sizes the y axis. A single series does not grow a legend. A monotone curve can bow past the data max; the y domain grows by that overshoot so the peak stays inside the plot, and the plot clip still applies.
 
 ## Candidates
 
@@ -41,49 +41,52 @@ Structural numbers (line width, bar radius, gap, area opacity, point markers) ar
 | Dark background | `#09090b` | `#0b1020` | `#1c1c1e` |
 | Line | 1.75px, no dots | 2.25px, small dots | 2px, no dots |
 | Bar radius / gap | 4 / 0.22 | 2 / 0.18 | 8 / 0.34 |
-| Area fade | 0.14 at the top | 0.24 at the top | 0.20 at the top |
+| Area fade | 0.18 at the top, then 35% of that, then clear | 0.28 at the top, same falloff | 0.22 at the top, same falloff |
 | Type | system sans, tabular nums | same, ink titles (`#0a2540`) | same, on a warm gray page |
 
-Positive and negative are taken from the series (a green and a rose or brick) so candles and KPI deltas stay inside the checked set.
+Positive and negative are text colours on KPI deltas and candle bodies. They clear 3:1 on that look’s background (the light ones clear 4.5:1 except editorial is the same pair). They are not required to be members of the fill list.
 
 ### A. Refined neutral
 
-Quiet chrome. Zinc text (`#18181b` / `#fafafa`), muted `#71717a` (4.83:1 on white) and `#a1a1aa` (7.76:1 on `#09090b`). Grid is 8% ink. The series is a dusty blue, brick, violet, green, teal, gold, cyan, and mauve. It is the closest of the three to a shadcn card: the colour is there, the furniture is not.
+Quiet chrome, vivid data. Zinc text (`#18181b` / `#fafafa`), muted `#71717a` (4.83:1 on white) and `#a1a1aa` (7.76:1 on `#09090b`). Grid is 5% ink. Series 1 is Tailwind blue 500 (`#3b82f6`), then rose 600, amber 400, emerald 500, violet 600, cyan 400, orange 400, and pink 500. Amber and cyan are bright fills; their 2px strokes drop to amber 600 and cyan 600.
 
 ### B. Vivid editorial
 
-Higher chroma, Stripe-like indigo as series 1 (`#4555a6` light, `#9fb3fc` dark), then crimson, green, orange, magenta, teal, olive, and lime. Titles use Stripe’s ink `#0a2540`. Dots stay on so a line reads as a marked series, the way Observable’s defaults do. Bars are almost square.
+Indigo 600 (`#4f46e5`) leads, in the same family as Stripe’s `#635bff`, then orange 500, emerald 600, amber 400, rose 600, cyan 400, purple 500 (`#a855f7`), and pink 500. Titles use Stripe’s ink `#0a2540`. The line is 2.25px, so the sheet paints the fill colour rather than the darker stroke token. Dots stay on. Bars are almost square, with the radius only on the outer end.
 
 ### C. Soft modern
 
-Page is Apple’s system gray `#f5f5f7`, not pure white. Bars get an 8px cap and a wider gap. No dots. The series is blue, green, amber, violet, rose, teal, indigo, and olive. Dark is `#1c1c1e`, the system gray Apple uses behind grouped content.
+Page is Apple’s system gray `#f5f5f7`. Bars get an 8px cap on the outer end and a wider gap. No dots. The series is Apple blue, green, orange, purple, and pink, plus sky, lime 600, and a warm orange. Dark is `#1c1c1e`. Several of those system colours sit under 3:1 as fills; the ≤2px stroke uses a darker variant (`#248a3d`, `#c93400`, `#0071a4`, `#4d7c0f`, `#9a3412`).
 
 ## Colour-vision and contrast checks
 
-Categorical, sequential, and diverging stops were checked against the look’s own background.
+Fills, sequential stops, and diverging stops are not all held to 3:1. Light heatmap stops are tints on purpose, so a low cell is visibly lighter than a high cell. Thin-line tokens (`--ck-line-1` … `--ck-line-8`), positive, negative, and muted text are the colours that have to clear a contrast floor: 3:1 for the strokes and the delta colours, 4.5:1 for muted ticks.
 
-Contrast is the WCAG relative-luminance ratio. The floor asked for is 3:1 for non-text. Every stop in all three looks, both schemes, is at or above 3:1. Muted tick colours are at or above 4.5:1. The minimum categorical contrast is 4.07:1 (soft light). The minimum sequential stop is 3.75:1 (soft light). The minimum diverging stop is 3.91:1 (soft light). Grays in the diverging midpoints sit around 4.6:1 on light backgrounds and 5.5:1 on dark ones.
+Contrast is the WCAG relative-luminance ratio against that look’s own background. The weakest fill is 1.67:1 (amber `#fbbf24` on white, refined and editorial light). The weakest thin-line token is 3.19:1 (amber `#d97706` on white). Positive and negative are at least 4.70:1 on white, 5.04:1 and 5.77:1 on `#f5f5f7`, and 4.99:1 or better on the dark backgrounds. Muted ticks are at least 4.66:1.
 
-Colour-vision simulation is Machado, Oliveira, and Fernandes 2009 at full severity (protanopia, deuteranopia, tritanopia), applied in linear sRGB, then compared with OKLab Euclidean distance (ΔE). This is not a WCAG number. Okabe–Ito’s original set reaches about 0.075 under deuteranopia, but its yellow is 1.32:1 on white and its sky blue is 2.31:1, so it cannot be used as-is. Once every swatch has to clear 3:1, yellow and sky get pulled into the same lightness band as orange and blue and the easy lightness gap disappears. Eight colours in that band cannot all be far apart under every simulation. The sets below are the mid-tone palettes that still clear 3:1. Closest pairs are named so a 3-series chart can avoid them by using the earlier series.
+Colour-vision simulation is Machado, Oliveira, and Fernandes 2009 at full severity (protanopia, deuteranopia, tritanopia), applied in linear sRGB, then compared with OKLab Euclidean distance (ΔE). This is not a WCAG number. Lightness is staggered so a hue collapse still leaves a luminance gap. Eight vivid colours still have a close pair under one simulation. The numbers below are the fills. Stroke tokens are listed when they are tighter than the fills.
 
-Minimum pairwise OKLab ΔE, and the closest pair:
+Minimum pairwise OKLab ΔE on the eight fills:
 
-| Look | Scheme | Normal | Protan | Deutan | Tritan | Weakest contrast |
-|---|---|---:|---:|---:|---:|---:|
-| Refined | light | 0.070 | 0.042 | 0.040 | 0.042 | 4.30 |
-| Refined | dark | 0.074 | 0.054 | 0.059 | 0.056 | 6.65 |
-| Editorial | light | 0.080 | 0.038 | 0.039 | 0.040 | 4.69 |
-| Editorial | dark | 0.077 | 0.069 | 0.054 | 0.053 | 6.19 |
-| Soft | light | 0.063 | 0.044 | 0.041 | 0.043 | 4.07 |
-| Soft | dark | 0.106 | 0.079 | 0.067 | 0.083 | 5.97 |
+| Look | Scheme | Normal | Protan | Deutan | Tritan | Weakest fill | Weakest line |
+|---|---|---:|---:|---:|---:|---:|---:|
+| Refined | light | 0.112 | 0.078 | 0.049 | 0.067 | 1.67 | 3.19 |
+| Refined | dark | 0.071 | 0.074 | 0.071 | 0.032 | 4.70 | 4.70 |
+| Editorial | light | 0.113 | 0.062 | 0.058 | 0.042 | 1.67 | 3.19 |
+| Editorial | dark | 0.123 | 0.077 | 0.044 | 0.063 | 5.14 | 5.14 |
+| Soft | light | 0.098 | 0.034 | 0.035 | 0.038 | 2.02 | 3.35 |
+| Soft | dark | 0.077 | 0.042 | 0.036 | 0.058 | 4.66 | 4.66 |
 
-Closest light-mode pairs, so they are easy to see on the sheet:
+Closest fill pairs:
 
-- Refined, deuteranopia 0.040: cyan `#258598` and mauve `#9d6184`. Also brick `#894840` and gold `#795616`.
-- Editorial, protanopia 0.038: orange `#b35c29` and lime `#527a19`. Deuteranopia 0.039: crimson `#99393b` and olive `#6f5c01`.
-- Soft, deuteranopia 0.041: blue `#407cb2` and indigo `#5a66a8`.
+- Refined light, deuteranopia 0.049: emerald `#10b981` and pink `#ec4899`. Tritanopia 0.067: rose `#e11d48` and pink `#ec4899`.
+- Refined dark, tritanopia 0.032: emerald `#6ee7b7` and cyan `#22d3ee`.
+- Editorial light, tritanopia 0.042: orange `#f97316` and pink `#ec4899`. The thin-line pair is tighter: orange `#ea580c` and amber `#d97706` are 0.016 under deuteranopia. Those two strokes are only used when the line is ≤2px; the editorial sheet is 2.25px and paints the fills.
+- Editorial dark, deuteranopia 0.044: emerald `#34d399` and rose `#fda4af`.
+- Soft light, protanopia 0.034: orange `#ff9500` and lime `#65a30d`. Deuteranopia 0.035: pink `#ff2d55` and lime `#65a30d`.
+- Soft dark, deuteranopia 0.036: green `#30d158` and red `#ff6961`.
 
-Those pairs are late in the series list where it was possible. A three-series chart uses the first colours, which are further apart. Sequential scales are monotonic in lightness, so order survives a simulation that only collapses hue. Diverging scales put a neutral gray that itself clears 3:1 between a rose arm and a teal or green arm.
+Sequential scales run from a light tint to a deep stop (OKLab L span about 0.55 to 0.57), so a heatmap is not one blue. Diverging scales put a neutral gray between a rose arm and a green or blue arm. The neutral and the tints are fills, not thin lines, and some of them are under 3:1.
 
 ## Theme API
 
@@ -100,7 +103,7 @@ Formatting stays presets only. No formatter functions.
 | `refined` | Candidate A. |
 | `editorial` | Candidate B. |
 | `soft` | Candidate C. |
-| `contrast` | Same hues as the chosen look, pushed to the ends of the 3:1 band when someone needs a larger colour-vision gap than the mid-tone set. Not built. |
+| `contrast` | Same hues as the chosen look, with the thin-line stroke used for fills too, when someone needs every swatch at 3:1. Not built. |
 
 Do not set `theme` to `refined`, `editorial`, or `soft` yet. An unknown name still falls through to midnight, which is a different look. Until one is registered, load the stylesheet and set the attributes on an ancestor:
 
@@ -132,12 +135,12 @@ A later `theme: { preset: "auto", brand: "#635bff" }` would call the same functi
 
 Themes are CSS custom properties. `candidates.css` is the opt-in file. `paletteFromBrand` is its own entry (`themes/brand`), not an import of `line`, `all`, or `validate`.
 
-Measured with `npm run size` on this branch (gzip -9, same method as CI). The three headline bundles are unchanged from the parent commit:
+Measured with `npm run size` on this branch (gzip -9, same method as CI). Line and all grew for the top-only bar path, the ≤2px `--ck-line-*` stroke, the extra gradient stop, and monotone headroom. Both stay inside budget. Validate is unchanged. `auto` and `midnight` are still the presets an unknown name falls through to.
 
 | Bundle | Bytes | Budget |
 |---|---:|---:|
-| line | 12517 | 13074 |
-| all | 23448 | 24788 |
+| line | 12902 | 13074 |
+| all | 24065 | 24788 |
 | validate | 16644 | 17594 |
 
-`candidates.css` is 6,422 bytes raw and 1,587 bytes gzipped. It is not imported by any JavaScript bundle. `paletteFromBrand` is a separate `themes/brand` entry: 3,529 bytes minified, 1,924 bytes gzipped. It is not on the line, all, or validate graphs.
+`candidates.css` is 7,946 bytes raw and 1,773 bytes gzipped. It is not imported by any JavaScript bundle. `paletteFromBrand` is a separate `themes/brand` entry: 3,529 bytes minified, 1,924 bytes gzipped. It is not on the line, all, or validate graphs.

@@ -118,6 +118,18 @@ function seriesPaint(n: number, preset: PresetTokens): string {
   return `var(--ck-series-${n}, var(--chart-${n}, ${fallback}))`;
 }
 
+/**
+ * Stroke for a line at or under 2px. Hosts can set --ck-line-N to a darker
+ * variant; when that variable is unset the series colour is used, so the
+ * default paint does not change.
+ */
+export function lineStroke(color: string, width: number): string {
+  if (!(width <= 2)) return color;
+  const match = /^var\(--ck-series-(\d+),/.exec(color);
+  if (!match) return color;
+  return `var(--ck-line-${match[1]}, ${color})`;
+}
+
 /** A CSS color, a var(), or a theme token name (`series-3`, `positive`, …). */
 export function paint(color: string | undefined, preset: PresetTokens, seriesIndex = 0): string {
   if (!color) return seriesPaint(seriesIndex + 1, preset);

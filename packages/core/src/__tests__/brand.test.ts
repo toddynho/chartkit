@@ -67,20 +67,27 @@ describe("paletteFromBrand", () => {
 describe("candidate looks", () => {
   const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../themes/candidates.css"), "utf8");
 
-  it("keeps every categorical, sequential, and diverging stop at 3:1 in the stylesheet", () => {
+  it("keeps thin-line and text colours at 3:1 and syncs the stylesheet", () => {
     expect(candidates).toHaveLength(3);
     for (const look of candidates) {
       for (const scheme of ["light", "dark"] as const) {
         const tokens = look[scheme];
-        const swatches = [...tokens.series, ...tokens.sequential, ...tokens.diverging];
-        expect(new Set(tokens.series).size).toBeGreaterThanOrEqual(8);
-        for (const color of swatches) {
+        expect(tokens.series).toHaveLength(8);
+        expect(tokens.lines).toHaveLength(8);
+        expect(new Set(tokens.series).size).toBe(8);
+        const painted = [...tokens.series, ...tokens.lines, ...tokens.sequential, ...tokens.diverging, tokens.positive, tokens.negative];
+        for (const color of painted) {
           expect(color).toMatch(/^#[0-9a-f]{6}$/);
-          expect(contrast(color, tokens.background)).toBeGreaterThanOrEqual(3);
           expect(css).toContain(color);
         }
+        for (const color of tokens.lines) expect(contrast(color, tokens.background)).toBeGreaterThanOrEqual(3);
+        expect(contrast(tokens.positive, tokens.background)).toBeGreaterThanOrEqual(3);
+        expect(contrast(tokens.negative, tokens.background)).toBeGreaterThanOrEqual(3);
+        expect(contrast(tokens.muted, tokens.background)).toBeGreaterThanOrEqual(4.5);
         expect(css).toContain(`data-ck-theme="${look.id}"`);
         expect(css).toContain(`data-ck-scheme="${scheme}"`);
+        expect(css).toContain("--ck-line-1:");
+        expect(css).toContain("--ck-track:");
       }
     }
   });

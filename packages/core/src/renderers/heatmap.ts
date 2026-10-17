@@ -126,7 +126,7 @@ function renderGrid(spec: Record<string, unknown>): string | null {
   const range = colorEnc?.range?.map((item, index) => paint(item, frame.preset, index));
   const radius = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : 3;
   const left = 48;
-  const top = frame.title ? 36 : 28;
+  const top = frame.title ? 42 : 28;
   const plotW = frame.width - left - 16;
   const plotH = frame.height - top - 36;
   const gapFrac = typeof frame.mark.gap === "number" ? frame.mark.gap : 0.15;
@@ -138,7 +138,7 @@ function renderGrid(spec: Record<string, unknown>): string | null {
   const parts: string[] = [];
   parts.push(openChart({ ...frame, renderer: "heatmap" }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
-  if (frame.title) parts.push(text(16, 20, frame.title, cssVar("text", frame.preset.text), 14, "600"));
+  if (frame.title) parts.push(text(left, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
   for (const y of ys) {
     const row = ys.indexOf(y);
     parts.push(text(left - 8, top + row * bandH + bandH / 2 + 4, y, cssVar("muted", frame.preset.muted), 11, "400", "end"));

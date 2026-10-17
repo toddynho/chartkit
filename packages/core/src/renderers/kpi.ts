@@ -1,4 +1,4 @@
-import { cssVar, paint } from "../theme";
+import { cssVar, lineStroke, paint } from "../theme";
 import { formatValue } from "../format";
 import { asNumber, column, fieldOf, readFrame, readMetric, readTable } from "../frame";
 import { closeChart, esc, font, n, openChart } from "../svg";
@@ -71,7 +71,7 @@ function sparkPath(values: number[], x: number, y: number, w: number, h: number,
   }));
   const line = pts.map((point, index) => `${index === 0 ? "M" : "L"} ${n(point.x)} ${n(point.y)}`).join(" ");
   const area = `${line} L ${n(pts[pts.length - 1].x)} ${n(y + h)} L ${n(pts[0].x)} ${n(y + h)} Z`;
-  return `<path d="${area}" fill="${color}" fill-opacity="0.18" stroke="none" /><path d="${line}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" />`;
+  return `<path d="${area}" fill="${color}" fill-opacity="0.16" stroke="none" /><path d="${line}" fill="none" stroke="${lineStroke(color, 1.5)}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" />`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

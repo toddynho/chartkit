@@ -3,7 +3,7 @@ import { isTypedArray, readData, type DataTable } from "../data";
 import { formatValue } from "../format";
 import { readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import { clamp, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
-import { cssVar, paint, resolvePreset, type PresetTokens } from "../theme";
+import { cssVar, lineStroke, paint, resolvePreset, type PresetTokens } from "../theme";
 
 type MarkDraw = (
   model: PlotModel,
@@ -262,18 +262,18 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   parts.push(openSvg(model));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", model.preset.background)}" />`);
   if (model.title) {
-    parts.push(`<text x="${n(pad.left)}" y="20" fill="${cssVar("text", model.preset.text)}" font-size="14" font-weight="600" font-family="${font()}">${esc(model.title)}</text>`);
+    parts.push(`<text x="${n(pad.left)}" y="22" fill="${cssVar("text", model.preset.text)}" font-size="15" font-weight="650" font-family="${font()}">${esc(model.title)}</text>`);
   }
   if (model.subtitle) {
-    parts.push(`<text x="${n(pad.left)}" y="${model.title ? 36 : 18}" fill="${cssVar("muted", model.preset.muted)}" font-size="12" font-family="${font()}">${esc(model.subtitle)}</text>`);
+    parts.push(`<text x="${n(pad.left)}" y="${model.title ? 40 : 18}" fill="${cssVar("muted", model.preset.muted)}" font-size="12" font-weight="400" font-family="${font()}">${esc(model.subtitle)}</text>`);
   }
-  if (model.legend) parts.push(legend(model, pad.left, model.title || model.subtitle ? (model.subtitle ? 48 : 32) : 8, model.width - pad.right));
+  if (model.legend) parts.push(legend(model, pad.left, model.title || model.subtitle ? (model.subtitle ? 54 : 36) : 8, plot.right));
 
   parts.push(`<defs><clipPath id="${model.id}-clip"><rect x="${n(plot.left)}" y="${n(plot.top)}" width="${n(plotW)}" height="${n(plotH)}" /></clipPath>`);
   if (model.gradient) {
     model.series.forEach((series, index) => {
       parts.push(
-        `<linearGradient id="${model.id}-g${index}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${series.color}" stop-opacity="${model.fillOpacity}" /><stop offset="100%" stop-color="${series.color}" stop-opacity="0" /></linearGradient>`,
+        `<linearGradient id="${model.id}-g${index}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${series.color}" stop-opacity="${model.fillOpacity}" /><stop offset="62%" stop-color="${series.color}" stop-opacity="${n(model.fillOpacity * 0.35)}" /><stop offset="100%" stop-color="${series.color}" stop-opacity="0" /></linearGradient>`,
       );
     });
   }
@@ -423,7 +423,7 @@ function appendLineSeries(
       out.push(`<path d="${areaPath(points, bottoms, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillOpacity}" stroke="none"${indexAttr} />`);
     }
     out.push(
-      `<path d="${linePath(points, model.curve)}" fill="none" stroke="${series.color}" stroke-width="${model.strokeWidth}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)}${indexAttr} />`,
+      `<path d="${linePath(points, model.curve)}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokeWidth}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)}${indexAttr} />`,
     );
     if (model.points === "always") {
       for (let k = 0; k < run.length; k++) {
@@ -457,7 +457,7 @@ function appendFullLine(
   }
   for (const segment of segments(points, model.connectNulls)) {
     out.push(
-      `<path d="${linePath(segment, model.curve)}" fill="none" stroke="${series.color}" stroke-width="${model.strokeWidth}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
+      `<path d="${linePath(segment, model.curve)}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokeWidth}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
     );
   }
   if (model.points === "always") {
@@ -482,7 +482,7 @@ function appendLinear(
   const flush = () => {
     if (!path) return;
     out.push(
-      `<path d="${path}" fill="none" stroke="${series.color}" stroke-width="${model.strokeWidth}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
+      `<path d="${path}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokeWidth}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
     );
     path = "";
     open = false;
@@ -500,6 +500,31 @@ function appendLinear(
     open = true;
   }
   flush();
+}
+
+function strokeOf(series: Series, model: PlotModel): string {
+  return lineStroke(series.color, model.strokeWidth);
+}
+
+/** Round only the end away from the baseline. A full rx would also round the base. */
+function barMark(x: number, y: number, width: number, height: number, radius: number, edge: "top" | "bottom" | "left" | "right", fill: string): string {
+  const r = Math.max(0, Math.min(radius, width / 2, height / 2));
+  if (r < 0.5 || width <= 0 || height <= 0) {
+    return `<rect x="${n(x)}" y="${n(y)}" width="${n(width)}" height="${n(height)}" fill="${fill}" />`;
+  }
+  const x2 = x + width;
+  const y2 = y + height;
+  let d = "";
+  if (edge === "top") {
+    d = `M ${n(x + r)} ${n(y)} H ${n(x2 - r)} Q ${n(x2)} ${n(y)} ${n(x2)} ${n(y + r)} V ${n(y2)} H ${n(x)} V ${n(y + r)} Q ${n(x)} ${n(y)} ${n(x + r)} ${n(y)} Z`;
+  } else if (edge === "bottom") {
+    d = `M ${n(x)} ${n(y)} H ${n(x2)} V ${n(y2 - r)} Q ${n(x2)} ${n(y2)} ${n(x2 - r)} ${n(y2)} H ${n(x + r)} Q ${n(x)} ${n(y2)} ${n(x)} ${n(y2 - r)} Z`;
+  } else if (edge === "right") {
+    d = `M ${n(x)} ${n(y)} H ${n(x2 - r)} Q ${n(x2)} ${n(y)} ${n(x2)} ${n(y + r)} V ${n(y2 - r)} Q ${n(x2)} ${n(y2)} ${n(x2 - r)} ${n(y2)} H ${n(x)} Z`;
+  } else {
+    d = `M ${n(x + r)} ${n(y)} H ${n(x2)} V ${n(y2)} H ${n(x + r)} Q ${n(x)} ${n(y2)} ${n(x)} ${n(y2 - r)} V ${n(y + r)} Q ${n(x)} ${n(y)} ${n(x + r)} ${n(y)} Z`;
+  }
+  return `<path d="${d}" fill="${fill}" />`;
 }
 
 function bars(
@@ -528,18 +553,22 @@ function bars(
     const start = band.start + (band.size - inner) / 2 + slot * barSize;
     const a = yScale(baseline);
     const b = yScale(value ?? baseline);
-    const radius = n(model.cornerRadius);
     const inset = slots > 1 ? 2 : 0;
+    const fill = series.colors?.[i] ?? series.color;
     if (horizontal) {
       const y = start;
       const x = Math.min(a, b);
       const width = Math.max(0, Math.abs(b - a));
-      out.push(`<rect x="${n(x)}" y="${n(y)}" width="${n(width)}" height="${n(Math.max(0, barSize - inset))}" rx="${radius}" fill="${series.colors?.[i] ?? series.color}" />`);
+      const height = Math.max(0, barSize - inset);
+      const edge = b >= a ? "right" : "left";
+      out.push(barMark(x, y, width, height, model.cornerRadius, edge, fill));
     } else {
       const x = start;
       const y = Math.min(a, b);
       const height = Math.max(0, Math.abs(b - a));
-      out.push(`<rect x="${n(x)}" y="${n(y)}" width="${n(Math.max(0, barSize - inset))}" height="${n(height)}" rx="${radius}" fill="${series.colors?.[i] ?? series.color}" />`);
+      const width = Math.max(0, barSize - inset);
+      const edge = b <= a ? "top" : "bottom";
+      out.push(barMark(x, y, width, height, model.cornerRadius, edge, fill));
       if (model.labelsOn && value !== null) {
         out.push(`<text x="${n(x + barSize / 2)}" y="${n(y - 4)}" text-anchor="middle" fill="${cssVar("text", model.preset.text)}" font-size="10" font-family="${font()}">${esc(formatNumber(value, model.locale))}</text>`);
       }
@@ -769,7 +798,7 @@ function legend(model: PlotModel, x: number, y: number, maxRight: number): strin
 
 function openSvg(model: PlotModel): string {
   const width = model.responsive ? "100%" : String(model.width);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}" class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}" style="font-variant-numeric:tabular-nums">` +
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}" class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}" style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
     `<title>${esc(model.title || model.alt)}</title><desc>${esc(model.alt)}</desc>`;
 }
 
@@ -791,10 +820,10 @@ function padding(model: PlotModel, leftLabels: string[], rightLabels: string[]):
   const horizontal = model.orientation === "horizontal" && model.type === "bar";
   const left = (horizontal ? model.showX : model.showY) ? Math.max(52, Math.ceil(widest(leftLabels) + 12)) : 12;
   const right = model.showY2 ? Math.max(52, Math.ceil(widest(rightLabels) + 12)) : 16;
-  let top = 12;
-  if (model.title) top += 22;
-  if (model.subtitle) top += 16;
-  if (model.legend) top += 8 + legendRows(model, left, model.width - right) * 18;
+  let top = 14;
+  if (model.title) top += 20;
+  if (model.subtitle) top += 18;
+  if (model.legend) top += 12 + legendRows(model, left, model.width - right) * 18;
   return {
     top,
     right,
@@ -841,7 +870,48 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
     min -= Math.abs(min) || 1;
     max += Math.abs(max) || 1;
   }
-  return niceDomain(min, max);
+  const [niceMin, niceMax] = niceDomain(min, max);
+  const head = monotoneHeadroom(model, axis);
+  let lo = niceMin;
+  let hi = niceMax;
+  if (head.above > 0 && max + head.above > niceMax) hi = round(max + head.above);
+  const pinnedAtZero = axisIncludesZero(model, axis) && niceMin <= 0 && min >= 0;
+  if (!pinnedAtZero && head.below > 0 && min - head.below < niceMin) lo = round(min - head.below);
+  return [lo, hi];
+}
+
+/** How far a monotone control point leaves the data range. Linear and step curves stay on the points. */
+function monotoneHeadroom(model: PlotModel, axis: "y" | "y2"): { above: number; below: number } {
+  if (model.curve !== "monotone" || model.stack !== "none") return { above: 0, below: 0 };
+  let above = 0;
+  let below = 0;
+  for (const series of model.series) {
+    if (series.axis !== axis || series.mark === "bar") continue;
+    const values: number[] = [];
+    for (let i = 0; i < series.values.length; i++) {
+      const value = series.values[i];
+      if (value !== null && Number.isFinite(value)) values.push(value);
+    }
+    if (values.length < 3) continue;
+    let hi = values[0];
+    let lo = values[0];
+    for (let i = 1; i < values.length; i++) {
+      if (values[i] > hi) hi = values[i];
+      if (values[i] < lo) lo = values[i];
+    }
+    for (let i = 0; i < values.length - 1; i++) {
+      const p0 = values[Math.max(0, i - 1)];
+      const p1 = values[i];
+      const p2 = values[i + 1];
+      const p3 = values[Math.min(values.length - 1, i + 2)];
+      const cps = [p1 + (p2 - p0) / 6, p2 - (p3 - p1) / 6];
+      for (let c = 0; c < cps.length; c++) {
+        if (cps[c] > hi) above = Math.max(above, cps[c] - hi);
+        if (cps[c] < lo) below = Math.max(below, lo - cps[c]);
+      }
+    }
+  }
+  return { above, below };
 }
 
 function ticks(min: number, max: number, count: number): number[] {
