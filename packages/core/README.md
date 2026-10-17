@@ -20,6 +20,17 @@ import { line } from "@chartkitdev/core/charts/line";
 const render = createRenderer([line]);
 ```
 
+Interaction is a separate entry. Static `render()` output does not include it.
+
+```ts
+import { attach, patchSvg } from "@chartkitdev/core/interact";
+
+patchSvg(host, render(spec));
+const chart = attach(host, spec, { render });
+chart.update(nextSpec, render(nextSpec));
+chart.destroy();
+```
+
 `mark.sampling` defaults to `"auto"`: line, area, sparkline, mini-area, stacked-area, combo lines, and spike charts downsample above twice the plot width. See [SPEC.md](./SPEC.md).
 
 Theme colors are CSS variables (`var(--ck-series-1, …)`, `--ck-text`, `--ck-background`, and the rest) so a host stylesheet wins. An omitted theme, `"auto"`, or `"soft"` is Soft: `light-dark()` colours that follow the page scheme, and a transparent plot so the page shows through. Set `--ck-background: light-dark(#f5f5f7, #1c1c1e)` for the optional Soft card. `"refined"` and `"editorial"` are built in. `theme: "midnight"` is the opt-in dark card. Other presets are `@chartkitdev/core/themes/<name>` (a name that has not been imported renders as midnight). `@chartkitdev/core/all` registers those extra presets. A brand palette stays a separate import: `paletteFromBrand` from `@chartkitdev/core/themes/brand`, passed as `theme.tokens.series`.
@@ -38,7 +49,7 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
 - `encoding.*.axis` is the string `"y"` or `"y2"`. Titles go in `axes.y.title` or `axes.y2.title`.
 - Field types are `quantitative`, `temporal`, `ordinal`, or `nominal`. Not `categorical`.
 - A list of fields goes on `encoding.y`, not on `field`. On a combo, `bar`, `line`, and `area` go in `mark`, not in `type`. A series with `"axis": "y2"` needs `axes.y2`; `repair` adds it when it is missing.
-- A bar splits series with `encoding.series`, or with `encoding.color` when that field is not `x`. `encoding.color` equal to `x` colours each bar and does not split series. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel is applied to the ticks. Rule, band, and text `annotations` are drawn. Tooltip, zoom, pan, brush, animation, `legend.interactive`, and `a11y.keyboard` / `a11y.dataTable` are valid; when one is turned on, `validate` warns CK3011 because the SVG does not draw it yet. The default theme is `auto` (Soft: `light-dark`, transparent plot, page scheme; optional card via `--ck-background`). `soft`, `refined`, and `editorial` are built in. `midnight` is opt-in. Other names stay midnight until imported. `--ck-*` or `--chart-N` still wins.
+- A bar splits series with `encoding.series`, or with `encoding.color` when that field is not `x`. `encoding.color` equal to `x` colours each bar and does not split series. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel is applied to the ticks. Rule, band, and text `annotations` are drawn. Tooltip, crosshair, x zoom, pan, brush, animation, `legend.interactive`, and `a11y.keyboard` / `a11y.dataTable` are client behavior in `@chartkitdev/core/interact` (a separate entry, so a static bundle does not include it). Tooltip defaults on for a client-rendered line, bar, stacked area, scatter, combo, or donut; `tooltip: false` turns it off. The static SVG is unchanged apart from hook attributes the client sets after mount (`data-ck-interact` on the host, `tabindex` when keyboard is on). Zoom, pan, and brush stay off unless the spec asks; a candlestick with `zoom` omitted pans and zooms on x. Animation is off unless requested, and stays off for `prefers-reduced-motion` and for more than 2000 rows. The default theme is `auto` (Soft: `light-dark`, transparent plot, page scheme; optional card via `--ck-background`). `soft`, `refined`, and `editorial` are built in. `midnight` is opt-in. Other names stay midnight until imported. `--ck-*` or `--chart-N` still wins.
 - A heatmap with `encoding.x`, `encoding.y`, and `encoding.color` is a grid. A calendar heatmap is a date `x` plus `color`, or `mark.layout: "calendar"`.
 
 ## line

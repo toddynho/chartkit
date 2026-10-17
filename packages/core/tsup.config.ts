@@ -41,6 +41,7 @@ const entry: Record<string, string> = {
   index: "src/index.ts",
   all: "src/all.ts",
   validate: "src/validate.ts",
+  interact: "src/interact.ts",
   "themes/all": "src/themes/all.ts",
 };
 

@@ -29,6 +29,7 @@ bench/last-run.json
 bench/.out/
 bench/results/partial.json
 bench/results/agent/conditions/
+scripts/.interact-out/
 
 # Misc
 *.tgz

@@ -269,7 +269,10 @@ async function adapterSsr() {
     outfile: svelteOut,
     absWorkingDir: root,
     nodePaths: [join(root, "node_modules")],
-    alias: { "@chartkitdev/core/all": join(srcDir, "all.ts") },
+    alias: {
+      "@chartkitdev/core/all": join(srcDir, "all.ts"),
+      "@chartkitdev/core/interact": join(srcDir, "interact.ts"),
+    },
     logLevel: "silent",
   });
   const svelte = await import(svelteOut);
@@ -293,6 +296,156 @@ try {
   adapters = { error: error instanceof Error ? error.message : String(error) };
 }
 
+async function interactBench() {
+  const { JSDOM } = await import("jsdom");
+  const dom = new JSDOM("<!doctype html><body></body>");
+  const previous = globalThis.document;
+  const previousWindow = globalThis.window;
+  const previousRAF = globalThis.requestAnimationFrame;
+  globalThis.window = dom.window;
+  globalThis.document = dom.window.document;
+  globalThis.DOMParser = dom.window.DOMParser;
+  globalThis.SVGSVGElement = dom.window.SVGSVGElement;
+  globalThis.Element = dom.window.Element;
+  globalThis.HTMLElement = dom.window.HTMLElement;
+  globalThis.PointerEvent = dom.window.PointerEvent;
+  globalThis.MouseEvent = dom.window.MouseEvent;
+  globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
+  globalThis.requestAnimationFrame = (cb) => setTimeout(() => cb(performance.now()), 0);
+  const outfile = join(tmpdir(), "chartkit-bench-interact.mjs");
+  await build({
+    entryPoints: [entry("interact-bench.mjs", `import { render } from ${JSON.stringify(join(srcDir, "all.ts"))};\nimport { attach, buildHoverIndex, lookupIndex, patchSvg } from ${JSON.stringify(join(srcDir, "interact.ts"))};\nexport { render, attach, buildHoverIndex, lookupIndex, patchSvg };\n`)],
+    bundle: true,
+    format: "esm",
+    platform: "node",
+    outfile,
+    logLevel: "silent",
+  });
+  const mod = await import(outfile);
+  const values = new Float64Array(100_000);
+  for (let i = 0; i < values.length; i++) values[i] = i * 1.5;
+  const numeric = mod.buildHoverIndex(values.length, 48, 560, values);
+  const uniform = mod.buildHoverIndex(100_000, 48, 560, null);
+  const hoverNumeric = time(() => {
+    mod.lookupIndex(numeric, (Math.random() * 560) + 48);
+  }, 1000);
+  const hoverUniform = time(() => {
+    mod.lookupIndex(uniform, (Math.random() * 560) + 48);
+  }, 1000);
+
+  function spec(rows, salt) {
+    const data = [];
+    for (let i = 0; i < rows; i++) data.push({ month: `m${i}`, revenue: (i * 3 + salt) % 997 });
+    return {
+      version: "1",
+      type: "line",
+      data,
+      encoding: { x: "month", y: "revenue" },
+      a11y: { alt: "Synthetic line used only to time an in-place SVG update." },
+    };
+  }
+
+  function quick(fn, iterations) {
+    for (let i = 0; i < 2; i++) fn();
+    const start = performance.now();
+    for (let i = 0; i < iterations; i++) fn();
+    const elapsedMs = performance.now() - start;
+    return {
+      iterations,
+      elapsedMs: Number(elapsedMs.toFixed(2)),
+      perOpMs: Number((elapsedMs / iterations).toFixed(2)),
+    };
+  }
+
+  function timeUpdate(rows) {
+    const host = dom.window.document.createElement("div");
+    dom.window.document.body.append(host);
+    const first = mod.render(spec(rows, 1));
+    const second = mod.render(spec(rows, 2));
+    let flip = false;
+    const old = quick(() => {
+      host.innerHTML = flip ? first : second;
+      flip = !flip;
+    }, 10);
+    host.innerHTML = first;
+    mod.patchSvg(host, first);
+    const svg = host.querySelector("svg");
+    let patchFlip = false;
+    const patched = quick(() => {
+      patchFlip = !patchFlip;
+      mod.patchSvg(host, patchFlip ? second : first);
+    }, 10);
+    const sameNode = host.querySelector("svg") === svg;
+    let salt = 3;
+    const renderInner = quick(() => {
+      salt += 1;
+      host.innerHTML = mod.render(spec(rows, salt));
+    }, 8);
+    const renderPatch = quick(() => {
+      salt += 1;
+      mod.patchSvg(host, mod.render(spec(rows, salt)));
+    }, 8);
+    return {
+      rows,
+      sameNode,
+      innerHTML: old,
+      patchSvg: patched,
+      renderPlusInnerHTML: renderInner,
+      renderPlusPatch: renderPatch,
+    };
+  }
+
+  function hoverDom(rows) {
+    const host = dom.window.document.createElement("div");
+    dom.window.document.body.append(host);
+    const data = [];
+    for (let i = 0; i < rows; i++) data.push({ t: i, v: (i * 3) % 997 });
+    const chart = {
+      version: "1",
+      type: "line",
+      data,
+      encoding: { x: "t", y: "v" },
+      a11y: { alt: "Synthetic line used only to time tooltip hover." },
+    };
+    host.innerHTML = mod.render(chart);
+    mod.attach(host, chart, { render: (next) => mod.render(next) });
+    const svg = host.querySelector("svg");
+    const view = (svg.getAttribute("viewBox") || "0 0 640 320").split(/[\s,]+/).map(Number);
+    const width = view[2] || 640;
+    const sample = quick(() => {
+      svg.dispatchEvent(new dom.window.PointerEvent("pointermove", {
+        clientX: 48 + Math.random() * Math.max(1, width - 96),
+        clientY: 80,
+        bubbles: true,
+      }));
+    }, 100);
+    const tip = host.querySelector("[data-ck-tip]");
+    return { rows, perOpMs: sample.perOpMs, tipShown: Boolean(tip && !tip.hidden) };
+  }
+
+  const updates = [timeUpdate(1000), timeUpdate(10_000), timeUpdate(100_000)];
+  const hoverDom100k = hoverDom(100_000);
+  if (previous === undefined) delete globalThis.document;
+  else globalThis.document = previous;
+  if (previousWindow === undefined) delete globalThis.window;
+  else globalThis.window = previousWindow;
+  globalThis.requestAnimationFrame = previousRAF;
+  return {
+    note: "Hover lookup is 50 warmup + 1000 calls on a 100k index. hoverDom is 2 warmup + 100 pointermove events on a mounted 100k line, tooltip included, in jsdom. Update DOM rows are 2 warmup + 10 applies of two pre-rendered strings. renderPlus rows are 2 warmup + 8 full render-and-apply cycles. Downsampling stays on. jsdom innerHTML is much slower than Chrome.",
+    hoverNumeric100k: hoverNumeric,
+    hoverUniform100k: hoverUniform,
+    hoverDom100k,
+    updates,
+  };
+}
+
+let interact;
+try {
+  interact = await interactBench();
+} catch (error) {
+  interact = { error: error instanceof Error ? error.message : String(error) };
+}
+
 const report = {
   measuredAt: new Date().toISOString(),
   node: process.version,
@@ -313,6 +466,7 @@ const report = {
     rows5000TwoSeries: wideRun,
   },
   adapterSsr: adapters,
+  interact,
 };
 
 mkdirSync(join(root, "bench"), { recursive: true });
