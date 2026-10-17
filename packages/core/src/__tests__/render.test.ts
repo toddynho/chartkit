@@ -33,7 +33,55 @@ function dataRects(svg: string): { x: number; y: number; width: number; height: 
     if (box.width === "10" && box.height === "10") continue;
     rects.push({ x: Number(box.x), y: Number(box.y), width: Number(box.width), height: Number(box.height) });
   }
+  for (const match of body.matchAll(/<path\b([^>]*)\/?>/g)) {
+    const box = attrs(match[1]);
+    if (!box.d || box.fill === "none") continue;
+    const mark = pathBox(box.d);
+    if (mark && mark.width > 0 && mark.height > 0) rects.push(mark);
+  }
   return rects;
+}
+
+function pathBox(d: string): { x: number; y: number; width: number; height: number } | null {
+  const tokens = d.match(/[A-Za-z]|-?\d*\.?\d+/g);
+  if (!tokens) return null;
+  let x = 0;
+  let y = 0;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  let cmd = "";
+  const touch = (px: number, py: number) => {
+    if (px < minX) minX = px;
+    if (py < minY) minY = py;
+    if (px > maxX) maxX = px;
+    if (py > maxY) maxY = py;
+  };
+  for (let i = 0; i < tokens.length; ) {
+    if (/[A-Za-z]/.test(tokens[i])) {
+      cmd = tokens[i++];
+      continue;
+    }
+    if (cmd === "M" || cmd === "L") {
+      x = Number(tokens[i++]);
+      y = Number(tokens[i++]);
+      touch(x, y);
+    } else if (cmd === "H") {
+      x = Number(tokens[i++]);
+      touch(x, y);
+    } else if (cmd === "V") {
+      y = Number(tokens[i++]);
+      touch(x, y);
+    } else if (cmd === "Q") {
+      touch(Number(tokens[i++]), Number(tokens[i++]));
+      x = Number(tokens[i++]);
+      y = Number(tokens[i++]);
+      touch(x, y);
+    } else i++;
+  }
+  if (!Number.isFinite(minX)) return null;
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
 }
 
 function labeledY(svg: string, label: string): number | null {
@@ -391,7 +439,7 @@ describe("remaining chart renderers", () => {
     expect(coloredRects).toHaveLength(rows.length);
     expect(coloredRects.map((bar) => [bar.x, bar.width])).toEqual(plainRects.map((bar) => [bar.x, bar.width]));
     expect(colored).not.toMatch(/width="10" height="10"/);
-    const fills = [...colored.matchAll(/<rect\b[^>]*\bfill="([^"]+)"/g)]
+    const fills = [...colored.matchAll(/<(?:rect|path)\b[^>]*\bfill="([^"]+)"/g)]
       .map((match) => match[1])
       .filter((fill) => fill.includes("--ck-series-") || fill.includes("--chart-"));
     expect(fills).toHaveLength(4);
@@ -503,6 +551,34 @@ describe("remaining chart renderers", () => {
     expect(svg).toContain(">Launch<");
     expect(svg).toContain(">Dip<");
     expect(render(spec("02-rich-line.json"))).toContain(">Target<");
+  });
+
+  it("keeps donut legend labels clear of the percentages", () => {
+    const svg = render({
+      version: "1",
+      type: "donut",
+      size: { width: 340, height: 220 },
+      data: [
+        { plan: "Starter", total: 30 },
+        { plan: "Pro", total: 48 },
+        { plan: "Enterprise", total: 22 },
+      ],
+      encoding: { x: "plan", y: "total" },
+      a11y: { alt: "Pro is the largest share." },
+    });
+    const texts = [...svg.matchAll(/<text\b([^>]*)>([^<]*)<\/text>/g)].map((match) => ({
+      x: Number(/ x="([^"]+)"/.exec(match[1] ?? "")?.[1]),
+      y: Number(/ y="([^"]+)"/.exec(match[1] ?? "")?.[1]),
+      anchor: /text-anchor="([^"]+)"/.exec(match[1] ?? "")?.[1] ?? "start",
+      text: match[2] ?? "",
+    }));
+    for (const label of ["Starter", "Pro", "Enterprise"]) {
+      const name = texts.find((item) => item.text === label);
+      const value = texts.find((item) => item.anchor === "end" && item.y === name?.y);
+      expect(name, label).toBeTruthy();
+      expect(value, label).toBeTruthy();
+      expect((value?.x ?? 0) - 8).toBeGreaterThan((name?.x ?? 0) + label.length * 6.6);
+    }
   });
 
   it("keeps donut legend values inside the view box", () => {

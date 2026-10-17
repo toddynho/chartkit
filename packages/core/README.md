@@ -4,7 +4,7 @@ Framework-free ChartKit core. Zero runtime dependencies. The agent interface is 
 
 - `schema/chartkit.schema.json` — ChartKit spec v1 (`$id`: `https://chartkit.dev/schema/v1.json`), exported as `@chartkitdev/core/schema.json`
 - `validate(spec)` — `@chartkitdev/core/validate`. Structural and data-aware diagnostics (`CK1001`…`CK4004`). The runtime checker uses a stripped schema; codes, pointers, hints, and fixes match the published schema.
-- `render(spec, target?)` — SVG. The package root is a registry plus the midnight theme. Chart modules are opt-in. An unregistered type returns an error SVG (`CK1010`) and does not throw.
+- `render(spec, target?)` — SVG. The package root is a registry. Chart modules are opt-in. An unregistered type returns an error SVG (`CK1010`) and does not throw. An omitted theme renders as Soft.
 
 ```ts
 import { render } from "@chartkitdev/core/all";
@@ -22,7 +22,7 @@ const render = createRenderer([line]);
 
 `mark.sampling` defaults to `"auto"`: line, area, sparkline, mini-area, stacked-area, combo lines, and spike charts downsample above twice the plot width. See [SPEC.md](./SPEC.md).
 
-Theme colors are CSS variables (`var(--ck-series-1, …)`, `--ck-text`, `--ck-background`, and the rest) so a host stylesheet wins. An omitted theme, or `"auto"`, is a transparent background that follows `prefers-color-scheme`, and `--ck-*` or `--chart-N` on an ancestor replaces a token. `theme: "midnight"` is the dark card. Other presets are `@chartkitdev/core/themes/<name>` (a name that has not been imported renders as midnight). `@chartkitdev/core/all` registers all 17.
+Theme colors are CSS variables (`var(--ck-series-1, …)`, `--ck-text`, `--ck-background`, and the rest) so a host stylesheet wins. An omitted theme, `"auto"`, or `"soft"` is Soft: `light-dark()` colours that follow the page scheme, and a transparent plot so the page shows through. Set `--ck-background: light-dark(#f5f5f7, #1c1c1e)` for the optional Soft card. `"refined"` and `"editorial"` are built in. `theme: "midnight"` is the opt-in dark card. Other presets are `@chartkitdev/core/themes/<name>` (a name that has not been imported renders as midnight). `@chartkitdev/core/all` registers those extra presets. A brand palette stays a separate import: `paletteFromBrand` from `@chartkitdev/core/themes/brand`, passed as `theme.tokens.series`.
 
 TypeScript types in `src/generated/schema.ts` are generated from the schema (`npm run generate:types`). Do not edit that file by hand.
 
@@ -38,7 +38,7 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
 - `encoding.*.axis` is the string `"y"` or `"y2"`. Titles go in `axes.y.title` or `axes.y2.title`.
 - Field types are `quantitative`, `temporal`, `ordinal`, or `nominal`. Not `categorical`.
 - A list of fields goes on `encoding.y`, not on `field`. On a combo, `bar`, `line`, and `area` go in `mark`, not in `type`. A series with `"axis": "y2"` needs `axes.y2`; `repair` adds it when it is missing.
-- A bar splits series with `encoding.series`, or with `encoding.color` when that field is not `x`. `encoding.color` equal to `x` colours each bar and does not split series. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel is applied to the ticks. Rule, band, and text `annotations` are drawn. Tooltip, zoom, pan, brush, animation, `legend.interactive`, and `a11y.keyboard` / `a11y.dataTable` are valid; when one is turned on, `validate` warns CK3011 because the SVG does not draw it yet. The default theme is `auto` (transparent, follows `prefers-color-scheme`, overridable with `--ck-*` or `--chart-N`). `theme: "midnight"` is the dark card.
+- A bar splits series with `encoding.series`, or with `encoding.color` when that field is not `x`. `encoding.color` equal to `x` colours each bar and does not split series. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel is applied to the ticks. Rule, band, and text `annotations` are drawn. Tooltip, zoom, pan, brush, animation, `legend.interactive`, and `a11y.keyboard` / `a11y.dataTable` are valid; when one is turned on, `validate` warns CK3011 because the SVG does not draw it yet. The default theme is `auto` (Soft: `light-dark`, transparent plot, page scheme; optional card via `--ck-background`). `soft`, `refined`, and `editorial` are built in. `midnight` is opt-in. Other names stay midnight until imported. `--ck-*` or `--chart-N` still wins.
 - A heatmap with `encoding.x`, `encoding.y`, and `encoding.color` is a grid. A calendar heatmap is a date `x` plus `color`, or `mark.layout: "calendar"`.
 
 ## line

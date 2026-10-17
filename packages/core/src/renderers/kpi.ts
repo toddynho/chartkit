@@ -1,4 +1,4 @@
-import { cssVar, paint } from "../theme";
+import { cssVar, lineStroke, paint } from "../theme";
 import { formatValue } from "../format";
 import { asNumber, column, fieldOf, readFrame, readMetric, readTable } from "../frame";
 import { closeChart, esc, font, n, openChart } from "../svg";
@@ -15,6 +15,11 @@ export function renderKpi(spec: Record<string, unknown>): string | null {
   const deltaColor = good ? cssVar("positive", frame.preset.positive) : cssVar("negative", frame.preset.negative);
   const series = paint(undefined, frame.preset, 0);
   const spark = sparklineValues(spec);
+  const strokeSet = typeof frame.mark.strokeWidth === "number";
+  const stroke = strokeSet ? (frame.mark.strokeWidth as number) : frame.geometry.compactStroke;
+  const strokeAttr = strokeSet ? n(stroke) : `var(--ck-line-width, ${n(stroke)})`;
+  const opacitySet = typeof frame.mark.fillOpacity === "number";
+  const fillPaint = opacitySet ? n(frame.mark.fillOpacity as number) : `var(--ck-area-opacity, ${n(frame.geometry.fillOpacity)})`;
 
   const parts: string[] = [];
   parts.push(openChart({ ...frame, renderer: "kpi" }));
@@ -38,7 +43,7 @@ export function renderKpi(spec: Record<string, unknown>): string | null {
     const y = valueY + 14;
     const w = frame.width - 40;
     const h = Math.max(24, frame.height - y - 16);
-    parts.push(sparkPath(spark, x, y, w, h, series));
+    parts.push(sparkPath(spark, x, y, w, h, series, frame.preset.lines, stroke, strokeAttr, fillPaint));
   }
   parts.push(closeChart());
   return parts.join("");
@@ -60,18 +65,31 @@ function sparklineValues(spec: Record<string, unknown>): number[] | null {
   return values.length > 1 ? values : null;
 }
 
-function sparkPath(values: number[], x: number, y: number, w: number, h: number, color: string): string {
+function sparkPath(
+  values: number[],
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  color: string,
+  lines: readonly string[],
+  stroke: number,
+  strokeAttr: string,
+  fillPaint: string,
+): string {
   const min = Math.min(...values);
   const max = Math.max(...values);
   const span = max - min || 1;
   const step = w / (values.length - 1);
+  const pad = Math.max(stroke, 2) * 0.5 + 2;
+  const inner = Math.max(1, h - pad * 2);
   const pts = values.map((value, index) => ({
     x: x + step * index,
-    y: y + h - ((value - min) / span) * h,
+    y: y + pad + inner - ((value - min) / span) * inner,
   }));
   const line = pts.map((point, index) => `${index === 0 ? "M" : "L"} ${n(point.x)} ${n(point.y)}`).join(" ");
   const area = `${line} L ${n(pts[pts.length - 1].x)} ${n(y + h)} L ${n(pts[0].x)} ${n(y + h)} Z`;
-  return `<path d="${area}" fill="${color}" fill-opacity="0.18" stroke="none" /><path d="${line}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" />`;
+  return `<path d="${area}" fill="${color}" fill-opacity="${fillPaint}" stroke="none" /><path d="${line}" fill="none" stroke="${lineStroke(color, stroke, lines)}" stroke-width="${strokeAttr}" stroke-linejoin="round" stroke-linecap="round" />`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
