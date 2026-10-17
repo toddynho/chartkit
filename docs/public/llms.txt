@@ -1,33 +1,27 @@
 # ChartKit JSON spec
 
-> @chartkitdev/core v0.5.0
-> Schema: https://chartkit.dev/schema/v1.json
-> `import { render } from "@chartkitdev/core/all"`
-> `import { repair, validate } from "@chartkitdev/core/validate"`
-
-This file describes the JSON spec. React component props are in the last section. They are not keys in the spec.
+> v0.5.0. Schema: https://chartkit.dev/schema/v1.json. `render` from `@chartkitdev/core/all`. `repair` and `validate` from `@chartkitdev/core/validate`.
 
 ## Rules
 
 - `version` is `"1"`. `a11y.alt` is one sentence and is required.
-- `data` is a plain array of row objects. It is not `{ "values": [...] }`. Sparkline, mini-area, and spike may use a plain number array. Large data may use `{ "columns": { "field": [] } }`.
-- The chart type goes in `type`. `mark` is an options object (`curve`, `sampling`, `layout`), not a string.
-- Gauge, kpi, and progress-ring put the number in `metric`: `{ "value", "min", "max", "delta", "label" }`. Those keys are not top-level. A `data` object of the same fields moves into `metric`.
+- `data` is an array of row objects, not `{ "values": [...] }`. Sparkline, mini-area, and spike may use a number array. Large data may use `{ "columns": { "field": [] } }`.
+- `type` is the chart. `mark` is options (`curve`, `sampling`, `layout`), not a string.
+- Gauge, kpi, and progress-ring put the number in `metric` (`value`, `min`, `max`, `delta`, `label`). A `data` object of those fields moves into `metric`.
 - Donut uses `encoding.x` (slice label) and `encoding.y` (slice value). Not `theta`, `angle`, or `label`.
-- `encoding.*.axis` is the string `"y"` or `"y2"`. Titles go in `axes.y.title` or `axes.y2.title`.
+- `encoding.*.axis` is `"y"` or `"y2"`. Titles go in `axes.y.title` or `axes.y2.title`.
 - Field types are `quantitative`, `temporal`, `ordinal`, or `nominal`. Not `categorical`.
-- A heatmap with `encoding.x`, `encoding.y`, and `encoding.color` is a grid. A calendar heatmap is a date `x` plus `color`, or `mark.layout: "calendar"`. The measure is `encoding.color`, not `encoding.value`. `grid-heatmap` and `calendar-heatmap` are `heatmap` plus `mark.layout`.
-- Combo is one spec. `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. Not `layer`, `layers`, `marks`, or `encoding.bar` / `encoding.line`. A list of fields goes on `encoding.y`, not on `field`. On a combo, `bar`, `line`, and `area` go in `mark`, not in `type`.
+- Heatmap: `x` + `y` + `color` is a grid. Calendar is a date `x` plus `color`, or `mark.layout: "calendar"`. The measure is `encoding.color`, not `encoding.value`. `grid-heatmap` and `calendar-heatmap` are `heatmap` plus `mark.layout`.
+- Combo: `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. Not `layer`, `layers`, `marks`, or `encoding.bar` / `encoding.line`. A field list goes on `encoding.y`, not on `field`. `bar`, `line`, and `area` go in `mark`, not in `type`. A series with `"axis": "y2"` needs `axes.y2`; `repair` adds it if missing.
+- A bar splits series with `encoding.series`, or with `encoding.color` when that field is not `x`. `encoding.color` equal to `x` colours each bar and does not split series. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel formats the ticks. Rule, band, and text annotations are drawn. Tooltip, zoom, pan, brush, animation, `legend.interactive`, `a11y.keyboard`, and `a11y.dataTable` warn CK3011 when on (not drawn yet). Omitted theme is `auto` (transparent, `prefers-color-scheme`, `--ck-*` or `--chart-N`). `theme: "midnight"` is the dark card.
 
 ## Repair loop
 
-Recommended agent loop:
+1. `validate(spec)`.
+2. If not ok, `repair(spec)` applies each `fix` and returns `{ spec, ok, errors, applied }` without mutating the input.
+3. Render the repaired spec when `ok`. A missing `type` is reported first, with a patch.
 
-1. `const result = validate(spec)`.
-2. When `result.ok` is false, call `repair(spec)`. It applies the safe JSON Patch on each error (`fix`) and returns `{ spec, ok, errors, applied }`. The input spec is not mutated.
-3. Render `repair(spec).spec` when `ok` is true. When errors remain, follow those hints. A missing or unknown `type` is reported first, with a patch, and without every other chart type's required fields.
-
-`repair` only applies patches `validate` already produced. It does not invent data.
+`repair` does not invent data.
 
 ## line
 
@@ -232,23 +226,6 @@ Recommended agent loop:
 }
 ```
 
-## React components (not the JSON spec)
+## React
 
-`@chartkitdev/react` also exports components. Their props (`dataKey`, `leftAxis`, `value` on `GaugeChart`) are not spec keys. To render a spec, use `<Chart spec={...} />`.
-
-| Component | Role |
-|---|---|
-| `LineChart`, `BarChart`, `DonutChart`, `StackedArea`, `ScatterChart`, `ComboChart` | Dashboard components. Prefer a spec for agents. |
-| `Heatmap`, `GaugeChart`, `KpiCard`, `Sparkline`, `MiniArea`, `ProgressRing`, `SpikeChart`, `CandlestickChart` | Same. Metric components take `value` as a prop; the spec uses `metric`. |
-| `Chart` | Renders a JSON spec. |
-
-## Framework adapters
-
-The same spec renders in React, Vue, Svelte, and a plain element. Each wrapper asks `@chartkitdev/core` for an SVG string. There are no extra spec keys.
-
-- React: `import { Chart } from "@chartkitdev/react"` and `<Chart spec={spec} />`.
-- Vue 3: `import { Chart } from "@chartkitdev/vue"` and `<Chart :spec="spec" />`. `renderToString` from `@chartkitdev/vue/ssr` includes the SVG.
-- Svelte 5, and Svelte 4: `import { Chart } from "@chartkitdev/svelte"` and `<Chart {spec} />`. The component uses `export let`. SvelteKit SSR includes the SVG.
-- Vanilla: `import { mount, renderToString } from "@chartkitdev/vanilla"`. `mount(element, spec)` returns `{ update(spec), destroy() }`. `renderToString(spec)` is the SVG string core returns.
-
-`spec` in each of those is the line example above (`quarter` / `units`), or any other spec in this file. Pass `render` from `createRenderer([...])` to ship one chart type.
+`<Chart spec={...} />` from `@chartkitdev/react` renders this spec. Named components (`LineChart`, `GaugeChart`, and the rest) take their own props. Those props are not spec keys.

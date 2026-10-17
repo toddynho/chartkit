@@ -1,0 +1,27 @@
+{
+  "version": "1",
+  "id": "throughput-latency",
+  "type": "line",
+  "title": "API throughput vs latency",
+  "subtitle": "Last 6 hours, 1-hour buckets",
+  "data": [
+    { "time": "2026-10-16T05:00:00Z", "requests": 1200, "latency": 180 },
+    { "time": "2026-10-16T06:00:00Z", "requests": 1800, "latency": 200 },
+    { "time": "2026-10-16T07:00:00Z", "requests": 2100, "latency": 240 },
+    { "time": "2026-10-16T08:00:00Z", "requests": 1900, "latency": 210 },
+    { "time": "2026-10-16T09:00:00Z", "requests": 2400, "latency": 190 },
+    { "time": "2026-10-16T10:00:00Z", "requests": 2600, "latency": 170 },
+    { "time": "2026-10-16T11:00:00Z", "requests": 2300, "latency": 185 }
+  ],
+  "encoding": {
+    "x": { "field": "time", "type": "temporal" },
+    "y": [
+      { "field": "requests", "title": "Requests / min", "color": "var(--chart-1)" },
+      { "field": "latency", "title": "p95 latency", "axis": "y2", "color": "var(--chart-2)" }
+    ]
+  },
+  "axes": { "y2": true },
+  "size": { "width": 640, "height": 240 },
+  "locale": "en-US",
+  "a11y": { "alt": "Requests stayed above one thousand while p95 latency peaked at 240." }
+}

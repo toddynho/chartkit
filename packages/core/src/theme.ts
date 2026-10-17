@@ -27,7 +27,37 @@ export const midnight: PresetTokens = {
   series: ["#22c55e", "#3b82f6", "#a855f7", "#f59e0b", "#ec4899", "#14b8a6", "#f43f5e", "#8b5cf6"],
 };
 
-const presets = new Map<string, PresetTokens>([["midnight", midnight]]);
+/**
+ * Default when theme is omitted or "auto".
+ * Fallbacks use light-dark() so prefers-color-scheme (and a color-scheme on an ancestor) wins.
+ * cssVar() still prefers --ck-*, so a host override beats these.
+ */
+export const auto: PresetTokens = {
+  background: "transparent",
+  surface: "light-dark(#ffffff, #0f172a)",
+  text: "light-dark(#0f172a, #f8fafc)",
+  muted: "light-dark(#64748b, #94a3b8)",
+  grid: "light-dark(rgb(15 23 42 / 0.08), rgb(248 250 252 / 0.12))",
+  axis: "light-dark(rgb(15 23 42 / 0.18), rgb(248 250 252 / 0.22))",
+  accent: "light-dark(#0f766e, #2dd4bf)",
+  positive: "light-dark(#047857, #34d399)",
+  negative: "light-dark(#be123c, #fb7185)",
+  series: [
+    "light-dark(#0f766e, #2dd4bf)",
+    "light-dark(#1d4ed8, #60a5fa)",
+    "light-dark(#b45309, #fbbf24)",
+    "light-dark(#be123c, #fb7185)",
+    "light-dark(#6d28d9, #c4b5fd)",
+    "light-dark(#047857, #34d399)",
+    "light-dark(#0369a1, #38bdf8)",
+    "light-dark(#a16207, #fcd34d)",
+  ],
+};
+
+const presets = new Map<string, PresetTokens>([
+  ["midnight", midnight],
+  ["auto", auto],
+]);
 
 export function registerPreset(name: string, tokens: PresetTokens): PresetTokens {
   presets.set(name, tokens);
@@ -81,32 +111,43 @@ const TOKEN_KEYS: Record<string, keyof PresetTokens> = {
   negative: "negative",
 };
 
+/** Series paint: host --ck-series-N, then shadcn --chart-N, then the preset. */
+function seriesPaint(n: number, preset: PresetTokens): string {
+  const index = ((n - 1) % preset.series.length + preset.series.length) % preset.series.length;
+  const fallback = preset.series[index] ?? preset.accent;
+  return `var(--ck-series-${n}, var(--chart-${n}, ${fallback}))`;
+}
+
 /** A CSS color, a var(), or a theme token name (`series-3`, `positive`, …). */
 export function paint(color: string | undefined, preset: PresetTokens, seriesIndex = 0): string {
-  if (!color) {
-    const fallback = preset.series[seriesIndex % preset.series.length] ?? preset.accent;
-    return cssVar(`series-${seriesIndex + 1}`, fallback);
-  }
+  if (!color) return seriesPaint(seriesIndex + 1, preset);
   const seriesMatch = /^series-(\d+)$/.exec(color);
-  if (seriesMatch) {
-    const n = Number(seriesMatch[1]);
-    const fallback = preset.series[(n - 1) % preset.series.length] ?? preset.accent;
-    return cssVar(`series-${n}`, fallback);
-  }
+  if (seriesMatch) return seriesPaint(Number(seriesMatch[1]), preset);
+  const chartVar = /^var\(--chart-(\d+)\)$/.exec(color.trim());
+  if (chartVar) return seriesPaint(Number(chartVar[1]), preset);
   const key = TOKEN_KEYS[color];
   if (key) {
     const fallback = preset[key];
     return cssVar(color, typeof fallback === "string" ? fallback : preset.accent);
   }
+  const bare = /^var\(--[A-Za-z0-9-_]+\)$/.exec(color.trim());
+  if (bare) {
+    const fallback = preset.series[seriesIndex % preset.series.length] ?? preset.accent;
+    return `${color.trim().slice(0, -1)}, ${fallback})`;
+  }
   return color;
 }
 
 function presetName(theme: unknown): string {
-  if (typeof theme === "string" && theme !== "auto" && presets.has(theme)) return theme;
-  if (isRecord(theme) && typeof theme.preset === "string" && theme.preset !== "auto" && presets.has(theme.preset)) {
-    return theme.preset;
+  if (typeof theme === "string") {
+    if (theme === "auto") return "auto";
+    return presets.has(theme) ? theme : "midnight";
   }
-  return "midnight";
+  if (isRecord(theme) && typeof theme.preset === "string") {
+    if (theme.preset === "auto") return "auto";
+    return presets.has(theme.preset) ? theme.preset : "midnight";
+  }
+  return "auto";
 }
 
 function themeRecord(theme: unknown): Record<string, unknown> | undefined {

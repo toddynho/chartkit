@@ -1,0 +1,21 @@
+{
+  "version": "1",
+  "id": "spend-usage",
+  "type": "scatter",
+  "title": "Spend vs usage",
+  "data": [
+    { "spend": 10, "usage": 20, "customers": 8, "segment": "SMB" },
+    { "spend": 100, "usage": 80, "customers": 40, "segment": "Mid-market" },
+    { "spend": 1000, "usage": 400, "customers": 120, "segment": "Enterprise" },
+    { "spend": 10000, "usage": 2000, "customers": 30, "segment": "Enterprise" }
+  ],
+  "encoding": {
+    "x": { "field": "spend", "type": "quantitative", "scale": { "type": "log" } },
+    "y": { "field": "usage", "type": "quantitative", "scale": { "type": "log" } },
+    "size": { "field": "customers", "range": [8, 36] },
+    "color": "segment"
+  },
+  "size": { "width": 640, "height": 320 },
+  "locale": "en-US",
+  "a11y": { "alt": "Spend and usage both span orders of magnitude across segments." }
+}
