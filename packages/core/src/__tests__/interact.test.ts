@@ -60,6 +60,78 @@ describe("patchSvg", () => {
     expect(writes).toBe(2);
     expect(html).toContain("id=\"b\"");
   });
+
+  it("matches a fresh render for data, alt, bars, and a structure change", () => {
+    const column = (n: number, shape: "jitter" | "gaps", seed: number) => {
+      const xs = new Float64Array(n);
+      const ys = new Float64Array(n);
+      let t = 1.7e12;
+      let u = seed >>> 0;
+      for (let i = 0; i < n; i++) {
+        u = (Math.imul(u, 1664525) + 1013904223) >>> 0;
+        const unit = u / 4294967296;
+        xs[i] = shape === "jitter" ? i + unit * 0.9 : t;
+        ys[i] = unit * 100 + Math.sin(i / 50) * 20;
+        t += i % 50 === 0 ? 8000 : 1000;
+      }
+      return {
+        version: "1",
+        type: "line",
+        data: { columns: { x: xs, y: ys } },
+        encoding: { x: "x", y: "y" },
+        mark: { curve: "linear", points: "none" },
+        size: { width: 640, height: 360 },
+        locale: "en-US",
+        a11y: { alt },
+      };
+    };
+    const bar = {
+      version: "1",
+      type: "bar",
+      data: [
+        { month: "Jan", revenue: 10 },
+        { month: "Feb", revenue: 12 },
+        { month: "Mar", revenue: 9 },
+      ],
+      encoding: { x: "month", y: "revenue" },
+      a11y: { alt },
+    };
+    const pairs: { before: InteractSpec; after: InteractSpec; samePath: boolean; dChanges?: boolean }[] = [
+      {
+        before: lineSpec(),
+        after: lineSpec({ data: [{ month: "Jan", revenue: 11, cost: 100 }, { month: "Feb", revenue: 8, cost: 90 }, { month: "Mar", revenue: 15, cost: 70 }, { month: "Apr", revenue: 40, cost: 60 }] }),
+        samePath: false,
+      },
+      { before: lineSpec(), after: lineSpec({ a11y: { alt: "Revenue and cost, revised." } }), samePath: false },
+      { before: column(3000, "jitter", 1), after: column(3000, "jitter", 3), samePath: true, dChanges: true },
+      { before: column(3000, "gaps", 1), after: column(3000, "gaps", 3), samePath: true, dChanges: true },
+      {
+        before: bar,
+        after: { ...bar, data: [{ month: "Jan", revenue: 4 }, { month: "Feb", revenue: 18 }, { month: "Mar", revenue: 7 }] },
+        samePath: false,
+      },
+      {
+        before: lineSpec(),
+        after: { ...bar, type: "combo", encoding: { x: "month", y: [{ field: "revenue", type: "bar" }] } },
+        samePath: false,
+      },
+    ];
+
+    for (const { before, after, samePath, dChanges } of pairs) {
+      const host = document.createElement("div");
+      patchSvg(host, render(before));
+      const svg = host.querySelector("svg");
+      const path = host.querySelector("path");
+      const beforeD = path?.getAttribute("d");
+      patchSvg(host, render(after));
+      const fresh = document.createElement("div");
+      fresh.innerHTML = render(after);
+      expect(host.querySelector("svg")).toBe(svg);
+      expect(host.innerHTML).toBe(fresh.innerHTML);
+      if (samePath) expect(host.querySelector("path")).toBe(path);
+      if (dChanges) expect(path?.getAttribute("d")).not.toBe(beforeD);
+    }
+  });
 });
 
 describe("hover index", () => {

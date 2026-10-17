@@ -176,42 +176,23 @@ function yChannels(y: unknown): { field: string; title: string; format?: unknown
 
 function seriesOf(spec: InteractSpec, table: Table): SeriesMeta[] {
   const enc = isRecord(spec.encoding) ? spec.encoding : {};
-  const type = spec.type;
-  if (type === "candlestick") {
-    return ["open", "high", "low", "close"].map((key) => ({
-      name: key,
-      field: fieldOf(enc[key]) || key,
-    }));
-  }
-  if (type === "donut") {
-    const x = fieldOf(enc.x);
-    const y = fieldOf(enc.y);
-    const format = isRecord(enc.y) ? enc.y.format : undefined;
-    const seen = new Set<string>();
-    const out: SeriesMeta[] = [];
-    for (let i = 0; i < table.n; i++) {
-      const name = String(table.cell(x, i) ?? i);
-      if (seen.has(name)) continue;
-      seen.add(name);
-      out.push({ name, field: y, format, match: x });
-    }
-    return out;
-  }
-  const seriesField = typeof enc.series === "string" ? enc.series : fieldOf(enc.series);
+  if (spec.type === "candlestick") return ["open", "high", "low", "close"].map((key) => ({ name: key, field: fieldOf(enc[key]) || key }));
   const channels = yChannels(enc.y);
-  if (seriesField && channels.length === 1) {
+  const group = spec.type === "donut" ? fieldOf(enc.x) : typeof enc.series === "string" ? enc.series : fieldOf(enc.series);
+  if (group && (spec.type === "donut" || channels.length === 1)) {
+    const field = spec.type === "donut" ? fieldOf(enc.y) : channels[0].field;
+    const format = spec.type === "donut" ? (isRecord(enc.y) ? enc.y.format : undefined) : channels[0].format;
     const seen = new Set<string>();
     const out: SeriesMeta[] = [];
     for (let i = 0; i < table.n; i++) {
-      const name = String(table.cell(seriesField, i) ?? "");
+      const name = String(table.cell(group, i) ?? (spec.type === "donut" ? i : ""));
       if (!name || seen.has(name)) continue;
       seen.add(name);
-      out.push({ name, field: channels[0].field, format: channels[0].format, match: seriesField });
+      out.push({ name, field, format, match: group });
     }
     return out;
   }
-  if (channels.length === 0) return [{ name: "value", field: "value" }];
-  return channels.map((channel) => ({ name: channel.title, field: channel.field, format: channel.format }));
+  return channels.length ? channels.map((c) => ({ name: c.title, field: c.field, format: c.format })) : [{ name: "value", field: "value" }];
 }
 
 function axisFormat(spec: InteractSpec, axis: "y" | "y2"): unknown {
@@ -272,7 +253,7 @@ function ensureCss(): void {
   const style = document.createElement("style");
   style.id = "ck-interact-style";
   style.textContent =
-    ".ck-tip{position:absolute;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}";
+    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}";
   document.head.append(style);
 }
 
@@ -318,40 +299,62 @@ function fmt(value: unknown, format: unknown, locale: string): string {
   return value == null ? "" : String(value);
 }
 
-function decodeAttr(value: string): string {
-  return value.replace(/&(#x[0-9a-fA-F]+|#\d+|amp|lt|gt|quot);/g, (all, entity: string) => {
-    if (entity === "amp") return "&";
-    if (entity === "lt") return "<";
-    if (entity === "gt") return ">";
-    if (entity === "quot") return "\"";
-    const code = entity[1] === "x" ? parseInt(entity.slice(2), 16) : parseInt(entity.slice(1), 10);
-    return Number.isFinite(code) ? String.fromCodePoint(code) : all;
-  });
+function dec(value: string): string {
+  return value.replace(/&amp;|&lt;|&gt;|&quot;/g, (ch) => (ch[1] === "a" ? "&" : ch[1] === "l" ? "<" : ch[1] === "g" ? ">" : "\""));
 }
 
-/** Patch root attributes. `tabindex` is a client hook and stays. */
 function patchRoot(el: Element, attrs: string): void {
-  const keep = new Set<string>(["tabindex"]);
+  const keep = new Set<string>(["tabindex", "xmlns"]);
   const re = /([\w:-]+)="([^"]*)"/g;
   let match: RegExpExecArray | null;
   while ((match = re.exec(attrs))) {
-    const name = match[1];
-    if (name === "xmlns") continue;
-    keep.add(name);
-    const value = decodeAttr(match[2]);
-    if (el.getAttribute(name) !== value) el.setAttribute(name, value);
+    if (match[1] === "xmlns") continue;
+    keep.add(match[1]);
+    const value = dec(match[2]);
+    if (el.getAttribute(match[1]) !== value) el.setAttribute(match[1], value);
   }
-  for (let i = el.attributes.length - 1; i >= 0; i--) {
-    const name = el.attributes[i].name;
-    if (!keep.has(name)) el.removeAttribute(name);
-  }
+  for (let i = el.attributes.length - 1; i >= 0; i--) if (!keep.has(el.attributes[i].name)) el.removeAttribute(el.attributes[i].name);
 }
 
-function fade(el: Element, ms: number): void {
+/** Same tags, in order: copy attributes and text. False when the shape changed. */
+function paint(svg: Element, markup: string): boolean {
+  const nodes = svg.querySelectorAll("*");
+  let n = 0;
+  let el: Element = svg;
+  let i = 0;
+  while (i < markup.length) {
+    if (markup.charCodeAt(i) !== 60) {
+      const j = markup.indexOf("<", i);
+      const text = dec(markup.slice(i, j < 0 ? markup.length : j));
+      const node = el.firstChild;
+      if (text && node && node.nodeType === 3 && node.nodeValue !== text) node.nodeValue = text;
+      if (j < 0) break;
+      i = j;
+      continue;
+    }
+    if (markup.charCodeAt(i + 1) === 47) {
+      i = markup.indexOf(">", i) + 1;
+      continue;
+    }
+    const gt = markup.indexOf(">", i);
+    if (gt < 0) return false;
+    const head = markup.slice(i + 1, gt);
+    const cut = head.search(/[\s/]/);
+    const target = n ? nodes[n - 1] : svg;
+    if (!target || target.localName !== (cut < 0 ? head : head.slice(0, cut))) return false;
+    el = target;
+    patchRoot(el, head);
+    n++;
+    i = gt + 1;
+  }
+  return n === nodes.length + 1;
+}
+
+function fade(el: Element, ms: number, from = "0.45"): void {
   if (ms <= 0) return;
   const node = el as SVGSVGElement;
   node.style.transition = "none";
-  node.style.opacity = "0.45";
+  node.style.opacity = from;
   requestAnimationFrame(() => {
     node.style.transition = `opacity ${ms}ms ease-out`;
     node.style.opacity = "1";
@@ -359,10 +362,10 @@ function fade(el: Element, ms: number): void {
 }
 
 /**
- * Write `markup` into the existing `<svg>`. Root attributes are patched.
- * Children (path `d`, rects, ticks) are replaced in one write: walking every
- * hidden dot is slower than the parser, and the svg node keeps its listeners.
- * A host without an svg falls back to `innerHTML`.
+ * Write `markup` into the existing `<svg>`. When the tags and attribute names
+ * still match, path `d`, tick text, positions, and aria/alt update in place.
+ * A structure change, or a host without an svg, replaces the markup.
+ * The svg node keeps its listeners. Crosshair and brush stay mounted.
  */
 export function patchSvg(host: PatchHost, markup: string, duration = 0): void {
   if (lastMarkup.get(host) === markup) return;
@@ -377,8 +380,11 @@ export function patchSvg(host: PatchHost, markup: string, duration = 0): void {
   const held: Element[] = [];
   const keep = current.querySelectorAll("[data-ck-crosshair],[data-ck-brush]");
   for (let i = 0; i < keep.length; i++) held.push(keep[i]);
-  patchRoot(current, markup.slice(4, open));
-  current.innerHTML = markup.slice(open + 1, close);
+  for (let i = 0; i < held.length; i++) held[i].remove();
+  if (!paint(current, markup)) {
+    patchRoot(current, markup.slice(4, open));
+    current.innerHTML = markup.slice(open + 1, close);
+  }
   for (let i = 0; i < held.length; i++) current.append(held[i]);
   fade(current, duration);
   lastMarkup.set(host, markup);
@@ -397,28 +403,23 @@ function legendItems(svg: SVGSVGElement): { name: string; text: SVGTextElement; 
 }
 
 function numericValues(spec: InteractSpec, table: Table): ArrayLike<number> | null {
-  const type = spec.type;
-  if (type === "bar" || type === "combo" || type === "heatmap" || type === "donut") return null;
+  if (spec.type === "bar" || spec.type === "combo" || spec.type === "heatmap" || spec.type === "donut") return null;
   const enc = isRecord(spec.encoding) ? spec.encoding : {};
   const field = fieldOf(enc.x);
-  if (!field) {
-    if (Array.isArray(spec.data) && (spec.data.length === 0 || typeof spec.data[0] === "number")) {
-      const values = new Float64Array(table.n);
-      for (let i = 0; i < table.n; i++) values[i] = i;
-      return values;
-    }
-    return null;
-  }
   const declared = isRecord(enc.x) ? enc.x.type : undefined;
   if (declared === "nominal" || declared === "ordinal") return null;
-  const sample = Math.min(table.n, 8);
-  for (let i = 0; i < sample; i++) {
-    const value = table.cell(field, i);
-    if (typeof value !== "number" || !Number.isFinite(value)) return null;
-  }
-  if (sample === 0) return null;
   const values = new Float64Array(table.n);
-  for (let i = 0; i < table.n; i++) values[i] = Number(table.cell(field, i));
+  if (!field) {
+    if (!(Array.isArray(spec.data) && (spec.data.length === 0 || typeof spec.data[0] === "number"))) return null;
+    for (let i = 0; i < table.n; i++) values[i] = i;
+    return values;
+  }
+  if (!table.n) return null;
+  for (let i = 0; i < table.n; i++) {
+    const value = table.cell(field, i);
+    if (i < 8 && (typeof value !== "number" || !Number.isFinite(value))) return null;
+    values[i] = Number(value);
+  }
   return values;
 }
 
@@ -523,19 +524,15 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const grouped = series.some((item) => item.match) && base.type !== "donut";
     const rows: { name: string; text: string; color: string; raw: number }[] = [];
     const yFormat = axisFormat(base, "y");
+    const push = (name: string, raw: unknown, color: string) => {
+      if (raw == null || raw === "") return;
+      const num = typeof raw === "number" ? raw : Number(raw);
+      rows.push({ name, text: fmt(raw, series.find((s) => s.name === name)?.format ?? yFormat, locale()), color, raw: Number.isFinite(num) ? num : 0 });
+    };
     if (!grouped) {
       for (let i = 0; i < series.length; i++) {
         const item = series[i];
-        if (hidden.has(item.name)) continue;
-        const raw = table.cell(item.field, index);
-        if (raw == null || raw === "") continue;
-        const num = typeof raw === "number" ? raw : Number(raw);
-        rows.push({
-          name: item.name,
-          text: fmt(raw, item.format ?? yFormat, locale()),
-          color: colorFor(item.name, i),
-          raw: Number.isFinite(num) ? num : 0,
-        });
+        if (!hidden.has(item.name)) push(item.name, table.cell(item.field, index), colorFor(item.name, i));
       }
     } else {
       const key = String(table.cell(xField(), index) ?? index);
@@ -544,18 +541,10 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         const name = String(table.cell(series[0]?.match ?? "", i) ?? "");
         if (!name || hidden.has(name)) continue;
         const item = series.find((s) => s.name === name);
-        const raw = table.cell(item?.field || series[0]?.field || "", i);
-        if (raw == null || raw === "") continue;
-        const num = typeof raw === "number" ? raw : Number(raw);
-        rows.push({
-          name,
-          text: fmt(raw, item?.format ?? yFormat, locale()),
-          color: colorFor(name, rows.length),
-          raw: Number.isFinite(num) ? num : 0,
-        });
+        push(name, table.cell(item?.field || series[0]?.field || "", i), colorFor(name, rows.length));
       }
     }
-    let chosen = rows;
+    let best = 0;
     if (mode === "nearest" && rows.length > 1 && pointerY != null) {
       const fraction = box.h ? (pointerY - box.t) / box.h : 0;
       let min = Infinity;
@@ -565,19 +554,17 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         if (row.raw > max) max = row.raw;
       }
       const span = max - min || 1;
-      let best = 0;
       let bestDist = Infinity;
       for (let i = 0; i < rows.length; i++) {
-        const y = 1 - (rows[i].raw - min) / span;
-        const dist = Math.abs(y - fraction);
+        const dist = Math.abs(1 - (rows[i].raw - min) / span - fraction);
         if (dist < bestDist) {
           bestDist = dist;
           best = i;
         }
       }
-      chosen = [rows[best]];
+      return [rows[best]];
     }
-    return chosen.map(({ name, text, color }) => ({ name, text, color }));
+    return rows;
   }
 
   /** Legend fill for a series name, or the paint that names the same `--ck-series-N`. */
@@ -625,23 +612,20 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const bounds = host.getBoundingClientRect();
     const rect = svg.getBoundingClientRect();
     const vb = (svg.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number);
-    const rw = rect.width || vb[2] || 1;
-    const rh = rect.height || vb[3] || 1;
-    const width = tip.offsetWidth || 160;
-    const height = tip.offsetHeight || 48;
+    const sx = (rect.width || vb[2] || 1) / (vb[2] || rect.width || 1);
+    const sy = (rect.height || vb[3] || 1) / (vb[3] || rect.height || 1);
     const cluster = marks.length > 0 ? marks : [viewPoint(svg, clientX, clientY)];
-    let minX = Infinity;
-    let maxX = -Infinity;
-    let minY = Infinity;
-    let maxY = -Infinity;
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     for (let i = 0; i < cluster.length; i++) {
-      const lx = rect.left + (cluster[i].x / (vb[2] || rw)) * rw - bounds.left;
-      const ly = rect.top + (cluster[i].y / (vb[3] || rh)) * rh - bounds.top;
+      const lx = rect.left + cluster[i].x * sx - bounds.left;
+      const ly = rect.top + cluster[i].y * sy - bounds.top;
       if (lx < minX) minX = lx;
       if (lx > maxX) maxX = lx;
       if (ly < minY) minY = ly;
       if (ly > maxY) maxY = ly;
     }
+    const width = tip.offsetWidth || 160;
+    const height = tip.offsetHeight || 48;
     let top = minY - height - 14;
     if (top < 4) top = maxY + 14;
     if (top + height > bounds.height - 4) top = Math.max(4, bounds.height - height - 4);
@@ -657,10 +641,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     if (!showCross) return;
     let line = svg.querySelector("[data-ck-crosshair]");
     if (!line) {
-      line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line.setAttribute("data-ck-crosshair", "");
-      line.setAttribute("class", "ck-xhair");
-      svg.append(line);
+      svg.insertAdjacentHTML("beforeend", `<line data-ck-crosshair="" class="ck-xhair"/>`);
+      line = svg.lastElementChild as Element;
     }
     line.setAttribute("x1", String(x));
     line.setAttribute("x2", String(x));
@@ -680,54 +662,35 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function addDot(x: number, y: number, fill: string): { x: number; y: number } {
-    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    dot.setAttribute("data-ck-dot", "");
-    dot.setAttribute("cx", String(Math.round(x * 100) / 100));
-    dot.setAttribute("cy", String(Math.round(y * 100) / 100));
-    dot.setAttribute("r", "3.5");
-    dot.setAttribute("fill", fill);
-    dot.setAttribute("stroke", "light-dark(#fff,#1c1c1e)");
-    dot.setAttribute("stroke-width", "1.5");
-    dot.setAttribute("pointer-events", "none");
-    svg.append(dot);
+    const cx = String(Math.round(x * 100) / 100);
+    const cy = String(Math.round(y * 100) / 100);
+    svg.insertAdjacentHTML("beforeend", `<circle data-ck-dot="" cx="${cx}" cy="${cy}" r="3.5" fill="${esc(fill)}" stroke="light-dark(#fff,#1c1c1e)" stroke-width="1.5" pointer-events="none"/>`);
     return { x, y };
   }
 
-  /** Y of the vertex segment that contains viewBox x. Curve endpoints are the vertices. */
   function yOnPath(d: string, x: number): number | null {
-    const tokens = d.split(/[\s,]+/);
-    let cmd = "";
-    let x0 = 0;
-    let y0 = 0;
-    let on = false;
-    let hit: number | null = null;
-    const vert = (x1: number, y1: number) => {
-      if (on && hit == null && ((x0 <= x && x <= x1) || (x1 <= x && x <= x0))) {
-        const t = x1 === x0 ? 0 : (x - x0) / (x1 - x0);
-        hit = y0 + (y1 - y0) * t;
+    const t = d.split(/[\s,]+/);
+    let c = "", x0 = 0, y0 = 0, hit: number | null = null;
+    for (let i = 0; i < t.length && hit == null; i++) {
+      const p = t[i];
+      if (p === "M" || p === "L" || p === "C" || p === "Z") {
+        c = p === "Z" ? "" : p;
+        continue;
+      }
+      if (c === "M") {
+        x0 = +p;
+        y0 = +t[++i];
+        continue;
+      }
+      if (c !== "L" && c !== "C") continue;
+      const x1 = c === "L" ? +p : +t[i + 4];
+      const y1 = c === "L" ? +t[++i] : +t[i + 5];
+      if (c === "C") i += 5;
+      if (x1 === x1 && y1 === y1 && ((x0 <= x && x <= x1) || (x1 <= x && x <= x0))) {
+        hit = x1 === x0 ? y0 : y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
       }
       x0 = x1;
       y0 = y1;
-      on = true;
-    };
-    for (let i = 0; i < tokens.length; i++) {
-      const token = tokens[i];
-      if (token === "M" || token === "L" || token === "C" || token === "Z") {
-        cmd = token;
-        if (token === "Z") on = false;
-        continue;
-      }
-      if (cmd === "M") {
-        x0 = +token;
-        y0 = +tokens[++i];
-        on = true;
-      } else if (cmd === "L") vert(+token, +tokens[++i]);
-      else if (cmd === "C") {
-        const x1 = +tokens[i + 4];
-        const y1 = +tokens[i + 5];
-        if (x1 === x1 && y1 === y1) vert(x1, y1);
-        i += 5;
-      }
     }
     return hit;
   }
@@ -814,7 +777,9 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     return marks;
   }
 
+  let dirty = false;
   function rebuild(): void {
+    dirty = false;
     const viewN = Math.max(0, hi - lo + 1);
     box = plotBox(svg);
     const values = numericValues(base, table);
@@ -829,6 +794,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function crossX(local: number): number {
+    if (dirty) rebuild();
     return hover.pixels[local] ?? box.l;
   }
 
@@ -847,27 +813,11 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const last = items[items.length - 1];
     let y = last ? Number(last.text.getAttribute("y")) + 20 : 28;
     const x = last?.swatch ? Number(last.swatch.getAttribute("x")) : 8;
-    const ns = "http://www.w3.org/2000/svg";
     for (const item of series) {
       if (!hidden.has(item.name) || visible.has(item.name)) continue;
-      const swatch = document.createElementNS(ns, "rect");
-      swatch.setAttribute("data-ck-hidden-key", item.name);
-      swatch.setAttribute("x", String(x));
-      swatch.setAttribute("y", String(y - 9));
-      swatch.setAttribute("width", "10");
-      swatch.setAttribute("height", "10");
-      swatch.setAttribute("rx", "2");
-      swatch.setAttribute("fill", "var(--ck-series-1, #007aff)");
-      swatch.setAttribute("opacity", "0.35");
-      const text = document.createElementNS(ns, "text");
-      text.setAttribute("data-ck-hidden-key", item.name);
-      text.setAttribute("x", String(x + 16));
-      text.setAttribute("y", String(y));
-      text.setAttribute("font-size", "12");
-      text.setAttribute("opacity", "0.35");
-      text.textContent = item.name;
-      text.style.cursor = "pointer";
-      svg.append(swatch, text);
+      const name = esc(item.name);
+      svg.insertAdjacentHTML("beforeend", `<rect data-ck-hidden-key="${name}" x="${x}" y="${y - 9}" width="10" height="10" rx="2" fill="var(--ck-series-1, #007aff)" opacity="0.35"/><text data-ck-hidden-key="${name}" x="${x + 16}" y="${y}" font-size="12" opacity="0.35">${name}</text>`);
+      (svg.lastElementChild as SVGTextElement).style.cursor = "pointer";
       y += 20;
     }
   }
@@ -960,6 +910,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function hoverMove(event: PointerEvent | MouseEvent): void {
+    if (dirty) rebuild();
     if (base.type === "donut") {
       const path = (event.target as Element | null)?.closest?.("path[aria-label]");
       if (!path) {
@@ -996,14 +947,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
 
   rebuild();
   paintTable();
-  const enter = durationMs(spec, n);
-  if (enter > 0) {
-    svg.style.opacity = "0";
-    requestAnimationFrame(() => {
-      svg.style.transition = `opacity ${enter}ms ease-out`;
-      svg.style.opacity = "1";
-    });
-  }
+  fade(svg, durationMs(spec, n), "0");
 
   if (showTip || showCross) {
     on(svg, "pointermove", hoverMove as EventListener);
@@ -1042,7 +986,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           showTip,
           () => alive,
           (clientX, clientY) => viewPoint(svg, clientX, clientY),
-          (x) => lookupIndex(hover, x),
+          (x) => (dirty && rebuild(), lookupIndex(hover, x)),
           zoomAt,
           resetRange,
           () => redraw(),
@@ -1104,7 +1048,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         patchSvg(host as PatchHost, markup, durationMs(next, n));
         if (keys) svg.setAttribute("tabindex", "0");
         dim();
-        rebuild();
+        dirty = true;
         paintTable();
         return;
       }
