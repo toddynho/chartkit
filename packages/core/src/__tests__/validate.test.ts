@@ -60,7 +60,7 @@ describe("example specs", () => {
       expect(ajvOk).toBe(true);
       const result = validate(spec);
       expect(result.errors, JSON.stringify(result.errors, null, 2)).toEqual([]);
-      expect(result.warnings.every((warning) => warning.code === "CK3011"), JSON.stringify(result.warnings, null, 2)).toBe(true);
+      expect(result.warnings.some((warning) => warning.code === "CK3011"), JSON.stringify(result.warnings, null, 2)).toBe(false);
       expect(result.ok).toBe(true);
     });
   }
@@ -193,7 +193,7 @@ describe("diagnostic codes", () => {
     expect(result.errors.some((error) => error.code === "CK2006" && error.path === "/encoding/series")).toBe(true);
   });
 
-  it("CK3011 warns when a requested feature is not drawn yet", () => {
+  it("does not warn CK3011 for tooltip, zoom, legend toggle, animation, or a11y", () => {
     const result = validate({
       ...base,
       tooltip: true,
@@ -203,17 +203,7 @@ describe("diagnostic codes", () => {
       a11y: { alt: "Revenue rose from January to February.", keyboard: true, dataTable: true },
     });
     expect(result.ok).toBe(true);
-    expect(result.warnings.filter((warning) => warning.code === "CK3011").map((warning) => warning.path).sort()).toEqual([
-      "/a11y/dataTable",
-      "/a11y/keyboard",
-      "/animation",
-      "/interaction/brush",
-      "/interaction/pan",
-      "/interaction/zoom",
-      "/legend/interactive",
-      "/tooltip",
-    ]);
-    expect(result.warnings[0]?.message).toContain("not rendered yet");
+    expect(result.warnings.filter((warning) => warning.code === "CK3011")).toEqual([]);
   });
 
   it("stays quiet when those features are off", () => {

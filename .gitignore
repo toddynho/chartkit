@@ -26,6 +26,8 @@ npm-debug.log*
 # Testing
 coverage/
 bench/last-run.json
+scripts/.interact-out/
+scripts/design/.out/
 
 # Misc
 *.tgz

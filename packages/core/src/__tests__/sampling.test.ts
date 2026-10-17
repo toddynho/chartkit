@@ -105,6 +105,111 @@ describe("sampling render", () => {
     expect(renderLine(small)).toBe(renderLine({ ...small, mark: { ...small.mark, sampling: "auto" } }));
   });
 
+  it("keeps the same minmax indexes for an even x step", () => {
+    const n = 5000;
+    const ys = series(n, 2000, 10000);
+    const xs = new Float64Array(n);
+    for (let i = 0; i < n; i++) xs[i] = i * 2;
+    const body = {
+      version: "1",
+      type: "line",
+      data: { columns: { x: xs, y: ys } },
+      encoding: { x: "x", y: "y" },
+      mark: { curve: "linear", points: "none", sampling: "auto" },
+      size: { width: 640, height: 360 },
+      locale: "en-US",
+      a11y: { alt },
+    };
+    const svg = renderLine(body);
+    const clip = svg.match(/<clipPath[^>]*>\s*<rect[^>]*width="([\d.]+)"/);
+    const plotWidth = Number(clip?.[1] ?? 0);
+    const drawn = svg.match(/data-ck-i="([^"]+)"/)?.[1].split(" ").map(Number) ?? [];
+    const direct = sampleSeries("minmax", xs, ys, n, plotWidth, false);
+    expect(plotWidth).toBeGreaterThan(100);
+    expect(drawn).toEqual([...direct.runs[0]]);
+    expect(drawn).toContain(2000);
+  });
+
+  it("uses value buckets for sorted jitter and gaps, and the floor fallback for unsorted x", () => {
+    const floorPick = (xs: Float64Array, ys: Float64Array, target: number) => {
+      const last = xs.length - 1;
+      const buckets = Math.max(1, Math.floor((target - 2) / 2));
+      const minI = new Int32Array(buckets);
+      const maxI = new Int32Array(buckets);
+      minI.fill(-1);
+      const x0 = xs[0];
+      const span = xs[last] - x0;
+      const scale = span !== 0 ? buckets / span : 0;
+      for (let i = 1; i < last; i++) {
+        const y = ys[i];
+        let bucket = 0;
+        if (scale !== 0) {
+          bucket = Math.floor((xs[i] - x0) * scale);
+          if (bucket < 0) bucket = 0;
+          else if (bucket >= buckets) bucket = buckets - 1;
+        }
+        const lo = minI[bucket];
+        if (lo < 0 || y < ys[lo]) minI[bucket] = i;
+        const hi = maxI[bucket];
+        if (hi < 0 || y > ys[hi]) maxI[bucket] = i;
+      }
+      const raw = [0];
+      for (let bucket = 0; bucket < buckets; bucket++) {
+        const a = minI[bucket];
+        const b = maxI[bucket];
+        if (a >= 0) raw.push(a);
+        if (b >= 0 && b !== a) raw.push(b);
+      }
+      raw.push(last);
+      return [...new Set(raw)].sort((a, b) => a - b);
+    };
+    const check = (xs: Float64Array) => {
+      const n = xs.length;
+      const ys = series(n, Math.floor(n * 0.4), 10000);
+      const target = 80;
+      const picked = sampleSeries("minmax", xs, ys, n, Math.ceil(target / 2), false);
+      expect([...picked.runs[0]]).toEqual(floorPick(xs, ys, target));
+      expect(picked.runs[0]).toContain(Math.floor(n * 0.4));
+    };
+    const n = 5000;
+    const jitter = new Float64Array(n);
+    const gaps = new Float64Array(n);
+    let t = 1.7e12;
+    let u = 1;
+    for (let i = 0; i < n; i++) {
+      u = (u * 1664525 + 1013904223) % 4294967296;
+      jitter[i] = i + u / 4294967296 * 0.9;
+      t += i % 50 === 0 ? 8000 : 1000;
+      gaps[i] = t;
+    }
+    check(jitter);
+    check(gaps);
+    const step = new Float64Array(n);
+    for (let i = 0; i < n; i++) step[i] = i * 2;
+    check(step);
+
+    const reversed = new Float64Array(n);
+    for (let i = 0; i < n; i++) reversed[i] = n - i;
+    const ys = series(n, 2000, 10000);
+    const unsorted = sampleSeries("minmax", reversed, ys, n, 40, false);
+    expect(unsorted.runs[0]).toContain(2000);
+    expect(unsorted.runs[0][0]).toBe(0);
+    expect(unsorted.runs[0][unsorted.runs[0].length - 1]).toBe(n - 1);
+  });
+
+  it("rounds a 100k numeric x axis to nice steps", () => {
+    const svg = renderLine(spec(100_000));
+    expect(svg).not.toContain("ck-chart-error");
+    expect(svg).toContain(">0<");
+    expect(svg).toContain(">20,000<");
+    expect(svg).toContain(">40,000<");
+    expect(svg).toContain(">60,000<");
+    expect(svg).toContain(">80,000<");
+    expect(svg).not.toContain(">16667<");
+    expect(svg).not.toContain(">33334<");
+    expect(svg).not.toContain(">100,000<");
+  });
+
   it("downsamples a million points without dropping the full extent or the alt text", () => {
     const svg = renderLine(spec(1_000_000, "auto"));
     expect(svg).not.toContain("ck-chart-error");

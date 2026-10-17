@@ -1,7 +1,7 @@
 import { annotationLayers } from "../annotations";
 import { isTypedArray, readData, type DataTable } from "../data";
 import { formatValue } from "../format";
-import { readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
+import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import { clamp, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
@@ -16,6 +16,7 @@ type MarkDraw = (
 
 function renderTyped(spec: Record<string, unknown>, type: string, draw: MarkDraw): string | null {
   if (spec.type !== type) return null;
+  beginFrame();
   const model = toModel(spec);
   if (!model) return null;
   return modelToSvg(model, draw);
@@ -437,7 +438,14 @@ function appendLineSeries(
       points[k] = { x, y: yScale(y) };
       if (area) bottoms[k] = { x, y: yScale(layers ? layers.bottom[index][i] : 0) };
     }
-    const indexAttr = ` data-ck-sample="${sampled.mode}" data-ck-i="${run.join(" ")}"`;
+    const v0 = ys[run[0]];
+    const v1 = ys[run[run.length - 1]];
+    const log = series.axis === "y2" ? model.y2Log : model.yLog;
+    const scaleAttr =
+      !layers && !log && typeof v0 === "number" && typeof v1 === "number" && v0 !== v1
+        ? ` data-ck-ys="${n(points[0].y)},${n(points[points.length - 1].y)},${n(v0)},${n(v1)},${index}"`
+        : "";
+    const indexAttr = ` data-ck-sample="${sampled.mode}" data-ck-i="${run.join(" ")}"${scaleAttr}`;
     if (area) {
       const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
       out.push(`<path d="${areaPath(points, bottoms, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillPaint}" stroke="none"${indexAttr} />`);
@@ -445,7 +453,10 @@ function appendLineSeries(
     out.push(
       `<path d="${linePath(points, model.curve)}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokePaint}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)}${indexAttr} />`,
     );
-    if (model.dots !== "off") {
+    // Hidden circles exist so --ck-line-dots can reveal them. A downsampled line
+    // already has a vertex per pixel, and those circles dominate the SVG, so
+    // interact draws the hover dot from the path instead.
+    if (model.dots === "shown") {
       for (let k = 0; k < run.length; k++) {
         out.push(pointMark(points[k], model, series.color, ` data-ck-i="${run[k]}"`));
       }
@@ -496,15 +507,13 @@ function appendLinear(
   yScale: (value: number) => number,
 ): void {
   const values = series.values;
-  let path = "";
-  let open = false;
+  let parts: string[] = [];
   const flush = () => {
-    if (!path) return;
+    if (parts.length === 0) return;
     out.push(
-      `<path d="${path}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokePaint}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
+      `<path d="${parts.join(" ")}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokePaint}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
     );
-    path = "";
-    open = false;
+    parts = [];
   };
   for (let i = 0; i < values.length; i++) {
     const value = values[i];
@@ -512,11 +521,7 @@ function appendLinear(
       if (!model.connectNulls) flush();
       continue;
     }
-    const x = n(xScale.center(i));
-    const y = n(yScale(value));
-    if (!open) path = "M " + x + " " + y;
-    else path += " L " + x + " " + y;
-    open = true;
+    parts.push((parts.length === 0 ? "M " : "L ") + n(xScale.center(i)) + " " + n(yScale(value)));
   }
   flush();
 }
@@ -685,6 +690,8 @@ interface XScale {
   center(index: number): number;
   band(index: number): { start: number; size: number };
   at(value: number): number;
+  min: number;
+  max: number;
 }
 
 function xPosition(
@@ -704,17 +711,30 @@ function xPosition(
       center: (index) => spanStart + size * index + size / 2,
       band: (index) => ({ start: spanStart + size * index, size }),
       at: (value) => spanStart + size * value + size / 2,
+      min: 0,
+      max: Math.max(0, count - 1),
     };
   }
   let min = Infinity;
   let max = -Infinity;
   let seen = false;
-  for (let i = 0; i < model.x.length; i++) {
-    const value = model.x[i];
-    if (value === null || !Number.isFinite(value)) continue;
-    seen = true;
-    if (value < min) min = value;
-    if (value > max) max = value;
+  if (model.x instanceof Float64Array) {
+    const extent = linearExtent(model.x);
+    if (extent) {
+      min = extent.min;
+      max = extent.max;
+      seen = true;
+      if (extent.linear) noteLinear(model.x);
+    }
+  }
+  if (!seen) {
+    for (let i = 0; i < model.x.length; i++) {
+      const value = model.x[i];
+      if (value === null || !Number.isFinite(value)) continue;
+      seen = true;
+      if (value < min) min = value;
+      if (value > max) max = value;
+    }
   }
   if (!seen) {
     min = 0;
@@ -728,6 +748,8 @@ function xPosition(
       return { start: spanStart + step * index, size: step };
     },
     at: (value) => scale(value),
+    min,
+    max,
   };
 }
 
@@ -765,6 +787,7 @@ function xAxisLabels(
   plot: { left: number; right?: number; bottom: number; top: number },
 ): string {
   if (model.xTemporal && model.x && !horizontal) return timeAxisLabels(model, xScale, plot);
+  if (model.x && !horizontal) return numericXAxisLabels(model, xScale, plot);
   const step = count > 8 ? Math.ceil(count / 6) : 1;
   const out: string[] = [];
   let lastRight = -Infinity;
@@ -776,6 +799,29 @@ function xAxisLabels(
       continue;
     }
     const x = xScale.center(i);
+    const width = label.length * 6.4;
+    if (x - width / 2 < lastRight) continue;
+    lastRight = x + width / 2 + 8;
+    out.push(`<text x="${n(x)}" y="${n(plot.bottom + 16)}" text-anchor="middle" fill="${cssVar("muted", model.preset.muted)}" font-size="11" font-family="${font()}">${esc(label)}</text>`);
+  }
+  return out.join("");
+}
+
+function numericXAxisLabels(
+  model: PlotModel,
+  xScale: XScale,
+  plot: { left: number; right?: number; bottom: number },
+): string {
+  const values = ticks(xScale.min, xScale.max, 6);
+  const labels = tickText(values, model, model.xFormat);
+  const right = plot.right ?? model.width;
+  const out: string[] = [];
+  let lastRight = -Infinity;
+  for (let i = 0; i < values.length; i++) {
+    const label = labels[i];
+    if (!label) continue;
+    const x = xScale.at(values[i]);
+    if (x < plot.left - 8 || x > right + 8) continue;
     const width = label.length * 6.4;
     if (x - width / 2 < lastRight) continue;
     lastRight = x + width / 2 + 8;
@@ -866,6 +912,40 @@ function padding(model: PlotModel, leftLabels: string[], rightLabels: string[]):
   };
 }
 
+/** Min and max of a typed column. Null when the extent is empty or non-finite. NaN does not move it. */
+function floatExtent(values: Float64Array): { min: number; max: number; dense: boolean } | null {
+  let min = Infinity;
+  let max = -Infinity;
+  let dense = true;
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i];
+    if (value < min) min = value;
+    if (value > max) max = value;
+    else if (value !== value) dense = false;
+  }
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
+  return { min, max, dense };
+}
+
+/** Extent plus an exact arithmetic-sequence check. Used for x, where index buckets need a linear axis. */
+function linearExtent(values: Float64Array): { min: number; max: number; linear: boolean } | null {
+  const count = values.length;
+  if (count === 0) return null;
+  let min = Infinity;
+  let max = -Infinity;
+  const first = values[0];
+  const stride = count === 1 ? 0 : (values[count - 1] - first) / (count - 1);
+  let linear = Number.isFinite(first) && Number.isFinite(stride);
+  for (let i = 0; i < count; i++) {
+    const value = values[i];
+    if (value < min) min = value;
+    if (value > max) max = value;
+    if (linear && value !== first + i * stride) linear = false;
+  }
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
+  return { min, max, linear };
+}
+
 function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
   let min = Infinity;
   let max = -Infinity;
@@ -886,10 +966,24 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
   } else {
     for (const series of model.series) {
       if (series.axis !== axis) continue;
-      for (let i = 0; i < series.values.length; i++) {
-        const value = series.values[i];
-        if (value !== null) consider(value);
+      const values = series.values;
+      if (values instanceof Float64Array) {
+        const extent = floatExtent(values);
+        if (extent) {
+          consider(extent.min);
+          consider(extent.max);
+          if (extent.dense) noteDense(values);
+          continue;
+        }
       }
+      let finite = 0;
+      for (let i = 0; i < values.length; i++) {
+        const value = values[i];
+        if (value === null || !Number.isFinite(value)) continue;
+        finite += 1;
+        consider(value);
+      }
+      if (values.length > 0 && finite === values.length) noteDense(values);
     }
   }
   const log = axis === "y2" ? model.y2Log : model.yLog;
@@ -945,28 +1039,29 @@ function monotoneHeadroom(model: PlotModel, axis: "y" | "y2"): { above: number; 
   let below = 0;
   for (const series of model.series) {
     if (series.axis !== axis || series.mark === "bar") continue;
+    const src = series.values;
     const values: number[] = [];
-    for (let i = 0; i < series.values.length; i++) {
-      const value = series.values[i];
-      if (value !== null && Number.isFinite(value)) values.push(value);
+    let hi = -Infinity;
+    let lo = Infinity;
+    for (let i = 0; i < src.length; i++) {
+      const value = src[i];
+      if (value === null || !Number.isFinite(value)) continue;
+      values.push(value);
+      if (value > hi) hi = value;
+      if (value < lo) lo = value;
     }
     if (values.length < 3) continue;
-    let hi = values[0];
-    let lo = values[0];
-    for (let i = 1; i < values.length; i++) {
-      if (values[i] > hi) hi = values[i];
-      if (values[i] < lo) lo = values[i];
-    }
     for (let i = 0; i < values.length - 1; i++) {
       const p0 = values[Math.max(0, i - 1)];
       const p1 = values[i];
       const p2 = values[i + 1];
       const p3 = values[Math.min(values.length - 1, i + 2)];
-      const cps = [p1 + (p2 - p0) / 6, p2 - (p3 - p1) / 6];
-      for (let c = 0; c < cps.length; c++) {
-        if (cps[c] > hi) above = Math.max(above, cps[c] - hi);
-        if (cps[c] < lo) below = Math.max(below, lo - cps[c]);
-      }
+      const c1 = p1 + (p2 - p0) / 6;
+      const c2 = p2 - (p3 - p1) / 6;
+      if (c1 > hi) above = Math.max(above, c1 - hi);
+      if (c2 > hi) above = Math.max(above, c2 - hi);
+      if (c1 < lo) below = Math.max(below, lo - c1);
+      if (c2 < lo) below = Math.max(below, lo - c2);
     }
   }
   return { above, below };
@@ -989,7 +1084,9 @@ function linePath(points: Pt[], curve: Curve): string {
   if (points.length === 1) return `M ${n(points[0].x)} ${n(points[0].y)}`;
   if (curve === "monotone") return monotone(points);
   if (curve === "step" || curve === "step-before" || curve === "step-after") return step(points, curve);
-  return points.map((point, index) => `${index === 0 ? "M" : "L"} ${n(point.x)} ${n(point.y)}`).join(" ");
+  const parts = new Array<string>(points.length);
+  for (let i = 0; i < points.length; i++) parts[i] = (i === 0 ? "M " : "L ") + n(points[i].x) + " " + n(points[i].y);
+  return parts.join(" ");
 }
 
 function areaPath(top: Pt[], bottom: Pt[], curve: Curve): string {
@@ -1001,19 +1098,28 @@ function areaPath(top: Pt[], bottom: Pt[], curve: Curve): string {
 }
 
 function monotone(points: Pt[]): string {
-  let path = `M ${n(points[0].x)} ${n(points[0].y)}`;
+  const parts = new Array<string>(points.length);
+  parts[0] = "M " + n(points[0].x) + " " + n(points[0].y);
   for (let i = 0; i < points.length - 1; i++) {
     const p0 = points[Math.max(0, i - 1)];
     const p1 = points[i];
     const p2 = points[i + 1];
     const p3 = points[Math.min(points.length - 1, i + 2)];
-    const cp1x = p1.x + ((p2.x - p0.x) / 6);
-    const cp1y = p1.y + ((p2.y - p0.y) / 6);
-    const cp2x = p2.x - ((p3.x - p1.x) / 6);
-    const cp2y = p2.y - ((p3.y - p1.y) / 6);
-    path += ` C ${n(cp1x)} ${n(cp1y)}, ${n(cp2x)} ${n(cp2y)}, ${n(p2.x)} ${n(p2.y)}`;
+    parts[i + 1] =
+      "C " +
+      n(p1.x + (p2.x - p0.x) / 6) +
+      " " +
+      n(p1.y + (p2.y - p0.y) / 6) +
+      ", " +
+      n(p2.x - (p3.x - p1.x) / 6) +
+      " " +
+      n(p2.y - (p3.y - p1.y) / 6) +
+      ", " +
+      n(p2.x) +
+      " " +
+      n(p2.y);
   }
-  return path;
+  return parts.join(" ");
 }
 
 function step(points: Pt[], curve: Curve): string {
