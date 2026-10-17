@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { midnight, resolvePreset } from "../theme";
+import { auto, midnight, paint, resolvePreset } from "../theme";
 import { emerald } from "../themes/emerald";
 import { latte } from "../themes/latte";
 import { retro } from "../themes/retro";
@@ -8,8 +8,18 @@ import { sunset } from "../themes/sunset";
 describe("theme presets", () => {
   it("keeps midnight as the built-in preset", () => {
     expect(midnight.series[0]).toBe("#22c55e");
-    expect(resolvePreset(undefined).background).toBe("#0c0c0c");
-    expect(resolvePreset("auto").accent).toBe("#22d3ee");
+    expect(resolvePreset("midnight").background).toBe("#0c0c0c");
+    expect(resolvePreset(undefined).background).toBe("transparent");
+    expect(resolvePreset("auto")).toEqual(auto);
+    expect(resolvePreset("auto").series[0]).toContain("light-dark(");
+  });
+
+  it("gives a CSS variable a visible fallback", () => {
+    const painted = paint("var(--chart-1)", auto, 0);
+    expect(painted).toContain("var(--ck-series-1,");
+    expect(painted).toContain("var(--chart-1,");
+    expect(painted).toContain("light-dark(");
+    expect(paint("var(--brand)", midnight, 0)).toBe("var(--brand, #22c55e)");
   });
 
   it("derives other presets from midnight plus a delta", () => {

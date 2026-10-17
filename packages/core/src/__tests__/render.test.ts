@@ -36,6 +36,23 @@ function dataRects(svg: string): { x: number; y: number; width: number; height: 
   return rects;
 }
 
+function labeledY(svg: string, label: string): number | null {
+  for (const match of svg.matchAll(/<text\b([^>]*)>([^<]*)<\/text>/g)) {
+    if (match[2] !== label) continue;
+    const y = / y="([^"]+)"/.exec(match[1]);
+    if (y) return Number(y[1]);
+  }
+  return null;
+}
+
+function circles(svg: string): { cx: number; cy: number; r: number }[] {
+  return [...svg.matchAll(/<circle\b([^>]*)\/?>/g)].map((match) => ({
+    cx: Number(/cx="([^"]+)"/.exec(match[1])?.[1]),
+    cy: Number(/cy="([^"]+)"/.exec(match[1])?.[1]),
+    r: Number(/ r="([^"]+)"/.exec(match[1])?.[1]),
+  }));
+}
+
 function tickTexts(svg: string, anchor: "start" | "end"): string[] {
   const re = new RegExp(`<text\\b[^>]*text-anchor="${anchor}"[^>]*>([^<]*)</text>`, "g");
   return [...svg.matchAll(re)].map((match) => match[1]);
@@ -276,6 +293,133 @@ describe("remaining chart renderers", () => {
     });
     expect(svg).toContain("var(--ck-negative,");
     expect(svg).not.toContain('data-ck-renderer="pending"');
+  });
+
+  it("draws the rich line, the stacked bar, and a log scatter", () => {
+    const rich = render(spec("02-line-rich.json"));
+    expect(rich.match(/<path\b[^>]*stroke="/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(rich).toContain("var(--chart-1,");
+    expect(rich).toContain("var(--chart-2,");
+    expect(rich).not.toContain("2026-10-16T05:00:00Z");
+    expect(rich).toMatch(/\d{2}:\d{2}/);
+
+    const stacked = render(spec("03-bar-stacked.json"));
+    expect(stacked).toContain("var(--ck-series-1,");
+    expect(stacked).toContain("var(--ck-series-2,");
+    expect(stacked.match(/>NA</g)).toHaveLength(1);
+    expect(stacked.match(/>EU</g)).toHaveLength(1);
+    expect(stacked.match(/>APAC</g)).toHaveLength(1);
+    const regions = dataRects(stacked);
+    expect(regions.length).toBe(6);
+
+    const bubble = render(spec("06-scatter-bubble.json"));
+    const y10 = labeledY(bubble, "10");
+    const y100 = labeledY(bubble, "100");
+    const y1000 = labeledY(bubble, "1,000");
+    expect(y10).not.toBeNull();
+    expect(y100).not.toBeNull();
+    expect(y1000).not.toBeNull();
+    expect(Math.abs(Math.abs(y10! - y100!) - Math.abs(y100! - y1000!))).toBeLessThan(4);
+    const marks = circles(bubble);
+    expect(marks.length).toBe(4);
+    for (const circle of marks) {
+      expect(circle.r).toBeGreaterThan(0);
+      expect(circle.cx - circle.r).toBeGreaterThanOrEqual(-0.5);
+      expect(circle.cx + circle.r).toBeLessThanOrEqual(640.5);
+      expect(circle.cy - circle.r).toBeGreaterThanOrEqual(-0.5);
+      expect(circle.cy + circle.r).toBeLessThanOrEqual(320.5);
+    }
+  });
+
+  it("draws grouped bars from a series field and from a color field", () => {
+    const rows = [
+      { month: "Jan", plan: "Free", signups: 4 },
+      { month: "Jan", plan: "Pro", signups: 2 },
+      { month: "Feb", plan: "Free", signups: 5 },
+      { month: "Feb", plan: "Pro", signups: 3 },
+    ];
+    const grouped = render({
+      version: "1",
+      type: "bar",
+      data: rows,
+      encoding: { x: "month", y: "signups", series: "plan" },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "Free and Pro are both higher in February." },
+    });
+    expect(dataRects(grouped)).toHaveLength(4);
+    expect(grouped).toContain("var(--ck-series-1,");
+    expect(grouped).toContain("var(--ck-series-2,");
+    expect(grouped.match(/>Jan</g)).toHaveLength(1);
+    const byColor = render({
+      version: "1",
+      type: "bar",
+      data: rows,
+      encoding: { x: "month", y: "signups", color: "plan" },
+      mark: { stack: "stack" },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "Free and Pro are stacked by month." },
+    });
+    expect(dataRects(byColor)).toHaveLength(4);
+    expect(byColor).toContain("var(--ck-series-2,");
+  });
+
+  it("uses a log scale and a currency format on the axis", () => {
+    const svg = render({
+      version: "1",
+      type: "line",
+      data: [
+        { step: "A", value: 1 },
+        { step: "B", value: 10 },
+        { step: "C", value: 100 },
+      ],
+      encoding: { x: "step", y: { field: "value", scale: { type: "log" }, format: "currency" } },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "The value grows by ten each step." },
+    });
+    const y1 = labeledY(svg, "$1.00");
+    const y10 = labeledY(svg, "$10.00");
+    const y100 = labeledY(svg, "$100.00");
+    expect(y1).not.toBeNull();
+    expect(y10).not.toBeNull();
+    expect(y100).not.toBeNull();
+    expect(Math.abs(Math.abs(y1! - y10!) - Math.abs(y10! - y100!))).toBeLessThan(2);
+  });
+
+  it("draws rule, band, and text annotations with their labels", () => {
+    const svg = render({
+      version: "1",
+      type: "line",
+      data: [
+        { month: "Jan", revenue: 20 },
+        { month: "Feb", revenue: 40 },
+        { month: "Mar", revenue: 30 },
+      ],
+      encoding: { x: "month", y: "revenue" },
+      annotations: [
+        { type: "rule", axis: "y", value: 35, label: "Target", dash: "dotted" },
+        { type: "band", axis: "x", from: "Jan", to: "Feb", label: "Launch" },
+        { type: "text", x: "Mar", y: 30, label: "Dip" },
+      ],
+      size: { width: 640, height: 240 },
+      a11y: { alt: "Revenue rose in February and dipped in March." },
+    });
+    expect(svg).toContain('data-ck-annotation="rule"');
+    expect(svg).toContain('data-ck-annotation="band"');
+    expect(svg).toContain(">Target<");
+    expect(svg).toContain(">Launch<");
+    expect(svg).toContain(">Dip<");
+    expect(render(spec("02-rich-line.json"))).toContain(">Target<");
+  });
+
+  it("keeps donut legend values inside the view box", () => {
+    const svg = render(spec("04-donut.json"));
+    expect(svg).toContain('text-anchor="end"');
+    expect(svg).toContain('font-size="20" font-weight="700"');
+    for (const match of svg.matchAll(/<text\b([^>]*)text-anchor="end"[^>]*>([^<]*)<\/text>/g)) {
+      const x = Number(/ x="([^"]+)"/.exec(match[1])?.[1]);
+      expect(x).toBeLessThanOrEqual(420);
+      expect(match[2].length).toBeGreaterThan(0);
+    }
   });
 
   it("keeps each renderer module free of its siblings", () => {

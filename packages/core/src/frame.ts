@@ -228,7 +228,7 @@ export function gridStyle(spec: Record<string, unknown>): false | "solid" | "das
   const axes = isRecord(spec.axes) ? spec.axes : undefined;
   const y = axes && isRecord(axes.y) ? axes.y.grid : undefined;
   if (y === false) return false;
-  if (y === true || y === undefined) return "dashed";
+  if (y === true || y === undefined) return "solid";
   if (y === "solid" || y === "dashed" || y === "dotted") return y;
   return "dashed";
 }

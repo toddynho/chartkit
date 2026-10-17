@@ -18,6 +18,7 @@ This file describes the JSON spec. React component props are in the last section
 - Field types are `quantitative`, `temporal`, `ordinal`, or `nominal`. Not `categorical`.
 - A heatmap with `encoding.x`, `encoding.y`, and `encoding.color` is a grid. A calendar heatmap is a date `x` plus `color`, or `mark.layout: "calendar"`. The measure is `encoding.color`, not `encoding.value`. `grid-heatmap` and `calendar-heatmap` are `heatmap` plus `mark.layout`.
 - Combo is one spec. `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. Not `layer`, `layers`, `marks`, or `encoding.bar` / `encoding.line`. A list of fields goes on `encoding.y`, not on `field`. On a combo, `bar`, `line`, and `area` go in `mark`, not in `type`.
+- A bar splits long data with `encoding.series`, or with `encoding.color` when that value is a field. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel is applied to the ticks. Rule, band, and text `annotations` are drawn. Tooltip, zoom, pan, brush, animation, `legend.interactive`, and `a11y.keyboard` / `a11y.dataTable` are valid; when one is turned on, `validate` warns CK3011 because the SVG does not draw it yet. The default theme is `auto` (transparent, follows `prefers-color-scheme`, overridable with `--ck-*` or `--chart-N`). `theme: "midnight"` is the dark card.
 
 ## Repair loop
 

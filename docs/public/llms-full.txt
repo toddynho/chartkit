@@ -20,6 +20,7 @@ The JSON spec is the agent interface. The React section at the bottom is a diffe
 - Heatmap: `encoding.y` with no `mark.layout` renders a grid. Calendar is a date `x` plus `color`, or `mark.layout: "calendar"`. The measure is `encoding.color`. `encoding.value` moves there (CK1009). A numeric `y` moves to `color` only on a calendar.
 - Combo is one spec. `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. `layer`, `layers`, `marks`, `encoding.bar`, `encoding.line`, and `encoding.y2` are CK1009. A list of fields goes on `encoding.y`, not on `field`. On a combo, `bar`, `line`, and `area` go in `mark`, not in `type`.
 - `encoding.x.axis` is not a channel. A title goes in `axes.x.title` (CK1009). `mark.points: true` means `"always"` (CK1007).
+- A bar splits long data with `encoding.series`, or with `encoding.color` when that value is a field. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel is applied to the ticks. Rule, band, and text `annotations` are drawn. Tooltip, zoom, pan, brush, animation, `legend.interactive`, and `a11y.keyboard` / `a11y.dataTable` are valid; when one is turned on, `validate` warns CK3011 because the SVG does not draw it yet. The default theme is `auto` (transparent, follows `prefers-color-scheme`, overridable with `--ck-*` or `--chart-N`). `theme: "midnight"` is the dark card.
 
 ## Repair loop
 
