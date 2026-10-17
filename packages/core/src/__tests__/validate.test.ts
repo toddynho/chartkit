@@ -60,7 +60,7 @@ describe("example specs", () => {
       expect(ajvOk).toBe(true);
       const result = validate(spec);
       expect(result.errors, JSON.stringify(result.errors, null, 2)).toEqual([]);
-      expect(result.warnings, JSON.stringify(result.warnings, null, 2)).toEqual([]);
+      expect(result.warnings.every((warning) => warning.code === "CK3011"), JSON.stringify(result.warnings, null, 2)).toBe(true);
       expect(result.ok).toBe(true);
     });
   }
@@ -191,6 +191,56 @@ describe("diagnostic codes", () => {
       encoding: { x: "month", y: ["revenue"], series: "region" },
     });
     expect(result.errors.some((error) => error.code === "CK2006" && error.path === "/encoding/series")).toBe(true);
+  });
+
+  it("CK3011 warns when a requested feature is not drawn yet", () => {
+    const result = validate({
+      ...base,
+      tooltip: true,
+      interaction: { zoom: "x", pan: true, brush: "x" },
+      animation: { duration: 400 },
+      legend: { interactive: true },
+      a11y: { alt: "Revenue rose from January to February.", keyboard: true, dataTable: true },
+    });
+    expect(result.ok).toBe(true);
+    expect(result.warnings.filter((warning) => warning.code === "CK3011").map((warning) => warning.path).sort()).toEqual([
+      "/a11y/dataTable",
+      "/a11y/keyboard",
+      "/animation",
+      "/interaction/brush",
+      "/interaction/pan",
+      "/interaction/zoom",
+      "/legend/interactive",
+      "/tooltip",
+    ]);
+    expect(result.warnings[0]?.message).toContain("not rendered yet");
+  });
+
+  it("stays quiet when those features are off", () => {
+    const result = validate({
+      ...base,
+      tooltip: false,
+      interaction: { zoom: "none", pan: false, brush: "none", hover: true },
+      animation: { duration: 0 },
+      legend: { interactive: false },
+      a11y: { alt: "Revenue rose from January to February.", keyboard: false, dataTable: false },
+    });
+    expect(result.warnings.some((warning) => warning.code === "CK3011")).toBe(false);
+    expect(result.ok).toBe(true);
+  });
+
+  it("does not warn CK2008 when a scatter x is unsorted", () => {
+    const result = validate({
+      version: "1",
+      type: "scatter",
+      data: [
+        { x: 3, y: 1 },
+        { x: 1, y: 2 },
+      ],
+      encoding: { x: { field: "x", type: "quantitative" }, y: "y" },
+      a11y: { alt: "The points are not in x order." },
+    });
+    expect(result.warnings.some((warning) => warning.code === "CK2008")).toBe(false);
   });
 
   it("CK3010 warns, and the chart still validates, when a mark does not apply", () => {
@@ -830,6 +880,50 @@ describe("diagnostic codes", () => {
   it("CK2004 rejects empty data", () => {
     const result = validate({ ...base, data: [] });
     expect(result.errors.some((error) => error.code === "CK2004" && error.path === "/data")).toBe(true);
+  });
+
+  it("CK3002 repair adds a missing y2 axis and leaves an explicit false", () => {
+    const spec = {
+      version: "1",
+      type: "combo",
+      data: [
+        { week: "W1", orders: 30, rate: 0.4 },
+        { week: "W2", orders: 36, rate: 0.55 },
+      ],
+      encoding: {
+        x: "week",
+        y: [
+          { field: "orders", mark: "bar" },
+          { field: "rate", mark: "line", axis: "y2" },
+        ],
+      },
+      a11y: { alt: "Orders and the rate both rose." },
+    };
+    const missing = validate(spec);
+    expect(missing.errors.find((item) => item.code === "CK3002")?.fix).toEqual([
+      { op: "add", path: "/axes", value: { y2: true } },
+    ]);
+    const repaired = repair(spec);
+    expect(repaired.ok).toBe(true);
+    expect((repaired.spec as { axes: { y2: boolean } }).axes.y2).toBe(true);
+    expect((spec as { axes?: unknown }).axes).toBeUndefined();
+
+    const titled = { ...spec, axes: { y: { title: "Orders" } } };
+    expect(validate(titled).errors.find((item) => item.code === "CK3002")?.fix).toEqual([
+      { op: "add", path: "/axes/y2", value: true },
+    ]);
+    const kept = repair(titled);
+    expect(kept.ok).toBe(true);
+    expect((kept.spec as { axes: { y: { title: string }; y2: boolean } }).axes).toEqual({
+      y: { title: "Orders" },
+      y2: true,
+    });
+
+    const off = { ...spec, axes: { y2: false } };
+    expect(validate(off).errors.find((item) => item.code === "CK3002")?.fix).toBeUndefined();
+    const refused = repair(off);
+    expect(refused.ok).toBe(false);
+    expect((refused.spec as { axes: { y2: boolean } }).axes.y2).toBe(false);
   });
 
   it("CK2005 rejects uneven columns", () => {

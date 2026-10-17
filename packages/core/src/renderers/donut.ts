@@ -8,7 +8,7 @@ import {
   readFrame,
   readTable,
 } from "../frame";
-import { closeChart, esc, font, n, openChart, polar } from "../svg";
+import { closeChart, esc, font, isRecord, n, openChart, polar } from "../svg";
 
 /**
  * Donut (or pie when mark.innerRadius is 0).
@@ -35,21 +35,20 @@ export function renderDonut(spec: Record<string, unknown>): string | null {
   const corner = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : 0;
   const showLabels = frame.mark.labels === true;
   const valueFormat = channelFormat(frame.encoding.y);
-  const showLegend = frame.legend !== false && slices.length > 1;
-  const place = showLegend ? frame.legend : "top";
+  const place = legendPlace(spec, frame.width, frame.height, frame.legend !== false && slices.length > 1);
+  const showLegend = place !== false;
   const legendRow = 20;
+  const longest = slices.reduce((max, slice) => Math.max(max, slice.label.length), 0);
+  const sideWidth = Math.min(240, Math.max(148, 36 + longest * 7 + 48));
   const legendBlock = showLegend && (place === "top" || place === "bottom") ? slices.length * legendRow + 8 : 0;
-  const sideLegend = showLegend && (place === "right" || place === "left") ? 168 : 0;
+  const sideLegend = showLegend && (place === "right" || place === "left") ? sideWidth : 0;
 
   let y0 = 8;
-  const heads: string[] = [];
-  if (frame.title) {
-    heads.push(text(16, 22, frame.title, cssVar("text", frame.preset.text), 14, "600"));
-    y0 = 32;
-  }
+  let subtitleY = 0;
+  if (frame.title) y0 = 36;
   if (frame.subtitle) {
-    heads.push(text(16, y0 + 12, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
-    y0 += 20;
+    subtitleY = y0 + 14;
+    y0 += 22;
   }
 
   const width = frame.width;
@@ -78,10 +77,11 @@ export function renderDonut(spec: Record<string, unknown>): string | null {
   const parts: string[] = [];
   parts.push(openChart({ ...frame, renderer: "donut" }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
-  parts.push(heads.join(""));
+  if (frame.title) parts.push(text(pieX, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
+  if (frame.subtitle) parts.push(text(pieX, subtitleY, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
 
-  if (showLegend && place === "top") parts.push(legend(arcs, 16, y0, frame, valueFormat));
-  if (showLegend && place === "left") parts.push(legend(arcs, 12, pieY, frame, valueFormat));
+  if (showLegend && place === "top") parts.push(legend(arcs, 8, y0, frame, valueFormat, width - 8));
+  if (showLegend && place === "left") parts.push(legend(arcs, 12, pieY, frame, valueFormat, 12 + sideWidth - 8));
 
   for (const arc of arcs) {
     const path = slicePath(cx, cy, outer, inner, arc.start, arc.end);
@@ -105,8 +105,8 @@ export function renderDonut(spec: Record<string, unknown>): string | null {
     );
   }
 
-  if (showLegend && place === "bottom") parts.push(legend(arcs, 16, pieY + size + 8, frame, valueFormat));
-  if (showLegend && place === "right") parts.push(legend(arcs, pieX + size + 16, pieY, frame, valueFormat));
+  if (showLegend && place === "bottom") parts.push(legend(arcs, 8, pieY + size + 8, frame, valueFormat, width - 8));
+  if (showLegend && place === "right") parts.push(legend(arcs, pieX + size + 16, pieY, frame, valueFormat, pieX + size + sideWidth - 8));
   parts.push(closeChart());
   return parts.join("");
 }
@@ -118,19 +118,52 @@ interface ArcSlice {
   percent: number;
 }
 
-function legend(slices: ArcSlice[], x: number, y: number, frame: ReturnType<typeof readFrame>, valueFormat: unknown): string {
+function legendPlace(
+  spec: Record<string, unknown>,
+  width: number,
+  height: number,
+  show: boolean,
+): "top" | "right" | "bottom" | "left" | false {
+  if (!show || spec.legend === false) return false;
+  if (isRecord(spec.legend)) {
+    if (spec.legend.show === false) return false;
+    const position = spec.legend.position;
+    if (position === "top" || position === "right" || position === "bottom" || position === "left") return position;
+  }
+  return width >= height * 2 ? "right" : "bottom";
+}
+
+function legend(
+  slices: ArcSlice[],
+  x: number,
+  y: number,
+  frame: ReturnType<typeof readFrame>,
+  valueFormat: unknown,
+  valueRight: number,
+): string {
+  const valueWidth = frame.legendValues ? 112 : 68;
   return slices
     .map((slice, index) => {
       const dy = y + index * 20;
       const pct = formatValue(slice.percent / 100, "percent", frame.locale);
       const extra = frame.legendValues ? ` ${formatValue(slice.value, valueFormat, frame.locale)}` : "";
+      const labelX = x + 16;
+      const label = fitLabel(slice.label, Math.max(12, valueRight - valueWidth - labelX));
       return (
         `<rect x="${n(x)}" y="${n(dy)}" width="10" height="10" rx="2" fill="${slice.color}" />` +
-        text(x + 16, dy + 9, slice.label, cssVar("muted", frame.preset.muted), 12, "400", "start") +
-        text(x + 108, dy + 9, `${pct}${extra}`, cssVar("text", frame.preset.text), 12, "600", "start")
+        text(labelX, dy + 9, label, cssVar("muted", frame.preset.muted), 12, "400", "start") +
+        text(valueRight, dy + 9, `${pct}${extra}`, cssVar("text", frame.preset.text), 12, "600", "end")
       );
     })
     .join("");
+}
+
+/** 12px labels are about 6.6px per character. Keep the value column clear of the name. */
+function fitLabel(label: string, maxPx: number): string {
+  const maxChars = Math.max(1, Math.floor(maxPx / 6.6));
+  if (label.length <= maxChars) return label;
+  if (maxChars <= 1) return "…";
+  return `${label.slice(0, maxChars - 1)}…`;
 }
 
 function slicePath(cx: number, cy: number, outer: number, inner: number, start: number, end: number): string {

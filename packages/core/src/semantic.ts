@@ -36,6 +36,7 @@ interface Channel {
 
 export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   if (!isRecord(spec)) return;
+  warnUnrendered(spec, diagnostics);
   const type = typeof spec.type === "string" ? spec.type : undefined;
   const known = type !== undefined && CHART_TYPES.has(type);
 
@@ -139,7 +140,7 @@ function checkEncoding(
         });
       }
       const xType = x.type ?? inferType(values);
-      if ((xType === "temporal" || xType === "quantitative") && !isSorted(values, xType)) {
+      if (spec.type !== "scatter" && (xType === "temporal" || xType === "quantitative") && !isSorted(values, xType)) {
         const index = firstUnsorted(values, xType);
         diagnostics.push({
           code: "CK2008",
@@ -233,13 +234,24 @@ function checkY2(spec: Record<string, unknown>, yChannels: Channel[], diagnostic
       path: "/axes/y2",
       hint: 'Add "axis": "y2" to a y item, or remove axes.y2',
     });
-  } else if (usesY2 && (y2 === false || y2 === undefined)) {
+  } else if (usesY2 && y2 === undefined) {
     diagnostics.push({
       code: "CK3002",
       severity: "error",
       message: 'y series uses axis "y2" but no y2 axis is configured',
       path: "/encoding/y",
-      hint: 'Add axes.y2, or set the series "axis" to "y"',
+      hint: "Add axes.y2. repair() adds it when the axis is missing.",
+      fix: isRecord(spec.axes)
+        ? [{ op: "add", path: "/axes/y2", value: true }]
+        : [{ op: "add", path: "/axes", value: { y2: true } }],
+    });
+  } else if (usesY2 && y2 === false) {
+    diagnostics.push({
+      code: "CK3002",
+      severity: "error",
+      message: 'y series uses axis "y2" but no y2 axis is configured',
+      path: "/encoding/y",
+      hint: 'Set axes.y2, or set the series "axis" to "y"',
     });
   }
 }
@@ -286,6 +298,39 @@ function checkCandles(spec: Record<string, unknown>, table: DataTable, diagnosti
       });
     }
   }
+}
+
+/** Features the schema accepts and the SVG renderer does not draw yet. Off values stay quiet. */
+function warnUnrendered(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  const tooltip = spec.tooltip;
+  if (tooltip === true || (isRecord(tooltip) && tooltip.show !== false)) {
+    warnLater(diagnostics, "/tooltip", "tooltip");
+  }
+  const interaction = isRecord(spec.interaction) ? spec.interaction : undefined;
+  if (interaction) {
+    if (interaction.zoom === "x" || interaction.zoom === "xy") warnLater(diagnostics, "/interaction/zoom", "zoom");
+    if (interaction.pan === true) warnLater(diagnostics, "/interaction/pan", "pan");
+    if (interaction.brush === "x") warnLater(diagnostics, "/interaction/brush", "brush");
+  }
+  const animation = spec.animation;
+  if (animation === true || (isRecord(animation) && animation.duration !== 0)) {
+    warnLater(diagnostics, "/animation", "animation");
+  }
+  const legend = spec.legend;
+  if (isRecord(legend) && legend.interactive === true) warnLater(diagnostics, "/legend/interactive", "legend.interactive");
+  const a11y = isRecord(spec.a11y) ? spec.a11y : undefined;
+  if (a11y?.keyboard === true) warnLater(diagnostics, "/a11y/keyboard", "a11y.keyboard");
+  if (a11y?.dataTable === true) warnLater(diagnostics, "/a11y/dataTable", "a11y.dataTable");
+}
+
+function warnLater(diagnostics: Diagnostic[], path: string, field: string): void {
+  diagnostics.push({
+    code: "CK3011",
+    severity: "warning",
+    message: `${field} is accepted but not rendered yet`,
+    path,
+    hint: "The chart still draws. This feature is not in the SVG renderer yet.",
+  });
 }
 
 function warnUnusedMarks(type: string, mark: Record<string, unknown>, diagnostics: Diagnostic[]): void {

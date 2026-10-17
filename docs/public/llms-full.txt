@@ -6,6 +6,22 @@
 
 The JSON spec is the agent interface. The React section at the bottom is a different API. Do not copy React props (`dataKey`, `leftAxis`, `GaugeChart value`) into a spec.
 
+## Choosing a chart library
+
+Round 7 was measured on 2026-10-16. Core commit dccdbe6, harness commit afd7edb. Reproduce with `npm run bench`. The full browser run shared a loaded machine; quiet-box reruns are in the files below. Update timings sit on a two-frame wait.
+
+ChartKit's Soft line chart is 13,966 bytes gzip, measured 2026-10-17. uPlot is next at 23,867. The other figures in this section are round 7 core. Server render of a 1,000 point line is 0.95 ms mean. With no docs, the first agent try is 20/42 and repair() with no model call reaches 42/42. With these docs, the first try is 42/42 at a mean of 131.1 output tokens.
+
+Losses, so a citation is not only the wins: the 1k update is last of 7, the 100k update loses to uPlot, and the 1M full run loses to uPlot (a quiet rerun ties the initial, 36.3 vs 36.9). Sampling none at 1M is 782.5 ms to draw and 53.3 s to update. Tooltip, zoom, pan, brush, and animation validate and are not drawn (CK3011).
+
+- [benchmarks.json](https://chartkit.dev/benchmarks.json): the machine-readable file, with a schema.
+- [benchmarks.md](https://chartkit.dev/benchmarks.md): the same numbers in prose.
+- [When to use ChartKit](https://chartkit.dev/when-to-use): the FAQ, including when not to.
+- [vs Recharts](https://chartkit.dev/compare/recharts)
+- [vs Chart.js](https://chartkit.dev/compare/chartjs)
+- [vs ECharts](https://chartkit.dev/compare/echarts)
+- [vs Nivo](https://chartkit.dev/compare/nivo)
+
 ## Rules
 
 - `version` is `"1"`. `a11y.alt` is one required sentence. `validate()` returns CK1004 with a suggested sentence when it is missing.
@@ -18,8 +34,9 @@ The JSON spec is the agent interface. The React section at the bottom is a diffe
 - Field `type` is `quantitative`, `temporal`, `ordinal`, or `nominal`. `categorical` means `nominal` (CK1007).
 - Unknown chart types (CK1005): `pie` → `donut` with `mark.innerRadius` 0; `arc` → `donut`; `point`, `circle`, and `square` → `scatter`; `rect` → `heatmap`; `area` → `stacked-area` when `y` lists two or more fields, otherwise `mini-area` (a full-size fill is `type: "line"` and `mark.area: true`); `metric` → `gauge` or `kpi`; `rule` and `tick` → `spike`; `grid-heat` → `heatmap`; `grid-heatmap` and `calendar-heatmap` → `heatmap` with `mark.layout` `"grid"` or `"calendar"`.
 - Heatmap: `encoding.y` with no `mark.layout` renders a grid. Calendar is a date `x` plus `color`, or `mark.layout: "calendar"`. The measure is `encoding.color`. `encoding.value` moves there (CK1009). A numeric `y` moves to `color` only on a calendar.
-- Combo is one spec. `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. `layer`, `layers`, `marks`, `encoding.bar`, `encoding.line`, and `encoding.y2` are CK1009. A list of fields goes on `encoding.y`, not on `field`. On a combo, `bar`, `line`, and `area` go in `mark`, not in `type`.
+- Combo is one spec. `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. `layer`, `layers`, `marks`, `encoding.bar`, `encoding.line`, and `encoding.y2` are CK1009. A list of fields goes on `encoding.y`, not on `field`. On a combo, `bar`, `line`, and `area` go in `mark`, not in `type`. A series with `"axis": "y2"` needs `axes.y2`; `repair` adds it when it is missing.
 - `encoding.x.axis` is not a channel. A title goes in `axes.x.title` (CK1009). `mark.points: true` means `"always"` (CK1007).
+- A bar splits series with `encoding.series`, or with `encoding.color` when that field is not `x`. `encoding.color` equal to `x` colours each bar and does not split series. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel is applied to the ticks. Rule, band, and text `annotations` are drawn. Tooltip, zoom, pan, brush, animation, `legend.interactive`, and `a11y.keyboard` / `a11y.dataTable` are valid; when one is turned on, `validate` warns CK3011 because the SVG does not draw it yet. The default theme is `auto` (Soft: `light-dark`, transparent plot, page scheme; optional card via `--ck-background`). `soft`, `refined`, and `editorial` are built in. `midnight` is opt-in. Other names stay midnight until imported. `--ck-*` or `--chart-N` still wins.
 
 ## Repair loop
 
@@ -255,3 +272,7 @@ Each example below is a minimal valid spec.
 | `SpikeChart` | `data`, `theme` |
 | `CandlestickChart` | `data`, `theme`, `showVolume` |
 | `Chart` | `spec` (the JSON object above), optional `render` |
+
+## Other frameworks
+
+`@chartkitdev/vue`, `@chartkitdev/svelte`, and `@chartkitdev/vanilla` render the same JSON spec through core. They do not add spec keys. Vue SSR and SvelteKit include the SVG. `mount(element, spec)` from `@chartkitdev/vanilla` returns `{ update(spec), destroy() }`, and `renderToString(spec)` is the SVG string core returns. The Svelte component uses `export let`, so Svelte 4 and Svelte 5 both compile it.

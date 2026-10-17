@@ -1,0 +1,77 @@
+{
+  "name": "@chartkitdev/vue",
+  "version": "0.5.0",
+  "description": "Vue 3 adapter for the ChartKit JSON spec. Same core as the 13,966 B gzip Soft line chart. Evidence: https://chartkit.dev/benchmarks",
+  "keywords": ["chart", "vue", "svg", "chartkit"],
+  "author": "Todd Garland",
+  "homepage": "https://chartkit.dev",
+  "bugs": {
+    "url": "https://github.com/toddynho/chartkit/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./ssr": {
+      "import": {
+        "types": "./dist/ssr.d.ts",
+        "default": "./dist/ssr.js"
+      },
+      "require": {
+        "types": "./dist/ssr.d.cts",
+        "default": "./dist/ssr.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@chartkitdev/core": "*"
+  },
+  "peerDependencies": {
+    "@vue/server-renderer": ">=3.4.0",
+    "vue": ">=3.4.0"
+  },
+  "peerDependenciesMeta": {
+    "@vue/server-renderer": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@vue/server-renderer": "^3.5.22",
+    "@vue/test-utils": "^2.4.6",
+    "jsdom": "^27.0.1",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^3.2.4",
+    "vue": "^3.5.22"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toddynho/chartkit",
+    "directory": "packages/vue"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,66 +1,41 @@
-import { MetadataRoute } from 'next';
+import type { MetadataRoute } from "next";
+import { rivals } from "@/lib/rivals";
+import { chartTypes, examples } from "@/lib/specs";
 
-const BASE_URL = 'https://chartkit.dev';
+const BASE = "https://chartkit.dev";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-
-  // Static pages
-  const staticPages = [
-    { url: '', priority: 1.0, changeFrequency: 'weekly' as const },
-    { url: '/getting-started', priority: 0.9, changeFrequency: 'monthly' as const },
-    { url: '/components', priority: 0.9, changeFrequency: 'weekly' as const },
-    { url: '/themes', priority: 0.8, changeFrequency: 'monthly' as const },
-    { url: '/hooks', priority: 0.7, changeFrequency: 'monthly' as const },
-    { url: '/utilities', priority: 0.7, changeFrequency: 'monthly' as const },
-    { url: '/examples', priority: 0.8, changeFrequency: 'weekly' as const },
-    { url: '/demo', priority: 0.8, changeFrequency: 'weekly' as const },
-    { url: '/about', priority: 0.5, changeFrequency: 'monthly' as const },
+  const paths = [
+    "",
+    "/docs",
+    "/docs/react",
+    "/docs/vue",
+    "/docs/svelte",
+    "/docs/vanilla",
+    "/docs/spec",
+    "/docs/theming",
+    "/docs/migrate",
+    "/examples",
+    "/playground",
+    "/benchmarks",
+    "/agents",
+    "/demo",
+    "/compare",
+    "/when-to-use",
+    ...rivals.map((rival) => `/compare/${rival.slug}`),
+    "/benchmarks.json",
+    "/benchmarks.md",
+    "/benchmarks.schema.json",
+    "/llms.txt",
+    "/llms-full.txt",
+    ...chartTypes.map((item) => `/docs/charts/${item.type}`),
+    ...examples.map((item) => `/examples/${item.slug}`),
   ];
-
-  // Component pages
-  const components = [
-    'sparkline',
-    'mini-area',
-    'line-chart',
-    'stacked-area',
-    'bar-chart',
-    'donut-chart',
-    'scatter-chart',
-    'combo-chart',
-    'heatmap',
-    'spike-chart',
-    'kpi-card',
-    'progress-ring',
-    'gauge-chart',
-    'candlestick-chart',
-  ];
-
-  // Utility pages
-  const utilities = [
-    'legend',
-    'annotations',
-    'responsive-chart',
-  ];
-
-  const componentPages = components.map((slug) => ({
-    url: `/components/${slug}`,
-    priority: 0.8,
-    changeFrequency: 'monthly' as const,
-  }));
-
-  const utilityPages = utilities.map((slug) => ({
-    url: `/utilities/${slug}`,
-    priority: 0.7,
-    changeFrequency: 'monthly' as const,
-  }));
-
-  const allPages = [...staticPages, ...componentPages, ...utilityPages];
-
-  return allPages.map((page) => ({
-    url: `${BASE_URL}${page.url}`,
+  return paths.map((path) => ({
+    url: `${BASE}${path}`,
     lastModified: now,
-    changeFrequency: page.changeFrequency,
-    priority: page.priority,
+    changeFrequency: path === "" || path === "/examples" ? "weekly" : "monthly",
+    priority: path === "" ? 1 : 0.7,
   }));
 }

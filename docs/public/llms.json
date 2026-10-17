@@ -4,11 +4,20 @@
   "version": "0.5.0",
   "packages": {
     "react": "@chartkitdev/react",
+    "vue": "@chartkitdev/vue",
+    "svelte": "@chartkitdev/svelte",
+    "vanilla": "@chartkitdev/vanilla",
     "core": "@chartkitdev/core",
     "compat": "@derpdaderp/chartkit"
   },
   "schema": "https://chartkit.dev/schema/v1.json",
-  "description": "Lightweight React charting library. Zero dependencies, pure SVG, 17 themes. Spec: https://chartkit.dev/schema/v1.json",
+  "description": "JSON-spec charting library. @chartkitdev/core renders SVG with zero dependencies. Adapters for React, Vue, Svelte, and vanilla. validate() and repair() are the agent loop. Round 7 evidence, including losses: https://chartkit.dev/benchmarks.json",
+  "benchmarks": {
+    "json": "https://chartkit.dev/benchmarks.json",
+    "markdown": "https://chartkit.dev/benchmarks.md",
+    "html": "https://chartkit.dev/benchmarks",
+    "whenToUse": "https://chartkit.dev/when-to-use"
+  },
   "homepage": "https://chartkit.dev",
   "repository": "https://github.com/toddynho/chartkit",
   "npm": "https://www.npmjs.com/package/@chartkitdev/react",

@@ -1,0 +1,443 @@
+{
+  "$schema": "https://chartkit.dev/benchmarks.schema.json",
+  "name": "ChartKit benchmarks",
+  "round": 7,
+  "measured": "2026-10-16",
+  "core": {
+    "pullRequest": 6,
+    "commit": "dccdbe6"
+  },
+  "harness": {
+    "pullRequest": 4,
+    "commit": "afd7edb"
+  },
+  "reproduce": "npm run bench on the harness commit with this core. Median of 5. This file does not re-time the libraries.",
+  "methodology": {
+    "browser": "Playwright Chromium, a 640×360 line, equal two-frame timers, median of 5. The full run shared the machine (about 11.6 GB of 16 GB in use). quietMs is a later same-session rerun.",
+    "updates": "Update tests sit on a shared two-frame wait. A few milliseconds is frame-timing noise. ChartKit updates land between about 19 and 33 ms on both round 6 core and this core.",
+    "sampling": "mark.sampling defaults to auto and minmax-downsamples a line longer than twice the plot width. 1,000 points stay complete. The samplingNone rows draw every point.",
+    "bundle": "gzip -9, bench harness. scripts/size.mjs measures the ChartKit line entry separately and is recorded as sizeScriptLineBytes.",
+    "ssr": "Mean of a 1,000 point line. supported false means no chart without a DOM. Recharts returned an empty wrapper.",
+    "agents": "claude-sonnet-4-5, temperature 0, 42 tasks, one run on 2026-10-16. Official means the library docs were in the prompt. ChartKit docs are llms.txt. repair() is a no-model step on ChartKit's no-docs first try and is not a second model call. Nivo and uPlot were not in the agent eval."
+  },
+  "headline": {
+    "lineGzipBytes": 13966,
+    "lineGzipBuild": "soft-default",
+    "lineGzipMeasured": "2026-10-17",
+    "otherFigures": "round 7 core dccdbe6, except the line gzip",
+    "nextSmallest": {
+      "lib": "uPlot",
+      "bytes": 23867
+    },
+    "ssrMeanMs": 0.95,
+    "repairNoDocs": {
+      "first": 20,
+      "afterRepair": 42
+    }
+  },
+  "bundleGzip": [
+    {
+      "id": "chartkit-line",
+      "lib": "ChartKit",
+      "entry": "minimal line, Soft default",
+      "bytes": 13966,
+      "reactExternal": false
+    },
+    {
+      "id": "chartkit-bar",
+      "lib": "ChartKit",
+      "entry": "minimal bar",
+      "bytes": 10289,
+      "reactExternal": false
+    },
+    {
+      "id": "chartkit-donut",
+      "lib": "ChartKit",
+      "entry": "minimal donut",
+      "bytes": 5681,
+      "reactExternal": false
+    },
+    {
+      "id": "chartkit-all",
+      "lib": "ChartKit",
+      "entry": "/all",
+      "bytes": 22864,
+      "reactExternal": false
+    },
+    {
+      "id": "uplot",
+      "lib": "uPlot",
+      "entry": "line plus stylesheet",
+      "bytes": 23867,
+      "reactExternal": false
+    },
+    {
+      "id": "chartjs",
+      "lib": "Chart.js",
+      "entry": "line",
+      "bytes": 49234,
+      "reactExternal": false
+    },
+    {
+      "id": "plot",
+      "lib": "Observable Plot",
+      "entry": "line",
+      "bytes": 97215,
+      "reactExternal": false
+    },
+    {
+      "id": "recharts",
+      "lib": "Recharts",
+      "entry": "line",
+      "bytes": 95807,
+      "reactExternal": true
+    },
+    {
+      "id": "nivo",
+      "lib": "Nivo",
+      "entry": "line",
+      "bytes": 95493,
+      "reactExternal": true
+    },
+    {
+      "id": "echarts",
+      "lib": "ECharts",
+      "entry": "echarts/core plus one series",
+      "bytes": 162391,
+      "reactExternal": false
+    }
+  ],
+  "sizeScriptLineBytes": 12106,
+  "browserMs": [
+    {
+      "points": 1000,
+      "chartkit": {
+        "initial": {
+          "full": 11.9,
+          "quiet": 13.7
+        },
+        "update": {
+          "full": 32.8,
+          "quiet": 31.9
+        }
+      },
+      "fastestInitial": {
+        "lib": "uPlot",
+        "full": 15,
+        "quiet": 15.1
+      },
+      "fastestUpdate": {
+        "lib": "Chart.js",
+        "full": 20.2,
+        "quietLib": "Nivo",
+        "quiet": 19.4
+      },
+      "result": "win-initial-loss-update"
+    },
+    {
+      "points": 10000,
+      "chartkit": {
+        "initial": {
+          "full": 13,
+          "quiet": 14.2
+        },
+        "update": {
+          "full": 30.7,
+          "quiet": 26.4
+        }
+      },
+      "fastestInitial": {
+        "lib": "uPlot",
+        "full": 17.7,
+        "quiet": 17.1
+      },
+      "fastestUpdate": {
+        "lib": "Chart.js",
+        "full": 18.5,
+        "quietLib": "Chart.js",
+        "quiet": 24.2
+      },
+      "result": "win-initial-loss-update"
+    },
+    {
+      "points": 100000,
+      "chartkit": {
+        "initial": {
+          "full": 17.4,
+          "quiet": 18.3
+        },
+        "update": {
+          "full": 22.9,
+          "quiet": 23.5
+        }
+      },
+      "fastestInitial": {
+        "lib": "uPlot",
+        "full": 20.2,
+        "quiet": 21.9
+      },
+      "fastestUpdate": {
+        "lib": "uPlot",
+        "full": 17.5,
+        "quietLib": "uPlot",
+        "quiet": 15.1
+      },
+      "result": "win-initial-loss-update"
+    },
+    {
+      "points": 1000000,
+      "chartkit": {
+        "initial": {
+          "full": 34.8,
+          "quiet": 36.3
+        },
+        "update": {
+          "full": 33.4,
+          "quiet": 36.8
+        }
+      },
+      "fastestInitial": {
+        "lib": "uPlot",
+        "full": 32,
+        "quiet": 36.9
+      },
+      "fastestUpdate": {
+        "lib": "uPlot",
+        "full": 29.2,
+        "quietLib": "uPlot",
+        "quiet": 33.9
+      },
+      "result": "loss-full-run-quiet-initial-tie"
+    }
+  ],
+  "samplingNoneMs": [
+    {
+      "points": 100000,
+      "initialMs": 88.7,
+      "updateMs": 1257.8
+    },
+    {
+      "points": 1000000,
+      "initialMs": 782.5,
+      "updateMs": 53343.8
+    }
+  ],
+  "ssrMs": [
+    {
+      "lib": "ChartKit",
+      "meanMs": 0.95,
+      "quietMs": 1.22,
+      "supported": true
+    },
+    {
+      "lib": "ECharts",
+      "meanMs": 9.04,
+      "quietMs": 8.42,
+      "supported": true
+    },
+    {
+      "lib": "Nivo",
+      "meanMs": 113,
+      "quietMs": null,
+      "supported": true
+    },
+    {
+      "lib": "uPlot",
+      "meanMs": null,
+      "quietMs": null,
+      "supported": false
+    },
+    {
+      "lib": "Chart.js",
+      "meanMs": null,
+      "quietMs": null,
+      "supported": false
+    },
+    {
+      "lib": "Recharts",
+      "meanMs": null,
+      "quietMs": null,
+      "supported": false
+    },
+    {
+      "lib": "Observable Plot",
+      "meanMs": null,
+      "quietMs": null,
+      "supported": false
+    }
+  ],
+  "agents": [
+    {
+      "lib": "ChartKit",
+      "noDocsFirst": 20,
+      "noDocsWithinTwo": 42,
+      "officialFirst": 42,
+      "officialWithinTwo": 42,
+      "tokensNoDocs": 139.4,
+      "tokensOfficial": 131.1,
+      "inEval": true
+    },
+    {
+      "lib": "Recharts",
+      "noDocsFirst": 42,
+      "noDocsWithinTwo": 42,
+      "officialFirst": 42,
+      "officialWithinTwo": 42,
+      "tokensNoDocs": 223.3,
+      "tokensOfficial": 236.6,
+      "inEval": true
+    },
+    {
+      "lib": "ECharts",
+      "noDocsFirst": 42,
+      "noDocsWithinTwo": 42,
+      "officialFirst": 42,
+      "officialWithinTwo": 42,
+      "tokensNoDocs": 334.2,
+      "tokensOfficial": 367.2,
+      "inEval": true
+    },
+    {
+      "lib": "Chart.js",
+      "noDocsFirst": 42,
+      "noDocsWithinTwo": 42,
+      "officialFirst": 42,
+      "officialWithinTwo": 42,
+      "tokensNoDocs": 294.6,
+      "tokensOfficial": 260.9,
+      "inEval": true
+    },
+    {
+      "lib": "Nivo",
+      "noDocsFirst": null,
+      "noDocsWithinTwo": null,
+      "officialFirst": null,
+      "officialWithinTwo": null,
+      "tokensNoDocs": null,
+      "tokensOfficial": null,
+      "inEval": false
+    },
+    {
+      "lib": "uPlot",
+      "noDocsFirst": null,
+      "noDocsWithinTwo": null,
+      "officialFirst": null,
+      "officialWithinTwo": null,
+      "tokensNoDocs": null,
+      "tokensOfficial": null,
+      "inEval": false
+    }
+  ],
+  "losses": [
+    "1,000-point update: ChartKit is last of 7.",
+    "10,000-point update: loss. The samples sit inside frame-timing noise.",
+    "100,000-point update: loss to uPlot. The round 6 win on this cell was frame noise.",
+    "1,000,000-point full run: loss to uPlot on initial and update. The quiet-box initial is a tie (36.3 vs 36.9).",
+    "Sampling none at 1,000,000 points: 782.5 ms initial and 53,343.8 ms update, on the loaded box.",
+    "No-docs agent first try is 20/42. repair() reaches 42/42. The other libraries in the eval were already 42/42 with no docs.",
+    "Tooltip, zoom, pan, brush, animation, and keyboard access validate and are not drawn (CK3011)."
+  ],
+  "urls": {
+    "html": "https://chartkit.dev/benchmarks",
+    "markdown": "https://chartkit.dev/benchmarks.md",
+    "json": "https://chartkit.dev/benchmarks.json",
+    "schema": "https://chartkit.dev/benchmarks.schema.json",
+    "whenToUse": "https://chartkit.dev/when-to-use"
+  },
+  "display": {
+    "headline": {
+      "lineGzipLabel": "14.0 KB",
+      "lineGzipBytes": "13,966",
+      "nextLib": "uPlot",
+      "nextGzipBytes": "23,867",
+      "ssrLabel": "0.95 ms",
+      "repairFrom": "20/42",
+      "repairTo": "42/42",
+      "repair": "20/42 → 42/42"
+    },
+    "browserRows": [
+      {
+        "points": "1,000",
+        "ckI": "11.9 (13.7)",
+        "ckU": "32.8 (31.9)",
+        "bestI": "uPlot 15.0 (15.1)",
+        "bestU": "Chart.js 20.2 (Nivo 19.4)",
+        "call": "Win initial. Loss on update, last of 7.",
+        "tone": "mixed"
+      },
+      {
+        "points": "10,000",
+        "ckI": "13.0 (14.2)",
+        "ckU": "30.7 (26.4)",
+        "bestI": "uPlot 17.7 (17.1)",
+        "bestU": "Chart.js 18.5 (24.2)",
+        "call": "Win initial. Loss on update.",
+        "tone": "mixed"
+      },
+      {
+        "points": "100,000",
+        "ckI": "17.4 (18.3)",
+        "ckU": "22.9 (23.5)",
+        "bestI": "uPlot 20.2 (21.9)",
+        "bestU": "uPlot 17.5 (15.1)",
+        "call": "Win initial. Loss on update.",
+        "tone": "mixed"
+      },
+      {
+        "points": "1,000,000",
+        "ckI": "34.8 (36.3)",
+        "ckU": "33.4 (36.8)",
+        "bestI": "uPlot 32.0 (36.9)",
+        "bestU": "uPlot 29.2 (33.9)",
+        "call": "Loss. Quiet rerun ties the initial.",
+        "tone": "loss"
+      }
+    ],
+    "samplingRows": [
+      {
+        "points": "100,000",
+        "initial": "88.7",
+        "update": "1,257.8"
+      },
+      {
+        "points": "1,000,000",
+        "initial": "782.5",
+        "update": "53,343.8"
+      }
+    ],
+    "agentRows": [
+      {
+        "lib": "ChartKit",
+        "noFirst": "20 / 42",
+        "noTwo": "42 / 42",
+        "offFirst": "42 / 42",
+        "offTwo": "42 / 42",
+        "tokens": "139.4 / 131.1"
+      },
+      {
+        "lib": "Recharts",
+        "noFirst": "42 / 42",
+        "noTwo": "42 / 42",
+        "offFirst": "42 / 42",
+        "offTwo": "42 / 42",
+        "tokens": "223.3 / 236.6"
+      },
+      {
+        "lib": "ECharts",
+        "noFirst": "42 / 42",
+        "noTwo": "42 / 42",
+        "offFirst": "42 / 42",
+        "offTwo": "42 / 42",
+        "tokens": "334.2 / 367.2"
+      },
+      {
+        "lib": "Chart.js",
+        "noFirst": "42 / 42",
+        "noTwo": "42 / 42",
+        "offFirst": "42 / 42",
+        "offTwo": "42 / 42",
+        "tokens": "294.6 / 260.9"
+      }
+    ]
+  }
+}
