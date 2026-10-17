@@ -22,7 +22,7 @@ const render = createRenderer([line]);
 
 `mark.sampling` defaults to `"auto"`: line, area, sparkline, mini-area, stacked-area, combo lines, and spike charts downsample above twice the plot width. See [SPEC.md](./SPEC.md).
 
-Theme colors are CSS variables (`var(--ck-series-1, …)`, `--ck-text`, `--ck-background`, and the rest) so a host stylesheet wins. Midnight ships with every renderer. Other presets are `@chartkitdev/core/themes/<name>` (a name that has not been imported renders as midnight). `@chartkitdev/core/all` registers all 17.
+Theme colors are CSS variables (`var(--ck-series-1, …)`, `--ck-text`, `--ck-background`, and the rest) so a host stylesheet wins. An omitted theme, or `"auto"`, is a transparent background that follows `prefers-color-scheme`, and `--ck-*` or `--chart-N` on an ancestor replaces a token. `theme: "midnight"` is the dark card. Other presets are `@chartkitdev/core/themes/<name>` (a name that has not been imported renders as midnight). `@chartkitdev/core/all` registers all 17.
 
 TypeScript types in `src/generated/schema.ts` are generated from the schema (`npm run generate:types`). Do not edit that file by hand.
 
@@ -37,7 +37,8 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
 - Donut uses `encoding.x` (slice label) and `encoding.y` (slice value). Not `theta`, `angle`, or `label`.
 - `encoding.*.axis` is the string `"y"` or `"y2"`. Titles go in `axes.y.title` or `axes.y2.title`.
 - Field types are `quantitative`, `temporal`, `ordinal`, or `nominal`. Not `categorical`.
-- A list of fields goes on `encoding.y`, not on `field`. On a combo, `bar`, `line`, and `area` go in `mark`, not in `type`.
+- A list of fields goes on `encoding.y`, not on `field`. On a combo, `bar`, `line`, and `area` go in `mark`, not in `type`. A series with `"axis": "y2"` needs `axes.y2`; `repair` adds it when it is missing.
+- A bar splits series with `encoding.series`, or with `encoding.color` when that field is not `x`. `encoding.color` equal to `x` colours each bar and does not split series. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel is applied to the ticks. Rule, band, and text `annotations` are drawn. Tooltip, zoom, pan, brush, animation, `legend.interactive`, and `a11y.keyboard` / `a11y.dataTable` are valid; when one is turned on, `validate` warns CK3011 because the SVG does not draw it yet. The default theme is `auto` (transparent, follows `prefers-color-scheme`, overridable with `--ck-*` or `--chart-N`). `theme: "midnight"` is the dark card.
 - A heatmap with `encoding.x`, `encoding.y`, and `encoding.color` is a grid. A calendar heatmap is a date `x` plus `color`, or `mark.layout: "calendar"`.
 
 ## line
@@ -246,3 +247,5 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
 ## React components (not the JSON spec)
 
 `@chartkitdev/react` exports dashboard components. Props such as `dataKey`, `leftAxis`, and `value` on `GaugeChart` are not spec keys. To render a spec, use `<Chart spec={...} />`.
+
+`@chartkitdev/vue`, `@chartkitdev/svelte`, and `@chartkitdev/vanilla` render this same spec. Vue SSR and SvelteKit include the SVG. `mount(element, spec)` returns `{ update(spec), destroy() }`. None of them add spec keys.
