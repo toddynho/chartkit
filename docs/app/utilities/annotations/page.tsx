@@ -3,7 +3,7 @@
 import { DocsLayout } from '@/components/layout/DocsLayout';
 import { PropsTable } from '@/components/docs/PropsTable';
 import { CodeBlock } from '@/components/docs/CodeBlock';
-import { LineChart, ScatterChart } from '@derpdaderp/chartkit';
+import { LineChart, ScatterChart } from '@chartkitdev/react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 import { useMemo } from 'react';
 

@@ -1,0 +1,15 @@
+{
+  "version": "1",
+  "type": "spike",
+  "data": [
+    { "time": "00:00", "count": 1 },
+    { "time": "00:05", "count": 0 },
+    { "time": "00:10", "count": 8 },
+    { "time": "00:15", "count": 2 },
+    { "time": "00:20", "count": 0 },
+    { "time": "00:25", "count": 14 }
+  ],
+  "encoding": { "x": "time", "y": "count" },
+  "mark": { "baseline": 0 },
+  "a11y": { "alt": "Blocked requests stayed low, then spiked to 14 at 00:25." }
+}

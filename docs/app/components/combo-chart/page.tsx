@@ -5,7 +5,7 @@ import { DocsLayout } from '@/components/layout/DocsLayout';
 import { Playground } from '@/components/playground/Playground';
 import { PropsTable } from '@/components/docs/PropsTable';
 import { CodeBlock } from '@/components/docs/CodeBlock';
-import { ComboChart } from '@derpdaderp/chartkit';
+import { ComboChart } from '@chartkitdev/react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 
 const generateComboData = () => [

@@ -1,0 +1,10 @@
+{
+  "version": "1",
+  "type": "pie",
+  "data": [
+    { "label": "A", "value": 2 },
+    { "label": "B", "value": 3 }
+  ],
+  "encoding": { "x": "label", "y": "value" },
+  "a11y": { "alt": "Slice B is larger than slice A in this sample." }
+}

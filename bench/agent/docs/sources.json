@@ -1,0 +1,44 @@
+{
+  "retrieved": "2026-10-16",
+  "capBytes": 6335,
+  "capFile": "docs/public/llms.txt",
+  "libraries": {
+    "chartkit": {
+      "title": "ChartKit llms.txt",
+      "url": "https://chartkit.dev/llms.txt",
+      "file": "docs/public/llms.txt",
+      "note": "Full file. This length is the cap. The other libraries are cut to this many bytes."
+    },
+    "recharts": {
+      "title": "Recharts getting started and quickstart",
+      "url": "https://mintlify.com/recharts/recharts/guides/getting-started.md",
+      "also": [
+        "https://mintlify.com/recharts/recharts/quickstart.md"
+      ],
+      "llmsTxt": "https://mintlify.com/recharts/recharts/llms.txt",
+      "file": "bench/agent/docs/recharts.md",
+      "note": "Recharts publishes an llms.txt index of links, not a spec. This excerpt is the official getting-started page plus the start of quickstart, cut to the ChartKit cap. The Mintlify index blurb at the top of each page was removed."
+    },
+    "echarts": {
+      "title": "Apache ECharts handbook: Get Started and Import",
+      "url": "https://echarts.apache.org/handbook/en/get-started/",
+      "also": [
+        "https://github.com/apache/echarts-handbook/blob/master/contents/en/basics/import.md"
+      ],
+      "llmsTxt": "https://echarts.apache.org/en/llms.txt",
+      "file": "bench/agent/docs/echarts.md",
+      "note": "ECharts publishes an llms.txt index. The handbook link on that index is Get Started. This excerpt is that page plus Import ECharts, cut to the ChartKit cap. Apache License 2.0."
+    },
+    "chartjs": {
+      "title": "Chart.js getting started: installation and usage",
+      "url": "https://www.chartjs.org/docs/latest/getting-started/",
+      "also": [
+        "https://github.com/chartjs/Chart.js/blob/master/docs/getting-started/installation.md",
+        "https://github.com/chartjs/Chart.js/blob/master/docs/getting-started/usage.md"
+      ],
+      "llmsTxt": null,
+      "file": "bench/agent/docs/chartjs.md",
+      "note": "Chart.js does not publish an llms.txt. This excerpt is the official installation page plus the start of the usage guide, from the Chart.js docs (MIT), cut to the ChartKit cap."
+    }
+  }
+}

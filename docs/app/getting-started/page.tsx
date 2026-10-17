@@ -16,14 +16,14 @@ export default function GettingStartedPage() {
       <p>Install ChartKit using your preferred package manager:</p>
       
       <CodeBlock
-        code="npm install @derpdaderp/chartkit"
+        code="npm install @chartkitdev/react"
         language="bash"
       />
 
       <p>Or with yarn:</p>
       
       <CodeBlock
-        code="yarn add @derpdaderp/chartkit"
+        code="yarn add @chartkitdev/react"
         language="bash"
       />
 
@@ -35,7 +35,7 @@ export default function GettingStartedPage() {
       <CodeBlock
         language="tsx"
         filename="app/dashboard/page.tsx"
-        code={`import { Sparkline, KpiCard, LineChart } from '@derpdaderp/chartkit';
+        code={`import { Sparkline, KpiCard, LineChart } from '@chartkitdev/react';
 
 // Sample data
 const data = [
@@ -91,7 +91,7 @@ export default function Dashboard() {
 
       <CodeBlock
         language="tsx"
-        code={`import { themes } from '@derpdaderp/chartkit';
+        code={`import { themes } from '@chartkitdev/react';
 
 const t = themes['midnight'];
 console.log(t.colors); // ['#4ade80', '#38bdf8', ...]
@@ -105,7 +105,7 @@ console.log(t.bg);     // '#0c0c0c'`}
 
       <CodeBlock
         language="tsx"
-        code={`import { LineChart, useContainerWidth } from '@derpdaderp/chartkit';
+        code={`import { LineChart, useContainerWidth } from '@chartkitdev/react';
 
 function ResponsiveChart({ data }) {
   const { ref, width } = useContainerWidth<HTMLDivElement>();

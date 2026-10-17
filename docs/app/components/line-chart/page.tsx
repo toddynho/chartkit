@@ -5,7 +5,7 @@ import { DocsLayout } from '@/components/layout/DocsLayout';
 import { Playground } from '@/components/playground/Playground';
 import { PropsTable } from '@/components/docs/PropsTable';
 import { CodeBlock } from '@/components/docs/CodeBlock';
-import { LineChart } from '@derpdaderp/chartkit';
+import { LineChart } from '@chartkitdev/react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 
 function generateMultiSeriesData() {
@@ -153,7 +153,7 @@ export default function LineChartPage() {
 
       <CodeBlock
         language="tsx"
-        code={`import { LineChart } from '@derpdaderp/chartkit';
+        code={`import { LineChart } from '@chartkitdev/react';
 
 const data = [
   { time: '09:00', p50: 1.5, p95: 2.1, p99: 3.2 },
@@ -446,10 +446,10 @@ const series = [
       <CodeBlock
         language="tsx"
         code={`// Before
-import { MonitorLine } from '@derpdaderp/chartkit';
+import { MonitorLine } from '@chartkitdev/react';
 
 // After
-import { LineChart } from '@derpdaderp/chartkit';
+import { LineChart } from '@chartkitdev/react';
 
 // MonitorLine is still exported as a deprecated alias`}
       />

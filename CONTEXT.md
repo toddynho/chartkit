@@ -4,10 +4,10 @@
 
 ## Project Overview
 
-**ChartKit** (`@derpdaderp/chartkit`) is a lightweight React charting library designed for dashboards and analytics applications. It prioritizes:
+**ChartKit** ships `@chartkitdev/core` (framework-free schema, `validate`, and SVG `render`) and `@chartkitdev/react` (the existing components plus `<Chart spec={...} />`). `@derpdaderp/chartkit` is a compatibility shim. The spec id is `https://chartkit.dev/schema/v1.json`. It prioritizes:
 
-- **Small bundle size**: ~15KB gzipped
-- **Zero dependencies**: Only peer dependency is React 18+
+- **Small core**: `@chartkitdev/core` has zero runtime dependencies. Chart renderers and themes past midnight are opt-in imports. `mark.sampling` defaults to `auto` and downsamples line, area, sparkline, mini-area, stacked-area, combo lines, and spike above twice the plot width (`packages/core/SPEC.md`). `npm run bench` writes the public comparison in `BENCHMARKS.md`. `npm run bench:core` prints core size and validate throughput. `npm run size` fails when the line, all-charts, or validate bundles grow past their budgets.
+- **Dependencies**: `@chartkitdev/core` has none. `@chartkitdev/react` depends on the core and peers React 18+
 - **Beautiful defaults**: 17 curated themes that work out of the box
 - **TypeScript-first**: Full type safety and autocomplete
 
@@ -16,19 +16,11 @@
 ```
 chartkit/
 ├── packages/
-│   └── chartkit/           # Main library package
-│       ├── src/
-│       │   ├── components/ # All chart components
-│       │   ├── hooks/      # React hooks (useAutoTheme, etc.)
-│       │   ├── themes/     # Theme definitions
-│       │   └── utils/      # Scale functions, path generation
-│       └── package.json    # Published as @derpdaderp/chartkit
-├── docs/                   # Documentation site (Next.js)
-│   ├── app/               # Next.js App Router pages
-│   ├── components/        # Doc site components
-│   ├── lib/               # Utilities and metadata
-│   └── public/            # Static assets, llms.txt
-└── CONTEXT.md             # This file
+│   ├── core/                 # @chartkitdev/core — registry, charts/*, themes/*, validate
+│   ├── react/                # @chartkitdev/react — components, hooks, themes
+│   └── compat-derpdaderp/    # @derpdaderp/chartkit shim
+├── docs/                     # Documentation site (Next.js) and docs/migrate.md
+└── CONTEXT.md
 ```
 
 ## Key Components
@@ -58,7 +50,7 @@ chartkit/
 
 ### Dark/Light Mode
 ```tsx
-import { useAutoTheme } from '@derpdaderp/chartkit';
+import { useAutoTheme } from '@chartkitdev/react';
 
 const theme = useAutoTheme({ light: 'sunset', dark: 'midnight' });
 <LineChart theme={theme} ... />
@@ -85,7 +77,7 @@ const theme = useAutoTheme({ light: 'sunset', dark: 'midnight' });
 
 Access theme colors directly:
 ```tsx
-import { themes } from '@derpdaderp/chartkit';
+import { themes } from '@chartkitdev/react';
 const t = themes['midnight'];
 // t.colors, t.bg, t.text, t.border, etc.
 ```
@@ -96,28 +88,40 @@ const t = themes['midnight'];
 # Install dependencies (from root)
 npm install
 
-# Build the library
-npm run build -w packages/chartkit
+# Build the libraries (core, then react, then the shim)
+npm run build:lib
 
 # Run docs site
 npm run dev -w docs
 
 # Run tests
-npm test -w packages/chartkit
+npm test
+
+# Public comparison (bundle, browser, SSR). Writes BENCHMARKS.md
+npm run bench
+
+# Internal core size and validate throughput
+npm run bench:core
+
+# Fail if line, all-charts, or validate gzip exceeds the budget
+npm run size
 ```
 
 ## Resources
 
 - **Documentation**: https://chartkit.dev
-- **npm**: https://www.npmjs.com/package/@derpdaderp/chartkit
+- **npm (React)**: https://www.npmjs.com/package/@chartkitdev/react
+- **npm (core)**: https://www.npmjs.com/package/@chartkitdev/core
+- **Schema**: https://chartkit.dev/schema/v1.json
 - **GitHub**: https://github.com/toddynho/chartkit
 - **LLM Reference**: https://chartkit.dev/llms.txt (summary) or /llms-full.txt (complete API)
 - **LLM JSON**: https://chartkit.dev/llms.json (structured data)
+- **Migration**: docs/migrate.md
 
 ## When Generating Code
 
-1. Always import from `@derpdaderp/chartkit`
-2. Every chart requires a `theme` prop - use `"midnight"` as default for dark UIs
+1. Prefer a v1 JSON spec (`version`, `type`, `data`, `encoding`, `a11y.alt`). One-line quick start: `import { render } from "@chartkitdev/core/all"`. Validate with `import { validate } from "@chartkitdev/core/validate"`. For a smaller bundle, `createRenderer([line])` after `import { line } from "@chartkitdev/core/charts/line"`. `<Chart spec={...} />` from `@chartkitdev/react` uses every chart unless you pass `render`.
+2. Existing components still import from `@chartkitdev/react`. `theme` is required on those components — `"midnight"` is a solid default. It is optional on the JSON spec (default `auto`).
 3. For responsive charts, use the `responsive` prop or `ResponsiveChart` wrapper
 4. Use `useAutoTheme` hook when the app supports dark/light mode switching
 5. Data format: arrays of objects with consistent keys

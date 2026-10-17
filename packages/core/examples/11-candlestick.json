@@ -1,0 +1,17 @@
+{
+  "version": "1",
+  "type": "candlestick",
+  "data": [
+    { "date": "2026-01-01", "open": 10, "high": 12, "low": 9, "close": 11, "volume": 1000 },
+    { "date": "2026-01-02", "open": 11, "high": 13, "low": 10, "close": 12, "volume": 800 }
+  ],
+  "encoding": {
+    "x": { "field": "date", "type": "temporal" },
+    "open": "open",
+    "high": "high",
+    "low": "low",
+    "close": "close",
+    "volume": "volume"
+  },
+  "a11y": { "alt": "The price closed higher on both January 1 and January 2." }
+}

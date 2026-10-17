@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "type": "candlestick",
+  "data": [
+    { "date": "2026-01-01", "close": 11 }
+  ],
+  "encoding": { "x": "date", "close": "close" },
+  "a11y": { "alt": "This candlestick spec is missing open, high, and low." }
+}

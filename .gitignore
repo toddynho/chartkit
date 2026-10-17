@@ -5,6 +5,7 @@ node_modules/
 dist/
 .next/
 out/
+*.tsbuildinfo
 
 # Environment
 .env
@@ -24,6 +25,10 @@ npm-debug.log*
 
 # Testing
 coverage/
+bench/last-run.json
+bench/.out/
+bench/results/partial.json
+bench/results/agent/conditions/
 
 # Misc
 *.tgz

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ArrowRight, Sparkles, Palette, Zap, Code2, Copy, Check } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Logo, Wordmark } from '@/components/Logo';
-import { LineChart, KpiCard, DonutChart, BarChart, ResponsiveChart } from '@derpdaderp/chartkit';
+import { LineChart, KpiCard, DonutChart, BarChart, ResponsiveChart } from '@chartkitdev/react';
 import { useMemo, useState } from 'react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 
@@ -83,7 +83,7 @@ const features = [
   {
     icon: Zap,
     title: 'Incredibly Light',
-    description: '~15KB gzipped. Zero dependencies. Just React.',
+    description: 'Zero dependencies. Just React.',
   },
   {
     icon: Code2,
@@ -109,7 +109,7 @@ export default function HomePage() {
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText('npm install @derpdaderp/chartkit');
+    navigator.clipboard.writeText('npm install @chartkitdev/react');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -183,7 +183,7 @@ export default function HomePage() {
               style={{ color: 'var(--ck-text-muted)' }}
             >
               The React chart library for dashboards that look as good as they perform. 
-              14 components, 17 themes, ~15KB.
+              14 components, 17 themes, one JSON spec.
             </p>
             
             {/* CTAs */}
@@ -208,7 +208,7 @@ export default function HomePage() {
                 }}
               >
                 <span style={{ color: 'var(--ck-dark-text-muted)' }}>$</span>
-                <span>npm install @derpdaderp/chartkit</span>
+                <span>npm install @chartkitdev/react</span>
                 <button
                   onClick={copyToClipboard}
                   className="ml-2 p-1 rounded hover:bg-white/10 transition-colors"
@@ -332,7 +332,7 @@ export default function HomePage() {
                 </p>
                 <p>
                   <strong style={{ color: 'var(--ck-text)' }}>Incredibly light.</strong>{' '}
-                  ~15KB gzipped with zero dependencies. Just React.
+                  Zero dependencies. Just React.
                 </p>
                 <p>
                   <strong style={{ color: 'var(--ck-text)' }}>TypeScript first.</strong>{' '}
@@ -405,7 +405,7 @@ export default function HomePage() {
               className="p-6 overflow-x-auto text-sm"
               style={{ backgroundColor: 'var(--ck-dark-bg)', color: 'var(--ck-dark-text)' }}
             >
-              <code>{`import { LineChart, KpiCard } from '@derpdaderp/chartkit';
+              <code>{`import { LineChart, KpiCard } from '@chartkitdev/react';
 
 export function Dashboard({ data }) {
   return (
@@ -486,7 +486,7 @@ export function Dashboard({ data }) {
               llms.txt
             </a>
             <a
-              href="https://www.npmjs.com/package/@derpdaderp/chartkit"
+              href="https://www.npmjs.com/package/@chartkitdev/react"
               className="hover:underline"
             >
               npm

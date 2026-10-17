@@ -1,0 +1,12 @@
+{
+  "version": "1",
+  "type": "kpi",
+  "metric": {
+    "label": "Revenue",
+    "value": 125000,
+    "delta": 0.125,
+    "format": "compact"
+  },
+  "data": [10, 12, 9, 14, 18, 17],
+  "a11y": { "alt": "Revenue is 125,000, up 12.5 percent versus the previous period." }
+}

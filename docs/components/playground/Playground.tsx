@@ -3,7 +3,7 @@
 import { useState, useCallback, type ReactNode } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { PropControls, type PropControlProps } from './PropControls';
-import { themes, type ThemeName, ResponsiveChart } from '@derpdaderp/chartkit';
+import { themes, type ThemeName, ResponsiveChart } from '@chartkitdev/react';
 import { useChartTheme } from '../ChartThemeProvider';
 import { cn } from '@/lib/utils';
 

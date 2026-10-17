@@ -17,7 +17,7 @@ import {
   ResponsiveChart,
   themes,
   type HeatmapDataPoint,
-} from '@derpdaderp/chartkit';
+} from '@chartkitdev/react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 
 // ============================================

@@ -1,0 +1,52 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
+import { render } from "../all";
+import { validate } from "../validate";
+
+const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
+
+const CHART_TYPES = [
+  "line",
+  "bar",
+  "donut",
+  "stacked-area",
+  "scatter",
+  "combo",
+  "heatmap",
+  "gauge",
+  "kpi",
+  "sparkline",
+  "mini-area",
+  "progress-ring",
+  "spike",
+  "candlestick",
+];
+
+function fencedSpecs(relativePath: string): unknown[] {
+  const text = readFileSync(join(repoRoot, relativePath), "utf8");
+  const specs: unknown[] = [];
+  const pattern = /```json\n([\s\S]*?)```/g;
+  for (const match of text.matchAll(pattern)) {
+    specs.push(JSON.parse(match[1] ?? "") as unknown);
+  }
+  return specs;
+}
+
+describe("published JSON examples", () => {
+  for (const file of ["docs/public/llms.txt", "docs/public/llms-full.txt", "packages/core/README.md"]) {
+    it(`${file} has one valid, drawable spec per chart type`, () => {
+      const specs = fencedSpecs(file);
+      const types = specs.map((spec) => (spec as { type?: string }).type);
+      expect([...types].sort()).toEqual([...CHART_TYPES].sort());
+      for (const spec of specs) {
+        const result = validate(spec);
+        expect(result.ok, JSON.stringify(result.errors)).toBe(true);
+        const svg = render(spec);
+        expect(svg).not.toContain("ck-chart-error");
+        expect(svg).toContain(`data-ck-type="${(spec as { type: string }).type}"`);
+      }
+    });
+  }
+});

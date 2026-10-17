@@ -1,0 +1,12 @@
+{
+  "version": "1",
+  "type": "progress-ring",
+  "metric": {
+    "label": "Uptime",
+    "value": 99.2,
+    "min": 0,
+    "max": 100,
+    "format": { "style": "number", "decimals": 1, "suffix": "%" }
+  },
+  "a11y": { "alt": "Uptime is 99.2 percent." }
+}

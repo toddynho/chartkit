@@ -11,13 +11,18 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace=chartkit-docs",
-    "build": "npm run build --workspace=@derpdaderp/chartkit && npm run build --workspace=chartkit-docs",
-    "build:lib": "npm run build --workspace=@derpdaderp/chartkit",
+    "build": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/react && npm run build --workspace=@derpdaderp/chartkit && npm run build --workspace=chartkit-docs",
+    "build:lib": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/react && npm run build --workspace=@derpdaderp/chartkit",
     "build:docs": "npm run build --workspace=chartkit-docs",
+    "test": "npm run test:run --workspace=@chartkitdev/core && npm run test:run --workspace=@chartkitdev/react && npm run test:run --workspace=@derpdaderp/chartkit && node --test bench/agent/check.test.mjs",
+    "bench": "node bench/run.mjs",
+    "bench:core": "node scripts/bench.mjs",
+    "size": "node scripts/size.mjs",
     "start": "npm run start --workspace=chartkit-docs",
     "clean": "rm -rf packages/*/dist docs/.next node_modules"
   },
   "devDependencies": {
+    "esbuild": "^0.25.0",
     "typescript": "^5.3.3"
   }
 }

@@ -1,0 +1,5 @@
+{
+  "version": "1",
+  "type": "gauge",
+  "a11y": { "alt": "This gauge is missing its metric value." }
+}

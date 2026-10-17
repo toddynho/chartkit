@@ -3,7 +3,7 @@
 import { DocsLayout } from '@/components/layout/DocsLayout';
 import { PropsTable } from '@/components/docs/PropsTable';
 import { CodeBlock } from '@/components/docs/CodeBlock';
-import { ResponsiveChart, LineChart, BarChart } from '@derpdaderp/chartkit';
+import { ResponsiveChart, LineChart, BarChart } from '@chartkitdev/react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 import { useMemo } from 'react';
 
@@ -72,7 +72,7 @@ export default function ResponsiveChartPage() {
 
       <CodeBlock
         language="tsx"
-        code={`import { ResponsiveChart, LineChart } from '@derpdaderp/chartkit';
+        code={`import { ResponsiveChart, LineChart } from '@chartkitdev/react';
 
 <ResponsiveChart aspectRatio={16 / 9}>
   {({ width, height }) => (

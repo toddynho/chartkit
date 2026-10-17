@@ -1,0 +1,113 @@
+"use client";
+
+// Components
+export {
+  // Chart Components
+  LineChart,
+  MonitorLine, // deprecated alias
+  Sparkline,
+  MiniArea,
+  KpiCard,
+  SpikeChart,
+  BarChart,
+  DonutChart,
+  StackedArea,
+  Heatmap,
+  ResponsiveChart,
+  ScatterChart,
+  ComboChart,
+  ProgressRing,
+  ProgressCircle,
+  GaugeChart,
+  CandlestickChart,
+  // Utility Components
+  Legend,
+  Annotations,
+  // Types
+  type LineChartProps,
+  type MonitorLineProps, // deprecated alias
+  type YAxisConfig,
+  type SeriesConfig,
+  type SparklineProps,
+  type MiniAreaProps,
+  type KpiCardProps,
+  type SpikeChartProps,
+  type BarChartProps,
+  type DonutChartProps,
+  type StackedAreaProps,
+  type HeatmapProps,
+  type HeatmapDataPoint,
+  type ResponsiveChartProps,
+  type ScatterChartProps,
+  type ScaleType,
+  type ComboChartProps,
+  type ComboSeriesConfig,
+  type ProgressRingProps,
+  type GaugeChartProps,
+  type CandlestickChartProps,
+  type CandlestickDataPoint,
+  type CandlestickTooltipProps,
+  type LegendProps,
+  type AnnotationsProps,
+  // Shared Types
+  type DataPointClickEvent,
+  type BarClickEvent,
+  type SegmentClickEvent,
+  type TooltipRenderProps,
+  type TooltipRenderer,
+  type LegendItem,
+  type LegendClickEvent,
+  type ReferenceLine,
+  type ReferenceArea,
+  type Annotation,
+  type GridOptions,
+} from './components';
+
+// Themes
+export { themes, getTheme, type ChartTheme, type ThemeName, type ThemeRegistry } from './themes';
+
+// Utilities
+export {
+  linearScale,
+  inverseLinearScale,
+  logScale,
+  inverseLogScale,
+  logTicks,
+  clamp,
+  extent,
+  padExtent,
+  interpolateY,
+  linePath,
+  linePathFromPoints,
+  areaPath,
+  areaPathFromLine,
+  generateTicks,
+  type ScaleFunction,
+  type Extent,
+  type InterpolatedPoint,
+  type CurveType,
+} from './utils';
+
+// Hooks
+export {
+  useUniqueId,
+  useMouseTracking,
+  useResizeObserver,
+  useContainerWidth,
+  useAnimatedMount,
+  useAutoTheme,
+  estimatePathLength,
+  type MouseTrackingState,
+  type UseMouseTrackingOptions,
+  type UseMouseTrackingResult,
+  type Size,
+  type UseResizeObserverResult,
+  type AnimationConfig,
+  type UseAnimatedMountResult,
+  type UseAutoThemeOptions,
+} from './hooks';
+
+export { Chart, type ChartProps } from './Chart';
+export { validate, suggestAlt } from '@chartkitdev/core/validate';
+export { render, register, createRenderer } from '@chartkitdev/core/all';
+export type { ChartSpec, Diagnostic, ValidationResult, JsonPatchOperation, ChartRenderer, RenderTarget } from '@chartkitdev/core';

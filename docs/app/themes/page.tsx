@@ -2,7 +2,7 @@
 
 import { DocsLayout } from '@/components/layout/DocsLayout';
 import { CodeBlock } from '@/components/docs/CodeBlock';
-import { themes, type ThemeName } from '@derpdaderp/chartkit';
+import { themes, type ThemeName } from '@chartkitdev/react';
 
 const themeNames = Object.keys(themes) as ThemeName[];
 
@@ -79,7 +79,7 @@ export default function ThemesPage() {
       <p>Import the themes object to access colors directly:</p>
       <CodeBlock
         language="tsx"
-        code={`import { themes } from '@derpdaderp/chartkit';
+        code={`import { themes } from '@chartkitdev/react';
 
 const t = themes['midnight'];
 

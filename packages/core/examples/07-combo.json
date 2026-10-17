@@ -1,0 +1,19 @@
+{
+  "version": "1",
+  "type": "combo",
+  "data": [
+    { "month": "Jan", "revenue": 100, "margin": 0.2 },
+    { "month": "Feb", "revenue": 140, "margin": 0.24 },
+    { "month": "Mar", "revenue": 130, "margin": 0.22 }
+  ],
+  "encoding": {
+    "x": "month",
+    "y": [
+      { "field": "revenue", "title": "Revenue", "mark": "bar" },
+      { "field": "margin", "title": "Margin", "mark": "line", "axis": "y2", "format": "percent" }
+    ]
+  },
+  "axes": { "y2": { "title": "Margin", "format": "percent" } },
+  "locale": "en-US",
+  "a11y": { "alt": "Revenue and margin both finished the quarter higher than they started." }
+}

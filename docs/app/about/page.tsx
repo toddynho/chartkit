@@ -26,7 +26,7 @@ export default function AboutPage() {
           
           <p className="text-lg leading-relaxed">
             The goal is simple: provide a set of chart components that look great out of 
-            the box, are lightweight (~15KB), and require minimal configuration. No fighting 
+            the box, are lightweight, and require minimal configuration. No fighting 
             with styling, no hunting through documentation for basic customization.
           </p>
           
@@ -143,7 +143,7 @@ export default function AboutPage() {
               Home
             </Link>
             <a
-              href="https://www.npmjs.com/package/@derpdaderp/chartkit"
+              href="https://www.npmjs.com/package/@chartkitdev/react"
               className="hover:underline"
             >
               npm

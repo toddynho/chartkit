@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { DocsLayout } from '@/components/layout/DocsLayout';
 import { PropsTable } from '@/components/docs/PropsTable';
 import { CodeBlock } from '@/components/docs/CodeBlock';
-import { Legend } from '@derpdaderp/chartkit';
+import { Legend } from '@chartkitdev/react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 
 const props = [
@@ -66,7 +66,7 @@ export default function LegendPage() {
 
       <CodeBlock
         language="tsx"
-        code={`import { Legend } from '@derpdaderp/chartkit';
+        code={`import { Legend } from '@chartkitdev/react';
 
 <Legend
   items={[

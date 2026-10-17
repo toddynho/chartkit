@@ -1,0 +1,6 @@
+{
+  "line": 8800,
+  "all": 20879,
+  "validate": 17594,
+  "note": "gzip -9 byte budgets, 8 percent above the measurement. 2026-10-16: line 8737, all 20000, validate 16291. Validate grew for the y-field-list and combo mark repairs; the new budget is round(16291 * 1.08). Line and all stay inside their existing budgets."
+}

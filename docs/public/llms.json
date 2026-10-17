@@ -1,13 +1,28 @@
 {
   "$schema": "https://chartkit.dev/llms-schema.json",
-  "name": "@derpdaderp/chartkit",
-  "version": "0.4.1",
-  "description": "Lightweight React charting library. Zero dependencies, pure SVG, 17 themes, ~15KB gzipped.",
+  "name": "@chartkitdev/react",
+  "version": "0.5.0",
+  "packages": {
+    "react": "@chartkitdev/react",
+    "core": "@chartkitdev/core",
+    "compat": "@derpdaderp/chartkit"
+  },
+  "schema": "https://chartkit.dev/schema/v1.json",
+  "description": "Lightweight React charting library. Zero dependencies, pure SVG, 17 themes. Spec: https://chartkit.dev/schema/v1.json",
   "homepage": "https://chartkit.dev",
   "repository": "https://github.com/toddynho/chartkit",
-  "npm": "https://www.npmjs.com/package/@derpdaderp/chartkit",
+  "npm": "https://www.npmjs.com/package/@chartkitdev/react",
   "license": "MIT",
-  "installation": "npm install @derpdaderp/chartkit",
+  "installation": "npm install @chartkitdev/react",
+  "coreQuickStart": "import { render } from \"@chartkitdev/core/all\"",
+  "core": {
+    "quickStart": "import { render } from \"@chartkitdev/core/all\"",
+    "validate": "import { validate } from \"@chartkitdev/core/validate\"",
+    "optIn": "import { createRenderer } from \"@chartkitdev/core\"; import { line } from \"@chartkitdev/core/charts/line\"; const render = createRenderer([line]);",
+    "themes": "@chartkitdev/core/themes/<name> (midnight is built in)",
+    "schema": "@chartkitdev/core/schema.json",
+    "unregisteredType": "CK1010"
+  },
   "peerDependencies": {
     "react": ">=18.0.0"
   },

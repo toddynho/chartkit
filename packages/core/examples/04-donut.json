@@ -1,0 +1,13 @@
+{
+  "version": "1",
+  "type": "donut",
+  "data": [
+    { "label": "Search", "value": 42 },
+    { "label": "Direct", "value": 28 },
+    { "label": "Social", "value": 18 },
+    { "label": "Email", "value": 12 }
+  ],
+  "encoding": { "x": "label", "y": "value" },
+  "mark": { "innerRadius": 0.6 },
+  "a11y": { "alt": "Search is the largest traffic source at 42 percent of sessions." }
+}

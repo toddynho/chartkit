@@ -5,7 +5,7 @@ import { DocsLayout } from '@/components/layout/DocsLayout';
 import { Playground } from '@/components/playground/Playground';
 import { PropsTable } from '@/components/docs/PropsTable';
 import { CodeBlock } from '@/components/docs/CodeBlock';
-import { Heatmap, type HeatmapDataPoint } from '@derpdaderp/chartkit';
+import { Heatmap, type HeatmapDataPoint } from '@chartkitdev/react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 
 function generateHeatmapData(): HeatmapDataPoint[] {
@@ -98,7 +98,7 @@ export default function HeatmapPage() {
 
       <CodeBlock
         language="tsx"
-        code={`import { Heatmap, type HeatmapDataPoint } from '@derpdaderp/chartkit';
+        code={`import { Heatmap, type HeatmapDataPoint } from '@chartkitdev/react';
 
 const data: HeatmapDataPoint[] = [
   { date: '2024-01-01', value: 5 },

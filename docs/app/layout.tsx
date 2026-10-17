@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     default: 'ChartKit - Lightweight charts for React & Next.js',
     template: '%s | ChartKit',
   },
-  description: 'Beautiful, lightweight React charts. 14 chart types, 17 themes, zero dependencies, ~15KB gzipped. Build stunning dashboards in minutes.',
+  description: 'Beautiful, lightweight React charts. 14 chart types, 17 themes, zero dependencies. Build stunning dashboards in minutes.',
   keywords: [
     'react charts',
     'react charting library',
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   publisher: 'ChartKit',
   openGraph: {
     title: 'ChartKit - Lightweight charts for React & Next.js',
-    description: 'Beautiful, lightweight React charts. 14 chart types, 17 themes, zero dependencies, ~15KB gzipped.',
+    description: 'Beautiful, lightweight React charts. 14 chart types, 17 themes, zero dependencies.',
     url: siteConfig.url,
     siteName: siteConfig.name,
     type: 'website',
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'ChartKit - Lightweight charts for React & Next.js',
-    description: 'Beautiful, lightweight React charts. 14 chart types, 17 themes, zero dependencies, ~15KB gzipped.',
+    description: 'Beautiful, lightweight React charts. 14 chart types, 17 themes, zero dependencies.',
     site: siteConfig.twitter,
     creator: siteConfig.twitter,
     images: [siteConfig.ogImage],

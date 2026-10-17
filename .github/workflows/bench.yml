@@ -1,0 +1,27 @@
+name: Benchmarks
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm install
+        working-directory: bench
+      - run: npx playwright install --with-deps chromium
+        working-directory: bench
+      - run: npm run bench -- --skip-agent
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmarks
+          path: |
+            BENCHMARKS.md
+            bench/results/latest.json

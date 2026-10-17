@@ -5,7 +5,7 @@ import { DocsLayout } from '@/components/layout/DocsLayout';
 import { Playground } from '@/components/playground/Playground';
 import { PropsTable } from '@/components/docs/PropsTable';
 import { CodeBlock } from '@/components/docs/CodeBlock';
-import { Sparkline } from '@derpdaderp/chartkit';
+import { Sparkline } from '@chartkitdev/react';
 import { useChartTheme } from '@/components/ChartThemeProvider';
 
 const generateData = (count: number = 30) =>
@@ -77,7 +77,7 @@ export default function SparklinePage() {
 
       <CodeBlock
         language="tsx"
-        code={`import { Sparkline } from '@derpdaderp/chartkit';
+        code={`import { Sparkline } from '@chartkitdev/react';
 
 const data = [
   { value: 10 },
