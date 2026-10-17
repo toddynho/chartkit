@@ -1,17 +1,22 @@
 import Link from "next/link";
 import { ChartView } from "@/lib/chart";
 import {
-  BENCH_COMMIT,
+  CORE_COMMIT,
+  HARNESS_COMMIT,
   MEASURED,
+  ROUND,
   agentRows,
   browserRows,
   bundleRace,
   bundleRows,
+  headline,
   initial100k,
+  initial1k,
   initial1m,
   raceSpec,
   samplingRows,
   ssrRace,
+  ssrRows,
 } from "@/lib/benchmarks";
 import { pageMeta } from "@/lib/site";
 
@@ -26,13 +31,20 @@ export default function BenchmarksPage() {
     <div className="wrap section prose wide">
       <h1>Benchmarks</h1>
       <p className="lede">
-        These are the published medians from <code>BENCHMARKS.md</code> on pull request #4, commit{" "}
-        <code>{BENCH_COMMIT}</code>, measured {MEASURED}. Five browser samples, Playwright Chromium, a 640×360 line.
-        Reproduce with <code>npm run bench</code> on that commit. This page does not re-time the libraries.
+        Round {ROUND}, measured {MEASURED}. Core is pull request #6 at <code>{CORE_COMMIT}</code>. The harness is pull
+        request #4 at <code>{HARNESS_COMMIT}</code>. Five browser samples, Playwright Chromium, a 640×360 line. Reproduce
+        with <code>npm run bench</code> on that pairing. This page does not re-time the libraries.
+      </p>
+      <p>
+        The full run shared the machine with other work, about 11.6 GB of 16 GB in use, and competitors were slower
+        than in round 6. Quiet-box reruns are in parentheses. Where those two disagree, both numbers are on the page.
       </p>
 
       <h2>Bundle size</h2>
-      <p>ChartKit’s minimal line chart is 8,712 bytes gzip. That is the number behind the 8.7 KB on the homepage.</p>
+      <p>
+        ChartKit’s minimal line chart is {headline.lineGzipBytes} bytes gzip ({headline.lineGzipLabel}). It is still
+        the smallest. Next is {headline.nextLib} at {headline.nextGzipBytes} bytes.
+      </p>
       <ChartView spec={raceSpec(bundleRace)} />
       <p className="meta">{bundleRace.caption}</p>
       <div className="table-wrap">
@@ -58,20 +70,24 @@ export default function BenchmarksPage() {
 
       <h2>Browser render</h2>
       <p>
-        ChartKit wins the initial render at 10k and 100k, and the 100k update. It loses the 1k initial (rank 3 of 7),
-        the 1k update to Recharts, Nivo, ECharts, and Chart.js, the 10k update by a millisecond, and both 1M timings to
-        uPlot.
+        ChartKit wins the initial render at 1k, 10k, and 100k. It loses the 1k update, and it is last of the seven
+        there. It also loses the 10k update, the 100k update, and both 1M timings on the full run. The quiet-box 1M
+        initial is a tie with uPlot (36.3 ms vs 36.9 ms).
       </p>
       <div className="grid-2">
+        <article className="card">
+          <ChartView spec={raceSpec(initial1k)} />
+          <p className="meta">{initial1k.caption}</p>
+        </article>
         <article className="card">
           <ChartView spec={raceSpec(initial100k)} />
           <p className="meta">{initial100k.caption}</p>
         </article>
-        <article className="card">
-          <ChartView spec={raceSpec(initial1m)} />
-          <p className="meta">{initial1m.caption}</p>
-        </article>
       </div>
+      <article className="card">
+        <ChartView spec={raceSpec(initial1m)} />
+        <p className="meta">{initial1m.caption}</p>
+      </article>
       <div className="table-wrap">
         <table>
           <thead>
@@ -92,17 +108,17 @@ export default function BenchmarksPage() {
                 <td className="num">{row.ckU}</td>
                 <td>{row.bestI}</td>
                 <td>{row.bestU}</td>
-                <td className={row.call.startsWith("Win") ? "win" : row.call.startsWith("Loss") ? "loss" : undefined}>
-                  {row.call}
-                </td>
+                <td className={row.tone === "loss" ? "loss" : undefined}>{row.call}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
       <p>
-        The 10k update samples sit on the shared two-frame wait (ChartKit 33.20 ms, uPlot 33.10, Chart.js 32.10). The
-        file treats that cell as a frame-quantized tie, not a separate hotspot in the SVG replacement.
+        Parentheses are the quiet-box rerun. Update tests sit on a shared two-frame wait, so a few milliseconds is
+        frame-timing noise, not a separate hotspot in the SVG replacement. ChartKit updates land between 19 and 33 ms
+        on both round 6 core and this core. uPlot swung 13–35 ms in the same session. The round 6 “win” at 100k update
+        was that noise; in this environment uPlot is usually ahead by about a frame.
       </p>
 
       <h2>Downsampling</h2>
@@ -132,7 +148,10 @@ export default function BenchmarksPage() {
           </tbody>
         </table>
       </div>
-      <p>The 1M loss to uPlot is with sampling on. Sampling off at 1M is 505 ms to draw and 21.5 seconds to update.</p>
+      <p>
+        The 1M comparison with uPlot is with sampling on. Sampling off at 1M is 782.5 ms to draw and 53.3 seconds to
+        update, on the loaded box.
+      </p>
 
       <h2>Server render</h2>
       <ChartView spec={raceSpec(ssrRace)} />
@@ -142,40 +161,30 @@ export default function BenchmarksPage() {
           <thead>
             <tr>
               <th>Library</th>
-              <th className="num">Mean ms</th>
+              <th className="num">Full run, mean ms</th>
+              <th className="num">Quiet box</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>ChartKit minimal</td>
-              <td className="num">0.62</td>
-              <td>SVG, no DOM</td>
-            </tr>
-            <tr>
-              <td>ECharts</td>
-              <td className="num">5.32</td>
-              <td>SVG SSR</td>
-            </tr>
-            <tr>
-              <td>Nivo</td>
-              <td className="num">52.91</td>
-              <td>SVG</td>
-            </tr>
-            <tr>
-              <td>uPlot, Chart.js, Recharts, Observable Plot</td>
-              <td className="num">—</td>
-              <td>No chart without a DOM. Recharts returned an empty wrapper.</td>
-            </tr>
+            {ssrRows.map((row) => (
+              <tr key={row.lib}>
+                <td>{row.lib}</td>
+                <td className="num">{row.mean}</td>
+                <td className="num">{row.quiet}</td>
+                <td>{row.status}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
 
       <h2 id="agents">Agent eval</h2>
       <p>
-        Round 6 is the current scoreboard. One model, claude-sonnet-4-5, temperature 0, one run on 2026-10-16, 42
-        tasks. “Official” means the library’s docs were in the prompt. ChartKit’s docs are <Link href="/llms.txt">llms.txt</Link>.
-        The previous llms.txt, the React-only v0 file, scored 18/42 in an earlier run.
+        Round {ROUND}. One model, claude-sonnet-4-5, temperature 0, one run on {MEASURED}, 42 tasks. “Official” means
+        the library’s docs were in the prompt. ChartKit’s docs are <Link href="/llms.txt">llms.txt</Link>, taken from
+        the Phase 1 branch and not edited on this site. The previous llms.txt, the React-only v0 file, scored 18/42 in
+        an earlier run.
       </p>
       <div className="table-wrap">
         <table>
@@ -204,10 +213,12 @@ export default function BenchmarksPage() {
         </table>
       </div>
       <p>
-        ChartKit’s first try with no docs is 21/42. <code>repair()</code>, with no model call, takes that same output
-        to 42/42. With the official docs, the first try is already 42/42, at about 132 output tokens against about 237
-        for Recharts. The other libraries have no repair step.{" "}
-        <Link href="/agents">How to use the loop</Link>.
+        ChartKit’s first try with no docs is {headline.repairFrom}. <code>repair()</code>, with no model call, takes
+        that same output to {headline.repairTo}. With the official docs, the first try is already 42/42, at a mean of
+        131.1 output tokens against 236.6 for Recharts. The other libraries have no repair step. Phase 1 grew llms.txt
+        to 8,274 bytes, about 1.9 KB more than the competitor excerpts. A ChartKit-only rerun with the file cut to
+        6,329 bytes scored 41/42 on the first try. The miss was a combo axis, CK3002, which <code>repair()</code> does
+        not patch. The headline numbers use the full file. <Link href="/agents">How to use the loop</Link>.
       </p>
     </div>
   );

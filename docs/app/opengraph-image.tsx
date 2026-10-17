@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { headline } from "@/lib/benchmarks";
 
 export const alt = "ChartKit. Charts from one JSON spec. Any framework. Built for agents.";
 export const size = { width: 1200, height: 630 };
@@ -29,9 +30,9 @@ export default function Image() {
           <span style={{ fontSize: 36, marginTop: 16, color: "#4a453e" }}>Any framework. Built for agents.</span>
         </div>
         <div style={{ display: "flex", gap: 28, fontSize: 28 }}>
-          <span>8.7 KB</span>
-          <span>0.62 ms SSR</span>
-          <span>42/42 with the docs</span>
+          <span>{headline.lineGzipLabel}</span>
+          <span>{headline.ssrLabel} SSR</span>
+          <span>{headline.repair}</span>
         </div>
       </div>
     ),

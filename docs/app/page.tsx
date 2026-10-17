@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChartView } from "@/lib/chart";
+import { headline } from "@/lib/benchmarks";
 import { heroSpec, examples } from "@/lib/specs";
 import { snippetsFor } from "@/lib/snippets";
 import { FrameworkTabs } from "@/components/FrameworkTabs";
@@ -32,21 +33,23 @@ export default function HomePage() {
           </div>
           <div className="stats">
             <Link className="stat" href="/benchmarks">
-              <b>8.7 KB</b>
-              <span>gzip, line chart</span>
+              <b>{headline.lineGzipLabel}</b>
+              <span>gzip, line chart. Next is {headline.nextLib} at {headline.nextGzipBytes} B</span>
             </Link>
             <Link className="stat" href="/benchmarks">
-              <b>0.62 ms</b>
+              <b>{headline.ssrLabel}</b>
               <span>server render</span>
             </Link>
             <Link className="stat" href="/benchmarks#agents">
-              <b>42 / 42</b>
-              <span>agent eval with the docs</span>
+              <b>{headline.repair}</b>
+              <span>repair(), no docs, first try</span>
             </Link>
           </div>
         </div>
-        <LiveSpec spec={heroSpec} />
       </section>
+      <div className="hero-stage">
+        <LiveSpec spec={heroSpec} mode="hero" labelScale={1.65} />
+      </div>
 
       <section className="section">
         <h2>The same spec, every framework</h2>
@@ -69,7 +72,10 @@ export default function HomePage() {
           </article>
           <article className="card">
             <h3>repair()</h3>
-            <p>Applies the safe patches validate already produced. It does not invent data. With no docs, repair() takes a first try from 21/42 to 42/42.</p>
+            <p>
+              Applies the safe patches validate already produced. It does not invent data. With no docs, repair() takes a
+              first try from {headline.repairFrom} to {headline.repairTo}.
+            </p>
             <Link href="/agents">The agent loop</Link>
           </article>
         </div>

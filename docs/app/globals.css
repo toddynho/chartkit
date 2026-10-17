@@ -157,12 +157,18 @@ strong { font-weight: 650; }
 }
 
 .hero {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 36px;
-  align-items: flex-end;
-  padding: 42px 0 12px;
+  display: block;
+  padding: 48px 0 8px;
+  max-width: 740px;
 }
+.hero-stage {
+  width: 100%;
+  margin: 8px 0 36px;
+}
+.editor-hero { grid-template-columns: minmax(0, 1fr); }
+.editor-hero .editor-side { border-left: 0; border-top: 1px solid var(--line); }
+.editor-hero .preview { padding: 18px 18px 4px; }
+.editor-hero textarea { min-height: 168px; }
 .stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -375,7 +381,8 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 @media (max-width: 960px) {
-  .hero, .docs, .editor, .grid-3, .grid-2, .site-footer { grid-template-columns: 1fr; }
+  .hero { max-width: none; }
+  .docs, .editor, .grid-3, .grid-2, .site-footer { grid-template-columns: 1fr; }
   .editor-side { border-left: 0; border-top: 1px solid var(--line); }
   .docs-side { display: none; }
   .docs-jump { display: block; }

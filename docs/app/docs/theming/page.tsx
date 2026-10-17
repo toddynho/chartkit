@@ -23,11 +23,21 @@ export default function ThemingPage() {
     <>
       <h1>Theming</h1>
       <p>
-        Every painted color is <code>var(--ck-*, fallback)</code>. Set the variables on a parent and the SVG follows.
-        This site does that for light and dark. Series colors are left unset, so a new core palette shows up here
-        without a site change.
+        The default theme is <code>auto</code>. Omit <code>theme</code>, or set it to <code>&quot;auto&quot;</code>, and
+        the chart is transparent and follows the page: <code>light-dark()</code> colors track{" "}
+        <code>prefers-color-scheme</code> and an ancestor&apos;s <code>color-scheme</code>. <code>--ck-*</code> still
+        overrides, and <code>--chart-N</code> is the next fallback, so <code>var(--chart-1)</code> stays visible.
       </p>
-      <p>Toggle the theme in the header. This chart uses the page tokens:</p>
+      <p>
+        <code>theme: &quot;midnight&quot;</code> is opt-in. It paints the dark card. Every other named preset is an
+        opt-in import of <code>@chartkitdev/core/themes/all</code>. Midnight is no longer what you get when the field
+        is missing.
+      </p>
+      <p>
+        Every painted color is <code>var(--ck-*, fallback)</code>. This site sets the text, grid, and delta variables
+        for light and dark, and leaves the series variables unset, so the core palette shows up here without a site
+        change. Toggle the theme in the header. This chart is <code>auto</code>, with the page tokens on top:
+      </p>
       <ChartView spec={swatch} />
       <h2>Tokens</h2>
       <div className="table-wrap">
@@ -72,8 +82,9 @@ export default function ThemingPage() {
         label="css"
       />
       <p>
-        Muted text has to clear 4.5:1 against the page. The midnight fallback <code>#8a8a8a</code> does not, on white,
-        so the host sets <code>--ck-muted</code>. To use a shadcn palette, point the series variables at yours:
+        Muted text has to clear 4.5:1 against the page. The midnight muted color <code>#8a8a8a</code> does not, on
+        white, which is one reason the page default is <code>auto</code> and the host sets <code>--ck-muted</code>. To
+        use a shadcn palette, point the series variables at yours:
       </p>
       <CodeBlock
         code={`.chart-host {
@@ -87,10 +98,11 @@ export default function ThemingPage() {
       />
       <h2>Presets</h2>
       <p>
-        Seventeen presets ship with core. Midnight is built in. The others are an opt-in import of{" "}
-        <code>@chartkitdev/core/themes/all</code>. A preset chart below opts out of the page tokens so you see the
-        preset&apos;s own colors. Emerald, latte, neon, obsidian, and orchid are omitted here because their muted color
-        is under 4.5:1 on the preset background.
+        Seventeen presets ship with core. <code>auto</code> is the default and is built in, as is midnight. The rest
+        register when you import <code>@chartkitdev/core/themes/all</code>. A preset chart below sets{" "}
+        <code>theme</code> explicitly and opts out of the page tokens, so you see that preset&apos;s own colors.
+        Emerald, latte, neon, obsidian, and orchid are omitted here because their muted color is under 4.5:1 on the
+        preset background.
       </p>
       <div className="preset-grid">
         {THEMES.filter((name) => !quietMuted.has(name)).map((name) => (

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CodeBlock } from "@/components/CodeBlock";
 import { CopyButton } from "@/components/CopyButton";
+import { headline, ROUND } from "@/lib/benchmarks";
 import { pageMeta } from "@/lib/site";
 import { AGENT_PROMPT } from "@/lib/specs";
 
@@ -31,9 +32,11 @@ export default function AgentsPage() {
         </li>
       </ul>
       <p>
-        On the round 6 eval, official docs put ChartKit at 42/42 on the first try. With no docs, the first try is
-        21/42 and the second try, which sees the validator errors, is 42/42. The old React-only llms.txt scored 18/42.
-        Numbers and method are on the <Link href="/benchmarks#agents">benchmarks page</Link>.
+        On the round {ROUND} eval, official docs put ChartKit at 42/42 on the first try, at a mean of 131.1 output
+        tokens. With no docs, the first try is {headline.repairFrom} and the second try, which sees the validator
+        errors, is 42/42. <code>repair()</code> with no model call takes that same first try to {headline.repairTo}.
+        The old React-only llms.txt scored 18/42. Numbers and method are on the{" "}
+        <Link href="/benchmarks#agents">benchmarks page</Link>.
       </p>
       <h2>The loop</h2>
       <CodeBlock

@@ -76,7 +76,7 @@ export const heroSpec: Spec = {
     ],
   },
   mark: { curve: "monotone", points: "none" },
-  size: { width: 720, height: 340 },
+  size: { width: 560, height: 320 },
   a11y: { alt: "Revenue stays near the target and finishes the year above it, at 81 against a target of 73." },
 };
 
@@ -97,7 +97,7 @@ export const chartTypes: ChartTypeDoc[] = [
     summary: "A comparison across categories. Several y channels stack when mark.stack is stack or percent.",
     notes: [
       "mark.orientation horizontal turns the bars sideways.",
-      "A list of y channels is how you stack. encoding.series on a bar is accepted by the schema and not drawn.",
+      "encoding.series, or encoding.color set to a data field, splits the bars into series. mark.stack stack or percent stacks them. A list of y channels stacks too.",
       "cornerRadius and gap are mark options.",
     ],
   },
@@ -122,7 +122,7 @@ export const chartTypes: ChartTypeDoc[] = [
     summary: "Two quantitative fields, with an optional size channel for bubbles.",
     notes: [
       "Keep the size range inside the plot. Very large bubbles are clipped.",
-      "scale type log is accepted by the schema and currently draws as linear.",
+      "scale.type log draws a log axis for a positive domain.",
     ],
   },
   {
@@ -188,7 +188,7 @@ export const chartTypes: ChartTypeDoc[] = [
     summary: "Open, high, low, and close. Optional volume.",
     notes: [
       "encoding needs x, open, high, low, and close.",
-      "Short category labels avoid the overlapping ISO dates a temporal axis still prints as raw text.",
+      "A temporal x is a time axis, formatted from the span (Jan 5, Jan 2026) instead of a raw ISO string.",
     ],
   },
 ];

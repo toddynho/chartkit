@@ -20,9 +20,9 @@ export default function SpecPage() {
       </p>
       <div className="note">
         <strong>Accepted, not drawn yet</strong>
-        Tooltip, annotations, interaction (zoom, pan, brush), animation, log scales, and keyboard or data-table
-        accessibility are in the schema. Core does not paint them, and validate does not warn. The examples on this
-        site are charts the renderer draws.
+        Tooltip, zoom, pan, brush, animation, interactive legends, and keyboard or data-table accessibility are in the
+        schema. Turning one on warns CK3011, because the SVG does not paint it yet. Annotations, log scales, time
+        axes, and bar series are drawn. The examples on this site are charts the renderer draws.
       </div>
       <h2>Repair loop</h2>
       <CodeBlock

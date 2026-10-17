@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headline } from "@/lib/benchmarks";
 import { pageMeta } from "@/lib/site";
 
 export const metadata = pageMeta(
@@ -18,10 +19,10 @@ const rows = [
   ["Radar, treemap, sankey", "No", "Yes", "Partial", "Yes", "No"],
   ["Tooltips", "In the spec, not drawn", "Yes", "Yes", "Yes", "Yes"],
   ["Zoom and pan", "In the spec, not drawn", "No", "Plugin", "Yes", "Yes"],
-  ["Annotations", "In the spec, not drawn", "Yes", "Plugin", "Yes", "Yes"],
-  ["SSR without a DOM", "Yes, 0.62 ms", "Empty wrapper", "No", "Yes, 5.32 ms", "No"],
-  ["JSON spec and repair()", "Yes", "No", "No", "No", "No"],
-  ["Line chart, gzip", "8.7 KB", "100 KB", "49 KB", "163 KB", "24 KB"],
+  ["Annotations", "Yes", "Yes", "Plugin", "Yes", "Yes"],
+  ["SSR without a DOM", `Yes, ${headline.ssrLabel}`, "Empty wrapper", "No", "Yes, 9.04 ms", "No"],
+  ["repair(), no docs", headline.repair, "No repair", "No repair", "No repair", "No repair"],
+  ["Line chart, gzip", `${headline.lineGzipLabel} (${headline.lineGzipBytes} B)`, "96 KB, React external", "49 KB", "162 KB", `${headline.nextGzipBytes} B`],
 ];
 
 export default function ComparePage() {
@@ -29,8 +30,11 @@ export default function ComparePage() {
     <div className="wrap section prose wide">
       <h1>Compare</h1>
       <p className="lede">
-        A short, honest cut of the October 2026 matrix. “In the spec, not drawn” means <code>validate()</code> accepts
-        the field and the SVG renderer ignores it. Cells for other libraries come from their docs and are point-in-time.
+        A short, honest cut of the round 7 matrix. “In the spec, not drawn” means the field validates and the SVG
+        renderer does not paint it. Turning tooltip, zoom, pan, brush, animation, or keyboard access on warns CK3011.
+        Annotations, log scales, time axes, and bar series are drawn. Cells for other libraries come from their docs
+        and are point-in-time. ChartKit’s line chart is still the smallest; uPlot is next at {headline.nextGzipBytes}{" "}
+        bytes.
       </p>
       <div className="table-wrap">
         <table>

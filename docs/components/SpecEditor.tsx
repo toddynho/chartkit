@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { scaleSvgText } from "@/lib/chart";
 import { THEMES } from "@/lib/specs";
 
 interface Props {
   initialSpec: unknown;
   initialSvg: string;
-  mode?: "compact" | "full";
+  mode?: "compact" | "full" | "hero";
+  labelScale?: number;
 }
 
 async function draw(spec: unknown, preset: boolean): Promise<string> {
@@ -15,7 +17,7 @@ async function draw(spec: unknown, preset: boolean): Promise<string> {
   return render(spec);
 }
 
-export function SpecEditor({ initialSpec, initialSvg, mode = "compact" }: Props) {
+export function SpecEditor({ initialSpec, initialSvg, mode = "compact", labelScale = 1 }: Props) {
   const [text, setText] = useState(() => JSON.stringify(initialSpec, null, 2));
   const [svg, setSvg] = useState(initialSvg);
   const [theme, setTheme] = useState("site");
@@ -36,7 +38,7 @@ export function SpecEditor({ initialSpec, initialSvg, mode = "compact" }: Props)
     }
     const themed = applyTheme(parsed, themeName);
     try {
-      const next = await draw(themed, themeName !== "site");
+      const next = scaleSvgText(await draw(themed, themeName !== "site"), labelScale);
       setSvg(next);
       if (keepStatus.current) {
         keepStatus.current = false;
@@ -156,8 +158,10 @@ export function SpecEditor({ initialSpec, initialSvg, mode = "compact" }: Props)
 
   const preset = theme !== "site";
 
+  const frame = mode === "full" ? "editor editor-full" : mode === "hero" ? "editor editor-hero" : "editor";
+
   return (
-    <div className={mode === "full" ? "editor editor-full" : "editor"}>
+    <div className={frame}>
       <div className={preset ? "chart-host chart-preset preview" : "chart-host preview"} dangerouslySetInnerHTML={{ __html: svg }} />
       <div className="editor-side">
         <label htmlFor="spec-json">Chart spec (JSON)</label>
