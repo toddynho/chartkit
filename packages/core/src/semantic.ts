@@ -234,13 +234,24 @@ function checkY2(spec: Record<string, unknown>, yChannels: Channel[], diagnostic
       path: "/axes/y2",
       hint: 'Add "axis": "y2" to a y item, or remove axes.y2',
     });
-  } else if (usesY2 && (y2 === false || y2 === undefined)) {
+  } else if (usesY2 && y2 === undefined) {
     diagnostics.push({
       code: "CK3002",
       severity: "error",
       message: 'y series uses axis "y2" but no y2 axis is configured',
       path: "/encoding/y",
-      hint: 'Add axes.y2, or set the series "axis" to "y"',
+      hint: "Add axes.y2. repair() adds it when the axis is missing.",
+      fix: isRecord(spec.axes)
+        ? [{ op: "add", path: "/axes/y2", value: true }]
+        : [{ op: "add", path: "/axes", value: { y2: true } }],
+    });
+  } else if (usesY2 && y2 === false) {
+    diagnostics.push({
+      code: "CK3002",
+      severity: "error",
+      message: 'y series uses axis "y2" but no y2 axis is configured',
+      path: "/encoding/y",
+      hint: 'Set axes.y2, or set the series "axis" to "y"',
     });
   }
 }

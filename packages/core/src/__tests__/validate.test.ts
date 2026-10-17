@@ -882,6 +882,50 @@ describe("diagnostic codes", () => {
     expect(result.errors.some((error) => error.code === "CK2004" && error.path === "/data")).toBe(true);
   });
 
+  it("CK3002 repair adds a missing y2 axis and leaves an explicit false", () => {
+    const spec = {
+      version: "1",
+      type: "combo",
+      data: [
+        { week: "W1", orders: 30, rate: 0.4 },
+        { week: "W2", orders: 36, rate: 0.55 },
+      ],
+      encoding: {
+        x: "week",
+        y: [
+          { field: "orders", mark: "bar" },
+          { field: "rate", mark: "line", axis: "y2" },
+        ],
+      },
+      a11y: { alt: "Orders and the rate both rose." },
+    };
+    const missing = validate(spec);
+    expect(missing.errors.find((item) => item.code === "CK3002")?.fix).toEqual([
+      { op: "add", path: "/axes", value: { y2: true } },
+    ]);
+    const repaired = repair(spec);
+    expect(repaired.ok).toBe(true);
+    expect((repaired.spec as { axes: { y2: boolean } }).axes.y2).toBe(true);
+    expect((spec as { axes?: unknown }).axes).toBeUndefined();
+
+    const titled = { ...spec, axes: { y: { title: "Orders" } } };
+    expect(validate(titled).errors.find((item) => item.code === "CK3002")?.fix).toEqual([
+      { op: "add", path: "/axes/y2", value: true },
+    ]);
+    const kept = repair(titled);
+    expect(kept.ok).toBe(true);
+    expect((kept.spec as { axes: { y: { title: string }; y2: boolean } }).axes).toEqual({
+      y: { title: "Orders" },
+      y2: true,
+    });
+
+    const off = { ...spec, axes: { y2: false } };
+    expect(validate(off).errors.find((item) => item.code === "CK3002")?.fix).toBeUndefined();
+    const refused = repair(off);
+    expect(refused.ok).toBe(false);
+    expect((refused.spec as { axes: { y2: boolean } }).axes.y2).toBe(false);
+  });
+
   it("CK2005 rejects uneven columns", () => {
     const result = validate({
       ...base,
