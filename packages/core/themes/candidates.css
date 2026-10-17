@@ -1,0 +1,240 @@
+/* Candidate default looks. Opt-in stylesheet. Not the library default.
+   Put data-ck-theme and data-ck-scheme on an ancestor of the chart.
+   Colour tokens are already read by the renderer (var(--ck-*)).
+   --ck-line-width, --ck-bar-radius, --ck-bar-gap, and --ck-area-opacity are proposed.
+   The renderer still uses its mark defaults until a look is chosen. */
+
+[data-ck-theme="refined"][data-ck-scheme="light"] {
+  color-scheme: light;
+  --ck-font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ck-background: #ffffff;
+  --ck-surface: #fafafa;
+  --ck-text: #18181b;
+  --ck-muted: #71717a;
+  --ck-grid: rgb(24 24 27 / 0.08);
+  --ck-axis: rgb(24 24 27 / 0.18);
+  --ck-accent: #436f9e;
+  --ck-positive: #548556;
+  --ck-negative: #894840;
+  --ck-series-1: #436f9e;
+  --ck-series-2: #894840;
+  --ck-series-3: #6d4e83;
+  --ck-series-4: #548556;
+  --ck-series-5: #026e5b;
+  --ck-series-6: #795616;
+  --ck-series-7: #258598;
+  --ck-series-8: #9d6184;
+  --ck-seq-1: #517dae;
+  --ck-seq-2: #4671a2;
+  --ck-seq-3: #3b6695;
+  --ck-seq-4: #2f5a89;
+  --ck-seq-5: #244f7c;
+  --ck-seq-6: #184470;
+  --ck-div-1: #7b4263;
+  --ck-div-2: #8d5375;
+  --ck-div-3: #9d6184;
+  --ck-div-4: #757575;
+  --ck-div-5: #2f8974;
+  --ck-div-6: #1b7a66;
+  --ck-div-7: #066755;
+  --ck-line-width: 1.75;
+  --ck-bar-radius: 4;
+  --ck-bar-gap: 0.22;
+  --ck-area-opacity: 0.14;
+}
+
+[data-ck-theme="refined"][data-ck-scheme="dark"] {
+  color-scheme: dark;
+  --ck-font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ck-background: #09090b;
+  --ck-surface: #18181b;
+  --ck-text: #fafafa;
+  --ck-muted: #a1a1aa;
+  --ck-grid: rgb(250 250 250 / 0.08);
+  --ck-axis: rgb(250 250 250 / 0.18);
+  --ck-accent: #88bcf6;
+  --ck-positive: #7fb980;
+  --ck-negative: #feb1a6;
+  --ck-series-1: #88bcf6;
+  --ck-series-2: #feb1a6;
+  --ck-series-3: #ab87c7;
+  --ck-series-4: #7fb980;
+  --ck-series-5: #49ac95;
+  --ck-series-6: #ba904c;
+  --ck-series-7: #a1d1dd;
+  --ck-series-8: #d58eb6;
+  --ck-seq-1: #6396ce;
+  --ck-seq-2: #6fa2db;
+  --ck-seq-3: #7cafe8;
+  --ck-seq-4: #88bcf6;
+  --ck-seq-5: #9ac8fd;
+  --ck-seq-6: #b0d5fe;
+  --ck-div-1: #fab0d9;
+  --ck-div-2: #df97c0;
+  --ck-div-3: #c57fa6;
+  --ck-div-4: #868686;
+  --ck-div-5: #49ac95;
+  --ck-div-6: #64c6ad;
+  --ck-div-7: #7fe0c7;
+  --ck-line-width: 1.75;
+  --ck-bar-radius: 4;
+  --ck-bar-gap: 0.22;
+  --ck-area-opacity: 0.14;
+}
+
+[data-ck-theme="editorial"][data-ck-scheme="light"] {
+  color-scheme: light;
+  --ck-font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ck-background: #ffffff;
+  --ck-surface: #f6f9fc;
+  --ck-text: #0a2540;
+  --ck-muted: #425466;
+  --ck-grid: rgb(10 37 64 / 0.08);
+  --ck-axis: rgb(10 37 64 / 0.22);
+  --ck-accent: #4555a6;
+  --ck-positive: #0a6f50;
+  --ck-negative: #99393b;
+  --ck-series-1: #4555a6;
+  --ck-series-2: #99393b;
+  --ck-series-3: #0a6f50;
+  --ck-series-4: #b35c29;
+  --ck-series-5: #8a3c77;
+  --ck-series-6: #037a84;
+  --ck-series-7: #6f5c01;
+  --ck-series-8: #527a19;
+  --ck-seq-1: #5c6eba;
+  --ck-seq-2: #5162ad;
+  --ck-seq-3: #4757a1;
+  --ck-seq-4: #3c4b94;
+  --ck-seq-5: #324087;
+  --ck-seq-6: #29347b;
+  --ck-div-1: #8f3738;
+  --ck-div-2: #a34949;
+  --ck-div-3: #b05454;
+  --ck-div-4: #757575;
+  --ck-div-5: #2c8766;
+  --ck-div-6: #117555;
+  --ck-div-7: #076246;
+  --ck-line-width: 2.25;
+  --ck-bar-radius: 2;
+  --ck-bar-gap: 0.18;
+  --ck-area-opacity: 0.24;
+}
+
+[data-ck-theme="editorial"][data-ck-scheme="dark"] {
+  color-scheme: dark;
+  --ck-font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ck-background: #0b1020;
+  --ck-surface: #12182b;
+  --ck-text: #f6f9fc;
+  --ck-muted: #adbdcc;
+  --ck-grid: rgb(246 249 252 / 0.10);
+  --ck-axis: rgb(246 249 252 / 0.22);
+  --ck-accent: #9fb3fc;
+  --ck-positive: #56d1a3;
+  --ck-negative: #dd7573;
+  --ck-series-1: #9fb3fc;
+  --ck-series-2: #dd7573;
+  --ck-series-3: #56d1a3;
+  --ck-series-4: #e98d5b;
+  --ck-series-5: #dc86c4;
+  --ck-series-6: #3bdfef;
+  --ck-series-7: #d1b64a;
+  --ck-series-8: #abd87c;
+  --ck-seq-1: #798ddc;
+  --ck-seq-2: #8499e9;
+  --ck-seq-3: #90a6f7;
+  --ck-seq-4: #9fb3fe;
+  --ck-seq-5: #b1c1fc;
+  --ck-seq-6: #c2cffd;
+  --ck-div-1: #fdb5b2;
+  --ck-div-2: #f4918e;
+  --ck-div-3: #d87876;
+  --ck-div-4: #8a8a8a;
+  --ck-div-5: #4bae87;
+  --ck-div-6: #66c7a0;
+  --ck-div-7: #80e2b9;
+  --ck-line-width: 2.25;
+  --ck-bar-radius: 2;
+  --ck-bar-gap: 0.18;
+  --ck-area-opacity: 0.24;
+}
+
+[data-ck-theme="soft"][data-ck-scheme="light"] {
+  color-scheme: light;
+  --ck-font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ck-background: #f5f5f7;
+  --ck-surface: #ffffff;
+  --ck-text: #1d1d1f;
+  --ck-muted: #6e6e73;
+  --ck-grid: rgb(0 0 0 / 0.06);
+  --ck-axis: rgb(0 0 0 / 0.14);
+  --ck-accent: #407cb2;
+  --ck-positive: #297e54;
+  --ck-negative: #8f414e;
+  --ck-series-1: #407cb2;
+  --ck-series-2: #297e54;
+  --ck-series-3: #a56632;
+  --ck-series-4: #6c4d8d;
+  --ck-series-5: #8f414e;
+  --ck-series-6: #0a6c66;
+  --ck-series-7: #5a66a8;
+  --ck-series-8: #50671b;
+  --ck-seq-1: #3f8c63;
+  --ck-seq-2: #328058;
+  --ck-seq-3: #24744d;
+  --ck-seq-4: #136842;
+  --ck-seq-5: #085c38;
+  --ck-seq-6: #00502f;
+  --ck-div-1: #863e49;
+  --ck-div-2: #994f59;
+  --ck-div-3: #aa5d68;
+  --ck-div-4: #6f6f6f;
+  --ck-div-5: #3b8960;
+  --ck-div-6: #2b7a52;
+  --ck-div-7: #136842;
+  --ck-line-width: 2;
+  --ck-bar-radius: 8;
+  --ck-bar-gap: 0.34;
+  --ck-area-opacity: 0.2;
+}
+
+[data-ck-theme="soft"][data-ck-scheme="dark"] {
+  color-scheme: dark;
+  --ck-font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ck-background: #1c1c1e;
+  --ck-surface: #2c2c2e;
+  --ck-text: #f5f5f7;
+  --ck-muted: #98989d;
+  --ck-grid: rgb(245 245 247 / 0.10);
+  --ck-axis: rgb(245 245 247 / 0.18);
+  --ck-accent: #5e9ed9;
+  --ck-positive: #93ebb9;
+  --ck-negative: #e48a95;
+  --ck-series-1: #5e9ed9;
+  --ck-series-2: #93ebb9;
+  --ck-series-3: #fdb57e;
+  --ck-series-4: #e0c8fe;
+  --ck-series-5: #e48a95;
+  --ck-series-6: #52cec4;
+  --ck-series-7: #a3b2fe;
+  --ck-series-8: #89a455;
+  --ck-seq-1: #58a57b;
+  --ck-seq-2: #65b187;
+  --ck-seq-3: #71be93;
+  --ck-seq-4: #7ecb9f;
+  --ck-seq-5: #8bd8ab;
+  --ck-seq-6: #97e5b8;
+  --ck-div-1: #fdb4bc;
+  --ck-div-2: #e996a0;
+  --ck-div-3: #ce7e88;
+  --ck-div-4: #929292;
+  --ck-div-5: #5eab81;
+  --ck-div-6: #77c599;
+  --ck-div-7: #91dfb2;
+  --ck-line-width: 2;
+  --ck-bar-radius: 8;
+  --ck-bar-gap: 0.34;
+  --ck-area-opacity: 0.2;
+}
+
