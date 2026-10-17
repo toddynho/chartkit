@@ -1,7 +1,7 @@
 import { annotationLayers } from "../annotations";
 import { isTypedArray, readData, type DataTable } from "../data";
 import { formatValue } from "../format";
-import { MIX_SEED, beginFrame, columnMix, foldMix, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
+import { beginFrame, noteDense, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import { clamp, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
@@ -683,6 +683,8 @@ interface XScale {
   center(index: number): number;
   band(index: number): { start: number; size: number };
   at(value: number): number;
+  min: number;
+  max: number;
 }
 
 function xPosition(
@@ -702,17 +704,29 @@ function xPosition(
       center: (index) => spanStart + size * index + size / 2,
       band: (index) => ({ start: spanStart + size * index, size }),
       at: (value) => spanStart + size * value + size / 2,
+      min: 0,
+      max: Math.max(0, count - 1),
     };
   }
   let min = Infinity;
   let max = -Infinity;
   let seen = false;
-  for (let i = 0; i < model.x.length; i++) {
-    const value = model.x[i];
-    if (value === null || !Number.isFinite(value)) continue;
-    seen = true;
-    if (value < min) min = value;
-    if (value > max) max = value;
+  if (model.x instanceof Float64Array) {
+    const extent = floatExtent(model.x);
+    if (extent) {
+      min = extent.min;
+      max = extent.max;
+      seen = true;
+    }
+  }
+  if (!seen) {
+    for (let i = 0; i < model.x.length; i++) {
+      const value = model.x[i];
+      if (value === null || !Number.isFinite(value)) continue;
+      seen = true;
+      if (value < min) min = value;
+      if (value > max) max = value;
+    }
   }
   if (!seen) {
     min = 0;
@@ -726,6 +740,8 @@ function xPosition(
       return { start: spanStart + step * index, size: step };
     },
     at: (value) => scale(value),
+    min,
+    max,
   };
 }
 
@@ -763,6 +779,7 @@ function xAxisLabels(
   plot: { left: number; right?: number; bottom: number; top: number },
 ): string {
   if (model.xTemporal && model.x && !horizontal) return timeAxisLabels(model, xScale, plot);
+  if (model.x && !horizontal) return numericXAxisLabels(model, xScale, plot);
   const step = count > 8 ? Math.ceil(count / 6) : 1;
   const out: string[] = [];
   let lastRight = -Infinity;
@@ -774,6 +791,29 @@ function xAxisLabels(
       continue;
     }
     const x = xScale.center(i);
+    const width = label.length * 6.4;
+    if (x - width / 2 < lastRight) continue;
+    lastRight = x + width / 2 + 8;
+    out.push(`<text x="${n(x)}" y="${n(plot.bottom + 16)}" text-anchor="middle" fill="${cssVar("muted", model.preset.muted)}" font-size="11" font-family="${font()}">${esc(label)}</text>`);
+  }
+  return out.join("");
+}
+
+function numericXAxisLabels(
+  model: PlotModel,
+  xScale: XScale,
+  plot: { left: number; right?: number; bottom: number },
+): string {
+  const values = ticks(xScale.min, xScale.max, 6);
+  const labels = tickText(values, model, model.xFormat);
+  const right = plot.right ?? model.width;
+  const out: string[] = [];
+  let lastRight = -Infinity;
+  for (let i = 0; i < values.length; i++) {
+    const label = labels[i];
+    if (!label) continue;
+    const x = xScale.at(values[i]);
+    if (x < plot.left - 8 || x > right + 8) continue;
     const width = label.length * 6.4;
     if (x - width / 2 < lastRight) continue;
     lastRight = x + width / 2 + 8;
@@ -864,25 +904,19 @@ function padding(model: PlotModel, leftLabels: string[], rightLabels: string[]):
   };
 }
 
-interface ColumnStat {
-  mix: number;
-  min: number;
-  max: number;
-  above: number;
-  below: number;
-}
-
-const columnStat = new WeakMap<object, ColumnStat>();
-
-function statOf(values: ArrayLike<number | null>): ColumnStat | null {
-  if (typeof values !== "object" || values === null) return null;
-  const prev = columnStat.get(values);
-  if (!prev || prev.mix !== columnMix(values, values.length)) return null;
-  return prev;
-}
-
-function storeStat(values: ArrayLike<number | null>, stat: ColumnStat): void {
-  if (typeof values === "object" && values !== null) columnStat.set(values, stat);
+/** Min and max of a typed column. Null when the extent is empty or non-finite. NaN does not move it. */
+function floatExtent(values: Float64Array): { min: number; max: number; dense: boolean } | null {
+  let min = Infinity;
+  let max = -Infinity;
+  let dense = true;
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i];
+    if (value < min) min = value;
+    if (value > max) max = value;
+    else if (value !== value) dense = false;
+  }
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
+  return { min, max, dense };
 }
 
 function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
@@ -905,29 +939,24 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
   } else {
     for (const series of model.series) {
       if (series.axis !== axis) continue;
-      const cached = statOf(series.values);
-      if (cached) {
-        consider(cached.min);
-        consider(cached.max);
-        continue;
-      }
-      let lo = Infinity;
-      let hi = -Infinity;
-      let mix = MIX_SEED;
-      let seenSeries = false;
-      for (let i = 0; i < series.values.length; i++) {
-        const value = series.values[i];
-        mix = foldMix(mix, i, value);
-        if (value !== null) {
-          consider(value);
-          if (Number.isFinite(value)) {
-            seenSeries = true;
-            if (value < lo) lo = value;
-            if (value > hi) hi = value;
-          }
+      const values = series.values;
+      if (values instanceof Float64Array) {
+        const extent = floatExtent(values);
+        if (extent) {
+          consider(extent.min);
+          consider(extent.max);
+          if (extent.dense) noteDense(values);
+          continue;
         }
       }
-      if (seenSeries) storeStat(series.values, { mix: mix | 0, min: lo, max: hi, above: 0, below: 0 });
+      let finite = 0;
+      for (let i = 0; i < values.length; i++) {
+        const value = values[i];
+        if (value === null || !Number.isFinite(value)) continue;
+        finite += 1;
+        consider(value);
+      }
+      if (values.length > 0 && finite === values.length) noteDense(values);
     }
   }
   const log = axis === "y2" ? model.y2Log : model.yLog;

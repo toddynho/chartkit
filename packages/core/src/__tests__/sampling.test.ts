@@ -105,6 +105,19 @@ describe("sampling render", () => {
     expect(renderLine(small)).toBe(renderLine({ ...small, mark: { ...small.mark, sampling: "auto" } }));
   });
 
+  it("rounds a 100k numeric x axis to nice steps", () => {
+    const svg = renderLine(spec(100_000));
+    expect(svg).not.toContain("ck-chart-error");
+    expect(svg).toContain(">0<");
+    expect(svg).toContain(">20,000<");
+    expect(svg).toContain(">40,000<");
+    expect(svg).toContain(">60,000<");
+    expect(svg).toContain(">80,000<");
+    expect(svg).not.toContain(">16667<");
+    expect(svg).not.toContain(">33334<");
+    expect(svg).not.toContain(">100,000<");
+  });
+
   it("downsamples a million points without dropping the full extent or the alt text", () => {
     const svg = renderLine(spec(1_000_000, "auto"));
     expect(svg).not.toContain("ck-chart-error");

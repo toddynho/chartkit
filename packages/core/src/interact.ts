@@ -723,7 +723,9 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         on = true;
       } else if (cmd === "L") vert(+token, +tokens[++i]);
       else if (cmd === "C") {
-        vert(+tokens[i + 3], +tokens[i + 4]);
+        const x1 = +tokens[i + 4];
+        const y1 = +tokens[i + 5];
+        if (x1 === x1 && y1 === y1) vert(x1, y1);
         i += 5;
       }
     }

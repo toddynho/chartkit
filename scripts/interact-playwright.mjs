@@ -2,10 +2,12 @@
  * Browser checks for tooltip, zoom, and legend toggle, plus Chrome update timing.
  * Uses the Playwright already installed under bench/. Run from the repo root:
  *   node scripts/interact-playwright.mjs
+ * Screenshots stay in scripts/.interact-out. Set CHARTKIT_SHOT_DIR to also
+ * copy them (path delimiter separates more than one directory).
  */
 import { mkdirSync, writeFileSync, cpSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { delimiter, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
 
@@ -539,24 +541,22 @@ const video = page.video();
 await context.close();
 await browser.close();
 
-const store = "/cursor/stores/self/phase2";
-const artifacts = "/opt/cursor/artifacts/phase2";
-mkdirSync(store, { recursive: true });
-mkdirSync(artifacts, { recursive: true });
-for (const name of shots) {
-  cpSync(join(outDir, name), join(store, name));
-  cpSync(join(outDir, name), join(artifacts, name));
-}
 let videoPath = "";
 if (video) {
   const saved = await video.path();
-  videoPath = join(store, "interact-light-dark.webm");
+  videoPath = join(outDir, "interact-light-dark.webm");
   cpSync(saved, videoPath);
-  cpSync(saved, join(artifacts, "interact-light-dark.webm"));
 }
 
 const report = { errors, timing, shots, videoPath, pageFile };
-writeFileSync(join(outDir, "report.json"), JSON.stringify(report, null, 2));
-writeFileSync(join(store, "playwright-report.json"), JSON.stringify(report, null, 2));
+const reportJson = JSON.stringify(report, null, 2);
+writeFileSync(join(outDir, "report.json"), reportJson);
+const shotDirs = (process.env.CHARTKIT_SHOT_DIR ?? "").split(delimiter).map((dir) => dir.trim()).filter(Boolean);
+for (const dir of shotDirs) {
+  mkdirSync(dir, { recursive: true });
+  for (const name of shots) cpSync(join(outDir, name), join(dir, name));
+  if (videoPath) cpSync(videoPath, join(dir, "interact-light-dark.webm"));
+  writeFileSync(join(dir, "playwright-report.json"), reportJson);
+}
 console.log(JSON.stringify(report, null, 2));
 if (errors.length) process.exit(1);

@@ -16,6 +16,9 @@ on:
         options:
           - "@chartkitdev/core"
           - "@chartkitdev/react"
+          - "@chartkitdev/vue"
+          - "@chartkitdev/svelte"
+          - "@chartkitdev/vanilla"
           - "@derpdaderp/chartkit"
           - all
 
@@ -58,6 +61,9 @@ jobs:
             all)
               publish "@chartkitdev/core"
               publish "@chartkitdev/react"
+              publish "@chartkitdev/vue"
+              publish "@chartkitdev/svelte"
+              publish "@chartkitdev/vanilla"
               publish "@derpdaderp/chartkit"
               ;;
             *)
