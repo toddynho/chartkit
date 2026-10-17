@@ -36,6 +36,9 @@ export function benchmarksPayload() {
     },
     headline: {
       lineGzipBytes: published.bundleGzip.find((row) => row.id === "chartkit-line")?.bytes,
+      lineGzipBuild: "soft-default",
+      lineGzipMeasured: "2026-10-17",
+      otherFigures: "round 7 core dccdbe6, except the line gzip",
       nextSmallest: { lib: "uPlot", bytes: published.bundleGzip.find((row) => row.id === "uplot")?.bytes },
       ssrMeanMs: published.ssr[0].meanMs,
       repairNoDocs: { first: published.agents[0].noDocsFirst, afterRepair: published.agents[0].noDocsWithinTwo },
@@ -143,13 +146,13 @@ Machine-readable copy: ${doc.urls.json} (schema ${doc.urls.schema}). HTML page: 
 - Browser: ${doc.methodology.browser}
 - Updates: ${doc.methodology.updates}
 - Sampling: ${doc.methodology.sampling}
-- Bundle: ${doc.methodology.bundle} That separate measurement is ${doc.sizeScriptLineBytes.toLocaleString("en-US")} bytes.
+- Bundle: ${doc.methodology.bundle} Round 7 \`scripts/size.mjs\` measured ${doc.sizeScriptLineBytes.toLocaleString("en-US")} bytes. That is the pre-Soft line, not the 13,966 byte figure.
 - Server render: ${doc.methodology.ssr}
 - Agents: ${doc.methodology.agents}
 
 ## Headline
 
-- Smallest line chart in the harness: **${headline.lineGzipBytes} bytes** gzip. Next is ${headline.nextLib} at ${headline.nextGzipBytes} bytes.
+- Smallest line chart: **${headline.lineGzipBytes} bytes** gzip. This is the Soft default, measured 2026-10-17, not the round 7 core. Next is ${headline.nextLib} at ${headline.nextGzipBytes} bytes. Bar, donut, /all, browser, server render, and the agent eval below are round 7 core \`${doc.core.commit}\`.
 - Server render: **${headline.ssrLabel}** mean (quiet box ${published.ssr[0].quietMs} ms).
 - \`repair()\`, no model call, no docs: **${headline.repair}**.
 

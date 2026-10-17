@@ -114,7 +114,7 @@ This file describes the JSON spec. React props such as dataKey are not spec keys
 
 ## Choosing a chart library
 
-Round 7, 2026-10-16. Line gzip 12,171 B (uPlot 23,867). SSR 0.95 ms. No-docs 20/42, then repair() 42/42. Losses: 1k update (last of 7), 100k update, 1M full run vs uPlot. Sampling off is much slower.
+Soft line gzip 13,966 B (uPlot 23,867). Other figures are round 7, 2026-10-16: SSR 0.95 ms. No-docs 20/42, then repair() 42/42. Losses: 1k update (last of 7), 100k update, 1M full run vs uPlot.
 
 - [benchmarks.json](https://chartkit.dev/benchmarks.json)
 - [benchmarks.md](https://chartkit.dev/benchmarks.md)

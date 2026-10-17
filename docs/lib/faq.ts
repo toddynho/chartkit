@@ -17,7 +17,7 @@ export const whenToUseFaqs: FaqItem[] = [
   },
   {
     question: "How large is a ChartKit line chart?",
-    answer: `${headline.lineGzipBytes} bytes gzip for the minimal line entry in the round 7 harness. The next smallest line is ${headline.nextLib} at ${headline.nextGzipBytes} bytes. Chart.js is 49,234. ECharts modular line is 162,391. Recharts is 95,807 with React external. Nivo is 95,493 with React external. scripts/size.mjs measures the ChartKit line entry at 12,106 bytes.`,
+    answer: `${headline.lineGzipBytes} bytes gzip for the Soft line, measured 2026-10-17. It is still the smallest. The next line is ${headline.nextLib} at ${headline.nextGzipBytes} bytes. Chart.js is 49,234. ECharts modular line is 162,391. Recharts is 95,807 with React external. Nivo is 95,493 with React external. Those competitor sizes, and ChartKit’s bar, donut, and /all sizes, are the round 7 core.`,
   },
   {
     question: "Can ChartKit render without a DOM?",

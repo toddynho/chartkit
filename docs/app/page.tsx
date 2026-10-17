@@ -5,6 +5,8 @@ import { heroSpec, examples } from "@/lib/specs";
 import { snippetsFor } from "@/lib/snippets";
 import { FrameworkTabs } from "@/components/FrameworkTabs";
 import { LiveSpec } from "@/components/LiveSpec";
+import { ThemeShowcase } from "@/components/ThemeShowcase";
+import { lookPanels } from "@/lib/looks";
 
 const previewSlugs = ["channels-bar", "traffic-donut", "orders-combo", "capacity-gauge", "load-grid", "week-candles"];
 
@@ -50,6 +52,18 @@ export default function HomePage() {
       <div className="hero-stage">
         <LiveSpec spec={heroSpec} mode="hero" labelScale={1.65} />
       </div>
+
+      <section className="section">
+        <h2>Soft, then the other looks</h2>
+        <p className="lede">
+          The same two charts. Soft is what you get when <code>theme</code> is omitted. Refined and editorial are built
+          in. Midnight is the opt-in dark card.
+        </p>
+        <ThemeShowcase looks={lookPanels()} />
+        <p>
+          <Link href="/docs/theming">Theme tokens and a brand palette</Link>
+        </p>
+      </section>
 
       <section className="section">
         <h2>The same spec, every framework</h2>

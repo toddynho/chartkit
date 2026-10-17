@@ -51,8 +51,9 @@ export default function BenchmarksPage() {
 
       <h2>Bundle size</h2>
       <p>
-        ChartKit’s minimal line chart is {headline.lineGzipBytes} bytes gzip ({headline.lineGzipLabel}). It is still
-        the smallest. Next is {headline.nextLib} at {headline.nextGzipBytes} bytes.
+        ChartKit’s minimal line chart is {headline.lineGzipBytes} bytes gzip ({headline.lineGzipLabel}), the Soft
+        default measured on 2026-10-17. It is still the smallest. Next is {headline.nextLib} at {headline.nextGzipBytes}{" "}
+        bytes. Bar, donut, /all, and every timed row on this page are the round 7 core, before that palette.
       </p>
       <ChartView spec={raceSpec(bundleRace)} />
       <p className="meta">{bundleRace.caption}</p>

@@ -1,13 +1,14 @@
+import { BrandPalette } from "@/components/BrandPalette";
 import { CodeBlock } from "@/components/CodeBlock";
+import { ThemeShowcase } from "@/components/ThemeShowcase";
 import { ChartView } from "@/lib/chart";
+import { lookPanels } from "@/lib/looks";
 import { pageMeta } from "@/lib/site";
 import { minimalSpec, THEMES, TOKENS } from "@/lib/specs";
 
-const quietMuted = new Set(["emerald", "latte", "neon", "obsidian", "orchid"]);
-
 export const metadata = pageMeta(
   "Theming",
-  "Theme ChartKit with --ck-* CSS variables, light and dark mode, and the 17 built-in presets.",
+  "Soft is the default ChartKit look. Switch refined, editorial, and midnight, or derive a palette from a brand colour.",
   "/docs/theming",
 );
 
@@ -23,20 +24,21 @@ export default function ThemingPage() {
     <>
       <h1>Theming</h1>
       <p>
-        The default theme is <code>auto</code>. Omit <code>theme</code>, or set it to <code>&quot;auto&quot;</code>, and
-        the chart is transparent and follows the page: <code>light-dark()</code> colors track{" "}
-        <code>prefers-color-scheme</code> and an ancestor&apos;s <code>color-scheme</code>. <code>--ck-*</code> still
-        overrides, and <code>--chart-N</code> is the next fallback, so <code>var(--chart-1)</code> stays visible.
+        Soft is the default. Omit <code>theme</code>, or set <code>&quot;auto&quot;</code> or <code>&quot;soft&quot;</code>.
+        The plot is transparent and the colours follow the page: <code>light-dark()</code> tracks{" "}
+        <code>prefers-color-scheme</code> and an ancestor&apos;s <code>color-scheme</code>. The optional card is{" "}
+        <code>#f5f5f7</code> in light and <code>#1c1c1e</code> in dark. <code>--ck-*</code> still overrides, and{" "}
+        <code>--chart-N</code> is the next fallback.
       </p>
       <p>
-        <code>theme: &quot;midnight&quot;</code> is opt-in. It paints the dark card. Every other named preset is an
-        opt-in import of <code>@chartkitdev/core/themes/all</code>. Midnight is no longer what you get when the field
-        is missing.
+        <code>refined</code> and <code>editorial</code> are built-in names. <code>theme: &quot;midnight&quot;</code> is
+        the opt-in dark card. Any other name still falls through to midnight until you import that preset from{" "}
+        <code>@chartkitdev/core/themes/all</code>.
       </p>
+      <ThemeShowcase looks={lookPanels()} />
       <p>
-        Every painted color is <code>var(--ck-*, fallback)</code>. This site sets the text, grid, and delta variables
-        for light and dark, and leaves the series variables unset, so the core palette shows up here without a site
-        change. Toggle the theme in the header. This chart is <code>auto</code>, with the page tokens on top:
+        This next chart leaves <code>theme</code> unset, so it is Soft with this page&apos;s text and grid tokens on
+        top. Toggle light and dark in the header.
       </p>
       <ChartView spec={swatch} />
       <h2>Tokens</h2>
@@ -64,20 +66,20 @@ export default function ThemingPage() {
       <CodeBlock
         code={`.chart-host {
   --ck-background: transparent;
-  --ck-text: #1c1915;
-  --ck-muted: #4a453e;
-  --ck-grid: rgba(28, 25, 21, 0.14);
-  --ck-positive: #157a3a;
-  --ck-negative: #b42318;
+  --ck-text: #1d1d1f;
+  --ck-muted: #6e6e73;
+  --ck-grid: rgb(0 0 0 / 0.06);
+  --ck-positive: #047857;
+  --ck-negative: #be123c;
   --ck-font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 .dark .chart-host {
-  --ck-text: #f4f1ea;
-  --ck-muted: #c8c2b8;
-  --ck-grid: rgba(244, 241, 234, 0.16);
-  --ck-positive: #86efac;
-  --ck-negative: #fca5a5;
+  --ck-text: #f5f5f7;
+  --ck-muted: #98989d;
+  --ck-grid: rgb(245 245 247 / 0.08);
+  --ck-positive: #30d158;
+  --ck-negative: #ff453a;
 }`}
         label="css"
       />
@@ -96,22 +98,44 @@ export default function ThemingPage() {
 }`}
         label="css"
       />
+      <h2>theme.tokens.series</h2>
+      <p>
+        A spec can replace the series list without a preset name. The base stays Soft unless you set{" "}
+        <code>preset</code>. <code>lines</code> defaults to the same list, so thin strokes follow the fills unless you
+        pass a darker set.
+      </p>
+      <CodeBlock
+        code={`{
+  "version": "1",
+  "type": "bar",
+  "theme": {
+    "tokens": {
+      "series": ["#007aff", "#34c759", "#ff9500", "#af52de"]
+    }
+  }
+}`}
+        label="json"
+      />
+      <h2>paletteFromBrand</h2>
+      <p>
+        <code>paletteFromBrand</code> is opt-in. It is not in the line bundle and it is not the default theme. Pass one
+        hex colour, or a list, and <code>&quot;light&quot;</code> or <code>&quot;dark&quot;</code>. Put the result on{" "}
+        <code>theme.tokens.series</code>.
+      </p>
+      <CodeBlock
+        code={`import { paletteFromBrand } from "@chartkitdev/core/themes/brand";
+
+const series = paletteFromBrand("#007aff", "light");
+const spec = { version: "1", type: "bar", theme: { tokens: { series } } };`}
+        label="ts"
+      />
+      <BrandPalette />
       <h2>Presets</h2>
       <p>
-        Seventeen presets ship with core. <code>auto</code> is the default and is built in, as is midnight. The rest
-        register when you import <code>@chartkitdev/core/themes/all</code>. A preset chart below sets{" "}
-        <code>theme</code> explicitly and opts out of the page tokens, so you see that preset&apos;s own colors.
-        Emerald, latte, neon, obsidian, and orchid are omitted here because their muted color is under 4.5:1 on the
-        preset background.
+        Soft, refined, editorial, and midnight are built in. The older names ({THEMES.join(", ")}) register when you
+        import <code>@chartkitdev/core/themes/all</code>. Set <code>theme</code> to that name. Several of those muted
+        colours are under 4.5:1 on their own background, which is why Soft is the default.
       </p>
-      <div className="preset-grid">
-        {THEMES.filter((name) => !quietMuted.has(name)).map((name) => (
-          <article className="card" key={name}>
-            <ChartView spec={{ ...swatch, id: `preset-${name}`, theme: name, title: name }} />
-            <h3>{name}</h3>
-          </article>
-        ))}
-      </div>
     </>
   );
 }

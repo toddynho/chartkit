@@ -6,7 +6,7 @@ Round 7, measured 2026-10-16. These are the harness numbers, including the losse
 
 | | ChartKit | Next or note |
 | --- | ---: | --- |
-| Line chart, gzip | **12,171 B** | uPlot 23,867 B |
+| Line chart, gzip | **13,966 B** | uPlot 23,867 B. Soft default, 2026-10-17. Other rows are round 7 |
 | Server render, 1k line | **0.95 ms** | ECharts 9.04 ms. uPlot, Chart.js, and Recharts produced no chart without a DOM |
 | Agent, no docs, then repair() | **20/42 → 42/42** | Recharts, ECharts, and Chart.js were already 42/42 with no docs |
 | 1k update | 32.8 ms, last of 7 | Chart.js 20.2 ms |

@@ -1,3 +1,4 @@
+import { headline } from "./benchmarks";
 import { minimalSpec } from "./specs";
 import { snippetsFor } from "./snippets";
 
@@ -35,7 +36,7 @@ export const rivals: Rival[] = [
     npm: "recharts",
     description: "React components on SVG. The usual pick when a React app wants hover tooltips and a component API.",
     bundleBytes: 95807,
-    bundleNote: "Line chart with React external. ChartKit’s minimal line is 12,171 bytes and does not require React.",
+    bundleNote: `Line chart with React external. ChartKit’s minimal line is ${headline.lineGzipBytes} bytes and does not require React.`,
     ssr: "The round 7 harness got an empty wrapper, not a chart, without a DOM. ChartKit wrote SVG in 0.95 ms mean.",
     agent:
       "Recharts was in the round 7 eval: 42/42 with no docs and 42/42 with docs, at 223.3 / 236.6 mean first-try output tokens. ChartKit was 20/42 with no docs, 42/42 after repair() with no model call, and 42/42 with the docs at 139.4 / 131.1 tokens.",
@@ -48,7 +49,7 @@ export const rivals: Rival[] = [
     chartkitWhen: [
       "The same chart has to render in Vue, Svelte, or without a framework.",
       "The HTML response has to contain the SVG. Recharts did not produce one in this harness.",
-      "Bundle size matters. 12,171 bytes against 95,807 with React still external.",
+      `Bundle size matters. ${headline.lineGzipBytes} bytes against 95,807 with React still external.`,
       "An agent should validate and repair a spec instead of guessing component props.",
     ],
     interaction: "Tooltips are drawn. Zoom and pan are not part of the core chart.",
@@ -80,7 +81,7 @@ export function Panel() {
     npm: "chart.js",
     description: "Canvas charts and a plugin ecosystem. Fast updates in this harness, and no chart without a DOM.",
     bundleBytes: 49234,
-    bundleNote: "Line chart, gzip -9. ChartKit’s minimal line is 12,171 bytes.",
+    bundleNote: `Line chart, gzip -9. ChartKit’s minimal line is ${headline.lineGzipBytes} bytes.`,
     ssr: "No chart without a DOM in this harness. ChartKit wrote SVG in 0.95 ms mean.",
     agent:
       "Chart.js was in the round 7 eval: 42/42 with no docs and 42/42 with docs, at 294.6 / 260.9 mean first-try output tokens. ChartKit’s official first try used 131.1 tokens.",
@@ -92,7 +93,7 @@ export function Panel() {
     chartkitWhen: [
       "The page is server-rendered and the chart has to be in the HTML.",
       "You want one spec for React, Vue, Svelte, and a plain element.",
-      "12,171 bytes is the budget and 49,234 is not.",
+      `${headline.lineGzipBytes} bytes is the budget and 49,234 is not.`,
     ],
     interaction: "Canvas tooltips are drawn. Zoom and annotation are plugins.",
     theirLabel: "js",
@@ -116,7 +117,7 @@ new Chart(ctx, {
     npm: "echarts",
     description: "The large catalog: maps, graphs, brush, and dataZoom. Bigger and slower to server-render in this harness.",
     bundleBytes: 162391,
-    bundleNote: "echarts/core plus one series. ChartKit’s minimal line is 12,171 bytes. ChartKit /all is 22,864.",
+    bundleNote: `echarts/core plus one series. ChartKit’s minimal line is ${headline.lineGzipBytes} bytes. ChartKit /all is 22,864.`,
     ssr: "ECharts SVG SSR was 9.04 ms mean on the full run and 8.42 ms on the quiet box. ChartKit was 0.95 ms and 1.22 ms.",
     agent:
       "ECharts was in the round 7 eval: 42/42 in every column, at 334.2 / 367.2 mean first-try output tokens. That is the highest token count in the eval. ChartKit’s official first try used 131.1.",
@@ -126,7 +127,7 @@ new Chart(ctx, {
       "The 1,000,000-point update matters more than the initial draw, and you are comparing with uPlot rather than with ChartKit. ChartKit loses that cell to uPlot. This page does not claim ECharts wins it. The published fastest update at 1M is uPlot at 29.2 ms.",
     ],
     chartkitWhen: [
-      "A modular line at 162,391 bytes is too large. ChartKit’s line is 12,171.",
+      `A modular line at 162,391 bytes is too large. ChartKit’s line is ${headline.lineGzipBytes}.`,
       "Server render time matters. 0.95 ms against 9.04 ms.",
       "The agent should spend fewer output tokens. 131 against 367 on the official first try.",
     ],
@@ -153,7 +154,7 @@ chart.setOption({
     npm: "@nivo/line",
     description: "React charts with a wide catalog. In the browser harness, not in the agent eval.",
     bundleBytes: 95493,
-    bundleNote: "Line chart with React external. ChartKit’s minimal line is 12,171 bytes and does not require React.",
+    bundleNote: `Line chart with React external. ChartKit’s minimal line is ${headline.lineGzipBytes} bytes and does not require React.`,
     ssr: "Nivo did render SVG. The full run, on a loaded box, was 113 ms mean. Round 6 on a quieter box was 52.91 ms. ChartKit was 0.95 ms on the round 7 full run. Do not cite 113 ms as a quiet-box number.",
     agent:
       "Nivo was not in the round 7 agent eval. This page does not invent a 42-task score for it. The eval covered ChartKit, Recharts, ECharts, and Chart.js only.",

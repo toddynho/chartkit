@@ -1,6 +1,7 @@
 /**
- * Round 7 figures, from the Phase 1 bench (PR #6 core dccdbe6, harness PR #4 afd7edb).
- * Pages read this file. A later round replaces the values here and nowhere else.
+ * Timed figures are round 7, from the Phase 1 bench (PR #6 core dccdbe6, harness PR #4 afd7edb).
+ * The line gzip is newer: the Soft default, 13,966 bytes, measured 2026-10-17.
+ * Bar, donut, /all, browser, SSR, and the agent eval are still the round 7 core.
  * The full run was on a loaded box. Quiet-box reruns are the parenthetical numbers.
  */
 
@@ -10,8 +11,8 @@ export const CORE_COMMIT = "dccdbe6";
 export const HARNESS_COMMIT = "afd7edb";
 
 export const headline = {
-  lineGzipLabel: "12.2 KB",
-  lineGzipBytes: "12,171",
+  lineGzipLabel: "14.0 KB",
+  lineGzipBytes: "13,966",
   nextLib: "uPlot",
   nextGzipBytes: "23,867",
   ssrLabel: "0.95 ms",
@@ -33,11 +34,11 @@ export const bundleRace: Race = {
   id: "bundle-gzip",
   title: "Line chart, gzip",
   unit: "KB",
-  alt: "ChartKit’s minimal line chart is 12.2 KB gzip. uPlot is 23.9, Chart.js is 49.2, Nivo is 95.5, Recharts is 95.8, and Plot is 97.2. ECharts is 162 KB and is off this scale.",
+  alt: "ChartKit’s minimal line chart is 14.0 KB gzip. uPlot is 23.9, Chart.js is 49.2, Nivo is 95.5, Recharts is 95.8, and Plot is 97.2. ECharts is 162 KB and is off this scale.",
   caption:
-    "Minimal line entry, gzip -9, from the bench harness. ECharts modular line is 162.4 KB and is left off the chart so the rest stay readable. The table has every library.",
+    "The ChartKit bar is the Soft line, 13,966 bytes gzip. The other libraries are the round 7 harness. ECharts modular line is 162.4 KB and is left off the chart so the rest stay readable.",
   rows: [
-    { lib: "ChartKit", value: 12.2 },
+    { lib: "ChartKit", value: 14.0 },
     { lib: "uPlot", value: 23.9 },
     { lib: "Chart.js", value: 49.2 },
     { lib: "Nivo", value: 95.5 },
@@ -158,14 +159,14 @@ export const samplingRows = [
 ] as const;
 
 export const bundleRows = [
-  { lib: "ChartKit minimal", gzip: "12,171", note: "Line chart. Bar 10,289. Donut 5,681. scripts/size.mjs measures the line entry at 12,106." },
+  { lib: "ChartKit minimal", gzip: "13,966", note: "Soft line, 2026-10-17. Still the smallest. Bar 10,289 and donut 5,681 are the round 7 core." },
   { lib: "uPlot", gzip: "23,867", note: "Next smallest. JS plus the published stylesheet." },
   { lib: "Chart.js", gzip: "49,234", note: "Line chart." },
   { lib: "Observable Plot", gzip: "97,215", note: "No donut." },
   { lib: "Recharts", gzip: "95,807", note: "With React external." },
   { lib: "Nivo", gzip: "95,493", note: "With React external." },
   { lib: "ECharts", gzip: "162,391", note: "echarts/core plus one series." },
-  { lib: "ChartKit /all", gzip: "22,864", note: "Every chart and theme, no validator." },
+  { lib: "ChartKit /all", gzip: "22,864", note: "Round 7 core. Every chart and theme, no validator. Not remeasured for Soft." },
 ] as const;
 
 export const ssrRows = [
@@ -185,7 +186,7 @@ export const agentRows = [
 /** Machine-readable round 7 numbers. Display strings above must start with these values. */
 export const published = {
   bundleGzip: [
-    { id: "chartkit-line", lib: "ChartKit", entry: "minimal line", bytes: 12171, reactExternal: false },
+    { id: "chartkit-line", lib: "ChartKit", entry: "minimal line, Soft default", bytes: 13966, reactExternal: false },
     { id: "chartkit-bar", lib: "ChartKit", entry: "minimal bar", bytes: 10289, reactExternal: false },
     { id: "chartkit-donut", lib: "ChartKit", entry: "minimal donut", bytes: 5681, reactExternal: false },
     { id: "chartkit-all", lib: "ChartKit", entry: "/all", bytes: 22864, reactExternal: false },

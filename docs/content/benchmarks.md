@@ -11,13 +11,13 @@ Machine-readable copy: https://chartkit.dev/benchmarks.json (schema https://char
 - Browser: Playwright Chromium, a 640×360 line, equal two-frame timers, median of 5. The full run shared the machine (about 11.6 GB of 16 GB in use). quietMs is a later same-session rerun.
 - Updates: Update tests sit on a shared two-frame wait. A few milliseconds is frame-timing noise. ChartKit updates land between about 19 and 33 ms on both round 6 core and this core.
 - Sampling: mark.sampling defaults to auto and minmax-downsamples a line longer than twice the plot width. 1,000 points stay complete. The samplingNone rows draw every point.
-- Bundle: gzip -9, bench harness. scripts/size.mjs measures the ChartKit line entry separately and is recorded as sizeScriptLineBytes. That separate measurement is 12,106 bytes.
+- Bundle: gzip -9, bench harness. scripts/size.mjs measures the ChartKit line entry separately and is recorded as sizeScriptLineBytes. Round 7 `scripts/size.mjs` measured 12,106 bytes. That is the pre-Soft line, not the 13,966 byte figure.
 - Server render: Mean of a 1,000 point line. supported false means no chart without a DOM. Recharts returned an empty wrapper.
 - Agents: claude-sonnet-4-5, temperature 0, 42 tasks, one run on 2026-10-16. Official means the library docs were in the prompt. ChartKit docs are llms.txt. repair() is a no-model step on ChartKit's no-docs first try and is not a second model call. Nivo and uPlot were not in the agent eval.
 
 ## Headline
 
-- Smallest line chart in the harness: **12,171 bytes** gzip. Next is uPlot at 23,867 bytes.
+- Smallest line chart: **13,966 bytes** gzip. This is the Soft default, measured 2026-10-17, not the round 7 core. Next is uPlot at 23,867 bytes. Bar, donut, /all, browser, server render, and the agent eval below are round 7 core `dccdbe6`.
 - Server render: **0.95 ms** mean (quiet box 1.22 ms).
 - `repair()`, no model call, no docs: **20/42 → 42/42**.
 
@@ -35,7 +35,7 @@ Machine-readable copy: https://chartkit.dev/benchmarks.json (schema https://char
 
 | Library | Entry | Bytes | Note |
 | --- | --- | ---: | --- |
-| ChartKit | minimal line | 12,171 |  |
+| ChartKit | minimal line, Soft default | 13,966 |  |
 | ChartKit | minimal bar | 10,289 |  |
 | ChartKit | minimal donut | 5,681 |  |
 | ChartKit | /all | 22,864 |  |

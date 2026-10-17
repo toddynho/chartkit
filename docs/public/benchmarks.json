@@ -21,7 +21,10 @@
     "agents": "claude-sonnet-4-5, temperature 0, 42 tasks, one run on 2026-10-16. Official means the library docs were in the prompt. ChartKit docs are llms.txt. repair() is a no-model step on ChartKit's no-docs first try and is not a second model call. Nivo and uPlot were not in the agent eval."
   },
   "headline": {
-    "lineGzipBytes": 12171,
+    "lineGzipBytes": 13966,
+    "lineGzipBuild": "soft-default",
+    "lineGzipMeasured": "2026-10-17",
+    "otherFigures": "round 7 core dccdbe6, except the line gzip",
     "nextSmallest": {
       "lib": "uPlot",
       "bytes": 23867
@@ -36,8 +39,8 @@
     {
       "id": "chartkit-line",
       "lib": "ChartKit",
-      "entry": "minimal line",
-      "bytes": 12171,
+      "entry": "minimal line, Soft default",
+      "bytes": 13966,
       "reactExternal": false
     },
     {
@@ -343,8 +346,8 @@
   },
   "display": {
     "headline": {
-      "lineGzipLabel": "12.2 KB",
-      "lineGzipBytes": "12,171",
+      "lineGzipLabel": "14.0 KB",
+      "lineGzipBytes": "13,966",
       "nextLib": "uPlot",
       "nextGzipBytes": "23,867",
       "ssrLabel": "0.95 ms",
