@@ -4,10 +4,10 @@
 
 ## Project Overview
 
-**ChartKit** ships `@chartkitdev/core` (framework-free schema, `validate`, and SVG `render`) and `@chartkitdev/react` (the existing components plus `<Chart spec={...} />`). `@derpdaderp/chartkit` is a compatibility shim. The spec id is `https://chartkit.dev/schema/v1.json`. It prioritizes:
+**ChartKit** ships `@chartkitdev/core` (framework-free schema, `validate`, and SVG `render`), `@chartkitdev/react` (the existing components plus `<Chart spec={...} />`), and thin spec adapters `@chartkitdev/vue`, `@chartkitdev/svelte`, and `@chartkitdev/vanilla` (`mount(el, spec)` → `{ update, destroy }`). `@derpdaderp/chartkit` is a compatibility shim. The spec id is `https://chartkit.dev/schema/v1.json`. It prioritizes:
 
-- **Small core**: `@chartkitdev/core` has zero runtime dependencies. Chart renderers and themes past midnight are opt-in imports. `mark.sampling` defaults to `auto` and downsamples line, area, sparkline, mini-area, stacked-area, combo lines, and spike above twice the plot width (`packages/core/SPEC.md`). `npm run bench` prints bundle size and validate throughput. `npm run size` fails when the line, all-charts, or validate bundles grow past their budgets.
-- **Dependencies**: `@chartkitdev/core` has none. `@chartkitdev/react` depends on the core and peers React 18+
+- **Small core**: `@chartkitdev/core` has zero runtime dependencies. Chart renderers and themes past midnight are opt-in imports. `mark.sampling` defaults to `auto` and downsamples line, area, sparkline, mini-area, stacked-area, combo lines, and spike above twice the plot width (`packages/core/SPEC.md`). `npm run bench` prints bundle size and validate throughput. `npm run size` fails when the line, all-charts, validate, or adapter bundles grow past their budgets. Adapter budgets exclude core and the framework.
+- **Dependencies**: `@chartkitdev/core` has none. `@chartkitdev/react` depends on the core and peers React 18+. `@chartkitdev/vue` peers Vue 3. `@chartkitdev/svelte` peers Svelte 4 or 5 (the component uses `export let`). `@chartkitdev/vanilla` depends only on the core.
 - **Beautiful defaults**: 17 curated themes that work out of the box
 - **TypeScript-first**: Full type safety and autocomplete
 
@@ -18,6 +18,9 @@ chartkit/
 ├── packages/
 │   ├── core/                 # @chartkitdev/core — registry, charts/*, themes/*, validate
 │   ├── react/                # @chartkitdev/react — components, hooks, themes
+│   ├── vue/                  # @chartkitdev/vue — <Chart :spec="..." />
+│   ├── svelte/               # @chartkitdev/svelte — <Chart {spec} />
+│   ├── vanilla/              # @chartkitdev/vanilla — mount(el, spec)
 │   └── compat-derpdaderp/    # @derpdaderp/chartkit shim
 ├── docs/                     # Documentation site (Next.js) and docs/migrate.md
 └── CONTEXT.md

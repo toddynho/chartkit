@@ -4,6 +4,9 @@
   "version": "0.5.0",
   "packages": {
     "react": "@chartkitdev/react",
+    "vue": "@chartkitdev/vue",
+    "svelte": "@chartkitdev/svelte",
+    "vanilla": "@chartkitdev/vanilla",
     "core": "@chartkitdev/core",
     "compat": "@derpdaderp/chartkit"
   },

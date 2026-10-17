@@ -1,18 +1,21 @@
 # ChartKit
 
-One JSON spec, a framework-free core, and optional React components. The spec is the agent interface. React props are a different API and are not keys in the spec.
+One JSON spec, a framework-free core, and thin adapters for React, Vue, Svelte, and plain DOM. The spec is the agent interface. Component props on the older React charts are a different API and are not keys in the spec.
 
 **[Documentation](https://chartkit.dev)** | **[Demo](https://chartkit.dev/demo)** | **[Components](https://chartkit.dev/components)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[llms.txt](docs/public/llms.txt)**
 
 ---
 
-`@chartkitdev/core` has zero runtime dependencies and renders SVG from the spec. `@chartkitdev/react` depends on that core and on React. One minimal valid spec for each of the 14 chart types is in [packages/core/README.md](packages/core/README.md) and [docs/public/llms.txt](docs/public/llms.txt).
+`@chartkitdev/core` has zero runtime dependencies and renders SVG from the spec. The adapters depend on that core and on their framework. One minimal valid spec for each of the 14 chart types is in [packages/core/README.md](packages/core/README.md) and [docs/public/llms.txt](docs/public/llms.txt).
 
 ## Installation
 
 ```bash
 npm install @chartkitdev/core
 npm install @chartkitdev/react
+npm install @chartkitdev/vue
+npm install @chartkitdev/svelte
+npm install @chartkitdev/vanilla
 ```
 
 `@derpdaderp/chartkit` remains as a compatibility shim (not published from this branch). See [docs/migrate.md](docs/migrate.md).
@@ -49,7 +52,9 @@ Rules:
 }
 ```
 
-## React components (not the JSON spec)
+## Adapters
+
+Each adapter draws the spec above. None of them add chart logic. Pass `render` from `createRenderer([...])` when a page should ship one chart instead of every chart.
 
 ```tsx
 import { Chart } from "@chartkitdev/react";
@@ -59,13 +64,46 @@ function Panel({ spec }) {
 }
 ```
 
-Dashboard components (`LineChart`, `KpiCard`, and the rest) take their own props. `dataKey`, `leftAxis`, and a top-level `value` on `GaugeChart` are not spec keys.
+```vue
+<script setup>
+import { Chart } from "@chartkitdev/vue";
+</script>
+
+<template>
+  <Chart :spec="spec" />
+</template>
+```
+
+Vue SSR (`renderToString` from `@chartkitdev/vue/ssr`, which uses `vue/server-renderer`) includes the SVG.
+
+```svelte
+<script>
+  import { Chart } from "@chartkitdev/svelte";
+  export let spec;
+</script>
+
+<Chart {spec} />
+```
+
+The Svelte component uses `export let`, so Svelte 4 and Svelte 5 both compile it. SvelteKit SSR includes the SVG.
+
+```js
+import { mount, renderToString } from "@chartkitdev/vanilla";
+
+const chart = mount(document.querySelector("#chart"), spec);
+chart.update(nextSpec);
+chart.destroy();
+```
+
+`renderToString(spec)` is the SVG string core returns. `mount` writes that string into an element you already have. `update` keeps the element and skips the DOM write when the SVG is unchanged. `destroy` clears it.
+
+Dashboard components in `@chartkitdev/react` (`LineChart`, `KpiCard`, and the rest) take their own props. `dataKey`, `leftAxis`, and a top-level `value` on `GaugeChart` are not spec keys.
 
 ## Features
 
 - **14 Chart Components** - Lines, bars, areas, donuts, gauges, heatmaps, and more
 - **17 Curated Themes** - Dark and light themes that look great out of the box
-- **No third-party runtime dependencies** - Pure SVG. The core package depends on nothing; the React package depends on the core.
+- **No third-party runtime dependencies in core** - Pure SVG. The core package depends on nothing. Each adapter depends on the core and its framework.
 - **TypeScript First** - Full type safety with autocomplete for every prop
 - **Dual Y-Axis** - Display multiple scales in LineChart
 - **Responsive** - Charts automatically resize to fit their container

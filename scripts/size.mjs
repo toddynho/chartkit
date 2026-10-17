@@ -1,6 +1,7 @@
 /**
- * Gzip budgets for the three headline bundles.
- * esbuild --bundle --minify, gzip -9, zero externals, same method as npm run bench.
+ * Gzip budgets for the headline bundles and the framework adapters.
+ * esbuild --bundle --minify, gzip -9, platform node, same method as npm run bench.
+ * Core bundles have zero externals. Adapter bundles externalize @chartkitdev/core and the framework.
  * Budgets live in scripts/size-budget.json. Exceeding one fails CI.
  */
 import { gzipSync } from "node:zlib";
@@ -9,11 +10,22 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
+import { compile } from "svelte/compiler";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const src = join(root, "packages/core/src");
 
-async function gzipOf(entry) {
+const externalFramework = {
+  name: "external-framework",
+  setup(build) {
+    build.onResolve({ filter: /^(vue|svelte|@chartkitdev\/core)(\/|$)/ }, (args) => ({
+      path: args.path,
+      external: true,
+    }));
+  },
+};
+
+async function gzipOf(entry, { external = false } = {}) {
   const outfile = join(tmpdir(), `chartkit-size-${Math.random().toString(36).slice(2)}.mjs`);
   await build({
     entryPoints: [entry],
@@ -22,6 +34,7 @@ async function gzipOf(entry) {
     format: "esm",
     platform: "node",
     outfile,
+    plugins: external ? [externalFramework] : [],
     logLevel: "silent",
   });
   const code = readFileSync(outfile);
@@ -58,10 +71,35 @@ const isolation = {
   allIncludesCandle: all.code.includes('data-ck-mark="candle"'),
 };
 
-const measured = { line: line.gzipBytes, all: all.gzipBytes, validate: validate.gzipBytes };
+const vue = await gzipOf(join(root, "packages/vue/src/Chart.ts"), { external: true });
+const vanilla = await gzipOf(join(root, "packages/vanilla/src/index.ts"), { external: true });
+const svelteCompiled = compile(readFileSync(join(root, "packages/svelte/src/Chart.svelte"), "utf8"), {
+  filename: "Chart.svelte",
+  generate: "client",
+  css: "external",
+});
+const svelteEntry = join(tmpdir(), "chartkit-size-svelte.js");
+writeFileSync(svelteEntry, svelteCompiled.js.code);
+const svelte = await gzipOf(svelteEntry, { external: true });
+for (const [name, built] of [["vue", vue], ["svelte", svelte], ["vanilla", vanilla]]) {
+  if (built.code.includes("function bars") || built.code.includes("CK1004")) {
+    isolation[`${name}OmitsCore`] = false;
+  } else {
+    isolation[`${name}OmitsCore`] = true;
+  }
+}
+
+const measured = {
+  line: line.gzipBytes,
+  all: all.gzipBytes,
+  validate: validate.gzipBytes,
+  vue: vue.gzipBytes,
+  svelte: svelte.gzipBytes,
+  vanilla: vanilla.gzipBytes,
+};
 const budget = JSON.parse(readFileSync(join(root, "scripts/size-budget.json"), "utf8"));
 const failures = [];
-for (const key of ["line", "all", "validate"]) {
+for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla"]) {
   if (typeof budget[key] !== "number") failures.push(`${key} budget missing`);
   else if (measured[key] > budget[key]) failures.push(`${key} gzip ${measured[key]} > budget ${budget[key]}`);
 }
@@ -69,7 +107,19 @@ for (const [key, ok] of Object.entries(isolation)) {
   if (!ok) failures.push(`isolation ${key} failed`);
 }
 
-console.log(JSON.stringify({ measured, budget, minBytes: { line: line.minBytes, all: all.minBytes, validate: validate.minBytes }, isolation }, null, 2));
+console.log(JSON.stringify({
+  measured,
+  budget,
+  minBytes: {
+    line: line.minBytes,
+    all: all.minBytes,
+    validate: validate.minBytes,
+    vue: vue.minBytes,
+    svelte: svelte.minBytes,
+    vanilla: vanilla.minBytes,
+  },
+  isolation,
+}, null, 2));
 if (failures.length > 0) {
   console.error(failures.join("\n"));
   process.exit(1);
