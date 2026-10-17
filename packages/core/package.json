@@ -58,6 +58,16 @@
         "default": "./dist/interact.cjs"
       }
     },
+    "./interact/extra": {
+      "import": {
+        "types": "./dist/interact-extra.d.ts",
+        "default": "./dist/interact-extra.js"
+      },
+      "require": {
+        "types": "./dist/interact-extra.d.cts",
+        "default": "./dist/interact-extra.cjs"
+      }
+    },
     "./charts/*": {
       "import": {
         "types": "./dist/charts/*.d.ts",

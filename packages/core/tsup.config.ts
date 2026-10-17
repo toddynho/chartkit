@@ -1,4 +1,16 @@
-import { defineConfig } from "tsup";
+import { defineConfig, type Options } from "tsup";
+import type { Plugin } from "esbuild";
+
+/** Keep zoom/brush/keyboard/table out of the tooltip entry. */
+const externalInteractExtra: Plugin = {
+  name: "external-interact-extra",
+  setup(build) {
+    build.onResolve({ filter: /interact-extra(\.ts)?$/ }, (args) => {
+      if (args.kind === "entry-point") return null;
+      return { path: "@chartkitdev/core/interact/extra", external: true };
+    });
+  },
+};
 
 const charts = [
   "line",
@@ -42,6 +54,7 @@ const entry: Record<string, string> = {
   all: "src/all.ts",
   validate: "src/validate.ts",
   interact: "src/interact.ts",
+  "interact-extra": "src/interact-extra.ts",
   "themes/all": "src/themes/all.ts",
 };
 
@@ -56,4 +69,5 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   treeshake: true,
-});
+  esbuildPlugins: [externalInteractExtra],
+} satisfies Options);
