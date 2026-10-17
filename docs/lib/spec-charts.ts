@@ -76,6 +76,7 @@ export const specPages: Record<string, SpecPage> = {
       "type is funnel.",
       "encoding.x is the stage label. encoding.y is the value.",
       "Negative values are drawn as zero. The first stage sets the full width.",
+      "mark.shape bar (the default) draws centered rounded bars. trapezoid connects each stage to the next.",
     ],
     example: `{
   "version": "1",
@@ -95,7 +96,7 @@ export const specPages: Record<string, SpecPage> = {
     fields: [
       "type is treemap.",
       "encoding.x is the tile label. encoding.y is the size. Non-positive sizes are skipped.",
-      "encoding.color is an optional group. Tiles in a group share a series color and sit side by side.",
+      "encoding.color is an optional group. Tiles in a group share a series color, in lighter and darker tints, and sit side by side.",
       "name, size, value, and parent repair onto x, y, and color.",
     ],
     example: `{

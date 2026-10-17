@@ -2,9 +2,12 @@
   "line": 15083,
   "all": 27401,
   "validate": 17594,
-  "vue": 348,
-  "svelte": 517,
-  "vanilla": 298,
+  "vue": 531,
+  "svelte": 719,
+  "vanilla": 446,
+  "vueLine": 15568,
+  "svelteLine": 15773,
+  "vanillaLine": 15442,
   "extra": 35173,
   "histogram": 6723,
   "boxplot": 6769,
@@ -14,5 +17,5 @@
   "sankey": 5926,
   "bullet": 5440,
   "waterfall": 6159,
-  "note": "gzip -9 byte budgets, 8 percent above the measurement. 2026-10-16: line 8737, all 20000, validate 16291. Validate grew for the y-field-list and combo mark repairs; the new budget is round(16291 * 1.08). 2026-10-17 adapters, core and the framework externalized: vue 254 budget round(254 * 1.08) = 274, svelte client compile 413 budget 446, vanilla 222 budget 240. 2026-10-17 Phase 1 (no silent drops): line 12106 budget round(12106 * 1.08) = 13074, all 22952 budget round(22952 * 1.08) = 24788. The line entry includes the cartesian renderer, which now pivots bar series, draws log scales, time axes, axis format presets, and annotations, plus the auto theme light-dark fallbacks. Validate measured 16597 and stays inside 17594. Adapter budgets are unchanged. 2026-10-17 Soft default: line 13966 budget round(13966 * 1.08) = 15083, all 25371 budget round(25371 * 1.08) = 27401. The growth is the Soft, refined, and editorial light-dark palettes (fills and thin-line strokes) plus the geometry token strings in the renderer. paletteFromBrand stays out: its themes/brand entry is about 1.9 KB gzipped, which is more than the remaining line headroom. Validate measured 16658 and stays inside 17594. 2026-10-17 Phase 3 charts are not in all: line stays 13966 and all stays 25371. `@chartkitdev/core/extra` measured 32568, budget round(32568 * 1.08) = 35173. Per-chart entries are histogram 6225/6723, boxplot 6268/6769, radar 4678/5052, funnel 4768/5149, treemap 5534/5977, sankey 5487/5926, bullet 5037/5440, waterfall 5703/6159. Adapters import extra and attach mark tooltips: vue 322 budget 348, svelte 479 budget 517, vanilla 276 budget 298. Validate measured 17533 and stays inside 17594."
+  "note": "gzip -9 byte budgets, 8 percent above the measurement. 2026-10-17 Phase 3 charts stay out of all (line 13972 budget 15083, all 25535 budget 27401). Adapters statically import all. They dynamic-import @chartkitdev/core/load, which imports @chartkitdev/core/charts/<type>, only when spec.type is histogram, boxplot, radar, funnel, treemap, sankey, bullet, or waterfall. SSR entries import extra statically. Adapter shells: vue 492 budget round(492 * 1.08) = 531, svelte 666 budget 719, vanilla 413 budget 446. adapter-with-line bundles that shell with the line renderer and leaves the chart imports external: vueLine 14415 budget 15568, svelteLine 14605 budget 15773, vanillaLine 14298 budget 15442. extra measured 32884 and stays inside 35173. Validate measured 17549 and stays inside 17594."
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { Chart } from "../Chart";
 
 const spec = {
@@ -22,7 +22,7 @@ describe("Chart", () => {
     expect(container.textContent).toContain("Jan");
   });
 
-  it("renders a histogram spec", () => {
+  it("renders a histogram spec", async () => {
     const histogram = {
       version: "1" as const,
       type: "histogram" as const,
@@ -36,7 +36,7 @@ describe("Chart", () => {
       a11y: { alt: "Scores cluster at the low end." },
     };
     const { container } = render(<Chart spec={histogram} />);
-    expect(container.querySelector("svg")?.getAttribute("data-ck-type")).toBe("histogram");
+    await waitFor(() => expect(container.querySelector("svg")?.getAttribute("data-ck-type")).toBe("histogram"));
     expect(container.querySelector("svg")?.getAttribute("aria-label")).toBe(histogram.a11y.alt);
   });
 

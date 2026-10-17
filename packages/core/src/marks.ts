@@ -24,6 +24,7 @@ export const MARK_APPLIES: Record<string, readonly string[]> = {
   endAngle: ["gauge", "progress-ring"],
   linecap: ["gauge", "progress-ring"],
   baseline: ["spike"],
+  shape: ["funnel"],
   bins: ["histogram"],
   bin: ["histogram"],
   binWidth: ["histogram"],

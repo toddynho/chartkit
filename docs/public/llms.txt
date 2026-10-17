@@ -16,7 +16,7 @@ Pages: https://chartkit.dev/spec/<type>
 - Field types: `quantitative`, `temporal`, `ordinal`, `nominal`.
 - Heatmap grid: `x`, `y`, `color`. Calendar: date `x` plus `color`, or `mark.layout: "calendar"`.
 - Combo `y`: `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. Not `layer`. Field lists go on `y`. `bar`, `line`, and `area` go in `mark`, not `type`.
-- Extra charts (`/extra`): histogram bins `x` (`bins` default 8, `binWidth`, or `bin` count/width/sturges/sqrt/fd); `y` is a count. Boxplot `x`+`y`. Radar `x`+`y` list. Funnel `x`+`y`. Treemap `x`+`y`, optional `color`. Sankey `source`,`target`,`y`. Bullet `x`+`y`+`target`, `mark.ranges`. Waterfall `x`+`y`; `mark.total` is an absolute bar.
+- Extra charts (`/extra`): histogram bins `x` (`bins` default 8, `binWidth`, or `bin` count/width/sturges/sqrt/fd); `y` is a count. Boxplot `x`+`y`. Radar `x`+`y` list. Funnel `x`+`y` (bar, or trapezoid). Treemap `x`+`y`, optional `color`. Sankey `source`,`target`,`y`. Bullet `x`+`y`+`target`, `mark.ranges`. Waterfall `x`+`y`; `mark.total` is an absolute bar.
 
 ## Repair
 

@@ -1,11 +1,19 @@
 {
   "version": "1",
   "type": "sankey",
+  "title": "Acquisition flow",
   "data": [
-    { "from": "Source", "to": "Mill", "flow": 10 },
-    { "from": "Source", "to": "Shop", "flow": 4 },
-    { "from": "Mill", "to": "Shop", "flow": 6 }
+    { "from": "Ads", "to": "Landing", "flow": 40 },
+    { "from": "Ads", "to": "Product", "flow": 25 },
+    { "from": "Search", "to": "Landing", "flow": 30 },
+    { "from": "Search", "to": "Blog", "flow": 20 },
+    { "from": "Search", "to": "Product", "flow": 15 },
+    { "from": "Landing", "to": "Trial", "flow": 35 },
+    { "from": "Landing", "to": "Paid", "flow": 20 },
+    { "from": "Product", "to": "Trial", "flow": 18 },
+    { "from": "Product", "to": "Paid", "flow": 16 },
+    { "from": "Blog", "to": "Trial", "flow": 8 }
   ],
   "encoding": { "source": "from", "target": "to", "y": "flow" },
-  "a11y": { "alt": "Most of the flow reaches the shop through the mill." }
+  "a11y": { "alt": "Ads and search reach trial and paid mostly through the landing page and the product page." }
 }
