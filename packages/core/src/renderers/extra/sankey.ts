@@ -44,21 +44,22 @@ export function renderSankey(spec: Record<string, unknown>): string | null {
   }
   const nodeValue = ids.map((_, index) => Math.max(incoming[index], outgoing[index], 1));
 
-  const top = frame.title ? 36 : 16;
+  const top = frame.title ? 40 : 20;
   const bottom = frame.height - 16;
-  const nodeW = 14;
-  const innerW = frame.width - 160;
+  const nodeW = 12;
+  const gutter = 108;
+  const span = Math.max(nodeW, frame.width - gutter * 2 - nodeW);
   const columns = Array.from({ length: depth + 1 }, () => [] as number[]);
   ids.forEach((_, index) => columns[layer[index]].push(index));
   const pos = ids.map(() => ({ x: 0, y: 0, h: 8 }));
   columns.forEach((col, colIndex) => {
     const total = col.reduce((sum, index) => sum + nodeValue[index], 0) || 1;
-    const gap = 14;
-    const usable = Math.max(col.length * 12, bottom - top - gap * Math.max(0, col.length - 1));
+    const gap = 18;
+    const usable = Math.max(col.length * 16, bottom - top - gap * Math.max(0, col.length - 1));
     let y = top;
     for (const index of col) {
-      const h = Math.max(12, (nodeValue[index] / total) * usable);
-      pos[index] = { x: 72 + (colIndex / depth) * innerW, y, h };
+      const h = Math.max(16, (nodeValue[index] / total) * usable);
+      pos[index] = { x: gutter + (colIndex / depth) * span, y, h };
       y += h + gap;
     }
   });
@@ -67,7 +68,9 @@ export function renderSankey(spec: Record<string, unknown>): string | null {
   const outAt = ids.map(() => 0);
   const inAt = ids.map(() => 0);
   const ordered = [...links].sort((a, b) => a.source - b.source || a.target - b.target);
-  for (const link of ordered) {
+  const ribbons: string[] = [];
+  const grads: string[] = [];
+  ordered.forEach((link, index) => {
     const source = pos[link.source];
     const target = pos[link.target];
     const sh = (link.value / Math.max(outgoing[link.source], link.value)) * source.h;
@@ -80,19 +83,22 @@ export function renderSankey(spec: Record<string, unknown>): string | null {
     const x1 = target.x;
     const c = (x0 + x1) / 2;
     const d = `M${n(x0)} ${n(y0)} C${n(c)} ${n(y0)} ${n(c)} ${n(y1)} ${n(x1)} ${n(y1)} L${n(x1)} ${n(y1 + th)} C${n(c)} ${n(y1 + th)} ${n(c)} ${n(y0 + sh)} ${n(x0)} ${n(y0 + sh)} Z`;
+    const id = `${frame.id}-f${index}`;
+    grads.push(`<linearGradient id="${id}"><stop offset="0" stop-color="${fill(frame, link.source)}"/><stop offset="1" stop-color="${fill(frame, link.target)}"/></linearGradient>`);
     const label = `${ids[link.source]} → ${ids[link.target]}: ${fmt(link.value, frame.locale)}`;
-    parts.push(openMark("path", "link", label, `d="${d}" fill="${fill(frame, link.source)}" fill-opacity="0.38"`));
-    parts.push("</path>");
-  }
+    ribbons.push(openMark("path", "link", label, `d="${d}" fill="url(#${id})" fill-opacity="0.35"`) + "</path>");
+  });
+  if (grads.length) parts.push(`<defs>${grads.join("")}</defs>`);
+  parts.push(ribbons.join(""));
   ids.forEach((name, index) => {
     const node = pos[index];
     const label = `${name}: ${fmt(nodeValue[index], frame.locale)}`;
     parts.push(openMark("rect", "node", label, `x="${n(node.x)}" y="${n(node.y)}" width="${nodeW}" height="${n(node.h)}" rx="4" fill="${fill(frame, index)}"`));
     parts.push("</rect>");
-    const right = layer[index] === depth;
-    const anchor = right ? "start" : "end";
-    const x = right ? node.x + nodeW + 8 : node.x - 8;
-    parts.push(`<text x="${n(x)}" y="${n(node.y + node.h / 2 + 4)}" text-anchor="${anchor}" fill="${cssVar("text", frame.preset.text)}" font-size="12" font-weight="600" font-family="${font()}">${fit(name, 88, 12)}</text>`);
+    const first = layer[index] === 0;
+    const anchor = first ? "end" : "start";
+    const x = first ? node.x - 10 : node.x + nodeW + 10;
+    parts.push(`<text x="${n(x)}" y="${n(node.y + node.h / 2 + 4)}" text-anchor="${anchor}" fill="${cssVar("text", frame.preset.text)}" stroke="${cssVar("surface", frame.preset.surface)}" stroke-width="4" paint-order="stroke" font-size="12" font-weight="600" font-family="${font()}">${fit(name, 96, 12)}</text>`);
   });
   return view.done();
 }

@@ -1028,6 +1028,14 @@
           "default": 0,
           "description": "Value spikes rise from. Applies to: spike."
         },
+        "shape": {
+          "enum": [
+            "bar",
+            "trapezoid"
+          ],
+          "default": "bar",
+          "description": "Funnel geometry. bar draws centered rounded bars and is the default. trapezoid connects each stage to the next. Applies to: funnel."
+        },
         "bins": {
           "type": "integer",
           "minimum": 1,

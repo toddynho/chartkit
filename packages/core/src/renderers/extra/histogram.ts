@@ -1,6 +1,6 @@
 import { column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
-import { n } from "../../svg";
+import { n, niceDomain } from "../../svg";
 import { asNumber } from "../../frame";
 import {
   axisLine,
@@ -54,8 +54,11 @@ export function renderHistogram(spec: Record<string, unknown>): string | null {
   const yTicks = countTicks(peak);
   const yTop = Math.max(peak, yTicks[yTicks.length - 1] ?? peak);
   const yAt = scaleOf(0, yTop, box.bottom, box.top);
-  const span = bars[bars.length - 1].x1 - bars[0].x0 || 1;
-  const xAt = (value: number) => box.left + ((value - bars[0].x0) / span) * (box.right - box.left);
+  const dataMin = bars[0].x0;
+  const dataMax = bars[bars.length - 1].x1;
+  const [axisMin, axisMax] = yField ? [dataMin, dataMax] : niceDomain(dataMin, dataMax);
+  const span = axisMax - axisMin || 1;
+  const xAt = (value: number) => box.left + ((value - axisMin) / span) * (box.right - box.left);
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
@@ -74,7 +77,7 @@ export function renderHistogram(spec: Record<string, unknown>): string | null {
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
   const edges = yField
     ? bars.map((bar) => ({ x: xAt(bar.x0 + (bar.x1 - bar.x0) / 2), text: bar.label }))
-    : labelEdges(bars, xAt);
+    : domainTicks(axisMin, axisMax).map((value) => ({ x: xAt(value), text: trimNum(value) }));
   parts.push(xLabels(frame, spec, edges));
   if (!yField && bars.length <= 8) {
     parts.push(`<text x="${n(box.left)}" y="${n(box.top - 4)}" fill="${cssVar("muted", frame.preset.muted)}" font-size="11">${bars.length} bins</text>`);
@@ -82,19 +85,9 @@ export function renderHistogram(spec: Record<string, unknown>): string | null {
   return view.done();
 }
 
-function labelEdges(bars: { x0: number; x1: number; label: string }[], xAt: (value: number) => number): { x: number; text: string }[] {
-  if (bars.length > 8) {
-    const min = bars[0].x0;
-    const max = bars[bars.length - 1].x1;
-    return domainTicks(min, max).map((value) => ({ x: xAt(value), text: String(Math.round(value * 100) / 100) }));
-  }
-  const labels = bars.map((bar) => ({ x: xAt(bar.x0), text: trimNum(bar.x0) }));
-  labels.push({ x: xAt(bars[bars.length - 1].x1), text: trimNum(bars[bars.length - 1].x1) });
-  return labels;
-}
-
 function trimNum(value: number): string {
-  const rounded = Math.round(value * 100) / 100;
+  const rounded = Math.round(value * 1000) / 1000;
+  if (Math.abs(rounded - Math.round(rounded)) < 1e-6) return String(Math.round(rounded));
   return String(rounded);
 }
 

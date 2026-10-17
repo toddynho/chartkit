@@ -63,7 +63,7 @@ export const auto: PresetTokens = {
   axis: ld("rgb(0 0 0 / 0.14)", "rgb(245 245 247 / 0.16)"),
   track: ld("rgb(0 0 0 / 0.10)", "rgb(245 245 247 / 0.16)"),
   accent: ld("#007aff", "#0a84ff"),
-  positive: ld("#047857", "#30d158"),
+  positive: ld("#15803d", "#30d158"),
   negative: ld("#be123c", "#ff453a"),
   series: ldList(
     ["#007aff", "#34c759", "#ff9500", "#af52de", "#ff2d55", "#32ade6", "#65a30d", "#ff6723"],

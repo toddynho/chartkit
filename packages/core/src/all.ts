@@ -1,4 +1,4 @@
-import { createRenderer, register } from "./render";
+import { createRenderer, register, type ChartRenderer } from "./render";
 import { registerPreset } from "./theme";
 import { themes } from "./themes/all";
 import { line } from "./charts/line";
@@ -22,8 +22,57 @@ export const charts = [line, bar, donut, stackedArea, scatter, combo, heatmap, g
 for (const [name, preset] of Object.entries(themes)) registerPreset(name, preset);
 register(...charts);
 
-/** Zero-config renderer for the core set. Phase 3 types: `@chartkitdev/core/extra`. */
-export const render = createRenderer(charts);
+const EXTRA_TYPES = new Set(["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall"]);
+
+/** True for a phase-3 type. Those renderers load from `@chartkitdev/core/charts/<type>`. */
+export function isExtra(type: string): boolean {
+  return EXTRA_TYPES.has(type);
+}
+
+const adopted: ChartRenderer[] = [];
+let draw = createRenderer(charts);
+
+/**
+ * Add one phase-3 chart to this entry's renderer.
+ * The shared `register()` does not see it, and `@chartkitdev/core/all` stays free of those modules until this runs.
+ */
+export function adopt(chart: ChartRenderer): void {
+  if (adopted.some((item) => item.name === chart.name)) return;
+  adopted.push(chart);
+  draw = createRenderer([...charts, ...adopted]);
+}
+
+/** Zero-config renderer for the core set. Phase 3 types join after `adopt`. */
+export function render(spec: unknown, target?: Parameters<typeof draw>[1]): string {
+  return draw(spec, target);
+}
+
+const jobs = new WeakMap<object, number>();
+const tips = new WeakMap<object, { destroy(): void }>();
+
+/**
+ * Draw one phase-3 chart into `el`. Returns false for a core type so the caller keeps its own renderer.
+ * The chart module and the mark tooltip load on demand.
+ */
+export function open(el: { innerHTML: string }, spec: { type?: string }): boolean {
+  const type = spec.type;
+  if (!type || !EXTRA_TYPES.has(type)) return false;
+  const token = (jobs.get(el) ?? 0) + 1;
+  jobs.set(el, token);
+  void import("./load").then(async (mod) => {
+    if (jobs.get(el) !== token) return;
+    const chart = await mod.load(type);
+    if (jobs.get(el) !== token || !chart) return;
+    adopt(chart);
+    el.innerHTML = draw(spec);
+    if (typeof (el as { addEventListener?: unknown }).addEventListener !== "function") return;
+    const { attach } = await import("./extra-tip");
+    if (jobs.get(el) !== token) return;
+    tips.get(el)?.destroy();
+    tips.set(el, attach(el as never));
+  });
+  return true;
+}
 
 export { register, createRenderer };
 export { line, bar, donut, stackedArea, scatter, combo, heatmap, gauge, kpi, sparkline, miniArea, progressRing, spike, candlestick };

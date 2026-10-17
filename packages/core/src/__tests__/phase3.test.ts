@@ -85,9 +85,22 @@ describe("phase 3 charts", () => {
 
   it("bins raw histogram values and keeps them out of line and all", () => {
     const svg = render(load("16-histogram.json"));
-    expect(svg).toContain('data-ck-count="3"');
-    expect(svg).toContain('data-ck-count="1"');
-    expect(svg).toContain("<text");
+    const bins = svg.match(/data-ck-mark="bar"/g)?.length ?? 0;
+    expect(bins).toBeGreaterThanOrEqual(12);
+    expect(bins).toBeLessThanOrEqual(20);
+    expect(svg).not.toMatch(/>\d+\.\d+</);
+    const small = render({
+      version: "1",
+      type: "histogram",
+      data: [{ score: 1 }, { score: 2 }, { score: 2 }, { score: 8 }],
+      encoding: { x: "score" },
+      mark: { bins: 2 },
+      a11y: { alt: "Scores cluster at the low end." },
+    });
+    expect(small).toContain('data-ck-count="3"');
+    expect(small).toContain('data-ck-count="1"');
+    expect(small).not.toContain(">4.5<");
+    expect(small).toContain(">2<");
     const onlyLine = createRenderer([line]);
     expect(onlyLine(load("16-histogram.json"))).toContain("CK1010");
     expect(renderAll(load("16-histogram.json"))).toContain("CK1010");
@@ -96,26 +109,48 @@ describe("phase 3 charts", () => {
 
   it("draws the marks for each new geometry", () => {
     const box = render(load("17-boxplot.json"));
-    expect(box).toContain('data-ck-mark="box"');
+    expect(box.match(/data-ck-mark="box"/g)).toHaveLength(5);
     expect(box).toContain('data-ck-mark="whisker"');
     expect(box).toContain('data-ck-mark="median"');
     expect(box).toContain('data-ck-mark="outlier"');
     const radar = render(load("18-radar.json"));
     expect(radar.match(/data-ck-mark="polygon"/g)).toHaveLength(2);
-    expect(radar).toContain('data-ck-mark="spoke"');
+    expect(radar.match(/data-ck-mark="spoke"/g)).toHaveLength(6);
     expect(radar).toContain("Speed");
     const funnel = render(load("19-funnel.json"));
-    expect(funnel.match(/data-ck-mark="stage"/g)).toHaveLength(3);
+    expect(funnel.match(/data-ck-mark="stage"/g)).toHaveLength(5);
+    expect(funnel).toContain('rx="');
     expect(funnel).toContain("%");
+    const trapezoid = render({
+      version: "1",
+      type: "funnel",
+      data: [
+        { stage: "Visit", count: 80 },
+        { stage: "Start", count: 40 },
+        { stage: "Pay", count: 12 },
+      ],
+      encoding: { x: "stage", y: "count" },
+      mark: { shape: "trapezoid" },
+      a11y: { alt: "12 of 80 visits pay." },
+    });
+    expect(trapezoid).toContain('d="M');
     const tiles = render(load("20-treemap.json"));
-    expect(tiles.match(/data-ck-mark="tile"/g)).toHaveLength(4);
+    expect(tiles.match(/data-ck-mark="tile"/g)).toHaveLength(12);
+    expect(tiles).toContain("color-mix(");
     expect(tiles).toContain("Oak");
     const sankey = render(load("21-sankey.json"));
-    expect(sankey.match(/data-ck-mark="link"/g)).toHaveLength(3);
-    expect(sankey).toContain(" C");
-    expect(sankey).toContain("Mill");
+    expect(sankey.match(/data-ck-mark="link"/g)?.length).toBe(10);
+    expect(sankey.match(/data-ck-mark="node"/g)?.length).toBe(7);
+    expect(sankey).toContain("linearGradient");
+    expect(sankey).toContain('fill-opacity="0.35"');
+    expect(sankey).toContain('text-anchor="end"');
+    expect(sankey).toContain('text-anchor="start"');
+    expect(sankey).toContain("Landing");
     expect(render(load("22-bullet.json"))).toContain('data-ck-mark="target"');
-    expect(render(load("23-waterfall.json"))).toContain('data-ck-mark="total"');
-    expect(render(load("23-waterfall.json"))).toContain('data-ck-mark="delta"');
+    const waterfall = render(load("23-waterfall.json"));
+    expect(waterfall).toContain('data-ck-mark="total"');
+    expect(waterfall).toContain('data-ck-mark="delta"');
+    expect(waterfall).toContain("var(--ck-positive, light-dark(#15803d, #30d158))");
+    expect(waterfall).toContain("var(--ck-negative, light-dark(#be123c, #ff453a))");
   });
 });

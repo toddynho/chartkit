@@ -1,18 +1,374 @@
 {
   "version": "1",
   "type": "boxplot",
+  "title": "Days to close",
   "data": [
-    { "group": "A", "value": 1 },
-    { "group": "A", "value": 2 },
-    { "group": "A", "value": 3 },
-    { "group": "A", "value": 4 },
-    { "group": "A", "value": 9 },
-    { "group": "B", "value": 2 },
-    { "group": "B", "value": 3 },
-    { "group": "B", "value": 3 },
-    { "group": "B", "value": 4 },
-    { "group": "B", "value": 5 }
+    {
+      "region": "North",
+      "days": 40
+    },
+    {
+      "region": "North",
+      "days": 43
+    },
+    {
+      "region": "North",
+      "days": 39
+    },
+    {
+      "region": "North",
+      "days": 38
+    },
+    {
+      "region": "North",
+      "days": 36
+    },
+    {
+      "region": "North",
+      "days": 46
+    },
+    {
+      "region": "North",
+      "days": 34
+    },
+    {
+      "region": "North",
+      "days": 44
+    },
+    {
+      "region": "North",
+      "days": 46
+    },
+    {
+      "region": "North",
+      "days": 41
+    },
+    {
+      "region": "North",
+      "days": 44
+    },
+    {
+      "region": "North",
+      "days": 54
+    },
+    {
+      "region": "North",
+      "days": 46
+    },
+    {
+      "region": "North",
+      "days": 46
+    },
+    {
+      "region": "North",
+      "days": 36
+    },
+    {
+      "region": "North",
+      "days": 30
+    },
+    {
+      "region": "North",
+      "days": 35
+    },
+    {
+      "region": "North",
+      "days": 34
+    },
+    {
+      "region": "East",
+      "days": 64
+    },
+    {
+      "region": "East",
+      "days": 56
+    },
+    {
+      "region": "East",
+      "days": 50
+    },
+    {
+      "region": "East",
+      "days": 63
+    },
+    {
+      "region": "East",
+      "days": 54
+    },
+    {
+      "region": "East",
+      "days": 66
+    },
+    {
+      "region": "East",
+      "days": 63
+    },
+    {
+      "region": "East",
+      "days": 62
+    },
+    {
+      "region": "East",
+      "days": 56
+    },
+    {
+      "region": "East",
+      "days": 52
+    },
+    {
+      "region": "East",
+      "days": 54
+    },
+    {
+      "region": "East",
+      "days": 56
+    },
+    {
+      "region": "East",
+      "days": 47
+    },
+    {
+      "region": "East",
+      "days": 52
+    },
+    {
+      "region": "East",
+      "days": 58
+    },
+    {
+      "region": "East",
+      "days": 41
+    },
+    {
+      "region": "East",
+      "days": 52
+    },
+    {
+      "region": "East",
+      "days": 49
+    },
+    {
+      "region": "South",
+      "days": 45
+    },
+    {
+      "region": "South",
+      "days": 52
+    },
+    {
+      "region": "South",
+      "days": 49
+    },
+    {
+      "region": "South",
+      "days": 30
+    },
+    {
+      "region": "South",
+      "days": 32
+    },
+    {
+      "region": "South",
+      "days": 28
+    },
+    {
+      "region": "South",
+      "days": 24
+    },
+    {
+      "region": "South",
+      "days": 85
+    },
+    {
+      "region": "South",
+      "days": 51
+    },
+    {
+      "region": "South",
+      "days": 15
+    },
+    {
+      "region": "South",
+      "days": 32
+    },
+    {
+      "region": "South",
+      "days": 16
+    },
+    {
+      "region": "South",
+      "days": 8
+    },
+    {
+      "region": "South",
+      "days": 30
+    },
+    {
+      "region": "South",
+      "days": 26
+    },
+    {
+      "region": "South",
+      "days": 31
+    },
+    {
+      "region": "South",
+      "days": 30
+    },
+    {
+      "region": "South",
+      "days": 57
+    },
+    {
+      "region": "West",
+      "days": 61
+    },
+    {
+      "region": "West",
+      "days": 82
+    },
+    {
+      "region": "West",
+      "days": 48
+    },
+    {
+      "region": "West",
+      "days": 71
+    },
+    {
+      "region": "West",
+      "days": 65
+    },
+    {
+      "region": "West",
+      "days": 57
+    },
+    {
+      "region": "West",
+      "days": 58
+    },
+    {
+      "region": "West",
+      "days": 62
+    },
+    {
+      "region": "West",
+      "days": 67
+    },
+    {
+      "region": "West",
+      "days": 69
+    },
+    {
+      "region": "West",
+      "days": 59
+    },
+    {
+      "region": "West",
+      "days": 47
+    },
+    {
+      "region": "West",
+      "days": 63
+    },
+    {
+      "region": "West",
+      "days": 68
+    },
+    {
+      "region": "West",
+      "days": 70
+    },
+    {
+      "region": "West",
+      "days": 55
+    },
+    {
+      "region": "West",
+      "days": 71
+    },
+    {
+      "region": "West",
+      "days": 69
+    },
+    {
+      "region": "Central",
+      "days": 43
+    },
+    {
+      "region": "Central",
+      "days": 52
+    },
+    {
+      "region": "Central",
+      "days": 32
+    },
+    {
+      "region": "Central",
+      "days": 52
+    },
+    {
+      "region": "Central",
+      "days": 59
+    },
+    {
+      "region": "Central",
+      "days": 58
+    },
+    {
+      "region": "Central",
+      "days": 69
+    },
+    {
+      "region": "Central",
+      "days": 55
+    },
+    {
+      "region": "Central",
+      "days": 58
+    },
+    {
+      "region": "Central",
+      "days": 55
+    },
+    {
+      "region": "Central",
+      "days": 33
+    },
+    {
+      "region": "Central",
+      "days": 55
+    },
+    {
+      "region": "Central",
+      "days": 42
+    },
+    {
+      "region": "Central",
+      "days": 47
+    },
+    {
+      "region": "Central",
+      "days": 62
+    },
+    {
+      "region": "Central",
+      "days": 52
+    },
+    {
+      "region": "Central",
+      "days": 55
+    },
+    {
+      "region": "Central",
+      "days": 31
+    }
   ],
-  "encoding": { "x": "group", "y": "value" },
-  "a11y": { "alt": "Group A stretches higher than group B." }
+  "encoding": {
+    "x": "region",
+    "y": "days"
+  },
+  "a11y": {
+    "alt": "West deals take longer to close than South deals, and each region has a wide spread."
+  }
 }

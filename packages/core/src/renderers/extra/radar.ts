@@ -54,10 +54,6 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
   for (let ring = 1; ring <= rings; ring++) {
     const points = axes.map((_, index) => at(index, (max * ring) / rings));
     parts.push(`<polygon points="${points.map((point) => `${n(point.x)},${n(point.y)}`).join(" ")}" fill="none" stroke="${grid}" />`);
-    if (ring === rings) {
-      const label = at(0, max * 1.02);
-      parts.push(text(label.x, label.y, String(Math.round(max * 100) / 100), cssVar("muted", frame.preset.muted), 11, "400", "middle"));
-    }
   }
   axes.forEach((name, index) => {
     const end = at(index, max);

@@ -894,6 +894,10 @@ export interface Mark {
    */
   baseline?: number;
   /**
+   * Funnel geometry. bar draws centered rounded bars and is the default. trapezoid connects each stage to the next. Applies to: funnel.
+   */
+  shape?: "bar" | "trapezoid";
+  /**
    * Histogram bin count when mark.bin is count or omitted. Default 8. Applies to: histogram.
    */
   bins?: number;
