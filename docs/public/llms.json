@@ -11,7 +11,7 @@
     "compat": "@derpdaderp/chartkit"
   },
   "schema": "https://chartkit.dev/schema/v1.json",
-  "description": "Lightweight React charting library. Zero dependencies, pure SVG, 17 themes. Spec: https://chartkit.dev/schema/v1.json",
+  "description": "JSON-spec charting library. @chartkitdev/core renders SVG with zero dependencies. Adapters for React, Vue, Svelte, and vanilla. validate() and repair() are the agent loop. Spec: https://chartkit.dev/schema/v1.json",
   "homepage": "https://chartkit.dev",
   "repository": "https://github.com/toddynho/chartkit",
   "npm": "https://www.npmjs.com/package/@chartkitdev/react",
