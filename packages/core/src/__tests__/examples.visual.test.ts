@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { render } from "../all";
+import { render } from "../extra";
 
 const examples = join(dirname(fileURLToPath(import.meta.url)), "../../examples");
 

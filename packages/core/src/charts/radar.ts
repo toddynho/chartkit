@@ -1,5 +1,5 @@
 import type { ChartRenderer } from "../render";
-import { renderRadar } from "../renderers/phase3";
+import { renderRadar } from "../renderers/extra/radar";
 
 export const radar: ChartRenderer = {
   name: "radar",

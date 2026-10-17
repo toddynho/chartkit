@@ -51,7 +51,7 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
 - A list of fields goes on `encoding.y`, not on `field`. On a combo, `bar`, `line`, and `area` go in `mark`, not in `type`. A series with `"axis": "y2"` needs `axes.y2`; `repair` adds it when it is missing.
 - A bar splits series with `encoding.series`, or with `encoding.color` when that field is not `x`. `encoding.color` equal to `x` colours each bar and does not split series. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel is applied to the ticks. Rule, band, and text `annotations` are drawn. Tooltip, crosshair, x zoom, pan, brush, animation, `legend.interactive`, and `a11y.keyboard` / `a11y.dataTable` are client behavior in `@chartkitdev/core/interact` (a separate entry, so a static bundle does not include it). Tooltip defaults on for a client-rendered line, bar, stacked area, scatter, combo, or donut; `tooltip: false` turns it off. The static SVG is unchanged apart from hook attributes the client sets after mount (`data-ck-interact` on the host, `tabindex` when keyboard is on). Zoom, pan, and brush stay off unless the spec asks; a candlestick with `zoom` omitted pans and zooms on x. Animation is off unless requested, and stays off for `prefers-reduced-motion` and for more than 2000 rows. The default theme is `auto` (Soft: `light-dark`, transparent plot, page scheme; optional card via `--ck-background`). `soft`, `refined`, and `editorial` are built in. `midnight` is opt-in. Other names stay midnight until imported. `--ck-*` or `--chart-N` still wins.
 - A heatmap with `encoding.x`, `encoding.y`, and `encoding.color` is a grid. A calendar heatmap is a date `x` plus `color`, or `mark.layout: "calendar"`.
-- Histogram bins `encoding.x` (`mark.bins`, default 8). `encoding.y` is a pre-binned count. Boxplot uses `encoding.x` and observation `encoding.y`. Radar uses `encoding.x` and one or more `encoding.y` fields. Funnel uses `encoding.x` (stage) and `encoding.y`. Treemap uses `encoding.x`, `encoding.y`, and optional `encoding.color`. Sankey uses `encoding.source`, `encoding.target`, and `encoding.y`. Waterfall uses `encoding.x` and `encoding.y`; color `"total"` anchors that bar at zero. Bullet uses `metric`, including optional `target` and `bands`.
+- Histogram bins `encoding.x` (`mark.bins` default 8, `mark.binWidth`, or `mark.bin` of count, width, sturges, sqrt, or fd). `encoding.y` is a pre-binned count. Boxplot uses `encoding.x` and observation `encoding.y`. Radar uses `encoding.x` and one or more `encoding.y` fields. Funnel uses `encoding.x` (stage) and `encoding.y`. Treemap uses `encoding.x`, `encoding.y`, and optional `encoding.color`. Sankey uses `encoding.source`, `encoding.target`, and `encoding.y`. Bullet uses `encoding.x`, `encoding.y`, optional `encoding.target`, and `mark.ranges`. Waterfall uses `encoding.x` and delta `encoding.y`; `mark.total` names a field that marks an absolute total. These eight types render from `@chartkitdev/core/extra`.
 
 ## line
 
@@ -353,6 +353,35 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
   ],
   "encoding": { "source": "from", "target": "to", "y": "flow" },
   "a11y": { "alt": "The mill sends flow on to the shop." }
+}
+```
+
+## bullet
+
+```json
+{
+  "version": "1",
+  "type": "bullet",
+  "data": [{ "name": "Revenue", "value": 275, "target": 250, "good": 300 }],
+  "encoding": { "x": "name", "y": "value", "target": "target" },
+  "mark": { "ranges": ["good"] },
+  "a11y": { "alt": "Revenue is past its target." }
+}
+```
+
+## waterfall
+
+```json
+{
+  "version": "1",
+  "type": "waterfall",
+  "data": [
+    { "step": "Open", "amount": 120, "total": true },
+    { "step": "Won", "amount": 40 },
+    { "step": "Close", "amount": 160, "total": true }
+  ],
+  "encoding": { "x": "step", "y": "amount" },
+  "a11y": { "alt": "The close is 160." }
 }
 ```
 

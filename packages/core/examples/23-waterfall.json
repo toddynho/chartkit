@@ -1,0 +1,13 @@
+{
+  "version": "1",
+  "type": "waterfall",
+  "data": [
+    { "step": "Open", "amount": 120, "total": true },
+    { "step": "Won", "amount": 40 },
+    { "step": "Lost", "amount": -25 },
+    { "step": "Close", "amount": 135, "total": true }
+  ],
+  "encoding": { "x": "step", "y": "amount" },
+  "mark": { "total": "total" },
+  "a11y": { "alt": "The year closes at 135 after a gain and a loss." }
+}

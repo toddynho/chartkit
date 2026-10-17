@@ -34,6 +34,7 @@ describe("Svelte SSR", () => {
       absWorkingDir: join(here, "../../../.."),
       nodePaths: [join(here, "../../../../node_modules")],
       alias: {
+        "@chartkitdev/core/extra": join(here, "../../../core/src/extra.ts"),
         "@chartkitdev/core/all": join(here, "../../../core/src/all.ts"),
         "@chartkitdev/core/interact": join(here, "../../../core/src/interact.ts"),
       },

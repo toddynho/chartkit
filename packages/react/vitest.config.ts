@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: [
+      { find: '@chartkitdev/core/extra', replacement: path.resolve(__dirname, '../core/src/extra.ts') },
       { find: '@chartkitdev/core/interact', replacement: path.resolve(__dirname, '../core/src/interact.ts') },
       { find: '@chartkitdev/core/all', replacement: path.resolve(__dirname, '../core/src/all.ts') },
       { find: '@chartkitdev/core/validate', replacement: path.resolve(__dirname, '../core/src/validate.ts') },

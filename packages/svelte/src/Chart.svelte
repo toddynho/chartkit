@@ -1,6 +1,6 @@
 <script>
   import { onMount } from "svelte";
-  import { render as renderAll } from "@chartkitdev/core/all";
+  import { render as renderAll } from "@chartkitdev/core/extra";
   import { attach, patchSvg } from "@chartkitdev/core/interact";
 
   /** @type {import("@chartkitdev/core").ChartSpec} */

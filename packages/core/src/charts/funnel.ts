@@ -1,5 +1,5 @@
 import type { ChartRenderer } from "../render";
-import { renderFunnel } from "../renderers/phase3";
+import { renderFunnel } from "../renderers/extra/funnel";
 
 export const funnel: ChartRenderer = {
   name: "funnel",

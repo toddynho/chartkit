@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import type { ChartSpec } from "@chartkitdev/core";
-import { render as renderAll } from "@chartkitdev/core/all";
+import { render as renderAll } from "@chartkitdev/core/extra";
 import { attach, type Controller } from "@chartkitdev/core/interact";
 
 export interface ChartProps {

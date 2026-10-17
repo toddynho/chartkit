@@ -1,5 +1,5 @@
 import type { ChartRenderer } from "../render";
-import { renderHistogram } from "../renderers/phase3";
+import { renderHistogram } from "../renderers/extra/histogram";
 
 export const histogram: ChartRenderer = {
   name: "histogram",

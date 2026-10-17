@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     conditions: ["browser"],
     alias: [
+      { find: "@chartkitdev/core/extra", replacement: path.resolve(__dirname, "../core/src/extra.ts") },
       { find: "@chartkitdev/core/all", replacement: path.resolve(__dirname, "../core/src/all.ts") },
       { find: "@chartkitdev/core/interact", replacement: path.resolve(__dirname, "../core/src/interact.ts") },
       { find: "@chartkitdev/core", replacement: path.resolve(__dirname, "../core/src/index.ts") },

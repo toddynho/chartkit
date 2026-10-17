@@ -33,6 +33,8 @@ const charts = [
   "funnel",
   "treemap",
   "sankey",
+  "bullet",
+  "waterfall",
 ];
 
 const themes = [
@@ -58,6 +60,7 @@ const themes = [
 const entry: Record<string, string> = {
   index: "src/index.ts",
   all: "src/all.ts",
+  extra: "src/extra.ts",
   validate: "src/validate.ts",
   interact: "src/interact.ts",
   "interact-extra": "src/interact-extra.ts",

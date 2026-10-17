@@ -1,5 +1,5 @@
 import type { ChartRenderer } from "../render";
-import { renderTreemap } from "../renderers/phase3";
+import { renderTreemap } from "../renderers/extra/treemap";
 
 export const treemap: ChartRenderer = {
   name: "treemap",

@@ -49,6 +49,8 @@ const CHART_TYPES = [
   "funnel",
   "treemap",
   "sankey",
+  "bullet",
+  "waterfall",
 ];
 
 describe("example specs", () => {

@@ -13,7 +13,7 @@ export const specPages: Record<string, SpecPage> = {
       "type is histogram.",
       "data is one row per observation, or one row per bin when encoding.y is set.",
       "encoding.x is the value to bin. encoding.y, when present, is the pre-binned count.",
-      "mark.bins is the bin count (default 8, max 60). It is ignored when y is set.",
+      "mark.bins is the bin count (default 8, max 60). mark.binWidth sets a fixed width. mark.bin is count, width, sturges, sqrt, or fd.",
       "hist repairs to histogram. encoding.value moves to encoding.x when x is missing.",
     ],
     example: `{
@@ -27,7 +27,7 @@ export const specPages: Record<string, SpecPage> = {
   },
   boxplot: {
     title: "Box plot",
-    summary: "A box per category spanning the quartiles, plus outliers outside 1.5 IQR.",
+    summary: "Quartile box, whiskers to the 1.5 IQR fence, a median line, and outlier dots.",
     fields: [
       "type is boxplot.",
       "encoding.x is the category. encoding.y holds the raw observations.",
@@ -53,7 +53,7 @@ export const specPages: Record<string, SpecPage> = {
     summary: "Compares one or more series around a shared set of spokes.",
     fields: [
       "type is radar.",
-      "encoding.x is the spoke label. At least three rows are required.",
+      "encoding.x is the spoke label. At least three spokes are required. Rings and spoke lines are drawn.",
       "encoding.y is one field or a list of fields, one polygon per field.",
       "Values are scaled from zero to the largest number in the spec.",
     ],
@@ -91,7 +91,7 @@ export const specPages: Record<string, SpecPage> = {
   },
   treemap: {
     title: "Treemap",
-    summary: "Tiles sized by a measure. An optional group shares a series color.",
+    summary: "Squarified tiles sized by a measure. Labels truncate to the tile. An optional group shares a series color.",
     fields: [
       "type is treemap.",
       "encoding.x is the tile label. encoding.y is the size. Non-positive sizes are skipped.",
@@ -112,7 +112,7 @@ export const specPages: Record<string, SpecPage> = {
   },
   sankey: {
     title: "Sankey",
-    summary: "Flows between nodes. Link thickness follows the value.",
+    summary: "Curved links between labeled nodes. Link thickness follows the value.",
     fields: [
       "type is sankey.",
       "encoding.source is the node the flow leaves. encoding.target is the node it enters. encoding.y is the amount.",
@@ -128,6 +128,45 @@ export const specPages: Record<string, SpecPage> = {
   ],
   "encoding": { "source": "from", "target": "to", "y": "flow" },
   "a11y": { "alt": "The mill sends flow on to the shop." }
+}`,
+  },
+  bullet: {
+    title: "Bullet",
+    summary: "A measure against qualitative bands and a target marker.",
+    fields: [
+      "type is bullet.",
+      "encoding.x is the label. encoding.y is the measure. encoding.target is the goal.",
+      "mark.ranges is a list of field names, worst to best. Each value is that band's upper edge.",
+      "bullet-chart repairs to bullet.",
+    ],
+    example: `{
+  "version": "1",
+  "type": "bullet",
+  "data": [{ "name": "Revenue", "value": 275, "target": 250, "good": 300 }],
+  "encoding": { "x": "name", "y": "value", "target": "target" },
+  "mark": { "ranges": ["good"] },
+  "a11y": { "alt": "Revenue is past its target." }
+}`,
+  },
+  waterfall: {
+    title: "Waterfall",
+    summary: "Deltas float from a running total. A flagged row is an absolute total.",
+    fields: [
+      "type is waterfall.",
+      "encoding.x is the step. encoding.y is the delta.",
+      "mark.total names a field. A true value on that row draws an absolute total from zero.",
+      "waterfall-chart repairs to waterfall.",
+    ],
+    example: `{
+  "version": "1",
+  "type": "waterfall",
+  "data": [
+    { "step": "Open", "amount": 120, "total": true },
+    { "step": "Won", "amount": 40 },
+    { "step": "Close", "amount": 160, "total": true }
+  ],
+  "encoding": { "x": "step", "y": "amount" },
+  "a11y": { "alt": "The close is 160." }
 }`,
   },
   gauge: {
