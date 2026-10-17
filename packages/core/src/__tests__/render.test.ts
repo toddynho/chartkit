@@ -54,8 +54,15 @@ function circles(svg: string): { cx: number; cy: number; r: number }[] {
 }
 
 function tickTexts(svg: string, anchor: "start" | "end"): string[] {
-  const re = new RegExp(`<text\\b[^>]*text-anchor="${anchor}"[^>]*>([^<]*)</text>`, "g");
-  return [...svg.matchAll(re)].map((match) => match[1]);
+  return anchored(svg, anchor).map((item) => item.text);
+}
+
+function anchored(svg: string, anchor: "start" | "end"): { x: number; text: string }[] {
+  const re = new RegExp(`<text\\b([^>]*)text-anchor="${anchor}"[^>]*>([^<]*)</text>`, "g");
+  return [...svg.matchAll(re)].map((match) => ({
+    x: Number(/ x="([^"]+)"/.exec(match[1])?.[1]),
+    text: match[2],
+  }));
 }
 
 const area = {
@@ -361,6 +368,93 @@ describe("remaining chart renderers", () => {
     });
     expect(dataRects(byColor)).toHaveLength(4);
     expect(byColor).toContain("var(--ck-series-2,");
+  });
+
+  it("colours each bar when color names the x field", () => {
+    const rows = [
+      { lane: "alpha", amount: 40 },
+      { lane: "beta", amount: 55 },
+      { lane: "gamma", amount: 32 },
+      { lane: "alpha", amount: 48 },
+    ];
+    const base = {
+      version: "1",
+      type: "bar",
+      data: rows,
+      size: { width: 640, height: 240 },
+      a11y: { alt: "Alpha is drawn twice." },
+    };
+    const plain = render({ ...base, encoding: { x: "lane", y: "amount" } });
+    const colored = render({ ...base, encoding: { x: "lane", y: "amount", color: "lane" } });
+    const plainRects = dataRects(plain);
+    const coloredRects = dataRects(colored);
+    expect(coloredRects).toHaveLength(rows.length);
+    expect(coloredRects.map((bar) => [bar.x, bar.width])).toEqual(plainRects.map((bar) => [bar.x, bar.width]));
+    expect(colored).not.toMatch(/width="10" height="10"/);
+    const fills = [...colored.matchAll(/<rect\b[^>]*\bfill="([^"]+)"/g)]
+      .map((match) => match[1])
+      .filter((fill) => fill.includes("--ck-series-") || fill.includes("--chart-"));
+    expect(fills).toHaveLength(4);
+    expect(new Set(fills).size).toBe(3);
+    expect(fills[0]).toBe(fills[3]);
+    const sameField = render({ ...base, encoding: { x: "lane", y: "amount", series: "lane" } });
+    expect(dataRects(sameField).map((bar) => bar.width)).toEqual(plainRects.map((bar) => bar.width));
+  });
+
+  it("grows the y and y2 margins to fit wide tick labels", () => {
+    const svg = render({
+      version: "1",
+      type: "line",
+      data: [
+        { step: "A", amount: 2200 },
+        { step: "B", amount: 1800 },
+      ],
+      encoding: { x: "step", y: { field: "amount", format: "currency" } },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "The amount fell." },
+    });
+    const left = anchored(svg, "end");
+    expect(left.some((item) => item.text.startsWith("$"))).toBe(true);
+    for (const item of left) expect(item.x - item.text.length * 6.7).toBeGreaterThanOrEqual(-0.5);
+
+    const y2 = render({
+      version: "1",
+      type: "combo",
+      data: [
+        { step: "A", amount: 2200, units: 10 },
+        { step: "B", amount: 1800, units: 12 },
+      ],
+      encoding: {
+        x: "step",
+        y: [
+          { field: "units", mark: "bar" },
+          { field: "amount", mark: "line", axis: "y2", format: "currency" },
+        ],
+      },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "Units rose while the amount fell." },
+    });
+    const right = anchored(y2, "start");
+    expect(right.some((item) => item.text.startsWith("$"))).toBe(true);
+    for (const item of right) expect(item.x + item.text.length * 6.7).toBeLessThanOrEqual(640.5);
+    expect(clipRect(y2).x + clipRect(y2).width).toBeLessThan(640 - 52);
+
+    const horizontal = render({
+      version: "1",
+      type: "bar",
+      data: [
+        { name: "primary warehouse", amount: 10 },
+        { name: "south", amount: 20 },
+      ],
+      encoding: { x: "name", y: "amount" },
+      mark: { orientation: "horizontal" },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "The primary warehouse is smaller." },
+    });
+    expect(clipRect(horizontal).x).toBeGreaterThan(52);
+    const names = anchored(horizontal, "end");
+    expect(names.some((item) => item.text === "primary warehouse")).toBe(true);
+    for (const item of names) expect(item.x - item.text.length * 6.7).toBeGreaterThanOrEqual(-0.5);
   });
 
   it("uses a log scale and a currency format on the axis", () => {

@@ -74,14 +74,23 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   if (showLegend) top += 22;
   const showX = axisOn(spec, "x");
   const showY = axisOn(spec, "y");
-  const plot = { left: showY ? 56 : 16, top, right: frame.width - 16, bottom: frame.height - (showX ? 36 : 16) };
+  const xFormat = channelFormat(frame.encoding.x);
+  const yFormat = channelFormat(frame.encoding.y);
+  const yTicks = yLog ? logTicks(yDomain[0], yDomain[1]) : ticks(yDomain[0], yDomain[1], 5);
+  let left = showY ? 56 : 16;
+  if (showY) {
+    let label = 0;
+    for (let i = 0; i < yTicks.length; i++) {
+      const size = formatValue(yTicks[i], yFormat, frame.locale).length * 6.7;
+      if (size > label) label = size;
+    }
+    left = Math.max(56, Math.ceil(label + 14));
+  }
+  const plot = { left, top, right: frame.width - 16, bottom: frame.height - (showX ? 36 : 16) };
   const xScale = xLog ? logScale(xDomain[0], xDomain[1], plot.left, plot.right) : linear(xDomain[0], xDomain[1], plot.left, plot.right);
   const yScale = yLog ? logScale(yDomain[0], yDomain[1], plot.bottom, plot.top) : linear(yDomain[0], yDomain[1], plot.bottom, plot.top);
   const xTicks = xLog ? logTicks(xDomain[0], xDomain[1]) : ticks(xDomain[0], xDomain[1], 5);
-  const yTicks = yLog ? logTicks(yDomain[0], yDomain[1]) : ticks(yDomain[0], yDomain[1], 5);
   const grid = gridStyle(spec);
-  const xFormat = channelFormat(frame.encoding.x);
-  const yFormat = channelFormat(frame.encoding.y);
   const colorOf = (category: string | undefined, index: number) => {
     if (colorEnc?.constant) return paint(colorEnc.constant, frame.preset, 0);
     if (category === undefined) return paint(undefined, frame.preset, 0);
