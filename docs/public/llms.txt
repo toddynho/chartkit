@@ -1,231 +1,159 @@
 # ChartKit JSON spec
 
-> v0.5.0. Schema: https://chartkit.dev/schema/v1.json. `render` from `@chartkitdev/core/all`. `repair` and `validate` from `@chartkitdev/core/validate`.
+> @chartkitdev/core v0.5.0 · https://chartkit.dev/schema/v1.json
+> `@chartkitdev/core/all`, or `/extra` for histogram through waterfall. `validate` exports `repair`.
+
+Pages: https://chartkit.dev/spec/<type>
 
 ## Rules
 
-- `version` is `"1"`. `a11y.alt` is one sentence and is required.
-- `data` is an array of row objects, not `{ "values": [...] }`. Sparkline, mini-area, and spike may use a number array. Large data may use `{ "columns": { "field": [] } }`.
-- `type` is the chart. `mark` is options (`curve`, `sampling`, `layout`), not a string.
-- Gauge, kpi, and progress-ring put the number in `metric` (`value`, `min`, `max`, `delta`, `label`). A `data` object of those fields moves into `metric`.
-- Donut uses `encoding.x` (slice label) and `encoding.y` (slice value). Not `theta`, `angle`, or `label`.
-- `encoding.*.axis` is `"y"` or `"y2"`. Titles go in `axes.y.title` or `axes.y2.title`.
-- Field types are `quantitative`, `temporal`, `ordinal`, or `nominal`. Not `categorical`.
-- Heatmap: `x` + `y` + `color` is a grid. Calendar is a date `x` plus `color`, or `mark.layout: "calendar"`. The measure is `encoding.color`, not `encoding.value`. `grid-heatmap` and `calendar-heatmap` are `heatmap` plus `mark.layout`.
-- Combo: `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. Not `layer`, `layers`, `marks`, or `encoding.bar` / `encoding.line`. A field list goes on `encoding.y`, not on `field`. `bar`, `line`, and `area` go in `mark`, not in `type`. A series with `"axis": "y2"` needs `axes.y2`; `repair` adds it if missing.
-- A bar splits series with `encoding.series`, or with `encoding.color` when that field is not `x`. `encoding.color` equal to `x` colours each bar and does not split series. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel formats the ticks. Rule, band, and text annotations are drawn. Tooltip, zoom, pan, brush, animation, `legend.interactive`, `a11y.keyboard`, and `a11y.dataTable` warn CK3011 when on (not drawn yet). Omitted theme or `"auto"` is Soft (`light-dark`, transparent plot). `soft`, `refined`, `editorial` built in; `midnight` opt-in.
+- `version` is `"1"`. `a11y.alt` is one required sentence.
+- `data` is a row array, not `{ "values": [...] }`. Sparkline, mini-area, and spike may be numbers. Large data: `{ "columns": { "field": [] } }`.
+- `type` is the chart. `mark` is an options object.
+- Gauge, kpi, and progress-ring use `metric` (`value`, `min`, `max`, `delta`, `label`, `target`, `bands`), not top-level keys.
+- Donut: `x` is the label and `y` is the value. Not `theta`, `angle`, or `label`.
+- `axis` is `"y"` or `"y2"`. Titles: `axes.y.title` and `axes.y2.title`.
+- Field types: `quantitative`, `temporal`, `ordinal`, `nominal`.
+- Heatmap grid: `x`, `y`, `color`. Calendar: date `x` plus `color`, or `mark.layout: "calendar"`.
+- Combo `y`: `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. Not `layer`. Field lists go on `y`. `bar`, `line`, and `area` go in `mark`, not `type`.
+- Extra charts (`/extra`): histogram bins `x` (`bins` default 8, `binWidth`, or `bin` count/width/sturges/sqrt/fd); `y` is a count. Boxplot `x`+`y`. Radar `x`+`y` list. Funnel `x`+`y` (bar, or trapezoid). Treemap `x`+`y`, optional `color`. Sankey `source`,`target`,`y`. Bullet `x`+`y`+`target`, `mark.ranges`. Waterfall `x`+`y`; `mark.total` is an absolute bar.
 
-## Repair loop
+## Repair
 
-1. `validate(spec)`.
-2. If not ok, `repair(spec)` applies each `fix` and returns `{ spec, ok, errors, applied }` without mutating the input.
-3. Render the repaired spec when `ok`. A missing `type` is reported first, with a patch.
-
-`repair` does not invent data.
+`repair(spec)` applies each `fix` and returns `{ spec, ok, errors, applied }`. It does not mutate the input. Render when `ok`.
 
 ## line
 
 ```json
-{
-  "version": "1",
-  "type": "line",
-  "data": [
-    { "quarter": "Q1", "units": 40 },
-    { "quarter": "Q2", "units": 55 },
-    { "quarter": "Q3", "units": 48 }
-  ],
-  "encoding": { "x": "quarter", "y": "units" },
-  "a11y": { "alt": "Units peaked in Q2." }
-}
+{"version":"1","type":"line","data":[{"quarter":"Q1","units":40},{"quarter":"Q2","units":55}],"encoding":{"x":"quarter","y":"units"},"a11y":{"alt":"Units rose in Q2."}}
 ```
 
 ## bar
 
 ```json
-{
-  "version": "1",
-  "type": "bar",
-  "data": [
-    { "lane": "A", "stops": 12 },
-    { "lane": "B", "stops": 7 },
-    { "lane": "C", "stops": 15 }
-  ],
-  "encoding": { "x": "lane", "y": "stops" },
-  "a11y": { "alt": "Lane C has the most stops." }
-}
+{"version":"1","type":"bar","data":[{"lane":"A","stops":12},{"lane":"C","stops":15}],"encoding":{"x":"lane","y":"stops"},"a11y":{"alt":"Lane C has more."}}
 ```
 
 ## donut
 
 ```json
-{
-  "version": "1",
-  "type": "donut",
-  "data": [
-    { "wood": "Oak", "boards": 8 },
-    { "wood": "Pine", "boards": 5 },
-    { "wood": "Maple", "boards": 3 }
-  ],
-  "encoding": { "x": "wood", "y": "boards" },
-  "a11y": { "alt": "Oak is the largest share of boards." }
-}
+{"version":"1","type":"donut","data":[{"wood":"Oak","boards":8},{"wood":"Pine","boards":5}],"encoding":{"x":"wood","y":"boards"},"a11y":{"alt":"Oak is the larger share."}}
 ```
 
 ## stacked-area
 
 ```json
-{
-  "version": "1",
-  "type": "stacked-area",
-  "data": [
-    { "year": "2022", "rail": 20, "road": 30 },
-    { "year": "2023", "rail": 24, "road": 28 }
-  ],
-  "encoding": { "x": "year", "y": ["rail", "road"] },
-  "a11y": { "alt": "Road stayed larger than rail." }
-}
+{"version":"1","type":"stacked-area","data":[{"year":"2022","rail":20,"road":30},{"year":"2023","rail":24,"road":28}],"encoding":{"x":"year","y":["rail","road"]},"a11y":{"alt":"Road stayed larger."}}
 ```
 
 ## scatter
 
 ```json
-{
-  "version": "1",
-  "type": "scatter",
-  "data": [
-    { "temp": 16, "yieldKg": 3 },
-    { "temp": 22, "yieldKg": 5 },
-    { "temp": 27, "yieldKg": 4 }
-  ],
-  "encoding": { "x": "temp", "y": "yieldKg" },
-  "a11y": { "alt": "Yield is highest at 22 degrees." }
-}
+{"version":"1","type":"scatter","data":[{"temp":16,"yieldKg":3},{"temp":22,"yieldKg":5}],"encoding":{"x":"temp","y":"yieldKg"},"a11y":{"alt":"Yield is higher at 22."}}
 ```
 
 ## combo
 
 ```json
-{
-  "version": "1",
-  "type": "combo",
-  "data": [
-    { "week": "W1", "orders": 30, "rate": 0.4 },
-    { "week": "W2", "orders": 36, "rate": 0.55 }
-  ],
-  "encoding": {
-    "x": "week",
-    "y": [
-      { "field": "orders", "mark": "bar" },
-      { "field": "rate", "mark": "line", "axis": "y2" }
-    ]
-  },
-  "axes": { "y2": { "title": "Fill rate" } },
-  "a11y": { "alt": "Orders and the fill rate both rose." }
-}
+{"version":"1","type":"combo","data":[{"week":"W1","orders":30,"rate":0.4},{"week":"W2","orders":36,"rate":0.55}],"encoding":{"x":"week","y":[{"field":"orders","mark":"bar"},{"field":"rate","mark":"line","axis":"y2"}]},"axes":{"y2":{"title":"Fill rate"}},"a11y":{"alt":"Orders and fill rate rose."}}
 ```
 
 ## heatmap
 
 ```json
-{
-  "version": "1",
-  "type": "heatmap",
-  "data": [
-    { "bin": "A", "band": "Low", "level": 1 },
-    { "bin": "B", "band": "Low", "level": 4 },
-    { "bin": "A", "band": "High", "level": 2 }
-  ],
-  "encoding": { "x": "bin", "y": "band", "color": "level" },
-  "a11y": { "alt": "Bin B in the low band is the darkest cell." }
-}
+{"version":"1","type":"heatmap","data":[{"bin":"A","band":"Low","level":1},{"bin":"B","band":"Low","level":4}],"encoding":{"x":"bin","y":"band","color":"level"},"a11y":{"alt":"Bin B is darker."}}
 ```
 
 ## gauge
 
 ```json
-{
-  "version": "1",
-  "type": "gauge",
-  "metric": { "label": "Capacity", "value": 64, "min": 0, "max": 100 },
-  "a11y": { "alt": "Capacity is 64 out of 100." }
-}
+{"version":"1","type":"gauge","metric":{"label":"Capacity","value":64,"min":0,"max":100},"a11y":{"alt":"Capacity is 64 of 100."}}
 ```
 
 ## kpi
 
 ```json
-{
-  "version": "1",
-  "type": "kpi",
-  "metric": { "label": "Tickets", "value": 18, "delta": -0.05 },
-  "a11y": { "alt": "Open tickets are 18, slightly down." }
-}
+{"version":"1","type":"kpi","metric":{"label":"Tickets","value":18,"delta":-0.05},"a11y":{"alt":"Tickets are 18, slightly down."}}
 ```
 
 ## sparkline
 
 ```json
-{
-  "version": "1",
-  "type": "sparkline",
-  "data": [4, 6, 5, 9, 8],
-  "a11y": { "alt": "The sparkline ends higher than it starts." }
-}
+{"version":"1","type":"sparkline","data":[4,6,5,9,8],"a11y":{"alt":"The line ends higher."}}
 ```
 
 ## mini-area
 
 ```json
-{
-  "version": "1",
-  "type": "mini-area",
-  "data": [2, 3, 3, 6, 5],
-  "a11y": { "alt": "The mini area rises, then eases." }
-}
+{"version":"1","type":"mini-area","data":[2,3,3,6,5],"a11y":{"alt":"The area rises, then eases."}}
 ```
 
 ## progress-ring
 
 ```json
-{
-  "version": "1",
-  "type": "progress-ring",
-  "metric": { "label": "Done", "value": 3, "min": 0, "max": 8 },
-  "a11y": { "alt": "3 of 8 items are done." }
-}
+{"version":"1","type":"progress-ring","metric":{"label":"Done","value":3,"min":0,"max":8},"a11y":{"alt":"3 of 8 items are done."}}
 ```
 
 ## spike
 
 ```json
-{
-  "version": "1",
-  "type": "spike",
-  "data": [
-    { "slot": "t1", "hits": 0 },
-    { "slot": "t2", "hits": 6 },
-    { "slot": "t3", "hits": 1 }
-  ],
-  "encoding": { "x": "slot", "y": "hits" },
-  "a11y": { "alt": "Hits spike at t2." }
-}
+{"version":"1","type":"spike","data":[{"slot":"t1","hits":0},{"slot":"t2","hits":6}],"encoding":{"x":"slot","y":"hits"},"a11y":{"alt":"Hits spike at t2."}}
 ```
 
 ## candlestick
 
 ```json
-{
-  "version": "1",
-  "type": "candlestick",
-  "data": [
-    { "day": "D1", "open": 5, "high": 7, "low": 4, "close": 6 },
-    { "day": "D2", "open": 6, "high": 6, "low": 3, "close": 4 }
-  ],
-  "encoding": { "x": "day", "open": "open", "high": "high", "low": "low", "close": "close" },
-  "a11y": { "alt": "The second session closed below its open." }
-}
+{"version":"1","type":"candlestick","data":[{"day":"D1","open":5,"high":7,"low":4,"close":6},{"day":"D2","open":6,"high":6,"low":3,"close":4}],"encoding":{"x":"day","open":"open","high":"high","low":"low","close":"close"},"a11y":{"alt":"D2 closed down."}}
+```
+
+## histogram
+
+```json
+{"version":"1","type":"histogram","data":[{"score":1},{"score":2},{"score":2},{"score":8}],"encoding":{"x":"score"},"mark":{"bins":2},"a11y":{"alt":"Scores cluster low."}}
+```
+
+## boxplot
+
+```json
+{"version":"1","type":"boxplot","data":[{"group":"A","value":1},{"group":"A","value":3},{"group":"A","value":9},{"group":"B","value":2},{"group":"B","value":4},{"group":"B","value":5}],"encoding":{"x":"group","y":"value"},"a11y":{"alt":"Group A stretches higher."}}
+```
+
+## radar
+
+```json
+{"version":"1","type":"radar","data":[{"spoke":"Speed","car":4,"bike":2},{"spoke":"Cost","car":2,"bike":5},{"spoke":"Ease","car":3,"bike":4}],"encoding":{"x":"spoke","y":["car","bike"]},"a11y":{"alt":"The bike leads on cost and ease."}}
+```
+
+## funnel
+
+```json
+{"version":"1","type":"funnel","data":[{"stage":"Visit","count":80},{"stage":"Pay","count":12}],"encoding":{"x":"stage","y":"count"},"a11y":{"alt":"12 of 80 visits pay."}}
+```
+
+## treemap
+
+```json
+{"version":"1","type":"treemap","data":[{"name":"Oak","size":8,"group":"Wood"},{"name":"Steel","size":6,"group":"Metal"}],"encoding":{"x":"name","y":"size","color":"group"},"a11y":{"alt":"Oak is the larger tile."}}
+```
+
+## sankey
+
+```json
+{"version":"1","type":"sankey","data":[{"from":"Source","to":"Mill","flow":10},{"from":"Mill","to":"Shop","flow":6}],"encoding":{"source":"from","target":"to","y":"flow"},"a11y":{"alt":"Flow continues from the mill."}}
+```
+
+## bullet
+
+```json
+{"version":"1","type":"bullet","data":[{"name":"Revenue","value":275,"target":250,"good":300}],"encoding":{"x":"name","y":"value","target":"target"},"mark":{"ranges":["good"]},"a11y":{"alt":"Revenue is past its target."}}
+```
+
+## waterfall
+
+```json
+{"version":"1","type":"waterfall","data":[{"step":"Open","amount":120,"total":true},{"step":"Won","amount":40},{"step":"Close","amount":160,"total":true}],"encoding":{"x":"step","y":"amount"},"a11y":{"alt":"The close is 160."}}
 ```
 
 ## React
 
-`<Chart spec={...} />` from `@chartkitdev/react` renders this spec. Named components (`LineChart`, `GaugeChart`, and the rest) take their own props. Those props are not spec keys.
+`<Chart spec={...} />` (React, Vue, Svelte) and `mount(el, spec)` (vanilla) render this spec. `dataKey` is not a spec key.

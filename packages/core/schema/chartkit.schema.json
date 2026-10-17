@@ -36,10 +36,20 @@
         "mini-area",
         "progress-ring",
         "spike",
-        "candlestick"
+        "candlestick",
+        "histogram",
+        "boxplot",
+        "radar",
+        "funnel",
+        "treemap",
+        "sankey",
+        "bullet",
+        "waterfall"
       ],
-      "examples": ["line"],
-      "description": "Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. mark.innerRadius 0 gives a pie. Replaces DonutChart. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart."
+      "examples": [
+        "line"
+      ],
+      "description": "Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. mark.innerRadius 0 gives a pie. Replaces DonutChart. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar."
     },
     "id": {
       "type": "string",
@@ -123,7 +133,15 @@
               "sparkline",
               "mini-area",
               "spike",
-              "candlestick"
+              "candlestick",
+              "histogram",
+              "boxplot",
+              "radar",
+              "funnel",
+              "treemap",
+              "sankey",
+              "bullet",
+              "waterfall"
             ]
           }
         },
@@ -147,7 +165,13 @@
               "bar",
               "donut",
               "stacked-area",
-              "combo"
+              "combo",
+              "boxplot",
+              "radar",
+              "funnel",
+              "treemap",
+              "bullet",
+              "waterfall"
             ]
           }
         },
@@ -280,6 +304,64 @@
         "required": [
           "metric"
         ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "histogram"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "required": [
+          "encoding"
+        ],
+        "properties": {
+          "encoding": {
+            "type": "object",
+            "required": [
+              "x"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "sankey"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "required": [
+          "encoding"
+        ],
+        "properties": {
+          "encoding": {
+            "type": "object",
+            "required": [
+              "source",
+              "target",
+              "y"
+            ]
+          }
+        }
       }
     }
   ],
@@ -504,7 +586,10 @@
                 "y2"
               ],
               "default": "y",
-              "examples": ["y", "y2"],
+              "examples": [
+                "y",
+                "y2"
+              ],
               "description": "Which y axis this series uses. The string \"y\" or \"y2\", not an axis object. 'y2' draws a second axis on the right. Put titles in axes.y.title or axes.y2.title."
             },
             "color": {
@@ -699,6 +784,14 @@
         "volume": {
           "$ref": "#/$defs/channel",
           "description": "Candlestick only: volume field; when present, a volume pane is drawn."
+        },
+        "source": {
+          "$ref": "#/$defs/channel",
+          "description": "Sankey only: the node the flow leaves."
+        },
+        "target": {
+          "$ref": "#/$defs/channel",
+          "description": "Sankey: the node the flow enters. Bullet: the target value field."
         }
       },
       "description": "Which data fields drive which visual channels. Same names for every chart type: x is the category or time axis, y is the measured value(s). Donut uses x (slice label) and y (slice value), not theta, angle, or label. A y series axis is the string \"y\" or \"y2\". Switching 'type' between line/bar/donut/stacked-area/combo needs no re-encoding."
@@ -757,7 +850,18 @@
           "description": "Columnar: equal-length arrays keyed by field name. Preferred for 10k+ points. In JS, arrays may be typed arrays (Float64Array)."
         }
       ],
-      "examples": [[{ "quarter": "Q1", "units": 40 }, { "quarter": "Q2", "units": 55 }]],
+      "examples": [
+        [
+          {
+            "quarter": "Q1",
+            "units": 40
+          },
+          {
+            "quarter": "Q2",
+            "units": 55
+          }
+        ]
+      ],
       "description": "The data to plot. A plain array of row objects, not { values: [...] }. Sparkline, mini-area, and spike also accept a plain number array (x becomes the index). A columnar object { columns: { field: [...] } } is accepted for large data and maps directly to typed arrays."
     },
     "mark": {
@@ -923,9 +1027,55 @@
           "type": "number",
           "default": 0,
           "description": "Value spikes rise from. Applies to: spike."
+        },
+        "shape": {
+          "enum": [
+            "bar",
+            "trapezoid"
+          ],
+          "default": "bar",
+          "description": "Funnel geometry. bar draws centered rounded bars and is the default. trapezoid connects each stage to the next. Applies to: funnel."
+        },
+        "bins": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60,
+          "description": "Histogram bin count when mark.bin is count or omitted. Default 8. Applies to: histogram."
+        },
+        "bin": {
+          "enum": [
+            "count",
+            "width",
+            "sturges",
+            "sqrt",
+            "fd"
+          ],
+          "description": "Histogram bin rule. count uses mark.bins. width uses mark.binWidth. sturges, sqrt, and fd choose a count from the data. Applies to: histogram."
+        },
+        "binWidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Histogram bin width. Used when mark.bin is width. Applies to: histogram."
+        },
+        "ranges": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 5,
+          "description": "Bullet band fields, worst to best. Each value is the upper edge of that band. Applies to: bullet."
+        },
+        "total": {
+          "type": "string",
+          "description": "Waterfall field that marks an absolute total when the row is true. Default field name total. Applies to: waterfall."
         }
       },
-      "examples": [{ "curve": "linear" }],
+      "examples": [
+        {
+          "curve": "linear"
+        }
+      ],
       "description": "Visual options for the marks. An object, not the chart type (the type goes in type). Each option lists the types it applies to; options that do not apply to the chosen type are ignored with warning CK3010."
     },
     "metric": {
@@ -1008,7 +1158,14 @@
           "description": "Colored ranges on the gauge, e.g. good/warn/bad."
         }
       },
-      "examples": [{ "label": "Capacity", "value": 64, "min": 0, "max": 100 }],
+      "examples": [
+        {
+          "label": "Capacity",
+          "value": 64,
+          "min": 0,
+          "max": 100
+        }
+      ],
       "description": "Single-value content for gauge, progress-ring and kpi. Put value, min, max, delta, and label here, not at the top level of the spec. Kpi may also set data for a sparkline."
     },
     "axes": {

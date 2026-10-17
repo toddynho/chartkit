@@ -15,6 +15,14 @@ const charts = [
   "progress-ring",
   "spike",
   "candlestick",
+  "histogram",
+  "boxplot",
+  "radar",
+  "funnel",
+  "treemap",
+  "sankey",
+  "bullet",
+  "waterfall",
 ];
 
 const themes = [
@@ -40,6 +48,9 @@ const themes = [
 const entry: Record<string, string> = {
   index: "src/index.ts",
   all: "src/all.ts",
+  extra: "src/extra.ts",
+  load: "src/load.ts",
+  "extra-tip": "src/extra-tip.ts",
   validate: "src/validate.ts",
   "themes/all": "src/themes/all.ts",
 };
@@ -55,4 +66,16 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   treeshake: true,
+  esbuildPlugins: [
+    {
+      name: "external-chart-chunks",
+      setup(build) {
+        build.onResolve({ filter: /^\.\/charts\/[a-z0-9-]+$/ }, (args) => {
+          if (args.kind !== "dynamic-import") return null;
+          const name = args.path.slice("./charts/".length);
+          return { path: `@chartkitdev/core/charts/${name}`, external: true };
+        });
+      },
+    },
+  ],
 });

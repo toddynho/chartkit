@@ -141,7 +141,7 @@ export const candidates: readonly CandidateLook[] = [
       axis: "rgb(0 0 0 / 0.14)",
       track: "rgb(0 0 0 / 0.10)",
       accent: "#007aff",
-      positive: "#047857",
+      positive: "#15803d",
       negative: "#be123c",
       series: ["#007aff", "#34c759", "#ff9500", "#af52de", "#ff2d55", "#32ade6", "#65a30d", "#ff6723"],
       lines: ["#007aff", "#248a3d", "#c93400", "#af52de", "#ff2d55", "#0071a4", "#4d7c0f", "#9a3412"],
