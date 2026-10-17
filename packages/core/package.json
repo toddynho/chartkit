@@ -48,6 +48,16 @@
         "default": "./dist/validate.cjs"
       }
     },
+    "./interact": {
+      "import": {
+        "types": "./dist/interact.d.ts",
+        "default": "./dist/interact.js"
+      },
+      "require": {
+        "types": "./dist/interact.d.cts",
+        "default": "./dist/interact.cjs"
+      }
+    },
     "./charts/*": {
       "import": {
         "types": "./dist/charts/*.d.ts",

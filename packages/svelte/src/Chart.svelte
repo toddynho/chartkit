@@ -1,5 +1,7 @@
 <script>
+  import { onMount } from "svelte";
   import { render as renderAll } from "@chartkitdev/core/all";
+  import { attach, patchSvg } from "@chartkitdev/core/interact";
 
   /** @type {import("@chartkitdev/core").ChartSpec} */
   export let spec;
@@ -10,7 +12,23 @@
    */
   export let render = renderAll;
 
-  $: svg = render(spec);
+  /** @type {HTMLDivElement} */
+  let host;
+  let shown = "";
+  let ready = false;
+  /** @type {import("@chartkitdev/core/interact").Controller | undefined} */
+  let ctl;
+
+  $: markup = render(spec);
+  $: if (!ready) shown = markup;
+  $: if (ready && host && ctl) ctl.update(spec, markup);
+
+  onMount(() => {
+    if (!host.querySelector("svg")) patchSvg(host, markup);
+    ctl = attach(host, spec, { render: (next) => render(/** @type {import("@chartkitdev/core").ChartSpec} */ (next)) });
+    ready = true;
+    return () => ctl?.destroy();
+  });
 </script>
 
-<div class={$$props.class} style={$$props.style}>{@html svg}</div>
+<div bind:this={host} class={$$props.class} style={$$props.style}>{@html shown}</div>
