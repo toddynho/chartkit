@@ -1,0 +1,12 @@
+{
+  "version": "1",
+  "type": "treemap",
+  "data": [
+    { "name": "Oak", "size": 8, "group": "Wood" },
+    { "name": "Pine", "size": 5, "group": "Wood" },
+    { "name": "Steel", "size": 6, "group": "Metal" },
+    { "name": "Tin", "size": 2, "group": "Metal" }
+  ],
+  "encoding": { "x": "name", "y": "size", "color": "group" },
+  "a11y": { "alt": "Oak is the largest tile." }
+}

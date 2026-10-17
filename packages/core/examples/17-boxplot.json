@@ -1,0 +1,18 @@
+{
+  "version": "1",
+  "type": "boxplot",
+  "data": [
+    { "group": "A", "value": 1 },
+    { "group": "A", "value": 2 },
+    { "group": "A", "value": 3 },
+    { "group": "A", "value": 4 },
+    { "group": "A", "value": 9 },
+    { "group": "B", "value": 2 },
+    { "group": "B", "value": 3 },
+    { "group": "B", "value": 3 },
+    { "group": "B", "value": 4 },
+    { "group": "B", "value": 5 }
+  ],
+  "encoding": { "x": "group", "y": "value" },
+  "a11y": { "alt": "Group A stretches higher than group B." }
+}

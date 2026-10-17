@@ -61,6 +61,12 @@ const CHART_TYPES = [
   "progress-ring",
   "spike",
   "candlestick",
+  "histogram",
+  "boxplot",
+  "radar",
+  "funnel",
+  "treemap",
+  "sankey",
 ] as const;
 
 export function walkSchema(value: unknown, schema: JsonSchema, diagnostics: Diagnostic[]): void {
@@ -322,6 +328,7 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
     if (path === "/encoding") {
       noteDonutChannels(value, ctx);
       noteHeatmapChannels(value, ctx);
+      noteFlowChannels(value, ctx);
     }
     if (node.minProperties !== undefined && Object.keys(value).length < node.minProperties) {
       emit(ctx, {
@@ -906,6 +913,12 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
       layout: "calendar",
     };
   }
+  if (value === "hist") return { type: "histogram", note: 'A histogram bins encoding.x. mark.bins sets the count.', kind: "rename" };
+  if (value === "box" || value === "box-plot") return { type: "boxplot", note: "A box plot uses encoding.x and encoding.y observations.", kind: "rename" };
+  if (value === "radar-chart") return { type: "radar", note: "A radar chart uses encoding.x for spokes and encoding.y for series.", kind: "rename" };
+  if (value === "funnel-chart") return { type: "funnel", note: "A funnel uses encoding.x for the stage and encoding.y for the value.", kind: "rename" };
+  if (value === "tree-map") return { type: "treemap", note: "A treemap uses encoding.x, encoding.y, and optional encoding.color.", kind: "rename" };
+  if (value === "sankey-diagram") return { type: "sankey", note: "A sankey uses encoding.source, encoding.target, and encoding.y.", kind: "rename" };
   return undefined;
 }
 
@@ -947,6 +960,41 @@ function noteChartType(spec: Record<string, unknown>, ctx: Ctx): void {
     message: "chartType belongs in type",
     path: "/chartType",
     hint: `The chart type is type: ${JSON.stringify(mapped)}. chartType is not a spec key.`,
+    fix,
+  });
+}
+
+function noteFlowChannels(encoding: Record<string, unknown>, ctx: Ctx): void {
+  const root = isPlainObject(ctx.rootValue) ? ctx.rootValue : {};
+  const type = typeof root.type === "string" ? root.type : "";
+  const fix: JsonPatchOperation[] = [];
+  const move = (from: string, to: string) => {
+    if (encoding[from] === undefined) return;
+    ctx.skipUnknown.add(`/encoding/${from}`);
+    if (encoding[to] === undefined) {
+      fix.push({ op: "move", from: `/encoding/${from}`, path: `/encoding/${to}` });
+      ctx.skipMissing.add(`/encoding|${to}`);
+    } else fix.push({ op: "remove", path: `/encoding/${from}` });
+  };
+  if (type === "sankey" || type === "sankey-diagram") {
+    move("from", "source");
+    move("to", "target");
+    move("value", "y");
+  } else if (type === "treemap" || type === "tree-map") {
+    move("name", "x");
+    move("size", "y");
+    move("value", "y");
+    move("parent", "color");
+  } else if (type === "histogram" || type === "hist") {
+    if (encoding.x === undefined) move("value", "x");
+  }
+  if (fix.length === 0) return;
+  emit(ctx, {
+    code: "CK1009",
+    severity: "error",
+    message: "chart channels were moved onto the v1 encoding",
+    path: "/encoding",
+    hint: 'Sankey uses source, target, and y. Treemap uses x, y, and color. A histogram bins x.',
     fix,
   });
 }

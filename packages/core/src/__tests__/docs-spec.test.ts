@@ -22,6 +22,12 @@ const CHART_TYPES = [
   "progress-ring",
   "spike",
   "candlestick",
+  "histogram",
+  "boxplot",
+  "radar",
+  "funnel",
+  "treemap",
+  "sankey",
 ];
 
 function fencedSpecs(relativePath: string): unknown[] {

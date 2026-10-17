@@ -18,6 +18,12 @@ const CHART_TYPES = new Set([
   "progress-ring",
   "spike",
   "candlestick",
+  "histogram",
+  "boxplot",
+  "radar",
+  "funnel",
+  "treemap",
+  "sankey",
 ]);
 
 const SVG_BUDGET = 5000;
@@ -84,7 +90,7 @@ function checkEncoding(
   diagnostics: Diagnostic[],
 ): void {
   const channels: Channel[] = [];
-  for (const key of ["x", "series", "color", "size", "open", "high", "low", "close", "volume"] as const) {
+  for (const key of ["x", "series", "color", "size", "open", "high", "low", "close", "volume", "source", "target"] as const) {
     const channel = readChannel(encoding[key], `/encoding/${key}`);
     if (channel?.field) channels.push(channel);
   }
@@ -139,7 +145,7 @@ function checkEncoding(
         });
       }
       const xType = x.type ?? inferType(values);
-      if (spec.type !== "scatter" && (xType === "temporal" || xType === "quantitative") && !isSorted(values, xType)) {
+      if (spec.type !== "scatter" && spec.type !== "histogram" && (xType === "temporal" || xType === "quantitative") && !isSorted(values, xType)) {
         const index = firstUnsorted(values, xType);
         diagnostics.push({
           code: "CK2008",

@@ -51,6 +51,7 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
 - A list of fields goes on `encoding.y`, not on `field`. On a combo, `bar`, `line`, and `area` go in `mark`, not in `type`. A series with `"axis": "y2"` needs `axes.y2`; `repair` adds it when it is missing.
 - A bar splits series with `encoding.series`, or with `encoding.color` when that field is not `x`. `encoding.color` equal to `x` colours each bar and does not split series. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel is applied to the ticks. Rule, band, and text `annotations` are drawn. Tooltip, crosshair, x zoom, pan, brush, animation, `legend.interactive`, and `a11y.keyboard` / `a11y.dataTable` are client behavior in `@chartkitdev/core/interact` (a separate entry, so a static bundle does not include it). Tooltip defaults on for a client-rendered line, bar, stacked area, scatter, combo, or donut; `tooltip: false` turns it off. The static SVG is unchanged apart from hook attributes the client sets after mount (`data-ck-interact` on the host, `tabindex` when keyboard is on). Zoom, pan, and brush stay off unless the spec asks; a candlestick with `zoom` omitted pans and zooms on x. Animation is off unless requested, and stays off for `prefers-reduced-motion` and for more than 2000 rows. The default theme is `auto` (Soft: `light-dark`, transparent plot, page scheme; optional card via `--ck-background`). `soft`, `refined`, and `editorial` are built in. `midnight` is opt-in. Other names stay midnight until imported. `--ck-*` or `--chart-N` still wins.
 - A heatmap with `encoding.x`, `encoding.y`, and `encoding.color` is a grid. A calendar heatmap is a date `x` plus `color`, or `mark.layout: "calendar"`.
+- Histogram bins `encoding.x` (`mark.bins`, default 8). `encoding.y` is a pre-binned count. Boxplot uses `encoding.x` and observation `encoding.y`. Radar uses `encoding.x` and one or more `encoding.y` fields. Funnel uses `encoding.x` (stage) and `encoding.y`. Treemap uses `encoding.x`, `encoding.y`, and optional `encoding.color`. Sankey uses `encoding.source`, `encoding.target`, and `encoding.y`. Waterfall uses `encoding.x` and `encoding.y`; color `"total"` anchors that bar at zero. Bullet uses `metric`, including optional `target` and `bands`.
 
 ## line
 
@@ -252,6 +253,106 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
   ],
   "encoding": { "x": "day", "open": "open", "high": "high", "low": "low", "close": "close" },
   "a11y": { "alt": "The second session closed below its open." }
+}
+```
+
+## histogram
+
+```json
+{
+  "version": "1",
+  "type": "histogram",
+  "data": [
+    { "score": 1 },
+    { "score": 2 },
+    { "score": 2 },
+    { "score": 8 }
+  ],
+  "encoding": { "x": "score" },
+  "mark": { "bins": 2 },
+  "a11y": { "alt": "Scores cluster at the low end." }
+}
+```
+
+## boxplot
+
+```json
+{
+  "version": "1",
+  "type": "boxplot",
+  "data": [
+    { "group": "A", "value": 1 },
+    { "group": "A", "value": 3 },
+    { "group": "A", "value": 9 },
+    { "group": "B", "value": 2 },
+    { "group": "B", "value": 4 },
+    { "group": "B", "value": 5 }
+  ],
+  "encoding": { "x": "group", "y": "value" },
+  "a11y": { "alt": "Group A stretches higher than group B." }
+}
+```
+
+## radar
+
+```json
+{
+  "version": "1",
+  "type": "radar",
+  "data": [
+    { "spoke": "Speed", "car": 4, "bike": 2 },
+    { "spoke": "Cost", "car": 2, "bike": 5 },
+    { "spoke": "Ease", "car": 3, "bike": 4 }
+  ],
+  "encoding": { "x": "spoke", "y": ["car", "bike"] },
+  "a11y": { "alt": "The bike scores higher on cost and ease." }
+}
+```
+
+## funnel
+
+```json
+{
+  "version": "1",
+  "type": "funnel",
+  "data": [
+    { "stage": "Visit", "count": 80 },
+    { "stage": "Start", "count": 40 },
+    { "stage": "Pay", "count": 12 }
+  ],
+  "encoding": { "x": "stage", "y": "count" },
+  "a11y": { "alt": "12 of 80 visits pay." }
+}
+```
+
+## treemap
+
+```json
+{
+  "version": "1",
+  "type": "treemap",
+  "data": [
+    { "name": "Oak", "size": 8, "group": "Wood" },
+    { "name": "Pine", "size": 5, "group": "Wood" },
+    { "name": "Steel", "size": 6, "group": "Metal" }
+  ],
+  "encoding": { "x": "name", "y": "size", "color": "group" },
+  "a11y": { "alt": "Oak is the largest tile." }
+}
+```
+
+## sankey
+
+```json
+{
+  "version": "1",
+  "type": "sankey",
+  "data": [
+    { "from": "Source", "to": "Mill", "flow": 10 },
+    { "from": "Mill", "to": "Shop", "flow": 6 }
+  ],
+  "encoding": { "source": "from", "target": "to", "y": "flow" },
+  "a11y": { "alt": "The mill sends flow on to the shop." }
 }
 ```
 

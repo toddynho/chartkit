@@ -16,7 +16,6 @@ export interface ChartRenderer {
 
 const registry = new Map<string, ChartRenderer>();
 
-
 /**
  * Add chart types to the shared `render()` registry.
  * Importing a chart module does not register it; call this or `createRenderer`.
@@ -99,7 +98,7 @@ function undrawable(type: string): Diagnostic {
 }
 
 function hintFor(type: string): string {
-  const known = " line bar donut stacked-area scatter combo heatmap gauge kpi sparkline mini-area progress-ring spike candlestick ";
+  const known = " line bar donut stacked-area scatter combo heatmap gauge kpi sparkline mini-area progress-ring spike candlestick histogram boxplot radar funnel treemap sankey ";
   if (!known.includes(" " + type + " ")) return 'import { render } from "@chartkitdev/core/all" registers every v1 chart.';
   const binding = type.replace(/-([a-z])/g, (_match, char: string) => char.toUpperCase());
   return `import { ${binding} } from "@chartkitdev/core/charts/${type}"; register(${binding}); or import { render } from "@chartkitdev/core/all".`;

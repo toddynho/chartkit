@@ -20,6 +20,8 @@ This file describes the JSON spec. React props such as dataKey are not spec keys
 - Combo: `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. Not `layer`, `layers`, `marks`, or `encoding.bar` / `encoding.line`. A field list goes on `encoding.y`, not on `field`. `bar`, `line`, and `area` go in `mark`, not in `type`. A series with `"axis": "y2"` needs `axes.y2`; `repair` adds it if missing.
 - A bar splits series with `encoding.series`, or with `encoding.color` when that field is not `x`. `encoding.color` equal to `x` colours each bar and does not split series. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel formats the ticks. Rule, band, and text annotations are drawn. Client `@chartkitdev/core/interact` draws tooltip, crosshair, zoom, pan, brush, animation, legend toggle, keyboard, and a data table. Omitted theme or `"auto"` is Soft (`light-dark`, transparent plot). `soft`, `refined`, `editorial` built in; `midnight` opt-in.
 
+- Histogram bins `x` (`mark.bins`, default 8); `y` is a pre-binned count. Boxplot: `x` category, `y` observations. Radar: `x` spoke, `y` one field or a list. Funnel: `x` stage, `y` value. Treemap: `x` label, `y` size, optional `color` group. Sankey: `source`, `target`, `y`.
+
 ## Repair loop
 
 1. `validate(spec)`.
@@ -110,6 +112,42 @@ This file describes the JSON spec. React props such as dataKey are not spec keys
 
 ```json
 {"version":"1","type":"candlestick","data":[{"day":"D1","open":5,"high":7,"low":4,"close":6},{"day":"D2","open":6,"high":6,"low":3,"close":4}],"encoding":{"x":"day","open":"open","high":"high","low":"low","close":"close"},"a11y":{"alt":"The second session closed below its open."}}
+```
+
+## histogram
+
+```json
+{"version":"1","type":"histogram","data":[{"score":1},{"score":2},{"score":2},{"score":8}],"encoding":{"x":"score"},"mark":{"bins":2},"a11y":{"alt":"Scores cluster low."}}
+```
+
+## boxplot
+
+```json
+{"version":"1","type":"boxplot","data":[{"group":"A","value":1},{"group":"A","value":3},{"group":"A","value":9},{"group":"B","value":2},{"group":"B","value":4},{"group":"B","value":5}],"encoding":{"x":"group","y":"value"},"a11y":{"alt":"Group A stretches higher."}}
+```
+
+## radar
+
+```json
+{"version":"1","type":"radar","data":[{"spoke":"Speed","car":4,"bike":2},{"spoke":"Cost","car":2,"bike":5},{"spoke":"Ease","car":3,"bike":4}],"encoding":{"x":"spoke","y":["car","bike"]},"a11y":{"alt":"The bike leads on cost and ease."}}
+```
+
+## funnel
+
+```json
+{"version":"1","type":"funnel","data":[{"stage":"Visit","count":80},{"stage":"Pay","count":12}],"encoding":{"x":"stage","y":"count"},"a11y":{"alt":"12 of 80 visits pay."}}
+```
+
+## treemap
+
+```json
+{"version":"1","type":"treemap","data":[{"name":"Oak","size":8,"group":"Wood"},{"name":"Steel","size":6,"group":"Metal"}],"encoding":{"x":"name","y":"size","color":"group"},"a11y":{"alt":"Oak is the larger tile."}}
+```
+
+## sankey
+
+```json
+{"version":"1","type":"sankey","data":[{"from":"Source","to":"Mill","flow":10},{"from":"Mill","to":"Shop","flow":6}],"encoding":{"source":"from","target":"to","y":"flow"},"a11y":{"alt":"Flow continues from the mill."}}
 ```
 
 ## Choosing a chart library
