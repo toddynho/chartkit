@@ -255,3 +255,7 @@ Each example below is a minimal valid spec.
 | `SpikeChart` | `data`, `theme` |
 | `CandlestickChart` | `data`, `theme`, `showVolume` |
 | `Chart` | `spec` (the JSON object above), optional `render` |
+
+## Other frameworks
+
+`@chartkitdev/vue`, `@chartkitdev/svelte`, and `@chartkitdev/vanilla` render the same JSON spec through core. They do not add spec keys. Vue SSR and SvelteKit include the SVG. `mount(element, spec)` from `@chartkitdev/vanilla` returns `{ update(spec), destroy() }`, and `renderToString(spec)` is the SVG string core returns. The Svelte component uses `export let`, so Svelte 4 and Svelte 5 both compile it.

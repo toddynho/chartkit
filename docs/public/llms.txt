@@ -241,3 +241,14 @@ Recommended agent loop:
 | `LineChart`, `BarChart`, `DonutChart`, `StackedArea`, `ScatterChart`, `ComboChart` | Dashboard components. Prefer a spec for agents. |
 | `Heatmap`, `GaugeChart`, `KpiCard`, `Sparkline`, `MiniArea`, `ProgressRing`, `SpikeChart`, `CandlestickChart` | Same. Metric components take `value` as a prop; the spec uses `metric`. |
 | `Chart` | Renders a JSON spec. |
+
+## Framework adapters
+
+The same spec renders in React, Vue, Svelte, and a plain element. Each wrapper asks `@chartkitdev/core` for an SVG string. There are no extra spec keys.
+
+- React: `import { Chart } from "@chartkitdev/react"` and `<Chart spec={spec} />`.
+- Vue 3: `import { Chart } from "@chartkitdev/vue"` and `<Chart :spec="spec" />`. `renderToString` from `@chartkitdev/vue/ssr` includes the SVG.
+- Svelte 5, and Svelte 4: `import { Chart } from "@chartkitdev/svelte"` and `<Chart {spec} />`. The component uses `export let`. SvelteKit SSR includes the SVG.
+- Vanilla: `import { mount, renderToString } from "@chartkitdev/vanilla"`. `mount(element, spec)` returns `{ update(spec), destroy() }`. `renderToString(spec)` is the SVG string core returns.
+
+`spec` in each of those is the line example above (`quarter` / `units`), or any other spec in this file. Pass `render` from `createRenderer([...])` to ship one chart type.

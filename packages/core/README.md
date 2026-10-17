@@ -246,3 +246,5 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
 ## React components (not the JSON spec)
 
 `@chartkitdev/react` exports dashboard components. Props such as `dataKey`, `leftAxis`, and `value` on `GaugeChart` are not spec keys. To render a spec, use `<Chart spec={...} />`.
+
+`@chartkitdev/vue`, `@chartkitdev/svelte`, and `@chartkitdev/vanilla` render this same spec. Vue SSR and SvelteKit include the SVG. `mount(element, spec)` returns `{ update(spec), destroy() }`. None of them add spec keys.
