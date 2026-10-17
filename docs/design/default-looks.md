@@ -1,8 +1,8 @@
 # Default looks
 
-Three candidate defaults for Todd to choose from. None of them is the library default. `theme` omitted or `"auto"` still resolves to the current auto theme.
+Soft is the library default. `theme` omitted, `"auto"`, or `"soft"` resolve to the same tokens. Light or dark follows the page scheme (`light-dark()`, so `color-scheme` on an ancestor and `prefers-color-scheme` both work). `"refined"` and `"editorial"` are built-in names. `"midnight"` stays an opt-in dark card. Any other name still falls through to midnight until that preset is imported.
 
-The pictures are in `/opt/cursor/artifacts/design/`. Colour tokens live in `packages/core/themes/candidates.css`. The same values are in `packages/core/src/themes/candidates.ts` for the sheet renderer and the tests. That module is not imported by the line bundle, `all`, or `validate`.
+The pictures are in `/opt/cursor/artifacts/design/`. Colour tokens live in `packages/core/themes/candidates.css`. The same values are in `packages/core/src/themes/candidates.ts` for the sheet renderer and the sync test. That module is not imported by the line bundle. The renderer carries the light-dark pairs itself, in `theme.ts`.
 
 ## What the reference defaults do well
 
@@ -24,25 +24,25 @@ Studied as they ship, not as a custom theme on top: Tremor, shadcn/ui charts, Ob
 
 **Lines and areas.** Stroke around 1.75–2.25px, round caps and joins. Area fill is a vertical fade to transparent, not a flat 30% slab. Point markers are off or hover-only on dashboard lines (shadcn, Vercel, Apple). Observable and Chart.js keep small dots. Dots on every vertex fight a smooth curve at this size, so only the editorial candidate turns them on.
 
-**Legend.** A small rounded swatch and a 12px label, in a row under the title or under the plot. No framed legend box. Hidden when there is only one series.
+**Legend.** A small rounded swatch and a 12px label, in a row under the title or under the plot. No framed legend box. Hidden when there is only one series. Donut legends use two columns: the name on the left, the percentage on the right, with the value column reserved so a label cannot run into the number.
 
-**Empty and edge.** Empty is a track, not an illustration and not a fake zero series. Heatmap cells with no value use the surface colour. Gauge and ring tracks use `--ck-track`, and fall back to the grid colour when that variable is unset. A missing point breaks the line (it is not dropped into a neighbour). Wide tick labels need margin; that is already how the renderer sizes the y axis. A single series does not grow a legend. A monotone curve can bow past the data max; the y domain grows by that overshoot so the peak stays inside the plot, and the plot clip still applies.
+**Empty and edge.** Empty is a track, not an illustration and not a fake zero series. Heatmap cells with no value use the surface colour. Gauge and ring tracks use `--ck-track`, falling back to the theme track colour. A missing point breaks the line (it is not dropped into a neighbour). Wide tick labels need margin; that is already how the renderer sizes the y axis. A single series does not grow a legend. A monotone curve can bow past the data max, and a stroke centered on the top gridline is clipped by the plot. The y domain grows by that overshoot and by extra air (about half the stroke plus 14px on a full chart, less on a sparkline) so the peak sits inside the plot. The plot clip still applies.
 
 ## Candidates
 
 Each look is a full token set, light and dark: background, surface, text, muted, grid, axis, accent, positive, negative, eight series, a six-stop sequential scale, and a seven-stop diverging scale. Series order is the order a chart paints (`--ck-series-1` first).
 
-Structural numbers (line width, bar radius, gap, area opacity, point markers) are in the stylesheet as `--ck-line-width`, `--ck-bar-radius`, `--ck-bar-gap`, and `--ck-area-opacity`. The renderer does not read those yet. It already reads `--ck-font-family` and the colour tokens. The sheets pass the structural numbers through `mark` so the pictures show the proposed geometry. Wiring them into every `stroke-width` attribute would grow the line bundle, so that waits until a look is chosen.
+Structural numbers are wired. `--ck-line-width`, `--ck-bar-radius` (outer end of a bar only, via `clip-path`), `--ck-area-opacity` (including the gradient mid stop), `--ck-track`, and `--ck-line-dots` (`none` or `inline`) are presentation values, so a host stylesheet overrides them on the painted SVG. `--ck-bar-gap` is the same number as the theme, but the renderer applies it when it places the bars. A later CSS change cannot move those bars; set `mark.gap`, or pick a theme, to change the gap. `mark.strokeWidth`, `mark.cornerRadius`, `mark.fillOpacity`, `mark.points`, and `mark.gap` still override the theme. Soft and refined omit visible dots; the circles are in the SVG with `display: none` so `--ck-line-dots: inline` can turn them on. Editorial draws them. Midnight keeps the previous geometry (radius 3, gap 0.25, hover dots that are not painted).
 
 | | A Refined neutral | B Vivid editorial | C Soft modern |
 |---|---|---|---|
 | Reference | shadcn, Vercel | Stripe, Observable | Tremor, Apple |
-| Light background | `#ffffff` | `#ffffff` | `#f5f5f7` |
+| Light card | `#ffffff` | `#ffffff` | `#f5f5f7` (plot stays transparent) |
 | Dark background | `#09090b` | `#0b1020` | `#1c1c1e` |
 | Line | 1.75px, no dots | 2.25px, small dots | 2px, no dots |
 | Bar radius / gap | 4 / 0.22 | 2 / 0.18 | 8 / 0.34 |
 | Area fade | 0.18 at the top, then 35% of that, then clear | 0.28 at the top, same falloff | 0.22 at the top, same falloff |
-| Type | system sans, tabular nums | same, ink titles (`#0a2540`) | same, on a warm gray page |
+| Type | system sans, tabular nums | same, ink titles (`#0a2540`) | same; gray card is optional |
 
 Positive and negative are text colours on KPI deltas and candle bodies. They clear 3:1 on that look’s background (the light ones clear 4.5:1 except editorial is the same pair). They are not required to be members of the fill list.
 
@@ -88,24 +88,31 @@ Closest fill pairs:
 
 Sequential scales run from a light tint to a deep stop (OKLab L span about 0.55 to 0.57), so a heatmap is not one blue. Diverging scales put a neutral gray between a rose arm and a green or blue arm. The neutral and the tints are fills, not thin lines, and some of them are under 3:1.
 
+## Plot and card
+
+Soft light’s card colour is `#f5f5f7` (dark `#1c1c1e`). Painting that rectangle inside the SVG makes a gray slab on a white page and covers a colored page. The built-in plot fill is therefore `transparent`. On white, the chart is just the marks and the type. On any other page, that page shows through, and `light-dark()` still picks the Soft ink for the page scheme.
+
+The card is opt-in. Set `--ck-background: light-dark(#f5f5f7, #1c1c1e)`, or wrap the chart:
+
+```css
+.ck-card { background: light-dark(#f5f5f7, #1c1c1e); border-radius: 12px; }
+```
+
+`themes/candidates.css` does the same when an ancestor has `data-ck-theme="soft"` and `data-ck-scheme`. KPI cards use `--ck-surface` (`#ffffff` / `#2c2c2e`), not the page card. Contrast figures in this doc were measured on the card colour; on a transparent plot they hold on white and on the dark card, and they are the host’s to check on a saturated page.
+
 ## Theme API
 
 Formatting stays presets only. No formatter functions.
 
-**Today.** `theme` omitted or `"auto"` is the default and follows `light-dark()`. `"midnight"` is the built-in dark card. Other names (`emerald`, `slate`, …) are opt-in imports. A `tokens` object on the theme already replaces any colour, including `series`.
-
-**Proposed built-ins, after a look is picked.** Six names, selected by `theme`:
-
 | Name | Role |
 |---|---|
-| `auto` | Default. Follows the page scheme. |
-| `midnight` | Current dark card. |
-| `refined` | Candidate A. |
-| `editorial` | Candidate B. |
-| `soft` | Candidate C. |
-| `contrast` | Same hues as the chosen look, with the thin-line stroke used for fills too, when someone needs every swatch at 3:1. Not built. |
+| `auto`, `soft` | Default. Same tokens. Follows the page scheme. Transparent plot. |
+| `refined` | Built in. Hairline grid, thinner line, radius 4. |
+| `editorial` | Built in. Heavier line, dots on, radius 2. |
+| `midnight` | Opt-in dark card. |
+| anything else | Midnight, until `@chartkitdev/core/themes/<name>` is imported. |
 
-Do not set `theme` to `refined`, `editorial`, or `soft` yet. An unknown name still falls through to midnight, which is a different look. Until one is registered, load the stylesheet and set the attributes on an ancestor:
+A `tokens` object on the theme still replaces any colour, including `series`. Host `--ck-*` and `--chart-N` win over the fallbacks. The stylesheet remains the way to force one scheme without changing the page:
 
 ```html
 <div data-ck-theme="refined" data-ck-scheme="light">
@@ -113,34 +120,27 @@ Do not set `theme` to `refined`, `editorial`, or `soft` yet. An unknown name sti
 </div>
 ```
 
-The renderer already emits `var(--ck-series-1, …)`, so the host variables win without a JavaScript preset.
-
-**Brand in one call.** `paletteFromBrand` derives eight categorical colours from one hex, or from a short list. The first colour keeps the brand hue and is only shifted enough to clear 3:1 on white (light) or `#09090b` (dark). Further colours rotate that hue and are spaced for the same contrast floor. It is not wired into `resolvePreset`, so it cannot change the default and it stays out of the line bundle.
+**Brand in one call.** `paletteFromBrand` derives eight categorical colours from one hex, or from a short list. The first colour keeps the brand hue and is only shifted enough to clear 3:1 on white (light) or `#09090b` (dark). It is not called from `resolvePreset`. The OKLCH math is about 1.9 KB gzipped, which does not fit in the line bundle next to the three built-in palettes, so `theme.brand` is not a spec field. Pass the array through the tokens override:
 
 ```ts
 import { paletteFromBrand } from "@chartkitdev/core/themes/brand";
 
 const series = paletteFromBrand("#635bff");
+render({ ...spec, theme: { preset: "soft", tokens: { series } } });
 ```
 
-Pass the array through the tokens override that already exists:
-
-```ts
-render({ ...spec, theme: { preset: "auto", tokens: { series } } });
-```
-
-A later `theme: { preset: "auto", brand: "#635bff" }` would call the same function inside the renderer. That waits, because the OKLCH math would ship in every bundle that paints a chart.
+Overriding `series` also replaces the thin-line fallback, so the brand colours are used for both fills and strokes unless `tokens.lines` is set too.
 
 ## Size
 
-Themes are CSS custom properties. `candidates.css` is the opt-in file. `paletteFromBrand` is its own entry (`themes/brand`), not an import of `line`, `all`, or `validate`.
+`paletteFromBrand` stays a separate `themes/brand` entry. It is not an import of `line`, `all`, or `validate`. `candidates.css` is not imported by any JavaScript bundle.
 
-Measured with `npm run size` on this branch (gzip -9, same method as CI). Line and all grew for the top-only bar path, the ≤2px `--ck-line-*` stroke, the extra gradient stop, and monotone headroom. Both stay inside budget. Validate is unchanged. `auto` and `midnight` are still the presets an unknown name falls through to.
+Measured with `npm run size` (gzip -9) after Soft, refined, and editorial moved into `theme.ts`.
 
 | Bundle | Bytes | Budget |
 |---|---:|---:|
-| line | 12902 | 13074 |
-| all | 24065 | 24788 |
-| validate | 16644 | 17594 |
+| line | 13966 | 15083 |
+| all | 25371 | 27401 |
+| validate | 16658 | 17594 |
 
-`candidates.css` is 7,946 bytes raw and 1,773 bytes gzipped. It is not imported by any JavaScript bundle. `paletteFromBrand` is a separate `themes/brand` entry: 3,529 bytes minified, 1,924 bytes gzipped. It is not on the line, all, or validate graphs.
+Line and all passed the previous caps (13074 and 24788). The new caps are 8 percent above the measurement, recorded in `scripts/size-budget.json` on 2026-10-17. Validate and the adapters stayed inside their budgets. `candidates.css` is 8,323 bytes raw and 1,897 bytes gzipped. `paletteFromBrand` remains about 1.9 KB gzipped on its own entry, which is more than the line headroom, so it is not imported there.

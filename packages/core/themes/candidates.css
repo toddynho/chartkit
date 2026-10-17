@@ -1,10 +1,13 @@
-/* Candidate default looks. Opt-in stylesheet. Not the library default.
+/* Soft, refined, and editorial. Opt-in stylesheet.
+   The built-in SVG fallback is already Soft (or refined / editorial when theme names them):
+   light-dark() colours and a transparent plot. This file paints the optional card
+   via --ck-background (#f5f5f7 for Soft light, #1c1c1e for Soft dark) and the
+   scheme-specific colours. Omit the attributes, or set --ck-background: transparent,
+   when the page itself should show through.
    Put data-ck-theme and data-ck-scheme on an ancestor of the chart.
-   Colour tokens are already read by the renderer (var(--ck-*)).
-   Series fills may be vivid and under 3:1. --ck-line-* is the stroke for lines at or under 2px.
-   --ck-track is the gauge and progress-ring track.
-   --ck-line-width, --ck-bar-radius, --ck-bar-gap, and --ck-area-opacity are proposed.
-   The renderer still uses its mark defaults until a look is chosen. */
+   --ck-line-width, --ck-bar-radius, --ck-area-opacity, --ck-track, and --ck-line-dots
+   are read live. --ck-bar-gap is the same number the theme uses at render time;
+   changing it in CSS does not move bars. Set mark.gap for that. */
 
 [data-ck-theme="refined"][data-ck-scheme="light"] {
   color-scheme: light;
@@ -52,6 +55,7 @@
   --ck-bar-radius: 4;
   --ck-bar-gap: 0.22;
   --ck-area-opacity: 0.18;
+  --ck-line-dots: none;
 }
 
 [data-ck-theme="refined"][data-ck-scheme="dark"] {
@@ -100,6 +104,7 @@
   --ck-bar-radius: 4;
   --ck-bar-gap: 0.22;
   --ck-area-opacity: 0.18;
+  --ck-line-dots: none;
 }
 
 [data-ck-theme="editorial"][data-ck-scheme="light"] {
@@ -148,6 +153,7 @@
   --ck-bar-radius: 2;
   --ck-bar-gap: 0.18;
   --ck-area-opacity: 0.28;
+  --ck-line-dots: inline;
 }
 
 [data-ck-theme="editorial"][data-ck-scheme="dark"] {
@@ -196,6 +202,7 @@
   --ck-bar-radius: 2;
   --ck-bar-gap: 0.18;
   --ck-area-opacity: 0.28;
+  --ck-line-dots: inline;
 }
 
 [data-ck-theme="soft"][data-ck-scheme="light"] {
@@ -244,6 +251,7 @@
   --ck-bar-radius: 8;
   --ck-bar-gap: 0.34;
   --ck-area-opacity: 0.22;
+  --ck-line-dots: none;
 }
 
 [data-ck-theme="soft"][data-ck-scheme="dark"] {
@@ -292,4 +300,5 @@
   --ck-bar-radius: 8;
   --ck-bar-gap: 0.34;
   --ck-area-opacity: 0.22;
+  --ck-line-dots: none;
 }

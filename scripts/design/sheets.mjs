@@ -64,14 +64,8 @@ function shoot(html, png, width, height) {
   }
 }
 
-function markOf(look, extra = {}) {
+function markOf(_look, extra = {}) {
   return {
-    strokeWidth: look.geometry.strokeWidth,
-    cornerRadius: look.geometry.cornerRadius,
-    gap: look.geometry.gap,
-    fillOpacity: look.geometry.fillOpacity,
-    points: look.geometry.points,
-    pointSize: look.geometry.pointSize,
     curve: "monotone",
     ...extra,
   };
@@ -198,7 +192,7 @@ function charts(look) {
           y: "day",
           color: { field: "level", range: [1, 2, 3, 4, 5, 6].map((n) => `var(--ck-seq-${n})`) },
         },
-        mark: { cornerRadius: Math.min(look.geometry.cornerRadius, 6), gap: 0.16 },
+        mark: { curve: "monotone" },
         a11y: { alt },
       },
     },
@@ -305,6 +299,7 @@ function charts(look) {
       spec: {
         ...chart.spec,
         id: `${look.id}-${slug}`,
+        theme: look.id,
         a11y: { alt: `${look.title}, ${chart.name}.` },
       },
     };
@@ -452,9 +447,9 @@ const compareColumns = [
 ];
 
 function compareSpec(look, kind) {
-  const mark = markOf(look, kind === "area" ? { area: true } : {});
+  const mark = kind === "donut" ? undefined : markOf(look, kind === "area" ? { area: true } : {});
   const size = { width: 250, height: 188 };
-  const base = { version: "1", size, id: `${look.id}-${kind}`, a11y: { alt: `${look.title} ${kind} comparison.` }, mark };
+  const base = { version: "1", size, id: `${look.id}-${kind}`, theme: look.id, a11y: { alt: `${look.title} ${kind} comparison.` }, mark };
   if (kind === "line" || kind === "area") {
     return { ...base, type: "line", data: rows, encoding: { x: "month", y: ["Starter", "Pro", "Enterprise"] } };
   }

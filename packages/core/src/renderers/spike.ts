@@ -25,9 +25,10 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
   if (!values.some((value) => value !== null)) return null;
 
   const baseline = typeof frame.mark.baseline === "number" ? frame.mark.baseline : 0;
-  const width = typeof frame.mark.strokeWidth === "number" ? frame.mark.strokeWidth : 2;
+  const width = typeof frame.mark.strokeWidth === "number" ? frame.mark.strokeWidth : frame.geometry.strokeWidth;
+  const strokeAttr = typeof frame.mark.strokeWidth === "number" ? n(width) : `var(--ck-line-width, ${n(width)})`;
   const opacity = typeof frame.mark.opacity === "number" ? frame.mark.opacity : 1;
-  const color = lineStroke(paint(undefined, frame.preset, 0), width);
+  const color = lineStroke(paint(undefined, frame.preset, 0), width, frame.preset.lines);
   const domain = resolveDomain(
     values.filter((value): value is number => value !== null).concat(baseline),
     frame.encoding.y,
@@ -60,7 +61,7 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
     const name = labels[index] ? `${labels[index]}: ` : "";
     const label = `${name}${formatValue(value, yFormat, frame.locale)}`;
     parts.push(
-      `<line x1="${n(x)}" y1="${n(baseY)}" x2="${n(x)}" y2="${n(y)}" stroke="${color}" stroke-width="${n(width)}" stroke-linecap="round" stroke-opacity="${n(opacity)}" aria-label="${esc(label)}"${sampledAttr}><title>${esc(label)}</title></line>`,
+      `<line x1="${n(x)}" y1="${n(baseY)}" x2="${n(x)}" y2="${n(y)}" stroke="${color}" stroke-width="${strokeAttr}" stroke-linecap="round" stroke-opacity="${n(opacity)}" aria-label="${esc(label)}"${sampledAttr}><title>${esc(label)}</title></line>`,
     );
   };
   if (!sampled.reduced) {
