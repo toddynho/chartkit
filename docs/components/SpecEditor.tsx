@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { scaleSvgText } from "@/lib/chart";
+import { scaleSvgText, specAtSize } from "@/lib/chart";
 import { THEMES } from "@/lib/specs";
 
 interface Props {
@@ -23,10 +23,20 @@ export function SpecEditor({ initialSpec, initialSvg, mode = "compact", labelSca
   const [theme, setTheme] = useState("site");
   const [status, setStatus] = useState("Showing the published spec.");
   const [issues, setIssues] = useState<string[]>([]);
+  const [pixelWidth, setPixelWidth] = useState<number | null>(null);
   const skip = useRef(true);
   const keepStatus = useRef(false);
+  const quietFit = useRef(mode === "hero");
+  const hostRef = useRef<HTMLDivElement>(null);
+  const fitWidth = useRef<number | null>(null);
+  const renderGen = useRef(0);
+  const textRef = useRef(text);
+  const themeRef = useRef(theme);
+  textRef.current = text;
+  themeRef.current = theme;
 
   async function renderText(source: string, themeName: string) {
+    const gen = ++renderGen.current;
     let parsed: unknown;
     try {
       parsed = JSON.parse(source);
@@ -36,10 +46,17 @@ export function SpecEditor({ initialSpec, initialSvg, mode = "compact", labelSca
       setIssues([]);
       return;
     }
-    const themed = applyTheme(parsed, themeName);
+    const sized = mode === "hero" && fitWidth.current ? specAtSize(parsed, fitWidth.current) : parsed;
+    const themed = applyTheme(sized, themeName);
     try {
       const next = scaleSvgText(await draw(themed, themeName !== "site"), labelScale);
+      if (gen !== renderGen.current) return;
       setSvg(next);
+      if (mode === "hero" && fitWidth.current) setPixelWidth(fitWidth.current);
+      if (quietFit.current) {
+        quietFit.current = false;
+        return;
+      }
       if (keepStatus.current) {
         keepStatus.current = false;
       } else if (next.includes("ck-chart-error")) {
@@ -66,6 +83,26 @@ export function SpecEditor({ initialSpec, initialSvg, mode = "compact", labelSca
     // theme and text are the inputs; renderText is recreated each render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, theme]);
+
+  useEffect(() => {
+    if (mode !== "hero") return;
+    const el = hostRef.current;
+    if (!el) return;
+    const measure = () => {
+      const style = getComputedStyle(el);
+      const padX = Number.parseFloat(style.paddingLeft) + Number.parseFloat(style.paddingRight);
+      const next = Math.round(el.clientWidth - padX);
+      if (next < 32 || next === fitWidth.current) return;
+      fitWidth.current = next;
+      void renderText(textRef.current, themeRef.current);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+    // renderText reads the latest spec text through refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   useEffect(() => {
     if (mode !== "full") return;
@@ -162,7 +199,12 @@ export function SpecEditor({ initialSpec, initialSvg, mode = "compact", labelSca
 
   return (
     <div className={frame}>
-      <div className={preset ? "chart-host chart-preset preview" : "chart-host preview"} dangerouslySetInnerHTML={{ __html: svg }} />
+      <div
+        ref={hostRef}
+        className={preset ? "chart-host chart-preset preview" : "chart-host preview"}
+        data-pixel-width={pixelWidth ?? undefined}
+        dangerouslySetInnerHTML={{ __html: svg }}
+      />
       <div className="editor-side">
         <label htmlFor="spec-json">Chart spec (JSON)</label>
         <textarea

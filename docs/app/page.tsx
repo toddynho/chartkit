@@ -50,7 +50,7 @@ export default function HomePage() {
         </div>
       </section>
       <div className="hero-stage">
-        <LiveSpec spec={heroSpec} mode="hero" labelScale={1.65} />
+        <LiveSpec spec={heroSpec} mode="hero" />
       </div>
 
       <section className="section">

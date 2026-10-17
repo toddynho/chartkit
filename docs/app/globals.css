@@ -264,6 +264,8 @@ textarea { min-height: 220px; resize: vertical; font-family: var(--mono); font-s
   --ck-series-8: initial;
 }
 .chart-host svg { width: 100%; height: auto; display: block; }
+/* Until the hero viewBox matches the host, keep the SVG at its authored width so type is not scaled up. */
+.editor-hero .chart-host:not([data-pixel-width]) svg { width: auto; max-width: 100%; }
 
 .grid-3, .grid-2, .gallery, .preset-grid, .dash {
   display: grid;
