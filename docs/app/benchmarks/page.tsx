@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ChartView } from "@/lib/chart";
 import {
@@ -20,11 +21,17 @@ import {
 } from "@/lib/benchmarks";
 import { pageMeta } from "@/lib/site";
 
-export const metadata = pageMeta(
-  "Benchmarks",
-  "Published ChartKit benchmark numbers: bundle size, browser render, server render, sampling, and the agent eval. Losses included.",
-  "/benchmarks",
-);
+export const metadata: Metadata = {
+  ...pageMeta(
+    "Benchmarks",
+    "Published ChartKit benchmark numbers: bundle size, browser render, server render, sampling, and the agent eval. Losses included.",
+    "/benchmarks",
+  ),
+  alternates: {
+    canonical: "https://chartkit.dev/benchmarks",
+    types: { "text/markdown": "https://chartkit.dev/benchmarks.md" },
+  },
+};
 
 export default function BenchmarksPage() {
   return (
@@ -33,7 +40,9 @@ export default function BenchmarksPage() {
       <p className="lede">
         Round {ROUND}, measured {MEASURED}. Core is pull request #6 at <code>{CORE_COMMIT}</code>. The harness is pull
         request #4 at <code>{HARNESS_COMMIT}</code>. Five browser samples, Playwright Chromium, a 640×360 line. Reproduce
-        with <code>npm run bench</code> on that pairing. This page does not re-time the libraries.
+        with <code>npm run bench</code> on that pairing. This page does not re-time the libraries. The same numbers are
+        in <a href="/benchmarks.json">benchmarks.json</a> (schema <a href="/benchmarks.schema.json">benchmarks.schema.json</a>)
+        and <a href="/benchmarks.md">benchmarks.md</a>.
       </p>
       <p>
         The full run shared the machine with other work, about 11.6 GB of 16 GB in use, and competitors were slower

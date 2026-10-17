@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { rivals } from "@/lib/rivals";
 import { chartTypes, examples } from "@/lib/specs";
 
 const BASE = "https://chartkit.dev";
@@ -21,6 +22,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/agents",
     "/demo",
     "/compare",
+    "/when-to-use",
+    ...rivals.map((rival) => `/compare/${rival.slug}`),
+    "/benchmarks.json",
+    "/benchmarks.md",
+    "/benchmarks.schema.json",
+    "/llms.txt",
+    "/llms-full.txt",
     ...chartTypes.map((item) => `/docs/charts/${item.type}`),
     ...examples.map((item) => `/examples/${item.slug}`),
   ];

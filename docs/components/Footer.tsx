@@ -14,8 +14,11 @@ export function Footer() {
         <Link href="/benchmarks">Benchmarks</Link>
         <Link href="/agents">Agents</Link>
         <Link href="/compare">Compare</Link>
+        <Link href="/when-to-use">When to use</Link>
         <Link href="/demo">Demo</Link>
         <a href="/llms.txt">llms.txt</a>
+        <a href="/benchmarks.json">benchmarks.json</a>
+        <a href="/benchmarks.md">benchmarks.md</a>
         <a href="/llms-full.txt">llms-full.txt</a>
         <a href="/schema/v1.json">Schema</a>
       </nav>

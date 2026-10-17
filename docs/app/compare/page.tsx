@@ -59,8 +59,24 @@ export default function ComparePage() {
           </tbody>
         </table>
       </div>
+      <h2>One library at a time</h2>
+      <ul>
+        <li>
+          <Link href="/compare/recharts">ChartKit vs Recharts</Link>
+        </li>
+        <li>
+          <Link href="/compare/chartjs">ChartKit vs Chart.js</Link>
+        </li>
+        <li>
+          <Link href="/compare/echarts">ChartKit vs ECharts</Link>
+        </li>
+        <li>
+          <Link href="/compare/nivo">ChartKit vs Nivo</Link>
+        </li>
+      </ul>
       <p>
-        The timed comparison, including the losses at 1M points, is on <Link href="/benchmarks">Benchmarks</Link>.
+        The timed comparison, including the losses, is on <Link href="/benchmarks">Benchmarks</Link>.{" "}
+        <Link href="/when-to-use">When to use ChartKit</Link>.
       </p>
     </div>
   );

@@ -2,7 +2,20 @@
 
 One JSON spec, a framework-free core, and thin adapters for React, Vue, Svelte, and plain DOM. The spec is the agent interface. Component props on the older React charts are a different API and are not keys in the spec.
 
-**[Documentation](https://chartkit.dev)** | **[Demo](https://chartkit.dev/demo)** | **[Components](https://chartkit.dev/components)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[llms.txt](docs/public/llms.txt)**
+Round 7, measured 2026-10-16. These are the harness numbers, including the losses. Method and the quiet-box reruns: [chartkit.dev/benchmarks](https://chartkit.dev/benchmarks) and [benchmarks.json](https://chartkit.dev/benchmarks.json).
+
+| | ChartKit | Next or note |
+| --- | ---: | --- |
+| Line chart, gzip | **12,171 B** | uPlot 23,867 B |
+| Server render, 1k line | **0.95 ms** | ECharts 9.04 ms. uPlot, Chart.js, and Recharts produced no chart without a DOM |
+| Agent, no docs, then repair() | **20/42 → 42/42** | Recharts, ECharts, and Chart.js were already 42/42 with no docs |
+| 1k update | 32.8 ms, last of 7 | Chart.js 20.2 ms |
+| 100k update | 22.9 ms, loss | uPlot 17.5 ms |
+| 1M initial, full run | 34.8 ms, loss | uPlot 32.0 ms. A quiet rerun ties this cell (36.3 vs 36.9) |
+
+Update timings sit on a two-frame wait. Sampling defaults to auto. With sampling off, 1M is 782.5 ms to draw and 53.3 s to update. Tooltip, zoom, pan, and brush are in the spec and not drawn.
+
+**[Documentation](https://chartkit.dev)** | **[When to use](https://chartkit.dev/when-to-use)** | **[Benchmarks](https://chartkit.dev/benchmarks)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[llms.txt](docs/public/llms.txt)**
 
 ---
 
@@ -107,7 +120,7 @@ Dashboard components in `@chartkitdev/react` (`LineChart`, `KpiCard`, and the re
 - **TypeScript First** - Full type safety with autocomplete for every prop
 - **Dual Y-Axis** - Display multiple scales in LineChart
 - **Responsive** - Charts automatically resize to fit their container
-- **Interactive** - Tooltips, click handlers, and hover states
+- **Not drawn yet** - Tooltip, zoom, pan, brush, and animation validate and warn CK3011. They are not painted.
 
 ## Components
 
@@ -126,7 +139,7 @@ Dashboard components in `@chartkitdev/react` (`LineChart`, `KpiCard`, and the re
 | `MiniArea` | Small area charts with gradients |
 | `ProgressRing` | Circular progress indicators |
 | `SpikeChart` | Event/activity spike visualization |
-| `CandlestickChart` | Financial OHLC charts with zoom/pan |
+| `CandlestickChart` | Financial OHLC charts. Zoom and pan are not drawn. |
 
 ## Themes
 
@@ -157,10 +170,11 @@ const theme = useAutoTheme({ light: 'sunset', dark: 'midnight' });
 
 Full documentation and examples at **[chartkit.dev](https://chartkit.dev)**
 
-- [Getting Started](https://chartkit.dev/getting-started)
-- [Components](https://chartkit.dev/components)
-- [Themes](https://chartkit.dev/themes)
-- [Live Demo](https://chartkit.dev/demo)
+- [Getting started](https://chartkit.dev/docs)
+- [When to use ChartKit](https://chartkit.dev/when-to-use)
+- [Benchmarks](https://chartkit.dev/benchmarks.json)
+- [Themes](https://chartkit.dev/docs/theming)
+- [Live demo](https://chartkit.dev/demo)
 
 ## Author
 

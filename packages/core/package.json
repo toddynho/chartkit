@@ -1,7 +1,7 @@
 {
   "name": "@chartkitdev/core",
   "version": "0.5.0",
-  "description": "Framework-agnostic ChartKit core: JSON schema, validator, and SVG renderer. Zero runtime dependencies.",
+  "description": "JSON-spec SVG charts, zero dependencies. Line chart 12,171 B gzip, 0.95 ms server render. validate() and repair() for agents (no-docs 20/42, then 42/42). Losses included: https://chartkit.dev/benchmarks",
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev",
   "bugs": {
@@ -97,9 +97,17 @@
   "keywords": [
     "chartkit",
     "charts",
-    "json-schema",
+    "chart",
     "svg",
+    "json",
+    "json-schema",
     "validation",
+    "visualization",
+    "react",
+    "vue",
+    "svelte",
+    "ssr",
+    "benchmark",
     "typescript"
   ],
   "license": "MIT",

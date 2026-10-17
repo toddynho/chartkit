@@ -62,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM context" />
         <link rel="alternate" type="text/plain" href="/llms-full.txt" title="LLM context, full" />
+        <link rel="describedby" href="/llms.txt" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </head>
       <body>

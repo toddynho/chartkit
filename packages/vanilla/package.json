@@ -1,7 +1,8 @@
 {
   "name": "@chartkitdev/vanilla",
   "version": "0.5.0",
-  "description": "Mount a ChartKit JSON spec into an element. No framework. SVG comes from @chartkitdev/core.",
+  "description": "Mount a ChartKit JSON spec into an element. No framework. The core line chart is 12,171 B gzip. Evidence: https://chartkit.dev/benchmarks",
+  "keywords": ["chart", "svg", "vanilla", "chartkit"],
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev",
   "bugs": {
