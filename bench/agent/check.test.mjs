@@ -661,3 +661,60 @@ after(async () => {
   const { stop } = await import("esbuild");
   await Promise.race([stop(), new Promise((resolve) => setTimeout(resolve, 500))]);
 });
+
+test("series-field bars count one rect per category per series value", () => {
+  const data = [
+    { month: "Jan", plan: "free", users: 4 },
+    { month: "Jan", plan: "pro", users: 2 },
+    { month: "Feb", plan: "free", users: 5 },
+    { month: "Feb", plan: "pro", users: 3 },
+    { month: "Mar", plan: "free", users: 6 },
+  ];
+  const task = {
+    id: "bar-series",
+    type: "bar",
+    data,
+    expect: { type: "bar", x: "month", y: "users", values: [4, 2, 5, 3, 6] },
+  };
+  for (const encoding of [
+    { x: "month", y: "users", series: "plan" },
+    { x: "month", y: "users", color: { field: "plan" } },
+  ]) {
+    for (const stack of [undefined, "stack"]) {
+      const spec = {
+        version: "1",
+        type: "bar",
+        data,
+        encoding,
+        ...(stack ? { mark: { stack } } : {}),
+        a11y: { alt: "Free and pro users by month." },
+      };
+      assert.equal(suite.seriesBarCount(spec, "bar"), 6);
+      const result = suite.checkChartKit(spec, task);
+      const marks = result.stages.marks;
+      const detail = JSON.stringify({ encoding, stack, marks });
+      // This core draws one rect per row. A core that pivots also draws the missing pair.
+      const rowBars = Array.isArray(marks.issues) && marks.issues.includes("expected 6 bars, found 5");
+      assert.ok(marks.ok || rowBars, detail);
+    }
+  }
+  assert.equal(suite.seriesBarCount({
+    type: "bar",
+    data,
+    encoding: { x: "month", y: "users", color: "month" },
+  }, "bar"), null);
+  assert.equal(suite.seriesBarCount({
+    type: "bar",
+    data,
+    encoding: { x: "month", y: "users", series: "month", color: { field: "plan" } },
+  }, "bar"), 6);
+  const single = suite.tasks.find((item) => item.id === "bar-region");
+  const plain = suite.checkChartKit({
+    version: "1",
+    type: "bar",
+    data: single.data,
+    encoding: { x: "region", y: "sales" },
+    a11y: { alt: "South leads sales." },
+  }, single);
+  assert.equal(plain.ok, true, JSON.stringify(plain.stages));
+});

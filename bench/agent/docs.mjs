@@ -51,7 +51,9 @@ export function officialReference(library) {
   const capFile = join(repoRoot, sources.capFile);
   const cap = readFileSync(capFile).length;
   const file = library === "chartkit" ? capFile : join(repoRoot, meta.file);
-  const text = readCapped(file, library === "chartkit" ? Number.MAX_SAFE_INTEGER : cap);
+  // BENCH_CHARTKIT_DOC_CAP (bytes) is an optional equal-length check: cut ChartKit's llms.txt like the others.
+  const ckCap = Number(process.env.BENCH_CHARTKIT_DOC_CAP) > 0 ? Number(process.env.BENCH_CHARTKIT_DOC_CAP) : Number.MAX_SAFE_INTEGER;
+  const text = readCapped(file, library === "chartkit" ? ckCap : cap);
   return {
     library,
     title: meta.title,
