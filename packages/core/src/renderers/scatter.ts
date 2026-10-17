@@ -62,15 +62,8 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
 
   const showLegend = frame.legend !== false && categories.length > 1;
   let top = 16;
-  const heads: string[] = [];
-  if (frame.title) {
-    heads.push(label(16, 20, frame.title, cssVar("text", frame.preset.text), 14, "600"));
-    top = 36;
-  }
-  if (frame.subtitle) {
-    heads.push(label(16, top, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
-    top += 16;
-  }
+  if (frame.title) top = 38;
+  if (frame.subtitle) top += 18;
   if (showLegend) top += 22;
   const showX = axisOn(spec, "x");
   const showY = axisOn(spec, "y");
@@ -101,17 +94,20 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   const parts: string[] = [];
   parts.push(openChart({ ...frame, renderer: "scatter" }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
-  parts.push(heads.join(""));
+  if (frame.title) parts.push(label(plot.left, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
+  if (frame.subtitle) parts.push(label(plot.left, frame.title ? 40 : 18, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
   if (showLegend) {
-    parts.push(
-      categories
-        .map((category, index) => {
-          const dx = 16 + index * 110;
-          const color = colorOf(category, index);
-          return `<rect x="${n(dx)}" y="${n(top - 18)}" width="10" height="10" rx="2" fill="${color}" />${label(dx + 16, top - 9, category || " ", cssVar("text", frame.preset.text), 12, "400")}`;
-        })
-        .join(""),
-    );
+    let cx = plot.left;
+    const bits: string[] = [];
+    for (let index = 0; index < categories.length; index++) {
+      const category = categories[index] ?? "";
+      const width = 28 + category.length * 6.6;
+      if (cx > plot.left && cx + width > plot.right) break;
+      const color = colorOf(category, index);
+      bits.push(`<rect x="${n(cx)}" y="${n(top - 18)}" width="10" height="10" rx="2" fill="${color}" />${label(cx + 16, top - 9, category || " ", cssVar("text", frame.preset.text), 12, "400")}`);
+      cx += width;
+    }
+    parts.push(bits.join(""));
   }
 
   if (grid && showY) {

@@ -47,7 +47,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   const showX = axisOn(spec, "x");
   const showY = axisOn(spec, "y");
   let top = 12;
-  if (frame.title) top = 28;
+  if (frame.title) top = 36;
   const plot = { left: showY ? 56 : 12, top, right: frame.width - 12, bottom: frame.height - (showX ? 28 : 12) };
   const volumeH = showVolume ? Math.max(28, (plot.bottom - plot.top) * 0.2) : 0;
   const priceBottom = plot.bottom - volumeH - (showVolume ? 8 : 0);
@@ -65,7 +65,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   const parts: string[] = [];
   parts.push(openChart({ ...frame, renderer: "candlestick" }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
-  if (frame.title) parts.push(text(12, 16, frame.title, cssVar("text", frame.preset.text), 14, "600"));
+  if (frame.title) parts.push(text(plot.left, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
   if (grid && showY) {
     const dash = grid === "dashed" ? ' stroke-dasharray="3 3"' : grid === "dotted" ? ' stroke-dasharray="1 3"' : "";
     for (const tick of yTicks) {

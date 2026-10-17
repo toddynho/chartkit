@@ -1,4 +1,4 @@
-import { cssVar, paint } from "../theme";
+import { cssVar, lineStroke, paint } from "../theme";
 import { formatValue } from "../format";
 import {
   asNumber,
@@ -27,7 +27,7 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
   const baseline = typeof frame.mark.baseline === "number" ? frame.mark.baseline : 0;
   const width = typeof frame.mark.strokeWidth === "number" ? frame.mark.strokeWidth : 2;
   const opacity = typeof frame.mark.opacity === "number" ? frame.mark.opacity : 1;
-  const color = paint(undefined, frame.preset, 0);
+  const color = lineStroke(paint(undefined, frame.preset, 0), width);
   const domain = resolveDomain(
     values.filter((value): value is number => value !== null).concat(baseline),
     frame.encoding.y,
@@ -47,7 +47,7 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
   const parts: string[] = [];
   parts.push(openChart({ ...frame, renderer: "spike" }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
-  if (frame.title) parts.push(text(12, 18, frame.title, cssVar("text", frame.preset.text), 14, "600"));
+  if (frame.title) parts.push(text(plot.left, 20, frame.title, cssVar("text", frame.preset.text), 15, "650"));
   const baseY = yScale(baseline);
   parts.push(
     `<line x1="${n(plot.left)}" y1="${n(baseY)}" x2="${n(plot.right)}" y2="${n(baseY)}" stroke="${cssVar("axis", frame.preset.axis)}" stroke-width="1.5" />`,

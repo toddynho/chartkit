@@ -19,14 +19,14 @@ export function renderGauge(spec: Record<string, unknown>): string | null {
   const cy = frame.height * 0.58;
   const radius = Math.max(24, Math.min(frame.width, frame.height) * 0.36);
   const valueColor = bandColor(metric, frame.preset) ?? paint(undefined, frame.preset, 0);
-  const track = cssVar("grid", frame.preset.grid);
+  const track = cssVar("track", frame.preset.grid);
   const valueText = formatValue(metric.value, metric.format, frame.locale);
 
   const parts: string[] = [];
   parts.push(openChart({ ...frame, renderer: "gauge" }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
   if (frame.title) {
-    parts.push(text(16, 18, frame.title, cssVar("text", frame.preset.text), 14, "600"));
+    parts.push(text(16, 20, frame.title, cssVar("text", frame.preset.text), 15, "650"));
   }
   parts.push(
     `<path d="${arcStroke(cx, cy, radius, start, end)}" fill="none" stroke="${track}" stroke-width="${n(stroke)}" stroke-linecap="${cap}" />`,

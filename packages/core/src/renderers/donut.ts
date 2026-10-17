@@ -44,14 +44,11 @@ export function renderDonut(spec: Record<string, unknown>): string | null {
   const sideLegend = showLegend && (place === "right" || place === "left") ? sideWidth : 0;
 
   let y0 = 8;
-  const heads: string[] = [];
-  if (frame.title) {
-    heads.push(text(16, 22, frame.title, cssVar("text", frame.preset.text), 14, "600"));
-    y0 = 32;
-  }
+  let subtitleY = 0;
+  if (frame.title) y0 = 36;
   if (frame.subtitle) {
-    heads.push(text(16, y0 + 12, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
-    y0 += 20;
+    subtitleY = y0 + 14;
+    y0 += 22;
   }
 
   const width = frame.width;
@@ -80,9 +77,10 @@ export function renderDonut(spec: Record<string, unknown>): string | null {
   const parts: string[] = [];
   parts.push(openChart({ ...frame, renderer: "donut" }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
-  parts.push(heads.join(""));
+  if (frame.title) parts.push(text(pieX, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
+  if (frame.subtitle) parts.push(text(pieX, subtitleY, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
 
-  if (showLegend && place === "top") parts.push(legend(arcs, 16, y0, frame, valueFormat, width - 12));
+  if (showLegend && place === "top") parts.push(legend(arcs, pieX, y0, frame, valueFormat, pieX + size));
   if (showLegend && place === "left") parts.push(legend(arcs, 12, pieY, frame, valueFormat, 12 + sideWidth - 8));
 
   for (const arc of arcs) {
@@ -107,7 +105,7 @@ export function renderDonut(spec: Record<string, unknown>): string | null {
     );
   }
 
-  if (showLegend && place === "bottom") parts.push(legend(arcs, 16, pieY + size + 8, frame, valueFormat, width - 12));
+  if (showLegend && place === "bottom") parts.push(legend(arcs, pieX, pieY + size + 8, frame, valueFormat, pieX + size));
   if (showLegend && place === "right") parts.push(legend(arcs, pieX + size + 16, pieY, frame, valueFormat, pieX + size + sideWidth - 8));
   parts.push(closeChart());
   return parts.join("");

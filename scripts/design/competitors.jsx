@@ -183,7 +183,18 @@ function mountChartjs() {
   draw("chartjs-area", "line", { labels, datasets: sets(true) });
 }
 
-mountRecharts("recharts");
-mountTremor();
-mountEcharts();
-mountChartjs();
+try {
+  mountRecharts("recharts");
+  mountTremor();
+  mountEcharts();
+  mountChartjs();
+} catch (error) {
+  document.body.dataset.ckError = String(error && error.stack ? error.stack : error);
+}
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      document.body.dataset.ckReady = "1";
+    }, 500);
+  });
+});
