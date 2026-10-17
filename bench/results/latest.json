@@ -1,0 +1,1237 @@
+{
+  "machine": {
+    "measuredAt": "2026-10-16T21:44:20.619Z",
+    "node": "v22.14.0",
+    "platform": "linux 6.12.94+ x64",
+    "cpu": "Intel(R) Xeon(R) Processor",
+    "cpuCount": 4,
+    "totalMemBytes": 16780574720
+  },
+  "versions": {
+    "@chartkitdev/core": "0.5.0",
+    "uplot": "1.6.32",
+    "chart.js": "4.5.1",
+    "recharts": "3.10.1",
+    "echarts": "6.1.0",
+    "@nivo/line": "0.99.0",
+    "@nivo/bar": "0.99.0",
+    "@nivo/pie": "0.99.0",
+    "@observablehq/plot": "0.6.17",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "esbuild": "0.25.0",
+    "playwright": "1.64.1"
+  },
+  "command": "node bench/run.mjs --skip-agent",
+  "bundle": {
+    "method": "esbuild --bundle --minify, platform browser, NODE_ENV=production, gzip level 9, brotli quality 11. ChartKit entries bundle packages/core/src. Competitor entries use the pinned package and only the import that chart needs. ECharts uses echarts/core plus one chart, its grid component when the chart has axes, and CanvasRenderer.",
+    "uplotCss": {
+      "minBytes": 1857,
+      "gzipBytes": 762,
+      "brotliBytes": 605
+    },
+    "rows": [
+      {
+        "id": "chartkit-minimal",
+        "library": "ChartKit minimal",
+        "chart": "line",
+        "renderer": "svg",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 23636,
+        "gzipBytes": 8712,
+        "brotliBytes": 7859,
+        "note": null
+      },
+      {
+        "id": "chartkit-minimal",
+        "library": "ChartKit minimal",
+        "chart": "bar",
+        "renderer": "svg",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 17818,
+        "gzipBytes": 6794,
+        "brotliBytes": 6159,
+        "note": null
+      },
+      {
+        "id": "chartkit-minimal",
+        "library": "ChartKit minimal",
+        "chart": "donut",
+        "renderer": "svg",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 13397,
+        "gzipBytes": 5188,
+        "brotliBytes": 4723,
+        "note": null
+      },
+      {
+        "id": "chartkit-all",
+        "library": "ChartKit all",
+        "chart": "line",
+        "renderer": "svg",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 61398,
+        "gzipBytes": 19855,
+        "brotliBytes": 17407,
+        "note": "Same /all bundle for line, bar, and donut. It registers every chart and every theme and does not include the validator."
+      },
+      {
+        "id": "chartkit-all",
+        "library": "ChartKit all",
+        "chart": "bar",
+        "renderer": "svg",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 61398,
+        "gzipBytes": 19855,
+        "brotliBytes": 17407,
+        "note": "Same /all bundle for line, bar, and donut."
+      },
+      {
+        "id": "chartkit-all",
+        "library": "ChartKit all",
+        "chart": "donut",
+        "renderer": "svg",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 61398,
+        "gzipBytes": 19855,
+        "brotliBytes": 17407,
+        "note": "Same /all bundle for line, bar, and donut."
+      },
+      {
+        "id": "uplot",
+        "library": "uPlot",
+        "chart": "line",
+        "renderer": "canvas",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 52132,
+        "gzipBytes": 23276,
+        "brotliBytes": 20919,
+        "note": "JS bundle plus uPlot's published uPlot.min.css, gzipped and brotli-compressed separately. css+js gzip is the sum of the two responses, not one combined stream.",
+        "cssMinBytes": 1857,
+        "cssGzipBytes": 762,
+        "cssBrotliBytes": 605
+      },
+      {
+        "id": "uplot",
+        "library": "uPlot",
+        "chart": "bar",
+        "renderer": "canvas",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 52161,
+        "gzipBytes": 23285,
+        "brotliBytes": 20975,
+        "note": "JS bundle plus uPlot's published uPlot.min.css, gzipped and brotli-compressed separately. css+js gzip is the sum of the two responses, not one combined stream.",
+        "cssMinBytes": 1857,
+        "cssGzipBytes": 762,
+        "cssBrotliBytes": 605
+      },
+      {
+        "id": "uplot",
+        "library": "uPlot",
+        "chart": "donut",
+        "renderer": "canvas",
+        "react": "none",
+        "status": "unsupported",
+        "note": "uPlot has no pie or donut series."
+      },
+      {
+        "id": "chartjs",
+        "library": "Chart.js",
+        "chart": "line",
+        "renderer": "canvas",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 139295,
+        "gzipBytes": 49374,
+        "brotliBytes": 43436,
+        "note": null
+      },
+      {
+        "id": "chartjs",
+        "library": "Chart.js",
+        "chart": "bar",
+        "renderer": "canvas",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 134265,
+        "gzipBytes": 47530,
+        "brotliBytes": 41751,
+        "note": null
+      },
+      {
+        "id": "chartjs",
+        "library": "Chart.js",
+        "chart": "donut",
+        "renderer": "canvas",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 132392,
+        "gzipBytes": 46922,
+        "brotliBytes": 41268,
+        "note": null
+      },
+      {
+        "id": "echarts",
+        "library": "ECharts",
+        "chart": "line",
+        "renderer": "canvas",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 476543,
+        "gzipBytes": 162991,
+        "brotliBytes": 139071,
+        "note": "Modular import: echarts/core + LineChart + GridComponent + CanvasRenderer."
+      },
+      {
+        "id": "echarts",
+        "library": "ECharts",
+        "chart": "bar",
+        "renderer": "canvas",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 471499,
+        "gzipBytes": 161020,
+        "brotliBytes": 137410,
+        "note": "Modular import: echarts/core + BarChart + GridComponent + CanvasRenderer."
+      },
+      {
+        "id": "echarts",
+        "library": "ECharts",
+        "chart": "donut",
+        "renderer": "canvas",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 357668,
+        "gzipBytes": 122174,
+        "brotliBytes": 104570,
+        "note": "Modular import: echarts/core + PieChart + CanvasRenderer. Donut is a pie with an inner radius."
+      },
+      {
+        "id": "recharts",
+        "library": "Recharts",
+        "chart": "line",
+        "renderer": "svg",
+        "react": "included",
+        "status": "ok",
+        "minBytes": 331253,
+        "gzipBytes": 99718,
+        "brotliBytes": 84424,
+        "note": null,
+        "reactExternal": {
+          "minBytes": 319077,
+          "gzipBytes": 96213,
+          "brotliBytes": 81368,
+          "note": "react, react-dom, and jsx-runtime are external. This is the added cost when the app already ships React."
+        }
+      },
+      {
+        "id": "recharts",
+        "library": "Recharts",
+        "chart": "bar",
+        "renderer": "svg",
+        "react": "included",
+        "status": "ok",
+        "minBytes": 328817,
+        "gzipBytes": 98811,
+        "brotliBytes": 83730,
+        "note": null,
+        "reactExternal": {
+          "minBytes": 316618,
+          "gzipBytes": 95516,
+          "brotliBytes": 80838,
+          "note": "react, react-dom, and jsx-runtime are external. This is the added cost when the app already ships React."
+        }
+      },
+      {
+        "id": "recharts",
+        "library": "Recharts",
+        "chart": "donut",
+        "renderer": "svg",
+        "react": "included",
+        "status": "ok",
+        "minBytes": 306908,
+        "gzipBytes": 93493,
+        "brotliBytes": 79824,
+        "note": null,
+        "reactExternal": {
+          "minBytes": 294771,
+          "gzipBytes": 90090,
+          "brotliBytes": 76964,
+          "note": "react, react-dom, and jsx-runtime are external. This is the added cost when the app already ships React."
+        }
+      },
+      {
+        "id": "nivo",
+        "library": "Nivo",
+        "chart": "line",
+        "renderer": "svg",
+        "react": "included",
+        "status": "ok",
+        "minBytes": 291572,
+        "gzipBytes": 100594,
+        "brotliBytes": 85196,
+        "note": null,
+        "reactExternal": {
+          "minBytes": 275851,
+          "gzipBytes": 96583,
+          "brotliBytes": 81736,
+          "note": "react, react-dom, and jsx-runtime are external. This is the added cost when the app already ships React."
+        }
+      },
+      {
+        "id": "nivo",
+        "library": "Nivo",
+        "chart": "bar",
+        "renderer": "svg",
+        "react": "included",
+        "status": "ok",
+        "minBytes": 275347,
+        "gzipBytes": 94417,
+        "brotliBytes": 79798,
+        "note": null,
+        "reactExternal": {
+          "minBytes": 260382,
+          "gzipBytes": 90441,
+          "brotliBytes": 76301,
+          "note": "react, react-dom, and jsx-runtime are external. This is the added cost when the app already ships React."
+        }
+      },
+      {
+        "id": "nivo",
+        "library": "Nivo",
+        "chart": "donut",
+        "renderer": "svg",
+        "react": "included",
+        "status": "ok",
+        "minBytes": 233012,
+        "gzipBytes": 79913,
+        "brotliBytes": 67820,
+        "note": null,
+        "reactExternal": {
+          "minBytes": 218374,
+          "gzipBytes": 75518,
+          "brotliBytes": 64271,
+          "note": "react, react-dom, and jsx-runtime are external. This is the added cost when the app already ships React."
+        }
+      },
+      {
+        "id": "plot",
+        "library": "Observable Plot",
+        "chart": "line",
+        "renderer": "svg",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 289324,
+        "gzipBytes": 97723,
+        "brotliBytes": 79872,
+        "note": null
+      },
+      {
+        "id": "plot",
+        "library": "Observable Plot",
+        "chart": "bar",
+        "renderer": "svg",
+        "react": "none",
+        "status": "ok",
+        "minBytes": 267789,
+        "gzipBytes": 92953,
+        "brotliBytes": 76361,
+        "note": null
+      },
+      {
+        "id": "plot",
+        "library": "Observable Plot",
+        "chart": "donut",
+        "renderer": "svg",
+        "react": "none",
+        "status": "unsupported",
+        "note": "Observable Plot has no pie or donut mark."
+      }
+    ]
+  },
+  "ssr": {
+    "method": "Same 1,000-point line (x[i] = i) for every library. Success means a chart was produced in Node without a DOM implementation. Timing is mean/median/min of 8 calls after 2 warmup calls.",
+    "rows": [
+      {
+        "library": "ChartKit minimal",
+        "renderer": "svg",
+        "status": "ok",
+        "points": 1000,
+        "iterations": 8,
+        "meanMs": 0.62,
+        "medianMs": 0.6,
+        "minMs": 0.47,
+        "maxMs": 0.8,
+        "note": "Node, no jsdom and no node-canvas. 2 warmup calls, then 8 timed calls. The series is makeSeries(1000, 1)."
+      },
+      {
+        "library": "uPlot",
+        "renderer": "canvas",
+        "status": "unsupported",
+        "points": 1000,
+        "error": "uPlot requires a DOM element. Node has no document."
+      },
+      {
+        "library": "Chart.js",
+        "renderer": "canvas",
+        "status": "unsupported",
+        "points": 1000,
+        "error": "Chart.js renders to a canvas element. This probe does not load a DOM or node-canvas."
+      },
+      {
+        "library": "Recharts",
+        "renderer": "svg",
+        "status": "unsupported",
+        "points": 1000,
+        "error": "Recharts renderToStaticMarkup returned 127 characters and no <svg>: <div width=\"640\" height=\"360\" class=\"recharts-wrapper\" style=\"position:relative;cursor:default;width:640px;height:360px\"></div>"
+      },
+      {
+        "library": "ECharts",
+        "renderer": "svg",
+        "status": "ok",
+        "points": 1000,
+        "iterations": 8,
+        "meanMs": 5.32,
+        "medianMs": 5.36,
+        "minMs": 3.78,
+        "maxMs": 6.45,
+        "note": "Node, no jsdom and no node-canvas. 2 warmup calls, then 8 timed calls. The series is makeSeries(1000, 1)."
+      },
+      {
+        "library": "Nivo",
+        "renderer": "svg",
+        "status": "ok",
+        "points": 1000,
+        "iterations": 8,
+        "meanMs": 52.91,
+        "medianMs": 51.79,
+        "minMs": 49.5,
+        "maxMs": 60.85,
+        "note": "Node, no jsdom and no node-canvas. 2 warmup calls, then 8 timed calls. The series is makeSeries(1000, 1)."
+      },
+      {
+        "library": "Observable Plot",
+        "renderer": "svg",
+        "status": "unsupported",
+        "points": 1000,
+        "error": "Cannot read properties of undefined (reading 'documentElement')"
+      }
+    ]
+  },
+  "browser": {
+    "method": "Playwright Chromium. Each sample is a fresh page. Reported times are the median of 5 samples. Data is makeSeries(n, seed) generated inside the page and excluded from the timer. x[i] = i. Every library does its own update, then waits for the same two animation frames. ECharts also waits for its finished event before those frames. ChartKit replaces innerHTML with a new SVG (curve linear, points none, sampling auto, which is minmax above twice the plot width). ChartKit sampling none is the same line with mark.sampling none, measured only at 100k and 1M. An error SVG (ck-chart-error) fails that sample. uPlot uses setData. Chart.js uses update('none') and {x,y} points. ECharts uses setOption on a canvas renderer with sampling left off. Recharts and Nivo use flushSync. Observable Plot replaces the SVG node. Width 640, height 360. Memory is the median performance.memory.usedJSHeapSize when Chromium exposes it. A failed size skips larger sizes for that library.",
+    "samples": 5,
+    "sizes": [
+      1000,
+      10000,
+      100000,
+      1000000
+    ],
+    "rows": [
+      {
+        "id": "chartkit",
+        "library": "ChartKit",
+        "renderer": "svg",
+        "points": 1000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 22.300000000745058,
+        "updateMs": 33.100000001490116,
+        "heapBefore": 1368692,
+        "heapAfterRender": 2349885,
+        "heapAfterUpdate": 1872654,
+        "initialSamples": [
+          22.300000000745058,
+          25.300000000745058,
+          10.199999999254942,
+          11.100000001490116,
+          24.300000000745058
+        ],
+        "updateSamples": [
+          33.100000001490116,
+          33.099999997764826,
+          33.400000002235174,
+          33.600000001490116,
+          33.100000001490116
+        ]
+      },
+      {
+        "id": "chartkit",
+        "library": "ChartKit",
+        "renderer": "svg",
+        "points": 10000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 11.699999999254942,
+        "updateMs": 33.19999999925494,
+        "heapBefore": 1368692,
+        "heapAfterRender": 2502632,
+        "heapAfterUpdate": 2308338,
+        "initialSamples": [
+          10.399999998509884,
+          11.699999999254942,
+          13.100000001490116,
+          9.300000000745058,
+          12
+        ],
+        "updateSamples": [
+          33.19999999925494,
+          33.399999998509884,
+          32.5,
+          33.19999999925494,
+          33.19999999925494
+        ]
+      },
+      {
+        "id": "chartkit",
+        "library": "ChartKit",
+        "renderer": "svg",
+        "points": 100000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 11.599999997764826,
+        "updateMs": 27.299999997019768,
+        "heapBefore": 1368692,
+        "heapAfterRender": 4285220,
+        "heapAfterUpdate": 5684687,
+        "initialSamples": [
+          10.800000000745058,
+          11.900000002235174,
+          11.300000000745058,
+          11.599999997764826,
+          14.900000002235174
+        ],
+        "updateSamples": [
+          28.900000002235174,
+          26.099999997764826,
+          23.800000000745058,
+          28.099999997764826,
+          27.299999997019768
+        ]
+      },
+      {
+        "id": "chartkit",
+        "library": "ChartKit",
+        "renderer": "svg",
+        "points": 1000000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 24.899999998509884,
+        "updateMs": 31.899999998509884,
+        "heapBefore": 1368696,
+        "heapAfterRender": 18333690,
+        "heapAfterUpdate": 34400140,
+        "initialSamples": [
+          25.099999997764826,
+          27.300000000745058,
+          24.800000000745058,
+          23.800000000745058,
+          24.899999998509884
+        ],
+        "updateSamples": [
+          31.899999998509884,
+          32,
+          20.600000001490116,
+          35,
+          19.599999997764826
+        ]
+      },
+      {
+        "id": "chartkit-full",
+        "library": "ChartKit sampling none",
+        "renderer": "svg",
+        "points": 100000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 66.80000000074506,
+        "updateMs": 1170.9000000022352,
+        "heapBefore": 1368770,
+        "heapAfterRender": 23505880,
+        "heapAfterUpdate": 43762990,
+        "initialSamples": [
+          65.60000000149012,
+          67.5,
+          75.39999999850988,
+          64.79999999701977,
+          66.80000000074506
+        ],
+        "updateSamples": [
+          1166.199999999255,
+          1144.300000000745,
+          1190.199999999255,
+          1170.9000000022352,
+          1200.5
+        ]
+      },
+      {
+        "id": "chartkit-full",
+        "library": "ChartKit sampling none",
+        "renderer": "svg",
+        "points": 1000000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 505.19999999925494,
+        "updateMs": 21472.5,
+        "heapBefore": 1368774,
+        "heapAfterRender": 198788756,
+        "heapAfterUpdate": 33597440,
+        "initialSamples": [
+          577.1999999992549,
+          502.30000000074506,
+          519.8999999985099,
+          505.19999999925494,
+          502.5
+        ],
+        "updateSamples": [
+          21864.60000000149,
+          21472.5,
+          21203.699999999255,
+          21918.199999999255,
+          20869.699999999255
+        ]
+      },
+      {
+        "id": "uplot",
+        "library": "uPlot",
+        "renderer": "canvas",
+        "points": 1000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 19.700000002980232,
+        "updateMs": 33.19999999925494,
+        "heapBefore": 1742703,
+        "heapAfterRender": 3011050,
+        "heapAfterUpdate": 3280046,
+        "initialSamples": [
+          13,
+          19.700000002980232,
+          18.200000002980232,
+          20.900000002235174,
+          20.5
+        ],
+        "updateSamples": [
+          33.5,
+          33.30000000074506,
+          33.19999999925494,
+          33.099999997764826,
+          32.899999998509884
+        ]
+      },
+      {
+        "id": "uplot",
+        "library": "uPlot",
+        "renderer": "canvas",
+        "points": 10000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 17.600000001490116,
+        "updateMs": 33.099999997764826,
+        "heapBefore": 1742703,
+        "heapAfterRender": 2392106,
+        "heapAfterUpdate": 2927254,
+        "initialSamples": [
+          20.099999997764826,
+          11.900000002235174,
+          17.600000001490116,
+          15.800000000745058,
+          17.900000002235174
+        ],
+        "updateSamples": [
+          32.80000000074506,
+          25.099999997764826,
+          33.30000000074506,
+          33.30000000074506,
+          33.099999997764826
+        ]
+      },
+      {
+        "id": "uplot",
+        "library": "uPlot",
+        "renderer": "canvas",
+        "points": 100000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 16.5,
+        "updateMs": 30.800000000745058,
+        "heapBefore": 1742703,
+        "heapAfterRender": 4805722,
+        "heapAfterUpdate": 5502182,
+        "initialSamples": [
+          16.5,
+          17.699999999254942,
+          14.900000002235174,
+          17.200000002980232,
+          13.899999998509884
+        ],
+        "updateSamples": [
+          30.800000000745058,
+          30.800000000745058,
+          30.800000000745058,
+          30.800000000745058,
+          30.400000002235174
+        ]
+      },
+      {
+        "id": "uplot",
+        "library": "uPlot",
+        "renderer": "canvas",
+        "points": 1000000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 22.5,
+        "updateMs": 25.699999999254942,
+        "heapBefore": 1742707,
+        "heapAfterRender": 19378506,
+        "heapAfterUpdate": 34914901,
+        "initialSamples": [
+          25.800000000745058,
+          24.600000001490116,
+          22.300000000745058,
+          21.400000002235174,
+          22.5
+        ],
+        "updateSamples": [
+          24.300000000745058,
+          23.399999998509884,
+          27.400000002235174,
+          26.100000001490116,
+          25.699999999254942
+        ]
+      },
+      {
+        "id": "chartjs",
+        "library": "Chart.js",
+        "renderer": "canvas",
+        "points": 1000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 26.300000000745058,
+        "updateMs": 25.400000002235174,
+        "heapBefore": 2362321,
+        "heapAfterRender": 4658491,
+        "heapAfterUpdate": 3657035,
+        "initialSamples": [
+          26.300000000745058,
+          24.899999998509884,
+          25.699999999254942,
+          28.899999998509884,
+          28.300000000745058
+        ],
+        "updateSamples": [
+          25.400000002235174,
+          26,
+          26.800000000745058,
+          23.199999999254942,
+          23.699999999254942
+        ]
+      },
+      {
+        "id": "chartjs",
+        "library": "Chart.js",
+        "renderer": "canvas",
+        "points": 10000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 31.800000000745058,
+        "updateMs": 32.100000001490116,
+        "heapBefore": 2362321,
+        "heapAfterRender": 6638626,
+        "heapAfterUpdate": 7118846,
+        "initialSamples": [
+          29.5,
+          33.69999999925494,
+          31.800000000745058,
+          31.299999997019768,
+          32.69999999925494
+        ],
+        "updateSamples": [
+          21.300000000745058,
+          32.899999998509884,
+          32.69999999925494,
+          32.100000001490116,
+          19.5
+        ]
+      },
+      {
+        "id": "chartjs",
+        "library": "Chart.js",
+        "renderer": "canvas",
+        "points": 100000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 56.30000000074506,
+        "updateMs": 40.099999997764826,
+        "heapBefore": 2362321,
+        "heapAfterRender": 20956206,
+        "heapAfterUpdate": 31040534,
+        "initialSamples": [
+          55.099999997764826,
+          57.69999999925494,
+          59.600000001490116,
+          56.100000001490116,
+          56.30000000074506
+        ],
+        "updateSamples": [
+          40.5,
+          37,
+          36.69999999925494,
+          40.099999997764826,
+          41.899999998509884
+        ]
+      },
+      {
+        "id": "chartjs",
+        "library": "Chart.js",
+        "renderer": "canvas",
+        "points": 1000000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 321.69999999925494,
+        "updateMs": 173.69999999925494,
+        "heapBefore": 2362325,
+        "heapAfterRender": 154874227,
+        "heapAfterUpdate": 229311535,
+        "initialSamples": [
+          321.69999999925494,
+          334.19999999925494,
+          270.4000000022352,
+          322,
+          278.69999999925494
+        ],
+        "updateSamples": [
+          175.69999999925494,
+          172.69999999925494,
+          173.69999999925494,
+          168.69999999925494,
+          180.10000000149012
+        ]
+      },
+      {
+        "id": "echarts",
+        "library": "ECharts",
+        "renderer": "canvas",
+        "points": 1000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 37.899999998509884,
+        "updateMs": 19.100000001490116,
+        "heapBefore": 5953954,
+        "heapAfterRender": 14407234,
+        "heapAfterUpdate": 9462878,
+        "initialSamples": [
+          41,
+          38.399999998509884,
+          37.600000001490116,
+          37.899999998509884,
+          37.100000001490116
+        ],
+        "updateSamples": [
+          11.899999998509884,
+          26.5,
+          19.100000001490116,
+          18.800000000745058,
+          19.300000000745058
+        ]
+      },
+      {
+        "id": "echarts",
+        "library": "ECharts",
+        "renderer": "canvas",
+        "points": 10000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 94.59999999776483,
+        "updateMs": 74,
+        "heapBefore": 5953958,
+        "heapAfterRender": 16011895,
+        "heapAfterUpdate": 16350119,
+        "initialSamples": [
+          94.59999999776483,
+          91.90000000223517,
+          94.80000000074506,
+          95.70000000298023,
+          92.5
+        ],
+        "updateSamples": [
+          64.90000000223517,
+          66.60000000149012,
+          78.5,
+          74,
+          81.20000000298023
+        ]
+      },
+      {
+        "id": "echarts",
+        "library": "ECharts",
+        "renderer": "canvas",
+        "points": 100000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 2642,
+        "updateMs": 2574.400000002235,
+        "heapBefore": 5953946,
+        "heapAfterRender": 61895012,
+        "heapAfterUpdate": 67264056,
+        "initialSamples": [
+          2642,
+          2569.10000000149,
+          2696.599999997765,
+          2621.800000000745,
+          2792.300000000745
+        ],
+        "updateSamples": [
+          2592.199999999255,
+          2574.400000002235,
+          2523.900000002235,
+          2521,
+          2609.699999999255
+        ]
+      },
+      {
+        "id": "echarts",
+        "library": "ECharts",
+        "renderer": "canvas",
+        "points": 1000000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 34051.10000000149,
+        "updateMs": 33740.300000000745,
+        "heapBefore": 5953962,
+        "heapAfterRender": 394724130,
+        "heapAfterUpdate": 615214077,
+        "initialSamples": [
+          34051.10000000149,
+          34134.699999999255,
+          32277.5,
+          33430.29999999702,
+          35055.400000002235
+        ],
+        "updateSamples": [
+          37424.89999999851,
+          33740.300000000745,
+          33976,
+          33056.300000000745,
+          33437.599999997765
+        ]
+      },
+      {
+        "id": "recharts",
+        "library": "Recharts",
+        "renderer": "svg",
+        "points": 1000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 65.69999999925494,
+        "updateMs": 15.300000000745058,
+        "heapBefore": 7077581,
+        "heapAfterRender": 20639468,
+        "heapAfterUpdate": 15205276,
+        "initialSamples": [
+          65.69999999925494,
+          67,
+          68.5,
+          64.39999999850988,
+          64.60000000149012
+        ],
+        "updateSamples": [
+          14.600000001490116,
+          20.899999998509884,
+          27.599999997764826,
+          15.300000000745058,
+          14.199999999254942
+        ]
+      },
+      {
+        "id": "recharts",
+        "library": "Recharts",
+        "renderer": "svg",
+        "points": 10000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 223.40000000223517,
+        "updateMs": 104.60000000149012,
+        "heapBefore": 7077581,
+        "heapAfterRender": 39248143,
+        "heapAfterUpdate": 42074935,
+        "initialSamples": [
+          222.5,
+          223.40000000223517,
+          224.59999999776483,
+          223.40000000223517,
+          226.60000000149012
+        ],
+        "updateSamples": [
+          104.60000000149012,
+          103.90000000223517,
+          116.5,
+          102.89999999850988,
+          115.09999999776483
+        ]
+      },
+      {
+        "id": "recharts",
+        "library": "Recharts",
+        "renderer": "svg",
+        "points": 100000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 1770.7000000029802,
+        "updateMs": 940.8999999985099,
+        "heapBefore": 7077577,
+        "heapAfterRender": 165170180,
+        "heapAfterUpdate": 265044307,
+        "initialSamples": [
+          1751.4000000022352,
+          1770.7000000029802,
+          1761.699999999255,
+          1775.5,
+          1789.300000000745
+        ],
+        "updateSamples": [
+          940.8999999985099,
+          933.8999999985099,
+          932,
+          943.5,
+          948.8999999985099
+        ]
+      },
+      {
+        "id": "recharts",
+        "library": "Recharts",
+        "renderer": "svg",
+        "points": 1000000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 19790.699999999255,
+        "updateMs": 11251.800000000745,
+        "heapBefore": 7077585,
+        "heapAfterRender": 1351332137,
+        "heapAfterUpdate": 2632379429,
+        "initialSamples": [
+          20710.39999999851,
+          20006.300000000745,
+          19790.699999999255,
+          19583.699999999255,
+          19698.300000000745
+        ],
+        "updateSamples": [
+          10693.800000000745,
+          10634.300000000745,
+          11794.39999999851,
+          12171.099999997765,
+          11251.800000000745
+        ]
+      },
+      {
+        "id": "nivo",
+        "library": "Nivo",
+        "renderer": "svg",
+        "points": 1000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 39.19999999925494,
+        "updateMs": 17.100000001490116,
+        "heapBefore": 6289714,
+        "heapAfterRender": 16856696,
+        "heapAfterUpdate": 11647349,
+        "initialSamples": [
+          42.19999999925494,
+          43.400000002235174,
+          39.19999999925494,
+          38.600000001490116,
+          38
+        ],
+        "updateSamples": [
+          13.699999999254942,
+          27.099999997764826,
+          17.100000001490116,
+          13.800000000745058,
+          22
+        ]
+      },
+      {
+        "id": "nivo",
+        "library": "Nivo",
+        "renderer": "svg",
+        "points": 10000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 75.20000000298023,
+        "updateMs": 52.5,
+        "heapBefore": 6289714,
+        "heapAfterRender": 24279666,
+        "heapAfterUpdate": 38127396,
+        "initialSamples": [
+          75.20000000298023,
+          70.80000000074506,
+          69.69999999925494,
+          77.59999999776483,
+          77.59999999776483
+        ],
+        "updateSamples": [
+          51.5,
+          64.09999999776483,
+          56.69999999925494,
+          52.5,
+          51.600000001490116
+        ]
+      },
+      {
+        "id": "nivo",
+        "library": "Nivo",
+        "renderer": "svg",
+        "points": 100000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 343.30000000074506,
+        "updateMs": 954.8999999985099,
+        "heapBefore": 6289714,
+        "heapAfterRender": 131410102,
+        "heapAfterUpdate": 257355368,
+        "initialSamples": [
+          350.20000000298023,
+          346.69999999925494,
+          338.69999999925494,
+          343.30000000074506,
+          343.19999999925494
+        ],
+        "updateSamples": [
+          928.0999999977648,
+          956.6000000014901,
+          954.8999999985099,
+          960.8999999985099,
+          932.0999999977648
+        ]
+      },
+      {
+        "id": "nivo",
+        "library": "Nivo",
+        "points": 1000000,
+        "status": "error",
+        "error": "Maximum call stack size exceeded",
+        "samples": 0
+      },
+      {
+        "id": "plot",
+        "library": "Observable Plot",
+        "renderer": "svg",
+        "points": 1000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 18,
+        "updateMs": 33.399999998509884,
+        "heapBefore": 3566139,
+        "heapAfterRender": 8190739,
+        "heapAfterUpdate": 5399726,
+        "initialSamples": [
+          18.400000002235174,
+          18,
+          17.100000001490116,
+          17.5,
+          18.800000000745058
+        ],
+        "updateSamples": [
+          24.699999999254942,
+          33.399999998509884,
+          32.399999998509884,
+          33.399999998509884,
+          33.5
+        ]
+      },
+      {
+        "id": "plot",
+        "library": "Observable Plot",
+        "renderer": "svg",
+        "points": 10000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 27.199999999254942,
+        "updateMs": 56.19999999925494,
+        "heapBefore": 3566351,
+        "heapAfterRender": 10112583,
+        "heapAfterUpdate": 9242730,
+        "initialSamples": [
+          24.800000000745058,
+          24.699999999254942,
+          27.199999999254942,
+          30.199999999254942,
+          28
+        ],
+        "updateSamples": [
+          45.5,
+          58.399999998509884,
+          56.899999998509884,
+          56.19999999925494,
+          43.600000001490116
+        ]
+      },
+      {
+        "id": "plot",
+        "library": "Observable Plot",
+        "renderer": "svg",
+        "points": 100000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 93.59999999776483,
+        "updateMs": 1475.0999999977648,
+        "heapBefore": 3566139,
+        "heapAfterRender": 33575286,
+        "heapAfterUpdate": 55114653,
+        "initialSamples": [
+          95.89999999850988,
+          94,
+          90.19999999925494,
+          89.5,
+          93.59999999776483
+        ],
+        "updateSamples": [
+          1467.1000000014901,
+          1475.0999999977648,
+          1484,
+          1485.6000000014901,
+          1439.300000000745
+        ]
+      },
+      {
+        "id": "plot",
+        "library": "Observable Plot",
+        "renderer": "svg",
+        "points": 1000000,
+        "status": "ok",
+        "samples": 5,
+        "initialMs": 737.0999999977648,
+        "updateMs": 25647.10000000149,
+        "heapBefore": 3566367,
+        "heapAfterRender": 259480175,
+        "heapAfterUpdate": 343158814,
+        "initialSamples": [
+          702.1999999992549,
+          767,
+          737.0999999977648,
+          727.5,
+          771.1999999992549
+        ],
+        "updateSamples": [
+          24734.39999999851,
+          25352.5,
+          25895.800000000745,
+          26478.599999997765,
+          25647.10000000149
+        ]
+      }
+    ]
+  },
+  "agent": {
+    "status": "not yet run",
+    "reason": "Skipped with --skip-agent. Set OPENAI_API_KEY or ANTHROPIC_API_KEY and run without that flag.",
+    "taskCount": 42
+  }
+}
