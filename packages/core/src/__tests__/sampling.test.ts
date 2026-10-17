@@ -105,6 +105,31 @@ describe("sampling render", () => {
     expect(renderLine(small)).toBe(renderLine({ ...small, mark: { ...small.mark, sampling: "auto" } }));
   });
 
+  it("keeps the same minmax indexes for an even x step", () => {
+    const n = 5000;
+    const ys = series(n, 2000, 10000);
+    const xs = new Float64Array(n);
+    for (let i = 0; i < n; i++) xs[i] = i * 2;
+    const body = {
+      version: "1",
+      type: "line",
+      data: { columns: { x: xs, y: ys } },
+      encoding: { x: "x", y: "y" },
+      mark: { curve: "linear", points: "none", sampling: "auto" },
+      size: { width: 640, height: 360 },
+      locale: "en-US",
+      a11y: { alt },
+    };
+    const svg = renderLine(body);
+    const clip = svg.match(/<clipPath[^>]*>\s*<rect[^>]*width="([\d.]+)"/);
+    const plotWidth = Number(clip?.[1] ?? 0);
+    const drawn = svg.match(/data-ck-i="([^"]+)"/)?.[1].split(" ").map(Number) ?? [];
+    const direct = sampleSeries("minmax", xs, ys, n, plotWidth, false);
+    expect(plotWidth).toBeGreaterThan(100);
+    expect(drawn).toEqual([...direct.runs[0]]);
+    expect(drawn).toContain(2000);
+  });
+
   it("rounds a 100k numeric x axis to nice steps", () => {
     const svg = renderLine(spec(100_000));
     expect(svg).not.toContain("ck-chart-error");
