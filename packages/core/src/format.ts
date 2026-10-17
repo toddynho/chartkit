@@ -80,35 +80,21 @@ function formatDate(value: number, style: string, locale: string): string {
 }
 
 function body(value: number, fmt: Fmt, locale: string): string {
-  switch (fmt.style) {
-    case "integer":
-      return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(value);
-    case "compact":
-      return new Intl.NumberFormat(locale, { notation: "compact", ...digits(fmt, 1) }).format(value);
-    case "percent":
-      return new Intl.NumberFormat(locale, { style: "percent", ...digits(fmt, 1) }).format(value);
-    case "percent-raw":
-      return new Intl.NumberFormat(locale, { style: "percent", ...digits(fmt, 1) }).format(value / 100);
-    case "currency":
-      return new Intl.NumberFormat(locale, {
-        style: "currency",
-        currency: fmt.currency ?? "USD",
-        ...digits(fmt, 2),
-      }).format(value);
-    case "bytes":
-      return formatBytes(value);
-    case "duration-ms":
-      return formatDuration(value);
-    case "date":
-    case "time":
-    case "datetime":
-    case "month":
-    case "year":
-    case "weekday":
-      return formatDate(value, fmt.style, locale);
-    default:
-      return new Intl.NumberFormat(locale, digits(fmt, 2)).format(value);
+  const style = fmt.style;
+  if (style === "bytes") return formatBytes(value);
+  if (style === "duration-ms") return formatDuration(value);
+  if (style === "date" || style === "time" || style === "datetime" || style === "month" || style === "year" || style === "weekday") {
+    return formatDate(value, style, locale);
   }
+  if (style === "integer") return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(value);
+  const options: Intl.NumberFormatOptions = digits(fmt, style === "compact" || style === "percent" || style === "percent-raw" ? 1 : 2);
+  if (style === "compact") options.notation = "compact";
+  else if (style === "percent" || style === "percent-raw") options.style = "percent";
+  else if (style === "currency") {
+    options.style = "currency";
+    options.currency = fmt.currency ?? "USD";
+  }
+  return new Intl.NumberFormat(locale, options).format(style === "percent-raw" ? value / 100 : value);
 }
 
 /** Format a number with a spec preset or format object. */

@@ -1040,42 +1040,17 @@ function monotoneHeadroom(model: PlotModel, axis: "y" | "y2"): { above: number; 
   for (const series of model.series) {
     if (series.axis !== axis || series.mark === "bar") continue;
     const src = series.values;
-    const count = src.length;
-    let finite = 0;
-    let gap = false;
+    const values: number[] = [];
     let hi = -Infinity;
     let lo = Infinity;
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < src.length; i++) {
       const value = src[i];
-      if (value === null || !Number.isFinite(value)) {
-        gap = true;
-        continue;
-      }
-      finite += 1;
+      if (value === null || !Number.isFinite(value)) continue;
+      values.push(value);
       if (value > hi) hi = value;
       if (value < lo) lo = value;
     }
-    if (finite < 3) continue;
-    if (!gap) {
-      for (let i = 0; i < count - 1; i++) {
-        const p0 = src[Math.max(0, i - 1)] as number;
-        const p1 = src[i] as number;
-        const p2 = src[i + 1] as number;
-        const p3 = src[Math.min(count - 1, i + 2)] as number;
-        const c1 = p1 + (p2 - p0) / 6;
-        const c2 = p2 - (p3 - p1) / 6;
-        if (c1 > hi) above = Math.max(above, c1 - hi);
-        if (c2 > hi) above = Math.max(above, c2 - hi);
-        if (c1 < lo) below = Math.max(below, lo - c1);
-        if (c2 < lo) below = Math.max(below, lo - c2);
-      }
-      continue;
-    }
-    const values: number[] = [];
-    for (let i = 0; i < count; i++) {
-      const value = src[i];
-      if (value !== null && Number.isFinite(value)) values.push(value);
-    }
+    if (values.length < 3) continue;
     for (let i = 0; i < values.length - 1; i++) {
       const p0 = values[Math.max(0, i - 1)];
       const p1 = values[i];
