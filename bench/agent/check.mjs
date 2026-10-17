@@ -294,6 +294,30 @@ function barSeriesCount(spec, type) {
 }
 
 /**
+ * A single-y bar with a series field (encoding.series, or encoding.color naming a
+ * data column) is long-format: one rect per distinct x per distinct series value,
+ * including a missing pair. A field equal to x colours the bars and is not a split.
+ */
+export function seriesBarCount(spec, type) {
+  if (type !== "bar") return null;
+  const encoding = spec?.encoding ?? {};
+  const y = encoding.y;
+  const items = Array.isArray(y) ? y : y == null ? [] : [y];
+  if (items.length !== 1) return null;
+  const data = Array.isArray(spec?.data) ? spec.data : null;
+  if (!data || data.length === 0) return null;
+  const has = (field) => typeof field === "string" && data.some((row) => row && typeof row === "object" && field in row);
+  const xField = channelField(encoding.x);
+  let seriesField = channelField(encoding.series);
+  if (!has(seriesField) || seriesField === xField) seriesField = channelField(encoding.color);
+  if (!has(seriesField) || seriesField === xField) return null;
+  const key = (row, field) => (row?.[field] == null ? "" : String(row[field]));
+  const xs = new Set(data.map((row, i) => (typeof xField === "string" ? key(row, xField) : String(i))));
+  const groups = new Set(data.map((row) => key(row, seriesField)));
+  return xs.size * groups.size;
+}
+
+/**
  * Drawn-shape check for a ChartKit SVG. Bars must sit inside the plot clip.
  * Mark counts follow the chart type, so a combo that clips its bars fails.
  */
@@ -312,7 +336,7 @@ export function chartGeometry(svg, task, spec) {
   if (type === "bar" || type === "combo") {
     const bars = rectsFrom(plot);
     if (!clip) note("missing plot clip");
-    const expected = rows * barSeriesCount(spec, type);
+    const expected = seriesBarCount(spec, type) ?? rows * barSeriesCount(spec, type);
     if (bars.length !== expected) note(`expected ${expected} bars, found ${bars.length}`);
     if (clip && bars.some((bar) => !insideBox(bar, clip))) note("a bar is outside the plot");
     if (type === "combo" && !/<path\b[^>]*\bfill="none"/.test(plot)) note("expected a line");
