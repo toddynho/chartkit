@@ -30,6 +30,7 @@ bench/.out/
 bench/results/partial.json
 bench/results/agent/conditions/
 scripts/.interact-out/
+scripts/design/.out/
 
 # Misc
 *.tgz

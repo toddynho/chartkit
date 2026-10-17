@@ -1,7 +1,7 @@
 import { annotationLayers } from "../annotations";
 import { isTypedArray, readData, type DataTable } from "../data";
 import { formatValue } from "../format";
-import { beginFrame, noteDense, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
+import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import { clamp, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
@@ -438,7 +438,14 @@ function appendLineSeries(
       points[k] = { x, y: yScale(y) };
       if (area) bottoms[k] = { x, y: yScale(layers ? layers.bottom[index][i] : 0) };
     }
-    const indexAttr = ` data-ck-sample="${sampled.mode}" data-ck-i="${run.join(" ")}"`;
+    const v0 = ys[run[0]];
+    const v1 = ys[run[run.length - 1]];
+    const log = series.axis === "y2" ? model.y2Log : model.yLog;
+    const scaleAttr =
+      !layers && !log && typeof v0 === "number" && typeof v1 === "number" && v0 !== v1
+        ? ` data-ck-ys="${n(points[0].y)},${n(points[points.length - 1].y)},${n(v0)},${n(v1)},${index}"`
+        : "";
+    const indexAttr = ` data-ck-sample="${sampled.mode}" data-ck-i="${run.join(" ")}"${scaleAttr}`;
     if (area) {
       const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
       out.push(`<path d="${areaPath(points, bottoms, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillPaint}" stroke="none"${indexAttr} />`);
@@ -712,11 +719,12 @@ function xPosition(
   let max = -Infinity;
   let seen = false;
   if (model.x instanceof Float64Array) {
-    const extent = floatExtent(model.x);
+    const extent = linearExtent(model.x);
     if (extent) {
       min = extent.min;
       max = extent.max;
       seen = true;
+      if (extent.linear) noteLinear(model.x);
     }
   }
   if (!seen) {
@@ -917,6 +925,25 @@ function floatExtent(values: Float64Array): { min: number; max: number; dense: b
   }
   if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
   return { min, max, dense };
+}
+
+/** Extent plus an exact arithmetic-sequence check. Used for x, where index buckets need a linear axis. */
+function linearExtent(values: Float64Array): { min: number; max: number; linear: boolean } | null {
+  const count = values.length;
+  if (count === 0) return null;
+  let min = Infinity;
+  let max = -Infinity;
+  const first = values[0];
+  const stride = count === 1 ? 0 : (values[count - 1] - first) / (count - 1);
+  let linear = Number.isFinite(first) && Number.isFinite(stride);
+  for (let i = 0; i < count; i++) {
+    const value = values[i];
+    if (value < min) min = value;
+    if (value > max) max = value;
+    if (linear && value !== first + i * stride) linear = false;
+  }
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
+  return { min, max, linear };
 }
 
 function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {

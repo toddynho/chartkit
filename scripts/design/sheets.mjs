@@ -1,19 +1,20 @@
 /**
  * Render the default-look sheets.
  *   node scripts/design/sheets.mjs
- * Writes PNGs under /opt/cursor/artifacts/design/.
+ * Writes PNGs under scripts/design/.out. Set CHARTKIT_SHOT_DIR to also copy
+ * them (the path delimiter separates more than one directory).
  */
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { createRequire } from "node:module";
-import { dirname, join } from "node:path";
+import { delimiter, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { donut, rows } from "./sample.mjs";
 
 const require = createRequire(join(dirname(fileURLToPath(import.meta.url)), "../../package.json"));
 const esbuild = require("esbuild");
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
-const outDir = "/opt/cursor/artifacts/design";
+const outDir = join(dirname(fileURLToPath(import.meta.url)), ".out");
 const css = readFileSync(join(root, "packages/core/themes/candidates.css"), "utf8");
 
 mkdirSync(outDir, { recursive: true });
@@ -515,6 +516,13 @@ await shootCompare(compareHtml, comparePng);
 paths.push(comparePng);
 console.log("wrote", comparePng);
 console.log(paths.join("\n"));
+const shotDirs = (process.env.CHARTKIT_SHOT_DIR ?? "").split(delimiter).map((dir) => dir.trim()).filter(Boolean);
+for (const dir of shotDirs) {
+  mkdirSync(dir, { recursive: true });
+  for (const name of readdirSync(outDir)) {
+    if (name.endsWith(".png")) cpSync(join(outDir, name), join(dir, name));
+  }
+}
 
 async function shootCompare(html, png) {
   const file = png.replace(/\.png$/, ".html");

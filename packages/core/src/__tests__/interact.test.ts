@@ -153,6 +153,104 @@ describe("attach", () => {
     ctl.destroy();
   });
 
+  it("puts the hover dot on the tooltip value, not the downsampled segment", () => {
+    const n = 4000;
+    const xs = new Float64Array(n);
+    const ys = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      xs[i] = i;
+      ys[i] = (i % 2 === 0 ? 2 : 8) + (i % 17) * 0.01;
+    }
+    const at = 2000;
+    ys[at] = 5.5;
+    const spec: InteractSpec = {
+      version: "1",
+      type: "line",
+      data: { columns: { x: xs, y: ys } },
+      encoding: { x: "x", y: "y" },
+      mark: { points: "none", sampling: "auto" },
+      size: { width: 640, height: 360 },
+      locale: "en-US",
+      a11y: { alt: "A long line with one point at 5.5." },
+    };
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg")!;
+    const kept = new Set((svg.querySelector("path[data-ck-i]")?.getAttribute("data-ck-i") ?? "").split(" ").map(Number));
+    expect(kept.size).toBeGreaterThan(10);
+    expect(kept.has(at)).toBe(false);
+    const clip = svg.querySelector("clipPath rect")!;
+    const left = Number(clip.getAttribute("x"));
+    const width = Number(clip.getAttribute("width"));
+    const x = left + (at / (n - 1)) * width;
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 40, bubbles: true }));
+    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+    expect(tip.hidden).toBe(false);
+    expect(tip.textContent).toContain("5.5");
+    const dot = svg.querySelector("[data-ck-dot]");
+    expect(dot).toBeTruthy();
+    const ticks = Array.from(svg.querySelectorAll("text"))
+      .filter((node) => node.getAttribute("text-anchor") === "end")
+      .map((node) => ({ y: Number(node.getAttribute("y")) - 4, label: node.textContent ?? "" }))
+      .filter((tick) => /^-?\d/.test(tick.label));
+    expect(ticks.length).toBeGreaterThan(1);
+    const parse = (label: string) => Number(label.replace(/,/g, ""));
+    const a = ticks[0];
+    const b = ticks[ticks.length - 1];
+    const value = parse(a.label) + ((Number(dot?.getAttribute("cy")) - a.y) / (b.y - a.y)) * (parse(b.label) - parse(a.label));
+    expect(Math.abs(value - 5.5)).toBeLessThan(0.75);
+    ctl.destroy();
+  });
+
+  it("keeps the hover dot on the line when a bar series is drawn first", () => {
+    const n = 2000;
+    const xs = new Float64Array(n);
+    const bars = new Float64Array(n);
+    const ys = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      xs[i] = i;
+      bars[i] = 100;
+      ys[i] = i % 2 === 0 ? 2 : 8;
+    }
+    ys[1000] = 5.5;
+    const spec: InteractSpec = {
+      version: "1",
+      type: "combo",
+      data: { columns: { x: xs, orders: bars, rate: ys } },
+      encoding: {
+        x: "x",
+        y: [
+          { field: "orders", mark: "bar" },
+          { field: "rate", mark: "line" },
+        ],
+      },
+      mark: { points: "none", sampling: "auto" },
+      size: { width: 640, height: 360 },
+      locale: "en-US",
+      a11y: { alt: "Bars and a downsampled line." },
+    };
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg")!;
+    const path = svg.querySelector("path[stroke]:not([stroke='none'])")!;
+    expect(path.getAttribute("data-ck-ys")?.endsWith(",1")).toBe(true);
+    expect(path.getAttribute("data-ck-i")?.split(" ").includes("1000")).toBe(false);
+    const clip = svg.querySelector("clipPath rect")!;
+    const x = Number(clip.getAttribute("x")) + (1000 / (n - 1)) * Number(clip.getAttribute("width"));
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 40, bubbles: true }));
+    const dot = svg.querySelector("[data-ck-dot]");
+    const ticks = Array.from(svg.querySelectorAll("text"))
+      .filter((node) => node.getAttribute("text-anchor") === "end")
+      .map((node) => ({ y: Number(node.getAttribute("y")) - 4, label: node.textContent ?? "" }))
+      .filter((tick) => /^-?\d/.test(tick.label));
+    const parse = (label: string) => Number(label.replace(/,/g, ""));
+    const a = ticks[0];
+    const b = ticks[ticks.length - 1];
+    const value = parse(a.label) + ((Number(dot?.getAttribute("cy")) - a.y) / (b.y - a.y)) * (parse(b.label) - parse(a.label));
+    expect(Math.abs(value - 5.5)).toBeLessThan(0.75);
+    ctl.destroy();
+  });
+
   it("puts the y2 hover dot on the line, not the baseline", () => {
     const spec: InteractSpec = {
       version: "1",

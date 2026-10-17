@@ -272,7 +272,7 @@ function ensureCss(): void {
   const style = document.createElement("style");
   style.id = "ck-interact-style";
   style.textContent =
-    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-tip .ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px;font-variant-numeric:tabular-nums}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}";
+    ".ck-tip{position:absolute;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}";
   document.head.append(style);
 }
 
@@ -620,7 +620,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     if (!showTip) return;
     tip.innerHTML =
       (title ? `<div>${esc(title)}</div>` : "") +
-      rows.map((row) => `<div class="ck-row"><i style="background:${row.color}"></i><span>${esc(row.name)}</span><b>${esc(row.text)}</b></div>`).join("");
+      rows.map((row) => `<div class="ck-row"><i style="background:${row.color}"></i>${esc(row.name)}<b>${esc(row.text)}</b></div>`).join("");
     tip.hidden = false;
     const bounds = host.getBoundingClientRect();
     const rect = svg.getBoundingClientRect();
@@ -732,7 +732,15 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     return hit;
   }
 
-  function placeDots(snapped: number, horizontal: boolean): { x: number; y: number }[] {
+  function dataDotY(path: Element, index: number): number | null {
+    const c = (path as SVGElement).dataset.ckYs?.split(",");
+    if (!c) return null;
+    const s = +(table.cell(series[+c[4]]?.field || "", index) as number);
+    const y = +c[0] + ((s - +c[2]) * (+c[1] - +c[0])) / (+c[3] - +c[2]);
+    return Number.isFinite(y) ? y : null;
+  }
+
+  function placeDots(snapped: number, horizontal: boolean, index: number): { x: number; y: number }[] {
     clearDots();
     if (base.type === "donut" || base.type === "heatmap") return [];
     const marks: { x: number; y: number }[] = [];
@@ -746,7 +754,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         if (!stroke || stroke === "none") continue;
         const d = path.getAttribute("d");
         if (!d) continue;
-        const y = yOnPath(d, snapped);
+        const y = dataDotY(path, index) ?? yOnPath(d, snapped);
         if (y == null) continue;
         marks.push(addDot(snapped, y, legendPaint(stroke, seen)));
         seen += 1;
@@ -804,10 +812,6 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       }
     }
     return marks;
-  }
-
-  function absoluteIndex(local: number): number {
-    return lo + local;
   }
 
   function rebuild(): void {
@@ -975,13 +979,13 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const point = viewPoint(svg, event.clientX, event.clientY);
     const horizontal = isRecord(base.mark) && base.mark.orientation === "horizontal";
     const local = lookupIndex(hover, horizontal ? point.y : point.x);
-    const index = Math.min(n - 1, Math.max(0, absoluteIndex(local)));
+    const index = Math.min(n - 1, Math.max(0, lo + local));
     focus = index;
     const title = xText(index);
     const rows = entriesAt(index, point.y);
     const px = crossX(local);
     moveCross(px);
-    const marks = placeDots(px, horizontal);
+    const marks = placeDots(px, horizontal, index);
     if (showTip) placeTip(event.clientX, event.clientY, title, rows, marks);
   }
 
@@ -1114,9 +1118,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       tip.remove();
       live.remove();
       tableWrap.remove();
-      svg.querySelector("[data-ck-crosshair]")?.remove();
-      svg.querySelector("[data-ck-brush]")?.remove();
-      svg.querySelectorAll("[data-ck-dot]").forEach((node) => node.remove());
+      svg.querySelectorAll("[data-ck-crosshair],[data-ck-brush],[data-ck-dot]").forEach((node) => node.remove());
       svg.removeAttribute("tabindex");
       host.removeAttribute("data-ck-interact");
     },
