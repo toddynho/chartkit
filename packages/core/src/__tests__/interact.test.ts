@@ -153,6 +153,51 @@ describe("attach", () => {
     ctl.destroy();
   });
 
+  it("puts the y2 hover dot on the line, not the baseline", () => {
+    const spec: InteractSpec = {
+      version: "1",
+      type: "combo",
+      data: [
+        { week: "W1", orders: 42, rate: 0.31 },
+        { week: "W2", orders: 48, rate: 0.36 },
+        { week: "W3", orders: 45, rate: 0.33 },
+        { week: "W4", orders: 53, rate: 0.41 },
+      ],
+      encoding: {
+        x: "week",
+        y: [
+          { field: "orders", mark: "bar" },
+          { field: "rate", mark: "line", axis: "y2" },
+        ],
+      },
+      axes: { y2: true },
+      a11y: { alt: "Orders and the conversion rate for four weeks." },
+    };
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg")!;
+    const marks = Array.from(svg.querySelectorAll("circle")).sort(
+      (a, b) => Number(a.getAttribute("cx")) - Number(b.getAttribute("cx")),
+    );
+    expect(marks).toHaveLength(4);
+    const mark = marks[1];
+    const x = Number(mark.getAttribute("cx"));
+    const y = Number(mark.getAttribute("cy"));
+    const plot = svg.querySelector("clipPath rect")!;
+    const baseline = Number(plot.getAttribute("y")) + Number(plot.getAttribute("height"));
+    expect(baseline - y).toBeGreaterThan(24);
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 40, bubbles: true }));
+    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+    expect(tip.hidden).toBe(false);
+    expect(tip.textContent).toContain("0.36");
+    const dots = Array.from(svg.querySelectorAll("[data-ck-dot]"));
+    const lineDot = dots.find((dot) => Math.abs(Number(dot.getAttribute("cy")) - y) < 1.25);
+    expect(lineDot).toBeTruthy();
+    expect(Math.abs(Number(lineDot?.getAttribute("cx")) - x)).toBeLessThan(1.25);
+    expect(baseline - Number(lineDot?.getAttribute("cy"))).toBeGreaterThan(24);
+    ctl.destroy();
+  });
+
   it("stays quiet when tooltip is off", () => {
     const spec = lineSpec({ tooltip: false });
     const host = hostOf(spec);
