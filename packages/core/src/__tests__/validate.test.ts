@@ -60,7 +60,7 @@ describe("example specs", () => {
       expect(ajvOk).toBe(true);
       const result = validate(spec);
       expect(result.errors, JSON.stringify(result.errors, null, 2)).toEqual([]);
-      expect(result.warnings, JSON.stringify(result.warnings, null, 2)).toEqual([]);
+      expect(result.warnings.every((warning) => warning.code === "CK3011"), JSON.stringify(result.warnings, null, 2)).toBe(true);
       expect(result.ok).toBe(true);
     });
   }
@@ -191,6 +191,56 @@ describe("diagnostic codes", () => {
       encoding: { x: "month", y: ["revenue"], series: "region" },
     });
     expect(result.errors.some((error) => error.code === "CK2006" && error.path === "/encoding/series")).toBe(true);
+  });
+
+  it("CK3011 warns when a requested feature is not drawn yet", () => {
+    const result = validate({
+      ...base,
+      tooltip: true,
+      interaction: { zoom: "x", pan: true, brush: "x" },
+      animation: { duration: 400 },
+      legend: { interactive: true },
+      a11y: { alt: "Revenue rose from January to February.", keyboard: true, dataTable: true },
+    });
+    expect(result.ok).toBe(true);
+    expect(result.warnings.filter((warning) => warning.code === "CK3011").map((warning) => warning.path).sort()).toEqual([
+      "/a11y/dataTable",
+      "/a11y/keyboard",
+      "/animation",
+      "/interaction/brush",
+      "/interaction/pan",
+      "/interaction/zoom",
+      "/legend/interactive",
+      "/tooltip",
+    ]);
+    expect(result.warnings[0]?.message).toContain("not rendered yet");
+  });
+
+  it("stays quiet when those features are off", () => {
+    const result = validate({
+      ...base,
+      tooltip: false,
+      interaction: { zoom: "none", pan: false, brush: "none", hover: true },
+      animation: { duration: 0 },
+      legend: { interactive: false },
+      a11y: { alt: "Revenue rose from January to February.", keyboard: false, dataTable: false },
+    });
+    expect(result.warnings.some((warning) => warning.code === "CK3011")).toBe(false);
+    expect(result.ok).toBe(true);
+  });
+
+  it("does not warn CK2008 when a scatter x is unsorted", () => {
+    const result = validate({
+      version: "1",
+      type: "scatter",
+      data: [
+        { x: 3, y: 1 },
+        { x: 1, y: 2 },
+      ],
+      encoding: { x: { field: "x", type: "quantitative" }, y: "y" },
+      a11y: { alt: "The points are not in x order." },
+    });
+    expect(result.warnings.some((warning) => warning.code === "CK2008")).toBe(false);
   });
 
   it("CK3010 warns, and the chart still validates, when a mark does not apply", () => {

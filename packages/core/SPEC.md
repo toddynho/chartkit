@@ -28,7 +28,7 @@ The threshold is `2 * floor(plotWidth)`, where plot width is the pixel width ins
 
 - **Axis extents** are the min and max of every finite value, computed before sampling. A spike that is drawn is also inside the axis domain; a spike that sampling kept is not required for the domain itself.
 - **`a11y.alt`** is the author's sentence. The renderer does not rewrite it from the sample. It is the SVG `aria-label` and `<desc>`.
-- **Hover.** Every sampled vertex is an original row, not an average. The path carries `data-ck-sample` and `data-ck-i` (original indexes, in order) only when the series was actually reduced. A tooltip resolves the nearest vertex, then reads that index. Spike lines carry `data-ck-i` of that one row. `mark.points: "always"` draws markers only at those indexes.
+- **Hover.** Every sampled vertex is an original row, not an average. The path carries `data-ck-sample` and `data-ck-i` (original indexes, in order) only when the series was actually reduced. The SVG does not draw a tooltip yet: `validate` warns CK3011 when `tooltip` is on. Those indexes are the rows a tooltip would read. Spike lines carry `data-ck-i` of that one row. `mark.points: "always"` draws markers only at those indexes.
 
 Sampling assumes each series is already ordered by x. Nulls stay as gaps unless `mark.connectNulls` is true, in which case the finite points are sampled as one run.
 
