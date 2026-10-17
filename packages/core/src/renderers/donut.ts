@@ -80,7 +80,7 @@ export function renderDonut(spec: Record<string, unknown>): string | null {
   if (frame.title) parts.push(text(pieX, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
   if (frame.subtitle) parts.push(text(pieX, subtitleY, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
 
-  if (showLegend && place === "top") parts.push(legend(arcs, pieX, y0, frame, valueFormat, pieX + size));
+  if (showLegend && place === "top") parts.push(legend(arcs, 8, y0, frame, valueFormat, width - 8));
   if (showLegend && place === "left") parts.push(legend(arcs, 12, pieY, frame, valueFormat, 12 + sideWidth - 8));
 
   for (const arc of arcs) {
@@ -105,7 +105,7 @@ export function renderDonut(spec: Record<string, unknown>): string | null {
     );
   }
 
-  if (showLegend && place === "bottom") parts.push(legend(arcs, pieX, pieY + size + 8, frame, valueFormat, pieX + size));
+  if (showLegend && place === "bottom") parts.push(legend(arcs, 8, pieY + size + 8, frame, valueFormat, width - 8));
   if (showLegend && place === "right") parts.push(legend(arcs, pieX + size + 16, pieY, frame, valueFormat, pieX + size + sideWidth - 8));
   parts.push(closeChart());
   return parts.join("");
@@ -141,18 +141,29 @@ function legend(
   valueFormat: unknown,
   valueRight: number,
 ): string {
+  const valueWidth = frame.legendValues ? 112 : 68;
   return slices
     .map((slice, index) => {
       const dy = y + index * 20;
       const pct = formatValue(slice.percent / 100, "percent", frame.locale);
       const extra = frame.legendValues ? ` ${formatValue(slice.value, valueFormat, frame.locale)}` : "";
+      const labelX = x + 16;
+      const label = fitLabel(slice.label, Math.max(12, valueRight - valueWidth - labelX));
       return (
         `<rect x="${n(x)}" y="${n(dy)}" width="10" height="10" rx="2" fill="${slice.color}" />` +
-        text(x + 16, dy + 9, slice.label, cssVar("muted", frame.preset.muted), 12, "400", "start") +
+        text(labelX, dy + 9, label, cssVar("muted", frame.preset.muted), 12, "400", "start") +
         text(valueRight, dy + 9, `${pct}${extra}`, cssVar("text", frame.preset.text), 12, "600", "end")
       );
     })
     .join("");
+}
+
+/** 12px labels are about 6.6px per character. Keep the value column clear of the name. */
+function fitLabel(label: string, maxPx: number): string {
+  const maxChars = Math.max(1, Math.floor(maxPx / 6.6));
+  if (label.length <= maxChars) return label;
+  if (maxChars <= 1) return "…";
+  return `${label.slice(0, maxChars - 1)}…`;
 }
 
 function slicePath(cx: number, cy: number, outer: number, inner: number, start: number, end: number): string {

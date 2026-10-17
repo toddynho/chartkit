@@ -553,6 +553,34 @@ describe("remaining chart renderers", () => {
     expect(render(spec("02-rich-line.json"))).toContain(">Target<");
   });
 
+  it("keeps donut legend labels clear of the percentages", () => {
+    const svg = render({
+      version: "1",
+      type: "donut",
+      size: { width: 340, height: 220 },
+      data: [
+        { plan: "Starter", total: 30 },
+        { plan: "Pro", total: 48 },
+        { plan: "Enterprise", total: 22 },
+      ],
+      encoding: { x: "plan", y: "total" },
+      a11y: { alt: "Pro is the largest share." },
+    });
+    const texts = [...svg.matchAll(/<text\b([^>]*)>([^<]*)<\/text>/g)].map((match) => ({
+      x: Number(/ x="([^"]+)"/.exec(match[1] ?? "")?.[1]),
+      y: Number(/ y="([^"]+)"/.exec(match[1] ?? "")?.[1]),
+      anchor: /text-anchor="([^"]+)"/.exec(match[1] ?? "")?.[1] ?? "start",
+      text: match[2] ?? "",
+    }));
+    for (const label of ["Starter", "Pro", "Enterprise"]) {
+      const name = texts.find((item) => item.text === label);
+      const value = texts.find((item) => item.anchor === "end" && item.y === name?.y);
+      expect(name, label).toBeTruthy();
+      expect(value, label).toBeTruthy();
+      expect((value?.x ?? 0) - 8).toBeGreaterThan((name?.x ?? 0) + label.length * 6.6);
+    }
+  });
+
   it("keeps donut legend values inside the view box", () => {
     const svg = render(spec("04-donut.json"));
     expect(svg).toContain('text-anchor="end"');

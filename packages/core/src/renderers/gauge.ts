@@ -19,7 +19,7 @@ export function renderGauge(spec: Record<string, unknown>): string | null {
   const cy = frame.height * 0.58;
   const radius = Math.max(24, Math.min(frame.width, frame.height) * 0.36);
   const valueColor = bandColor(metric, frame.preset) ?? paint(undefined, frame.preset, 0);
-  const track = cssVar("track", frame.preset.grid);
+  const track = cssVar("track", frame.preset.track);
   const valueText = formatValue(metric.value, metric.format, frame.locale);
 
   const parts: string[] = [];

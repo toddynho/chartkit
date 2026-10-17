@@ -7,13 +7,32 @@ export interface PresetTokens {
   muted: string;
   grid: string;
   axis: string;
+  /** Gauge and progress-ring track. Hosts override with --ck-track. */
+  track: string;
   accent: string;
   positive: string;
   negative: string;
+  /** Fills. Hosts override with --ck-series-N. */
   series: string[];
+  /** Strokes at or under 2px. Hosts override with --ck-line-N. */
+  lines: string[];
 }
 
-/** Built in. Every other preset is an opt-in import that calls `definePreset`. */
+/** Render-time geometry. Gap moves bar positions, so it is chosen here rather than live from CSS. */
+export interface PresetGeometry {
+  strokeWidth: number;
+  /** Sparkline and mini-area stroke when mark.strokeWidth is omitted. */
+  compactStroke: number;
+  cornerRadius: number;
+  gap: number;
+  fillOpacity: number;
+  points: "none" | "hover" | "always";
+  pointSize: number;
+}
+
+const midnightSeries = ["#22c55e", "#3b82f6", "#a855f7", "#f59e0b", "#ec4899", "#14b8a6", "#f43f5e", "#8b5cf6"];
+
+/** Opt-in dark card. Unknown preset names still resolve here. */
 export const midnight: PresetTokens = {
   background: "#0c0c0c",
   surface: "#1a1a1a",
@@ -21,42 +40,126 @@ export const midnight: PresetTokens = {
   muted: "#8a8a8a",
   grid: "#1f1f1f",
   axis: "#262626",
+  track: "#1f1f1f",
   accent: "#22d3ee",
   positive: "#4ade80",
   negative: "#f87171",
-  series: ["#22c55e", "#3b82f6", "#a855f7", "#f59e0b", "#ec4899", "#14b8a6", "#f43f5e", "#8b5cf6"],
+  series: midnightSeries,
+  lines: midnightSeries,
 };
 
 /**
- * Default when theme is omitted or "auto".
- * Fallbacks use light-dark() so prefers-color-scheme (and a color-scheme on an ancestor) wins.
- * cssVar() still prefers --ck-*, so a host override beats these.
+ * Soft, the default when theme is omitted, "auto", or "soft".
+ * The plot fill is transparent so a white page and any other page show through.
+ * The #f5f5f7 / #1c1c1e card is optional: set --ck-background, or use the stylesheet.
+ * Colour fallbacks use light-dark() so the page color-scheme wins. --ck-* still wins over these.
  */
 export const auto: PresetTokens = {
   background: "transparent",
-  surface: "light-dark(#ffffff, #0f172a)",
-  text: "light-dark(#0f172a, #f8fafc)",
-  muted: "light-dark(#64748b, #94a3b8)",
-  grid: "light-dark(rgb(15 23 42 / 0.08), rgb(248 250 252 / 0.12))",
-  axis: "light-dark(rgb(15 23 42 / 0.18), rgb(248 250 252 / 0.22))",
-  accent: "light-dark(#0f766e, #2dd4bf)",
-  positive: "light-dark(#047857, #34d399)",
-  negative: "light-dark(#be123c, #fb7185)",
-  series: [
-    "light-dark(#0f766e, #2dd4bf)",
-    "light-dark(#1d4ed8, #60a5fa)",
-    "light-dark(#b45309, #fbbf24)",
-    "light-dark(#be123c, #fb7185)",
-    "light-dark(#6d28d9, #c4b5fd)",
-    "light-dark(#047857, #34d399)",
-    "light-dark(#0369a1, #38bdf8)",
-    "light-dark(#a16207, #fcd34d)",
+  surface: ld("#ffffff", "#2c2c2e"),
+  text: ld("#1d1d1f", "#f5f5f7"),
+  muted: ld("#6e6e73", "#98989d"),
+  grid: ld("rgb(0 0 0 / 0.05)", "rgb(245 245 247 / 0.07)"),
+  axis: ld("rgb(0 0 0 / 0.14)", "rgb(245 245 247 / 0.16)"),
+  track: ld("rgb(0 0 0 / 0.10)", "rgb(245 245 247 / 0.16)"),
+  accent: ld("#007aff", "#0a84ff"),
+  positive: ld("#047857", "#30d158"),
+  negative: ld("#be123c", "#ff453a"),
+  series: ldList(
+    ["#007aff", "#34c759", "#ff9500", "#af52de", "#ff2d55", "#32ade6", "#65a30d", "#ff6723"],
+    ["#0a84ff", "#30d158", "#ff9f0a", "#bf5af2", "#ff375f", "#64d2ff", "#a3e635", "#ff6961"],
+  ),
+  lines: ldList(
+    ["#007aff", "#248a3d", "#c93400", "#af52de", "#ff2d55", "#0071a4", "#4d7c0f", "#9a3412"],
+    ["#0a84ff", "#30d158", "#ff9f0a", "#bf5af2", "#ff375f", "#64d2ff", "#a3e635", "#ff6961"],
+  ),
+};
+
+/** Same tokens as auto. Named so `theme: "soft"` does not fall through to midnight. */
+export const soft: PresetTokens = auto;
+
+export const refined: PresetTokens = {
+  background: "transparent",
+  surface: ld("#fafafa", "#18181b"),
+  text: ld("#18181b", "#fafafa"),
+  muted: ld("#71717a", "#a1a1aa"),
+  grid: ld("rgb(24 24 27 / 0.05)", "rgb(250 250 250 / 0.06)"),
+  axis: ld("rgb(24 24 27 / 0.16)", "rgb(250 250 250 / 0.16)"),
+  track: ld("rgb(24 24 27 / 0.12)", "rgb(250 250 250 / 0.16)"),
+  accent: ld("#3b82f6", "#60a5fa"),
+  positive: ld("#047857", "#34d399"),
+  negative: ld("#e11d48", "#fb7185"),
+  series: ldList(
+    ["#3b82f6", "#e11d48", "#fbbf24", "#10b981", "#7c3aed", "#22d3ee", "#fb923c", "#ec4899"],
+    ["#60a5fa", "#fb7185", "#fcd34d", "#6ee7b7", "#8b5cf6", "#22d3ee", "#fb923c", "#f472b6"],
+  ),
+  lines: ldList(
+    ["#3b82f6", "#be123c", "#d97706", "#047857", "#7c3aed", "#0891b2", "#c2410c", "#ec4899"],
+    ["#60a5fa", "#fb7185", "#fcd34d", "#6ee7b7", "#8b5cf6", "#22d3ee", "#fb923c", "#f472b6"],
+  ),
+};
+
+export const editorial: PresetTokens = {
+  background: "transparent",
+  surface: ld("#f6f9fc", "#12182b"),
+  text: ld("#0a2540", "#f6f9fc"),
+  muted: ld("#425466", "#adbdcc"),
+  grid: ld("rgb(10 37 64 / 0.06)", "rgb(246 249 252 / 0.07)"),
+  axis: ld("rgb(10 37 64 / 0.18)", "rgb(246 249 252 / 0.18)"),
+  track: ld("rgb(10 37 64 / 0.12)", "rgb(246 249 252 / 0.16)"),
+  accent: ld("#4f46e5", "#c4b5fd"),
+  positive: ld("#047857", "#34d399"),
+  negative: ld("#e11d48", "#fb7185"),
+  series: ldList(
+    ["#4f46e5", "#f97316", "#059669", "#fbbf24", "#e11d48", "#22d3ee", "#a855f7", "#ec4899"],
+    ["#c4b5fd", "#fb923c", "#34d399", "#fcd34d", "#fda4af", "#0891b2", "#818cf8", "#f43f5e"],
+  ),
+  lines: ldList(
+    ["#4f46e5", "#ea580c", "#059669", "#d97706", "#e11d48", "#0891b2", "#7c3aed", "#ec4899"],
+    ["#c4b5fd", "#fb923c", "#34d399", "#fcd34d", "#fda4af", "#0891b2", "#818cf8", "#f43f5e"],
+  ),
+};
+
+const softGeometry: PresetGeometry = {
+  strokeWidth: 2,
+  compactStroke: 2,
+  cornerRadius: 8,
+  gap: 0.34,
+  fillOpacity: 0.22,
+  points: "none",
+  pointSize: 3,
+};
+
+const geometries = new Map<string, PresetGeometry>([
+  ["auto", softGeometry],
+  ["soft", softGeometry],
+  [
+    "refined",
+    { strokeWidth: 1.75, compactStroke: 1.75, cornerRadius: 4, gap: 0.22, fillOpacity: 0.18, points: "none", pointSize: 3 },
   ],
+  [
+    "editorial",
+    { strokeWidth: 2.25, compactStroke: 2.25, cornerRadius: 2, gap: 0.18, fillOpacity: 0.28, points: "always", pointSize: 3 },
+  ],
+]);
+
+/** Geometry for midnight and for presets that do not name their own. */
+const legacyGeometry: PresetGeometry = {
+  strokeWidth: 2,
+  compactStroke: 1.5,
+  cornerRadius: 3,
+  gap: 0.25,
+  fillOpacity: 0.28,
+  points: "hover",
+  pointSize: 3,
 };
 
 const presets = new Map<string, PresetTokens>([
   ["midnight", midnight],
   ["auto", auto],
+  ["soft", auto],
+  ["refined", refined],
+  ["editorial", editorial],
 ]);
 
 export function registerPreset(name: string, tokens: PresetTokens): PresetTokens {
@@ -89,10 +192,20 @@ export function resolvePreset(theme: unknown): PresetTokens {
     accent: colorOverride(tokens.accent) ?? base.accent,
     positive: colorOverride(tokens.positive) ?? base.positive,
     negative: colorOverride(tokens.negative) ?? base.negative,
+    track: colorOverride(tokens.track) ?? base.track,
     series: Array.isArray(tokens.series)
       ? tokens.series.filter((item): item is string => typeof item === "string" && item.length > 0)
       : base.series,
+    lines: Array.isArray(tokens.lines)
+      ? tokens.lines.filter((item): item is string => typeof item === "string" && item.length > 0)
+      : Array.isArray(tokens.series)
+        ? tokens.series.filter((item): item is string => typeof item === "string" && item.length > 0)
+        : base.lines,
   };
+}
+
+export function resolveGeometry(theme: unknown): PresetGeometry {
+  return geometries.get(presetName(theme)) ?? legacyGeometry;
 }
 
 export function cssVar(token: string, fallback: string): string {
@@ -109,6 +222,7 @@ const TOKEN_KEYS: Record<string, keyof PresetTokens> = {
   accent: "accent",
   positive: "positive",
   negative: "negative",
+  track: "track",
 };
 
 /** Series paint: host --ck-series-N, then shadcn --chart-N, then the preset. */
@@ -123,11 +237,13 @@ function seriesPaint(n: number, preset: PresetTokens): string {
  * variant; when that variable is unset the series colour is used, so the
  * default paint does not change.
  */
-export function lineStroke(color: string, width: number): string {
+export function lineStroke(color: string, width: number, lines?: readonly string[]): string {
   if (!(width <= 2)) return color;
   const match = /^var\(--ck-series-(\d+),/.exec(color);
   if (!match) return color;
-  return `var(--ck-line-${match[1]}, ${color})`;
+  const index = Number(match[1]) - 1;
+  const fallback = lines && lines.length > 0 ? lines[(index % lines.length + lines.length) % lines.length] : color;
+  return `var(--ck-line-${match[1]}, ${fallback})`;
 }
 
 /** A CSS color, a var(), or a theme token name (`series-3`, `positive`, …). */
@@ -177,4 +293,12 @@ function colorOverride(value: unknown): string | undefined {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function ld(light: string, dark: string): string {
+  return light === dark ? light : `light-dark(${light}, ${dark})`;
+}
+
+function ldList(light: readonly string[], dark: readonly string[]): string[] {
+  return light.map((color, index) => ld(color, dark[index] ?? color));
 }

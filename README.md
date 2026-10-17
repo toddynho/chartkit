@@ -102,7 +102,7 @@ Dashboard components in `@chartkitdev/react` (`LineChart`, `KpiCard`, and the re
 ## Features
 
 - **14 Chart Components** - Lines, bars, areas, donuts, gauges, heatmaps, and more
-- **17 Curated Themes** - Dark and light themes that look great out of the box
+- **Soft by default** - An omitted theme uses the Soft look, light or dark with the page. `refined`, `editorial`, and `midnight` are built in. More presets are opt-in imports.
 - **No third-party runtime dependencies in core** - Pure SVG. The core package depends on nothing. Each adapter depends on the core and its framework.
 - **TypeScript First** - Full type safety with autocomplete for every prop
 - **Dual Y-Axis** - Display multiple scales in LineChart
@@ -130,11 +130,21 @@ Dashboard components in `@chartkitdev/react` (`LineChart`, `KpiCard`, and the re
 
 ## Themes
 
-17 built-in themes:
+The JSON spec default is Soft. Omit `theme`, or set `"auto"` or `"soft"`. Colours follow the page scheme (`light-dark()`). The plot is transparent, so it sits on a white page or any other background. The gray card is optional:
 
-**Dark:** `midnight`, `emerald`, `mono`, `slate`, `arctic`, `orchid`, `obsidian`, `neon`, `mocha`, `owl`, `retro`, `copper`, `rose`
+```css
+.ck-card { background: light-dark(#f5f5f7, #1c1c1e); }
+```
+
+Or set `--ck-background` to that pair. `"refined"` and `"editorial"` are built-in names. `"midnight"` is the opt-in dark card. A name that has not been imported still renders as midnight.
+
+Other presets, imported from `@chartkitdev/core/themes/<name>`:
+
+**Dark:** `emerald`, `mono`, `slate`, `arctic`, `orchid`, `obsidian`, `neon`, `mocha`, `owl`, `retro`, `copper`, `rose`
 
 **Light:** `sunset`, `silver`, `pearl`, `latte`
+
+A brand palette is `@chartkitdev/core/themes/brand`: `paletteFromBrand("#635bff")`, then `theme: { tokens: { series } }`. It stays out of the default bundle.
 
 ```tsx
 import { useAutoTheme } from '@chartkitdev/react';

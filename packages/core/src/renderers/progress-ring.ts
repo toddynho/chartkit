@@ -27,7 +27,7 @@ export function renderProgressRing(spec: Record<string, unknown>): string | null
   parts.push(openChart({ ...frame, renderer: "progress-ring" }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
   parts.push(
-    `<path d="${arcStroke(cx, cy, radius, start, end)}" fill="none" stroke="${cssVar("track", frame.preset.grid)}" stroke-width="${n(stroke)}" stroke-linecap="${cap}" />`,
+    `<path d="${arcStroke(cx, cy, radius, start, end)}" fill="none" stroke="${cssVar("track", frame.preset.track)}" stroke-width="${n(stroke)}" stroke-linecap="${cap}" />`,
   );
   if (ratio > 0) {
     parts.push(

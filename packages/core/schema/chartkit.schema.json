@@ -1447,6 +1447,9 @@
         {
           "enum": [
             "auto",
+            "soft",
+            "refined",
+            "editorial",
             "midnight",
             "emerald",
             "mono",
@@ -1465,7 +1468,7 @@
             "pearl",
             "latte"
           ],
-          "description": "Preset name. 'auto' follows the host CSS variables and prefers-color-scheme."
+          "description": "Preset name. 'auto' and 'soft' are the Soft default (light-dark, transparent plot). 'refined' and 'editorial' are built in. 'midnight' is opt-in. Other names render as midnight until that preset is imported."
         },
         {
           "type": "object",
@@ -1474,6 +1477,9 @@
             "preset": {
               "enum": [
                 "auto",
+                "soft",
+                "refined",
+                "editorial",
                 "midnight",
                 "emerald",
                 "mono",
@@ -1570,7 +1576,7 @@
           "description": "Theme object."
         }
       ],
-      "description": "Look and feel. A preset name, or an object combining a preset, a light/dark mode and token overrides. Every token is also read from CSS variables --ck-<token> (and --ck-series-N) on the container, so host design systems (e.g. shadcn --chart-1..5) can theme charts with no JS. Default 'auto'."
+      "description": "Look and feel. A preset name, or an object combining a preset, a light/dark mode and token overrides. Every token is also read from CSS variables --ck-<token> (and --ck-series-N) on the container, so host design systems (e.g. shadcn --chart-1..5) can theme charts with no JS. Default 'auto' is Soft: light-dark colours, transparent plot. Set --ck-background for the optional #f5f5f7 card."
     },
     "size": {
       "type": "object",

@@ -1,7 +1,8 @@
 /**
- * Candidate default looks for Todd to pick from.
- * Not registered, not imported by the line bundle, and not the default.
- * The stylesheet at themes/candidates.css is the same tokens as CSS variables.
+ * Soft, refined, and editorial token sheets.
+ * The same colours are registered in theme.ts (light-dark pairs). This module
+ * stays out of the line bundle: the sheet renderer and the sync test import it.
+ * The stylesheet at themes/candidates.css is the optional card and the scheme override.
  *
  * Series fills are vivid (Tailwind / shadcn 400–600, Stripe, Apple). They are
  * not all required to clear 3:1. --ck-line-* is the stroke used at ≤2px and
@@ -128,7 +129,7 @@ export const candidates: readonly CandidateLook[] = [
   {
     id: "soft",
     title: "Soft modern",
-    note: "Apple and Tremor: system gray page, round bar caps, quiet grid, saturated rings.",
+    note: "Apple and Tremor: gray card on the page, round bar caps, quiet grid, saturated rings.",
     geometry: { strokeWidth: 2, cornerRadius: 8, gap: 0.34, fillOpacity: 0.22, points: "none", pointSize: 3 },
     fontFamily: font,
     light: {

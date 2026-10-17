@@ -43,7 +43,7 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
   const start = alignSunday(end - (weeks * 7 - 1) * 86400000);
   const cell = 12;
   const gap = typeof frame.mark.gap === "number" ? Math.round(12 * frame.mark.gap) : 3;
-  const radius = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : 2;
+  const radius = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : Math.min(frame.geometry.cornerRadius, 4);
   const dayLabelW = 28;
   const monthLabelH = 16;
   const counts = [...byDay.values()];
@@ -124,7 +124,7 @@ function renderGrid(spec: Record<string, unknown>): string | null {
   const min = Math.min(...nums, 0);
   const color = colorEnc?.constant ? paint(colorEnc.constant, frame.preset, 0) : paint(undefined, frame.preset, 0);
   const range = colorEnc?.range?.map((item, index) => paint(item, frame.preset, index));
-  const radius = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : 3;
+  const radius = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : Math.min(frame.geometry.cornerRadius, 6);
   const left = 48;
   const top = frame.title ? 42 : 28;
   const plotW = frame.width - left - 16;
