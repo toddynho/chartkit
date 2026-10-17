@@ -1,0 +1,1069 @@
+{
+  "started": "2026-10-16T18:27:45.244Z",
+  "finished": "2026-10-16T18:29:34.398Z",
+  "env": {
+    "BENCH_LIBRARIES": "chartkit",
+    "BENCH_CHARTKIT_CONTEXT": "/workspace/chartkit-eval/docs/public/llms.txt"
+  },
+  "agent": {
+    "status": "ok",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-5",
+    "taskCount": 42,
+    "attempts": 42,
+    "passed": 18,
+    "usage": {
+      "input_tokens": 92434,
+      "output_tokens": 6805
+    },
+    "results": [
+      {
+        "id": "line-revenue",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "line"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2208,
+          "output_tokens": 134
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"line\",\n  \"data\": [\n    {\"month\": \"Jan\", \"revenue\": 120},\n    {\"month\": \"Feb\", \"revenue\": 150},\n    {\"month\": \"Mar\", \"revenue\": 132}\n  ],\n  \"encoding\": {\n    \"x\": \"month\",\n    \"y\": \"revenue\"\n  },\n  \"a11y\": {\n    \"alt\": \"Monthly revenue rose from January to February, then eased in March.\"\n  }\n}\n```"
+      },
+      {
+        "id": "line-users",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "line"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2213,
+          "output_tokens": 177
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"line\",\n  \"data\": [\n    {\"week\": \"W1\", \"users\": 800},\n    {\"week\": \"W2\", \"users\": 910},\n    {\"week\": \"W3\", \"users\": 870},\n    {\"week\": \"W4\", \"users\": 1020}\n  ],\n  \"encoding\": {\n    \"x\": \"week\",\n    \"y\": \"users\"\n  },\n  \"a11y\": {\n    \"alt\": \"Weekly active users fluctuated from 800 in week 1 to 1020 in week 4, with a dip to 870 in week 3.\"\n  }\n}\n```"
+      },
+      {
+        "id": "line-temp",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "line"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2209,
+          "output_tokens": 164
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"line\",\n  \"data\": [\n    {\"day\": \"Mon\", \"celsius\": 18},\n    {\"day\": \"Tue\", \"celsius\": 21},\n    {\"day\": \"Wed\", \"celsius\": 19},\n    {\"day\": \"Thu\", \"celsius\": 24}\n  ],\n  \"encoding\": {\n    \"x\": \"day\",\n    \"y\": \"celsius\"\n  },\n  \"a11y\": {\n    \"alt\": \"Daily high temperature fluctuated between 18°C and 24°C from Monday to Thursday, with Thursday being the warmest day.\"\n  }\n}\n```"
+      },
+      {
+        "id": "bar-signups",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "bar"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2205,
+          "output_tokens": 155
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"bar\",\n  \"data\": [\n    {\"month\": \"Jan\", \"signups\": 100},\n    {\"month\": \"Feb\", \"signups\": 180},\n    {\"month\": \"Mar\", \"signups\": 150}\n  ],\n  \"encoding\": {\n    \"x\": \"month\",\n    \"y\": \"signups\"\n  },\n  \"a11y\": {\n    \"alt\": \"Signups by month showing February as the peak with 180 signups, compared to 100 in January and 150 in March.\"\n  }\n}\n```"
+      },
+      {
+        "id": "bar-region",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "bar"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2205,
+          "output_tokens": 165
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"bar\",\n  \"data\": [\n    {\"region\": \"North\", \"sales\": 40},\n    {\"region\": \"South\", \"sales\": 55},\n    {\"region\": \"East\", \"sales\": 32},\n    {\"region\": \"West\", \"sales\": 48}\n  ],\n  \"encoding\": {\n    \"x\": \"region\",\n    \"y\": \"sales\"\n  },\n  \"a11y\": {\n    \"alt\": \"Bar chart showing sales by region with South leading at 55, followed by West at 48, North at 40, and East at 32.\"\n  }\n}\n```"
+      },
+      {
+        "id": "bar-priority",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "bar"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2197,
+          "output_tokens": 147
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"bar\",\n  \"data\": [\n    {\"priority\": \"Low\", \"tickets\": 12},\n    {\"priority\": \"Medium\", \"tickets\": 27},\n    {\"priority\": \"High\", \"tickets\": 9}\n  ],\n  \"encoding\": {\n    \"x\": \"priority\",\n    \"y\": \"tickets\"\n  },\n  \"a11y\": {\n    \"alt\": \"Bar chart showing Medium priority has the most open tickets at 27, followed by Low at 12 and High at 9.\"\n  }\n}\n```"
+      },
+      {
+        "id": "donut-traffic",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"x\"",
+              "CK1003 missing required property \"y\"",
+              "CK1002 unknown property \"label\"",
+              "CK1002 unknown property \"value\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2214,
+          "output_tokens": 166
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"donut\",\n  \"data\": [\n    {\"label\": \"Search\", \"value\": 42},\n    {\"label\": \"Direct\", \"value\": 28},\n    {\"label\": \"Social\", \"value\": 18},\n    {\"label\": \"Email\", \"value\": 12}\n  ],\n  \"encoding\": {\n    \"label\": \"label\",\n    \"value\": \"value\"\n  },\n  \"a11y\": {\n    \"alt\": \"Search accounts for the largest share of sessions at 42%, followed by Direct at 28%, Social at 18%, and Email at 12%.\"\n  }\n}\n```"
+      },
+      {
+        "id": "donut-budget",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"x\"",
+              "CK1003 missing required property \"y\"",
+              "CK1002 unknown property \"label\"",
+              "CK1002 unknown property \"value\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2201,
+          "output_tokens": 143
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"donut\",\n  \"data\": [\n    {\"label\": \"Eng\", \"value\": 50},\n    {\"label\": \"Sales\", \"value\": 30},\n    {\"label\": \"Ops\", \"value\": 20}\n  ],\n  \"encoding\": {\n    \"label\": \"label\",\n    \"value\": \"value\"\n  },\n  \"a11y\": {\n    \"alt\": \"Budget distribution shows Engineering at 50%, Sales at 30%, and Operations at 20%.\"\n  }\n}\n```"
+      },
+      {
+        "id": "donut-survey",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"x\"",
+              "CK1003 missing required property \"y\"",
+              "CK1002 unknown property \"label\"",
+              "CK1002 unknown property \"value\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2197,
+          "output_tokens": 143
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"donut\",\n  \"data\": [\n    {\"label\": \"Yes\", \"value\": 64},\n    {\"label\": \"No\", \"value\": 22},\n    {\"label\": \"Later\", \"value\": 14}\n  ],\n  \"encoding\": {\n    \"label\": \"label\",\n    \"value\": \"value\"\n  },\n  \"a11y\": {\n    \"alt\": \"Survey responses show 64% answered Yes, 22% answered No, and 14% answered Later.\"\n  }\n}\n```"
+      },
+      {
+        "id": "stack-plans",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "stacked-area"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2213,
+          "output_tokens": 178
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"stacked-area\",\n  \"data\": [\n    {\"month\": \"Jan\", \"free\": 40, \"pro\": 20},\n    {\"month\": \"Feb\", \"free\": 42, \"pro\": 28},\n    {\"month\": \"Mar\", \"free\": 39, \"pro\": 35}\n  ],\n  \"encoding\": {\n    \"x\": \"month\",\n    \"y\": [\"free\", \"pro\"]\n  },\n  \"a11y\": {\n    \"alt\": \"Stacked area chart showing free and pro subscribers over three months, with pro subscribers growing from 20 to 35 while free subscribers remained around 40.\"\n  }\n}\n```"
+      },
+      {
+        "id": "stack-energy",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "stacked-area"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2211,
+          "output_tokens": 197
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"stacked-area\",\n  \"data\": [\n    {\"year\": \"2024\", \"solar\": 10, \"wind\": 14, \"gas\": 22},\n    {\"year\": \"2025\", \"solar\": 16, \"wind\": 15, \"gas\": 18}\n  ],\n  \"encoding\": {\n    \"x\": \"year\",\n    \"y\": [\"solar\", \"wind\", \"gas\"]\n  },\n  \"a11y\": {\n    \"alt\": \"Stacked area chart showing energy mix in gigawatt hours from 2024 to 2025, with solar increasing from 10 to 16, wind rising from 14 to 15, and gas decreasing from 22 to 18.\"\n  }\n}\n```"
+      },
+      {
+        "id": "stack-queue",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "stacked-area"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2214,
+          "output_tokens": 165
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"stacked-area\",\n  \"data\": [\n    {\"hour\": \"9\", \"open\": 8, \"pending\": 3},\n    {\"hour\": \"10\", \"open\": 5, \"pending\": 6},\n    {\"hour\": \"11\", \"open\": 4, \"pending\": 2}\n  ],\n  \"encoding\": {\n    \"x\": \"hour\",\n    \"y\": [\"open\", \"pending\"]\n  },\n  \"a11y\": {\n    \"alt\": \"Queue items by state across a shift showing open and pending items from hour 9 to 11.\"\n  }\n}\n```"
+      },
+      {
+        "id": "scatter-hw",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "scatter"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2201,
+          "output_tokens": 143
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"scatter\",\n  \"data\": [\n    {\"height\": 160, \"weight\": 58},\n    {\"height\": 172, \"weight\": 70},\n    {\"height\": 181, \"weight\": 79}\n  ],\n  \"encoding\": {\n    \"x\": \"height\",\n    \"y\": \"weight\"\n  },\n  \"a11y\": {\n    \"alt\": \"Scatter plot showing positive correlation between height in centimeters and weight in kilograms for three data points.\"\n  }\n}\n```"
+      },
+      {
+        "id": "scatter-ads",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "scatter"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2202,
+          "output_tokens": 137
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"scatter\",\n  \"data\": [\n    {\"spend\": 2, \"revenue\": 8},\n    {\"spend\": 5, \"revenue\": 14},\n    {\"spend\": 9, \"revenue\": 21}\n  ],\n  \"encoding\": {\n    \"x\": \"spend\",\n    \"y\": \"revenue\"\n  },\n  \"a11y\": {\n    \"alt\": \"Scatter plot showing positive correlation between ad spend and revenue, both measured in thousands.\"\n  }\n}\n```"
+      },
+      {
+        "id": "scatter-latency",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "scatter"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2203,
+          "output_tokens": 147
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"scatter\",\n  \"data\": [\n    {\"kb\": 4, \"ms\": 20},\n    {\"kb\": 40, \"ms\": 55},\n    {\"kb\": 120, \"ms\": 140}\n  ],\n  \"encoding\": {\n    \"x\": \"kb\",\n    \"y\": \"ms\"\n  },\n  \"a11y\": {\n    \"alt\": \"Scatter plot showing latency increases with payload size from 20ms at 4KB to 140ms at 120KB.\"\n  }\n}\n```"
+      },
+      {
+        "id": "combo-margin",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"y\"",
+              "CK1002 unknown property \"leftAxis\"",
+              "CK1002 unknown property \"rightAxis\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2224,
+          "output_tokens": 240
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"combo\",\n  \"data\": [\n    {\"month\": \"Jan\", \"revenue\": 100, \"margin\": 0.2},\n    {\"month\": \"Feb\", \"revenue\": 140, \"margin\": 0.24},\n    {\"month\": \"Mar\", \"revenue\": 130, \"margin\": 0.22}\n  ],\n  \"encoding\": {\n    \"x\": \"month\",\n    \"leftAxis\": [\n      {\n        \"field\": \"revenue\",\n        \"type\": \"bar\",\n        \"label\": \"Revenue\"\n      }\n    ],\n    \"rightAxis\": [\n      {\n        \"field\": \"margin\",\n        \"type\": \"line\",\n        \"label\": \"Margin\"\n      }\n    ]\n  },\n  \"a11y\": {\n    \"alt\": \"Revenue increased from January to February then decreased slightly in March, while margin followed a similar trend peaking in February.\"\n  }\n}\n```"
+      },
+      {
+        "id": "combo-orders",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"y\"",
+              "CK1002 unknown property \"leftAxis\"",
+              "CK1002 unknown property \"rightAxis\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2209,
+          "output_tokens": 225
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"combo\",\n  \"data\": [\n    {\"week\": \"W1\", \"orders\": 80, \"conversion\": 0.03},\n    {\"week\": \"W2\", \"orders\": 110, \"conversion\": 0.04}\n  ],\n  \"encoding\": {\n    \"x\": \"week\",\n    \"leftAxis\": [\n      {\n        \"key\": \"orders\",\n        \"label\": \"Order Count\",\n        \"type\": \"bar\"\n      }\n    ],\n    \"rightAxis\": [\n      {\n        \"key\": \"conversion\",\n        \"label\": \"Conversion Rate\",\n        \"type\": \"line\"\n      }\n    ]\n  },\n  \"a11y\": {\n    \"alt\": \"Orders increased from 80 to 110 while conversion rate rose from 3% to 4% over two weeks.\"\n  }\n}\n```"
+      },
+      {
+        "id": "combo-weather",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"y\"",
+              "CK1002 unknown property \"leftAxis\"",
+              "CK1002 unknown property \"rightAxis\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2215,
+          "output_tokens": 228
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"combo\",\n  \"data\": [\n    {\"day\": \"Mon\", \"rain\": 2, \"temp\": 18},\n    {\"day\": \"Tue\", \"rain\": 8, \"temp\": 16},\n    {\"day\": \"Wed\", \"rain\": 0, \"temp\": 22}\n  ],\n  \"encoding\": {\n    \"x\": \"day\",\n    \"leftAxis\": [\n      {\n        \"key\": \"rain\",\n        \"label\": \"Rainfall\",\n        \"type\": \"bar\"\n      }\n    ],\n    \"rightAxis\": [\n      {\n        \"key\": \"temp\",\n        \"label\": \"Temperature\",\n        \"type\": \"line\"\n      }\n    ]\n  },\n  \"a11y\": {\n    \"alt\": \"Combo chart showing rainfall as bars and temperature as a line across three days.\"\n  }\n}\n```"
+      },
+      {
+        "id": "heat-load",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": false
+          },
+          "type": {
+            "ok": true,
+            "actual": "heatmap"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2214,
+          "output_tokens": 176
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"heatmap\",\n  \"data\": [\n    {\"hour\": \"9\", \"day\": \"Mon\", \"load\": 1},\n    {\"hour\": \"10\", \"day\": \"Mon\", \"load\": 5},\n    {\"hour\": \"9\", \"day\": \"Tue\", \"load\": 3}\n  ],\n  \"encoding\": {\n    \"x\": \"hour\",\n    \"y\": \"day\",\n    \"color\": \"load\"\n  },\n  \"a11y\": {\n    \"alt\": \"Heatmap showing system load by hour and weekday, with peak load of 5 at 10am on Monday.\"\n  }\n}\n```"
+      },
+      {
+        "id": "heat-commits",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"x\"",
+              "CK1003 missing required property \"color\"",
+              "CK1002 unknown property \"date\"",
+              "CK1002 unknown property \"value\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2213,
+          "output_tokens": 161
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"heatmap\",\n  \"data\": [\n    {\"date\": \"2026-01-01\", \"commits\": 1},\n    {\"date\": \"2026-01-02\", \"commits\": 4},\n    {\"date\": \"2026-01-03\", \"commits\": 2}\n  ],\n  \"encoding\": {\n    \"date\": \"date\",\n    \"value\": \"commits\"\n  },\n  \"a11y\": {\n    \"alt\": \"Calendar heatmap showing commit activity per day in January 2026, with peak activity on January 2nd.\"\n  }\n}\n```"
+      },
+      {
+        "id": "heat-sales",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": false
+          },
+          "type": {
+            "ok": true,
+            "actual": "heatmap"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2212,
+          "output_tokens": 175
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"heatmap\",\n  \"data\": [\n    {\"city\": \"Austin\", \"month\": \"Jan\", \"sales\": 12},\n    {\"city\": \"Austin\", \"month\": \"Feb\", \"sales\": 18},\n    {\"city\": \"Denver\", \"month\": \"Jan\", \"sales\": 9}\n  ],\n  \"encoding\": {\n    \"x\": \"month\",\n    \"y\": \"city\",\n    \"color\": \"sales\"\n  },\n  \"a11y\": {\n    \"alt\": \"Heatmap showing sales performance across Austin and Denver for January and February, with Austin February having the highest sales at 18.\"\n  }\n}\n```"
+      },
+      {
+        "id": "gauge-done",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"metric\"",
+              "CK1002 unknown property \"max\"",
+              "CK1002 unknown property \"min\"",
+              "CK1002 unknown property \"value\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2187,
+          "output_tokens": 116
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"gauge\",\n  \"data\": [{\"value\": 72, \"min\": 0, \"max\": 100}],\n  \"encoding\": {\n    \"value\": \"value\",\n    \"min\": \"min\",\n    \"max\": \"max\"\n  },\n  \"a11y\": {\n    \"alt\": \"Project completion gauge showing 72% progress out of 100%.\"\n  }\n}\n```"
+      },
+      {
+        "id": "gauge-cpu",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"metric\"",
+              "CK1003 missing required property \"columns\"",
+              "CK1002 unknown property \"max\"",
+              "CK1002 unknown property \"min\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2184,
+          "output_tokens": 118
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"gauge\",\n  \"data\": {\n    \"value\": 41,\n    \"min\": 0,\n    \"max\": 100\n  },\n  \"encoding\": {\n    \"value\": \"value\",\n    \"min\": \"min\",\n    \"max\": \"max\"\n  },\n  \"a11y\": {\n    \"alt\": \"CPU usage is at 41 percent.\"\n  }\n}\n```"
+      },
+      {
+        "id": "gauge-nps",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"metric\"",
+              "CK1002 unknown property \"max\"",
+              "CK1002 unknown property \"min\"",
+              "CK1002 unknown property \"value\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2193,
+          "output_tokens": 115
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"gauge\",\n  \"data\": [{\"value\": 62, \"min\": 0, \"max\": 100}],\n  \"encoding\": {\n    \"value\": \"value\",\n    \"min\": \"min\",\n    \"max\": \"max\"\n  },\n  \"a11y\": {\n    \"alt\": \"NPS score gauge showing 62 out of 100.\"\n  }\n}\n```"
+      },
+      {
+        "id": "kpi-revenue",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"metric\"",
+              "CK1002 unknown property \"delta\"",
+              "CK1002 unknown property \"label\"",
+              "CK1002 unknown property \"value\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2201,
+          "output_tokens": 124
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"kpi\",\n  \"data\": [{\"value\": 125000, \"delta\": 0.125, \"label\": \"Revenue\"}],\n  \"encoding\": {\n    \"value\": \"value\",\n    \"delta\": \"delta\",\n    \"label\": \"label\"\n  },\n  \"a11y\": {\n    \"alt\": \"Revenue is 125000 with a positive change of 12.5 percent.\"\n  }\n}\n```"
+      },
+      {
+        "id": "kpi-errors",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"metric\"",
+              "CK1003 missing required property \"columns\"",
+              "CK1002 unknown property \"delta\"",
+              "CK1002 unknown property \"label\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2193,
+          "output_tokens": 100
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"kpi\",\n  \"data\": {\n    \"value\": 14,\n    \"delta\": -0.2,\n    \"label\": \"Errors\"\n  },\n  \"a11y\": {\n    \"alt\": \"There are 14 open errors, down 0.2 from the previous period.\"\n  }\n}\n```"
+      },
+      {
+        "id": "kpi-uptime",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"metric\"",
+              "CK1003 missing required property \"columns\"",
+              "CK1002 unknown property \"label\"",
+              "CK1002 unknown property \"value\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2186,
+          "output_tokens": 127
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"kpi\",\n  \"data\": {\"value\": 99.95, \"label\": \"Uptime\"},\n  \"encoding\": {\n    \"value\": \"value\",\n    \"label\": \"label\"\n  },\n  \"format\": {\n    \"value\": \".2f\",\n    \"suffix\": \"%\"\n  },\n  \"a11y\": {\n    \"alt\": \"System uptime is 99.95 percent.\"\n  }\n}\n```"
+      },
+      {
+        "id": "spark-latency",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": false
+          },
+          "type": {
+            "ok": false,
+            "actual": "line"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2180,
+          "output_tokens": 182
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"line\",\n  \"data\": [\n    { \"index\": 0, \"latency\": 20 },\n    { \"index\": 1, \"latency\": 22 },\n    { \"index\": 2, \"latency\": 19 },\n    { \"index\": 3, \"latency\": 30 },\n    { \"index\": 4, \"latency\": 18 }\n  ],\n  \"encoding\": {\n    \"x\": \"index\",\n    \"y\": \"latency\"\n  },\n  \"a11y\": {\n    \"alt\": \"API latency fluctuates between 18ms and 30ms across five samples.\"\n  }\n}\n```"
+      },
+      {
+        "id": "spark-sales",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1002 unknown property \"style\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2179,
+          "output_tokens": 221
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"line\",\n  \"data\": [\n    { \"day\": 1, \"sales\": 5 },\n    { \"day\": 2, \"sales\": 8 },\n    { \"day\": 3, \"sales\": 6 },\n    { \"day\": 4, \"sales\": 11 },\n    { \"day\": 5, \"sales\": 9 }\n  ],\n  \"encoding\": {\n    \"x\": \"day\",\n    \"y\": \"sales\"\n  },\n  \"style\": {\n    \"height\": 40,\n    \"showAxes\": false,\n    \"showGrid\": false,\n    \"showPoints\": false\n  },\n  \"a11y\": {\n    \"alt\": \"Daily sales counts show an upward trend from 5 to 11 with minor fluctuations.\"\n  }\n}\n```"
+      },
+      {
+        "id": "spark-queue",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": false
+          },
+          "type": {
+            "ok": false,
+            "actual": "line"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2178,
+          "output_tokens": 182
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"line\",\n  \"data\": [\n    { \"index\": 0, \"depth\": 3 },\n    { \"index\": 1, \"depth\": 3 },\n    { \"index\": 2, \"depth\": 7 },\n    { \"index\": 3, \"depth\": 4 },\n    { \"index\": 4, \"depth\": 2 }\n  ],\n  \"encoding\": {\n    \"x\": \"index\",\n    \"y\": \"depth\"\n  },\n  \"a11y\": {\n    \"alt\": \"Queue depth sparkline showing values fluctuating between 2 and 7 over 5 time periods.\"\n  }\n}\n```"
+      },
+      {
+        "id": "mini-balance",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1002 unknown property \"height\"",
+              "CK1005 unknown chart type \"area\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2178,
+          "output_tokens": 180
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"area\",\n  \"data\": [\n    {\"index\": 0, \"balance\": 10},\n    {\"index\": 1, \"balance\": 12},\n    {\"index\": 2, \"balance\": 9},\n    {\"index\": 3, \"balance\": 14},\n    {\"index\": 4, \"balance\": 13}\n  ],\n  \"encoding\": {\n    \"x\": \"index\",\n    \"y\": \"balance\"\n  },\n  \"height\": 60,\n  \"a11y\": {\n    \"alt\": \"Account balance fluctuated between 9 and 14 over 5 periods, ending at 13.\"\n  }\n}\n```"
+      },
+      {
+        "id": "mini-cpu",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1002 unknown property \"style\"",
+              "CK1005 unknown chart type \"area\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2176,
+          "output_tokens": 192
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"area\",\n  \"data\": [\n    { \"index\": 0, \"cpu\": 20 },\n    { \"index\": 1, \"cpu\": 35 },\n    { \"index\": 2, \"cpu\": 28 },\n    { \"index\": 3, \"cpu\": 40 }\n  ],\n  \"encoding\": {\n    \"x\": \"index\",\n    \"y\": \"cpu\"\n  },\n  \"style\": {\n    \"height\": 60,\n    \"showAxes\": false,\n    \"showGrid\": false\n  },\n  \"a11y\": {\n    \"alt\": \"CPU usage fluctuates between 20% and 40% over four measurements.\"\n  }\n}\n```"
+      },
+      {
+        "id": "mini-signups",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1002 unknown property \"height\"",
+              "CK1005 unknown chart type \"area\"",
+              "CK1002 unknown property \"width\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2180,
+          "output_tokens": 199
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"area\",\n  \"data\": [\n    {\"hour\": 1, \"signups\": 1},\n    {\"hour\": 2, \"signups\": 4},\n    {\"hour\": 3, \"signups\": 2},\n    {\"hour\": 4, \"signups\": 6},\n    {\"hour\": 5, \"signups\": 5}\n  ],\n  \"encoding\": {\n    \"x\": \"hour\",\n    \"y\": \"signups\"\n  },\n  \"width\": 200,\n  \"height\": 80,\n  \"a11y\": {\n    \"alt\": \"Hourly signups fluctuated between 1 and 6 over 5 hours with a peak at hour 4.\"\n  }\n}\n```"
+      },
+      {
+        "id": "ring-uptime",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"metric\"",
+              "CK1003 missing required property \"columns\"",
+              "CK1002 unknown property \"max\"",
+              "CK1002 unknown property \"min\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2188,
+          "output_tokens": 92
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"progress-ring\",\n  \"data\": {\n    \"value\": 99.2,\n    \"min\": 0,\n    \"max\": 100\n  },\n  \"a11y\": {\n    \"alt\": \"System uptime is at 99.2 percent.\"\n  }\n}\n```"
+      },
+      {
+        "id": "ring-storage",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"metric\"",
+              "CK1002 unknown property \"max\"",
+              "CK1002 unknown property \"min\"",
+              "CK1002 unknown property \"value\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2183,
+          "output_tokens": 112
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"progress-ring\",\n  \"data\": [{\"value\": 73, \"min\": 0, \"max\": 100}],\n  \"encoding\": {\n    \"value\": \"value\",\n    \"min\": \"min\",\n    \"max\": \"max\"\n  },\n  \"a11y\": {\n    \"alt\": \"Storage is 73 percent full.\"\n  }\n}\n```"
+      },
+      {
+        "id": "ring-tasks",
+        "library": "chartkit",
+        "ok": false,
+        "stages": {
+          "validate": {
+            "ok": false,
+            "errors": [
+              "CK1003 missing required property \"metric\"",
+              "CK1003 missing required property \"columns\"",
+              "CK1002 unknown property \"max\"",
+              "CK1002 unknown property \"min\""
+            ]
+          }
+        },
+        "usage": {
+          "input_tokens": 2186,
+          "output_tokens": 98
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"progress-ring\",\n  \"data\": {\n    \"value\": 40,\n    \"min\": 0,\n    \"max\": 50\n  },\n  \"a11y\": {\n    \"alt\": \"Progress ring showing 40 out of 50 tasks completed, representing 80% completion.\"\n  }\n}\n```"
+      },
+      {
+        "id": "spike-deploys",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "spike"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2207,
+          "output_tokens": 155
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"spike\",\n  \"data\": [\n    {\"hour\": \"09\", \"count\": 1},\n    {\"hour\": \"10\", \"count\": 4},\n    {\"hour\": \"11\", \"count\": 0},\n    {\"hour\": \"12\", \"count\": 2}\n  ],\n  \"encoding\": {\n    \"x\": \"hour\",\n    \"y\": \"count\"\n  },\n  \"a11y\": {\n    \"alt\": \"Deployment activity shows 4 deploys at 10am, with lower activity in other hours.\"\n  }\n}\n```"
+      },
+      {
+        "id": "spike-errors",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "spike"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2197,
+          "output_tokens": 152
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"spike\",\n  \"data\": [\n    {\"minute\": \"00\", \"count\": 0},\n    {\"minute\": \"01\", \"count\": 3},\n    {\"minute\": \"02\", \"count\": 1}\n  ],\n  \"encoding\": {\n    \"x\": \"minute\",\n    \"y\": \"count\"\n  },\n  \"a11y\": {\n    \"alt\": \"Error spike chart showing 0 errors at minute 00, 3 errors at minute 01, and 1 error at minute 02.\"\n  }\n}\n```"
+      },
+      {
+        "id": "spike-alerts",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "spike"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2198,
+          "output_tokens": 144
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"spike\",\n  \"data\": [\n    {\"day\": \"Mon\", \"count\": 2},\n    {\"day\": \"Tue\", \"count\": 0},\n    {\"day\": \"Wed\", \"count\": 5}\n  ],\n  \"encoding\": {\n    \"x\": \"day\",\n    \"y\": \"count\"\n  },\n  \"a11y\": {\n    \"alt\": \"Alert counts per day showing 2 alerts on Monday, none on Tuesday, and 5 on Wednesday.\"\n  }\n}\n```"
+      },
+      {
+        "id": "candle-up",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "candlestick"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2225,
+          "output_tokens": 205
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"candlestick\",\n  \"data\": [\n    {\"date\": \"2026-01-02\", \"open\": 10, \"high\": 12, \"low\": 9, \"close\": 11},\n    {\"date\": \"2026-01-03\", \"open\": 11, \"high\": 14, \"low\": 11, \"close\": 13}\n  ],\n  \"encoding\": {\n    \"x\": \"date\",\n    \"open\": \"open\",\n    \"high\": \"high\",\n    \"low\": \"low\",\n    \"close\": \"close\"\n  },\n  \"a11y\": {\n    \"alt\": \"Candlestick chart showing two consecutive rising trading sessions from January 2nd to 3rd, 2026.\"\n  }\n}\n```"
+      },
+      {
+        "id": "candle-down",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "candlestick"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2203,
+          "output_tokens": 187
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"candlestick\",\n  \"data\": [{\"date\": \"2026-01-06\", \"open\": 20, \"high\": 21, \"low\": 16, \"close\": 17}],\n  \"encoding\": {\n    \"x\": \"date\",\n    \"open\": \"open\",\n    \"high\": \"high\",\n    \"low\": \"low\",\n    \"close\": \"close\"\n  },\n  \"a11y\": {\n    \"alt\": \"Candlestick chart showing a bearish session on January 6, 2026, where the price opened at 20, reached a high of 21, dropped to a low of 16, and closed at 17.\"\n  }\n}\n```"
+      },
+      {
+        "id": "candle-flat",
+        "library": "chartkit",
+        "ok": true,
+        "stages": {
+          "validate": {
+            "ok": true,
+            "errors": []
+          },
+          "render": {
+            "ok": true
+          },
+          "type": {
+            "ok": true,
+            "actual": "candlestick"
+          },
+          "fields": {
+            "ok": true
+          },
+          "values": {
+            "ok": true
+          }
+        },
+        "usage": {
+          "input_tokens": 2252,
+          "output_tokens": 238
+        },
+        "output": "```json\n{\n  \"version\": \"1\",\n  \"type\": \"candlestick\",\n  \"data\": [\n    {\"date\": \"2026-02-01\", \"open\": 8, \"high\": 9, \"low\": 7, \"close\": 9},\n    {\"date\": \"2026-02-02\", \"open\": 9, \"high\": 9, \"low\": 8, \"close\": 8},\n    {\"date\": \"2026-02-03\", \"open\": 8, \"high\": 8, \"low\": 8, \"close\": 8}\n  ],\n  \"encoding\": {\n    \"x\": \"date\",\n    \"open\": \"open\",\n    \"high\": \"high\",\n    \"low\": \"low\",\n    \"close\": \"close\"\n  },\n  \"a11y\": {\n    \"alt\": \"Candlestick chart showing price movement over three sessions, with the third session flat at 8.\"\n  }\n}\n```"
+      }
+    ]
+  }
+}
