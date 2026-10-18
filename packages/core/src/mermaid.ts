@@ -224,8 +224,9 @@ function build(kind: Kind, headerRest: string, body: string[], meta: Meta, maxPo
 
 interface Series {
   mark: "bar" | "line";
-  name: string;
+  name?: string;
   values: number[];
+  field: string;
 }
 
 function buildXy(headerRest: string, body: string[], meta: Meta, maxPoints: number, warnings: ImportWarning[]): Record<string, unknown> | null {
@@ -245,8 +246,6 @@ function buildXy(headerRest: string, body: string[], meta: Meta, maxPoints: numb
   let xTitle: string | undefined;
   let yTitle: string | undefined;
   let yRange: { min: number; max: number } | null = null;
-  let bars = 0;
-  let lines = 0;
 
   for (const line of body) {
     const trimmed = line.trim();
@@ -282,8 +281,7 @@ function buildXy(headerRest: string, body: string[], meta: Meta, maxPoints: numb
         warnings.push(warn("CK8004", `Could not read ${mark} values.`, "/encoding/y"));
         continue;
       }
-      const count = mark === "bar" ? ++bars : ++lines;
-      series.push({ mark, name: parsed.name || (mark === "bar" ? `Bar ${count}` : `Line ${count}`), values: parsed.values });
+      series.push({ mark, name: parsed.name, values: parsed.values, field: "" });
       continue;
     }
     if (dropDirective(trimmed, warnings)) continue;
@@ -324,32 +322,41 @@ function buildXy(headerRest: string, body: string[], meta: Meta, maxPoints: numb
   if (yRange) {
     warnings.push(warn("CK8004", "Bar and line charts size the y-axis from the data, so the Mermaid y range is not drawn.", "/axes/y"));
   }
+  nameUnnamed(series, yTitle);
+  const xKey = claimKey(slugKey(xTitle), "x", new Set());
+  const used = new Set<string>([xKey]);
+  for (const item of series) {
+    const label = series.length === 1 ? yTitle || item.name : item.name || yTitle;
+    item.field = claimKey(slugKey(label), "value", used);
+  }
+  const split = secondAxis(series, type, warnings);
 
   const rows = labels.map((label, index) => {
-    const row: Record<string, string | number> = { x: numeric && type === "line" ? Number(label) : label };
-    series.forEach((item, seriesIndex) => {
-      row[fieldName(item.mark, seriesIndex, series)] = item.values[index] ?? 0;
-    });
+    const row: Record<string, string | number> = { [xKey]: numeric && type === "line" ? Number(label) : label };
+    for (const item of series) row[item.field] = item.values[index] ?? 0;
     return row;
   });
   const channels = series.map((item, index) => {
-    const channel: Record<string, unknown> = {
-      field: fieldName(item.mark, index, series),
-      title: item.name,
-    };
+    const channel: Record<string, unknown> = { field: item.field };
+    if (item.name) channel.title = item.name;
     if (type === "combo") channel.mark = item.mark;
+    if (split.has(index)) channel.axis = "y2";
     if (yRange && index === 0) channel.scale = { domain: [yRange.min, yRange.max] };
     return channel;
   });
   const axes: Record<string, unknown> = {};
   if (xTitle) axes.x = { title: xTitle };
   if (yTitle) axes.y = { title: yTitle };
+  if (split.size) {
+    const titled = series.find((item, index) => split.has(index) && item.name);
+    axes.y2 = titled?.name ? { title: titled.name } : true;
+  }
   const spec: Record<string, unknown> = {
     version: "1",
     type,
     data: rows,
     encoding: {
-      x: numeric && type === "line" ? { field: "x", type: "quantitative", ...(xTitle ? { title: xTitle } : {}) } : "x",
+      x: numeric && type === "line" ? { field: xKey, type: "quantitative", ...(xTitle ? { title: xTitle } : {}) } : xKey,
       y: channels.length === 1 ? channels[0] : channels,
     },
     a11y: { alt: chooseAlt(meta, diagramTitle, xyAlt(diagramTitle, series, labels)) },
@@ -360,11 +367,78 @@ function buildXy(headerRest: string, body: string[], meta: Meta, maxPoints: numb
   return spec;
 }
 
-function fieldName(mark: "bar" | "line", index: number, series: Series[]): string {
-  const same = series.filter((item) => item.mark === mark);
-  const at = series.slice(0, index + 1).filter((item) => item.mark === mark).length;
-  if (same.length === 1) return mark;
-  return `${mark}${at}`;
+function nameUnnamed(series: Series[], yTitle: string | undefined): void {
+  if (!yTitle) return;
+  const unnamed = series.filter((item) => !item.name);
+  unnamed.forEach((item, index) => {
+    item.name = index === 0 ? yTitle : `${yTitle} ${index + 1}`;
+  });
+}
+
+/** A field key: a letter, then letters, digits, or underscores. */
+function slugKey(label: string | undefined): string {
+  if (!label) return "";
+  const slug = label
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  if (!slug) return "";
+  return slug.charCodeAt(0) >= 97 ? slug : `f_${slug}`;
+}
+
+function claimKey(slug: string, fallback: string, used: Set<string>): string {
+  const base = slug || fallback;
+  let key = base;
+  let n = 2;
+  while (used.has(key)) {
+    key = `${base}${n}`;
+    n += 1;
+  }
+  used.add(key);
+  return key;
+}
+
+interface Extent {
+  span: number;
+  mag: number;
+}
+
+function extentOf(values: number[]): Extent {
+  let min = Infinity;
+  let max = -Infinity;
+  for (const value of values) {
+    if (value < min) min = value;
+    if (value > max) max = value;
+  }
+  if (!Number.isFinite(min)) return { span: 0, mag: 0 };
+  return { span: max - min, mag: Math.max(Math.abs(min), Math.abs(max)) };
+}
+
+/** Line range under about 1/10 of the bars, or the two magnitudes an order apart. */
+function scalesDiffer(line: Extent, bar: Extent): boolean {
+  if (bar.span > 0 && line.span > 0) {
+    const ratio = line.span / bar.span;
+    if (ratio < 0.1 || ratio > 10) return true;
+  }
+  if (bar.mag > 0 && line.mag > 0) {
+    const ratio = line.mag / bar.mag;
+    if (ratio < 0.1 || ratio > 10) return true;
+  }
+  return false;
+}
+
+function secondAxis(series: Series[], type: string, warnings: ImportWarning[]): Set<number> {
+  const split = new Set<number>();
+  if (type !== "combo") return split;
+  const bars = extentOf(series.filter((item) => item.mark === "bar").flatMap((item) => item.values));
+  series.forEach((item, index) => {
+    if (item.mark === "line" && scalesDiffer(extentOf(item.values), bars)) split.add(index);
+  });
+  if (split.size) {
+    warnings.push(warn("CK8004", "The line scale differs from the bars, so the line is drawn on a second y-axis.", "/encoding/y"));
+  }
+  return split;
 }
 
 function xyAlt(title: string | undefined, series: Series[], labels: string[]): string {

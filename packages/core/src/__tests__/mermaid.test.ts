@@ -24,8 +24,13 @@ describe("fromMermaid", () => {
     expect(result.spec?.type).toBe("combo");
     expect(result.spec?.title).toBe("Weekly orders");
     expect(result.spec?.a11y).toMatchObject({ alt: "Weekly orders" });
-    const data = result.spec?.data as { x: string }[];
+    const data = result.spec?.data as { x: string; placed: number; shipped: number }[];
     expect(data.map((row) => row.x)).toEqual(["Mon", "Tue", "Wed", "Thu", "Fri"]);
+    expect(data.map((row) => row.placed)).toEqual([12, 18, 15, 22, 30]);
+    expect(data.map((row) => row.shipped)).toEqual([10, 14, 16, 20, 28]);
+    const y = (result.spec?.encoding as { y: { field: string; axis?: string }[] }).y;
+    expect(y.map((channel) => channel.field)).toEqual(["placed", "shipped"]);
+    expect(y.every((channel) => channel.axis === undefined)).toBe(true);
     expect(validate(result.spec).ok).toBe(true);
     const svg = render(result.spec);
     expect(svg).toContain('data-ck-type="combo"');
@@ -37,6 +42,8 @@ describe("fromMermaid", () => {
     const result = fromMermaid(read("xychart-horizontal.mmd"));
     expect(result.spec?.type).toBe("bar");
     expect(result.spec?.mark).toMatchObject({ orientation: "horizontal" });
+    expect(result.spec?.encoding).toMatchObject({ x: "x", y: { field: "hours", title: "Hours" } });
+    expect(JSON.stringify(result.spec)).not.toContain("Bar 1");
     expect(validate(result.spec).ok).toBe(true);
     expect(render(result.spec)).toContain('data-ck-type="bar"');
   });
@@ -46,9 +53,15 @@ describe("fromMermaid", () => {
     expect(result.spec?.type).toBe("line");
     expect(codes(result.warnings)).toContain("CK8004");
     expect(result.warnings.some((item) => item.message.includes("y range"))).toBe(true);
-    const data = result.spec?.data as { x: number }[];
-    expect(data[0].x).toBe(0);
-    expect(data[data.length - 1].x).toBe(6);
+    const data = result.spec?.data as { hour: number; degrees: number }[];
+    expect(data[0].hour).toBe(0);
+    expect(data[data.length - 1].hour).toBe(6);
+    expect(data[0].degrees).toBe(3);
+    expect(result.spec?.encoding).toMatchObject({
+      x: { field: "hour", type: "quantitative" },
+      y: { field: "degrees", title: "Degrees" },
+    });
+    expect(JSON.stringify(result.spec)).not.toContain("Line 1");
     expect(validate(result.spec).ok).toBe(true);
     expect(render(result.spec)).toContain('data-ck-type="line"');
   });
@@ -173,6 +186,69 @@ describe("fromMermaid", () => {
     const svg = render(result.spec);
     expect(svg).not.toContain("<script>");
     expect(svg).toContain("&lt;script&gt;");
+  });
+
+  it("slugs axis and series titles, and falls back to x and value", () => {
+    const named = fromMermaid(`xychart-beta
+    x-axis "Week day" [Mon, Tue]
+    y-axis "USD"
+    bar "Net sales" [10, 12]
+    line "Return rate" [0.2, 0.4]`);
+    const row = (named.spec?.data as Record<string, unknown>[])[0];
+    expect(Object.keys(row)).toEqual(["week_day", "net_sales", "return_rate"]);
+    const y = (named.spec?.encoding as { y: { field: string; axis?: string }[] }).y;
+    expect(y[1].axis).toBe("y2");
+    expect(named.warnings.some((item) => item.message.includes("second y-axis"))).toBe(true);
+    expect(named.spec?.axes).toMatchObject({ y2: { title: "Return rate" } });
+    expect(validate(named.spec).ok).toBe(true);
+
+    const single = fromMermaid(`xychart-beta
+    x-axis "Month" [Jan, Feb]
+    y-axis "USD"
+    bar "Product" [10, 20]`);
+    expect(single.spec?.encoding).toMatchObject({ x: "month", y: { field: "usd", title: "Product" } });
+
+    const plain = fromMermaid(`xychart-beta
+    bar [4, 9]
+    line [5, 8]`);
+    expect(Object.keys((plain.spec?.data as Record<string, unknown>[])[0]).sort()).toEqual(["value", "value2", "x"]);
+    expect(JSON.stringify(plain.spec)).not.toContain("Bar 1");
+    expect(JSON.stringify(plain.spec)).not.toContain("Line 1");
+    expect((plain.spec?.encoding as { y: { axis?: string }[] }).y.every((channel) => !channel.axis)).toBe(true);
+  });
+
+  it("names every unnamed series from the y-axis title", () => {
+    const result = fromMermaid(`xychart-beta
+    x-axis [Mon, Tue]
+    y-axis "Orders"
+    bar [4, 9]
+    line [5, 8]`);
+    const y = (result.spec?.encoding as { y: { field: string; title: string }[] }).y;
+    expect(y.map((channel) => channel.title)).toEqual(["Orders", "Orders 2"]);
+    expect(y.map((channel) => channel.field)).toEqual(["orders", "orders_2"]);
+    expect(JSON.stringify(result.spec)).not.toContain("Bar 1");
+    expect(JSON.stringify(result.spec)).not.toContain("Line 1");
+  });
+
+  it("renders a pie as a filled disc", () => {
+    const result = fromMermaid(read("pie.mmd"));
+    const svg = render(result.spec) ?? "";
+    const paths = [...svg.matchAll(/<path d="([^"]+)"/g)].map((match) => match[1]);
+    expect(paths.length).toBe(3);
+    for (const path of paths) expect(path.match(/A /g)?.length).toBe(1);
+    expect(svg).not.toContain('font-size="20"');
+    const holed = render({
+      version: "1",
+      type: "donut",
+      data: [
+        { label: "Oak", value: 8 },
+        { label: "Pine", value: 3 },
+      ],
+      encoding: { x: "label", y: "value" },
+      a11y: { alt: "Oak is the larger slice of the sample." },
+    });
+    const hole = [...(holed ?? "").matchAll(/<path d="([^"]+)"/g)].map((match) => match[1]);
+    expect(hole.some((path) => (path.match(/A /g)?.length ?? 0) >= 2)).toBe(true);
   });
 
   it("rejects a radar with fewer than three spokes", () => {
