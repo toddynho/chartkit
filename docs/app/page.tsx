@@ -1,14 +1,29 @@
 import Link from "next/link";
-import { ChartView } from "@/lib/chart";
+import { ChartView } from "@/components/ChartView";
 import { headline } from "@/lib/benchmarks";
-import { heroSpec, examples } from "@/lib/specs";
+import { heroSpec, chartTypes, examples } from "@/lib/specs";
 import { snippetsFor } from "@/lib/snippets";
 import { FrameworkTabs } from "@/components/FrameworkTabs";
 import { LiveSpec } from "@/components/LiveSpec";
 import { ThemeShowcase } from "@/components/ThemeShowcase";
 import { lookPanels } from "@/lib/looks";
 
-const previewSlugs = ["channels-bar", "traffic-donut", "orders-combo", "capacity-gauge", "load-grid", "week-candles"];
+const previewSlugs = [
+  "channels-bar",
+  "traffic-donut",
+  "orders-combo",
+  "capacity-gauge",
+  "load-grid",
+  "week-candles",
+  "checkout-histogram",
+  "close-boxplot",
+  "model-radar",
+  "signup-funnel",
+  "inventory-treemap",
+  "mill-sankey",
+  "revenue-bullet",
+  "quarter-waterfall",
+];
 
 export default function HomePage() {
   const previews = previewSlugs
@@ -43,8 +58,8 @@ export default function HomePage() {
               <span>server render</span>
             </Link>
             <Link className="stat" href="/benchmarks#agents">
-              <b>{headline.repair}</b>
-              <span>repair(), no docs, first try</span>
+              <b>20/42</b>
+              <span>no docs, first try. 42/42 with the docs</span>
             </Link>
           </div>
         </div>
@@ -87,8 +102,8 @@ export default function HomePage() {
           <article className="card">
             <h3>repair()</h3>
             <p>
-              Applies the safe patches validate already produced. It does not invent data. With no docs, repair() takes a
-              first try from {headline.repairFrom} to {headline.repairTo}.
+              Applies the safe patches validate already produced. It does not invent data. The measured run was 20/42
+              on the first try with no docs, and 42/42 on the first try with the docs.
             </p>
             <Link href="/agents">The agent loop</Link>
           </article>
@@ -96,8 +111,18 @@ export default function HomePage() {
       </section>
 
       <section className="section">
-        <h2>Fourteen chart types</h2>
-        <p className="lede">Server-rendered SVG. Edit any of them.</p>
+        <h2>Twenty-two chart types</h2>
+        <p className="lede">
+          Server-rendered SVG, with tooltip, crosshair, and the rest of the interaction layer after the page hydrates.
+          Histogram through waterfall load their chart modules on demand.
+        </p>
+        <ul className="type-list">
+          {chartTypes.map((item) => (
+            <li key={item.type}>
+              <Link href={`/docs/charts/${item.type}`}>{item.title}</Link>
+            </li>
+          ))}
+        </ul>
         <div className="gallery">
           {previews.map((example) => (
             <article className="card" key={example.slug}>

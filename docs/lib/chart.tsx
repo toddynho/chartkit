@@ -38,9 +38,3 @@ export function specAtSize(spec: unknown, width: number, height?: number): unkno
   return next;
 }
 
-export function ChartView({ spec, className, labelScale = 1 }: { spec: unknown; className?: string; labelScale?: number }) {
-  const svg = scaleSvgText(chartSvg(spec), labelScale);
-  const preset = usesPreset(spec);
-  const classes = ["chart-host", preset ? "chart-preset" : "", className].filter(Boolean).join(" ");
-  return <div className={classes} dangerouslySetInnerHTML={{ __html: svg }} />;
-}

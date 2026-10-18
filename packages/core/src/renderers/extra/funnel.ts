@@ -31,7 +31,9 @@ export function renderFunnel(spec: Record<string, unknown>): string | null {
     const w0 = Math.max(barH, (value / max) * plotW);
     const next = stages[index + 1]?.[1] ?? value;
     const w1 = Math.max(barH, (next / max) * plotW);
-    const tip = `${label}: ${fmt(value, frame.locale)} · ${formatPercent(conversion, frame.locale)} of previous`;
+    const valueText = fmt(value, frame.locale);
+    const pct = formatPercent(conversion, frame.locale);
+    const tip = index === 0 ? `${label}: ${valueText} (start)` : `${label}: ${valueText} · ${pct} of previous`;
     const color = fill(frame, 0);
     if (trapezoid) {
       const y1 = y + barH;
@@ -45,7 +47,7 @@ export function renderFunnel(spec: Record<string, unknown>): string | null {
     }
     const mid = y + barH / 2;
     parts.push(text(16, mid - 6, label, cssVar("text", frame.preset.text), 14, "650"));
-    parts.push(text(16, mid + 12, `${fmt(value, frame.locale)} · ${formatPercent(conversion, frame.locale)}`, cssVar("muted", frame.preset.muted), 12, "500"));
+    parts.push(text(16, mid + 12, index === 0 ? valueText : `${valueText} · ${pct}`, cssVar("muted", frame.preset.muted), 12, "500"));
   });
   return view.done();
 }

@@ -15,11 +15,12 @@ export function attach(host: EventTarget & { querySelector?(selector: string): E
     return { destroy() {} };
   }
   const root = host as unknown as Element;
+  // Keep position off the shared `.ck-tip` class. Interact places that card with host-relative coordinates.
   if (!document.getElementById("ck-extra-tip-style")) {
     const style = document.createElement("style");
     style.id = "ck-extra-tip-style";
     style.textContent =
-      ".ck-tip{position:fixed;z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums;max-width:280px}";
+      "[data-ck-extra-tip].ck-tip{position:fixed}.ck-tip{z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums;max-width:280px}";
     document.head.append(style);
   }
   const tip = document.createElement("div");

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { scaleSvgText, specAtSize } from "@/lib/chart";
+import { specAtSize } from "@/lib/chart";
 import { THEMES } from "@/lib/specs";
+import { ChartHost } from "./ChartHost";
 
 interface Props {
   initialSpec: unknown;
@@ -11,15 +12,9 @@ interface Props {
   labelScale?: number;
 }
 
-async function draw(spec: unknown, preset: boolean): Promise<string> {
-  if (preset) await import("@chartkitdev/core/themes/all");
-  const { render } = await import("@chartkitdev/core/all");
-  return render(spec);
-}
-
 export function SpecEditor({ initialSpec, initialSvg, mode = "compact", labelScale = 1 }: Props) {
   const [text, setText] = useState(() => JSON.stringify(initialSpec, null, 2));
-  const [svg, setSvg] = useState(initialSvg);
+  const [liveSpec, setLiveSpec] = useState(initialSpec);
   const [theme, setTheme] = useState("site");
   const [status, setStatus] = useState("Showing the published spec.");
   const [issues, setIssues] = useState<string[]>([]);
@@ -34,8 +29,9 @@ export function SpecEditor({ initialSpec, initialSvg, mode = "compact", labelSca
   const themeRef = useRef(theme);
   textRef.current = text;
   themeRef.current = theme;
+  void labelScale;
 
-  async function renderText(source: string, themeName: string) {
+  function renderText(source: string, themeName: string) {
     const gen = ++renderGen.current;
     let parsed: unknown;
     try {
@@ -46,29 +42,21 @@ export function SpecEditor({ initialSpec, initialSvg, mode = "compact", labelSca
       setIssues([]);
       return;
     }
+    if (gen !== renderGen.current) return;
     const sized = mode === "hero" && fitWidth.current ? specAtSize(parsed, fitWidth.current) : parsed;
     const themed = applyTheme(sized, themeName);
-    try {
-      const next = scaleSvgText(await draw(themed, themeName !== "site"), labelScale);
-      if (gen !== renderGen.current) return;
-      setSvg(next);
-      if (mode === "hero" && fitWidth.current) setPixelWidth(fitWidth.current);
-      if (quietFit.current) {
-        quietFit.current = false;
-        return;
-      }
-      if (keepStatus.current) {
-        keepStatus.current = false;
-      } else if (next.includes("ck-chart-error")) {
-        setStatus("This spec rendered an error chart. Validate or Repair it.");
-        setIssues([]);
-      } else {
-        setStatus(themeName === "site" ? "Rendered." : `Rendered with the ${themeName} theme.`);
-        setIssues([]);
-      }
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Render failed");
+    setLiveSpec(themed);
+    if (mode === "hero" && fitWidth.current) setPixelWidth(fitWidth.current);
+    if (quietFit.current) {
+      quietFit.current = false;
+      return;
     }
+    if (keepStatus.current) {
+      keepStatus.current = false;
+      return;
+    }
+    setStatus(themeName === "site" ? "Rendered." : `Rendered with the ${themeName} theme.`);
+    setIssues([]);
   }
 
   useEffect(() => {
@@ -77,7 +65,7 @@ export function SpecEditor({ initialSpec, initialSvg, mode = "compact", labelSca
       return;
     }
     const timer = window.setTimeout(() => {
-      void renderText(text, theme);
+      renderText(text, theme);
     }, 160);
     return () => window.clearTimeout(timer);
     // theme and text are the inputs; renderText is recreated each render.
@@ -94,7 +82,7 @@ export function SpecEditor({ initialSpec, initialSvg, mode = "compact", labelSca
       const next = Math.round(el.clientWidth - padX);
       if (next < 32 || next === fitWidth.current) return;
       fitWidth.current = next;
-      void renderText(textRef.current, themeRef.current);
+      renderText(textRef.current, themeRef.current);
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -164,13 +152,17 @@ export function SpecEditor({ initialSpec, initialSvg, mode = "compact", labelSca
     }
   }
 
+  function currentSvg(): string {
+    return hostRef.current?.querySelector("svg")?.outerHTML ?? initialSvg;
+  }
+
   function onSvg() {
-    const blob = new Blob([svg], { type: "image/svg+xml" });
+    const blob = new Blob([currentSvg()], { type: "image/svg+xml" });
     download(blob, "chartkit.svg");
   }
 
   function onPng() {
-    const sized = svg.replace('width="100%"', 'width="640"');
+    const sized = currentSvg().replace('width="100%"', 'width="640"');
     const blob = new Blob([sized], { type: "image/svg+xml;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const image = new Image();
@@ -199,11 +191,12 @@ export function SpecEditor({ initialSpec, initialSvg, mode = "compact", labelSca
 
   return (
     <div className={frame}>
-      <div
+      <ChartHost
         ref={hostRef}
+        spec={liveSpec}
+        svg={initialSvg}
+        pixelWidth={pixelWidth}
         className={preset ? "chart-host chart-preset preview" : "chart-host preview"}
-        data-pixel-width={pixelWidth ?? undefined}
-        dangerouslySetInnerHTML={{ __html: svg }}
       />
       <div className="editor-side">
         <label htmlFor="spec-json">Chart spec (JSON)</label>

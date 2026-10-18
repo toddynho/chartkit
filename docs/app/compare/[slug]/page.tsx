@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CodeBlock } from "@/components/CodeBlock";
-import { ChartView } from "@/lib/chart";
+import { ChartView } from "@/components/ChartView";
 import { headline } from "@/lib/benchmarks";
 import { chartkitCode, rivalBySlug, rivals, sameSpec } from "@/lib/rivals";
 import { pageMeta } from "@/lib/site";

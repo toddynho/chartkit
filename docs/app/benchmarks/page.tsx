@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChartView } from "@/lib/chart";
+import { ChartView } from "@/components/ChartView";
 import {
   AGENT_MEASURED,
   CORE_COMMIT,

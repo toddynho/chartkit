@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["@chartkitdev/core"],
+  transpilePackages: ["@chartkitdev/core", "@chartkitdev/vanilla"],
   async redirects() {
     return [
       {
