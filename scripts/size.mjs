@@ -89,6 +89,7 @@ const isolation = {
   lineOmitsCandle: !line.code.includes('data-ck-mark="candle"'),
   lineOmitsRetro: !line.code.includes("#ff7edb"),
   lineOmitsValidator: !line.code.includes("CK1004"),
+  lineOmitsMermaid: !debug.includes("fromMermaid") && !debug.includes("xychart"),
   lineOmitsInteract: !line.code.includes("data-ck-tip") && !debug.includes("data-ck-tip"),
   allIncludesRetro: all.code.includes("#ff7edb"),
   allIncludesCandle: all.code.includes('data-ck-mark="candle"'),
@@ -150,10 +151,45 @@ for (const [name, built] of [["vue", vue], ["svelte", svelte], ["vanilla", vanil
   const pullsExtra = built.code.includes('@chartkitdev/core/extra"') || built.code.includes("@chartkitdev/core/extra'");
   isolation[`${name}OmitsExtra`] = !pullsExtra;
 }
+isolation.vanillaOmitsMermaid = !vanilla.code.includes("fromMermaid") && !vanilla.code.includes("xychart");
 for (const [name, built] of [["vueLine", vueLine], ["svelteLine", svelteLine], ["vanillaLine", vanillaLine]]) {
   const leaked = built.code.includes('data-ck-mark="whisker"') || built.code.includes('data-ck-renderer="histogram"') || built.code.includes("function renderHistogram");
   isolation[`${name}OmitsExtra`] = !leaked;
 }
+
+const mermaid = await gzipOf(join(src, "mermaid.ts"));
+const vanillaAuto = await gzipOf(join(root, "packages/vanilla/src/auto.ts"), { external: true });
+const markdown = await gzipOf(join(root, "packages/markdown/src/index.ts"), { external: true });
+
+const globalAlias = {
+  "@chartkitdev/core/mermaid": join(src, "mermaid.ts"),
+  "@chartkitdev/core/extra": join(src, "extra.ts"),
+  "@chartkitdev/core/all": join(src, "all.ts"),
+  "@chartkitdev/core/interact": join(src, "interact.ts"),
+  "@chartkitdev/core": join(src, "index.ts"),
+};
+async function iife(entry) {
+  const outfile = join(tmpdir(), `chartkit-size-global-${Math.random().toString(36).slice(2)}.js`);
+  await build({
+    entryPoints: [entry],
+    bundle: true,
+    minify: true,
+    format: "iife",
+    platform: "browser",
+    target: "es2020",
+    legalComments: "none",
+    outfile,
+    alias: globalAlias,
+    logLevel: "silent",
+  });
+  const code = readFileSync(outfile);
+  return { minBytes: code.length, gzipBytes: gzipSync(code, { level: 9 }).length, code: code.toString("utf8") };
+}
+const vanillaSrc = join(root, "packages/vanilla/src");
+const globalBundle = await iife(join(vanillaSrc, "global.ts"));
+const globalAuto = await iife(join(vanillaSrc, "global-auto.ts"));
+const globalMermaid = await iife(join(vanillaSrc, "global-mermaid.ts"));
+isolation.globalAutoOmitsMermaid = !globalAuto.code.includes("xychart") && !globalAuto.code.includes("CK8004");
 
 const extra = await gzipOf(join(src, "extra.ts"));
 const extraTypes = ["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall"];
@@ -178,11 +214,17 @@ const measured = {
   svelteLine: svelteLine.gzipBytes,
   vanillaLine: vanillaLine.gzipBytes,
   extra: extra.gzipBytes,
+  mermaid: mermaid.gzipBytes,
+  vanillaAuto: vanillaAuto.gzipBytes,
+  markdown: markdown.gzipBytes,
+  global: globalBundle.gzipBytes,
+  globalAuto: globalAuto.gzipBytes,
+  globalMermaid: globalMermaid.gzipBytes,
 };
 for (const name of extraTypes) measured[name] = chartSizes[name].gzipBytes;
 const budget = JSON.parse(readFileSync(join(root, "scripts/size-budget.json"), "utf8"));
 const failures = [];
-for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "extra", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall"]) {
+for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "extra", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid"]) {
   if (typeof budget[key] !== "number") failures.push(`${key} budget missing`);
   else if (measured[key] > budget[key]) failures.push(`${key} gzip ${measured[key]} > budget ${budget[key]}`);
 }
@@ -206,6 +248,12 @@ console.log(JSON.stringify({
     svelteLine: svelteLine.minBytes,
     vanillaLine: vanillaLine.minBytes,
     extra: extra.minBytes,
+    mermaid: mermaid.minBytes,
+    vanillaAuto: vanillaAuto.minBytes,
+    markdown: markdown.minBytes,
+    global: globalBundle.minBytes,
+    globalAuto: globalAuto.minBytes,
+    globalMermaid: globalMermaid.minBytes,
     ...Object.fromEntries(extraTypes.map((name) => [name, chartSizes[name].minBytes])),
   },
   isolation,

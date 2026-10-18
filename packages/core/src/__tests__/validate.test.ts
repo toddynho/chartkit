@@ -280,6 +280,63 @@ describe("diagnostic codes", () => {
     expect(codes).toContain("CK3003");
   });
 
+  it("CK1005 maps Mermaid type names onto ChartKit types", () => {
+    const line = validate({ ...base, type: "xychart" });
+    expect(line.errors.find((item) => item.code === "CK1005")?.fix).toEqual([
+      { op: "replace", path: "/type", value: "line" },
+    ]);
+    expect(repair({ ...base, type: "xychart-beta" }).spec).toMatchObject({ type: "line" });
+
+    const bar = validate({
+      ...base,
+      type: "xychart-beta",
+      encoding: { x: "month", y: { field: "revenue", mark: "bar" } },
+    });
+    expect(bar.errors.find((item) => item.code === "CK1005")?.fix).toEqual([
+      { op: "replace", path: "/type", value: "bar" },
+    ]);
+
+    const combo = {
+      ...base,
+      type: "xychart",
+      data: [
+        { month: "Jan", revenue: 10, rate: 0.2 },
+        { month: "Feb", revenue: 12, rate: 0.4 },
+      ],
+      encoding: {
+        x: "month",
+        y: [
+          { field: "revenue", mark: "bar" },
+          { field: "rate", mark: "line" },
+        ],
+      },
+    };
+    expect(validate(combo).errors.find((item) => item.code === "CK1005")?.fix).toEqual([
+      { op: "replace", path: "/type", value: "combo" },
+    ]);
+    expect(repair(combo).ok).toBe(true);
+
+    for (const [raw, type] of [
+      ["sankey-beta", "sankey"],
+      ["radar-beta", "radar"],
+      ["treemap-beta", "treemap"],
+    ] as const) {
+      const result = validate({ ...base, type: raw });
+      expect(result.errors.find((item) => item.code === "CK1005")?.fix).toEqual([
+        { op: "replace", path: "/type", value: type },
+      ]);
+    }
+
+    const stacked = validate({ ...base, type: "area", mark: { stack: "stack" } });
+    expect(stacked.errors.find((item) => item.code === "CK1005")?.fix).toEqual([
+      { op: "replace", path: "/type", value: "stacked-area" },
+    ]);
+    expect(repair({ ...base, type: "area", mark: { stack: "percent" } }).spec).toMatchObject({ type: "stacked-area" });
+    expect(validate({ ...base, type: "area", stacked: true }).errors.find((item) => item.code === "CK1005")?.fix?.[0]).toMatchObject({
+      value: "stacked-area",
+    });
+  });
+
   it("CK1005 maps area onto mini-area and names the full-size alternative", () => {
     const result = validate({ ...base, type: "area" });
     const error = result.errors.find((item) => item.code === "CK1005");

@@ -865,7 +865,7 @@ function emitUnknownType(value: unknown, ctx: Ctx): void {
 
 interface Alias {
   type: string;
-  note: string;
+  note?: string;
   kind: "pie" | "rename";
   layout?: "grid" | "calendar";
 }
@@ -886,8 +886,13 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
       kind: "rename",
     };
   }
+  if (value.startsWith("xychart")) return { type: xyKind(root), kind: "rename" };
+  if (value.endsWith("-beta")) {
+    const head = value.slice(0, -5);
+    if (head === "sankey" || head === "radar" || head === "treemap") return { type: head, kind: "rename" };
+  }
   if (value === "area") {
-    const stacked = yCount(root) >= 2;
+    const stacked = yCount(root) >= 2 || stackFlag(root);
     return stacked
       ? { type: "stacked-area", note: 'Two or more y fields are type "stacked-area" with encoding.y as a list of fields.', kind: "rename" }
       : {
@@ -924,6 +929,21 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   if (value === "bullet-chart") return { type: "bullet", note: "A bullet uses encoding.x, encoding.y, and optional encoding.target.", kind: "rename" };
   if (value === "waterfall-chart") return { type: "waterfall", note: "A waterfall uses encoding.x for the step and encoding.y for the delta.", kind: "rename" };
   return undefined;
+}
+
+function xyKind(root: unknown): "line" | "bar" | "combo" {
+  const spec = isPlainObject(root) ? root : {};
+  const blob = JSON.stringify([spec.encoding, spec.mark, spec.series, spec.marks, spec.layer, spec.layers]);
+  const bar = blob.includes('"bar"');
+  const line = blob.includes('"line"') || blob.includes('"area"');
+  return bar && line ? "combo" : bar ? "bar" : "line";
+}
+
+function stackFlag(root: unknown): boolean {
+  const spec = isPlainObject(root) ? root : undefined;
+  const mark = spec && isPlainObject(spec.mark) ? spec.mark : undefined;
+  const flag = spec?.stack ?? spec?.stacked ?? mark?.stack ?? mark?.stacked;
+  return flag === true || flag === "stack" || flag === "stacked" || flag === "percent";
 }
 
 function looksLikeGauge(root: unknown): boolean {
@@ -998,7 +1018,7 @@ function noteFlowChannels(encoding: Record<string, unknown>, ctx: Ctx): void {
     severity: "error",
     message: "chart channels were moved onto the v1 encoding",
     path: "/encoding",
-    hint: 'Sankey uses source, target, and y. Treemap uses x, y, and color. A histogram bins x.',
+    hint: "Sankey: source, target, y. Treemap: x, y, color. Histogram bins x.",
     fix,
   });
 }

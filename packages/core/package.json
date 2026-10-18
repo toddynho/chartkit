@@ -90,6 +90,16 @@
         "default": "./dist/interact.cjs"
       }
     },
+    "./mermaid": {
+      "import": {
+        "types": "./dist/mermaid.d.ts",
+        "default": "./dist/mermaid.js"
+      },
+      "require": {
+        "types": "./dist/mermaid.d.cts",
+        "default": "./dist/mermaid.cjs"
+      }
+    },
     "./interact/extra": {
       "import": {
         "types": "./dist/interact-extra.d.ts",

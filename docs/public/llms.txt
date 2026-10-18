@@ -10,8 +10,9 @@
 - Gauge, kpi, progress-ring: metric (value, min, max, delta, label). A data object of those fields moves into metric. Donut: x label, y value (not theta, angle, label). axis "y" or "y2". Titles: axes.y.title, axes.y2.title. Types: quantitative, temporal, ordinal, nominal (not categorical).
 - Heatmap: x+y+color grid. Calendar: date x plus color, or mark.layout "calendar". Measure is color, not value. grid-heatmap and calendar-heatmap are heatmap plus mark.layout.
 - Combo y: [{field, mark:bar}, {field, mark:line, axis:y2}]. Not layer, layers, marks, encoding.bar, or encoding.line. bar, line, area in mark, not type. axis y2 needs axes.y2; repair adds it.
-- Bar series: encoding.series, or color when it is not x (color equal to x colours bars, no split). mark.stack stack or percent. scale.type log. Temporal x. format formats ticks. Rule, band, and text annotations are drawn. @chartkitdev/core/interact: tooltip, crosshair, zoom, pan, brush, animation, legend toggle, keyboard, data table. Omitted or auto is Soft (light-dark, transparent plot). soft, refined, editorial built in; midnight opt-in.
+- Bar series: encoding.series, or color when it is not x (color equal to x colours bars, no split). mark.stack stack or percent. scale.type log. Temporal x. format formats ticks. Rule, band, and text annotations are drawn. @chartkitdev/core/interact. auto is Soft. midnight is opt-in.
 - Extra on demand. Histogram bins x (bins 8, binWidth, or bin count/width/sturges/sqrt/fd); y is a count. Funnel x+y (bar, or trapezoid). Bullet mark.ranges. Waterfall mark.total is absolute.
+- ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
 
 ## line
 
