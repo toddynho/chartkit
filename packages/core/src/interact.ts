@@ -311,23 +311,31 @@ function patchRoot(el: Element, attrs: string): void {
     if (match[1] === "xmlns") continue;
     keep.add(match[1]);
     const value = dec(match[2]);
-    if (el.getAttribute(match[1]) !== value) el.setAttribute(match[1], value);
+    if (value.length > 80 || el.getAttribute(match[1]) !== value) el.setAttribute(match[1], value);
   }
   for (let i = el.attributes.length - 1; i >= 0; i--) if (!keep.has(el.attributes[i].name)) el.removeAttribute(el.attributes[i].name);
 }
 
-/** Same tags, in order: copy attributes and text. False when the shape changed. */
+function putText(el: Element, text: string): void {
+  if (!el.firstElementChild && el.textContent !== text) el.textContent = text;
+}
+
+/** Same tags, in order: copy attributes and text. False when the shape changed, before any write. */
 function paint(svg: Element, markup: string): boolean {
   const nodes = svg.querySelectorAll("*");
+  let opens = 0;
+  const need = nodes.length + 1;
+  for (let p = 0; p < markup.length; p++) {
+    if (markup.charCodeAt(p) === 60 && markup.charCodeAt(p + 1) !== 47 && ++opens > need) return false;
+  }
+  if (opens !== need) return false;
   let n = 0;
   let el: Element = svg;
   let i = 0;
   while (i < markup.length) {
     if (markup.charCodeAt(i) !== 60) {
       const j = markup.indexOf("<", i);
-      const text = dec(markup.slice(i, j < 0 ? markup.length : j));
-      const node = el.firstChild;
-      if (text && node && node.nodeType === 3 && node.nodeValue !== text) node.nodeValue = text;
+      putText(el, dec(markup.slice(i, j < 0 ? markup.length : j)));
       if (j < 0) break;
       i = j;
       continue;
@@ -344,10 +352,11 @@ function paint(svg: Element, markup: string): boolean {
     if (!target || target.localName !== (cut < 0 ? head : head.slice(0, cut))) return false;
     el = target;
     patchRoot(el, head);
+    if (markup.charCodeAt(gt + 1) === 60 || gt + 1 >= markup.length) putText(el, "");
     n++;
     i = gt + 1;
   }
-  return n === nodes.length + 1;
+  return n === need;
 }
 
 function fade(el: Element, ms: number, from = "0.45"): void {
@@ -402,19 +411,25 @@ function legendItems(svg: SVGSVGElement): { name: string; text: SVGTextElement; 
   return out;
 }
 
-function numericValues(spec: InteractSpec, table: Table): ArrayLike<number> | null {
+function numericValues(spec: InteractSpec, table: Table): Float64Array | null {
   if (spec.type === "bar" || spec.type === "combo" || spec.type === "heatmap" || spec.type === "donut") return null;
   const enc = isRecord(spec.encoding) ? spec.encoding : {};
   const field = fieldOf(enc.x);
   const declared = isRecord(enc.x) ? enc.x.type : undefined;
   if (declared === "nominal" || declared === "ordinal") return null;
-  const values = new Float64Array(table.n);
   if (!field) {
     if (!(Array.isArray(spec.data) && (spec.data.length === 0 || typeof spec.data[0] === "number"))) return null;
+    const values = new Float64Array(table.n);
     for (let i = 0; i < table.n; i++) values[i] = i;
     return values;
   }
   if (!table.n) return null;
+  const data = spec.data;
+  if (isRecord(data) && isRecord(data.columns)) {
+    const column = data.columns[field];
+    if (column instanceof Float64Array && column.length === table.n) return column;
+  }
+  const values = new Float64Array(table.n);
   for (let i = 0; i < table.n; i++) {
     const value = table.cell(field, i);
     if (i < 8 && (typeof value !== "number" || !Number.isFinite(value))) return null;
@@ -477,17 +492,6 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   live.className = "ck-clip";
   live.setAttribute("aria-live", "polite");
   live.setAttribute("data-ck-live", "");
-  const tableWrap = document.createElement("div");
-  tableWrap.setAttribute("data-ck-table-wrap", "");
-  const tableBtn = document.createElement("button");
-  tableBtn.type = "button";
-  tableBtn.setAttribute("data-ck-table-btn", "");
-  tableBtn.textContent = "Show data table";
-  const tableEl = document.createElement("table");
-  tableEl.className = "ck-table ck-clip";
-  tableEl.setAttribute("data-ck-table", "");
-  tableWrap.append(tableBtn, tableEl);
-
   const showTip = tooltipOn(spec);
   const showCross = crosshairOn(spec);
   const legend = isRecord(spec.legend) && spec.legend.interactive === true;
@@ -504,8 +508,6 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     svg.setAttribute("tabindex", "0");
     host.append(live);
   }
-  if (dataTable) host.append(tableWrap);
-
   const offs: (() => void)[] = [];
   const on = (target: EventTarget, type: string, fn: EventListener, opts?: AddEventListenerOptions) => {
     target.addEventListener(type, fn, opts);
@@ -712,7 +714,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       let seen = 0;
       for (let i = 0; i < paths.length; i++) {
         const path = paths[i];
-        if (path.closest("defs") || path.closest("clipPath")) continue;
+        if (path.closest("defs,clipPath")) continue;
         const stroke = path.getAttribute("stroke");
         if (!stroke || stroke === "none") continue;
         const d = path.getAttribute("d");
@@ -725,35 +727,27 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     }
     const slot = hover.uniform ? hover.width / Math.max(1, hover.count) : Math.max(24, box.w / 8);
     const tol = Math.max(slot / 2, 8);
-    const rects = svg.querySelectorAll("rect");
     let best = Infinity;
-    const hits: SVGRectElement[] = [];
+    const hits: { x: number; y: number; fill: string | null }[] = [];
+    const rects = svg.querySelectorAll("rect");
     for (let i = 0; i < rects.length; i++) {
-      const rect = rects[i] as SVGRectElement;
-      if (rect.closest("defs") || rect.closest("clipPath")) continue;
-      const w = Number(rect.getAttribute("width"));
-      const h = Number(rect.getAttribute("height"));
+      const rect = rects[i];
+      if (rect.closest("defs,clipPath")) continue;
+      const x = +(rect.getAttribute("x") || 0);
+      const y = +(rect.getAttribute("y") || 0);
+      const w = +(rect.getAttribute("width") || 0);
+      const h = +(rect.getAttribute("height") || 0);
       if (!(w > 12) || !(h > 0) || w > box.w * 0.85) continue;
-      const cx = Number(rect.getAttribute("x")) + w / 2;
-      const cy = Number(rect.getAttribute("y")) + h / 2;
-      const dist = Math.abs((horizontal ? cy : cx) - snapped);
+      const dist = Math.abs((horizontal ? y + h / 2 : x + w / 2) - snapped);
       if (dist > tol) continue;
+      const dot = { x: horizontal ? x + w : x + w / 2, y: horizontal ? y + h / 2 : y, fill: rect.getAttribute("fill") };
       if (dist < best - 0.5) {
         best = dist;
         hits.length = 0;
-        hits.push(rect);
-      } else if (dist <= best + 0.5) hits.push(rect);
+      }
+      if (dist <= best + 0.5) hits.push(dot);
     }
-    for (let i = 0; i < hits.length; i++) {
-      const rect = hits[i];
-      const x = Number(rect.getAttribute("x"));
-      const y = Number(rect.getAttribute("y"));
-      const w = Number(rect.getAttribute("width"));
-      const h = Number(rect.getAttribute("height"));
-      const dx = horizontal ? x + w : x + w / 2;
-      const dy = horizontal ? y + h / 2 : y;
-      marks.push(addDot(dx, dy, legendPaint(rect.getAttribute("fill"), marks.length)));
-    }
+    for (let i = 0; i < hits.length; i++) marks.push(addDot(hits[i].x, hits[i].y, legendPaint(hits[i].fill, marks.length)));
     if (marks.length === 0) {
       const circles = svg.querySelectorAll("circle");
       const nearest = new Map<string, { x: number; y: number; dist: number; fill: string }>();
@@ -783,12 +777,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const viewN = Math.max(0, hi - lo + 1);
     box = plotBox(svg);
     const values = numericValues(base, table);
-    let slice: ArrayLike<number> | null = null;
-    if (values && viewN > 0) {
-      const next = new Float64Array(viewN);
-      for (let i = 0; i < viewN; i++) next[i] = Number(values[lo + i]);
-      slice = next;
-    }
+    const slice = values && viewN ? (lo === 0 && values.length === viewN ? values : values.subarray(lo, hi + 1)) : null;
     hover = buildHoverIndex(viewN, box.l, box.w, slice);
     refreshColors();
   }
@@ -823,7 +812,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function paintTable(): void {
-    if (!dataTable) return;
+    const tableEl = dataTable ? host.querySelector("table.ck-table") : null;
+    if (!tableEl) return;
     const cap = Math.min(n, 1000);
     const head = [`<th>${esc(xField() || "x")}</th>`].concat(series.map((item) => `<th>${esc(item.name)}</th>`)).join("");
     const body: string[] = [];
@@ -865,7 +855,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     patchSvg(host as PatchHost, next, ms);
     if (keys) svg.setAttribute("tabindex", "0");
     dim();
-    rebuild();
+    dirty = true;
   }
 
   function emit(name: string, detail: unknown): void {
@@ -945,7 +935,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     live.textContent = `${xText(index)}: ${rows.map((row) => `${row.name} ${row.text}`.trim()).join(", ")}`;
   }
 
-  rebuild();
+  dirty = true;
   paintTable();
   fade(svg, durationMs(spec, n), "0");
 
@@ -1008,25 +998,21 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
             focus = value;
           },
           announce,
-          tableBtn,
-          tableEl,
+          paintTable,
         ]);
       })
     : Promise.resolve();
 
-  const initial = isRecord(spec.interaction) && Array.isArray(spec.interaction.initialRange) ? spec.interaction.initialRange : null;
-  if (initial && n > 1) {
-    const [from, to] = initial;
-    const within = (raw: unknown, bound: unknown, above: boolean) => {
-      if (typeof raw === "number" && typeof bound === "number") return above ? raw >= bound : raw <= bound;
-      return above ? String(raw) >= String(bound) : String(raw) <= String(bound);
-    };
+  const initial = isRecord(spec.interaction) ? spec.interaction.initialRange : 0;
+  if (Array.isArray(initial) && n > 1) {
+    const cmp = (a: unknown, b: unknown) =>
+      typeof a === "number" && typeof b === "number" ? a - b : +(String(a) > String(b)) - +(String(a) < String(b));
     let start = 0;
     let end = n - 1;
     for (let i = 0; i < n; i++) {
       const raw = xField() ? table.cell(xField(), i) : i;
-      if (within(raw, from, true) && start === 0 && i !== 0) start = i;
-      if (within(raw, to, false)) end = i;
+      if (cmp(raw, initial[0]) >= 0 && !start && i) start = i;
+      if (cmp(raw, initial[1]) <= 0) end = i;
     }
     if (end > start) {
       lo = start;
@@ -1061,7 +1047,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       for (const off of offs) off();
       tip.remove();
       live.remove();
-      tableWrap.remove();
+      host.querySelector("[data-ck-table-wrap]")?.remove();
       svg.querySelectorAll("[data-ck-crosshair],[data-ck-brush],[data-ck-dot]").forEach((node) => node.remove());
       svg.removeAttribute("tabindex");
       host.removeAttribute("data-ck-interact");

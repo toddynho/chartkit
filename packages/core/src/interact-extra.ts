@@ -36,8 +36,7 @@ export type ExtraHook = [
   () => number,
   (value: number) => void,
   (index: number) => void,
-  HTMLButtonElement,
-  HTMLTableElement,
+  () => void,
 ];
 
 function ensureTableCss(): void {
@@ -86,15 +85,27 @@ export function armExtras(a: ExtraHook): void {
   const readFocus = a[24];
   const writeFocus = a[25];
   const announce = a[26];
-  const tableBtn = a[27];
-  const tableEl = a[28];
+  const paintTable = a[27];
   if (!alive()) return;
   if (dataTable) {
     ensureTableCss();
-    on(tableBtn, "click", () => {
-      const open = tableEl.classList.toggle("ck-clip");
-      tableBtn.textContent = open ? "Show data table" : "Hide data table";
+    const host = svg.parentElement;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.setAttribute("data-ck-table-btn", "");
+    btn.textContent = "Show data table";
+    const table = document.createElement("table");
+    table.className = "ck-table ck-clip";
+    table.setAttribute("data-ck-table", "");
+    const wrap = document.createElement("div");
+    wrap.setAttribute("data-ck-table-wrap", "");
+    wrap.append(btn, table);
+    host?.append(wrap);
+    on(btn, "click", () => {
+      const open = table.classList.toggle("ck-clip");
+      btn.textContent = open ? "Show data table" : "Hide data table";
     });
+    paintTable();
   }
   if (keys) {
     on(svg, "keydown", ((event: KeyboardEvent) => {

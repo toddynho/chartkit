@@ -132,6 +132,46 @@ describe("patchSvg", () => {
       if (dChanges) expect(path?.getAttribute("d")).not.toBe(beforeD);
     }
   });
+
+  it("fills an empty label and clears one that becomes empty", () => {
+    const host = document.createElement("div");
+    const before = `<svg xmlns="http://www.w3.org/2000/svg"><text x="1"></text><text x="2">old</text></svg>`;
+    const after = `<svg xmlns="http://www.w3.org/2000/svg"><text x="1">Jan</text><text x="2"></text></svg>`;
+    patchSvg(host, before);
+    const text = host.querySelector("text");
+    patchSvg(host, after);
+    const fresh = document.createElement("div");
+    fresh.innerHTML = after;
+    expect(host.querySelector("text")).toBe(text);
+    expect(text?.textContent).toBe("Jan");
+    expect(host.innerHTML).toBe(fresh.innerHTML);
+  });
+
+  it("replaces the svg once when the tick count changes", () => {
+    const host = document.createElement("div");
+    let writes = 0;
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    host.append(svg);
+    const real = Object.getOwnPropertyDescriptor(Element.prototype, "innerHTML");
+    Object.defineProperty(svg, "innerHTML", {
+      set(value: string) {
+        writes += 1;
+        real?.set?.call(svg, value);
+      },
+      get() {
+        return real?.get?.call(svg);
+      },
+    });
+    const open = `<svg xmlns="http://www.w3.org/2000/svg"><path d="M 0 0 L 1 1"/>`;
+    patchSvg(host, `${open}<text x="1">a</text></svg>`);
+    writes = 0;
+    const after = `${open}<text x="1">a</text><text x="2">b</text></svg>`;
+    patchSvg(host, after);
+    const fresh = document.createElement("div");
+    fresh.innerHTML = after;
+    expect(writes).toBe(1);
+    expect(svg.innerHTML).toBe(fresh.querySelector("svg")!.innerHTML);
+  });
 });
 
 describe("hover index", () => {
