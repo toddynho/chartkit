@@ -19,5 +19,9 @@
   "sankey": 5926,
   "bullet": 5440,
   "waterfall": 6159,
-  "note": "gzip -9 byte budgets, 8 percent above the measurement. Phase 2 adapter and interact budgets are unchanged: vue 526, svelte 642, vanilla 345, interact 8697, interactExtra 1649. Phase 3 charts stay out of all. Adapters call open() on all, which dynamic-imports @chartkitdev/core/load for histogram, boxplot, radar, funnel, treemap, sankey, bullet, or waterfall. SSR entries import extra statically. adapter-with-line bundles that shell with the line renderer and leaves the chart imports external: vueLine budget 15568, svelteLine 15773, vanillaLine 15442. extra budget 35173. Per-chart budgets stay histogram 6723, boxplot 6769, radar 5052, funnel 5149, treemap 5977, sankey 5926, bullet 5440, waterfall 6159."
+  "mermaid": 24651,
+  "vanillaAuto": 784,
+  "markdown": 708,
+  "global": 73118,
+  "note": "gzip -9 byte budgets, 8 percent above the measurement. Phase 2 adapter and interact budgets are unchanged: vue 526, svelte 642, vanilla 345, interact 8697, interactExtra 1649. Phase 3 charts stay out of all. Adapters call open() on all, which dynamic-imports @chartkitdev/core/load for histogram, boxplot, radar, funnel, treemap, sankey, bullet, or waterfall. SSR entries import extra statically. adapter-with-line bundles that shell with the line renderer and leaves the chart imports external: vueLine budget 15568, svelteLine 15773, vanillaLine 15442. extra budget 35173. Per-chart budgets stay histogram 6723, boxplot 6769, radar 5052, funnel 5149, treemap 5977, sankey 5926, bullet 5440, waterfall 6159. Mermaid import is mermaid 24651. vanilla autoRender is vanillaAuto 784 and does not ship in the vanilla entry. Markdown fence plugins are markdown 708. The browser IIFE is global 73118."
 }

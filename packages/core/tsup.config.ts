@@ -64,6 +64,7 @@ const entry: Record<string, string> = {
   load: "src/load.ts",
   "extra-tip": "src/extra-tip.ts",
   validate: "src/validate.ts",
+  mermaid: "src/mermaid.ts",
   interact: "src/interact.ts",
   "interact-extra": "src/interact-extra.ts",
   "themes/all": "src/themes/all.ts",

@@ -13,6 +13,7 @@ const start = [
   { href: "/docs/spec", label: "Spec reference" },
   { href: "/docs/theming", label: "Theming" },
   { href: "/docs/migrate", label: "Migrate from v0" },
+  { href: "/docs/mermaid", label: "Mermaid or Markdown" },
 ];
 
 export function DocsNav() {
