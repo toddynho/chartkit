@@ -1,4 +1,5 @@
-import { ChartView } from "@/lib/chart";
+import { ChartView } from "@/components/ChartView";
+import { StreamDemo } from "@/components/StreamDemo";
 import { pageMeta } from "@/lib/site";
 import type { Spec } from "@/lib/specs";
 
@@ -101,6 +102,7 @@ export default function DemoPage() {
           <ChartView spec={services} />
         </article>
       </div>
+      <StreamDemo />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CodeBlock } from "@/components/CodeBlock";
 import { FrameworkTabs } from "@/components/FrameworkTabs";
-import { ChartView } from "@/lib/chart";
+import { ChartView } from "@/components/ChartView";
 import { pageMeta } from "@/lib/site";
 import { snippetsFor } from "@/lib/snippets";
 import { chartTypes, examplesForType, playgroundHref } from "@/lib/specs";

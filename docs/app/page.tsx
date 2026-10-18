@@ -1,14 +1,29 @@
 import Link from "next/link";
-import { ChartView } from "@/lib/chart";
+import { ChartView } from "@/components/ChartView";
 import { headline } from "@/lib/benchmarks";
-import { heroSpec, examples } from "@/lib/specs";
+import { heroSpec, chartTypes, examples } from "@/lib/specs";
 import { snippetsFor } from "@/lib/snippets";
 import { FrameworkTabs } from "@/components/FrameworkTabs";
 import { LiveSpec } from "@/components/LiveSpec";
 import { ThemeShowcase } from "@/components/ThemeShowcase";
 import { lookPanels } from "@/lib/looks";
 
-const previewSlugs = ["channels-bar", "traffic-donut", "orders-combo", "capacity-gauge", "load-grid", "week-candles"];
+const previewSlugs = [
+  "channels-bar",
+  "traffic-donut",
+  "orders-combo",
+  "capacity-gauge",
+  "load-grid",
+  "week-candles",
+  "checkout-histogram",
+  "close-boxplot",
+  "model-radar",
+  "signup-funnel",
+  "inventory-treemap",
+  "mill-sankey",
+  "revenue-bullet",
+  "quarter-waterfall",
+];
 
 export default function HomePage() {
   const previews = previewSlugs
@@ -96,8 +111,18 @@ export default function HomePage() {
       </section>
 
       <section className="section">
-        <h2>Fourteen chart types</h2>
-        <p className="lede">Server-rendered SVG. Edit any of them.</p>
+        <h2>Twenty-two chart types</h2>
+        <p className="lede">
+          Server-rendered SVG, with tooltip, crosshair, and the rest of the interaction layer after the page hydrates.
+          Histogram through waterfall load their chart modules on demand.
+        </p>
+        <ul className="type-list">
+          {chartTypes.map((item) => (
+            <li key={item.type}>
+              <Link href={`/docs/charts/${item.type}`}>{item.title}</Link>
+            </li>
+          ))}
+        </ul>
         <div className="gallery">
           {previews.map((example) => (
             <article className="card" key={example.slug}>

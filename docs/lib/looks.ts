@@ -66,9 +66,9 @@ const bars = {
 export function lookPanels() {
   return LOOKS.map((look) => ({
     ...look,
-    charts: [line, bars].map((spec) => ({
-      title: spec.title,
-      svg: chartSvg({ ...spec, id: `look-${look.id}-${spec.type}`, theme: look.id }),
-    })),
+    charts: [line, bars].map((spec) => {
+      const themed = { ...spec, id: `look-${look.id}-${spec.type}`, theme: look.id };
+      return { title: spec.title, spec: themed, svg: chartSvg(themed) };
+    }),
   }));
 }

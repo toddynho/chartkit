@@ -231,7 +231,17 @@ textarea { min-height: 220px; resize: vertical; font-family: var(--mono); font-s
 .issues { margin: 0; padding-left: 1.1rem; font-family: var(--mono); font-size: 12.5px; }
 .issues li { margin: 0.2rem 0; }
 
+.type-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+}
+.type-list li { margin: 0; }
 .chart-host {
+  position: relative;
   --ck-background: transparent;
   --ck-surface: transparent;
   --ck-text: var(--fg);

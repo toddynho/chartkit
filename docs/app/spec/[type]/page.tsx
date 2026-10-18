@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ChartView } from "@/components/ChartView";
 import { specPages } from "@/lib/spec-charts";
 
 export function generateStaticParams() {
@@ -23,6 +24,7 @@ export default function SpecTypePage({ params }: { params: { type: string } }) {
         ))}
       </ul>
       <h2 id="example">Example</h2>
+      <ChartView spec={JSON.parse(page.example) as unknown} />
       <pre>
         <code>{page.example}</code>
       </pre>

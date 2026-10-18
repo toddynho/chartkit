@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { ChartView } from "@/lib/chart";
+import { ChartView } from "@/components/ChartView";
 import { pageMeta } from "@/lib/site";
 import { exampleGroups, examples } from "@/lib/specs";
 
 export const metadata = pageMeta(
   "Examples",
-  "A gallery of ChartKit v1 specs: line, bar, area, donut, scatter, combo, heatmap, gauge, KPI, and candlestick.",
+  "A gallery of ChartKit specs, including histogram, box plot, radar, funnel, treemap, sankey, bullet, and waterfall.",
   "/examples",
 );
 

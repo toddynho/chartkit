@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { ChartHost } from "./ChartHost";
 
 export interface LookPanel {
   id: string;
   label: string;
   detail: string;
-  charts: { title: string; svg: string }[];
+  charts: { title: string; svg: string; spec: unknown }[];
 }
 
 export function ThemeShowcase({ looks }: { looks: LookPanel[] }) {
@@ -27,7 +28,12 @@ export function ThemeShowcase({ looks }: { looks: LookPanel[] }) {
       <div className={`look-stage look-${look.id}`}>
         <div className="look-grid">
           {look.charts.map((chart) => (
-            <div key={chart.title} className="chart-host chart-preset" dangerouslySetInnerHTML={{ __html: chart.svg }} />
+            <ChartHost
+              key={`${look.id}-${chart.title}`}
+              spec={chart.spec}
+              svg={chart.svg}
+              className="chart-host chart-preset"
+            />
           ))}
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { BrandPalette } from "@/components/BrandPalette";
 import { CodeBlock } from "@/components/CodeBlock";
 import { ThemeShowcase } from "@/components/ThemeShowcase";
-import { ChartView } from "@/lib/chart";
+import { ChartView } from "@/components/ChartView";
 import { lookPanels } from "@/lib/looks";
 import { pageMeta } from "@/lib/site";
 import { minimalSpec, THEMES, TOKENS } from "@/lib/specs";
