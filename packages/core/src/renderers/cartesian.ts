@@ -1,7 +1,7 @@
 import { annotationLayers } from "../annotations";
 import { isTypedArray, readData, type DataTable } from "../data";
 import { formatValue } from "../format";
-import { readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
+import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import { clamp, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
@@ -14,9 +14,22 @@ type MarkDraw = (
   horizontal: boolean,
 ) => string;
 
-function renderTyped(spec: Record<string, unknown>, type: string, draw: MarkDraw): string | null {
+function renderTyped(
+  spec: Record<string, unknown>,
+  type: string,
+  draw: MarkDraw,
+  adjust?: (
+    table: DataTable,
+    encoding: Record<string, unknown>,
+    channels: YChannel[],
+    preset: PresetTokens,
+    series: Series[],
+    labels: string[],
+  ) => { series: Series[]; labels: string[] } | null,
+): string | null {
   if (spec.type !== type) return null;
-  const model = toModel(spec);
+  beginFrame();
+  const model = toModel(spec, adjust);
   if (!model) return null;
   return modelToSvg(model, draw);
 }
@@ -27,7 +40,12 @@ export function renderLine(spec: Record<string, unknown>): string | null {
 }
 
 export function renderBar(spec: Record<string, unknown>): string | null {
-  return renderTyped(spec, "bar", drawBars);
+  return renderTyped(spec, "bar", drawBars, (table, encoding, channels, preset, series, labels) => {
+    const pivoted = pivotBars(table, encoding, channels, preset);
+    if (pivoted) return pivoted;
+    if (series.length === 1) colorBarsByX(series[0], labels, encoding, preset);
+    return null;
+  });
 }
 
 export function renderStackedArea(spec: Record<string, unknown>): string | null {
@@ -110,34 +128,163 @@ interface PlotModel {
 
 type Curve = "linear" | "monotone" | "step" | "step-before" | "step-after";
 
-function toModel(spec: Record<string, unknown>): PlotModel | null {
+interface ChartShell {
+  /** Non-data spec contents. In-place edits change it; replacing `data` does not. */
+  stamp: string;
+  type: string;
+  preset: PresetTokens;
+  channels: YChannel[];
+  xField?: string;
+  xIsTemporal: boolean;
+  continuousX: boolean;
+  curve: Curve;
+  sampling: SamplingMode;
+  stack: PlotModel["stack"];
+  width: number;
+  height: number;
+  responsive: boolean;
+  alt: string;
+  locale: string;
+  id: string;
+  title?: string;
+  subtitle?: string;
+  orientation: PlotModel["orientation"];
+  fillOpacity: number;
+  fillPaint: string;
+  strokeWidth: number;
+  strokePaint: string;
+  gradient: boolean;
+  points: PlotModel["points"];
+  dots: PlotModel["dots"];
+  pointSize: number;
+  connectNulls: boolean;
+  cornerRadius: number;
+  radiusVar: boolean;
+  gap: number;
+  labelsOn: boolean;
+  showX: boolean;
+  showY: boolean;
+  showY2: boolean;
+  legendOn: boolean;
+  yGrid: PlotModel["yGrid"];
+  xFormat: unknown;
+  yFormat: unknown;
+  y2Format: unknown;
+  yLog: boolean;
+  y2Log: boolean;
+}
+
+function shellStamp(spec: Record<string, unknown>): string {
+  return JSON.stringify(spec, (key, value) => (key === "data" ? undefined : value)) ?? "";
+}
+
+let chartShell: ChartShell | null = null;
+
+/** Theme, channels, and geometry. Reused when a later spec only replaces `data`. */
+function shellFor(spec: Record<string, unknown>): ChartShell {
+  const stamp = shellStamp(spec);
+  const hit = chartShell;
+  if (hit && hit.stamp === stamp) return hit;
   const type = spec.type as string;
   const preset = resolvePreset(spec.theme);
+  const encoding = isRecord(spec.encoding) ? spec.encoding : {};
+  const mark = isRecord(spec.mark) ? spec.mark : {};
+  const channels = readYChannels(encoding.y);
+  const size = isRecord(spec.size) ? spec.size : {};
+  const width = typeof size.width === "number" ? size.width : 640;
+  const compact = type === "sparkline" || type === "mini-area";
+  const geometry = resolveGeometry(spec.theme);
+  const opacitySet = typeof mark.fillOpacity === "number";
+  const fillOpacity = opacitySet ? (mark.fillOpacity as number) : geometry.fillOpacity;
+  const strokeSet = typeof mark.strokeWidth === "number";
+  const strokeWidth = strokeSet ? (mark.strokeWidth as number) : compact ? geometry.compactStroke : geometry.strokeWidth;
+  const radiusSet = typeof mark.cornerRadius === "number";
+  const pointsSet = mark.points === "always" || mark.points === "none" || mark.points === "hover";
+  const points = pointsSet ? (mark.points as "none" | "hover" | "always") : geometry.points;
+  const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : "";
+  const idSource = typeof spec.id === "string" ? spec.id : alt || type;
+  const next: ChartShell = {
+    stamp,
+    type,
+    preset,
+    channels,
+    xField: channelField(encoding.x),
+    xIsTemporal: isRecord(encoding.x) && encoding.x.type === "temporal",
+    continuousX: type === "line" || type === "stacked-area" || type === "sparkline" || type === "mini-area",
+    curve: curveOf(mark.curve),
+    sampling: readSamplingMode(mark.sampling),
+    stack: stackMode(type, mark.stack),
+    width,
+    height: heightOf(type, size, width),
+    responsive: size.width === undefined || size.width === "auto",
+    alt,
+    locale: typeof spec.locale === "string" ? spec.locale : "en-US",
+    id: `ck${hash(idSource)}`,
+    title: typeof spec.title === "string" ? spec.title : undefined,
+    subtitle: typeof spec.subtitle === "string" ? spec.subtitle : undefined,
+    orientation: mark.orientation === "horizontal" ? "horizontal" : "vertical",
+    fillOpacity,
+    fillPaint: opacitySet ? n(fillOpacity) : `var(--ck-area-opacity, ${n(fillOpacity)})`,
+    strokeWidth,
+    strokePaint: strokeSet ? n(strokeWidth) : `var(--ck-line-width, ${n(strokeWidth)})`,
+    gradient: mark.gradient !== false,
+    points,
+    dots: points === "always" ? "shown" : points === "none" && !pointsSet ? "hidden" : "off",
+    pointSize: typeof mark.pointSize === "number" ? mark.pointSize : geometry.pointSize,
+    connectNulls: mark.connectNulls === true,
+    cornerRadius: radiusSet ? (mark.cornerRadius as number) : geometry.cornerRadius,
+    radiusVar: !radiusSet,
+    gap: typeof mark.gap === "number" ? mark.gap : geometry.gap,
+    labelsOn: mark.labels === true,
+    showX: !compact && axisVisible(spec, "x"),
+    showY: !compact && axisVisible(spec, "y"),
+    showY2: !compact && axisVisible(spec, "y2"),
+    legendOn: !compact && legendVisible(spec),
+    yGrid: compact ? false : gridOf(spec),
+    xFormat: isRecord(encoding.x) ? encoding.x.format : undefined,
+    yFormat: axisFormat(spec, "y", channels),
+    y2Format: axisFormat(spec, "y2", channels),
+    yLog: channels.some((channel) => channel.axis === "y" && channel.log),
+    y2Log: channels.some((channel) => channel.axis === "y2" && channel.log),
+  };
+  chartShell = next;
+  return next;
+}
+
+function toModel(
+  spec: Record<string, unknown>,
+  adjust?: (
+    table: DataTable,
+    encoding: Record<string, unknown>,
+    channels: YChannel[],
+    preset: PresetTokens,
+    series: Series[],
+    labels: string[],
+  ) => { series: Series[]; labels: string[] } | null,
+): PlotModel | null {
   const read = readData(spec.data);
   if (!read.ok) return null;
   const table = read.table;
+  const shell = shellFor(spec);
+  const { type, preset, channels: yChannels } = shell;
   const encoding = isRecord(spec.encoding) ? spec.encoding : {};
   const mark = isRecord(spec.mark) ? spec.mark : {};
-  const xChannel = channelField(encoding.x);
-  const yChannels = readYChannels(encoding.y);
 
   let labels: string[] = [];
   let x: ArrayLike<number | null> | null = null;
   let xTemporal = false;
-  const xIsTemporal = isRecord(encoding.x) && encoding.x.type === "temporal";
-  const continuousX = type === "line" || type === "stacked-area" || type === "sparkline" || type === "mini-area";
   if (table.kind === "numbers") {
     const count = table.length;
     const indexes = new Float64Array(count);
     for (let i = 0; i < count; i++) indexes[i] = i;
     x = indexes;
-  } else if (xChannel && table.columns[xChannel]) {
-    const raw = table.columns[xChannel];
-    if (continuousX && (isTypedArray(raw) || columnNumeric(raw))) {
+  } else if (shell.xField && table.columns[shell.xField]) {
+    const raw = table.columns[shell.xField];
+    if (shell.continuousX && (isTypedArray(raw) || columnNumeric(raw))) {
       x = raw as ArrayLike<number | null>;
-      xTemporal = xIsTemporal;
+      xTemporal = shell.xIsTemporal;
     } else {
-      const temporal = !isTypedArray(raw) && (columnTemporal(raw) || xIsTemporal);
+      const temporal = !isTypedArray(raw) && (columnTemporal(raw) || shell.xIsTemporal);
       if (temporal && type !== "bar") {
         x = mapNumbers(raw, toNumber);
         xTemporal = true;
@@ -178,78 +325,23 @@ function toModel(spec: Record<string, unknown>): PlotModel | null {
     });
   }
 
-  const pivoted = pivotBars(type, table, encoding, yChannels, preset);
+  const pivoted = adjust?.(table, encoding, yChannels, preset, series, labels) ?? null;
   if (pivoted) {
     series = pivoted.series;
     labels = pivoted.labels;
     x = null;
     xTemporal = false;
-  } else if (type === "bar" && series.length === 1) {
-    colorBarsByX(series[0], labels, encoding, preset);
   }
 
-  const stack = stackMode(type, mark.stack);
-  const curve = curveOf(mark.curve);
-  const sampling = readSamplingMode(mark.sampling);
-  const size = isRecord(spec.size) ? spec.size : {};
-  const width = typeof size.width === "number" ? size.width : 640;
-  const responsive = size.width === undefined || size.width === "auto";
-  const height = heightOf(type, size, width);
-  const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : "";
-  const idSource = typeof spec.id === "string" ? spec.id : alt || type;
-  const compact = type === "sparkline" || type === "mini-area";
-  const geometry = resolveGeometry(spec.theme);
-  const opacitySet = typeof mark.fillOpacity === "number";
-  const fillOpacity = opacitySet ? (mark.fillOpacity as number) : geometry.fillOpacity;
-  const strokeSet = typeof mark.strokeWidth === "number";
-  const strokeWidth = strokeSet ? (mark.strokeWidth as number) : compact ? geometry.compactStroke : geometry.strokeWidth;
-  const radiusSet = typeof mark.cornerRadius === "number";
-  const pointsSet = mark.points === "always" || mark.points === "none" || mark.points === "hover";
-  const points = pointsSet ? (mark.points as "none" | "hover" | "always") : geometry.points;
-
   return {
-    type,
-    title: typeof spec.title === "string" ? spec.title : undefined,
-    subtitle: typeof spec.subtitle === "string" ? spec.subtitle : undefined,
-    alt,
-    locale: typeof spec.locale === "string" ? spec.locale : "en-US",
-    width,
-    height,
-    responsive,
+    ...shell,
     labels,
     x: type === "bar" || type === "combo" ? null : x,
     series,
-    curve,
-    sampling,
-    stack,
-    orientation: mark.orientation === "horizontal" ? "horizontal" : "vertical",
-    fillOpacity,
-    fillPaint: opacitySet ? n(fillOpacity) : `var(--ck-area-opacity, ${n(fillOpacity)})`,
-    strokeWidth,
-    strokePaint: strokeSet ? n(strokeWidth) : `var(--ck-line-width, ${n(strokeWidth)})`,
-    gradient: mark.gradient !== false,
-    points,
-    dots: points === "always" ? "shown" : points === "none" && !pointsSet ? "hidden" : "off",
-    pointSize: typeof mark.pointSize === "number" ? mark.pointSize : geometry.pointSize,
-    connectNulls: mark.connectNulls === true,
-    cornerRadius: radiusSet ? (mark.cornerRadius as number) : geometry.cornerRadius,
-    radiusVar: !radiusSet,
-    gap: typeof mark.gap === "number" ? mark.gap : geometry.gap,
-    labelsOn: mark.labels === true,
-    showX: !compact && axisVisible(spec, "x"),
-    showY: !compact && axisVisible(spec, "y"),
-    showY2: !compact && series.some((item) => item.axis === "y2") && axisVisible(spec, "y2"),
-    yGrid: compact ? false : gridOf(spec),
-    legend: !compact && series.length > 1 && legendVisible(spec),
+    showY2: shell.showY2 && series.some((item) => item.axis === "y2"),
+    legend: shell.legendOn && series.length > 1,
     zero: zeroDefault(type, mark, series),
-    preset,
-    id: `ck${hash(idSource)}`,
     xTemporal,
-    xFormat: isRecord(encoding.x) ? encoding.x.format : undefined,
-    yFormat: axisFormat(spec, "y", yChannels),
-    y2Format: axisFormat(spec, "y2", yChannels),
-    yLog: yChannels.some((channel) => channel.axis === "y" && channel.log),
-    y2Log: yChannels.some((channel) => channel.axis === "y2" && channel.log),
     notes: spec.annotations,
   };
 }
@@ -437,7 +529,14 @@ function appendLineSeries(
       points[k] = { x, y: yScale(y) };
       if (area) bottoms[k] = { x, y: yScale(layers ? layers.bottom[index][i] : 0) };
     }
-    const indexAttr = ` data-ck-sample="${sampled.mode}" data-ck-i="${run.join(" ")}"`;
+    const v0 = ys[run[0]];
+    const v1 = ys[run[run.length - 1]];
+    const log = series.axis === "y2" ? model.y2Log : model.yLog;
+    const scaleAttr =
+      !layers && !log && typeof v0 === "number" && typeof v1 === "number" && v0 !== v1
+        ? ` data-ck-ys="${n(points[0].y)},${n(points[points.length - 1].y)},${n(v0)},${n(v1)},${index}"`
+        : "";
+    const indexAttr = ` data-ck-sample="${sampled.mode}" data-ck-i="${run.join(" ")}"${scaleAttr}`;
     if (area) {
       const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
       out.push(`<path d="${areaPath(points, bottoms, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillPaint}" stroke="none"${indexAttr} />`);
@@ -445,7 +544,10 @@ function appendLineSeries(
     out.push(
       `<path d="${linePath(points, model.curve)}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokePaint}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)}${indexAttr} />`,
     );
-    if (model.dots !== "off") {
+    // Hidden circles exist so --ck-line-dots can reveal them. A downsampled line
+    // already has a vertex per pixel, and those circles dominate the SVG, so
+    // interact draws the hover dot from the path instead.
+    if (model.dots === "shown") {
       for (let k = 0; k < run.length; k++) {
         out.push(pointMark(points[k], model, series.color, ` data-ck-i="${run[k]}"`));
       }
@@ -496,15 +598,13 @@ function appendLinear(
   yScale: (value: number) => number,
 ): void {
   const values = series.values;
-  let path = "";
-  let open = false;
+  let parts: string[] = [];
   const flush = () => {
-    if (!path) return;
+    if (parts.length === 0) return;
     out.push(
-      `<path d="${path}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokePaint}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
+      `<path d="${parts.join(" ")}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokePaint}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
     );
-    path = "";
-    open = false;
+    parts = [];
   };
   for (let i = 0; i < values.length; i++) {
     const value = values[i];
@@ -512,11 +612,7 @@ function appendLinear(
       if (!model.connectNulls) flush();
       continue;
     }
-    const x = n(xScale.center(i));
-    const y = n(yScale(value));
-    if (!open) path = "M " + x + " " + y;
-    else path += " L " + x + " " + y;
-    open = true;
+    parts.push((parts.length === 0 ? "M " : "L ") + n(xScale.center(i)) + " " + n(yScale(value)));
   }
   flush();
 }
@@ -685,6 +781,10 @@ interface XScale {
   center(index: number): number;
   band(index: number): { start: number; size: number };
   at(value: number): number;
+  min: number;
+  max: number;
+  /** False when x had no finite value and min/max are the 0..1 fallback. */
+  live: boolean;
 }
 
 function xPosition(
@@ -704,17 +804,31 @@ function xPosition(
       center: (index) => spanStart + size * index + size / 2,
       band: (index) => ({ start: spanStart + size * index, size }),
       at: (value) => spanStart + size * value + size / 2,
+      min: 0,
+      max: Math.max(0, count - 1),
+      live: false,
     };
   }
   let min = Infinity;
   let max = -Infinity;
   let seen = false;
-  for (let i = 0; i < model.x.length; i++) {
-    const value = model.x[i];
-    if (value === null || !Number.isFinite(value)) continue;
-    seen = true;
-    if (value < min) min = value;
-    if (value > max) max = value;
+  if (model.x instanceof Float64Array) {
+    const extent = linearExtent(model.x);
+    if (extent) {
+      min = extent.min;
+      max = extent.max;
+      seen = true;
+      if (extent.linear) noteLinear(model.x);
+    }
+  }
+  if (!seen) {
+    for (let i = 0; i < model.x.length; i++) {
+      const value = model.x[i];
+      if (value === null || !Number.isFinite(value)) continue;
+      seen = true;
+      if (value < min) min = value;
+      if (value > max) max = value;
+    }
   }
   if (!seen) {
     min = 0;
@@ -728,6 +842,9 @@ function xPosition(
       return { start: spanStart + step * index, size: step };
     },
     at: (value) => scale(value),
+    min,
+    max,
+    live: seen,
   };
 }
 
@@ -765,6 +882,7 @@ function xAxisLabels(
   plot: { left: number; right?: number; bottom: number; top: number },
 ): string {
   if (model.xTemporal && model.x && !horizontal) return timeAxisLabels(model, xScale, plot);
+  if (model.x && !horizontal) return numericXAxisLabels(model, xScale, plot);
   const step = count > 8 ? Math.ceil(count / 6) : 1;
   const out: string[] = [];
   let lastRight = -Infinity;
@@ -784,18 +902,33 @@ function xAxisLabels(
   return out.join("");
 }
 
-function timeAxisLabels(model: PlotModel, xScale: XScale, plot: { left: number; right?: number; bottom: number }): string {
-  let min = Infinity;
-  let max = -Infinity;
-  const column = model.x;
-  if (!column) return "";
-  for (let i = 0; i < column.length; i++) {
-    const value = column[i];
-    if (value === null || !Number.isFinite(value)) continue;
-    if (value < min) min = value;
-    if (value > max) max = value;
+function numericXAxisLabels(
+  model: PlotModel,
+  xScale: XScale,
+  plot: { left: number; right?: number; bottom: number },
+): string {
+  const values = ticks(xScale.min, xScale.max, 6);
+  const labels = tickText(values, model, model.xFormat);
+  const right = plot.right ?? model.width;
+  const out: string[] = [];
+  let lastRight = -Infinity;
+  for (let i = 0; i < values.length; i++) {
+    const label = labels[i];
+    if (!label) continue;
+    const x = xScale.at(values[i]);
+    if (x < plot.left - 8 || x > right + 8) continue;
+    const width = label.length * 6.4;
+    if (x - width / 2 < lastRight) continue;
+    lastRight = x + width / 2 + 8;
+    out.push(`<text x="${n(x)}" y="${n(plot.bottom + 16)}" text-anchor="middle" fill="${cssVar("muted", model.preset.muted)}" font-size="11" font-family="${font()}">${esc(label)}</text>`);
   }
-  if (!(max > min)) return "";
+  return out.join("");
+}
+
+function timeAxisLabels(model: PlotModel, xScale: XScale, plot: { left: number; right?: number; bottom: number }): string {
+  if (!model.x || !xScale.live || !(xScale.max > xScale.min)) return "";
+  const min = xScale.min;
+  const max = xScale.max;
   const span = max - min;
   const plotWidth = Math.max(1, (plot.right ?? model.width) - plot.left);
   const ticks = timeTicks(min, max, Math.max(2, Math.floor(plotWidth / 72)));
@@ -866,6 +999,40 @@ function padding(model: PlotModel, leftLabels: string[], rightLabels: string[]):
   };
 }
 
+/** Min and max of a typed column. Null when the extent is empty or non-finite. NaN does not move it. */
+function floatExtent(values: Float64Array): { min: number; max: number; dense: boolean } | null {
+  let min = Infinity;
+  let max = -Infinity;
+  let dense = true;
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i];
+    if (value < min) min = value;
+    if (value > max) max = value;
+    else if (value !== value) dense = false;
+  }
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
+  return { min, max, dense };
+}
+
+/** Extent plus an exact arithmetic-sequence check. Used for x, where index buckets need a linear axis. */
+function linearExtent(values: Float64Array): { min: number; max: number; linear: boolean } | null {
+  const count = values.length;
+  if (count === 0) return null;
+  let min = Infinity;
+  let max = -Infinity;
+  const first = values[0];
+  const stride = count === 1 ? 0 : (values[count - 1] - first) / (count - 1);
+  let linear = Number.isFinite(first) && Number.isFinite(stride);
+  for (let i = 0; i < count; i++) {
+    const value = values[i];
+    if (value < min) min = value;
+    if (value > max) max = value;
+    if (linear && value !== first + i * stride) linear = false;
+  }
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
+  return { min, max, linear };
+}
+
 function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
   let min = Infinity;
   let max = -Infinity;
@@ -886,10 +1053,24 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
   } else {
     for (const series of model.series) {
       if (series.axis !== axis) continue;
-      for (let i = 0; i < series.values.length; i++) {
-        const value = series.values[i];
-        if (value !== null) consider(value);
+      const values = series.values;
+      if (values instanceof Float64Array) {
+        const extent = floatExtent(values);
+        if (extent) {
+          consider(extent.min);
+          consider(extent.max);
+          if (extent.dense) noteDense(values);
+          continue;
+        }
       }
+      let finite = 0;
+      for (let i = 0; i < values.length; i++) {
+        const value = values[i];
+        if (value === null || !Number.isFinite(value)) continue;
+        finite += 1;
+        consider(value);
+      }
+      if (values.length > 0 && finite === values.length) noteDense(values);
     }
   }
   const log = axis === "y2" ? model.y2Log : model.yLog;
@@ -945,28 +1126,29 @@ function monotoneHeadroom(model: PlotModel, axis: "y" | "y2"): { above: number; 
   let below = 0;
   for (const series of model.series) {
     if (series.axis !== axis || series.mark === "bar") continue;
+    const src = series.values;
     const values: number[] = [];
-    for (let i = 0; i < series.values.length; i++) {
-      const value = series.values[i];
-      if (value !== null && Number.isFinite(value)) values.push(value);
+    let hi = -Infinity;
+    let lo = Infinity;
+    for (let i = 0; i < src.length; i++) {
+      const value = src[i];
+      if (value === null || !Number.isFinite(value)) continue;
+      values.push(value);
+      if (value > hi) hi = value;
+      if (value < lo) lo = value;
     }
     if (values.length < 3) continue;
-    let hi = values[0];
-    let lo = values[0];
-    for (let i = 1; i < values.length; i++) {
-      if (values[i] > hi) hi = values[i];
-      if (values[i] < lo) lo = values[i];
-    }
     for (let i = 0; i < values.length - 1; i++) {
       const p0 = values[Math.max(0, i - 1)];
       const p1 = values[i];
       const p2 = values[i + 1];
       const p3 = values[Math.min(values.length - 1, i + 2)];
-      const cps = [p1 + (p2 - p0) / 6, p2 - (p3 - p1) / 6];
-      for (let c = 0; c < cps.length; c++) {
-        if (cps[c] > hi) above = Math.max(above, cps[c] - hi);
-        if (cps[c] < lo) below = Math.max(below, lo - cps[c]);
-      }
+      const c1 = p1 + (p2 - p0) / 6;
+      const c2 = p2 - (p3 - p1) / 6;
+      if (c1 > hi) above = Math.max(above, c1 - hi);
+      if (c2 > hi) above = Math.max(above, c2 - hi);
+      if (c1 < lo) below = Math.max(below, lo - c1);
+      if (c2 < lo) below = Math.max(below, lo - c2);
     }
   }
   return { above, below };
@@ -989,7 +1171,9 @@ function linePath(points: Pt[], curve: Curve): string {
   if (points.length === 1) return `M ${n(points[0].x)} ${n(points[0].y)}`;
   if (curve === "monotone") return monotone(points);
   if (curve === "step" || curve === "step-before" || curve === "step-after") return step(points, curve);
-  return points.map((point, index) => `${index === 0 ? "M" : "L"} ${n(point.x)} ${n(point.y)}`).join(" ");
+  const parts = new Array<string>(points.length);
+  for (let i = 0; i < points.length; i++) parts[i] = (i === 0 ? "M " : "L ") + n(points[i].x) + " " + n(points[i].y);
+  return parts.join(" ");
 }
 
 function areaPath(top: Pt[], bottom: Pt[], curve: Curve): string {
@@ -1001,19 +1185,28 @@ function areaPath(top: Pt[], bottom: Pt[], curve: Curve): string {
 }
 
 function monotone(points: Pt[]): string {
-  let path = `M ${n(points[0].x)} ${n(points[0].y)}`;
+  const parts = new Array<string>(points.length);
+  parts[0] = "M " + n(points[0].x) + " " + n(points[0].y);
   for (let i = 0; i < points.length - 1; i++) {
     const p0 = points[Math.max(0, i - 1)];
     const p1 = points[i];
     const p2 = points[i + 1];
     const p3 = points[Math.min(points.length - 1, i + 2)];
-    const cp1x = p1.x + ((p2.x - p0.x) / 6);
-    const cp1y = p1.y + ((p2.y - p0.y) / 6);
-    const cp2x = p2.x - ((p3.x - p1.x) / 6);
-    const cp2y = p2.y - ((p3.y - p1.y) / 6);
-    path += ` C ${n(cp1x)} ${n(cp1y)}, ${n(cp2x)} ${n(cp2y)}, ${n(p2.x)} ${n(p2.y)}`;
+    parts[i + 1] =
+      "C " +
+      n(p1.x + (p2.x - p0.x) / 6) +
+      " " +
+      n(p1.y + (p2.y - p0.y) / 6) +
+      ", " +
+      n(p2.x - (p3.x - p1.x) / 6) +
+      " " +
+      n(p2.y - (p3.y - p1.y) / 6) +
+      ", " +
+      n(p2.x) +
+      " " +
+      n(p2.y);
   }
-  return path;
+  return parts.join(" ");
 }
 
 function step(points: Pt[], curve: Curve): string {
@@ -1197,13 +1390,12 @@ function legendRows(model: PlotModel, start: number, maxRight: number): number {
 }
 
 function pivotBars(
-  type: string,
   table: DataTable,
   encoding: Record<string, unknown>,
   yChannels: YChannel[],
   preset: PresetTokens,
 ): { series: Series[]; labels: string[] } | null {
-  if (type !== "bar" || yChannels.length !== 1) return null;
+  if (yChannels.length !== 1) return null;
   const yField = yChannels[0]?.field;
   const seriesField = seriesFieldName(encoding, table);
   if (!yField || !seriesField) return null;
@@ -1300,15 +1492,14 @@ function dataNumber(value: number | string): number | null {
   return Number.isFinite(numeric) ? numeric : null;
 }
 
-const MINUTE = 60_000;
-const HOUR = 60 * MINUTE;
-const DAY = 24 * HOUR;
+const TICK_MIN = [1, 5, 15, 30, 60, 180, 360, 720, 1440, 2880, 10080, 20160, 43200, 129600, 525600];
+const MONTHS = "JanFebMarAprMayJunJulAugSepOctNovDec";
 
 function timeTicks(min: number, max: number, count: number): number[] {
-  const span = Math.max(max - min, 1);
-  const steps = [MINUTE, 5 * MINUTE, 15 * MINUTE, 30 * MINUTE, HOUR, 3 * HOUR, 6 * HOUR, 12 * HOUR, DAY, 2 * DAY, 7 * DAY, 14 * DAY, 30 * DAY, 90 * DAY, 365 * DAY];
-  let step = steps[steps.length - 1];
-  for (const candidate of steps) {
+  const span = max - min || 1;
+  let step = 525600 * 60000;
+  for (let i = 0; i < TICK_MIN.length; i++) {
+    const candidate = TICK_MIN[i] * 60000;
     if (span / candidate <= count + 1) {
       step = candidate;
       break;
@@ -1319,25 +1510,35 @@ function timeTicks(min: number, max: number, count: number): number[] {
   for (let value = start; value <= max + step * 0.001 && out.length < 12; value += step) {
     if (value >= min - step * 0.001) out.push(value);
   }
-  return out.length > 0 ? out : [min, max];
+  return out.length ? out : [min, max];
 }
 
 function formatTimeLabel(ms: number, span: number, locale: string, format: unknown): string {
   if (format !== undefined) return formatValue(ms, format, locale);
   const date = new Date(ms);
-  if (Number.isNaN(date.getTime())) return "";
-  const options: Intl.DateTimeFormatOptions = { timeZone: "UTC" };
-  if (span < 2 * DAY) {
-    options.hour = "2-digit";
-    options.minute = "2-digit";
-  } else if (span < 70 * DAY) {
-    options.month = "short";
-    options.day = "numeric";
-  } else if (span < 800 * DAY) {
-    options.month = "short";
-    options.year = "numeric";
-  } else options.year = "numeric";
-  return new Intl.DateTimeFormat(locale, options).format(date);
+  if (date.getTime() !== date.getTime()) return "";
+  if (locale !== "en-US") {
+    const opt: Intl.DateTimeFormatOptions =
+      span < 1728e5
+        ? { timeZone: "UTC", hour: "2-digit", minute: "2-digit" }
+        : span < 6048e6
+          ? { timeZone: "UTC", month: "short", day: "numeric" }
+          : span < 6912e7
+            ? { timeZone: "UTC", month: "short", year: "numeric" }
+            : { timeZone: "UTC", year: "numeric" };
+    return new Intl.DateTimeFormat(locale, opt).format(date);
+  }
+  if (span < 1728e5) {
+    const hour = date.getUTCHours();
+    const minute = date.getUTCMinutes();
+    const h12 = hour % 12 || 12;
+    return (h12 < 10 ? "0" : "") + h12 + ":" + (minute < 10 ? "0" : "") + minute + (hour < 12 ? " AM" : " PM");
+  }
+  const mo = date.getUTCMonth() * 3;
+  const mon = MONTHS.slice(mo, mo + 3);
+  if (span < 6048e6) return mon + " " + date.getUTCDate();
+  const year = date.getUTCFullYear();
+  return span < 6912e7 ? mon + " " + year : "" + year;
 }
 
 function tickLabel(model: PlotModel, index: number): string {

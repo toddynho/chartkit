@@ -28,6 +28,39 @@ export function resolveSampling(mode: SamplingMode, count: number, plotWidth: nu
   return mode === "lttb" ? "lttb" : "minmax";
 }
 
+let frame = 0;
+const denseNote = new WeakMap<object, { frame: number; length: number }>();
+const linearNote = new WeakMap<object, number>();
+
+/** Start a render. A density note from an older render no longer applies. */
+export function beginFrame(): void {
+  frame += 1;
+}
+
+/**
+ * This column was entirely finite during the current render.
+ * Sampling can skip its gap scan. The values are still read by the sampler.
+ */
+export function noteDense(values: ArrayLike<number | null>): void {
+  if (typeof values === "object" && values !== null) denseNote.set(values, { frame, length: values.length });
+}
+
+function notedDense(values: ArrayLike<number | null>, count: number): boolean {
+  if (typeof values !== "object" || values === null) return false;
+  const note = denseNote.get(values);
+  return note !== undefined && note.frame === frame && note.length === count;
+}
+
+/** `x[i]` is an exact arithmetic sequence for this render, so buckets follow the index. */
+export function noteLinear(values: ArrayLike<number | null>): void {
+  if (typeof values === "object" && values !== null) linearNote.set(values, frame);
+}
+
+function notedLinear(values: ArrayLike<number | null> | null): boolean {
+  if (typeof values !== "object" || values === null) return false;
+  return linearNote.get(values) === frame;
+}
+
 export function sampleSeries(
   requested: SamplingMode,
   xs: ArrayLike<number | null> | null,
@@ -40,6 +73,15 @@ export function sampleSeries(
   if (requested === "none" || count <= samplingThreshold(plotWidth)) {
     return { reduced: false, mode: "none", runs: [] };
   }
+  // The domain scan already proved this column has no gaps. Don't walk it again
+  // just to discover that. minmax still reads every point.
+  if (notedDense(ys, count)) {
+    const mode = resolveSampling(requested, count, plotWidth);
+    if (mode === "none") return { reduced: false, mode, runs: [] };
+    const target = samplingThreshold(plotWidth);
+    const run = sampleDense(mode, xs, ys, 0, count, Math.min(target, count));
+    return { reduced: run.length < count, mode, runs: run.length < count ? [run] : [] };
+  }
   let finite = 0;
   let gaps = false;
   for (let i = 0; i < count; i++) {
@@ -50,6 +92,7 @@ export function sampleSeries(
   if (mode === "none") return { reduced: false, mode, runs: [] };
 
   const target = samplingThreshold(plotWidth);
+
   if (!gaps) {
     const run = sampleDense(mode, xs, ys, 0, count, Math.min(target, count));
     return { reduced: run.length < count, mode, runs: run.length < count ? [run] : [] };
@@ -107,44 +150,84 @@ function sampleDense(
   const len = end - start;
   const cap = Math.max(2, target);
   if (len <= cap) return copyRange(start, end);
-  if (mode === "minmax" && xs instanceof Float64Array && ys instanceof Float64Array) return minmaxFloat(xs, ys, start, end, cap);
+  if (mode === "minmax" && ys instanceof Float64Array && (xs === null || notedLinear(xs))) return minmaxIndex(ys, start, end, cap);
+  if (mode === "minmax" && xs instanceof Float64Array && ys instanceof Float64Array) {
+    const walked = minmaxSorted(xs, ys, start, end, cap);
+    if (walked) return walked;
+    return minmaxRange(xs, ys, start, end, cap);
+  }
   return mode === "lttb" ? lttbRange(xs, ys, start, end, cap) : minmaxRange(xs, ys, start, end, cap);
 }
 
-/** Min/max buckets for dense typed columns. Indexes increase, so an equal y keeps the earlier point. */
-function minmaxFloat(xs: Float64Array, ys: Float64Array, start: number, end: number, target: number): Int32Array {
+/** Bucket edges by value. The pointer only moves forward, so a gap skips empty buckets. */
+function minmaxSorted(xs: Float64Array, ys: Float64Array, start: number, end: number, target: number): Int32Array | null {
   const last = end - 1;
+  const x0 = xs[start];
+  const endX = xs[last];
+  const span = endX - x0;
+  if (!(span >= 0)) return null;
   const buckets = Math.max(1, Math.floor((target - 2) / 2));
   const minI = new Int32Array(buckets);
   const maxI = new Int32Array(buckets);
   minI.fill(-1);
-  const x0 = xs[start];
-  const span = xs[last] - x0;
-  const scale = span !== 0 ? buckets / span : 0;
-  for (let i = start + 1; i < last; i++) {
-    const y = ys[i];
-    let bucket = 0;
-    if (scale !== 0) {
-      bucket = Math.floor((xs[i] - x0) * scale);
-      if (bucket < 0) bucket = 0;
-      else if (bucket >= buckets) bucket = buckets - 1;
-    }
-    const lo = minI[bucket];
-    if (lo < 0 || y < ys[lo]) minI[bucket] = i;
-    const hi = maxI[bucket];
-    if (hi < 0 || y > ys[hi]) maxI[bucket] = i;
-  }
-  const raw = new Int32Array(2 + buckets * 2);
-  let n = 0;
-  raw[n++] = start;
+  let i = start + 1;
+  let prev = x0;
   for (let bucket = 0; bucket < buckets; bucket++) {
-    const a = minI[bucket];
-    const b = maxI[bucket];
-    if (a >= 0) raw[n++] = a;
-    if (b >= 0 && b !== a) raw[n++] = b;
+    const edge = span > 0 && bucket < buckets - 1 ? x0 + ((bucket + 1) * span) / buckets : Infinity;
+    let lo = -1;
+    let hi = -1;
+    while (i < last) {
+      const x = xs[i];
+      if (!(x >= prev) || x > endX) return null;
+      if (x >= edge) break;
+      const y = ys[i];
+      if (lo < 0 || y < ys[lo]) lo = i;
+      if (hi < 0 || y > ys[hi]) hi = i;
+      prev = x;
+      i += 1;
+    }
+    minI[bucket] = lo;
+    maxI[bucket] = hi;
   }
-  raw[n++] = last;
-  return uniqueSorted(raw, n);
+  return pack(minI, maxI, buckets, start, last);
+}
+
+/**
+ * Min/max inside equal index buckets. Matches x-based buckets when x is linear in the index.
+ * Ties keep the earlier point. The first and last indexes are always kept.
+ */
+function minmaxIndex(ys: Float64Array, start: number, end: number, target: number): Int32Array {
+  const last = end - 1;
+  const len = last - start;
+  const buckets = Math.max(1, Math.floor((target - 2) / 2));
+  const minI = new Int32Array(buckets);
+  const maxI = new Int32Array(buckets);
+  minI.fill(-1);
+  for (let bucket = 0; bucket < buckets; bucket++) {
+    let from = start + 1 + Math.floor((bucket * len) / buckets);
+    let to = start + 1 + Math.floor(((bucket + 1) * len) / buckets);
+    if (from < start + 1) from = start + 1;
+    if (to > last) to = last;
+    if (from >= to) continue;
+    let minV = Infinity;
+    let maxV = -Infinity;
+    let lo = -1;
+    let hi = -1;
+    for (let i = from; i < to; i++) {
+      const y = ys[i];
+      if (y < minV) {
+        minV = y;
+        lo = i;
+      }
+      if (y > maxV) {
+        maxV = y;
+        hi = i;
+      }
+    }
+    minI[bucket] = lo;
+    maxI[bucket] = hi;
+  }
+  return pack(minI, maxI, buckets, start, last);
 }
 
 function minmaxRange(
@@ -175,6 +258,10 @@ function minmaxRange(
     const hi = maxI[bucket];
     if (hi < 0 || y > (ys[hi] as number) || (y === ys[hi] && i < hi)) maxI[bucket] = i;
   }
+  return pack(minI, maxI, buckets, start, last);
+}
+
+function pack(minI: Int32Array, maxI: Int32Array, buckets: number, start: number, last: number): Int32Array {
   const raw = new Int32Array(2 + buckets * 2);
   let n = 0;
   raw[n++] = start;

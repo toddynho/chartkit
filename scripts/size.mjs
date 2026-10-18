@@ -25,7 +25,17 @@ const externalFramework = {
   },
 };
 
-async function gzipOf(entry, { external = false } = {}) {
+const externalInteractExtra = {
+  name: "external-interact-extra",
+  setup(build) {
+    build.onResolve({ filter: /interact-extra(\.ts)?$/ }, (args) => {
+      if (args.kind === "entry-point") return null;
+      return { path: "@chartkitdev/core/interact/extra", external: true };
+    });
+  },
+};
+
+async function gzipOf(entry, { external = false, splitExtra = false } = {}) {
   const outfile = join(tmpdir(), `chartkit-size-${Math.random().toString(36).slice(2)}.mjs`);
   await build({
     entryPoints: [entry],
@@ -34,7 +44,7 @@ async function gzipOf(entry, { external = false } = {}) {
     format: "esm",
     platform: "node",
     outfile,
-    plugins: external ? [externalFramework] : [],
+    plugins: [...(external ? [externalFramework] : []), ...(splitExtra ? [externalInteractExtra] : [])],
     logLevel: "silent",
   });
   const code = readFileSync(outfile);
@@ -50,6 +60,8 @@ writeFileSync(
 const line = await gzipOf(minimalLine);
 const all = await gzipOf(join(src, "all.ts"));
 const validate = await gzipOf(join(src, "validate.ts"));
+const interact = await gzipOf(join(src, "interact.ts"), { splitExtra: true });
+const interactExtra = await gzipOf(join(src, "interact-extra.ts"));
 
 const debugOut = join(tmpdir(), "chartkit-size-line-debug.mjs");
 await build({
@@ -67,6 +79,7 @@ const isolation = {
   lineOmitsCandle: !line.code.includes('data-ck-mark="candle"'),
   lineOmitsRetro: !line.code.includes("#ff7edb"),
   lineOmitsValidator: !line.code.includes("CK1004"),
+  lineOmitsInteract: !line.code.includes("data-ck-tip") && !debug.includes("data-ck-tip"),
   allIncludesRetro: all.code.includes("#ff7edb"),
   allIncludesCandle: all.code.includes('data-ck-mark="candle"'),
 };
@@ -96,10 +109,12 @@ const measured = {
   vue: vue.gzipBytes,
   svelte: svelte.gzipBytes,
   vanilla: vanilla.gzipBytes,
+  interact: interact.gzipBytes,
+  interactExtra: interactExtra.gzipBytes,
 };
 const budget = JSON.parse(readFileSync(join(root, "scripts/size-budget.json"), "utf8"));
 const failures = [];
-for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla"]) {
+for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "interact", "interactExtra"]) {
   if (typeof budget[key] !== "number") failures.push(`${key} budget missing`);
   else if (measured[key] > budget[key]) failures.push(`${key} gzip ${measured[key]} > budget ${budget[key]}`);
 }
@@ -117,6 +132,8 @@ console.log(JSON.stringify({
     vue: vue.minBytes,
     svelte: svelte.minBytes,
     vanilla: vanilla.minBytes,
+    interact: interact.minBytes,
+    interactExtra: interactExtra.minBytes,
   },
   isolation,
 }, null, 2));

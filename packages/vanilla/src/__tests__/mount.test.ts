@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { line } from "../../../core/src/charts/line";
+import { createRenderer } from "../../../core/src/render";
 import { mount, renderToString } from "../index";
 import { comboSpec, coreSvg, heatmapSpec, lineSpec, specs } from "./specs";
 
@@ -49,6 +51,64 @@ describe("vanilla mount", () => {
     expect(host.querySelector("svg")?.getAttribute("data-ck-type")).toBe("combo");
     chart.destroy();
     expect(host.innerHTML).toBe("");
+  });
+
+  it("applies in-place mark and encoding edits on render and mount().update", () => {
+    const render = createRenderer([line]);
+    const spec = {
+      version: "1" as const,
+      type: "line" as const,
+      data: [
+        { m: "Jan", a: 1, b: 4 },
+        { m: "Feb", a: 3, b: 2 },
+        { m: "Mar", a: 2, b: 5 },
+      ],
+      encoding: { x: "m", y: [{ field: "a", title: "Alpha" }, { field: "b", title: "Beta" }] },
+      mark: { curve: "linear" as const },
+      size: { width: 400, height: 240 },
+      locale: "en-US",
+      a11y: { alt: "Two series" },
+    };
+    render(spec);
+    spec.mark.curve = "step";
+    spec.encoding.y[1].title = "Beta (renamed)";
+    const actual = render(spec);
+    const expected = render(structuredClone(spec));
+    const linearFresh = render({ ...structuredClone(spec), mark: { curve: "linear" } });
+    expect(actual).toBe(expected);
+    expect(actual).toContain("Beta (renamed)");
+    expect(actual).not.toBe(linearFresh);
+
+    const host = document.createElement("div");
+    document.body.append(host);
+    const live = {
+      version: "1" as const,
+      type: "line" as const,
+      data: [
+        { m: "Jan", a: 1, b: 4 },
+        { m: "Feb", a: 3, b: 2 },
+        { m: "Mar", a: 2, b: 5 },
+      ],
+      encoding: { x: "m", y: [{ field: "a", title: "Alpha" }, { field: "b", title: "Beta" }] },
+      mark: { curve: "linear" as const },
+      size: { width: 400, height: 240 },
+      locale: "en-US",
+      a11y: { alt: "Two series" },
+    };
+    const chart = mount(host, live, { render });
+    expect(host.textContent).toContain("Beta");
+    expect(host.textContent).not.toContain("Beta (renamed)");
+    live.mark.curve = "step";
+    live.encoding.y[1].title = "Beta (renamed)";
+    live.data[0].a = 8;
+    chart.update(live);
+    expect(host.textContent).toContain("Beta (renamed)");
+    const painted = host.querySelector("path")?.getAttribute("d");
+    const fresh = render(structuredClone(live));
+    expect(painted).toBe(fresh.match(/<path d="([^"]+)"/)?.[1]);
+    expect(painted).not.toBe(linearFresh.match(/<path d="([^"]+)"/)?.[1]);
+    chart.destroy();
+    host.remove();
   });
 
   it("renderToString matches core for line, combo, and heatmap", () => {

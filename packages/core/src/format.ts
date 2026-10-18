@@ -36,79 +36,52 @@ function digits(fmt: Fmt, fallback: number): { minimumFractionDigits?: number; m
 function formatBytes(value: number): string {
   const sign = value < 0 ? "-" : "";
   let abs = Math.abs(value);
-  const units = ["B", "KB", "MB", "GB", "TB"];
   let index = 0;
-  while (abs >= 1024 && index < units.length - 1) {
-    abs /= 1024;
-    index += 1;
-  }
-  const rounded = abs >= 10 || index === 0 ? Math.round(abs) : Math.round(abs * 10) / 10;
-  return `${sign}${rounded} ${units[index]}`;
+  while (abs >= 1024 && index < 4) abs /= 1024, index++;
+  const rounded = abs >= 10 || !index ? Math.round(abs) : Math.round(abs * 10) / 10;
+  return `${sign}${rounded} ${["B", "KB", "MB", "GB", "TB"][index]}`;
 }
 
 function formatDuration(value: number): string {
   const sign = value < 0 ? "-" : "";
   const abs = Math.abs(value);
-  const trim = (n: number) => String(Math.round(n * 10) / 10);
-  if (abs < 1000) return `${sign}${Math.round(abs)}ms`;
-  if (abs < 60_000) return `${sign}${trim(abs / 1000)}s`;
-  if (abs < 3_600_000) return `${sign}${trim(abs / 60_000)}m`;
-  return `${sign}${trim(abs / 3_600_000)}h`;
+  const step = abs < 1e3 ? 1 : abs < 6e4 ? 1e3 : abs < 36e5 ? 6e4 : 36e5;
+  const n = abs / step;
+  return sign + (step === 1 ? Math.round(abs) : Math.round(n * 10) / 10) + (step === 1 ? "ms" : step === 1e3 ? "s" : step === 6e4 ? "m" : "h");
 }
 
 function formatDate(value: number, style: string, locale: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
   const options: Intl.DateTimeFormatOptions = { timeZone: "UTC" };
-  if (style === "date") {
-    options.year = "numeric";
-    options.month = "short";
-    options.day = "numeric";
-  } else if (style === "time") {
+  const dateish = style === "date" || style === "datetime";
+  if (dateish || style === "year") options.year = "numeric";
+  if (dateish || style === "month") options.month = "short";
+  if (dateish) options.day = "numeric";
+  if (style === "time" || style === "datetime") {
     options.hour = "2-digit";
     options.minute = "2-digit";
-  } else if (style === "datetime") {
-    options.year = "numeric";
-    options.month = "short";
-    options.day = "numeric";
-    options.hour = "2-digit";
-    options.minute = "2-digit";
-  } else if (style === "month") options.month = "short";
-  else if (style === "year") options.year = "numeric";
-  else if (style === "weekday") options.weekday = "short";
+  }
+  if (style === "weekday") options.weekday = "short";
   return new Intl.DateTimeFormat(locale, options).format(date);
 }
 
 function body(value: number, fmt: Fmt, locale: string): string {
-  switch (fmt.style) {
-    case "integer":
-      return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(value);
-    case "compact":
-      return new Intl.NumberFormat(locale, { notation: "compact", ...digits(fmt, 1) }).format(value);
-    case "percent":
-      return new Intl.NumberFormat(locale, { style: "percent", ...digits(fmt, 1) }).format(value);
-    case "percent-raw":
-      return new Intl.NumberFormat(locale, { style: "percent", ...digits(fmt, 1) }).format(value / 100);
-    case "currency":
-      return new Intl.NumberFormat(locale, {
-        style: "currency",
-        currency: fmt.currency ?? "USD",
-        ...digits(fmt, 2),
-      }).format(value);
-    case "bytes":
-      return formatBytes(value);
-    case "duration-ms":
-      return formatDuration(value);
-    case "date":
-    case "time":
-    case "datetime":
-    case "month":
-    case "year":
-    case "weekday":
-      return formatDate(value, fmt.style, locale);
-    default:
-      return new Intl.NumberFormat(locale, digits(fmt, 2)).format(value);
+  const style = fmt.style;
+  if (style === "bytes") return formatBytes(value);
+  if (style === "duration-ms") return formatDuration(value);
+  if (style === "date" || style === "time" || style === "datetime" || style === "month" || style === "year" || style === "weekday") {
+    return formatDate(value, style, locale);
   }
+  if (style === "integer") return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(value);
+  const options: Intl.NumberFormatOptions = digits(fmt, style === "compact" || style === "percent" || style === "percent-raw" ? 1 : 2);
+  if (style === "compact") options.notation = "compact";
+  else if (style === "percent" || style === "percent-raw") options.style = "percent";
+  else if (style === "currency") {
+    options.style = "currency";
+    options.currency = fmt.currency ?? "USD";
+  }
+  return new Intl.NumberFormat(locale, options).format(style === "percent-raw" ? value / 100 : value);
 }
 
 /** Format a number with a spec preset or format object. */

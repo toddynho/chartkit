@@ -13,9 +13,13 @@ export function esc(value: string): string {
 }
 
 export function n(value: number): string {
-  if (!Number.isFinite(value)) return "0";
-  const rounded = Math.round(value * 100) / 100;
-  return String(rounded);
+  const r = Math.round(value * 100);
+  const a = r < 0 ? -r : r;
+  if (a !== a || a > 1e7) return Number.isFinite(value) ? String(r / 100) : "0";
+  const w = (a / 100) | 0;
+  const f = a % 100;
+  const s = r < 0 ? "-" : "";
+  return f ? s + w + "." + (f < 10 ? "0" : "") + (f % 10 ? f : f / 10) : s + w;
 }
 
 export function font(): string {
