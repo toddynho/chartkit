@@ -163,7 +163,8 @@ function sampleDense(
 function minmaxSorted(xs: Float64Array, ys: Float64Array, start: number, end: number, target: number): Int32Array | null {
   const last = end - 1;
   const x0 = xs[start];
-  const span = xs[last] - x0;
+  const endX = xs[last];
+  const span = endX - x0;
   if (!(span >= 0)) return null;
   const buckets = Math.max(1, Math.floor((target - 2) / 2));
   const minI = new Int32Array(buckets);
@@ -177,7 +178,7 @@ function minmaxSorted(xs: Float64Array, ys: Float64Array, start: number, end: nu
     let hi = -1;
     while (i < last) {
       const x = xs[i];
-      if (!(x >= prev) || x > xs[last]) return null;
+      if (!(x >= prev) || x > endX) return null;
       if (x >= edge) break;
       const y = ys[i];
       if (lo < 0 || y < ys[lo]) lo = i;

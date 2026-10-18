@@ -202,32 +202,24 @@ function axisFormat(spec: InteractSpec, axis: "y" | "y2"): unknown {
 }
 
 function tooltipOn(spec: InteractSpec): boolean {
-  const interaction = isRecord(spec.interaction) ? spec.interaction : undefined;
-  if (interaction?.hover === false) return false;
+  if (isRecord(spec.interaction) && spec.interaction.hover === false) return false;
   const tooltip = spec.tooltip;
-  if (tooltip === false) return false;
-  if (isRecord(tooltip) && tooltip.show === false) return false;
-  if (tooltip === true || isRecord(tooltip)) return true;
-  return TIP_TYPES.has(spec.type ?? "");
+  if (tooltip === false || (isRecord(tooltip) && tooltip.show === false)) return false;
+  return tooltip === true || isRecord(tooltip) || TIP_TYPES.has(spec.type ?? "");
 }
 
 function crosshairOn(spec: InteractSpec): boolean {
-  if (!tooltipOn(spec) || spec.type === "donut") return false;
-  const tooltip = spec.tooltip;
-  if (isRecord(tooltip) && tooltip.crosshair === false) return false;
-  return true;
+  return tooltipOn(spec) && spec.type !== "donut" && !(isRecord(spec.tooltip) && spec.tooltip.crosshair === false);
 }
 
 function zoomMode(spec: InteractSpec): "none" | "x" | "xy" {
-  const interaction = isRecord(spec.interaction) ? spec.interaction : undefined;
-  const zoom = interaction?.zoom;
-  if (zoom === "x" || zoom === "xy" || zoom === "none") return zoom;
-  return spec.type === "candlestick" ? "x" : "none";
+  const zoom = isRecord(spec.interaction) ? spec.interaction.zoom : 0;
+  return zoom === "x" || zoom === "xy" || zoom === "none" ? zoom : spec.type === "candlestick" ? "x" : "none";
 }
 
 function reducedMotion(): boolean {
   try {
-    return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    return matchMedia("(prefers-reduced-motion: reduce)").matches;
   } catch {
     return false;
   }
@@ -237,11 +229,8 @@ function durationMs(spec: InteractSpec, count: number): number {
   const animation = spec.animation;
   if (animation == null || animation === false || count > 2000 || reducedMotion()) return 0;
   if (animation === true) return 400;
-  if (isRecord(animation)) {
-    if (animation.duration === 0) return 0;
-    return typeof animation.duration === "number" ? animation.duration : 400;
-  }
-  return 0;
+  if (!isRecord(animation) || animation.duration === 0) return 0;
+  return typeof animation.duration === "number" ? animation.duration : 400;
 }
 
 function esc(value: string): string {
@@ -267,12 +256,8 @@ interface Box {
 function plotBox(svg: SVGSVGElement): Box {
   const rect = svg.querySelector("clipPath rect");
   if (rect) {
-    return {
-      l: Number(rect.getAttribute("x")) || 0,
-      t: Number(rect.getAttribute("y")) || 0,
-      w: Number(rect.getAttribute("width")) || 1,
-      h: Number(rect.getAttribute("height")) || 1,
-    };
+    const num = (name: string) => Number(rect.getAttribute(name)) || 0;
+    return { l: num("x"), t: num("y"), w: num("width") || 1, h: num("height") || 1 };
   }
   const parts = (svg.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number);
   return { l: 0, t: 0, w: parts[2] || 640, h: parts[3] || 240 };
@@ -439,7 +424,7 @@ function numericValues(spec: InteractSpec, table: Table): Float64Array | null {
 }
 
 function materialize(data: unknown): unknown[] | null {
-  if (Array.isArray(data) || ArrayBuffer.isView(data)) return Array.prototype.slice.call(data as ArrayLike<unknown>);
+  if (Array.isArray(data) || ArrayBuffer.isView(data)) return [].slice.call(data as ArrayLike<unknown>);
   if (!isRecord(data) || !isRecord(data.columns)) return null;
   const columns = data.columns as Record<string, ArrayLike<unknown>>;
   const keys = Object.keys(columns);
@@ -643,7 +628,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     if (!showCross) return;
     let line = svg.querySelector("[data-ck-crosshair]");
     if (!line) {
-      svg.insertAdjacentHTML("beforeend", `<line data-ck-crosshair="" class="ck-xhair"/>`);
+      svg.insertAdjacentHTML("beforeend", `<line data-ck-crosshair class="ck-xhair"/>`);
       line = svg.lastElementChild as Element;
     }
     line.setAttribute("x1", String(x));
@@ -666,35 +651,33 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   function addDot(x: number, y: number, fill: string): { x: number; y: number } {
     const cx = String(Math.round(x * 100) / 100);
     const cy = String(Math.round(y * 100) / 100);
-    svg.insertAdjacentHTML("beforeend", `<circle data-ck-dot="" cx="${cx}" cy="${cy}" r="3.5" fill="${esc(fill)}" stroke="light-dark(#fff,#1c1c1e)" stroke-width="1.5" pointer-events="none"/>`);
+    svg.insertAdjacentHTML("beforeend", `<circle data-ck-dot cx="${cx}" cy="${cy}" r="3.5" fill="${esc(fill)}" stroke="light-dark(#fff,#1c1c1e)" stroke-width="1.5" pointer-events="none"/>`);
     return { x, y };
   }
 
   function yOnPath(d: string, x: number): number | null {
     const t = d.split(/[\s,]+/);
-    let c = "", x0 = 0, y0 = 0, hit: number | null = null;
-    for (let i = 0; i < t.length && hit == null; i++) {
+    let c = "", x0 = 0, y0 = 0;
+    for (let i = 0; i < t.length; i++) {
       const p = t[i];
-      if (p === "M" || p === "L" || p === "C" || p === "Z") {
-        c = p === "Z" ? "" : p;
-        continue;
-      }
-      if (c === "M") {
+      if (p === "Z") c = "";
+      else if (p === "M" || p === "L" || p === "C") c = p;
+      else if (c === "M") {
         x0 = +p;
         y0 = +t[++i];
-        continue;
+      } else if (c === "L" || c === "C") {
+        const curve = c === "C";
+        const x1 = curve ? +t[i + 4] : +p;
+        const y1 = curve ? +t[i + 5] : +t[++i];
+        if (curve) i += 5;
+        if (x1 === x1 && y1 === y1 && (x - x0) * (x - x1) <= 0) {
+          return x1 === x0 ? y0 : y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
+        }
+        x0 = x1;
+        y0 = y1;
       }
-      if (c !== "L" && c !== "C") continue;
-      const x1 = c === "L" ? +p : +t[i + 4];
-      const y1 = c === "L" ? +t[++i] : +t[i + 5];
-      if (c === "C") i += 5;
-      if (x1 === x1 && y1 === y1 && ((x0 <= x && x <= x1) || (x1 <= x && x <= x0))) {
-        hit = x1 === x0 ? y0 : y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
-      }
-      x0 = x1;
-      y0 = y1;
     }
-    return hit;
+    return null;
   }
 
   function dataDotY(path: Element, index: number): number | null {
@@ -772,6 +755,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   let dirty = false;
+  let ticket = 0;
   function rebuild(): void {
     dirty = false;
     const viewN = Math.max(0, hi - lo + 1);
@@ -781,9 +765,20 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     hover = buildHoverIndex(viewN, box.l, box.w, slice);
     refreshColors();
   }
+  function arm(now?: 1): void {
+    const mine = ++ticket;
+    if (now) {
+      if (dirty) rebuild();
+      return;
+    }
+    dirty = true;
+    const go = () => mine === ticket && dirty && rebuild();
+    const ric = globalThis.requestIdleCallback;
+    ric ? ric(go, { timeout: 400 }) : setTimeout(go);
+  }
 
   function crossX(local: number): number {
-    if (dirty) rebuild();
+    arm(1);
     return hover.pixels[local] ?? box.l;
   }
 
@@ -855,7 +850,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     patchSvg(host as PatchHost, next, ms);
     if (keys) svg.setAttribute("tabindex", "0");
     dim();
-    dirty = true;
+    arm();
   }
 
   function emit(name: string, detail: unknown): void {
@@ -900,7 +895,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function hoverMove(event: PointerEvent | MouseEvent): void {
-    if (dirty) rebuild();
+    arm(1);
     if (base.type === "donut") {
       const path = (event.target as Element | null)?.closest?.("path[aria-label]");
       if (!path) {
@@ -935,7 +930,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     live.textContent = `${xText(index)}: ${rows.map((row) => `${row.name} ${row.text}`.trim()).join(", ")}`;
   }
 
-  dirty = true;
+  arm();
   paintTable();
   fade(svg, durationMs(spec, n), "0");
 
@@ -976,7 +971,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           showTip,
           () => alive,
           (clientX, clientY) => viewPoint(svg, clientX, clientY),
-          (x) => (dirty && rebuild(), lookupIndex(hover, x)),
+          (x) => (arm(1), lookupIndex(hover, x)),
           zoomAt,
           resetRange,
           () => redraw(),
@@ -1034,7 +1029,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         patchSvg(host as PatchHost, markup, durationMs(next, n));
         if (keys) svg.setAttribute("tabindex", "0");
         dim();
-        dirty = true;
+        arm();
         paintTable();
         return;
       }
@@ -1044,6 +1039,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     destroy() {
       if (!alive) return;
       alive = false;
+      ticket++;
       for (const off of offs) off();
       tip.remove();
       live.remove();

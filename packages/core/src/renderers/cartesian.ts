@@ -129,7 +129,8 @@ interface PlotModel {
 type Curve = "linear" | "monotone" | "step" | "step-before" | "step-after";
 
 interface ChartShell {
-  key: unknown[];
+  /** Non-data spec contents. In-place edits change it; replacing `data` does not. */
+  stamp: string;
   type: string;
   preset: PresetTokens;
   channels: YChannel[];
@@ -173,13 +174,17 @@ interface ChartShell {
   y2Log: boolean;
 }
 
+function shellStamp(spec: Record<string, unknown>): string {
+  return JSON.stringify(spec, (key, value) => (key === "data" ? undefined : value)) ?? "";
+}
+
 let chartShell: ChartShell | null = null;
 
 /** Theme, channels, and geometry. Reused when a later spec only replaces `data`. */
 function shellFor(spec: Record<string, unknown>): ChartShell {
-  const key = [spec.type, spec.encoding, spec.mark, spec.theme, spec.size, spec.axes, spec.legend, spec.a11y, spec.title, spec.subtitle, spec.locale, spec.id];
+  const stamp = shellStamp(spec);
   const hit = chartShell;
-  if (hit && hit.key.every((item, index) => item === key[index])) return hit;
+  if (hit && hit.stamp === stamp) return hit;
   const type = spec.type as string;
   const preset = resolvePreset(spec.theme);
   const encoding = isRecord(spec.encoding) ? spec.encoding : {};
@@ -199,7 +204,7 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : "";
   const idSource = typeof spec.id === "string" ? spec.id : alt || type;
   const next: ChartShell = {
-    key,
+    stamp,
     type,
     preset,
     channels,
@@ -329,48 +334,14 @@ function toModel(
   }
 
   return {
-    type,
-    title: shell.title,
-    subtitle: shell.subtitle,
-    alt: shell.alt,
-    locale: shell.locale,
-    width: shell.width,
-    height: shell.height,
-    responsive: shell.responsive,
+    ...shell,
     labels,
     x: type === "bar" || type === "combo" ? null : x,
     series,
-    curve: shell.curve,
-    sampling: shell.sampling,
-    stack: shell.stack,
-    orientation: shell.orientation,
-    fillOpacity: shell.fillOpacity,
-    fillPaint: shell.fillPaint,
-    strokeWidth: shell.strokeWidth,
-    strokePaint: shell.strokePaint,
-    gradient: shell.gradient,
-    points: shell.points,
-    dots: shell.dots,
-    pointSize: shell.pointSize,
-    connectNulls: shell.connectNulls,
-    cornerRadius: shell.cornerRadius,
-    radiusVar: shell.radiusVar,
-    gap: shell.gap,
-    labelsOn: shell.labelsOn,
-    showX: shell.showX,
-    showY: shell.showY,
     showY2: shell.showY2 && series.some((item) => item.axis === "y2"),
-    yGrid: shell.yGrid,
     legend: shell.legendOn && series.length > 1,
     zero: zeroDefault(type, mark, series),
-    preset,
-    id: shell.id,
     xTemporal,
-    xFormat: shell.xFormat,
-    yFormat: shell.yFormat,
-    y2Format: shell.y2Format,
-    yLog: shell.yLog,
-    y2Log: shell.y2Log,
     notes: spec.annotations,
   };
 }
@@ -1521,15 +1492,14 @@ function dataNumber(value: number | string): number | null {
   return Number.isFinite(numeric) ? numeric : null;
 }
 
-const MINUTE = 60_000;
-const HOUR = 60 * MINUTE;
-const DAY = 24 * HOUR;
+const TICK_MIN = [1, 5, 15, 30, 60, 180, 360, 720, 1440, 2880, 10080, 20160, 43200, 129600, 525600];
+const MONTHS = "JanFebMarAprMayJunJulAugSepOctNovDec";
 
 function timeTicks(min: number, max: number, count: number): number[] {
-  const span = Math.max(max - min, 1);
-  const steps = [MINUTE, 5 * MINUTE, 15 * MINUTE, 30 * MINUTE, HOUR, 3 * HOUR, 6 * HOUR, 12 * HOUR, DAY, 2 * DAY, 7 * DAY, 14 * DAY, 30 * DAY, 90 * DAY, 365 * DAY];
-  let step = steps[steps.length - 1];
-  for (const candidate of steps) {
+  const span = max - min || 1;
+  let step = 525600 * 60000;
+  for (let i = 0; i < TICK_MIN.length; i++) {
+    const candidate = TICK_MIN[i] * 60000;
     if (span / candidate <= count + 1) {
       step = candidate;
       break;
@@ -1540,34 +1510,35 @@ function timeTicks(min: number, max: number, count: number): number[] {
   for (let value = start; value <= max + step * 0.001 && out.length < 12; value += step) {
     if (value >= min - step * 0.001) out.push(value);
   }
-  return out.length > 0 ? out : [min, max];
+  return out.length ? out : [min, max];
 }
-
-let timeFormat: Intl.DateTimeFormat | undefined;
-let timeFormatKey = "";
 
 function formatTimeLabel(ms: number, span: number, locale: string, format: unknown): string {
   if (format !== undefined) return formatValue(ms, format, locale);
   const date = new Date(ms);
-  if (Number.isNaN(date.getTime())) return "";
-  const kind = span < 2 * DAY ? "t" : span < 70 * DAY ? "d" : span < 800 * DAY ? "m" : "y";
-  const key = locale + kind;
-  if (!timeFormat || timeFormatKey !== key) {
-    const options: Intl.DateTimeFormatOptions = { timeZone: "UTC" };
-    if (kind === "t") {
-      options.hour = "2-digit";
-      options.minute = "2-digit";
-    } else if (kind === "d") {
-      options.month = "short";
-      options.day = "numeric";
-    } else if (kind === "m") {
-      options.month = "short";
-      options.year = "numeric";
-    } else options.year = "numeric";
-    timeFormat = new Intl.DateTimeFormat(locale, options);
-    timeFormatKey = key;
+  if (date.getTime() !== date.getTime()) return "";
+  if (locale !== "en-US") {
+    const opt: Intl.DateTimeFormatOptions =
+      span < 1728e5
+        ? { timeZone: "UTC", hour: "2-digit", minute: "2-digit" }
+        : span < 6048e6
+          ? { timeZone: "UTC", month: "short", day: "numeric" }
+          : span < 6912e7
+            ? { timeZone: "UTC", month: "short", year: "numeric" }
+            : { timeZone: "UTC", year: "numeric" };
+    return new Intl.DateTimeFormat(locale, opt).format(date);
   }
-  return timeFormat.format(date);
+  if (span < 1728e5) {
+    const hour = date.getUTCHours();
+    const minute = date.getUTCMinutes();
+    const h12 = hour % 12 || 12;
+    return (h12 < 10 ? "0" : "") + h12 + ":" + (minute < 10 ? "0" : "") + minute + (hour < 12 ? " AM" : " PM");
+  }
+  const mo = date.getUTCMonth() * 3;
+  const mon = MONTHS.slice(mo, mo + 3);
+  if (span < 6048e6) return mon + " " + date.getUTCDate();
+  const year = date.getUTCFullYear();
+  return span < 6912e7 ? mon + " " + year : "" + year;
 }
 
 function tickLabel(model: PlotModel, index: number): string {

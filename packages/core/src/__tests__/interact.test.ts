@@ -205,6 +205,60 @@ describe("attach", () => {
     expect(svg).not.toContain("data-ck-interact");
   });
 
+  it("builds the hover index in idle time and finishes it if the pointer arrives first", () => {
+    const queued: IdleRequestCallback[] = [];
+    const previous = globalThis.requestIdleCallback;
+    const originalTimeout = globalThis.setTimeout;
+    globalThis.requestIdleCallback = ((callback: IdleRequestCallback) => {
+      queued.push(callback);
+      return queued.length;
+    }) as typeof requestIdleCallback;
+    try {
+      const spec = lineSpec();
+      const host = hostOf(spec);
+      const ctl = attach(host, spec, { render });
+      expect(queued.length).toBe(1);
+      const svg = host.querySelector("svg")!;
+      const plot = svg.querySelector("clipPath rect")!;
+      const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.875;
+      svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 80, bubbles: true }));
+      expect(host.querySelector("[data-ck-tip]")?.textContent).toContain("Apr");
+      ctl.destroy();
+
+      const warmed = hostOf(spec);
+      const warmCtl = attach(warmed, spec, { render });
+      const pending = queued.splice(0);
+      expect(pending.length).toBeGreaterThan(0);
+      for (const callback of pending) callback({ didTimeout: false, timeRemaining: () => 50 });
+      const warmSvg = warmed.querySelector("svg")!;
+      const warmPlot = warmSvg.querySelector("clipPath rect")!;
+      const warmX = Number(warmPlot.getAttribute("x")) + Number(warmPlot.getAttribute("width")) * 0.875;
+      warmSvg.dispatchEvent(new PointerEvent("pointermove", { clientX: warmX, clientY: 80, bubbles: true }));
+      expect(warmed.querySelector("[data-ck-tip]")?.textContent).toContain("Apr");
+      warmCtl.destroy();
+
+      const later: Array<() => void> = [];
+      globalThis.setTimeout = ((fn: TimerHandler) => {
+        later.push(fn as () => void);
+        return 0;
+      }) as typeof setTimeout;
+      globalThis.requestIdleCallback = undefined as unknown as typeof requestIdleCallback;
+      const fallback = hostOf(spec);
+      const fallbackCtl = attach(fallback, spec, { render });
+      expect(later.length).toBe(1);
+      later[0]();
+      const fallbackSvg = fallback.querySelector("svg")!;
+      const fallbackPlot = fallbackSvg.querySelector("clipPath rect")!;
+      const fallbackX = Number(fallbackPlot.getAttribute("x")) + Number(fallbackPlot.getAttribute("width")) * 0.875;
+      fallbackSvg.dispatchEvent(new PointerEvent("pointermove", { clientX: fallbackX, clientY: 80, bubbles: true }));
+      expect(fallback.querySelector("[data-ck-tip]")?.textContent).toContain("Apr");
+      fallbackCtl.destroy();
+    } finally {
+      globalThis.requestIdleCallback = previous;
+      globalThis.setTimeout = originalTimeout;
+    }
+  });
+
   it("shows every series at the nearest x, with the format preset", () => {
     const spec = lineSpec({
       encoding: {

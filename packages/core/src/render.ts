@@ -16,22 +16,6 @@ export interface ChartRenderer {
 
 const registry = new Map<string, ChartRenderer>();
 
-const IMPORT_NAME: Record<string, string> = {
-  line: "line",
-  bar: "bar",
-  donut: "donut",
-  "stacked-area": "stackedArea",
-  scatter: "scatter",
-  combo: "combo",
-  heatmap: "heatmap",
-  gauge: "gauge",
-  kpi: "kpi",
-  sparkline: "sparkline",
-  "mini-area": "miniArea",
-  "progress-ring": "progressRing",
-  spike: "spike",
-  candlestick: "candlestick",
-};
 
 /**
  * Add chart types to the shared `render()` registry.
@@ -115,8 +99,9 @@ function undrawable(type: string): Diagnostic {
 }
 
 function hintFor(type: string): string {
-  const binding = IMPORT_NAME[type];
-  if (!binding) return 'import { render } from "@chartkitdev/core/all" registers every v1 chart.';
+  const known = " line bar donut stacked-area scatter combo heatmap gauge kpi sparkline mini-area progress-ring spike candlestick ";
+  if (!known.includes(" " + type + " ")) return 'import { render } from "@chartkitdev/core/all" registers every v1 chart.';
+  const binding = type.replace(/-([a-z])/g, (_match, char: string) => char.toUpperCase());
   return `import { ${binding} } from "@chartkitdev/core/charts/${type}"; register(${binding}); or import { render } from "@chartkitdev/core/all".`;
 }
 

@@ -177,31 +177,18 @@ export function definePreset(name: string, delta: Partial<PresetTokens>): Preset
 }
 
 export function resolvePreset(theme: unknown): PresetTokens {
-  const baseName = presetName(theme);
-  const base = presets.get(baseName) ?? midnight;
+  const base = presets.get(presetName(theme)) ?? midnight;
   const tokens = themeRecord(theme);
   if (!tokens) return base;
-  return {
-    ...base,
-    background: colorOverride(tokens.background) ?? base.background,
-    surface: colorOverride(tokens.surface) ?? base.surface,
-    text: colorOverride(tokens.text) ?? base.text,
-    muted: colorOverride(tokens.muted) ?? base.muted,
-    grid: colorOverride(tokens.grid) ?? base.grid,
-    axis: colorOverride(tokens.axis) ?? base.axis,
-    accent: colorOverride(tokens.accent) ?? base.accent,
-    positive: colorOverride(tokens.positive) ?? base.positive,
-    negative: colorOverride(tokens.negative) ?? base.negative,
-    track: colorOverride(tokens.track) ?? base.track,
-    series: Array.isArray(tokens.series)
-      ? tokens.series.filter((item): item is string => typeof item === "string" && item.length > 0)
-      : base.series,
-    lines: Array.isArray(tokens.lines)
-      ? tokens.lines.filter((item): item is string => typeof item === "string" && item.length > 0)
-      : Array.isArray(tokens.series)
-        ? tokens.series.filter((item): item is string => typeof item === "string" && item.length > 0)
-        : base.lines,
-  };
+  const next: PresetTokens = { ...base };
+  for (const key of Object.keys(TOKEN_KEYS) as (keyof PresetTokens)[]) {
+    const color = colorOverride(tokens[key]);
+    if (typeof color === "string") next[key] = color as never;
+  }
+  if (Array.isArray(tokens.series)) next.series = tokens.series.filter((item): item is string => typeof item === "string" && item.length > 0);
+  if (Array.isArray(tokens.lines)) next.lines = tokens.lines.filter((item): item is string => typeof item === "string" && item.length > 0);
+  else if (Array.isArray(tokens.series)) next.lines = next.series;
+  return next;
 }
 
 export function resolveGeometry(theme: unknown): PresetGeometry {
@@ -267,15 +254,9 @@ export function paint(color: string | undefined, preset: PresetTokens, seriesInd
 }
 
 function presetName(theme: unknown): string {
-  if (typeof theme === "string") {
-    if (theme === "auto") return "auto";
-    return presets.has(theme) ? theme : "midnight";
-  }
-  if (isRecord(theme) && typeof theme.preset === "string") {
-    if (theme.preset === "auto") return "auto";
-    return presets.has(theme.preset) ? theme.preset : "midnight";
-  }
-  return "auto";
+  const name = typeof theme === "string" ? theme : isRecord(theme) && typeof theme.preset === "string" ? theme.preset : null;
+  if (name === null) return "auto";
+  return presets.has(name) ? name : "midnight";
 }
 
 function themeRecord(theme: unknown): Record<string, unknown> | undefined {
@@ -284,11 +265,7 @@ function themeRecord(theme: unknown): Record<string, unknown> | undefined {
 }
 
 function colorOverride(value: unknown): string | undefined {
-  if (typeof value !== "string" || value.length === 0) return undefined;
-  if (value.startsWith("var(") || value.startsWith("#") || value.startsWith("rgb") || value.startsWith("hsl") || value.startsWith("oklch")) {
-    return value;
-  }
-  return undefined;
+  return typeof value === "string" && /^(?:var\(|#|rgb|hsl|oklch)/.test(value) ? value : undefined;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
