@@ -6,6 +6,7 @@ import addFormats from "ajv-formats";
 import { describe, expect, it } from "vitest";
 import schema from "../../schema/chartkit.schema.json";
 import { repair, suggestAlt, validate } from "../validate";
+import { validatePhase4 } from "../validate-phase4";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const examplesDir = join(root, "examples");
@@ -53,16 +54,31 @@ const CHART_TYPES = [
   "waterfall",
 ];
 
+const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);
+
 describe("example specs", () => {
   const names = files(examplesDir);
   it("includes an example for every chart type", () => {
     const types = names.map((name) => (load(examplesDir, name) as { type: string }).type);
-    expect([...new Set(types)].sort()).toEqual([...CHART_TYPES].sort());
+    const schemaTypes = types.filter((type) => !PHASE4.has(type));
+    expect([...new Set(schemaTypes)].sort()).toEqual([...CHART_TYPES].sort());
+    expect([...new Set(types.filter((type) => PHASE4.has(type)))].sort()).toEqual([...PHASE4].sort());
   });
 
   for (const name of names) {
+    const spec = load(examplesDir, name);
+    const type = (spec as { type?: string }).type ?? "";
+    if (PHASE4.has(type)) {
+      it(`${name} is outside the schema enum and passes validatePhase4()`, () => {
+        expect(ajvValidate(spec)).toBe(false);
+        const result = validatePhase4(spec);
+        expect(result.errors, JSON.stringify(result.errors, null, 2)).toEqual([]);
+        expect(result.warnings.some((warning) => warning.code === "CK3011"), JSON.stringify(result.warnings, null, 2)).toBe(false);
+        expect(result.ok).toBe(true);
+      });
+      continue;
+    }
     it(`${name} passes Ajv and validate()`, () => {
-      const spec = load(examplesDir, name);
       const ajvOk = ajvValidate(spec);
       expect(ajvValidate.errors ?? [], JSON.stringify(ajvValidate.errors)).toEqual([]);
       expect(ajvOk).toBe(true);
