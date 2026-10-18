@@ -25,6 +25,16 @@ const externalFramework = {
   },
 };
 
+const externalDynamicEntries = {
+  name: "external-dynamic-entries",
+  setup(build) {
+    build.onResolve({ filter: /^\.\/(load|extra-tip)$/ }, (args) => {
+      if (args.kind !== "dynamic-import") return null;
+      return { path: `@chartkitdev/core/${args.path.slice(2)}`, external: true };
+    });
+  },
+};
+
 const externalInteractExtra = {
   name: "external-interact-extra",
   setup(build) {
@@ -44,7 +54,7 @@ async function gzipOf(entry, { external = false, splitExtra = false } = {}) {
     format: "esm",
     platform: "node",
     outfile,
-    plugins: [...(external ? [externalFramework] : []), ...(splitExtra ? [externalInteractExtra] : [])],
+    plugins: [externalDynamicEntries, ...(external ? [externalFramework] : []), ...(splitExtra ? [externalInteractExtra] : [])],
     logLevel: "silent",
   });
   const code = readFileSync(outfile);
@@ -84,6 +94,40 @@ const isolation = {
   allIncludesCandle: all.code.includes('data-ck-mark="candle"'),
 };
 
+const lineStub = join(tmpdir(), "chartkit-size-line-stub.mjs");
+writeFileSync(
+  lineStub,
+  `import { createRenderer } from ${JSON.stringify(join(src, "render.ts"))};\nimport { line } from ${JSON.stringify(join(src, "charts/line.ts"))};\nexport const render = createRenderer([line]);\nexport function isExtra(type){return /^(histogram|boxplot|radar|funnel|treemap|sankey|bullet|waterfall)$/.test(type);}\nexport function adopt(){}\nexport function open(){return false}\n`,
+);
+
+const withLine = {
+  name: "adapter-with-line",
+  setup(build) {
+    build.onResolve({ filter: /^@chartkitdev\/core\/all$/ }, () => ({ path: lineStub }));
+    build.onResolve({ filter: /^@chartkitdev\/core(\/|$)/ }, (args) => ({
+      path: args.path,
+      external: true,
+    }));
+    build.onResolve({ filter: /^(vue|svelte)(\/|$)/ }, (args) => ({ path: args.path, external: true }));
+  },
+};
+
+async function gzipLine(entry) {
+  const outfile = join(tmpdir(), `chartkit-size-line-${Math.random().toString(36).slice(2)}.mjs`);
+  await build({
+    entryPoints: [entry],
+    bundle: true,
+    minify: true,
+    format: "esm",
+    platform: "node",
+    outfile,
+    plugins: [withLine],
+    logLevel: "silent",
+  });
+  const code = readFileSync(outfile);
+  return { minBytes: code.length, gzipBytes: gzipSync(code, { level: 9 }).length, code: code.toString("utf8") };
+}
+
 const vue = await gzipOf(join(root, "packages/vue/src/Chart.ts"), { external: true });
 const vanilla = await gzipOf(join(root, "packages/vanilla/src/index.ts"), { external: true });
 const svelteCompiled = compile(readFileSync(join(root, "packages/svelte/src/Chart.svelte"), "utf8"), {
@@ -94,12 +138,31 @@ const svelteCompiled = compile(readFileSync(join(root, "packages/svelte/src/Char
 const svelteEntry = join(tmpdir(), "chartkit-size-svelte.js");
 writeFileSync(svelteEntry, svelteCompiled.js.code);
 const svelte = await gzipOf(svelteEntry, { external: true });
+const vueLine = await gzipLine(join(root, "packages/vue/src/Chart.ts"));
+const vanillaLine = await gzipLine(join(root, "packages/vanilla/src/index.ts"));
+const svelteLine = await gzipLine(svelteEntry);
 for (const [name, built] of [["vue", vue], ["svelte", svelte], ["vanilla", vanilla]]) {
   if (built.code.includes("function bars") || built.code.includes("CK1004")) {
     isolation[`${name}OmitsCore`] = false;
   } else {
     isolation[`${name}OmitsCore`] = true;
   }
+  const pullsExtra = built.code.includes('@chartkitdev/core/extra"') || built.code.includes("@chartkitdev/core/extra'");
+  isolation[`${name}OmitsExtra`] = !pullsExtra;
+}
+for (const [name, built] of [["vueLine", vueLine], ["svelteLine", svelteLine], ["vanillaLine", vanillaLine]]) {
+  const leaked = built.code.includes('data-ck-mark="whisker"') || built.code.includes('data-ck-renderer="histogram"') || built.code.includes("function renderHistogram");
+  isolation[`${name}OmitsExtra`] = !leaked;
+}
+
+const extra = await gzipOf(join(src, "extra.ts"));
+const extraTypes = ["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall"];
+const chartSizes = {};
+for (const name of extraTypes) chartSizes[name] = await gzipOf(join(src, "charts", `${name}.ts`));
+if (all.code.includes('data-ck-renderer="histogram"') || all.code.includes('data-ck-mark="whisker"')) {
+  isolation.allOmitsExtra = false;
+} else {
+  isolation.allOmitsExtra = true;
 }
 
 const measured = {
@@ -111,10 +174,15 @@ const measured = {
   vanilla: vanilla.gzipBytes,
   interact: interact.gzipBytes,
   interactExtra: interactExtra.gzipBytes,
+  vueLine: vueLine.gzipBytes,
+  svelteLine: svelteLine.gzipBytes,
+  vanillaLine: vanillaLine.gzipBytes,
+  extra: extra.gzipBytes,
 };
+for (const name of extraTypes) measured[name] = chartSizes[name].gzipBytes;
 const budget = JSON.parse(readFileSync(join(root, "scripts/size-budget.json"), "utf8"));
 const failures = [];
-for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "interact", "interactExtra"]) {
+for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "extra", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall"]) {
   if (typeof budget[key] !== "number") failures.push(`${key} budget missing`);
   else if (measured[key] > budget[key]) failures.push(`${key} gzip ${measured[key]} > budget ${budget[key]}`);
 }
@@ -134,6 +202,11 @@ console.log(JSON.stringify({
     vanilla: vanilla.minBytes,
     interact: interact.minBytes,
     interactExtra: interactExtra.minBytes,
+    vueLine: vueLine.minBytes,
+    svelteLine: svelteLine.minBytes,
+    vanillaLine: vanillaLine.minBytes,
+    extra: extra.minBytes,
+    ...Object.fromEntries(extraTypes.map((name) => [name, chartSizes[name].minBytes])),
   },
   isolation,
 }, null, 2));

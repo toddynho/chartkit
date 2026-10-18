@@ -19,7 +19,7 @@ export type ChartKitChartSpecV1 = {
    */
   version: "1";
   /**
-   * Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. mark.innerRadius 0 gives a pie. Replaces DonutChart. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart.
+   * Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. mark.innerRadius 0 gives a pie. Replaces DonutChart. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar.
    */
   type:
     | "line"
@@ -35,7 +35,15 @@ export type ChartKitChartSpecV1 = {
     | "mini-area"
     | "progress-ring"
     | "spike"
-    | "candlestick";
+    | "candlestick"
+    | "histogram"
+    | "boxplot"
+    | "radar"
+    | "funnel"
+    | "treemap"
+    | "sankey"
+    | "bullet"
+    | "waterfall";
   /**
    * Optional stable id (used for keys, events, test hooks).
    */
@@ -589,6 +597,42 @@ export interface Encoding {
         format?: Format;
         scale?: Scale;
       };
+  /**
+   * Sankey only: the node the flow leaves.
+   */
+  source?:
+    | FieldName
+    | {
+        field: FieldName;
+        /**
+         * Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.
+         */
+        type?: "quantitative" | "temporal" | "ordinal" | "nominal";
+        /**
+         * Human-readable name used in axes, legend and tooltip. Defaults to the field name.
+         */
+        title?: string;
+        format?: Format;
+        scale?: Scale;
+      };
+  /**
+   * Sankey: the node the flow enters. Bullet: the target value field.
+   */
+  target?:
+    | FieldName
+    | {
+        field: FieldName;
+        /**
+         * Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.
+         */
+        type?: "quantitative" | "temporal" | "ordinal" | "nominal";
+        /**
+         * Human-readable name used in axes, legend and tooltip. Defaults to the field name.
+         */
+        title?: string;
+        format?: Format;
+        scale?: Scale;
+      };
 }
 /**
  * Detailed format.
@@ -849,6 +893,38 @@ export interface Mark {
    * Value spikes rise from. Applies to: spike.
    */
   baseline?: number;
+  /**
+   * Funnel geometry. bar draws centered rounded bars and is the default. trapezoid connects each stage to the next. Applies to: funnel.
+   */
+  shape?: "bar" | "trapezoid";
+  /**
+   * Histogram bin count when mark.bin is count or omitted. Default 8. Applies to: histogram.
+   */
+  bins?: number;
+  /**
+   * Histogram bin rule. count uses mark.bins. width uses mark.binWidth. sturges, sqrt, and fd choose a count from the data. Applies to: histogram.
+   */
+  bin?: "count" | "width" | "sturges" | "sqrt" | "fd";
+  /**
+   * Histogram bin width. Used when mark.bin is width. Applies to: histogram.
+   */
+  binWidth?: number;
+  /**
+   * Bullet band fields, worst to best. Each value is the upper edge of that band. Applies to: bullet.
+   *
+   * @minItems 1
+   * @maxItems 5
+   */
+  ranges?:
+    | [string]
+    | [string, string]
+    | [string, string, string]
+    | [string, string, string, string]
+    | [string, string, string, string, string];
+  /**
+   * Waterfall field that marks an absolute total when the row is true. Default field name total. Applies to: waterfall.
+   */
+  total?: string;
 }
 /**
  * Axis display. Scale domains live on encoding.<channel>.scale; this block is display-only.

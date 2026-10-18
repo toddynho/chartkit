@@ -1,0 +1,21 @@
+{
+  "version": "1",
+  "type": "treemap",
+  "title": "Inventory by material",
+  "data": [
+    { "name": "Oak", "size": 42, "group": "Wood" },
+    { "name": "Pine", "size": 28, "group": "Wood" },
+    { "name": "Maple", "size": 18, "group": "Wood" },
+    { "name": "Walnut", "size": 12, "group": "Wood" },
+    { "name": "Steel", "size": 36, "group": "Metal" },
+    { "name": "Aluminum", "size": 22, "group": "Metal" },
+    { "name": "Copper", "size": 14, "group": "Metal" },
+    { "name": "Tin", "size": 8, "group": "Metal" },
+    { "name": "Clear", "size": 24, "group": "Glass" },
+    { "name": "Tinted", "size": 16, "group": "Glass" },
+    { "name": "Laminated", "size": 11, "group": "Glass" },
+    { "name": "Mirror", "size": 7, "group": "Glass" }
+  ],
+  "encoding": { "x": "name", "y": "size", "color": "group" },
+  "a11y": { "alt": "Wood, metal, and glass each hold several products, and oak is the largest tile." }
+}

@@ -1,5 +1,5 @@
 import type { ChartSpec } from "@chartkitdev/core";
-import { render as renderAll } from "@chartkitdev/core/all";
+import { open, render as renderAll } from "@chartkitdev/core/all";
 import { attach, patchSvg, type Controller } from "@chartkitdev/core/interact";
 
 /** Anything with an `innerHTML` string. `HTMLElement` qualifies. */
@@ -8,7 +8,7 @@ export interface MountElement {
 }
 
 export interface MountOptions {
-  /** Defaults to every v1 chart. Pass `createRenderer([...])` to ship a subset. */
+  /** Defaults to the core charts. Pass `createRenderer([...])` to ship a subset. */
   render?: (spec: ChartSpec) => string;
 }
 
@@ -21,8 +21,8 @@ export interface MountedChart {
 
 /**
  * Draw `spec` into `el` and return handles for later specs.
- * The element is the caller's. This does not wrap it in another node.
- * `renderToString(spec)` is the same SVG, for a server that writes HTML.
+ * Core charts paint immediately. Histogram through waterfall load on demand.
+ * `renderToString` from `@chartkitdev/vanilla/ssr` imports those charts statically.
  */
 function isElement(el: MountElement): el is MountElement & Element {
   return typeof (el as Element).querySelector === "function" && (el as Element).nodeType === 1;
@@ -39,25 +39,29 @@ export function mount(el: MountElement, spec: ChartSpec, options: MountOptions =
     else patchSvg(el, markup);
   };
 
-  draw(spec);
-  if (isElement(el)) ctl = attach(el, spec, { render: (next) => render(next as ChartSpec) });
+  const kick = (next: ChartSpec) => {
+    if (!options.render && open(el, next)) return;
+    draw(next);
+    if (!ctl && isElement(el)) ctl = attach(el, next, { render: (value) => render(value as ChartSpec) });
+  };
+
+  kick(spec);
 
   return {
     update(next) {
-      if (!alive) return;
-      draw(next);
+      if (alive) kick(next);
     },
     destroy() {
       if (!alive) return;
       alive = false;
       ctl?.destroy();
       ctl = null;
-      if (el.innerHTML !== "") el.innerHTML = "";
+      if (el.innerHTML) el.innerHTML = "";
     },
   };
 }
 
-/** The SVG string `@chartkitdev/core` returns. No DOM and no extra wrapper. */
+/** The SVG string for a core chart. Phase 3 charts need `@chartkitdev/vanilla/ssr`. */
 export function renderToString(spec: ChartSpec, render: (spec: ChartSpec) => string = renderAll): string {
   return render(spec);
 }

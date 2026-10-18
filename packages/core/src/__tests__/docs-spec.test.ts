@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { render } from "../all";
+import { render } from "../extra";
 import { validate } from "../validate";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
@@ -22,6 +22,14 @@ const CHART_TYPES = [
   "progress-ring",
   "spike",
   "candlestick",
+  "histogram",
+  "boxplot",
+  "radar",
+  "funnel",
+  "treemap",
+  "sankey",
+  "bullet",
+  "waterfall",
 ];
 
 function fencedSpecs(relativePath: string): unknown[] {

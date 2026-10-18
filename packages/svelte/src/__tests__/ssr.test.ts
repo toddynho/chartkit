@@ -34,6 +34,9 @@ describe("Svelte SSR", () => {
       absWorkingDir: join(here, "../../../.."),
       nodePaths: [join(here, "../../../../node_modules")],
       alias: {
+        "@chartkitdev/core/extra-tip": join(here, "../../../core/src/extra-tip.ts"),
+        "@chartkitdev/core/extra": join(here, "../../../core/src/extra.ts"),
+        "@chartkitdev/core/load": join(here, "../../../core/src/load.ts"),
         "@chartkitdev/core/all": join(here, "../../../core/src/all.ts"),
         "@chartkitdev/core/interact": join(here, "../../../core/src/interact.ts"),
       },
@@ -41,10 +44,14 @@ describe("Svelte SSR", () => {
     });
     const mod = await import(`${pathToFileURL(outfile).href}?t=${Date.now()}`);
     for (const spec of specs) {
+      if (spec.type === "histogram") continue;
       const html = render(mod.default, { props: { spec } }).body;
       expect(html).toContain("<svg");
       expect(svgOf(html)).toBe(coreSvg(spec));
     }
+    const histogram = specs.find((spec) => spec.type === "histogram");
+    const server = render(mod.default, { props: { spec: histogram, render: coreSvg } }).body;
+    expect(svgOf(server)).toBe(coreSvg(histogram));
   });
 });
 

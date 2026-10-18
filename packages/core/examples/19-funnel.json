@@ -1,0 +1,14 @@
+{
+  "version": "1",
+  "type": "funnel",
+  "title": "Signup funnel",
+  "data": [
+    { "stage": "Visit", "count": 12840 },
+    { "stage": "Signup", "count": 5420 },
+    { "stage": "Activate", "count": 2610 },
+    { "stage": "Trial", "count": 1380 },
+    { "stage": "Pay", "count": 640 }
+  ],
+  "encoding": { "x": "stage", "y": "count" },
+  "a11y": { "alt": "640 of 12,840 visits pay, and the biggest drop is from visit to signup." }
+}

@@ -1,9 +1,9 @@
 import { mount } from "@vue/test-utils";
 import type { ChartSpec } from "@chartkitdev/core";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Chart } from "../Chart";
 import { renderToString } from "../ssr";
-import { comboSpec, coreSvg, heatmapSpec, lineSpec, specs, svgOf } from "./specs";
+import { comboSpec, coreSvg, heatmapSpec, histogramSpec, lineSpec, specs, svgOf } from "./specs";
 
 describe("Vue Chart", () => {
   it("mounts the core SVG", () => {
@@ -38,6 +38,12 @@ describe("Vue Chart", () => {
     expect(document.body.querySelector("svg")).toBeTruthy();
     wrapper.unmount();
     expect(document.body.querySelector("svg")).toBeNull();
+  });
+
+  it("loads a histogram on demand", async () => {
+    const wrapper = mount(Chart, { props: { spec: histogramSpec } });
+    await vi.waitFor(() => expect(wrapper.find("svg").attributes("data-ck-type")).toBe("histogram"));
+    expect(wrapper.find("svg").attributes("aria-label")).toBe(histogramSpec.a11y.alt);
   });
 
   it("SSR HTML matches core for line, combo, and heatmap", async () => {

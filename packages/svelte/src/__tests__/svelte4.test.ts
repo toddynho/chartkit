@@ -13,6 +13,7 @@ describe("Svelte 4 compiler", () => {
       const warnings = (result.warnings ?? []).filter((warning) => warning.code !== "css-unused-selector");
       expect(warnings, JSON.stringify(warnings)).toEqual([]);
       expect(result.js.code).toContain("@chartkitdev/core/all");
+      expect(result.js.code).toContain("open(");
     }
   });
 });

@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { line } from "../../../core/src/charts/line";
 import { createRenderer } from "../../../core/src/render";
 import { mount, renderToString } from "../index";
-import { comboSpec, coreSvg, heatmapSpec, lineSpec, specs } from "./specs";
+import { renderToString as renderSsr } from "../ssr";
+import { comboSpec, coreSvg, heatmapSpec, histogramSpec, lineSpec, specs } from "./specs";
 
 describe("vanilla mount", () => {
   it("writes the core SVG and skips a second write when the picture matches", () => {
@@ -111,9 +112,22 @@ describe("vanilla mount", () => {
     host.remove();
   });
 
+  it("loads a histogram into the element", async () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    mount(host, histogramSpec);
+    await vi.waitFor(() => expect(host.querySelector("svg")?.getAttribute("data-ck-type")).toBe("histogram"));
+    expect(host.querySelector("svg")?.getAttribute("aria-label")).toBe(histogramSpec.a11y.alt);
+    host.remove();
+  });
+
   it("renderToString matches core for line, combo, and heatmap", () => {
-    for (const spec of specs) {
+    for (const spec of [lineSpec, comboSpec, heatmapSpec]) {
       expect(renderToString(spec)).toBe(coreSvg(spec));
     }
+  });
+
+  it("SSR entry includes a histogram", () => {
+    for (const spec of specs) expect(renderSsr(spec)).toBe(coreSvg(spec));
   });
 });

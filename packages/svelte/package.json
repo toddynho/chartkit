@@ -18,6 +18,11 @@
       "svelte": "./src/index.js",
       "import": "./src/index.js",
       "default": "./src/index.js"
+    },
+    "./ssr": {
+      "types": "./src/ssr.d.ts",
+      "import": "./src/ssr.js",
+      "default": "./src/ssr.js"
     }
   },
   "files": [

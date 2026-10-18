@@ -43,6 +43,14 @@ const CHART_TYPES = [
   "progress-ring",
   "spike",
   "candlestick",
+  "histogram",
+  "boxplot",
+  "radar",
+  "funnel",
+  "treemap",
+  "sankey",
+  "bullet",
+  "waterfall",
 ];
 
 describe("example specs", () => {

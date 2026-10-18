@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { Chart } from "../Chart";
 
 const spec = {
@@ -20,6 +20,24 @@ describe("Chart", () => {
     expect(svg).toBeTruthy();
     expect(svg?.getAttribute("data-ck-type")).toBe("bar");
     expect(container.textContent).toContain("Jan");
+  });
+
+  it("renders a histogram spec", async () => {
+    const histogram = {
+      version: "1" as const,
+      type: "histogram" as const,
+      data: [
+        { score: 1 },
+        { score: 2 },
+        { score: 8 },
+      ],
+      encoding: { x: "score" },
+      mark: { bins: 2 },
+      a11y: { alt: "Scores cluster at the low end." },
+    };
+    const { container } = render(<Chart spec={histogram} />);
+    await waitFor(() => expect(container.querySelector("svg")?.getAttribute("data-ck-type")).toBe("histogram"));
+    expect(container.querySelector("svg")?.getAttribute("aria-label")).toBe(histogram.a11y.alt);
   });
 
   it("uses a custom renderer when one is passed", () => {

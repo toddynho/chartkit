@@ -27,6 +27,14 @@ const charts = [
   "progress-ring",
   "spike",
   "candlestick",
+  "histogram",
+  "boxplot",
+  "radar",
+  "funnel",
+  "treemap",
+  "sankey",
+  "bullet",
+  "waterfall",
 ];
 
 const themes = [
@@ -52,6 +60,9 @@ const themes = [
 const entry: Record<string, string> = {
   index: "src/index.ts",
   all: "src/all.ts",
+  extra: "src/extra.ts",
+  load: "src/load.ts",
+  "extra-tip": "src/extra-tip.ts",
   validate: "src/validate.ts",
   interact: "src/interact.ts",
   "interact-extra": "src/interact-extra.ts",
@@ -69,5 +80,21 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   treeshake: true,
-  esbuildPlugins: [externalInteractExtra],
+  esbuildPlugins: [
+    externalInteractExtra,
+    {
+      name: "external-chart-chunks",
+      setup(build) {
+        build.onResolve({ filter: /^\.\/charts\/[a-z0-9-]+$/ }, (args) => {
+          if (args.kind !== "dynamic-import") return null;
+          const name = args.path.slice("./charts/".length);
+          return { path: `@chartkitdev/core/charts/${name}`, external: true };
+        });
+        build.onResolve({ filter: /^\.\/(load|extra-tip)$/ }, (args) => {
+          if (args.kind !== "dynamic-import") return null;
+          return { path: `@chartkitdev/core/${args.path.slice(2)}`, external: true };
+        });
+      },
+    },
+  ],
 } satisfies Options);

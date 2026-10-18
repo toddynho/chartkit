@@ -11,6 +11,8 @@
   "sideEffects": [
     "./dist/all.js",
     "./dist/all.cjs",
+    "./dist/extra.js",
+    "./dist/extra.cjs",
     "./dist/themes/*.js",
     "./dist/themes/*.cjs"
   ],
@@ -36,6 +38,36 @@
       "require": {
         "types": "./dist/all.d.cts",
         "default": "./dist/all.cjs"
+      }
+    },
+    "./load": {
+      "import": {
+        "types": "./dist/load.d.ts",
+        "default": "./dist/load.js"
+      },
+      "require": {
+        "types": "./dist/load.d.cts",
+        "default": "./dist/load.cjs"
+      }
+    },
+    "./extra-tip": {
+      "import": {
+        "types": "./dist/extra-tip.d.ts",
+        "default": "./dist/extra-tip.js"
+      },
+      "require": {
+        "types": "./dist/extra-tip.d.cts",
+        "default": "./dist/extra-tip.cjs"
+      }
+    },
+    "./extra": {
+      "import": {
+        "types": "./dist/extra.d.ts",
+        "default": "./dist/extra.js"
+      },
+      "require": {
+        "types": "./dist/extra.d.cts",
+        "default": "./dist/extra.cjs"
       }
     },
     "./validate": {

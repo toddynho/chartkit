@@ -1,12 +1,12 @@
 import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref, watch, withDirectives, type Directive, type PropType } from "vue";
 import type { ChartSpec } from "@chartkitdev/core";
-import { render as renderAll } from "@chartkitdev/core/all";
+import { open, render as renderAll } from "@chartkitdev/core/all";
 import { attach, patchSvg, type Controller } from "@chartkitdev/core/interact";
 
 export interface ChartProps {
   /** A v1 chart spec. The same object renders in every ChartKit adapter. */
   spec: ChartSpec;
-  /** Defaults to every v1 chart. Pass `createRenderer([...])` to ship a subset. */
+  /** Defaults to the core charts. Pass `createRenderer([...])` to ship a subset. */
   render?: (spec: ChartSpec) => string;
 }
 
@@ -22,8 +22,8 @@ const paint: Directive<HTMLElement, string> = {
 
 /**
  * Thin Vue 3 wrapper over `@chartkitdev/core/all`.
- * The SVG is produced during render, so Vue SSR includes it. A spec change
- * patches the existing SVG. Unmount drops the node and the interaction listeners.
+ * A core chart renders during setup and patches in place.
+ * Histogram through waterfall go through `open`, which loads `@chartkitdev/core/load`.
  */
 export const Chart = defineComponent({
   name: "Chart",
@@ -44,9 +44,17 @@ export const Chart = defineComponent({
       ctl.update(props.spec, markup);
     });
 
+    watch(
+      () => props.spec,
+      (spec) => {
+        const el = host.value;
+        if (el && !props.render && open(el, spec)) ctl?.destroy();
+      },
+    );
+
     onMounted(() => {
       const el = host.value;
-      if (!el) return;
+      if (!el || (!props.render && open(el, props.spec))) return;
       if (!el.querySelector("svg")) patchSvg(el, svg.value);
       ctl = attach(el, props.spec, { render: (next) => draw(next as ChartSpec) });
     });
