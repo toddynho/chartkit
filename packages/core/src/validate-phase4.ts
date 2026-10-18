@@ -32,7 +32,12 @@ export function validatePhase4(spec: unknown, data?: unknown): ValidationResult 
   const base = validate(spec, data);
   const type = phase4Type(spec);
   if (!type) return base;
-  const diagnostics = base.diagnostics.filter((item) => !(item.code === "CK1005" && item.path === "/type"));
+  const diagnostics = base.diagnostics.filter((item) => {
+    if (item.code === "CK1011") return false;
+    if (item.code === "CK1005" && item.path === "/type") return false;
+    if (item.code === "CK1002" && item.path === "/quadrants") return false;
+    return true;
+  });
   if (isRecord(spec) && spec.type !== type) {
     diagnostics.push({
       code: "CK1400",
@@ -166,10 +171,53 @@ function timelineChecks(spec: Record<string, unknown>): Diagnostic[] {
   return out;
 }
 
+function quadrantLabelChecks(spec: Record<string, unknown>): Diagnostic[] {
+  const raw = spec.quadrants;
+  if (raw === undefined) {
+    if (typeof spec.subtitle !== "string" || !spec.subtitle.includes("|")) return [];
+    const parts = spec.subtitle.split("|").map((part) => part.trim());
+    if (parts.length !== 4 || parts.some((part) => part === "")) return [];
+    return [
+      error(
+        "CK1412",
+        "/subtitle",
+        "quadrant names belong in quadrants, not subtitle",
+        "Order is top-left, top-right, bottom-left, bottom-right. subtitle stays a subtitle.",
+        [
+          { op: "add", path: "/quadrants", value: parts },
+          { op: "remove", path: "/subtitle" },
+        ],
+      ),
+    ];
+  }
+  const labels = Array.isArray(raw) ? raw.map((item) => (typeof item === "string" ? item.trim() : typeof item === "number" ? String(item) : "")) : [];
+  const clean = Array.isArray(raw) && raw.length === 4 && raw.every((item) => typeof item === "string" && item.trim() !== "" && item === item.trim());
+  if (clean) return [];
+  if (labels.length >= 4 && labels.slice(0, 4).every((item) => item !== "")) {
+    return [
+      error(
+        "CK1412",
+        "/quadrants",
+        "quadrants must be four strings: top-left, top-right, bottom-left, bottom-right",
+        "Extra labels are dropped. Numbers become strings.",
+        [{ op: "replace", path: "/quadrants", value: labels.slice(0, 4) }],
+      ),
+    ];
+  }
+  return [
+    error(
+      "CK1412",
+      "/quadrants",
+      "quadrants must be four strings: top-left, top-right, bottom-left, bottom-right",
+      "Order is top-left, top-right, bottom-left, bottom-right.",
+    ),
+  ];
+}
+
 function quadrantChecks(spec: Record<string, unknown>): Diagnostic[] {
+  const out: Diagnostic[] = quadrantLabelChecks(spec);
   const model = readQuadrant(spec);
-  if (!model) return [];
-  const out: Diagnostic[] = [];
+  if (!model) return out;
   for (const point of model.points) {
     const row = quadrantRow(spec, point.index);
     out.push(...rangeCheck(row, point.index, point.fields.x, point.x, model.xDomain, "x"));

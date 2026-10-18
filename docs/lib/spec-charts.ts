@@ -242,9 +242,9 @@ export const specPages: Record<string, SpecPage> = {
     fields: [
       "type is quadrant. x and y are numbers. The domain defaults to 0..1. Set encoding.x.scale.domain and encoding.y.scale.domain to change it.",
       "encoding.x.title and encoding.y.title are the low and high end labels, split by |.",
-      "subtitle is four names split by |, in order top-left, top-right, bottom-left, bottom-right.",
+      "quadrants is four strings: top-left, top-right, bottom-left, bottom-right. subtitle is the subtitle.",
       "size sets the point radius. color accepts positive, negative, accent, or muted, or falls back to the series palette.",
-      "CK1406 is a missing coordinate or a point outside the domain. The patch clamps it.",
+      "CK1406 is a missing coordinate or a point outside the domain. The patch clamps it. CK1412 moves a |-split subtitle into quadrants, or repairs a bad quadrants array.",
     ],
     example: specExample("priority-quadrant"),
   },

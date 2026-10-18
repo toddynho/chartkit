@@ -98,10 +98,13 @@ function undrawable(type: string): Diagnostic {
 }
 
 function hintFor(type: string): string {
+  const extra = " gantt timeline quadrant venn journey ";
   const known = " line bar donut stacked-area scatter combo heatmap gauge kpi sparkline mini-area progress-ring spike candlestick histogram boxplot radar funnel treemap sankey bullet waterfall ";
-  if (!known.includes(" " + type + " ")) return 'import { render } from "@chartkitdev/core/all" registers every v1 chart.';
+  const phase4 = extra.includes(" " + type + " ");
+  if (!phase4 && !known.includes(" " + type + " ")) return 'import { render } from "@chartkitdev/core/all" registers every v1 chart.';
   const binding = type.replace(/-([a-z])/g, (_match, char: string) => char.toUpperCase());
-  return `import { ${binding} } from "@chartkitdev/core/charts/${type}"; register(${binding}); or import { render } from "@chartkitdev/core/all".`;
+  const entry = phase4 ? "extra" : "all";
+  return `import { ${binding} } from "@chartkitdev/core/charts/${type}"; register(${binding}); or import { render } from "@chartkitdev/core/${entry}".`;
 }
 
 function errorSvg(errors: Diagnostic[]): string {

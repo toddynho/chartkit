@@ -11,6 +11,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
 import { compile } from "svelte/compiler";
+import { stubDynamicCharts } from "./stub-dynamic-charts.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const src = join(root, "packages/core/src");
@@ -31,6 +32,10 @@ const externalDynamicEntries = {
     build.onResolve({ filter: /^\.\/(load|extra-tip)$/ }, (args) => {
       if (args.kind !== "dynamic-import") return null;
       return { path: `@chartkitdev/core/${args.path.slice(2)}`, external: true };
+    });
+    build.onResolve({ filter: /^\.\/validate-phase4$/ }, (args) => {
+      if (args.kind !== "dynamic-import") return null;
+      return { path: "@chartkitdev/core/validate/phase4", external: true };
     });
   },
 };
@@ -163,6 +168,7 @@ const markdown = await gzipOf(join(root, "packages/markdown/src/index.ts"), { ex
 
 const globalAlias = {
   "@chartkitdev/core/mermaid": join(src, "mermaid.ts"),
+  "@chartkitdev/core/extra-tip": join(src, "extra-tip.ts"),
   "@chartkitdev/core/extra": join(src, "extra.ts"),
   "@chartkitdev/core/all": join(src, "all.ts"),
   "@chartkitdev/core/interact": join(src, "interact.ts"),
@@ -180,6 +186,7 @@ async function iife(entry) {
     legalComments: "none",
     outfile,
     alias: globalAlias,
+    plugins: [stubDynamicCharts],
     logLevel: "silent",
   });
   const code = readFileSync(outfile);
@@ -190,6 +197,10 @@ const globalBundle = await iife(join(vanillaSrc, "global.ts"));
 const globalAuto = await iife(join(vanillaSrc, "global-auto.ts"));
 const globalMermaid = await iife(join(vanillaSrc, "global-mermaid.ts"));
 isolation.globalAutoOmitsMermaid = !globalAuto.code.includes("xychart") && !globalAuto.code.includes("CK8004");
+const extraMark = 'data-ck-mark="whisker"';
+const ganttMark = 'data-ck-mark="milestone"';
+isolation.globalOmitsExtraCharts = !globalBundle.code.includes(extraMark) && !globalBundle.code.includes(ganttMark);
+isolation.globalAutoOmitsExtraCharts = !globalAuto.code.includes(extraMark) && !globalAuto.code.includes(ganttMark);
 
 const extra = await gzipOf(join(src, "extra.ts"));
 const extraTypes = ["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey"];

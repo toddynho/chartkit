@@ -1,15 +1,20 @@
 import { fromMermaid, toSpec } from "@chartkitdev/core/mermaid";
-import { autoRender } from "./auto";
+import { bootBrowser } from "./global-charts";
+
+const script = typeof document === "undefined" ? null : document.currentScript;
+const scriptSrc = script instanceof HTMLScriptElement ? script.src : null;
+const mermaidOn = script instanceof HTMLElement && script.hasAttribute("data-chartkit-mermaid");
+
+function autoRender(root: ParentNode = document, options: { mermaid?: boolean; maxSource?: number; maxPoints?: number } = {}): number {
+  return bootBrowser(root, { ...options, fromMermaid, toSpec, scriptSrc });
+}
 
 const api = { autoRender, fromMermaid, toSpec };
 (globalThis as { ChartKit?: typeof api }).ChartKit = api;
 
-const current = typeof document === "undefined" ? null : document.currentScript;
-const mermaid = current instanceof HTMLElement && current.hasAttribute("data-chartkit-mermaid");
-
 function boot(): void {
   if (typeof document === "undefined") return;
-  autoRender(document, { mermaid });
+  autoRender(document, { mermaid: mermaidOn });
 }
 
 if (typeof document !== "undefined") {

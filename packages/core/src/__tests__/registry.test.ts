@@ -29,6 +29,14 @@ describe("opt-in renderers", () => {
     expect(svg).toContain("@chartkitdev/core/all");
   });
 
+  it("points gantt at extra or its chart module", () => {
+    const svg = renderLine({ version: "1", type: "gantt", a11y: { alt: "A launch plan." } });
+    expect(svg).toContain("CK1010");
+    expect(svg).toContain("@chartkitdev/core/charts/gantt");
+    expect(svg).toContain("@chartkitdev/core/extra");
+    expect(svg).not.toContain("@chartkitdev/core/all");
+  });
+
   it("draws bar only after that renderer is included", () => {
     const spec = { version: "1", type: "bar", data: [{ month: "Jan", value: 1 }], encoding: { x: "month", y: "value" }, a11y: { alt: "January." } };
     expect(renderLine(spec)).toContain("CK1010");

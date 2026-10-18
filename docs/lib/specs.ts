@@ -266,7 +266,7 @@ export const chartTypes: ChartTypeDoc[] = [
     type: "quadrant",
     title: "Quadrant",
     summary: "Points on a square split into four labeled regions.",
-    notes: ["x and y default to 0..1. subtitle is the four names, top-left first, split by |."],
+    notes: ["x and y default to 0..1. quadrants is four names: top-left, top-right, bottom-left, bottom-right. subtitle stays a subtitle."],
   },
   {
     type: "venn",

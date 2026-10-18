@@ -1,6 +1,5 @@
-import type { ChartSpec } from "@chartkitdev/core";
-import { render } from "@chartkitdev/core/extra";
-import { mermaidScriptUrl, mountFences, type FenceResult } from "./mount-fences";
+import { bootBrowser } from "./global-charts";
+import { mermaidScriptUrl, type FenceResult } from "./mount-fences";
 
 interface MermaidApi {
   fromMermaid: (text: string, options?: { maxSource?: number; maxPoints?: number }) => FenceResult;
@@ -8,7 +7,6 @@ interface MermaidApi {
 }
 
 const root = globalThis as { ChartKit?: Record<string, unknown>; ChartKitMermaid?: MermaidApi };
-const draw = render as (spec: ChartSpec) => string;
 
 function chartkitJson(text: string): FenceResult {
   const trimmed = text.replace(/^\uFEFF/, "").trim();
@@ -26,11 +24,12 @@ function chartkitJson(text: string): FenceResult {
 }
 
 const script = typeof document === "undefined" ? null : document.currentScript;
+const scriptSrc = script instanceof HTMLScriptElement ? script.src : null;
 const wantMermaid = script instanceof HTMLScriptElement && script.hasAttribute("data-chartkit-mermaid");
 
 function loadMermaid(): Promise<MermaidApi> {
   if (root.ChartKitMermaid) return Promise.resolve(root.ChartKitMermaid);
-  const src = script instanceof HTMLScriptElement && script.src ? mermaidScriptUrl(script.src) : "chartkit.mermaid.global.js";
+  const src = scriptSrc ? mermaidScriptUrl(scriptSrc) : "chartkit.mermaid.global.js";
   return new Promise((resolve, reject) => {
     const el = document.createElement("script");
     el.src = src;
@@ -43,9 +42,9 @@ function loadMermaid(): Promise<MermaidApi> {
 
 function autoRender(scope: ParentNode = document, options: { mermaid?: boolean; maxSource?: number; maxPoints?: number } = {}): number {
   const parser = root.ChartKitMermaid;
-  return mountFences(scope, {
+  return bootBrowser(scope, {
     ...options,
-    render: draw,
+    scriptSrc,
     toSpec: parser?.toSpec ?? chartkitJson,
     fromMermaid: parser?.fromMermaid,
   });

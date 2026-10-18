@@ -3,7 +3,8 @@
   "type": "quadrant",
   "id": "priority-quadrant",
   "title": "Where the quarter goes",
-  "subtitle": "Quick wins|Big bets|Fill-ins|Thankless",
+  "subtitle": "Effort against impact",
+  "quadrants": ["Quick wins", "Big bets", "Fill-ins", "Thankless"],
   "data": [
     { "name": "SSO", "x": 0.18, "y": 0.84, "size": 16, "color": "positive" },
     { "name": "Saved replies", "x": 0.3, "y": 0.68, "size": 10, "color": "positive" },

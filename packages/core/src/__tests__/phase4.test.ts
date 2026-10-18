@@ -7,7 +7,7 @@ import { render as renderAll } from "../all";
 import { render } from "../extra";
 import { distanceFor, intersectionArea } from "../renderers/extra/venn";
 import { repairPhase4, validatePhase4 } from "../validate-phase4";
-import { validate } from "../validate";
+import { validate, validateAsync } from "../validate";
 
 const examples = join(dirname(fileURLToPath(import.meta.url)), "../../examples");
 const phase4 = ["24-gantt.json", "25-timeline.json", "26-quadrant.json", "27-venn.json", "28-journey.json"];
@@ -30,7 +30,11 @@ describe("phase 4 charts", () => {
       expect(svg).toContain("var(--ck-");
       expect(svg).toContain("light-dark(");
       expect(svg).not.toMatch(/\b(window|document|Math\.random|Date\.now)\b/);
-      expect(renderAll(spec)).toContain("CK1010");
+      const miss = renderAll(spec);
+      expect(miss).toContain("CK1010");
+      expect(miss).toContain(`@chartkitdev/core/charts/${spec.type}`);
+      expect(miss).toContain("@chartkitdev/core/extra");
+      expect(miss).not.toContain("@chartkitdev/core/all");
     });
   }
 
@@ -59,6 +63,7 @@ describe("phase 4 charts", () => {
     expect(svg.match(/data-ck-mark="quadrant"/g)?.length).toBe(4);
     expect(svg.match(/data-ck-mark="point"/g)?.length).toBe(7);
     expect(svg).toContain("Quick wins");
+    expect(svg).toContain("Effort against impact");
     expect(svg).toContain("Low effort");
     expect(svg).toContain("High impact");
     expect(svg).toContain('r="18"');
@@ -170,6 +175,20 @@ describe("phase 4 charts", () => {
     expect(quadrant.ok, JSON.stringify(quadrant.errors)).toBe(true);
     expect((quadrant.spec as { data: { x: number; y: number }[] }).data[0]).toEqual({ name: "SSO", x: 1, y: 0 });
 
+    const named = repairPhase4({
+      version: "1",
+      type: "quadrant",
+      subtitle: "Quick wins|Big bets|Fill-ins|Thankless",
+      data: [{ name: "SSO", x: 0.2, y: 0.8 }],
+      encoding: { x: "x", y: "y" },
+      a11y: { alt: "SSO is a quick win." },
+    });
+    expect(named.ok, JSON.stringify(named.errors)).toBe(true);
+    expect(named.spec).toMatchObject({
+      quadrants: ["Quick wins", "Big bets", "Fill-ins", "Thankless"],
+    });
+    expect((named.spec as { subtitle?: string }).subtitle).toBeUndefined();
+
     const journey = repairPhase4({
       version: "1",
       type: "user-journey",
@@ -187,7 +206,34 @@ describe("phase 4 charts", () => {
     delete (spec.a11y as { alt?: string }).alt;
     const result = validatePhase4(spec);
     expect(result.errors.some((error) => error.code === "CK1004")).toBe(true);
-    expect(validate(spec).errors.some((error) => error.code === "CK1005")).toBe(true);
+    expect(validate(spec).errors.some((error) => error.code === "CK1005")).toBe(false);
+    expect(validate(spec).errors.some((error) => error.code === "CK1004")).toBe(true);
+  });
+
+  it("accepts the five types in validate() and checks fields in validateAsync()", async () => {
+    const spec = load("24-gantt.json");
+    const sync = validate(spec);
+    expect(sync.ok).toBe(true);
+    expect(sync.errors.some((error) => error.code === "CK1005")).toBe(false);
+    expect(sync.warnings.some((warning) => warning.code === "CK1011")).toBe(true);
+    const checked = await validateAsync(spec);
+    expect(checked.ok).toBe(true);
+    expect(checked.warnings.some((warning) => warning.code === "CK1011")).toBe(false);
+
+    const undated = {
+      version: "1",
+      type: "gantt",
+      data: [{ task: "Write the spec", section: "Plan" }],
+      a11y: { alt: "The spec has no dates." },
+    };
+    expect(validate(undated).errors.some((error) => error.code === "CK1005")).toBe(false);
+    const asyncUndated = await validateAsync(undated);
+    expect(asyncUndated.ok).toBe(false);
+    expect(asyncUndated.errors.some((error) => error.code === "CK1401" || error.code === "CK1402")).toBe(true);
+
+    const quadrant = validate(load("26-quadrant.json"));
+    expect(quadrant.errors.some((error) => error.code === "CK1002" && error.path === "/quadrants")).toBe(false);
+    expect(quadrant.errors.some((error) => error.code === "CK1005")).toBe(false);
   });
 
   it("shows a gantt tooltip from the extra-tip path", async () => {

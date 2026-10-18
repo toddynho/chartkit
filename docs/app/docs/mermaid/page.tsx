@@ -71,11 +71,12 @@ const { spec, warnings } = fromMermaid(\`${xy}\`);`}
 autoRender(document, { mermaid: true });`}
       />
       <p>
-        <code>dist/chartkit.global.js</code> is the one-file build: <code>ChartKit.autoRender</code>,{" "}
+        <code>dist/chartkit.global.js</code> draws the core charts and includes <code>ChartKit.autoRender</code>,{" "}
         <code>ChartKit.fromMermaid</code>, and <code>ChartKit.toSpec</code>.{" "}
         <code>dist/chartkit.auto.global.js</code> is the same auto-render without the Mermaid parser. With{" "}
         <code>data-chartkit-mermaid</code> and a Mermaid block on the page, it loads the sibling{" "}
-        <code>chartkit.mermaid.global.js</code>. Unsupported Mermaid blocks stay as source.
+        <code>chartkit.mermaid.global.js</code>. Histogram through journey load the sibling{" "}
+        <code>chartkit.&lt;type&gt;.global.js</code> from that same directory. Unsupported Mermaid blocks stay as source.
       </p>
       <CodeBlock
         label="html"

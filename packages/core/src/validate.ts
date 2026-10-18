@@ -42,6 +42,22 @@ export function validate(spec: unknown, data?: unknown): ValidationResult {
     semanticChecks(spec, diagnostics);
   }
 
+  const phase4 = phase4Type(spec);
+  if (phase4) {
+    for (let index = diagnostics.length - 1; index >= 0; index -= 1) {
+      const item = diagnostics[index];
+      if (item.code === "CK1005" && item.path === "/type") diagnostics.splice(index, 1);
+      else if (phase4 === "quadrant" && item.code === "CK1002" && item.path === "/quadrants") diagnostics.splice(index, 1);
+    }
+    diagnostics.push({
+      code: "CK1011",
+      severity: "warning",
+      message: "field rules for this chart live in validate/phase4",
+      path: "/type",
+      hint: 'await validateAsync(spec), or import { validatePhase4 } from "@chartkitdev/core/validate/phase4".',
+    });
+  }
+
   diagnostics.sort((a, b) => {
     const rank = repairRank(a) - repairRank(b);
     if (rank !== 0) return rank;
@@ -114,6 +130,22 @@ function repairRank(diagnostic: Diagnostic): number {
   if (diagnostic.code === "CK1009") return 0;
   if (diagnostic.code === "CK1005") return 1;
   return 2;
+}
+
+const PHASE4 = " gantt timeline quadrant venn journey ";
+
+function phase4Type(spec: unknown): string {
+  if (!isRecord(spec) || typeof spec.type !== "string") return "";
+  return PHASE4.includes(` ${spec.type} `) ? spec.type : "";
+}
+
+/**
+ * `validate()` plus the gantt, timeline, quadrant, venn, and journey field rules.
+ * The rules load from `@chartkitdev/core/validate/phase4` on demand. Other types stay synchronous.
+ */
+export function validateAsync(spec: unknown, data?: unknown): Promise<ValidationResult> {
+  if (!phase4Type(spec)) return Promise.resolve(validate(spec, data));
+  return import("./validate-phase4").then((mod) => mod.validatePhase4(spec, data));
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

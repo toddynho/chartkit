@@ -101,6 +101,10 @@ export default defineConfig({
           if (args.kind !== "dynamic-import") return null;
           return { path: `@chartkitdev/core/${args.path.slice(2)}`, external: true };
         });
+        build.onResolve({ filter: /^\.\/validate-phase4$/ }, (args) => {
+          if (args.kind !== "dynamic-import") return null;
+          return { path: "@chartkitdev/core/validate/phase4", external: true };
+        });
       },
     },
   ],

@@ -57,7 +57,7 @@ export function readQuadrant(spec: Record<string, unknown>): QuadrantModel | nul
     yDomain: domainOf(encoding.y),
     xEnds: endsOf(encoding.x, ["Low", "High"]),
     yEnds: endsOf(encoding.y, ["Low", "High"]),
-    names: quadNames(spec.subtitle),
+    names: quadNames(spec.quadrants),
   };
 }
 
@@ -68,7 +68,8 @@ export function renderQuadrant(spec: Record<string, unknown>): string | null {
   const view = viewOf(spec, "quadrant", 680, 520);
   if (!view) return null;
   const { frame, parts } = view;
-  const box = { left: 116, top: frame.title ? 56 : 36, right: frame.width - 28, bottom: frame.height - 48 };
+  if (frame.subtitle) parts.push(text(16, frame.title ? 40 : 22, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "500"));
+  const box = { left: 116, top: (frame.title ? 56 : 36) + (frame.subtitle ? 16 : 0), right: frame.width - 28, bottom: frame.height - 48 };
   const xAt = linear(model.xDomain[0], model.xDomain[1], box.left, box.right);
   const yAt = linear(model.yDomain[0], model.yDomain[1], box.bottom, box.top);
   const midX = (model.xDomain[0] + model.xDomain[1]) / 2;
@@ -132,8 +133,9 @@ function endsOf(channelValue: unknown, fallback: [string, string]): [string, str
   return [parts[0] || fallback[0], parts[1] || fallback[1]];
 }
 
-function quadNames(subtitle: unknown): [string, string, string, string] {
-  const parts = typeof subtitle === "string" ? subtitle.split("|").map((part) => part.trim()) : [];
+function quadNames(quadrants: unknown): [string, string, string, string] {
+  if (!Array.isArray(quadrants)) return ["", "", "", ""];
+  const parts = quadrants.map((item) => (typeof item === "string" ? item.trim() : ""));
   return [parts[0] ?? "", parts[1] ?? "", parts[2] ?? "", parts[3] ?? ""];
 }
 
