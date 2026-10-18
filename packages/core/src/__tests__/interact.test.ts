@@ -259,6 +259,27 @@ describe("attach", () => {
     }
   });
 
+  it("stays on the chart when the phase-3 tooltip sheet sets .ck-tip to fixed", async () => {
+    const { attach: attachExtra } = await import("../extra-tip");
+    const extraHost = document.createElement("div");
+    extraHost.innerHTML = `<svg data-ck-type="funnel" viewBox="0 0 100 40"><rect data-ck-mark="stage" aria-label="Visit: 80 (start)" x="0" y="0" width="40" height="20"/></svg>`;
+    document.body.append(extraHost);
+    attachExtra(extraHost);
+    const host = hostOf(lineSpec());
+    host.style.position = "relative";
+    const ctl = attach(host, lineSpec(), { render });
+    const svg = host.querySelector("svg")!;
+    const plot = svg.querySelector("clipPath rect")!;
+    const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.5;
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 80, bubbles: true }));
+    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+    const extra = document.querySelector("[data-ck-extra-tip]") as HTMLElement;
+    expect(getComputedStyle(tip).position).toBe("absolute");
+    expect(getComputedStyle(extra).position).toBe("fixed");
+    ctl.destroy();
+    extraHost.remove();
+  });
+
   it("shows every series at the nearest x, with the format preset", () => {
     const spec = lineSpec({
       encoding: {

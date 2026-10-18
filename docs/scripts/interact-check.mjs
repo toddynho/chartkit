@@ -34,9 +34,43 @@ async function waitForServer(url) {
   throw new Error(`docs server did not answer at ${url}`);
 }
 
-async function tipText(page, root) {
-  const tip = root.locator("[data-ck-tip], [data-ck-extra-tip]").first();
+function gap(box, x, y) {
+  const dx = x < box.x ? box.x - x : x > box.x + box.width ? x - (box.x + box.width) : 0;
+  const dy = y < box.y ? box.y - y : y > box.y + box.height ? y - (box.y + box.height) : 0;
+  return Math.hypot(dx, dy);
+}
+
+async function tipLocator(page, root) {
+  const local = root.locator("[data-ck-tip]");
+  if ((await local.count()) > 0) return local.first();
+  return page.locator("[data-ck-extra-tip]").first();
+}
+
+async function hoveredPoint(root, fallback) {
+  const dot = root.locator("[data-ck-dot]").first();
+  if ((await dot.count()) > 0) {
+    const box = await dot.boundingBox();
+    if (box) return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  }
+  return fallback;
+}
+
+async function assertTipNear(page, root, point) {
+  const tip = await tipLocator(page, root);
   await tip.waitFor({ state: "visible", timeout: 8_000 });
+  const tipBox = await tip.boundingBox();
+  const hostBox = await root.locator("[data-ck-mounted='1']").first().boundingBox();
+  assert(tipBox && hostBox, "tooltip or chart has no box");
+  const distance = gap(tipBox, point.x, point.y);
+  const inside =
+    tipBox.x >= hostBox.x - 2 &&
+    tipBox.y >= hostBox.y - 2 &&
+    tipBox.x + tipBox.width <= hostBox.x + hostBox.width + 2 &&
+    tipBox.y + tipBox.height <= hostBox.y + hostBox.height + 2;
+  assert(
+    distance <= 24 || inside,
+    `tooltip is ${distance.toFixed(1)}px from the hovered point and outside the chart`,
+  );
   const text = (await tip.textContent()) ?? "";
   assert(text.trim().length > 0, "tooltip was empty");
   return text;
@@ -45,8 +79,17 @@ async function tipText(page, root) {
 async function hoverSvg(page, svg) {
   const box = await svg.boundingBox();
   assert(box, "chart svg has no box");
+  const point = { x: box.x + box.width * 0.84, y: box.y + box.height * 0.62 };
   await page.mouse.move(box.x + box.width * 0.72, box.y + box.height * 0.58);
-  await page.mouse.move(box.x + box.width * 0.84, box.y + box.height * 0.62);
+  await page.mouse.move(point.x, point.y);
+  return point;
+}
+
+async function scrollChart(page, root) {
+  await root.locator("[data-ck-mounted='1']").first().evaluate((el) => {
+    const top = el.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo(0, Math.max(0, top - 160));
+  });
 }
 
 async function hoverMark(page, root) {
@@ -78,10 +121,14 @@ async function main() {
     await page.goto(`${base}/`, { waitUntil: "networkidle" });
     const hero = page.locator(".hero-stage");
     await hero.locator("[data-ck-mounted='1']").waitFor();
-    await hoverSvg(page, hero.locator("svg"));
-    const heroTip = await tipText(page, hero);
+    let heroPoint = await hoverSvg(page, hero.locator("svg"));
+    let heroTip = await assertTipNear(page, hero, await hoveredPoint(hero, heroPoint));
     assert(/(42|46|44|51|58|55|63|61|70|74|72|81)/.test(heroTip), `home tooltip missed the revenue series: ${heroTip}`);
     assert(/Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec/.test(heroTip), `home tooltip missed the month: ${heroTip}`);
+    await scrollChart(page, hero);
+    heroPoint = await hoverSvg(page, hero.locator("svg"));
+    heroTip = await assertTipNear(page, hero, await hoveredPoint(hero, heroPoint));
+    assert(/(42|46|44|51|58|55|63|61|70|74|72|81)/.test(heroTip), `scrolled home tooltip missed the revenue series: ${heroTip}`);
     const target = hero.locator("svg text", { hasText: /^Target$/ });
     if ((await target.count()) > 0) {
       await target.first().click();
@@ -94,10 +141,14 @@ async function main() {
     await page.goto(`${base}/examples/quarterly-units`, { waitUntil: "networkidle" });
     const example = page.locator(".editor");
     await example.locator("[data-ck-mounted='1']").waitFor();
-    await hoverSvg(page, example.locator("svg"));
-    const exampleTip = await tipText(page, example);
+    let examplePoint = await hoverSvg(page, example.locator("svg"));
+    let exampleTip = await assertTipNear(page, example, await hoveredPoint(example, examplePoint));
     assert(/(40|55|48|62)/.test(exampleTip), `example tooltip missed a quarterly value: ${exampleTip}`);
     assert(/Q[1-4]/.test(exampleTip), `example tooltip missed the quarter: ${exampleTip}`);
+    await scrollChart(page, example);
+    examplePoint = await hoverSvg(page, example.locator("svg"));
+    exampleTip = await assertTipNear(page, example, await hoveredPoint(example, examplePoint));
+    assert(/Q[1-4]/.test(exampleTip), `scrolled example tooltip missed the quarter: ${exampleTip}`);
 
     await page.goto(`${base}/spec/funnel`, { waitUntil: "networkidle" });
     const spec = page.locator("article");
@@ -114,13 +165,25 @@ async function main() {
       await delay(250);
     }
     assert(specTip.includes(expected), `spec tooltip ${JSON.stringify(specTip)} did not include ${JSON.stringify(expected)}`);
+    assert(!specTip.includes("100% of previous"), `first funnel stage still says 100% of previous: ${specTip}`);
+    const markBox = await spec.locator("[data-ck-mark]").first().boundingBox();
+    assert(markBox, "funnel stage has no box");
+    await assertTipNear(page, spec, { x: markBox.x + markBox.width / 2, y: markBox.y + markBox.height / 2 });
+    await scrollChart(page, spec);
+    await hoverMark(page, spec);
+    const scrolledMark = await spec.locator("[data-ck-mark]").first().boundingBox();
+    await assertTipNear(page, spec, { x: scrolledMark.x + scrolledMark.width / 2, y: scrolledMark.y + scrolledMark.height / 2 });
 
     await page.goto(`${base}/playground`, { waitUntil: "networkidle" });
     const play = page.locator(".editor-full");
     await play.locator("[data-ck-mounted='1']").waitFor();
-    await hoverSvg(page, play.locator("svg"));
-    const playTip = await tipText(page, play);
+    let playPoint = await hoverSvg(page, play.locator("svg"));
+    let playTip = await assertTipNear(page, play, await hoveredPoint(play, playPoint));
     assert(/(42|46|44|51|58|55|63|61|70|74|72|81)/.test(playTip), `playground tooltip missed the revenue series: ${playTip}`);
+    await scrollChart(page, play);
+    playPoint = await hoverSvg(page, play.locator("svg"));
+    playTip = await assertTipNear(page, play, await hoveredPoint(play, playPoint));
+    assert(/(42|46|44|51|58|55|63|61|70|74|72|81)/.test(playTip), `scrolled playground tooltip missed the revenue series: ${playTip}`);
 
     const edited = await page.locator("#spec-json").inputValue();
     const next = edited.replace('"Revenue"', '"Revenue edited"');

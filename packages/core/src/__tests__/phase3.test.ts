@@ -134,6 +134,9 @@ describe("phase 3 charts", () => {
       a11y: { alt: "12 of 80 visits pay." },
     });
     expect(trapezoid).toContain('d="M');
+    expect(trapezoid).toContain("Visit: 80 (start)");
+    expect(trapezoid).not.toContain("100% of previous");
+    expect(trapezoid).toContain("of previous");
     const tiles = render(load("20-treemap.json"));
     expect(tiles.match(/data-ck-mark="tile"/g)).toHaveLength(12);
     expect(tiles).toContain("color-mix(");

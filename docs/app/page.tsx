@@ -58,8 +58,8 @@ export default function HomePage() {
               <span>server render</span>
             </Link>
             <Link className="stat" href="/benchmarks#agents">
-              <b>{headline.repair}</b>
-              <span>repair(), no docs, first try</span>
+              <b>20/42</b>
+              <span>no docs, first try. 42/42 with the docs</span>
             </Link>
           </div>
         </div>
@@ -102,8 +102,8 @@ export default function HomePage() {
           <article className="card">
             <h3>repair()</h3>
             <p>
-              Applies the safe patches validate already produced. It does not invent data. With no docs, repair() takes a
-              first try from {headline.repairFrom} to {headline.repairTo}.
+              Applies the safe patches validate already produced. It does not invent data. The measured run was 20/42
+              on the first try with no docs, and 42/42 on the first try with the docs.
             </p>
             <Link href="/agents">The agent loop</Link>
           </article>
