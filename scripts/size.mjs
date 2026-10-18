@@ -192,7 +192,7 @@ const globalMermaid = await iife(join(vanillaSrc, "global-mermaid.ts"));
 isolation.globalAutoOmitsMermaid = !globalAuto.code.includes("xychart") && !globalAuto.code.includes("CK8004");
 
 const extra = await gzipOf(join(src, "extra.ts"));
-const extraTypes = ["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall"];
+const extraTypes = ["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey"];
 const chartSizes = {};
 for (const name of extraTypes) chartSizes[name] = await gzipOf(join(src, "charts", `${name}.ts`));
 if (all.code.includes('data-ck-renderer="histogram"') || all.code.includes('data-ck-mark="whisker"')) {
@@ -224,7 +224,7 @@ const measured = {
 for (const name of extraTypes) measured[name] = chartSizes[name].gzipBytes;
 const budget = JSON.parse(readFileSync(join(root, "scripts/size-budget.json"), "utf8"));
 const failures = [];
-for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "extra", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid"]) {
+for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "extra", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid"]) {
   if (typeof budget[key] !== "number") failures.push(`${key} budget missing`);
   else if (measured[key] > budget[key]) failures.push(`${key} gzip ${measured[key]} > budget ${budget[key]}`);
 }

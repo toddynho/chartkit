@@ -20,7 +20,7 @@ The aligned update starts at the top of a requestAnimationFrame, awaits the libr
 
 ---
 
-`@chartkitdev/core` has zero runtime dependencies and renders SVG from the spec. The adapters depend on that core and on their framework. One minimal valid spec for each of the 14 chart types is in [packages/core/README.md](packages/core/README.md) and [docs/public/llms.txt](docs/public/llms.txt).
+`@chartkitdev/core` has zero runtime dependencies and renders SVG from the spec. The adapters depend on that core and on their framework. One minimal valid spec for each chart type is in [packages/core/README.md](packages/core/README.md) and [docs/public/llms.txt](docs/public/llms.txt).
 
 ## Installation
 

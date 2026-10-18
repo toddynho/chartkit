@@ -35,6 +35,11 @@ const charts = [
   "sankey",
   "bullet",
   "waterfall",
+  "gantt",
+  "timeline",
+  "quadrant",
+  "venn",
+  "journey",
 ];
 
 const themes = [
@@ -64,6 +69,7 @@ const entry: Record<string, string> = {
   load: "src/load.ts",
   "extra-tip": "src/extra-tip.ts",
   validate: "src/validate.ts",
+  "validate-phase4": "src/validate-phase4.ts",
   mermaid: "src/mermaid.ts",
   interact: "src/interact.ts",
   "interact-extra": "src/interact-extra.ts",

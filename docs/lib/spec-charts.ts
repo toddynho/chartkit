@@ -1,3 +1,5 @@
+import { examples } from "./specs";
+
 export interface SpecPage {
   title: string;
   summary: string;
@@ -207,4 +209,71 @@ export const specPages: Record<string, SpecPage> = {
   "a11y": { "alt": "The sixth of January is the busiest day." }
 }`,
   },
+  gantt: {
+    title: "Gantt",
+    summary: "Tasks as horizontal bars on a time axis. Sections group the rows. A zero-length task is a diamond.",
+    fields: [
+      "type is gantt.",
+      "task is encoding.x. section is encoding.y. start is encoding.open. end is encoding.close.",
+      "duration is a day count when end is omitted. 5d and 2w are accepted.",
+      "status is done, active, or crit, drawn with the positive, accent, and negative tokens.",
+      "id is encoding.source. depends is encoding.target, a comma-separated list of ids. Connectors are elbows.",
+      "milestone: true, duration 0, or a start that equals the end draws a diamond.",
+      "progress is 0 to 1 (or 0 to 100) and fills the bar. A today date on any row draws the marker.",
+      "Checks live in validatePhase4: CK1401 missing start, CK1402 missing end, CK1403 end before start, CK1404 unknown dependency, CK1411 duplicate id.",
+    ],
+    example: specExample("launch-gantt"),
+  },
+  timeline: {
+    title: "Timeline",
+    summary: "Events along a date axis. Periods are spans. Labels move above or below so they do not collide.",
+    fields: [
+      "type is timeline.",
+      "label is encoding.x. An event uses date, or start.",
+      "kind period (or era) uses start and end and draws a span. Overlapping periods stack.",
+      "The chart shares its UTC date parser with gantt.",
+      "CK1405 is a missing date, or a period whose end is before its start.",
+    ],
+    example: specExample("company-timeline"),
+  },
+  quadrant: {
+    title: "Quadrant",
+    summary: "A square split into four tinted regions, with axis-end labels and named points.",
+    fields: [
+      "type is quadrant. x and y are numbers. The domain defaults to 0..1. Set encoding.x.scale.domain and encoding.y.scale.domain to change it.",
+      "encoding.x.title and encoding.y.title are the low and high end labels, split by |.",
+      "subtitle is four names split by |, in order top-left, top-right, bottom-left, bottom-right.",
+      "size sets the point radius. color accepts positive, negative, accent, or muted, or falls back to the series palette.",
+      "CK1406 is a missing coordinate or a point outside the domain. The patch clamps it.",
+    ],
+    example: specExample("priority-quadrant"),
+  },
+  venn: {
+    title: "Venn",
+    summary: "Two sets are area-proportional. Three sets are a best-effort layout, and the areas are approximate.",
+    fields: [
+      "type is venn. set is encoding.x and size is encoding.y.",
+      "One name is a set. Names joined by + are an intersection, for example Search+Filters.",
+      "The overlap of two circles is solved so its area matches the intersection size.",
+      "Three circles are placed from the pairwise overlaps. The chart captions that those areas are approximate.",
+      "Four or more sets draw an error and CK1407 removes the extra set. CK1408 clamps an intersection that is larger than a member set.",
+    ],
+    example: specExample("feature-venn"),
+  },
+  journey: {
+    title: "Journey",
+    summary: "A user journey: sections, steps, a 1–5 face on a score scale, and actor chips.",
+    fields: [
+      "type is journey. step is encoding.x. score is encoding.y, from 1 to 5. section is encoding.series. actors is encoding.color, comma-separated.",
+      "1 and 2 use the negative token, 3 uses muted, and 4 and 5 use positive.",
+      "Each actor is a legend chip. The same chips repeat on the step.",
+      "CK1409 clamps a score outside 1..5, or fills a missing score with the neutral 3. CK1410 fills a missing section. user-journey repairs to journey (CK1400).",
+    ],
+    example: specExample("checkout-journey"),
+  },
 };
+
+function specExample(slug: string): string {
+  const example = examples.find((item) => item.slug === slug);
+  return JSON.stringify(example?.spec ?? {}, null, 2);
+}

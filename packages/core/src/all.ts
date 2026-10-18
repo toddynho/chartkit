@@ -22,7 +22,7 @@ export const charts = [line, bar, donut, stackedArea, scatter, combo, heatmap, g
 for (const [name, preset] of Object.entries(themes)) registerPreset(name, preset);
 register(...charts);
 
-const EXTRA_TYPES = new Set(["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall"]);
+const EXTRA_TYPES = new Set(["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey"]);
 
 /** True for a phase-3 type. Those renderers load from `@chartkitdev/core/charts/<type>`. */
 export function isExtra(type: string): boolean {

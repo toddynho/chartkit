@@ -80,6 +80,16 @@
         "default": "./dist/validate.cjs"
       }
     },
+    "./validate/phase4": {
+      "import": {
+        "types": "./dist/validate-phase4.d.ts",
+        "default": "./dist/validate-phase4.js"
+      },
+      "require": {
+        "types": "./dist/validate-phase4.d.cts",
+        "default": "./dist/validate-phase4.cjs"
+      }
+    },
     "./interact": {
       "import": {
         "types": "./dist/interact.d.ts",

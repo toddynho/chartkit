@@ -1,3 +1,9 @@
+import launchGantt from "../../packages/core/examples/24-gantt.json";
+import companyTimeline from "../../packages/core/examples/25-timeline.json";
+import priorityQuadrant from "../../packages/core/examples/26-quadrant.json";
+import featureVenn from "../../packages/core/examples/27-venn.json";
+import checkoutJourney from "../../packages/core/examples/28-journey.json";
+
 export interface Spec {
   version: "1";
   type: string;
@@ -13,6 +19,7 @@ export interface Spec {
   size?: { width?: number; height?: number | "auto" };
   theme?: string;
   locale?: string;
+  subtitle?: string;
 }
 
 export interface Example {
@@ -239,6 +246,39 @@ export const chartTypes: ChartTypeDoc[] = [
     title: "Waterfall",
     summary: "Signed steps between totals.",
     notes: ["encoding.x is the step and encoding.y is the amount.", "A row with total: true is a full bar, not a delta."],
+  },
+  {
+    type: "gantt",
+    title: "Gantt",
+    summary: "Tasks as bars on a time axis, with sections, milestones, and dependencies.",
+    notes: [
+      "start plus end, or duration. status is done, active, or crit.",
+      "A milestone is a diamond. depends names task ids. today draws the marker.",
+    ],
+  },
+  {
+    type: "timeline",
+    title: "Timeline",
+    summary: "Events on a date axis, with eras as spans.",
+    notes: ["kind period uses start and end. Event labels alternate above and below."],
+  },
+  {
+    type: "quadrant",
+    title: "Quadrant",
+    summary: "Points on a square split into four labeled regions.",
+    notes: ["x and y default to 0..1. subtitle is the four names, top-left first, split by |."],
+  },
+  {
+    type: "venn",
+    title: "Venn",
+    summary: "Two or three sets. Two are area-proportional. Three are approximate.",
+    notes: ["An intersection joins set names with +. Four or more is an error with a fix."],
+  },
+  {
+    type: "journey",
+    title: "Journey",
+    summary: "Sections and steps, with a 1–5 score and actor chips.",
+    notes: ["The score is a face on a five-step scale. actors is a comma-separated list."],
   },
 ];
 
@@ -879,6 +919,46 @@ export const examples: Example[] = [
       size: { width: 560, height: 280 },
       a11y: { alt: "The close is 160." },
     },
+  },
+  {
+    slug: "launch-gantt",
+    title: "Product launch",
+    group: "Planning",
+    type: "gantt",
+    blurb: "A launch plan with sections, a critical path, and a today line.",
+    spec: launchGantt as Spec,
+  },
+  {
+    slug: "company-timeline",
+    title: "Company history",
+    group: "Planning",
+    type: "timeline",
+    blurb: "Twelve years, three eras, and the events that mark them.",
+    spec: companyTimeline as Spec,
+  },
+  {
+    slug: "priority-quadrant",
+    title: "Priority quadrant",
+    group: "Planning",
+    type: "quadrant",
+    blurb: "Effort against impact, with the quick wins in the top left.",
+    spec: priorityQuadrant as Spec,
+  },
+  {
+    slug: "feature-venn",
+    title: "Feature overlap",
+    group: "Planning",
+    type: "venn",
+    blurb: "Search, filters, and saved views. Three-set areas are approximate.",
+    spec: featureVenn as Spec,
+  },
+  {
+    slug: "checkout-journey",
+    title: "Checkout journey",
+    group: "Planning",
+    type: "journey",
+    blurb: "Browse is easy. Payment is where the score drops.",
+    spec: checkoutJourney as Spec,
   },
 ];
 

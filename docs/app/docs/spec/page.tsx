@@ -5,7 +5,7 @@ import { chartTypes } from "@/lib/specs";
 
 export const metadata = pageMeta(
   "Spec reference",
-  "The ChartKit v1 JSON spec: required alt text, 22 chart types, and the validate and repair loop.",
+  "The ChartKit v1 JSON spec: required alt text, 27 chart types, and the validate and repair loop.",
   "/docs/spec",
 );
 

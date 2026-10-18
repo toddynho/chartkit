@@ -52,6 +52,7 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
 - A bar splits series with `encoding.series`, or with `encoding.color` when that field is not `x`. `encoding.color` equal to `x` colours each bar and does not split series. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel is applied to the ticks. Rule, band, and text `annotations` are drawn. Tooltip, crosshair, x zoom, pan, brush, animation, `legend.interactive`, and `a11y.keyboard` / `a11y.dataTable` are client behavior in `@chartkitdev/core/interact` (a separate entry, so a static bundle does not include it). Tooltip defaults on for a client-rendered line, bar, stacked area, scatter, combo, or donut; `tooltip: false` turns it off. The static SVG is unchanged apart from hook attributes the client sets after mount (`data-ck-interact` on the host, `tabindex` when keyboard is on). Zoom, pan, and brush stay off unless the spec asks; a candlestick with `zoom` omitted pans and zooms on x. Animation is off unless requested, and stays off for `prefers-reduced-motion` and for more than 2000 rows. The default theme is `auto` (Soft: `light-dark`, transparent plot, page scheme; optional card via `--ck-background`). `soft`, `refined`, and `editorial` are built in. `midnight` is opt-in. Other names stay midnight until imported. `--ck-*` or `--chart-N` still wins.
 - A heatmap with `encoding.x`, `encoding.y`, and `encoding.color` is a grid. A calendar heatmap is a date `x` plus `color`, or `mark.layout: "calendar"`.
 - Histogram bins `encoding.x` (`mark.bins` default 8, `mark.binWidth`, or `mark.bin` of count, width, sturges, sqrt, or fd). `encoding.y` is a pre-binned count. Boxplot uses `encoding.x` and observation `encoding.y`. Radar uses `encoding.x` and one or more `encoding.y` fields. Funnel uses `encoding.x` (stage) and `encoding.y`. `mark.shape` is `"bar"` (centered rounded bars, the default) or `"trapezoid"`. Treemap uses `encoding.x`, `encoding.y`, and optional `encoding.color`. Leaves in a group use tints of that group's series color. Sankey uses `encoding.source`, `encoding.target`, and `encoding.y`. Bullet uses `encoding.x`, `encoding.y`, optional `encoding.target`, and `mark.ranges`. Waterfall uses `encoding.x` and delta `encoding.y`; `mark.total` names a field that marks an absolute total. These eight types render from `@chartkitdev/core/extra`, or from `@chartkitdev/core/charts/<type>` one at a time. Adapters load that chart module when `spec.type` needs it. Their SSR entry imports `@chartkitdev/core/extra` statically.
+- Gantt, timeline, quadrant, venn, and journey use the same on-demand path. `validate()` still reports CK1005 because they are outside the core schema enum. `validatePhase4()` and `repairPhase4()` from `@chartkitdev/core/validate/phase4` check them (CK1400–CK1411). Gantt takes start plus end or duration, status done/active/crit, dependencies, milestones, progress, and a today marker. Timeline takes events and period spans. Quadrant takes x/y in a domain (default 0..1) and four names in `subtitle`, split by `|`. Venn takes 2 or 3 sets; two are area-proportional and three are approximate. Journey takes sections, steps, a 1–5 score, and actors.
 
 ## line
 
@@ -383,6 +384,36 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
   "encoding": { "x": "step", "y": "amount" },
   "a11y": { "alt": "The close is 160." }
 }
+```
+
+## gantt
+
+```json
+{"version":"1","type":"gantt","data":[{"id":"a","task":"Spec","section":"Plan","start":"2026-03-02","end":"2026-03-13","status":"done"},{"id":"b","task":"Ship","start":"2026-04-06","milestone":true,"depends":"a"}],"a11y":{"alt":"Ship follows the spec."}}
+```
+
+## timeline
+
+```json
+{"version":"1","type":"timeline","data":[{"label":"Founded","date":"2014-06-01"},{"label":"Platform","start":"2024-01-01","end":"2026-01-01","kind":"period"}],"a11y":{"alt":"The company started in 2014."}}
+```
+
+## quadrant
+
+```json
+{"version":"1","type":"quadrant","subtitle":"Quick wins|Big bets|Fill-ins|Reconsider","data":[{"name":"SSO","x":0.2,"y":0.8},{"name":"Reports","x":0.8,"y":0.3}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"SSO is a quick win."}}
+```
+
+## venn
+
+```json
+{"version":"1","type":"venn","data":[{"set":"Search","size":12},{"set":"Filters","size":8},{"set":"Search+Filters","size":3}],"a11y":{"alt":"Search and filters overlap."}}
+```
+
+## journey
+
+```json
+{"version":"1","type":"journey","data":[{"section":"Pay","step":"Enter card","score":2,"actors":"Shopper"}],"a11y":{"alt":"Entering a card scores 2."}}
 ```
 
 ## React components (not the JSON spec)

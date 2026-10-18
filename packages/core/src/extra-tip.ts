@@ -4,7 +4,7 @@
  * A static render stays a string: adapters call `attach` after the SVG is in the DOM.
  */
 
-const EXTRA = new Set(["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall"]);
+const EXTRA = new Set(["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey"]);
 
 export interface TipController {
   destroy(): void;

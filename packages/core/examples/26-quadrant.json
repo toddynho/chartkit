@@ -1,0 +1,23 @@
+{
+  "version": "1",
+  "type": "quadrant",
+  "id": "priority-quadrant",
+  "title": "Where the quarter goes",
+  "subtitle": "Quick wins|Big bets|Fill-ins|Thankless",
+  "data": [
+    { "name": "SSO", "x": 0.18, "y": 0.84, "size": 16, "color": "positive" },
+    { "name": "Saved replies", "x": 0.3, "y": 0.68, "size": 10, "color": "positive" },
+    { "name": "Checkout rewrite", "x": 0.8, "y": 0.88, "size": 18, "color": "accent" },
+    { "name": "Search ranking", "x": 0.64, "y": 0.72, "size": 14, "color": "accent" },
+    { "name": "Dark mode", "x": 0.24, "y": 0.28, "size": 8, "color": "muted" },
+    { "name": "PDF export", "x": 0.84, "y": 0.24, "size": 12, "color": "negative" },
+    { "name": "Audit log", "x": 0.46, "y": 0.56, "size": 11, "color": "accent" }
+  ],
+  "encoding": {
+    "x": { "field": "x", "title": "Low effort|High effort", "scale": { "domain": [0, 1] } },
+    "y": { "field": "y", "title": "Low impact|High impact", "scale": { "domain": [0, 1] } },
+    "size": "size",
+    "color": "color"
+  },
+  "a11y": { "alt": "SSO is a quick win. The checkout rewrite is a big bet. PDF export is high effort and low impact." }
+}

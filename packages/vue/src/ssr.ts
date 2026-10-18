@@ -5,8 +5,8 @@ import { render as renderExtra } from "@chartkitdev/core/extra";
 import { Chart } from "./Chart";
 
 /**
- * Vue SSR HTML for a spec. Phase 3 charts are imported here, statically,
- * so the SVG is in the first response. The client entry loads them on demand.
+ * Vue SSR HTML for a spec. Extra charts, including gantt through journey, are imported
+ * here statically so the SVG is in the first response. The client entry loads them on demand.
  */
 export function renderToString(spec: ChartSpec, render?: (spec: ChartSpec) => string): Promise<string> {
   const app = createSSRApp({
