@@ -1,6 +1,6 @@
 import type { Frame } from "../../frame";
 import { cssVar } from "../../theme";
-import { clamp, isRecord, linear, n } from "../../svg";
+import { clamp, domainEnds, isRecord, linear, n } from "../../svg";
 import { cells, channel, rowAt, tableOf, textAt } from "./fields";
 import { fill, fit, openMark, text, viewOf } from "./plot";
 
@@ -121,8 +121,9 @@ export function renderQuadrant(spec: Record<string, unknown>): string | null {
 }
 
 function domainOf(channelValue: unknown): [number, number] {
-  if (!isRecord(channelValue) || !isRecord(channelValue.scale) || !Array.isArray(channelValue.scale.domain)) return [0, 1];
-  const [min, max] = channelValue.scale.domain;
+  const ends = isRecord(channelValue) && isRecord(channelValue.scale) ? domainEnds(channelValue.scale.domain) : undefined;
+  const min = ends?.[0];
+  const max = ends?.[1];
   if (typeof min === "number" && typeof max === "number" && max > min) return [min, max];
   return [0, 1];
 }

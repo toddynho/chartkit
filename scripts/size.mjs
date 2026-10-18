@@ -37,6 +37,10 @@ const externalDynamicEntries = {
       if (args.kind !== "dynamic-import") return null;
       return { path: "@chartkitdev/core/validate/phase4", external: true };
     });
+    build.onResolve({ filter: /^\.\/mermaid-phase4$/ }, (args) => {
+      if (args.kind !== "dynamic-import") return null;
+      return { path: "@chartkitdev/core/mermaid/phase4", external: true };
+    });
   },
 };
 
@@ -167,6 +171,7 @@ const vanillaAuto = await gzipOf(join(root, "packages/vanilla/src/auto.ts"), { e
 const markdown = await gzipOf(join(root, "packages/markdown/src/index.ts"), { external: true });
 
 const globalAlias = {
+  "@chartkitdev/core/mermaid/phase4": join(src, "mermaid-phase4.ts"),
   "@chartkitdev/core/mermaid": join(src, "mermaid.ts"),
   "@chartkitdev/core/extra-tip": join(src, "extra-tip.ts"),
   "@chartkitdev/core/extra": join(src, "extra.ts"),

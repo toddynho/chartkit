@@ -8,6 +8,7 @@ import { stubDynamicCharts } from "../../../scripts/stub-dynamic-charts.mjs";
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const core = join(root, "../core/src");
 const alias = {
+  "@chartkitdev/core/mermaid/phase4": join(core, "mermaid-phase4.ts"),
   "@chartkitdev/core/mermaid": join(core, "mermaid.ts"),
   "@chartkitdev/core/extra-tip": join(core, "extra-tip.ts"),
   "@chartkitdev/core/extra": join(core, "extra.ts"),
@@ -51,6 +52,26 @@ await build({
   ...shared,
   entryPoints: [join(root, "src/global-mermaid.ts")],
   outfile: join(root, "dist/chartkit.mermaid.global.js"),
+  alias,
+  plugins: [stubDynamicCharts],
+});
+const phase4Entry = join(tmpdir(), "chartkit-mermaid-phase4-global.ts");
+writeFileSync(
+  phase4Entry,
+  `import { fromMermaid, toSpec } from "@chartkitdev/core/mermaid/phase4";
+const api = { fromMermaid, toSpec };
+const root = globalThis as { ChartKit?: Record<string, unknown>; ChartKitMermaid?: typeof api };
+root.ChartKitMermaid = api;
+if (root.ChartKit) {
+  root.ChartKit.fromMermaid = fromMermaid;
+  root.ChartKit.toSpec = toSpec;
+}
+`,
+);
+await build({
+  ...shared,
+  entryPoints: [phase4Entry],
+  outfile: join(root, "dist/chartkit.mermaid-phase4.global.js"),
   alias,
 });
 

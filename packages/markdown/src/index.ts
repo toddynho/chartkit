@@ -1,6 +1,6 @@
 import type { ChartSpec } from "@chartkitdev/core";
 import { render } from "@chartkitdev/core/extra";
-import { fromMermaid, toSpec, type ImportOptions } from "@chartkitdev/core/mermaid";
+import { fromMermaid, toSpec, type ImportOptions } from "@chartkitdev/core/mermaid/phase4";
 
 export interface FenceOptions extends ImportOptions {
   /** Convert ```mermaid fences when the diagram is a supported chart. Default true. */

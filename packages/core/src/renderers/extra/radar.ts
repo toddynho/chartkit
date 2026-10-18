@@ -1,6 +1,6 @@
 import { column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
-import { n, polar } from "../../svg";
+import { domainEnds, n, polar } from "../../svg";
 import { asNumber } from "../../frame";
 import { fieldsOf, fill, fit, openMark, str, stroke, text, viewOf } from "./plot";
 
@@ -87,6 +87,6 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
 function spokeMax(channel: unknown): number | undefined {
   if (!channel || typeof channel !== "object" || !("scale" in channel)) return undefined;
   const scale = (channel as { scale?: { domain?: unknown } }).scale;
-  const max = Array.isArray(scale?.domain) ? scale.domain[1] : undefined;
+  const max = domainEnds(scale?.domain)?.[1];
   return typeof max === "number" && max > 0 ? max : undefined;
 }

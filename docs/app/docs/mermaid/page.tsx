@@ -73,7 +73,10 @@ const { spec, warnings } = fromMermaid(\`${xy}\`);`}
         A frontmatter title, <code>accTitle</code>, and <code>accDescr</code> are read. <code>accDescr</code> or the
         title becomes <code>a11y.alt</code>. If neither is present, ChartKit writes one factual sentence from the
         data. Unknown syntax returns a <code>CK8004</code> warning. Flowcharts and other diagrams return{" "}
-        <code>CK8003</code> and no spec.
+        <code>CK8003</code> and no spec. <code>gantt</code>, <code>timeline</code>, <code>quadrantChart</code>,{" "}
+        <code>venn-beta</code>, and <code>journey</code> load from <code>@chartkitdev/core/mermaid/phase4</code>.{" "}
+        <code>fromMermaidAsync</code> loads that chunk, and Node can import <code>fromMermaid</code> from the phase-4
+        entry directly.
       </p>
       <img src="/mermaid-sheet.png" alt="Mermaid source beside the ChartKit chart for each supported kind, in light mode." />
       <h2>Markdown</h2>
@@ -92,8 +95,10 @@ autoRender(document, { mermaid: true });`}
         <code>ChartKit.fromMermaid</code>, and <code>ChartKit.toSpec</code>.{" "}
         <code>dist/chartkit.auto.global.js</code> is the same auto-render without the Mermaid parser. With{" "}
         <code>data-chartkit-mermaid</code> and a Mermaid block on the page, it loads the sibling{" "}
-        <code>chartkit.mermaid.global.js</code>. Histogram through journey load the sibling{" "}
-        <code>chartkit.&lt;type&gt;.global.js</code> from that same directory. Unsupported Mermaid blocks stay as source.
+        <code>chartkit.mermaid.global.js</code>. That file loads <code>chartkit.mermaid-phase4.global.js</code> from the
+        same directory when the page has a gantt, timeline, quadrant, venn, or journey diagram. Histogram through
+        journey load the sibling <code>chartkit.&lt;type&gt;.global.js</code> from that same directory. Unsupported
+        Mermaid blocks stay as source.
       </p>
       <CodeBlock
         label="html"

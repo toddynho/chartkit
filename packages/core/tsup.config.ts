@@ -71,6 +71,7 @@ const entry: Record<string, string> = {
   validate: "src/validate.ts",
   "validate-phase4": "src/validate-phase4.ts",
   mermaid: "src/mermaid.ts",
+  "mermaid-phase4": "src/mermaid-phase4.ts",
   interact: "src/interact.ts",
   "interact-extra": "src/interact-extra.ts",
   "themes/all": "src/themes/all.ts",
@@ -104,6 +105,10 @@ export default defineConfig({
         build.onResolve({ filter: /^\.\/validate-phase4$/ }, (args) => {
           if (args.kind !== "dynamic-import") return null;
           return { path: "@chartkitdev/core/validate/phase4", external: true };
+        });
+        build.onResolve({ filter: /^\.\/mermaid-phase4$/ }, (args) => {
+          if (args.kind !== "dynamic-import") return null;
+          return { path: "@chartkitdev/core/mermaid/phase4", external: true };
         });
       },
     },

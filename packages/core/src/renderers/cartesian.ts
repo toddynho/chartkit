@@ -2,7 +2,7 @@ import { annotationLayers } from "../annotations";
 import { isTypedArray, readData, type DataTable } from "../data";
 import { formatValue } from "../format";
 import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
-import { clamp, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
+import { clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
 type MarkDraw = (
@@ -381,7 +381,7 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   }
   if (model.legend) parts.push(legend(model, pad.left, model.title || model.subtitle ? (model.subtitle ? 54 : 36) : 8, plot.right));
 
-  parts.push(`<defs><clipPath id="${model.id}-clip"><rect x="${n(plot.left)}" y="${n(plot.top)}" width="${n(plotW)}" height="${n(plotH)}" /></clipPath>`);
+  parts.push(`<defs>${clipPath(`${model.id}-clip`, plot.left, plot.top, plotW, plotH)}`);
   if (model.gradient) {
     model.series.forEach((series, index) => {
       parts.push(
@@ -1379,14 +1379,6 @@ function readYChannels(y: unknown): YChannel[] {
       lock: isRecord(item.scale) ? domainEnds(item.scale.domain) : undefined,
     };
   });
-}
-
-function domainEnds(domain: unknown): [number | null, number | null] | undefined {
-  if (!Array.isArray(domain)) return;
-  const a = domain[0];
-  const b = domain[1];
-  const end = (value: unknown) => value === null || (typeof value === "number" && Number.isFinite(value));
-  return end(a) && end(b) ? [a, b] : undefined;
 }
 
 function axisLock(model: PlotModel, axis: "y" | "y2"): DomainLock {

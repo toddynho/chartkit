@@ -2,7 +2,7 @@
 export const stubDynamicCharts = {
   name: "stub-dynamic-charts",
   setup(build) {
-    build.onResolve({ filter: /^\.\/(load|extra-tip|charts\/[a-z0-9-]+)$/ }, (args) => {
+    build.onResolve({ filter: /^\.\/(load|extra-tip|mermaid-phase4|charts\/[a-z0-9-]+)$/ }, (args) => {
       if (args.kind !== "dynamic-import") return null;
       return { path: args.path, namespace: "chartkit-stub" };
     });

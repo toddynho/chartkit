@@ -15,7 +15,7 @@ const pngPath = join(root, "docs/public/mermaid-sheet.png");
 writeFileSync(
   entry,
   `import { readFileSync } from "node:fs";
-import { fromMermaid } from ${JSON.stringify(join(src, "mermaid.ts"))};
+import { fromMermaid } from ${JSON.stringify(join(src, "mermaid-phase4.ts"))};
 import { render } from ${JSON.stringify(join(src, "extra.ts"))};
 const dir = ${JSON.stringify(join(src, "__tests__/fixtures/mermaid"))};
 const kinds = [

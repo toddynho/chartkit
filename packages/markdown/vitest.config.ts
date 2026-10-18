@@ -4,6 +4,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve: {
     alias: [
+      { find: "@chartkitdev/core/mermaid/phase4", replacement: path.resolve(__dirname, "../core/src/mermaid-phase4.ts") },
       { find: "@chartkitdev/core/mermaid", replacement: path.resolve(__dirname, "../core/src/mermaid.ts") },
       { find: "@chartkitdev/core/extra", replacement: path.resolve(__dirname, "../core/src/extra.ts") },
       { find: "@chartkitdev/core", replacement: path.resolve(__dirname, "../core/src/index.ts") },

@@ -12,6 +12,19 @@ export function esc(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/** Explicit `scale.domain` ends. `null` leaves that end automatic. */
+export function domainEnds(domain: unknown): [number | null, number | null] | undefined {
+  if (!Array.isArray(domain)) return;
+  const lo = domain[0];
+  const hi = domain[1];
+  const end = (value: unknown): value is number | null => value === null || (typeof value === "number" && Number.isFinite(value));
+  return end(lo) && end(hi) ? [lo, hi] : undefined;
+}
+
+export function clipPath(id: string, x: number, y: number, w: number, h: number): string {
+  return `<clipPath id="${id}"><rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" /></clipPath>`;
+}
+
 export function n(value: number): string {
   const r = Math.round(value * 100);
   const a = r < 0 ? -r : r;
