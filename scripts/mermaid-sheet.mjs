@@ -19,8 +19,9 @@ import { fromMermaid } from ${JSON.stringify(join(src, "mermaid.ts"))};
 import { render } from ${JSON.stringify(join(src, "extra.ts"))};
 const dir = ${JSON.stringify(join(src, "__tests__/fixtures/mermaid"))};
 const kinds = [
-  ["xychart.mmd", "xychart"],
-  ["pie.mmd", "pie"],
+  ["xychart.mmd", "xychart bar and line"],
+  ["xychart-horizontal.mmd", "horizontal xychart"],
+  ["pie.mmd", "pie showData"],
   ["sankey.mmd", "sankey"],
   ["radar.mmd", "radar"],
   ["treemap.mmd", "treemap"],
@@ -95,7 +96,7 @@ const chrome = spawnSync(
     "--disable-gpu",
     "--hide-scrollbars",
     "--force-device-scale-factor=1",
-    "--window-size=1200,2720",
+    "--window-size=1280,3400",
     `--screenshot=${pngPath}`,
     `file://${htmlPath}`,
   ],

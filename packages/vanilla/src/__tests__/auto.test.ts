@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { autoRender } from "../auto";
+import { mermaidScriptUrl, mountFences } from "../mount-fences";
 
 function mountHtml(html: string): void {
   document.body.innerHTML = html;
@@ -35,6 +36,17 @@ describe("autoRender", () => {
     expect(autoRender(document)).toBe(1);
     expect(document.querySelector("pre")).toBeNull();
     expect(document.querySelector("svg")?.getAttribute("data-ck-type")).toBe("donut");
+  });
+
+  it("leaves mermaid fences in place until a parser is passed", () => {
+    mountHtml(`<pre class="mermaid">pie
+    title Share of workshop hours
+    "Design": 42
+    "Build": 10</pre>`);
+    const render = () => "<svg></svg>";
+    expect(mountFences(document, { mermaid: true, render, toSpec: () => ({ spec: null }) })).toBe(0);
+    expect(document.querySelector("pre.mermaid")).not.toBeNull();
+    expect(mermaidScriptUrl("https://cdn.example/chartkit.auto.global.js")).toBe("https://cdn.example/chartkit.mermaid.global.js");
   });
 
   it("does not mount the same fence twice", () => {

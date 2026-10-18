@@ -71,10 +71,11 @@ const { spec, warnings } = fromMermaid(\`${xy}\`);`}
 autoRender(document, { mermaid: true });`}
       />
       <p>
-        The CDN build is <code>dist/chartkit.global.js</code>. It exposes <code>ChartKit.autoRender</code>,{" "}
-        <code>ChartKit.fromMermaid</code>, and <code>ChartKit.toSpec</code>. Add{" "}
-        <code>data-chartkit-mermaid</code> on the script tag to mount supported Mermaid blocks. Unsupported Mermaid
-        blocks stay as source.
+        <code>dist/chartkit.global.js</code> is the one-file build: <code>ChartKit.autoRender</code>,{" "}
+        <code>ChartKit.fromMermaid</code>, and <code>ChartKit.toSpec</code>.{" "}
+        <code>dist/chartkit.auto.global.js</code> is the same auto-render without the Mermaid parser. With{" "}
+        <code>data-chartkit-mermaid</code> and a Mermaid block on the page, it loads the sibling{" "}
+        <code>chartkit.mermaid.global.js</code>. Unsupported Mermaid blocks stay as source.
       </p>
       <CodeBlock
         label="html"
@@ -98,8 +99,9 @@ rehype().use(rehypeParse).use(rehypeChartkit);`}
       />
       <h2>Limits</h2>
       <p>
-        A y-axis range on <code>xychart</code> is kept on the spec and warned: bar and line axes are sized from the
-        data. Radar draws to the largest value, with a polygon graticule. A treemap keeps one group level. Quadrant
+        A y-axis range on <code>xychart</code> is stored as <code>encoding.y.scale.domain</code> and warned. Bar and
+        line charts size the axis from the data, and <code>axes.y</code> has no min or max. Radar has no min or max
+        either, so it draws to the largest value, with a polygon graticule. A treemap keeps one group level. Quadrant
         point radius is not drawn. <code>showData</code> prints the value in the legend.
       </p>
       <h2>Security</h2>
