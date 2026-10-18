@@ -246,7 +246,8 @@ describe("render SVG", () => {
     const target = { innerHTML: "" };
     const svg = render({ version: "1", type: "not-a-chart" }, target);
     expect(svg).toContain("CK1010");
-    expect(svg).toContain("@chartkitdev/core/all");
+    expect(svg).toContain("@chartkitdev/core/charts/not-a-chart");
+    expect(svg).toContain("@chartkitdev/core/extra");
     expect(target.innerHTML).toBe(svg);
     expect(() => render(null)).not.toThrow();
   });

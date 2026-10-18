@@ -1,3 +1,4 @@
+import type { ChartSpec } from "@chartkitdev/core";
 import { describe, expect, it } from "vitest";
 import { chartScriptUrl, extraTypesIn, renderKnown } from "../global-charts";
 
@@ -12,10 +13,10 @@ describe("browser extra charts", () => {
       data: [{ task: "Spec", section: "Plan", start: "2026-03-02", end: "2026-03-13" }],
       a11y: { alt: "The spec runs in March." },
     };
-    expect(renderKnown(spec)).toBe("");
+    expect(renderKnown(spec as unknown as ChartSpec)).toBe("");
     (globalThis as { ChartKitCharts?: Record<string, { render: (value: Record<string, unknown>) => string | null }> }).ChartKitCharts = {
       gantt: { render: () => "<svg data-ck-type=\"gantt\"></svg>" },
     };
-    expect(renderKnown(spec)).toContain("gantt");
+    expect(renderKnown(spec as unknown as ChartSpec)).toContain("gantt");
   });
 });

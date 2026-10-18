@@ -1,4 +1,6 @@
 import { fromMermaid as parseMermaid, installPhase4, toSpec as convertSpec, type ImportOptions, type ImportResult } from "./mermaid";
+
+export type { ImportOptions, ImportResult } from "./mermaid";
 import { capList, chooseAlt, clipText, dropDirective, parseTitle, unquote, warn, type ImportWarning, type Meta } from "./mermaid-shared";
 
 function buildPhase4(
