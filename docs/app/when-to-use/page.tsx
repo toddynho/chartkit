@@ -4,7 +4,7 @@ import { SITE, pageMeta } from "@/lib/site";
 
 export const metadata = pageMeta(
   "When to use ChartKit",
-  "When ChartKit is the right chart library, when it is not, and the round 7 numbers behind that choice.",
+  "When ChartKit is the right chart library, when it is not, and the round 13 numbers behind that choice.",
   "/when-to-use",
 );
 
@@ -45,7 +45,7 @@ export default function WhenToUsePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <h1>When to use ChartKit</h1>
       <p className="lede">
-        A direct answer, then the losses. The numbers are round 7 and match{" "}
+        A direct answer, then the losses. The numbers are round 13 and match{" "}
         <a href="/benchmarks.json">benchmarks.json</a>.
       </p>
       {whenToUseFaqs.map((item) => (

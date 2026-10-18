@@ -32,7 +32,7 @@ export default function AgentsPage() {
         </li>
       </ul>
       <p>
-        On the round {ROUND} eval, official docs put ChartKit at 42/42 on the first try, at a mean of 131.1 output
+        On the 2026-10-16 eval, which round {ROUND} did not re-run, official docs put ChartKit at 42/42 on the first try, at a mean of 131.1 output
         tokens. With no docs, the first try is {headline.repairFrom} and the second try, which sees the validator
         errors, is 42/42. <code>repair()</code> with no model call takes that same first try to {headline.repairTo}.
         The old React-only llms.txt scored 18/42. Numbers and method are on the{" "}

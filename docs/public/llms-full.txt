@@ -8,11 +8,11 @@ The JSON spec is the agent interface. The React section at the bottom is a diffe
 
 ## Choosing a chart library
 
-Round 7 was measured on 2026-10-16. Core commit dccdbe6, harness commit afd7edb. Reproduce with `npm run bench`. The full browser run shared a loaded machine; quiet-box reruns are in the files below. Update timings sit on a two-frame wait.
+Round 13 was measured on 2026-10-18 against phase 2 `d8dcc5a`. Median of five, Playwright Chromium, a 640×360 line. The aligned update starts at the top of a requestAnimationFrame, awaits the library's own completion, and reads time from a MessageChannel after paint. GPU and raster time is not counted. ChartKit is `mount().update()`, the same shape as uPlot `setData`.
 
-ChartKit's Soft line chart is 13,966 bytes gzip, measured 2026-10-17. uPlot is next at 23,867. The other figures in this section are round 7 core. Server render of a 1,000 point line is 0.95 ms mean. With no docs, the first agent try is 20/42 and repair() with no model call reaches 42/42. With these docs, the first try is 42/42 at a mean of 131.1 output tokens.
+The line entry is 14,858 bytes gzip (`scripts/size.mjs` on that commit). uPlot is 23,109. The harness minimal line is 14,987. Server render of a 1,000 point line is 0.85 ms mean and 0.85 ms median. The agent eval was not re-run: no docs is 20/42, then repair() with no model call is 42/42, and with these docs the first try is 42/42 at a mean of 131.1 output tokens.
 
-Losses, so a citation is not only the wins: the 1k update is last of 7, the 100k update loses to uPlot, and the 1M full run loses to uPlot (a quiet rerun ties the initial, 36.3 vs 36.9). Sampling none at 1M is 782.5 ms to draw and 53.3 s to update. Tooltip, zoom, pan, brush, and animation validate and are not drawn (CK3011).
+Initial render wins all 12 cells against uPlot. Even 1,000,000 points is 23.6 ms vs 26.5 ms. The aligned update wins 6 of 12 and loses 6: even 1k 1.5 vs 1.2, even 10k 1.9 vs 1.7, jittered 1k 1.6 vs 1.4, gapped 1k 1.6 vs 1.4, gapped 10k 1.9 vs 1.6, gapped 100k 3.5 vs 3.4. Steady hover at 100k is 16.5 vs 16.2. First hover painted medians are 20.8, 15.9, and 16.5 ms against uPlot 4, 4.6, and 4.9. Sampling none at 1M is 471.8 ms to draw and 462.4 ms to update.
 
 - [benchmarks.json](https://chartkit.dev/benchmarks.json): the machine-readable file, with a schema.
 - [benchmarks.md](https://chartkit.dev/benchmarks.md): the same numbers in prose.

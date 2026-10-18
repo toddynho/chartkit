@@ -2,18 +2,19 @@
 
 One JSON spec, a framework-free core, and thin adapters for React, Vue, Svelte, and plain DOM. The spec is the agent interface. Component props on the older React charts are a different API and are not keys in the spec.
 
-Round 7, measured 2026-10-16. These are the harness numbers, including the losses. Method and the quiet-box reruns: [chartkit.dev/benchmarks](https://chartkit.dev/benchmarks) and [benchmarks.json](https://chartkit.dev/benchmarks.json).
+Round 13, measured 2026-10-18 on phase 2 `d8dcc5a`. These are the harness numbers, including the losses. Method: [chartkit.dev/benchmarks](https://chartkit.dev/benchmarks) and [benchmarks.json](https://chartkit.dev/benchmarks.json).
 
 | | ChartKit | Next or note |
 | --- | ---: | --- |
-| Line chart, gzip | **13,966 B** | uPlot 23,867 B. Soft default, 2026-10-17. Other rows are round 7 |
-| Server render, 1k line | **0.95 ms** | ECharts 9.04 ms. uPlot, Chart.js, and Recharts produced no chart without a DOM |
-| Agent, no docs, then repair() | **20/42 → 42/42** | Recharts, ECharts, and Chart.js were already 42/42 with no docs |
-| 1k update | 32.8 ms, last of 7 | Chart.js 20.2 ms |
-| 100k update | 22.9 ms, loss | uPlot 17.5 ms |
-| 1M initial, full run | 34.8 ms, loss | uPlot 32.0 ms. A quiet rerun ties this cell (36.3 vs 36.9) |
+| Line chart, gzip | **14,858 B** | uPlot 23,109 B. `scripts/size.mjs` on that commit. Harness minimal line is 14,987 B |
+| Server render, 1k line | **0.85 ms** | ECharts 6.65 ms mean. uPlot, Chart.js, and Recharts produced no chart without a DOM |
+| Agent, no docs, then repair() | **20/42 → 42/42** | Not re-run for round 13. Recharts, ECharts, and Chart.js were already 42/42 with no docs |
+| Initial, 12 cells | wins all | Even 1M is 23.6 ms vs uPlot 26.5 ms |
+| Aligned update | wins 6 of 12 | Losses: even 1k 1.5 vs 1.2, even 10k 1.9 vs 1.7, jitter 1k 1.6 vs 1.4, gapped 1k 1.6 vs 1.4, gapped 10k 1.9 vs 1.6, gapped 100k 3.5 vs 3.4 |
+| First hover, painted | 20.8 / 15.9 / 16.5 ms | uPlot 4 / 4.6 / 4.9 ms, at about 50 / 200 / 500 ms after mount |
+| Steady hover, 100k | 16.5 ms | uPlot 16.2 ms |
 
-Update timings sit on a two-frame wait. Sampling defaults to auto. With sampling off, 1M is 782.5 ms to draw and 53.3 s to update. Tooltip, zoom, pan, and brush are in the spec and not drawn.
+The aligned update starts at the top of a requestAnimationFrame, awaits the library’s own completion, and reads time from a MessageChannel after paint. ChartKit is `mount().update()`, the same shape as uPlot `setData`. Sampling defaults to auto. With sampling off, 1M is 471.8 ms to draw and 462.4 ms to update.
 
 **[Documentation](https://chartkit.dev)** | **[When to use](https://chartkit.dev/when-to-use)** | **[Benchmarks](https://chartkit.dev/benchmarks)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[llms.txt](docs/public/llms.txt)**
 

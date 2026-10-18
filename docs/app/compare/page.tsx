@@ -20,7 +20,7 @@ const rows = [
   ["Tooltips", "In the spec, not drawn", "Yes", "Yes", "Yes", "Yes"],
   ["Zoom and pan", "In the spec, not drawn", "No", "Plugin", "Yes", "Yes"],
   ["Annotations", "Yes", "Yes", "Plugin", "Yes", "Yes"],
-  ["SSR without a DOM", `Yes, ${headline.ssrLabel}`, "Empty wrapper", "No", "Yes, 9.04 ms", "No"],
+  ["SSR without a DOM", `Yes, ${headline.ssrLabel}`, "Empty wrapper", "No", "Yes, 6.65 ms", "No"],
   ["repair(), no docs", headline.repair, "No repair", "No repair", "No repair", "No repair"],
   ["Line chart, gzip", `${headline.lineGzipLabel} (${headline.lineGzipBytes} B)`, "96 KB, React external", "49 KB", "162 KB", `${headline.nextGzipBytes} B`],
 ];
@@ -30,7 +30,7 @@ export default function ComparePage() {
     <div className="wrap section prose wide">
       <h1>Compare</h1>
       <p className="lede">
-        A short, honest cut of the round 7 matrix. “In the spec, not drawn” means the field validates and the SVG
+        A short, honest cut of the round 13 matrix. “In the spec, not drawn” means the field validates and the SVG
         renderer does not paint it. Turning tooltip, zoom, pan, brush, animation, or keyboard access on warns CK3011.
         Annotations, log scales, time axes, and bar series are drawn. Cells for other libraries come from their docs
         and are point-in-time. ChartKit’s line chart is still the smallest; uPlot is next at {headline.nextGzipBytes}{" "}

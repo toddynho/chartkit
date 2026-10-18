@@ -25,9 +25,9 @@ export default function RivalPage({ params }: { params: { slug: string } }) {
   if (!rival) notFound();
 
   const rows = [
-    ["Line chart, gzip", `${headline.lineGzipBytes} bytes, Soft`, rival.bundleBytes ? `${rival.bundleBytes.toLocaleString("en-US")} bytes` : "—"],
-    ["Server render, 1k line", "0.95 ms mean, SVG, no DOM", rival.ssr],
-    ["Agent eval, round 7", "20/42 no docs, then 42/42 with repair(). 42/42 with docs. 139.4 / 131.1 tokens.", rival.agent],
+    ["Line chart, gzip", `${headline.lineGzipBytes} bytes, size script`, rival.bundleBytes ? `${rival.bundleBytes.toLocaleString("en-US")} bytes` : "—"],
+    ["Server render, 1k line", `${headline.ssrLabel} mean, SVG, no DOM`, rival.ssr],
+    ["Agent eval, 2026-10-16", "20/42 no docs, then 42/42 with repair(). 42/42 with docs. 139.4 / 131.1 tokens. Not re-run for round 13.", rival.agent],
     ["Tooltips and zoom", "In the spec, not drawn (CK3011)", rival.interaction],
   ];
 

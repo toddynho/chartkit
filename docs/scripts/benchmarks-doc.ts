@@ -1,14 +1,17 @@
 import {
+  AGENT_MEASURED,
   CORE_COMMIT,
-  HARNESS_COMMIT,
   MEASURED,
   ROUND,
   agentRows,
   assertPublishedMatchesDisplay,
   browserRows,
+  firstHoverRows,
   headline,
+  hoverRows,
   published,
   samplingRows,
+  updateMethod,
 } from "../lib/benchmarks.ts";
 
 export const BENCHMARKS_SCHEMA_URL = "https://chartkit.dev/benchmarks.schema.json";
@@ -20,25 +23,22 @@ export function benchmarksPayload() {
     name: "ChartKit benchmarks",
     round: ROUND,
     measured: MEASURED,
-    core: { pullRequest: 6, commit: CORE_COMMIT },
-    harness: { pullRequest: 4, commit: HARNESS_COMMIT },
-    reproduce: "npm run bench on the harness commit with this core. Median of 5. This file does not re-time the libraries.",
+    core: { pullRequest: 10, commit: CORE_COMMIT, note: "Phase 2 head the timings were taken on. This docs branch does not contain that commit." },
+    reproduce: "Median of 5, Playwright Chromium, a 640×360 line, three x spacings. This file does not re-time the libraries.",
     methodology: {
-      browser:
-        "Playwright Chromium, a 640×360 line, equal two-frame timers, median of 5. The full run shared the machine (about 11.6 GB of 16 GB in use). quietMs is a later same-session rerun.",
-      updates:
-        "Update tests sit on a shared two-frame wait. A few milliseconds is frame-timing noise. ChartKit updates land between about 19 and 33 ms on both round 6 core and this core.",
+      browser: "Playwright Chromium, a 640×360 line, median of 5. Shapes are even x, jittered x, and gapped timestamps. ChartKit initial is mount(); the aligned update is mount().update().",
+      updates: updateMethod,
       sampling:
-        "mark.sampling defaults to auto and minmax-downsamples a line longer than twice the plot width. 1,000 points stay complete. The samplingNone rows draw every point.",
-      bundle: "gzip -9, bench harness. scripts/size.mjs measures the ChartKit line entry separately and is recorded as sizeScriptLineBytes.",
-      ssr: "Mean of a 1,000 point line. supported false means no chart without a DOM. Recharts returned an empty wrapper.",
-      agents: `${published.model}, temperature ${published.temperature}, ${published.tasks} tasks, one run on ${MEASURED}. Official means the library docs were in the prompt. ChartKit docs are llms.txt. repair() is a no-model step on ChartKit's no-docs first try and is not a second model call. Nivo and uPlot were not in the agent eval.`,
+        "mark.sampling defaults to auto and minmax-downsamples a line longer than twice the plot width. 1,000 points stay complete. The samplingNone rows draw every point and use the same aligned update timer.",
+      bundle: "gzip -9. ChartKit’s headline line is scripts/size.mjs. Competitor rows and the harness chartkit-minimal line are the bench harness. uPlot adds its stylesheet, gzipped separately.",
+      ssr: "Mean and median of 8 calls after 2 warmups, a 1,000 point line. supported false means no chart without a DOM. Recharts returned an empty wrapper.",
+      agents: `${published.model}, temperature ${published.temperature}, ${published.tasks} tasks, one run on ${AGENT_MEASURED}. Not re-run for round 13. Official means the library docs were in the prompt. ChartKit docs are llms.txt. repair() is a no-model step on ChartKit's no-docs first try and is not a second model call. Nivo and uPlot were not in the agent eval.`,
     },
     headline: {
       lineGzipBytes: published.bundleGzip.find((row) => row.id === "chartkit-line")?.bytes,
-      lineGzipBuild: "soft-default",
-      lineGzipMeasured: "2026-10-17",
-      otherFigures: "round 7 core dccdbe6, except the line gzip",
+      lineGzipBuild: "phase-2-d8dcc5a",
+      lineGzipMeasured: MEASURED,
+      otherFigures: "round 13, measured 2026-10-18 on phase 2 d8dcc5a, except the agent eval",
       nextSmallest: { lib: "uPlot", bytes: published.bundleGzip.find((row) => row.id === "uplot")?.bytes },
       ssrMeanMs: published.ssr[0].meanMs,
       repairNoDocs: { first: published.agents[0].noDocsFirst, afterRepair: published.agents[0].noDocsWithinTwo },
@@ -47,16 +47,20 @@ export function benchmarksPayload() {
     sizeScriptLineBytes: published.sizeScriptLineBytes,
     browserMs: published.browser,
     samplingNoneMs: published.samplingNone,
+    hoverSteady100k: published.hoverSteady100k,
+    firstHoverPainted: published.firstHoverPainted,
     ssrMs: published.ssr,
     agents: published.agents,
     losses: [
-      "1,000-point update: ChartKit is last of 7.",
-      "10,000-point update: loss. The samples sit inside frame-timing noise.",
-      "100,000-point update: loss to uPlot. The round 6 win on this cell was frame noise.",
-      "1,000,000-point full run: loss to uPlot on initial and update. The quiet-box initial is a tie (36.3 vs 36.9).",
-      "Sampling none at 1,000,000 points: 782.5 ms initial and 53,343.8 ms update, on the loaded box.",
-      "No-docs agent first try is 20/42. repair() reaches 42/42. The other libraries in the eval were already 42/42 with no docs.",
-      "Tooltip, zoom, pan, brush, animation, and keyboard access validate and are not drawn (CK3011).",
+      "Aligned update, even x, 1,000 points: ChartKit 1.5 ms, uPlot 1.2 ms.",
+      "Aligned update, even x, 10,000 points: ChartKit 1.9 ms, uPlot 1.7 ms.",
+      "Aligned update, jittered x, 1,000 points: ChartKit 1.6 ms, uPlot 1.4 ms.",
+      "Aligned update, gapped timestamps, 1,000 points: ChartKit 1.6 ms, uPlot 1.4 ms.",
+      "Aligned update, gapped timestamps, 10,000 points: ChartKit 1.9 ms, uPlot 1.6 ms.",
+      "Aligned update, gapped timestamps, 100,000 points: ChartKit 3.5 ms, uPlot 3.4 ms.",
+      "Steady hover at 100k, painted median: ChartKit 16.5 ms, uPlot 16.2 ms.",
+      "First hover, painted median: ChartKit 20.8 / 15.9 / 16.5 ms at about 50 / 200 / 500 ms after mount. uPlot 4 / 4.6 / 4.9 ms.",
+      "No-docs agent first try is 20/42. That eval was not re-run for round 13. repair() reaches 42/42. The other libraries in the eval were already 42/42 with no docs.",
     ],
     urls: {
       html: "https://chartkit.dev/benchmarks",
@@ -69,6 +73,8 @@ export function benchmarksPayload() {
       headline,
       browserRows,
       samplingRows,
+      hoverRows,
+      firstHoverRows,
       agentRows,
     },
   };
@@ -110,19 +116,24 @@ export function benchmarksMarkdown(): string {
   const bundle = doc.bundleGzip
     .map((row) => `| ${row.lib} | ${row.entry} | ${row.bytes.toLocaleString("en-US")} | ${row.reactExternal ? "React external" : ""} |`)
     .join("\n");
+  const ms = (value: number) => value.toFixed(1);
   const browser = doc.browserMs
-    .map((row) => {
-      const updateQuiet = row.fastestUpdate.quietLib
-        ? `${row.fastestUpdate.quietLib} ${row.fastestUpdate.quiet}`
-        : String(row.fastestUpdate.quiet);
-      return `| ${row.points.toLocaleString("en-US")} | ${row.chartkit.initial.full} (${row.chartkit.initial.quiet}) | ${row.chartkit.update.full} (${row.chartkit.update.quiet}) | ${row.fastestInitial.lib} ${row.fastestInitial.full} (${row.fastestInitial.quiet}) | ${row.fastestUpdate.lib} ${row.fastestUpdate.full} (${updateQuiet}) | ${row.result} |`;
-    })
+    .map(
+      (row) =>
+        `| ${row.shape} | ${row.points.toLocaleString("en-US")} | ${ms(row.chartkit.initial)} | ${ms(row.uplot.initial)} | ${ms(row.chartkit.update)} | ${ms(row.uplot.update)} | ${row.result} |`,
+    )
+    .join("\n");
+  const hover = doc.hoverSteady100k
+    .map((row) => `| ${row.lib} | ${row.tipMs} | ${row.paintedMs} | ${row.p95Ms} |`)
+    .join("\n");
+  const firstHover = doc.firstHoverPainted
+    .map((row) => `| ${row.afterMountMs} | ${row.chartkit} | ${row.chartkitMax} | ${row.uplot} | ${row.uplotMax} |`)
     .join("\n");
   const sampling = doc.samplingNoneMs
     .map((row) => `| ${row.points.toLocaleString("en-US")} | ${row.initialMs} | ${row.updateMs} |`)
     .join("\n");
   const ssr = doc.ssrMs
-    .map((row) => `| ${row.lib} | ${row.supported ? row.meanMs : "—"} | ${row.quietMs ?? "—"} | ${row.supported ? "yes" : "no chart without a DOM"} |`)
+    .map((row) => `| ${row.lib} | ${row.supported ? row.meanMs : "—"} | ${row.supported ? row.medianMs : "—"} | ${row.supported ? "yes" : "no chart without a DOM"} |`)
     .join("\n");
   const agents = doc.agents
     .map((row) =>
@@ -135,7 +146,7 @@ export function benchmarksMarkdown(): string {
 
   return `# ChartKit benchmarks, round ${doc.round}
 
-Measured ${doc.measured}. Core is pull request #6 at \`${doc.core.commit}\`. The harness is pull request #4 at \`${doc.harness.commit}\`.
+Measured ${doc.measured} on phase 2 \`${doc.core.commit}\`. The agent eval was not re-run; it stays ${AGENT_MEASURED}.
 
 ${doc.reproduce}
 
@@ -146,15 +157,17 @@ Machine-readable copy: ${doc.urls.json} (schema ${doc.urls.schema}). HTML page: 
 - Browser: ${doc.methodology.browser}
 - Updates: ${doc.methodology.updates}
 - Sampling: ${doc.methodology.sampling}
-- Bundle: ${doc.methodology.bundle} Round 7 \`scripts/size.mjs\` measured ${doc.sizeScriptLineBytes.toLocaleString("en-US")} bytes. That is the pre-Soft line, not the 13,966 byte figure.
+- Bundle: ${doc.methodology.bundle} \`scripts/size.mjs\` line is ${doc.sizeScriptLineBytes.toLocaleString("en-US")} bytes. \`/all\` on that script is ${published.sizeScriptAllBytes.toLocaleString("en-US")} bytes.
 - Server render: ${doc.methodology.ssr}
 - Agents: ${doc.methodology.agents}
 
 ## Headline
 
-- Smallest line chart: **${headline.lineGzipBytes} bytes** gzip. This is the Soft default, measured 2026-10-17, not the round 7 core. Next is ${headline.nextLib} at ${headline.nextGzipBytes} bytes. Bar, donut, /all, browser, server render, and the agent eval below are round 7 core \`${doc.core.commit}\`.
-- Server render: **${headline.ssrLabel}** mean (quiet box ${published.ssr[0].quietMs} ms).
-- \`repair()\`, no model call, no docs: **${headline.repair}**.
+- Smallest line chart: **${headline.lineGzipBytes} bytes** gzip, \`scripts/size.mjs\` on phase 2 \`${doc.core.commit}\`. Next is ${headline.nextLib} at ${headline.nextGzipBytes} bytes. The harness minimal line is 14,987 bytes.
+- Initial render: ChartKit is faster than uPlot in all 12 cells. Even 1,000,000 points is 23.6 ms vs 26.5 ms.
+- Aligned update: ChartKit wins 6 of 12 cells against uPlot and loses the 6 listed below. It is not a sweep.
+- Server render: **${headline.ssrLabel}** mean (median ${published.ssr[0].medianMs} ms).
+- \`repair()\`, no model call, no docs: **${headline.repair}**. That agent run is ${AGENT_MEASURED}, not round 13.
 
 ## Losses
 
@@ -166,15 +179,31 @@ ${losses}
 | --- | --- | ---: | --- |
 ${bundle}
 
-## Browser, milliseconds
+## Browser, milliseconds, ChartKit mount().update() vs uPlot setData
 
-Parentheses are the quiet-box rerun.
+ChartKit wins every initial cell. The update column is the fair timer. Six of those twelve cells are losses, and they are marked in the result column.
 
-| Points | ChartKit initial | ChartKit update | Fastest initial | Fastest update | Result |
-| ---: | --- | --- | --- | --- | --- |
+| X spacing | Points | ChartKit initial | uPlot initial | ChartKit update | uPlot update | Result |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
 ${browser}
 
-## Sampling none, ChartKit only
+In these same 12 cells ChartKit’s initial and aligned update are both faster than Chart.js and Observable Plot. Even 1,000,000 points: Chart.js updates in 189.8 ms and Plot in 1,295.8 ms. ECharts, Recharts, and Nivo are not in the round 13 browser rows, so this file does not give them a browser millisecond.
+
+## Hover
+
+Steady hover at 100,000 points. Painted median is the number to cite. ChartKit 16.5 ms, uPlot 16.2 ms.
+
+| Library | Tip ms | Painted median ms | Painted p95 ms |
+| --- | ---: | ---: | ---: |
+${hover}
+
+First hover on a fresh 100,000 point chart, painted median. uPlot is about 4–5 ms. ChartKit is 15.9–20.8 ms. That gap is a loss.
+
+| After mount | ChartKit painted | ChartKit max | uPlot painted | uPlot max |
+| ---: | ---: | ---: | ---: | ---: |
+${firstHover}
+
+## Sampling none, ChartKit only, fair timer
 
 | Points | Initial ms | Update ms |
 | ---: | ---: | ---: |
@@ -182,7 +211,7 @@ ${sampling}
 
 ## Server render, 1,000 point line
 
-| Library | Full run mean ms | Quiet ms | SVG without a DOM |
+| Library | Mean ms | Median ms | SVG without a DOM |
 | --- | ---: | ---: | --- |
 ${ssr}
 

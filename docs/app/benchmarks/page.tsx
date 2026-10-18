@@ -2,15 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChartView } from "@/lib/chart";
 import {
+  AGENT_MEASURED,
   CORE_COMMIT,
-  HARNESS_COMMIT,
   MEASURED,
   ROUND,
   agentRows,
   browserRows,
   bundleRace,
   bundleRows,
+  firstHoverRows,
   headline,
+  hoverRows,
   initial100k,
   initial1k,
   initial1m,
@@ -18,6 +20,7 @@ import {
   samplingRows,
   ssrRace,
   ssrRows,
+  updateMethod,
 } from "@/lib/benchmarks";
 import { pageMeta } from "@/lib/site";
 
@@ -38,22 +41,18 @@ export default function BenchmarksPage() {
     <div className="wrap section prose wide">
       <h1>Benchmarks</h1>
       <p className="lede">
-        Round {ROUND}, measured {MEASURED}. Core is pull request #6 at <code>{CORE_COMMIT}</code>. The harness is pull
-        request #4 at <code>{HARNESS_COMMIT}</code>. Five browser samples, Playwright Chromium, a 640×360 line. Reproduce
-        with <code>npm run bench</code> on that pairing. This page does not re-time the libraries. The same numbers are
-        in <a href="/benchmarks.json">benchmarks.json</a> (schema <a href="/benchmarks.schema.json">benchmarks.schema.json</a>)
-        and <a href="/benchmarks.md">benchmarks.md</a>.
+        Round {ROUND}, measured {MEASURED} on phase 2 <code>{CORE_COMMIT}</code>. Five browser samples, Playwright
+        Chromium, a 640×360 line, three x spacings. This page does not re-time the libraries. The same numbers are in{" "}
+        <a href="/benchmarks.json">benchmarks.json</a> (schema <a href="/benchmarks.schema.json">benchmarks.schema.json</a>)
+        and <a href="/benchmarks.md">benchmarks.md</a>. The agent eval was not re-run; it stays {AGENT_MEASURED}.
       </p>
-      <p>
-        The full run shared the machine with other work, about 11.6 GB of 16 GB in use, and competitors were slower
-        than in round 6. Quiet-box reruns are in parentheses. Where those two disagree, both numbers are on the page.
-      </p>
+      <p>{updateMethod}</p>
 
       <h2>Bundle size</h2>
       <p>
-        ChartKit’s minimal line chart is {headline.lineGzipBytes} bytes gzip ({headline.lineGzipLabel}), the Soft
-        default measured on 2026-10-17. It is still the smallest. Next is {headline.nextLib} at {headline.nextGzipBytes}{" "}
-        bytes. Bar, donut, /all, and every timed row on this page are the round 7 core, before that palette.
+        ChartKit’s line entry is {headline.lineGzipBytes} bytes gzip ({headline.lineGzipLabel}), from{" "}
+        <code>scripts/size.mjs</code> on phase 2 <code>{CORE_COMMIT}</code>. It is still the smallest. Next is{" "}
+        {headline.nextLib} at {headline.nextGzipBytes} bytes. The harness minimal line on the same day is 14,987 bytes.
       </p>
       <ChartView spec={raceSpec(bundleRace)} />
       <p className="meta">{bundleRace.caption}</p>
@@ -80,9 +79,10 @@ export default function BenchmarksPage() {
 
       <h2>Browser render</h2>
       <p>
-        ChartKit wins the initial render at 1k, 10k, and 100k. It loses the 1k update, and it is last of the seven
-        there. It also loses the 10k update, the 100k update, and both 1M timings on the full run. The quiet-box 1M
-        initial is a tie with uPlot (36.3 ms vs 36.9 ms).
+        ChartKit wins the initial render in all 12 cells against uPlot. Even 1,000,000 points is 23.6 ms vs 26.5 ms.
+        The aligned update wins 6 of 12 and loses 6. The losses are in the table, not a footnote: even 1k (1.5 vs 1.2),
+        even 10k (1.9 vs 1.7), jittered 1k (1.6 vs 1.4), and gapped timestamps at 1k (1.6 vs 1.4), 10k (1.9 vs 1.6),
+        and 100k (3.5 vs 3.4).
       </p>
       <div className="grid-2">
         <article className="card">
@@ -102,22 +102,24 @@ export default function BenchmarksPage() {
         <table>
           <thead>
             <tr>
+              <th>X spacing</th>
               <th>Points</th>
               <th className="num">ChartKit initial</th>
+              <th className="num">uPlot initial</th>
               <th className="num">ChartKit update</th>
-              <th>Fastest initial</th>
-              <th>Fastest update</th>
+              <th className="num">uPlot update</th>
               <th>Call</th>
             </tr>
           </thead>
           <tbody>
             {browserRows.map((row) => (
-              <tr key={row.points}>
+              <tr key={`${row.shape}-${row.points}`}>
+                <td>{row.shape}</td>
                 <td>{row.points}</td>
                 <td className="num">{row.ckI}</td>
+                <td className="num">{row.upI}</td>
                 <td className="num">{row.ckU}</td>
-                <td>{row.bestI}</td>
-                <td>{row.bestU}</td>
+                <td className="num">{row.upU}</td>
                 <td className={row.tone === "loss" ? "loss" : undefined}>{row.call}</td>
               </tr>
             ))}
@@ -125,11 +127,62 @@ export default function BenchmarksPage() {
         </table>
       </div>
       <p>
-        Parentheses are the quiet-box rerun. Update tests sit on a shared two-frame wait, so a few milliseconds is
-        frame-timing noise, not a separate hotspot in the SVG replacement. ChartKit updates land between 19 and 33 ms
-        on both round 6 core and this core. uPlot swung 13–35 ms in the same session. The round 6 “win” at 100k update
-        was that noise; in this environment uPlot is usually ahead by about a frame.
+        In these 12 cells ChartKit is also faster than Chart.js and Observable Plot on both the initial and the aligned
+        update. Even 1,000,000 points: Chart.js updates in 189.8 ms and Plot in 1,295.8 ms. ECharts, Recharts, and Nivo
+        are not in the round 13 browser rows, so this page does not give them a browser millisecond.
       </p>
+
+      <h2>Hover</h2>
+      <p>
+        Steady hover at 100,000 points is close. ChartKit’s painted median is 16.5 ms and uPlot’s is 16.2 ms. First
+        hover on a fresh chart is not close: uPlot paints in 4 to 4.9 ms, and ChartKit paints in 15.9 to 20.8 ms.
+      </p>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Library</th>
+              <th className="num">Tip ms</th>
+              <th className="num">Painted median ms</th>
+              <th className="num">Painted p95 ms</th>
+            </tr>
+          </thead>
+          <tbody>
+            {hoverRows.map((row) => (
+              <tr key={row.lib}>
+                <td>{row.lib}</td>
+                <td className="num">{row.tip}</td>
+                <td className="num">{row.painted}</td>
+                <td className="num">{row.p95}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>First hover</th>
+              <th className="num">ChartKit painted</th>
+              <th className="num">ChartKit max</th>
+              <th className="num">uPlot painted</th>
+              <th className="num">uPlot max</th>
+            </tr>
+          </thead>
+          <tbody>
+            {firstHoverRows.map((row) => (
+              <tr key={row.delay}>
+                <td>{row.delay}</td>
+                <td className="num">{row.ck}</td>
+                <td className="num">{row.ckMax}</td>
+                <td className="num">{row.uplot}</td>
+                <td className="num">{row.uplotMax}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <h2>Downsampling</h2>
       <div className="note">
@@ -159,8 +212,8 @@ export default function BenchmarksPage() {
         </table>
       </div>
       <p>
-        The 1M comparison with uPlot is with sampling on. Sampling off at 1M is 782.5 ms to draw and 53.3 seconds to
-        update, on the loaded box.
+        These sampling-none times use the same fair update timer. At 1,000,000 points that is 471.8 ms to draw and
+        462.4 ms to update, not the old two-frame figure.
       </p>
 
       <h2>Server render</h2>
@@ -171,8 +224,8 @@ export default function BenchmarksPage() {
           <thead>
             <tr>
               <th>Library</th>
-              <th className="num">Full run, mean ms</th>
-              <th className="num">Quiet box</th>
+              <th className="num">Mean ms</th>
+              <th className="num">Median ms</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -181,7 +234,7 @@ export default function BenchmarksPage() {
               <tr key={row.lib}>
                 <td>{row.lib}</td>
                 <td className="num">{row.mean}</td>
-                <td className="num">{row.quiet}</td>
+                <td className="num">{row.median}</td>
                 <td>{row.status}</td>
               </tr>
             ))}
@@ -191,7 +244,7 @@ export default function BenchmarksPage() {
 
       <h2 id="agents">Agent eval</h2>
       <p>
-        Round {ROUND}. One model, claude-sonnet-4-5, temperature 0, one run on {MEASURED}, 42 tasks. “Official” means
+        Not re-run for round {ROUND}. One model, claude-sonnet-4-5, temperature 0, one run on {AGENT_MEASURED}, 42 tasks. “Official” means
         the library’s docs were in the prompt. ChartKit’s docs are <Link href="/llms.txt">llms.txt</Link>, taken from
         the Phase 1 branch and not edited on this site. The previous llms.txt, the React-only v0 file, scored 18/42 in
         an earlier run.
