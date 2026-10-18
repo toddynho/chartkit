@@ -137,7 +137,9 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
       return yScale(numeric);
     },
   });
+  parts.push(`<defs><clipPath id="${frame.id}-clip"><rect x="${n(plot.left)}" y="${n(plot.top)}" width="${n(plot.right - plot.left)}" height="${n(plot.bottom - plot.top)}" /></clipPath></defs>`);
   parts.push(notes.under);
+  parts.push(`<g clip-path="url(#${frame.id}-clip)">`);
   points.forEach((point, index) => {
     const raw = point.size === null ? radius[0] : lerp(point.size, sizeDomain[0], sizeDomain[1], radius[0], radius[1]);
     const cx = xScale(point.x);
@@ -151,6 +153,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
       `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" fill="${color}" fill-opacity="${n(opacity)}" aria-label="${esc(text)}"><title>${esc(text)}</title></circle>`,
     );
   });
+  parts.push("</g>");
   parts.push(notes.over);
 
   if (showY) {

@@ -319,9 +319,6 @@ function buildXy(headerRest: string, body: string[], meta: Meta, maxPoints: numb
     horizontal = false;
     warnings.push(warn("CK8004", "Horizontal orientation is only drawn for bar charts.", "/mark/orientation"));
   }
-  if (yRange) {
-    warnings.push(warn("CK8004", "Bar and line charts size the y-axis from the data, so the Mermaid y range is not drawn.", "/axes/y"));
-  }
   nameUnnamed(series, yTitle);
   const xKey = claimKey(slugKey(xTitle), "x", new Set());
   const used = new Set<string>([xKey]);
@@ -641,8 +638,8 @@ function buildRadar(headerRest: string, body: string[], meta: Meta, maxPoints: n
     warnings.push(warn("CK8002", `Radar has ${points} points; kept the first ${keptSpokes} spokes.`, "/data"));
   }
   const spokes = axes.slice(0, keptSpokes);
-  const dataMax = Math.max(...curves.flatMap((curve) => curve.values.slice(0, keptSpokes)));
-  if (declaredMax !== null && declaredMax !== dataMax) {
+  const radarMax = declaredMax !== null && declaredMax > 0 ? declaredMax : null;
+  if (declaredMax !== null && radarMax === null) {
     warnings.push(warn("CK8004", "Radar scales to the largest value, so the declared max is not drawn.", "/encoding/y"));
   }
   const rows: Record<string, string | number>[] = [];
@@ -658,7 +655,11 @@ function buildRadar(headerRest: string, body: string[], meta: Meta, maxPoints: n
     version: "1",
     type: "radar",
     data: rows,
-    encoding: { x: "spoke", y: "value", series: "series" },
+    encoding: {
+      x: "spoke",
+      y: radarMax === null ? "value" : { field: "value", scale: { domain: [0, radarMax] } },
+      series: "series",
+    },
     a11y: { alt: chooseAlt(meta, diagramTitle, `${best.name} is highest on ${best.spoke}.`) },
   };
   if (diagramTitle) spec.title = diagramTitle;

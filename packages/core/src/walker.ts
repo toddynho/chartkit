@@ -871,13 +871,11 @@ interface Alias {
 }
 
 function aliasFor(value: string, root: unknown): Alias | undefined {
-  if (value === "pie") return { type: "donut", note: '"pie" maps to type "donut" with mark.innerRadius 0.', kind: "pie" };
-  if (value === "arc") return { type: "donut", note: '"arc" maps to type "donut". encoding.x is the slice label and encoding.y is the value.', kind: "rename" };
-  if (value === "point" || value === "circle" || value === "square") {
-    return { type: "scatter", note: '"point", "circle", and "square" are type "scatter".', kind: "rename" };
-  }
-  if (value === "rect") return { type: "heatmap", note: "A colored grid is type \"heatmap\" with encoding.x, encoding.y, and encoding.color.", kind: "rename" };
-  if (value === "rule" || value === "tick") return { type: "spike", note: '"rule" and "tick" map to type "spike".', kind: "rename" };
+  if (value === "pie") return { type: "donut", note: "mark.innerRadius 0.", kind: "pie" };
+  if (value === "arc") return { type: "donut", kind: "rename" };
+  if (value === "point" || value === "circle" || value === "square") return { type: "scatter", kind: "rename" };
+  if (value === "rect") return { type: "heatmap", kind: "rename" };
+  if (value === "rule" || value === "tick") return { type: "spike", kind: "rename" };
   if (value === "metric") {
     const gauge = looksLikeGauge(root);
     return {
@@ -894,46 +892,35 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   if (value === "area") {
     const stacked = yCount(root) >= 2 || stackFlag(root);
     return stacked
-      ? { type: "stacked-area", note: 'Two or more y fields are type "stacked-area" with encoding.y as a list of fields.', kind: "rename" }
-      : {
-          type: "mini-area",
-          note: 'A full-size filled line is type "line" with mark.area true. Stacked layers are "stacked-area".',
-          kind: "rename",
-        };
+      ? { type: "stacked-area", kind: "rename" }
+      : { type: "mini-area", note: 'A full-size filled line is type "line" with mark.area true. Stacked layers are "stacked-area".', kind: "rename" };
   }
-  if (value === "grid-heat" || value === "gridheat" || value === "grid_heat") {
-    return { type: "heatmap", note: "A grid uses encoding.x, encoding.y, and encoding.color.", kind: "rename" };
-  }
-  if (value === "grid-heatmap") {
-    return {
-      type: "heatmap",
-      note: 'A grid heatmap is type "heatmap" with mark.layout "grid". The number is encoding.color.',
-      kind: "rename",
-      layout: "grid",
-    };
-  }
-  if (value === "calendar-heatmap") {
-    return {
-      type: "heatmap",
-      note: 'A calendar heatmap is type "heatmap" with mark.layout "calendar". The date is encoding.x and the number is encoding.color.',
-      kind: "rename",
-      layout: "calendar",
-    };
-  }
-  if (value === "hist") return { type: "histogram", note: 'A histogram bins encoding.x. mark.bins sets the count.', kind: "rename" };
-  if (value === "box" || value === "box-plot") return { type: "boxplot", note: "A box plot uses encoding.x and encoding.y observations.", kind: "rename" };
-  if (value === "radar-chart") return { type: "radar", note: "A radar chart uses encoding.x for spokes and encoding.y for series.", kind: "rename" };
-  if (value === "funnel-chart") return { type: "funnel", note: "A funnel uses encoding.x for the stage and encoding.y for the value.", kind: "rename" };
-  if (value === "tree-map") return { type: "treemap", note: "A treemap uses encoding.x, encoding.y, and optional encoding.color.", kind: "rename" };
-  if (value === "sankey-diagram") return { type: "sankey", note: "A sankey uses encoding.source, encoding.target, and encoding.y.", kind: "rename" };
-  if (value === "bullet-chart") return { type: "bullet", note: "A bullet uses encoding.x, encoding.y, and optional encoding.target.", kind: "rename" };
-  if (value === "waterfall-chart") return { type: "waterfall", note: "A waterfall uses encoding.x for the step and encoding.y for the delta.", kind: "rename" };
+  if (value === "grid-heat" || value === "gridheat" || value === "grid_heat") return { type: "heatmap", kind: "rename" };
+  if (value === "grid-heatmap") return { type: "heatmap", kind: "rename", layout: "grid" };
+  if (value === "calendar-heatmap") return { type: "heatmap", kind: "rename", layout: "calendar" };
+  if (value === "hist") return { type: "histogram", kind: "rename" };
+  if (value === "box" || value === "box-plot") return { type: "boxplot", kind: "rename" };
+  if (value === "radar-chart") return { type: "radar", kind: "rename" };
+  if (value === "funnel-chart") return { type: "funnel", kind: "rename" };
+  if (value === "tree-map") return { type: "treemap", kind: "rename" };
+  if (value === "sankey-diagram") return { type: "sankey", kind: "rename" };
+  if (value === "bullet-chart") return { type: "bullet", kind: "rename" };
+  if (value === "waterfall-chart") return { type: "waterfall", kind: "rename" };
   return undefined;
 }
 
 function xyKind(root: unknown): "line" | "bar" | "combo" {
   const spec = isPlainObject(root) ? root : {};
-  const blob = JSON.stringify([spec.encoding, spec.mark, spec.series, spec.marks, spec.layer, spec.layers]);
+  const rows = isPlainObject(spec.data) ? spec.data.datasets : 0;
+  const blob = JSON.stringify([
+    spec.encoding,
+    spec.mark,
+    spec.series,
+    spec.marks,
+    spec.layer,
+    spec.layers,
+    Array.isArray(rows) && rows.map((item) => (item as { type?: unknown })?.type),
+  ]);
   const bar = blob.includes('"bar"');
   const line = blob.includes('"line"') || blob.includes('"area"');
   return bar && line ? "combo" : bar ? "bar" : "line";

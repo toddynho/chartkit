@@ -48,22 +48,24 @@ describe("fromMermaid", () => {
     expect(render(result.spec)).toContain('data-ck-type="bar"');
   });
 
-  it("reads a numeric x range and warns that the y range is not drawn", () => {
+  it("draws a numeric y range from encoding.y.scale.domain", () => {
     const result = fromMermaid(read("xychart-range.mmd"));
     expect(result.spec?.type).toBe("line");
-    expect(codes(result.warnings)).toContain("CK8004");
-    expect(result.warnings.some((item) => item.message.includes("y range"))).toBe(true);
+    expect(result.warnings.some((item) => item.message.includes("y range"))).toBe(false);
     const data = result.spec?.data as { hour: number; degrees: number }[];
     expect(data[0].hour).toBe(0);
     expect(data[data.length - 1].hour).toBe(6);
     expect(data[0].degrees).toBe(3);
     expect(result.spec?.encoding).toMatchObject({
       x: { field: "hour", type: "quantitative" },
-      y: { field: "degrees", title: "Degrees" },
+      y: { field: "degrees", title: "Degrees", scale: { domain: [0, 20] } },
     });
     expect(JSON.stringify(result.spec)).not.toContain("Line 1");
     expect(validate(result.spec).ok).toBe(true);
-    expect(render(result.spec)).toContain('data-ck-type="line"');
+    const svg = render(result.spec);
+    expect(svg).toContain('data-ck-type="line"');
+    expect(svg).toContain(">0<");
+    expect(svg).toContain(">20<");
   });
 
   it("maps pie showData onto a pie with legend values", () => {
@@ -88,10 +90,11 @@ describe("fromMermaid", () => {
     expect(render(result.spec)).toContain("Farm");
   });
 
-  it("converts radar-beta curves and warns when max is not the data max", () => {
+  it("converts radar-beta curves and draws a positive max", () => {
     const result = fromMermaid(read("radar.mmd"));
     expect(result.spec?.type).toBe("radar");
-    expect(codes(result.warnings)).toContain("CK8004");
+    expect(result.spec?.encoding).toMatchObject({ y: { field: "value", scale: { domain: [0, 100] } } });
+    expect(result.warnings.some((item) => item.message.includes("declared max"))).toBe(false);
     expect(validate(result.spec).ok).toBe(true);
     const svg = render(result.spec);
     expect(svg).toContain('data-ck-type="radar"');

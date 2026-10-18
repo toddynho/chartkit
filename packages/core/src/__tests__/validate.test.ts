@@ -316,6 +316,28 @@ describe("diagnostic codes", () => {
     ]);
     expect(repair(combo).ok).toBe(true);
 
+    const datasets = validate({
+      ...base,
+      type: "xychart-beta",
+      data: {
+        datasets: [
+          { type: "bar", label: "Orders", data: [10, 12] },
+          { type: "line", label: "Rate", data: [1, 2] },
+        ],
+      },
+    });
+    expect(datasets.errors.find((item) => item.code === "CK1005")?.fix).toEqual([
+      { op: "replace", path: "/type", value: "combo" },
+    ]);
+    const labeled = validate({
+      ...base,
+      type: "xychart-beta",
+      data: { datasets: [{ type: "line", label: "bar", data: [1, 2] }] },
+    });
+    expect(labeled.errors.find((item) => item.code === "CK1005")?.fix).toEqual([
+      { op: "replace", path: "/type", value: "line" },
+    ]);
+
     for (const [raw, type] of [
       ["sankey-beta", "sankey"],
       ["radar-beta", "radar"],
@@ -935,6 +957,47 @@ describe("diagnostic codes", () => {
   it("CK2004 rejects empty data", () => {
     const result = validate({ ...base, data: [] });
     expect(result.errors.some((error) => error.code === "CK2004" && error.path === "/data")).toBe(true);
+  });
+
+  it("CK3004 checks encoding.y.scale.domain and patches a reversed range", () => {
+    const ok = validate({
+      ...base,
+      encoding: { x: "month", y: { field: "revenue", scale: { domain: [0, null] } } },
+    });
+    expect(ok.errors.some((item) => item.code === "CK3004")).toBe(false);
+
+    const reversed = {
+      ...base,
+      encoding: { x: "month", y: { field: "revenue", scale: { domain: [20, 0] } } },
+    };
+    expect(validate(reversed).errors.find((item) => item.code === "CK3004")?.fix).toEqual([
+      { op: "replace", path: "/encoding/y/scale/domain", value: [0, 20] },
+    ]);
+    expect(repair(reversed).spec).toMatchObject({ encoding: { y: { scale: { domain: [0, 20] } } } });
+
+    const equal = validate({
+      ...base,
+      encoding: { x: "month", y: { field: "revenue", scale: { domain: [5, 5] } } },
+    });
+    expect(equal.errors.find((item) => item.code === "CK3004")?.fix).toBeUndefined();
+
+    const text = {
+      ...base,
+      encoding: {
+        x: "month",
+        y: [
+          { field: "revenue", scale: { domain: ["low", 10] } },
+          { field: "revenue", axis: "y2", scale: { domain: [0, 1] } },
+        ],
+      },
+      axes: { y2: true },
+    };
+    expect(validate(text).errors.find((item) => item.code === "CK3004")).toMatchObject({
+      path: "/encoding/y/0/scale/domain",
+      fix: [{ op: "replace", path: "/encoding/y/0/scale/domain", value: [null, 10] }],
+    });
+    expect(validate(text).ok).toBe(false);
+    expect(repair(text).ok).toBe(true);
   });
 
   it("CK3002 repair adds a missing y2 axis and leaves an explicit false", () => {

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import type { ChartSpec } from "../../../core/src/index";
 import { line } from "../../../core/src/charts/line";
 import { createRenderer } from "../../../core/src/render";
 import { mount, renderToString } from "../index";
@@ -65,7 +66,7 @@ describe("vanilla mount", () => {
         { m: "Mar", a: 2, b: 5 },
       ],
       encoding: { x: "m", y: [{ field: "a", title: "Alpha" }, { field: "b", title: "Beta" }] },
-      mark: { curve: "linear" as const },
+      mark: { curve: "linear" as "linear" | "step" },
       size: { width: 400, height: 240 },
       locale: "en-US",
       a11y: { alt: "Two series" },
@@ -91,18 +92,18 @@ describe("vanilla mount", () => {
         { m: "Mar", a: 2, b: 5 },
       ],
       encoding: { x: "m", y: [{ field: "a", title: "Alpha" }, { field: "b", title: "Beta" }] },
-      mark: { curve: "linear" as const },
+      mark: { curve: "linear" as "linear" | "step" },
       size: { width: 400, height: 240 },
       locale: "en-US",
       a11y: { alt: "Two series" },
     };
-    const chart = mount(host, live, { render });
+    const chart = mount(host, live as ChartSpec, { render });
     expect(host.textContent).toContain("Beta");
     expect(host.textContent).not.toContain("Beta (renamed)");
     live.mark.curve = "step";
     live.encoding.y[1].title = "Beta (renamed)";
     live.data[0].a = 8;
-    chart.update(live);
+    chart.update(live as ChartSpec);
     expect(host.textContent).toContain("Beta (renamed)");
     const painted = host.querySelector("path")?.getAttribute("d");
     const fresh = render(structuredClone(live));
