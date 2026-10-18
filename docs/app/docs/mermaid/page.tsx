@@ -49,7 +49,24 @@ const { spec, warnings } = fromMermaid(\`${xy}\`);`}
           <code>treemap-beta</code>.
         </li>
         <li>
-          <code>quadrantChart</code>, drawn as a scatter with quadrant labels and reference lines.
+          <code>quadrantChart</code>, drawn as a quadrant. <code>quadrant-1</code> through <code>quadrant-4</code> are
+          top-right, top-left, bottom-left, and bottom-right. An axis <code>Low --&gt; High</code> becomes a{" "}
+          <code>Low|High</code> title.
+        </li>
+        <li>
+          <code>gantt</code> sections, ISO dates, <code>Nd</code>/<code>Nw</code> durations, <code>after id</code>, and
+          done, active, crit, and milestone tags.
+        </li>
+        <li>
+          <code>timeline</code> years, <code>YYYY-MM</code>, and ISO dates. A slash or dash between two dates is a
+          period. Sections are not date spans.
+        </li>
+        <li>
+          <code>journey</code> sections, a 1–5 score, and comma-separated actors.
+        </li>
+        <li>
+          <code>venn-beta</code> <code>set</code> and <code>union</code> lines. Two sets are area-proportional. Three
+          sets are approximate. Text and styles are not drawn.
         </li>
       </ul>
       <p>

@@ -26,6 +26,10 @@ const kinds = [
   ["radar.mmd", "radar"],
   ["treemap.mmd", "treemap"],
   ["quadrant.mmd", "quadrantChart"],
+  ["gantt.mmd", "gantt"],
+  ["timeline.mmd", "timeline"],
+  ["venn.mmd", "venn-beta"],
+  ["journey.mmd", "journey"],
 ];
 const rows = kinds.map(([file, label]) => {
   const source = readFileSync(dir + "/" + file, "utf8").trim();
@@ -96,7 +100,7 @@ const chrome = spawnSync(
     "--disable-gpu",
     "--hide-scrollbars",
     "--force-device-scale-factor=1",
-    "--window-size=1280,3400",
+    "--window-size=1280,6400",
     `--screenshot=${pngPath}`,
     `file://${htmlPath}`,
   ],

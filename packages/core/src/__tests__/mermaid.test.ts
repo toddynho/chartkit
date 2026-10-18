@@ -111,17 +111,96 @@ describe("fromMermaid", () => {
     expect(render(result.spec)).toContain('data-ck-type="treemap"');
   });
 
-  it("maps quadrantChart onto a scatter with rules and labels", () => {
+  it("maps quadrantChart onto a quadrant with quadrants labels", () => {
     const result = fromMermaid(read("quadrant.mmd"));
-    expect(result.spec?.type).toBe("scatter");
-    const notes = result.spec?.annotations as { type: string; label?: string }[];
-    expect(notes.filter((item) => item.type === "rule")).toHaveLength(2);
-    expect(notes.some((item) => item.label === "Expand")).toBe(true);
+    expect(codes(result.warnings)).not.toContain("CK8006");
+    expect(result.spec?.type).toBe("quadrant");
+    expect(result.spec?.quadrants).toEqual(["Promote", "Expand", "Revisit", "Improve"]);
+    expect(result.spec?.encoding).toMatchObject({
+      x: { field: "x", title: "Low reach|High reach" },
+      y: { field: "y", title: "Low engagement|High engagement" },
+    });
+    const data = result.spec?.data as { name: string; x: number; y: number }[];
+    expect(data).toContainEqual({ name: "North", x: 0.72, y: 0.81 });
     expect(validate(result.spec).ok).toBe(true);
     const svg = render(result.spec);
-    expect(svg).toContain('data-ck-annotation="rule"');
+    expect(svg).toContain('data-ck-type="quadrant"');
+    expect(svg).not.toContain('data-ck-annotation="rule"');
     expect(svg).toContain("Expand");
     expect(svg).toContain("North");
+    const wide = fromMermaid("quadrantChart\n    Out: [1.5, -0.2]");
+    expect(wide.spec?.encoding).toMatchObject({
+      x: { scale: { domain: [0, 1.5] } },
+      y: { scale: { domain: [-0.2, 1] } },
+    });
+  });
+
+  it("converts a gantt with sections, status, duration, and after", () => {
+    const result = fromMermaid(read("gantt.mmd"));
+    expect(codes(result.warnings)).not.toContain("CK8006");
+    expect(result.spec?.type).toBe("gantt");
+    const data = result.spec?.data as Record<string, unknown>[];
+    expect(data[0]).toMatchObject({ id: "spec", task: "Write the spec", section: "Plan", start: "2026-03-02", end: "2026-03-13", status: "done" });
+    expect(data.find((row) => row.id === "copy")).toMatchObject({ duration: "9d", depends: "spec", start: "2026-03-16" });
+    expect(data.find((row) => row.id === "beta")).toMatchObject({ milestone: true, start: "2026-04-06", status: "crit", depends: "web" });
+    expect(data.find((row) => row.id === "ga")).toMatchObject({ depends: "beta, billing" });
+    expect(validate(result.spec).ok).toBe(true);
+    expect(render(result.spec)).toContain('data-ck-type="gantt"');
+    const odd = fromMermaid("gantt\n    dateFormat DD.MM.YYYY\n    axisFormat %m\n    excludes weekends\n    Task : 2026-03-02, 1d");
+    expect(codes(odd.warnings)).toContain("CK8004");
+  });
+
+  it("converts timeline dates, ranges, and multiple events", () => {
+    const result = fromMermaid(read("timeline.mmd"));
+    expect(codes(result.warnings)).not.toContain("CK8006");
+    expect(result.spec?.type).toBe("timeline");
+    const data = result.spec?.data as Record<string, unknown>[];
+    expect(data).toContainEqual({ label: "Founded", date: "2014-04-02" });
+    expect(data).toContainEqual({ label: "Series A", start: "2016-03-01", end: "2019-08-01" });
+    expect(data).toContainEqual({ label: "Platform", start: "2024-01-15", end: "2026-06-01" });
+    expect(validate(result.spec).ok).toBe(true);
+    expect(render(result.spec)).toContain('data-ck-type="timeline"');
+    const years = fromMermaid("timeline\n    section 2010s\n    2004 : Facebook : Google\n    : YouTube\n    2005-06 : Later");
+    expect(codes(years.warnings)).toContain("CK8004");
+    expect(years.spec?.data).toEqual([
+      { label: "Facebook", date: "2004-01-01" },
+      { label: "Google", date: "2004-01-01" },
+      { label: "YouTube", date: "2004-01-01" },
+      { label: "Later", date: "2005-06-01" },
+    ]);
+  });
+
+  it("converts a journey score and actors", () => {
+    const result = fromMermaid(read("journey.mmd"));
+    expect(codes(result.warnings)).not.toContain("CK8006");
+    expect(result.spec?.type).toBe("journey");
+    const data = result.spec?.data as Record<string, unknown>[];
+    expect(data.find((row) => row.step === "Enter the card")).toMatchObject({ section: "Pay", score: 2, actors: "Shopper, Payments" });
+    expect(data.find((row) => row.step === "Fix a declined card")).toMatchObject({ score: 1, actors: "Shopper, Payments, Support" });
+    expect(validate(result.spec).ok).toBe(true);
+    expect(render(result.spec)).toContain('data-ck-type="journey"');
+  });
+
+  it("converts venn-beta sets and unions", () => {
+    const result = fromMermaid(read("venn.mmd"));
+    expect(codes(result.warnings)).not.toContain("CK8006");
+    expect(result.spec?.type).toBe("venn");
+    const data = result.spec?.data as { set: string; size: number }[];
+    expect(data).toContainEqual({ set: "Search", size: 1280 });
+    expect(data).toContainEqual({ set: "Saved views", size: 540 });
+    expect(data).toContainEqual({ set: "Search+Filters", size: 410 });
+    expect(data).toContainEqual({ set: "Search+Filters+Saved views", size: 90 });
+    expect(validate(result.spec).ok).toBe(true);
+    const svg = render(result.spec);
+    expect(svg).toContain('data-ck-type="venn"');
+    expect(svg).toContain("3-set areas are approximate");
+    const labeled = fromMermaid('venn-beta\n    set A["Alpha"]:20\n    set B["Beta"]:12\n    union A,B["AB"]:3\n    text A1["React"]');
+    expect(labeled.spec?.data).toEqual([
+      { set: "Alpha", size: 20 },
+      { set: "Beta", size: 12 },
+      { set: "Alpha+Beta", size: 3 },
+    ]);
+    expect(codes(labeled.warnings)).toContain("CK8004");
   });
 
   it("uses accDescr as alt text and the frontmatter title as the heading", () => {

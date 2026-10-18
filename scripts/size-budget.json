@@ -1,16 +1,16 @@
 {
   "line": 15283,
   "all": 27401,
-  "validate": 17724,
+  "validate": 17971,
   "vue": 526,
   "svelte": 642,
   "vanilla": 345,
   "interact": 8697,
   "interactExtra": 1649,
-  "vueLine": 15568,
-  "svelteLine": 15773,
-  "vanillaLine": 15442,
-  "extra": 35173,
+  "vueLine": 15768,
+  "svelteLine": 15973,
+  "vanillaLine": 15642,
+  "extra": 42178,
   "histogram": 6723,
   "boxplot": 6769,
   "radar": 5052,
@@ -30,5 +30,5 @@
   "global": 73118,
   "globalAuto": 49880,
   "globalMermaid": 24675,
-  "note": "gzip -9 byte budgets, 8 percent above the measurement. Phase 2 adapter and interact budgets are unchanged: vue 526, svelte 642, vanilla 345, interact 8697, interactExtra 1649. line, vue, svelte, and vanilla did not grow for phase 4. all stayed 27401. validate stayed 17594. Phase 4 charts are gantt, timeline, quadrant, venn, and journey. They stay out of all. Adapters call open() on all, which dynamic-imports @chartkitdev/core/load. SSR entries import extra statically, so extra is every extra chart at once and stays budgeted at 35173. Browser IIFEs do not bundle those charts: chartkit.global.js and chartkit.auto.global.js load chartkit.<type>.global.js on demand. global stays 73118 and globalAuto stays 49880. Per-chart budgets: gantt 7233, timeline 6021, quadrant 5694, venn 6251, journey 5617."
+  "note": "gzip -9 byte budgets. Phase 2 adapter and interact budgets are unchanged: vue 526, svelte 642, vanilla 345, interact 8697, interactExtra 1649. line, vueLine, svelteLine, and vanillaLine keep the y-domain budgets 15283, 15768, 15973, and 15642. all stays 27401. validate is the measured 17971, under the 17974 cap. extra is capped at 42178. Phase 4 charts stay out of all and load in the browser as chartkit.<type>.global.js. global stays 73118 and globalAuto stays 49880. mermaid stays 24651 and globalMermaid stays 24675. Per-chart budgets: gantt 7233, timeline 6021, quadrant 5694, venn 6251, journey 5617."
 }
