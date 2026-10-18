@@ -1,15 +1,15 @@
 {
-  "line": 15083,
+  "line": 15283,
   "all": 27401,
-  "validate": 17594,
+  "validate": 17724,
   "vue": 526,
   "svelte": 642,
   "vanilla": 345,
   "interact": 8697,
   "interactExtra": 1649,
-  "vueLine": 15568,
-  "svelteLine": 15773,
-  "vanillaLine": 15442,
+  "vueLine": 15768,
+  "svelteLine": 15973,
+  "vanillaLine": 15642,
   "extra": 35173,
   "histogram": 6723,
   "boxplot": 6769,
@@ -25,5 +25,5 @@
   "global": 73118,
   "globalAuto": 49880,
   "globalMermaid": 24675,
-  "note": "gzip -9 byte budgets, 8 percent above the measurement. Phase 2 adapter and interact budgets are unchanged: vue 526, svelte 642, vanilla 345, interact 8697, interactExtra 1649. Phase 3 charts stay out of all. Adapters call open() on all, which dynamic-imports @chartkitdev/core/load for histogram, boxplot, radar, funnel, treemap, sankey, bullet, or waterfall. SSR entries import extra statically. adapter-with-line bundles that shell with the line renderer and leaves the chart imports external: vueLine budget 15568, svelteLine 15773, vanillaLine 15442. extra budget 35173. Per-chart budgets stay histogram 6723, boxplot 6769, radar 5052, funnel 5149, treemap 5977, sankey 5926, bullet 5440, waterfall 6159. Mermaid import is mermaid 24651. vanilla autoRender is vanillaAuto 784 and does not ship in the vanilla entry. Markdown fence plugins are markdown 708. The one-file browser IIFE is global 73118. chartkit.auto.global.js is globalAuto 49880 and loads chartkit.mermaid.global.js (globalMermaid 24675) only when a Mermaid block is present."
+  "note": "gzip -9 byte budgets, 8 percent above the measurement. Phase 2 adapter and interact budgets are unchanged: vue 526, svelte 642, vanilla 345, interact 8697, interactExtra 1649. Phase 3 charts stay out of all. Adapters call open() on all, which dynamic-imports @chartkitdev/core/load for histogram, boxplot, radar, funnel, treemap, sankey, bullet, or waterfall. SSR entries import extra statically. adapter-with-line bundles that shell with the line renderer and leaves the chart imports external: vueLine budget 15768, svelteLine 15973, vanillaLine 15642. extra budget 35173. Per-chart budgets stay histogram 6723, boxplot 6769, radar 5052, funnel 5149, treemap 5977, sankey 5926, bullet 5440, waterfall 6159. Mermaid import is mermaid 24651. vanilla autoRender is vanillaAuto 784 and does not ship in the vanilla entry. Markdown fence plugins are markdown 708. The one-file browser IIFE is global 73118. chartkit.auto.global.js is globalAuto 49880 and loads chartkit.mermaid.global.js (globalMermaid 24675) only when a Mermaid block is present."
 }
