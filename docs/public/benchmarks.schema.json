@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chartkit.dev/benchmarks.schema.json",
+  "title": "ChartKit benchmarks",
+  "type": "object",
+  "required": [
+    "round",
+    "measured",
+    "methodology",
+    "bundleGzip",
+    "browserMs",
+    "samplingNoneMs",
+    "ssrMs",
+    "agents",
+    "losses"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "round": {
+      "type": "integer"
+    },
+    "measured": {
+      "type": "string"
+    },
+    "methodology": {
+      "type": "object"
+    },
+    "bundleGzip": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "lib",
+          "bytes"
+        ],
+        "properties": {
+          "lib": {
+            "type": "string"
+          },
+          "bytes": {
+            "type": "integer"
+          },
+          "reactExternal": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "browserMs": {
+      "type": "array"
+    },
+    "samplingNoneMs": {
+      "type": "array"
+    },
+    "ssrMs": {
+      "type": "array"
+    },
+    "agents": {
+      "type": "array"
+    },
+    "losses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

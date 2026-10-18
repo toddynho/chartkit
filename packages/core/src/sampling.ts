@@ -36,6 +36,10 @@ export function sampleSeries(
   plotWidth: number,
   connectNulls: boolean,
 ): SampledRuns {
+  // A short series, and sampling "none", never drop points. Skip the scan.
+  if (requested === "none" || count <= samplingThreshold(plotWidth)) {
+    return { reduced: false, mode: "none", runs: [] };
+  }
   let finite = 0;
   let gaps = false;
   for (let i = 0; i < count; i++) {

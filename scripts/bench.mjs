@@ -190,6 +190,109 @@ const exampleRun = time(() => {
 const wide = wideSpec(5000);
 const wideRun = time(() => validate(wide), 50);
 
+const adapterSpec = {
+  version: "1",
+  type: "line",
+  data: [
+    { quarter: "Q1", units: 40 },
+    { quarter: "Q2", units: 55 },
+  ],
+  encoding: { x: "quarter", y: "units" },
+  a11y: { alt: "Units rose from Q1 to Q2." },
+};
+
+async function timeAsync(fn, iterations) {
+  for (let i = 0; i < 20; i++) await fn();
+  const start = performance.now();
+  for (let i = 0; i < iterations; i++) await fn();
+  const elapsedMs = performance.now() - start;
+  return {
+    iterations,
+    elapsedMs: Number(elapsedMs.toFixed(2)),
+    perOpUs: Number(((elapsedMs * 1000) / iterations).toFixed(2)),
+    opsPerSec: Number((iterations / (elapsedMs / 1000)).toFixed(1)),
+  };
+}
+
+async function adapterSsr() {
+  const coreOut = join(tmpdir(), "chartkit-bench-adapter-core.mjs");
+  await build({
+    entryPoints: [join(srcDir, "all.ts")],
+    bundle: true,
+    format: "esm",
+    platform: "node",
+    outfile: coreOut,
+    logLevel: "silent",
+  });
+  const core = await import(coreOut);
+  const coreRow = time(() => {
+    const svg = core.render(adapterSpec);
+    if (!svg.includes('data-ck-type="line"')) throw new Error("core SSR missed the line chart");
+  }, 200);
+
+  const vueEntry = join(tmpEntries, "vue-ssr.mjs");
+  writeFileSync(
+    vueEntry,
+    `export { renderToString } from ${JSON.stringify(join(root, "packages/vue/src/ssr.ts"))};\n`,
+  );
+  const vueOut = join(tmpdir(), "chartkit-bench-adapter-vue.mjs");
+  await build({
+    entryPoints: [vueEntry],
+    bundle: true,
+    format: "esm",
+    platform: "node",
+    outfile: vueOut,
+    absWorkingDir: root,
+    logLevel: "silent",
+  });
+  const vue = await import(vueOut);
+  const vueRow = await timeAsync(async () => {
+    const html = await vue.renderToString(adapterSpec);
+    if (!html.includes('data-ck-type="line"')) throw new Error("Vue SSR missed the line chart");
+  }, 100);
+
+  const { compile } = await import("svelte/compiler");
+  const { render } = await import("svelte/server");
+  const compiled = compile(readFileSync(join(root, "packages/svelte/src/Chart.svelte"), "utf8"), {
+    filename: "Chart.svelte",
+    generate: "server",
+    css: "external",
+  });
+  const svelteEntry = join(tmpEntries, "svelte-ssr.mjs");
+  writeFileSync(svelteEntry, compiled.js.code);
+  const svelteOut = join(tmpdir(), "chartkit-bench-adapter-svelte.mjs");
+  await build({
+    entryPoints: [svelteEntry],
+    bundle: true,
+    format: "esm",
+    platform: "node",
+    outfile: svelteOut,
+    absWorkingDir: root,
+    nodePaths: [join(root, "node_modules")],
+    alias: { "@chartkitdev/core/all": join(srcDir, "all.ts") },
+    logLevel: "silent",
+  });
+  const svelte = await import(svelteOut);
+  const svelteRow = time(() => {
+    const html = render(svelte.default, { props: { spec: adapterSpec } }).body;
+    if (!html.includes('data-ck-type="line"')) throw new Error("Svelte SSR missed the line chart");
+  }, 200);
+
+  return {
+    note: "Same two-point line spec. Core is render() from src/all.ts. Vue is renderToString from @chartkitdev/vue/ssr (async, 20 warmup, 100 iterations). Svelte is svelte/server render of the server-compiled Chart.svelte (sync, 50 warmup via time(), 200 iterations). These are not the published browser comparison.",
+    core: coreRow,
+    vue: vueRow,
+    svelte: svelteRow,
+  };
+}
+
+let adapters;
+try {
+  adapters = await adapterSsr();
+} catch (error) {
+  adapters = { error: error instanceof Error ? error.message : String(error) };
+}
+
 const report = {
   measuredAt: new Date().toISOString(),
   node: process.version,
@@ -209,6 +312,7 @@ const report = {
     examples: { specsPerIteration: examples.length, ...exampleRun },
     rows5000TwoSeries: wideRun,
   },
+  adapterSsr: adapters,
 };
 
 mkdirSync(join(root, "bench"), { recursive: true });

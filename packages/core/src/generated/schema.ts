@@ -274,11 +274,14 @@ export type Annotation =
       color?: Color;
     };
 /**
- * Look and feel. A preset name, or an object combining a preset, a light/dark mode and token overrides. Every token is also read from CSS variables --ck-<token> (and --ck-series-N) on the container, so host design systems (e.g. shadcn --chart-1..5) can theme charts with no JS. Default 'auto'.
+ * Look and feel. A preset name, or an object combining a preset, a light/dark mode and token overrides. Every token is also read from CSS variables --ck-<token> (and --ck-series-N) on the container, so host design systems (e.g. shadcn --chart-1..5) can theme charts with no JS. Default 'auto' is Soft: light-dark colours, transparent plot. Set --ck-background for the optional #f5f5f7 card.
  */
 export type Theme =
   | (
       | "auto"
+      | "soft"
+      | "refined"
+      | "editorial"
       | "midnight"
       | "emerald"
       | "mono"
@@ -303,6 +306,9 @@ export type Theme =
        */
       preset?:
         | "auto"
+        | "soft"
+        | "refined"
+        | "editorial"
         | "midnight"
         | "emerald"
         | "mono"

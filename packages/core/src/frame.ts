@@ -1,6 +1,6 @@
 import { readData, type DataTable } from "./data";
-import type { PresetTokens } from "./theme";
-import { resolvePreset } from "./theme";
+import type { PresetGeometry, PresetTokens } from "./theme";
+import { resolveGeometry, resolvePreset } from "./theme";
 import { hash, isRecord, niceDomain } from "./svg";
 
 export interface Frame {
@@ -15,6 +15,7 @@ export interface Frame {
   heightFixed: boolean;
   widthFixed: boolean;
   preset: PresetTokens;
+  geometry: PresetGeometry;
   id: string;
   mark: Record<string, unknown>;
   encoding: Record<string, unknown>;
@@ -52,6 +53,7 @@ export function readFrame(
     heightFixed,
     widthFixed,
     preset: resolvePreset(spec.theme),
+    geometry: resolveGeometry(spec.theme),
     id: `ck${hash(idSource)}`,
     mark: isRecord(spec.mark) ? spec.mark : {},
     encoding: isRecord(spec.encoding) ? spec.encoding : {},
@@ -228,7 +230,7 @@ export function gridStyle(spec: Record<string, unknown>): false | "solid" | "das
   const axes = isRecord(spec.axes) ? spec.axes : undefined;
   const y = axes && isRecord(axes.y) ? axes.y.grid : undefined;
   if (y === false) return false;
-  if (y === true || y === undefined) return "dashed";
+  if (y === true || y === undefined) return "solid";
   if (y === "solid" || y === "dashed" || y === "dotted") return y;
   return "dashed";
 }

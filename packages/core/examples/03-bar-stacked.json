@@ -1,0 +1,19 @@
+{
+  "version": "1",
+  "id": "signups-plan-region",
+  "type": "bar",
+  "title": "Signups by plan and region",
+  "data": [
+    { "region": "NA", "plan": "Free", "signups": 820 },
+    { "region": "NA", "plan": "Pro", "signups": 260 },
+    { "region": "EU", "plan": "Free", "signups": 640 },
+    { "region": "EU", "plan": "Pro", "signups": 210 },
+    { "region": "APAC", "plan": "Free", "signups": 430 },
+    { "region": "APAC", "plan": "Pro", "signups": 90 }
+  ],
+  "encoding": { "x": "region", "y": "signups", "series": "plan" },
+  "mark": { "stack": "stack", "orientation": "horizontal" },
+  "size": { "width": 640, "height": 240 },
+  "locale": "en-US",
+  "a11y": { "alt": "Free signups lead in every region, and North America is the largest." }
+}

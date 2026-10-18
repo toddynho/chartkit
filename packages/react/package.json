@@ -1,7 +1,7 @@
 {
   "name": "@chartkitdev/react",
   "version": "0.5.0",
-  "description": "React components for ChartKit. The existing component API, plus a thin Chart wrapper over @chartkitdev/core.",
+  "description": "React adapter for the ChartKit JSON spec. Core line chart is 14,858 B gzip and server-renders in 0.85 ms. Compare: https://chartkit.dev/compare/recharts",
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev",
   "bugs": {
@@ -66,8 +66,10 @@
     "vitest": "^3.2.4"
   },
   "keywords": [
+    "chartkit",
     "react",
     "charts",
+    "benchmark",
     "nextjs",
     "sparkline",
     "monitoring",

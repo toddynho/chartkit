@@ -34,6 +34,7 @@ const themes = [
   "silver",
   "pearl",
   "latte",
+  "brand",
 ];
 
 const entry: Record<string, string> = {

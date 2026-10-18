@@ -19,7 +19,7 @@ export function n(value: number): string {
 }
 
 export function font(): string {
-  return "var(--ck-font-family, ui-sans-serif)";
+  return "var(--ck-font-family, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif)";
 }
 
 export function hash(value: string): string {
@@ -64,6 +64,39 @@ export function niceDomain(min: number, max: number): [number, number] {
   const niceMin = Math.floor(min / step) * step;
   const niceMax = Math.ceil(max / step) * step;
   return [round(niceMin), round(niceMax === niceMin ? niceMin + step : niceMax)];
+}
+
+/** Positive domain on a log scale, padded so a point is not stuck to the spine. Never includes 0. */
+export function logNice(min: number, max: number): [number, number] {
+  const lo = Math.log10(Math.max(min, Number.MIN_VALUE));
+  const hi = Math.log10(Math.max(max, min, Number.MIN_VALUE));
+  const pad = 0.15;
+  const start = 10 ** (Math.min(lo, hi) - pad);
+  const end = 10 ** (Math.max(lo, hi) + pad);
+  return end > start ? [start, end] : [start, start * 10];
+}
+
+export function logScale(d0: number, d1: number, r0: number, r1: number): (value: number) => number {
+  const a = Math.log10(Math.max(d0, Number.MIN_VALUE));
+  const b = Math.log10(Math.max(d1, d0 * 1.0000001));
+  const span = b - a || 1;
+  return (value) => r0 + ((Math.log10(Math.max(value, Number.MIN_VALUE)) - a) / span) * (r1 - r0);
+}
+
+export function logTicks(min: number, max: number): number[] {
+  if (!(max > 0) || !(min > 0)) return [1];
+  const start = Math.floor(Math.log10(min));
+  const end = Math.ceil(Math.log10(max));
+  const multipliers = end - start <= 4 ? [1, 2, 5] : [1];
+  const out: number[] = [];
+  for (let exp = start; exp <= end; exp++) {
+    for (const factor of multipliers) {
+      const value = factor * 10 ** exp;
+      if (value >= min * 0.999 && value <= max * 1.001) out.push(value);
+      if (out.length > 8) return out;
+    }
+  }
+  return out.length > 0 ? out : [min, max];
 }
 
 export function ticks(min: number, max: number, count: number): number[] {
@@ -116,7 +149,7 @@ export function openChart(chart: ChartOpen): string {
   const width = chart.responsive ? "100%" : String(chart.width);
   const label = chart.alt || chart.title || chart.type;
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}" class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}">` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}" class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}" style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
     `<title>${esc(chart.title || chart.alt)}</title><desc>${esc(chart.alt)}</desc>`
   );
 }
