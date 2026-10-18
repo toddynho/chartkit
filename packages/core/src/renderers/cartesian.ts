@@ -1390,7 +1390,9 @@ function domainEnds(domain: unknown): [number | null, number | null] | undefined
 }
 
 function axisLock(model: PlotModel, axis: "y" | "y2"): DomainLock {
-  for (const channel of (model as ChartShell).channels) if (channel.axis === axis && channel.lock) return channel.lock;
+  const channels = (model as unknown as { channels?: YChannel[] }).channels;
+  if (!channels) return null;
+  for (const channel of channels) if (channel.axis === axis && channel.lock) return channel.lock;
   return null;
 }
 

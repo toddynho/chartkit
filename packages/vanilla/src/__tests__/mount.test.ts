@@ -97,13 +97,13 @@ describe("vanilla mount", () => {
       locale: "en-US",
       a11y: { alt: "Two series" },
     };
-    const chart = mount(host, live as ChartSpec, { render });
+    const chart = mount(host, live as unknown as ChartSpec, { render });
     expect(host.textContent).toContain("Beta");
     expect(host.textContent).not.toContain("Beta (renamed)");
     live.mark.curve = "step";
     live.encoding.y[1].title = "Beta (renamed)";
     live.data[0].a = 8;
-    chart.update(live as ChartSpec);
+    chart.update(live as unknown as ChartSpec);
     expect(host.textContent).toContain("Beta (renamed)");
     const painted = host.querySelector("path")?.getAttribute("d");
     const fresh = render(structuredClone(live));
