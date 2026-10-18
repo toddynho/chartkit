@@ -449,7 +449,7 @@ function xyAlt(title: string | undefined, series: Series[], labels: string[]): s
     item.values.forEach((value, index) => {
       if (value >= best) {
         best = value;
-        name = item.name;
+        name = item.name ?? "Series";
         at = labels[index] ?? at;
       }
     });
