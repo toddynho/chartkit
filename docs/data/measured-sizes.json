@@ -1,7 +1,7 @@
 {
-  "commit": "f33124a3c6219a85eb471de12717e8dae6b49517",
-  "coreCommit": "116d0afd99b381d4b9be858bc1e312a4e0384991",
-  "coreMatchesMain": true,
+  "commit": "bdf969b7d1236db933be4ecdc4e472746c49e02e",
+  "coreCommit": "bdf969b7d1236db933be4ecdc4e472746c49e02e",
+  "coreMatchesMain": false,
   "sizeScript": {
     "command": "node scripts/size.mjs",
     "method": "esbuild --bundle --minify, gzip level 9, platform node. line is createRenderer([line]) from packages/core/src. all is packages/core/src/all.ts.",
