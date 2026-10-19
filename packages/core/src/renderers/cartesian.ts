@@ -1033,6 +1033,13 @@ function linearExtent(values: Float64Array): { min: number; max: number; linear:
   return { min, max, linear };
 }
 
+function pinDomain(pair: [number, number], lock: DomainLock): [number, number] {
+  if (!lock) return pair;
+  const lo = lock[0] ?? pair[0];
+  const hi = lock[1] ?? pair[1];
+  return hi > lo ? [lo, hi] : pair;
+}
+
 function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
   let min = Infinity;
   let max = -Infinity;
@@ -1073,14 +1080,15 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
       if (values.length > 0 && finite === values.length) noteDense(values);
     }
   }
+  const lock = axisLock(model, axis);
   const log = axis === "y2" ? model.y2Log : model.yLog;
   if (log) {
-    if (!seen || !(max > 0)) return [1, 10];
+    if (!seen || !(max > 0)) return pinDomain([1, 10], lock);
     const lo = min > 0 ? min : max / 10;
-    return logNice(lo, max);
+    return pinDomain(logNice(lo, max), lock);
   }
   if (axisIncludesZero(model, axis)) consider(0);
-  if (!seen) return [0, 1];
+  if (!seen) return pinDomain([0, 1], lock);
   if (min === max) {
     min -= Math.abs(min) || 1;
     max += Math.abs(max) || 1;
@@ -1098,7 +1106,7 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
     const below = Math.max(head.below, gutter * 0.5);
     if (below > 0 && min - below < lo) lo = round(min - below);
   }
-  return [lo, hi];
+  return pinDomain([lo, hi], lock);
 }
 
 /** Pixel air above a line, converted to data units, so the stroke does not sit on the plot edge. */
@@ -1338,6 +1346,8 @@ function channelField(value: unknown): string | undefined {
   return undefined;
 }
 
+type DomainLock = [number | null, number | null] | null;
+
 interface YChannel {
   field?: string;
   title?: string;
@@ -1348,6 +1358,7 @@ interface YChannel {
   area: boolean;
   log: boolean;
   format?: unknown;
+  lock?: [number | null, number | null];
 }
 
 function readYChannels(y: unknown): YChannel[] {
@@ -1365,8 +1376,24 @@ function readYChannels(y: unknown): YChannel[] {
       area: item.area === true,
       log: isRecord(item.scale) && item.scale.type === "log",
       format: item.format,
+      lock: isRecord(item.scale) ? domainEnds(item.scale.domain) : undefined,
     };
   });
+}
+
+function domainEnds(domain: unknown): [number | null, number | null] | undefined {
+  if (!Array.isArray(domain)) return;
+  const a = domain[0];
+  const b = domain[1];
+  const end = (value: unknown) => value === null || (typeof value === "number" && Number.isFinite(value));
+  return end(a) && end(b) ? [a, b] : undefined;
+}
+
+function axisLock(model: PlotModel, axis: "y" | "y2"): DomainLock {
+  const channels = (model as unknown as { channels?: YChannel[] }).channels;
+  if (!channels) return null;
+  for (const channel of channels) if (channel.axis === axis && channel.lock) return channel.lock;
+  return null;
 }
 
 function dashAttr(dash: string): string {

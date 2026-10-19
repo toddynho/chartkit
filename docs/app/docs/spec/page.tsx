@@ -65,6 +65,11 @@ if (!result.ok) {
           Field types are quantitative, temporal, ordinal, or nominal.
         </li>
         <li>
+          A y range is <code>encoding.y.scale.domain</code>: <code>[min, max]</code>. Either end may be{" "}
+          <code>null</code> to stay automatic, as in <code>[0, null]</code>. A y2 channel uses the same domain for
+          the combo&apos;s second axis. Ticks stay inside that range, and points outside it are clipped to the plot.
+        </li>
+        <li>
           <code>mark.sampling</code> defaults to <code>auto</code> and downsamples line-like charts above twice the plot
           width. <code>none</code> draws every point and is much slower at 100k and 1M.
         </li>

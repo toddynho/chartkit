@@ -48,7 +48,10 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   const known = type !== undefined && CHART_TYPES.has(type);
 
   if (known && isRecord(spec.mark)) warnUnusedMarks(type, spec.mark, diagnostics);
-  if (isRecord(spec.encoding)) warnSeriesShape(spec.encoding, diagnostics);
+  if (isRecord(spec.encoding)) {
+    warnSeriesShape(spec.encoding, diagnostics);
+    checkDomains(spec.encoding, diagnostics);
+  }
 
   const dataSource = spec.data;
   if (dataSource === undefined) {
@@ -225,6 +228,32 @@ function checkColumn(
     }
   }
   void spec;
+}
+
+function checkDomains(encoding: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  const y = encoding.y;
+  const list = Array.isArray(y) ? y : y ? [y] : [];
+  for (let i = 0; i < list.length; i++) {
+    const item = list[i];
+    const domain = isRecord(item) && isRecord(item.scale) ? item.scale.domain : 0;
+    if (!Array.isArray(domain)) continue;
+    const path = "/encoding/y" + (Array.isArray(y) ? "/" + i : "") + "/scale/domain";
+    const a = domain[0];
+    const b = domain[1];
+    const end = (value: unknown) => value === null || (typeof value === "number" && Number.isFinite(value));
+    const swap = typeof a === "number" && typeof b === "number" && a > b;
+    if (domain.length === 2 && end(a) && end(b) && !swap && !(typeof a === "number" && a === b)) continue;
+    const next = swap ? [b, a] : [end(a) ? a : null, end(b) ? b : null];
+    const good = next[0] === null || next[1] === null || (typeof next[0] === "number" && typeof next[1] === "number" && next[0] < next[1]);
+    diagnostics.push({
+      code: "CK3004",
+      severity: "error",
+      message: "min < max",
+      path,
+      hint: "two numbers or null",
+      fix: domain.length === 2 && good ? [{ op: "replace", path, value: next }] : domain.length === 2 ? undefined : [{ op: "remove", path }],
+    });
+  }
 }
 
 function checkY2(spec: Record<string, unknown>, yChannels: Channel[], diagnostics: Diagnostic[]): void {

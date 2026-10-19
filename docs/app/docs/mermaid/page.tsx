@@ -101,10 +101,10 @@ rehype().use(rehypeParse).use(rehypeChartkit);`}
       <p>
         Column names come from the axis and series titles. A single series with no title uses the y-axis title.
         Nothing named falls back to <code>x</code> and <code>value</code>. A line whose scale is far from the bars
-        is drawn on <code>axis: &quot;y2&quot;</code>. A y-axis range on <code>xychart</code> is stored as{" "}
-        <code>encoding.y.scale.domain</code> and warned. Bar and line charts size the axis from the data, and{" "}
-        <code>axes.y</code> has no min or max. Radar has no min or max either, so it draws to the largest value, with
-        a polygon graticule. A treemap keeps one group level. Quadrant point radius is not drawn.{" "}
+        is drawn on <code>axis: &quot;y2&quot;</code>. A y-axis range on <code>xychart</code> is drawn from{" "}
+        <code>encoding.y.scale.domain</code>. <code>axes.y</code> is display-only. Radar draws a positive max from
+        that same domain and still starts at zero, with a polygon graticule. A treemap keeps one group level.
+        Quadrant point radius is not drawn.{" "}
         <code>showData</code> prints the value in the legend.
       </p>
       <h2>Security</h2>

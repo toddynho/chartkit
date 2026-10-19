@@ -592,6 +592,138 @@ describe("remaining chart renderers", () => {
     }
   });
 
+  it("honors an explicit y domain, a one-sided domain, y2, and clips outside points", () => {
+    const line = render({
+      version: "1",
+      type: "line",
+      data: [
+        { month: "Jan", revenue: 12 },
+        { month: "Feb", revenue: 18 },
+        { month: "Mar", revenue: 15 },
+      ],
+      encoding: { x: "month", y: { field: "revenue", scale: { domain: [0, 100] } } },
+      mark: { curve: "linear", area: true },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "Revenue stays under 20 on a 0 to 100 scale." },
+    });
+    expect(tickTexts(line, "end")).toEqual(expect.arrayContaining(["0", "100"]));
+    expect(tickTexts(line, "end")).not.toContain("120");
+
+    const bars = render({
+      version: "1",
+      type: "bar",
+      data: [
+        { month: "Jan", revenue: -10 },
+        { month: "Feb", revenue: 30 },
+        { month: "Mar", revenue: 12 },
+      ],
+      encoding: { x: "month", y: { field: "revenue", scale: { domain: [0, null] } } },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "February is 30 and January is below zero." },
+    });
+    const barTicks = tickTexts(bars, "end").map(Number);
+    expect(Math.min(...barTicks)).toBe(0);
+    expect(Math.max(...barTicks)).toBeLessThan(100);
+    const barClip = clipRect(bars);
+    const barMark = dataRects(bars).find((mark) => mark.y + mark.height > barClip.y + barClip.height);
+    expect(barMark).toBeTruthy();
+    const barGroup = bars.slice(bars.indexOf("clip-path=\"url("), bars.indexOf("</g>"));
+    expect(barGroup).toContain("<rect");
+
+    const horizontal = render({
+      version: "1",
+      type: "bar",
+      data: [
+        { lane: "A", hours: 40 },
+        { lane: "B", hours: 25 },
+      ],
+      encoding: { x: "lane", y: { field: "hours", scale: { domain: [0, 100] } } },
+      mark: { orientation: "horizontal" },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "Lane A is 40 hours on a 0 to 100 scale." },
+    });
+    const valueTicks = [...horizontal.matchAll(/<text\b([^>]*)text-anchor="middle"[^>]*>([^<]*)<\/text>/g)].map((match) => match[2]);
+    expect(valueTicks).toEqual(expect.arrayContaining(["0", "100"]));
+    const plot = clipRect(horizontal);
+    const widest = Math.max(...dataRects(horizontal).map((mark) => mark.width));
+    expect(widest).toBeLessThan(plot.width * 0.5);
+
+    const combo = render({
+      version: "1",
+      type: "combo",
+      data: [
+        { week: "W1", orders: 40, rate: 0.2 },
+        { week: "W2", orders: 90, rate: 0.8 },
+      ],
+      encoding: {
+        x: "week",
+        y: [
+          { field: "orders", mark: "bar" },
+          { field: "rate", mark: "line", axis: "y2", scale: { domain: [0, 1] } },
+        ],
+      },
+      axes: { y2: true },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "Orders rose and the rate stayed below 1." },
+    });
+    expect(tickTexts(combo, "start")).toEqual(expect.arrayContaining(["0", "1"]));
+    expect(tickTexts(combo, "end").map(Number).some((value) => value >= 40)).toBe(true);
+
+    const clipped = render({
+      version: "1",
+      type: "line",
+      data: [
+        { month: "Jan", revenue: 10 },
+        { month: "Feb", revenue: 160 },
+        { month: "Mar", revenue: 30 },
+      ],
+      encoding: { x: "month", y: { field: "revenue", scale: { domain: [0, 100] } } },
+      mark: { curve: "linear" },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "February is above the 100 line and clipped." },
+    });
+    const clip = clipRect(clipped);
+    const path = /<path\b[^>]* d="([^"]+)"/.exec(clipped)?.[1] ?? "";
+    const ys = [...path.matchAll(/[ML]\s*[-\d.]+[,\s]+([-\d.]+)/g)].map((match) => Number(match[1]));
+    expect(Math.min(...ys)).toBeLessThan(clip.y);
+    const group = clipped.slice(clipped.indexOf("clip-path=\"url("), clipped.indexOf("</g>"));
+    expect(group).toContain("<path");
+    expect(clipped.slice(clipped.indexOf("</g>"))).toContain(">100<");
+
+    const stacked = render({
+      version: "1",
+      type: "stacked-area",
+      data: [
+        { year: "2022", rail: 10, road: 12 },
+        { year: "2023", rail: 14, road: 11 },
+      ],
+      encoding: { x: "year", y: [{ field: "rail", scale: { domain: [0, 100] } }, { field: "road" }] },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "Both modes stay under 100." },
+    });
+    expect(tickTexts(stacked, "end")).toEqual(expect.arrayContaining(["0", "100"]));
+
+    const scatter = render({
+      version: "1",
+      type: "scatter",
+      data: [
+        { temp: 10, yieldKg: 20 },
+        { temp: 30, yieldKg: 150 },
+      ],
+      encoding: {
+        x: { field: "temp", type: "quantitative" },
+        y: { field: "yieldKg", type: "quantitative", scale: { domain: [0, 100] } },
+      },
+      size: { width: 640, height: 240 },
+      a11y: { alt: "One yield is above 100 and clipped." },
+    });
+    const scatterClip = clipRect(scatter);
+    const high = circles(scatter).find((dot) => dot.cy < scatterClip.y);
+    expect(high).toBeTruthy();
+    const scatterGroup = scatter.slice(scatter.indexOf("clip-path=\"url("), scatter.indexOf("</g>"));
+    expect(scatterGroup).toContain("<circle");
+  });
+
   it("keeps each renderer module free of its siblings", () => {
     const dir = join(dirname(fileURLToPath(import.meta.url)), "../renderers");
     for (const name of readdirSync(dir)) {

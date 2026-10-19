@@ -43,7 +43,8 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
   }
   if (!series.length) return null;
 
-  const max = Math.max(1, ...series.flatMap((item) => item.values));
+  const capped = spokeMax(frame.encoding.y);
+  const max = capped ?? Math.max(1, ...series.flatMap((item) => item.values));
   const cx = frame.width / 2;
   const cy = frame.height / 2 + (frame.title ? 8 : 0);
   const radius = Math.min(frame.width, frame.height) * 0.32;
@@ -65,7 +66,7 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
   series.forEach((item, index) => {
     const color = fill(frame, index);
     const ink = stroke(frame, index, 2);
-    const points = item.values.map((value, axisIndex) => at(axisIndex, value));
+    const points = item.values.map((value, axisIndex) => at(axisIndex, Math.min(value, max)));
     const label = `${item.name}: ${axes.map((name, axisIndex) => `${name} ${item.values[axisIndex]}`).join(", ")}`;
     parts.push(openMark("polygon", "polygon", label, `points="${points.map((point) => `${n(point.x)},${n(point.y)}`).join(" ")}" fill="${color}" fill-opacity="${n(frame.geometry.fillOpacity)}" stroke="${ink}" stroke-width="2"`));
     parts.push("</polygon>");
@@ -81,4 +82,11 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
     });
   }
   return view.done();
+}
+
+function spokeMax(channel: unknown): number | undefined {
+  if (!channel || typeof channel !== "object" || !("scale" in channel)) return undefined;
+  const scale = (channel as { scale?: { domain?: unknown } }).scale;
+  const max = Array.isArray(scale?.domain) ? scale.domain[1] : undefined;
+  return typeof max === "number" && max > 0 ? max : undefined;
 }
