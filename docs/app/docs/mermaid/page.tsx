@@ -49,14 +49,34 @@ const { spec, warnings } = fromMermaid(\`${xy}\`);`}
           <code>treemap-beta</code>.
         </li>
         <li>
-          <code>quadrantChart</code>, drawn as a scatter with quadrant labels and reference lines.
+          <code>quadrantChart</code>, drawn as a quadrant. <code>quadrant-1</code> through <code>quadrant-4</code> are
+          top-right, top-left, bottom-left, and bottom-right. An axis <code>Low --&gt; High</code> becomes a{" "}
+          <code>Low|High</code> title.
+        </li>
+        <li>
+          <code>gantt</code> sections, ISO dates, <code>Nd</code>/<code>Nw</code> durations, <code>after id</code>, and
+          done, active, crit, and milestone tags.
+        </li>
+        <li>
+          <code>timeline</code> years, <code>YYYY-MM</code>, and ISO dates. A slash or dash between two dates is a
+          period. Sections are not date spans.
+        </li>
+        <li>
+          <code>journey</code> sections, a 1–5 score, and comma-separated actors.
+        </li>
+        <li>
+          <code>venn-beta</code> <code>set</code> and <code>union</code> lines. Two sets are area-proportional. Three
+          sets are approximate. Text and styles are not drawn.
         </li>
       </ul>
       <p>
         A frontmatter title, <code>accTitle</code>, and <code>accDescr</code> are read. <code>accDescr</code> or the
         title becomes <code>a11y.alt</code>. If neither is present, ChartKit writes one factual sentence from the
         data. Unknown syntax returns a <code>CK8004</code> warning. Flowcharts and other diagrams return{" "}
-        <code>CK8003</code> and no spec.
+        <code>CK8003</code> and no spec. <code>gantt</code>, <code>timeline</code>, <code>quadrantChart</code>,{" "}
+        <code>venn-beta</code>, and <code>journey</code> load from <code>@chartkitdev/core/mermaid/phase4</code>.{" "}
+        <code>fromMermaidAsync</code> loads that chunk, and Node can import <code>fromMermaid</code> from the phase-4
+        entry directly.
       </p>
       <img src="/mermaid-sheet.png" alt="Mermaid source beside the ChartKit chart for each supported kind, in light mode." />
       <h2>Markdown</h2>
@@ -71,11 +91,14 @@ const { spec, warnings } = fromMermaid(\`${xy}\`);`}
 autoRender(document, { mermaid: true });`}
       />
       <p>
-        <code>dist/chartkit.global.js</code> is the one-file build: <code>ChartKit.autoRender</code>,{" "}
+        <code>dist/chartkit.global.js</code> draws the core charts and includes <code>ChartKit.autoRender</code>,{" "}
         <code>ChartKit.fromMermaid</code>, and <code>ChartKit.toSpec</code>.{" "}
         <code>dist/chartkit.auto.global.js</code> is the same auto-render without the Mermaid parser. With{" "}
         <code>data-chartkit-mermaid</code> and a Mermaid block on the page, it loads the sibling{" "}
-        <code>chartkit.mermaid.global.js</code>. Unsupported Mermaid blocks stay as source.
+        <code>chartkit.mermaid.global.js</code>. That file loads <code>chartkit.mermaid-phase4.global.js</code> from the
+        same directory when the page has a gantt, timeline, quadrant, venn, or journey diagram. Histogram through
+        journey load the sibling <code>chartkit.&lt;type&gt;.global.js</code> from that same directory. Unsupported
+        Mermaid blocks stay as source.
       </p>
       <CodeBlock
         label="html"

@@ -13,6 +13,8 @@
     "./dist/all.cjs",
     "./dist/extra.js",
     "./dist/extra.cjs",
+    "./dist/mermaid-phase4.js",
+    "./dist/mermaid-phase4.cjs",
     "./dist/themes/*.js",
     "./dist/themes/*.cjs"
   ],
@@ -80,6 +82,16 @@
         "default": "./dist/validate.cjs"
       }
     },
+    "./validate/phase4": {
+      "import": {
+        "types": "./dist/validate-phase4.d.ts",
+        "default": "./dist/validate-phase4.js"
+      },
+      "require": {
+        "types": "./dist/validate-phase4.d.cts",
+        "default": "./dist/validate-phase4.cjs"
+      }
+    },
     "./interact": {
       "import": {
         "types": "./dist/interact.d.ts",
@@ -98,6 +110,16 @@
       "require": {
         "types": "./dist/mermaid.d.cts",
         "default": "./dist/mermaid.cjs"
+      }
+    },
+    "./mermaid/phase4": {
+      "import": {
+        "types": "./dist/mermaid-phase4.d.ts",
+        "default": "./dist/mermaid-phase4.js"
+      },
+      "require": {
+        "types": "./dist/mermaid-phase4.d.cts",
+        "default": "./dist/mermaid-phase4.cjs"
       }
     },
     "./interact/extra": {

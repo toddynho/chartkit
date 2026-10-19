@@ -1,0 +1,19 @@
+{
+  "version": "1",
+  "type": "journey",
+  "id": "checkout-journey",
+  "title": "Checkout",
+  "data": [
+    { "section": "Browse", "step": "Land on the product", "score": 5, "actors": "Shopper" },
+    { "section": "Browse", "step": "Compare two lamps", "score": 4, "actors": "Shopper" },
+    { "section": "Cart", "step": "Add the lamp", "score": 5, "actors": "Shopper" },
+    { "section": "Cart", "step": "See the shipping date", "score": 3, "actors": "Shopper" },
+    { "section": "Pay", "step": "Create an account", "score": 2, "actors": "Shopper" },
+    { "section": "Pay", "step": "Enter the card", "score": 2, "actors": "Shopper, Payments" },
+    { "section": "Pay", "step": "Fix a declined card", "score": 1, "actors": "Shopper, Payments, Support" },
+    { "section": "Done", "step": "See the confirmation", "score": 4, "actors": "Shopper" },
+    { "section": "Done", "step": "Track the parcel", "score": 5, "actors": "Shopper" }
+  ],
+  "encoding": { "x": "step", "y": "score", "series": "section", "color": "actors" },
+  "a11y": { "alt": "Checkout is smooth until payment. Creating an account scores 2, and a declined card scores 1 before confirmation recovers." }
+}

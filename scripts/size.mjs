@@ -11,6 +11,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
 import { compile } from "svelte/compiler";
+import { stubDynamicCharts } from "./stub-dynamic-charts.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const src = join(root, "packages/core/src");
@@ -31,6 +32,14 @@ const externalDynamicEntries = {
     build.onResolve({ filter: /^\.\/(load|extra-tip)$/ }, (args) => {
       if (args.kind !== "dynamic-import") return null;
       return { path: `@chartkitdev/core/${args.path.slice(2)}`, external: true };
+    });
+    build.onResolve({ filter: /^\.\/validate-phase4$/ }, (args) => {
+      if (args.kind !== "dynamic-import") return null;
+      return { path: "@chartkitdev/core/validate/phase4", external: true };
+    });
+    build.onResolve({ filter: /^\.\/mermaid-phase4$/ }, (args) => {
+      if (args.kind !== "dynamic-import") return null;
+      return { path: "@chartkitdev/core/mermaid/phase4", external: true };
     });
   },
 };
@@ -162,7 +171,9 @@ const vanillaAuto = await gzipOf(join(root, "packages/vanilla/src/auto.ts"), { e
 const markdown = await gzipOf(join(root, "packages/markdown/src/index.ts"), { external: true });
 
 const globalAlias = {
+  "@chartkitdev/core/mermaid/phase4": join(src, "mermaid-phase4.ts"),
   "@chartkitdev/core/mermaid": join(src, "mermaid.ts"),
+  "@chartkitdev/core/extra-tip": join(src, "extra-tip.ts"),
   "@chartkitdev/core/extra": join(src, "extra.ts"),
   "@chartkitdev/core/all": join(src, "all.ts"),
   "@chartkitdev/core/interact": join(src, "interact.ts"),
@@ -180,6 +191,7 @@ async function iife(entry) {
     legalComments: "none",
     outfile,
     alias: globalAlias,
+    plugins: [stubDynamicCharts],
     logLevel: "silent",
   });
   const code = readFileSync(outfile);
@@ -190,9 +202,13 @@ const globalBundle = await iife(join(vanillaSrc, "global.ts"));
 const globalAuto = await iife(join(vanillaSrc, "global-auto.ts"));
 const globalMermaid = await iife(join(vanillaSrc, "global-mermaid.ts"));
 isolation.globalAutoOmitsMermaid = !globalAuto.code.includes("xychart") && !globalAuto.code.includes("CK8004");
+const extraMark = 'data-ck-mark="whisker"';
+const ganttMark = 'data-ck-mark="milestone"';
+isolation.globalOmitsExtraCharts = !globalBundle.code.includes(extraMark) && !globalBundle.code.includes(ganttMark);
+isolation.globalAutoOmitsExtraCharts = !globalAuto.code.includes(extraMark) && !globalAuto.code.includes(ganttMark);
 
 const extra = await gzipOf(join(src, "extra.ts"));
-const extraTypes = ["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall"];
+const extraTypes = ["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey"];
 const chartSizes = {};
 for (const name of extraTypes) chartSizes[name] = await gzipOf(join(src, "charts", `${name}.ts`));
 if (all.code.includes('data-ck-renderer="histogram"') || all.code.includes('data-ck-mark="whisker"')) {
@@ -224,7 +240,7 @@ const measured = {
 for (const name of extraTypes) measured[name] = chartSizes[name].gzipBytes;
 const budget = JSON.parse(readFileSync(join(root, "scripts/size-budget.json"), "utf8"));
 const failures = [];
-for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "extra", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid"]) {
+for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "extra", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid"]) {
   if (typeof budget[key] !== "number") failures.push(`${key} budget missing`);
   else if (measured[key] > budget[key]) failures.push(`${key} gzip ${measured[key]} > budget ${budget[key]}`);
 }

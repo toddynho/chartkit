@@ -4,16 +4,23 @@
  * Grammar cases in the tests follow the public Mermaid docs syntax.
  */
 import { validate } from "./validate";
+import {
+  capList,
+  chooseAlt,
+  clipText,
+  dropDirective,
+  parseTitle,
+  unquote,
+  warn,
+  type ImportWarning,
+  type Meta,
+} from "./mermaid-shared";
+
+export type { ImportWarning } from "./mermaid-shared";
 
 export const DEFAULT_MAX_SOURCE = 100_000;
 export const DEFAULT_MAX_POINTS = 2_000;
 
-export interface ImportWarning {
-  code: string;
-  severity: "warning";
-  message: string;
-  path: string;
-}
 
 export interface ImportResult {
   spec: Record<string, unknown> | null;
@@ -27,13 +34,8 @@ export interface ImportOptions {
   maxPoints?: number;
 }
 
-type Kind = "xychart" | "pie" | "sankey" | "radar" | "treemap" | "quadrant";
+type Kind = "xychart" | "pie" | "sankey" | "radar" | "treemap" | "quadrant" | "gantt" | "timeline" | "journey" | "venn";
 
-interface Meta {
-  title?: string;
-  accTitle?: string;
-  accDescr?: string;
-}
 
 const DIAGRAMS: { name: string; kind: Kind }[] = [
   { name: "xychart-beta", kind: "xychart" },
@@ -45,8 +47,33 @@ const DIAGRAMS: { name: string; kind: Kind }[] = [
   { name: "treemap-beta", kind: "treemap" },
   { name: "treemap", kind: "treemap" },
   { name: "quadrantchart", kind: "quadrant" },
+  { name: "gantt", kind: "gantt" },
+  { name: "timeline", kind: "timeline" },
+  { name: "journey", kind: "journey" },
+  { name: "venn-beta", kind: "venn" },
+  { name: "venn", kind: "venn" },
   { name: "pie", kind: "pie" },
 ];
+
+type Phase4Build = (
+  kind: string,
+  headerRest: string,
+  body: string[],
+  meta: Meta,
+  maxPoints: number,
+  warnings: ImportWarning[],
+) => Record<string, unknown> | null;
+
+let phase4Build: Phase4Build | null = null;
+
+/** Registers the gantt, timeline, journey, venn, and quadrantChart parsers. Called by the phase-4 chunk. */
+export function installPhase4(build: Phase4Build): void {
+  phase4Build = build;
+}
+
+function phase4Kind(kind: Kind): boolean {
+  return kind === "gantt" || kind === "timeline" || kind === "journey" || kind === "venn" || kind === "quadrant";
+}
 
 /** Convert Mermaid chart text into a ChartKit spec. Unsupported diagrams return spec null and a warning. */
 export function fromMermaid(text: string, options?: ImportOptions): ImportResult {
@@ -58,8 +85,22 @@ export function fromMermaid(text: string, options?: ImportOptions): ImportResult
     warnings.push(warn(prepared.unsupported ? "CK8003" : "CK8005", prepared.unsupported ?? "No supported Mermaid chart type found.", ""));
     return { spec: null, warnings };
   }
+  if (phase4Kind(prepared.kind) && !phase4Build) {
+    warnings.push(warn("CK8004", 'Import "@chartkitdev/core/mermaid/phase4" or await fromMermaidAsync.', ""));
+    return { spec: null, warnings };
+  }
   const spec = build(prepared.kind, prepared.headerRest, prepared.body, prepared.meta, limits.maxPoints, warnings);
   return finish(spec, warnings);
+}
+
+/** Same as fromMermaid, loading the phase-4 parsers when the diagram needs them. */
+export function fromMermaidAsync(text: string, options?: ImportOptions): Promise<ImportResult> {
+  if (phase4Build) return Promise.resolve(fromMermaid(text, options));
+  const limits = limitsOf(options);
+  if (text.length > limits.maxSource) return Promise.resolve(tooBig(text.length, limits.maxSource));
+  const prepared = prepare(text, []);
+  if (prepared.kind && phase4Kind(prepared.kind)) return import("./mermaid-phase4").then(() => fromMermaid(text, options));
+  return Promise.resolve(fromMermaid(text, options));
 }
 
 /** ChartKit JSON when the text starts with `{`, otherwise Mermaid. A JSON parse error does not fall through. */
@@ -112,9 +153,6 @@ function tooBig(length: number, max: number): ImportResult {
   };
 }
 
-function warn(code: string, message: string, path: string): ImportWarning {
-  return { code, severity: "warning", message, path };
-}
 
 function prepare(text: string, warnings: ImportWarning[]): {
   meta: Meta;
@@ -219,7 +257,7 @@ function build(kind: Kind, headerRest: string, body: string[], meta: Meta, maxPo
   if (kind === "sankey") return buildSankey(headerRest, body, meta, maxPoints, warnings);
   if (kind === "radar") return buildRadar(headerRest, body, meta, maxPoints, warnings);
   if (kind === "treemap") return buildTreemap(headerRest, body, meta, maxPoints, warnings);
-  return buildQuadrant(headerRest, body, meta, maxPoints, warnings);
+  return phase4Build ? phase4Build(kind, headerRest, body, meta, maxPoints, warnings) : null;
 }
 
 interface Series {
@@ -738,93 +776,6 @@ function buildTreemap(headerRest: string, body: string[], meta: Meta, maxPoints:
   return spec;
 }
 
-function buildQuadrant(headerRest: string, body: string[], meta: Meta, maxPoints: number, warnings: ImportWarning[]): Record<string, unknown> | null {
-  if (headerRest) warnings.push(warn("CK8004", `Unsupported quadrant header "${clipText(headerRest)}".`, ""));
-  let diagramTitle = meta.title;
-  let xTitle: string | undefined;
-  let yTitle: string | undefined;
-  const quadrant = ["", "", "", ""];
-  const points: { name: string; x: number; y: number }[] = [];
-  for (const line of body) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-    const title = parseTitle(trimmed);
-    if (title) {
-      diagramTitle = title;
-      continue;
-    }
-    const axis = trimmed.match(/^(x-axis|y-axis)\b\s*(.*)$/i);
-    if (axis) {
-      const label = axisLabel(axis[2] ?? "");
-      if (/^x-axis/i.test(axis[1])) xTitle = label;
-      else yTitle = label;
-      continue;
-    }
-    const quad = trimmed.match(/^quadrant-([1-4])\b\s*:?\s*(.*)$/i);
-    if (quad) {
-      quadrant[Number(quad[1]) - 1] = unquote(quad[2].trim());
-      continue;
-    }
-    const point = trimmed.match(/^(.+?)\s*:\s*\[\s*([+-]?(?:\d+\.?\d*|\.\d+))\s*,\s*([+-]?(?:\d+\.?\d*|\.\d+))\s*\]\s*(.*)$/);
-    if (point) {
-      if (point[4] && /radius/i.test(point[4])) warnings.push(warn("CK8004", "Quadrant point radius is not drawn.", "/mark"));
-      else if (point[4].trim()) warnings.push(warn("CK8004", `Unsupported quadrant point suffix "${clipText(point[4])}".`, "/data"));
-      points.push({ name: unquote(point[1].trim()), x: Number(point[2]), y: Number(point[3]) });
-      continue;
-    }
-    if (dropDirective(trimmed, warnings)) continue;
-    warnings.push(warn("CK8004", `Unsupported quadrant line "${clipText(trimmed)}".`, ""));
-  }
-  const kept = capList(points, maxPoints, warnings, "quadrant");
-  if (!kept.length) {
-    warnings.push(warn("CK8005", "Quadrant chart has no points.", "/data"));
-    return null;
-  }
-  const xDomain: [number, number] = [Math.min(0, ...kept.map((point) => point.x)), Math.max(1, ...kept.map((point) => point.x))];
-  const yDomain: [number, number] = [Math.min(0, ...kept.map((point) => point.y)), Math.max(1, ...kept.map((point) => point.y))];
-  const annotations: Record<string, unknown>[] = [
-    { type: "rule", axis: "x", value: 0.5 },
-    { type: "rule", axis: "y", value: 0.5 },
-  ];
-  const spots: [number, number][] = [
-    [0.62, 0.92],
-    [0.04, 0.92],
-    [0.04, 0.1],
-    [0.62, 0.1],
-  ];
-  quadrant.forEach((label, index) => {
-    if (!label) return;
-    annotations.push({ type: "text", x: spots[index][0], y: spots[index][1], label });
-  });
-  for (const point of kept) {
-    const y = point.y + 0.06 <= yDomain[1] ? round(point.y + 0.06) : round(point.y - 0.06);
-    annotations.push({ type: "text", x: point.x, y, label: point.name });
-  }
-  const axes: Record<string, unknown> = {};
-  if (xTitle) axes.x = { title: xTitle };
-  if (yTitle) axes.y = { title: yTitle };
-  const lead = kept[0];
-  const spec: Record<string, unknown> = {
-    version: "1",
-    type: "scatter",
-    data: kept.map((point) => ({ x: point.x, y: point.y })),
-    encoding: {
-      x: { field: "x", type: "quantitative", scale: { domain: xDomain } },
-      y: { field: "y", type: "quantitative", scale: { domain: yDomain } },
-    },
-    annotations,
-    a11y: { alt: chooseAlt(meta, diagramTitle, `${lead.name} is plotted at ${lead.x}, ${lead.y}.`) },
-  };
-  if (diagramTitle) spec.title = diagramTitle;
-  if (Object.keys(axes).length) spec.axes = axes;
-  return spec;
-}
-
-function axisLabel(rest: string): string {
-  const parts = rest.split(/\s*-->\s*/);
-  if (parts.length === 2) return `${unquote(parts[0].trim())} → ${unquote(parts[1].trim())}`;
-  return unquote(rest.trim());
-}
 
 function parseAxis(rest: string): { title?: string; categories: string[] | null; range: { min: number; max: number } | null } | null {
   let body = rest.trim();
@@ -960,31 +911,9 @@ function readQuoted(input: string): { value: string; rest: string } | null {
   return { value, rest: "" };
 }
 
-function parseTitle(line: string): string | null {
-  const match = line.match(/^title\b\s*(.*)$/i);
-  if (!match) return null;
-  return unquote(match[1].trim());
-}
 
-function unquote(value: string): string {
-  if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) return value.slice(1, -1);
-  return value;
-}
 
-function dropDirective(line: string, warnings: ImportWarning[]): boolean {
-  if (/^(click|style|classDef|class)\b/i.test(line) || /\bhref\b/i.test(line)) {
-    warnings.push(warn("CK8004", `Dropped "${clipText(line)}". Links and styles are not copied into the chart.`, ""));
-    return true;
-  }
-  return false;
-}
 
-function chooseAlt(meta: Meta, title: string | undefined, factual: string): string {
-  const provided = (meta.accDescr || title || meta.accTitle || "").trim();
-  if (provided.length >= 10) return provided;
-  if (provided) return `${provided}. ${factual}`;
-  return factual.length >= 10 ? factual : `${factual} Values are plotted.`;
-}
 
 function capCount(count: number, series: number, max: number, warnings: ImportWarning[], what: string): number {
   const total = count * series;
@@ -994,15 +923,7 @@ function capCount(count: number, series: number, max: number, warnings: ImportWa
   return kept;
 }
 
-function capList<T>(items: T[], max: number, warnings: ImportWarning[], what: string): T[] {
-  if (items.length <= max) return items;
-  warnings.push(warn("CK8002", `${what} has ${items.length} points; kept the first ${max}.`, "/data"));
-  return items.slice(0, max);
-}
 
-function clipText(value: string): string {
-  return value.length > 80 ? `${value.slice(0, 77)}...` : value;
-}
 
 function round(value: number): number {
   return Math.round(value * 1000) / 1000;

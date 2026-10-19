@@ -1,6 +1,6 @@
 import type { ChartSpec } from "@chartkitdev/core";
 import { render } from "@chartkitdev/core/extra";
-import { fromMermaid, toSpec, type ImportOptions } from "@chartkitdev/core/mermaid";
+import { fromMermaid, toSpec, type ImportOptions } from "@chartkitdev/core/mermaid/phase4";
 import { mount } from "./index";
 
 export interface AutoRenderOptions extends ImportOptions {

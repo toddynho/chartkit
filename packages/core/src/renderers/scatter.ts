@@ -17,7 +17,7 @@ import {
   scaleTypeOf,
   wantsZero,
 } from "../frame";
-import { closeChart, esc, font, linear, logNice, logScale, logTicks, n, openChart, ticks } from "../svg";
+import { clipPath, closeChart, domainEnds, esc, font, linear, logNice, logScale, logTicks, n, openChart, ticks } from "../svg";
 
 /** Scatter / bubble. encoding.x and encoding.y are quantitative; size and color are optional. */
 export function renderScatter(spec: Record<string, unknown>): string | null {
@@ -137,7 +137,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
       return yScale(numeric);
     },
   });
-  parts.push(`<defs><clipPath id="${frame.id}-clip"><rect x="${n(plot.left)}" y="${n(plot.top)}" width="${n(plot.right - plot.left)}" height="${n(plot.bottom - plot.top)}" /></clipPath></defs>`);
+  parts.push(`<defs>${clipPath(`${frame.id}-clip`, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top)}</defs>`);
   parts.push(notes.under);
   parts.push(`<g clip-path="url(#${frame.id}-clip)">`);
   points.forEach((point, index) => {
@@ -191,9 +191,9 @@ function logDomain(values: number[], channel: unknown): [number, number] {
 function explicitPositiveDomain(channel: unknown): [number, number] | null {
   if (typeof channel !== "object" || channel === null || !("scale" in channel)) return null;
   const scale = (channel as { scale?: { domain?: unknown } }).scale;
-  if (!scale || !Array.isArray(scale.domain)) return null;
-  const min = scale.domain[0];
-  const max = scale.domain[1];
+  const ends = domainEnds(scale?.domain);
+  const min = ends?.[0];
+  const max = ends?.[1];
   if (typeof min === "number" && typeof max === "number" && min > 0 && max > min) return [min, max];
   return null;
 }

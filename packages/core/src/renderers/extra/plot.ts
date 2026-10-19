@@ -2,7 +2,7 @@ import type { DataTable } from "../../data";
 import { formatValue } from "../../format";
 import { asNumber, axisOn, column, fieldOf, gridStyle, readFrame, readTable, type Frame } from "../../frame";
 import { cssVar, lineStroke, paint } from "../../theme";
-import { closeChart, esc, font, linear, n, openChart, ticks } from "../../svg";
+import { clipPath, closeChart, esc, font, linear, n, openChart, ticks } from "../../svg";
 
 export interface View {
   frame: Frame;
@@ -105,7 +105,7 @@ export function plotBox(frame: Frame, spec: Record<string, unknown>, opts?: { le
 }
 
 export function clip(frame: Frame, box: Box): string {
-  return `<defs><clipPath id="${frame.id}-p"><rect x="${n(box.left)}" y="${n(box.top)}" width="${n(box.right - box.left)}" height="${n(box.bottom - box.top)}" /></clipPath></defs>`;
+  return `<defs>${clipPath(`${frame.id}-p`, box.left, box.top, box.right - box.left, box.bottom - box.top)}</defs>`;
 }
 
 export function hGrid(spec: Record<string, unknown>, frame: Frame, box: Box, values: number[], yAt: (value: number) => number): string {

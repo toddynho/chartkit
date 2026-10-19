@@ -1,7 +1,7 @@
 {
   "line": 15283,
   "all": 27401,
-  "validate": 17724,
+  "validate": 17971,
   "vue": 526,
   "svelte": 642,
   "vanilla": 345,
@@ -10,7 +10,7 @@
   "vueLine": 15768,
   "svelteLine": 15973,
   "vanillaLine": 15642,
-  "extra": 35173,
+  "extra": 42267,
   "histogram": 6723,
   "boxplot": 6769,
   "radar": 5052,
@@ -19,11 +19,16 @@
   "sankey": 5926,
   "bullet": 5440,
   "waterfall": 6159,
+  "gantt": 7233,
+  "timeline": 6021,
+  "quadrant": 5694,
+  "venn": 6251,
+  "journey": 5617,
   "mermaid": 24651,
   "vanillaAuto": 784,
   "markdown": 708,
   "global": 73118,
   "globalAuto": 49880,
   "globalMermaid": 24675,
-  "note": "gzip -9 byte budgets, 8 percent above the measurement. Phase 2 adapter and interact budgets are unchanged: vue 526, svelte 642, vanilla 345, interact 8697, interactExtra 1649. Phase 3 charts stay out of all. Adapters call open() on all, which dynamic-imports @chartkitdev/core/load for histogram, boxplot, radar, funnel, treemap, sankey, bullet, or waterfall. SSR entries import extra statically. adapter-with-line bundles that shell with the line renderer and leaves the chart imports external: vueLine budget 15768, svelteLine 15973, vanillaLine 15642. extra budget 35173. Per-chart budgets stay histogram 6723, boxplot 6769, radar 5052, funnel 5149, treemap 5977, sankey 5926, bullet 5440, waterfall 6159. Mermaid import is mermaid 24651. vanilla autoRender is vanillaAuto 784 and does not ship in the vanilla entry. Markdown fence plugins are markdown 708. The one-file browser IIFE is global 73118. chartkit.auto.global.js is globalAuto 49880 and loads chartkit.mermaid.global.js (globalMermaid 24675) only when a Mermaid block is present."
+  "note": "gzip -9 byte budgets. Phase 2 adapter and interact budgets are unchanged: vue 526, svelte 642, vanilla 345, interact 8697, interactExtra 1649. line, vueLine, svelteLine, and vanillaLine keep the y-domain budgets 15283, 15768, 15973, and 15642. all stays 27401. validate is the measured 17971, under the 17974 cap. extra is the measured 42267, the approved cap after the 89 B y-domain raise. Phase 4 charts stay out of all and load in the browser as chartkit.<type>.global.js. global stays 73118 and globalAuto stays 49880. mermaid stays 24651 and globalMermaid stays 24675. Per-chart budgets: gantt 7233, timeline 6021, quadrant 5694, venn 6251, journey 5617."
 }

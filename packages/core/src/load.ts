@@ -22,6 +22,16 @@ export function load(type: string): Promise<ChartRenderer | undefined> {
       return import("./charts/bullet").then((mod) => mod.bullet);
     case "waterfall":
       return import("./charts/waterfall").then((mod) => mod.waterfall);
+    case "gantt":
+      return import("./charts/gantt").then((mod) => mod.gantt);
+    case "timeline":
+      return import("./charts/timeline").then((mod) => mod.timeline);
+    case "quadrant":
+      return import("./charts/quadrant").then((mod) => mod.quadrant);
+    case "venn":
+      return import("./charts/venn").then((mod) => mod.venn);
+    case "journey":
+      return import("./charts/journey").then((mod) => mod.journey);
     default:
       return Promise.resolve(undefined);
   }

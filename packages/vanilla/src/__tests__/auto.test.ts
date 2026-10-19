@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { autoRender } from "../auto";
+import { mermaidPhase4ScriptUrl, pageNeedsMermaidPhase4 } from "../mermaid-phase4-url";
 import { mermaidScriptUrl, mountFences } from "../mount-fences";
 
 function mountHtml(html: string): void {
@@ -47,6 +48,15 @@ describe("autoRender", () => {
     expect(mountFences(document, { mermaid: true, render, toSpec: () => ({ spec: null }) })).toBe(0);
     expect(document.querySelector("pre.mermaid")).not.toBeNull();
     expect(mermaidScriptUrl("https://cdn.example/chartkit.auto.global.js")).toBe("https://cdn.example/chartkit.mermaid.global.js");
+    expect(mermaidPhase4ScriptUrl("https://cdn.example/chartkit.mermaid.global.js")).toBe("https://cdn.example/chartkit.mermaid-phase4.global.js");
+    document.body.innerHTML = `<pre class="mermaid">gantt
+    title Plan
+    Task : 2026-03-02, 1d</pre>`;
+    expect(pageNeedsMermaidPhase4(document)).toBe(true);
+    document.body.innerHTML = `<pre class="mermaid">pie
+    title Share
+    "A": 1</pre>`;
+    expect(pageNeedsMermaidPhase4(document)).toBe(false);
   });
 
   it("does not mount the same fence twice", () => {

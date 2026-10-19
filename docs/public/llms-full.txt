@@ -35,6 +35,7 @@ Initial render wins all 12 cells against uPlot. Even 1,000,000 points is 23.6 ms
 - Unknown chart types (CK1005): `pie` → `donut` with `mark.innerRadius` 0; `arc` → `donut`; `point`, `circle`, and `square` → `scatter`; `rect` → `heatmap`; `area` → `stacked-area` when `y` lists two or more fields, otherwise `mini-area` (a full-size fill is `type: "line"` and `mark.area: true`); `metric` → `gauge` or `kpi`; `rule` and `tick` → `spike`; `grid-heat` → `heatmap`; `grid-heatmap` and `calendar-heatmap` → `heatmap` with `mark.layout` `"grid"` or `"calendar"`.
 - Heatmap: `encoding.y` with no `mark.layout` renders a grid. Calendar is a date `x` plus `color`, or `mark.layout: "calendar"`. The measure is `encoding.color`. `encoding.value` moves there (CK1009). A numeric `y` moves to `color` only on a calendar.
 - Histogram bins `encoding.x` (`mark.bins` default 8, `mark.binWidth`, or `mark.bin` of count, width, sturges, sqrt, or fd). A pre-binned count is `encoding.y`. `hist` repairs to `histogram` (CK1005). Boxplot is `encoding.x` plus observation `encoding.y`; `box` and `box-plot` repair to `boxplot`. Radar is `encoding.x` and one `encoding.y` or a list. Funnel is stage `x` and value `y`. Treemap is label `x`, size `y`, optional group `color`; `name`, `size`, and `parent` repair onto those channels (CK1009). Sankey is `encoding.source`, `encoding.target`, and `encoding.y`; `from`, `to`, and `value` repair onto those channels. Bullet is label `x`, measure `y`, optional `target`, and `mark.ranges`. Waterfall is step `x` and delta `y`; `mark.total` names a boolean field for an absolute total. `bullet-chart` and `waterfall-chart` repair to those types. These eight types render from `@chartkitdev/core/extra` (or `@chartkitdev/core/charts/<type>`). Per-type pages: https://chartkit.dev/spec/histogram and the same path for boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gauge, and calendar-heatmap.
+- Gantt, timeline, quadrant, venn, and journey also render from `@chartkitdev/core/extra` or `@chartkitdev/core/charts/<type>`. They are not in the core schema enum. `validate()` accepts the five names (CK1011 warns that field rules live elsewhere) and `validateAsync()` loads them. `validatePhase4()` and `repairPhase4()` from `@chartkitdev/core/validate/phase4` add CK1400–CK1412. Gantt: `task` (x), `section` (y), `start` (open), `end` (close) or `duration` (days, `5d`, or `2w`), `status` done/active/crit (color; positive, accent, and negative tokens), `id` (source), `depends` (target, comma-separated ids), `milestone`, `progress` 0–1, and `today` on any row. A zero-length task is a diamond. Dependencies are elbow connectors. Timeline: `label` (x), `date` or `start`, and `end` with `kind` `period` for an era. Labels alternate above and below. Quadrant: numeric `x` and `y`, domain 0..1 unless `scale.domain` is set. Channel `title` is `Low|High`. `quadrants` is four strings: top-left, top-right, bottom-left, bottom-right. `subtitle` is a subtitle. Optional `size` and `color`. A `|`-split subtitle repairs into `quadrants` (CK1412). Venn: `set` and `size`. An intersection joins names with `+`. Two sets are area-proportional. Three sets are a best-effort layout and the areas are approximate. Four or more is CK1407, and the patch drops the extra set. Journey: `section`, `step`, `score` 1–5 drawn as a face on a scale, and `actors` as comma-separated legend chips. `user-journey` repairs to `journey` (CK1400). Pages: https://chartkit.dev/spec/gantt and the same path for timeline, quadrant, venn, and journey.
 - Combo is one spec. `encoding.y` is `[{ "field", "mark": "bar" }, { "field", "mark": "line", "axis": "y2" }]`. `layer`, `layers`, `marks`, `encoding.bar`, `encoding.line`, and `encoding.y2` are CK1009. A list of fields goes on `encoding.y`, not on `field`. On a combo, `bar`, `line`, and `area` go in `mark`, not in `type`. A series with `"axis": "y2"` needs `axes.y2`; `repair` adds it when it is missing.
 - `encoding.x.axis` is not a channel. A title goes in `axes.x.title` (CK1009). `mark.points: true` means `"always"` (CK1007).
 - A bar splits series with `encoding.series`, or with `encoding.color` when that field is not `x`. `encoding.color` equal to `x` colours each bar and does not split series. `mark.stack` is `"stack"` or `"percent"`. `scale.type` `"log"` is a log axis. A temporal `x` is a time axis. `format` on an axis or channel is applied to the ticks. Rule, band, and text `annotations` are drawn. Tooltip, crosshair, zoom, pan, brush, animation, `legend.interactive`, and `a11y.keyboard` / `a11y.dataTable` are drawn by `@chartkitdev/core/interact` on the client (tooltip defaults on for line, bar, area, scatter, combo, and donut). The static SVG string stays the same, so SSR output does not include the tooltip. `validate` does not warn for these. The default theme is `auto` (Soft: `light-dark`, transparent plot, page scheme; optional card via `--ck-background`). `soft`, `refined`, and `editorial` are built in. `midnight` is opt-in. Other names stay midnight until imported. `--ck-*` or `--chart-N` still wins.
@@ -379,6 +380,36 @@ Each example below is a minimal valid spec.
   "encoding": { "x": "step", "y": "amount" },
   "a11y": { "alt": "The close is 160." }
 }
+```
+
+## gantt
+
+```json
+{"version":"1","type":"gantt","data":[{"id":"a","task":"Spec","section":"Plan","start":"2026-03-02","end":"2026-03-13","status":"done"},{"id":"b","task":"Ship","start":"2026-04-06","milestone":true,"depends":"a"}],"a11y":{"alt":"Ship follows the spec."}}
+```
+
+## timeline
+
+```json
+{"version":"1","type":"timeline","data":[{"label":"Founded","date":"2014-06-01"},{"label":"Platform","start":"2024-01-01","end":"2026-01-01","kind":"period"}],"a11y":{"alt":"The company started in 2014."}}
+```
+
+## quadrant
+
+```json
+{"version":"1","type":"quadrant","quadrants":["Quick wins","Big bets","Fill-ins","Reconsider"],"data":[{"name":"SSO","x":0.2,"y":0.8},{"name":"Reports","x":0.8,"y":0.3}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"SSO is a quick win."}}
+```
+
+## venn
+
+```json
+{"version":"1","type":"venn","data":[{"set":"Search","size":12},{"set":"Filters","size":8},{"set":"Search+Filters","size":3}],"a11y":{"alt":"Search and filters overlap."}}
+```
+
+## journey
+
+```json
+{"version":"1","type":"journey","data":[{"section":"Pay","step":"Enter card","score":2,"actors":"Shopper"}],"a11y":{"alt":"Entering a card scores 2."}}
 ```
 
 ## React components (not the JSON spec)

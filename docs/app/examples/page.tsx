@@ -5,7 +5,7 @@ import { exampleGroups, examples } from "@/lib/specs";
 
 export const metadata = pageMeta(
   "Examples",
-  "A gallery of ChartKit specs, including histogram, box plot, radar, funnel, treemap, sankey, bullet, and waterfall.",
+  "A gallery of ChartKit specs, including gantt, timeline, quadrant, venn, and journey.",
   "/examples",
 );
 

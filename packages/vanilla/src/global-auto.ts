@@ -1,14 +1,13 @@
-import type { ChartSpec } from "@chartkitdev/core";
-import { render } from "@chartkitdev/core/extra";
-import { mermaidScriptUrl, mountFences, type FenceResult } from "./mount-fences";
+import { bootBrowser } from "./global-charts";
+import { mermaidScriptUrl, type FenceResult } from "./mount-fences";
 
 interface MermaidApi {
   fromMermaid: (text: string, options?: { maxSource?: number; maxPoints?: number }) => FenceResult;
   toSpec: (text: string, options?: { maxSource?: number; maxPoints?: number }) => FenceResult;
+  ready?: Promise<unknown>;
 }
 
 const root = globalThis as { ChartKit?: Record<string, unknown>; ChartKitMermaid?: MermaidApi };
-const draw = render as (spec: ChartSpec) => string;
 
 function chartkitJson(text: string): FenceResult {
   const trimmed = text.replace(/^\uFEFF/, "").trim();
@@ -26,16 +25,30 @@ function chartkitJson(text: string): FenceResult {
 }
 
 const script = typeof document === "undefined" ? null : document.currentScript;
+const scriptSrc = script instanceof HTMLScriptElement ? script.src : null;
 const wantMermaid = script instanceof HTMLScriptElement && script.hasAttribute("data-chartkit-mermaid");
 
+function whenReady(api: MermaidApi): Promise<MermaidApi> {
+  const ready = api.ready;
+  if (!ready) return Promise.resolve(root.ChartKitMermaid ?? api);
+  return ready.then(() => root.ChartKitMermaid ?? api);
+}
+
 function loadMermaid(): Promise<MermaidApi> {
-  if (root.ChartKitMermaid) return Promise.resolve(root.ChartKitMermaid);
-  const src = script instanceof HTMLScriptElement && script.src ? mermaidScriptUrl(script.src) : "chartkit.mermaid.global.js";
+  if (root.ChartKitMermaid) return whenReady(root.ChartKitMermaid);
+  const src = scriptSrc ? mermaidScriptUrl(scriptSrc) : "chartkit.mermaid.global.js";
   return new Promise((resolve, reject) => {
     const el = document.createElement("script");
     el.src = src;
     el.async = true;
-    el.onload = () => (root.ChartKitMermaid ? resolve(root.ChartKitMermaid) : reject(new Error("ChartKit Mermaid parser did not register")));
+    el.onload = () => {
+      const api = root.ChartKitMermaid;
+      if (!api) {
+        reject(new Error("ChartKit Mermaid parser did not register"));
+        return;
+      }
+      whenReady(api).then(resolve, reject);
+    };
     el.onerror = () => reject(new Error("ChartKit Mermaid parser failed to load"));
     document.head.appendChild(el);
   });
@@ -43,9 +56,9 @@ function loadMermaid(): Promise<MermaidApi> {
 
 function autoRender(scope: ParentNode = document, options: { mermaid?: boolean; maxSource?: number; maxPoints?: number } = {}): number {
   const parser = root.ChartKitMermaid;
-  return mountFences(scope, {
+  return bootBrowser(scope, {
     ...options,
-    render: draw,
+    scriptSrc,
     toSpec: parser?.toSpec ?? chartkitJson,
     fromMermaid: parser?.fromMermaid,
   });
