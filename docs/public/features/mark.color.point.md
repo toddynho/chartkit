@@ -1,14 +1,14 @@
 # Per-point / per-category colour
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Colour individual bars, slices or points
 
-Matrix status: `partial`. Verification: `dts-path` (strong).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-color = x colours each bar
+encoding.color names a category or a paint column. domain and range map values to colours. Drawn on bar, scatter, and pie. Probed by rendering.
 
-Source: chartkit:packages/core/src/generated/schema.ts:461
+Source: packages/core/src/generated/schema.ts:482
 
 ## ChartKit spec
 
@@ -70,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~color | dts-grep (weak) | @antv/g2/lib/index.d.ts:43 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 67a0c9849a0c.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 0749a0e1cb93.
 
 https://chartkit.dev/features.json
