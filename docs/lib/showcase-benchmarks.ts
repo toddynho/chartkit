@@ -129,7 +129,7 @@ export function benchmarkCharts(): ChartSlot[] {
     {
       id: "bundles",
       title: "Line chart, gzip",
-      caption: "Log scale. ChartKit is scripts/size.mjs. The others are the bench line, React external where that row exists.",
+      caption: "Log scale. ChartKit is the size script. The other bars are the bench line, using the React-external gzip when that row has one. uPlot’s CSS is a separate measured file and is not added to its bar.",
       span: "board-12",
       spec: {
         version: "1",

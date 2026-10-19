@@ -6,7 +6,7 @@ Bundle bytes are from docs/data/measured-sizes.json, size script measured 2026-1
 
 ## Line chart, gzip
 
-Log scale. ChartKit is scripts/size.mjs. The others are the bench line, React external where that row exists.
+Log scale. ChartKit is the size script. The other bars are the bench line, using the React-external gzip when that row has one. uPlot’s CSS is a separate measured file and is not added to its bar.
 
 ```json
 {
