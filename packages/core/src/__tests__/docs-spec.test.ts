@@ -12,6 +12,7 @@ const CHART_TYPES = [
   "line",
   "bar",
   "donut",
+  "pie",
   "stacked-area",
   "scatter",
   "combo",

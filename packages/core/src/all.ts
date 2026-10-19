@@ -4,6 +4,7 @@ import { themes } from "./themes/all";
 import { line } from "./charts/line";
 import { bar } from "./charts/bar";
 import { donut } from "./charts/donut";
+import { pie } from "./charts/pie";
 import { stackedArea } from "./charts/stacked-area";
 import { scatter } from "./charts/scatter";
 import { combo } from "./charts/combo";
@@ -18,7 +19,7 @@ import { candlestick } from "./charts/candlestick";
 import { mountAxes } from "./axis-extra";
 
 /** Core v1 charts. Histogram through waterfall live in `@chartkitdev/core/extra`. */
-export const charts = [line, bar, donut, stackedArea, scatter, combo, heatmap, gauge, kpi, sparkline, miniArea, progressRing, spike, candlestick] as const;
+export const charts = [line, bar, donut, pie, stackedArea, scatter, combo, heatmap, gauge, kpi, sparkline, miniArea, progressRing, spike, candlestick] as const;
 
 for (const [name, preset] of Object.entries(themes)) registerPreset(name, preset);
 mountAxes();
@@ -77,5 +78,5 @@ export function open(el: { innerHTML: string }, spec: { type?: string }): boolea
 }
 
 export { register, createRenderer };
-export { line, bar, donut, stackedArea, scatter, combo, heatmap, gauge, kpi, sparkline, miniArea, progressRing, spike, candlestick };
+export { line, bar, donut, pie, stackedArea, scatter, combo, heatmap, gauge, kpi, sparkline, miniArea, progressRing, spike, candlestick };
 export { themes };

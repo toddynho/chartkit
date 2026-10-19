@@ -6,7 +6,7 @@ Checked 2026-10-18. 263 features in 23 categories × 21 libraries = 5523 cells. 
 
 Legend: ● native · ◐ partial · ⊕ plugin · ✎ manual (escape hatch only) · \· none · ? unknown/unverified. Suffix ᴱ = AG Enterprise, ᴾ = MUI Pro/Premium (paid).
 
-Coverage: 34.1% strong (type-checked path / schema / runtime probe / licence file), 31.3% weak (identifier grep, plugin on npm, escape-hatch only), 26.6% absence-verified "none", 8.0% unknown. ChartKit `axis.title.position`, `axis.ticks.autoskip`, `axis.ticks.wrap`, `axis.ticks.marks`, and `axis.line` were rechecked native on 2026-10-19, along with the marks and labels cells.
+Coverage: 34.1% strong (type-checked path / schema / runtime probe / licence file), 31.3% weak (identifier grep, plugin on npm, escape-hatch only), 26.5% absence-verified "none", 8.0% unknown. ChartKit `type.pie`, `label.pie`, `mark.color.point`, and `mark.color.conditional` were rechecked native on 2026-10-19, along with the axis finishing and marks and labels cells.
 
 ## Libraries
 
@@ -68,7 +68,7 @@ Every chart type and major variant. Status native = a first-class type/series/ma
 | **Bump chart** <br><sub>`type.bump`</sub> | · | ✎ | ✎ | ✎ | ✎ | ✎ | ● | ✎ | ✎ | · | · | ✎ | ✎ | ? | ✎ | · | · | · | ● | ? | ✎ |
 | **Slope chart** <br><sub>`type.slope`</sub> | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | · | ◐ | ? | ◐ |
 | **Marimekko / variable-width bar** <br><sub>`type.marimekko`</sub> | · | · | · | ✎ | ● | ◐ | ● | ✎ | ✎ | · | · | ✎ | ✎ | ? | ✎ | · | · | · | · | · | ✎ |
-| **Pie chart** <br><sub>`type.pie` ★</sub> | ◐ | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ✎ | ● | ● | ● | ● | · | · | ● | ● | ● |
+| **Pie chart** <br><sub>`type.pie` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ✎ | ● | ● | ● | ● | · | · | ● | ● | ● |
 | **Donut chart** <br><sub>`type.donut` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ✎ | ● | ● | ● | ● | · | · | ● | ? | ● |
 | **Semi-circle / partial arc pie** <br><sub>`type.pie.semi`</sub> | ● | ● | ● | ● | ● | ◐ | ● | ● | ● | ● | · | · | ● | ● | ● | ● | ? | · | ● | ? | ● |
 | **Radial bar** <br><sub>`type.polar.radialbar`</sub> | ◐ | · | ● | ● | ● | ● | ● | ◐ | ✎ | ● | ◐ | ✎ | ◐ | ● | ● | · | · | · | ●ᴾ | · | ● |
@@ -151,8 +151,8 @@ Per-series visual properties
 | Feature | CK | CJ | RC | EC | HC | PL | NV | VI | VX | AP | TR | OP | VL | AG | AM | GC | UP | LW | MU | MM | G2 |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | **Per-series colour** <br><sub>`mark.color.series` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
-| **Per-point / per-category colour** <br><sub>`mark.color.point` ★</sub> | ◐ | ● | ● | ● | ● | ● | ● | ◐ | ● | ● | ◐ | ● | ● | ● | ● | ● | ◐ | ● | ● | · | ● |
-| **Conditional / threshold colouring** <br><sub>`mark.color.conditional` ★</sub> | ◐ | ◐ | ◐ | ● | ● | ◐ | ◐ | ◐ | ◐ | ● | · | ◐ | ● | ◐ | ● | ◐ | ◐ | ● | ● | · | ◐ |
+| **Per-point / per-category colour** <br><sub>`mark.color.point` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ◐ | ● | ● | ◐ | ● | ● | ● | ● | ● | ◐ | ● | ● | · | ● |
+| **Conditional / threshold colouring** <br><sub>`mark.color.conditional` ★</sub> | ● | ◐ | ◐ | ● | ● | ◐ | ◐ | ◐ | ◐ | ● | · | ◐ | ● | ◐ | ● | ◐ | ◐ | ● | ● | · | ◐ |
 | **Gradient fills** <br><sub>`mark.gradient`</sub> | ● | ◐ | ? | ● | ● | ● | ● | ◐ | ● | ● | ◐ | ◐ | ● | ● | ● | ? | ◐ | ● | ◐ | ? | ● |
 | **Pattern / hatch fills** <br><sub>`mark.pattern` ★</sub> | · | ⊕ | ? | ● | ⊕ | ● | ● | ✎ | ● | ● | ? | ✎ | · | ● | ● | ? | · | · | ✎ | ? | ? |
 | **Line width** <br><sub>`mark.stroke.width` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ? | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
@@ -272,7 +272,7 @@ Values printed on marks
 | **Data label position** <br><sub>`label.position` ★</sub> | ● | ⊕ | ● | ● | ● | ● | ● | ● | ✎ | ● | ? | ● | ● | ● | ● | ? | ? | ? | ● | ● | ● |
 | **Data label formatting** <br><sub>`label.format` ★</sub> | ● | ⊕ | ● | ● | ● | ● | ● | ● | ✎ | ● | ? | ● | ● | ● | ● | ● | ? | ? | ● | · | ● |
 | **Label collision avoidance** <br><sub>`label.collision`</sub> | ● | ⊕ | · | ● | ● | ● | ● | ? | · | ? | · | ● | · | ● | ● | ? | · | · | · | ? | ● |
-| **Pie slice labels / leader lines** <br><sub>`label.pie` ★</sub> | · | ⊕ | ● | ● | ● | ◐ | ● | ● | ✎ | · | · | · | · | ● | ● | ● | · | · | ● | · | ● |
+| **Pie slice labels / leader lines** <br><sub>`label.pie` ★</sub> | ● | ⊕ | ● | ● | ● | ◐ | ● | ● | ✎ | · | · | · | · | ● | ● | ● | · | · | ● | · | ● |
 | **Stack totals** <br><sub>`label.total` ★</sub> | ● | ⊕ | ✎ | ✎ | ● | ✎ | ● | ✎ | ✎ | ● | · | ✎ | ✎ | ? | ✎ | · | · | · | ✎ | · | ✎ |
 
 ## Interaction (`interaction`)

@@ -70,8 +70,8 @@ describe("fromMermaid", () => {
 
   it("maps pie showData onto a pie with legend values", () => {
     const result = fromMermaid(read("pie.mmd"));
-    expect(result.spec?.type).toBe("donut");
-    expect(result.spec?.mark).toMatchObject({ innerRadius: 0 });
+    expect(result.spec?.type).toBe("pie");
+    expect(result.spec?.mark).toBeUndefined();
     expect(result.spec?.legend).toMatchObject({ values: true });
     expect(result.spec?.a11y).toMatchObject({ alt: "Share of workshop hours" });
     expect(validate(result.spec).ok).toBe(true);
@@ -355,7 +355,7 @@ describe("toSpec", () => {
 
   it("detects Mermaid when the text is not JSON", () => {
     const result = toSpec(read("pie.mmd"));
-    expect(result.spec?.type).toBe("donut");
+    expect(result.spec?.type).toBe("pie");
   });
 });
 

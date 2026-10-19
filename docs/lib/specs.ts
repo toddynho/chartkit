@@ -110,11 +110,21 @@ export const chartTypes: ChartTypeDoc[] = [
     ],
   },
   {
+    type: "pie",
+    title: "Pie",
+    summary: "Parts of a whole with no hole. encoding.x is the slice label and encoding.y is the value.",
+    notes: [
+      "mark.startAngle, mark.padAngle, mark.cornerRadius, and mark.sort set the geometry.",
+      "mark.other folds small slices. mark.explode and mark.offset pull slices out.",
+      "Outside labels draw leader lines. Donut labels do the same.",
+    ],
+  },
+  {
     type: "donut",
     title: "Donut",
     summary: "Parts of a whole. encoding.x is the slice label and encoding.y is the value. The center shows the total.",
     notes: [
-      "mark.innerRadius 0 draws a pie. The default is a donut.",
+      "A pie is type pie. mark.innerRadius 0 on a donut only removes the hole.",
       "legend.position bottom keeps the labels under the ring.",
     ],
   },
@@ -485,7 +495,7 @@ export const examples: Example[] = [
     title: "Budget split",
     group: "Donut",
     type: "donut",
-    blurb: "A pie is a donut with innerRadius 0.",
+    blurb: "A donut with the hole closed. A real pie is type pie.",
     spec: {
       version: "1",
       id: "budget-pie",

@@ -33,6 +33,7 @@ const CHART_TYPES = [
   "line",
   "bar",
   "donut",
+  "pie",
   "stacked-area",
   "scatter",
   "combo",
@@ -123,17 +124,13 @@ describe("invalid specs", () => {
     expect(error?.hint).toContain("encoding.color");
   });
 
-  it("CK1005 maps pie to donut and offers a patch", () => {
+  it("CK1005 rejects an unknown type", () => {
     const result = validate(load(invalidDir, "02-unknown-type.json"));
     const error = result.errors[0];
     expect(error.code).toBe("CK1005");
     expect(error.path).toBe("/type");
-    expect(error.hint).toContain("donut");
-    expect(error.fix).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ op: "replace", path: "/type", value: "donut" }),
-      ]),
-    );
+    expect(error.message).toContain("waffle");
+    expect(error.hint).toContain("pie");
   });
 
   it("CK1004 suggests an alt and the patch makes the spec valid", () => {

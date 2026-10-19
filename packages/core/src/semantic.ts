@@ -1,3 +1,4 @@
+import { ruleMatchesAny, type ColorRule } from "./color";
 import type { Diagnostic, JsonPatchOperation } from "./diagnostics";
 import { readData, type DataTable } from "./data";
 import { MARK_APPLIES } from "./marks";
@@ -7,6 +8,7 @@ const CHART_TYPES = new Set([
   "line",
   "bar",
   "donut",
+  "pie",
   "stacked-area",
   "scatter",
   "combo",
@@ -451,15 +453,18 @@ function warnDesign(
   table: DataTable | undefined,
   diagnostics: Diagnostic[],
 ): void {
-  if (type === "donut" && table && table.length > DONUT_SLICE_BUDGET) {
+  if ((type === "donut" || type === "pie") && table && table.length > DONUT_SLICE_BUDGET) {
     diagnostics.push({
       code: "CK4001",
       severity: "warning",
-      message: `${table.length} slices; donuts are hard to read beyond ~7`,
+      message: `${table.length} slices; pies and donuts are hard to read beyond ~7`,
       path: "/data",
-      hint: 'Use "type": "bar" (same encoding) or group small slices into "Other"',
+      hint: 'Use "type": "bar" (same encoding) or set mark.other to group small slices',
     });
   }
+  warnSliceNames(spec, type, table, diagnostics);
+  warnColorDomain(spec, table, diagnostics);
+  warnColorRules(spec, type, table, diagnostics);
 
   const seriesCount = countSeries(spec, table);
   const palette = paletteSize(spec);
@@ -469,7 +474,7 @@ function warnDesign(
       severity: "warning",
       message: `${seriesCount} series; colors repeat after ${palette}`,
       path: "/encoding/y",
-      hint: "Use encoding.series with fewer groups, or add theme.tokens.series",
+      hint: "Use encoding.series with fewer groups, or set mark.palette or theme.tokens.series",
     });
   }
 
@@ -514,6 +519,8 @@ function countSeries(spec: Record<string, unknown>, table: DataTable | undefined
 }
 
 function paletteSize(spec: Record<string, unknown>): number {
+  const mark = isRecord(spec.mark) ? spec.mark : undefined;
+  if (mark && Array.isArray(mark.palette) && mark.palette.length > 0) return mark.palette.length;
   const theme = spec.theme;
   if (isRecord(theme) && isRecord(theme.tokens) && Array.isArray(theme.tokens.series) && theme.tokens.series.length > 0) {
     return theme.tokens.series.length;
@@ -536,6 +543,143 @@ function textContrast(
     ratio: ratio.toFixed(2),
     suggestion: nearestPassing(text, background),
   };
+}
+
+function fieldName(value: unknown): string | undefined {
+  if (typeof value === "string") return value;
+  if (isRecord(value) && typeof value.field === "string") return value.field;
+  return undefined;
+}
+
+function columnStrings(table: DataTable | undefined, field: string | undefined): Set<string> {
+  const seen = new Set<string>();
+  if (!table || !field) return seen;
+  const column = table.columns[field];
+  if (!column) return seen;
+  for (let i = 0; i < column.length; i++) if (column[i] != null && String(column[i]) !== "") seen.add(String(column[i]));
+  return seen;
+}
+
+function plottedNumbers(spec: Record<string, unknown>, table: DataTable | undefined): number[] {
+  if (!table) return [];
+  const encoding = isRecord(spec.encoding) ? spec.encoding : {};
+  const fields: string[] = [];
+  const y = encoding.y;
+  if (Array.isArray(y)) {
+    for (const item of y) {
+      const name = fieldName(item);
+      if (name) fields.push(name);
+    }
+  } else {
+    const name = fieldName(y);
+    if (name) fields.push(name);
+  }
+  const numbers: number[] = [];
+  for (const field of fields) {
+    const column = table.columns[field];
+    if (!column) continue;
+    for (let i = 0; i < column.length; i++) if (typeof column[i] === "number" && Number.isFinite(column[i])) numbers.push(column[i] as number);
+  }
+  return numbers;
+}
+
+function warnSliceNames(
+  spec: Record<string, unknown>,
+  type: string,
+  table: DataTable | undefined,
+  diagnostics: Diagnostic[],
+): void {
+  if (type !== "donut" && type !== "pie") return;
+  const mark = isRecord(spec.mark) ? spec.mark : undefined;
+  if (!mark || !Array.isArray(mark.explode)) return;
+  const encoding = isRecord(spec.encoding) ? spec.encoding : {};
+  const names = columnStrings(table, fieldName(encoding.x));
+  mark.explode.forEach((item, index) => {
+    if (typeof item === "string" && names.has(item)) return;
+    diagnostics.push({
+      code: "CK3012",
+      severity: "warning",
+      message: `mark.explode[${index}] does not match a slice`,
+      path: `/mark/explode/${index}`,
+      hint: "use a slice label from encoding.x",
+    });
+  });
+}
+
+function warnColorDomain(spec: Record<string, unknown>, table: DataTable | undefined, diagnostics: Diagnostic[]): void {
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  const color = encoding && isRecord(encoding.color) ? encoding.color : undefined;
+  if (!color || !Array.isArray(color.domain)) return;
+  const field = typeof color.field === "string" ? color.field : fieldName(encoding?.x);
+  const seen = columnStrings(table, field);
+  color.domain.forEach((item, index) => {
+    if (typeof item === "string" && seen.has(item)) return;
+    diagnostics.push({
+      code: "CK3012",
+      severity: "warning",
+      message: `encoding.color.domain[${index}] is not in ${field ?? "the colour field"}`,
+      path: `/encoding/color/domain/${index}`,
+      hint: "list values that appear in the colour field, in the same order as range",
+    });
+  });
+}
+
+function asRule(item: Record<string, unknown>): ColorRule | null {
+  if (typeof item.color !== "string") return null;
+  return {
+    test: typeof item.test === "string" ? item.test : undefined,
+    lt: typeof item.lt === "number" ? item.lt : undefined,
+    lte: typeof item.lte === "number" ? item.lte : undefined,
+    gt: typeof item.gt === "number" ? item.gt : undefined,
+    gte: typeof item.gte === "number" ? item.gte : undefined,
+    eq: typeof item.eq === "number" ? item.eq : undefined,
+    color: item.color,
+  };
+}
+
+function warnColorRules(
+  spec: Record<string, unknown>,
+  type: string,
+  table: DataTable | undefined,
+  diagnostics: Diagnostic[],
+): void {
+  const applies = MARK_APPLIES.colorRules;
+  if (!applies?.includes(type)) return;
+  const mark = isRecord(spec.mark) ? spec.mark : undefined;
+  if (!mark || !Array.isArray(mark.colorRules)) return;
+  const numbers = plottedNumbers(spec, table);
+  mark.colorRules.forEach((item, index) => {
+    if (!isRecord(item)) {
+      diagnostics.push({
+        code: "CK3012",
+        severity: "warning",
+        message: `mark.colorRules[${index}] is not a colour rule`,
+        path: `/mark/colorRules/${index}`,
+        hint: 'use { "color": "negative", "test": "negative" } or gt, lt, or eq',
+      });
+      return;
+    }
+    const rule = asRule(item);
+    if (!rule) {
+      diagnostics.push({
+        code: "CK3012",
+        severity: "warning",
+        message: `mark.colorRules[${index}] needs a color`,
+        path: `/mark/colorRules/${index}/color`,
+        hint: "set color to a hex colour or a theme token such as negative or accent",
+      });
+      return;
+    }
+    if (numbers.length > 0 && !ruleMatchesAny(rule, numbers)) {
+      diagnostics.push({
+        code: "CK3012",
+        severity: "warning",
+        message: `mark.colorRules[${index}] matches no values`,
+        path: `/mark/colorRules/${index}`,
+        hint: "widen the test, or drop the rule",
+      });
+    }
+  });
 }
 
 function readY(y: unknown): Channel[] {

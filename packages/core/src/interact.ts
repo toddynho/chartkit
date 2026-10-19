@@ -29,6 +29,8 @@ export interface ClickDetail {
   y: unknown;
   value: unknown;
   row: unknown;
+  /** Resolved fill of the clicked mark, when the node has one. */
+  color?: string;
 }
 
 export interface PointRef {
@@ -75,7 +77,11 @@ export interface HoverIndex {
   width: number;
 }
 
-const TIP_TYPES = new Set(["line", "bar", "stacked-area", "scatter", "combo", "donut", "waterfall"]);
+const TIP_TYPES = new Set(["line", "bar", "stacked-area", "scatter", "combo", "donut", "pie", "waterfall"]);
+
+function arcChart(type: string | undefined): boolean {
+  return type === "donut" || type === "pie";
+}
 const lastMarkup = new WeakMap<object, string>();
 
 /** Pixel centers for a category axis, or a numeric x scaled across the plot. Unsorted x is indexed. */
@@ -202,14 +208,15 @@ function seriesOf(spec: InteractSpec, table: Table): SeriesMeta[] {
   const enc = isRecord(spec.encoding) ? spec.encoding : {};
   if (spec.type === "candlestick") return ["open", "high", "low", "close"].map((key) => ({ name: key, field: fieldOf(enc[key]) || key }));
   const channels = yChannels(enc.y);
-  const group = spec.type === "donut" ? fieldOf(enc.x) : typeof enc.series === "string" ? enc.series : fieldOf(enc.series);
-  if (group && (spec.type === "donut" || channels.length === 1)) {
-    const field = spec.type === "donut" ? fieldOf(enc.y) : channels[0].field;
-    const format = spec.type === "donut" ? (isRecord(enc.y) ? enc.y.format : undefined) : channels[0].format;
+  const arc = arcChart(spec.type);
+  const group = arc ? fieldOf(enc.x) : typeof enc.series === "string" ? enc.series : fieldOf(enc.series);
+  if (group && (arc || channels.length === 1)) {
+    const field = arc ? fieldOf(enc.y) : channels[0].field;
+    const format = arc ? (isRecord(enc.y) ? enc.y.format : undefined) : channels[0].format;
     const seen = new Set<string>();
     const out: SeriesMeta[] = [];
     for (let i = 0; i < table.n; i++) {
-      const name = String(table.cell(group, i) ?? (spec.type === "donut" ? i : ""));
+      const name = String(table.cell(group, i) ?? (arc ? i : ""));
       if (!name || seen.has(name)) continue;
       seen.add(name);
       out.push({ name, field, format, match: group });
@@ -233,7 +240,7 @@ function tooltipOn(spec: InteractSpec): boolean {
 }
 
 function crosshairOn(spec: InteractSpec): boolean {
-  return tooltipOn(spec) && spec.type !== "donut" && spec.type !== "waterfall" && !(isRecord(spec.tooltip) && spec.tooltip.crosshair === false);
+  return tooltipOn(spec) && !arcChart(spec.type) && spec.type !== "waterfall" && !(isRecord(spec.tooltip) && spec.tooltip.crosshair === false);
 }
 
 function tipFields(spec: InteractSpec): { field: string; title?: string; format?: unknown }[] | null {
@@ -460,7 +467,7 @@ function legendItems(svg: SVGSVGElement): { name: string; text: SVGTextElement; 
 }
 
 function numericValues(spec: InteractSpec, table: Table): Float64Array | null {
-  if (spec.type === "bar" || spec.type === "combo" || spec.type === "heatmap" || spec.type === "donut") return null;
+  if (spec.type === "bar" || spec.type === "combo" || spec.type === "heatmap" || arcChart(spec.type)) return null;
   const enc = isRecord(spec.encoding) ? spec.encoding : {};
   const field = fieldOf(enc.x);
   const declared = isRecord(enc.x) ? enc.x.type : undefined;
@@ -582,9 +589,24 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     return raw == null ? String(index) : String(raw);
   }
 
+  function inkAt(name: string, index: number): string | null {
+    const nodes = svg.querySelectorAll("[data-ck-i]");
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      if (!node || node.getAttribute("data-ck-i") !== String(index)) continue;
+      const called = node.getAttribute("data-ck-name");
+      if (called !== name && owner(node) !== name) continue;
+      const fill = node.getAttribute("fill");
+      const stroke = node.getAttribute("stroke");
+      const ink = fill && fill !== "none" ? fill : stroke && stroke !== "none" ? stroke : "";
+      if (ink) return legendPaint(ink, 0);
+    }
+    return null;
+  }
+
   function entriesAt(index: number, pointerY: number | null): { name: string; text: string; color: string }[] {
     const chosen = tipFields(base);
-    const grouped = !chosen && series.some((item) => item.match) && base.type !== "donut";
+    const grouped = !chosen && series.some((item) => item.match) && !arcChart(base.type);
     const rows: { name: string; text: string; color: string; raw: number }[] = [];
     const yFormat = axisFormat(base, "y");
     const push = (name: string, raw: unknown, color: string, format?: unknown) => {
@@ -609,7 +631,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           item.format ?? known?.format,
         );
       }
-      return rows;
+      return tint(rows, index);
     }
     if (!grouped) {
       for (let i = 0; i < series.length; i++) {
@@ -644,9 +666,23 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           best = i;
         }
       }
-      return [rows[best]];
+      const picked = rows[best];
+      return picked ? tint([picked], index) : [];
     }
-    return rows;
+    return tint(rows, index);
+  }
+
+  function tint(
+    list: { name: string; text: string; color: string; raw: number }[],
+    index: number,
+  ): { name: string; text: string; color: string; raw: number }[] {
+    for (let i = 0; i < list.length; i++) {
+      const row = list[i];
+      if (!row) continue;
+      const ink = inkAt(row.name, index);
+      if (ink) row.color = ink;
+    }
+    return list;
   }
 
   /** Legend fill for a series name, or the paint that names the same `--ck-series-N`. */
@@ -819,7 +855,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
 
   function placeDots(snapped: number, horizontal: boolean, index: number): { x: number; y: number }[] {
     clearDots();
-    if (base.type === "donut" || base.type === "heatmap") return [];
+    if (arcChart(base.type) || base.type === "heatmap") return [];
     const marks: { x: number; y: number }[] = [];
     if (!horizontal) {
       const paths = svg.querySelectorAll("path");
@@ -921,7 +957,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       item.swatch?.setAttribute("opacity", off ? "0.35" : "1");
       item.text.style.cursor = "pointer";
     }
-    if (base.type !== "donut") return;
+    if (!arcChart(base.type)) return;
     const visible = new Set(items.map((item) => item.name));
     const last = items[items.length - 1];
     let y = last ? Number(last.text.getAttribute("y")) + 20 : 28;
@@ -944,7 +980,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     for (let i = 0; i < cap; i++) {
       const cells = [`<td>${esc(xText(i))}</td>`];
       for (const item of series) {
-        if (item.match && String(table.cell(item.match, i)) !== item.name && base.type === "donut") continue;
+        if (item.match && String(table.cell(item.match, i)) !== item.name && arcChart(base.type)) continue;
         cells.push(`<td>${esc(fmt(table.cell(item.field, i), item.format, locale()))}</td>`);
       }
       body.push(`<tr>${cells.join("")}</tr>`);
@@ -959,7 +995,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const ranged = lo > 0 || hi < n - 1;
     let data = ranged ? rows.slice(lo, hi + 1) : rows;
     if (hidden.size > 0 && data.length && isRecord(data[0])) {
-      const drop = base.type === "donut";
+      const drop = arcChart(base.type);
       data = data.flatMap((row) => {
         const record = row as Record<string, unknown>;
         if (drop && series.some((item) => hidden.has(item.name) && item.match && String(record[item.match]) === item.name)) return [];
@@ -1021,7 +1057,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     return row;
   }
 
-  function payload(name: string, index: number): ClickDetail {
+  function payload(name: string, index: number, color?: string): ClickDetail {
     const item = series.find((entry) => entry.name === name);
     const field = item?.field ?? "";
     const x = index < 0 ? null : xField() ? table.cell(xField(), index) : index;
@@ -1036,7 +1072,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         }
       }
     }
-    return { series: name, datum: y, index, x, y, value: y, row: index < 0 ? null : rowAt(index) };
+    return { series: name, datum: y, index, x, y, value: y, row: index < 0 ? null : rowAt(index), ...(color ? { color } : {}) };
   }
 
   function legendTarget(target: Element | null): { name: string; index: number } | null {
@@ -1076,7 +1112,15 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     return Math.min(n - 1, Math.max(0, lo + lookupIndex(hover, horizontal ? point.y : point.x)));
   }
 
-  function hitOf(event: MouseEvent): { kind: "point" | "series"; name: string; index: number } | null {
+  function nodeInk(node: Element): string | undefined {
+    const fill = node.getAttribute("fill");
+    if (fill && fill !== "none") return fill;
+    const stroke = node.getAttribute("stroke");
+    if (stroke && stroke !== "none") return stroke;
+    return undefined;
+  }
+
+  function hitOf(event: MouseEvent): { kind: "point" | "series"; name: string; index: number; color?: string } | null {
     const node = (event.target as Element | null)?.closest?.("path,circle,rect");
     if (!node || node.closest("defs,clipPath")) return null;
     if (node.hasAttribute("data-ck-dot") || node.hasAttribute("data-ck-pick")) return null;
@@ -1084,10 +1128,11 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     let kind: "point" | "series" = node.localName === "path" ? "series" : "point";
     let name = "";
     let index = 0;
-    if (node.localName === "path" && node.hasAttribute("aria-label") && base.type === "donut") {
+    if (node.localName === "path" && node.hasAttribute("aria-label") && arcChart(base.type)) {
+      const named = node.getAttribute("data-ck-name");
       const label = node.getAttribute("aria-label") || "";
       const cut = label.indexOf(": ");
-      name = (cut >= 0 ? label.slice(0, cut) : label).trim();
+      name = named || (cut >= 0 ? label.slice(0, cut) : label).trim();
       index = Math.max(0, series.findIndex((entry) => entry.name === name));
     } else {
       name = owner(node);
@@ -1098,7 +1143,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const picking = selMode();
     if (picking === "point") kind = "point";
     else if (picking === "series") kind = "series";
-    return { kind, name, index };
+    return { kind, name, index, color: nodeInk(node) };
   }
 
   function paintPick(): void {
@@ -1161,8 +1206,21 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           bar = rect;
         }
       }
+      if (arcChart(base.type)) {
+        const paths = svg.querySelectorAll("path[data-ck-name]");
+        for (let p = 0; p < paths.length; p++) {
+          const path = paths[p];
+          if (!path || path.getAttribute("data-ck-name") !== point.series) continue;
+          path.classList.add("ck-pick");
+          const fill = path.getAttribute("fill");
+          if (fill && fill !== "none") (path as SVGElement).style.stroke = fill;
+        }
+        continue;
+      }
       if (bar) {
         bar.classList.add("ck-pick");
+        const fill = bar.getAttribute("fill");
+        if (fill && fill !== "none") (bar as SVGElement).style.stroke = fill;
         continue;
       }
       let y = box.t + box.h / 2;
@@ -1176,7 +1234,18 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           break;
         }
       }
-      svg.insertAdjacentHTML("beforeend", `<circle data-ck-pick class="ck-pick" cx="${Math.round(x)}" cy="${Math.round(y)}" r="5" fill="none" pointer-events="none"/>`);
+      let ink = "";
+      const marks = svg.querySelectorAll("[data-ck-i]");
+      for (let m = 0; m < marks.length; m++) {
+        const mark = marks[m];
+        if (!mark || mark.getAttribute("data-ck-i") !== String(point.index)) continue;
+        if (owner(mark) !== point.series && mark.getAttribute("data-ck-name") !== point.series) continue;
+        const fill = mark.getAttribute("fill");
+        if (fill && fill !== "none") ink = fill;
+        break;
+      }
+      const ring = ink ? ` style="stroke:${ink}"` : "";
+      svg.insertAdjacentHTML("beforeend", `<circle data-ck-pick class="ck-pick"${ring} cx="${Math.round(x)}" cy="${Math.round(y)}" r="5" fill="none" pointer-events="none"/>`);
     }
   }
 
@@ -1236,7 +1305,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       placeTip(event.clientX, event.clientY, name, [{ name, text, color: legendPaint(mark.getAttribute("fill"), 0) }], [viewPoint(svg, event.clientX, event.clientY)]);
       return;
     }
-    if (base.type === "donut") {
+    if (arcChart(base.type)) {
       const path = (event.target as Element | null)?.closest?.("path[aria-label]");
       if (!path) {
         hideHover();
@@ -1301,7 +1370,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       if (selMode() && (picked.points.length || picked.series.length)) choose(copySelection(null));
       return;
     }
-    emit(hit.kind === "point" ? "pointclick" : "seriesclick", payload(hit.name, hit.index));
+    emit(hit.kind === "point" ? "pointclick" : "seriesclick", payload(hit.name, hit.index, hit.color));
     if (selMode() === "point" && hit.kind === "point") togglePoint(hit.name, hit.index, addKey(event));
     else if (selMode() === "series") toggleSeries(hit.name, addKey(event));
   }) as EventListener);
@@ -1323,7 +1392,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const name = series.find((item) => !hidden.has(item.name))?.name || series[0]?.name || "";
     if (!name) return;
     event.preventDefault();
-    emit("pointclick", payload(name, focus));
+    emit("pointclick", payload(name, focus, inkAt(name, focus) ?? undefined));
     if (selMode() === "point") togglePoint(name, focus, addKey(event));
     else if (selMode() === "series") toggleSeries(name, addKey(event));
   }) as EventListener);

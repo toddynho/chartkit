@@ -5,12 +5,12 @@
 
 ## Rules
 
-- version "1". a11y.alt required. data is rows, not {"values":[...]}. repair(spec) returns {spec, ok, errors, applied}. Y domain is encoding.y.scale.domain [min, max]; null = auto. Keys, data table, and legend clicks are off unless set. Field rules: llms-full.txt.
-- Extra charts: @chartkitdev/core/extra or /charts/<type>. Phase 4 is gantt, timeline, quadrant, venn, and journey. import { validatePhase4 } from "@chartkitdev/core/validate/phase4". Field details are in llms-full.txt.
+- version "1". a11y.alt required. data is rows, not {"values":[...]}. Field rules: llms-full.txt.
+- Extra charts: @chartkitdev/core/extra or /charts/<type>. Phase 4 is gantt, timeline, quadrant, venn, and journey. Field details are in llms-full.txt.
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
 
 Features (21 libraries, sourced): https://chartkit.dev/features.json
-Types: line, bar, donut, stacked-area, scatter, combo, heatmap, gauge, kpi, sparkline, mini-area, progress-ring, spike, candlestick, histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey
+Types: line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi, sparkline, mini-area, progress-ring, spike, candlestick, histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey
 
 ```json
 {"version":"1","type":"line","data":[{"quarter":"Q1","units":40},{"quarter":"Q2","units":55}],"encoding":{"x":"quarter","y":"units"},"a11y":{"alt":"Units rose in Q2."}}
@@ -22,6 +22,10 @@ Types: line, bar, donut, stacked-area, scatter, combo, heatmap, gauge, kpi, spar
 
 ```json
 {"version":"1","type":"donut","data":[{"wood":"Oak","boards":8},{"wood":"Pine","boards":5}],"encoding":{"x":"wood","y":"boards"},"a11y":{"alt":"Oak is larger."}}
+```
+
+```json
+{"version":"1","type":"pie","data":[{"wood":"Oak","boards":8},{"wood":"Pine","boards":5}],"encoding":{"x":"wood","y":"boards"},"a11y":{"alt":"Oak is larger."}}
 ```
 
 ```json

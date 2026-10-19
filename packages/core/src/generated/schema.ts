@@ -19,12 +19,13 @@ export type ChartKitChartSpecV1 = {
    */
   version: "1";
   /**
-   * Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. mark.innerRadius 0 gives a pie. Replaces DonutChart. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar.
+   * Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar.
    */
   type:
     | "line"
     | "bar"
     | "donut"
+    | "pie"
     | "stacked-area"
     | "scatter"
     | "combo"
@@ -498,6 +499,12 @@ export interface Encoding {
          * @minItems 2
          */
         range?: [Color, Color, ...Color[]];
+        /**
+         * Category values in the same order as range. A value that is not listed takes the next palette colour.
+         *
+         * @minItems 1
+         */
+        domain?: [string, ...string[]];
       }
     | {
         value: Color;
@@ -874,7 +881,7 @@ export interface Mark {
    */
   orientation?: "vertical" | "horizontal";
   /**
-   * Rounded corners in px. Applies to: bar, donut, heatmap.
+   * Rounded corners in px. Applies to: bar, donut, pie, heatmap.
    */
   cornerRadius?: number;
   /**
@@ -882,11 +889,11 @@ export interface Mark {
    */
   gap?: number;
   /**
-   * Draw value labels on the marks. Applies to: bar, donut, line, stacked-area, scatter. Overlapping labels are skipped.
+   * Draw value labels on the marks. Applies to: bar, donut, pie, line, stacked-area, scatter. Outside pie and donut labels use leader lines. Overlapping labels are skipped.
    */
   labels?: boolean;
   /**
-   * Where the value label sits. top, bottom, left, right, and center suit line, area, and scatter. inside and outside suit bar and donut. Setting it turns labels on. Applies to: bar, donut, line, stacked-area, scatter, combo.
+   * Where the value label sits. top, bottom, left, right, and center suit line, area, and scatter. inside and outside suit bar, donut, and pie. Outside pie and donut labels draw leader lines. Setting it turns labels on. Applies to: bar, donut, pie, line, stacked-area, scatter, combo.
    */
   labelPosition?: "top" | "bottom" | "left" | "right" | "center" | "inside" | "outside";
   /**
@@ -919,13 +926,1150 @@ export interface Mark {
    */
   stackTotal?: boolean;
   /**
-   * Hole size as a 0–0.95 fraction of the radius; 0 = pie. Applies to: donut.
+   * Hole size as a 0–0.95 fraction of the radius. Donut defaults to 0.6. Pie defaults to 0. Applies to: donut, pie.
    */
   innerRadius?: number;
   /**
-   * Gap between slices in degrees. Applies to: donut.
+   * Gap between slices in degrees. Donut defaults to 2. Pie defaults to 0. Applies to: donut, pie.
    */
   padAngle?: number;
+  /**
+   * Slice order. none keeps data order and pins an Other bucket last. asc and desc sort by value, including Other. Applies to: donut, pie.
+   */
+  sort?: "none" | "asc" | "desc";
+  /**
+   * Group small slices into one Other slice. A number is the fraction. Applies to: donut, pie.
+   */
+  other?:
+    | number
+    | {
+        /**
+         * Fold slices smaller than this fraction of the total.
+         */
+        threshold: number;
+        /**
+         * Name of the folded slice. Default Other.
+         */
+        label?: string;
+      };
+  /**
+   * Pull slices out from the centre, in px. With mark.explode, only those slices move. Otherwise every slice moves. Applies to: donut, pie.
+   */
+  offset?: number;
+  /**
+   * Slice names to offset. Uses mark.offset, or 12px when offset is omitted. Applies to: donut, pie.
+   */
+  explode?: string[];
+  /**
+   * Series colours for this chart, in order. Overrides the theme palette. Omit it to keep the theme tokens. Applies to: line, bar, scatter, combo, stacked-area, donut, pie.
+   *
+   * @minItems 1
+   * @maxItems 24
+   */
+  palette?: [Color, ...Color[]];
+  /**
+   * Conditional colours. First match wins and overrides the series or category colour. Applies to: line, bar, scatter, combo, donut, pie.
+   *
+   * @maxItems 8
+   */
+  colorRules?:
+    | []
+    | [
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        }
+      ]
+    | [
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        }
+      ]
+    | [
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        }
+      ]
+    | [
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        }
+      ]
+    | [
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        }
+      ]
+    | [
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        }
+      ]
+    | [
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        }
+      ]
+    | [
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        }
+      ];
   /**
    * Mark opacity 0–1. Applies to: scatter, spike.
    */
@@ -939,7 +2083,7 @@ export interface Mark {
    */
   weeks?: number;
   /**
-   * Arc start in degrees (0 = top, clockwise). Applies to: gauge, progress-ring.
+   * Arc start in degrees (0 = top, clockwise). Applies to: gauge, progress-ring, donut, pie.
    */
   startAngle?: number;
   /**

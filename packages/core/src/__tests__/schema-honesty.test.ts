@@ -167,6 +167,10 @@ function probes(leaf: Leaf): unknown[] {
     else push(["region"]);
   }
   if (leaf.path.endsWith("/domain")) push([500, 4000]);
+  if (leaf.path === "/mark/explode") push(["Jan"]);
+  if (leaf.path === "/mark/colorRules") push([{ color: "#c0ffee", gt: 0 }]);
+  if (leaf.path === "/encoding/color/domain") push(["NA", "EU"]);
+  if (leaf.path === "/mark/palette") push(["#c0ffee", "#111111"]);
   if (leaf.path.endsWith("/initialRange")) push([0, 1]);
   if (/^\/axes\/(x|y|y2)$/.test(leaf.path)) push({ title: "ProbeLabel" });
   return out;
@@ -237,6 +241,28 @@ function apply(host: Record<string, unknown>, path: string, value: unknown): Rec
     if (typeof box.title !== "string") box.title = "ProbeLabel";
     axes[key] = box;
     spec.axes = axes;
+  }
+  if (path.startsWith("/mark/colorRules")) {
+    const mark = isRecord(spec.mark) ? spec.mark : {};
+    const rules = Array.isArray(mark.colorRules) ? mark.colorRules : [{}];
+    if (!isRecord(rules[0])) rules[0] = {};
+    if (typeof (rules[0] as Record<string, unknown>).color !== "string") (rules[0] as Record<string, unknown>).color = "#c0ffee";
+    mark.colorRules = rules;
+    spec.mark = mark;
+  }
+  if (path.startsWith("/mark/other/")) {
+    const mark = isRecord(spec.mark) ? spec.mark : {};
+    const other = isRecord(mark.other) ? mark.other : {};
+    if (typeof other.threshold !== "number") other.threshold = 0.2;
+    mark.other = other;
+    spec.mark = mark;
+  }
+  if (path === "/encoding/color/domain") {
+    const encoding = isRecord(spec.encoding) ? spec.encoding : {};
+    const color = isRecord(encoding.color) ? encoding.color : {};
+    if (!Array.isArray(color.range)) color.range = ["#c0ffee", "#111111"];
+    encoding.color = color;
+    spec.encoding = encoding;
   }
   if (path.startsWith("/tooltip/fields/")) {
     const tooltip = isRecord(spec.tooltip) ? spec.tooltip : {};
@@ -339,6 +365,7 @@ const ENTRY_FILES: Array<[string, string]> = [
   ["line", "line"],
   ["bar", "bar"],
   ["donut", "donut"],
+  ["pie", "pie"],
   ["stacked-area", "stackedArea"],
   ["scatter", "scatter"],
   ["combo", "combo"],

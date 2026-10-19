@@ -121,7 +121,9 @@ const TYPE_FOR = {
   "type.scatter": "scatter",
   "type.bubble": "scatter",
   "type.slope": "line",
-  "type.pie": "donut",
+  "type.pie": "pie",
+  "label.pie": "pie",
+  "mark.color.conditional": "line",
   "type.donut": "donut",
   "type.pie.semi": "donut",
   "type.polar.radialbar": "progress-ring",
@@ -253,7 +255,9 @@ function demoValue(id, parts, literal) {
   if (leaf === "width" && parts.includes("line")) return 2;
   if (leaf === "color" && parts[0] === "axes") return "#5c6b7a";
   if (leaf === "pointShape") return "diamond";
+  if (id === "label.pie" && leaf === "labelPosition") return "outside";
   if (leaf === "labelPosition") return "top";
+  if (leaf === "colorRules") return [{ color: "accent", gt: 0 }];
   if (leaf === "labelFormat") return "integer";
   if (leaf === "stackTotal") return true;
   if (leaf === "dash") return "dashed";

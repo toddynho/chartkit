@@ -2,16 +2,16 @@
 
 Broken specs about a fictional bakery. validate() names the code and the JSON Pointer. repair() applies the safe patches. A line that asks for labels warns CK3012 and still draws the line.
 
-## pie is not a type
+## arc is not a type
 
-The type pie is rewritten to donut.
+The type arc is rewritten to donut.
 
 Broken:
 
 ```json
 {
   "version": "1",
-  "type": "pie",
+  "type": "arc",
   "title": "Crumb mix",
   "theme": "soft",
   "data": [
@@ -74,9 +74,6 @@ Repaired:
   },
   "a11y": {
     "alt": "Crumb is the largest part of the mix, then filling, then crust."
-  },
-  "mark": {
-    "innerRadius": 0
   }
 }
 ```
