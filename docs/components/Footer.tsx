@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SITE } from "@/lib/site";
 
 export function Footer() {
   return (
@@ -15,6 +16,7 @@ export function Footer() {
         <Link href="/agents">Agents</Link>
         <Link href="/features">Features</Link>
         <Link href="/compare">Compare</Link>
+        <a href={`${SITE.github}/blob/main/ROADMAP.md`}>Roadmap</a>
         <Link href="/when-to-use">When to use</Link>
         <Link href="/demo">Demo</Link>
         <a href="/llms.txt">llms.txt</a>

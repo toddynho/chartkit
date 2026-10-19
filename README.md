@@ -16,7 +16,7 @@ Round 13, measured 2026-10-18 on phase 2 `d8dcc5a`. These are the harness number
 
 The aligned update starts at the top of a requestAnimationFrame, awaits the library’s own completion, and reads time from a MessageChannel after paint. ChartKit is `mount().update()`, the same shape as uPlot `setData`. Sampling defaults to auto. With sampling off, 1M is 471.8 ms to draw and 462.4 ms to update.
 
-**[Documentation](https://chartkit.dev)** | **[When to use](https://chartkit.dev/when-to-use)** | **[Benchmarks](https://chartkit.dev/benchmarks)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[llms.txt](docs/public/llms.txt)**
+**[Documentation](https://chartkit.dev)** | **[When to use](https://chartkit.dev/when-to-use)** | **[Benchmarks](https://chartkit.dev/benchmarks)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[Roadmap](ROADMAP.md)** | **[llms.txt](docs/public/llms.txt)**
 
 ---
 
@@ -172,6 +172,7 @@ const theme = useAutoTheme({ light: 'sunset', dark: 'midnight' });
 Full documentation and examples at **[chartkit.dev](https://chartkit.dev)**
 
 - [Getting started](https://chartkit.dev/docs)
+- [Roadmap](ROADMAP.md)
 - [When to use ChartKit](https://chartkit.dev/when-to-use)
 - [Benchmarks](https://chartkit.dev/benchmarks.json)
 - [Themes](https://chartkit.dev/docs/theming)
