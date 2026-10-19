@@ -6,8 +6,8 @@
 ## Rules
 
 - version "1". a11y.alt required. data is rows, not {"values":[...]}. Field rules: llms-full.txt.
-- Extra charts: @chartkitdev/core/extra or /charts/<type>. Phase 4 is gantt, timeline, quadrant, venn, and journey. Field details are in llms-full.txt.
-- ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
+- Extra charts: @chartkitdev/core/extra or /charts/<type>. Phase 4 is gantt, timeline, quadrant, venn, and journey.
+- ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec. Export: toPNG, toSVG, toCSV. PNG skips cross-origin sheets and remote images.
 
 Features (21 libraries, sourced): https://chartkit.dev/features.json
 Types: line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi, sparkline, mini-area, progress-ring, spike, candlestick, histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey

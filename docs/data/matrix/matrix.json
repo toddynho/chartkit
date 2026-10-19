@@ -45646,19 +45646,19 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "partial",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "ChartKitChartSpecV1.encoding.color.range"
+            "ChartKitChartSpecV1.encoding.color.scale.type=sequential"
           ],
           "evidence": [
             {
               "kind": "dts-path",
-              "path": "ChartKitChartSpecV1.encoding.color.range",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:480"
+              "path": "ChartKitChartSpecV1.encoding.color.scale.type=sequential",
+              "loc": "chartkit:packages/core/src/generated/schema.ts:779"
             }
           ],
-          "note": "range of colours",
+          "note": "sequential, diverging, quantize, and threshold. scheme blue, teal, orange, or violet.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -53901,7 +53901,7 @@
               "loc": "chartkit:packages/core/src/generated/schema.ts:173"
             }
           ],
-          "note": "",
+          "note": "top, right, bottom, left, and inside.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -54998,20 +54998,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:itemWidth)['\"`]|(?:^|[\\s{,;])\\w*(?:itemWidth)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:itemWidth)"
+            "ChartKitChartSpecV1.legend.symbol"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:itemWidth)['\"`]|(?:^|[\\s{,;])\\w*(?:itemWidth)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:itemWidth)"
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.legend.symbol",
+              "loc": "chartkit:packages/core/src/generated/schema.ts:215"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "symbol and per-series symbols.",
+          "verified": "dts-path",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "native",
@@ -55411,20 +55412,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:pagination)['\"`]|(?:^|[\\s{,;])\\w*(?:pagination)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:pagination)"
+            "ChartKitChartSpecV1.legend.maxRows"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:pagination)['\"`]|(?:^|[\\s{,;])\\w*(?:pagination)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:pagination)"
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.legend.maxRows",
+              "loc": "chartkit:packages/core/src/generated/schema.ts:203"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "Rows past maxRows page.",
+          "verified": "dts-path",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "none",
@@ -55775,14 +55777,20 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:colorbar)['\"`]|(?:^|[\\s{,;])\\w*(?:colorbar)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:colorbar)"
+            "ChartKitChartSpecV1.encoding.color.scale.type=sequential"
           ],
-          "evidence": [],
-          "note": "probe hit reviewed: match is colorBarsByX (bar colouring)",
-          "verified": "source-review",
+          "evidence": [
+            {
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.encoding.color.scale.type=sequential",
+              "loc": "chartkit:packages/core/src/generated/schema.ts:779"
+            }
+          ],
+          "note": "Gradient or binned colour legend.",
+          "verified": "dts-path",
           "strength": "strong"
         },
         "chartjs": {
@@ -87204,20 +87212,21 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:png)['\"`]|(?:^|[\\s{,;])\\w*(?:png)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:png)"
+            "ChartKitChartSpecV1.interaction.export"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:png)['\"`]|(?:^|[\\s{,;])\\w*(?:png)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:png)"
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.interaction.export",
+              "loc": "chartkit:packages/core/src/generated/schema.ts:2611"
             }
           ],
-          "note": "SVG string only; no PNG helper in packages (the docs playground exports PNG in the browser)",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "toPNG draws the SVG on a canvas. Same-origin fonts only; remote images can taint it.",
+          "verified": "dts-path",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "native",
@@ -87558,18 +87567,18 @@
           "status": "native",
           "tier": null,
           "apiPaths": [
-            "~renderToString"
+            "ChartKitChartSpecV1.interaction.export"
           ],
           "evidence": [
             {
-              "kind": "dts-grep",
-              "path": "renderToString",
-              "loc": "chartkit:packages/vanilla/src/ssr.ts:5"
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.interaction.export",
+              "loc": "chartkit:packages/core/src/generated/schema.ts:2611"
             }
           ],
-          "note": "the render output is SVG",
-          "verified": "dts-grep",
-          "strength": "weak"
+          "note": "toSVG serializes the live SVG.",
+          "verified": "dts-path",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "none",
@@ -87894,14 +87903,20 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:csv)['\"`]|(?:^|[\\s{,;])\\w*(?:csv)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:csv)"
+            "ChartKitChartSpecV1.interaction.export"
           ],
-          "evidence": [],
-          "note": "probe hit reviewed: match is Mermaid CSV import (parseCsv), not export",
-          "verified": "source-review",
+          "evidence": [
+            {
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.interaction.export",
+              "loc": "chartkit:packages/core/src/generated/schema.ts:2611"
+            }
+          ],
+          "note": "toCSV writes rows, number arrays, or columns.",
+          "verified": "dts-path",
           "strength": "strong"
         },
         "chartjs": {
@@ -88576,20 +88591,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:toolbox)['\"`]|(?:^|[\\s{,;])\\w*(?:toolbox)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:toolbox)"
+            "ChartKitChartSpecV1.interaction.export"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:toolbox)['\"`]|(?:^|[\\s{,;])\\w*(?:toolbox)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:toolbox)"
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.interaction.export",
+              "loc": "chartkit:packages/core/src/generated/schema.ts:2611"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "Keyboard menu, loaded only when interaction.export is set.",
+          "verified": "dts-path",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "none",

@@ -1,4 +1,5 @@
 import type { ChartSpec } from "@chartkitdev/core";
+export { toPNG, toSVG, toCSV } from "@chartkitdev/core/export";
 import { open, render as renderAll } from "@chartkitdev/core/all";
 import { attach, listen, patchSvg, type ClickDetail, type Controller, type Selection } from "@chartkitdev/core/interact";
 

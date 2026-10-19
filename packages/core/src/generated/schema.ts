@@ -181,9 +181,51 @@ export type Legend =
        */
       show?: boolean;
       /**
-       * Placement.
+       * Placement. inside draws over the plot; pair it with anchor.
        */
-      position?: "top" | "right" | "bottom" | "left";
+      position?: "top" | "right" | "bottom" | "left" | "inside";
+      /**
+       * Anchor for an inside legend. Setting anchor without position uses inside.
+       */
+      anchor?:
+        "top-left" | "top" | "top-right" | "left" | "center" | "right" | "bottom-left" | "bottom" | "bottom-right";
+      /**
+       * Alignment of items within the legend block.
+       */
+      align?: "start" | "center" | "end";
+      /**
+       * Item flow. Default horizontal on the top and bottom, vertical on the sides.
+       */
+      orient?: "horizontal" | "vertical";
+      /**
+       * Maximum visible rows. Further rows page behind the first, with previous and next controls.
+       */
+      maxRows?: number;
+      /**
+       * Legend title.
+       */
+      title?: string;
+      /**
+       * Series names omitted from the legend. The series still draws.
+       */
+      hide?: string[];
+      /**
+       * Marker used for every series unless symbols overrides it.
+       */
+      symbol?: "circle" | "square" | "diamond" | "triangle" | "line" | "cross";
+      /**
+       * Per-series legend markers.
+       */
+      symbols?: {
+        /**
+         * Series name.
+         */
+        series?: string;
+        /**
+         * Marker for that series.
+         */
+        symbol?: "circle" | "square" | "diamond" | "triangle" | "line" | "cross";
+      }[];
       /**
        * Click a legend item to hide/show its series. Off unless set; the SVG records it as data-ck-intent.
        */
@@ -492,9 +534,9 @@ export interface Encoding {
          */
         title?: string;
         format?: Format;
-        scale?: Scale;
+        scale?: ColorScale;
         /**
-         * Colors to use, in order (categorical) or low→high (sequential).
+         * Colors to use, in order (categorical) or low→high (sequential). Two or more colours replace a named scheme.
          *
          * @minItems 2
          */
@@ -726,6 +768,49 @@ export interface Scale {
    * Flip the direction of the scale.
    */
   reverse?: boolean;
+}
+/**
+ * Colour scale. Sequential and diverging are continuous; quantize and threshold are binned.
+ */
+export interface ColorScale {
+  /**
+   * Position types match the shared scale. sequential, diverging, quantize, and threshold are colour-only and are not valid on x or y.
+   */
+  type?: "linear" | "log" | "sqrt" | "time" | "band" | "point" | "sequential" | "diverging" | "quantize" | "threshold";
+  /**
+   * Explicit [min, max] for a continuous colour scale.
+   *
+   * @minItems 1
+   */
+  domain?: [number | string | null, ...(number | string | null)[]];
+  /**
+   * Force the scale to include zero.
+   */
+  zero?: boolean;
+  /**
+   * Round the domain to tidy values.
+   */
+  nice?: boolean;
+  /**
+   * Flip the direction of the scale.
+   */
+  reverse?: boolean;
+  /**
+   * Diverging midpoint. Default is the middle of the domain.
+   */
+  midpoint?: number;
+  /**
+   * Named colour-blind-safe ramp. blue is the default. A range of two or more colours replaces it. Midnight uses a brighter ramp of the same name.
+   */
+  scheme?: "blue" | "teal" | "orange" | "violet";
+  /**
+   * Equal-width bins for quantize. Default 5.
+   */
+  bins?: number;
+  /**
+   * Cut points for threshold. Colours are one more than the number of cuts.
+   */
+  thresholds?: number[];
 }
 /**
  * Single-value content for gauge, progress-ring and kpi. Put value, min, max, delta, and label here, not at the top level of the spec. Kpi may also set data for a sparkline.
@@ -2520,6 +2605,10 @@ export interface Interaction {
    * @maxItems 2
    */
   initialRange?: [number | string, number | string];
+  /**
+   * Formats offered by the export menu. The SVG records them as data-ck-export. The menu loads only when this list is set. toPNG, toSVG, and toCSV are @chartkitdev/core/export.
+   */
+  export?: ("png" | "svg" | "csv")[];
 }
 /**
  * Accessibility. 'alt' is required: a one or two sentence description of what the chart shows and its key takeaway, used as the accessible name/description and for text-only renders (agents should always write it).

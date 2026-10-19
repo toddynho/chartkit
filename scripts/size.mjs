@@ -51,6 +51,10 @@ const externalInteractExtra = {
       if (args.kind === "entry-point") return null;
       return { path: "@chartkitdev/core/interact/extra", external: true };
     });
+    build.onResolve({ filter: /export-menu(\.ts)?$/ }, (args) => {
+      if (args.kind === "entry-point") return null;
+      return { path: "@chartkitdev/core/export-menu", external: true };
+    });
   },
 };
 
@@ -100,6 +104,8 @@ const isolation = {
   lineOmitsValidator: !line.code.includes("CK1004"),
   lineOmitsMermaid: !debug.includes("fromMermaid") && !debug.includes("xychart"),
   lineOmitsInteract: !line.code.includes("data-ck-tip") && !debug.includes("data-ck-tip"),
+  lineOmitsPng: !line.code.includes("toDataURL") && !debug.includes("toDataURL"),
+  interactOmitsPng: !interact.code.includes("toDataURL"),
   allIncludesRetro: all.code.includes("#ff7edb"),
   allIncludesCandle: all.code.includes('data-ck-mark="candle"'),
 };
@@ -171,6 +177,8 @@ const vanillaAuto = await gzipOf(join(root, "packages/vanilla/src/auto.ts"), { e
 const markdown = await gzipOf(join(root, "packages/markdown/src/index.ts"), { external: true });
 
 const globalAlias = {
+  "@chartkitdev/core/export-menu": join(src, "export-menu.ts"),
+  "@chartkitdev/core/export": join(src, "export.ts"),
   "@chartkitdev/core/mermaid/phase4": join(src, "mermaid-phase4.ts"),
   "@chartkitdev/core/mermaid": join(src, "mermaid.ts"),
   "@chartkitdev/core/extra-tip": join(src, "extra-tip.ts"),

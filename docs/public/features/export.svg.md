@@ -4,13 +4,50 @@ ChartKit: **native**
 
 Get the chart as an SVG string/file
 
-Matrix status: `native`. Verification: `dts-grep` (weak).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-the render output is SVG
+toSVG serializes the live SVG.
 
-Source: chartkit:packages/vanilla/src/ssr.ts:5
+Source: chartkit:packages/core/src/generated/schema.ts:2611
 
-No spec snippet. This row is not a single option that `validate()` can show.
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40
+    },
+    {
+      "quarter": "Q2",
+      "units": 55
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": "units"
+  },
+  "a11y": {
+    "alt": "Units rose in Q2."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "interaction": {
+    "export": [
+      "png",
+      "svg",
+      "csv"
+    ]
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -37,6 +74,6 @@ No spec snippet. This row is not a single option that `validate()` can show.
 | Mermaid (chart-ish diagrams only) | native | ~render | dts-grep (weak) | mermaid/dist/internals.d.ts:1 mermaid.render returns SVG string |
 | AntV G2 | none | — | dts-absence (absence) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 0749a0e1cb93.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 699f05dc7c70.
 
 https://chartkit.dev/features.json

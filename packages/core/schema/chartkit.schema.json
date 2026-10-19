@@ -500,6 +500,37 @@
       },
       "description": "How data values map to positions or sizes. Usually inferred; set only to override."
     },
+    "colorScale": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": ["linear", "log", "sqrt", "time", "band", "point", "sequential", "diverging", "quantize", "threshold"],
+          "description": "Position types match the shared scale. sequential, diverging, quantize, and threshold are colour-only and are not valid on x or y."
+        },
+        "domain": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": ["number", "string", "null"] },
+          "description": "Explicit [min, max] for a continuous colour scale."
+        },
+        "zero": { "type": "boolean", "description": "Force the scale to include zero." },
+        "nice": { "type": "boolean", "description": "Round the domain to tidy values." },
+        "reverse": { "type": "boolean", "description": "Flip the direction of the scale." },
+        "midpoint": { "type": "number", "description": "Diverging midpoint. Default is the middle of the domain." },
+        "scheme": {
+          "enum": ["blue", "teal", "orange", "violet"],
+          "description": "Named colour-blind-safe ramp. blue is the default. A range of two or more colours replaces it. Midnight uses a brighter ramp of the same name."
+        },
+        "bins": { "type": "integer", "minimum": 2, "description": "Equal-width bins for quantize. Default 5." },
+        "thresholds": {
+          "type": "array",
+          "items": { "type": "number" },
+          "description": "Cut points for threshold. Colours are one more than the number of cuts."
+        }
+      },
+      "description": "Colour scale. Sequential and diverging are continuous; quantize and threshold are binned."
+    },
     "channel": {
       "oneOf": [
         {
@@ -662,7 +693,7 @@
               "$ref": "#/$defs/format"
             },
             "scale": {
-              "$ref": "#/$defs/scale"
+              "$ref": "#/$defs/colorScale"
             },
             "range": {
               "type": "array",
@@ -670,7 +701,7 @@
               "items": {
                 "$ref": "#/$defs/color"
               },
-              "description": "Colors to use, in order (categorical) or low→high (sequential)."
+              "description": "Colors to use, in order (categorical) or low→high (sequential). Two or more colours replace a named scheme."
             },
             "domain": {
               "type": "array",
@@ -1749,14 +1780,54 @@
               "description": "Show the legend."
             },
             "position": {
-              "enum": [
-                "top",
-                "right",
-                "bottom",
-                "left"
-              ],
+              "enum": ["top", "right", "bottom", "left", "inside"],
               "default": "top",
-              "description": "Placement."
+              "description": "Placement. inside draws over the plot; pair it with anchor."
+            },
+            "anchor": {
+              "enum": ["top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right"],
+              "description": "Anchor for an inside legend. Setting anchor without position uses inside."
+            },
+            "align": {
+              "enum": ["start", "center", "end"],
+              "description": "Alignment of items within the legend block."
+            },
+            "orient": {
+              "enum": ["horizontal", "vertical"],
+              "description": "Item flow. Default horizontal on the top and bottom, vertical on the sides."
+            },
+            "maxRows": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum visible rows. Further rows page behind the first, with previous and next controls."
+            },
+            "title": {
+              "type": "string",
+              "description": "Legend title."
+            },
+            "hide": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Series names omitted from the legend. The series still draws."
+            },
+            "symbol": {
+              "enum": ["circle", "square", "diamond", "triangle", "line", "cross"],
+              "description": "Marker used for every series unless symbols overrides it."
+            },
+            "symbols": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "series": { "type": "string", "description": "Series name." },
+                  "symbol": {
+                    "enum": ["circle", "square", "diamond", "triangle", "line", "cross"],
+                    "description": "Marker for that series."
+                  }
+                }
+              },
+              "description": "Per-series legend markers."
             },
             "interactive": {
               "type": "boolean",
@@ -2261,6 +2332,11 @@
             ]
           },
           "description": "Initially visible x range [from, to] in data units (zoomable charts)."
+        },
+        "export": {
+          "type": "array",
+          "items": { "enum": ["png", "svg", "csv"] },
+          "description": "Formats offered by the export menu. The SVG records them as data-ck-export. The menu loads only when this list is set. toPNG, toSVG, and toCSV are @chartkitdev/core/export."
         }
       },
       "description": "What the user can do. Adapters emit events (pointclick, legendtoggle, rangechange) for app code; JSON never contains functions."

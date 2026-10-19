@@ -156,6 +156,8 @@ const TYPE_FOR = {
   "mark.bar.radius": "bar",
   "mark.bar.width": "bar",
   "mark.color.point": "bar",
+  "scale.color.sequential": "heatmap",
+  "legend.continuous": "heatmap",
 };
 
 function hostType(feature) {
@@ -240,6 +242,16 @@ function demoValue(id, parts, literal) {
   if (leaf === "strokeWidth" || leaf === "pointSize" || leaf === "cornerRadius") return 4;
   if (leaf === "innerRadius" || leaf === "startAngle") return 0;
   if (leaf === "bins") return 4;
+  if (leaf === "export") return ["png", "svg", "csv"];
+  if (leaf === "maxRows") return 1;
+  if (leaf === "scheme") return "teal";
+  if (leaf === "midpoint") return 0;
+  if (leaf === "thresholds") return [1, 3];
+  if (leaf === "hide") return ["units"];
+  if (leaf === "symbol") return "circle";
+  if (leaf === "anchor") return "top-right";
+  if (leaf === "align") return "center";
+  if (leaf === "orient") return "vertical";
   if (leaf === "aspectRatio") return 2;
   if (leaf === "width" && parts.includes("size")) return 640;
   if (leaf === "locale") return "en-US";

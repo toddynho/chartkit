@@ -8,6 +8,8 @@ import { stubDynamicCharts } from "../../../scripts/stub-dynamic-charts.mjs";
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const core = join(root, "../core/src");
 const alias = {
+  "@chartkitdev/core/export-menu": join(core, "export-menu.ts"),
+  "@chartkitdev/core/export": join(core, "export.ts"),
   "@chartkitdev/core/mermaid/phase4": join(core, "mermaid-phase4.ts"),
   "@chartkitdev/core/mermaid": join(core, "mermaid.ts"),
   "@chartkitdev/core/extra-tip": join(core, "extra-tip.ts"),

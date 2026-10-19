@@ -108,6 +108,7 @@ export {
 } from './hooks';
 
 export { Chart, type ChartProps } from './Chart';
+export { toPNG, toSVG, toCSV } from '@chartkitdev/core/export';
 export { validate, suggestAlt } from '@chartkitdev/core/validate';
 export { render, register, createRenderer } from '@chartkitdev/core/all';
 export { attach } from '@chartkitdev/core/extra-tip';

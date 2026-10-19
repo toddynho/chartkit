@@ -1,4 +1,5 @@
 import { annotationLayers } from "../annotations";
+import { colorLegendHeight, readColorScale, scaleLabel } from "../color-scale";
 import { readRules, resolveColors, withPalette } from "../color";
 import { cssVar, paint } from "../theme";
 import { formatValue } from "../format";
@@ -37,19 +38,27 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   const yLog = scaleTypeOf(frame.encoding.y) === "log";
 
   const preset = withPalette(frame.preset, spec.mark);
+  const colorNums: number[] = [];
+  for (let i = 0; i < colorRaw.length; i++) {
+    const value = asNumber(colorRaw[i]);
+    if (value !== null) colorNums.push(value);
+  }
+  const ramp = colorNums.length ? readColorScale(frame.encoding.color, preset, colorNums, false) : null;
   const categories: string[] = [];
-  const points: { x: number; y: number; size: number | null; category?: string; index: number }[] = [];
+  const points: { x: number; y: number; size: number | null; category?: string; tone?: number; index: number }[] = [];
   for (let i = 0; i < table.length; i++) {
     const x = asNumber(xRaw[i]);
     const y = asNumber(yRaw[i]);
     if (x === null || y === null) continue;
     if ((xLog && x <= 0) || (yLog && y <= 0)) continue;
     let category: string | undefined;
-    if (colorEnc?.field) {
+    let tone: number | undefined;
+    if (ramp) tone = asNumber(colorRaw[i]) ?? undefined;
+    else if (colorEnc?.field) {
       category = colorRaw[i] === null || colorRaw[i] === undefined ? "" : String(colorRaw[i]);
       if (!categories.includes(category)) categories.push(category);
     }
-    points.push({ x, y, size: sizeEnc ? asNumber(sizeRaw[i]) : null, category, index: i });
+    points.push({ x, y, size: sizeEnc ? asNumber(sizeRaw[i]) : null, category, tone, index: i });
   }
   if (points.length === 0) return null;
 
@@ -59,21 +68,23 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   const yDomain = yLog ? logDomain(yValues, frame.encoding.y) : padDomain(resolveDomain(yValues, frame.encoding.y, wantsZero(frame.encoding.y, false)), frame.encoding.y);
   const sizes = points.map((point) => point.size).filter((value): value is number => value !== null);
   const sizeDomain: [number, number] = sizes.length ? [Math.min(...sizes), Math.max(...sizes)] : [0, 1];
-  const radius = sizeEnc?.range ?? [typeof frame.mark.pointSize === "number" ? frame.mark.pointSize : 4, typeof frame.mark.pointSize === "number" ? frame.mark.pointSize : 4];
-  const opacity = typeof frame.mark.opacity === "number" ? frame.mark.opacity : 0.75;
+  const point = typeof frame.mark.pointSize === "number" ? frame.mark.pointSize : Math.max(6, frame.geometry.pointSize);
+  const radius = sizeEnc?.range ?? [point, point];
+  const opacity = typeof frame.mark.opacity === "number" ? frame.mark.opacity : ramp ? 1 : 0.75;
   const yMark = isRecord(frame.encoding.y) ? frame.encoding.y : undefined;
   const shape = glyphOf(yMark?.pointShape) || glyphOf(frame.mark.pointShape) || "circle";
   const hollow = yMark?.pointFill === "hollow" || frame.mark.pointFill === "hollow";
   const labelAt = named(frame.mark.labelPosition, ["top", "bottom", "left", "right", "center", "inside", "outside"]);
   const showLabels = frame.mark.labels === true || labelAt !== "" || frame.mark.labelFormat !== undefined;
 
-  const showLegend = frame.legend !== false && categories.length > 1;
+  const showLegend = !ramp && frame.legend !== false && categories.length > 1;
   let top = 16;
   if (frame.title) top = 38;
   if (frame.subtitle) top += 18;
   if (showLegend) top += 22;
   const showX = axisOn(spec, "x");
   const showY = axisOn(spec, "y");
+  const footer = ramp && frame.legend !== false ? colorLegendHeight : 0;
   const xFormat = channelFormat(frame.encoding.x);
   const yFormat = channelFormat(frame.encoding.y);
   const yAxis = readAxis(spec, "y");
@@ -93,7 +104,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   let plotLeft = showY && yAxis.labels && !yRight ? left : 16;
   let plotRight = frame.width - (showY && yAxis.labels && yRight ? left : 16);
   let plotTop = top;
-  let plotBottom = frame.height - (showX && xAxis.labels ? (xAxis.end ? 16 : 36) : 16);
+  let plotBottom = frame.height - footer - (showX && xAxis.labels ? (xAxis.end ? 16 : 36) : 16);
   if (xAxis.end && showX && xAxis.labels) plotTop += 28;
   if (yAxis.title) {
     if (yRight) plotRight -= 16;
@@ -139,7 +150,11 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     fallback: paint(undefined, preset, 0),
     categorical: Boolean(colorEnc?.field || colorEnc?.domain || colorEnc?.range),
   });
-  const pointColor = (index: number) => resolved?.[index] ?? paint(undefined, preset, 0);
+  const pointColor = (index: number) => {
+    const tone = points[index]?.tone;
+    if (ramp && typeof tone === "number") return ramp.paint(tone);
+    return resolved?.[index] ?? paint(undefined, preset, 0);
+  };
   const colorOf = (category: string | undefined) => {
     const found = points.findIndex((point) => point.category === category);
     return pointColor(found >= 0 ? found : 0);
@@ -250,8 +265,9 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     }
   }
   if (showX && xAxis.title) {
-    parts.push(label((plot.left + plot.right) / 2, xAxis.end ? plot.top - 40 : frame.height - 6, xAxis.title, cssVar("muted", frame.preset.muted), 11, "500", "middle"));
+    parts.push(label((plot.left + plot.right) / 2, xAxis.end ? plot.top - 40 : frame.height - footer - 6, xAxis.title, cssVar("muted", frame.preset.muted), 11, "500", "middle"));
   }
+  if (footer && ramp) parts.push(ramp.legend(plot.left, frame.height - colorLegendHeight, scaleLabel(preset)));
   parts.push(closeChart());
   return parts.join("");
 }

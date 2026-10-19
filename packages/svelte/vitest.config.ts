@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     conditions: ["browser"],
     alias: [
+      { find: "@chartkitdev/core/export", replacement: path.resolve(__dirname, "../core/src/export.ts") },
       { find: "@chartkitdev/core/extra-tip", replacement: path.resolve(__dirname, "../core/src/extra-tip.ts") },
       { find: "@chartkitdev/core/extra", replacement: path.resolve(__dirname, "../core/src/extra.ts") },
       { find: "@chartkitdev/core/load", replacement: path.resolve(__dirname, "../core/src/load.ts") },
