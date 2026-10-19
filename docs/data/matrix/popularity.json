@@ -1,0 +1,201 @@
+{
+ "fetched": "2026-10-19T01:17:26.172Z",
+ "npmWeekly": {
+  "recharts": 34129545,
+  "d3": 13955013,
+  "mermaid": 11229409,
+  "chart.js": 7174002,
+  "@visx/shape": 4025826,
+  "echarts": 3734129,
+  "react-chartjs-2": 2519741,
+  "highcharts": 1329887,
+  "apexcharts": 1154442,
+  "ag-charts-community": 1062793,
+  "ag-charts-enterprise": 857791,
+  "echarts-for-react": 886887,
+  "@nivo/core": 875412,
+  "vega": 831974,
+  "vega-lite": 806427,
+  "lightweight-charts": 774266,
+  "@mui/x-charts": 600081,
+  "@mui/x-charts-pro": 91543,
+  "@observablehq/plot": 577211,
+  "plotly.js": 430191,
+  "plotly.js-dist-min": 295097,
+  "uplot": 401206,
+  "@tremor/react": 291486,
+  "victory": 235507,
+  "victory-native": 264518,
+  "@amcharts/amcharts5": 188470,
+  "@antv/g2": 187311,
+  "@unovis/ts": 151866,
+  "react-google-charts": 88511,
+  "c3": 83435,
+  "chartist": 67472,
+  "billboard.js": 31927,
+  "@carbon/charts": 47565,
+  "frappe-charts": 58285,
+  "nvd3": 61011,
+  "react-apexcharts": 573404,
+  "highcharts-react-official": 539720,
+  "@chartkitdev/core": null
+ },
+ "npmWindow": "2026-10-10..2026-10-16",
+ "github": {
+  "chartkit": {
+   "repo": "toddynho/chartkit",
+   "stars": 7,
+   "pushed_at": "2026-10-19T00:49:47Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "chartjs": {
+   "repo": "chartjs/Chart.js",
+   "stars": 67746,
+   "pushed_at": "2026-10-04T13:05:36Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "recharts": {
+   "repo": "recharts/recharts",
+   "stars": 27638,
+   "pushed_at": "2026-10-18T03:15:09Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "echarts": {
+   "repo": "apache/echarts",
+   "stars": 67539,
+   "pushed_at": "2026-10-13T09:27:20Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "highcharts": {
+   "repo": "highcharts/highcharts",
+   "stars": 12494,
+   "pushed_at": "2026-10-16T17:26:41Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "plotly": {
+   "repo": "plotly/plotly.js",
+   "stars": 18362,
+   "pushed_at": "2026-10-16T21:18:29Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "nivo": {
+   "repo": "plouc/nivo",
+   "stars": 14118,
+   "pushed_at": "2026-07-21T02:46:40Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "victory": {
+   "repo": "FormidableLabs/victory",
+   "stars": 11240,
+   "pushed_at": "2025-12-19T23:11:18Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "visx": {
+   "repo": "airbnb/visx",
+   "stars": 21080,
+   "pushed_at": "2026-06-22T14:25:22Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "apexcharts": {
+   "repo": "apexcharts/apexcharts.js",
+   "stars": 15179,
+   "pushed_at": "2026-10-17T19:25:43Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "tremor": {
+   "repo": "tremorlabs/tremor-npm",
+   "stars": 16473,
+   "pushed_at": "2025-01-13T13:06:10Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "plot": {
+   "repo": "observablehq/plot",
+   "stars": 5406,
+   "pushed_at": "2026-09-01T17:19:43Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "vegalite": {
+   "repo": "vega/vega-lite",
+   "stars": 5524,
+   "pushed_at": "2026-10-14T01:26:54Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "agcharts": {
+   "repo": "ag-grid/ag-charts",
+   "stars": 485,
+   "pushed_at": "2026-10-18T20:31:13Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "amcharts": {
+   "repo": "amcharts/amcharts5",
+   "stars": 448,
+   "pushed_at": "2026-10-14T15:21:04Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "googlecharts": null,
+  "uplot": {
+   "repo": "leeoniya/uPlot",
+   "stars": 10568,
+   "pushed_at": "2026-10-17T07:24:33Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "lightweight": {
+   "repo": "tradingview/lightweight-charts",
+   "stars": 17614,
+   "pushed_at": "2026-10-13T13:23:44Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "muix": {
+   "repo": "mui/mui-x",
+   "stars": 5862,
+   "pushed_at": "2026-10-19T00:55:33Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "mermaid": {
+   "repo": "mermaid-js/mermaid",
+   "stars": 90738,
+   "pushed_at": "2026-10-18T22:28:44Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "d3": {
+   "repo": "d3/d3",
+   "stars": 113766,
+   "pushed_at": "2026-05-28T14:43:01Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "g2": {
+   "repo": "antvis/G2",
+   "stars": 12637,
+   "pushed_at": "2026-10-16T08:03:06Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  },
+  "unovis": {
+   "repo": "f5/unovis",
+   "stars": 2856,
+   "pushed_at": "2026-10-16T22:21:14Z",
+   "archived": false,
+   "fetched": "2026-10-19T01:17:26.172Z"
+  }
+ }
+}

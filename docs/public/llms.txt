@@ -9,163 +9,112 @@
 - Extra charts: @chartkitdev/core/extra or /charts/<type>. Phase 4 is gantt, timeline, quadrant, venn, and journey. import { validatePhase4 } from "@chartkitdev/core/validate/phase4". Field details are in llms-full.txt.
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
 
-## line
+Features (21 libraries, sourced): https://chartkit.dev/features.json
+Types: line, bar, donut, stacked-area, scatter, combo, heatmap, gauge, kpi, sparkline, mini-area, progress-ring, spike, candlestick, histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey
 
 ```json
 {"version":"1","type":"line","data":[{"quarter":"Q1","units":40},{"quarter":"Q2","units":55}],"encoding":{"x":"quarter","y":"units"},"a11y":{"alt":"Units rose in Q2."}}
 ```
 
-## bar
-
 ```json
 {"version":"1","type":"bar","data":[{"lane":"A","stops":12},{"lane":"C","stops":15}],"encoding":{"x":"lane","y":"stops"},"a11y":{"alt":"Lane C has more."}}
 ```
-
-## donut
 
 ```json
 {"version":"1","type":"donut","data":[{"wood":"Oak","boards":8},{"wood":"Pine","boards":5}],"encoding":{"x":"wood","y":"boards"},"a11y":{"alt":"Oak is larger."}}
 ```
 
-## stacked-area
-
 ```json
 {"version":"1","type":"stacked-area","data":[{"year":"2022","rail":20,"road":30},{"year":"2023","rail":24,"road":28}],"encoding":{"x":"year","y":["rail","road"]},"a11y":{"alt":"Road stayed larger."}}
 ```
-
-## scatter
 
 ```json
 {"version":"1","type":"scatter","data":[{"temp":16,"yieldKg":3},{"temp":22,"yieldKg":5}],"encoding":{"x":"temp","y":"yieldKg"},"a11y":{"alt":"Yield peaks at 22."}}
 ```
 
-## combo
-
 ```json
 {"version":"1","type":"combo","data":[{"week":"W1","orders":30,"rate":0.4},{"week":"W2","orders":36,"rate":0.55}],"encoding":{"x":"week","y":[{"field":"orders","mark":"bar"},{"field":"rate","mark":"line","axis":"y2"}]},"axes":{"y2":{"title":"Fill rate"}},"a11y":{"alt":"Orders and rate rose."}}
 ```
-
-## heatmap
 
 ```json
 {"version":"1","type":"heatmap","data":[{"bin":"A","band":"Low","level":1},{"bin":"B","band":"Low","level":4}],"encoding":{"x":"bin","y":"band","color":"level"},"a11y":{"alt":"Bin B is darker."}}
 ```
 
-## gauge
-
 ```json
 {"version":"1","type":"gauge","metric":{"label":"Capacity","value":64,"min":0,"max":100},"a11y":{"alt":"Capacity is 64/100."}}
 ```
-
-## kpi
 
 ```json
 {"version":"1","type":"kpi","metric":{"label":"Tickets","value":18,"delta":-0.05},"a11y":{"alt":"Tickets are 18, down."}}
 ```
 
-## sparkline
-
 ```json
 {"version":"1","type":"sparkline","data":[4,6,5,9,8],"a11y":{"alt":"It ends higher."}}
 ```
-
-## mini-area
 
 ```json
 {"version":"1","type":"mini-area","data":[2,3,3,6,5],"a11y":{"alt":"It rises, then eases."}}
 ```
 
-## progress-ring
-
 ```json
 {"version":"1","type":"progress-ring","metric":{"label":"Done","value":3,"min":0,"max":8},"a11y":{"alt":"3 of 8 are done."}}
 ```
-
-## spike
 
 ```json
 {"version":"1","type":"spike","data":[{"slot":"t1","hits":0},{"slot":"t2","hits":6}],"encoding":{"x":"slot","y":"hits"},"a11y":{"alt":"Hits spike at t2."}}
 ```
 
-## candlestick
-
 ```json
 {"version":"1","type":"candlestick","data":[{"day":"D1","open":5,"high":7,"low":4,"close":6}],"encoding":{"x":"day","open":"open","high":"high","low":"low","close":"close"},"a11y":{"alt":"D1 closed up."}}
 ```
-
-## histogram
 
 ```json
 {"version":"1","type":"histogram","data":[{"score":1},{"score":2},{"score":2},{"score":8}],"encoding":{"x":"score"},"mark":{"bins":2},"a11y":{"alt":"Scores cluster low."}}
 ```
 
-## boxplot
-
 ```json
 {"version":"1","type":"boxplot","data":[{"group":"A","value":1},{"group":"A","value":9},{"group":"B","value":2},{"group":"B","value":4}],"encoding":{"x":"group","y":"value"},"a11y":{"alt":"A stretches higher."}}
 ```
-
-## radar
 
 ```json
 {"version":"1","type":"radar","data":[{"spoke":"Speed","car":4,"bike":2},{"spoke":"Cost","car":2,"bike":5},{"spoke":"Ease","car":3,"bike":4}],"encoding":{"x":"spoke","y":["car","bike"]},"a11y":{"alt":"Bike leads on cost."}}
 ```
 
-## funnel
-
 ```json
 {"version":"1","type":"funnel","data":[{"stage":"Visit","count":80},{"stage":"Pay","count":12}],"encoding":{"x":"stage","y":"count"},"a11y":{"alt":"12 of 80 pay."}}
 ```
-
-## treemap
 
 ```json
 {"version":"1","type":"treemap","data":[{"name":"Oak","size":8,"group":"Wood"},{"name":"Steel","size":6,"group":"Metal"}],"encoding":{"x":"name","y":"size","color":"group"},"a11y":{"alt":"Oak is larger."}}
 ```
 
-## sankey
-
 ```json
 {"version":"1","type":"sankey","data":[{"from":"Source","to":"Mill","flow":10},{"from":"Mill","to":"Shop","flow":6}],"encoding":{"source":"from","target":"to","y":"flow"},"a11y":{"alt":"Flow leaves the mill."}}
 ```
-
-## bullet
 
 ```json
 {"version":"1","type":"bullet","data":[{"name":"Revenue","value":275,"target":250,"good":300}],"encoding":{"x":"name","y":"value","target":"target"},"mark":{"ranges":["good"]},"a11y":{"alt":"Revenue beats target."}}
 ```
 
-## waterfall
-
 ```json
 {"version":"1","type":"waterfall","data":[{"step":"Open","amount":120,"total":true},{"step":"Won","amount":40},{"step":"Close","amount":160,"total":true}],"encoding":{"x":"step","y":"amount"},"a11y":{"alt":"The close is 160."}}
 ```
-
-## gantt
 
 ```json
 {"version":"1","type":"gantt","data":[{"id":"a","task":"Spec","section":"Plan","start":"2026-03-02","end":"2026-03-13","status":"done"},{"id":"b","task":"Ship","start":"2026-04-06","milestone":true,"depends":"a"}],"a11y":{"alt":"Ship follows the spec."}}
 ```
 
-## timeline
-
 ```json
 {"version":"1","type":"timeline","data":[{"label":"Founded","date":"2014-06-01"},{"label":"Platform","start":"2024-01-01","end":"2026-01-01","kind":"period"}],"a11y":{"alt":"The company started in 2014."}}
 ```
-
-## quadrant
 
 ```json
 {"version":"1","type":"quadrant","quadrants":["Quick wins","Big bets","Fill-ins","Reconsider"],"data":[{"name":"SSO","x":0.2,"y":0.8},{"name":"Reports","x":0.8,"y":0.3}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"SSO is a quick win."}}
 ```
 
-## venn
-
 ```json
 {"version":"1","type":"venn","data":[{"set":"Search","size":12},{"set":"Filters","size":8},{"set":"Search+Filters","size":3}],"a11y":{"alt":"Search and filters overlap."}}
 ```
-
-## journey
 
 ```json
 {"version":"1","type":"journey","data":[{"section":"Pay","step":"Enter card","score":2,"actors":"Shopper"}],"a11y":{"alt":"Entering a card scores 2."}}

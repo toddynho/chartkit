@@ -342,6 +342,42 @@ p code, li code, td code {
   padding: 0.05em 0.35em;
 }
 
+.badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.badge-native, .badge-win { color: var(--good); }
+.badge-partial, .badge-plugin, .badge-manual { color: var(--accent); }
+.badge-warns, .badge-none { color: var(--bad); }
+.badge-unknown { color: var(--muted); }
+.counts { display: flex; flex-wrap: wrap; gap: 16px; padding: 0; list-style: none; }
+.counts b { font-variant-numeric: tabular-nums; }
+.feature-list { list-style: none; padding: 0; margin: 0 0 28px; }
+.feature-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  border-bottom: 1px solid var(--line);
+  padding: 6px 0;
+}
+.feature-list a { text-decoration: none; }
+.spec-block {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  background: var(--code);
+  border-radius: 12px;
+  font-size: 13px;
+}
+.cell-note { display: block; color: var(--muted); margin-top: 4px; }
 .table-wrap { overflow-x: auto; margin: 0 0 16px; }
 table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
 th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
