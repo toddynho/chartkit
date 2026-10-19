@@ -15011,7 +15011,7 @@
               "loc": "chartkit:packages/core/src/generated/schema.ts:2165"
             }
           ],
-          "note": "A fixed size grows the day cells to fill the box. Unsized calendars stay at 12px.",
+          "note": "A fixed width lays the weeks across that width. Unsized calendars stay at 12px. The legend sits under the first week.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -45658,7 +45658,7 @@
               "loc": "chartkit:packages/core/src/generated/schema.ts:779"
             }
           ],
-          "note": "sequential, diverging, quantize, and threshold. scheme blue, teal, orange, or violet.",
+          "note": "sequential, diverging, quantize, and threshold. A threshold legend labels the cuts, not the data ends. scheme blue, teal, orange, or violet.",
           "verified": "dts-path",
           "strength": "strong"
         },

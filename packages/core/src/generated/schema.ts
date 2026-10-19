@@ -808,7 +808,7 @@ export interface ColorScale {
    */
   bins?: number;
   /**
-   * Cut points for threshold. Colours are one more than the number of cuts.
+   * Cut points for threshold. Colours are one more than the number of cuts. The legend labels the cuts, for example <6, 6–12, ≥12, not the data ends.
    */
   thresholds?: number[];
 }
@@ -2164,7 +2164,7 @@ export interface Mark {
    */
   layout?: "calendar" | "grid";
   /**
-   * Number of weeks shown in calendar layout. Ignored on a grid heatmap. A fixed size grows the cells to fill the box. Applies to: heatmap.
+   * Number of weeks shown in calendar layout. Ignored on a grid heatmap. A fixed width lays the weeks across that width. Unsized calendars stay at 12px. Applies to: heatmap.
    */
   weeks?: number;
   /**

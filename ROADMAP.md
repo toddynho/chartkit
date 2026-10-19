@@ -26,7 +26,7 @@ Earlier v1 work. 28 chart types draw: 15 in the first core, eight in Phase 3, an
 - [x] Pie and colour: a real pie type, leader lines, and per-point and conditional colour ([#25](https://github.com/toddynho/chartkit/pull/25))
 - [x] PNG, SVG, and CSV export, with a keyboard export menu ([#27](https://github.com/toddynho/chartkit/pull/27))
 - [x] Legends and colour scales ([#27](https://github.com/toddynho/chartkit/pull/27))
-- [x] Core gaps: line glow, funnel legends, monotone curves, and calendar sizing ([#32](https://github.com/toddynho/chartkit/pull/32))
+- [x] Core gaps: line glow, funnel legends, monotone curves, calendar weeks that fill a fixed width, and threshold legends that label the cuts ([#32](https://github.com/toddynho/chartkit/pull/32))
 
 ## In progress
 
