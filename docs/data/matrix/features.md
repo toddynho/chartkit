@@ -6,7 +6,7 @@ Checked 2026-10-18. 263 features in 23 categories × 21 libraries = 5523 cells. 
 
 Legend: ● native · ◐ partial · ⊕ plugin · ✎ manual (escape hatch only) · \· none · ? unknown/unverified. Suffix ᴱ = AG Enterprise, ᴾ = MUI Pro/Premium (paid).
 
-Coverage: 33.9% strong (type-checked path / schema / runtime probe / licence file), 31.3% weak (identifier grep, plugin on npm, escape-hatch only), 26.7% absence-verified "none", 8.0% unknown.
+Coverage: 34.0% strong (type-checked path / schema / runtime probe / licence file), 31.3% weak (identifier grep, plugin on npm, escape-hatch only), 26.6% absence-verified "none", 8.0% unknown. ChartKit `mark.point.shape`, `label.show`, `label.position`, `label.format`, `label.collision`, and `label.total` were rechecked native on 2026-10-19.
 
 ## Libraries
 
@@ -158,7 +158,7 @@ Per-series visual properties
 | **Line width** <br><sub>`mark.stroke.width` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ? | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
 | **Dashed / dotted lines** <br><sub>`mark.stroke.dash` ★</sub> | ● | ● | ● | ● | ● | ● | ◐ | ● | ● | ● | · | ● | ● | ● | ● | ◐ | ● | ● | ◐ | ? | ● |
 | **Opacity / fill opacity** <br><sub>`mark.opacity` ★</sub> | ● | ◐ | ● | ● | ● | ● | ● | ● | ● | ● | ? | ● | ● | ● | ● | ● | ◐ | ◐ | ◐ | ? | ● |
-| **Point marker shapes** <br><sub>`mark.point.shape` ★</sub> | · | ● | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ● | ● | ◐ | ● | ● | · | ● |
+| **Point marker shapes** <br><sub>`mark.point.shape` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ● | ● | ◐ | ● | ● | · | ● |
 | **Point marker size** <br><sub>`mark.point.size`</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ● | ● | ● | ● | ● | · | ● |
 | **Show markers always / on hover / never** <br><sub>`mark.point.visibility`</sub> | ● | ● | ● | ● | ● | ● | ● | ◐ | ◐ | ● | ? | ● | ● | ● | ● | ● | ● | ● | ● | · | ● |
 | **Rounded bar corners** <br><sub>`mark.bar.radius`</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ● | · | · | · | ● | · | ● |
@@ -268,12 +268,12 @@ Values printed on marks
 
 | Feature | CK | CJ | RC | EC | HC | PL | NV | VI | VX | AP | TR | OP | VL | AG | AM | GC | UP | LW | MU | MM | G2 |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| **Data labels on marks** <br><sub>`label.show` ★</sub> | ◐ | ⊕ | ● | ● | ● | ● | ● | ● | ✎ | ● | · | ● | ● | ● | ● | ● | · | ◐ | ● | ● | ● |
-| **Data label position** <br><sub>`label.position` ★</sub> | · | ⊕ | ● | ● | ● | ● | ● | ● | ✎ | ● | ? | ● | ● | ● | ● | ? | ? | ? | ● | ● | ● |
-| **Data label formatting** <br><sub>`label.format` ★</sub> | ◐ | ⊕ | ● | ● | ● | ● | ● | ● | ✎ | ● | ? | ● | ● | ● | ● | ● | ? | ? | ● | · | ● |
-| **Label collision avoidance** <br><sub>`label.collision`</sub> | · | ⊕ | · | ● | ● | ● | ● | ? | · | ? | · | ● | · | ● | ● | ? | · | · | · | ? | ● |
+| **Data labels on marks** <br><sub>`label.show` ★</sub> | ● | ⊕ | ● | ● | ● | ● | ● | ● | ✎ | ● | · | ● | ● | ● | ● | ● | · | ◐ | ● | ● | ● |
+| **Data label position** <br><sub>`label.position` ★</sub> | ● | ⊕ | ● | ● | ● | ● | ● | ● | ✎ | ● | ? | ● | ● | ● | ● | ? | ? | ? | ● | ● | ● |
+| **Data label formatting** <br><sub>`label.format` ★</sub> | ● | ⊕ | ● | ● | ● | ● | ● | ● | ✎ | ● | ? | ● | ● | ● | ● | ● | ? | ? | ● | · | ● |
+| **Label collision avoidance** <br><sub>`label.collision`</sub> | ● | ⊕ | · | ● | ● | ● | ● | ? | · | ? | · | ● | · | ● | ● | ? | · | · | · | ? | ● |
 | **Pie slice labels / leader lines** <br><sub>`label.pie` ★</sub> | · | ⊕ | ● | ● | ● | ◐ | ● | ● | ✎ | · | · | · | · | ● | ● | ● | · | · | ● | · | ● |
-| **Stack totals** <br><sub>`label.total` ★</sub> | · | ⊕ | ✎ | ✎ | ● | ✎ | ● | ✎ | ✎ | ● | · | ✎ | ✎ | ? | ✎ | · | · | · | ✎ | · | ✎ |
+| **Stack totals** <br><sub>`label.total` ★</sub> | ● | ⊕ | ✎ | ✎ | ● | ✎ | ● | ✎ | ✎ | ● | · | ✎ | ✎ | ? | ✎ | · | · | · | ✎ | · | ✎ |
 
 ## Interaction (`interaction`)
 

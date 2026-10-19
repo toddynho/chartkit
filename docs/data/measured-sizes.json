@@ -5,14 +5,14 @@
   "sizeScript": {
     "command": "node scripts/size.mjs",
     "method": "esbuild --bundle --minify, gzip level 9, platform node. line is createRenderer([line]) from packages/core/src. all is packages/core/src/all.ts.",
-    "measuredAt": "2026-10-19T15:12:23.781Z",
+    "measuredAt": "2026-10-19T16:45:00.000Z",
     "measured": {
-      "line": 17661,
-      "all": 30579
+      "line": 19004,
+      "all": 32860
     },
     "minBytes": {
-      "line": 49410,
-      "all": 90721
+      "line": 53132,
+      "all": 96815
     }
   },
   "bench": {

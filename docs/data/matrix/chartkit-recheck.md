@@ -34,3 +34,16 @@ Rechecked after tooltip content (PR #18) and this interaction pass. A cell moved
 | interaction.click | native | `pointclick`, `seriesclick`, and `legendclick` carry series, datum, index, x, y, value, and the original row. Enter or Space fires `pointclick`. |
 | interaction.select | native | `point` and `series`, with Shift, Ctrl, or Meta to add. Escape or a background click clears. `--ck-dim` and `--ck-selected` style the marks. CK3012 is gone. |
 | interaction.legend.hover | native | Hovering a legend item dims the other series. |
+
+## Marks and labels
+
+Rechecked on `createRenderer([line])` and the bar, scatter, and donut entries. A cell moved to native only when a runtime probe changed the picture.
+
+| id | status | correction |
+|---|---|---|
+| mark.point.shape | native | `mark.pointShape` draws circle, square, diamond, triangle, cross, or none. A series can override shape, size, and filled or hollow. The legend swatch uses the marker. |
+| label.show | native | Line, stacked area, and scatter draw `mark.labels`. CK3012 is gone. Bar and donut still draw it. |
+| label.position | native | `mark.labelPosition` is top, bottom, left, right, center, inside, or outside. |
+| label.format | native | `mark.labelFormat` reuses the format presets on the label text. |
+| label.collision | native | A label that would overlap one already drawn is skipped. |
+| label.total | native | `mark.stackTotal` labels the total on a stacked bar or stacked area. |

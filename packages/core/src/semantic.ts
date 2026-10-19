@@ -393,9 +393,6 @@ function warnUnbuilt(spec: Record<string, unknown>, diagnostics: Diagnostic[]): 
 }
 
 function warnUnusedMarks(type: string, mark: Record<string, unknown>, diagnostics: Diagnostic[]): void {
-  if (mark.labels === true && (type === "line" || type === "stacked-area" || type === "scatter")) {
-    flag(diagnostics, "/mark/labels", "ignored; bars and slices");
-  }
   for (const key of Object.keys(mark)) {
     const applies = MARK_APPLIES[key];
     if (!applies || applies.includes(type)) continue;

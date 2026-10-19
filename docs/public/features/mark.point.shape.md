@@ -1,14 +1,49 @@
 # Point marker shapes
 
-ChartKit: **none**
+ChartKit: **native**
 
 Circle, square, triangle, custom symbols
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-circles only
+circle, square, diamond, triangle, cross, or none. A y series may set pointShape, pointSize, and pointFill. The legend swatch uses the marker. Drawn on createRenderer([line]).
 
-No spec snippet. ChartKit does not support this feature.
+Source: packages/core/src/glyphs.ts:15
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "scatter",
+  "data": [
+    {
+      "temp": 16,
+      "yieldKg": 3
+    },
+    {
+      "temp": 22,
+      "yieldKg": 5
+    }
+  ],
+  "encoding": {
+    "x": "temp",
+    "y": "yieldKg"
+  },
+  "a11y": {
+    "alt": "Yield peaks at 22."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "mark": {
+    "pointShape": "diamond"
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -35,6 +70,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~shape | dts-grep (weak) | @antv/g2/lib/component/utils.d.ts:27 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 167b01d2f0df.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against c09b89c6d9f1.
 
 https://chartkit.dev/features.json

@@ -1,6 +1,7 @@
 import { annotationLayers } from "../annotations";
 import { cssVar, paint } from "../theme";
 import { formatValue } from "../format";
+import { bag, glyphOf, marker, named, nudge } from "../glyphs";
 import {
   asNumber,
   axisOn,
@@ -16,7 +17,7 @@ import {
   scaleTypeOf,
   wantsZero,
 } from "../frame";
-import { boxId, clipPath, closeChart, domainEnds, esc, font, linear, logNice, logScale, logTicks, n, openChart, pickTicks, readAxis, readInset } from "../svg";
+import { boxId, clipPath, closeChart, domainEnds, esc, font, isRecord, linear, logNice, logScale, logTicks, n, openChart, pickTicks, readAxis, readInset } from "../svg";
 
 /** Scatter / bubble. encoding.x and encoding.y are quantitative; size and color are optional. */
 export function renderScatter(spec: Record<string, unknown>): string | null {
@@ -58,6 +59,11 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   const sizeDomain: [number, number] = sizes.length ? [Math.min(...sizes), Math.max(...sizes)] : [0, 1];
   const radius = sizeEnc?.range ?? [typeof frame.mark.pointSize === "number" ? frame.mark.pointSize : 4, typeof frame.mark.pointSize === "number" ? frame.mark.pointSize : 4];
   const opacity = typeof frame.mark.opacity === "number" ? frame.mark.opacity : 0.75;
+  const yMark = isRecord(frame.encoding.y) ? frame.encoding.y : undefined;
+  const shape = glyphOf(yMark?.pointShape) || glyphOf(frame.mark.pointShape) || "circle";
+  const hollow = yMark?.pointFill === "hollow" || frame.mark.pointFill === "hollow";
+  const labelAt = named(frame.mark.labelPosition, ["top", "bottom", "left", "right", "center", "inside", "outside"]);
+  const showLabels = frame.mark.labels === true || labelAt !== "" || frame.mark.labelFormat !== undefined;
 
   const showLegend = frame.legend !== false && categories.length > 1;
   let top = 16;
@@ -99,6 +105,13 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   if (inset.r !== undefined) plotRight = Math.min(plotRight, frame.width - inset.r);
   if (inset.t !== undefined) plotTop = Math.max(plotTop, inset.t);
   if (inset.b !== undefined) plotBottom = Math.min(plotBottom, frame.height - inset.b);
+  if (showLabels) {
+    const pos = labelAt || "top";
+    if (pos === "top" || pos === "outside") plotTop += 16;
+    if (pos === "bottom") plotBottom -= 14;
+    if (pos === "left") plotLeft += 28;
+    if (pos === "right") plotRight -= 28;
+  }
   const plot = { left: plotLeft, top: plotTop, right: Math.max(plotLeft + 1, plotRight), bottom: Math.max(plotTop + 1, plotBottom) };
   const xRev = scaleReverse(frame.encoding.x);
   const yRev = scaleReverse(frame.encoding.y);
@@ -130,7 +143,10 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
       const width = 28 + category.length * 6.6;
       if (cx > plot.left && cx + width > plot.right) break;
       const color = colorOf(category, index);
-      bits.push(`<rect x="${n(cx)}" y="${n(top - 18)}" width="10" height="10" rx="2" fill="${color}" />${label(cx + 16, top - 9, category || " ", cssVar("text", frame.preset.text), 12, "400")}`);
+      const swatch = shape === "circle" && !hollow
+        ? `<rect x="${n(cx)}" y="${n(top - 18)}" width="10" height="10" rx="2" fill="${color}" />`
+        : marker(cx + 5, top - 13, 4.5, shape, color, hollow);
+      bits.push(`${swatch}${label(cx + 16, top - 9, category || " ", cssVar("text", frame.preset.text), 12, "400")}`);
       cx += width;
     }
     parts.push(bits.join(""));
@@ -167,6 +183,9 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   parts.push(`<defs>${clipPath(clip, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top)}</defs>`);
   parts.push(notes.under);
   parts.push(`<g clip-path="url(#${clip})">`);
+  const labels = bag();
+  let labelSvg = "";
+  const labelFill = cssVar("text", frame.preset.text);
   points.forEach((point, index) => {
     const raw = point.size === null ? radius[0] : lerp(point.size, sizeDomain[0], sizeDomain[1], radius[0], radius[1]);
     const cx = xScale(point.x);
@@ -176,11 +195,20 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     const color = colorOf(point.category, index);
     const name = point.category ? `${point.category}, ` : "";
     const text = `${name}${xField ?? "x"} ${formatValue(point.x, xFormat, frame.locale)}, ${yField ?? "y"} ${formatValue(point.y, yFormat, frame.locale)}`;
-    parts.push(
-      `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" fill="${color}" fill-opacity="${n(opacity)}" aria-label="${esc(text)}"><title>${esc(text)}</title></circle>`,
-    );
+    const extra = ` fill-opacity="${n(opacity)}" aria-label="${esc(text)}"`;
+    const drawn = shape === "none" ? "" : marker(cx, cy, r, shape, color, hollow, extra);
+    if (drawn) {
+      const tag = drawn.startsWith("<rect") ? "rect" : drawn.startsWith("<path") ? "path" : "circle";
+      parts.push(drawn.replace(/\s*\/>$/, `><title>${esc(text)}</title></${tag}>`));
+    }
+    if (showLabels) {
+      const shift = nudge(labelAt || "top", r);
+      const format = frame.mark.labelFormat ?? yFormat;
+      labelSvg += labels.put(formatValue(point.y, format, frame.locale), cx + shift[0], cy + shift[1], shift[2], labelFill);
+    }
   });
   parts.push("</g>");
+  if (labelSvg) parts.push(labelSvg);
   parts.push(notes.over);
 
   if (showY && yAxis.labels) {

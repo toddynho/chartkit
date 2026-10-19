@@ -2099,7 +2099,7 @@ mark.opacity,mark,Opacity / fill opacity,3,lightweight,5.2.1,partial,,,~color,24
 mark.opacity,mark,Opacity / fill opacity,3,muix,9.15.0,partial,,,~opacity,@mui/x-charts/ChartsYAxis/useAxisTicksProps.d.ts:3941,dts-grep,weak,
 mark.opacity,mark,Opacity / fill opacity,3,mermaid,11.17.2,unknown,none,,"~['""`](?:opacity)['""`]|(?:^|[\s{,;])\w*(?:opacity)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:opacity)",,conflict,unknown,
 mark.opacity,mark,Opacity / fill opacity,3,g2,5.4.8,native,,,~fillOpacity,@antv/g2/lib/runtime/types/theme.d.ts:11,dts-grep,weak,
-mark.point.shape,mark,Point marker shapes,3,chartkit,0.5.0 (main 116d0af),none,,,"~['""`](?:symbol)['""`]|(?:^|[\s{,;])\w*(?:symbol)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:symbol)","['""`](?:symbol)['""`]|(?:^|[\s{,;])\w*(?:symbol)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:symbol)",dts-absence,absence,circles only
+mark.point.shape,mark,Point marker shapes,3,chartkit,"0.5.0 (main, marks and labels)",native,,,ChartKitChartSpecV1.mark.pointShape,packages/core/src/glyphs.ts:15,runtime-probe,strong,"circle, square, diamond, triangle, cross, or none. A y series may set pointShape, pointSize, and pointFill. The legend swatch uses the marker. Drawn on createRenderer([line])."
 mark.point.shape,mark,Point marker shapes,3,chartjs,4.5.1,native,,,ChartConfiguration.data.datasets.pointStyle,chart.js/dist/types/index.d.ts:2074,dts-path,strong,
 mark.point.shape,mark,Point marker shapes,3,recharts,3.10.1,native,,,Line.dot | Scatter.shape,recharts/types/cartesian/Line.d.ts:120 | recharts/types/cartesian/Scatter.d.ts:179,dts-path,strong,
 mark.point.shape,mark,Point marker shapes,3,echarts,6.1.0,native,,,series.symbol,echarts/types/dist/shared.d.ts:7754,dts-path,strong,
@@ -3527,7 +3527,7 @@ annotation.trendline,annotation,Trend / average / statistic lines,2,lightweight,
 annotation.trendline,annotation,Trend / average / statistic lines,2,muix,9.15.0,none,,,"~['""`](?:average)['""`]|(?:^|[\s{,;])\w*(?:average)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:average)","['""`](?:average)['""`]|(?:^|[\s{,;])\w*(?:average)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:average)",dts-absence,absence,
 annotation.trendline,annotation,Trend / average / statistic lines,2,mermaid,11.17.2,none,,,"~['""`](?:average)['""`]|(?:^|[\s{,;])\w*(?:average)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:average)","['""`](?:average)['""`]|(?:^|[\s{,;])\w*(?:average)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:average)",dts-absence,absence,
 annotation.trendline,annotation,Trend / average / statistic lines,2,g2,5.4.8,native,,,~mean|median,@antv/g2/lib/spec/transform.d.ts:26,dts-grep,weak,
-label.show,label,Data labels on marks,3,chartkit,0.5.0 (main 116d0af),partial,,,ChartKitChartSpecV1.mark.labels,chartkit:packages/core/src/generated/schema.ts:859,runtime-probe,strong,"bar and donut draw mark.labels since PR #16; line, stacked-area, and scatter warn CK3012 (ignored; bars and slices) since PR #17 (main 116d0af) and are not drawn"
+label.show,label,Data labels on marks,3,chartkit,"0.5.0 (main, marks and labels)",native,,,ChartKitChartSpecV1.mark.labels,packages/core/src/generated/schema.ts:887,runtime-probe,strong,"Line, stacked area, scatter, bar, and donut draw mark.labels. CK3012 is gone. Overlapping labels are skipped."
 label.show,label,Data labels on marks,3,chartjs,4.5.1,plugin,,,,chartjs-plugin-datalabels,npm,weak,
 label.show,label,Data labels on marks,3,recharts,3.10.1,native,,,LabelList | Bar.label,recharts/types/component/LabelList.d.ts:146 | recharts/types/cartesian/Bar.d.ts:259,dts-path,strong,
 label.show,label,Data labels on marks,3,echarts,6.1.0,native,,,series.label.show,echarts/types/dist/shared.d.ts:7875,dts-path,strong,
@@ -3548,7 +3548,7 @@ label.show,label,Data labels on marks,3,lightweight,5.2.1,partial,,,~lastValueVi
 label.show,label,Data labels on marks,3,muix,9.15.0,native,,,BarChart.series.barLabel,@mui/x-charts/models/seriesType/bar.d.mts:53,dts-path,strong,
 label.show,label,Data labels on marks,3,mermaid,11.17.2,native,,,MermaidConfig.pie.textPosition,mermaid/dist/config.type.d.ts:938,dts-path,strong,pie labels
 label.show,label,Data labels on marks,3,g2,5.4.8,native,,,~label,@antv/g2/lib/index.d.ts:165,dts-grep,weak,
-label.position,label,Data label position,3,chartkit,0.5.0 (main 116d0af),none,,,"~['""`](?:position)['""`]|(?:^|[\s{,;])\w*(?:position)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:position)",,source-review,strong,probe hit reviewed: match is CSS position:fixed
+label.position,label,Data label position,3,chartkit,"0.5.0 (main, marks and labels)",native,,,ChartKitChartSpecV1.mark.labelPosition,packages/core/src/generated/schema.ts:891,runtime-probe,strong,"top, bottom, left, right, center, inside, or outside. inside and outside suit bar and donut. Setting it turns labels on."
 label.position,label,Data label position,3,chartjs,4.5.1,plugin,,,,chartjs-plugin-datalabels,npm,weak,anchor / align
 label.position,label,Data label position,3,recharts,3.10.1,native,,,LabelList.position,recharts/types/component/LabelList.d.ts:86,dts-path,strong,
 label.position,label,Data label position,3,echarts,6.1.0,native,,,series.label.position,echarts/types/dist/shared.d.ts:7876,dts-path,strong,
@@ -3569,7 +3569,7 @@ label.position,label,Data label position,3,lightweight,5.2.1,unknown,none,,"~['"
 label.position,label,Data label position,3,muix,9.15.0,native,,,~barLabelPlacement|barLabel,@mui/x-charts/SparkLineChart/SparkLineChart.d.ts:14,dts-grep,weak,
 label.position,label,Data label position,3,mermaid,11.17.2,native,,,MermaidConfig.pie.textPosition,mermaid/dist/config.type.d.ts:938,dts-path,strong,
 label.position,label,Data label position,3,g2,5.4.8,native,,,~position,@antv/g2/lib/index.d.ts:2,dts-grep,weak,
-label.format,label,Data label formatting,3,chartkit,0.5.0 (main 116d0af),partial,,,ChartKitChartSpecV1.encoding.y.format,chartkit:packages/core/src/generated/schema.ts:136,dts-path,strong,channel format reused
+label.format,label,Data label formatting,3,chartkit,"0.5.0 (main, marks and labels)",native,,,ChartKitChartSpecV1.mark.labelFormat,packages/core/src/generated/schema.ts:895,runtime-probe,strong,Format preset on the label text. Falls back to the series format. Setting it turns labels on.
 label.format,label,Data label formatting,3,chartjs,4.5.1,plugin,,,,chartjs-plugin-datalabels,npm,weak,formatter
 label.format,label,Data label formatting,3,recharts,3.10.1,native,,,LabelList.formatter,recharts/types/component/LabelList.d.ts:106,dts-path,strong,
 label.format,label,Data label formatting,3,echarts,6.1.0,native,,,series.label.formatter,echarts/types/dist/shared.d.ts:7927,dts-path,strong,
@@ -3590,7 +3590,7 @@ label.format,label,Data label formatting,3,lightweight,5.2.1,unknown,none,,"~['"
 label.format,label,Data label formatting,3,muix,9.15.0,native,,,BarChart.series.barLabel,@mui/x-charts/models/seriesType/bar.d.mts:53,dts-path,strong,function
 label.format,label,Data label formatting,3,mermaid,11.17.2,none,,,"~['""`](?:formatter)['""`]|(?:^|[\s{,;])\w*(?:formatter)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:formatter)","['""`](?:formatter)['""`]|(?:^|[\s{,;])\w*(?:formatter)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:formatter)",dts-absence,absence,
 label.format,label,Data label formatting,3,g2,5.4.8,native,,,~formatter,@antv/g2/lib/component/legendCategory.d.ts:5,dts-grep,weak,
-label.collision,label,Label collision avoidance,2,chartkit,0.5.0 (main 116d0af),none,,,"~['""`](?:overlap)['""`]|(?:^|[\s{,;])\w*(?:overlap)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:overlap)",,source-review,strong,probe hit reviewed: match is venn overlap geometry
+label.collision,label,Label collision avoidance,2,chartkit,"0.5.0 (main, marks and labels)",native,,,ChartKitChartSpecV1.mark.labels,packages/core/src/glyphs.ts:39,runtime-probe,strong,A label whose box overlaps one already drawn is skipped. No separate option.
 label.collision,label,Label collision avoidance,2,chartjs,4.5.1,plugin,,,,chartjs-plugin-datalabels,npm,weak,display:'auto'
 label.collision,label,Label collision avoidance,2,recharts,3.10.1,none,,,"~['""`](?:overlap)['""`]|(?:^|[\s{,;])\w*(?:overlap)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:overlap)","['""`](?:overlap)['""`]|(?:^|[\s{,;])\w*(?:overlap)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:overlap)",dts-absence,absence,
 label.collision,label,Label collision avoidance,2,echarts,6.1.0,native,,,series.labelLayout | series.avoidLabelOverlap,echarts/types/dist/shared.d.ts:8361 | echarts/types/dist/shared.d.ts:11264,dts-path,strong,
@@ -3632,7 +3632,7 @@ label.pie,label,Pie slice labels / leader lines,3,lightweight,5.2.1,none,,,"~['"
 label.pie,label,Pie slice labels / leader lines,3,muix,9.15.0,native,,,~arcLabel,@mui/x-charts/themeAugmentation/overrides.d.ts:20,dts-grep,weak,inside labels only
 label.pie,label,Pie slice labels / leader lines,3,mermaid,11.17.2,none,,,"~['""`](?:labelLine)['""`]|(?:^|[\s{,;])\w*(?:labelLine)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:labelLine)","['""`](?:labelLine)['""`]|(?:^|[\s{,;])\w*(?:labelLine)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:labelLine)",dts-absence,absence,
 label.pie,label,Pie slice labels / leader lines,3,g2,5.4.8,native,,,~connector,@antv/g2/lib/index.d.ts:79,dts-grep,weak,
-label.total,label,Stack totals,3,chartkit,0.5.0 (main 116d0af),none,,,"~['""`](?:stackLabels)['""`]|(?:^|[\s{,;])\w*(?:stackLabels)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:stackLabels)","['""`](?:stackLabels)['""`]|(?:^|[\s{,;])\w*(?:stackLabels)\w*\??\s*[:(]|(?:class|interface|type|const|function|enum)\s+\w*(?:stackLabels)",dts-absence,absence,
+label.total,label,Stack totals,3,chartkit,"0.5.0 (main, marks and labels)",native,,,ChartKitChartSpecV1.mark.stackTotal,packages/core/src/totals.ts:6,runtime-probe,strong,Labels the total on a stacked bar or stacked area. On a bar this also stacks the series.
 label.total,label,Stack totals,3,chartjs,4.5.1,plugin,,,,chartjs-plugin-datalabels,npm,weak,
 label.total,label,Stack totals,3,recharts,3.10.1,manual,,,Customized,recharts/types/component/Customized.d.ts:26,dts-mechanism,weak,
 label.total,label,Stack totals,3,echarts,6.1.0,manual,,,series.type=custom,echarts/types/dist/shared.d.ts:11176,dts-mechanism,weak,

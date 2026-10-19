@@ -607,6 +607,20 @@
             "area": {
               "type": "boolean",
               "description": "Fill under this line (line/combo)."
+            },
+            "pointShape": {
+              "enum": ["circle", "square", "diamond", "triangle", "cross", "none"],
+              "description": "Marker for this series. Overrides mark.pointShape. Applies to: line, stacked-area, scatter, combo."
+            },
+            "pointSize": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 40,
+              "description": "Marker radius in px for this series. Overrides mark.pointSize."
+            },
+            "pointFill": {
+              "enum": ["filled", "hollow"],
+              "description": "Filled or hollow marker for this series. Overrides mark.pointFill."
             }
           },
           "description": "Full y series definition."
@@ -902,7 +916,15 @@
           "type": "number",
           "minimum": 0,
           "maximum": 40,
-          "description": "Point radius in px. Applies to: line, combo, scatter."
+          "description": "Point radius in px. Applies to: line, stacked-area, combo, scatter."
+        },
+        "pointShape": {
+          "enum": ["circle", "square", "diamond", "triangle", "cross", "none"],
+          "description": "Point marker. circle, square, diamond, triangle, cross, or none. A y series may override it. Applies to: line, stacked-area, scatter, combo. Drawn on createRenderer([line])."
+        },
+        "pointFill": {
+          "enum": ["filled", "hollow"],
+          "description": "Filled or hollow markers. Applies to: line, stacked-area, scatter, combo."
         },
         "area": {
           "type": "boolean",
@@ -966,7 +988,24 @@
         "labels": {
           "type": "boolean",
           "default": false,
-          "description": "Draw value labels on bars/slices. Applies to: bar, donut."
+          "description": "Draw value labels on the marks. Applies to: bar, donut, line, stacked-area, scatter. Overlapping labels are skipped."
+        },
+        "labelPosition": {
+          "enum": ["top", "bottom", "left", "right", "center", "inside", "outside"],
+          "description": "Where the value label sits. top, bottom, left, right, and center suit line, area, and scatter. inside and outside suit bar and donut. Setting it turns labels on. Applies to: bar, donut, line, stacked-area, scatter, combo."
+        },
+        "labelFormat": {
+          "$ref": "#/$defs/format",
+          "description": "Format preset for data labels. Falls back to the series format, then a plain number. Setting it turns labels on. Applies to: bar, donut, line, stacked-area, scatter, combo."
+        },
+        "labelEnds": {
+          "enum": ["all", "ends", "last"],
+          "description": "Which line points are labelled. all, ends (first and last), or last. Setting it turns labels on. Applies to: line, stacked-area, combo."
+        },
+        "stackTotal": {
+          "type": "boolean",
+          "default": false,
+          "description": "Label the total of a stacked bar or stacked area. On a bar this also stacks the series. Applies to: bar, stacked-area."
         },
         "innerRadius": {
           "type": "number",

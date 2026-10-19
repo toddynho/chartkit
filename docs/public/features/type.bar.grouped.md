@@ -70,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | partial | MermaidConfig.xyChart | dts-path (strong) | mermaid/dist/config.type.d.ts:225 multiple bar lines overlap rather than group |
 | AntV G2 | native | ~dodgeX | dts-grep (weak) | @antv/g2/lib/index.d.ts:30 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 167b01d2f0df.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against c09b89c6d9f1.
 
 https://chartkit.dev/features.json

@@ -273,6 +273,25 @@ describe("diagnostic codes", () => {
     expect(fixed.spec.interaction).toEqual({ select: "series" });
   });
 
+  it("repairs marker names, label words, and stack totals", () => {
+    const fixed = repair({ ...base, mark: { symbol: "rect", hollow: true, labels: "above", stackLabels: true } });
+    expect(fixed.ok).toBe(true);
+    expect(fixed.spec.mark).toMatchObject({
+      pointShape: "square",
+      pointFill: "hollow",
+      labels: true,
+      labelPosition: "top",
+      stackTotal: true,
+    });
+    expect(fixed.spec.mark).not.toHaveProperty("symbol");
+    expect(fixed.spec.mark).not.toHaveProperty("hollow");
+    expect(fixed.spec.mark).not.toHaveProperty("stackLabels");
+    const shape = validate({ ...base, mark: { pointShape: "rect" } });
+    expect(shape.errors.find((item) => item.path === "/mark/pointShape")?.fix).toEqual([
+      { op: "replace", path: "/mark/pointShape", value: "square" },
+    ]);
+  });
+
   it("does not warn CK3011 for tooltip, zoom, legend toggle, animation, or a11y", () => {
     const result = validate({
       ...base,

@@ -138,6 +138,10 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
   if (node.type) {
     const types = Array.isArray(node.type) ? node.type : [node.type];
     if (!types.some((t) => typeMatches(value, t))) {
+      if (path === "/mark/labels" && typeof value === "string" && labelWord(value, ctx)) {
+        ctx.depth -= 1;
+        return;
+      }
       if (path === "/a11y") emitAltRequired(ctx);
       const px = typeof value === "string" ? /^(-?\d+(?:\.\d+)?)px$/.exec(value) : null;
       const wantsNumber = types.includes("number") || types.includes("integer");
@@ -185,6 +189,45 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
         path,
         hint: 'select is "point" or "series". true means "point". Hold Shift, Ctrl, or Meta to add another.',
         fix: [{ op: "replace", path, value: "point" }],
+      });
+    } else if (path === "/mark/shape" && typeof value === "string" && SHAPE_ALIAS[value]) {
+      emit(ctx, {
+        code: "CK1007",
+        severity: "error",
+        message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
+        path,
+        hint: `mark.shape is the funnel geometry. A marker is mark.pointShape. ${quote(value)} means ${quote(SHAPE_ALIAS[value])}.`,
+        fix: [
+          { op: "remove", path },
+          { op: "add", path: "/mark/pointShape", value: SHAPE_ALIAS[value] },
+        ],
+      });
+    } else if (path.endsWith("/pointShape") && typeof value === "string" && SHAPE_ALIAS[value]) {
+      emit(ctx, {
+        code: "CK1007",
+        severity: "error",
+        message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
+        path,
+        hint: `pointShape is circle, square, diamond, triangle, cross, or none. ${quote(value)} means ${quote(SHAPE_ALIAS[value])}.`,
+        fix: [{ op: "replace", path, value: SHAPE_ALIAS[value] }],
+      });
+    } else if (path.endsWith("/labelPosition") && typeof value === "string" && POS_ALIAS[value]) {
+      emit(ctx, {
+        code: "CK1007",
+        severity: "error",
+        message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
+        path,
+        hint: `labelPosition is top, bottom, left, right, center, inside, or outside. ${quote(value)} means ${quote(POS_ALIAS[value])}.`,
+        fix: [{ op: "replace", path, value: POS_ALIAS[value] }],
+      });
+    } else if (path.endsWith("/labelEnds") && typeof value === "string" && ENDS_ALIAS[value]) {
+      emit(ctx, {
+        code: "CK1007",
+        severity: "error",
+        message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
+        path,
+        hint: `labelEnds is "all", "ends", or "last". ${quote(value)} means ${quote(ENDS_ALIAS[value])}.`,
+        fix: [{ op: "replace", path, value: ENDS_ALIAS[value] }],
       });
     } else if (path.endsWith("/points") && (value === true || value === false) && node.enum.includes("always")) {
       const mapped = value === true ? "always" : "none";
@@ -363,7 +406,7 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
             emitXAxis(value[key], join(path, key), ctx);
             continue;
           }
-          emitUnknownProp(key, path, props, ctx);
+          emitUnknownProp(key, path, props, ctx, value[key]);
         }
       }
     } else if (isSchema(node.additionalProperties)) {
@@ -1320,9 +1363,147 @@ function aliasFix(root: unknown, alias: Alias): JsonPatchOperation[] {
 
 const CLICK_KEYS = ["onClick", "click", "onPointClick", "onSeriesClick", "onLegendClick"];
 
-function emitUnknownProp(name: string, path: string, props: Record<string, JsonSchema>, ctx: Ctx): void {
+const SHAPE_ALIAS: Record<string, string> = {
+  rect: "square",
+  rectangle: "square",
+  box: "square",
+  dot: "circle",
+  circle: "circle",
+  diamond: "diamond",
+  rhombus: "diamond",
+  triangle: "triangle",
+  "triangle-up": "triangle",
+  cross: "cross",
+  plus: "cross",
+  x: "cross",
+  none: "none",
+  hidden: "none",
+};
+
+const POS_ALIAS: Record<string, string> = {
+  above: "top",
+  below: "bottom",
+  middle: "center",
+  in: "inside",
+  out: "outside",
+  start: "left",
+  end: "right",
+};
+
+const ENDS_ALIAS: Record<string, string> = {
+  end: "last",
+  both: "ends",
+  firstLast: "ends",
+  "first-last": "ends",
+};
+
+const MARK_SHAPE_KEYS = ["symbol", "marker", "pointStyle", "markerShape", "markerSymbol"];
+const MARK_LABEL_KEYS = ["dataLabels", "showLabels", "showValues", "dataLabel"];
+const MARK_TOTAL_KEYS = ["stackLabels", "showTotal", "totals", "totalLabel", "stackLabel"];
+
+function labelWord(value: string, ctx: Ctx): boolean {
+  const position = POS_ALIAS[value] ?? (["top", "bottom", "left", "right", "center", "inside", "outside"].includes(value) ? value : "");
+  const ends = ENDS_ALIAS[value] ?? (value === "all" || value === "ends" || value === "last" ? value : "");
+  if (!position && !ends) return false;
+  const root = isPlainObject(ctx.rootValue) ? ctx.rootValue : {};
+  const mark = isPlainObject(root.mark) ? root.mark : {};
+  const fix: JsonPatchOperation[] = [{ op: "replace", path: "/mark/labels", value: true }];
+  if (position && mark.labelPosition === undefined) fix.push({ op: "add", path: "/mark/labelPosition", value: position });
+  if (ends && mark.labelEnds === undefined) fix.push({ op: "add", path: "/mark/labelEnds", value: ends });
+  emit(ctx, {
+    code: "CK1006",
+    severity: "error",
+    message: `${showPath("/mark/labels")} must be boolean, got ${quote(value)}`,
+    path: "/mark/labels",
+    hint: position
+      ? `labels is true or false. ${quote(value)} means labels on, at ${quote(position)}.`
+      : `labels is true or false. ${quote(value)} means labels on, labelEnds ${quote(ends)}.`,
+    fix,
+  });
+  return true;
+}
+
+function markHome(path: string): string | null {
+  if (path === "/mark" || path === "/encoding/y" || /^\/encoding\/y\/\d+$/.test(path)) return path;
+  return null;
+}
+
+function markMistake(name: string, path: string, pointer: string, value: unknown, ctx: Ctx): boolean {
+  const home = markHome(path);
+  if (!home) return false;
+  const shape = MARK_SHAPE_KEYS.includes(name) ? (typeof value === "string" ? SHAPE_ALIAS[value] ?? (NAMES_SHAPE.has(value) ? value : "") : "") : "";
+  if (MARK_SHAPE_KEYS.includes(name) && shape) {
+    emit(ctx, {
+      code: "CK1002",
+      severity: "error",
+      message: `unknown property ${quote(name)}`,
+      path: pointer,
+      hint: `markers are ${home === "/mark" ? "mark.pointShape" : "pointShape"}: circle, square, diamond, triangle, cross, or none. ${quote(value)} means ${quote(shape)}.`,
+      fix: [
+        { op: "remove", path: pointer },
+        { op: "add", path: `${home}/pointShape`, value: shape },
+      ],
+    });
+    return true;
+  }
+  if (MARK_LABEL_KEYS.includes(name)) {
+    const position = typeof value === "string" ? POS_ALIAS[value] ?? (POS_NAMES.has(value) ? value : "") : "";
+    const fix: JsonPatchOperation[] = [
+      { op: "remove", path: pointer },
+      { op: "add", path: home === "/mark" ? "/mark/labels" : `${home}/pointShape`, value: home === "/mark" ? true : "circle" },
+    ];
+    if (home === "/mark") {
+      fix[1] = { op: "add", path: "/mark/labels", value: true };
+      if (position) fix.push({ op: "add", path: "/mark/labelPosition", value: position });
+    }
+    emit(ctx, {
+      code: "CK1002",
+      severity: "error",
+      message: `unknown property ${quote(name)}`,
+      path: pointer,
+      hint: position ? `labels are mark.labels. ${quote(value)} means on, at ${quote(position)}.` : "labels are mark.labels: true, not a separate key",
+      fix: home === "/mark" ? fix : [{ op: "remove", path: pointer }],
+    });
+    return true;
+  }
+  if (home === "/mark" && MARK_TOTAL_KEYS.includes(name)) {
+    emit(ctx, {
+      code: "CK1002",
+      severity: "error",
+      message: `unknown property ${quote(name)}`,
+      path: pointer,
+      hint: 'stack totals are mark.stackTotal: true on a stacked bar or stacked area',
+      fix: [
+        { op: "remove", path: pointer },
+        { op: "add", path: "/mark/stackTotal", value: true },
+      ],
+    });
+    return true;
+  }
+  if (home === "/mark" && name === "hollow") {
+    emit(ctx, {
+      code: "CK1002",
+      severity: "error",
+      message: `unknown property ${quote(name)}`,
+      path: pointer,
+      hint: 'hollow markers are mark.pointFill: "hollow"',
+      fix: [
+        { op: "remove", path: pointer },
+        { op: "add", path: "/mark/pointFill", value: value === false ? "filled" : "hollow" },
+      ],
+    });
+    return true;
+  }
+  return false;
+}
+
+const NAMES_SHAPE = new Set(["circle", "square", "diamond", "triangle", "cross", "none"]);
+const POS_NAMES = new Set(["top", "bottom", "left", "right", "center", "inside", "outside"]);
+
+function emitUnknownProp(name: string, path: string, props: Record<string, JsonSchema>, ctx: Ctx, value?: unknown): void {
   const pointer = join(path, name);
   if (ctx.skipUnknown.has(pointer)) return;
+  if (markMistake(name, path, pointer, value, ctx)) return;
   if (CLICK_KEYS.includes(name)) {
     emit(ctx, {
       code: "CK1002",

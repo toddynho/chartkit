@@ -497,9 +497,8 @@ describe("schema honesty", () => {
     const font = validate({ ...line, theme: { tokens: { fontFamily: "Georgia" } } });
     expect(font.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/theme/tokens/fontFamily")).toBe(true);
     const labels = validate({ ...line, mark: { labels: true } });
-    const labelWarning = labels.warnings.find((warning) => warning.code === "CK3012" && warning.path === "/mark/labels");
-    expect(labelWarning?.message).toContain("mark.labels");
-    expect(labelWarning?.message).toContain("bars and slices");
+    expect(labels.ok).toBe(true);
+    expect(labels.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/mark/labels")).toBe(false);
     const quantitative = validate({
       ...line,
       encoding: { x: "month", y: { field: "revenue", type: "quantitative" } },
@@ -630,6 +629,58 @@ describe("schema honesty", () => {
     expect(legend?.hasAttribute("data-ck-dim")).toBe(false);
     series.ctl.destroy();
     series.host.remove();
+  });
+
+  it("draws shapes, labels, and stack totals on the small chart entry", async () => {
+    vi.resetModules();
+    const { createRenderer } = await import("../render");
+    const { line: lineChart } = await import("../charts/line");
+    const drawLine = createRenderer([lineChart]);
+    const marked = drawLine({
+      ...line,
+      encoding: {
+        x: "month",
+        y: [
+          { field: "revenue", pointShape: "diamond" },
+          { field: "cost", pointShape: "square", pointFill: "hollow" },
+        ],
+      },
+      mark: { pointShape: "circle", labels: true, labelEnds: "last", labelFormat: { style: "integer", suffix: "u" } },
+    });
+    expect(marked).toContain("<path");
+    expect(marked).toMatch(/<rect x="[^"]+" y="[^"]+" width="[^"]+" height="[^"]+" fill="none" stroke="/);
+    expect(marked).toContain("1,800u");
+    expect(marked).toContain("900u");
+    expect(marked).not.toContain("1,000u");
+    expect(marked).not.toContain("3,000u");
+    vi.resetModules();
+    const { createRenderer: createBar } = await import("../render");
+    const { bar } = await import("../charts/bar");
+    const drawBar = createBar([bar]);
+    const totals = drawBar({
+      version: "1",
+      type: "bar",
+      data: rows,
+      encoding: { x: "month", y: ["revenue", "cost"] },
+      mark: { stackTotal: true, labels: true, labelPosition: "inside" },
+      a11y: { alt },
+      size: { width: 420, height: 260 },
+    });
+    expect(totals).toContain("1,400");
+    expect(totals).toContain("4,200");
+    expect(totals).toContain("2,700");
+    const crowded = drawLine({
+      version: "1",
+      type: "line",
+      data: Array.from({ length: 12 }, (_, index) => ({ month: `M${index}`, revenue: 100 + index })),
+      encoding: { x: "month", y: "revenue" },
+      mark: { labels: true, labelFormat: { style: "integer", suffix: "u" } },
+      a11y: { alt: "Revenue steps up." },
+      size: { width: 280, height: 160 },
+    });
+    const hits = crowded?.match(/u</g) ?? [];
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits.length).toBeLessThan(12);
   });
 
   it("walks every schema property on the full renderer and on each chart entry", async () => {
