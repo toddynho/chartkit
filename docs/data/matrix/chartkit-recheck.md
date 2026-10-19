@@ -70,3 +70,12 @@ Rechecked on the pie, donut, bar, line, and scatter entries. A cell moved to nat
 | label.pie | native | `mark.labels` and `mark.labelPosition: "outside"` draw leader lines on pie and donut. Labels on one side stack with a 16px gap. |
 | mark.color.point | native | `encoding.color` names a category or a paint column. `domain` and `range` map values to colours. Drawn on bar, scatter, and pie. |
 | mark.color.conditional | native | `mark.colorRules` recolours bar, line points, scatter, and pie. First match wins. Tokens `negative`, `positive`, and `accent` follow the theme. |
+
+## Core gaps
+
+| feature | status | note |
+| --- | --- | --- |
+| mark.glow | native | Blurred understroke on line and sparkline. One filter, emitted only when `mark.glow` is true. |
+| type.line.smooth | native | `mark.curve` `monotone` is monotone-x. `smooth`, `spline`, and `basis` repair to it (CK1007). |
+| legend.position | native | A funnel draws the legend when `legend` is set, including `position: "top"`. |
+| type.heatmap.calendar | native | A fixed `size` grows the day cells to fill the box. Unsized calendars stay at 12px. `mark.weeks` on a grid warns CK3012. |

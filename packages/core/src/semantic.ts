@@ -50,6 +50,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   const known = type !== undefined && CHART_TYPES.has(type);
 
   if (known && isRecord(spec.mark)) warnUnusedMarks(type, spec.mark, diagnostics);
+  warnGridWeeks(spec, diagnostics);
   warnUnbuilt(spec, diagnostics);
   if (isRecord(spec.encoding)) {
     warnSeriesShape(spec.encoding, diagnostics);
@@ -392,6 +393,14 @@ function warnUnbuilt(spec: Record<string, unknown>, diagnostics: Diagnostic[]): 
             : typeof value === "number";
     if (hit) flag(diagnostics, "/" + path, why);
   }
+}
+
+function warnGridWeeks(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  if (spec.type !== "heatmap" || !isRecord(spec.mark) || spec.mark.weeks === undefined) return;
+  const mark = spec.mark;
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  const layout = mark.layout === "grid" || mark.layout === "calendar" ? mark.layout : encoding && encoding.y != null ? "grid" : "calendar";
+  if (layout === "grid") flag(diagnostics, "/mark/weeks", "ignored; calendar layout only");
 }
 
 function warnUnusedMarks(type: string, mark: Record<string, unknown>, diagnostics: Diagnostic[]): void {

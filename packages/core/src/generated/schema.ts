@@ -910,7 +910,7 @@ export interface Metric {
  */
 export interface Mark {
   /**
-   * Line interpolation. Applies to: line, stacked-area, combo, sparkline, mini-area.
+   * Line interpolation. monotone is monotone-x and stays inside the data, so a spike does not cross the low point or pass the peak. smooth, spline, and basis repair to monotone. Applies to: line, stacked-area, combo, sparkline, mini-area.
    */
   curve?: "linear" | "monotone" | "step" | "step-before" | "step-after";
   /**
@@ -950,7 +950,7 @@ export interface Mark {
    */
   strokeWidth?: number;
   /**
-   * Soft glow behind lines (dark themes). Applies to: line, sparkline.
+   * Soft glow behind the line. A blurred understroke and one filter, emitted only when true, on Soft and on midnight. Applies to: line, sparkline.
    */
   glow?: boolean;
   /**
@@ -2164,7 +2164,7 @@ export interface Mark {
    */
   layout?: "calendar" | "grid";
   /**
-   * Number of weeks shown in calendar layout. Applies to: heatmap.
+   * Number of weeks shown in calendar layout. Ignored on a grid heatmap. A fixed size grows the cells to fill the box. Applies to: heatmap.
    */
   weeks?: number;
   /**

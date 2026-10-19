@@ -932,7 +932,7 @@
             "step-after"
           ],
           "default": "monotone",
-          "description": "Line interpolation. Applies to: line, stacked-area, combo, sparkline, mini-area."
+          "description": "Line interpolation. monotone is monotone-x and stays inside the data, so a spike does not cross the low point or pass the peak. smooth, spline, and basis repair to monotone. Applies to: line, stacked-area, combo, sparkline, mini-area."
         },
         "sampling": {
           "enum": [
@@ -991,7 +991,7 @@
         "glow": {
           "type": "boolean",
           "default": false,
-          "description": "Soft glow behind lines (dark themes). Applies to: line, sparkline."
+          "description": "Soft glow behind the line. A blurred understroke and one filter, emitted only when true, on Soft and on midnight. Applies to: line, sparkline."
         },
         "connectNulls": {
           "type": "boolean",
@@ -1162,7 +1162,7 @@
           "minimum": 1,
           "maximum": 104,
           "default": 52,
-          "description": "Number of weeks shown in calendar layout. Applies to: heatmap."
+          "description": "Number of weeks shown in calendar layout. Ignored on a grid heatmap. A fixed size grows the cells to fill the box. Applies to: heatmap."
         },
         "startAngle": {
           "type": "number",

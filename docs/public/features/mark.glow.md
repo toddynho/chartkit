@@ -6,7 +6,9 @@ Drop shadows or glow on series
 
 Matrix status: `native`. Verification: `dts-path` (strong).
 
-Source: chartkit:packages/core/src/generated/schema.ts:835
+Blurred understroke on line and sparkline. The filter is emitted only when glow is true.
+
+Source: chartkit:packages/core/src/generated/schema.ts:955
 
 ## ChartKit spec
 
@@ -68,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~shadowBlur | dts-grep (weak) | @antv/g2/lib/spec/interaction.d.ts:94 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 699f05dc7c70.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 85c6caf6e04b.
 
 https://chartkit.dev/features.json

@@ -1,10 +1,12 @@
 import { colorLegendHeight, readColorScale, scaleLabel } from "../color-scale";
 import { cssVar, paint } from "../theme";
 import { formatValue } from "../format";
-import { asNumber, column, fieldOf, readColor, readFrame, readTable } from "../frame";
+import { asNumber, column, fieldOf, readColor, readFrame, readTable, type Frame } from "../frame";
 import { closeChart, esc, font, hash, n, openChart } from "../svg";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAY_LABEL_W = 28;
+const MONTH_LABEL_H = 16;
 
 /**
  * Calendar (date × weekday) or grid (x × y) heatmap. Color encodes the value.
@@ -42,16 +44,15 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
   const weeks = typeof frame.mark.weeks === "number" ? frame.mark.weeks : 52;
   const end = Math.max(...byDay.keys());
   const start = alignSunday(end - (weeks * 7 - 1) * 86400000);
-  const cell = 12;
-  const gap = typeof frame.mark.gap === "number" ? Math.round(12 * frame.mark.gap) : 3;
-  const radius = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : Math.min(frame.geometry.cornerRadius, 4);
-  const dayLabelW = 28;
-  const monthLabelH = 16;
   const counts = [...byDay.values()];
   const max = Math.max(...counts, 1);
   const color = colorEnc?.constant ? paint(colorEnc.constant, frame.preset, 0) : paint(colorEnc?.range?.[colorEnc.range.length - 1], frame.preset, 0);
   const ramp = colorEnc?.constant ? null : readColorScale(frame.encoding.color, frame.preset, counts, !colorEnc?.range);
   const quiet = emptyMark(frame.id, frame.preset);
+  const legendH = ramp ? colorLegendHeight : 22;
+  const box = calendarLayout(frame, weeks, legendH);
+  const radius = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : Math.min(frame.geometry.cornerRadius, 4);
+  const pitch = box.cell + box.gap;
 
   const months: { label: string; x: number }[] = [];
   let lastMonth = -1;
@@ -65,12 +66,12 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
         lastMonth = date.getUTCMonth();
         months.push({
           label: new Intl.DateTimeFormat(frame.locale, { month: "short", timeZone: "UTC" }).format(date),
-          x: dayLabelW + week * (cell + gap),
+          x: box.ox + DAY_LABEL_W + week * pitch,
         });
       }
       const value = byDay.get(time) ?? 0;
-      const x = dayLabelW + week * (cell + gap);
-      const y = monthLabelH + dow * (cell + gap);
+      const x = box.ox + DAY_LABEL_W + week * pitch;
+      const y = box.oy + MONTH_LABEL_H + dow * pitch;
       const iso = date.toISOString().slice(0, 10);
       const label = `${iso}: ${formatValue(value, channelFormatOf(frame.encoding.color), frame.locale)}`;
       const missing = value <= 0;
@@ -78,29 +79,59 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
       const opacity = missing || ramp ? 1 : opacityStep(value / max);
       const edge = missing ? ` stroke="${quiet.stroke}" stroke-width="1" data-ck-empty="1"` : "";
       cells.push(
-        `<rect x="${n(x)}" y="${n(y)}" width="${cell}" height="${cell}" rx="${n(radius)}" fill="${fill}" fill-opacity="${n(opacity)}"${edge} aria-label="${esc(label)}"><title>${esc(label)}</title></rect>`,
+        `<rect x="${n(x)}" y="${n(y)}" width="${n(box.cell)}" height="${n(box.cell)}" rx="${n(radius)}" fill="${fill}" fill-opacity="${n(opacity)}"${edge} aria-label="${esc(label)}"><title>${esc(label)}</title></rect>`,
       );
     }
   }
 
-  const width = frame.widthFixed ? frame.width : dayLabelW + weeks * (cell + gap) + 4;
-  const gridH = monthLabelH + 7 * (cell + gap);
-  const legendH = ramp ? colorLegendHeight : 22;
-  const height = frame.heightFixed ? frame.height : gridH + 8 + legendH;
   const parts: string[] = [];
-  parts.push(openChart({ ...frame, width, height, renderer: "heatmap" }));
+  parts.push(openChart({ ...frame, width: box.width, height: box.height, renderer: "heatmap" }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
   parts.push(`<defs>${quiet.def}</defs>`);
   for (const month of months) {
-    parts.push(text(month.x, 11, month.label, cssVar("muted", frame.preset.muted), 10));
+    parts.push(text(month.x, box.oy + 11, month.label, cssVar("muted", frame.preset.muted), 10));
   }
   for (const dow of [1, 3, 5]) {
-    parts.push(text(0, monthLabelH + dow * (cell + gap) + cell / 2 + 3, WEEKDAYS[dow], cssVar("muted", frame.preset.muted), 10));
+    parts.push(text(box.ox, box.oy + MONTH_LABEL_H + dow * pitch + box.cell / 2 + 3, WEEKDAYS[dow], cssVar("muted", frame.preset.muted), 10));
   }
   parts.push(cells.join(""));
-  parts.push(ramp ? ramp.legend(Math.max(4, width - 180), gridH + 6, scaleLabel(frame.preset)) : scaleLegend(color, quiet.fill, cssVar("muted", frame.preset.muted), Math.max(4, width - 136), gridH + 14));
+  parts.push(ramp ? ramp.legend(Math.max(4, box.width - 180), box.legendY, scaleLabel(frame.preset)) : scaleLegend(color, quiet.fill, cssVar("muted", frame.preset.muted), Math.max(4, box.width - 136), box.legendY + 8));
   parts.push(closeChart());
   return parts.join("");
+}
+
+/**
+ * Unsized calendars keep a 12px cell. A fixed width or height grows the cells
+ * so the weeks fill that box instead of sitting in the corner.
+ */
+function calendarLayout(frame: Frame, weeks: number, legendH: number): { cell: number; gap: number; ox: number; oy: number; width: number; height: number; legendY: number } {
+  if (!frame.widthFixed && !frame.heightFixed) {
+    const cell = 12;
+    const gap = typeof frame.mark.gap === "number" ? Math.round(12 * frame.mark.gap) : 3;
+    const gridH = MONTH_LABEL_H + 7 * (cell + gap);
+    return { cell, gap, ox: 0, oy: 0, width: DAY_LABEL_W + weeks * (cell + gap) + 4, height: gridH + 8 + legendH, legendY: gridH + 6 };
+  }
+  const frac = typeof frame.mark.gap === "number" ? Math.min(0.55, Math.max(0, frame.mark.gap)) : 0.2;
+  const padX = DAY_LABEL_W + 8;
+  const padY = MONTH_LABEL_H + legendH + 12;
+  const widthPitch = frame.widthFixed ? Math.max(4, (frame.width - padX) / weeks) : Infinity;
+  const heightPitch = frame.heightFixed ? Math.max(4, (frame.height - padY) / 7) : Infinity;
+  const pitch = Math.min(widthPitch, heightPitch);
+  const gap = pitch * frac;
+  const cell = Math.max(2, pitch - gap);
+  const gridW = DAY_LABEL_W + weeks * (cell + gap);
+  const gridH = MONTH_LABEL_H + 7 * (cell + gap);
+  const width = frame.widthFixed ? frame.width : gridW + 4;
+  const height = frame.heightFixed ? frame.height : gridH + 8 + legendH;
+  return {
+    cell,
+    gap,
+    ox: Math.max(0, (width - 4 - gridW) / 2),
+    oy: Math.max(0, (height - legendH - 8 - gridH) / 2),
+    width,
+    height,
+    legendY: frame.heightFixed ? height - legendH + 2 : gridH + 6,
+  };
 }
 
 function renderGrid(spec: Record<string, unknown>): string | null {
