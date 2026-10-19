@@ -1,0 +1,207 @@
+{
+  "generated": "2026-10-19",
+  "boards": [
+    {
+      "slug": "one-spec",
+      "number": 11,
+      "title": "One spec, every stack",
+      "types": [
+        "line"
+      ],
+      "options": [
+        "a11y.alt",
+        "annotation.band",
+        "annotation.label.position",
+        "annotation.line.y",
+        "annotation.style",
+        "axis.title",
+        "format.locale",
+        "format.number",
+        "framework.react",
+        "framework.svelte",
+        "framework.vanilla",
+        "framework.vue",
+        "legend.position",
+        "legend.values",
+        "theme.presets",
+        "tooltip.crosshair",
+        "tooltip.fields",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.line",
+        "type.xychart.text"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "roastery",
+      "number": 1,
+      "title": "Roastery P&L cockpit",
+      "types": [
+        "kpi",
+        "combo",
+        "bullet",
+        "waterfall",
+        "sparkline"
+      ],
+      "options": [
+        "a11y.alt",
+        "annotation.label.position",
+        "annotation.line.y",
+        "annotation.style",
+        "axis.ticks.rotate",
+        "axis.title",
+        "format.compact",
+        "format.locale",
+        "format.number",
+        "legend.position",
+        "legend.values",
+        "scale.multi",
+        "theme.presets",
+        "tooltip.crosshair",
+        "tooltip.fields",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.bar.waterfall",
+        "type.bullet",
+        "type.combo",
+        "type.kpi",
+        "type.sparkline"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "bike-share",
+      "number": 3,
+      "title": "City bike-share flows",
+      "types": [
+        "sankey",
+        "heatmap",
+        "stacked-area",
+        "donut"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.ticks.rotate",
+        "axis.title",
+        "format.number",
+        "label.show",
+        "legend.position",
+        "legend.values",
+        "theme.presets",
+        "tooltip.crosshair",
+        "tooltip.fields",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.area.percent",
+        "type.donut",
+        "type.heatmap.calendar",
+        "type.sankey"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "game-launch",
+      "number": 5,
+      "title": "Indie game launch, from Mermaid",
+      "types": [
+        "gantt",
+        "timeline",
+        "journey",
+        "quadrant"
+      ],
+      "options": [
+        "a11y.alt",
+        "theme.presets",
+        "type.gantt",
+        "type.journey",
+        "type.quadrant",
+        "type.timeline",
+        "type.xychart.text",
+        "validate.runtime"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "repair-loop",
+      "number": 13,
+      "title": "The repair loop, live",
+      "types": [],
+      "options": [
+        "a11y.alt",
+        "axis.title",
+        "label.show",
+        "theme.presets",
+        "type.bar.vertical",
+        "type.donut",
+        "type.line",
+        "validate.codes",
+        "validate.repair",
+        "validate.runtime",
+        "validate.unknown.keys"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "benchmarks-drawn",
+      "number": 16,
+      "title": "Benchmarks, drawn by ChartKit",
+      "types": [
+        "bar"
+      ],
+      "options": [
+        "a11y.alt",
+        "annotation.band",
+        "axis.ticks.rotate",
+        "axis.title",
+        "legend.position",
+        "scale.log",
+        "theme.presets",
+        "tooltip.crosshair",
+        "tooltip.fields",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.bar.grouped",
+        "type.bar.horizontal",
+        "type.bar.vertical"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    }
+  ]
+}

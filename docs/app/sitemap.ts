@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { librariesExceptChartkit, matrix } from "@/lib/matrix";
+import { showcaseBoards } from "@/lib/showcase";
 import { chartTypes, examples } from "@/lib/specs";
 
 const BASE = "https://chartkit.dev";
@@ -24,10 +25,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/demo",
     "/compare",
     "/features",
+    "/showcase",
+    "/showcase.json",
     "/features.json",
     "/when-to-use",
     ...matrix().features.flatMap((feature) => [`/features/${feature.id}`, `/features/${feature.id}.md`]),
     ...librariesExceptChartkit().map((library) => `/compare/${library.id}`),
+    ...showcaseBoards().flatMap((board) => [`/showcase/${board.slug}`, `/showcase/${board.slug}.md`]),
     "/benchmarks.json",
     "/benchmarks.md",
     "/benchmarks.schema.json",

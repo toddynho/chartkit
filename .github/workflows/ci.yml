@@ -21,4 +21,5 @@ jobs:
         working-directory: bench
       - run: npm test
       - run: npm run build:lib
+      - run: npm run showcase:check -- --check
       - run: npm run size
