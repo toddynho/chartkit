@@ -30,6 +30,10 @@ export default function AgentsPage() {
         <li>
           <a href="/schema/v1.json">schema/v1.json</a> — the JSON Schema.
         </li>
+        <li>
+          <a href="/features.json">features.json</a> — 21 libraries, one status and source per feature.{" "}
+          <Link href="/features">Feature pages</Link> have a Markdown twin.
+        </li>
       </ul>
       <p>
         On the 2026-10-16 eval, which round {ROUND} did not re-run, official docs put ChartKit at 42/42 on the first try, at a mean of 131.1 output

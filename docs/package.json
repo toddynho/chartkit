@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "benchmarks": "node --experimental-strip-types scripts/write-benchmarks.ts",
-    "prebuild": "node --experimental-strip-types scripts/write-benchmarks.ts",
+    "matrix:refresh": "node scripts/matrix-refresh.mjs",
+    "prebuild": "node --experimental-strip-types scripts/write-benchmarks.ts && node scripts/matrix-refresh.mjs",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit"

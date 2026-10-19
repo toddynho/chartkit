@@ -75,6 +75,21 @@ const nextConfig = {
         ],
       },
       {
+        source: "/features.json",
+        headers: [
+          { key: "Content-Type", value: "application/json; charset=utf-8" },
+          { key: "Cache-Control", value: "public, max-age=86400" },
+          { key: "Access-Control-Allow-Origin", value: "*" },
+        ],
+      },
+      {
+        source: "/features/:file.md",
+        headers: [
+          { key: "Content-Type", value: "text/markdown; charset=utf-8" },
+          { key: "Cache-Control", value: "public, max-age=86400" },
+        ],
+      },
+      {
         source: "/llms.json",
         headers: [
           { key: "Content-Type", value: "application/json; charset=utf-8" },

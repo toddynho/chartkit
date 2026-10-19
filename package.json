@@ -18,6 +18,7 @@
     "bench": "node bench/run.mjs",
     "bench:core": "node scripts/bench.mjs",
     "size": "node scripts/size.mjs",
+    "matrix:refresh": "node docs/scripts/matrix-refresh.mjs",
     "start": "npm run start --workspace=chartkit-docs",
     "clean": "rm -rf packages/*/dist docs/.next node_modules"
   },
