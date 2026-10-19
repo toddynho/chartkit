@@ -20,34 +20,37 @@ function SpecBlock({ spec }: { spec: unknown }) {
   const text = JSON.stringify(spec, null, 2);
   return (
     <div className="spec-tools">
-      <pre className="spec-block spec-scroll">
-        <code>{text}</code>
-      </pre>
       <p className="spec-actions">
-        <button
-          type="button"
-          className="btn btn-ghost"
-          onClick={() => void navigator.clipboard.writeText(text)}
-        >
+        <button type="button" className="btn" onClick={() => void navigator.clipboard.writeText(text)}>
           Copy spec
         </button>
-        <a className="btn btn-ghost" href={playgroundHref(spec)}>
+        <a className="btn" href={playgroundHref(spec)}>
           Open in playground
         </a>
       </p>
+      <details className="spec-fold">
+        <summary>View spec</summary>
+        <pre className="spec-block spec-scroll">
+          <code>{text}</code>
+        </pre>
+      </details>
     </div>
   );
 }
 
 function ChartFigure({ chart, theme }: { chart: ReadyChart; theme: string }) {
   const spec = withTheme(chart.spec, theme);
+  const kpi = chart.spec.type === "kpi";
   return (
-    <figure className={`board-card ${chart.span}`}>
-      <figcaption>
-        <h3>{chart.title}</h3>
-        <p>{chart.caption}</p>
-      </figcaption>
+    <figure className={`board-card ${chart.span}${kpi ? " kpi-card" : ""}`}>
+      {kpi ? null : (
+        <figcaption>
+          <h3>{chart.title}</h3>
+          <p>{chart.caption}</p>
+        </figcaption>
+      )}
       <ChartHost spec={spec} svg={chart.svg} className="chart-host chart-preset" />
+      {kpi ? <p className="kpi-note">{chart.caption}</p> : null}
       <script type="application/json" data-ck-spec={chart.id} dangerouslySetInnerHTML={{ __html: JSON.stringify(spec) }} />
       <SpecBlock spec={spec} />
     </figure>

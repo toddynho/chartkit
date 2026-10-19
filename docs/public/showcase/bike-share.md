@@ -1,17 +1,16 @@
 # City bike-share flows
 
-Trips between four fictional neighbourhoods, sixteen weeks of days, and the shift from classic bikes to e-bikes.
+Trips through four fictional neighbourhoods, one way from Lantern to Moth, then sixteen weeks of days and the shift from classic bikes to e-bikes.
 
 ## Neighbourhood flows
 
-Trips from one dock to another.
+One direction, left to right. Lantern feeds the other three docks.
 
 ```json
 {
   "version": "1",
   "id": "bike-flows",
   "type": "sankey",
-  "title": "Where trips go",
   "theme": "soft",
   "data": [
     {
@@ -22,7 +21,17 @@ Trips from one dock to another.
     {
       "from": "Lantern",
       "to": "Kiln",
-      "trips": 90
+      "trips": 150
+    },
+    {
+      "from": "Lantern",
+      "to": "Moth",
+      "trips": 80
+    },
+    {
+      "from": "Quay",
+      "to": "Kiln",
+      "trips": 70
     },
     {
       "from": "Quay",
@@ -32,17 +41,7 @@ Trips from one dock to another.
     {
       "from": "Kiln",
       "to": "Moth",
-      "trips": 70
-    },
-    {
-      "from": "Moth",
-      "to": "Lantern",
       "trips": 110
-    },
-    {
-      "from": "Quay",
-      "to": "Lantern",
-      "trips": 130
     }
   ],
   "encoding": {
@@ -50,21 +49,12 @@ Trips from one dock to another.
     "target": "to",
     "y": "trips"
   },
-  "tooltip": {
-    "position": "right",
-    "fields": [
-      {
-        "field": "trips",
-        "title": "Trips"
-      }
-    ]
-  },
   "size": {
-    "width": 760,
-    "height": 380
+    "width": 980,
+    "height": 560
   },
   "a11y": {
-    "alt": "The largest flow is Lantern to Quay, 240 trips. Moth sends 110 back to Lantern."
+    "alt": "Lantern sends the most trips to Quay. Quay and Kiln both feed Moth, and nothing rides back upstream."
   }
 }
 ```
@@ -78,7 +68,6 @@ One cell per day. Colour is the trip count.
   "version": "1",
   "id": "bike-calendar",
   "type": "heatmap",
-  "title": "Daily trips",
   "theme": "soft",
   "data": [
     {
@@ -546,8 +535,8 @@ One cell per day. Colour is the trip count.
     "weeks": 16
   },
   "size": {
-    "width": 760,
-    "height": 250
+    "width": 980,
+    "height": 360
   },
   "a11y": {
     "alt": "Daily trips over sixteen weeks vary between a quiet day and a busy day, with no empty week."
@@ -557,14 +546,13 @@ One cell per day. Colour is the trip count.
 
 ## Classic and e-bike share
 
-Each span sums to 100 percent. Tick labels are tilted.
+Each span sums to 100 percent. Tick labels are tilted. Click a legend name to hide a share.
 
 ```json
 {
   "version": "1",
   "id": "bike-mix",
   "type": "stacked-area",
-  "title": "Fleet mix",
   "theme": "soft",
   "data": [
     {
@@ -625,8 +613,8 @@ Each span sums to 100 percent. Tick labels are tilted.
     }
   },
   "legend": {
-    "values": true,
-    "position": "bottom"
+    "position": "bottom",
+    "interactive": true
   },
   "tooltip": {
     "mode": "index",
@@ -634,9 +622,12 @@ Each span sums to 100 percent. Tick labels are tilted.
     "crosshair": true,
     "crosshairLabel": true
   },
+  "interaction": {
+    "select": "series"
+  },
   "size": {
-    "width": 640,
-    "height": 320
+    "width": 760,
+    "height": 380
   },
   "a11y": {
     "alt": "E-bike's share of trips grows from Belt to Jade, and classic shrinks to just under half."
@@ -646,14 +637,13 @@ Each span sums to 100 percent. Tick labels are tilted.
 
 ## Fleet
 
-Slice labels and legend values.
+Slice labels and legend values. Click a slice or its legend name.
 
 ```json
 {
   "version": "1",
   "id": "bike-fleet",
   "type": "donut",
-  "title": "Fleet",
   "theme": "soft",
   "data": [
     {
@@ -674,7 +664,8 @@ Slice labels and legend values.
   },
   "legend": {
     "values": true,
-    "position": "bottom"
+    "position": "bottom",
+    "interactive": true
   },
   "tooltip": {
     "position": "top",
@@ -685,9 +676,12 @@ Slice labels and legend values.
       }
     ]
   },
+  "interaction": {
+    "select": "point"
+  },
   "size": {
-    "width": 360,
-    "height": 320
+    "width": 420,
+    "height": 380
   },
   "a11y": {
     "alt": "Classic bikes take 1,840 trips and e-bikes take 1,260."
@@ -701,7 +695,10 @@ Slice labels and legend values.
 - [Tick label rotation](https://chartkit.dev/features/axis.ticks.rotate) (`axis.ticks.rotate`)
 - [Axis title](https://chartkit.dev/features/axis.title) (`axis.title`)
 - [Number formatting options](https://chartkit.dev/features/format.number) (`format.number`)
+- [Click events on marks](https://chartkit.dev/features/interaction.click) (`interaction.click`)
+- [Selection (point / multi / series)](https://chartkit.dev/features/interaction.select) (`interaction.select`)
 - [Data labels on marks](https://chartkit.dev/features/label.show) (`label.show`)
+- [Click to toggle series](https://chartkit.dev/features/legend.interactive) (`legend.interactive`)
 - [Legend position](https://chartkit.dev/features/legend.position) (`legend.position`)
 - [Values in legend](https://chartkit.dev/features/legend.values) (`legend.values`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)

@@ -13,7 +13,6 @@ Log scale. ChartKit is the size script. The other bars are the bench line, using
   "version": "1",
   "id": "bench-bundles",
   "type": "bar",
-  "title": "Line gzip",
   "theme": "soft",
   "data": [
     {
@@ -79,9 +78,12 @@ Log scale. ChartKit is the size script. The other bars are the bench line, using
       }
     ]
   },
+  "interaction": {
+    "select": "point"
+  },
   "size": {
-    "width": 760,
-    "height": 420,
+    "width": 980,
+    "height": 460,
     "padding": {
       "left": 72
     }
@@ -94,14 +96,13 @@ Log scale. ChartKit is the size script. The other bars are the bench line, using
 
 ## Aligned update, ChartKit and uPlot
 
-Grouped bars from the round 13 browser rows. A taller uPlot bar is a loss.
+Grouped bars from the round 13 browser rows. A taller uPlot bar is a loss. Click a legend name to hide that library.
 
 ```json
 {
   "version": "1",
   "id": "bench-updates",
   "type": "bar",
-  "title": "Aligned update",
   "theme": "soft",
   "data": [
     {
@@ -240,16 +241,20 @@ Grouped bars from the round 13 browser rows. A taller uPlot bar is a loss.
     }
   },
   "legend": {
-    "position": "bottom"
+    "position": "bottom",
+    "interactive": true
   },
   "tooltip": {
     "mode": "index",
     "position": "top",
     "crosshair": true
   },
+  "interaction": {
+    "select": "series"
+  },
   "size": {
-    "width": 760,
-    "height": 400,
+    "width": 980,
+    "height": 440,
     "padding": {
       "left": 88
     }
@@ -269,7 +274,6 @@ ChartKit minus uPlot. The band below zero is a loss. The band above zero is a le
   "version": "1",
   "id": "bench-gap",
   "type": "bar",
-  "title": "Update gap",
   "theme": "soft",
   "data": [
     {
@@ -364,9 +368,12 @@ ChartKit minus uPlot. The band below zero is a loss. The band above zero is a le
       }
     ]
   },
+  "interaction": {
+    "select": "point"
+  },
   "size": {
-    "width": 760,
-    "height": 360,
+    "width": 980,
+    "height": 400,
     "padding": {
       "left": 84
     }
@@ -386,7 +393,6 @@ Painted median from the same round 13 file. uPlot is ahead of ChartKit here.
   "version": "1",
   "id": "bench-hover",
   "type": "bar",
-  "title": "Hover painted",
   "theme": "soft",
   "data": [
     {
@@ -443,9 +449,12 @@ Painted median from the same round 13 file. uPlot is ahead of ChartKit here.
       }
     ]
   },
+  "interaction": {
+    "select": "point"
+  },
   "size": {
-    "width": 760,
-    "height": 340,
+    "width": 980,
+    "height": 380,
     "padding": {
       "left": 72
     }
@@ -472,6 +481,9 @@ Painted median from the same round 13 file. uPlot is ahead of ChartKit here.
 - [Shaded band / region](https://chartkit.dev/features/annotation.band) (`annotation.band`)
 - [Tick label rotation](https://chartkit.dev/features/axis.ticks.rotate) (`axis.ticks.rotate`)
 - [Axis title](https://chartkit.dev/features/axis.title) (`axis.title`)
+- [Click events on marks](https://chartkit.dev/features/interaction.click) (`interaction.click`)
+- [Selection (point / multi / series)](https://chartkit.dev/features/interaction.select) (`interaction.select`)
+- [Click to toggle series](https://chartkit.dev/features/legend.interactive) (`legend.interactive`)
 - [Legend position](https://chartkit.dev/features/legend.position) (`legend.position`)
 - [Logarithmic scale](https://chartkit.dev/features/scale.log) (`scale.log`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)

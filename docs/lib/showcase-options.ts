@@ -94,6 +94,13 @@ export function optionsIn(spec: unknown): OptionLink[] {
   if (isRecord(spec.legend)) {
     if (spec.legend.values === true) add(ids, "legend.values");
     if (typeof spec.legend.position === "string") add(ids, "legend.position");
+    if (spec.legend.interactive === true) add(ids, "legend.interactive");
+  }
+  if (isRecord(spec.interaction)) {
+    if (spec.interaction.select === "point" || spec.interaction.select === "series") {
+      add(ids, "interaction.select");
+      add(ids, "interaction.click");
+    }
   }
   if (isRecord(spec.tooltip)) {
     if (spec.tooltip.fields) add(ids, "tooltip.fields");

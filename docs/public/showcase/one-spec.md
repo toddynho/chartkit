@@ -4,7 +4,7 @@ Tide heights at the fictional harbour of Greywick. The same JSON renders in Reac
 
 ## Greywick harbour
 
-One spec. The SVG in this page is the Next.js server render. Hydration adds the tooltip and the crosshair.
+One spec. The SVG in this page is the Next.js server render. Hover for the tooltip, click a point to mark it, or click a legend name to hide that line.
 
 ```json
 {
@@ -75,8 +75,8 @@ One spec. The SVG in this page is the Next.js server render. Hydration adds the 
     }
   },
   "legend": {
-    "values": true,
-    "position": "bottom"
+    "position": "bottom",
+    "interactive": true
   },
   "tooltip": {
     "mode": "index",
@@ -102,6 +102,9 @@ One spec. The SVG in this page is the Next.js server render. Hydration adds the 
       }
     ]
   },
+  "interaction": {
+    "select": "point"
+  },
   "annotations": [
     {
       "type": "rule",
@@ -121,8 +124,8 @@ One spec. The SVG in this page is the Next.js server render. Hydration adds the 
     }
   ],
   "size": {
-    "width": 720,
-    "height": 360,
+    "width": 960,
+    "height": 440,
     "padding": {
       "left": 96
     }
@@ -208,8 +211,8 @@ const spec = {
     }
   },
   "legend": {
-    "values": true,
-    "position": "bottom"
+    "position": "bottom",
+    "interactive": true
   },
   "tooltip": {
     "mode": "index",
@@ -235,6 +238,9 @@ const spec = {
       }
     ]
   },
+  "interaction": {
+    "select": "point"
+  },
   "annotations": [
     {
       "type": "rule",
@@ -254,8 +260,8 @@ const spec = {
     }
   ],
   "size": {
-    "width": 720,
-    "height": 360,
+    "width": 960,
+    "height": 440,
     "padding": {
       "left": 96
     }
@@ -344,8 +350,8 @@ const spec = {
     }
   },
   "legend": {
-    "values": true,
-    "position": "bottom"
+    "position": "bottom",
+    "interactive": true
   },
   "tooltip": {
     "mode": "index",
@@ -371,6 +377,9 @@ const spec = {
       }
     ]
   },
+  "interaction": {
+    "select": "point"
+  },
   "annotations": [
     {
       "type": "rule",
@@ -390,8 +399,8 @@ const spec = {
     }
   ],
   "size": {
-    "width": 720,
-    "height": 360,
+    "width": 960,
+    "height": 440,
     "padding": {
       "left": 96
     }
@@ -480,8 +489,8 @@ const spec = {
     }
   },
   "legend": {
-    "values": true,
-    "position": "bottom"
+    "position": "bottom",
+    "interactive": true
   },
   "tooltip": {
     "mode": "index",
@@ -507,6 +516,9 @@ const spec = {
       }
     ]
   },
+  "interaction": {
+    "select": "point"
+  },
   "annotations": [
     {
       "type": "rule",
@@ -526,8 +538,8 @@ const spec = {
     }
   ],
   "size": {
-    "width": 720,
-    "height": 360,
+    "width": 960,
+    "height": 440,
     "padding": {
       "left": 96
     }
@@ -617,8 +629,8 @@ const spec = {
     }
   },
   "legend": {
-    "values": true,
-    "position": "bottom"
+    "position": "bottom",
+    "interactive": true
   },
   "tooltip": {
     "mode": "index",
@@ -644,6 +656,9 @@ const spec = {
       }
     ]
   },
+  "interaction": {
+    "select": "point"
+  },
   "annotations": [
     {
       "type": "rule",
@@ -663,8 +678,8 @@ const spec = {
     }
   ],
   "size": {
-    "width": 720,
-    "height": 360,
+    "width": 960,
+    "height": 440,
     "padding": {
       "left": 96
     }
@@ -751,8 +766,8 @@ const spec = {
     }
   },
   "legend": {
-    "values": true,
-    "position": "bottom"
+    "position": "bottom",
+    "interactive": true
   },
   "tooltip": {
     "mode": "index",
@@ -778,6 +793,9 @@ const spec = {
       }
     ]
   },
+  "interaction": {
+    "select": "point"
+  },
   "annotations": [
     {
       "type": "rule",
@@ -797,8 +815,8 @@ const spec = {
     }
   ],
   "size": {
-    "width": 720,
-    "height": 360,
+    "width": 960,
+    "height": 440,
     "padding": {
       "left": 96
     }
@@ -885,8 +903,8 @@ chart.destroy();
     }
   },
   "legend": {
-    "values": true,
-    "position": "bottom"
+    "position": "bottom",
+    "interactive": true
   },
   "tooltip": {
     "mode": "index",
@@ -912,6 +930,9 @@ chart.destroy();
       }
     ]
   },
+  "interaction": {
+    "select": "point"
+  },
   "annotations": [
     {
       "type": "rule",
@@ -931,8 +952,8 @@ chart.destroy();
     }
   ],
   "size": {
-    "width": 720,
-    "height": 360,
+    "width": 960,
+    "height": 440,
     "padding": {
       "left": 96
     }
@@ -1015,8 +1036,8 @@ chart.destroy();
     }
   },
   "legend": {
-    "values": true,
-    "position": "bottom"
+    "position": "bottom",
+    "interactive": true
   },
   "tooltip": {
     "mode": "index",
@@ -1042,6 +1063,9 @@ chart.destroy();
       }
     ]
   },
+  "interaction": {
+    "select": "point"
+  },
   "annotations": [
     {
       "type": "rule",
@@ -1061,8 +1085,8 @@ chart.destroy();
     }
   ],
   "size": {
-    "width": 720,
-    "height": 360,
+    "width": 960,
+    "height": 440,
     "padding": {
       "left": 96
     }
@@ -1147,8 +1171,8 @@ const spec = {
     }
   },
   "legend": {
-    "values": true,
-    "position": "bottom"
+    "position": "bottom",
+    "interactive": true
   },
   "tooltip": {
     "mode": "index",
@@ -1174,6 +1198,9 @@ const spec = {
       }
     ]
   },
+  "interaction": {
+    "select": "point"
+  },
   "annotations": [
     {
       "type": "rule",
@@ -1193,8 +1220,8 @@ const spec = {
     }
   ],
   "size": {
-    "width": 720,
-    "height": 360,
+    "width": 960,
+    "height": 440,
     "padding": {
       "left": 96
     }
@@ -1221,8 +1248,10 @@ const svg = renderToString(spec);
 - [Svelte](https://chartkit.dev/features/framework.svelte) (`framework.svelte`)
 - [Vanilla JS / framework-agnostic core](https://chartkit.dev/features/framework.vanilla) (`framework.vanilla`)
 - [Vue](https://chartkit.dev/features/framework.vue) (`framework.vue`)
+- [Click events on marks](https://chartkit.dev/features/interaction.click) (`interaction.click`)
+- [Selection (point / multi / series)](https://chartkit.dev/features/interaction.select) (`interaction.select`)
+- [Click to toggle series](https://chartkit.dev/features/legend.interactive) (`legend.interactive`)
 - [Legend position](https://chartkit.dev/features/legend.position) (`legend.position`)
-- [Values in legend](https://chartkit.dev/features/legend.values) (`legend.values`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)
 - [Crosshair / guide line](https://chartkit.dev/features/tooltip.crosshair) (`tooltip.crosshair`)
 - [Custom tooltip fields](https://chartkit.dev/features/tooltip.fields) (`tooltip.fields`)

@@ -124,7 +124,7 @@ function mermaidCards(): MermaidCard[] {
   return mermaidBoards.map((board) => {
     const converted = fromMermaid(board.source);
     if (!converted.spec) throw new Error(`${board.id} mermaid produced no spec`);
-    const spec = { ...converted.spec, theme: "soft", size: { width: 720, height: board.height ?? 380 } } as unknown as ShowcaseSpec;
+    const spec = { ...converted.spec, theme: "soft", size: { width: 880, height: board.height ?? 440 } } as unknown as ShowcaseSpec;
     const checked = validatePhase4(spec);
     if (!checked.ok) {
       throw new Error(`${board.id} ${checked.errors.map((error) => `${error.code} ${error.message}`).join("; ")}`);
@@ -175,7 +175,7 @@ export function boards(): Board[] {
   const tideChart = ready({
     id: "tide",
     title: "Greywick harbour",
-    caption: "One spec. The SVG in this page is the Next.js server render. Hydration adds the tooltip and the crosshair.",
+    caption: "One spec. The SVG in this page is the Next.js server render. Hover for the tooltip, click a point to mark it, or click a legend name to hide that line.",
     span: "board-12",
     spec: tide,
   });
@@ -206,7 +206,7 @@ export function boards(): Board[] {
       slug: "bike-share",
       number: 3,
       title: "City bike-share flows",
-      lede: "Trips between four fictional neighbourhoods, sixteen weeks of days, and the shift from classic bikes to e-bikes.",
+      lede: "Trips through four fictional neighbourhoods, one way from Lantern to Moth, then sixteen weeks of days and the shift from classic bikes to e-bikes.",
       charts: bike,
     }),
     board({

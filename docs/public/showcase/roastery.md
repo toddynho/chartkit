@@ -32,8 +32,8 @@ Compact count and a rising delta.
     29
   ],
   "size": {
-    "width": 320,
-    "height": 156
+    "width": 420,
+    "height": 240
   },
   "a11y": {
     "alt": "Bags out are 3.8 thousand, up 8 percent, and the sparkline finishes higher than it starts."
@@ -73,8 +73,8 @@ Currency, and a lower bill is the good direction.
     6
   ],
   "size": {
-    "width": 320,
-    "height": 156
+    "width": 420,
+    "height": 240
   },
   "a11y": {
     "alt": "The green-bean bill is 24,600 pounds, down 6 percent, which is the good direction."
@@ -112,8 +112,8 @@ Percent of bags that stayed in the café.
     0.54
   ],
   "size": {
-    "width": 320,
-    "height": 156
+    "width": 420,
+    "height": 240
   },
   "a11y": {
     "alt": "Café share is 54 percent, down 2 points."
@@ -123,14 +123,13 @@ Percent of bags that stayed in the café.
 
 ## Bags and bean cost
 
-Bars on the left, a currency line on y2, and a target rule.
+Bars on the left, a currency line on y2, and a target rule. Click a bar to highlight that series, or a legend name to hide it.
 
 ```json
 {
   "version": "1",
   "id": "roastery-combo",
   "type": "combo",
-  "title": "Bags and bean cost",
   "theme": "soft",
   "locale": "en-GB",
   "data": [
@@ -204,8 +203,8 @@ Bars on the left, a currency line on y2, and a target rule.
     }
   },
   "legend": {
-    "values": true,
-    "position": "bottom"
+    "position": "bottom",
+    "interactive": true
   },
   "tooltip": {
     "mode": "index",
@@ -228,6 +227,9 @@ Bars on the left, a currency line on y2, and a target rule.
       }
     ]
   },
+  "interaction": {
+    "select": "series"
+  },
   "annotations": [
     {
       "type": "rule",
@@ -239,8 +241,8 @@ Bars on the left, a currency line on y2, and a target rule.
     }
   ],
   "size": {
-    "width": 760,
-    "height": 340,
+    "width": 960,
+    "height": 420,
     "padding": {
       "right": 96
     }
@@ -260,7 +262,6 @@ The bar is the value, the marker is the aim, and the range is the wide mark.
   "version": "1",
   "id": "roastery-bullet",
   "type": "bullet",
-  "title": "Café bags",
   "theme": "soft",
   "data": [
     {
@@ -281,8 +282,8 @@ The bar is the value, the marker is the aim, and the range is the wide mark.
     ]
   },
   "size": {
-    "width": 520,
-    "height": 160
+    "width": 640,
+    "height": 200
   },
   "a11y": {
     "alt": "Café bags are 1,880, past the aim of 1,700 and inside the wide mark of 2,400."
@@ -299,7 +300,6 @@ Signed steps between two totals.
   "version": "1",
   "id": "roastery-bridge",
   "type": "waterfall",
-  "title": "Receipts bridge",
   "theme": "soft",
   "locale": "en-GB",
   "data": [
@@ -346,23 +346,9 @@ Signed steps between two totals.
       "title": "Pounds"
     }
   },
-  "tooltip": {
-    "position": "top",
-    "fields": [
-      {
-        "field": "amount",
-        "title": "Amount",
-        "format": {
-          "style": "currency",
-          "currency": "GBP",
-          "decimals": 0
-        }
-      }
-    ]
-  },
   "size": {
-    "width": 520,
-    "height": 280
+    "width": 640,
+    "height": 340
   },
   "a11y": {
     "alt": "Receipts open at 12,000 pounds, café and wholesale add, beans subtract, and the close is 12,700."
@@ -390,8 +376,8 @@ A sparkline with no axes.
     69
   ],
   "size": {
-    "width": 760,
-    "height": 128
+    "width": 960,
+    "height": 140
   },
   "a11y": {
     "alt": "Daily bags rise from 42 to 69 across the week, with a dip after the fourth day."
@@ -410,8 +396,10 @@ A sparkline with no axes.
 - [Compact / SI number abbreviations](https://chartkit.dev/features/format.compact) (`format.compact`)
 - [Locale-aware formatting (i18n)](https://chartkit.dev/features/format.locale) (`format.locale`)
 - [Number formatting options](https://chartkit.dev/features/format.number) (`format.number`)
+- [Click events on marks](https://chartkit.dev/features/interaction.click) (`interaction.click`)
+- [Selection (point / multi / series)](https://chartkit.dev/features/interaction.select) (`interaction.select`)
+- [Click to toggle series](https://chartkit.dev/features/legend.interactive) (`legend.interactive`)
 - [Legend position](https://chartkit.dev/features/legend.position) (`legend.position`)
-- [Values in legend](https://chartkit.dev/features/legend.values) (`legend.values`)
 - [Multiple / dual y axes](https://chartkit.dev/features/scale.multi) (`scale.multi`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)
 - [Crosshair / guide line](https://chartkit.dev/features/tooltip.crosshair) (`tooltip.crosshair`)

@@ -64,8 +64,8 @@ gantt
   "title": "Paper Kite",
   "theme": "soft",
   "size": {
-    "width": 720,
-    "height": 380
+    "width": 880,
+    "height": 440
   }
 }
 ```
@@ -112,8 +112,8 @@ timeline
   "title": "Lumen and Co",
   "theme": "soft",
   "size": {
-    "width": 720,
-    "height": 380
+    "width": 880,
+    "height": 440
   }
 }
 ```
@@ -177,8 +177,8 @@ journey
   "title": "Paper Kite playtest",
   "theme": "soft",
   "size": {
-    "width": 720,
-    "height": 480
+    "width": 880,
+    "height": 520
   }
 }
 ```
@@ -250,8 +250,8 @@ quadrantChart
   "title": "Paper Kite bets",
   "theme": "soft",
   "size": {
-    "width": 720,
-    "height": 380
+    "width": 880,
+    "height": 440
   }
 }
 ```

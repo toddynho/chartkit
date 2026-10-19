@@ -33,8 +33,8 @@ Broken:
     "y": "grams"
   },
   "size": {
-    "width": 420,
-    "height": 280
+    "width": 480,
+    "height": 320
   },
   "a11y": {
     "alt": "Crumb is the largest part of the mix, then filling, then crust."
@@ -69,8 +69,8 @@ Repaired:
     "y": "grams"
   },
   "size": {
-    "width": 420,
-    "height": 280
+    "width": 480,
+    "height": 320
   },
   "a11y": {
     "alt": "Crumb is the largest part of the mix, then filling, then crust."
@@ -114,8 +114,8 @@ Broken:
     "y": "loaves"
   },
   "size": {
-    "width": 520,
-    "height": 260
+    "width": 560,
+    "height": 300
   },
   "a11y": {
     "alt": "Mid sitting bakes the most loaves."
@@ -150,8 +150,8 @@ Repaired:
     "y": "loaves"
   },
   "size": {
-    "width": 520,
-    "height": 260
+    "width": 560,
+    "height": 300
   },
   "a11y": {
     "alt": "Mid sitting bakes the most loaves."
@@ -190,8 +190,8 @@ Broken:
     "y": "loafes"
   },
   "size": {
-    "width": 520,
-    "height": 260
+    "width": 560,
+    "height": 300
   },
   "a11y": {
     "alt": "Mid sitting bakes the most loaves."
@@ -226,8 +226,8 @@ Repaired:
     "y": "loaves"
   },
   "size": {
-    "width": 520,
-    "height": 260
+    "width": 560,
+    "height": 300
   },
   "a11y": {
     "alt": "Mid sitting bakes the most loaves."
@@ -266,8 +266,8 @@ Broken:
     "y": "loaves"
   },
   "size": {
-    "width": 520,
-    "height": 260
+    "width": 560,
+    "height": 300
   }
 }
 ```
@@ -299,8 +299,8 @@ Repaired:
     "y": "loaves"
   },
   "size": {
-    "width": 520,
-    "height": 260
+    "width": 560,
+    "height": 300
   },
   "a11y": {
     "alt": "Bar chart of loaves — Sittings."
@@ -347,8 +347,8 @@ Broken:
     }
   },
   "size": {
-    "width": 560,
-    "height": 260,
+    "width": 640,
+    "height": 300,
     "padding": {
       "left": 64
     }
@@ -394,8 +394,8 @@ Repaired:
     }
   },
   "size": {
-    "width": 560,
-    "height": 260,
+    "width": 640,
+    "height": 300,
     "padding": {
       "left": 64
     }

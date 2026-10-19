@@ -392,7 +392,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .gallery-index, .board-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 16px;
+  gap: 22px;
   margin: 8px 0 28px;
 }
 .gallery-index { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -406,12 +406,49 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   background: var(--bg-elev);
   border: 1px solid var(--line);
   border-radius: 18px;
-  padding: 16px 16px 8px;
+  padding: 20px 20px 14px;
 }
-.board-card h3 { margin: 0 0 4px; font-size: 1.05rem; }
+.board-card h3 { margin: 0 0 4px; font-size: 1.15rem; letter-spacing: -0.02em; }
 .board-card h4 { margin: 0 0 8px; font-size: 0.92rem; }
 .board-card p { color: var(--muted); font-size: 0.95rem; }
-.board-card .chart-host { margin: 4px 0 8px; }
+.board-card .chart-host { margin: 12px 0 6px; }
+.kpi-card {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+.kpi-note { margin: 8px 4px 0; font-size: 0.84rem; }
+.spec-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 18px;
+  margin-top: 2px;
+}
+.spec-actions { margin: 0; gap: 18px; }
+.spec-actions .btn {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 550;
+}
+.spec-actions .btn:hover { color: var(--fg); }
+.spec-fold { margin: 0; }
+.spec-fold summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.84rem;
+  width: fit-content;
+}
+.spec-fold summary:hover { color: var(--fg); }
+.spec-fold[open] { flex-basis: 100%; }
+.spec-fold[open] summary { margin-bottom: 8px; }
+.gallery-index .chart-host svg { max-height: 280px; width: auto; max-width: 100%; }
 .theme-switch {
   display: flex;
   flex-wrap: wrap;
@@ -435,8 +472,9 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .spec-actions .btn { text-decoration: none; }
 .mermaid-pair, .repair-pair {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr);
-  gap: 16px;
+  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+  gap: 20px;
+  align-items: start;
 }
 .repair-pair { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .option-list { list-style: none; padding: 0; margin: 0 0 28px; }
