@@ -1,14 +1,14 @@
 # Axis line styling
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Visibility, colour and width of the axis baseline
 
-Matrix status: `partial`. Verification: `dts-path` (strong).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-colour token only
+The baseline is off until line is true or { show, color, width, dash }. Dash is solid, dashed, or dotted. Drawn on createRenderer([line]).
 
-Source: chartkit:packages/core/src/generated/schema.ts:368
+Source: packages/core/src/generated/schema.ts:1044
 
 ## ChartKit spec
 
@@ -37,9 +37,13 @@ Source: chartkit:packages/core/src/generated/schema.ts:368
     "width": 640,
     "height": 260
   },
-  "theme": {
-    "tokens": {
-      "axis": "#5c6b7a"
+  "axes": {
+    "x": {
+      "line": {
+        "show": true,
+        "dash": "dashed",
+        "width": 1.5
+      }
     }
   }
 }
@@ -72,6 +76,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | ~showAxisLine\|axisLineWidth | dts-grep (weak) | mermaid/dist/config.type.d.ts:1137 |
 | AntV G2 | native | ~line\|lineStroke | dts-grep (weak) | @antv/g2/lib/index.d.ts:12 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against bdf969b7d123.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 67a0c9849a0c.
 
 https://chartkit.dev/features.json

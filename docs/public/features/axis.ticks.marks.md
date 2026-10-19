@@ -1,14 +1,51 @@
 # Tick marks size / visibility
 
-ChartKit: **none**
+ChartKit: **native**
 
 Show/hide tick marks and set their length
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-no tick-mark options
+tickMarks is inside, outside, or none. tickLength sets the length. Drawn on createRenderer([line]).
 
-No spec snippet. ChartKit does not support this feature.
+Source: packages/core/src/generated/schema.ts:1044
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40
+    },
+    {
+      "quarter": "Q2",
+      "units": 55
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": "units"
+  },
+  "a11y": {
+    "alt": "Units rose in Q2."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "axes": {
+    "x": {
+      "tickMarks": "outside"
+    }
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -35,6 +72,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | native | ~showTick\|tickLength | dts-grep (weak) | mermaid/dist/config.type.d.ts:1125 |
 | AntV G2 | native | ~tickLength | dts-grep (weak) | @antv/g2/lib/component/axis.d.ts:16 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against bdf969b7d123.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 67a0c9849a0c.
 
 https://chartkit.dev/features.json
