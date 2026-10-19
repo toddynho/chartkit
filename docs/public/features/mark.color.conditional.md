@@ -1,14 +1,14 @@
 # Conditional / threshold colouring
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Colour by value threshold (negative red, above target green)
 
-Matrix status: `partial`. Verification: `dts-path` (strong).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-waterfall/candlestick use positive/negative tokens
+mark.colorRules recolours bar, line points, scatter, and pie. First match wins. Tokens negative, positive, and accent follow the theme. Probed by rendering.
 
-Source: chartkit:packages/core/src/generated/schema.ts:380
+Source: packages/core/src/generated/schema.ts:975
 
 ## ChartKit spec
 
@@ -37,10 +37,13 @@ Source: chartkit:packages/core/src/generated/schema.ts:380
     "width": 640,
     "height": 260
   },
-  "theme": {
-    "tokens": {
-      "negative": "#5c6b7a"
-    }
+  "mark": {
+    "colorRules": [
+      {
+        "color": "accent",
+        "gt": 0
+      }
+    ]
   }
 }
 ```
@@ -72,6 +75,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | partial | ~color | dts-grep (weak) | @antv/g2/lib/index.d.ts:43 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 67a0c9849a0c.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 0749a0e1cb93.
 
 https://chartkit.dev/features.json

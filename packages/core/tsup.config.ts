@@ -16,6 +16,7 @@ const charts = [
   "line",
   "bar",
   "donut",
+  "pie",
   "stacked-area",
   "scatter",
   "combo",

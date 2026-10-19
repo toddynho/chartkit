@@ -532,10 +532,9 @@ function buildPie(headerRest: string, body: string[], meta: Meta, maxPoints: num
   const top = kept.reduce((best, slice) => (slice.value > best.value ? slice : best), kept[0]);
   const spec: Record<string, unknown> = {
     version: "1",
-    type: "donut",
+    type: "pie",
     data: kept.map((slice) => ({ label: slice.name, value: slice.value })),
     encoding: { x: "label", y: "value" },
-    mark: { innerRadius: 0 },
     a11y: { alt: chooseAlt(meta, diagramTitle, `${top.name} is the largest slice at ${top.value}.`) },
   };
   if (diagramTitle) spec.title = diagramTitle;

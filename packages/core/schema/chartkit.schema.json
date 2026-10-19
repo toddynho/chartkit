@@ -26,6 +26,7 @@
         "line",
         "bar",
         "donut",
+        "pie",
         "stacked-area",
         "scatter",
         "combo",
@@ -49,7 +50,7 @@
       "examples": [
         "line"
       ],
-      "description": "Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. mark.innerRadius 0 gives a pie. Replaces DonutChart. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar."
+      "description": "Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar."
     },
     "id": {
       "type": "string",
@@ -126,6 +127,7 @@
               "line",
               "bar",
               "donut",
+              "pie",
               "stacked-area",
               "scatter",
               "combo",
@@ -669,6 +671,14 @@
                 "$ref": "#/$defs/color"
               },
               "description": "Colors to use, in order (categorical) or low→high (sequential)."
+            },
+            "domain": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              },
+              "description": "Category values in the same order as range. A value that is not listed takes the next palette colour."
             }
           },
           "description": "Color by field."
@@ -977,7 +987,7 @@
           "type": "number",
           "minimum": 0,
           "maximum": 40,
-          "description": "Rounded corners in px. Applies to: bar, donut, heatmap."
+          "description": "Rounded corners in px. Applies to: bar, donut, pie, heatmap."
         },
         "gap": {
           "type": "number",
@@ -988,15 +998,15 @@
         "labels": {
           "type": "boolean",
           "default": false,
-          "description": "Draw value labels on the marks. Applies to: bar, donut, line, stacked-area, scatter. Overlapping labels are skipped."
+          "description": "Draw value labels on the marks. Applies to: bar, donut, pie, line, stacked-area, scatter. Outside pie and donut labels use leader lines. Overlapping labels are skipped."
         },
         "labelPosition": {
           "enum": ["top", "bottom", "left", "right", "center", "inside", "outside"],
-          "description": "Where the value label sits. top, bottom, left, right, and center suit line, area, and scatter. inside and outside suit bar and donut. Setting it turns labels on. Applies to: bar, donut, line, stacked-area, scatter, combo."
+          "description": "Where the value label sits. top, bottom, left, right, and center suit line, area, and scatter. inside and outside suit bar, donut, and pie. Outside pie and donut labels draw leader lines. Setting it turns labels on. Applies to: bar, donut, pie, line, stacked-area, scatter, combo."
         },
         "labelFormat": {
           "$ref": "#/$defs/format",
-          "description": "Format preset for data labels. Falls back to the series format, then a plain number. Setting it turns labels on. Applies to: bar, donut, line, stacked-area, scatter, combo."
+          "description": "Format preset for data labels. Falls back to the series format, then a plain number. Setting it turns labels on. Applies to: bar, donut, pie, line, stacked-area, scatter, combo."
         },
         "labelEnds": {
           "enum": ["all", "ends", "last"],
@@ -1012,13 +1022,95 @@
           "minimum": 0,
           "maximum": 0.95,
           "default": 0.6,
-          "description": "Hole size as a 0–0.95 fraction of the radius; 0 = pie. Applies to: donut."
+          "description": "Hole size as a 0–0.95 fraction of the radius. Donut defaults to 0.6. Pie defaults to 0. Applies to: donut, pie."
         },
         "padAngle": {
           "type": "number",
           "minimum": 0,
           "maximum": 10,
-          "description": "Gap between slices in degrees. Applies to: donut."
+          "description": "Gap between slices in degrees. Donut defaults to 2. Pie defaults to 0. Applies to: donut, pie."
+        },
+        "sort": {
+          "enum": ["none", "asc", "desc"],
+          "default": "none",
+          "description": "Slice order. none keeps data order and pins an Other bucket last. asc and desc sort by value, including Other. Applies to: donut, pie."
+        },
+        "other": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Fold slices smaller than this fraction of the total into Other."
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["threshold"],
+              "properties": {
+                "threshold": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Fold slices smaller than this fraction of the total."
+                },
+                "label": {
+                  "type": "string",
+                  "description": "Name of the folded slice. Default Other."
+                }
+              },
+              "description": "Fold slices under threshold into one bucket."
+            }
+          ],
+          "description": "Group small slices into one Other slice. A number is the fraction. Applies to: donut, pie."
+        },
+        "offset": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 48,
+          "description": "Pull slices out from the centre, in px. With mark.explode, only those slices move. Otherwise every slice moves. Applies to: donut, pie."
+        },
+        "explode": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Slice names to offset. Uses mark.offset, or 12px when offset is omitted. Applies to: donut, pie."
+        },
+        "palette": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 24,
+          "items": {
+            "$ref": "#/$defs/color"
+          },
+          "description": "Series colours for this chart, in order. Overrides the theme palette. Omit it to keep the theme tokens. Applies to: line, bar, scatter, combo, stacked-area, donut, pie."
+        },
+        "colorRules": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["color"],
+            "properties": {
+              "color": {
+                "$ref": "#/$defs/color",
+                "description": "Colour for values that match this rule. A theme token stays readable in midnight."
+              },
+              "test": {
+                "enum": ["negative", "positive"],
+                "description": "Match negative or positive values."
+              },
+              "lt": { "type": "number", "description": "Match values less than this." },
+              "lte": { "type": "number", "description": "Match values less than or equal to this." },
+              "gt": { "type": "number", "description": "Match values greater than this." },
+              "gte": { "type": "number", "description": "Match values greater than or equal to this." },
+              "eq": { "type": "number", "description": "Match this value." }
+            },
+            "description": "First matching rule sets the mark colour. A rule with only color matches every value."
+          },
+          "description": "Conditional colours. First match wins and overrides the series or category colour. Applies to: line, bar, scatter, combo, donut, pie."
         },
         "opacity": {
           "type": "number",
@@ -1045,7 +1137,7 @@
           "type": "number",
           "minimum": -360,
           "maximum": 360,
-          "description": "Arc start in degrees (0 = top, clockwise). Applies to: gauge, progress-ring."
+          "description": "Arc start in degrees (0 = top, clockwise). Applies to: gauge, progress-ring, donut, pie."
         },
         "endAngle": {
           "type": "number",

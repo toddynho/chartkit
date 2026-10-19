@@ -424,12 +424,12 @@ const bakeryRows = [
 
 export const repairCases: BrokenCase[] = [
   {
-    id: "pie",
-    title: "pie is not a type",
-    caption: "The type pie is rewritten to donut.",
+    id: "arc",
+    title: "arc is not a type",
+    caption: "The type arc is rewritten to donut.",
     spec: {
       version: "1",
-      type: "pie",
+      type: "arc",
       title: "Crumb mix",
       theme: "soft",
       data: [

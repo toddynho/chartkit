@@ -1,4 +1,5 @@
 import { annotationLayers } from "../annotations";
+import { readRules, resolveColors, withPalette } from "../color";
 import { cssVar, paint } from "../theme";
 import { formatValue } from "../format";
 import { bag, glyphOf, marker, named, nudge } from "../glyphs";
@@ -35,8 +36,9 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   const xLog = scaleTypeOf(frame.encoding.x) === "log";
   const yLog = scaleTypeOf(frame.encoding.y) === "log";
 
+  const preset = withPalette(frame.preset, spec.mark);
   const categories: string[] = [];
-  const points: { x: number; y: number; size: number | null; category?: string }[] = [];
+  const points: { x: number; y: number; size: number | null; category?: string; index: number }[] = [];
   for (let i = 0; i < table.length; i++) {
     const x = asNumber(xRaw[i]);
     const y = asNumber(yRaw[i]);
@@ -47,7 +49,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
       category = colorRaw[i] === null || colorRaw[i] === undefined ? "" : String(colorRaw[i]);
       if (!categories.includes(category)) categories.push(category);
     }
-    points.push({ x, y, size: sizeEnc ? asNumber(sizeRaw[i]) : null, category });
+    points.push({ x, y, size: sizeEnc ? asNumber(sizeRaw[i]) : null, category, index: i });
   }
   if (points.length === 0) return null;
 
@@ -123,11 +125,24 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     : linear(yDomain[0], yDomain[1], yRev ? plot.top : plot.bottom, yRev ? plot.bottom : plot.top);
   const xTicks = pickTicks(xDomain[0], xDomain[1], xAxis.count ?? 5, xAxis.values, xLog);
   const grid = gridStyle(spec);
-  const colorOf = (category: string | undefined, index: number) => {
-    if (colorEnc?.constant) return paint(colorEnc.constant, frame.preset, 0);
-    if (category === undefined) return paint(undefined, frame.preset, 0);
-    const at = Math.max(0, categories.indexOf(category));
-    return paint(colorEnc?.range?.[at], frame.preset, at);
+  const rules = readRules(spec.mark);
+  const resolved = resolveColors({
+    count: points.length,
+    values: points.map((point) => point.y),
+    labels: points.map((point) => point.category ?? ""),
+    raw: colorEnc?.field ? points.map((point) => point.category ?? "") : null,
+    range: colorEnc?.range,
+    domain: colorEnc?.domain,
+    constant: colorEnc?.constant,
+    rules,
+    preset,
+    fallback: paint(undefined, preset, 0),
+    categorical: Boolean(colorEnc?.field || colorEnc?.domain || colorEnc?.range),
+  });
+  const pointColor = (index: number) => resolved?.[index] ?? paint(undefined, preset, 0);
+  const colorOf = (category: string | undefined) => {
+    const found = points.findIndex((point) => point.category === category);
+    return pointColor(found >= 0 ? found : 0);
   };
 
   const parts: string[] = [];
@@ -142,7 +157,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
       const category = categories[index] ?? "";
       const width = 28 + category.length * 6.6;
       if (cx > plot.left && cx + width > plot.right) break;
-      const color = colorOf(category, index);
+      const color = colorOf(category);
       const swatch = shape === "circle" && !hollow
         ? `<rect x="${n(cx)}" y="${n(top - 18)}" width="10" height="10" rx="2" fill="${color}" />`
         : marker(cx + 5, top - 13, 4.5, shape, color, hollow);
@@ -192,10 +207,11 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     const cy = yScale(point.y);
     const room = Math.min(cx - plot.left, plot.right - cx, cy - plot.top, plot.bottom - cy);
     const r = Math.max(0, Math.min(raw, Math.max(0, room)));
-    const color = colorOf(point.category, index);
+    const color = pointColor(index);
     const name = point.category ? `${point.category}, ` : "";
     const text = `${name}${xField ?? "x"} ${formatValue(point.x, xFormat, frame.locale)}, ${yField ?? "y"} ${formatValue(point.y, yFormat, frame.locale)}`;
-    const extra = ` fill-opacity="${n(opacity)}" aria-label="${esc(text)}"`;
+    const called = point.category || yField || "value";
+    const extra = ` fill-opacity="${n(opacity)}" data-ck-name="${esc(called)}" data-ck-i="${point.index}" aria-label="${esc(text)}"`;
     const drawn = shape === "none" ? "" : marker(cx, cy, r, shape, color, hollow, extra);
     if (drawn) {
       const tag = drawn.startsWith("<rect") ? "rect" : drawn.startsWith("<path") ? "path" : "circle";

@@ -48,8 +48,8 @@
     {
       "id": "chartkit",
       "name": "ChartKit",
-      "package": "@chartkitdev/core (repo, axis finishing rechecked)",
-      "version": "0.5.0 (axis finishing)",
+      "package": "@chartkitdev/core (repo, pie and colour rechecked)",
+      "version": "0.5.0 (pie and colour)",
       "dateChecked": "2026-10-19",
       "docs": "https://chartkit.dev",
       "escapeHatch": "none (no plugin/custom-mark API; only lifecycle hooks)",
@@ -9778,20 +9778,20 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "partial",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "ChartKitChartSpecV1.mark.innerRadius"
+            "ChartKitChartSpecV1.type=pie"
           ],
           "evidence": [
             {
-              "kind": "dts-path",
-              "path": "ChartKitChartSpecV1.mark.innerRadius",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:863"
+              "kind": "runtime-probe",
+              "path": "ChartKitChartSpecV1.type=pie",
+              "loc": "packages/core/src/generated/schema.ts:24"
             }
           ],
-          "note": "donut with mark.innerRadius 0; 'pie' repairs to donut (CK1005)",
-          "verified": "dts-path",
+          "note": "type pie draws a solid pie. startAngle, padAngle, cornerRadius, sort, other, and explode. A donut keeps its hole. Probed by rendering.",
+          "verified": "runtime-probe",
           "strength": "strong"
         },
         "chartjs": {
@@ -34575,20 +34575,20 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "partial",
+          "status": "native",
           "tier": null,
           "apiPaths": [
             "ChartKitChartSpecV1.encoding.color"
           ],
           "evidence": [
             {
-              "kind": "dts-path",
+              "kind": "runtime-probe",
               "path": "ChartKitChartSpecV1.encoding.color",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:461"
+              "loc": "packages/core/src/generated/schema.ts:482"
             }
           ],
-          "note": "color = x colours each bar",
-          "verified": "dts-path",
+          "note": "encoding.color names a category or a paint column. domain and range map values to colours. Drawn on bar, scatter, and pie. Probed by rendering.",
+          "verified": "runtime-probe",
           "strength": "strong"
         },
         "chartjs": {
@@ -34948,20 +34948,20 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "partial",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "ChartKitChartSpecV1.theme.tokens.negative"
+            "ChartKitChartSpecV1.mark.colorRules"
           ],
           "evidence": [
             {
-              "kind": "dts-path",
-              "path": "ChartKitChartSpecV1.theme.tokens.negative",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:380"
+              "kind": "runtime-probe",
+              "path": "ChartKitChartSpecV1.mark.colorRules",
+              "loc": "packages/core/src/generated/schema.ts:975"
             }
           ],
-          "note": "waterfall/candlestick use positive/negative tokens",
-          "verified": "dts-path",
+          "note": "mark.colorRules recolours bar, line points, scatter, and pie. First match wins. Tokens negative, positive, and accent follow the theme. Probed by rendering.",
+          "verified": "runtime-probe",
           "strength": "strong"
         },
         "chartjs": {
@@ -63823,20 +63823,21 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:labelLine)['\"`]|(?:^|[\\s{,;])\\w*(?:labelLine)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:labelLine)"
+            "ChartKitChartSpecV1.mark.labelPosition"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:labelLine)['\"`]|(?:^|[\\s{,;])\\w*(?:labelLine)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:labelLine)"
+              "kind": "runtime-probe",
+              "path": "ChartKitChartSpecV1.mark.labelPosition",
+              "loc": "packages/core/src/generated/schema.ts:898"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "mark.labels and mark.labelPosition outside draw leader lines on pie and donut. Labels on one side stack with a 16px gap. Probed by rendering.",
+          "verified": "runtime-probe",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "plugin",
@@ -95711,29 +95712,29 @@
   ],
   "coverage": {
     "cells": 5523,
-    "strong": 1881,
+    "strong": 1882,
     "weak": 1731,
-    "absence": 1467,
+    "absence": 1466,
     "unknown": 444,
     "byStatus": {
-      "native": 2705,
+      "native": 2709,
       "unknown": 444,
       "manual": 425,
-      "none": 1519,
-      "partial": 292,
+      "none": 1518,
+      "partial": 289,
       "plugin": 138
     },
     "perLibrary": {
       "chartkit": {
-        "strong": 166,
+        "strong": 167,
         "weak": 32,
-        "absence": 62,
+        "absence": 61,
         "unknown": 6,
-        "native": 158,
-        "partial": 21,
+        "native": 162,
+        "partial": 18,
         "plugin": 0,
         "manual": 0,
-        "none": 81
+        "none": 80
       },
       "chartjs": {
         "strong": 44,

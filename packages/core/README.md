@@ -33,7 +33,7 @@ chart.destroy();
 
 `mark.sampling` defaults to `"auto"`: line, area, sparkline, mini-area, stacked-area, combo lines, and spike charts downsample above twice the plot width. See [SPEC.md](./SPEC.md).
 
-Theme colors are CSS variables (`var(--ck-series-1, …)`, `--ck-text`, `--ck-background`, and the rest) so a host stylesheet wins. An omitted theme, `"auto"`, or `"soft"` is Soft: `light-dark()` colours that follow the page scheme, and a transparent plot so the page shows through. Set `--ck-background: light-dark(#f5f5f7, #1c1c1e)` for the optional Soft card. `"refined"` and `"editorial"` are built in. `theme: "midnight"` is the opt-in dark card. Other presets are `@chartkitdev/core/themes/<name>` (a name that has not been imported renders as midnight). `@chartkitdev/core/all` registers those extra presets. A brand palette stays a separate import: `paletteFromBrand` from `@chartkitdev/core/themes/brand`, passed as `theme.tokens.series`.
+Theme colors are CSS variables (`var(--ck-series-1, …)`, `--ck-text`, `--ck-background`, and the rest) so a host stylesheet wins. An omitted theme, `"auto"`, or `"soft"` is Soft: `light-dark()` colours that follow the page scheme, and a transparent plot so the page shows through. Set `--ck-background: light-dark(#f5f5f7, #1c1c1e)` for the optional Soft card. `"refined"` and `"editorial"` are built in. `theme: "midnight"` is the opt-in dark card. Other presets are `@chartkitdev/core/themes/<name>` (a name that has not been imported renders as midnight). `@chartkitdev/core/all` registers those extra presets. A brand palette stays a separate import: `paletteFromBrand` from `@chartkitdev/core/themes/brand`, passed as `theme.tokens.series`. `mark.palette` overrides the series list for one spec. `mark.colorRules` recolours a bar, line point, scatter point, or slice when the value matches (`negative`, `positive`, or `lt` / `gt` / `eq`). `encoding.color.domain` maps category values onto `range`.
 
 TypeScript types in `src/generated/schema.ts` are generated from the schema (`npm run generate:types`). Do not edit that file by hand.
 
@@ -83,6 +83,23 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
   ],
   "encoding": { "x": "lane", "y": "stops" },
   "a11y": { "alt": "Lane C has the most stops." }
+}
+```
+
+## pie
+
+```json
+{
+  "version": "1",
+  "type": "pie",
+  "data": [
+    { "wood": "Oak", "boards": 8 },
+    { "wood": "Pine", "boards": 5 },
+    { "wood": "Maple", "boards": 3 }
+  ],
+  "encoding": { "x": "wood", "y": "boards" },
+  "mark": { "labels": true, "padAngle": 1.5 },
+  "a11y": { "alt": "Oak is the largest share of boards." }
 }
 ```
 

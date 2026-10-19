@@ -149,6 +149,7 @@ export interface ColorEncoding {
   field?: string;
   constant?: string;
   range?: string[];
+  domain?: string[];
   title?: string;
 }
 
@@ -158,9 +159,11 @@ export function readColor(value: unknown): ColorEncoding | undefined {
   if (!isRecord(value)) return undefined;
   if (typeof value.value === "string" && typeof value.field !== "string") return { constant: value.value };
   const range = Array.isArray(value.range) ? value.range.filter((item): item is string => typeof item === "string") : undefined;
+  const domain = Array.isArray(value.domain) ? value.domain.map((item) => String(item)).filter((item) => item.length > 0) : undefined;
   return {
     field: typeof value.field === "string" ? value.field : undefined,
     range: range && range.length >= 2 ? range : undefined,
+    domain: domain && domain.length ? domain : undefined,
     title: typeof value.title === "string" ? value.title : undefined,
   };
 }

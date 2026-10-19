@@ -50,6 +50,7 @@ const CHART_TYPES = [
   "line",
   "bar",
   "donut",
+  "pie",
   "stacked-area",
   "scatter",
   "combo",
@@ -950,12 +951,11 @@ function emitUnknownType(value: unknown, ctx: Ctx): void {
 interface Alias {
   type: string;
   note?: string;
-  kind: "pie" | "rename";
+  kind: "rename";
   layout?: "grid" | "calendar";
 }
 
 function aliasFor(value: string, root: unknown): Alias | undefined {
-  if (value === "pie") return { type: "donut", note: "mark.innerRadius 0.", kind: "pie" };
   if (value === "arc") return { type: "donut", kind: "rename" };
   if (value === "point" || value === "circle" || value === "square") return { type: "scatter", kind: "rename" };
   if (value === "rect") return { type: "heatmap", kind: "rename" };
@@ -1357,19 +1357,6 @@ function formatPresetFix(value: string): { hint: string; value: unknown } | unde
 
 function aliasFix(root: unknown, alias: Alias): JsonPatchOperation[] {
   const spec = isPlainObject(root) ? root : {};
-  const mark = isPlainObject(spec.mark) ? spec.mark : undefined;
-  if (alias.kind === "pie") {
-    if (mark) {
-      return [
-        { op: "replace", path: "/type", value: "donut" },
-        { op: mark.innerRadius === undefined ? "add" : "replace", path: "/mark/innerRadius", value: 0 },
-      ];
-    }
-    return [
-      { op: "replace", path: "/type", value: "donut" },
-      { op: "add", path: "/mark", value: { innerRadius: 0 } },
-    ];
-  }
   const fix: JsonPatchOperation[] = [{ op: "replace", path: "/type", value: alias.type }];
   if (!alias.layout) return fix;
   const rawMark = spec.mark;

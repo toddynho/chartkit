@@ -24,7 +24,7 @@ describe("autoRender", () => {
     expect(document.querySelectorAll("pre.mermaid")).toHaveLength(2);
 
     expect(autoRender(document, { mermaid: true })).toBe(1);
-    expect(document.querySelectorAll('svg[data-ck-type="donut"]')).toHaveLength(1);
+    expect(document.querySelectorAll('svg[data-ck-type="pie"]')).toHaveLength(1);
     expect(document.body.textContent).toContain("flowchart TD");
     expect(document.querySelectorAll("pre.mermaid")).toHaveLength(1);
   });
@@ -36,7 +36,7 @@ describe("autoRender", () => {
     "Build": 10</code></pre>`);
     expect(autoRender(document)).toBe(1);
     expect(document.querySelector("pre")).toBeNull();
-    expect(document.querySelector("svg")?.getAttribute("data-ck-type")).toBe("donut");
+    expect(document.querySelector("svg")?.getAttribute("data-ck-type")).toBe("pie");
   });
 
   it("leaves mermaid fences in place until a parser is passed", () => {

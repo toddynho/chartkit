@@ -59,3 +59,14 @@ Rechecked on `createRenderer([line])` with a crowded category axis and a second 
 | axis.ticks.wrap | native | `labelWidth` and `labelLines` wrap tick labels, then ellipsize. |
 | axis.ticks.marks | native | `tickMarks` is inside, outside, or none. `tickLength` sets the length. Outside is the default when only the length is set. |
 | axis.line | native | The baseline is off until `line` is true or `{ show, color, width, dash }`. Dash is solid, dashed, or dotted. |
+
+## Pie and colour
+
+Rechecked on the pie, donut, bar, line, and scatter entries. A cell moved to native only when a runtime probe changed the picture.
+
+| id | status | correction |
+|---|---|---|
+| type.pie | native | `type: "pie"` draws a solid pie. `mark.startAngle`, `mark.padAngle`, `mark.cornerRadius`, `mark.sort`, `mark.other`, and `mark.explode` change the slices. A donut keeps its hole. |
+| label.pie | native | `mark.labels` and `mark.labelPosition: "outside"` draw leader lines on pie and donut. Labels on one side stack with a 16px gap. |
+| mark.color.point | native | `encoding.color` names a category or a paint column. `domain` and `range` map values to colours. Drawn on bar, scatter, and pie. |
+| mark.color.conditional | native | `mark.colorRules` recolours bar, line points, scatter, and pie. First match wins. Tokens `negative`, `positive`, and `accent` follow the theme. |

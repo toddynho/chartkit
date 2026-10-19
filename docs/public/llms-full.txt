@@ -32,7 +32,7 @@ Initial render wins all 12 cells against uPlot. Even 1,000,000 points is 23.6 ms
 - Donut encoding is `x` (label) and `y` (value). `theta`, `angle`, and `label` are CK1009.
 - `axis` on a y series is `"y"` or `"y2"`, never `{ "title": "..." }`. Titles belong in `axes.y.title` or `axes.y2.title` (CK1009).
 - Field `type` is `quantitative`, `temporal`, `ordinal`, or `nominal`. `categorical` means `nominal` (CK1007).
-- Unknown chart types (CK1005): `pie` → `donut` with `mark.innerRadius` 0; `arc` → `donut`; `point`, `circle`, and `square` → `scatter`; `rect` → `heatmap`; `area` → `stacked-area` when `y` lists two or more fields, otherwise `mini-area` (a full-size fill is `type: "line"` and `mark.area: true`); `metric` → `gauge` or `kpi`; `rule` and `tick` → `spike`; `grid-heat` → `heatmap`; `grid-heatmap` and `calendar-heatmap` → `heatmap` with `mark.layout` `"grid"` or `"calendar"`.
+- Unknown chart types (CK1005): `arc` → `donut`; `pie` is its own type (no hole; `mark.innerRadius` 0 on a donut is still a donut); `point`, `circle`, and `square` → `scatter`; `rect` → `heatmap`; `area` → `stacked-area` when `y` lists two or more fields, otherwise `mini-area` (a full-size fill is `type: "line"` and `mark.area: true`); `metric` → `gauge` or `kpi`; `rule` and `tick` → `spike`; `grid-heat` → `heatmap`; `grid-heatmap` and `calendar-heatmap` → `heatmap` with `mark.layout` `"grid"` or `"calendar"`.
 - Heatmap: `encoding.y` with no `mark.layout` renders a grid. Calendar is a date `x` plus `color`, or `mark.layout: "calendar"`. The measure is `encoding.color`. `encoding.value` moves there (CK1009). A numeric `y` moves to `color` only on a calendar.
 - Histogram bins `encoding.x` (`mark.bins` default 8, `mark.binWidth`, or `mark.bin` of count, width, sturges, sqrt, or fd). A pre-binned count is `encoding.y`. `hist` repairs to `histogram` (CK1005). Boxplot is `encoding.x` plus observation `encoding.y`; `box` and `box-plot` repair to `boxplot`. Radar is `encoding.x` and one `encoding.y` or a list. Funnel is stage `x` and value `y`. Treemap is label `x`, size `y`, optional group `color`; `name`, `size`, and `parent` repair onto those channels (CK1009). Sankey is `encoding.source`, `encoding.target`, and `encoding.y`; `from`, `to`, and `value` repair onto those channels. Bullet is label `x`, measure `y`, optional `target`, and `mark.ranges`. Waterfall is step `x` and delta `y`; `mark.total` names a boolean field for an absolute total. `bullet-chart` and `waterfall-chart` repair to those types. These eight types render from `@chartkitdev/core/extra` (or `@chartkitdev/core/charts/<type>`). Per-type pages: https://chartkit.dev/spec/histogram and the same path for boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gauge, and calendar-heatmap.
 - Gantt, timeline, quadrant, venn, and journey also render from `@chartkitdev/core/extra` or `@chartkitdev/core/charts/<type>`. They are not in the core schema enum. `validate()` accepts the five names (CK1011 warns that field rules live elsewhere) and `validateAsync()` loads them. `validatePhase4()` and `repairPhase4()` from `@chartkitdev/core/validate/phase4` add CK1400–CK1412. Gantt: `task` (x), `section` (y), `start` (open), `end` (close) or `duration` (days, `5d`, or `2w`), `status` done/active/crit (color; positive, accent, and negative tokens), `id` (source), `depends` (target, comma-separated ids), `milestone`, `progress` 0–1, and `today` on any row. A zero-length task is a diamond. Dependencies are elbow connectors. Timeline: `label` (x), `date` or `start`, and `end` with `kind` `period` for an era. Labels alternate above and below. Quadrant: numeric `x` and `y`, domain 0..1 unless `scale.domain` is set. Channel `title` is `Low|High`. `quadrants` is four strings: top-left, top-right, bottom-left, bottom-right. `subtitle` is a subtitle. Optional `size` and `color`. A `|`-split subtitle repairs into `quadrants` (CK1412). Venn: `set` and `size`. An intersection joins names with `+`. Two sets are area-proportional. Three sets are a best-effort layout and the areas are approximate. Four or more is CK1407, and the patch drops the extra set. Journey: `section`, `step`, `score` 1–5 drawn as a face on a scale, and `actors` as comma-separated legend chips. `user-journey` repairs to `journey` (CK1400). Pages: https://chartkit.dev/spec/gantt and the same path for timeline, quadrant, venn, and journey.
@@ -80,6 +80,23 @@ Each example below is a minimal valid spec.
   ],
   "encoding": { "x": "lane", "y": "stops" },
   "a11y": { "alt": "Lane C has the most stops." }
+}
+```
+
+## pie
+
+```json
+{
+  "version": "1",
+  "type": "pie",
+  "data": [
+    { "wood": "Oak", "boards": 8 },
+    { "wood": "Pine", "boards": 5 },
+    { "wood": "Maple", "boards": 3 }
+  ],
+  "encoding": { "x": "wood", "y": "boards" },
+  "mark": { "labels": true, "padAngle": 1.5 },
+  "a11y": { "alt": "Oak is the largest share of boards." }
 }
 ```
 

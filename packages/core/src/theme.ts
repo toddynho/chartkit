@@ -16,6 +16,11 @@ export interface PresetTokens {
   series: string[];
   /** Strokes at or under 2px. Hosts override with --ck-line-N. */
   lines: string[];
+  /**
+   * Series came from mark.palette. Paint those colours directly so a host
+   * --ck-series-N does not cover the spec. Unset for theme tokens.
+   */
+  explicit?: boolean;
 }
 
 /** Render-time geometry. Gap moves bar positions, so it is chosen here rather than live from CSS. */
@@ -212,11 +217,22 @@ const TOKEN_KEYS: Record<string, keyof PresetTokens> = {
   track: "track",
 };
 
-/** Series paint: host --ck-series-N, then shadcn --chart-N, then the preset. */
+/** Series paint: host --ck-series-N, then shadcn --chart-N, then the preset. A spec palette skips the variables. */
 function seriesPaint(n: number, preset: PresetTokens): string {
   const index = ((n - 1) % preset.series.length + preset.series.length) % preset.series.length;
   const fallback = preset.series[index] ?? preset.accent;
+  if (preset.explicit) return literalPaint(fallback, preset);
   return `var(--ck-series-${n}, var(--chart-${n}, ${fallback}))`;
+}
+
+/** A palette entry: a token still tracks the theme, a CSS colour stays itself. */
+function literalPaint(color: string, preset: PresetTokens): string {
+  const key = TOKEN_KEYS[color];
+  if (key && key !== "series" && key !== "lines") {
+    const fallback = preset[key];
+    return cssVar(color, typeof fallback === "string" ? fallback : preset.accent);
+  }
+  return color;
 }
 
 /**

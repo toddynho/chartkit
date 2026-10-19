@@ -12,7 +12,7 @@ Work is ordered by how widely a feature already exists across charting libraries
 - [x] The published feature matrix, with feature pages and compare pages ([#19](https://github.com/toddynho/chartkit/pull/19))
 - [x] Click events, selection, and legend hover ([#21](https://github.com/toddynho/chartkit/pull/21))
 
-Earlier v1 work. 27 chart types draw: 14 in the first core, eight in Phase 3, and five in Phase 4.
+Earlier v1 work. 28 chart types draw: 15 in the first core, eight in Phase 3, and five in Phase 4.
 
 - [x] Core, the React adapter, and the first 14 chart types ([#3](https://github.com/toddynho/chartkit/pull/3))
 - [x] Vue, Svelte, and vanilla adapters ([#7](https://github.com/toddynho/chartkit/pull/7))
@@ -21,16 +21,13 @@ Earlier v1 work. 27 chart types draw: 14 in the first core, eight in Phase 3, an
 - [x] Phase 4: gantt, timeline, quadrant, venn, and journey ([#14](https://github.com/toddynho/chartkit/pull/14))
 - [x] Mermaid import and Markdown auto-render ([#13](https://github.com/toddynho/chartkit/pull/13))
 - [x] An explicit y domain ([#15](https://github.com/toddynho/chartkit/pull/15))
+- [x] Point shapes and data labels ([#23](https://github.com/toddynho/chartkit/pull/23))
+- [x] Axis finishing: title position, auto-skip, wrap, the axis line, and tick marks ([#24](https://github.com/toddynho/chartkit/pull/24))
+- [x] Pie and colour: a real pie type, leader lines, and per-point and conditional colour ([#25](https://github.com/toddynho/chartkit/pull/25))
 
 ## In progress
 
-- [ ] Point shapes and data labels
 - [ ] Showcase gallery, the first six boards ([#20](https://github.com/toddynho/chartkit/pull/20)): one spec on every stack, the roastery P&L, bike-share flows, a Mermaid game launch, the repair loop, and benchmarks drawn as charts
-
-## Now
-
-- [ ] Axis finishing: title position, auto-skip, wrap, the axis line, and tick marks
-- [ ] Pie and colour: a real pie type, leader lines, and per-point and conditional colour
 
 ## Next
 

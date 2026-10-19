@@ -1,8 +1,10 @@
 import { annotationLayers } from "../annotations";
+import { isPaintColumn, readRules, resolveColors, withPalette } from "../color";
 import { isTypedArray, readData, type DataTable } from "../data";
 import { formatValue } from "../format";
 import { bag, glyphOf, marker, named, nudge, type Bag } from "../glyphs";
 import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
+import { readColor } from "../frame";
 import { boxId, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
@@ -105,7 +107,6 @@ export function renderBar(spec: Record<string, unknown>): string | null {
   return renderTyped(spec, "bar", drawBars, (table, encoding, channels, preset, series, labels) => {
     const pivoted = pivotBars(table, encoding, channels, preset);
     if (pivoted) return pivoted;
-    if (series.length === 1) colorBarsByX(series[0], labels, encoding, preset);
     return null;
   });
 }
@@ -188,6 +189,7 @@ export interface PlotModel {
   showY2: boolean;
   yGrid: false | "solid" | "dashed" | "dotted";
   legend: boolean;
+  swatches?: { name: string; color: string }[];
   zero: boolean;
   preset: PresetTokens;
   id: string;
@@ -257,6 +259,7 @@ export interface ChartShell {
   showY: boolean;
   showY2: boolean;
   legendOn: boolean;
+  swatches?: { name: string; color: string }[];
   yGrid: PlotModel["yGrid"];
   xFormat: unknown;
   yFormat: unknown;
@@ -287,9 +290,9 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
   const hit = chartShell;
   if (hit && hit.stamp === stamp) return hit;
   const type = spec.type as string;
-  const preset = resolvePreset(spec.theme);
   const encoding = isRecord(spec.encoding) ? spec.encoding : {};
   const mark = isRecord(spec.mark) ? spec.mark : {};
+  const preset = withPalette(resolvePreset(spec.theme), mark);
   const channels = readYChannels(encoding.y);
   const size = isRecord(spec.size) ? spec.size : {};
   const width = typeof size.width === "number" ? size.width : 640;
@@ -453,6 +456,8 @@ function toModel(
     x = null;
     xTemporal = false;
   }
+  applyPointColors(table, encoding, mark, preset, series, labels);
+  const swatches = categorySwatches(spec, series, labels);
 
   return {
     ...shell,
@@ -460,7 +465,8 @@ function toModel(
     x: type === "bar" || type === "combo" ? null : x,
     series,
     showY2: shell.showY2 && series.some((item) => item.axis === "y2"),
-    legend: shell.legendOn && series.length > 1,
+    legend: shell.legendOn && (series.length > 1 || Boolean(swatches)),
+    swatches,
     zero: zeroDefault(type, mark, series),
     xTemporal,
     notes: spec.annotations,
@@ -776,9 +782,10 @@ function explicitMark(model: PlotModel, series: Series): boolean {
 }
 
 function paintPoints(out: string[], points: (Pt | null)[], model: PlotModel, series: Series, indexes?: number[]): void {
-  const shape = markerShape(model, series);
+  const colored = Boolean(series.colors && series.colors.length);
+  const shape = markerShape(model, series) || (colored ? "circle" : null);
   if (!shape) return;
-  const explicit = explicitMark(model, series);
+  const explicit = explicitMark(model, series) || colored;
   if (!explicit && model.dots === "off") return;
   if (!explicit && indexes && model.dots !== "shown") return;
   const hollow = series.hollow ?? model.pointHollow;
@@ -787,8 +794,10 @@ function paintPoints(out: string[], points: (Pt | null)[], model: PlotModel, ser
   for (let k = 0; k < points.length; k++) {
     const point = points[k];
     if (!point) continue;
-    const at = indexes ? ` data-ck-i="${indexes[k]}"` : "";
-    out.push(marker(point.x, point.y, radius, shape, series.color, hollow, hidden + at));
+    const at = indexes ? indexes[k] : k;
+    const color = series.colors?.[at] ?? series.color;
+    const named = colored ? ` data-ck-name="${esc(series.name)}" data-ck-i="${at}"` : indexes ? ` data-ck-i="${indexes[k]}"` : "";
+    out.push(marker(point.x, point.y, radius, shape, color, hollow, hidden + named));
   }
 }
 
@@ -805,8 +814,9 @@ function barMark(
   useVar: boolean,
   edge: "top" | "bottom" | "left" | "right",
   fill: string,
+  extra = "",
 ): string {
-  const rect = `<rect x="${n(x)}" y="${n(y)}" width="${n(width)}" height="${n(height)}" fill="${fill}"`;
+  const rect = `<rect x="${n(x)}" y="${n(y)}" width="${n(width)}" height="${n(height)}" fill="${fill}"${extra}`;
   if (width <= 0 || height <= 0 || (!useVar && radius < 0.5)) return `${rect} />`;
   const cap = useVar
     ? `min(var(--ck-bar-radius, ${n(radius)}) * 1px, ${n(width / 2)}px, ${n(height / 2)}px)`
@@ -844,6 +854,7 @@ function bars(
     const b = yScale(value ?? baseline);
     const inset = slots > 1 ? 2 : 0;
     const fill = series.colors?.[i] ?? series.color;
+    const extra = series.colors ? ` data-ck-name="${esc(series.name)}" data-ck-i="${i}"` : "";
     const outer = !layers || Math.abs((value ?? baseline) - layers.top[layers.top.length - 1][i]) <= 1e-6;
     const radius = outer ? model.cornerRadius : 0;
     const useVar = outer && model.radiusVar;
@@ -853,7 +864,7 @@ function bars(
       const width = Math.max(0, Math.abs(b - a));
       const height = Math.max(0, barSize - inset);
       const edge = b >= a ? "right" : "left";
-      out.push(barMark(x, y, width, height, radius, useVar, edge, fill));
+      out.push(barMark(x, y, width, height, radius, useVar, edge, fill, extra));
       queueBarLabel(model, series, series.values[i], x, y, width, height, true, labs);
     } else {
       const x = start;
@@ -861,7 +872,7 @@ function bars(
       const height = Math.max(0, Math.abs(b - a));
       const width = Math.max(0, barSize - inset);
       const edge = b <= a ? "top" : "bottom";
-      out.push(barMark(x, y, width, height, radius, useVar, edge, fill));
+      out.push(barMark(x, y, width, height, radius, useVar, edge, fill, extra));
       queueBarLabel(model, series, series.values[i], x, y, width, height, false, labs);
     }
   }
@@ -1516,6 +1527,25 @@ function xStep(model: PlotModel, count: number, angle: number): number {
   return footprint <= slot ? 1 : Math.max(1, Math.ceil(footprint / slot));
 }
 
+function legend(model: PlotModel, x: number, y: number, maxRight: number): string {
+  if (model.swatches && model.swatches.length > 1) {
+    let cx = x;
+    let cy = y;
+    const out: string[] = [];
+    for (const item of model.swatches) {
+      const width = 26 + item.name.length * 6.6;
+      if (cx > x && cx + width > maxRight) {
+        cx = x;
+        cy += 18;
+      }
+      out.push(`<rect x="${n(cx)}" y="${n(cy)}" width="10" height="10" rx="2" fill="${item.color}" /><text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12" font-family="${font()}">${esc(item.name)}</text>`);
+      cx += width;
+    }
+    return out.join("");
+  }
+  return legendSeries(model, x, y, maxRight);
+}
+
 function legendIcon(model: PlotModel, series: Series, x: number, y: number): string {
   const shape = markerShape(model, series);
   if (shape && (explicitMark(model, series) || model.dots === "shown")) {
@@ -1524,7 +1554,7 @@ function legendIcon(model: PlotModel, series: Series, x: number, y: number): str
   return `<rect x="${n(x)}" y="${n(y)}" width="10" height="10" rx="2" fill="${series.color}" />`;
 }
 
-function legend(model: PlotModel, x: number, y: number, maxRight: number): string {
+function legendSeries(model: PlotModel, x: number, y: number, maxRight: number): string {
   let cx = x;
   let cy = y;
   const out: string[] = [];
@@ -2091,8 +2121,9 @@ function dashAttr(dash: string): string {
 export function legendRows(model: PlotModel, start: number, maxRight: number): number {
   let cx = start;
   let rows = 1;
-  for (const series of model.series) {
-    const width = 26 + legendName(model, series).length * 6.6;
+  const names = model.swatches && model.swatches.length > 1 ? model.swatches.map((item) => item.name) : model.series.map((series) => legendName(model, series));
+  for (const name of names) {
+    const width = 26 + name.length * 6.6;
     if (cx > start && cx + width > maxRight) {
       rows += 1;
       cx = start;
@@ -2150,29 +2181,71 @@ function seriesFieldName(encoding: Record<string, unknown>, table: DataTable): s
   const named = channelField(encoding.series);
   if (named && named !== xName && table.columns[named]) return named;
   const color = channelField(encoding.color);
-  if (color && color !== xName && table.columns[color]) return color;
+  const column = color ? table.columns[color] : undefined;
+  if (color && color !== xName && column && !isPaintColumn(column)) return color;
   return undefined;
 }
 
-/** Colour each bar by its category. Does not run when color names a different column (that pivots). */
-function colorBarsByX(series: Series, labels: string[], encoding: Record<string, unknown>, preset: PresetTokens): void {
-  const colorName = channelField(encoding.color);
-  const xName = channelField(encoding.x);
-  if (!colorName || colorName !== xName || labels.length === 0) return;
-  const palette = new Map<string, string>();
-  let next = 0;
-  const colors = new Array<string>(labels.length);
-  for (let i = 0; i < labels.length; i++) {
-    const label = labels[i] ?? "";
-    let color = palette.get(label);
-    if (!color) {
-      color = paint(undefined, preset, next);
-      next += 1;
-      palette.set(label, color);
-    }
-    colors[i] = color;
+/** Per-point colour from a colour field, a domain map, a constant, or mark.colorRules. */
+function applyPointColors(
+  table: DataTable,
+  encoding: Record<string, unknown>,
+  mark: Record<string, unknown>,
+  preset: PresetTokens,
+  series: Series[],
+  labels: string[],
+): void {
+  const rules = readRules(mark);
+  const colorEnc = readColor(encoding.color);
+  const colorField = colorEnc?.field;
+  const xField = channelField(encoding.x);
+  const pivot = seriesFieldName(encoding, table);
+  const column = colorField && pivot !== colorField ? table.columns[colorField] : undefined;
+  const paintCol = column ? isPaintColumn(column) : false;
+  for (const item of series) {
+    const count = item.values.length;
+    const aligned = column && column.length === count ? column : null;
+    const categorical = Boolean(colorEnc?.domain || colorEnc?.range || (colorField && colorField === xField) || (aligned && !paintCol));
+    const colors = resolveColors({
+      count,
+      values: item.values,
+      labels: labels.length === count ? labels : Array.from({ length: count }, (_, index) => labels[index] ?? String(index)),
+      raw: aligned,
+      range: colorEnc?.range,
+      domain: colorEnc?.domain,
+      constant: colorEnc?.constant,
+      rules,
+      preset,
+      fallback: item.color,
+      categorical,
+    });
+    if (!colors) continue;
+    if (colorEnc?.constant) item.color = paint(colorEnc.constant, preset, 0);
+    if (colors.some((color) => color !== item.color)) item.colors = colors;
   }
-  series.colors = colors;
+}
+
+function legendAsked(spec: Record<string, unknown>): boolean {
+  if (spec.legend === true) return true;
+  return isRecord(spec.legend) && spec.legend.show !== false;
+}
+
+/** Category swatches when the legend is requested and one series has more than one colour. */
+function categorySwatches(spec: Record<string, unknown>, series: Series[], labels: string[]): { name: string; color: string }[] | undefined {
+  if (!legendAsked(spec) || series.length !== 1) return undefined;
+  const colors = series[0]?.colors;
+  if (!colors) return undefined;
+  const out: { name: string; color: string }[] = [];
+  const seen = new Set<string>();
+  for (let i = 0; i < colors.length; i++) {
+    const name = labels[i] ?? String(i);
+    if (seen.has(name)) continue;
+    seen.add(name);
+    out.push({ name, color: colors[i] ?? series[0]?.color ?? "" });
+  }
+  if (out.length < 2) return undefined;
+  if (new Set(out.map((item) => item.color)).size < 2) return undefined;
+  return out;
 }
 
 function axisFormat(spec: Record<string, unknown>, key: "y" | "y2", channels: YChannel[]): unknown {

@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "type": "pie",
+  "type": "waffle",
   "data": [
     { "label": "A", "value": 2 },
     { "label": "B", "value": 3 }

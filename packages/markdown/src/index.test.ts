@@ -25,7 +25,7 @@ describe("markdown fences", () => {
     expect(tree.children[0].value).toContain("<svg");
     expect(tree.children[0].value).toContain('data-ck-type="bar"');
     expect(tree.children[0].value).not.toContain("<script");
-    expect(tree.children[1].value).toContain('data-ck-type="donut"');
+    expect(tree.children[1].value).toContain('data-ck-type="pie"');
     expect(tree.children[2]).toMatchObject({ type: "code", lang: "mermaid" });
   });
 
@@ -51,7 +51,7 @@ describe("markdown fences", () => {
     rehypeChartkit()(tree);
     const raw = tree.children[0] as { type: string; value?: string };
     expect(raw.type).toBe("raw");
-    expect(raw.value).toContain('data-ck-type="donut"');
+    expect(raw.value).toContain('data-ck-type="pie"');
     expect(renderFence("flowchart TD\nA-->B", "mermaid")).toBeNull();
   });
 });
