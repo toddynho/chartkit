@@ -33,6 +33,6 @@ No spec snippet. This ChartKit cell is unknown.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | unknown | ~touch | unverified (unknown) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 85c6caf6e04b.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against bb58c45afae3.
 
 https://chartkit.dev/features.json
