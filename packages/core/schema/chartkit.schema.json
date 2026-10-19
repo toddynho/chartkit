@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://chartkit.dev/schema/v1.json",
   "title": "ChartKit chart spec v1",
-  "description": "A complete, framework-agnostic description of one chart. The same JSON renders in React, Vue, Svelte, vanilla JS, web components, on the server (SVG/PNG), and through the ChartKit MCP server. Minimal line chart: {version, type, data, encoding:{x,y}, a11y:{alt}}. Everything else has sensible defaults.",
+  "description": "A complete, framework-agnostic description of one chart. The same JSON renders in React, Vue, Svelte, and vanilla JS. Minimal line chart: {version, type, data, encoding:{x,y}, a11y:{alt}}. Everything else has sensible defaults.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -1191,10 +1191,22 @@
                   "description": "Tick label format. Defaults to the channel format."
                 },
                 "ticks": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 50,
-                  "description": "Approximate number of ticks."
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50
+                    },
+                    {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 50,
+                      "items": {
+                        "type": "number"
+                      }
+                    }
+                  ],
+                  "description": "Approximate tick count, or the exact tick values."
                 },
                 "grid": {
                   "oneOf": [
@@ -1223,7 +1235,11 @@
                     "left",
                     "right"
                   ],
-                  "description": "Axis side. Defaults: x bottom, y left, y2 right."
+                  "description": "Axis side. Defaults: x bottom, y left, y2 right. A side perpendicular to the axis maps onto the nearer end."
+                },
+                "rotate": {
+                  "type": "number",
+                  "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees."
                 }
               },
               "description": "Axis settings."
@@ -1250,10 +1266,22 @@
                   "description": "Tick label format. Defaults to the channel format."
                 },
                 "ticks": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 50,
-                  "description": "Approximate number of ticks."
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50
+                    },
+                    {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 50,
+                      "items": {
+                        "type": "number"
+                      }
+                    }
+                  ],
+                  "description": "Approximate tick count, or the exact tick values."
                 },
                 "grid": {
                   "oneOf": [
@@ -1282,7 +1310,11 @@
                     "left",
                     "right"
                   ],
-                  "description": "Axis side. Defaults: x bottom, y left, y2 right."
+                  "description": "Axis side. Defaults: x bottom, y left, y2 right. A side perpendicular to the axis maps onto the nearer end."
+                },
+                "rotate": {
+                  "type": "number",
+                  "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees."
                 }
               },
               "description": "Axis settings."
@@ -1309,10 +1341,22 @@
                   "description": "Tick label format. Defaults to the channel format."
                 },
                 "ticks": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 50,
-                  "description": "Approximate number of ticks."
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50
+                    },
+                    {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 50,
+                      "items": {
+                        "type": "number"
+                      }
+                    }
+                  ],
+                  "description": "Approximate tick count, or the exact tick values."
                 },
                 "grid": {
                   "oneOf": [
@@ -1341,7 +1385,11 @@
                     "left",
                     "right"
                   ],
-                  "description": "Axis side. Defaults: x bottom, y left, y2 right."
+                  "description": "Axis side. Defaults: x bottom, y left, y2 right. A side perpendicular to the axis maps onto the nearer end."
+                },
+                "rotate": {
+                  "type": "number",
+                  "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees."
                 }
               },
               "description": "Axis settings."
@@ -1377,8 +1425,8 @@
             },
             "interactive": {
               "type": "boolean",
-              "default": true,
-              "description": "Click a legend item to hide/show its series."
+              "default": false,
+              "description": "Click a legend item to hide/show its series. Off unless set; the SVG records it as data-ck-intent."
             },
             "values": {
               "type": "boolean",
@@ -1917,13 +1965,13 @@
         },
         "keyboard": {
           "type": "boolean",
-          "default": true,
-          "description": "Arrow-key navigation between points with announcements."
+          "default": false,
+          "description": "Arrow-key navigation between points with announcements. Off unless set, because turning it on loads the interaction runtime."
         },
         "dataTable": {
           "type": "boolean",
-          "default": true,
-          "description": "Render a visually hidden data table for screen readers."
+          "default": false,
+          "description": "Render a visually hidden data table for screen readers. Off unless set, because turning it on loads the interaction runtime."
         }
       },
       "description": "Accessibility. 'alt' is required: a one or two sentence description of what the chart shows and its key takeaway, used as the accessible name/description and for text-only renders (agents should always write it)."

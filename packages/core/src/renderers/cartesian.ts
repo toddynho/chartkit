@@ -2,8 +2,46 @@ import { annotationLayers } from "../annotations";
 import { isTypedArray, readData, type DataTable } from "../data";
 import { formatValue } from "../format";
 import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
-import { clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
+import { boxId, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
+
+export interface AxisBox {
+  title?: string;
+  count?: number;
+  labels: boolean;
+  /** Non-default side. Set by the axis extra, absent from the line entry. */
+  end?: boolean;
+  values?: number[];
+  rotate?: number;
+}
+
+export interface Pad {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+interface PlotBox {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+interface AxisHooks {
+  prepare(spec: Record<string, unknown>, shell: ChartShell): void;
+  /** Vertical grid for `axes.x.grid`. Labels and padding use the shared axis routine. */
+  grid(model: PlotModel, plot: PlotBox, horizontal: boolean, count: number, xScale: XScale): string | null;
+  seriesName(model: PlotModel, series: Series): string | null;
+}
+
+let hooks: AxisHooks | null = null;
+
+/** Position, rotation, explicit ticks, and legend values. Loaded with `all`, not the line entry. */
+export function installAxes(next: AxisHooks): void {
+  hooks = next;
+}
 
 type MarkDraw = (
   model: PlotModel,
@@ -64,7 +102,7 @@ export function renderCombo(spec: Record<string, unknown>): string | null {
   return renderTyped(spec, "combo", drawCombo);
 }
 
-interface Series {
+export interface Series {
   name: string;
   values: ArrayLike<number | null>;
   color: string;
@@ -76,7 +114,7 @@ interface Series {
   area: boolean;
 }
 
-interface PlotModel {
+export interface PlotModel {
   type: string;
   title?: string;
   subtitle?: string;
@@ -124,11 +162,21 @@ interface PlotModel {
   yLog: boolean;
   y2Log: boolean;
   notes: unknown;
+  xAxis: AxisBox;
+  yAxis: AxisBox;
+  y2Axis: AxisBox;
+  inset: { t?: number; r?: number; b?: number; l?: number };
+  description?: string;
+  intent?: string;
+  /** Scale bits set by the axis extra. 0 keeps the classic scale. */
+  f: number;
+  lv?: boolean;
+  gx?: false | "solid" | "dashed" | "dotted";
 }
 
 type Curve = "linear" | "monotone" | "step" | "step-before" | "step-after";
 
-interface ChartShell {
+export interface ChartShell {
   /** Non-data spec contents. In-place edits change it; replacing `data` does not. */
   stamp: string;
   type: string;
@@ -172,6 +220,16 @@ interface ChartShell {
   y2Format: unknown;
   yLog: boolean;
   y2Log: boolean;
+  xAxis: AxisBox;
+  yAxis: AxisBox;
+  y2Axis: AxisBox;
+  inset: { t?: number; r?: number; b?: number; l?: number };
+  description?: string;
+  intent?: string;
+  /** Scale bits set by the axis extra. 0 keeps the classic scale. */
+  f: number;
+  lv?: boolean;
+  gx?: false | "solid" | "dashed" | "dotted";
 }
 
 function shellStamp(spec: Record<string, unknown>): string {
@@ -203,6 +261,8 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
   const points = pointsSet ? (mark.points as "none" | "hover" | "always") : geometry.points;
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : "";
   const idSource = typeof spec.id === "string" ? spec.id : alt || type;
+  const orientation = mark.orientation === "horizontal" && type === "bar" ? "horizontal" : "vertical";
+  const xObj = isRecord(encoding.x) ? encoding.x : undefined;
   const next: ChartShell = {
     stamp,
     type,
@@ -222,7 +282,7 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     id: `ck${hash(idSource)}`,
     title: typeof spec.title === "string" ? spec.title : undefined,
     subtitle: typeof spec.subtitle === "string" ? spec.subtitle : undefined,
-    orientation: mark.orientation === "horizontal" ? "horizontal" : "vertical",
+    orientation,
     fillOpacity,
     fillPaint: opacitySet ? n(fillOpacity) : `var(--ck-area-opacity, ${n(fillOpacity)})`,
     strokeWidth,
@@ -241,12 +301,18 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     showY2: !compact && axisVisible(spec, "y2"),
     legendOn: !compact && legendVisible(spec),
     yGrid: compact ? false : gridOf(spec),
-    xFormat: isRecord(encoding.x) ? encoding.x.format : undefined,
+    xFormat: xObj?.format,
     yFormat: axisFormat(spec, "y", channels),
     y2Format: axisFormat(spec, "y2", channels),
     yLog: channels.some((channel) => channel.axis === "y" && channel.log),
     y2Log: channels.some((channel) => channel.axis === "y2" && channel.log),
+    xAxis: { labels: true },
+    yAxis: { labels: true },
+    y2Axis: { labels: true },
+    inset: {},
+    f: 0,
   };
+  hooks?.prepare(spec, next);
   chartShell = next;
   return next;
 }
@@ -350,12 +416,12 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   const horizontal = model.orientation === "horizontal" && model.type === "bar";
   const yDomain = domain(model, "y");
   const y2Domain = domain(model, "y2");
-  const yTicks = model.yLog ? logTicks(yDomain[0], yDomain[1]) : ticks(yDomain[0], yDomain[1], 5);
-  const y2Ticks = model.y2Log ? logTicks(y2Domain[0], y2Domain[1]) : ticks(y2Domain[0], y2Domain[1], 5);
+  const yTicks = resolveTicks(model, "y", yDomain[0], yDomain[1], model.yAxis?.count ?? 5, model.yLog);
+  const y2Ticks = resolveTicks(model, "y2", y2Domain[0], y2Domain[1], model.y2Axis?.count ?? 5, model.y2Log);
   const yTickText = tickText(yTicks, model, model.yFormat);
   const y2TickText = tickText(y2Ticks, model, model.y2Format);
   const count = model.series[0]?.values.length ?? model.labels.length;
-  const pad = padding(model, horizontal ? categoryTickText(model, count) : yTickText, y2TickText);
+  const pad = padding(model, yTickText, y2TickText, categoryTickText(model, count));
   const plot = {
     left: pad.left,
     top: pad.top,
@@ -364,10 +430,14 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   };
   const plotW = Math.max(1, plot.right - plot.left);
   const plotH = Math.max(1, plot.bottom - plot.top);
-  const yScale = model.yLog
-    ? logScale(yDomain[0], yDomain[1], horizontal ? plot.left : plot.bottom, horizontal ? plot.right : plot.top)
-    : linear(yDomain[0], yDomain[1], horizontal ? plot.left : plot.bottom, horizontal ? plot.right : plot.top);
-  const y2Scale = model.y2Log ? logScale(y2Domain[0], y2Domain[1], plot.bottom, plot.top) : linear(y2Domain[0], y2Domain[1], plot.bottom, plot.top);
+  const yRev = model.f & 8;
+  const yFrom = horizontal ? (yRev ? plot.right : plot.left) : yRev ? plot.top : plot.bottom;
+  const yTo = horizontal ? (yRev ? plot.left : plot.right) : yRev ? plot.bottom : plot.top;
+  const yScale = model.yLog ? logScale(yDomain[0], yDomain[1], yFrom, yTo) : linear(yDomain[0], yDomain[1], yFrom, yTo);
+  const y2Rev = model.f & 16;
+  const y2From = y2Rev ? plot.top : plot.bottom;
+  const y2To = y2Rev ? plot.bottom : plot.top;
+  const y2Scale = model.y2Log ? logScale(y2Domain[0], y2Domain[1], y2From, y2To) : linear(y2Domain[0], y2Domain[1], y2From, y2To);
   const xScale = xPosition(model, count, plot.left, plot.right, plot.top, plot.bottom, horizontal);
 
   const parts: string[] = [];
@@ -381,7 +451,8 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   }
   if (model.legend) parts.push(legend(model, pad.left, model.title || model.subtitle ? (model.subtitle ? 54 : 36) : 8, plot.right));
 
-  parts.push(`<defs>${clipPath(`${model.id}-clip`, plot.left, plot.top, plotW, plotH)}`);
+  const clip = boxId(model.id, plot.left, plot.top, plotW, plotH);
+  parts.push(`<defs>${clipPath(clip, plot.left, plot.top, plotW, plotH)}`);
   if (model.gradient) {
     model.series.forEach((series, index) => {
       parts.push(
@@ -402,6 +473,8 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
       }
     }
   }
+  const grid = hooks?.grid(model, plot, horizontal, count, xScale);
+  if (grid) parts.push(grid);
 
   const notes = annotationLayers(model.notes, {
     plot,
@@ -413,15 +486,13 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
       return (axis === "y2" ? y2Scale : yScale)(numeric);
     },
   });
-  parts.push(`<g clip-path="url(#${model.id}-clip)">`);
+  parts.push(`<g clip-path="url(#${clip})">`);
   parts.push(notes.under);
   parts.push(draw(model, xScale, yScale, y2Scale, plot, horizontal));
   parts.push(`</g>`);
   parts.push(notes.over);
 
-  if (model.showY) parts.push(yAxisLabels(yTickText, yTicks, yScale, plot.left, horizontal, model, false));
-  if (model.showY2) parts.push(yAxisLabels(y2TickText, y2Ticks, y2Scale, plot.right, false, model, true));
-  if (model.showX) parts.push(xAxisLabels(model, xScale, count, horizontal, plot));
+  parts.push(drawAxes(model, plot, horizontal, count, yTicks, y2Ticks, yTickText, y2TickText, yScale, y2Scale, xScale));
 
   parts.push(`</svg>`);
   return parts.join("");
@@ -777,7 +848,7 @@ function stackLayers(series: Series[], mode: "stack" | "percent"): Layers {
   return { top, bottom };
 }
 
-interface XScale {
+export interface XScale {
   center(index: number): number;
   band(index: number): { start: number; size: number };
   at(value: number): number;
@@ -796,8 +867,13 @@ function xPosition(
   bottom: number,
   horizontal: boolean,
 ): XScale {
-  const spanStart = horizontal ? top : left;
-  const spanEnd = horizontal ? bottom : right;
+  let spanStart = horizontal ? top : left;
+  let spanEnd = horizontal ? bottom : right;
+  if (model.f & 32) {
+    const swap = spanStart;
+    spanStart = spanEnd;
+    spanEnd = swap;
+  }
   if (!model.x) {
     const size = count > 0 ? (spanEnd - spanStart) / count : spanEnd - spanStart;
     return {
@@ -833,6 +909,16 @@ function xPosition(
   if (!seen) {
     min = 0;
     max = 1;
+  } else {
+    if (model.f & 256) {
+      if (min > 0) min = 0;
+      if (max < 0) max = 0;
+    }
+    if (model.f & 4 && max > min) {
+      const nice = niceDomain(min, max);
+      min = nice[0];
+      max = nice[1];
+    }
   }
   const scale = linear(min, max, spanStart, spanEnd);
   return {
@@ -848,103 +934,214 @@ function xPosition(
   };
 }
 
-function yAxisLabels(
+function axText(x: number, y: number, anchor: string, body: string, fill: string, family: string, angle = 0, weight = ""): string {
+  const spin = angle ? ` transform="rotate(${n(angle)} ${n(x)} ${n(y)})"` : "";
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="11"${weight} font-family="${family}"${spin}>${esc(body)}</text>`;
+}
+
+/** 0 left, 1 right, 2 top, 3 bottom. */
+function place(side: number, edge: number, at: number, titled: boolean, height: number): [number, number, string] {
+  if (side === 0) return [edge - 6, at + 4, "end"];
+  if (side === 1) return [edge + 6, at + 4, "start"];
+  if (side === 2) return [at, edge - 18, "middle"];
+  return [at, titled ? edge + 14 : height - 8, "middle"];
+}
+
+function drawAxes(
+  model: PlotModel,
+  plot: PlotBox,
+  horizontal: boolean,
+  count: number,
+  yTicks: number[],
+  y2Ticks: number[],
+  yText: string[],
+  y2Text: string[],
+  yScale: (value: number) => number,
+  y2Scale: (value: number) => number,
+  xScale: XScale,
+): string {
+  let out = "";
+  if (model.showY && model.yAxis.labels !== false) {
+    const side = horizontal ? (model.yAxis.end ? 2 : 3) : model.yAxis.end ? 1 : 0;
+    out += band(yText, yTicks, yScale, model, plot, side, model.yAxis);
+  }
+  if (model.showY2 && model.y2Axis.labels !== false) {
+    const side = model.y2Axis.end !== false ? 1 : 0;
+    out += band(y2Text, y2Ticks, y2Scale, model, plot, side, model.y2Axis);
+  }
+  if (model.showX && model.xAxis.labels !== false) out += xBand(model, xScale, count, horizontal, plot);
+  out += axisTitles(model, plot, horizontal);
+  return out;
+}
+
+function band(
   labels: string[],
   values: number[],
   scale: (value: number) => number,
-  x: number,
-  horizontal: boolean,
   model: PlotModel,
-  right = false,
+  plot: PlotBox,
+  side: number,
+  axis: AxisBox,
 ): string {
   const fill = cssVar("muted", model.preset.muted);
   const family = font();
+  const edge = side === 0 ? plot.left : side === 1 ? plot.right : side === 2 ? plot.top : plot.bottom;
+  const angle = axis.rotate || 0;
   let out = "";
   for (let i = 0; i < values.length; i++) {
-    const pos = scale(values[i]);
-    const label = esc(labels[i] ?? "");
+    const at = place(side, edge, scale(values[i]), Boolean(axis.title), model.height);
+    out += axText(at[0], at[1], at[2], labels[i] ?? "", fill, family, angle);
+  }
+  return out;
+}
+
+function xBand(model: PlotModel, xScale: XScale, count: number, horizontal: boolean, plot: PlotBox): string {
+  if (model.xTemporal && model.x && !horizontal) return timeBand(model, xScale, plot);
+  if (model.x && !horizontal) return numBand(model, xScale, plot);
+  const angle = xAngle(model);
+  const step = xStep(model, count, angle);
+  if (step === 0) return "";
+  const fill = cssVar("muted", model.preset.muted);
+  const family = font();
+  const y = model.xAxis.end && !horizontal ? plot.top - 18 : plot.bottom + 16;
+  let out = "";
+  let last = -Infinity;
+  for (let i = 0; i < count; i += step) {
+    const label = tickLabel(model, i);
+    if (!label) continue;
     if (horizontal) {
-      out += `<text x="${n(pos)}" y="${n(model.height - 8)}" text-anchor="middle" fill="${fill}" font-size="11" font-family="${family}">${label}</text>`;
-    } else {
-      const anchor = right ? "start" : "end";
-      const tx = right ? x + 6 : x - 6;
-      out += `<text x="${n(tx)}" y="${n(pos + 4)}" text-anchor="${anchor}" fill="${fill}" font-size="11" font-family="${family}">${label}</text>`;
+      const right = Boolean(model.xAxis.end);
+      out += axText(right ? plot.right + 8 : plot.left - 6, xScale.center(i) + 4, right ? "start" : "end", label, fill, family);
+      continue;
+    }
+    out += alongOne(label, xScale.center(i), y, angle, plot, 0, fill, family, last);
+    if (!angle) {
+      const width = label.length * 6.4;
+      const x = xScale.center(i);
+      if (x - width / 2 >= last) last = x + width / 2 + 8;
     }
   }
   return out;
 }
 
-function xAxisLabels(
-  model: PlotModel,
-  xScale: XScale,
-  count: number,
-  horizontal: boolean,
-  plot: { left: number; right?: number; bottom: number; top: number },
-): string {
-  if (model.xTemporal && model.x && !horizontal) return timeAxisLabels(model, xScale, plot);
-  if (model.x && !horizontal) return numericXAxisLabels(model, xScale, plot);
-  const step = count > 8 ? Math.ceil(count / 6) : 1;
-  const out: string[] = [];
-  let lastRight = -Infinity;
-  for (let i = 0; i < count; i += step) {
-    const label = tickLabel(model, i);
-    if (!label) continue;
-    if (horizontal) {
-      out.push(`<text x="${n(plot.left - 6)}" y="${n(xScale.center(i) + 4)}" text-anchor="end" fill="${cssVar("muted", model.preset.muted)}" font-size="11" font-family="${font()}">${esc(label)}</text>`);
-      continue;
-    }
-    const x = xScale.center(i);
-    const width = label.length * 6.4;
-    if (x - width / 2 < lastRight) continue;
-    lastRight = x + width / 2 + 8;
-    out.push(`<text x="${n(x)}" y="${n(plot.bottom + 16)}" text-anchor="middle" fill="${cssVar("muted", model.preset.muted)}" font-size="11" font-family="${font()}">${esc(label)}</text>`);
-  }
-  return out.join("");
+function numBand(model: PlotModel, xScale: XScale, plot: PlotBox): string {
+  const values = resolveTicks(model, "x", xScale.min, xScale.max, model.xAxis.count ?? 6, false);
+  return along(model, values, tickText(values, model, model.xFormat), (value) => xScale.at(value), plot, 8);
 }
 
-function numericXAxisLabels(
+function timeBand(model: PlotModel, xScale: XScale, plot: PlotBox): string {
+  if (!model.x || !xScale.live || !(xScale.max > xScale.min) || model.xAxis.count === 0) return "";
+  const min = xScale.min;
+  const max = xScale.max;
+  const width = Math.max(1, plot.right - plot.left);
+  const values =
+    model.xAxis.count !== undefined || model.xAxis.values?.length
+      ? resolveTicks(model, "x", min, max, model.xAxis.count ?? 6, false)
+      : timeTicks(min, max, Math.max(2, Math.floor(width / 72)));
+  const labels = values.map((tick) => formatTimeLabel(tick, max - min, model.locale, model.xFormat));
+  return along(model, values, labels, (value) => xScale.at(value), plot, 4);
+}
+
+function along(
   model: PlotModel,
-  xScale: XScale,
-  plot: { left: number; right?: number; bottom: number },
+  values: number[],
+  labels: string[],
+  at: (value: number) => number,
+  plot: PlotBox,
+  slack: number,
 ): string {
-  const values = ticks(xScale.min, xScale.max, 6);
-  const labels = tickText(values, model, model.xFormat);
-  const right = plot.right ?? model.width;
-  const out: string[] = [];
-  let lastRight = -Infinity;
+  const angle = xAngle(model);
+  const y = model.xAxis.end ? plot.top - 18 : plot.bottom + 16;
+  const fill = cssVar("muted", model.preset.muted);
+  const family = font();
+  let out = "";
+  let last = -Infinity;
   for (let i = 0; i < values.length; i++) {
     const label = labels[i];
     if (!label) continue;
-    const x = xScale.at(values[i]);
-    if (x < plot.left - 8 || x > right + 8) continue;
-    const width = label.length * 6.4;
-    if (x - width / 2 < lastRight) continue;
-    lastRight = x + width / 2 + 8;
-    out.push(`<text x="${n(x)}" y="${n(plot.bottom + 16)}" text-anchor="middle" fill="${cssVar("muted", model.preset.muted)}" font-size="11" font-family="${font()}">${esc(label)}</text>`);
+    const x = at(values[i]);
+    out += alongOne(label, x, y, angle, plot, slack, fill, family, last);
+    if (!angle && x >= plot.left - slack && x <= plot.right + slack) {
+      const width = label.length * 6.4;
+      if (x - width / 2 >= last) last = x + width / 2 + 8;
+    }
   }
-  return out.join("");
+  return out;
 }
 
-function timeAxisLabels(model: PlotModel, xScale: XScale, plot: { left: number; right?: number; bottom: number }): string {
-  if (!model.x || !xScale.live || !(xScale.max > xScale.min)) return "";
-  const min = xScale.min;
-  const max = xScale.max;
-  const span = max - min;
-  const plotWidth = Math.max(1, (plot.right ?? model.width) - plot.left);
-  const ticks = timeTicks(min, max, Math.max(2, Math.floor(plotWidth / 72)));
-  const out: string[] = [];
-  let lastRight = -Infinity;
-  for (const tick of ticks) {
-    const label = formatTimeLabel(tick, span, model.locale, model.xFormat);
-    if (!label) continue;
-    const x = xScale.at(tick);
+function alongOne(
+  label: string,
+  x: number,
+  y: number,
+  angle: number,
+  plot: PlotBox,
+  slack: number,
+  fill: string,
+  family: string,
+  last: number,
+): string {
+  if (slack && (x < plot.left - slack || x > plot.right + slack)) return "";
+  if (!angle) {
     const width = label.length * 6.4;
-    if (x - width / 2 < lastRight) continue;
-    if (x < plot.left - 4 || x > (plot.right ?? model.width) + 4) continue;
-    lastRight = x + width / 2 + 8;
-    out.push(`<text x="${n(x)}" y="${n(plot.bottom + 16)}" text-anchor="middle" fill="${cssVar("muted", model.preset.muted)}" font-size="11" font-family="${font()}">${esc(label)}</text>`);
+    if (x - width / 2 < last) return "";
   }
-  return out.join("");
+  return axText(x, y, angle < 0 ? "end" : angle > 0 ? "start" : "middle", label, fill, family, angle);
+}
+
+function axisTitles(model: PlotModel, plot: PlotBox, horizontal: boolean): string {
+  const fill = cssVar("muted", model.preset.muted);
+  const family = font();
+  const midY = (plot.top + plot.bottom) / 2;
+  const midX = (plot.left + plot.right) / 2;
+  const weight = ' font-weight="500"';
+  let out = "";
+  if (model.showY && model.yAxis.title) {
+    const title = model.yAxis.title;
+    const side = horizontal ? (model.yAxis.end ? 2 : 3) : model.yAxis.end ? 1 : 0;
+    if (side === 0) out += axText(14, midY, "middle", title, fill, family, -90, weight);
+    else if (side === 1) out += axText(model.width - 14, midY, "middle", title, fill, family, 90, weight);
+    else if (side === 2) out += axText(midX, Math.max(12, plot.top - 18), "middle", title, fill, family, 0, weight);
+    else out += axText(midX, model.height - 6, "middle", title, fill, family, 0, weight);
+  }
+  if (model.showY2 && model.y2Axis.title) {
+    const right = model.y2Axis.end !== false;
+    out += axText(right ? model.width - 14 : 14, midY, "middle", model.y2Axis.title, fill, family, right ? 90 : -90, weight);
+  }
+  if (model.showX && model.xAxis.title) {
+    const title = model.xAxis.title;
+    if (horizontal) {
+      const right = Boolean(model.xAxis.end);
+      out += axText(right ? model.width - 14 : 14, midY, "middle", title, fill, family, right ? 90 : -90, weight);
+    } else if (model.xAxis.end) out += axText(midX, plot.top - 40, "middle", title, fill, family, 0, weight);
+    else out += axText(midX, model.height - 6, "middle", title, fill, family, 0, weight);
+  }
+  return out;
+}
+
+/** Explicit rotate, or −40 when every category label fits once tilted. */
+export function xAngle(model: PlotModel): number {
+  if (typeof model.xAxis.rotate === "number") return model.xAxis.rotate;
+  if (!model.showX || !model.xAxis.labels || model.x) return 0;
+  if (model.orientation === "horizontal" && model.type === "bar") return 0;
+  const labels = model.labels;
+  if (labels.length < 2) return 0;
+  const slot = Math.max(1, (model.width - 64) / labels.length);
+  if (widest(labels) <= slot) return 0;
+  const rad = (40 * Math.PI) / 180;
+  const spun = widest(labels) * Math.abs(Math.cos(rad)) + 11 * Math.abs(Math.sin(rad));
+  return spun <= slot ? -40 : 0;
+}
+
+function xStep(model: PlotModel, count: number, angle: number): number {
+  const target = model.xAxis.count;
+  if (target === 0) return 0;
+  if (target !== undefined) return Math.max(1, Math.ceil(count / Math.max(1, target)));
+  if (!angle) return count > 8 ? Math.ceil(count / 6) : 1;
+  const slot = Math.max(1, (model.width - 64) / Math.max(1, count));
+  const rad = (Math.abs(angle) * Math.PI) / 180;
+  const labels = model.labels.length ? model.labels : [];
+  const footprint = widest(labels) * Math.abs(Math.cos(rad)) + 11 * Math.abs(Math.sin(rad));
+  return footprint <= slot ? 1 : Math.max(1, Math.ceil(footprint / slot));
 }
 
 function legend(model: PlotModel, x: number, y: number, maxRight: number): string {
@@ -952,12 +1149,13 @@ function legend(model: PlotModel, x: number, y: number, maxRight: number): strin
   let cy = y;
   const out: string[] = [];
   for (const series of model.series) {
-    const width = 26 + series.name.length * 6.6;
+    const name = legendName(model, series);
+    const width = 26 + name.length * 6.6;
     if (cx > x && cx + width > maxRight) {
       cx = x;
       cy += 18;
     }
-    out.push(`<rect x="${n(cx)}" y="${n(cy)}" width="10" height="10" rx="2" fill="${series.color}" /><text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12" font-family="${font()}">${esc(series.name)}</text>`);
+    out.push(`<rect x="${n(cx)}" y="${n(cy)}" width="10" height="10" rx="2" fill="${series.color}" /><text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12" font-family="${font()}">${esc(name)}</text>`);
     cx += width;
   }
   return out.join("");
@@ -965,14 +1163,17 @@ function legend(model: PlotModel, x: number, y: number, maxRight: number): strin
 
 function openSvg(model: PlotModel): string {
   const width = model.responsive ? "100%" : String(model.width);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}" class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}" style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
-    `<title>${esc(model.title || model.alt)}</title><desc>${esc(model.alt)}</desc>`;
+  const described = model.description ? ` aria-describedby="${model.id}-d"` : "";
+  const intent = model.intent ? ` data-ck-intent="${esc(model.intent)}"` : "";
+  const desc = model.description ? `<desc id="${model.id}-d">${esc(model.description)}</desc>` : `<desc>${esc(model.alt)}</desc>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent} style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
+    `<title>${esc(model.title || model.alt)}</title>${desc}`;
 }
 
 /** 11px tick labels are about 6.7px per character, plus the 6px anchor gap and a little edge. */
 const TICK_PX = 6.7;
 
-function widest(labels: string[]): number {
+export function widest(labels: string[]): number {
   let width = 0;
   for (let i = 0; i < labels.length; i++) {
     const size = labels[i].length * TICK_PX;
@@ -981,21 +1182,69 @@ function widest(labels: string[]): number {
   return width;
 }
 
-function padding(model: PlotModel, leftLabels: string[], rightLabels: string[]): { top: number; right: number; bottom: number; left: number } {
-  const compact = model.type === "sparkline" || model.type === "mini-area";
-  if (compact) return { top: 2, right: 2, bottom: 2, left: 2 };
+function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabels: string[]): Pad {
+  if (model.type === "sparkline" || model.type === "mini-area") return { top: 2, right: 2, bottom: 2, left: 2 };
   const horizontal = model.orientation === "horizontal" && model.type === "bar";
-  const left = (horizontal ? model.showX : model.showY) ? Math.max(52, Math.ceil(widest(leftLabels) + 12)) : 12;
-  const right = model.showY2 ? Math.max(52, Math.ceil(widest(rightLabels) + 12)) : 16;
+  const yEnd = Boolean(model.yAxis.end);
+  const xEnd = Boolean(model.xAxis.end);
+  const y2End = model.y2Axis.end !== false;
+  const yGap = Math.max(52, Math.ceil(widest(yLabels) + 12));
+  const y2Gap = Math.max(52, Math.ceil(widest(y2Labels) + 12));
+  const xGap = Math.max(52, Math.ceil(widest(xLabels) + 12));
+  let left = 12;
+  let right = 16;
   let top = 14;
+  let bottom = 12;
   if (model.title) top += 20;
   if (model.subtitle) top += 18;
+  if (!horizontal && model.showY && model.yAxis.labels !== false) {
+    if (yEnd) right = Math.max(right, yGap);
+    else left = yGap;
+  }
+  if (horizontal && model.showY) {
+    if (yEnd) top += 20;
+    else bottom = 32;
+  }
+  if (model.showY2 && model.y2Axis.labels !== false) {
+    if (y2End) right = Math.max(right, y2Gap);
+    else left = Math.max(left, y2Gap);
+  }
+  if (model.showX && model.xAxis.labels !== false) {
+    if (!horizontal && xEnd) top += 32;
+    else if (!horizontal) bottom = 32;
+    else if (xEnd) right = Math.max(right, xGap);
+    else left = Math.max(left, xGap);
+  }
+  if (model.showY && model.yAxis.title) {
+    if (!horizontal && yEnd) right += 16;
+    else if (!horizontal) left += 16;
+    else if (yEnd) top += 16;
+    else bottom += 16;
+  }
+  if (model.showX && model.xAxis.title) {
+    if (!horizontal && xEnd) top += 22;
+    else if (!horizontal) bottom += 16;
+    else if (xEnd) right += 16;
+    else left += 16;
+  }
+  if (model.showY2 && model.y2Axis.title) {
+    if (y2End) right += 16;
+    else left += 16;
+  }
+  const angle = xAngle(model);
+  if (angle && model.showX && !horizontal) {
+    const rad = (Math.abs(angle) * Math.PI) / 180;
+    const extra = Math.ceil(Math.abs(Math.sin(rad)) * Math.max(24, widest(model.labels.length ? model.labels : xLabels)));
+    if (xEnd) top += extra;
+    else bottom += extra;
+  }
   if (model.legend) top += 12 + legendRows(model, left, model.width - right) * 18;
+  const inset = model.inset;
   return {
-    top,
-    right,
-    bottom: model.showX ? 32 : 12,
-    left,
+    top: typeof inset.t === "number" ? Math.max(top, inset.t) : top,
+    right: typeof inset.r === "number" ? Math.max(right, inset.r) : right,
+    bottom: typeof inset.b === "number" ? Math.max(bottom, inset.b) : bottom,
+    left: typeof inset.l === "number" ? Math.max(left, inset.l) : left,
   };
 }
 
@@ -1093,6 +1342,7 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
     min -= Math.abs(min) || 1;
     max += Math.abs(max) || 1;
   }
+  if (model.f & (axis === "y2" ? 2 : 1)) return pinDomain([min, max], lock);
   const [niceMin, niceMax] = niceDomain(min, max);
   const head = monotoneHeadroom(model, axis);
   let lo = niceMin;
@@ -1162,7 +1412,31 @@ function monotoneHeadroom(model: PlotModel, axis: "y" | "y2"): { above: number; 
   return { above, below };
 }
 
-function ticks(min: number, max: number, count: number): number[] {
+function resolveTicks(model: PlotModel, key: "x" | "y" | "y2", min: number, max: number, count: number, log: boolean): number[] {
+  const axis = key === "y" ? model.yAxis : key === "y2" ? model.y2Axis : model.xAxis;
+  const values = axis.values;
+  if (values && values.length) {
+    const out: number[] = [];
+    for (let i = 0; i < values.length; i++) if (values[i] >= min - 1e-6 && values[i] <= max + 1e-6) out.push(values[i]);
+    return out;
+  }
+  if (count <= 0) return [];
+  return log ? logTicks(min, max) : ticks(min, max, count);
+}
+
+function labelStep(model: PlotModel, count: number): number {
+  const target = model.xAxis.count;
+  if (target === 0) return 0;
+  if (target !== undefined) return Math.max(1, Math.ceil(count / Math.max(1, target)));
+  return count > 8 ? Math.ceil(count / 6) : 1;
+}
+
+function legendName(model: PlotModel, series: Series): string {
+  return hooks?.seriesName(model, series) ?? series.name;
+}
+
+export function ticks(min: number, max: number, count: number): number[] {
+  if (count <= 0) return [];
   if (!(max > min)) return [min];
   const step = niceNum((max - min) / (count - 1), true) || 1;
   const start = Math.ceil(min / step) * step;
@@ -1298,6 +1572,7 @@ function zeroDefault(type: string, mark: Record<string, unknown>, series: Series
 
 /** Bar and area marks include 0 on the axis they use. A combo line on the other axis does not. */
 function axisIncludesZero(model: PlotModel, axis: "y" | "y2"): boolean {
+  if (model.f & (axis === "y2" ? 1024 : 512)) return Boolean(model.f & (axis === "y2" ? 128 : 64));
   if (model.type === "bar" || model.type === "stacked-area" || model.type === "mini-area") return true;
   if (model.stack !== "none" && axis === "y") return true;
   for (let i = 0; i < model.series.length; i++) {
@@ -1309,13 +1584,13 @@ function axisIncludesZero(model: PlotModel, axis: "y" | "y2"): boolean {
 }
 
 function heightOf(type: string, size: Record<string, unknown>, width: number): number {
-  if (typeof size.height === "number") return size.height;
-  if (size.height === "auto" && typeof size.aspectRatio === "number" && size.aspectRatio > 0) {
-    return Math.max(1, Math.round(width / size.aspectRatio));
-  }
-  if (type === "sparkline") return 32;
-  if (type === "mini-area") return 40;
-  return 240;
+  let height = 240;
+  if (typeof size.height === "number") height = size.height;
+  else if (size.height === "auto" && typeof size.aspectRatio === "number" && size.aspectRatio > 0) height = Math.max(1, Math.round(width / size.aspectRatio));
+  else if (type === "sparkline") height = 32;
+  else if (type === "mini-area") height = 40;
+  if (typeof size.minHeight === "number" && size.minHeight > height) height = size.minHeight;
+  return height;
 }
 
 function axisVisible(spec: Record<string, unknown>, key: "x" | "y" | "y2"): boolean {
@@ -1366,6 +1641,7 @@ function readYChannels(y: unknown): YChannel[] {
   return list.map((item) => {
     if (typeof item === "string") return { field: item, axis: "y" as const, dash: "solid", area: false, log: false };
     if (!isRecord(item)) return { axis: "y" as const, dash: "solid", area: false, log: false };
+    const scale = isRecord(item.scale) ? item.scale : undefined;
     return {
       field: typeof item.field === "string" ? item.field : undefined,
       title: typeof item.title === "string" ? item.title : undefined,
@@ -1374,9 +1650,9 @@ function readYChannels(y: unknown): YChannel[] {
       mark: typeof item.mark === "string" ? item.mark : undefined,
       dash: item.dash === "dashed" || item.dash === "dotted" ? item.dash : "solid",
       area: item.area === true,
-      log: isRecord(item.scale) && item.scale.type === "log",
+      log: scale?.type === "log",
       format: item.format,
-      lock: isRecord(item.scale) ? domainEnds(item.scale.domain) : undefined,
+      lock: scale ? domainEnds(scale.domain) : undefined,
     };
   });
 }
@@ -1394,11 +1670,11 @@ function dashAttr(dash: string): string {
   return "";
 }
 
-function legendRows(model: PlotModel, start: number, maxRight: number): number {
+export function legendRows(model: PlotModel, start: number, maxRight: number): number {
   let cx = start;
   let rows = 1;
   for (const series of model.series) {
-    const width = 26 + series.name.length * 6.6;
+    const width = 26 + legendName(model, series).length * 6.6;
     if (cx > start && cx + width > maxRight) {
       rows += 1;
       cx = start;
@@ -1514,7 +1790,7 @@ function dataNumber(value: number | string): number | null {
 const TICK_MIN = [1, 5, 15, 30, 60, 180, 360, 720, 1440, 2880, 10080, 20160, 43200, 129600, 525600];
 const MONTHS = "JanFebMarAprMayJunJulAugSepOctNovDec";
 
-function timeTicks(min: number, max: number, count: number): number[] {
+export function timeTicks(min: number, max: number, count: number): number[] {
   const span = max - min || 1;
   let step = 525600 * 60000;
   for (let i = 0; i < TICK_MIN.length; i++) {
@@ -1532,7 +1808,7 @@ function timeTicks(min: number, max: number, count: number): number[] {
   return out.length ? out : [min, max];
 }
 
-function formatTimeLabel(ms: number, span: number, locale: string, format: unknown): string {
+export function formatTimeLabel(ms: number, span: number, locale: string, format: unknown): string {
   if (format !== undefined) return formatValue(ms, format, locale);
   const date = new Date(ms);
   if (date.getTime() !== date.getTime()) return "";
@@ -1560,14 +1836,15 @@ function formatTimeLabel(ms: number, span: number, locale: string, format: unkno
   return span < 6912e7 ? mon + " " + year : "" + year;
 }
 
-function tickLabel(model: PlotModel, index: number): string {
+export function tickLabel(model: PlotModel, index: number): string {
   if (index < model.labels.length) return model.labels[index] ?? "";
   const value = model.x?.[index];
   return typeof value === "number" && Number.isFinite(value) ? String(value) : "";
 }
 
 function categoryTickText(model: PlotModel, count: number): string[] {
-  const step = count > 8 ? Math.ceil(count / 6) : 1;
+  const step = labelStep(model, count);
+  if (step === 0) return [];
   const out: string[] = [];
   for (let i = 0; i < count; i += step) {
     const label = tickLabel(model, i);
@@ -1576,7 +1853,7 @@ function categoryTickText(model: PlotModel, count: number): string[] {
   return out;
 }
 
-function tickText(values: number[], model: PlotModel, format: unknown): string[] {
+export function tickText(values: number[], model: PlotModel, format: unknown): string[] {
   const digits = tickDigits(values);
   const out = new Array<string>(values.length);
   for (let i = 0; i < values.length; i++) {
@@ -1650,7 +1927,7 @@ function tickDigits(values: number[]): number {
   return digits > 6 ? 6 : digits;
 }
 
-function formatNumber(value: number, locale: string, digits = 2): string {
+export function formatNumber(value: number, locale: string, digits = 2): string {
   if (locale === "en-US") {
     const text = formatEn(value, digits);
     if (text !== null) return text;

@@ -4,7 +4,6 @@ import { formatValue } from "../format";
 import {
   asNumber,
   axisOn,
-  axisTitle,
   channelFormat,
   column,
   fieldOf,
@@ -17,7 +16,7 @@ import {
   scaleTypeOf,
   wantsZero,
 } from "../frame";
-import { clipPath, closeChart, domainEnds, esc, font, linear, logNice, logScale, logTicks, n, openChart, ticks } from "../svg";
+import { boxId, clipPath, closeChart, domainEnds, esc, font, linear, logNice, logScale, logTicks, n, openChart, pickTicks, readAxis, readInset } from "../svg";
 
 /** Scatter / bubble. encoding.x and encoding.y are quantitative; size and color are optional. */
 export function renderScatter(spec: Record<string, unknown>): string | null {
@@ -69,7 +68,9 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   const showY = axisOn(spec, "y");
   const xFormat = channelFormat(frame.encoding.x);
   const yFormat = channelFormat(frame.encoding.y);
-  const yTicks = yLog ? logTicks(yDomain[0], yDomain[1]) : ticks(yDomain[0], yDomain[1], 5);
+  const yAxis = readAxis(spec, "y");
+  const xAxis = readAxis(spec, "x");
+  const yTicks = pickTicks(yDomain[0], yDomain[1], yAxis.count ?? 5, yAxis.values, yLog);
   let left = showY ? 56 : 16;
   if (showY) {
     let label = 0;
@@ -79,10 +80,35 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     }
     left = Math.max(56, Math.ceil(label + 14));
   }
-  const plot = { left, top, right: frame.width - 16, bottom: frame.height - (showX ? 36 : 16) };
-  const xScale = xLog ? logScale(xDomain[0], xDomain[1], plot.left, plot.right) : linear(xDomain[0], xDomain[1], plot.left, plot.right);
-  const yScale = yLog ? logScale(yDomain[0], yDomain[1], plot.bottom, plot.top) : linear(yDomain[0], yDomain[1], plot.bottom, plot.top);
-  const xTicks = xLog ? logTicks(xDomain[0], xDomain[1]) : ticks(xDomain[0], xDomain[1], 5);
+  const inset = readInset(spec);
+  const yRight = yAxis.end;
+  let plotLeft = showY && yAxis.labels && !yRight ? left : 16;
+  let plotRight = frame.width - (showY && yAxis.labels && yRight ? left : 16);
+  let plotTop = top;
+  let plotBottom = frame.height - (showX && xAxis.labels ? (xAxis.end ? 16 : 36) : 16);
+  if (xAxis.end && showX && xAxis.labels) plotTop += 28;
+  if (yAxis.title) {
+    if (yRight) plotRight -= 16;
+    else plotLeft += 16;
+  }
+  if (xAxis.title) {
+    if (xAxis.end) plotTop += 22;
+    else plotBottom -= 16;
+  }
+  if (inset.l !== undefined) plotLeft = Math.max(plotLeft, inset.l);
+  if (inset.r !== undefined) plotRight = Math.min(plotRight, frame.width - inset.r);
+  if (inset.t !== undefined) plotTop = Math.max(plotTop, inset.t);
+  if (inset.b !== undefined) plotBottom = Math.min(plotBottom, frame.height - inset.b);
+  const plot = { left: plotLeft, top: plotTop, right: Math.max(plotLeft + 1, plotRight), bottom: Math.max(plotTop + 1, plotBottom) };
+  const xRev = scaleReverse(frame.encoding.x);
+  const yRev = scaleReverse(frame.encoding.y);
+  const xScale = xLog
+    ? logScale(xDomain[0], xDomain[1], xRev ? plot.right : plot.left, xRev ? plot.left : plot.right)
+    : linear(xDomain[0], xDomain[1], xRev ? plot.right : plot.left, xRev ? plot.left : plot.right);
+  const yScale = yLog
+    ? logScale(yDomain[0], yDomain[1], yRev ? plot.top : plot.bottom, yRev ? plot.bottom : plot.top)
+    : linear(yDomain[0], yDomain[1], yRev ? plot.top : plot.bottom, yRev ? plot.bottom : plot.top);
+  const xTicks = pickTicks(xDomain[0], xDomain[1], xAxis.count ?? 5, xAxis.values, xLog);
   const grid = gridStyle(spec);
   const colorOf = (category: string | undefined, index: number) => {
     if (colorEnc?.constant) return paint(colorEnc.constant, frame.preset, 0);
@@ -137,9 +163,10 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
       return yScale(numeric);
     },
   });
-  parts.push(`<defs>${clipPath(`${frame.id}-clip`, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top)}</defs>`);
+  const clip = boxId(frame.id, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top);
+  parts.push(`<defs>${clipPath(clip, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top)}</defs>`);
   parts.push(notes.under);
-  parts.push(`<g clip-path="url(#${frame.id}-clip)">`);
+  parts.push(`<g clip-path="url(#${clip})">`);
   points.forEach((point, index) => {
     const raw = point.size === null ? radius[0] : lerp(point.size, sizeDomain[0], sizeDomain[1], radius[0], radius[1]);
     const cx = xScale(point.x);
@@ -156,19 +183,30 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   parts.push("</g>");
   parts.push(notes.over);
 
-  if (showY) {
+  if (showY && yAxis.labels) {
     for (const tick of yTicks) {
-      parts.push(label(plot.left - 8, yScale(tick) + 4, formatValue(tick, yFormat, frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "end"));
+      const y = yScale(tick) + 4;
+      parts.push(
+        yRight
+          ? label(plot.right + 8, y, formatValue(tick, yFormat, frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "start")
+          : label(plot.left - 8, y, formatValue(tick, yFormat, frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "end"),
+      );
     }
-    const title = axisTitle(spec, "y");
-    if (title) parts.push(label(16, plot.top - 6, title, cssVar("muted", frame.preset.muted), 11, "500"));
   }
-  if (showX) {
+  if (showY && yAxis.title) {
+    const x = yRight ? frame.width - 12 : 12;
+    parts.push(rotated(x, (plot.top + plot.bottom) / 2, yAxis.title, cssVar("muted", frame.preset.muted), yRight ? 90 : -90));
+  }
+  if (showX && xAxis.labels) {
+    const angle = xAxis.rotate ?? 0;
     for (const tick of xTicks) {
-      parts.push(label(xScale(tick), plot.bottom + 16, formatValue(tick, xFormat, frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "middle"));
+      const x = xScale(tick);
+      const y = xAxis.end ? plot.top - 18 : plot.bottom + 16;
+      parts.push(angle ? rotated(x, y, formatValue(tick, xFormat, frame.locale), cssVar("muted", frame.preset.muted), angle) : label(x, y, formatValue(tick, xFormat, frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "middle"));
     }
-    const title = axisTitle(spec, "x");
-    if (title) parts.push(label(plot.right, frame.height - 6, title, cssVar("muted", frame.preset.muted), 11, "500", "end"));
+  }
+  if (showX && xAxis.title) {
+    parts.push(label((plot.left + plot.right) / 2, xAxis.end ? plot.top - 40 : frame.height - 6, xAxis.title, cssVar("muted", frame.preset.muted), 11, "500", "middle"));
   }
   parts.push(closeChart());
   return parts.join("");
@@ -201,8 +239,8 @@ function explicitPositiveDomain(channel: unknown): [number, number] | null {
 function padDomain(domain: [number, number], channel: unknown): [number, number] {
   if (scaleTypeOf(channel) === "log") return domain;
   const explicit = typeof channel === "object" && channel !== null && "scale" in channel;
-  const scale = explicit ? (channel as { scale?: { domain?: unknown } }).scale : undefined;
-  if (scale && Array.isArray(scale.domain)) return domain;
+  const scale = explicit ? (channel as { scale?: { domain?: unknown; nice?: unknown } }).scale : undefined;
+  if (scale && (Array.isArray(scale.domain) || scale.nice === false)) return domain;
   const span = domain[1] - domain[0] || 1;
   return [domain[0] - span * 0.06, domain[1] + span * 0.06];
 }
@@ -211,6 +249,14 @@ function lerp(value: number, d0: number, d1: number, r0: number, r1: number): nu
   if (d1 === d0) return (r0 + r1) / 2;
   const t = Math.min(1, Math.max(0, (value - d0) / (d1 - d0)));
   return r0 + t * (r1 - r0);
+}
+
+function scaleReverse(channel: unknown): boolean {
+  return typeof channel === "object" && channel !== null && "scale" in channel && (channel as { scale?: { reverse?: unknown } }).scale?.reverse === true;
+}
+
+function rotated(x: number, y: number, value: string, fill: string, angle: number): string {
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="middle" fill="${fill}" font-size="11" font-weight="500" font-family="${font()}" transform="rotate(${n(angle)} ${n(x)} ${n(y)})">${esc(value)}</text>`;
 }
 
 function label(x: number, y: number, value: string, fill: string, size: number, weight: string, anchor = "start"): string {

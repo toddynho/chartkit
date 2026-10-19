@@ -48,9 +48,11 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   const known = type !== undefined && CHART_TYPES.has(type);
 
   if (known && isRecord(spec.mark)) warnUnusedMarks(type, spec.mark, diagnostics);
+  warnUnbuilt(spec, diagnostics);
   if (isRecord(spec.encoding)) {
     warnSeriesShape(spec.encoding, diagnostics);
     checkDomains(spec.encoding, diagnostics);
+    warnChannelExtras(spec.encoding, diagnostics);
   }
 
   const dataSource = spec.data;
@@ -336,6 +338,57 @@ function checkCandles(spec: Record<string, unknown>, table: DataTable, diagnosti
   }
 }
 
+function flag(diagnostics: Diagnostic[], path: string): void {
+  diagnostics.push({
+    code: "CK3012",
+    severity: "warning",
+    message: "not applied",
+    path,
+    hint: "accepted so it is not dropped silently",
+  });
+}
+
+/** kind: 0 defined, 1 point|series, 2 array, 3 light|dark, 4 string, 5 number. */
+const UNBUILT: ReadonlyArray<readonly [string, 0 | 1 | 2 | 3 | 4 | 5]> = [
+  ["animation/easing", 0],
+  ["interaction/select", 1],
+  ["tooltip/fields", 2],
+  ["theme/mode", 3],
+  ["theme/tokens/fontFamily", 4],
+  ["theme/tokens/fontSize", 5],
+  ["axes/y2/grid", 0],
+];
+
+function at(root: unknown, path: string): unknown {
+  let cur = root;
+  for (const key of path.split("/")) {
+    if (!isRecord(cur)) return;
+    cur = cur[key];
+  }
+  return cur;
+}
+
+function warnUnbuilt(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  for (let i = 0; i < UNBUILT.length; i++) {
+    const path = UNBUILT[i][0];
+    const kind = UNBUILT[i][1];
+    const value = at(spec, path);
+    const hit =
+      kind === 0
+        ? value !== undefined
+        : kind === 1
+          ? value === "point" || value === "series"
+          : kind === 2
+            ? Array.isArray(value)
+            : kind === 3
+              ? value === "light" || value === "dark"
+              : kind === 4
+                ? typeof value === "string"
+                : typeof value === "number";
+    if (hit) flag(diagnostics, "/" + path);
+  }
+}
+
 function warnUnusedMarks(type: string, mark: Record<string, unknown>, diagnostics: Diagnostic[]): void {
   for (const key of Object.keys(mark)) {
     const applies = MARK_APPLIES[key];
@@ -347,6 +400,31 @@ function warnUnusedMarks(type: string, mark: Record<string, unknown>, diagnostic
       path: `/mark/${key}`,
       hint: `applies to: ${applies.join(", ")}. Remove it or change the type`,
     });
+  }
+}
+
+function warnChannelExtras(encoding: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  for (const key of Object.keys(encoding)) {
+    if (key === "x") continue;
+    const value = encoding[key];
+    const list = Array.isArray(value) ? value : [value];
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      if (!isRecord(item)) continue;
+      const base = Array.isArray(value) ? `/encoding/${key}/${i}` : `/encoding/${key}`;
+      if (typeof item.type === "string") flag(diagnostics, `${base}/type`);
+      if (key === "y") continue;
+      if (typeof item.title === "string") flag(diagnostics, `${base}/title`);
+      if (item.format !== undefined) flag(diagnostics, `${base}/format`);
+      const scale = isRecord(item.scale) ? item.scale : undefined;
+      if (!scale) continue;
+      if (scale.type !== undefined) flag(diagnostics, `${base}/scale/type`);
+      if (scale.reverse === true) flag(diagnostics, `${base}/scale/reverse`);
+      if (key === "high") continue;
+      if (scale.domain !== undefined) flag(diagnostics, `${base}/scale/domain`);
+      if (typeof scale.zero === "boolean") flag(diagnostics, `${base}/scale/zero`);
+      if (scale.nice === false) flag(diagnostics, `${base}/scale/nice`);
+    }
   }
 }
 

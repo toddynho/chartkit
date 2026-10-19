@@ -45,6 +45,11 @@ export function hash(value: string): string {
   return (h >>> 0).toString(36);
 }
 
+/** Clip id for one plot box. Charts that share an alt still need distinct ids in one document. */
+export function boxId(id: string, x: number, y: number, w: number, h: number): string {
+  return id + hash((x | 0) + "," + (y | 0) + "," + (w | 0) + "," + (h | 0));
+}
+
 export function round(value: number): number {
   return Math.round(value * 1e8) / 1e8;
 }
@@ -173,4 +178,72 @@ export function openChart(chart: ChartOpen): string {
 
 export function closeChart(): string {
   return "</svg>";
+}
+
+export interface AxisSpec {
+  on: boolean;
+  title?: string;
+  count?: number;
+  values?: number[];
+  labels: boolean;
+  /** Right or top, rather than the default left or bottom. */
+  end: boolean;
+  rotate?: number;
+}
+
+/** Axis box from `axes.x`, `axes.y`, or `axes.y2`. Perpendicular sides map onto that axis. */
+export function readAxis(spec: Record<string, unknown>, key: "x" | "y" | "y2", horizontal = false): AxisSpec {
+  const axes = isRecord(spec.axes) ? spec.axes : undefined;
+  const raw = axes ? axes[key] : undefined;
+  const axis = isRecord(raw) ? raw : {};
+  const ticks = axis.ticks;
+  const values = Array.isArray(ticks) ? ticks.filter((item): item is number => typeof item === "number" && Number.isFinite(item)) : undefined;
+  const pos = axis.position;
+  const drawnVertical = key === "x" ? horizontal : !horizontal;
+  let end = key === "y2";
+  if (pos === "right" || pos === "top" || pos === "left" || pos === "bottom") {
+    end = drawnVertical ? pos === "right" || pos === "top" : pos === "top" || pos === "left";
+  }
+  return {
+    on: raw !== false,
+    title: typeof axis.title === "string" && axis.title ? axis.title : undefined,
+    count: typeof ticks === "number" ? Math.max(0, Math.min(50, Math.round(ticks))) : undefined,
+    values: values && values.length ? values : undefined,
+    labels: axis.labels !== false,
+    end,
+    rotate: typeof axis.rotate === "number" && Number.isFinite(axis.rotate) ? axis.rotate : undefined,
+  };
+}
+
+export function pickTicks(min: number, max: number, count: number, values?: number[], log = false): number[] {
+  if (values && values.length) return values.filter((value) => value >= min - 1e-6 && value <= max + 1e-6);
+  if (count <= 0) return [];
+  return log ? logTicks(min, max) : ticks(min, max, count);
+}
+
+export function readInset(spec: Record<string, unknown>): { t?: number; r?: number; b?: number; l?: number } {
+  const size = isRecord(spec.size) ? spec.size : undefined;
+  const pad = size?.padding;
+  if (typeof pad === "number") return { t: pad, r: pad, b: pad, l: pad };
+  if (!isRecord(pad)) return {};
+  const side = (key: string) => (typeof pad[key] === "number" ? (pad[key] as number) : undefined);
+  return { t: side("top"), r: side("right"), b: side("bottom"), l: side("left") };
+}
+
+/** Client-only options, recorded on the SVG so a static render does not drop them. */
+export function clientIntent(spec: Record<string, unknown>): string {
+  const bits: string[] = [];
+  const a11y = isRecord(spec.a11y) ? spec.a11y : undefined;
+  if (a11y?.keyboard === true) bits.push("keys");
+  if (a11y?.dataTable === true) bits.push("table");
+  if (isRecord(spec.legend) && spec.legend.interactive === true) bits.push("legend");
+  if (spec.tooltip === false || isRecord(spec.tooltip)) bits.push("tip");
+  if (spec.animation === true || isRecord(spec.animation)) bits.push("anim");
+  if (isRecord(spec.interaction)) bits.push("ix");
+  return bits.join(" ");
+}
+
+export function longDesc(spec: Record<string, unknown>): string | undefined {
+  const a11y = isRecord(spec.a11y) ? spec.a11y : undefined;
+  return a11y && typeof a11y.description === "string" ? a11y.description : undefined;
 }

@@ -46,8 +46,8 @@ export default function ChartTypePage({ params }: { params: { type: string } }) 
       <h2>Accessibility</h2>
       <p>
         <code>a11y.alt</code> is required. The SVG has <code>role=&quot;img&quot;</code> and <code>aria-label</code> set
-        to that sentence, plus a <code>title</code> and <code>desc</code>. Keyboard navigation and a data table are in
-        the schema and not drawn yet, so the alt sentence has to carry the chart.
+        to that sentence, plus a <code>title</code> and <code>desc</code>. Keyboard navigation and a data table stay
+        off unless <code>a11y.keyboard</code> or <code>a11y.dataTable</code> is set. The alt sentence is still the accessible name.
       </p>
       {related.length > 1 ? (
         <>

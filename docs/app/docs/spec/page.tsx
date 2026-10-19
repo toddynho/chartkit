@@ -19,10 +19,14 @@ export default function SpecPage() {
         throw.
       </p>
       <div className="note">
-        <strong>Accepted, not drawn yet</strong>
-        Tooltip, zoom, pan, brush, animation, interactive legends, and keyboard or data-table accessibility are in the
-        schema. Turning one on warns CK3011, because the SVG does not paint it yet. Annotations, log scales, time
-        axes, and bar series are drawn. The examples on this site are charts the renderer draws.
+        <strong>Client behavior</strong>
+        Tooltip, zoom, pan, brush, and animation duration run in <code>@chartkitdev/core/interact</code>. The tooltip
+        defaults on for line, bar, area, scatter, combo, and donut. <code>a11y.keyboard</code>, <code>a11y.dataTable</code>,
+        and <code>legend.interactive</code> stay off unless set, because turning them on loads extra interaction code.
+        The static SVG records those choices in <code>data-ck-intent</code>. <code>animation.easing</code>,{" "}
+        <code>interaction.select</code>, <code>tooltip.fields</code>, and <code>theme.tokens.fontFamily</code> warn
+        CK3012. Axis titles, tick counts, rotation, side, reversed and un-niced scales, padding, min height, and{" "}
+        <code>a11y.description</code> are drawn.
       </div>
       <h2>Repair loop</h2>
       <CodeBlock

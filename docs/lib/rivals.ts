@@ -41,7 +41,7 @@ export const rivals: Rival[] = [
     agent:
       "Recharts was in the 2026-10-16 eval, which round 13 did not re-run: 42/42 with no docs and 42/42 with docs, at 223.3 / 236.6 mean first-try output tokens. ChartKit was 20/42 with no docs, 42/42 after repair() with no model call, and 42/42 with the docs at 139.4 / 131.1 tokens.",
     betterWhen: [
-      "You need a hover tooltip, a click handler, or a legend that toggles a series. ChartKit accepts those fields and warns CK3011. It does not draw them.",
+      "You need a hover tooltip, a click handler, or a legend that toggles a series. ChartKit draws those in the client runtime when the spec sets them. The static SVG does not.",
       "You want radar, treemap, or sankey. ChartKit does not draw those.",
       "The app is already React and the team wants <LineChart> props, not a JSON spec.",
       "You care about the 1,000-point aligned update. ChartKit loses that cell to uPlot: 1.5 vs 1.2 on even x, 1.6 vs 1.4 on jittered x, and 1.6 vs 1.4 on gapped timestamps. Round 13 did not publish a Recharts millisecond for that cell.",
@@ -123,7 +123,7 @@ new Chart(ctx, {
       "ECharts was in the 2026-10-16 eval, which round 13 did not re-run: 42/42 in every column, at 334.2 / 367.2 mean first-try output tokens. That is the highest token count in the eval. ChartKit’s official first try used 131.1.",
     betterWhen: [
       "You need a chart ChartKit does not draw: a map, a graph, a sankey, a treemap, or brush selection.",
-      "You need dataZoom or a tooltip. ChartKit validates zoom and tooltip and does not draw them (CK3011).",
+      "You need dataZoom or a tooltip. ChartKit draws zoom and tooltips in the client runtime when the spec sets them. The static SVG does not.",
       "The 1,000-point aligned update matters, and you are comparing with uPlot. ChartKit loses that cell (1.5 vs 1.2 on even x). At 1,000,000 even points ChartKit wins the update, 10.7 vs 11.2. This page does not claim ECharts wins either cell. ECharts has no browser millisecond in the round 13 rows. Its steady painted hover at 100k is 2,881.4 ms.",
     ],
     chartkitWhen: [

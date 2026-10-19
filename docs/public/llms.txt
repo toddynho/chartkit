@@ -5,7 +5,7 @@
 
 ## Rules
 
-- version "1". a11y.alt required. data is rows, not {"values":[...]}. repair(spec) returns {spec, ok, errors, applied}. Y domain is encoding.y.scale.domain [min, max]; null = auto. Field rules: llms-full.txt.
+- version "1". a11y.alt required. data is rows, not {"values":[...]}. repair(spec) returns {spec, ok, errors, applied}. Y domain is encoding.y.scale.domain [min, max]; null = auto. Keys, data table, and legend clicks are off unless set. Field rules: llms-full.txt.
 - Extra charts: @chartkitdev/core/extra or /charts/<type>. Phase 4 is gantt, timeline, quadrant, venn, and journey. import { validatePhase4 } from "@chartkitdev/core/validate/phase4". Field details are in llms-full.txt.
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
 

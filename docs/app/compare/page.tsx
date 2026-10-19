@@ -30,9 +30,9 @@ export default function ComparePage() {
     <div className="wrap section prose wide">
       <h1>Compare</h1>
       <p className="lede">
-        A short, honest cut of the round 13 matrix. “In the spec, not drawn” means the field validates and the SVG
-        renderer does not paint it. Turning tooltip, zoom, pan, brush, animation, or keyboard access on warns CK3011.
-        Annotations, log scales, time axes, and bar series are drawn. Cells for other libraries come from their docs
+        A short, honest cut of the round 13 matrix. “In the spec, not drawn” means the static SVG does not paint it.
+        Tooltip, zoom, pan, brush, and animation run in the client runtime and do not warn. Keyboard access stays off
+        unless set. Annotations, log scales, time axes, and bar series are drawn. Cells for other libraries come from their docs
         and are point-in-time. ChartKit’s line chart is still the smallest; uPlot is next at {headline.nextGzipBytes}{" "}
         bytes.
       </p>

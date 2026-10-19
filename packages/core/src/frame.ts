@@ -38,6 +38,7 @@ export function readFrame(
   else if (size.height === "auto" && typeof size.aspectRatio === "number" && size.aspectRatio > 0) {
     height = Math.max(1, Math.round(width / size.aspectRatio));
   }
+  if (typeof size.minHeight === "number") height = Math.max(height, size.minHeight);
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : "";
   const type = typeof spec.type === "string" ? spec.type : "chart";
   const idSource = typeof spec.id === "string" ? spec.id : alt || type;
@@ -208,9 +209,12 @@ export function resolveDomain(values: ArrayLike<number>, channel: unknown, zero:
     min -= Math.abs(min) || 1;
     max += Math.abs(max) || 1;
   }
-  const [niceMin, niceMax] = niceDomain(min, max);
-  min = niceMin;
-  max = niceMax;
+  const niceOff = isRecord(channel) && isRecord(channel.scale) && channel.scale.nice === false;
+  if (!niceOff) {
+    const [niceMin, niceMax] = niceDomain(min, max);
+    min = niceMin;
+    max = niceMax;
+  }
   if (isRecord(channel) && isRecord(channel.scale) && Array.isArray(channel.scale.domain)) {
     const domain = channel.scale.domain;
     if (typeof domain[0] === "number") min = domain[0];

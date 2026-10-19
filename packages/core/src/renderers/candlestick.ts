@@ -9,6 +9,7 @@ import {
   readFrame,
   readTable,
   resolveDomain,
+  wantsZero,
 } from "../frame";
 import { closeChart, esc, font, linear, n, openChart, ticks } from "../svg";
 
@@ -42,7 +43,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
 
   const prices = candles.flatMap((candle) => [candle.high, candle.low]);
   const pad = (Math.max(...prices) - Math.min(...prices)) * 0.08 || 1;
-  const domain = resolveDomain([Math.min(...prices) - pad, Math.max(...prices) + pad], frame.encoding.high, false);
+  const domain = resolveDomain([Math.min(...prices) - pad, Math.max(...prices) + pad], frame.encoding.high, wantsZero(frame.encoding.high, false));
   const showVolume = volumeF !== undefined;
   const showX = axisOn(spec, "x");
   const showY = axisOn(spec, "y");

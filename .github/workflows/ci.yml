@@ -15,6 +15,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm ci
+        working-directory: bench
+      - run: npx playwright install --with-deps chromium
+        working-directory: bench
       - run: npm test
       - run: npm run size
       - run: npm run build:lib
