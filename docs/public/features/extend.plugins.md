@@ -35,6 +35,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | native | ~registerExternalDiagrams | dts-grep (weak) | mermaid/dist/mermaid.d.ts:87 external diagram registration |
 | AntV G2 | native | ~register | dts-grep (weak) | @antv/g2/lib/exports.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 7eff21f18449.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against d039a4e4a8c9.
 
 https://chartkit.dev/features.json
