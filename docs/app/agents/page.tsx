@@ -34,6 +34,10 @@ export default function AgentsPage() {
           <a href="/features.json">features.json</a> — 21 libraries, one status and source per feature.{" "}
           <Link href="/features">Feature pages</Link> have a Markdown twin.
         </li>
+        <li>
+          <Link href="/docs/mcp">@chartkitdev/mcp</Link> — validate, repair, render, and feature lookup over stdio.
+          Install is coming soon. The package is not on npm yet.
+        </li>
       </ul>
       <p>
         On the 2026-10-16 eval, which round {ROUND} did not re-run, official docs put ChartKit at 42/42 on the first try, at a mean of 131.1 output

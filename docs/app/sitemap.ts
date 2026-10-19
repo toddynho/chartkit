@@ -18,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/docs/theming",
     "/docs/migrate",
     "/docs/mermaid",
+    "/docs/mcp",
     "/examples",
     "/playground",
     "/benchmarks",
