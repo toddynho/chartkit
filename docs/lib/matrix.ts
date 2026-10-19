@@ -23,6 +23,23 @@ export interface MatrixFeature {
   cells: Record<string, MatrixCell>;
 }
 
+export interface BundleGzip {
+  minimalLine?: number | null;
+  fullEntry?: number | null;
+  source?: string;
+  commit?: string;
+  coreCommit?: string;
+  measured?: string;
+  method?: string;
+  note?: string;
+  harnessLine?: number | null;
+  sizeScriptAll?: number | null;
+  reactExternal?: boolean;
+  jsGzipBytes?: number | null;
+  cssGzipBytes?: number | null;
+  priorExtract?: { minimalLine?: number | null; fullEntry?: number | null; measured?: string; note?: string } | null;
+}
+
 export interface MatrixLibrary {
   id: string;
   name: string;
@@ -32,6 +49,7 @@ export interface MatrixLibrary {
   docs: string;
   escapeHatch: string;
   license: string;
+  bundleGzip?: BundleGzip | null;
 }
 
 export interface MatrixFile {
@@ -65,6 +83,19 @@ const RANK: Record<string, number> = {
   none: 1,
   unknown: 0,
 };
+
+export function rankStatus(status: string): number {
+  return RANK[status] ?? 0;
+}
+
+export function callFor(ours: string | undefined, theirs: string | undefined): Call {
+  if (!ours || !theirs || ours === "unknown" || theirs === "unknown") return "unknown";
+  const theirRank = rankStatus(theirs);
+  const ourRank = rankStatus(ours);
+  if (theirRank > ourRank) return "loss";
+  if (ourRank > theirRank) return "win";
+  return "tie";
+}
 
 let cached: MatrixFile | null = null;
 
@@ -104,11 +135,7 @@ export function compareRows(libraryId: string): CompareRow[] {
   return matrix().features.map((feature) => {
     const ours = feature.cells.chartkit;
     const theirs = feature.cells[libraryId];
-    let call: Call = "tie";
-    if (!ours || !theirs || ours.status === "unknown" || theirs.status === "unknown") call = "unknown";
-    else if ((RANK[theirs.status] ?? 0) > (RANK[ours.status] ?? 0)) call = "loss";
-    else if ((RANK[ours.status] ?? 0) > (RANK[theirs.status] ?? 0)) call = "win";
-    return { feature, ours, theirs, call };
+    return { feature, ours, theirs, call: callFor(ours?.status, theirs?.status) };
   });
 }
 

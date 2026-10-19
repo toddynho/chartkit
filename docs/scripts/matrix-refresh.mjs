@@ -2,7 +2,7 @@
  * Publish docs/data/matrix/matrix.json as features.json and per-feature Markdown.
  * Spec snippets are included only after validate() and render() succeed.
  */
-import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validate } from "@chartkitdev/core/validate";
@@ -11,6 +11,94 @@ import { render } from "@chartkitdev/core/extra";
 
 const docsRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const matrixPath = join(docsRoot, "data/matrix/matrix.json");
+const measuredPath = join(docsRoot, "data/measured-sizes.json");
+
+const BENCH_VERSION_KEY = {
+  chartjs: "chart.js",
+  recharts: "recharts",
+  echarts: "echarts",
+  nivo: "@nivo/line",
+  plot: "@observablehq/plot",
+  uplot: "uplot",
+};
+
+function lineRows(measured) {
+  const rows = new Map();
+  for (const row of measured.bench.rows) {
+    if (row.chart === "line" && row.status === "ok") rows.set(row.id, row);
+  }
+  return rows;
+}
+
+function publishLibraries(libraries, matrixDate) {
+  if (!existsSync(measuredPath)) throw new Error("docs/data/measured-sizes.json is missing. Run node docs/scripts/capture-sizes.mjs");
+  const measured = JSON.parse(readFileSync(measuredPath, "utf8"));
+  if (typeof measured.sizeScript?.measured?.line !== "number") throw new Error("measured-sizes.json has no size-script line");
+  const lines = lineRows(measured);
+  return libraries.map((library) => {
+    const prior = library.bundleGzip;
+    const priorExtract = prior
+      ? {
+          minimalLine: prior.minimalLine ?? null,
+          fullEntry: prior.fullEntry ?? null,
+          measured: matrixDate,
+          note: "Matrix extract. Not a substitute for a later measurement.",
+        }
+      : null;
+    if (library.id === "chartkit") {
+      const harness = lines.get("chartkit-minimal");
+      return {
+        ...library,
+        bundleGzip: {
+          minimalLine: measured.sizeScript.measured.line,
+          fullEntry: null,
+          sizeScriptAll: measured.sizeScript.measured.all,
+          harnessLine: harness?.gzipBytes ?? null,
+          source: measured.sizeScript.command,
+          commit: measured.commit,
+          coreCommit: measured.coreCommit,
+          measured: measured.sizeScript.measuredAt.slice(0, 10),
+          method: measured.sizeScript.method,
+          note: "minimalLine is the current scripts/size.mjs line. sizeScriptAll is scripts/size.mjs all.ts. harnessLine is the bench browser line bundle. priorExtract is the older matrix figure and is not the current line. fullEntry is null because the matrix full entry used a different entry than all.ts.",
+          priorExtract,
+        },
+      };
+    }
+    const bench = lines.get(library.id);
+    if (bench) {
+      const reactExternal = bench.reactExternalGzipBytes != null;
+      return {
+        ...library,
+        bundleGzip: {
+          minimalLine: reactExternal ? bench.reactExternalGzipBytes : bench.gzipBytes,
+          fullEntry: prior?.fullEntry ?? null,
+          jsGzipBytes: bench.gzipBytes,
+          cssGzipBytes: bench.cssGzipBytes ?? null,
+          reactExternal,
+          source: measured.bench.command,
+          commit: measured.commit,
+          measured: measured.bench.measuredAt.slice(0, 10),
+          method: measured.bench.method,
+          packageVersion: measured.bench.versions[BENCH_VERSION_KEY[library.id]] ?? null,
+          note: prior?.fullEntry != null
+            ? "minimalLine is the bench remeasure. fullEntry is still the matrix extract; the bench did not remeasure the full public entry."
+            : "minimalLine is the bench remeasure.",
+          priorExtract,
+        },
+      };
+    }
+    if (!prior) return { ...library, bundleGzip: null };
+    return {
+      ...library,
+      bundleGzip: {
+        ...prior,
+        source: "docs/data/matrix/matrix.json",
+        measured: matrixDate,
+        note: "Not in the bench bundle set. This is the matrix extract, not a new measurement.",
+      },
+    };
+  });
+}
 const publicDir = join(docsRoot, "public");
 const featureDir = join(publicDir, "features");
 const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);
@@ -412,7 +500,7 @@ function main() {
     synonymsNote:
       "Keys are feature labels, absence-probe tokens, and recorded api paths. Regex absence probes are omitted. scales.x.title and scales.y.title are conventional Chart.js names for axis.title; that cell's recorded evidence is a grep (~title), not a type-checked path.",
     schema: matrix.schema,
-    libraries: matrix.libraries,
+    libraries: publishLibraries(matrix.libraries, matrix.dateChecked),
     notScored: matrix.notScored,
     taxonomy: matrix.taxonomy,
     features,
@@ -442,6 +530,14 @@ function main() {
   }
   if (!synonymObject["xAxis.name"]?.includes("axis.title") || !synonymObject["scales.x.title"]?.includes("axis.title")) {
     throw new Error("synonyms missing axis title lookups");
+  }
+  const chartkitLib = payload.libraries.find((library) => library.id === "chartkit");
+  const measured = JSON.parse(readFileSync(measuredPath, "utf8"));
+  if (chartkitLib?.bundleGzip?.minimalLine !== measured.sizeScript.measured.line) {
+    throw new Error("features.json ChartKit line gzip was not taken from the size measurement");
+  }
+  if (chartkitLib.bundleGzip.minimalLine === chartkitLib.bundleGzip.priorExtract?.minimalLine) {
+    throw new Error("features.json ChartKit line gzip still matches the older matrix extract");
   }
   console.log(`features.json ${json.length} bytes, ${features.length} features, ${withSpec} specs, ${Object.keys(synonymObject).length} synonyms`);
   if (skipped.length) console.log(`snippets omitted: ${skipped.length}\n${skipped.slice(0, 40).join("\n")}`);

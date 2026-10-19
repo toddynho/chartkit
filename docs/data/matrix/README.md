@@ -1,10 +1,13 @@
 # Publishing this matrix on chartkit.dev
 
-`matrix.json` in this directory is the source the site publishes. From the repo root:
+`matrix.json` in this directory is the source the site publishes. Bundle bytes on the compare pages and in `features.json` come from `docs/data/measured-sizes.json`. From the repo root:
 
 ```bash
+npm run sizes:capture
 npm run matrix:refresh
 ```
+
+`sizes:capture` runs `node scripts/size.mjs` and `node bench/run.mjs --skip-browser --skip-ssr --skip-agent`, then writes the JSON. Run it when main’s line chart or the pinned bench packages change. Do not type gzip figures into the compare pages.
 
 That writes `docs/public/features.json` and one Markdown file per feature at `docs/public/features/<id>.md`. The docs prebuild runs the same script, so `npm run build` regenerates the `/features` and `/compare` pages from this file. Do not hand-edit those pages or the generated JSON.
 

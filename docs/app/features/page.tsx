@@ -85,6 +85,15 @@ export default function FeaturesPage() {
           page&apos;s data. Refresh monthly, or when a scored library ships a release, then re-check the ChartKit
           column against current main before publishing. The steps are in <code>docs/data/matrix/README.md</code>.
         </p>
+        {chartkit?.bundleGzip?.minimalLine != null ? (
+          <p>
+            ChartKit line gzip in <a href="/features.json">features.json</a> is{" "}
+            {chartkit.bundleGzip.minimalLine.toLocaleString("en-US")} bytes from {chartkit.bundleGzip.source}, commit{" "}
+            <code>{chartkit.bundleGzip.commit}</code>, measured {chartkit.bundleGzip.measured}. {chartkit.bundleGzip.method}{" "}
+            {chartkit.bundleGzip.note} Libraries the bench remeasured store that run on <code>bundleGzip</code>. The rest
+            keep the matrix extract and say so on <code>bundleGzip.measured</code>.
+          </p>
+        ) : null}
         <h3>Not scored</h3>
         <ul>
           {data.notScored.map((item) => (

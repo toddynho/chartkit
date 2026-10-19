@@ -1,4 +1,4 @@
-> ChartKit cells in `matrix.json` were rechecked on 2026-10-19 against main 116d0af (PR #17). This grid is the 2026-10-18 export; where they differ, `matrix.json` and `chartkit-recheck.md` win.
+> ChartKit cells in `matrix.json` were rechecked on 2026-10-19 against main 116d0af (PR #17). This grid is the 2026-10-18 export; where they differ, `matrix.json` and `chartkit-recheck.md` win. The Min line gzip and Full entry gzip columns are that same extract, including ChartKit before PR #17. Current bundle figures are `libraries[].bundleGzip` in the published features.json, written from `docs/data/measured-sizes.json`. Do not copy the table below onto the site.
 
 # Charting library feature matrix
 
