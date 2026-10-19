@@ -24,6 +24,8 @@ Earlier v1 work. 28 chart types draw: 15 in the first core, eight in Phase 3, an
 - [x] Point shapes and data labels ([#23](https://github.com/toddynho/chartkit/pull/23))
 - [x] Axis finishing: title position, auto-skip, wrap, the axis line, and tick marks ([#24](https://github.com/toddynho/chartkit/pull/24))
 - [x] Pie and colour: a real pie type, leader lines, and per-point and conditional colour ([#25](https://github.com/toddynho/chartkit/pull/25))
+- [x] PNG, SVG, and CSV export, with a keyboard export menu
+- [x] Legends and colour scales
 
 ## In progress
 
@@ -32,8 +34,6 @@ Earlier v1 work. 28 chart types draw: 15 in the first core, eight in Phase 3, an
 
 ## Next
 
-- [ ] PNG and CSV export
-- [ ] Legends and colour scales
 - [ ] Annotations
 - [ ] Range area and error bars
 - [ ] Time zones and sorting

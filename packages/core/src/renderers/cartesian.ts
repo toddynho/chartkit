@@ -4,7 +4,9 @@ import { isTypedArray, readData, type DataTable } from "../data";
 import { formatValue } from "../format";
 import { bag, glyphOf, marker, named, nudge, type Bag } from "../glyphs";
 import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
-import { readColor } from "../frame";
+import { readColorScale, scaleLabel, type ColorScale } from "../color-scale";
+import { exportList, readColor } from "../frame";
+import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
 import { boxId, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
@@ -189,6 +191,9 @@ export interface PlotModel {
   showY2: boolean;
   yGrid: false | "solid" | "dashed" | "dotted";
   legend: boolean;
+  legendBox: LegendBox | null;
+  exportMark: string;
+  colorScale: ColorScale | null;
   swatches?: { name: string; color: string }[];
   zero: boolean;
   preset: PresetTokens;
@@ -259,6 +264,8 @@ export interface ChartShell {
   showY: boolean;
   showY2: boolean;
   legendOn: boolean;
+  legendBox: LegendBox | null;
+  exportMark: string;
   swatches?: { name: string; color: string }[];
   yGrid: PlotModel["yGrid"];
   xFormat: unknown;
@@ -353,6 +360,8 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     showY: !compact && axisVisible(spec, "y"),
     showY2: !compact && axisVisible(spec, "y2"),
     legendOn: !compact && legendVisible(spec),
+    legendBox: compact ? null : readLegend(spec),
+    exportMark: exportList(spec),
     yGrid: compact ? false : gridOf(spec),
     xFormat: xObj?.format,
     yFormat: axisFormat(spec, "y", channels),
@@ -456,8 +465,8 @@ function toModel(
     x = null;
     xTemporal = false;
   }
-  applyPointColors(table, encoding, mark, preset, series, labels);
-  const swatches = categorySwatches(spec, series, labels);
+  const colorScale = applyPointColors(table, encoding, mark, preset, series, labels);
+  const swatches = colorScale ? undefined : categorySwatches(spec, series, labels);
 
   return {
     ...shell,
@@ -466,6 +475,7 @@ function toModel(
     series,
     showY2: shell.showY2 && series.some((item) => item.axis === "y2"),
     legend: shell.legendOn && (series.length > 1 || Boolean(swatches)),
+    colorScale,
     swatches,
     zero: zeroDefault(type, mark, series),
     xTemporal,
@@ -510,7 +520,7 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   if (model.subtitle) {
     parts.push(`<text x="${n(pad.left)}" y="${model.title ? 40 : 18}" fill="${cssVar("muted", model.preset.muted)}" font-size="12" font-weight="400" font-family="${font()}">${esc(model.subtitle)}</text>`);
   }
-  if (model.legend) parts.push(legend(model, pad.left, model.title || model.subtitle ? (model.subtitle ? 54 : 36) : 8, plot.right));
+  if (model.legend && !model.legendBox) parts.push(legend(model, pad.left, model.title || model.subtitle ? (model.subtitle ? 54 : 36) : 8, plot.right));
 
   const clip = boxId(model.id, plot.left, plot.top, plotW, plotH);
   parts.push(`<defs>${clipPath(clip, plot.left, plot.top, plotW, plotH)}`);
@@ -555,6 +565,10 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   if (model.late) parts.push(model.late);
 
   parts.push(drawAxes(model, plot, horizontal, count, yTicks, y2Ticks, yTickText, y2TickText, yScale, y2Scale, xScale));
+  if (model.legend && model.legendBox) {
+    parts.push(paintLegend(model.legendBox, legendItems(model), { plot, width: model.width, height: model.height, preset: model.preset }));
+  }
+  if (model.colorScale) parts.push(model.colorScale.legend(plot.left, model.height - 22, scaleLabel(model.preset)));
 
   parts.push(`</svg>`);
   return parts.join("");
@@ -1527,6 +1541,15 @@ function xStep(model: PlotModel, count: number, angle: number): number {
   return footprint <= slot ? 1 : Math.max(1, Math.ceil(footprint / slot));
 }
 
+function legendItems(model: PlotModel): LegendItem[] {
+  if (model.swatches && model.swatches.length > 1) return model.swatches.map((item) => ({ name: item.name, color: item.color }));
+  return model.series.map((series) => {
+    const shape = markerShape(model, series);
+    const symbol = shape && (explicitMark(model, series) || model.dots === "shown") ? shape : undefined;
+    return { name: legendName(model, series), color: series.color, symbol };
+  });
+}
+
 function legend(model: PlotModel, x: number, y: number, maxRight: number): string {
   if (model.swatches && model.swatches.length > 1) {
     let cx = x;
@@ -1575,8 +1598,9 @@ function openSvg(model: PlotModel): string {
   const width = model.responsive ? "100%" : String(model.width);
   const described = model.description ? ` aria-describedby="${model.id}-d"` : "";
   const intent = model.intent ? ` data-ck-intent="${esc(model.intent)}"` : "";
+  const exported = model.exportMark ? ` data-ck-export="${esc(model.exportMark)}"` : "";
   const desc = model.description ? `<desc id="${model.id}-d">${esc(model.description)}</desc>` : `<desc>${esc(model.alt)}</desc>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent} style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent}${exported} style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
     `<title>${esc(model.title || model.alt)}</title>${desc}`;
 }
 
@@ -1680,7 +1704,15 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
     if (xEnd) top += extra;
     else bottom += extra;
   }
-  if (model.legend) top += 12 + legendRows(model, left, model.width - right) * 18;
+  if (model.legend && model.legendBox) {
+    const space = legendSpace(model.legendBox, legendItems(model), Math.max(80, model.width - left - right));
+    const pos = model.legendBox.position;
+    if (pos === "top") top += space.band;
+    else if (pos === "bottom") bottom += space.band;
+    else if (pos === "left") left += space.side;
+    else if (pos === "right") right += space.side;
+  } else if (model.legend) top += 12 + legendRows(model, left, model.width - right) * 18;
+  if (model.colorScale) bottom += 28;
   const inset = model.inset;
   return {
     top: typeof inset.t === "number" ? Math.max(top, inset.t) : top,
@@ -1813,7 +1845,7 @@ function strokeGutter(model: PlotModel, axis: "y" | "y2", span: number): number 
   let top = compact ? 2 : 14;
   if (!compact && model.title) top += 20;
   if (!compact && model.subtitle) top += 18;
-  if (!compact && model.legend) top += 30;
+  if (!compact && model.legend && (!model.legendBox || model.legendBox.position === "top")) top += 30;
   const bottom = compact ? 2 : model.showX ? 32 : 12;
   const plotH = Math.max(24, model.height - top - bottom);
   return Math.max((air / plotH) * span, compact ? 0 : span * 0.06);
@@ -2182,7 +2214,9 @@ function seriesFieldName(encoding: Record<string, unknown>, table: DataTable): s
   if (named && named !== xName && table.columns[named]) return named;
   const color = channelField(encoding.color);
   const column = color ? table.columns[color] : undefined;
-  if (color && color !== xName && column && !isPaintColumn(column)) return color;
+  const scale = isRecord(encoding.color) && isRecord(encoding.color.scale) ? encoding.color.scale.type : undefined;
+  const quantitative = scale === "sequential" || scale === "diverging" || scale === "quantize" || scale === "threshold" || (isRecord(encoding.color) && encoding.color.type === "quantitative");
+  if (color && color !== xName && column && !isPaintColumn(column) && !quantitative) return color;
   return undefined;
 }
 
@@ -2194,7 +2228,7 @@ function applyPointColors(
   preset: PresetTokens,
   series: Series[],
   labels: string[],
-): void {
+): ColorScale | null {
   const rules = readRules(mark);
   const colorEnc = readColor(encoding.color);
   const colorField = colorEnc?.field;
@@ -2202,6 +2236,34 @@ function applyPointColors(
   const pivot = seriesFieldName(encoding, table);
   const column = colorField && pivot !== colorField ? table.columns[colorField] : undefined;
   const paintCol = column ? isPaintColumn(column) : false;
+  const numeric: number[] = [];
+  if (column && !paintCol) {
+    for (let i = 0; i < column.length; i++) {
+      const value = column[i];
+      if (typeof value === "number" && Number.isFinite(value)) numeric.push(value);
+    }
+  }
+  const scale = column && !paintCol && numeric.length ? readColorScale(encoding.color, preset, numeric, false) : null;
+  if (scale && column) {
+    let used = false;
+    for (const item of series) {
+      if (column.length !== item.values.length) continue;
+      const colors: string[] = [];
+      let hits = 0;
+      for (let i = 0; i < item.values.length; i++) {
+        const value = column[i];
+        if (typeof value === "number" && Number.isFinite(value)) {
+          hits += 1;
+          colors.push(scale.paint(value));
+        } else colors.push(item.color);
+      }
+      if (hits) {
+        item.colors = colors;
+        used = true;
+      }
+    }
+    if (used) return scale;
+  }
   for (const item of series) {
     const count = item.values.length;
     const aligned = column && column.length === count ? column : null;
@@ -2223,6 +2285,7 @@ function applyPointColors(
     if (colorEnc?.constant) item.color = paint(colorEnc.constant, preset, 0);
     if (colors.some((color) => color !== item.color)) item.colors = colors;
   }
+  return null;
 }
 
 function legendAsked(spec: Record<string, unknown>): boolean {

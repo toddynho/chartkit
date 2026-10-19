@@ -37,6 +37,6 @@ No spec snippet. This row is not a single option that `validate()` can show.
 | Mermaid (chart-ish diagrams only) | native | ~click | dts-grep (weak) | mermaid/dist/themes/theme-redux.d.ts:86 Mermaid click directives on flowcharts (not charts) |
 | AntV G2 | native | ~on | dts-grep (weak) | @antv/g2/lib/index.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 0749a0e1cb93.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against b2aaa2671f30.
 
 https://chartkit.dev/features.json

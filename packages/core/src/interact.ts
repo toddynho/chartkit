@@ -146,6 +146,34 @@ export function lookupIndex(index: HoverIndex, x: number): number {
   return index.order ? index.order[pick] : pick;
 }
 
+function exportFormats(spec: InteractSpec): string[] {
+  const interaction = isRecord(spec.interaction) ? spec.interaction : undefined;
+  const list = interaction && Array.isArray(interaction.export) ? interaction.export : [];
+  const out: string[] = [];
+  for (const item of list) if ((item === "png" || item === "svg" || item === "csv") && !out.includes(item)) out.push(item);
+  return out;
+}
+
+/** Page a legend that drew more rows than legend.maxRows. */
+function turnLegendPage(svg: SVGElement, target: Element | null): boolean {
+  const hit = target?.closest?.("[data-ck-legend-page]");
+  if (!hit || !svg.contains(hit)) return false;
+  const group = hit.closest("[data-ck-legend]");
+  if (!group) return false;
+  const rows = Array.from(group.querySelectorAll("[data-ck-legend-row]"));
+  const per = Number(group.getAttribute("data-ck-legend-max") || rows.length) || rows.length;
+  const pages = Math.max(1, Math.ceil(rows.length / per));
+  let page = Number(group.getAttribute("data-ck-legend-at") || 0);
+  page = hit.getAttribute("data-ck-legend-page") === "next" ? Math.min(pages - 1, page + 1) : Math.max(0, page - 1);
+  group.setAttribute("data-ck-legend-at", String(page));
+  rows.forEach((row, index) => {
+    (row as SVGElement).style.display = Math.floor(index / per) === page ? "" : "none";
+  });
+  const label = group.querySelector("[data-ck-legend-count]");
+  if (label) label.textContent = `${page + 1}/${pages}`;
+  return true;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -1355,6 +1383,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
   if (legend) dim();
   on(svg, "click", ((event: MouseEvent) => {
+    if (turnLegendPage(svg, event.target as Element | null)) return;
     const legendItem = legendTarget(event.target as Element | null);
     if (legendItem) {
       emit("legendclick", { series: legendItem.name, datum: null, index: legendItem.index, x: null, y: null, value: null, row: null });
@@ -1381,6 +1410,10 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     paintPick();
   }) as EventListener);
   on(svg, "keydown", ((event: KeyboardEvent) => {
+    if ((event.key === "Enter" || event.key === " ") && turnLegendPage(svg, event.target as Element | null)) {
+      event.preventDefault();
+      return;
+    }
     if (event.key === "Escape") {
       if (selMode() && (picked.points.length || picked.series.length)) {
         event.preventDefault();
@@ -1396,6 +1429,16 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     if (selMode() === "point") togglePoint(name, focus, addKey(event));
     else if (selMode() === "series") toggleSeries(name, addKey(event));
   }) as EventListener);
+
+  const formats = exportFormats(spec);
+  let exportStop = () => {};
+  let specNow: { data?: unknown } = spec;
+  if (formats.length) {
+    void import("./export-menu").then((mod) => {
+      if (!alive) return;
+      exportStop = mod.armExport(svg, () => specNow, formats);
+    });
+  }
 
   const wantsExtra = zooming || brush || keys || dataTable;
   const ready: Promise<void> = wantsExtra
@@ -1460,6 +1503,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   return {
     update(next, markup) {
       if (!alive) return;
+      specNow = next;
       base = next;
       table = openTable(next.data);
       series = seriesOf(next, table);
@@ -1491,6 +1535,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       for (const off of offs) off();
       tip.remove();
       live.remove();
+      exportStop();
       host.querySelector("[data-ck-table-wrap]")?.remove();
       svg.querySelectorAll("[data-ck-crosshair],[data-ck-brush],[data-ck-dot],[data-ck-pick]").forEach((node) => node.remove());
       svg.removeAttribute("tabindex");

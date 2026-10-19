@@ -65,6 +65,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.quadrantChart | dts-path (strong) | mermaid/dist/config.type.d.ts:224 quadrant points only |
 | AntV G2 | native | MarkTypes=point | dts-path (strong) | @antv/g2/lib/spec/mark.d.ts:13 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 0749a0e1cb93.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against b2aaa2671f30.
 
 https://chartkit.dev/features.json

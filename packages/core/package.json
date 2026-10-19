@@ -122,6 +122,26 @@
         "default": "./dist/mermaid-phase4.cjs"
       }
     },
+    "./export": {
+      "import": {
+        "types": "./dist/export.d.ts",
+        "default": "./dist/export.js"
+      },
+      "require": {
+        "types": "./dist/export.d.cts",
+        "default": "./dist/export.cjs"
+      }
+    },
+    "./export-menu": {
+      "import": {
+        "types": "./dist/export-menu.d.ts",
+        "default": "./dist/export-menu.js"
+      },
+      "require": {
+        "types": "./dist/export-menu.d.cts",
+        "default": "./dist/export-menu.cjs"
+      }
+    },
     "./interact/extra": {
       "import": {
         "types": "./dist/interact-extra.d.ts",

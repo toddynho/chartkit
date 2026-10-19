@@ -1,3 +1,4 @@
+import { readColorScale, scaleLabel } from "../color-scale";
 import { cssVar, paint } from "../theme";
 import { formatValue } from "../format";
 import { asNumber, column, fieldOf, readColor, readFrame, readTable } from "../frame";
@@ -49,6 +50,7 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
   const counts = [...byDay.values()];
   const max = Math.max(...counts, 1);
   const color = colorEnc?.constant ? paint(colorEnc.constant, frame.preset, 0) : paint(colorEnc?.range?.[colorEnc.range.length - 1], frame.preset, 0);
+  const ramp = colorEnc?.constant ? null : readColorScale(frame.encoding.color, frame.preset, counts, !colorEnc?.range);
   const empty = cssVar("surface", frame.preset.surface);
 
   const months: { label: string; x: number }[] = [];
@@ -71,8 +73,8 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
       const y = monthLabelH + dow * (cell + gap);
       const iso = date.toISOString().slice(0, 10);
       const label = `${iso}: ${formatValue(value, channelFormatOf(frame.encoding.color), frame.locale)}`;
-      const fill = value <= 0 ? empty : color;
-      const opacity = value <= 0 ? 1 : opacityStep(value / max);
+      const fill = value <= 0 ? empty : ramp ? ramp.paint(value) : color;
+      const opacity = value <= 0 || ramp ? 1 : opacityStep(value / max);
       cells.push(
         `<rect x="${n(x)}" y="${n(y)}" width="${cell}" height="${cell}" rx="${n(radius)}" fill="${fill}" fill-opacity="${n(opacity)}" aria-label="${esc(label)}"><title>${esc(label)}</title></rect>`,
       );
@@ -92,7 +94,7 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
     parts.push(text(0, monthLabelH + dow * (cell + gap) + cell / 2 + 3, WEEKDAYS[dow], cssVar("muted", frame.preset.muted), 10));
   }
   parts.push(cells.join(""));
-  parts.push(scaleLegend(color, empty, cssVar("muted", frame.preset.muted), Math.max(4, width - 136), gridH + 14));
+  parts.push(ramp ? ramp.legend(Math.max(4, width - 160), gridH + 4, scaleLabel(frame.preset)) : scaleLegend(color, empty, cssVar("muted", frame.preset.muted), Math.max(4, width - 136), gridH + 14));
   parts.push(closeChart());
   return parts.join("");
 }
@@ -124,11 +126,12 @@ function renderGrid(spec: Record<string, unknown>): string | null {
   const min = Math.min(...nums, 0);
   const color = colorEnc?.constant ? paint(colorEnc.constant, frame.preset, 0) : paint(undefined, frame.preset, 0);
   const range = colorEnc?.range?.map((item, index) => paint(item, frame.preset, index));
+  const ramp = colorEnc?.constant ? null : readColorScale(frame.encoding.color, frame.preset, nums, !range);
   const radius = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : Math.min(frame.geometry.cornerRadius, 6);
   const left = 48;
   const top = frame.title ? 42 : 28;
   const plotW = frame.width - left - 16;
-  const plotH = frame.height - top - 36;
+  const plotH = frame.height - top - (ramp ? 52 : 36);
   const gapFrac = typeof frame.mark.gap === "number" ? frame.mark.gap : 0.15;
   const bandW = plotW / xs.length;
   const bandH = plotH / Math.max(1, ys.length);
@@ -145,7 +148,7 @@ function renderGrid(spec: Record<string, unknown>): string | null {
   }
   for (const x of xs) {
     const col = xs.indexOf(x);
-    parts.push(text(left + col * bandW + bandW / 2, frame.height - 12, x, cssVar("muted", frame.preset.muted), 11, "400", "middle"));
+    parts.push(text(left + col * bandW + bandW / 2, ramp ? frame.height - 34 : frame.height - 12, x, cssVar("muted", frame.preset.muted), 11, "400", "middle"));
   }
   for (const x of xs) {
     for (const y of ys) {
@@ -154,13 +157,14 @@ function renderGrid(spec: Record<string, unknown>): string | null {
       const row = ys.indexOf(y);
       const label = `${x}, ${y}: ${value === undefined ? "no value" : formatValue(value, channelFormatOf(frame.encoding.color), frame.locale)}`;
       const t = value === undefined ? 0 : max === min ? 1 : (value - min) / (max - min);
-      const fill = value === undefined ? cssVar("surface", frame.preset.surface) : range ? range[Math.min(range.length - 1, Math.floor(t * (range.length - 1)))] : color;
-      const opacity = value === undefined || range ? 1 : opacityStep(t);
+      const fill = value === undefined ? cssVar("surface", frame.preset.surface) : ramp ? ramp.paint(value) : range ? range[Math.min(range.length - 1, Math.floor(t * (range.length - 1)))] : color;
+      const opacity = value === undefined || range || ramp ? 1 : opacityStep(t);
       parts.push(
         `<rect x="${n(left + col * bandW + insetX)}" y="${n(top + row * bandH + insetY)}" width="${n(Math.max(1, bandW - insetX * 2))}" height="${n(Math.max(1, bandH - insetY * 2))}" rx="${n(radius)}" fill="${fill}" fill-opacity="${n(opacity)}" aria-label="${esc(label)}"><title>${esc(label)}</title></rect>`,
       );
     }
   }
+  if (ramp) parts.push(ramp.legend(left, frame.height - 20, scaleLabel(frame.preset)));
   parts.push(closeChart());
   return parts.join("");
 }

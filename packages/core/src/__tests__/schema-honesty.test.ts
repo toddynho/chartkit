@@ -170,6 +170,12 @@ function probes(leaf: Leaf): unknown[] {
   if (leaf.path === "/mark/explode") push(["Jan"]);
   if (leaf.path === "/mark/colorRules") push([{ color: "#c0ffee", gt: 0 }]);
   if (leaf.path === "/encoding/color/domain") push(["NA", "EU"]);
+  if (leaf.path === "/legend/hide") push(["cost"]);
+  if (leaf.path === "/legend/symbols") push([{ series: "revenue", symbol: "circle" }]);
+  if (leaf.path === "/legend/maxRows") push(1);
+  if (leaf.path === "/interaction/export") push(["png", "svg", "csv"]);
+  if (leaf.path === "/encoding/color/scale/thresholds") push([1200, 2000]);
+  if (leaf.path === "/encoding/color/scale/scheme") push("teal");
   if (leaf.path === "/mark/palette") push(["#c0ffee", "#111111"]);
   if (leaf.path.endsWith("/initialRange")) push([0, 1]);
   if (/^\/axes\/(x|y|y2)$/.test(leaf.path)) push({ title: "ProbeLabel" });
@@ -256,6 +262,29 @@ function apply(host: Record<string, unknown>, path: string, value: unknown): Rec
     if (typeof other.threshold !== "number") other.threshold = 0.2;
     mark.other = other;
     spec.mark = mark;
+  }
+  if (path.startsWith("/encoding/color/scale/")) {
+    const encoding = isRecord(spec.encoding) ? spec.encoding : {};
+    const color = isRecord(encoding.color) ? encoding.color : { field: "revenue" };
+    if (typeof color.field !== "string") color.field = "revenue";
+    const scale = isRecord(color.scale) ? color.scale : {};
+    const kinds = ["sequential", "diverging", "quantize", "threshold"];
+    if (typeof scale.type !== "string" || !kinds.includes(String(scale.type))) {
+      scale.type = path.endsWith("/midpoint") ? "diverging" : path.endsWith("/thresholds") ? "threshold" : path.endsWith("/bins") ? "quantize" : "sequential";
+    }
+    color.scale = scale;
+    encoding.color = color;
+    spec.encoding = encoding;
+  }
+  if (path.startsWith("/legend/symbols")) {
+    const legend = isRecord(spec.legend) ? spec.legend : {};
+    const symbols = Array.isArray(legend.symbols) ? legend.symbols : [{}];
+    if (!isRecord(symbols[0])) symbols[0] = {};
+    const row = symbols[0] as Record<string, unknown>;
+    if (typeof row.series !== "string" || row.series === "ProbeLabel" || row.series === "region") row.series = "revenue";
+    if (typeof row.symbol !== "string") row.symbol = "circle";
+    legend.symbols = symbols;
+    spec.legend = legend;
   }
   if (path === "/encoding/color/domain") {
     const encoding = isRecord(spec.encoding) ? spec.encoding : {};

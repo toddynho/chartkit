@@ -1,4 +1,5 @@
-import { column, fieldOf } from "../../frame";
+import { readColorScale, scaleLabel } from "../../color-scale";
+import { asNumber, column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
 import { font, n } from "../../svg";
 import { fill, fit, fmt, num, openMark, str, viewOf } from "./plot";
@@ -28,22 +29,26 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
   const colorField = fieldOf(frame.encoding.color);
   const xs = column(table, xField);
   const groups = column(table, colorField);
+  const tones = groups.map((item) => asNumber(item)).filter((item): item is number => item !== null);
+  const ramp = tones.length ? readColorScale(frame.encoding.color, frame.preset, tones, false) : null;
   const colors = new Map<string, string>();
   const leaves: Leaf[] = [];
   num(table, yField).forEach((value, index) => {
     if (value === null || value <= 0) return;
     const group = colorField ? str(groups[index]) || "Group" : "All";
-    if (!colors.has(group)) colors.set(group, fill(frame, colors.size));
+    const tone = asNumber(groups[index]);
+    const scaled = ramp && tone !== null ? ramp.paint(tone) : "";
+    if (!scaled && !colors.has(group)) colors.set(group, fill(frame, colors.size));
     leaves.push({
       label: xField ? str(xs[index]) : group,
       value,
       group,
-      fill: colors.get(group) ?? fill(frame, 0),
+      fill: scaled || colors.get(group) || fill(frame, 0),
     });
   });
   if (!leaves.length) return null;
   const top = frame.title ? 40 : 12;
-  const legend = frame.legend !== false && colors.size > 1;
+  const legend = frame.legend !== false && (Boolean(ramp) || colors.size > 1);
   const grouped = [...groupLeaves(leaves)].map(([name, kids]) => ({
     label: name,
     value: kids.reduce((sum, leaf) => sum + leaf.value, 0),
@@ -74,7 +79,9 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
       }
     });
   }
-  if (frame.legend !== false && colors.size > 1) {
+  if (ramp && frame.legend !== false) {
+    parts.push(ramp.legend(12, frame.height - 26, scaleLabel(frame.preset)));
+  } else if (frame.legend !== false && colors.size > 1) {
     let x = 12;
     const y = frame.height - 8;
     for (const [name, color] of colors) {

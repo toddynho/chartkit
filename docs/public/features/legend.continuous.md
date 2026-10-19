@@ -1,14 +1,54 @@
 # Continuous colour legend / colour bar
 
-ChartKit: **none**
+ChartKit: **native**
 
 Gradient legend for colour scales
 
-Matrix status: `none`. Verification: `source-review` (strong).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-probe hit reviewed: match is colorBarsByX (bar colouring)
+Gradient or binned colour legend.
 
-No spec snippet. ChartKit does not support this feature.
+Source: chartkit:packages/core/src/generated/schema.ts:779
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "heatmap",
+  "data": [
+    {
+      "bin": "A",
+      "band": "Low",
+      "level": 1
+    },
+    {
+      "bin": "B",
+      "band": "Low",
+      "level": 4
+    }
+  ],
+  "encoding": {
+    "x": "bin",
+    "y": "band",
+    "color": {
+      "field": "level",
+      "scale": {
+        "type": "sequential"
+      }
+    }
+  },
+  "a11y": {
+    "alt": "Bin B is darker."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -35,6 +75,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~legendContinuous | dts-grep (weak) | @antv/g2/lib/index.d.ts:113 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 0749a0e1cb93.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against b2aaa2671f30.
 
 https://chartkit.dev/features.json

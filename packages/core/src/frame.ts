@@ -22,6 +22,8 @@ export interface Frame {
   /** false hides the legend. Otherwise the placement. */
   legend: false | "top" | "right" | "bottom" | "left";
   legendValues: boolean;
+  /** Comma-joined interaction.export formats, or "". */
+  exportMark: string;
 }
 
 export function readFrame(
@@ -60,7 +62,17 @@ export function readFrame(
     encoding: isRecord(spec.encoding) ? spec.encoding : {},
     legend: legendPlacement(spec),
     legendValues: isRecord(spec.legend) && spec.legend.values === true,
+    exportMark: exportList(spec),
   };
+}
+
+/** png,svg,csv from interaction.export. Empty when the menu is off. */
+export function exportList(spec: Record<string, unknown>): string {
+  const interaction = isRecord(spec.interaction) ? spec.interaction : undefined;
+  const list = interaction && Array.isArray(interaction.export) ? interaction.export : [];
+  const out: string[] = [];
+  for (const item of list) if ((item === "png" || item === "svg" || item === "csv") && !out.includes(item)) out.push(item);
+  return out.join(",");
 }
 
 export function readTable(spec: Record<string, unknown>): DataTable | null {
@@ -157,11 +169,13 @@ export function readColor(value: unknown): ColorEncoding | undefined {
   if (value === undefined) return undefined;
   if (typeof value === "string") return { field: value };
   if (!isRecord(value)) return undefined;
-  if (typeof value.value === "string" && typeof value.field !== "string") return { constant: value.value };
+  const constant = typeof value.value === "string" ? value.value : undefined;
+  if (constant && typeof value.field !== "string") return { constant };
   const range = Array.isArray(value.range) ? value.range.filter((item): item is string => typeof item === "string") : undefined;
   const domain = Array.isArray(value.domain) ? value.domain.map((item) => String(item)).filter((item) => item.length > 0) : undefined;
   return {
     field: typeof value.field === "string" ? value.field : undefined,
+    constant,
     range: range && range.length >= 2 ? range : undefined,
     domain: domain && domain.length ? domain : undefined,
     title: typeof value.title === "string" ? value.title : undefined,

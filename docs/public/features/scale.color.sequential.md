@@ -1,44 +1,45 @@
 # Sequential / diverging colour scale
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Continuous colour mapping for heatmaps etc
 
-Matrix status: `partial`. Verification: `dts-path` (strong).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-range of colours
+sequential, diverging, quantize, and threshold. scheme blue, teal, orange, or violet.
 
-Source: chartkit:packages/core/src/generated/schema.ts:480
+Source: chartkit:packages/core/src/generated/schema.ts:779
 
 ## ChartKit spec
 
 ```json
 {
   "version": "1",
-  "type": "line",
+  "type": "heatmap",
   "data": [
     {
-      "quarter": "Q1",
-      "units": 40
+      "bin": "A",
+      "band": "Low",
+      "level": 1
     },
     {
-      "quarter": "Q2",
-      "units": 55
+      "bin": "B",
+      "band": "Low",
+      "level": 4
     }
   ],
   "encoding": {
-    "x": "quarter",
-    "y": "units",
+    "x": "bin",
+    "y": "band",
     "color": {
-      "range": [
-        "#d6e4f0",
-        "#0066cc"
-      ],
-      "field": "units"
+      "field": "level",
+      "scale": {
+        "type": "sequential"
+      }
     }
   },
   "a11y": {
-    "alt": "Units rose in Q2."
+    "alt": "Bin B is darker."
   },
   "size": {
     "width": 640,
@@ -74,6 +75,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~palette\|interpolate | dts-grep (weak) | @antv/g2/lib/index.d.ts:89 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 0749a0e1cb93.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against b2aaa2671f30.
 
 https://chartkit.dev/features.json

@@ -165,13 +165,15 @@ export interface ChartOpen {
   type: string;
   id: string;
   renderer: string;
+  exportMark?: string;
 }
 
 export function openChart(chart: ChartOpen): string {
   const width = chart.responsive ? "100%" : String(chart.width);
   const label = chart.alt || chart.title || chart.type;
+  const exported = chart.exportMark ? ` data-ck-export="${esc(chart.exportMark)}"` : "";
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}" class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}" style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}" class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}"${exported} style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
     `<title>${esc(chart.title || chart.alt)}</title><desc>${esc(chart.alt)}</desc>`
   );
 }

@@ -1,4 +1,6 @@
 import { isPaintColumn, matchRule, readRules, resolveColors, withPalette } from "../color";
+import { paintLegend, readLegend } from "../legend";
+import { legendSpace } from "../legend";
 import { cssVar, paint } from "../theme";
 import { formatValue } from "../format";
 import { bag, named } from "../glyphs";
@@ -134,13 +136,17 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   const inside = labelAt === "inside" || labelAt === "center";
   const leaders = showLabels && !inside;
   const valueFormat = frame.mark.labelFormat ?? channelFormat(frame.encoding.y);
-  const place = legendPlace(spec, frame.width, frame.height, frame.legend !== false && slices.length > 1);
-  const showLegend = place !== false;
+  const legendBox = readLegend(spec);
+  const classicPlace = legendPlace(spec, frame.width, frame.height, frame.legend !== false && slices.length > 1);
+  const place = legendBox ? (legendBox.position === "inside" ? false : legendBox.position) : classicPlace;
+  const showLegend = place !== false || legendBox?.position === "inside";
   const legendRow = 20;
   const longest = slices.reduce((max, slice) => Math.max(max, slice.label.length), 0);
   const sideWidth = Math.min(240, Math.max(148, 36 + longest * 7 + 48));
-  const legendBlock = showLegend && (place === "top" || place === "bottom") ? slices.length * legendRow + 8 : 0;
-  const sideLegend = showLegend && (place === "right" || place === "left") ? sideWidth : 0;
+  const legendItems = slices.map((slice) => ({ name: slice.label, color: slice.color }));
+  const richSpace = legendBox ? legendSpace(legendBox, legendItems, Math.max(80, frame.width - sideWidth)) : null;
+  const legendBlock = !showLegend || place === false ? 0 : legendBox && richSpace ? (place === "top" || place === "bottom" ? richSpace.band : 0) : place === "top" || place === "bottom" ? slices.length * legendRow + 8 : 0;
+  const sideLegend = !showLegend || place === false ? 0 : legendBox && richSpace ? (place === "left" || place === "right" ? richSpace.side : 0) : place === "right" || place === "left" ? sideWidth : 0;
 
   let y0 = 8;
   let subtitleY = 0;
@@ -206,8 +212,8 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   if (frame.title) parts.push(text(pieX, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
   if (frame.subtitle) parts.push(text(pieX, subtitleY, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
 
-  if (showLegend && place === "top") parts.push(legend(arcs, 8, y0, frame, valueFormat, width - 8));
-  if (showLegend && place === "left") parts.push(legend(arcs, 12, pieY, frame, valueFormat, 12 + sideWidth - 8));
+  if (showLegend && !legendBox && place === "top") parts.push(legend(arcs, 8, y0, frame, valueFormat, width - 8));
+  if (showLegend && !legendBox && place === "left") parts.push(legend(arcs, 12, pieY, frame, valueFormat, 12 + sideWidth - 8));
 
   const held = bag();
   let labelSvg = "";
@@ -274,8 +280,14 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   }
 
   if (labelSvg) parts.push(labelSvg);
-  if (showLegend && place === "bottom") parts.push(legend(arcs, 8, pieY + size + 8, frame, valueFormat, width - 8));
-  if (showLegend && place === "right") parts.push(legend(arcs, pieX + size + 16, pieY, frame, valueFormat, pieX + size + sideWidth - 8));
+  if (showLegend && !legendBox && place === "bottom") parts.push(legend(arcs, 8, pieY + size + 8, frame, valueFormat, width - 8));
+  if (showLegend && !legendBox && place === "right") parts.push(legend(arcs, pieX + size + 16, pieY, frame, valueFormat, pieX + size + sideWidth - 8));
+  if (legendBox && showLegend) {
+    const host = legendBox.position === "inside"
+      ? { left: pieX, top: pieY, right: pieX + size, bottom: pieY + size }
+      : { left: place === "left" ? 8 : pieX, top: place === "top" ? y0 : pieY, right: place === "right" ? width - 8 : pieX + size, bottom: place === "bottom" ? height - 8 : pieY + size };
+    parts.push(paintLegend(legendBox, legendItems, { plot: host, width, height, preset: frame.preset }));
+  }
   parts.push(closeChart());
   return parts.join("");
 }

@@ -417,7 +417,7 @@ function warnChannelExtras(encoding: Record<string, unknown>, diagnostics: Diagn
       const item = list[i];
       if (!isRecord(item)) continue;
       const base = Array.isArray(value) ? `/encoding/${key}/${i}` : `/encoding/${key}`;
-      if (typeof item.type === "string" && !(key === "y" && item.type === "quantitative")) {
+      if (typeof item.type === "string" && !(key === "y" && item.type === "quantitative") && !(key === "color" && item.type === "quantitative")) {
         flag(diagnostics, `${base}/type`, "ignored; ChartKit infers the scale type");
       }
       if (key === "y") continue;
@@ -425,10 +425,11 @@ function warnChannelExtras(encoding: Record<string, unknown>, diagnostics: Diagn
       if (item.format !== undefined) flag(diagnostics, `${base}/format`, "ignored; use the axis");
       const scale = isRecord(item.scale) ? item.scale : undefined;
       if (!scale) continue;
-      if (scale.type !== undefined) flag(diagnostics, `${base}/scale/type`, "ignored; ChartKit infers the scale type");
+      const colorKind = key === "color" && (scale.type === "sequential" || scale.type === "diverging" || scale.type === "quantize" || scale.type === "threshold");
+      if (scale.type !== undefined && !colorKind) flag(diagnostics, `${base}/scale/type`, "ignored; ChartKit infers the scale type");
       if (scale.reverse === true) flag(diagnostics, `${base}/scale/reverse`, "ignored; not reversed");
       if (key === "high") continue;
-      if (scale.domain !== undefined) flag(diagnostics, `${base}/scale/domain`, "ignored; automatic");
+      if (scale.domain !== undefined && !colorKind) flag(diagnostics, `${base}/scale/domain`, "ignored; automatic");
       if (typeof scale.zero === "boolean") flag(diagnostics, `${base}/scale/zero`, "ignored; automatic");
       if (scale.nice === false) flag(diagnostics, `${base}/scale/nice`, "ignored; stays nice");
     }

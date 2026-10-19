@@ -9,6 +9,10 @@ const externalInteractExtra: Plugin = {
       if (args.kind === "entry-point") return null;
       return { path: "@chartkitdev/core/interact/extra", external: true };
     });
+    build.onResolve({ filter: /export-menu(\.ts)?$/ }, (args) => {
+      if (args.kind === "entry-point") return null;
+      return { path: "@chartkitdev/core/export-menu", external: true };
+    });
   },
 };
 
@@ -75,6 +79,8 @@ const entry: Record<string, string> = {
   "mermaid-phase4": "src/mermaid-phase4.ts",
   interact: "src/interact.ts",
   "interact-extra": "src/interact-extra.ts",
+  export: "src/export.ts",
+  "export-menu": "src/export-menu.ts",
   "themes/all": "src/themes/all.ts",
 };
 
