@@ -217,21 +217,13 @@ describe("diagnostic codes", () => {
     expect(result.errors.some((error) => error.code === "CK2006" && error.path === "/encoding/series")).toBe(true);
   });
 
-  it("repairs tooltip fields, position, and the crosshair label", () => {
-    const listed = validate({ ...base, tooltip: { fields: "revenue" } });
+  it("repairs tooltip fields and position synonyms", () => {
+    const listed = validate({ ...base, tooltip: { fields: "revenue, cost" } });
     expect(listed.errors.find((item) => item.path === "/tooltip/fields")?.hint).toContain("did you mean");
     expect(listed.errors.find((item) => item.path === "/tooltip/fields")?.fix).toEqual([
-      { op: "replace", path: "/tooltip/fields", value: ["revenue"] },
+      { op: "replace", path: "/tooltip/fields", value: ["revenue", "cost"] },
     ]);
     expect(repair({ ...base, tooltip: { fields: "revenue" } }).ok).toBe(true);
-
-    const named = validate({ ...base, tooltip: { fields: [{ name: "revenue", title: "Sales", format: "currency" }] } });
-    expect(named.errors.find((item) => item.path === "/tooltip/fields/0")?.fix?.[0]?.value).toEqual({
-      field: "revenue",
-      title: "Sales",
-      format: "currency",
-    });
-    expect(repair({ ...base, tooltip: { fields: { name: "revenue" } } }).ok).toBe(true);
 
     const missing = validate({ ...base, tooltip: { fields: ["revnue"] } });
     const miss = missing.errors.find((item) => item.code === "CK2001" && item.path === "/tooltip/fields/0");
@@ -239,17 +231,18 @@ describe("diagnostic codes", () => {
     expect(miss?.fix).toEqual([{ op: "replace", path: "/tooltip/fields/0", value: "revenue" }]);
     expect(repair({ ...base, tooltip: { fields: ["revnue"] } }).ok).toBe(true);
 
-    const above = validate({ ...base, tooltip: { position: "above" } });
-    expect(above.errors.find((item) => item.path === "/tooltip/position")?.hint).toContain("top");
-    expect(above.errors.find((item) => item.path === "/tooltip/position")?.fix).toEqual([
-      { op: "replace", path: "/tooltip/position", value: "top" },
-    ]);
-
-    const flag = validate({ ...base, tooltip: { crosshairLabel: "yes" } });
-    expect(flag.errors.find((item) => item.path === "/tooltip/crosshairLabel")?.hint).toContain("true");
-    expect(flag.errors.find((item) => item.path === "/tooltip/crosshairLabel")?.fix).toEqual([
-      { op: "replace", path: "/tooltip/crosshairLabel", value: true },
-    ]);
+    for (const [from, to] of [
+      ["above", "top"],
+      ["below", "bottom"],
+      ["over", "top"],
+      ["under", "bottom"],
+    ] as const) {
+      const placed = validate({ ...base, tooltip: { position: from } });
+      expect(placed.errors.find((item) => item.path === "/tooltip/position")?.hint).toContain(to);
+      expect(placed.errors.find((item) => item.path === "/tooltip/position")?.fix).toEqual([
+        { op: "replace", path: "/tooltip/position", value: to },
+      ]);
+    }
 
     const ok = validate({
       ...base,

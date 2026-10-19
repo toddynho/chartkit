@@ -231,9 +231,9 @@ function tipFields(spec: InteractSpec): { field: string; title?: string; format?
   return out.length ? out : null;
 }
 
-function tipPlace(spec: InteractSpec): "auto" | "top" | "bottom" | "left" | "right" {
-  const place = isRecord(spec.tooltip) ? spec.tooltip.position : "";
-  return place === "top" || place === "bottom" || place === "left" || place === "right" ? place : "auto";
+function tipSide(spec: InteractSpec): number {
+  const place = isRecord(spec.tooltip) ? spec.tooltip.position : 0;
+  return place === "bottom" ? 2 : place === "left" ? 3 : place === "right" ? 4 : place === "top" ? 1 : 0;
 }
 
 function zoomMode(spec: InteractSpec): "none" | "x" | "xy" {
@@ -533,33 +533,33 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
 
   function entriesAt(index: number, pointerY: number | null): { name: string; text: string; color: string }[] {
     const chosen = tipFields(base);
+    const grouped = !chosen && series.some((item) => item.match) && base.type !== "donut";
+    const rows: { name: string; text: string; color: string; raw: number }[] = [];
+    const yFormat = axisFormat(base, "y");
+    const push = (name: string, raw: unknown, color: string, format?: unknown) => {
+      if (raw == null || raw === "") return;
+      const num = typeof raw === "number" ? raw : Number(raw);
+      rows.push({
+        name,
+        text: fmt(raw, format ?? series.find((s) => s.name === name)?.format ?? yFormat, locale()),
+        color,
+        raw: Number.isFinite(num) ? num : 0,
+      });
+    };
     if (chosen) {
-      const yFormat = axisFormat(base, "y");
-      const picked: { name: string; text: string; color: string; raw: number }[] = [];
       for (let i = 0; i < chosen.length; i++) {
         const item = chosen[i];
         const known = series.find((s) => s.field === item.field || s.name === item.field);
         if (known && hidden.has(known.name)) continue;
-        const raw = table.cell(item.field, index);
-        if (raw == null || raw === "") continue;
-        const num = typeof raw === "number" ? raw : Number(raw);
-        picked.push({
-          name: item.title || known?.name || item.field,
-          text: fmt(raw, item.format ?? known?.format ?? yFormat, locale()),
-          color: known ? colorFor(known.name, Math.max(0, series.indexOf(known))) : paintAt(i),
-          raw: Number.isFinite(num) ? num : 0,
-        });
+        push(
+          item.title || known?.name || item.field,
+          table.cell(item.field, index),
+          known ? colorFor(known.name, series.indexOf(known)) : "transparent",
+          item.format ?? known?.format,
+        );
       }
-      return picked;
+      return rows;
     }
-    const grouped = series.some((item) => item.match) && base.type !== "donut";
-    const rows: { name: string; text: string; color: string; raw: number }[] = [];
-    const yFormat = axisFormat(base, "y");
-    const push = (name: string, raw: unknown, color: string) => {
-      if (raw == null || raw === "") return;
-      const num = typeof raw === "number" ? raw : Number(raw);
-      rows.push({ name, text: fmt(raw, series.find((s) => s.name === name)?.format ?? yFormat, locale()), color, raw: Number.isFinite(num) ? num : 0 });
-    };
     if (!grouped) {
       for (let i = 0; i < series.length; i++) {
         const item = series[i];
@@ -660,24 +660,21 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const gap = 14;
     const midX = (minX + maxX) / 2;
     const midY = (minY + maxY) / 2;
-    const place = tipPlace(base);
+    const place = tipSide(base);
     let top = minY - height - gap;
     let left = midX - width / 2;
-    if (place === "bottom") top = maxY + gap;
-    else if (place === "left") {
-      left = minX - width - gap;
+    if (place === 2) top = maxY + gap;
+    else if (place > 2) {
+      left = place === 3 ? minX - width - gap : maxX + gap;
       top = midY - height / 2;
-    } else if (place === "right") {
-      left = maxX + gap;
-      top = midY - height / 2;
-    } else if (place === "auto") {
+    } else if (!place) {
       if (top < 4) top = maxY + gap;
       if (top + height > bounds.height - 4) top = Math.max(4, bounds.height - height - 4);
       left = midX + gap;
       if (left + width > bounds.width - 4) left = Math.max(4, midX - width - gap);
       if (left < maxX && left + width > minX && top < maxY && top + height > minY && midX - width - gap >= 4) left = midX - width - gap;
     }
-    if (place !== "auto" && bounds.width > width + 8 && bounds.height > height + 8) {
+    if (place && bounds.width > width + 8 && bounds.height > height + 8) {
       left = Math.max(4, Math.min(left, bounds.width - width - 4));
       top = Math.max(4, Math.min(top, bounds.height - height - 4));
     }
@@ -706,8 +703,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       svg.insertAdjacentHTML("beforeend", `<text data-ck-xlabel class="ck-xlabel"/>`);
       label = svg.lastElementChild as Element;
     }
-    const place = tipPlace(base);
-    const y = place === "bottom" ? box.t + 14 : box.t + box.h - 6;
+    const y = tipSide(base) === 2 ? box.t + 14 : box.t + box.h - 6;
     const pad = 36;
     const anchor = x < box.l + pad ? "start" : x > box.l + box.w - pad ? "end" : "middle";
     const lx = anchor === "start" ? x + 4 : anchor === "end" ? x - 4 : x;
