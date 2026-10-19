@@ -7,6 +7,7 @@ import {
   domainTicks,
   fill,
   fmt,
+  valueFormat,
   gapOf,
   hGrid,
   num,
@@ -51,11 +52,12 @@ export function renderBoxplot(spec: Record<string, unknown>): string | null {
   const domain = domainTicks(min - pad, max + pad);
   const y0 = Math.min(min - pad, domain[0] ?? min);
   const y1 = Math.max(max + pad, domain[domain.length - 1] ?? max);
-  const box = plotBox(frame, spec);
-  const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const yTicks = domainTicks(y0, y1);
+  const box = plotBox(frame, spec, { yTicks });
+  const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const band = (box.right - box.left) / rows.length;
   const boxW = Math.max(12, band * (1 - gapOf(frame, 0.34)));
+  const shown = valueFormat(frame, spec, frame.encoding.y);
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
@@ -64,7 +66,7 @@ export function renderBoxplot(spec: Record<string, unknown>): string | null {
     const color = fill(frame, index);
     const ink = stroke(frame, index, 1.5);
     const cap = boxW * 0.45;
-    const label = `${row.name}: min ${fmt(row.whiskerLow, frame.locale)}, q1 ${fmt(row.q1, frame.locale)}, median ${fmt(row.median, frame.locale)}, q3 ${fmt(row.q3, frame.locale)}, max ${fmt(row.whiskerHigh, frame.locale)}`;
+    const label = `${row.name}: min ${fmt(row.whiskerLow, frame.locale, shown)}, q1 ${fmt(row.q1, frame.locale, shown)}, median ${fmt(row.median, frame.locale, shown)}, q3 ${fmt(row.q3, frame.locale, shown)}, max ${fmt(row.whiskerHigh, frame.locale, shown)}`;
     parts.push(openMark("line", "whisker", label, `x1="${n(cx)}" y1="${n(yAt(row.whiskerLow))}" x2="${n(cx)}" y2="${n(yAt(row.whiskerHigh))}" stroke="${ink}" stroke-width="1.5"`));
     parts.push("</line>");
     parts.push(`<line x1="${n(cx - cap)}" y1="${n(yAt(row.whiskerLow))}" x2="${n(cx + cap)}" y2="${n(yAt(row.whiskerLow))}" stroke="${ink}" stroke-width="1.5" />`);
@@ -76,7 +78,7 @@ export function renderBoxplot(spec: Record<string, unknown>): string | null {
     parts.push(openMark("line", "median", label, `data-ck-median="${row.median}" x1="${n(cx - boxW / 2)}" y1="${n(yAt(row.median))}" x2="${n(cx + boxW / 2)}" y2="${n(yAt(row.median))}" stroke="${cssVar("text", frame.preset.text)}" stroke-width="2"`));
     parts.push("</line>");
     for (const value of row.outliers) {
-      parts.push(openMark("circle", "outlier", `${row.name} outlier ${fmt(value, frame.locale)}`, `cx="${n(cx)}" cy="${n(yAt(value))}" r="${n(frame.geometry.pointSize)}" fill="${color}"`));
+      parts.push(openMark("circle", "outlier", `${row.name} outlier ${fmt(value, frame.locale, shown)}`, `cx="${n(cx)}" cy="${n(yAt(value))}" r="${n(frame.geometry.pointSize)}" fill="${color}"`));
       parts.push("</circle>");
     }
   });

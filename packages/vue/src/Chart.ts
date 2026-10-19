@@ -38,9 +38,34 @@ export const Chart = defineComponent({
     const svg = computed(() => (props.render ?? renderAll)(props.spec));
     const host = ref<HTMLElement | null>(null);
     let ctl: Controller | undefined;
+    let bound: Element | null = null;
+    let listening = false;
     let stop = () => {};
     const draw = (spec: ChartSpec) => (props.render ?? renderAll)(spec);
     const relay = (name: "pointclick" | "seriesclick" | "legendclick" | "selectionchange") => (detail: ClickDetail | Selection) => emit(name, detail);
+
+    const arm = (spec: ChartSpec) => {
+      const el = host.value;
+      if (!el) return;
+      const svg = el.querySelector("svg");
+      if (!(svg instanceof SVGSVGElement)) return;
+      if (ctl && svg === bound) {
+        ctl.update(spec, draw(spec));
+        return;
+      }
+      ctl?.destroy();
+      ctl = attach(el, spec, { render: (next) => draw(next as ChartSpec), selection: props.selection });
+      bound = svg;
+      if (!listening) {
+        stop = listen(el, {
+          pointclick: relay("pointclick"),
+          seriesclick: relay("seriesclick"),
+          legendclick: relay("legendclick"),
+          selectionchange: relay("selectionchange"),
+        });
+        listening = true;
+      }
+    };
 
     watch(svg, (markup) => {
       const el = host.value;
@@ -59,21 +84,17 @@ export const Chart = defineComponent({
       () => props.spec,
       (spec) => {
         const el = host.value;
-        if (el && !props.render && open(el, spec)) ctl?.destroy();
+        if (!el || props.render) return;
+        open(el, spec, () => arm(spec));
       },
     );
 
     onMounted(() => {
       const el = host.value;
-      if (!el || (!props.render && open(el, props.spec))) return;
+      if (!el) return;
+      if (!props.render && open(el, props.spec, () => arm(props.spec))) return;
       if (!el.querySelector("svg")) patchSvg(el, svg.value);
-      ctl = attach(el, props.spec, { render: (next) => draw(next as ChartSpec), selection: props.selection });
-      stop = listen(el, {
-        pointclick: relay("pointclick"),
-        seriesclick: relay("seriesclick"),
-        legendclick: relay("legendclick"),
-        selectionchange: relay("selectionchange"),
-      });
+      arm(props.spec);
     });
 
     onBeforeUnmount(() => {

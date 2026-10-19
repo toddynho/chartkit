@@ -519,9 +519,9 @@ describe("remaining chart renderers", () => {
       size: { width: 640, height: 240 },
       a11y: { alt: "The value grows by ten each step." },
     });
-    const y1 = labeledY(svg, "$1.00");
-    const y10 = labeledY(svg, "$10.00");
-    const y100 = labeledY(svg, "$100.00");
+    const y1 = labeledY(svg, "$1");
+    const y10 = labeledY(svg, "$10");
+    const y100 = labeledY(svg, "$100");
     expect(y1).not.toBeNull();
     expect(y10).not.toBeNull();
     expect(y100).not.toBeNull();

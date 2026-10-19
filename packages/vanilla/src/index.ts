@@ -37,9 +37,12 @@ function isElement(el: MountElement): el is MountElement & Element {
 
 export function mount(el: MountElement, spec: ChartSpec, options: MountOptions = {}): MountedChart {
   const render = options.render ?? renderAll;
+  const idle = () => {};
   let alive = true;
   let ctl: Controller | null = null;
-  let stop = () => {};
+  let bound: Element | null = null;
+  let stop = idle;
+  let selection = options.selection;
 
   const draw = (next: ChartSpec) => {
     const markup = render(next);
@@ -47,11 +50,19 @@ export function mount(el: MountElement, spec: ChartSpec, options: MountOptions =
     else patchSvg(el, markup);
   };
 
-  const kick = (next: ChartSpec) => {
-    if (!options.render && open(el, next)) return;
-    draw(next);
-    if (!ctl && isElement(el)) {
-      ctl = attach(el, next, { render: (value) => render(value as ChartSpec), selection: options.selection });
+  const arm = (next: ChartSpec) => {
+    if (!alive || !isElement(el)) return;
+    const svg = el.querySelector("svg");
+    if (!(svg instanceof SVGSVGElement)) return;
+    if (ctl && svg === bound) {
+      ctl.update(next);
+      if (selection !== undefined) ctl.setSelection(selection);
+      return;
+    }
+    ctl?.destroy();
+    ctl = attach(el, next, { render: (value) => render(value as ChartSpec), selection });
+    bound = svg;
+    if (stop === idle) {
       stop = listen(el, {
         pointclick: options.onPointClick,
         seriesclick: options.onSeriesClick,
@@ -61,12 +72,23 @@ export function mount(el: MountElement, spec: ChartSpec, options: MountOptions =
     }
   };
 
+  const kick = (next: ChartSpec) => {
+    if (!options.render && open(el, next, () => arm(next))) return;
+    draw(next);
+    if (!isElement(el)) return;
+    const svg = el.querySelector("svg");
+    if (!ctl || (svg && svg !== bound)) arm(next);
+  };
+
   kick(spec);
 
   return {
-    update(next, selection) {
+    update(next, nextSelection) {
       if (!alive) return;
-      if (selection !== undefined) ctl?.setSelection(selection);
+      if (nextSelection !== undefined) {
+        selection = nextSelection;
+        ctl?.setSelection(nextSelection);
+      }
       kick(next);
     },
     destroy() {

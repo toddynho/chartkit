@@ -1,7 +1,7 @@
 import { column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
 import { n } from "../../svg";
-import { fill, fmt, formatPercent, num, openMark, str, text, viewOf } from "./plot";
+import { fill, fmt, formatPercent, num, openMark, str, text, valueFormat, viewOf } from "./plot";
 
 /** Stages in data order. Centered rounded bars are the default; `mark.shape` `"trapezoid"` connects them. */
 export function renderFunnel(spec: Record<string, unknown>): string | null {
@@ -22,6 +22,7 @@ export function renderFunnel(spec: Record<string, unknown>): string | null {
   const plotW = frame.width - plotLeft - 28;
   const cx = plotLeft + plotW / 2;
   const trapezoid = frame.mark.shape === "trapezoid";
+  const shown = valueFormat(frame, spec, frame.encoding.y);
   stages.forEach(([label, value], index) => {
     const prev = index === 0 ? value : stages[index - 1][1];
     const conversion = prev > 0 ? value / prev : 0;
@@ -31,7 +32,7 @@ export function renderFunnel(spec: Record<string, unknown>): string | null {
     const w0 = Math.max(barH, (value / max) * plotW);
     const next = stages[index + 1]?.[1] ?? value;
     const w1 = Math.max(barH, (next / max) * plotW);
-    const valueText = fmt(value, frame.locale);
+    const valueText = fmt(value, frame.locale, shown);
     const pct = formatPercent(conversion, frame.locale);
     const tip = index === 0 ? `${label}: ${valueText} (start)` : `${label}: ${valueText} · ${pct} of previous`;
     const color = fill(frame, 0);

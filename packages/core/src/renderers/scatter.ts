@@ -2,7 +2,7 @@ import { annotationLayers } from "../annotations";
 import { colorLegendHeight, readColorScale, scaleLabel } from "../color-scale";
 import { readRules, resolveColors, withPalette } from "../color";
 import { cssVar, paint } from "../theme";
-import { formatValue } from "../format";
+import { formatAxisValue, formatValue } from "../format";
 import { bag, glyphOf, marker, named, nudge } from "../glyphs";
 import {
   asNumber,
@@ -94,7 +94,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   if (showY) {
     let label = 0;
     for (let i = 0; i < yTicks.length; i++) {
-      const size = formatValue(yTicks[i], yFormat, frame.locale).length * 6.7;
+      const size = formatAxisValue(yTicks[i], yFormat, frame.locale, yTicks).length * 6.7;
       if (size > label) label = size;
     }
     left = Math.max(56, Math.ceil(label + 14));
@@ -247,8 +247,8 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
       const y = yScale(tick) + 4;
       parts.push(
         yRight
-          ? label(plot.right + 8, y, formatValue(tick, yFormat, frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "start")
-          : label(plot.left - 8, y, formatValue(tick, yFormat, frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "end"),
+          ? label(plot.right + 8, y, formatAxisValue(tick, yFormat, frame.locale, yTicks), cssVar("muted", frame.preset.muted), 11, "400", "start")
+          : label(plot.left - 8, y, formatAxisValue(tick, yFormat, frame.locale, yTicks), cssVar("muted", frame.preset.muted), 11, "400", "end"),
       );
     }
   }
@@ -261,7 +261,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     for (const tick of xTicks) {
       const x = xScale(tick);
       const y = xAxis.end ? plot.top - 18 : plot.bottom + 16;
-      parts.push(angle ? rotated(x, y, formatValue(tick, xFormat, frame.locale), cssVar("muted", frame.preset.muted), angle) : label(x, y, formatValue(tick, xFormat, frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "middle"));
+      parts.push(angle ? rotated(x, y, formatAxisValue(tick, xFormat, frame.locale, xTicks), cssVar("muted", frame.preset.muted), angle) : label(x, y, formatAxisValue(tick, xFormat, frame.locale, xTicks), cssVar("muted", frame.preset.muted), 11, "400", "middle"));
     }
   }
   if (showX && xAxis.title) {

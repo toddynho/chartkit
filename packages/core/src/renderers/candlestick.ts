@@ -1,8 +1,9 @@
 import { cssVar } from "../theme";
-import { formatValue } from "../format";
+import { formatAxisValue, formatValue } from "../format";
 import {
   asNumber,
   axisOn,
+  channelFormat,
   column,
   fieldOf,
   gridStyle,
@@ -11,7 +12,7 @@ import {
   resolveDomain,
   wantsZero,
 } from "../frame";
-import { closeChart, esc, font, linear, n, openChart, ticks } from "../svg";
+import { closeChart, esc, font, isRecord, linear, n, openChart, ticks } from "../svg";
 
 /** OHLC candles. A volume pane is drawn when encoding.volume is set. */
 export function renderCandlestick(spec: Record<string, unknown>): string | null {
@@ -47,13 +48,22 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   const showVolume = volumeF !== undefined;
   const showX = axisOn(spec, "x");
   const showY = axisOn(spec, "y");
+  const yAxisFormat = isRecord(spec.axes) && isRecord(spec.axes.y) ? spec.axes.y.format : undefined;
+  const priceFormat = yAxisFormat ?? channelFormat(frame.encoding.close) ?? channelFormat(frame.encoding.high) ?? channelFormat(frame.encoding.open) ?? "number";
+  const yTicks = ticks(domain[0], domain[1], 5);
+  const yTickText = yTicks.map((tick) => formatAxisValue(tick, priceFormat, frame.locale, yTicks));
   let top = 12;
   if (frame.title) top = 36;
-  const plot = { left: showY ? 56 : 12, top, right: frame.width - 12, bottom: frame.height - (showX ? 28 : 12) };
+  let left = 12;
+  if (showY) {
+    let width = 0;
+    for (let i = 0; i < yTickText.length; i++) width = Math.max(width, yTickText[i].length * 6.7);
+    left = Math.max(56, Math.ceil(width + 16));
+  }
+  const plot = { left, top, right: frame.width - 12, bottom: frame.height - (showX ? 28 : 12) };
   const volumeH = showVolume ? Math.max(28, (plot.bottom - plot.top) * 0.2) : 0;
   const priceBottom = plot.bottom - volumeH - (showVolume ? 8 : 0);
   const yScale = linear(domain[0], domain[1], priceBottom, plot.top);
-  const yTicks = ticks(domain[0], domain[1], 5);
   const slot = (plot.right - plot.left) / candles.length;
   const gap = typeof frame.mark.gap === "number" ? frame.mark.gap : 0.3;
   const bodyW = Math.max(1, slot * (1 - gap));
@@ -103,8 +113,8 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   });
 
   if (showY) {
-    for (const tick of yTicks) {
-      parts.push(text(plot.left - 6, yScale(tick) + 4, formatValue(tick, "number", frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "end"));
+    for (let i = 0; i < yTicks.length; i++) {
+      parts.push(text(plot.left - 8, yScale(yTicks[i]) + 4, yTickText[i] ?? "", cssVar("muted", frame.preset.muted), 11, "400", "end"));
     }
   }
   if (showX) {

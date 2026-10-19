@@ -14,6 +14,7 @@ import {
   openMark,
   plotBox,
   scaleOf,
+  valueFormat,
   viewOf,
   xLabels,
   yLabels,
@@ -27,7 +28,6 @@ export function renderHistogram(spec: Record<string, unknown>): string | null {
   const xField = fieldOf(frame.encoding.x);
   const yField = fieldOf(frame.encoding.y);
   const xs = column(table, xField);
-  const box = plotBox(frame, spec);
   const color = fill(frame, 0);
   const bars: { x0: number; x1: number; count: number; label: string }[] = [];
 
@@ -42,16 +42,19 @@ export function renderHistogram(spec: Record<string, unknown>): string | null {
     const values = xs.map(asNumber).filter((value): value is number => value !== null);
     if (!values.length) return null;
     const binned = binValues(values, frame.mark);
+    const edgeFormat = valueFormat(frame, spec, frame.encoding.x, "x");
     binned.counts.forEach((count, index) => {
       const lo = binned.edges[index];
       const hi = binned.edges[index + 1];
-      bars.push({ x0: lo, x1: hi, count, label: `${fmt(lo, frame.locale)}–${fmt(hi, frame.locale)}` });
+      bars.push({ x0: lo, x1: hi, count, label: `${fmt(lo, frame.locale, edgeFormat)}–${fmt(hi, frame.locale, edgeFormat)}` });
     });
   }
   if (!bars.length) return null;
 
+  const countFormat = yField ? valueFormat(frame, spec, frame.encoding.y) : undefined;
   const peak = Math.max(...bars.map((bar) => bar.count), 1);
   const yTicks = countTicks(peak);
+  const box = plotBox(frame, spec, { yTicks });
   const yTop = Math.max(peak, yTicks[yTicks.length - 1] ?? peak);
   const yAt = scaleOf(0, yTop, box.bottom, box.top);
   const dataMin = bars[0].x0;
@@ -68,7 +71,8 @@ export function renderHistogram(spec: Record<string, unknown>): string | null {
     const y = yAt(bar.count);
     const height = Math.max(0, box.bottom - y);
     if (height <= 0) continue;
-    const label = `${bar.label}: ${bar.count}`;
+    const countText = countFormat !== undefined ? fmt(bar.count, frame.locale, countFormat) : String(bar.count);
+    const label = `${bar.label}: ${countText}`;
     parts.push(openMark("rect", "bar", label, `data-ck-count="${bar.count}" x="${n(x)}" y="${n(y)}" width="${n(width)}" height="${n(height)}" fill="${color}"`));
     parts.push("</rect>");
   }
@@ -77,12 +81,17 @@ export function renderHistogram(spec: Record<string, unknown>): string | null {
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
   const edges = yField
     ? bars.map((bar) => ({ x: xAt(bar.x0 + (bar.x1 - bar.x0) / 2), text: bar.label }))
-    : domainTicks(axisMin, axisMax).map((value) => ({ x: xAt(value), text: trimNum(value) }));
+    : domainTicks(axisMin, axisMax).map((value) => ({ x: xAt(value), text: edgeText(value, frame.locale, valueFormat(frame, spec, frame.encoding.x, "x")) }));
   parts.push(xLabels(frame, spec, edges));
   if (!yField && bars.length <= 8) {
     parts.push(`<text x="${n(box.left)}" y="${n(box.top - 4)}" fill="${cssVar("muted", frame.preset.muted)}" font-size="11">${bars.length} bins</text>`);
   }
   return view.done();
+}
+
+function edgeText(value: number, locale: string, format: unknown): string {
+  if (format !== undefined) return fmt(value, locale, format);
+  return trimNum(value);
 }
 
 function trimNum(value: number): string {

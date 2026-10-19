@@ -124,6 +124,36 @@ describe("vanilla mount", () => {
     host.remove();
   });
 
+  it("emits waterfall pointclick after the lazy draw and after a theme replaces the SVG", async () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    const onPointClick = vi.fn();
+    const spec = {
+      version: "1" as const,
+      type: "waterfall" as const,
+      data: [
+        { step: "Open", amount: 10, total: true },
+        { step: "Add", amount: 4 },
+        { step: "End", amount: 14, total: true },
+      ],
+      encoding: { x: "step", y: "amount" },
+      mark: { total: "total" },
+      a11y: { alt: "The total ends at 14 after one gain." },
+    };
+    const chart = mount(host, spec, { onPointClick });
+    await vi.waitFor(() => expect(host.querySelector('[data-ck-name="Add"]')).toBeTruthy());
+    const first = host.querySelector("svg");
+    host.querySelector('[data-ck-name="Add"]')?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(onPointClick).toHaveBeenCalledTimes(1);
+    expect(onPointClick.mock.calls[0][0]).toMatchObject({ series: "Add" });
+    chart.update({ ...spec, theme: "midnight" });
+    await vi.waitFor(() => expect(host.querySelector("svg")).not.toBe(first));
+    host.querySelector('[data-ck-name="Add"]')?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(onPointClick).toHaveBeenCalledTimes(2);
+    chart.destroy();
+    host.remove();
+  });
+
   it("loads a histogram into the element", async () => {
     const host = document.createElement("div");
     document.body.append(host);

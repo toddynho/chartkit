@@ -14,6 +14,7 @@ import {
   scaleOf,
   str,
   text,
+  valueFormat,
   viewOf,
   xLabels,
   yLabels,
@@ -49,11 +50,12 @@ export function renderWaterfall(spec: Record<string, unknown>): string | null {
   const pad = (max - min) * 0.12;
   const y0 = min - pad;
   const y1 = max + pad;
-  const box = plotBox(frame, spec, { bottom: 36 });
-  const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const yTicks = domainTicks(y0, y1);
+  const box = plotBox(frame, spec, { bottom: 36, yTicks });
+  const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const band = (box.right - box.left) / steps.length;
   const barW = Math.max(10, band * (1 - gapOf(frame, 0.34)));
+  const format = valueFormat(frame, spec, frame.encoding.y);
   const up = cssVar("positive", frame.preset.positive);
   const down = cssVar("negative", frame.preset.negative);
   const totalColor = cssVar("accent", frame.preset.accent);
@@ -69,7 +71,7 @@ export function renderWaterfall(spec: Record<string, unknown>): string | null {
     const height = Math.max(2, Math.abs(yAt(step.end) - yAt(step.start)));
     const color = step.total ? totalColor : step.end >= step.start ? up : down;
     const kind = step.total ? "total" : "delta";
-    const label = `${step.name}: ${step.total ? "total " : ""}${fmt(step.value, frame.locale)}`;
+    const label = `${step.name}: ${step.total ? "total " : ""}${fmt(step.value, frame.locale, format)}`;
     if (index > 0) {
       const prev = steps[index - 1];
       const x0 = box.left + band * (index - 1) + (band - barW) / 2 + barW;
@@ -77,7 +79,7 @@ export function renderWaterfall(spec: Record<string, unknown>): string | null {
     }
     parts.push(openMark("rect", kind, label, `x="${n(x)}" y="${n(y)}" width="${n(barW)}" height="${n(height)}" rx="4" fill="${color}"`, step.name, index));
     parts.push("</rect>");
-    parts.push(text(x + barW / 2, y - 6, fmt(step.total ? step.end : step.value, frame.locale), cssVar("text", frame.preset.text), 11, "600", "middle"));
+    parts.push(text(x + barW / 2, y - 6, fmt(step.total ? step.end : step.value, frame.locale, format), cssVar("text", frame.preset.text), 11, "600", "middle"));
   });
   parts.push("</g>");
   parts.push(axisLine(frame, box));

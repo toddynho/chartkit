@@ -1,8 +1,8 @@
 import type { DataTable } from "../../data";
-import { formatValue } from "../../format";
-import { asNumber, axisOn, column, fieldOf, gridStyle, readFrame, readTable, type Frame } from "../../frame";
+import { formatAxisValue, formatValue } from "../../format";
+import { asNumber, axisOn, channelFormat, column, fieldOf, gridStyle, readFrame, readTable, type Frame } from "../../frame";
 import { cssVar, lineStroke, paint } from "../../theme";
-import { clipPath, closeChart, esc, font, linear, n, openChart, ticks } from "../../svg";
+import { clipPath, closeChart, esc, font, isRecord, linear, n, openChart, ticks } from "../../svg";
 
 export interface View {
   frame: Frame;
@@ -53,7 +53,24 @@ export function fieldsOf(value: unknown): string[] {
   return one ? [one] : [];
 }
 
-export function fmt(value: number, locale: string): string {
+/** Axis format, or the channel format when the axis does not set one. */
+export function axisFormat(spec: Record<string, unknown>, channel: unknown, axis: "x" | "y" = "y"): unknown {
+  const axes = isRecord(spec.axes) ? spec.axes : undefined;
+  const node = axes && isRecord(axes[axis]) ? axes[axis] : undefined;
+  if (node && node.format !== undefined) return node.format;
+  return channelFormat(channel);
+}
+
+/** Mark label format, then the encoding format, then the axis format. */
+export function valueFormat(frame: Frame, spec: Record<string, unknown>, channel: unknown, axis: "x" | "y" = "y"): unknown {
+  if (frame.mark.labelFormat !== undefined) return frame.mark.labelFormat;
+  const encoded = channelFormat(channel);
+  if (encoded !== undefined) return encoded;
+  return axisFormat(spec, channel, axis);
+}
+
+export function fmt(value: number, locale: string, format?: unknown): string {
+  if (format !== undefined) return formatValue(value, format, locale);
   const abs = Math.abs(value);
   const style = abs >= 10000 ? "compact" : "number";
   return formatValue(value, style, locale);
@@ -94,11 +111,27 @@ export interface Box {
   bottom: number;
 }
 
-export function plotBox(frame: Frame, spec: Record<string, unknown>, opts?: { left?: number; bottom?: number }): Box {
+const TICK_PX = 6.7;
+
+/** Left gutter for 11px tick labels. The label is drawn 8px left of the plot. */
+export function yTickGutter(labels: string[], floor = 52): number {
+  let width = 0;
+  for (let i = 0; i < labels.length; i++) width = Math.max(width, labels[i].length * TICK_PX);
+  return Math.max(floor, Math.ceil(width + 16));
+}
+
+export function plotBox(frame: Frame, spec: Record<string, unknown>, opts?: { left?: number; bottom?: number; yTicks?: number[] }): Box {
   const showY = axisOn(spec, "y");
   const showX = axisOn(spec, "x");
+  let left = opts?.left ?? (showY ? 52 : 16);
+  if (showY && opts?.yTicks && opts.left === undefined) {
+    const format = axisFormat(spec, frame.encoding.y);
+    const labels: string[] = [];
+    for (let i = 0; i < opts.yTicks.length; i++) labels.push(formatAxisValue(opts.yTicks[i], format, frame.locale, opts.yTicks));
+    left = yTickGutter(labels);
+  }
   return {
-    left: opts?.left ?? (showY ? 52 : 16),
+    left,
     top: frame.title ? 40 : 16,
     right: frame.width - 16,
     bottom: frame.height - (opts?.bottom ?? (showX ? 32 : 16)),
@@ -123,7 +156,8 @@ export function hGrid(spec: Record<string, unknown>, frame: Frame, box: Box, val
 
 export function yLabels(frame: Frame, spec: Record<string, unknown>, box: Box, values: number[], yAt: (value: number) => number): string {
   if (!axisOn(spec, "y")) return "";
-  return values.map((value) => text(box.left - 8, yAt(value) + 4, fmt(value, frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "end")).join("");
+  const format = axisFormat(spec, frame.encoding.y);
+  return values.map((value) => text(box.left - 8, yAt(value) + 4, formatAxisValue(value, format, frame.locale, values), cssVar("muted", frame.preset.muted), 11, "400", "end")).join("");
 }
 
 export function xLabels(frame: Frame, spec: Record<string, unknown>, labels: { x: number; text: string }[]): string {

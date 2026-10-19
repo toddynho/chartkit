@@ -55,9 +55,9 @@ const tips = new WeakMap<object, { destroy(): void }>();
 
 /**
  * Draw one phase-3 chart into `el`. Returns false for a core type so the caller keeps its own renderer.
- * The chart module and the mark tooltip load on demand.
+ * The chart module and the mark tooltip load on demand. `painted` runs after the SVG is in `el`, including a later spec that replaces it.
  */
-export function open(el: { innerHTML: string }, spec: { type?: string }): boolean {
+export function open(el: { innerHTML: string }, spec: { type?: string }, painted?: () => void): boolean {
   const type = spec.type;
   if (!type || !EXTRA_TYPES.has(type)) return false;
   const token = (jobs.get(el) ?? 0) + 1;
@@ -68,6 +68,8 @@ export function open(el: { innerHTML: string }, spec: { type?: string }): boolea
     if (jobs.get(el) !== token || !chart) return;
     adopt(chart);
     el.innerHTML = draw(spec);
+    painted?.();
+    if (jobs.get(el) !== token) return;
     if (typeof (el as { addEventListener?: unknown }).addEventListener !== "function") return;
     const { attach } = await import("./extra-tip");
     if (jobs.get(el) !== token) return;

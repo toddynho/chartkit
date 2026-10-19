@@ -2,7 +2,7 @@ import { colorLegendHeight, readColorScale, scaleLabel } from "../color-scale";
 import { cssVar, paint } from "../theme";
 import { formatValue } from "../format";
 import { asNumber, column, fieldOf, readColor, readFrame, readTable } from "../frame";
-import { closeChart, esc, font, n, openChart } from "../svg";
+import { closeChart, esc, font, hash, n, openChart } from "../svg";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -178,12 +178,16 @@ function renderGrid(spec: Record<string, unknown>): string | null {
   return parts.join("");
 }
 
-/** Card fill plus a hairline hatch, so a gap is not the low ramp and not a blank cell. */
+/**
+ * Card fill plus a hairline hatch, so a gap is not the low ramp and not a blank cell.
+ * The id includes the card paint. Two charts that share an alt (Soft beside midnight)
+ * otherwise reuse the first pattern in the page, and the later theme paints the wrong card.
+ */
 function emptyMark(id: string, preset: { background: string; axis: string; text: string }): { def: string; fill: string; stroke: string } {
   const night = preset.background === "#0c0c0c" || preset.text === "#ffffff";
   const card = cssVar("background", night ? preset.background : "#f5f5f7");
   const ink = cssVar("axis", preset.axis);
-  const pattern = `${id}e`;
+  const pattern = `${id}e${hash(card + ink)}`;
   const def =
     `<pattern id="${pattern}" width="6" height="6" patternUnits="userSpaceOnUse">` +
     `<rect width="6" height="6" fill="${card}" />` +

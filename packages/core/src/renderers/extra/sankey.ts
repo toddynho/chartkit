@@ -2,7 +2,7 @@ import { column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
 import { font, n } from "../../svg";
 import { asNumber } from "../../frame";
-import { fill, fit, fmt, openMark, str, viewOf } from "./plot";
+import { fill, fit, fmt, openMark, str, valueFormat, viewOf } from "./plot";
 
 /** Curved flow ribbons and labeled nodes sized by the flow through them. */
 export function renderSankey(spec: Record<string, unknown>): string | null {
@@ -62,6 +62,7 @@ export function renderSankey(spec: Record<string, unknown>): string | null {
   });
   relax(columns, links.filter((link) => !link.back), pos, top, bottom);
 
+  const shown = valueFormat(frame, spec, frame.encoding.y);
   const outAt = ids.map(() => 0);
   const inAt = ids.map(() => 0);
   const ordered = [...links].sort((a, b) => a.source - b.source || a.target - b.target);
@@ -70,8 +71,8 @@ export function renderSankey(spec: Record<string, unknown>): string | null {
   ordered.forEach((link, index) => {
     const source = pos[link.source];
     const target = pos[link.target];
-    const sh = (link.value / Math.max(outgoing[link.source], link.value)) * source.h;
-    const th = (link.value / Math.max(incoming[link.target], link.value)) * target.h;
+    const sh = link.value * (source.h / nodeValue[link.source]);
+    const th = link.value * (target.h / nodeValue[link.target]);
     const y0 = source.y + outAt[link.source];
     const y1 = target.y + inAt[link.target];
     outAt[link.source] += sh;
@@ -82,7 +83,7 @@ export function renderSankey(spec: Record<string, unknown>): string | null {
     const d = back ? returnRibbon(x0, y0, sh, x1, y1, th) : forwardRibbon(x0, y0, sh, x1, y1, th);
     const id = `${frame.id}-f${index}`;
     grads.push(`<linearGradient id="${id}"><stop offset="0" stop-color="${fill(frame, link.source)}"/><stop offset="1" stop-color="${fill(frame, link.target)}"/></linearGradient>`);
-    const label = `${ids[link.source]} → ${ids[link.target]}: ${fmt(link.value, frame.locale)}`;
+    const label = `${ids[link.source]} → ${ids[link.target]}: ${fmt(link.value, frame.locale, shown)}`;
     const name = `${ids[link.source]} → ${ids[link.target]}`;
     ribbons.push(openMark("path", "link", label, `d="${d}" fill="url(#${id})" fill-opacity="${back ? 0.28 : 0.35}"${back ? ' data-ck-return="1"' : ""}`, name, index) + "</path>");
   });
@@ -90,7 +91,7 @@ export function renderSankey(spec: Record<string, unknown>): string | null {
   parts.push(ribbons.join(""));
   ids.forEach((name, index) => {
     const node = pos[index];
-    const label = `${name}: ${fmt(nodeValue[index], frame.locale)}`;
+    const label = `${name}: ${fmt(nodeValue[index], frame.locale, shown)}`;
     parts.push(openMark("rect", "node", label, `x="${n(node.x)}" y="${n(node.y)}" width="${nodeW}" height="${n(node.h)}" rx="4" fill="${fill(frame, index)}"`, name, index));
     parts.push("</rect>");
     const first = layer[index] === 0;

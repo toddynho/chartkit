@@ -1,7 +1,7 @@
-import { column, fieldOf } from "../../frame";
+import { channelFormat, column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
 import { n } from "../../svg";
-import { fill, fmt, num, openMark, str, text, viewOf } from "./plot";
+import { fill, fmt, num, openMark, str, text, valueFormat, viewOf } from "./plot";
 
 /** Qualitative bands, a measure bar, and a target marker. */
 export function renderBullet(spec: Record<string, unknown>): string | null {
@@ -24,7 +24,9 @@ export function renderBullet(spec: Record<string, unknown>): string | null {
       const opacity = 0.55 - band * 0.15;
       parts.push(`<rect x="${n(xAt(start))}" y="${n(y)}" width="${n(Math.max(0, xAt(edge) - xAt(start)))}" height="36" rx="6" fill="${cssVar("track", frame.preset.track)}" fill-opacity="${n(Math.max(0.12, opacity))}" />`);
     });
-    const label = `${row.name}: ${fmt(row.value, frame.locale)}${row.target !== undefined ? `, target ${fmt(row.target, frame.locale)}` : ""}`;
+    const shown = valueFormat(frame, spec, frame.encoding.y);
+    const targetShown = channelFormat(frame.encoding.target) ?? shown;
+    const label = `${row.name}: ${fmt(row.value, frame.locale, shown)}${row.target !== undefined ? `, target ${fmt(row.target, frame.locale, targetShown)}` : ""}`;
     parts.push(openMark("rect", "measure", label, `x="${n(left)}" y="${n(y + 11)}" width="${n(Math.max(2, xAt(row.value) - left))}" height="14" rx="4" fill="${fill(frame, index)}"`));
     parts.push("</rect>");
     if (row.target !== undefined) {
@@ -33,7 +35,7 @@ export function renderBullet(spec: Record<string, unknown>): string | null {
       parts.push("</line>");
     }
     parts.push(text(16, y + 16, row.name, cssVar("text", frame.preset.text), 13, "650"));
-    parts.push(text(16, y + 32, fmt(row.value, frame.locale), cssVar("muted", frame.preset.muted), 12, "500"));
+    parts.push(text(16, y + 32, fmt(row.value, frame.locale, shown), cssVar("muted", frame.preset.muted), 12, "500"));
   });
   return view.done();
 }

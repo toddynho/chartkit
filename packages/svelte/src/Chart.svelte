@@ -30,38 +30,59 @@
   let ready = false;
   /** @type {import("@chartkitdev/core/interact").Controller | undefined} */
   let ctl;
+  /** @type {Element | null} */
+  let bound = null;
+  let unlist = () => {};
+  let listening = false;
+
+  function arm(next) {
+    if (!host) return;
+    const svg = host.querySelector("svg");
+    if (!(svg instanceof SVGSVGElement)) return;
+    if (ctl && svg === bound) {
+      ctl.update(next, render(next));
+      return;
+    }
+    ctl?.destroy();
+    ctl = attach(host, next, { render: (value) => render(/** @type {import("@chartkitdev/core").ChartSpec} */ (value)), selection });
+    bound = svg;
+    if (!listening) {
+      unlist = listen(host, {
+        pointclick: (detail) => {
+          onpointclick?.(detail);
+          dispatch("pointclick", detail);
+        },
+        seriesclick: (detail) => {
+          onseriesclick?.(detail);
+          dispatch("seriesclick", detail);
+        },
+        legendclick: (detail) => {
+          onlegendclick?.(detail);
+          dispatch("legendclick", detail);
+        },
+        selectionchange: (detail) => {
+          onselectionchange?.(detail);
+          dispatch("selectionchange", detail);
+        },
+      });
+      listening = true;
+    }
+  }
 
   $: markup = render(spec);
   $: if (!ready) shown = markup;
   $: if (ready && host && ctl) ctl.update(spec, markup);
   $: if (ready && ctl && selection !== undefined) ctl.setSelection(selection);
-  $: if (host && render === renderAll) open(host, spec);
+  $: if (host && render === renderAll) open(host, spec, () => arm(spec));
 
   onMount(() => {
-    if (render === renderAll && open(host, spec)) return;
-    if (!host.querySelector("svg")) patchSvg(host, markup);
-    ctl = attach(host, spec, { render: (next) => render(/** @type {import("@chartkitdev/core").ChartSpec} */ (next)), selection });
-    const stop = listen(host, {
-      pointclick: (detail) => {
-        onpointclick?.(detail);
-        dispatch("pointclick", detail);
-      },
-      seriesclick: (detail) => {
-        onseriesclick?.(detail);
-        dispatch("seriesclick", detail);
-      },
-      legendclick: (detail) => {
-        onlegendclick?.(detail);
-        dispatch("legendclick", detail);
-      },
-      selectionchange: (detail) => {
-        onselectionchange?.(detail);
-        dispatch("selectionchange", detail);
-      },
-    });
-    ready = true;
+    if (!(render === renderAll && open(host, spec, () => arm(spec)))) {
+      if (!host.querySelector("svg")) patchSvg(host, markup);
+      arm(spec);
+      ready = true;
+    }
     return () => {
-      stop();
+      unlist();
       ctl?.destroy();
     };
   });

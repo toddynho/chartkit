@@ -183,6 +183,14 @@ describe("colour scales", () => {
     expect(svg).toContain('data-ck-empty="1"');
     expect(svg).toContain("<pattern");
     expect(svg).not.toContain('data-ck-empty="1" fill="#');
+    const night = render({ ...heat, theme: "midnight" });
+    const softId = patternId(svg);
+    const nightId = patternId(night);
+    expect(softId).not.toBe(nightId);
+    expect(svg).toContain(`fill="url(#${softId})"`);
+    expect(night).toContain(`fill="url(#${nightId})"`);
+    expect(patternFill(svg, softId)).toBe("var(--ck-background, #f5f5f7)");
+    expect(patternFill(night, nightId)).toBe("var(--ck-background, #0c0c0c)");
     const filled = render({
       ...heat,
       data: [
@@ -250,6 +258,15 @@ describe("colour scales", () => {
     expect(svg).not.toContain("#ff9500");
   });
 });
+
+function patternId(svg: string): string {
+  return /<pattern id="([^"]+)"/.exec(svg)?.[1] ?? "";
+}
+
+function patternFill(svg: string, id: string): string {
+  const pattern = new RegExp(`<pattern id="${id}"[^>]*>[\\s\\S]*?</pattern>`).exec(svg)?.[0] ?? "";
+  return /<rect[^>]*fill="([^"]+)"/.exec(pattern)?.[1] ?? "";
+}
 
 function firstStop(svg: string): string {
   return /<stop offset="0%" stop-color="(#[0-9a-fA-F]{6})"/.exec(svg)?.[1] ?? "";

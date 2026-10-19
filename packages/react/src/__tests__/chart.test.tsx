@@ -40,6 +40,26 @@ describe("Chart", () => {
     expect(container.querySelector("svg")?.getAttribute("aria-label")).toBe(histogram.a11y.alt);
   });
 
+  it("sends a waterfall click through onPointClick after the chart loads", async () => {
+    const onPointClick = vi.fn();
+    const waterfall = {
+      version: "1" as const,
+      type: "waterfall" as const,
+      data: [
+        { step: "Open", amount: 10, total: true },
+        { step: "Add", amount: 4 },
+      ],
+      encoding: { x: "step", y: "amount" },
+      mark: { total: "total" },
+      a11y: { alt: "Open is the starting total." },
+    };
+    const { container } = render(<Chart spec={waterfall} onPointClick={onPointClick} />);
+    await waitFor(() => expect(container.querySelector('[data-ck-name="Add"]')).toBeTruthy());
+    container.querySelector('[data-ck-name="Add"]')?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(onPointClick).toHaveBeenCalledTimes(1);
+    expect(onPointClick.mock.calls[0][0]).toMatchObject({ series: "Add" });
+  });
+
   it("sends a bar click through onPointClick", () => {
     const onPointClick = vi.fn();
     const { container } = render(<Chart spec={spec} onPointClick={onPointClick} />);
