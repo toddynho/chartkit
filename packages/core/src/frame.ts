@@ -1,7 +1,7 @@
 import { readData, type DataTable } from "./data";
 import type { PresetGeometry, PresetTokens } from "./theme";
 import { resolveGeometry, resolvePreset } from "./theme";
-import { hash, isRecord, niceDomain } from "./svg";
+import { clientIntent, hash, isRecord, longDesc, niceDomain } from "./svg";
 
 export interface Frame {
   type: string;
@@ -22,6 +22,8 @@ export interface Frame {
   /** false hides the legend. Otherwise the placement. */
   legend: false | "top" | "right" | "bottom" | "left";
   legendValues: boolean;
+  description?: string;
+  intent?: string;
 }
 
 export function readFrame(
@@ -38,6 +40,7 @@ export function readFrame(
   else if (size.height === "auto" && typeof size.aspectRatio === "number" && size.aspectRatio > 0) {
     height = Math.max(1, Math.round(width / size.aspectRatio));
   }
+  if (typeof size.minHeight === "number") height = Math.max(height, size.minHeight);
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : "";
   const type = typeof spec.type === "string" ? spec.type : "chart";
   const idSource = typeof spec.id === "string" ? spec.id : alt || type;
@@ -59,6 +62,8 @@ export function readFrame(
     encoding: isRecord(spec.encoding) ? spec.encoding : {},
     legend: legendPlacement(spec),
     legendValues: isRecord(spec.legend) && spec.legend.values === true,
+    description: longDesc(spec),
+    intent: clientIntent(spec) || undefined,
   };
 }
 
@@ -208,9 +213,12 @@ export function resolveDomain(values: ArrayLike<number>, channel: unknown, zero:
     min -= Math.abs(min) || 1;
     max += Math.abs(max) || 1;
   }
-  const [niceMin, niceMax] = niceDomain(min, max);
-  min = niceMin;
-  max = niceMax;
+  const niceOff = isRecord(channel) && isRecord(channel.scale) && channel.scale.nice === false;
+  if (!niceOff) {
+    const [niceMin, niceMax] = niceDomain(min, max);
+    min = niceMin;
+    max = niceMax;
+  }
   if (isRecord(channel) && isRecord(channel.scale) && Array.isArray(channel.scale.domain)) {
     const domain = channel.scale.domain;
     if (typeof domain[0] === "number") min = domain[0];

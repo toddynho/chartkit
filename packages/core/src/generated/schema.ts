@@ -5,7 +5,7 @@
  */
 
 /**
- * A complete, framework-agnostic description of one chart. The same JSON renders in React, Vue, Svelte, vanilla JS, web components, on the server (SVG/PNG), and through the ChartKit MCP server. Minimal line chart: {version, type, data, encoding:{x,y}, a11y:{alt}}. Everything else has sensible defaults.
+ * A complete, framework-agnostic description of one chart. The same JSON renders in React, Vue, Svelte, and vanilla JS. Minimal line chart: {version, type, data, encoding:{x,y}, a11y:{alt}}. Everything else has sensible defaults.
  */
 export type ChartKitChartSpecV1 = {
   [k: string]: unknown;
@@ -172,7 +172,7 @@ export type Legend =
        */
       position?: "top" | "right" | "bottom" | "left";
       /**
-       * Click a legend item to hide/show its series.
+       * Click a legend item to hide/show its series. Off unless set; the SVG records it as data-ck-intent.
        */
       interactive?: boolean;
       /**
@@ -962,9 +962,9 @@ export interface Axes {
             )
           | FormatObject;
         /**
-         * Approximate number of ticks.
+         * Approximate tick count, or the exact tick values.
          */
-        ticks?: number;
+        ticks?: number | [number, ...number[]];
         /**
          * Grid lines from this axis.
          */
@@ -974,9 +974,13 @@ export interface Axes {
          */
         labels?: boolean;
         /**
-         * Axis side. Defaults: x bottom, y left, y2 right.
+         * Axis side. Defaults: x bottom, y left, y2 right. A side perpendicular to the axis maps onto the nearer end.
          */
         position?: "top" | "bottom" | "left" | "right";
+        /**
+         * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees.
+         */
+        rotate?: number;
       };
   /**
    * Axis options. Set to false to hide the axis.
@@ -1010,9 +1014,9 @@ export interface Axes {
             )
           | FormatObject;
         /**
-         * Approximate number of ticks.
+         * Approximate tick count, or the exact tick values.
          */
-        ticks?: number;
+        ticks?: number | [number, ...number[]];
         /**
          * Grid lines from this axis.
          */
@@ -1022,9 +1026,13 @@ export interface Axes {
          */
         labels?: boolean;
         /**
-         * Axis side. Defaults: x bottom, y left, y2 right.
+         * Axis side. Defaults: x bottom, y left, y2 right. A side perpendicular to the axis maps onto the nearer end.
          */
         position?: "top" | "bottom" | "left" | "right";
+        /**
+         * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees.
+         */
+        rotate?: number;
       };
   /**
    * Second (right) y axis, used by y series with axis 'y2'.
@@ -1058,9 +1066,9 @@ export interface Axes {
             )
           | FormatObject;
         /**
-         * Approximate number of ticks.
+         * Approximate tick count, or the exact tick values.
          */
-        ticks?: number;
+        ticks?: number | [number, ...number[]];
         /**
          * Grid lines from this axis.
          */
@@ -1070,9 +1078,13 @@ export interface Axes {
          */
         labels?: boolean;
         /**
-         * Axis side. Defaults: x bottom, y left, y2 right.
+         * Axis side. Defaults: x bottom, y left, y2 right. A side perpendicular to the axis maps onto the nearer end.
          */
         position?: "top" | "bottom" | "left" | "right";
+        /**
+         * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees.
+         */
+        rotate?: number;
       };
 }
 /**
@@ -1164,11 +1176,11 @@ export interface A11Y {
    */
   description?: string;
   /**
-   * Arrow-key navigation between points with announcements.
+   * Arrow-key navigation between points with announcements. Off unless set, because turning it on loads the interaction runtime.
    */
   keyboard?: boolean;
   /**
-   * Render a visually hidden data table for screen readers.
+   * Render a visually hidden data table for screen readers. Off unless set, because turning it on loads the interaction runtime.
    */
   dataTable?: boolean;
 }

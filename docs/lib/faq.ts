@@ -13,7 +13,7 @@ export const whenToUseFaqs: FaqItem[] = [
   {
     question: "When should I pick another chart library?",
     answer:
-      "Pick something else when you need a hover tooltip, zoom, pan, brush, or animation. This tree accepts those fields and does not draw them (CK3011). Pick Recharts, Chart.js, ECharts, or Nivo when you need their larger catalog (radar, treemap, sankey, maps). Pick uPlot when the aligned update at 1,000 points is the constraint: ChartKit loses that cell on even, jittered, and gapped x (1.5 vs 1.2, 1.6 vs 1.4, and 1.6 vs 1.4). Pick uPlot when the first hover has to be a few milliseconds: ChartKit’s painted median is 20.8, 15.9, and 16.5 ms, and uPlot’s is 4, 4.6, and 4.9 ms.",
+      "Tooltip, zoom, pan, brush, and animation run in the client runtime. The static SVG does not paint them. Keyboard, the data table, and legend clicks stay off unless set. Pick Recharts, Chart.js, ECharts, or Nivo when you need maps. Pick uPlot when the aligned update at 1,000 points is the constraint: ChartKit loses that cell on even, jittered, and gapped x (1.5 vs 1.2, 1.6 vs 1.4, and 1.6 vs 1.4). Pick uPlot when the first hover has to be a few milliseconds: ChartKit’s painted median is 20.8, 15.9, and 16.5 ms, and uPlot’s is 4, 4.6, and 4.9 ms.",
   },
   {
     question: "How large is a ChartKit line chart?",

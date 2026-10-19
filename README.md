@@ -121,7 +121,7 @@ Dashboard components in `@chartkitdev/react` (`LineChart`, `KpiCard`, and the re
 - **TypeScript First** - Full type safety with autocomplete for every prop
 - **Dual Y-Axis** - Display multiple scales in LineChart
 - **Responsive** - Charts automatically resize to fit their container
-- **Not drawn yet** - Tooltip, zoom, pan, brush, and animation validate and warn CK3011. They are not painted.
+- **Client interaction** - Tooltip, zoom, pan, brush, and animation run in the interaction runtime. Keyboard, the data table, and legend clicks stay off unless set. `animation.easing`, `interaction.select`, `tooltip.fields`, and `theme.tokens.fontFamily` warn CK3012.
 
 ## Components
 
