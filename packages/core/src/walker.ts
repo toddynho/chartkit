@@ -220,6 +220,24 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
         hint: `labelPosition is top, bottom, left, right, center, inside, or outside. ${quote(value)} means ${quote(POS_ALIAS[value])}.`,
         fix: [{ op: "replace", path, value: POS_ALIAS[value] }],
       });
+    } else if (path.endsWith("/titlePosition") && typeof value === "string" && TITLE_AT[value]) {
+      emit(ctx, {
+        code: "CK1007",
+        severity: "error",
+        message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
+        path,
+        hint: `titlePosition is start, center, or end. ${quote(value)} means ${quote(TITLE_AT[value])}.`,
+        fix: [{ op: "replace", path, value: TITLE_AT[value] }],
+      });
+    } else if (path.endsWith("/tickMarks") && typeof value === "string" && TICK_AT[value]) {
+      emit(ctx, {
+        code: "CK1007",
+        severity: "error",
+        message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
+        path,
+        hint: `tickMarks is inside, outside, or none. ${quote(value)} means ${quote(TICK_AT[value])}.`,
+        fix: [{ op: "replace", path, value: TICK_AT[value] }],
+      });
     } else if (path.endsWith("/labelEnds") && typeof value === "string" && ENDS_ALIAS[value]) {
       emit(ctx, {
         code: "CK1007",
@@ -1380,6 +1398,17 @@ const SHAPE_ALIAS: Record<string, string> = {
   hidden: "none",
 };
 
+const TITLE_AT: Record<string, string> = { middle: "center", left: "start", right: "end", top: "end", bottom: "start" };
+const TICK_AT: Record<string, string> = { in: "inside", out: "outside", hidden: "none" };
+const AXIS_RENAME: Record<string, string> = {
+  titleAnchor: "titlePosition",
+  titleAlign: "titlePosition",
+  nameLocation: "titlePosition",
+  nameRotate: "titleRotate",
+  tickSize: "tickLength",
+  labelWrap: "labelWidth",
+};
+
 const POS_ALIAS: Record<string, string> = {
   above: "top",
   below: "bottom",
@@ -1504,6 +1533,27 @@ function emitUnknownProp(name: string, path: string, props: Record<string, JsonS
   const pointer = join(path, name);
   if (ctx.skipUnknown.has(pointer)) return;
   if (markMistake(name, path, pointer, value, ctx)) return;
+  if (/^\/axes\/(x|y|y2)$/.test(path) && AXIS_RENAME[name]) {
+    const dest = AXIS_RENAME[name];
+    let next = value;
+    if (dest === "titlePosition" && typeof value === "string" && TITLE_AT[value]) next = TITLE_AT[value];
+    if (dest === "titlePosition" && (next === "start" || next === "middle" || next === "left" || next === "right" || next === "top" || next === "bottom")) {
+      next = TITLE_AT[String(next)] ?? next;
+    }
+    if ((dest === "tickLength" || dest === "labelWidth" || dest === "titleRotate") && typeof next !== "number") next = dest === "labelWidth" ? 72 : dest === "titleRotate" ? 0 : 4;
+    emit(ctx, {
+      code: "CK1009",
+      severity: "error",
+      message: `${quote(name)} is ${quote(dest)} on an axis`,
+      path: pointer,
+      hint: `Use ${quote(dest)} instead of ${quote(name)}.`,
+      fix: [
+        { op: "remove", path: pointer },
+        { op: "add", path: join(path, dest), value: next },
+      ],
+    });
+    return;
+  }
   if (CLICK_KEYS.includes(name)) {
     emit(ctx, {
       code: "CK1002",

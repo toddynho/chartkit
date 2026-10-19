@@ -230,6 +230,14 @@ function apply(host: Record<string, unknown>, path: string, value: unknown): Rec
   }
   const last = parts[parts.length - 1] ?? "";
   (cursor as Record<string, unknown>)[last] = value;
+  if (/^\/axes\/(x|y|y2)\/(titlePosition|titleRotate)$/.test(path)) {
+    const key = path.split("/")[2] ?? "x";
+    const axes = isRecord(spec.axes) ? spec.axes : {};
+    const box = isRecord(axes[key]) ? axes[key] : {};
+    if (typeof box.title !== "string") box.title = "ProbeLabel";
+    axes[key] = box;
+    spec.axes = axes;
+  }
   if (path.startsWith("/tooltip/fields/")) {
     const tooltip = isRecord(spec.tooltip) ? spec.tooltip : {};
     const fields = Array.isArray(tooltip.fields) ? tooltip.fields : [];
@@ -272,6 +280,18 @@ function hosts(): Host[] {
     ["candle", { version: "1", type: "candlestick", data: rows, encoding: { x: "date", open: "open", high: "high", low: "low", close: "close" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["sankey", { version: "1", type: "sankey", data: rows, encoding: { source: "source", target: "target", y: "value" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["histogram", { version: "1", type: "histogram", data: rows, encoding: { x: "revenue" }, a11y: { alt }, size: { width: 420, height: 220 } }],
+    [
+      "crowd",
+      {
+        version: "1",
+        type: "line",
+        data: Array.from({ length: 8 }, (_, index) => ({ month: `Warehouse ${index + 1} north`, revenue: 80 + index * 40, other: 20 + index * 15 })),
+        encoding: { x: "month", y: [{ field: "revenue" }, { field: "other", axis: "y2" }] },
+        axes: { y: { ticks: 14 }, y2: { ticks: 14 } },
+        a11y: { alt },
+        size: { width: 280, height: 150 },
+      },
+    ],
   ];
   const ready: Host[] = [];
   for (const [name, spec] of specs) {

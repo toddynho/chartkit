@@ -75,7 +75,7 @@ export interface HoverIndex {
   width: number;
 }
 
-const TIP_TYPES = new Set(["line", "bar", "stacked-area", "scatter", "combo", "donut"]);
+const TIP_TYPES = new Set(["line", "bar", "stacked-area", "scatter", "combo", "donut", "waterfall"]);
 const lastMarkup = new WeakMap<object, string>();
 
 /** Pixel centers for a category axis, or a numeric x scaled across the plot. Unsorted x is indexed. */
@@ -233,7 +233,7 @@ function tooltipOn(spec: InteractSpec): boolean {
 }
 
 function crosshairOn(spec: InteractSpec): boolean {
-  return tooltipOn(spec) && spec.type !== "donut" && !(isRecord(spec.tooltip) && spec.tooltip.crosshair === false);
+  return tooltipOn(spec) && spec.type !== "donut" && spec.type !== "waterfall" && !(isRecord(spec.tooltip) && spec.tooltip.crosshair === false);
 }
 
 function tipFields(spec: InteractSpec): { field: string; title?: string; format?: unknown }[] | null {
@@ -1051,6 +1051,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function owner(node: Element): string {
+    const named = node.getAttribute("data-ck-name");
+    if (named) return named;
     const ys = node.getAttribute("data-ck-ys");
     if (ys) {
       const index = +ys.slice(ys.lastIndexOf(",") + 1);
@@ -1221,6 +1223,19 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
 
   function hoverMove(event: PointerEvent | MouseEvent): void {
     arm(1);
+    if (base.type === "waterfall") {
+      const mark = (event.target as Element | null)?.closest?.("[data-ck-mark]");
+      if (!mark || mark.getAttribute("data-ck-mark") === "connector") {
+        hideHover();
+        return;
+      }
+      const label = mark.getAttribute("aria-label") || "";
+      const cut = label.indexOf(": ");
+      const name = mark.getAttribute("data-ck-name") || (cut >= 0 ? label.slice(0, cut) : label).trim();
+      const text = cut >= 0 ? label.slice(cut + 2) : label;
+      placeTip(event.clientX, event.clientY, name, [{ name, text, color: legendPaint(mark.getAttribute("fill"), 0) }], [viewPoint(svg, event.clientX, event.clientY)]);
+      return;
+    }
     if (base.type === "donut") {
       const path = (event.target as Element | null)?.closest?.("path[aria-label]");
       if (!path) {

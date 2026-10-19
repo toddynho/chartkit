@@ -75,7 +75,7 @@ export function renderWaterfall(spec: Record<string, unknown>): string | null {
       const x0 = box.left + band * (index - 1) + (band - barW) / 2 + barW;
       parts.push(`<line data-ck-mark="connector" x1="${n(x0)}" y1="${n(yAt(prev.end))}" x2="${n(x)}" y2="${n(yAt(prev.end))}" stroke="${cssVar("muted", frame.preset.muted)}" stroke-dasharray="3 3" />`);
     }
-    parts.push(openMark("rect", kind, label, `x="${n(x)}" y="${n(y)}" width="${n(barW)}" height="${n(height)}" rx="4" fill="${color}"`));
+    parts.push(openMark("rect", kind, label, `x="${n(x)}" y="${n(y)}" width="${n(barW)}" height="${n(height)}" rx="4" fill="${color}"`, step.name, index));
     parts.push("</rect>");
     parts.push(text(x + barW / 2, y - 6, fmt(step.total ? step.end : step.value, frame.locale), cssVar("text", frame.preset.text), 11, "600", "middle"));
   });

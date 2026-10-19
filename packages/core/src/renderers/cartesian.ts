@@ -14,6 +14,14 @@ export interface AxisBox {
   end?: boolean;
   values?: number[];
   rotate?: number;
+  titleAt?: string;
+  titleSpin?: number;
+  skip?: boolean;
+  wrapW?: number;
+  wrapN?: number;
+  rule?: { on: boolean; color?: string; width?: number; dash?: string };
+  tick?: string;
+  tickLen?: number;
 }
 
 export interface Pad {
@@ -1124,9 +1132,108 @@ function xPosition(
   };
 }
 
-function axText(x: number, y: number, anchor: string, body: string, fill: string, family: string, angle = 0, weight = ""): string {
+function axText(x: number, y: number, anchor: string, body: string, fill: string, family: string, angle = 0, weight = "", rows?: string[] | null): string {
   const spin = angle ? ` transform="rotate(${n(angle)} ${n(x)} ${n(y)})"` : "";
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="11"${weight} font-family="${family}"${spin}>${esc(body)}</text>`;
+  const text = rows ? rows.map((row, i) => `<tspan x="${n(x)}" dy="${i ? 12 : 0}">${esc(row)}</tspan>`).join("") : esc(body);
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="11"${weight} font-family="${family}"${spin}>${text}</text>`;
+}
+
+function wrapWords(text: string, width: number, lines: number): string[] {
+  const max = Math.max(1, Math.floor(width / TICK_PX));
+  const cap = Math.max(1, lines);
+  if (text.length <= max) return [text];
+  if (cap === 1) return [text.slice(0, Math.max(1, max - 1)) + "…"];
+  const words = text.split(" ");
+  const out: string[] = [];
+  let cur = "";
+  const take = (value: string) => {
+    if (out.length < cap) out.push(value);
+  };
+  for (let w = 0; w < words.length; w++) {
+    let word = words[w] ?? "";
+    if (word.length > max) {
+      if (cur) {
+        take(cur);
+        cur = "";
+      }
+      while (word && out.length < cap) {
+        if (out.length === cap - 1 && word.length > max) {
+          take(word.slice(0, Math.max(1, max - 1)) + "…");
+          word = "";
+          break;
+        }
+        take(word.slice(0, max));
+        word = word.slice(max);
+      }
+      if (word && out.length < cap) cur = word;
+      continue;
+    }
+    const next = cur ? cur + " " + word : word;
+    if (next.length <= max) cur = next;
+    else {
+      if (cur) take(cur);
+      cur = out.length < cap ? word : "";
+    }
+  }
+  if (cur) take(cur);
+  return out.length ? out : [text];
+}
+
+/** Null keeps a single text node. An array, even of one line, is the wrap path. */
+function linesOf(axis: AxisBox, label: string): string[] | null {
+  if (axis.wrapW === undefined && axis.wrapN === undefined) return null;
+  const width = axis.wrapW && axis.wrapW > 0 ? axis.wrapW : 72;
+  return wrapWords(label, width, axis.wrapN ?? 3);
+}
+
+function lineCount(axis: AxisBox, labels: string[]): number {
+  let count = 1;
+  for (let i = 0; i < labels.length; i++) {
+    const rows = linesOf(axis, labels[i] ?? "");
+    if (rows && rows.length > count) count = rows.length;
+  }
+  return count;
+}
+
+function inkWidth(axis: AxisBox, labels: string[]): number {
+  let width = 0;
+  for (let i = 0; i < labels.length; i++) {
+    const rows = linesOf(axis, labels[i] ?? "");
+    const text = rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : labels[i] ?? "";
+    const size = text.length * TICK_PX;
+    if (size > width) width = size;
+  }
+  return width;
+}
+
+function outsideLen(axis: AxisBox): number {
+  if (axis.tick === "inside" || axis.tick === "none") return 0;
+  if (axis.tick === "outside" || typeof axis.tickLen === "number") return axis.tickLen || 4;
+  return 0;
+}
+
+function tickInk(side: number, edge: number, at: number, axis: AxisBox, stroke: string): string {
+  const mode = axis.tick === "inside" || axis.tick === "outside" ? axis.tick : typeof axis.tickLen === "number" ? "outside" : "";
+  if (!mode) return "";
+  const len = axis.tickLen ?? 4;
+  if (!(len > 0)) return "";
+  const dir = mode === "outside" ? 1 : -1;
+  const x2 = side === 0 ? edge - dir * len : side === 1 ? edge + dir * len : at;
+  const y2 = side === 2 ? edge - dir * len : side === 3 ? edge + dir * len : at;
+  const x1 = side < 2 ? edge : at;
+  const y1 = side < 2 ? at : edge;
+  return `<line x1="${n(x1)}" y1="${n(y1)}" x2="${n(x2)}" y2="${n(y2)}" stroke="${stroke}" />`;
+}
+
+function ruleLine(side: number, plot: PlotBox, model: PlotModel, axis: AxisBox): string {
+  const rule = axis.rule;
+  if (!rule?.on) return "";
+  const dash = rule.dash === "dashed" ? ' stroke-dasharray="4 3"' : rule.dash === "dotted" ? ' stroke-dasharray="1 3"' : "";
+  const width = rule.width ? ` stroke-width="${n(rule.width)}"` : "";
+  const stroke = rule.color || cssVar("axis", model.preset.axis);
+  const edge = side === 0 ? plot.left : side === 1 ? plot.right : side === 2 ? plot.top : plot.bottom;
+  if (side < 2) return `<line data-ck-axis="line" x1="${n(edge)}" y1="${n(plot.top)}" x2="${n(edge)}" y2="${n(plot.bottom)}" stroke="${stroke}"${width}${dash} />`;
+  return `<line data-ck-axis="line" x1="${n(plot.left)}" y1="${n(edge)}" x2="${n(plot.right)}" y2="${n(edge)}" stroke="${stroke}"${width}${dash} />`;
 }
 
 /** 0 left, 1 right, 2 top, 3 bottom. */
@@ -1135,6 +1242,14 @@ function place(side: number, edge: number, at: number, titled: boolean, height: 
   if (side === 1) return [edge + 6, at + 4, "start"];
   if (side === 2) return [at, edge - 18, "middle"];
   return [at, titled ? edge + 14 : height - 8, "middle"];
+}
+
+function ySide(model: PlotModel, horizontal: boolean): number {
+  return horizontal ? (model.yAxis.end ? 2 : 3) : model.yAxis.end ? 1 : 0;
+}
+
+function xSide(model: PlotModel, horizontal: boolean): number {
+  return horizontal ? (model.xAxis.end ? 1 : 0) : model.xAxis.end ? 2 : 3;
 }
 
 function drawAxes(
@@ -1151,15 +1266,20 @@ function drawAxes(
   xScale: XScale,
 ): string {
   let out = "";
-  if (model.showY && model.yAxis.labels !== false) {
-    const side = horizontal ? (model.yAxis.end ? 2 : 3) : model.yAxis.end ? 1 : 0;
-    out += band(yText, yTicks, yScale, model, plot, side, model.yAxis);
+  if (model.showY) {
+    const side = ySide(model, horizontal);
+    out += ruleLine(side, plot, model, model.yAxis);
+    if (model.yAxis.labels !== false) out += band(yText, yTicks, yScale, model, plot, side, model.yAxis);
   }
-  if (model.showY2 && model.y2Axis.labels !== false) {
+  if (model.showY2) {
     const side = model.y2Axis.end !== false ? 1 : 0;
-    out += band(y2Text, y2Ticks, y2Scale, model, plot, side, model.y2Axis);
+    out += ruleLine(side, plot, model, model.y2Axis);
+    if (model.y2Axis.labels !== false) out += band(y2Text, y2Ticks, y2Scale, model, plot, side, model.y2Axis);
   }
-  if (model.showX && model.xAxis.labels !== false) out += xBand(model, xScale, count, horizontal, plot);
+  if (model.showX) {
+    out += ruleLine(xSide(model, horizontal), plot, model, model.xAxis);
+    if (model.xAxis.labels !== false) out += xBand(model, xScale, count, horizontal, plot);
+  }
   out += axisTitles(model, plot, horizontal);
   return out;
 }
@@ -1175,12 +1295,28 @@ function band(
 ): string {
   const fill = cssVar("muted", model.preset.muted);
   const family = font();
+  const ink = cssVar("axis", model.preset.axis);
   const edge = side === 0 ? plot.left : side === 1 ? plot.right : side === 2 ? plot.top : plot.bottom;
   const angle = axis.rotate || 0;
+  const skip = axis.skip !== false;
   let out = "";
+  let last = side < 2 ? Infinity : -Infinity;
   for (let i = 0; i < values.length; i++) {
+    const label = labels[i] ?? "";
     const at = place(side, edge, scale(values[i]), Boolean(axis.title), model.height);
-    out += axText(at[0], at[1], at[2], labels[i] ?? "", fill, family, angle);
+    const rows = linesOf(axis, label);
+    if (skip && !angle) {
+      if (side < 2) {
+        if (Math.abs(last - at[1]) < 13) continue;
+        last = at[1];
+      } else {
+        const width = ((rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label).length || 1) * 6.4;
+        if (at[0] - width / 2 < last) continue;
+        last = at[0] + width / 2 + 8;
+      }
+    }
+    out += tickInk(side, edge, scale(values[i]), axis, ink);
+    out += axText(at[0], at[1], at[2], label, fill, family, angle, "", rows);
   }
   return out;
 }
@@ -1193,21 +1329,31 @@ function xBand(model: PlotModel, xScale: XScale, count: number, horizontal: bool
   if (step === 0) return "";
   const fill = cssVar("muted", model.preset.muted);
   const family = font();
+  const ink = cssVar("axis", model.preset.axis);
+  const side = xSide(model, horizontal);
+  const edge = side === 0 ? plot.left : side === 1 ? plot.right : side === 2 ? plot.top : plot.bottom;
   const y = model.xAxis.end && !horizontal ? plot.top - 18 : plot.bottom + 16;
+  const keep = model.xAxis.skip === false;
   let out = "";
   let last = -Infinity;
   for (let i = 0; i < count; i += step) {
     const label = tickLabel(model, i);
     if (!label) continue;
+    const rows = linesOf(model.xAxis, label);
     if (horizontal) {
       const right = Boolean(model.xAxis.end);
-      out += axText(right ? plot.right + 8 : plot.left - 6, xScale.center(i) + 4, right ? "start" : "end", label, fill, family);
+      const at = xScale.center(i);
+      out += tickInk(side, edge, at, model.xAxis, ink);
+      out += axText(right ? plot.right + 8 : plot.left - 6, at + 4, right ? "start" : "end", label, fill, family, 0, "", rows);
       continue;
     }
-    out += alongOne(label, xScale.center(i), y, angle, plot, 0, fill, family, last);
-    if (!angle) {
-      const width = label.length * 6.4;
-      const x = xScale.center(i);
+    const x = xScale.center(i);
+    const drawn = alongOne(label, x, y, angle, plot, 0, fill, family, keep ? -Infinity : last, rows);
+    if (!drawn) continue;
+    out += tickInk(side, edge, x, model.xAxis, ink);
+    out += drawn;
+    if (!angle && !keep) {
+      const width = ((rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label).length) * 6.4;
       if (x - width / 2 >= last) last = x + width / 2 + 8;
     }
   }
@@ -1244,15 +1390,23 @@ function along(
   const y = model.xAxis.end ? plot.top - 18 : plot.bottom + 16;
   const fill = cssVar("muted", model.preset.muted);
   const family = font();
+  const ink = cssVar("axis", model.preset.axis);
+  const side = model.xAxis.end ? 2 : 3;
+  const edge = model.xAxis.end ? plot.top : plot.bottom;
+  const keep = model.xAxis.skip === false;
   let out = "";
   let last = -Infinity;
   for (let i = 0; i < values.length; i++) {
     const label = labels[i];
     if (!label) continue;
     const x = at(values[i]);
-    out += alongOne(label, x, y, angle, plot, slack, fill, family, last);
-    if (!angle && x >= plot.left - slack && x <= plot.right + slack) {
-      const width = label.length * 6.4;
+    const rows = linesOf(model.xAxis, label);
+    const drawn = alongOne(label, x, y, angle, plot, slack, fill, family, keep ? -Infinity : last, rows);
+    if (!drawn) continue;
+    out += tickInk(side, edge, x, model.xAxis, ink);
+    out += drawn;
+    if (!angle && !keep && x >= plot.left - slack && x <= plot.right + slack) {
+      const width = ((rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label).length) * 6.4;
       if (x - width / 2 >= last) last = x + width / 2 + 8;
     }
   }
@@ -1269,13 +1423,26 @@ function alongOne(
   fill: string,
   family: string,
   last: number,
+  rows?: string[] | null,
 ): string {
   if (slack && (x < plot.left - slack || x > plot.right + slack)) return "";
   if (!angle) {
-    const width = label.length * 6.4;
+    const width = ((rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label).length) * 6.4;
     if (x - width / 2 < last) return "";
   }
-  return axText(x, y, angle < 0 ? "end" : angle > 0 ? "start" : "middle", label, fill, family, angle);
+  return axText(x, y, angle < 0 ? "end" : angle > 0 ? "start" : "middle", label, fill, family, angle, "", rows);
+}
+
+function titleSpin(axis: AxisBox, vertical: boolean, end: boolean): number {
+  if (typeof axis.titleSpin === "number") return axis.titleSpin;
+  if (!vertical) return 0;
+  return end ? 90 : -90;
+}
+
+function titleAlong(at: string | undefined, mid: number, start: number, end: number): number {
+  if (at === "start") return start;
+  if (at === "end") return end;
+  return mid;
 }
 
 function axisTitles(model: PlotModel, plot: PlotBox, horizontal: boolean): string {
@@ -1284,33 +1451,46 @@ function axisTitles(model: PlotModel, plot: PlotBox, horizontal: boolean): strin
   const midY = (plot.top + plot.bottom) / 2;
   const midX = (plot.left + plot.right) / 2;
   const weight = ' font-weight="500"';
+  const lo = Math.min(plot.top + 28, midY);
+  const hi = Math.max(plot.bottom - 28, midY);
   let out = "";
   if (model.showY && model.yAxis.title) {
     const title = model.yAxis.title;
-    const side = horizontal ? (model.yAxis.end ? 2 : 3) : model.yAxis.end ? 1 : 0;
-    if (side === 0) out += axText(14, midY, "middle", title, fill, family, -90, weight);
-    else if (side === 1) out += axText(model.width - 14, midY, "middle", title, fill, family, 90, weight);
-    else if (side === 2) out += axText(midX, Math.max(12, plot.top - 18), "middle", title, fill, family, 0, weight);
-    else out += axText(midX, model.height - 6, "middle", title, fill, family, 0, weight);
+    const side = ySide(model, horizontal);
+    const vertical = side < 2;
+    const angle = titleSpin(model.yAxis, vertical, side === 1);
+    if (vertical) out += axText(side === 0 ? 14 : model.width - 14, titleAlong(model.yAxis.titleAt, midY, hi, lo), "middle", title, fill, family, angle, weight);
+    else {
+      const anchor = model.yAxis.titleAt === "start" ? "start" : model.yAxis.titleAt === "end" ? "end" : "middle";
+      const x = titleAlong(model.yAxis.titleAt, midX, plot.left, plot.right);
+      out += axText(x, side === 2 ? Math.max(12, plot.top - 18) : model.height - 6, anchor, title, fill, family, angle, weight);
+    }
   }
   if (model.showY2 && model.y2Axis.title) {
     const right = model.y2Axis.end !== false;
-    out += axText(right ? model.width - 14 : 14, midY, "middle", model.y2Axis.title, fill, family, right ? 90 : -90, weight);
+    const angle = titleSpin(model.y2Axis, true, right);
+    out += axText(right ? model.width - 14 : 14, titleAlong(model.y2Axis.titleAt, midY, hi, lo), "middle", model.y2Axis.title, fill, family, angle, weight);
   }
   if (model.showX && model.xAxis.title) {
     const title = model.xAxis.title;
     if (horizontal) {
       const right = Boolean(model.xAxis.end);
-      out += axText(right ? model.width - 14 : 14, midY, "middle", title, fill, family, right ? 90 : -90, weight);
-    } else if (model.xAxis.end) out += axText(midX, plot.top - 40, "middle", title, fill, family, 0, weight);
-    else out += axText(midX, model.height - 6, "middle", title, fill, family, 0, weight);
+      const angle = titleSpin(model.xAxis, true, right);
+      out += axText(right ? model.width - 14 : 14, titleAlong(model.xAxis.titleAt, midY, hi, lo), "middle", title, fill, family, angle, weight);
+    } else {
+      const anchor = model.xAxis.titleAt === "start" ? "start" : model.xAxis.titleAt === "end" ? "end" : "middle";
+      const x = titleAlong(model.xAxis.titleAt, midX, plot.left, plot.right);
+      const angle = titleSpin(model.xAxis, false, false);
+      out += axText(x, model.xAxis.end ? plot.top - 40 : model.height - 6, anchor, title, fill, family, angle, weight);
+    }
   }
   return out;
 }
 
-/** Explicit rotate, or −40 when every category label fits once tilted. */
+/** Explicit rotate, or −40 when every category label fits once tilted. autoSkip replaces the tilt with a skip. */
 export function xAngle(model: PlotModel): number {
   if (typeof model.xAxis.rotate === "number") return model.xAxis.rotate;
+  if (model.xAxis.skip === true) return 0;
   if (!model.showX || !model.xAxis.labels || model.x) return 0;
   if (model.orientation === "horizontal" && model.type === "bar") return 0;
   const labels = model.labels;
@@ -1326,10 +1506,12 @@ function xStep(model: PlotModel, count: number, angle: number): number {
   const target = model.xAxis.count;
   if (target === 0) return 0;
   if (target !== undefined) return Math.max(1, Math.ceil(count / Math.max(1, target)));
-  if (!angle) return count > 8 ? Math.ceil(count / 6) : 1;
+  if (model.xAxis.skip === false) return 1;
   const slot = Math.max(1, (model.width - 64) / Math.max(1, count));
-  const rad = (Math.abs(angle) * Math.PI) / 180;
   const labels = model.labels.length ? model.labels : [];
+  if (model.xAxis.skip === true) return Math.max(1, Math.ceil(widest(labels) / slot));
+  if (!angle) return count > 8 ? Math.ceil(count / 6) : 1;
+  const rad = (Math.abs(angle) * Math.PI) / 180;
   const footprint = widest(labels) * Math.abs(Math.cos(rad)) + 11 * Math.abs(Math.sin(rad));
   return footprint <= slot ? 1 : Math.max(1, Math.ceil(footprint / slot));
 }
@@ -1386,9 +1568,9 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
   const yEnd = Boolean(model.yAxis.end);
   const xEnd = Boolean(model.xAxis.end);
   const y2End = model.y2Axis.end !== false;
-  const yGap = Math.max(52, Math.ceil(widest(yLabels) + 12));
-  const y2Gap = Math.max(52, Math.ceil(widest(y2Labels) + 12));
-  const xGap = Math.max(52, Math.ceil(widest(xLabels) + 12));
+  const yGap = Math.max(52, Math.ceil(inkWidth(model.yAxis, yLabels) + 12));
+  const y2Gap = Math.max(52, Math.ceil(inkWidth(model.y2Axis, y2Labels) + 12));
+  const xGap = Math.max(52, Math.ceil(inkWidth(model.xAxis, xLabels) + 12));
   let left = 12;
   let right = 16;
   let top = 14;
@@ -1419,10 +1601,31 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
     else left = Math.max(left, y2Gap);
   }
   if (model.showX && model.xAxis.labels !== false) {
-    if (!horizontal && xEnd) top += 32;
-    else if (!horizontal) bottom = 32;
+    const lines = lineCount(model.xAxis, xLabels);
+    const extra = (lines - 1) * 12;
+    if (!horizontal && xEnd) top += 32 + extra;
+    else if (!horizontal) bottom = 32 + extra;
     else if (xEnd) right = Math.max(right, xGap);
     else left = Math.max(left, xGap);
+  }
+  const yTick = model.showY ? outsideLen(model.yAxis) : 0;
+  const y2Tick = model.showY2 ? outsideLen(model.y2Axis) : 0;
+  const xTick = model.showX ? outsideLen(model.xAxis) : 0;
+  if (yTick) {
+    if (!horizontal && yEnd) right += yTick;
+    else if (!horizontal) left += yTick;
+    else if (yEnd) top += yTick;
+    else bottom += yTick;
+  }
+  if (y2Tick) {
+    if (y2End) right += y2Tick;
+    else left += y2Tick;
+  }
+  if (xTick) {
+    if (!horizontal && xEnd) top += xTick;
+    else if (!horizontal) bottom += xTick;
+    else if (xEnd) right += xTick;
+    else left += xTick;
   }
   if (model.showY && model.yAxis.title) {
     if (!horizontal && yEnd) right += 16;
