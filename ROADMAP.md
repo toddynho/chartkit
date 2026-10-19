@@ -23,11 +23,11 @@ Earlier v1 work. 28 chart types draw: 15 in the first core, eight in Phase 3, an
 - [x] An explicit y domain ([#15](https://github.com/toddynho/chartkit/pull/15))
 - [x] Point shapes and data labels ([#23](https://github.com/toddynho/chartkit/pull/23))
 - [x] Axis finishing: title position, auto-skip, wrap, the axis line, and tick marks ([#24](https://github.com/toddynho/chartkit/pull/24))
+- [x] Pie and colour: a real pie type, leader lines, and per-point and conditional colour ([#25](https://github.com/toddynho/chartkit/pull/25))
 
 ## In progress
 
 - [ ] Showcase gallery, the first six boards ([#20](https://github.com/toddynho/chartkit/pull/20)): one spec on every stack, the roastery P&L, bike-share flows, a Mermaid game launch, the repair loop, and benchmarks drawn as charts
-- [ ] Pie and colour: a real pie type, leader lines, and per-point and conditional colour
 
 ## Next
 
