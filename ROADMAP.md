@@ -26,7 +26,7 @@ Earlier v1 work. 28 chart types draw: 15 in the first core, eight in Phase 3, an
 - [x] Pie and colour: a real pie type, leader lines, and per-point and conditional colour ([#25](https://github.com/toddynho/chartkit/pull/25))
 - [x] PNG, SVG, and CSV export, with a keyboard export menu ([#27](https://github.com/toddynho/chartkit/pull/27))
 - [x] Legends and colour scales ([#27](https://github.com/toddynho/chartkit/pull/27))
-- [x] Annotations: trendlines, a regression overlay, callouts, and axis bands
+- [x] Annotations: trendlines, a regression overlay, callouts, and axis bands ([#31](https://github.com/toddynho/chartkit/pull/31))
 
 ## In progress
 
