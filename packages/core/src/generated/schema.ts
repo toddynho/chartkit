@@ -1039,7 +1039,58 @@ export interface Axes {
          */
         position?: "top" | "bottom" | "left" | "right";
         /**
-         * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees.
+         * Where the title sits along the axis. start is the minimum end (left or bottom). end is the maximum end. Default center.
+         */
+        titlePosition?: "start" | "center" | "end";
+        /**
+         * Axis title rotation in degrees. Default 0 on x, -90 on a left y axis, and 90 on a right y or y2 axis.
+         */
+        titleRotate?: number;
+        /**
+         * Skip tick labels that would overlap. false draws every label. When omitted, crowded category labels still tilt about -40 degrees if that fits, and numeric ticks skip only when they collide.
+         */
+        autoSkip?: boolean;
+        /**
+         * Maximum tick-label width in pixels. Longer labels wrap, then ellipsize.
+         */
+        labelWidth?: number;
+        /**
+         * Maximum lines for a wrapped tick label. Enables wrapping at 72 pixels when labelWidth is omitted.
+         */
+        labelLines?: number;
+        /**
+         * Axis baseline. Off unless set. Color defaults to the axis token.
+         */
+        line?:
+          | boolean
+          | {
+              /**
+               * Draw the baseline.
+               */
+              show?: boolean;
+              /**
+               * Stroke color. Defaults to the axis token.
+               */
+              color?: string;
+              /**
+               * Stroke width in pixels.
+               */
+              width?: number;
+              /**
+               * Stroke pattern.
+               */
+              dash?: "solid" | "dashed" | "dotted";
+            };
+        /**
+         * Tick marks at labeled ticks. none is the default. inside points into the plot.
+         */
+        tickMarks?: "inside" | "outside" | "none";
+        /**
+         * Tick mark length in pixels. Setting it draws outside marks unless tickMarks says otherwise.
+         */
+        tickLength?: number;
+        /**
+         * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true.
          */
         rotate?: number;
       };
@@ -1091,7 +1142,58 @@ export interface Axes {
          */
         position?: "top" | "bottom" | "left" | "right";
         /**
-         * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees.
+         * Where the title sits along the axis. start is the minimum end (left or bottom). end is the maximum end. Default center.
+         */
+        titlePosition?: "start" | "center" | "end";
+        /**
+         * Axis title rotation in degrees. Default 0 on x, -90 on a left y axis, and 90 on a right y or y2 axis.
+         */
+        titleRotate?: number;
+        /**
+         * Skip tick labels that would overlap. false draws every label. When omitted, crowded category labels still tilt about -40 degrees if that fits, and numeric ticks skip only when they collide.
+         */
+        autoSkip?: boolean;
+        /**
+         * Maximum tick-label width in pixels. Longer labels wrap, then ellipsize.
+         */
+        labelWidth?: number;
+        /**
+         * Maximum lines for a wrapped tick label. Enables wrapping at 72 pixels when labelWidth is omitted.
+         */
+        labelLines?: number;
+        /**
+         * Axis baseline. Off unless set. Color defaults to the axis token.
+         */
+        line?:
+          | boolean
+          | {
+              /**
+               * Draw the baseline.
+               */
+              show?: boolean;
+              /**
+               * Stroke color. Defaults to the axis token.
+               */
+              color?: string;
+              /**
+               * Stroke width in pixels.
+               */
+              width?: number;
+              /**
+               * Stroke pattern.
+               */
+              dash?: "solid" | "dashed" | "dotted";
+            };
+        /**
+         * Tick marks at labeled ticks. none is the default. inside points into the plot.
+         */
+        tickMarks?: "inside" | "outside" | "none";
+        /**
+         * Tick mark length in pixels. Setting it draws outside marks unless tickMarks says otherwise.
+         */
+        tickLength?: number;
+        /**
+         * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true.
          */
         rotate?: number;
       };
@@ -1143,7 +1245,58 @@ export interface Axes {
          */
         position?: "top" | "bottom" | "left" | "right";
         /**
-         * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees.
+         * Where the title sits along the axis. start is the minimum end (left or bottom). end is the maximum end. Default center.
+         */
+        titlePosition?: "start" | "center" | "end";
+        /**
+         * Axis title rotation in degrees. Default 0 on x, -90 on a left y axis, and 90 on a right y or y2 axis.
+         */
+        titleRotate?: number;
+        /**
+         * Skip tick labels that would overlap. false draws every label. When omitted, crowded category labels still tilt about -40 degrees if that fits, and numeric ticks skip only when they collide.
+         */
+        autoSkip?: boolean;
+        /**
+         * Maximum tick-label width in pixels. Longer labels wrap, then ellipsize.
+         */
+        labelWidth?: number;
+        /**
+         * Maximum lines for a wrapped tick label. Enables wrapping at 72 pixels when labelWidth is omitted.
+         */
+        labelLines?: number;
+        /**
+         * Axis baseline. Off unless set. Color defaults to the axis token.
+         */
+        line?:
+          | boolean
+          | {
+              /**
+               * Draw the baseline.
+               */
+              show?: boolean;
+              /**
+               * Stroke color. Defaults to the axis token.
+               */
+              color?: string;
+              /**
+               * Stroke width in pixels.
+               */
+              width?: number;
+              /**
+               * Stroke pattern.
+               */
+              dash?: "solid" | "dashed" | "dotted";
+            };
+        /**
+         * Tick marks at labeled ticks. none is the default. inside points into the plot.
+         */
+        tickMarks?: "inside" | "outside" | "none";
+        /**
+         * Tick mark length in pixels. Setting it draws outside marks unless tickMarks says otherwise.
+         */
+        tickLength?: number;
+        /**
+         * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true.
          */
         rotate?: number;
       };

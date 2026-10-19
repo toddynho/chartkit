@@ -242,6 +242,16 @@ function demoValue(id, parts, literal) {
   if (leaf === "width" && parts.includes("size")) return 640;
   if (leaf === "locale") return "en-US";
   if (leaf === "format") return "compact";
+  if (leaf === "titlePosition") return "end";
+  if (leaf === "titleRotate") return -20;
+  if (leaf === "autoSkip") return false;
+  if (leaf === "labelWidth") return 48;
+  if (leaf === "labelLines") return 2;
+  if (leaf === "tickMarks") return "outside";
+  if (leaf === "tickLength") return 6;
+  if (leaf === "line" && parts[0] === "axes") return { show: true, dash: "dashed", width: 1.5 };
+  if (leaf === "width" && parts.includes("line")) return 2;
+  if (leaf === "color" && parts[0] === "axes") return "#5c6b7a";
   if (leaf === "pointShape") return "diamond";
   if (leaf === "labelPosition") return "top";
   if (leaf === "labelFormat") return "integer";
@@ -309,6 +319,10 @@ function applyFeature(spec, feature) {
       row.size = 4 + index * 6;
     });
     spec.encoding.size = "size";
+  }
+  if (parts[0] === "axes" && (parts.includes("titlePosition") || parts.includes("titleRotate"))) {
+    const axis = spec.axes?.[parts[1]];
+    if (axis && typeof axis === "object") axis.title = parts[1] === "x" ? "Quarter" : "Units";
   }
   if (parts.includes("axis") && (value === "y2" || spec.encoding?.y?.axis === "y2")) {
     spec.axes = { ...spec.axes, y2: { title: "Other" } };

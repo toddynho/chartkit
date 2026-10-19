@@ -180,6 +180,13 @@ export function closeChart(): string {
   return "</svg>";
 }
 
+export interface AxisRule {
+  on: boolean;
+  color?: string;
+  width?: number;
+  dash?: string;
+}
+
 export interface AxisSpec {
   on: boolean;
   title?: string;
@@ -189,6 +196,29 @@ export interface AxisSpec {
   /** Right or top, rather than the default left or bottom. */
   end: boolean;
   rotate?: number;
+  /** start, center, or end. */
+  titleAt?: string;
+  titleSpin?: number;
+  /** true forces skip, false draws every label, omitted keeps the tilt default on x. */
+  skip?: boolean;
+  wrapW?: number;
+  wrapN?: number;
+  rule?: AxisRule;
+  /** inside, outside, or none. */
+  tick?: string;
+  tickLen?: number;
+}
+
+function axisRule(value: unknown): AxisRule | undefined {
+  if (value === true) return { on: true };
+  if (value === false) return { on: false };
+  if (!isRecord(value)) return undefined;
+  const dash = value.dash === "dashed" || value.dash === "dotted" || value.dash === "solid" ? value.dash : undefined;
+  const width = typeof value.width === "number" && Number.isFinite(value.width) ? Math.max(0, Math.min(8, value.width)) : undefined;
+  const color = typeof value.color === "string" && value.color ? value.color : undefined;
+  if (value.show === false) return { on: false, color, width, dash };
+  const on = value.show === true || color !== undefined || width !== undefined || dash !== undefined;
+  return { on, color, width, dash };
 }
 
 /** Axis box from `axes.x`, `axes.y`, or `axes.y2`. Perpendicular sides map onto that axis. */
@@ -204,6 +234,8 @@ export function readAxis(spec: Record<string, unknown>, key: "x" | "y" | "y2", h
   if (pos === "right" || pos === "top" || pos === "left" || pos === "bottom") {
     end = drawnVertical ? pos === "right" || pos === "top" : pos === "top" || pos === "left";
   }
+  const at = axis.titlePosition;
+  const marks = axis.tickMarks;
   return {
     on: raw !== false,
     title: typeof axis.title === "string" && axis.title ? axis.title : undefined,
@@ -212,6 +244,14 @@ export function readAxis(spec: Record<string, unknown>, key: "x" | "y" | "y2", h
     labels: axis.labels !== false,
     end,
     rotate: typeof axis.rotate === "number" && Number.isFinite(axis.rotate) ? axis.rotate : undefined,
+    titleAt: at === "start" || at === "end" || at === "center" ? at : undefined,
+    titleSpin: typeof axis.titleRotate === "number" && Number.isFinite(axis.titleRotate) ? axis.titleRotate : undefined,
+    skip: typeof axis.autoSkip === "boolean" ? axis.autoSkip : undefined,
+    wrapW: typeof axis.labelWidth === "number" && Number.isFinite(axis.labelWidth) ? Math.max(0, Math.min(240, axis.labelWidth)) : undefined,
+    wrapN: typeof axis.labelLines === "number" && Number.isFinite(axis.labelLines) ? Math.max(1, Math.min(6, Math.round(axis.labelLines))) : undefined,
+    rule: axisRule(axis.line),
+    tick: marks === "inside" || marks === "outside" || marks === "none" ? marks : undefined,
+    tickLen: typeof axis.tickLength === "number" && Number.isFinite(axis.tickLength) ? Math.max(0, Math.min(24, axis.tickLength)) : undefined,
   };
 }
 

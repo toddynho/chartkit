@@ -47,3 +47,15 @@ Rechecked on `createRenderer([line])` and the bar, scatter, and donut entries. A
 | label.format | native | `mark.labelFormat` reuses the format presets on the label text. |
 | label.collision | native | A label that would overlap one already drawn is skipped. |
 | label.total | native | `mark.stackTotal` labels the total on a stacked bar or stacked area. |
+
+## Axis finishing
+
+Rechecked on `createRenderer([line])` with a crowded category axis and a second y axis. A cell moved to native only when a runtime probe changed the picture.
+
+| id | status | correction |
+|---|---|---|
+| axis.title.position | native | `titlePosition` is start, center, or end on x, y, and y2. `titleRotate` sets the y and y2 title angle. |
+| axis.ticks.autoskip | native | `autoSkip: true` drops crowded category labels instead of tilting them. `false` draws every label. Numeric ticks skip on collision unless it is false. |
+| axis.ticks.wrap | native | `labelWidth` and `labelLines` wrap tick labels, then ellipsize. |
+| axis.ticks.marks | native | `tickMarks` is inside, outside, or none. `tickLength` sets the length. Outside is the default when only the length is set. |
+| axis.line | native | The baseline is off until `line` is true or `{ show, color, width, dash }`. Dash is solid, dashed, or dotted. |

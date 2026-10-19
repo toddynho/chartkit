@@ -26,8 +26,9 @@ export function text(x: number, y: number, value: string, fill: string, size: nu
 }
 
 /** Opens a mark that can hold a `<title>`, so a static SVG still has a tooltip. */
-export function openMark(tag: string, kind: string, label: string, attrs: string): string {
-  return `<${tag} ${attrs} data-ck-mark="${kind}" aria-label="${esc(label)}"><title>${esc(label)}</title>`;
+export function openMark(tag: string, kind: string, label: string, attrs: string, name?: string, index?: number): string {
+  const named = name ? ` data-ck-name="${esc(name)}" data-ck-i="${index ?? 0}"` : "";
+  return `<${tag} ${attrs}${named} data-ck-mark="${kind}" aria-label="${esc(label)}"><title>${esc(label)}</title>`;
 }
 
 export function fill(frame: Frame, index: number): string {

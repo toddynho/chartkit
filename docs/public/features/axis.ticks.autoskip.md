@@ -1,14 +1,14 @@
 # Tick label overlap avoidance
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Auto-skip, stagger or hide overlapping labels
 
-Matrix status: `partial`. Verification: `dts-path` (strong).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-auto-tilt (~-40 deg) only; no skip, stagger, or hide; the tilt is drawn on createRenderer([line]) since PR #17 (main 116d0af)
+autoSkip true drops crowded category labels instead of tilting them. false draws every label. Numeric ticks skip on collision unless it is false. Drawn on createRenderer([line]).
 
-Source: chartkit:packages/core/src/generated/schema.ts:983
+Source: packages/core/src/generated/schema.ts:1044
 
 ## ChartKit spec
 
@@ -39,7 +39,7 @@ Source: chartkit:packages/core/src/generated/schema.ts:983
   },
   "axes": {
     "x": {
-      "rotate": -40
+      "autoSkip": false
     }
   }
 }
@@ -72,6 +72,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | unknown | ~labelAutoHide\|labelAutoRotate | unverified (unknown) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against bdf969b7d123.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 67a0c9849a0c.
 
 https://chartkit.dev/features.json

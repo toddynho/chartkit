@@ -1276,9 +1276,77 @@
                   ],
                   "description": "Axis side. Defaults: x bottom, y left, y2 right. A side perpendicular to the axis maps onto the nearer end."
                 },
+                "titlePosition": {
+                  "enum": ["start", "center", "end"],
+                  "description": "Where the title sits along the axis. start is the minimum end (left or bottom). end is the maximum end. Default center."
+                },
+                "titleRotate": {
+                  "type": "number",
+                  "minimum": -360,
+                  "maximum": 360,
+                  "description": "Axis title rotation in degrees. Default 0 on x, -90 on a left y axis, and 90 on a right y or y2 axis."
+                },
+                "autoSkip": {
+                  "type": "boolean",
+                  "description": "Skip tick labels that would overlap. false draws every label. When omitted, crowded category labels still tilt about -40 degrees if that fits, and numeric ticks skip only when they collide."
+                },
+                "labelWidth": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 240,
+                  "description": "Maximum tick-label width in pixels. Longer labels wrap, then ellipsize."
+                },
+                "labelLines": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 6,
+                  "description": "Maximum lines for a wrapped tick label. Enables wrapping at 72 pixels when labelWidth is omitted."
+                },
+                "line": {
+                  "description": "Axis baseline. Off unless set. Color defaults to the axis token.",
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "show": {
+                          "type": "boolean",
+                          "description": "Draw the baseline."
+                        },
+                        "color": {
+                          "type": "string",
+                          "description": "Stroke color. Defaults to the axis token."
+                        },
+                        "width": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 8,
+                          "description": "Stroke width in pixels."
+                        },
+                        "dash": {
+                          "enum": ["solid", "dashed", "dotted"],
+                          "description": "Stroke pattern."
+                        }
+                      }
+                    }
+                  ]
+                },
+                "tickMarks": {
+                  "enum": ["inside", "outside", "none"],
+                  "description": "Tick marks at labeled ticks. none is the default. inside points into the plot."
+                },
+                "tickLength": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 24,
+                  "description": "Tick mark length in pixels. Setting it draws outside marks unless tickMarks says otherwise."
+                },
                 "rotate": {
                   "type": "number",
-                  "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees."
+                  "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true."
                 }
               },
               "description": "Axis settings."
@@ -1351,9 +1419,77 @@
                   ],
                   "description": "Axis side. Defaults: x bottom, y left, y2 right. A side perpendicular to the axis maps onto the nearer end."
                 },
+                "titlePosition": {
+                  "enum": ["start", "center", "end"],
+                  "description": "Where the title sits along the axis. start is the minimum end (left or bottom). end is the maximum end. Default center."
+                },
+                "titleRotate": {
+                  "type": "number",
+                  "minimum": -360,
+                  "maximum": 360,
+                  "description": "Axis title rotation in degrees. Default 0 on x, -90 on a left y axis, and 90 on a right y or y2 axis."
+                },
+                "autoSkip": {
+                  "type": "boolean",
+                  "description": "Skip tick labels that would overlap. false draws every label. When omitted, crowded category labels still tilt about -40 degrees if that fits, and numeric ticks skip only when they collide."
+                },
+                "labelWidth": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 240,
+                  "description": "Maximum tick-label width in pixels. Longer labels wrap, then ellipsize."
+                },
+                "labelLines": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 6,
+                  "description": "Maximum lines for a wrapped tick label. Enables wrapping at 72 pixels when labelWidth is omitted."
+                },
+                "line": {
+                  "description": "Axis baseline. Off unless set. Color defaults to the axis token.",
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "show": {
+                          "type": "boolean",
+                          "description": "Draw the baseline."
+                        },
+                        "color": {
+                          "type": "string",
+                          "description": "Stroke color. Defaults to the axis token."
+                        },
+                        "width": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 8,
+                          "description": "Stroke width in pixels."
+                        },
+                        "dash": {
+                          "enum": ["solid", "dashed", "dotted"],
+                          "description": "Stroke pattern."
+                        }
+                      }
+                    }
+                  ]
+                },
+                "tickMarks": {
+                  "enum": ["inside", "outside", "none"],
+                  "description": "Tick marks at labeled ticks. none is the default. inside points into the plot."
+                },
+                "tickLength": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 24,
+                  "description": "Tick mark length in pixels. Setting it draws outside marks unless tickMarks says otherwise."
+                },
                 "rotate": {
                   "type": "number",
-                  "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees."
+                  "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true."
                 }
               },
               "description": "Axis settings."
@@ -1426,9 +1562,77 @@
                   ],
                   "description": "Axis side. Defaults: x bottom, y left, y2 right. A side perpendicular to the axis maps onto the nearer end."
                 },
+                "titlePosition": {
+                  "enum": ["start", "center", "end"],
+                  "description": "Where the title sits along the axis. start is the minimum end (left or bottom). end is the maximum end. Default center."
+                },
+                "titleRotate": {
+                  "type": "number",
+                  "minimum": -360,
+                  "maximum": 360,
+                  "description": "Axis title rotation in degrees. Default 0 on x, -90 on a left y axis, and 90 on a right y or y2 axis."
+                },
+                "autoSkip": {
+                  "type": "boolean",
+                  "description": "Skip tick labels that would overlap. false draws every label. When omitted, crowded category labels still tilt about -40 degrees if that fits, and numeric ticks skip only when they collide."
+                },
+                "labelWidth": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 240,
+                  "description": "Maximum tick-label width in pixels. Longer labels wrap, then ellipsize."
+                },
+                "labelLines": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 6,
+                  "description": "Maximum lines for a wrapped tick label. Enables wrapping at 72 pixels when labelWidth is omitted."
+                },
+                "line": {
+                  "description": "Axis baseline. Off unless set. Color defaults to the axis token.",
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "show": {
+                          "type": "boolean",
+                          "description": "Draw the baseline."
+                        },
+                        "color": {
+                          "type": "string",
+                          "description": "Stroke color. Defaults to the axis token."
+                        },
+                        "width": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 8,
+                          "description": "Stroke width in pixels."
+                        },
+                        "dash": {
+                          "enum": ["solid", "dashed", "dotted"],
+                          "description": "Stroke pattern."
+                        }
+                      }
+                    }
+                  ]
+                },
+                "tickMarks": {
+                  "enum": ["inside", "outside", "none"],
+                  "description": "Tick marks at labeled ticks. none is the default. inside points into the plot."
+                },
+                "tickLength": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 24,
+                  "description": "Tick mark length in pixels. Setting it draws outside marks unless tickMarks says otherwise."
+                },
                 "rotate": {
                   "type": "number",
-                  "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees."
+                  "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true."
                 }
               },
               "description": "Axis settings."

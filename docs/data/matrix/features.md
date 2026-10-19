@@ -6,7 +6,7 @@ Checked 2026-10-18. 263 features in 23 categories × 21 libraries = 5523 cells. 
 
 Legend: ● native · ◐ partial · ⊕ plugin · ✎ manual (escape hatch only) · \· none · ? unknown/unverified. Suffix ᴱ = AG Enterprise, ᴾ = MUI Pro/Premium (paid).
 
-Coverage: 34.0% strong (type-checked path / schema / runtime probe / licence file), 31.3% weak (identifier grep, plugin on npm, escape-hatch only), 26.6% absence-verified "none", 8.0% unknown. ChartKit `mark.point.shape`, `label.show`, `label.position`, `label.format`, `label.collision`, and `label.total` were rechecked native on 2026-10-19.
+Coverage: 34.1% strong (type-checked path / schema / runtime probe / licence file), 31.3% weak (identifier grep, plugin on npm, escape-hatch only), 26.6% absence-verified "none", 8.0% unknown. ChartKit `axis.title.position`, `axis.ticks.autoskip`, `axis.ticks.wrap`, `axis.ticks.marks`, and `axis.line` were rechecked native on 2026-10-19, along with the marks and labels cells.
 
 ## Libraries
 
@@ -199,17 +199,17 @@ Axis lines, ticks, labels, titles and grids
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | **Show / hide axis** <br><sub>`axis.show` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ? | ● | ● | ● | ● | ● | ● | ● |
 | **Axis title** <br><sub>`axis.title` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ? | ● | ● | ● |
-| **Axis title position / alignment** <br><sub>`axis.title.position` ★</sub> | · | ● | ◐ | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ● | · | ● | · | ● | · | ● |
+| **Axis title position / alignment** <br><sub>`axis.title.position` ★</sub> | ● | ● | ◐ | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ● | · | ● | · | ● | · | ● |
 | **Axis position (top/bottom/left/right)** <br><sub>`axis.position` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ? | ● | ● | ● | ● | ? | ● | ● | ● | ? | ● |
 | **Tick count / interval** <br><sub>`axis.ticks.count` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | · | ● |
 | **Explicit tick values** <br><sub>`axis.ticks.values` ★</sub> | ● | ◐ | ● | ◐ | ● | ● | ● | ● | ● | ◐ | · | ● | ● | ● | ● | ● | ● | · | ● | ? | ● |
 | **Tick label formatting** <br><sub>`axis.ticks.format` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ? | ● |
 | **Tick label rotation** <br><sub>`axis.ticks.rotate` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ? | ● |
-| **Tick label overlap avoidance** <br><sub>`axis.ticks.autoskip`</sub> | ◐ | ● | ● | ● | ● | ◐ | · | ● | · | ● | ? | ● | ● | ● | ● | ● | ◐ | ◐ | ● | · | ? |
-| **Tick label wrapping / truncation** <br><sub>`axis.ticks.wrap`</sub> | · | ◐ | ◐ | ● | ● | · | ◐ | ◐ | ◐ | ● | ? | ● | ● | ● | ● | ● | · | ? | ● | ? | ? |
-| **Tick marks size / visibility** <br><sub>`axis.ticks.marks`</sub> | · | ● | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ● | · | ● | · | ● | ● | ● |
+| **Tick label overlap avoidance** <br><sub>`axis.ticks.autoskip`</sub> | ● | ● | ● | ● | ● | ◐ | · | ● | · | ● | ? | ● | ● | ● | ● | ● | ◐ | ◐ | ● | · | ? |
+| **Tick label wrapping / truncation** <br><sub>`axis.ticks.wrap`</sub> | ● | ◐ | ◐ | ● | ● | · | ◐ | ◐ | ◐ | ● | ? | ● | ● | ● | ● | ● | · | ? | ● | ? | ? |
+| **Tick marks size / visibility** <br><sub>`axis.ticks.marks`</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ● | · | ● | · | ● | ● | ● |
 | **Minor ticks / minor grid** <br><sub>`axis.ticks.minor`</sub> | · | ? | · | ● | ● | ● | · | ? | ? | ? | · | · | · | ● | ● | ● | · | · | · | · | · |
-| **Axis line styling** <br><sub>`axis.line`</sub> | ◐ | ● | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
+| **Axis line styling** <br><sub>`axis.line`</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
 | **Grid lines** <br><sub>`axis.grid` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ? | ● |
 | **Grid line style (dash, colour, width)** <br><sub>`axis.grid.style` ★</sub> | ● | ● | ● | ● | ● | ● | ◐ | ● | ● | ● | · | ● | ● | ● | ● | ● | ● | ● | ● | · | ● |
 | **Alternating bands / plot bands** <br><sub>`axis.bands`</sub> | ◐ | ⊕ | ● | ● | ● | ● | ✎ | ✎ | ✎ | ● | · | ● | ✎ | ● | ● | · | ● | · | ● | · | ● |

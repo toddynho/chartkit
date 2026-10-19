@@ -48,8 +48,8 @@
     {
       "id": "chartkit",
       "name": "ChartKit",
-      "package": "@chartkitdev/core (repo main, marks and labels rechecked)",
-      "version": "0.5.0 (main, marks and labels)",
+      "package": "@chartkitdev/core (repo, axis finishing rechecked)",
+      "version": "0.5.0 (axis finishing)",
       "dateChecked": "2026-10-19",
       "docs": "https://chartkit.dev",
       "escapeHatch": "none (no plugin/custom-mark API; only lifecycle hooks)",
@@ -47131,20 +47131,21 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:titleAnchor)['\"`]|(?:^|[\\s{,;])\\w*(?:titleAnchor)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:titleAnchor)"
+            "ChartKitChartSpecV1.axes.x.titlePosition"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:titleAnchor)['\"`]|(?:^|[\\s{,;])\\w*(?:titleAnchor)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:titleAnchor)"
+              "kind": "runtime-probe",
+              "path": "ChartKitChartSpecV1.axes.x.titlePosition",
+              "loc": "packages/core/src/generated/schema.ts:1044"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "titlePosition is start, center, or end on x, y, and y2. titleRotate sets the y and y2 title angle. Drawn on createRenderer([line]).",
+          "verified": "runtime-probe",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "native",
@@ -49423,20 +49424,20 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "partial",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "ChartKitChartSpecV1.axes.x.rotate"
+            "ChartKitChartSpecV1.axes.x.autoSkip"
           ],
           "evidence": [
             {
-              "kind": "dts-path",
-              "path": "ChartKitChartSpecV1.axes.x.rotate",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:983"
+              "kind": "runtime-probe",
+              "path": "ChartKitChartSpecV1.axes.x.autoSkip",
+              "loc": "packages/core/src/generated/schema.ts:1044"
             }
           ],
-          "note": "auto-tilt (~-40 deg) only; no skip, stagger, or hide; the tilt is drawn on createRenderer([line]) since PR #17 (main 116d0af)",
-          "verified": "dts-path",
+          "note": "autoSkip true drops crowded category labels instead of tilting them. false draws every label. Numeric ticks skip on collision unless it is false. Drawn on createRenderer([line]).",
+          "verified": "runtime-probe",
           "strength": "strong"
         },
         "chartjs": {
@@ -49792,14 +49793,20 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:wrap)['\"`]|(?:^|[\\s{,;])\\w*(?:wrap)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:wrap)"
+            "ChartKitChartSpecV1.axes.x.labelWidth"
           ],
-          "evidence": [],
-          "note": "probe hit reviewed: match is a table wrapper div",
-          "verified": "source-review",
+          "evidence": [
+            {
+              "kind": "runtime-probe",
+              "path": "ChartKitChartSpecV1.axes.x.labelWidth",
+              "loc": "packages/core/src/generated/schema.ts:1044"
+            }
+          ],
+          "note": "labelWidth and labelLines wrap tick labels on x, y, and y2, then ellipsize. Drawn on createRenderer([line]).",
+          "verified": "runtime-probe",
           "strength": "strong"
         },
         "chartjs": {
@@ -50148,20 +50155,21 @@
       "agentRelevance": 1,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:tickSize)['\"`]|(?:^|[\\s{,;])\\w*(?:tickSize)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:tickSize)"
+            "ChartKitChartSpecV1.axes.x.tickMarks"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:tickSize)['\"`]|(?:^|[\\s{,;])\\w*(?:tickSize)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:tickSize)"
+              "kind": "runtime-probe",
+              "path": "ChartKitChartSpecV1.axes.x.tickMarks",
+              "loc": "packages/core/src/generated/schema.ts:1044"
             }
           ],
-          "note": "no tick-mark options",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "tickMarks is inside, outside, or none. tickLength sets the length. Drawn on createRenderer([line]).",
+          "verified": "runtime-probe",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "native",
@@ -50903,20 +50911,20 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "partial",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "ChartKitChartSpecV1.theme.tokens.axis"
+            "ChartKitChartSpecV1.axes.x.line"
           ],
           "evidence": [
             {
-              "kind": "dts-path",
-              "path": "ChartKitChartSpecV1.theme.tokens.axis",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:368"
+              "kind": "runtime-probe",
+              "path": "ChartKitChartSpecV1.axes.x.line",
+              "loc": "packages/core/src/generated/schema.ts:1044"
             }
           ],
-          "note": "colour token only",
-          "verified": "dts-path",
+          "note": "The baseline is off until line is true or { show, color, width, dash }. Dash is solid, dashed, or dotted. Drawn on createRenderer([line]).",
+          "verified": "runtime-probe",
           "strength": "strong"
         },
         "chartjs": {
@@ -95703,29 +95711,29 @@
   ],
   "coverage": {
     "cells": 5523,
-    "strong": 1879,
+    "strong": 1881,
     "weak": 1731,
-    "absence": 1469,
+    "absence": 1467,
     "unknown": 444,
     "byStatus": {
-      "native": 2700,
+      "native": 2705,
       "unknown": 444,
       "manual": 425,
-      "none": 1522,
-      "partial": 294,
+      "none": 1519,
+      "partial": 292,
       "plugin": 138
     },
     "perLibrary": {
       "chartkit": {
-        "strong": 164,
+        "strong": 166,
         "weak": 32,
-        "absence": 64,
+        "absence": 62,
         "unknown": 6,
-        "native": 153,
-        "partial": 23,
+        "native": 158,
+        "partial": 21,
         "plugin": 0,
         "manual": 0,
-        "none": 84
+        "none": 81
       },
       "chartjs": {
         "strong": 44,
