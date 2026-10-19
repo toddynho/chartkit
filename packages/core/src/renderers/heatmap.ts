@@ -43,7 +43,10 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
 
   const weeks = typeof frame.mark.weeks === "number" ? frame.mark.weeks : 52;
   const end = Math.max(...byDay.keys());
-  const start = alignSunday(end - (weeks * 7 - 1) * 86400000);
+  // Last column is the week of the latest day. Counting back from that Sunday
+  // keeps `weeks` columns and still draws the latest day. Snapping an
+  // end-anchored start to Sunday used to finish the grid a few days early.
+  const start = alignSunday(end) - Math.max(0, weeks - 1) * 7 * 86400000;
   const counts = [...byDay.values()];
   const max = Math.max(...counts, 1);
   const color = colorEnc?.constant ? paint(colorEnc.constant, frame.preset, 0) : paint(colorEnc?.range?.[colorEnc.range.length - 1], frame.preset, 0);

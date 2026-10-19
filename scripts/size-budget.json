@@ -1,6 +1,6 @@
 {
   "line": 24460,
-  "all": 43407,
+  "all": 43411,
   "validate": 21969,
   "vue": 760,
   "svelte": 925,
@@ -10,7 +10,7 @@
   "vueLine": 25156,
   "svelteLine": 25342,
   "vanillaLine": 24969,
-  "extra": 59397,
+  "extra": 59400,
   "histogram": 7198,
   "boxplot": 7154,
   "radar": 5205,
@@ -27,8 +27,8 @@
   "mermaid": 27301,
   "vanillaAuto": 959,
   "markdown": 663,
-  "global": 86189,
-  "globalAuto": 59750,
+  "global": 86191,
+  "globalAuto": 59751,
   "globalMermaid": 27728,
-  "note": "gzip -9 byte budgets, each set to the measured size after threshold cut labels and width-filling calendars. line 24460, all 43407, validate 21969, interact 11974, interactExtra 1623, extra 59397, mermaid 27301, vanillaAuto 959, markdown 663, global 86189, globalAuto 59750, globalMermaid 27728. Adapters: vue 760, svelte 925, vanilla 598; vueLine 25156, svelteLine 25342, vanillaLine 24969. Phase 4 charts stay out of all: histogram 7198, boxplot 7154, radar 5205, funnel 5911, treemap 8405, sankey 6536, bullet 5678, waterfall 6596, gantt 6896, timeline 5766, quadrant 5550, venn 5978, journey 5393."
+  "note": "gzip -9 byte budgets, each set to the measured size after threshold cut labels and width-filling calendars. line 24460, all 43411, validate 21969, interact 11974, interactExtra 1623, extra 59400, mermaid 27301, vanillaAuto 959, markdown 663, global 86191, globalAuto 59751, globalMermaid 27728. Adapters: vue 760, svelte 925, vanilla 598; vueLine 25156, svelteLine 25342, vanillaLine 24969. Phase 4 charts stay out of all: histogram 7198, boxplot 7154, radar 5205, funnel 5911, treemap 8405, sankey 6536, bullet 5678, waterfall 6596, gantt 6896, timeline 5766, quadrant 5550, venn 5978, journey 5393."
 }

@@ -69,6 +69,17 @@ function endpointYs(d: string): number[] {
   return ends;
 }
 
+function dayRect(svg: string, day: string): string {
+  for (const match of svg.matchAll(/<rect [^>]*aria-label="([^"]+)"[^>]*>/g)) {
+    if (match[1].startsWith(day)) return match[0];
+  }
+  return "";
+}
+
+function fillOf(rect: string): string {
+  return /fill="([^"]+)"/.exec(rect)?.[1] ?? "";
+}
+
 function dayCells(svg: string): { x: number; y: number; w: number; h: number }[] {
   const cells: { x: number; y: number; w: number; h: number }[] = [];
   for (const box of svg.matchAll(/<rect x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)"([^>]*)>/g)) {
@@ -226,7 +237,7 @@ describe("core gaps", () => {
     const fittedBottom = Math.max(...fittedCells.map((cell) => cell.y + cell.h));
     expect(fittedRight).toBeGreaterThan(600);
     expect(fittedBottom).toBeGreaterThan(180);
-    const repro = render({
+    const reproSpec = {
       version: "1",
       type: "heatmap",
       data: [
@@ -240,7 +251,8 @@ describe("core gaps", () => {
       mark: { layout: "calendar", weeks: 12 },
       size: { width: 720, height: 220 },
       a11y: { alt: "Two April days, one below 6 baskets and one at 14." },
-    });
+    };
+    const repro = render(reproSpec);
     expect(repro).toContain('viewBox="0 0 720 220"');
     const legend = /<g data-ck-scale="threshold">([\s\S]*?)<\/g>/.exec(repro)?.[1] ?? "";
     expect(legend).toContain("&lt;6");
@@ -255,6 +267,38 @@ describe("core gaps", () => {
     const right = Math.max(...cells.map((cell) => cell.x + cell.w));
     expect(right).toBeGreaterThan(680);
     expect(right - left).toBeGreaterThan(600);
+    const low = dayRect(repro, "2026-04-06");
+    const high = dayRect(repro, "2026-04-07");
+    const gap = dayRect(repro, "2026-04-05");
+    expect(low).not.toBe("");
+    expect(high).not.toBe("");
+    expect(low).not.toContain("data-ck-empty");
+    expect(high).not.toContain("data-ck-empty");
+    expect(low).not.toContain("url(#");
+    expect(high).not.toContain("url(#");
+    expect(fillOf(low)).not.toBe(fillOf(high));
+    expect(gap).toContain("data-ck-empty");
+    const mid = render({
+      ...reproSpec,
+      data: [
+        { day: "2026-04-06", baskets: 4 },
+        { day: "2026-04-08", baskets: 9 },
+        { day: "2026-04-09", baskets: 14 },
+      ],
+      a11y: { alt: "Three April days, one in each basket band, with Tuesday missing." },
+    });
+    const below = dayRect(mid, "2026-04-06");
+    const between = dayRect(mid, "2026-04-08");
+    const above = dayRect(mid, "2026-04-09");
+    const tuesday = dayRect(mid, "2026-04-07");
+    expect(fillOf(below)).not.toBe(fillOf(between));
+    expect(fillOf(between)).not.toBe(fillOf(above));
+    expect(fillOf(below)).not.toBe(fillOf(above));
+    for (const rect of [below, between, above]) {
+      expect(rect).not.toContain("data-ck-empty");
+      expect(rect).not.toContain("url(#");
+    }
+    expect(tuesday).toContain("data-ck-empty");
     const grid = validate({
       version: "1",
       type: "heatmap",
