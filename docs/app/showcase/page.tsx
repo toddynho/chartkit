@@ -5,7 +5,7 @@ import { pageMeta } from "@/lib/site";
 
 export const metadata = pageMeta(
   "Showcase",
-  "Six ChartKit boards: one spec on every stack, a roastery cockpit, bike-share flows, a Mermaid game launch, the repair loop, and the measured benchmarks.",
+  "Twelve ChartKit boards, from one spec on every stack through a ferry sankey with a return loop, a pie with leader lines, and a wetlands accessibility tour.",
   "/showcase",
 );
 
@@ -15,8 +15,10 @@ export default function ShowcasePage() {
     <div className="wrap section showcase">
       <h1>Showcase</h1>
       <p className="lede">
-        Six boards that put more than a line and a bar on one page. Specs are checked before the page builds. The sample
-        data is fictional and stays off the agent eval themes.
+        Twelve boards. The first six cover stacks, a roastery, bike-share, Mermaid, repair, and the measured
+        benchmarks. The next six use markers, axis options, a pie with leader lines, conditional colour, a sankey
+        that comes back, and waterfall clicks. Specs are checked before the page builds. The sample data is fictional
+        and stays off the agent eval themes.
       </p>
       <div className="gallery-index">
         {boards.map((board) => {

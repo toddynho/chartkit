@@ -212,6 +212,249 @@
         "editorial",
         "midnight"
       ]
+    },
+    {
+      "slug": "marathon",
+      "number": 7,
+      "title": "Marathon training block",
+      "types": [
+        "combo",
+        "bar",
+        "radar",
+        "sparkline"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.position",
+        "axis.ticks.values",
+        "axis.title",
+        "axis.title.position",
+        "format.locale",
+        "interaction.click",
+        "interaction.select",
+        "label.show",
+        "legend.interactive",
+        "legend.position",
+        "mark.point.shape",
+        "mark.point.visibility",
+        "scale.multi",
+        "scale.reverse",
+        "theme.presets",
+        "tooltip.crosshair",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.bar.stacked",
+        "type.bar.vertical",
+        "type.combo",
+        "type.radar",
+        "type.sparkline"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "orchard",
+      "number": 4,
+      "title": "Orchard harvest almanac",
+      "types": [
+        "scatter",
+        "bar",
+        "boxplot",
+        "histogram"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.ticks.values",
+        "axis.title",
+        "interaction.click",
+        "interaction.select",
+        "label.position",
+        "label.show",
+        "legend.interactive",
+        "legend.position",
+        "mark.color.conditional",
+        "mark.color.point",
+        "mark.point.shape",
+        "mark.point.size",
+        "scale.nice",
+        "theme.presets",
+        "tooltip.fields",
+        "tooltip.position",
+        "type.bar.vertical",
+        "type.boxplot",
+        "type.bubble",
+        "type.histogram"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "library",
+      "number": 9,
+      "title": "Library lending year",
+      "types": [
+        "pie",
+        "bar",
+        "heatmap",
+        "kpi",
+        "mini-area"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.ticks.wrap",
+        "axis.title",
+        "format.compact",
+        "format.locale",
+        "interaction.click",
+        "interaction.select",
+        "label.pie",
+        "label.position",
+        "label.show",
+        "legend.interactive",
+        "legend.position",
+        "theme.palette",
+        "theme.presets",
+        "tooltip.fields",
+        "tooltip.position",
+        "type.area",
+        "type.bar.horizontal",
+        "type.heatmap.calendar",
+        "type.kpi",
+        "type.pie"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "ferry",
+      "number": 15,
+      "title": "Ferry network",
+      "types": [
+        "sankey",
+        "bar",
+        "kpi",
+        "line"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.position",
+        "axis.ticks.rotate",
+        "axis.title",
+        "format.locale",
+        "format.number",
+        "interaction.click",
+        "interaction.select",
+        "label.position",
+        "label.show",
+        "legend.interactive",
+        "legend.position",
+        "mark.point.shape",
+        "mark.point.visibility",
+        "theme.presets",
+        "tooltip.crosshair",
+        "tooltip.fields",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.bar.vertical",
+        "type.kpi",
+        "type.line",
+        "type.sankey"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "harbour",
+      "number": 8,
+      "title": "Harbour freight desk",
+      "types": [
+        "candlestick",
+        "waterfall",
+        "kpi"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.title",
+        "format.locale",
+        "format.number",
+        "interaction.click",
+        "interaction.select",
+        "theme.presets",
+        "tooltip.fields",
+        "tooltip.position",
+        "type.bar.waterfall",
+        "type.candlestick",
+        "type.finance.volume",
+        "type.kpi"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "wetlands",
+      "number": 14,
+      "title": "Accessibility tour",
+      "types": [
+        "line",
+        "bar"
+      ],
+      "options": [
+        "a11y.alt",
+        "a11y.datatable",
+        "a11y.description.long",
+        "a11y.keyboard",
+        "axis.ticks.values",
+        "axis.title",
+        "interaction.click",
+        "interaction.select",
+        "label.position",
+        "label.show",
+        "legend.interactive",
+        "legend.position",
+        "mark.color.point",
+        "mark.point.shape",
+        "mark.point.visibility",
+        "mark.stroke.dash",
+        "theme.presets",
+        "tooltip.crosshair",
+        "tooltip.fields",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.bar.vertical",
+        "type.line"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
     }
   ]
 }

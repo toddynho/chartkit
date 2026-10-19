@@ -6,6 +6,7 @@ import { validatePhase4 } from "@chartkitdev/core/validate/phase4";
 import { snippetsFor } from "./snippets.ts";
 import { benchSources, benchmarkCharts, timingLosses } from "./showcase-benchmarks.ts";
 import { bikeCharts, mermaidBoards, repairCases, roasteryCharts, stacks, tide, type ChartSlot, type ShowcaseSpec } from "./showcase-data.ts";
+import { nextBoardMeta } from "./showcase-next.ts";
 import { optionById, optionsIn, type OptionLink } from "./showcase-options.ts";
 
 const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);
@@ -236,6 +237,15 @@ export function boards(): Board[] {
       losses: timingLosses(),
       sources: benchSources(),
     }),
+    ...nextBoardMeta.map((item) =>
+      board({
+        slug: item.slug,
+        number: item.number,
+        title: item.title,
+        lede: item.lede,
+        charts: item.charts.map(ready),
+      }),
+    ),
   ];
 }
 
