@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { chartTypes } from "@/lib/specs";
+import { SITE } from "@/lib/site";
 
-const start = [
+const start: { href: string; label: string; external?: boolean }[] = [
   { href: "/docs", label: "Getting started" },
   { href: "/docs/react", label: "React" },
   { href: "/docs/vue", label: "Vue" },
@@ -14,6 +15,7 @@ const start = [
   { href: "/docs/theming", label: "Theming" },
   { href: "/docs/migrate", label: "Migrate from v0" },
   { href: "/docs/mermaid", label: "Mermaid or Markdown" },
+  { href: `${SITE.github}/blob/main/ROADMAP.md`, label: "Roadmap", external: true },
 ];
 
 export function DocsNav() {
@@ -24,9 +26,13 @@ export function DocsNav() {
       <ul>
         {start.map((item) => (
           <li key={item.href}>
-            <Link href={item.href} aria-current={path === item.href ? "page" : undefined}>
-              {item.label}
-            </Link>
+            {item.external ? (
+              <a href={item.href}>{item.label}</a>
+            ) : (
+              <Link href={item.href} aria-current={path === item.href ? "page" : undefined}>
+                {item.label}
+              </Link>
+            )}
           </li>
         ))}
       </ul>
