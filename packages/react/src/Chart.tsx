@@ -95,13 +95,15 @@ export function Chart({ spec, className, style, render, onPointClick, onSeriesCl
   }, [selection]);
 
   useEffect(() => {
-    if (!extra) {
-      return;
-    }
+    if (!extra) return;
     ctl.current?.destroy();
     ctl.current = null;
     const el = host.current;
-    if (!el) return;
+    if (!el || !extraSvg) return;
+    ctl.current = attach(el, spec, {
+      render: (next) => renderRef.current(next as ChartSpec),
+      selection: selectionRef.current,
+    });
     let tip: { destroy(): void } | undefined;
     let alive = true;
     void import("@chartkitdev/core/extra-tip").then(({ attach: attachTip }) => {
@@ -110,8 +112,10 @@ export function Chart({ spec, className, style, render, onPointClick, onSeriesCl
     return () => {
       alive = false;
       tip?.destroy();
+      ctl.current?.destroy();
+      ctl.current = null;
     };
-  }, [spec.type, extra, extraSvg]);
+  }, [spec, extra, extraSvg]);
 
   useEffect(() => () => {
     ctl.current?.destroy();

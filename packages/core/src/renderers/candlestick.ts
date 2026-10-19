@@ -3,6 +3,7 @@ import { formatValue } from "../format";
 import {
   asNumber,
   axisOn,
+  channelFormat,
   column,
   fieldOf,
   gridStyle,
@@ -11,7 +12,7 @@ import {
   resolveDomain,
   wantsZero,
 } from "../frame";
-import { closeChart, esc, font, linear, n, openChart, ticks } from "../svg";
+import { closeChart, esc, font, isRecord, linear, n, openChart, ticks } from "../svg";
 
 /** OHLC candles. A volume pane is drawn when encoding.volume is set. */
 export function renderCandlestick(spec: Record<string, unknown>): string | null {
@@ -103,8 +104,10 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   });
 
   if (showY) {
+    const yAxis = isRecord(spec.axes) && isRecord(spec.axes.y) ? spec.axes.y.format : undefined;
+    const priceFormat = yAxis ?? channelFormat(frame.encoding.close) ?? channelFormat(frame.encoding.high) ?? channelFormat(frame.encoding.open) ?? "number";
     for (const tick of yTicks) {
-      parts.push(text(plot.left - 6, yScale(tick) + 4, formatValue(tick, "number", frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "end"));
+      parts.push(text(plot.left - 6, yScale(tick) + 4, formatValue(tick, priceFormat, frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "end"));
     }
   }
   if (showX) {

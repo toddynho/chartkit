@@ -2,7 +2,7 @@ import { colorLegendHeight, readColorScale, scaleLabel } from "../../color-scale
 import { asNumber, column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
 import { font, n } from "../../svg";
-import { fill, fit, fmt, num, openMark, str, viewOf } from "./plot";
+import { fill, fit, fmt, num, openMark, str, valueFormat, viewOf } from "./plot";
 
 interface Leaf {
   label: string;
@@ -57,6 +57,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
     fill: kids[0].fill,
     kids,
   }));
+  const shown = valueFormat(frame, spec, frame.encoding.y);
   const outer = squarify(grouped, 10, top, frame.width - 20, frame.height - top - legendH);
   for (const block of outer) {
     const inner = block.kids.length > 1
@@ -68,14 +69,14 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
       const y = tile.y + pad;
       const w = Math.max(1, tile.w - pad * 2);
       const h = Math.max(1, tile.h - pad * 2);
-      const label = `${tile.label}: ${fmt(tile.value, frame.locale)}${tile.group && tile.group !== tile.label ? ` · ${tile.group}` : ""}`;
+      const label = `${tile.label}: ${fmt(tile.value, frame.locale, shown)}${tile.group && tile.group !== tile.label ? ` · ${tile.group}` : ""}`;
       const paint = tint(tile.fill, index, inner.length);
       parts.push(openMark("rect", "tile", label, `x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="6" fill="${paint}"`));
       parts.push("</rect>");
       const name = fit(tile.label, w - 12, 13);
       if (name && w > 36 && h > 22) {
         parts.push(`<text x="${n(x + 8)}" y="${n(y + 18)}" fill="#fff" stroke="rgb(0 0 0 / 0.35)" stroke-width="2" paint-order="stroke" font-size="13" font-weight="650" font-family="${font()}">${name}</text>`);
-        const value = fit(fmt(tile.value, frame.locale), w - 12, 11);
+        const value = fit(fmt(tile.value, frame.locale, shown), w - 12, 11);
         if (value && h > 40) parts.push(`<text x="${n(x + 8)}" y="${n(y + 34)}" fill="#fff" fill-opacity="0.9" stroke="rgb(0 0 0 / 0.35)" stroke-width="2" paint-order="stroke" font-size="11" font-family="${font()}">${value}</text>`);
       }
     });
