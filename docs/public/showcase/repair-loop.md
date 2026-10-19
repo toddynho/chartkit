@@ -348,7 +348,10 @@ Broken:
   },
   "size": {
     "width": 560,
-    "height": 240
+    "height": 260,
+    "padding": {
+      "left": 64
+    }
   },
   "a11y": {
     "alt": "Loaves peak at the mid sitting. Mark labels are requested and not drawn on a line."
@@ -392,7 +395,10 @@ Repaired:
   },
   "size": {
     "width": 560,
-    "height": 240
+    "height": 260,
+    "padding": {
+      "left": 64
+    }
   },
   "a11y": {
     "alt": "Loaves peak at the mid sitting. Mark labels are requested and not drawn on a line."

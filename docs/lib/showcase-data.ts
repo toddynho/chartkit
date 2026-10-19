@@ -56,7 +56,7 @@ export const tide: ShowcaseSpec = {
     { type: "rule", axis: "y", value: 160, dash: "dashed", label: "Dock lip", labelPosition: "end" },
     { type: "band", axis: "y", from: 40, to: 90, label: "Keel window", opacity: 0.18 },
   ],
-  size: { width: 720, height: 360 },
+  size: { width: 720, height: 360, padding: { left: 96 } },
   a11y: { alt: "Sounded tide at Greywick peaks at the 10:20 bell, above the dock lip, and the posted tide stays close to it." },
 };
 
@@ -163,8 +163,8 @@ export const roasteryCharts: ChartSlot[] = [
           { field: "beans", title: "Bean cost", format: { style: "currency", currency: "GBP", decimals: 0 } },
         ],
       },
-      annotations: [{ type: "rule", axis: "y", value: 700, dash: "dashed", label: "Bag target", labelPosition: "end" }],
-      size: { width: 760, height: 320 },
+      annotations: [{ type: "rule", axis: "y", value: 700, dash: "dashed", label: "Bag target", labelPosition: "start" }],
+      size: { width: 760, height: 340, padding: { right: 96 } },
       a11y: { alt: "Bags peak in Heat above the target line, and the bean bill peaks in the same roast." },
     },
   },
@@ -226,7 +226,7 @@ export const roasteryCharts: ChartSlot[] = [
       type: "sparkline",
       theme: "soft",
       data: [42, 48, 45, 61, 58, 73, 69],
-      size: { width: 760, height: 88 },
+      size: { width: 760, height: 128 },
       a11y: { alt: "Daily bags rise from 42 to 69 across the week, with a dip after the fourth day." },
     },
   },
@@ -285,7 +285,7 @@ export const bikeCharts: ChartSlot[] = [
         color: { field: "trips", title: "Trips" },
       },
       mark: { layout: "calendar", weeks: 16 },
-      size: { width: 760, height: 200 },
+      size: { width: 760, height: 250 },
       a11y: { alt: "Daily trips over sixteen weeks vary between a quiet day and a busy day, with no empty week." },
     },
   },
@@ -348,7 +348,7 @@ export const bikeCharts: ChartSlot[] = [
   },
 ];
 
-export const mermaidBoards: { id: string; title: string; caption: string; span: "board-12"; source: string }[] = [
+export const mermaidBoards: { id: string; title: string; caption: string; span: "board-12"; source: string; height?: number }[] = [
   {
     id: "gantt",
     title: "Launch lanes",
@@ -382,6 +382,7 @@ export const mermaidBoards: { id: string; title: string; caption: string; span: 
     title: "Playtest journey",
     caption: "Scores from 1 to 5, with who was in the room.",
     span: "board-12",
+    height: 480,
     source: `journey
     title Paper Kite playtest
     section Arrive
@@ -503,7 +504,7 @@ export const repairCases: BrokenCase[] = [
       encoding: { x: "sitting", y: "loaves" },
       mark: { labels: true },
       axes: { y: { title: "Loaves" } },
-      size: { width: 560, height: 240 },
+      size: { width: 560, height: 260, padding: { left: 64 } },
       a11y: { alt: "Loaves peak at the mid sitting. Mark labels are requested and not drawn on a line." },
     },
   },

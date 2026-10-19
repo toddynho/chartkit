@@ -235,12 +235,15 @@ Bars on the left, a currency line on y2, and a target rule.
       "value": 700,
       "dash": "dashed",
       "label": "Bag target",
-      "labelPosition": "end"
+      "labelPosition": "start"
     }
   ],
   "size": {
     "width": 760,
-    "height": 320
+    "height": 340,
+    "padding": {
+      "right": 96
+    }
   },
   "a11y": {
     "alt": "Bags peak in Heat above the target line, and the bean bill peaks in the same roast."
@@ -388,7 +391,7 @@ A sparkline with no axes.
   ],
   "size": {
     "width": 760,
-    "height": 88
+    "height": 128
   },
   "a11y": {
     "alt": "Daily bags rise from 42 to 69 across the week, with a dip after the fourth day."

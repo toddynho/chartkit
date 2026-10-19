@@ -122,7 +122,10 @@ One spec. The SVG in this page is the Next.js server render. Hydration adds the 
   ],
   "size": {
     "width": 720,
-    "height": 360
+    "height": 360,
+    "padding": {
+      "left": 96
+    }
   },
   "a11y": {
     "alt": "Sounded tide at Greywick peaks at the 10:20 bell, above the dock lip, and the posted tide stays close to it."
@@ -252,7 +255,10 @@ const spec = {
   ],
   "size": {
     "width": 720,
-    "height": 360
+    "height": 360,
+    "padding": {
+      "left": 96
+    }
   },
   "a11y": {
     "alt": "Sounded tide at Greywick peaks at the 10:20 bell, above the dock lip, and the posted tide stays close to it."
@@ -385,7 +391,10 @@ const spec = {
   ],
   "size": {
     "width": 720,
-    "height": 360
+    "height": 360,
+    "padding": {
+      "left": 96
+    }
   },
   "a11y": {
     "alt": "Sounded tide at Greywick peaks at the 10:20 bell, above the dock lip, and the posted tide stays close to it."
@@ -518,7 +527,10 @@ const spec = {
   ],
   "size": {
     "width": 720,
-    "height": 360
+    "height": 360,
+    "padding": {
+      "left": 96
+    }
   },
   "a11y": {
     "alt": "Sounded tide at Greywick peaks at the 10:20 bell, above the dock lip, and the posted tide stays close to it."
@@ -652,7 +664,10 @@ const spec = {
   ],
   "size": {
     "width": 720,
-    "height": 360
+    "height": 360,
+    "padding": {
+      "left": 96
+    }
   },
   "a11y": {
     "alt": "Sounded tide at Greywick peaks at the 10:20 bell, above the dock lip, and the posted tide stays close to it."
@@ -783,7 +798,10 @@ const spec = {
   ],
   "size": {
     "width": 720,
-    "height": 360
+    "height": 360,
+    "padding": {
+      "left": 96
+    }
   },
   "a11y": {
     "alt": "Sounded tide at Greywick peaks at the 10:20 bell, above the dock lip, and the posted tide stays close to it."
@@ -914,7 +932,10 @@ chart.destroy();
   ],
   "size": {
     "width": 720,
-    "height": 360
+    "height": 360,
+    "padding": {
+      "left": 96
+    }
   },
   "a11y": {
     "alt": "Sounded tide at Greywick peaks at the 10:20 bell, above the dock lip, and the posted tide stays close to it."
@@ -1041,7 +1062,10 @@ chart.destroy();
   ],
   "size": {
     "width": 720,
-    "height": 360
+    "height": 360,
+    "padding": {
+      "left": 96
+    }
   },
   "a11y": {
     "alt": "Sounded tide at Greywick peaks at the 10:20 bell, above the dock lip, and the posted tide stays close to it."
@@ -1170,7 +1194,10 @@ const spec = {
   ],
   "size": {
     "width": 720,
-    "height": 360
+    "height": 360,
+    "padding": {
+      "left": 96
+    }
   },
   "a11y": {
     "alt": "Sounded tide at Greywick peaks at the 10:20 bell, above the dock lip, and the posted tide stays close to it."

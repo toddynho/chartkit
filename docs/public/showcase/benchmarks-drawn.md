@@ -81,7 +81,10 @@ Log scale. ChartKit is scripts/size.mjs. The others are the bench line, React ex
   },
   "size": {
     "width": 760,
-    "height": 420
+    "height": 420,
+    "padding": {
+      "left": 72
+    }
   },
   "a11y": {
     "alt": "ChartKit’s measured line is the smallest bar. ECharts is the largest on this log scale."
@@ -246,7 +249,10 @@ Grouped bars from the round 13 browser rows. A taller uPlot bar is a loss.
   },
   "size": {
     "width": 760,
-    "height": 380
+    "height": 400,
+    "padding": {
+      "left": 88
+    }
   },
   "a11y": {
     "alt": "uPlot’s aligned update is faster than ChartKit’s in several of the twelve cells, including the smaller point counts."
@@ -328,7 +334,7 @@ ChartKit minus uPlot. The band below zero is a loss. The band above zero is a le
       "rotate": -32
     },
     "y": {
-      "title": "ChartKit − uPlot (ms)"
+      "title": "Gap (ms)"
     }
   },
   "annotations": [
@@ -360,7 +366,10 @@ ChartKit minus uPlot. The band below zero is a loss. The band above zero is a le
   },
   "size": {
     "width": 760,
-    "height": 340
+    "height": 360,
+    "padding": {
+      "left": 84
+    }
   },
   "a11y": {
     "alt": "Bars below zero are cells where uPlot’s aligned update is faster. Bars above zero are cells where ChartKit is faster."
@@ -436,7 +445,10 @@ Painted median from the same round 13 file. uPlot is ahead of ChartKit here.
   },
   "size": {
     "width": 760,
-    "height": 320
+    "height": 340,
+    "padding": {
+      "left": 72
+    }
   },
   "a11y": {
     "alt": "At 100,000 points, uPlot’s painted hover is slightly faster than ChartKit’s. ECharts is far slower."

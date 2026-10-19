@@ -65,7 +65,7 @@ gantt
   "theme": "soft",
   "size": {
     "width": 720,
-    "height": 340
+    "height": 380
   }
 }
 ```
@@ -113,7 +113,7 @@ timeline
   "theme": "soft",
   "size": {
     "width": 720,
-    "height": 340
+    "height": 380
   }
 }
 ```
@@ -178,7 +178,7 @@ journey
   "theme": "soft",
   "size": {
     "width": 720,
-    "height": 340
+    "height": 480
   }
 }
 ```
@@ -251,7 +251,7 @@ quadrantChart
   "theme": "soft",
   "size": {
     "width": 720,
-    "height": 340
+    "height": 380
   }
 }
 ```

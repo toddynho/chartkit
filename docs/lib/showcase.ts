@@ -124,7 +124,7 @@ function mermaidCards(): MermaidCard[] {
   return mermaidBoards.map((board) => {
     const converted = fromMermaid(board.source);
     if (!converted.spec) throw new Error(`${board.id} mermaid produced no spec`);
-    const spec = { ...converted.spec, theme: "soft", size: { width: 720, height: 340 } } as unknown as ShowcaseSpec;
+    const spec = { ...converted.spec, theme: "soft", size: { width: 720, height: board.height ?? 380 } } as unknown as ShowcaseSpec;
     const checked = validatePhase4(spec);
     if (!checked.ok) {
       throw new Error(`${board.id} ${checked.errors.map((error) => `${error.code} ${error.message}`).join("; ")}`);

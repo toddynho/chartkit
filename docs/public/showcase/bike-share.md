@@ -547,7 +547,7 @@ One cell per day. Colour is the trip count.
   },
   "size": {
     "width": 760,
-    "height": 200
+    "height": 250
   },
   "a11y": {
     "alt": "Daily trips over sixteen weeks vary between a quiet day and a busy day, with no empty week."
