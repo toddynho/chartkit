@@ -217,6 +217,52 @@ describe("diagnostic codes", () => {
     expect(result.errors.some((error) => error.code === "CK2006" && error.path === "/encoding/series")).toBe(true);
   });
 
+  it("repairs tooltip fields, position, and the crosshair label", () => {
+    const listed = validate({ ...base, tooltip: { fields: "revenue" } });
+    expect(listed.errors.find((item) => item.path === "/tooltip/fields")?.hint).toContain("did you mean");
+    expect(listed.errors.find((item) => item.path === "/tooltip/fields")?.fix).toEqual([
+      { op: "replace", path: "/tooltip/fields", value: ["revenue"] },
+    ]);
+    expect(repair({ ...base, tooltip: { fields: "revenue" } }).ok).toBe(true);
+
+    const named = validate({ ...base, tooltip: { fields: [{ name: "revenue", title: "Sales", format: "currency" }] } });
+    expect(named.errors.find((item) => item.path === "/tooltip/fields/0")?.fix?.[0]?.value).toEqual({
+      field: "revenue",
+      title: "Sales",
+      format: "currency",
+    });
+    expect(repair({ ...base, tooltip: { fields: { name: "revenue" } } }).ok).toBe(true);
+
+    const missing = validate({ ...base, tooltip: { fields: ["revnue"] } });
+    const miss = missing.errors.find((item) => item.code === "CK2001" && item.path === "/tooltip/fields/0");
+    expect(miss?.hint).toContain("revenue");
+    expect(miss?.fix).toEqual([{ op: "replace", path: "/tooltip/fields/0", value: "revenue" }]);
+    expect(repair({ ...base, tooltip: { fields: ["revnue"] } }).ok).toBe(true);
+
+    const above = validate({ ...base, tooltip: { position: "above" } });
+    expect(above.errors.find((item) => item.path === "/tooltip/position")?.hint).toContain("top");
+    expect(above.errors.find((item) => item.path === "/tooltip/position")?.fix).toEqual([
+      { op: "replace", path: "/tooltip/position", value: "top" },
+    ]);
+
+    const flag = validate({ ...base, tooltip: { crosshairLabel: "yes" } });
+    expect(flag.errors.find((item) => item.path === "/tooltip/crosshairLabel")?.hint).toContain("true");
+    expect(flag.errors.find((item) => item.path === "/tooltip/crosshairLabel")?.fix).toEqual([
+      { op: "replace", path: "/tooltip/crosshairLabel", value: true },
+    ]);
+
+    const ok = validate({
+      ...base,
+      tooltip: {
+        fields: [{ field: "revenue", title: "Sales", format: "currency" }],
+        position: "top",
+        crosshairLabel: true,
+      },
+    });
+    expect(ok.ok).toBe(true);
+    expect(ok.warnings.some((warning) => warning.path === "/tooltip/fields")).toBe(false);
+  });
+
   it("does not warn CK3011 for tooltip, zoom, legend toggle, animation, or a11y", () => {
     const result = validate({
       ...base,

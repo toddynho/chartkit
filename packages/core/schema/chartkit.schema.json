@@ -1465,6 +1465,22 @@
               "default": true,
               "description": "Draw a vertical guide line at the hovered x."
             },
+            "crosshairLabel": {
+              "type": "boolean",
+              "default": false,
+              "description": "Print the hovered x value on the guide."
+            },
+            "position": {
+              "enum": [
+                "auto",
+                "top",
+                "bottom",
+                "left",
+                "right"
+              ],
+              "default": "auto",
+              "description": "Where the card sits. auto tries above, then below, then beside the point."
+            },
             "fields": {
               "type": "array",
               "items": {
@@ -1494,7 +1510,7 @@
                   }
                 ]
               },
-              "description": "Extra or reordered fields to show. Strings are field names."
+              "description": "Fields to show, in this order. Omit to keep the encoded series. Strings are field names."
             }
           },
           "description": "Tooltip settings."

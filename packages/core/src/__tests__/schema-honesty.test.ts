@@ -1,9 +1,11 @@
+// @vitest-environment jsdom
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it, vi } from "vitest";
 import type { ValidationResult } from "../diagnostics";
 import { render } from "../extra";
+import { attach } from "../interact";
 import type { ChartRenderer } from "../render";
 import { validate } from "../validate";
 
@@ -228,6 +230,13 @@ function apply(host: Record<string, unknown>, path: string, value: unknown): Rec
   }
   const last = parts[parts.length - 1] ?? "";
   (cursor as Record<string, unknown>)[last] = value;
+  if (path.startsWith("/tooltip/fields/")) {
+    const tooltip = isRecord(spec.tooltip) ? spec.tooltip : {};
+    const fields = Array.isArray(tooltip.fields) ? tooltip.fields : [];
+    if (isRecord(fields[0]) && typeof fields[0].field !== "string") fields[0].field = "revenue";
+    tooltip.fields = fields;
+    spec.tooltip = tooltip;
+  }
   return spec;
 }
 
@@ -476,13 +485,14 @@ describe("schema honesty", () => {
     expect(title.left < label.right && label.left < title.right && title.top < label.bottom && label.top < title.bottom).toBe(false);
   });
 
-  it("warns for easing, select, tooltip fields, and font family", () => {
+  it("warns for easing, select, and font family", () => {
     const easing = validate({ ...line, animation: { easing: "linear" } });
     expect(easing.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/animation/easing")).toBe(true);
     const select = validate({ ...line, interaction: { select: "point" } });
     expect(select.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/interaction/select")).toBe(true);
-    const fields = validate({ ...line, tooltip: { fields: [{ field: "revenue" }] } });
-    expect(fields.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/tooltip/fields")).toBe(true);
+    const fields = validate({ ...line, tooltip: { fields: [{ field: "revenue", title: "Sales", format: "currency" }], position: "top", crosshairLabel: true } });
+    expect(fields.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/tooltip/fields")).toBe(false);
+    expect(fields.ok).toBe(true);
     const font = validate({ ...line, theme: { tokens: { fontFamily: "Georgia" } } });
     expect(font.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/theme/tokens/fontFamily")).toBe(true);
     const labels = validate({ ...line, mark: { labels: true } });
@@ -500,6 +510,64 @@ describe("schema honesty", () => {
     });
     const typeWarning = nominal.warnings.find((warning) => warning.code === "CK3012" && warning.path === "/encoding/y/type");
     expect(typeWarning?.message).toBe("encoding.y.type is ignored; ChartKit infers the scale type");
+  });
+
+  it("changes the tooltip when fields, format, position, or the crosshair label change", () => {
+    const spec = {
+      version: "1",
+      type: "line",
+      data: rows,
+      encoding: { x: "month", y: ["revenue", "cost"] },
+      a11y: { alt },
+      size: { width: 420, height: 240 },
+    };
+    const hover = (extra: Record<string, unknown>) => {
+      const host = document.createElement("div");
+      document.body.append(host);
+      const next = { ...spec, ...extra };
+      host.innerHTML = render(next);
+      const ctl = attach(host, next, { render });
+      const svg = host.querySelector("svg");
+      const plot = svg?.querySelector("clipPath rect");
+      const x = Number(plot?.getAttribute("x")) + Number(plot?.getAttribute("width")) * 0.5;
+      const y = Number(plot?.getAttribute("y")) + Number(plot?.getAttribute("height")) * 0.45;
+      svg?.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: y, bubbles: true }));
+      const tip = host.querySelector("[data-ck-tip]") as HTMLElement | null;
+      const shot = {
+        text: tip?.textContent ?? "",
+        left: Number.parseFloat(tip?.style.left ?? ""),
+        top: Number.parseFloat(tip?.style.top ?? ""),
+        label: svg?.querySelector("[data-ck-xlabel]")?.textContent ?? "",
+      };
+      ctl.destroy();
+      host.remove();
+      return shot;
+    };
+    const plain = hover({});
+    const ordered = hover({
+      tooltip: { fields: ["cost", { field: "revenue", title: "Sales", format: "currency" }] },
+    });
+    const subset = hover({ tooltip: { fields: ["region"] } });
+    expect(plain.text.indexOf("revenue")).toBeGreaterThanOrEqual(0);
+    expect(plain.text.indexOf("revenue")).toBeLessThan(plain.text.indexOf("cost"));
+    expect(plain.text).not.toContain("$");
+    expect(ordered.text.indexOf("cost")).toBeGreaterThanOrEqual(0);
+    expect(ordered.text.indexOf("cost")).toBeLessThan(ordered.text.indexOf("Sales"));
+    expect(ordered.text).toContain("$");
+    expect(ordered.text).not.toBe(plain.text);
+    expect(subset.text).not.toContain("revenue");
+    expect(subset.text).not.toContain("cost");
+    expect(subset.text).not.toBe(ordered.text);
+    const places = (["top", "bottom", "left", "right"] as const).map((position) => {
+      const shot = hover({ tooltip: { position } });
+      return `${shot.left},${shot.top}`;
+    });
+    expect(new Set(places).size).toBe(4);
+    const labeled = hover({ tooltip: { crosshairLabel: true } });
+    const quiet = hover({ tooltip: { crosshairLabel: false } });
+    expect(labeled.label.length).toBeGreaterThan(0);
+    expect(quiet.label).toBe("");
+    expect(labeled.label).not.toBe(quiet.label);
   });
 
   it("walks every schema property on the full renderer and on each chart entry", async () => {

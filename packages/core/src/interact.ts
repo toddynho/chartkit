@@ -212,6 +212,30 @@ function crosshairOn(spec: InteractSpec): boolean {
   return tooltipOn(spec) && spec.type !== "donut" && !(isRecord(spec.tooltip) && spec.tooltip.crosshair === false);
 }
 
+function tipFields(spec: InteractSpec): { field: string; title?: string; format?: unknown }[] | null {
+  const tooltip = spec.tooltip;
+  if (!isRecord(tooltip) || !Array.isArray(tooltip.fields)) return null;
+  const out: { field: string; title?: string; format?: unknown }[] = [];
+  for (let i = 0; i < tooltip.fields.length; i++) {
+    const item = tooltip.fields[i];
+    if (typeof item === "string") {
+      if (item) out.push({ field: item });
+    } else if (isRecord(item) && typeof item.field === "string" && item.field) {
+      out.push({
+        field: item.field,
+        title: typeof item.title === "string" ? item.title : undefined,
+        format: item.format,
+      });
+    }
+  }
+  return out.length ? out : null;
+}
+
+function tipPlace(spec: InteractSpec): "auto" | "top" | "bottom" | "left" | "right" {
+  const place = isRecord(spec.tooltip) ? spec.tooltip.position : "";
+  return place === "top" || place === "bottom" || place === "left" || place === "right" ? place : "auto";
+}
+
 function zoomMode(spec: InteractSpec): "none" | "x" | "xy" {
   const zoom = isRecord(spec.interaction) ? spec.interaction.zoom : 0;
   return zoom === "x" || zoom === "xy" || zoom === "none" ? zoom : spec.type === "candlestick" ? "x" : "none";
@@ -242,7 +266,7 @@ function ensureCss(): void {
   const style = document.createElement("style");
   style.id = "ck-interact-style";
   style.textContent =
-    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}";
+    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-xlabel{font:11px ui-sans-serif,system-ui,sans-serif;fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}";
   document.head.append(style);
 }
 
@@ -508,6 +532,26 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function entriesAt(index: number, pointerY: number | null): { name: string; text: string; color: string }[] {
+    const chosen = tipFields(base);
+    if (chosen) {
+      const yFormat = axisFormat(base, "y");
+      const picked: { name: string; text: string; color: string; raw: number }[] = [];
+      for (let i = 0; i < chosen.length; i++) {
+        const item = chosen[i];
+        const known = series.find((s) => s.field === item.field || s.name === item.field);
+        if (known && hidden.has(known.name)) continue;
+        const raw = table.cell(item.field, index);
+        if (raw == null || raw === "") continue;
+        const num = typeof raw === "number" ? raw : Number(raw);
+        picked.push({
+          name: item.title || known?.name || item.field,
+          text: fmt(raw, item.format ?? known?.format ?? yFormat, locale()),
+          color: known ? colorFor(known.name, Math.max(0, series.indexOf(known))) : paintAt(i),
+          raw: Number.isFinite(num) ? num : 0,
+        });
+      }
+      return picked;
+    }
     const grouped = series.some((item) => item.match) && base.type !== "donut";
     const rows: { name: string; text: string; color: string; raw: number }[] = [];
     const yFormat = axisFormat(base, "y");
@@ -613,18 +657,35 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     }
     const width = tip.offsetWidth || 160;
     const height = tip.offsetHeight || 48;
-    let top = minY - height - 14;
-    if (top < 4) top = maxY + 14;
-    if (top + height > bounds.height - 4) top = Math.max(4, bounds.height - height - 4);
-    const mid = (minX + maxX) / 2;
-    let left = mid + 14;
-    if (left + width > bounds.width - 4) left = Math.max(4, mid - width - 14);
-    if (left < maxX && left + width > minX && top < maxY && top + height > minY && mid - width - 14 >= 4) left = mid - width - 14;
+    const gap = 14;
+    const midX = (minX + maxX) / 2;
+    const midY = (minY + maxY) / 2;
+    const place = tipPlace(base);
+    let top = minY - height - gap;
+    let left = midX - width / 2;
+    if (place === "bottom") top = maxY + gap;
+    else if (place === "left") {
+      left = minX - width - gap;
+      top = midY - height / 2;
+    } else if (place === "right") {
+      left = maxX + gap;
+      top = midY - height / 2;
+    } else if (place === "auto") {
+      if (top < 4) top = maxY + gap;
+      if (top + height > bounds.height - 4) top = Math.max(4, bounds.height - height - 4);
+      left = midX + gap;
+      if (left + width > bounds.width - 4) left = Math.max(4, midX - width - gap);
+      if (left < maxX && left + width > minX && top < maxY && top + height > minY && midX - width - gap >= 4) left = midX - width - gap;
+    }
+    if (place !== "auto" && bounds.width > width + 8 && bounds.height > height + 8) {
+      left = Math.max(4, Math.min(left, bounds.width - width - 4));
+      top = Math.max(4, Math.min(top, bounds.height - height - 4));
+    }
     tip.style.left = `${left}px`;
     tip.style.top = `${top}px`;
   }
 
-  function moveCross(x: number): void {
+  function moveCross(x: number, title: string): void {
     if (!showCross) return;
     let line = svg.querySelector("[data-ck-crosshair]");
     if (!line) {
@@ -635,11 +696,31 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     line.setAttribute("x2", String(x));
     line.setAttribute("y1", String(box.t));
     line.setAttribute("y2", String(box.t + box.h));
+    const showLabel = isRecord(base.tooltip) && base.tooltip.crosshairLabel === true;
+    let label = svg.querySelector("[data-ck-xlabel]");
+    if (!showLabel) {
+      label?.remove();
+      return;
+    }
+    if (!label) {
+      svg.insertAdjacentHTML("beforeend", `<text data-ck-xlabel class="ck-xlabel"/>`);
+      label = svg.lastElementChild as Element;
+    }
+    const place = tipPlace(base);
+    const y = place === "bottom" ? box.t + 14 : box.t + box.h - 6;
+    const pad = 36;
+    const anchor = x < box.l + pad ? "start" : x > box.l + box.w - pad ? "end" : "middle";
+    const lx = anchor === "start" ? x + 4 : anchor === "end" ? x - 4 : x;
+    label.setAttribute("x", String(Math.round(lx)));
+    label.setAttribute("y", String(Math.round(y)));
+    label.setAttribute("text-anchor", anchor);
+    label.textContent = title;
   }
 
   function hideHover(): void {
     tip.hidden = true;
     svg.querySelector("[data-ck-crosshair]")?.remove();
+    svg.querySelector("[data-ck-xlabel]")?.remove();
     clearDots();
   }
 
@@ -906,9 +987,14 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       const cut = label.indexOf(": ");
       const name = (cut >= 0 ? label.slice(0, cut) : label).trim();
       const text = cut >= 0 ? label.slice(cut + 2) : label;
-      placeTip(event.clientX, event.clientY, name, [
-        { name, text, color: legendPaint(path.getAttribute("fill"), 0) },
-      ], [viewPoint(svg, event.clientX, event.clientY)]);
+      let rows = [{ name, text, color: legendPaint(path.getAttribute("fill"), 0) }];
+      if (tipFields(base)) {
+        const slices = svg.querySelectorAll("path[aria-label]");
+        let index = 0;
+        for (let i = 0; i < slices.length; i++) if (slices[i] === path) index = i;
+        rows = entriesAt(index, null);
+      }
+      placeTip(event.clientX, event.clientY, name, rows, [viewPoint(svg, event.clientX, event.clientY)]);
       return;
     }
     if (!showTip && !showCross && !keys) return;
@@ -920,7 +1006,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const title = xText(index);
     const rows = entriesAt(index, point.y);
     const px = crossX(local);
-    moveCross(px);
+    moveCross(px, title);
     const marks = placeDots(px, horizontal, index);
     if (showTip) placeTip(event.clientX, event.clientY, title, rows, marks);
   }

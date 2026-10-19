@@ -210,7 +210,11 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
         });
       }
     } else {
-      const alias = typeof value === "string" && node.enum.includes(FIELD_TYPE_ALIAS[value]) ? FIELD_TYPE_ALIAS[value] : undefined;
+      const alias =
+        (path.endsWith("/position") && typeof value === "string" && node.enum.includes(PLACE_ALIAS[value])
+          ? PLACE_ALIAS[value]
+          : undefined) ??
+        (typeof value === "string" && node.enum.includes(FIELD_TYPE_ALIAS[value]) ? FIELD_TYPE_ALIAS[value] : undefined);
       const closest = alias ?? (typeof value === "string" ? nearest(value, node.enum.map(String), 3) : undefined);
       emit(ctx, {
         code: "CK1007",
@@ -462,11 +466,53 @@ const FIELD_TYPE_ALIAS: Record<string, string> = {
   qualitative: "nominal",
 };
 
+const PLACE_ALIAS: Record<string, string> = { above: "top", below: "bottom", over: "top", under: "bottom" };
+
 const METRIC_FIELDS = ["label", "value", "min", "max", "delta", "target"] as const;
 const DONUT_CHANNELS = ["label", "theta", "angle", "value"] as const;
 
 /** Shapes agents copy from Vega-Lite. One CK1009, with a patch, instead of a pile of missing-property errors. */
 function repairShape(value: unknown, path: string, ctx: Ctx): boolean {
+  if (path.endsWith("/crosshairLabel") && (value === "true" || value === "yes" || value === "false" || value === "no")) {
+    const on = value === "true" || value === "yes";
+    emit(ctx, {
+      code: "CK1006",
+      severity: "error",
+      message: `${showPath(path)} must be boolean, got ${describe(value)}`,
+      path,
+      hint: `did you mean ${on}?`,
+      fix: [{ op: "replace", path, value: on }],
+    });
+    return true;
+  }
+  if (path === "/tooltip/fields" && !Array.isArray(value) && (typeof value === "string" || isPlainObject(value))) {
+    emit(ctx, {
+      code: "CK1009",
+      severity: "error",
+      message: "tooltip.fields is a list",
+      path,
+      hint: "did you mean a list?",
+      fix: [{ op: "replace", path, value: typeof value === "string" ? value.split(",").map((part) => part.trim()).filter(Boolean) : [value] }],
+    });
+    return true;
+  }
+  if (path.startsWith("/tooltip/fields/") && isPlainObject(value) && typeof value.field !== "string") {
+    const named = typeof value.name === "string" ? value.name : undefined;
+    if (named) {
+      const next: Record<string, unknown> = { field: named };
+      if (typeof value.title === "string") next.title = value.title;
+      if (value.format !== undefined) next.format = value.format;
+      emit(ctx, {
+        code: "CK1009",
+        severity: "error",
+        message: 'key is "field"',
+        path,
+        hint: 'did you mean "field"?',
+        fix: [{ op: "replace", path, value: next }],
+      });
+      return true;
+    }
+  }
   if (path === "/data" && isPlainObject(value) && Array.isArray(value.values) && value.columns === undefined) {
     emit(ctx, {
       code: "CK1009",

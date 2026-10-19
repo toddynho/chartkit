@@ -103,6 +103,13 @@ function checkEncoding(
   }
   const yChannels = readY(encoding.y);
   channels.push(...yChannels);
+  const tip = spec.tooltip;
+  if (isRecord(tip) && Array.isArray(tip.fields)) {
+    for (let i = 0; i < tip.fields.length; i++) {
+      const channel = readChannel(tip.fields[i], `/tooltip/fields/${i}`);
+      if (channel?.field) channels.push(channel);
+    }
+  }
 
   for (const channel of channels) {
     if (!channel.field) continue;
@@ -349,11 +356,10 @@ function flag(diagnostics: Diagnostic[], path: string, why: string): void {
   });
 }
 
-/** kind: 0 defined, 1 point|series, 2 array, 3 light|dark, 4 string, 5 number. */
-const UNBUILT: ReadonlyArray<readonly [string, 0 | 1 | 2 | 3 | 4 | 5, string]> = [
+/** kind: 0 defined, 1 point|series, 3 light|dark, 4 string, 5 number. */
+const UNBUILT: ReadonlyArray<readonly [string, 0 | 1 | 3 | 4 | 5, string]> = [
   ["animation/easing", 0, "ignored; duration only"],
   ["interaction/select", 1, "ignored; no selection"],
-  ["tooltip/fields", 2, "ignored; encoded fields"],
   ["theme/mode", 3, "ignored; preset stays"],
   ["theme/tokens/fontFamily", 4, "ignored; built-in font"],
   ["theme/tokens/fontSize", 5, "ignored; built-in size"],
@@ -380,13 +386,11 @@ function warnUnbuilt(spec: Record<string, unknown>, diagnostics: Diagnostic[]): 
         ? value !== undefined
         : kind === 1
           ? value === "point" || value === "series"
-          : kind === 2
-            ? Array.isArray(value)
-            : kind === 3
-              ? value === "light" || value === "dark"
-              : kind === 4
-                ? typeof value === "string"
-                : typeof value === "number";
+          : kind === 3
+            ? value === "light" || value === "dark"
+            : kind === 4
+              ? typeof value === "string"
+              : typeof value === "number";
     if (hit) flag(diagnostics, "/" + path, why);
   }
 }

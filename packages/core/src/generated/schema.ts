@@ -199,7 +199,15 @@ export type Tooltip =
        */
       crosshair?: boolean;
       /**
-       * Extra or reordered fields to show. Strings are field names.
+       * Print the hovered x value on the guide.
+       */
+      crosshairLabel?: boolean;
+      /**
+       * Where the card sits. auto tries above, then below, then beside the point.
+       */
+      position?: "auto" | "top" | "bottom" | "left" | "right";
+      /**
+       * Fields to show, in this order. Omit to keep the encoded series. Strings are field names.
        */
       fields?: (
         | FieldName
