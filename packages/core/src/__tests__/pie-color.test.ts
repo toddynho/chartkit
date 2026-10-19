@@ -58,6 +58,8 @@ describe("pie", () => {
     const donut = render({ ...pie({ labels: true, labelPosition: "outside" }), type: "donut" });
     expect(labeled.match(/<polyline /g)?.length).toBe(4);
     expect(donut.match(/<polyline /g)?.length).toBe(4);
+    const radius = Number(labeled.match(/A ([\d.]+) [\d.]+/)?.[1]);
+    expect(radius).toBeGreaterThan(40);
     const placed = [...labeled.matchAll(/<text x="[^"]+" y="([^"]+)" text-anchor="(start|end)" dominant-baseline="middle"/g)];
     const bySide = new Map<string, number[]>();
     for (const row of placed) {
@@ -66,7 +68,57 @@ describe("pie", () => {
       list.push(Number(row[1]));
       bySide.set(side, list);
     }
+    expect(bySide.get("start")?.length).toBeGreaterThan(0);
+    expect(bySide.get("end")?.length).toBeGreaterThan(0);
     for (const list of bySide.values()) expect(new Set(list.map((y) => Math.round(y))).size).toBe(list.length);
+    const lines = [...labeled.matchAll(/<polyline points="([^"]+)"/g)];
+    expect(lines.length).toBe(4);
+    for (const line of lines) {
+      const points = (line[1] ?? "").split(" ").map((pair) => pair.split(",").map(Number));
+      const first = points[0];
+      expect(first).toBeTruthy();
+      for (const point of points.slice(1)) {
+        const span = Math.hypot((point[0] ?? 0) - (first?.[0] ?? 0), (point[1] ?? 0) - (first?.[1] ?? 0));
+        expect(span).toBeLessThan(48);
+      }
+    }
+  });
+
+  it("nudges an exploded slice a few pixels along its bisector", () => {
+    const popped = render(pie({ explode: ["Email"], offset: 8 }));
+    const centers = [...popped.matchAll(/<path d="M ([\d.]+) ([\d.]+)[^"]*"[^>]* data-ck-name="([^"]+)"/g)].map((row) => ({
+      x: Number(row[1]),
+      y: Number(row[2]),
+      name: row[3],
+    }));
+    const email = centers.find((item) => item.name === "Email");
+    const home = centers.find((item) => item.name === "Search");
+    expect(email && home).toBeTruthy();
+    const distance = Math.hypot((email?.x ?? 0) - (home?.x ?? 0), (email?.y ?? 0) - (home?.y ?? 0));
+    expect(distance).toBeGreaterThan(6);
+    expect(distance).toBeLessThan(12);
+  });
+
+  it("folds small slices into Other and paints shared rule colours with a seam", () => {
+    const folded = render(pie({ sort: "desc", other: { threshold: 0.1, label: "Other" }, labels: true }));
+    expect(folded).toContain(">Other<");
+    expect(folded).not.toContain(">Email<");
+    const rules = { colorRules: [{ color: "accent", gt: 30 }, { color: "negative", lt: 10 }] };
+    const data = [
+      { label: "Search", value: 42 },
+      { label: "Direct", value: 28 },
+      { label: "Social", value: 18 },
+      { label: "Email", value: 4 },
+      { label: "Ads", value: 3 },
+    ];
+    const ruled = render({ ...pie(rules), data });
+    const midnight = render({ ...pie(rules), data, theme: "midnight" });
+    for (const svg of [ruled, midnight]) {
+      expect(svg).toContain("var(--ck-accent");
+      expect(svg).toContain("var(--ck-negative");
+      expect(svg).toContain("var(--ck-series-2");
+      expect(svg).toContain('stroke="var(--ck-background');
+    }
   });
 });
 

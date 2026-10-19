@@ -1,6 +1,6 @@
 {
   "line": 21996,
-  "all": 36815,
+  "all": 37758,
   "validate": 21497,
   "vue": 668,
   "svelte": 822,
@@ -10,7 +10,7 @@
   "vueLine": 22592,
   "svelteLine": 22771,
   "vanillaLine": 22343,
-  "extra": 52046,
+  "extra": 52956,
   "histogram": 6616,
   "boxplot": 6614,
   "radar": 5100,
@@ -27,8 +27,8 @@
   "mermaid": 26850,
   "vanillaAuto": 833,
   "markdown": 663,
-  "global": 76655,
-  "globalAuto": 50743,
+  "global": 77520,
+  "globalAuto": 51652,
   "globalMermaid": 27262,
-  "note": "gzip -9 byte budgets, each set to the measured size after pie and colour. line 21996, all 36815, validate 21497, interact 11559, interactExtra 1623, extra 52046, mermaid 26850, vanillaAuto 833, markdown 663, global 76655, globalAuto 50743, globalMermaid 27262. Adapters: vue 668, svelte 822, vanilla 440; vueLine 22592, svelteLine 22771, vanillaLine 22343. Phase 4 charts stay out of all: histogram 6616, boxplot 6614, radar 5100, funnel 5220, treemap 5948, sankey 6246, bullet 5370, waterfall 6048, gantt 6790, timeline 5666, quadrant 5452, venn 5874, journey 5291."
+  "note": "gzip -9 byte budgets, each set to the measured size after the pie label layout fix. line 21996, all 37758, validate 21497, interact 11559, interactExtra 1623, extra 52956, mermaid 26850, vanillaAuto 833, markdown 663, global 77520, globalAuto 51652, globalMermaid 27262. Adapters: vue 668, svelte 822, vanilla 440; vueLine 22592, svelteLine 22771, vanillaLine 22343. Phase 4 charts stay out of all: histogram 6616, boxplot 6614, radar 5100, funnel 5220, treemap 5948, sankey 6246, bullet 5370, waterfall 6048, gantt 6790, timeline 5666, quadrant 5452, venn 5874, journey 5291."
 }

@@ -82,11 +82,16 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
         (colorField && colorField === labelField),
     ),
   });
-  let slices: Slice[] = kept.map((slice, index) => ({
-    label: slice.label,
-    value: slice.value,
-    color: painted?.[index] ?? paint(undefined, preset, index),
-  }));
+  const seriesOnly = !colorEnc?.field && !colorEnc?.constant && !colorEnc?.domain && !colorEnc?.range;
+  let slices: Slice[] = kept.map((slice, index) => {
+    const palette = paint(undefined, preset, index);
+    const ruled = matchRule(slice.value, rules, preset);
+    return {
+      label: slice.label,
+      value: slice.value,
+      color: seriesOnly ? (ruled ?? palette) : (painted?.[index] ?? palette),
+    };
+  });
 
   const other = readOther(frame.mark);
   if (other && other.threshold > 0) {
@@ -149,13 +154,39 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   const height = frame.height;
   const availW = width - sideLegend - 16;
   const availH = height - y0 - legendBlock - 12;
-  const size = Math.max(48, Math.min(availW, availH));
-  const pieX = place === "left" ? width - size - 8 : place === "right" ? 8 : (width - sideLegend - size) / 2;
-  const pieY = place === "bottom" ? y0 + 4 : y0 + (place === "top" ? legendBlock : 0) + Math.max(0, (availH - size) / 2);
-  const cx = pieX + size / 2;
-  const cy = pieY + size / 2;
+  let size = Math.max(48, Math.min(availW, availH));
+  let pieX = place === "left" ? width - size - 8 : place === "right" ? 8 : (width - sideLegend - size) / 2;
+  let pieY = place === "bottom" ? y0 + 4 : y0 + (place === "top" ? legendBlock : 0) + Math.max(0, (availH - size) / 2);
+  let cx = pieX + size / 2;
+  let cy = pieY + size / 2;
   const margin = leaders ? 56 : showLabels ? 22 : 8;
-  const outer = Math.max(12, size / 2 - margin - (offset > 0 ? Math.min(offset, 24) : 0));
+  let outer = Math.max(12, size / 2 - margin - (offset > 0 ? Math.min(offset, 24) : 0));
+  let plotTop = pieY;
+  let plotBottom = pieY + size;
+  if (leaders) {
+    const laid = layoutOutside({
+      slices,
+      total,
+      valueFormat,
+      locale: frame.locale,
+      labelFormat: frame.mark.labelFormat,
+      width,
+      height,
+      y0,
+      place,
+      legendBlock,
+      sideLegend,
+      offset,
+    });
+    cx = laid.cx;
+    cy = laid.cy;
+    outer = laid.outer;
+    pieX = laid.pieX;
+    pieY = laid.pieY;
+    size = laid.size;
+    plotTop = laid.plotTop;
+    plotBottom = laid.plotBottom;
+  }
   const inner = outer * innerRatio;
 
   const totalPad = Math.min(padAngle * slices.length, 40);
@@ -189,7 +220,14 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
     const origin = moved ? polar(cx, cy, offset, mid) : { x: cx, y: cy };
     const path = slicePath(origin.x, origin.y, outer, inner, arc.start, arc.end);
     const label = `${arc.label}: ${formatValue(arc.value, valueFormat, frame.locale)} (${formatValue(arc.percent / 100, "percent", frame.locale)})`;
-    const radius = corner > 0 ? ` stroke="${arc.color}" stroke-width="${n(Math.min(corner, 8))}" stroke-linejoin="round"` : "";
+    const prev = arcs.length > 1 ? arcs[(index + arcs.length - 1) % arcs.length] : undefined;
+    const next = arcs.length > 1 ? arcs[(index + 1) % arcs.length] : undefined;
+    const shares = Boolean((prev && prev.color === arc.color) || (next && next.color === arc.color));
+    const radius = corner > 0
+      ? ` stroke="${arc.color}" stroke-width="${n(Math.min(corner, 8))}" stroke-linejoin="round"`
+      : shares
+        ? ` stroke="${seamPaint(preset)}" stroke-width="3" stroke-linejoin="round"`
+        : "";
     parts.push(
       `<path d="${path}" fill="${arc.color}" fill-rule="evenodd"${radius} data-ck-name="${esc(arc.label)}" data-ck-i="${index}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`,
     );
@@ -204,28 +242,27 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
       labelSvg += held.put(body, point.x, point.y, anchor, cssVar("text", frame.preset.text));
       continue;
     }
+    const rim = polar(cx, cy, 1, mid);
     const tip = polar(origin.x, origin.y, outer, mid);
+    const reach = polar(origin.x, origin.y, outer + 14, mid);
     pending.push({
       text: body,
-      side: tip.x >= cx ? 1 : -1,
-      y: tip.y,
+      side: rim.x >= cx ? 1 : -1,
+      y: reach.y,
       tipX: tip.x,
       tipY: tip.y,
-      elbow: polar(origin.x, origin.y, outer + 8, mid),
+      width: estimateText(body),
       color: arc.color,
     });
   }
 
   if (leaders && pending.length) {
-    stackLabels(pending, pieY + 14, pieY + size - 14);
-    const rightX = Math.min(width - sideLegend - 6, cx + outer + 18);
-    const leftX = Math.max(6, cx - outer - 18);
+    stackLabels(pending, plotTop + 8, plotBottom - 16);
     for (const item of pending) {
-      const labelX = item.side > 0 ? rightX : leftX;
-      const joinX = item.side > 0 ? labelX - 8 : labelX + 8;
+      const laid = leaderLine(item, cx, cy, outer, width - sideLegend);
       labelSvg +=
-        `<polyline points="${n(item.tipX)},${n(item.tipY)} ${n(item.elbow.x)},${n(item.elbow.y)} ${n(joinX)},${n(item.y)} ${n(labelX)},${n(item.y)}" fill="none" stroke="${item.color}" stroke-width="1" />` +
-        `<text x="${n(labelX)}" y="${n(item.y)}" text-anchor="${item.side > 0 ? "start" : "end"}" dominant-baseline="middle" fill="${cssVar("text", frame.preset.text)}" font-size="12" font-weight="400" font-family="${font()}">${esc(item.text)}</text>`;
+        `<polyline points="${laid.points}" fill="none" stroke="${item.color}" stroke-width="1" />` +
+        `<text x="${n(laid.labelX)}" y="${n(item.y)}" text-anchor="${item.side > 0 ? "start" : "end"}" dominant-baseline="middle" fill="${cssVar("text", frame.preset.text)}" font-size="12" font-weight="400" font-family="${font()}">${esc(item.text)}</text>`;
     }
   }
 
@@ -249,34 +286,161 @@ interface Leader {
   y: number;
   tipX: number;
   tipY: number;
-  elbow: { x: number; y: number };
+  width: number;
   color: string;
 }
 
-/** Stack one side so labels keep a 16px gap, then pull the run back into the pie box. */
+/** 12px text is about 6.6px per character. */
+function estimateText(value: string): number {
+  return Math.max(18, Math.ceil(value.length * 6.6));
+}
+
+function outsideText(value: number, total: number, labelFormat: unknown, valueFormat: unknown, locale: string): string {
+  return labelFormat !== undefined
+    ? formatValue(value, valueFormat, locale)
+    : formatValue(value / total, "percent", locale);
+}
+
+/**
+ * Keep the pie large. The side gutter is the label width plus a short elbow.
+ * The radius never drops below about a third of the plot, and never past the plot.
+ */
+function layoutOutside(input: {
+  slices: { value: number }[];
+  total: number;
+  valueFormat: unknown;
+  locale: string;
+  labelFormat: unknown;
+  width: number;
+  height: number;
+  y0: number;
+  place: "top" | "right" | "bottom" | "left" | false;
+  legendBlock: number;
+  sideLegend: number;
+  offset: number;
+}): { cx: number; cy: number; outer: number; pieX: number; pieY: number; size: number; plotTop: number; plotBottom: number } {
+  const plotLeft = input.place === "left" ? input.sideLegend + 8 : 8;
+  const plotRight = input.width - (input.place === "right" ? input.sideLegend + 8 : 8);
+  const plotTop = input.y0 + (input.place === "top" ? input.legendBlock : 0);
+  const plotBottom = input.height - (input.place === "bottom" ? input.legendBlock + 4 : 8);
+  const plotW = Math.max(48, plotRight - plotLeft);
+  const plotH = Math.max(48, plotBottom - plotTop);
+  const labelW = Math.max(
+    24,
+    ...input.slices.map((slice) => estimateText(outsideText(slice.value, input.total, input.labelFormat, input.valueFormat, input.locale))),
+  );
+  const gutter = labelW + 32;
+  const pop = input.offset > 0 ? Math.min(input.offset, 12) : 0;
+  const cap = Math.min(plotW, plotH) / 2 - 2;
+  const minRadius = Math.min(cap, Math.max(40, Math.min(plotW, plotH) * 0.34));
+  let outer = Math.min(plotH / 2 - 28, plotW / 2 - gutter - pop);
+  outer = Math.max(outer, minRadius);
+  outer = Math.min(Math.max(24, outer), cap);
+  const cx = plotLeft + plotW / 2;
+  const cy = plotTop + plotH / 2;
+  const pieX = plotLeft;
+  const pieY = plotTop;
+  const size = input.place === "right" || input.place === "left" ? Math.max(0, plotRight - plotLeft - 8) : Math.max(0, plotBottom - plotTop - 8);
+  return { cx, cy, outer, pieX, pieY, size, plotTop, plotBottom };
+}
+
+/** Shared fills need a seam in the chart background, or the surface when that background is clear. */
+function seamPaint(preset: { background: string; surface: string }): string {
+  const fallback = !preset.background || preset.background === "transparent" ? preset.surface : preset.background;
+  return cssVar("background", fallback);
+}
+
+/**
+ * Short elbow on the slice's own side.
+ * The first bend is a few pixels out along the bisector, then a horizontal tail.
+ * A label that had to move keeps that tail outside the circle instead of crossing it.
+ */
+function leaderLine(
+  item: Leader,
+  cx: number,
+  cy: number,
+  outer: number,
+  rightLimit: number,
+): { points: string; labelX: number } {
+  const vx = item.tipX - cx;
+  const vy = item.tipY - cy;
+  const mag = Math.hypot(vx, vy) || 1;
+  const stub = 14;
+  const tail = 14;
+  const stubX = item.tipX + (vx / mag) * stub;
+  const stubY = item.tipY + (vy / mag) * stub;
+  const y0 = Math.min(stubY, item.y);
+  const y1 = Math.max(stubY, item.y);
+  let elbowX = stubX;
+  if (y1 >= cy - outer && y0 <= cy + outer) {
+    const yWidest = Math.min(y1, Math.max(y0, cy));
+    const dy = yWidest - cy;
+    const room = outer * outer - dy * dy;
+    const half = room > 0 ? Math.sqrt(room) : 0;
+    const edge = item.side > 0 ? cx + half : cx - half;
+    elbowX = item.side > 0 ? Math.max(stubX, edge) : Math.min(stubX, edge);
+  }
+  elbowX += item.side > 0 ? 4 : -4;
+  let labelX = item.side > 0 ? elbowX + tail : elbowX - tail;
+  if (item.side > 0) {
+    const limit = rightLimit - item.width - 4;
+    if (labelX > limit) {
+      labelX = limit;
+      elbowX = Math.min(elbowX, Math.max(stubX, labelX - tail));
+    }
+  } else {
+    const limit = item.width + 4;
+    if (labelX < limit) {
+      labelX = limit;
+      elbowX = Math.max(elbowX, Math.min(stubX, labelX + tail));
+    }
+  }
+  const raw = [
+    [item.tipX, item.tipY],
+    [stubX, stubY],
+    [elbowX, stubY],
+    [elbowX, item.y],
+    [labelX, item.y],
+  ];
+  const kept: number[][] = [];
+  for (const point of raw) {
+    const prev = kept[kept.length - 1];
+    if (prev && Math.hypot((point[0] ?? 0) - (prev[0] ?? 0), (point[1] ?? 0) - (prev[1] ?? 0)) < 0.6) continue;
+    kept.push(point);
+  }
+  return { points: kept.map((point) => `${n(point[0] ?? 0)},${n(point[1] ?? 0)}`).join(" "), labelX };
+}
+
+/** Stack one side so labels keep a gap, and compress the run when the pie box is short. */
 function stackLabels(items: Leader[], minY: number, maxY: number): void {
-  const gap = 16;
+  const gap = 18;
   for (const side of [1, -1]) {
     const group = items.filter((item) => item.side === side).sort((a, b) => a.y - b.y);
+    if (!group.length) continue;
     for (let i = 1; i < group.length; i++) {
       const prev = group[i - 1];
       const item = group[i];
       if (prev && item && item.y < prev.y + gap) item.y = prev.y + gap;
     }
+    const room = maxY - minY;
+    const first = group[0];
     const last = group[group.length - 1];
+    const span = first && last ? last.y - first.y : 0;
+    if (group.length > 1 && span > room) {
+      const step = room / (group.length - 1);
+      group.forEach((item, index) => {
+        item.y = minY + index * step;
+      });
+      continue;
+    }
     if (last && last.y > maxY) {
       const shift = last.y - maxY;
       for (const item of group) item.y -= shift;
     }
-    const first = group[0];
-    if (first && first.y < minY) {
-      const shift = minY - first.y;
+    const head = group[0];
+    if (head && head.y < minY) {
+      const shift = minY - head.y;
       for (const item of group) item.y += shift;
-    }
-    for (let i = 1; i < group.length; i++) {
-      const prev = group[i - 1];
-      const item = group[i];
-      if (prev && item && item.y < prev.y + gap) item.y = prev.y + gap;
     }
   }
 }
