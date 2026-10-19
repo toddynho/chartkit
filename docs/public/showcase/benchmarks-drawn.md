@@ -483,6 +483,7 @@ Painted median from the same round 13 file. uPlot is ahead of ChartKit here.
 - [Axis title](https://chartkit.dev/features/axis.title) (`axis.title`)
 - [Click events on marks](https://chartkit.dev/features/interaction.click) (`interaction.click`)
 - [Selection (point / multi / series)](https://chartkit.dev/features/interaction.select) (`interaction.select`)
+- [Margins / padding](https://chartkit.dev/features/layout.margin) (`layout.margin`)
 - [Click to toggle series](https://chartkit.dev/features/legend.interactive) (`legend.interactive`)
 - [Legend position](https://chartkit.dev/features/legend.position) (`legend.position`)
 - [Logarithmic scale](https://chartkit.dev/features/scale.log) (`scale.log`)
