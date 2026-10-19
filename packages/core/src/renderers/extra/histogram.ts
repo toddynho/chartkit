@@ -28,7 +28,6 @@ export function renderHistogram(spec: Record<string, unknown>): string | null {
   const xField = fieldOf(frame.encoding.x);
   const yField = fieldOf(frame.encoding.y);
   const xs = column(table, xField);
-  const box = plotBox(frame, spec);
   const color = fill(frame, 0);
   const bars: { x0: number; x1: number; count: number; label: string }[] = [];
 
@@ -55,6 +54,7 @@ export function renderHistogram(spec: Record<string, unknown>): string | null {
   const countFormat = yField ? valueFormat(frame, spec, frame.encoding.y) : undefined;
   const peak = Math.max(...bars.map((bar) => bar.count), 1);
   const yTicks = countTicks(peak);
+  const box = plotBox(frame, spec, { yTicks });
   const yTop = Math.max(peak, yTicks[yTicks.length - 1] ?? peak);
   const yAt = scaleOf(0, yTop, box.bottom, box.top);
   const dataMin = bars[0].x0;

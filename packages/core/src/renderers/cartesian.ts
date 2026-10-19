@@ -1,7 +1,7 @@
 import { annotationLayers } from "../annotations";
 import { isPaintColumn, readRules, resolveColors, withPalette } from "../color";
 import { isTypedArray, readData, type DataTable } from "../data";
-import { formatValue } from "../format";
+import { formatAxisValue, formatValue } from "../format";
 import { bag, glyphOf, marker, named, nudge, type Bag } from "../glyphs";
 import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import type { ColorScale } from "../color-scale";
@@ -2430,7 +2430,7 @@ export function tickText(values: number[], model: PlotModel, format: unknown): s
   const digits = tickDigits(values);
   const out = new Array<string>(values.length);
   for (let i = 0; i < values.length; i++) {
-    out[i] = format === undefined ? formatNumber(values[i], model.locale, digits) : formatValue(values[i], format, model.locale);
+    out[i] = format === undefined ? formatNumber(values[i], model.locale, digits) : formatAxisValue(values[i], format, model.locale, values);
   }
   return out;
 }
@@ -2501,6 +2501,7 @@ function tickDigits(values: number[]): number {
 }
 
 export function formatNumber(value: number, locale: string, digits = 2): string {
+  if (Object.is(value, -0) || value === 0) value = 0;
   if (locale === "en-US") {
     const text = formatEn(value, digits);
     if (text !== null) return text;

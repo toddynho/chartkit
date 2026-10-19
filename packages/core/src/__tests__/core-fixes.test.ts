@@ -1,9 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { formatValue } from "../format";
+import { formatAxisValue, formatValue } from "../format";
 import { render } from "../extra";
 
 const gbp = { style: "currency", currency: "GBP" };
 const money = (value: number) => formatValue(value, gbp, "en-US");
+
+function fits(svg: string): void {
+  const ticks = [...svg.matchAll(/<text x="([^"]+)"[^>]*text-anchor="end"[^>]*>([^<]*)<\/text>/g)];
+  expect(ticks.length).toBeGreaterThan(0);
+  for (const tick of ticks) {
+    const x = Number(tick[1]);
+    expect(x - tick[2].length * 6.7).toBeGreaterThanOrEqual(0);
+  }
+}
 
 function nodeHeight(svg: string, name: string): number {
   const height = svg.match(new RegExp(`height="([^"]+)"[^>]*data-ck-name="${name}"`))?.[1];
@@ -59,7 +68,17 @@ describe("mark labels use the encoding format", () => {
     expect(svg).toContain(money(11200));
     expect(svg).toContain(`Open: total ${money(2100)}`);
     expect(svg).not.toContain("11.2k");
-    expect(svg).toContain(money(0));
+    expect(svg).toContain(">£0<");
+    expect(svg).toContain(">£5,000<");
+    expect(svg).toContain(">£10,000<");
+    expect(svg).not.toContain("-£0.00");
+    expect(svg).not.toContain("£10,000.00");
+    fits(svg);
+    expect(formatValue(-0, gbp, "en-US")).toBe(money(0));
+    expect(formatAxisValue(10000, gbp, "en-US", [0, 5000, 10000])).toBe("£10,000");
+    expect(formatAxisValue(10000, { ...gbp, decimals: 2 }, "en-US", [0, 10000])).toBe("£10,000.00");
+    expect(formatAxisValue(10000, { ...gbp, minimumFractionDigits: 2 }, "en-US", [0, 10000])).toBe("£10,000.00");
+    expect(formatValue(2100, gbp, "en-US")).toBe("£2,100.00");
   });
 
   it("formats funnel, bullet, treemap, histogram, candlestick, and bar labels", () => {
@@ -105,11 +124,44 @@ describe("mark labels use the encoding format", () => {
     const candles = render({
       version: "1",
       type: "candlestick",
-      data: [{ day: "Mon", open: 10, high: 12, low: 9, close: 11 }],
+      data: [{ day: "Mon", open: 9800, high: 10200, low: 9700, close: 10000 }],
       encoding: { x: "day", open: "open", high: "high", low: "low", close: { field: "close", format: gbp } },
       a11y: { alt: "Monday closed higher." },
     })!;
-    expect(candles).toContain("£");
+    expect(candles).toContain("£10,000");
+    expect(candles).not.toContain("£10,000.00");
+    expect(candles).not.toContain("-£0");
+
+    const boxes = render({
+      version: "1",
+      type: "boxplot",
+      data: [
+        { team: "A", days: 1000 },
+        { team: "A", days: 4000 },
+        { team: "A", days: 7000 },
+        { team: "A", days: 10000 },
+      ],
+      encoding: { x: "team", y: { field: "days", format: gbp } },
+      a11y: { alt: "Team A closes in the thousands of pounds." },
+    })!;
+    expect(boxes).toContain(">£10,000<");
+    expect(boxes).toContain("max £10,000.00");
+
+    const counted = render({
+      version: "1",
+      type: "histogram",
+      data: [
+        { bin: "Low", n: 2000 },
+        { bin: "High", n: 10000 },
+      ],
+      encoding: { x: "bin", y: { field: "n", format: gbp } },
+      a11y: { alt: "The high bin is ten thousand pounds." },
+    })!;
+    expect(counted).toContain(">£10,000<");
+    expect(counted).toContain(": £10,000.00");
+    fits(candles);
+    fits(boxes);
+    fits(counted);
 
     const bars = render({
       version: "1",

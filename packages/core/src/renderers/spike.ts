@@ -1,5 +1,5 @@
 import { cssVar, lineStroke, paint } from "../theme";
-import { formatValue } from "../format";
+import { formatAxisValue, formatValue } from "../format";
 import {
   asNumber,
   axisOn,
@@ -38,12 +38,19 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
   const showY = axisOn(spec, "y");
   let top = 16;
   if (frame.title) top = 32;
-  const plot = { left: showY ? 44 : 12, top, right: frame.width - 12, bottom: frame.height - (showX ? 28 : 12) };
-  const yScale = linear(domain[0], domain[1], plot.bottom, plot.top);
   const yTicks = ticks(domain[0], domain[1], 4);
+  const yFormat = channelFormat(frame.encoding.y);
+  const yTickText = yTicks.map((tick) => formatAxisValue(tick, yFormat, frame.locale, yTicks));
+  let left = 12;
+  if (showY) {
+    let width = 0;
+    for (let i = 0; i < yTickText.length; i++) width = Math.max(width, yTickText[i].length * 6.7);
+    left = Math.max(44, Math.ceil(width + 14));
+  }
+  const plot = { left, top, right: frame.width - 12, bottom: frame.height - (showX ? 28 : 12) };
+  const yScale = linear(domain[0], domain[1], plot.bottom, plot.top);
   const count = values.length;
   const slot = count > 0 ? (plot.right - plot.left) / count : plot.right - plot.left;
-  const yFormat = channelFormat(frame.encoding.y);
 
   const parts: string[] = [];
   parts.push(openChart({ ...frame, renderer: "spike" }));
@@ -80,8 +87,8 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
     }
   }
   if (showY) {
-    for (const tick of yTicks) {
-      parts.push(text(plot.left - 6, yScale(tick) + 4, formatValue(tick, yFormat, frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "end"));
+    for (let i = 0; i < yTicks.length; i++) {
+      parts.push(text(plot.left - 8, yScale(yTicks[i]) + 4, yTickText[i] ?? "", cssVar("muted", frame.preset.muted), 11, "400", "end"));
     }
   }
   if (showX) {

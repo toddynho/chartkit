@@ -3,6 +3,8 @@
 interface Fmt {
   style: string;
   decimals?: number;
+  /** Set when the spec asked for a minimum. Axis ticks then keep the fraction digits. */
+  minimumFractionDigits?: number;
   currency?: string;
   prefix?: string;
   suffix?: string;
@@ -19,6 +21,7 @@ function normalize(format: unknown): Fmt {
     return {
       style: format.style,
       decimals: typeof format.decimals === "number" ? format.decimals : undefined,
+      minimumFractionDigits: typeof format.minimumFractionDigits === "number" ? format.minimumFractionDigits : undefined,
       currency: typeof format.currency === "string" ? format.currency : undefined,
       prefix: typeof format.prefix === "string" ? format.prefix : undefined,
       suffix: typeof format.suffix === "string" ? format.suffix : undefined,
@@ -29,8 +32,16 @@ function normalize(format: unknown): Fmt {
 }
 
 function digits(fmt: Fmt, fallback: number): { minimumFractionDigits?: number; maximumFractionDigits: number } {
-  if (fmt.decimals === undefined) return { maximumFractionDigits: fallback };
-  return { minimumFractionDigits: fmt.decimals, maximumFractionDigits: fmt.decimals };
+  if (fmt.decimals !== undefined) return { minimumFractionDigits: fmt.decimals, maximumFractionDigits: fmt.decimals };
+  if (fmt.minimumFractionDigits !== undefined) {
+    return { minimumFractionDigits: fmt.minimumFractionDigits, maximumFractionDigits: Math.max(fmt.minimumFractionDigits, fallback) };
+  }
+  return { maximumFractionDigits: fallback };
+}
+
+/** Negative zero formats as zero. Intl currency otherwise prints a minus. */
+function zero(value: number): number {
+  return Object.is(value, -0) || value === 0 ? 0 : value;
 }
 
 function formatBytes(value: number): string {
@@ -67,6 +78,7 @@ function formatDate(value: number, style: string, locale: string): string {
 }
 
 function body(value: number, fmt: Fmt, locale: string): string {
+  value = zero(value);
   const style = fmt.style;
   if (style === "bytes") return formatBytes(value);
   if (style === "duration-ms") return formatDuration(value);
@@ -84,10 +96,40 @@ function body(value: number, fmt: Fmt, locale: string): string {
   return new Intl.NumberFormat(locale, options).format(style === "percent-raw" ? value / 100 : value);
 }
 
+function fractionsLocked(fmt: Fmt): boolean {
+  return fmt.decimals !== undefined || fmt.minimumFractionDigits !== undefined;
+}
+
+function allWhole(ticks: ArrayLike<number>): boolean {
+  let seen = false;
+  for (let i = 0; i < ticks.length; i++) {
+    const value = ticks[i];
+    if (typeof value !== "number" || !Number.isFinite(value)) continue;
+    seen = true;
+    if (!Number.isInteger(zero(value))) return false;
+  }
+  return seen;
+}
+
+/**
+ * Axis ticks. When every tick is a whole number and the format did not set
+ * `decimals` or `minimumFractionDigits`, drop the trailing fraction (`£10,000`).
+ * Mark labels keep `formatValue`, so they stay at the encoding precision.
+ */
+export function formatAxisValue(value: number, format: unknown, locale: string, ticks: ArrayLike<number>): string {
+  const fmt = normalize(format);
+  const numeric = fmt.style === "number" || fmt.style === "currency" || fmt.style === "percent" || fmt.style === "percent-raw" || fmt.style === "compact";
+  if (numeric && !fractionsLocked(fmt) && allWhole(ticks)) {
+    const base = isRecord(format) ? format : { style: fmt.style };
+    return formatValue(value, { ...base, decimals: 0 }, locale);
+  }
+  return formatValue(value, format, locale);
+}
+
 /** Format a number with a spec preset or format object. */
 export function formatValue(value: number, format: unknown, locale: string): string {
   const fmt = normalize(format);
-  let text = body(value, fmt, locale);
+  let text = body(zero(value), fmt, locale);
   if (fmt.signed && value > 0 && !text.startsWith("+")) text = `+${text}`;
   return `${fmt.prefix ?? ""}${text}${fmt.suffix ?? ""}`;
 }

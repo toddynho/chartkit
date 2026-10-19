@@ -50,9 +50,9 @@ export function renderWaterfall(spec: Record<string, unknown>): string | null {
   const pad = (max - min) * 0.12;
   const y0 = min - pad;
   const y1 = max + pad;
-  const box = plotBox(frame, spec, { bottom: 36 });
-  const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const yTicks = domainTicks(y0, y1);
+  const box = plotBox(frame, spec, { bottom: 36, yTicks });
+  const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const band = (box.right - box.left) / steps.length;
   const barW = Math.max(10, band * (1 - gapOf(frame, 0.34)));
   const format = valueFormat(frame, spec, frame.encoding.y);

@@ -52,9 +52,9 @@ export function renderBoxplot(spec: Record<string, unknown>): string | null {
   const domain = domainTicks(min - pad, max + pad);
   const y0 = Math.min(min - pad, domain[0] ?? min);
   const y1 = Math.max(max + pad, domain[domain.length - 1] ?? max);
-  const box = plotBox(frame, spec);
-  const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const yTicks = domainTicks(y0, y1);
+  const box = plotBox(frame, spec, { yTicks });
+  const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const band = (box.right - box.left) / rows.length;
   const boxW = Math.max(12, band * (1 - gapOf(frame, 0.34)));
   const shown = valueFormat(frame, spec, frame.encoding.y);
