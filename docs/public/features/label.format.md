@@ -1,44 +1,44 @@
 # Data label formatting
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Format/template for label text
 
-Matrix status: `partial`. Verification: `dts-path` (strong).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-channel format reused
+Format preset on the label text. Falls back to the series format. Setting it turns labels on.
 
-Source: chartkit:packages/core/src/generated/schema.ts:136
+Source: packages/core/src/generated/schema.ts:895
 
 ## ChartKit spec
 
 ```json
 {
   "version": "1",
-  "type": "bar",
+  "type": "line",
   "data": [
     {
-      "lane": "A",
-      "stops": 12
+      "quarter": "Q1",
+      "units": 40
     },
     {
-      "lane": "C",
-      "stops": 15
+      "quarter": "Q2",
+      "units": 55
     }
   ],
   "encoding": {
-    "x": "lane",
-    "y": {
-      "field": "stops",
-      "format": "compact"
-    }
+    "x": "quarter",
+    "y": "units"
   },
   "a11y": {
-    "alt": "Lane C has more."
+    "alt": "Units rose in Q2."
   },
   "size": {
     "width": 640,
     "height": 260
+  },
+  "mark": {
+    "labelFormat": "integer"
   }
 }
 ```
@@ -70,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~formatter | dts-grep (weak) | @antv/g2/lib/component/legendCategory.d.ts:5 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 167b01d2f0df.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against bdf969b7d123.
 
 https://chartkit.dev/features.json

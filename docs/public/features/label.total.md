@@ -1,12 +1,54 @@
 # Stack totals
 
-ChartKit: **none**
+ChartKit: **native**
 
 Label the total on stacked bars
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+Labels the total on a stacked bar or stacked area. On a bar this also stacks the series.
+
+Source: packages/core/src/totals.ts:6
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "stacked-area",
+  "data": [
+    {
+      "year": "2022",
+      "rail": 20,
+      "road": 30
+    },
+    {
+      "year": "2023",
+      "rail": 24,
+      "road": 28
+    }
+  ],
+  "encoding": {
+    "x": "year",
+    "y": [
+      "rail",
+      "road"
+    ]
+  },
+  "a11y": {
+    "alt": "Road stayed larger."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "mark": {
+    "stackTotal": true
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -33,6 +75,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | manual | ~register | dts-mechanism (weak) | @antv/g2/lib/exports.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 167b01d2f0df.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against bdf969b7d123.
 
 https://chartkit.dev/features.json

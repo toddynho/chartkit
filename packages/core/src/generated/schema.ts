@@ -152,6 +152,18 @@ export type YChannel =
        * Fill under this line (line/combo).
        */
       area?: boolean;
+      /**
+       * Marker for this series. Overrides mark.pointShape. Applies to: line, stacked-area, scatter, combo.
+       */
+      pointShape?: "circle" | "square" | "diamond" | "triangle" | "cross" | "none";
+      /**
+       * Marker radius in px for this series. Overrides mark.pointSize.
+       */
+      pointSize?: number;
+      /**
+       * Filled or hollow marker for this series. Overrides mark.pointFill.
+       */
+      pointFill?: "filled" | "hollow";
     };
 /**
  * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
@@ -818,9 +830,17 @@ export interface Mark {
    */
   points?: "none" | "hover" | "always";
   /**
-   * Point radius in px. Applies to: line, combo, scatter.
+   * Point radius in px. Applies to: line, stacked-area, combo, scatter.
    */
   pointSize?: number;
+  /**
+   * Point marker. circle, square, diamond, triangle, cross, or none. A y series may override it. Applies to: line, stacked-area, scatter, combo. Drawn on createRenderer([line]).
+   */
+  pointShape?: "circle" | "square" | "diamond" | "triangle" | "cross" | "none";
+  /**
+   * Filled or hollow markers. Applies to: line, stacked-area, scatter, combo.
+   */
+  pointFill?: "filled" | "hollow";
   /**
    * Fill under every line. Applies to: line, sparkline.
    */
@@ -862,9 +882,42 @@ export interface Mark {
    */
   gap?: number;
   /**
-   * Draw value labels on bars/slices. Applies to: bar, donut.
+   * Draw value labels on the marks. Applies to: bar, donut, line, stacked-area, scatter. Overlapping labels are skipped.
    */
   labels?: boolean;
+  /**
+   * Where the value label sits. top, bottom, left, right, and center suit line, area, and scatter. inside and outside suit bar and donut. Setting it turns labels on. Applies to: bar, donut, line, stacked-area, scatter, combo.
+   */
+  labelPosition?: "top" | "bottom" | "left" | "right" | "center" | "inside" | "outside";
+  /**
+   * How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.
+   */
+  labelFormat?:
+    | (
+        | "number"
+        | "integer"
+        | "compact"
+        | "percent"
+        | "percent-raw"
+        | "currency"
+        | "bytes"
+        | "duration-ms"
+        | "date"
+        | "time"
+        | "datetime"
+        | "month"
+        | "year"
+        | "weekday"
+      )
+    | FormatObject;
+  /**
+   * Which line points are labelled. all, ends (first and last), or last. Setting it turns labels on. Applies to: line, stacked-area, combo.
+   */
+  labelEnds?: "all" | "ends" | "last";
+  /**
+   * Label the total of a stacked bar or stacked area. On a bar this also stacks the series. Applies to: bar, stacked-area.
+   */
+  stackTotal?: boolean;
   /**
    * Hole size as a 0–0.95 fraction of the radius; 0 = pie. Applies to: donut.
    */

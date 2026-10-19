@@ -432,13 +432,28 @@ export function patchSvg(host: PatchHost, markup: string, duration = 0): void {
   lastMarkup.set(host, markup);
 }
 
+function legendSwatch(node: Element | null): boolean {
+  if (!node) return false;
+  if (node.localName === "rect") {
+    const w = Number(node.getAttribute("width"));
+    const h = Number(node.getAttribute("height"));
+    return w > 0 && w <= 12 && h > 0 && h <= 12;
+  }
+  if (node.localName === "circle") {
+    const r = Number(node.getAttribute("r"));
+    return r > 0 && r <= 6;
+  }
+  const d = node.localName === "path" ? node.getAttribute("d") || "" : "";
+  return d.length > 0 && d.length < 80 && !node.hasAttribute("stroke-dasharray");
+}
+
 function legendItems(svg: SVGSVGElement): { name: string; text: SVGTextElement; swatch: Element | null }[] {
   const out: { name: string; text: SVGTextElement; swatch: Element | null }[] = [];
   const texts = svg.querySelectorAll("text");
   for (let i = 0; i < texts.length; i++) {
     const text = texts[i] as SVGTextElement;
     const prev = text.previousElementSibling;
-    if (!prev || prev.localName !== "rect" || prev.getAttribute("width") !== "10") continue;
+    if (!legendSwatch(prev)) continue;
     out.push({ name: text.textContent ?? "", text, swatch: prev });
   }
   return out;
@@ -660,7 +675,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     colors = new Map();
     for (const item of legendItems(svg)) {
       const fill = item.swatch?.getAttribute("fill");
-      if (fill) colors.set(item.name, fill);
+      const ink = fill && fill !== "none" ? fill : item.swatch?.getAttribute("stroke");
+      if (ink) colors.set(item.name, ink);
     }
   }
 

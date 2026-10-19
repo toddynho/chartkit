@@ -1,5 +1,6 @@
 import { cssVar, paint } from "../theme";
 import { formatValue } from "../format";
+import { bag, named } from "../glyphs";
 import {
   asNumber,
   channelFormat,
@@ -33,8 +34,9 @@ export function renderDonut(spec: Record<string, unknown>): string | null {
   const innerRatio = typeof frame.mark.innerRadius === "number" ? frame.mark.innerRadius : 0.6;
   const padAngle = typeof frame.mark.padAngle === "number" ? frame.mark.padAngle : 2;
   const corner = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : 0;
-  const showLabels = frame.mark.labels === true;
-  const valueFormat = channelFormat(frame.encoding.y);
+  const labelAt = named(frame.mark.labelPosition, ["top", "bottom", "left", "right", "center", "inside", "outside"]);
+  const showLabels = frame.mark.labels === true || labelAt !== "" || frame.mark.labelFormat !== undefined;
+  const valueFormat = frame.mark.labelFormat ?? channelFormat(frame.encoding.y);
   const place = legendPlace(spec, frame.width, frame.height, frame.legend !== false && slices.length > 1);
   const showLegend = place !== false;
   const legendRow = 20;
@@ -83,6 +85,8 @@ export function renderDonut(spec: Record<string, unknown>): string | null {
   if (showLegend && place === "top") parts.push(legend(arcs, 8, y0, frame, valueFormat, width - 8));
   if (showLegend && place === "left") parts.push(legend(arcs, 12, pieY, frame, valueFormat, 12 + sideWidth - 8));
 
+  const held = bag();
+  let labelSvg = "";
   for (const arc of arcs) {
     const path = slicePath(cx, cy, outer, inner, arc.start, arc.end);
     const label = `${arc.label}: ${formatValue(arc.value, valueFormat, frame.locale)} (${formatValue(arc.percent / 100, "percent", frame.locale)})`;
@@ -92,9 +96,19 @@ export function renderDonut(spec: Record<string, unknown>): string | null {
     );
     if (showLabels) {
       const mid = (arc.start + arc.end) / 2;
-      const point = polar(cx, cy, outer + 12, mid);
-      const anchor = point.x < cx - 4 ? "end" : point.x > cx + 4 ? "start" : "middle";
-      parts.push(text(point.x, point.y, formatValue(arc.percent / 100, "percent", frame.locale), cssVar("text", frame.preset.text), 11, "500", anchor));
+      const inside = labelAt === "inside" || labelAt === "center";
+      const at = inside ? (inner > 8 ? (inner + outer) / 2 : outer * 0.55) : outer + 14;
+      const point = polar(cx, cy, at, mid);
+      let anchor = point.x < cx - 4 ? "end" : point.x > cx + 4 ? "start" : "middle";
+      if (labelAt === "left") anchor = "end";
+      if (labelAt === "right") anchor = "start";
+      let y = point.y;
+      if (labelAt === "top") y -= 8;
+      if (labelAt === "bottom") y += 10;
+      const body = frame.mark.labelFormat !== undefined
+        ? formatValue(arc.value, valueFormat, frame.locale)
+        : formatValue(arc.percent / 100, "percent", frame.locale);
+      labelSvg += held.put(body, point.x, y, anchor, cssVar("text", frame.preset.text));
     }
   }
 
@@ -105,6 +119,7 @@ export function renderDonut(spec: Record<string, unknown>): string | null {
     );
   }
 
+  if (labelSvg) parts.push(labelSvg);
   if (showLegend && place === "bottom") parts.push(legend(arcs, 8, pieY + size + 8, frame, valueFormat, width - 8));
   if (showLegend && place === "right") parts.push(legend(arcs, pieX + size + 16, pieY, frame, valueFormat, pieX + size + sideWidth - 8));
   parts.push(closeChart());

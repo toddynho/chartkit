@@ -1,6 +1,7 @@
 import { annotationLayers } from "../annotations";
 import { isTypedArray, readData, type DataTable } from "../data";
 import { formatValue } from "../format";
+import { bag, glyphOf, marker, named, nudge, type Bag } from "../glyphs";
 import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import { boxId, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
@@ -37,6 +38,21 @@ interface AxisHooks {
 }
 
 let hooks: AxisHooks | null = null;
+let totalHook: TotalHook | null = null;
+
+export type TotalHook = (
+  model: PlotModel,
+  layers: Layers,
+  xScale: XScale,
+  yScale: (value: number) => number,
+  horizontal: boolean,
+  held: Bag,
+) => string;
+
+/** Stack-total labels. Bar and stacked-area entries call this so the line bundle can omit them. */
+export function mountTotals(hook: TotalHook): void {
+  totalHook = hook;
+}
 
 /** Position, rotation, explicit ticks, and legend values. Chart entries call `mountAxes`. */
 export function installAxes(next: AxisHooks): void {
@@ -112,6 +128,10 @@ export interface Series {
   mark: "line" | "bar" | "area";
   dash: string;
   area: boolean;
+  shape?: string;
+  radius?: number;
+  hollow?: boolean;
+  format?: unknown;
 }
 
 export interface PlotModel {
@@ -147,6 +167,14 @@ export interface PlotModel {
   radiusVar: boolean;
   gap: number;
   labelsOn: boolean;
+  pointShape: string;
+  pointHollow: boolean;
+  labelAt: string;
+  labelEnds: string;
+  labelFormat: unknown;
+  stackTotal: boolean;
+  /** Data labels drawn after the plot clip so they are not cut off. */
+  late: string;
   showX: boolean;
   showY: boolean;
   showY2: boolean;
@@ -210,6 +238,13 @@ export interface ChartShell {
   radiusVar: boolean;
   gap: number;
   labelsOn: boolean;
+  pointShape: string;
+  pointHollow: boolean;
+  labelAt: string;
+  labelEnds: string;
+  labelFormat: unknown;
+  stackTotal: boolean;
+  late: string;
   showX: boolean;
   showY: boolean;
   showY2: boolean;
@@ -273,7 +308,7 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     continuousX: type === "line" || type === "stacked-area" || type === "sparkline" || type === "mini-area",
     curve: curveOf(mark.curve),
     sampling: readSamplingMode(mark.sampling),
-    stack: stackMode(type, mark.stack),
+    stack: stackMode(type, mark.stackTotal === true && (type === "bar" || type === "stacked-area") && stackMode(type, mark.stack) === "none" ? "stack" : mark.stack),
     width,
     height: heightOf(type, size, width),
     responsive: size.width === undefined || size.width === "auto",
@@ -296,6 +331,13 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     radiusVar: !radiusSet,
     gap: typeof mark.gap === "number" ? mark.gap : geometry.gap,
     labelsOn: mark.labels === true,
+    pointShape: glyphOf(mark.pointShape),
+    pointHollow: mark.pointFill === "hollow",
+    labelAt: named(mark.labelPosition, LABEL_AT),
+    labelEnds: named(mark.labelEnds, LABEL_ENDS),
+    labelFormat: mark.labelFormat,
+    stackTotal: mark.stackTotal === true && (type === "bar" || type === "stacked-area"),
+    late: "",
     showX: !compact && axisVisible(spec, "x"),
     showY: !compact && axisVisible(spec, "y"),
     showY2: !compact && axisVisible(spec, "y2"),
@@ -372,6 +414,7 @@ function toModel(
         mark: type === "bar" ? "bar" : type === "mini-area" || type === "stacked-area" ? "area" : "line",
         dash: "solid",
         area: type === "mini-area" || type === "stacked-area" || mark.area === true,
+        shape: glyphOf(mark.pointShape),
       },
     ];
   } else {
@@ -387,6 +430,10 @@ function toModel(
         mark: markKind,
         dash: channel.dash,
         area: markKind === "area" || channel.area === true || mark.area === true || type === "stacked-area" || type === "mini-area",
+        shape: channel.pointShape,
+        radius: channel.pointSize,
+        hollow: channel.pointHollow || undefined,
+        format: channel.format,
       };
     });
   }
@@ -491,6 +538,7 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   parts.push(draw(model, xScale, yScale, y2Scale, plot, horizontal));
   parts.push(`</g>`);
   parts.push(notes.over);
+  if (model.late) parts.push(model.late);
 
   parts.push(drawAxes(model, plot, horizontal, count, yTicks, y2Ticks, yTickText, y2TickText, yScale, y2Scale, xScale));
 
@@ -515,6 +563,11 @@ function drawLines(
     if (series.mark === "bar") return;
     appendLineSeries(out, model, series, index, layers, xScale, series.axis === "y2" ? y2Scale : yScale, plotWidth, shared);
   });
+  const held = bag();
+  let late = "";
+  if (layers && totalHook) late += totalHook(model, layers, xScale, yScale, false, held);
+  late += placeLineLabels(model, layers, xScale, yScale, y2Scale, held);
+  if (late) model.late += late;
   return out.join("");
 }
 
@@ -529,13 +582,20 @@ function drawBars(
   const stackMode = model.stack === "none" ? null : model.stack;
   const layers = stackMode ? stackLayers(model.series, stackMode) : null;
   const out: string[] = [];
+  const labs: Lab[] = [];
   const barSeries = model.series.filter((series) => series.mark === "bar");
   model.series.forEach((series, index) => {
     if (series.mark !== "bar") return;
     const scale = series.axis === "y2" ? y2Scale : yScale;
     const barIndex = model.series.slice(0, index).filter((item) => item.mark === "bar").length;
-    out.push(bars(model, series, index, barSeries.length, layers, xScale, scale, plot, horizontal, barIndex));
+    out.push(bars(model, series, index, barSeries.length, layers, xScale, scale, plot, horizontal, barIndex, labs));
   });
+  const held = bag();
+  let late = "";
+  if (layers && totalHook) late += totalHook(model, layers, xScale, yScale, horizontal, held);
+  const fill = cssVar("text", model.preset.text);
+  for (const lab of labs) late += held.put(lab.text, lab.x, lab.y, lab.anchor, fill);
+  if (late) model.late += late;
   return out.join("");
 }
 
@@ -551,6 +611,7 @@ function drawCombo(
   const stackMode = model.stack === "none" ? null : model.stack;
   const layers = stackMode ? stackLayers(model.series, stackMode) : null;
   const out: string[] = [];
+  const labs: Lab[] = [];
   const barSeries = model.series.filter((series) => series.mark === "bar");
   const plotWidth = Math.max(1, plot.right - plot.left);
   const shared = sharedSample(model, layers, plotWidth);
@@ -558,11 +619,16 @@ function drawCombo(
     const scale = series.axis === "y2" ? y2Scale : yScale;
     if (series.mark === "bar") {
       const barIndex = model.series.slice(0, index).filter((item) => item.mark === "bar").length;
-      out.push(bars(model, series, index, barSeries.length, layers, xScale, scale, plot, horizontal, barIndex));
+      out.push(bars(model, series, index, barSeries.length, layers, xScale, scale, plot, horizontal, barIndex, labs));
       return;
     }
     appendLineSeries(out, model, series, index, layers, xScale, scale, plotWidth, shared);
   });
+  const held = bag();
+  const fill = cssVar("text", model.preset.text);
+  let late = placeLineLabels(model, layers, xScale, yScale, y2Scale, held);
+  for (const lab of labs) late += held.put(lab.text, lab.x, lab.y, lab.anchor, fill);
+  if (late) model.late += late;
   return out.join("");
 }
 
@@ -618,11 +684,7 @@ function appendLineSeries(
     // Hidden circles exist so --ck-line-dots can reveal them. A downsampled line
     // already has a vertex per pixel, and those circles dominate the SVG, so
     // interact draws the hover dot from the path instead.
-    if (model.dots === "shown") {
-      for (let k = 0; k < run.length; k++) {
-        out.push(pointMark(points[k], model, series.color, ` data-ck-i="${run[k]}"`));
-      }
-    }
+    paintPoints(out, points, model, series, run);
   }
 }
 
@@ -635,7 +697,7 @@ function appendFullLine(
   xScale: XScale,
   yScale: (value: number) => number,
 ): void {
-  if (!layers && model.curve === "linear" && !series.area && model.type !== "stacked-area" && model.dots === "off") {
+  if (!layers && model.curve === "linear" && !series.area && model.type !== "stacked-area" && model.dots === "off" && !markerShape(model, series)) {
     appendLinear(out, model, series, xScale, yScale);
     return;
   }
@@ -652,12 +714,7 @@ function appendFullLine(
       `<path d="${linePath(segment, model.curve)}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokePaint}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
     );
   }
-  if (model.dots !== "off") {
-    for (const point of points) {
-      if (!point) continue;
-      out.push(pointMark(point, model, series.color));
-    }
-  }
+  paintPoints(out, points, model, series);
 }
 
 /** Linear stroke with no area and no markers. Same commands as linePath, without a point object per row. */
@@ -697,9 +754,34 @@ function areaMid(model: PlotModel): string {
   return n(model.fillOpacity * 0.35);
 }
 
-function pointMark(point: Pt, model: PlotModel, fill: string, extra = ""): string {
-  const shown = model.dots === "shown" ? "inline" : "none";
-  return `<circle cx="${n(point.x)}" cy="${n(point.y)}" r="${n(model.pointSize)}" fill="${fill}" style="display:var(--ck-line-dots, ${shown})"${extra} />`;
+function markerShape(model: PlotModel, series: Series): string | null {
+  const shape = series.shape || model.pointShape;
+  if (shape === "none") return null;
+  if (shape) return shape;
+  if (series.radius !== undefined || series.hollow || model.pointHollow) return "circle";
+  if (model.dots === "off") return null;
+  return "circle";
+}
+
+function explicitMark(model: PlotModel, series: Series): boolean {
+  return Boolean(series.shape || model.pointShape || series.radius !== undefined || series.hollow || model.pointHollow);
+}
+
+function paintPoints(out: string[], points: (Pt | null)[], model: PlotModel, series: Series, indexes?: number[]): void {
+  const shape = markerShape(model, series);
+  if (!shape) return;
+  const explicit = explicitMark(model, series);
+  if (!explicit && model.dots === "off") return;
+  if (!explicit && indexes && model.dots !== "shown") return;
+  const hollow = series.hollow ?? model.pointHollow;
+  const radius = series.radius ?? model.pointSize;
+  const hidden = !explicit && model.dots !== "shown" ? ` style="display:var(--ck-line-dots, none)"` : "";
+  for (let k = 0; k < points.length; k++) {
+    const point = points[k];
+    if (!point) continue;
+    const at = indexes ? ` data-ck-i="${indexes[k]}"` : "";
+    out.push(marker(point.x, point.y, radius, shape, series.color, hollow, hidden + at));
+  }
 }
 
 /**
@@ -736,6 +818,7 @@ function bars(
   plot: { left: number; right: number; top: number; bottom: number },
   horizontal: boolean,
   barIndex: number,
+  labs: Lab[] = [],
 ): string {
   const gap = clamp(model.gap, 0, 0.9);
   const out: string[] = [];
@@ -763,6 +846,7 @@ function bars(
       const height = Math.max(0, barSize - inset);
       const edge = b >= a ? "right" : "left";
       out.push(barMark(x, y, width, height, radius, useVar, edge, fill));
+      queueBarLabel(model, series, series.values[i], x, y, width, height, true, labs);
     } else {
       const x = start;
       const y = Math.min(a, b);
@@ -770,12 +854,118 @@ function bars(
       const width = Math.max(0, barSize - inset);
       const edge = b <= a ? "top" : "bottom";
       out.push(barMark(x, y, width, height, radius, useVar, edge, fill));
-      if (model.labelsOn && value !== null) {
-        out.push(`<text x="${n(x + barSize / 2)}" y="${n(y - 4)}" text-anchor="middle" fill="${cssVar("text", model.preset.text)}" font-size="10" font-family="${font()}">${esc(formatNumber(value, model.locale))}</text>`);
-      }
+      queueBarLabel(model, series, series.values[i], x, y, width, height, false, labs);
     }
   }
   return out.join("");
+}
+
+const LABEL_AT = ["top", "bottom", "left", "right", "center", "inside", "outside"];
+const LABEL_ENDS = ["all", "ends", "last"];
+
+interface Lab {
+  x: number;
+  y: number;
+  anchor: string;
+  text: string;
+}
+
+function wantLabels(model: PlotModel): boolean {
+  return model.labelsOn || model.labelAt !== "" || model.labelEnds !== "" || model.labelFormat !== undefined;
+}
+
+export function labelText(model: PlotModel, series: Series | undefined, value: number): string {
+  const format = model.labelFormat ?? series?.format;
+  if (format !== undefined) return formatValue(value, format, model.locale);
+  return formatNumber(value, model.locale);
+}
+
+function endsOf(values: ArrayLike<number | null>): [number, number] {
+  let first = -1;
+  let last = -1;
+  for (let i = 0; i < values.length; i++) {
+    if (typeof values[i] !== "number") continue;
+    if (first < 0) first = i;
+    last = i;
+  }
+  return [first, last];
+}
+
+function labelIndex(mode: string, index: number, first: number, last: number): boolean {
+  if (mode === "last") return index === last;
+  if (mode === "ends") return index === first || index === last;
+  return true;
+}
+
+function queueBarLabel(
+  model: PlotModel,
+  series: Series,
+  value: number | null,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  horizontal: boolean,
+  labs: Lab[],
+): void {
+  if (!wantLabels(model) || typeof value !== "number") return;
+  let pos = model.labelAt || (model.stackTotal ? "inside" : horizontal ? "right" : "top");
+  if ((pos === "inside" || pos === "center") && Math.min(w, h) < 16) pos = horizontal ? "right" : "top";
+  const text = labelText(model, series, value);
+  let lx = x + w / 2;
+  let ly = y - 4;
+  let anchor = "middle";
+  if (horizontal) {
+    ly = y + h / 2 + 3;
+    if (pos === "left" || pos === "bottom") {
+      lx = x + 4;
+      anchor = "start";
+    } else if (pos === "center" || pos === "inside") anchor = "middle";
+    else {
+      lx = x + w + 4;
+      anchor = "start";
+    }
+  } else if (pos === "bottom") ly = y + h - 2;
+  else if (pos === "center" || pos === "inside") ly = y + Math.min(h - 2, Math.max(12, h / 2)) ;
+  else if (pos === "left") {
+    lx = x - 4;
+    ly = y + h / 2 + 3;
+    anchor = "end";
+  } else if (pos === "right") {
+    lx = x + w + 4;
+    ly = y + h / 2 + 3;
+    anchor = "start";
+  }
+  labs.push({ x: lx, y: ly, anchor, text });
+}
+
+function placeLineLabels(
+  model: PlotModel,
+  layers: Layers | null,
+  xScale: XScale,
+  yScale: (value: number) => number,
+  y2Scale: (value: number) => number,
+  held: Bag,
+): string {
+  if (!wantLabels(model)) return "";
+  const pos = model.labelAt || "top";
+  const fill = cssVar("text", model.preset.text);
+  let out = "";
+  model.series.forEach((series, index) => {
+    if (series.mark === "bar") return;
+    const [first, last] = endsOf(series.values);
+    if (first < 0) return;
+    const scale = series.axis === "y2" ? y2Scale : yScale;
+    const shift = nudge(pos, series.radius ?? model.pointSize);
+    for (let i = 0; i < series.values.length; i++) {
+      const value = series.values[i];
+      if (typeof value !== "number" || !labelIndex(model.labelEnds, i, first, last)) continue;
+      const plotted = layers ? layers.top[index]?.[i] : value;
+      if (typeof plotted !== "number") continue;
+      out += held.put(labelText(model, series, value), xScale.center(i) + shift[0], scale(plotted) + shift[1], shift[2], fill);
+    }
+  });
+  return out;
 }
 
 interface Pt {
@@ -821,7 +1011,7 @@ function bottomPoints(
   return out;
 }
 
-interface Layers {
+export interface Layers {
   top: number[][];
   bottom: number[][];
 }
@@ -1144,6 +1334,14 @@ function xStep(model: PlotModel, count: number, angle: number): number {
   return footprint <= slot ? 1 : Math.max(1, Math.ceil(footprint / slot));
 }
 
+function legendIcon(model: PlotModel, series: Series, x: number, y: number): string {
+  const shape = markerShape(model, series);
+  if (shape && (explicitMark(model, series) || model.dots === "shown")) {
+    return marker(x + 5, y + 5, 4.5, shape, series.color, series.hollow ?? model.pointHollow);
+  }
+  return `<rect x="${n(x)}" y="${n(y)}" width="10" height="10" rx="2" fill="${series.color}" />`;
+}
+
 function legend(model: PlotModel, x: number, y: number, maxRight: number): string {
   let cx = x;
   let cy = y;
@@ -1155,7 +1353,7 @@ function legend(model: PlotModel, x: number, y: number, maxRight: number): strin
       cx = x;
       cy += 18;
     }
-    out.push(`<rect x="${n(cx)}" y="${n(cy)}" width="10" height="10" rx="2" fill="${series.color}" /><text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12" font-family="${font()}">${esc(name)}</text>`);
+    out.push(`${legendIcon(model, series, cx, cy)}<text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12" font-family="${font()}">${esc(name)}</text>`);
     cx += width;
   }
   return out.join("");
@@ -1197,6 +1395,17 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
   let bottom = 12;
   if (model.title) top += 20;
   if (model.subtitle) top += 18;
+  if (wantLabels(model)) {
+    const pos = model.labelAt || "top";
+    if (pos === "top" || pos === "outside" || pos === "") top += 16;
+    if (pos === "bottom") bottom += 14;
+    if (pos === "left") left += 28;
+    if (pos === "right" || (horizontal && (pos === "outside" || pos === ""))) right = Math.max(right, 36);
+  }
+  if (model.stackTotal) {
+    if (horizontal) right = Math.max(right, 48);
+    else top += 16;
+  }
   if (!horizontal && model.showY && model.yAxis.labels !== false) {
     if (yEnd) right = Math.max(right, yGap);
     else left = yGap;
@@ -1633,14 +1842,17 @@ interface YChannel {
   area: boolean;
   log: boolean;
   format?: unknown;
+  pointShape: string;
+  pointSize?: number;
+  pointHollow: boolean;
   lock?: [number | null, number | null];
 }
 
 function readYChannels(y: unknown): YChannel[] {
   const list = Array.isArray(y) ? y : y === undefined ? [] : [y];
   return list.map((item) => {
-    if (typeof item === "string") return { field: item, axis: "y" as const, dash: "solid", area: false, log: false };
-    if (!isRecord(item)) return { axis: "y" as const, dash: "solid", area: false, log: false };
+    if (typeof item === "string") return { field: item, axis: "y" as const, dash: "solid", area: false, log: false, pointShape: "", pointHollow: false };
+    if (!isRecord(item)) return { axis: "y" as const, dash: "solid", area: false, log: false, pointShape: "", pointHollow: false };
     const scale = isRecord(item.scale) ? item.scale : undefined;
     return {
       field: typeof item.field === "string" ? item.field : undefined,
@@ -1652,6 +1864,9 @@ function readYChannels(y: unknown): YChannel[] {
       area: item.area === true,
       log: scale?.type === "log",
       format: item.format,
+      pointShape: glyphOf(item.pointShape),
+      pointSize: typeof item.pointSize === "number" ? item.pointSize : undefined,
+      pointHollow: item.pointFill === "hollow",
       lock: scale ? domainEnds(scale.domain) : undefined,
     };
   });

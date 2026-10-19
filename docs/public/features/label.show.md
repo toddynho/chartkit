@@ -1,14 +1,14 @@
 # Data labels on marks
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Print values on bars, points, slices
 
-Matrix status: `partial`. Verification: `runtime-probe` (strong).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-bar and donut draw mark.labels since PR #16; line, stacked-area, and scatter warn CK3012 (ignored; bars and slices) since PR #17 (main 116d0af) and are not drawn
+Line, stacked area, scatter, bar, and donut draw mark.labels. CK3012 is gone. Overlapping labels are skipped.
 
-Source: chartkit:packages/core/src/generated/schema.ts:859
+Source: packages/core/src/generated/schema.ts:887
 
 ## ChartKit spec
 
@@ -70,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.pie.textPosition | dts-path (strong) | mermaid/dist/config.type.d.ts:938 pie labels |
 | AntV G2 | native | ~label | dts-grep (weak) | @antv/g2/lib/index.d.ts:165 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 167b01d2f0df.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against bdf969b7d123.
 
 https://chartkit.dev/features.json

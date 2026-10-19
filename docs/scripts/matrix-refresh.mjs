@@ -149,7 +149,8 @@ const TYPE_FOR = {
   "type.journey": "journey",
   "type.table": "line",
   "label.show": "bar",
-  "label.format": "bar",
+  "label.format": "line",
+  "label.total": "stacked-area",
   "mark.bar.radius": "bar",
   "mark.bar.width": "bar",
   "mark.color.point": "bar",
@@ -241,6 +242,10 @@ function demoValue(id, parts, literal) {
   if (leaf === "width" && parts.includes("size")) return 640;
   if (leaf === "locale") return "en-US";
   if (leaf === "format") return "compact";
+  if (leaf === "pointShape") return "diamond";
+  if (leaf === "labelPosition") return "top";
+  if (leaf === "labelFormat") return "integer";
+  if (leaf === "stackTotal") return true;
   if (leaf === "dash") return "dashed";
   if (leaf === "series" && parts.includes("tokens")) return ["#0066cc", "#c45c26"];
   if (leaf === "series") return "group";
@@ -531,8 +536,8 @@ function main() {
     throw new Error("ChartKit notes still say createRenderer([line]) ignores an option");
   }
   const labels = features.find((feature) => feature.id === "label.show");
-  if (labels?.badge !== "partial" || labels.cells.chartkit.status !== "partial") {
-    throw new Error("label.show must stay partial");
+  if (labels?.badge !== "native" || labels.cells.chartkit.status !== "native") {
+    throw new Error("label.show must be native");
   }
   if (!synonymObject["xAxis.name"]?.includes("axis.title") || !synonymObject["scales.x.title"]?.includes("axis.title")) {
     throw new Error("synonyms missing axis title lookups");
