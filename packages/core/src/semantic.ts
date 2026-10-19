@@ -52,7 +52,6 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   if (isRecord(spec.encoding)) {
     warnSeriesShape(spec.encoding, diagnostics);
     checkDomains(spec.encoding, diagnostics);
-    warnChannelType(spec.encoding, diagnostics);
     warnChannelExtras(spec.encoding, diagnostics);
   }
 
@@ -339,35 +338,55 @@ function checkCandles(spec: Record<string, unknown>, table: DataTable, diagnosti
   }
 }
 
-function unbuilt(path: string, message: string): Diagnostic {
-  return {
+function flag(diagnostics: Diagnostic[], path: string): void {
+  diagnostics.push({
     code: "CK3012",
     severity: "warning",
-    message,
+    message: "not applied",
     path,
-    hint: "The option is accepted and reported so it is not dropped silently",
-  };
+    hint: "accepted so it is not dropped silently",
+  });
+}
+
+/** kind: 0 defined, 1 point|series, 2 array, 3 light|dark, 4 string, 5 number. */
+const UNBUILT: ReadonlyArray<readonly [string, 0 | 1 | 2 | 3 | 4 | 5]> = [
+  ["animation/easing", 0],
+  ["interaction/select", 1],
+  ["tooltip/fields", 2],
+  ["theme/mode", 3],
+  ["theme/tokens/fontFamily", 4],
+  ["theme/tokens/fontSize", 5],
+  ["axes/y2/grid", 0],
+];
+
+function at(root: unknown, path: string): unknown {
+  let cur = root;
+  for (const key of path.split("/")) {
+    if (!isRecord(cur)) return;
+    cur = cur[key];
+  }
+  return cur;
 }
 
 function warnUnbuilt(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
-  const animation = spec.animation;
-  if (isRecord(animation) && animation.easing !== undefined) diagnostics.push(unbuilt("/animation/easing", "animation.easing is not applied"));
-  const interaction = spec.interaction;
-  if (isRecord(interaction) && (interaction.select === "point" || interaction.select === "series")) {
-    diagnostics.push(unbuilt("/interaction/select", "interaction.select is not applied"));
+  for (let i = 0; i < UNBUILT.length; i++) {
+    const path = UNBUILT[i][0];
+    const kind = UNBUILT[i][1];
+    const value = at(spec, path);
+    const hit =
+      kind === 0
+        ? value !== undefined
+        : kind === 1
+          ? value === "point" || value === "series"
+          : kind === 2
+            ? Array.isArray(value)
+            : kind === 3
+              ? value === "light" || value === "dark"
+              : kind === 4
+                ? typeof value === "string"
+                : typeof value === "number";
+    if (hit) flag(diagnostics, "/" + path);
   }
-  const tooltip = spec.tooltip;
-  if (isRecord(tooltip) && Array.isArray(tooltip.fields)) diagnostics.push(unbuilt("/tooltip/fields", "tooltip.fields is not applied"));
-  const theme = spec.theme;
-  if (isRecord(theme)) {
-    if (theme.mode === "light" || theme.mode === "dark") diagnostics.push(unbuilt("/theme/mode", "theme.mode is not applied; color follows light-dark()"));
-    const tokens = isRecord(theme.tokens) ? theme.tokens : undefined;
-    if (typeof tokens?.fontFamily === "string") diagnostics.push(unbuilt("/theme/tokens/fontFamily", "theme.tokens.fontFamily is not applied"));
-    if (typeof tokens?.fontSize === "number") diagnostics.push(unbuilt("/theme/tokens/fontSize", "theme.tokens.fontSize is not applied"));
-  }
-  const axes = isRecord(spec.axes) ? spec.axes : undefined;
-  const y2 = axes && isRecord(axes.y2) ? axes.y2 : undefined;
-  if (y2 && y2.grid !== undefined) diagnostics.push(unbuilt("/axes/y2/grid", "axes.y2.grid is not drawn; grid lines follow axes.y.grid"));
 }
 
 function warnUnusedMarks(type: string, mark: Record<string, unknown>, diagnostics: Diagnostic[]): void {
@@ -386,35 +405,26 @@ function warnUnusedMarks(type: string, mark: Record<string, unknown>, diagnostic
 
 function warnChannelExtras(encoding: Record<string, unknown>, diagnostics: Diagnostic[]): void {
   for (const key of Object.keys(encoding)) {
-    if (key === "x" || key === "y") continue;
-    const value = encoding[key];
-    const list = Array.isArray(value) ? value : [value];
-    list.forEach((item, index) => {
-      if (!isRecord(item)) return;
-      const base = Array.isArray(value) ? `/encoding/${key}/${index}` : `/encoding/${key}`;
-      if (typeof item.title === "string") diagnostics.push(unbuilt(`${base}/title`, `encoding.${key}.title is not drawn`));
-      if (item.format !== undefined) diagnostics.push(unbuilt(`${base}/format`, `encoding.${key}.format is not applied`));
-      if (isRecord(item.scale) && item.scale.type !== undefined) diagnostics.push(unbuilt(`${base}/scale/type`, `encoding.${key}.scale.type is not applied`));
-      if (isRecord(item.scale) && item.scale.reverse === true) diagnostics.push(unbuilt(`${base}/scale/reverse`, `encoding.${key}.scale.reverse is not applied`));
-      if (key !== "high" && isRecord(item.scale)) {
-        if (item.scale.domain !== undefined) diagnostics.push(unbuilt(`${base}/scale/domain`, `encoding.${key}.scale.domain is not applied`));
-        if (typeof item.scale.zero === "boolean") diagnostics.push(unbuilt(`${base}/scale/zero`, `encoding.${key}.scale.zero is not applied`));
-        if (item.scale.nice === false) diagnostics.push(unbuilt(`${base}/scale/nice`, `encoding.${key}.scale.nice is not applied`));
-      }
-    });
-  }
-}
-
-function warnChannelType(encoding: Record<string, unknown>, diagnostics: Diagnostic[]): void {
-  for (const key of Object.keys(encoding)) {
     if (key === "x") continue;
     const value = encoding[key];
     const list = Array.isArray(value) ? value : [value];
-    list.forEach((item, index) => {
-      if (!isRecord(item) || typeof item.type !== "string") return;
-      const path = Array.isArray(value) ? `/encoding/${key}/${index}/type` : `/encoding/${key}/type`;
-      diagnostics.push(unbuilt(path, `encoding.${key}.type is inferred from the data and is not applied`));
-    });
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      if (!isRecord(item)) continue;
+      const base = Array.isArray(value) ? `/encoding/${key}/${i}` : `/encoding/${key}`;
+      if (typeof item.type === "string") flag(diagnostics, `${base}/type`);
+      if (key === "y") continue;
+      if (typeof item.title === "string") flag(diagnostics, `${base}/title`);
+      if (item.format !== undefined) flag(diagnostics, `${base}/format`);
+      const scale = isRecord(item.scale) ? item.scale : undefined;
+      if (!scale) continue;
+      if (scale.type !== undefined) flag(diagnostics, `${base}/scale/type`);
+      if (scale.reverse === true) flag(diagnostics, `${base}/scale/reverse`);
+      if (key === "high") continue;
+      if (scale.domain !== undefined) flag(diagnostics, `${base}/scale/domain`);
+      if (typeof scale.zero === "boolean") flag(diagnostics, `${base}/scale/zero`);
+      if (scale.nice === false) flag(diagnostics, `${base}/scale/nice`);
+    }
   }
 }
 

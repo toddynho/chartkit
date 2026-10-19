@@ -86,12 +86,13 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   let plotRight = frame.width - (showY && yAxis.labels && yRight ? left : 16);
   let plotTop = top;
   let plotBottom = frame.height - (showX && xAxis.labels ? (xAxis.end ? 16 : 36) : 16);
+  if (xAxis.end && showX && xAxis.labels) plotTop += 28;
   if (yAxis.title) {
     if (yRight) plotRight -= 16;
     else plotLeft += 16;
   }
   if (xAxis.title) {
-    if (xAxis.end) plotTop += 16;
+    if (xAxis.end) plotTop += 22;
     else plotBottom -= 16;
   }
   if (inset.l !== undefined) plotLeft = Math.max(plotLeft, inset.l);
@@ -199,12 +200,12 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     const angle = xAxis.rotate ?? 0;
     for (const tick of xTicks) {
       const x = xScale(tick);
-      const y = xAxis.end ? plot.top - 8 : plot.bottom + 16;
+      const y = xAxis.end ? plot.top - 18 : plot.bottom + 16;
       parts.push(angle ? rotated(x, y, formatValue(tick, xFormat, frame.locale), cssVar("muted", frame.preset.muted), angle) : label(x, y, formatValue(tick, xFormat, frame.locale), cssVar("muted", frame.preset.muted), 11, "400", "middle"));
     }
   }
   if (showX && xAxis.title) {
-    parts.push(label((plot.left + plot.right) / 2, xAxis.end ? plot.top - 20 : frame.height - 6, xAxis.title, cssVar("muted", frame.preset.muted), 11, "500", "middle"));
+    parts.push(label((plot.left + plot.right) / 2, xAxis.end ? plot.top - 40 : frame.height - 6, xAxis.title, cssVar("muted", frame.preset.muted), 11, "500", "middle"));
   }
   parts.push(closeChart());
   return parts.join("");

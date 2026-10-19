@@ -326,6 +326,59 @@ describe("schema honesty", () => {
     expect(keys).toContain('data-ck-intent="keys"');
   });
 
+  it("keeps a top x axis inside the clip and clear of its title", () => {
+    const svg = render({
+      version: "1",
+      type: "line",
+      data: [
+        { month: "January", revenue: 1200 },
+        { month: "February", revenue: 1800 },
+        { month: "March", revenue: 1400 },
+        { month: "April", revenue: 2600 },
+        { month: "May", revenue: 2200 },
+        { month: "June", revenue: 3100 },
+      ],
+      encoding: { x: "month", y: "revenue" },
+      size: { width: 460, height: 250 },
+      a11y: { alt: "Revenue from January to June." },
+      axes: { x: { title: "Month", position: "top" }, y: { title: "Revenue", position: "right" } },
+    });
+    const clip = /<clipPath[^>]*>\s*<rect x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)"/.exec(svg);
+    expect(clip).toBeTruthy();
+    const box = { x: Number(clip?.[1]), y: Number(clip?.[2]), w: Number(clip?.[3]), h: Number(clip?.[4]) };
+    const path = /<path d="([^"]+)" fill="none"/.exec(svg)?.[1] ?? "";
+    const nums = path.match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? [];
+    expect(nums.length).toBeGreaterThan(4);
+    for (let i = 0; i < nums.length; i += 2) {
+      expect(nums[i]).toBeGreaterThanOrEqual(box.x - 0.01);
+      expect(nums[i]).toBeLessThanOrEqual(box.x + box.w + 0.01);
+      expect(nums[i + 1]).toBeGreaterThanOrEqual(box.y + 1);
+      expect(nums[i + 1]).toBeLessThanOrEqual(box.y + box.h - 1);
+    }
+    const tickAt = (label: string) => {
+      const mark = new RegExp(`<text x="([^"]+)" y="([^"]+)" text-anchor="start"[^>]*>${label}</text>`).exec(svg);
+      return mark ? Number(mark[2]) - 4 : NaN;
+    };
+    expect(nums[1]).toBeGreaterThan(tickAt("1,500"));
+    expect(nums[1]).toBeLessThan(tickAt("1,000") + 1);
+    const texts = [...svg.matchAll(/<text x="([^"]+)" y="([^"]+)"([^>]*)>([^<]*)<\/text>/g)];
+    const bounds = (mark: RegExpMatchArray) => {
+      const x = Number(mark[1]);
+      const y = Number(mark[2]);
+      const anchor = /text-anchor="([^"]+)"/.exec(mark[3])?.[1] ?? "start";
+      const width = mark[4].length * 6.4;
+      const left = anchor === "middle" ? x - width / 2 : anchor === "end" ? x - width : x;
+      return { left, right: left + width, top: y - 9, bottom: y + 3 };
+    };
+    const month = texts.find((mark) => mark[4] === "Month");
+    const march = texts.find((mark) => mark[4] === "March");
+    expect(month && march).toBeTruthy();
+    const title = bounds(month!);
+    const label = bounds(march!);
+    const overlaps = title.left < label.right && label.left < title.right && title.top < label.bottom && label.top < title.bottom;
+    expect(overlaps).toBe(false);
+  });
+
   it("warns for easing, select, tooltip fields, and font family", () => {
     const easing = validate({ ...line, animation: { easing: "linear" } });
     expect(easing.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/animation/easing")).toBe(true);
