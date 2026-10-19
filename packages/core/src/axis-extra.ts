@@ -3,7 +3,7 @@ import { clientIntent, isRecord, longDesc, n, readAxis, readInset } from "./svg"
 import {
   formatNumber,
   installAxes,
-  ticks,
+  resolveTicks,
   type ChartShell,
   type PlotModel,
   type Series,
@@ -48,36 +48,25 @@ function flags(spec: Record<string, unknown>): number {
   const encoding = isRecord(spec.encoding) ? spec.encoding : {};
   const y = encoding.y;
   const list = Array.isArray(y) ? y : y ? [y] : [];
-  let yOff = 0;
-  let y2Off = 0;
-  let yRev = 0;
-  let y2Rev = 0;
-  let ySet = 0;
-  let yOn = 0;
-  let y2Set = 0;
-  let y2On = 0;
+  let bits = 0;
   for (let i = 0; i < list.length; i++) {
     const item = list[i];
     if (!isRecord(item) || !isRecord(item.scale)) continue;
-    const alt = item.axis === "y2";
     const scale = item.scale;
-    if (scale.nice === false) alt ? (y2Off = 1) : (yOff = 1);
-    if (scale.reverse === true) alt ? (y2Rev = 1) : (yRev = 1);
+    const shift = item.axis === "y2" ? 1 : 0;
+    if (scale.nice === false) bits |= 1 << shift;
+    if (scale.reverse === true) bits |= 8 << shift;
     if (typeof scale.zero === "boolean") {
-      if (alt) {
-        y2Set = 1;
-        y2On = scale.zero ? 1 : 0;
-      } else {
-        ySet = 1;
-        yOn = scale.zero ? 1 : 0;
-      }
+      bits |= 512 << shift;
+      const on = 64 << shift;
+      bits = scale.zero ? bits | on : bits & ~on;
     }
   }
   const x = isRecord(encoding.x) && isRecord(encoding.x.scale) ? encoding.x.scale : undefined;
-  return (
-    (yOff && 1) | (y2Off && 2) | (x?.nice === true ? 4 : 0) | (yRev && 8) | (y2Rev && 16) | (x?.reverse === true ? 32 : 0) |
-    (yOn && 64) | (y2On && 128) | (x?.zero === true ? 256 : 0) | (ySet && 512) | (y2Set && 1024)
-  );
+  if (x?.nice === true) bits |= 4;
+  if (x?.reverse === true) bits |= 32;
+  if (x?.zero === true) bits |= 256;
+  return bits;
 }
 
 function gridOf(value: unknown): NonNullable<ChartShell["gx"]> {
@@ -102,7 +91,7 @@ function grid(model: PlotModel, plot: Box, horizontal: boolean, count: number, x
   const stroke = cssVar("grid", model.preset.grid);
   let out = "";
   if (!horizontal && model.x) {
-    const values = kept(xScale.min, xScale.max, model.xAxis.count ?? 6, model.xAxis.values);
+    const values = resolveTicks(model, "x", xScale.min, xScale.max, model.xAxis.count ?? 6, false);
     for (let i = 0; i < values.length; i++) {
       const pos = xScale.at(values[i]);
       out += line(pos, plot.top, pos, plot.bottom, stroke, dash);
@@ -114,15 +103,6 @@ function grid(model: PlotModel, plot: Box, horizontal: boolean, count: number, x
     out += horizontal ? line(plot.left, pos, plot.right, pos, stroke, dash) : line(pos, plot.top, pos, plot.bottom, stroke, dash);
   }
   return out;
-}
-
-function kept(min: number, max: number, count: number, values?: number[]): number[] {
-  if (values?.length) {
-    const out: number[] = [];
-    for (let i = 0; i < values.length; i++) if (values[i] >= min - 1e-6 && values[i] <= max + 1e-6) out.push(values[i]);
-    return out;
-  }
-  return ticks(min, max, count);
 }
 
 function line(x1: number, y1: number, x2: number, y2: number, stroke: string, dash: string): string {

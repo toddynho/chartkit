@@ -338,25 +338,26 @@ function checkCandles(spec: Record<string, unknown>, table: DataTable, diagnosti
   }
 }
 
-function flag(diagnostics: Diagnostic[], path: string): void {
+function flag(diagnostics: Diagnostic[], path: string, why: string): void {
+  const name = path.slice(1).split("/").join(".");
   diagnostics.push({
     code: "CK3012",
     severity: "warning",
-    message: "not applied",
+    message: `${name} is ${why}`,
     path,
-    hint: "accepted so it is not dropped silently",
+    hint: "kept",
   });
 }
 
 /** kind: 0 defined, 1 point|series, 2 array, 3 light|dark, 4 string, 5 number. */
-const UNBUILT: ReadonlyArray<readonly [string, 0 | 1 | 2 | 3 | 4 | 5]> = [
-  ["animation/easing", 0],
-  ["interaction/select", 1],
-  ["tooltip/fields", 2],
-  ["theme/mode", 3],
-  ["theme/tokens/fontFamily", 4],
-  ["theme/tokens/fontSize", 5],
-  ["axes/y2/grid", 0],
+const UNBUILT: ReadonlyArray<readonly [string, 0 | 1 | 2 | 3 | 4 | 5, string]> = [
+  ["animation/easing", 0, "ignored; duration only"],
+  ["interaction/select", 1, "ignored; no selection"],
+  ["tooltip/fields", 2, "ignored; encoded fields"],
+  ["theme/mode", 3, "ignored; preset stays"],
+  ["theme/tokens/fontFamily", 4, "ignored; built-in font"],
+  ["theme/tokens/fontSize", 5, "ignored; built-in size"],
+  ["axes/y2/grid", 0, "ignored; no y2 grid"],
 ];
 
 function at(root: unknown, path: string): unknown {
@@ -372,6 +373,7 @@ function warnUnbuilt(spec: Record<string, unknown>, diagnostics: Diagnostic[]): 
   for (let i = 0; i < UNBUILT.length; i++) {
     const path = UNBUILT[i][0];
     const kind = UNBUILT[i][1];
+    const why = UNBUILT[i][2];
     const value = at(spec, path);
     const hit =
       kind === 0
@@ -385,11 +387,14 @@ function warnUnbuilt(spec: Record<string, unknown>, diagnostics: Diagnostic[]): 
               : kind === 4
                 ? typeof value === "string"
                 : typeof value === "number";
-    if (hit) flag(diagnostics, "/" + path);
+    if (hit) flag(diagnostics, "/" + path, why);
   }
 }
 
 function warnUnusedMarks(type: string, mark: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  if (mark.labels === true && (type === "line" || type === "stacked-area" || type === "scatter")) {
+    flag(diagnostics, "/mark/labels", "ignored; bars and slices");
+  }
   for (const key of Object.keys(mark)) {
     const applies = MARK_APPLIES[key];
     if (!applies || applies.includes(type)) continue;
@@ -412,18 +417,20 @@ function warnChannelExtras(encoding: Record<string, unknown>, diagnostics: Diagn
       const item = list[i];
       if (!isRecord(item)) continue;
       const base = Array.isArray(value) ? `/encoding/${key}/${i}` : `/encoding/${key}`;
-      if (typeof item.type === "string") flag(diagnostics, `${base}/type`);
+      if (typeof item.type === "string" && !(key === "y" && item.type === "quantitative")) {
+        flag(diagnostics, `${base}/type`, "ignored; ChartKit infers the scale type");
+      }
       if (key === "y") continue;
-      if (typeof item.title === "string") flag(diagnostics, `${base}/title`);
-      if (item.format !== undefined) flag(diagnostics, `${base}/format`);
+      if (typeof item.title === "string") flag(diagnostics, `${base}/title`, "ignored; use the axis");
+      if (item.format !== undefined) flag(diagnostics, `${base}/format`, "ignored; use the axis");
       const scale = isRecord(item.scale) ? item.scale : undefined;
       if (!scale) continue;
-      if (scale.type !== undefined) flag(diagnostics, `${base}/scale/type`);
-      if (scale.reverse === true) flag(diagnostics, `${base}/scale/reverse`);
+      if (scale.type !== undefined) flag(diagnostics, `${base}/scale/type`, "ignored; ChartKit infers the scale type");
+      if (scale.reverse === true) flag(diagnostics, `${base}/scale/reverse`, "ignored; not reversed");
       if (key === "high") continue;
-      if (scale.domain !== undefined) flag(diagnostics, `${base}/scale/domain`);
-      if (typeof scale.zero === "boolean") flag(diagnostics, `${base}/scale/zero`);
-      if (scale.nice === false) flag(diagnostics, `${base}/scale/nice`);
+      if (scale.domain !== undefined) flag(diagnostics, `${base}/scale/domain`, "ignored; automatic");
+      if (typeof scale.zero === "boolean") flag(diagnostics, `${base}/scale/zero`, "ignored; automatic");
+      if (scale.nice === false) flag(diagnostics, `${base}/scale/nice`, "ignored; stays nice");
     }
   }
 }
