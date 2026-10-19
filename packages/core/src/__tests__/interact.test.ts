@@ -307,6 +307,51 @@ describe("attach", () => {
     expect(host.hasAttribute("data-ck-interact")).toBe(false);
   });
 
+  it("paints a renamed field with that series colour in every theme, and skips a swatch for other fields", () => {
+    const themes = ["soft", "midnight", "refined", "editorial"] as const;
+    for (const theme of themes) {
+      const spec = lineSpec({
+        theme,
+        data: [
+          { month: "Jan", revenue: 10, cost: 100, region: "NA" },
+          { month: "Feb", revenue: 12, cost: 110, region: "EU" },
+          { month: "Mar", revenue: 9, cost: 90, region: "NA" },
+          { month: "Apr", revenue: 14, cost: 80, region: "EU" },
+        ],
+        tooltip: { fields: ["cost", { field: "revenue", title: "Sales", format: "currency" }, "region"] },
+      });
+      const host = hostOf(spec);
+      const ctl = attach(host, spec, { render });
+      const svg = host.querySelector("svg")!;
+      const fillOf = (name: string) => {
+        const text = Array.from(svg.querySelectorAll("text")).find((node) => node.textContent === name);
+        const rect = text?.previousElementSibling;
+        return rect?.getAttribute("fill") ?? "";
+      };
+      const revenue = fillOf("revenue");
+      const cost = fillOf("cost");
+      expect(revenue).not.toBe("");
+      expect(cost).not.toBe(revenue);
+      const plot = svg.querySelector("clipPath rect")!;
+      const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.5;
+      svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 80, bubbles: true }));
+      const rows = Array.from(host.querySelectorAll(".ck-row"));
+      const row = (label: string) => rows.find((node) => node.textContent?.includes(label));
+      expect(row("Sales")?.querySelector("i")?.getAttribute("style")).toBe(`background:${revenue}`);
+      expect(row("cost")?.querySelector("i")?.getAttribute("style")).toBe(`background:${cost}`);
+      expect(row("Sales")?.textContent).toContain("$");
+      expect(row("region")?.querySelector("i")?.getAttribute("style")).toBe("background:transparent");
+      expect(revenue).not.toContain("transparent");
+      expect(row("region")?.textContent).toMatch(/NA|EU/);
+      if (theme === "midnight") expect(revenue).toContain("#22c55e");
+      if (theme === "soft") expect(revenue).toContain("#007aff");
+      if (theme === "refined") expect(revenue).toContain("#3b82f6");
+      if (theme === "editorial") expect(revenue).toContain("#4f46e5");
+      ctl.destroy();
+      host.remove();
+    }
+  });
+
   it("paints each series with its legend colour, right-aligns the value, and drops a hidden series", () => {
     const spec = lineSpec({ legend: { interactive: true } });
     const host = hostOf(spec);
@@ -621,7 +666,7 @@ describe("attach", () => {
 
   it("moves keyboard focus and toggles the data table", async () => {
     const spec = lineSpec({
-      tooltip: true,
+      tooltip: { crosshairLabel: true },
       a11y: { alt, keyboard: true, dataTable: true },
     });
     const host = hostOf(spec);
@@ -633,6 +678,7 @@ describe("attach", () => {
     const live = host.querySelector("[data-ck-live]");
     expect(live?.textContent).toContain("Feb");
     expect(live?.textContent).toContain("revenue");
+    expect(svg.querySelector("[data-ck-xlabel]")?.textContent).toBe("Feb");
     const table = host.querySelector("[data-ck-table]") as HTMLElement;
     expect(table.classList.contains("ck-clip")).toBe(true);
     expect(table.textContent).toContain("110");

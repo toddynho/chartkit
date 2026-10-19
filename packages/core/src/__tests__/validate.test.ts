@@ -217,6 +217,45 @@ describe("diagnostic codes", () => {
     expect(result.errors.some((error) => error.code === "CK2006" && error.path === "/encoding/series")).toBe(true);
   });
 
+  it("repairs tooltip fields and position synonyms", () => {
+    const listed = validate({ ...base, tooltip: { fields: "revenue, cost" } });
+    expect(listed.errors.find((item) => item.path === "/tooltip/fields")?.hint).toContain("did you mean");
+    expect(listed.errors.find((item) => item.path === "/tooltip/fields")?.fix).toEqual([
+      { op: "replace", path: "/tooltip/fields", value: ["revenue", "cost"] },
+    ]);
+    expect(repair({ ...base, tooltip: { fields: "revenue" } }).ok).toBe(true);
+
+    const missing = validate({ ...base, tooltip: { fields: ["revnue"] } });
+    const miss = missing.errors.find((item) => item.code === "CK2001" && item.path === "/tooltip/fields/0");
+    expect(miss?.hint).toContain("revenue");
+    expect(miss?.fix).toEqual([{ op: "replace", path: "/tooltip/fields/0", value: "revenue" }]);
+    expect(repair({ ...base, tooltip: { fields: ["revnue"] } }).ok).toBe(true);
+
+    for (const [from, to] of [
+      ["above", "top"],
+      ["below", "bottom"],
+      ["over", "top"],
+      ["under", "bottom"],
+    ] as const) {
+      const placed = validate({ ...base, tooltip: { position: from } });
+      expect(placed.errors.find((item) => item.path === "/tooltip/position")?.hint).toContain(to);
+      expect(placed.errors.find((item) => item.path === "/tooltip/position")?.fix).toEqual([
+        { op: "replace", path: "/tooltip/position", value: to },
+      ]);
+    }
+
+    const ok = validate({
+      ...base,
+      tooltip: {
+        fields: [{ field: "revenue", title: "Sales", format: "currency" }],
+        position: "top",
+        crosshairLabel: true,
+      },
+    });
+    expect(ok.ok).toBe(true);
+    expect(ok.warnings.some((warning) => warning.path === "/tooltip/fields")).toBe(false);
+  });
+
   it("does not warn CK3011 for tooltip, zoom, legend toggle, animation, or a11y", () => {
     const result = validate({
       ...base,

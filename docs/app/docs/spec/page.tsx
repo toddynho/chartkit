@@ -23,9 +23,12 @@ export default function SpecPage() {
         Tooltip, zoom, pan, brush, and animation duration run in <code>@chartkitdev/core/interact</code>. The tooltip
         defaults on for line, bar, area, scatter, combo, and donut. <code>a11y.keyboard</code>, <code>a11y.dataTable</code>,
         and <code>legend.interactive</code> stay off unless set, because turning them on loads extra interaction code.
-        The static SVG records those choices in <code>data-ck-intent</code>. <code>animation.easing</code>,{" "}
-        <code>interaction.select</code>, <code>tooltip.fields</code>, and <code>theme.tokens.fontFamily</code> warn
-        CK3012. Axis titles, tick counts, rotation, side, reversed and un-niced scales, padding, min height, and{" "}
+        The static SVG records those choices in <code>data-ck-intent</code>. <code>tooltip.fields</code> chooses the
+        rows and their order. A string is a field name. An object sets <code>title</code> and a <code>format</code>{" "}
+        preset. <code>tooltip.position</code> is <code>auto</code>, <code>top</code>, <code>bottom</code>,{" "}
+        <code>left</code>, or <code>right</code>. <code>tooltip.crosshairLabel</code> prints the hovered x value on the
+        guide. <code>animation.easing</code>, <code>interaction.select</code>, and <code>theme.tokens.fontFamily</code>{" "}
+        warn CK3012. Axis titles, tick counts, rotation, side, reversed and un-niced scales, padding, min height, and{" "}
         <code>a11y.description</code> are drawn.
       </div>
       <h2>Repair loop</h2>

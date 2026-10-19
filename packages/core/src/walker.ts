@@ -210,7 +210,8 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
         });
       }
     } else {
-      const alias = typeof value === "string" && node.enum.includes(FIELD_TYPE_ALIAS[value]) ? FIELD_TYPE_ALIAS[value] : undefined;
+      const named = typeof value === "string" ? PLACE_ALIAS[path.endsWith("/position") ? value : ""] ?? FIELD_TYPE_ALIAS[value] : undefined;
+      const alias = named && node.enum.includes(named) ? named : undefined;
       const closest = alias ?? (typeof value === "string" ? nearest(value, node.enum.map(String), 3) : undefined);
       emit(ctx, {
         code: "CK1007",
@@ -462,11 +463,24 @@ const FIELD_TYPE_ALIAS: Record<string, string> = {
   qualitative: "nominal",
 };
 
+const PLACE_ALIAS: Record<string, string> = { above: "top", below: "bottom", over: "top", under: "bottom" };
+
 const METRIC_FIELDS = ["label", "value", "min", "max", "delta", "target"] as const;
 const DONUT_CHANNELS = ["label", "theta", "angle", "value"] as const;
 
 /** Shapes agents copy from Vega-Lite. One CK1009, with a patch, instead of a pile of missing-property errors. */
 function repairShape(value: unknown, path: string, ctx: Ctx): boolean {
+  if (path === "/tooltip/fields" && typeof value === "string") {
+    emit(ctx, {
+      code: "CK1009",
+      severity: "error",
+      message: "tooltip.fields is a list",
+      path,
+      hint: "did you mean a list?",
+      fix: [{ op: "replace", path, value: value.split(",").map((part) => part.trim()).filter(Boolean) }],
+    });
+    return true;
+  }
   if (path === "/data" && isPlainObject(value) && Array.isArray(value.values) && value.columns === undefined) {
     emit(ctx, {
       code: "CK1009",
