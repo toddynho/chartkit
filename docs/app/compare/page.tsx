@@ -4,7 +4,7 @@ import { pageMeta } from "@/lib/site";
 
 export const metadata = pageMeta(
   "Compare",
-  "ChartKit compared with Recharts, Chart.js, ECharts, and uPlot. Wins, gaps, and features that are in the spec but not drawn.",
+  "ChartKit compared with Recharts, Chart.js, ECharts, and uPlot. Wins, gaps, and what the client runtime draws.",
   "/compare",
 );
 
@@ -16,9 +16,10 @@ const rows = [
   ["Combo / dual axis", "Yes", "Yes", "Yes", "Yes", "DIY"],
   ["Gauge, KPI, sparkline", "Yes", "Partial", "Partial", "Yes", "Partial"],
   ["Candlestick", "Yes", "No", "Plugin", "Yes", "DIY"],
-  ["Radar, treemap, sankey", "No", "Yes", "Partial", "Yes", "No"],
-  ["Tooltips", "In the spec, not drawn", "Yes", "Yes", "Yes", "Yes"],
-  ["Zoom and pan", "In the spec, not drawn", "No", "Plugin", "Yes", "Yes"],
+  ["Radar, treemap, sankey", "Yes", "Yes", "Partial", "Yes", "No"],
+  ["Funnel", "Yes", "No", "No", "Yes", "No"],
+  ["Tooltips", "Client runtime", "Yes", "Yes", "Yes", "Yes"],
+  ["Zoom and pan", "Client runtime", "No", "Plugin", "Yes", "Yes"],
   ["Annotations", "Yes", "Yes", "Plugin", "Yes", "Yes"],
   ["SSR without a DOM", `Yes, ${headline.ssrLabel}`, "Empty wrapper", "No", "Yes, 6.65 ms", "No"],
   ["repair(), no docs", headline.repair, "No repair", "No repair", "No repair", "No repair"],
@@ -30,11 +31,11 @@ export default function ComparePage() {
     <div className="wrap section prose wide">
       <h1>Compare</h1>
       <p className="lede">
-        A short, honest cut of the round 13 matrix. “In the spec, not drawn” means the static SVG does not paint it.
-        Tooltip, zoom, pan, brush, and animation run in the client runtime and do not warn. Keyboard access stays off
-        unless set. Annotations, log scales, time axes, and bar series are drawn. Cells for other libraries come from their docs
-        and are point-in-time. ChartKit’s line chart is still the smallest; uPlot is next at {headline.nextGzipBytes}{" "}
-        bytes.
+        A short, honest cut of the round 13 matrix. Tooltip, zoom, pan, brush, and animation run in the client
+        runtime when the spec sets them. The static SVG does not paint those. Radar, treemap, sankey, and funnel are
+        drawn. Keyboard access stays off unless set. Annotations, log scales, time axes, and bar series are drawn.
+        Cells for other libraries come from their docs and are point-in-time. ChartKit’s line chart is still the
+        smallest; uPlot is next at {headline.nextGzipBytes} bytes.
       </p>
       <div className="table-wrap">
         <table>

@@ -8,6 +8,6 @@
   "rules": [
     "Prefer the JSON spec over React component props such as dataKey.",
     "Cite benchmark losses as well as wins. The numbers are in docs/public/benchmarks.md.",
-    "a11y.alt is required. Tooltip, zoom, pan, brush, and animation are not drawn."
+    "a11y.alt is required. Tooltip, zoom, pan, brush, and animation run in @chartkitdev/core/interact when the spec sets them. The static SVG does not paint them."
   ]
 }

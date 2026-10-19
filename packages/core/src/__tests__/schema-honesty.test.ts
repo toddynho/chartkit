@@ -1,9 +1,10 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { ValidationResult } from "../diagnostics";
 import { render } from "../extra";
+import type { ChartRenderer } from "../render";
 import { validate } from "../validate";
 
 const schema = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../schema/chartkit.schema.json"), "utf8")) as SchemaNode;
@@ -273,20 +274,90 @@ function hosts(): Host[] {
   return ready;
 }
 
-function covered(leaf: Leaf, ready: Host[]): boolean {
+interface EntrySet {
+  draw: Map<string, (spec: unknown) => string | null>;
+  base: Map<string, string | null>;
+}
+
+function covered(leaf: Leaf, ready: Host[], entries?: EntrySet): boolean {
   const values = probes(leaf);
   if (values.length === 0) return leaf.children && !leaf.types.has("boolean") && leaf.enums.length === 0 && leaf.consts.length <= 1;
+  let drew = false;
   for (const value of values) {
     for (const host of ready) {
       const spec = apply(host.spec, leaf.path, value);
       const result = validate(spec);
-      if (warned(result, leaf.path)) return true;
-      if (!result.ok) continue;
+      const warnedPath = warned(result, leaf.path);
+      if (!result.ok) {
+        if (warnedPath) drew = true;
+        continue;
+      }
       const svg = chart(spec);
-      if (svg && svg !== host.svg) return true;
+      const fullChanged = Boolean(svg && svg !== host.svg);
+      if (fullChanged && entries) {
+        const type = String(host.spec.type);
+        const draw = entries.draw.get(type);
+        const small = draw?.(spec) ?? null;
+        if (draw && small === entries.base.get(host.name)) return false;
+      }
+      if (fullChanged || warnedPath) drew = true;
     }
   }
-  return false;
+  return drew;
+}
+
+const ENTRY_FILES: Array<[string, string]> = [
+  ["line", "line"],
+  ["bar", "bar"],
+  ["donut", "donut"],
+  ["stacked-area", "stackedArea"],
+  ["scatter", "scatter"],
+  ["combo", "combo"],
+  ["heatmap", "heatmap"],
+  ["gauge", "gauge"],
+  ["kpi", "kpi"],
+  ["sparkline", "sparkline"],
+  ["mini-area", "miniArea"],
+  ["progress-ring", "progressRing"],
+  ["spike", "spike"],
+  ["candlestick", "candlestick"],
+  ["histogram", "histogram"],
+  ["boxplot", "boxplot"],
+  ["radar", "radar"],
+  ["funnel", "funnel"],
+  ["treemap", "treemap"],
+  ["sankey", "sankey"],
+  ["bullet", "bullet"],
+  ["waterfall", "waterfall"],
+  ["gantt", "gantt"],
+  ["timeline", "timeline"],
+  ["quadrant", "quadrant"],
+  ["venn", "venn"],
+  ["journey", "journey"],
+];
+
+async function entrySet(ready: Host[]): Promise<EntrySet> {
+  const draw = new Map<string, (spec: unknown) => string | null>();
+  for (const [file, name] of ENTRY_FILES) {
+    vi.resetModules();
+    const { createRenderer } = await import("../render");
+    const mod = (await import(`../charts/${file}.ts`)) as Record<string, ChartRenderer>;
+    const chart = mod[name];
+    const renderEntry = createRenderer([chart]);
+    draw.set(chart.types[0] ?? file, (spec) => {
+      try {
+        return renderEntry(spec);
+      } catch {
+        return null;
+      }
+    });
+  }
+  const base = new Map<string, string | null>();
+  for (const host of ready) {
+    const renderEntry = draw.get(String(host.spec.type));
+    base.set(host.name, renderEntry ? renderEntry(host.spec) : null);
+  }
+  return { draw, base };
 }
 
 /** Pixel y of a data value, interpolated from the rendered tick baselines. */
@@ -411,17 +482,41 @@ describe("schema honesty", () => {
     const font = validate({ ...line, theme: { tokens: { fontFamily: "Georgia" } } });
     expect(font.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/theme/tokens/fontFamily")).toBe(true);
     const labels = validate({ ...line, mark: { labels: true } });
-    expect(labels.warnings.some((warning) => warning.code === "CK3010" && warning.path === "/mark/labels")).toBe(true);
+    const labelWarning = labels.warnings.find((warning) => warning.code === "CK3012" && warning.path === "/mark/labels");
+    expect(labelWarning?.message).toContain("mark.labels");
+    expect(labelWarning?.message).toContain("bars and slices");
+    const quantitative = validate({
+      ...line,
+      encoding: { x: "month", y: { field: "revenue", type: "quantitative" } },
+    });
+    expect(quantitative.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/encoding/y/type")).toBe(false);
+    const nominal = validate({
+      ...line,
+      encoding: { x: "month", y: { field: "revenue", type: "nominal" } },
+    });
+    const typeWarning = nominal.warnings.find((warning) => warning.code === "CK3012" && warning.path === "/encoding/y/type");
+    expect(typeWarning?.message).toBe("encoding.y.type is ignored; ChartKit infers the scale type");
   });
 
-  it("walks every schema property", () => {
+  it("walks every schema property on the full renderer and on each chart entry", async () => {
     const ready = hosts();
     expect(ready.length).toBeGreaterThan(5);
+    const entries = await entrySet(ready);
+    expect(entries.draw.size).toBe(ENTRY_FILES.length);
+    const lineDraw = entries.draw.get("line");
+    const lineSvg = lineDraw?.({
+      ...line,
+      axes: { x: { title: "Month", position: "top" }, y: { title: "Revenue", position: "right" } },
+      a11y: { alt, description: "Monthly revenue." },
+    });
+    expect(lineSvg).toContain("Month");
+    expect(lineSvg).toContain("Revenue");
+    expect(lineSvg).toContain("Monthly revenue.");
     const silent: string[] = [];
     for (const leaf of collect()) {
       const only = [...new Set([...leaf.consts, ...leaf.enums].map((value) => JSON.stringify(value)))];
       if (only.length === 1 && leaf.enums.length === 0 && !leaf.types.has("boolean") && !leaf.types.has("number") && !leaf.types.has("integer") && !leaf.types.has("array")) continue;
-      if (!covered(leaf, ready)) silent.push(leaf.path);
+      if (!covered(leaf, ready, entries)) silent.push(leaf.path);
     }
     expect(silent, silent.join("\n")).toEqual([]);
   });

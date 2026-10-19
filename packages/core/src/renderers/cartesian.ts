@@ -9,7 +9,7 @@ export interface AxisBox {
   title?: string;
   count?: number;
   labels: boolean;
-  /** Non-default side. Set by the axis extra, absent from the line entry. */
+  /** Non-default side. Set when the axis extras are mounted. */
   end?: boolean;
   values?: number[];
   rotate?: number;
@@ -38,7 +38,7 @@ interface AxisHooks {
 
 let hooks: AxisHooks | null = null;
 
-/** Position, rotation, explicit ticks, and legend values. Loaded with `all`, not the line entry. */
+/** Position, rotation, explicit ticks, and legend values. Chart entries call `mountAxes`. */
 export function installAxes(next: AxisHooks): void {
   hooks = next;
 }
@@ -1412,7 +1412,7 @@ function monotoneHeadroom(model: PlotModel, axis: "y" | "y2"): { above: number; 
   return { above, below };
 }
 
-function resolveTicks(model: PlotModel, key: "x" | "y" | "y2", min: number, max: number, count: number, log: boolean): number[] {
+export function resolveTicks(model: PlotModel, key: "x" | "y" | "y2", min: number, max: number, count: number, log: boolean): number[] {
   const axis = key === "y" ? model.yAxis : key === "y2" ? model.y2Axis : model.xAxis;
   const values = axis.values;
   if (values && values.length) {

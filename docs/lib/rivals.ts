@@ -42,7 +42,7 @@ export const rivals: Rival[] = [
       "Recharts was in the 2026-10-16 eval, which round 13 did not re-run: 42/42 with no docs and 42/42 with docs, at 223.3 / 236.6 mean first-try output tokens. ChartKit was 20/42 with no docs, 42/42 after repair() with no model call, and 42/42 with the docs at 139.4 / 131.1 tokens.",
     betterWhen: [
       "You need a hover tooltip, a click handler, or a legend that toggles a series. ChartKit draws those in the client runtime when the spec sets them. The static SVG does not.",
-      "You want radar, treemap, or sankey. ChartKit does not draw those.",
+      "You want a map. ChartKit draws radar, treemap, sankey, and funnel, and does not draw maps.",
       "The app is already React and the team wants <LineChart> props, not a JSON spec.",
       "You care about the 1,000-point aligned update. ChartKit loses that cell to uPlot: 1.5 vs 1.2 on even x, 1.6 vs 1.4 on jittered x, and 1.6 vs 1.4 on gapped timestamps. Round 13 did not publish a Recharts millisecond for that cell.",
     ],
@@ -86,7 +86,7 @@ export function Panel() {
     agent:
       "Chart.js was in the 2026-10-16 eval, which round 13 did not re-run: 42/42 with no docs and 42/42 with docs, at 294.6 / 260.9 mean first-try output tokens. ChartKit’s official first try used 131.1 tokens.",
     betterWhen: [
-      "You want the plugin set: zoom, annotation, datalabels, and a canvas tooltip. This tree does not draw zoom or tooltips.",
+      "You want the plugin set: zoom, annotation, datalabels, and a canvas tooltip. ChartKit draws zoom and tooltips in the client runtime when the spec sets them. The static SVG does not.",
       "The first hover has to be a few milliseconds. At 100,000 points uPlot paints the first hover in 4, 4.6, or 4.9 ms. ChartKit paints it in 20.8, 15.9, or 16.5 ms. Chart.js’s steady painted hover is 20.3 ms; ChartKit’s is 16.5 ms.",
       "Do not pick Chart.js for the round 13 aligned update. ChartKit is faster in all 12 of those cells. Even 1,000 points is 1.5 ms against Chart.js at 5.3 ms. The library that wins the small updates is uPlot.",
     ],
@@ -122,8 +122,8 @@ new Chart(ctx, {
     agent:
       "ECharts was in the 2026-10-16 eval, which round 13 did not re-run: 42/42 in every column, at 334.2 / 367.2 mean first-try output tokens. That is the highest token count in the eval. ChartKit’s official first try used 131.1.",
     betterWhen: [
-      "You need a chart ChartKit does not draw: a map, a graph, a sankey, a treemap, or brush selection.",
-      "You need dataZoom or a tooltip. ChartKit draws zoom and tooltips in the client runtime when the spec sets them. The static SVG does not.",
+      "You need a chart ChartKit does not draw: a map or a graph. ChartKit draws sankey and treemap. Its brush is an x range in the client runtime, not ECharts brush selection.",
+      "You want dataZoom inside the chart bundle. ChartKit draws zoom and tooltips in the client runtime when the spec sets them. The static SVG does not.",
       "The 1,000-point aligned update matters, and you are comparing with uPlot. ChartKit loses that cell (1.5 vs 1.2 on even x). At 1,000,000 even points ChartKit wins the update, 10.7 vs 11.2. This page does not claim ECharts wins either cell. ECharts has no browser millisecond in the round 13 rows. Its steady painted hover at 100k is 2,881.4 ms.",
     ],
     chartkitWhen: [
@@ -159,8 +159,8 @@ chart.setOption({
     agent:
       "Nivo was not in the agent eval. Round 13 did not add it. This page does not invent a 42-task score. The eval covered ChartKit, Recharts, ECharts, and Chart.js only.",
     betterWhen: [
-      "You want a Nivo chart ChartKit does not draw, such as a choropleth, a funnel, or circle packing, and the app is React.",
-      "You want a hover tooltip and a rich legend. ChartKit does not draw those.",
+      "You want a Nivo chart ChartKit does not draw, such as a choropleth or circle packing, and the app is React. ChartKit draws a funnel.",
+      "You want Nivo's hover tooltip and rich legend on the React chart. ChartKit draws the tooltip in the client runtime when the spec sets it, and a legend when the spec asks.",
       "The 1,000-point aligned update is the cell you care about, and the comparison is uPlot, not Nivo. ChartKit loses it (1.5 vs 1.2 on even x). Round 13 has no Nivo browser row, so this page does not invent one.",
     ],
     chartkitWhen: [

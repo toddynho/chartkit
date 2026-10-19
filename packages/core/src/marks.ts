@@ -14,7 +14,7 @@ export const MARK_APPLIES: Record<string, readonly string[]> = {
   orientation: ["bar"],
   cornerRadius: ["bar", "donut", "heatmap", "histogram", "boxplot", "treemap", "sankey", "bullet", "waterfall"],
   gap: ["bar", "combo", "heatmap", "candlestick", "histogram", "boxplot", "funnel", "treemap", "waterfall"],
-  labels: ["bar", "donut"],
+  labels: ["bar", "donut", "line", "stacked-area", "scatter"],
   innerRadius: ["donut"],
   padAngle: ["donut"],
   opacity: ["scatter", "spike"],
