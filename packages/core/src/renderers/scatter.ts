@@ -16,7 +16,7 @@ import {
   scaleTypeOf,
   wantsZero,
 } from "../frame";
-import { clipPath, closeChart, domainEnds, esc, font, linear, logNice, logScale, logTicks, n, openChart, pickTicks, readAxis, readInset } from "../svg";
+import { boxId, clipPath, closeChart, domainEnds, esc, font, linear, logNice, logScale, logTicks, n, openChart, pickTicks, readAxis, readInset } from "../svg";
 
 /** Scatter / bubble. encoding.x and encoding.y are quantitative; size and color are optional. */
 export function renderScatter(spec: Record<string, unknown>): string | null {
@@ -163,9 +163,10 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
       return yScale(numeric);
     },
   });
-  parts.push(`<defs>${clipPath(`${frame.id}-clip`, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top)}</defs>`);
+  const clip = boxId(frame.id, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top);
+  parts.push(`<defs>${clipPath(clip, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top)}</defs>`);
   parts.push(notes.under);
-  parts.push(`<g clip-path="url(#${frame.id}-clip)">`);
+  parts.push(`<g clip-path="url(#${clip})">`);
   points.forEach((point, index) => {
     const raw = point.size === null ? radius[0] : lerp(point.size, sizeDomain[0], sizeDomain[1], radius[0], radius[1]);
     const cx = xScale(point.x);

@@ -1,7 +1,7 @@
 import { readData, type DataTable } from "./data";
 import type { PresetGeometry, PresetTokens } from "./theme";
 import { resolveGeometry, resolvePreset } from "./theme";
-import { clientIntent, hash, isRecord, longDesc, niceDomain } from "./svg";
+import { hash, isRecord, niceDomain } from "./svg";
 
 export interface Frame {
   type: string;
@@ -22,8 +22,6 @@ export interface Frame {
   /** false hides the legend. Otherwise the placement. */
   legend: false | "top" | "right" | "bottom" | "left";
   legendValues: boolean;
-  description?: string;
-  intent?: string;
 }
 
 export function readFrame(
@@ -62,8 +60,6 @@ export function readFrame(
     encoding: isRecord(spec.encoding) ? spec.encoding : {},
     legend: legendPlacement(spec),
     legendValues: isRecord(spec.legend) && spec.legend.values === true,
-    description: longDesc(spec),
-    intent: clientIntent(spec) || undefined,
   };
 }
 

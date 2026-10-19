@@ -45,6 +45,11 @@ export function hash(value: string): string {
   return (h >>> 0).toString(36);
 }
 
+/** Clip id for one plot box. Charts that share an alt still need distinct ids in one document. */
+export function boxId(id: string, x: number, y: number, w: number, h: number): string {
+  return id + hash((x | 0) + "," + (y | 0) + "," + (w | 0) + "," + (h | 0));
+}
+
 export function round(value: number): number {
   return Math.round(value * 1e8) / 1e8;
 }
@@ -157,8 +162,6 @@ export interface ChartOpen {
   responsive: boolean;
   alt: string;
   title?: string;
-  description?: string;
-  intent?: string;
   type: string;
   id: string;
   renderer: string;
@@ -167,14 +170,9 @@ export interface ChartOpen {
 export function openChart(chart: ChartOpen): string {
   const width = chart.responsive ? "100%" : String(chart.width);
   const label = chart.alt || chart.title || chart.type;
-  const described = chart.description ? ` aria-describedby="${chart.id}-d"` : "";
-  const intent = chart.intent ? ` data-ck-intent="${esc(chart.intent)}"` : "";
-  const desc = chart.description
-    ? `<desc id="${chart.id}-d">${esc(chart.description)}</desc>`
-    : `<desc>${esc(chart.alt)}</desc>`;
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}"${described} class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}"${intent} style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
-    `<title>${esc(chart.title || chart.alt)}</title>${desc}`
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}" class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}" style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
+    `<title>${esc(chart.title || chart.alt)}</title><desc>${esc(chart.alt)}</desc>`
   );
 }
 

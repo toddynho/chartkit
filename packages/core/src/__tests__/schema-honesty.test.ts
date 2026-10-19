@@ -289,6 +289,19 @@ function covered(leaf: Leaf, ready: Host[]): boolean {
   return false;
 }
 
+/** Pixel y of a data value, interpolated from the rendered tick baselines. */
+function scaleY(svg: string, value: number): number {
+  const ticks = [...svg.matchAll(/<text x="[^"]+" y="([^"]+)"[^>]*>([\d,]+)<\/text>/g)].map((mark) => ({
+    y: Number(mark[1]) - 4,
+    v: Number(mark[2].replace(/,/g, "")),
+  }));
+  const sorted = ticks.sort((a, b) => a.v - b.v);
+  const lo = [...sorted].reverse().find((tick) => tick.v <= value) ?? sorted[0];
+  const hi = sorted.find((tick) => tick.v >= value) ?? sorted[sorted.length - 1];
+  if (!lo || !hi || hi.v === lo.v) return lo?.y ?? NaN;
+  return lo.y + ((hi.y - lo.y) * (value - lo.v)) / (hi.v - lo.v);
+}
+
 describe("schema honesty", () => {
   const line = {
     version: "1",
@@ -326,42 +339,52 @@ describe("schema honesty", () => {
     expect(keys).toContain('data-ck-intent="keys"');
   });
 
-  it("keeps a top x axis inside the clip and clear of its title", () => {
-    const svg = render({
+  it("covers the y-scale range of the data when x is on top, on the bottom, and padded", () => {
+    const data = [
+      { month: "January", revenue: 1200 },
+      { month: "February", revenue: 1800 },
+      { month: "March", revenue: 1400 },
+      { month: "April", revenue: 2600 },
+      { month: "May", revenue: 2200 },
+      { month: "June", revenue: 3100 },
+    ];
+    const base = {
       version: "1",
       type: "line",
-      data: [
-        { month: "January", revenue: 1200 },
-        { month: "February", revenue: 1800 },
-        { month: "March", revenue: 1400 },
-        { month: "April", revenue: 2600 },
-        { month: "May", revenue: 2200 },
-        { month: "June", revenue: 3100 },
-      ],
+      data,
       encoding: { x: "month", y: "revenue" },
       size: { width: 460, height: 250 },
       a11y: { alt: "Revenue from January to June." },
-      axes: { x: { title: "Month", position: "top" }, y: { title: "Revenue", position: "right" } },
-    });
-    const clip = /<clipPath[^>]*>\s*<rect x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)"/.exec(svg);
-    expect(clip).toBeTruthy();
-    const box = { x: Number(clip?.[1]), y: Number(clip?.[2]), w: Number(clip?.[3]), h: Number(clip?.[4]) };
-    const path = /<path d="([^"]+)" fill="none"/.exec(svg)?.[1] ?? "";
-    const nums = path.match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? [];
-    expect(nums.length).toBeGreaterThan(4);
-    for (let i = 0; i < nums.length; i += 2) {
-      expect(nums[i]).toBeGreaterThanOrEqual(box.x - 0.01);
-      expect(nums[i]).toBeLessThanOrEqual(box.x + box.w + 0.01);
-      expect(nums[i + 1]).toBeGreaterThanOrEqual(box.y + 1);
-      expect(nums[i + 1]).toBeLessThanOrEqual(box.y + box.h - 1);
-    }
-    const tickAt = (label: string) => {
-      const mark = new RegExp(`<text x="([^"]+)" y="([^"]+)" text-anchor="start"[^>]*>${label}</text>`).exec(svg);
-      return mark ? Number(mark[2]) - 4 : NaN;
     };
-    expect(nums[1]).toBeGreaterThan(tickAt("1,500"));
-    expect(nums[1]).toBeLessThan(tickAt("1,000") + 1);
-    const texts = [...svg.matchAll(/<text x="([^"]+)" y="([^"]+)"([^>]*)>([^<]*)<\/text>/g)];
+    const specs = [
+      { ...base, axes: { x: { title: "Month" }, y: { title: "Revenue" } } },
+      { ...base, axes: { x: { title: "Month", position: "top" }, y: { title: "Revenue", position: "right" } } },
+      {
+        ...base,
+        size: { width: 460, height: 250, padding: { top: 36, right: 72, bottom: 48, left: 96 } },
+        axes: { x: { title: "Month" }, y: { title: "Revenue" } },
+      },
+    ];
+    const svgs = specs.map((spec) => render(spec));
+    const page = svgs.join("");
+    const ids = svgs.map((svg) => /clip-path="url\(#([^"]+)\)"/.exec(svg)?.[1] ?? "");
+    expect(new Set(ids).size).toBe(svgs.length);
+    for (const svg of svgs) {
+      const id = /clip-path="url\(#([^"]+)\)"/.exec(svg)?.[1] ?? "";
+      const own = new RegExp(`<clipPath id="${id}"><rect x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)"`).exec(svg);
+      const first = new RegExp(`<clipPath id="${id}"><rect x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)"`).exec(page);
+      expect(own && first).toBeTruthy();
+      expect(first?.[2]).toBe(own?.[2]);
+      expect(first?.[4]).toBe(own?.[4]);
+      const boxTop = Number(own?.[2]);
+      const boxBottom = boxTop + Number(own?.[4]);
+      const low = scaleY(svg, 1200);
+      const high = scaleY(svg, 3100);
+      expect(boxTop).toBeLessThanOrEqual(Math.min(low, high) + 0.5);
+      expect(boxBottom).toBeGreaterThanOrEqual(Math.max(low, high) - 0.5);
+    }
+    const top = svgs[1];
+    const texts = [...top.matchAll(/<text x="([^"]+)" y="([^"]+)"([^>]*)>([^<]*)<\/text>/g)];
     const bounds = (mark: RegExpMatchArray) => {
       const x = Number(mark[1]);
       const y = Number(mark[2]);
@@ -375,8 +398,7 @@ describe("schema honesty", () => {
     expect(month && march).toBeTruthy();
     const title = bounds(month!);
     const label = bounds(march!);
-    const overlaps = title.left < label.right && label.left < title.right && title.top < label.bottom && label.top < title.bottom;
-    expect(overlaps).toBe(false);
+    expect(title.left < label.right && label.left < title.right && title.top < label.bottom && label.top < title.bottom).toBe(false);
   });
 
   it("warns for easing, select, tooltip fields, and font family", () => {
