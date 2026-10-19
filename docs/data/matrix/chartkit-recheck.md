@@ -70,3 +70,14 @@ Rechecked on the pie, donut, bar, line, and scatter entries. A cell moved to nat
 | label.pie | native | `mark.labels` and `mark.labelPosition: "outside"` draw leader lines on pie and donut. Labels on one side stack with a 16px gap. |
 | mark.color.point | native | `encoding.color` names a category or a paint column. `domain` and `range` map values to colours. Drawn on bar, scatter, and pie. |
 | mark.color.conditional | native | `mark.colorRules` recolours bar, line points, scatter, and pie. First match wins. Tokens `negative`, `positive`, and `accent` follow the theme. |
+
+## Annotations
+
+Rechecked on `createRenderer([line])` and the scatter entry. A cell moved to native only when a runtime probe changed the picture.
+
+| id | status | correction |
+|---|---|---|
+| annotation.trendline | native | `type: "trendline"` draws mean, median, or linear, with a label. |
+| type.regression | native | `type: "regression"` is an overlay, not a chart type. Linear or loess, with an optional confidence band. |
+| annotation.marker | native | A point, a leader, and a text box. The box stays inside the plot and moves clear of earlier callouts. |
+| axis.bands | native | `axes.x.bands` and `axes.y.bands` shade ranges. `axes.x.bands: "weekends"` shades Saturday and Sunday when x is dates, and warns otherwise. |

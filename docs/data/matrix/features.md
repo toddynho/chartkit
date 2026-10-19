@@ -101,7 +101,7 @@ Every chart type and major variant. Status native = a first-class type/series/ma
 | **Violin plot** <br><sub>`type.violin`</sub> | · | ⊕ | · | ✎ | ✎ | ● | · | · | ● | ● | · | ✎ | ✎ | · | · | · | · | · | · | · | ✎ |
 | **Density (KDE)** <br><sub>`type.density`</sub> | · | · | · | · | ◐ | ◐ | · | · | · | ? | · | ● | ● | · | ? | · | · | ? | · | · | ● |
 | **Error bars** <br><sub>`type.errorbar` ★</sub> | · | ⊕ | ● | ✎ | ● | ● | · | ● | ✎ | · | · | ● | ● | ●ᴱ | ✎ | ◐ | ◐ | · | · | · | ✎ |
-| **Trend / regression line** <br><sub>`type.regression` ★</sub> | · | ⊕ | ◐ | ⊕ | ● | · | · | · | · | · | · | ● | ● | ● | ● | ● | · | · | · | · | ✎ |
+| **Trend / regression line** <br><sub>`type.regression` ★</sub> | ● | ⊕ | ◐ | ⊕ | ● | · | · | · | · | · | · | ● | ● | ● | ● | ● | · | · | · | · | ✎ |
 | **Candlestick** <br><sub>`type.candlestick` ★</sub> | ● | ⊕ | ✎ | ● | ● | ● | · | ● | ✎ | ● | · | ● | ✎ | ●ᴱ | ● | ● | ✎ | ● | ●ᴾ | · | ✎ |
 | **OHLC bars** <br><sub>`type.ohlc`</sub> | · | ⊕ | · | · | ● | ● | · | · | ✎ | · | · | ✎ | ✎ | ●ᴱ | ● | · | ✎ | ● | ? | · | ✎ |
 | **Technical indicators** <br><sub>`type.finance.indicators`</sub> | · | · | · | · | ● | · | · | · | · | · | · | ● | ◐ | ● | ● | · | · | ⊕ | · | · | · |
@@ -212,7 +212,7 @@ Axis lines, ticks, labels, titles and grids
 | **Axis line styling** <br><sub>`axis.line`</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
 | **Grid lines** <br><sub>`axis.grid` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ? | ● |
 | **Grid line style (dash, colour, width)** <br><sub>`axis.grid.style` ★</sub> | ● | ● | ● | ● | ● | ● | ◐ | ● | ● | ● | · | ● | ● | ● | ● | ● | ● | ● | ● | · | ● |
-| **Alternating bands / plot bands** <br><sub>`axis.bands`</sub> | ◐ | ⊕ | ● | ● | ● | ● | ✎ | ✎ | ✎ | ● | · | ● | ✎ | ● | ● | · | ● | · | ● | · | ● |
+| **Alternating bands / plot bands** <br><sub>`axis.bands`</sub> | ● | ⊕ | ● | ● | ● | ● | ✎ | ✎ | ✎ | ● | · | ● | ✎ | ● | ● | · | ● | · | ● | · | ● |
 | **Axis breaks** <br><sub>`axis.breaks`</sub> | · | · | · | ● | ● | ● | · | · | · | · | · | ? | · | · | ? | · | · | ● | · | ? | ● |
 | **Axis pointer label** <br><sub>`axis.crosshair.label`</sub> | ● | ⊕ | · | ● | ● | ● | · | ● | · | ● | · | ● | · | ● | ● | · | ● | ● | ● | · | ● |
 | **Axis offset / origin crossing** <br><sub>`axis.offset`</sub> | · | ● | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ◐ | ? | ? | ? | ● | ? | ● |
@@ -256,11 +256,11 @@ Reference lines, bands, labels and markers
 | **Vertical reference line** <br><sub>`annotation.line.x` ★</sub> | ● | ⊕ | ● | ● | ● | ● | ● | ✎ | ✎ | ● | · | ● | ● | ● | ● | · | ✎ | ◐ | ● | ● | ● |
 | **Shaded band / region** <br><sub>`annotation.band` ★</sub> | ● | ⊕ | ● | ● | ● | ● | ✎ | ✎ | ✎ | ● | · | ● | ● | ● | ● | · | ● | · | ✎ | · | ● |
 | **Text annotation at a data point** <br><sub>`annotation.text` ★</sub> | ● | ⊕ | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ● | ● | ✎ | ● | ✎ | ? | ● |
-| **Point marker / callout** <br><sub>`annotation.marker`</sub> | · | ⊕ | ● | ● | ● | ● | ● | ✎ | ● | ● | · | ● | ✎ | ● | ● | · | ✎ | ● | ✎ | · | ● |
+| **Point marker / callout** <br><sub>`annotation.marker`</sub> | ● | ⊕ | ● | ● | ● | ● | ● | ✎ | ● | ● | · | ● | ✎ | ● | ● | · | ✎ | ● | ✎ | · | ● |
 | **Annotation label placement** <br><sub>`annotation.label.position`</sub> | ● | ⊕ | ● | ● | ● | ● | ? | ✎ | ● | ● | · | ● | ● | ● | ● | · | · | ● | ● | ? | ● |
 | **Annotation styling (dash, colour, opacity)** <br><sub>`annotation.style`</sub> | ● | ⊕ | ● | ● | ● | ● | ● | ✎ | ✎ | ● | · | ● | ● | ● | ● | ? | ? | ● | ● | ? | ● |
 | **Interactive / draggable annotations** <br><sub>`annotation.editable`</sub> | · | ⊕ | · | ? | ● | ● | · | · | ● | ? | · | · | · | ●ᴱ | ● | · | · | ⊕ | ? | · | · |
-| **Trend / average / statistic lines** <br><sub>`annotation.trendline`</sub> | · | ⊕ | ◐ | ● | ● | · | ? | ? | · | · | · | ● | ● | ? | ● | ● | · | · | · | · | ● |
+| **Trend / average / statistic lines** <br><sub>`annotation.trendline`</sub> | ● | ⊕ | ◐ | ● | ● | · | ? | ? | · | · | · | ● | ● | ? | ● | ● | · | · | · | · | ● |
 
 ## Data labels (`label`)
 
