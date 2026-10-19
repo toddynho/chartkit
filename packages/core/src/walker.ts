@@ -177,6 +177,15 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
     } else if (path.endsWith("/axis") && node.enum.includes("y") && node.enum.includes("y2") && (value === null || isPlainObject(value))) {
       if (value === null) emitAxisNull(path, ctx);
       else emitAxisObject(value, path, ctx);
+    } else if (path === "/interaction/select" && (value === true || value === "single" || value === "multi")) {
+      emit(ctx, {
+        code: "CK1007",
+        severity: "error",
+        message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
+        path,
+        hint: 'select is "point" or "series". true means "point". Hold Shift, Ctrl, or Meta to add another.',
+        fix: [{ op: "replace", path, value: "point" }],
+      });
     } else if (path.endsWith("/points") && (value === true || value === false) && node.enum.includes("always")) {
       const mapped = value === true ? "always" : "none";
       emit(ctx, {
@@ -1309,9 +1318,22 @@ function aliasFix(root: unknown, alias: Alias): JsonPatchOperation[] {
   return fix;
 }
 
+const CLICK_KEYS = ["onClick", "click", "onPointClick", "onSeriesClick", "onLegendClick"];
+
 function emitUnknownProp(name: string, path: string, props: Record<string, JsonSchema>, ctx: Ctx): void {
   const pointer = join(path, name);
   if (ctx.skipUnknown.has(pointer)) return;
+  if (CLICK_KEYS.includes(name)) {
+    emit(ctx, {
+      code: "CK1002",
+      severity: "error",
+      message: `unknown property ${quote(name)}`,
+      path: pointer,
+      hint: "clicks are pointclick, seriesclick, and legendclick events, not spec keys",
+      fix: [{ op: "remove", path: pointer }],
+    });
+    return;
+  }
   let hint: string | undefined;
   if (name === "colour") {
     hint = 'did you mean "theme.tokens" or "encoding.color"?';

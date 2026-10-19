@@ -20,3 +20,17 @@ Statuses were not changed. `axis.ticks.autoskip` stays partial: the small path t
 | layout.margin | native | `size.padding` draws on `createRenderer([line])`. |
 | a11y.description.long | native | Description draws on `createRenderer([line])`. |
 | label.show | partial | Bar and donut still draw it. Line, stacked-area, and scatter warn CK3012 and are not drawn. |
+
+## Events and selection
+
+Rechecked after tooltip content (PR #18) and this interaction pass. A cell moved to native only when a runtime probe changed the DOM.
+
+| id | status | correction |
+|---|---|---|
+| tooltip.fields | native | The interaction runtime draws the listed rows, labels, and format presets. CK3012 is gone. |
+| tooltip.position | native | `auto`, `top`, `bottom`, `left`, and `right` place the tooltip. |
+| tooltip.crosshair | native | Already drawn. `tooltip.crosshairLabel` prints the x value on the guide. |
+| axis.crosshair.label | native | That label sits on the guide at the axis edge. |
+| interaction.click | native | `pointclick`, `seriesclick`, and `legendclick` carry series, datum, index, x, y, value, and the original row. Enter or Space fires `pointclick`. |
+| interaction.select | native | `point` and `series`, with Shift, Ctrl, or Meta to add. Escape or a background click clears. `--ck-dim` and `--ck-selected` style the marks. CK3012 is gone. |
+| interaction.legend.hover | native | Hovering a legend item dims the other series. |

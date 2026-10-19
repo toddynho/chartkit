@@ -2,6 +2,7 @@
  * Publish docs/data/matrix/matrix.json as features.json and per-feature Markdown.
  * Spec snippets are included only after validate() and render() succeed.
  */
+import { execSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -254,6 +255,9 @@ function demoValue(id, parts, literal) {
   if (leaf === "shape") return "trapezoid";
   if (leaf === "linecap") return "round";
   if (leaf === "hover") return true;
+  if (leaf === "fields" && parts[0] === "tooltip") return ["units"];
+  if (leaf === "crosshairLabel") return true;
+  if (leaf === "select") return literal || "point";
   if (leaf === "zoom" || leaf === "brush") return "x";
   if (leaf === "animation") return { duration: 200 };
   if (leaf === "legend") return { show: true, position: "bottom" };
@@ -419,6 +423,8 @@ function probeTokens(probe) {
     .filter((part) => /^[A-Za-z][A-Za-z0-9 _./-]{1,48}$/.test(part));
 }
 
+const chartkitCommit = execSync("git rev-parse --short=12 HEAD", { cwd: join(docsRoot, "..") }).toString().trim();
+
 function markdown(feature, libraries) {
   const lines = [`# ${feature.label}`, "", `ChartKit: **${feature.badge}**`, "", feature.desc, ""];
   const cell = feature.cells.chartkit;
@@ -445,7 +451,7 @@ function markdown(feature, libraries) {
     const note = other.note ? ` ${other.note.replaceAll("|", "\\|")}` : "";
     lines.push(`| ${library.name} | ${other.status}${other.tier ? ` (${other.tier})` : ""} | ${option} | ${other.verified} (${other.strength}) | ${source}${note} |`);
   }
-  lines.push("", "Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against main 116d0af.", "", "https://chartkit.dev/features.json", "");
+  lines.push("", `Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against ${chartkitCommit}.`, "", "https://chartkit.dev/features.json", "");
   return lines.join("\n");
 }
 
@@ -494,7 +500,7 @@ function main() {
     schemaVersion: "1.0.0",
     generated: "2026-10-19",
     methodology: "https://chartkit.dev/features#method",
-    chartkitCommit: "116d0af",
+    chartkitCommit,
     chartkitRechecked: "2026-10-19",
     dateChecked: matrix.dateChecked,
     synonymsNote:

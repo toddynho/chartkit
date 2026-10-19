@@ -1,14 +1,51 @@
 # Custom tooltip fields
 
-ChartKit: **warns**
+ChartKit: **native**
 
 Add extra data fields or reorder tooltip rows
 
-Matrix status: `none`. Verification: `runtime-probe` (strong).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-accepted but not applied; validate() warns CK3012 since PR #16
+A string is a field name. An object sets title and format. The interaction runtime draws those rows in that order.
 
-No spec snippet. The option is accepted and `validate()` warns. It is not drawn.
+Source: packages/core/src/interact.ts
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40
+    },
+    {
+      "quarter": "Q2",
+      "units": 55
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": "units"
+  },
+  "a11y": {
+    "alt": "Units rose in Q2."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "tooltip": {
+    "fields": [
+      "units"
+    ]
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -35,6 +72,6 @@ No spec snippet. The option is accepted and `validate()` warns. It is not drawn.
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~items | dts-grep (weak) | @antv/g2/lib/component/utils.d.ts:14 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against main 116d0af.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 167b01d2f0df.
 
 https://chartkit.dev/features.json

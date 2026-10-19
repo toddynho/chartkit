@@ -121,7 +121,7 @@ Dashboard components in `@chartkitdev/react` (`LineChart`, `KpiCard`, and the re
 - **TypeScript First** - Full type safety with autocomplete for every prop
 - **Dual Y-Axis** - Display multiple scales in LineChart
 - **Responsive** - Charts automatically resize to fit their container
-- **Client interaction** - Tooltip, zoom, pan, brush, and animation run in the interaction runtime. Keyboard, the data table, and legend clicks stay off unless set. `tooltip.fields` chooses the rows and their order, with a label and a format preset. `tooltip.position` is `auto`, `top`, `bottom`, `left`, or `right`. `tooltip.crosshairLabel` prints the x value on the guide. `animation.easing`, `interaction.select`, and `theme.tokens.fontFamily` warn CK3012.
+- **Client interaction** - Tooltip, zoom, pan, brush, and animation run in the interaction runtime. Keyboard, the data table, and legend clicks stay off unless set. `tooltip.fields` chooses the rows and their order, with a label and a format preset. `tooltip.position` is `auto`, `top`, `bottom`, `left`, or `right`. `tooltip.crosshairLabel` prints the x value on the guide. `interaction.select` is `point` or `series` (Shift, Ctrl, or Meta adds; Escape or a background click clears) and emits `pointclick`, `seriesclick`, `legendclick`, and `selectionchange`. React and Next pass `onPointClick`, `onSeriesClick`, `onLegendClick`, `selection`, and `onSelectionChange`. Vue emits those names. Svelte dispatches them. Vanilla takes the same callbacks on `mount`. Legend hover highlights the series. `--ck-dim` and `--ck-selected` style the marks. `animation.easing` and `theme.tokens.fontFamily` warn CK3012.
 
 ## Components
 

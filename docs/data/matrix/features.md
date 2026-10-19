@@ -214,7 +214,7 @@ Axis lines, ticks, labels, titles and grids
 | **Grid line style (dash, colour, width)** <br><sub>`axis.grid.style` ★</sub> | ● | ● | ● | ● | ● | ● | ◐ | ● | ● | ● | · | ● | ● | ● | ● | ● | ● | ● | ● | · | ● |
 | **Alternating bands / plot bands** <br><sub>`axis.bands`</sub> | ◐ | ⊕ | ● | ● | ● | ● | ✎ | ✎ | ✎ | ● | · | ● | ✎ | ● | ● | · | ● | · | ● | · | ● |
 | **Axis breaks** <br><sub>`axis.breaks`</sub> | · | · | · | ● | ● | ● | · | · | · | · | · | ? | · | · | ? | · | · | ● | · | ? | ● |
-| **Axis pointer label** <br><sub>`axis.crosshair.label`</sub> | · | ⊕ | · | ● | ● | ● | · | ● | · | ● | · | ● | · | ● | ● | · | ● | ● | ● | · | ● |
+| **Axis pointer label** <br><sub>`axis.crosshair.label`</sub> | ● | ⊕ | · | ● | ● | ● | · | ● | · | ● | · | ● | · | ● | ● | · | ● | ● | ● | · | ● |
 | **Axis offset / origin crossing** <br><sub>`axis.offset`</sub> | · | ● | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ◐ | ? | ? | ? | ● | ? | ● |
 
 ## Legends (`legend`)
@@ -240,9 +240,9 @@ Hover information
 | **Tooltip on hover** <br><sub>`tooltip.show` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ◐ | ⊕ | ● | ? | ● |
 | **Shared (index) vs single (nearest) tooltip** <br><sub>`tooltip.shared` ★</sub> | ● | ● | ● | ● | ● | ? | ● | ● | ● | ● | · | ● | ◐ | ● | ● | ● | ◐ | · | ● | ? | ● |
 | **Tooltip value formatting** <br><sub>`tooltip.format` ★</sub> | ◐ | ● | ● | ● | ● | ● | ● | ● | ✎ | ● | ● | ● | ● | ● | ● | ● | ✎ | · | ● | · | ● |
-| **Custom tooltip fields** <br><sub>`tooltip.fields` ★</sub> | · | ● | ◐ | ● | ● | ● | ◐ | ◐ | ✎ | ● | ◐ | ● | ● | ● | ● | ● | ✎ | · | ● | ? | ● |
+| **Custom tooltip fields** <br><sub>`tooltip.fields` ★</sub> | ● | ● | ◐ | ● | ● | ● | ◐ | ◐ | ✎ | ● | ◐ | ● | ● | ● | ● | ● | ✎ | · | ● | ? | ● |
 | **Custom HTML / component tooltip** <br><sub>`tooltip.custom` ★</sub> | · | ● | ● | ● | ● | · | ● | ● | ● | ● | ● | ● | ? | ● | ● | ● | ✎ | ✎ | ● | ? | ● |
-| **Tooltip positioning / follow cursor** <br><sub>`tooltip.position`</sub> | · | ● | ● | ● | ● | ? | ? | ● | ● | ● | ? | ● | ? | ● | ● | ● | ? | ? | ● | ? | ● |
+| **Tooltip positioning / follow cursor** <br><sub>`tooltip.position`</sub> | ● | ● | ● | ● | ● | ? | ? | ● | ● | ● | ? | ● | ? | ● | ● | ● | ? | ? | ● | ? | ● |
 | **Touch-friendly tooltip** <br><sub>`tooltip.touch`</sub> | ? | ● | ● | ● | ● | · | ● | ● | ● | · | · | ● | · | ● | ● | · | · | ● | ● | · | ? |
 | **Crosshair / guide line** <br><sub>`tooltip.crosshair`</sub> | ● | ⊕ | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ◐ | ● | ● | ● | ● | ● | ● | · | ● |
 
@@ -282,8 +282,8 @@ Hover, zoom, pan, brush, selection, events, drilldown
 | Feature | CK | CJ | RC | EC | HC | PL | NV | VI | VX | AP | TR | OP | VL | AG | AM | GC | UP | LW | MU | MM | G2 |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | **Hover highlight** <br><sub>`interaction.hover.highlight` ★</sub> | ● | ● | ● | ● | ● | ◐ | ● | ● | ✎ | ● | ● | ● | ● | ● | ● | ● | ● | ◐ | ● | · | ● |
-| **Click events on marks** <br><sub>`interaction.click` ★</sub> | · | ● | ● | ● | ● | ● | ● | ● | ✎ | ● | ● | ✎ | ● | ● | ● | ● | ● | ● | ● | ● | ● |
-| **Selection (point / multi / series)** <br><sub>`interaction.select` ★</sub> | · | · | ? | ● | ● | ● | ? | ● | ✎ | ● | ◐ | ✎ | ● | ● | ● | ● | ● | · | ● | ? | ● |
+| **Click events on marks** <br><sub>`interaction.click` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ✎ | ● | ● | ✎ | ● | ● | ● | ● | ● | ● | ● | ● | ● |
+| **Selection (point / multi / series)** <br><sub>`interaction.select` ★</sub> | ● | · | ? | ● | ● | ● | ? | ● | ✎ | ● | ◐ | ✎ | ● | ● | ● | ● | ● | · | ● | ? | ● |
 | **Zoom (wheel / pinch / drag)** <br><sub>`interaction.zoom` ★</sub> | ● | ⊕ | · | ● | ● | ● | ? | ● | ● | ● | · | · | ● | ●ᴱ | ● | ● | ● | ● | ●ᴾ | · | ● |
 | **Pan** <br><sub>`interaction.pan`</sub> | ● | ⊕ | ? | ● | ● | ● | ? | ● | ● | ● | ? | · | ● | ●ᴱ | ● | ? | ✎ | ● | ●ᴾ | ? | ● |
 | **Brush / range selection** <br><sub>`interaction.brush`</sub> | ● | · | ● | ● | ● | ● | · | ● | ● | ● | · | · | ● | ● | ● | ● | ● | · | ● | · | ● |
@@ -292,7 +292,7 @@ Hover, zoom, pan, brush, selection, events, drilldown
 | **Keyboard navigation** <br><sub>`interaction.keyboard`</sub> | ● | · | ● | ● | ● | · | ● | ● | · | ? | · | · | · | ● | ● | · | · | · | ? | · | · |
 | **Range / zoom change events** <br><sub>`interaction.events.range`</sub> | ● | ⊕ | ● | ● | ● | ● | · | ● | ? | ● | · | · | ● | ● | ● | ? | ● | ● | ●ᴾ | · | ● |
 | **Synchronised charts** <br><sub>`interaction.sync`</sub> | · | ✎ | ● | ● | ✎ | ✎ | · | ✎ | ✎ | ● | · | · | ● | ● | ✎ | ? | ● | ✎ | ✎ | ? | ✎ |
-| **Legend hover highlights series** <br><sub>`interaction.legend.hover`</sub> | · | ● | ● | ● | ● | · | ● | ✎ | ✎ | ● | · | · | ● | ● | ● | · | · | · | ● | · | ● |
+| **Legend hover highlights series** <br><sub>`interaction.legend.hover`</sub> | ● | ● | ● | ● | ● | · | ● | ✎ | ✎ | ● | · | · | ● | ● | ● | · | · | · | ● | · | ● |
 
 ## Animation and transitions (`animation`)
 

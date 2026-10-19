@@ -1,12 +1,16 @@
 # Legend hover highlights series
 
-ChartKit: **none**
+ChartKit: **native**
 
 Hovering a legend item emphasises its series
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+Hovering a legend item dims the other series with --ck-dim. It is on whenever a legend is drawn.
+
+Source: packages/core/src/interact.ts
+
+No spec snippet. This row is not a single option that `validate()` can show.
 
 ## Other libraries
 
@@ -33,6 +37,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~legendHighlight | dts-grep (weak) | @antv/g2/lib/index.d.ts:144 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against main 116d0af.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 167b01d2f0df.
 
 https://chartkit.dev/features.json
