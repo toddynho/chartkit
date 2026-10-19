@@ -27,6 +27,7 @@ export function pageMeta(title: string, description: string, path: string): Meta
 export const NAV = [
   { href: "/docs", label: "Docs" },
   { href: "/examples", label: "Examples" },
+  { href: "/showcase", label: "Showcase" },
   { href: "/playground", label: "Playground" },
   { href: "/benchmarks", label: "Benchmarks" },
   { href: "/features", label: "Features" },

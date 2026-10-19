@@ -10,6 +10,7 @@ export function Footer() {
       <nav aria-label="Footer">
         <Link href="/docs">Docs</Link>
         <Link href="/examples">Examples</Link>
+        <Link href="/showcase">Showcase</Link>
         <Link href="/playground">Playground</Link>
         <Link href="/benchmarks">Benchmarks</Link>
         <Link href="/agents">Agents</Link>
@@ -19,6 +20,7 @@ export function Footer() {
         <Link href="/demo">Demo</Link>
         <a href="/llms.txt">llms.txt</a>
         <a href="/features.json">features.json</a>
+        <a href="/showcase.json">showcase.json</a>
         <a href="/benchmarks.json">benchmarks.json</a>
         <a href="/benchmarks.md">benchmarks.md</a>
         <a href="/llms-full.txt">llms-full.txt</a>

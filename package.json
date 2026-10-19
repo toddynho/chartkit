@@ -19,6 +19,7 @@
     "bench:core": "node scripts/bench.mjs",
     "size": "node scripts/size.mjs",
     "sizes:capture": "node docs/scripts/capture-sizes.mjs",
+    "showcase:check": "node --experimental-strip-types docs/scripts/showcase-check.mjs",
     "matrix:refresh": "node docs/scripts/matrix-refresh.mjs",
     "start": "npm run start --workspace=chartkit-docs",
     "clean": "rm -rf packages/*/dist docs/.next node_modules"
