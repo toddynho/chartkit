@@ -133,6 +133,10 @@ describe("sankey cycles", () => {
     });
     expect(svg).toContain('data-ck-return="1"');
     expect(svg).toContain("Quay → Lantern");
+    const ribbon = svg?.match(/d="([^"]+)"[^>]*data-ck-return="1"/)?.[1] ?? "";
+    const coords = ribbon.match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? [];
+    const ys = coords.filter((_, index) => index % 2 === 1);
+    expect(Math.min(...ys)).toBeGreaterThanOrEqual(8);
     const xs = [...(svg ?? "").matchAll(/data-ck-mark="node"/g)].map((hit) => {
       const tag = (svg ?? "").slice(Math.max(0, hit.index! - 360), hit.index);
       return Number(tag.match(/x="([^"]+)"/)?.[1]);

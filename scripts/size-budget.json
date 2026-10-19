@@ -10,13 +10,13 @@
   "vueLine": 21129,
   "svelteLine": 21309,
   "vanillaLine": 20865,
-  "extra": 49605,
+  "extra": 49619,
   "histogram": 6569,
   "boxplot": 6569,
   "radar": 5053,
   "funnel": 5175,
   "treemap": 5897,
-  "sankey": 6177,
+  "sankey": 6194,
   "bullet": 5321,
   "waterfall": 6048,
   "gantt": 6744,
@@ -30,5 +30,5 @@
   "global": 73036,
   "globalAuto": 47940,
   "globalMermaid": 26357,
-  "note": "gzip -9 byte budgets, each set to the measured size after axis finishing. line 20523, all 34426, validate 20555, interact 11170, interactExtra 1623, extra 49605, mermaid 25933, vanillaAuto 833, markdown 663, global 73036, globalAuto 47940, globalMermaid 26357. Adapters: vue 668, svelte 822, vanilla 440; vueLine 21129, svelteLine 21309, vanillaLine 20865. Phase 4 charts stay out of all: histogram 6569, boxplot 6569, radar 5053, funnel 5175, treemap 5897, sankey 6177, bullet 5321, waterfall 6048, gantt 6744, timeline 5618, quadrant 5404, venn 5828, journey 5240."
+  "note": "gzip -9 byte budgets, each set to the measured size after axis finishing. line 20523, all 34426, validate 20555, interact 11170, interactExtra 1623, extra 49619, mermaid 25933, vanillaAuto 833, markdown 663, global 73036, globalAuto 47940, globalMermaid 26357. Adapters: vue 668, svelte 822, vanilla 440; vueLine 21129, svelteLine 21309, vanillaLine 20865. Phase 4 charts stay out of all: histogram 6569, boxplot 6569, radar 5053, funnel 5175, treemap 5897, sankey 6194, bullet 5321, waterfall 6048, gantt 6744, timeline 5618, quadrant 5404, venn 5828, journey 5240."
 }

@@ -41,7 +41,7 @@ export function renderSankey(spec: Record<string, unknown>): string | null {
   }
   const nodeValue = ids.map((_, index) => Math.max(incoming[index], outgoing[index], 1));
 
-  const top = frame.title ? 40 : 20;
+  const top = (frame.title ? 40 : 20) + (links.some((link) => link.back) ? 36 : 0);
   const bottom = frame.height - 16;
   const nodeW = 12;
   const gutter = 108;
