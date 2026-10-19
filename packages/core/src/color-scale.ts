@@ -11,9 +11,14 @@ export interface ColorScale {
   midpoint: number;
   binned: boolean;
   paint(value: number): string;
-  /** Gradient or binned swatches. `x,y` is the top-left of the bar. */
+  /** Gradient or binned swatches. `x,y` is the top-left of the block (title, ramp, ticks). */
   legend(x: number, y: number, fill: string): string;
 }
+
+/** Title plus ramp plus tick line. Callers keep this much space under the plot. */
+export const colorLegendHeight = 46;
+
+const MIN_CONTRAST = 3;
 
 const KINDS = new Set<string>(["sequential", "diverging", "quantize", "threshold"]);
 const SCHEMES = new Set(["blue", "teal", "orange", "violet"]);
@@ -53,6 +58,50 @@ function mix(a: string, b: string, t: number): string {
   const u = Math.min(1, Math.max(0, t));
   const channel = (index: number) => Math.round((from[index] ?? 0) + ((to[index] ?? 0) - (from[index] ?? 0)) * u);
   return `#${[0, 1, 2].map((index) => channel(index).toString(16).padStart(2, "0")).join("")}`;
+}
+
+function luminance(color: string): number {
+  const rgb = hex(color);
+  if (!rgb) return 0;
+  const lin = (channel: number) => {
+    const s = channel / 255;
+    return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * lin(rgb[0] ?? 0) + 0.7152 * lin(rgb[1] ?? 0) + 0.0722 * lin(rgb[2] ?? 0);
+}
+
+function contrast(a: string, b: string): number {
+  const left = luminance(a);
+  const right = luminance(b);
+  const hi = Math.max(left, right);
+  const lo = Math.min(left, right);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/** The card the ramp sits on. Soft's plot is transparent, so the light card is the Soft sheet. */
+function cardOf(preset: PresetTokens): string {
+  if (dark(preset)) return hex(preset.background) ? preset.background : "#0c0c0c";
+  return hex(preset.background) ? preset.background : "#f5f5f7";
+}
+
+/**
+ * Move the low end up the ramp until it clears the card, then resample so the
+ * ramp stays in order. The high stop does not move. A custom range is left alone.
+ */
+function clampLow(stops: string[], card: string): string[] {
+  const low = stops[0];
+  if (!low || stops.length < 2 || contrast(low, card) >= MIN_CONTRAST) return stops;
+  let lo = 0;
+  let hi = 1;
+  let floor = 1;
+  for (let i = 0; i < 16; i++) {
+    const t = (lo + hi) / 2;
+    if (contrast(sample(stops, t), card) >= MIN_CONTRAST) {
+      floor = t;
+      hi = t;
+    } else lo = t;
+  }
+  return stops.map((_, index) => sample(stops, floor + (1 - floor) * (index / (stops.length - 1))));
 }
 
 function sample(stops: string[], t: number): string {
@@ -102,7 +151,16 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
   const midpoint = scale && typeof scale.midpoint === "number" ? scale.midpoint : (min + max) / 2;
   const scheme = scale && typeof scale.scheme === "string" ? scale.scheme : "blue";
   const custom = record && Array.isArray(record.range) ? record.range.filter((item): item is string => typeof item === "string" && item.length > 0) : [];
-  const stops = custom.length >= 2 ? custom : schemeStops(scheme, preset, kind === "diverging");
+  const schemeColors = schemeStops(scheme, preset, kind === "diverging");
+  const stops = custom.length >= 2 ? custom : clampLow(schemeColors, cardOf(preset));
+  const title =
+    record && typeof record.title === "string" && record.title
+      ? record.title
+      : typeof channel === "string"
+        ? channel
+        : record && typeof record.field === "string"
+          ? record.field
+          : "";
   const bins = scale && typeof scale.bins === "number" && scale.bins >= 2 ? Math.min(12, Math.round(scale.bins)) : 5;
   const edges = numbers(scale, "thresholds").sort((a, b) => a - b);
 
@@ -139,21 +197,34 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
     binned,
     paint,
     legend(x, y, fill) {
-      const label = (text: string, at: number, anchor: string) =>
-        `<text x="${n(at)}" y="${n(y + 22)}" text-anchor="${anchor}" fill="${fill}" font-size="10" font-family="${font()}">${esc(text)}</text>`;
+      const size = 11;
+      const barY = y + (title ? 16 : 0);
+      const barH = 8;
+      const swatch = 16;
+      const barW = binned ? Math.max(48, swatches.length * swatch - 4) : 148;
+      const labelY = barY + barH + 16;
+      const tick = (text: string, at: number, anchor: string) =>
+        `<text x="${n(at)}" y="${n(labelY)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-family="${font()}">${esc(text)}</text>`;
+      const heading = title
+        ? `<text x="${n(x)}" y="${n(y + 11)}" fill="${fill}" font-size="${size}" font-weight="650" font-family="${font()}" data-ck-scale-title="${esc(title)}">${esc(title)}</text>`
+        : "";
       const lo = formatTick(min);
       const hi = formatTick(max);
       if (binned) {
         const cells = swatches
-          .map((color, index) => `<rect x="${n(x + 28 + index * 14)}" y="${n(y)}" width="12" height="10" rx="1" fill="${color}" data-ck-scale="bin" />`)
+          .map((color, index) => `<rect x="${n(x + index * swatch)}" y="${n(barY)}" width="12" height="${barH}" rx="1" fill="${color}" data-ck-scale="bin" />`)
           .join("");
-        return `<g data-ck-scale="${kind}">${label(lo, x, "start")}${cells}${label(hi, x + 28 + swatches.length * 14 + 4, "start")}</g>`;
+        return `<g data-ck-scale="${kind}">${heading}${cells}${tick(lo, x, "start")}${tick(hi, x + barW, "end")}</g>`;
       }
       const gradient =
         `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">` +
         stops.map((color, index) => `<stop offset="${n((index / Math.max(1, stops.length - 1)) * 100)}%" stop-color="${color}" />`).join("") +
         `</linearGradient>`;
-      return `<g data-ck-scale="${kind}"><defs>${gradient}</defs>${label(lo, x, "start")}<rect x="${n(x + 28)}" y="${n(y)}" width="88" height="10" rx="2" fill="url(#${id})" data-ck-scale="gradient" />${label(hi, x + 122, "start")}</g>`;
+      const mid =
+        kind === "diverging"
+          ? `<line x1="${n(x + barW / 2)}" y1="${n(barY + barH)}" x2="${n(x + barW / 2)}" y2="${n(barY + barH + 5)}" stroke="${fill}" stroke-width="1" data-ck-scale="mid" />${tick(formatTick(midpoint), x + barW / 2, "middle")}`
+          : "";
+      return `<g data-ck-scale="${kind}"><defs>${gradient}</defs>${heading}<rect x="${n(x)}" y="${n(barY)}" width="${barW}" height="${barH}" rx="2" fill="url(#${id})" data-ck-scale="gradient" />${tick(lo, x, "start")}${mid}${tick(hi, x + barW, "end")}</g>`;
     },
   };
 }

@@ -4,7 +4,7 @@ import { isTypedArray, readData, type DataTable } from "../data";
 import { formatValue } from "../format";
 import { bag, glyphOf, marker, named, nudge, type Bag } from "../glyphs";
 import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
-import { readColorScale, scaleLabel, type ColorScale } from "../color-scale";
+import type { ColorScale } from "../color-scale";
 import { exportList, readColor } from "../frame";
 import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
 import { boxId, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
@@ -98,6 +98,20 @@ function renderTyped(
   const model = toModel(spec, adjust);
   if (!model) return null;
   return modelToSvg(model, draw);
+}
+
+type ColorScaleReader = (channel: unknown, preset: PresetTokens, values: ArrayLike<number>, fallback: boolean) => ColorScale | null;
+
+let colorScaleReader: ColorScaleReader | null = null;
+
+/**
+ * Bar and combo mount this. Line, area, and sparkline do not, so a plain line
+ * bundle pays for legend layout and not for sequential, diverging, quantize, or threshold.
+ * A line chart never paints a quantitative ramp, including from the full bundle, so the
+ * two entries stay in step.
+ */
+export function mountColorScale(reader: ColorScaleReader): void {
+  colorScaleReader = reader;
 }
 
 /** Area is type "line" plus mark.area, so it stays in this entry. */
@@ -465,7 +479,7 @@ function toModel(
     x = null;
     xTemporal = false;
   }
-  const colorScale = applyPointColors(table, encoding, mark, preset, series, labels);
+  const colorScale = applyPointColors(table, encoding, mark, preset, series, labels, type === "bar" || type === "combo");
   const swatches = colorScale ? undefined : categorySwatches(spec, series, labels);
 
   return {
@@ -568,7 +582,7 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   if (model.legend && model.legendBox) {
     parts.push(paintLegend(model.legendBox, legendItems(model), { plot, width: model.width, height: model.height, preset: model.preset }));
   }
-  if (model.colorScale) parts.push(model.colorScale.legend(plot.left, model.height - 22, scaleLabel(model.preset)));
+  if (model.colorScale) parts.push(model.colorScale.legend(plot.left, model.height - 46, cssVar("muted", model.preset.muted)));
 
   parts.push(`</svg>`);
   return parts.join("");
@@ -1488,7 +1502,7 @@ function axisTitles(model: PlotModel, plot: PlotBox, horizontal: boolean): strin
     else {
       const anchor = model.yAxis.titleAt === "start" ? "start" : model.yAxis.titleAt === "end" ? "end" : "middle";
       const x = titleAlong(model.yAxis.titleAt, midX, plot.left, plot.right);
-      out += axText(x, side === 2 ? Math.max(12, plot.top - 18) : model.height - 6, anchor, title, fill, family, angle, weight);
+      out += axText(x, side === 2 ? Math.max(12, plot.top - 18) : model.height - 6 - colorLegendFoot(model), anchor, title, fill, family, angle, weight);
     }
   }
   if (model.showY2 && model.y2Axis.title) {
@@ -1506,7 +1520,7 @@ function axisTitles(model: PlotModel, plot: PlotBox, horizontal: boolean): strin
       const anchor = model.xAxis.titleAt === "start" ? "start" : model.xAxis.titleAt === "end" ? "end" : "middle";
       const x = titleAlong(model.xAxis.titleAt, midX, plot.left, plot.right);
       const angle = titleSpin(model.xAxis, false, false);
-      out += axText(x, model.xAxis.end ? plot.top - 40 : model.height - 6, anchor, title, fill, family, angle, weight);
+      out += axText(x, model.xAxis.end ? plot.top - 40 : model.height - 6 - colorLegendFoot(model), anchor, title, fill, family, angle, weight);
     }
   }
   return out;
@@ -1712,7 +1726,7 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
     else if (pos === "left") left += space.side;
     else if (pos === "right") right += space.side;
   } else if (model.legend) top += 12 + legendRows(model, left, model.width - right) * 18;
-  if (model.colorScale) bottom += 28;
+  if (model.colorScale) bottom += 46;
   const inset = model.inset;
   return {
     top: typeof inset.t === "number" ? Math.max(top, inset.t) : top,
@@ -2221,6 +2235,10 @@ function seriesFieldName(encoding: Record<string, unknown>, table: DataTable): s
 }
 
 /** Per-point colour from a colour field, a domain map, a constant, or mark.colorRules. */
+function colorLegendFoot(model: PlotModel): number {
+  return model.colorScale ? 46 : 0;
+}
+
 function applyPointColors(
   table: DataTable,
   encoding: Record<string, unknown>,
@@ -2228,6 +2246,7 @@ function applyPointColors(
   preset: PresetTokens,
   series: Series[],
   labels: string[],
+  useScale: boolean,
 ): ColorScale | null {
   const rules = readRules(mark);
   const colorEnc = readColor(encoding.color);
@@ -2243,7 +2262,7 @@ function applyPointColors(
       if (typeof value === "number" && Number.isFinite(value)) numeric.push(value);
     }
   }
-  const scale = column && !paintCol && numeric.length ? readColorScale(encoding.color, preset, numeric, false) : null;
+  const scale = useScale && colorScaleReader && column && !paintCol && numeric.length ? colorScaleReader(encoding.color, preset, numeric, false) : null;
   if (scale && column) {
     let used = false;
     for (const item of series) {

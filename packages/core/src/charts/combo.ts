@@ -1,8 +1,10 @@
 import { mountAxes } from "../axis-extra";
+import { readColorScale } from "../color-scale";
 import type { ChartRenderer } from "../render";
-import { renderCombo } from "../renderers/cartesian";
+import { mountColorScale, renderCombo } from "../renderers/cartesian";
 
 mountAxes();
+mountColorScale(readColorScale);
 
 export const combo: ChartRenderer = {
   name: "combo",

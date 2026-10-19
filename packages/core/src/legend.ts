@@ -194,7 +194,7 @@ export function paintLegend(box: LegendBox, items: LegendItem[], frame: LegendFr
     parts.push(
       `<g data-ck-legend-pager>` +
         `<g data-ck-legend-page="prev" role="button" tabindex="0"><path d="M${n(x + 8)} ${n(py + 3)}l-5 5 5 5" fill="none" stroke="${muted}" stroke-width="1.4" /></g>` +
-        `<text data-ck-legend-count="1" x="${n(x + 16)}" y="${n(py + 11)}" fill="${muted}" font-size="10" font-family="${font()}">1/${pages}</text>` +
+        `<text data-ck-legend-count="1" x="${n(x + 16)}" y="${n(py + 11)}" fill="${muted}" font-size="11" font-family="${font()}">1/${pages}</text>` +
         `<g data-ck-legend-page="next" role="button" tabindex="0"><path d="M${n(x + 48)} ${n(py + 3)}l5 5-5 5" fill="none" stroke="${muted}" stroke-width="1.4" /></g>` +
         `</g>`,
     );

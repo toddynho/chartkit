@@ -1,4 +1,4 @@
-import { readColorScale, scaleLabel } from "../../color-scale";
+import { colorLegendHeight, readColorScale, scaleLabel } from "../../color-scale";
 import { asNumber, column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
 import { font, n } from "../../svg";
@@ -49,6 +49,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
   if (!leaves.length) return null;
   const top = frame.title ? 40 : 12;
   const legend = frame.legend !== false && (Boolean(ramp) || colors.size > 1);
+  const legendH = ramp && frame.legend !== false ? colorLegendHeight : legend ? 28 : 12;
   const grouped = [...groupLeaves(leaves)].map(([name, kids]) => ({
     label: name,
     value: kids.reduce((sum, leaf) => sum + leaf.value, 0),
@@ -56,7 +57,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
     fill: kids[0].fill,
     kids,
   }));
-  const outer = squarify(grouped, 10, top, frame.width - 20, frame.height - top - (legend ? 28 : 12));
+  const outer = squarify(grouped, 10, top, frame.width - 20, frame.height - top - legendH);
   for (const block of outer) {
     const inner = block.kids.length > 1
       ? squarify(block.kids, block.x + 3, block.y + 3, Math.max(1, block.w - 6), Math.max(1, block.h - 6))
@@ -80,7 +81,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
     });
   }
   if (ramp && frame.legend !== false) {
-    parts.push(ramp.legend(12, frame.height - 26, scaleLabel(frame.preset)));
+    parts.push(ramp.legend(12, frame.height - colorLegendHeight, scaleLabel(frame.preset)));
   } else if (frame.legend !== false && colors.size > 1) {
     let x = 12;
     const y = frame.height - 8;
