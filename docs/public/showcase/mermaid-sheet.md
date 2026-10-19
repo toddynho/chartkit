@@ -45,8 +45,8 @@ pie showData
   },
   "theme": "soft",
   "size": {
-    "width": 880,
-    "height": 440
+    "width": 520,
+    "height": 460
   }
 }
 ```

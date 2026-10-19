@@ -254,8 +254,8 @@ The legend is on the left.
     }
   },
   "size": {
-    "width": 420,
-    "height": 420
+    "width": 880,
+    "height": 360
   },
   "a11y": {
     "alt": "Steady writers score higher in every room. The gap is widest on Share."
@@ -266,6 +266,7 @@ The legend is on the left.
 ## Options used
 
 - [Accessible name / alt text](https://chartkit.dev/features/a11y.alt) (`a11y.alt`)
+- [Explicit tick values](https://chartkit.dev/features/axis.ticks.values) (`axis.ticks.values`)
 - [Axis title](https://chartkit.dev/features/axis.title) (`axis.title`)
 - [Legend position](https://chartkit.dev/features/legend.position) (`legend.position`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)

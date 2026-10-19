@@ -265,8 +265,8 @@ Value, a mark, and three bands.
     ]
   },
   "size": {
-    "width": 480,
-    "height": 320
+    "width": 880,
+    "height": 240
   },
   "a11y": {
     "alt": "Marrow and kale are past their marks. Beet is still short."
@@ -688,10 +688,6 @@ Threshold colours: quiet under 6, busy from 12.
   "mark": {
     "layout": "calendar",
     "weeks": 12
-  },
-  "size": {
-    "width": 720,
-    "height": 220
   },
   "a11y": {
     "alt": "Basket counts run for twelve weeks from early April, split at 6 and 12."

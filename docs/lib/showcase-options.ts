@@ -78,7 +78,8 @@ export function optionsIn(spec: unknown): OptionLink[] {
   const encoding = isRecord(spec.encoding) ? spec.encoding : {};
   if (type === "line") add(ids, "type.line");
   if (type === "bar") add(ids, mark.orientation === "horizontal" ? "type.bar.horizontal" : "type.bar.vertical");
-  if (type === "bar" && (encoding.series || encoding.color || Array.isArray(encoding.y))) add(ids, "type.bar.grouped");
+  if (type === "bar" && mark.stack === "stack") add(ids, "type.bar.stacked");
+  else if (type === "bar" && (encoding.series || Array.isArray(encoding.y))) add(ids, "type.bar.grouped");
   if (type === "stacked-area") add(ids, mark.stack === "percent" ? "type.area.percent" : "type.area.stacked");
   if (type === "combo") add(ids, "type.combo");
   if (type === "scatter") add(ids, "type.scatter");
@@ -96,6 +97,9 @@ export function optionsIn(spec: unknown): OptionLink[] {
   if (type === "treemap") add(ids, "type.treemap");
   if (type === "venn") add(ids, "type.venn");
   if (type === "radar") add(ids, "type.radar");
+  if (type === "boxplot") add(ids, "type.boxplot");
+  if (type === "candlestick") add(ids, "type.candlestick");
+  if (type === "mini-area") add(ids, "type.area");
   if (type === "heatmap") add(ids, mark.layout === "calendar" ? "type.heatmap.calendar" : "type.heatmap");
   if (type === "gantt") add(ids, "type.gantt");
   if (type === "timeline") add(ids, "type.timeline");
@@ -104,13 +108,17 @@ export function optionsIn(spec: unknown): OptionLink[] {
   if (mark.glow === true) add(ids, "mark.glow");
   if (mark.sampling === "lttb" || mark.sampling === "minmax" || mark.sampling === "auto") add(ids, "data.decimation");
   if (Array.isArray(mark.palette)) add(ids, "theme.palette");
-  if (typeof mark.labelPosition === "string") {
-    add(ids, "label.position");
-    if (type === "pie" || type === "donut") add(ids, "label.pie");
-  }
+  if (Array.isArray(mark.colorRules)) add(ids, "mark.color.conditional");
+  if (typeof mark.pointShape === "string") add(ids, "mark.point.shape");
+  if (typeof mark.pointSize === "number") add(ids, "mark.point.size");
+  if (mark.points === "always" || mark.points === "hover" || mark.points === "none") add(ids, "mark.point.visibility");
+  if (mark.curve === "monotone") add(ids, "type.line.smooth");
+  if (mark.curve === "step" || mark.curve === "step-before" || mark.curve === "step-after") add(ids, "type.line.step");
+  if (mark.labels === true || typeof mark.labelEnds === "string" || typeof mark.labelPosition === "string") add(ids, "label.show");
+  if ((type === "pie" || type === "donut") && mark.labelPosition === "outside") add(ids, "label.pie");
+  else if (typeof mark.labelPosition === "string") add(ids, "label.position");
   if (typeof spec.theme === "string") add(ids, "theme.presets");
   if (typeof spec.locale === "string") add(ids, "format.locale");
-  if (mark.labels === true) add(ids, "label.show");
   if (mark.stack === "percent") add(ids, "type.area.percent");
   if (isRecord(spec.legend)) {
     if (spec.legend.values === true) add(ids, "legend.values");
@@ -148,6 +156,10 @@ export function optionsIn(spec: unknown): OptionLink[] {
       if (!isRecord(axis)) continue;
       if (typeof axis.title === "string") add(ids, "axis.title");
       if (typeof axis.rotate === "number") add(ids, "axis.ticks.rotate");
+      if (Array.isArray(axis.ticks)) add(ids, "axis.ticks.values");
+      if (typeof axis.position === "string") add(ids, "axis.position");
+      if (typeof axis.titlePosition === "string") add(ids, "axis.title.position");
+      if (typeof axis.labelWidth === "number" || typeof axis.labelLines === "number") add(ids, "axis.ticks.wrap");
       noteFormat(ids, axis.format);
       if (key === "y2") add(ids, "scale.multi");
     }
@@ -158,6 +170,8 @@ export function optionsIn(spec: unknown): OptionLink[] {
     for (const item of list) {
       if (!isRecord(item)) continue;
       if (item.axis === "y2") add(ids, "scale.multi");
+      if (typeof item.pointShape === "string") add(ids, "mark.point.shape");
+      if (typeof item.dash === "string") add(ids, "mark.stroke.dash");
       noteFormat(ids, item.format);
       walkScale(ids, item.scale);
     }
@@ -174,7 +188,13 @@ export function optionsIn(spec: unknown): OptionLink[] {
       if (typeof mark.dash === "string") add(ids, "annotation.style");
     }
   }
+  if (encoding.color && (type === "bar" || type === "scatter" || type === "pie" || type === "donut")) add(ids, "mark.color.point");
+  if (isRecord(encoding.size) || typeof encoding.size === "string") add(ids, "type.bubble");
+  if (encoding.volume) add(ids, "type.finance.volume");
   if (isRecord(spec.a11y) && typeof spec.a11y.alt === "string") add(ids, "a11y.alt");
+  if (isRecord(spec.a11y) && typeof spec.a11y.description === "string") add(ids, "a11y.description.long");
+  if (isRecord(spec.a11y) && spec.a11y.keyboard === true) add(ids, "a11y.keyboard");
+  if (isRecord(spec.a11y) && spec.a11y.dataTable === true) add(ids, "a11y.datatable");
   const labels = features().labels;
   return Array.from(ids).sort().map((id) => ({ id, label: labels.get(id) ?? id }));
 }

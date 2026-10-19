@@ -4,7 +4,7 @@ Jolts at Ashmere, a fictional peak. A short trace with zoom and export, then seq
 
 ## Forty-eight hours at Ashmere
 
-Two stations. The legend sits on the right, and export is on the chart. LTTB is set; a series this short is still drawn in full.
+Two stations, joined with straight segments. The legend sits on the right, and export is on the chart.
 
 ```json
 {
@@ -273,7 +273,8 @@ Two stations. The legend sits on the right, and export is on the chart. LTTB is 
   },
   "mark": {
     "sampling": "lttb",
-    "glow": true
+    "glow": true,
+    "curve": "linear"
   },
   "axes": {
     "x": {

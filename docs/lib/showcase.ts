@@ -6,6 +6,7 @@ import { validatePhase4 } from "@chartkitdev/core/validate/phase4";
 import { snippetsFor } from "./snippets.ts";
 import { benchSources, benchmarkCharts, timingLosses } from "./showcase-benchmarks.ts";
 import { bikeCharts, mermaidBoards, repairCases, roasteryCharts, stacks, tide, type ChartSlot, type ShowcaseSpec } from "./showcase-data.ts";
+import { nextBoardMeta } from "./showcase-next.ts";
 import { sheetMeta, thirdBoardMeta } from "./showcase-third.ts";
 import { optionById, optionsIn, type OptionLink } from "./showcase-options.ts";
 
@@ -121,11 +122,13 @@ function tideStacks(): StackSnippet[] {
   ];
 }
 
-function mermaidCards(source: typeof mermaidBoards = mermaidBoards): MermaidCard[] {
+type MermaidSource = (typeof mermaidBoards)[number] & { width?: number };
+
+function mermaidCards(source: MermaidSource[] = mermaidBoards): MermaidCard[] {
   return source.map((board) => {
     const converted = fromMermaid(board.source);
     if (!converted.spec) throw new Error(`${board.id} mermaid produced no spec`);
-    const spec = { ...converted.spec, theme: "soft", size: { width: 880, height: board.height ?? 440 } } as unknown as ShowcaseSpec;
+    const spec = { ...converted.spec, theme: "soft", size: { width: board.width ?? 880, height: board.height ?? 440 } } as unknown as ShowcaseSpec;
     const checked = validatePhase4(spec);
     if (!checked.ok) {
       throw new Error(`${board.id} ${checked.errors.map((error) => `${error.code} ${error.message}`).join("; ")}`);
@@ -237,9 +240,8 @@ export function boards(): Board[] {
       losses: timingLosses(),
       sources: benchSources(),
     }),
-    ...thirdBoardMeta
-      .filter((item) => item.slug !== "garden")
-      .map((item) =>
+    ...[
+      ...nextBoardMeta.map((item) =>
         board({
           slug: item.slug,
           number: item.number,
@@ -248,26 +250,38 @@ export function boards(): Board[] {
           charts: item.charts.map(ready),
         }),
       ),
-    board({
-      slug: sheetMeta.slug,
-      number: sheetMeta.number,
-      title: sheetMeta.title,
-      lede: sheetMeta.lede,
-      charts: [],
-      mermaid: mermaidCards(sheetMeta.sources),
-      extraOptions: ["type.xychart.text"],
-    }),
-    ...thirdBoardMeta
-      .filter((item) => item.slug === "garden")
-      .map((item) =>
-        board({
-          slug: item.slug,
-          number: item.number,
-          title: item.title,
-          lede: item.lede,
-          charts: item.charts.map(ready),
-        }),
-      ),
+      ...thirdBoardMeta
+        .filter((item) => item.slug !== "garden")
+        .map((item) =>
+          board({
+            slug: item.slug,
+            number: item.number,
+            title: item.title,
+            lede: item.lede,
+            charts: item.charts.map(ready),
+          }),
+        ),
+      board({
+        slug: sheetMeta.slug,
+        number: sheetMeta.number,
+        title: sheetMeta.title,
+        lede: sheetMeta.lede,
+        charts: [],
+        mermaid: mermaidCards(sheetMeta.sources),
+        extraOptions: ["type.xychart.text"],
+      }),
+      ...thirdBoardMeta
+        .filter((item) => item.slug === "garden")
+        .map((item) =>
+          board({
+            slug: item.slug,
+            number: item.number,
+            title: item.title,
+            lede: item.lede,
+            charts: item.charts.map(ready),
+          }),
+        ),
+    ].sort((a, b) => a.number - b.number),
   ];
 }
 

@@ -5,7 +5,7 @@ import { pageMeta } from "@/lib/site";
 
 export const metadata = pageMeta(
   "Showcase",
-  "Twelve ChartKit boards: the first six, plus a volcano watch, a launch manifest, a discovery map, a nursery theme studio, a Mermaid sheet, and a field report.",
+  "Eighteen ChartKit boards, from one spec on every stack through export, paged legends, colour scales, and pound and euro formats.",
   "/showcase",
 );
 
@@ -15,8 +15,9 @@ export default function ShowcasePage() {
     <div className="wrap section showcase">
       <h1>Showcase</h1>
       <p className="lede">
-        Twelve boards. The newer six use export, legends (including a paged one), sequential, diverging, and threshold
-        colour, and pound and euro formats. Specs are checked before the page builds. The sample data is fictional.
+        Eighteen boards. Markers, leader lines, conditional colour, a returning sankey, and waterfall clicks sit with
+        export, paged legends, colour scales, and pound and euro formats. Specs are checked before the page builds. The
+        sample data is fictional.
       </p>
       <div className="gallery-index">
         {boards.map((board) => {

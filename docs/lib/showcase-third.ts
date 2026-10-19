@@ -18,7 +18,7 @@ export const volcanoCharts: ChartSlot[] = [
   {
     id: "trace",
     title: "Forty-eight hours at Ashmere",
-    caption: "Two stations. The legend sits on the right, and export is on the chart. LTTB is set; a series this short is still drawn in full.",
+    caption: "Two stations, joined with straight segments. The legend sits on the right, and export is on the chart.",
     span: "board-12",
     spec: {
       version: "1",
@@ -33,7 +33,7 @@ export const volcanoCharts: ChartSlot[] = [
           { field: "cinder", title: "Cinder" },
         ],
       },
-      mark: { sampling: "lttb", glow: true },
+      mark: { sampling: "lttb", glow: true, curve: "linear" },
       axes: { x: { title: "Hour" }, y: { title: "Jolts" } },
       legend: { position: "right", orient: "vertical", interactive: true },
       tooltip: { mode: "index", position: "top", crosshair: true },
@@ -227,7 +227,7 @@ export const launchCharts: ChartSlot[] = [
   {
     id: "readiness",
     title: "Readiness",
-    caption: "Seventy-two of one hundred. The mark is eighty.",
+    caption: "The needle and the figure both read 72. The dot on the arc is the target at 80.",
     span: "board-6",
     spec: {
       version: "1",
@@ -246,8 +246,8 @@ export const launchCharts: ChartSlot[] = [
           { from: 50, to: 100, color: "positive", label: "Go" },
         ],
       },
-      size: { width: 480, height: 320 },
-      a11y: { alt: "Readiness is 72 out of 100, short of the mark at 80." },
+      size: { width: 420, height: 250 },
+      a11y: { alt: "The needle reads 72. A dot on the arc marks the target at 80." },
     },
   },
   {
@@ -261,7 +261,7 @@ export const launchCharts: ChartSlot[] = [
       type: "progress-ring",
       theme: "soft",
       metric: { label: "Checks", value: 7, min: 0, max: 10, format: { style: "number", decimals: 0 } },
-      size: { width: 420, height: 320 },
+      size: { width: 240, height: 240 },
       a11y: { alt: "Seven of ten pre-flight checks are closed." },
     },
   },
@@ -345,7 +345,7 @@ export const discoveryCharts: ChartSlot[] = [
     id: "rooms",
     title: "Scores by room",
     caption: "The legend is on the left.",
-    span: "board-4",
+    span: "board-12",
     spec: {
       version: "1",
       id: "quill-rooms",
@@ -365,49 +365,49 @@ export const discoveryCharts: ChartSlot[] = [
       },
       legend: { position: "left", orient: "vertical" },
       axes: { x: { title: "Room" }, y: { title: "Score", ticks: [0, 2, 4, 6] } },
-      size: { width: 420, height: 420 },
+      size: { width: 880, height: 360 },
       a11y: { alt: "Steady writers score higher in every room. The gap is widest on Share." },
     },
   },
 ];
 
 const beds = ["Fern", "Ivy", "Moss", "Sage", "Rue", "Yarrow", "Nettle", "Cress"];
-const bedWeeks = ["W1", "W2", "W3", "W4", "W5", "W6"];
 
 export const nurseryCharts: ChartSlot[] = [
   {
     id: "beds",
-    title: "Eight beds, one row at a time",
-    caption: "The legend pages. Export sits above the chart.",
+    title: "Eight beds, two at a time",
+    caption: "The legend shows two beds, then the next page. Export sits above the chart.",
     span: "board-12",
     spec: {
       version: "1",
       id: "low-fern-beds",
       type: "line",
       theme: "soft",
-      data: bedWeeks.map((week, weekIndex) => {
-        const row: Record<string, string | number> = { week };
-        beds.forEach((bed, bedIndex) => {
-          row[bed.toLowerCase()] = 4 + ((weekIndex * 3 + bedIndex * 2) % 9);
-        });
-        return row;
-      }),
+      data: [
+        { week: "W1", fern: 6, ivy: 8, moss: 4, sage: 10, rue: 3, yarrow: 7, nettle: 5, cress: 9 },
+        { week: "W2", fern: 9, ivy: 11, moss: 6, sage: 12, rue: 5, yarrow: 10, nettle: 7, cress: 14 },
+        { week: "W3", fern: 14, ivy: 13, moss: 9, sage: 11, rue: 8, yarrow: 16, nettle: 8, cress: 18 },
+        { week: "W4", fern: 18, ivy: 13, moss: 15, sage: 14, rue: 12, yarrow: 19, nettle: 11, cress: 20 },
+        { week: "W5", fern: 22, ivy: 16, moss: 17, sage: 18, rue: 16, yarrow: 19, nettle: 15, cress: 21 },
+        { week: "W6", fern: 24, ivy: 19, moss: 18, sage: 21, rue: 20, yarrow: 23, nettle: 17, cress: 22 },
+      ],
       encoding: {
         x: "week",
         y: beds.map((bed) => ({ field: bed.toLowerCase(), title: bed })),
       },
-      legend: { position: "right", orient: "vertical", maxRows: 1, title: "Beds", interactive: true },
+      legend: { position: "right", orient: "vertical", maxRows: 2, title: "Beds", interactive: true },
       tooltip: { mode: "index", position: "top" },
       interaction: { select: "series", export: ["png", "svg", "csv"] },
       axes: { x: { title: "Week" }, y: { title: "Trays" } },
       size: { width: 980, height: 420 },
-      a11y: { alt: "Eight beds of trays over six weeks. The legend shows one bed at a time." },
+      a11y: { alt: "Eight beds of trays over six weeks. Most climb, sage dips in week 3, and ivy pauses before it climbs again." },
     },
   },
   {
     id: "inside",
     title: "Cuttings this week",
-    caption: "The legend sits inside the plot, at the top right.",
+    caption: "The legend sits in the clear space above the bars.",
     span: "board-6",
     spec: {
       version: "1",
@@ -422,7 +422,7 @@ export const nurseryCharts: ChartSlot[] = [
       encoding: {
         x: "week",
         y: [
-          { field: "fern", title: "Fern" },
+          { field: "fern", title: "Fern", scale: { domain: [0, 24] } },
           { field: "ivy", title: "Ivy" },
         ],
       },
@@ -571,7 +571,7 @@ export const gardenCharts: ChartSlot[] = [
     id: "crops",
     title: "Takings by crop",
     caption: "Labels use the same pound format as the axis.",
-    span: "board-8",
+    span: "board-12",
     spec: {
       version: "1",
       id: "marrow-crops",
@@ -605,7 +605,7 @@ export const gardenCharts: ChartSlot[] = [
     id: "targets",
     title: "Against the bed marks",
     caption: "Value, a mark, and three bands.",
-    span: "board-4",
+    span: "board-12",
     spec: {
       version: "1",
       id: "marrow-targets",
@@ -618,7 +618,7 @@ export const gardenCharts: ChartSlot[] = [
       ],
       encoding: { x: "crop", y: "kilos", target: "mark" },
       mark: { ranges: ["thin", "fair", "full"] },
-      size: { width: 480, height: 320 },
+      size: { width: 880, height: 240 },
       a11y: { alt: "Marrow and kale are past their marks. Beet is still short." },
     },
   },
@@ -660,13 +660,12 @@ export const gardenCharts: ChartSlot[] = [
         color: { field: "baskets", title: "Baskets", scale: { type: "threshold", thresholds: [6, 12] } },
       },
       mark: { layout: "calendar", weeks: 12 },
-      size: { width: 720, height: 220 },
       a11y: { alt: "Basket counts run for twelve weeks from early April, split at 6 and 12." },
     },
   },
 ];
 
-export const sheetSources: { id: string; title: string; caption: string; span: "board-12"; source: string; height?: number }[] = [
+export const sheetSources: { id: string; title: string; caption: string; span: "board-12"; source: string; width?: number; height?: number }[] = [
   {
     id: "pie",
     title: "Kiln hours",
@@ -677,6 +676,8 @@ export const sheetSources: { id: string; title: string; caption: string; span: "
     "Bisque" : 18
     "Glaze" : 27
     "Cool" : 11`,
+    width: 520,
+    height: 460,
   },
   {
     id: "xychart",

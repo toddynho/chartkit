@@ -2,9 +2,9 @@
 
 Low Fern, a fictional yard. The switcher restyles the board. One legend pages, one sits inside the plot, and the donut keeps its own palette.
 
-## Eight beds, one row at a time
+## Eight beds, two at a time
 
-The legend pages. Export sits above the chart.
+The legend shows two beds, then the next page. Export sits above the chart.
 
 ```json
 {
@@ -15,69 +15,69 @@ The legend pages. Export sits above the chart.
   "data": [
     {
       "week": "W1",
-      "fern": 4,
-      "ivy": 6,
-      "moss": 8,
+      "fern": 6,
+      "ivy": 8,
+      "moss": 4,
       "sage": 10,
-      "rue": 12,
-      "yarrow": 5,
-      "nettle": 7,
+      "rue": 3,
+      "yarrow": 7,
+      "nettle": 5,
       "cress": 9
     },
     {
       "week": "W2",
-      "fern": 7,
-      "ivy": 9,
-      "moss": 11,
-      "sage": 4,
-      "rue": 6,
-      "yarrow": 8,
-      "nettle": 10,
-      "cress": 12
+      "fern": 9,
+      "ivy": 11,
+      "moss": 6,
+      "sage": 12,
+      "rue": 5,
+      "yarrow": 10,
+      "nettle": 7,
+      "cress": 14
     },
     {
       "week": "W3",
-      "fern": 10,
-      "ivy": 12,
-      "moss": 5,
-      "sage": 7,
-      "rue": 9,
-      "yarrow": 11,
-      "nettle": 4,
-      "cress": 6
+      "fern": 14,
+      "ivy": 13,
+      "moss": 9,
+      "sage": 11,
+      "rue": 8,
+      "yarrow": 16,
+      "nettle": 8,
+      "cress": 18
     },
     {
       "week": "W4",
-      "fern": 4,
-      "ivy": 6,
-      "moss": 8,
-      "sage": 10,
+      "fern": 18,
+      "ivy": 13,
+      "moss": 15,
+      "sage": 14,
       "rue": 12,
-      "yarrow": 5,
-      "nettle": 7,
-      "cress": 9
+      "yarrow": 19,
+      "nettle": 11,
+      "cress": 20
     },
     {
       "week": "W5",
-      "fern": 7,
-      "ivy": 9,
-      "moss": 11,
-      "sage": 4,
-      "rue": 6,
-      "yarrow": 8,
-      "nettle": 10,
-      "cress": 12
+      "fern": 22,
+      "ivy": 16,
+      "moss": 17,
+      "sage": 18,
+      "rue": 16,
+      "yarrow": 19,
+      "nettle": 15,
+      "cress": 21
     },
     {
       "week": "W6",
-      "fern": 10,
-      "ivy": 12,
-      "moss": 5,
-      "sage": 7,
-      "rue": 9,
-      "yarrow": 11,
-      "nettle": 4,
-      "cress": 6
+      "fern": 24,
+      "ivy": 19,
+      "moss": 18,
+      "sage": 21,
+      "rue": 20,
+      "yarrow": 23,
+      "nettle": 17,
+      "cress": 22
     }
   ],
   "encoding": {
@@ -120,7 +120,7 @@ The legend pages. Export sits above the chart.
   "legend": {
     "position": "right",
     "orient": "vertical",
-    "maxRows": 1,
+    "maxRows": 2,
     "title": "Beds",
     "interactive": true
   },
@@ -149,14 +149,14 @@ The legend pages. Export sits above the chart.
     "height": 420
   },
   "a11y": {
-    "alt": "Eight beds of trays over six weeks. The legend shows one bed at a time."
+    "alt": "Eight beds of trays over six weeks. Most climb, sage dips in week 3, and ivy pauses before it climbs again."
   }
 }
 ```
 
 ## Cuttings this week
 
-The legend sits inside the plot, at the top right.
+The legend sits in the clear space above the bars.
 
 ```json
 {
@@ -186,7 +186,13 @@ The legend sits inside the plot, at the top right.
     "y": [
       {
         "field": "fern",
-        "title": "Fern"
+        "title": "Fern",
+        "scale": {
+          "domain": [
+            0,
+            24
+          ]
+        }
       },
       {
         "field": "ivy",
@@ -396,6 +402,7 @@ Litres against a mark of 80.
 - [Paginated / scrolling legend](https://chartkit.dev/features/legend.scroll) (`legend.scroll`)
 - [Legend item styling](https://chartkit.dev/features/legend.style) (`legend.style`)
 - [Values in legend](https://chartkit.dev/features/legend.values) (`legend.values`)
+- [Per-point / per-category colour](https://chartkit.dev/features/mark.color.point) (`mark.color.point`)
 - [Custom colour palette](https://chartkit.dev/features/theme.palette) (`theme.palette`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)
 - [Tooltip positioning / follow cursor](https://chartkit.dev/features/tooltip.position) (`tooltip.position`)

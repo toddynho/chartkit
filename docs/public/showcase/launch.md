@@ -230,7 +230,7 @@ The booked window, in euros.
 
 ## Readiness
 
-Seventy-two of one hundred. The mark is eighty.
+The needle and the figure both read 72. The dot on the arc is the target at 80.
 
 ```json
 {
@@ -264,11 +264,11 @@ Seventy-two of one hundred. The mark is eighty.
     ]
   },
   "size": {
-    "width": 480,
-    "height": 320
+    "width": 420,
+    "height": 250
   },
   "a11y": {
-    "alt": "Readiness is 72 out of 100, short of the mark at 80."
+    "alt": "The needle reads 72. A dot on the arc marks the target at 80."
   }
 }
 ```
@@ -294,8 +294,8 @@ Seven of ten cards on the wall.
     }
   },
   "size": {
-    "width": 420,
-    "height": 320
+    "width": 240,
+    "height": 240
   },
   "a11y": {
     "alt": "Seven of ten pre-flight checks are closed."
