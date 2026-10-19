@@ -214,7 +214,7 @@ Axis lines, ticks, labels, titles and grids
 | **Grid line style (dash, colour, width)** <br><sub>`axis.grid.style` ★</sub> | ● | ● | ● | ● | ● | ● | ◐ | ● | ● | ● | · | ● | ● | ● | ● | ● | ● | ● | ● | · | ● |
 | **Alternating bands / plot bands** <br><sub>`axis.bands`</sub> | ◐ | ⊕ | ● | ● | ● | ● | ✎ | ✎ | ✎ | ● | · | ● | ✎ | ● | ● | · | ● | · | ● | · | ● |
 | **Axis breaks** <br><sub>`axis.breaks`</sub> | · | · | · | ● | ● | ● | · | · | · | · | · | ? | · | · | ? | · | · | ● | · | ? | ● |
-| **Axis pointer label** <br><sub>`axis.crosshair.label`</sub> | · | ⊕ | · | ● | ● | ● | · | ● | · | ● | · | ● | · | ● | ● | · | ● | ● | ● | · | ● |
+| **Axis pointer label** <br><sub>`axis.crosshair.label`</sub> | ● | ⊕ | · | ● | ● | ● | · | ● | · | ● | · | ● | · | ● | ● | · | ● | ● | ● | · | ● |
 | **Axis offset / origin crossing** <br><sub>`axis.offset`</sub> | · | ● | ● | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ● | ◐ | ? | ? | ? | ● | ? | ● |
 
 ## Legends (`legend`)
