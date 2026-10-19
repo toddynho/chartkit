@@ -42,6 +42,17 @@ describe("vanilla mount", () => {
     expect(el.innerHTML).toBe("");
   });
 
+  it("calls onSeriesClick with the clicked row", () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    const onSeriesClick = vi.fn();
+    const chart = mount(host, lineSpec, { onSeriesClick });
+    host.querySelector("path")?.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: 80, clientY: 40 }));
+    expect(onSeriesClick).toHaveBeenCalledTimes(1);
+    expect(onSeriesClick.mock.calls[0][0]).toMatchObject({ series: "units", row: { quarter: "Q1" } });
+    chart.destroy();
+  });
+
   it("mounts into an element, updates, and unmounts", () => {
     const host = document.createElement("div");
     document.body.append(host);

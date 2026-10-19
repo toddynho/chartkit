@@ -1,4 +1,5 @@
 import type { ChartSpec } from "@chartkitdev/core";
+import type { ClickDetail, Selection } from "@chartkitdev/core/interact";
 
 export interface ChartProps {
   /** A v1 chart spec. The same object renders in every ChartKit adapter. */
@@ -7,6 +8,13 @@ export interface ChartProps {
   render?: (spec: ChartSpec) => string;
   class?: string;
   style?: string;
+  /** Controlled selection. Omit it and the chart keeps its own. */
+  selection?: Selection | null;
+  /** Svelte 5 callbacks. Svelte 4 listens with `on:pointclick`, `on:seriesclick`, `on:legendclick`, and `on:selectionchange`. */
+  onpointclick?: (detail: ClickDetail) => void;
+  onseriesclick?: (detail: ClickDetail) => void;
+  onlegendclick?: (detail: ClickDetail) => void;
+  onselectionchange?: (detail: Selection) => void;
 }
 
 /**

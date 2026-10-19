@@ -6,6 +6,8 @@ Vertical (and horizontal) guide line following the cursor
 
 Matrix status: `native`. Verification: `dts-path` (strong).
 
+tooltip.crosshair draws the guide. tooltip.crosshairLabel prints the x value on it.
+
 Source: chartkit:packages/core/src/generated/schema.ts:200
 
 ## ChartKit spec
@@ -68,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~crosshairs | dts-grep (weak) | @antv/g2/lib/runtime/types/mark.d.ts:30 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against main 116d0af.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 167b01d2f0df.
 
 https://chartkit.dev/features.json

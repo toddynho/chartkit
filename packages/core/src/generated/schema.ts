@@ -1148,7 +1148,7 @@ export interface Interaction {
    */
   hover?: boolean;
   /**
-   * Click selection emitted as 'pointclick' / 'seriesclick' events.
+   * Click selection. 'point' or 'series'. Shift, Ctrl, or Meta adds another. Escape or a background click clears. Selected marks use --ck-selected; others use --ck-dim. Emits pointclick or seriesclick, and selectionchange.
    */
   select?: "none" | "point" | "series";
   /**

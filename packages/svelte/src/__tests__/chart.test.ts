@@ -6,6 +6,16 @@ import { comboSpec, coreSvg, heatmapSpec, lineSpec } from "./specs";
 afterEach(() => cleanup());
 
 describe("Svelte Chart", () => {
+  it("dispatches seriesclick when a line is clicked", () => {
+    const details: { series?: string }[] = [];
+    const { container } = render(Chart, {
+      spec: lineSpec,
+      onseriesclick: (detail: { series?: string }) => details.push(detail),
+    });
+    container.querySelector("path")?.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: 80, clientY: 40 }));
+    expect(details[0]?.series).toBe("units");
+  });
+
   it("mounts the core SVG", () => {
     const { container } = render(Chart, { spec: lineSpec });
     const svg = container.querySelector("svg");

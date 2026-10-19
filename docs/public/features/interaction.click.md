@@ -1,14 +1,16 @@
 # Click events on marks
 
-ChartKit: **none**
+ChartKit: **native**
 
 Callback with the clicked datum
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-no pointclick/seriesclick event yet; interaction.select warns CK3012 since PR #16
+Host events pointclick, seriesclick, and legendclick carry series, datum, index, x, y, value, and row. Enter or Space on a focused point emits pointclick. These are events, not spec keys.
 
-No spec snippet. ChartKit does not support this feature.
+Source: packages/core/src/interact.ts
+
+No spec snippet. This row is not a single option that `validate()` can show.
 
 ## Other libraries
 
@@ -35,6 +37,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | native | ~click | dts-grep (weak) | mermaid/dist/themes/theme-redux.d.ts:86 Mermaid click directives on flowcharts (not charts) |
 | AntV G2 | native | ~on | dts-grep (weak) | @antv/g2/lib/index.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against main 116d0af.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 167b01d2f0df.
 
 https://chartkit.dev/features.json

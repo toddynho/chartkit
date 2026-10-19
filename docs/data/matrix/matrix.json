@@ -48,8 +48,8 @@
     {
       "id": "chartkit",
       "name": "ChartKit",
-      "package": "@chartkitdev/core (repo main 116d0af, PR #17 merged)",
-      "version": "0.5.0 (main 116d0af)",
+      "package": "@chartkitdev/core (repo main, events and selection rechecked)",
+      "version": "0.5.0 (main, events and selection)",
       "dateChecked": "2026-10-19",
       "docs": "https://chartkit.dev",
       "escapeHatch": "none (no plugin/custom-mark API; only lifecycle hooks)",
@@ -52770,20 +52770,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:axisPointer)['\"`]|(?:^|[\\s{,;])\\w*(?:axisPointer)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:axisPointer)"
+            "ChartKitChartSpecV1.tooltip.crosshairLabel"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:axisPointer)['\"`]|(?:^|[\\s{,;])\\w*(?:axisPointer)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:axisPointer)"
+              "kind": "runtime-probe",
+              "path": "ChartKitChartSpecV1.tooltip.crosshairLabel",
+              "loc": "packages/core/src/interact.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "tooltip.crosshairLabel prints the hovered x value on the guide, at the axis edge.",
+          "verified": "runtime-probe",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "plugin",
@@ -56883,7 +56884,7 @@
               "loc": "chartkit:packages/core/src/generated/schema.ts:136"
             }
           ],
-          "note": "tooltip reuses the channel format; tooltip.fields warns CK3012 (not applied) since PR #16",
+          "note": "tooltip reuses the channel format, and a tooltip.fields item can set its own format preset",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -57267,15 +57268,19 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
-          "apiPaths": [],
+          "apiPaths": [
+            "ChartKitChartSpecV1.tooltip.fields"
+          ],
           "evidence": [
             {
-              "kind": "runtime-probe"
+              "kind": "runtime-probe",
+              "path": "ChartKitChartSpecV1.tooltip.fields",
+              "loc": "packages/core/src/interact.ts"
             }
           ],
-          "note": "accepted but not applied; validate() warns CK3012 since PR #16",
+          "note": "A string is a field name. An object sets title and format. The interaction runtime draws those rows in that order.",
           "verified": "runtime-probe",
           "strength": "strong"
         },
@@ -58011,14 +58016,20 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:position)['\"`]|(?:^|[\\s{,;])\\w*(?:position)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:position)"
+            "ChartKitChartSpecV1.tooltip.position=top"
           ],
-          "evidence": [],
-          "note": "probe hit reviewed: match is CSS position:fixed",
-          "verified": "source-review",
+          "evidence": [
+            {
+              "kind": "runtime-probe",
+              "path": "ChartKitChartSpecV1.tooltip.position",
+              "loc": "packages/core/src/interact.ts"
+            }
+          ],
+          "note": "auto, top, bottom, left, or right. The interaction runtime places the tooltip.",
+          "verified": "runtime-probe",
           "strength": "strong"
         },
         "chartjs": {
@@ -58722,7 +58733,8 @@
           "status": "native",
           "tier": null,
           "apiPaths": [
-            "ChartKitChartSpecV1.tooltip.crosshair"
+            "ChartKitChartSpecV1.tooltip.crosshair",
+            "ChartKitChartSpecV1.tooltip.crosshairLabel"
           ],
           "evidence": [
             {
@@ -58731,7 +58743,7 @@
               "loc": "chartkit:packages/core/src/generated/schema.ts:200"
             }
           ],
-          "note": "",
+          "note": "tooltip.crosshair draws the guide. tooltip.crosshairLabel prints the x value on it.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -64917,20 +64929,23 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:onClick)['\"`]|(?:^|[\\s{,;])\\w*(?:onClick)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:onClick)"
+            "pointclick",
+            "seriesclick",
+            "legendclick"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:onClick)['\"`]|(?:^|[\\s{,;])\\w*(?:onClick)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:onClick)"
+              "kind": "runtime-probe",
+              "path": "pointclick",
+              "loc": "packages/core/src/interact.ts"
             }
           ],
-          "note": "no pointclick/seriesclick event yet; interaction.select warns CK3012 since PR #16",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "Host events pointclick, seriesclick, and legendclick carry series, datum, index, x, y, value, and row. Enter or Space on a focused point emits pointclick. These are events, not spec keys.",
+          "verified": "runtime-probe",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "native",
@@ -65301,15 +65316,19 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
-          "apiPaths": [],
+          "apiPaths": [
+            "ChartKitChartSpecV1.interaction.select=point"
+          ],
           "evidence": [
             {
-              "kind": "runtime-probe"
+              "kind": "runtime-probe",
+              "path": "ChartKitChartSpecV1.interaction.select",
+              "loc": "packages/core/src/interact.ts"
             }
           ],
-          "note": "accepted but not applied; validate() warns CK3012 since PR #16",
+          "note": "point or series. Shift, Ctrl, or Meta adds. Escape or a background click clears. --ck-dim fades the rest and --ck-selected strokes the chosen mark.",
           "verified": "runtime-probe",
           "strength": "strong"
         },
@@ -68517,20 +68536,19 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
-          "apiPaths": [
-            "~['\"`](?:legendHover)['\"`]|(?:^|[\\s{,;])\\w*(?:legendHover)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:legendHover)"
-          ],
+          "apiPaths": [],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:legendHover)['\"`]|(?:^|[\\s{,;])\\w*(?:legendHover)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:legendHover)"
+              "kind": "runtime-probe",
+              "path": "legend hover",
+              "loc": "packages/core/src/interact.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "Hovering a legend item dims the other series with --ck-dim. It is on whenever a legend is drawn.",
+          "verified": "runtime-probe",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "native",
@@ -95674,29 +95692,29 @@
   ],
   "coverage": {
     "cells": 5523,
-    "strong": 1874,
+    "strong": 1877,
     "weak": 1731,
-    "absence": 1474,
+    "absence": 1471,
     "unknown": 444,
     "byStatus": {
-      "native": 2688,
+      "native": 2694,
       "unknown": 444,
       "manual": 425,
-      "none": 1532,
+      "none": 1526,
       "partial": 296,
       "plugin": 138
     },
     "perLibrary": {
       "chartkit": {
-        "strong": 159,
+        "strong": 162,
         "weak": 32,
-        "absence": 69,
+        "absence": 66,
         "unknown": 6,
-        "native": 141,
+        "native": 147,
         "partial": 25,
         "plugin": 0,
         "manual": 0,
-        "none": 94
+        "none": 88
       },
       "chartjs": {
         "strong": 44,

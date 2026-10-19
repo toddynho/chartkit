@@ -6,7 +6,7 @@ Format numbers/dates in tooltips
 
 Matrix status: `partial`. Verification: `dts-path` (strong).
 
-tooltip reuses the channel format; tooltip.fields warns CK3012 (not applied) since PR #16
+tooltip reuses the channel format, and a tooltip.fields item can set its own format preset
 
 Source: chartkit:packages/core/src/generated/schema.ts:136
 
@@ -70,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~items\|valueFormatter | dts-grep (weak) | @antv/g2/lib/runtime/transform.d.ts:10 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against main 116d0af.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 167b01d2f0df.
 
 https://chartkit.dev/features.json

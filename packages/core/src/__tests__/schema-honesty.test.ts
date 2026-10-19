@@ -485,11 +485,12 @@ describe("schema honesty", () => {
     expect(title.left < label.right && label.left < title.right && title.top < label.bottom && label.top < title.bottom).toBe(false);
   });
 
-  it("warns for easing, select, and font family", () => {
+  it("warns for easing and font family, and accepts selection", () => {
     const easing = validate({ ...line, animation: { easing: "linear" } });
     expect(easing.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/animation/easing")).toBe(true);
     const select = validate({ ...line, interaction: { select: "point" } });
-    expect(select.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/interaction/select")).toBe(true);
+    expect(select.ok).toBe(true);
+    expect(select.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/interaction/select")).toBe(false);
     const fields = validate({ ...line, tooltip: { fields: [{ field: "revenue", title: "Sales", format: "currency" }], position: "top", crosshairLabel: true } });
     expect(fields.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/tooltip/fields")).toBe(false);
     expect(fields.ok).toBe(true);
@@ -568,6 +569,67 @@ describe("schema honesty", () => {
     expect(labeled.label.length).toBeGreaterThan(0);
     expect(quiet.label).toBe("");
     expect(labeled.label).not.toBe(quiet.label);
+  });
+
+  it("changes the picture when a point or series is selected, and when the legend is hovered", () => {
+    const spec = {
+      version: "1",
+      type: "line",
+      data: rows,
+      encoding: { x: "month", y: ["revenue", "cost"] },
+      a11y: { alt },
+      size: { width: 420, height: 240 },
+    };
+    const open = (select?: "point" | "series") => {
+      const host = document.createElement("div");
+      document.body.append(host);
+      const next = select ? { ...spec, interaction: { select } } : spec;
+      host.innerHTML = render(next);
+      const ctl = attach(host, next, { render });
+      const svg = host.querySelector("svg")!;
+      const plot = svg.querySelector("clipPath rect")!;
+      const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.5;
+      return { host, ctl, svg, x };
+    };
+    const idle = open();
+    idle.svg.querySelector("path")!.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: idle.x, clientY: 40 }));
+    expect(idle.svg.querySelector("[data-ck-dim],.ck-pick,[data-ck-pick]")).toBeNull();
+    idle.ctl.destroy();
+    idle.host.remove();
+
+    const point = open("point");
+    let clicked: { series: string; index: number; row: { month?: string }; value: unknown } | null = null;
+    point.host.addEventListener("pointclick", ((event: CustomEvent) => {
+      clicked = event.detail;
+    }) as EventListener);
+    point.svg.querySelector("path")!.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: point.x, clientY: 40 }));
+    expect(clicked?.series).toBeTruthy();
+    expect(clicked?.row.month).toBeTruthy();
+    expect(clicked?.value).not.toBeUndefined();
+    expect(point.svg.querySelector("[data-ck-dim]")).toBeTruthy();
+    expect(point.svg.querySelector(".ck-pick,[data-ck-pick]")).toBeTruthy();
+    const dimmed = point.svg.querySelectorAll("[data-ck-dim]").length;
+    point.svg.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    expect(point.svg.querySelector("[data-ck-dim]")).toBeNull();
+    expect(dimmed).toBeGreaterThan(0);
+    point.ctl.destroy();
+    point.host.remove();
+
+    const series = open("series");
+    let seriesName = "";
+    series.host.addEventListener("seriesclick", ((event: CustomEvent) => {
+      seriesName = event.detail.series;
+    }) as EventListener);
+    series.svg.querySelector("path")!.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: series.x, clientY: 40 }));
+    expect(seriesName).toBeTruthy();
+    expect(series.svg.querySelector("[data-ck-dim]")).toBeTruthy();
+    const legend = [...series.svg.querySelectorAll("text")].find((node) => node.textContent && node.textContent !== seriesName);
+    legend?.dispatchEvent(new PointerEvent("pointerover", { bubbles: true }));
+    const hovered = series.svg.querySelector("[data-ck-dim]");
+    expect(hovered).toBeTruthy();
+    expect(legend?.hasAttribute("data-ck-dim")).toBe(false);
+    series.ctl.destroy();
+    series.host.remove();
   });
 
   it("walks every schema property on the full renderer and on each chart entry", async () => {

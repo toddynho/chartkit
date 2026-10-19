@@ -6,6 +6,14 @@ import { renderToString } from "../ssr";
 import { comboSpec, coreSvg, heatmapSpec, histogramSpec, lineSpec, specs, svgOf } from "./specs";
 
 describe("Vue Chart", () => {
+  it("emits seriesclick when a line is clicked", async () => {
+    const wrapper = mount(Chart, { props: { spec: lineSpec }, attachTo: document.body });
+    wrapper.find("path").element.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: 80, clientY: 40 }));
+    const emitted = wrapper.emitted("seriesclick");
+    expect(emitted?.[0]?.[0]).toMatchObject({ series: "units", row: { quarter: expect.any(String) } });
+    wrapper.unmount();
+  });
+
   it("mounts the core SVG", () => {
     const wrapper = mount(Chart, { props: { spec: lineSpec } });
     const svg = wrapper.find("svg");
