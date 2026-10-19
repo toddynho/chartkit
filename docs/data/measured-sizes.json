@@ -1,6 +1,6 @@
 {
-  "commit": "0749a0e1cb93a5114685158cf297e6a0281487c8",
-  "coreCommit": "0749a0e1cb93a5114685158cf297e6a0281487c8",
+  "commit": "699f05dc7c7068a0eaac9fe087e80289fb5b8731",
+  "coreCommit": "699f05dc7c7068a0eaac9fe087e80289fb5b8731",
   "coreMatchesMain": false,
   "sizeScript": {
     "command": "node scripts/size.mjs",
