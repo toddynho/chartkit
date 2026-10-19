@@ -20,5 +20,5 @@ jobs:
       - run: npx playwright install --with-deps chromium
         working-directory: bench
       - run: npm test
-      - run: npm run size
       - run: npm run build:lib
+      - run: npm run size
