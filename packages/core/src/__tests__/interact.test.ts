@@ -621,7 +621,7 @@ describe("attach", () => {
 
   it("moves keyboard focus and toggles the data table", async () => {
     const spec = lineSpec({
-      tooltip: true,
+      tooltip: { crosshairLabel: true },
       a11y: { alt, keyboard: true, dataTable: true },
     });
     const host = hostOf(spec);
@@ -633,6 +633,7 @@ describe("attach", () => {
     const live = host.querySelector("[data-ck-live]");
     expect(live?.textContent).toContain("Feb");
     expect(live?.textContent).toContain("revenue");
+    expect(svg.querySelector("[data-ck-xlabel]")?.textContent).toBe("Feb");
     const table = host.querySelector("[data-ck-table]") as HTMLElement;
     expect(table.classList.contains("ck-clip")).toBe(true);
     expect(table.textContent).toContain("110");
