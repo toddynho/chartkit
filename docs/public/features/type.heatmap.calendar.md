@@ -6,7 +6,7 @@ Days laid out as a calendar grid
 
 Matrix status: `native`. Verification: `dts-path` (strong).
 
-A fixed size grows the day cells to fill the box. Unsized calendars stay at 12px.
+A fixed width lays the weeks across that width. Unsized calendars stay at 12px. The legend sits under the first week.
 
 Source: chartkit:packages/core/src/generated/schema.ts:2165
 
@@ -79,6 +79,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | manual | ~register | dts-mechanism (weak) | @antv/g2/lib/exports.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against bb58c45afae3.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 7eff21f18449.
 
 https://chartkit.dev/features.json
