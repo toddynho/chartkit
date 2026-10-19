@@ -356,10 +356,9 @@ function flag(diagnostics: Diagnostic[], path: string, why: string): void {
   });
 }
 
-/** kind: 0 defined, 1 point|series, 3 light|dark, 4 string, 5 number. */
-const UNBUILT: ReadonlyArray<readonly [string, 0 | 1 | 3 | 4 | 5, string]> = [
+/** kind: 0 defined, 3 light|dark, 4 string, 5 number. */
+const UNBUILT: ReadonlyArray<readonly [string, 0 | 3 | 4 | 5, string]> = [
   ["animation/easing", 0, "ignored; duration only"],
-  ["interaction/select", 1, "ignored; no selection"],
   ["theme/mode", 3, "ignored; preset stays"],
   ["theme/tokens/fontFamily", 4, "ignored; built-in font"],
   ["theme/tokens/fontSize", 5, "ignored; built-in size"],
@@ -384,13 +383,11 @@ function warnUnbuilt(spec: Record<string, unknown>, diagnostics: Diagnostic[]): 
     const hit =
       kind === 0
         ? value !== undefined
-        : kind === 1
-          ? value === "point" || value === "series"
-          : kind === 3
-            ? value === "light" || value === "dark"
-            : kind === 4
-              ? typeof value === "string"
-              : typeof value === "number";
+        : kind === 3
+          ? value === "light" || value === "dark"
+          : kind === 4
+            ? typeof value === "string"
+            : typeof value === "number";
     if (hit) flag(diagnostics, "/" + path, why);
   }
 }

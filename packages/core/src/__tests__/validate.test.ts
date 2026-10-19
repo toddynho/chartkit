@@ -256,6 +256,23 @@ describe("diagnostic codes", () => {
     expect(ok.warnings.some((warning) => warning.path === "/tooltip/fields")).toBe(false);
   });
 
+  it("repairs select true and removes click keys", () => {
+    const selected = validate({ ...base, interaction: { select: true } });
+    expect(selected.errors.find((item) => item.path === "/interaction/select")?.hint).toContain("point");
+    expect(selected.errors.find((item) => item.path === "/interaction/select")?.fix).toEqual([
+      { op: "replace", path: "/interaction/select", value: "point" },
+    ]);
+    expect(repair({ ...base, interaction: { select: true } }).spec).toMatchObject({ interaction: { select: "point" } });
+    const clicked = validate({ ...base, onClick: "handler", interaction: { click: true } });
+    expect(clicked.errors.find((item) => item.path === "/onClick")?.hint).toContain("pointclick");
+    expect(clicked.errors.find((item) => item.path === "/onClick")?.fix).toEqual([{ op: "remove", path: "/onClick" }]);
+    expect(clicked.errors.find((item) => item.path === "/interaction/click")?.fix).toEqual([{ op: "remove", path: "/interaction/click" }]);
+    const fixed = repair({ ...base, onClick: "handler", interaction: { click: true, select: "series" } });
+    expect(fixed.ok).toBe(true);
+    expect(fixed.spec).not.toHaveProperty("onClick");
+    expect(fixed.spec.interaction).toEqual({ select: "series" });
+  });
+
   it("does not warn CK3011 for tooltip, zoom, legend toggle, animation, or a11y", () => {
     const result = validate({
       ...base,

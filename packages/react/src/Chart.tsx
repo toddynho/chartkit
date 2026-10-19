@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChartRenderer, ChartSpec } from "@chartkitdev/core";
 import { adopt, isExtra, render as renderAll } from "@chartkitdev/core/all";
-import { attach, type Controller } from "@chartkitdev/core/interact";
+import { attach, listen, type ClickDetail, type Controller, type Selection } from "@chartkitdev/core/interact";
 
 export interface ChartProps {
   /** A v1 chart spec. The same object renders in every ChartKit adapter. */
@@ -12,6 +12,16 @@ export interface ChartProps {
   style?: React.CSSProperties;
   /** Defaults to the core charts. Pass `createRenderer([...])` to ship a subset. */
   render?: (spec: ChartSpec) => string;
+  /**
+   * Next.js app router uses this client component. The same props apply.
+   * `pointclick` is a mark or Enter/Space on the focused point. `seriesclick` is the series.
+   * `legendclick` is a legend item. `selection` is controlled; omit it to let the chart own the state.
+   */
+  onPointClick?: (detail: ClickDetail) => void;
+  onSeriesClick?: (detail: ClickDetail) => void;
+  onLegendClick?: (detail: ClickDetail) => void;
+  selection?: Selection | null;
+  onSelectionChange?: (selection: Selection) => void;
 }
 
 async function ensure(type: string): Promise<void> {
@@ -27,7 +37,7 @@ async function ensure(type: string): Promise<void> {
  * Histogram through waterfall load `@chartkitdev/core/charts/<type>` after that.
  * `renderToString` from `./ssr` imports them statically.
  */
-export function Chart({ spec, className, style, render }: ChartProps) {
+export function Chart({ spec, className, style, render, onPointClick, onSeriesClick, onLegendClick, selection, onSelectionChange }: ChartProps) {
   const extra = render == null && isExtra(spec.type);
   const coreMarkup = useMemo(() => (extra ? "" : (render ?? renderAll)(spec)), [spec, render, extra]);
   const [extraSvg, setExtraSvg] = useState("");
@@ -38,6 +48,10 @@ export function Chart({ spec, className, style, render }: ChartProps) {
   const ctl = useRef<Controller | null>(null);
   const renderRef = useRef(render ?? renderAll);
   renderRef.current = render ?? renderAll;
+  const handlers = useRef({ onPointClick, onSeriesClick, onLegendClick, onSelectionChange });
+  handlers.current = { onPointClick, onSeriesClick, onLegendClick, onSelectionChange };
+  const selectionRef = useRef(selection);
+  selectionRef.current = selection;
 
   useEffect(() => {
     if (!extra) return;
@@ -55,9 +69,30 @@ export function Chart({ spec, className, style, render }: ChartProps) {
   useEffect(() => {
     const el = host.current;
     if (!el || extra) return;
-    if (!ctl.current) ctl.current = attach(el, spec, { render: (next) => renderRef.current(next as ChartSpec) });
+    if (!ctl.current) {
+      ctl.current = attach(el, spec, {
+        render: (next) => renderRef.current(next as ChartSpec),
+        selection: selectionRef.current,
+      });
+    }
     ctl.current.update(spec, markup);
+    if (selectionRef.current !== undefined) ctl.current.setSelection(selectionRef.current);
   }, [spec, markup, extra]);
+
+  useEffect(() => {
+    const el = host.current;
+    if (!el) return;
+    return listen(el, {
+      pointclick: (detail) => handlers.current.onPointClick?.(detail),
+      seriesclick: (detail) => handlers.current.onSeriesClick?.(detail),
+      legendclick: (detail) => handlers.current.onLegendClick?.(detail),
+      selectionchange: (next) => handlers.current.onSelectionChange?.(next),
+    });
+  }, []);
+
+  useEffect(() => {
+    if (selection !== undefined) ctl.current?.setSelection(selection);
+  }, [selection]);
 
   useEffect(() => {
     if (!extra) {

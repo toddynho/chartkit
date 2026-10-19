@@ -21,14 +21,38 @@ export interface InteractSpec {
   [key: string]: unknown;
 }
 
+export interface ClickDetail {
+  series: string;
+  datum: unknown;
+  index: number;
+  x: unknown;
+  y: unknown;
+  value: unknown;
+  row: unknown;
+}
+
+export interface PointRef {
+  series: string;
+  index: number;
+}
+
+export interface Selection {
+  points: PointRef[];
+  series: string[];
+}
+
 export interface AttachOptions {
   /** Same renderer the adapter used to draw the SVG. Called again for zoom and legend rescale. */
   render: (spec: InteractSpec) => string;
+  /** When set, including null, selection is controlled. Clicks emit `selectionchange` and wait for `setSelection`. */
+  selection?: Selection | null;
 }
 
 export interface Controller {
   /** `markup` is the adapter's render of the full spec. Zoom and hidden series render internally. */
   update(spec: InteractSpec, markup?: string): void;
+  /** Show this selection without emitting. Later clicks stay controlled. */
+  setSelection(selection: Selection | null): void;
   destroy(): void;
   /** Resolves once zoom, brush, keyboard, and the data table are listening. Tooltip does not wait. */
   ready: Promise<void>;
@@ -266,7 +290,7 @@ function ensureCss(): void {
   const style = document.createElement("style");
   style.id = "ck-interact-style";
   style.textContent =
-    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-xlabel{font:11px ui-sans-serif,system-ui,sans-serif;fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}";
+    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-xlabel{font:11px ui-sans-serif,system-ui,sans-serif;fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-pick{stroke:var(--ck-selected,light-dark(#1d1d1f,#f5f5f7));stroke-width:2}[data-ck-dim]{opacity:var(--ck-dim,.32)}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}";
   document.head.append(style);
 }
 
@@ -462,15 +486,22 @@ function materialize(data: unknown): unknown[] | null {
   return rows;
 }
 
+function copySelection(value: Selection | null | undefined): Selection {
+  return {
+    points: value?.points ? value.points.map((point) => ({ series: point.series, index: point.index })) : [],
+    series: value?.series ? value.series.slice() : [],
+  };
+}
+
 /**
- * Listen on `host` for tooltip, crosshair, legend toggle, x zoom/pan/brush,
- * enter/update motion, keyboard focus, and an optional data table.
+ * Listen on `host` for tooltip, crosshair, legend toggle, clicks, selection,
+ * x zoom/pan/brush, enter/update motion, keyboard focus, and an optional data table.
  * Tears down with `destroy`. Does nothing when the spec leaves interaction off.
  */
 export function attach(host: Element, spec: InteractSpec, options: AttachOptions): Controller {
   const found = host.querySelector?.("svg");
   if (!(found instanceof SVGSVGElement) || typeof document === "undefined") {
-    return { update() {}, destroy() {}, ready: Promise.resolve() };
+    return { update() {}, setSelection() {}, destroy() {}, ready: Promise.resolve() };
   }
   const svg: SVGSVGElement = found;
   ensureCss();
@@ -511,12 +542,17 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   const pan = zooming && !(isRecord(spec.interaction) && spec.interaction.pan === false);
   const brush = isRecord(spec.interaction) && spec.interaction.brush === "x";
   const mode = isRecord(spec.tooltip) && spec.tooltip.mode === "nearest" ? "nearest" : "index";
+  const selMode = () => {
+    const value = isRecord(base.interaction) ? base.interaction.select : 0;
+    return value === "point" || value === "series" ? value : 0;
+  };
+  let picked = copySelection(options.selection);
+  let locked = options.selection !== undefined;
+  let lit = "";
 
   if (showTip) host.append(tip);
-  if (keys) {
-    svg.setAttribute("tabindex", "0");
-    host.append(live);
-  }
+  if (keys || selMode()) svg.setAttribute("tabindex", "0");
+  if (keys) host.append(live);
   const offs: (() => void)[] = [];
   const on = (target: EventTarget, type: string, fn: EventListener, opts?: AddEventListenerOptions) => {
     target.addEventListener(type, fn, opts);
@@ -925,9 +961,205 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const ms = durationMs(base, n);
     const next = partial ? options.render(project()) : markup ?? options.render(base);
     patchSvg(host as PatchHost, next, ms);
-    if (keys) svg.setAttribute("tabindex", "0");
+    if (keys || selMode()) svg.setAttribute("tabindex", "0");
     dim();
+    paintPick();
     arm();
+  }
+
+  function choose(next: Selection): void {
+    if (!locked) picked = next;
+    paintPick();
+    emit("selectionchange", next);
+  }
+
+  function addKey(event: MouseEvent | KeyboardEvent): boolean {
+    return event.shiftKey || event.metaKey || event.ctrlKey;
+  }
+
+  function togglePoint(name: string, index: number, add: boolean): void {
+    const has = picked.points.some((point) => point.series === name && point.index === index);
+    const points = add
+      ? has
+        ? picked.points.filter((point) => point.series !== name || point.index !== index)
+        : picked.points.concat({ series: name, index })
+      : has && picked.points.length === 1
+        ? []
+        : [{ series: name, index }];
+    choose({ points, series: [] });
+  }
+
+  function toggleSeries(name: string, add: boolean): void {
+    const has = picked.series.includes(name);
+    const names = add ? (has ? picked.series.filter((item) => item !== name) : picked.series.concat(name)) : has && picked.series.length === 1 ? [] : [name];
+    choose({ points: [], series: names });
+  }
+
+  function rowAt(index: number): unknown {
+    const data = base.data;
+    if (Array.isArray(data) || ArrayBuffer.isView(data)) return (data as ArrayLike<unknown>)[index];
+    if (!isRecord(data) || !isRecord(data.columns) || index < 0) return null;
+    const columns = data.columns as Record<string, ArrayLike<unknown>>;
+    const row: Record<string, unknown> = {};
+    for (const key of Object.keys(columns)) row[key] = columns[key][index];
+    return row;
+  }
+
+  function payload(name: string, index: number): ClickDetail {
+    const item = series.find((entry) => entry.name === name);
+    const field = item?.field ?? "";
+    const x = index < 0 ? null : xField() ? table.cell(xField(), index) : index;
+    let y: unknown = null;
+    if (item && index >= 0) {
+      if (!item.match) y = table.cell(field, index);
+      else {
+        for (let i = 0; i < n; i++) {
+          if (String(table.cell(item.match, i)) !== name) continue;
+          y = table.cell(field, i);
+          if (!xField() || table.cell(xField(), i) === x) break;
+        }
+      }
+    }
+    return { series: name, datum: y, index, x, y, value: y, row: index < 0 ? null : rowAt(index) };
+  }
+
+  function legendTarget(target: Element | null): { name: string; index: number } | null {
+    const text =
+      target?.closest?.("text") ||
+      (target?.localName === "rect" && target.getAttribute("width") === "10" ? target.nextElementSibling : null);
+    if (!text) return null;
+    const item = legendItems(svg).find((entry) => entry.text === text);
+    if (!item) return null;
+    const index = series.findIndex((entry) => entry.name === item.name);
+    return index < 0 ? null : { name: item.name, index };
+  }
+
+  function owner(node: Element): string {
+    const ys = node.getAttribute("data-ck-ys");
+    if (ys) {
+      const index = +ys.slice(ys.lastIndexOf(",") + 1);
+      if (series[index]) return series[index].name;
+    }
+    const stroke = node.getAttribute("stroke");
+    const paint = stroke && stroke !== "none" ? stroke : node.getAttribute("fill");
+    if (!paint || paint === "none") return "";
+    for (const [name, fill] of colors) if (fill === paint) return name;
+    const id = /--ck-(?:line|series)-(\d+)/.exec(paint);
+    if (!id) return "";
+    const want = "--ck-series-" + id[1];
+    for (const [name, fill] of colors) if (fill.includes(want)) return name;
+    return series[+id[1] - 1]?.name ?? "";
+  }
+
+  function indexAt(clientX: number, clientY: number): number {
+    arm(1);
+    const point = viewPoint(svg, clientX, clientY);
+    const horizontal = isRecord(base.mark) && base.mark.orientation === "horizontal";
+    return Math.min(n - 1, Math.max(0, lo + lookupIndex(hover, horizontal ? point.y : point.x)));
+  }
+
+  function hitOf(event: MouseEvent): { kind: "point" | "series"; name: string; index: number } | null {
+    const node = (event.target as Element | null)?.closest?.("path,circle,rect");
+    if (!node || node.closest("defs,clipPath")) return null;
+    if (node.hasAttribute("data-ck-dot") || node.hasAttribute("data-ck-pick")) return null;
+    if (node.localName === "rect" && (node.getAttribute("width") === "10" || node.getAttribute("width") === "100%")) return null;
+    let kind: "point" | "series" = node.localName === "path" ? "series" : "point";
+    let name = "";
+    let index = 0;
+    if (node.localName === "path" && node.hasAttribute("aria-label") && base.type === "donut") {
+      const label = node.getAttribute("aria-label") || "";
+      const cut = label.indexOf(": ");
+      name = (cut >= 0 ? label.slice(0, cut) : label).trim();
+      index = Math.max(0, series.findIndex((entry) => entry.name === name));
+    } else {
+      name = owner(node);
+      const raw = node.getAttribute("data-ck-i");
+      index = raw && !raw.includes(" ") ? +raw : indexAt(event.clientX, event.clientY);
+    }
+    if (!name) return null;
+    const picking = selMode();
+    if (picking === "point") kind = "point";
+    else if (picking === "series") kind = "series";
+    return { kind, name, index };
+  }
+
+  function paintPick(): void {
+    arm(1);
+    refreshColors();
+    const picking = selMode();
+    const hot = lit ? [lit] : picking === "series" ? picked.series : picking === "point" ? picked.points.map((point) => point.series) : [];
+    const on = hot.length > 0;
+    const nodes = svg.querySelectorAll("path,circle,rect");
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      if (node.closest("defs,clipPath") || node.hasAttribute("data-ck-dot") || node.hasAttribute("data-ck-pick") || node.hasAttribute("data-ck-crosshair")) continue;
+      if (node.localName === "rect" && (node.getAttribute("width") === "10" || node.getAttribute("width") === "100%")) continue;
+      const name = owner(node);
+      const raw = node.getAttribute("data-ck-i");
+      const one = raw && !raw.includes(" ") ? +raw : -1;
+      const dimmed =
+        !name || !on
+          ? false
+          : lit
+            ? name !== lit
+            : picking === "series"
+              ? !picked.series.includes(name)
+              : picking === "point"
+                ? one >= 0
+                  ? !picked.points.some((point) => point.series === name && point.index === one)
+                  : !hot.includes(name)
+                : false;
+      if (dimmed) node.setAttribute("data-ck-dim", "");
+      else node.removeAttribute("data-ck-dim");
+    }
+    const items = legendItems(svg);
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (hidden.has(item.name)) continue;
+      const dimmed = on && !hot.includes(item.name);
+      if (dimmed) {
+        item.text.setAttribute("data-ck-dim", "");
+        item.swatch?.setAttribute("data-ck-dim", "");
+      } else {
+        item.text.removeAttribute("data-ck-dim");
+        item.swatch?.removeAttribute("data-ck-dim");
+      }
+    }
+    svg.querySelectorAll("[data-ck-pick]").forEach((node) => node.remove());
+    svg.querySelectorAll(".ck-pick").forEach((node) => node.classList.remove("ck-pick"));
+    if (picking !== "point") return;
+    for (let i = 0; i < picked.points.length; i++) {
+      const point = picked.points[i];
+      const x = hover.pixels[point.index - lo] ?? box.l;
+      let bar: Element | null = null;
+      let best = 48;
+      const rects = svg.querySelectorAll("rect");
+      for (let r = 0; r < rects.length; r++) {
+        const rect = rects[r];
+        if (owner(rect) !== point.series) continue;
+        const dist = Math.abs(+(rect.getAttribute("x") || 0) + +(rect.getAttribute("width") || 0) / 2 - x);
+        if (dist < best) {
+          best = dist;
+          bar = rect;
+        }
+      }
+      if (bar) {
+        bar.classList.add("ck-pick");
+        continue;
+      }
+      let y = box.t + box.h / 2;
+      const paths = svg.querySelectorAll("path");
+      for (let p = 0; p < paths.length; p++) {
+        if (owner(paths[p]) !== point.series) continue;
+        const d = paths[p].getAttribute("d");
+        const found = d ? yOnPath(d, x) : null;
+        if (found != null) {
+          y = found;
+          break;
+        }
+      }
+      svg.insertAdjacentHTML("beforeend", `<circle data-ck-pick class="ck-pick" cx="${Math.round(x)}" cy="${Math.round(y)}" r="5" fill="none" pointer-events="none"/>`);
+    }
   }
 
   function emit(name: string, detail: unknown): void {
@@ -1015,28 +1247,55 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   arm();
   paintTable();
   fade(svg, durationMs(spec, n), "0");
+  if (picked.points.length || picked.series.length) paintPick();
 
   if (showTip || showCross) {
     on(svg, "pointermove", hoverMove as EventListener);
     on(svg, "pointerleave", () => hideHover());
   }
-  if (legend) {
-    dim();
-    on(svg, "click", ((event: MouseEvent) => {
-      const target = event.target as Element | null;
-      const text =
-        target?.closest?.("text") ||
-        (target?.localName === "rect" && target.getAttribute("width") === "10" ? target.nextElementSibling : null);
-      if (!text) return;
-      const item = legendItems(svg).find((entry) => entry.text === text);
-      if (!item || !series.some((entry) => entry.name === item.name)) return;
-      if (hidden.has(item.name)) hidden.delete(item.name);
-      else hidden.add(item.name);
-      const index = series.findIndex((entry) => entry.name === item.name);
-      emit("legendtoggle", { index, hidden: hidden.has(item.name), name: item.name });
+  if (legend) dim();
+  on(svg, "click", ((event: MouseEvent) => {
+    const legendItem = legendTarget(event.target as Element | null);
+    if (legendItem) {
+      emit("legendclick", { series: legendItem.name, datum: null, index: legendItem.index, x: null, y: null, value: null, row: null });
+      if (!legend) return;
+      if (hidden.has(legendItem.name)) hidden.delete(legendItem.name);
+      else hidden.add(legendItem.name);
+      emit("legendtoggle", { index: legendItem.index, hidden: hidden.has(legendItem.name), name: legendItem.name });
       redraw();
-    }) as EventListener);
-  }
+      return;
+    }
+    const hit = hitOf(event);
+    if (!hit) {
+      if (selMode() && (picked.points.length || picked.series.length)) choose(copySelection(null));
+      return;
+    }
+    emit(hit.kind === "point" ? "pointclick" : "seriesclick", payload(hit.name, hit.index));
+    if (selMode() === "point" && hit.kind === "point") togglePoint(hit.name, hit.index, addKey(event));
+    else if (selMode() === "series") toggleSeries(hit.name, addKey(event));
+  }) as EventListener);
+  on(svg, "pointerover", ((event: PointerEvent) => {
+    const name = legendTarget(event.target as Element | null)?.name ?? "";
+    if (name === lit) return;
+    lit = name;
+    paintPick();
+  }) as EventListener);
+  on(svg, "keydown", ((event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      if (selMode() && (picked.points.length || picked.series.length)) {
+        event.preventDefault();
+        choose(copySelection(null));
+      }
+      return;
+    }
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const name = series.find((item) => !hidden.has(item.name))?.name || series[0]?.name || "";
+    if (!name) return;
+    event.preventDefault();
+    emit("pointclick", payload(name, focus));
+    if (selMode() === "point") togglePoint(name, focus, addKey(event));
+    else if (selMode() === "series") toggleSeries(name, addKey(event));
+  }) as EventListener);
 
   const wantsExtra = zooming || brush || keys || dataTable;
   const ready: Promise<void> = wantsExtra
@@ -1109,14 +1368,21 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       if (lo > hi) lo = 0;
       if (lo === 0 && hi === n - 1 && hidden.size === 0 && markup) {
         patchSvg(host as PatchHost, markup, durationMs(next, n));
-        if (keys) svg.setAttribute("tabindex", "0");
+        if (keys || selMode()) svg.setAttribute("tabindex", "0");
         dim();
+        paintPick();
         arm();
         paintTable();
         return;
       }
       redraw(markup);
       paintTable();
+    },
+    setSelection(selection) {
+      if (!alive) return;
+      locked = true;
+      picked = copySelection(selection);
+      paintPick();
     },
     destroy() {
       if (!alive) return;
@@ -1126,10 +1392,35 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       tip.remove();
       live.remove();
       host.querySelector("[data-ck-table-wrap]")?.remove();
-      svg.querySelectorAll("[data-ck-crosshair],[data-ck-brush],[data-ck-dot]").forEach((node) => node.remove());
+      svg.querySelectorAll("[data-ck-crosshair],[data-ck-brush],[data-ck-dot],[data-ck-pick]").forEach((node) => node.remove());
       svg.removeAttribute("tabindex");
       host.removeAttribute("data-ck-interact");
     },
     ready,
+  };
+}
+
+/** Forward host events to adapter callbacks. Returns the unlisten function. */
+export function listen(
+  host: EventTarget,
+  handlers: {
+    pointclick?: (detail: ClickDetail) => void;
+    seriesclick?: (detail: ClickDetail) => void;
+    legendclick?: (detail: ClickDetail) => void;
+    selectionchange?: (detail: Selection) => void;
+  },
+): () => void {
+  const names = ["pointclick", "seriesclick", "legendclick", "selectionchange"] as const;
+  const offs: (() => void)[] = [];
+  for (let i = 0; i < names.length; i++) {
+    const name = names[i];
+    const fn = handlers[name];
+    if (!fn) continue;
+    const listener = (event: Event) => fn((event as CustomEvent).detail);
+    host.addEventListener(name, listener);
+    offs.push(() => host.removeEventListener(name, listener));
+  }
+  return () => {
+    for (let i = 0; i < offs.length; i++) offs[i]();
   };
 }

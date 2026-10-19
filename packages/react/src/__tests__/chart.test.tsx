@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, waitFor } from "@testing-library/react";
 import { Chart } from "../Chart";
 
@@ -38,6 +38,18 @@ describe("Chart", () => {
     const { container } = render(<Chart spec={histogram} />);
     await waitFor(() => expect(container.querySelector("svg")?.getAttribute("data-ck-type")).toBe("histogram"));
     expect(container.querySelector("svg")?.getAttribute("aria-label")).toBe(histogram.a11y.alt);
+  });
+
+  it("sends a bar click through onPointClick", () => {
+    const onPointClick = vi.fn();
+    const { container } = render(<Chart spec={spec} onPointClick={onPointClick} />);
+    const bar = [...container.querySelectorAll("rect")].find((node) => {
+      const width = node.getAttribute("width");
+      return width !== "100%" && width !== "10" && !node.closest("defs");
+    });
+    bar?.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: Number(bar.getAttribute("x")) + 4, clientY: Number(bar.getAttribute("y")) + 4 }));
+    expect(onPointClick).toHaveBeenCalledTimes(1);
+    expect(onPointClick.mock.calls[0][0]).toMatchObject({ series: "value", index: expect.any(Number), row: { month: expect.any(String) } });
   });
 
   it("uses a custom renderer when one is passed", () => {

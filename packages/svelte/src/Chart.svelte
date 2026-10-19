@@ -1,7 +1,7 @@
 <script>
-  import { onMount } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import { open, render as renderAll } from "@chartkitdev/core/all";
-  import { attach, patchSvg } from "@chartkitdev/core/interact";
+  import { attach, listen, patchSvg } from "@chartkitdev/core/interact";
 
   /** @type {import("@chartkitdev/core").ChartSpec} */
   export let spec;
@@ -13,6 +13,17 @@
    */
   export let render = renderAll;
 
+  /** Controlled selection. Omit it and the chart keeps its own. */
+  export let selection = undefined;
+
+  /** Svelte 5 callback props. Svelte 4 still listens with `on:pointclick` and the other event names. */
+  export let onpointclick = undefined;
+  export let onseriesclick = undefined;
+  export let onlegendclick = undefined;
+  export let onselectionchange = undefined;
+
+  const dispatch = createEventDispatcher();
+
   /** @type {HTMLDivElement} */
   let host;
   let shown = "";
@@ -23,14 +34,36 @@
   $: markup = render(spec);
   $: if (!ready) shown = markup;
   $: if (ready && host && ctl) ctl.update(spec, markup);
+  $: if (ready && ctl && selection !== undefined) ctl.setSelection(selection);
   $: if (host && render === renderAll) open(host, spec);
 
   onMount(() => {
     if (render === renderAll && open(host, spec)) return;
     if (!host.querySelector("svg")) patchSvg(host, markup);
-    ctl = attach(host, spec, { render: (next) => render(/** @type {import("@chartkitdev/core").ChartSpec} */ (next)) });
+    ctl = attach(host, spec, { render: (next) => render(/** @type {import("@chartkitdev/core").ChartSpec} */ (next)), selection });
+    const stop = listen(host, {
+      pointclick: (detail) => {
+        onpointclick?.(detail);
+        dispatch("pointclick", detail);
+      },
+      seriesclick: (detail) => {
+        onseriesclick?.(detail);
+        dispatch("seriesclick", detail);
+      },
+      legendclick: (detail) => {
+        onlegendclick?.(detail);
+        dispatch("legendclick", detail);
+      },
+      selectionchange: (detail) => {
+        onselectionchange?.(detail);
+        dispatch("selectionchange", detail);
+      },
+    });
     ready = true;
-    return () => ctl?.destroy();
+    return () => {
+      stop();
+      ctl?.destroy();
+    };
   });
 </script>
 

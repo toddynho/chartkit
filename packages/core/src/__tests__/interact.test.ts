@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
 import { render } from "../all";
-import { attach, buildHoverIndex, lookupIndex, patchSvg, type InteractSpec } from "../interact";
+import { attach, buildHoverIndex, lookupIndex, patchSvg, type ClickDetail, type InteractSpec, type Selection } from "../interact";
 
 const alt = "Sample series used to exercise client interaction.";
 
@@ -534,6 +534,73 @@ describe("attach", () => {
     attach(host, spec, { render });
     host.querySelector("svg")!.dispatchEvent(new PointerEvent("pointermove", { clientX: 200, clientY: 80, bubbles: true }));
     expect(host.querySelector("[data-ck-tip]")).toBeNull();
+  });
+
+  it("emits point and series clicks, selects with a modifier, and clears", () => {
+    const spec = lineSpec({ interaction: { select: "point" }, a11y: { alt, keyboard: true } });
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const clicks: ClickDetail[] = [];
+    const changes: Selection[] = [];
+    host.addEventListener("pointclick", ((event: CustomEvent) => clicks.push(event.detail)) as EventListener);
+    host.addEventListener("selectionchange", ((event: CustomEvent) => changes.push(event.detail)) as EventListener);
+    const svg = host.querySelector("svg")!;
+    const plot = svg.querySelector("clipPath rect")!;
+    const left = Number(plot.getAttribute("x"));
+    const width = Number(plot.getAttribute("width"));
+    const at = (fraction: number) => left + width * fraction;
+    svg.querySelector("path")!.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: at(0.1), clientY: 40 }));
+    expect(clicks[0]).toMatchObject({ series: expect.any(String), index: 0 });
+    expect(clicks[0].row).toMatchObject({ month: "Jan" });
+    expect(clicks[0].value).toBe(clicks[0].y);
+    expect(svg.querySelector("[data-ck-pick],.ck-pick")).toBeTruthy();
+    expect(svg.querySelector("[data-ck-dim]")).toBeTruthy();
+    svg.querySelectorAll("path")[1]!.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: at(0.9), clientY: 40, shiftKey: true }));
+    expect(changes.at(-1)?.points.length).toBe(2);
+    svg.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: 2, clientY: 2 }));
+    expect(changes.at(-1)?.points).toEqual([]);
+    expect(svg.querySelector("[data-ck-dim]")).toBeNull();
+    svg.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(clicks.at(-1)?.index).toBe(0);
+    expect(svg.querySelector("[data-ck-pick],.ck-pick")).toBeTruthy();
+    svg.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    svg.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    expect(svg.querySelector("[data-ck-pick],[data-ck-dim]")).toBeNull();
+
+    const seriesSpec = lineSpec({ interaction: { select: "series" } });
+    const seriesHost = hostOf(seriesSpec);
+    attach(seriesHost, seriesSpec, { render });
+    const seriesClicks: ClickDetail[] = [];
+    seriesHost.addEventListener("seriesclick", ((event: CustomEvent) => seriesClicks.push(event.detail)) as EventListener);
+    const seriesSvg = seriesHost.querySelector("svg")!;
+    seriesSvg.querySelector("path")!.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: at(0.5), clientY: 30 }));
+    expect(seriesClicks[0].series).toBeTruthy();
+    expect(seriesClicks[0].row).toBeTruthy();
+    expect(seriesSvg.querySelector("[data-ck-dim]")).toBeTruthy();
+    const other = [...seriesSvg.querySelectorAll("text")].find((node) => node.textContent && node.textContent !== seriesClicks[0].series);
+    other?.dispatchEvent(new PointerEvent("pointerover", { bubbles: true }));
+    expect(other?.hasAttribute("data-ck-dim")).toBe(false);
+    expect(seriesSvg.querySelector("[data-ck-dim]")).toBeTruthy();
+    const legendClicks: ClickDetail[] = [];
+    seriesHost.addEventListener("legendclick", ((event: CustomEvent) => legendClicks.push(event.detail)) as EventListener);
+    other?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(legendClicks[0]).toMatchObject({ series: other?.textContent, datum: null, row: null });
+
+    const locked = hostOf(lineSpec({ interaction: { select: "point" } }));
+    const ctlLocked = attach(locked, lineSpec({ interaction: { select: "point" } }), {
+      render,
+      selection: { points: [{ series: "revenue", index: 1 }], series: [] },
+    });
+    expect(locked.querySelector("svg")?.querySelector("[data-ck-pick],.ck-pick")).toBeTruthy();
+    let proposed: Selection | null = null;
+    locked.addEventListener("selectionchange", ((event: CustomEvent) => {
+      proposed = event.detail;
+    }) as EventListener);
+    locked.querySelector("path")!.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: at(0.9), clientY: 40 }));
+    expect(proposed?.points[0]?.index).not.toBe(1);
+    expect(locked.querySelector("[data-ck-pick]")?.getAttribute("cx")).toBeTruthy();
+    ctlLocked.setSelection(proposed);
+    ctl.destroy();
   });
 
   it("toggles a legend series and rescales", () => {
