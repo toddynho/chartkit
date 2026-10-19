@@ -28,11 +28,11 @@ Earlier v1 work. 28 chart types draw: 15 in the first core, eight in Phase 3, an
 ## In progress
 
 - [ ] Showcase gallery, the first six boards ([#20](https://github.com/toddynho/chartkit/pull/20)): one spec on every stack, the roastery P&L, bike-share flows, a Mermaid game launch, the repair loop, and benchmarks drawn as charts
+- [ ] `@chartkitdev/mcp`: validate, repair, render, and feature lookup for agents ([#26](https://github.com/toddynho/chartkit/pull/26))
 
 ## Next
 
 - [ ] PNG and CSV export
-- [ ] `@chartkitdev/mcp`: validate, repair, render, and feature lookup for agents
 - [ ] Legends and colour scales
 - [ ] Annotations
 - [ ] Range area and error bars
