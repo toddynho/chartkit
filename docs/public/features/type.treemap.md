@@ -6,6 +6,8 @@ Nested rectangles sized by value
 
 Matrix status: `native`. Verification: `dts-path` (strong).
 
+Nested or flat. Siblings in a branch shift lightness and keep a gap. Label ink clears 4.5:1 against the fill. A formatted value sits under the name when the tile fits it.
+
 Source: chartkit:packages/core/src/generated/schema.ts:24
 
 ## ChartKit spec
@@ -68,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.treeView | dts-path (strong) | mermaid/dist/config.type.d.ts:237 treemap-beta diagram |
 | AntV G2 | native | MarkTypes=treemap | dts-path (strong) | @antv/g2/lib/spec/mark.d.ts:13 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 2e11cdd3e2dc.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 24651e4fe1b9.
 
 https://chartkit.dev/features.json
