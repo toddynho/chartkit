@@ -1,5 +1,5 @@
 import { annotationLayers, seriesPoints } from "../annotations";
-import { isPaintColumn, readRules, resolveColors, ruleCaption, ruleMatchesAny, withPalette, type ColorRule } from "../color";
+import { isPaintColumn, matchRule, readRules, resolveColors, ruleCaption, ruleMatchesAny, withPalette, type ColorRule } from "../color";
 import { loadTable } from "../data-prep";
 import { isTypedArray, type DataTable } from "../data";
 import { formatZoned, zoneOf, zonedTimeTicks } from "../timezone";
@@ -212,8 +212,8 @@ export interface PlotModel {
   gradient: boolean;
   /** Blurred understroke. The filter is omitted unless this is set. */
   glow: boolean;
-  /** Colour-rule tokens that matched a line point. Shown when the legend is. */
-  ruleLegend?: { name: string; color: string }[];
+  /** Colour-rule swatches. A bar rule uses the bar fill. Shown when the legend is. */
+  ruleLegend?: { name: string; color: string; symbol?: "circle" | "square" }[];
   points: "none" | "hover" | "always";
   /** off omits circles. hidden keeps them so --ck-line-dots can show them. shown uses inline. */
   dots: "off" | "hidden" | "shown";
@@ -520,7 +520,7 @@ function toModel(
     xTemporal = false;
   }
   const colorScale = applyPointColors(table, encoding, mark, preset, series, labels, type === "bar" || type === "combo");
-  const ruleLegend = colorScale ? [] : ruleSwatches(series, readRules(mark), preset);
+  const ruleLegend = colorScale ? [] : ruleSwatches(series, readRules(mark), preset, baseLabelOf(mark));
   const swatches = colorScale ? undefined : categorySwatches(spec, series, labels);
 
   return {
@@ -529,7 +529,7 @@ function toModel(
     x: type === "bar" || type === "combo" ? null : x,
     series,
     showY2: shell.showY2 && series.some((item) => item.axis === "y2"),
-    legend: shell.legendOn && (series.length > 1 || Boolean(swatches)),
+    legend: shell.legendOn && (series.length > 1 || Boolean(swatches) || ruleLegend.length > 0),
     colorScale,
     swatches,
     ruleLegend,
@@ -1686,7 +1686,7 @@ function legendItems(model: PlotModel): LegendItem[] {
 }
 
 function ruleItems(model: PlotModel): LegendItem[] {
-  return (model.ruleLegend ?? []).map((item) => ({ name: item.name, color: item.color, symbol: "circle" }));
+  return (model.ruleLegend ?? []).map((item) => ({ name: item.name, color: item.color, symbol: item.symbol ?? "circle" }));
 }
 
 function legend(model: PlotModel, x: number, y: number, maxRight: number): string {
@@ -1743,7 +1743,11 @@ function appendRules(out: string[], model: PlotModel, cx: number, cy: number, x:
       cx = x;
       cy += 18;
     }
-    out.push(`<circle cx="${n(cx + 5)}" cy="${n(cy + 5)}" r="4.5" fill="${item.color}" stroke="${cssVar("background", model.preset.background)}" stroke-width="1.5" /><text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12" font-family="${font()}">${esc(item.name)}</text>`);
+    const swatch =
+      item.symbol === "square"
+        ? `<rect x="${n(cx)}" y="${n(cy)}" width="10" height="10" rx="2" fill="${item.color}" />`
+        : `<circle cx="${n(cx + 5)}" cy="${n(cy + 5)}" r="4.5" fill="${item.color}" stroke="${cssVar("background", model.preset.background)}" stroke-width="1.5" />`;
+    out.push(`${swatch}<text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12" font-family="${font()}">${esc(item.name)}</text>`);
     cx += width;
   }
 }
@@ -2467,25 +2471,64 @@ function occupiedPaints(series: Series[], preset: PresetTokens): string[] {
   return occupied;
 }
 
-function ruleSwatches(series: Series[], rules: ColorRule[], preset: PresetTokens): { name: string; color: string }[] {
+function baseLabelOf(mark: Record<string, unknown>): string | undefined {
+  return typeof mark.baseLabel === "string" && mark.baseLabel.trim() ? mark.baseLabel.trim() : undefined;
+}
+
+function hasUnmatched(values: ArrayLike<number | null>, rules: ColorRule[], preset: PresetTokens): boolean {
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i];
+    if (typeof value !== "number" || !Number.isFinite(value)) continue;
+    if (matchRule(value, rules, preset) === null) return true;
+  }
+  return false;
+}
+
+/**
+ * One swatch per rule. A rule that paints bars uses the bar fill, once, even
+ * when line points are shifted off that fill. Point-only rules use the point
+ * colour. mark.baseLabel names values that match no rule.
+ */
+function ruleSwatches(
+  series: Series[],
+  rules: ColorRule[],
+  preset: PresetTokens,
+  baseLabel?: string,
+): { name: string; color: string; symbol: "circle" | "square" }[] {
   const occupied = occupiedPaints(series, preset);
-  const out: { name: string; color: string }[] = [];
+  const out: { name: string; color: string; symbol: "circle" | "square" }[] = [];
+  if (baseLabel) {
+    const bars = series.filter((item) => item.mark === "bar" && hasUnmatched(item.values, rules, preset));
+    const item = bars[0] ?? series.find((entry) => hasUnmatched(entry.values, rules, preset));
+    if (item) out.push({ name: baseLabel, color: item.color, symbol: item.mark === "bar" ? "square" : "circle" });
+  }
   const seen = new Set<string>();
   for (const rule of rules) {
     if (!rule.color || seen.has(rule.color)) continue;
     const painted = paint(rule.color, preset, 0);
-    let used = false;
-    const next = distinctPaint(painted, occupied);
+    const shifted = distinctPaint(painted, occupied);
+    let barUsed = false;
+    let pointUsed = false;
     for (const item of series) {
-      if (item.mark === "bar" || !item.colors || !ruleMatchesAny(rule, item.values)) continue;
-      used = true;
-      if (next === painted) continue;
-      for (let i = 0; i < item.colors.length; i++) if (item.colors[i] === painted) item.colors[i] = next;
+      if (!ruleMatchesAny(rule, item.values)) continue;
+      if (item.mark === "bar") {
+        barUsed = true;
+        continue;
+      }
+      if (!item.colors) continue;
+      pointUsed = true;
+      if (shifted === painted) continue;
+      for (let i = 0; i < item.colors.length; i++) if (item.colors[i] === painted) item.colors[i] = shifted;
     }
-    if (!used) continue;
+    if (!barUsed && !pointUsed) continue;
     seen.add(rule.color);
-    occupied.push(next);
-    out.push({ name: rule.label || rule.color, color: next });
+    if (barUsed) occupied.push(painted);
+    if (pointUsed) occupied.push(shifted);
+    out.push({
+      name: rule.label || rule.color,
+      color: barUsed ? painted : shifted,
+      symbol: barUsed ? "square" : "circle",
+    });
   }
   return out;
 }

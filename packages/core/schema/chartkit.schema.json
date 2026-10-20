@@ -1290,9 +1290,13 @@
               "gte": { "type": "number", "description": "Match values greater than or equal to this." },
               "eq": { "type": "number", "description": "Match this value." }
             },
-            "description": "First matching rule sets the mark colour. label names it in the legend and tooltip. A rule with only color matches every value."
+            "description": "First matching rule sets the mark colour. label names it in the legend and tooltip. A rule with only color matches every value. A rule that paints bars is one legend entry in the bar fill, even when line points use a shifted colour."
           },
-          "description": "Conditional colours. First match wins and overrides the series or category colour. Applies to: line, bar, scatter, combo, donut, pie."
+          "description": "Conditional colours. First match wins and overrides the series or category colour. A bar rule's legend swatch is the bar fill. Applies to: line, bar, scatter, combo, donut, pie."
+        },
+        "baseLabel": {
+          "type": "string",
+          "description": "Legend name for values that match no colour rule, such as Normal. The swatch is that series colour, and it is a square when those values are bars. Omit it to leave the unmatched colour under the series name. Applies to: line, bar, combo."
         },
         "opacity": {
           "type": "number",
@@ -1369,6 +1373,11 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "description": "Histogram bin width. Used when mark.bin is width. Applies to: histogram."
+        },
+        "binLabel": {
+          "type": "boolean",
+          "default": false,
+          "description": "Draw the bin count at the top right of the plot, clear of the y ticks. Omit it and that corner stays empty. Applies to: histogram."
         },
         "ranges": {
           "type": "array",

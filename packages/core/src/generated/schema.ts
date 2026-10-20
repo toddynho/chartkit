@@ -1279,7 +1279,7 @@ export interface Mark {
    */
   palette?: [Color, ...Color[]];
   /**
-   * Conditional colours. First match wins and overrides the series or category colour. Applies to: line, bar, scatter, combo, donut, pie.
+   * Conditional colours. First match wins and overrides the series or category colour. A bar rule's legend swatch is the bar fill. Applies to: line, bar, scatter, combo, donut, pie.
    *
    * @maxItems 8
    */
@@ -2526,6 +2526,10 @@ export interface Mark {
         }
       ];
   /**
+   * Legend name for values that match no colour rule, such as Normal. The swatch is that series colour, and it is a square when those values are bars. Omit it to leave the unmatched colour under the series name. Applies to: line, bar, combo.
+   */
+  baseLabel?: string;
+  /**
    * Mark opacity 0–1. Applies to: scatter, spike.
    */
   opacity?: number;
@@ -2569,6 +2573,10 @@ export interface Mark {
    * Histogram bin width. Used when mark.bin is width. Applies to: histogram.
    */
   binWidth?: number;
+  /**
+   * Draw the bin count at the top right of the plot, clear of the y ticks. Omit it and that corner stays empty. Applies to: histogram.
+   */
+  binLabel?: boolean;
   /**
    * Bullet band fields, worst to best. Each value is the upper edge of that band. Applies to: bullet.
    *
