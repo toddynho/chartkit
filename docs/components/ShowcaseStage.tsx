@@ -42,7 +42,7 @@ function ChartFigure({ chart, theme }: { chart: ReadyChart; theme: string }) {
   const spec = withTheme(chart.spec, theme);
   const kpi = chart.spec.type === "kpi";
   return (
-    <figure className={`board-card ${chart.span}${kpi ? " kpi-card" : ""}`}>
+    <figure className={`board-card ${chart.span}${kpi ? " kpi-card" : ""} board-theme-${theme}`}>
       {kpi ? null : (
         <figcaption>
           <h3>{chart.title}</h3>
@@ -57,12 +57,12 @@ function ChartFigure({ chart, theme }: { chart: ReadyChart; theme: string }) {
   );
 }
 
-function Stacks({ snippets }: { snippets: StackSnippet[] }) {
+function Stacks({ snippets, theme }: { snippets: StackSnippet[]; theme: string }) {
   const [id, setId] = useState(snippets[0]?.id ?? "");
   const current = snippets.find((snippet) => snippet.id === id) ?? snippets[0];
   if (!current) return null;
   return (
-    <div className="board-card board-12">
+    <div className={`board-card board-12 board-theme-${theme}`}>
       <h3>The same spec, in each stack</h3>
       <div className="theme-switch" role="tablist" aria-label="Adapter">
         {snippets.map((snippet) => (
@@ -110,9 +110,9 @@ export function ShowcaseStage({
         {charts.map((chart) => (
           <ChartFigure key={chart.id} chart={chart} theme={theme} />
         ))}
-        {stacks ? <Stacks snippets={stacks} /> : null}
+        {stacks ? <Stacks snippets={stacks} theme={theme} /> : null}
         {themedMermaid.map((card) => (
-          <article key={card.id} className="board-card board-12 mermaid-pair">
+          <article key={card.id} className={`board-card board-12 mermaid-pair board-theme-${theme}`}>
             <div>
               <h3>{card.title}</h3>
               <p>{card.caption}</p>
@@ -139,7 +139,7 @@ export function ShowcaseStage({
           </article>
         ))}
         {repairs.map((item) => (
-          <article key={item.id} className="board-card board-12">
+          <article key={item.id} className={`board-card board-12 board-theme-${theme}`}>
             <h3>{item.title}</h3>
             <p>{item.caption}</p>
             <div className="repair-pair">

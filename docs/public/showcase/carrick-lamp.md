@@ -1,6 +1,6 @@
 # Carrick lamp, overnight
 
-Lamp current at a fictional lighthouse. Points are the hourly reading, coloured when the lamp runs dim or bright. The glow line is a three-hour mean. A callout marks the dip at 03:00. A host slides this window with mount().append.
+Lamp current at a fictional lighthouse. Bars are the hourly reading, coloured when the lamp runs dim or bright. The glow line is a three-hour mean, and its points use a distinct threshold colour. A callout marks the dip at 03:00. A host slides this window with mount().append.
 
 ## Current through the night
 
@@ -10,7 +10,7 @@ Under 40 is the dim token. 70 and over is the bright token. The mean waits until
 {
   "version": "1",
   "id": "carrick-lamp",
-  "type": "line",
+  "type": "combo",
   "title": "Carrick Light",
   "subtitle": "Hourly current, and a three-hour mean.",
   "theme": "soft",
@@ -81,10 +81,19 @@ Under 40 is the dim token. 70 and over is the bright token. The mean waits until
     "y": [
       {
         "field": "milliamp",
-        "title": "Reading"
+        "mark": "bar",
+        "title": "Reading",
+        "scale": {
+          "domain": [
+            0,
+            90
+          ],
+          "nice": false
+        }
       },
       {
         "field": "mean",
+        "mark": "line",
         "title": "Three-hour mean"
       }
     ]
@@ -109,11 +118,18 @@ Under 40 is the dim token. 70 and over is the bright token. The mean waits until
       "title": "Hour"
     },
     "y": {
-      "title": "Milliamps"
+      "title": "Milliamps",
+      "ticks": [
+        0,
+        20,
+        40,
+        60,
+        80
+      ]
     }
   },
   "legend": {
-    "position": "bottom",
+    "position": "top",
     "interactive": true
   },
   "tooltip": {
@@ -126,16 +142,16 @@ Under 40 is the dim token. 70 and over is the bright token. The mean waits until
       "x": "03:00",
       "y": 28,
       "label": "Lamp dipped",
-      "dx": 16,
-      "dy": -36
+      "dx": 18,
+      "dy": -42
     }
   ],
   "size": {
     "width": 1040,
-    "height": 460
+    "height": 500
   },
   "a11y": {
-    "alt": "Carrick lamp current stays near 70 milliamps, dips to 28 at 03:00, then recovers by 07:00. The line is a three-hour mean."
+    "alt": "Carrick lamp current stays near 70 milliamps, dips to 28 at 03:00, then recovers by 07:00. Bars are the reading. The glow line is a three-hour mean."
   }
 }
 ```
@@ -144,6 +160,7 @@ Under 40 is the dim token. 70 and over is the bright token. The mean waits until
 
 - [Accessible name / alt text](https://chartkit.dev/features/a11y.alt) (`a11y.alt`)
 - [Point marker / callout](https://chartkit.dev/features/annotation.marker) (`annotation.marker`)
+- [Explicit tick values](https://chartkit.dev/features/axis.ticks.values) (`axis.ticks.values`)
 - [Axis title](https://chartkit.dev/features/axis.title) (`axis.title`)
 - [Built-in data transforms](https://chartkit.dev/features/data.transform) (`data.transform`)
 - [Click to toggle series](https://chartkit.dev/features/legend.interactive) (`legend.interactive`)
@@ -151,10 +168,12 @@ Under 40 is the dim token. 70 and over is the bright token. The mean waits until
 - [Conditional / threshold colouring](https://chartkit.dev/features/mark.color.conditional) (`mark.color.conditional`)
 - [Glow / shadow effects](https://chartkit.dev/features/mark.glow) (`mark.glow`)
 - [Show markers always / on hover / never](https://chartkit.dev/features/mark.point.visibility) (`mark.point.visibility`)
+- [Explicit domain (min/max)](https://chartkit.dev/features/scale.domain) (`scale.domain`)
+- [Nice rounding](https://chartkit.dev/features/scale.nice) (`scale.nice`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)
 - [Tooltip positioning / follow cursor](https://chartkit.dev/features/tooltip.position) (`tooltip.position`)
 - [Shared (index) vs single (nearest) tooltip](https://chartkit.dev/features/tooltip.shared) (`tooltip.shared`)
-- [Line chart](https://chartkit.dev/features/type.line) (`type.line`)
+- [Combined bar + line](https://chartkit.dev/features/type.combo) (`type.combo`)
 - [Smoothed / spline line](https://chartkit.dev/features/type.line.smooth) (`type.line.smooth`)
 
 https://chartkit.dev/showcase/carrick-lamp

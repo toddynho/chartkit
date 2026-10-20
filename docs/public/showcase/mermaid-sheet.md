@@ -395,6 +395,7 @@ venn-beta
 - [Accessible name / alt text](https://chartkit.dev/features/a11y.alt) (`a11y.alt`)
 - [Axis title](https://chartkit.dev/features/axis.title) (`axis.title`)
 - [Values in legend](https://chartkit.dev/features/legend.values) (`legend.values`)
+- [Explicit domain (min/max)](https://chartkit.dev/features/scale.domain) (`scale.domain`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)
 - [Combined bar + line](https://chartkit.dev/features/type.combo) (`type.combo`)
 - [Pie chart](https://chartkit.dev/features/type.pie) (`type.pie`)

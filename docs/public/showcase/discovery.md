@@ -269,6 +269,7 @@ The legend is on the left.
 - [Explicit tick values](https://chartkit.dev/features/axis.ticks.values) (`axis.ticks.values`)
 - [Axis title](https://chartkit.dev/features/axis.title) (`axis.title`)
 - [Legend position](https://chartkit.dev/features/legend.position) (`legend.position`)
+- [Explicit domain (min/max)](https://chartkit.dev/features/scale.domain) (`scale.domain`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)
 - [Grouped bar](https://chartkit.dev/features/type.bar.grouped) (`type.bar.grouped`)
 - [Column / vertical bar](https://chartkit.dev/features/type.bar.vertical) (`type.bar.vertical`)
