@@ -1,14 +1,14 @@
 # Large dataset mode (100k+ points)
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Dedicated large-data rendering paths
 
-Matrix status: `partial`. Verification: `dts-path` (strong).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-SVG + sampling; columns input
+Canvas for line, area, scatter, bar, heatmap, and candlestick. Columnar data.sampling is lttb, minmax, or none. Typed-array append. Other types stay SVG.
 
-Source: chartkit:packages/core/src/generated/schema.ts:807
+Source: chartkit:packages/core/src/generated/schema.ts:82, chartkit:packages/core/src/generated/schema.ts:177
 
 ## ChartKit spec
 
@@ -16,16 +16,19 @@ Source: chartkit:packages/core/src/generated/schema.ts:807
 {
   "version": "1",
   "type": "line",
-  "data": [
-    {
-      "quarter": "Q1",
-      "units": 40
+  "data": {
+    "columns": {
+      "quarter": [
+        "Q1",
+        "Q2"
+      ],
+      "units": [
+        40,
+        55
+      ]
     },
-    {
-      "quarter": "Q2",
-      "units": 55
-    }
-  ],
+    "sampling": "lttb"
+  },
   "encoding": {
     "x": "quarter",
     "y": "units"
@@ -37,9 +40,7 @@ Source: chartkit:packages/core/src/generated/schema.ts:807
     "width": 640,
     "height": 260
   },
-  "mark": {
-    "sampling": "lttb"
-  }
+  "render": "canvas"
 }
 ```
 
@@ -70,6 +71,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | none | — | dts-absence (absence) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against cfb64fb8d1fe.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40eb8c4522fd.
 
 https://chartkit.dev/features.json

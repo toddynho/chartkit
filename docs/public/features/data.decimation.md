@@ -6,9 +6,9 @@ Reduce large series before drawing (LTTB, min-max)
 
 Matrix status: `native`. Verification: `dts-path` (strong).
 
-auto | minmax | lttb | none
+auto | minmax | lttb | none. Columnar data.sampling overrides mark.sampling.
 
-Source: chartkit:packages/core/src/generated/schema.ts:807
+Source: chartkit:packages/core/src/generated/schema.ts:1149, chartkit:packages/core/src/generated/schema.ts:177
 
 ## ChartKit spec
 
@@ -70,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | none | — | dts-absence (absence) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against cfb64fb8d1fe.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40eb8c4522fd.
 
 https://chartkit.dev/features.json

@@ -127,4 +127,16 @@ Tasks: 42. Model: claude-sonnet-4-5. Temperature: 0.
 
 ChartKit's no-docs first try plus `repair()` is 42/42. Official first try is already 42/42. The other libraries have no repair step. Nivo and uPlot were not in this eval, so this file does not invent scores for them.
 
+## Canvas line, 2026-10-20
+
+Median of 5, Playwright Chromium, a 640×360 line, sampling auto (minmax above twice the plot width). This is not a re-time of round 13. `render` is the synchronous SVG build, and for canvas it includes painting the marks. First paint waits for the same two frames. uPlot has no separate render number. Nivo at 1M threw `Maximum call stack size exceeded`. With sampling none, 100k updates in 1,213.7 ms and 1M takes 418.9 ms to build and 22,259.3 ms to update.
+
+| Points | SVG render | Canvas render | SVG first paint | Canvas first paint | uPlot first paint | SVG update | Canvas update | uPlot update |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 10,000 | 8.5 | 14.3 | 16.7 | 31.2 | 12.9 | 32.8 | 25.5 | 29.2 |
+| 100,000 | 19.8 | 29.1 | 24.3 | 41.2 | 15.0 | 30.6 | 23.0 | 24.1 |
+| 1,000,000 | 151.2 | 127.8 | 155.2 | 137.8 | 25.0 | 98.7 | 105.6 | 26.8 |
+
+Losses: canvas render vs SVG at 10k (14.3 vs 8.5) and 100k (29.1 vs 19.8). Canvas first paint vs uPlot at 10k (31.2 vs 12.9), 100k (41.2 vs 15.0), and 1M (137.8 vs 25.0). Canvas update vs uPlot at 1M (105.6 vs 26.8); that update is also slower than SVG (105.6 vs 98.7). Canvas wins the 10k and 100k updates against uPlot, and the 1M render and first paint against SVG.
+
 A ChartKit-only rerun with llms.txt cut to 6,329 bytes scored 41/42 on the first try. The miss was combo axis CK3002, which repair() does not patch. The headline uses the full docs file.
