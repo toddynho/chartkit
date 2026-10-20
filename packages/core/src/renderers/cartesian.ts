@@ -1,5 +1,5 @@
 import { annotationLayers, seriesPoints } from "../annotations";
-import { isPaintColumn, readRules, resolveColors, ruleMatchesAny, withPalette, type ColorRule } from "../color";
+import { isPaintColumn, readRules, resolveColors, ruleCaption, ruleMatchesAny, withPalette, type ColorRule } from "../color";
 import { loadTable } from "../data-prep";
 import { isTypedArray, type DataTable } from "../data";
 import { formatZoned, zoneOf, zonedTimeTicks } from "../timezone";
@@ -169,6 +169,8 @@ export interface Series {
   color: string;
   /** One fill per bar when encoding.color names the x field. */
   colors?: string[];
+  /** Caption of the colour rule that painted each value. Empty when that point has no label. */
+  ruleLabels?: string[];
   axis: "y" | "y2";
   mark: "line" | "bar" | "area" | "range";
   /** Low and high of a combo range band. The line entry never fills this. */
@@ -891,11 +893,14 @@ function paintPoints(out: string[], points: (Pt | null)[], model: PlotModel, ser
     const point = points[k];
     if (!point) continue;
     const at = indexes ? indexes[k] : k;
-    const color = series.colors?.[at] ?? series.color;
-    const ruled = Boolean(series.colors && color !== series.color);
+    const override = series.colors?.[at];
+    const ruled = Boolean(override && override !== series.color);
+    const color = ruled ? override : series.mark === "line" ? strokeOf(series, model) : series.color;
+    const caption = series.ruleLabels?.[at] ?? "";
     const named = colored ? ` data-ck-name="${esc(series.name)}" data-ck-i="${at}"` : indexes ? ` data-ck-i="${indexes[k]}"` : "";
+    const rule = caption ? ` data-ck-rule="${esc(caption)}"` : "";
     const ring = ruled ? ` stroke="${cssVar("background", model.preset.background)}" stroke-width="2"` : "";
-    out.push(marker(point.x, point.y, radius + (ruled ? 1.25 : 0), shape, color, hollow, hidden + ring + named));
+    out.push(marker(point.x, point.y, radius + (ruled ? 1.25 : 0), shape, color, hollow, hidden + ring + named + rule, caption));
   }
 }
 
@@ -952,7 +957,8 @@ function bars(
     const b = yScale(value ?? baseline);
     const inset = slots > 1 ? 2 : 0;
     const fill = series.colors?.[i] ?? series.color;
-    const extra = series.colors ? ` data-ck-name="${esc(series.name)}" data-ck-i="${i}"` : "";
+    const caption = series.ruleLabels?.[i] ?? "";
+    const extra = (series.colors ? ` data-ck-name="${esc(series.name)}" data-ck-i="${i}"` : "") + (caption ? ` data-ck-rule="${esc(caption)}"` : "");
     const outer = !layers || Math.abs((value ?? baseline) - layers.top[layers.top.length - 1][i]) <= 1e-6;
     const radius = outer ? model.cornerRadius : 0;
     const useVar = outer && model.radiusVar;
@@ -962,7 +968,7 @@ function bars(
       const width = Math.max(0, Math.abs(b - a));
       const height = Math.max(0, barSize - inset);
       const edge = b >= a ? "right" : "left";
-      out.push(barMark(x, y, width, height, radius, useVar, edge, fill, extra));
+      out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra), caption));
       queueBarLabel(model, series, series.values[i], x, y, width, height, true, labs);
     } else {
       const x = start;
@@ -970,7 +976,7 @@ function bars(
       const height = Math.max(0, Math.abs(b - a));
       const width = Math.max(0, barSize - inset);
       const edge = b <= a ? "top" : "bottom";
-      out.push(barMark(x, y, width, height, radius, useVar, edge, fill, extra));
+      out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra), caption));
       queueBarLabel(model, series, series.values[i], x, y, width, height, false, labs);
     }
   }
@@ -1659,8 +1665,14 @@ function xStep(model: PlotModel, count: number, angle: number): number {
 }
 
 function legendColor(model: PlotModel, series: Series): string {
-  if (model.type === "combo" && series.mark === "line") return strokeOf(series, model);
+  if (series.mark === "line") return strokeOf(series, model);
   return series.color;
+}
+
+/** Native tooltip on a bar, naming the colour rule that painted it. */
+function withTitle(mark: string, title: string): string {
+  if (!title) return mark;
+  return mark.replace(/ \/>$/, `><title>${esc(title)}</title></rect>`);
 }
 
 function legendItems(model: PlotModel): LegendItem[] {
@@ -2434,24 +2446,36 @@ function nearAny(color: string, others: string[]): boolean {
   return others.some((other) => nearColor(color, other));
 }
 
-/** A rule colour that sits on a line. Shift it when it matches that line. */
-function distinctPaint(painted: string, strokes: string[]): string {
-  if (!nearAny(painted, strokes)) return painted;
+/** A rule colour that sits on a line or a bar. Shift it when it matches either. */
+function distinctPaint(painted: string, occupied: string[]): string {
+  if (!nearAny(painted, occupied)) return painted;
   for (const alt of DISTINCT) {
-    if (!nearAny(alt, strokes) && !nearColor(alt, painted)) return alt;
+    if (!nearAny(alt, occupied) && !nearColor(alt, painted)) return alt;
   }
   return painted;
 }
 
+/** Line strokes, bar fills, and colour-ruled bar paints already in the chart. */
+function occupiedPaints(series: Series[], preset: PresetTokens): string[] {
+  const occupied: string[] = [];
+  for (const item of series) {
+    if (item.mark === "bar") {
+      occupied.push(item.color);
+      if (item.colors) for (const color of item.colors) if (color) occupied.push(color);
+    } else occupied.push(lineStroke(item.color, 2, preset.lines));
+  }
+  return occupied;
+}
+
 function ruleSwatches(series: Series[], rules: ColorRule[], preset: PresetTokens): { name: string; color: string }[] {
-  const strokes = series.filter((item) => item.mark !== "bar").map((item) => lineStroke(item.color, 2, preset.lines));
+  const occupied = occupiedPaints(series, preset);
   const out: { name: string; color: string }[] = [];
   const seen = new Set<string>();
   for (const rule of rules) {
     if (!rule.color || seen.has(rule.color)) continue;
     const painted = paint(rule.color, preset, 0);
     let used = false;
-    const next = distinctPaint(painted, strokes);
+    const next = distinctPaint(painted, occupied);
     for (const item of series) {
       if (item.mark === "bar" || !item.colors || !ruleMatchesAny(rule, item.values)) continue;
       used = true;
@@ -2460,7 +2484,8 @@ function ruleSwatches(series: Series[], rules: ColorRule[], preset: PresetTokens
     }
     if (!used) continue;
     seen.add(rule.color);
-    out.push({ name: rule.color, color: next });
+    occupied.push(next);
+    out.push({ name: rule.label || rule.color, color: next });
   }
   return out;
 }
@@ -2541,7 +2566,23 @@ function applyPointColors(
     if (colorEnc?.constant) item.color = paint(colorEnc.constant, preset, 0);
     if (colors.some((color) => color !== item.color)) item.colors = colors;
   }
+  applyRuleLabels(series, rules);
   return null;
+}
+
+function applyRuleLabels(series: Series[], rules: ColorRule[]): void {
+  if (!rules.some((rule) => rule.label)) return;
+  for (const item of series) {
+    const captions: string[] = [];
+    let any = false;
+    for (let i = 0; i < item.values.length; i++) {
+      const value = item.values[i];
+      const caption = typeof value === "number" ? ruleCaption(value, rules) : "";
+      if (caption) any = true;
+      captions.push(caption);
+    }
+    if (any) item.ruleLabels = captions;
+  }
 }
 
 function legendAsked(spec: Record<string, unknown>): boolean {

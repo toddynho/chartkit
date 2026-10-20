@@ -753,8 +753,22 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       if (!row) continue;
       const ink = inkAt(row.name, index);
       if (ink) row.color = ink;
+      const caption = captionAt(row.name, index);
+      if (caption) row.name = `${row.name} · ${caption}`;
     }
     return list;
+  }
+
+  function captionAt(name: string, index: number): string {
+    const nodes = svg.querySelectorAll("[data-ck-rule]");
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      if (!node || node.getAttribute("data-ck-i") !== String(index)) continue;
+      const called = node.getAttribute("data-ck-name");
+      if (called !== name && owner(node) !== name) continue;
+      return node.getAttribute("data-ck-rule") || "";
+    }
+    return "";
   }
 
   /** Legend fill for a series name, or the paint that names the same `--ck-series-N`. */
@@ -769,13 +783,17 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     return fills[index] || "light-dark(#007aff,#0a84ff)";
   }
 
+  /** Legend fill that uses the same line or series token as the mark. */
   function legendPaint(paint: string | null, index: number): string {
-    const id = paint ? /--ck-(?:line|series)-(\d+)/.exec(paint) : null;
+    if (!paint) return paintAt(index);
+    for (const fill of colors.values()) if (fill === paint) return fill;
+    const id = /--ck-(line|series)-(\d+)/.exec(paint);
     if (id) {
-      const want = `--ck-series-${id[1]}`;
+      const want = `--ck-${id[1]}-${id[2]}`;
       for (const fill of colors.values()) if (fill.includes(want)) return fill;
-    }
-    if (paint && colors.size === 0) return paint;
+      if (id[1] === "line") return paint;
+    } else return paint;
+    if (colors.size === 0) return paint;
     return paintAt(index);
   }
 
@@ -1183,11 +1201,15 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const paint = stroke && stroke !== "none" ? stroke : node.getAttribute("fill");
     if (!paint || paint === "none") return "";
     for (const [name, fill] of colors) if (fill === paint) return name;
-    const id = /--ck-(?:line|series)-(\d+)/.exec(paint);
+    const id = /--ck-(line|series)-(\d+)/.exec(paint);
     if (!id) return "";
-    const want = "--ck-series-" + id[1];
+    const want = `--ck-${id[1]}-${id[2]}`;
     for (const [name, fill] of colors) if (fill.includes(want)) return name;
-    return series[+id[1] - 1]?.name ?? "";
+    if (id[1] === "line") {
+      const seriesToken = `--ck-series-${id[2]}`;
+      for (const [name, fill] of colors) if (fill.includes(seriesToken)) return name;
+    }
+    return series[+id[2] - 1]?.name ?? "";
   }
 
   function indexAt(clientX: number, clientY: number): number {

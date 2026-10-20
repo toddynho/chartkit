@@ -1276,6 +1276,10 @@
                 "$ref": "#/$defs/color",
                 "description": "Colour for values that match this rule. A theme token stays readable in midnight."
               },
+              "label": {
+                "type": "string",
+                "description": "Legend and tooltip name for values that match. Omit it to use the colour token."
+              },
               "test": {
                 "enum": ["negative", "positive"],
                 "description": "Match negative or positive values."
@@ -1286,7 +1290,7 @@
               "gte": { "type": "number", "description": "Match values greater than or equal to this." },
               "eq": { "type": "number", "description": "Match this value." }
             },
-            "description": "First matching rule sets the mark colour. A rule with only color matches every value."
+            "description": "First matching rule sets the mark colour. label names it in the legend and tooltip. A rule with only color matches every value."
           },
           "description": "Conditional colours. First match wins and overrides the series or category colour. Applies to: line, bar, scatter, combo, donut, pie."
         },

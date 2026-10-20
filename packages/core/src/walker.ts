@@ -1550,6 +1550,29 @@ function emitUnknownProp(name: string, path: string, props: Record<string, JsonS
   const pointer = join(path, name);
   if (ctx.skipUnknown.has(pointer)) return;
   if (markMistake(name, path, pointer, value, ctx)) return;
+  if (/^\/mark\/colorRules\/\d+$/.test(path) && (name === "name" || name === "title")) {
+    let rule: unknown = ctx.rootValue;
+    for (const part of path.slice(1).split("/")) {
+      if (rule === null || typeof rule !== "object") {
+        rule = undefined;
+        break;
+      }
+      rule = (rule as Record<string, unknown>)[part];
+    }
+    const hasLabel = isPlainObject(rule) && typeof rule.label === "string" && rule.label.trim() !== "";
+    const text = typeof value === "string" && value.trim() ? value : undefined;
+    const fix: JsonPatchOperation[] = [{ op: "remove", path: pointer }];
+    if (text !== undefined && !hasLabel) fix.push({ op: "add", path: join(path, "label"), value: text });
+    emit(ctx, {
+      code: "CK1002",
+      severity: "error",
+      message: `unknown property ${quote(name)}`,
+      path: pointer,
+      hint: "the legend and tooltip name on a colour rule is label",
+      fix,
+    });
+    return;
+  }
   if ((path === "/encoding/y" || /^\/encoding\/y\/\d+$/.test(path)) && (name === "low" || name === "high") && typeof value === "string") {
     const dest = name === "low" ? "lo" : "hi";
     emit(ctx, {

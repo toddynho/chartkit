@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render } from "../extra";
+import { repair, validate } from "../validate";
 import { nearMatches } from "../walker";
 import { ticks } from "../svg";
 
@@ -130,6 +131,157 @@ describe("trendline label", () => {
       const hit = fitBox.left < other.right && fitBox.right > other.left && fitBox.top < other.bottom && fitBox.bottom > other.top;
       expect(hit).toBe(false);
     }
+  });
+});
+
+const hours = ["20:00", "21:00", "22:00", "23:00", "00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00"];
+const lamp = [62, 66, 70, 74, 71, 68, 44, 28, 39, 58, 69, 73];
+
+function lampSpec(extra: Record<string, unknown> = {}) {
+  return {
+    version: "1",
+    type: "combo",
+    title: "Carrick Light",
+    data: hours.map((hour, index) => ({ hour, milliamp: lamp[index] })),
+    transform: [{ type: "window", field: "milliamp", size: 3, op: "mean", as: "mean" }],
+    encoding: {
+      x: "hour",
+      y: [
+        { field: "milliamp", mark: "bar", title: "Reading" },
+        { field: "mean", mark: "line", title: "Three-hour mean" },
+      ],
+    },
+    mark: {
+      curve: "monotone",
+      points: "always",
+      colorRules: [
+        { color: "positive", gte: 70 },
+        { color: "negative", lt: 40 },
+      ],
+    },
+    legend: { position: "top" },
+    a11y: { alt: "Carrick lamp current dips, then recovers." },
+    size: { width: 640, height: 320 },
+    ...extra,
+  };
+}
+
+function ruledPointFills(svg: string): string[] {
+  return [...svg.matchAll(/<circle\b([^>]*)>/g)]
+    .map((match) => match[1] ?? "")
+    .filter((attrs) => attrs.includes("data-ck-i="))
+    .map((attrs) => /fill="([^"]+)"/.exec(attrs)?.[1] ?? "")
+    .filter((fill) => fill && !fill.includes("--ck-line-") && !fill.includes("--ck-series-"));
+}
+
+describe("colour rule labels", () => {
+  it("names the threshold legend and the mark tooltip", () => {
+    const spec = lampSpec({
+      mark: {
+        curve: "monotone",
+        points: "always",
+        colorRules: [
+          { color: "positive", gte: 70, label: "Bright" },
+          { color: "negative", lt: 40, label: "Dim" },
+        ],
+      },
+    });
+    expect(validate(spec).ok).toBe(true);
+    const svg = render(spec) ?? "";
+    expect(svg).toContain(">Bright<");
+    expect(svg).toContain(">Dim<");
+    expect(svg).not.toContain(">positive<");
+    expect(svg).not.toContain(">negative<");
+    expect(svg).toContain("<title>Bright</title>");
+    expect(svg).toContain("<title>Dim</title>");
+    expect(svg).toContain('data-ck-rule="Bright"');
+    expect(svg).toContain('data-ck-rule="Dim"');
+  });
+
+  it("repairs name and title aliases onto label", () => {
+    const base = lampSpec();
+    const named = lampSpec({
+      mark: { colorRules: [{ color: "positive", gte: 70, name: "Bright" }, { color: "negative", lt: 40 }] },
+    });
+    const nameError = validate(named).errors.find((error) => error.path === "/mark/colorRules/0/name");
+    expect(nameError?.code).toBe("CK1002");
+    expect(nameError?.hint).toContain("label");
+    const fixed = repair(named);
+    expect(fixed.ok).toBe(true);
+    expect((fixed.spec as { mark: { colorRules: { label?: string; name?: string }[] } }).mark.colorRules[0]).toMatchObject({
+      color: "positive",
+      label: "Bright",
+    });
+    expect((fixed.spec as { mark: { colorRules: { name?: string }[] } }).mark.colorRules[0].name).toBeUndefined();
+
+    const titled = lampSpec({
+      mark: { colorRules: [{ color: "negative", lt: 40, title: "Dim" }] },
+    });
+    expect(validate(titled).errors.find((error) => error.path === "/mark/colorRules/0/title")?.hint).toContain("label");
+    expect((repair(titled).spec as { mark: { colorRules: { label?: string }[] } }).mark.colorRules[0].label).toBe("Dim");
+
+    const kept = lampSpec({
+      mark: { colorRules: [{ color: "positive", gte: 70, label: "Bright", name: "Other" }] },
+    });
+    const keptRule = (repair(kept).spec as { mark: { colorRules: { label?: string; name?: string }[] } }).mark.colorRules[0];
+    expect(keptRule.label).toBe("Bright");
+    expect(keptRule.name).toBeUndefined();
+    expect(validate(base).errors.some((error) => error.path.includes("colorRules") && error.code === "CK1002")).toBe(false);
+  });
+});
+
+describe("threshold points beside bars", () => {
+  it.each(["soft", "midnight"])("keeps mean-line points off the bar colours in %s", (theme) => {
+    const svg = render(lampSpec({ theme })) ?? "";
+    const fills = ruledPointFills(svg);
+    expect(fills.length).toBeGreaterThan(0);
+    for (const fill of fills) {
+      expect(fill).not.toContain("--ck-positive");
+      expect(fill).not.toContain("--ck-negative");
+    }
+    expect(new Set(fills).size).toBeGreaterThanOrEqual(2);
+    const rects = [...svg.matchAll(/<rect\b[^>]*fill="([^"]+)"/g)].map((match) => match[1] ?? "");
+    expect(rects.some((fill) => fill.includes("--ck-positive"))).toBe(true);
+    expect(rects.some((fill) => fill.includes("--ck-negative"))).toBe(true);
+  });
+});
+
+describe("line swatch and points", () => {
+  it("uses the drawn line token for the swatch and the points", () => {
+    const spec = {
+      version: "1",
+      type: "line",
+      theme: "soft",
+      data: [
+        { x: "a", a: 1, b: 3, c: 2 },
+        { x: "b", a: 2, b: 2, c: 4 },
+        { x: "c", a: 3, b: 4, c: 3 },
+      ],
+      encoding: {
+        x: "x",
+        y: [
+          { field: "a", title: "One" },
+          { field: "b", title: "Two" },
+          { field: "c", title: "Three" },
+        ],
+      },
+      mark: { curve: "monotone", points: "always" },
+      legend: { position: "top" },
+      a11y: { alt: "Three lines." },
+      size: { width: 640, height: 320 },
+    };
+    const svg = render(spec) ?? "";
+    const strokes = [...svg.matchAll(/<path\b[^>]*stroke="([^"]+)"/g)].map((match) => match[1] ?? "").filter((stroke) => stroke.includes("--ck-line-"));
+    const third = strokes[2] ?? "";
+    const swatch = svg.match(/<circle\b[^>]*fill="([^"]+)"[^>]*\/>\s*<text[^>]*>Three<\/text>/)?.[1] ?? "";
+    const circles = [...svg.matchAll(/<circle\b[^>]*fill="([^"]+)"/g)].map((match) => match[1] ?? "");
+    expect(third).toContain("--ck-line-3");
+    expect(third).toContain("#c93400");
+    expect(swatch).toBe(third);
+    expect(circles.filter((fill) => fill === third).length).toBeGreaterThanOrEqual(4);
+    const visible = svg.replace(/<defs>[\s\S]*?<\/defs>/, "");
+    expect(visible).not.toContain("--ck-series-3");
+    expect(visible).not.toContain("#ff9500");
   });
 });
 

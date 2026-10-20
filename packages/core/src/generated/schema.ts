@@ -1292,67 +1292,9 @@ export interface Mark {
            */
           color: string;
           /**
-           * Match negative or positive values.
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
            */
-          test?: "negative" | "positive";
-          /**
-           * Match values less than this.
-           */
-          lt?: number;
-          /**
-           * Match values less than or equal to this.
-           */
-          lte?: number;
-          /**
-           * Match values greater than this.
-           */
-          gt?: number;
-          /**
-           * Match values greater than or equal to this.
-           */
-          gte?: number;
-          /**
-           * Match this value.
-           */
-          eq?: number;
-        }
-      ]
-    | [
-        {
-          /**
-           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
-           */
-          color: string;
-          /**
-           * Match negative or positive values.
-           */
-          test?: "negative" | "positive";
-          /**
-           * Match values less than this.
-           */
-          lt?: number;
-          /**
-           * Match values less than or equal to this.
-           */
-          lte?: number;
-          /**
-           * Match values greater than this.
-           */
-          gt?: number;
-          /**
-           * Match values greater than or equal to this.
-           */
-          gte?: number;
-          /**
-           * Match this value.
-           */
-          eq?: number;
-        },
-        {
-          /**
-           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
-           */
-          color: string;
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -1386,35 +1328,9 @@ export interface Mark {
            */
           color: string;
           /**
-           * Match negative or positive values.
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
            */
-          test?: "negative" | "positive";
-          /**
-           * Match values less than this.
-           */
-          lt?: number;
-          /**
-           * Match values less than or equal to this.
-           */
-          lte?: number;
-          /**
-           * Match values greater than this.
-           */
-          gt?: number;
-          /**
-           * Match values greater than or equal to this.
-           */
-          gte?: number;
-          /**
-           * Match this value.
-           */
-          eq?: number;
-        },
-        {
-          /**
-           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
-           */
-          color: string;
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -1445,6 +1361,10 @@ export interface Mark {
            * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
            */
           color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -1478,35 +1398,9 @@ export interface Mark {
            */
           color: string;
           /**
-           * Match negative or positive values.
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
            */
-          test?: "negative" | "positive";
-          /**
-           * Match values less than this.
-           */
-          lt?: number;
-          /**
-           * Match values less than or equal to this.
-           */
-          lte?: number;
-          /**
-           * Match values greater than this.
-           */
-          gt?: number;
-          /**
-           * Match values greater than or equal to this.
-           */
-          gte?: number;
-          /**
-           * Match this value.
-           */
-          eq?: number;
-        },
-        {
-          /**
-           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
-           */
-          color: string;
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -1538,6 +1432,10 @@ export interface Mark {
            */
           color: string;
           /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
            * Match negative or positive values.
            */
           test?: "negative" | "positive";
@@ -1567,6 +1465,10 @@ export interface Mark {
            * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
            */
           color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -1600,35 +1502,9 @@ export interface Mark {
            */
           color: string;
           /**
-           * Match negative or positive values.
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
            */
-          test?: "negative" | "positive";
-          /**
-           * Match values less than this.
-           */
-          lt?: number;
-          /**
-           * Match values less than or equal to this.
-           */
-          lte?: number;
-          /**
-           * Match values greater than this.
-           */
-          gt?: number;
-          /**
-           * Match values greater than or equal to this.
-           */
-          gte?: number;
-          /**
-           * Match this value.
-           */
-          eq?: number;
-        },
-        {
-          /**
-           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
-           */
-          color: string;
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -1660,35 +1536,9 @@ export interface Mark {
            */
           color: string;
           /**
-           * Match negative or positive values.
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
            */
-          test?: "negative" | "positive";
-          /**
-           * Match values less than this.
-           */
-          lt?: number;
-          /**
-           * Match values less than or equal to this.
-           */
-          lte?: number;
-          /**
-           * Match values greater than this.
-           */
-          gt?: number;
-          /**
-           * Match values greater than or equal to this.
-           */
-          gte?: number;
-          /**
-           * Match this value.
-           */
-          eq?: number;
-        },
-        {
-          /**
-           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
-           */
-          color: string;
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -1719,6 +1569,44 @@ export interface Mark {
            * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
            */
           color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -1752,35 +1640,9 @@ export interface Mark {
            */
           color: string;
           /**
-           * Match negative or positive values.
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
            */
-          test?: "negative" | "positive";
-          /**
-           * Match values less than this.
-           */
-          lt?: number;
-          /**
-           * Match values less than or equal to this.
-           */
-          lte?: number;
-          /**
-           * Match values greater than this.
-           */
-          gt?: number;
-          /**
-           * Match values greater than or equal to this.
-           */
-          gte?: number;
-          /**
-           * Match this value.
-           */
-          eq?: number;
-        },
-        {
-          /**
-           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
-           */
-          color: string;
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -1812,35 +1674,9 @@ export interface Mark {
            */
           color: string;
           /**
-           * Match negative or positive values.
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
            */
-          test?: "negative" | "positive";
-          /**
-           * Match values less than this.
-           */
-          lt?: number;
-          /**
-           * Match values less than or equal to this.
-           */
-          lte?: number;
-          /**
-           * Match values greater than this.
-           */
-          gt?: number;
-          /**
-           * Match values greater than or equal to this.
-           */
-          gte?: number;
-          /**
-           * Match this value.
-           */
-          eq?: number;
-        },
-        {
-          /**
-           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
-           */
-          color: string;
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -1872,6 +1708,10 @@ export interface Mark {
            */
           color: string;
           /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
            * Match negative or positive values.
            */
           test?: "negative" | "positive";
@@ -1901,6 +1741,44 @@ export interface Mark {
            * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
            */
           color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -1934,35 +1812,9 @@ export interface Mark {
            */
           color: string;
           /**
-           * Match negative or positive values.
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
            */
-          test?: "negative" | "positive";
-          /**
-           * Match values less than this.
-           */
-          lt?: number;
-          /**
-           * Match values less than or equal to this.
-           */
-          lte?: number;
-          /**
-           * Match values greater than this.
-           */
-          gt?: number;
-          /**
-           * Match values greater than or equal to this.
-           */
-          gte?: number;
-          /**
-           * Match this value.
-           */
-          eq?: number;
-        },
-        {
-          /**
-           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
-           */
-          color: string;
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -1994,35 +1846,9 @@ export interface Mark {
            */
           color: string;
           /**
-           * Match negative or positive values.
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
            */
-          test?: "negative" | "positive";
-          /**
-           * Match values less than this.
-           */
-          lt?: number;
-          /**
-           * Match values less than or equal to this.
-           */
-          lte?: number;
-          /**
-           * Match values greater than this.
-           */
-          gt?: number;
-          /**
-           * Match values greater than or equal to this.
-           */
-          gte?: number;
-          /**
-           * Match this value.
-           */
-          eq?: number;
-        },
-        {
-          /**
-           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
-           */
-          color: string;
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -2054,35 +1880,9 @@ export interface Mark {
            */
           color: string;
           /**
-           * Match negative or positive values.
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
            */
-          test?: "negative" | "positive";
-          /**
-           * Match values less than this.
-           */
-          lt?: number;
-          /**
-           * Match values less than or equal to this.
-           */
-          lte?: number;
-          /**
-           * Match values greater than this.
-           */
-          gt?: number;
-          /**
-           * Match values greater than or equal to this.
-           */
-          gte?: number;
-          /**
-           * Match this value.
-           */
-          eq?: number;
-        },
-        {
-          /**
-           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
-           */
-          color: string;
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -2113,6 +1913,78 @@ export interface Mark {
            * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
            */
           color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -2146,35 +2018,9 @@ export interface Mark {
            */
           color: string;
           /**
-           * Match negative or positive values.
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
            */
-          test?: "negative" | "positive";
-          /**
-           * Match values less than this.
-           */
-          lt?: number;
-          /**
-           * Match values less than or equal to this.
-           */
-          lte?: number;
-          /**
-           * Match values greater than this.
-           */
-          gt?: number;
-          /**
-           * Match values greater than or equal to this.
-           */
-          gte?: number;
-          /**
-           * Match this value.
-           */
-          eq?: number;
-        },
-        {
-          /**
-           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
-           */
-          color: string;
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -2206,35 +2052,9 @@ export interface Mark {
            */
           color: string;
           /**
-           * Match negative or positive values.
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
            */
-          test?: "negative" | "positive";
-          /**
-           * Match values less than this.
-           */
-          lt?: number;
-          /**
-           * Match values less than or equal to this.
-           */
-          lte?: number;
-          /**
-           * Match values greater than this.
-           */
-          gt?: number;
-          /**
-           * Match values greater than or equal to this.
-           */
-          gte?: number;
-          /**
-           * Match this value.
-           */
-          eq?: number;
-        },
-        {
-          /**
-           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
-           */
-          color: string;
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -2266,35 +2086,9 @@ export interface Mark {
            */
           color: string;
           /**
-           * Match negative or positive values.
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
            */
-          test?: "negative" | "positive";
-          /**
-           * Match values less than this.
-           */
-          lt?: number;
-          /**
-           * Match values less than or equal to this.
-           */
-          lte?: number;
-          /**
-           * Match values greater than this.
-           */
-          gt?: number;
-          /**
-           * Match values greater than or equal to this.
-           */
-          gte?: number;
-          /**
-           * Match this value.
-           */
-          eq?: number;
-        },
-        {
-          /**
-           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
-           */
-          color: string;
+          label?: string;
           /**
            * Match negative or positive values.
            */
@@ -2326,6 +2120,10 @@ export interface Mark {
            */
           color: string;
           /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
            * Match negative or positive values.
            */
           test?: "negative" | "positive";
@@ -2355,6 +2153,352 @@ export interface Mark {
            * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
            */
           color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        }
+      ]
+    | [
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
+          /**
+           * Match negative or positive values.
+           */
+          test?: "negative" | "positive";
+          /**
+           * Match values less than this.
+           */
+          lt?: number;
+          /**
+           * Match values less than or equal to this.
+           */
+          lte?: number;
+          /**
+           * Match values greater than this.
+           */
+          gt?: number;
+          /**
+           * Match values greater than or equal to this.
+           */
+          gte?: number;
+          /**
+           * Match this value.
+           */
+          eq?: number;
+        },
+        {
+          /**
+           * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
+           */
+          color: string;
+          /**
+           * Legend and tooltip name for values that match. Omit it to use the colour token.
+           */
+          label?: string;
           /**
            * Match negative or positive values.
            */

@@ -810,4 +810,46 @@ describe("attach", () => {
     expect(host.querySelector("[data-ck-tip]")?.innerHTML).toBe("<b>Custom tip</b>");
     ctl.destroy();
   });
+
+  it("names a threshold row with the colour-rule label and the line colour", () => {
+    const spec: InteractSpec = {
+      version: "1",
+      type: "combo",
+      theme: "midnight",
+      data: [
+        { hour: "01:00", milliamp: 74, mean: 72 },
+        { hour: "03:00", milliamp: 28, mean: 36 },
+      ],
+      encoding: {
+        x: "hour",
+        y: [
+          { field: "milliamp", mark: "bar", title: "Reading" },
+          { field: "mean", mark: "line", title: "Three-hour mean" },
+        ],
+      },
+      mark: {
+        points: "always",
+        colorRules: [
+          { color: "positive", gte: 70, label: "Bright" },
+          { color: "negative", lt: 40, label: "Dim" },
+        ],
+      },
+      a11y: { alt: "A bright reading and a dim one." },
+      size: { width: 420, height: 220 },
+    };
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg")!;
+    const bright = svg.querySelector('[data-ck-rule="Bright"]')!;
+    expect(bright.querySelector("title")?.textContent).toBe("Bright");
+    const x = Number(bright.getAttribute("cx") || bright.getAttribute("x"));
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 40, bubbles: true }));
+    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+    expect(tip.textContent).toContain("Bright");
+    expect(tip.textContent).toContain("Reading");
+    const line = [...svg.querySelectorAll("path")].find((node) => (node.getAttribute("stroke") ?? "").includes("--ck-line-"));
+    const swatch = [...svg.querySelectorAll("text")].find((node) => node.textContent === "Three-hour mean")?.previousElementSibling;
+    expect(line?.getAttribute("stroke")).toBe(swatch?.getAttribute("fill"));
+    ctl.destroy();
+  });
 });
