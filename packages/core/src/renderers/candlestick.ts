@@ -1,5 +1,5 @@
 import { seriesPoints } from "../annotations";
-import { axisTitleMarks, categoryX, chooseTicks, heading, lockDomain, placedNotes } from "../chrome";
+import { axisTitleMarks, bottomLegendBand, categoryX, chooseTicks, heading, lockDomain, placedNotes } from "../chrome";
 import { cssVar } from "../theme";
 import { formatAxisValue, formatValue } from "../format";
 import {
@@ -64,7 +64,8 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
     left = Math.max(56, Math.ceil(width + 16));
   }
   if (showY && readAxis(spec, "y").title) left += 16;
-  const plot = { left, top, right: frame.width - 12, bottom: frame.height - (showX ? 28 : 12) - (showX && readAxis(spec, "x").title ? 14 : 0) };
+  const legendBand = bottomLegendBand(spec, frame.preset, frame.width - 12 - left);
+  const plot = { left, top, right: frame.width - 12, bottom: frame.height - (showX ? 28 : 12) - (showX && readAxis(spec, "x").title ? 14 : 0) - legendBand };
   const volumeH = showVolume ? Math.max(28, (plot.bottom - plot.top) * 0.2) : 0;
   const priceBottom = plot.bottom - volumeH - (showVolume ? 8 : 0);
   const yScale = linear(domain[0], domain[1], priceBottom, plot.top);
@@ -124,7 +125,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   }
   if (showX) {
     const step = candles.length > 8 ? Math.ceil(candles.length / 6) : 1;
-    const labelY = frame.height - (readAxis(spec, "x").title ? 26 : 12);
+    const labelY = frame.height - legendBand - (readAxis(spec, "x").title ? 26 : 12);
     for (let i = 0; i < candles.length; i += step) {
       if (!candles[i].label) continue;
       parts.push(text(plot.left + slot * i + slot / 2, labelY, candles[i].label, cssVar("muted", frame.preset.muted), 11, "400", "middle"));

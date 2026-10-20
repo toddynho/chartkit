@@ -1605,7 +1605,7 @@ function axisTitles(model: PlotModel, plot: PlotBox, horizontal: boolean): strin
     else {
       const anchor = model.yAxis.titleAt === "start" ? "start" : model.yAxis.titleAt === "end" ? "end" : "middle";
       const x = titleAlong(model.yAxis.titleAt, midX, plot.left, plot.right);
-      out += axText(x, side === 2 ? Math.max(12, plot.top - 18) : model.height - 6 - colorLegendFoot(model), anchor, title, fill, family, angle, weight);
+      out += axText(x, side === 2 ? Math.max(12, plot.top - 18) : model.height - 6 - colorLegendFoot(model) - bottomLegendFoot(model, plot), anchor, title, fill, family, angle, weight);
     }
   }
   if (model.showY2 && model.y2Axis.title) {
@@ -1623,7 +1623,7 @@ function axisTitles(model: PlotModel, plot: PlotBox, horizontal: boolean): strin
       const anchor = model.xAxis.titleAt === "start" ? "start" : model.xAxis.titleAt === "end" ? "end" : "middle";
       const x = titleAlong(model.xAxis.titleAt, midX, plot.left, plot.right);
       const angle = titleSpin(model.xAxis, false, false);
-      out += axText(x, model.xAxis.end ? plot.top - 40 : model.height - 6 - colorLegendFoot(model), anchor, title, fill, family, angle, weight);
+      out += axText(x, model.xAxis.end ? plot.top - 40 : model.height - 6 - colorLegendFoot(model) - bottomLegendFoot(model, plot), anchor, title, fill, family, angle, weight);
     }
   }
   return out;
@@ -2468,6 +2468,12 @@ function ruleSwatches(series: Series[], rules: ColorRule[], preset: PresetTokens
 /** Per-point colour from a colour field, a domain map, a constant, or mark.colorRules. */
 function colorLegendFoot(model: PlotModel): number {
   return model.colorScale ? 46 : 0;
+}
+
+/** The bottom legend's own band, so the x title sits above it instead of in it. */
+function bottomLegendFoot(model: PlotModel, plot: PlotBox): number {
+  if (!model.legend || !model.legendBox || model.legendBox.position !== "bottom") return 0;
+  return legendSpace(model.legendBox, legendItems(model), Math.max(80, plot.right - plot.left)).band;
 }
 
 function applyPointColors(

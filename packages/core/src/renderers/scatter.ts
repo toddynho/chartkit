@@ -4,6 +4,7 @@ import { readRules, resolveColors, withPalette } from "../color";
 import { cssVar, paint } from "../theme";
 import { formatAxisValue, formatValue } from "../format";
 import { bag, glyphOf, marker, named, nudge } from "../glyphs";
+import { legendSpace, paintLegend, readLegend } from "../legend";
 import {
   asNumber,
   axisOn,
@@ -78,10 +79,12 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   const showLabels = frame.mark.labels === true || labelAt !== "" || frame.mark.labelFormat !== undefined;
 
   const showLegend = !ramp && frame.legend !== false && categories.length > 1;
+  const legendBox = readLegend(spec);
+  const legendAtBottom = showLegend && legendBox?.position === "bottom";
   let top = 16;
   if (frame.title) top = 38;
   if (frame.subtitle) top += 18;
-  if (showLegend) top += 22;
+  if (showLegend && !legendAtBottom) top += 22;
   const showX = axisOn(spec, "x");
   const showY = axisOn(spec, "y");
   const footer = ramp && frame.legend !== false ? colorLegendHeight : 0;
@@ -110,6 +113,10 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     if (yRight) plotRight -= 16;
     else plotLeft += 16;
   }
+  const legendBand = legendAtBottom && legendBox
+    ? legendSpace(legendBox, categories.map((name) => ({ name: name || " ", color: "#000" })), Math.max(80, plotRight - plotLeft)).band
+    : 0;
+  if (legendBand) plotBottom -= legendBand;
   if (xAxis.title) {
     if (xAxis.end) plotTop += 22;
     else plotBottom -= 16;
@@ -173,7 +180,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
   if (frame.title) parts.push(label(plot.left, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
   if (frame.subtitle) parts.push(label(plot.left, frame.title ? 40 : 18, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
-  if (showLegend) {
+  if (showLegend && !legendAtBottom) {
     let cx = plot.left;
     const bits: string[] = [];
     for (let index = 0; index < categories.length; index++) {
@@ -294,7 +301,11 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     }
   }
   if (showX && xAxis.title) {
-    parts.push(label((plot.left + plot.right) / 2, xAxis.end ? plot.top - 40 : frame.height - footer - 6, xAxis.title, cssVar("muted", frame.preset.muted), 11, "500", "middle"));
+    parts.push(label((plot.left + plot.right) / 2, xAxis.end ? plot.top - 40 : frame.height - footer - legendBand - 6, xAxis.title, cssVar("muted", frame.preset.muted), 11, "500", "middle"));
+  }
+  if (legendAtBottom && legendBox) {
+    const items = categories.map((name) => ({ name: name || " ", color: colorOf(name) }));
+    parts.push(paintLegend(legendBox, items, { plot, width: frame.width, height: frame.height, preset: frame.preset }));
   }
   if (footer && ramp) parts.push(ramp.legend(plot.left, frame.height - colorLegendHeight, scaleLabel(preset)));
   parts.push(closeChart());

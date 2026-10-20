@@ -2,7 +2,7 @@ import type { DataTable } from "../../data";
 import { formatAxisValue, formatValue } from "../../format";
 import { asNumber, axisOn, channelFormat, column, fieldOf, gridStyle, readFrame, readTable, type Frame } from "../../frame";
 import { cssVar, lineStroke, paint } from "../../theme";
-import { heading } from "../../chrome";
+import { bottomLegendBand, heading } from "../../chrome";
 import { clipPath, closeChart, esc, font, isRecord, linear, n, openChart, readAxis, ticks } from "../../svg";
 
 export interface View {
@@ -139,6 +139,8 @@ export function plotBox(frame: Frame, spec: Record<string, unknown>, opts?: { le
   if (frame.subtitle) top += 18;
   let bottom = opts?.bottom ?? (showX ? 32 : 16);
   if (showX && xAxis.title) bottom += 14;
+  const inner = Math.max(80, frame.width - 16 - left);
+  bottom += bottomLegendBand(spec, frame.preset, inner);
   return {
     left,
     top,
@@ -169,10 +171,11 @@ export function yLabels(frame: Frame, spec: Record<string, unknown>, box: Box, v
   return values.map((value) => text(box.left - 8, yAt(value) + 4, formatAxisValue(value, format, frame.locale, values), cssVar("muted", frame.preset.muted), 11, "400", "end")).join("");
 }
 
-export function xLabels(frame: Frame, spec: Record<string, unknown>, labels: { x: number; text: string }[]): string {
+export function xLabels(frame: Frame, spec: Record<string, unknown>, labels: { x: number; text: string }[], plot?: { left: number; right: number }): string {
   if (!axisOn(spec, "x")) return "";
   const step = labels.length > 8 ? Math.ceil(labels.length / 6) : 1;
-  const y = frame.height - (readAxis(spec, "x").title ? 26 : 12);
+  const inner = plot ? Math.max(80, plot.right - plot.left) : Math.max(80, frame.width - 96);
+  const y = frame.height - bottomLegendBand(spec, frame.preset, inner) - (readAxis(spec, "x").title ? 26 : 12);
   return labels
     .filter((label, index) => index % step === 0 && label.text)
     .map((label) => text(label.x, y, fit(label.text, 72, 11), cssVar("muted", frame.preset.muted), 11, "400", "middle"))

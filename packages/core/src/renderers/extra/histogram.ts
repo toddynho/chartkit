@@ -99,7 +99,7 @@ export function renderHistogram(spec: Record<string, unknown>): string | null {
   const edges = yField
     ? bars.map((bar) => ({ x: xAt(bar.x0 + (bar.x1 - bar.x0) / 2), text: bar.label }))
     : domainTicks(axisMin, axisMax).map((value) => ({ x: xAt(value), text: edgeText(value, frame.locale, valueFormat(frame, spec, frame.encoding.x, "x")) }));
-  parts.push(xLabels(frame, spec, edges));
+  parts.push(xLabels(frame, spec, edges, box));
   if (!yField && bars.length <= 8) {
     parts.push(`<text x="${n(box.left)}" y="${n(box.top - 4)}" fill="${cssVar("muted", frame.preset.muted)}" font-size="11">${bars.length} bins</text>`);
   }

@@ -91,7 +91,7 @@ export function renderWaterfall(spec: Record<string, unknown>): string | null {
   parts.push(axisTitleMarks(frame, spec, box));
   parts.push(axisLine(frame, box));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
-  parts.push(xLabels(frame, spec, names.map((name, index) => ({ x: xAt(index), text: name }))));
+  parts.push(xLabels(frame, spec, names.map((name, index) => ({ x: xAt(index), text: name })), box));
   return view.done();
 }
 

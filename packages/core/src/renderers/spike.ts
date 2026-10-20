@@ -1,5 +1,5 @@
 import { seriesPoints } from "../annotations";
-import { axisTitleMarks, categoryX, chooseTicks, heading, lockDomain, placedNotes } from "../chrome";
+import { axisTitleMarks, bottomLegendBand, categoryX, chooseTicks, heading, lockDomain, placedNotes } from "../chrome";
 import { cssVar, lineStroke, paint } from "../theme";
 import { formatAxisValue, formatValue } from "../format";
 import {
@@ -51,7 +51,8 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
     left = Math.max(44, Math.ceil(width + 14));
   }
   if (showY && readAxis(spec, "y").title) left += 16;
-  const plot = { left, top, right: frame.width - 12, bottom: frame.height - (showX ? 28 : 12) - (showX && readAxis(spec, "x").title ? 14 : 0) };
+  const legendBand = bottomLegendBand(spec, frame.preset, frame.width - 12 - left);
+  const plot = { left, top, right: frame.width - 12, bottom: frame.height - (showX ? 28 : 12) - (showX && readAxis(spec, "x").title ? 14 : 0) - legendBand };
   const yScale = linear(domain[0], domain[1], plot.bottom, plot.top);
   const count = values.length;
   const slot = count > 0 ? (plot.right - plot.left) / count : plot.right - plot.left;
@@ -98,7 +99,7 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
   }
   if (showX) {
     const step = count > 8 ? Math.ceil(count / 6) : 1;
-    const labelY = frame.height - (readAxis(spec, "x").title ? 26 : 12);
+    const labelY = frame.height - legendBand - (readAxis(spec, "x").title ? 26 : 12);
     for (let i = 0; i < count; i += step) {
       if (!labels[i]) continue;
       parts.push(text(plot.left + slot * i + slot / 2, labelY, labels[i], cssVar("muted", frame.preset.muted), 11, "400", "middle"));

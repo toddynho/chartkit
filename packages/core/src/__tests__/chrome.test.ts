@@ -216,4 +216,68 @@ describe("shared cartesian chrome", () => {
     const draw = createRenderer([line]);
     expect(draw(spec)).toContain("#ffd60a");
   });
+
+  it.each(cases)("%s keeps a bottom legend below the x-axis title", (type, spec) => {
+    const encoding = spec.encoding as Record<string, unknown>;
+    const next: Record<string, unknown> = {
+      ...spec,
+      legend: { position: "bottom" },
+      axes: {
+        ...(spec.axes as Record<string, unknown>),
+        x: { title: "Hour" },
+      },
+    };
+    if (type === "line" || type === "bar" || type === "stacked-area") {
+      next.encoding = { x: "month", y: [{ field: "value", title: "One" }, { field: "high", title: "Two" }] };
+    }
+    if (type === "scatter") {
+      next.encoding = { ...encoding, color: "month" };
+    }
+    const svg = render(next) ?? "";
+    expect(svg).not.toContain("ck-chart-error");
+    const legendSvg = legendGroup(svg);
+    const legend = textNodes(legendSvg).filter((node) => node.text.trim());
+    const title = textNodes(svg).find((node) => node.text === "Hour");
+    expect(title).toBeTruthy();
+    expect(legend.length).toBeGreaterThan(0);
+    const titleTop = (title?.y ?? 0) - (title?.size ?? 11);
+    const titleBottom = title?.y ?? 0;
+    for (const item of legend) {
+      const top = item.y - item.size;
+      const bottom = item.y;
+      expect(titleBottom > top && titleTop < bottom).toBe(false);
+      expect(item.y).toBeGreaterThan(title?.y ?? 0);
+    }
+    const ticks = textNodes(svg).filter((node) => node.text === "Mar" || node.text === "Apr");
+    for (const tick of ticks) {
+      if (legend.some((item) => item.text === tick.text && item.y === tick.y)) continue;
+      expect(tick.y).toBeLessThan(titleTop);
+    }
+  });
 });
+
+function legendGroup(svg: string): string {
+  const start = svg.indexOf('<g data-ck-legend="bottom"');
+  if (start < 0) return "";
+  let depth = 0;
+  for (let i = start; i < svg.length; i++) {
+    if (svg.startsWith("<g", i)) depth += 1;
+    else if (svg.startsWith("</g>", i)) {
+      depth -= 1;
+      if (depth === 0) return svg.slice(start, i + 4);
+    }
+  }
+  return "";
+}
+
+function textNodes(svg: string): Array<{ text: string; x: number; y: number; size: number }> {
+  return [...svg.matchAll(/<text\b([^>]*)>([^<]*)<\/text>/g)].map((match) => {
+    const attrs = match[1] ?? "";
+    return {
+      text: match[2] ?? "",
+      x: Number(/x="([^"]+)"/.exec(attrs)?.[1]),
+      y: Number(/y="([^"]+)"/.exec(attrs)?.[1]),
+      size: Number(/font-size="([^"]+)"/.exec(attrs)?.[1] ?? 12),
+    };
+  });
+}

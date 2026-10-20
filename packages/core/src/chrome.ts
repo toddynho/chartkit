@@ -1,6 +1,6 @@
 import { annotationLayers, type NoteSeries, type PlotBox } from "./annotations";
 import type { Frame } from "./frame";
-import { cssVar } from "./theme";
+import { cssVar, paint } from "./theme";
 import { esc, font, isRecord, n, padExtent, pickTicks, readAxis, scalePad } from "./svg";
 
 export interface PlotRect {
@@ -77,11 +77,117 @@ export function chooseTicks(spec: Record<string, unknown>, key: "x" | "y" | "y2"
   return auto;
 }
 
-/** Rotated y title and a centred x title. Omitted when the axis is hidden or untitled. */
+interface FooterLegend {
+  title: string;
+  items: { name: string; color: string }[];
+}
+
+const LEGEND_ROW = 18;
+
+function channelName(channel: unknown): string {
+  if (typeof channel === "string" && channel) return channel;
+  if (!isRecord(channel)) return "";
+  if (typeof channel.title === "string" && channel.title) return channel.title;
+  if (typeof channel.lo === "string" && typeof channel.hi === "string") return `${channel.lo}–${channel.hi}`;
+  if (typeof channel.field === "string" && channel.field) return channel.field;
+  return "";
+}
+
+/** An explicit bottom legend. Null keeps the chart's own legend where it already sits. */
+function footerLegend(spec: Record<string, unknown>, preset: Frame["preset"]): FooterLegend | null {
+  if (!isRecord(spec.legend) || spec.legend.show === false || spec.legend.position !== "bottom") return null;
+  const hide = Array.isArray(spec.legend.hide) ? spec.legend.hide.filter((item): item is string => typeof item === "string") : [];
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  const names: string[] = [];
+  const take = (channel: unknown) => {
+    const name = channelName(channel);
+    if (name && !names.includes(name) && !hide.includes(name)) names.push(name);
+  };
+  const y = encoding?.y;
+  if (Array.isArray(y)) y.forEach(take);
+  else if (y !== undefined) take(y);
+  if (!names.length && encoding) {
+    const low = channelName(encoding.low);
+    const high = channelName(encoding.high);
+    if (low && high && !hide.includes(`${low}–${high}`)) names.push(`${low}–${high}`);
+  }
+  if (!names.length && encoding) {
+    for (const key of ["close", "high", "low", "open"]) {
+      const name = channelName(encoding[key]);
+      if (name && !hide.includes(name)) {
+        names.push(name);
+        break;
+      }
+    }
+  }
+  if (!names.length && !hide.includes("Series")) names.push("Series");
+  if (!names.length) return null;
+  const title = typeof spec.legend.title === "string" ? spec.legend.title : "";
+  return { title, items: names.map((name, index) => ({ name, color: paint(undefined, preset, index) })) };
+}
+
+function legendItemWidth(name: string): number {
+  return 26 + name.length * 6.6;
+}
+
+function legendRows(items: FooterLegend["items"], width: number): FooterLegend["items"][] {
+  const rows: FooterLegend["items"][] = [];
+  let row: FooterLegend["items"] = [];
+  let used = 0;
+  for (const item of items) {
+    const span = legendItemWidth(item.name);
+    if (row.length && used + span > width) {
+      rows.push(row);
+      row = [];
+      used = 0;
+    }
+    row.push(item);
+    used += span;
+  }
+  if (row.length) rows.push(row);
+  return rows;
+}
+
+/** Pixels under the x title for a bottom legend. Zero when the legend sits somewhere else. */
+export function bottomLegendBand(spec: Record<string, unknown>, preset: Frame["preset"], innerWidth: number): number {
+  const legend = footerLegend(spec, preset);
+  if (!legend) return 0;
+  const rows = legendRows(legend.items, Math.max(80, innerWidth));
+  return 8 + (legend.title ? 16 : 0) + Math.max(1, rows.length) * LEGEND_ROW;
+}
+
+function bottomLegendMarkup(frame: Frame, legend: FooterLegend, box: PlotRect): string {
+  const width = Math.max(80, box.right - box.left);
+  const rows = legendRows(legend.items, width);
+  const band = 8 + (legend.title ? 16 : 0) + Math.max(1, rows.length) * LEGEND_ROW;
+  const y = frame.height - band + 2;
+  const fill = cssVar("text", frame.preset.text);
+  const parts: string[] = [];
+  if (legend.title) {
+    parts.push(ink(box.left, y + 11, legend.title, fill, 11, "650"));
+  }
+  const body = y + (legend.title ? 16 : 0);
+  rows.forEach((row, index) => {
+    const rowY = body + index * LEGEND_ROW;
+    let cx = box.left;
+    const bits = row.map((item) => {
+      const swatch = `<rect x="${n(cx)}" y="${n(rowY)}" width="10" height="10" rx="2" fill="${item.color}" />`;
+      const text = ink(cx + 16, rowY + 9, item.name, fill, 12, "400");
+      cx += legendItemWidth(item.name);
+      return swatch + text;
+    });
+    parts.push(`<g data-ck-legend-row="${index}">${bits.join("")}</g>`);
+  });
+  return `<g data-ck-legend="bottom" data-ck-legend-align="start" data-ck-legend-orient="horizontal" data-ck-legend-at="0">${parts.join("")}</g>`;
+}
+
+/** Rotated y title and a centred x title. A bottom legend sits under the x title, in its own band. */
 export function axisTitleMarks(frame: Frame, spec: Record<string, unknown>, box: PlotRect): string {
   const y = readAxis(spec, "y");
   const x = readAxis(spec, "x");
   const fill = cssVar("muted", frame.preset.muted);
+  const legend = footerLegend(spec, frame.preset);
+  const band = legend ? bottomLegendBand(spec, frame.preset, box.right - box.left) : 0;
   let out = "";
   if (y.on && y.title) {
     const mid = (box.top + box.bottom) / 2;
@@ -91,8 +197,9 @@ export function axisTitleMarks(frame: Frame, spec: Record<string, unknown>, box:
   }
   if (x.on && x.title) {
     const mid = (box.left + box.right) / 2;
-    out += ink(mid, frame.height - 8, x.title, fill, 11, "500", "middle");
+    out += ink(mid, frame.height - 8 - band, x.title, fill, 11, "500", "middle");
   }
+  if (legend && band) out += bottomLegendMarkup(frame, legend, box);
   return out;
 }
 

@@ -94,7 +94,7 @@ export function renderBoxplot(spec: Record<string, unknown>): string | null {
   parts.push(axisTitleMarks(frame, spec, box));
   parts.push(axisLine(frame, box));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
-  parts.push(xLabels(frame, spec, stats.map((row, index) => ({ x: xAt(index), text: row.name }))));
+  parts.push(xLabels(frame, spec, stats.map((row, index) => ({ x: xAt(index), text: row.name })), box));
   return view.done();
 }
 
