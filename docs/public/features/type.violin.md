@@ -33,6 +33,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | manual | ~register | dts-mechanism (weak) | @antv/g2/lib/exports.d.ts:2 density mark + polygon |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against ab69724f4cc6.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 8f00db13813e.
 
 https://chartkit.dev/features.json

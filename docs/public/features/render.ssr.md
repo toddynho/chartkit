@@ -37,6 +37,6 @@ No spec snippet. This row is not a single option that `validate()` can show.
 | Mermaid (chart-ish diagrams only) | plugin | — | npm (weak) | — needs headless browser |
 | AntV G2 | plugin | — | npm (weak) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against ab69724f4cc6.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 8f00db13813e.
 
 https://chartkit.dev/features.json
