@@ -371,7 +371,8 @@ function hosts(): Host[] {
     ["candle", { version: "1", type: "candlestick", data: rows, encoding: { x: "date", open: "open", high: "high", low: "low", close: "close" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["sankey", { version: "1", type: "sankey", data: rows, encoding: { source: "source", target: "target", y: "value" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["histogram", { version: "1", type: "histogram", data: rows, encoding: { x: "revenue" }, a11y: { alt }, size: { width: 420, height: 220 } }],
-    ["area-range", { version: "1", type: "area-range", data: rows, encoding: { x: "month", y: { field: "revenue", lo: "cost", hi: "value" } }, a11y: { alt }, size: { width: 420, height: 220 } }],
+    // A field beside the band, so mark.line and mark.strokeDash have a centre line to paint.
+    ["area-range", { version: "1", type: "area-range", data: rows, encoding: { x: "month", y: [{ lo: "cost", hi: "value" }, { field: "revenue" }] }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["bar-range", { version: "1", type: "bar-range", data: rows, encoding: { x: "month", low: "cost", high: "revenue" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["errorbar", { version: "1", type: "errorbar", data: rows, encoding: { x: "month", y: "revenue", error: "cost" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     [
