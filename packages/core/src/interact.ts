@@ -5,6 +5,10 @@
  */
 import { formatValue } from "./format";
 import { formatInstant, instantOf, namedZone } from "./timezone";
+import { readTooltip, type TooltipDetail, type TooltipRender } from "./tooltip-slot";
+
+export type { TooltipDetail, TooltipRender };
+export { readTooltip, writeTooltip } from "./tooltip-slot";
 
 export interface InteractSpec {
   type?: string;
@@ -49,6 +53,8 @@ export interface AttachOptions {
   render: (spec: InteractSpec) => string;
   /** When set, including null, selection is controlled. Clicks emit `selectionchange` and wait for `setSelection`. */
   selection?: Selection | null;
+  /** Replaces the tooltip card. Return HTML, a node, or null to hide it. */
+  tooltip?: TooltipRender;
 }
 
 export interface Controller {
@@ -788,11 +794,24 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     title: string,
     rows: { name: string; text: string; color: string }[],
     marks: { x: number; y: number }[],
+    index = -1,
   ): void {
     if (!showTip) return;
-    tip.innerHTML =
-      (title ? `<div>${esc(title)}</div>` : "") +
-      rows.map((row) => `<div class="ck-row"><i style="background:${row.color}"></i>${esc(row.name)}<b>${esc(row.text)}</b></div>`).join("");
+    const custom = options.tooltip ?? readTooltip(host);
+    if (custom) {
+      const body = custom({ title, index, x: title, rows });
+      tip.replaceChildren();
+      if (body == null || body === "") {
+        tip.hidden = true;
+        return;
+      }
+      if (typeof body === "string") tip.innerHTML = body;
+      else tip.append(body);
+    } else {
+      tip.innerHTML =
+        (title ? `<div>${esc(title)}</div>` : "") +
+        rows.map((row) => `<div class="ck-row"><i style="background:${row.color}"></i>${esc(row.name)}<b>${esc(row.text)}</b></div>`).join("");
+    }
     tip.hidden = false;
     const bounds = host.getBoundingClientRect();
     const rect = svg.getBoundingClientRect();
@@ -1402,7 +1421,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const px = crossX(local);
     moveCross(px, title);
     const marks = placeDots(px, horizontal, index);
-    if (showTip) placeTip(event.clientX, event.clientY, title, rows, marks);
+    if (showTip) placeTip(event.clientX, event.clientY, title, rows, marks, index);
   }
 
   function announce(index: number): void {

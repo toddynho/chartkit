@@ -121,18 +121,85 @@ export function logTicks(min: number, max: number): number[] {
   return out.length > 0 ? out : [min, max];
 }
 
+function stepTicks(min: number, max: number, step: number): number[] {
+  if (!(step > 0)) return [];
+  const start = Math.ceil((min - step * 1e-8) / step) * step;
+  const out: number[] = [];
+  for (let value = start; value <= max + step * 1e-6; value += step) {
+    const next = round(value);
+    if (next < min - step * 1e-6) continue;
+    out.push(Object.is(next, -0) ? 0 : next);
+    if (out.length > 12) break;
+  }
+  return out;
+}
+
+/**
+ * Nice ticks for a domain. A short whole-number span keeps a step of 1 or 2,
+ * so a 2–5 point series does not pick up 8.5 labels or skip the data.
+ * Wider domains keep the usual 1-2-5 step.
+ */
 export function ticks(min: number, max: number, count: number): number[] {
-  if (!(max > min)) return [min];
+  if (count <= 0) return [];
+  if (!(max > min) || !Number.isFinite(min) || !Number.isFinite(max)) return [Object.is(round(min), -0) ? 0 : round(min)];
+  const near = (value: number) => Math.abs(value - Math.round(value)) <= 0.35;
+  if (near(min) && near(max)) {
+    const lo = Math.round(min);
+    const hi = Math.round(max);
+    const width = hi - lo;
+    if (width >= 1 && width <= 12) {
+      const step = width <= 7 ? 1 : 2;
+      const list = stepTicks(Math.min(lo, min), Math.max(hi, max), step).filter((value) => value >= min - 1e-6 && value <= max + 1e-6);
+      if (list.length >= 2) return list;
+    }
+  }
   const step = niceNum((max - min) / Math.max(1, count - 1), true) || 1;
   const start = Math.ceil((min - step * 1e-8) / step) * step;
   const out: number[] = [];
   for (let value = start; value <= max + step * 1e-6; value += step) {
     const next = round(value);
     if (next + step * 1e-8 < min) continue;
-    out.push(next);
+    out.push(Object.is(next, -0) ? 0 : next);
     if (out.length > 12) break;
   }
   return out.length > 0 ? out : [min, max];
+}
+
+export interface ScalePad {
+  min: number;
+  max: number;
+}
+
+/** Fraction of the span added past the data. A number pads both ends. */
+export function scalePad(channel: unknown): ScalePad | null {
+  if (!isRecord(channel) || !isRecord(channel.scale)) return null;
+  const pad = channel.scale.padding;
+  const frac = (value: unknown) => (typeof value === "number" && value > 0 && Number.isFinite(value) ? Math.min(1, value) : 0);
+  if (typeof pad === "number") {
+    const amount = frac(pad);
+    return amount > 0 ? { min: amount, max: amount } : null;
+  }
+  if (!isRecord(pad)) return null;
+  const min = frac(pad.min);
+  const max = frac(pad.max);
+  return min > 0 || max > 0 ? { min, max } : null;
+}
+
+/** True when clamp can pull marks to an explicit domain edge. */
+export function scaleClamp(channel: unknown): boolean {
+  if (!isRecord(channel) || !isRecord(channel.scale) || channel.scale.clamp !== true) return false;
+  return domainEnds(channel.scale.domain) !== undefined;
+}
+
+/** Grows an extent by `pad`. A locked end stays put. */
+export function padExtent(min: number, max: number, pad: ScalePad | null, lock?: [number | null, number | null] | null): [number, number] {
+  if (!pad) return [min, max];
+  const span = max > min ? max - min : Math.abs(max) || 1;
+  let lo = min;
+  let hi = max;
+  if (!(lock && typeof lock[0] === "number")) lo = round(min - span * pad.min);
+  if (!(lock && typeof lock[1] === "number")) hi = round(max + span * pad.max);
+  return hi > lo ? [lo, hi] : [min, max];
 }
 
 /** 0° is the top of the circle; positive angles run clockwise. */

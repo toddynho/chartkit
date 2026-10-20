@@ -1,7 +1,7 @@
 import type { ChartSpec } from "@chartkitdev/core";
 export { toPNG, toSVG, toCSV } from "@chartkitdev/core/export";
 import { open, render as renderAll } from "@chartkitdev/core/all";
-import { attach, listen, patchSvg, type ClickDetail, type Controller, type Selection } from "@chartkitdev/core/interact";
+import { attach, listen, patchSvg, writeTooltip, type ClickDetail, type Controller, type Selection, type TooltipRender } from "@chartkitdev/core/interact";
 import { joinRows } from "./append";
 
 export interface AppendOptions {
@@ -23,6 +23,8 @@ export interface MountOptions {
   onSelectionChange?: (selection: Selection) => void;
   /** When set, selection is controlled. Pass the next value to `update`. */
   selection?: Selection | null;
+  /** Replaces the tooltip card. Return HTML, a node, or null to hide it. */
+  tooltip?: TooltipRender;
 }
 
 export interface MountedChart {
@@ -44,6 +46,7 @@ function isElement(el: MountElement): el is MountElement & Element {
 }
 
 export function mount(el: MountElement, spec: ChartSpec, options: MountOptions = {}): MountedChart {
+  if (isElement(el)) writeTooltip(el, options.tooltip);
   const render = options.render ?? renderAll;
   const idle = () => {};
   let alive = true;

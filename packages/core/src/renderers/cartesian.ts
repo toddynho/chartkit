@@ -9,7 +9,7 @@ import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type
 import type { ColorScale } from "../color-scale";
 import { exportList, readColor } from "../frame";
 import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
-import { boxId, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
+import { boxId, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, round, scaleClamp, scalePad, ticks } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
 export interface AxisBox {
@@ -258,6 +258,9 @@ export interface PlotModel {
   intent?: string;
   /** Scale bits set by the axis extra. 0 keeps the classic scale. */
   f: number;
+  /** Extra room on a quantitative x, as fractions of the span. */
+  xPad?: { min: number; max: number } | null;
+  xClamp?: boolean;
   lv?: boolean;
   gx?: false | "solid" | "dashed" | "dotted";
 }
@@ -532,6 +535,8 @@ function toModel(
     xTemporal,
     notes: spec.annotations,
     bands: readBands(spec),
+    xPad: scalePad(encoding.x),
+    xClamp: scaleClamp(encoding.x),
   };
 }
 
@@ -556,11 +561,13 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   const yRev = model.f & 8;
   const yFrom = horizontal ? (yRev ? plot.right : plot.left) : yRev ? plot.top : plot.bottom;
   const yTo = horizontal ? (yRev ? plot.left : plot.right) : yRev ? plot.bottom : plot.top;
-  const yScale = model.yLog ? logScale(yDomain[0], yDomain[1], yFrom, yTo) : linear(yDomain[0], yDomain[1], yFrom, yTo);
+  const yScaleRaw = model.yLog ? logScale(yDomain[0], yDomain[1], yFrom, yTo) : linear(yDomain[0], yDomain[1], yFrom, yTo);
+  const yScale = modelClamp(yScaleRaw, yDomain, axisClamps(model, "y"));
   const y2Rev = model.f & 16;
   const y2From = y2Rev ? plot.top : plot.bottom;
   const y2To = y2Rev ? plot.bottom : plot.top;
-  const y2Scale = model.y2Log ? logScale(y2Domain[0], y2Domain[1], y2From, y2To) : linear(y2Domain[0], y2Domain[1], y2From, y2To);
+  const y2ScaleRaw = model.y2Log ? logScale(y2Domain[0], y2Domain[1], y2From, y2To) : linear(y2Domain[0], y2Domain[1], y2From, y2To);
+  const y2Scale = modelClamp(y2ScaleRaw, y2Domain, axisClamps(model, "y2"));
   const xScale = xPosition(model, count, plot.left, plot.right, plot.top, plot.bottom, horizontal);
 
   const parts: string[] = [];
@@ -605,6 +612,7 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
 
   const notes = annotationLayers(model.notes, {
     plot,
+    taken: seriesLabelBoxes(model, xScale, yScale, y2Scale, horizontal),
     preset: model.preset,
     xAt: (value) => locateX(model, xScale, value, count),
     yAt: (value, axis) => {
@@ -1218,6 +1226,9 @@ function xPosition(
       min = nice[0];
       max = nice[1];
     }
+    const padded = padExtent(min, max, model.xPad, null);
+    min = padded[0];
+    max = padded[1];
   }
   const scale = linear(min, max, spanStart, spanEnd);
   return {
@@ -1947,16 +1958,16 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
     min -= Math.abs(min) || 1;
     max += Math.abs(max) || 1;
   }
-  if (model.f & (axis === "y2" ? 2 : 1)) return pinDomain([min, max], lock);
+  if (model.f & (axis === "y2" ? 2 : 1)) return pinDomain(padExtent(min, max, axisPad(model, axis), lock), lock);
   const [niceMin, niceMax] = niceDomain(min, max);
   let lo = niceMin;
   let hi = niceMax;
   const pinnedAtZero = axisIncludesZero(model, axis) && niceMin <= 0 && min >= 0;
-  const span = Math.max(hi - lo, Math.abs(max) || 1);
+  const span = hi > lo ? hi - lo : Math.abs(max) || 1;
   const gutter = strokeGutter(model, axis, span);
   if (gutter > 0 && max + gutter > hi) hi = round(max + gutter);
   if (!pinnedAtZero && gutter > 0 && min - gutter * 0.5 < lo) lo = round(min - gutter * 0.5);
-  return pinDomain([lo, hi], lock);
+  return pinDomain(padExtent(lo, hi, axisPad(model, axis), lock), lock);
 }
 
 /** Pixel air above a line, converted to data units, so the stroke does not sit on the plot edge. */
@@ -1989,6 +2000,39 @@ export function resolveTicks(model: PlotModel, key: "x" | "y" | "y2", min: numbe
   return log ? logTicks(min, max) : ticks(min, max, count);
 }
 
+function seriesLabelBoxes(
+  model: PlotModel,
+  xScale: XScale,
+  yScale: (value: number) => number,
+  y2Scale: (value: number) => number,
+  horizontal: boolean,
+): { x: number; y: number; w: number; h: number }[] {
+  if (!wantLabels(model) || horizontal) return [];
+  const pos = model.labelAt || "top";
+  const layers = model.stack === "none" ? null : stackLayers(model.series, model.stack === "percent" ? "percent" : "stack");
+  const boxes: { x: number; y: number; w: number; h: number }[] = [];
+  model.series.forEach((series, index) => {
+    if (series.mark === "bar") return;
+    const [first, last] = endsOf(series.values);
+    if (first < 0) return;
+    const scale = series.axis === "y2" ? y2Scale : yScale;
+    const shift = nudge(pos, series.radius ?? model.pointSize);
+    for (let i = 0; i < series.values.length; i++) {
+      const value = series.values[i];
+      if (typeof value !== "number" || !labelIndex(model.labelEnds, i, first, last)) continue;
+      const plotted = layers ? layers.top[index]?.[i] : value;
+      if (typeof plotted !== "number") continue;
+      const text = labelText(model, series, value);
+      const x = xScale.center(i) + shift[0];
+      const y = scale(plotted) + shift[1];
+      const w = Math.max(8, text.length * 6);
+      const left = shift[2] === "middle" ? x - w / 2 : shift[2] === "end" ? x - w : x;
+      boxes.push({ x: left, y: y - 9, w, h: 11 });
+    }
+  });
+  return boxes;
+}
+
 function labelStep(model: PlotModel, count: number): number {
   const target = model.xAxis.count;
   if (target === 0) return 0;
@@ -1998,19 +2042,6 @@ function labelStep(model: PlotModel, count: number): number {
 
 function legendName(model: PlotModel, series: Series): string {
   return hooks?.seriesName(model, series) ?? series.name;
-}
-
-export function ticks(min: number, max: number, count: number): number[] {
-  if (count <= 0) return [];
-  if (!(max > min)) return [min];
-  const step = niceNum((max - min) / (count - 1), true) || 1;
-  const start = Math.ceil(min / step) * step;
-  const out: number[] = [];
-  for (let value = start; value <= max + step * 1e-6; value += step) {
-    out.push(round(value));
-    if (out.length > 12) break;
-  }
-  return out.length > 0 ? out : [min, max];
 }
 
 function linePath(points: Pt[], curve: Curve): string {
@@ -2237,6 +2268,8 @@ interface YChannel {
   pointSize?: number;
   pointHollow: boolean;
   lock?: [number | null, number | null];
+  pad?: { min: number; max: number } | null;
+  clamp?: boolean;
 }
 
 function readYChannels(y: unknown): YChannel[] {
@@ -2259,15 +2292,40 @@ function readYChannels(y: unknown): YChannel[] {
       pointSize: typeof item.pointSize === "number" ? item.pointSize : undefined,
       pointHollow: item.pointFill === "hollow",
       lock: scale ? domainEnds(scale.domain) : undefined,
+      pad: scalePad(item),
+      clamp: scaleClamp(item),
     };
   });
 }
 
+function axisChannels(model: PlotModel): YChannel[] | undefined {
+  return (model as unknown as { channels?: YChannel[] }).channels;
+}
+
 function axisLock(model: PlotModel, axis: "y" | "y2"): DomainLock {
-  const channels = (model as unknown as { channels?: YChannel[] }).channels;
+  const channels = axisChannels(model);
   if (!channels) return null;
   for (const channel of channels) if (channel.axis === axis && channel.lock) return channel.lock;
   return null;
+}
+
+function axisPad(model: PlotModel, axis: "y" | "y2"): { min: number; max: number } | null {
+  const channels = axisChannels(model);
+  if (!channels) return null;
+  for (const channel of channels) if (channel.axis === axis && channel.pad) return channel.pad;
+  return null;
+}
+
+function axisClamps(model: PlotModel, axis: "y" | "y2"): boolean {
+  const channels = axisChannels(model);
+  return Boolean(channels?.some((channel) => channel.axis === axis && channel.clamp));
+}
+
+function modelClamp(scale: (value: number) => number, domain: [number, number], on: boolean): (value: number) => number {
+  if (!on) return scale;
+  const lo = Math.min(domain[0], domain[1]);
+  const hi = Math.max(domain[0], domain[1]);
+  return (value) => scale(value < lo ? lo : value > hi ? hi : value);
 }
 
 function dashAttr(dash: string): string {

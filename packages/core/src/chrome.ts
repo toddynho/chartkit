@@ -1,7 +1,7 @@
 import { annotationLayers, type NoteSeries, type PlotBox } from "./annotations";
 import type { Frame } from "./frame";
 import { cssVar } from "./theme";
-import { esc, font, isRecord, n, pickTicks, readAxis } from "./svg";
+import { esc, font, isRecord, n, padExtent, pickTicks, readAxis, scalePad } from "./svg";
 
 export interface PlotRect {
   left: number;
@@ -37,17 +37,30 @@ function channelsOf(channels: unknown[]): unknown[] {
  * A set end replaces that side. Both ends replace the extent.
  */
 export function lockDomain(min: number, max: number, channels: unknown[]): [number, number] {
-  for (const item of channelsOf(channels)) {
+  const list = channelsOf(channels);
+  let pad = null as ReturnType<typeof scalePad>;
+  for (const item of list) {
+    const next = scalePad(item);
+    if (next) pad = next;
+  }
+  for (const item of list) {
     if (!isRecord(item) || !isRecord(item.scale) || !Array.isArray(item.scale.domain)) continue;
     const domain = item.scale.domain;
     let lo = min;
     let hi = max;
-    if (typeof domain[0] === "number" && Number.isFinite(domain[0])) lo = domain[0];
-    if (typeof domain[1] === "number" && Number.isFinite(domain[1])) hi = domain[1];
+    const lock: [number | null, number | null] = [null, null];
+    if (typeof domain[0] === "number" && Number.isFinite(domain[0])) {
+      lo = domain[0];
+      lock[0] = domain[0];
+    }
+    if (typeof domain[1] === "number" && Number.isFinite(domain[1])) {
+      hi = domain[1];
+      lock[1] = domain[1];
+    }
     if (!(hi > lo)) hi = lo + 1;
-    return [lo, hi];
+    return padExtent(lo, hi, pad, lock);
   }
-  return [min, max];
+  return padExtent(min, max, pad, null);
 }
 
 /**

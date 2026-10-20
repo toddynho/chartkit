@@ -19,7 +19,7 @@ import {
   scaleTypeOf,
   wantsZero,
 } from "../frame";
-import { boxId, clipPath, closeChart, domainEnds, esc, font, isRecord, linear, logNice, logScale, logTicks, n, openChart, pickTicks, readAxis, readInset } from "../svg";
+import { boxId, clipPath, closeChart, domainEnds, esc, font, isRecord, linear, logNice, logScale, logTicks, n, openChart, padExtent, pickTicks, readAxis, readInset, scaleClamp, scalePad } from "../svg";
 
 /** Scatter / bubble. encoding.x and encoding.y are quantitative; size and color are optional. */
 export function renderScatter(spec: Record<string, unknown>): string | null {
@@ -128,12 +128,20 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   const plot = { left: plotLeft, top: plotTop, right: Math.max(plotLeft + 1, plotRight), bottom: Math.max(plotTop + 1, plotBottom) };
   const xRev = scaleReverse(frame.encoding.x);
   const yRev = scaleReverse(frame.encoding.y);
-  const xScale = xLog
-    ? logScale(xDomain[0], xDomain[1], xRev ? plot.right : plot.left, xRev ? plot.left : plot.right)
-    : linear(xDomain[0], xDomain[1], xRev ? plot.right : plot.left, xRev ? plot.left : plot.right);
-  const yScale = yLog
-    ? logScale(yDomain[0], yDomain[1], yRev ? plot.top : plot.bottom, yRev ? plot.bottom : plot.top)
-    : linear(yDomain[0], yDomain[1], yRev ? plot.top : plot.bottom, yRev ? plot.bottom : plot.top);
+  const xScale = clampScale(
+    xLog
+      ? logScale(xDomain[0], xDomain[1], xRev ? plot.right : plot.left, xRev ? plot.left : plot.right)
+      : linear(xDomain[0], xDomain[1], xRev ? plot.right : plot.left, xRev ? plot.left : plot.right),
+    xDomain,
+    scaleClamp(frame.encoding.x),
+  );
+  const yScale = clampScale(
+    yLog
+      ? logScale(yDomain[0], yDomain[1], yRev ? plot.top : plot.bottom, yRev ? plot.bottom : plot.top)
+      : linear(yDomain[0], yDomain[1], yRev ? plot.top : plot.bottom, yRev ? plot.bottom : plot.top),
+    yDomain,
+    scaleClamp(frame.encoding.y),
+  );
   const xTicks = pickTicks(xDomain[0], xDomain[1], xAxis.count ?? 5, xAxis.values, xLog);
   const grid = gridStyle(spec);
   const rules = readRules(spec.mark);
@@ -197,8 +205,21 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   const axes = isRecord(spec.axes) ? spec.axes : undefined;
   const bandOf = (key: string) => (axes && isRecord(axes[key]) ? axes[key].bands : undefined);
   const dated = points.length > 0 && points.every((point) => point.x > 1e11);
+  const taken = showLabels
+    ? points.map((point) => {
+        const shift = nudge(labelAt || "top", 4);
+        const format = frame.mark.labelFormat ?? yFormat;
+        const text = formatValue(point.y, format, frame.locale);
+        const x = xScale(point.x) + shift[0];
+        const y = yScale(point.y) + shift[1];
+        const w = Math.max(8, text.length * 6);
+        const left = shift[2] === "middle" ? x - w / 2 : shift[2] === "end" ? x - w : x;
+        return { x: left, y: y - 9, w, h: 11 };
+      })
+    : [];
   const notes = annotationLayers(spec.annotations, {
     plot,
+    taken,
     preset: frame.preset,
     xAt: (value) => {
       const numeric = finite(value);
@@ -304,13 +325,25 @@ function explicitPositiveDomain(channel: unknown): [number, number] | null {
   return null;
 }
 
+function clampScale(scale: (value: number) => number, domain: [number, number], on: boolean): (value: number) => number {
+  if (!on) return scale;
+  const lo = Math.min(domain[0], domain[1]);
+  const hi = Math.max(domain[0], domain[1]);
+  return (value) => scale(value < lo ? lo : value > hi ? hi : value);
+}
+
 function padDomain(domain: [number, number], channel: unknown): [number, number] {
-  if (scaleTypeOf(channel) === "log") return domain;
+  if (scaleTypeOf(channel) === "log") return padExtent(domain[0], domain[1], scalePad(channel), null);
   const explicit = typeof channel === "object" && channel !== null && "scale" in channel;
   const scale = explicit ? (channel as { scale?: { domain?: unknown; nice?: unknown } }).scale : undefined;
-  if (scale && (Array.isArray(scale.domain) || scale.nice === false)) return domain;
-  const span = domain[1] - domain[0] || 1;
-  return [domain[0] - span * 0.06, domain[1] + span * 0.06];
+  const ends = domainEnds(scale?.domain);
+  const lock: [number | null, number | null] | null = ends ? [ends[0], ends[1]] : null;
+  let next = domain;
+  if (!(scale && (Array.isArray(scale.domain) || scale.nice === false))) {
+    const span = domain[1] - domain[0] || 1;
+    next = [domain[0] - span * 0.06, domain[1] + span * 0.06];
+  }
+  return padExtent(next[0], next[1], scalePad(channel), lock);
 }
 
 function lerp(value: number, d0: number, d1: number, r0: number, r1: number): number {

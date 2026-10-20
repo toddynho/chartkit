@@ -4,6 +4,8 @@
  * A static render stays a string: adapters call `attach` after the SVG is in the DOM.
  */
 
+import { readTooltip } from "./tooltip-slot";
+
 const EXTRA = new Set(["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey"]);
 
 export interface TipController {
@@ -38,7 +40,17 @@ export function attach(host: EventTarget & { querySelector?(selector: string): E
       tip.style.display = "none";
       return;
     }
-    tip.textContent = label;
+    const custom = readTooltip(root);
+    if (custom) {
+      const body = custom({ title: label, index: -1, x: null, rows: [{ name: label, text: label, color: "" }] });
+      tip.replaceChildren();
+      if (body == null || body === "") {
+        tip.style.display = "none";
+        return;
+      }
+      if (typeof body === "string") tip.innerHTML = body;
+      else tip.append(body);
+    } else tip.textContent = label;
     tip.style.display = "block";
     tip.style.left = `${pointer.clientX + 12}px`;
     tip.style.top = `${pointer.clientY + 12}px`;

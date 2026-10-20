@@ -27,6 +27,13 @@ function titleOf(value: unknown, fallback: string): string {
   return fallback;
 }
 
+/** A band is the range, not the lower field. An explicit title stays as written. */
+function rangeName(item: unknown, lo: string, hi: string): string {
+  if (isRecord(item) && typeof item.title === "string" && item.title) return item.title;
+  if (lo && hi) return `${lo}–${hi}`;
+  return lo || hi || "range";
+}
+
 function colorOf(value: unknown, preset: Parameters<typeof paint>[1], index: number): string {
   const color = isRecord(value) && typeof value.color === "string" ? value.color : undefined;
   return paint(color, preset, index);
@@ -73,7 +80,7 @@ function readBands(encoding: Record<string, unknown>, table: DataTable, preset: 
     if (isRecord(item) && typeof item.lo === "string" && typeof item.hi === "string") {
       const explicit = typeof item.color === "string";
       bands.push({
-        name: titleOf(item, item.lo),
+        name: rangeName(item, item.lo, item.hi),
         color: colorOf(item, preset, palette),
         explicit,
         lo: columnNums(table, item.lo),
@@ -99,7 +106,7 @@ function readBands(encoding: Record<string, unknown>, table: DataTable, preset: 
   const high = fieldOf(encoding.high);
   if (low && high && bands.length === 0) {
     bands.push({
-      name: "Band",
+      name: low && high ? `${low}–${high}` : "range",
       color: line ? line.color : paint(undefined, preset, palette),
       explicit: false,
       lo: columnNums(table, low),

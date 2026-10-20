@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
 import { render } from "../all";
-import { attach, buildHoverIndex, lookupIndex, patchSvg, type ClickDetail, type InteractSpec, type Selection } from "../interact";
+import { attach, buildHoverIndex, lookupIndex, patchSvg, writeTooltip, type ClickDetail, type InteractSpec, type Selection } from "../interact";
 
 const alt = "Sample series used to exercise client interaction.";
 
@@ -797,5 +797,17 @@ describe("attach", () => {
     frames.at(-1)?.(now + 1000);
     expect(svg.querySelector("path")!.getAttribute("d")).not.toBe(before);
     expect(host.querySelector("svg")).toBe(svg);
+  });
+
+  it("lets an adapter replace the tooltip card", () => {
+    const host = hostOf(lineSpec());
+    writeTooltip(host, () => "<b>Custom tip</b>");
+    const ctl = attach(host, lineSpec(), { render });
+    const svg = host.querySelector("svg")!;
+    const plot = svg.querySelector("clipPath rect")!;
+    const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.5;
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 80, bubbles: true }));
+    expect(host.querySelector("[data-ck-tip]")?.innerHTML).toBe("<b>Custom tip</b>");
+    ctl.destroy();
   });
 });

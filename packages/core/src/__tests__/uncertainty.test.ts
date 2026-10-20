@@ -103,6 +103,22 @@ describe("uncertainty charts", () => {
     expect(createRenderer([line])(forecast)).toContain("@chartkitdev/core/charts/area-range");
   });
 
+  it("names an untitled band from its two fields", () => {
+    const spec = {
+      ...forecast,
+      encoding: {
+        x: "month",
+        y: [
+          { lo: "lo", hi: "hi" },
+          { field: "revenue", title: "Forecast" },
+        ],
+      },
+    };
+    const svg = render(spec);
+    expect(svg).toContain(">lo–hi<");
+    expect(svg).not.toMatch(/>lo</);
+  });
+
   it("shares the line colour across nested bands and can dash the forecast", () => {
     const spec = {
       version: "1",

@@ -47,7 +47,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   const prices = candles.flatMap((candle) => [candle.high, candle.low]);
   const pad = (Math.max(...prices) - Math.min(...prices)) * 0.08 || 1;
   const fitted = resolveDomain([Math.min(...prices) - pad, Math.max(...prices) + pad], frame.encoding.high, wantsZero(frame.encoding.high, false));
-  const domain = lockDomain(fitted[0], fitted[1], [frame.encoding.high, frame.encoding.low, frame.encoding.close, frame.encoding.y]);
+  const domain = lockDomain(fitted[0], fitted[1], [frame.encoding.open, frame.encoding.high, frame.encoding.low, frame.encoding.close, frame.encoding.y]);
   const showVolume = volumeF !== undefined;
   const showX = axisOn(spec, "x");
   const showY = axisOn(spec, "y");

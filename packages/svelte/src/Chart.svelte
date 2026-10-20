@@ -1,7 +1,7 @@
 <script>
   import { createEventDispatcher, onMount } from "svelte";
   import { open, render as renderAll } from "@chartkitdev/core/all";
-  import { attach, listen, patchSvg } from "@chartkitdev/core/interact";
+  import { attach, listen, patchSvg, writeTooltip } from "@chartkitdev/core/interact";
 
   /** @type {import("@chartkitdev/core").ChartSpec} */
   export let spec;
@@ -21,6 +21,12 @@
   export let onseriesclick = undefined;
   export let onlegendclick = undefined;
   export let onselectionchange = undefined;
+
+  /**
+   * Replaces the tooltip card. Return HTML, a node, or null to hide it.
+   * @type {import("@chartkitdev/core/interact").TooltipRender | undefined}
+   */
+  export let tooltip = undefined;
 
   const dispatch = createEventDispatcher();
 
@@ -69,6 +75,7 @@
     }
   }
 
+  $: if (host) writeTooltip(host, tooltip);
   $: markup = render(spec);
   $: if (!ready) shown = markup;
   $: if (ready && host && ctl) ctl.update(spec, markup);

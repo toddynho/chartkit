@@ -971,6 +971,25 @@ export interface Scale {
    * Flip the direction of the scale.
    */
   reverse?: boolean;
+  /**
+   * Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.
+   */
+  padding?:
+    | number
+    | {
+        /**
+         * Fraction of the span added below the data.
+         */
+        min?: number;
+        /**
+         * Fraction of the span added above the data.
+         */
+        max?: number;
+      };
+  /**
+   * Draw values outside an explicit scale.domain at the domain edge.
+   */
+  clamp?: boolean;
 }
 /**
  * Colour scale. Sequential and diverging are continuous; quantize and threshold are binned.

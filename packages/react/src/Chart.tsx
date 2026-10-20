@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChartRenderer, ChartSpec } from "@chartkitdev/core";
 import { adopt, isExtra, render as renderAll } from "@chartkitdev/core/all";
-import { attach, listen, type ClickDetail, type Controller, type Selection } from "@chartkitdev/core/interact";
+import { attach, listen, writeTooltip, type ClickDetail, type Controller, type Selection, type TooltipRender } from "@chartkitdev/core/interact";
 
 export interface ChartProps {
   /** A v1 chart spec. The same object renders in every ChartKit adapter. */
@@ -22,6 +22,8 @@ export interface ChartProps {
   onLegendClick?: (detail: ClickDetail) => void;
   selection?: Selection | null;
   onSelectionChange?: (selection: Selection) => void;
+  /** Replaces the tooltip card. Return HTML, a node, or null to hide it. The spec stays JSON. */
+  tooltip?: TooltipRender;
 }
 
 async function ensure(type: string): Promise<void> {
@@ -37,7 +39,7 @@ async function ensure(type: string): Promise<void> {
  * Histogram through waterfall load `@chartkitdev/core/charts/<type>` after that.
  * `renderToString` from `./ssr` imports them statically.
  */
-export function Chart({ spec, className, style, render, onPointClick, onSeriesClick, onLegendClick, selection, onSelectionChange }: ChartProps) {
+export function Chart({ spec, className, style, render, onPointClick, onSeriesClick, onLegendClick, selection, onSelectionChange, tooltip }: ChartProps) {
   const extra = render == null && isExtra(spec.type);
   const coreMarkup = useMemo(() => (extra ? "" : (render ?? renderAll)(spec)), [spec, render, extra]);
   const [extraSvg, setExtraSvg] = useState("");
@@ -65,6 +67,10 @@ export function Chart({ spec, className, style, render, onPointClick, onSeriesCl
       alive = false;
     };
   }, [spec, extra]);
+
+  useEffect(() => {
+    if (host.current) writeTooltip(host.current, tooltip);
+  }, [tooltip]);
 
   useEffect(() => {
     const el = host.current;
