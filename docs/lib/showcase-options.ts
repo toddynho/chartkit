@@ -177,6 +177,12 @@ export function optionsIn(spec: unknown): OptionLink[] {
     }
   }
   if (isRecord(spec.metric)) noteFormat(ids, spec.metric.format);
+  if (isRecord(spec.axes)) {
+    for (const key of ["x", "y", "y2"]) {
+      const axis = spec.axes[key];
+      if (isRecord(axis) && axis.bands !== undefined) add(ids, "axis.bands");
+    }
+  }
   if (Array.isArray(spec.annotations)) {
     for (const mark of spec.annotations) {
       if (!isRecord(mark)) continue;
@@ -184,6 +190,9 @@ export function optionsIn(spec: unknown): OptionLink[] {
       if (mark.type === "rule" && mark.axis === "y") add(ids, "annotation.line.y");
       if (mark.type === "rule" && mark.axis === "x") add(ids, "annotation.line.x");
       if (mark.type === "text") add(ids, "annotation.text");
+      if (mark.type === "trendline") add(ids, "annotation.trendline");
+      if (mark.type === "marker") add(ids, "annotation.marker");
+      if (mark.type === "regression") add(ids, "type.regression");
       if (typeof mark.labelPosition === "string") add(ids, "annotation.label.position");
       if (typeof mark.dash === "string") add(ids, "annotation.style");
     }

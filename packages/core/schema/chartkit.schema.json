@@ -91,7 +91,7 @@
       "items": {
         "$ref": "#/$defs/annotation"
       },
-      "description": "Reference rules, bands and text notes."
+      "description": "Reference rules, bands, text, trendlines, regression fits, and point callouts."
     },
     "theme": {
       "$ref": "#/$defs/theme"
@@ -1470,6 +1470,20 @@
                 "rotate": {
                   "type": "number",
                   "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true."
+                },
+                "bands": {
+                  "description": "Shaded x ranges, or \"weekends\" to shade Saturday and Sunday when x is dates.",
+                  "oneOf": [
+                    {
+                      "const": "weekends",
+                      "description": "Shade Saturday and Sunday. Warns when x values are not dates."
+                    },
+                    {
+                      "type": "array",
+                      "items": { "$ref": "#/$defs/axisBand" },
+                      "description": "Shaded ranges, such as a launch window."
+                    }
+                  ]
                 }
               },
               "description": "Axis settings."
@@ -1613,6 +1627,11 @@
                 "rotate": {
                   "type": "number",
                   "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true."
+                },
+                "bands": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/axisBand" },
+                  "description": "Shaded y ranges, such as a target zone."
                 }
               },
               "description": "Axis settings."
@@ -1756,6 +1775,11 @@
                 "rotate": {
                   "type": "number",
                   "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true."
+                },
+                "bands": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/axisBand" },
+                  "description": "Shaded ranges on the second y axis."
                 }
               },
               "description": "Axis settings."
@@ -1924,6 +1948,34 @@
       ],
       "description": "Hover tooltip. true/false or settings. Default on for interactive charts."
     },
+    "axisBand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": {
+          "type": ["number", "string"],
+          "description": "Start of the range, in data units or a category."
+        },
+        "to": {
+          "type": ["number", "string"],
+          "description": "End of the range, in data units or a category."
+        },
+        "label": {
+          "type": "string",
+          "description": "Text shown on the band."
+        },
+        "color": { "$ref": "#/$defs/color" },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.12,
+          "description": "Fill opacity, 0–1."
+        }
+      },
+      "description": "A shaded range on an axis."
+    },
     "annotation": {
       "oneOf": [
         {
@@ -2065,6 +2117,108 @@
             }
           },
           "description": "Text: a note pinned to a data coordinate."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "method"],
+          "properties": {
+            "type": { "const": "trendline" },
+            "method": {
+              "enum": ["mean", "median", "linear"],
+              "description": "mean and median are horizontal lines. linear is a least-squares fit."
+            },
+            "axis": {
+              "enum": ["y", "y2"],
+              "default": "y",
+              "description": "Series axis the statistic is taken from."
+            },
+            "series": {
+              "type": "string",
+              "description": "Series name. Defaults to the first series on the axis."
+            },
+            "dash": {
+              "enum": ["solid", "dashed", "dotted"],
+              "default": "dashed",
+              "description": "Line style. Mean and median default to dashed; linear defaults to solid."
+            },
+            "label": {
+              "type": "string",
+              "description": "Text at the end of the line. Defaults to Mean, Median, or Linear."
+            },
+            "color": { "$ref": "#/$defs/color" }
+          },
+          "description": "Trendline: mean, median, or a linear fit, with a label."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "method"],
+          "properties": {
+            "type": { "const": "regression" },
+            "method": {
+              "enum": ["linear", "loess"],
+              "default": "linear",
+              "description": "linear is least squares. loess is a local weighted fit."
+            },
+            "band": {
+              "type": "boolean",
+              "default": false,
+              "description": "Shade a 95% confidence band around the fit."
+            },
+            "bandwidth": {
+              "type": "number",
+              "minimum": 0.2,
+              "maximum": 1,
+              "default": 0.6,
+              "description": "Loess window as a fraction of the points. Ignored for linear."
+            },
+            "axis": {
+              "enum": ["y", "y2"],
+              "default": "y",
+              "description": "Series axis the fit is taken from."
+            },
+            "series": {
+              "type": "string",
+              "description": "Series name. Defaults to the first series on the axis."
+            },
+            "label": {
+              "type": "string",
+              "description": "Text at the end of the fit. Defaults to Linear fit or Loess."
+            },
+            "color": { "$ref": "#/$defs/color" }
+          },
+          "description": "Regression overlay: a linear or loess fit, with an optional confidence band. Not a separate chart type."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "x", "label"],
+          "properties": {
+            "type": { "const": "marker" },
+            "x": {
+              "type": ["number", "string"],
+              "description": "x position in data units, or a category."
+            },
+            "y": {
+              "type": "number",
+              "description": "y position in data units. Omit to use the series value at x."
+            },
+            "label": {
+              "type": "string",
+              "description": "Text in the callout box."
+            },
+            "dx": {
+              "type": "number",
+              "description": "Horizontal offset of the text box, in pixels."
+            },
+            "dy": {
+              "type": "number",
+              "description": "Vertical offset of the text box, in pixels. Negative is up."
+            },
+            "color": { "$ref": "#/$defs/color" }
+          },
+          "description": "Callout: a point, a leader, and a text box kept inside the plot."
         }
       ],
       "description": "A reference mark drawn on the chart."

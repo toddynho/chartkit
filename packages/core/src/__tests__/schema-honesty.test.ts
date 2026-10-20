@@ -183,7 +183,10 @@ function probes(leaf: Leaf): unknown[] {
 }
 
 function annotationSeed(path: string): Record<string, unknown> {
-  if (path.endsWith("/from") || path.endsWith("/to") || path.endsWith("/opacity")) return { type: "band", axis: "y", from: 1000, to: 2200, label: "Band" };
+  if (path.endsWith("/bandwidth") || path.endsWith("/band")) return { type: "regression", method: "loess", band: true, bandwidth: 0.6, label: "Fit" };
+  if (path.endsWith("/dx") || path.endsWith("/dy")) return { type: "marker", x: "Feb", y: 2000, label: "Note" };
+  if (path.endsWith("/method") || path.endsWith("/series")) return { type: "trendline", method: "mean", label: "Mean" };
+  if (path.endsWith("/from") || path.endsWith("/to") || path.endsWith("/opacity")) return { type: "band", axis: "y", from: 0, to: 2200, label: "Band" };
   if (path.endsWith("/x") || (path.endsWith("/y") && path.startsWith("/annotations"))) return { type: "text", x: "Feb", y: 2000, label: "Note" };
   return { type: "rule", axis: "y", value: 2500, label: "Goal" };
 }
@@ -191,6 +194,19 @@ function annotationSeed(path: string): Record<string, unknown> {
 function apply(host: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
   const spec = structuredClone(host);
   if (path.startsWith("/annotations/")) spec.annotations = [annotationSeed(path)];
+  if (/^\/axes\/(x|y|y2)\/bands\//.test(path)) {
+    const key = path.split("/")[2] ?? "x";
+    const axes = isRecord(spec.axes) ? spec.axes : {};
+    const box = isRecord(axes[key]) ? axes[key] : {};
+    const bands = Array.isArray(box.bands) ? box.bands : [{}];
+    if (!isRecord(bands[0])) bands[0] = {};
+    const row = bands[0] as Record<string, unknown>;
+    if (typeof row.from !== "number" && typeof row.from !== "string") row.from = 0;
+    if (typeof row.to !== "number" && typeof row.to !== "string") row.to = key === "x" ? 2 : 1000;
+    box.bands = bands;
+    axes[key] = box;
+    spec.axes = axes;
+  }
   if (path.startsWith("/metric/bands/")) {
     const metric = isRecord(spec.metric) ? spec.metric : { value: 64, label: "Capacity used", min: 0, max: 100 };
     spec.metric = { ...metric, bands: [{ from: 0, to: 100, label: "Low", color: "#c0ffee" }] };
@@ -240,6 +256,17 @@ function apply(host: Record<string, unknown>, path: string, value: unknown): Rec
   }
   const last = parts[parts.length - 1] ?? "";
   (cursor as Record<string, unknown>)[last] = value;
+  if (/^\/axes\/(x|y|y2)\/bands\/0\/(from|to)$/.test(path)) {
+    const key = path.split("/")[2] ?? "x";
+    const axes = isRecord(spec.axes) ? spec.axes : {};
+    const box = isRecord(axes[key]) ? axes[key] : {};
+    const row = Array.isArray(box.bands) && isRecord(box.bands[0]) ? (box.bands[0] as Record<string, unknown>) : undefined;
+    if (row && typeof row.from === "number" && typeof row.to === "number" && row.from > row.to) {
+      const swap = row.from;
+      row.from = row.to;
+      row.to = swap;
+    }
+  }
   if (/^\/axes\/(x|y|y2)\/(titlePosition|titleRotate)$/.test(path)) {
     const key = path.split("/")[2] ?? "x";
     const axes = isRecord(spec.axes) ? spec.axes : {};

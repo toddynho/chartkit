@@ -1,14 +1,14 @@
 # Alternating bands / plot bands
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Shaded alternating stripes or bands on an axis
 
-Matrix status: `partial`. Verification: `dts-path` (strong).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-band annotations (manual)
+axes.x.bands and axes.y.bands shade ranges. x also accepts "weekends" when x is dates.
 
-Source: chartkit:packages/core/src/generated/schema.ts:69
+Source: chartkit:packages/core/src/annotations.ts:19
 
 ## ChartKit spec
 
@@ -37,14 +37,17 @@ Source: chartkit:packages/core/src/generated/schema.ts:69
     "width": 640,
     "height": 260
   },
-  "annotations": [
-    {
-      "type": "rule",
-      "axis": "y",
-      "value": 50,
-      "label": "Mark"
+  "axes": {
+    "x": {
+      "bands": [
+        {
+          "from": "Q1",
+          "to": "Q2",
+          "label": "Window"
+        }
+      ]
     }
-  ]
+  }
 }
 ```
 
@@ -75,6 +78,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~rangeY | dts-grep (weak) | @antv/g2/lib/index.d.ts:82 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 699f05dc7c70.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 5b79c72ec5e9.
 
 https://chartkit.dev/features.json

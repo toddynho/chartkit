@@ -17,7 +17,7 @@ Log scale. ChartKit is the size script. The other bars are the bench line, using
   "data": [
     {
       "name": "ChartKit",
-      "bytes": 25614
+      "bytes": 27908
     },
     {
       "name": "CK bench",
