@@ -2,7 +2,7 @@
 
 The measured line bundles and the published round of browser timings, drawn as charts. Losses stay on the page.
 
-Bundle bytes are from docs/data/measured-sizes.json, size script measured 2026-10-19 on `699f05dc7c7068a0eaac9fe087e80289fb5b8731`, bench bundles measured 2026-10-19. Timings are older round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
+Bundle bytes are from docs/data/measured-sizes.json, size script measured 2026-10-20 on `f0e644ec234d6dbae5ff4dac9dd5b58a2e5e054a`, bench bundles measured 2026-10-19. Timings are older round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
 
 ## Line chart, gzip
 
@@ -17,7 +17,7 @@ Log scale. ChartKit is the size script. The other bars are the bench line, using
   "data": [
     {
       "name": "ChartKit",
-      "bytes": 25614
+      "bytes": 30482
     },
     {
       "name": "CK bench",
@@ -483,6 +483,7 @@ Painted median from the same round 13 file. uPlot is ahead of ChartKit here.
 - [Axis title](https://chartkit.dev/features/axis.title) (`axis.title`)
 - [Click events on marks](https://chartkit.dev/features/interaction.click) (`interaction.click`)
 - [Selection (point / multi / series)](https://chartkit.dev/features/interaction.select) (`interaction.select`)
+- [Margins / padding](https://chartkit.dev/features/layout.margin) (`layout.margin`)
 - [Click to toggle series](https://chartkit.dev/features/legend.interactive) (`legend.interactive`)
 - [Legend position](https://chartkit.dev/features/legend.position) (`legend.position`)
 - [Logarithmic scale](https://chartkit.dev/features/scale.log) (`scale.log`)

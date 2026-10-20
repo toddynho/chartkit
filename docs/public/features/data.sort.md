@@ -1,14 +1,50 @@
 # Sorting categories
 
-ChartKit: **none**
+ChartKit: **native**
 
 Sort bars/categories by value or custom order
 
-Matrix status: `none`. Verification: `source-review` (strong).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-probe hit reviewed: match is internal x-index sort in interact.ts:90; no spec option
+sort by a field or by value, ascending or descending
 
-No spec snippet. ChartKit does not support this feature.
+Source: chartkit:packages/core/src/sort.ts:1
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "bar",
+  "data": [
+    {
+      "lane": "A",
+      "stops": 12
+    },
+    {
+      "lane": "C",
+      "stops": 15
+    }
+  ],
+  "encoding": {
+    "x": "lane",
+    "y": "stops"
+  },
+  "a11y": {
+    "alt": "Lane C has more."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "sort": {
+    "by": "value",
+    "order": "descending"
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -35,6 +71,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~sortX | dts-grep (weak) | @antv/g2/lib/index.d.ts:45 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 699f05dc7c70.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against f0e644ec234d.
 
 https://chartkit.dev/features.json

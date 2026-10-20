@@ -398,6 +398,7 @@ A sparkline with no axes.
 - [Number formatting options](https://chartkit.dev/features/format.number) (`format.number`)
 - [Click events on marks](https://chartkit.dev/features/interaction.click) (`interaction.click`)
 - [Selection (point / multi / series)](https://chartkit.dev/features/interaction.select) (`interaction.select`)
+- [Margins / padding](https://chartkit.dev/features/layout.margin) (`layout.margin`)
 - [Click to toggle series](https://chartkit.dev/features/legend.interactive) (`legend.interactive`)
 - [Legend position](https://chartkit.dev/features/legend.position) (`legend.position`)
 - [Multiple / dual y axes](https://chartkit.dev/features/scale.multi) (`scale.multi`)

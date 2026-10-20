@@ -194,6 +194,9 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     const numeric = typeof value === "number" ? value : Number(value);
     return Number.isFinite(numeric) ? numeric : null;
   };
+  const axes = isRecord(spec.axes) ? spec.axes : undefined;
+  const bandOf = (key: string) => (axes && isRecord(axes[key]) ? axes[key].bands : undefined);
+  const dated = points.length > 0 && points.every((point) => point.x > 1e11);
   const notes = annotationLayers(spec.annotations, {
     plot,
     preset: frame.preset,
@@ -208,11 +211,16 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
       if (numeric === null || (yLog && numeric <= 0)) return null;
       return yScale(numeric);
     },
+    samples: [{ name: yField || "y", axis: "y", pts: points.map((point) => ({ x: point.x, y: point.y })) }],
+    temporal: dated,
+    xNum: dated ? points.map((point) => point.x) : null,
+    count: points.length,
+    bands: { x: bandOf("x"), y: bandOf("y") },
   });
   const clip = boxId(frame.id, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top);
   parts.push(`<defs>${clipPath(clip, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top)}</defs>`);
-  parts.push(notes.under);
   parts.push(`<g clip-path="url(#${clip})">`);
+  parts.push(notes.under);
   const labels = bag();
   let labelSvg = "";
   const labelFill = cssVar("text", frame.preset.text);

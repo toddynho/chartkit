@@ -4,6 +4,7 @@
  * Adapters call `attach` after the SVG is mounted and `patchSvg` when the spec changes.
  */
 import { formatValue } from "./format";
+import { formatInstant, instantOf, namedZone } from "./timezone";
 
 export interface InteractSpec {
   type?: string;
@@ -613,6 +614,11 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const field = xField();
     const raw = field ? table.cell(field, index) : index;
     const format = isRecord(base.encoding) && isRecord(base.encoding.x) ? base.encoding.x.format : undefined;
+    const zone = namedZone(base.timezone);
+    if (zone) {
+      const ms = instantOf(raw);
+      if (ms !== null) return format !== undefined ? formatValue(ms, format, locale(), zone) : formatInstant(ms, locale(), zone);
+    }
     if (typeof raw === "number") return formatValue(raw, format ?? "number", locale());
     return raw == null ? String(index) : String(raw);
   }
@@ -1505,10 +1511,14 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       if (!alive) return;
       specNow = next;
       base = next;
+      const follow = lo === 0 && (n === 0 || hi === n - 1);
       table = openTable(next.data);
       series = seriesOf(next, table);
       n = table.n;
-      if (hi >= n) hi = Math.max(0, n - 1);
+      if (follow) {
+        lo = 0;
+        hi = Math.max(0, n - 1);
+      } else if (hi >= n) hi = Math.max(0, n - 1);
       if (lo > hi) lo = 0;
       if (lo === 0 && hi === n - 1 && hidden.size === 0 && markup) {
         patchSvg(host as PatchHost, markup, durationMs(next, n));

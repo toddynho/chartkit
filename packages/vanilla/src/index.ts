@@ -2,6 +2,12 @@ import type { ChartSpec } from "@chartkitdev/core";
 export { toPNG, toSVG, toCSV } from "@chartkitdev/core/export";
 import { open, render as renderAll } from "@chartkitdev/core/all";
 import { attach, listen, patchSvg, type ClickDetail, type Controller, type Selection } from "@chartkitdev/core/interact";
+import { joinRows } from "./append";
+
+export interface AppendOptions {
+  /** Keep this many trailing rows after the append. */
+  window?: number;
+}
 
 /** Anything with an `innerHTML` string. `HTMLElement` qualifies. */
 export interface MountElement {
@@ -22,6 +28,8 @@ export interface MountOptions {
 export interface MountedChart {
   /** Draw a new spec into the same element. A matching SVG does not rewrite the DOM. */
   update(spec: ChartSpec, selection?: Selection | null): void;
+  /** Append rows and redraw in place. `window` keeps the last N rows. */
+  append(rows: unknown[], options?: AppendOptions): void;
   /** Remove the chart markup. Further updates do nothing. */
   destroy(): void;
 }
@@ -80,16 +88,23 @@ export function mount(el: MountElement, spec: ChartSpec, options: MountOptions =
     if (!ctl || (svg && svg !== bound)) arm(next);
   };
 
-  kick(spec);
+  let current = spec;
+  kick(current);
 
   return {
     update(next, nextSelection) {
       if (!alive) return;
+      current = next;
       if (nextSelection !== undefined) {
         selection = nextSelection;
         ctl?.setSelection(nextSelection);
       }
       kick(next);
+    },
+    append(rows, options) {
+      if (!alive) return;
+      current = { ...current, data: joinRows(current.data, rows, options?.window) as ChartSpec["data"] };
+      kick(current);
     },
     destroy() {
       if (!alive) return;

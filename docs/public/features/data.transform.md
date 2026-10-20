@@ -1,14 +1,14 @@
 # Built-in data transforms
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Filter, aggregate, bin, fold, pivot, window inside the spec
 
-Matrix status: `partial`. Verification: `dts-path` (strong).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-histogram binning and boxplot stats only
+filter, window (rolling mean), and aggregate (sum, mean, count) in transform
 
-Source: chartkit:packages/core/src/generated/schema.ts:903
+Source: chartkit:packages/core/src/transform.ts:1
 
 ## ChartKit spec
 
@@ -18,28 +18,48 @@ Source: chartkit:packages/core/src/generated/schema.ts:903
   "type": "line",
   "data": [
     {
-      "quarter": "Q1",
-      "units": 40
+      "day": "2026-02-01",
+      "units": 10
     },
     {
-      "quarter": "Q2",
-      "units": 55
+      "day": "2026-02-02",
+      "units": 14
+    },
+    {
+      "day": "2026-02-03",
+      "units": 12
+    },
+    {
+      "day": "2026-02-04",
+      "units": 18
     }
   ],
   "encoding": {
-    "x": "quarter",
-    "y": "units"
+    "x": {
+      "field": "day",
+      "type": "temporal"
+    },
+    "y": [
+      "units",
+      "roll"
+    ]
   },
   "a11y": {
-    "alt": "Units rose in Q2."
+    "alt": "Units with a two-day rolling mean."
   },
   "size": {
     "width": 640,
     "height": 260
   },
-  "mark": {
-    "bins": 4
-  }
+  "transform": [
+    {
+      "type": "window",
+      "field": "units",
+      "size": 2,
+      "op": "mean",
+      "as": "roll"
+    }
+  ]
 }
 ```
 
@@ -70,6 +90,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~transform | dts-grep (weak) | @antv/g2/lib/index.d.ts:27 sortX, groupX, binX, stackY, normalizeY... |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 699f05dc7c70.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against f0e644ec234d.
 
 https://chartkit.dev/features.json

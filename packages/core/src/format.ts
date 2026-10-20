@@ -61,10 +61,10 @@ function formatDuration(value: number): string {
   return sign + (step === 1 ? Math.round(abs) : Math.round(n * 10) / 10) + (step === 1 ? "ms" : step === 1e3 ? "s" : step === 6e4 ? "m" : "h");
 }
 
-function formatDate(value: number, style: string, locale: string): string {
+function formatDate(value: number, style: string, locale: string, zone: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  const options: Intl.DateTimeFormatOptions = { timeZone: "UTC" };
+  const options: Intl.DateTimeFormatOptions = { timeZone: zone || "UTC" };
   const dateish = style === "date" || style === "datetime";
   if (dateish || style === "year") options.year = "numeric";
   if (dateish || style === "month") options.month = "short";
@@ -77,13 +77,13 @@ function formatDate(value: number, style: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, options).format(date);
 }
 
-function body(value: number, fmt: Fmt, locale: string): string {
+function body(value: number, fmt: Fmt, locale: string, zone: string): string {
   value = zero(value);
   const style = fmt.style;
   if (style === "bytes") return formatBytes(value);
   if (style === "duration-ms") return formatDuration(value);
   if (style === "date" || style === "time" || style === "datetime" || style === "month" || style === "year" || style === "weekday") {
-    return formatDate(value, style, locale);
+    return formatDate(value, style, locale, zone);
   }
   if (style === "integer") return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(value);
   const options: Intl.NumberFormatOptions = digits(fmt, style === "compact" || style === "percent" || style === "percent-raw" ? 1 : 2);
@@ -116,20 +116,20 @@ function allWhole(ticks: ArrayLike<number>): boolean {
  * `decimals` or `minimumFractionDigits`, drop the trailing fraction (`£10,000`).
  * Mark labels keep `formatValue`, so they stay at the encoding precision.
  */
-export function formatAxisValue(value: number, format: unknown, locale: string, ticks: ArrayLike<number>): string {
+export function formatAxisValue(value: number, format: unknown, locale: string, ticks: ArrayLike<number>, zone = "UTC"): string {
   const fmt = normalize(format);
   const numeric = fmt.style === "number" || fmt.style === "currency" || fmt.style === "percent" || fmt.style === "percent-raw" || fmt.style === "compact";
   if (numeric && !fractionsLocked(fmt) && allWhole(ticks)) {
     const base = isRecord(format) ? format : { style: fmt.style };
-    return formatValue(value, { ...base, decimals: 0 }, locale);
+    return formatValue(value, { ...base, decimals: 0 }, locale, zone);
   }
-  return formatValue(value, format, locale);
+  return formatValue(value, format, locale, zone);
 }
 
-/** Format a number with a spec preset or format object. */
-export function formatValue(value: number, format: unknown, locale: string): string {
+/** Format a number with a spec preset or format object. `zone` is UTC unless the spec set one. */
+export function formatValue(value: number, format: unknown, locale: string, zone = "UTC"): string {
   const fmt = normalize(format);
-  let text = body(zero(value), fmt, locale);
+  let text = body(zero(value), fmt, locale, zone);
   if (fmt.signed && value > 0 && !text.startsWith("+")) text = `+${text}`;
   return `${fmt.prefix ?? ""}${text}${fmt.suffix ?? ""}`;
 }
