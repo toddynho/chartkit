@@ -32,10 +32,10 @@ export function hydrate(host: Element): void {
     foreign.append(canvas);
     layer.insertBefore(foreign, layer.firstChild);
   }
-  const box = place(layer, foreign);
-  const ctx = canvas.getContext("2d");
+  const box = place(layer, foreign as SVGForeignObjectElement);
+  const ctx = (canvas as HTMLCanvasElement).getContext("2d");
   if (!ctx) return;
-  paint(svg, canvas, ctx, layer, box);
+  paint(svg, canvas as HTMLCanvasElement, ctx, layer, box);
   for (let i = 0; i < layer.children.length; i++) {
     const child = layer.children[i];
     if (child === foreign) continue;
@@ -293,7 +293,7 @@ function gradientOf(
   const id = /url\(#([^)]+)\)/.exec(value)?.[1];
   if (!id) return "";
   const grad = svg.querySelector(`#${CSS.escape(id)}`);
-  const stops = grad ? [...grad.querySelectorAll("stop")] : [];
+  const stops = grad ? Array.from(grad.querySelectorAll("stop")) : [];
   if (!stops.length) return "";
   let box = { x: 0, y: 0, width: 0, height: 0 };
   if (node instanceof SVGGraphicsElement) {
