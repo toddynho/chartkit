@@ -1,7 +1,8 @@
 import { colorLegendHeight, readColorScale, scaleLabel } from "../../color-scale";
 import { asNumber, column, fieldOf } from "../../frame";
+import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
 import { cssVar } from "../../theme";
-import { font, n } from "../../svg";
+import { esc, font, n } from "../../svg";
 import { fill, fit, fmt, num, openMark, str, valueFormat, viewOf } from "./plot";
 
 interface Leaf {
@@ -20,6 +21,8 @@ interface Tile extends Leaf {
 
 /** Squarified tiles. Labels truncate to the tile. Leaves in a group share a series color, in lighter and darker tints. */
 export function renderTreemap(spec: Record<string, unknown>): string | null {
+  const hierarchical = renderLevels(spec);
+  if (hierarchical !== undefined) return hierarchical;
   const view = viewOf(spec, "treemap", 640, 420);
   if (!view) return null;
   const { frame, parts, table } = view;
@@ -156,4 +159,80 @@ function squarify<T extends { value: number }>(items: T[], x: number, y: number,
   };
   place(sorted, x, y, w, h);
   return out;
+}
+
+function shade(base: string, depth: number): string {
+  if (depth <= 0) return base;
+  const mix = Math.max(36, 74 - (depth - 1) * 16);
+  return `color-mix(in srgb, ${base} ${mix}%, light-dark(#ffffff, #1c1c1e))`;
+}
+
+function share(part: number, whole: number): string {
+  if (!whole) return "0%";
+  const pct = Math.round((part / whole) * 1000) / 10;
+  return `${pct}%`;
+}
+
+function tip(node: HNode, parent: number, total: number, locale: string, format: unknown): string {
+  const where = node.path.filter(Boolean).join(" / ") || node.name;
+  return `${where}: ${fmt(node.value, locale, format)} · ${share(node.value, parent)} of parent · ${share(node.value, total)} of total`;
+}
+
+/** Multi-level tiles. Undefined means the spec is still the flat one-level treemap. */
+function renderLevels(spec: Record<string, unknown>): string | null | undefined {
+  const read = readHierarchy(spec);
+  if (!read) return undefined;
+  const view = viewOf(spec, "treemap", 640, 420);
+  if (!view) return null;
+  const { frame, parts } = view;
+  const max = typeof frame.mark.depth === "number" ? frame.mark.depth : 8;
+  const root = limitDepth(read.root, max);
+  const branches = root.children.length ? root.children : root.value > 0 ? [root] : [];
+  if (!branches.length) return null;
+  const total = branches.reduce((sum, node) => sum + node.value, 0);
+  const legend = frame.legend !== false && branches.length > 1;
+  const top = frame.title ? 40 : 12;
+  const legendH = legend ? 28 : 12;
+  const shown = valueFormat(frame, spec, frame.encoding.y);
+  const colors = branches.map((_, index) => fill(frame, index));
+  let ordinal = 0;
+  const paintNode = (node: HNode, color: string, branch: string, depth: number, x: number, y: number, w: number, h: number, parent: number) => {
+    const label = tip(node, parent, total, frame.locale, shown);
+    const index = ordinal;
+    ordinal += 1;
+    if (!node.children.length || w < 28 || h < 22) {
+      parts.push(openMark("rect", "tile", label, `x="${n(x)}" y="${n(y)}" width="${n(Math.max(1, w))}" height="${n(Math.max(1, h))}" rx="4" fill="${shade(color, depth)}"`, branch, index));
+      parts.push("</rect>");
+      const name = fit(node.name, w - 12, 12);
+      if (name && w > 36 && h > 20) {
+        parts.push(`<text x="${n(x + 6)}" y="${n(y + 16)}" fill="#fff" stroke="rgb(0 0 0 / 0.35)" stroke-width="2" paint-order="stroke" font-size="12" font-weight="650" font-family="${font()}">${esc(name)}</text>`);
+      }
+      return;
+    }
+    parts.push(openMark("rect", "group", label, `x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="6" fill="${shade(color, Math.max(0, depth - 1))}"`, branch, index));
+    parts.push("</rect>");
+    const header = h > 40 && w > 48 ? 16 : 0;
+    if (header) {
+      const name = fit(node.name, w - 16, 12);
+      if (name) parts.push(`<text x="${n(x + 8)}" y="${n(y + 13)}" fill="#fff" stroke="rgb(0 0 0 / 0.4)" stroke-width="2" paint-order="stroke" font-size="12" font-weight="650" font-family="${font()}">${esc(name)}</text>`);
+    }
+    const pad = 3;
+    const inner = squarify(node.children, x + pad, y + header + pad, Math.max(1, w - pad * 2), Math.max(1, h - header - pad * 2));
+    for (const child of inner) paintNode(child, color, branch, depth + 1, child.x, child.y, child.w, child.h, node.value);
+  };
+  const outer = squarify(branches, 10, top, frame.width - 20, frame.height - top - legendH);
+  outer.forEach((tile, index) => {
+    paintNode(tile, colors[index] ?? fill(frame, index), tile.name, 0, tile.x, tile.y, tile.w, tile.h, total);
+  });
+  if (legend) {
+    let x = 12;
+    const y = frame.height - 8;
+    branches.forEach((node, index) => {
+      const color = colors[index] ?? fill(frame, index);
+      const name = fit(node.name, 88, 12) || node.name;
+      parts.push(`<rect x="${n(x)}" y="${n(y - 10)}" width="10" height="10" rx="2" fill="${color}" /><text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12" font-family="${font()}">${esc(name)}</text>`);
+      x += 14 + Math.min(name.length, 12) * 7 + 14;
+    });
+  }
+  return view.done();
 }

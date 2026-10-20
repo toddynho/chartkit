@@ -15719,20 +15719,21 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:sunburst)['\"`]|(?:^|[\\s{,;])\\w*(?:sunburst)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:sunburst)"
+            "ChartKitChartSpecV1.type=sunburst"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:sunburst)['\"`]|(?:^|[\\s{,;])\\w*(?:sunburst)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:sunburst)"
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.type=sunburst",
+              "loc": "chartkit:packages/core/src/charts/sunburst.ts:1"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "Concentric rings from nested children, encoding.path, or encoding.id and encoding.parent. Loaded from @chartkitdev/core/charts/sunburst.",
+          "verified": "dts-path",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "none",
@@ -33411,19 +33412,20 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "partial",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "ChartKitChartSpecV1.encoding.color"
+            "ChartKitChartSpecV1.encoding.path",
+            "ChartKitChartSpecV1.encoding.parent"
           ],
           "evidence": [
             {
               "kind": "dts-path",
-              "path": "ChartKitChartSpecV1.encoding.color",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:461"
+              "path": "ChartKitChartSpecV1.encoding.path",
+              "loc": "chartkit:packages/core/src/hierarchy.ts:1"
             }
           ],
-          "note": "treemap: label/size/group (one level)",
+          "note": "Nested children, encoding.path, or encoding.id plus encoding.parent. A missing parent value is the sum of its leaves.",
           "verified": "dts-path",
           "strength": "strong"
         },

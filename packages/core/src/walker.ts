@@ -73,6 +73,7 @@ const CHART_TYPES = [
   "area-range",
   "bar-range",
   "errorbar",
+  "sunburst",
 ] as const;
 
 export function walkSchema(value: unknown, schema: JsonSchema, diagnostics: Diagnostic[]): void {
@@ -1006,6 +1007,7 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   if (value === "arearange" || value === "area_range" || value === "range-area" || value === "rangearea") return { type: "area-range", kind: "rename" };
   if (value === "columnrange" || value === "column-range" || value === "rangebar" || value === "range-bar" || value === "floating-bar") return { type: "bar-range", kind: "rename" };
   if (value === "error-bar" || value === "error-bars" || value === "errorbars") return { type: "errorbar", kind: "rename" };
+  if (value === "sun-burst" || value === "sunburstchart" || value === "sunburst-chart" || value === "partition") return { type: "sunburst", kind: "rename" };
   return undefined;
 }
 
@@ -1095,7 +1097,7 @@ function noteFlowChannels(encoding: Record<string, unknown>, ctx: Ctx): void {
     move("name", "x");
     move("size", "y");
     move("value", "y");
-    move("parent", "color");
+    if (encoding.id === undefined) move("parent", "color");
   } else if (type === "histogram" || type === "hist") {
     if (encoding.x === undefined) move("value", "x");
   }

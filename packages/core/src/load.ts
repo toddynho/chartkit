@@ -38,6 +38,8 @@ export function load(type: string): Promise<ChartRenderer | undefined> {
       return import("./charts/bar-range").then((mod) => mod.barRange);
     case "errorbar":
       return import("./charts/errorbar").then((mod) => mod.errorbar);
+    case "sunburst":
+      return import("./charts/sunburst").then((mod) => mod.sunburst);
     default:
       return Promise.resolve(undefined);
   }

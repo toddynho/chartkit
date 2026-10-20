@@ -48,12 +48,13 @@
         "waterfall",
         "area-range",
         "bar-range",
-        "errorbar"
+        "errorbar",
+        "sunburst"
       ],
       "examples": [
         "line"
       ],
-      "description": "Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar. 'area-range': a band between low and high, with an optional centre line from y. Several bands are a y list of {lo, hi}. 'bar-range': a floating bar from low to high per category. 'errorbar': whiskers on a point or a bar, from low and high or from encoding.error as ± around y. A combo y item with mark range and lo/hi draws that band under the other series."
+      "description": "Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. Nested children, encoding.path, or encoding.id with encoding.parent draw nested levels; a flat treemap stays one level. 'sunburst': concentric rings for that same hierarchy. Colour follows the top-level branch. mark.innerRadius is the hole (0.28 when omitted) and mark.depth caps the rings. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar. 'area-range': a band between low and high, with an optional centre line from y. Several bands are a y list of {lo, hi}. 'bar-range': a floating bar from low to high per category. 'errorbar': whiskers on a point or a bar, from low and high or from encoding.error as ± around y. A combo y item with mark range and lo/hi draws that band under the other series."
     },
     "id": {
       "type": "string",
@@ -229,7 +230,8 @@
               "waterfall",
               "area-range",
               "bar-range",
-              "errorbar"
+              "errorbar",
+              "sunburst"
             ]
           }
         },
@@ -949,6 +951,23 @@
         "error": {
           "$ref": "#/$defs/channel",
           "description": "Error bar only: symmetric ± around y. The field is the half-width. encoding.low and encoding.high override it."
+        },
+        "path": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string"
+          },
+          "description": "Treemap and sunburst: field names from the root down to the leaf, for flat rows. A parent with no value is the sum of its leaves."
+        },
+        "id": {
+          "type": "string",
+          "description": "Treemap and sunburst: the node id field. Pair it with encoding.parent."
+        },
+        "parent": {
+          "type": "string",
+          "description": "Treemap and sunburst: the parent id field. An empty parent is a root. On a treemap with no encoding.id, a legacy parent field still repairs to encoding.color."
         }
       },
       "description": "Which data fields drive which visual channels. Same names for every chart type: x is the category or time axis, y is the measured value(s). Donut uses x (slice label) and y (slice value), not theta, angle, or label. A y series axis is the string \"y\" or \"y2\". Switching 'type' between line/bar/donut/stacked-area/combo needs no re-encoding."
@@ -964,11 +983,13 @@
                 "number",
                 "string",
                 "boolean",
-                "null"
+                "null",
+                "object",
+                "array"
               ]
             }
           },
-          "description": "Rows: one object per record, keys are field names. Values are numbers, strings (ISO 8601 dates are parsed on temporal fields), booleans or null (missing)."
+          "description": "Rows: one object per record, keys are field names. Values are numbers, strings (ISO 8601 dates are parsed on temporal fields), booleans, null, or nested objects and arrays (treemap and sunburst children)."
         },
         {
           "type": "array",
@@ -1155,7 +1176,13 @@
           "minimum": 0,
           "maximum": 0.95,
           "default": 0.6,
-          "description": "Hole size as a 0–0.95 fraction of the radius. Donut defaults to 0.6. Pie defaults to 0. Applies to: donut, pie."
+          "description": "Hole size as a 0–0.95 fraction of the radius. Donut defaults to 0.6. Pie defaults to 0. Sunburst uses 0.28 when this is omitted. Applies to: donut, pie, sunburst."
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12,
+          "description": "How many levels to draw under the root. Deeper nodes fold into that level. Default 8. Applies to: treemap, sunburst."
         },
         "padAngle": {
           "type": "number",

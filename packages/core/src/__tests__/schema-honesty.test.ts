@@ -13,6 +13,12 @@ import { validate } from "../validate";
 const schema = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../schema/chartkit.schema.json"), "utf8")) as SchemaNode;
 
 const alt = "Revenue rose from January to March.";
+function chain(names: string[]): Record<string, unknown> {
+  const [head, ...rest] = names;
+  if (!rest.length) return { name: head, value: 8 };
+  return { name: head, children: [chain(rest)] };
+}
+const deepTree = { name: "All", value: 8, children: [chain(["A", "B", "C", "D"])] };
 const rows = [
   { month: "Jan", revenue: 1000, cost: 400, region: "NA", date: "2024-01-01", open: 10, high: 14, low: 9, close: 12, source: "a", target: "b", value: 1000 },
   { month: "Feb", revenue: 3000, cost: 1200, region: "EU", date: "2024-02-01", open: 12, high: 16, low: 11, close: 15, source: "b", target: "c", value: 3000 },
@@ -375,6 +381,8 @@ function hosts(): Host[] {
     ["area-range", { version: "1", type: "area-range", data: rows, encoding: { x: "month", y: [{ lo: "cost", hi: "value" }, { field: "revenue" }] }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["bar-range", { version: "1", type: "bar-range", data: rows, encoding: { x: "month", low: "cost", high: "revenue" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["errorbar", { version: "1", type: "errorbar", data: rows, encoding: { x: "month", y: "revenue", error: "cost" }, a11y: { alt }, size: { width: 420, height: 220 } }],
+    ["treemap", { version: "1", type: "treemap", data: [deepTree], encoding: { x: "name", y: "value" }, a11y: { alt }, size: { width: 420, height: 280 } }],
+    ["sunburst", { version: "1", type: "sunburst", data: [deepTree], encoding: { x: "name", y: "value" }, a11y: { alt }, size: { width: 420, height: 280 } }],
     [
       "trace",
       {
@@ -502,6 +510,7 @@ const ENTRY_FILES: Array<[string, string]> = [
   ["area-range", "areaRange"],
   ["bar-range", "barRange"],
   ["errorbar", "errorbar"],
+  ["sunburst", "sunburst"],
 ];
 
 const FRESH_ENTRY = new Set(["line", "bar", "stacked-area", "combo", "sparkline", "mini-area"]);

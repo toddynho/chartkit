@@ -102,6 +102,15 @@ Rechecked on `area-range`, `bar-range`, `errorbar`, and a combo with `mark: "ran
 | type.bar.range | native | `type: "bar-range"` draws a floating bar from `encoding.low` to `encoding.high`. The bar does not start at zero. |
 | type.errorbar | native | `type: "errorbar"` draws whiskers on a point or a bar. Bounds are `encoding.low` and `encoding.high`, or `encoding.error` as ± around y. `mark.error` is `point` or `bar`. |
 
+## Hierarchy
+
+Rechecked on multi-level treemap and sunburst. A flat treemap (encoding.x, encoding.y, optional encoding.color) still draws one level. Sunburst loads from `@chartkitdev/core/charts/sunburst`, so `createRenderer([line])` does not include it.
+
+| id | status | correction |
+|---|---|---|
+| data.hierarchy | native | Nested `{name, value, children}`, `encoding.path` (field names from the root to the leaf), or `encoding.id` plus `encoding.parent`. A parent with no value is the sum of its leaves. Cycles, a missing parent, a negative size, and a parent that does not match its children are CK3027–CK3030. |
+| type.sunburst | native | `type: "sunburst"` draws concentric rings coloured by the top-level branch. `mark.innerRadius` sets the hole (0.28 when omitted). `mark.depth` caps the rings. `sun-burst`, `sunburstchart`, and `partition` repair to sunburst (CK1005). |
+
 ## Web component
 
 | id | status | correction |

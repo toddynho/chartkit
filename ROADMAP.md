@@ -12,7 +12,7 @@ Work is ordered by how widely a feature already exists across charting libraries
 - [x] The published feature matrix, with feature pages and compare pages ([#19](https://github.com/toddynho/chartkit/pull/19))
 - [x] Click events, selection, and legend hover ([#21](https://github.com/toddynho/chartkit/pull/21))
 
-Earlier v1 work. 31 chart types draw: 15 in the first core, eight in Phase 3, five in Phase 4, and three uncertainty charts.
+Earlier v1 work. 32 chart types draw: 15 in the first core, eight in Phase 3, five in Phase 4, three uncertainty charts, and sunburst.
 
 - [x] Core, the React adapter, and the first 14 chart types ([#3](https://github.com/toddynho/chartkit/pull/3))
 - [x] Vue, Svelte, and vanilla adapters ([#7](https://github.com/toddynho/chartkit/pull/7))
@@ -31,6 +31,7 @@ Earlier v1 work. 31 chart types draw: 15 in the first core, eight in Phase 3, fi
 - [x] Uncertainty: range area, floating bars, and error bars ([#34](https://github.com/toddynho/chartkit/pull/34))
 - [x] Time zones, sorting, streaming append, and filter, window, and aggregate transforms ([#35](https://github.com/toddynho/chartkit/pull/35))
 - [x] A web component, `<chart-kit>` in `@chartkitdev/element` ([#33](https://github.com/toddynho/chartkit/pull/33))
+- [x] Hierarchy: nested and flat data, multi-level treemap, and sunburst
 
 ## In progress
 
@@ -39,7 +40,6 @@ Earlier v1 work. 31 chart types draw: 15 in the first core, eight in Phase 3, fi
 
 ## Next
 
-- [ ] Sunburst
 - [ ] The remaining showcase boards
 
 ## Later
