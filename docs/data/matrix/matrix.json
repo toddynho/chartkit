@@ -39500,7 +39500,7 @@
               "loc": "chartkit:packages/core/src/generated/schema.ts:955"
             }
           ],
-          "note": "Blurred understroke on line and sparkline. The filter is emitted only when glow is true.",
+          "note": "Blurred understroke on line, sparkline, and combo. The filter is emitted only when glow is true.",
           "verified": "dts-path",
           "strength": "strong"
         },

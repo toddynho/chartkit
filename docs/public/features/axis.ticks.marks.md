@@ -72,6 +72,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | ~showTick\|tickLength | dts-grep (weak) | mermaid/dist/config.type.d.ts:1125 |
 | AntV G2 | native | ~tickLength | dts-grep (weak) | @antv/g2/lib/component/axis.d.ts:16 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 21d2db2b482c.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3a53ab56c775.
 
 https://chartkit.dev/features.json

@@ -86,7 +86,7 @@ Rechecked on `createRenderer([line])` and the scatter entry. A cell moved to nat
 
 | feature | status | note |
 | --- | --- | --- |
-| mark.glow | native | Blurred understroke on line and sparkline. One filter, emitted only when `mark.glow` is true. |
+| mark.glow | native | Blurred understroke on line, sparkline, and combo. One filter, emitted only when `mark.glow` is true. |
 | type.line.smooth | native | `mark.curve` `monotone` is monotone-x. `smooth`, `spline`, and `basis` repair to it (CK1007). |
 | legend.position | native | A funnel draws the legend when `legend` is set, including `position: "top"`. |
 | type.heatmap.calendar | native | Cells stay square, or at most 1.5:1, and cap at 32px. Extra width centres the grid. The last week includes the latest day. Unsized calendars stay at 12px. `mark.weeks` on a grid warns CK3012. |
@@ -107,3 +107,7 @@ Rechecked on `area-range`, `bar-range`, `errorbar`, and a combo with `mark: "ran
 | id | status | correction |
 |---|---|---|
 | framework.webcomponent | native | `@chartkitdev/element` defines `<chart-kit>`. The spec comes from the property, the `spec` attribute, or a child JSON script. `theme` reflects. `pointclick` and `select` are DOM events. An existing SVG is patched in place. |
+
+## Shared chrome
+
+Rechecked on line, bar, stacked-area, combo, scatter, candlestick, spike, histogram, boxplot, waterfall, area-range, bar-range, and errorbar. Title, subtitle, axis titles, `axes.y.ticks`, `scale.domain`, a y rule, and a linear trendline paint on each. Funnel and calendar heatmap paint the subtitle. The calendar also paints the title. A threshold point that sits on a line stroke shifts to a distinct colour, and the token is named when a legend is already shown.
