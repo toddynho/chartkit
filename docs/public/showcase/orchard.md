@@ -367,7 +367,7 @@ A box for each variety.
 
 ## How the weights fall
 
-Eight bins across every crate.
+Eight bins of 10 grams, from 135. The bin from 195 to 205 is empty.
 
 ```json
 {
@@ -377,35 +377,35 @@ Eight bins across every crate.
   "theme": "soft",
   "data": [
     {
-      "grams": "136",
+      "grams": "135",
       "crates": 2
     },
     {
-      "grams": "145.25",
+      "grams": "145",
       "crates": 2
     },
     {
-      "grams": "154.5",
+      "grams": "155",
       "crates": 2
     },
     {
-      "grams": "163.75",
-      "crates": 1
+      "grams": "165",
+      "crates": 2
     },
     {
-      "grams": "173",
+      "grams": "175",
       "crates": 3
     },
     {
-      "grams": "182.25",
+      "grams": "185",
       "crates": 2
     },
     {
-      "grams": "191.5",
-      "crates": 1
+      "grams": "195",
+      "crates": 0
     },
     {
-      "grams": "200.75",
+      "grams": "205",
       "crates": 2
     }
   ],
@@ -432,7 +432,7 @@ Eight bins across every crate.
     "height": 340
   },
   "a11y": {
-    "alt": "Crate weights run from the mid 130s to just over 200 grams, with more than one bin occupied."
+    "alt": "Crate weights run from 136 to 210 grams, in eight bins of 10 grams starting at 135. The bin from 195 to 205 grams is empty."
   }
 }
 ```

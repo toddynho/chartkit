@@ -140,6 +140,17 @@ const crates = [
   { variety: "Ashmead", grams: 176, hours: 4.8, brix: 12.2 },
 ];
 
+const weightBinStart = 135;
+const weightBinWidth = 10;
+const weightBinCount = 8;
+const weightBins = Array.from({ length: weightBinCount }, (_, index) => {
+  const start = weightBinStart + index * weightBinWidth;
+  const end = start + weightBinWidth;
+  const last = index === weightBinCount - 1;
+  const count = crates.filter((row) => row.grams >= start && (last ? row.grams <= end : row.grams < end)).length;
+  return { grams: String(start), crates: count };
+});
+
 export const orchardCharts: ChartSlot[] = [
   {
     id: "sun",
@@ -227,30 +238,21 @@ export const orchardCharts: ChartSlot[] = [
   {
     id: "bins",
     title: "How the weights fall",
-    caption: "Eight bins across every crate.",
+    caption: "Eight bins of 10 grams, from 135. The bin from 195 to 205 is empty.",
     span: "board-6",
     spec: {
       version: "1",
       id: "orchard-bins",
       type: "histogram",
       theme: "soft",
-      data: [
-        { grams: "136", crates: 2 },
-        { grams: "145.25", crates: 2 },
-        { grams: "154.5", crates: 2 },
-        { grams: "163.75", crates: 1 },
-        { grams: "173", crates: 3 },
-        { grams: "182.25", crates: 2 },
-        { grams: "191.5", crates: 1 },
-        { grams: "200.75", crates: 2 },
-      ],
+      data: weightBins,
       encoding: {
         x: { field: "grams", title: "Grams" },
         y: { field: "crates", title: "Crates" },
       },
       axes: { x: { title: "Grams" }, y: { title: "Crates" } },
       size: { width: 560, height: 340 },
-      a11y: { alt: "Crate weights run from the mid 130s to just over 200 grams, with more than one bin occupied." },
+      a11y: { alt: "Crate weights run from 136 to 210 grams, in eight bins of 10 grams starting at 135. The bin from 195 to 205 grams is empty." },
     },
   },
 ];
