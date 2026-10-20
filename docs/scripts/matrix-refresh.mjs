@@ -144,6 +144,8 @@ const TYPE_FOR = {
   "type.area.range": "area-range",
   "type.bar.range": "bar-range",
   "type.errorbar": "errorbar",
+  "type.sunburst": "sunburst",
+  "data.hierarchy": "treemap",
   "type.boxplot": "boxplot",
   "type.candlestick": "candlestick",
   "type.finance.volume": "candlestick",
@@ -323,6 +325,13 @@ function concretePath(cell) {
 }
 
 function applyFeature(spec, feature) {
+  if (feature.id === "data.hierarchy") {
+    spec.type = "treemap";
+    spec.data = [{ name: "Ads", value: 40, children: [{ name: "Search", value: 25 }, { name: "Social", value: 15 }] }];
+    spec.encoding = { x: "name", y: "value" };
+    spec.a11y = { alt: "Search is most of Ads." };
+    return true;
+  }
   const path = concretePath(feature.cells.chartkit);
   if (!path) return feature.id.startsWith("type.");
   if (path === "ChartKitChartSpecV1") return false;

@@ -1,40 +1,43 @@
 # Hierarchical data input
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Nested/parent-child data for tree types
 
-Matrix status: `partial`. Verification: `dts-path` (strong).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-treemap: label/size/group (one level)
+Nested children, encoding.path, or encoding.id plus encoding.parent. A missing parent value is the sum of its leaves.
 
-Source: chartkit:packages/core/src/generated/schema.ts:461
+Source: chartkit:packages/core/src/hierarchy.ts:1
 
 ## ChartKit spec
 
 ```json
 {
   "version": "1",
-  "type": "line",
+  "type": "treemap",
   "data": [
     {
-      "quarter": "Q1",
-      "units": 40,
-      "group": "A"
-    },
-    {
-      "quarter": "Q2",
-      "units": 55,
-      "group": "B"
+      "name": "Ads",
+      "value": 40,
+      "children": [
+        {
+          "name": "Search",
+          "value": 25
+        },
+        {
+          "name": "Social",
+          "value": 15
+        }
+      ]
     }
   ],
   "encoding": {
-    "x": "quarter",
-    "y": "units",
-    "color": "group"
+    "x": "name",
+    "y": "value"
   },
   "a11y": {
-    "alt": "Units rose in Q2."
+    "alt": "Search is most of Ads."
   },
   "size": {
     "width": 640,
@@ -70,6 +73,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.treeView | dts-path (strong) | mermaid/dist/config.type.d.ts:237 |
 | AntV G2 | native | ~children | dts-grep (weak) | @antv/g2/lib/composition/view.d.ts:5 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3a53ab56c775.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 2e11cdd3e2dc.
 
 https://chartkit.dev/features.json

@@ -1,12 +1,47 @@
 # Sunburst
 
-ChartKit: **none**
+ChartKit: **native**
 
 Radial hierarchy
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+Concentric rings from nested children, encoding.path, or encoding.id and encoding.parent. Loaded from @chartkitdev/core/charts/sunburst.
+
+Source: chartkit:packages/core/src/charts/sunburst.ts:1
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "sunburst",
+  "data": [
+    {
+      "name": "A",
+      "children": [
+        {
+          "name": "B",
+          "value": 3
+        },
+        {
+          "name": "C",
+          "value": 1
+        }
+      ]
+    }
+  ],
+  "a11y": {
+    "alt": "B leads A."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -33,6 +68,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | MarkTypes=partition | dts-path (strong) | @antv/g2/lib/spec/mark.d.ts:13 sunburst via partition + polar (extension) |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3a53ab56c775.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 2e11cdd3e2dc.
 
 https://chartkit.dev/features.json
