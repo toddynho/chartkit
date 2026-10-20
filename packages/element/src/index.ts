@@ -5,6 +5,22 @@ import { attach, listen, patchSvg, type ClickDetail, type Controller, type Selec
 export type { ChartSpec, ClickDetail, Selection };
 
 const TAG = "chart-kit";
+const STYLE_ID = "chart-kit-display";
+
+function px(value: string): number {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/** Block layout, so an omitted width is the container's content box. */
+function ensureBlock(): void {
+  const root = document.head ?? document.documentElement;
+  if (!root || document.getElementById(STYLE_ID)) return;
+  const style = document.createElement("style");
+  style.id = STYLE_ID;
+  style.textContent = ":where(chart-kit){display:block}:where(chart-kit)>svg{display:block}";
+  root.append(style);
+}
 
 function isSpec(value: unknown): value is ChartSpec {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -29,10 +45,14 @@ export class ChartKitElement extends HTMLElement {
   #job = 0;
   #ctl: Controller | null = null;
   #bound: SVGSVGElement | null = null;
+  #rows = -1;
   #listening = false;
   #stop = () => {};
   #tip: { destroy(): void } | null = null;
   #observer: MutationObserver | null = null;
+  #ro: ResizeObserver | null = null;
+  /** Width last passed into the spec. 0 when the spec set its own width, or the box was not measurable. */
+  #drawn = 0;
   #reflecting = false;
 
   /** The spec last drawn, or the object assigned through the property. */
@@ -58,8 +78,10 @@ export class ChartKitElement extends HTMLElement {
 
   connectedCallback(): void {
     this.#alive = true;
+    ensureBlock();
     this.#watch();
     this.#render();
+    this.#observe();
   }
 
   disconnectedCallback(): void {
@@ -71,10 +93,13 @@ export class ChartKitElement extends HTMLElement {
     this.#ctl?.destroy();
     this.#ctl = null;
     this.#bound = null;
+    this.#rows = -1;
     this.#tip?.destroy();
     this.#tip = null;
     this.#observer?.disconnect();
     this.#observer = null;
+    this.#ro?.disconnect();
+    this.#ro = null;
   }
 
   attributeChangedCallback(name: string, previous: string | null, next: string | null): void {
@@ -174,10 +199,12 @@ export class ChartKitElement extends HTMLElement {
     if (!this.#alive) return;
     const svg = this.#svg();
     if (!svg) return;
-    if (this.#ctl && svg === this.#bound) {
+    const rows = Array.isArray(spec.data) ? spec.data.length : -1;
+    if (this.#ctl && svg === this.#bound && rows === this.#rows) {
       this.#ctl.update(spec, markup);
       return;
     }
+    this.#rows = rows;
     this.#ctl?.destroy();
     this.#ctl = attach(this, spec, { render: (value) => renderAll(value as ChartSpec) });
     this.#bound = svg;
@@ -190,19 +217,57 @@ export class ChartKitElement extends HTMLElement {
     this.#listening = true;
   }
 
+  /** Content-box width. A numeric `size.width` on the spec is left alone. */
+  #contentWidth(): number {
+    const style = getComputedStyle(this);
+    const pad = px(style.paddingLeft) + px(style.paddingRight);
+    return Math.max(0, Math.round(this.clientWidth - pad));
+  }
+
+  #fit(spec: ChartSpec): ChartSpec {
+    const size = spec.size;
+    if (size && typeof size.width === "number") {
+      this.#drawn = 0;
+      return spec;
+    }
+    const width = this.#contentWidth();
+    if (width < 2) {
+      this.#drawn = 0;
+      return spec;
+    }
+    this.#drawn = width;
+    return { ...spec, size: { ...size, width } };
+  }
+
+  #observe(): void {
+    this.#ro?.disconnect();
+    if (typeof ResizeObserver === "undefined") return;
+    this.#ro = new ResizeObserver(() => this.#syncSize());
+    this.#ro.observe(this);
+  }
+
+  #syncSize(): void {
+    if (!this.#alive || !this.#active) return;
+    if (this.#active.size && typeof this.#active.size.width === "number") return;
+    const width = this.#contentWidth();
+    if (width < 2 || width === this.#drawn) return;
+    this.#kick(this.#active);
+  }
+
   #kick(spec: ChartSpec): void {
     const token = ++this.#job;
-    const type = spec.type;
+    const drawn = this.#fit(spec);
+    const type = drawn.type;
     if (typeof type === "string" && isExtra(type)) {
-      void this.#loadExtra(spec, token);
+      void this.#loadExtra(drawn, token);
       return;
     }
     this.#tip?.destroy();
     this.#tip = null;
-    const markup = renderAll(spec);
+    const markup = renderAll(drawn);
     if (!this.#alive || token !== this.#job) return;
     this.#paint(markup);
-    this.#arm(spec, markup);
+    this.#arm(drawn, markup);
   }
 
   /**

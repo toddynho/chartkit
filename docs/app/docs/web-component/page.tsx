@@ -56,6 +56,10 @@ export default function WebComponentPage() {
         </li>
       </ul>
       <p>Changing any of those redraws the chart. The property wins over the attribute and the script.</p>
+      <p>
+        Leave <code>size.width</code> unset and the element measures its content box, then redraws through a{" "}
+        <code>ResizeObserver</code> when the box changes. A numeric <code>size.width</code> stays as written.
+      </p>
       <CodeBlock code={script} label="html" />
       <h2>Theme</h2>
       <p>

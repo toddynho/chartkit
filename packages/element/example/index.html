@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>ChartKit web component</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%231c1915'/%3E%3C/svg%3E" />
     <script type="importmap">
       {
         "imports": {
@@ -23,10 +24,11 @@
         background: #f4f1ea;
         color: #1c1915;
       }
-      main { max-width: 880px; margin: 0 auto; padding: 40px 20px 64px; }
+      main { max-width: 960px; margin: 0 auto; padding: 40px 20px 72px; }
       h1 { font-size: 2rem; letter-spacing: -0.03em; margin: 0 0 8px; }
-      p { margin: 0 0 18px; max-width: 62ch; }
-      .bar { display: flex; gap: 8px; margin: 0 0 16px; }
+      h2 { font-size: 1.15rem; margin: 28px 0 8px; }
+      p { margin: 0 0 14px; max-width: 66ch; }
+      .bar { display: flex; gap: 8px; margin: 0 0 18px; align-items: center; }
       button {
         font: inherit;
         border: 1px solid #1c1915;
@@ -36,51 +38,118 @@
         cursor: pointer;
       }
       button[aria-pressed="true"] { background: #1c1915; color: #fff; }
-      chart-kit { display: block; background: #fff; border-radius: 16px; padding: 8px; }
+      button:disabled { opacity: 0.45; cursor: default; }
+      chart-kit { display: block; border-radius: 16px; overflow: hidden; }
+      .note { color: #5c564c; font-size: 0.95rem; }
     </style>
   </head>
   <body>
     <main>
-      <h1>Baskets this month</h1>
+      <h1>The stand, this season</h1>
       <p>
-        This page is plain HTML. The chart spec lives in the script tag. Switching the theme sets the
-        <code>theme</code> attribute on <code>&lt;chart-kit&gt;</code>.
+        Both charts are <code>&lt;chart-kit&gt;</code>. The width comes from the card, and the theme
+        attribute restyles the drawing that is already there.
       </p>
       <div class="bar">
         <button type="button" id="soft" aria-pressed="true">Soft</button>
         <button type="button" id="midnight" aria-pressed="false">Midnight</button>
       </div>
-      <chart-kit id="chart" theme="soft">
+
+      <h2>Sold and returned</h2>
+      <p class="note">The spec is the JSON script inside the element. Bars and a line share one axis.</p>
+      <chart-kit id="season" theme="soft">
+        <script type="application/json">
+          {
+            "version": "1",
+            "type": "combo",
+            "title": "Baskets this season",
+            "theme": "soft",
+            "size": { "height": 380 },
+            "data": [
+              { "week": "W1", "sold": 28, "returned": 4 },
+              { "week": "W2", "sold": 34, "returned": 6 },
+              { "week": "W3", "sold": 31, "returned": 5 },
+              { "week": "W4", "sold": 40, "returned": 7 },
+              { "week": "W5", "sold": 46, "returned": 8 },
+              { "week": "W6", "sold": 44, "returned": 6 },
+              { "week": "W7", "sold": 52, "returned": 9 },
+              { "week": "W8", "sold": 49, "returned": 8 },
+              { "week": "W9", "sold": 58, "returned": 10 },
+              { "week": "W10", "sold": 63, "returned": 11 }
+            ],
+            "encoding": {
+              "x": { "field": "week" },
+              "y": [
+                { "field": "sold", "mark": "bar", "title": "Sold" },
+                { "field": "returned", "mark": "line", "title": "Returned" }
+              ]
+            },
+            "axes": { "x": { "title": "Week", "ticks": 10 }, "y": { "title": "Baskets" } },
+            "a11y": { "alt": "Sold baskets climbed from 28 in week one to 63 in week ten. Returned baskets stayed between 4 and 11." }
+          }
+        </script>
+      </chart-kit>
+
+      <h2>Walk-ins</h2>
+      <p class="note">This one also starts from a script tag. Adding a week assigns the <code>spec</code> property, which redraws the chart.</p>
+      <div class="bar">
+        <button type="button" id="add">Add a week</button>
+        <span id="weeks" class="note">8 weeks</span>
+      </div>
+      <chart-kit id="walkins" theme="soft">
         <script type="application/json">
           {
             "version": "1",
             "type": "line",
+            "title": "Walk-ins",
             "theme": "soft",
+            "size": { "height": 300 },
             "data": [
-              { "week": "W1", "baskets": 12 },
-              { "week": "W2", "baskets": 18 },
-              { "week": "W3", "baskets": 15 },
-              { "week": "W4", "baskets": 22 }
+              { "week": "W1", "people": 18 },
+              { "week": "W2", "people": 22 },
+              { "week": "W3", "people": 19 },
+              { "week": "W4", "people": 26 },
+              { "week": "W5", "people": 24 },
+              { "week": "W6", "people": 30 },
+              { "week": "W7", "people": 28 },
+              { "week": "W8", "people": 33 }
             ],
-            "encoding": { "x": "week", "y": "baskets" },
-            "a11y": { "alt": "Baskets rose from week one to week four, with a dip in week three." }
+            "encoding": {
+              "x": { "field": "week" },
+              "y": { "field": "people", "title": "People", "scale": { "zero": true } }
+            },
+            "axes": { "x": { "title": "Week", "ticks": 12 }, "y": { "title": "People" } },
+            "a11y": { "alt": "Walk-ins moved from 18 in week one to 33 in week eight." }
           }
         </script>
       </chart-kit>
     </main>
     <script type="module">
       import "@chartkitdev/element";
-      const chart = document.querySelector("#chart");
-      for (const button of document.querySelectorAll("button")) {
+      const season = document.querySelector("#season");
+      const walkins = document.querySelector("#walkins");
+      const charts = [season, walkins];
+      for (const button of [document.querySelector("#soft"), document.querySelector("#midnight")]) {
         button.addEventListener("click", () => {
-          chart.theme = button.id;
-          for (const other of document.querySelectorAll("button")) {
+          for (const chart of charts) chart.theme = button.id;
+          for (const other of [document.querySelector("#soft"), document.querySelector("#midnight")]) {
             other.setAttribute("aria-pressed", other === button ? "true" : "false");
           }
         });
       }
-      chart.addEventListener("pointclick", (event) => {
-        console.log("pointclick", event.detail);
+
+      const starting = JSON.parse(walkins.querySelector('script[type="application/json"]').textContent);
+      const rows = starting.data.map((row) => ({ ...row }));
+      const extras = [36, 34, 41, 39];
+      const add = document.querySelector("#add");
+      const weeks = document.querySelector("#weeks");
+      add.addEventListener("click", () => {
+        const people = extras.shift();
+        if (people == null) return;
+        rows.push({ week: "W" + (rows.length + 1), people });
+        walkins.spec = { ...starting, data: rows.map((row) => ({ ...row })), a11y: { alt: "Walk-ins across " + rows.length + " weeks, latest week " + people + "." } };
+        weeks.textContent = rows.length + " weeks";
+        if (extras.length === 0) add.disabled = true;
       });
     </script>
   </body>

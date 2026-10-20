@@ -16,6 +16,8 @@ A framework-free `<chart-kit>` element. It draws the same JSON spec as the Vue, 
 
 The spec can also be the `spec` property or a JSON `spec` attribute. The property wins when it is set. `theme` reflects as an attribute and overrides `spec.theme`.
 
+With no numeric `size.width`, the element draws at its content-box width and redraws when a `ResizeObserver` reports a new width.
+
 `pointclick` is the core click event, bubbling from the element. A selection also fires `select` (`detail` is `{ points, series }`). Histogram through journey load on demand. If the element already contains an SVG, that node is patched in place.
 
 `renderToString` from `@chartkitdev/element/ssr` returns the element with the SVG already inside, including the extra charts.

@@ -160,6 +160,64 @@ describe("<chart-kit>", () => {
     el.remove();
   });
 
+  it("draws at the element width and redraws when that width changes", () => {
+    let width = 720;
+    const box: { notify: (() => void) | null } = { notify: null };
+    class BoxObserver {
+      constructor(callback: ResizeObserverCallback) {
+        box.notify = () => callback([], this as unknown as ResizeObserver);
+      }
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {
+        box.notify = null;
+      }
+    }
+    vi.stubGlobal("ResizeObserver", BoxObserver);
+    const el = document.createElement("chart-kit") as ChartKitElement;
+    Object.defineProperty(el, "clientWidth", { configurable: true, get: () => width });
+    try {
+      el.spec = lineSpec;
+      document.body.append(el);
+      expect(el.querySelector("svg")?.getAttribute("viewBox")).toMatch(/^0 0 720 /);
+      width = 540;
+      box.notify?.();
+      expect(el.querySelector("svg")?.getAttribute("viewBox")).toMatch(/^0 0 540 /);
+      const fitted = el.querySelector("svg");
+      el.remove();
+      width = 320;
+      box.notify?.();
+      expect(el.querySelector("svg")).toBe(fitted);
+      expect(fitted?.getAttribute("viewBox")).toMatch(/^0 0 540 /);
+    } finally {
+      el.remove();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("draws a newly added row instead of keeping the previous window", () => {
+    const el = mount((node) => {
+      node.spec = lineSpec;
+    });
+    el.spec = {
+      ...lineSpec,
+      data: [...lineSpec.data, { quarter: "Q3", units: 70 }],
+      a11y: { alt: "Units rose through Q3." },
+    };
+    expect(el.querySelector("svg")?.textContent).toContain("Q3");
+    expect(el.querySelector("svg")?.getAttribute("aria-label")).toBe("Units rose through Q3.");
+    el.remove();
+  });
+
+  it("keeps a numeric size.width from the spec", () => {
+    const el = document.createElement("chart-kit") as ChartKitElement;
+    Object.defineProperty(el, "clientWidth", { configurable: true, get: () => 880 });
+    el.spec = { ...lineSpec, size: { width: 400, height: 200 } };
+    document.body.append(el);
+    expect(el.querySelector("svg")?.getAttribute("viewBox")).toBe("0 0 400 200");
+    el.remove();
+  });
+
   it("loads a histogram on demand and skips the paint after disconnect", async () => {
     const live = mount((node) => {
       node.spec = histogramSpec;
