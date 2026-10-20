@@ -62,11 +62,11 @@ const yard = [
 ];
 
 const boats = [
-  { boat: "Cobble", hours: 102 },
-  { boat: "Ketch", hours: 68 },
-  { boat: "Yawl", hours: 42 },
-  { boat: "Punt", hours: 36 },
-  { boat: "Pram", hours: 32 },
+  { boat: "Cobble", Skiff: 102, Lantern: null, Moth: null },
+  { boat: "Ketch", Skiff: null, Lantern: 68, Moth: null },
+  { boat: "Yawl", Skiff: null, Lantern: 42, Moth: null },
+  { boat: "Punt", Skiff: 36, Lantern: null, Moth: null },
+  { boat: "Pram", Skiff: null, Lantern: null, Moth: 32 },
 ];
 
 const mornings = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"] as const;
@@ -166,7 +166,7 @@ export const fifthBoards: {
     slug: "carrick-yard",
     number: 27,
     title: "Carrick yard, winter hours",
-    lede: "Winter work at a fictional boatyard. The sunburst splits hours by shed, boat, and job. The bars are those same hours rolled up to the boat and ranked.",
+    lede: "Winter work at a fictional boatyard. The sunburst splits hours by shed, boat, and job. The bars are those same hours rolled up to the boat, coloured by the shed they belong to.",
     charts: [
       {
         id: "sheds",
@@ -192,26 +192,28 @@ export const fifthBoards: {
       {
         id: "boats",
         title: "The same hours, by boat",
-        caption: "Cobble is 102 hours. Pram is 32. The ranking is the sunburst, folded to one name per boat.",
+        caption: "Skiff, Lantern, and Moth use the sunburst colours. Cobble is 102 hours. Pram is 32.",
         span: "board-6",
         spec: {
           version: "1",
           id: "carrick-yard-boats",
           type: "bar",
           title: "Hours by boat",
-          subtitle: "Ranked from the same winter.",
+          subtitle: "Each boat keeps its shed's colour.",
           theme: "soft",
           locale: "en-GB",
           data: boats,
-          sort: { by: "value", order: "descending" },
           encoding: {
             x: { field: "boat", title: "Boat" },
-            y: { field: "hours", title: "Hours", format: { style: "number", suffix: " h" }, scale: { domain: [0, 120], nice: false } },
-            color: "boat",
+            y: [
+              { field: "Skiff", title: "Skiff", format: { style: "number", suffix: " h" }, scale: { domain: [0, 120], nice: false } },
+              { field: "Lantern", title: "Lantern", format: { style: "number", suffix: " h" } },
+              { field: "Moth", title: "Moth", format: { style: "number", suffix: " h" } },
+            ],
           },
-          mark: { orientation: "horizontal", labels: true, labelPosition: "right" },
+          mark: { orientation: "horizontal", labels: true, labelPosition: "right", stack: "stack" },
           axes: { x: { title: "Boat" }, y: { title: "Hours", ticks: [0, 30, 60, 90, 120] } },
-          legend: false,
+          legend: { position: "top" },
           size: { width: 560, height: 480 },
           a11y: { alt: "Cobble 102 hours, Ketch 68, Yawl 42, Punt 36, and Pram 32." },
         },

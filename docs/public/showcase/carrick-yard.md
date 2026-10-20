@@ -1,6 +1,6 @@
 # Carrick yard, winter hours
 
-Winter work at a fictional boatyard. The sunburst splits hours by shed, boat, and job. The bars are those same hours rolled up to the boat and ranked.
+Winter work at a fictional boatyard. The sunburst splits hours by shed, boat, and job. The bars are those same hours rolled up to the boat, coloured by the shed they belong to.
 
 ## Shed, boat, job
 
@@ -130,7 +130,7 @@ Skiff, Lantern, and Moth. Cobble takes the longest job list.
 
 ## The same hours, by boat
 
-Cobble is 102 hours. Pram is 32. The ranking is the sunburst, folded to one name per boat.
+Skiff, Lantern, and Moth use the sunburst colours. Cobble is 102 hours. Pram is 32.
 
 ```json
 {
@@ -138,61 +138,85 @@ Cobble is 102 hours. Pram is 32. The ranking is the sunburst, folded to one name
   "id": "carrick-yard-boats",
   "type": "bar",
   "title": "Hours by boat",
-  "subtitle": "Ranked from the same winter.",
+  "subtitle": "Each boat keeps its shed's colour.",
   "theme": "soft",
   "locale": "en-GB",
   "data": [
     {
       "boat": "Cobble",
-      "hours": 102
+      "Skiff": 102,
+      "Lantern": null,
+      "Moth": null
     },
     {
       "boat": "Ketch",
-      "hours": 68
+      "Skiff": null,
+      "Lantern": 68,
+      "Moth": null
     },
     {
       "boat": "Yawl",
-      "hours": 42
+      "Skiff": null,
+      "Lantern": 42,
+      "Moth": null
     },
     {
       "boat": "Punt",
-      "hours": 36
+      "Skiff": 36,
+      "Lantern": null,
+      "Moth": null
     },
     {
       "boat": "Pram",
-      "hours": 32
+      "Skiff": null,
+      "Lantern": null,
+      "Moth": 32
     }
   ],
-  "sort": {
-    "by": "value",
-    "order": "descending"
-  },
   "encoding": {
     "x": {
       "field": "boat",
       "title": "Boat"
     },
-    "y": {
-      "field": "hours",
-      "title": "Hours",
-      "format": {
-        "style": "number",
-        "suffix": " h"
+    "y": [
+      {
+        "field": "Skiff",
+        "title": "Skiff",
+        "format": {
+          "style": "number",
+          "suffix": " h"
+        },
+        "scale": {
+          "domain": [
+            0,
+            120
+          ],
+          "nice": false
+        }
       },
-      "scale": {
-        "domain": [
-          0,
-          120
-        ],
-        "nice": false
+      {
+        "field": "Lantern",
+        "title": "Lantern",
+        "format": {
+          "style": "number",
+          "suffix": " h"
+        }
+      },
+      {
+        "field": "Moth",
+        "title": "Moth",
+        "format": {
+          "style": "number",
+          "suffix": " h"
+        }
       }
-    },
-    "color": "boat"
+    ]
   },
   "mark": {
     "orientation": "horizontal",
     "labels": true,
-    "labelPosition": "right"
+    "labelPosition": "right",
+    "stack": "stack"
   },
   "axes": {
     "x": {
@@ -209,7 +233,9 @@ Cobble is 102 hours. Pram is 32. The ranking is the sunburst, folded to one name
       ]
     }
   },
-  "legend": false,
+  "legend": {
+    "position": "top"
+  },
   "size": {
     "width": 560,
     "height": 480
@@ -226,17 +252,16 @@ Cobble is 102 hours. Pram is 32. The ranking is the sunburst, folded to one name
 - [Explicit tick values](https://chartkit.dev/features/axis.ticks.values) (`axis.ticks.values`)
 - [Axis title](https://chartkit.dev/features/axis.title) (`axis.title`)
 - [Hierarchical data input](https://chartkit.dev/features/data.hierarchy) (`data.hierarchy`)
-- [Sorting categories](https://chartkit.dev/features/data.sort) (`data.sort`)
 - [Locale-aware formatting (i18n)](https://chartkit.dev/features/format.locale) (`format.locale`)
 - [Number formatting options](https://chartkit.dev/features/format.number) (`format.number`)
 - [Data label position](https://chartkit.dev/features/label.position) (`label.position`)
 - [Data labels on marks](https://chartkit.dev/features/label.show) (`label.show`)
 - [Legend position](https://chartkit.dev/features/legend.position) (`legend.position`)
-- [Per-point / per-category colour](https://chartkit.dev/features/mark.color.point) (`mark.color.point`)
 - [Explicit domain (min/max)](https://chartkit.dev/features/scale.domain) (`scale.domain`)
 - [Nice rounding](https://chartkit.dev/features/scale.nice) (`scale.nice`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)
 - [Horizontal bar](https://chartkit.dev/features/type.bar.horizontal) (`type.bar.horizontal`)
+- [Stacked bar](https://chartkit.dev/features/type.bar.stacked) (`type.bar.stacked`)
 - [Sunburst](https://chartkit.dev/features/type.sunburst) (`type.sunburst`)
 
 https://chartkit.dev/showcase/carrick-yard

@@ -365,7 +365,7 @@ export const fourthBoards: {
           mark: { error: "bar" },
           axes: { x: { title: "Dish" }, y: { title: "Reading", ticks: [0, 6, 12, 18, 24] } },
           annotations: [
-            { type: "rule", axis: "y", value: 12.4, label: "Blank", dash: "dashed", labelPosition: "center" },
+            { type: "rule", axis: "y", value: 12.4, label: "Blank", dash: "dashed", labelPosition: "end" },
             { type: "marker", x: "Salt", y: 19.4, label: "Clear of the blank", dx: 18, dy: -28 },
           ],
           size: { width: 1040, height: 480 },

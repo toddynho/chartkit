@@ -96,7 +96,7 @@ The bar is the mean. The whisker is the low and high of three runs. Salt is the 
       "value": 12.4,
       "label": "Blank",
       "dash": "dashed",
-      "labelPosition": "center"
+      "labelPosition": "end"
     },
     {
       "type": "marker",
