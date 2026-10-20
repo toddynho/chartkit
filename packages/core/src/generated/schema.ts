@@ -2164,7 +2164,7 @@ export interface Mark {
    */
   layout?: "calendar" | "grid";
   /**
-   * Number of weeks shown in calendar layout, ending on the week of the latest day. Ignored on a grid heatmap. A fixed width lays the weeks across that width. Unsized calendars stay at 12px. Applies to: heatmap.
+   * Number of weeks shown in calendar layout, ending on the week of the latest day. Ignored on a grid heatmap. Cells stay square, or at most 1.5:1, and cap at 32px. Extra width centres the grid. Unsized calendars stay at 12px. Applies to: heatmap.
    */
   weeks?: number;
   /**

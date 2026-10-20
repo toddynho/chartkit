@@ -15011,7 +15011,7 @@
               "loc": "chartkit:packages/core/src/generated/schema.ts:2165"
             }
           ],
-          "note": "A fixed width lays the weeks across that width. The last week includes the latest day. Unsized calendars stay at 12px. The legend sits under the first week.",
+          "note": "Cells stay square, or at most 1.5:1, and cap at 32px. Extra width centres the grid. The last week includes the latest day. Unsized calendars stay at 12px.",
           "verified": "dts-path",
           "strength": "strong"
         },

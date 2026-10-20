@@ -78,5 +78,5 @@ Rechecked on the pie, donut, bar, line, and scatter entries. A cell moved to nat
 | mark.glow | native | Blurred understroke on line and sparkline. One filter, emitted only when `mark.glow` is true. |
 | type.line.smooth | native | `mark.curve` `monotone` is monotone-x. `smooth`, `spline`, and `basis` repair to it (CK1007). |
 | legend.position | native | A funnel draws the legend when `legend` is set, including `position: "top"`. |
-| type.heatmap.calendar | native | A fixed `size.width` lays the weeks across that width. The last week includes the latest day. Unsized calendars stay at 12px. The legend sits under the first week. `mark.weeks` on a grid warns CK3012. |
+| type.heatmap.calendar | native | Cells stay square, or at most 1.5:1, and cap at 32px. Extra width centres the grid. The last week includes the latest day. Unsized calendars stay at 12px. `mark.weeks` on a grid warns CK3012. |
 | scale.color.sequential | native | A threshold legend labels the cuts (`<6`, `6–12`, `≥12`), not the data ends. |

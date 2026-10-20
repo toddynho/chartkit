@@ -115,10 +115,15 @@ type CalendarBox = {
   legendY: number;
 };
 
+/** A day cell does not grow past this, so a wide card cannot turn weeks into bars. */
+const MAX_CELL = 32;
+/** Width and height stay within this of each other. Square is the aim. */
+const MAX_CELL_RATIO = 1.5;
+
 /**
- * Unsized calendars keep a 12px cell. A fixed width gives each week a column
- * of that width, so the grid fills the card. A fixed height sets the row pitch.
- * The free axis stays square. The legend sits under the first week.
+ * Unsized calendars keep a 12px cell. A fixed size grows the cells, but they
+ * stay square or at most 1.5:1 and never pass 32px. Leftover width or height
+ * centres the grid. The legend sits under the first week.
  */
 function calendarLayout(frame: Frame, weeks: number, legendH: number): CalendarBox {
   if (!frame.widthFixed && !frame.heightFixed) {
@@ -142,16 +147,20 @@ function calendarLayout(frame: Frame, weeks: number, legendH: number): CalendarB
   const frac = typeof frame.mark.gap === "number" ? Math.min(0.55, Math.max(0, frame.mark.gap)) : 0.2;
   const padX = DAY_LABEL_W + 8;
   const padY = MONTH_LABEL_H + legendH + 12;
+  const maxPitch = MAX_CELL / (1 - frac);
   const widthPitch = frame.widthFixed ? Math.max(4, (frame.width - padX) / weeks) : null;
   const heightPitch = frame.heightFixed ? Math.max(4, (frame.height - padY) / 7) : null;
-  const pitchX = widthPitch ?? heightPitch ?? 15;
-  const pitchY = heightPitch ?? widthPitch ?? 15;
+  let pitchX = Math.min(widthPitch ?? heightPitch ?? 15, maxPitch);
+  let pitchY = Math.min(heightPitch ?? widthPitch ?? 15, maxPitch);
+  if (pitchX > pitchY * MAX_CELL_RATIO) pitchX = pitchY * MAX_CELL_RATIO;
+  if (pitchY > pitchX * MAX_CELL_RATIO) pitchY = pitchX * MAX_CELL_RATIO;
   const gridW = DAY_LABEL_W + weeks * pitchX;
   const gridH = MONTH_LABEL_H + 7 * pitchY;
   const width = frame.widthFixed ? frame.width : gridW + 4;
   const height = frame.heightFixed ? frame.height : gridH + 8 + legendH;
+  const blockH = gridH + 8 + legendH;
   const ox = frame.widthFixed ? Math.max(0, (width - 4 - gridW) / 2) : 0;
-  const oy = frame.heightFixed ? Math.max(0, (height - legendH - 8 - gridH) / 2) : 0;
+  const oy = frame.heightFixed ? Math.max(0, (height - blockH) / 2) : 0;
   return {
     cellW: Math.max(2, pitchX * (1 - frac)),
     cellH: Math.max(2, pitchY * (1 - frac)),
@@ -162,7 +171,7 @@ function calendarLayout(frame: Frame, weeks: number, legendH: number): CalendarB
     width,
     height,
     legendX: ox + DAY_LABEL_W,
-    legendY: frame.heightFixed ? height - legendH + 2 : gridH + 6,
+    legendY: oy + gridH + 6,
   };
 }
 

@@ -69,6 +69,20 @@ function endpointYs(d: string): number[] {
   return ends;
 }
 
+function aspect(cells: { w: number; h: number }[]): number {
+  const wide = Math.max(...cells.map((cell) => cell.w));
+  const tall = Math.max(...cells.map((cell) => cell.h));
+  return Math.max(wide, tall) / Math.min(wide, tall);
+}
+
+/** The grid sits in the middle when the card is wider than the capped cells. */
+function centred(cells: { x: number; w: number }[], width: number): boolean {
+  const left = Math.min(...cells.map((cell) => cell.x));
+  const right = Math.max(...cells.map((cell) => cell.x + cell.w));
+  const mid = (left + right) / 2;
+  return left > 24 && right < width - 24 && Math.abs(mid - width / 2) < 48;
+}
+
 function dayRect(svg: string, day: string): string {
   for (const match of svg.matchAll(/<rect [^>]*aria-label="([^"]+)"[^>]*>/g)) {
     if (match[1].startsWith(day)) return match[0];
@@ -233,10 +247,8 @@ describe("core gaps", () => {
     expect(fitted).toContain('viewBox="0 0 640 280"');
     const fittedCells = dayCells(fitted);
     expect(Math.max(...fittedCells.map((cell) => cell.w))).toBeGreaterThan(18);
-    const fittedRight = Math.max(...fittedCells.map((cell) => cell.x + cell.w));
-    const fittedBottom = Math.max(...fittedCells.map((cell) => cell.y + cell.h));
-    expect(fittedRight).toBeGreaterThan(600);
-    expect(fittedBottom).toBeGreaterThan(180);
+    expect(aspect(fittedCells)).toBeLessThanOrEqual(1.51);
+    expect(centred(fittedCells, 640)).toBe(true);
     const reproSpec = {
       version: "1",
       type: "heatmap",
@@ -260,13 +272,19 @@ describe("core gaps", () => {
     expect(legend).toContain("≥12");
     expect(legend).not.toContain(">4<");
     expect(legend).not.toContain(">14<");
-    const binX = Number(/<rect x="([^"]+)"[^>]*data-ck-scale="bin"/.exec(repro)?.[1]);
-    expect(binX).toBeLessThan(80);
     const cells = dayCells(repro);
-    const left = Math.min(...cells.map((cell) => cell.x));
-    const right = Math.max(...cells.map((cell) => cell.x + cell.w));
-    expect(right).toBeGreaterThan(680);
-    expect(right - left).toBeGreaterThan(600);
+    expect(aspect(cells)).toBeLessThanOrEqual(1.51);
+    expect(centred(cells, 720)).toBe(true);
+    expect(Math.max(...cells.map((cell) => cell.w))).toBeLessThanOrEqual(32.5);
+    const wide = render({
+      ...reproSpec,
+      mark: { layout: "calendar", weeks: 3 },
+      a11y: { alt: "Three weeks in a wide card stay square." },
+    });
+    const wideCells = dayCells(wide);
+    expect(aspect(wideCells)).toBeLessThanOrEqual(1.51);
+    expect(centred(wideCells, 720)).toBe(true);
+    expect(Math.max(...wideCells.map((cell) => cell.x + cell.w))).toBeLessThan(500);
     const low = dayRect(repro, "2026-04-06");
     const high = dayRect(repro, "2026-04-07");
     const gap = dayRect(repro, "2026-04-05");
