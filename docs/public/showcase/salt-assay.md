@@ -206,8 +206,8 @@ The same dish, one point and whisker each weekday. Thursday carries the highest 
       "x": "Thu",
       "y": 19.8,
       "label": "Highest morning",
-      "dx": -12,
-      "dy": -26
+      "dx": -8,
+      "dy": -40
     }
   ],
   "size": {

@@ -329,7 +329,7 @@ export const fourthBoards: {
           },
           annotations: [
             { type: "trendline", method: "linear", label: "Season line" },
-            { type: "marker", x: "Jul", y: 25, label: "July high", dx: 16, dy: -24 },
+            { type: "marker", x: "Jul", y: 25, label: "July high", dx: -36, dy: 12 },
           ],
           size: { width: 1040, height: 480 },
           a11y: { alt: "The Pell glasshouse runs from 10 to 16 degrees in March and from 18 to 25 degrees in July. A linear season line leans upward through the midpoint." },
@@ -393,7 +393,7 @@ export const fourthBoards: {
           },
           mark: { error: "point", pointSize: 5 },
           axes: { x: { title: "Day" }, y: { title: "Reading", ticks: [16, 17, 18, 19, 20, 21] } },
-          annotations: [{ type: "marker", x: "Thu", y: 19.8, label: "Highest morning", dx: -12, dy: -26 }],
+          annotations: [{ type: "marker", x: "Thu", y: 19.8, label: "Highest morning", dx: -8, dy: -40 }],
           size: { width: 1040, height: 440 },
           a11y: { alt: "Salt stays between 17.2 and 19.8 across the week. Thursday is the highest morning." },
         },

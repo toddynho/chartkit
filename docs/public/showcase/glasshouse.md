@@ -104,8 +104,8 @@ Ticks sit on 10, 14, 18, 22, and 26 degrees, so March's 10 and July's 25 stay in
       "x": "Jul",
       "y": 25,
       "label": "July high",
-      "dx": 16,
-      "dy": -24
+      "dx": -36,
+      "dy": 12
     }
   ],
   "size": {
