@@ -2,7 +2,7 @@
 
 The measured line bundles and the published round of browser timings, drawn as charts. Losses stay on the page.
 
-Bundle bytes are from docs/data/measured-sizes.json, size script measured 2026-10-20 on `1ca0d78bb669a563e641ecfdc03ab04131be28d1`, bench bundles measured 2026-10-19. Timings are older round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
+Bundle bytes are from docs/data/measured-sizes.json, size script measured 2026-10-20 on `7fd168ebe9c04642a579e0e7500f240ede12d41a`, bench bundles measured 2026-10-19. Timings are older round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
 
 ## Line chart, gzip
 
@@ -17,7 +17,7 @@ Log scale. ChartKit is the size script. The other bars are the bench line, using
   "data": [
     {
       "name": "ChartKit",
-      "bytes": 30480
+      "bytes": 30556
     },
     {
       "name": "CK bench",

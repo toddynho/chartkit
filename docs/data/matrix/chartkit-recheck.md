@@ -82,6 +82,16 @@ Rechecked on `createRenderer([line])` and the scatter entry. A cell moved to nat
 | annotation.marker | native | A point, a leader, and a text box. The box stays inside the plot and moves clear of earlier callouts. |
 | axis.bands | native | `axes.x.bands` and `axes.y.bands` shade ranges. `axes.x.bands: "weekends"` shades Saturday and Sunday when x is dates, and warns otherwise. |
 
+## Core gaps
+
+| feature | status | note |
+| --- | --- | --- |
+| mark.glow | native | Blurred understroke on line and sparkline. One filter, emitted only when `mark.glow` is true. |
+| type.line.smooth | native | `mark.curve` `monotone` is monotone-x. `smooth`, `spline`, and `basis` repair to it (CK1007). |
+| legend.position | native | A funnel draws the legend when `legend` is set, including `position: "top"`. |
+| type.heatmap.calendar | native | Cells stay square, or at most 1.5:1, and cap at 32px. Extra width centres the grid. The last week includes the latest day. Unsized calendars stay at 12px. `mark.weeks` on a grid warns CK3012. |
+| scale.color.sequential | native | A threshold legend labels the cuts (`<6`, `6–12`, `≥12`), not the data ends. |
+
 ## Uncertainty
 
 Rechecked on `area-range`, `bar-range`, `errorbar`, and a combo with `mark: "range"`. A cell moved to native only when a runtime probe changed the picture. The three renderers live in `@chartkitdev/core/charts/<type>`, so `createRenderer([line])` does not include them.

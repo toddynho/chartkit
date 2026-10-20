@@ -68,6 +68,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.xyChart.chartOrientation=horizontal | dts-path (strong) | mermaid/dist/config.type.d.ts:1085 |
 | AntV G2 | native | ~transpose | dts-grep (weak) | @antv/g2/lib/index.d.ts:54 coordinate.transform transpose |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 1ca0d78bb669.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 7fd168ebe9c0.
 
 https://chartkit.dev/features.json

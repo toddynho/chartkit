@@ -72,6 +72,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | ~xAxis\|title | dts-grep (weak) | mermaid/dist/utils.d.ts:223 x-axis "title" |
 | AntV G2 | native | ~title | dts-grep (weak) | @antv/g2/lib/index.d.ts:115 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 1ca0d78bb669.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 7fd168ebe9c0.
 
 https://chartkit.dev/features.json

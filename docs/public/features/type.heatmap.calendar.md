@@ -6,7 +6,9 @@ Days laid out as a calendar grid
 
 Matrix status: `native`. Verification: `dts-path` (strong).
 
-Source: chartkit:packages/core/src/generated/schema.ts:875
+Cells stay square, or at most 1.5:1, and cap at 32px. Extra width centres the grid. The last week includes the latest day. Unsized calendars stay at 12px.
+
+Source: chartkit:packages/core/src/generated/schema.ts:2165
 
 ## ChartKit spec
 
@@ -77,6 +79,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | manual | ~register | dts-mechanism (weak) | @antv/g2/lib/exports.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 1ca0d78bb669.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 7fd168ebe9c0.
 
 https://chartkit.dev/features.json

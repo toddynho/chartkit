@@ -35,6 +35,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~getCoordinate\|getScale | dts-grep (weak) | @antv/g2/lib/api/mark.d.ts:20 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 1ca0d78bb669.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 7fd168ebe9c0.
 
 https://chartkit.dev/features.json

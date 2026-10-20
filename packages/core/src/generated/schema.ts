@@ -987,7 +987,7 @@ export interface ColorScale {
    */
   bins?: number;
   /**
-   * Cut points for threshold. Colours are one more than the number of cuts.
+   * Cut points for threshold. Colours are one more than the number of cuts. The legend labels the cuts, for example <6, 6–12, ≥12, not the data ends.
    */
   thresholds?: number[];
 }
@@ -1089,7 +1089,7 @@ export interface Metric {
  */
 export interface Mark {
   /**
-   * Line interpolation. Applies to: line, stacked-area, combo, sparkline, mini-area.
+   * Line interpolation. monotone is monotone-x and stays inside the data, so a spike does not cross the low point or pass the peak. smooth, spline, and basis repair to monotone. Applies to: line, stacked-area, combo, sparkline, mini-area.
    */
   curve?: "linear" | "monotone" | "step" | "step-before" | "step-after";
   /**
@@ -1129,7 +1129,7 @@ export interface Mark {
    */
   strokeWidth?: number;
   /**
-   * Soft glow behind lines (dark themes). Applies to: line, sparkline.
+   * Soft glow behind the line. A blurred understroke and one filter, emitted only when true, on Soft and on midnight. Applies to: line, sparkline.
    */
   glow?: boolean;
   /**
@@ -2343,7 +2343,7 @@ export interface Mark {
    */
   layout?: "calendar" | "grid";
   /**
-   * Number of weeks shown in calendar layout. Applies to: heatmap.
+   * Number of weeks shown in calendar layout, ending on the week of the latest day. Ignored on a grid heatmap. Cells stay square, or at most 1.5:1, and cap at 32px. Extra width centres the grid. Unsized calendars stay at 12px. Applies to: heatmap.
    */
   weeks?: number;
   /**

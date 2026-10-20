@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { ValidationResult } from "../diagnostics";
 import { render } from "../extra";
 import { attach } from "../interact";
+import { MARK_APPLIES } from "../marks";
 import type { ChartRenderer } from "../render";
 import { validate } from "../validate";
 
@@ -374,6 +375,21 @@ function hosts(): Host[] {
     ["bar-range", { version: "1", type: "bar-range", data: rows, encoding: { x: "month", low: "cost", high: "revenue" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["errorbar", { version: "1", type: "errorbar", data: rows, encoding: { x: "month", y: "revenue", error: "cost" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     [
+      "trace",
+      {
+        version: "1",
+        type: "line",
+        data: Array.from({ length: 160 }, (_, index) => ({
+          month: index,
+          revenue: index === 40 ? null : Math.round(20 + 15 * Math.sin(index / 3)),
+          cost: 8 + (index % 5),
+        })),
+        encoding: { x: "month", y: ["revenue", "cost"] },
+        a11y: { alt },
+        size: { width: 100, height: 72 },
+      },
+    ],
+    [
       "crowd",
       {
         version: "1",
@@ -401,31 +417,56 @@ interface EntrySet {
   base: Map<string, string | null>;
 }
 
+/**
+ * CK3010 means the option does not apply to that host's chart type.
+ * It must not count as coverage when some host is a type the option does
+ * apply to. Otherwise mark.glow passes because a bar warns, while the line
+ * never paints it.
+ */
+function appliesTo(path: string, type: string): boolean | null {
+  if (!path.startsWith("/mark/")) return null;
+  const list = MARK_APPLIES[path.split("/")[2] ?? ""];
+  if (!list) return null;
+  return list.includes(type);
+}
+
 function covered(leaf: Leaf, ready: Host[], entries?: EntrySet): boolean {
   const values = probes(leaf);
   if (values.length === 0) return leaf.children && !leaf.types.has("boolean") && leaf.enums.length === 0 && leaf.consts.length <= 1;
-  let drew = false;
+  let applicableHost = false;
+  let drewApplicable = false;
+  let drewOther = false;
   for (const value of values) {
     for (const host of ready) {
       const spec = apply(host.spec, leaf.path, value);
       const result = validate(spec);
-      const warnedPath = warned(result, leaf.path);
+      const type = String(host.spec.type);
+      const scope = appliesTo(leaf.path, type);
+      if (scope === true) applicableHost = true;
+      const realWarn = result.warnings.some((warning) => warning.code !== "CK3010" && mentions(warning.path, leaf.path));
+      const anyWarn = warned(result, leaf.path);
+      const noted = scope === true ? realWarn : anyWarn;
       if (!result.ok) {
-        if (warnedPath) drew = true;
+        if (noted) {
+          if (scope === true) drewApplicable = true;
+          else drewOther = true;
+        }
         continue;
       }
       const svg = chart(spec);
       const fullChanged = Boolean(svg && svg !== host.svg);
-      if (fullChanged && entries) {
-        const type = String(host.spec.type);
+      if (fullChanged && entries && scope !== false) {
         const draw = entries.draw.get(type);
         const small = draw?.(spec) ?? null;
         if (draw && small === entries.base.get(host.name)) return false;
       }
-      if (fullChanged || warnedPath) drew = true;
+      if (fullChanged || noted) {
+        if (scope === true) drewApplicable = true;
+        else drewOther = true;
+      }
     }
   }
-  return drew;
+  return applicableHost ? drewApplicable : drewApplicable || drewOther;
 }
 
 const ENTRY_FILES: Array<[string, string]> = [

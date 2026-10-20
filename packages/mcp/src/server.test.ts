@@ -62,7 +62,7 @@ describe("bundled data", () => {
     const bundled = readdirSync(join(pkgRoot, "data/examples")).sort();
     const source = readdirSync(join(repoRoot, "packages/core/examples")).filter((name) => name.endsWith(".json")).sort();
     expect(bundled).toEqual(source);
-    expect(Buffer.byteLength(readFileSync(join(pkgRoot, "data/llms.txt")))).toBeLessThanOrEqual(7100);
+    expect(Buffer.byteLength(readFileSync(join(pkgRoot, "data/llms.txt")))).toBeLessThanOrEqual(6400);
   });
 });
 

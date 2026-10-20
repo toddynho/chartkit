@@ -6,7 +6,7 @@ Continuous colour mapping for heatmaps etc
 
 Matrix status: `native`. Verification: `dts-path` (strong).
 
-sequential, diverging, quantize, and threshold. scheme blue, teal, orange, or violet.
+sequential, diverging, quantize, and threshold. A threshold legend labels the cuts, not the data ends. scheme blue, teal, orange, or violet.
 
 Source: chartkit:packages/core/src/generated/schema.ts:779
 
@@ -75,6 +75,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~palette\|interpolate | dts-grep (weak) | @antv/g2/lib/index.d.ts:89 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 1ca0d78bb669.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 7fd168ebe9c0.
 
 https://chartkit.dev/features.json
