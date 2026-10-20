@@ -1,7 +1,11 @@
 import { ruleMatchesAny, type ColorRule } from "./color";
+import { loadTable } from "./data-prep";
 import type { Diagnostic, JsonPatchOperation } from "./diagnostics";
 import { readData, type DataTable } from "./data";
 import { MARK_APPLIES } from "./marks";
+import { sortIssue } from "./sort";
+import { namedZone } from "./timezone";
+import { transformIssues } from "./transform";
 import { nearest } from "./walker";
 
 const CHART_TYPES = new Set([
@@ -58,6 +62,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
     warnChannelExtras(spec.encoding, diagnostics);
   }
 
+  checkTimezone(spec, diagnostics);
   const dataSource = spec.data;
   if (dataSource === undefined) {
     if (known) warnDesign(spec, type, undefined, diagnostics);
@@ -88,9 +93,90 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   if (!read.ok) return;
 
   const table = read.table;
-  if (isRecord(spec.encoding)) checkEncoding(spec, spec.encoding, table, diagnostics);
-  if (type === "candlestick") checkCandles(spec, table, diagnostics);
-  if (known) warnDesign(spec, type, table, diagnostics);
+  checkSort(spec, table, diagnostics);
+  checkTransform(spec, table, diagnostics);
+  const prepared = loadTable(spec);
+  if (!prepared.ok && prepared.reason === "empty") {
+    diagnostics.push({
+      code: "CK2004",
+      severity: "error",
+      message: "transform removed every row",
+      path: "/transform",
+      hint: "widen the filter or drop the step",
+      fix: [{ op: "remove", path: "/transform" }],
+    });
+    diagnostics.push({
+      code: "CK2004",
+      severity: "warning",
+      message: "transform removed every row and is not drawn",
+      path: "/transform/0",
+      hint: "widen the filter or drop the step",
+    });
+    return;
+  }
+  const view = prepared.ok ? prepared.table : table;
+  if (isRecord(spec.encoding)) checkEncoding(spec, spec.encoding, view, diagnostics);
+  if (type === "candlestick") checkCandles(spec, view, diagnostics);
+  if (known) warnDesign(spec, type, view, diagnostics);
+}
+
+function flagged(diagnostics: Diagnostic[], item: Diagnostic): void {
+  diagnostics.push(item);
+  diagnostics.push({ ...item, severity: "warning", fix: undefined });
+}
+
+function checkTimezone(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  if (spec.timezone === undefined) return;
+  const zone = namedZone(spec.timezone);
+  if (!zone) {
+    flagged(diagnostics, {
+      code: "CK3020",
+      severity: "error",
+      message: `timezone ${JSON.stringify(spec.timezone)} is not an IANA zone and is ignored`,
+      path: "/timezone",
+      hint: 'use a zone such as "UTC" or "America/New_York", or remove timezone (UTC)',
+      fix: [{ op: "remove", path: "/timezone" }],
+    });
+    return;
+  }
+  const temporal = xLooksDated(spec) || (isRecord(spec.encoding) && isRecord(spec.encoding.x) && spec.encoding.x.type === "temporal");
+  if (zone !== "UTC" && !temporal) {
+    diagnostics.push({
+      code: "CK3021",
+      severity: "warning",
+      message: "timezone has no effect unless x is temporal",
+      path: "/timezone",
+      hint: 'set encoding.x.type to "temporal", or remove timezone',
+    });
+  }
+}
+
+function checkSort(spec: Record<string, unknown>, table: DataTable, diagnostics: Diagnostic[]): void {
+  const message = sortIssue(spec, table);
+  if (!message) return;
+  const path = message.includes("sort field") ? "/sort/field" : "/sort";
+  flagged(diagnostics, {
+    code: "CK3022",
+    severity: "error",
+    message,
+    path,
+    hint: "sort by a data field or by value, ascending or descending",
+    fix: [{ op: "remove", path: "/sort" }],
+  });
+}
+
+function checkTransform(spec: Record<string, unknown>, table: DataTable, diagnostics: Diagnostic[]): void {
+  for (const issue of transformIssues(spec.transform, table)) {
+    const path = issue.index < 0 ? "/transform" : `/transform/${issue.index}`;
+    flagged(diagnostics, {
+      code: "CK3024",
+      severity: "error",
+      message: issue.message,
+      path,
+      hint: "filter, window mean, or aggregate (sum, mean, count)",
+      fix: [{ op: "remove", path }],
+    });
+  }
 }
 
 function checkEncoding(

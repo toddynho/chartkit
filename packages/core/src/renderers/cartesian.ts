@@ -1,6 +1,8 @@
 import { annotationLayers, seriesPoints } from "../annotations";
 import { isPaintColumn, readRules, resolveColors, withPalette } from "../color";
-import { isTypedArray, readData, type DataTable } from "../data";
+import { loadTable } from "../data-prep";
+import { isTypedArray, type DataTable } from "../data";
+import { formatZoned, zoneOf } from "../timezone";
 import { formatAxisValue, formatValue } from "../format";
 import { bag, glyphOf, marker, named, nudge, type Bag } from "../glyphs";
 import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
@@ -165,6 +167,8 @@ export interface PlotModel {
   subtitle?: string;
   alt: string;
   locale: string;
+  /** IANA zone for temporal ticks. UTC when the spec omits timezone. */
+  zone: string;
   width: number;
   height: number;
   responsive: boolean;
@@ -251,6 +255,7 @@ export interface ChartShell {
   responsive: boolean;
   alt: string;
   locale: string;
+  zone: string;
   id: string;
   title?: string;
   subtitle?: string;
@@ -347,6 +352,7 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     responsive: size.width === undefined || size.width === "auto",
     alt,
     locale: typeof spec.locale === "string" ? spec.locale : "en-US",
+    zone: zoneOf(spec),
     id: `ck${hash(idSource)}`,
     title: typeof spec.title === "string" ? spec.title : undefined,
     subtitle: typeof spec.subtitle === "string" ? spec.subtitle : undefined,
@@ -405,7 +411,7 @@ function toModel(
     labels: string[],
   ) => { series: Series[]; labels: string[] } | null,
 ): PlotModel | null {
-  const read = readData(spec.data);
+  const read = loadTable(spec);
   if (!read.ok) return null;
   const table = read.table;
   const shell = shellFor(spec);
@@ -1423,7 +1429,7 @@ function timeBand(model: PlotModel, xScale: XScale, plot: PlotBox): string {
     model.xAxis.count !== undefined || model.xAxis.values?.length
       ? resolveTicks(model, "x", min, max, model.xAxis.count ?? 6, false)
       : timeTicks(min, max, Math.max(2, Math.floor(width / 72)));
-  const labels = values.map((tick) => formatTimeLabel(tick, max - min, model.locale, model.xFormat));
+  const labels = values.map((tick) => formatTimeLabel(tick, max - min, model.locale, model.xFormat, model.zone));
   return along(model, values, labels, (value) => xScale.at(value), plot, 4);
 }
 
@@ -2399,8 +2405,9 @@ export function timeTicks(min: number, max: number, count: number): number[] {
   return out.length ? out : [min, max];
 }
 
-export function formatTimeLabel(ms: number, span: number, locale: string, format: unknown): string {
-  if (format !== undefined) return formatValue(ms, format, locale);
+export function formatTimeLabel(ms: number, span: number, locale: string, format: unknown, zone = "UTC"): string {
+  if (format !== undefined) return formatValue(ms, format, locale, zone);
+  if (zone !== "UTC") return formatZoned(ms, span, locale, zone);
   const date = new Date(ms);
   if (date.getTime() !== date.getTime()) return "";
   if (locale !== "en-US") {

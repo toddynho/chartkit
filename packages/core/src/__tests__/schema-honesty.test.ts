@@ -126,6 +126,8 @@ function probes(leaf: Leaf): unknown[] {
   }
   if (leaf.path === "/data/columns") return [{ month: ["Jan", "Feb", "Mar"], revenue: [5, 9, 4], cost: [1, 2, 3] }];
   if (leaf.path === "/annotations") return [[{ type: "rule", axis: "y", value: 2500, label: "Goal" }]];
+  if (leaf.path === "/transform") return [[{ type: "filter", field: "region", eq: "EU" }]];
+  if (leaf.path === "/timezone") return ["America/New_York"];
   const values = [...leaf.enums, ...leaf.consts];
   const out: unknown[] = [];
   const unique = new Set<string>();
@@ -194,6 +196,9 @@ function annotationSeed(path: string): Record<string, unknown> {
 function apply(host: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
   const spec = structuredClone(host);
   if (path.startsWith("/annotations/")) spec.annotations = [annotationSeed(path)];
+  if (path.startsWith("/transform/")) {
+    spec.transform = [{ type: "filter", field: "region", eq: "EU" }];
+  }
   if (/^\/axes\/(x|y|y2)\/bands\//.test(path)) {
     const key = path.split("/")[2] ?? "x";
     const axes = isRecord(spec.axes) ? spec.axes : {};
