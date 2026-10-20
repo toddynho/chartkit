@@ -1,10 +1,10 @@
 # Saltwharf, in the page
 
-A fictional stall, drawn from the same spec a plain HTML page puts inside <chart-kit>. The element reads the child JSON script. The package is @chartkitdev/element.
+A fictional stall, drawn from the same spec a plain HTML page puts inside <chart-kit>. The element reads the child JSON script, and its tooltip slot names the week as jars out and lids back. The package is @chartkitdev/element.
 
 ## Jars and lids
 
-The chart above is that spec. The block below is the element a static page would ship.
+The chart above is that spec. Hover names the week as jars out and lids back. The block below is the element a static page would ship, with the same tooltip slot.
 
 ```json
 {
@@ -224,6 +224,14 @@ The chart above is that spec. The block below is the element a static page would
 </chart-kit>
 <script type="module">
   import "@chartkitdev/element";
+  const chart = document.querySelector("#saltwharf");
+  chart.tooltip = (detail) => {
+    const jars = detail.rows.find((row) => row.name === "Jars");
+    const lids = detail.rows.find((row) => row.name === "Lids");
+    const sent = jars ? jars.text : "0";
+    const back = lids ? lids.text : "0";
+    return "<strong>" + detail.title + "</strong><div>" + sent + " jars out, " + back + " lids back</div>";
+  };
 </script>
 ```
 
@@ -235,6 +243,7 @@ The chart above is that spec. The block below is the element a static page would
 - [Click to toggle series](https://chartkit.dev/features/legend.interactive) (`legend.interactive`)
 - [Legend position](https://chartkit.dev/features/legend.position) (`legend.position`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)
+- [Custom HTML / component tooltip](https://chartkit.dev/features/tooltip.custom) (`tooltip.custom`)
 - [Tooltip positioning / follow cursor](https://chartkit.dev/features/tooltip.position) (`tooltip.position`)
 - [Shared (index) vs single (nearest) tooltip](https://chartkit.dev/features/tooltip.shared) (`tooltip.shared`)
 - [Combined bar + line](https://chartkit.dev/features/type.combo) (`type.combo`)

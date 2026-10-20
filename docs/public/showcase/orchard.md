@@ -4,7 +4,7 @@ Three fictional apple varieties. Sun hours against sugar, crate weight coloured 
 
 ## Sun hours and sugar
 
-Each diamond is one crate. Colour is the variety, and the dot grows with weight. The vertical scale is not nicened.
+Each diamond is one crate. Colour is the variety, and the dot grows with weight. The vertical scale is not nicened, with a little room past the crates.
 
 ```json
 {
@@ -107,13 +107,20 @@ Each diamond is one crate. Colour is the variety, and the dot grows with weight.
   "encoding": {
     "x": {
       "field": "hours",
-      "title": "Sun hours"
+      "title": "Sun hours",
+      "scale": {
+        "padding": 0.08
+      }
     },
     "y": {
       "field": "brix",
       "title": "Brix",
       "scale": {
-        "nice": false
+        "nice": false,
+        "padding": {
+          "min": 0.08,
+          "max": 0.14
+        }
       }
     },
     "size": {
@@ -458,6 +465,7 @@ Eight bins across every crate.
 - [Point marker shapes](https://chartkit.dev/features/mark.point.shape) (`mark.point.shape`)
 - [Point marker size](https://chartkit.dev/features/mark.point.size) (`mark.point.size`)
 - [Nice rounding](https://chartkit.dev/features/scale.nice) (`scale.nice`)
+- [Scale padding / clamp / grace](https://chartkit.dev/features/scale.padding) (`scale.padding`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)
 - [Custom tooltip fields](https://chartkit.dev/features/tooltip.fields) (`tooltip.fields`)
 - [Tooltip positioning / follow cursor](https://chartkit.dev/features/tooltip.position) (`tooltip.position`)

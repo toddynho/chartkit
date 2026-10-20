@@ -144,7 +144,7 @@ export const orchardCharts: ChartSlot[] = [
   {
     id: "sun",
     title: "Sun hours and sugar",
-    caption: "Each diamond is one crate. Colour is the variety, and the dot grows with weight. The vertical scale is not nicened.",
+    caption: "Each diamond is one crate. Colour is the variety, and the dot grows with weight. The vertical scale is not nicened, with a little room past the crates.",
     span: "board-8",
     spec: {
       version: "1",
@@ -153,8 +153,8 @@ export const orchardCharts: ChartSlot[] = [
       theme: "soft",
       data: crates,
       encoding: {
-        x: { field: "hours", title: "Sun hours" },
-        y: { field: "brix", title: "Brix", scale: { nice: false } },
+        x: { field: "hours", title: "Sun hours", scale: { padding: 0.08 } },
+        y: { field: "brix", title: "Brix", scale: { nice: false, padding: { min: 0.08, max: 0.14 } } },
         size: { field: "grams", range: [8, 28] },
         color: "variety",
       },

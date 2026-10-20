@@ -4,7 +4,7 @@ Lamp current at a fictional lighthouse. Bars are the hourly reading, coloured wh
 
 ## Current through the night
 
-Under 40 is the dim token. 70 and over is the bright token. The mean waits until three readings exist.
+Under 40 is Dim. 70 and over is Bright. The mean waits until three readings exist.
 
 ```json
 {
@@ -105,11 +105,13 @@ Under 40 is the dim token. 70 and over is the bright token. The mean waits until
     "colorRules": [
       {
         "color": "positive",
-        "gte": 70
+        "gte": 70,
+        "label": "Bright"
       },
       {
         "color": "negative",
-        "lt": 40
+        "lt": 40,
+        "label": "Dim"
       }
     ]
   },
@@ -129,7 +131,7 @@ Under 40 is the dim token. 70 and over is the bright token. The mean waits until
     }
   },
   "legend": {
-    "position": "top",
+    "position": "bottom",
     "interactive": true
   },
   "tooltip": {
