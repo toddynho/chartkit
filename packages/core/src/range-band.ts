@@ -47,14 +47,26 @@ function nums(table: DataTable, field: string): (number | null)[] {
   return out;
 }
 
-function paintBand(series: Series, index: number, xAt: (index: number) => number, yAt: (value: number) => number): string {
+/** Outer rank 0 is the lightest fill. A single band sits between the two nested weights. */
+export function nestedOpacity(rank: number, count: number): number {
+  if (count <= 1) return 0.22;
+  if (count === 2) return rank === 0 ? 0.15 : 0.3;
+  return 0.15 + (rank / (count - 1)) * 0.2;
+}
+
+/** "95%" becomes "95% interval". Other names stay as written. */
+export function intervalLabel(name: string): string {
+  return /^\d+(?:\.\d+)?%$/.test(name) ? `${name} interval` : name;
+}
+
+function paintBand(series: Series, _index: number, xAt: (index: number) => number, yAt: (value: number) => number): string {
   const span = series.span;
   if (!span) return "";
   const d = bandPath(span.lo, span.hi, xAt, yAt);
   if (!d) return "";
-  const opacity = n(0.16 + (index % 4) * 0.06);
+  const opacity = n(series.bandOpacity ?? 0.22);
   const label = series.name;
-  return `<path d="${d}" fill="${series.color}" fill-opacity="${opacity}" stroke="${series.color}" stroke-width="1.25" stroke-linejoin="round" data-ck-mark="band" data-ck-series="${esc(label)}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`;
+  return `<path d="${d}" fill="${series.color}" fill-opacity="${opacity}" stroke="none" data-ck-mark="band" data-ck-series="${esc(label)}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`;
 }
 
 function prepareBands(
@@ -104,7 +116,65 @@ function prepareBands(
     }
     return { ...item, mark: "range" as const, span: { lo, hi }, values: mid };
   });
+  if (changed) linkBands(list, next);
   return changed ? { series: next, labels } : null;
+}
+
+function meanSpan(series: Series): number {
+  const span = series.span;
+  if (!span) return 0;
+  let sum = 0;
+  let count = 0;
+  const length = Math.min(span.lo.length, span.hi.length);
+  for (let i = 0; i < length; i++) {
+    const lo = span.lo[i];
+    const hi = span.hi[i];
+    if (lo === null || hi === null || !Number.isFinite(lo) || !Number.isFinite(hi)) continue;
+    sum += Math.abs(hi - lo);
+    count += 1;
+  }
+  return count ? sum / count : 0;
+}
+
+/** Bands without their own colour take the nearest line, and the wider band is the lighter fill. */
+function linkBands(list: unknown[], series: Series[]): void {
+  const lines: number[] = [];
+  for (let i = 0; i < list.length; i++) {
+    const spec = list[i];
+    if (!isRecord(spec) || typeof spec.field !== "string") continue;
+    if (spec.mark === "range" || spec.mark === "bar" || spec.mark === "area") continue;
+    lines.push(i);
+  }
+  const groups = new Map<number, number[]>();
+  for (let i = 0; i < series.length; i++) {
+    if (series[i].mark !== "range" || !series[i].span) continue;
+    const spec = list[i];
+    const explicit = isRecord(spec) && typeof spec.color === "string";
+    let link = -1;
+    if (!explicit && lines.length) {
+      let best = lines[0];
+      let dist = Math.abs(best - i);
+      for (const line of lines) {
+        const gap = Math.abs(line - i);
+        if (gap < dist) {
+          dist = gap;
+          best = line;
+        }
+      }
+      link = best;
+      series[i].color = series[best].color;
+      series[i].name = intervalLabel(series[i].name);
+    }
+    const group = groups.get(link) ?? [];
+    group.push(i);
+    groups.set(link, group);
+  }
+  for (const group of groups.values()) {
+    const ranked = [...group].sort((a, b) => meanSpan(series[b]) - meanSpan(series[a]) || a - b);
+    ranked.forEach((index, rank) => {
+      series[index].bandOpacity = nestedOpacity(rank, ranked.length);
+    });
+  }
 }
 
 /** Called from the combo entry only. */

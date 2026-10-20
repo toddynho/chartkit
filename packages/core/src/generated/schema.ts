@@ -1031,7 +1031,7 @@ export interface Mark {
    */
   points?: "none" | "hover" | "always";
   /**
-   * Point radius in px. Applies to: line, stacked-area, combo, scatter.
+   * Point radius in px. Applies to: line, stacked-area, combo, scatter, errorbar.
    */
   pointSize?: number;
   /**
@@ -2328,6 +2328,14 @@ export interface Mark {
    * Centre line through encoding.y on a range area. Defaults on when y is set. false draws the band only. Applies to: area-range.
    */
   line?: boolean;
+  /**
+   * Outline a range band. Off by default so a nested interval stays a fill in the line colour. Applies to: area-range.
+   */
+  stroke?: boolean;
+  /**
+   * Dash the centre line where a band is present, and keep the earlier actuals solid. Both parts use the line colour. Applies to: area-range.
+   */
+  strokeDash?: boolean;
   /**
    * Whisker anchor. point draws a marker at y. bar draws a bar from zero to y. Applies to: errorbar.
    */

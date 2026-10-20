@@ -171,6 +171,8 @@ export interface Series {
   mark: "line" | "bar" | "area" | "range";
   /** Low and high of a combo range band. The line entry never fills this. */
   span?: { lo: ArrayLike<number | null>; hi: ArrayLike<number | null> };
+  /** Fill opacity of a combo range band. The line entry never reads this. */
+  bandOpacity?: number;
   dash: string;
   area: boolean;
   shape?: string;

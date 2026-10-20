@@ -993,6 +993,7 @@ export const examples: Example[] = [
         { month: "Jul", min: 17, max: 29 },
       ],
       encoding: { x: "month", low: "min", high: "max" },
+      axes: { y: { format: { style: "number", suffix: "°C" } } },
       size: { width: 560, height: 280 },
       a11y: { alt: "July ranges from 17 to 29." },
     },

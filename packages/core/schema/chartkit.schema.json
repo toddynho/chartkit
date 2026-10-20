@@ -979,7 +979,7 @@
           "type": "number",
           "minimum": 0,
           "maximum": 40,
-          "description": "Point radius in px. Applies to: line, stacked-area, combo, scatter."
+          "description": "Point radius in px. Applies to: line, stacked-area, combo, scatter, errorbar."
         },
         "pointShape": {
           "enum": ["circle", "square", "diamond", "triangle", "cross", "none"],
@@ -1257,6 +1257,16 @@
         "line": {
           "type": "boolean",
           "description": "Centre line through encoding.y on a range area. Defaults on when y is set. false draws the band only. Applies to: area-range."
+        },
+        "stroke": {
+          "type": "boolean",
+          "default": false,
+          "description": "Outline a range band. Off by default so a nested interval stays a fill in the line colour. Applies to: area-range."
+        },
+        "strokeDash": {
+          "type": "boolean",
+          "default": false,
+          "description": "Dash the centre line where a band is present, and keep the earlier actuals solid. Both parts use the line colour. Applies to: area-range."
         },
         "error": {
           "enum": ["point", "bar"],

@@ -103,6 +103,66 @@ describe("uncertainty charts", () => {
     expect(createRenderer([line])(forecast)).toContain("@chartkitdev/core/charts/area-range");
   });
 
+  it("shares the line colour across nested bands and can dash the forecast", () => {
+    const spec = {
+      version: "1",
+      type: "area-range",
+      data: months.map((month, index) => ({
+        month,
+        revenue: 100 + index * 10,
+        wideLo: index < 2 ? null : 70,
+        wideHi: index < 2 ? null : 160,
+        tightLo: index < 2 ? null : 90,
+        tightHi: index < 2 ? null : 140,
+      })),
+      encoding: {
+        x: "month",
+        y: [
+          { lo: "wideLo", hi: "wideHi", title: "95%" },
+          { lo: "tightLo", hi: "tightHi", title: "80%" },
+          { field: "revenue", title: "Forecast" },
+        ],
+      },
+      a11y: { alt },
+      size: { width: 480, height: 260 },
+    };
+    const svg = render(spec);
+    const bands = [...svg.matchAll(/<path\b([^>]*data-ck-mark="band"[^>]*)>/g)];
+    const lineMark = /<path\b([^>]*data-ck-mark="line"[^>]*)>/.exec(svg);
+    expect(bands).toHaveLength(2);
+    expect(lineMark).toBeTruthy();
+    const stroke = /stroke="([^"]+)"/.exec(lineMark?.[1] ?? "")?.[1];
+    expect(stroke).toBeTruthy();
+    const opacities = bands.map((band) => /fill-opacity="([^"]+)"/.exec(band[1])?.[1]);
+    expect(opacities).toEqual(["0.15", "0.3"]);
+    for (const band of bands) {
+      expect(band[1]).toContain(`fill="${stroke}"`);
+      expect(band[1]).toContain('stroke="none"');
+    }
+    expect(svg).toContain("95% interval");
+    expect(svg).toContain("80% interval");
+    const outlined = render({ ...spec, mark: { stroke: true } });
+    expect(outlined).toContain(`stroke="${stroke}" stroke-width="1.25"`);
+    const own = render({
+      ...spec,
+      encoding: {
+        x: "month",
+        y: [
+          { lo: "wideLo", hi: "wideHi", title: "95%", color: "#c0ffee" },
+          { field: "revenue", title: "Forecast" },
+        ],
+      },
+    });
+    expect(own).toContain('fill="#c0ffee"');
+    expect(own).not.toContain(`fill="${stroke}" fill-opacity`);
+    const dashed = render({ ...spec, mark: { strokeDash: true } });
+    const lines = [...dashed.matchAll(/<path\b([^>]*data-ck-mark="line"[^>]*)>/g)];
+    expect(lines).toHaveLength(2);
+    expect(lines.some((mark) => mark[1].includes('stroke-dasharray="6 4"'))).toBe(true);
+    expect(lines.some((mark) => !mark[1].includes("stroke-dasharray"))).toBe(true);
+    expect(lines.every((mark) => mark[1].includes(`stroke="${stroke}"`))).toBe(true);
+  });
+
   it("paints a combo band under a later line and includes the band in the domain", () => {
     const spec = {
       version: "1",
@@ -140,7 +200,7 @@ describe("uncertainty charts", () => {
     const bars = svg.match(/data-ck-mark="range"/g) ?? [];
     expect(bars).toHaveLength(4);
     expect(svg).toContain("Jan");
-    expect(svg).toContain("-2");
+    expect(svg).toContain("-2°C");
     expect(svg).not.toContain('data-ck-mark="bar"');
     const tops = [...svg.matchAll(/<rect\b([^>]*)>/g)]
       .filter((mark) => mark[1].includes('data-ck-mark="range"'))
@@ -154,6 +214,11 @@ describe("uncertainty charts", () => {
     expect(points.match(/data-ck-mark="whisker"/g)).toHaveLength(3);
     expect(points).toContain("20.6");
     expect(points).toContain("22.2");
+    expect(points).toContain('r="4.5"');
+    const caps = [...points.matchAll(/<line\b([^>]*)\/>/g)]
+      .map((mark) => Math.abs(Number(/x2="([^"]+)"/.exec(mark[1])?.[1]) - Number(/x1="([^"]+)"/.exec(mark[1])?.[1])))
+      .filter((width) => width > 0);
+    expect(Math.max(...caps)).toBeGreaterThanOrEqual(16);
     const bars = render({
       version: "1",
       type: "errorbar",
