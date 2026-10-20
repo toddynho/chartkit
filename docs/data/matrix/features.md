@@ -378,7 +378,7 @@ Official integrations
 | **Svelte** <br><sub>`framework.svelte`</sub> | ● | ⊕ | · | ⊕ | ⊕ | ✎ | · | · | · | ⊕ | · | ✎ | ⊕ | ? | ✎ | ? | ✎ | ✎ | · | ? | ✎ |
 | **Angular** <br><sub>`framework.angular`</sub> | · | ⊕ | · | ⊕ | ⊕ | ⊕ | ? | · | ? | ⊕ | · | ✎ | ✎ | ⊕ | ✎ | ⊕ | ✎ | ✎ | ? | ? | ✎ |
 | **Vanilla JS / framework-agnostic core** <br><sub>`framework.vanilla`</sub> | ● | ● | · | ● | ● | ● | · | · | · | ● | · | ● | ⊕ | ● | ● | ● | ● | ● | · | ● | ● |
-| **Web component** <br><sub>`framework.webcomponent`</sub> | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| **Web component** <br><sub>`framework.webcomponent`</sub> | ● | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
 | **React Native** <br><sub>`framework.reactnative`</sub> | · | · | · | ⊕ | ? | · | · | ⊕ | · | · | · | · | · | · | · | · | · | · | · | · | · |
 | **MCP server / agent tool** <br><sub>`framework.mcp`</sub> | · | · | · | ⊕ | · | · | · | · | · | · | · | · | ? | · | · | · | · | · | · | ? | ⊕ |
 

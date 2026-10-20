@@ -6,7 +6,7 @@ import { minimalSpec } from "@/lib/specs";
 
 export const metadata = pageMeta(
   "Getting started",
-  "Install ChartKit and render a JSON spec to SVG in React, Vue, Svelte, vanilla JavaScript, or Node.",
+  "Install ChartKit and render a JSON spec to SVG in React, Vue, Svelte, vanilla JavaScript, a custom element, or Node.",
   "/docs",
 );
 
@@ -16,7 +16,7 @@ export default function GettingStartedPage() {
       <h1>Getting started</h1>
       <p>
         ChartKit v1 is a JSON spec plus <code>@chartkitdev/core</code>. The core has zero dependencies, validates the
-        spec, and renders SVG. Adapters for React, Vue, Svelte, and the plain DOM pass that spec through. They do not
+        spec, and renders SVG. Adapters for React, Vue, Svelte, the plain DOM, and a custom element pass that spec through. They do not
         add chart logic.
       </p>
       <h2>Install the core</h2>
@@ -70,6 +70,9 @@ const render = createRenderer([line]);`}
         </li>
         <li>
           <Link href="/docs/vanilla">Vanilla</Link>
+        </li>
+        <li>
+          <Link href="/docs/web-component">Web component</Link>
         </li>
       </ul>
       <p>

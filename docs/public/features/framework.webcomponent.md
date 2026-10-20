@@ -1,14 +1,14 @@
 # Web component
 
-ChartKit: **none**
+ChartKit: **native**
 
 Custom element usage
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `dts-grep` (weak).
 
-no custom element in any package
+@chartkitdev/element defines <chart-kit>. Spec from the property, the spec attribute, or a child JSON script.
 
-No spec snippet. ChartKit does not support this feature.
+No spec snippet. This feature is not a field on the chart spec.
 
 ## Other libraries
 

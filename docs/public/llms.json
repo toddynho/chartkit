@@ -7,6 +7,7 @@
     "vue": "@chartkitdev/vue",
     "svelte": "@chartkitdev/svelte",
     "vanilla": "@chartkitdev/vanilla",
+    "element": "@chartkitdev/element",
     "core": "@chartkitdev/core",
     "compat": "@derpdaderp/chartkit"
   },

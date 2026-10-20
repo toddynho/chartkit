@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ChartKit web component</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "@chartkitdev/element": "../dist/index.js",
+          "@chartkitdev/core/all": "../../core/dist/all.js",
+          "@chartkitdev/core/interact": "../../core/dist/interact.js",
+          "@chartkitdev/core/load": "../../core/dist/load.js",
+          "@chartkitdev/core/extra-tip": "../../core/dist/extra-tip.js"
+        }
+      }
+    </script>
+    <style>
+      :root { color-scheme: light; }
+      body {
+        margin: 0;
+        font: 16px/1.45 ui-sans-serif, system-ui, sans-serif;
+        background: #f4f1ea;
+        color: #1c1915;
+      }
+      main { max-width: 880px; margin: 0 auto; padding: 40px 20px 64px; }
+      h1 { font-size: 2rem; letter-spacing: -0.03em; margin: 0 0 8px; }
+      p { margin: 0 0 18px; max-width: 62ch; }
+      .bar { display: flex; gap: 8px; margin: 0 0 16px; }
+      button {
+        font: inherit;
+        border: 1px solid #1c1915;
+        background: #fff;
+        border-radius: 999px;
+        padding: 6px 14px;
+        cursor: pointer;
+      }
+      button[aria-pressed="true"] { background: #1c1915; color: #fff; }
+      chart-kit { display: block; background: #fff; border-radius: 16px; padding: 8px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Baskets this month</h1>
+      <p>
+        This page is plain HTML. The chart spec lives in the script tag. Switching the theme sets the
+        <code>theme</code> attribute on <code>&lt;chart-kit&gt;</code>.
+      </p>
+      <div class="bar">
+        <button type="button" id="soft" aria-pressed="true">Soft</button>
+        <button type="button" id="midnight" aria-pressed="false">Midnight</button>
+      </div>
+      <chart-kit id="chart" theme="soft">
+        <script type="application/json">
+          {
+            "version": "1",
+            "type": "line",
+            "theme": "soft",
+            "data": [
+              { "week": "W1", "baskets": 12 },
+              { "week": "W2", "baskets": 18 },
+              { "week": "W3", "baskets": 15 },
+              { "week": "W4", "baskets": 22 }
+            ],
+            "encoding": { "x": "week", "y": "baskets" },
+            "a11y": { "alt": "Baskets rose from week one to week four, with a dip in week three." }
+          }
+        </script>
+      </chart-kit>
+    </main>
+    <script type="module">
+      import "@chartkitdev/element";
+      const chart = document.querySelector("#chart");
+      for (const button of document.querySelectorAll("button")) {
+        button.addEventListener("click", () => {
+          chart.theme = button.id;
+          for (const other of document.querySelectorAll("button")) {
+            other.setAttribute("aria-pressed", other === button ? "true" : "false");
+          }
+        });
+      }
+      chart.addEventListener("pointclick", (event) => {
+        console.log("pointclick", event.detail);
+      });
+    </script>
+  </body>
+</html>

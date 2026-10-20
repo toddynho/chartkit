@@ -5,11 +5,13 @@
   "vue": 760,
   "svelte": 925,
   "vanilla": 598,
+  "element": 1356,
   "interact": 11974,
   "interactExtra": 1623,
   "vueLine": 25066,
   "svelteLine": 25261,
   "vanillaLine": 24891,
+  "elementLine": 25643,
   "extra": 58527,
   "histogram": 7198,
   "boxplot": 7154,
@@ -30,5 +32,5 @@
   "global": 85451,
   "globalAuto": 59251,
   "globalMermaid": 27523,
-  "note": "gzip -9 byte budgets, each set to the measured size on top of export and colour scales, after axis ticks drop trailing zeros, negative zero normalizes, and y margins measure formatted labels. line 24387, all 42919, validate 21762, interact 11974, interactExtra 1623, extra 58527, mermaid 27107, vanillaAuto 959, markdown 663, global 85451, globalAuto 59251, globalMermaid 27523. Adapters: vue 760, svelte 925, vanilla 598; vueLine 25066, svelteLine 25261, vanillaLine 24891. Phase 4 charts stay out of all: histogram 7198, boxplot 7154, radar 5205, funnel 5528, treemap 8247, sankey 6536, bullet 5678, waterfall 6596, gantt 6896, timeline 5766, quadrant 5550, venn 5978, journey 5393."
+  "note": "gzip -9 byte budgets, each set to the measured size on top of export and colour scales, after axis ticks drop trailing zeros, negative zero normalizes, and y margins measure formatted labels. line 24387, all 42919, validate 21762, interact 11974, interactExtra 1623, extra 58527, mermaid 27107, vanillaAuto 959, markdown 663, global 85451, globalAuto 59251, globalMermaid 27523. Adapters: vue 760, svelte 925, vanilla 598, element 1356; vueLine 25066, svelteLine 25261, vanillaLine 24891, elementLine 25643. Phase 4 charts stay out of all: histogram 7198, boxplot 7154, radar 5205, funnel 5528, treemap 8247, sankey 6536, bullet 5678, waterfall 6596, gantt 6896, timeline 5766, quadrant 5550, venn 5978, journey 5393."
 }

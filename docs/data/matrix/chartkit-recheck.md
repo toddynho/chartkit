@@ -70,3 +70,9 @@ Rechecked on the pie, donut, bar, line, and scatter entries. A cell moved to nat
 | label.pie | native | `mark.labels` and `mark.labelPosition: "outside"` draw leader lines on pie and donut. Labels on one side stack with a 16px gap. |
 | mark.color.point | native | `encoding.color` names a category or a paint column. `domain` and `range` map values to colours. Drawn on bar, scatter, and pie. |
 | mark.color.conditional | native | `mark.colorRules` recolours bar, line points, scatter, and pie. First match wins. Tokens `negative`, `positive`, and `accent` follow the theme. |
+
+## Web component
+
+| id | status | correction |
+|---|---|---|
+| framework.webcomponent | native | `@chartkitdev/element` defines `<chart-kit>`. The spec comes from the property, the `spec` attribute, or a child JSON script. `theme` reflects. `pointclick` and `select` are DOM events. An existing SVG is patched in place. |
