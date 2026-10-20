@@ -32,6 +32,9 @@ const CHART_TYPES = new Set([
   "sankey",
   "bullet",
   "waterfall",
+  "area-range",
+  "bar-range",
+  "errorbar",
 ]);
 
 const SVG_BUDGET = 5000;
@@ -54,6 +57,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   const known = type !== undefined && CHART_TYPES.has(type);
 
   if (known && isRecord(spec.mark)) warnUnusedMarks(type, spec.mark, diagnostics);
+  warnGridWeeks(spec, diagnostics);
   warnUnbuilt(spec, diagnostics);
   checkAnnotations(spec, diagnostics);
   if (isRecord(spec.encoding)) {
@@ -117,6 +121,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   const view = prepared.ok ? prepared.table : table;
   if (isRecord(spec.encoding)) checkEncoding(spec, spec.encoding, view, diagnostics);
   if (type === "candlestick") checkCandles(spec, view, diagnostics);
+  if (type) checkUncertainty(spec, type, view, diagnostics);
   if (known) warnDesign(spec, type, view, diagnostics);
 }
 
@@ -186,12 +191,12 @@ function checkEncoding(
   diagnostics: Diagnostic[],
 ): void {
   const channels: Channel[] = [];
-  for (const key of ["x", "series", "color", "size", "open", "high", "low", "close", "volume", "source", "target"] as const) {
+  for (const key of ["x", "series", "color", "size", "open", "high", "low", "close", "volume", "source", "target", "error"] as const) {
     const channel = readChannel(encoding[key], `/encoding/${key}`);
     if (channel?.field) channels.push(channel);
   }
   const yChannels = readY(encoding.y);
-  channels.push(...yChannels);
+  channels.push(...yChannels, ...boundChannels(encoding.y));
   const tip = spec.tooltip;
   if (isRecord(tip) && Array.isArray(tip.fields)) {
     for (let i = 0; i < tip.fields.length; i++) {
@@ -481,6 +486,14 @@ function warnUnbuilt(spec: Record<string, unknown>, diagnostics: Diagnostic[]): 
   }
 }
 
+function warnGridWeeks(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  if (spec.type !== "heatmap" || !isRecord(spec.mark) || spec.mark.weeks === undefined) return;
+  const mark = spec.mark;
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  const layout = mark.layout === "grid" || mark.layout === "calendar" ? mark.layout : encoding && encoding.y != null ? "grid" : "calendar";
+  if (layout === "grid") flag(diagnostics, "/mark/weeks", "ignored; calendar layout only");
+}
+
 function warnUnusedMarks(type: string, mark: Record<string, unknown>, diagnostics: Diagnostic[]): void {
   for (const key of Object.keys(mark)) {
     const applies = MARK_APPLIES[key];
@@ -768,6 +781,160 @@ function warnColorRules(
       });
     }
   });
+}
+
+const RANGE_TYPES = new Set(["area-range", "bar-range", "errorbar"]);
+
+function boundChannels(y: unknown): Channel[] {
+  const items = Array.isArray(y) ? y : isRecord(y) ? [y] : [];
+  const out: Channel[] = [];
+  items.forEach((item, index) => {
+    if (!isRecord(item)) return;
+    const base = Array.isArray(y) ? `/encoding/y/${index}` : "/encoding/y";
+    for (const key of ["lo", "hi", "error"] as const) {
+      if (typeof item[key] !== "string") continue;
+      out.push({ field: item[key], path: `${base}/${key}`, fieldPath: `${base}/${key}` });
+    }
+  });
+  return out;
+}
+
+function pairSwapped(table: DataTable, loField: string, hiField: string): boolean {
+  const lo = table.columns[loField];
+  const hi = table.columns[hiField];
+  if (!lo || !hi) return false;
+  let seen = 0;
+  for (let i = 0; i < table.length; i++) {
+    const a = lo[i];
+    const b = hi[i];
+    if (typeof a !== "number" || typeof b !== "number" || a === b) continue;
+    if (a < b) return false;
+    seen += 1;
+  }
+  return seen > 0;
+}
+
+function checkUncertainty(spec: Record<string, unknown>, type: string, table: DataTable, diagnostics: Diagnostic[]): void {
+  const encoding = isRecord(spec.encoding) ? spec.encoding : {};
+  const y = encoding.y;
+  const items = Array.isArray(y) ? y : isRecord(y) ? [y] : [];
+  let yPair = false;
+  let yDelta = false;
+  items.forEach((item, index) => {
+    if (!isRecord(item)) return;
+    const base = Array.isArray(y) ? `/encoding/y/${index}` : "/encoding/y";
+    const lo = typeof item.lo === "string";
+    const hi = typeof item.hi === "string";
+    if (typeof item.field !== "string" && !(lo && hi)) {
+      diagnostics.push({
+        code: "CK1003",
+        severity: "error",
+        message: 'a y series needs "field", or both "lo" and "hi"',
+        path: base,
+        hint: 'Set "field" for a line, bar, or area. A band sets "lo" and "hi".',
+      });
+    }
+    if (lo && hi) yPair = true;
+    if (typeof item.error === "string") yDelta = true;
+    if (lo !== hi) {
+      diagnostics.push({
+        code: "CK3012",
+        severity: "warning",
+        message: "a band needs both lo and hi",
+        path: `${base}/${lo ? "lo" : "hi"}`,
+        hint: "Set both field names. low and high on a y series repair to lo and hi.",
+      });
+    }
+    if (item.mark === "range" && !(lo && hi)) {
+      diagnostics.push({
+        code: "CK3020",
+        severity: "error",
+        message: "a range series needs lo and hi",
+        path: `${base}/mark`,
+        hint: 'Set "lo" and "hi" to field names.',
+      });
+    }
+    const paintsBand =
+      type === "area-range" ||
+      type === "bar-range" ||
+      (type === "combo" && item.mark !== "line" && item.mark !== "bar" && item.mark !== "area");
+    if (lo && hi && !paintsBand) {
+      diagnostics.push({
+        code: "CK3012",
+        severity: "warning",
+        message: "a lo/hi band applies to area-range, bar-range, or a combo range series",
+        path: `${base}/lo`,
+        hint: 'On a combo, omit mark or set mark to "range".',
+      });
+    }
+    if (typeof item.error === "string" && type !== "errorbar") {
+      diagnostics.push({
+        code: "CK3012",
+        severity: "warning",
+        message: "a ± field applies to error bars",
+        path: `${base}/error`,
+        hint: 'Use type "errorbar".',
+      });
+    }
+    if (lo && hi && typeof item.lo === "string" && typeof item.hi === "string" && pairSwapped(table, item.lo, item.hi)) {
+      diagnostics.push({
+        code: "CK3021",
+        severity: "error",
+        message: "lo is above hi on every row",
+        path: `${base}/lo`,
+        hint: "lo and hi look swapped",
+        fix: [
+          { op: "replace", path: `${base}/lo`, value: item.hi },
+          { op: "replace", path: `${base}/hi`, value: item.lo },
+        ],
+      });
+    }
+  });
+  const low = fieldName(encoding.low);
+  const high = fieldName(encoding.high);
+  const error = fieldName(encoding.error);
+  if (low && high && pairSwapped(table, low, high)) {
+    diagnostics.push({
+      code: "CK3021",
+      severity: "error",
+      message: "low is above high on every row",
+      path: "/encoding/low",
+      hint: "low and high look swapped",
+      fix: [
+        { op: "replace", path: "/encoding/low", value: typeof encoding.low === "string" ? high : { ...(isRecord(encoding.low) ? encoding.low : {}), field: high } },
+        { op: "replace", path: "/encoding/high", value: typeof encoding.high === "string" ? low : { ...(isRecord(encoding.high) ? encoding.high : {}), field: low } },
+      ],
+    });
+  }
+  if (error && type !== "errorbar") {
+    diagnostics.push({
+      code: "CK3012",
+      severity: "warning",
+      message: "encoding.error is a ± field for error bars",
+      path: "/encoding/error",
+      hint: 'Use type "errorbar", or remove it.',
+    });
+  } else if (type === "errorbar" && error && low && high) {
+    diagnostics.push({
+      code: "CK3012",
+      severity: "warning",
+      message: "encoding.error is ignored when low and high are set",
+      path: "/encoding/error",
+      hint: "Remove encoding.error, or remove low and high to use ±.",
+    });
+  }
+  if (!RANGE_TYPES.has(type)) return;
+  const hasPair = Boolean(low && high) || yPair;
+  const hasDelta = type === "errorbar" && (Boolean(error) || yDelta);
+  if (!hasPair && !hasDelta) {
+    diagnostics.push({
+      code: "CK3020",
+      severity: "error",
+      message: type === "errorbar" ? "error bars need low and high, or a ± field" : `${type} needs a low and a high`,
+      path: "/encoding/low",
+      hint: 'Set encoding.low and encoding.high, or y.lo and y.hi. An error bar may use encoding.error as ± around y.',
+    });
+  }
 }
 
 function readY(y: unknown): Channel[] {

@@ -1,14 +1,52 @@
 # Range / band area
 
-ChartKit: **none**
+ChartKit: **native**
 
 Area between a low and high value per x (confidence band)
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-no low/high band; annotations band is a constant interval
+Band between lo and hi, with an optional centre line. A combo mark range paints the band under the other series.
 
-No spec snippet. ChartKit does not support this feature.
+Source: chartkit:packages/core/src/charts/area-range.ts:1
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "area-range",
+  "data": [
+    {
+      "month": "Jan",
+      "y": 40,
+      "lo": 36,
+      "hi": 48
+    },
+    {
+      "month": "Feb",
+      "y": 55,
+      "lo": 46,
+      "hi": 66
+    }
+  ],
+  "encoding": {
+    "x": "month",
+    "y": "y",
+    "low": "lo",
+    "high": "hi"
+  },
+  "a11y": {
+    "alt": "The band widens."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -35,6 +73,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | MarkTypes=area, ~y1 | dts-path (strong) | @antv/g2/lib/spec/mark.d.ts:13, @antv/g2/lib/index.d.ts:89 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 668873d6cd29.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

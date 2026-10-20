@@ -70,6 +70,9 @@ const CHART_TYPES = [
   "sankey",
   "bullet",
   "waterfall",
+  "area-range",
+  "bar-range",
+  "errorbar",
 ] as const;
 
 export function walkSchema(value: unknown, schema: JsonSchema, diagnostics: Diagnostic[]): void {
@@ -247,6 +250,16 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
         path,
         hint: `labelEnds is "all", "ends", or "last". ${quote(value)} means ${quote(ENDS_ALIAS[value])}.`,
         fix: [{ op: "replace", path, value: ENDS_ALIAS[value] }],
+      });
+    } else if (path.endsWith("/curve") && typeof value === "string" && CURVE_ALIAS[value] && node.enum.includes(CURVE_ALIAS[value])) {
+      const mapped = CURVE_ALIAS[value];
+      emit(ctx, {
+        code: "CK1007",
+        severity: "error",
+        message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
+        path,
+        hint: `${quote(value)} means ${quote(mapped)}. The smooth curve is monotone-x, so a spike does not overshoot the data.`,
+        fix: [{ op: "replace", path, value: mapped }],
       });
     } else if (path.endsWith("/points") && (value === true || value === false) && node.enum.includes("always")) {
       const mapped = value === true ? "always" : "none";
@@ -990,6 +1003,9 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   if (value === "sankey-diagram") return { type: "sankey", kind: "rename" };
   if (value === "bullet-chart") return { type: "bullet", kind: "rename" };
   if (value === "waterfall-chart") return { type: "waterfall", kind: "rename" };
+  if (value === "arearange" || value === "area_range" || value === "range-area" || value === "rangearea") return { type: "area-range", kind: "rename" };
+  if (value === "columnrange" || value === "column-range" || value === "rangebar" || value === "range-bar" || value === "floating-bar") return { type: "bar-range", kind: "rename" };
+  if (value === "error-bar" || value === "error-bars" || value === "errorbars") return { type: "errorbar", kind: "rename" };
   return undefined;
 }
 
@@ -1368,6 +1384,16 @@ function aliasFix(root: unknown, alias: Alias): JsonPatchOperation[] {
 
 const CLICK_KEYS = ["onClick", "click", "onPointClick", "onSeriesClick", "onLegendClick"];
 
+const CURVE_ALIAS: Record<string, string> = {
+  smooth: "monotone",
+  spline: "monotone",
+  basis: "monotone",
+  natural: "monotone",
+  cardinal: "monotone",
+  "monotone-x": "monotone",
+  "monotonex": "monotone",
+};
+
 const SHAPE_ALIAS: Record<string, string> = {
   rect: "square",
   rectangle: "square",
@@ -1520,6 +1546,21 @@ function emitUnknownProp(name: string, path: string, props: Record<string, JsonS
   const pointer = join(path, name);
   if (ctx.skipUnknown.has(pointer)) return;
   if (markMistake(name, path, pointer, value, ctx)) return;
+  if ((path === "/encoding/y" || /^\/encoding\/y\/\d+$/.test(path)) && (name === "low" || name === "high") && typeof value === "string") {
+    const dest = name === "low" ? "lo" : "hi";
+    emit(ctx, {
+      code: "CK3022",
+      severity: "error",
+      message: `${quote(name)} on a y series is ${quote(dest)}`,
+      path: pointer,
+      hint: `Use ${quote(dest)} for the ${name === "low" ? "lower" : "upper"} field of a band.`,
+      fix: [
+        { op: "remove", path: pointer },
+        { op: "add", path: join(path, dest), value },
+      ],
+    });
+    return;
+  }
   if (/^\/axes\/(x|y|y2)$/.test(path) && AXIS_RENAME[name]) {
     const dest = AXIS_RENAME[name];
     let next = value;

@@ -45,12 +45,15 @@
         "treemap",
         "sankey",
         "bullet",
-        "waterfall"
+        "waterfall",
+        "area-range",
+        "bar-range",
+        "errorbar"
       ],
       "examples": [
         "line"
       ],
-      "description": "Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar."
+      "description": "Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar. 'area-range': a band between low and high, with an optional centre line from y. Several bands are a y list of {lo, hi}. 'bar-range': a floating bar from low to high per category. 'errorbar': whiskers on a point or a bar, from low and high or from encoding.error as ± around y. A combo y item with mark range and lo/hi draws that band under the other series."
     },
     "id": {
       "type": "string",
@@ -223,7 +226,10 @@
               "treemap",
               "sankey",
               "bullet",
-              "waterfall"
+              "waterfall",
+              "area-range",
+              "bar-range",
+              "errorbar"
             ]
           }
         },
@@ -253,7 +259,9 @@
               "funnel",
               "treemap",
               "bullet",
-              "waterfall"
+              "waterfall",
+              "area-range",
+              "errorbar"
             ]
           }
         },
@@ -606,7 +614,7 @@
         "thresholds": {
           "type": "array",
           "items": { "type": "number" },
-          "description": "Cut points for threshold. Colours are one more than the number of cuts."
+          "description": "Cut points for threshold. Colours are one more than the number of cuts. The legend labels the cuts, for example <6, 6–12, ≥12, not the data ends."
         }
       },
       "description": "Colour scale. Sequential and diverging are continuous; quantize and threshold are binned."
@@ -659,12 +667,21 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "field"
-          ],
           "properties": {
             "field": {
               "$ref": "#/$defs/fieldName"
+            },
+            "lo": {
+              "type": "string",
+              "description": "Lower field of a range band. With hi, the series is a band. On a combo, set mark to range so the band sits under the other series."
+            },
+            "hi": {
+              "type": "string",
+              "description": "Upper field of a range band."
+            },
+            "error": {
+              "type": "string",
+              "description": "± field around this series. Half-width. Used by error bars when low and high are omitted."
             },
             "type": {
               "enum": [
@@ -689,9 +706,10 @@
               "enum": [
                 "line",
                 "bar",
-                "area"
+                "area",
+                "range"
               ],
-              "description": "Mark for this series. Only used by type 'combo' (default 'line')."
+              "description": "Mark for this series. line, bar, and area are for combo. range draws a lo/hi band under the other combo series. A range series sets lo and hi instead of, or as well as, field."
             },
             "axis": {
               "enum": [
@@ -736,7 +754,7 @@
               "description": "Filled or hollow marker for this series. Overrides mark.pointFill."
             }
           },
-          "description": "Full y series definition."
+          "description": "Full y series definition. field, or both lo and hi, is required."
         }
       ],
       "description": "A y series. Shorthand: a plain string is the field name."
@@ -906,11 +924,11 @@
         },
         "high": {
           "$ref": "#/$defs/channel",
-          "description": "Candlestick only: high price field."
+          "description": "Upper value. Candlestick: the high price. Area range, floating bar, and error bar: the top of the band or whisker."
         },
         "low": {
           "$ref": "#/$defs/channel",
-          "description": "Candlestick only: low price field."
+          "description": "Lower value. Candlestick: the low price. Area range, floating bar, and error bar: the bottom of the band or whisker."
         },
         "close": {
           "$ref": "#/$defs/channel",
@@ -927,6 +945,10 @@
         "target": {
           "$ref": "#/$defs/channel",
           "description": "Sankey: the node the flow enters. Bullet: the target value field."
+        },
+        "error": {
+          "$ref": "#/$defs/channel",
+          "description": "Error bar only: symmetric ± around y. The field is the half-width. encoding.low and encoding.high override it."
         }
       },
       "description": "Which data fields drive which visual channels. Same names for every chart type: x is the category or time axis, y is the measured value(s). Donut uses x (slice label) and y (slice value), not theta, angle, or label. A y series axis is the string \"y\" or \"y2\". Switching 'type' between line/bar/donut/stacked-area/combo needs no re-encoding."
@@ -1012,7 +1034,7 @@
             "step-after"
           ],
           "default": "monotone",
-          "description": "Line interpolation. Applies to: line, stacked-area, combo, sparkline, mini-area."
+          "description": "Line interpolation. monotone is monotone-x and stays inside the data, so a spike does not cross the low point or pass the peak. smooth, spline, and basis repair to monotone. Applies to: line, stacked-area, combo, sparkline, mini-area."
         },
         "sampling": {
           "enum": [
@@ -1037,7 +1059,7 @@
           "type": "number",
           "minimum": 0,
           "maximum": 40,
-          "description": "Point radius in px. Applies to: line, stacked-area, combo, scatter."
+          "description": "Point radius in px. Applies to: line, stacked-area, combo, scatter, errorbar."
         },
         "pointShape": {
           "enum": ["circle", "square", "diamond", "triangle", "cross", "none"],
@@ -1071,7 +1093,7 @@
         "glow": {
           "type": "boolean",
           "default": false,
-          "description": "Soft glow behind lines (dark themes). Applies to: line, sparkline."
+          "description": "Soft glow behind the line. A blurred understroke and one filter, emitted only when true, on Soft and on midnight. Applies to: line, sparkline."
         },
         "connectNulls": {
           "type": "boolean",
@@ -1242,7 +1264,7 @@
           "minimum": 1,
           "maximum": 104,
           "default": 52,
-          "description": "Number of weeks shown in calendar layout. Applies to: heatmap."
+          "description": "Number of weeks shown in calendar layout, ending on the week of the latest day. Ignored on a grid heatmap. Cells stay square, or at most 1.5:1, and cap at 32px. Extra width centres the grid. Unsized calendars stay at 12px. Applies to: heatmap."
         },
         "startAngle": {
           "type": "number",
@@ -1311,6 +1333,24 @@
         "total": {
           "type": "string",
           "description": "Waterfall field that marks an absolute total when the row is true. Default field name total. Applies to: waterfall."
+        },
+        "line": {
+          "type": "boolean",
+          "description": "Centre line through encoding.y on a range area. Defaults on when y is set. false draws the band only. Applies to: area-range."
+        },
+        "stroke": {
+          "type": "boolean",
+          "default": false,
+          "description": "Outline a range band. Off by default so a nested interval stays a fill in the line colour. Applies to: area-range."
+        },
+        "strokeDash": {
+          "type": "boolean",
+          "default": false,
+          "description": "Dash the centre line where a band is present, and keep the earlier actuals solid. Both parts use the line colour. Applies to: area-range."
+        },
+        "error": {
+          "enum": ["point", "bar"],
+          "description": "Whisker anchor. point draws a marker at y. bar draws a bar from zero to y. Applies to: errorbar."
         }
       },
       "examples": [

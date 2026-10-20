@@ -45,6 +45,9 @@ const charts = [
   "quadrant",
   "venn",
   "journey",
+  "area-range",
+  "bar-range",
+  "errorbar",
 ];
 
 const themes = [

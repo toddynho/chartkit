@@ -16,28 +16,28 @@ Source: chartkit:packages/core/src/generated/schema.ts:24
   "type": "boxplot",
   "data": [
     {
-      "group": "A",
-      "value": 1
+      "x": "A",
+      "y": 1
     },
     {
-      "group": "A",
-      "value": 9
+      "x": "A",
+      "y": 9
     },
     {
-      "group": "B",
-      "value": 2
+      "x": "B",
+      "y": 2
     },
     {
-      "group": "B",
-      "value": 4
+      "x": "B",
+      "y": 4
     }
   ],
   "encoding": {
-    "x": "group",
-    "y": "value"
+    "x": "x",
+    "y": "y"
   },
   "a11y": {
-    "alt": "A stretches higher."
+    "alt": "A is wider."
   },
   "size": {
     "width": 640,
@@ -73,6 +73,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | MarkTypes=boxplot, MarkTypes=box | dts-path (strong) | @antv/g2/lib/spec/mark.d.ts:13, @antv/g2/lib/spec/mark.d.ts:13 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 668873d6cd29.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

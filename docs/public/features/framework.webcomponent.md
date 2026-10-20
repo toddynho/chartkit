@@ -1,16 +1,14 @@
 # Web component
 
-ChartKit: **native**
+ChartKit: **none**
 
 Custom element usage
 
-Matrix status: `native`. Verification: `dts-grep` (weak).
+Matrix status: `none`. Verification: `dts-absence` (absence).
 
-@chartkitdev/element defines <chart-kit>. Spec from the property, the spec attribute, or a child JSON script.
+no custom element in any package
 
-Source: chartkit:packages/element/src/index.ts:298
-
-No spec snippet. This row is not a single option that `validate()` can show.
+No spec snippet. ChartKit does not support this feature.
 
 ## Other libraries
 
@@ -37,6 +35,6 @@ No spec snippet. This row is not a single option that `validate()` can show.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | none | — | dts-absence (absence) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 668873d6cd29.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

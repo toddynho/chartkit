@@ -18,20 +18,20 @@ Source: chartkit:packages/core/src/annotations.ts:19
   "type": "scatter",
   "data": [
     {
-      "temp": 16,
-      "yieldKg": 3
+      "x": 16,
+      "y": 3
     },
     {
-      "temp": 22,
-      "yieldKg": 5
+      "x": 22,
+      "y": 5
     }
   ],
   "encoding": {
-    "x": "temp",
-    "y": "yieldKg"
+    "x": "x",
+    "y": "y"
   },
   "a11y": {
-    "alt": "Yield peaks at 22."
+    "alt": "Y peaks at 22."
   },
   "size": {
     "width": 640,
@@ -75,6 +75,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | manual | ~register | dts-mechanism (weak) | @antv/g2/lib/exports.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 668873d6cd29.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

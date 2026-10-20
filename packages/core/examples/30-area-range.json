@@ -1,0 +1,21 @@
+{
+  "version": "1",
+  "type": "area-range",
+  "title": "Revenue forecast",
+  "data": [
+    { "month": "Jan", "revenue": 420, "lo": null, "hi": null },
+    { "month": "Feb", "revenue": 390, "lo": null, "hi": null },
+    { "month": "Mar", "revenue": 450, "lo": null, "hi": null },
+    { "month": "Apr", "revenue": 510, "lo": 470, "hi": 560 },
+    { "month": "May", "revenue": 540, "lo": 480, "hi": 610 },
+    { "month": "Jun", "revenue": 580, "lo": 500, "hi": 670 }
+  ],
+  "encoding": {
+    "x": "month",
+    "y": { "field": "revenue", "title": "Forecast" },
+    "low": "lo",
+    "high": "hi"
+  },
+  "annotations": [{ "type": "rule", "axis": "x", "value": "Apr", "label": "today" }],
+  "a11y": { "alt": "Revenue is forecast from April, with a band that widens through June." }
+}

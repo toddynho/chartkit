@@ -53,6 +53,19 @@ interface AxisHooks {
 
 let hooks: AxisHooks | null = null;
 let totalHook: TotalHook | null = null;
+let rangePainter: ((series: Series, index: number, xAt: (index: number) => number, yAt: (value: number) => number) => string) | null = null;
+let rangePrepare:
+  | ((table: DataTable, encoding: Record<string, unknown>, series: Series[], labels: string[]) => { series: Series[]; labels: string[] } | null)
+  | null = null;
+
+/** Combo mounts this. Line does not, so a lo/hi band stays out of createRenderer([line]). */
+export function mountRange(
+  painter: (series: Series, index: number, xAt: (index: number) => number, yAt: (value: number) => number) => string,
+  prepare: (table: DataTable, encoding: Record<string, unknown>, series: Series[], labels: string[]) => { series: Series[]; labels: string[] } | null,
+): void {
+  rangePainter = painter;
+  rangePrepare = prepare;
+}
 
 export type TotalHook = (
   model: PlotModel,
@@ -142,7 +155,12 @@ export function renderMiniArea(spec: Record<string, unknown>): string | null {
 }
 
 export function renderCombo(spec: Record<string, unknown>): string | null {
-  return renderTyped(spec, "combo", drawCombo);
+  return renderTyped(
+    spec,
+    "combo",
+    drawCombo,
+    rangePrepare ? (table, encoding, _channels, _preset, series, labels) => rangePrepare?.(table, encoding, series, labels) ?? null : undefined,
+  );
 }
 
 export interface Series {
@@ -152,7 +170,11 @@ export interface Series {
   /** One fill per bar when encoding.color names the x field. */
   colors?: string[];
   axis: "y" | "y2";
-  mark: "line" | "bar" | "area";
+  mark: "line" | "bar" | "area" | "range";
+  /** Low and high of a combo range band. The line entry never fills this. */
+  span?: { lo: ArrayLike<number | null>; hi: ArrayLike<number | null> };
+  /** Fill opacity of a combo range band. The line entry never reads this. */
+  bandOpacity?: number;
   dash: string;
   area: boolean;
   shape?: string;
@@ -186,6 +208,8 @@ export interface PlotModel {
   /** Emitted stroke-width. A var() when the spec did not set mark.strokeWidth. */
   strokePaint: string;
   gradient: boolean;
+  /** Blurred understroke. The filter is omitted unless this is set. */
+  glow: boolean;
   points: "none" | "hover" | "always";
   /** off omits circles. hidden keeps them so --ck-line-dots can show them. shown uses inline. */
   dots: "off" | "hidden" | "shown";
@@ -265,6 +289,7 @@ export interface ChartShell {
   strokeWidth: number;
   strokePaint: string;
   gradient: boolean;
+  glow: boolean;
   points: PlotModel["points"];
   dots: PlotModel["dots"];
   pointSize: number;
@@ -362,6 +387,7 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     strokeWidth,
     strokePaint: strokeSet ? n(strokeWidth) : `var(--ck-line-width, ${n(strokeWidth)})`,
     gradient: mark.gradient !== false,
+    glow: (type === "line" || type === "sparkline") && mark.glow === true,
     points,
     dots: points === "always" ? "shown" : points === "none" && !pointsSet ? "hidden" : "off",
     pointSize: typeof mark.pointSize === "number" ? mark.pointSize : geometry.pointSize,
@@ -546,6 +572,10 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
 
   const clip = boxId(model.id, plot.left, plot.top, plotW, plotH);
   parts.push(`<defs>${clipPath(clip, plot.left, plot.top, plotW, plotH)}`);
+  if (model.glow) {
+    const blur = model.preset.text === "#ffffff" ? 3 : 1.8;
+    parts.push(`<filter id="${model.id}glow" x="-25%" y="-50%" width="150%" height="200%"><feGaussianBlur stdDeviation="${blur}"/></filter>`);
+  }
   if (model.gradient) {
     model.series.forEach((series, index) => {
       parts.push(
@@ -657,7 +687,7 @@ function drawBars(
   return out.join("");
 }
 
-/** Combo paints each series in order so a line can sit between bars. */
+/** Range bands paint first, so a band sits under a line even when the series is listed later. */
 function drawCombo(
   model: PlotModel,
   xScale: XScale,
@@ -673,8 +703,16 @@ function drawCombo(
   const barSeries = model.series.filter((series) => series.mark === "bar");
   const plotWidth = Math.max(1, plot.right - plot.left);
   const shared = sharedSample(model, layers, plotWidth);
+  if (rangePainter) {
+    model.series.forEach((series, index) => {
+      if (series.mark !== "range") return;
+      const scale = series.axis === "y2" ? y2Scale : yScale;
+      out.push(rangePainter?.(series, index, (i) => xScale.center(i), scale) ?? "");
+    });
+  }
   model.series.forEach((series, index) => {
     const scale = series.axis === "y2" ? y2Scale : yScale;
+    if (series.mark === "range") return;
     if (series.mark === "bar") {
       const barIndex = model.series.slice(0, index).filter((item) => item.mark === "bar").length;
       out.push(bars(model, series, index, barSeries.length, layers, xScale, scale, plot, horizontal, barIndex, labs));
@@ -736,9 +774,7 @@ function appendLineSeries(
       const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
       out.push(`<path d="${areaPath(points, bottoms, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillPaint}" stroke="none"${indexAttr} />`);
     }
-    out.push(
-      `<path d="${linePath(points, model.curve)}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokePaint}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)}${indexAttr} />`,
-    );
+    pushStroke(out, linePath(points, model.curve), model, series, indexAttr);
     // Hidden circles exist so --ck-line-dots can reveal them. A downsampled line
     // already has a vertex per pixel, and those circles dominate the SVG, so
     // interact draws the hover dot from the path instead.
@@ -768,9 +804,7 @@ function appendFullLine(
     }
   }
   for (const segment of segments(points, model.connectNulls)) {
-    out.push(
-      `<path d="${linePath(segment, model.curve)}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokePaint}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
-    );
+    pushStroke(out, linePath(segment, model.curve), model, series, "");
   }
   paintPoints(out, points, model, series);
 }
@@ -787,9 +821,7 @@ function appendLinear(
   let parts: string[] = [];
   const flush = () => {
     if (parts.length === 0) return;
-    out.push(
-      `<path d="${parts.join(" ")}" fill="none" stroke="${strokeOf(series, model)}" stroke-width="${model.strokePaint}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)} />`,
-    );
+    pushStroke(out, parts.join(" "), model, series, "");
     parts = [];
   };
   for (let i = 0; i < values.length; i++) {
@@ -805,6 +837,14 @@ function appendLinear(
 
 function strokeOf(series: Series, model: PlotModel): string {
   return lineStroke(series.color, model.strokeWidth, model.preset.lines);
+}
+
+/** Crisp stroke, and a blurred copy under it when mark.glow is set. */
+function pushStroke(out: string[], d: string, model: PlotModel, series: Series, extra: string): void {
+  const stroke = strokeOf(series, model);
+  const base = `fill="none" stroke="${stroke}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)}`;
+  if (model.glow) out.push(`<path d="${d}" ${base} stroke-width="${n(model.strokeWidth + 2.5)}" filter="url(#${model.id}glow)" pointer-events="none" />`);
+  out.push(`<path d="${d}" ${base} stroke-width="${model.strokePaint}"${extra} />`);
 }
 
 function areaMid(model: PlotModel): string {
@@ -1878,18 +1918,13 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
   }
   if (model.f & (axis === "y2" ? 2 : 1)) return pinDomain([min, max], lock);
   const [niceMin, niceMax] = niceDomain(min, max);
-  const head = monotoneHeadroom(model, axis);
   let lo = niceMin;
   let hi = niceMax;
   const pinnedAtZero = axisIncludesZero(model, axis) && niceMin <= 0 && min >= 0;
   const span = Math.max(hi - lo, Math.abs(max) || 1);
   const gutter = strokeGutter(model, axis, span);
-  const above = Math.max(head.above, gutter);
-  if (above > 0 && max + above > hi) hi = round(max + above);
-  if (!pinnedAtZero) {
-    const below = Math.max(head.below, gutter * 0.5);
-    if (below > 0 && min - below < lo) lo = round(min - below);
-  }
+  if (gutter > 0 && max + gutter > hi) hi = round(max + gutter);
+  if (!pinnedAtZero && gutter > 0 && min - gutter * 0.5 < lo) lo = round(min - gutter * 0.5);
   return pinDomain([lo, hi], lock);
 }
 
@@ -1909,41 +1944,6 @@ function strokeGutter(model: PlotModel, axis: "y" | "y2", span: number): number 
   const bottom = compact ? 2 : model.showX ? 32 : 12;
   const plotH = Math.max(24, model.height - top - bottom);
   return Math.max((air / plotH) * span, compact ? 0 : span * 0.06);
-}
-
-/** How far a monotone control point leaves the data range. Linear and step curves stay on the points. */
-function monotoneHeadroom(model: PlotModel, axis: "y" | "y2"): { above: number; below: number } {
-  if (model.curve !== "monotone" || model.stack !== "none") return { above: 0, below: 0 };
-  let above = 0;
-  let below = 0;
-  for (const series of model.series) {
-    if (series.axis !== axis || series.mark === "bar") continue;
-    const src = series.values;
-    const values: number[] = [];
-    let hi = -Infinity;
-    let lo = Infinity;
-    for (let i = 0; i < src.length; i++) {
-      const value = src[i];
-      if (value === null || !Number.isFinite(value)) continue;
-      values.push(value);
-      if (value > hi) hi = value;
-      if (value < lo) lo = value;
-    }
-    if (values.length < 3) continue;
-    for (let i = 0; i < values.length - 1; i++) {
-      const p0 = values[Math.max(0, i - 1)];
-      const p1 = values[i];
-      const p2 = values[i + 1];
-      const p3 = values[Math.min(values.length - 1, i + 2)];
-      const c1 = p1 + (p2 - p0) / 6;
-      const c2 = p2 - (p3 - p1) / 6;
-      if (c1 > hi) above = Math.max(above, c1 - hi);
-      if (c2 > hi) above = Math.max(above, c2 - hi);
-      if (c1 < lo) below = Math.max(below, lo - c1);
-      if (c2 < lo) below = Math.max(below, lo - c2);
-    }
-  }
-  return { above, below };
 }
 
 export function resolveTicks(model: PlotModel, key: "x" | "y" | "y2", min: number, max: number, count: number, log: boolean): number[] {
@@ -2000,27 +2000,62 @@ function areaPath(top: Pt[], bottom: Pt[], curve: Curve): string {
   return `${forward} ${backward} Z`;
 }
 
+/**
+ * Fritsch–Carlson monotone cubic. Control points stay between the segment
+ * ends, so a spike does not pass the peak or cross the low point.
+ */
 function monotone(points: Pt[]): string {
-  const parts = new Array<string>(points.length);
+  const count = points.length;
+  const dx: number[] = [];
+  const slope: number[] = [];
+  for (let i = 0; i < count - 1; i++) {
+    const span = points[i + 1].x - points[i].x;
+    dx.push(span);
+    slope.push(span === 0 ? 0 : (points[i + 1].y - points[i].y) / span);
+  }
+  const tangent = new Array<number>(count);
+  tangent[0] = slope[0];
+  tangent[count - 1] = slope[count - 2];
+  for (let i = 1; i < count - 1; i++) {
+    const left = slope[i - 1];
+    const right = slope[i];
+    tangent[i] = left * right <= 0 ? 0 : (left + right) / 2;
+  }
+  for (let i = 0; i < count - 1; i++) {
+    const delta = slope[i];
+    if (delta === 0) {
+      tangent[i] = 0;
+      tangent[i + 1] = 0;
+      continue;
+    }
+    const alpha = tangent[i] / delta;
+    const beta = tangent[i + 1] / delta;
+    const sum = alpha * alpha + beta * beta;
+    if (sum > 9) {
+      const scale = 3 / Math.sqrt(sum);
+      tangent[i] = scale * alpha * delta;
+      tangent[i + 1] = scale * beta * delta;
+    }
+  }
+  const parts = new Array<string>(count);
   parts[0] = "M " + n(points[0].x) + " " + n(points[0].y);
-  for (let i = 0; i < points.length - 1; i++) {
-    const p0 = points[Math.max(0, i - 1)];
-    const p1 = points[i];
-    const p2 = points[i + 1];
-    const p3 = points[Math.min(points.length - 1, i + 2)];
+  for (let i = 0; i < count - 1; i++) {
+    const from = points[i];
+    const to = points[i + 1];
+    const span = dx[i];
     parts[i + 1] =
       "C " +
-      n(p1.x + (p2.x - p0.x) / 6) +
+      n(from.x + span / 3) +
       " " +
-      n(p1.y + (p2.y - p0.y) / 6) +
+      n(from.y + (tangent[i] * span) / 3) +
       ", " +
-      n(p2.x - (p3.x - p1.x) / 6) +
+      n(to.x - span / 3) +
       " " +
-      n(p2.y - (p3.y - p1.y) / 6) +
+      n(to.y - (tangent[i + 1] * span) / 3) +
       ", " +
-      n(p2.x) +
+      n(to.x) +
       " " +
-      n(p2.y);
+      n(to.y);
   }
   return parts.join(" ");
 }
@@ -2077,7 +2112,7 @@ function pairSegments(top: (Pt | null)[], bottom: (Pt | null)[], connect: boolea
   return pairs;
 }
 
-function seriesMark(type: string, mark: unknown, area: boolean): "line" | "bar" | "area" {
+function seriesMark(type: string, mark: unknown, area: boolean): "line" | "bar" | "area" | "range" {
   if (type === "bar") return "bar";
   if (type === "stacked-area" || type === "mini-area") return "area";
   if (mark === "bar" || mark === "line" || mark === "area") return mark;
@@ -2094,7 +2129,7 @@ function stackMode(type: string, stack: unknown): "none" | "stack" | "percent" {
 }
 
 function curveOf(value: unknown): Curve {
-  if (value === "linear" || value === "monotone" || value === "step" || value === "step-before" || value === "step-after") return value;
+  if (value === "linear" || value === "step" || value === "step-before" || value === "step-after") return value;
   return "monotone";
 }
 

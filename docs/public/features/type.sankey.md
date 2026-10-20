@@ -16,23 +16,23 @@ Source: chartkit:packages/core/src/generated/schema.ts:24
   "type": "sankey",
   "data": [
     {
-      "from": "Source",
-      "to": "Mill",
-      "flow": 10
+      "s": "A",
+      "t": "B",
+      "y": 10
     },
     {
-      "from": "Mill",
-      "to": "Shop",
-      "flow": 6
+      "s": "B",
+      "t": "C",
+      "y": 6
     }
   ],
   "encoding": {
-    "source": "from",
-    "target": "to",
-    "y": "flow"
+    "source": "s",
+    "target": "t",
+    "y": "y"
   },
   "a11y": {
-    "alt": "Flow leaves the mill."
+    "alt": "Flow leaves B."
   },
   "size": {
     "width": 640,
@@ -68,6 +68,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.sankey | dts-path (strong) | mermaid/dist/config.type.d.ts:233 |
 | AntV G2 | native | MarkTypes=sankey | dts-path (strong) | @antv/g2/lib/spec/mark.d.ts:13 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 668873d6cd29.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

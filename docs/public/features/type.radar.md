@@ -16,30 +16,30 @@ Source: chartkit:packages/core/src/generated/schema.ts:24
   "type": "radar",
   "data": [
     {
-      "spoke": "Speed",
-      "car": 4,
-      "bike": 2
+      "x": "S",
+      "a": 4,
+      "b": 2
     },
     {
-      "spoke": "Cost",
-      "car": 2,
-      "bike": 5
+      "x": "C",
+      "a": 2,
+      "b": 5
     },
     {
-      "spoke": "Ease",
-      "car": 3,
-      "bike": 4
+      "x": "E",
+      "a": 3,
+      "b": 4
     }
   ],
   "encoding": {
-    "x": "spoke",
+    "x": "x",
     "y": [
-      "car",
-      "bike"
+      "a",
+      "b"
     ]
   },
   "a11y": {
-    "alt": "Bike leads on cost."
+    "alt": "B leads on C."
   },
   "size": {
     "width": 640,
@@ -75,6 +75,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.radar | dts-path (strong) | mermaid/dist/config.type.d.ts:238 |
 | AntV G2 | native | ~polar | dts-grep (weak) | @antv/g2/lib/index.d.ts:53 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 668873d6cd29.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

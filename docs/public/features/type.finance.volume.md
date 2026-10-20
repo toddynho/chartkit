@@ -18,20 +18,20 @@ Source: chartkit:packages/core/src/generated/schema.ts:585
   "type": "candlestick",
   "data": [
     {
-      "day": "D1",
-      "open": 5,
-      "high": 7,
-      "low": 4,
-      "close": 6,
+      "x": "D1",
+      "o": 5,
+      "h": 7,
+      "l": 4,
+      "c": 6,
       "volume": "A"
     }
   ],
   "encoding": {
-    "x": "day",
-    "open": "open",
-    "high": "high",
-    "low": "low",
-    "close": "close",
+    "x": "x",
+    "open": "o",
+    "high": "h",
+    "low": "l",
+    "close": "c",
     "volume": "volume"
   },
   "a11y": {
@@ -71,6 +71,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | manual | ~register | dts-mechanism (weak) | @antv/g2/lib/exports.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 668873d6cd29.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

@@ -16,23 +16,23 @@ Source: chartkit:packages/core/src/generated/schema.ts:24
   "type": "heatmap",
   "data": [
     {
-      "bin": "A",
-      "band": "Low",
-      "level": 1
+      "x": "A",
+      "y": "L",
+      "v": 1
     },
     {
-      "bin": "B",
-      "band": "Low",
-      "level": 4
+      "x": "B",
+      "y": "L",
+      "v": 4
     }
   ],
   "encoding": {
-    "x": "bin",
-    "y": "band",
-    "color": "level"
+    "x": "x",
+    "y": "y",
+    "color": "v"
   },
   "a11y": {
-    "alt": "Bin B is darker."
+    "alt": "B is darker."
   },
   "size": {
     "width": 640,
@@ -68,6 +68,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | MarkTypes=cell, MarkTypes=heatmap | dts-path (strong) | @antv/g2/lib/spec/mark.d.ts:13, @antv/g2/lib/spec/mark.d.ts:13 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 668873d6cd29.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

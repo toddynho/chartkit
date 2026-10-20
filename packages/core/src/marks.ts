@@ -3,7 +3,7 @@ export const MARK_APPLIES: Record<string, readonly string[]> = {
   curve: ["line", "stacked-area", "combo", "sparkline", "mini-area"],
   sampling: ["line", "stacked-area", "combo", "sparkline", "mini-area", "spike"],
   points: ["line", "combo"],
-  pointSize: ["line", "stacked-area", "combo", "scatter"],
+  pointSize: ["line", "stacked-area", "combo", "scatter", "errorbar"],
   pointShape: ["line", "stacked-area", "scatter", "combo"],
   pointFill: ["line", "stacked-area", "scatter", "combo"],
   area: ["line", "sparkline"],
@@ -42,6 +42,10 @@ export const MARK_APPLIES: Record<string, readonly string[]> = {
   binWidth: ["histogram"],
   ranges: ["bullet"],
   total: ["waterfall"],
+  line: ["area-range"],
+  stroke: ["area-range"],
+  strokeDash: ["area-range"],
+  error: ["errorbar"],
 };
 
 /** Legacy component prop names → v1 spec paths, used by CK1002 hints. */

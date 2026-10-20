@@ -17,13 +17,13 @@ Source: chartkit:packages/core/src/validate-phase4.ts:13
   "data": [
     {
       "section": "Pay",
-      "step": "Enter card",
+      "step": "Card",
       "score": 2,
-      "actors": "Shopper"
+      "actors": "Shop"
     }
   ],
   "a11y": {
-    "alt": "Entering a card scores 2."
+    "alt": "Card scores 2."
   },
   "size": {
     "width": 640,
@@ -59,6 +59,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.journey | dts-path (strong) | mermaid/dist/config.type.d.ts:218 |
 | AntV G2 | none | — | dts-absence (absence) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 668873d6cd29.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

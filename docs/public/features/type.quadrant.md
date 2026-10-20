@@ -15,10 +15,10 @@ Source: chartkit:packages/core/src/validate-phase4.ts:13
   "version": "1",
   "type": "quadrant",
   "quadrants": [
-    "Quick wins",
-    "Big bets",
-    "Fill-ins",
-    "Reconsider"
+    "A",
+    "B",
+    "C",
+    "D"
   ],
   "data": [
     {
@@ -27,7 +27,7 @@ Source: chartkit:packages/core/src/validate-phase4.ts:13
       "y": 0.8
     },
     {
-      "name": "Reports",
+      "name": "R",
       "x": 0.8,
       "y": 0.3
     }
@@ -37,7 +37,7 @@ Source: chartkit:packages/core/src/validate-phase4.ts:13
     "y": "y"
   },
   "a11y": {
-    "alt": "SSO is a quick win."
+    "alt": "SSO is a win."
   },
   "size": {
     "width": 640,
@@ -73,6 +73,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.quadrantChart | dts-path (strong) | mermaid/dist/config.type.d.ts:224 |
 | AntV G2 | manual | ~register | dts-mechanism (weak) | @antv/g2/lib/exports.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 668873d6cd29.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

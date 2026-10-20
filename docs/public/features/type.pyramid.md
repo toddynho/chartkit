@@ -16,17 +16,17 @@ Source: chartkit:packages/core/src/generated/schema.ts:899
   "type": "funnel",
   "data": [
     {
-      "stage": "Visit",
-      "count": 80
+      "x": "A",
+      "y": 80
     },
     {
-      "stage": "Pay",
-      "count": 12
+      "x": "B",
+      "y": 12
     }
   ],
   "encoding": {
-    "x": "stage",
-    "y": "count"
+    "x": "x",
+    "y": "y"
   },
   "a11y": {
     "alt": "12 of 80 pay."
@@ -68,6 +68,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | manual | ~register | dts-mechanism (weak) | @antv/g2/lib/exports.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 668873d6cd29.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json
