@@ -66,6 +66,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | ~title | dts-grep (weak) | mermaid/dist/utils.d.ts:223 'title' in diagram text |
 | AntV G2 | native | ~title\|subtitle | dts-grep (weak) | @antv/g2/lib/index.d.ts:115 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3a59d27e1bde.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 77c1df48ccc6.
 
 https://chartkit.dev/features.json

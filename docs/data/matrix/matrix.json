@@ -44946,8 +44946,8 @@
           "status": "native",
           "tier": null,
           "apiPaths": [
-            "Scale.padding",
-            "Scale.clamp"
+            "encoding.y.scale.padding",
+            "encoding.y.scale.clamp"
           ],
           "evidence": [
             {

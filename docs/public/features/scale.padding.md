@@ -1,14 +1,51 @@
 # Scale padding / clamp / grace
 
-ChartKit: **none**
+ChartKit: **native**
 
 Extra space beyond data extent or clamp out-of-range
 
-Matrix status: `none`. Verification: `source-review` (strong).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-probe hit reviewed: match is size.padding (chart padding around the plot, not scale padding)
+scale.padding is a fraction of the span (a number, or {min, max}). scale.clamp draws a value outside an explicit domain at the domain edge. A set domain end is not padded.
 
-No spec snippet. ChartKit does not support this feature.
+Source: chartkit:packages/core/src/generated/schema.ts:977
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40
+    },
+    {
+      "quarter": "Q2",
+      "units": 55
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": {
+      "field": "units",
+      "scale": {
+        "padding": 0.08
+      }
+    }
+  },
+  "a11y": {
+    "alt": "Units rose in Q2."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -35,6 +72,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~clamp | dts-grep (weak) | @antv/g2/lib/utils/number.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3a59d27e1bde.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 77c1df48ccc6.
 
 https://chartkit.dev/features.json

@@ -1,12 +1,16 @@
 # Custom HTML / component tooltip
 
-ChartKit: **none**
+ChartKit: **native**
 
 Render arbitrary markup in the tooltip
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+Adapter slot on React, Vue, Svelte, vanilla, and the element. The callback returns HTML, a node, or null. The JSON spec stays data.
+
+Source: packages/core/src/tooltip-slot.ts:19
+
+No spec snippet. This row is not a single option that `validate()` can show.
 
 ## Other libraries
 
@@ -33,6 +37,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~render\|css | dts-grep (weak) | @antv/g2/lib/exports.d.ts:1 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3a59d27e1bde.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 77c1df48ccc6.
 
 https://chartkit.dev/features.json
