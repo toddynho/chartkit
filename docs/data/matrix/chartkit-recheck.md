@@ -109,7 +109,8 @@ Rechecked on multi-level treemap and sunburst. A flat treemap (encoding.x, encod
 | id | status | correction |
 |---|---|---|
 | data.hierarchy | native | Nested `{name, value, children}`, `encoding.path` (field names from the root to the leaf), or `encoding.id` plus `encoding.parent`. A parent with no value is the sum of its leaves. Cycles, a missing parent, a negative size, and a parent that does not match its children are CK3027–CK3030. |
-| type.sunburst | native | `type: "sunburst"` draws concentric rings coloured by the top-level branch. `mark.innerRadius` sets the hole (0.28 when omitted). `mark.depth` caps the rings. `sun-burst`, `sunburstchart`, and `partition` repair to sunburst (CK1005). |
+| type.sunburst | native | `type: "sunburst"` draws concentric rings coloured by the top-level branch. `mark.innerRadius` sets the hole (0.28 when omitted). `mark.depth` caps the rings. `sun-burst`, `sunburstchart`, and `partition` repair to sunburst (CK1005). Segment labels use the ink that clears 4.5:1 against the fill. Siblings shift lightness and keep a gap. |
+| type.treemap | native | Nested leaves shift lightness within the branch hue and keep a gap. The label colour clears 4.5:1 against the fill. The formatted value sits under the name when the tile fits it. |
 
 ## Web component
 

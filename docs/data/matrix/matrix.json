@@ -15371,7 +15371,7 @@
               "loc": "chartkit:packages/core/src/generated/schema.ts:24"
             }
           ],
-          "note": "",
+          "note": "Nested or flat. Siblings in a branch shift lightness and keep a gap. Label ink clears 4.5:1 against the fill. A formatted value sits under the name when the tile fits it.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -15731,7 +15731,7 @@
               "loc": "chartkit:packages/core/src/charts/sunburst.ts:1"
             }
           ],
-          "note": "Concentric rings from nested children, encoding.path, or encoding.id and encoding.parent. Loaded from @chartkitdev/core/charts/sunburst.",
+          "note": "Concentric rings from nested children, encoding.path, or encoding.id and encoding.parent. Loaded from @chartkitdev/core/charts/sunburst. Segment labels clear 4.5:1 against the fill. Siblings shift lightness and keep a gap.",
           "verified": "dts-path",
           "strength": "strong"
         },
