@@ -5,7 +5,7 @@ import { pageMeta } from "@/lib/site";
 
 export const metadata = pageMeta(
   "Showcase",
-  "Twenty-five ChartKit boards, from one spec on every stack through range bands, whiskers, time zones, and a custom element.",
+  "Twenty-eight ChartKit boards, from one spec on every stack through a cellar treemap, a sunburst, whiskers, and a custom element.",
   "/showcase",
 );
 
@@ -15,8 +15,8 @@ export default function ShowcasePage() {
     <div className="wrap section showcase">
       <h1>Showcase</h1>
       <p className="lede">
-        Twenty-five boards. Range bands, floating bars, whiskers, a zoned hour axis, and a custom element sit with
-        markers, leader lines, conditional colour, export, and pound and euro formats. Specs are checked before the
+        Twenty-eight boards. A cellar treemap beside its sunburst, a yard of hours, and a market fortnight sit with
+        range bands, floating bars, whiskers, a zoned hour axis, and a custom element. Specs are checked before the
         page builds. The sample data is fictional.
       </p>
       <div className="gallery-index">

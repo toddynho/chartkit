@@ -7,6 +7,7 @@ import { snippetsFor } from "./snippets.ts";
 import { benchSources, benchmarkCharts, timingLosses } from "./showcase-benchmarks.ts";
 import { bikeCharts, mermaidBoards, repairCases, roasteryCharts, stacks, tide, type ChartSlot, type ShowcaseSpec } from "./showcase-data.ts";
 import { nextBoardMeta } from "./showcase-next.ts";
+import { fifthBoards } from "./showcase-fifth.ts";
 import { fourthBoards } from "./showcase-fourth.ts";
 import { sheetMeta, thirdBoardMeta } from "./showcase-third.ts";
 import { optionById, optionsIn, type OptionLink } from "./showcase-options.ts";
@@ -291,6 +292,15 @@ export function boards(): Board[] {
           charts: item.charts.map(ready),
           stacks: item.stacks,
           extraOptions: item.extraOptions,
+        }),
+      ),
+      ...fifthBoards.map((item) =>
+        board({
+          slug: item.slug,
+          number: item.number,
+          title: item.title,
+          lede: item.lede,
+          charts: item.charts.map(ready),
         }),
       ),
     ].sort((a, b) => a.number - b.number),

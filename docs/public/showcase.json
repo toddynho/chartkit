@@ -468,6 +468,7 @@
         "axis.ticks.values",
         "axis.title",
         "legend.position",
+        "scale.domain",
         "theme.presets",
         "type.bar.grouped",
         "type.bar.vertical",
@@ -510,6 +511,7 @@
         "legend.style",
         "legend.values",
         "mark.color.point",
+        "scale.domain",
         "theme.palette",
         "theme.presets",
         "tooltip.position",
@@ -630,6 +632,7 @@
         "a11y.alt",
         "axis.title",
         "legend.values",
+        "scale.domain",
         "theme.presets",
         "type.combo",
         "type.pie",
@@ -725,11 +728,12 @@
       "number": 20,
       "title": "Carrick lamp, overnight",
       "types": [
-        "line"
+        "combo"
       ],
       "options": [
         "a11y.alt",
         "annotation.marker",
+        "axis.ticks.values",
         "axis.title",
         "data.transform",
         "legend.interactive",
@@ -737,10 +741,12 @@
         "mark.color.conditional",
         "mark.glow",
         "mark.point.visibility",
+        "scale.domain",
+        "scale.nice",
         "theme.presets",
         "tooltip.position",
         "tooltip.shared",
-        "type.line",
+        "type.combo",
         "type.line.smooth"
       ],
       "theme": "soft",
@@ -792,22 +798,20 @@
       "number": 22,
       "title": "Glasshouse spans",
       "types": [
-        "bar-range",
-        "line"
+        "bar-range"
       ],
       "options": [
         "a11y.alt",
+        "annotation.marker",
         "annotation.trendline",
         "axis.ticks.values",
         "axis.title",
         "format.locale",
         "format.number",
-        "mark.point.visibility",
+        "scale.domain",
         "scale.nice",
         "theme.presets",
-        "type.bar.range",
-        "type.line",
-        "type.line.smooth"
+        "type.bar.range"
       ],
       "theme": "soft",
       "themes": [
@@ -826,8 +830,15 @@
       ],
       "options": [
         "a11y.alt",
+        "annotation.label.position",
+        "annotation.line.y",
+        "annotation.marker",
+        "annotation.style",
+        "axis.ticks.values",
         "axis.title",
         "mark.point.size",
+        "scale.domain",
+        "scale.nice",
         "theme.presets",
         "type.errorbar"
       ],
@@ -882,6 +893,102 @@
         "tooltip.position",
         "tooltip.shared",
         "type.combo"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "pell-press",
+      "number": 26,
+      "title": "Pell press cellar",
+      "types": [
+        "treemap",
+        "sunburst"
+      ],
+      "options": [
+        "a11y.alt",
+        "data.hierarchy",
+        "format.locale",
+        "format.number",
+        "legend.position",
+        "theme.presets",
+        "type.sunburst",
+        "type.treemap"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "carrick-yard",
+      "number": 27,
+      "title": "Carrick yard, winter hours",
+      "types": [
+        "sunburst",
+        "bar"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.ticks.values",
+        "axis.title",
+        "data.hierarchy",
+        "data.sort",
+        "format.locale",
+        "format.number",
+        "label.position",
+        "label.show",
+        "legend.position",
+        "mark.color.point",
+        "scale.domain",
+        "scale.nice",
+        "theme.presets",
+        "type.bar.horizontal",
+        "type.sunburst"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "brine-market",
+      "number": 28,
+      "title": "Brine market, twelve mornings",
+      "types": [
+        "treemap",
+        "line"
+      ],
+      "options": [
+        "a11y.alt",
+        "annotation.marker",
+        "axis.ticks.values",
+        "axis.title",
+        "data.hierarchy",
+        "format.locale",
+        "format.number",
+        "legend.interactive",
+        "legend.position",
+        "mark.point.visibility",
+        "scale.domain",
+        "scale.nice",
+        "theme.presets",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.line",
+        "type.line.smooth",
+        "type.treemap"
       ],
       "theme": "soft",
       "themes": [

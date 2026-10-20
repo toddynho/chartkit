@@ -57,6 +57,7 @@ function walkScale(ids: Set<string>, scale: unknown) {
   if (scale.type === "linear") add(ids, "scale.linear");
   if (scale.nice === false) add(ids, "scale.nice");
   if (scale.reverse === true) add(ids, "scale.reverse");
+  if (Array.isArray(scale.domain)) add(ids, "scale.domain");
   if (scale.type === "sequential" || scale.type === "diverging") add(ids, "scale.color.sequential");
   if (scale.type === "quantize" || scale.type === "threshold") add(ids, "scale.quantize");
   if (scale.type === "sequential" || scale.type === "diverging" || scale.type === "quantize" || scale.type === "threshold") {
@@ -98,6 +99,7 @@ export function optionsIn(spec: unknown): OptionLink[] {
   if (type === "gauge") add(ids, "type.gauge");
   if (type === "progress-ring") add(ids, "type.progress.ring");
   if (type === "treemap") add(ids, "type.treemap");
+  if (type === "sunburst") add(ids, "type.sunburst");
   if (type === "venn") add(ids, "type.venn");
   if (type === "radar") add(ids, "type.radar");
   if (type === "boxplot") add(ids, "type.boxplot");
@@ -206,6 +208,10 @@ export function optionsIn(spec: unknown): OptionLink[] {
   if (encoding.color && (type === "bar" || type === "scatter" || type === "pie" || type === "donut")) add(ids, "mark.color.point");
   if (isRecord(encoding.size) || typeof encoding.size === "string") add(ids, "type.bubble");
   if (encoding.volume) add(ids, "type.finance.volume");
+  const nested = Array.isArray(spec.data) && spec.data.some((row) => isRecord(row) && Array.isArray(row.children));
+  const hierarchyPath = Array.isArray(encoding.path) && encoding.path.length > 0;
+  const hierarchyIds = typeof encoding.id === "string" && typeof encoding.parent === "string";
+  if ((type === "treemap" || type === "sunburst") && (nested || hierarchyPath || hierarchyIds)) add(ids, "data.hierarchy");
   if (isRecord(spec.a11y) && typeof spec.a11y.alt === "string") add(ids, "a11y.alt");
   if (isRecord(spec.a11y) && typeof spec.a11y.description === "string") add(ids, "a11y.description.long");
   if (isRecord(spec.a11y) && spec.a11y.keyboard === true) add(ids, "a11y.keyboard");
