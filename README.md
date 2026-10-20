@@ -1,6 +1,6 @@
 # ChartKit
 
-One JSON spec, a framework-free core, and thin adapters for React, Vue, Svelte, and plain DOM. The spec is the agent interface. Component props on the older React charts are a different API and are not keys in the spec.
+One JSON spec, a framework-free core, and thin adapters for React, Vue, Svelte, plain DOM, and a `<chart-kit>` element. The spec is the agent interface. Component props on the older React charts are a different API and are not keys in the spec.
 
 Round 13, measured 2026-10-18 on phase 2 `d8dcc5a`. These are the harness numbers, including the losses. Method: [chartkit.dev/benchmarks](https://chartkit.dev/benchmarks) and [benchmarks.json](https://chartkit.dev/benchmarks.json).
 
@@ -31,6 +31,8 @@ npm install @chartkitdev/vue
 npm install @chartkitdev/svelte
 npm install @chartkitdev/vanilla
 ```
+
+`@chartkitdev/element` (`<chart-kit>`) is in this repo and is not on npm yet.
 
 `@derpdaderp/chartkit` remains as a compatibility shim (not published from this branch). See [docs/migrate.md](docs/migrate.md).
 

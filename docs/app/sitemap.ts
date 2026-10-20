@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/docs/vue",
     "/docs/svelte",
     "/docs/vanilla",
+    "/docs/web-component",
     "/docs/spec",
     "/docs/theming",
     "/docs/migrate",

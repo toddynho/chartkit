@@ -101,3 +101,9 @@ Rechecked on `area-range`, `bar-range`, `errorbar`, and a combo with `mark: "ran
 | type.area.range | native | `type: "area-range"` draws a band between low and high. `encoding.y` is an optional centre line. `mark.line: false` draws the band only. A combo y item with `mark: "range"` and `lo`/`hi` paints the band under the other series. |
 | type.bar.range | native | `type: "bar-range"` draws a floating bar from `encoding.low` to `encoding.high`. The bar does not start at zero. |
 | type.errorbar | native | `type: "errorbar"` draws whiskers on a point or a bar. Bounds are `encoding.low` and `encoding.high`, or `encoding.error` as ± around y. `mark.error` is `point` or `bar`. |
+
+## Web component
+
+| id | status | correction |
+|---|---|---|
+| framework.webcomponent | native | `@chartkitdev/element` defines `<chart-kit>`. The spec comes from the property, the `spec` attribute, or a child JSON script. `theme` reflects. `pointclick` and `select` are DOM events. An existing SVG is patched in place. |

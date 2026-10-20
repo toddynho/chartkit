@@ -146,6 +146,7 @@ async function gzipLine(entry) {
 
 const vue = await gzipOf(join(root, "packages/vue/src/Chart.ts"), { external: true });
 const vanilla = await gzipOf(join(root, "packages/vanilla/src/index.ts"), { external: true });
+const element = await gzipOf(join(root, "packages/element/src/index.ts"), { external: true });
 const svelteCompiled = compile(readFileSync(join(root, "packages/svelte/src/Chart.svelte"), "utf8"), {
   filename: "Chart.svelte",
   generate: "client",
@@ -157,7 +158,8 @@ const svelte = await gzipOf(svelteEntry, { external: true });
 const vueLine = await gzipLine(join(root, "packages/vue/src/Chart.ts"));
 const vanillaLine = await gzipLine(join(root, "packages/vanilla/src/index.ts"));
 const svelteLine = await gzipLine(svelteEntry);
-for (const [name, built] of [["vue", vue], ["svelte", svelte], ["vanilla", vanilla]]) {
+const elementLine = await gzipLine(join(root, "packages/element/src/index.ts"));
+for (const [name, built] of [["vue", vue], ["svelte", svelte], ["vanilla", vanilla], ["element", element]]) {
   if (built.code.includes("function bars") || built.code.includes("CK1004")) {
     isolation[`${name}OmitsCore`] = false;
   } else {
@@ -167,7 +169,7 @@ for (const [name, built] of [["vue", vue], ["svelte", svelte], ["vanilla", vanil
   isolation[`${name}OmitsExtra`] = !pullsExtra;
 }
 isolation.vanillaOmitsMermaid = !vanilla.code.includes("fromMermaid") && !vanilla.code.includes("xychart");
-for (const [name, built] of [["vueLine", vueLine], ["svelteLine", svelteLine], ["vanillaLine", vanillaLine]]) {
+for (const [name, built] of [["vueLine", vueLine], ["svelteLine", svelteLine], ["vanillaLine", vanillaLine], ["elementLine", elementLine]]) {
   const leaked = built.code.includes('data-ck-mark="whisker"') || built.code.includes('data-ck-renderer="histogram"') || built.code.includes("function renderHistogram");
   isolation[`${name}OmitsExtra`] = !leaked;
 }
@@ -232,11 +234,13 @@ const measured = {
   vue: vue.gzipBytes,
   svelte: svelte.gzipBytes,
   vanilla: vanilla.gzipBytes,
+  element: element.gzipBytes,
   interact: interact.gzipBytes,
   interactExtra: interactExtra.gzipBytes,
   vueLine: vueLine.gzipBytes,
   svelteLine: svelteLine.gzipBytes,
   vanillaLine: vanillaLine.gzipBytes,
+  elementLine: elementLine.gzipBytes,
   extra: extra.gzipBytes,
   mermaid: mermaid.gzipBytes,
   vanillaAuto: vanillaAuto.gzipBytes,
@@ -248,7 +252,7 @@ const measured = {
 for (const name of extraTypes) measured[name] = chartSizes[name].gzipBytes;
 const budget = JSON.parse(readFileSync(join(root, "scripts/size-budget.json"), "utf8"));
 const failures = [];
-for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "extra", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid"]) {
+for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "element", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "elementLine", "extra", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid"]) {
   if (typeof budget[key] !== "number") failures.push(`${key} budget missing`);
   else if (measured[key] > budget[key]) failures.push(`${key} gzip ${measured[key]} > budget ${budget[key]}`);
 }
@@ -266,11 +270,13 @@ console.log(JSON.stringify({
     vue: vue.minBytes,
     svelte: svelte.minBytes,
     vanilla: vanilla.minBytes,
+    element: element.minBytes,
     interact: interact.minBytes,
     interactExtra: interactExtra.minBytes,
     vueLine: vueLine.minBytes,
     svelteLine: svelteLine.minBytes,
     vanillaLine: vanillaLine.minBytes,
+    elementLine: elementLine.minBytes,
     extra: extra.minBytes,
     mermaid: mermaid.minBytes,
     vanillaAuto: vanillaAuto.minBytes,

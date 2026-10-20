@@ -84094,20 +84094,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~customElements\\.define"
+            "~customElements.define"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "customElements\\.define"
+              "kind": "dts-grep",
+              "path": "customElements.define",
+              "loc": "chartkit:packages/element/src/index.ts:298"
             }
           ],
-          "note": "no custom element in any package",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "@chartkitdev/element defines <chart-kit>. Spec from the property, the spec attribute, or a child JSON script.",
+          "verified": "dts-grep",
+          "strength": "weak"
         },
         "chartjs": {
           "status": "none",

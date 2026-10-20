@@ -54,7 +54,10 @@ describe("Chart", () => {
       a11y: { alt: "Open is the starting total." },
     };
     const { container } = render(<Chart spec={waterfall} onPointClick={onPointClick} />);
-    await waitFor(() => expect(container.querySelector('[data-ck-name="Add"]')).toBeTruthy());
+    await waitFor(() => {
+      expect(container.querySelector('[data-ck-name="Add"]')).toBeTruthy();
+      expect(container.querySelector("[data-ck-interact]")).toBeTruthy();
+    });
     container.querySelector('[data-ck-name="Add"]')?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(onPointClick).toHaveBeenCalledTimes(1);
     expect(onPointClick.mock.calls[0][0]).toMatchObject({ series: "Add" });

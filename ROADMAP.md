@@ -30,6 +30,7 @@ Earlier v1 work. 31 chart types draw: 15 in the first core, eight in Phase 3, fi
 - [x] Core gaps: line glow, funnel legends, monotone curves, calendar weeks that stay near square, and threshold legends that label the cuts ([#32](https://github.com/toddynho/chartkit/pull/32))
 - [x] Uncertainty: range area, floating bars, and error bars ([#34](https://github.com/toddynho/chartkit/pull/34))
 - [x] Time zones, sorting, streaming append, and filter, window, and aggregate transforms ([#35](https://github.com/toddynho/chartkit/pull/35))
+- [x] A web component, `<chart-kit>` in `@chartkitdev/element` ([#33](https://github.com/toddynho/chartkit/pull/33))
 
 ## In progress
 
@@ -39,7 +40,6 @@ Earlier v1 work. 31 chart types draw: 15 in the first core, eight in Phase 3, fi
 ## Next
 
 - [ ] Sunburst
-- [ ] A web component
 - [ ] The remaining showcase boards
 
 ## Later

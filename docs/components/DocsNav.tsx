@@ -11,6 +11,7 @@ const start: { href: string; label: string; external?: boolean }[] = [
   { href: "/docs/vue", label: "Vue" },
   { href: "/docs/svelte", label: "Svelte" },
   { href: "/docs/vanilla", label: "Vanilla" },
+  { href: "/docs/web-component", label: "Web component" },
   { href: "/docs/spec", label: "Spec reference" },
   { href: "/docs/theming", label: "Theming" },
   { href: "/docs/migrate", label: "Migrate from v0" },
