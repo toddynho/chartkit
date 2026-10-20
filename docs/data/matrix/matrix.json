@@ -21759,20 +21759,21 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:regression)['\"`]|(?:^|[\\s{,;])\\w*(?:regression)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:regression)"
+            "ChartKitChartSpecV1.annotations"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:regression)['\"`]|(?:^|[\\s{,;])\\w*(?:regression)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:regression)"
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.annotations",
+              "loc": "chartkit:packages/core/src/annotations.ts:19"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "Regression overlay on scatter or a cartesian series: linear or loess, with an optional confidence band. Not a separate chart type.",
+          "verified": "dts-path",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "plugin",
@@ -52075,19 +52076,19 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "partial",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "ChartKitChartSpecV1.annotations"
+            "ChartKitChartSpecV1.axes.x.bands"
           ],
           "evidence": [
             {
               "kind": "dts-path",
-              "path": "ChartKitChartSpecV1.annotations",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:69"
+              "path": "ChartKitChartSpecV1.axes.x.bands",
+              "loc": "chartkit:packages/core/src/annotations.ts:19"
             }
           ],
-          "note": "band annotations (manual)",
+          "note": "axes.x.bands and axes.y.bands shade ranges. x also accepts \"weekends\" when x is dates.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -60617,20 +60618,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:markPoint)['\"`]|(?:^|[\\s{,;])\\w*(?:markPoint)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:markPoint)"
+            "ChartKitChartSpecV1.annotations"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:markPoint)['\"`]|(?:^|[\\s{,;])\\w*(?:markPoint)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:markPoint)"
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.annotations",
+              "loc": "chartkit:packages/core/src/annotations.ts:19"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "Point, leader, and a text box kept inside the plot. Later callouts move clear of earlier ones.",
+          "verified": "dts-path",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "plugin",
@@ -62041,20 +62043,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:average)['\"`]|(?:^|[\\s{,;])\\w*(?:average)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:average)"
+            "ChartKitChartSpecV1.annotations"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:average)['\"`]|(?:^|[\\s{,;])\\w*(?:average)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:average)"
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.annotations",
+              "loc": "chartkit:packages/core/src/annotations.ts:19"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "Mean, median, or linear, each with a label.",
+          "verified": "dts-path",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "plugin",

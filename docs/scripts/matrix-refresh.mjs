@@ -158,6 +158,7 @@ const TYPE_FOR = {
   "mark.color.point": "bar",
   "scale.color.sequential": "heatmap",
   "legend.continuous": "heatmap",
+  "type.regression": "scatter",
 };
 
 function hostType(feature) {
@@ -219,6 +220,10 @@ function demoValue(id, parts, literal) {
   }
   const leaf = parts[parts.length - 1];
   if (id === "scale.nice" || leaf === "nice") return false;
+  if (id === "annotation.trendline") return [{ type: "trendline", method: "mean", label: "Mean" }];
+  if (id === "annotation.marker") return [{ type: "marker", x: "Q2", label: "Peak" }];
+  if (id === "type.regression") return [{ type: "regression", method: "linear", band: true, label: "Fit" }];
+  if (id === "axis.bands" || (leaf === "bands" && parts[0] === "axes")) return [{ from: "Q1", to: "Q2", label: "Window" }];
   if (id.startsWith("annotation.") || leaf === "annotations") {
     const axis = id.includes(".x") ? "x" : "y";
     return [{ type: "rule", axis, value: axis === "x" ? "Q2" : 50, label: "Mark" }];

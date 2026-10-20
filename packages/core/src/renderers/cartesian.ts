@@ -1,4 +1,4 @@
-import { annotationLayers } from "../annotations";
+import { annotationLayers, seriesPoints } from "../annotations";
 import { isPaintColumn, readRules, resolveColors, withPalette } from "../color";
 import { isTypedArray, readData, type DataTable } from "../data";
 import { formatAxisValue, formatValue } from "../format";
@@ -221,6 +221,7 @@ export interface PlotModel {
   yLog: boolean;
   y2Log: boolean;
   notes: unknown;
+  bands?: { x?: unknown; y?: unknown; y2?: unknown };
   xAxis: AxisBox;
   yAxis: AxisBox;
   y2Axis: AxisBox;
@@ -498,6 +499,7 @@ function toModel(
     zero: zeroDefault(type, mark, series),
     xTemporal,
     notes: spec.annotations,
+    bands: readBands(spec),
   };
 }
 
@@ -578,6 +580,14 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
       if (numeric === null) return null;
       return (axis === "y2" ? y2Scale : yScale)(numeric);
     },
+    samples: model.series.map((series) => ({ name: series.name, axis: series.axis, pts: seriesPoints(model.x, series.values) })),
+    labels: model.labels,
+    temporal: model.xTemporal,
+    xNum: model.x,
+    slot: (index) => xScale.band(index),
+    count,
+    flip: horizontal,
+    bands: model.bands,
   });
   parts.push(`<g clip-path="url(#${clip})">`);
   parts.push(notes.under);
@@ -2333,6 +2343,14 @@ function categorySwatches(spec: Record<string, unknown>, series: Series[], label
   if (out.length < 2) return undefined;
   if (new Set(out.map((item) => item.color)).size < 2) return undefined;
   return out;
+}
+
+function readBands(spec: Record<string, unknown>): { x?: unknown; y?: unknown; y2?: unknown } | undefined {
+  const axes = isRecord(spec.axes) ? spec.axes : undefined;
+  if (!axes) return;
+  const one = (key: string) => (isRecord(axes[key]) ? axes[key].bands : undefined);
+  const bands = { x: one("x"), y: one("y"), y2: one("y2") };
+  return bands.x === undefined && bands.y === undefined && bands.y2 === undefined ? undefined : bands;
 }
 
 function axisFormat(spec: Record<string, unknown>, key: "y" | "y2", channels: YChannel[]): unknown {

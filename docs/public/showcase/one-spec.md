@@ -1250,6 +1250,7 @@ const svg = renderToString(spec);
 - [Vue](https://chartkit.dev/features/framework.vue) (`framework.vue`)
 - [Click events on marks](https://chartkit.dev/features/interaction.click) (`interaction.click`)
 - [Selection (point / multi / series)](https://chartkit.dev/features/interaction.select) (`interaction.select`)
+- [Margins / padding](https://chartkit.dev/features/layout.margin) (`layout.margin`)
 - [Click to toggle series](https://chartkit.dev/features/legend.interactive) (`legend.interactive`)
 - [Legend position](https://chartkit.dev/features/legend.position) (`legend.position`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)

@@ -65,7 +65,7 @@ export type ChartKitChartSpecV1 = {
   legend?: Legend;
   tooltip?: Tooltip;
   /**
-   * Reference rules, bands and text notes.
+   * Reference rules, bands, text, trendlines, regression fits, and point callouts.
    */
   annotations?: Annotation[];
   theme?: Theme;
@@ -342,6 +342,82 @@ export type Annotation =
        * Text shown with the annotation.
        */
       label: string;
+      color?: Color;
+    }
+  | {
+      type: "trendline";
+      /**
+       * mean and median are horizontal lines. linear is a least-squares fit.
+       */
+      method: "mean" | "median" | "linear";
+      /**
+       * Series axis the statistic is taken from.
+       */
+      axis?: "y" | "y2";
+      /**
+       * Series name. Defaults to the first series on the axis.
+       */
+      series?: string;
+      /**
+       * Line style. Mean and median default to dashed; linear defaults to solid.
+       */
+      dash?: "solid" | "dashed" | "dotted";
+      /**
+       * Text at the end of the line. Defaults to Mean, Median, or Linear.
+       */
+      label?: string;
+      color?: Color;
+    }
+  | {
+      type: "regression";
+      /**
+       * linear is least squares. loess is a local weighted fit.
+       */
+      method: "linear" | "loess";
+      /**
+       * Shade a 95% confidence band around the fit.
+       */
+      band?: boolean;
+      /**
+       * Loess window as a fraction of the points. Ignored for linear.
+       */
+      bandwidth?: number;
+      /**
+       * Series axis the fit is taken from.
+       */
+      axis?: "y" | "y2";
+      /**
+       * Series name. Defaults to the first series on the axis.
+       */
+      series?: string;
+      /**
+       * Text at the end of the fit. Defaults to Linear fit or Loess.
+       */
+      label?: string;
+      color?: Color;
+    }
+  | {
+      type: "marker";
+      /**
+       * x position in data units, or a category.
+       */
+      x: number | string;
+      /**
+       * y position in data units. Omit to use the series value at x.
+       */
+      y?: number;
+      /**
+       * Text in the callout box.
+       */
+      label: string;
+      /**
+       * Horizontal offset of the text box, in pixels.
+       */
+      dx?: number;
+      /**
+       * Vertical offset of the text box, in pixels. Negative is up.
+       */
+      dy?: number;
       color?: Color;
     };
 /**
@@ -2322,6 +2398,10 @@ export interface Axes {
          * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true.
          */
         rotate?: number;
+        /**
+         * Shaded x ranges, or "weekends" to shade Saturday and Sunday when x is dates.
+         */
+        bands?: "weekends" | AxisBand[];
       };
   /**
    * Axis options. Set to false to hide the axis.
@@ -2425,6 +2505,10 @@ export interface Axes {
          * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true.
          */
         rotate?: number;
+        /**
+         * Shaded y ranges, such as a target zone.
+         */
+        bands?: AxisBand[];
       };
   /**
    * Second (right) y axis, used by y series with axis 'y2'.
@@ -2528,7 +2612,33 @@ export interface Axes {
          * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true.
          */
         rotate?: number;
+        /**
+         * Shaded ranges on the second y axis.
+         */
+        bands?: AxisBand[];
       };
+}
+/**
+ * A shaded range on an axis.
+ */
+export interface AxisBand {
+  /**
+   * Start of the range, in data units or a category.
+   */
+  from: number | string;
+  /**
+   * End of the range, in data units or a category.
+   */
+  to: number | string;
+  /**
+   * Text shown on the band.
+   */
+  label?: string;
+  color?: Color;
+  /**
+   * Fill opacity, 0–1.
+   */
+  opacity?: number;
 }
 /**
  * Dimensions. Default: fill container width, height by type (line/bar 240px, sparkline 32px, gauge 160px).

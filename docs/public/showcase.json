@@ -23,6 +23,7 @@
         "framework.vue",
         "interaction.click",
         "interaction.select",
+        "layout.margin",
         "legend.interactive",
         "legend.position",
         "theme.presets",
@@ -64,6 +65,7 @@
         "format.number",
         "interaction.click",
         "interaction.select",
+        "layout.margin",
         "legend.interactive",
         "legend.position",
         "scale.multi",
@@ -162,6 +164,7 @@
         "a11y.alt",
         "axis.title",
         "label.show",
+        "layout.margin",
         "theme.presets",
         "type.bar.vertical",
         "type.donut",
@@ -193,6 +196,7 @@
         "axis.title",
         "interaction.click",
         "interaction.select",
+        "layout.margin",
         "legend.interactive",
         "legend.position",
         "scale.log",
@@ -204,6 +208,482 @@
         "type.bar.grouped",
         "type.bar.horizontal",
         "type.bar.vertical"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "volcano",
+      "number": 2,
+      "title": "Volcano watch",
+      "types": [
+        "line",
+        "spike",
+        "histogram",
+        "heatmap"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.title",
+        "data.decimation",
+        "export.csv",
+        "export.menu",
+        "export.png",
+        "export.svg",
+        "interaction.pan",
+        "interaction.zoom",
+        "legend.continuous",
+        "legend.interactive",
+        "legend.position",
+        "mark.glow",
+        "scale.color.sequential",
+        "theme.presets",
+        "tooltip.crosshair",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.heatmap",
+        "type.histogram",
+        "type.line"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "orchard",
+      "number": 4,
+      "title": "Orchard harvest almanac",
+      "types": [
+        "scatter",
+        "bar",
+        "boxplot",
+        "histogram"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.ticks.values",
+        "axis.title",
+        "interaction.click",
+        "interaction.select",
+        "label.position",
+        "label.show",
+        "legend.interactive",
+        "legend.position",
+        "mark.color.conditional",
+        "mark.color.point",
+        "mark.point.shape",
+        "mark.point.size",
+        "scale.nice",
+        "theme.presets",
+        "tooltip.fields",
+        "tooltip.position",
+        "type.bar.vertical",
+        "type.boxplot",
+        "type.bubble",
+        "type.histogram",
+        "type.scatter"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "launch",
+      "number": 6,
+      "title": "Space launch manifest",
+      "types": [
+        "timeline",
+        "gantt",
+        "funnel",
+        "kpi",
+        "gauge",
+        "progress-ring"
+      ],
+      "options": [
+        "a11y.alt",
+        "format.locale",
+        "format.number",
+        "legend.position",
+        "theme.presets",
+        "type.funnel",
+        "type.gantt",
+        "type.gauge",
+        "type.kpi",
+        "type.progress.ring",
+        "type.timeline"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "marathon",
+      "number": 7,
+      "title": "Marathon training block",
+      "types": [
+        "combo",
+        "bar",
+        "radar",
+        "sparkline"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.position",
+        "axis.ticks.values",
+        "axis.title",
+        "axis.title.position",
+        "format.locale",
+        "interaction.click",
+        "interaction.select",
+        "label.show",
+        "layout.margin",
+        "legend.interactive",
+        "legend.position",
+        "mark.point.shape",
+        "mark.point.visibility",
+        "scale.multi",
+        "scale.reverse",
+        "theme.presets",
+        "tooltip.crosshair",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.bar.stacked",
+        "type.bar.vertical",
+        "type.combo",
+        "type.radar",
+        "type.sparkline"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "harbour",
+      "number": 8,
+      "title": "Harbour freight desk",
+      "types": [
+        "candlestick",
+        "waterfall",
+        "kpi"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.title",
+        "format.locale",
+        "format.number",
+        "interaction.click",
+        "interaction.select",
+        "theme.presets",
+        "tooltip.fields",
+        "tooltip.position",
+        "type.bar.waterfall",
+        "type.candlestick",
+        "type.finance.volume",
+        "type.kpi"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "library",
+      "number": 9,
+      "title": "Library lending year",
+      "types": [
+        "pie",
+        "bar",
+        "heatmap",
+        "kpi",
+        "mini-area"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.ticks.wrap",
+        "axis.title",
+        "format.compact",
+        "format.locale",
+        "interaction.click",
+        "interaction.select",
+        "label.pie",
+        "label.position",
+        "label.show",
+        "layout.margin",
+        "legend.interactive",
+        "legend.position",
+        "theme.palette",
+        "theme.presets",
+        "tooltip.fields",
+        "tooltip.position",
+        "type.area",
+        "type.bar.horizontal",
+        "type.heatmap.calendar",
+        "type.kpi",
+        "type.pie"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "discovery",
+      "number": 10,
+      "title": "Product discovery map",
+      "types": [
+        "quadrant",
+        "venn",
+        "journey",
+        "bar"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.ticks.values",
+        "axis.title",
+        "legend.position",
+        "theme.presets",
+        "type.bar.grouped",
+        "type.bar.vertical",
+        "type.journey",
+        "type.quadrant",
+        "type.venn"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "nursery",
+      "number": 12,
+      "title": "Nursery theme studio",
+      "types": [
+        "line",
+        "bar",
+        "donut",
+        "scatter",
+        "gauge"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.title",
+        "export.csv",
+        "export.menu",
+        "export.png",
+        "export.svg",
+        "format.number",
+        "interaction.click",
+        "interaction.select",
+        "legend.interactive",
+        "legend.position",
+        "legend.scroll",
+        "legend.style",
+        "legend.values",
+        "mark.color.point",
+        "theme.palette",
+        "theme.presets",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.bar.grouped",
+        "type.bar.vertical",
+        "type.donut",
+        "type.gauge",
+        "type.line",
+        "type.scatter"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "wetlands",
+      "number": 14,
+      "title": "Accessibility tour",
+      "types": [
+        "line",
+        "bar"
+      ],
+      "options": [
+        "a11y.alt",
+        "a11y.datatable",
+        "a11y.description.long",
+        "a11y.keyboard",
+        "axis.ticks.values",
+        "axis.title",
+        "interaction.click",
+        "interaction.select",
+        "label.position",
+        "label.show",
+        "layout.margin",
+        "legend.interactive",
+        "legend.position",
+        "mark.color.point",
+        "mark.point.shape",
+        "mark.point.visibility",
+        "mark.stroke.dash",
+        "theme.presets",
+        "tooltip.crosshair",
+        "tooltip.fields",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.bar.vertical",
+        "type.line"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "ferry",
+      "number": 15,
+      "title": "Ferry network",
+      "types": [
+        "sankey",
+        "bar",
+        "kpi",
+        "line"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.position",
+        "axis.ticks.rotate",
+        "axis.title",
+        "format.locale",
+        "format.number",
+        "interaction.click",
+        "interaction.select",
+        "label.position",
+        "label.show",
+        "legend.interactive",
+        "legend.position",
+        "mark.point.shape",
+        "mark.point.visibility",
+        "theme.presets",
+        "tooltip.crosshair",
+        "tooltip.fields",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.bar.vertical",
+        "type.kpi",
+        "type.line",
+        "type.sankey"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "mermaid-sheet",
+      "number": 17,
+      "title": "Mermaid sheet",
+      "types": [
+        "pie",
+        "combo",
+        "sankey",
+        "radar",
+        "treemap",
+        "venn"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.title",
+        "legend.values",
+        "theme.presets",
+        "type.combo",
+        "type.pie",
+        "type.radar",
+        "type.sankey",
+        "type.treemap",
+        "type.venn",
+        "type.xychart.text"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "garden",
+      "number": 18,
+      "title": "Printable field report",
+      "types": [
+        "line",
+        "kpi",
+        "bar",
+        "bullet",
+        "donut",
+        "heatmap"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.title",
+        "export.csv",
+        "export.menu",
+        "export.png",
+        "export.svg",
+        "format.locale",
+        "format.number",
+        "label.position",
+        "label.show",
+        "layout.margin",
+        "legend.continuous",
+        "legend.position",
+        "legend.values",
+        "scale.quantize",
+        "theme.presets",
+        "tooltip.fields",
+        "tooltip.position",
+        "type.bar.vertical",
+        "type.bullet",
+        "type.donut",
+        "type.heatmap.calendar",
+        "type.kpi",
+        "type.line"
       ],
       "theme": "soft",
       "themes": [
