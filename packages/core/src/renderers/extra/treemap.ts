@@ -1,7 +1,7 @@
 import { colorLegendHeight, readColorScale, scaleLabel } from "../../color-scale";
 import { asNumber, column, fieldOf } from "../../frame";
 import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
-import { labelInk, siblingFill } from "../../ink";
+import { headerFill, labelInk, siblingFill } from "../../ink";
 import { cssVar } from "../../theme";
 import { esc, font, n } from "../../svg";
 import { fill, fit, fmt, num, openMark, str, valueFormat, viewOf } from "./plot";
@@ -18,6 +18,11 @@ interface Tile extends Leaf {
   y: number;
   w: number;
   h: number;
+}
+
+/** Same heading-to-plot gap as the shared cartesian plot. */
+function plotTop(frame: { title?: string; subtitle?: string }): number {
+  return (frame.title ? 40 : 12) + (frame.subtitle ? 18 : 0);
 }
 
 /** Squarified tiles. Labels truncate to the tile. Leaves in a group share a series color, in lighter and darker tints. */
@@ -51,7 +56,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
     });
   });
   if (!leaves.length) return null;
-  const top = frame.title ? 40 : 12;
+  const top = plotTop(frame);
   const legend = frame.legend !== false && (Boolean(ramp) || colors.size > 1);
   const legendH = ramp && frame.legend !== false ? colorLegendHeight : legend ? 28 : 12;
   const grouped = [...groupLeaves(leaves)].map(([name, kids]) => ({
@@ -103,7 +108,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
 function tint(base: string, index: number, count: number): string {
   if (count <= 1) return base;
   const amount = 62 + Math.round((index / (count - 1)) * 30);
-  return `color-mix(in srgb, ${base} ${amount}%, light-dark(#ffffff, #1c1c1e))`;
+  return `color-mix(in srgb, ${base} ${amount}%, light-dark(#ffffff, #f5f5f7))`;
 }
 
 function groupLeaves(leaves: Leaf[]): Map<string, Leaf[]> {
@@ -198,7 +203,7 @@ function renderLevels(spec: Record<string, unknown>): string | null | undefined 
   if (!branches.length) return null;
   const total = branches.reduce((sum, node) => sum + node.value, 0);
   const legend = frame.legend !== false && branches.length > 1;
-  const top = frame.title ? 40 : 12;
+  const top = plotTop(frame);
   const legendH = legend ? 28 : 12;
   const shown = valueFormat(frame, spec, frame.encoding.y);
   const colors = branches.map((_, index) => fill(frame, index));
@@ -209,11 +214,13 @@ function renderLevels(spec: Record<string, unknown>): string | null | undefined 
     const y = y0 + gap;
     const w = Math.max(1, w0 - gap * 2);
     const h = Math.max(1, h0 - gap * 2);
-    const paint = siblingFill(color, depth, sibling, siblings);
+    const tone = siblingFill(color, depth, sibling, siblings);
+    const grouped = node.children.length > 0 && w >= 28 && h >= 22;
+    const paint = grouped ? headerFill(tone) : tone;
     const label = tip(node, parent, total, frame.locale, shown);
     const index = ordinal;
     ordinal += 1;
-    if (!node.children.length || w < 28 || h < 22) {
+    if (!grouped) {
       parts.push(openMark("rect", "tile", label, `x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="4" fill="${paint}"${edge(frame)}`, branch, index));
       parts.push("</rect>");
       const name = fit(node.name, w - 12, 12);

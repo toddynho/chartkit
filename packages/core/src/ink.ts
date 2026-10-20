@@ -19,7 +19,57 @@ export function siblingFill(base: string, depth: number, index: number, count: n
   const depthMix = Math.max(48, 78 - (depth - 1) * 12);
   const shift = count <= 1 ? 0 : Math.round((index - (count - 1) / 2) * (18 / Math.max(1, count - 1)));
   const mix = Math.min(88, Math.max(46, depthMix + shift));
-  return `color-mix(in srgb, ${base} ${mix}%, light-dark(#ffffff, #1c1c1e))`;
+  return `color-mix(in srgb, ${base} ${mix}%, ${LEAF_MIX})`;
+}
+
+/**
+ * Group header. Light scheme keeps the branch colour. Dark scheme deepens it
+ * so a light ink clears 4.5:1 on saturated blues and purples.
+ */
+export function headerFill(base: string): string {
+  return `light-dark(${base}, color-mix(in srgb, ${base} 62%, #000000))`;
+}
+
+/**
+ * One ink for every fill in a ring, when a single choice clears 4.5:1 on all
+ * of them. Null means the ring has to fall back to a per-segment ink.
+ */
+export function sharedInk(fills: string[]): string | null {
+  if (fills.length === 0) return null;
+  const pairs = [];
+  for (const fill of fills) {
+    const pair = resolve(fill);
+    if (!pair) return null;
+    pairs.push(pair);
+  }
+  const light = sharedChoice(pairs.map((pair) => pair.light));
+  const dark = sharedChoice(pairs.map((pair) => pair.dark));
+  if (!light || !dark) return null;
+  return light === dark ? light : `light-dark(${light}, ${dark})`;
+}
+
+/** Leaf mix. Both schemes lighten, so a dark page does not turn siblings muddy. */
+const LEAF_MIX = "light-dark(#ffffff, #f5f5f7)";
+
+function sharedChoice(backgrounds: RGB[]): string | null {
+  let best: string | null = null;
+  let bestMin = 0;
+  for (const [hex, rgb] of INKS) {
+    let min = Infinity;
+    for (const bg of backgrounds) {
+      const value = ratio(rgb, bg);
+      if (value < 4.5) {
+        min = 0;
+        break;
+      }
+      if (value < min) min = value;
+    }
+    if (min >= 4.5 && min > bestMin) {
+      best = hex;
+      bestMin = min;
+    }
+  }
+  return best;
 }
 
 /**
@@ -37,9 +87,15 @@ export function labelInk(fill: string): string {
 
 /** Lower of the light-scheme and dark-scheme contrast ratios for labelInk(fill). */
 export function labelContrast(fill: string): number {
+  return inkContrast(labelInk(fill), fill);
+}
+
+/** Lower of the two scheme contrast ratios for an ink already chosen against a fill. */
+export function inkContrast(ink: string, fill: string): number {
   const pair = resolve(fill);
-  if (!pair) return 1;
-  return Math.min(ratio(inkRgb(choose(pair.light)), pair.light), ratio(inkRgb(choose(pair.dark)), pair.dark));
+  const chosen = resolve(ink);
+  if (!pair || !chosen) return 1;
+  return Math.min(ratio(chosen.light, pair.light), ratio(chosen.dark, pair.dark));
 }
 
 function choose(bg: RGB): string {

@@ -41,6 +41,17 @@ function withDomain(encoding: Record<string, unknown>): Record<string, unknown> 
   };
 }
 
+function horizontalGrids(svg: string): string[] {
+  return [...svg.matchAll(/<line ([^>]*?)\/>/g)]
+    .map((match) => match[1] ?? "")
+    .filter((attrs) => {
+      if (attrs.includes("data-ck-") || !attrs.includes("--ck-grid")) return false;
+      const y1 = attrs.match(/y1="([^"]+)"/)?.[1];
+      const y2 = attrs.match(/y2="([^"]+)"/)?.[1];
+      return Boolean(y1 && y1 === y2);
+    });
+}
+
 describe("shared cartesian chrome", () => {
   const cases: Array<[string, Record<string, unknown>]> = [
     ["line", xy("line", withDomain({ x: "month", y: "value" }))],
@@ -66,6 +77,18 @@ describe("shared cartesian chrome", () => {
       expect(svg).toContain(text);
     }
     expect(svg).toMatch(/>42</);
+  });
+
+  it("draws a gridline and a label for every explicit tick, including 42", () => {
+    const spec = xy("bar-range", {
+      encoding: { x: "month", low: "low", high: { field: "high", scale: { domain: [0, 80] } } },
+      title: "Span",
+      subtitle: "Scale",
+      axes: { x: { title: "Bed" }, y: { title: "Centimetres", ticks: [0, 20, 42, 60, 80] } },
+    });
+    const svg = render(spec) ?? "";
+    for (const tick of ["0", "20", "42", "60", "80"]) expect(svg).toContain(`>${tick}<`);
+    expect(horizontalGrids(svg).length).toBe(5);
   });
 
   it("emits mark.glow on a combo line", () => {
@@ -108,6 +131,49 @@ describe("shared cartesian chrome", () => {
     });
     expect(calendar).toContain("Door scans");
     expect(calendar).toContain("Twelve weeks");
+    const may = render({
+      version: "1",
+      type: "heatmap",
+      title: "Door scans",
+      subtitle: "Four weeks in May",
+      data: Array.from({ length: 28 }, (_, i) => ({ day: `2026-05-${String(i + 1).padStart(2, "0")}`, scans: i })),
+      encoding: { x: { field: "day", type: "temporal" }, color: "scans" },
+      mark: { layout: "calendar", weeks: 5 },
+      a11y: { alt: "Scans across May." },
+      size: { width: 480, height: 220 },
+    }) ?? "";
+    const texts = [...may.matchAll(/<text x="([^"]+)" y="([^"]+)"[^>]*>([^<]*)<\/text>/g)];
+    const months = texts.filter((match) => /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$/.test(match[3] ?? ""));
+    expect(new Set(months.map((match) => match[1])).size).toBe(months.length);
+    const subtitle = texts.find((match) => match[3] === "Four weeks in May");
+    expect(subtitle).toBeTruthy();
+    for (const month of months) expect(Number(month[2])).toBeGreaterThan(Number(subtitle?.[2]) + 8);
+  });
+
+  it("keeps a trendline label clear of the series end", () => {
+    const spec = xy("area-range", {
+      title: "Pell forecast",
+      subtitle: "Band and a fitted line",
+      encoding: { x: "month", y: [{ lo: "lo", hi: "hi" }, { field: "value" }] },
+      axes: { x: { title: "Month" }, y: { title: "Visitors" } },
+      annotations: [{ type: "trendline", method: "linear", label: "Fit" }],
+    });
+    const svg = render(spec) ?? "";
+    const points = svg.match(/data-ck-annotation="trendline"[^>]*points="([^"]+)"/)?.[1] ?? "";
+    const last = points.trim().split(/\s+/).at(-1)?.split(",") ?? [];
+    const label = svg.match(/data-ck-annotation="trendline" x="([^"]+)" y="([^"]+)" text-anchor="([^"]+)"/);
+    expect(last.length).toBe(2);
+    expect(label).toBeTruthy();
+    const x = Number(last[0]);
+    const y = Number(last[1]);
+    const lx = Number(label?.[1]);
+    const ly = Number(label?.[2]);
+    const anchor = label?.[3];
+    const width = "Fit".length * 6.3;
+    const left = anchor === "end" ? lx - width : lx;
+    const right = left + width;
+    const overlaps = right > x - 4 && left < x + 4 && ly > y - 8 && ly < y + 8;
+    expect(overlaps).toBe(false);
   });
 
   it("shifts a threshold point off the line colour and lists the token", () => {

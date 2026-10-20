@@ -61,10 +61,20 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
     box.height += head;
     box.legendY += head;
   }
+  // Subtitle baseline is 40. Keep the month band under that, and the cells under the band.
+  const monthFloor = frame.subtitle ? (frame.title ? 54 : 32) : frame.title ? 36 : 11;
+  const monthDrop = Math.max(0, monthFloor - (box.oy + 11));
+  if (monthDrop) {
+    box.oy += monthDrop;
+    box.height += monthDrop;
+    box.legendY += monthDrop;
+  }
+  const monthY = box.oy + 11;
   const radius = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : Math.min(frame.geometry.cornerRadius, 4);
 
   const months: { label: string; x: number }[] = [];
   let lastMonth = -1;
+  const usedColumn = new Set<number>();
   const cells: string[] = [];
   for (let week = 0; week < weeks; week++) {
     for (let dow = 0; dow < 7; dow++) {
@@ -73,10 +83,17 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
       const date = new Date(time);
       if (date.getUTCMonth() !== lastMonth) {
         lastMonth = date.getUTCMonth();
-        months.push({
-          label: new Intl.DateTimeFormat(frame.locale, { month: "short", timeZone: "UTC" }).format(date),
-          x: box.ox + DAY_LABEL_W + week * box.pitchX,
-        });
+        // A month that starts mid-week shares that column with the month
+        // already labelled at the Sunday. Put it on the next free column.
+        let column = usedColumn.has(week) ? week + 1 : week;
+        const label = new Intl.DateTimeFormat(frame.locale, { month: "short", timeZone: "UTC" }).format(date);
+        const x = box.ox + DAY_LABEL_W + column * box.pitchX;
+        const prev = months[months.length - 1];
+        const crowded = prev ? x < prev.x + prev.label.length * 5.8 + 6 : false;
+        if (column < weeks && !usedColumn.has(column) && !crowded) {
+          usedColumn.add(column);
+          months.push({ label, x });
+        }
       }
       const value = byDay.get(time) ?? 0;
       const x = box.ox + DAY_LABEL_W + week * box.pitchX;
@@ -100,7 +117,7 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
   const titled = heading(frame, box.ox + DAY_LABEL_W);
   if (titled) parts.push(titled);
   for (const month of months) {
-    parts.push(text(month.x, box.oy + 11, month.label, cssVar("muted", frame.preset.muted), 10));
+    parts.push(text(month.x, monthY, month.label, cssVar("muted", frame.preset.muted), 10));
   }
   for (const dow of [1, 3, 5]) {
     parts.push(text(box.ox, box.oy + MONTH_LABEL_H + dow * box.pitchY + box.cellH / 2 + 3, WEEKDAYS[dow], cssVar("muted", frame.preset.muted), 10));

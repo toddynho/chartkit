@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { line } from "../charts/line";
 import { render } from "../extra";
-import { labelContrast, labelInk } from "../ink";
+import { headerFill, inkContrast, labelContrast, labelInk, sharedInk } from "../ink";
 import { createRenderer } from "../render";
 import { repair, validate } from "../validate";
 
@@ -202,9 +202,19 @@ describe("hierarchy", () => {
       for (const svg of [tree, sun]) {
         for (const mark of ["tile", "group", "arc"]) {
           for (const [fill, ink] of labeled(svg, mark)) {
-            expect(ink, `${theme} ${mark}`).toBe(labelInk(fill));
+            if (mark !== "arc") expect(ink, `${theme} ${mark}`).toBe(labelInk(fill));
             expect(labelContrast(fill), `${theme} ${mark} ${fill}`).toBeGreaterThanOrEqual(4.5);
+            expect(inkContrast(ink, fill), `${theme} ${mark} ${ink} on ${fill}`).toBeGreaterThanOrEqual(4.5);
           }
+        if (mark === "arc") {
+          const byDepth = new Map<string, Set<string>>();
+          for (const match of svg.matchAll(/<text[^>]*fill="([^"]+)"[^>]*data-ck-depth="(\d+)"/g)) {
+            const set = byDepth.get(match[2] ?? "") ?? new Set<string>();
+            set.add(match[1] ?? "");
+            byDepth.set(match[2] ?? "", set);
+          }
+          for (const [depth, inks] of byDepth) expect(inks.size, `${theme} ring ${depth}`).toBe(1);
+        }
         }
         expect(svg, theme).not.toContain('fill="#fff"');
       }
@@ -216,6 +226,13 @@ describe("hierarchy", () => {
     expect(tight).not.toContain(">$25<");
     expect(labelInk("#ff9500")).toBe("#1d1d1f");
     expect(labelContrast("color-mix(in srgb, #34c759 70%, #ffffff)")).toBeGreaterThanOrEqual(4.5);
+    expect(labelContrast(headerFill("#3b82f6"))).toBeGreaterThanOrEqual(4.5);
+    expect(labelInk(headerFill("#3b82f6"))).toBe("light-dark(#1d1d1f, #f5f5f7)");
+    const leaf = render({ ...wide, theme: "midnight" }) ?? "";
+    expect(leaf).toContain("light-dark(#ffffff, #f5f5f7)");
+    expect(leaf).not.toContain("#1c1c1e");
+    expect(sharedInk(["#22c55e", "#3b82f6", "#a855f7"])).toBe("#000000");
+    expect(sharedInk(["#111111", "#f5f5f7"])).toBeNull();
   });
 
   it("still repairs a legacy treemap parent onto color when there is no id", () => {
