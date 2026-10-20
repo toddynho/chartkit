@@ -6,7 +6,7 @@ Top/right/bottom/left/inside placement
 
 Matrix status: `native`. Verification: `dts-path` (strong).
 
-top, right, bottom, left, and inside. A funnel draws it when legend is set.
+top, right, bottom, left, and inside.
 
 Source: chartkit:packages/core/src/generated/schema.ts:173
 
@@ -70,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~position | dts-grep (weak) | @antv/g2/lib/index.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 8f00db13813e.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against f0e644ec234d.
 
 https://chartkit.dev/features.json

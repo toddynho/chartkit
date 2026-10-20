@@ -76,6 +76,76 @@ export type ChartKitChartSpecV1 = {
    * BCP 47 locale for number/date formatting. Default: the host's locale.
    */
   locale?: string;
+  /**
+   * IANA time zone for temporal axes, ticks, and tooltips. Omitted means UTC, so a server render and the client label the same instant the same way.
+   */
+  timezone?: string;
+  /**
+   * Sort rows before drawing. field sorts by that column. by value sorts categories by the first y field. order is ascending (default) or descending.
+   */
+  sort?: {
+    /**
+     * Field to sort by.
+     */
+    field?: string;
+    /**
+     * Sort by the first y value. Used for bars.
+     */
+    by?: "value";
+    /**
+     * Sort direction. Default ascending.
+     */
+    order?: "ascending" | "descending";
+  };
+  /**
+   * Row steps applied before sort: filter, a rolling window, or an aggregate.
+   */
+  transform?: {
+    /**
+     * filter keeps matching rows. window adds a rolling column. aggregate groups rows.
+     */
+    type?: "filter" | "window" | "aggregate";
+    /**
+     * Source field. Required for filter and window, and for sum or mean.
+     */
+    field?: string;
+    /**
+     * filter: keep rows whose field equals this.
+     */
+    eq?: string | number | boolean | null;
+    /**
+     * filter: keep rows greater than this.
+     */
+    gt?: number;
+    /**
+     * filter: keep rows greater than or equal to this.
+     */
+    gte?: number;
+    /**
+     * filter: keep rows less than this.
+     */
+    lt?: number;
+    /**
+     * filter: keep rows less than or equal to this.
+     */
+    lte?: number;
+    /**
+     * window: number of rows in the rolling window, including the current row.
+     */
+    size?: number;
+    /**
+     * window defaults to mean. aggregate is sum, mean, or count.
+     */
+    op?: "mean" | "sum" | "count";
+    /**
+     * Output field name. window requires it. aggregate defaults to the source field, or count.
+     */
+    as?: string;
+    /**
+     * aggregate: field to group by.
+     */
+    group?: string;
+  }[];
   a11y: A11Y;
 };
 /**

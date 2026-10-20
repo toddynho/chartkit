@@ -119,6 +119,9 @@ export function optionsIn(spec: unknown): OptionLink[] {
   else if (typeof mark.labelPosition === "string") add(ids, "label.position");
   if (typeof spec.theme === "string") add(ids, "theme.presets");
   if (typeof spec.locale === "string") add(ids, "format.locale");
+  if (typeof spec.timezone === "string") add(ids, "data.timezone");
+  if (isRecord(spec.sort)) add(ids, "data.sort");
+  if (Array.isArray(spec.transform)) add(ids, "data.transform");
   if (mark.stack === "percent") add(ids, "type.area.percent");
   if (isRecord(spec.legend)) {
     if (spec.legend.values === true) add(ids, "legend.values");

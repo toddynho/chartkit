@@ -163,6 +163,31 @@ describe("vanilla mount", () => {
     host.remove();
   });
 
+  it("appends rows in place and keeps a sliding window", () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    const chart = mount(host, lineSpec, { render: createRenderer([line]) });
+    const svg = host.querySelector("svg");
+    expect(svg?.getAttribute("data-ck-type")).toBe("line");
+    const ticks = () => [...host.querySelectorAll("text")].map((node) => node.textContent);
+    chart.append([{ quarter: "Q3", units: 70 }]);
+    expect(host.querySelector("svg")).toBe(svg);
+    expect(ticks()).toContain("Q3");
+    chart.append(
+      [
+        { quarter: "Q4", units: 30 },
+        { quarter: "Q5", units: 80 },
+      ],
+      { window: 2 },
+    );
+    expect(host.querySelector("svg")).toBe(svg);
+    expect(ticks()).toEqual(expect.arrayContaining(["Q4", "Q5"]));
+    expect(ticks()).not.toContain("Q1");
+    expect(ticks()).not.toContain("Q3");
+    chart.destroy();
+    host.remove();
+  });
+
   it("renderToString matches core for line, combo, and heatmap", () => {
     for (const spec of [lineSpec, comboSpec, heatmapSpec]) {
       expect(renderToString(spec)).toBe(coreSvg(spec));
