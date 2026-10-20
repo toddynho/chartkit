@@ -1,0 +1,13 @@
+{
+  "version": "1",
+  "type": "bar-range",
+  "title": "Temperature",
+  "data": [
+    { "month": "Jan", "min": -2, "max": 6 },
+    { "month": "Apr", "min": 6, "max": 17 },
+    { "month": "Jul", "min": 17, "max": 29 },
+    { "month": "Oct", "min": 7, "max": 18 }
+  ],
+  "encoding": { "x": "month", "low": "min", "high": "max" },
+  "a11y": { "alt": "July is the warmest month, from 17 to 29." }
+}

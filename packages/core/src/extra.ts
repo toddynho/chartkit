@@ -14,17 +14,20 @@ import { timeline } from "./charts/timeline";
 import { quadrant } from "./charts/quadrant";
 import { venn } from "./charts/venn";
 import { journey } from "./charts/journey";
+import { areaRange } from "./charts/area-range";
+import { barRange } from "./charts/bar-range";
+import { errorbar } from "./charts/errorbar";
 
 /** Phase 3 and phase 4 charts. Importing this module registers them on the shared registry. */
-export const charts = [histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey] as const;
+export const charts = [histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, areaRange, barRange, errorbar] as const;
 
 register(...charts);
 
 /**
- * Core charts plus histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, and journey.
+ * Core charts plus histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, area-range, bar-range, and errorbar.
  * `@chartkitdev/core/all` does not include these, so the line and all bundles stay smaller.
  */
 export const render = createRenderer([...base, ...charts]);
 
 export { attach };
-export { histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey };
+export { histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, areaRange, barRange, errorbar };

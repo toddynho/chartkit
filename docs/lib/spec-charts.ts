@@ -151,6 +151,66 @@ export const specPages: Record<string, SpecPage> = {
   "a11y": { "alt": "Revenue is past its target." }
 }`,
   },
+  "area-range": {
+    title: "Range area",
+    summary: "A band between low and high, with an optional centre line.",
+    fields: [
+      "type is area-range.",
+      "encoding.low and encoding.high name the band. A y list of { lo, hi, title } draws several bands.",
+      "encoding.y is the centre line. mark.line false draws the band only.",
+      "A rule annotation can mark today. Null low and high values break the band.",
+      "On a combo, a y item with mark range and lo/hi paints the band under the other series.",
+      "arearange repairs to area-range. low and high on a y series repair to lo and hi.",
+    ],
+    example: `{
+  "version": "1",
+  "type": "area-range",
+  "data": [
+    { "month": "Jan", "revenue": 40, "lo": 36, "hi": 48 },
+    { "month": "Feb", "revenue": 55, "lo": 46, "hi": 66 }
+  ],
+  "encoding": { "x": "month", "y": "revenue", "low": "lo", "high": "hi" },
+  "a11y": { "alt": "Revenue is forecast inside a widening band." }
+}`,
+  },
+  "bar-range": {
+    title: "Range bar",
+    summary: "A floating bar from a low value to a high value.",
+    fields: [
+      "type is bar-range.",
+      "encoding.x is the category. encoding.low and encoding.high are the ends.",
+      "The bar does not start at zero.",
+      "columnrange and floating-bar repair to bar-range.",
+    ],
+    example: `{
+  "version": "1",
+  "type": "bar-range",
+  "data": [
+    { "month": "Jan", "min": -2, "max": 6 },
+    { "month": "Jul", "min": 17, "max": 29 }
+  ],
+  "encoding": { "x": "month", "low": "min", "high": "max" },
+  "a11y": { "alt": "July ranges from 17 to 29." }
+}`,
+  },
+  errorbar: {
+    title: "Error bar",
+    summary: "Whiskers on a point or a bar, from a low and high or a ± field.",
+    fields: [
+      "type is errorbar.",
+      "encoding.y is the centre. encoding.low and encoding.high are the whisker ends.",
+      "encoding.error is a ± half-width around y. low and high override it.",
+      "mark.error is point or bar. point is the default.",
+      "errorbars repairs to errorbar.",
+    ],
+    example: `{
+  "version": "1",
+  "type": "errorbar",
+  "data": [{ "assay": "Glucose", "mean": 5.2, "lo": 4.9, "hi": 5.5 }],
+  "encoding": { "x": "assay", "y": "mean", "low": "lo", "high": "hi" },
+  "a11y": { "alt": "Glucose is 5.2, from 4.9 to 5.5." }
+}`,
+  },
   waterfall: {
     title: "Waterfall",
     summary: "Deltas float from a running total. A flagged row is an absolute total.",

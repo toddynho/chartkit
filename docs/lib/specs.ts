@@ -20,6 +20,7 @@ export interface Spec {
   theme?: string;
   locale?: string;
   subtitle?: string;
+  annotations?: unknown;
 }
 
 export interface Example {
@@ -256,6 +257,31 @@ export const chartTypes: ChartTypeDoc[] = [
     title: "Waterfall",
     summary: "Signed steps between totals.",
     notes: ["encoding.x is the step and encoding.y is the amount.", "A row with total: true is a full bar, not a delta."],
+  },
+  {
+    type: "area-range",
+    title: "Range area",
+    summary: "A band between a low and a high, with an optional centre line.",
+    notes: [
+      "encoding.low and encoding.high, or y.lo and y.hi, name the band. Several bands are a y list.",
+      "encoding.y is the centre line. mark.line false draws the band only.",
+      "A combo series with mark range paints the same band under the other series.",
+    ],
+  },
+  {
+    type: "bar-range",
+    title: "Range bar",
+    summary: "A floating bar from a low value to a high value.",
+    notes: ["encoding.low and encoding.high are the ends. y is not required.", "The bar does not start at zero."],
+  },
+  {
+    type: "errorbar",
+    title: "Error bar",
+    summary: "Whiskers on a point or a bar.",
+    notes: [
+      "encoding.low and encoding.high, or encoding.error as ± around y.",
+      "mark.error is point or bar. point is the default.",
+    ],
   },
   {
     type: "gantt",
@@ -928,6 +954,64 @@ export const examples: Example[] = [
       encoding: { x: "step", y: "amount" },
       size: { width: 560, height: 280 },
       a11y: { alt: "The close is 160." },
+    },
+  },
+  {
+    slug: "revenue-forecast",
+    title: "Revenue forecast",
+    group: "Flow",
+    type: "area-range",
+    blurb: "A centre line and a band that starts after today.",
+    spec: {
+      version: "1",
+      id: "revenue-forecast",
+      type: "area-range",
+      title: "Revenue forecast",
+      data: [
+        { month: "Jan", revenue: 40, lo: null, hi: null },
+        { month: "Feb", revenue: 55, lo: 46, hi: 66 },
+      ],
+      encoding: { x: "month", y: "revenue", low: "lo", high: "hi" },
+      annotations: [{ type: "rule", axis: "x", value: "Feb", label: "today" }],
+      size: { width: 640, height: 320 },
+      a11y: { alt: "Revenue is forecast inside a widening band." },
+    },
+  },
+  {
+    slug: "temperature-range",
+    title: "Monthly temperature",
+    group: "Flow",
+    type: "bar-range",
+    blurb: "Each month floats from its low to its high.",
+    spec: {
+      version: "1",
+      id: "temperature-range",
+      type: "bar-range",
+      title: "Temperature",
+      data: [
+        { month: "Jan", min: -2, max: 6 },
+        { month: "Jul", min: 17, max: 29 },
+      ],
+      encoding: { x: "month", low: "min", high: "max" },
+      size: { width: 560, height: 280 },
+      a11y: { alt: "July ranges from 17 to 29." },
+    },
+  },
+  {
+    slug: "lab-error-bars",
+    title: "Lab measurements",
+    group: "Flow",
+    type: "errorbar",
+    blurb: "Each assay is a point with a whisker.",
+    spec: {
+      version: "1",
+      id: "lab-error-bars",
+      type: "errorbar",
+      title: "Lab measurements",
+      data: [{ assay: "Glucose", mean: 5.2, lo: 4.9, hi: 5.5 }],
+      encoding: { x: "assay", y: "mean", low: "lo", high: "hi" },
+      size: { width: 560, height: 280 },
+      a11y: { alt: "Glucose is 5.2, from 4.9 to 5.5." },
     },
   },
   {

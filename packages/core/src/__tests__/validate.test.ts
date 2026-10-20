@@ -53,6 +53,9 @@ const CHART_TYPES = [
   "sankey",
   "bullet",
   "waterfall",
+  "area-range",
+  "bar-range",
+  "errorbar",
 ];
 
 const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);

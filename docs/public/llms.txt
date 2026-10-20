@@ -10,7 +10,7 @@
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec. Export: toPNG, toSVG, toCSV. PNG skips cross-origin sheets and remote images.
 
 Features (21 libraries, sourced): https://chartkit.dev/features.json
-Types: line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi, sparkline, mini-area, progress-ring, spike, candlestick, histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey
+Types: line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi, sparkline, mini-area, progress-ring, spike, candlestick, histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, area-range, bar-range, errorbar
 
 ```json
 {"version":"1","type":"line","data":[{"quarter":"Q1","units":40},{"quarter":"Q2","units":55}],"encoding":{"x":"quarter","y":"units"},"a11y":{"alt":"Units rose in Q2."}}
@@ -102,6 +102,18 @@ Types: line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi,
 
 ```json
 {"version":"1","type":"waterfall","data":[{"step":"Open","amount":120,"total":true},{"step":"Won","amount":40},{"step":"Close","amount":160,"total":true}],"encoding":{"x":"step","y":"amount"},"a11y":{"alt":"The close is 160."}}
+```
+
+```json
+{"version":"1","type":"area-range","data":[{"month":"Jan","y":40,"lo":36,"hi":48},{"month":"Feb","y":55,"lo":46,"hi":66}],"encoding":{"x":"month","y":"y","low":"lo","high":"hi"},"a11y":{"alt":"The band widens."}}
+```
+
+```json
+{"version":"1","type":"bar-range","data":[{"month":"Jan","min":-2,"max":6},{"month":"Jul","min":17,"max":29}],"encoding":{"x":"month","low":"min","high":"max"},"a11y":{"alt":"July is 17 to 29."}}
+```
+
+```json
+{"version":"1","type":"errorbar","data":[{"assay":"A","mean":5.2,"lo":4.9,"hi":5.5}],"encoding":{"x":"assay","y":"mean","low":"lo","high":"hi"},"a11y":{"alt":"A reads 5.2."}}
 ```
 
 ```json

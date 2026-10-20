@@ -32,6 +32,12 @@ export function load(type: string): Promise<ChartRenderer | undefined> {
       return import("./charts/venn").then((mod) => mod.venn);
     case "journey":
       return import("./charts/journey").then((mod) => mod.journey);
+    case "area-range":
+      return import("./charts/area-range").then((mod) => mod.areaRange);
+    case "bar-range":
+      return import("./charts/bar-range").then((mod) => mod.barRange);
+    case "errorbar":
+      return import("./charts/errorbar").then((mod) => mod.errorbar);
     default:
       return Promise.resolve(undefined);
   }

@@ -51,6 +51,19 @@ interface AxisHooks {
 
 let hooks: AxisHooks | null = null;
 let totalHook: TotalHook | null = null;
+let rangePainter: ((series: Series, index: number, xAt: (index: number) => number, yAt: (value: number) => number) => string) | null = null;
+let rangePrepare:
+  | ((table: DataTable, encoding: Record<string, unknown>, series: Series[], labels: string[]) => { series: Series[]; labels: string[] } | null)
+  | null = null;
+
+/** Combo mounts this. Line does not, so a lo/hi band stays out of createRenderer([line]). */
+export function mountRange(
+  painter: (series: Series, index: number, xAt: (index: number) => number, yAt: (value: number) => number) => string,
+  prepare: (table: DataTable, encoding: Record<string, unknown>, series: Series[], labels: string[]) => { series: Series[]; labels: string[] } | null,
+): void {
+  rangePainter = painter;
+  rangePrepare = prepare;
+}
 
 export type TotalHook = (
   model: PlotModel,
@@ -140,7 +153,12 @@ export function renderMiniArea(spec: Record<string, unknown>): string | null {
 }
 
 export function renderCombo(spec: Record<string, unknown>): string | null {
-  return renderTyped(spec, "combo", drawCombo);
+  return renderTyped(
+    spec,
+    "combo",
+    drawCombo,
+    rangePrepare ? (table, encoding, _channels, _preset, series, labels) => rangePrepare?.(table, encoding, series, labels) ?? null : undefined,
+  );
 }
 
 export interface Series {
@@ -150,7 +168,9 @@ export interface Series {
   /** One fill per bar when encoding.color names the x field. */
   colors?: string[];
   axis: "y" | "y2";
-  mark: "line" | "bar" | "area";
+  mark: "line" | "bar" | "area" | "range";
+  /** Low and high of a combo range band. The line entry never fills this. */
+  span?: { lo: ArrayLike<number | null>; hi: ArrayLike<number | null> };
   dash: string;
   area: boolean;
   shape?: string;
@@ -651,7 +671,7 @@ function drawBars(
   return out.join("");
 }
 
-/** Combo paints each series in order so a line can sit between bars. */
+/** Range bands paint first, so a band sits under a line even when the series is listed later. */
 function drawCombo(
   model: PlotModel,
   xScale: XScale,
@@ -667,8 +687,16 @@ function drawCombo(
   const barSeries = model.series.filter((series) => series.mark === "bar");
   const plotWidth = Math.max(1, plot.right - plot.left);
   const shared = sharedSample(model, layers, plotWidth);
+  if (rangePainter) {
+    model.series.forEach((series, index) => {
+      if (series.mark !== "range") return;
+      const scale = series.axis === "y2" ? y2Scale : yScale;
+      out.push(rangePainter?.(series, index, (i) => xScale.center(i), scale) ?? "");
+    });
+  }
   model.series.forEach((series, index) => {
     const scale = series.axis === "y2" ? y2Scale : yScale;
+    if (series.mark === "range") return;
     if (series.mark === "bar") {
       const barIndex = model.series.slice(0, index).filter((item) => item.mark === "bar").length;
       out.push(bars(model, series, index, barSeries.length, layers, xScale, scale, plot, horizontal, barIndex, labs));
@@ -2041,7 +2069,7 @@ function pairSegments(top: (Pt | null)[], bottom: (Pt | null)[], connect: boolea
   return pairs;
 }
 
-function seriesMark(type: string, mark: unknown, area: boolean): "line" | "bar" | "area" {
+function seriesMark(type: string, mark: unknown, area: boolean): "line" | "bar" | "area" | "range" {
   if (type === "bar") return "bar";
   if (type === "stacked-area" || type === "mini-area") return "area";
   if (mark === "bar" || mark === "line" || mark === "area") return mark;

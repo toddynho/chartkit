@@ -54,7 +54,7 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
 - `legend.position` is `top`, `right`, `bottom`, `left`, or `inside` (`anchor` places an inside legend). `align`, `orient`, `maxRows` (later rows page), `title`, `symbol`, `symbols`, and `hide` (omit from the legend, still draw the series) apply when set. The default top legend is unchanged.
 - `encoding.color.scale.type` may be `sequential`, `diverging` (`midpoint`), `quantize` (`bins`), or `threshold` (`thresholds`). `scheme` is `blue`, `teal`, `orange`, or `violet` (colour-blind-safe; midnight uses a brighter ramp of the same name). A `range` of two or more colours replaces the scheme. These types are not valid on x or y. Heatmap and calendar use the sequential ramp for a numeric colour with no constant; a constant keeps the opacity ramp. Bar, combo, scatter, and treemap paint a ramp when `encoding.color.scale` is set. Line, area, and sparkline keep their series colours, so `createRenderer([line])` carries legend layout and not the ramp. A missing heatmap cell is a hatched card, not the low stop. Each named scheme's low stop stays at least 3:1 against the Soft card (`#f5f5f7`) and the midnight card (`#0c0c0c`).
 - A heatmap with `encoding.x`, `encoding.y`, and `encoding.color` is a grid. A calendar heatmap is a date `x` plus `color`, or `mark.layout: "calendar"`.
-- Histogram bins `encoding.x` (`mark.bins` default 8, `mark.binWidth`, or `mark.bin` of count, width, sturges, sqrt, or fd). `encoding.y` is a pre-binned count. Boxplot uses `encoding.x` and observation `encoding.y`. Radar uses `encoding.x` and one or more `encoding.y` fields. Funnel uses `encoding.x` (stage) and `encoding.y`. `mark.shape` is `"bar"` (centered rounded bars, the default) or `"trapezoid"`. Treemap uses `encoding.x`, `encoding.y`, and optional `encoding.color`. Leaves in a group use tints of that group's series color. Sankey uses `encoding.source`, `encoding.target`, and `encoding.y`. Bullet uses `encoding.x`, `encoding.y`, optional `encoding.target`, and `mark.ranges`. Waterfall uses `encoding.x` and delta `encoding.y`; `mark.total` names a field that marks an absolute total. These eight types render from `@chartkitdev/core/extra`, or from `@chartkitdev/core/charts/<type>` one at a time. Adapters load that chart module when `spec.type` needs it. Their SSR entry imports `@chartkitdev/core/extra` statically.
+- Histogram bins `encoding.x` (`mark.bins` default 8, `mark.binWidth`, or `mark.bin` of count, width, sturges, sqrt, or fd). `encoding.y` is a pre-binned count. Boxplot uses `encoding.x` and observation `encoding.y`. Radar uses `encoding.x` and one or more `encoding.y` fields. Funnel uses `encoding.x` (stage) and `encoding.y`. `mark.shape` is `"bar"` (centered rounded bars, the default) or `"trapezoid"`. Treemap uses `encoding.x`, `encoding.y`, and optional `encoding.color`. Leaves in a group use tints of that group's series color. Sankey uses `encoding.source`, `encoding.target`, and `encoding.y`. Bullet uses `encoding.x`, `encoding.y`, optional `encoding.target`, and `mark.ranges`. Waterfall uses `encoding.x` and delta `encoding.y`; `mark.total` names a field that marks an absolute total. These eight types render from `@chartkitdev/core/extra`. `area-range` draws a band between low and high, with an optional centre line (`mark.line: false` draws the band only). A combo y item with `mark: "range"` and `lo`/`hi` paints that band under the other series. `bar-range` draws a floating bar from low to high. `errorbar` draws whiskers on a point (`mark.error: "point"`) or a bar (`"bar"`), from low and high or from `encoding.error` as ± around y. `arearange`, `columnrange`, and `errorbars` repair to those types. They render from `@chartkitdev/core/extra` or `@chartkitdev/core/charts/<type>` one at a time, so `createRenderer([line])` does not include them. Adapters load that chart module when `spec.type` needs it. Their SSR entry imports `@chartkitdev/core/extra` statically.
 - Gantt, timeline, quadrant, venn, and journey use the same on-demand path. Mermaid for those five is `@chartkitdev/core/mermaid/phase4`, or `fromMermaidAsync` on the base entry. `validate()` accepts those five names and warns CK1011; `validateAsync()` loads the field rules. `validatePhase4()` and `repairPhase4()` from `@chartkitdev/core/validate/phase4` check them (CK1400–CK1412). Gantt takes start plus end or duration, status done/active/crit, dependencies, milestones, progress, and a today marker. Timeline takes events and period spans. Quadrant takes x/y in a domain (default 0..1) and `quadrants`: top-left, top-right, bottom-left, bottom-right. `subtitle` stays a subtitle. Venn takes 2 or 3 sets; two are area-proportional and three are approximate. Journey takes sections, steps, a 1–5 score, and actors.
 
 ## line
@@ -403,6 +403,48 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
   ],
   "encoding": { "x": "step", "y": "amount" },
   "a11y": { "alt": "The close is 160." }
+}
+```
+
+## area-range
+
+```json
+{
+  "version": "1",
+  "type": "area-range",
+  "data": [
+    { "month": "Jan", "revenue": 40, "lo": 36, "hi": 48 },
+    { "month": "Feb", "revenue": 55, "lo": 46, "hi": 66 }
+  ],
+  "encoding": { "x": "month", "y": "revenue", "low": "lo", "high": "hi" },
+  "a11y": { "alt": "Revenue is forecast inside a widening band." }
+}
+```
+
+## bar-range
+
+```json
+{
+  "version": "1",
+  "type": "bar-range",
+  "data": [
+    { "month": "Jan", "min": -2, "max": 6 },
+    { "month": "Jul", "min": 17, "max": 29 }
+  ],
+  "encoding": { "x": "month", "low": "min", "high": "max" },
+  "a11y": { "alt": "July ranges from 17 to 29." }
+}
+```
+
+## errorbar
+
+```json
+{
+  "version": "1",
+  "type": "errorbar",
+  "data": [{ "assay": "Glucose", "mean": 5.2, "lo": 4.9, "hi": 5.5 }],
+  "encoding": { "x": "assay", "y": "mean", "low": "lo", "high": "hi" },
+  "a11y": { "alt": "Glucose is 5.2, from 4.9 to 5.5." }
 }
 ```
 

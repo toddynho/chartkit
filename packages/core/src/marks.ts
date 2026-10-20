@@ -42,6 +42,8 @@ export const MARK_APPLIES: Record<string, readonly string[]> = {
   binWidth: ["histogram"],
   ranges: ["bullet"],
   total: ["waterfall"],
+  line: ["area-range"],
+  error: ["errorbar"],
 };
 
 /** Legacy component prop names → v1 spec paths, used by CK1002 hints. */

@@ -70,6 +70,9 @@ const CHART_TYPES = [
   "sankey",
   "bullet",
   "waterfall",
+  "area-range",
+  "bar-range",
+  "errorbar",
 ] as const;
 
 export function walkSchema(value: unknown, schema: JsonSchema, diagnostics: Diagnostic[]): void {
@@ -990,6 +993,9 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   if (value === "sankey-diagram") return { type: "sankey", kind: "rename" };
   if (value === "bullet-chart") return { type: "bullet", kind: "rename" };
   if (value === "waterfall-chart") return { type: "waterfall", kind: "rename" };
+  if (value === "arearange" || value === "area_range" || value === "range-area" || value === "rangearea") return { type: "area-range", kind: "rename" };
+  if (value === "columnrange" || value === "column-range" || value === "rangebar" || value === "range-bar" || value === "floating-bar") return { type: "bar-range", kind: "rename" };
+  if (value === "error-bar" || value === "error-bars" || value === "errorbars") return { type: "errorbar", kind: "rename" };
   return undefined;
 }
 
@@ -1520,6 +1526,21 @@ function emitUnknownProp(name: string, path: string, props: Record<string, JsonS
   const pointer = join(path, name);
   if (ctx.skipUnknown.has(pointer)) return;
   if (markMistake(name, path, pointer, value, ctx)) return;
+  if ((path === "/encoding/y" || /^\/encoding\/y\/\d+$/.test(path)) && (name === "low" || name === "high") && typeof value === "string") {
+    const dest = name === "low" ? "lo" : "hi";
+    emit(ctx, {
+      code: "CK3022",
+      severity: "error",
+      message: `${quote(name)} on a y series is ${quote(dest)}`,
+      path: pointer,
+      hint: `Use ${quote(dest)} for the ${name === "low" ? "lower" : "upper"} field of a band.`,
+      fix: [
+        { op: "remove", path: pointer },
+        { op: "add", path: join(path, dest), value },
+      ],
+    });
+    return;
+  }
   if (/^\/axes\/(x|y|y2)$/.test(path) && AXIS_RENAME[name]) {
     const dest = AXIS_RENAME[name];
     let next = value;
