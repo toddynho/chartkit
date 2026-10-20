@@ -18,17 +18,17 @@ Source: packages/core/src/generated/schema.ts:898
   "type": "pie",
   "data": [
     {
-      "wood": "Oak",
-      "boards": 8
+      "x": "Oak",
+      "y": 8
     },
     {
-      "wood": "Pine",
-      "boards": 5
+      "x": "Pine",
+      "y": 5
     }
   ],
   "encoding": {
-    "x": "wood",
-    "y": "boards"
+    "x": "x",
+    "y": "y"
   },
   "a11y": {
     "alt": "Oak is larger."
@@ -70,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~connector | dts-grep (weak) | @antv/g2/lib/index.d.ts:79 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 7fd168ebe9c0.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

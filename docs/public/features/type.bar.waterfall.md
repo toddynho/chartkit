@@ -18,26 +18,26 @@ Source: chartkit:packages/core/src/generated/schema.ts:24
   "type": "waterfall",
   "data": [
     {
-      "step": "Open",
-      "amount": 120,
+      "x": "Open",
+      "y": 120,
       "total": true
     },
     {
-      "step": "Won",
-      "amount": 40
+      "x": "Won",
+      "y": 40
     },
     {
-      "step": "Close",
-      "amount": 160,
+      "x": "Close",
+      "y": 160,
       "total": true
     }
   ],
   "encoding": {
-    "x": "step",
-    "y": "amount"
+    "x": "x",
+    "y": "y"
   },
   "a11y": {
-    "alt": "The close is 160."
+    "alt": "Close is 160."
   },
   "size": {
     "width": 640,
@@ -73,6 +73,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | manual | ~register | dts-mechanism (weak) | @antv/g2/lib/exports.d.ts:2 interval + y1 recipe |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 7fd168ebe9c0.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

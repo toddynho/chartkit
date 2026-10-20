@@ -16,24 +16,24 @@ Source: chartkit:packages/core/src/generated/schema.ts:24
   "type": "bullet",
   "data": [
     {
-      "name": "Revenue",
-      "value": 275,
-      "target": 250,
-      "good": 300
+      "x": "R",
+      "y": 275,
+      "t": 250,
+      "g": 300
     }
   ],
   "encoding": {
-    "x": "name",
-    "y": "value",
-    "target": "target"
+    "x": "x",
+    "y": "y",
+    "target": "t"
   },
   "mark": {
     "ranges": [
-      "good"
+      "g"
     ]
   },
   "a11y": {
-    "alt": "Revenue beats target."
+    "alt": "R beats target."
   },
   "size": {
     "width": 640,
@@ -69,6 +69,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | manual | ~register | dts-mechanism (weak) | @antv/g2/lib/exports.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 7fd168ebe9c0.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

@@ -19,22 +19,20 @@ Source: chartkit:packages/core/src/validate-phase4.ts:13
   "data": [
     {
       "id": "a",
-      "task": "Spec",
-      "section": "Plan",
+      "task": "A",
       "start": "2026-03-02",
-      "end": "2026-03-13",
-      "status": "done"
+      "end": "2026-03-13"
     },
     {
       "id": "b",
-      "task": "Ship",
+      "task": "B",
       "start": "2026-04-06",
       "milestone": true,
       "depends": "a"
     }
   ],
   "a11y": {
-    "alt": "Ship follows the spec."
+    "alt": "B follows A."
   },
   "size": {
     "width": 640,
@@ -70,6 +68,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.gantt | dts-path (strong) | mermaid/dist/config.type.d.ts:217 |
 | AntV G2 | manual | ~register | dts-mechanism (weak) | @antv/g2/lib/exports.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 7fd168ebe9c0.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json
