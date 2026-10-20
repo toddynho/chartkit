@@ -6,6 +6,7 @@ import { MARK_APPLIES } from "./marks";
 import { sortIssue } from "./sort";
 import { namedZone } from "./timezone";
 import { transformIssues } from "./transform";
+import { foreignHierarchy, readHierarchy } from "./hierarchy";
 import { nearest } from "./walker";
 
 const CHART_TYPES = new Set([
@@ -35,6 +36,7 @@ const CHART_TYPES = new Set([
   "area-range",
   "bar-range",
   "errorbar",
+  "sunburst",
 ]);
 
 const SVG_BUDGET = 5000;
@@ -67,6 +69,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   }
 
   checkTimezone(spec, diagnostics);
+  for (const item of foreignHierarchy(spec)) diagnostics.push(item);
   const dataSource = spec.data;
   if (dataSource === undefined) {
     if (known) warnDesign(spec, type, undefined, diagnostics);
@@ -122,12 +125,21 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   if (isRecord(spec.encoding)) checkEncoding(spec, spec.encoding, view, diagnostics);
   if (type === "candlestick") checkCandles(spec, view, diagnostics);
   if (type) checkUncertainty(spec, type, view, diagnostics);
+  checkHierarchy(spec, diagnostics);
   if (known) warnDesign(spec, type, view, diagnostics);
 }
 
 function flagged(diagnostics: Diagnostic[], item: Diagnostic): void {
   diagnostics.push(item);
   diagnostics.push({ ...item, severity: "warning", fix: undefined });
+}
+
+function checkHierarchy(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  const type = typeof spec.type === "string" ? spec.type : "";
+  if (type !== "treemap" && type !== "sunburst") return;
+  const read = readHierarchy(spec);
+  if (!read) return;
+  for (const item of read.issues) flagged(diagnostics, item);
 }
 
 function checkTimezone(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
@@ -209,6 +221,7 @@ function checkEncoding(
     if (!channel.field) continue;
     const resolved = resolveField(channel.field, table.fields);
     if (!resolved.match) {
+      if ((spec.type === "treemap" || spec.type === "sunburst") && readHierarchy(spec)) continue;
       const suggestion = resolved.caseMatch ?? resolved.closest;
       const hintParts = [`available fields: ${table.fields.join(", ") || "(none)"}`];
       if (resolved.caseMatch) hintParts.push(`did you mean ${JSON.stringify(resolved.caseMatch)}? (case differs)`);

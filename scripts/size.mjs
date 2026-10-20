@@ -218,7 +218,7 @@ isolation.globalOmitsExtraCharts = !globalBundle.code.includes(extraMark) && !gl
 isolation.globalAutoOmitsExtraCharts = !globalAuto.code.includes(extraMark) && !globalAuto.code.includes(ganttMark);
 
 const extra = await gzipOf(join(src, "extra.ts"));
-const extraTypes = ["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar"];
+const extraTypes = ["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst"];
 const chartSizes = {};
 for (const name of extraTypes) chartSizes[name] = await gzipOf(join(src, "charts", `${name}.ts`));
 if (all.code.includes('data-ck-renderer="histogram"') || all.code.includes('data-ck-mark="whisker"')) {
@@ -252,7 +252,7 @@ const measured = {
 for (const name of extraTypes) measured[name] = chartSizes[name].gzipBytes;
 const budget = JSON.parse(readFileSync(join(root, "scripts/size-budget.json"), "utf8"));
 const failures = [];
-for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "element", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "elementLine", "extra", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid"]) {
+for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "element", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "elementLine", "extra", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid"]) {
   if (typeof budget[key] !== "number") failures.push(`${key} budget missing`);
   else if (measured[key] > budget[key]) failures.push(`${key} gzip ${measured[key]} > budget ${budget[key]}`);
 }

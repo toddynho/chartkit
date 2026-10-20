@@ -78,10 +78,10 @@ export interface HoverIndex {
   width: number;
 }
 
-const TIP_TYPES = new Set(["line", "bar", "stacked-area", "scatter", "combo", "donut", "pie", "waterfall"]);
+const TIP_TYPES = new Set(["line", "bar", "stacked-area", "scatter", "combo", "donut", "pie", "waterfall", "sunburst"]);
 
 function arcChart(type: string | undefined): boolean {
-  return type === "donut" || type === "pie";
+  return type === "donut" || type === "pie" || type === "sunburst";
 }
 const lastMarkup = new WeakMap<object, string>();
 
@@ -233,8 +233,40 @@ function yChannels(y: unknown): { field: string; title: string; format?: unknown
   return out;
 }
 
+function sunburstNames(spec: InteractSpec, table: Table): SeriesMeta[] {
+  const enc = isRecord(spec.encoding) ? spec.encoding : {};
+  const field = fieldOf(enc.y) || "value";
+  const names: string[] = [];
+  const push = (name: unknown) => {
+    const text = typeof name === "string" ? name : name == null ? "" : String(name);
+    if (text && !names.includes(text)) names.push(text);
+  };
+  const path = Array.isArray(enc.path) && typeof enc.path[0] === "string" ? enc.path[0] : "";
+  const id = typeof enc.id === "string" ? enc.id : "";
+  const parent = typeof enc.parent === "string" ? enc.parent : "";
+  if (path) {
+    for (let i = 0; i < table.n; i++) push(table.cell(path, i));
+  } else if (id && parent) {
+    const nameField = fieldOf(enc.x) || id;
+    for (let i = 0; i < table.n; i++) {
+      const up = table.cell(parent, i);
+      if (up === null || up === undefined || up === "") push(table.cell(nameField, i) ?? table.cell(id, i));
+    }
+  } else if (table.n === 1 && Array.isArray(table.cell("children", 0))) {
+    const kids = table.cell("children", 0) as unknown[];
+    for (const child of kids) {
+      if (!isRecord(child)) continue;
+      push(typeof child.name === "string" ? child.name : typeof child.label === "string" ? child.label : child.id);
+    }
+  } else {
+    for (let i = 0; i < table.n; i++) push(table.cell("name", i) ?? table.cell("label", i) ?? table.cell("id", i));
+  }
+  return names.length ? names.map((name) => ({ name, field })) : [{ name: "value", field }];
+}
+
 function seriesOf(spec: InteractSpec, table: Table): SeriesMeta[] {
   const enc = isRecord(spec.encoding) ? spec.encoding : {};
+  if (spec.type === "sunburst") return sunburstNames(spec, table);
   if (spec.type === "candlestick") return ["open", "high", "low", "close"].map((key) => ({ name: key, field: fieldOf(enc[key]) || key }));
   const channels = yChannels(enc.y);
   const arc = arcChart(spec.type);

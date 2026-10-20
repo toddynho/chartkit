@@ -13,6 +13,7 @@ export type Severity = "error" | "warning";
  * CK3xxx semantics, CK4xxx design advice). CK1010 means no renderer is registered
  * for the spec type. Messages may improve; codes do not.
  * CK3020–CK3022 belong to range and error bars. Time and data use CK3023–CK3026.
+ * Hierarchy uses CK3027–CK3030.
  */
 export interface Diagnostic {
   code: string;

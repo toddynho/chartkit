@@ -1641,12 +1641,17 @@ function xStep(model: PlotModel, count: number, angle: number): number {
   return footprint <= slot ? 1 : Math.max(1, Math.ceil(footprint / slot));
 }
 
+function legendColor(model: PlotModel, series: Series): string {
+  if (model.type === "combo" && series.mark === "line") return strokeOf(series, model);
+  return series.color;
+}
+
 function legendItems(model: PlotModel): LegendItem[] {
   if (model.swatches && model.swatches.length > 1) return model.swatches.map((item) => ({ name: item.name, color: item.color }));
   return model.series.map((series) => {
     const shape = markerShape(model, series);
     const symbol = shape && (explicitMark(model, series) || model.dots === "shown") ? shape : undefined;
-    return { name: legendName(model, series), color: series.color, symbol };
+    return { name: legendName(model, series), color: legendColor(model, series), symbol };
   });
 }
 
@@ -1671,10 +1676,11 @@ function legend(model: PlotModel, x: number, y: number, maxRight: number): strin
 
 function legendIcon(model: PlotModel, series: Series, x: number, y: number): string {
   const shape = markerShape(model, series);
+  const color = legendColor(model, series);
   if (shape && (explicitMark(model, series) || model.dots === "shown")) {
-    return marker(x + 5, y + 5, 4.5, shape, series.color, series.hollow ?? model.pointHollow);
+    return marker(x + 5, y + 5, 4.5, shape, color, series.hollow ?? model.pointHollow);
   }
-  return `<rect x="${n(x)}" y="${n(y)}" width="10" height="10" rx="2" fill="${series.color}" />`;
+  return `<rect x="${n(x)}" y="${n(y)}" width="10" height="10" rx="2" fill="${color}" />`;
 }
 
 function legendSeries(model: PlotModel, x: number, y: number, maxRight: number): string {

@@ -48,6 +48,7 @@ const charts = [
   "area-range",
   "bar-range",
   "errorbar",
+  "sunburst",
 ];
 
 const themes = [

@@ -10,7 +10,7 @@
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec. Export: toPNG, toSVG, toCSV. PNG skips cross-origin sheets and remote images.
 
 Features (21 libraries, sourced): https://chartkit.dev/features.json
-Types: line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi, sparkline, mini-area, progress-ring, spike, candlestick, histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, area-range, bar-range, errorbar
+Types: line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi, sparkline, mini-area, progress-ring, spike, candlestick, histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, area-range, bar-range, errorbar, sunburst
 
 ```json
 {"version":"1","type":"line","data":[{"quarter":"Q1","units":40},{"quarter":"Q2","units":55}],"encoding":{"x":"quarter","y":"units"},"a11y":{"alt":"Units rose in Q2."}}
@@ -101,19 +101,23 @@ Types: line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi,
 ```
 
 ```json
-{"version":"1","type":"waterfall","data":[{"x":"Open","y":120,"total":true},{"x":"Won","y":40},{"x":"Close","y":160,"total":true}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"Close is 160."}}
+{"version":"1","type":"waterfall","data":[{"x":"Open","y":120,"total":true},{"x":"Won","y":40},{"x":"Close","y":160,"total":true}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"Close is up."}}
 ```
 
 ```json
-{"version":"1","type":"area-range","data":[{"month":"Jan","y":40,"lo":36,"hi":48},{"month":"Feb","y":55,"lo":46,"hi":66}],"encoding":{"x":"month","y":"y","low":"lo","high":"hi"},"a11y":{"alt":"The band widens."}}
+{"version":"1","type":"area-range","data":[{"month":"Jan","y":40,"lo":36,"hi":48},{"month":"Feb","y":55,"lo":46,"hi":66}],"encoding":{"x":"month","y":"y","low":"lo","high":"hi"},"a11y":{"alt":"It widens."}}
 ```
 
 ```json
-{"version":"1","type":"bar-range","data":[{"month":"Jan","min":-2,"max":6},{"month":"Jul","min":17,"max":29}],"encoding":{"x":"month","low":"min","high":"max"},"a11y":{"alt":"July is 17 to 29."}}
+{"version":"1","type":"bar-range","data":[{"month":"Jan","min":-2,"max":6},{"month":"Jul","min":17,"max":29}],"encoding":{"x":"month","low":"min","high":"max"},"a11y":{"alt":"July is warm."}}
 ```
 
 ```json
 {"version":"1","type":"errorbar","data":[{"assay":"A","mean":5.2,"lo":4.9,"hi":5.5}],"encoding":{"x":"assay","y":"mean","low":"lo","high":"hi"},"a11y":{"alt":"A reads 5.2."}}
+```
+
+```json
+{"version":"1","type":"sunburst","data":[{"name":"A","children":[{"name":"B","value":3},{"name":"C","value":1}]}],"a11y":{"alt":"B leads A."}}
 ```
 
 ```json
