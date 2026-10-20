@@ -171,6 +171,10 @@ export interface Series {
   colors?: string[];
   /** Caption of the colour rule that painted each value. Empty when that point has no label. */
   ruleLabels?: string[];
+  /** Legend text when mark.baseLabel folds the unmatched colour into this series. */
+  legendName?: string;
+  /** Point is an outline in the rule colour, so it can share that legend entry with the bars. */
+  ruleHollow?: boolean[];
   axis: "y" | "y2";
   mark: "line" | "bar" | "area" | "range";
   /** Low and high of a combo range band. The line entry never fills this. */
@@ -521,7 +525,7 @@ function toModel(
   }
   const colorScale = applyPointColors(table, encoding, mark, preset, series, labels, type === "bar" || type === "combo");
   const ruleLegend = colorScale ? [] : ruleSwatches(series, readRules(mark), preset, baseLabelOf(mark));
-  const swatches = colorScale ? undefined : categorySwatches(spec, series, labels);
+  const swatches = colorScale || ruleLegend.length ? undefined : categorySwatches(spec, series, labels);
 
   return {
     ...shell,
@@ -886,7 +890,6 @@ function paintPoints(out: string[], points: (Pt | null)[], model: PlotModel, ser
   const explicit = explicitMark(model, series) || colored;
   if (!explicit && model.dots === "off") return;
   if (!explicit && indexes && model.dots !== "shown") return;
-  const hollow = series.hollow ?? model.pointHollow;
   const radius = series.radius ?? model.pointSize;
   const hidden = !explicit && model.dots !== "shown" ? ` style="display:var(--ck-line-dots, none)"` : "";
   for (let k = 0; k < points.length; k++) {
@@ -895,10 +898,20 @@ function paintPoints(out: string[], points: (Pt | null)[], model: PlotModel, ser
     const at = indexes ? indexes[k] : k;
     const override = series.colors?.[at];
     const ruled = Boolean(override && override !== series.color);
+    const outlined = Boolean(series.ruleHollow?.[at]);
+    const hollow = outlined || series.hollow || model.pointHollow;
     const color = ruled ? override : series.mark === "line" ? strokeOf(series, model) : series.color;
     const caption = series.ruleLabels?.[at] ?? "";
     const named = colored ? ` data-ck-name="${esc(series.name)}" data-ck-i="${at}"` : indexes ? ` data-ck-i="${indexes[k]}"` : "";
     const rule = caption ? ` data-ck-rule="${esc(caption)}"` : "";
+    if (outlined) {
+      const hole = cssVar("surface", model.preset.surface);
+      const title = caption ? `><title>${esc(caption)}</title></circle>` : " />";
+      out.push(
+        `<circle cx="${n(point.x)}" cy="${n(point.y)}" r="${n(radius + 1.25)}" fill="${hole}" stroke="${color}" stroke-width="2"${hidden}${named}${rule}${title}`,
+      );
+      continue;
+    }
     const ring = ruled ? ` stroke="${cssVar("background", model.preset.background)}" stroke-width="2"` : "";
     out.push(marker(point.x, point.y, radius + (ruled ? 1.25 : 0), shape, color, hollow, hidden + ring + named + rule, caption));
   }
@@ -1680,7 +1693,8 @@ function legendItems(model: PlotModel): LegendItem[] {
   if (model.swatches && model.swatches.length > 1) return [...model.swatches.map((item) => ({ name: item.name, color: item.color })), ...rules];
   return [...model.series.map((series) => {
     const shape = markerShape(model, series);
-    const symbol = shape && (explicitMark(model, series) || model.dots === "shown") ? shape : undefined;
+    const marked = shape && (explicitMark(model, series) || model.dots === "shown") ? shape : undefined;
+    const symbol = series.mark === "bar" ? "square" : marked;
     return { name: legendName(model, series), color: legendColor(model, series), symbol };
   }), ...rules];
 }
@@ -1710,8 +1724,9 @@ function legend(model: PlotModel, x: number, y: number, maxRight: number): strin
 }
 
 function legendIcon(model: PlotModel, series: Series, x: number, y: number): string {
-  const shape = markerShape(model, series);
   const color = legendColor(model, series);
+  if (series.mark === "bar") return `<rect x="${n(x)}" y="${n(y)}" width="10" height="10" rx="2" fill="${color}" />`;
+  const shape = markerShape(model, series);
   if (shape && (explicitMark(model, series) || model.dots === "shown")) {
     return marker(x + 5, y + 5, 4.5, shape, color, series.hollow ?? model.pointHollow);
   }
@@ -2057,6 +2072,7 @@ function labelStep(model: PlotModel, count: number): number {
 }
 
 function legendName(model: PlotModel, series: Series): string {
+  if (series.legendName) return series.legendName;
   return hooks?.seriesName(model, series) ?? series.name;
 }
 
@@ -2422,51 +2438,85 @@ function seriesFieldName(encoding: Record<string, unknown>, table: DataTable): s
 }
 
 const DISTINCT = ["#ffd60a", "#5e5ce6", "#ff9f0a", "#64d2ff", "#ac8e68", "#ff6961"];
+/** CIE76. Below this, a rule colour is the same colour as a series in that theme. */
+const RULE_DELTA_E = 25;
 
-function hexes(color: string): number[][] {
-  const out: number[][] = [];
-  const re = /#([0-9a-fA-F]{6})/g;
-  let match: RegExpExecArray | null;
-  while ((match = re.exec(color))) {
-    const hex = match[1];
-    out.push([parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)]);
-  }
-  return out;
+function rgbOf(hex: string): [number, number, number] {
+  return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
 }
 
-function nearColor(a: string, b: string): boolean {
-  const left = hexes(a);
-  const right = hexes(b);
-  if (!left.length || !right.length) return a === b;
-  for (const p of left) {
-    for (const q of right) {
-      if (Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]) < 80) return true;
-    }
-  }
-  return false;
+function labOf(hex: string): [number, number, number] {
+  const [r, g, b] = rgbOf(hex);
+  const channel = (value: number) => {
+    const c = value / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  };
+  const R = channel(r);
+  const G = channel(g);
+  const B = channel(b);
+  let x = R * 0.4124564 + G * 0.3575761 + B * 0.1804375;
+  let y = R * 0.2126729 + G * 0.7151522 + B * 0.072175;
+  let z = R * 0.0193339 + G * 0.119192 + B * 0.9503041;
+  x /= 0.95047;
+  z /= 1.08883;
+  const pivot = (t: number) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  const fx = pivot(x);
+  const fy = pivot(y);
+  const fz = pivot(z);
+  return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
 }
 
-function nearAny(color: string, others: string[]): boolean {
-  return others.some((other) => nearColor(color, other));
+function deltaE76(a: string, b: string): number {
+  const left = labOf(a);
+  const right = labOf(b);
+  return Math.hypot(left[0] - right[0], left[1] - right[1], left[2] - right[2]);
 }
 
-/** A rule colour that sits on a line or a bar. Shift it when it matches either. */
+/** Light and dark fallbacks, in theme order. A single hex is one theme. */
+function themeSlots(color: string): string[] {
+  const paired = /light-dark\(\s*(#[0-9a-fA-F]{6})\s*,\s*(#[0-9a-fA-F]{6})\s*\)/.exec(color);
+  if (paired) return [paired[1].toLowerCase(), paired[2].toLowerCase()];
+  const hex = /#([0-9a-fA-F]{6})/.exec(color);
+  return hex ? [`#${hex[1].toLowerCase()}`] : [];
+}
+
+function tooClose(hex: string, others: string[]): boolean {
+  return others.some((other) => deltaE76(hex, other) < RULE_DELTA_E);
+}
+
+/**
+ * Move a rule colour off every series colour in the same theme.
+ * Light is compared with light, and dark with dark. A shifted colour is the
+ * new shade itself, so a host token cannot paint the collision back.
+ */
 function distinctPaint(painted: string, occupied: string[]): string {
-  if (!nearAny(painted, occupied)) return painted;
-  for (const alt of DISTINCT) {
-    if (!nearAny(alt, occupied) && !nearColor(alt, painted)) return alt;
-  }
-  return painted;
+  const slots = themeSlots(painted);
+  if (!slots.length) return painted;
+  const occupiedSlots = occupied.map(themeSlots);
+  const next = slots.map((hex, index) => {
+    const others: string[] = [];
+    for (const row of occupiedSlots) {
+      if (row.length === slots.length) {
+        if (row[index]) others.push(row[index]);
+      } else others.push(...row);
+    }
+    if (!tooClose(hex, others)) return hex;
+    for (const alt of DISTINCT) {
+      if (!tooClose(alt, others) && deltaE76(alt, hex) >= RULE_DELTA_E) return alt;
+    }
+    return hex;
+  });
+  if (next.every((hex, index) => hex === slots[index])) return painted;
+  if (next.length === 2) return `light-dark(${next[0]}, ${next[1]})`;
+  return next[0] ?? painted;
 }
 
-/** Line strokes, bar fills, and colour-ruled bar paints already in the chart. */
+/** Series fills and line strokes. Rule paints are not occupied: they are what this shifts. */
 function occupiedPaints(series: Series[], preset: PresetTokens): string[] {
   const occupied: string[] = [];
   for (const item of series) {
-    if (item.mark === "bar") {
-      occupied.push(item.color);
-      if (item.colors) for (const color of item.colors) if (color) occupied.push(color);
-    } else occupied.push(lineStroke(item.color, 2, preset.lines));
+    occupied.push(item.color);
+    if (item.mark !== "bar") occupied.push(lineStroke(item.color, 2, preset.lines));
   }
   return occupied;
 }
@@ -2484,10 +2534,15 @@ function hasUnmatched(values: ArrayLike<number | null>, rules: ColorRule[], pres
   return false;
 }
 
+function repaint(item: Series, from: string, to: string): void {
+  if (!item.colors || from === to) return;
+  for (let i = 0; i < item.colors.length; i++) if (item.colors[i] === from) item.colors[i] = to;
+}
+
 /**
- * One swatch per rule. A rule that paints bars uses the bar fill, once, even
- * when line points are shifted off that fill. Point-only rules use the point
- * colour. mark.baseLabel names values that match no rule.
+ * One swatch per rule colour. Bars and the points that share a rule use that
+ * colour; the points are outlines so the bar and the dot stay distinct.
+ * mark.baseLabel folds the unmatched series colour into that series' own entry.
  */
 function ruleSwatches(
   series: Series[],
@@ -2496,12 +2551,12 @@ function ruleSwatches(
   baseLabel?: string,
 ): { name: string; color: string; symbol: "circle" | "square" }[] {
   const occupied = occupiedPaints(series, preset);
-  const out: { name: string; color: string; symbol: "circle" | "square" }[] = [];
   if (baseLabel) {
     const bars = series.filter((item) => item.mark === "bar" && hasUnmatched(item.values, rules, preset));
     const item = bars[0] ?? series.find((entry) => hasUnmatched(entry.values, rules, preset));
-    if (item) out.push({ name: baseLabel, color: item.color, symbol: item.mark === "bar" ? "square" : "circle" });
+    if (item) item.legendName = `${item.name}: ${baseLabel}`;
   }
+  const out: { name: string; color: string; symbol: "circle" | "square" }[] = [];
   const seen = new Set<string>();
   for (const rule of rules) {
     if (!rule.color || seen.has(rule.color)) continue;
@@ -2513,20 +2568,27 @@ function ruleSwatches(
       if (!ruleMatchesAny(rule, item.values)) continue;
       if (item.mark === "bar") {
         barUsed = true;
+        repaint(item, painted, shifted);
         continue;
       }
       if (!item.colors) continue;
       pointUsed = true;
-      if (shifted === painted) continue;
-      for (let i = 0; i < item.colors.length; i++) if (item.colors[i] === painted) item.colors[i] = shifted;
+      repaint(item, painted, shifted);
     }
     if (!barUsed && !pointUsed) continue;
     seen.add(rule.color);
-    if (barUsed) occupied.push(painted);
-    if (pointUsed) occupied.push(shifted);
+    occupied.push(shifted);
+    if (barUsed && pointUsed) {
+      for (const item of series) {
+        if (item.mark === "bar" || !item.colors) continue;
+        const hollow = item.ruleHollow ?? item.colors.map(() => false);
+        for (let i = 0; i < item.colors.length; i++) if (item.colors[i] === shifted) hollow[i] = true;
+        item.ruleHollow = hollow;
+      }
+    }
     out.push({
       name: rule.label || rule.color,
-      color: barUsed ? painted : shifted,
+      color: shifted,
       symbol: barUsed ? "square" : "circle",
     });
   }

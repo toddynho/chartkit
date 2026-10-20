@@ -197,12 +197,12 @@ export const fourthBoards: {
     slug: "carrick-lamp",
     number: 20,
     title: "Carrick lamp, overnight",
-    lede: "Lamp current at a fictional lighthouse. Bars are the hourly reading. Bright and Dim are the threshold colours, and Normal is the rest. The glow line is a three-hour mean, and its points use a distinct threshold colour. A callout marks the dip at 03:00. A host slides this window with mount().append.",
+    lede: "Lamp current at a fictional lighthouse. Bars are the hourly reading. Bright and Dim are the threshold colours, and Normal is the rest, named on the Reading entry. The glow line is a three-hour mean. A point that crosses a threshold is an outline in that bar colour. A callout marks the dip at 03:00. A host slides this window with mount().append.",
     charts: [
       {
         id: "lamp",
         title: "Current through the night",
-        caption: "Under 40 is Dim. 70 and over is Bright. Unmatched bars are Normal. The mean waits until three readings exist.",
+        caption: "Under 40 is Dim. 70 and over is Bright. The Reading entry names the unmatched bars Normal. The mean waits until three readings exist.",
         span: "board-12",
         spec: {
           version: "1",

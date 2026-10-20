@@ -231,18 +231,23 @@ describe("colour rule labels", () => {
 });
 
 describe("threshold points beside bars", () => {
-  it.each(["soft", "midnight"])("keeps mean-line points off the bar colours in %s", (theme) => {
+  it.each(["soft", "midnight"])("outlines mean-line points in the bar rule colour in %s", (theme) => {
     const svg = render(lampSpec({ theme })) ?? "";
-    const fills = ruledPointFills(svg);
-    expect(fills.length).toBeGreaterThan(0);
-    for (const fill of fills) {
-      expect(fill).not.toContain("--ck-positive");
-      expect(fill).not.toContain("--ck-negative");
+    const ruled = [...svg.matchAll(/<circle\b([^>]*)>/g)]
+      .map((match) => match[1] ?? "")
+      .filter((attrs) => /fill="([^"]+)"/.exec(attrs)?.[1]?.includes("--ck-surface"));
+    expect(ruled.length).toBeGreaterThan(0);
+    const strokes = ruled.map((attrs) => /stroke="([^"]+)"/.exec(attrs)?.[1] ?? "");
+    expect(new Set(strokes).size).toBeGreaterThanOrEqual(2);
+    const rects = [...svg.matchAll(/<rect\b[^>]*fill="([^"]+)"[^>]*data-ck-name=/g)].map((match) => match[1] ?? "");
+    for (const attrs of ruled) {
+      const stroke = /stroke="([^"]+)"/.exec(attrs)?.[1] ?? "";
+      const fill = /fill="([^"]+)"/.exec(attrs)?.[1] ?? "";
+      expect(rects).toContain(stroke);
+      expect(fill).toContain("--ck-surface");
+      expect(fill).not.toBe(stroke);
     }
-    expect(new Set(fills).size).toBeGreaterThanOrEqual(2);
-    const rects = [...svg.matchAll(/<rect\b[^>]*fill="([^"]+)"/g)].map((match) => match[1] ?? "");
-    expect(rects.some((fill) => fill.includes("--ck-positive"))).toBe(true);
-    expect(rects.some((fill) => fill.includes("--ck-negative"))).toBe(true);
+    expect(ruledPointFills(svg).every((fill) => fill.includes("--ck-surface"))).toBe(true);
   });
 });
 

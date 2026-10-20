@@ -1,6 +1,6 @@
 {
-  "line": 32653,
-  "all": 54961,
+  "line": 33173,
+  "all": 55480,
   "validate": 30021,
   "vue": 802,
   "svelte": 962,
@@ -8,11 +8,11 @@
   "element": 1821,
   "interact": 12820,
   "interactExtra": 1623,
-  "vueLine": 33378,
-  "svelteLine": 33576,
-  "vanillaLine": 33472,
-  "elementLine": 34323,
-  "extra": 79314,
+  "vueLine": 33907,
+  "svelteLine": 34105,
+  "vanillaLine": 34002,
+  "elementLine": 34855,
+  "extra": 79824,
   "histogram": 15603,
   "boxplot": 15568,
   "radar": 6962,
@@ -33,8 +33,8 @@
   "mermaid": 35362,
   "vanillaAuto": 1360,
   "markdown": 663,
-  "global": 105598,
-  "globalAuto": 72362,
+  "global": 106091,
+  "globalAuto": 72888,
   "globalMermaid": 35877,
-  "note": "gzip -9 byte budgets, each set to the measured size after bar colour rules use the bar fill in the legend and the histogram bin count is opt-in. line 32653, all 54961, validate 30021, interact 12820, interactExtra 1623, extra 79314, mermaid 35362, vanillaAuto 1360, markdown 663, global 105598, globalAuto 72362, globalMermaid 35877. Adapters: vue 802, svelte 962, vanilla 1020, element 1821; vueLine 33378, svelteLine 33576, vanillaLine 33472, elementLine 34323. Phase 3 and 4: histogram 15603, boxplot 15568, radar 6962, funnel 7683, treemap 13532, sankey 8277, bullet 7429, waterfall 15236, gantt 8655, timeline 7538, quadrant 7297, venn 7744, journey 7154. Uncertainty: area-range 16078, bar-range 15073, errorbar 15351. Sunburst: 11074."
+  "note": "gzip -9 byte budgets, each set to the measured size after a rule colour within CIE76 delta-E 25 of a series colour shifts, and combo points outline in that bar colour. line 33173, all 55480, validate 30021, interact 12820, interactExtra 1623, extra 79824, mermaid 35362, vanillaAuto 1360, markdown 663, global 106091, globalAuto 72888, globalMermaid 35877. Adapters: vue 802, svelte 962, vanilla 1020, element 1821; vueLine 33907, svelteLine 34105, vanillaLine 34002, elementLine 34855. Phase 3 and 4: histogram 15603, boxplot 15568, radar 6962, funnel 7683, treemap 13532, sankey 8277, bullet 7429, waterfall 15236, gantt 8655, timeline 7538, quadrant 7297, venn 7744, journey 7154. Uncertainty: area-range 16078, bar-range 15073, errorbar 15351. Sunburst: 11074."
 }

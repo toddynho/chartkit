@@ -1279,7 +1279,7 @@ export interface Mark {
    */
   palette?: [Color, ...Color[]];
   /**
-   * Conditional colours. First match wins and overrides the series or category colour. A bar rule's legend swatch is the bar fill. Applies to: line, bar, scatter, combo, donut, pie.
+   * Conditional colours. First match wins and overrides the series or category colour. A bar rule's legend swatch is the bar fill. A rule colour within CIE76 delta-E 25 of a series colour in the same theme shifts to a distinct shade. Applies to: line, bar, scatter, combo, donut, pie.
    *
    * @maxItems 8
    */
@@ -2526,7 +2526,7 @@ export interface Mark {
         }
       ];
   /**
-   * Legend name for values that match no colour rule, such as Normal. The swatch is that series colour, and it is a square when those values are bars. Omit it to leave the unmatched colour under the series name. Applies to: line, bar, combo.
+   * Legend name for values that match no colour rule, such as Normal. The series entry is renamed to the series name plus this label, for example Reading: Normal, and it is a square when those values are bars. Omit it to keep the series name. Applies to: line, bar, combo.
    */
   baseLabel?: string;
   /**
