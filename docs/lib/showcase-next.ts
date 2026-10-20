@@ -140,12 +140,23 @@ const crates = [
   { variety: "Ashmead", grams: 176, hours: 4.8, brix: 12.2 },
 ];
 
+const weightBinStart = 135;
+const weightBinWidth = 10;
+const weightBinCount = 8;
+const weightBins = Array.from({ length: weightBinCount }, (_, index) => {
+  const start = weightBinStart + index * weightBinWidth;
+  const end = start + weightBinWidth;
+  const last = index === weightBinCount - 1;
+  const count = crates.filter((row) => row.grams >= start && (last ? row.grams <= end : row.grams < end)).length;
+  return { grams: String(start), crates: count };
+});
+
 export const orchardCharts: ChartSlot[] = [
   {
     id: "sun",
     title: "Sun hours and sugar",
-    caption: "Each diamond is one crate. Colour is the variety, and the dot grows with weight. The vertical scale is not nicened.",
-    span: "board-8",
+    caption: "Each diamond is one crate. Colour is the variety, and the dot grows with weight. The vertical scale is not nicened, with a little room past the crates.",
+    span: "board-6",
     spec: {
       version: "1",
       id: "orchard-sun",
@@ -153,8 +164,8 @@ export const orchardCharts: ChartSlot[] = [
       theme: "soft",
       data: crates,
       encoding: {
-        x: { field: "hours", title: "Sun hours" },
-        y: { field: "brix", title: "Brix", scale: { nice: false } },
+        x: { field: "hours", title: "Sun hours", scale: { padding: 0.08 } },
+        y: { field: "brix", title: "Brix", scale: { nice: false, padding: { min: 0.08, max: 0.14 } } },
         size: { field: "grams", range: [8, 28] },
         color: "variety",
       },
@@ -170,7 +181,7 @@ export const orchardCharts: ChartSlot[] = [
         ],
       },
       interaction: { select: "point" },
-      size: { width: 760, height: 420 },
+      size: { width: 560, height: 420 },
       a11y: { alt: "Russet crates are sweeter at fewer sun hours. Ashmead crates are heavier and sit toward more sun." },
     },
   },
@@ -178,7 +189,7 @@ export const orchardCharts: ChartSlot[] = [
     id: "weight-rule",
     title: "Crate weight, coloured by a rule",
     caption: "Under 150 grams is the negative token. 180 grams and over is the positive token. The labels are the weights.",
-    span: "board-4",
+    span: "board-6",
     spec: {
       version: "1",
       id: "orchard-weight-rule",
@@ -203,7 +214,7 @@ export const orchardCharts: ChartSlot[] = [
       axes: { x: { title: "Crate" }, y: { title: "Grams", ticks: [0, 100, 200] } },
       tooltip: { position: "top", fields: [{ field: "grams", title: "Grams" }] },
       interaction: { select: "point" },
-      size: { width: 420, height: 420 },
+      size: { width: 560, height: 420 },
       a11y: { alt: "Two crates are under 150 grams and two are at or over 180. The heaviest is 205 grams." },
     },
   },
@@ -227,19 +238,21 @@ export const orchardCharts: ChartSlot[] = [
   {
     id: "bins",
     title: "How the weights fall",
-    caption: "Eight bins across every crate.",
+    caption: "Eight bins of 10 grams, from 135. The bin from 195 to 205 is empty.",
     span: "board-6",
     spec: {
       version: "1",
       id: "orchard-bins",
       type: "histogram",
       theme: "soft",
-      data: crates.map((row) => ({ grams: row.grams })),
-      encoding: { x: { field: "grams", title: "Grams" } },
-      mark: { bins: 8 },
+      data: weightBins,
+      encoding: {
+        x: { field: "grams", title: "Grams" },
+        y: { field: "crates", title: "Crates" },
+      },
       axes: { x: { title: "Grams" }, y: { title: "Crates" } },
       size: { width: 560, height: 340 },
-      a11y: { alt: "Crate weights run from the mid 130s to just over 200 grams, with more than one bin occupied." },
+      a11y: { alt: "Crate weights run from 136 to 210 grams, in eight bins of 10 grams starting at 135. The bin from 195 to 205 grams is empty." },
     },
   },
 ];

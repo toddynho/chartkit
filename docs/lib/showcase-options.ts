@@ -58,6 +58,7 @@ function walkScale(ids: Set<string>, scale: unknown) {
   if (scale.nice === false) add(ids, "scale.nice");
   if (scale.reverse === true) add(ids, "scale.reverse");
   if (Array.isArray(scale.domain)) add(ids, "scale.domain");
+  if (typeof scale.padding === "number" || isRecord(scale.padding) || scale.clamp === true) add(ids, "scale.padding");
   if (scale.type === "sequential" || scale.type === "diverging") add(ids, "scale.color.sequential");
   if (scale.type === "quantize" || scale.type === "threshold") add(ids, "scale.quantize");
   if (scale.type === "sequential" || scale.type === "diverging" || scale.type === "quantize" || scale.type === "threshold") {

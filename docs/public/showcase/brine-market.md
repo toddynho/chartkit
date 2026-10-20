@@ -267,7 +267,7 @@ Morning 6 is Quay's busiest, at 72. Lane climbs toward the end of the twelve.
     }
   },
   "legend": {
-    "position": "top",
+    "position": "bottom",
     "interactive": true
   },
   "tooltip": {

@@ -134,6 +134,14 @@ ${JSON.stringify(stallSpec, null, 2)}
 </chart-kit>
 <script type="module">
   import "@chartkitdev/element";
+  const chart = document.querySelector("#saltwharf");
+  chart.tooltip = (detail) => {
+    const jars = detail.rows.find((row) => row.name === "Jars");
+    const lids = detail.rows.find((row) => row.name === "Lids");
+    const sent = jars ? jars.text : "0";
+    const back = lids ? lids.text : "0";
+    return "<strong>" + detail.title + "</strong><div>" + sent + " jars out, " + back + " lids back</div>";
+  };
 </script>`;
 
 export const fourthBoards: {
@@ -194,7 +202,7 @@ export const fourthBoards: {
       {
         id: "lamp",
         title: "Current through the night",
-        caption: "Under 40 is the dim token. 70 and over is the bright token. The mean waits until three readings exist.",
+        caption: "Under 40 is Dim. 70 and over is Bright. The mean waits until three readings exist.",
         span: "board-12",
         spec: {
           version: "1",
@@ -217,14 +225,14 @@ export const fourthBoards: {
             curve: "monotone",
             points: "always",
             colorRules: [
-              { color: "positive", gte: 70 },
-              { color: "negative", lt: 40 },
+              { color: "positive", gte: 70, label: "Bright" },
+              { color: "negative", lt: 40, label: "Dim" },
             ],
           },
           axes: { x: { title: "Hour" }, y: { title: "Milliamps", ticks: [0, 20, 40, 60, 80] } },
-          legend: { position: "top", interactive: true },
+          legend: { position: "bottom", interactive: true },
           tooltip: { mode: "index", position: "top" },
-          annotations: [{ type: "marker", x: "03:00", y: 28, label: "Lamp dipped", dx: 18, dy: -42 }],
+          annotations: [{ type: "marker", x: "03:00", y: 28, label: "Lamp dipped", dx: -44, dy: -34 }],
           size: { width: 1040, height: 500 },
           a11y: { alt: "Carrick lamp current stays near 70 milliamps, dips to 28 at 03:00, then recovers by 07:00. Bars are the reading. The glow line is a three-hour mean." },
         },
@@ -457,17 +465,17 @@ export const fourthBoards: {
     slug: "saltwharf",
     number: 25,
     title: "Saltwharf, in the page",
-    lede: "A fictional stall, drawn from the same spec a plain HTML page puts inside <chart-kit>. The element reads the child JSON script. The package is @chartkitdev/element.",
+    lede: "A fictional stall, drawn from the same spec a plain HTML page puts inside <chart-kit>. The element reads the child JSON script, and its tooltip slot names the week as jars out and lids back. The package is @chartkitdev/element.",
     charts: [
       {
         id: "jars",
         title: "Jars and lids",
-        caption: "The chart above is that spec. The block below is the element a static page would ship.",
+        caption: "The chart above is that spec. Hover names the week as jars out and lids back. The block below is the element a static page would ship, with the same tooltip slot.",
         span: "board-12",
         spec: stallSpec,
       },
     ],
     stacks: [{ id: "element", label: "HTML", code: stallHtml, feature: "framework.webcomponent" }],
-    extraOptions: ["framework.webcomponent"],
+    extraOptions: ["framework.webcomponent", "tooltip.custom"],
   },
 ];
