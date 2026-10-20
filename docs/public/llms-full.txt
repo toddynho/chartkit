@@ -25,7 +25,7 @@ Initial render wins all 12 cells against uPlot. Even 1,000,000 points is 23.6 ms
 ## Rules
 
 - `version` is `"1"`. `a11y.alt` is one required sentence. `validate()` returns CK1004 with a suggested sentence when it is missing.
-- `data` is a plain array of rows: `[{ "quarter": "Q1", "units": 40 }]`. It is not Vega-Lite `{ "values": [...] }` (CK1009 moves `values` up). Sparkline, mini-area, and spike accept a number array. 10k+ points may use `{ "columns": { "quarter": [], "units": [] } }`.
+- `data` is a plain array of rows: `[{ "quarter": "Q1", "units": 40 }]`. It is not Vega-Lite `{ "values": [...] }` (CK1009 moves `values` up). Sparkline, mini-area, and spike accept a number array. 10k+ points may use `{ "columns": { "quarter": [], "units": [] } }`. `timezone` is an IANA zone for temporal axes, ticks, and tooltips; omitted means UTC so server and client labels match. `sort` is `{ "field", "order" }` or `{ "by": "value", "order" }` (`ascending` or `descending`). `transform` is `filter`, `window` (rolling mean), or `aggregate` (`sum`, `mean`, `count`). `mount().append(rows, { window })` on `@chartkitdev/vanilla` appends points and redraws in place.
 - Chart type is `type`. `mark` is an object of options. `mark: "line"` is CK1009: move that string to `type`.
 - `mark.sampling` defaults to `"auto"` (minmax above twice the plot width) for line, stacked-area, combo lines, sparkline, mini-area, and spike.
 - Gauge, kpi, and progress-ring use `metric`. Top-level `value` / `min` / `max` / `delta` / `label` is CK1009. A `data` object of those fields moves into `metric` and `data` is removed.

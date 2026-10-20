@@ -1,4 +1,5 @@
-import { readData, type DataTable } from "./data";
+import { loadTable } from "./data-prep";
+import type { DataTable } from "./data";
 import type { PresetGeometry, PresetTokens } from "./theme";
 import { resolveGeometry, resolvePreset } from "./theme";
 import { hash, isRecord, niceDomain } from "./svg";
@@ -76,7 +77,7 @@ export function exportList(spec: Record<string, unknown>): string {
 }
 
 export function readTable(spec: Record<string, unknown>): DataTable | null {
-  const read = readData(spec.data);
+  const read = loadTable(spec);
   return read.ok ? read.table : null;
 }
 

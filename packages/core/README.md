@@ -43,6 +43,7 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
 
 - `version` is `"1"`. `a11y.alt` is one sentence and is required.
 - `data` is a plain array of row objects. It is not `{ "values": [...] }`. Sparkline, mini-area, and spike may use a plain number array. Large data may use `{ "columns": { "field": [] } }`.
+- `timezone` is an IANA zone for temporal axes, ticks, and tooltips. Omitted means UTC, so a server render and the client label the same instant the same way. `sort` is `{ "field", "order" }` or `{ "by": "value", "order" }` with `order` `ascending` or `descending`. `transform` runs before sort: `filter` (`field` plus `eq`, `gt`, `gte`, `lt`, or `lte`), `window` (`field`, `size`, `op` `mean` by default, `as`), or `aggregate` (`group`, `op` `sum`, `mean`, or `count`, `field`, `as`). `mount().append(rows, { window })` from `@chartkitdev/vanilla` adds points, keeps the last `window` rows, and redraws in place.
 - The chart type goes in `type`. `mark` is an options object (`curve`, `sampling`, `layout`), not a string.
 - Gauge, kpi, and progress-ring put the number in `metric`: `{ "value", "min", "max", "delta", "label" }`. Those keys are not top-level. A `data` object of the same fields moves into `metric`.
 - Donut uses `encoding.x` (slice label) and `encoding.y` (slice value). Not `theta`, `angle`, or `label`.

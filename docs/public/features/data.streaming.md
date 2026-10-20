@@ -1,14 +1,14 @@
 # Streaming / realtime append
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Append points and shift window efficiently
 
-Matrix status: `partial`. Verification: `dts-grep` (weak).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-mount().update(spec) re-render; no append API
+mount().append(rows, { window }) adds points, keeps a sliding window, and redraws in place
 
-Source: chartkit:packages/core/schema/chartkit.schema.json:1947
+Source: chartkit:packages/vanilla/src/index.ts:22
 
 No spec snippet. This row is not a single option that `validate()` can show.
 
@@ -37,6 +37,6 @@ No spec snippet. This row is not a single option that `validate()` can show.
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | partial | ~changeData | dts-grep (weak) | @antv/g2/lib/api/mark.d.ts:12 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against da8da9d595d9.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against f0e644ec234d.
 
 https://chartkit.dev/features.json

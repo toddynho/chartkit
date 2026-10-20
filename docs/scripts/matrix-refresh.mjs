@@ -162,6 +162,9 @@ const TYPE_FOR = {
   "scale.color.sequential": "heatmap",
   "legend.continuous": "heatmap",
   "type.regression": "scatter",
+  "data.sort": "bar",
+  "data.timezone": "line",
+  "data.transform": "line",
 };
 
 function hostType(feature) {
@@ -263,6 +266,9 @@ function demoValue(id, parts, literal) {
   if (leaf === "aspectRatio") return 2;
   if (leaf === "width" && parts.includes("size")) return 640;
   if (leaf === "locale") return "en-US";
+  if (leaf === "timezone") return "America/New_York";
+  if (leaf === "sort") return { by: "value", order: "descending" };
+  if (id === "data.transform" || leaf === "transform") return [{ type: "window", field: "units", size: 2, op: "mean", as: "roll" }];
   if (leaf === "format") return "compact";
   if (leaf === "titlePosition") return "end";
   if (leaf === "titleRotate") return -20;
@@ -357,6 +363,31 @@ function applyFeature(spec, feature) {
   }
   if (feature.id === "data.columns") {
     spec.data = { columns: { quarter: ["Q1", "Q2"], units: [40, 55] } };
+  }
+  if (feature.id === "data.timezone") {
+    spec.data = [
+      { t: "2026-03-08T05:00:00Z", load: 40 },
+      { t: "2026-03-08T06:00:00Z", load: 42 },
+      { t: "2026-03-08T07:00:00Z", load: 48 },
+      { t: "2026-03-08T08:00:00Z", load: 45 },
+    ];
+    spec.encoding = { x: { field: "t", type: "temporal" }, y: "load" };
+    spec.timezone = "America/New_York";
+    spec.a11y = { alt: "Load stepped across the New York spring-forward." };
+  }
+  if (feature.id === "data.transform") {
+    spec.data = [
+      { day: "2026-02-01", units: 10 },
+      { day: "2026-02-02", units: 14 },
+      { day: "2026-02-03", units: 12 },
+      { day: "2026-02-04", units: 18 },
+    ];
+    spec.encoding = { x: { field: "day", type: "temporal" }, y: ["units", "roll"] };
+    spec.transform = [{ type: "window", field: "units", size: 2, op: "mean", as: "roll" }];
+    spec.a11y = { alt: "Units with a two-day rolling mean." };
+  }
+  if (feature.id === "data.sort") {
+    spec.sort = { by: "value", order: "descending" };
   }
   return true;
 }
