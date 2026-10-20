@@ -692,6 +692,204 @@
         "editorial",
         "midnight"
       ]
+    },
+    {
+      "slug": "pell-forecast",
+      "number": 19,
+      "title": "Pell Hall forecast",
+      "types": [
+        "area-range"
+      ],
+      "options": [
+        "a11y.alt",
+        "annotation.band",
+        "annotation.label.position",
+        "annotation.line.x",
+        "annotation.marker",
+        "annotation.style",
+        "axis.title",
+        "format.locale",
+        "theme.presets",
+        "type.area.range"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "carrick-lamp",
+      "number": 20,
+      "title": "Carrick lamp, overnight",
+      "types": [
+        "line"
+      ],
+      "options": [
+        "a11y.alt",
+        "annotation.marker",
+        "axis.title",
+        "data.transform",
+        "legend.interactive",
+        "legend.position",
+        "mark.color.conditional",
+        "mark.glow",
+        "mark.point.visibility",
+        "theme.presets",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.line",
+        "type.line.smooth"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "spring-notes",
+      "number": 21,
+      "title": "Notes across the spring-forward",
+      "types": [
+        "line",
+        "bar"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.bands",
+        "axis.title",
+        "data.sort",
+        "data.timezone",
+        "data.transform",
+        "format.locale",
+        "label.position",
+        "label.show",
+        "legend.position",
+        "mark.color.point",
+        "mark.point.visibility",
+        "theme.presets",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.bar.vertical",
+        "type.line",
+        "type.line.smooth"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "glasshouse",
+      "number": 22,
+      "title": "Glasshouse spans",
+      "types": [
+        "bar-range",
+        "line"
+      ],
+      "options": [
+        "a11y.alt",
+        "annotation.trendline",
+        "axis.ticks.values",
+        "axis.title",
+        "format.locale",
+        "format.number",
+        "mark.point.visibility",
+        "scale.nice",
+        "theme.presets",
+        "type.bar.range",
+        "type.line",
+        "type.line.smooth"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "salt-assay",
+      "number": 23,
+      "title": "Salt assay",
+      "types": [
+        "errorbar"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.title",
+        "mark.point.size",
+        "theme.presets",
+        "type.errorbar"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "marlow-hall",
+      "number": 24,
+      "title": "Marlow Hall, twelve weeks",
+      "types": [
+        "heatmap",
+        "funnel"
+      ],
+      "options": [
+        "a11y.alt",
+        "format.locale",
+        "legend.continuous",
+        "legend.position",
+        "scale.quantize",
+        "theme.presets",
+        "type.funnel",
+        "type.heatmap.calendar"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
+    },
+    {
+      "slug": "saltwharf",
+      "number": 25,
+      "title": "Saltwharf, in the page",
+      "types": [
+        "combo"
+      ],
+      "options": [
+        "a11y.alt",
+        "axis.title",
+        "framework.webcomponent",
+        "legend.interactive",
+        "legend.position",
+        "theme.presets",
+        "tooltip.position",
+        "tooltip.shared",
+        "type.combo"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
     }
   ]
 }
