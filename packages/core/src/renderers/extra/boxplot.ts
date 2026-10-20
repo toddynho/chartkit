@@ -1,3 +1,5 @@
+import { seriesPoints } from "../../annotations";
+import { axisTitleMarks, categoryX, chooseTicks, lockDomain, placedNotes } from "../../chrome";
 import { column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
 import { n } from "../../svg";
@@ -49,20 +51,25 @@ export function renderBoxplot(spec: Record<string, unknown>): string | null {
   let max = Math.max(...flat);
   if (min === max) max = min + 1;
   const pad = (max - min) * 0.08;
-  const domain = domainTicks(min - pad, max + pad);
-  const y0 = Math.min(min - pad, domain[0] ?? min);
-  const y1 = Math.max(max + pad, domain[domain.length - 1] ?? max);
-  const yTicks = domainTicks(y0, y1);
+  const locked = lockDomain(min - pad, max + pad, [frame.encoding.y]);
+  const domain = domainTicks(locked[0], locked[1]);
+  const y0 = Math.min(locked[0], domain[0] ?? locked[0]);
+  const y1 = Math.max(locked[1], domain[domain.length - 1] ?? locked[1]);
+  const yTicks = chooseTicks(spec, "y", y0, y1, domainTicks(y0, y1));
   const box = plotBox(frame, spec, { yTicks });
   const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const band = (box.right - box.left) / rows.length;
   const boxW = Math.max(12, band * (1 - gapOf(frame, 0.34)));
   const shown = valueFormat(frame, spec, frame.encoding.y);
+  const names = stats.map((row) => row.name);
+  const xAt = (index: number) => box.left + band * index + band / 2;
+  const notes = placedNotes(spec, frame, box, categoryX(names, xAt), yAt, [{ name: yField, axis: "y", pts: seriesPoints(null, stats.map((row) => row.median)) }], names);
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
+  parts.push(notes.under);
   stats.forEach((row, index) => {
-    const cx = box.left + band * index + band / 2;
+    const cx = xAt(index);
     const color = fill(frame, index);
     const ink = stroke(frame, index, 1.5);
     const cap = boxW * 0.45;
@@ -83,9 +90,11 @@ export function renderBoxplot(spec: Record<string, unknown>): string | null {
     }
   });
   parts.push("</g>");
+  parts.push(notes.over);
+  parts.push(axisTitleMarks(frame, spec, box));
   parts.push(axisLine(frame, box));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
-  parts.push(xLabels(frame, spec, stats.map((row, index) => ({ x: box.left + band * index + band / 2, text: row.name }))));
+  parts.push(xLabels(frame, spec, stats.map((row, index) => ({ x: xAt(index), text: row.name }))));
   return view.done();
 }
 

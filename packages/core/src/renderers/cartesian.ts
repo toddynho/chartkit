@@ -1,5 +1,5 @@
 import { annotationLayers, seriesPoints } from "../annotations";
-import { isPaintColumn, readRules, resolveColors, withPalette } from "../color";
+import { isPaintColumn, readRules, resolveColors, ruleMatchesAny, withPalette, type ColorRule } from "../color";
 import { loadTable } from "../data-prep";
 import { isTypedArray, type DataTable } from "../data";
 import { formatZoned, zoneOf, zonedTimeTicks } from "../timezone";
@@ -210,6 +210,8 @@ export interface PlotModel {
   gradient: boolean;
   /** Blurred understroke. The filter is omitted unless this is set. */
   glow: boolean;
+  /** Colour-rule tokens that matched a line point. Shown when the legend is. */
+  ruleLegend?: { name: string; color: string }[];
   points: "none" | "hover" | "always";
   /** off omits circles. hidden keeps them so --ck-line-dots can show them. shown uses inline. */
   dots: "off" | "hidden" | "shown";
@@ -387,7 +389,7 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     strokeWidth,
     strokePaint: strokeSet ? n(strokeWidth) : `var(--ck-line-width, ${n(strokeWidth)})`,
     gradient: mark.gradient !== false,
-    glow: (type === "line" || type === "sparkline") && mark.glow === true,
+    glow: (type === "line" || type === "sparkline" || type === "combo") && mark.glow === true,
     points,
     dots: points === "always" ? "shown" : points === "none" && !pointsSet ? "hidden" : "off",
     pointSize: typeof mark.pointSize === "number" ? mark.pointSize : geometry.pointSize,
@@ -513,6 +515,7 @@ function toModel(
     xTemporal = false;
   }
   const colorScale = applyPointColors(table, encoding, mark, preset, series, labels, type === "bar" || type === "combo");
+  const ruleLegend = colorScale ? [] : ruleSwatches(series, readRules(mark), preset);
   const swatches = colorScale ? undefined : categorySwatches(spec, series, labels);
 
   return {
@@ -524,6 +527,7 @@ function toModel(
     legend: shell.legendOn && (series.length > 1 || Boolean(swatches)),
     colorScale,
     swatches,
+    ruleLegend,
     zero: zeroDefault(type, mark, series),
     xTemporal,
     notes: spec.annotations,
@@ -880,8 +884,10 @@ function paintPoints(out: string[], points: (Pt | null)[], model: PlotModel, ser
     if (!point) continue;
     const at = indexes ? indexes[k] : k;
     const color = series.colors?.[at] ?? series.color;
+    const ruled = Boolean(series.colors && color !== series.color);
     const named = colored ? ` data-ck-name="${esc(series.name)}" data-ck-i="${at}"` : indexes ? ` data-ck-i="${indexes[k]}"` : "";
-    out.push(marker(point.x, point.y, radius, shape, color, hollow, hidden + named));
+    const ring = ruled ? ` stroke="${cssVar("background", model.preset.background)}" stroke-width="2"` : "";
+    out.push(marker(point.x, point.y, radius + (ruled ? 1.25 : 0), shape, color, hollow, hidden + ring + named));
   }
 }
 
@@ -1642,12 +1648,17 @@ function xStep(model: PlotModel, count: number, angle: number): number {
 }
 
 function legendItems(model: PlotModel): LegendItem[] {
-  if (model.swatches && model.swatches.length > 1) return model.swatches.map((item) => ({ name: item.name, color: item.color }));
-  return model.series.map((series) => {
+  const rules = model.legend ? ruleItems(model) : [];
+  if (model.swatches && model.swatches.length > 1) return [...model.swatches.map((item) => ({ name: item.name, color: item.color })), ...rules];
+  return [...model.series.map((series) => {
     const shape = markerShape(model, series);
     const symbol = shape && (explicitMark(model, series) || model.dots === "shown") ? shape : undefined;
     return { name: legendName(model, series), color: series.color, symbol };
-  });
+  }), ...rules];
+}
+
+function ruleItems(model: PlotModel): LegendItem[] {
+  return (model.ruleLegend ?? []).map((item) => ({ name: item.name, color: item.color, symbol: "circle" }));
 }
 
 function legend(model: PlotModel, x: number, y: number, maxRight: number): string {
@@ -1664,6 +1675,7 @@ function legend(model: PlotModel, x: number, y: number, maxRight: number): strin
       out.push(`<rect x="${n(cx)}" y="${n(cy)}" width="10" height="10" rx="2" fill="${item.color}" /><text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12" font-family="${font()}">${esc(item.name)}</text>`);
       cx += width;
     }
+    appendRules(out, model, cx, cy, x, maxRight);
     return out.join("");
   }
   return legendSeries(model, x, y, maxRight);
@@ -1691,7 +1703,20 @@ function legendSeries(model: PlotModel, x: number, y: number, maxRight: number):
     out.push(`${legendIcon(model, series, cx, cy)}<text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12" font-family="${font()}">${esc(name)}</text>`);
     cx += width;
   }
+  appendRules(out, model, cx, cy, x, maxRight);
   return out.join("");
+}
+
+function appendRules(out: string[], model: PlotModel, cx: number, cy: number, x: number, maxRight: number): void {
+  for (const item of ruleItems(model)) {
+    const width = 26 + item.name.length * 6.6;
+    if (cx > x && cx + width > maxRight) {
+      cx = x;
+      cy += 18;
+    }
+    out.push(`<circle cx="${n(cx + 5)}" cy="${n(cy + 5)}" r="4.5" fill="${item.color}" stroke="${cssVar("background", model.preset.background)}" stroke-width="1.5" /><text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12" font-family="${font()}">${esc(item.name)}</text>`);
+    cx += width;
+  }
 }
 
 function openSvg(model: PlotModel): string {
@@ -2249,6 +2274,7 @@ export function legendRows(model: PlotModel, start: number, maxRight: number): n
   let cx = start;
   let rows = 1;
   const names = model.swatches && model.swatches.length > 1 ? model.swatches.map((item) => item.name) : model.series.map((series) => legendName(model, series));
+  if (model.legend) for (const item of model.ruleLegend ?? []) names.push(item.name);
   for (const name of names) {
     const width = 26 + name.length * 6.6;
     if (cx > start && cx + width > maxRight) {
@@ -2313,6 +2339,66 @@ function seriesFieldName(encoding: Record<string, unknown>, table: DataTable): s
   const quantitative = scale === "sequential" || scale === "diverging" || scale === "quantize" || scale === "threshold" || (isRecord(encoding.color) && encoding.color.type === "quantitative");
   if (color && color !== xName && column && !isPaintColumn(column) && !quantitative) return color;
   return undefined;
+}
+
+const DISTINCT = ["#ffd60a", "#5e5ce6", "#ff9f0a", "#64d2ff", "#ac8e68", "#ff6961"];
+
+function hexes(color: string): number[][] {
+  const out: number[][] = [];
+  const re = /#([0-9a-fA-F]{6})/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(color))) {
+    const hex = match[1];
+    out.push([parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)]);
+  }
+  return out;
+}
+
+function nearColor(a: string, b: string): boolean {
+  const left = hexes(a);
+  const right = hexes(b);
+  if (!left.length || !right.length) return a === b;
+  for (const p of left) {
+    for (const q of right) {
+      if (Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]) < 80) return true;
+    }
+  }
+  return false;
+}
+
+function nearAny(color: string, others: string[]): boolean {
+  return others.some((other) => nearColor(color, other));
+}
+
+/** A rule colour that sits on a line. Shift it when it matches that line. */
+function distinctPaint(painted: string, strokes: string[]): string {
+  if (!nearAny(painted, strokes)) return painted;
+  for (const alt of DISTINCT) {
+    if (!nearAny(alt, strokes) && !nearColor(alt, painted)) return alt;
+  }
+  return painted;
+}
+
+function ruleSwatches(series: Series[], rules: ColorRule[], preset: PresetTokens): { name: string; color: string }[] {
+  const strokes = series.filter((item) => item.mark !== "bar").map((item) => lineStroke(item.color, 2, preset.lines));
+  const out: { name: string; color: string }[] = [];
+  const seen = new Set<string>();
+  for (const rule of rules) {
+    if (!rule.color || seen.has(rule.color)) continue;
+    const painted = paint(rule.color, preset, 0);
+    let used = false;
+    const next = distinctPaint(painted, strokes);
+    for (const item of series) {
+      if (item.mark === "bar" || !item.colors || !ruleMatchesAny(rule, item.values)) continue;
+      used = true;
+      if (next === painted) continue;
+      for (let i = 0; i < item.colors.length; i++) if (item.colors[i] === painted) item.colors[i] = next;
+    }
+    if (!used) continue;
+    seen.add(rule.color);
+    out.push({ name: rule.color, color: next });
+  }
+  return out;
 }
 
 /** Per-point colour from a colour field, a domain map, a constant, or mark.colorRules. */

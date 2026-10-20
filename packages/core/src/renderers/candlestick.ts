@@ -1,3 +1,5 @@
+import { seriesPoints } from "../annotations";
+import { axisTitleMarks, categoryX, chooseTicks, heading, lockDomain, placedNotes } from "../chrome";
 import { cssVar } from "../theme";
 import { formatAxisValue, formatValue } from "../format";
 import {
@@ -12,7 +14,7 @@ import {
   resolveDomain,
   wantsZero,
 } from "../frame";
-import { closeChart, esc, font, isRecord, linear, n, openChart, ticks } from "../svg";
+import { closeChart, esc, font, isRecord, linear, n, openChart, readAxis, ticks } from "../svg";
 
 /** OHLC candles. A volume pane is drawn when encoding.volume is set. */
 export function renderCandlestick(spec: Record<string, unknown>): string | null {
@@ -44,23 +46,25 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
 
   const prices = candles.flatMap((candle) => [candle.high, candle.low]);
   const pad = (Math.max(...prices) - Math.min(...prices)) * 0.08 || 1;
-  const domain = resolveDomain([Math.min(...prices) - pad, Math.max(...prices) + pad], frame.encoding.high, wantsZero(frame.encoding.high, false));
+  const fitted = resolveDomain([Math.min(...prices) - pad, Math.max(...prices) + pad], frame.encoding.high, wantsZero(frame.encoding.high, false));
+  const domain = lockDomain(fitted[0], fitted[1], [frame.encoding.high, frame.encoding.low, frame.encoding.close, frame.encoding.y]);
   const showVolume = volumeF !== undefined;
   const showX = axisOn(spec, "x");
   const showY = axisOn(spec, "y");
   const yAxisFormat = isRecord(spec.axes) && isRecord(spec.axes.y) ? spec.axes.y.format : undefined;
   const priceFormat = yAxisFormat ?? channelFormat(frame.encoding.close) ?? channelFormat(frame.encoding.high) ?? channelFormat(frame.encoding.open) ?? "number";
-  const yTicks = ticks(domain[0], domain[1], 5);
+  const yTicks = chooseTicks(spec, "y", domain[0], domain[1], ticks(domain[0], domain[1], 5));
   const yTickText = yTicks.map((tick) => formatAxisValue(tick, priceFormat, frame.locale, yTicks));
-  let top = 12;
-  if (frame.title) top = 36;
+  let top = 12 + (frame.subtitle ? 18 : 0);
+  if (frame.title) top = 36 + (frame.subtitle ? 18 : 0);
   let left = 12;
   if (showY) {
     let width = 0;
     for (let i = 0; i < yTickText.length; i++) width = Math.max(width, yTickText[i].length * 6.7);
     left = Math.max(56, Math.ceil(width + 16));
   }
-  const plot = { left, top, right: frame.width - 12, bottom: frame.height - (showX ? 28 : 12) };
+  if (showY && readAxis(spec, "y").title) left += 16;
+  const plot = { left, top, right: frame.width - 12, bottom: frame.height - (showX ? 28 : 12) - (showX && readAxis(spec, "x").title ? 14 : 0) };
   const volumeH = showVolume ? Math.max(28, (plot.bottom - plot.top) * 0.2) : 0;
   const priceBottom = plot.bottom - volumeH - (showVolume ? 8 : 0);
   const yScale = linear(domain[0], domain[1], priceBottom, plot.top);
@@ -76,7 +80,8 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   const parts: string[] = [];
   parts.push(openChart({ ...frame, renderer: "candlestick" }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
-  if (frame.title) parts.push(text(plot.left, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
+  const head = heading(frame, plot.left);
+  if (head) parts.push(head);
   if (grid && showY) {
     const dash = grid === "dashed" ? ' stroke-dasharray="3 3"' : grid === "dotted" ? ' stroke-dasharray="1 3"' : "";
     for (const tick of yTicks) {
@@ -119,11 +124,19 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   }
   if (showX) {
     const step = candles.length > 8 ? Math.ceil(candles.length / 6) : 1;
+    const labelY = frame.height - (readAxis(spec, "x").title ? 26 : 12);
     for (let i = 0; i < candles.length; i += step) {
       if (!candles[i].label) continue;
-      parts.push(text(plot.left + slot * i + slot / 2, plot.bottom + 16, candles[i].label, cssVar("muted", frame.preset.muted), 11, "400", "middle"));
+      parts.push(text(plot.left + slot * i + slot / 2, labelY, candles[i].label, cssVar("muted", frame.preset.muted), 11, "400", "middle"));
     }
   }
+  const xAt = (index: number) => plot.left + slot * index + slot / 2;
+  const names = candles.map((candle) => candle.label);
+  const notes = placedNotes(spec, frame, plot, categoryX(names, xAt), (value) => yScale(value), [
+    { name: "close", axis: "y", pts: seriesPoints(null, candles.map((candle) => candle.close)) },
+  ], names);
+  parts.push(notes.over);
+  parts.push(axisTitleMarks(frame, spec, plot));
   parts.push(closeChart());
   return parts.join("");
 }

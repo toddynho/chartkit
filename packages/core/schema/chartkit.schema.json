@@ -1093,7 +1093,7 @@
         "glow": {
           "type": "boolean",
           "default": false,
-          "description": "Soft glow behind the line. A blurred understroke and one filter, emitted only when true, on Soft and on midnight. Applies to: line, sparkline."
+          "description": "Soft glow behind the line. A blurred understroke and one filter, emitted only when true, on Soft and on midnight. Applies to: line, sparkline, combo."
         },
         "connectNulls": {
           "type": "boolean",

@@ -1,4 +1,5 @@
 import { colorLegendHeight, readColorScale, scaleLabel } from "../color-scale";
+import { heading } from "../chrome";
 import { cssVar, paint } from "../theme";
 import { formatValue } from "../format";
 import { asNumber, column, fieldOf, readColor, readFrame, readTable, type Frame } from "../frame";
@@ -54,6 +55,12 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
   const quiet = emptyMark(frame.id, frame.preset);
   const legendH = ramp ? colorLegendHeight : 22;
   const box = calendarLayout(frame, weeks, legendH);
+  const head = (frame.title ? 28 : 0) + (frame.subtitle ? 16 : 0);
+  if (head) {
+    box.oy += head;
+    box.height += head;
+    box.legendY += head;
+  }
   const radius = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : Math.min(frame.geometry.cornerRadius, 4);
 
   const months: { label: string; x: number }[] = [];
@@ -90,6 +97,8 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
   parts.push(openChart({ ...frame, width: box.width, height: box.height, renderer: "heatmap" }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
   parts.push(`<defs>${quiet.def}</defs>`);
+  const titled = heading(frame, box.ox + DAY_LABEL_W);
+  if (titled) parts.push(titled);
   for (const month of months) {
     parts.push(text(month.x, box.oy + 11, month.label, cssVar("muted", frame.preset.muted), 10));
   }
@@ -206,7 +215,7 @@ function renderGrid(spec: Record<string, unknown>): string | null {
   const radius = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : Math.min(frame.geometry.cornerRadius, 6);
   const quiet = emptyMark(frame.id, frame.preset);
   const left = 48;
-  const top = frame.title ? 42 : 28;
+  const top = (frame.title ? 42 : 28) + (frame.subtitle ? 16 : 0);
   const legendH = ramp ? colorLegendHeight : 0;
   const plotW = frame.width - left - 16;
   const plotH = frame.height - top - 22 - legendH;
@@ -220,7 +229,8 @@ function renderGrid(spec: Record<string, unknown>): string | null {
   parts.push(openChart({ ...frame, renderer: "heatmap" }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
   parts.push(`<defs>${quiet.def}</defs>`);
-  if (frame.title) parts.push(text(left, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
+  const titled = heading(frame, left);
+  if (titled) parts.push(titled);
   for (const y of ys) {
     const row = ys.indexOf(y);
     parts.push(text(left - 8, top + row * bandH + bandH / 2 + 4, y, cssVar("muted", frame.preset.muted), 11, "400", "end"));

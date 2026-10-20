@@ -1,3 +1,5 @@
+import { seriesPoints } from "../annotations";
+import { axisTitleMarks, categoryX, chooseTicks, heading, lockDomain, placedNotes } from "../chrome";
 import { cssVar, lineStroke, paint } from "../theme";
 import { formatAxisValue, formatValue } from "../format";
 import {
@@ -11,7 +13,7 @@ import {
   resolveDomain,
 } from "../frame";
 import { readSamplingMode, sampleSeries } from "../sampling";
-import { closeChart, esc, font, linear, n, openChart, ticks } from "../svg";
+import { closeChart, esc, font, linear, n, openChart, readAxis, ticks } from "../svg";
 
 /** Thin vertical spikes from mark.baseline (default 0) across x. */
 export function renderSpike(spec: Record<string, unknown>): string | null {
@@ -29,16 +31,17 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
   const strokeAttr = typeof frame.mark.strokeWidth === "number" ? n(width) : `var(--ck-line-width, ${n(width)})`;
   const opacity = typeof frame.mark.opacity === "number" ? frame.mark.opacity : 1;
   const color = lineStroke(paint(undefined, frame.preset, 0), width, frame.preset.lines);
-  const domain = resolveDomain(
+  const fitted = resolveDomain(
     values.filter((value): value is number => value !== null).concat(baseline),
     frame.encoding.y,
     true,
   );
+  const domain = lockDomain(fitted[0], fitted[1], [frame.encoding.y]);
   const showX = axisOn(spec, "x");
   const showY = axisOn(spec, "y");
-  let top = 16;
-  if (frame.title) top = 32;
-  const yTicks = ticks(domain[0], domain[1], 4);
+  let top = 16 + (frame.subtitle ? 18 : 0);
+  if (frame.title) top = 32 + (frame.subtitle ? 18 : 0);
+  const yTicks = chooseTicks(spec, "y", domain[0], domain[1], ticks(domain[0], domain[1], 4));
   const yFormat = channelFormat(frame.encoding.y);
   const yTickText = yTicks.map((tick) => formatAxisValue(tick, yFormat, frame.locale, yTicks));
   let left = 12;
@@ -47,7 +50,8 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
     for (let i = 0; i < yTickText.length; i++) width = Math.max(width, yTickText[i].length * 6.7);
     left = Math.max(44, Math.ceil(width + 14));
   }
-  const plot = { left, top, right: frame.width - 12, bottom: frame.height - (showX ? 28 : 12) };
+  if (showY && readAxis(spec, "y").title) left += 16;
+  const plot = { left, top, right: frame.width - 12, bottom: frame.height - (showX ? 28 : 12) - (showX && readAxis(spec, "x").title ? 14 : 0) };
   const yScale = linear(domain[0], domain[1], plot.bottom, plot.top);
   const count = values.length;
   const slot = count > 0 ? (plot.right - plot.left) / count : plot.right - plot.left;
@@ -55,7 +59,8 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
   const parts: string[] = [];
   parts.push(openChart({ ...frame, renderer: "spike" }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
-  if (frame.title) parts.push(text(plot.left, 20, frame.title, cssVar("text", frame.preset.text), 15, "650"));
+  const head = heading(frame, plot.left);
+  if (head) parts.push(head);
   const baseY = yScale(baseline);
   parts.push(
     `<line x1="${n(plot.left)}" y1="${n(baseY)}" x2="${n(plot.right)}" y2="${n(baseY)}" stroke="${cssVar("axis", frame.preset.axis)}" stroke-width="1.5" />`,
@@ -93,11 +98,18 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
   }
   if (showX) {
     const step = count > 8 ? Math.ceil(count / 6) : 1;
+    const labelY = frame.height - (readAxis(spec, "x").title ? 26 : 12);
     for (let i = 0; i < count; i += step) {
       if (!labels[i]) continue;
-      parts.push(text(plot.left + slot * i + slot / 2, plot.bottom + 16, labels[i], cssVar("muted", frame.preset.muted), 11, "400", "middle"));
+      parts.push(text(plot.left + slot * i + slot / 2, labelY, labels[i], cssVar("muted", frame.preset.muted), 11, "400", "middle"));
     }
   }
+  const xAt = (index: number) => plot.left + slot * index + slot / 2;
+  const notes = placedNotes(spec, frame, plot, categoryX(labels, xAt), (value) => yScale(value), [
+    { name: yField ?? "y", axis: "y", pts: seriesPoints(null, values) },
+  ], labels);
+  parts.push(notes.over);
+  parts.push(axisTitleMarks(frame, spec, plot));
   parts.push(closeChart());
   return parts.join("");
 }

@@ -2,7 +2,8 @@ import type { DataTable } from "../../data";
 import { formatAxisValue, formatValue } from "../../format";
 import { asNumber, axisOn, channelFormat, column, fieldOf, gridStyle, readFrame, readTable, type Frame } from "../../frame";
 import { cssVar, lineStroke, paint } from "../../theme";
-import { clipPath, closeChart, esc, font, isRecord, linear, n, openChart, ticks } from "../../svg";
+import { heading } from "../../chrome";
+import { clipPath, closeChart, esc, font, isRecord, linear, n, openChart, readAxis, ticks } from "../../svg";
 
 export interface View {
   frame: Frame;
@@ -17,7 +18,8 @@ export function viewOf(spec: Record<string, unknown>, renderer: string, width: n
   if (!table) return null;
   const frame = readFrame(spec, { width, height });
   const parts = [openChart({ ...frame, renderer }), `<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`];
-  if (frame.title) parts.push(text(16, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
+  const head = heading(frame, 16);
+  if (head) parts.push(head);
   return { frame, spec, table, parts, done: () => (parts.push(closeChart()), parts.join("")) };
 }
 
@@ -130,11 +132,18 @@ export function plotBox(frame: Frame, spec: Record<string, unknown>, opts?: { le
     for (let i = 0; i < opts.yTicks.length; i++) labels.push(formatAxisValue(opts.yTicks[i], format, frame.locale, opts.yTicks));
     left = yTickGutter(labels);
   }
+  const yAxis = readAxis(spec, "y");
+  const xAxis = readAxis(spec, "x");
+  if (showY && yAxis.title && opts?.left === undefined) left += 16;
+  let top = frame.title ? 40 : 16;
+  if (frame.subtitle) top += 18;
+  let bottom = opts?.bottom ?? (showX ? 32 : 16);
+  if (showX && xAxis.title) bottom += 14;
   return {
     left,
-    top: frame.title ? 40 : 16,
+    top,
     right: frame.width - 16,
-    bottom: frame.height - (opts?.bottom ?? (showX ? 32 : 16)),
+    bottom: frame.height - bottom,
   };
 }
 
@@ -163,9 +172,10 @@ export function yLabels(frame: Frame, spec: Record<string, unknown>, box: Box, v
 export function xLabels(frame: Frame, spec: Record<string, unknown>, labels: { x: number; text: string }[]): string {
   if (!axisOn(spec, "x")) return "";
   const step = labels.length > 8 ? Math.ceil(labels.length / 6) : 1;
+  const y = frame.height - (readAxis(spec, "x").title ? 26 : 12);
   return labels
     .filter((label, index) => index % step === 0 && label.text)
-    .map((label) => text(label.x, frame.height - 12, fit(label.text, 72, 11), cssVar("muted", frame.preset.muted), 11, "400", "middle"))
+    .map((label) => text(label.x, y, fit(label.text, 72, 11), cssVar("muted", frame.preset.muted), 11, "400", "middle"))
     .join("");
 }
 

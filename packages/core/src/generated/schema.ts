@@ -1129,7 +1129,7 @@ export interface Mark {
    */
   strokeWidth?: number;
   /**
-   * Soft glow behind the line. A blurred understroke and one filter, emitted only when true, on Soft and on midnight. Applies to: line, sparkline.
+   * Soft glow behind the line. A blurred understroke and one filter, emitted only when true, on Soft and on midnight. Applies to: line, sparkline, combo.
    */
   glow?: boolean;
   /**

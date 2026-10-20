@@ -10,7 +10,7 @@ export const MARK_APPLIES: Record<string, readonly string[]> = {
   fillOpacity: ["line", "stacked-area", "combo", "mini-area", "bar"],
   gradient: ["line", "stacked-area", "mini-area", "sparkline"],
   strokeWidth: ["line", "stacked-area", "combo", "sparkline", "mini-area", "spike", "progress-ring", "gauge"],
-  glow: ["line", "sparkline"],
+  glow: ["line", "sparkline", "combo"],
   connectNulls: ["line", "stacked-area", "combo", "sparkline", "mini-area"],
   stack: ["bar", "stacked-area", "combo"],
   orientation: ["bar"],
