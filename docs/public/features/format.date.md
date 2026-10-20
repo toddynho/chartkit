@@ -72,6 +72,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | ~axisFormat\|dateFormat | dts-grep (weak) | mermaid/dist/config.type.d.ts:590 gantt |
 | AntV G2 | native | ~labelFormatter | dts-grep (weak) | @antv/g2/lib/component/legendCategory.d.ts:5 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40eb8c4522fd.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against fb308ab4f88e.
 
 https://chartkit.dev/features.json

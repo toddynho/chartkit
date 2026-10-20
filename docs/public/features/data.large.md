@@ -6,7 +6,7 @@ Dedicated large-data rendering paths
 
 Matrix status: `native`. Verification: `dts-path` (strong).
 
-Canvas for line, area, scatter, bar, heatmap, and candlestick. Columnar data.sampling is lttb, minmax, or none. Typed-array append. Other types stay SVG.
+Canvas paints line, area, scatter, bar, heatmap, and candlestick from the sampled geometry. Columnar data.sampling is lttb, minmax, or none. auto from 100000 rows. Typed-array append. Other types stay SVG.
 
 Source: chartkit:packages/core/src/generated/schema.ts:82, chartkit:packages/core/src/generated/schema.ts:177
 
@@ -71,6 +71,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | none | — | dts-absence (absence) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40eb8c4522fd.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against fb308ab4f88e.
 
 https://chartkit.dev/features.json

@@ -6,7 +6,7 @@ Renders to 2D canvas
 
 Matrix status: `partial`. Verification: `dts-path` (strong).
 
-Line, stacked-area, scatter, bar, heatmap, and candlestick. Axes, legend, title, and annotations stay SVG. auto from 8000 rows. Other types stay SVG and warn CK3033.
+Line, stacked-area, scatter, bar, heatmap, and candlestick. Axes, legend, title, and annotations stay SVG. Marks are painted from the sampled geometry. auto from 100000 rows. Other types stay SVG and warn CK3033.
 
 Source: chartkit:packages/core/src/generated/schema.ts:82
 
@@ -68,6 +68,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~canvas | dts-grep (weak) | @antv/g2/lib/data/wordCloud.d.ts:94 default G canvas renderer |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40eb8c4522fd.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against fb308ab4f88e.
 
 https://chartkit.dev/features.json
