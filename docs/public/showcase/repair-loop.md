@@ -408,6 +408,7 @@ Repaired:
 - [Accessible name / alt text](https://chartkit.dev/features/a11y.alt) (`a11y.alt`)
 - [Axis title](https://chartkit.dev/features/axis.title) (`axis.title`)
 - [Data labels on marks](https://chartkit.dev/features/label.show) (`label.show`)
+- [Margins / padding](https://chartkit.dev/features/layout.margin) (`layout.margin`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)
 - [Column / vertical bar](https://chartkit.dev/features/type.bar.vertical) (`type.bar.vertical`)
 - [Donut chart](https://chartkit.dev/features/type.donut) (`type.donut`)
