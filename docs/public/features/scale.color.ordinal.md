@@ -73,6 +73,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | ~plotColorPalette | dts-grep (weak) | mermaid/dist/diagrams/xychart/chartBuilder/interfaces.d.ts:20 |
 | AntV G2 | native | ~palette\|category10 | dts-grep (weak) | @antv/g2/lib/index.d.ts:89 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 24651e4fe1b9.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3a59d27e1bde.
 
 https://chartkit.dev/features.json

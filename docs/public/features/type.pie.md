@@ -67,6 +67,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.pie | dts-path (strong) | mermaid/dist/config.type.d.ts:223 |
 | AntV G2 | native | ~polar | dts-grep (weak) | @antv/g2/lib/index.d.ts:53 interval + theta coordinate |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 24651e4fe1b9.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3a59d27e1bde.
 
 https://chartkit.dev/features.json

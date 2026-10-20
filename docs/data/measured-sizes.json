@@ -1,18 +1,18 @@
 {
-  "commit": "24651e4fe1b9cfbb283008da7cbb0530e0bdbeb1",
-  "coreCommit": "24651e4fe1b9cfbb283008da7cbb0530e0bdbeb1",
+  "commit": "3a59d27e1bde0382939e2fac3c7a298d6967896b",
+  "coreCommit": "5c665516f90bc7dafb717c286e27eadc1f9437da",
   "coreMatchesMain": false,
   "sizeScript": {
     "command": "node scripts/size.mjs",
     "method": "esbuild --bundle --minify, gzip level 9, platform node. line is createRenderer([line]) from packages/core/src. all is packages/core/src/all.ts.",
-    "measuredAt": "2026-10-20T15:46:00.000Z",
+    "measuredAt": "2026-10-20T16:20:00.000Z",
     "measured": {
-      "line": 31245,
-      "all": 52385
+      "line": 31251,
+      "all": 52527
     },
     "minBytes": {
-      "line": 88685,
-      "all": 151305
+      "line": 88670,
+      "all": 151540
     }
   },
   "bench": {
