@@ -8,7 +8,9 @@ Matrix status: `native`. Verification: `dts-grep` (weak).
 
 @chartkitdev/element defines <chart-kit>. Spec from the property, the spec attribute, or a child JSON script.
 
-No spec snippet. This feature is not a field on the chart spec.
+Source: chartkit:packages/element/src/index.ts:298
+
+No spec snippet. This row is not a single option that `validate()` can show.
 
 ## Other libraries
 
@@ -35,6 +37,6 @@ No spec snippet. This feature is not a field on the chart spec.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | none | — | dts-absence (absence) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against f0e644ec234d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 668873d6cd29.
 
 https://chartkit.dev/features.json
