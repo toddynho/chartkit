@@ -1,6 +1,8 @@
 import { annotationLayers, seriesPoints } from "../annotations";
 import { isPaintColumn, readRules, resolveColors, withPalette } from "../color";
-import { isTypedArray, readData, type DataTable } from "../data";
+import { loadTable } from "../data-prep";
+import { isTypedArray, type DataTable } from "../data";
+import { formatZoned, zoneOf, zonedTimeTicks } from "../timezone";
 import { formatAxisValue, formatValue } from "../format";
 import { bag, glyphOf, marker, named, nudge, type Bag } from "../glyphs";
 import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
@@ -165,6 +167,8 @@ export interface PlotModel {
   subtitle?: string;
   alt: string;
   locale: string;
+  /** IANA zone for temporal ticks. UTC when the spec omits timezone. */
+  zone: string;
   width: number;
   height: number;
   responsive: boolean;
@@ -251,6 +255,7 @@ export interface ChartShell {
   responsive: boolean;
   alt: string;
   locale: string;
+  zone: string;
   id: string;
   title?: string;
   subtitle?: string;
@@ -347,6 +352,7 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     responsive: size.width === undefined || size.width === "auto",
     alt,
     locale: typeof spec.locale === "string" ? spec.locale : "en-US",
+    zone: zoneOf(spec),
     id: `ck${hash(idSource)}`,
     title: typeof spec.title === "string" ? spec.title : undefined,
     subtitle: typeof spec.subtitle === "string" ? spec.subtitle : undefined,
@@ -405,7 +411,7 @@ function toModel(
     labels: string[],
   ) => { series: Series[]; labels: string[] } | null,
 ): PlotModel | null {
-  const read = readData(spec.data);
+  const read = loadTable(spec);
   if (!read.ok) return null;
   const table = read.table;
   const shell = shellFor(spec);
@@ -1419,12 +1425,42 @@ function timeBand(model: PlotModel, xScale: XScale, plot: PlotBox): string {
   const min = xScale.min;
   const max = xScale.max;
   const width = Math.max(1, plot.right - plot.left);
-  const values =
-    model.xAxis.count !== undefined || model.xAxis.values?.length
+  const explicit = model.xAxis.count !== undefined || Boolean(model.xAxis.values?.length);
+  const at = (value: number) => xScale.at(value);
+  if (explicit || model.zone === "UTC") {
+    const values = explicit
       ? resolveTicks(model, "x", min, max, model.xAxis.count ?? 6, false)
       : timeTicks(min, max, Math.max(2, Math.floor(width / 72)));
-  const labels = values.map((tick) => formatTimeLabel(tick, max - min, model.locale, model.xFormat));
-  return along(model, values, labels, (value) => xScale.at(value), plot, 4);
+    const labels = values.map((tick) => formatTimeLabel(tick, max - min, model.locale, model.xFormat, model.zone));
+    return along(model, values, labels, at, plot, 4);
+  }
+  let count = Math.max(2, Math.floor(width / 84));
+  let values = timeTicks(min, max, count, model.zone);
+  let labels = values.map((tick) => formatTimeLabel(tick, max - min, model.locale, model.xFormat, model.zone));
+  while (count > 2 && model.xAxis.skip !== false && timeLabelsCollide(values, labels, at, plot.left, plot.right)) {
+    count -= 1;
+    values = timeTicks(min, max, count, model.zone);
+    labels = values.map((tick) => formatTimeLabel(tick, max - min, model.locale, model.xFormat, model.zone));
+  }
+  return along(model, values, labels, at, plot, 4);
+}
+
+function timeLabelsCollide(
+  values: number[],
+  labels: string[],
+  at: (value: number) => number,
+  left: number,
+  right: number,
+): boolean {
+  let last = -Infinity;
+  for (let i = 0; i < values.length; i++) {
+    const x = at(values[i]);
+    if (x < left - 8 || x > right + 8) continue;
+    const half = ((labels[i]?.length || 1) * 6.4) / 2;
+    if (x - half < last) return true;
+    last = x + half + 8;
+  }
+  return false;
 }
 
 function along(
@@ -2381,7 +2417,8 @@ function dataNumber(value: number | string): number | null {
 const TICK_MIN = [1, 5, 15, 30, 60, 180, 360, 720, 1440, 2880, 10080, 20160, 43200, 129600, 525600];
 const MONTHS = "JanFebMarAprMayJunJulAugSepOctNovDec";
 
-export function timeTicks(min: number, max: number, count: number): number[] {
+export function timeTicks(min: number, max: number, count: number, zone = "UTC"): number[] {
+  if (zone !== "UTC") return zonedTimeTicks(min, max, count, zone);
   const span = max - min || 1;
   let step = 525600 * 60000;
   for (let i = 0; i < TICK_MIN.length; i++) {
@@ -2399,8 +2436,9 @@ export function timeTicks(min: number, max: number, count: number): number[] {
   return out.length ? out : [min, max];
 }
 
-export function formatTimeLabel(ms: number, span: number, locale: string, format: unknown): string {
-  if (format !== undefined) return formatValue(ms, format, locale);
+export function formatTimeLabel(ms: number, span: number, locale: string, format: unknown, zone = "UTC"): string {
+  if (format !== undefined) return formatValue(ms, format, locale, zone);
+  if (zone !== "UTC") return formatZoned(ms, span, locale, zone);
   const date = new Date(ms);
   if (date.getTime() !== date.getTime()) return "";
   if (locale !== "en-US") {

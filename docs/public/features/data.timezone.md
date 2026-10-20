@@ -1,14 +1,58 @@
 # Time zone handling
 
-ChartKit: **none**
+ChartKit: **native**
 
 UTC vs local display and explicit time zones
 
-Matrix status: `none`. Verification: `source-review` (strong).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-temporal parsed and formatted without a time-zone option; probe hit reviewed: dates are always formatted with timeZone:"UTC" (format.ts:56); no option
+IANA timezone for temporal axes, ticks, and tooltips. Omitted means UTC so server and client labels match.
 
-No spec snippet. ChartKit does not support this feature.
+Source: chartkit:packages/core/src/timezone.ts:1
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "t": "2026-03-08T05:00:00Z",
+      "load": 40
+    },
+    {
+      "t": "2026-03-08T06:00:00Z",
+      "load": 42
+    },
+    {
+      "t": "2026-03-08T07:00:00Z",
+      "load": 48
+    },
+    {
+      "t": "2026-03-08T08:00:00Z",
+      "load": 45
+    }
+  ],
+  "encoding": {
+    "x": {
+      "field": "t",
+      "type": "temporal"
+    },
+    "y": "load"
+  },
+  "a11y": {
+    "alt": "Load stepped across the New York spring-forward."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "timezone": "America/New_York"
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -35,6 +79,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | unknown | ~utc | unverified (unknown) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 5b79c72ec5e9.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against f0e644ec234d.
 
 https://chartkit.dev/features.json

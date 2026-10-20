@@ -113,6 +113,86 @@
       ],
       "description": "BCP 47 locale for number/date formatting. Default: the host's locale."
     },
+    "timezone": {
+      "type": "string",
+      "examples": ["UTC", "America/New_York"],
+      "description": "IANA time zone for temporal axes, ticks, and tooltips. Omitted means UTC, so a server render and the client label the same instant the same way."
+    },
+    "sort": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Sort rows before drawing. field sorts by that column. by value sorts categories by the first y field. order is ascending (default) or descending.",
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Field to sort by."
+        },
+        "by": {
+          "enum": ["value"],
+          "description": "Sort by the first y value. Used for bars."
+        },
+        "order": {
+          "enum": ["ascending", "descending"],
+          "description": "Sort direction. Default ascending."
+        }
+      }
+    },
+    "transform": {
+      "type": "array",
+      "description": "Row steps applied before sort: filter, a rolling window, or an aggregate.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "enum": ["filter", "window", "aggregate"],
+            "description": "filter keeps matching rows. window adds a rolling column. aggregate groups rows."
+          },
+          "field": {
+            "type": "string",
+            "description": "Source field. Required for filter and window, and for sum or mean."
+          },
+          "eq": {
+            "type": ["string", "number", "boolean", "null"],
+            "description": "filter: keep rows whose field equals this."
+          },
+          "gt": {
+            "type": "number",
+            "description": "filter: keep rows greater than this."
+          },
+          "gte": {
+            "type": "number",
+            "description": "filter: keep rows greater than or equal to this."
+          },
+          "lt": {
+            "type": "number",
+            "description": "filter: keep rows less than this."
+          },
+          "lte": {
+            "type": "number",
+            "description": "filter: keep rows less than or equal to this."
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "description": "window: number of rows in the rolling window, including the current row."
+          },
+          "op": {
+            "enum": ["mean", "sum", "count"],
+            "description": "window defaults to mean. aggregate is sum, mean, or count."
+          },
+          "as": {
+            "type": "string",
+            "description": "Output field name. window requires it. aggregate defaults to the source field, or count."
+          },
+          "group": {
+            "type": "string",
+            "description": "aggregate: field to group by."
+          }
+        }
+      }
+    },
     "a11y": {
       "$ref": "#/$defs/a11y"
     }

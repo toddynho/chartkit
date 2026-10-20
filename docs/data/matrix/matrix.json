@@ -30566,19 +30566,19 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "partial",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "ChartKitChartSpecV1.mark.bins"
+            "ChartKitChartSpecV1.transform"
           ],
           "evidence": [
             {
               "kind": "dts-path",
-              "path": "ChartKitChartSpecV1.mark.bins",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:903"
+              "path": "ChartKitChartSpecV1.transform",
+              "loc": "chartkit:packages/core/src/transform.ts:1"
             }
           ],
-          "note": "histogram binning and boxplot stats only",
+          "note": "filter, window (rolling mean), and aggregate (sum, mean, count) in transform",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -31667,14 +31667,20 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:timezone)['\"`]|(?:^|[\\s{,;])\\w*(?:timezone)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:timezone)"
+            "ChartKitChartSpecV1.timezone"
           ],
-          "evidence": [],
-          "note": "temporal parsed and formatted without a time-zone option; probe hit reviewed: dates are always formatted with timeZone:\"UTC\" (format.ts:56); no option",
-          "verified": "source-review",
+          "evidence": [
+            {
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.timezone",
+              "loc": "chartkit:packages/core/src/timezone.ts:1"
+            }
+          ],
+          "note": "IANA timezone for temporal axes, ticks, and tooltips. Omitted means UTC so server and client labels match.",
+          "verified": "dts-path",
           "strength": "strong"
         },
         "chartjs": {
@@ -32020,21 +32026,21 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "partial",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~update"
+            "MountedChart.append"
           ],
           "evidence": [
             {
-              "kind": "dts-grep",
-              "path": "update",
-              "loc": "chartkit:packages/core/schema/chartkit.schema.json:1947"
+              "kind": "dts-path",
+              "path": "MountedChart.append",
+              "loc": "chartkit:packages/vanilla/src/index.ts:22"
             }
           ],
-          "note": "mount().update(spec) re-render; no append API",
-          "verified": "dts-grep",
-          "strength": "weak"
+          "note": "mount().append(rows, { window }) adds points, keeps a sliding window, and redraws in place",
+          "verified": "dts-path",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "plugin",
@@ -33079,14 +33085,20 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:sort)['\"`]|(?:^|[\\s{,;])\\w*(?:sort)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:sort)"
+            "ChartKitChartSpecV1.sort"
           ],
-          "evidence": [],
-          "note": "probe hit reviewed: match is internal x-index sort in interact.ts:90; no spec option",
-          "verified": "source-review",
+          "evidence": [
+            {
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.sort",
+              "loc": "chartkit:packages/core/src/sort.ts:1"
+            }
+          ],
+          "note": "sort by a field or by value, ascending or descending",
+          "verified": "dts-path",
           "strength": "strong"
         },
         "chartjs": {
