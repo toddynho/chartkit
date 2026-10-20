@@ -2,6 +2,7 @@
 
 import { forwardRef, useEffect, useRef } from "react";
 import type { ChartSpec } from "@chartkitdev/core";
+import type { TooltipRender } from "@chartkitdev/core/interact";
 import type { MountedChart } from "@chartkitdev/vanilla";
 
 interface Props {
@@ -9,6 +10,8 @@ interface Props {
   svg: string;
   className?: string;
   pixelWidth?: number | null;
+  /** Adapter tooltip. Omitted charts keep the built-in card. */
+  tooltip?: TooltipRender;
 }
 
 /**
@@ -16,12 +19,14 @@ interface Props {
  * `@chartkitdev/vanilla`, which attaches `@chartkitdev/core/interact` and loads
  * phase-3 charts through `open()`. Later spec changes go through `update()`.
  */
-export const ChartHost = forwardRef<HTMLDivElement, Props>(function ChartHost({ spec, svg, className, pixelWidth }, ref) {
+export const ChartHost = forwardRef<HTMLDivElement, Props>(function ChartHost({ spec, svg, className, pixelWidth, tooltip }, ref) {
   const local = useRef<{ node: HTMLDivElement | null }>({ node: null });
   const frozen = useRef(svg);
   const handle = useRef<MountedChart | null>(null);
   const latest = useRef(spec);
+  const tip = useRef(tooltip);
   latest.current = spec;
+  tip.current = tooltip;
 
   useEffect(() => {
     const el = local.current.node;
@@ -30,7 +35,8 @@ export const ChartHost = forwardRef<HTMLDivElement, Props>(function ChartHost({ 
     let chart: MountedChart | null = null;
     void import("@chartkitdev/vanilla").then(({ mount }) => {
       if (!alive || !local.current.node) return;
-      chart = mount(local.current.node, latest.current as ChartSpec);
+      const custom = tip.current;
+      chart = mount(local.current.node, latest.current as ChartSpec, custom ? { tooltip: (detail) => tip.current?.(detail) ?? null } : {});
       handle.current = chart;
       local.current.node.setAttribute("data-ck-mounted", "1");
     });

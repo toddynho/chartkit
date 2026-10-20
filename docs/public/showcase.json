@@ -283,6 +283,7 @@
         "mark.point.shape",
         "mark.point.size",
         "scale.nice",
+        "scale.padding",
         "theme.presets",
         "tooltip.fields",
         "tooltip.position",
@@ -890,6 +891,7 @@
         "legend.interactive",
         "legend.position",
         "theme.presets",
+        "tooltip.custom",
         "tooltip.position",
         "tooltip.shared",
         "type.combo"

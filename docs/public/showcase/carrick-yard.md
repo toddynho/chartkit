@@ -234,7 +234,7 @@ Skiff, Lantern, and Moth use the sunburst colours. Cobble is 102 hours. Pram is 
     }
   },
   "legend": {
-    "position": "top"
+    "position": "bottom"
   },
   "size": {
     "width": 560,

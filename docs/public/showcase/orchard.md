@@ -4,7 +4,7 @@ Three fictional apple varieties. Sun hours against sugar, crate weight coloured 
 
 ## Sun hours and sugar
 
-Each diamond is one crate. Colour is the variety, and the dot grows with weight. The vertical scale is not nicened.
+Each diamond is one crate. Colour is the variety, and the dot grows with weight. The vertical scale is not nicened, with a little room past the crates.
 
 ```json
 {
@@ -107,13 +107,20 @@ Each diamond is one crate. Colour is the variety, and the dot grows with weight.
   "encoding": {
     "x": {
       "field": "hours",
-      "title": "Sun hours"
+      "title": "Sun hours",
+      "scale": {
+        "padding": 0.08
+      }
     },
     "y": {
       "field": "brix",
       "title": "Brix",
       "scale": {
-        "nice": false
+        "nice": false,
+        "padding": {
+          "min": 0.08,
+          "max": 0.14
+        }
       }
     },
     "size": {
@@ -169,7 +176,7 @@ Each diamond is one crate. Colour is the variety, and the dot grows with weight.
     "select": "point"
   },
   "size": {
-    "width": 760,
+    "width": 560,
     "height": 420
   },
   "a11y": {
@@ -255,7 +262,7 @@ Under 150 grams is the negative token. 180 grams and over is the positive token.
     "select": "point"
   },
   "size": {
-    "width": 420,
+    "width": 560,
     "height": 420
   },
   "a11y": {
@@ -360,7 +367,7 @@ A box for each variety.
 
 ## How the weights fall
 
-Eight bins across every crate.
+Eight bins of 10 grams, from 135. The bin from 195 to 205 is empty.
 
 ```json
 {
@@ -370,59 +377,47 @@ Eight bins across every crate.
   "theme": "soft",
   "data": [
     {
-      "grams": 168
+      "grams": "135",
+      "crates": 2
     },
     {
-      "grams": 174
+      "grams": "145",
+      "crates": 2
     },
     {
-      "grams": 181
+      "grams": "155",
+      "crates": 2
     },
     {
-      "grams": 159
+      "grams": "165",
+      "crates": 2
     },
     {
-      "grams": 188
+      "grams": "175",
+      "crates": 3
     },
     {
-      "grams": 142
+      "grams": "185",
+      "crates": 2
     },
     {
-      "grams": 151
+      "grams": "195",
+      "crates": 0
     },
     {
-      "grams": 136
-    },
-    {
-      "grams": 158
-    },
-    {
-      "grams": 147
-    },
-    {
-      "grams": 192
-    },
-    {
-      "grams": 205
-    },
-    {
-      "grams": 184
-    },
-    {
-      "grams": 210
-    },
-    {
-      "grams": 176
+      "grams": "205",
+      "crates": 2
     }
   ],
   "encoding": {
     "x": {
       "field": "grams",
       "title": "Grams"
+    },
+    "y": {
+      "field": "crates",
+      "title": "Crates"
     }
-  },
-  "mark": {
-    "bins": 8
   },
   "axes": {
     "x": {
@@ -437,7 +432,7 @@ Eight bins across every crate.
     "height": 340
   },
   "a11y": {
-    "alt": "Crate weights run from the mid 130s to just over 200 grams, with more than one bin occupied."
+    "alt": "Crate weights run from 136 to 210 grams, in eight bins of 10 grams starting at 135. The bin from 195 to 205 grams is empty."
   }
 }
 ```
@@ -458,6 +453,7 @@ Eight bins across every crate.
 - [Point marker shapes](https://chartkit.dev/features/mark.point.shape) (`mark.point.shape`)
 - [Point marker size](https://chartkit.dev/features/mark.point.size) (`mark.point.size`)
 - [Nice rounding](https://chartkit.dev/features/scale.nice) (`scale.nice`)
+- [Scale padding / clamp / grace](https://chartkit.dev/features/scale.padding) (`scale.padding`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)
 - [Custom tooltip fields](https://chartkit.dev/features/tooltip.fields) (`tooltip.fields`)
 - [Tooltip positioning / follow cursor](https://chartkit.dev/features/tooltip.position) (`tooltip.position`)

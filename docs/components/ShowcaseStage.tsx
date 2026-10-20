@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import type { TooltipDetail } from "@chartkitdev/core/interact";
 import { ChartHost } from "./ChartHost";
 import type { MermaidCard, ReadyChart, RepairCard, StackSnippet } from "@/lib/showcase";
 
@@ -38,6 +39,15 @@ function SpecBlock({ spec }: { spec: unknown }) {
   );
 }
 
+function stallTooltip(detail: TooltipDetail): string {
+  const jars = detail.rows.find((row) => row.name === "Jars");
+  const lids = detail.rows.find((row) => row.name === "Lids");
+  const sent = jars?.text ?? "0";
+  const back = lids?.text ?? "0";
+  const title = detail.title.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch] ?? ch);
+  return `<strong>${title}</strong><div>${sent} jars out, ${back} lids back</div>`;
+}
+
 function ChartFigure({ chart, theme }: { chart: ReadyChart; theme: string }) {
   const spec = withTheme(chart.spec, theme);
   const kpi = chart.spec.type === "kpi";
@@ -49,7 +59,7 @@ function ChartFigure({ chart, theme }: { chart: ReadyChart; theme: string }) {
           <p>{chart.caption}</p>
         </figcaption>
       )}
-      <ChartHost spec={spec} svg={chart.svg} className="chart-host chart-preset" />
+      <ChartHost spec={spec} svg={chart.svg} className="chart-host chart-preset" tooltip={chart.id === "jars" ? stallTooltip : undefined} />
       {kpi ? <p className="kpi-note">{chart.caption}</p> : null}
       <script type="application/json" data-ck-spec={chart.id} dangerouslySetInnerHTML={{ __html: JSON.stringify(spec) }} />
       <SpecBlock spec={spec} />
