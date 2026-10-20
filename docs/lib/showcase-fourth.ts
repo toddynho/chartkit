@@ -232,7 +232,7 @@ export const fourthBoards: {
           axes: { x: { title: "Hour" }, y: { title: "Milliamps", ticks: [0, 20, 40, 60, 80] } },
           legend: { position: "bottom", interactive: true },
           tooltip: { mode: "index", position: "top" },
-          annotations: [{ type: "marker", x: "03:00", y: 28, label: "Lamp dipped", dx: 18, dy: -42 }],
+          annotations: [{ type: "marker", x: "03:00", y: 28, label: "Lamp dipped", dx: -44, dy: -34 }],
           size: { width: 1040, height: 500 },
           a11y: { alt: "Carrick lamp current stays near 70 milliamps, dips to 28 at 03:00, then recovers by 07:00. Bars are the reading. The glow line is a three-hour mean." },
         },

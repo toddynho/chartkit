@@ -144,8 +144,8 @@ Under 40 is Dim. 70 and over is Bright. The mean waits until three readings exis
       "x": "03:00",
       "y": 28,
       "label": "Lamp dipped",
-      "dx": 18,
-      "dy": -42
+      "dx": -44,
+      "dy": -34
     }
   ],
   "size": {

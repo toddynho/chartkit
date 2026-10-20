@@ -176,7 +176,7 @@ Each diamond is one crate. Colour is the variety, and the dot grows with weight.
     "select": "point"
   },
   "size": {
-    "width": 760,
+    "width": 560,
     "height": 420
   },
   "a11y": {
@@ -262,7 +262,7 @@ Under 150 grams is the negative token. 180 grams and over is the positive token.
     "select": "point"
   },
   "size": {
-    "width": 420,
+    "width": 560,
     "height": 420
   },
   "a11y": {
@@ -377,59 +377,47 @@ Eight bins across every crate.
   "theme": "soft",
   "data": [
     {
-      "grams": 168
+      "grams": "136",
+      "crates": 2
     },
     {
-      "grams": 174
+      "grams": "145.25",
+      "crates": 2
     },
     {
-      "grams": 181
+      "grams": "154.5",
+      "crates": 2
     },
     {
-      "grams": 159
+      "grams": "163.75",
+      "crates": 1
     },
     {
-      "grams": 188
+      "grams": "173",
+      "crates": 3
     },
     {
-      "grams": 142
+      "grams": "182.25",
+      "crates": 2
     },
     {
-      "grams": 151
+      "grams": "191.5",
+      "crates": 1
     },
     {
-      "grams": 136
-    },
-    {
-      "grams": 158
-    },
-    {
-      "grams": 147
-    },
-    {
-      "grams": 192
-    },
-    {
-      "grams": 205
-    },
-    {
-      "grams": 184
-    },
-    {
-      "grams": 210
-    },
-    {
-      "grams": 176
+      "grams": "200.75",
+      "crates": 2
     }
   ],
   "encoding": {
     "x": {
       "field": "grams",
       "title": "Grams"
+    },
+    "y": {
+      "field": "crates",
+      "title": "Crates"
     }
-  },
-  "mark": {
-    "bins": 8
   },
   "axes": {
     "x": {
