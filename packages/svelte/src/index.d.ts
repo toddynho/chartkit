@@ -1,5 +1,5 @@
 import type { ChartSpec } from "@chartkitdev/core";
-import type { ClickDetail, Selection } from "@chartkitdev/core/interact";
+import type { ClickDetail, Selection, TooltipRender } from "@chartkitdev/core/interact";
 
 export interface ChartProps {
   /** A v1 chart spec. The same object renders in every ChartKit adapter. */
@@ -15,6 +15,8 @@ export interface ChartProps {
   onseriesclick?: (detail: ClickDetail) => void;
   onlegendclick?: (detail: ClickDetail) => void;
   onselectionchange?: (detail: Selection) => void;
+  /** Replaces the tooltip card. Return HTML, a node, or null to hide it. The spec stays JSON. */
+  tooltip?: TooltipRender;
 }
 
 /**

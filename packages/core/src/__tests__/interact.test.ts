@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
 import { render } from "../all";
-import { attach, buildHoverIndex, lookupIndex, patchSvg, type ClickDetail, type InteractSpec, type Selection } from "../interact";
+import { attach, buildHoverIndex, lookupIndex, patchSvg, writeTooltip, type ClickDetail, type InteractSpec, type Selection } from "../interact";
 
 const alt = "Sample series used to exercise client interaction.";
 
@@ -797,5 +797,59 @@ describe("attach", () => {
     frames.at(-1)?.(now + 1000);
     expect(svg.querySelector("path")!.getAttribute("d")).not.toBe(before);
     expect(host.querySelector("svg")).toBe(svg);
+  });
+
+  it("lets an adapter replace the tooltip card", () => {
+    const host = hostOf(lineSpec());
+    writeTooltip(host, () => "<b>Custom tip</b>");
+    const ctl = attach(host, lineSpec(), { render });
+    const svg = host.querySelector("svg")!;
+    const plot = svg.querySelector("clipPath rect")!;
+    const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.5;
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 80, bubbles: true }));
+    expect(host.querySelector("[data-ck-tip]")?.innerHTML).toBe("<b>Custom tip</b>");
+    ctl.destroy();
+  });
+
+  it("names a threshold row with the colour-rule label and the line colour", () => {
+    const spec: InteractSpec = {
+      version: "1",
+      type: "combo",
+      theme: "midnight",
+      data: [
+        { hour: "01:00", milliamp: 74, mean: 72 },
+        { hour: "03:00", milliamp: 28, mean: 36 },
+      ],
+      encoding: {
+        x: "hour",
+        y: [
+          { field: "milliamp", mark: "bar", title: "Reading" },
+          { field: "mean", mark: "line", title: "Three-hour mean" },
+        ],
+      },
+      mark: {
+        points: "always",
+        colorRules: [
+          { color: "positive", gte: 70, label: "Bright" },
+          { color: "negative", lt: 40, label: "Dim" },
+        ],
+      },
+      a11y: { alt: "A bright reading and a dim one." },
+      size: { width: 420, height: 220 },
+    };
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg")!;
+    const bright = svg.querySelector('[data-ck-rule="Bright"]')!;
+    expect(bright.querySelector("title")?.textContent).toBe("Bright");
+    const x = Number(bright.getAttribute("cx") || bright.getAttribute("x"));
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 40, bubbles: true }));
+    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+    expect(tip.textContent).toContain("Bright");
+    expect(tip.textContent).toContain("Reading");
+    const line = [...svg.querySelectorAll("path")].find((node) => (node.getAttribute("stroke") ?? "").includes("--ck-line-"));
+    const swatch = [...svg.querySelectorAll("text")].find((node) => node.textContent === "Three-hour mean")?.previousElementSibling;
+    expect(line?.getAttribute("stroke")).toBe(swatch?.getAttribute("fill"));
+    ctl.destroy();
   });
 });

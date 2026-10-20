@@ -7,7 +7,8 @@ import { sortIssue } from "./sort";
 import { namedZone } from "./timezone";
 import { transformIssues } from "./transform";
 import { foreignHierarchy, readHierarchy } from "./hierarchy";
-import { nearest } from "./walker";
+import { domainEnds } from "./svg";
+import { nearMatches, suggestHint } from "./walker";
 
 const CHART_TYPES = new Set([
   "line",
@@ -222,10 +223,13 @@ function checkEncoding(
     const resolved = resolveField(channel.field, table.fields);
     if (!resolved.match) {
       if ((spec.type === "treemap" || spec.type === "sunburst") && readHierarchy(spec)) continue;
-      const suggestion = resolved.caseMatch ?? resolved.closest;
+      const suggestion = resolved.caseMatch ?? resolved.suggestions[0];
       const hintParts = [`available fields: ${table.fields.join(", ") || "(none)"}`];
       if (resolved.caseMatch) hintParts.push(`did you mean ${JSON.stringify(resolved.caseMatch)}? (case differs)`);
-      else if (resolved.closest) hintParts.push(`did you mean ${JSON.stringify(resolved.closest)}?`);
+      else {
+        const hinted = suggestHint(resolved.suggestions);
+        if (hinted) hintParts.push(hinted);
+      }
       let fix: JsonPatchOperation[] | undefined = suggestion
         ? [{ op: "replace", path: channel.fieldPath, value: suggestion }]
         : undefined;
@@ -347,28 +351,30 @@ function checkColumn(
 }
 
 function checkDomains(encoding: Record<string, unknown>, diagnostics: Diagnostic[]): void {
-  const y = encoding.y;
-  const list = Array.isArray(y) ? y : y ? [y] : [];
-  for (let i = 0; i < list.length; i++) {
-    const item = list[i];
-    const domain = isRecord(item) && isRecord(item.scale) ? item.scale.domain : 0;
-    if (!Array.isArray(domain)) continue;
-    const path = "/encoding/y" + (Array.isArray(y) ? "/" + i : "") + "/scale/domain";
-    const a = domain[0];
-    const b = domain[1];
-    const end = (value: unknown) => value === null || (typeof value === "number" && Number.isFinite(value));
-    const swap = typeof a === "number" && typeof b === "number" && a > b;
-    if (domain.length === 2 && end(a) && end(b) && !swap && !(typeof a === "number" && a === b)) continue;
-    const next = swap ? [b, a] : [end(a) ? a : null, end(b) ? b : null];
-    const good = next[0] === null || next[1] === null || (typeof next[0] === "number" && typeof next[1] === "number" && next[0] < next[1]);
-    diagnostics.push({
-      code: "CK3004",
-      severity: "error",
-      message: "min < max",
-      path,
-      hint: "two numbers or null",
-      fix: domain.length === 2 && good ? [{ op: "replace", path, value: next }] : domain.length === 2 ? undefined : [{ op: "remove", path }],
-    });
+  for (const key of Object.keys(encoding)) {
+    const value = encoding[key];
+    const list = Array.isArray(value) ? value : value ? [value] : [];
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      const domain = isRecord(item) && isRecord(item.scale) ? item.scale.domain : 0;
+      if (!Array.isArray(domain) || domain.every((entry) => typeof entry === "string")) continue;
+      const path = `/encoding/${key}` + (Array.isArray(value) ? `/${i}` : "") + "/scale/domain";
+      const a = domain[0];
+      const b = domain[1];
+      const end = (entry: unknown) => entry === null || (typeof entry === "number" && Number.isFinite(entry));
+      const swap = typeof a === "number" && typeof b === "number" && a > b;
+      if (domain.length === 2 && end(a) && end(b) && !swap && !(typeof a === "number" && a === b)) continue;
+      const next = swap ? [b, a] : [end(a) ? a : null, end(b) ? b : null];
+      const good = next[0] === null || next[1] === null || (typeof next[0] === "number" && typeof next[1] === "number" && next[0] < next[1]);
+      diagnostics.push({
+        code: "CK3004",
+        severity: "error",
+        message: "min < max",
+        path,
+        hint: "two numbers or null",
+        fix: domain.length === 2 && good ? [{ op: "replace", path, value: next }] : domain.length === 2 ? undefined : [{ op: "remove", path }],
+      });
+    }
   }
 }
 
@@ -523,15 +529,31 @@ function warnUnusedMarks(type: string, mark: Record<string, unknown>, diagnostic
 
 function warnChannelExtras(encoding: Record<string, unknown>, diagnostics: Diagnostic[]): void {
   for (const key of Object.keys(encoding)) {
-    if (key === "x") continue;
     const value = encoding[key];
     const list = Array.isArray(value) ? value : [value];
     for (let i = 0; i < list.length; i++) {
       const item = list[i];
       if (!isRecord(item)) continue;
       const base = Array.isArray(value) ? `/encoding/${key}/${i}` : `/encoding/${key}`;
+      if (isRecord(item.scale) && item.scale.clamp === true && !domainEnds(item.scale.domain)) {
+        flag(diagnostics, `${base}/scale/clamp`, "ignored; set scale.domain");
+      }
+      if (key === "x") continue;
       if (typeof item.type === "string" && !(key === "y" && item.type === "quantitative") && !(key === "color" && item.type === "quantitative")) {
         flag(diagnostics, `${base}/type`, "ignored; ChartKit infers the scale type");
+      }
+      if (
+        isRecord(item.scale) &&
+        item.scale.padding !== undefined &&
+        key !== "x" &&
+        key !== "y" &&
+        key !== "low" &&
+        key !== "high" &&
+        key !== "open" &&
+        key !== "close" &&
+        key !== "error"
+      ) {
+        flag(diagnostics, `${base}/scale/padding`, "ignored; quantitative position scales only");
       }
       if (key === "y") continue;
       if (typeof item.title === "string") flag(diagnostics, `${base}/title`, "ignored; use the axis");
@@ -978,12 +1000,12 @@ function readChannel(value: unknown, path: string): Channel | undefined {
   };
 }
 
-function resolveField(name: string, fields: string[]): { match?: string; caseMatch?: string; closest?: string } {
-  if (fields.includes(name)) return { match: name };
+function resolveField(name: string, fields: string[]): { match?: string; caseMatch?: string; suggestions: string[] } {
+  if (fields.includes(name)) return { match: name, suggestions: [] };
   const lower = name.toLowerCase();
   const caseMatch = fields.find((field) => field.toLowerCase() === lower);
-  const closest = nearest(name, fields, name.length <= 4 ? 1 : 3);
-  return { caseMatch, closest: caseMatch ?? closest };
+  const suggestions = caseMatch ? [] : nearMatches(name, fields, name.length <= 4 ? 1 : 3);
+  return { caseMatch, suggestions };
 }
 
 function temporalFix(x: unknown): JsonPatchOperation[] {

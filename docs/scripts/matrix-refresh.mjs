@@ -239,6 +239,8 @@ function demoValue(id, parts, literal) {
   if (id === "scale.domain" || id === "scale.domain.partial" || leaf === "domain") return [0, 80];
   if (id === "axis.ticks.values") return [20, 50];
   if (id === "axis.ticks.count" || leaf === "ticks") return 3;
+  if (leaf === "padding" && parts.includes("scale")) return 0.08;
+  if (leaf === "clamp" && parts.includes("scale")) return true;
   if (id === "layout.margin" || leaf === "padding") return { left: 48, right: 16, top: 12, bottom: 28 };
   if (leaf === "title") return parts.includes("x") ? "Quarter" : "Units";
   if (leaf === "subtitle") return "Two quarters";
@@ -325,6 +327,7 @@ function concretePath(cell) {
 }
 
 function applyFeature(spec, feature) {
+  if (feature.id === "tooltip.custom") return false;
   if (feature.id === "data.hierarchy") {
     spec.type = "treemap";
     spec.data = [{ name: "Ads", value: 40, children: [{ name: "Search", value: 25 }, { name: "Social", value: 15 }] }];

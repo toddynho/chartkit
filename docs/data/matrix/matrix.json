@@ -44943,14 +44943,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:padding)['\"`]|(?:^|[\\s{,;])\\w*(?:padding)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:padding)"
+            "encoding.y.scale.padding",
+            "encoding.y.scale.clamp"
           ],
-          "evidence": [],
-          "note": "probe hit reviewed: match is size.padding (chart padding around the plot, not scale padding)",
-          "verified": "source-review",
+          "evidence": [
+            {
+              "kind": "dts-path",
+              "path": "Scale.padding",
+              "loc": "chartkit:packages/core/src/generated/schema.ts:977"
+            }
+          ],
+          "note": "scale.padding is a fraction of the span (a number, or {min, max}). scale.clamp draws a value outside an explicit domain at the domain edge. A set domain end is not padded.",
+          "verified": "dts-path",
           "strength": "strong"
         },
         "chartjs": {
@@ -57678,20 +57685,21 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:content)['\"`]|(?:^|[\\s{,;])\\w*(?:content)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:content)"
+            "Chart.tooltip"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:content)['\"`]|(?:^|[\\s{,;])\\w*(?:content)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:content)"
+              "kind": "runtime-probe",
+              "path": "packages/core/src/tooltip-slot.ts",
+              "loc": "packages/core/src/tooltip-slot.ts:19"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "Adapter slot on React, Vue, Svelte, vanilla, and the element. The callback returns HTML, a node, or null. The JSON spec stays data.",
+          "verified": "runtime-probe",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "native",

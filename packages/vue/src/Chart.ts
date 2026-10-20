@@ -1,7 +1,7 @@
 import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref, watch, withDirectives, type Directive, type PropType } from "vue";
 import type { ChartSpec } from "@chartkitdev/core";
 import { open, render as renderAll } from "@chartkitdev/core/all";
-import { attach, listen, patchSvg, type ClickDetail, type Controller, type Selection } from "@chartkitdev/core/interact";
+import { attach, listen, patchSvg, writeTooltip, type ClickDetail, type Controller, type Selection, type TooltipRender } from "@chartkitdev/core/interact";
 
 export interface ChartProps {
   /** A v1 chart spec. The same object renders in every ChartKit adapter. */
@@ -32,6 +32,7 @@ export const Chart = defineComponent({
     spec: { type: Object as PropType<ChartSpec>, required: true },
     render: { type: Function as PropType<(spec: ChartSpec) => string> },
     selection: { type: Object as PropType<Selection | null>, default: undefined },
+    tooltip: { type: Function as PropType<TooltipRender>, default: undefined },
   },
   emits: ["pointclick", "seriesclick", "legendclick", "selectionchange"],
   setup(props, { attrs, emit }) {
@@ -74,6 +75,13 @@ export const Chart = defineComponent({
     });
 
     watch(
+      () => props.tooltip,
+      (tooltip) => {
+        if (host.value) writeTooltip(host.value, tooltip);
+      },
+    );
+
+    watch(
       () => props.selection,
       (selection) => {
         if (selection !== undefined) ctl?.setSelection(selection);
@@ -92,6 +100,7 @@ export const Chart = defineComponent({
     onMounted(() => {
       const el = host.value;
       if (!el) return;
+      writeTooltip(el, props.tooltip);
       if (!props.render && open(el, props.spec, () => arm(props.spec))) return;
       if (!el.querySelector("svg")) patchSvg(el, svg.value);
       arm(props.spec);

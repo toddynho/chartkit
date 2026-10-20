@@ -27,6 +27,13 @@ function titleOf(value: unknown, fallback: string): string {
   return fallback;
 }
 
+/** A band is the range, not the lower field. An explicit title stays as written. */
+function rangeName(item: unknown, lo: string, hi: string): string {
+  if (isRecord(item) && typeof item.title === "string" && item.title) return item.title;
+  if (lo && hi) return `${lo}–${hi}`;
+  return lo || hi || "range";
+}
+
 function colorOf(value: unknown, preset: Parameters<typeof paint>[1], index: number): string {
   const color = isRecord(value) && typeof value.color === "string" ? value.color : undefined;
   return paint(color, preset, index);
@@ -73,7 +80,7 @@ function readBands(encoding: Record<string, unknown>, table: DataTable, preset: 
     if (isRecord(item) && typeof item.lo === "string" && typeof item.hi === "string") {
       const explicit = typeof item.color === "string";
       bands.push({
-        name: titleOf(item, item.lo),
+        name: rangeName(item, item.lo, item.hi),
         color: colorOf(item, preset, palette),
         explicit,
         lo: columnNums(table, item.lo),
@@ -99,7 +106,7 @@ function readBands(encoding: Record<string, unknown>, table: DataTable, preset: 
   const high = fieldOf(encoding.high);
   if (low && high && bands.length === 0) {
     bands.push({
-      name: "Band",
+      name: low && high ? `${low}–${high}` : "range",
       color: line ? line.color : paint(undefined, preset, palette),
       explicit: false,
       lo: columnNums(table, low),
@@ -200,7 +207,8 @@ export function renderAreaRange(spec: Record<string, unknown>): string | null {
   const box = plotBox(frame, spec, { bottom: 36, yTicks });
   const legend = byWidth(bands).map((band) => ({ name: band.name, color: band.color, opacity: band.opacity }));
   if (showLine && line) legend.push({ name: line.name, color: line.color, opacity: 1 });
-  if (legend.length > 1) box.top = Math.max(box.top, frame.title ? (frame.subtitle ? 72 : 58) : frame.subtitle ? 52 : 36);
+  const legendBelow = frame.legend === "bottom";
+  if (legend.length > 1 && !legendBelow) box.top = Math.max(box.top, frame.title ? (frame.subtitle ? 72 : 58) : frame.subtitle ? 52 : 36);
   const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const slot = (box.right - box.left) / Math.max(1, labels.length);
   const xAt = (index: number) => box.left + slot * index + slot / 2;
@@ -217,9 +225,9 @@ export function renderAreaRange(spec: Record<string, unknown>): string | null {
   ], labels);
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
-  parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: xAt(index), text: label }))));
+  parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: xAt(index), text: label })), box));
   parts.push(axisLine(frame, box));
-  if (legend.length > 1) parts.push(legendRow(legend, box.left, frame.title ? (frame.subtitle ? 56 : 40) : frame.subtitle ? 32 : 14, cssVar("text", frame.preset.text)));
+  if (legend.length > 1 && !legendBelow) parts.push(legendRow(legend, box.left, frame.title ? (frame.subtitle ? 56 : 40) : frame.subtitle ? 32 : 14, cssVar("text", frame.preset.text)));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
   parts.push(notes.under);
@@ -277,7 +285,7 @@ export function renderBarRange(spec: Record<string, unknown>): string | null {
   const notes = placedNotes(spec, frame, box, categoryX(labels, xAt), yAt, [{ name: "range", axis: "y", pts: seriesPoints(null, mids) }], labels);
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
-  parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: xAt(index), text: label }))));
+  parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: xAt(index), text: label })), box));
   parts.push(axisLine(frame, box));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
@@ -344,7 +352,7 @@ export function renderErrorbar(spec: Record<string, unknown>): string | null {
   const notes = placedNotes(spec, frame, box, categoryX(labels, xAtIndex), yAt, [{ name: yField, axis: "y", pts: seriesPoints(null, y) }], labels);
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
-  parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: xAtIndex(index), text: label }))));
+  parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: xAtIndex(index), text: label })), box));
   parts.push(axisLine(frame, box));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);

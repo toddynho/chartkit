@@ -32,6 +32,8 @@ export interface AnnotationGeom {
   count?: number;
   flip?: boolean;
   bands?: { x?: unknown; y?: unknown; y2?: unknown };
+  /** Boxes already taken by series labels, so a fit label can step aside. */
+  taken?: Box[];
 }
 
 interface Box {
@@ -45,7 +47,7 @@ interface Box {
 export function annotationLayers(notes: unknown, geom: AnnotationGeom): { under: string; over: string } {
   const under: string[] = [];
   const over: string[] = [];
-  const boxes: Box[] = [];
+  const boxes: Box[] = geom.taken ? geom.taken.map((box) => ({ x: box.x, y: box.y, w: box.w, h: box.h })) : [];
   paintAxisBands(geom, under, over, boxes);
   if (Array.isArray(notes)) {
     for (const item of notes) {
@@ -376,13 +378,35 @@ function placeBox(plot: PlotBox, px: number, py: number, w: number, h: number, d
 
 function placeLineLabel(text: string, x: number, y: number, _axis: "x" | "y" | "y2", geom: AnnotationGeom, color: string, kind: string, over: string[], boxes: Box[]): void {
   const w = text.length * 6.3;
-  const gap = 10;
-  const roomLeft = x - gap - w >= geom.plot.left + 2;
-  const anchor = roomLeft ? "end" : "start";
-  const px = roomLeft ? x - gap : Math.min(geom.plot.right - w - 4, Math.max(geom.plot.left + 4, x + gap));
-  const py = Math.min(geom.plot.bottom - 4, Math.max(geom.plot.top + 12, y - 14));
+  const h = 14;
+  const point: Box = { x: x - 6, y: y - 6, w: 12, h: 12 };
+  const options: Box[] = [];
+  for (const lift of [14, 30, 46]) {
+    for (const gap of [10, 24, 40]) {
+      options.push({ x: x - gap - w, y: y - lift - 11, w, h });
+      options.push({ x: x + gap, y: y - lift - 11, w, h });
+    }
+  }
+  options.push({ x: x - w / 2, y: y + 8, w, h });
+  let chosen: Box | null = null;
+  for (const box of options) {
+    if (!fits(geom.plot, box)) continue;
+    if (hit(box, point) || boxes.some((other) => hit(box, other))) continue;
+    chosen = box;
+    break;
+  }
+  if (!chosen) {
+    const gap = 10;
+    const roomLeft = x - gap - w >= geom.plot.left + 2;
+    const px = roomLeft ? x - gap - w : Math.min(geom.plot.right - w - 4, Math.max(geom.plot.left + 4, x + gap));
+    const py = Math.min(geom.plot.bottom - h - 4, Math.max(geom.plot.top + 2, y - 14 - 11));
+    chosen = clampBox(geom.plot, { x: px, y: py, w, h });
+  }
+  const anchor = chosen.x + w <= x + 1 ? "end" : "start";
+  const px = anchor === "end" ? chosen.x + w : chosen.x;
+  const py = chosen.y + 11;
   over.push(label(text, px, py, anchor, color, kind));
-  boxes.push({ x: anchor === "end" ? px - w : px, y: py - 11, w, h: 14 });
+  boxes.push(chosen);
 }
 
 function pickPts(geom: AnnotationGeom, item: Record<string, unknown>): Pt[] | null {

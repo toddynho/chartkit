@@ -1,6 +1,6 @@
 import type { ChartSpec } from "@chartkitdev/core";
 import { adopt, isExtra, render as renderAll } from "@chartkitdev/core/all";
-import { attach, listen, patchSvg, type ClickDetail, type Controller, type Selection } from "@chartkitdev/core/interact";
+import { attach, listen, patchSvg, readTooltip, writeTooltip, type ClickDetail, type Controller, type Selection, type TooltipRender } from "@chartkitdev/core/interact";
 
 export type { ChartSpec, ClickDetail, Selection };
 
@@ -64,6 +64,15 @@ export class ChartKitElement extends HTMLElement {
     this.#fromProperty = value != null;
     this.#property = value;
     this.#render();
+  }
+
+  /** Replaces the tooltip card. Return HTML, a node, or null to hide it. Not a spec field. */
+  get tooltip(): TooltipRender | undefined {
+    return readTooltip(this);
+  }
+
+  set tooltip(value: TooltipRender | null) {
+    writeTooltip(this, value ?? undefined);
   }
 
   /** Theme name. Reflects the `theme` attribute and overrides `spec.theme` while set. */

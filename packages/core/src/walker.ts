@@ -284,27 +284,27 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
           fix: [{ op: "replace", path: path || "/", value: preset.value }],
         });
       } else {
-        const closest = nearest(value, node.enum.map(String), 3);
+        const matches = nearMatches(value, node.enum.map(String), 3);
         emit(ctx, {
           code: "CK1007",
           severity: "error",
           message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
           path,
-          hint: closest ? `did you mean ${quote(closest)}?` : undefined,
-          fix: closest ? [{ op: "replace", path: path || "/", value: closest }] : undefined,
+          hint: suggestHint(matches),
+          fix: matches[0] ? [{ op: "replace", path: path || "/", value: matches[0] }] : undefined,
         });
       }
     } else {
       const named = typeof value === "string" ? PLACE_ALIAS[path.endsWith("/position") ? value : ""] ?? FIELD_TYPE_ALIAS[value] : undefined;
       const alias = named && node.enum.includes(named) ? named : undefined;
-      const closest = alias ?? (typeof value === "string" ? nearest(value, node.enum.map(String), 3) : undefined);
+      const matches = alias ? [alias] : typeof value === "string" ? nearMatches(value, node.enum.map(String), 3) : [];
       emit(ctx, {
         code: "CK1007",
         severity: "error",
         message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
         path,
-        hint: closest ? `did you mean ${quote(closest)}?` : undefined,
-        fix: closest ? [{ op: "replace", path: path || "/", value: closest }] : undefined,
+        hint: suggestHint(matches),
+        fix: matches[0] ? [{ op: "replace", path: path || "/", value: matches[0] }] : undefined,
       });
     }
     ctx.depth -= 1;
@@ -944,9 +944,11 @@ function emitUnknownType(value: unknown, ctx: Ctx): void {
   const raw = typeof value === "string" ? value : String(value);
   const kebab = raw.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`).replace(/^-/, "");
   const alias = aliasFor(raw, ctx.rootValue);
-  const closest = alias?.type ?? (CHART_TYPES as readonly string[]).find((t) => t === kebab) ?? nearest(raw, [...CHART_TYPES], 3);
+  const named = alias?.type ?? (CHART_TYPES as readonly string[]).find((t) => t === kebab);
+  const matches = named ? [named] : nearMatches(raw, [...CHART_TYPES], 3);
+  const closest = matches[0];
   const hintParts = [
-    closest ? `did you mean ${quote(closest)}?` : undefined,
+    suggestHint(matches),
     `valid: ${CHART_TYPES.join(", ")}`,
     alias?.note,
   ].filter(Boolean);
@@ -1548,6 +1550,29 @@ function emitUnknownProp(name: string, path: string, props: Record<string, JsonS
   const pointer = join(path, name);
   if (ctx.skipUnknown.has(pointer)) return;
   if (markMistake(name, path, pointer, value, ctx)) return;
+  if (/^\/mark\/colorRules\/\d+$/.test(path) && (name === "name" || name === "title")) {
+    let rule: unknown = ctx.rootValue;
+    for (const part of path.slice(1).split("/")) {
+      if (rule === null || typeof rule !== "object") {
+        rule = undefined;
+        break;
+      }
+      rule = (rule as Record<string, unknown>)[part];
+    }
+    const hasLabel = isPlainObject(rule) && typeof rule.label === "string" && rule.label.trim() !== "";
+    const text = typeof value === "string" && value.trim() ? value : undefined;
+    const fix: JsonPatchOperation[] = [{ op: "remove", path: pointer }];
+    if (text !== undefined && !hasLabel) fix.push({ op: "add", path: join(path, "label"), value: text });
+    emit(ctx, {
+      code: "CK1002",
+      severity: "error",
+      message: `unknown property ${quote(name)}`,
+      path: pointer,
+      hint: "the legend and tooltip name on a colour rule is label",
+      fix,
+    });
+    return;
+  }
   if ((path === "/encoding/y" || /^\/encoding\/y\/\d+$/.test(path)) && (name === "low" || name === "high") && typeof value === "string") {
     const dest = name === "low" ? "lo" : "hi";
     emit(ctx, {
@@ -1601,8 +1626,9 @@ function emitUnknownProp(name: string, path: string, props: Record<string, JsonS
   } else if (LEGACY_PROPS[name]) {
     hint = `did you mean ${quote(LEGACY_PROPS[name])}?`;
   } else {
-    const closest = nearest(name, Object.keys(props), name.length <= 4 ? 1 : 3);
-    if (closest) hint = `did you mean ${quote(closest)}?`;
+    const matches = nearMatches(name, Object.keys(props), name.length <= 4 ? 1 : 3);
+    const hinted = suggestHint(matches);
+    if (hinted) hint = hinted;
   }
   emit(ctx, {
     code: "CK1002",
@@ -1787,19 +1813,35 @@ function quote(value: unknown): string {
   return describe(value);
 }
 
-export function nearest(input: string, choices: readonly string[], maxDistance: number): string | undefined {
-  let best: string | undefined;
-  let bestDistance = maxDistance + 1;
+/** Up to three close spellings. A match has to be a small edit, not merely within a fixed distance. */
+export function nearMatches(input: string, choices: readonly string[], maxDistance: number): string[] {
   const lower = input.toLowerCase();
-  for (const choice of choices) {
-    if (choice === input) return choice;
+  const found: { choice: string; distance: number; index: number }[] = [];
+  for (let index = 0; index < choices.length; index++) {
+    const choice = choices[index] ?? "";
+    if (!choice || choice === input) continue;
     const distance = levenshtein(lower, choice.toLowerCase());
-    if (distance < bestDistance && distance <= maxDistance && distance < choice.length) {
-      best = choice;
-      bestDistance = distance;
-    }
+    const limit = Math.min(maxDistance, Math.max(1, Math.floor(Math.min(input.length, choice.length) * 0.34)));
+    if (distance > 0 && distance <= limit && distance < choice.length) found.push({ choice, distance, index });
   }
-  return best;
+  found.sort((a, b) => a.distance - b.distance || a.index - b.index);
+  const out: string[] = [];
+  for (const item of found) {
+    if (out.length === 3) break;
+    if (!out.includes(item.choice)) out.push(item.choice);
+  }
+  return out;
+}
+
+export function nearest(input: string, choices: readonly string[], maxDistance: number): string | undefined {
+  return nearMatches(input, choices, maxDistance)[0];
+}
+
+export function suggestHint(choices: readonly string[]): string | undefined {
+  if (choices.length === 0) return undefined;
+  if (choices.length === 1) return `did you mean ${quote(choices[0])}?`;
+  if (choices.length === 2) return `did you mean ${quote(choices[0])} or ${quote(choices[1])}?`;
+  return `did you mean ${quote(choices[0])}, ${quote(choices[1])}, or ${quote(choices[2])}?`;
 }
 
 function levenshtein(a: string, b: string): number {

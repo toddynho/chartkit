@@ -12,6 +12,8 @@ export interface ColorRule {
   gte?: number;
   eq?: number;
   color?: string;
+  /** Legend and tooltip name. The colour token is used when this is omitted. */
+  label?: string;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -56,6 +58,7 @@ export function readRules(mark: unknown): ColorRule[] {
       gte: typeof item.gte === "number" ? item.gte : undefined,
       eq: typeof item.eq === "number" ? item.eq : undefined,
       color: item.color,
+      label: typeof item.label === "string" && item.label.trim() ? item.label.trim() : undefined,
     });
   }
   return rules;
@@ -80,6 +83,15 @@ export function ruleMatchesAny(rule: ColorRule, values: ArrayLike<number | null>
     if (typeof value === "number" && Number.isFinite(value) && matches(value, rule)) return true;
   }
   return false;
+}
+
+/** Legend and tooltip caption of the first matching rule, or "" when that rule has no label. */
+export function ruleCaption(value: number, rules: ColorRule[]): string {
+  for (const rule of rules) {
+    if (!matches(value, rule)) continue;
+    return rule.label ?? "";
+  }
+  return "";
 }
 
 /** First matching rule wins. A rule with only `color` matches every value. */

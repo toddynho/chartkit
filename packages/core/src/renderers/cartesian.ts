@@ -1,5 +1,5 @@
 import { annotationLayers, seriesPoints } from "../annotations";
-import { isPaintColumn, readRules, resolveColors, ruleMatchesAny, withPalette, type ColorRule } from "../color";
+import { isPaintColumn, readRules, resolveColors, ruleCaption, ruleMatchesAny, withPalette, type ColorRule } from "../color";
 import { loadTable } from "../data-prep";
 import { isTypedArray, type DataTable } from "../data";
 import { formatZoned, zoneOf, zonedTimeTicks } from "../timezone";
@@ -9,7 +9,7 @@ import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type
 import type { ColorScale } from "../color-scale";
 import { exportList, readColor } from "../frame";
 import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
-import { boxId, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, niceNum, round } from "../svg";
+import { boxId, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, round, scaleClamp, scalePad, ticks } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
 export interface AxisBox {
@@ -169,6 +169,8 @@ export interface Series {
   color: string;
   /** One fill per bar when encoding.color names the x field. */
   colors?: string[];
+  /** Caption of the colour rule that painted each value. Empty when that point has no label. */
+  ruleLabels?: string[];
   axis: "y" | "y2";
   mark: "line" | "bar" | "area" | "range";
   /** Low and high of a combo range band. The line entry never fills this. */
@@ -258,6 +260,9 @@ export interface PlotModel {
   intent?: string;
   /** Scale bits set by the axis extra. 0 keeps the classic scale. */
   f: number;
+  /** Extra room on a quantitative x, as fractions of the span. */
+  xPad?: { min: number; max: number } | null;
+  xClamp?: boolean;
   lv?: boolean;
   gx?: false | "solid" | "dashed" | "dotted";
 }
@@ -532,6 +537,8 @@ function toModel(
     xTemporal,
     notes: spec.annotations,
     bands: readBands(spec),
+    xPad: scalePad(encoding.x),
+    xClamp: scaleClamp(encoding.x),
   };
 }
 
@@ -556,11 +563,13 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   const yRev = model.f & 8;
   const yFrom = horizontal ? (yRev ? plot.right : plot.left) : yRev ? plot.top : plot.bottom;
   const yTo = horizontal ? (yRev ? plot.left : plot.right) : yRev ? plot.bottom : plot.top;
-  const yScale = model.yLog ? logScale(yDomain[0], yDomain[1], yFrom, yTo) : linear(yDomain[0], yDomain[1], yFrom, yTo);
+  const yScaleRaw = model.yLog ? logScale(yDomain[0], yDomain[1], yFrom, yTo) : linear(yDomain[0], yDomain[1], yFrom, yTo);
+  const yScale = modelClamp(yScaleRaw, yDomain, axisClamps(model, "y"));
   const y2Rev = model.f & 16;
   const y2From = y2Rev ? plot.top : plot.bottom;
   const y2To = y2Rev ? plot.bottom : plot.top;
-  const y2Scale = model.y2Log ? logScale(y2Domain[0], y2Domain[1], y2From, y2To) : linear(y2Domain[0], y2Domain[1], y2From, y2To);
+  const y2ScaleRaw = model.y2Log ? logScale(y2Domain[0], y2Domain[1], y2From, y2To) : linear(y2Domain[0], y2Domain[1], y2From, y2To);
+  const y2Scale = modelClamp(y2ScaleRaw, y2Domain, axisClamps(model, "y2"));
   const xScale = xPosition(model, count, plot.left, plot.right, plot.top, plot.bottom, horizontal);
 
   const parts: string[] = [];
@@ -605,6 +614,7 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
 
   const notes = annotationLayers(model.notes, {
     plot,
+    taken: seriesLabelBoxes(model, xScale, yScale, y2Scale, horizontal),
     preset: model.preset,
     xAt: (value) => locateX(model, xScale, value, count),
     yAt: (value, axis) => {
@@ -883,11 +893,14 @@ function paintPoints(out: string[], points: (Pt | null)[], model: PlotModel, ser
     const point = points[k];
     if (!point) continue;
     const at = indexes ? indexes[k] : k;
-    const color = series.colors?.[at] ?? series.color;
-    const ruled = Boolean(series.colors && color !== series.color);
+    const override = series.colors?.[at];
+    const ruled = Boolean(override && override !== series.color);
+    const color = ruled ? override : series.mark === "line" ? strokeOf(series, model) : series.color;
+    const caption = series.ruleLabels?.[at] ?? "";
     const named = colored ? ` data-ck-name="${esc(series.name)}" data-ck-i="${at}"` : indexes ? ` data-ck-i="${indexes[k]}"` : "";
+    const rule = caption ? ` data-ck-rule="${esc(caption)}"` : "";
     const ring = ruled ? ` stroke="${cssVar("background", model.preset.background)}" stroke-width="2"` : "";
-    out.push(marker(point.x, point.y, radius + (ruled ? 1.25 : 0), shape, color, hollow, hidden + ring + named));
+    out.push(marker(point.x, point.y, radius + (ruled ? 1.25 : 0), shape, color, hollow, hidden + ring + named + rule, caption));
   }
 }
 
@@ -944,7 +957,8 @@ function bars(
     const b = yScale(value ?? baseline);
     const inset = slots > 1 ? 2 : 0;
     const fill = series.colors?.[i] ?? series.color;
-    const extra = series.colors ? ` data-ck-name="${esc(series.name)}" data-ck-i="${i}"` : "";
+    const caption = series.ruleLabels?.[i] ?? "";
+    const extra = (series.colors ? ` data-ck-name="${esc(series.name)}" data-ck-i="${i}"` : "") + (caption ? ` data-ck-rule="${esc(caption)}"` : "");
     const outer = !layers || Math.abs((value ?? baseline) - layers.top[layers.top.length - 1][i]) <= 1e-6;
     const radius = outer ? model.cornerRadius : 0;
     const useVar = outer && model.radiusVar;
@@ -954,7 +968,7 @@ function bars(
       const width = Math.max(0, Math.abs(b - a));
       const height = Math.max(0, barSize - inset);
       const edge = b >= a ? "right" : "left";
-      out.push(barMark(x, y, width, height, radius, useVar, edge, fill, extra));
+      out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra), caption));
       queueBarLabel(model, series, series.values[i], x, y, width, height, true, labs);
     } else {
       const x = start;
@@ -962,7 +976,7 @@ function bars(
       const height = Math.max(0, Math.abs(b - a));
       const width = Math.max(0, barSize - inset);
       const edge = b <= a ? "top" : "bottom";
-      out.push(barMark(x, y, width, height, radius, useVar, edge, fill, extra));
+      out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra), caption));
       queueBarLabel(model, series, series.values[i], x, y, width, height, false, labs);
     }
   }
@@ -1218,6 +1232,9 @@ function xPosition(
       min = nice[0];
       max = nice[1];
     }
+    const padded = padExtent(min, max, model.xPad, null);
+    min = padded[0];
+    max = padded[1];
   }
   const scale = linear(min, max, spanStart, spanEnd);
   return {
@@ -1594,7 +1611,7 @@ function axisTitles(model: PlotModel, plot: PlotBox, horizontal: boolean): strin
     else {
       const anchor = model.yAxis.titleAt === "start" ? "start" : model.yAxis.titleAt === "end" ? "end" : "middle";
       const x = titleAlong(model.yAxis.titleAt, midX, plot.left, plot.right);
-      out += axText(x, side === 2 ? Math.max(12, plot.top - 18) : model.height - 6 - colorLegendFoot(model), anchor, title, fill, family, angle, weight);
+      out += axText(x, side === 2 ? Math.max(12, plot.top - 18) : model.height - 6 - colorLegendFoot(model) - bottomLegendFoot(model, plot), anchor, title, fill, family, angle, weight);
     }
   }
   if (model.showY2 && model.y2Axis.title) {
@@ -1612,7 +1629,7 @@ function axisTitles(model: PlotModel, plot: PlotBox, horizontal: boolean): strin
       const anchor = model.xAxis.titleAt === "start" ? "start" : model.xAxis.titleAt === "end" ? "end" : "middle";
       const x = titleAlong(model.xAxis.titleAt, midX, plot.left, plot.right);
       const angle = titleSpin(model.xAxis, false, false);
-      out += axText(x, model.xAxis.end ? plot.top - 40 : model.height - 6 - colorLegendFoot(model), anchor, title, fill, family, angle, weight);
+      out += axText(x, model.xAxis.end ? plot.top - 40 : model.height - 6 - colorLegendFoot(model) - bottomLegendFoot(model, plot), anchor, title, fill, family, angle, weight);
     }
   }
   return out;
@@ -1648,8 +1665,14 @@ function xStep(model: PlotModel, count: number, angle: number): number {
 }
 
 function legendColor(model: PlotModel, series: Series): string {
-  if (model.type === "combo" && series.mark === "line") return strokeOf(series, model);
+  if (series.mark === "line") return strokeOf(series, model);
   return series.color;
+}
+
+/** Native tooltip on a bar, naming the colour rule that painted it. */
+function withTitle(mark: string, title: string): string {
+  if (!title) return mark;
+  return mark.replace(/ \/>$/, `><title>${esc(title)}</title></rect>`);
 }
 
 function legendItems(model: PlotModel): LegendItem[] {
@@ -1947,16 +1970,16 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
     min -= Math.abs(min) || 1;
     max += Math.abs(max) || 1;
   }
-  if (model.f & (axis === "y2" ? 2 : 1)) return pinDomain([min, max], lock);
+  if (model.f & (axis === "y2" ? 2 : 1)) return pinDomain(padExtent(min, max, axisPad(model, axis), lock), lock);
   const [niceMin, niceMax] = niceDomain(min, max);
   let lo = niceMin;
   let hi = niceMax;
   const pinnedAtZero = axisIncludesZero(model, axis) && niceMin <= 0 && min >= 0;
-  const span = Math.max(hi - lo, Math.abs(max) || 1);
+  const span = hi > lo ? hi - lo : Math.abs(max) || 1;
   const gutter = strokeGutter(model, axis, span);
   if (gutter > 0 && max + gutter > hi) hi = round(max + gutter);
   if (!pinnedAtZero && gutter > 0 && min - gutter * 0.5 < lo) lo = round(min - gutter * 0.5);
-  return pinDomain([lo, hi], lock);
+  return pinDomain(padExtent(lo, hi, axisPad(model, axis), lock), lock);
 }
 
 /** Pixel air above a line, converted to data units, so the stroke does not sit on the plot edge. */
@@ -1989,6 +2012,39 @@ export function resolveTicks(model: PlotModel, key: "x" | "y" | "y2", min: numbe
   return log ? logTicks(min, max) : ticks(min, max, count);
 }
 
+function seriesLabelBoxes(
+  model: PlotModel,
+  xScale: XScale,
+  yScale: (value: number) => number,
+  y2Scale: (value: number) => number,
+  horizontal: boolean,
+): { x: number; y: number; w: number; h: number }[] {
+  if (!wantLabels(model) || horizontal) return [];
+  const pos = model.labelAt || "top";
+  const layers = model.stack === "none" ? null : stackLayers(model.series, model.stack === "percent" ? "percent" : "stack");
+  const boxes: { x: number; y: number; w: number; h: number }[] = [];
+  model.series.forEach((series, index) => {
+    if (series.mark === "bar") return;
+    const [first, last] = endsOf(series.values);
+    if (first < 0) return;
+    const scale = series.axis === "y2" ? y2Scale : yScale;
+    const shift = nudge(pos, series.radius ?? model.pointSize);
+    for (let i = 0; i < series.values.length; i++) {
+      const value = series.values[i];
+      if (typeof value !== "number" || !labelIndex(model.labelEnds, i, first, last)) continue;
+      const plotted = layers ? layers.top[index]?.[i] : value;
+      if (typeof plotted !== "number") continue;
+      const text = labelText(model, series, value);
+      const x = xScale.center(i) + shift[0];
+      const y = scale(plotted) + shift[1];
+      const w = Math.max(8, text.length * 6);
+      const left = shift[2] === "middle" ? x - w / 2 : shift[2] === "end" ? x - w : x;
+      boxes.push({ x: left, y: y - 9, w, h: 11 });
+    }
+  });
+  return boxes;
+}
+
 function labelStep(model: PlotModel, count: number): number {
   const target = model.xAxis.count;
   if (target === 0) return 0;
@@ -1998,19 +2054,6 @@ function labelStep(model: PlotModel, count: number): number {
 
 function legendName(model: PlotModel, series: Series): string {
   return hooks?.seriesName(model, series) ?? series.name;
-}
-
-export function ticks(min: number, max: number, count: number): number[] {
-  if (count <= 0) return [];
-  if (!(max > min)) return [min];
-  const step = niceNum((max - min) / (count - 1), true) || 1;
-  const start = Math.ceil(min / step) * step;
-  const out: number[] = [];
-  for (let value = start; value <= max + step * 1e-6; value += step) {
-    out.push(round(value));
-    if (out.length > 12) break;
-  }
-  return out.length > 0 ? out : [min, max];
 }
 
 function linePath(points: Pt[], curve: Curve): string {
@@ -2237,6 +2280,8 @@ interface YChannel {
   pointSize?: number;
   pointHollow: boolean;
   lock?: [number | null, number | null];
+  pad?: { min: number; max: number } | null;
+  clamp?: boolean;
 }
 
 function readYChannels(y: unknown): YChannel[] {
@@ -2259,15 +2304,40 @@ function readYChannels(y: unknown): YChannel[] {
       pointSize: typeof item.pointSize === "number" ? item.pointSize : undefined,
       pointHollow: item.pointFill === "hollow",
       lock: scale ? domainEnds(scale.domain) : undefined,
+      pad: scalePad(item),
+      clamp: scaleClamp(item),
     };
   });
 }
 
+function axisChannels(model: PlotModel): YChannel[] | undefined {
+  return (model as unknown as { channels?: YChannel[] }).channels;
+}
+
 function axisLock(model: PlotModel, axis: "y" | "y2"): DomainLock {
-  const channels = (model as unknown as { channels?: YChannel[] }).channels;
+  const channels = axisChannels(model);
   if (!channels) return null;
   for (const channel of channels) if (channel.axis === axis && channel.lock) return channel.lock;
   return null;
+}
+
+function axisPad(model: PlotModel, axis: "y" | "y2"): { min: number; max: number } | null {
+  const channels = axisChannels(model);
+  if (!channels) return null;
+  for (const channel of channels) if (channel.axis === axis && channel.pad) return channel.pad;
+  return null;
+}
+
+function axisClamps(model: PlotModel, axis: "y" | "y2"): boolean {
+  const channels = axisChannels(model);
+  return Boolean(channels?.some((channel) => channel.axis === axis && channel.clamp));
+}
+
+function modelClamp(scale: (value: number) => number, domain: [number, number], on: boolean): (value: number) => number {
+  if (!on) return scale;
+  const lo = Math.min(domain[0], domain[1]);
+  const hi = Math.max(domain[0], domain[1]);
+  return (value) => scale(value < lo ? lo : value > hi ? hi : value);
 }
 
 function dashAttr(dash: string): string {
@@ -2376,24 +2446,36 @@ function nearAny(color: string, others: string[]): boolean {
   return others.some((other) => nearColor(color, other));
 }
 
-/** A rule colour that sits on a line. Shift it when it matches that line. */
-function distinctPaint(painted: string, strokes: string[]): string {
-  if (!nearAny(painted, strokes)) return painted;
+/** A rule colour that sits on a line or a bar. Shift it when it matches either. */
+function distinctPaint(painted: string, occupied: string[]): string {
+  if (!nearAny(painted, occupied)) return painted;
   for (const alt of DISTINCT) {
-    if (!nearAny(alt, strokes) && !nearColor(alt, painted)) return alt;
+    if (!nearAny(alt, occupied) && !nearColor(alt, painted)) return alt;
   }
   return painted;
 }
 
+/** Line strokes, bar fills, and colour-ruled bar paints already in the chart. */
+function occupiedPaints(series: Series[], preset: PresetTokens): string[] {
+  const occupied: string[] = [];
+  for (const item of series) {
+    if (item.mark === "bar") {
+      occupied.push(item.color);
+      if (item.colors) for (const color of item.colors) if (color) occupied.push(color);
+    } else occupied.push(lineStroke(item.color, 2, preset.lines));
+  }
+  return occupied;
+}
+
 function ruleSwatches(series: Series[], rules: ColorRule[], preset: PresetTokens): { name: string; color: string }[] {
-  const strokes = series.filter((item) => item.mark !== "bar").map((item) => lineStroke(item.color, 2, preset.lines));
+  const occupied = occupiedPaints(series, preset);
   const out: { name: string; color: string }[] = [];
   const seen = new Set<string>();
   for (const rule of rules) {
     if (!rule.color || seen.has(rule.color)) continue;
     const painted = paint(rule.color, preset, 0);
     let used = false;
-    const next = distinctPaint(painted, strokes);
+    const next = distinctPaint(painted, occupied);
     for (const item of series) {
       if (item.mark === "bar" || !item.colors || !ruleMatchesAny(rule, item.values)) continue;
       used = true;
@@ -2402,7 +2484,8 @@ function ruleSwatches(series: Series[], rules: ColorRule[], preset: PresetTokens
     }
     if (!used) continue;
     seen.add(rule.color);
-    out.push({ name: rule.color, color: next });
+    occupied.push(next);
+    out.push({ name: rule.label || rule.color, color: next });
   }
   return out;
 }
@@ -2410,6 +2493,12 @@ function ruleSwatches(series: Series[], rules: ColorRule[], preset: PresetTokens
 /** Per-point colour from a colour field, a domain map, a constant, or mark.colorRules. */
 function colorLegendFoot(model: PlotModel): number {
   return model.colorScale ? 46 : 0;
+}
+
+/** The bottom legend's own band, so the x title sits above it instead of in it. */
+function bottomLegendFoot(model: PlotModel, plot: PlotBox): number {
+  if (!model.legend || !model.legendBox || model.legendBox.position !== "bottom") return 0;
+  return legendSpace(model.legendBox, legendItems(model), Math.max(80, plot.right - plot.left)).band;
 }
 
 function applyPointColors(
@@ -2477,7 +2566,23 @@ function applyPointColors(
     if (colorEnc?.constant) item.color = paint(colorEnc.constant, preset, 0);
     if (colors.some((color) => color !== item.color)) item.colors = colors;
   }
+  applyRuleLabels(series, rules);
   return null;
+}
+
+function applyRuleLabels(series: Series[], rules: ColorRule[]): void {
+  if (!rules.some((rule) => rule.label)) return;
+  for (const item of series) {
+    const captions: string[] = [];
+    let any = false;
+    for (let i = 0; i < item.values.length; i++) {
+      const value = item.values[i];
+      const caption = typeof value === "number" ? ruleCaption(value, rules) : "";
+      if (caption) any = true;
+      captions.push(caption);
+    }
+    if (any) item.ruleLabels = captions;
+  }
 }
 
 function legendAsked(spec: Record<string, unknown>): boolean {

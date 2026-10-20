@@ -12,23 +12,24 @@ export function named(value: unknown, names: readonly string[]): string {
 }
 
 /** Marker centered on x,y. r is the circle radius. Hollow strokes instead of filling. */
-export function marker(x: number, y: number, r: number, shape: string, color: string, hollow: boolean, extra = ""): string {
+export function marker(x: number, y: number, r: number, shape: string, color: string, hollow: boolean, extra = "", title = ""): string {
   if (!shape || shape === "none" || r < 0) return "";
   const fill = hollow ? "none" : color;
   const stroke = hollow ? ` stroke="${color}" stroke-width="1.5"` : "";
-  if (shape === "square") return `<rect x="${n(x - r)}" y="${n(y - r)}" width="${n(r * 2)}" height="${n(r * 2)}" fill="${fill}"${stroke}${extra} />`;
+  const end = (name: string) => (title ? `><title>${esc(title)}</title></${name}>` : " />");
+  if (shape === "square") return `<rect x="${n(x - r)}" y="${n(y - r)}" width="${n(r * 2)}" height="${n(r * 2)}" fill="${fill}"${stroke}${extra}${end("rect")}`;
   if (shape === "cross") {
     const arm = r * 0.75;
-    return `<path d="M${n(x - arm)} ${n(y)}h${n(arm * 2)}M${n(x)} ${n(y - arm)}v${n(arm * 2)}" fill="none" stroke="${color}" stroke-width="1.5"${extra} />`;
+    return `<path d="M${n(x - arm)} ${n(y)}h${n(arm * 2)}M${n(x)} ${n(y - arm)}v${n(arm * 2)}" fill="none" stroke="${color}" stroke-width="1.5"${extra}${end("path")}`;
   }
   if (shape === "diamond" || shape === "triangle") {
     const d =
       shape === "diamond"
         ? `M${n(x)} ${n(y - r)}L${n(x + r)} ${n(y)} ${n(x)} ${n(y + r)} ${n(x - r)} ${n(y)}Z`
         : `M${n(x)} ${n(y - r)}L${n(x + r)} ${n(y + r * 0.8)} ${n(x - r)} ${n(y + r * 0.8)}Z`;
-    return `<path d="${d}" fill="${fill}"${stroke}${extra} />`;
+    return `<path d="${d}" fill="${fill}"${stroke}${extra}${end("path")}`;
   }
-  return `<circle cx="${n(x)}" cy="${n(y)}" r="${n(r)}" fill="${fill}"${stroke}${extra} />`;
+  return `<circle cx="${n(x)}" cy="${n(y)}" r="${n(r)}" fill="${fill}"${stroke}${extra}${end("circle")}`;
 }
 
 export interface Bag {

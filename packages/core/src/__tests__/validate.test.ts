@@ -1092,6 +1092,50 @@ describe("diagnostic codes", () => {
     expect(repair(text).ok).toBe(true);
   });
 
+  it("CK3004 checks every scale domain, including x, and skips category lists", () => {
+    const reversed = validate({
+      ...base,
+      encoding: { x: { field: "month", scale: { domain: [20, 0] } }, y: "revenue" },
+    });
+    expect(reversed.errors.find((item) => item.code === "CK3004")).toMatchObject({
+      path: "/encoding/x/scale/domain",
+      fix: [{ op: "replace", path: "/encoding/x/scale/domain", value: [0, 20] }],
+    });
+    const length = validate({
+      ...base,
+      encoding: { x: "month", y: { field: "revenue", scale: { domain: [0, 10, 20] } } },
+    });
+    expect(length.errors.find((item) => item.code === "CK3004")?.fix).toEqual([
+      { op: "remove", path: "/encoding/y/scale/domain" },
+    ]);
+    const words = validate({
+      ...base,
+      encoding: { x: { field: "month", scale: { domain: ["Jan", "Mar"] } }, y: "revenue" },
+    });
+    expect(words.errors.some((item) => item.code === "CK3004")).toBe(false);
+  });
+
+  it("suggests at most three close names and skips a distant one", () => {
+    const far = validate({
+      ...base,
+      encoding: { x: "month", y: "zzzzzz" },
+    });
+    expect(far.errors.find((item) => item.code === "CK2001")?.hint ?? "").not.toContain("did you mean");
+    const near = validate({
+      ...base,
+      data: [
+        { month: "Jan", cost: 1, coat: 2, coast: 3 },
+        { month: "Feb", cost: 2, coat: 3, coast: 4 },
+      ],
+      encoding: { x: "month", y: "cot" },
+    });
+    const hint = near.errors.find((item) => item.code === "CK2001")?.hint ?? "";
+    const quoted = [...hint.matchAll(/"([^"]+)"/g)].map((match) => match[1]);
+    expect(quoted.length).toBeGreaterThan(0);
+    expect(quoted.length).toBeLessThanOrEqual(3);
+    expect(quoted).not.toContain("coast");
+  });
+
   it("CK3002 repair adds a missing y2 axis and leaves an explicit false", () => {
     const spec = {
       version: "1",
