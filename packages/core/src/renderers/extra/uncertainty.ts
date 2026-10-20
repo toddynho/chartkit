@@ -1,4 +1,5 @@
-import { annotationLayers } from "../../annotations";
+import { seriesPoints } from "../../annotations";
+import { axisTitleMarks, categoryX, chooseTicks, lockDomain, placedNotes } from "../../chrome";
 import type { DataTable } from "../../data";
 import { fieldOf } from "../../frame";
 import { cssVar, paint } from "../../theme";
@@ -194,33 +195,31 @@ export function renderAreaRange(spec: Record<string, unknown>): string | null {
     columns.push(band.lo, band.hi);
   }
   if (showLine && line) columns.push(line.values);
-  const [y0, y1] = extent(columns);
-  const yTicks = domainTicks(y0, y1);
+  const [y0, y1] = lockDomain(extent(columns)[0], extent(columns)[1], [frame.encoding.y, frame.encoding.low, frame.encoding.high]);
+  const yTicks = chooseTicks(spec, "y", y0, y1, domainTicks(y0, y1));
   const box = plotBox(frame, spec, { bottom: 36, yTicks });
   const legend = byWidth(bands).map((band) => ({ name: band.name, color: band.color, opacity: band.opacity }));
   if (showLine && line) legend.push({ name: line.name, color: line.color, opacity: 1 });
-  if (legend.length > 1) box.top = Math.max(box.top, frame.title ? 58 : 36);
+  if (legend.length > 1) box.top = Math.max(box.top, frame.title ? (frame.subtitle ? 72 : 58) : frame.subtitle ? 52 : 36);
   const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const slot = (box.right - box.left) / Math.max(1, labels.length);
   const xAt = (index: number) => box.left + slot * index + slot / 2;
-  const notes = annotationLayers(spec.annotations, {
-    plot: box,
-    preset: frame.preset,
-    xAt: (value) => {
-      if (typeof value === "number" && value >= 0 && value < labels.length) return xAt(value);
-      const index = labels.indexOf(String(value));
-      return index >= 0 ? xAt(index) : null;
-    },
-    yAt: (value) => {
-      const numeric = typeof value === "number" ? value : Number(value);
-      return Number.isFinite(numeric) ? yAt(numeric) : null;
-    },
-  });
+  const sampleYs = showLine && line
+    ? line.values
+    : bands[0]
+      ? bands[0].lo.map((lo, index) => {
+          const hi = bands[0].hi[index];
+          return lo === null || hi === null ? null : (lo + hi) / 2;
+        })
+      : [];
+  const notes = placedNotes(spec, frame, box, categoryX(labels, xAt), yAt, [
+    { name: line?.name ?? bands[0]?.name ?? "band", axis: "y", pts: seriesPoints(null, sampleYs) },
+  ], labels);
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
   parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: xAt(index), text: label }))));
   parts.push(axisLine(frame, box));
-  if (legend.length > 1) parts.push(legendRow(legend, box.left, frame.title ? 40 : 14, cssVar("text", frame.preset.text)));
+  if (legend.length > 1) parts.push(legendRow(legend, box.left, frame.title ? (frame.subtitle ? 56 : 40) : frame.subtitle ? 32 : 14, cssVar("text", frame.preset.text)));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
   parts.push(notes.under);
@@ -248,6 +247,7 @@ export function renderAreaRange(spec: Record<string, unknown>): string | null {
   }
   parts.push(`</g>`);
   parts.push(notes.over);
+  parts.push(axisTitleMarks(frame, spec, box));
   return view.done();
 }
 
@@ -264,20 +264,24 @@ export function renderBarRange(spec: Record<string, unknown>): string | null {
   const lo = num(table, loField);
   const hi = num(table, hiField);
   const labels = labelsOf(table, fieldOf(frame.encoding.x));
-  const [y0, y1] = extent([lo, hi]);
-  const yTicks = domainTicks(y0, y1);
+  const [y0, y1] = lockDomain(extent([lo, hi])[0], extent([lo, hi])[1], [frame.encoding.y, frame.encoding.low, frame.encoding.high]);
+  const yTicks = chooseTicks(spec, "y", y0, y1, domainTicks(y0, y1));
   const box = plotBox(frame, spec, { bottom: 36, yTicks });
   const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const slot = (box.right - box.left) / Math.max(1, labels.length);
+  const xAt = (index: number) => box.left + slot * index + slot / 2;
   const barW = Math.max(8, slot * (1 - gapOf(frame, 0.28)));
   const color = paint(undefined, frame.preset, 0);
   const format = valueFormat(frame, spec, frame.encoding.high ?? frame.encoding.y);
+  const mids = lo.map((value, index) => (value === null || hi[index] === null ? null : ((value as number) + (hi[index] as number)) / 2));
+  const notes = placedNotes(spec, frame, box, categoryX(labels, xAt), yAt, [{ name: "range", axis: "y", pts: seriesPoints(null, mids) }], labels);
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
-  parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: box.left + slot * index + slot / 2, text: label }))));
+  parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: xAt(index), text: label }))));
   parts.push(axisLine(frame, box));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
+  parts.push(notes.under);
   for (let i = 0; i < labels.length; i++) {
     const a = lo[i];
     const b = hi[i];
@@ -290,6 +294,8 @@ export function renderBarRange(spec: Record<string, unknown>): string | null {
     parts.push(`</rect>`);
   }
   parts.push(`</g>`);
+  parts.push(notes.over);
+  parts.push(axisTitleMarks(frame, spec, box));
   return view.done();
 }
 
@@ -324,26 +330,29 @@ export function renderErrorbar(spec: Record<string, unknown>): string | null {
   const labels = labelsOf(table, fieldOf(frame.encoding.x));
   const columns: ArrayLike<number | null>[] = [y, lo, hi];
   if (asBar) columns.push(y.map(() => 0));
-  const [y0, y1] = extent(columns);
-  const yTicks = domainTicks(y0, y1);
+  const [y0, y1] = lockDomain(extent(columns)[0], extent(columns)[1], [frame.encoding.y, frame.encoding.low, frame.encoding.high, frame.encoding.error]);
+  const yTicks = chooseTicks(spec, "y", y0, y1, domainTicks(y0, y1));
   const box = plotBox(frame, spec, { bottom: 36, yTicks });
   const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const slot = (box.right - box.left) / Math.max(1, labels.length);
+  const xAtIndex = (index: number) => box.left + slot * index + slot / 2;
   const barW = Math.max(8, slot * (1 - gapOf(frame, 0.34)));
   const color = paint(isRecord(frame.encoding.y) && typeof frame.encoding.y.color === "string" ? frame.encoding.y.color : undefined, frame.preset, 0);
   const radius = typeof frame.mark.pointSize === "number" ? frame.mark.pointSize : 4.5;
   const cap = Math.max(8, radius + 3.5);
   const format = valueFormat(frame, spec, frame.encoding.y);
+  const notes = placedNotes(spec, frame, box, categoryX(labels, xAtIndex), yAt, [{ name: yField, axis: "y", pts: seriesPoints(null, y) }], labels);
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
-  parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: box.left + slot * index + slot / 2, text: label }))));
+  parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: xAtIndex(index), text: label }))));
   parts.push(axisLine(frame, box));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
+  parts.push(notes.under);
   for (let i = 0; i < labels.length; i++) {
     const value = y[i];
     if (value === null) continue;
-    const x = box.left + slot * i + slot / 2;
+    const x = xAtIndex(i);
     const span = lo[i] !== null && hi[i] !== null ? `${fmt(Math.min(lo[i] as number, hi[i] as number), frame.locale, format)}–${fmt(Math.max(lo[i] as number, hi[i] as number), frame.locale, format)}` : fmt(value, frame.locale, format);
     const label = `${labels[i]}: ${span}`;
     if (asBar) {
@@ -357,5 +366,7 @@ export function renderErrorbar(spec: Record<string, unknown>): string | null {
     if (lo[i] !== null && hi[i] !== null) parts.push(whisker(x, yAt(lo[i] as number), yAt(hi[i] as number), color, label, cap));
   }
   parts.push(`</g>`);
+  parts.push(notes.over);
+  parts.push(axisTitleMarks(frame, spec, box));
   return view.done();
 }

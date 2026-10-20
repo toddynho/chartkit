@@ -376,10 +376,11 @@ function placeBox(plot: PlotBox, px: number, py: number, w: number, h: number, d
 
 function placeLineLabel(text: string, x: number, y: number, _axis: "x" | "y" | "y2", geom: AnnotationGeom, color: string, kind: string, over: string[], boxes: Box[]): void {
   const w = text.length * 6.3;
-  const end = x - w >= geom.plot.left + 2;
-  const px = end ? Math.min(geom.plot.right - 4, x) : Math.min(geom.plot.right - w - 4, Math.max(geom.plot.left + 4, x + 6));
-  const py = Math.min(geom.plot.bottom - 4, Math.max(geom.plot.top + 12, y - 6));
-  const anchor = end ? "end" : "start";
+  const gap = 10;
+  const roomLeft = x - gap - w >= geom.plot.left + 2;
+  const anchor = roomLeft ? "end" : "start";
+  const px = roomLeft ? x - gap : Math.min(geom.plot.right - w - 4, Math.max(geom.plot.left + 4, x + gap));
+  const py = Math.min(geom.plot.bottom - 4, Math.max(geom.plot.top + 12, y - 14));
   over.push(label(text, px, py, anchor, color, kind));
   boxes.push({ x: anchor === "end" ? px - w : px, y: py - 11, w, h: 14 });
 }

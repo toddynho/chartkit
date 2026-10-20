@@ -1,3 +1,5 @@
+import { seriesPoints } from "../../annotations";
+import { axisTitleMarks, categoryX, chooseTicks, lockDomain, placedNotes } from "../../chrome";
 import { column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
 import { n } from "../../svg";
@@ -48,25 +50,28 @@ export function renderWaterfall(spec: Record<string, unknown>): string | null {
   let max = Math.max(...flat);
   if (min === max) max = min + 1;
   const pad = (max - min) * 0.12;
-  const y0 = min - pad;
-  const y1 = max + pad;
-  const yTicks = domainTicks(y0, y1);
+  const [y0, y1] = lockDomain(min - pad, max + pad, [frame.encoding.y]);
+  const yTicks = chooseTicks(spec, "y", y0, y1, domainTicks(y0, y1));
   const box = plotBox(frame, spec, { bottom: 36, yTicks });
   const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const band = (box.right - box.left) / steps.length;
   const barW = Math.max(10, band * (1 - gapOf(frame, 0.34)));
   const format = valueFormat(frame, spec, frame.encoding.y);
+  const names = steps.map((step) => step.name);
+  const xAt = (index: number) => box.left + band * index + band / 2;
+  const notes = placedNotes(spec, frame, box, categoryX(names, xAt), yAt, [{ name: yField, axis: "y", pts: seriesPoints(null, steps.map((step) => step.end)) }], names);
   const up = cssVar("positive", frame.preset.positive);
   const down = cssVar("negative", frame.preset.negative);
   const totalColor = cssVar("accent", frame.preset.accent);
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
+  parts.push(notes.under);
   if (y0 < 0 && y1 > 0) {
     parts.push(`<line x1="${n(box.left)}" y1="${n(yAt(0))}" x2="${n(box.right)}" y2="${n(yAt(0))}" stroke="${cssVar("axis", frame.preset.axis)}" />`);
   }
   steps.forEach((step, index) => {
-    const x = box.left + band * index + (band - barW) / 2;
+    const x = xAt(index) - barW / 2;
     const y = Math.min(yAt(step.start), yAt(step.end));
     const height = Math.max(2, Math.abs(yAt(step.end) - yAt(step.start)));
     const color = step.total ? totalColor : step.end >= step.start ? up : down;
@@ -74,7 +79,7 @@ export function renderWaterfall(spec: Record<string, unknown>): string | null {
     const label = `${step.name}: ${step.total ? "total " : ""}${fmt(step.value, frame.locale, format)}`;
     if (index > 0) {
       const prev = steps[index - 1];
-      const x0 = box.left + band * (index - 1) + (band - barW) / 2 + barW;
+      const x0 = xAt(index - 1) + barW / 2;
       parts.push(`<line data-ck-mark="connector" x1="${n(x0)}" y1="${n(yAt(prev.end))}" x2="${n(x)}" y2="${n(yAt(prev.end))}" stroke="${cssVar("muted", frame.preset.muted)}" stroke-dasharray="3 3" />`);
     }
     parts.push(openMark("rect", kind, label, `x="${n(x)}" y="${n(y)}" width="${n(barW)}" height="${n(height)}" rx="4" fill="${color}"`, step.name, index));
@@ -82,9 +87,11 @@ export function renderWaterfall(spec: Record<string, unknown>): string | null {
     parts.push(text(x + barW / 2, y - 6, fmt(step.total ? step.end : step.value, frame.locale, format), cssVar("text", frame.preset.text), 11, "600", "middle"));
   });
   parts.push("</g>");
+  parts.push(notes.over);
+  parts.push(axisTitleMarks(frame, spec, box));
   parts.push(axisLine(frame, box));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
-  parts.push(xLabels(frame, spec, steps.map((step, index) => ({ x: box.left + band * index + band / 2, text: step.name }))));
+  parts.push(xLabels(frame, spec, names.map((name, index) => ({ x: xAt(index), text: name }))));
   return view.done();
 }
 

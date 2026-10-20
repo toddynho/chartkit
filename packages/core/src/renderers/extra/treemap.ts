@@ -1,6 +1,7 @@
 import { colorLegendHeight, readColorScale, scaleLabel } from "../../color-scale";
 import { asNumber, column, fieldOf } from "../../frame";
 import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
+import { headerFill, labelInk, siblingFill } from "../../ink";
 import { cssVar } from "../../theme";
 import { esc, font, n } from "../../svg";
 import { fill, fit, fmt, num, openMark, str, valueFormat, viewOf } from "./plot";
@@ -17,6 +18,11 @@ interface Tile extends Leaf {
   y: number;
   w: number;
   h: number;
+}
+
+/** Same heading-to-plot gap as the shared cartesian plot. */
+function plotTop(frame: { title?: string; subtitle?: string }): number {
+  return (frame.title ? 40 : 12) + (frame.subtitle ? 18 : 0);
 }
 
 /** Squarified tiles. Labels truncate to the tile. Leaves in a group share a series color, in lighter and darker tints. */
@@ -50,7 +56,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
     });
   });
   if (!leaves.length) return null;
-  const top = frame.title ? 40 : 12;
+  const top = plotTop(frame);
   const legend = frame.legend !== false && (Boolean(ramp) || colors.size > 1);
   const legendH = ramp && frame.legend !== false ? colorLegendHeight : legend ? 28 : 12;
   const grouped = [...groupLeaves(leaves)].map(([name, kids]) => ({
@@ -74,13 +80,13 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
       const h = Math.max(1, tile.h - pad * 2);
       const label = `${tile.label}: ${fmt(tile.value, frame.locale, shown)}${tile.group && tile.group !== tile.label ? ` · ${tile.group}` : ""}`;
       const paint = tint(tile.fill, index, inner.length);
-      parts.push(openMark("rect", "tile", label, `x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="6" fill="${paint}"`));
+      parts.push(openMark("rect", "tile", label, `x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="6" fill="${paint}"${edge(frame)}`));
       parts.push("</rect>");
       const name = fit(tile.label, w - 12, 13);
       if (name && w > 36 && h > 22) {
-        parts.push(`<text x="${n(x + 8)}" y="${n(y + 18)}" fill="#fff" stroke="rgb(0 0 0 / 0.35)" stroke-width="2" paint-order="stroke" font-size="13" font-weight="650" font-family="${font()}">${name}</text>`);
-        const value = fit(fmt(tile.value, frame.locale, shown), w - 12, 11);
-        if (value && h > 40) parts.push(`<text x="${n(x + 8)}" y="${n(y + 34)}" fill="#fff" fill-opacity="0.9" stroke="rgb(0 0 0 / 0.35)" stroke-width="2" paint-order="stroke" font-size="11" font-family="${font()}">${value}</text>`);
+        parts.push(inkText(x + 8, y + 18, name, paint, 13));
+        const value = fmt(tile.value, frame.locale, shown);
+        if (h > 40 && fits(value, w - 12, 11)) parts.push(inkText(x + 8, y + 34, value, paint, 11, "500"));
       }
     });
   }
@@ -102,7 +108,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
 function tint(base: string, index: number, count: number): string {
   if (count <= 1) return base;
   const amount = 62 + Math.round((index / (count - 1)) * 30);
-  return `color-mix(in srgb, ${base} ${amount}%, light-dark(#ffffff, #1c1c1e))`;
+  return `color-mix(in srgb, ${base} ${amount}%, light-dark(#ffffff, #f5f5f7))`;
 }
 
 function groupLeaves(leaves: Leaf[]): Map<string, Leaf[]> {
@@ -161,10 +167,16 @@ function squarify<T extends { value: number }>(items: T[], x: number, y: number,
   return out;
 }
 
-function shade(base: string, depth: number): string {
-  if (depth <= 0) return base;
-  const mix = Math.max(36, 74 - (depth - 1) * 16);
-  return `color-mix(in srgb, ${base} ${mix}%, light-dark(#ffffff, #1c1c1e))`;
+function edge(frame: { preset: { background: string } }): string {
+  return ` stroke="${cssVar("background", frame.preset.background)}" stroke-width="2"`;
+}
+
+function fits(value: string, width: number, size: number): boolean {
+  return value.length * size * 0.52 <= width;
+}
+
+function inkText(x: number, y: number, value: string, fill: string, size: number, weight = "650"): string {
+  return `<text x="${n(x)}" y="${n(y)}" fill="${labelInk(fill)}" font-size="${size}" font-weight="${weight}" font-family="${font()}">${esc(value)}</text>`;
 }
 
 function share(part: number, whole: number): string {
@@ -191,38 +203,48 @@ function renderLevels(spec: Record<string, unknown>): string | null | undefined 
   if (!branches.length) return null;
   const total = branches.reduce((sum, node) => sum + node.value, 0);
   const legend = frame.legend !== false && branches.length > 1;
-  const top = frame.title ? 40 : 12;
+  const top = plotTop(frame);
   const legendH = legend ? 28 : 12;
   const shown = valueFormat(frame, spec, frame.encoding.y);
   const colors = branches.map((_, index) => fill(frame, index));
   let ordinal = 0;
-  const paintNode = (node: HNode, color: string, branch: string, depth: number, x: number, y: number, w: number, h: number, parent: number) => {
+  const paintNode = (node: HNode, color: string, branch: string, depth: number, x0: number, y0: number, w0: number, h0: number, parent: number, sibling: number, siblings: number) => {
+    const gap = 1.5;
+    const x = x0 + gap;
+    const y = y0 + gap;
+    const w = Math.max(1, w0 - gap * 2);
+    const h = Math.max(1, h0 - gap * 2);
+    const tone = siblingFill(color, depth, sibling, siblings);
+    const grouped = node.children.length > 0 && w >= 28 && h >= 22;
+    const paint = grouped ? headerFill(tone) : tone;
     const label = tip(node, parent, total, frame.locale, shown);
     const index = ordinal;
     ordinal += 1;
-    if (!node.children.length || w < 28 || h < 22) {
-      parts.push(openMark("rect", "tile", label, `x="${n(x)}" y="${n(y)}" width="${n(Math.max(1, w))}" height="${n(Math.max(1, h))}" rx="4" fill="${shade(color, depth)}"`, branch, index));
+    if (!grouped) {
+      parts.push(openMark("rect", "tile", label, `x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="4" fill="${paint}"${edge(frame)}`, branch, index));
       parts.push("</rect>");
       const name = fit(node.name, w - 12, 12);
       if (name && w > 36 && h > 20) {
-        parts.push(`<text x="${n(x + 6)}" y="${n(y + 16)}" fill="#fff" stroke="rgb(0 0 0 / 0.35)" stroke-width="2" paint-order="stroke" font-size="12" font-weight="650" font-family="${font()}">${esc(name)}</text>`);
+        parts.push(inkText(x + 6, y + 16, name, paint, 12));
+        const value = fmt(node.value, frame.locale, shown);
+        if (h > 40 && fits(value, w - 12, 11)) parts.push(inkText(x + 6, y + 32, value, paint, 11, "500"));
       }
       return;
     }
-    parts.push(openMark("rect", "group", label, `x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="6" fill="${shade(color, Math.max(0, depth - 1))}"`, branch, index));
+    parts.push(openMark("rect", "group", label, `x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="6" fill="${paint}"${edge(frame)}`, branch, index));
     parts.push("</rect>");
     const header = h > 40 && w > 48 ? 16 : 0;
     if (header) {
       const name = fit(node.name, w - 16, 12);
-      if (name) parts.push(`<text x="${n(x + 8)}" y="${n(y + 13)}" fill="#fff" stroke="rgb(0 0 0 / 0.4)" stroke-width="2" paint-order="stroke" font-size="12" font-weight="650" font-family="${font()}">${esc(name)}</text>`);
+      if (name) parts.push(inkText(x + 8, y + 13, name, paint, 12));
     }
     const pad = 3;
     const inner = squarify(node.children, x + pad, y + header + pad, Math.max(1, w - pad * 2), Math.max(1, h - header - pad * 2));
-    for (const child of inner) paintNode(child, color, branch, depth + 1, child.x, child.y, child.w, child.h, node.value);
+    inner.forEach((child, childIndex) => paintNode(child, color, branch, depth + 1, child.x, child.y, child.w, child.h, node.value, childIndex, inner.length));
   };
   const outer = squarify(branches, 10, top, frame.width - 20, frame.height - top - legendH);
   outer.forEach((tile, index) => {
-    paintNode(tile, colors[index] ?? fill(frame, index), tile.name, 0, tile.x, tile.y, tile.w, tile.h, total);
+    paintNode(tile, colors[index] ?? fill(frame, index), tile.name, 0, tile.x, tile.y, tile.w, tile.h, total, index, outer.length);
   });
   if (legend) {
     let x = 12;

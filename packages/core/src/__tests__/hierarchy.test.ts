@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { line } from "../charts/line";
 import { render } from "../extra";
+import { headerFill, inkContrast, labelContrast, labelInk, sharedInk } from "../ink";
 import { createRenderer } from "../render";
 import { repair, validate } from "../validate";
 
@@ -193,6 +194,47 @@ describe("hierarchy", () => {
     }
   });
 
+  it("picks label ink that clears 4.5:1 and separates sibling leaves", () => {
+    const wide = { ...nested, size: { width: 640, height: 420 }, encoding: { x: "name", y: { field: "value", format: { style: "currency", decimals: 0 } } } };
+    for (const theme of ["soft", "midnight"]) {
+      const tree = render({ ...wide, theme }) ?? "";
+      const sun = render({ ...load("33-sunburst.json"), theme }) ?? "";
+      for (const svg of [tree, sun]) {
+        for (const mark of ["tile", "group", "arc"]) {
+          for (const [fill, ink] of labeled(svg, mark)) {
+            if (mark !== "arc") expect(ink, `${theme} ${mark}`).toBe(labelInk(fill));
+            expect(labelContrast(fill), `${theme} ${mark} ${fill}`).toBeGreaterThanOrEqual(4.5);
+            expect(inkContrast(ink, fill), `${theme} ${mark} ${ink} on ${fill}`).toBeGreaterThanOrEqual(4.5);
+          }
+        if (mark === "arc") {
+          const byDepth = new Map<string, Set<string>>();
+          for (const match of svg.matchAll(/<text[^>]*fill="([^"]+)"[^>]*data-ck-depth="(\d+)"/g)) {
+            const set = byDepth.get(match[2] ?? "") ?? new Set<string>();
+            set.add(match[1] ?? "");
+            byDepth.set(match[2] ?? "", set);
+          }
+          for (const [depth, inks] of byDepth) expect(inks.size, `${theme} ring ${depth}`).toBe(1);
+        }
+        }
+        expect(svg, theme).not.toContain('fill="#fff"');
+      }
+      const mixes = [...tree.matchAll(/color-mix\(in srgb,[\s\S]*? (\d+)%/g)].map((match) => match[1]);
+      expect(new Set(mixes).size, theme).toBeGreaterThan(1);
+      expect(tree, theme).toContain(">$25<");
+    }
+    const tight = render({ ...wide, size: { width: 120, height: 80 } }) ?? "";
+    expect(tight).not.toContain(">$25<");
+    expect(labelInk("#ff9500")).toBe("#1d1d1f");
+    expect(labelContrast("color-mix(in srgb, #34c759 70%, #ffffff)")).toBeGreaterThanOrEqual(4.5);
+    expect(labelContrast(headerFill("#3b82f6"))).toBeGreaterThanOrEqual(4.5);
+    expect(labelInk(headerFill("#3b82f6"))).toBe("light-dark(#1d1d1f, #f5f5f7)");
+    const leaf = render({ ...wide, theme: "midnight" }) ?? "";
+    expect(leaf).toContain("light-dark(#ffffff, #f5f5f7)");
+    expect(leaf).not.toContain("#1c1c1e");
+    expect(sharedInk(["#22c55e", "#3b82f6", "#a855f7"])).toBe("#000000");
+    expect(sharedInk(["#111111", "#f5f5f7"])).toBeNull();
+  });
+
   it("still repairs a legacy treemap parent onto color when there is no id", () => {
     const spec = {
       version: "1",
@@ -208,3 +250,15 @@ describe("hierarchy", () => {
     expect(fixed.encoding.parent).toBeUndefined();
   });
 });
+
+function labeled(svg: string, mark: string): Array<[string, string]> {
+  const chunks = svg.split(`data-ck-mark="${mark}"`);
+  const out: Array<[string, string]> = [];
+  for (let i = 1; i < chunks.length; i++) {
+    const tag = chunks[i - 1].slice(chunks[i - 1].lastIndexOf("<"));
+    const fill = tag.match(/fill="([^"]+)"/)?.[1];
+    const ink = chunks[i].split(/<rect|<path/)[0].match(/<text[^>]*fill="([^"]+)"/)?.[1];
+    if (fill && ink) out.push([fill, ink]);
+  }
+  return out;
+}

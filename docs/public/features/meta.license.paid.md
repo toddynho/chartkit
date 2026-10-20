@@ -37,6 +37,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | pkg-license (strong) | mermaid/package.json MIT |
 | AntV G2 | none | — | pkg-license (strong) | @antv/g2/package.json MIT |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 2e11cdd3e2dc.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3a59d27e1bde.
 
 https://chartkit.dev/features.json

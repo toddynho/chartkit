@@ -1,3 +1,5 @@
+import { seriesPoints } from "../../annotations";
+import { axisTitleMarks, chooseTicks, lockDomain, placedNotes } from "../../chrome";
 import { column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
 import { n, niceDomain } from "../../svg";
@@ -53,18 +55,31 @@ export function renderHistogram(spec: Record<string, unknown>): string | null {
 
   const countFormat = yField ? valueFormat(frame, spec, frame.encoding.y) : undefined;
   const peak = Math.max(...bars.map((bar) => bar.count), 1);
-  const yTicks = countTicks(peak);
+  const [y0, yTop0] = lockDomain(0, peak, [frame.encoding.y]);
+  const yTicks = chooseTicks(spec, "y", y0, Math.max(yTop0, peak), countTicks(Math.max(yTop0, peak)));
+  const yTop = Math.max(yTop0, yTicks[yTicks.length - 1] ?? yTop0, peak);
   const box = plotBox(frame, spec, { yTicks });
-  const yTop = Math.max(peak, yTicks[yTicks.length - 1] ?? peak);
-  const yAt = scaleOf(0, yTop, box.bottom, box.top);
+  const yAt = scaleOf(y0, yTop, box.bottom, box.top);
   const dataMin = bars[0].x0;
   const dataMax = bars[bars.length - 1].x1;
   const [axisMin, axisMax] = yField ? [dataMin, dataMax] : niceDomain(dataMin, dataMax);
   const span = axisMax - axisMin || 1;
   const xAt = (value: number) => box.left + ((value - axisMin) / span) * (box.right - box.left);
+  const notes = placedNotes(
+    spec,
+    frame,
+    box,
+    (value) => {
+      const numeric = typeof value === "number" ? value : Number(value);
+      return Number.isFinite(numeric) ? xAt(numeric) : null;
+    },
+    yAt,
+    [{ name: "count", axis: "y", pts: seriesPoints(bars.map((bar) => (bar.x0 + bar.x1) / 2), bars.map((bar) => bar.count)) }],
+  );
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
+  parts.push(notes.under);
   for (const bar of bars) {
     const x = xAt(bar.x0);
     const width = Math.max(1, xAt(bar.x1) - x - 1);
@@ -77,6 +92,8 @@ export function renderHistogram(spec: Record<string, unknown>): string | null {
     parts.push("</rect>");
   }
   parts.push("</g>");
+  parts.push(notes.over);
+  parts.push(axisTitleMarks(frame, spec, box));
   parts.push(axisLine(frame, box));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
   const edges = yField

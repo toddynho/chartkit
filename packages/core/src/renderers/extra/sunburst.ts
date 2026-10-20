@@ -1,13 +1,8 @@
 import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
+import { labelInk, sharedInk, siblingFill } from "../../ink";
 import { cssVar } from "../../theme";
 import { esc, font, n } from "../../svg";
 import { fill, fit, fmt, valueFormat, viewOf } from "./plot";
-
-function shade(base: string, depth: number): string {
-  if (depth <= 0) return base;
-  const mix = Math.max(38, 76 - (depth - 1) * 14);
-  return `color-mix(in srgb, ${base} ${mix}%, light-dark(#ffffff, #1c1c1e))`;
-}
 
 function share(part: number, whole: number): string {
   if (!whole) return "0%";
@@ -64,53 +59,73 @@ export function renderSunburst(spec: Record<string, unknown>): string | null {
   const thick = (outer - inner) / rings;
   const colors = branches.map((_, index) => fill(frame, index));
   const defs: string[] = [];
-  let ordinal = 0;
-  const paint = (node: HNode, color: string, branch: string, depth: number, a0: number, a1: number, parent: number) => {
+  const labeledByDepth = new Map<number, string[]>();
+  const inkByDepth = new Map<number, string>();
+  const paint = (node: HNode, color: string, branch: string, depth: number, a0: number, a1: number, parent: number, sibling: number, siblings: number, emit: boolean, indexBox: { n: number }) => {
     const r0 = inner + depth * thick;
     const r1 = r0 + thick;
     const label = tip(node, parent, total, frame.locale, shown);
-    const index = ordinal;
-    ordinal += 1;
+    const index = indexBox.n;
+    if (emit) indexBox.n += 1;
     const span = a1 - a0;
-    parts.push(
-      `<path d="${arc(cx, cy, r0, r1, a0, a1)}" fill="${shade(color, depth)}" data-ck-mark="arc" data-ck-name="${esc(branch)}" data-ck-i="${index}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`,
-    );
+    const gap = Math.min(0.012, span * 0.12);
+    const radial = Math.min(1.5, Math.max(0, (r1 - r0) * 0.08));
+    const drawn = arc(cx, cy, r0 < 1 ? r0 : r0 + radial, r1 - radial, a0 + gap, Math.max(a0 + gap + 0.004, a1 - gap));
+    const paintFill = siblingFill(color, depth, sibling, siblings);
     const mid = (a0 + a1) / 2;
     const name = node.name;
     const radius = (r0 + r1) / 2;
     const arcLen = span * radius;
     const width = name.length * 11 * 0.56;
-    if (name && arcLen > width + 10 && thick > 14 && span > 0.08) {
-      const lower = Math.sin(mid) > 0;
-      const start = lower ? a1 : a0;
-      const end = lower ? a0 : a1;
-      const [sx, sy] = polar(cx, cy, radius, start);
-      const [ex, ey] = polar(cx, cy, radius, end);
-      const id = `${frame.id}-a${index}`;
-      const large = Math.abs(end - start) > Math.PI ? 1 : 0;
-      const sweep = lower ? 0 : 1;
-      defs.push(`<path id="${id}" d="M ${n(sx)} ${n(sy)} A ${n(radius)} ${n(radius)} 0 ${large} ${sweep} ${n(ex)} ${n(ey)}" fill="none" />`);
-      const text = fit(name, arcLen - 8, 11);
+    const text = name && arcLen > width + 10 && thick > 14 && span > 0.08 ? fit(name, arcLen - 8, 11) : "";
+    if (text && !emit) {
+      const list = labeledByDepth.get(depth) ?? [];
+      list.push(paintFill);
+      labeledByDepth.set(depth, list);
+    }
+    if (emit) {
+      parts.push(
+        `<path d="${drawn}" fill="${paintFill}" stroke="${cssVar("background", frame.preset.background)}" stroke-width="1.25" data-ck-mark="arc" data-ck-name="${esc(branch)}" data-ck-i="${index}" data-ck-depth="${depth}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`,
+      );
       if (text) {
+        const lower = Math.sin(mid) > 0;
+        const start = lower ? a1 : a0;
+        const end = lower ? a0 : a1;
+        const [sx, sy] = polar(cx, cy, radius, start);
+        const [ex, ey] = polar(cx, cy, radius, end);
+        const id = `${frame.id}-a${index}`;
+        const large = Math.abs(end - start) > Math.PI ? 1 : 0;
+        const sweep = lower ? 0 : 1;
+        defs.push(`<path id="${id}" d="M ${n(sx)} ${n(sy)} A ${n(radius)} ${n(radius)} 0 ${large} ${sweep} ${n(ex)} ${n(ey)}" fill="none" />`);
+        const ink = inkByDepth.get(depth) ?? labelInk(paintFill);
         parts.push(
-          `<text fill="#fff" stroke="rgb(0 0 0 / 0.4)" stroke-width="2" paint-order="stroke" font-size="11" font-weight="650" font-family="${font()}"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${esc(text)}</textPath></text>`,
+          `<text fill="${ink}" font-size="11" font-weight="650" font-family="${font()}" data-ck-depth="${depth}"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${esc(text)}</textPath></text>`,
         );
       }
     }
     if (!node.children.length) return;
     let cursor = a0;
-    for (const child of node.children) {
+    node.children.forEach((child, childIndex) => {
       const next = cursor + span * (child.value / (node.value || 1));
-      paint(child, color, branch, depth + 1, cursor, next, node.value);
+      paint(child, color, branch, depth + 1, cursor, next, node.value, childIndex, node.children.length, emit, indexBox);
       cursor = next;
-    }
+    });
   };
-  let cursor = -Math.PI / 2;
-  branches.forEach((node, index) => {
-    const next = cursor + (Math.PI * 2 * node.value) / total;
-    paint(node, colors[index] ?? fill(frame, index), node.name, 0, cursor, next, total);
-    cursor = next;
-  });
+  const walk = (emit: boolean) => {
+    const indexBox = { n: 0 };
+    let cursor = -Math.PI / 2;
+    branches.forEach((node, index) => {
+      const next = cursor + (Math.PI * 2 * node.value) / total;
+      paint(node, colors[index] ?? fill(frame, index), node.name, 0, cursor, next, total, index, branches.length, emit, indexBox);
+      cursor = next;
+    });
+  };
+  walk(false);
+  for (const [depth, fills] of labeledByDepth) {
+    const ink = sharedInk(fills);
+    if (ink) inkByDepth.set(depth, ink);
+  }
+  walk(true);
   if (defs.length) parts.splice(1, 0, `<defs>${defs.join("")}</defs>`);
   const centre = root.name || fmt(total, frame.locale, shown);
   const holePx = inner;

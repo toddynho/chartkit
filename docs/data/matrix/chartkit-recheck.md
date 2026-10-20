@@ -86,7 +86,7 @@ Rechecked on `createRenderer([line])` and the scatter entry. A cell moved to nat
 
 | feature | status | note |
 | --- | --- | --- |
-| mark.glow | native | Blurred understroke on line and sparkline. One filter, emitted only when `mark.glow` is true. |
+| mark.glow | native | Blurred understroke on line, sparkline, and combo. One filter, emitted only when `mark.glow` is true. |
 | type.line.smooth | native | `mark.curve` `monotone` is monotone-x. `smooth`, `spline`, and `basis` repair to it (CK1007). |
 | legend.position | native | A funnel draws the legend when `legend` is set, including `position: "top"`. |
 | type.heatmap.calendar | native | Cells stay square, or at most 1.5:1, and cap at 32px. Extra width centres the grid. The last week includes the latest day. Unsized calendars stay at 12px. `mark.weeks` on a grid warns CK3012. |
@@ -109,10 +109,15 @@ Rechecked on multi-level treemap and sunburst. A flat treemap (encoding.x, encod
 | id | status | correction |
 |---|---|---|
 | data.hierarchy | native | Nested `{name, value, children}`, `encoding.path` (field names from the root to the leaf), or `encoding.id` plus `encoding.parent`. A parent with no value is the sum of its leaves. Cycles, a missing parent, a negative size, and a parent that does not match its children are CK3027–CK3030. |
-| type.sunburst | native | `type: "sunburst"` draws concentric rings coloured by the top-level branch. `mark.innerRadius` sets the hole (0.28 when omitted). `mark.depth` caps the rings. `sun-burst`, `sunburstchart`, and `partition` repair to sunburst (CK1005). |
+| type.sunburst | native | `type: "sunburst"` draws concentric rings coloured by the top-level branch. `mark.innerRadius` sets the hole (0.28 when omitted). `mark.depth` caps the rings. `sun-burst`, `sunburstchart`, and `partition` repair to sunburst (CK1005). Segment labels use the ink that clears 4.5:1 against the fill. Siblings shift lightness and keep a gap. |
+| type.treemap | native | Nested leaves shift lightness within the branch hue and keep a gap. The label colour clears 4.5:1 against the fill. The formatted value sits under the name when the tile fits it. |
 
 ## Web component
 
 | id | status | correction |
 |---|---|---|
 | framework.webcomponent | native | `@chartkitdev/element` defines `<chart-kit>`. The spec comes from the property, the `spec` attribute, or a child JSON script. `theme` reflects. `pointclick` and `select` are DOM events. An existing SVG is patched in place. |
+
+## Shared chrome
+
+Rechecked on line, bar, stacked-area, combo, scatter, candlestick, spike, histogram, boxplot, waterfall, area-range, bar-range, and errorbar. Title, subtitle, axis titles, `axes.y.ticks`, `scale.domain`, a y rule, and a linear trendline paint on each. Funnel and calendar heatmap paint the subtitle. The calendar also paints the title. A threshold point that sits on a line stroke shifts to a distinct colour, and the token is named when a legend is already shown.

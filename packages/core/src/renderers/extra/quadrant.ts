@@ -68,7 +68,6 @@ export function renderQuadrant(spec: Record<string, unknown>): string | null {
   const view = viewOf(spec, "quadrant", 680, 520);
   if (!view) return null;
   const { frame, parts } = view;
-  if (frame.subtitle) parts.push(text(16, frame.title ? 40 : 22, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "500"));
   const box = { left: 116, top: (frame.title ? 56 : 36) + (frame.subtitle ? 16 : 0), right: frame.width - 28, bottom: frame.height - 48 };
   const xAt = linear(model.xDomain[0], model.xDomain[1], box.left, box.right);
   const yAt = linear(model.yDomain[0], model.yDomain[1], box.bottom, box.top);
