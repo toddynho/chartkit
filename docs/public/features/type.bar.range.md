@@ -1,14 +1,49 @@
 # Range / floating bar
 
-ChartKit: **none**
+ChartKit: **native**
 
 Bars from a low to a high value
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-waterfall only
+Floating bar from low to high per category. The bar does not start at zero.
 
-No spec snippet. ChartKit does not support this feature.
+Source: chartkit:packages/core/src/charts/bar-range.ts:1
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "bar-range",
+  "data": [
+    {
+      "month": "Jan",
+      "min": -2,
+      "max": 6
+    },
+    {
+      "month": "Jul",
+      "min": 17,
+      "max": 29
+    }
+  ],
+  "encoding": {
+    "x": "month",
+    "low": "min",
+    "high": "max"
+  },
+  "a11y": {
+    "alt": "July is 17 to 29."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -35,6 +70,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | MarkTypes=interval, ~y1 | dts-path (strong) | @antv/g2/lib/spec/mark.d.ts:13, @antv/g2/lib/index.d.ts:89 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 5b79c72ec5e9.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against da8da9d595d9.
 
 https://chartkit.dev/features.json
