@@ -67,6 +67,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — text DSL |
 | AntV G2 | native | G2Spec | dts-path (strong) | @antv/g2/lib/spec/index.d.ts:4 JSON spec (or chainable API) |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against aad14577fd95.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against cfb64fb8d1fe.
 
 https://chartkit.dev/features.json
