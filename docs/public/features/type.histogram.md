@@ -16,26 +16,26 @@ Source: chartkit:packages/core/src/generated/schema.ts:24
   "type": "histogram",
   "data": [
     {
-      "score": 1
+      "x": 1
     },
     {
-      "score": 2
+      "x": 2
     },
     {
-      "score": 2
+      "x": 2
     },
     {
-      "score": 8
+      "x": 8
     }
   ],
   "encoding": {
-    "x": "score"
+    "x": "x"
   },
   "mark": {
     "bins": 2
   },
   "a11y": {
-    "alt": "Scores cluster low."
+    "alt": "Most are low."
   },
   "size": {
     "width": 640,
@@ -71,6 +71,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~binX | dts-grep (weak) | @antv/g2/lib/index.d.ts:28 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 7fd168ebe9c0.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

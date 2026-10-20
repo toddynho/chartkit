@@ -8,7 +8,8 @@ const repoRoot = join(fileURLToPath(new URL(".", import.meta.url)), "../../../..
 /**
  * Codes that already describe one situation in more than one wording.
  * A new code is one diagnostic: two different messages fail this test.
- * CK3020–CK3022 are range and error bars on the uncertainty branch.
+ * CK3020 and CK3021 each cover the range series and the error-bar wording.
+ * CK3020–CK3022 are uncertainty. Time and data is CK3023–CK3026.
  */
 const FAMILIES = new Set([
   "CK1006",
@@ -21,9 +22,12 @@ const FAMILIES = new Set([
   "CK3014",
   "CK3016",
   "CK3017",
+  "CK3020",
+  "CK3021",
 ]);
 
-const RESERVED = ["CK3020", "CK3021", "CK3022"];
+const UNCERTAINTY = ["CK3020", "CK3021", "CK3022"];
+const TIME_DATA = ["CK3023", "CK3024", "CK3025", "CK3026"];
 
 function walk(dir: string, out: string[]): void {
   for (const name of readdirSync(dir)) {
@@ -66,7 +70,7 @@ describe("CK codes", () => {
     expect(dupes).toEqual([]);
   });
 
-  it("leaves CK3020–CK3022 for range and error bars", () => {
-    for (const code of RESERVED) expect(byCode.has(code), code).toBe(false);
+  it("keeps uncertainty on CK3020–CK3022 and time and data on CK3023–CK3026", () => {
+    for (const code of [...UNCERTAINTY, ...TIME_DATA]) expect(byCode.has(code), code).toBe(true);
   });
 });

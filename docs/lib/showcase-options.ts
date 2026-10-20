@@ -88,6 +88,9 @@ export function optionsIn(spec: unknown): OptionLink[] {
   if (type === "bullet") add(ids, "type.bullet");
   if (type === "waterfall") add(ids, "type.bar.waterfall");
   if (type === "pie") add(ids, "type.pie");
+  if (type === "area-range") add(ids, "type.area.range");
+  if (type === "bar-range") add(ids, "type.bar.range");
+  if (type === "errorbar") add(ids, "type.errorbar");
   if (type === "donut") add(ids, "type.donut");
   if (type === "sankey") add(ids, "type.sankey");
   if (type === "histogram") add(ids, "type.histogram");

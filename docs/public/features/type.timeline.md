@@ -16,18 +16,18 @@ Source: chartkit:packages/core/src/validate-phase4.ts:13
   "type": "timeline",
   "data": [
     {
-      "label": "Founded",
+      "label": "Start",
       "date": "2014-06-01"
     },
     {
-      "label": "Platform",
+      "label": "Span",
       "start": "2024-01-01",
       "end": "2026-01-01",
       "kind": "period"
     }
   ],
   "a11y": {
-    "alt": "The company started in 2014."
+    "alt": "It starts in 2014."
   },
   "size": {
     "width": 640,
@@ -63,6 +63,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.timeline | dts-path (strong) | mermaid/dist/config.type.d.ts:219 |
 | AntV G2 | manual | ~register | dts-mechanism (weak) | @antv/g2/lib/exports.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 7fd168ebe9c0.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3347c1854d67.
 
 https://chartkit.dev/features.json

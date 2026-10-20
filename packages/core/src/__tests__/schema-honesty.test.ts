@@ -148,7 +148,10 @@ function probes(leaf: Leaf): unknown[] {
     if (leaf.maximum !== undefined && leaf.maximum <= 1) push(leaf.maximum === 0 ? 0 : Math.min(leaf.maximum, 0.2));
     else push(typeof leaf.maximum === "number" ? Math.min(80, leaf.maximum) : 80);
   }
-  const fieldPath = /\/encoding\/(x|y|color|size|series|open|high|low|close|volume|source|target)$/.test(leaf.path) || leaf.path.endsWith("/field");
+  const fieldPath =
+    /\/encoding\/(x|y|color|size|series|open|high|low|close|volume|source|target|error)$/.test(leaf.path) ||
+    leaf.path.endsWith("/field") ||
+    /\/(lo|hi|error)$/.test(leaf.path);
   if (leaf.types.has("string") && values.length === 0) {
     if (leaf.pattern === "^[A-Z]{3}$") push("USD");
     else if (leaf.path.endsWith("/locale")) push("de-DE");
@@ -368,6 +371,10 @@ function hosts(): Host[] {
     ["candle", { version: "1", type: "candlestick", data: rows, encoding: { x: "date", open: "open", high: "high", low: "low", close: "close" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["sankey", { version: "1", type: "sankey", data: rows, encoding: { source: "source", target: "target", y: "value" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["histogram", { version: "1", type: "histogram", data: rows, encoding: { x: "revenue" }, a11y: { alt }, size: { width: 420, height: 220 } }],
+    // A field beside the band, so mark.line and mark.strokeDash have a centre line to paint.
+    ["area-range", { version: "1", type: "area-range", data: rows, encoding: { x: "month", y: [{ lo: "cost", hi: "value" }, { field: "revenue" }] }, a11y: { alt }, size: { width: 420, height: 220 } }],
+    ["bar-range", { version: "1", type: "bar-range", data: rows, encoding: { x: "month", low: "cost", high: "revenue" }, a11y: { alt }, size: { width: 420, height: 220 } }],
+    ["errorbar", { version: "1", type: "errorbar", data: rows, encoding: { x: "month", y: "revenue", error: "cost" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     [
       "trace",
       {
@@ -492,6 +499,9 @@ const ENTRY_FILES: Array<[string, string]> = [
   ["quadrant", "quadrant"],
   ["venn", "venn"],
   ["journey", "journey"],
+  ["area-range", "areaRange"],
+  ["bar-range", "barRange"],
+  ["errorbar", "errorbar"],
 ];
 
 const FRESH_ENTRY = new Set(["line", "bar", "stacked-area", "combo", "sparkline", "mini-area"]);

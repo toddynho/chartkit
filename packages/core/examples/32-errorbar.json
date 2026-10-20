@@ -1,0 +1,12 @@
+{
+  "version": "1",
+  "type": "errorbar",
+  "title": "Lab measurements",
+  "data": [
+    { "assay": "Control", "mean": 18.2, "lo": 17.1, "hi": 19.3 },
+    { "assay": "Batch A", "mean": 21.4, "lo": 20.6, "hi": 22.2 },
+    { "assay": "Batch B", "mean": 16.7, "lo": 15.3, "hi": 18.1 }
+  ],
+  "encoding": { "x": "assay", "y": "mean", "low": "lo", "high": "hi" },
+  "a11y": { "alt": "Batch A is highest, with a whisker from 20.6 to 22.2." }
+}
