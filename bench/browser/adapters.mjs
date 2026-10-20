@@ -274,10 +274,7 @@ globalThis.__bench = {
 
 function chartkitCanvasSource() {
   return prelude + `
-import { createRenderer } from "../../packages/core/src/render.ts";
-import { line } from "../../packages/core/src/charts/line.ts";
-import { hydrate } from "../../packages/core/src/canvas/hydrate.ts";
-const render = createRenderer([line]);
+import { paintSpec, lastPaintProfile } from "../../packages/core/src/canvas/paint.ts";
 function spec(xs, ys) {
   return {
     version: "1",
@@ -300,12 +297,12 @@ globalThis.__bench = {
     document.getElementById("root").replaceChildren(host);
     const paint = async (data) => {
       const t = performance.now();
-      host.innerHTML = render(spec(data.xs, data.ys));
-      if (host.innerHTML.includes("ck-chart-error")) {
-        throw new Error(host.textContent.replace(/\\s+/g, " ").slice(0, 240));
+      const ok = paintSpec(host, spec(data.xs, data.ys));
+      if (!ok || host.innerHTML.includes("ck-chart-error")) {
+        throw new Error(host.textContent.replace(/\\s+/g, " ").slice(0, 240) || "canvas scene did not paint");
       }
-      hydrate(host);
       const renderMs = performance.now() - t;
+      globalThis.__ckProfile = lastPaintProfile();
       await frames();
       return renderMs;
     };

@@ -14,6 +14,7 @@ import {
   resolveDomain,
   wantsZero,
 } from "../frame";
+import { activeScene, pushRect, takeMark, type SceneMark } from "../canvas/sink";
 import { canvasWanted } from "../render-mode";
 import { closeChart, esc, font, isRecord, linear, n, openChart, readAxis, ticks } from "../svg";
 
@@ -93,7 +94,31 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
     }
   }
 
-  if (canvas) parts.push(`<g data-ck-layer="marks">`);
+  const scene = activeScene();
+  let body: SceneMark | null = null;
+  let volume: SceneMark | null = null;
+  if (scene) {
+    scene.plot = { left: 0, top: 0, right: frame.width, bottom: frame.height };
+    scene.width = frame.width;
+    scene.height = frame.height;
+    scene.count = candles.length;
+    scene.linear = true;
+    scene.x0 = 0;
+    scene.stride = 1;
+    scene.xMin = 0;
+    scene.xMax = candles.length;
+    scene.key = `candle|${frame.width}|${frame.height}|${candles.length}|${domain[0]}|${domain[1]}|${showVolume ? 1 : 0}`;
+    body = takeMark();
+    body.kind = "bar";
+    body.fillOpacity = 1;
+    scene.marks.push(body);
+    if (showVolume) {
+      volume = takeMark();
+      volume.kind = "bar";
+      volume.fillOpacity = 0.35;
+      scene.marks.push(volume);
+    }
+  } else if (canvas) parts.push(`<g data-ck-layer="marks">`);
   candles.forEach((candle, index) => {
     const rising = candle.close >= candle.open;
     const color = rising ? up : down;
@@ -104,6 +129,15 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
     const closeY = yScale(candle.close);
     const bodyY = Math.min(openY, closeY);
     const bodyH = Math.max(1, Math.abs(closeY - openY));
+    if (body) {
+      pushRect(body, x - 0.5, Math.min(highY, lowY), 1, Math.abs(lowY - highY), color);
+      pushRect(body, x - bodyW / 2, bodyY, bodyW, bodyH, color);
+      if (volume && candle.volume !== null) {
+        const vy = volScale(candle.volume);
+        pushRect(volume, x - bodyW / 2, vy, bodyW, Math.max(0, plot.bottom - vy), color);
+      }
+      return;
+    }
     const label = `${candle.label} open ${candle.open} high ${candle.high} low ${candle.low} close ${candle.close}`;
     parts.push(`<g aria-label="${esc(label)}"><title>${esc(label)}</title>`);
     parts.push(
@@ -120,7 +154,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
     }
     parts.push(`</g>`);
   });
-  if (canvas) parts.push(`</g>`);
+  if (canvas && !body) parts.push(`</g>`);
 
   if (showY) {
     for (let i = 0; i < yTicks.length; i++) {

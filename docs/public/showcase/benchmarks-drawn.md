@@ -474,12 +474,13 @@ Painted median from the same round 13 file. uPlot is ahead of ChartKit here.
 - **gapped 10k.** Aligned update: ChartKit 1.9 ms, uPlot 1.6 ms.
 - **gapped 100k.** Aligned update: ChartKit 3.5 ms, uPlot 3.4 ms.
 - **Hover 100k.** Painted median: ChartKit 16.5 ms, uPlot 16.2 ms.
-- **10k render.** ChartKit canvas 14.3 ms, ChartKit 8.5 ms.
-- **10k first paint.** ChartKit canvas 31.2 ms, uPlot 12.9 ms.
-- **100k render.** ChartKit canvas 29.1 ms, ChartKit 19.8 ms.
-- **100k first paint.** ChartKit canvas 41.2 ms, uPlot 15.0 ms.
-- **1M first paint.** ChartKit canvas 137.8 ms, uPlot 25.0 ms.
-- **1M update.** ChartKit canvas 105.6 ms, uPlot 26.8 ms.
+- **10k render.** ChartKit canvas 10.1 ms, ChartKit 6.8 ms.
+- **10k first paint.** ChartKit canvas 29.3 ms, uPlot 15.8 ms.
+- **100k render.** ChartKit canvas 11.1 ms, ChartKit 8.2 ms.
+- **100k first paint.** ChartKit canvas 25.4 ms, uPlot 14.5 ms.
+- **1M render.** ChartKit canvas 19.2 ms, ChartKit 15.8 ms.
+- **1M first paint.** ChartKit canvas 31.3 ms, ChartKit 20.2 ms.
+- **1M update.** ChartKit canvas 26.3 ms, uPlot 23.3 ms.
 
 ## Options used
 

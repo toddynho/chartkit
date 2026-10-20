@@ -1,9 +1,10 @@
 /**
- * Paint an already-rendered SVG's marks onto a canvas inside the marks group.
- * Axes, legend, title, annotations, the aria description, and the data table stay SVG,
- * so type stays sharp and pointer hit-testing keeps using the same nodes.
+ * Upgrade an SVG that already contains mark nodes (SSR output) by replaying those nodes.
+ * The fast client path is `paintSpec`, which paints from sampled geometry and does not build mark nodes.
  * Loaded on demand from `interact.ts`. `createRenderer([line])` does not import this module.
  */
+
+export { paintSpec, lastPaintProfile, type PaintProfile } from "./paint";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const watchers = new WeakMap<Element, ResizeObserver>();

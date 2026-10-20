@@ -13,13 +13,13 @@ The threshold is `2 * floor(plotWidth)`, where plot width is the pixel width ins
 
 ## Columnar `data.sampling`
 
-A columnar table `{ "columns": { … } }` may set `sampling` to `lttb`, `minmax`, or `none`. That value overrides `mark.sampling`. Omit it to keep `mark.sampling`. There is no `auto` on the columnar field: the default stays on the mark. A line-like chart with sampling explicitly `none` and 8,000 or more rows warns **CK3032**. The patch sets `lttb`. Row arrays keep using `mark.sampling`.
+A columnar table `{ "columns": { … } }` may set `sampling` to `lttb`, `minmax`, or `none`. That value overrides `mark.sampling`. Omit it to keep `mark.sampling`. There is no `auto` on the columnar field: the default stays on the mark. A line-like chart with sampling explicitly `none` and 100,000 or more rows warns **CK3032**. The patch sets `lttb`. Row arrays keep using `mark.sampling`.
 
 `mount().append` from `@chartkitdev/vanilla` grows `Float64Array` columns by doubling, so a one-point append does not copy the whole series. A `window` copies the tail into a new array.
 
 ## Canvas
 
-`render` is `svg` (the default), `canvas`, or `auto`. `render()` always returns SVG, including on the server. The client then paints the marks onto a canvas for `line`, `stacked-area`, `scatter`, `bar`, `heatmap`, and `candlestick`. Axes, the legend, the title, annotations, the aria description, and the data table stay SVG, so type stays sharp and hit-testing still uses the SVG nodes. `auto` chooses canvas for those types at 8,000 rows or more. Other types stay SVG. `render: "canvas"` on a type with no painter warns **CK3033**. A covered type left on `svg` at 8,000 or more rows warns **CK3031**.
+`render` is `svg` (the default), `canvas`, or `auto`. `render()` always returns SVG, including on the server, marks included. On the client, canvas paints `line`, `stacked-area`, `scatter`, `bar`, `heatmap`, and `candlestick` marks from the computed geometry. The SVG keeps the axes, the legend, the title, annotations, the aria description, and the data table. Hit-testing reads the data: binary search on x for line, area, and bar, and a grid for scatter. `auto` chooses canvas for those types at 100,000 rows or more. Sampled SVG is still faster on first paint at 10,000, so auto leaves that size on SVG. Other types stay SVG. `render: "canvas"` on a type with no painter warns **CK3033**. A covered type left on `svg` at 100,000 or more rows warns **CK3031**.
 
 The painter is `@chartkitdev/core/canvas/hydrate`. It loads on demand. `createRenderer([line])` does not include it. The canvas is sized with `devicePixelRatio` and redrawn when the SVG resizes. Until the chunk loads, the SVG marks are the picture.
 

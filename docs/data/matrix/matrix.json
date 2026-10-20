@@ -32754,7 +32754,7 @@
               "loc": "chartkit:packages/core/src/generated/schema.ts:177"
             }
           ],
-          "note": "Canvas for line, area, scatter, bar, heatmap, and candlestick. Columnar data.sampling is lttb, minmax, or none. Typed-array append. Other types stay SVG.",
+          "note": "Canvas paints line, area, scatter, bar, heatmap, and candlestick from the sampled geometry. Columnar data.sampling is lttb, minmax, or none. auto from 100000 rows. Typed-array append. Other types stay SVG.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -80381,7 +80381,7 @@
               "loc": "chartkit:packages/core/src/generated/schema.ts:82"
             }
           ],
-          "note": "Line, stacked-area, scatter, bar, heatmap, and candlestick. Axes, legend, title, and annotations stay SVG. auto from 8000 rows. Other types stay SVG and warn CK3033.",
+          "note": "Line, stacked-area, scatter, bar, heatmap, and candlestick. Axes, legend, title, and annotations stay SVG. Marks are painted from the sampled geometry. auto from 100000 rows. Other types stay SVG and warn CK3033.",
           "verified": "dts-path",
           "strength": "strong"
         },

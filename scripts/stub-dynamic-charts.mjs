@@ -6,8 +6,12 @@ export const stubDynamicCharts = {
       if (args.kind !== "dynamic-import") return null;
       return { path: args.path, namespace: "chartkit-stub" };
     });
+    build.onResolve({ filter: /canvas\/hydrate$/ }, (args) => {
+      if (args.kind !== "dynamic-import") return null;
+      return { path: args.path, namespace: "chartkit-stub" };
+    });
     build.onLoad({ filter: /.*/, namespace: "chartkit-stub" }, () => ({
-      contents: "export function load(){return Promise.resolve(undefined)} export function attach(){return {destroy(){}}} export function hydrate(){} export function release(){} export default {}",
+      contents: "export function load(){return Promise.resolve(undefined)} export function attach(){return {destroy(){}}} export function hydrate(){} export function release(){} export function paintSpec(){return false} export function lastPaintProfile(){return null} export default {}",
       loader: "js",
     }));
   },

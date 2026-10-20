@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { applyPatch } from "../repair";
-import { renderLine } from "../renderers/cartesian";
+import { beginScene, endScene } from "../canvas/sink";
+import { renderCartesianScene, renderLine } from "../renderers/cartesian";
 import { renderBar } from "../renderers/cartesian";
 import { renderCandlestick } from "../renderers/candlestick";
 import { renderHeatmap } from "../renderers/heatmap";
@@ -38,9 +39,102 @@ describe("canvas render mode", () => {
     expect(validate(line({ render: "canvas" })).ok).toBe(true);
   });
 
+  it("builds a chrome-only scene for canvas clients and keeps the svg string full", () => {
+    const n = 4000;
+    const xs = new Float64Array(n);
+    const ys = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      xs[i] = i;
+      ys[i] = Math.sin(i / 20) * 10;
+    }
+    const spec = {
+      version: "1",
+      type: "line",
+      render: "canvas",
+      data: { columns: { x: xs, y: ys } },
+      encoding: { x: "x", y: "y" },
+      mark: { curve: "linear", points: "none", sampling: "auto" },
+      a11y: { alt },
+      size: { width: 640, height: 360 },
+    };
+    const full = renderLine(spec);
+    const scene = renderCartesianScene(spec);
+    expect(full).toContain('data-ck-layer="marks"');
+    expect(full).toContain("<path ");
+    expect(scene).not.toBeNull();
+    expect(scene!.svg).toContain('data-ck-scene="1"');
+    expect(scene!.svg).toContain('data-ck-render="canvas"');
+    expect(scene!.svg).not.toContain("<path ");
+    expect(scene!.frame.marks).toHaveLength(1);
+    expect(scene!.frame.marks[0].n).toBeGreaterThan(2);
+    expect(scene!.frame.marks[0].n).toBeLessThan(n);
+    expect(scene!.frame.linear).toBe(true);
+  });
+
+  it("keeps the last numeric tick inside the view box", () => {
+    const n = 100_001;
+    const data = Array.from({ length: n }, (_, i) => ({ x: i, y: i % 7 }));
+    const svg = renderLine({
+      version: "1",
+      type: "line",
+      data,
+      encoding: { x: "x", y: "y" },
+      a11y: { alt },
+      size: { width: 320, height: 180 },
+      mark: { curve: "linear", points: "none" },
+    }) ?? "";
+    const ticks = [...svg.matchAll(/<text\b([^>]*)>([^<]*)<\/text>/g)];
+    const last = ticks.find((match) => match[2].replace(/,/g, "") === "100000");
+    expect(last).toBeTruthy();
+    const attrs = last?.[1] ?? "";
+    const x = Number(/x="([^"]+)"/.exec(attrs)?.[1]);
+    const anchor = /text-anchor="([^"]+)"/.exec(attrs)?.[1];
+    const width = (last?.[2].length ?? 0) * 6.4;
+    const edge = anchor === "end" ? x : anchor === "start" ? x + width : x + width / 2;
+    expect(edge).toBeLessThanOrEqual(320);
+  });
+
   it("auto stays on svg under the threshold and moves to canvas above it", () => {
     expect(renderLine(line({ render: "auto" }, 12))).not.toContain('data-ck-render="canvas"');
     expect(renderLine(line({ render: "auto" }, CANVAS_AT))).toContain('data-ck-render="canvas"');
+  });
+
+  it("paints scatter, heatmap, and candlestick from scene geometry", () => {
+    const rows = [
+      { x: "A", y: 2, v: 1, o: 4, h: 6, l: 3, c: 5 },
+      { x: "B", y: 5, v: 4, o: 5, h: 7, l: 4, c: 6 },
+    ];
+    const base = { version: "1", render: "canvas", a11y: { alt }, size: { width: 320, height: 180 } };
+    const scatter = { ...base, type: "scatter", data: rows, encoding: { x: "y", y: "v" } };
+    const scene = beginScene();
+    try {
+      const svg = renderScatter(scatter) ?? "";
+      expect(svg).toContain('data-ck-scene="1"');
+      expect(svg).not.toContain("data-ck-layer");
+      expect(svg).not.toContain("<circle");
+      expect(scene.marks[0]?.kind).toBe("scatter");
+      expect(scene.marks[0]?.n).toBe(2);
+    } finally {
+      endScene();
+    }
+    const heat = beginScene();
+    try {
+      const svg = renderHeatmap({ ...base, type: "heatmap", data: rows, encoding: { x: "x", y: "y", color: "v" } }) ?? "";
+      expect(svg).not.toContain("data-ck-layer");
+      expect(heat.marks[0]?.rectN).toBe(4);
+    } finally {
+      endScene();
+    }
+    const candle = beginScene();
+    try {
+      const svg = renderCandlestick({ ...base, type: "candlestick", data: rows, encoding: { x: "x", open: "o", high: "h", low: "l", close: "c" } }) ?? "";
+      expect(svg).not.toContain("data-ck-layer");
+      expect(svg).not.toContain('data-ck-mark="candle"');
+      expect(candle.marks[0]?.rectN).toBeGreaterThan(0);
+    } finally {
+      endScene();
+    }
+    expect(renderScatter(scatter)).toContain('data-ck-layer="marks"');
   });
 
   it("covers area, scatter, bar, heatmap, and candlestick", () => {

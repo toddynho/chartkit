@@ -5,8 +5,14 @@
 
 export const CANVAS_TYPES = new Set(["line", "stacked-area", "scatter", "bar", "heatmap", "candlestick"]);
 
-/** `render: "auto"` uses canvas once a covered chart has at least this many rows. */
-export const CANVAS_AT = 8000;
+/**
+ * `render: "auto"` uses canvas once a covered chart has at least this many rows.
+ * Measured on a sampled line, fresh Chromium page, median of 5.
+ * SVG is faster on first paint at 10k (17.7 vs 29.3), 100k (15.7 vs 25.4), and 1M (20.2 vs 31.3).
+ * Canvas is faster on the update at 10k (27.7 vs 33.2) and 100k (25.9 vs 28.7), and slower at 1M (26.3 vs 23.5).
+ * There is no first-paint crossover in that range. 100_000 keeps 10k on SVG and switches where the update is faster.
+ */
+export const CANVAS_AT = 100_000;
 
 export type RenderMode = "svg" | "canvas" | "auto";
 

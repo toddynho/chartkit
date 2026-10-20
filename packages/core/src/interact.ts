@@ -3,6 +3,8 @@
  * `@chartkitdev/core/all` does not import this module, so a static render stays the same string.
  * Adapters call `attach` after the SVG is mounted and `patchSvg` when the spec changes.
  */
+import { dataHit, dotsAt, nearestScatter, paintScene } from "./canvas/hit";
+export { canvasWanted } from "./render-mode";
 import { formatValue } from "./format";
 import { formatInstant, instantOf, namedZone } from "./timezone";
 import { readTooltip, type TooltipDetail, type TooltipRender } from "./tooltip-slot";
@@ -59,7 +61,7 @@ export interface AttachOptions {
 
 export interface Controller {
   /** `markup` is the adapter's render of the full spec. Zoom and hidden series render internally. */
-  update(spec: InteractSpec, markup?: string): void;
+  update(spec: InteractSpec, markup?: string | null): void;
   /** Show this selection without emitting. Later clicks stay controlled. */
   setSelection(selection: Selection | null): void;
   destroy(): void;
@@ -82,6 +84,9 @@ export interface HoverIndex {
   count: number;
   left: number;
   width: number;
+  /** Canvas scenes resolve the row from the pointer without a pixel buffer. */
+  at?: (px: number) => number;
+  pixel?: (index: number) => number;
 }
 
 const TIP_TYPES = new Set(["line", "bar", "stacked-area", "scatter", "combo", "donut", "pie", "waterfall", "sunburst"]);
@@ -130,7 +135,10 @@ export function buildHoverIndex(
 }
 
 /** Nearest precomputed x. Category axes are O(1). Numeric axes are a binary search. */
+const NO_PIXELS = new Float64Array(0);
+
 export function lookupIndex(index: HoverIndex, x: number): number {
+  if (index.at) return index.at(x);
   const n = index.count;
   if (n <= 1) return 0;
   if (index.uniform) {
@@ -486,9 +494,10 @@ function fade(el: Element, ms: number, from = "0.45"): void {
 const canvasToken = new WeakMap<object, number>();
 
 /** Load the canvas painter after the SVG is in the document. The chunk stays out of the line bundle. */
-function queueCanvas(host: Element): void {
+function queueCanvas(host: Element, spec?: InteractSpec): void {
   const svg = host.querySelector?.("svg");
   if (!(svg instanceof SVGSVGElement) || svg.getAttribute("data-ck-render") !== "canvas") return;
+  if (svg.getAttribute("data-ck-scene") === "1") return;
   if (typeof document === "undefined") return;
   const token = (canvasToken.get(host) ?? 0) + 1;
   canvasToken.set(host, token);
@@ -496,6 +505,7 @@ function queueCanvas(host: Element): void {
     if (canvasToken.get(host) !== token) return;
     void import("./canvas/hydrate").then((mod) => {
       if (canvasToken.get(host) !== token) return;
+      if (spec && mod.paintSpec(host, spec)) return;
       mod.hydrate(host);
     });
   };
@@ -612,7 +622,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   if (!(found instanceof SVGSVGElement) || typeof document === "undefined") {
     return { update() {}, setSelection() {}, destroy() {}, ready: Promise.resolve() };
   }
-  const svg: SVGSVGElement = found;
+  let svg: SVGSVGElement = found;
   ensureCss();
   host.setAttribute("data-ck-interact", "1");
   if (getComputedStyle(host).position === "static") (host as HTMLElement).style.position = "relative";
@@ -978,6 +988,13 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
 
   function placeDots(snapped: number, horizontal: boolean, index: number): { x: number; y: number }[] {
     clearDots();
+    const hit = dataHit(svg);
+    if (hit && hit.kind !== "scatter") {
+      const dots = dotsAt(hit, index);
+      const marks: { x: number; y: number }[] = [];
+      for (let i = 0; i < dots.length; i++) marks.push(addDot(dots[i].x, dots[i].y, legendPaint(dots[i].color, i)));
+      return marks;
+    }
     if (arcChart(base.type) || base.type === "heatmap") return [];
     const marks: { x: number; y: number }[] = [];
     if (!horizontal) {
@@ -1046,6 +1063,23 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   let ticket = 0;
   function rebuild(): void {
     dirty = false;
+    const hit = dataHit(svg);
+    if (hit && hit.kind !== "scatter") {
+      box = plotBox(svg);
+      hover = {
+        xs: NO_PIXELS,
+        order: null,
+        pixels: NO_PIXELS,
+        uniform: false,
+        count: hit.count,
+        left: hit.plotLeft,
+        width: hit.plotWidth,
+        at: (px) => hit.indexAt(px),
+        pixel: (index) => hit.pixelAt(index),
+      };
+      refreshColors();
+      return;
+    }
     const viewN = Math.max(0, hi - lo + 1);
     box = plotBox(svg);
     const values = numericValues(base, table);
@@ -1067,6 +1101,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
 
   function crossX(local: number): number {
     arm(1);
+    if (hover.pixel) return hover.pixel(local);
     return hover.pixels[local] ?? box.l;
   }
 
@@ -1134,13 +1169,23 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   function redraw(markup?: string): void {
     const partial = lo > 0 || hi < n - 1 || hidden.size > 0;
     const ms = durationMs(base, n);
-    const next = partial ? options.render(project()) : markup ?? options.render(base);
+    const nextSpec = partial ? project() : base;
+    if (svg.getAttribute("data-ck-scene") === "1" && paintScene(host, nextSpec)) {
+      const nextSvg = host.querySelector("svg");
+      if (nextSvg instanceof SVGSVGElement) svg = nextSvg;
+      if (keys || selMode()) svg.setAttribute("tabindex", "0");
+      dim();
+      paintPick();
+      arm();
+      return;
+    }
+    const next = partial ? options.render(nextSpec) : markup ?? options.render(base);
     patchSvg(host as PatchHost, next, ms);
     if (keys || selMode()) svg.setAttribute("tabindex", "0");
     dim();
     paintPick();
     arm();
-    queueCanvas(host);
+    queueCanvas(host, base);
   }
 
   function choose(next: Selection): void {
@@ -1459,6 +1504,20 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     }
     if (!showTip && !showCross && !keys) return;
     const point = viewPoint(svg, event.clientX, event.clientY);
+    const sceneHit = dataHit(svg);
+    if (sceneHit?.kind === "scatter" && sceneHit.grid) {
+      const nearest = nearestScatter(sceneHit.grid, point.x, point.y);
+      if (!nearest) {
+        hideHover();
+        return;
+      }
+      focus = nearest.index;
+      moveCross(nearest.x, xText(nearest.index));
+      clearDots();
+      const marks = [addDot(nearest.x, nearest.y, legendPaint(nearest.color, 0))];
+      if (showTip) placeTip(event.clientX, event.clientY, nearest.name || xText(nearest.index), entriesAt(nearest.index, nearest.y), marks, nearest.index);
+      return;
+    }
     const horizontal = isRecord(base.mark) && base.mark.orientation === "horizontal";
     const local = lookupIndex(hover, horizontal ? point.y : point.x);
     const index = Math.min(n - 1, Math.max(0, lo + local));
@@ -1604,7 +1663,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     }
   }
 
-  queueCanvas(host);
+  queueCanvas(host, base);
 
   return {
     update(next, markup) {
@@ -1620,6 +1679,11 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         hi = Math.max(0, n - 1);
       } else if (hi >= n) hi = Math.max(0, n - 1);
       if (lo > hi) lo = 0;
+      if (markup === null) {
+        arm();
+        paintTable();
+        return;
+      }
       if (lo === 0 && hi === n - 1 && hidden.size === 0 && markup) {
         patchSvg(host as PatchHost, markup, durationMs(next, n));
         if (keys || selMode()) svg.setAttribute("tabindex", "0");
@@ -1627,7 +1691,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         paintPick();
         arm();
         paintTable();
-        queueCanvas(host);
+        queueCanvas(host, next);
         return;
       }
       redraw(markup);

@@ -12,6 +12,7 @@ export default defineConfig({
       { find: "@chartkitdev/core/all", replacement: path.resolve(__dirname, "../core/src/all.ts") },
       { find: "@chartkitdev/core/mermaid/phase4", replacement: path.resolve(__dirname, "../core/src/mermaid-phase4.ts") },
       { find: "@chartkitdev/core/mermaid", replacement: path.resolve(__dirname, "../core/src/mermaid.ts") },
+      { find: "@chartkitdev/core/canvas/hydrate", replacement: path.resolve(__dirname, "../core/src/canvas/hydrate.ts") },
       { find: "@chartkitdev/core/interact", replacement: path.resolve(__dirname, "../core/src/interact.ts") },
       { find: "@chartkitdev/core", replacement: path.resolve(__dirname, "../core/src/index.ts") },
     ],

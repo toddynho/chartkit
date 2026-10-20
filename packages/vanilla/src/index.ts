@@ -1,7 +1,7 @@
 import type { ChartSpec } from "@chartkitdev/core";
 export { toPNG, toSVG, toCSV } from "@chartkitdev/core/export";
 import { open, render as renderAll } from "@chartkitdev/core/all";
-import { attach, listen, patchSvg, writeTooltip, type ClickDetail, type Controller, type Selection, type TooltipRender } from "@chartkitdev/core/interact";
+import { attach, canvasWanted, listen, patchSvg, writeTooltip, type ClickDetail, type Controller, type Selection, type TooltipRender } from "@chartkitdev/core/interact";
 import { joinRows } from "./append";
 
 export interface AppendOptions {
@@ -55,6 +55,29 @@ export function mount(el: MountElement, spec: ChartSpec, options: MountOptions =
   let stop = idle;
   let selection = options.selection;
 
+  let painter: ((host: Element, spec: ChartSpec) => boolean) | null = null;
+
+  const paintCanvas = (next: ChartSpec, done: () => void) => {
+    const run = (fn: (host: Element, spec: ChartSpec) => boolean) => {
+      if (!alive || !isElement(el)) return;
+      if (!fn(el, next)) {
+        const markup = render(next);
+        if (ctl) ctl.update(next, markup);
+        else patchSvg(el, markup);
+      }
+      done();
+    };
+    if (painter) {
+      run(painter);
+      return;
+    }
+    void import("@chartkitdev/core/canvas/hydrate").then((mod) => {
+      painter = (host, spec) => mod.paintSpec(host, spec);
+      if (!alive) return;
+      run(painter);
+    });
+  };
+
   const draw = (next: ChartSpec) => {
     const markup = render(next);
     if (ctl) ctl.update(next, markup);
@@ -85,10 +108,18 @@ export function mount(el: MountElement, spec: ChartSpec, options: MountOptions =
 
   const kick = (next: ChartSpec) => {
     if (!options.render && open(el, next, () => arm(next))) return;
+    const finish = () => {
+      if (!isElement(el)) return;
+      const svg = el.querySelector("svg");
+      if (!ctl || (svg && svg !== bound)) arm(next);
+      else if (svg?.getAttribute("data-ck-scene") === "1") ctl.update(next, null);
+    };
+    if (isElement(el) && canvasWanted(next)) {
+      paintCanvas(next, finish);
+      return;
+    }
     draw(next);
-    if (!isElement(el)) return;
-    const svg = el.querySelector("svg");
-    if (!ctl || (svg && svg !== bound)) arm(next);
+    finish();
   };
 
   let current = spec;

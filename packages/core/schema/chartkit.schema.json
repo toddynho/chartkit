@@ -112,7 +112,7 @@
     "render": {
       "enum": ["svg", "canvas", "auto"],
       "default": "svg",
-      "description": "How the marks are drawn. svg is the default and what render() always returns, including on the server. canvas paints line, stacked-area, scatter, bar, heatmap, and candlestick marks on a 2D canvas after the client hydrates; axes, legend, title, annotations, the aria description, and the data table stay SVG. auto uses canvas for those types once the table has 8000 or more rows. Other types stay SVG and warn CK3033. The canvas painter loads on demand and is not part of createRenderer([line])."
+      "description": "How the marks are drawn. svg is the default and what render() always returns, including on the server, with the marks included. canvas paints line, stacked-area, scatter, bar, heatmap, and candlestick marks from the computed geometry onto a 2D canvas. The client SVG keeps the axes, legend, title, annotations, the aria description, and the data table. Hit-testing reads the data: binary search on x for line, area, and bar, and a grid for scatter. auto uses canvas for those types once the table has 100000 or more rows. Other types stay SVG and warn CK3033. The canvas painter loads on demand and is not part of createRenderer([line])."
     },
     "locale": {
       "type": "string",

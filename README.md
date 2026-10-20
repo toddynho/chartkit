@@ -16,15 +16,15 @@ Round 13, measured 2026-10-18 on phase 2 `d8dcc5a`. These are the harness number
 
 The aligned update starts at the top of a requestAnimationFrame, awaits the library’s own completion, and reads time from a MessageChannel after paint. ChartKit is `mount().update()`, the same shape as uPlot `setData`. Sampling defaults to auto. With sampling off, 1M is 471.8 ms to draw and 462.4 ms to update.
 
-Canvas line, measured 2026-10-20, median of 5, Playwright Chromium, 640×360, sampling auto (minmax above twice the plot width). `render` is the synchronous build. First paint includes the same two frames as the other libraries. uPlot does not split a synchronous render time out of that paint. Nivo threw `Maximum call stack size exceeded` at 1M. Sampling none is a different path: 100k updates in 1,213.7 ms, and 1M takes 418.9 ms to build and 22,259.3 ms to update.
+Canvas line, measured 2026-10-20, median of 5, Playwright Chromium, 640×360, sampling auto (minmax above twice the plot width). Canvas paints the sampled points and builds SVG for the axes only. `render` is that synchronous work. First paint includes the same two frames as the other libraries. uPlot does not split a synchronous render time out of that paint. Nivo threw `Maximum call stack size exceeded` at 1M. Sampling none is a different path: 100k updates in 1,224.8 ms, and 1M takes 332.5 ms to build and 21,773.5 ms to update.
 
 | Points | SVG render | Canvas render | SVG first paint | Canvas first paint | uPlot first paint | SVG update | Canvas update | uPlot update |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 10k | 8.5 | 14.3 | 16.7 | 31.2 | 12.9 | 32.8 | 25.5 | 29.2 |
-| 100k | 19.8 | 29.1 | 24.3 | 41.2 | 15.0 | 30.6 | 23.0 | 24.1 |
-| 1M | 151.2 | 127.8 | 155.2 | 137.8 | 25.0 | 98.7 | 105.6 | 26.8 |
+| 10k | 6.8 | 10.1 | 17.7 | 29.3 | 15.8 | 33.2 | 27.7 | 33.1 |
+| 100k | 8.2 | 11.1 | 15.7 | 25.4 | 14.5 | 28.7 | 25.9 | 26.2 |
+| 1M | 15.8 | 19.2 | 20.2 | 31.3 | 25.4 | 23.5 | 26.3 | 23.3 |
 
-Canvas losses: render is slower than SVG at 10k (14.3 vs 8.5) and 100k (29.1 vs 19.8). First paint loses to uPlot at 10k (31.2 vs 12.9), 100k (41.2 vs 15.0), and 1M (137.8 vs 25.0). The 1M update loses to uPlot (105.6 vs 26.8) and is slower than this SVG run (105.6 vs 98.7). Canvas wins the 10k and 100k updates against uPlot, and the 1M render and first paint against its own SVG. `scripts/size.mjs` line is 32,734 bytes gzip. The canvas painter is a separate chunk, 2,547 bytes gzip, and is not in that line bundle.
+Canvas losses: render is slower than SVG at 10k (10.1 vs 6.8), 100k (11.1 vs 8.2), and 1M (19.2 vs 15.8). First paint is slower than SVG at those sizes (29.3 vs 17.7, 25.4 vs 15.7, 31.3 vs 20.2) and slower than uPlot (15.8, 14.5, 25.4). The 1M update is slower than uPlot (26.3 vs 23.3) and slower than SVG (26.3 vs 23.5). Canvas wins the 10k and 100k updates against both SVG and uPlot. `auto` stays on SVG at 10k and switches at 100,000 rows. `scripts/size.mjs` line is 36,009 bytes gzip. The canvas painter is a separate chunk, 54,050 bytes gzip, and is not in that line bundle.
 
 **[Documentation](https://chartkit.dev)** | **[When to use](https://chartkit.dev/when-to-use)** | **[Benchmarks](https://chartkit.dev/benchmarks)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[Roadmap](ROADMAP.md)** | **[llms.txt](docs/public/llms.txt)**
 

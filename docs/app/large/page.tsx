@@ -12,7 +12,7 @@ export default function LargePage() {
     <div className="wrap section">
       <h1>Large data</h1>
       <p className="lede">
-        Canvas marks for a line that is too long for a DOM path, with the same spec and the same theme tokens as SVG.
+        The same sensor trace as SVG with sampling, as canvas marks, or with sampling left off. Axes stay SVG.
       </p>
       <LargeDemo />
     </div>

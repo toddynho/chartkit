@@ -20,6 +20,7 @@ import {
   scaleTypeOf,
   wantsZero,
 } from "../frame";
+import { activeScene, lineBuffers, rectBuffers, takeMark, type SceneMark } from "../canvas/sink";
 import { canvasWanted } from "../render-mode";
 import { boxId, clipPath, closeChart, domainEnds, esc, font, isRecord, linear, logNice, logScale, logTicks, n, openChart, padExtent, pickTicks, readAxis, readInset, scaleClamp, scalePad } from "../svg";
 
@@ -251,7 +252,36 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   parts.push(`<defs>${clipPath(clip, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top)}</defs>`);
   parts.push(`<g clip-path="url(#${clip})">`);
   parts.push(notes.under);
-  if (canvas) parts.push(`<g data-ck-layer="marks">`);
+  const scene = activeScene();
+  let sceneMark: SceneMark | null = null;
+  if (scene) {
+    scene.plot = plot;
+    scene.width = frame.width;
+    scene.height = frame.height;
+    scene.count = points.length;
+    scene.xMin = xDomain[0];
+    scene.xMax = xDomain[1];
+    scene.yMin = yDomain[0];
+    scene.yMax = yDomain[1];
+    scene.key = `scatter|${frame.width}|${frame.height}|${points.length}|${xDomain[0]}|${xDomain[1]}|${yDomain[0]}|${yDomain[1]}|${shape}|${hollow ? 1 : 0}|${opacity}`;
+    sceneMark = takeMark();
+    sceneMark.kind = "scatter";
+    sceneMark.shape = shape || "circle";
+    sceneMark.hollow = hollow;
+    sceneMark.fillOpacity = opacity;
+    sceneMark.color = paint(undefined, preset, 0);
+    sceneMark.n = points.length;
+    sceneMark.rows = points.length;
+    const bufs = lineBuffers(points.length);
+    sceneMark.x = bufs.x;
+    sceneMark.y = bufs.y;
+    sceneMark.rects = rectBuffers(points.length);
+    sceneMark.rectN = points.length;
+    sceneMark.fills = new Array(points.length);
+    sceneMark.names = new Array(points.length);
+    sceneMark.indexes = new Int32Array(points.length);
+    scene.marks.push(sceneMark);
+  } else if (canvas) parts.push(`<g data-ck-layer="marks">`);
   const labels = bag();
   let labelSvg = "";
   const labelFill = cssVar("text", frame.preset.text);
@@ -262,6 +292,15 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     const room = Math.min(cx - plot.left, plot.right - cx, cy - plot.top, plot.bottom - cy);
     const r = Math.max(0, Math.min(raw, Math.max(0, room)));
     const color = pointColor(index);
+    if (sceneMark) {
+      sceneMark.x[index] = cx;
+      sceneMark.y[index] = cy;
+      sceneMark.rects[index] = r;
+      sceneMark.fills![index] = color;
+      sceneMark.names![index] = point.category || yField || "value";
+      sceneMark.indexes![index] = point.index;
+      return;
+    }
     const name = point.category ? `${point.category}, ` : "";
     const text = `${name}${xField ?? "x"} ${formatValue(point.x, xFormat, frame.locale)}, ${yField ?? "y"} ${formatValue(point.y, yFormat, frame.locale)}`;
     const called = point.category || yField || "value";
@@ -277,7 +316,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
       labelSvg += labels.put(formatValue(point.y, format, frame.locale), cx + shift[0], cy + shift[1], shift[2], labelFill);
     }
   });
-  if (canvas) parts.push(`</g>`);
+  if (canvas && !scene) parts.push(`</g>`);
   parts.push("</g>");
   if (labelSvg) parts.push(labelSvg);
   parts.push(notes.over);
