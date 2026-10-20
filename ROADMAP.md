@@ -31,7 +31,7 @@ Earlier v1 work. 32 chart types draw: 15 in the first core, eight in Phase 3, fi
 - [x] Uncertainty: range area, floating bars, and error bars ([#34](https://github.com/toddynho/chartkit/pull/34))
 - [x] Time zones, sorting, streaming append, and filter, window, and aggregate transforms ([#35](https://github.com/toddynho/chartkit/pull/35))
 - [x] A web component, `<chart-kit>` in `@chartkitdev/element` ([#33](https://github.com/toddynho/chartkit/pull/33))
-- [x] Hierarchy: nested and flat data, multi-level treemap, and sunburst
+- [x] Hierarchy: nested and flat data, multi-level treemap, and sunburst ([#37](https://github.com/toddynho/chartkit/pull/37))
 
 ## In progress
 
