@@ -27,7 +27,7 @@ Earlier v1 work. 31 chart types draw: 15 in the first core, eight in Phase 3, fi
 - [x] PNG, SVG, and CSV export, with a keyboard export menu ([#27](https://github.com/toddynho/chartkit/pull/27))
 - [x] Legends and colour scales ([#27](https://github.com/toddynho/chartkit/pull/27))
 - [x] Annotations: trendlines, a regression overlay, callouts, and axis bands ([#31](https://github.com/toddynho/chartkit/pull/31))
-- [x] Uncertainty: range area, floating bars, and error bars
+- [x] Uncertainty: range area, floating bars, and error bars ([#34](https://github.com/toddynho/chartkit/pull/34))
 
 ## In progress
 
