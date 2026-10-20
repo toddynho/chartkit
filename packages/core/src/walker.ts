@@ -248,6 +248,16 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
         hint: `labelEnds is "all", "ends", or "last". ${quote(value)} means ${quote(ENDS_ALIAS[value])}.`,
         fix: [{ op: "replace", path, value: ENDS_ALIAS[value] }],
       });
+    } else if (path.endsWith("/curve") && typeof value === "string" && CURVE_ALIAS[value] && node.enum.includes(CURVE_ALIAS[value])) {
+      const mapped = CURVE_ALIAS[value];
+      emit(ctx, {
+        code: "CK1007",
+        severity: "error",
+        message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
+        path,
+        hint: `${quote(value)} means ${quote(mapped)}. The smooth curve is monotone-x, so a spike does not overshoot the data.`,
+        fix: [{ op: "replace", path, value: mapped }],
+      });
     } else if (path.endsWith("/points") && (value === true || value === false) && node.enum.includes("always")) {
       const mapped = value === true ? "always" : "none";
       emit(ctx, {
@@ -1367,6 +1377,16 @@ function aliasFix(root: unknown, alias: Alias): JsonPatchOperation[] {
 }
 
 const CLICK_KEYS = ["onClick", "click", "onPointClick", "onSeriesClick", "onLegendClick"];
+
+const CURVE_ALIAS: Record<string, string> = {
+  smooth: "monotone",
+  spline: "monotone",
+  basis: "monotone",
+  natural: "monotone",
+  cardinal: "monotone",
+  "monotone-x": "monotone",
+  "monotonex": "monotone",
+};
 
 const SHAPE_ALIAS: Record<string, string> = {
   rect: "square",

@@ -163,6 +163,7 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
           : "";
   const bins = scale && typeof scale.bins === "number" && scale.bins >= 2 ? Math.min(12, Math.round(scale.bins)) : 5;
   const edges = numbers(scale, "thresholds").sort((a, b) => a - b);
+  const cuts = kind === "threshold" ? (edges.length ? edges : [min + (max - min) / 3, min + (2 * (max - min)) / 3]) : [];
 
   const unit = (value: number) => {
     if (kind === "diverging") {
@@ -178,7 +179,6 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
     swatches = Array.from({ length: bins }, (_, index) => sample(stops, bins === 1 ? 0 : index / (bins - 1)));
     paint = (value) => swatches[Math.min(bins - 1, Math.floor(unit(value) * bins))] ?? swatches[0] ?? "#007aff";
   } else if (kind === "threshold") {
-    const cuts = edges.length ? edges : [min + (max - min) / 3, min + (2 * (max - min)) / 3];
     swatches = Array.from({ length: cuts.length + 1 }, (_, index) => sample(stops, cuts.length === 0 ? 0 : index / cuts.length));
     paint = (value) => {
       const index = cuts.findIndex((edge) => value < edge);
@@ -210,6 +210,18 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
         : "";
       const lo = formatTick(min);
       const hi = formatTick(max);
+      if (kind === "threshold") {
+        const labels = swatches.map((_, index) => thresholdLabel(index, cuts));
+        const slot = Math.max(36, ...labels.map((label) => Math.ceil(label.length * 6.6 + 12)));
+        const cells = swatches
+          .map(
+            (color, index) =>
+              `<rect x="${n(x + index * slot)}" y="${n(barY)}" width="${n(slot - 4)}" height="${barH}" rx="1" fill="${color}" data-ck-scale="bin" />`,
+          )
+          .join("");
+        const names = labels.map((label, index) => tick(label, x + index * slot + slot / 2, "middle")).join("");
+        return `<g data-ck-scale="${kind}">${heading}${cells}${names}</g>`;
+      }
       if (binned) {
         const cells = swatches
           .map((color, index) => `<rect x="${n(x + index * swatch)}" y="${n(barY)}" width="12" height="${barH}" rx="1" fill="${color}" data-ck-scale="bin" />`)
@@ -227,6 +239,14 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
       return `<g data-ck-scale="${kind}"><defs>${gradient}</defs>${heading}<rect x="${n(x)}" y="${n(barY)}" width="${barW}" height="${barH}" rx="2" fill="url(#${id})" data-ck-scale="gradient" />${tick(lo, x, "start")}${mid}${tick(hi, x + barW, "end")}</g>`;
     },
   };
+}
+
+/** `<6`, `6–12`, `≥12` — the cuts, not the data ends. */
+function thresholdLabel(index: number, cuts: number[]): string {
+  const last = cuts.length - 1;
+  if (index <= 0) return `<${formatTick(cuts[0] ?? 0)}`;
+  if (index >= cuts.length) return `≥${formatTick(cuts[last] ?? 0)}`;
+  return `${formatTick(cuts[index - 1] ?? 0)}–${formatTick(cuts[index] ?? 0)}`;
 }
 
 function formatTick(value: number): string {

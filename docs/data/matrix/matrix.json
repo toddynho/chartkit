@@ -1624,10 +1624,10 @@
             {
               "kind": "dts-path",
               "path": "mark.curve=monotone",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:803"
+              "loc": "chartkit:packages/core/src/generated/schema.ts:915"
             }
           ],
-          "note": "",
+          "note": "monotone is monotone-x and stays inside the data. smooth, spline, and basis repair to monotone.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -15008,10 +15008,10 @@
             {
               "kind": "dts-path",
               "path": "ChartKitChartSpecV1.mark.layout=calendar",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:875"
+              "loc": "chartkit:packages/core/src/generated/schema.ts:2165"
             }
           ],
-          "note": "",
+          "note": "Cells stay square, or at most 1.5:1, and cap at 32px. Extra width centres the grid. The last week includes the latest day. Unsized calendars stay at 12px.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -39494,10 +39494,10 @@
             {
               "kind": "dts-path",
               "path": "ChartKitChartSpecV1.mark.glow",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:835"
+              "loc": "chartkit:packages/core/src/generated/schema.ts:955"
             }
           ],
-          "note": "",
+          "note": "Blurred understroke on line and sparkline. The filter is emitted only when glow is true.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -45671,7 +45671,7 @@
               "loc": "chartkit:packages/core/src/generated/schema.ts:779"
             }
           ],
-          "note": "sequential, diverging, quantize, and threshold. scheme blue, teal, orange, or violet.",
+          "note": "sequential, diverging, quantize, and threshold. A threshold legend labels the cuts, not the data ends. scheme blue, teal, orange, or violet.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -53914,7 +53914,7 @@
               "loc": "chartkit:packages/core/src/generated/schema.ts:173"
             }
           ],
-          "note": "top, right, bottom, left, and inside.",
+          "note": "top, right, bottom, left, and inside. A funnel draws it when legend is set.",
           "verified": "dts-path",
           "strength": "strong"
         },
