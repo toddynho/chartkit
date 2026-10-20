@@ -53,6 +53,92 @@ export function formatZoned(ms: number, span: number, locale: string, zone: stri
   return new Intl.DateTimeFormat(locale, options).format(date);
 }
 
+const MINUTE = 60000;
+const HOUR_STEPS = [60, 120, 180, 240, 360, 720, 1440, 2880, 10080, 43200, 129600, 525600];
+const FINE_STEPS = [1, 5, 15, 30, 60, 120, 180, 360, 720, 1440];
+
+interface Wall {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  second: number;
+}
+
+function wall(ms: number, zone: string): Wall {
+  const bag: Record<string, number> = {};
+  for (const part of new Intl.DateTimeFormat("en-US", {
+    timeZone: zone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(new Date(ms))) {
+    if (part.type !== "literal") bag[part.type] = Number(part.value);
+  }
+  return {
+    year: bag.year,
+    month: bag.month,
+    day: bag.day,
+    hour: bag.hour === 24 ? 0 : bag.hour,
+    minute: bag.minute,
+    second: bag.second,
+  };
+}
+
+function zoneOffset(ms: number, zone: string): number {
+  const p = wall(ms, zone);
+  return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - ms;
+}
+
+/** UTC instant for a wall-clock time, or null when that clock time does not exist. */
+function wallUtc(year: number, month: number, day: number, hour: number, minute: number, zone: string): number | null {
+  let utc = Date.UTC(year, month - 1, day, hour, minute) - zoneOffset(Date.UTC(year, month - 1, day, hour, minute), zone);
+  for (let i = 0; i < 3; i++) {
+    const next = Date.UTC(year, month - 1, day, hour, minute) - zoneOffset(utc, zone);
+    if (next === utc) break;
+    utc = next;
+  }
+  const p = wall(utc, zone);
+  return p.year === year && p.month === month && p.day === day && p.hour === hour && p.minute === minute ? utc : null;
+}
+
+/**
+ * Ticks on the zone clock. Spans of a couple of hours or more land on whole hours.
+ * The grid stays aligned to local midnight, and a missing hour is skipped.
+ */
+export function zonedTimeTicks(min: number, max: number, count: number, zone: string): number[] {
+  const span = max - min || 1;
+  const steps = span >= 2 * 3600000 ? HOUR_STEPS : FINE_STEPS;
+  const budget = Math.max(2, count);
+  let step = steps[steps.length - 1];
+  for (let i = 0; i < steps.length; i++) {
+    if (span / (steps[i] * MINUTE) <= budget + 1) {
+      step = steps[i];
+      break;
+    }
+  }
+  const origin = wall(min, zone);
+  let day = Date.UTC(origin.year, origin.month - 1, origin.day) - 86400000;
+  const out: number[] = [];
+  for (let guard = 0; guard < 8 && out.length < 16; guard++) {
+    const date = new Date(day);
+    for (let minute = 0; minute < 1440; minute += step) {
+      const hit = wallUtc(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate(), Math.floor(minute / 60), minute % 60, zone);
+      if (hit === null || hit < min) continue;
+      if (hit > max) return out.length ? out : [min, max];
+      out.push(hit);
+      if (out.length >= 16) return out;
+    }
+    day += 86400000;
+  }
+  return out.length ? out : [min, max];
+}
+
 /** Tooltip instant. Date and time, in the spec zone, never the host zone. */
 export function formatInstant(ms: number, locale: string, zone: string): string {
   const date = new Date(ms);

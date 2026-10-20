@@ -57,11 +57,55 @@ describe("timezone", () => {
     expect(labels(drawLine(hourly()))).toContain("07:00 AM");
   });
 
-  it("CK3020 removes an unknown zone and CK3021 warns when x is not temporal", () => {
+  it("lands zoned ticks on whole hours, thins collisions, and can mark the spring-forward", () => {
+    const rows = Array.from({ length: 18 }, (_, index) => ({
+      t: new Date(Date.parse("2026-03-08T04:00:00Z") + index * 3600000).toISOString(),
+      load: 40 + index,
+    }));
+    const svg = drawLine({
+      version: "1",
+      type: "line",
+      data: rows,
+      encoding: { x: { field: "t", type: "temporal" }, y: "load" },
+      timezone: "America/New_York",
+      axes: { x: { bands: [{ from: "2026-03-08T06:00:00Z", to: "2026-03-08T07:00:00Z", label: "Clocks spring forward" }] } },
+      size: { width: 720, height: 280 },
+      a11y: { alt },
+    });
+    const ticks = [...svg.matchAll(/<text [^>]*x="([^"]+)"[^>]*>([^<]*)<\/text>/g)]
+      .map((match) => ({ x: Number(match[1]), label: match[2] }))
+      .filter((tick) => /^\d{2}:\d{2} [AP]M$/.test(tick.label));
+    expect(ticks.length).toBeGreaterThan(2);
+    expect(ticks.every((tick) => tick.label.endsWith(":00 AM") || tick.label.endsWith(":00 PM"))).toBe(true);
+    expect(ticks.map((tick) => tick.label)).not.toContain("02:00 AM");
+    const ordered = [...ticks].sort((a, b) => a.x - b.x);
+    for (let i = 1; i < ordered.length; i++) {
+      const prev = ordered[i - 1];
+      const next = ordered[i];
+      expect(next.x - prev.label.length * 3.2).toBeGreaterThanOrEqual(prev.x + prev.label.length * 3.2 - 1);
+    }
+    expect(svg).toContain("Clocks spring forward");
+    expect(svg).toContain('data-ck-annotation="axis-band"');
+
+    const kolkata = drawLine({
+      version: "1",
+      type: "line",
+      data: rows,
+      encoding: { x: { field: "t", type: "temporal" }, y: "load" },
+      timezone: "Asia/Kolkata",
+      size: { width: 720, height: 280 },
+      a11y: { alt },
+    });
+    const india = labels(kolkata).filter((label) => /^\d{2}:\d{2} [AP]M$/.test(label));
+    expect(india.length).toBeGreaterThan(1);
+    expect(india.every((label) => label.includes(":00 "))).toBe(true);
+  });
+
+  it("CK3023 removes an unknown zone and CK3024 warns when x is not temporal", () => {
     const spec = hourly("Mars/Olympus");
     const result = validate(spec);
     expect(result.ok).toBe(false);
-    expect(result.errors.find((error) => error.code === "CK3020")?.fix).toEqual([{ op: "remove", path: "/timezone" }]);
+    expect(result.errors.find((error) => error.code === "CK3023")?.fix).toEqual([{ op: "remove", path: "/timezone" }]);
     const fixed = repair(spec);
     expect(fixed.ok).toBe(true);
     expect(fixed.spec).not.toHaveProperty("timezone");
@@ -77,9 +121,9 @@ describe("timezone", () => {
     };
     const unused = validate(barSpec);
     expect(unused.ok).toBe(true);
-    expect(unused.warnings.some((warning) => warning.code === "CK3021" && warning.path === "/timezone")).toBe(true);
+    expect(unused.warnings.some((warning) => warning.code === "CK3024" && warning.path === "/timezone")).toBe(true);
     const dated = validate(hourly("America/New_York"));
-    expect(dated.warnings.some((warning) => warning.code === "CK3021")).toBe(false);
+    expect(dated.warnings.some((warning) => warning.code === "CK3024")).toBe(false);
   });
 
   it("formats the tooltip instant in the spec zone", () => {
@@ -120,7 +164,7 @@ describe("sort and transform", () => {
     expect(text.indexOf("Feb")).toBeLessThan(text.indexOf("Mar"));
     expect(text.indexOf("Mar")).toBeLessThan(text.indexOf("Jan"));
     const missing = validate({ ...spec, sort: { field: "nope", order: "ascending" } });
-    expect(missing.errors.find((error) => error.code === "CK3022")?.fix).toEqual([{ op: "remove", path: "/sort" }]);
+    expect(missing.errors.find((error) => error.code === "CK3025")?.fix).toEqual([{ op: "remove", path: "/sort" }]);
     expect(repair({ ...spec, sort: { field: "nope" } }).spec).not.toHaveProperty("sort");
   });
 
@@ -181,7 +225,7 @@ describe("sort and transform", () => {
     });
     expect(counted.ok, JSON.stringify(counted.errors)).toBe(true);
     const broken = validate({ ...base, transform: [{ type: "window", field: "missing", size: 7, as: "roll" }] });
-    expect(broken.errors.find((error) => error.code === "CK3024")?.fix).toEqual([{ op: "remove", path: "/transform/0" }]);
+    expect(broken.errors.find((error) => error.code === "CK3026")?.fix).toEqual([{ op: "remove", path: "/transform/0" }]);
     const repaired = repair({ ...base, transform: [{ type: "window", field: "missing", size: 7, as: "roll" }] });
     expect((repaired.spec as { transform?: unknown }).transform).toEqual([]);
     expect(repaired.ok).toBe(true);

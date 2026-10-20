@@ -130,7 +130,7 @@ function checkTimezone(spec: Record<string, unknown>, diagnostics: Diagnostic[])
   const zone = namedZone(spec.timezone);
   if (!zone) {
     flagged(diagnostics, {
-      code: "CK3020",
+      code: "CK3023",
       severity: "error",
       message: `timezone ${JSON.stringify(spec.timezone)} is not an IANA zone and is ignored`,
       path: "/timezone",
@@ -142,7 +142,7 @@ function checkTimezone(spec: Record<string, unknown>, diagnostics: Diagnostic[])
   const temporal = xLooksDated(spec) || (isRecord(spec.encoding) && isRecord(spec.encoding.x) && spec.encoding.x.type === "temporal");
   if (zone !== "UTC" && !temporal) {
     diagnostics.push({
-      code: "CK3021",
+      code: "CK3024",
       severity: "warning",
       message: "timezone has no effect unless x is temporal",
       path: "/timezone",
@@ -156,7 +156,7 @@ function checkSort(spec: Record<string, unknown>, table: DataTable, diagnostics:
   if (!message) return;
   const path = message.includes("sort field") ? "/sort/field" : "/sort";
   flagged(diagnostics, {
-    code: "CK3022",
+    code: "CK3025",
     severity: "error",
     message,
     path,
@@ -169,7 +169,7 @@ function checkTransform(spec: Record<string, unknown>, table: DataTable, diagnos
   for (const issue of transformIssues(spec.transform, table)) {
     const path = issue.index < 0 ? "/transform" : `/transform/${issue.index}`;
     flagged(diagnostics, {
-      code: "CK3024",
+      code: "CK3026",
       severity: "error",
       message: issue.message,
       path,
