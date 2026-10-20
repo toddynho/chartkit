@@ -103,6 +103,9 @@ export default function DemoPage() {
         </article>
       </div>
       <StreamDemo />
+      <p className="meta">
+        <a href="/large">One million points on canvas</a>
+      </p>
     </div>
   );
 }

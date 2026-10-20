@@ -12,6 +12,15 @@ export function readSamplingMode(value: unknown): SamplingMode {
   return "auto";
 }
 
+/** `data.sampling` on a columnar table. `lttb`, `minmax`, and `none` override `mark.sampling`. */
+export function dataSampling(spec: { data?: unknown }): SamplingMode | undefined {
+  const data = spec.data;
+  if (!data || typeof data !== "object" || Array.isArray(data)) return undefined;
+  const value = (data as { sampling?: unknown }).sampling;
+  if (value === "lttb" || value === "minmax" || value === "none") return value;
+  return undefined;
+}
+
 export interface SampledRuns {
   reduced: boolean;
   mode: "none" | "lttb" | "minmax";

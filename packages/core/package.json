@@ -42,6 +42,16 @@
         "default": "./dist/all.cjs"
       }
     },
+    "./canvas/hydrate": {
+      "import": {
+        "types": "./dist/canvas/hydrate.d.ts",
+        "default": "./dist/canvas/hydrate.js"
+      },
+      "require": {
+        "types": "./dist/canvas/hydrate.d.cts",
+        "default": "./dist/canvas/hydrate.cjs"
+      }
+    },
     "./load": {
       "import": {
         "types": "./dist/load.d.ts",

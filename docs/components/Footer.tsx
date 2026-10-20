@@ -20,6 +20,7 @@ export function Footer() {
         <a href={`${SITE.github}/blob/main/ROADMAP.md`}>Roadmap</a>
         <Link href="/when-to-use">When to use</Link>
         <Link href="/demo">Demo</Link>
+        <Link href="/large">Large data</Link>
         <a href="/llms.txt">llms.txt</a>
         <a href="/features.json">features.json</a>
         <a href="/showcase.json">showcase.json</a>

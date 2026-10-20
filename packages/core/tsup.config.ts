@@ -82,6 +82,7 @@ const entry: Record<string, string> = {
   mermaid: "src/mermaid.ts",
   "mermaid-phase4": "src/mermaid-phase4.ts",
   interact: "src/interact.ts",
+  "canvas/hydrate": "src/canvas/hydrate.ts",
   "interact-extra": "src/interact-extra.ts",
   export: "src/export.ts",
   "export-menu": "src/export-menu.ts",
@@ -112,6 +113,10 @@ export default defineConfig({
         build.onResolve({ filter: /^\.\/(load|extra-tip)$/ }, (args) => {
           if (args.kind !== "dynamic-import") return null;
           return { path: `@chartkitdev/core/${args.path.slice(2)}`, external: true };
+        });
+        build.onResolve({ filter: /^\.\/canvas\/hydrate$/ }, (args) => {
+          if (args.kind !== "dynamic-import") return null;
+          return { path: "@chartkitdev/core/canvas/hydrate", external: true };
         });
         build.onResolve({ filter: /^\.\/validate-phase4$/ }, (args) => {
           if (args.kind !== "dynamic-import") return null;

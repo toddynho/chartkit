@@ -5,7 +5,8 @@ import { isTypedArray, type DataTable } from "../data";
 import { formatZoned, zoneOf, zonedTimeTicks } from "../timezone";
 import { formatAxisValue, formatValue } from "../format";
 import { bag, glyphOf, marker, named, nudge, type Bag } from "../glyphs";
-import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
+import { canvasWanted } from "../render-mode";
+import { beginFrame, dataSampling, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import type { ColorScale } from "../color-scale";
 import { exportList, readColor } from "../frame";
 import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
@@ -205,6 +206,8 @@ export interface PlotModel {
   series: Series[];
   curve: Curve;
   sampling: SamplingMode;
+  /** Marks paint on a canvas overlay. Chrome stays in this SVG. */
+  canvas?: boolean;
   stack: "none" | "stack" | "percent";
   orientation: "vertical" | "horizontal";
   fillOpacity: number;
@@ -534,6 +537,8 @@ function toModel(
     series,
     showY2: shell.showY2 && series.some((item) => item.axis === "y2"),
     legend: shell.legendOn && (series.length > 1 || Boolean(swatches) || ruleLegend.length > 0),
+    sampling: dataSampling(spec) ?? shell.sampling,
+    canvas: canvasWanted(spec),
     colorScale,
     swatches,
     ruleLegend,
@@ -637,7 +642,8 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   });
   parts.push(`<g clip-path="url(#${clip})">`);
   parts.push(notes.under);
-  parts.push(draw(model, xScale, yScale, y2Scale, plot, horizontal));
+  const marks = draw(model, xScale, yScale, y2Scale, plot, horizontal);
+  parts.push(model.canvas ? `<g data-ck-layer="marks">${marks}</g>` : marks);
   parts.push(`</g>`);
   parts.push(notes.over);
   if (model.late) parts.push(model.late);
@@ -1772,8 +1778,9 @@ function openSvg(model: PlotModel): string {
   const described = model.description ? ` aria-describedby="${model.id}-d"` : "";
   const intent = model.intent ? ` data-ck-intent="${esc(model.intent)}"` : "";
   const exported = model.exportMark ? ` data-ck-export="${esc(model.exportMark)}"` : "";
+  const canvas = model.canvas ? ` data-ck-render="canvas"` : "";
   const desc = model.description ? `<desc id="${model.id}-d">${esc(model.description)}</desc>` : `<desc>${esc(model.alt)}</desc>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent}${exported} style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent}${exported}${canvas} style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
     `<title>${esc(model.title || model.alt)}</title>${desc}`;
 }
 

@@ -20,6 +20,7 @@ import {
   scaleTypeOf,
   wantsZero,
 } from "../frame";
+import { canvasWanted } from "../render-mode";
 import { boxId, clipPath, closeChart, domainEnds, esc, font, isRecord, linear, logNice, logScale, logTicks, n, openChart, padExtent, pickTicks, readAxis, readInset, scaleClamp, scalePad } from "../svg";
 
 /** Scatter / bubble. encoding.x and encoding.y are quantitative; size and color are optional. */
@@ -175,8 +176,9 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     return pointColor(found >= 0 ? found : 0);
   };
 
+  const canvas = canvasWanted(spec);
   const parts: string[] = [];
-  parts.push(openChart({ ...frame, renderer: "scatter" }));
+  parts.push(openChart({ ...frame, renderer: "scatter", canvas }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
   if (frame.title) parts.push(label(plot.left, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
   if (frame.subtitle) parts.push(label(plot.left, frame.title ? 40 : 18, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
@@ -249,6 +251,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   parts.push(`<defs>${clipPath(clip, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top)}</defs>`);
   parts.push(`<g clip-path="url(#${clip})">`);
   parts.push(notes.under);
+  if (canvas) parts.push(`<g data-ck-layer="marks">`);
   const labels = bag();
   let labelSvg = "";
   const labelFill = cssVar("text", frame.preset.text);
@@ -274,6 +277,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
       labelSvg += labels.put(formatValue(point.y, format, frame.locale), cx + shift[0], cy + shift[1], shift[2], labelFill);
     }
   });
+  if (canvas) parts.push(`</g>`);
   parts.push("</g>");
   if (labelSvg) parts.push(labelSvg);
   parts.push(notes.over);

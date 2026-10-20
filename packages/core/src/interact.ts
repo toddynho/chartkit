@@ -483,6 +483,26 @@ function fade(el: Element, ms: number, from = "0.45"): void {
  * A structure change, or a host without an svg, replaces the markup.
  * The svg node keeps its listeners. Crosshair and brush stay mounted.
  */
+const canvasToken = new WeakMap<object, number>();
+
+/** Load the canvas painter after the SVG is in the document. The chunk stays out of the line bundle. */
+function queueCanvas(host: Element): void {
+  const svg = host.querySelector?.("svg");
+  if (!(svg instanceof SVGSVGElement) || svg.getAttribute("data-ck-render") !== "canvas") return;
+  if (typeof document === "undefined") return;
+  const token = (canvasToken.get(host) ?? 0) + 1;
+  canvasToken.set(host, token);
+  const run = () => {
+    if (canvasToken.get(host) !== token) return;
+    void import("./canvas/hydrate").then((mod) => {
+      if (canvasToken.get(host) !== token) return;
+      mod.hydrate(host);
+    });
+  };
+  if (typeof requestAnimationFrame === "function") requestAnimationFrame(run);
+  else run();
+}
+
 export function patchSvg(host: PatchHost, markup: string, duration = 0): void {
   if (lastMarkup.get(host) === markup) return;
   const current = host.querySelector?.("svg");
@@ -1120,6 +1140,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     dim();
     paintPick();
     arm();
+    queueCanvas(host);
   }
 
   function choose(next: Selection): void {
@@ -1297,7 +1318,10 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     }
     svg.querySelectorAll("[data-ck-pick]").forEach((node) => node.remove());
     svg.querySelectorAll(".ck-pick").forEach((node) => node.classList.remove("ck-pick"));
-    if (picking !== "point") return;
+    if (picking !== "point") {
+      queueCanvas(host);
+      return;
+    }
     for (let i = 0; i < picked.points.length; i++) {
       const point = picked.points[i];
       const x = hover.pixels[point.index - lo] ?? box.l;
@@ -1354,6 +1378,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       const ring = ink ? ` style="stroke:${ink}"` : "";
       svg.insertAdjacentHTML("beforeend", `<circle data-ck-pick class="ck-pick"${ring} cx="${Math.round(x)}" cy="${Math.round(y)}" r="5" fill="none" pointer-events="none"/>`);
     }
+    queueCanvas(host);
   }
 
   function emit(name: string, detail: unknown): void {
@@ -1579,6 +1604,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     }
   }
 
+  queueCanvas(host);
+
   return {
     update(next, markup) {
       if (!alive) return;
@@ -1600,6 +1627,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         paintPick();
         arm();
         paintTable();
+        queueCanvas(host);
         return;
       }
       redraw(markup);
@@ -1621,6 +1649,11 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       exportStop();
       host.querySelector("[data-ck-table-wrap]")?.remove();
       svg.querySelectorAll("[data-ck-crosshair],[data-ck-brush],[data-ck-dot],[data-ck-pick]").forEach((node) => node.remove());
+      if (svg.getAttribute("data-ck-render") === "canvas" || svg.querySelector("[data-ck-canvas]")) {
+        void import("./canvas/hydrate").then((mod) => {
+          if (host.isConnected) mod.release(host);
+        });
+      }
       svg.removeAttribute("tabindex");
       host.removeAttribute("data-ck-interact");
     },

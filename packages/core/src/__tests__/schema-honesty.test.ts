@@ -204,6 +204,21 @@ function annotationSeed(path: string): Record<string, unknown> {
 }
 
 function apply(host: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
+  if (path === "/data/sampling") {
+    const spec = structuredClone(host);
+    const data = spec.data;
+    if (Array.isArray(data) && data.length > 0 && isRecord(data[0])) {
+      const keys = Object.keys(data[0] as Record<string, unknown>);
+      const columns: Record<string, unknown[]> = {};
+      for (const key of keys) columns[key] = data.map((row) => (isRecord(row) ? row[key] : null));
+      spec.data = { columns, sampling: value };
+      return spec;
+    }
+    if (isRecord(data) && isRecord(data.columns)) {
+      spec.data = { ...data, sampling: value };
+      return spec;
+    }
+  }
   const spec = structuredClone(host);
   if (path.startsWith("/annotations/")) spec.annotations = [annotationSeed(path)];
   if (path.startsWith("/transform/")) {

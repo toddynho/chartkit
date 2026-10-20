@@ -7,6 +7,7 @@ import { sortIssue } from "./sort";
 import { namedZone } from "./timezone";
 import { transformIssues } from "./transform";
 import { foreignHierarchy, readHierarchy } from "./hierarchy";
+import { CANVAS_AT, CANVAS_TYPES, pointCount, readRender } from "./render-mode";
 import { domainEnds } from "./svg";
 import { nearMatches, suggestHint } from "./walker";
 
@@ -123,6 +124,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
     return;
   }
   const view = prepared.ok ? prepared.table : table;
+  if (known && type) warnCanvas(spec, type, view.length, diagnostics);
   if (isRecord(spec.encoding)) checkEncoding(spec, spec.encoding, view, diagnostics);
   if (type === "candlestick") checkCandles(spec, view, diagnostics);
   if (type) checkUncertainty(spec, type, view, diagnostics);
@@ -455,6 +457,53 @@ function checkCandles(spec: Record<string, unknown>, table: DataTable, diagnosti
         hint: "Check field mapping: are high/low swapped?",
       });
     }
+  }
+}
+
+const SAMPLED = new Set(["line", "stacked-area", "sparkline", "mini-area", "spike", "combo"]);
+
+function explicitNone(spec: Record<string, unknown>): string | null {
+  const data = spec.data;
+  if (data && typeof data === "object" && !Array.isArray(data) && (data as { sampling?: unknown }).sampling === "none") return "/data/sampling";
+  if (isRecord(spec.mark) && spec.mark.sampling === "none") return "/mark/sampling";
+  return null;
+}
+
+/** Large SVG series, sampling none, and canvas on a type that has no painter. */
+function warnCanvas(spec: Record<string, unknown>, type: string, count: number, diagnostics: Diagnostic[]): void {
+  const mode = readRender(spec.render);
+  const rows = Math.max(count, pointCount(spec.data));
+  if (mode === "canvas" && !CANVAS_TYPES.has(type)) {
+    diagnostics.push({
+      code: "CK3033",
+      severity: "warning",
+      message: `render canvas has no canvas painter for type ${type}`,
+      path: "/render",
+      hint: "this type stays SVG",
+      fix: [{ op: "replace", path: "/render", value: "svg" }],
+    });
+  }
+  if (rows < CANVAS_AT) return;
+  if (mode === "svg" && CANVAS_TYPES.has(type)) {
+    diagnostics.push({
+      code: "CK3031",
+      severity: "warning",
+      message: `${rows} points on the svg renderer`,
+      path: "/render",
+      hint: "canvas paints the marks and leaves the axes in SVG",
+      fix: [spec.render === "svg" ? { op: "replace", path: "/render", value: "canvas" } : { op: "add", path: "/render", value: "canvas" }],
+    });
+  }
+  const sampling = explicitNone(spec);
+  if (sampling && SAMPLED.has(type)) {
+    diagnostics.push({
+      code: "CK3032",
+      severity: "warning",
+      message: `sampling is none for ${rows} points`,
+      path: sampling,
+      hint: "lttb keeps the shape and drops points the plot cannot show",
+      fix: [{ op: "replace", path: sampling, value: "lttb" }],
+    });
   }
 }
 

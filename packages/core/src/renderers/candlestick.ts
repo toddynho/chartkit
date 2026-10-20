@@ -14,6 +14,7 @@ import {
   resolveDomain,
   wantsZero,
 } from "../frame";
+import { canvasWanted } from "../render-mode";
 import { closeChart, esc, font, isRecord, linear, n, openChart, readAxis, ticks } from "../svg";
 
 /** OHLC candles. A volume pane is drawn when encoding.volume is set. */
@@ -78,8 +79,9 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   const maxVol = Math.max(...candles.map((candle) => candle.volume ?? 0), 1);
   const volScale = linear(0, maxVol, plot.bottom, plot.bottom - volumeH);
 
+  const canvas = canvasWanted(spec);
   const parts: string[] = [];
-  parts.push(openChart({ ...frame, renderer: "candlestick" }));
+  parts.push(openChart({ ...frame, renderer: "candlestick", canvas }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
   const head = heading(frame, plot.left);
   if (head) parts.push(head);
@@ -91,6 +93,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
     }
   }
 
+  if (canvas) parts.push(`<g data-ck-layer="marks">`);
   candles.forEach((candle, index) => {
     const rising = candle.close >= candle.open;
     const color = rising ? up : down;
@@ -117,6 +120,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
     }
     parts.push(`</g>`);
   });
+  if (canvas) parts.push(`</g>`);
 
   if (showY) {
     for (let i = 0; i < yTicks.length; i++) {
