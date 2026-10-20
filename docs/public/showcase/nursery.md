@@ -403,6 +403,7 @@ Litres against a mark of 80.
 - [Legend item styling](https://chartkit.dev/features/legend.style) (`legend.style`)
 - [Values in legend](https://chartkit.dev/features/legend.values) (`legend.values`)
 - [Per-point / per-category colour](https://chartkit.dev/features/mark.color.point) (`mark.color.point`)
+- [Explicit domain (min/max)](https://chartkit.dev/features/scale.domain) (`scale.domain`)
 - [Custom colour palette](https://chartkit.dev/features/theme.palette) (`theme.palette`)
 - [Built-in themes](https://chartkit.dev/features/theme.presets) (`theme.presets`)
 - [Tooltip positioning / follow cursor](https://chartkit.dev/features/tooltip.position) (`tooltip.position`)
