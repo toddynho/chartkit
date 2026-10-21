@@ -474,6 +474,7 @@ describe("attach", () => {
     expect(svg.querySelector("[data-ck-crosshair]")).toBeNull();
     expect(svg.querySelector("[data-ck-dot]")).toBeNull();
     expect(north.classList.contains("ck-bar-on")).toBe(true);
+    expect(svg.querySelectorAll(".ck-bar-on").length).toBe(1);
     expect(east.getAttribute("data-ck-bar-dim")).toBe("");
     ctl.destroy();
   });

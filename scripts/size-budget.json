@@ -6,7 +6,7 @@
   "svelte": 962,
   "vanilla": 1571,
   "element": 1821,
-  "interact": 17627,
+  "interact": 17641,
   "interactExtra": 3780,
   "vueLine": 38368,
   "svelteLine": 38549,
@@ -17,8 +17,8 @@
   "mermaid": 37543,
   "vanillaAuto": 1903,
   "markdown": 663,
-  "global": 121639,
-  "globalAuto": 86087,
+  "global": 121660,
+  "globalAuto": 86089,
   "globalMermaid": 38160,
   "histogram": 15665,
   "boxplot": 15631,
@@ -37,5 +37,5 @@
   "bar-range": 15133,
   "errorbar": 15410,
   "sunburst": 11132,
-  "note": "gzip -9 byte budgets, each set to the measured size after facets, concatenation, breakpoints, and right-to-left layout. Against main 9c1dbdc: line 37641 (main 34015, +3626, layout in the line bundle). all 61271 (main 57650, +3621). extra 85621 (main 82076, +3545). canvas 56878 (main 56817, +61). validate 32196 includes CK3040\u2013CK3049 (main 31177, +1019). interact 17627 (main 16637, +990, bar highlight and the breakpoint watcher). interactExtra 3780 matches main. global 121639 (main 115985, +5654). globalAuto 86087 (main 81366, +4721). globalMermaid 38160 (main 37017, +1143). mermaid 37543 (main 36522, +1021). Adapters match main: vue 802, svelte 962, vanilla 1571, element 1821. vueLine 38368 (main 34751, +3617), svelteLine 38549 (main 34929, +3620), vanillaLine 38981 (main 35362, +3619), elementLine 39316 (main 35705, +3611). treemap 13596 matches main."
+  "note": "gzip -9 byte budgets, each set to the measured size after facets, concatenation, breakpoints, and right-to-left layout. Against main 9c1dbdc: line 37641 (main 34015, +3626, layout in the line bundle). all 61271 (main 57650, +3621). extra 85621 (main 82076, +3545). canvas 56878 (main 56817, +61). validate 32196 includes CK3040\u2013CK3049 (main 31177, +1019). interact 17641 (main 16637, +1004, bar highlight and the breakpoint watcher). interactExtra 3780 matches main. global 121660 (main 115985, +5675). globalAuto 86089 (main 81366, +4723). globalMermaid 38160 (main 37017, +1143). mermaid 37543 (main 36522, +1021). Adapters match main: vue 802, svelte 962, vanilla 1571, element 1821. vueLine 38368 (main 34751, +3617), svelteLine 38549 (main 34929, +3620), vanillaLine 38981 (main 35362, +3619), elementLine 39316 (main 35705, +3611). treemap 13596 matches main."
 }

@@ -1225,7 +1225,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function barsNear(snapped: number, horizontal: boolean): Element[] {
-    const tol = Math.max(18, box.w / Math.max(4, n));
+    const span = horizontal ? box.h : box.w;
+    const tol = Math.max(8, (span / Math.max(1, n)) * 0.49);
     const hits: Element[] = [];
     const rects = svg.querySelectorAll("rect");
     for (let i = 0; i < rects.length; i++) {
@@ -1303,9 +1304,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       top = (rect.top + ((y0 + y1) / 2) * sy - bounds.top) - height / 2;
       if (left + width > bounds.width - 4) left = rect.left + x0 * sx - bounds.left - width - 8;
     } else if (top < 4) {
-      const beside = cx < bounds.width / 2 ? rect.left + x1 * sx - bounds.left + 8 : rect.left + x0 * sx - bounds.left - width - 8;
-      left = beside;
-      top = Math.max(4, topEdge);
+      top = topEdge + 6;
     }
     left = Math.max(4, Math.min(left, Math.max(4, bounds.width - width - 4)));
     top = Math.max(4, Math.min(top, Math.max(4, bounds.height - height - 4)));
