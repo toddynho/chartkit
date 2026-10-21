@@ -1,7 +1,7 @@
 {
   "line": 34554,
   "all": 64372,
-  "validate": 32206,
+  "validate": 34425,
   "vue": 802,
   "svelte": 962,
   "vanilla": 1571,
@@ -14,12 +14,12 @@
   "elementLine": 36242,
   "extra": 88723,
   "canvas": 57396,
-  "mermaid": 37554,
+  "mermaid": 39758,
   "vanillaAuto": 1903,
   "markdown": 663,
-  "global": 124657,
+  "global": 126877,
   "globalAuto": 89096,
-  "globalMermaid": 38171,
+  "globalMermaid": 40376,
   "histogram": 15665,
   "boxplot": 15631,
   "radar": 7026,
@@ -37,10 +37,10 @@
   "bar-range": 15133,
   "errorbar": 15410,
   "sunburst": 11132,
-  "geo": 18531,
+  "geo": 18659,
   "geoWorld": 24702,
   "geoUs": 11887,
   "geoCanada": 3643,
   "geoEu": 3007,
-  "note": "gzip -9 byte budgets, each set to the measured size after facets, concatenation, breakpoints, and right-to-left layout moved out of the line bundle. Against main 9c1dbdc: line 34427 (main 34015, +412). all 64137 (main 57650, +6487). extra 88495 (main 82076, +6419). canvas 57127 (main 56817, +310). validate 32206 (main 31177, +1029), including CK3040\u2013CK3049. interact 17641 (main 16637, +1004), bar highlight and the breakpoint watcher. interactExtra 3780 matches main. global 124418 (main 115985, +8433). globalAuto 88864 (main 81366, +7498). globalMermaid 38171 (main 37017, +1154). mermaid 37554 (main 36522, +1032). Adapters match main: vue 802, svelte 962, vanilla 1571, element 1821. vueLine 35161 (main 34751, +410), svelteLine 35344 (main 34929, +415), vanillaLine 35758 (main 35362, +396), elementLine 36110 (main 35705, +405). treemap 13596 matches main. createRenderer([line]) does not include the layout chunk. all and extra call mountLayout(). Geo is a separate unpublished package. Against main 3fc5fca, validate and interact are unchanged. Diverging horizontal bar labels added line 34554 (+127), all 64372 (+235), extra 88723 (+228), canvas 57396 (+269), global 124657 (+239), globalAuto 89096 (+232), vueLine 35288 (+127), svelteLine 35475 (+131), vanillaLine 35885 (+127), elementLine 36242 (+132). geo 18531 is the geo core with atlas JSON external. geoWorld 24702, geoUs 11887, geoCanada 3643, and geoEu 3007 are the on-demand atlas chunks."
+  "note": "gzip -9 byte budgets, each set to the measured size after facets, concatenation, breakpoints, and right-to-left layout moved out of the line bundle. Against main 9c1dbdc: line 34427 (main 34015, +412). all 64137 (main 57650, +6487). extra 88495 (main 82076, +6419). canvas 57127 (main 56817, +310). validate 32206 (main 31177, +1029), including CK3040\u2013CK3049. interact 17641 (main 16637, +1004), bar highlight and the breakpoint watcher. interactExtra 3780 matches main. global 124418 (main 115985, +8433). globalAuto 88864 (main 81366, +7498). globalMermaid 38171 (main 37017, +1154). mermaid 37554 (main 36522, +1032). Adapters match main: vue 802, svelte 962, vanilla 1571, element 1821. vueLine 35161 (main 34751, +410), svelteLine 35344 (main 34929, +415), vanillaLine 35758 (main 35362, +396), elementLine 36110 (main 35705, +405). treemap 13596 matches main. createRenderer([line]) does not include the layout chunk. all and extra call mountLayout(). Geo is a separate unpublished package. Against main 3fc5fca, validate and interact are unchanged. Diverging horizontal bar labels added line 34554 (+127), all 64372 (+235), extra 88723 (+228), canvas 57396 (+269), global 124657 (+239), globalAuto 89096 (+232), vueLine 35288 (+127), svelteLine 35475 (+131), vanillaLine 35885 (+127), elementLine 36242 (+132). geo 18531 is the geo core with atlas JSON external. geoWorld 24702, geoUs 11887, geoCanada 3643, and geoEu 3007 are the on-demand atlas chunks. Against main b64aa4f, wrong-key repair hints and the map handoff added validate 34425 (+2219), mermaid 39758 (+2204), global 126877 (+2220), and globalMermaid 40376 (+2205). geo 18659 (+128) accepts a top-level atlas and location, lat, and lon aliases. line, all, extra, canvas, and the atlas chunks are unchanged."
 }

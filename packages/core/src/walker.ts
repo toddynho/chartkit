@@ -42,6 +42,8 @@ interface Ctx {
   skipUnknown: Set<string>;
   /** JSON pointers the walker must not descend into. A repair already explains them. */
   dropPaths: Set<string>;
+  /** JSON pointers whose own schema error is replaced by a repair patch. */
+  explained: Set<string>;
   /** `if` / `then` re-enters the root. The metric hoist must run once. */
   metricNoted: boolean;
 }
@@ -76,6 +78,13 @@ const CHART_TYPES = [
   "sunburst",
 ] as const;
 
+/** Types whose field rules live outside this schema. They stay out of the enum and in the CK1005 list. */
+const DEFERRED_TYPES = ["gantt", "timeline", "quadrant", "venn", "journey", "choropleth", "map-points"] as const;
+
+function validTypeList(): string {
+  return `${CHART_TYPES.join(", ")}, ${DEFERRED_TYPES.join(", ")}`;
+}
+
 export function walkSchema(value: unknown, schema: JsonSchema, diagnostics: Diagnostic[]): void {
   const ctx: Ctx = {
     rootSchema: schema,
@@ -85,6 +94,7 @@ export function walkSchema(value: unknown, schema: JsonSchema, diagnostics: Diag
     skipMissing: new Set(),
     skipUnknown: new Set(),
     dropPaths: new Set(),
+    explained: new Set(),
     metricNoted: false,
   };
   check(value, schema, "", ctx);
@@ -106,7 +116,7 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
     return;
   }
   ctx.depth += 1;
-  if (isDropped(path, ctx)) {
+  if (isDropped(path, ctx) || ctx.explained.has(path)) {
     ctx.depth -= 1;
     return;
   }
@@ -412,6 +422,7 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
       noteChartType(value, ctx);
       noteCombo(value, ctx);
       noteMetricHoist(value, ctx);
+      noteMisplaced(value, ctx);
     }
     if (path === "/encoding") {
       noteDonutChannels(value, ctx);
@@ -949,7 +960,7 @@ function emitUnknownType(value: unknown, ctx: Ctx): void {
   const closest = matches[0];
   const hintParts = [
     suggestHint(matches),
-    `valid: ${CHART_TYPES.join(", ")}`,
+    `valid: ${validTypeList()}`,
     alias?.note,
   ].filter(Boolean);
   emit(ctx, {
@@ -1056,6 +1067,350 @@ function yCount(root: unknown): number {
   else if (enc.y !== undefined) count = 1;
   if (enc.y2 !== undefined) count += 1;
   return count;
+}
+
+const FEATURE_CLICKS = ["click", "onClick", "onPointClick", "onSeriesClick", "onLegendClick", "interactions"];
+
+/**
+ * Plausible keys agents invent for features that already have a home.
+ * One CK1009 and a JSON Patch per feature, so a retry moves the value instead of deleting it.
+ */
+function noteMisplaced(spec: Record<string, unknown>, ctx: Ctx): void {
+  const moves: FeatureMove[] = [];
+  const layoutBag: Record<string, unknown> | null = isPlainObject(spec.layout) ? null : {};
+  const interactionBag: Record<string, unknown> | null = isPlainObject(spec.interaction) ? null : {};
+
+  const putLayout = (key: string, value: unknown, fix: JsonPatchOperation[]) => {
+    if (layoutBag) {
+      layoutBag[key] = value;
+      return;
+    }
+    const layout = spec.layout as Record<string, unknown>;
+    if (layout[key] === undefined) fix.push({ op: "add", path: `/layout/${key}`, value });
+  };
+  const putInteraction = (key: string, value: unknown, fix: JsonPatchOperation[]) => {
+    if (interactionBag) {
+      interactionBag[key] = value;
+      return;
+    }
+    const interaction = spec.interaction as Record<string, unknown>;
+    if (interaction[key] === undefined) fix.push({ op: "add", path: `/interaction/${key}`, value });
+  };
+
+  const facetMove = facetFeature(spec, ctx, putLayout);
+  if (facetMove) moves.push(facetMove);
+  const concatMove = concatFeature(spec, ctx, putLayout);
+  if (concatMove) moves.push(concatMove);
+  const breakMove = breakpointFeature(spec, ctx, putLayout);
+  if (breakMove) moves.push(breakMove);
+  const syncMove = syncFeature(spec, ctx, putInteraction);
+  if (syncMove) moves.push(syncMove);
+  const navMove = navigatorFeature(spec, ctx, putInteraction);
+  if (navMove) moves.push(navMove);
+  const drillMove = drillFeature(spec, ctx, putInteraction);
+  if (drillMove) moves.push(drillMove);
+
+  if (layoutBag && Object.keys(layoutBag).length > 0) {
+    moves.find((move) => move.layout)?.fix.unshift({ op: "add", path: "/layout", value: layoutBag });
+  }
+  if (interactionBag && Object.keys(interactionBag).length > 0) {
+    moves.find((move) => move.interaction)?.fix.unshift({ op: "add", path: "/interaction", value: interactionBag });
+  }
+  for (const move of moves) {
+    emit(ctx, {
+      code: "CK1009",
+      severity: "error",
+      message: move.message,
+      path: move.path,
+      hint: move.hint,
+      fix: move.fix.length > 0 ? move.fix : undefined,
+    });
+  }
+}
+
+interface FeatureMove {
+  path: string;
+  message: string;
+  hint: string;
+  fix: JsonPatchOperation[];
+  layout?: boolean;
+  interaction?: boolean;
+}
+
+function facetFeature(
+  spec: Record<string, unknown>,
+  ctx: Ctx,
+  putLayout: (key: string, value: unknown, fix: JsonPatchOperation[]) => void,
+): FeatureMove | undefined {
+  const encoding = isPlainObject(spec.encoding) ? spec.encoding : undefined;
+  const small = spec.type === "small-multiples";
+  if (spec.facet === undefined && encoding?.facet === undefined && !small) return undefined;
+  const payload = spec.facet !== undefined ? facetPayload(spec.facet) : encoding?.facet !== undefined ? facetPayload(encoding.facet) : undefined;
+  const fix: JsonPatchOperation[] = [];
+  if (payload !== undefined) putLayout("facet", payload, fix);
+  if (spec.facet !== undefined) {
+    ctx.skipUnknown.add("/facet");
+    fix.push({ op: "remove", path: "/facet" });
+  }
+  if (encoding?.facet !== undefined) {
+    ctx.skipUnknown.add("/encoding/facet");
+    fix.push({ op: "remove", path: "/encoding/facet" });
+  }
+  return {
+    path: spec.facet !== undefined ? "/facet" : encoding?.facet !== undefined ? "/encoding/facet" : "/type",
+    message: "small multiples are layout.facet",
+    hint: 'A faceted chart keeps its chart type and sets layout.facet: { field }. A top-level facet, encoding.facet, and type "small-multiples" are not the facet.',
+    fix,
+    layout: true,
+  };
+}
+
+function facetPayload(value: unknown): unknown {
+  if (typeof value === "string" && value) return { field: value };
+  return value;
+}
+
+function concatFeature(
+  spec: Record<string, unknown>,
+  ctx: Ctx,
+  putLayout: (key: string, value: unknown, fix: JsonPatchOperation[]) => void,
+): FeatureMove | undefined {
+  const layout = isPlainObject(spec.layout) ? spec.layout : undefined;
+  const sources: string[] = [];
+  if (spec.charts !== undefined) sources.push("/charts");
+  if (spec.views !== undefined) sources.push("/views");
+  if (layout?.charts !== undefined) sources.push("/layout/charts");
+  const direction = layout?.direction === "vertical" || layout?.direction === "horizontal" ? layout.direction : undefined;
+  if (sources.length === 0 && !direction) return undefined;
+  let views: unknown[] | undefined;
+  for (const source of sources) {
+    const raw = source === "/charts" ? spec.charts : source === "/views" ? spec.views : layout?.charts;
+    views ??= viewsPayload(raw);
+  }
+  const fix: JsonPatchOperation[] = [];
+  const concat: Record<string, unknown> = {};
+  if (views) concat.views = views;
+  if (direction) concat.direction = direction;
+  if (Object.keys(concat).length > 0) putLayout("concat", concat, fix);
+  for (const source of sources) {
+    ctx.skipUnknown.add(source);
+    if (views) fix.push({ op: "remove", path: source });
+  }
+  if (direction) {
+    ctx.explained.add("/layout/direction");
+    fix.push({ op: "remove", path: "/layout/direction" });
+  }
+  return {
+    path: sources[0] ?? "/layout/direction",
+    message: "several charts are layout.concat.views",
+    hint: 'layout.concat.views is a list of chart specs. direction "vertical" or "horizontal" is layout.concat.direction. layout.direction is "ltr" or "rtl".',
+    fix,
+    layout: true,
+  };
+}
+
+function viewsPayload(value: unknown): unknown[] | undefined {
+  if (Array.isArray(value)) return value;
+  if (!isPlainObject(value)) return undefined;
+  const views = Object.values(value).filter((item) => isPlainObject(item));
+  return views.length > 0 ? views : undefined;
+}
+
+function breakpointFeature(
+  spec: Record<string, unknown>,
+  ctx: Ctx,
+  putLayout: (key: string, value: unknown, fix: JsonPatchOperation[]) => void,
+): FeatureMove | undefined {
+  const legend = spec.legend;
+  const rule: Record<string, unknown> = { legend: false };
+  const removes: string[] = [];
+  if (typeof legend === "string" && isMediaQuery(legend)) {
+    const width = mediaWidth(legend);
+    if (width !== undefined) rule.maxWidth = width;
+    removes.push("/legend");
+    ctx.explained.add("/legend");
+  } else if (isPlainObject(legend)) {
+    for (const [key, value] of Object.entries(legend)) {
+      if (key !== "responsive" && !isMediaQuery(value)) continue;
+      if (rule.maxWidth === undefined) {
+        if (typeof value === "string") {
+          const width = mediaWidth(value);
+          if (width !== undefined) rule.maxWidth = width;
+        } else if (isPlainObject(value) && typeof value.maxWidth === "number" && value.maxWidth > 0) {
+          rule.maxWidth = value.maxWidth;
+        }
+      }
+      removes.push(`/legend/${key}`);
+      if (key === "responsive") ctx.skipUnknown.add(`/legend/${key}`);
+      else ctx.explained.add(`/legend/${key}`);
+    }
+  }
+  if (removes.length === 0) return undefined;
+  const fix: JsonPatchOperation[] = [];
+  const layout = isPlainObject(spec.layout) ? spec.layout : undefined;
+  if (Array.isArray(layout?.breakpoints)) fix.push({ op: "add", path: "/layout/breakpoints/-", value: rule });
+  else putLayout("breakpoints", [rule], fix);
+  for (const path of removes) fix.push({ op: "remove", path });
+  return {
+    path: removes[0] ?? "/legend",
+    message: "a responsive legend is layout.breakpoints",
+    hint: "Hide the legend on a narrow chart with layout.breakpoints: [{ maxWidth, legend: false }]. legend.responsive and media queries are not legend fields.",
+    fix,
+    layout: true,
+  };
+}
+
+function isMediaQuery(value: unknown): value is string {
+  return typeof value === "string" && /@media|max-width|min-width|maxWidth/i.test(value);
+}
+
+function mediaWidth(value: string): number | undefined {
+  const match = /max-?width\s*[:=]\s*(\d+(?:\.\d+)?)\s*px/i.exec(value);
+  if (!match) return undefined;
+  const width = Number(match[1]);
+  return Number.isFinite(width) && width > 0 ? width : undefined;
+}
+
+function syncFeature(
+  spec: Record<string, unknown>,
+  ctx: Ctx,
+  putInteraction: (key: string, value: unknown, fix: JsonPatchOperation[]) => void,
+): FeatureMove | undefined {
+  if (spec.sync === undefined) return undefined;
+  const fix: JsonPatchOperation[] = [];
+  const id = syncId(spec.sync);
+  if (id) putInteraction("sync", id, fix);
+  ctx.skipUnknown.add("/sync");
+  fix.push({ op: "remove", path: "/sync" });
+  return {
+    path: "/sync",
+    message: "sync belongs in interaction.sync",
+    hint: "interaction.sync is a string group id. Charts with the same id share the crosshair and the x window.",
+    fix,
+    interaction: true,
+  };
+}
+
+function syncId(value: unknown): string | undefined {
+  if (typeof value === "string" && value) return value;
+  if (!isPlainObject(value)) return undefined;
+  for (const key of ["group", "id", "key", "name"]) {
+    const id = value[key];
+    if (typeof id === "string" && id) return id;
+  }
+  return undefined;
+}
+
+function navigatorFeature(
+  spec: Record<string, unknown>,
+  ctx: Ctx,
+  putInteraction: (key: string, value: unknown, fix: JsonPatchOperation[]) => void,
+): FeatureMove | undefined {
+  const removes: string[] = [];
+  let value: unknown;
+  if (asksForOverview(spec.brush)) {
+    value = navigatorValue(spec.brush);
+    removes.push("/brush");
+    ctx.skipUnknown.add("/brush");
+  }
+  const interaction = isPlainObject(spec.interaction) ? spec.interaction : undefined;
+  if (interaction && asksForOverview(interaction.brush)) {
+    value ??= navigatorValue(interaction.brush);
+    removes.push("/interaction/brush");
+    ctx.explained.add("/interaction/brush");
+  }
+  if (removes.length === 0 || value === undefined) return undefined;
+  const fix: JsonPatchOperation[] = [];
+  putInteraction("navigator", value, fix);
+  for (const path of removes) fix.push({ op: "remove", path });
+  return {
+    path: removes[0] ?? "/brush",
+    message: "an overview brush is interaction.navigator",
+    hint: 'interaction.navigator is true or { height }. interaction.brush is "none" or "x" for a range select, not the overview.',
+    fix,
+    interaction: true,
+  };
+}
+
+function asksForOverview(value: unknown): boolean {
+  if (value === true) return true;
+  if (typeof value === "string") return /overview|navigator|minimap/i.test(value);
+  if (!isPlainObject(value)) return false;
+  if (value.x === true && value.height === undefined && value.overview === undefined && value.navigator === undefined && value.type === undefined) return false;
+  return true;
+}
+
+function navigatorValue(value: unknown): unknown {
+  if (isPlainObject(value) && typeof value.height === "number") return { height: value.height };
+  return true;
+}
+
+function drillFeature(
+  spec: Record<string, unknown>,
+  ctx: Ctx,
+  putInteraction: (key: string, value: unknown, fix: JsonPatchOperation[]) => void,
+): FeatureMove | undefined {
+  const found: { path: string; value: unknown; children: Record<string, unknown> }[] = [];
+  const consider = (path: string, value: unknown) => {
+    const children = childMap(value);
+    if (!children) return;
+    found.push({ path, value, children });
+  };
+  for (const key of FEATURE_CLICKS) {
+    if (spec[key] !== undefined) consider(`/${key}`, spec[key]);
+  }
+  const interaction = isPlainObject(spec.interaction) ? spec.interaction : undefined;
+  if (interaction) {
+    for (const key of FEATURE_CLICKS) {
+      if (interaction[key] !== undefined) consider(`/interaction/${key}`, interaction[key]);
+    }
+  }
+  if (found.length === 0) return undefined;
+  const children: Record<string, unknown> = {};
+  let key: string | undefined;
+  for (const item of found) {
+    Object.assign(children, item.children);
+    if (!key && isPlainObject(item.value) && typeof item.value.key === "string" && item.value.key) key = item.value.key;
+  }
+  const drill: Record<string, unknown> = { children };
+  if (key) drill.key = key;
+  const fix: JsonPatchOperation[] = [];
+  putInteraction("drilldown", drill, fix);
+  for (const item of found) {
+    ctx.skipUnknown.add(item.path);
+    fix.push({ op: "remove", path: item.path });
+  }
+  return {
+    path: found[0]?.path ?? "/click",
+    message: "a child chart is interaction.drilldown",
+    hint: "Clicking a category swaps in interaction.drilldown.children, keyed by that category. click, onClick, and interactions are not spec keys.",
+    fix,
+    interaction: true,
+  };
+}
+
+function childMap(value: unknown): Record<string, unknown> | undefined {
+  if (!isPlainObject(value)) return undefined;
+  if (isPlainObject(value.children)) {
+    const children: Record<string, unknown> = {};
+    for (const [key, child] of Object.entries(value.children)) {
+      if (isPlainObject(child)) children[key] = child;
+    }
+    if (Object.keys(children).length > 0) return children;
+  }
+  if (typeof value.type === "string" && value.type) {
+    const id = typeof value.id === "string" && value.id ? value.id : "detail";
+    return { [id]: value };
+  }
+  const children: Record<string, unknown> = {};
+  for (const [key, child] of Object.entries(value)) {
+    if (key === "key") continue;
+    if (isPlainObject(child) && typeof child.type === "string") children[key] = child;
+  }
+  if (Object.keys(children).length > 0) return children;
+  if (value.click !== undefined) return childMap(value.click);
+  if (value.onClick !== undefined) return childMap(value.onClick);
+  return undefined;
 }
 
 function noteChartType(spec: Record<string, unknown>, ctx: Ctx): void {
@@ -1660,7 +2015,7 @@ function emitMissing(name: string, path: string, parent: Record<string, unknown>
       severity: "error",
       message: `missing required property ${quote(name)}`,
       path: "",
-      hint: `set type to one of: ${CHART_TYPES.join(", ")}. The chart type goes in type, not mark.`,
+      hint: `set type to one of: ${validTypeList()}. The chart type goes in type, not mark.`,
     });
     return;
   }

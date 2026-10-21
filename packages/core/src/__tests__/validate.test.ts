@@ -1187,4 +1187,155 @@ describe("diagnostic codes", () => {
     });
     expect(result.errors.some((error) => error.code === "CK2005")).toBe(true);
   });
+
+  it("CK1009 moves facet, encoding.facet, and small-multiples onto layout.facet", () => {
+    const top = validate({ ...base, facet: "month" });
+    const facet = top.errors.find((item) => item.code === "CK1009" && item.path === "/facet");
+    expect(facet?.hint).toContain("layout.facet");
+    expect(facet?.fix).toEqual([
+      { op: "add", path: "/layout", value: { facet: { field: "month" } } },
+      { op: "remove", path: "/facet" },
+    ]);
+    expect(top.errors.some((item) => item.code === "CK1002" && item.path === "/facet")).toBe(false);
+    const fixed = repair({ ...base, facet: "month" });
+    expect(fixed.ok).toBe(true);
+    expect((fixed.spec as { layout: unknown }).layout).toEqual({ facet: { field: "month" } });
+
+    const encoded = validate({ ...base, encoding: { ...base.encoding, facet: { field: "month" } } });
+    expect(encoded.errors.find((item) => item.path === "/encoding/facet")?.fix).toEqual([
+      { op: "add", path: "/layout", value: { facet: { field: "month" } } },
+      { op: "remove", path: "/encoding/facet" },
+    ]);
+    expect(encoded.errors.some((item) => item.code === "CK1002")).toBe(false);
+
+    const small = validate({ ...base, type: "small-multiples", facet: { field: "month", columns: 2 } });
+    expect(small.errors[0]?.code).toBe("CK1009");
+    expect(small.errors[0]?.hint).toContain("small-multiples");
+    const moved = repair({ ...base, type: "small-multiples", facet: { field: "month", columns: 2 } });
+    expect((moved.spec as { layout: { facet: { field: string } } }).layout.facet).toEqual({ field: "month", columns: 2 });
+  });
+
+  it("CK1009 moves sync onto interaction.sync", () => {
+    const result = validate({ ...base, sync: "cpu" });
+    expect(result.errors.find((item) => item.path === "/sync")?.fix).toEqual([
+      { op: "add", path: "/interaction", value: { sync: "cpu" } },
+      { op: "remove", path: "/sync" },
+    ]);
+    expect(result.errors.some((item) => item.code === "CK1002" && item.path === "/sync")).toBe(false);
+    const fixed = repair({ ...base, sync: { group: "cpu" }, interaction: { hover: true } });
+    expect(fixed.ok).toBe(true);
+    expect((fixed.spec as { interaction: unknown }).interaction).toEqual({ hover: true, sync: "cpu" });
+  });
+
+  it("CK1009 moves an overview brush onto interaction.navigator and leaves a range brush", () => {
+    const top = validate({ ...base, brush: true });
+    expect(top.errors.find((item) => item.path === "/brush")?.hint).toContain("interaction.navigator");
+    expect(top.errors.find((item) => item.path === "/brush")?.fix).toEqual([
+      { op: "add", path: "/interaction", value: { navigator: true } },
+      { op: "remove", path: "/brush" },
+    ]);
+    const overview = repair({ ...base, interaction: { brush: { height: 48, overview: true } } });
+    expect(overview.ok).toBe(true);
+    expect((overview.spec as { interaction: unknown }).interaction).toEqual({ navigator: { height: 48 } });
+    expect(validate({ ...base, interaction: { brush: "x" } }).ok).toBe(true);
+    expect(validate({ ...base, brush: "overview" }).errors[0]?.fix).toEqual([
+      { op: "add", path: "/interaction", value: { navigator: true } },
+      { op: "remove", path: "/brush" },
+    ]);
+  });
+
+  it("CK1009 moves a child chart onto interaction.drilldown", () => {
+    const child = {
+      type: "bar",
+      data: base.data,
+      encoding: { x: "month", y: "revenue" },
+      a11y: { alt: "February is higher." },
+    };
+    const clicked = validate({ ...base, click: { North: child } });
+    const drill = clicked.errors.find((item) => item.path === "/click");
+    expect(drill?.hint).not.toContain("pointclick");
+    expect(drill?.hint).toContain("interaction.drilldown");
+    expect(drill?.fix).toEqual([
+      { op: "add", path: "/interaction", value: { drilldown: { children: { North: child } } } },
+      { op: "remove", path: "/click" },
+    ]);
+    const fixed = repair({ ...base, onClick: { children: { North: child }, key: "month" } });
+    expect(fixed.ok).toBe(true);
+    expect((fixed.spec as { interaction: { drilldown: unknown } }).interaction.drilldown).toEqual({
+      children: { North: child },
+      key: "month",
+    });
+    expect(fixed.spec).not.toHaveProperty("onClick");
+
+    const interactions = validate({ ...base, interactions: { click: { West: child } } });
+    expect(interactions.errors.find((item) => item.path === "/interactions")?.fix?.[0]).toMatchObject({
+      op: "add",
+      value: { drilldown: { children: { West: child } } },
+    });
+  });
+
+  it("CK1009 moves charts and a vertical direction onto layout.concat", () => {
+    const view = { type: "bar", data: base.data, encoding: base.encoding, a11y: base.a11y };
+    const charts = validate({ ...base, charts: [view] });
+    expect(charts.errors.find((item) => item.path === "/charts")?.hint).toContain("layout.concat.views");
+    expect(charts.errors.some((item) => item.code === "CK1002" && item.path === "/charts")).toBe(false);
+    const stacked = repair({ ...base, views: [view], layout: { direction: "horizontal" } });
+    expect(stacked.ok).toBe(true);
+    expect((stacked.spec as { layout: unknown }).layout).toEqual({
+      concat: { views: [view], direction: "horizontal" },
+    });
+    const side = repair({ ...base, layout: { charts: [view], direction: "vertical" } });
+    expect((side.spec as { layout: { concat: { direction: string } } }).layout.concat.direction).toBe("vertical");
+    expect((side.spec as { layout: { charts?: unknown } }).layout).not.toHaveProperty("charts");
+  });
+
+  it("CK1009 moves a responsive legend onto layout.breakpoints", () => {
+    const responsive = repair({
+      ...base,
+      legend: { position: "bottom", responsive: "@media (max-width: 480px)" },
+    });
+    expect(responsive.ok).toBe(true);
+    expect((responsive.spec as { legend: unknown }).legend).toEqual({ position: "bottom" });
+    expect((responsive.spec as { layout: { breakpoints: unknown } }).layout.breakpoints).toEqual([{ maxWidth: 480, legend: false }]);
+
+    const media = validate({ ...base, legend: { position: "@media (max-width: 600px)" } });
+    const hint = media.errors.find((item) => item.code === "CK1009");
+    expect(hint?.hint).toContain("layout.breakpoints");
+    expect(hint?.fix).toEqual([
+      { op: "add", path: "/layout", value: { breakpoints: [{ maxWidth: 600, legend: false }] } },
+      { op: "remove", path: "/legend/position" },
+    ]);
+    expect(media.errors.some((item) => item.code === "CK1007")).toBe(false);
+  });
+
+  it("CK1005 lists phase-4 and map types, and validate leaves map fields to geo", () => {
+    const unknown = validate({ ...base, type: "waffle" });
+    const hint = unknown.errors.find((item) => item.code === "CK1005")?.hint ?? "";
+    for (const type of ["gantt", "timeline", "quadrant", "venn", "journey", "choropleth", "map-points"]) {
+      expect(hint).toContain(type);
+    }
+
+    const choropleth = validate({
+      version: "1",
+      type: "choropleth",
+      atlas: "us",
+      data: [{ state: "CA", share: 1 }],
+      encoding: { region: "state", latitude: "lat" },
+      mark: { atlas: "us" },
+      a11y: { alt: "California is marked." },
+    });
+    expect(choropleth.errors.filter((item) => item.code === "CK1005" || item.code === "CK1002")).toEqual([]);
+    expect(choropleth.warnings.some((item) => item.code === "CK3057")).toBe(true);
+    expect(choropleth.ok).toBe(true);
+
+    const points = validate({
+      version: "1",
+      type: "map-points",
+      data: [{ name: "Paris", lat: 48.9, lon: 2.3 }],
+      encoding: { latitude: "lat", longitude: "lon", label: "name" },
+      a11y: { alt: "Paris is marked." },
+    });
+    expect(points.errors.filter((item) => item.code === "CK1005" || item.code === "CK1002")).toEqual([]);
+    expect(points.ok).toBe(true);
+  });
 });

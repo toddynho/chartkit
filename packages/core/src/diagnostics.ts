@@ -15,7 +15,7 @@ export type Severity = "error" | "warning";
  * CK3020–CK3022 belong to range and error bars. Time and data use CK3023–CK3026.
  * Hierarchy uses CK3027–CK3030. Canvas and large data use CK3031–CK3033.
  * Interaction+ uses CK3034–CK3039. Layout uses CK3040–CK3049.
- * Geo uses CK3050–CK3056 in @chartkitdev/geo.
+ * Geo uses CK3050–CK3056 in @chartkitdev/geo. CK3057 hands a map spec to that package.
  */
 export interface Diagnostic {
   code: string;

@@ -166,6 +166,40 @@ describe("validate", () => {
 
     const missing = validate({ type: "map-points", mark: { atlas: "world" }, data: [{ lat: 1, lon: 2 }] });
     expect(missing.warnings.map((item) => item.code)).toContain("CK3055");
+    expect(missing.warnings.find((item) => item.code === "CK3055")?.hint).toBe(
+      "Set encoding.latitude to lat and encoding.longitude to lon.",
+    );
+  });
+
+  it("treats a top-level atlas as mark.atlas and accepts location, lat, and lon", () => {
+    const atlas = validate({
+      type: "choropleth",
+      atlas: "us",
+      encoding: { location: "id", color: "n" },
+      data: [{ id: "California", n: 1 }],
+    });
+    expect(atlas.warnings.map((item) => item.code)).not.toContain("CK3050");
+    expect(atlas.warnings.map((item) => item.code)).not.toContain("CK3056");
+    expect(atlas.warnings.map((item) => item.code)).not.toContain("CK3051");
+
+    const typo = validate({ type: "choropleth", atlas: "usa", encoding: { region: "id", color: "n" }, data: [] });
+    expect(typo.warnings.find((item) => item.code === "CK3050")?.message).toContain("usa");
+
+    const points = validate({
+      type: "map-points",
+      atlas: "world",
+      encoding: { lat: "lat", lon: "lon" },
+      data: [
+        { lat: 139.7, lon: 35.7 },
+        { lat: -74.0, lon: 40.7 },
+        { lat: 151.2, lon: -33.9 },
+      ],
+    });
+    expect(points.warnings.map((item) => item.code)).toEqual(["CK3053"]);
+    expect(points.warnings[0]?.fix).toEqual([
+      { op: "replace", path: "/encoding/lat", value: "lon" },
+      { op: "replace", path: "/encoding/lon", value: "lat" },
+    ]);
   });
 });
 
@@ -245,6 +279,31 @@ describe("render", () => {
     expect(texas.startsWith("#")).toBe(true);
     expect(york.startsWith("#")).toBe(true);
     expect(texas).not.toBe(york);
+  });
+
+  it("uses a top-level atlas and location, lat, and lon aliases", async () => {
+    const states = await render({
+      type: "choropleth",
+      atlas: "us",
+      data: [{ id: "California", value: 4 }, { id: "Texas", value: 8 }],
+      encoding: { location: "id", color: "value" },
+      a11y: { alt: "Texas is higher than California." },
+    });
+    expect(states).toContain('data-ck-name="California"');
+    expect(states).toContain('data-ck-name="Texas"');
+    expect(states).toContain('data-ck-value="8"');
+    expect(states).not.toContain('data-ck-name="France"');
+
+    const cities = await render({
+      type: "map-points",
+      atlas: "world",
+      data: [{ name: "Paris", lat: 48.9, lon: 2.3 }],
+      encoding: { lat: "lat", lon: "lon", label: "name" },
+      a11y: { alt: "Paris is marked." },
+    });
+    expect(cities).toContain("<circle");
+    expect(cities).toContain(">Paris<");
+    expect(cities).not.toContain("Unknown atlas");
   });
 
   it("draws bubbles, labels the largest, and accepts Canada and the EU", async () => {

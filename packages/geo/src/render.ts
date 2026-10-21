@@ -1,7 +1,7 @@
 import { formatNumber, paintScale, parseFormat, POINT_PALETTE, sizeStops, type PaintScale, type ScaleFormat } from "./color";
 import { directoryIndex, matchRegion, type DirectoryEntry } from "./match";
 import { albersUsa, equalEarth, equirectangular, fitProject, mercator, type Box, type InsetFrame } from "./project";
-import { esc, fieldName, isRecord, num, round, rowsOf, sizeOf } from "./spec";
+import { esc, fieldName, isRecord, num, resolveEncoding, resolveMark, round, rowsOf, sizeOf } from "./spec";
 import { chromeFor, type Chrome } from "./theme";
 import { regionsFromGeoJSON, regionsFromTopology, type GeoRegion, type LonLat } from "./topo";
 import type { AtlasName, ColorScaleName } from "./types";
@@ -467,8 +467,8 @@ export async function render(spec: unknown): Promise<string> {
   }
   const chrome = chromeFor(spec.theme);
   const { width, height } = sizeOf(spec);
-  const mark = isRecord(spec.mark) ? spec.mark : {};
-  const encoding = isRecord(spec.encoding) ? spec.encoding : {};
+  const mark = resolveMark(spec);
+  const encoding = resolveEncoding(spec);
   const loaded = await load(mark);
   const title = typeof spec.title === "string" ? spec.title : "";
   const laid = title ? titleLayout(title, width) : null;

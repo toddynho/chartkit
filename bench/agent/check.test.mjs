@@ -21,6 +21,35 @@ await build({
 });
 const suite = await import(`${pathToFileURL(outfile).href}?t=${Date.now()}`);
 
+test("supplementary suite is tracked apart from the 42-task set", () => {
+  const ids = [
+    "canvas-sensor",
+    "navigator-pageviews",
+    "synced-cpu",
+    "drilldown-region",
+    "facet-temperatures",
+    "concat-dashboard",
+    "breakpoint-legend",
+    "rtl",
+    "mermaid",
+    "waterfall",
+    "boxplot",
+    "world-renewables",
+    "city-bubbles",
+    "sankey-funnel",
+  ];
+  assert.equal(suite.suppTasks.length, ids.length);
+  assert.deepEqual(suite.suppTasks.map((task) => task.id), ids);
+  const main = new Set(suite.tasks.map((task) => task.id));
+  for (const task of suite.suppTasks) {
+    assert.equal(main.has(task.id), false);
+    assert.ok(task.prompt.length > 20);
+    assert.ok(task.data !== undefined);
+    assert.equal(task.expect.type, task.type);
+    assert.equal(typeof task.expect.feature, "string");
+  }
+});
+
 test("task set spans every v1 chart type", () => {
   assert.ok(suite.tasks.length >= 30 && suite.tasks.length <= 50);
   const ids = new Set(suite.tasks.map((task) => task.id));
