@@ -2,7 +2,7 @@
 
 The measured line bundles and the published round of browser timings, drawn as charts. Losses stay on the page.
 
-Bundle bytes are from docs/data/measured-sizes.json, size script measured 2026-10-21 on `1eae17b953e2b6f1702ecba55e3fa5d376c91cd9`, bench bundles measured 2026-10-21. Timings are older round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
+Bundle bytes are from docs/data/measured-sizes.json, size script measured 2026-10-21 on `de2c823fa6b23953d4361061dbaaae9b52dddcbd`, bench bundles measured 2026-10-21. Timings are older round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
 
 ## Line chart, gzip
 
