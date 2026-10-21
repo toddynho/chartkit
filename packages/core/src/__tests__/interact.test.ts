@@ -434,51 +434,75 @@ describe("attach", () => {
     ctl.destroy();
   });
 
-  it("places a right-edge tooltip clear of the hovered bar and its neighbour", () => {
+  it("anchors a bar tooltip on the hovered bar and highlights it", () => {
     const spec: InteractSpec = {
       version: "1",
       type: "bar",
       theme: "midnight",
-      title: "Orders",
+      title: "Sales by region",
       data: [
-        { month: "Jan", value: 80 },
-        { month: "Feb", value: 92 },
-        { month: "Mar", value: 88 },
-        { month: "Apr", value: 110 },
-        { month: "May", value: 104 },
-        { month: "Jun", value: 121 },
+        { region: "North", revenue: 186000 },
+        { region: "West", revenue: 164000 },
+        { region: "South", revenue: 142000 },
+        { region: "East", revenue: 128000 },
       ],
-      encoding: { x: "month", y: { field: "value", title: "Orders", format: { style: "integer" }, color: "series-3" } },
+      encoding: { x: "region", y: { field: "revenue", title: "Revenue", format: { style: "compact", prefix: "$", decimals: 0 }, color: "series-2" } },
       legend: false,
-      size: { width: 720, height: 200 },
+      size: { width: 640, height: 280 },
       a11y: { alt },
     };
     const host = hostOf(spec);
     const ctl = attach(host, spec, { render });
     const svg = host.querySelector("svg")!;
-    const laid = { x: 0, y: 0, left: 0, top: 0, width: 720, height: 200, right: 720, bottom: 200, toJSON() { return {}; } } as DOMRect;
+    const laid = { x: 0, y: 0, left: 0, top: 0, width: 640, height: 280, right: 640, bottom: 280, toJSON() { return {}; } } as DOMRect;
+    host.getBoundingClientRect = () => laid;
+    svg.getBoundingClientRect = () => laid;
+    const bars = [...svg.querySelectorAll("rect")].filter((node) => (node.getAttribute("fill") || "").includes("series"));
+    const north = bars[0]!;
+    const east = bars[bars.length - 1]!;
+    const nx = Number(north.getAttribute("x")) + Number(north.getAttribute("width")) / 2;
+    const ny = Number(north.getAttribute("y")) + 8;
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: nx, clientY: ny, bubbles: true }));
+    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+    const left = parseFloat(tip.style.left);
+    const width = tip.offsetWidth || 160;
+    const tipMid = left + width / 2;
+    const ex = Number(east.getAttribute("x")) + Number(east.getAttribute("width")) / 2;
+    expect(tip.textContent).toContain("North");
+    expect(tip.textContent).toContain("Revenue");
+    expect(Math.abs(tipMid - nx)).toBeLessThan(Math.abs(tipMid - ex));
+    expect(svg.querySelector("[data-ck-crosshair]")).toBeNull();
+    expect(svg.querySelector("[data-ck-dot]")).toBeNull();
+    expect(north.classList.contains("ck-bar-on")).toBe(true);
+    expect(svg.querySelectorAll(".ck-bar-on").length).toBe(1);
+    expect(east.getAttribute("data-ck-bar-dim")).toBe("");
+    ctl.destroy();
+  });
+
+  it("draws a bar crosshair only when the spec asks for one", () => {
+    const spec: InteractSpec = {
+      version: "1",
+      type: "bar",
+      data: [
+        { region: "North", revenue: 4 },
+        { region: "East", revenue: 2 },
+      ],
+      encoding: { x: "region", y: "revenue" },
+      tooltip: { crosshair: true },
+      legend: false,
+      size: { width: 480, height: 220 },
+      a11y: { alt },
+    };
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg")!;
+    const laid = { x: 0, y: 0, left: 0, top: 0, width: 480, height: 220, right: 480, bottom: 220, toJSON() { return {}; } } as DOMRect;
     host.getBoundingClientRect = () => laid;
     svg.getBoundingClientRect = () => laid;
     const plot = svg.querySelector("clipPath rect")!;
-    const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.72;
+    const x = Number(plot.getAttribute("x")) + 24;
     svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 80, bubbles: true }));
-    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
-    const left = parseFloat(tip.style.left);
-    const top = parseFloat(tip.style.top);
-    const width = tip.offsetWidth || 160;
-    const height = tip.offsetHeight || 48;
-    expect(tip.textContent).toContain("Orders");
-    expect(tip.textContent).toContain("104");
-    expect(left + width).toBeLessThan(x + 40);
-    const bars = [...svg.querySelectorAll("rect")].filter((node) => (node.getAttribute("fill") || "").includes("series"));
-    for (const bar of bars) {
-      const bx = Number(bar.getAttribute("x"));
-      const by = Number(bar.getAttribute("y"));
-      const bw = Number(bar.getAttribute("width"));
-      const bh = Number(bar.getAttribute("height"));
-      const overlaps = left < bx + bw && left + width > bx && top < by + bh && top + height > by;
-      expect(overlaps).toBe(false);
-    }
+    expect(svg.querySelector("[data-ck-crosshair]")).toBeTruthy();
     ctl.destroy();
   });
 

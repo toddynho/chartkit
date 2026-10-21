@@ -103,6 +103,9 @@
     "size": {
       "$ref": "#/$defs/size"
     },
+    "layout": {
+      "$ref": "#/$defs/layout"
+    },
     "interaction": {
       "$ref": "#/$defs/interaction"
     },
@@ -2623,6 +2626,124 @@
         }
       },
       "description": "Dimensions. Default: fill container width, height by type (line/bar 240px, sparkline 32px, gauge 160px)."
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Small multiples, a composed dashboard, breakpoint rules, and right-to-left layout. The same JSON draws on the server and in the browser. The arrange pass loads with @chartkitdev/core/all and /extra. createRenderer([line]) does not include it; call mountLayout from @chartkitdev/core/layout first.",
+      "properties": {
+        "direction": {
+          "enum": ["ltr", "rtl"],
+          "description": "rtl mirrors a categorical x axis, moves the y axis to the right, and right-aligns the title. The SVG sets dir=rtl. Default ltr."
+        },
+        "facet": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "One panel per value of field. columns and rows set the grid. wrap (default true) flows extra panels onto new rows. scales shared uses one y domain; independent lets each panel scale itself. legend shared draws one legend for the grid.",
+          "properties": {
+            "field": {
+              "type": "string",
+              "description": "Column that splits the data. A name that is not a field warns CK3041. Omitting it warns CK3040."
+            },
+            "columns": {
+              "type": "integer",
+              "description": "Panels across. 1 to 12. Outside that range warns CK3042 and the patch clamps it. Omit to choose from the category count."
+            },
+            "rows": {
+              "type": "integer",
+              "description": "Panels down. 1 to 12. Outside that range warns CK3043 and the patch clamps it."
+            },
+            "wrap": {
+              "type": "boolean",
+              "description": "Flow extra categories onto new rows. false keeps the grid and warns CK3049 when categories do not fit."
+            },
+            "scales": {
+              "enum": ["shared", "independent"],
+              "description": "shared (default) locks every panel to one nice y domain that includes the data max. Y labels and the y title sit on the outer column only, and x labels and the x title sit on the bottom row. independent scales each panel to its own data and repeats the axes."
+            },
+            "legend": {
+              "enum": ["shared", "each"],
+              "description": "shared (default) draws one legend under the grid. each repeats the legend in every panel."
+            }
+          }
+        },
+        "concat": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Several charts in one spec. views are chart specs. direction is vertical (default) or horizontal. columns wraps them into a grid; a view may set span to cover more than one column. When views has a chart, the outer spec may omit data, encoding, and metric. Setting this beside facet warns CK3048.",
+          "properties": {
+            "columns": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4,
+              "description": "Wrap views into this many columns, 2 to 4. A view may set span to the number of columns it covers, so one wide chart can sit above two narrower ones. Omit to use direction."
+            },
+            "direction": {
+              "enum": ["vertical", "horizontal"],
+              "description": "vertical stacks the views. horizontal places them in a row. Ignored when columns is set."
+            },
+            "gap": {
+              "type": "number",
+              "description": "Space between views, in px. Default 16."
+            },
+            "views": {
+              "type": "array",
+              "items": { "type": "object" },
+              "description": "Chart specs. A view with no type warns CK3045. An empty list warns CK3044."
+            }
+          }
+        },
+        "breakpoints": {
+          "type": "array",
+          "description": "The first rule whose width matches size.width, or the container width when width is auto, overrides the layout. A non-positive maxWidth warns CK3046. columns or rows without a facet field warns CK3047.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "maxWidth": {
+                "type": "number",
+                "description": "Match when the chart width is this many px or less."
+              },
+              "minWidth": {
+                "type": "number",
+                "description": "Match when the chart width is this many px or more."
+              },
+              "legend": {
+                "type": "boolean",
+                "description": "Show or hide the legend at this width."
+              },
+              "direction": {
+                "enum": ["ltr", "rtl"],
+                "description": "Text and axis direction at this width."
+              },
+              "columns": {
+                "type": "integer",
+                "description": "Facet columns at this width."
+              },
+              "rows": {
+                "type": "integer",
+                "description": "Facet rows at this width."
+              },
+              "wrap": {
+                "type": "boolean",
+                "description": "Facet wrap at this width."
+              },
+              "scales": {
+                "enum": ["shared", "independent"],
+                "description": "Facet scale mode at this width."
+              },
+              "facetLegend": {
+                "enum": ["shared", "each"],
+                "description": "Facet legend mode at this width."
+              },
+              "concatDirection": {
+                "enum": ["vertical", "horizontal"],
+                "description": "Concat direction at this width."
+              }
+            }
+          }
+        }
+      }
     },
     "interaction": {
       "type": "object",

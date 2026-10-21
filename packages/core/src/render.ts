@@ -1,4 +1,5 @@
 import type { Diagnostic } from "./diagnostics";
+import { arrangeNow, type Draw } from "./layout-hook";
 import { cssVar } from "./theme";
 import { esc, font, isRecord } from "./svg";
 
@@ -60,7 +61,16 @@ function renderWith(map: Map<string, ChartRenderer>, spec: unknown, target?: Ren
     } else {
       const chart = map.get(spec.type);
       if (!chart) svg = errorSvg([unregistered(spec.type)]);
-      else svg = chart.render(spec) ?? errorSvg([undrawable(spec.type)]);
+      else {
+        const hostType = spec.type;
+        const draw: Draw = (next) => {
+          const type = typeof next.type === "string" ? next.type : hostType;
+          const inner = map.get(type) ?? chart;
+          return inner.render(next);
+        };
+        const laid = isRecord(spec.layout) ? arrangeNow(spec, draw) : null;
+        svg = laid ?? chart.render(spec) ?? errorSvg([undrawable(spec.type)]);
+      }
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

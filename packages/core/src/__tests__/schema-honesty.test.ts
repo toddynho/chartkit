@@ -186,6 +186,21 @@ function probes(leaf: Leaf): unknown[] {
   if (leaf.path === "/legend/symbols") push([{ series: "revenue", symbol: "circle" }]);
   if (leaf.path === "/legend/maxRows") push(1);
   if (leaf.path === "/interaction/export") push(["png", "svg", "csv"]);
+  if (leaf.path === "/layout/concat/views") {
+    push([
+      {
+        version: "1",
+        type: "bar",
+        data: [
+          { month: "Jan", revenue: 5 },
+          { month: "Feb", revenue: 9 },
+        ],
+        encoding: { x: "month", y: "revenue" },
+        a11y: { alt: "February is higher." },
+      },
+    ]);
+  }
+  if (leaf.path === "/layout/breakpoints") push([{ maxWidth: 200, legend: false }]);
   if (leaf.path === "/interaction/drilldown/children") {
     push({
       North: {
@@ -548,6 +563,8 @@ async function entrySet(ready: Host[]): Promise<EntrySet> {
     // so each one needs a fresh module graph. The other entries do not use that hook.
     if (FRESH_ENTRY.has(file)) vi.resetModules();
     const { createRenderer } = await import("../render");
+    const { mountLayout } = await import("../layout");
+    mountLayout();
     const mod = (await import(`../charts/${file}.ts`)) as Record<string, ChartRenderer>;
     const chart = mod[name];
     const renderEntry = createRenderer([chart]);

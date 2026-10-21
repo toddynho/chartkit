@@ -1,12 +1,97 @@
 # Composed dashboards / concatenation
 
-ChartKit: **none**
+ChartKit: **native**
 
 Multiple views in one spec
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+layout.concat.views is a list of chart specs stacked vertically, placed in a row, or wrapped with columns. A view may set span to cover more than one column. An empty list warns CK3044. A view with no type warns CK3045. Facet and concat together warn CK3048.
+
+Source: packages/core/src/layout.ts
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40
+    },
+    {
+      "quarter": "Q2",
+      "units": 55
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": "units"
+  },
+  "a11y": {
+    "alt": "Units rose while cost fell."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "layout": {
+    "concat": {
+      "direction": "vertical",
+      "views": [
+        {
+          "version": "1",
+          "type": "bar",
+          "title": "Units",
+          "data": [
+            {
+              "quarter": "Q1",
+              "units": 40
+            },
+            {
+              "quarter": "Q2",
+              "units": 55
+            }
+          ],
+          "encoding": {
+            "x": "quarter",
+            "y": "units"
+          },
+          "a11y": {
+            "alt": "Units rose in Q2."
+          }
+        },
+        {
+          "version": "1",
+          "type": "line",
+          "title": "Cost",
+          "data": [
+            {
+              "quarter": "Q1",
+              "cost": 18
+            },
+            {
+              "quarter": "Q2",
+              "cost": 14
+            }
+          ],
+          "encoding": {
+            "x": "quarter",
+            "y": "cost"
+          },
+          "a11y": {
+            "alt": "Cost fell in Q2."
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -33,6 +118,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~spaceFlex\|spaceLayer | dts-grep (weak) | @antv/g2/lib/index.d.ts:159 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 67d25e30b540.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
 
 https://chartkit.dev/features.json

@@ -14,7 +14,7 @@ export type Severity = "error" | "warning";
  * for the spec type. Messages may improve; codes do not.
  * CK3020–CK3022 belong to range and error bars. Time and data use CK3023–CK3026.
  * Hierarchy uses CK3027–CK3030. Canvas and large data use CK3031–CK3033.
- * Interaction+ uses CK3034–CK3039.
+ * Interaction+ uses CK3034–CK3039. Layout uses CK3040–CK3049.
  */
 export interface Diagnostic {
   code: string;

@@ -71434,20 +71434,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:rules)['\"`]|(?:^|[\\s{,;])\\w*(?:rules)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:rules)"
+            "layout.breakpoints"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:rules)['\"`]|(?:^|[\\s{,;])\\w*(?:rules)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:rules)"
+              "kind": "runtime-probe",
+              "path": "layout.breakpoints",
+              "loc": "packages/core/src/layout.ts"
             }
           ],
-          "note": "single layout; no breakpoint rules",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "layout.breakpoints is a list of rules. The first rule whose maxWidth or minWidth matches size.width, or the container width when width is auto, overrides legend, direction, facet columns, or concat direction. A narrow rule can set columns to 2 so the panels stay readable. A non-positive maxWidth warns CK3046. columns without a facet field warns CK3047.",
+          "verified": "runtime-probe",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "native",
@@ -72874,20 +72875,21 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:facet)['\"`]|(?:^|[\\s{,;])\\w*(?:facet)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:facet)"
+            "layout.facet"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:facet)['\"`]|(?:^|[\\s{,;])\\w*(?:facet)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:facet)"
+              "kind": "runtime-probe",
+              "path": "layout.facet",
+              "loc": "packages/core/src/layout.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "layout.facet splits one chart by a field into a rows and columns grid. wrap flows extra panels. scales shared locks one nice y domain and keeps y labels on the outer column and x labels on the bottom row. independent repeats the axes. legend shared draws one legend. A missing field warns CK3040. An unknown field warns CK3041. columns or rows outside 1 to 12 warn CK3042 and CK3043. wrap false with too many categories warns CK3049.",
+          "verified": "runtime-probe",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "manual",
@@ -73224,20 +73226,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:concat)['\"`]|(?:^|[\\s{,;])\\w*(?:concat)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:concat)"
+            "layout.concat"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:concat)['\"`]|(?:^|[\\s{,;])\\w*(?:concat)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:concat)"
+              "kind": "runtime-probe",
+              "path": "layout.concat",
+              "loc": "packages/core/src/layout.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "layout.concat.views is a list of chart specs stacked vertically, placed in a row, or wrapped with columns. A view may set span to cover more than one column. An empty list warns CK3044. A view with no type warns CK3045. Facet and concat together warn CK3048.",
+          "verified": "runtime-probe",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "none",
@@ -86604,14 +86607,20 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:rtl)['\"`]|(?:^|[\\s{,;])\\w*(?:rtl)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:rtl)"
+            "layout.direction"
           ],
-          "evidence": [],
-          "note": "probe hit reviewed: match unrelated (suggest.ts)",
-          "verified": "source-review",
+          "evidence": [
+            {
+              "kind": "runtime-probe",
+              "path": "layout.direction",
+              "loc": "packages/core/src/layout.ts"
+            }
+          ],
+          "note": "layout.direction rtl sets dir=rtl, mirrors every categorical bar, keeps every category label, moves the y axis to the right with a rotated title, and centres the x title.",
+          "verified": "runtime-probe",
           "strength": "strong"
         },
         "chartjs": {

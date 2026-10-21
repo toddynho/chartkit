@@ -355,6 +355,72 @@ function applyFeature(spec, feature) {
     };
     return true;
   }
+  if (feature.id === "layout.facet") {
+    spec.data = [
+      { quarter: "Q1", region: "North", units: 40 },
+      { quarter: "Q2", region: "North", units: 55 },
+      { quarter: "Q1", region: "South", units: 22 },
+      { quarter: "Q2", region: "South", units: 31 },
+    ];
+    spec.encoding = { x: "quarter", y: ["units", "cost"] };
+    spec.data.forEach((row, index) => {
+      row.cost = 10 + index;
+    });
+    spec.layout = { facet: { field: "region", columns: 2, scales: "shared", legend: "shared" } };
+    spec.a11y = { alt: "North stays above South in both quarters." };
+    return true;
+  }
+  if (feature.id === "layout.concat") {
+    spec.layout = {
+      concat: {
+        direction: "vertical",
+        views: [
+          {
+            version: "1",
+            type: "bar",
+            title: "Units",
+            data: [
+              { quarter: "Q1", units: 40 },
+              { quarter: "Q2", units: 55 },
+            ],
+            encoding: { x: "quarter", y: "units" },
+            a11y: { alt: "Units rose in Q2." },
+          },
+          {
+            version: "1",
+            type: "line",
+            title: "Cost",
+            data: [
+              { quarter: "Q1", cost: 18 },
+              { quarter: "Q2", cost: 14 },
+            ],
+            encoding: { x: "quarter", y: "cost" },
+            a11y: { alt: "Cost fell in Q2." },
+          },
+        ],
+      },
+    };
+    spec.a11y = { alt: "Units rose while cost fell." };
+    return true;
+  }
+  if (feature.id === "layout.breakpoints") {
+    spec.size = { width: 320, height: 220 };
+    spec.encoding = { ...(spec.encoding || {}), y: ["units", "cost"] };
+    if (Array.isArray(spec.data)) {
+      spec.data.forEach((row, index) => {
+        if (row && typeof row === "object") row.cost = 12 + index * 3;
+      });
+    }
+    spec.layout = { breakpoints: [{ maxWidth: 480, legend: false }] };
+    spec.a11y = { alt: "The legend hides below 480px." };
+    return true;
+  }
+  if (feature.id === "format.rtl") {
+    spec.title = "الوحدات";
+    spec.layout = { direction: "rtl" };
+    spec.a11y = { alt: "Units rose in Q2, laid out right to left." };
+    return true;
+  }
   if (feature.id === "data.hierarchy") {
     spec.type = "treemap";
     spec.data = [{ name: "Ads", value: 40, children: [{ name: "Search", value: 25 }, { name: "Social", value: 15 }] }];

@@ -37,6 +37,10 @@ const externalDynamicEntries = {
       if (args.kind !== "dynamic-import") return null;
       return { path: "@chartkitdev/core/canvas/hydrate", external: true };
     });
+    build.onResolve({ filter: /^\.\/layout$/ }, (args) => {
+      if (args.kind !== "dynamic-import") return null;
+      return { path: "@chartkitdev/core/layout", external: true };
+    });
     build.onResolve({ filter: /^\.\/sampling-run$/ }, (args) => {
       if (args.kind !== "dynamic-import") return null;
       return { path: "@chartkitdev/core/sampling", external: true };
@@ -114,6 +118,7 @@ const isolation = {
   lineOmitsMermaid: !debug.includes("fromMermaid") && !debug.includes("xychart"),
   lineOmitsInteract: !line.code.includes("data-ck-tip") && !debug.includes("data-ck-tip"),
   lineOmitsCanvas: !debug.includes("ck-canvas-paint"),
+  lineOmitsLayout: !debug.includes("data-ck-facet") && !debug.includes("data-ck-views"),
   lineOmitsSampling: !debug.includes("ck-sampling-run"),
   lineOmitsSceneSink: !debug.includes("ck-scene-sink"),
   interactOmitsCanvas: !interact.code.includes("ck-canvas-paint"),

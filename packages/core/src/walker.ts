@@ -1639,6 +1639,13 @@ function emitUnknownProp(name: string, path: string, props: Record<string, JsonS
   });
 }
 
+/** A composed dashboard carries its data on each view, so the outer spec may omit data, encoding, and metric. */
+function concatViews(value: unknown): boolean {
+  if (!isPlainObject(value) || !isPlainObject(value.layout) || !isPlainObject(value.layout.concat)) return false;
+  const views = value.layout.concat.views;
+  return Array.isArray(views) && views.length > 0;
+}
+
 function emitMissing(name: string, path: string, parent: Record<string, unknown>, ctx: Ctx): void {
   if (ctx.skipMissing.has(`${path}|${name}`)) return;
   const pointer = name === "a11y" && path === "" ? "/a11y" : path;
@@ -1646,6 +1653,7 @@ function emitMissing(name: string, path: string, parent: Record<string, unknown>
     emitAltRequired(ctx);
     return;
   }
+  if (path === "" && concatViews(ctx.rootValue) && (name === "data" || name === "encoding" || name === "metric")) return;
   if (path === "" && name === "type") {
     emit(ctx, {
       code: "CK1003",

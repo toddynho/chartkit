@@ -17,12 +17,14 @@ import { progressRing } from "./charts/progress-ring";
 import { spike } from "./charts/spike";
 import { candlestick } from "./charts/candlestick";
 import { mountAxes } from "./axis-extra";
+import { mountLayout } from "./layout";
 
 /** Core v1 charts. Histogram through waterfall live in `@chartkitdev/core/extra`. */
 export const charts = [line, bar, donut, pie, stackedArea, scatter, combo, heatmap, gauge, kpi, sparkline, miniArea, progressRing, spike, candlestick] as const;
 
 for (const [name, preset] of Object.entries(themes)) registerPreset(name, preset);
 mountAxes();
+mountLayout();
 register(...charts);
 
 const EXTRA_TYPES = new Set(["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst"]);

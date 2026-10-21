@@ -1,14 +1,50 @@
 # Right-to-left support
 
-ChartKit: **none**
+ChartKit: **native**
 
 RTL text and layout
 
-Matrix status: `none`. Verification: `source-review` (strong).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-probe hit reviewed: match unrelated (suggest.ts)
+layout.direction rtl sets dir=rtl, mirrors every categorical bar, keeps every category label, moves the y axis to the right with a rotated title, and centres the x title.
 
-No spec snippet. ChartKit does not support this feature.
+Source: packages/core/src/layout.ts
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40
+    },
+    {
+      "quarter": "Q2",
+      "units": 55
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": "units"
+  },
+  "a11y": {
+    "alt": "Units rose in Q2, laid out right to left."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "title": "الوحدات",
+  "layout": {
+    "direction": "rtl"
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -35,6 +71,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | none | — | dts-absence (absence) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 67d25e30b540.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
 
 https://chartkit.dev/features.json

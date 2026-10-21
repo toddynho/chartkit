@@ -11,6 +11,7 @@ import { beginFrame, dataSampling, noteDense, noteLinear, readSamplingMode, samp
 import type { ColorScale } from "../color-scale";
 import { exportList, readColor } from "../frame";
 import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
+import { layoutPaint } from "../layout-hook";
 import { boxId, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, round, scaleClamp, scalePad, ticks } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
@@ -291,8 +292,12 @@ export interface PlotModel {
   intent?: string;
   /** Scale bits set by the axis extra. 0 keeps the classic scale. */
   f: number;
+  /** Right-to-left: title on the right. The axis extra mirrors x and parks y on the right. */
+  rtl?: boolean;
   /** Extra room on a quantitative x, as fractions of the span. */
   xPad?: { min: number; max: number } | null;
+  /** Categorical line points sit on the plot edges. `scale.padding: 0`. Bars stay in bands. */
+  xEdge?: boolean;
   xClamp?: boolean;
   lv?: boolean;
   gx?: false | "solid" | "dashed" | "dotted";
@@ -364,6 +369,7 @@ export interface ChartShell {
   intent?: string;
   /** Scale bits set by the axis extra. 0 keeps the classic scale. */
   f: number;
+  rtl?: boolean;
   lv?: boolean;
   gx?: false | "solid" | "dashed" | "dotted";
 }
@@ -458,6 +464,7 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     y2Axis: { labels: true },
     inset: {},
     f: 0,
+    rtl: isRecord(spec.layout) && spec.layout.direction === "rtl",
   };
   hooks?.prepare(spec, next);
   chartShell = next;
@@ -571,6 +578,7 @@ function toModel(
     notes: spec.annotations,
     bands: readBands(spec),
     xPad: scalePad(encoding.x),
+    xEdge: xEdgeOf(encoding.x),
     xClamp: scaleClamp(encoding.x),
   };
 }
@@ -621,14 +629,18 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   if (pass === "reuse") return "";
 
   const tSvg = performance.now();
+  const paint = layoutPaint();
+  textDir = paint ? paint.bidi(Boolean(model.rtl)) : "";
   const parts: string[] = [];
   parts.push(openSvg(model));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", model.preset.background)}" />`);
+  const titleX = paint ? paint.titleX(Boolean(model.rtl), model.width, pad.left) : pad.left;
+  const titleAnchor = paint ? paint.titleAttr(Boolean(model.rtl)) : "";
   if (model.title) {
-    parts.push(`<text x="${n(pad.left)}" y="22" fill="${cssVar("text", model.preset.text)}" font-size="15" font-weight="650" font-family="${font()}">${esc(model.title)}</text>`);
+    parts.push(`<text x="${n(titleX)}" y="22"${titleAnchor} fill="${cssVar("text", model.preset.text)}" font-size="15" font-weight="650" font-family="${font()}">${esc(model.title)}</text>`);
   }
   if (model.subtitle) {
-    parts.push(`<text x="${n(pad.left)}" y="${model.title ? 40 : 18}" fill="${cssVar("muted", model.preset.muted)}" font-size="12" font-weight="400" font-family="${font()}">${esc(model.subtitle)}</text>`);
+    parts.push(`<text x="${n(titleX)}" y="${model.title ? 40 : 18}"${titleAnchor} fill="${cssVar("muted", model.preset.muted)}" font-size="12" font-weight="400" font-family="${font()}">${esc(model.subtitle)}</text>`);
   }
   if (model.legend && !model.legendBox) parts.push(legend(model, pad.left, model.title || model.subtitle ? (model.subtitle ? 54 : 36) : 8, plot.right));
 
@@ -1261,6 +1273,8 @@ function xPosition(
     spanEnd = swap;
   }
   if (!model.x) {
+    const placed = layoutPaint()?.cats(spanStart, spanEnd, count, Boolean(model.xEdge), model.type === "bar" || model.type === "combo");
+    if (placed) return placed;
     const size = count > 0 ? (spanEnd - spanStart) / count : spanEnd - spanStart;
     return {
       center: (index) => spanStart + size * index + size / 2,
@@ -1323,10 +1337,13 @@ function xPosition(
   };
 }
 
+/** Set for one draw when the layout chunk is mounted and the chart is rtl. */
+let textDir = "";
+
 function axText(x: number, y: number, anchor: string, body: string, fill: string, family: string, angle = 0, weight = "", rows?: string[] | null): string {
   const spin = angle ? ` transform="rotate(${n(angle)} ${n(x)} ${n(y)})"` : "";
   const text = rows ? rows.map((row, i) => `<tspan x="${n(x)}" dy="${i ? 12 : 0}">${esc(row)}</tspan>`).join("") : esc(body);
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="11"${weight} font-family="${family}"${spin}>${text}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="11"${weight} font-family="${family}"${textDir}${spin}>${text}</text>`;
 }
 
 function wrapWords(text: string, width: number, lines: number): string[] {
@@ -1525,9 +1542,20 @@ function xBand(model: PlotModel, xScale: XScale, count: number, horizontal: bool
   const edge = side === 0 ? plot.left : side === 1 ? plot.right : side === 2 ? plot.top : plot.bottom;
   const y = model.xAxis.end && !horizontal ? plot.top - 18 : plot.bottom + 16;
   const keep = model.xAxis.skip === false;
+  const seq = horizontal
+    ? null
+    : layoutPaint()?.order(
+        count,
+        step,
+        (index) => xScale.center(index),
+        (model.f & 32) !== 0,
+        keep ? undefined : (index) => (tickLabel(model, index)?.length || 1) * 6.4,
+      );
   let out = "";
   let last = -Infinity;
-  for (let i = 0; i < count; i += step) {
+  const total = seq ? seq.length : count;
+  for (let k = 0; k < total; k += seq ? 1 : step) {
+    const i = seq ? (seq[k] ?? 0) : k;
     const label = tickLabel(model, i);
     if (!label) continue;
     const rows = linesOf(model.xAxis, label);
@@ -1539,7 +1567,7 @@ function xBand(model: PlotModel, xScale: XScale, count: number, horizontal: bool
       continue;
     }
     const x = xScale.center(i);
-    const drawn = alongOne(label, x, y, angle, plot, 0, fill, family, keep ? -Infinity : last, rows, model.width);
+    const drawn = alongOne(label, x, y, angle, plot, 0, fill, family, seq || keep ? -Infinity : last, rows, model.width);
     if (!drawn) continue;
     out += tickInk(side, edge, x, model.xAxis, ink);
     out += drawn;
@@ -2004,6 +2032,10 @@ function linearExtent(values: Float64Array): { min: number; max: number; linear:
   }
   if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
   return { min, max, linear };
+}
+
+function xEdgeOf(channel: unknown): boolean {
+  return isRecord(channel) && isRecord(channel.scale) && channel.scale.padding === 0;
 }
 
 function pinDomain(pair: [number, number], lock: DomainLock): [number, number] {
