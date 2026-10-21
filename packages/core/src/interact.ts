@@ -300,7 +300,12 @@ function seriesOf(spec: InteractSpec, table: Table): SeriesMeta[] {
     }
     return out;
   }
-  return channels.length ? channels.map((c) => ({ name: c.title, field: c.field, format: c.format })) : [{ name: "value", field: "value" }];
+  const named = channels.map((c) => ({ name: c.title, field: c.field, format: c.format }));
+  if (named.length === 1 && named[0].name === named[0].field) {
+    const title = typeof spec.title === "string" ? spec.title.trim() : "";
+    if (title) named[0] = { ...named[0], name: title };
+  }
+  return named.length ? named : [{ name: "value", field: "value" }];
 }
 
 function axisFormat(spec: InteractSpec, axis: "y" | "y2"): unknown {
@@ -393,6 +398,169 @@ function plotBox(svg: SVGSVGElement): Box {
   }
   const parts = (svg.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number);
   return { l: 0, t: 0, w: parts[2] || 640, h: parts[3] || 240 };
+}
+
+interface TipBox {
+  l: number;
+  t: number;
+  r: number;
+  b: number;
+}
+
+/** Endpoints of a stroke. Monotone cubics stay inside each segment, so the ends are enough. */
+function pathVertices(d: string): { x: number; y: number }[] {
+  const tokens = d.match(/[MLHVCSQTAZ]|-?\d*\.?\d+(?:e[-+]?\d+)?/gi);
+  if (!tokens) return [];
+  const out: { x: number; y: number }[] = [];
+  let i = 0;
+  let cmd = "";
+  let x = 0;
+  let y = 0;
+  const read = () => Number(tokens[i++]);
+  while (i < tokens.length) {
+    const tok = tokens[i];
+    if (!tok) break;
+    if (tok >= "A" && tok <= "Z") {
+      cmd = tok;
+      i += 1;
+      continue;
+    }
+    if (cmd === "M" || cmd === "L" || cmd === "T") {
+      x = read();
+      y = read();
+      if (cmd === "M") cmd = "L";
+    } else if (cmd === "C") {
+      read(); read(); read(); read();
+      x = read();
+      y = read();
+    } else if (cmd === "S" || cmd === "Q") {
+      read(); read();
+      x = read();
+      y = read();
+    } else if (cmd === "H") {
+      x = read();
+    } else if (cmd === "V") {
+      y = read();
+    } else if (cmd === "A") {
+      read(); read(); read(); read(); read();
+      x = read();
+      y = read();
+    } else {
+      i += 1;
+      continue;
+    }
+    if (Number.isFinite(x) && Number.isFinite(y)) out.push({ x, y });
+  }
+  return out;
+}
+
+/** Plot marks the tooltip must not cover: line vertices, the segments between them, and bars. */
+function tipObstacles(svg: SVGSVGElement, rect: DOMRect, bounds: DOMRect, sx: number, sy: number, plot: Box): TipBox[] {
+  const xOf = (x: number) => rect.left + x * sx - bounds.left;
+  const yOf = (y: number) => rect.top + y * sy - bounds.top;
+  const out: TipBox[] = [];
+  const pad = 8;
+  const groups = new Map<string, { x: number; y: number }[]>();
+  const circles = svg.querySelectorAll("circle");
+  for (let i = 0; i < circles.length; i++) {
+    const node = circles[i];
+    const cx = Number(node.getAttribute("cx"));
+    const cy = Number(node.getAttribute("cy"));
+    if (!Number.isFinite(cx) || !Number.isFinite(cy)) continue;
+    if (cx < plot.l - 2 || cx > plot.l + plot.w + 2 || cy < plot.t - 2 || cy > plot.t + plot.h + 2) continue;
+    const key = node.getAttribute("stroke") || node.getAttribute("fill") || "point";
+    const list = groups.get(key);
+    if (list) list.push({ x: cx, y: cy });
+    else groups.set(key, [{ x: cx, y: cy }]);
+  }
+  const paths = svg.querySelectorAll("path");
+  for (let p = 0; p < paths.length; p++) {
+    const path = paths[p];
+    if (!path || path.getAttribute("filter")) continue;
+    const fill = path.getAttribute("fill");
+    const stroke = path.getAttribute("stroke");
+    if (!stroke || stroke === "none" || (fill && fill !== "none")) continue;
+    const points = pathVertices(path.getAttribute("d") || "").filter(
+      (point) => point.x >= plot.l - 2 && point.x <= plot.l + plot.w + 2 && point.y >= plot.t - 2 && point.y <= plot.t + plot.h + 2,
+    );
+    if (points.length) groups.set(`path-${p}`, points);
+  }
+  for (const list of groups.values()) {
+    list.sort((a, b) => a.x - b.x || a.y - b.y);
+    let prev: { x: number; y: number } | null = null;
+    for (let i = 0; i < list.length; i++) {
+      const point = list[i];
+      if (!point) continue;
+      if (prev && Math.abs(prev.x - point.x) < 0.5 && Math.abs(prev.y - point.y) < 0.5) continue;
+      const span = prev && point.x - prev.x <= plot.w * 0.2 ? prev : null;
+      const l = span ? Math.min(span.x, point.x) : point.x;
+      const t = span ? Math.min(span.y, point.y) : point.y;
+      const r = span ? Math.max(span.x, point.x) : point.x;
+      const b = span ? Math.max(span.y, point.y) : point.y;
+      out.push({ l: xOf(l) - pad, t: yOf(t) - pad, r: xOf(r) + pad, b: yOf(b) + pad });
+      prev = point;
+    }
+  }
+  const rects = svg.querySelectorAll("rect");
+  for (let i = 0; i < rects.length; i++) {
+    const node = rects[i];
+    const fill = node.getAttribute("fill");
+    if (!fill || fill === "none" || fill.startsWith("url(")) continue;
+    const w = Number(node.getAttribute("width"));
+    const h = Number(node.getAttribute("height"));
+    if (!(w > 8) || !(h > 8) || w > plot.w * 0.9) continue;
+    const x = Number(node.getAttribute("x"));
+    const y = Number(node.getAttribute("y"));
+    out.push({ l: xOf(x) - 4, t: yOf(y) - 4, r: xOf(x + w) + 4, b: yOf(y + h) + 4 });
+  }
+  return out;
+}
+
+/**
+ * Sit the card just above the marks in a column, on the side away from the
+ * anchor when the anchor is near an edge. Returns null when every column is blocked.
+ */
+function sitTip(
+  obstacles: TipBox[],
+  hostW: number,
+  hostH: number,
+  width: number,
+  height: number,
+  anchorX: number,
+  anchorY: number,
+  onRight: boolean,
+  plotLeft: number,
+  plotRight: number,
+): { left: number; top: number } | null {
+  if (hostW < width + 8 || hostH < height + 8) return null;
+  const gap = 8;
+  const columns = onRight
+    ? [anchorX - width - 14, plotLeft + 4, 4]
+    : [anchorX + 14, plotRight - width - 4, hostW - width - 4];
+  for (let c = 0; c < columns.length; c++) {
+    const left = Math.max(4, Math.min(columns[c], hostW - width - 4));
+    let ceiling = hostH;
+    let floor = 0;
+    let hit = false;
+    for (let i = 0; i < obstacles.length; i++) {
+      const item = obstacles[i];
+      if (left < item.r && left + width > item.l) {
+        hit = true;
+        if (item.t < ceiling) ceiling = item.t;
+        if (item.b > floor) floor = item.b;
+      }
+    }
+    if (!hit) {
+      const near = anchorY - height - gap;
+      if (near >= 4 && near + height <= hostH - 4) return { left, top: near };
+      continue;
+    }
+    const above = ceiling - height - gap;
+    if (above >= 4) return { left, top: above };
+    const below = floor + gap;
+    if (below + height <= hostH - 4) return { left, top: below };
+  }
+  return null;
 }
 
 function viewPoint(svg: SVGSVGElement, clientX: number, clientY: number): { x: number; y: number } {
@@ -701,6 +869,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   const focusable = () => keys || Boolean(selMode()) || Boolean(drillOf(base));
 
   if (showTip) host.append(tip);
+  if (drillOf(spec)) svg.style.cursor = "pointer";
   if (focusable()) svg.setAttribute("tabindex", "0");
   if (keys) host.append(live);
   const offs: (() => void)[] = [];
@@ -839,9 +1008,32 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     return paintAt(index);
   }
 
+  /** Mark stroke or bar fill. Used when the chart has no legend swatch to copy. */
+  function markPaint(index: number): string {
+    const strokes: string[] = [];
+    const paths = svg.querySelectorAll("path");
+    for (let i = 0; i < paths.length; i++) {
+      const path = paths[i];
+      if (path.getAttribute("filter")) continue;
+      const stroke = path.getAttribute("stroke");
+      if (stroke && stroke !== "none" && path.getAttribute("fill") === "none") strokes.push(stroke);
+    }
+    if (strokes.length) return strokes[Math.min(index, strokes.length - 1)] || strokes[0];
+    const fills: string[] = [];
+    const rects = svg.querySelectorAll("rect");
+    for (let i = 0; i < rects.length; i++) {
+      if (!(Number(rects[i].getAttribute("width")) > 8)) continue;
+      const fill = rects[i].getAttribute("fill");
+      if (!fill || fill === "none" || fill.startsWith("url(") || fills[fills.length - 1] === fill) continue;
+      fills.push(fill);
+    }
+    if (fills.length) return fills[Math.min(index, fills.length - 1)] || fills[0];
+    return "light-dark(#007aff,#0a84ff)";
+  }
+
   function paintAt(index: number): string {
     const fills = [...colors.values()];
-    return fills[index] || "light-dark(#007aff,#0a84ff)";
+    return fills[index] || markPaint(index);
   }
 
   /** Legend fill that uses the same line or series token as the mark. */
@@ -915,16 +1107,38 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const place = tipSide(base);
     let top = minY - height - gap;
     let left = midX - width / 2;
+    const plot = plotBox(svg);
+    const plotLeft = rect.left + plot.l * sx - bounds.left;
+    const plotRight = rect.left + (plot.l + plot.w) * sx - bounds.left;
     if (place === 2) top = maxY + gap;
     else if (place > 2) {
       left = place === 3 ? minX - width - gap : maxX + gap;
       top = midY - height / 2;
     } else if (!place) {
-      if (top < 4) top = maxY + gap;
-      if (top + height > bounds.height - 4) top = Math.max(4, bounds.height - height - 4);
-      left = midX + gap;
-      if (left + width > bounds.width - 4) left = Math.max(4, midX - width - gap);
-      if (left < maxX && left + width > minX && top < maxY && top + height > minY && midX - width - gap >= 4) left = midX - width - gap;
+      const onRight = midX > (plotLeft + plotRight) / 2;
+      const clear = sitTip(
+        tipObstacles(svg, rect, bounds, sx, sy, plot),
+        bounds.width,
+        bounds.height,
+        width,
+        height,
+        midX,
+        minY,
+        onRight,
+        plotLeft,
+        plotRight,
+      );
+      if (clear) {
+        left = clear.left;
+        top = clear.top;
+      } else {
+        if (top < 4) top = maxY + gap;
+        if (top + height > bounds.height - 4) top = Math.max(4, bounds.height - height - 4);
+        const flipped = midX - width - gap;
+        left = onRight && flipped >= 4 ? flipped : midX + gap;
+        if (left + width > bounds.width - 4) left = Math.max(4, flipped);
+        if (left < 4) left = Math.max(4, Math.min(midX + gap, bounds.width - width - 4));
+      }
     }
     if (place && bounds.width > width + 8 && bounds.height > height + 8) {
       left = Math.max(4, Math.min(left, bounds.width - width - 4));
@@ -1844,29 +2058,49 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     }
   }
 
-  function overview(): number[] {
+  function xNum(index: number): number | null {
+    const raw = xField() ? table.cell(xField(), index) : index;
+    if (typeof raw === "number" && raw === raw) return raw;
+    return null;
+  }
+
+  function overview(): { samples: number[]; start: number; end: number } {
     const enc = isRecord(base.encoding) ? base.encoding : {};
     const y = enc.y;
     const field = Array.isArray(y) ? fieldOf(y[0]) : fieldOf(y);
-    const out: number[] = [];
-    if (!field || n < 1) return out;
+    const samples: number[] = [];
+    const empty = { samples, start: 0, end: 1 };
+    if (!field || n < 1) return empty;
     const buckets = Math.min(80, n);
     const step = n / buckets;
     for (let b = 0; b < buckets; b++) {
-      const start = Math.floor(b * step);
-      const end = Math.min(n, Math.max(start + 1, Math.floor((b + 1) * step)));
+      const from = Math.floor(b * step);
+      const to = Math.min(n, Math.max(from + 1, Math.floor((b + 1) * step)));
       let loV = Infinity;
       let hiV = -Infinity;
-      for (let i = start; i < end; i++) {
+      for (let i = from; i < to; i++) {
         const raw = table.cell(field, i);
         const num = typeof raw === "number" ? raw : Number(raw);
         if (num !== num) continue;
         if (num < loV) loV = num;
         if (num > hiV) hiV = num;
       }
-      out.push(loV === Infinity ? Number.NaN : loV, hiV === -Infinity ? Number.NaN : hiV);
+      samples.push(loV === Infinity ? Number.NaN : loV, hiV === -Infinity ? Number.NaN : hiV);
     }
-    return out;
+    const x0 = xNum(0);
+    const x1 = xNum(n - 1);
+    const span = x0 !== null && x1 !== null ? x1 - x0 : 0;
+    if (span > 0 && x0 !== null) {
+      const a = xNum(lo);
+      const b = xNum(hi);
+      if (a !== null && b !== null) {
+        const start = Math.min(1, Math.max(0, (Math.min(a, b) - x0) / span));
+        const end = Math.min(1, Math.max(start, (Math.max(a, b) - x0) / span));
+        return { samples, start, end };
+      }
+    }
+    const count = Math.max(1, n);
+    return { samples, start: lo / count, end: Math.min(1, (hi + 1) / count) };
   }
 
   function mountCrumb(): void {
@@ -1897,6 +2131,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     hidden.clear();
     focus = 0;
     picked = copySelection(null);
+    svg.style.cursor = drillOf(next) ? "pointer" : "";
     bindSync();
     redraw();
     mountCrumb();

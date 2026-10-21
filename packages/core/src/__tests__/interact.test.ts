@@ -387,6 +387,126 @@ describe("attach", () => {
     ctl.destroy();
   });
 
+  it("names one series after the chart and copies the mark colour", () => {
+    const spec = {
+      version: "1" as const,
+      type: "line" as const,
+      title: "Revenue",
+      theme: "midnight" as const,
+      legend: false,
+      data: [
+        { month: "Jan", value: 120000 },
+        { month: "Jun", value: 149000 },
+      ],
+      encoding: { x: "month", y: { field: "value", format: { style: "compact", prefix: "$", decimals: 0 } } },
+      a11y: { alt },
+    };
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg")!;
+    const stroke = svg.querySelector("path[fill='none']:not([filter])")?.getAttribute("stroke");
+    const plot = svg.querySelector("clipPath rect")!;
+    const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.8;
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 40, bubbles: true }));
+    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+    expect(tip.textContent).toContain("Revenue");
+    expect(tip.textContent).not.toMatch(/\bvalue\b/);
+    expect(tip.textContent).toContain("$149K");
+    expect(stroke).toBeTruthy();
+    expect(tip.innerHTML).toContain(String(stroke));
+    expect(String(stroke)).toContain("#22c55e");
+    ctl.destroy();
+  });
+
+  it("flips the tooltip left of a crosshair on the right half of the plot", () => {
+    const spec = lineSpec({ legend: false });
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg")!;
+    const laid = { x: 0, y: 0, left: 0, top: 0, width: 720, height: 280, right: 720, bottom: 280, toJSON() { return {}; } } as DOMRect;
+    host.getBoundingClientRect = () => laid;
+    svg.getBoundingClientRect = () => laid;
+    const plot = svg.querySelector("clipPath rect")!;
+    const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.72;
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 80, bubbles: true }));
+    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+    expect(parseFloat(tip.style.left)).toBeLessThan(x);
+    ctl.destroy();
+  });
+
+  it("places a right-edge tooltip clear of the hovered bar and its neighbour", () => {
+    const spec: InteractSpec = {
+      version: "1",
+      type: "bar",
+      theme: "midnight",
+      title: "Orders",
+      data: [
+        { month: "Jan", value: 80 },
+        { month: "Feb", value: 92 },
+        { month: "Mar", value: 88 },
+        { month: "Apr", value: 110 },
+        { month: "May", value: 104 },
+        { month: "Jun", value: 121 },
+      ],
+      encoding: { x: "month", y: { field: "value", title: "Orders", format: { style: "integer" }, color: "series-3" } },
+      legend: false,
+      size: { width: 720, height: 200 },
+      a11y: { alt },
+    };
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg")!;
+    const laid = { x: 0, y: 0, left: 0, top: 0, width: 720, height: 200, right: 720, bottom: 200, toJSON() { return {}; } } as DOMRect;
+    host.getBoundingClientRect = () => laid;
+    svg.getBoundingClientRect = () => laid;
+    const plot = svg.querySelector("clipPath rect")!;
+    const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.72;
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 80, bubbles: true }));
+    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+    const left = parseFloat(tip.style.left);
+    const top = parseFloat(tip.style.top);
+    const width = tip.offsetWidth || 160;
+    const height = tip.offsetHeight || 48;
+    expect(tip.textContent).toContain("Orders");
+    expect(tip.textContent).toContain("104");
+    expect(left + width).toBeLessThan(x + 40);
+    const bars = [...svg.querySelectorAll("rect")].filter((node) => (node.getAttribute("fill") || "").includes("series"));
+    for (const bar of bars) {
+      const bx = Number(bar.getAttribute("x"));
+      const by = Number(bar.getAttribute("y"));
+      const bw = Number(bar.getAttribute("width"));
+      const bh = Number(bar.getAttribute("height"));
+      const overlaps = left < bx + bw && left + width > bx && top < by + bh && top + height > by;
+      expect(overlaps).toBe(false);
+    }
+    ctl.destroy();
+  });
+
+  it("starts a line after a leading gap instead of at zero", () => {
+    const n = 3000;
+    const x = new Float64Array(n);
+    const y = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      x[i] = i;
+      y[i] = i < 600 ? Number.NaN : Math.sin(i / 12) + 2;
+    }
+    const svg = render({
+      version: "1",
+      type: "line",
+      data: { columns: { x, y }, sampling: "lttb" },
+      encoding: { x: "x", y: "y" },
+      mark: { curve: "linear", points: "none" },
+      legend: false,
+      size: { width: 720, height: 280 },
+      a11y: { alt },
+    });
+    const d = svg.match(/<path d="([^"]+)" fill="none"/)?.[1] ?? "";
+    const first = Number(/^M ([\d.]+)/.exec(d)?.[1] ?? 0);
+    const left = Number(/<clipPath[^>]*>\s*<rect x="([\d.]+)"/.exec(svg)?.[1] ?? 0);
+    expect(first).toBeGreaterThan(left + 40);
+    expect(d).not.toContain("NaN");
+  });
+
   it("puts the hover dot on the tooltip value, not the downsampled segment", () => {
     const n = 4000;
     const xs = new Float64Array(n);
@@ -943,6 +1063,13 @@ describe("interaction plus", () => {
     const slider = host.querySelector("[role=slider]");
     expect(slider?.getAttribute("aria-valuenow")).toBe("1");
     expect(slider?.getAttribute("aria-valuetext")).toContain("Feb");
+    const overview = host.querySelector("[data-ck-overview]");
+    expect(overview?.getAttribute("preserveAspectRatio")).toBe("none");
+    expect(overview?.innerHTML).toContain("vector-effect");
+    expect(host.querySelectorAll(".ck-nav-handle")).toHaveLength(2);
+    expect(host.querySelectorAll(".ck-nav-shade")).toHaveLength(2);
+    expect((slider as HTMLElement).style.left).toBe("25%");
+    expect((slider as HTMLElement).style.width).toBe("75%");
     slider?.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true }));
     expect(slider?.getAttribute("aria-valuenow")).toBe("0");
     expect(host.querySelector("[data-ck-navigator] [role=slider]")).toBe(slider);

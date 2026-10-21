@@ -39,7 +39,7 @@ export type ExtraHook = [
   (index: number) => void,
   () => void,
   boolean,
-  () => number[],
+  () => { samples: number[]; start: number; end: number },
 ];
 
 function ensureTableCss(): void {
@@ -245,8 +245,26 @@ function ensureNavCss(): void {
   const style = document.createElement("style");
   style.id = "ck-interact-nav-style";
   style.textContent =
-    ".ck-navigator{position:relative;margin-top:8px;touch-action:none;color:light-dark(#1d1d1f,#f5f5f7)}.ck-navigator svg{display:block;width:100%;background:light-dark(#e8e8ed,#1c1c1e);border-radius:8px}.ck-navigator [role=slider]{position:absolute;top:0;bottom:0;box-sizing:border-box;border:1.5px solid light-dark(#1d1d1f,#f5f5f7);background:light-dark(#007aff22,#0a84ff33);border-radius:6px;cursor:ew-resize;touch-action:none}.ck-navigator [role=slider]:focus-visible{outline:2px solid #007aff;outline-offset:2px}";
+    ".ck-navigator{position:relative;margin-top:8px;touch-action:none}.ck-navigator svg{display:block;width:100%;background:light-dark(rgb(0 0 0 / 0.04),rgb(255 255 255 / 0.06));border-radius:8px}.ck-nav-shade{position:absolute;top:0;bottom:0;background:light-dark(rgb(255 255 255 / 0.62),rgb(0 0 0 / 0.45));pointer-events:none}.ck-navigator [role=slider]{position:absolute;top:0;bottom:0;box-sizing:border-box;border:0;background:color-mix(in srgb,var(--ck-nav,#007aff) 22%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ck-nav,#007aff) 50%,transparent);border-radius:6px;cursor:ew-resize;touch-action:none}.ck-navigator [role=slider]:focus-visible{outline:2px solid var(--ck-nav,#007aff);outline-offset:2px}.ck-nav-handle{position:absolute;top:18%;bottom:18%;width:4px;border-radius:2px;background:var(--ck-nav,#007aff)}.ck-nav-handle[data-ck-edge=lo]{left:0}.ck-nav-handle[data-ck-edge=hi]{right:0}";
   document.head.append(style);
+}
+
+/** Series stroke, or the first bar fill, so the overview uses the mark colour. */
+function seriesColor(svg: SVGSVGElement): string {
+  const paths = svg.querySelectorAll("path");
+  for (let i = 0; i < paths.length; i++) {
+    const path = paths[i];
+    if (path.getAttribute("filter")) continue;
+    const stroke = path.getAttribute("stroke");
+    if (stroke && stroke !== "none" && path.getAttribute("fill") === "none") return stroke;
+  }
+  const rects = svg.querySelectorAll("rect");
+  for (let i = 0; i < rects.length; i++) {
+    if (!(Number(rects[i].getAttribute("width")) > 8)) continue;
+    const fill = rects[i].getAttribute("fill");
+    if (fill && fill !== "none" && !fill.startsWith("url(")) return fill;
+  }
+  return "var(--ck-series-1, var(--chart-1, #007aff))";
 }
 
 function spark(samples: number[], width: number, height: number): string {
@@ -260,18 +278,39 @@ function spark(samples: number[], width: number, height: number): string {
   if (min === Infinity) return "";
   const span = max - min || 1;
   const buckets = samples.length / 2;
-  const top: string[] = [];
-  const bottom: string[] = [];
+  const yAt = (value: number) => (4 + (1 - (value - min) / span) * (height - 8)).toFixed(1);
+  let markup = "";
+  let top: string[] = [];
+  let line: string[] = [];
+  let bottom: string[] = [];
+  const flush = () => {
+    if (top.length < 2) {
+      top = [];
+      line = [];
+      bottom = [];
+      return;
+    }
+    const points = `${top.join(" ")} ${bottom.reverse().join(" ")}`;
+    markup += `<polygon points="${points}" fill="var(--ck-nav, currentColor)" fill-opacity="0.2" stroke="none"/>`;
+    markup += `<polyline points="${line.join(" ")}" fill="none" stroke="var(--ck-nav, currentColor)" stroke-width="1.25" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>`;
+    top = [];
+    line = [];
+    bottom = [];
+  };
   for (let i = 0; i < buckets; i++) {
     const lo = samples[i * 2];
     const hi = samples[i * 2 + 1];
-    if (lo !== lo || hi !== hi) continue;
-    const x = ((i + 0.5) / buckets) * width;
-    top.push(`${x.toFixed(1)},${(4 + (1 - (hi - min) / span) * (height - 8)).toFixed(1)}`);
-    bottom.push(`${x.toFixed(1)},${(4 + (1 - (lo - min) / span) * (height - 8)).toFixed(1)}`);
+    if (lo !== lo || hi !== hi) {
+      flush();
+      continue;
+    }
+    const x = (((i + 0.5) / buckets) * width).toFixed(1);
+    top.push(`${x},${yAt(hi)}`);
+    line.push(`${x},${yAt((lo + hi) / 2)}`);
+    bottom.push(`${x},${yAt(lo)}`);
   }
-  if (top.length < 2) return "";
-  return `${top.join(" ")} ${bottom.reverse().join(" ")}`;
+  flush();
+  return markup;
 }
 
 function mountNavigator(
@@ -283,7 +322,7 @@ function mountNavigator(
   redraw: () => void,
   emit: (name: string, detail: unknown) => void,
   rangeDetail: () => unknown,
-  overview: () => number[],
+  overview: () => { samples: number[]; start: number; end: number },
 ): void {
   const host = svg.parentElement;
   if (!host || !alive()) return;
@@ -299,12 +338,18 @@ function mountNavigator(
   const picture = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   picture.setAttribute("aria-hidden", "true");
   picture.setAttribute("data-ck-overview", "");
+  picture.setAttribute("preserveAspectRatio", "none");
+  const shadeL = document.createElement("div");
+  shadeL.className = "ck-nav-shade";
+  const shadeR = document.createElement("div");
+  shadeR.className = "ck-nav-shade";
   const slider = document.createElement("div");
   slider.setAttribute("role", "slider");
   slider.tabIndex = 0;
   slider.setAttribute("aria-orientation", "horizontal");
   slider.setAttribute("aria-label", "Visible window");
-  track.replaceChildren(picture, slider);
+  slider.innerHTML = `<span class="ck-nav-handle" data-ck-edge="lo"></span><span class="ck-nav-handle" data-ck-edge="hi"></span>`;
+  track.replaceChildren(picture, shadeL, shadeR, slider);
 
   const commit = (start: number, end: number) => {
     const current = range();
@@ -337,18 +382,21 @@ function mountNavigator(
     const { lo, hi, n } = range();
     const raw = Number(svg.getAttribute("data-ck-nav-h"));
     const height = Number.isFinite(raw) ? Math.max(28, Math.min(96, Math.round(raw))) : 48;
-    const width = 320;
+    const width = 1000;
     picture.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    picture.setAttribute("preserveAspectRatio", "none");
     picture.setAttribute("height", String(height));
-    const points = spark(overview(), width, height);
-    picture.innerHTML = points
-      ? `<polygon points="${points}" fill="currentColor" fill-opacity="0.28" stroke="currentColor" stroke-width="1.25"/>`
-      : "";
-    const span = Math.max(1, n);
-    const left = (lo / span) * 100;
-    const size = (Math.max(1, hi - lo + 1) / span) * 100;
-    slider.style.left = `${left}%`;
-    slider.style.width = `${Math.max(size, 4)}%`;
+    const frame = overview();
+    track.style.setProperty("--ck-nav", seriesColor(svg));
+    picture.innerHTML = spark(frame.samples, width, height);
+    const start = Math.min(1, Math.max(0, frame.start));
+    const end = Math.min(1, Math.max(start, frame.end));
+    shadeL.style.left = "0";
+    shadeL.style.width = `${start * 100}%`;
+    shadeR.style.left = `${end * 100}%`;
+    shadeR.style.right = "0";
+    slider.style.left = `${start * 100}%`;
+    slider.style.width = `${(end - start) * 100}%`;
     slider.setAttribute("aria-valuemin", "0");
     slider.setAttribute("aria-valuemax", String(Math.max(0, n - 1)));
     slider.setAttribute("aria-valuenow", String(lo));
@@ -359,7 +407,7 @@ function mountNavigator(
   bindNavigator(host, paint);
   paint();
 
-  let drag: { pointer: number; origin: number; lo: number; hi: number } | null = null;
+  let drag: { pointer: number; origin: number; lo: number; hi: number; edge: "move" | "lo" | "hi" } | null = null;
   on(track, "pointerdown", ((event: PointerEvent) => {
     if (event.button !== 0) return;
     const box = track.getBoundingClientRect();
@@ -383,7 +431,9 @@ function mountNavigator(
       slider.focus();
       return;
     }
-    drag = { pointer: event.pointerId, origin: event.clientX, lo, hi };
+    const edgeName = (event.target as Element | null)?.closest?.("[data-ck-edge]")?.getAttribute("data-ck-edge");
+    const edge = edgeName === "lo" || edgeName === "hi" ? edgeName : "move";
+    drag = { pointer: event.pointerId, origin: event.clientX, lo, hi, edge };
     slider.setPointerCapture?.(event.pointerId);
   }) as EventListener);
   on(track, "pointermove", ((event: PointerEvent) => {
@@ -391,6 +441,12 @@ function mountNavigator(
     const box = track.getBoundingClientRect();
     const width = box.width || 1;
     const { n } = range();
+    if (drag.edge !== "move") {
+      const at = Math.round(((event.clientX - box.left) / width) * Math.max(0, n - 1));
+      if (drag.edge === "lo") commit(Math.min(at, drag.hi - 1), drag.hi);
+      else commit(drag.lo, Math.max(at, drag.lo + 1));
+      return;
+    }
     const delta = Math.round(((event.clientX - drag.origin) / width) * Math.max(1, n));
     let start = drag.lo + delta;
     let end = drag.hi + delta;
