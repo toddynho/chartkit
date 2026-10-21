@@ -6,8 +6,8 @@
   "svelte": 962,
   "vanilla": 1571,
   "element": 1821,
-  "interact": 16632,
-  "interactExtra": 3772,
+  "interact": 16637,
+  "interactExtra": 3780,
   "vueLine": 34751,
   "svelteLine": 34929,
   "vanillaLine": 35362,
@@ -17,8 +17,8 @@
   "mermaid": 36522,
   "vanillaAuto": 1903,
   "markdown": 663,
-  "global": 115989,
-  "globalAuto": 81377,
+  "global": 115985,
+  "globalAuto": 81366,
   "globalMermaid": 37017,
   "histogram": 15665,
   "boxplot": 15631,
@@ -37,5 +37,5 @@
   "bar-range": 15133,
   "errorbar": 15410,
   "sunburst": 11132,
-  "note": "gzip -9 byte budgets, each set to the measured size after the navigator, tooltip, and drilldown visual pass. This branch includes the canvas painter from #42. Against main 60eaeec: line 34015 (main 33173, +842; 601 is the #42 SVG sampler, 241 is the interaction stamp and the gap guard). all 57650 (main 55480, +2170). extra 82076 (main 79824, +2252). canvas 56817 (the #42 painter plus the same gap guard, not in the line bundle). validate 31177 includes CK3031–CK3039 (main 30021, +1156). interact 16632 (main 12820, +3812). interactExtra 3772 holds the themed navigator (main 1623, +2149). global 115989 (main 106091, +9898). globalAuto 81377 (main 72888, +8489). globalMermaid 37017 (main 35877, +1140). mermaid 36522 (main 35362, +1160). Adapters: vue 802, svelte 962, vanilla 1571 (main 1020, +551), element 1821; vueLine 34751, svelteLine 34929, vanillaLine 35362, elementLine 35705. treemap 13596."
+  "note": "gzip -9 byte budgets, each set to the measured size after the navigator, tooltip, and drilldown visual pass. This branch includes the canvas painter from #42. Against main 60eaeec: line 34015 (main 33173, +842; 601 is the #42 SVG sampler, 241 is the interaction stamp and the gap guard). all 57650 (main 55480, +2170). extra 82076 (main 79824, +2252). canvas 56817 (the #42 painter plus the same gap guard, not in the line bundle). validate 31177 includes CK3031–CK3039 (main 30021, +1156). interact 16637 (main 12820, +3817). interactExtra 3780 holds the themed navigator (main 1623, +2157). global 115985 (main 106091, +9894). globalAuto 81366 (main 72888, +8478). globalMermaid 37017 (main 35877, +1140). mermaid 36522 (main 35362, +1160). Adapters: vue 802, svelte 962, vanilla 1571 (main 1020, +551), element 1821; vueLine 34751, svelteLine 34929, vanillaLine 35362, elementLine 35705. treemap 13596."
 }

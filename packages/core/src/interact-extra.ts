@@ -334,6 +334,7 @@ function mountNavigator(
     root.setAttribute("data-ck-navigator", "");
     host.append(root);
   }
+  if (!(root instanceof HTMLElement)) return;
   const track = root;
   const picture = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   picture.setAttribute("aria-hidden", "true");

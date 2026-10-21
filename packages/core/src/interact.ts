@@ -2058,12 +2058,6 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     }
   }
 
-  function xNum(index: number): number | null {
-    const raw = xField() ? table.cell(xField(), index) : index;
-    if (typeof raw === "number" && raw === raw) return raw;
-    return null;
-  }
-
   function overview(): { samples: number[]; start: number; end: number } {
     const enc = isRecord(base.encoding) ? base.encoding : {};
     const y = enc.y;
