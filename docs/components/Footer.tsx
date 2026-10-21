@@ -23,6 +23,7 @@ export function Footer() {
         <Link href="/large">Large data</Link>
         <Link href="/interaction">Interaction</Link>
         <Link href="/layouts">Layout</Link>
+        <Link href="/maps">Maps</Link>
         <a href="/llms.txt">llms.txt</a>
         <a href="/features.json">features.json</a>
         <a href="/showcase.json">showcase.json</a>

@@ -1,0 +1,41 @@
+{
+  "name": "@chartkitdev/geo",
+  "version": "0.5.0",
+  "private": true,
+  "description": "Choropleth and point maps for ChartKit. Unpublished. Not part of the line or all bundles.",
+  "keywords": ["chartkit", "map", "choropleth", "geo"],
+  "author": "Todd Garland",
+  "homepage": "https://chartkit.dev",
+  "bugs": {
+    "url": "https://github.com/toddynho/chartkit/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^3.2.4"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toddynho/chartkit",
+    "directory": "packages/geo"
+  }
+}

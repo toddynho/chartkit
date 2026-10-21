@@ -1,12 +1,29 @@
 # Choropleth map
 
-ChartKit: **none**
+ChartKit: **native**
 
 Regions coloured by value
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `source-review` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+`@chartkitdev/geo` draws `type: "choropleth"`. The package is unpublished and is not in the line or `all` bundles. Atlases: `world`, `us`, `canada`, `eu`, loaded on demand, or caller GeoJSON/TopoJSON. Scales: sequential, diverging, threshold, plus a no-data fill. Core `validate()` does not accept this type. Geo `validate()` uses CK3050–CK3056.
+
+Losses that are not a separate scored row: no pan or zoom, no US counties, no NUTS-1/2/3, and Natural Earth 110m omits Malta. Tile basemaps stay `none`. See `type.map.tiles`.
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "choropleth",
+  "data": [{ "country": "Norway", "share": 98 }, { "country": "UK", "share": 46 }, { "country": "USA", "share": 23 }],
+  "encoding": { "region": "country", "color": "share" },
+  "mark": { "atlas": "world", "scale": "sequential" },
+  "a11y": { "alt": "Norway's renewable share is higher than the UK and the US." }
+}
+```
+
+Rendered by `@chartkitdev/geo`, not by core `validate()` / `render()`.
 
 ## Other libraries
 

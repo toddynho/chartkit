@@ -8,7 +8,7 @@ Matrix status: `none`. Verification: `source-review` (strong).
 
 probe hit reviewed: match is treemap "tile" layout
 
-No spec snippet. ChartKit does not support this feature.
+No spec snippet. `@chartkitdev/geo` draws choropleth and point maps. It does not draw a tile or slippy base layer. Highcharts, Plotly, amCharts, and Google Maps do. ECharts tiles are a plugin. This row stays a ChartKit loss.
 
 ## Other libraries
 

@@ -518,6 +518,7 @@ function accept(spec) {
 
 function buildSpec(feature, bases) {
   const badge = badgeOf(feature.cells.chartkit);
+  if (String(feature.id).startsWith("type.map.")) return null;
   if (badge !== "native" && badge !== "partial") return null;
   const type = hostType(feature);
   const base = bases[type];
@@ -616,6 +617,10 @@ function markdown(feature, libraries) {
   if (cell.source?.length) lines.push("", `Source: ${cell.source.join(", ")}`);
   if (feature.spec) {
     lines.push("", "## ChartKit spec", "", "```json", JSON.stringify(feature.spec, null, 2), "```", "", "This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.");
+  } else if (feature.id === "type.map.tiles") {
+    lines.push("", "No spec snippet. `@chartkitdev/geo` draws choropleth and point maps. It does not draw a tile or slippy base layer.");
+  } else if (feature.id === "type.map.choropleth" || feature.id === "type.map.points") {
+    lines.push("", "No spec snippet from core `validate()`. `@chartkitdev/geo` renders this type. The package is unpublished and is not in the line or all bundles. Its own `validate()` reports CK3050–CK3056.");
   } else if (feature.badge === "warns") {
     lines.push("", "No spec snippet. The option is accepted and `validate()` warns. It is not drawn.");
   } else if (feature.badge === "none") {

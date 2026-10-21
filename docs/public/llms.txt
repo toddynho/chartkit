@@ -1,12 +1,12 @@
 # ChartKit JSON spec
 
 > @chartkitdev/core v0.5.0 · https://chartkit.dev/schema/v1.json
-> v1 @chartkitdev/core/all. Extra on demand: @chartkitdev/core/charts/<type> or /extra. repair, validate: @chartkitdev/core/validate.
+> v1 @chartkitdev/core/all. repair, validate: @chartkitdev/core/validate.
 
 ## Rules
 
 - version "1". a11y.alt required. data is rows, not {"values":[...]}. Field rules: llms-full.txt.
-- Extra charts: @chartkitdev/core/extra or /charts/<type>.
+- Maps: @chartkitdev/geo (unpublished). choropleth or map-points. atlas world|us|canada|eu. No tiles.
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
 - render svg|canvas|auto. sampling lttb|minmax|none. /large.
 
