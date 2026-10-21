@@ -1,11 +1,11 @@
 {
-  "commit": "ef3d290670a15e08ff00b710ecf9b4cea8b26c13",
+  "commit": "07234d1c80995bd952839eefb741754b4406b1ad",
   "coreCommit": "60eaeec79b0fb83b5c477e56e5a28f60c4aa3179",
   "coreMatchesMain": false,
   "sizeScript": {
     "command": "node scripts/size.mjs",
     "method": "esbuild --bundle --minify, gzip level 9, platform node. line is createRenderer([line]) from packages/core/src. all is packages/core/src/all.ts.",
-    "measuredAt": "2026-10-21T11:22:59.651Z",
+    "measuredAt": "2026-10-21T11:26:18.958Z",
     "measured": {
       "line": 34015,
       "all": 57650
@@ -17,7 +17,7 @@
   },
   "bench": {
     "command": "node bench/run.mjs --skip-browser --skip-ssr --skip-agent",
-    "measuredAt": "2026-10-21T11:22:49.242Z",
+    "measuredAt": "2026-10-21T11:26:08.603Z",
     "method": "esbuild --bundle --minify, platform browser, NODE_ENV=production, gzip level 9, brotli quality 11. ChartKit entries bundle packages/core/src. Competitor entries use the pinned package and only the import that chart needs. ECharts uses echarts/core plus one chart, its grid component when the chart has axes, and CanvasRenderer.",
     "versions": {
       "@chartkitdev/core": "0.5.0",

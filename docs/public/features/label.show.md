@@ -70,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.pie.textPosition | dts-path (strong) | mermaid/dist/config.type.d.ts:938 pie labels |
 | AntV G2 | native | ~label | dts-grep (weak) | @antv/g2/lib/index.d.ts:165 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against ef3d290670a1.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 07234d1c8099.
 
 https://chartkit.dev/features.json
