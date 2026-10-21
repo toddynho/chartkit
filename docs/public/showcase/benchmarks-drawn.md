@@ -2,7 +2,7 @@
 
 The measured line bundles and the published round of browser timings, drawn as charts. Losses stay on the page.
 
-Bundle bytes are from docs/data/measured-sizes.json, size script measured 2026-10-20 on `fb308ab4f88ec7856f573a115d76a44da20483b8`, bench bundles measured 2026-10-20. Timings are older round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
+Bundle bytes are from docs/data/measured-sizes.json, size script measured 2026-10-21 on `2c56df7b4c591aae6193e7373cb44acceaf2d185`, bench bundles measured 2026-10-21. Timings are older round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
 
 ## Line chart, gzip
 
@@ -17,11 +17,11 @@ Log scale. ChartKit is the size script. The other bars are the bench line, using
   "data": [
     {
       "name": "ChartKit",
-      "bytes": 36009
+      "bytes": 36752
     },
     {
       "name": "CK bench",
-      "bytes": 36150
+      "bytes": 36896
     },
     {
       "name": "uPlot",
@@ -474,13 +474,13 @@ Painted median from the same round 13 file. uPlot is ahead of ChartKit here.
 - **gapped 10k.** Aligned update: ChartKit 1.9 ms, uPlot 1.6 ms.
 - **gapped 100k.** Aligned update: ChartKit 3.5 ms, uPlot 3.4 ms.
 - **Hover 100k.** Painted median: ChartKit 16.5 ms, uPlot 16.2 ms.
-- **10k render.** ChartKit canvas 10.1 ms, ChartKit 6.8 ms.
-- **10k first paint.** ChartKit canvas 29.3 ms, uPlot 15.8 ms.
-- **100k render.** ChartKit canvas 11.1 ms, ChartKit 8.2 ms.
-- **100k first paint.** ChartKit canvas 25.4 ms, uPlot 14.5 ms.
-- **1M render.** ChartKit canvas 19.2 ms, ChartKit 15.8 ms.
-- **1M first paint.** ChartKit canvas 31.3 ms, ChartKit 20.2 ms.
-- **1M update.** ChartKit canvas 26.3 ms, uPlot 23.3 ms.
+- **10k render.** ChartKit canvas 7.8 ms, ChartKit 7.3 ms.
+- **10k first paint.** ChartKit canvas 21.8 ms, ChartKit 13.1 ms.
+- **100k render.** ChartKit canvas 9.1 ms, ChartKit 8.2 ms.
+- **100k first paint.** ChartKit canvas 20.1 ms, ChartKit 13.1 ms.
+- **1M render.** ChartKit canvas 17.1 ms, ChartKit 16.5 ms.
+- **1M first paint.** ChartKit canvas 27.7 ms, ChartKit 20.8 ms.
+- **1M update.** ChartKit canvas 21.8 ms, ChartKit 20.6 ms.
 
 ## Options used
 

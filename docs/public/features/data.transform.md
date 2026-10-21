@@ -90,6 +90,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~transform | dts-grep (weak) | @antv/g2/lib/index.d.ts:27 sortX, groupX, binX, stackY, normalizeY... |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against fb308ab4f88e.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 2c56df7b4c59.
 
 https://chartkit.dev/features.json
