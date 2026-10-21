@@ -1,3 +1,4 @@
+export { paintScale, parseFormat } from "./color";
 export { render } from "./render";
 export { validate } from "./validate";
 export { attach } from "./attach";

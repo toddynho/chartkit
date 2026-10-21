@@ -25001,7 +25001,7 @@
               "loc": "packages/geo/src/render.ts"
             }
           ],
-          "note": "@chartkitdev/geo, unpublished, not in the line or all bundles. No tiles, no pan/zoom, no US counties, no NUTS-2. Natural Earth 110m omits Malta.",
+          "note": "@chartkitdev/geo, unpublished, not in the line or all bundles. No tiles, no pan/zoom, no US counties, no NUTS-2. Small states missing from Natural Earth 110m, including Malta, are points.",
           "verified": "source-review",
           "strength": "strong"
         },
@@ -25366,7 +25366,7 @@
               "loc": "packages/geo/src/render.ts"
             }
           ],
-          "note": "@chartkitdev/geo, unpublished, not in the line or all bundles. No tiles, no pan/zoom, no US counties, no NUTS-2. Natural Earth 110m omits Malta.",
+          "note": "@chartkitdev/geo, unpublished, not in the line or all bundles. No tiles, no pan/zoom, no US counties, no NUTS-2. Small states missing from Natural Earth 110m, including Malta, are points.",
           "verified": "source-review",
           "strength": "strong"
         },

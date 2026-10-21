@@ -106,33 +106,86 @@ function samplesOf(polygons: LonLat[][][], unwrap: boolean): LonLat[] {
   return out;
 }
 
+export interface InsetFrame {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/**
+ * Albers USA composite. Lower 48 uses the USGS parallels. Alaska is 0.35× that
+ * scale and Hawaii uses the same scale, placed with the standard offsets so the
+ * main islands stay legible beside Alaska. A thin frame sits on each inset.
+ */
 export function albersUsa(
   groups: { id: string; polygons: LonLat[][][] }[],
   box: Box,
-): { region: (id: string) => (lon: number, lat: number) => XY; point: (lon: number, lat: number) => XY } {
-  const lowerH = box.h * 0.74;
-  const insetY = box.y + lowerH;
-  const insetH = Math.max(1, box.h - lowerH);
-  const boxes: Record<Zone, Box> = {
-    main: { x: box.x, y: box.y, w: box.w, h: lowerH },
-    ak: { x: box.x, y: insetY, w: box.w * 0.3, h: insetH },
-    hi: { x: box.x + box.w * 0.32, y: insetY + insetH * 0.18, w: box.w * 0.22, h: insetH * 0.7 },
-  };
-  const buckets: Record<Zone, LonLat[]> = { main: [], ak: [], hi: [] };
-  for (const group of groups) {
-    const zone = zoneFor(group.id);
-    buckets[zone].push(...samplesOf(group.polygons, zone === "ak"));
-  }
+): { region: (id: string) => (lon: number, lat: number) => XY; point: (lon: number, lat: number) => XY; frames: InsetFrame[] } {
   const lower = albers(29.5, 45.5, 37.5, -96);
-  const alaska = albers(55, 65, 58.5, -154);
-  const hawaii = albers(8, 18, 19.9, -157);
+  const alaskaRaw = albers(55, 65, 58.5, -156);
+  const hawaiiRaw = albers(8, 18, 19.9, -160);
+  const alaska = (lon: number, lat: number) => alaskaRaw(lon > 0 ? lon - 360 : lon, lat);
+  const samples: XY[] = [];
+  const take = (zone: Zone, project: (lon: number, lat: number) => XY, scale: number, dx: number, dy: number) => {
+    for (const group of groups) {
+      if (zoneFor(group.id) !== zone) continue;
+      for (const [lon, lat] of samplesOf(group.polygons, zone === "ak")) {
+        const [x, y] = project(lon, lat);
+        samples.push([dx + scale * x, dy - scale * y]);
+      }
+    }
+  };
+  take("main", lower, 1, 0, 0);
+  take("ak", alaska, 0.35, -0.307, 0.201);
+  take("hi", hawaiiRaw, 1, -0.205, 0.212);
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const [x, y] of samples) {
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+  }
+  const pad = 4;
+  const innerW = Math.max(1, box.w - pad * 2);
+  const innerH = Math.max(1, box.h - pad * 2);
+  const k = Math.min(innerW / Math.max(1e-6, maxX - minX), innerH / Math.max(1e-6, maxY - minY));
+  const tx = box.x + pad + (innerW - (maxX - minX) * k) / 2 - minX * k;
+  const ty = box.y + pad + (innerH - (maxY - minY) * k) / 2 - minY * k;
+  const place = (project: (lon: number, lat: number) => XY, scale: number, dx: number, dy: number) => (lon: number, lat: number): XY => {
+    const [x, y] = project(lon, lat);
+    return [tx + k * (dx + scale * x), ty + k * (dy - scale * y)];
+  };
   const fitted: Record<Zone, (lon: number, lat: number) => XY> = {
-    main: fitProject(lower, buckets.main, boxes.main, 4),
-    ak: fitProject((lon, lat) => alaska(lon > 0 ? lon - 360 : lon, lat), buckets.ak, boxes.ak, 3),
-    hi: fitProject(hawaii, buckets.hi, boxes.hi, 3),
+    main: place(lower, 1, 0, 0),
+    ak: place(alaska, 0.35, -0.307, 0.201),
+    hi: place(hawaiiRaw, 1, -0.205, 0.212),
+  };
+  const bounds = (zone: Zone): InsetFrame => {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    const project = fitted[zone];
+    for (const group of groups) {
+      if (zoneFor(group.id) !== zone) continue;
+      for (const [lon, lat] of samplesOf(group.polygons, false)) {
+        const [x, y] = project(lon, lat);
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
+    }
+    const pad = 4;
+    return { x: minX - pad, y: minY - pad, w: maxX - minX + pad * 2, h: maxY - minY + pad * 2 };
   };
   return {
     region: (id) => fitted[zoneFor(id)],
     point: (lon, lat) => fitted[zoneFor("", lon, lat)](lon, lat),
+    frames: [bounds("ak"), bounds("hi")],
   };
 }

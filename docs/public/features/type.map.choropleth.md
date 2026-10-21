@@ -8,7 +8,7 @@ Matrix status: `native`. Verification: `source-review` (strong).
 
 `@chartkitdev/geo` draws `type: "choropleth"`. The package is unpublished and is not in the line or `all` bundles. Atlases: `world`, `us`, `canada`, `eu`, loaded on demand, or caller GeoJSON/TopoJSON. Scales: sequential, diverging, threshold, plus a no-data fill. Core `validate()` does not accept this type. Geo `validate()` uses CK3050–CK3056.
 
-Losses that are not a separate scored row: no pan or zoom, no US counties, no NUTS-1/2/3, and Natural Earth 110m omits Malta. Tile basemaps stay `none`. See `type.map.tiles`.
+Losses that are not a separate scored row: no pan or zoom, no US counties, and no NUTS-1/2/3. Small states missing from Natural Earth 110m, including Malta, are points. Tile basemaps stay `none`. See `type.map.tiles`.
 
 ## ChartKit spec
 

@@ -4,6 +4,8 @@ export interface GeoRegion {
   id: string;
   name: string;
   polygons: LonLat[][][];
+  /** Small state drawn as a dot when the atlas has no polygon. */
+  point?: LonLat;
 }
 
 interface Topology {
@@ -17,6 +19,7 @@ interface TopologyGeom {
   type?: string;
   id?: string | number;
   arcs?: unknown;
+  coordinates?: number[];
   properties?: { name?: string };
 }
 
@@ -68,6 +71,16 @@ function polygonsOf(topo: Topology, arcs: unknown, type: string | undefined): Lo
   return [];
 }
 
+function pointOf(topo: Topology, coordinates: number[] | undefined): LonLat | null {
+  if (!coordinates || coordinates.length < 2) return null;
+  const scale = topo.transform?.scale ?? [1, 1];
+  const translate = topo.transform?.translate ?? [0, 0];
+  const lon = (coordinates[0] ?? 0) * (scale[0] ?? 1) + (translate[0] ?? 0);
+  const lat = (coordinates[1] ?? 0) * (scale[1] ?? 1) + (translate[1] ?? 0);
+  if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
+  return [lon, lat];
+}
+
 export function regionsFromTopology(topo: Topology): GeoRegion[] {
   const collection = topo.objects?.regions ?? Object.values(topo.objects ?? {})[0];
   const geoms = collection?.geometries ?? [];
@@ -75,9 +88,16 @@ export function regionsFromTopology(topo: Topology): GeoRegion[] {
   for (const geom of geoms) {
     const id = geom.id == null ? "" : String(geom.id);
     if (!id) continue;
+    const name = geom.properties?.name || id;
+    if (geom.type === "Point") {
+      const point = pointOf(topo, geom.coordinates);
+      if (!point) continue;
+      regions.push({ id, name, polygons: [], point });
+      continue;
+    }
     const polygons = polygonsOf(topo, geom.arcs, geom.type);
     if (!polygons.length) continue;
-    regions.push({ id, name: geom.properties?.name || id, polygons });
+    regions.push({ id, name, polygons });
   }
   return regions;
 }

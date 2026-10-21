@@ -37,10 +37,10 @@
   "bar-range": 15133,
   "errorbar": 15410,
   "sunburst": 11132,
-  "geo": 15004,
-  "geoWorld": 37496,
-  "geoUs": 35659,
+  "geo": 18118,
+  "geoWorld": 24702,
+  "geoUs": 11887,
   "geoCanada": 3643,
-  "geoEu": 4238,
-  "note": "gzip -9 byte budgets, each set to the measured size after facets, concatenation, breakpoints, and right-to-left layout moved out of the line bundle. Against main 9c1dbdc: line 34427 (main 34015, +412). all 64137 (main 57650, +6487). extra 88495 (main 82076, +6419). canvas 57127 (main 56817, +310). validate 32206 (main 31177, +1029), including CK3040\u2013CK3049. interact 17641 (main 16637, +1004), bar highlight and the breakpoint watcher. interactExtra 3780 matches main. global 124418 (main 115985, +8433). globalAuto 88864 (main 81366, +7498). globalMermaid 38171 (main 37017, +1154). mermaid 37554 (main 36522, +1032). Adapters match main: vue 802, svelte 962, vanilla 1571, element 1821. vueLine 35161 (main 34751, +410), svelteLine 35344 (main 34929, +415), vanillaLine 35758 (main 35362, +396), elementLine 36110 (main 35705, +405). treemap 13596 matches main. createRenderer([line]) does not include the layout chunk. all and extra call mountLayout(). Geo is a separate unpublished package. Against main 3fc5fca, line, all, extra, validate, interact, canvas, and the globals are unchanged. geo 15004 is the geo core with atlas JSON external. geoWorld 37496, geoUs 35659, geoCanada 3643, and geoEu 4238 are the on-demand atlas chunks."
+  "geoEu": 3007,
+  "note": "gzip -9 byte budgets, each set to the measured size after facets, concatenation, breakpoints, and right-to-left layout moved out of the line bundle. Against main 9c1dbdc: line 34427 (main 34015, +412). all 64137 (main 57650, +6487). extra 88495 (main 82076, +6419). canvas 57127 (main 56817, +310). validate 32206 (main 31177, +1029), including CK3040\u2013CK3049. interact 17641 (main 16637, +1004), bar highlight and the breakpoint watcher. interactExtra 3780 matches main. global 124418 (main 115985, +8433). globalAuto 88864 (main 81366, +7498). globalMermaid 38171 (main 37017, +1154). mermaid 37554 (main 36522, +1032). Adapters match main: vue 802, svelte 962, vanilla 1571, element 1821. vueLine 35161 (main 34751, +410), svelteLine 35344 (main 34929, +415), vanillaLine 35758 (main 35362, +396), elementLine 36110 (main 35705, +405). treemap 13596 matches main. createRenderer([line]) does not include the layout chunk. all and extra call mountLayout(). Geo is a separate unpublished package. Against main 3fc5fca, line, all, extra, validate, interact, canvas, and the globals are unchanged. geo 18118 is the geo core with atlas JSON external. geoWorld 24702, geoUs 11887, geoCanada 3643, and geoEu 3007 are the on-demand atlas chunks."
 }

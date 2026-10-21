@@ -1,9 +1,8 @@
-import { render } from "@chartkitdev/core/all";
-import { render as renderGeo } from "@chartkitdev/geo";
+import { paintScale, render as renderGeo } from "@chartkitdev/geo";
 import { ChartView } from "@/components/ChartView";
 import { CodeBlock } from "@/components/CodeBlock";
 import { StateBoard } from "@/components/StateBoard";
-import { citySpec, metroRows, stateChange, stateNames, usSpec, withTheme, worldSpec } from "@/lib/geo-samples";
+import { citySpec, metroBarSvg, metroChanges, stateChange, stateNames, usSpec, withTheme, worldSpec } from "@/lib/geo-samples";
 import { pageMeta } from "@/lib/site";
 
 export const metadata = pageMeta(
@@ -23,20 +22,11 @@ const sample = `{
 
 export default async function MapsPage() {
   const boardMap = await renderGeo(withTheme({ ...usSpec, title: "Click a state", size: { width: 760, height: 520 } }, "soft"));
+  const scale = paintScale("diverging", stateChange.map(([, change]) => change), undefined, { percent: true });
   const bars: Record<string, string> = {};
   for (const [id] of stateChange) {
     const name = stateNames[id] ?? id;
-    bars[id] = render({
-      version: "1",
-      type: "bar",
-      title: name,
-      theme: "soft",
-      data: metroRows(id),
-      encoding: { x: "name", y: "people" },
-      axes: { y: { title: "Millions" } },
-      size: { width: 420, height: 480 },
-      a11y: { alt: `${name} metros, approximate population in millions. This is not a county map.` },
-    });
+    bars[id] = metroBarSvg(`${name} metros`, metroChanges(id), scale.fill);
   }
 
   return (
@@ -50,7 +40,7 @@ export default async function MapsPage() {
       </p>
       <h2>What this does not do</h2>
       <p>
-        There is no tile layer. Highcharts (<code>tiledwebmap</code>), Plotly (<code>scattermap</code> and <code>choroplethmap</code>), amCharts (<code>MapRasterSeries</code>), and Google Maps do. ECharts tiles are a plugin. That row stays a ChartKit loss. There is no pan or zoom. There is no US county atlas and no NUTS-1, NUTS-2, or NUTS-3. The world and EU shapes are Natural Earth 110m, which omits Malta. Canada is a simplified 50m extract of the provinces and territories. Coastlines are coarse.
+        There is no tile layer. Highcharts (<code>tiledwebmap</code>), Plotly (<code>scattermap</code> and <code>choroplethmap</code>), amCharts (<code>MapRasterSeries</code>), and Google Maps do. ECharts tiles are a plugin. That row stays a ChartKit loss. There is no pan or zoom. There is no US county atlas and no NUTS-1, NUTS-2, or NUTS-3. The world and EU shapes are a simplified Natural Earth 110m. Small states missing from that extract, including Malta, are points. Canada is a simplified 50m extract of the provinces and territories. Coastlines are coarse.
       </p>
       <p>
         Choropleth and point maps are native here, which ties ECharts, Highcharts, Plotly, Observable Plot, and Vega-Lite. Nivo&apos;s point map is a manual layer, so that row is a ChartKit win. The tile row is not.
@@ -58,7 +48,7 @@ export default async function MapsPage() {
 
       <h2>Renewable share</h2>
       <p>
-        Sequential green. <code>USA</code>, <code>United States</code>, and <code>UK</code> match the same way. Countries with no row, and Malta, stay in the no-data colour.
+        Sequential green. The legend is the share in percent, with a hatched swatch for no data. <code>USA</code>, <code>United States</code>, and <code>UK</code> match the same way. Countries with no row stay hatched, including places drawn as points.
       </p>
       <ChartView spec={worldSpec} />
 
@@ -69,14 +59,14 @@ export default async function MapsPage() {
       <ChartView spec={usSpec} />
 
       <h2>Cities</h2>
-      <p>Bubble area follows urban population. The six largest are labelled. The rest stay on the map without a tag when the tags would collide.</p>
+      <p>Bubble area follows urban population, in millions. One accent colour, because size and colour would otherwise say the same thing. Labels sit above the bubbles, with a halo, and move aside when a neighbour would cover them.</p>
       <ChartView spec={citySpec} />
 
       <h2>A state and its metros</h2>
       <p>
-        Click a state, or focus it and press Enter. The bars are metro population for that state. ChartKit has no county polygons, so this drill stays in the data. California opens the board.
+        Click a state, or focus it and press Enter. The bars are population change for metros in that state, coloured with the same diverging scale as the map. ChartKit has no county polygons, so this drill stays in the data. California opens the board.
       </p>
-      <StateBoard mapSvg={boardMap} bars={bars} names={stateNames} />
+      <StateBoard mapSvg={boardMap} bars={bars} />
 
       <h2>Spec</h2>
       <CodeBlock code={sample} label="json" />

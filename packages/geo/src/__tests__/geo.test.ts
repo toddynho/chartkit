@@ -7,11 +7,18 @@ function codes(spec: unknown): string[] {
   return validate(spec).diagnostics.map((item) => item.code);
 }
 
+function pathOf(svg: string, name: string): string {
+  return new RegExp(`<path\\b[^>]*\\bd="([^"]+)"[^>]*data-ck-name="${name}"`).exec(svg)?.[1] ?? "";
+}
+
 function meanY(svg: string, name: string): number {
-  const match = new RegExp(`<path\\b[^>]*\\bd="([^"]+)"[^>]*data-ck-name="${name}"`).exec(svg);
-  const d = match?.[1] ?? "";
-  const ys = [...d.matchAll(/-?\d+(?:\.\d+)?/g)].map((item) => Number(item[0])).filter((_, index) => index % 2 === 1);
+  const ys = [...pathOf(svg, name).matchAll(/-?\d+(?:\.\d+)?/g)].map((item) => Number(item[0])).filter((_, index) => index % 2 === 1);
   return ys.reduce((sum, value) => sum + value, 0) / Math.max(1, ys.length);
+}
+
+function spanX(svg: string, name: string): number {
+  const xs = [...pathOf(svg, name).matchAll(/-?\d+(?:\.\d+)?/g)].map((item) => Number(item[0])).filter((_, index) => index % 2 === 0);
+  return Math.max(...xs) - Math.min(...xs);
 }
 
 const world = {
@@ -161,6 +168,32 @@ describe("render", () => {
     expect(france).toBeTruthy();
     expect(norway).not.toBe(france);
     expect(svg).toMatch(/data-ck-name="Antarctica"[^>]*class="ck-geo-region ck-geo-nodata"|class="ck-geo-region ck-geo-nodata"[^>]*data-ck-name="Antarctica"/);
+    expect(svg).toContain(">No data<");
+    expect(svg).toContain("patternUnits");
+  });
+
+  it("keeps a long title inside the viewBox and labels a percent legend with nice ticks", async () => {
+    const svg = await render({
+      ...world,
+      title: "Renewable share of electricity",
+      data: [
+        { country: "Norway", share: 100 },
+        { country: "Algeria", share: 1 },
+      ],
+      encoding: { region: "country", color: { field: "share", format: "%", title: "Share" } },
+      size: { width: 880, height: 520 },
+    });
+    expect(svg).toContain(">Renewable share of electricity<");
+    expect(svg).toContain('font-size="16"');
+    expect(svg).toContain(">Share<");
+    for (const tick of ["0%", "25%", "50%", "75%", "100%"]) expect(svg).toContain(`>${tick}<`);
+    const narrow = await render({
+      ...world,
+      title: "Renewable share of electricity",
+      size: { width: 180, height: 140 },
+    });
+    expect(narrow).toContain(">Renewable share of electricity<");
+    expect(narrow).not.toContain('font-size="16"');
   });
 
   it("uses a diverging scale and puts Alaska and Hawaii in the lower insets", async () => {
@@ -185,6 +218,8 @@ describe("render", () => {
     expect(svg).toContain("#ffffff");
     expect(meanY(svg, "Alaska")).toBeGreaterThan(meanY(svg, "California"));
     expect(meanY(svg, "Hawaii")).toBeGreaterThan(meanY(svg, "Texas"));
+    expect(spanX(svg, "Hawaii")).toBeGreaterThan(spanX(svg, "California") * 0.35);
+    expect(svg).toContain("ck-geo-inset");
     const texas = /fill="(#[0-9a-f]{6})"[^>]*data-ck-name="Texas"/.exec(svg)?.[1] ?? "";
     const york = /fill="(#[0-9a-f]{6})"[^>]*data-ck-name="New York"/.exec(svg)?.[1] ?? "";
     expect(texas.startsWith("#")).toBe(true);
@@ -205,7 +240,13 @@ describe("render", () => {
         { name: "London", lat: 51.5, lon: -0.1, pop: 9 },
         { name: "Sydney", lat: -33.9, lon: 151.2, pop: 5 },
       ],
-      encoding: { latitude: "lat", longitude: "lon", size: "pop", color: "pop", label: "name" },
+      encoding: {
+        latitude: "lat",
+        longitude: "lon",
+        size: { field: "pop", format: { suffix: " million" }, title: "Population" },
+        color: "pop",
+        label: "name",
+      },
       mark: { atlas: "world", labelCount: 3 },
       a11y: { alt: "Tokyo is the largest bubble." },
       size: { width: 640, height: 360 },
@@ -216,6 +257,11 @@ describe("render", () => {
     expect(svg).toContain(">Delhi<");
     expect(svg).not.toContain(">Sydney<");
     expect(svg).toContain("light-dark");
+    expect(svg).toContain("ck-geo-tag");
+    expect(svg).toContain("million");
+    expect(svg).not.toContain("linearGradient");
+    const mapEnd = svg.indexOf("</g>");
+    expect(svg.lastIndexOf("<circle", mapEnd)).toBeLessThan(svg.indexOf(">Tokyo<"));
 
     const canada = await render({
       type: "choropleth",
@@ -233,11 +279,12 @@ describe("render", () => {
       data: [{ id: "France", value: 4 }, { id: "Malta", value: 1 }],
       encoding: { region: "id", color: "value" },
       mark: { atlas: "eu" },
-      a11y: { alt: "France is in the EU atlas. Malta is not in the 110m extract." },
+      a11y: { alt: "France is in the EU atlas. Malta is a point." },
     });
     expect(eu).toContain('data-ck-name="France"');
-    expect(eu).not.toContain('data-ck-name="Malta"');
-    expect(codes({ type: "choropleth", mark: { atlas: "eu" }, encoding: { region: "id", color: "value" }, data: [{ id: "Malta", value: 1 }] })).toContain("CK3051");
+    expect(eu).toContain('data-ck-name="Malta"');
+    expect(eu).toContain("<circle");
+    expect(codes({ type: "choropleth", mark: { atlas: "eu" }, encoding: { region: "id", color: "value" }, data: [{ id: "Malta", value: 1 }] })).not.toContain("CK3051");
   });
 
   it("draws caller GeoJSON without an atlas", async () => {

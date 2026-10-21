@@ -189,6 +189,147 @@ def encode_arcs(polys: list[list[list[tuple[float, float]]]]) -> tuple[list, lis
     return arcs, encoded
 
 
+# Sovereign states missing from Natural Earth 110m. Drawn as points, not polygons.
+POINTS = [
+    ("MLT", "MT", "Malta", 14.44, 35.9, []),
+    ("SGP", "SG", "Singapore", 103.82, 1.35, []),
+    ("BHR", "BH", "Bahrain", 50.55, 26.07, []),
+    ("MDV", "MV", "Maldives", 73.51, 4.17, []),
+    ("AND", "AD", "Andorra", 1.52, 42.51, []),
+    ("MCO", "MC", "Monaco", 7.42, 43.73, []),
+    ("LIE", "LI", "Liechtenstein", 9.52, 47.14, []),
+    ("SMR", "SM", "San Marino", 12.46, 43.94, []),
+    ("VAT", "VA", "Vatican City", 12.45, 41.9, ["Vatican", "Holy See"]),
+    ("BRB", "BB", "Barbados", -59.56, 13.19, []),
+    ("ATG", "AG", "Antigua and Barbuda", -61.8, 17.06, ["Antigua"]),
+    ("DMA", "DM", "Dominica", -61.37, 15.41, []),
+    ("GRD", "GD", "Grenada", -61.75, 12.12, []),
+    ("LCA", "LC", "Saint Lucia", -60.98, 13.91, ["St Lucia", "St. Lucia"]),
+    ("KNA", "KN", "Saint Kitts and Nevis", -62.73, 17.36, ["St Kitts", "St. Kitts"]),
+    ("VCT", "VC", "Saint Vincent and the Grenadines", -61.2, 13.16, ["St Vincent", "St. Vincent"]),
+    ("SYC", "SC", "Seychelles", 55.45, -4.68, []),
+    ("COM", "KM", "Comoros", 43.33, -11.7, []),
+    ("CPV", "CV", "Cabo Verde", -23.62, 15.12, ["Cape Verde"]),
+    ("STP", "ST", "Sao Tome and Principe", 6.61, 0.19, ["São Tomé and Príncipe"]),
+    ("MUS", "MU", "Mauritius", 57.55, -20.28, []),
+    ("TUV", "TV", "Tuvalu", 179.2, -8.52, []),
+    ("NRU", "NR", "Nauru", 166.93, -0.52, []),
+    ("KIR", "KI", "Kiribati", 172.98, 1.33, []),
+    ("MHL", "MH", "Marshall Islands", 171.18, 7.13, []),
+    ("FSM", "FM", "Micronesia", 158.16, 6.92, ["Federated States of Micronesia"]),
+    ("PLW", "PW", "Palau", 134.58, 7.51, []),
+    ("WSM", "WS", "Samoa", -172.1, -13.76, []),
+    ("TON", "TO", "Tonga", -175.2, -21.18, []),
+]
+
+
+def simplify_arcs(topo: dict, epsilon: float, quant: int = 10000) -> None:
+    """Douglas-Peucker on shared arcs, then a 1e4 quantize with delta encoding."""
+    scale = topo["transform"]["scale"]
+    translate = topo["transform"]["translate"]
+    decoded: list[list[tuple[float, float]]] = []
+    minx, miny, maxx, maxy = 180.0, 90.0, -180.0, -90.0
+    for arc in topo["arcs"]:
+        x = y = 0.0
+        pts: list[tuple[float, float]] = []
+        for dx, dy in arc:
+            x += dx
+            y += dy
+            lon = x * scale[0] + translate[0]
+            lat = y * scale[1] + translate[1]
+            pts.append((lon, lat))
+            minx, miny = min(minx, lon), min(miny, lat)
+            maxx, maxy = max(maxx, lon), max(maxy, lat)
+        simple = dp(pts, epsilon) if epsilon and len(pts) > 4 else pts
+        if len(simple) < 2 and pts:
+            simple = [pts[0], pts[-1]]
+        decoded.append(simple)
+    spanx = max(maxx - minx, 1e-6)
+    spany = max(maxy - miny, 1e-6)
+    sx, sy = spanx / quant, spany / quant
+    arcs = []
+    for pts in decoded:
+        quantized: list[tuple[int, int]] = []
+        for lon, lat in pts:
+            ix = int(round((lon - minx) / sx))
+            iy = int(round((lat - miny) / sy))
+            if quantized and quantized[-1] == (ix, iy):
+                continue
+            quantized.append((ix, iy))
+        if len(quantized) < 2:
+            ix, iy = quantized[0] if quantized else (0, 0)
+            quantized = [(ix, iy), (ix + 1, iy)]
+        delta = []
+        px = py = 0
+        for ix, iy in quantized:
+            delta.append([ix - px, iy - py])
+            px, py = ix, iy
+        arcs.append(delta)
+    topo["transform"] = {"scale": [sx, sy], "translate": [minx, miny]}
+    topo["arcs"] = arcs
+
+
+def prune_arcs(topo: dict, geoms: list[dict]) -> None:
+    used: list[int] = []
+
+    def walk(node):
+        if isinstance(node, int):
+            used.append(~node if node < 0 else node)
+        elif isinstance(node, list):
+            for item in node:
+                walk(item)
+
+    for geom in geoms:
+        if geom.get("type") == "Point":
+            continue
+        walk(geom.get("arcs"))
+    order: list[int] = []
+    seen: set[int] = set()
+    for index in used:
+        if index not in seen:
+            seen.add(index)
+            order.append(index)
+    remap = {old: new for new, old in enumerate(order)}
+
+    def rewrite(node):
+        if isinstance(node, int):
+            rev = node < 0
+            index = ~node if rev else node
+            mapped = remap[index]
+            return ~mapped if rev else mapped
+        return [rewrite(item) for item in node]
+
+    for geom in geoms:
+        if geom.get("type") == "Point":
+            continue
+        geom["arcs"] = rewrite(geom["arcs"])
+    topo["arcs"] = [topo["arcs"][index] for index in order]
+
+
+def quantize_point(lon: float, lat: float, transform: dict) -> list[int]:
+    scale = transform["scale"]
+    translate = transform["translate"]
+    return [int(round((lon - translate[0]) / scale[0])), int(round((lat - translate[1]) / scale[1]))]
+
+
+def add_points(topo: dict, directory: list[dict], ids: set[str] | None) -> None:
+    have = {entry["id"] for entry in directory}
+    geoms = topo["objects"]["regions"]["geometries"]
+    for iso3, iso2, name, lon, lat, extra in POINTS:
+        if iso3 in have:
+            continue
+        if ids is not None and iso3 not in ids:
+            continue
+        aliases = [iso3, iso2, name, *extra]
+        directory.append({"id": iso3, "iso2": iso2, "name": name, "aliases": aliases})
+        geoms.append({
+            "type": "Point",
+            "id": iso3,
+            "coordinates": quantize_point(lon, lat, topo["transform"]),
+            "properties": {"name": name},
+        })
+
+
 def topology(geoms: list[dict]) -> dict:
     return {
         "type": "Topology",
@@ -280,8 +421,11 @@ def main() -> None:
     us = json.loads((TMP / "states-10m.json").read_text())
     admin = json.loads((TMP / "admin1-50m.geojson").read_text())
 
+    simplify_arcs(world, 0.12, 10000)
     world_topo, world_dir = subset_world(world, None, iso)
     eu_topo, eu_dir = subset_world(world, EU, iso)
+    add_points(world_topo, world_dir, None)
+    add_points(eu_topo, eu_dir, {"MLT"})
     write_topo(DATA / "world.json", world_topo)
     write_topo(DATA / "eu.json", eu_topo)
 
@@ -303,6 +447,8 @@ def main() -> None:
             "properties": {"name": name, "fips": fips},
         })
         us_dir.append({"id": postal, "fips": fips, "name": name, "aliases": aliases})
+    simplify_arcs(us, 0.05, 10000)
+    prune_arcs(us, us_geoms)
     us_topo = {
         "type": "Topology",
         "transform": us["transform"],

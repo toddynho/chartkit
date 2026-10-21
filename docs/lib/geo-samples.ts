@@ -21,10 +21,10 @@ export const worldSpec = {
   title: "Renewable share of electricity",
   theme: "soft",
   data: renewable.map(([country, share]) => ({ country, share })),
-  encoding: { region: "country", color: "share" },
+  encoding: { region: "country", color: { field: "share", format: "%", title: "Share" } },
   mark: { atlas: "world", projection: "equalEarth", scale: "sequential" as const },
   size: { width: 880, height: 520 },
-  a11y: { alt: "Approximate renewable share of electricity. Norway, Iceland, and Paraguay are near 100 percent. Saudi Arabia and Algeria are near zero. Countries with no row are no data, including Malta, which this 110m atlas omits." },
+  a11y: { alt: "Approximate renewable share of electricity. Norway, Iceland, and Paraguay are near 100 percent. Saudi Arabia and Algeria are near zero. Countries with no row are hatched as no data. Malta and other small states missing from the 110m atlas are points." },
 };
 
 /** Approximate percent change in state population, 2020 to 2023. */
@@ -57,7 +57,7 @@ export const usSpec = {
   title: "Population change, 2020–2023",
   theme: "midnight",
   data: stateChange.map(([id, change]) => ({ id, change })),
-  encoding: { region: "id", color: "change" },
+  encoding: { region: "id", color: { field: "change", format: "%", title: "Change" } },
   mark: { atlas: "us", projection: "albersUsa", scale: "diverging" as const },
   size: { width: 880, height: 560 },
   a11y: { alt: "Approximate percent change in population from 2020 to 2023. Idaho, Florida, and Texas grew. New York, West Virginia, and Illinois shrank. Alaska and Hawaii sit in insets." },
@@ -94,53 +94,77 @@ export const citySpec = {
   title: "Largest urban areas",
   theme: "soft",
   data: cities,
-  encoding: { latitude: "lat", longitude: "lon", size: "pop", color: "pop", label: "name" },
+  encoding: {
+    latitude: "lat",
+    longitude: "lon",
+    size: { field: "pop", format: { suffix: " million" }, title: "Population" },
+    color: "pop",
+    label: "name",
+  },
   mark: { atlas: "world", projection: "equalEarth", labelCount: 6 },
   size: { width: 880, height: 520 },
-  a11y: { alt: "Approximate urban-area population in millions. Tokyo, Delhi, and Shanghai are the largest bubbles and are labelled." },
+  a11y: { alt: "Approximate urban-area population in millions. Tokyo, Delhi, and Shanghai are the largest bubbles and are labelled. One accent colour, sized by population." },
 };
 
-/** Approximate metro population, millions. Missing states fall back to a statewide bar. */
-export const metros: Record<string, [string, number][]> = {
-  CA: [["Los Angeles", 12.8], ["San Francisco", 4.6], ["San Diego", 3.3], ["Sacramento", 2.4], ["San Jose", 2.0]],
-  TX: [["Dallas", 8.1], ["Houston", 7.5], ["San Antonio", 2.7], ["Austin", 2.5]],
-  NY: [["New York", 19.5], ["Buffalo", 1.1], ["Rochester", 1.1], ["Albany", 0.9]],
-  FL: [["Miami", 6.2], ["Tampa", 3.3], ["Orlando", 2.8], ["Jacksonville", 1.7]],
-  IL: [["Chicago", 9.4], ["Rockford", 0.3]],
-  PA: [["Philadelphia", 6.2], ["Pittsburgh", 2.4]],
-  OH: [["Columbus", 2.2], ["Cleveland", 2.1], ["Cincinnati", 2.3]],
-  GA: [["Atlanta", 6.3], ["Savannah", 0.4]],
-  NC: [["Charlotte", 2.8], ["Raleigh", 1.5]],
-  MI: [["Detroit", 4.3], ["Grand Rapids", 1.2]],
-  WA: [["Seattle", 4.0], ["Spokane", 0.6]],
-  AZ: [["Phoenix", 5.0], ["Tucson", 1.1]],
-  MA: [["Boston", 4.9], ["Springfield", 0.7]],
-  CO: [["Denver", 3.0], ["Colorado Springs", 0.8]],
-  TN: [["Nashville", 2.1], ["Memphis", 1.3]],
-  MD: [["Baltimore", 2.8], ["Frederick", 0.3]],
-  MN: [["Minneapolis", 3.7], ["Duluth", 0.3]],
-  MO: [["St. Louis", 2.8], ["Kansas City", 2.2]],
-  WI: [["Milwaukee", 1.6], ["Madison", 0.7]],
-  OR: [["Portland", 2.5], ["Eugene", 0.4]],
-  NV: [["Las Vegas", 2.3], ["Reno", 0.5]],
-  UT: [["Salt Lake City", 1.3], ["Provo", 0.7]],
-  VA: [["Virginia Beach", 1.8], ["Richmond", 1.3]],
-  AK: [["Anchorage", 0.4], ["Fairbanks", 0.1]],
-  HI: [["Honolulu", 1.0], ["Hilo", 0.2]],
+/** Approximate metro population change, percent, 2020 to 2023. Same metric as the state map. */
+export const metroChange: Record<string, [string, number][]> = {
+  CA: [["Los Angeles", -1.2], ["San Francisco", -2.4], ["San Diego", 0.4], ["Sacramento", 1.1], ["San Jose", -0.8]],
+  TX: [["Dallas", 5.4], ["Houston", 4.1], ["San Antonio", 3.6], ["Austin", 7.2]],
+  NY: [["New York", -2.8], ["Buffalo", -0.6], ["Rochester", -0.4], ["Albany", 0.5]],
+  FL: [["Miami", 3.2], ["Tampa", 5.1], ["Orlando", 4.4], ["Jacksonville", 3.8]],
+  IL: [["Chicago", -1.6], ["Rockford", -0.9]],
+  PA: [["Philadelphia", 0.4], ["Pittsburgh", -0.6]],
+  OH: [["Columbus", 1.6], ["Cleveland", -0.8], ["Cincinnati", 0.6]],
+  GA: [["Atlanta", 3.4], ["Savannah", 2.1]],
+  NC: [["Charlotte", 4.6], ["Raleigh", 5.2]],
+  MI: [["Detroit", -0.4], ["Grand Rapids", 1.2]],
+  WA: [["Seattle", 1.8], ["Spokane", 1.4]],
+  AZ: [["Phoenix", 4.2], ["Tucson", 2.1]],
+  MA: [["Boston", 0.2], ["Springfield", 0.4]],
+  CO: [["Denver", 2.4], ["Colorado Springs", 2.8]],
+  TN: [["Nashville", 4.1], ["Memphis", 0.6]],
+  MD: [["Baltimore", -0.3], ["Frederick", 2.2]],
+  MN: [["Minneapolis", 0.8], ["Duluth", -0.2]],
+  MO: [["St. Louis", -0.2], ["Kansas City", 1.4]],
+  WI: [["Milwaukee", -0.4], ["Madison", 1.6]],
+  OR: [["Portland", 0.3], ["Eugene", 0.8]],
+  NV: [["Las Vegas", 3.4], ["Reno", 2.6]],
+  UT: [["Salt Lake City", 3.8], ["Provo", 6.1]],
+  VA: [["Virginia Beach", 0.6], ["Richmond", 2.1]],
+  AK: [["Anchorage", -0.2], ["Fairbanks", 0.8]],
+  HI: [["Honolulu", -0.6], ["Hilo", 0.4]],
 };
 
-export const statePop: Record<string, number> = {
-  AL: 5.1, AK: 0.7, AZ: 7.4, AR: 3.1, CA: 39.0, CO: 5.9, CT: 3.6, DE: 1.0, DC: 0.7, FL: 22.6,
-  GA: 11.0, HI: 1.4, ID: 2.0, IL: 12.5, IN: 6.8, IA: 3.2, KS: 2.9, KY: 4.5, LA: 4.6, ME: 1.4,
-  MD: 6.2, MA: 7.0, MI: 10.0, MN: 5.7, MS: 2.9, MO: 6.2, MT: 1.1, NE: 2.0, NV: 3.2, NH: 1.4,
-  NJ: 9.3, NM: 2.1, NY: 19.5, NC: 10.8, ND: 0.8, OH: 11.8, OK: 4.0, OR: 4.2, PA: 13.0, RI: 1.1,
-  SC: 5.4, SD: 0.9, TN: 7.1, TX: 30.5, UT: 3.4, VT: 0.6, VA: 8.7, WA: 7.8, WV: 1.8, WI: 5.9, WY: 0.6,
-};
+export function metroChanges(id: string): { name: string; change: number }[] {
+  const listed = metroChange[id];
+  if (listed) return listed.map(([name, change]) => ({ name, change }));
+  const statewide = stateChange.find(([code]) => code === id);
+  return [{ name: "Statewide", change: statewide?.[1] ?? 0 }];
+}
 
-export function metroRows(id: string): { name: string; people: number }[] {
-  const listed = metros[id];
-  if (listed) return listed.map(([name, people]) => ({ name, people }));
-  return [{ name: "Statewide", people: statePop[id] ?? 1 }];
+function escXml(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/** Horizontal bars from a shared zero, coloured with the map scale. No card fill of its own. */
+export function metroBarSvg(title: string, rows: { name: string; change: number }[], fill: (value: number) => string, ink = "#1d1d1f"): string {
+  const width = 420;
+  const rowH = 34;
+  const height = 44 + rows.length * rowH + 12;
+  const maxAbs = Math.max(1.5, ...rows.map((row) => Math.abs(row.change)));
+  const mid = 176;
+  const scale = 130 / maxAbs;
+  const bars = rows
+    .map((row, index) => {
+      const y = 44 + index * rowH;
+      const w = Math.max(2, Math.abs(row.change) * scale);
+      const x = row.change >= 0 ? mid : mid - w;
+      const label = `${row.change > 0 ? "+" : ""}${row.change.toFixed(1)}%`;
+      const labelX = row.change >= 0 ? x + w + 6 : x - 6;
+      return `<text x="8" y="${y + 14}" fill="${ink}" font-size="13" font-family="ui-sans-serif,system-ui,sans-serif">${escXml(row.name)}</text><rect x="${x.toFixed(1)}" y="${y}" width="${w.toFixed(1)}" height="16" rx="3" fill="${fill(row.change)}"/><text x="${labelX.toFixed(1)}" y="${y + 13}" text-anchor="${row.change >= 0 ? "start" : "end"}" fill="${ink}" font-size="12" font-family="ui-sans-serif,system-ui,sans-serif">${label}</text>`;
+    })
+    .join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escXml(title)}, population change percent"><title>${escXml(title)}</title><text x="8" y="22" fill="${ink}" font-size="16" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">${escXml(title)}</text><line x1="${mid}" y1="36" x2="${mid}" y2="${height - 10}" stroke="${ink}" stroke-opacity="0.2"/>${bars}</svg>`;
 }
 
 export function withTheme<T extends { theme?: string }>(spec: T, theme: string): T {
