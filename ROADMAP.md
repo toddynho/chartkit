@@ -34,6 +34,7 @@ Earlier v1 work. 32 chart types draw: 15 in the first core, eight in Phase 3, fi
 - [x] Hierarchy: nested and flat data, multi-level treemap, and sunburst ([#37](https://github.com/toddynho/chartkit/pull/37))
 - [x] Shared cartesian chrome: title, subtitle, axis titles, ticks, domain, and annotations on every cartesian type, combo glow, and threshold points that stay distinct from the line ([#38](https://github.com/toddynho/chartkit/pull/38))
 - [x] Scale padding and clamp, a custom tooltip adapter slot, whole ticks on short series, trendline labels that clear series labels, closer "did you mean" hints, scale-domain errors on every channel, area-range legends that name the band, a bottom legend that sits under the x-axis title, colour-rule labels, threshold points that stay off the bar colour, and line swatches that match the stroke ([#40](https://github.com/toddynho/chartkit/pull/40))
+- [x] Canvas marks for line, area, scatter, bar, heatmap, and candlestick, with SVG axes, plus LTTB and min-max sampling on columnar data ([#42](https://github.com/toddynho/chartkit/pull/42))
 
 ## In progress
 
@@ -46,7 +47,6 @@ Earlier v1 work. 32 chart types draw: 15 in the first core, eight in Phase 3, fi
 
 ## Later
 
-- [ ] A canvas renderer
 - [ ] Maps
 - [ ] Small multiples
 - [ ] Linked interactions

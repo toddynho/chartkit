@@ -10,7 +10,7 @@ Pinned libraries: @chartkitdev/core 0.5.0, uplot 1.6.32, chart.js 4.5.1, rechart
 
 ChartKit's minimal entry is the registry, one chart, and the midnight theme. The `/all` entry is every chart and every theme, without the validator. React libraries are measured twice: React included, and React external for an app that already ships it. ECharts is the modular import (`echarts/core` plus one series), not the full bundle. uPlot's CSS is a second response. Observable Plot and uPlot have no donut, so those cells are unsupported rather than a fake chart.
 
-ChartKit is SVG-only. The ChartKit row uses `mark.sampling: "auto"` (minmax once a line is longer than twice the plot width). ChartKit sampling none is the same line with `mark.sampling: "none"`, measured only at 100,000 and 1,000,000 points. ECharts `sampling` stays off. Every update timer waits for that library's own completion and then the same two animation frames. ECharts completion is the `finished` event, and those two frames come after it.
+The round 13 ChartKit row is SVG. It uses `mark.sampling: "auto"` (minmax once a line is longer than twice the plot width). ChartKit sampling none is the same line with `mark.sampling: "none"`, measured only at 100,000 and 1,000,000 points. ECharts `sampling` stays off. Every update timer waits for that library's own completion and then the same two animation frames. ECharts completion is the `finished` event, and those two frames come after it. The canvas painter is a later measurement, in the canvas section, and it loses first paint at 10k, 100k, and 1M.
 
 ## Bundle size
 
@@ -122,11 +122,23 @@ Before is the median of 5 from 2026-10-16T15:40:22.418Z, after sampling was adde
 | 100000 | 35.10 / 21.10 | 11.60 / 27.30 |
 | 1000000 | 213.90 / 171.30 | 24.90 / 31.90 |
 
-On a cold page, constructing `Intl.NumberFormat` for the tick labels was about 10 ms, and `Array.from` on a 100k Float64 column was about 6 ms. This run keeps those columns in place and formats `en-US` ticks without `Intl`. Replacing `innerHTML` with the sampled SVG measured 0.2 ms, and the next animation frames matched a mutation that did nothing. Writing the path `d` attribute in place matched `innerHTML`. A canvas renderer was not added. The earlier 10k update gap was partly the timer: ChartKit waited for two animation frames and ECharts waited only for `finished`. This run gives every library the same two frames after its own completion.
+On a cold page, constructing `Intl.NumberFormat` for the tick labels was about 10 ms, and `Array.from` on a 100k Float64 column was about 6 ms. This run keeps those columns in place and formats `en-US` ticks without `Intl`. Replacing `innerHTML` with the sampled SVG measured 0.2 ms, and the next animation frames matched a mutation that did nothing. Writing the path `d` attribute in place matched `innerHTML`. The earlier 10k update gap was partly the timer: ChartKit waited for two animation frames and ECharts waited only for `finished`. This run gives every library the same two frames after its own completion.
 
-### Canvas
+## Canvas line, 2026-10-21
 
-Not measured. The ChartKit row still downsamples with `mark.sampling: "auto"` (minmax above twice the 572px plot width, so 1,000 points stay complete and 10k, 100k, and 1M do not). The ChartKit sampling none row draws every point at 100k and 1M. ECharts `sampling` stayed off.
+This is not a re-time of the round above. Median of 5, Playwright Chromium, a 640×360 sampled line. Canvas paints the marks and builds SVG for the axes only. First paint waits for the same two frames. Sampling none was not re-timed. Canvas loses first paint at 10k, 100k, and 1M.
+
+| Points | SVG render | Canvas render | SVG first paint | Canvas first paint | uPlot first paint | SVG update | Canvas update | uPlot update |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 10k | 7.3 | 7.8 | 13.1 | 21.8 | 14.5 | 25.6 | 19.1 | 33.2 |
+| 100k | 8.2 | 9.1 | 13.1 | 20.1 | 17.6 | 29.0 | 18.1 | 23.0 |
+| 1M | 16.5 | 17.1 | 20.8 | 27.7 | 25.1 | 20.6 | 21.8 | 20.9 |
+
+Losses: render at 10k (7.8 vs 7.3); first paint vs SVG at 10k (21.8 vs 13.1); first paint vs uPlot at 10k (21.8 vs 14.5); render at 100k (9.1 vs 8.2); first paint vs SVG at 100k (20.1 vs 13.1); first paint vs uPlot at 100k (20.1 vs 17.6); render at 1M (17.1 vs 16.5); first paint vs SVG at 1M (27.7 vs 20.8); first paint vs uPlot at 1M (27.7 vs 25.1); update vs SVG at 1M (21.8 vs 20.6); update vs uPlot at 1M (21.8 vs 20.9).
+Faster: update vs SVG at 10k (19.1 vs 25.6); update vs uPlot at 10k (19.1 vs 33.2); update vs SVG at 100k (18.1 vs 29.0); update vs uPlot at 100k (18.1 vs 23.0).
+
+
+The round 13 ChartKit row still downsamples with `mark.sampling: "auto"` (minmax above twice the 572px plot width, so 1,000 points stay complete and 10k, 100k, and 1M do not). The ChartKit sampling none row draws every point at 100k and 1M. ECharts `sampling` stayed off. Canvas first-paint losses are in the section above.
 
 ## Server render
 
@@ -248,7 +260,7 @@ ChartKit `repair()`, scored with `checkChartKit` on the first try and no model c
 
 | Library | no docs hint | with docs | Bytes | Source |
 |---|---|---|---:|---|
-| chartkit | Return one JSON object. version is "1". type is the chart name. data is the rows, or a number array when the chart is a single series. a11y.alt is one sentence. encoding.x is the category or date field and encoding.y is the measure. The renderer draws that object. | ChartKit llms.txt | 6679 | https://chartkit.dev/llms.txt. This file is the llms.txt. Full file. This length is the cap. The other libraries are cut to this many bytes. |
+| chartkit | Return one JSON object. version is "1". type is the chart name. data is the rows, or a number array when the chart is a single series. a11y.alt is one sentence. encoding.x is the category or date field and encoding.y is the measure. The renderer draws that object. | ChartKit llms.txt | 6382 | https://chartkit.dev/llms.txt. This file is the llms.txt. Full file. This length is the cap. The other libraries are cut to this many bytes. |
 | recharts | render() runs in a browser. renderToStaticMarkup returns an empty recharts-wrapper in Recharts 3.10.1 and draws nothing. Mount with react-dom/client createRoot and react-dom flushSync. Use a fixed width and height; ResponsiveContainer stays 0px. Put rows on data and field names on dataKey, and return the mounted markup. | Recharts getting started and quickstart | 6329 | https://mintlify.com/recharts/recharts/guides/getting-started.md. Also https://mintlify.com/recharts/recharts/quickstart.md. Official llms.txt index: https://mintlify.com/recharts/recharts/llms.txt. Recharts publishes an llms.txt index of links, not a spec. This excerpt is the official getting-started page plus the start of quickstart, cut to the ChartKit cap. The Mintlify index blurb at the top of each page was removed. |
 | echarts | In Node, call echarts.init(null, null, { renderer: "svg", ssr: true, width, height }) and return chart.renderToSVGString(). The SVG has to include the series marks. Put the numbers in series.data. Code that touches document or window runs in a browser instead. | Apache ECharts handbook: Get Started and Import | 6077 | https://echarts.apache.org/handbook/en/get-started/. Also https://github.com/apache/echarts-handbook/blob/master/contents/en/basics/import.md. Official llms.txt index: https://echarts.apache.org/en/llms.txt. ECharts publishes an llms.txt index. The handbook link on that index is Get Started. This excerpt is that page plus Import ECharts, cut to the ChartKit cap. Apache License 2.0. |
 | chartjs | render() runs in a browser document. Create a canvas, register every scale and controller you construct, and leave that canvas in the document. A canvas tag or a data URL with no painted pixels does not pass. Put the numbers in the dataset data. | Chart.js getting started: installation and usage | 6327 | https://www.chartjs.org/docs/latest/getting-started/. Also https://github.com/chartjs/Chart.js/blob/master/docs/getting-started/installation.md, https://github.com/chartjs/Chart.js/blob/master/docs/getting-started/usage.md. No official llms.txt. Chart.js does not publish an llms.txt. This excerpt is the official installation page plus the start of the usage guide, from the Chart.js docs (MIT), cut to the ChartKit cap. |

@@ -300,6 +300,7 @@ function demoValue(id, parts, literal) {
   if (leaf === "curve") return "monotone";
   if (leaf === "points") return "always";
   if (leaf === "sampling") return "lttb";
+  if (leaf === "render") return "canvas";
   if (leaf === "layout") return "calendar";
   if (leaf === "shape") return "trapezoid";
   if (leaf === "linecap") return "round";
@@ -375,6 +376,10 @@ function applyFeature(spec, feature) {
   }
   if (feature.id === "data.columns") {
     spec.data = { columns: { quarter: ["Q1", "Q2"], units: [40, 55] } };
+  }
+  if (feature.id === "data.large") {
+    spec.render = "canvas";
+    spec.data = { columns: { quarter: ["Q1", "Q2"], units: [40, 55] }, sampling: "lttb" };
   }
   if (feature.id === "data.timezone") {
     spec.data = [

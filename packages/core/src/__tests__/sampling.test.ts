@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { line } from "../charts/line";
 import { spike } from "../charts/spike";
 import { createRenderer } from "../render";
-import { readSamplingMode, resolveSampling, sampleSeries, samplingThreshold } from "../sampling";
+import { beginFrame, extendMinmax, noteLinear, readSamplingMode, resolveSampling, sampleSeries, sampleTyped, samplingThreshold } from "../sampling";
 import { validate } from "../validate";
 
 const renderLine = createRenderer([line]);
@@ -27,6 +27,52 @@ function indexes(mode: "lttb" | "minmax", n: number, target: number): number[] {
 }
 
 describe("sampling algorithms", () => {
+  it("samples typed columns into a reused index buffer with no per-point objects", () => {
+    const n = 5000;
+    const xs = new Float64Array(n);
+    const ys = series(n, 40, 100);
+    for (let i = 0; i < n; i++) xs[i] = i * 2;
+    beginFrame();
+    noteLinear(xs);
+    const typed = sampleTyped("minmax", xs, ys, n, 80);
+    const boxed = sampleSeries("minmax", xs, ys, n, 80, false);
+    expect(typed.reduced).toBe(true);
+    expect(typed.mode).toBe("minmax");
+    expect([...typed.index.subarray(0, typed.length)]).toEqual([...boxed.runs[0]]);
+    expect(typed.index[0]).toBe(0);
+    expect(typed.index[typed.length - 1]).toBe(n - 1);
+    expect([...typed.index.subarray(0, typed.length)]).toContain(40);
+  });
+
+  it("folds an append into the existing minmax buckets", () => {
+    const n = 5000;
+    const xs = new Float64Array(n);
+    const ys = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      xs[i] = i;
+      ys[i] = Math.sin(i / 9);
+    }
+    ys[100] = 50;
+    const prefix = ys.subarray(0, 4000);
+    beginFrame();
+    noteLinear(xs.subarray(0, 4000));
+    const first = sampleTyped("minmax", xs.subarray(0, 4000), prefix, 4000, 40);
+    const memo = first.memo;
+    expect(memo && memo.buckets > 0).toBe(true);
+    const saved = {
+      ...memo!,
+      lo: Int32Array.from(memo!.lo.subarray(0, memo!.buckets)),
+      hi: Int32Array.from(memo!.hi.subarray(0, memo!.buckets)),
+    };
+    ys[4500] = -40;
+    const extended = extendMinmax(saved, xs, ys, 4000, n);
+    const kept = [...extended.index.subarray(0, extended.length)];
+    expect(kept[0]).toBe(0);
+    expect(kept[kept.length - 1]).toBe(n - 1);
+    expect(kept).toContain(100);
+    expect(kept).toContain(4500);
+  });
+
   it("leaves series at or under twice the plot width untouched", () => {
     expect(samplingThreshold(572)).toBe(1144);
     expect(resolveSampling("auto", 1144, 572)).toBe("none");

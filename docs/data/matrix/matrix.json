@@ -32388,16 +32388,22 @@
           "status": "native",
           "tier": null,
           "apiPaths": [
-            "ChartKitChartSpecV1.mark.sampling=lttb"
+            "ChartKitChartSpecV1.mark.sampling=lttb",
+            "ChartKitChartSpecV1.data.sampling"
           ],
           "evidence": [
             {
               "kind": "dts-path",
               "path": "ChartKitChartSpecV1.mark.sampling=lttb",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:807"
+              "loc": "chartkit:packages/core/src/generated/schema.ts:1149"
+            },
+            {
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.data.sampling",
+              "loc": "chartkit:packages/core/src/generated/schema.ts:177"
             }
           ],
-          "note": "auto | minmax | lttb | none",
+          "note": "auto | minmax | lttb | none. Columnar data.sampling overrides mark.sampling.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -32730,19 +32736,25 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "partial",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "ChartKitChartSpecV1.mark.sampling"
+            "ChartKitChartSpecV1.render=canvas",
+            "ChartKitChartSpecV1.data.sampling"
           ],
           "evidence": [
             {
               "kind": "dts-path",
-              "path": "ChartKitChartSpecV1.mark.sampling",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:807"
+              "path": "ChartKitChartSpecV1.render=canvas",
+              "loc": "chartkit:packages/core/src/generated/schema.ts:82"
+            },
+            {
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.data.sampling",
+              "loc": "chartkit:packages/core/src/generated/schema.ts:177"
             }
           ],
-          "note": "SVG + sampling; columns input",
+          "note": "Canvas paints line, area, scatter, bar, heatmap, and candlestick from the sampled geometry. Columnar data.sampling is lttb, minmax, or none. auto from 100000 rows. Typed-array append. Other types stay SVG.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -80357,20 +80369,21 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "partial",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:canvas)['\"`]|(?:^|[\\s{,;])\\w*(?:canvas)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:canvas)"
+            "ChartKitChartSpecV1.render=canvas"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:canvas)['\"`]|(?:^|[\\s{,;])\\w*(?:canvas)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:canvas)"
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.render=canvas",
+              "loc": "chartkit:packages/core/src/generated/schema.ts:82"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "Line, stacked-area, scatter, bar, heatmap, and candlestick. Axes, legend, title, and annotations stay SVG. Marks are painted from the sampled geometry. auto from 100000 rows. Other types stay SVG and warn CK3033.",
+          "verified": "dts-path",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "native",

@@ -12,6 +12,15 @@ export function readSamplingMode(value: unknown): SamplingMode {
   return "auto";
 }
 
+/** `data.sampling` on a columnar table. `lttb`, `minmax`, and `none` override `mark.sampling`. */
+export function dataSampling(spec: { data?: unknown }): SamplingMode | undefined {
+  const data = spec.data;
+  if (!data || typeof data !== "object" || Array.isArray(data)) return undefined;
+  const value = (data as { sampling?: unknown }).sampling;
+  if (value === "lttb" || value === "minmax" || value === "none") return value;
+  return undefined;
+}
+
 export interface SampledRuns {
   reduced: boolean;
   mode: "none" | "lttb" | "minmax";
@@ -45,7 +54,7 @@ export function noteDense(values: ArrayLike<number | null>): void {
   if (typeof values === "object" && values !== null) denseNote.set(values, { frame, length: values.length });
 }
 
-function notedDense(values: ArrayLike<number | null>, count: number): boolean {
+export function notedDense(values: ArrayLike<number | null>, count: number): boolean {
   if (typeof values !== "object" || values === null) return false;
   const note = denseNote.get(values);
   return note !== undefined && note.frame === frame && note.length === count;
@@ -56,9 +65,72 @@ export function noteLinear(values: ArrayLike<number | null>): void {
   if (typeof values === "object" && values !== null) linearNote.set(values, frame);
 }
 
-function notedLinear(values: ArrayLike<number | null> | null): boolean {
+export function notedLinear(values: ArrayLike<number | null> | null): boolean {
   if (typeof values !== "object" || values === null) return false;
   return linearNote.get(values) === frame;
+}
+
+/** True when this render already proved `values` is an arithmetic sequence. */
+export function notedLinearColumn(values: ArrayLike<number | null> | null): boolean {
+  return notedLinear(values);
+}
+
+export interface BucketMemo {
+  buckets: number;
+  /** Index of the minimum in each bucket. -1 when the bucket is empty. Reused. */
+  lo: Int32Array;
+  hi: Int32Array;
+  /** Data x at the first and last kept edge. Bucket edges stay put while this span does. */
+  x0: number;
+  x1: number;
+  count: number;
+  first: number;
+  last: number;
+  linear: boolean;
+  stride: number;
+  dataX0: number;
+}
+
+export interface TypedSample {
+  /** Sorted source indexes. The buffer is reused on the next `sampleTyped` call. */
+  index: Int32Array;
+  length: number;
+  reduced: boolean;
+  mode: "none" | "lttb" | "minmax";
+  /** Present for minmax. Reused, so copy `lo`/`hi` if you keep them across a later sample. */
+  memo: BucketMemo | null;
+}
+
+
+export interface SamplingApi {
+  sampleSeries: (
+    requested: SamplingMode,
+    xs: ArrayLike<number | null> | null,
+    ys: ArrayLike<number | null>,
+    count: number,
+    plotWidth: number,
+    connectNulls: boolean,
+  ) => SampledRuns;
+  sampleTyped: (requested: SamplingMode, xs: Float64Array | null, ys: Float64Array, count: number, plotWidth: number) => TypedSample;
+  extendMinmax: (memoIn: BucketMemo, xs: Float64Array | null, ys: Float64Array, from: number, to: number) => TypedSample;
+  id: "ck-sampling-run";
+}
+
+let sampler: SamplingApi | null = null;
+let loading: Promise<void> | null = null;
+
+/** Remember the chunk's API. `all` and the canvas painter call this at load. */
+export function useSampler(next: SamplingApi): void {
+  sampler = next;
+}
+
+/** Fetch LTTB and minmax. A small series never calls this. */
+export function loadSampling(): Promise<void> {
+  if (sampler) return Promise.resolve();
+  loading ??= import("./sampling-run").then((mod) => {
+    useSampler(mod.bindSampling({ notedDense, notedLinear }));
+  });
+  return loading;
 }
 
 export function sampleSeries(
@@ -361,4 +433,29 @@ function xAt(xs: ArrayLike<number | null> | null, index: number): number {
   if (!xs) return index;
   const x = xs[index];
   return typeof x === "number" && Number.isFinite(x) ? x : index;
+}
+
+const emptyIndex = new Int32Array(0);
+
+/** Typed minmax or LTTB. A short series does not load the chunk. */
+export function sampleTyped(
+  requested: SamplingMode,
+  xs: Float64Array | null,
+  ys: Float64Array,
+  count: number,
+  plotWidth: number,
+): TypedSample {
+  const mode = resolveSampling(requested, count, plotWidth);
+  if (mode === "none" || count < 2) return { index: emptyIndex, length: 0, reduced: false, mode: "none", memo: null };
+  if (!sampler) {
+    void loadSampling();
+    return { index: emptyIndex, length: 0, reduced: false, mode: "none", memo: null };
+  }
+  return sampler.sampleTyped(requested, xs, ys, count, plotWidth);
+}
+
+/** Fold new tail points into a minmax memo. The canvas painter loads the chunk first. */
+export function extendMinmax(memoIn: BucketMemo, xs: Float64Array | null, ys: Float64Array, from: number, to: number): TypedSample {
+  if (!sampler) throw new Error("sampling chunk is not loaded");
+  return sampler.extendMinmax(memoIn, xs, ys, from, to);
 }

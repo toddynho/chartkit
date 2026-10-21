@@ -16,6 +16,16 @@ Round 13, measured 2026-10-18 on phase 2 `d8dcc5a`. These are the harness number
 
 The aligned update starts at the top of a requestAnimationFrame, awaits the library’s own completion, and reads time from a MessageChannel after paint. ChartKit is `mount().update()`, the same shape as uPlot `setData`. Sampling defaults to auto. With sampling off, 1M is 471.8 ms to draw and 462.4 ms to update.
 
+Canvas line, measured 2026-10-21, median of 5, Playwright Chromium, 640×360, sampling auto (minmax above twice the plot width). Canvas paints the sampled points and builds SVG for the axes only. `render` is that synchronous work. First paint includes the same two frames as the other libraries. uPlot does not split a synchronous render time out of that paint. Sampling none was not re-timed in this run.
+
+| Points | SVG render | Canvas render | SVG first paint | Canvas first paint | uPlot first paint | SVG update | Canvas update | uPlot update |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 10k | 7.3 | 7.8 | 13.1 | 21.8 | 14.5 | 25.6 | 19.1 | 33.2 |
+| 100k | 8.2 | 9.1 | 13.1 | 20.1 | 17.6 | 29.0 | 18.1 | 23.0 |
+| 1M | 16.5 | 17.1 | 20.8 | 27.7 | 25.1 | 20.6 | 21.8 | 20.9 |
+
+Canvas losses: render is slower than SVG at 10k (7.8 vs 7.3), 100k (9.1 vs 8.2), and 1M (17.1 vs 16.5). First paint is slower than SVG at those sizes (21.8 vs 13.1, 20.1 vs 13.1, 27.7 vs 20.8) and slower than uPlot (14.5, 17.6, 25.1). The 1M update is slower than SVG (21.8 vs 20.6) and slower than uPlot (21.8 vs 20.9). Canvas wins the 10k and 100k updates against both SVG and uPlot. There is no first-paint crossover, so `auto` stays on SVG at 10k and switches at 100,000 rows, where the update win is large. 1M first paint is 27.7 ms and the update is 21.8 ms. `scripts/size.mjs` line is 33,774 bytes gzip, 601 bytes over main `60eaeec` (33,173). The synchronous SVG sampler stays in that entry, so a line chart still downsamples. The typed canvas sampler, scene capture, and the painter do not. `@chartkitdev/core/all` is 57,413 bytes gzip (main 55,480). The canvas painter is a separate chunk, 56,766 bytes gzip.
+
 **[Documentation](https://chartkit.dev)** | **[When to use](https://chartkit.dev/when-to-use)** | **[Benchmarks](https://chartkit.dev/benchmarks)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[Roadmap](ROADMAP.md)** | **[llms.txt](docs/public/llms.txt)**
 
 ---

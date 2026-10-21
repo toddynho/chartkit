@@ -1,0 +1,126 @@
+{
+  "measured": "2026-10-21",
+  "commit": "2c56df7b4c59",
+  "samples": 5,
+  "points": [
+    10000,
+    100000,
+    1000000
+  ],
+  "libs": [
+    "chartkit",
+    "chartkit-canvas",
+    "uplot"
+  ],
+  "method": "Playwright Chromium. Each sample is a fresh page. Reported times are the median of 5 samples. Data is makeSeries(n, seed) generated inside the page and excluded from the timer. x[i] = i. Every library does its own update, then waits for the same two animation frames. ECharts also waits for its finished event before those frames. ChartKit replaces innerHTML with a new SVG (curve linear, points none, sampling auto, which is minmax above twice the plot width) and returns that synchronous build as renderMs before the two frames. ChartKit canvas is the same line with render canvas. It paints sampled points straight onto a canvas and builds SVG for the axes only, and renderMs includes that paint. It does not build the mark DOM. ChartKit sampling none is the same SVG line with mark.sampling none, measured only at 100k and 1M. An error SVG (ck-chart-error) fails that sample. uPlot uses setData. Chart.js uses update('none') and {x,y} points. ECharts uses setOption on a canvas renderer with sampling left off. Recharts and Nivo use flushSync. Observable Plot replaces the SVG node. Width 640, height 360. Memory is the median performance.memory.usedJSHeapSize when Chromium exposes it. A failed size skips larger sizes for that library.",
+  "rows": [
+    {
+      "id": "chartkit",
+      "library": "ChartKit",
+      "renderer": "svg",
+      "points": 10000,
+      "status": "ok",
+      "renderMs": 7.299999982118607,
+      "initialMs": 13.099999994039536,
+      "updateRenderMs": 1.5999999940395355,
+      "updateMs": 25.600000023841858,
+      "error": null
+    },
+    {
+      "id": "chartkit",
+      "library": "ChartKit",
+      "renderer": "svg",
+      "points": 100000,
+      "status": "ok",
+      "renderMs": 8.200000017881393,
+      "initialMs": 13.099999994039536,
+      "updateRenderMs": 2.0999999940395355,
+      "updateMs": 29,
+      "error": null
+    },
+    {
+      "id": "chartkit",
+      "library": "ChartKit",
+      "renderer": "svg",
+      "points": 1000000,
+      "status": "ok",
+      "renderMs": 16.5,
+      "initialMs": 20.799999982118607,
+      "updateRenderMs": 9.200000017881393,
+      "updateMs": 20.599999994039536,
+      "error": null
+    },
+    {
+      "id": "chartkit-canvas",
+      "library": "ChartKit canvas",
+      "renderer": "canvas",
+      "points": 10000,
+      "status": "ok",
+      "renderMs": 7.800000011920929,
+      "initialMs": 21.80000001192093,
+      "updateRenderMs": 0.5999999940395355,
+      "updateMs": 19.099999994039536,
+      "error": null
+    },
+    {
+      "id": "chartkit-canvas",
+      "library": "ChartKit canvas",
+      "renderer": "canvas",
+      "points": 100000,
+      "status": "ok",
+      "renderMs": 9.099999994039536,
+      "initialMs": 20.099999994039536,
+      "updateRenderMs": 1.300000011920929,
+      "updateMs": 18.099999994039536,
+      "error": null
+    },
+    {
+      "id": "chartkit-canvas",
+      "library": "ChartKit canvas",
+      "renderer": "canvas",
+      "points": 1000000,
+      "status": "ok",
+      "renderMs": 17.099999994039536,
+      "initialMs": 27.69999998807907,
+      "updateRenderMs": 8.100000023841858,
+      "updateMs": 21.80000001192093,
+      "error": null
+    },
+    {
+      "id": "uplot",
+      "library": "uPlot",
+      "renderer": "canvas",
+      "points": 10000,
+      "status": "ok",
+      "renderMs": null,
+      "initialMs": 14.5,
+      "updateRenderMs": null,
+      "updateMs": 33.20000001788139,
+      "error": null
+    },
+    {
+      "id": "uplot",
+      "library": "uPlot",
+      "renderer": "canvas",
+      "points": 100000,
+      "status": "ok",
+      "renderMs": null,
+      "initialMs": 17.599999994039536,
+      "updateRenderMs": null,
+      "updateMs": 23,
+      "error": null
+    },
+    {
+      "id": "uplot",
+      "library": "uPlot",
+      "renderer": "canvas",
+      "points": 1000000,
+      "status": "ok",
+      "renderMs": null,
+      "initialMs": 25.100000023841858,
+      "updateRenderMs": null,
+      "updateMs": 20.900000005960464,
+      "error": null
+    }
+  ]
+}

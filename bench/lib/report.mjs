@@ -32,7 +32,7 @@ export function renderReport(result) {
   lines.push("");
   lines.push("ChartKit's minimal entry is the registry, one chart, and the midnight theme. The `/all` entry is every chart and every theme, without the validator. React libraries are measured twice: React included, and React external for an app that already ships it. ECharts is the modular import (`echarts/core` plus one series), not the full bundle. uPlot's CSS is a second response. Observable Plot and uPlot have no donut, so those cells are unsupported rather than a fake chart.");
   lines.push("");
-  lines.push("ChartKit is SVG-only. The ChartKit row uses `mark.sampling: \"auto\"` (minmax once a line is longer than twice the plot width). ChartKit sampling none is the same line with `mark.sampling: \"none\"`, measured only at 100,000 and 1,000,000 points. ECharts `sampling` stays off. Every update timer waits for that library's own completion and then the same two animation frames. ECharts completion is the `finished` event, and those two frames come after it.");
+  lines.push("The round 13 ChartKit row is SVG. It uses `mark.sampling: \"auto\"` (minmax once a line is longer than twice the plot width). ChartKit sampling none is the same line with `mark.sampling: \"none\"`, measured only at 100,000 and 1,000,000 points. ECharts `sampling` stays off. Every update timer waits for that library's own completion and then the same two animation frames. ECharts completion is the `finished` event, and those two frames come after it. The canvas painter is a later measurement, in the canvas section, and it loses first paint at 10k, 100k, and 1M.");
   lines.push("");
   lines.push("## Bundle size");
   lines.push("");
@@ -106,11 +106,11 @@ export function renderReport(result) {
     lines.push(`| ${points} | ${initial.toFixed(2)} / ${update.toFixed(2)} | ${afterCell} |`);
   }
   lines.push("");
-  lines.push("On a cold page, constructing `Intl.NumberFormat` for the tick labels was about 10 ms, and `Array.from` on a 100k Float64 column was about 6 ms. This run keeps those columns in place and formats `en-US` ticks without `Intl`. Replacing `innerHTML` with the sampled SVG measured 0.2 ms, and the next animation frames matched a mutation that did nothing. Writing the path `d` attribute in place matched `innerHTML`. A canvas renderer was not added. The earlier 10k update gap was partly the timer: ChartKit waited for two animation frames and ECharts waited only for `finished`. This run gives every library the same two frames after its own completion.");
+  lines.push("On a cold page, constructing `Intl.NumberFormat` for the tick labels was about 10 ms, and `Array.from` on a 100k Float64 column was about 6 ms. This run keeps those columns in place and formats `en-US` ticks without `Intl`. Replacing `innerHTML` with the sampled SVG measured 0.2 ms, and the next animation frames matched a mutation that did nothing. Writing the path `d` attribute in place matched `innerHTML`. The earlier 10k update gap was partly the timer: ChartKit waited for two animation frames and ECharts waited only for `finished`. This run gives every library the same two frames after its own completion.");
   lines.push("");
-  lines.push("### Canvas");
+  lines.push(...canvasReportLines());
   lines.push("");
-  lines.push("Not measured. The ChartKit row still downsamples with `mark.sampling: \"auto\"` (minmax above twice the 572px plot width, so 1,000 points stay complete and 10k, 100k, and 1M do not). The ChartKit sampling none row draws every point at 100k and 1M. ECharts `sampling` stayed off.");
+  lines.push("The round 13 ChartKit row still downsamples with `mark.sampling: \"auto\"` (minmax above twice the 572px plot width, so 1,000 points stay complete and 10k, 100k, and 1M do not). The ChartKit sampling none row draws every point at 100k and 1M. ECharts `sampling` stayed off. Canvas first-paint losses are in the section above.");
   lines.push("");
   lines.push("## Server render");
   lines.push("");
@@ -439,6 +439,53 @@ function efficiencySection() {
     lines.push("");
   }
   return lines.join("\n");
+}
+
+function one(value) {
+  return typeof value === "number" ? value.toFixed(1) : "—";
+}
+
+/** Canvas line measured separately from round 13. Numbers come from docs/data/canvas-bench.json. */
+function canvasReportLines() {
+  const file = join(dirname(fileURLToPath(import.meta.url)), "../../docs/data/canvas-bench.json");
+  if (!existsSync(file)) return ["Canvas comparison: `docs/data/canvas-bench.json` is missing."];
+  const bench = JSON.parse(readFileSync(file, "utf8"));
+  const rows = Array.isArray(bench.rows) ? bench.rows : [];
+  const at = (id, points) => rows.find((row) => row.id === id && row.points === points);
+  const lines = [];
+  lines.push(`## Canvas line, ${bench.measured ?? "measured separately"}`);
+  lines.push("");
+  lines.push("This is not a re-time of the round above. Median of 5, Playwright Chromium, a 640×360 sampled line. Canvas paints the marks and builds SVG for the axes only. First paint waits for the same two frames. Sampling none was not re-timed. Canvas loses first paint at 10k, 100k, and 1M.");
+  lines.push("");
+  lines.push("| Points | SVG render | Canvas render | SVG first paint | Canvas first paint | uPlot first paint | SVG update | Canvas update | uPlot update |");
+  lines.push("| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+  const loss = [];
+  const win = [];
+  for (const points of [10000, 100000, 1000000]) {
+    const label = points >= 1000000 ? "1M" : `${points / 1000}k`;
+    const svg = at("chartkit", points);
+    const canvas = at("chartkit-canvas", points);
+    const uplot = at("uplot", points);
+    lines.push(`| ${label} | ${one(svg?.renderMs)} | ${one(canvas?.renderMs)} | ${one(svg?.initialMs)} | ${one(canvas?.initialMs)} | ${one(uplot?.initialMs)} | ${one(svg?.updateMs)} | ${one(canvas?.updateMs)} | ${one(uplot?.updateMs)} |`);
+    if (typeof canvas?.renderMs === "number" && typeof svg?.renderMs === "number" && canvas.renderMs > svg.renderMs) loss.push(`render at ${label} (${one(canvas.renderMs)} vs ${one(svg.renderMs)})`);
+    if (typeof canvas?.initialMs === "number" && typeof svg?.initialMs === "number" && canvas.initialMs > svg.initialMs) loss.push(`first paint vs SVG at ${label} (${one(canvas.initialMs)} vs ${one(svg.initialMs)})`);
+    if (typeof canvas?.initialMs === "number" && typeof uplot?.initialMs === "number" && canvas.initialMs > uplot.initialMs) loss.push(`first paint vs uPlot at ${label} (${one(canvas.initialMs)} vs ${one(uplot.initialMs)})`);
+    if (typeof canvas?.updateMs === "number" && typeof svg?.updateMs === "number") {
+      const text = `update vs SVG at ${label} (${one(canvas.updateMs)} vs ${one(svg.updateMs)})`;
+      if (canvas.updateMs > svg.updateMs) loss.push(text);
+      else win.push(text);
+    }
+    if (typeof canvas?.updateMs === "number" && typeof uplot?.updateMs === "number") {
+      const text = `update vs uPlot at ${label} (${one(canvas.updateMs)} vs ${one(uplot.updateMs)})`;
+      if (canvas.updateMs > uplot.updateMs) loss.push(text);
+      else win.push(text);
+    }
+  }
+  lines.push("");
+  lines.push(`Losses: ${loss.join("; ")}.`);
+  if (win.length) lines.push(`Faster: ${win.join("; ")}.`);
+  lines.push("");
+  return lines;
 }
 
 function efficiencyTable(stats) {

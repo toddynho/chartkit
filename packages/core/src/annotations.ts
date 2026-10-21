@@ -43,6 +43,17 @@ interface Box {
   h: number;
 }
 
+/** Trend lines, regressions, and markers look up a series point. Bands and rules do not. */
+export function notesNeedSamples(notes: unknown): boolean {
+  if (!Array.isArray(notes)) return false;
+  for (let i = 0; i < notes.length; i++) {
+    const item = notes[i];
+    if (!isRecord(item)) continue;
+    if (item.type === "trendline" || item.type === "regression" || item.type === "marker") return true;
+  }
+  return false;
+}
+
 /** Bands sit under the marks. Rules, fits, and callouts sit above, outside the plot clip. */
 export function annotationLayers(notes: unknown, geom: AnnotationGeom): { under: string; over: string } {
   const under: string[] = [];

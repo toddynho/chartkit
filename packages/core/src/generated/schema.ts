@@ -77,6 +77,10 @@ export type ChartKitChartSpecV1 = {
   interaction?: Interaction;
   animation?: Animation;
   /**
+   * How the marks are drawn. svg is the default and what render() always returns, including on the server, with the marks included. canvas paints line, stacked-area, scatter, bar, heatmap, and candlestick marks from the computed geometry onto a 2D canvas. The client SVG keeps the axes, legend, title, annotations, the aria description, and the data table. Hit-testing reads the data: binary search on x for line, area, and bar, and a grid for scatter. auto uses canvas for those types once the table has 100000 or more rows. Other types stay SVG and warn CK3033. The canvas painter loads on demand and is not part of createRenderer([line]).
+   */
+  render?: "svg" | "canvas" | "auto";
+  /**
    * BCP 47 locale for number/date formatting. Default: the host's locale.
    */
   locale?: string;
@@ -167,6 +171,10 @@ export type Data =
       columns: {
         [k: string]: (number | string | boolean | null)[];
       };
+      /**
+       * Downsample line-like marks. lttb is largest-triangle-three-buckets. minmax keeps the minimum and maximum in each pixel column. none draws every point. Omit it to keep mark.sampling, which defaults to auto (minmax once the series is longer than twice the plot width). When set, this overrides mark.sampling. A very long series drawn with none warns CK3032.
+       */
+      sampling?: "lttb" | "minmax" | "none";
     };
 /**
  * Name of a column in data (row key or columns key). Case-sensitive.

@@ -1,11 +1,13 @@
-import { annotationLayers, seriesPoints } from "../annotations";
+import { annotationLayers, notesNeedSamples, seriesPoints } from "../annotations";
+import { capturing, noteIngest, noteSvg, runCapture } from "../canvas/scene-hook";
 import { isPaintColumn, matchRule, readRules, resolveColors, ruleCaption, ruleMatchesAny, withPalette, type ColorRule } from "../color";
 import { loadTable } from "../data-prep";
 import { isTypedArray, type DataTable } from "../data";
 import { formatZoned, zoneOf, zonedTimeTicks } from "../timezone";
 import { formatAxisValue, formatValue } from "../format";
 import { bag, glyphOf, marker, named, nudge, type Bag } from "../glyphs";
-import { beginFrame, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
+import { canvasWanted } from "../render-mode";
+import { beginFrame, dataSampling, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import type { ColorScale } from "../color-scale";
 import { exportList, readColor } from "../frame";
 import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
@@ -110,8 +112,11 @@ function renderTyped(
 ): string | null {
   if (spec.type !== type) return null;
   beginFrame();
+  const t0 = performance.now();
   const model = toModel(spec, adjust);
+  const ingest = performance.now() - t0;
   if (!model) return null;
+  if (capturing()) noteIngest(ingest);
   return modelToSvg(model, draw);
 }
 
@@ -163,6 +168,26 @@ export function renderCombo(spec: Record<string, unknown>): string | null {
   );
 }
 
+/** Line, bar, area, sparkline, and combo. The canvas chunk calls this while capture is mounted. */
+export function renderPlotted(spec: Record<string, unknown>): string | null {
+  switch (spec.type) {
+    case "line":
+      return renderLine(spec);
+    case "bar":
+      return renderBar(spec);
+    case "stacked-area":
+      return renderStackedArea(spec);
+    case "sparkline":
+      return renderSparkline(spec);
+    case "mini-area":
+      return renderMiniArea(spec);
+    case "combo":
+      return renderCombo(spec);
+    default:
+      return null;
+  }
+}
+
 export interface Series {
   name: string;
   values: ArrayLike<number | null>;
@@ -205,6 +230,8 @@ export interface PlotModel {
   series: Series[];
   curve: Curve;
   sampling: SamplingMode;
+  /** Marks paint on a canvas overlay. Chrome stays in this SVG. */
+  canvas?: boolean;
   stack: "none" | "stack" | "percent";
   orientation: "vertical" | "horizontal";
   fillOpacity: number;
@@ -534,6 +561,8 @@ function toModel(
     series,
     showY2: shell.showY2 && series.some((item) => item.axis === "y2"),
     legend: shell.legendOn && (series.length > 1 || Boolean(swatches) || ruleLegend.length > 0),
+    sampling: dataSampling(spec) ?? shell.sampling,
+    canvas: canvasWanted(spec),
     colorScale,
     swatches,
     ruleLegend,
@@ -547,6 +576,7 @@ function toModel(
 }
 
 function modelToSvg(model: PlotModel, draw: MarkDraw): string {
+  const tScale = performance.now();
   const horizontal = model.orientation === "horizontal" && model.type === "bar";
   const yDomain = domain(model, "y");
   const y2Domain = domain(model, "y2");
@@ -575,7 +605,22 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   const y2ScaleRaw = model.y2Log ? logScale(y2Domain[0], y2Domain[1], y2From, y2To) : linear(y2Domain[0], y2Domain[1], y2From, y2To);
   const y2Scale = modelClamp(y2ScaleRaw, y2Domain, axisClamps(model, "y2"));
   const xScale = xPosition(model, count, plot.left, plot.right, plot.top, plot.bottom, horizontal);
+  const pass = capturing()
+    ? runCapture({
+        model,
+        xScale,
+        yScale,
+        y2Scale,
+        plot,
+        count,
+        scalesMs: performance.now() - tScale,
+        yDomain,
+        y2Domain,
+      })
+    : "off";
+  if (pass === "reuse") return "";
 
+  const tSvg = performance.now();
   const parts: string[] = [];
   parts.push(openSvg(model));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", model.preset.background)}" />`);
@@ -626,7 +671,9 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
       if (numeric === null) return null;
       return (axis === "y2" ? y2Scale : yScale)(numeric);
     },
-    samples: model.series.map((series) => ({ name: series.name, axis: series.axis, pts: seriesPoints(model.x, series.values) })),
+    samples: notesNeedSamples(model.notes)
+      ? model.series.map((series) => ({ name: series.name, axis: series.axis, pts: seriesPoints(model.x, series.values) }))
+      : undefined,
     labels: model.labels,
     temporal: model.xTemporal,
     xNum: model.x,
@@ -637,7 +684,10 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   });
   parts.push(`<g clip-path="url(#${clip})">`);
   parts.push(notes.under);
-  parts.push(draw(model, xScale, yScale, y2Scale, plot, horizontal));
+  if (pass === "off") {
+    const marks = draw(model, xScale, yScale, y2Scale, plot, horizontal);
+    parts.push(model.canvas ? `<g data-ck-layer="marks">${marks}</g>` : marks);
+  }
   parts.push(`</g>`);
   parts.push(notes.over);
   if (model.late) parts.push(model.late);
@@ -649,6 +699,7 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   if (model.colorScale) parts.push(model.colorScale.legend(plot.left, model.height - 46, cssVar("muted", model.preset.muted)));
 
   parts.push(`</svg>`);
+  if (pass !== "off") noteSvg(performance.now() - tSvg);
   return parts.join("");
 }
 
@@ -1152,7 +1203,7 @@ export interface Layers {
   bottom: number[][];
 }
 
-function stackLayers(series: Series[], mode: "stack" | "percent"): Layers {
+export function stackLayers(series: Series[], mode: "stack" | "percent"): Layers {
   const count = series[0]?.values.length ?? 0;
   const top = series.map(() => Array<number>(count).fill(0));
   const bottom = series.map(() => Array<number>(count).fill(0));
@@ -1479,7 +1530,7 @@ function xBand(model: PlotModel, xScale: XScale, count: number, horizontal: bool
       continue;
     }
     const x = xScale.center(i);
-    const drawn = alongOne(label, x, y, angle, plot, 0, fill, family, keep ? -Infinity : last, rows);
+    const drawn = alongOne(label, x, y, angle, plot, 0, fill, family, keep ? -Infinity : last, rows, model.width);
     if (!drawn) continue;
     out += tickInk(side, edge, x, model.xAxis, ink);
     out += drawn;
@@ -1562,7 +1613,7 @@ function along(
     if (!label) continue;
     const x = at(values[i]);
     const rows = linesOf(model.xAxis, label);
-    const drawn = alongOne(label, x, y, angle, plot, slack, fill, family, keep ? -Infinity : last, rows);
+    const drawn = alongOne(label, x, y, angle, plot, slack, fill, family, keep ? -Infinity : last, rows, model.width);
     if (!drawn) continue;
     out += tickInk(side, edge, x, model.xAxis, ink);
     out += drawn;
@@ -1585,13 +1636,28 @@ function alongOne(
   family: string,
   last: number,
   rows?: string[] | null,
+  viewWidth = 0,
 ): string {
   if (slack && (x < plot.left - slack || x > plot.right + slack)) return "";
-  if (!angle) {
-    const width = ((rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label).length) * 6.4;
-    if (x - width / 2 < last) return "";
+  const text = rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label;
+  const glyphs = text.length || 1;
+  const width = glyphs * 6.4;
+  if (!angle && x - width / 2 < last) return "";
+  let anchor = angle < 0 ? "end" : angle > 0 ? "start" : "middle";
+  let at = x;
+  // 11px tabular digits run wider than the collision estimate. Measure the edge with
+  // that wider box so "100,000" is end-anchored before the view box clips it.
+  const edgeWidth = glyphs * 8;
+  if (!angle && viewWidth > 0) {
+    if (x + edgeWidth / 2 > viewWidth - 4) {
+      at = viewWidth - 4;
+      anchor = "end";
+    } else if (x - edgeWidth / 2 < 4) {
+      at = 4;
+      anchor = "start";
+    }
   }
-  return axText(x, y, angle < 0 ? "end" : angle > 0 ? "start" : "middle", label, fill, family, angle, "", rows);
+  return axText(at, y, anchor, label, fill, family, angle, "", rows);
 }
 
 function titleSpin(axis: AxisBox, vertical: boolean, end: boolean): number {
@@ -1772,8 +1838,10 @@ function openSvg(model: PlotModel): string {
   const described = model.description ? ` aria-describedby="${model.id}-d"` : "";
   const intent = model.intent ? ` data-ck-intent="${esc(model.intent)}"` : "";
   const exported = model.exportMark ? ` data-ck-export="${esc(model.exportMark)}"` : "";
+  const canvas = model.canvas ? ` data-ck-render="canvas"` : "";
+  const sceneAttr = capturing() ? ` data-ck-scene="1"` : "";
   const desc = model.description ? `<desc id="${model.id}-d">${esc(model.description)}</desc>` : `<desc>${esc(model.alt)}</desc>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent}${exported} style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent}${exported}${canvas}${sceneAttr} style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
     `<title>${esc(model.title || model.alt)}</title>${desc}`;
 }
 
@@ -2617,6 +2685,7 @@ function applyPointColors(
 ): ColorScale | null {
   const rules = readRules(mark);
   const colorEnc = readColor(encoding.color);
+  if (rules.length === 0 && !colorEnc) return null;
   const colorField = colorEnc?.field;
   const xField = channelField(encoding.x);
   const pivot = seriesFieldName(encoding, table);

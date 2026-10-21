@@ -240,6 +240,8 @@ textarea { min-height: 220px; resize: vertical; font-family: var(--mono); font-s
   list-style: none;
 }
 .type-list li { margin: 0; }
+.mode-toggle { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 8px; }
+.mode-toggle .btn { height: 34px; font-size: 0.88rem; }
 .chart-host {
   position: relative;
   --ck-background: transparent;

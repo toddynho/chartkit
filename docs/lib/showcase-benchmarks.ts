@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { ChartSlot } from "./showcase-data";
 
@@ -218,6 +218,64 @@ export function benchmarkCharts(): ChartSlot[] {
   ];
 }
 
+interface CanvasBenchRow {
+  id: string;
+  library: string;
+  points: number;
+  status: string;
+  renderMs?: number | null;
+  initialMs?: number | null;
+  updateMs?: number | null;
+  error?: string;
+}
+
+/** Canvas line at 10k, 100k, and 1M. Absent until the browser bench writes it. */
+function canvasLosses(): { label: string; detail: string }[] {
+  const file = join(docsRoot(), "data/canvas-bench.json");
+  if (!existsSync(file)) return [];
+  const bench = JSON.parse(readFileSync(file, "utf8")) as { rows: CanvasBenchRow[] };
+  const losses: { label: string; detail: string }[] = [];
+  const metrics: { key: "renderMs" | "initialMs" | "updateMs"; name: string; peers: boolean }[] = [
+    { key: "renderMs", name: "render", peers: false },
+    { key: "initialMs", name: "first paint", peers: true },
+    { key: "updateMs", name: "update", peers: true },
+  ];
+  for (const points of [10_000, 100_000, 1_000_000]) {
+    const label = points >= 1_000_000 ? "1M" : `${points / 1000}k`;
+    const rows = bench.rows.filter((row) => row.points === points);
+    const canvas = rows.find((row) => row.id === "chartkit-canvas");
+    if (!canvas || canvas.status !== "ok") {
+      losses.push({
+        label: `${label} canvas`,
+        detail: `ChartKit canvas ${canvas?.status ?? "missing"}${canvas?.error ? `: ${canvas.error}` : "."}`,
+      });
+      continue;
+    }
+    for (const metric of metrics) {
+      const mine = canvas[metric.key];
+      if (typeof mine !== "number") continue;
+      const peers = rows.filter((row) => {
+        if (row.status !== "ok" || row.id === "chartkit-canvas" || row.id === "chartkit-full") return false;
+        if (!metric.peers && row.id !== "chartkit") return false;
+        return typeof row[metric.key] === "number";
+      });
+      let best: { library: string; value: number } | null = null;
+      for (const row of peers) {
+        const value = row[metric.key];
+        if (typeof value !== "number") continue;
+        if (!best || value < best.value) best = { library: row.library, value };
+      }
+      if (best && mine > best.value) {
+        losses.push({
+          label: `${label} ${metric.name}`,
+          detail: `ChartKit canvas ${mine.toFixed(1)} ms, ${best.library} ${best.value.toFixed(1)} ms.`,
+        });
+      }
+    }
+  }
+  return losses;
+}
+
 export function timingLosses(): { label: string; detail: string }[] {
   const bench = loadBenchmarks();
   const fromRows = bench.browserMs
@@ -232,5 +290,5 @@ export function timingLosses(): { label: string; detail: string }[] {
     hoverChartkit && hoverUplot && hoverUplot.paintedMs < hoverChartkit.paintedMs
       ? [{ label: "Hover 100k", detail: `Painted median: ChartKit ${hoverChartkit.paintedMs} ms, uPlot ${hoverUplot.paintedMs} ms.` }]
       : [];
-  return [...fromRows, ...hover];
+  return [...fromRows, ...hover, ...canvasLosses()];
 }

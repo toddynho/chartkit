@@ -11,16 +11,18 @@ async function timed(n, render, update) {
   const before = heap();
   const first = makeSeries(n, 1);
   const t0 = performance.now();
-  await render(first);
+  const rendered = await render(first);
   const initialMs = performance.now() - t0;
   const mid = heap();
   const second = makeSeries(n, 2);
   const t1 = performance.now();
-  await update(second);
+  const updated = await update(second);
   const updateMs = performance.now() - t1;
   return {
     initialMs,
     updateMs,
+    renderMs: typeof rendered === "number" ? rendered : null,
+    updateRenderMs: typeof updated === "number" ? updated : null,
     heapBefore: before,
     heapAfterRender: mid,
     heapAfterUpdate: heap(),
@@ -32,6 +34,9 @@ function chartkitSource(sampling, library) {
   return prelude + `
 import { createRenderer } from "../../packages/core/src/render.ts";
 import { line } from "../../packages/core/src/charts/line.ts";
+import { bindSampling } from "../../packages/core/src/sampling-run.ts";
+import { notedDense, notedLinear, useSampler } from "../../packages/core/src/sampling.ts";
+useSampler(bindSampling({ notedDense, notedLinear }));
 const render = createRenderer([line]);
 function spec(xs, ys) {
   return {
@@ -52,11 +57,14 @@ globalThis.__bench = {
     const host = document.createElement("div");
     document.getElementById("root").replaceChildren(host);
     const paint = async (data) => {
+      const t = performance.now();
       host.innerHTML = render(spec(data.xs, data.ys));
+      const renderMs = performance.now() - t;
       if (host.innerHTML.includes("ck-chart-error")) {
         throw new Error(host.textContent.replace(/\\s+/g, " ").slice(0, 240));
       }
       await frames();
+      return renderMs;
     };
     return timed(n, paint, paint);
   },
@@ -267,8 +275,49 @@ globalThis.__bench = {
 };
 `;
 
+function chartkitCanvasSource() {
+  return prelude + `
+import { paintSpec, lastPaintProfile } from "../../packages/core/src/canvas/paint.ts";
+function spec(xs, ys) {
+  return {
+    version: "1",
+    type: "line",
+    render: "canvas",
+    data: { columns: { x: xs, y: ys } },
+    encoding: { x: "x", y: "y" },
+    mark: { curve: "linear", points: "none", sampling: "auto" },
+    size: { width: 640, height: 360 },
+    locale: "en-US",
+    a11y: { alt: "Indexed line of one series." },
+  };
+}
+globalThis.__bench = {
+  library: "ChartKit canvas",
+  renderer: "canvas",
+  async run(n) {
+    const host = document.createElement("div");
+    host.style.cssText = "position:relative;width:640px;height:360px";
+    document.getElementById("root").replaceChildren(host);
+    const paint = async (data) => {
+      const t = performance.now();
+      const ok = paintSpec(host, spec(data.xs, data.ys));
+      if (!ok || host.innerHTML.includes("ck-chart-error")) {
+        throw new Error(host.textContent.replace(/\\s+/g, " ").slice(0, 240) || "canvas scene did not paint");
+      }
+      const renderMs = performance.now() - t;
+      globalThis.__ckProfile = lastPaintProfile();
+      await frames();
+      return renderMs;
+    };
+    return timed(n, paint, paint);
+  },
+};
+`;
+}
+
 export const browserAdapters = [
   { id: "chartkit", source: chartkitSource("auto", "ChartKit") },
+  { id: "chartkit-canvas", source: chartkitCanvasSource() },
   { id: "chartkit-full", source: chartkitSource("none", "ChartKit sampling none"), sizes: [100_000, 1_000_000] },
   { id: "uplot", source: uplot },
   { id: "chartjs", source: chartjs },

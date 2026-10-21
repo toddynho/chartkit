@@ -3,6 +3,8 @@ import { heading } from "../chrome";
 import { cssVar, paint } from "../theme";
 import { formatValue } from "../format";
 import { asNumber, column, fieldOf, readColor, readFrame, readTable, type Frame } from "../frame";
+import { activeScene, pushRect, takeMark, type SceneFrame, type SceneMark } from "../canvas/sink";
+import { canvasWanted } from "../render-mode";
 import { closeChart, esc, font, hash, n, openChart } from "../svg";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -76,6 +78,8 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
   let lastMonth = -1;
   const usedColumn = new Set<number>();
   const cells: string[] = [];
+  const scene = activeScene();
+  const cellsMark = scene ? sceneCells(scene, box.width, box.height, weeks * 7) : null;
   for (let week = 0; week < weeks; week++) {
     for (let dow = 0; dow < 7; dow++) {
       const time = start + (week * 7 + dow) * 86400000;
@@ -104,14 +108,16 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
       const fill = missing ? quiet.fill : ramp ? ramp.paint(value) : color;
       const opacity = missing || ramp ? 1 : opacityStep(value / max);
       const edge = missing ? ` stroke="${quiet.stroke}" stroke-width="1" data-ck-empty="1"` : "";
-      cells.push(
+      if (cellsMark) pushRect(cellsMark, x, y, box.cellW, box.cellH, missing ? quiet.stroke : fill);
+      else cells.push(
         `<rect x="${n(x)}" y="${n(y)}" width="${n(box.cellW)}" height="${n(box.cellH)}" rx="${n(radius)}" fill="${fill}" fill-opacity="${n(opacity)}"${edge} aria-label="${esc(label)}"><title>${esc(label)}</title></rect>`,
       );
     }
   }
 
   const parts: string[] = [];
-  parts.push(openChart({ ...frame, width: box.width, height: box.height, renderer: "heatmap" }));
+  const canvas = canvasWanted(spec);
+  parts.push(openChart({ ...frame, width: box.width, height: box.height, renderer: "heatmap", canvas }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
   parts.push(`<defs>${quiet.def}</defs>`);
   const titled = heading(frame, box.ox + DAY_LABEL_W);
@@ -122,7 +128,7 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
   for (const dow of [1, 3, 5]) {
     parts.push(text(box.ox, box.oy + MONTH_LABEL_H + dow * box.pitchY + box.cellH / 2 + 3, WEEKDAYS[dow], cssVar("muted", frame.preset.muted), 10));
   }
-  parts.push(cells.join(""));
+  if (!cellsMark) parts.push(canvas ? `<g data-ck-layer="marks">${cells.join("")}</g>` : cells.join(""));
   parts.push(ramp ? ramp.legend(box.legendX, box.legendY, scaleLabel(frame.preset)) : scaleLegend(color, quiet.fill, cssVar("muted", frame.preset.muted), box.legendX, box.legendY + 8));
   parts.push(closeChart());
   return parts.join("");
@@ -242,8 +248,11 @@ function renderGrid(spec: Record<string, unknown>): string | null {
   const insetX = bandW * gapFrac / 2;
   const insetY = bandH * gapFrac / 2;
 
+  const canvas = canvasWanted(spec);
+  const scene = activeScene();
+  const cellsMark = scene ? sceneCells(scene, frame.width, frame.height, xs.length * ys.length) : null;
   const parts: string[] = [];
-  parts.push(openChart({ ...frame, renderer: "heatmap" }));
+  parts.push(openChart({ ...frame, renderer: "heatmap", canvas }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
   parts.push(`<defs>${quiet.def}</defs>`);
   const titled = heading(frame, left);
@@ -256,6 +265,7 @@ function renderGrid(spec: Record<string, unknown>): string | null {
     const col = xs.indexOf(x);
     parts.push(text(left + col * bandW + bandW / 2, top + plotH + 14, x, cssVar("muted", frame.preset.muted), 11, "400", "middle"));
   }
+  if (canvas && !cellsMark) parts.push(`<g data-ck-layer="marks">`);
   for (const x of xs) {
     for (const y of ys) {
       const value = values.get(`${x}\0${y}`);
@@ -267,11 +277,17 @@ function renderGrid(spec: Record<string, unknown>): string | null {
       const fill = missing ? quiet.fill : ramp ? ramp.paint(value) : range ? range[Math.min(range.length - 1, Math.floor(t * (range.length - 1)))] : color;
       const opacity = missing || range || ramp ? 1 : opacityStep(t);
       const edge = missing ? ` stroke="${quiet.stroke}" stroke-width="1" data-ck-empty="1"` : "";
-      parts.push(
-        `<rect x="${n(left + col * bandW + insetX)}" y="${n(top + row * bandH + insetY)}" width="${n(Math.max(1, bandW - insetX * 2))}" height="${n(Math.max(1, bandH - insetY * 2))}" rx="${n(radius)}" fill="${fill}" fill-opacity="${n(opacity)}"${edge} aria-label="${esc(label)}"><title>${esc(label)}</title></rect>`,
+      const rx = left + col * bandW + insetX;
+      const ry = top + row * bandH + insetY;
+      const rw = Math.max(1, bandW - insetX * 2);
+      const rh = Math.max(1, bandH - insetY * 2);
+      if (cellsMark) pushRect(cellsMark, rx, ry, rw, rh, missing ? quiet.stroke : fill);
+      else parts.push(
+        `<rect x="${n(rx)}" y="${n(ry)}" width="${n(rw)}" height="${n(rh)}" rx="${n(radius)}" fill="${fill}" fill-opacity="${n(opacity)}"${edge} aria-label="${esc(label)}"><title>${esc(label)}</title></rect>`,
       );
     }
   }
+  if (canvas && !cellsMark) parts.push(`</g>`);
   if (ramp) parts.push(ramp.legend(left, frame.height - legendH, scaleLabel(frame.preset)));
   parts.push(closeChart());
   return parts.join("");
@@ -293,6 +309,19 @@ function emptyMark(id: string, preset: { background: string; axis: string; text:
     `<path d="M0 6 L6 0" stroke="${ink}" stroke-width="0.8" />` +
     `</pattern>`;
   return { def, fill: `url(#${pattern})`, stroke: ink };
+}
+
+function sceneCells(scene: SceneFrame, width: number, height: number, count: number): SceneMark {
+  scene.plot = { left: 0, top: 0, right: width, bottom: height };
+  scene.width = width;
+  scene.height = height;
+  scene.count = count;
+  scene.key = `heat|${width}|${height}|${count}`;
+  const mark = takeMark();
+  mark.kind = "bar";
+  mark.fillOpacity = 1;
+  scene.marks.push(mark);
+  return mark;
 }
 
 function opacityStep(t: number): number {

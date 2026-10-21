@@ -7,7 +7,8 @@
 
 - version "1". a11y.alt required. data is rows, not {"values":[...]}. Field rules: llms-full.txt.
 - Extra charts: @chartkitdev/core/extra or /charts/<type>.
-- ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec. Export: toPNG, toSVG, toCSV. PNG skips cross-origin sheets and remote images.
+- ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
+- render svg|canvas|auto. sampling lttb|minmax|none. /large.
 
 Features (21 libraries, sourced): https://chartkit.dev/features.json
 Types: line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi, sparkline, mini-area, progress-ring, spike, candlestick, histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, area-range, bar-range, errorbar, sunburst
