@@ -1,81 +1,10 @@
 /**
- * Hit testing for canvas marks. The line bundle and the interact bundle can import this.
- * The 2D painter stays in `paint.ts`, which is loaded on demand.
+ * Scatter grid and point dots. Imported by the canvas painter, not by interact.
  */
+import type { DataHit, ScatterGrid } from "./hit-state";
 
-export interface HitSeries {
-  name: string;
-  ys: ArrayLike<number | null>;
-  color: string;
-  /** Pixel y of a data y. */
-  py: (y: number) => number;
-}
-
-export interface ScatterGrid {
-  cols: number;
-  rows: number;
-  left: number;
-  top: number;
-  cell: number;
-  /** Point indexes per cell, packed. `starts[cell + 1]` is the end. */
-  starts: Int32Array;
-  order: Int32Array;
-  px: Float32Array;
-  py: Float32Array;
-  color: string[];
-  name: string[];
-  index: Int32Array;
-}
-
-export interface DataHit {
-  kind: "line" | "area" | "bar" | "scatter";
-  count: number;
-  plotLeft: number;
-  plotTop: number;
-  plotWidth: number;
-  plotHeight: number;
-  xMin: number;
-  xMax: number;
-  linear: boolean;
-  x0: number;
-  stride: number;
-  xs: Float64Array | null;
-  series: HitSeries[];
-  indexAt: (px: number) => number;
-  pixelAt: (index: number) => number;
-  grid?: ScatterGrid;
-}
-
-const hits = new WeakMap<Element, DataHit>();
-const repaints = new WeakMap<Element, () => void>();
-let painter: ((host: Element, spec: unknown) => boolean) | null = null;
-
-export function setDataHit(svg: Element, hit: DataHit | null): void {
-  if (hit) hits.set(svg, hit);
-  else hits.delete(svg);
-}
-
-export function dataHit(svg: Element | null): DataHit | null {
-  if (!svg) return null;
-  return hits.get(svg) ?? null;
-}
-
-export function onSceneRepaint(svg: Element, fn: () => void): void {
-  repaints.set(svg, fn);
-}
-
-export function sceneRepaint(svg: Element): void {
-  repaints.get(svg)?.();
-}
-
-/** Registered by the canvas chunk the first time it loads. */
-export function registerScenePainter(fn: (host: Element, spec: unknown) => boolean): void {
-  painter = fn;
-}
-
-export function paintScene(host: Element, spec: unknown): boolean {
-  return painter ? painter(host, spec) : false;
-}
+export type { DataHit, HitSeries, ScatterGrid } from "./hit-state";
+export { dataHit, onSceneRepaint, paintScene, registerScenePainter, sceneRepaint, setDataHit } from "./hit-state";
 
 export function dotsAt(hit: DataHit, index: number): { x: number; y: number; color: string }[] {
   const x = hit.pixelAt(index);

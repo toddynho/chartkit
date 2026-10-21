@@ -16,9 +16,9 @@ const MODES: { id: Mode; label: string }[] = [
 ];
 
 /**
- * A sensor trace: several slow cycles, a small drift, tiny noise, narrow spikes, and short outages.
+ * A sensor trace: several slow cycles, a small drift, tiny noise, narrow spikes, and short gaps.
  * The noise stays well under the cycle so downsampling does not paint a solid band.
- * Spikes and outages span a few samples so minmax and LTTB both keep them.
+ * Spikes span a few samples. Gaps are wide enough to read at a million-point zoom.
  */
 function reading(index: number, period: number): number {
   const cycle = (index / period) * Math.PI * 2;
@@ -42,10 +42,10 @@ function sensor(n: number, origin: number): { x: Float64Array; y: Float64Array }
     const width = Math.max(3, Math.floor(n / 200_000));
     for (let k = 0; k < width && s + k < n; k++) y[s + k] = k === 0 || k === width - 1 ? 36 : 52;
   }
-  for (const at of [0.18, 0.57]) {
+  for (const at of [0.18, 0.62]) {
     const start = Math.floor(n * at);
-    const end = Math.min(n, start + Math.max(8, Math.floor(n / 12000)));
-    for (let i = start; i < end; i++) y[i] = -14;
+    const end = Math.min(n, start + Math.max(24, Math.floor(n * 0.018)));
+    for (let i = start; i < end; i++) y[i] = Number.NaN;
   }
   return { x, y };
 }
@@ -94,7 +94,7 @@ export function LargeDemo() {
       const started = performance.now();
       million = mount(
         millionEl,
-        lineSpec(big.x, big.y, mode, "One million points", "A million-point sensor line. Spikes and outages stay visible after downsampling."),
+        lineSpec(big.x, big.y, mode, "Sensor reading, 1,000,000 samples", "A million-point sensor line. Spikes and short gaps stay visible after downsampling."),
       );
       const painter = mode === "canvas" ? "Canvas marks, SVG axes" : mode === "svg" ? "SVG with LTTB" : "SVG, every point";
       const reportMount = () => {
@@ -172,7 +172,7 @@ export function LargeDemo() {
       <section className="section">
         <h2>One million points</h2>
         <p className="lede">
-          A sensor trace with a slow cycle, a drift, noise, spikes, and short outages. LTTB and minmax keep the spikes.
+          A sensor trace with a slow cycle, a drift, noise, spikes, and short gaps. LTTB and minmax keep the spikes.
           Sampling none draws every point.
         </p>
         <div ref={millionHost} className="chart-host" data-large-host="" />

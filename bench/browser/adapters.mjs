@@ -34,6 +34,9 @@ function chartkitSource(sampling, library) {
   return prelude + `
 import { createRenderer } from "../../packages/core/src/render.ts";
 import { line } from "../../packages/core/src/charts/line.ts";
+import { bindSampling } from "../../packages/core/src/sampling-run.ts";
+import { notedDense, notedLinear, useSampler } from "../../packages/core/src/sampling.ts";
+useSampler(bindSampling({ notedDense, notedLinear }));
 const render = createRenderer([line]);
 function spec(xs, ys) {
   return {

@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChartView } from "@/components/ChartView";
@@ -131,6 +133,8 @@ export default function BenchmarksPage() {
         update. Even 1,000,000 points: Chart.js updates in 189.8 ms and Plot in 1,295.8 ms. ECharts, Recharts, and Nivo
         are not in the round 13 browser rows, so this page does not give them a browser millisecond.
       </p>
+
+      <CanvasLine />
 
       <h2>Hover</h2>
       <p>
@@ -284,5 +288,74 @@ export default function BenchmarksPage() {
         not patch. The headline numbers use the full file. <Link href="/agents">How to use the loop</Link>.
       </p>
     </div>
+  );
+}
+
+interface CanvasRow {
+  id: string;
+  points: number;
+  renderMs?: number | null;
+  initialMs?: number | null;
+  updateMs?: number | null;
+}
+
+function CanvasLine() {
+  const bench = JSON.parse(readFileSync(join(process.cwd(), "data/canvas-bench.json"), "utf8")) as { measured?: string; rows: CanvasRow[] };
+  const at = (id: string, points: number) => bench.rows.find((row) => row.id === id && row.points === points);
+  const text = (value: number | null | undefined) => (typeof value === "number" ? value.toFixed(1) : "—");
+  const body: { points: string; cells: string[] }[] = [];
+  const losses: string[] = [];
+  for (const points of [10_000, 100_000, 1_000_000]) {
+    const label = points >= 1_000_000 ? "1,000,000" : points.toLocaleString("en-US");
+    const svg = at("chartkit", points);
+    const canvas = at("chartkit-canvas", points);
+    const uplot = at("uplot", points);
+    body.push({
+      points: label,
+      cells: [text(svg?.renderMs), text(canvas?.renderMs), text(svg?.initialMs), text(canvas?.initialMs), text(uplot?.initialMs), text(svg?.updateMs), text(canvas?.updateMs), text(uplot?.updateMs)],
+    });
+    if (typeof canvas?.initialMs === "number" && typeof svg?.initialMs === "number" && canvas.initialMs > svg.initialMs) {
+      losses.push(`${label} first paint ${text(canvas.initialMs)} ms, SVG ${text(svg.initialMs)} ms`);
+    }
+    if (typeof canvas?.initialMs === "number" && typeof uplot?.initialMs === "number" && canvas.initialMs > uplot.initialMs) {
+      losses.push(`${label} first paint ${text(canvas.initialMs)} ms, uPlot ${text(uplot.initialMs)} ms`);
+    }
+  }
+  const heads = ["SVG render", "Canvas render", "SVG first", "Canvas first", "uPlot first", "SVG update", "Canvas update", "uPlot update"];
+  return (
+    <>
+      <h2>Canvas line</h2>
+      <p>
+        Measured {bench.measured ?? "separately"}, median of 5, Playwright Chromium, 640×360, sampling auto. This is not
+        a re-time of round {ROUND}. Canvas loses first paint at every size in this table. Sampling none was not re-timed.
+      </p>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Points</th>
+              {heads.map((head) => (
+                <th key={head} className="num">
+                  {head}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {body.map((row) => (
+              <tr key={row.points}>
+                <td>{row.points}</td>
+                {row.cells.map((cell, index) => (
+                  <td key={heads[index]} className="num">
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="meta">Losses: {losses.join("; ")}.</p>
+    </>
   );
 }

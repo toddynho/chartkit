@@ -1,3 +1,4 @@
+import { popScene, pushScene } from "./scene-hook";
 import type { BucketMemo } from "../sampling";
 
 export interface SceneMark {
@@ -96,6 +97,7 @@ function grow32(buf: Float32Array | undefined, need: number): Float32Array {
 }
 
 export function beginScene(reuseKey = ""): SceneFrame {
+  pushScene();
   lineCursor = 0;
   rectCursor = 0;
   markCursor = 0;
@@ -128,10 +130,11 @@ export function beginScene(reuseKey = ""): SceneFrame {
 }
 
 export function activeScene(): SceneFrame | null {
-  return current;
+  return current && current.reuseKey === "ck-scene-sink" ? current : current;
 }
 
 export function endScene(): void {
+  popScene();
   current = null;
 }
 

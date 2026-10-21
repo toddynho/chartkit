@@ -3,23 +3,18 @@
  * Loaded on demand. `createRenderer([line])` does not import this module.
  */
 import { canvasWanted } from "../render-mode";
-import { renderCartesianScene } from "../renderers/cartesian";
+import { bindSampling } from "../sampling-run";
+import { extendMinmax, notedDense, notedLinear, useSampler, type BucketMemo } from "../sampling";
+import { renderCartesianScene } from "./capture";
 import { renderCandlestick } from "../renderers/candlestick";
 import { renderHeatmap } from "../renderers/heatmap";
 import { renderScatter } from "../renderers/scatter";
 import { beginScene, endScene } from "./sink";
 import type { SceneFrame, SceneMark } from "./sink";
-import {
-  buildScatterGrid,
-  dotsAt,
-  nearestScatter,
-  onSceneRepaint,
-  registerScenePainter,
-  setDataHit,
-  type DataHit,
-  type HitSeries,
-} from "./hit";
-import { extendMinmax, type BucketMemo } from "../sampling";
+import { buildScatterGrid, dotsAt, nearestScatter } from "./hit";
+import { onSceneRepaint, registerScenePainter, setDataHit, type DataHit, type HitSeries } from "./hit-state";
+
+useSampler(bindSampling({ notedDense, notedLinear }));
 
 export interface PaintProfile {
   ingest: number;
@@ -417,6 +412,21 @@ function trace(ctx: CanvasRenderingContext2D, mark: SceneMark): void {
   const n = mark.n;
   const x = mark.x;
   const y = mark.y;
+  if (n < 1) return;
+  if (mark.curve !== "step" && mark.curve !== "step-before" && mark.curve !== "step-after" && mark.curve !== "monotone") {
+    let started = false;
+    for (let i = 0; i < n; i++) {
+      if (!Number.isFinite(x[i]) || !Number.isFinite(y[i])) {
+        started = false;
+        continue;
+      }
+      if (!started) {
+        ctx.moveTo(x[i], y[i]);
+        started = true;
+      } else ctx.lineTo(x[i], y[i]);
+    }
+    return;
+  }
   ctx.moveTo(x[0], y[0]);
   if (mark.curve === "step" || mark.curve === "step-before" || mark.curve === "step-after") {
     for (let i = 1; i < n; i++) {
@@ -705,7 +715,7 @@ function hitFor(frame: SceneFrame): DataHit | null {
     const slot = plotWidth / Math.max(1, count);
     return plot.left + slot * index + slot / 2;
   };
-  return {
+  const hit: DataHit = {
     kind: bars ? "bar" : frame.marks.some((mark) => mark.kind === "area") ? "area" : "line",
     count,
     plotLeft: plot.left,
@@ -722,6 +732,8 @@ function hitFor(frame: SceneFrame): DataHit | null {
     indexAt,
     pixelAt,
   };
+  hit.dots = (index) => dotsAt(hit, index);
+  return hit;
 }
 
 function scatterHit(frame: SceneFrame, mark: SceneMark, plot: NonNullable<SceneFrame["plot"]>): DataHit {
@@ -751,6 +763,7 @@ function scatterHit(frame: SceneFrame, mark: SceneMark, plot: NonNullable<SceneF
     xs: null,
     series: [],
     grid,
+    nearest: (x, y) => nearestScatter(grid, x, y),
     indexAt: (at) => {
       const found = nearestScatter(grid, at, plot.top + plotHeight / 2, Math.max(plotWidth, plotHeight));
       return found ? found.index : 0;

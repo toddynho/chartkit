@@ -3,7 +3,7 @@
  * `@chartkitdev/core/all` does not import this module, so a static render stays the same string.
  * Adapters call `attach` after the SVG is mounted and `patchSvg` when the spec changes.
  */
-import { dataHit, dotsAt, nearestScatter, paintScene } from "./canvas/hit";
+import { dataHit, paintScene } from "./canvas/hit-state";
 export { canvasWanted } from "./render-mode";
 import { formatValue } from "./format";
 import { formatInstant, instantOf, namedZone } from "./timezone";
@@ -990,7 +990,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     clearDots();
     const hit = dataHit(svg);
     if (hit && hit.kind !== "scatter") {
-      const dots = dotsAt(hit, index);
+      const dots = hit.dots?.(index) ?? [];
       const marks: { x: number; y: number }[] = [];
       for (let i = 0; i < dots.length; i++) marks.push(addDot(dots[i].x, dots[i].y, legendPaint(dots[i].color, i)));
       return marks;
@@ -1505,8 +1505,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     if (!showTip && !showCross && !keys) return;
     const point = viewPoint(svg, event.clientX, event.clientY);
     const sceneHit = dataHit(svg);
-    if (sceneHit?.kind === "scatter" && sceneHit.grid) {
-      const nearest = nearestScatter(sceneHit.grid, point.x, point.y);
+    if (sceneHit?.kind === "scatter" && sceneHit.nearest) {
+      const nearest = sceneHit.nearest(point.x, point.y);
       if (!nearest) {
         hideHover();
         return;

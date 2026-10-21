@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { applyPatch } from "../repair";
 import { beginScene, endScene } from "../canvas/sink";
-import { renderCartesianScene, renderLine } from "../renderers/cartesian";
+import { renderCartesianScene } from "../canvas/capture";
+import { renderLine } from "../renderers/cartesian";
 import { renderBar } from "../renderers/cartesian";
 import { renderCandlestick } from "../renderers/candlestick";
 import { renderHeatmap } from "../renderers/heatmap";

@@ -1,5 +1,5 @@
 /** Shared SVG primitives. Renderers import this module, not each other. */
-import { activeScene } from "./canvas/sink";
+import { capturing } from "./canvas/scene-hook";
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -243,7 +243,7 @@ export function openChart(chart: ChartOpen): string {
   const label = chart.alt || chart.title || chart.type;
   const exported = chart.exportMark ? ` data-ck-export="${esc(chart.exportMark)}"` : "";
   const canvas = chart.canvas ? ` data-ck-render="canvas"` : "";
-  const scene = activeScene() ? ` data-ck-scene="1"` : "";
+  const scene = capturing() ? ` data-ck-scene="1"` : "";
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}" class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}"${exported}${canvas}${scene} style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
     `<title>${esc(chart.title || chart.alt)}</title><desc>${esc(chart.alt)}</desc>`

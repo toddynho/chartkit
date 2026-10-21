@@ -42,6 +42,16 @@
         "default": "./dist/all.cjs"
       }
     },
+    "./sampling": {
+      "import": {
+        "types": "./dist/sampling.d.ts",
+        "default": "./dist/sampling.js"
+      },
+      "require": {
+        "types": "./dist/sampling.d.cts",
+        "default": "./dist/sampling.cjs"
+      }
+    },
     "./canvas/hydrate": {
       "import": {
         "types": "./dist/canvas/hydrate.d.ts",

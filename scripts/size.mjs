@@ -37,6 +37,10 @@ const externalDynamicEntries = {
       if (args.kind !== "dynamic-import") return null;
       return { path: "@chartkitdev/core/canvas/hydrate", external: true };
     });
+    build.onResolve({ filter: /^\.\/sampling-run$/ }, (args) => {
+      if (args.kind !== "dynamic-import") return null;
+      return { path: "@chartkitdev/core/sampling", external: true };
+    });
     build.onResolve({ filter: /^\.\/validate-phase4$/ }, (args) => {
       if (args.kind !== "dynamic-import") return null;
       return { path: "@chartkitdev/core/validate/phase4", external: true };
@@ -98,6 +102,7 @@ await build({
   format: "esm",
   platform: "node",
   outfile: debugOut,
+  plugins: [externalDynamicEntries],
   logLevel: "silent",
 });
 const debug = readFileSync(debugOut, "utf8");
@@ -109,6 +114,8 @@ const isolation = {
   lineOmitsMermaid: !debug.includes("fromMermaid") && !debug.includes("xychart"),
   lineOmitsInteract: !line.code.includes("data-ck-tip") && !debug.includes("data-ck-tip"),
   lineOmitsCanvas: !debug.includes("ck-canvas-paint"),
+  lineOmitsSampling: !debug.includes("ck-sampling-run"),
+  lineOmitsSceneSink: !debug.includes("ck-scene-sink"),
   interactOmitsCanvas: !interact.code.includes("ck-canvas-paint"),
   lineOmitsPng: !line.code.includes("toDataURL") && !debug.includes("toDataURL"),
   interactOmitsPng: !interact.code.includes("toDataURL"),
@@ -143,7 +150,7 @@ async function gzipLine(entry) {
     format: "esm",
     platform: "node",
     outfile,
-    plugins: [withLine],
+    plugins: [externalDynamicEntries, withLine],
     logLevel: "silent",
   });
   const code = readFileSync(outfile);
