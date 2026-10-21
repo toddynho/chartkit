@@ -3012,7 +3012,7 @@ export interface Size {
       };
 }
 /**
- * Small multiples, a composed dashboard, breakpoint rules, and right-to-left layout. The same JSON draws on the server and in the browser.
+ * Small multiples, a composed dashboard, breakpoint rules, and right-to-left layout. The same JSON draws on the server and in the browser. The arrange pass loads with @chartkitdev/core/all and /extra. createRenderer([line]) does not include it; call mountLayout from @chartkitdev/core/layout first.
  */
 export interface Layout {
   /**
@@ -3040,7 +3040,7 @@ export interface Layout {
      */
     wrap?: boolean;
     /**
-     * shared (default) locks every panel to the same y domain. independent scales each panel to its own data.
+     * shared (default) locks every panel to one nice y domain that includes the data max. Y labels and the y title sit on the outer column only, and x labels and the x title sit on the bottom row. independent scales each panel to its own data and repeats the axes.
      */
     scales?: "shared" | "independent";
     /**
@@ -3049,11 +3049,15 @@ export interface Layout {
     legend?: "shared" | "each";
   };
   /**
-   * Several charts in one spec. views are chart specs. direction is vertical (default) or horizontal. When views has a chart, the outer spec may omit data, encoding, and metric. Setting this beside facet warns CK3048.
+   * Several charts in one spec. views are chart specs. direction is vertical (default) or horizontal. columns wraps them into a grid; a view may set span to cover more than one column. When views has a chart, the outer spec may omit data, encoding, and metric. Setting this beside facet warns CK3048.
    */
   concat?: {
     /**
-     * vertical stacks the views. horizontal places them in a row.
+     * Wrap views into this many columns, 2 to 4. A view may set span to the number of columns it covers, so one wide chart can sit above two narrower ones. Omit to use direction.
+     */
+    columns?: number;
+    /**
+     * vertical stacks the views. horizontal places them in a row. Ignored when columns is set.
      */
     direction?: "vertical" | "horizontal";
     /**

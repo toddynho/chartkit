@@ -59,10 +59,22 @@ describe("layout", () => {
     expect(svg).toContain("Rides");
     expect(svg).toContain("Bikes");
     const lisbon = panel(svg, "Lisbon");
+    const milan = panel(svg, "Milan");
+    const porto = panel(svg, "Porto");
     const prague = panel(svg, "Prague");
-    const lisbonMax = lisbon.match(/>(\d+)</g)?.map((item) => Number(item.slice(1, -1))).filter((n) => n > 20) ?? [];
-    const pragueMax = prague.match(/>(\d+)</g)?.map((item) => Number(item.slice(1, -1))).filter((n) => n > 20) ?? [];
-    expect(Math.max(...lisbonMax)).toBe(Math.max(...pragueMax));
+    const nums = (svg: string) => svg.match(/>(\d+)</g)?.map((item) => Number(item.slice(1, -1))).filter((n) => n > 20) ?? [];
+    const lisbonMax = nums(lisbon);
+    const milanMax = nums(milan);
+    expect(lisbonMax.length).toBeGreaterThan(0);
+    expect(Math.max(...lisbonMax)).toBe(Math.max(...milanMax));
+    expect(Math.max(...lisbonMax)).toBeGreaterThanOrEqual(196);
+    expect(lisbon).toContain(">Rides<");
+    expect(milan).toContain(">Rides<");
+    expect(porto).not.toContain(">Rides<");
+    expect(porto).not.toContain(">Jan<");
+    expect(lisbon).not.toContain(">Jun<");
+    expect(prague).toContain(">Jun<");
+    expect(prague).toContain(">Jan<");
   });
 
   it("lets each panel scale itself", () => {
@@ -196,17 +208,14 @@ describe("layout", () => {
     expect(narrow).toContain("data-ck-bp=");
   });
 
-  it("lays an Arabic bar chart out from the right", () => {
+  it("draws one bar per row under rtl, mirrored, with every category label", () => {
+    const cities = ["الرياض", "جدة", "الدمام", "مكة", "المدينة", "الدوحة"];
+    const data = cities.map((city, index) => ({ city, value: [186, 164, 142, 128, 151, 119][index] }));
     const svg = render({
       version: "1",
       type: "bar",
       title: "المبيعات حسب المدينة",
-      data: [
-        { city: "الرياض", value: 186 },
-        { city: "جدة", value: 164 },
-        { city: "الدمام", value: 142 },
-        { city: "مكة", value: 128 },
-      ],
+      data,
       encoding: { x: "city", y: { field: "value", title: "المبيعات" } },
       axes: { x: { title: "المدينة" }, y: { title: "المبيعات" } },
       layout: { direction: "rtl" },
@@ -215,13 +224,93 @@ describe("layout", () => {
       a11y: { alt: "الرياض هي الأعلى." },
     });
     expect(svg).toContain('dir="rtl"');
-    expect(svg).toContain('text-anchor="end"');
-    expect(svg).toContain("الرياض");
-    const bars = [...svg.matchAll(/<rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)" fill="var\(--ck-series/g)];
-    expect(bars.length).toBeGreaterThanOrEqual(2);
-    const first = Number(bars[0]?.[1]);
-    const last = Number(bars[bars.length - 1]?.[1]);
-    expect(first).toBeGreaterThan(last);
+    expect(svg).toContain('direction="ltr"');
+    for (const city of cities) expect(svg).toContain(`>${city}<`);
+    const bars = [...svg.matchAll(/<rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)" fill="var\(--ck-series/g)].filter(
+      (item) => Number(item[3]) > 1 && Number(item[4]) > 1,
+    );
+    expect(bars).toHaveLength(data.length);
+    expect(Number(bars[0]?.[1])).toBeGreaterThan(Number(bars[bars.length - 1]?.[1]));
+    expect(svg).toMatch(/rotate\(-?90 /);
+    const axisTitle = [...svg.matchAll(/<text x="([\d.]+)" y="([\d.]+)"[^>]*font-weight="500"[^>]*>([^<]*)<\/text>/g)].find((item) => item[3] === "المدينة");
+    const x = Number(axisTitle?.[1]);
+    const yTitle = [...svg.matchAll(/<text x="([\d.]+)"[^>]*>(المبيعات)<\/text>/g)].map((item) => Number(item[1]));
+    expect(x).toBeGreaterThan(240);
+    expect(x).toBeLessThan(360);
+    expect(Math.max(...yTitle)).toBeGreaterThan(580);
+  });
+
+  it("draws a Hebrew line from the right", () => {
+    const months = ["ינו", "פבר", "מרץ", "אפר", "מאי", "יוני"];
+    const svg = render({
+      version: "1",
+      type: "line",
+      title: "נוסעים בתל אביב",
+      data: months.map((month, index) => ({ month, value: [42, 38, 55, 49, 63, 71][index] })),
+      encoding: { x: "month", y: { field: "value", title: "אלפים" } },
+      axes: { x: { title: "חודש" }, y: { title: "אלפים" } },
+      layout: { direction: "rtl" },
+      legend: false,
+      size: { width: 640, height: 280 },
+      a11y: { alt: "יוני הוא הגבוה." },
+    });
+    expect(svg).toContain('dir="rtl"');
+    expect(svg).toContain("<path");
+    for (const month of months) expect(svg).toContain(`>${month}<`);
+  });
+
+  it("places a wide view over two columns", () => {
+    const svg = render({
+      version: "1",
+      type: "line",
+      title: "Harbor week",
+      layout: {
+        concat: {
+          columns: 2,
+          gap: 12,
+          views: [
+            {
+              version: "1",
+              type: "line",
+              span: 2,
+              title: "Arrivals",
+              data: months.map((month, index) => ({ month, value: [40, 36, 52, 48, 61, 58][index] })),
+              encoding: { x: "month", y: "value" },
+              a11y: { alt: "Arrivals peak in May." },
+            },
+            {
+              version: "1",
+              type: "bar",
+              title: "Docks",
+              data: [
+                { dock: "A", ships: 12 },
+                { dock: "B", ships: 9 },
+              ],
+              encoding: { x: "dock", y: "ships" },
+              a11y: { alt: "Dock A is busier." },
+            },
+            {
+              version: "1",
+              type: "donut",
+              title: "Cargo",
+              data: [
+                { kind: "Grain", tons: 40 },
+                { kind: "Oil", tons: 25 },
+              ],
+              encoding: { x: "kind", y: "tons" },
+              a11y: { alt: "Grain is the largest share." },
+            },
+          ],
+        },
+      },
+      size: { width: 720, height: 560 },
+      a11y: { alt: "Arrivals, docks, and cargo." },
+    });
+    expect(svg).toContain('data-ck-flow="grid"');
+    expect(svg).toContain('data-ck-cols="2"');
+    expect(svg).toContain('data-ck-views="3"');
+    expect(svg).toContain("Arrivals");
+    expect(svg).toContain("Cargo");
   });
 
   it("warns CK3040 through CK3048 and patches the spec", () => {

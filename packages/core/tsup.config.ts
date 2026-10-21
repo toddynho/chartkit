@@ -83,6 +83,7 @@ const entry: Record<string, string> = {
   "mermaid-phase4": "src/mermaid-phase4.ts",
   interact: "src/interact.ts",
   "canvas/hydrate": "src/canvas/hydrate.ts",
+  layout: "src/layout.ts",
   sampling: "src/sampling-run.ts",
   "interact-extra": "src/interact-extra.ts",
   export: "src/export.ts",
@@ -118,6 +119,10 @@ export default defineConfig({
         build.onResolve({ filter: /^\.\/canvas\/hydrate$/ }, (args) => {
           if (args.kind !== "dynamic-import") return null;
           return { path: "@chartkitdev/core/canvas/hydrate", external: true };
+        });
+        build.onResolve({ filter: /^\.\/layout$/ }, (args) => {
+          if (args.kind !== "dynamic-import") return null;
+          return { path: "@chartkitdev/core/layout", external: true };
         });
         build.onResolve({ filter: /^\.\/sampling-run$/ }, (args) => {
           if (args.kind !== "dynamic-import") return null;

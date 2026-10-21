@@ -563,6 +563,8 @@ async function entrySet(ready: Host[]): Promise<EntrySet> {
     // so each one needs a fresh module graph. The other entries do not use that hook.
     if (FRESH_ENTRY.has(file)) vi.resetModules();
     const { createRenderer } = await import("../render");
+    const { mountLayout } = await import("../layout");
+    mountLayout();
     const mod = (await import(`../charts/${file}.ts`)) as Record<string, ChartRenderer>;
     const chart = mod[name];
     const renderEntry = createRenderer([chart]);

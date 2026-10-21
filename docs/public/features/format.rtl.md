@@ -6,7 +6,7 @@ RTL text and layout
 
 Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-layout.direction rtl sets dir=rtl, mirrors the x axis, moves the y axis to the right, and right-aligns the title.
+layout.direction rtl sets dir=rtl, mirrors every categorical bar, keeps every category label, moves the y axis to the right with a rotated title, and centres the x title.
 
 Source: packages/core/src/layout.ts
 

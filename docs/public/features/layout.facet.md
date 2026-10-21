@@ -6,7 +6,7 @@ Repeat a chart per category in a grid
 
 Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-layout.facet splits one chart by a field into a rows and columns grid. wrap flows extra panels. scales is shared or independent. legend shared draws one legend. A missing field warns CK3040. An unknown field warns CK3041. columns or rows outside 1 to 12 warn CK3042 and CK3043. wrap false with too many categories warns CK3049.
+layout.facet splits one chart by a field into a rows and columns grid. wrap flows extra panels. scales shared locks one nice y domain and keeps y labels on the outer column and x labels on the bottom row. independent repeats the axes. legend shared draws one legend. A missing field warns CK3040. An unknown field warns CK3041. columns or rows outside 1 to 12 warn CK3042 and CK3043. wrap false with too many categories warns CK3049.
 
 Source: packages/core/src/layout.ts
 

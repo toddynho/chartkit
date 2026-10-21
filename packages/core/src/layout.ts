@@ -5,9 +5,11 @@
  */
 import { readTable } from "./frame";
 import type { DataTable } from "./data";
-import { esc, font, isRecord } from "./svg";
+import { installLayout, installPaint, directionOf, type Draw } from "./layout-hook";
+import { esc, font, isRecord, niceDomain, niceNum } from "./svg";
 
-export type Draw = (spec: Record<string, unknown>) => string | null;
+export { directionOf };
+export type { Draw };
 
 interface Rule {
   maxWidth?: number;
@@ -22,10 +24,74 @@ interface Rule {
   concatDirection?: string;
 }
 
-/** rtl when layout.direction says so. ltr and anything else stay left to right. */
-export function directionOf(spec: Record<string, unknown>): "ltr" | "rtl" {
-  const layout = isRecord(spec.layout) ? spec.layout : undefined;
-  return layout?.direction === "rtl" ? "rtl" : "ltr";
+export function mountLayout(): void {
+  installLayout(arrange);
+  installPaint({ cats: catScale, order: catOrder, titleX, titleAttr, bidi });
+}
+
+/**
+ * Category labels left to right. The first and last stay, so June is not
+ * dropped when the left column is narrower than the others.
+ */
+function catOrder(
+  count: number,
+  step: number,
+  center: (index: number) => number,
+  reversed: boolean,
+  labelWidth?: (index: number) => number,
+): number[] | null {
+  if (step <= 0) return null;
+  const seq: number[] = [];
+  for (let i = 0; i < count; i += step) seq.push(i);
+  if (reversed) seq.sort((a, b) => center(a) - center(b));
+  if (!labelWidth) return reversed ? seq : null;
+  if (seq.length < 2) return seq;
+  const end = seq[seq.length - 1] ?? 0;
+  const endLeft = center(end) - labelWidth(end) / 2;
+  const kept: number[] = [];
+  let last = -Infinity;
+  for (const index of seq) {
+    const x = center(index);
+    const width = labelWidth(index);
+    const protect = index === seq[0] || index === end;
+    if (!protect && (x - width / 2 < last || x + width / 2 + 8 > endLeft)) continue;
+    kept.push(index);
+    if (x - width / 2 >= last) last = x + width / 2 + 8;
+  }
+  return kept;
+}
+
+function catScale(spanStart: number, spanEnd: number, count: number, edge: boolean, bar: boolean) {
+  const reversed = spanEnd < spanStart;
+  const lo = Math.min(spanStart, spanEnd);
+  const hi = Math.max(spanStart, spanEnd);
+  const span = hi - lo;
+  const n = Math.max(count, 1);
+  const inset = edge && !bar ? 0 : 0.5;
+  const step = n > 1 ? span / (n - 1 + inset * 2) : span;
+  const origin = n > 1 ? lo + step * inset : (lo + hi) / 2;
+  const slot = (index: number) => (reversed ? n - 1 - index : index);
+  const bandSize = span / n;
+  return {
+    center: (index: number) => (n <= 1 ? (lo + hi) / 2 : origin + step * slot(index)),
+    band: (index: number) => ({ start: lo + bandSize * slot(index), size: bandSize }),
+    at: (value: number) => (n <= 1 ? (lo + hi) / 2 : origin + step * slot(value)),
+    min: 0,
+    max: Math.max(0, count - 1),
+    live: false,
+  };
+}
+
+function titleX(rtl: boolean, width: number, fallback: number): number {
+  return rtl ? width - 16 : fallback;
+}
+
+function titleAttr(rtl: boolean): string {
+  return rtl ? ' text-anchor="end" direction="ltr" unicode-bidi="isolate"' : "";
+}
+
+function bidi(rtl: boolean): string {
+  return rtl ? ' direction="ltr" unicode-bidi="isolate"' : "";
 }
 
 export function arrange(spec: Record<string, unknown>, draw: Draw): string | null {
@@ -34,7 +100,7 @@ export function arrange(spec: Record<string, unknown>, draw: Draw): string | nul
   const rules = ruleList(layout.breakpoints);
   const width = widthOf(spec);
   const patched = rules.length && width != null ? applyRule(spec, matchRule(rules, width)) : null;
-  const next = patched ?? spec;
+  const next = aimRtl(patched ?? spec);
   const box = isRecord(next.layout) ? next.layout : undefined;
   let svg: string | null = null;
   const facet = box && isRecord(box.facet) ? box.facet : undefined;
@@ -42,10 +108,43 @@ export function arrange(spec: Record<string, unknown>, draw: Draw): string | nul
   if (facet && typeof facet.field === "string" && facet.field) svg = facetSvg(next, draw);
   else if (concat && Array.isArray(concat.views) && concat.views.length) svg = concatSvg(next, draw);
   else if (patched) svg = draw(patched);
+  else if (directionOf(next) === "rtl") svg = draw(next);
   if (!svg && rules.length) svg = draw(spec);
   if (!svg) return null;
   if (rules.length) svg = stampBreak(svg, rules);
-  return svg;
+  return stampRtl(svg, next);
+}
+
+function stampRtl(svg: string, spec: Record<string, unknown>): string {
+  if (directionOf(spec) !== "rtl" || svg.includes(" dir=")) return svg;
+  return svg.startsWith("<svg") ? `<svg dir="rtl"${svg.slice(4)}` : svg;
+}
+
+/** Mirror the category axis and park y on the right. The line bundle already honours scale.reverse and axis position. */
+function aimRtl(spec: Record<string, unknown>): Record<string, unknown> {
+  if (directionOf(spec) !== "rtl") return spec;
+  const encoding = isRecord(spec.encoding) ? { ...spec.encoding } : {};
+  const rawX = encoding.x;
+  if (typeof rawX === "string" || isRecord(rawX)) {
+    const x: Record<string, unknown> = typeof rawX === "string" ? { field: rawX } : { ...rawX };
+    const scale = isRecord(x.scale) ? { ...x.scale } : {};
+    if (scale.reverse !== false) {
+      scale.reverse = true;
+      x.scale = scale;
+      encoding.x = x;
+    }
+  }
+  const mark = isRecord(spec.mark) ? spec.mark : undefined;
+  const horizontal = spec.type === "bar" && mark?.orientation === "horizontal";
+  const axes = isRecord(spec.axes) ? { ...spec.axes } : {};
+  if (axes.y !== false) {
+    const y = isRecord(axes.y) ? { ...axes.y } : {};
+    if (y.position === undefined) {
+      y.position = horizontal ? "top" : "right";
+      axes.y = y;
+    }
+  }
+  return { ...spec, encoding, axes };
 }
 
 function widthOf(spec: Record<string, unknown>): number | null {
@@ -137,10 +236,12 @@ function facetSvg(spec: Record<string, unknown>, draw: Draw): string | null {
   const legendH = oneLegend && legends.length > 1 ? 32 : 0;
   const panelW = Math.max(96, Math.floor((w - gap * (grid.cols - 1)) / grid.cols));
   const room = Math.max(120, h - head - legendH - 8);
-  const panelH = Math.max(110, Math.floor((room - gap * (grid.rows - 1)) / grid.rows));
+  const fitted = Math.floor((room - gap * (grid.rows - 1)) / grid.rows);
+  const panelH = Math.max(136, fitted);
   const height = head + grid.rows * panelH + gap * Math.max(0, grid.rows - 1) + legendH + 8;
   const panels: string[] = [];
   let inks: string[] = [];
+  const rtl = directionOf(spec) === "rtl";
   for (let i = 0; i < shown.length; i++) {
     const groupRow = shown[i];
     if (!groupRow) continue;
@@ -151,8 +252,12 @@ function facetSvg(spec: Record<string, unknown>, draw: Draw): string | null {
       cats,
       domain,
       sharedLegend: oneLegend,
-      keepX: row === grid.rows - 1,
-      keepY: col === 0,
+      shared,
+      keepX: !shared || row === grid.rows - 1,
+      keepY: !shared || (rtl ? col === grid.cols - 1 : col === 0),
+      edgeX: spec.type !== "bar" && spec.type !== "combo",
+      yTitle: shared ? axisTitle(spec, "y") : "",
+      xTitle: shared ? axisTitle(spec, "x") : "",
     });
     const drawn = draw(child);
     if (!drawn) continue;
@@ -167,9 +272,8 @@ function facetSvg(spec: Record<string, unknown>, draw: Draw): string | null {
     oneLegend && legends.length > 1
       ? sharedLegend(legends, inks, 8, height - legendH + 4, w - 16)
       : "";
-  const rtl = directionOf(spec) === "rtl";
   const titleX = rtl ? w - 8 : 8;
-  const anchor = rtl ? ' text-anchor="end"' : "";
+  const anchor = rtl ? ' text-anchor="end" direction="ltr" unicode-bidi="isolate"' : "";
   const title = spec.title ? `<text x="${titleX}" y="20"${anchor} fill="var(--ck-text, light-dark(#1d1d1f,#f5f5f7))" font-size="15" font-weight="650" font-family="${font()}">${esc(String(spec.title))}</text>` : "";
   const subtitle = spec.subtitle
     ? `<text x="${titleX}" y="${spec.title ? 38 : 18}"${anchor} fill="var(--ck-muted, light-dark(#6e6e73,#a1a1a6))" font-size="12" font-family="${font()}">${esc(String(spec.subtitle))}</text>`
@@ -197,14 +301,25 @@ function panelSpec(
     cats: string[];
     domain: [number, number] | null;
     sharedLegend: boolean;
+    shared: boolean;
     keepX: boolean;
     keepY: boolean;
+    edgeX: boolean;
+    yTitle: string;
+    xTitle: string;
   },
 ): Record<string, unknown> {
   const encoding = isRecord(spec.encoding) ? { ...spec.encoding } : {};
   if (opts.domain) encoding.y = lockY(encoding.y, opts.domain);
+  if (opts.shared) encoding.y = stripTitles(encoding.y);
+  if (opts.edgeX) encoding.x = edgeChannel(encoding.x);
+  if (opts.shared && !opts.keepX && isRecord(encoding.x)) {
+    const x = { ...encoding.x };
+    delete x.title;
+    encoding.x = x;
+  }
   const data = opts.xField && opts.cats.length ? padCats(groupRow.rows, opts.xField, opts.cats, yFields(encoding)) : groupRow.rows;
-  const axes = axesOf(spec.axes, opts.keepX, opts.keepY);
+  const axes = axesOf(spec.axes, opts);
   const layout = directionOf(spec) === "rtl" ? { direction: "rtl" } : undefined;
   const child: Record<string, unknown> = {
     ...spec,
@@ -225,20 +340,67 @@ function panelSpec(
   return child;
 }
 
-function axesOf(value: unknown, keepX: boolean, keepY: boolean): Record<string, unknown> | undefined {
-  if (!isRecord(value)) return undefined;
+function axesOf(
+  value: unknown,
+  opts: { shared: boolean; keepX: boolean; keepY: boolean; yTitle: string; xTitle: string },
+): Record<string, unknown> | undefined {
+  const source = isRecord(value) ? value : {};
+  if (!opts.shared) {
+    if (!isRecord(value)) return undefined;
+    const axes: Record<string, unknown> = {};
+    for (const key of ["x", "y", "y2"]) {
+      const box = value[key];
+      if (!isRecord(box)) {
+        if (box !== undefined) axes[key] = box;
+        continue;
+      }
+      const next = { ...box };
+      if ((key === "x" && !opts.keepX) || (key !== "x" && !opts.keepY)) delete next.title;
+      axes[key] = next;
+    }
+    return axes;
+  }
   const axes: Record<string, unknown> = {};
   for (const key of ["x", "y", "y2"]) {
-    const box = value[key];
-    if (!isRecord(box)) {
-      if (box !== undefined) axes[key] = box;
-      continue;
-    }
-    const next = { ...box };
-    if ((key === "x" && !keepX) || (key !== "x" && !keepY)) delete next.title;
-    axes[key] = next;
+    if (key === "y2" && source[key] === undefined) continue;
+    const box = isRecord(source[key]) ? { ...source[key] } : {};
+    const keep = key === "x" ? opts.keepX : opts.keepY;
+    if (!keep) {
+      box.labels = false;
+      delete box.title;
+    } else if (key === "y" && opts.yTitle) box.title = opts.yTitle;
+    else if (key === "x" && opts.xTitle) box.title = opts.xTitle;
+    axes[key] = box;
   }
-  return axes;
+  return Object.keys(axes).length ? axes : undefined;
+}
+
+function axisTitle(spec: Record<string, unknown>, key: "x" | "y"): string {
+  const axes = isRecord(spec.axes) && isRecord(spec.axes[key]) ? spec.axes[key] : undefined;
+  if (axes && typeof axes.title === "string" && axes.title) return axes.title;
+  if (key !== "y") return "";
+  const encoding = isRecord(spec.encoding) ? spec.encoding : {};
+  const y = encoding.y;
+  const first = Array.isArray(y) ? y[0] : y;
+  const title = channelTitle(first, 0);
+  return title === "series 1" ? "" : title;
+}
+
+function stripTitles(channel: unknown): unknown {
+  const strip = (item: unknown) => {
+    if (!isRecord(item) || typeof item.title !== "string") return item;
+    const next = { ...item };
+    delete next.title;
+    return next;
+  };
+  return Array.isArray(channel) ? channel.map(strip) : strip(channel);
+}
+
+function edgeChannel(channel: unknown): unknown {
+  if (typeof channel === "string") return { field: channel, scale: { padding: 0 } };
+  if (!isRecord(channel)) return channel;
+  const scale = isRecord(channel.scale) ? { ...channel.scale, padding: 0 } : { padding: 0 };
+  return { ...channel, scale };
 }
 
 function concatSvg(spec: Record<string, unknown>, draw: Draw): string | null {
@@ -246,8 +408,10 @@ function concatSvg(spec: Record<string, unknown>, draw: Draw): string | null {
   const concat = isRecord(layout.concat) ? layout.concat : {};
   const views = Array.isArray(concat.views) ? concat.views.filter(isRecord) : [];
   if (!views.length) return null;
-  const horizontal = concat.direction === "horizontal";
   const gap = typeof concat.gap === "number" && concat.gap >= 0 ? Math.min(64, concat.gap) : 16;
+  const columns = intOr(concat.columns);
+  if (columns && columns >= 2) return concatGrid(spec, views, Math.min(4, Math.round(columns)), gap, draw);
+  const horizontal = concat.direction === "horizontal";
   const { w, h } = sizeOf(spec, 720, 280 * views.length);
   const head = spec.title ? 28 : 0;
   const count = views.length;
@@ -255,32 +419,91 @@ function concatSvg(spec: Record<string, unknown>, draw: Draw): string | null {
   const panelH = horizontal ? Math.max(80, h - head) : Math.max(80, Math.floor((h - head - gap * (count - 1)) / count));
   const height = horizontal ? head + panelH : head + count * panelH + gap * (count - 1);
   const width = horizontal ? count * panelW + gap * (count - 1) : w;
+  const placed = views.map((view, i) => ({
+    view,
+    x: horizontal ? i * (panelW + gap) : 0,
+    y: head + (horizontal ? 0 : i * (panelH + gap)),
+    w: panelW,
+    h: panelH,
+  }));
+  return concatFrame(spec, placed, width, height, draw, horizontal ? "horizontal" : "vertical", horizontal ? count : 1, horizontal ? 1 : count);
+}
+
+function concatGrid(spec: Record<string, unknown>, views: Record<string, unknown>[], cols: number, gap: number, draw: Draw): string | null {
+  const { w, h } = sizeOf(spec, 760, 320 * Math.ceil(views.length / cols));
+  const head = spec.title ? 28 : 0;
+  const rows: { view: Record<string, unknown>; span: number; col: number }[][] = [];
+  let row: { view: Record<string, unknown>; span: number; col: number }[] = [];
+  let used = 0;
+  for (const view of views) {
+    let span = typeof view.span === "number" && view.span > 0 ? Math.round(view.span) : 1;
+    span = Math.min(cols, Math.max(1, span));
+    if (used > 0 && used + span > cols) {
+      rows.push(row);
+      row = [];
+      used = 0;
+    }
+    row.push({ view, span, col: used });
+    used += span;
+    if (used >= cols) {
+      rows.push(row);
+      row = [];
+      used = 0;
+    }
+  }
+  if (row.length) rows.push(row);
+  const room = Math.max(120, h - head);
+  const rowH = Math.max(160, Math.floor((room - gap * (rows.length - 1)) / rows.length));
+  const height = head + rows.length * rowH + gap * Math.max(0, rows.length - 1);
+  const colW = (w - gap * (cols - 1)) / cols;
+  const placed = rows.flatMap((line) =>
+    line.map((cell) => ({
+      view: cell.view,
+      x: cell.col * (colW + gap),
+      y: head + rows.indexOf(line) * (rowH + gap),
+      w: cell.span * colW + (cell.span - 1) * gap,
+      h: rowH,
+    })),
+  );
+  return concatFrame(spec, placed, w, height, draw, "grid", cols, rows.length);
+}
+
+function concatFrame(
+  spec: Record<string, unknown>,
+  placed: { view: Record<string, unknown>; x: number; y: number; w: number; h: number }[],
+  width: number,
+  height: number,
+  draw: Draw,
+  flow: string,
+  cols: number,
+  rows: number,
+): string | null {
   const parts: string[] = [];
-  for (let i = 0; i < views.length; i++) {
-    const view = views[i];
-    if (!view || typeof view.type !== "string") continue;
+  for (let i = 0; i < placed.length; i++) {
+    const cell = placed[i];
+    if (!cell || typeof cell.view.type !== "string") continue;
     const child: Record<string, unknown> = {
-      ...view,
-      theme: view.theme ?? spec.theme,
-      locale: view.locale ?? spec.locale,
-      size: { width: panelW, height: panelH },
+      ...cell.view,
+      theme: cell.view.theme ?? spec.theme,
+      locale: cell.view.locale ?? spec.locale,
+      size: { width: Math.round(cell.w), height: Math.round(cell.h) },
     };
-    if (!child.a11y) child.a11y = { alt: typeof view.title === "string" ? view.title : `View ${i + 1}` };
+    if (!child.a11y) child.a11y = { alt: typeof cell.view.title === "string" ? cell.view.title : `View ${i + 1}` };
     delete child.layout;
+    delete child.span;
     const drawn = draw(child);
-    const x = horizontal ? i * (panelW + gap) : 0;
-    const y = head + (horizontal ? 0 : i * (panelH + gap));
-    const body = drawn ? inner(scope(drawn, `v${i}`)) : missingView(view, panelW, panelH);
-    parts.push(`<g data-ck-view="${i}" transform="translate(${x} ${y})">${body}</g>`);
+    const body = drawn ? inner(scope(drawn, `v${i}`)) : missingView(cell.view, Math.round(cell.w), Math.round(cell.h));
+    parts.push(`<g data-ck-view="${i}" transform="translate(${Math.round(cell.x)} ${Math.round(cell.y)})">${body}</g>`);
   }
   if (!parts.length) return null;
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : "Composed charts";
   const rtl = directionOf(spec) === "rtl";
+  const bidi = rtl ? ' direction="ltr" unicode-bidi="isolate"' : "";
   const title = spec.title
-    ? `<text x="${rtl ? width - 8 : 8}" y="20"${rtl ? ' text-anchor="end"' : ""} fill="var(--ck-text, light-dark(#1d1d1f,#f5f5f7))" font-size="15" font-weight="650" font-family="${font()}">${esc(String(spec.title))}</text>`
+    ? `<text x="${rtl ? width - 8 : 8}" y="20"${rtl ? ` text-anchor="end"${bidi}` : ""} fill="var(--ck-text, light-dark(#1d1d1f,#f5f5f7))" font-size="15" font-weight="650" font-family="${font()}">${esc(String(spec.title))}</text>`
     : "";
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(alt)}" class="ck-chart" data-ck-type="concat" data-ck-views="${parts.length}" data-ck-flow="${horizontal ? "horizontal" : "vertical"}"${rtl ? ' dir="rtl"' : ""}>` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(alt)}" class="ck-chart" data-ck-type="concat" data-ck-views="${parts.length}" data-ck-flow="${flow}" data-ck-cols="${cols}" data-ck-rows="${rows}"${rtl ? ' dir="rtl"' : ""}>` +
     `<title>${esc(String(spec.title ?? alt))}</title><desc>${esc(alt)}</desc>${title}${parts.join("")}</svg>`
   );
 }
@@ -400,7 +623,13 @@ function extent(rows: Record<string, unknown>[], fields: string[], type: unknown
     min -= 1;
     max += 1;
   }
-  return [min, max];
+  const [lo, hi] = niceDomain(min, max);
+  let top = hi;
+  if (!(max < hi)) {
+    const step = niceNum(Math.max(hi - lo, 1) / 4, true) || 1;
+    top = Math.round((hi + step) * 1000) / 1000;
+  }
+  return [lo, top];
 }
 
 function categories(rows: Record<string, unknown>[], field: string): string[] {

@@ -6,7 +6,7 @@ Different options at different container sizes
 
 Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-layout.breakpoints is a list of rules. The first rule whose maxWidth or minWidth matches size.width, or the container width when width is auto, overrides legend, direction, facet columns, or concat direction. A non-positive maxWidth warns CK3046. columns without a facet field warns CK3047.
+layout.breakpoints is a list of rules. The first rule whose maxWidth or minWidth matches size.width, or the container width when width is auto, overrides legend, direction, facet columns, or concat direction. A narrow rule can set columns to 2 so the panels stay readable. A non-positive maxWidth warns CK3046. columns without a facet field warns CK3047.
 
 Source: packages/core/src/layout.ts
 

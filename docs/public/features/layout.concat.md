@@ -6,7 +6,7 @@ Multiple views in one spec
 
 Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-layout.concat.views is a list of chart specs stacked vertically or placed in a row. An empty list warns CK3044. A view with no type warns CK3045. Facet and concat together warn CK3048.
+layout.concat.views is a list of chart specs stacked vertically, placed in a row, or wrapped with columns. A view may set span to cover more than one column. An empty list warns CK3044. A view with no type warns CK3045. Facet and concat together warn CK3048.
 
 Source: packages/core/src/layout.ts
 
