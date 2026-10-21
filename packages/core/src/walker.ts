@@ -18,7 +18,6 @@ interface JsonSchema {
   if?: JsonSchema;
   then?: JsonSchema;
   else?: JsonSchema;
-  not?: JsonSchema;
   minLength?: number;
   maxLength?: number;
   minimum?: number;
@@ -473,21 +472,6 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
   if (node.allOf) {
     for (const sub of node.allOf) check(value, sub, path, ctx);
   }
-  if (node.not) {
-    const before = ctx.out.length;
-    check(value, node.not, path, ctx);
-    const matched = ctx.out.length === before;
-    ctx.out.splice(before);
-    if (matched) {
-      emit(ctx, {
-        code: "CK1006",
-        severity: "error",
-        message: `${showPath(path)} matches a shape that is not allowed here`,
-        path,
-      });
-    }
-  }
-
   if (node.if) {
     const before = ctx.out.length;
     check(value, node.if, path, ctx);
@@ -1655,6 +1639,13 @@ function emitUnknownProp(name: string, path: string, props: Record<string, JsonS
   });
 }
 
+/** A composed dashboard carries its data on each view, so the outer spec may omit data, encoding, and metric. */
+function concatViews(value: unknown): boolean {
+  if (!isPlainObject(value) || !isPlainObject(value.layout) || !isPlainObject(value.layout.concat)) return false;
+  const views = value.layout.concat.views;
+  return Array.isArray(views) && views.length > 0;
+}
+
 function emitMissing(name: string, path: string, parent: Record<string, unknown>, ctx: Ctx): void {
   if (ctx.skipMissing.has(`${path}|${name}`)) return;
   const pointer = name === "a11y" && path === "" ? "/a11y" : path;
@@ -1662,6 +1653,7 @@ function emitMissing(name: string, path: string, parent: Record<string, unknown>
     emitAltRequired(ctx);
     return;
   }
+  if (path === "" && concatViews(ctx.rootValue) && (name === "data" || name === "encoding" || name === "metric")) return;
   if (path === "" && name === "type") {
     emit(ctx, {
       code: "CK1003",

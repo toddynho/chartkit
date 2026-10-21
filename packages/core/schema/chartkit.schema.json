@@ -212,9 +212,7 @@
   "allOf": [
     {
       "if": {
-        "allOf": [
-          {
-            "type": "object",
+        "type": "object",
         "properties": {
           "type": {
             "enum": [
@@ -245,13 +243,8 @@
             ]
           }
         },
-            "required": [
-              "type"
-            ]
-          },
-          {
-            "not": { "$ref": "#/$defs/hasConcatViews" }
-          }
+        "required": [
+          "type"
         ]
       },
       "then": {
@@ -262,9 +255,7 @@
     },
     {
       "if": {
-        "allOf": [
-          {
-            "type": "object",
+        "type": "object",
         "properties": {
           "type": {
             "enum": [
@@ -284,13 +275,8 @@
             ]
           }
         },
-            "required": [
-              "type"
-            ]
-          },
-          {
-            "not": { "$ref": "#/$defs/hasConcatViews" }
-          }
+        "required": [
+          "type"
         ]
       },
       "then": {
@@ -310,9 +296,7 @@
     },
     {
       "if": {
-        "allOf": [
-          {
-            "type": "object",
+        "type": "object",
         "properties": {
           "type": {
             "enum": [
@@ -320,13 +304,8 @@
             ]
           }
         },
-            "required": [
-              "type"
-            ]
-          },
-          {
-            "not": { "$ref": "#/$defs/hasConcatViews" }
-          }
+        "required": [
+          "type"
         ]
       },
       "then": {
@@ -346,9 +325,7 @@
     },
     {
       "if": {
-        "allOf": [
-          {
-            "type": "object",
+        "type": "object",
         "properties": {
           "type": {
             "enum": [
@@ -356,13 +333,8 @@
             ]
           }
         },
-            "required": [
-              "type"
-            ]
-          },
-          {
-            "not": { "$ref": "#/$defs/hasConcatViews" }
-          }
+        "required": [
+          "type"
         ]
       },
       "then": {
@@ -382,9 +354,7 @@
     },
     {
       "if": {
-        "allOf": [
-          {
-            "type": "object",
+        "type": "object",
         "properties": {
           "type": {
             "enum": [
@@ -392,13 +362,8 @@
             ]
           }
         },
-            "required": [
-              "type"
-            ]
-          },
-          {
-            "not": { "$ref": "#/$defs/hasConcatViews" }
-          }
+        "required": [
+          "type"
         ]
       },
       "then": {
@@ -421,9 +386,7 @@
     },
     {
       "if": {
-        "allOf": [
-          {
-            "type": "object",
+        "type": "object",
         "properties": {
           "type": {
             "enum": [
@@ -433,13 +396,8 @@
             ]
           }
         },
-            "required": [
-              "type"
-            ]
-          },
-          {
-            "not": { "$ref": "#/$defs/hasConcatViews" }
-          }
+        "required": [
+          "type"
         ]
       },
       "then": {
@@ -450,9 +408,7 @@
     },
     {
       "if": {
-        "allOf": [
-          {
-            "type": "object",
+        "type": "object",
         "properties": {
           "type": {
             "enum": [
@@ -460,13 +416,8 @@
             ]
           }
         },
-            "required": [
-              "type"
-            ]
-          },
-          {
-            "not": { "$ref": "#/$defs/hasConcatViews" }
-          }
+        "required": [
+          "type"
         ]
       },
       "then": {
@@ -485,9 +436,7 @@
     },
     {
       "if": {
-        "allOf": [
-          {
-            "type": "object",
+        "type": "object",
         "properties": {
           "type": {
             "enum": [
@@ -495,13 +444,8 @@
             ]
           }
         },
-            "required": [
-              "type"
-            ]
-          },
-          {
-            "not": { "$ref": "#/$defs/hasConcatViews" }
-          }
+        "required": [
+          "type"
         ]
       },
       "then": {
@@ -522,28 +466,6 @@
     }
   ],
   "$defs": {
-    "hasConcatViews": {
-      "type": "object",
-      "required": ["layout"],
-      "properties": {
-        "layout": {
-          "type": "object",
-          "required": ["concat"],
-          "properties": {
-            "concat": {
-              "type": "object",
-              "required": ["views"],
-              "properties": {
-                "views": {
-                  "type": "array",
-                  "minItems": 1
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "fieldName": {
       "type": "string",
       "minLength": 1,
