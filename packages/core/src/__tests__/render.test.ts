@@ -582,6 +582,27 @@ describe("remaining chart renderers", () => {
     }
   });
 
+  it("labels a donut centre with the measure name", () => {
+    const svg = render({
+      version: "1",
+      type: "donut",
+      title: "Cargo",
+      data: [
+        { kind: "Grain", tons: 42 },
+        { kind: "Oil", tons: 28 },
+        { kind: "Timber", tons: 18 },
+        { kind: "Mail", tons: 12 },
+      ],
+      encoding: { x: "kind", y: "tons" },
+      mark: { innerRadius: 0.62 },
+      size: { width: 320, height: 280 },
+      a11y: { alt: "Cargo by tons." },
+    });
+    expect(svg).toContain(">100<");
+    expect(svg).toContain(">tons<");
+    expect(svg).toContain('aria-label="Total 100 tons"');
+  });
+
   it("keeps donut legend values inside the view box", () => {
     const svg = render(spec("04-donut.json"));
     expect(svg).toContain('text-anchor="end"');

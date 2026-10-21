@@ -7,6 +7,7 @@ import { readTable } from "./frame";
 import type { DataTable } from "./data";
 import { installLayout, installPaint, directionOf, type Draw } from "./layout-hook";
 import { esc, font, isRecord, niceDomain, niceNum } from "./svg";
+import { cssVar, resolvePreset } from "./theme";
 
 export { directionOf };
 export type { Draw };
@@ -30,8 +31,8 @@ export function mountLayout(): void {
 }
 
 /**
- * Category labels left to right. The first and last stay, so June is not
- * dropped when the left column is narrower than the others.
+ * Category labels left to right. The first and last stay, so the ends of
+ * the axis are still labelled when a plot is short.
  */
 function catOrder(
   count: number,
@@ -234,20 +235,47 @@ function facetSvg(spec: Record<string, unknown>, draw: Draw): string | null {
   const gap = 12;
   const head = (spec.title ? 28 : 6) + (spec.subtitle ? 16 : 0);
   const legendH = oneLegend && legends.length > 1 ? 32 : 0;
-  const panelW = Math.max(96, Math.floor((w - gap * (grid.cols - 1)) / grid.cols));
   const room = Math.max(120, h - head - legendH - 8);
   const fitted = Math.floor((room - gap * (grid.rows - 1)) / grid.rows);
   const panelH = Math.max(136, fitted);
-  const height = head + grid.rows * panelH + gap * Math.max(0, grid.rows - 1) + legendH + 8;
+  const panelW = Math.max(96, Math.floor((w - gap * (grid.cols - 1)) / grid.cols));
+  const rtl = directionOf(spec) === "rtl";
+  const edgeX = spec.type !== "bar" && spec.type !== "combo";
+  const yTitle = shared ? axisTitle(spec, "y") : "";
+  const xTitle = shared ? axisTitle(spec, "x") : "";
+  const boxes = shared
+    ? sharedBoxes(spec, shown[0], draw, {
+        w,
+        room,
+        gap,
+        cols: grid.cols,
+        rows: grid.rows,
+        rtl,
+        panelW,
+        panelH,
+        xField,
+        cats,
+        domain,
+        sharedLegend: oneLegend,
+        edgeX,
+        yTitle,
+        xTitle,
+      })
+    : null;
+  const colW = boxes?.colW ?? Array.from({ length: grid.cols }, () => panelW);
+  const rowH = boxes?.rowH ?? Array.from({ length: grid.rows }, () => panelH);
+  const xs = place(colW, gap, 0);
+  const ys = place(rowH, gap, head);
+  const lastRow = rowH[rowH.length - 1] ?? panelH;
+  const height = (ys[ys.length - 1] ?? head) + lastRow + legendH + 8;
   const panels: string[] = [];
   let inks: string[] = [];
-  const rtl = directionOf(spec) === "rtl";
   for (let i = 0; i < shown.length; i++) {
     const groupRow = shown[i];
     if (!groupRow) continue;
     const col = i % grid.cols;
     const row = Math.floor(i / grid.cols);
-    const child = panelSpec(spec, groupRow, i, panelW, panelH, {
+    const child = panelSpec(spec, groupRow, i, colW[col] ?? panelW, rowH[row] ?? panelH, {
       xField,
       cats,
       domain,
@@ -255,28 +283,27 @@ function facetSvg(spec: Record<string, unknown>, draw: Draw): string | null {
       shared,
       keepX: !shared || row === grid.rows - 1,
       keepY: !shared || (rtl ? col === grid.cols - 1 : col === 0),
-      edgeX: spec.type !== "bar" && spec.type !== "combo",
-      yTitle: shared ? axisTitle(spec, "y") : "",
-      xTitle: shared ? axisTitle(spec, "x") : "",
+      edgeX,
+      yTitle,
+      xTitle,
     });
     const drawn = draw(child);
     if (!drawn) continue;
     const body = scope(drawn, `p${i}`);
     if (!inks.length) inks = paints(body);
-    const x = col * (panelW + gap);
-    const y = head + row * (panelH + gap);
-    panels.push(`<g data-ck-panel="${esc(groupRow.key)}" transform="translate(${x} ${y})">${inner(body)}</g>`);
+    panels.push(`<g data-ck-panel="${esc(groupRow.key)}" transform="translate(${xs[col] ?? 0} ${ys[row] ?? head})">${inner(body)}</g>`);
   }
   if (!panels.length) return null;
+  const ink = themeInk(spec.theme);
   const legend =
     oneLegend && legends.length > 1
-      ? sharedLegend(legends, inks, 8, height - legendH + 4, w - 16)
+      ? sharedLegend(legends, inks, 8, height - legendH + 4, w - 16, ink.text)
       : "";
   const titleX = rtl ? w - 8 : 8;
   const anchor = rtl ? ' text-anchor="end" direction="ltr" unicode-bidi="isolate"' : "";
-  const title = spec.title ? `<text x="${titleX}" y="20"${anchor} fill="var(--ck-text, light-dark(#1d1d1f,#f5f5f7))" font-size="15" font-weight="650" font-family="${font()}">${esc(String(spec.title))}</text>` : "";
+  const title = spec.title ? `<text x="${titleX}" y="20"${anchor} fill="${ink.text}" font-size="15" font-weight="650" font-family="${font()}">${esc(String(spec.title))}</text>` : "";
   const subtitle = spec.subtitle
-    ? `<text x="${titleX}" y="${spec.title ? 38 : 18}"${anchor} fill="var(--ck-muted, light-dark(#6e6e73,#a1a1a6))" font-size="12" font-family="${font()}">${esc(String(spec.subtitle))}</text>`
+    ? `<text x="${titleX}" y="${spec.title ? 38 : 18}"${anchor} fill="${ink.muted}" font-size="12" font-family="${font()}">${esc(String(spec.subtitle))}</text>`
     : "";
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : String(spec.title ?? "Small multiples");
   return (
@@ -288,6 +315,144 @@ function facetSvg(spec: Record<string, unknown>, draw: Draw): string | null {
     legend +
     `</svg>`
   );
+}
+
+/** Column and row sizes that share one plot width and height. The y gutter sits on the outer column and the x gutter on the outer row. */
+function sharedBoxes(
+  spec: Record<string, unknown>,
+  sample: { key: string; rows: Record<string, unknown>[] } | undefined,
+  draw: Draw,
+  box: {
+    w: number;
+    room: number;
+    gap: number;
+    cols: number;
+    rows: number;
+    rtl: boolean;
+    panelW: number;
+    panelH: number;
+    xField: string;
+    cats: string[];
+    domain: [number, number] | null;
+    sharedLegend: boolean;
+    edgeX: boolean;
+    yTitle: string;
+    xTitle: string;
+  },
+): { colW: number[]; rowH: number[] } | null {
+  if (!sample || (box.cols < 2 && box.rows < 2)) return null;
+  const spanX = box.w - box.gap * (box.cols - 1);
+  const spanY = box.room - box.gap * (box.rows - 1);
+  const measure = (outerW: number, outerH: number, plainW: number, plainH: number) => {
+    const outer = probePads(spec, sample, draw, outerW, outerH, box, true, true);
+    const plain = probePads(spec, sample, draw, plainW, plainH, box, box.rows === 1, box.cols === 1);
+    if (!outer || !plain) return null;
+    const leftExtra = Math.max(0, outer.left - plain.left);
+    const rightExtra = Math.max(0, outer.right - plain.right);
+    const topExtra = Math.max(0, outer.top - plain.top);
+    const botExtra = Math.max(0, outer.bottom - plain.bottom);
+    const yOnRight = box.cols > 1 && (box.rtl || rightExtra > leftExtra + 1);
+    const yGutter = box.cols > 1 ? (yOnRight ? rightExtra : leftExtra) : 0;
+    const xOnTop = box.rows > 1 && topExtra > botExtra + 1;
+    const xGutter = box.rows > 1 ? (xOnTop ? topExtra : botExtra) : 0;
+    const innerLeft = box.cols > 1 && !yOnRight ? plain.left : outer.left;
+    const innerRight = box.cols > 1 && yOnRight ? plain.right : outer.right;
+    const innerTop = box.rows > 1 && xOnTop ? plain.top : outer.top;
+    const innerBottom = box.rows > 1 && !xOnTop ? plain.bottom : outer.bottom;
+    const side = innerLeft + innerRight;
+    const vert = innerTop + innerBottom;
+    const plotW = (spanX - yGutter - box.cols * side) / box.cols;
+    const plotH = (spanY - xGutter - box.rows * vert) / box.rows;
+    if (!(plotW >= 36) || !(plotH >= 36)) return null;
+    const colW = Array.from({ length: box.cols }, (_, col) => {
+      const gutter = yGutter > 0 && (yOnRight ? col === box.cols - 1 : col === 0);
+      return plotW + side + (gutter ? yGutter : 0);
+    });
+    const rowH = Array.from({ length: box.rows }, (_, row) => {
+      const gutter = xGutter > 0 && (xOnTop ? row === 0 : row === box.rows - 1);
+      return plotH + vert + (gutter ? xGutter : 0);
+    });
+    return { colW: fitSum(colW, spanX), rowH: fitSum(rowH, spanY), yOnRight, xOnTop };
+  };
+  const first = measure(box.panelW, box.panelH, box.panelW, box.panelH);
+  if (!first) return null;
+  const gutterCol = first.yOnRight ? box.cols - 1 : 0;
+  const plainCol = box.cols > 1 ? (gutterCol === 0 ? 1 : 0) : 0;
+  const gutterRow = first.xOnTop ? 0 : box.rows - 1;
+  const plainRow = box.rows > 1 ? (gutterRow === box.rows - 1 ? 0 : box.rows - 1) : 0;
+  const moved =
+    Math.abs((first.colW[gutterCol] ?? 0) - box.panelW) > 24 ||
+    Math.abs((first.colW[plainCol] ?? 0) - box.panelW) > 24 ||
+    Math.abs((first.rowH[gutterRow] ?? 0) - box.panelH) > 24 ||
+    Math.abs((first.rowH[plainRow] ?? 0) - box.panelH) > 24;
+  if (!moved) return { colW: first.colW, rowH: first.rowH };
+  const second = measure(
+    first.colW[gutterCol] ?? box.panelW,
+    first.rowH[gutterRow] ?? box.panelH,
+    first.colW[plainCol] ?? box.panelW,
+    first.rowH[plainRow] ?? box.panelH,
+  );
+  return second ? { colW: second.colW, rowH: second.rowH } : { colW: first.colW, rowH: first.rowH };
+}
+
+function probePads(
+  spec: Record<string, unknown>,
+  sample: { key: string; rows: Record<string, unknown>[] },
+  draw: Draw,
+  width: number,
+  height: number,
+  box: {
+    xField: string;
+    cats: string[];
+    domain: [number, number] | null;
+    sharedLegend: boolean;
+    edgeX: boolean;
+    yTitle: string;
+    xTitle: string;
+  },
+  keepX: boolean,
+  keepY: boolean,
+): { left: number; right: number; top: number; bottom: number } | null {
+  const child = panelSpec(spec, sample, 0, width, height, {
+    xField: box.xField,
+    cats: box.cats,
+    domain: box.domain,
+    sharedLegend: box.sharedLegend,
+    shared: true,
+    keepX,
+    keepY,
+    edgeX: box.edgeX,
+    yTitle: box.yTitle,
+    xTitle: box.xTitle,
+  });
+  const drawn = draw(child);
+  if (!drawn) return null;
+  const match = /<clipPath[^>]*>\s*<rect x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)"/.exec(drawn);
+  if (!match) return null;
+  const x = Number(match[1]);
+  const y = Number(match[2]);
+  const w = Number(match[3]);
+  const h = Number(match[4]);
+  if (![x, y, w, h].every((value) => Number.isFinite(value)) || w <= 0 || h <= 0) return null;
+  return { left: x, right: Math.max(0, width - x - w), top: y, bottom: Math.max(0, height - y - h) };
+}
+
+function place(sizes: number[], gap: number, origin: number): number[] {
+  const out: number[] = [];
+  let cursor = origin;
+  for (const size of sizes) {
+    out.push(Math.round(cursor * 100) / 100);
+    cursor += size + gap;
+  }
+  return out;
+}
+
+function fitSum(values: number[], total: number): number[] {
+  const rounded = values.map((value) => Math.round(value * 100) / 100);
+  const used = rounded.reduce((sum, value) => sum + value, 0);
+  const last = rounded.length - 1;
+  if (last >= 0) rounded[last] = Math.round(((rounded[last] ?? 0) + (total - used)) * 100) / 100;
+  return rounded;
 }
 
 function panelSpec(
@@ -492,15 +657,16 @@ function concatFrame(
     delete child.layout;
     delete child.span;
     const drawn = draw(child);
-    const body = drawn ? inner(scope(drawn, `v${i}`)) : missingView(cell.view, Math.round(cell.w), Math.round(cell.h));
+    const body = drawn ? inner(scope(drawn, `v${i}`)) : missingView(cell.view, Math.round(cell.w), Math.round(cell.h), spec.theme);
     parts.push(`<g data-ck-view="${i}" transform="translate(${Math.round(cell.x)} ${Math.round(cell.y)})">${body}</g>`);
   }
   if (!parts.length) return null;
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : "Composed charts";
   const rtl = directionOf(spec) === "rtl";
   const bidi = rtl ? ' direction="ltr" unicode-bidi="isolate"' : "";
+  const ink = themeInk(spec.theme);
   const title = spec.title
-    ? `<text x="${rtl ? width - 8 : 8}" y="20"${rtl ? ` text-anchor="end"${bidi}` : ""} fill="var(--ck-text, light-dark(#1d1d1f,#f5f5f7))" font-size="15" font-weight="650" font-family="${font()}">${esc(String(spec.title))}</text>`
+    ? `<text x="${rtl ? width - 8 : 8}" y="20"${rtl ? ` text-anchor="end"${bidi}` : ""} fill="${ink.text}" font-size="15" font-weight="650" font-family="${font()}">${esc(String(spec.title))}</text>`
     : "";
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(alt)}" class="ck-chart" data-ck-type="concat" data-ck-views="${parts.length}" data-ck-flow="${flow}" data-ck-cols="${cols}" data-ck-rows="${rows}"${rtl ? ' dir="rtl"' : ""}>` +
@@ -508,15 +674,26 @@ function concatFrame(
   );
 }
 
-function missingView(view: Record<string, unknown>, width: number, height: number): string {
+function missingView(view: Record<string, unknown>, width: number, height: number, theme: unknown): string {
   const title = typeof view.title === "string" && view.title ? view.title : String(view.type ?? "Chart");
+  const ink = themeInk(theme);
   return (
-    `<rect width="${width}" height="${height}" rx="8" fill="var(--ck-background, transparent)" stroke="var(--ck-grid, light-dark(#d2d2d7,#3a3a3c))"/>` +
-    `<text x="12" y="24" fill="var(--ck-text, light-dark(#1d1d1f,#f5f5f7))" font-size="13" font-family="${font()}">${esc(title)}</text>`
+    `<rect width="${width}" height="${height}" rx="8" fill="${ink.background}" stroke="${ink.grid}"/>` +
+    `<text x="12" y="24" fill="${ink.text}" font-size="13" font-family="${font()}">${esc(title)}</text>`
   );
 }
 
-function sharedLegend(names: string[], inks: string[], x: number, y: number, width: number): string {
+function themeInk(theme: unknown): { text: string; muted: string; grid: string; background: string } {
+  const preset = resolvePreset(theme);
+  return {
+    text: cssVar("text", preset.text),
+    muted: cssVar("muted", preset.muted),
+    grid: cssVar("grid", preset.grid),
+    background: cssVar("background", preset.background),
+  };
+}
+
+function sharedLegend(names: string[], inks: string[], x: number, y: number, width: number, text: string): string {
   let cx = x;
   const bits: string[] = [];
   for (let i = 0; i < names.length; i++) {
@@ -528,7 +705,7 @@ function sharedLegend(names: string[], inks: string[], x: number, y: number, wid
     }
     bits.push(
       `<rect x="${cx}" y="${y}" width="10" height="10" rx="2" fill="${ink}" data-ck-legend-swatch="${esc(name)}"/>` +
-        `<text x="${cx + 16}" y="${y + 9}" fill="var(--ck-text, light-dark(#1d1d1f,#f5f5f7))" font-size="12" font-family="${font()}">${esc(name)}</text>`,
+        `<text x="${cx + 16}" y="${y + 9}" fill="${text}" font-size="12" font-family="${font()}">${esc(name)}</text>`,
     );
     cx += need + 12;
   }

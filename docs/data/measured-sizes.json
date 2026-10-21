@@ -8,11 +8,11 @@
     "measuredAt": "2026-10-21T20:28:46.772Z",
     "measured": {
       "line": 34427,
-      "all": 63032
+      "all": 64137
     },
     "minBytes": {
       "line": 96962,
-      "all": 180113
+      "all": 183170
     }
   },
   "bench": {

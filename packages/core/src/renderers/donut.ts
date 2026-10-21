@@ -274,9 +274,19 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
 
   if (inner > 8) {
     const totalLabel = formatValue(total, valueFormat, frame.locale);
-    parts.push(
-      `<text x="${n(cx)}" y="${n(cy + 1)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("text", frame.preset.text)}" font-size="20" font-weight="700" font-family="${font()}" aria-label="${esc(`Total ${totalLabel}`)}">${esc(totalLabel)}</text>`,
-    );
+    const unit = centreUnit(frame.encoding.y);
+    const fill = cssVar("text", frame.preset.text);
+    const label = unit ? `Total ${totalLabel} ${unit}` : `Total ${totalLabel}`;
+    if (unit) {
+      parts.push(
+        `<text x="${n(cx)}" y="${n(cy - 6)}" text-anchor="middle" dominant-baseline="middle" fill="${fill}" font-size="20" font-weight="700" font-family="${font()}" aria-label="${esc(label)}">${esc(totalLabel)}</text>` +
+          `<text x="${n(cx)}" y="${n(cy + 12)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("muted", frame.preset.muted)}" font-size="12" font-family="${font()}">${esc(unit)}</text>`,
+      );
+    } else {
+      parts.push(
+        `<text x="${n(cx)}" y="${n(cy + 1)}" text-anchor="middle" dominant-baseline="middle" fill="${fill}" font-size="20" font-weight="700" font-family="${font()}" aria-label="${esc(label)}">${esc(totalLabel)}</text>`,
+      );
+    }
   }
 
   if (labelSvg) parts.push(labelSvg);
@@ -300,6 +310,19 @@ interface Leader {
   tipY: number;
   width: number;
   color: string;
+}
+
+/** The y channel title, or its field, names the centre total. A bare "value" field stays unlabelled. */
+function centreUnit(channel: unknown): string {
+  const item = Array.isArray(channel) ? channel[0] : channel;
+  let label = "";
+  if (typeof item === "string") label = item;
+  else if (isRecord(item)) {
+    if (typeof item.title === "string" && item.title) label = item.title;
+    else if (typeof item.field === "string") label = item.field;
+  }
+  if (!label || label === "value" || label === "y") return "";
+  return label;
 }
 
 /** 12px text is about 6.6px per character. */

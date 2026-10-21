@@ -36,6 +36,16 @@ function facetSpec(extra: Record<string, unknown> = {}) {
   };
 }
 
+function plotBox(svg: string): { x: number; w: number; h: number } | null {
+  const match = /<clipPath[^>]*>\s*<rect x="([^"]+)" y="[^"]+" width="([^"]+)" height="([^"]+)"/.exec(svg);
+  if (!match) return null;
+  return { x: Number(match[1]), w: Number(match[2]), h: Number(match[3]) };
+}
+
+function monthsOf(svg: string): string[] {
+  return months.filter((month) => svg.includes(`>${month}<`));
+}
+
 function panel(svg: string, name: string): string {
   const start = svg.indexOf(`data-ck-panel="${name}"`);
   if (start < 0) return "";
@@ -75,6 +85,47 @@ describe("layout", () => {
     expect(lisbon).not.toContain(">Jun<");
     expect(prague).toContain(">Jun<");
     expect(prague).toContain(">Jan<");
+    const boxes = ["Lisbon", "Porto", "Madrid", "Milan", "Prague"].map((name) => plotBox(panel(svg, name)));
+    for (const box of boxes) expect(box).toBeTruthy();
+    const [first, portoBox, madridBox, milanBox, pragueBox] = boxes;
+    expect(first?.w).toBeCloseTo(portoBox?.w ?? 0, 0);
+    expect(portoBox?.w).toBeCloseTo(madridBox?.w ?? 0, 0);
+    expect(first?.h).toBeCloseTo(portoBox?.h ?? 0, 0);
+    expect(first?.h).toBeCloseTo(milanBox?.h ?? 0, 0);
+    expect(monthsOf(panel(svg, "Milan"))).toEqual(monthsOf(panel(svg, "Prague")));
+    expect(pragueBox?.w).toBeCloseTo(madridBox?.w ?? 0, 0);
+  });
+
+  it("keeps shared plot widths equal when the y axis sits on the right", () => {
+    const svg = render(
+      facetSpec({
+        layout: { direction: "rtl", facet: { field: "city", columns: 2, rows: 1, wrap: false, scales: "shared", legend: "each" } },
+        size: { width: 640, height: 280 },
+      }),
+    );
+    const lisbon = plotBox(panel(svg, "Lisbon"));
+    const porto = plotBox(panel(svg, "Porto"));
+    expect(lisbon && porto).toBeTruthy();
+    expect(lisbon?.w).toBeCloseTo(porto?.w ?? 0, 0);
+    expect(lisbon?.x).toBeLessThan(24);
+    expect(porto?.x).toBeLessThan(24);
+    const at = (name: string) => Number(/transform="translate\(([\d.]+)/.exec(panel(svg, name))?.[1]);
+    expect(at("Porto") - at("Lisbon")).toBeGreaterThan((porto?.w ?? 0) + 20);
+  });
+
+  it("paints the facet title and shared legend in the midnight text colour", () => {
+    const svg = render(facetSpec({ theme: "midnight", subtitle: "Shared scale" }));
+    const head = svg.slice(0, svg.indexOf("data-ck-panel"));
+    expect(head).toContain(">Rides by city<");
+    expect(head).toContain(">Shared scale<");
+    expect(head).toContain('fill="var(--ck-text, #ffffff)"');
+    expect(head).toContain('fill="var(--ck-muted, #8a8a8a)"');
+    expect(head).not.toContain("light-dark(#1d1d1f");
+    const legend = svg.slice(svg.indexOf('data-ck-legend-row="shared"'));
+    expect(legend).toContain(">Rides<");
+    expect(legend).toContain(">Bikes<");
+    expect(legend).toContain('fill="var(--ck-text, #ffffff)"');
+    expect(legend).not.toContain("light-dark(#1d1d1f");
   });
 
   it("lets each panel scale itself", () => {
@@ -157,6 +208,8 @@ describe("layout", () => {
     expect(svg).toContain("Revenue");
     expect(svg).toContain("Orders");
     expect(svg).toContain("Margin");
+    expect(svg).toMatch(/<text[^>]*fill="var\(--ck-text, #ffffff\)"[^>]*>Quarter<\/text>/);
+    expect(svg).not.toContain("light-dark(#1d1d1f");
   });
 
   it("keeps a panel when the view type is outside this bundle", async () => {
@@ -166,6 +219,7 @@ describe("layout", () => {
     const host = {
       version: "1",
       type: "line",
+      theme: "midnight",
       data: months.map((month, index) => ({ month, revenue: 5 + index })),
       encoding: { x: "month", y: "revenue" },
       a11y: { alt },
@@ -192,6 +246,9 @@ describe("layout", () => {
     expect(svg).not.toBe(base);
     expect(svg).toContain('data-ck-views="1"');
     expect(svg).toContain("Orders");
+    expect(svg).toContain('fill="var(--ck-text, #ffffff)"');
+    expect(svg).toContain('stroke="var(--ck-grid, #1f1f1f)"');
+    expect(svg).not.toContain("light-dark(#1d1d1f");
   });
 
   it("applies the narrow breakpoint and leaves the wide chart on four columns", () => {
@@ -311,6 +368,8 @@ describe("layout", () => {
     expect(svg).toContain('data-ck-views="3"');
     expect(svg).toContain("Arrivals");
     expect(svg).toContain("Cargo");
+    expect(svg).toContain(">tons<");
+    expect(svg).toContain('aria-label="Total 65 tons"');
   });
 
   it("warns CK3040 through CK3048 and patches the spec", () => {
