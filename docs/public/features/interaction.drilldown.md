@@ -1,12 +1,74 @@
 # Drilldown
 
-ChartKit: **none**
+ChartKit: **native**
 
 Click a mark to drill into a child dataset
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+interaction.drilldown.children maps a category to a child JSON spec. Click, Enter, or Space swaps to that spec. Back and Escape pop. The server SVG lists the keys on data-ck-drill. An empty map warns CK3037. A child with no type warns CK3038. A key that is not a field warns CK3039.
+
+Source: packages/core/src/interact.ts
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40
+    },
+    {
+      "quarter": "Q2",
+      "units": 55
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": "units"
+  },
+  "a11y": {
+    "alt": "Units rose in Q2."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "interaction": {
+    "drilldown": {
+      "key": "quarter",
+      "children": {
+        "Q1": {
+          "version": "1",
+          "type": "bar",
+          "data": [
+            {
+              "name": "East",
+              "units": 12
+            },
+            {
+              "name": "West",
+              "units": 9
+            }
+          ],
+          "encoding": {
+            "x": "name",
+            "y": "units"
+          },
+          "a11y": {
+            "alt": "East leads West in this category."
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -33,6 +95,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~drillDown | dts-grep (weak) | @antv/g2/lib/index.d.ts:156 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3a03bfbe111f.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 1eae17b953e2.
 
 https://chartkit.dev/features.json

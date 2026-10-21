@@ -1,12 +1,49 @@
 # Overview navigator / range slider
 
-ChartKit: **none**
+ChartKit: **native**
 
 Mini-chart or slider to choose the visible window
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+interaction.navigator is true or { height }. The client mounts an overview and a keyboard range slider. The server SVG records data-ck-nav and does not include the control. A type with no x window warns CK3034. A height outside 28 to 96 warns CK3035.
+
+Source: packages/core/src/interact-extra.ts
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40
+    },
+    {
+      "quarter": "Q2",
+      "units": 55
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": "units"
+  },
+  "a11y": {
+    "alt": "Units rose in Q2."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "interaction": {
+    "navigator": true
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -33,6 +70,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~slider | dts-grep (weak) | @antv/g2/lib/index.d.ts:116 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3a03bfbe111f.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 1eae17b953e2.
 
 https://chartkit.dev/features.json
