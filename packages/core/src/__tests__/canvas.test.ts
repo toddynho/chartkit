@@ -88,10 +88,13 @@ describe("canvas render mode", () => {
     expect(last).toBeTruthy();
     const attrs = last?.[1] ?? "";
     const x = Number(/x="([^"]+)"/.exec(attrs)?.[1]);
+    const y = Number(/ y="([^"]+)"/.exec(attrs)?.[1]);
     const anchor = /text-anchor="([^"]+)"/.exec(attrs)?.[1];
-    const width = (last?.[2].length ?? 0) * 6.4;
+    const width = (last?.[2].length ?? 0) * 8;
     const edge = anchor === "end" ? x : anchor === "start" ? x + width : x + width / 2;
-    expect(edge).toBeLessThanOrEqual(320);
+    expect(edge).toBeLessThanOrEqual(316);
+    expect(y).toBeGreaterThan(11);
+    expect(y).toBeLessThanOrEqual(180);
   });
 
   it("auto stays on svg under the threshold and moves to canvas above it", () => {

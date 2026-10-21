@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   AGENT_MEASURED,
   CORE_COMMIT,
@@ -226,5 +229,82 @@ ${agents}
 ChartKit's no-docs first try plus \`repair()\` is ${published.agents[0].noDocsWithinTwo}/${published.tasks}. Official first try is already ${published.agents[0].officialFirst}/${published.tasks}. The other libraries have no repair step. Nivo and uPlot were not in this eval, so this file does not invent scores for them.
 
 A ChartKit-only rerun with llms.txt cut to 6,329 bytes scored 41/42 on the first try. The miss was combo axis CK3002, which repair() does not patch. The headline uses the full docs file.
+${canvasMarkdown()}`;
+}
+
+interface CanvasBenchRow {
+  id: string;
+  library: string;
+  points: number;
+  status: string;
+  renderMs?: number | null;
+  initialMs?: number | null;
+  updateMs?: number | null;
+}
+
+function canvasFile(): { measured: string; samples: number; rows: CanvasBenchRow[] } | null {
+  const file = join(dirname(fileURLToPath(import.meta.url)), "../data/canvas-bench.json");
+  if (!existsSync(file)) return null;
+  return JSON.parse(readFileSync(file, "utf8")) as { measured: string; samples: number; rows: CanvasBenchRow[] };
+}
+
+function canvasAt(rows: CanvasBenchRow[], id: string, points: number): CanvasBenchRow | undefined {
+  return rows.find((row) => row.id === id && row.points === points && row.status === "ok");
+}
+
+function ms(value: number | null | undefined): string {
+  return typeof value === "number" ? value.toFixed(1) : "—";
+}
+
+/** Appendix for the canvas painter. Numbers come from docs/data/canvas-bench.json. */
+export function canvasMarkdown(): string {
+  const bench = canvasFile();
+  if (!bench) return "";
+  const sizes = [10_000, 100_000, 1_000_000];
+  const lines = sizes.map((points) => {
+    const svg = canvasAt(bench.rows, "chartkit", points);
+    const canvas = canvasAt(bench.rows, "chartkit-canvas", points);
+    const uplot = canvasAt(bench.rows, "uplot", points);
+    const label = points.toLocaleString("en-US");
+    return `| ${label} | ${ms(svg?.renderMs)} | ${ms(canvas?.renderMs)} | ${ms(svg?.initialMs)} | ${ms(canvas?.initialMs)} | ${ms(uplot?.initialMs)} | ${ms(svg?.updateMs)} | ${ms(canvas?.updateMs)} | ${ms(uplot?.updateMs)} |`;
+  });
+  const loss: string[] = [];
+  const win: string[] = [];
+  for (const points of sizes) {
+    const label = points >= 1_000_000 ? "1M" : `${points / 1000}k`;
+    const svg = canvasAt(bench.rows, "chartkit", points);
+    const canvas = canvasAt(bench.rows, "chartkit-canvas", points);
+    const uplot = canvasAt(bench.rows, "uplot", points);
+    if (!svg || !canvas) continue;
+    if (typeof canvas.renderMs === "number" && typeof svg.renderMs === "number" && canvas.renderMs > svg.renderMs) {
+      loss.push(`render at ${label} (${ms(canvas.renderMs)} vs ${ms(svg.renderMs)})`);
+    }
+    if (typeof canvas.initialMs === "number" && typeof svg.initialMs === "number" && canvas.initialMs > svg.initialMs) {
+      loss.push(`first paint vs SVG at ${label} (${ms(canvas.initialMs)} vs ${ms(svg.initialMs)})`);
+    }
+    if (typeof canvas.initialMs === "number" && typeof uplot?.initialMs === "number" && canvas.initialMs > uplot.initialMs) {
+      loss.push(`first paint vs uPlot at ${label} (${ms(canvas.initialMs)} vs ${ms(uplot.initialMs)})`);
+    }
+    if (typeof canvas.updateMs === "number" && typeof svg.updateMs === "number") {
+      const text = `update vs SVG at ${label} (${ms(canvas.updateMs)} vs ${ms(svg.updateMs)})`;
+      if (canvas.updateMs > svg.updateMs) loss.push(text);
+      else win.push(text);
+    }
+    if (typeof canvas.updateMs === "number" && typeof uplot?.updateMs === "number") {
+      const text = `update vs uPlot at ${label} (${ms(canvas.updateMs)} vs ${ms(uplot.updateMs)})`;
+      if (canvas.updateMs > uplot.updateMs) loss.push(text);
+      else win.push(text);
+    }
+  }
+  return `
+## Canvas line, ${bench.measured}
+
+Median of ${bench.samples}, Playwright Chromium, a 640×360 line, sampling auto (minmax above twice the plot width). This is not a re-time of round ${ROUND}. Canvas paints sampled points and builds SVG for the axes only. \`render\` includes that paint. First paint waits for the same two frames. uPlot has no separate render number. Sampling none was not re-timed in this run.
+
+| Points | SVG render | Canvas render | SVG first paint | Canvas first paint | uPlot first paint | SVG update | Canvas update | uPlot update |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+${lines.join("\n")}
+
+Losses: canvas ${loss.join("; ")}. Canvas wins the ${win.join("; ")}.
 `;
 }

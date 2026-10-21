@@ -1899,16 +1899,20 @@ function alongOne(
 ): string {
   if (slack && (x < plot.left - slack || x > plot.right + slack)) return "";
   const text = rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label;
-  const width = (text.length || 1) * 6.4;
+  const glyphs = text.length || 1;
+  const width = glyphs * 6.4;
   if (!angle && x - width / 2 < last) return "";
   let anchor = angle < 0 ? "end" : angle > 0 ? "start" : "middle";
   let at = x;
+  // 11px tabular digits run wider than the collision estimate. Measure the edge with
+  // that wider box so "100,000" is end-anchored before the view box clips it.
+  const edgeWidth = glyphs * 8;
   if (!angle && viewWidth > 0) {
-    if (x + width / 2 > viewWidth - 2) {
-      at = viewWidth - 2;
+    if (x + edgeWidth / 2 > viewWidth - 4) {
+      at = viewWidth - 4;
       anchor = "end";
-    } else if (x - width / 2 < 2) {
-      at = 2;
+    } else if (x - edgeWidth / 2 < 4) {
+      at = 4;
       anchor = "start";
     }
   }

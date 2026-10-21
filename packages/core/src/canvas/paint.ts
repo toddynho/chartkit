@@ -47,7 +47,11 @@ interface Live {
 
 const lives = new WeakMap<Element, Live>();
 let profile: PaintProfile | null = null;
-const colorCache = new Map<string, string>();
+const paintCache = new WeakMap<Element, Map<string, string>>();
+const numberCache = new WeakMap<Element, Map<string, number>>();
+const dashCache = new Map<string, number[]>();
+const NO_DASH: number[] = [];
+const paintedSize = new WeakMap<HTMLCanvasElement, { w: number; h: number }>();
 
 export function lastPaintProfile(): PaintProfile | null {
   return profile;
@@ -108,7 +112,8 @@ export function paintSpec(host: Element, spec: unknown): boolean {
       live.ys = cols.ys;
       live.xs = cols.xs;
       const painted = performance.now();
-      drawFrame(host, live.svg, live.canvas, live.frame);
+      const size = paintedSize.get(live.canvas) ?? authoredSize(live.svg, live.frame);
+      drawFrame(live.svg, live.canvas, live.frame, size.w, size.h);
       const hit = hitFor(live.frame);
       if (hit) setDataHit(live.svg, hit);
       profile = {
@@ -135,9 +140,10 @@ export function paintSpec(host: Element, spec: unknown): boolean {
     frame.profile.dom = 0;
   }
   if (!(svg instanceof SVGSVGElement)) return false;
-  const canvas = ensureCanvas(host, svg);
+  const size = authoredSize(svg, frame);
+  const canvas = ensureCanvas(host, size.w, size.h);
   const tPaint = performance.now();
-  drawFrame(host, svg, canvas, frame);
+  drawFrame(svg, canvas, frame, size.w, size.h);
   frame.profile.paint = performance.now() - tPaint;
   const mark = frame.marks[0];
   const memo = mark && mark.memo && mark.memo.buckets > 0 ? copyMemo(mark.memo) : null;
@@ -155,12 +161,23 @@ export function paintSpec(host: Element, spec: unknown): boolean {
   lives.set(host, stored);
   const hit = hitFor(frame);
   if (hit) setDataHit(svg, hit);
-  onSceneRepaint(svg, () => drawFrame(host, svg as SVGSVGElement, canvas, frame));
+  onSceneRepaint(svg, () => {
+    const current = lives.get(host);
+    if (!current) return;
+    const size = paintedSize.get(current.canvas) ?? authoredSize(current.svg, current.frame);
+    drawFrame(current.svg, current.canvas, current.frame, size.w, size.h);
+  });
   if (!watchers.has(svg) && typeof ResizeObserver !== "undefined") {
-    const observer = new ResizeObserver(() => {
+    const observer = new ResizeObserver((entries) => {
       const current = lives.get(host);
       if (!current) return;
-      drawFrame(host, current.svg, current.canvas, current.frame);
+      const box = entries[0]?.contentRect;
+      if (!box || box.width < 2 || box.height < 2) return;
+      const prev = paintedSize.get(current.canvas);
+      if (prev && Math.abs(prev.w - box.width) < 0.5 && Math.abs(prev.h - box.height) < 0.5) return;
+      current.canvas.style.width = `${box.width}px`;
+      current.canvas.style.height = `${box.height}px`;
+      drawFrame(current.svg, current.canvas, current.frame, box.width, box.height);
     });
     observer.observe(svg);
     watchers.set(svg, observer);
@@ -215,7 +232,17 @@ function swapChrome(host: Element, markup: string, previous: SVGSVGElement | nul
   return found instanceof SVGSVGElement ? found : null;
 }
 
-function ensureCanvas(host: Element, svg: SVGSVGElement): HTMLCanvasElement {
+/** Width and height attributes, or the scene size. No layout read. */
+function authoredSize(svg: SVGSVGElement, frame: SceneFrame): { w: number; h: number } {
+  const w = Number(svg.getAttribute("width"));
+  const h = Number(svg.getAttribute("height"));
+  return {
+    w: w > 0 ? w : frame.width || 640,
+    h: h > 0 ? h : frame.height || 360,
+  };
+}
+
+function ensureCanvas(host: Element, cssW: number, cssH: number): HTMLCanvasElement {
   const style = (host as HTMLElement).style;
   if (style && style.position === "") style.position = "relative";
   const found = host.querySelector("canvas[data-ck-painter='ck-canvas-paint']");
@@ -229,20 +256,16 @@ function ensureCanvas(host: Element, svg: SVGSVGElement): HTMLCanvasElement {
     canvas.style.pointerEvents = "none";
     host.append(canvas);
   }
-  const rect = svg.getBoundingClientRect();
-  const width = rect.width || Number(svg.getAttribute("width")) || svg.viewBox.baseVal.width || 640;
-  const height = rect.height || Number(svg.getAttribute("height")) || svg.viewBox.baseVal.height || 360;
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
+  const width = `${cssW}px`;
+  const height = `${cssH}px`;
+  if (canvas.style.width !== width) canvas.style.width = width;
+  if (canvas.style.height !== height) canvas.style.height = height;
   return canvas;
 }
 
-function drawFrame(host: Element, svg: SVGSVGElement, canvas: HTMLCanvasElement, frame: SceneFrame): void {
+function drawFrame(svg: SVGSVGElement, canvas: HTMLCanvasElement, frame: SceneFrame, cssW: number, cssH: number): void {
   const ctx = canvas.getContext("2d");
-  if (!ctx || !frame.plot) return;
-  const rect = svg.getBoundingClientRect();
-  const cssW = rect.width || frame.width;
-  const cssH = rect.height || frame.height;
+  if (!ctx || !frame.plot || !(cssW > 0) || !(cssH > 0) || !(frame.width > 0) || !(frame.height > 0)) return;
   const dpr = typeof window !== "undefined" && window.devicePixelRatio > 0 ? window.devicePixelRatio : 1;
   const pixelsW = Math.max(1, Math.round(cssW * dpr));
   const pixelsH = Math.max(1, Math.round(cssH * dpr));
@@ -259,6 +282,7 @@ function drawFrame(host: Element, svg: SVGSVGElement, canvas: HTMLCanvasElement,
   ctx.clip();
   for (let i = 0; i < frame.marks.length; i++) drawMark(svg, ctx, frame.marks[i], plot);
   ctx.restore();
+  paintedSize.set(canvas, { w: cssW, h: cssH });
 }
 
 function drawMark(svg: SVGSVGElement, ctx: CanvasRenderingContext2D, mark: SceneMark, plot: SceneFrame["plot"]): void {
@@ -285,7 +309,7 @@ function drawMark(svg: SVGSVGElement, ctx: CanvasRenderingContext2D, mark: Scene
   ctx.lineWidth = width;
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
-  ctx.setLineDash(mark.dash ? mark.dash.split(" ").map(Number) : []);
+  ctx.setLineDash(dashOf(mark.dash));
   if (mark.kind === "area") {
     ctx.beginPath();
     trace(ctx, mark);
@@ -463,46 +487,160 @@ function monotone(ctx: CanvasRenderingContext2D, x: Float64Array, y: Float64Arra
   }
 }
 
+function dashOf(dash: string): number[] {
+  if (!dash) return NO_DASH;
+  const hit = dashCache.get(dash);
+  if (hit) return hit;
+  const parsed = dash.split(" ").map(Number);
+  dashCache.set(dash, parsed);
+  return parsed;
+}
+
 function paintOf(svg: SVGSVGElement, value: string): string {
   if (!value || value === "none") return "#2563eb";
-  const hit = colorCache.get(value);
+  const hit = paintCache.get(svg)?.get(value);
   if (hit !== undefined) return hit;
   let resolved = value;
-  if (typeof document !== "undefined" && (value.includes("var(") || value.includes("light-dark"))) {
-    const parent = svg.parentElement ?? document.body;
-    const probe = document.createElement("span");
-    probe.style.color = value;
-    parent.append(probe);
-    const got = getComputedStyle(probe).color;
-    probe.remove();
-    if (got && !got.includes("var(") && !got.includes("light-dark")) resolved = got;
+  if (value.includes("var(") || value.includes("light-dark")) {
+    const stat = authorStyles() ? null : staticColor(value, svg);
+    if (stat && !stat.includes("var(") && !stat.includes("light-dark")) resolved = stat;
+    else resolved = probeColor(svg, value) || value;
   }
-  colorCache.set(value, resolved);
-  return resolved;
+  return remember(paintCache, svg, value, resolved);
 }
 
 function strokeWidthOf(svg: SVGSVGElement, mark: SceneMark): number {
   const raw = Number(mark.strokePaint);
-  if (Number.isFinite(raw) && mark.strokePaint !== "") return raw;
-  if (typeof document === "undefined") return mark.strokeWidth || 2;
-  const probe = document.createElementNS("http://www.w3.org/2000/svg", "line");
-  probe.setAttribute("stroke-width", mark.strokePaint || String(mark.strokeWidth || 2));
-  svg.append(probe);
-  const parsed = Number.parseFloat(getComputedStyle(probe).strokeWidth);
-  probe.remove();
-  return Number.isFinite(parsed) ? parsed : mark.strokeWidth || 2;
+  if (mark.strokePaint !== "" && Number.isFinite(raw) && !mark.strokePaint.includes("var(")) return raw;
+  const key = mark.strokePaint || String(mark.strokeWidth || 2);
+  const hit = numberCache.get(svg)?.get(key);
+  if (hit !== undefined) return hit;
+  const stat = authorStyles() ? null : staticNumber(svg, key);
+  const parsed = stat ?? probeLength(svg, "line", "stroke-width", "strokeWidth", key, mark.strokeWidth || 2);
+  return remember(numberCache, svg, key, parsed);
 }
 
 function fillAlpha(svg: SVGSVGElement, mark: SceneMark): number {
   const raw = Number(mark.fillPaint);
   if (Number.isFinite(raw) && !mark.fillPaint.includes("var(")) return raw;
-  if (typeof document === "undefined") return mark.fillOpacity;
-  const probe = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-  probe.setAttribute("fill-opacity", mark.fillPaint || String(mark.fillOpacity));
-  svg.append(probe);
-  const parsed = Number.parseFloat(getComputedStyle(probe).fillOpacity);
+  const key = mark.fillPaint || String(mark.fillOpacity);
+  const hit = numberCache.get(svg)?.get(`fill:${key}`);
+  if (hit !== undefined) return hit;
+  const stat = authorStyles() ? null : staticNumber(svg, key);
+  const parsed = stat ?? probeLength(svg, "rect", "fill-opacity", "fillOpacity", key, mark.fillOpacity);
+  return remember(numberCache, svg, `fill:${key}`, parsed);
+}
+
+function remember<T>(map: WeakMap<Element, Map<string, T>>, el: Element, key: string, value: T): T {
+  let bucket = map.get(el);
+  if (!bucket) {
+    bucket = new Map();
+    map.set(el, bucket);
+  }
+  bucket.set(key, value);
+  return value;
+}
+
+/** Author stylesheets can override a custom property. An empty document cannot. */
+function authorStyles(): boolean {
+  if (typeof document === "undefined") return false;
+  if (document.styleSheets.length > 0) return true;
+  const adopted = (document as Document & { adoptedStyleSheets?: unknown[] }).adoptedStyleSheets;
+  return Array.isArray(adopted) && adopted.length > 0;
+}
+
+function schemeDark(): boolean {
+  if (typeof document === "undefined") return false;
+  const inline = document.documentElement?.style?.colorScheme;
+  if (inline === "dark") return true;
+  if (inline === "light") return false;
+  return typeof matchMedia === "function" && matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+function inlineCustom(el: Element, name: string): string {
+  for (let node: Element | null = el; node; node = node.parentElement) {
+    if (node instanceof HTMLElement || node instanceof SVGElement) {
+      const value = node.style.getPropertyValue(name).trim();
+      if (value) return value;
+    }
+  }
+  return "";
+}
+
+function splitArgs(body: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i];
+    if (ch === "(") depth += 1;
+    else if (ch === ")") depth -= 1;
+    else if (ch === "," && depth === 0) {
+      out.push(body.slice(start, i).trim());
+      start = i + 1;
+    }
+  }
+  out.push(body.slice(start).trim());
+  return out;
+}
+
+/** Resolve var() and light-dark() from fallbacks. Null when a stylesheet may override them. */
+function staticColor(value: string, el: Element): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith("light-dark(") && trimmed.endsWith(")")) {
+    const inner = splitArgs(trimmed.slice("light-dark(".length, -1));
+    if (inner.length !== 2) return null;
+    return staticColor(schemeDark() ? inner[1] : inner[0], el);
+  }
+  if (trimmed.startsWith("var(") && trimmed.endsWith(")")) {
+    const inner = splitArgs(trimmed.slice(4, -1));
+    if (inner.length === 0) return null;
+    const name = inner[0];
+    if (!name.startsWith("--")) return null;
+    const set = inlineCustom(el, name);
+    if (set) return staticColor(set, el);
+    if (inner.length < 2) return null;
+    return staticColor(inner.slice(1).join(", "), el);
+  }
+  if (trimmed.includes("var(") || trimmed.includes("light-dark(")) return null;
+  return trimmed;
+}
+
+function staticNumber(el: Element, value: string): number | null {
+  const color = staticColor(value, el);
+  if (color === null) return null;
+  const parsed = Number(color);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function probeColor(svg: SVGSVGElement, value: string): string {
+  if (typeof document === "undefined") return "";
+  const parent = svg.parentElement ?? document.body;
+  const probe = document.createElement("span");
+  probe.style.color = value;
+  parent.append(probe);
+  const got = getComputedStyle(probe).color;
   probe.remove();
-  return Number.isFinite(parsed) ? parsed : mark.fillOpacity;
+  if (got && !got.includes("var(") && !got.includes("light-dark")) return got;
+  return "";
+}
+
+function probeLength(
+  svg: SVGSVGElement,
+  tag: "line" | "rect",
+  attr: string,
+  prop: "strokeWidth" | "fillOpacity",
+  paint: string,
+  fallback: number,
+): number {
+  if (typeof document === "undefined") return fallback;
+  const probe = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  probe.setAttribute(attr, paint);
+  svg.append(probe);
+  const parsed = Number.parseFloat(getComputedStyle(probe)[prop]);
+  probe.remove();
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function hitFor(frame: SceneFrame): DataHit | null {

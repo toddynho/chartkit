@@ -16,39 +16,38 @@ const MODES: { id: Mode; label: string }[] = [
 ];
 
 /**
- * A sensor trace: a few slow waves, a drift, small noise, sharp spikes, and short outages.
- * Spikes and outages are finite values, so minmax and LTTB can keep them.
+ * A sensor trace: several slow cycles, a small drift, tiny noise, narrow spikes, and short outages.
+ * The noise stays well under the cycle so downsampling does not paint a solid band.
+ * Spikes and outages span a few samples so minmax and LTTB both keep them.
  */
+function reading(index: number, period: number): number {
+  const cycle = (index / period) * Math.PI * 2;
+  const wave = Math.sin(cycle) * 18 + Math.sin(cycle * 3) * 4;
+  const drift = (index / MILLION) * 6;
+  const noise = ((((Math.imul(index, 1664525) + 1013904223) >>> 0) / 4294967296) - 0.5) * 0.8;
+  return wave + drift + noise;
+}
+
 function sensor(n: number, origin: number): { x: Float64Array; y: Float64Array } {
   const x = new Float64Array(n);
   const y = new Float64Array(n);
-  const period = Math.max(8, n / 4);
+  const period = Math.max(24, n / 6);
   for (let i = 0; i < n; i++) {
     const t = origin + i;
     x[i] = t;
-    const wave = Math.sin((t / period) * Math.PI * 2) * 16;
-    const drift = (t / MILLION) * 10;
-    const noise = ((((Math.imul(t, 1664525) + 1013904223) >>> 0) / 4294967296) - 0.5) * 2.4;
-    y[i] = wave + drift + noise;
+    y[i] = reading(t, period);
   }
-  const spikeEvery = Math.max(1, Math.floor(n / 8));
-  for (let s = Math.floor(spikeEvery * 0.7); s < n; s += spikeEvery) {
-    y[s] = 46;
-    if (s + 1 < n) y[s + 1] = 32;
+  const spikeEvery = Math.max(1, Math.floor(n / 6));
+  for (let s = Math.floor(spikeEvery * 0.45); s < n; s += spikeEvery) {
+    const width = Math.max(3, Math.floor(n / 200_000));
+    for (let k = 0; k < width && s + k < n; k++) y[s + k] = k === 0 || k === width - 1 ? 36 : 52;
   }
-  for (const at of [0.22, 0.61]) {
+  for (const at of [0.18, 0.57]) {
     const start = Math.floor(n * at);
-    const end = Math.min(n, start + Math.max(12, Math.floor(n / 8000)));
-    for (let i = start; i < end; i++) y[i] = -12;
+    const end = Math.min(n, start + Math.max(8, Math.floor(n / 12000)));
+    for (let i = start; i < end; i++) y[i] = -14;
   }
   return { x, y };
-}
-
-function reading(index: number, period: number): number {
-  const wave = Math.sin((index / period) * Math.PI * 2) * 16;
-  const drift = (index / MILLION) * 10;
-  const noise = ((((Math.imul(index, 1664525) + 1013904223) >>> 0) / 4294967296) - 0.5) * 2.4;
-  return wave + drift + noise;
 }
 
 function lineSpec(x: Float64Array, y: Float64Array, mode: Mode, title: string, alt: string): ChartSpec {
@@ -125,7 +124,7 @@ export function LargeDemo() {
       };
       reportStream();
       let phase = WINDOW;
-      const period = WINDOW / 4;
+      const period = WINDOW / 6;
       const tick = () => {
         if (!alive || !stream) return;
         const batch = Array.from({ length: 24 }, (_, i) => {
