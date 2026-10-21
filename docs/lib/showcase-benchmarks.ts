@@ -121,6 +121,18 @@ export function benchmarkCharts(): ChartSlot[] {
   const low = Math.min(...gaps, 0);
   const high = Math.max(...gaps, 0);
 
+  const smallest = bundles.reduce((a, b) => (a.bytes < b.bytes ? a : b));
+  const largest = bundles.reduce((a, b) => (a.bytes > b.bytes ? a : b));
+  const chartkit = bundles.find((item) => item.name === "ChartKit");
+  const uplot = bundles.find((item) => item.name === "uPlot");
+  const bundleLoss = chartkit != null && uplot != null && chartkit.bytes > uplot.bytes;
+  const bundleAlt = bundleLoss
+    ? `uPlot’s line is the smallest bar. ChartKit’s measured line is larger, ${chartkit.bytes.toLocaleString("en-US")} bytes against uPlot’s ${uplot.bytes.toLocaleString("en-US")}. ${largest.name} is the largest on this log scale.`
+    : `${smallest.name}’s measured line is the smallest bar. ${largest.name} is the largest on this log scale.`;
+  const bundleCaption = bundleLoss
+    ? "Log scale. ChartKit is the size script and is larger than uPlot. The other bars are the bench line, using the React-external gzip when that row has one. uPlot’s CSS is a separate measured file and is not added to its bar."
+    : "Log scale. ChartKit is the size script. The other bars are the bench line, using the React-external gzip when that row has one. uPlot’s CSS is a separate measured file and is not added to its bar.";
+
   const hover = bench.hoverSteady100k
     .filter((row) => row.lib === "ChartKit" || row.lib === "uPlot" || row.lib === "Chart.js" || row.lib === "Observable Plot" || row.lib === "Recharts" || row.lib === "ECharts")
     .map((row) => ({ lib: row.lib, ms: row.paintedMs }));
@@ -129,7 +141,7 @@ export function benchmarkCharts(): ChartSlot[] {
     {
       id: "bundles",
       title: "Line chart, gzip",
-      caption: "Log scale. ChartKit is the size script. The other bars are the bench line, using the React-external gzip when that row has one. uPlot’s CSS is a separate measured file and is not added to its bar.",
+      caption: bundleCaption,
       span: "board-12",
       spec: {
         version: "1",
@@ -146,7 +158,7 @@ export function benchmarkCharts(): ChartSlot[] {
         tooltip: { position: "top", fields: [{ field: "bytes", title: "Gzip bytes" }] },
         interaction: { select: "point" },
         size: { width: 980, height: 460, padding: { left: 72 } },
-        a11y: { alt: "ChartKit’s measured line is the smallest bar. ECharts is the largest on this log scale." },
+        a11y: { alt: bundleAlt },
       },
     },
     {

@@ -1,9 +1,10 @@
 /**
- * Round 13 browser, bundle, and SSR figures, measured 2026-10-18 on phase 2
+ * Round 13 browser and SSR figures, measured 2026-10-18 on phase 2
  * `d8dcc5a` (PR #10). Medians are the middle of five samples in the jsonl rows.
  * The agent eval was not re-run; those scores stay the 2026-10-16 run.
- * This docs branch does not contain `d8dcc5a`.
+ * Bundle bytes are read from docs/data/measured-sizes.json, not from that commit.
  */
+import { measuredBundle } from "./bundle-measured.ts";
 
 export const ROUND = 13;
 export const MEASURED = "2026-10-18";
@@ -14,10 +15,19 @@ export const updateMethod =
   "The aligned update starts at the top of a requestAnimationFrame. The harness awaits the library's own completion, then reads the clock from a MessageChannel task after that frame's style, layout, and paint. GPU and raster time is not in the number. ChartKit is measured through mount(element, spec).update(spec), the same shape as uPlot's setData. The figure is the median of five samples.";
 
 export const headline = {
-  lineGzipLabel: "14.9 KB",
-  lineGzipBytes: "14,858",
-  nextLib: "uPlot",
-  nextGzipBytes: "23,109",
+  lineGzipLabel: measuredBundle.headline.lineGzipLabel,
+  lineGzipBytes: measuredBundle.headline.lineGzipBytes,
+  nextLib: measuredBundle.headline.nextLib,
+  nextGzipBytes: measuredBundle.headline.nextGzipBytes,
+  uplotJsBytes: measuredBundle.headline.uplotJsBytes,
+  uplotCssBytes: measuredBundle.headline.uplotCssBytes,
+  uplotSumBytes: measuredBundle.headline.uplotSumBytes,
+  sizeCommit: measuredBundle.headline.sizeCommit,
+  sizeMeasured: measuredBundle.headline.sizeMeasured,
+  harnessLineBytes: measuredBundle.headline.harnessLineBytes,
+  bundleLoss: measuredBundle.headline.bundleLoss,
+  lineWins: measuredBundle.headline.lineWins,
+  donutWin: measuredBundle.headline.donutWin,
   ssrLabel: "0.85 ms",
   repairFrom: "20/42",
   repairTo: "42/42",
@@ -37,17 +47,9 @@ export const bundleRace: Race = {
   id: "bundle-gzip",
   title: "Line chart, gzip",
   unit: "KB",
-  alt: "ChartKit’s line entry is 14.9 KB gzip. uPlot is 23.1, Chart.js is 49.2, Nivo is 95.5, Recharts is 95.8, and Plot is 97.2. ECharts is 162 KB and is off this scale.",
-  caption:
-    "The ChartKit bar is scripts/size.mjs on phase 2 d8dcc5a: 14,858 bytes gzip. uPlot is the harness line plus its stylesheet, 23,109 bytes. ECharts modular line is 162,391 bytes and is left off the chart.",
-  rows: [
-    { lib: "ChartKit", value: 14.9 },
-    { lib: "uPlot", value: 23.1 },
-    { lib: "Chart.js", value: 49.2 },
-    { lib: "Nivo", value: 95.5 },
-    { lib: "Recharts", value: 95.8 },
-    { lib: "Plot", value: 97.2 },
-  ],
+  alt: measuredBundle.alt,
+  caption: measuredBundle.caption,
+  rows: measuredBundle.raceRows,
 };
 
 export const initial1k: Race = {
@@ -152,18 +154,7 @@ export const samplingRows = [
   { points: "1,000,000", initial: "471.8", update: "462.4" },
 ] as const;
 
-export const bundleRows = [
-  { lib: "ChartKit line", gzip: "14,858", note: "scripts/size.mjs on phase 2 d8dcc5a, 2026-10-18. The harness chartkit-minimal line is 14,987." },
-  { lib: "uPlot", gzip: "23,109", note: "Harness line. JS plus the published stylesheet, gzipped separately and summed." },
-  { lib: "Chart.js", gzip: "49,234", note: "Harness line." },
-  { lib: "Observable Plot", gzip: "97,215", note: "Harness line. No donut." },
-  { lib: "Recharts", gzip: "95,807", note: "Harness line, React external. With React included: 99,308." },
-  { lib: "Nivo", gzip: "95,493", note: "Harness line, React external. With React included: 99,550." },
-  { lib: "ECharts", gzip: "162,391", note: "Harness modular line: echarts/core plus one series." },
-  { lib: "ChartKit bar", gzip: "13,022", note: "Harness chartkit-minimal bar." },
-  { lib: "ChartKit donut", gzip: "6,683", note: "Harness chartkit-minimal donut." },
-  { lib: "ChartKit /all", gzip: "26,715", note: "Harness /all. scripts/size.mjs measured all at 26,673 on the same day." },
-] as const;
+export const bundleRows = measuredBundle.bundleRows;
 
 export const ssrRows = [
   { lib: "ChartKit minimal", mean: "0.85", median: "0.85", status: "SVG, no DOM. Mean of 8 calls after 2 warmups. Min 0.73, max 1.01." },
@@ -179,23 +170,11 @@ export const agentRows = [
   { lib: "Chart.js", noFirst: "42 / 42", noTwo: "42 / 42", offFirst: "42 / 42", offTwo: "42 / 42", tokens: "294.6 / 260.9" },
 ] as const;
 
-/** Machine-readable round 13 numbers. Display strings above must start with these values. */
+/** Machine-readable round 13 timings, plus the current bundle measurement. Display strings above must match these values. */
 export const published = {
-  bundleGzip: [
-    { id: "chartkit-line", lib: "ChartKit", entry: "size script line, phase 2 d8dcc5a", bytes: 14858, reactExternal: false },
-    { id: "chartkit-line-harness", lib: "ChartKit", entry: "harness minimal line", bytes: 14987, reactExternal: false },
-    { id: "chartkit-bar", lib: "ChartKit", entry: "harness minimal bar", bytes: 13022, reactExternal: false },
-    { id: "chartkit-donut", lib: "ChartKit", entry: "harness minimal donut", bytes: 6683, reactExternal: false },
-    { id: "chartkit-all", lib: "ChartKit", entry: "harness /all", bytes: 26715, reactExternal: false },
-    { id: "uplot", lib: "uPlot", entry: "line plus stylesheet", bytes: 23109, reactExternal: false },
-    { id: "chartjs", lib: "Chart.js", entry: "line", bytes: 49234, reactExternal: false },
-    { id: "plot", lib: "Observable Plot", entry: "line", bytes: 97215, reactExternal: false },
-    { id: "recharts", lib: "Recharts", entry: "line, React external", bytes: 95807, reactExternal: true },
-    { id: "nivo", lib: "Nivo", entry: "line, React external", bytes: 95493, reactExternal: true },
-    { id: "echarts", lib: "ECharts", entry: "echarts/core plus one series", bytes: 162391, reactExternal: false },
-  ],
-  sizeScriptLineBytes: 14858,
-  sizeScriptAllBytes: 26673,
+  bundleGzip: measuredBundle.bundleGzip,
+  sizeScriptLineBytes: measuredBundle.lineBytes,
+  sizeScriptAllBytes: measuredBundle.allBytes,
   browser: [
     { shape: "even", points: 1000, chartkit: { initial: 11.3, update: 1.5 }, uplot: { initial: 12.0, update: 1.2 }, result: "win-initial-loss-update" },
     { shape: "even", points: 10000, chartkit: { initial: 13.2, update: 1.9 }, uplot: { initial: 14.8, update: 1.7 }, result: "win-initial-loss-update" },
@@ -255,8 +234,11 @@ export function assertPublishedMatchesDisplay(): void {
   if (!bundleLine || headline.lineGzipBytes.replace(/,/g, "") !== String(bundleLine.bytes)) {
     throw new Error("headline line gzip does not match published.bundleGzip");
   }
-  if (!uplot || headline.nextGzipBytes.replace(/,/g, "") !== String(uplot.bytes)) {
-    throw new Error("headline uPlot gzip does not match published.bundleGzip");
+  if (!uplot || headline.uplotSumBytes.replace(/,/g, "") !== String(uplot.bytes)) {
+    throw new Error("headline uPlot sum does not match published.bundleGzip");
+  }
+  if (headline.nextGzipBytes.replace(/,/g, "") !== headline.uplotJsBytes.replace(/,/g, "")) {
+    throw new Error("headline uPlot JS gzip drifted");
   }
   if (headline.ssrLabel !== `${published.ssr[0].meanMs} ms`) {
     throw new Error("headline SSR does not match published.ssr");

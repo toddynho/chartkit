@@ -33,16 +33,22 @@ export function benchmarksPayload() {
       updates: updateMethod,
       sampling:
         "mark.sampling defaults to auto and minmax-downsamples a line longer than twice the plot width. 1,000 points stay complete. The samplingNone rows draw every point and use the same aligned update timer.",
-      bundle: "gzip -9. ChartKit’s headline line is scripts/size.mjs. Competitor rows and the harness chartkit-minimal line are the bench harness. uPlot adds its stylesheet, gzipped separately.",
+      bundle: "gzip -9. ChartKit’s headline line is scripts/size.mjs. Competitor rows and the harness chartkit-minimal line are the bench harness. uPlot’s JS and stylesheet are gzipped separately and the uPlot row sums those two responses. The JS figure is the loss named in the headline.",
       ssr: "Mean and median of 8 calls after 2 warmups, a 1,000 point line. supported false means no chart without a DOM. Recharts returned an empty wrapper.",
       agents: `${published.model}, temperature ${published.temperature}, ${published.tasks} tasks, one run on ${AGENT_MEASURED}. Not re-run for round 13. Official means the library docs were in the prompt. ChartKit docs are llms.txt. repair() is a no-model step on ChartKit's no-docs first try and is not a second model call. Nivo and uPlot were not in the agent eval.`,
     },
     headline: {
       lineGzipBytes: published.bundleGzip.find((row) => row.id === "chartkit-line")?.bytes,
-      lineGzipBuild: "phase-2-d8dcc5a",
-      lineGzipMeasured: MEASURED,
-      otherFigures: "round 13, measured 2026-10-18 on phase 2 d8dcc5a, except the agent eval",
-      nextSmallest: { lib: "uPlot", bytes: published.bundleGzip.find((row) => row.id === "uplot")?.bytes },
+      lineGzipCommit: headline.sizeCommit,
+      lineGzipMeasured: headline.sizeMeasured,
+      otherFigures: "round 13, measured 2026-10-18 on phase 2 d8dcc5a, except the agent eval and the bundle rows",
+      bundleVsUplot: {
+        chartkitBytes: published.sizeScriptLineBytes,
+        uplotJsBytes: Number(headline.uplotJsBytes.replace(/,/g, "")),
+        uplotCssBytes: Number(headline.uplotCssBytes.replace(/,/g, "")),
+        uplotSumBytes: published.bundleGzip.find((row) => row.id === "uplot")?.bytes,
+        result: published.sizeScriptLineBytes > Number(headline.uplotJsBytes.replace(/,/g, "")) ? "loss" : "not-a-loss",
+      },
       ssrMeanMs: published.ssr[0].meanMs,
       repairNoDocs: { first: published.agents[0].noDocsFirst, afterRepair: published.agents[0].noDocsWithinTwo },
     },
@@ -55,6 +61,7 @@ export function benchmarksPayload() {
     ssrMs: published.ssr,
     agents: published.agents,
     losses: [
+      `Line bundle: ChartKit ${headline.lineGzipBytes} bytes gzip, uPlot ${headline.uplotJsBytes} bytes of JS. The stylesheet is ${headline.uplotCssBytes} bytes more (${headline.uplotSumBytes} summed).`,
       "Aligned update, even x, 1,000 points: ChartKit 1.5 ms, uPlot 1.2 ms.",
       "Aligned update, even x, 10,000 points: ChartKit 1.9 ms, uPlot 1.7 ms.",
       "Aligned update, jittered x, 1,000 points: ChartKit 1.6 ms, uPlot 1.4 ms.",
@@ -166,7 +173,7 @@ Machine-readable copy: ${doc.urls.json} (schema ${doc.urls.schema}). HTML page: 
 
 ## Headline
 
-- Smallest line chart: **${headline.lineGzipBytes} bytes** gzip, \`scripts/size.mjs\` on phase 2 \`${doc.core.commit}\`. Next is ${headline.nextLib} at ${headline.nextGzipBytes} bytes. The harness minimal line is 14,987 bytes.
+- Line chart: **${headline.lineGzipBytes} bytes** gzip, \`scripts/size.mjs\` on \`${headline.sizeCommit}\`, measured ${headline.sizeMeasured}. ${headline.bundleLoss} ${headline.lineWins} The harness minimal line is ${headline.harnessLineBytes} bytes. ${headline.donutWin}
 - Initial render: ChartKit is faster than uPlot in all 12 cells. Even 1,000,000 points is 23.6 ms vs 26.5 ms.
 - Aligned update: ChartKit wins 6 of 12 cells against uPlot and loses the 6 listed below. It is not a sweep.
 - Server render: **${headline.ssrLabel}** mean (median ${published.ssr[0].medianMs} ms).

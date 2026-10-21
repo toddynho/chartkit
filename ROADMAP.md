@@ -37,6 +37,7 @@ Earlier v1 work. 32 chart types draw: 15 in the first core, eight in Phase 3, fi
 - [x] Canvas marks for line, area, scatter, bar, heatmap, and candlestick, with SVG axes, plus LTTB and min-max sampling on columnar data ([#42](https://github.com/toddynho/chartkit/pull/42))
 - [x] Linked interactions: an overview navigator, a shared crosshair, tooltip, and zoom, and drilldown into a child spec ([#44](https://github.com/toddynho/chartkit/pull/44))
 - [x] Small multiples, breakpoint rules, composed dashboards, and right-to-left layout ([#45](https://github.com/toddynho/chartkit/pull/45))
+- [x] Maps: choropleth and point maps in unpublished `@chartkitdev/geo` ([#46](https://github.com/toddynho/chartkit/pull/46))
 
 ## In progress
 
@@ -49,7 +50,6 @@ Earlier v1 work. 32 chart types draw: 15 in the first core, eight in Phase 3, fi
 
 ## Later
 
-- [ ] Maps
 - [ ] More chart types
 
 ## Then
