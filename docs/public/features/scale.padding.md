@@ -72,6 +72,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~clamp | dts-grep (weak) | @antv/g2/lib/utils/number.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 507c518833a4.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
 
 https://chartkit.dev/features.json
