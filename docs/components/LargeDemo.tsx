@@ -44,7 +44,7 @@ function sensor(n: number, origin: number): { x: Float64Array; y: Float64Array }
   }
   for (const at of [0.18, 0.62]) {
     const start = Math.floor(n * at);
-    const end = Math.min(n, start + Math.max(24, Math.floor(n * 0.018)));
+    const end = Math.min(n, start + Math.max(24, Math.floor(n * 0.045)));
     for (let i = start; i < end; i++) y[i] = Number.NaN;
   }
   return { x, y };
