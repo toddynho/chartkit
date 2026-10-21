@@ -1,12 +1,73 @@
 # Small multiples / faceting
 
-ChartKit: **none**
+ChartKit: **native**
 
 Repeat a chart per category in a grid
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+layout.facet splits one chart by a field into a rows and columns grid. wrap flows extra panels. scales is shared or independent. legend shared draws one legend. A missing field warns CK3040. An unknown field warns CK3041. columns or rows outside 1 to 12 warn CK3042 and CK3043. wrap false with too many categories warns CK3049.
+
+Source: packages/core/src/layout.ts
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "region": "North",
+      "units": 40,
+      "cost": 10
+    },
+    {
+      "quarter": "Q2",
+      "region": "North",
+      "units": 55,
+      "cost": 11
+    },
+    {
+      "quarter": "Q1",
+      "region": "South",
+      "units": 22,
+      "cost": 12
+    },
+    {
+      "quarter": "Q2",
+      "region": "South",
+      "units": 31,
+      "cost": 13
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": [
+      "units",
+      "cost"
+    ]
+  },
+  "a11y": {
+    "alt": "North stays above South in both quarters."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "layout": {
+    "facet": {
+      "field": "region",
+      "columns": 2,
+      "scales": "shared",
+      "legend": "shared"
+    }
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -33,6 +94,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~facetRect | dts-grep (weak) | @antv/g2/lib/index.d.ts:161 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 67d25e30b540.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 507c518833a4.
 
 https://chartkit.dev/features.json

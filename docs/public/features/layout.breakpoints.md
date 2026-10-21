@@ -1,14 +1,59 @@
 # Responsive rules / breakpoints
 
-ChartKit: **none**
+ChartKit: **native**
 
 Different options at different container sizes
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-single layout; no breakpoint rules
+layout.breakpoints is a list of rules. The first rule whose maxWidth or minWidth matches size.width, or the container width when width is auto, overrides legend, direction, facet columns, or concat direction. A non-positive maxWidth warns CK3046. columns without a facet field warns CK3047.
 
-No spec snippet. ChartKit does not support this feature.
+Source: packages/core/src/layout.ts
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40,
+      "cost": 12
+    },
+    {
+      "quarter": "Q2",
+      "units": 55,
+      "cost": 15
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": [
+      "units",
+      "cost"
+    ]
+  },
+  "a11y": {
+    "alt": "The legend hides below 480px."
+  },
+  "size": {
+    "width": 320,
+    "height": 220
+  },
+  "layout": {
+    "breakpoints": [
+      {
+        "maxWidth": 480,
+        "legend": false
+      }
+    ]
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -35,6 +80,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | none | — | dts-absence (absence) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 67d25e30b540.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 507c518833a4.
 
 https://chartkit.dev/features.json
