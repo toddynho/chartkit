@@ -73,8 +73,29 @@ function renderWith(map: Map<string, ChartRenderer>, spec: unknown, target?: Ren
       },
     ]);
   }
+  svg = stampInteraction(svg, spec);
   if (target) target.innerHTML = svg;
   return svg;
+}
+
+/** Records navigator, sync, and drilldown on the SVG. The controls mount on the client. */
+function stampInteraction(svg: string, spec: unknown): string {
+  if (!svg.startsWith("<svg") || !isRecord(spec) || !isRecord(spec.interaction)) return svg;
+  const interaction = spec.interaction;
+  const attrs: string[] = [];
+  const nav = interaction.navigator;
+  if (nav === true || isRecord(nav)) {
+    attrs.push('data-ck-nav="1"');
+    if (isRecord(nav) && typeof nav.height === "number" && Number.isFinite(nav.height)) attrs.push(`data-ck-nav-h="${Math.round(nav.height)}"`);
+  }
+  if (typeof interaction.sync === "string" && interaction.sync.length > 0) attrs.push(`data-ck-sync="${esc(interaction.sync)}"`);
+  const drill = interaction.drilldown;
+  if (isRecord(drill) && isRecord(drill.children)) {
+    const keys = Object.keys(drill.children);
+    if (keys.length) attrs.push(`data-ck-drill="${esc(keys.join(","))}"`);
+  }
+  if (!attrs.length) return svg;
+  return `<svg ${attrs.join(" ")}${svg.slice(4)}`;
 }
 
 function unregistered(type: string): Diagnostic {

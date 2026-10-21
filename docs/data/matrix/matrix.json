@@ -66828,20 +66828,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:navigator)['\"`]|(?:^|[\\s{,;])\\w*(?:navigator)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:navigator)"
+            "interaction.navigator"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:navigator)['\"`]|(?:^|[\\s{,;])\\w*(?:navigator)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:navigator)"
+              "kind": "runtime-probe",
+              "path": "interaction.navigator",
+              "loc": "packages/core/src/interact-extra.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "interaction.navigator is true or { height }. The client mounts an overview and a keyboard range slider. The server SVG records data-ck-nav and does not include the control. A type with no x window warns CK3034. A height outside 28 to 96 warns CK3035.",
+          "verified": "runtime-probe",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "none",
@@ -67195,20 +67196,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:drilldown)['\"`]|(?:^|[\\s{,;])\\w*(?:drilldown)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:drilldown)"
+            "interaction.drilldown"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:drilldown)['\"`]|(?:^|[\\s{,;])\\w*(?:drilldown)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:drilldown)"
+              "kind": "runtime-probe",
+              "path": "interaction.drilldown",
+              "loc": "packages/core/src/interact.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "interaction.drilldown.children maps a category to a child JSON spec. Click, Enter, or Space swaps to that spec. Back and Escape pop. The server SVG lists the keys on data-ck-drill. An empty map warns CK3037. A child with no type warns CK3038. A key that is not a field warns CK3039.",
+          "verified": "runtime-probe",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "manual",
@@ -68257,14 +68259,20 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:sync)['\"`]|(?:^|[\\s{,;])\\w*(?:sync)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:sync)"
+            "interaction.sync"
           ],
-          "evidence": [],
-          "note": "probe hit reviewed: match is fromMermaidAsync",
-          "verified": "source-review",
+          "evidence": [
+            {
+              "kind": "runtime-probe",
+              "path": "interaction.sync",
+              "loc": "packages/core/src/sync-group.ts"
+            }
+          ],
+          "note": "interaction.sync is a group id. Charts with that id share the crosshair, tooltip, and x window, matched on the x value. The server SVG records data-ck-sync. An empty id warns CK3036.",
+          "verified": "runtime-probe",
           "strength": "strong"
         },
         "chartjs": {

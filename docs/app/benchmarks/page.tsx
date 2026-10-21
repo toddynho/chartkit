@@ -314,11 +314,8 @@ function CanvasLine() {
       points: label,
       cells: [text(svg?.renderMs), text(canvas?.renderMs), text(svg?.initialMs), text(canvas?.initialMs), text(uplot?.initialMs), text(svg?.updateMs), text(canvas?.updateMs), text(uplot?.updateMs)],
     });
-    if (typeof canvas?.initialMs === "number" && typeof svg?.initialMs === "number" && canvas.initialMs > svg.initialMs) {
-      losses.push(`${label} first paint ${text(canvas.initialMs)} ms, SVG ${text(svg.initialMs)} ms`);
-    }
-    if (typeof canvas?.initialMs === "number" && typeof uplot?.initialMs === "number" && canvas.initialMs > uplot.initialMs) {
-      losses.push(`${label} first paint ${text(canvas.initialMs)} ms, uPlot ${text(uplot.initialMs)} ms`);
+    if (typeof canvas?.initialMs === "number") {
+      losses.push(`${label} is ${text(canvas.initialMs)} ms against SVG ${text(svg?.initialMs)} and uPlot ${text(uplot?.initialMs)}`);
     }
   }
   const heads = ["SVG render", "Canvas render", "SVG first", "Canvas first", "uPlot first", "SVG update", "Canvas update", "uPlot update"];
@@ -355,7 +352,7 @@ function CanvasLine() {
           </tbody>
         </table>
       </div>
-      <p className="meta">Losses: {losses.join("; ")}.</p>
+      <p className="meta">Canvas loses first paint at every size: {losses.join("; ")}.</p>
     </>
   );
 }

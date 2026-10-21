@@ -6,6 +6,8 @@
 import { dataHit, paintScene } from "./canvas/hit-state";
 export { canvasWanted } from "./render-mode";
 import { formatValue } from "./format";
+import { refreshNavigator, unbindNavigator } from "./nav-hook";
+import { joinSync, syncHide, syncHover, syncRange, type SyncMember } from "./sync-group";
 import { formatInstant, instantOf, namedZone } from "./timezone";
 import { readTooltip, type TooltipDetail, type TooltipRender } from "./tooltip-slot";
 
@@ -372,7 +374,7 @@ function ensureCss(): void {
   const style = document.createElement("style");
   style.id = "ck-interact-style";
   style.textContent =
-    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-xlabel{font:11px ui-sans-serif,system-ui,sans-serif;fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-pick{stroke:var(--ck-selected,light-dark(#1d1d1f,#f5f5f7));stroke-width:2}[data-ck-dim]{opacity:var(--ck-dim,.32)}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}";
+    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-xlabel{font:11px ui-sans-serif,system-ui,sans-serif;fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-pick{stroke:var(--ck-selected,light-dark(#1d1d1f,#f5f5f7));stroke-width:2}[data-ck-dim]{opacity:var(--ck-dim,.32)}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.ck-crumb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px;font:12px/1.3 ui-sans-serif,system-ui,sans-serif;color:light-dark(#1d1d1f,#f5f5f7)}.ck-crumb button{font:inherit;color:inherit;background:transparent;border:1px solid light-dark(#0002,#fff3);border-radius:8px;padding:4px 8px;cursor:pointer}.ck-crumb [aria-current]{font-weight:650}";
   document.head.append(style);
 }
 
@@ -612,9 +614,33 @@ function copySelection(value: Selection | null | undefined): Selection {
   };
 }
 
+function interactionOf(spec: InteractSpec): Record<string, unknown> | null {
+  return isRecord(spec.interaction) ? spec.interaction : null;
+}
+
+function navigatorOn(spec: InteractSpec): boolean {
+  const nav = interactionOf(spec)?.navigator;
+  return nav === true || isRecord(nav);
+}
+
+function syncIdOf(spec: InteractSpec): string {
+  const sync = interactionOf(spec)?.sync;
+  return typeof sync === "string" && sync.trim() ? sync : "";
+}
+
+function drillOf(spec: InteractSpec): Record<string, unknown> | null {
+  const drill = interactionOf(spec)?.drilldown;
+  return isRecord(drill) ? drill : null;
+}
+
+function titleOf(spec: InteractSpec): string {
+  return typeof spec.title === "string" && spec.title.trim() ? spec.title : "Overview";
+}
+
 /**
  * Listen on `host` for tooltip, crosshair, legend toggle, clicks, selection,
  * x zoom/pan/brush, enter/update motion, keyboard focus, and an optional data table.
+ * A navigator, sync group, and drilldown stay in the JSON spec.
  * Tears down with `destroy`. Does nothing when the spec leaves interaction off.
  */
 export function attach(host: Element, spec: InteractSpec, options: AttachOptions): Controller {
@@ -668,9 +694,14 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   let picked = copySelection(options.selection);
   let locked = options.selection !== undefined;
   let lit = "";
+  let quiet = false;
+  let leaveSync = () => {};
+  const stack: { spec: InteractSpec; label: string }[] = [];
+  let levelLabel = titleOf(spec);
+  const focusable = () => keys || Boolean(selMode()) || Boolean(drillOf(base));
 
   if (showTip) host.append(tip);
-  if (keys || selMode()) svg.setAttribute("tabindex", "0");
+  if (focusable()) svg.setAttribute("tabindex", "0");
   if (keys) host.append(live);
   const offs: (() => void)[] = [];
   const on = (target: EventTarget, type: string, fn: EventListener, opts?: AddEventListenerOptions) => {
@@ -904,7 +935,10 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function moveCross(x: number, title: string): void {
-    if (!showCross) return;
+    if (!showCross) {
+      publishHover();
+      return;
+    }
     let line = svg.querySelector("[data-ck-crosshair]");
     if (!line) {
       svg.insertAdjacentHTML("beforeend", `<line data-ck-crosshair class="ck-xhair"/>`);
@@ -918,6 +952,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     let label = svg.querySelector("[data-ck-xlabel]");
     if (!showLabel) {
       label?.remove();
+      publishHover();
       return;
     }
     if (!label) {
@@ -932,6 +967,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     label.setAttribute("y", String(Math.round(y)));
     label.setAttribute("text-anchor", anchor);
     label.textContent = title;
+    publishHover();
   }
 
   function hideHover(): void {
@@ -939,6 +975,135 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     svg.querySelector("[data-ck-crosshair]")?.remove();
     svg.querySelector("[data-ck-xlabel]")?.remove();
     clearDots();
+    publishHide();
+  }
+
+  function xNum(index: number): number | null {
+    const field = xField();
+    const raw = field ? table.cell(field, index) : index;
+    if (typeof raw === "number" && Number.isFinite(raw)) return raw;
+    if (typeof raw === "string" && raw.trim() !== "" && Number.isFinite(Number(raw))) return Number(raw);
+    return null;
+  }
+
+  function xKey(index: number): string {
+    const field = xField();
+    const raw = field ? table.cell(field, index) : index;
+    return raw == null ? String(index) : String(raw);
+  }
+
+  function indexForKey(key: string): number {
+    if (n < 1) return 0;
+    const target = Number(key);
+    const first = xNum(0);
+    const last = xNum(n - 1);
+    if (first != null && last != null && Number.isFinite(target) && n > 32) {
+      let loI = 0;
+      let hiI = n - 1;
+      let best = 0;
+      let bestDist = Infinity;
+      while (loI <= hiI) {
+        const mid = (loI + hiI) >> 1;
+        const value = xNum(mid);
+        if (value == null) break;
+        const dist = Math.abs(value - target);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = mid;
+        }
+        if (value === target) return mid;
+        if (value < target) loI = mid + 1;
+        else hiI = mid - 1;
+      }
+      return best;
+    }
+    const field = xField();
+    for (let i = 0; i < n; i++) {
+      const raw = field ? table.cell(field, i) : i;
+      if (String(raw) === key) return i;
+    }
+    if (!Number.isFinite(target)) return 0;
+    let best = 0;
+    let bestDist = Infinity;
+    for (let i = 0; i < n; i++) {
+      const value = xNum(i);
+      if (value == null) continue;
+      const dist = Math.abs(value - target);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = i;
+      }
+    }
+    return best;
+  }
+
+  const member: SyncMember = {
+    hover(key) {
+      const index = indexForKey(key);
+      quiet = true;
+      focus = index;
+      const local = Math.max(0, index - lo);
+      moveCross(crossX(local), xText(index));
+      if (showTip) {
+        const rect = svg.getBoundingClientRect();
+        const parts = (svg.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number);
+        const vw = parts[2] || rect.width || 1;
+        const px = crossX(local);
+        const clientX = rect.left + (px / vw) * (rect.width || vw);
+        const clientY = rect.top + (rect.height || 1) / 2;
+        placeTip(clientX, clientY, xText(index), entriesAt(index, null), [], index);
+      }
+      quiet = false;
+    },
+    hide() {
+      quiet = true;
+      hideHover();
+      quiet = false;
+    },
+    range(from, to) {
+      let start = indexForKey(from);
+      let end = indexForKey(to);
+      if (end < start) {
+        const swap = start;
+        start = end;
+        end = swap;
+      }
+      if (end <= start) end = Math.min(n - 1, start + 1);
+      if (start === lo && end === hi) return;
+      quiet = true;
+      lo = start;
+      hi = Math.min(n - 1, end);
+      redraw();
+      quiet = false;
+    },
+  };
+
+  function bindSync(): void {
+    leaveSync();
+    const id = syncIdOf(base);
+    if (!id) {
+      leaveSync = () => {};
+      return;
+    }
+    leaveSync = joinSync(id, member);
+  }
+
+  function publishHover(): void {
+    const id = syncIdOf(base);
+    if (!id || quiet) return;
+    syncHover(id, member, xKey(focus));
+  }
+
+  function publishHide(): void {
+    const id = syncIdOf(base);
+    if (!id || quiet) return;
+    syncHide(id, member);
+  }
+
+  function publishRange(): void {
+    const id = syncIdOf(base);
+    if (!id || quiet || n < 1) return;
+    syncRange(id, member, xKey(lo), xKey(hi));
   }
 
   function clearDots(): void {
@@ -1177,15 +1342,17 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       dim();
       paintPick();
       arm();
+      refreshNavigator(host);
       return;
     }
     const next = partial ? options.render(nextSpec) : markup ?? options.render(base);
     patchSvg(host as PatchHost, next, ms);
-    if (keys || selMode()) svg.setAttribute("tabindex", "0");
+    if (focusable()) svg.setAttribute("tabindex", "0");
     dim();
     paintPick();
     arm();
     queueCanvas(host, base);
+    refreshNavigator(host);
   }
 
   function choose(next: Selection): void {
@@ -1312,6 +1479,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       const raw = node.getAttribute("data-ck-i");
       index = raw && !raw.includes(" ") ? +raw : indexAt(event.clientX, event.clientY);
     }
+    if (!name) name = series.find((item) => !hidden.has(item.name))?.name || series[0]?.name || "";
     if (!name) return null;
     const picking = selMode();
     if (picking === "point") kind = "point";
@@ -1455,6 +1623,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     if (start === lo && end === hi) return;
     lo = start;
     hi = end;
+    publishRange();
     redraw();
     emit("rangechange", rangeDetail());
   }
@@ -1463,6 +1632,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     if (lo === 0 && hi === n - 1) return;
     lo = 0;
     hi = Math.max(0, n - 1);
+    publishRange();
     redraw();
     emit("rangechange", rangeDetail());
   }
@@ -1563,6 +1733,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       return;
     }
     emit(hit.kind === "point" ? "pointclick" : "seriesclick", payload(hit.name, hit.index, hit.color));
+    if (tryDrill(hit.name, hit.index)) return;
     if (selMode() === "point" && hit.kind === "point") togglePoint(hit.name, hit.index, addKey(event));
     else if (selMode() === "series") toggleSeries(hit.name, addKey(event));
   }) as EventListener);
@@ -1578,6 +1749,11 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       return;
     }
     if (event.key === "Escape") {
+      if (stack.length) {
+        event.preventDefault();
+        popTo(stack.length - 1);
+        return;
+      }
       if (selMode() && (picked.points.length || picked.series.length)) {
         event.preventDefault();
         choose(copySelection(null));
@@ -1589,6 +1765,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     if (!name) return;
     event.preventDefault();
     emit("pointclick", payload(name, focus, inkAt(name, focus) ?? undefined));
+    if (tryDrill(name, focus)) return;
     if (selMode() === "point") togglePoint(name, focus, addKey(event));
     else if (selMode() === "series") toggleSeries(name, addKey(event));
   }) as EventListener);
@@ -1603,7 +1780,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     });
   }
 
-  const wantsExtra = zooming || brush || keys || dataTable;
+  const wantsExtra = zooming || brush || keys || dataTable || navigatorOn(spec) || Boolean(drillOf(spec));
   const ready: Promise<void> = wantsExtra
     ? import("./interact-extra").then((mod) => {
         if (!alive) return;
@@ -1613,7 +1790,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           zooming,
           pan,
           brush,
-          keys,
+          keys || Boolean(drillOf(spec)),
           dataTable,
           showTip,
           () => alive,
@@ -1629,6 +1806,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           (start, end) => {
             lo = start;
             hi = end;
+            publishRange();
           },
           crossX,
           moveCross,
@@ -1641,6 +1819,8 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           },
           announce,
           paintTable,
+          navigatorOn(spec),
+          () => overview(),
         ]);
       })
     : Promise.resolve();
@@ -1659,9 +1839,118 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     if (end > start) {
       lo = start;
       hi = end;
+      publishRange();
       redraw();
     }
   }
+
+  function overview(): number[] {
+    const enc = isRecord(base.encoding) ? base.encoding : {};
+    const y = enc.y;
+    const field = Array.isArray(y) ? fieldOf(y[0]) : fieldOf(y);
+    const out: number[] = [];
+    if (!field || n < 1) return out;
+    const buckets = Math.min(80, n);
+    const step = n / buckets;
+    for (let b = 0; b < buckets; b++) {
+      const start = Math.floor(b * step);
+      const end = Math.min(n, Math.max(start + 1, Math.floor((b + 1) * step)));
+      let loV = Infinity;
+      let hiV = -Infinity;
+      for (let i = start; i < end; i++) {
+        const raw = table.cell(field, i);
+        const num = typeof raw === "number" ? raw : Number(raw);
+        if (num !== num) continue;
+        if (num < loV) loV = num;
+        if (num > hiV) hiV = num;
+      }
+      out.push(loV === Infinity ? Number.NaN : loV, hiV === -Infinity ? Number.NaN : hiV);
+    }
+    return out;
+  }
+
+  function mountCrumb(): void {
+    const existing = host.querySelector("[data-ck-crumb]");
+    if (!stack.length) {
+      existing?.remove();
+      return;
+    }
+    const nav = existing instanceof HTMLElement ? existing : document.createElement("nav");
+    nav.className = "ck-crumb";
+    nav.setAttribute("data-ck-crumb", "");
+    nav.setAttribute("aria-label", "Drilldown");
+    const parts = [`<button type="button" data-ck-back>Back</button>`];
+    for (let i = 0; i < stack.length; i++) parts.push(`<button type="button" data-ck-level="${i}">${esc(stack[i].label)}</button>`);
+    parts.push(`<span aria-current="page">${esc(levelLabel)}</span>`);
+    nav.innerHTML = parts.join("");
+    if (!nav.parentElement) host.insertBefore(nav, host.firstChild);
+  }
+
+  function applyBase(next: InteractSpec): void {
+    base = next;
+    specNow = next;
+    table = openTable(next.data);
+    series = seriesOf(next, table);
+    n = table.n;
+    lo = 0;
+    hi = Math.max(0, n - 1);
+    hidden.clear();
+    focus = 0;
+    picked = copySelection(null);
+    bindSync();
+    redraw();
+    mountCrumb();
+  }
+
+  function popTo(index: number): void {
+    const next = stack[index];
+    if (!next) return;
+    levelLabel = next.label;
+    stack.length = index;
+    applyBase(next.spec);
+  }
+
+  function childFor(name: string, index: number): { key: string; spec: InteractSpec } | null {
+    const dd = drillOf(base);
+    if (!dd || !isRecord(dd.children)) return null;
+    const keyField = typeof dd.key === "string" && dd.key ? dd.key : xField();
+    const guesses = [name];
+    if (keyField && index >= 0 && index < n) {
+      const raw = table.cell(keyField, index);
+      if (raw != null && String(raw) !== "") guesses.unshift(String(raw));
+    }
+    for (const key of guesses) {
+      const child = dd.children[key];
+      if (isRecord(child) && typeof child.type === "string" && child.type) return { key, spec: child as InteractSpec };
+    }
+    return null;
+  }
+
+  function tryDrill(name: string, index: number): boolean {
+    const found = childFor(name, index);
+    if (!found) return false;
+    stack.push({ spec: base, label: levelLabel });
+    levelLabel = found.key;
+    applyBase(found.spec);
+    return true;
+  }
+
+  bindSync();
+  on(host, "click", ((event: MouseEvent) => {
+    const target = event.target as Element | null;
+    if (target?.closest?.("[data-ck-back]")) {
+      popTo(stack.length - 1);
+      return;
+    }
+    const crumb = target?.closest?.("[data-ck-level]");
+    if (!crumb) return;
+    popTo(Number(crumb.getAttribute("data-ck-level")));
+  }) as EventListener);
+  on(host, "keydown", ((event: KeyboardEvent) => {
+    if (event.key !== "Escape" || !stack.length || event.target === svg) return;
+    event.preventDefault();
+    popTo(stack.length - 1);
+  }) as EventListener);
 
   queueCanvas(host, base);
 
@@ -1686,12 +1975,13 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       }
       if (lo === 0 && hi === n - 1 && hidden.size === 0 && markup) {
         patchSvg(host as PatchHost, markup, durationMs(next, n));
-        if (keys || selMode()) svg.setAttribute("tabindex", "0");
+        if (focusable()) svg.setAttribute("tabindex", "0");
         dim();
         paintPick();
         arm();
         paintTable();
         queueCanvas(host, next);
+        refreshNavigator(host);
         return;
       }
       redraw(markup);
@@ -1711,7 +2001,11 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       tip.remove();
       live.remove();
       exportStop();
+      leaveSync();
+      unbindNavigator(host);
       host.querySelector("[data-ck-table-wrap]")?.remove();
+      host.querySelector("[data-ck-navigator]")?.remove();
+      host.querySelector("[data-ck-crumb]")?.remove();
       svg.querySelectorAll("[data-ck-crosshair],[data-ck-brush],[data-ck-dot],[data-ck-pick]").forEach((node) => node.remove());
       if (svg.getAttribute("data-ck-render") === "canvas" || svg.querySelector("[data-ck-canvas]")) {
         void import("./canvas/hydrate").then((mod) => {

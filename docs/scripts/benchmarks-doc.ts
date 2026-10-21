@@ -256,6 +256,33 @@ function ms(value: number | null | undefined): string {
   return typeof value === "number" ? value.toFixed(1) : "—";
 }
 
+/** One paragraph instead of a semicolon for every comparison. */
+function canvasLossSentence(rows: CanvasBenchRow[]): string {
+  const sizes = [10_000, 100_000, 1_000_000];
+  const paints = sizes.map((points) => {
+    const label = points.toLocaleString("en-US");
+    const svg = canvasAt(rows, "chartkit", points);
+    const canvas = canvasAt(rows, "chartkit-canvas", points);
+    const uplot = canvasAt(rows, "uplot", points);
+    return `${label} is ${ms(canvas?.initialMs)} ms against SVG ${ms(svg?.initialMs)} and uPlot ${ms(uplot?.initialMs)}`;
+  });
+  const renders = sizes.map((points) => {
+    const label = points.toLocaleString("en-US");
+    const svg = canvasAt(rows, "chartkit", points);
+    const canvas = canvasAt(rows, "chartkit-canvas", points);
+    return `${label} ${ms(canvas?.renderMs)} vs ${ms(svg?.renderMs)}`;
+  });
+  const updates = sizes.map((points) => {
+    const label = points.toLocaleString("en-US");
+    const svg = canvasAt(rows, "chartkit", points);
+    const canvas = canvasAt(rows, "chartkit-canvas", points);
+    const uplot = canvasAt(rows, "uplot", points);
+    const slower = typeof canvas?.updateMs === "number" && typeof svg?.updateMs === "number" && canvas.updateMs > svg.updateMs;
+    return `${slower ? "loses" : "wins"} ${label} (${ms(canvas?.updateMs)} vs SVG ${ms(svg?.updateMs)} and uPlot ${ms(uplot?.updateMs)})`;
+  });
+  return `Canvas loses first paint at every size: ${paints.join("; ")}. Render is slower at every size: ${renders.join("; ")}. Updates: ${updates.join("; ")}.`;
+}
+
 /** Appendix for the canvas painter. Numbers come from docs/data/canvas-bench.json. */
 export function canvasMarkdown(): string {
   const bench = canvasFile();
@@ -268,34 +295,6 @@ export function canvasMarkdown(): string {
     const label = points.toLocaleString("en-US");
     return `| ${label} | ${ms(svg?.renderMs)} | ${ms(canvas?.renderMs)} | ${ms(svg?.initialMs)} | ${ms(canvas?.initialMs)} | ${ms(uplot?.initialMs)} | ${ms(svg?.updateMs)} | ${ms(canvas?.updateMs)} | ${ms(uplot?.updateMs)} |`;
   });
-  const loss: string[] = [];
-  const win: string[] = [];
-  for (const points of sizes) {
-    const label = points >= 1_000_000 ? "1M" : `${points / 1000}k`;
-    const svg = canvasAt(bench.rows, "chartkit", points);
-    const canvas = canvasAt(bench.rows, "chartkit-canvas", points);
-    const uplot = canvasAt(bench.rows, "uplot", points);
-    if (!svg || !canvas) continue;
-    if (typeof canvas.renderMs === "number" && typeof svg.renderMs === "number" && canvas.renderMs > svg.renderMs) {
-      loss.push(`render at ${label} (${ms(canvas.renderMs)} vs ${ms(svg.renderMs)})`);
-    }
-    if (typeof canvas.initialMs === "number" && typeof svg.initialMs === "number" && canvas.initialMs > svg.initialMs) {
-      loss.push(`first paint vs SVG at ${label} (${ms(canvas.initialMs)} vs ${ms(svg.initialMs)})`);
-    }
-    if (typeof canvas.initialMs === "number" && typeof uplot?.initialMs === "number" && canvas.initialMs > uplot.initialMs) {
-      loss.push(`first paint vs uPlot at ${label} (${ms(canvas.initialMs)} vs ${ms(uplot.initialMs)})`);
-    }
-    if (typeof canvas.updateMs === "number" && typeof svg.updateMs === "number") {
-      const text = `update vs SVG at ${label} (${ms(canvas.updateMs)} vs ${ms(svg.updateMs)})`;
-      if (canvas.updateMs > svg.updateMs) loss.push(text);
-      else win.push(text);
-    }
-    if (typeof canvas.updateMs === "number" && typeof uplot?.updateMs === "number") {
-      const text = `update vs uPlot at ${label} (${ms(canvas.updateMs)} vs ${ms(uplot.updateMs)})`;
-      if (canvas.updateMs > uplot.updateMs) loss.push(text);
-      else win.push(text);
-    }
-  }
   return `
 ## Canvas line, ${bench.measured}
 
@@ -305,6 +304,6 @@ Median of ${bench.samples}, Playwright Chromium, a 640×360 line, sampling auto 
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 ${lines.join("\n")}
 
-Losses: canvas ${loss.join("; ")}. Canvas wins the ${win.join("; ")}.
+${canvasLossSentence(bench.rows)}
 `;
 }

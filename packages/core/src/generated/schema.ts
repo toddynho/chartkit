@@ -3011,7 +3011,7 @@ export interface Size {
       };
 }
 /**
- * What the user can do. Adapters emit events (pointclick, legendtoggle, rangechange) for app code; JSON never contains functions.
+ * What the user can do. Adapters emit events (pointclick, legendtoggle, rangechange) for app code; JSON never contains functions. navigator, sync, and drilldown are JSON too.
  */
 export interface Interaction {
   /**
@@ -3045,6 +3045,36 @@ export interface Interaction {
    * Formats offered by the export menu. The SVG records them as data-ck-export. The menu loads only when this list is set. toPNG, toSVG, and toCSV are @chartkitdev/core/export.
    */
   export?: ("png" | "svg" | "csv")[];
+  /**
+   * Overview sparkline and range slider under the chart. true, or an object with height. The slider loads with the interaction extras. The server SVG records data-ck-nav and does not include the control.
+   */
+  navigator?:
+    | boolean
+    | {
+        /**
+         * Overview height in px. 28 to 96. A value outside that range warns CK3035 and the patch clamps it.
+         */
+        height?: number;
+      };
+  /**
+   * Group id. Charts with the same id share the crosshair, tooltip, and x window, matched on the x value. An empty string warns CK3036.
+   */
+  sync?: string;
+  /**
+   * Click a bar, slice, or node to swap in a child spec. Children are JSON specs keyed by category. The server SVG lists the keys and does not include the breadcrumb.
+   */
+  drilldown?: {
+    /**
+     * Data field that names the child. Default: encoding.x. A name that is not a field warns CK3039.
+     */
+    key?: string;
+    /**
+     * Child specs keyed by category. Each child needs a type. An empty map warns CK3037. A child with no type warns CK3038.
+     */
+    children?: {
+      [k: string]: {};
+    };
+  };
 }
 /**
  * Accessibility. 'alt' is required: a one or two sentence description of what the chart shows and its key takeaway, used as the accessible name/description and for text-only renders (agents should always write it).

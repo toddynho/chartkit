@@ -124,7 +124,10 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
     return;
   }
   const view = prepared.ok ? prepared.table : table;
-  if (known && type) warnCanvas(spec, type, view.length, diagnostics);
+  if (known && type) {
+    warnCanvas(spec, type, view.length, diagnostics);
+    warnInteraction(spec, type, view, diagnostics);
+  }
   if (isRecord(spec.encoding)) checkEncoding(spec, spec.encoding, view, diagnostics);
   if (type === "candlestick") checkCandles(spec, view, diagnostics);
   if (type) checkUncertainty(spec, type, view, diagnostics);
@@ -461,6 +464,99 @@ function checkCandles(spec: Record<string, unknown>, table: DataTable, diagnosti
 }
 
 const SAMPLED = new Set(["line", "stacked-area", "sparkline", "mini-area", "spike", "combo"]);
+
+/** Charts whose x axis is a window the overview can slide. */
+const NAV = new Set(["line", "bar", "stacked-area", "scatter", "combo", "candlestick", "area-range", "sparkline", "mini-area", "spike"]);
+
+function pointerToken(value: string): string {
+  return value.replace(/~/g, "~0").replace(/\//g, "~1");
+}
+
+function knownFields(table: DataTable | undefined): Set<string> {
+  if (!table) return new Set();
+  if (table.fields.length) return new Set(table.fields);
+  return new Set(Object.keys(table.columns));
+}
+
+/** Navigator, sync group, and drilldown. Warnings carry a JSON Patch. */
+function warnInteraction(spec: Record<string, unknown>, type: string, table: DataTable | undefined, diagnostics: Diagnostic[]): void {
+  const interaction = spec.interaction;
+  if (!isRecord(interaction)) return;
+  const nav = interaction.navigator;
+  if (nav === true || isRecord(nav)) {
+    if (!NAV.has(type)) {
+      diagnostics.push({
+        code: "CK3034",
+        severity: "warning",
+        message: `navigator does not apply to type ${type}`,
+        path: "/interaction/navigator",
+        hint: "the slider needs an x window",
+        fix: [{ op: "remove", path: "/interaction/navigator" }],
+      });
+    }
+    if (isRecord(nav) && typeof nav.height === "number" && (nav.height < 28 || nav.height > 96)) {
+      diagnostics.push({
+        code: "CK3035",
+        severity: "warning",
+        message: `navigator height ${nav.height} is outside 28 to 96`,
+        path: "/interaction/navigator/height",
+        hint: "the overview stays between 28 and 96 px",
+        fix: [{ op: "replace", path: "/interaction/navigator/height", value: Math.max(28, Math.min(96, Math.round(nav.height))) }],
+      });
+    }
+  }
+  if (interaction.sync !== undefined && (typeof interaction.sync !== "string" || interaction.sync.trim() === "")) {
+    diagnostics.push({
+      code: "CK3036",
+      severity: "warning",
+      message: "sync group id must be a non-empty string",
+      path: "/interaction/sync",
+      hint: "charts with the same id share the crosshair, tooltip, and x window",
+      fix: [{ op: "remove", path: "/interaction/sync" }],
+    });
+  }
+  if (interaction.drilldown === undefined) return;
+  const drill = interaction.drilldown;
+  const children = isRecord(drill) ? drill.children : undefined;
+  if (!isRecord(children) || Object.keys(children).length === 0) {
+    diagnostics.push({
+      code: "CK3037",
+      severity: "warning",
+      message: "drilldown needs a children map",
+      path: "/interaction/drilldown",
+      hint: "map a category to a child spec",
+      fix: [{ op: "remove", path: "/interaction/drilldown" }],
+    });
+    return;
+  }
+  for (const [key, child] of Object.entries(children)) {
+    if (isRecord(child) && typeof child.type === "string" && child.type) continue;
+    diagnostics.push({
+      code: "CK3038",
+      severity: "warning",
+      message: `drilldown child ${key} has no type`,
+      path: `/interaction/drilldown/children/${pointerToken(key)}`,
+      hint: "each child is a chart spec",
+      fix: [{ op: "remove", path: `/interaction/drilldown/children/${pointerToken(key)}` }],
+    });
+  }
+  if (!isRecord(drill) || typeof drill.key !== "string" || drill.key === "") return;
+  const fields = knownFields(table);
+  if (fields.has(drill.key)) return;
+  const encoding = isRecord(spec.encoding) ? spec.encoding : {};
+  const fallback = fieldName(encoding.x);
+  const fix: JsonPatchOperation[] = fallback
+    ? [{ op: "replace", path: "/interaction/drilldown/key", value: fallback }]
+    : [{ op: "remove", path: "/interaction/drilldown/key" }];
+  diagnostics.push({
+    code: "CK3039",
+    severity: "warning",
+    message: `drilldown key ${drill.key} is not a data field`,
+    path: "/interaction/drilldown/key",
+    hint: fallback ? `use ${fallback}` : "drop key and the category defaults to encoding.x",
+    fix,
+  });
+}
 
 function explicitNone(spec: Record<string, unknown>): string | null {
   const data = spec.data;

@@ -21,6 +21,7 @@ export function Footer() {
         <Link href="/when-to-use">When to use</Link>
         <Link href="/demo">Demo</Link>
         <Link href="/large">Large data</Link>
+        <Link href="/interaction">Interaction</Link>
         <a href="/llms.txt">llms.txt</a>
         <a href="/features.json">features.json</a>
         <a href="/showcase.json">showcase.json</a>
