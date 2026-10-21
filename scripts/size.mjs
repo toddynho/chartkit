@@ -70,7 +70,17 @@ const externalInteractExtra = {
   },
 };
 
-async function gzipOf(entry, { external = false, splitExtra = false } = {}) {
+const externalGeoAtlas = {
+  name: "external-geo-atlas",
+  setup(build) {
+    build.onResolve({ filter: /\/data\/(world|us|canada|eu)\.json$/ }, (args) => {
+      if (args.kind !== "dynamic-import") return null;
+      return { path: args.path, external: true };
+    });
+  },
+};
+
+async function gzipOf(entry, { external = false, splitExtra = false, plugins = [] } = {}) {
   const outfile = join(tmpdir(), `chartkit-size-${Math.random().toString(36).slice(2)}.mjs`);
   await build({
     entryPoints: [entry],
@@ -79,7 +89,7 @@ async function gzipOf(entry, { external = false, splitExtra = false } = {}) {
     format: "esm",
     platform: "node",
     outfile,
-    plugins: [externalDynamicEntries, ...(external ? [externalFramework] : []), ...(splitExtra ? [externalInteractExtra] : [])],
+    plugins: [externalDynamicEntries, ...(external ? [externalFramework] : []), ...(splitExtra ? [externalInteractExtra] : []), ...plugins],
     logLevel: "silent",
   });
   const code = readFileSync(outfile);
@@ -246,6 +256,14 @@ if (all.code.includes('data-ck-renderer="histogram"') || all.code.includes('data
   isolation.allOmitsExtra = true;
 }
 
+const geoSrc = join(root, "packages/geo/src");
+const geo = await gzipOf(join(geoSrc, "index.ts"), { plugins: [externalGeoAtlas] });
+const geoWorld = await gzipOf(join(geoSrc, "data/world.json"));
+const geoUs = await gzipOf(join(geoSrc, "data/us.json"));
+const geoCanada = await gzipOf(join(geoSrc, "data/canada.json"));
+const geoEu = await gzipOf(join(geoSrc, "data/eu.json"));
+isolation.geoOmitsAtlases = !geo.code.includes('"arcs":');
+
 const measured = {
   line: line.gzipBytes,
   all: all.gzipBytes,
@@ -268,11 +286,16 @@ const measured = {
   global: globalBundle.gzipBytes,
   globalAuto: globalAuto.gzipBytes,
   globalMermaid: globalMermaid.gzipBytes,
+  geo: geo.gzipBytes,
+  geoWorld: geoWorld.gzipBytes,
+  geoUs: geoUs.gzipBytes,
+  geoCanada: geoCanada.gzipBytes,
+  geoEu: geoEu.gzipBytes,
 };
 for (const name of extraTypes) measured[name] = chartSizes[name].gzipBytes;
 const budget = JSON.parse(readFileSync(join(root, "scripts/size-budget.json"), "utf8"));
 const failures = [];
-for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "element", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "elementLine", "extra", "canvas", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid"]) {
+for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "element", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "elementLine", "extra", "canvas", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid", "geo", "geoWorld", "geoUs", "geoCanada", "geoEu"]) {
   if (typeof budget[key] !== "number") failures.push(`${key} budget missing`);
   else if (measured[key] > budget[key]) failures.push(`${key} gzip ${measured[key]} > budget ${budget[key]}`);
 }
@@ -305,6 +328,11 @@ console.log(JSON.stringify({
     global: globalBundle.minBytes,
     globalAuto: globalAuto.minBytes,
     globalMermaid: globalMermaid.minBytes,
+    geo: geo.minBytes,
+    geoWorld: geoWorld.minBytes,
+    geoUs: geoUs.minBytes,
+    geoCanada: geoCanada.minBytes,
+    geoEu: geoEu.minBytes,
     ...Object.fromEntries(extraTypes.map((name) => [name, chartSizes[name].minBytes])),
   },
   isolation,

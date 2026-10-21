@@ -506,6 +506,60 @@ describe("remaining chart renderers", () => {
     for (const item of names) expect(item.x - item.text.length * 6.7).toBeGreaterThanOrEqual(-0.5);
   });
 
+  it("keeps diverging horizontal labels out of the category gutter and inside the view", () => {
+    const svg = render({
+      version: "1",
+      type: "bar",
+      title: "California metros",
+      data: [
+        { name: "Los Angeles", change: -1.2 },
+        { name: "San Francisco", change: -2.4 },
+        { name: "San Diego", change: 0.4 },
+        { name: "Austin", change: 7.2 },
+      ],
+      encoding: { x: "name", y: { field: "change", format: { style: "number", suffix: "%", decimals: 1, signed: true } } },
+      mark: {
+        orientation: "horizontal",
+        labels: true,
+        labelFormat: { style: "number", suffix: "%", decimals: 1, signed: true },
+      },
+      legend: false,
+      size: { width: 420, height: 260 },
+      a11y: { alt: "San Francisco fell and Austin grew." },
+    });
+    expect(svg).toContain(">San Francisco<");
+    expect(svg).not.toContain("San Fr…");
+    const width = Number(/viewBox="0 0 (\d+)/.exec(svg)?.[1]);
+    const texts = [...svg.matchAll(/<text\b([^>]*)>([^<]*)<\/text>/g)].map((match) => {
+      const attrs = match[1] ?? "";
+      return {
+        text: match[2] ?? "",
+        x: Number(/ x="([^"]+)"/.exec(attrs)?.[1]),
+        y: Number(/ y="([^"]+)"/.exec(attrs)?.[1]),
+        anchor: /text-anchor="([^"]+)"/.exec(attrs)?.[1] ?? "start",
+        size: /font-size="([^"]+)"/.exec(attrs)?.[1] ?? "",
+      };
+    });
+    const names = texts.filter((item) => ["Los Angeles", "San Francisco", "San Diego", "Austin"].includes(item.text));
+    const gutter = Math.max(...names.map((item) => item.x));
+    for (const name of names) {
+      expect(name.anchor).toBe("end");
+      expect(name.x - name.text.length * 6.7).toBeGreaterThanOrEqual(-0.5);
+    }
+    const values = texts.filter((item) => item.size === "10" && item.text.endsWith("%"));
+    expect(values.map((item) => item.text).sort()).toEqual(["+0.4%", "+7.2%", "-1.2%", "-2.4%"]);
+    for (const value of values) {
+      const left = value.anchor === "end" ? value.x - value.text.length * 6.2 : value.anchor === "middle" ? value.x - (value.text.length * 6.2) / 2 : value.x;
+      const right = left + value.text.length * 6.8;
+      expect(left).toBeGreaterThan(gutter);
+      expect(right).toBeLessThanOrEqual(width + 0.5);
+    }
+    const austin = values.find((item) => item.text === "+7.2%");
+    const sanFrancisco = values.find((item) => item.text === "-2.4%");
+    expect(austin?.anchor).toBe("start");
+    expect(sanFrancisco?.anchor).toBe("end");
+  });
+
   it("uses a log scale and a currency format on the axis", () => {
     const svg = render({
       version: "1",

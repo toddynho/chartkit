@@ -1,14 +1,29 @@
 # Point / bubble map
 
-ChartKit: **none**
+ChartKit: **native**
 
 Markers or bubbles at coordinates
 
-Matrix status: `none`. Verification: `source-review` (strong).
+Matrix status: `native`. Verification: `source-review` (strong).
 
-probe hit reviewed: match themes/candidates.ts:12 unrelated
+`@chartkitdev/geo` draws `type: "map-points"`. Latitude, longitude, size, and colour are fields. The largest points can be labelled. The same atlas chunks as the choropleth are the basemap. Unpublished, and not in the line or `all` bundles.
 
-No spec snippet. ChartKit does not support this feature.
+This ties libraries whose point maps are native. Nivo and visx are manual, so those rows rank as a ChartKit win. There is still no tile layer (`type.map.tiles` stays none) and no pan or zoom.
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "map-points",
+  "data": [{ "name": "Tokyo", "lat": 35.7, "lon": 139.7, "pop": 37 }],
+  "encoding": { "latitude": "lat", "longitude": "lon", "size": "pop", "color": "pop", "label": "name" },
+  "mark": { "atlas": "world", "labelCount": 5 },
+  "a11y": { "alt": "Tokyo is the largest bubble." }
+}
+```
+
+Rendered by `@chartkitdev/geo`, not by core `validate()` / `render()`.
 
 ## Other libraries
 

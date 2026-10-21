@@ -55,7 +55,14 @@ export default function FeaturePage({ params }: { params: { id: string } }) {
       {feature.spec ? (
         <>
           <h2>ChartKit spec</h2>
-          <p>Passed <code>validate()</code> during <code>npm run matrix:refresh</code>. The SVG is the server render.</p>
+          {feature.id === "type.map.choropleth" || feature.id === "type.map.points" ? (
+            <p>
+              Rendered by <code>@chartkitdev/geo</code>. Core <code>validate()</code> does not accept map types. The geo
+              package has its own <code>validate()</code> (CK3050–CK3056). The SVG is the server render.
+            </p>
+          ) : (
+            <p>Passed <code>validate()</code> during <code>npm run matrix:refresh</code>. The SVG is the server render.</p>
+          )}
           <ChartView spec={feature.spec} />
           <pre className="spec-block">
             <code>{specText}</code>

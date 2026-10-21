@@ -24988,20 +24988,22 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:choropleth)['\"`]|(?:^|[\\s{,;])\\w*(?:choropleth)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:choropleth)"
+            "type=choropleth",
+            "mark.atlas",
+            "mark.scale"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:choropleth)['\"`]|(?:^|[\\s{,;])\\w*(?:choropleth)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:choropleth)"
+              "kind": "source-review",
+              "loc": "packages/geo/src/render.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "@chartkitdev/geo, unpublished, not in the line or all bundles. No tiles, no pan/zoom, no US counties, no NUTS-2. Small states missing from Natural Earth 110m, including Malta, are points.",
+          "verified": "source-review",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "plugin",
@@ -25351,13 +25353,20 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:geo)['\"`]|(?:^|[\\s{,;])\\w*(?:geo)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:geo)"
+            "type=map-points",
+            "encoding.latitude",
+            "encoding.longitude"
           ],
-          "evidence": [],
-          "note": "probe hit reviewed: match themes/candidates.ts:12 unrelated",
+          "evidence": [
+            {
+              "kind": "source-review",
+              "loc": "packages/geo/src/render.ts"
+            }
+          ],
+          "note": "@chartkitdev/geo, unpublished, not in the line or all bundles. No tiles, no pan/zoom, no US counties, no NUTS-2. Small states missing from Natural Earth 110m, including Malta, are points.",
           "verified": "source-review",
           "strength": "strong"
         },
@@ -25699,7 +25708,7 @@
             "~['\"`](?:tile)['\"`]|(?:^|[\\s{,;])\\w*(?:tile)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:tile)"
           ],
           "evidence": [],
-          "note": "probe hit reviewed: match is treemap \"tile\" layout",
+          "note": "ChartKit geo draws choropleth and point maps and does not draw a tile layer. The earlier probe hit was treemap layout.",
           "verified": "source-review",
           "strength": "strong"
         },
@@ -95787,29 +95796,29 @@
   ],
   "coverage": {
     "cells": 5523,
-    "strong": 1882,
+    "strong": 1883,
     "weak": 1731,
-    "absence": 1466,
+    "absence": 1465,
     "unknown": 444,
     "byStatus": {
-      "native": 2709,
+      "native": 2711,
       "unknown": 444,
       "manual": 425,
-      "none": 1518,
+      "none": 1516,
       "partial": 289,
       "plugin": 138
     },
     "perLibrary": {
       "chartkit": {
-        "strong": 167,
+        "strong": 168,
         "weak": 32,
-        "absence": 61,
+        "absence": 60,
         "unknown": 6,
-        "native": 162,
+        "native": 164,
         "partial": 18,
         "plugin": 0,
         "manual": 0,
-        "none": 80
+        "none": 78
       },
       "chartjs": {
         "strong": 44,

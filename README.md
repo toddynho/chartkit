@@ -44,6 +44,8 @@ npm install @chartkitdev/vanilla
 
 `@chartkitdev/element` (`<chart-kit>`) is in this repo and is not on npm yet.
 
+`@chartkitdev/geo` is in this repo and is not on npm. Choropleth and point maps are not part of the line or `all` bundles. Each atlas is its own chunk. There is no tile layer.
+
 `@derpdaderp/chartkit` remains as a compatibility shim (not published from this branch). See [docs/migrate.md](docs/migrate.md).
 
 ## JSON spec

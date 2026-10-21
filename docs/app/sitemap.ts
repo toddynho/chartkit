@@ -27,6 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/demo",
     "/large",
     "/interaction",
+    "/maps",
     "/compare",
     "/features",
     "/showcase",
