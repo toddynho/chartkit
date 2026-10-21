@@ -1,10 +1,10 @@
 # Carrick lamp, overnight
 
-Lamp current at a fictional lighthouse. Bars are the hourly reading, coloured when the lamp runs dim or bright. The glow line is a three-hour mean, and its points use a distinct threshold colour. A callout marks the dip at 03:00. A host slides this window with mount().append.
+Lamp current at a fictional lighthouse. Bars are the hourly reading. Bright and Dim are the threshold colours, and Normal is the rest, named on the Reading entry. The glow line is a three-hour mean. A point that crosses a threshold is an outline in that bar colour. A callout marks the dip at 03:00. A host slides this window with mount().append.
 
 ## Current through the night
 
-Under 40 is Dim. 70 and over is Bright. The mean waits until three readings exist.
+Under 40 is Dim. 70 and over is Bright. The Reading entry names the unmatched bars Normal. The mean waits until three readings exist.
 
 ```json
 {
@@ -102,6 +102,7 @@ Under 40 is Dim. 70 and over is Bright. The mean waits until three readings exis
     "glow": true,
     "curve": "monotone",
     "points": "always",
+    "baseLabel": "Normal",
     "colorRules": [
       {
         "color": "positive",

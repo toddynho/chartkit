@@ -15,7 +15,7 @@ export const specPages: Record<string, SpecPage> = {
       "type is histogram.",
       "data is one row per observation, or one row per bin when encoding.y is set.",
       "encoding.x is the value to bin. encoding.y, when present, is the pre-binned count.",
-      "mark.bins is the bin count (default 8, max 60). mark.binWidth sets a fixed width. mark.bin is count, width, sturges, sqrt, or fd.",
+      "mark.bins is the bin count (default 8, max 60). mark.binWidth sets a fixed width. mark.bin is count, width, sturges, sqrt, or fd. mark.binLabel prints that count at the top right. Omit it and the corner stays empty.",
       "hist repairs to histogram. encoding.value moves to encoding.x when x is missing.",
     ],
     example: `{
