@@ -1,14 +1,49 @@
 # Synchronised charts
 
-ChartKit: **none**
+ChartKit: **native**
 
 Shared cursor/zoom across multiple charts
 
-Matrix status: `none`. Verification: `source-review` (strong).
+Matrix status: `native`. Verification: `runtime-probe` (strong).
 
-probe hit reviewed: match is fromMermaidAsync
+interaction.sync is a group id. Charts with that id share the crosshair, tooltip, and x window, matched on the x value. The server SVG records data-ck-sync. An empty id warns CK3036.
 
-No spec snippet. ChartKit does not support this feature.
+Source: packages/core/src/sync-group.ts
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40
+    },
+    {
+      "quarter": "Q2",
+      "units": 55
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": "units"
+  },
+  "a11y": {
+    "alt": "Units rose in Q2."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "interaction": {
+    "sync": "sales"
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -35,6 +70,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | manual | ~register | dts-mechanism (weak) | @antv/g2/lib/exports.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 3a03bfbe111f.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 67d25e30b540.
 
 https://chartkit.dev/features.json

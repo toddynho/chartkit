@@ -445,6 +445,33 @@ function one(value) {
   return typeof value === "number" ? value.toFixed(1) : "—";
 }
 
+function canvasLossLine(rows) {
+  const at = (id, points) => rows.find((row) => row.id === id && row.points === points);
+  const sizes = [10000, 100000, 1000000];
+  const paints = sizes.map((points) => {
+    const label = points.toLocaleString("en-US");
+    const svg = at("chartkit", points);
+    const canvas = at("chartkit-canvas", points);
+    const uplot = at("uplot", points);
+    return `${label} is ${one(canvas?.initialMs)} ms against SVG ${one(svg?.initialMs)} and uPlot ${one(uplot?.initialMs)}`;
+  });
+  const renders = sizes.map((points) => {
+    const label = points.toLocaleString("en-US");
+    const svg = at("chartkit", points);
+    const canvas = at("chartkit-canvas", points);
+    return `${label} ${one(canvas?.renderMs)} vs ${one(svg?.renderMs)}`;
+  });
+  const updates = sizes.map((points) => {
+    const label = points.toLocaleString("en-US");
+    const svg = at("chartkit", points);
+    const canvas = at("chartkit-canvas", points);
+    const uplot = at("uplot", points);
+    const slower = typeof canvas?.updateMs === "number" && typeof svg?.updateMs === "number" && canvas.updateMs > svg.updateMs;
+    return `${slower ? "loses" : "wins"} ${label} (${one(canvas?.updateMs)} vs SVG ${one(svg?.updateMs)} and uPlot ${one(uplot?.updateMs)})`;
+  });
+  return `Canvas loses first paint at every size: ${paints.join("; ")}. Render is slower at every size: ${renders.join("; ")}. Updates: ${updates.join("; ")}.`;
+}
+
 /** Canvas line measured separately from round 13. Numbers come from docs/data/canvas-bench.json. */
 function canvasReportLines() {
   const file = join(dirname(fileURLToPath(import.meta.url)), "../../docs/data/canvas-bench.json");
@@ -459,31 +486,15 @@ function canvasReportLines() {
   lines.push("");
   lines.push("| Points | SVG render | Canvas render | SVG first paint | Canvas first paint | uPlot first paint | SVG update | Canvas update | uPlot update |");
   lines.push("| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
-  const loss = [];
-  const win = [];
   for (const points of [10000, 100000, 1000000]) {
     const label = points >= 1000000 ? "1M" : `${points / 1000}k`;
     const svg = at("chartkit", points);
     const canvas = at("chartkit-canvas", points);
     const uplot = at("uplot", points);
     lines.push(`| ${label} | ${one(svg?.renderMs)} | ${one(canvas?.renderMs)} | ${one(svg?.initialMs)} | ${one(canvas?.initialMs)} | ${one(uplot?.initialMs)} | ${one(svg?.updateMs)} | ${one(canvas?.updateMs)} | ${one(uplot?.updateMs)} |`);
-    if (typeof canvas?.renderMs === "number" && typeof svg?.renderMs === "number" && canvas.renderMs > svg.renderMs) loss.push(`render at ${label} (${one(canvas.renderMs)} vs ${one(svg.renderMs)})`);
-    if (typeof canvas?.initialMs === "number" && typeof svg?.initialMs === "number" && canvas.initialMs > svg.initialMs) loss.push(`first paint vs SVG at ${label} (${one(canvas.initialMs)} vs ${one(svg.initialMs)})`);
-    if (typeof canvas?.initialMs === "number" && typeof uplot?.initialMs === "number" && canvas.initialMs > uplot.initialMs) loss.push(`first paint vs uPlot at ${label} (${one(canvas.initialMs)} vs ${one(uplot.initialMs)})`);
-    if (typeof canvas?.updateMs === "number" && typeof svg?.updateMs === "number") {
-      const text = `update vs SVG at ${label} (${one(canvas.updateMs)} vs ${one(svg.updateMs)})`;
-      if (canvas.updateMs > svg.updateMs) loss.push(text);
-      else win.push(text);
-    }
-    if (typeof canvas?.updateMs === "number" && typeof uplot?.updateMs === "number") {
-      const text = `update vs uPlot at ${label} (${one(canvas.updateMs)} vs ${one(uplot.updateMs)})`;
-      if (canvas.updateMs > uplot.updateMs) loss.push(text);
-      else win.push(text);
-    }
   }
   lines.push("");
-  lines.push(`Losses: ${loss.join("; ")}.`);
-  if (win.length) lines.push(`Faster: ${win.join("; ")}.`);
+  lines.push(canvasLossLine(rows));
   lines.push("");
   return lines;
 }

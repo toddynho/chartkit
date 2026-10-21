@@ -305,6 +305,8 @@ function demoValue(id, parts, literal) {
   if (leaf === "shape") return "trapezoid";
   if (leaf === "linecap") return "round";
   if (leaf === "hover") return true;
+  if (leaf === "navigator") return true;
+  if (leaf === "sync") return "sales";
   if (leaf === "fields" && parts[0] === "tooltip") return ["units"];
   if (leaf === "crosshairLabel") return true;
   if (leaf === "select") return literal || "point";
@@ -329,6 +331,30 @@ function concretePath(cell) {
 
 function applyFeature(spec, feature) {
   if (feature.id === "tooltip.custom") return false;
+  if (feature.id === "interaction.drilldown") {
+    const x = spec.encoding?.x;
+    const key = typeof x === "string" ? x : x?.field || "quarter";
+    const sample = Array.isArray(spec.data) ? spec.data.find((row) => row && row[key] != null)?.[key] : "Q1";
+    spec.interaction = {
+      ...(spec.interaction && typeof spec.interaction === "object" ? spec.interaction : {}),
+      drilldown: {
+        key,
+        children: {
+          [String(sample ?? "Q1")]: {
+            version: "1",
+            type: "bar",
+            data: [
+              { name: "East", units: 12 },
+              { name: "West", units: 9 },
+            ],
+            encoding: { x: "name", y: "units" },
+            a11y: { alt: "East leads West in this category." },
+          },
+        },
+      },
+    };
+    return true;
+  }
   if (feature.id === "data.hierarchy") {
     spec.type = "treemap";
     spec.data = [{ name: "Ads", value: 40, children: [{ name: "Search", value: 25 }, { name: "Social", value: 15 }] }];

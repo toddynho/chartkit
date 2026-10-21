@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
 import { render } from "../all";
+import { render as renderExtra } from "../extra";
 import { attach, buildHoverIndex, lookupIndex, patchSvg, writeTooltip, type ClickDetail, type InteractSpec, type Selection } from "../interact";
+import { validate } from "../validate";
 
 const alt = "Sample series used to exercise client interaction.";
 
@@ -383,6 +385,126 @@ describe("attach", () => {
     svg.dispatchEvent(new PointerEvent("pointerleave", { bubbles: true }));
     expect(svg.querySelector("[data-ck-dot]")).toBeNull();
     ctl.destroy();
+  });
+
+  it("names one series after the chart and copies the mark colour", () => {
+    const spec = {
+      version: "1" as const,
+      type: "line" as const,
+      title: "Revenue",
+      theme: "midnight" as const,
+      legend: false,
+      data: [
+        { month: "Jan", value: 120000 },
+        { month: "Jun", value: 149000 },
+      ],
+      encoding: { x: "month", y: { field: "value", format: { style: "compact", prefix: "$", decimals: 0 } } },
+      a11y: { alt },
+    };
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg")!;
+    const stroke = svg.querySelector("path[fill='none']:not([filter])")?.getAttribute("stroke");
+    const plot = svg.querySelector("clipPath rect")!;
+    const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.8;
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 40, bubbles: true }));
+    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+    expect(tip.textContent).toContain("Revenue");
+    expect(tip.textContent).not.toMatch(/\bvalue\b/);
+    expect(tip.textContent).toContain("$149K");
+    expect(stroke).toBeTruthy();
+    expect(tip.innerHTML).toContain(String(stroke));
+    expect(String(stroke)).toContain("#22c55e");
+    ctl.destroy();
+  });
+
+  it("flips the tooltip left of a crosshair on the right half of the plot", () => {
+    const spec = lineSpec({ legend: false });
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg")!;
+    const laid = { x: 0, y: 0, left: 0, top: 0, width: 720, height: 280, right: 720, bottom: 280, toJSON() { return {}; } } as DOMRect;
+    host.getBoundingClientRect = () => laid;
+    svg.getBoundingClientRect = () => laid;
+    const plot = svg.querySelector("clipPath rect")!;
+    const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.72;
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 80, bubbles: true }));
+    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+    expect(parseFloat(tip.style.left)).toBeLessThan(x);
+    ctl.destroy();
+  });
+
+  it("places a right-edge tooltip clear of the hovered bar and its neighbour", () => {
+    const spec: InteractSpec = {
+      version: "1",
+      type: "bar",
+      theme: "midnight",
+      title: "Orders",
+      data: [
+        { month: "Jan", value: 80 },
+        { month: "Feb", value: 92 },
+        { month: "Mar", value: 88 },
+        { month: "Apr", value: 110 },
+        { month: "May", value: 104 },
+        { month: "Jun", value: 121 },
+      ],
+      encoding: { x: "month", y: { field: "value", title: "Orders", format: { style: "integer" }, color: "series-3" } },
+      legend: false,
+      size: { width: 720, height: 200 },
+      a11y: { alt },
+    };
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const svg = host.querySelector("svg")!;
+    const laid = { x: 0, y: 0, left: 0, top: 0, width: 720, height: 200, right: 720, bottom: 200, toJSON() { return {}; } } as DOMRect;
+    host.getBoundingClientRect = () => laid;
+    svg.getBoundingClientRect = () => laid;
+    const plot = svg.querySelector("clipPath rect")!;
+    const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.72;
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 80, bubbles: true }));
+    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+    const left = parseFloat(tip.style.left);
+    const top = parseFloat(tip.style.top);
+    const width = tip.offsetWidth || 160;
+    const height = tip.offsetHeight || 48;
+    expect(tip.textContent).toContain("Orders");
+    expect(tip.textContent).toContain("104");
+    expect(left + width).toBeLessThan(x + 40);
+    const bars = [...svg.querySelectorAll("rect")].filter((node) => (node.getAttribute("fill") || "").includes("series"));
+    for (const bar of bars) {
+      const bx = Number(bar.getAttribute("x"));
+      const by = Number(bar.getAttribute("y"));
+      const bw = Number(bar.getAttribute("width"));
+      const bh = Number(bar.getAttribute("height"));
+      const overlaps = left < bx + bw && left + width > bx && top < by + bh && top + height > by;
+      expect(overlaps).toBe(false);
+    }
+    ctl.destroy();
+  });
+
+  it("starts a line after a leading gap instead of at zero", () => {
+    const n = 3000;
+    const x = new Float64Array(n);
+    const y = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      x[i] = i;
+      y[i] = i < 600 ? Number.NaN : Math.sin(i / 12) + 2;
+    }
+    const svg = render({
+      version: "1",
+      type: "line",
+      data: { columns: { x, y }, sampling: "lttb" },
+      encoding: { x: "x", y: "y" },
+      mark: { curve: "linear", points: "none" },
+      legend: false,
+      size: { width: 720, height: 280 },
+      a11y: { alt },
+    });
+    const d = svg.match(/<path d="([^"]+)" fill="none"/)?.[1] ?? "";
+    const first = Number(/^M ([\d.]+)/.exec(d)?.[1] ?? 0);
+    const left = Number(/<clipPath[^>]*>\s*<rect x="([\d.]+)"/.exec(svg)?.[1] ?? 0);
+    expect(first).toBeGreaterThan(left + 40);
+    expect(d).not.toContain("NaN");
   });
 
   it("puts the hover dot on the tooltip value, not the downsampled segment", () => {
@@ -851,5 +973,199 @@ describe("attach", () => {
     const swatch = [...svg.querySelectorAll("text")].find((node) => node.textContent === "Three-hour mean")?.previousElementSibling;
     expect(line?.getAttribute("stroke")).toBe(swatch?.getAttribute("fill"));
     ctl.destroy();
+  });
+});
+
+function salesBar(): InteractSpec {
+  return {
+    version: "1",
+    type: "bar",
+    title: "Sales",
+    data: [
+      { region: "North", revenue: 10 },
+      { region: "South", revenue: 7 },
+      { region: "East", revenue: 4 },
+    ],
+    encoding: { x: "region", y: "revenue" },
+    a11y: { alt: "Sales by region." },
+    interaction: {
+      drilldown: {
+        key: "region",
+        children: {
+          North: {
+            version: "1",
+            type: "bar",
+            title: "North",
+            data: [
+              { month: "Jan", revenue: 4 },
+              { month: "Feb", revenue: 6 },
+            ],
+            encoding: { x: "month", y: "revenue" },
+            a11y: { alt: "North by month." },
+          },
+        },
+      },
+    },
+  };
+}
+
+describe("interaction plus", () => {
+  it("keeps the server SVG free of controls and stamps the spec", () => {
+    const drill = (salesBar().interaction as { drilldown: unknown }).drilldown;
+    const svg = render(lineSpec({ interaction: { navigator: { height: 48 }, sync: "sales", drilldown: drill } }));
+    expect(svg).toContain('data-ck-nav="1"');
+    expect(svg).toContain('data-ck-nav-h="48"');
+    expect(svg).toContain('data-ck-sync="sales"');
+    expect(svg).toContain('data-ck-drill="North"');
+    expect(svg).not.toContain("<button");
+    expect(svg).not.toContain("<nav");
+    expect(svg).not.toContain("<script");
+    expect(svg).not.toContain("foreignObject");
+  });
+
+  it("warns CK3034 through CK3039 and patches the spec", () => {
+    const nav = validate({
+      version: "1",
+      type: "donut",
+      data: [
+        { name: "A", value: 2 },
+        { name: "B", value: 3 },
+      ],
+      encoding: { x: "name", y: "value" },
+      a11y: { alt },
+      interaction: { navigator: true },
+    });
+    expect(nav.ok).toBe(true);
+    expect(nav.warnings.find((item) => item.code === "CK3034")?.fix).toEqual([{ op: "remove", path: "/interaction/navigator" }]);
+
+    const height = validate(lineSpec({ interaction: { navigator: { height: 10 } } }));
+    expect(height.warnings.find((item) => item.code === "CK3035")?.fix?.[0]).toMatchObject({ op: "replace", value: 28 });
+
+    const sync = validate(lineSpec({ interaction: { sync: "  " } }));
+    expect(sync.warnings.find((item) => item.code === "CK3036")?.fix).toEqual([{ op: "remove", path: "/interaction/sync" }]);
+
+    const empty = validate(lineSpec({ interaction: { drilldown: { children: {} } } }));
+    expect(empty.warnings.find((item) => item.code === "CK3037")?.fix).toEqual([{ op: "remove", path: "/interaction/drilldown" }]);
+
+    const child = validate(lineSpec({ interaction: { drilldown: { children: { North: { title: "North" } } } } }));
+    expect(child.warnings.find((item) => item.code === "CK3038")?.fix?.[0]?.op).toBe("remove");
+
+    const key = validate(lineSpec({ interaction: { drilldown: { key: "missing", children: { Jan: { type: "bar", data: [], encoding: { x: "month", y: "revenue" }, a11y: { alt } } } } } }));
+    const keyWarning = key.warnings.find((item) => item.code === "CK3039");
+    expect(keyWarning?.fix).toEqual([{ op: "replace", path: "/interaction/drilldown/key", value: "month" }]);
+  });
+
+  it("moves the navigator window from the keyboard", async () => {
+    const spec = lineSpec({ interaction: { navigator: true, initialRange: ["Feb", "Mar"] } });
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    await ctl.ready;
+    const slider = host.querySelector("[role=slider]");
+    expect(slider?.getAttribute("aria-valuenow")).toBe("1");
+    expect(slider?.getAttribute("aria-valuetext")).toContain("Feb");
+    const overview = host.querySelector("[data-ck-overview]");
+    expect(overview?.getAttribute("preserveAspectRatio")).toBe("none");
+    expect(overview?.innerHTML).toContain("vector-effect");
+    expect(host.querySelectorAll(".ck-nav-handle")).toHaveLength(2);
+    expect(host.querySelectorAll(".ck-nav-shade")).toHaveLength(2);
+    expect((slider as HTMLElement).style.left).toBe("25%");
+    expect((slider as HTMLElement).style.width).toBe("75%");
+    slider?.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true }));
+    expect(slider?.getAttribute("aria-valuenow")).toBe("0");
+    expect(host.querySelector("[data-ck-navigator] [role=slider]")).toBe(slider);
+    ctl.destroy();
+    expect(host.querySelector("[data-ck-navigator]")).toBeNull();
+  });
+
+  it("shares the crosshair and the x window across a sync group", async () => {
+    const spec = lineSpec({ interaction: { sync: "board", zoom: "x" } });
+    const left = hostOf(spec);
+    const right = hostOf(spec);
+    const a = attach(left, spec, { render });
+    const b = attach(right, spec, { render });
+    await Promise.all([a.ready, b.ready]);
+    const svg = left.querySelector("svg")!;
+    const plot = svg.querySelector("clipPath rect")!;
+    const x = Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * 0.875;
+    svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: 80, bubbles: true }));
+    expect(right.querySelector("[data-ck-crosshair]")).toBeTruthy();
+    expect(right.querySelector("[data-ck-tip]")?.textContent).toContain("Apr");
+    const before = right.querySelector("svg path")?.getAttribute("d");
+    svg.dispatchEvent(new WheelEvent("wheel", { clientX: x, clientY: 80, deltaY: -120, bubbles: true, cancelable: true }));
+    expect(right.querySelector("svg path")?.getAttribute("d")).not.toBe(before);
+    a.destroy();
+    b.destroy();
+  });
+
+  it("drills into a child spec and comes back", () => {
+    const spec = salesBar();
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    const bar = [...host.querySelectorAll("rect")]
+      .filter((node) => {
+        const width = Number(node.getAttribute("width"));
+        return width > 12 && width < 200;
+      })
+      .sort((a, b) => Number(a.getAttribute("x")) - Number(b.getAttribute("x")))[0]!;
+    const x = Number(bar.getAttribute("x")) + Number(bar.getAttribute("width")) / 2;
+    const y = Number(bar.getAttribute("y")) + 4;
+    bar.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: x, clientY: y }));
+    expect(host.querySelector("[data-ck-back]")?.textContent).toBe("Back");
+    expect(host.querySelector("svg")?.getAttribute("aria-label")).toContain("North");
+    expect(host.querySelector("[aria-current]")?.textContent).toBe("North");
+    (host.querySelector("[data-ck-back]") as HTMLButtonElement).click();
+    expect(host.querySelector("[data-ck-back]")).toBeNull();
+    expect(host.querySelector("svg")?.textContent).toContain("Sales");
+    host.querySelector("svg")?.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(host.querySelector("[aria-current]")?.textContent).toBe("North");
+    host.querySelector("svg")?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    expect(host.querySelector("[data-ck-back]")).toBeNull();
+    ctl.destroy();
+  });
+
+  it("drills a donut slice and a treemap node", () => {
+    const north = {
+      version: "1",
+      type: "bar",
+      title: "North",
+      data: [{ month: "Jan", revenue: 4 }],
+      encoding: { x: "month", y: "revenue" },
+      a11y: { alt: "North in January." },
+    };
+    const donut: InteractSpec = {
+      version: "1",
+      type: "donut",
+      data: [
+        { name: "North", value: 4 },
+        { name: "South", value: 2 },
+      ],
+      encoding: { x: "name", y: "value" },
+      a11y: { alt: "North and South." },
+      interaction: { drilldown: { children: { North: north } } },
+    };
+    const host = hostOf(donut);
+    const ctl = attach(host, donut, { render });
+    host.querySelector('path[data-ck-name="North"]')!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(host.querySelector("[aria-current]")?.textContent).toBe("North");
+    ctl.destroy();
+
+    const tree: InteractSpec = {
+      version: "1",
+      type: "treemap",
+      data: [
+        { name: "North", value: 8 },
+        { name: "South", value: 3 },
+      ],
+      encoding: { x: "name", y: "value" },
+      a11y: { alt: "North is the larger region." },
+      interaction: { drilldown: { children: { North: north } } },
+    };
+    const tiles = document.createElement("div");
+    document.body.append(tiles);
+    patchSvg(tiles, renderExtra(tree));
+    const treeCtl = attach(tiles, tree, { render: (spec) => renderExtra(spec) });
+    tiles.querySelector('rect[data-ck-name="North"]')!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(tiles.querySelector("[aria-current]")?.textContent).toBe("North");
+    treeCtl.destroy();
   });
 });

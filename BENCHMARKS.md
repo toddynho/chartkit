@@ -134,8 +134,7 @@ This is not a re-time of the round above. Median of 5, Playwright Chromium, a 64
 | 100k | 8.2 | 9.1 | 13.1 | 20.1 | 17.6 | 29.0 | 18.1 | 23.0 |
 | 1M | 16.5 | 17.1 | 20.8 | 27.7 | 25.1 | 20.6 | 21.8 | 20.9 |
 
-Losses: render at 10k (7.8 vs 7.3); first paint vs SVG at 10k (21.8 vs 13.1); first paint vs uPlot at 10k (21.8 vs 14.5); render at 100k (9.1 vs 8.2); first paint vs SVG at 100k (20.1 vs 13.1); first paint vs uPlot at 100k (20.1 vs 17.6); render at 1M (17.1 vs 16.5); first paint vs SVG at 1M (27.7 vs 20.8); first paint vs uPlot at 1M (27.7 vs 25.1); update vs SVG at 1M (21.8 vs 20.6); update vs uPlot at 1M (21.8 vs 20.9).
-Faster: update vs SVG at 10k (19.1 vs 25.6); update vs uPlot at 10k (19.1 vs 33.2); update vs SVG at 100k (18.1 vs 29.0); update vs uPlot at 100k (18.1 vs 23.0).
+Canvas loses first paint at every size: 10,000 is 21.8 ms against SVG 13.1 and uPlot 14.5; 100,000 is 20.1 ms against SVG 13.1 and uPlot 17.6; 1,000,000 is 27.7 ms against SVG 20.8 and uPlot 25.1. Render is slower at every size: 10,000 7.8 vs 7.3; 100,000 9.1 vs 8.2; 1,000,000 17.1 vs 16.5. Updates: wins 10,000 (19.1 vs SVG 25.6 and uPlot 33.2); wins 100,000 (18.1 vs SVG 29.0 and uPlot 23.0); loses 1,000,000 (21.8 vs SVG 20.6 and uPlot 20.9).
 
 
 The round 13 ChartKit row still downsamples with `mark.sampling: "auto"` (minmax above twice the 572px plot width, so 1,000 points stay complete and 10k, 100k, and 1M do not). The ChartKit sampling none row draws every point at 100k and 1M. ECharts `sampling` stayed off. Canvas first-paint losses are in the section above.

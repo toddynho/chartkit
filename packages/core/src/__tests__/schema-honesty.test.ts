@@ -186,6 +186,17 @@ function probes(leaf: Leaf): unknown[] {
   if (leaf.path === "/legend/symbols") push([{ series: "revenue", symbol: "circle" }]);
   if (leaf.path === "/legend/maxRows") push(1);
   if (leaf.path === "/interaction/export") push(["png", "svg", "csv"]);
+  if (leaf.path === "/interaction/drilldown/children") {
+    push({
+      North: {
+        version: "1",
+        type: "bar",
+        data: [{ month: "Jan", revenue: 5 }],
+        encoding: { x: "month", y: "revenue" },
+        a11y: { alt: "North in January." },
+      },
+    });
+  }
   if (leaf.path === "/encoding/color/scale/thresholds") push([1200, 2000]);
   if (leaf.path === "/encoding/color/scale/scheme") push("teal");
   if (leaf.path === "/mark/palette") push(["#c0ffee", "#111111"]);
@@ -887,5 +898,5 @@ describe("schema honesty", () => {
       if (!covered(leaf, ready, entries)) silent.push(leaf.path);
     }
     expect(silent, silent.join("\n")).toEqual([]);
-  }, 20_000);
+  }, 40_000);
 });

@@ -121,3 +121,13 @@ Rechecked on multi-level treemap and sunburst. A flat treemap (encoding.x, encod
 ## Shared chrome
 
 Rechecked on line, bar, stacked-area, combo, scatter, candlestick, spike, histogram, boxplot, waterfall, area-range, bar-range, and errorbar. Title, subtitle, axis titles, `axes.y.ticks`, `scale.domain`, a y rule, and a linear trendline paint on each. Funnel and calendar heatmap paint the subtitle. The calendar also paints the title. A threshold point that sits on a line stroke shifts to a distinct colour, and the token is named when a legend is already shown.
+
+## Interaction+
+
+A cell moved to native only when a runtime probe changed the SVG or the client DOM. The server SVG stays free of buttons, nav, and scripts.
+
+| id | status | correction |
+|---|---|---|
+| interaction.navigator | native | `interaction.navigator` mounts an overview and a keyboard range slider from the interaction extra. The SVG records `data-ck-nav`. CK3034 and CK3035. |
+| interaction.sync | native | `interaction.sync` shares the crosshair, tooltip, and x window by x value. The SVG records `data-ck-sync`. CK3036. |
+| interaction.drilldown | native | `interaction.drilldown.children` swaps in a child spec. Click, Enter, or Space drills. Back and Escape pop. The SVG records `data-ck-drill`. CK3037–CK3039. |

@@ -822,23 +822,32 @@ function appendLineSeries(
   }
   const area = series.area || model.type === "stacked-area";
   for (const run of sampled.runs) {
-    const points: Pt[] = new Array(run.length);
-    const bottoms: Pt[] = area ? new Array(run.length) : [];
+    const points: Pt[] = [];
+    const bottoms: Pt[] = [];
+    const kept: number[] = [];
     for (let k = 0; k < run.length; k++) {
       const i = run[k];
+      const raw = layers ? layers.top[index][i] : series.values[i];
+      if (typeof raw !== "number" || !Number.isFinite(raw)) continue;
       const x = xScale.center(i);
-      const y = layers ? layers.top[index][i] : (series.values[i] ?? 0);
-      points[k] = { x, y: yScale(y) };
-      if (area) bottoms[k] = { x, y: yScale(layers ? layers.bottom[index][i] : 0) };
+      const y = yScale(raw);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      points.push({ x, y });
+      kept.push(i);
+      if (area) {
+        const base = layers ? layers.bottom[index][i] : 0;
+        bottoms.push({ x, y: yScale(typeof base === "number" && Number.isFinite(base) ? base : 0) });
+      }
     }
-    const v0 = ys[run[0]];
-    const v1 = ys[run[run.length - 1]];
+    if (points.length === 0) continue;
+    const v0 = ys[kept[0]];
+    const v1 = ys[kept[kept.length - 1]];
     const log = series.axis === "y2" ? model.y2Log : model.yLog;
     const scaleAttr =
       !layers && !log && typeof v0 === "number" && typeof v1 === "number" && v0 !== v1
         ? ` data-ck-ys="${n(points[0].y)},${n(points[points.length - 1].y)},${n(v0)},${n(v1)},${index}"`
         : "";
-    const indexAttr = ` data-ck-sample="${sampled.mode}" data-ck-i="${run.join(" ")}"${scaleAttr}`;
+    const indexAttr = ` data-ck-sample="${sampled.mode}" data-ck-i="${kept.join(" ")}"${scaleAttr}`;
     if (area) {
       const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
       out.push(`<path d="${areaPath(points, bottoms, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillPaint}" stroke="none"${indexAttr} />`);
@@ -847,7 +856,7 @@ function appendLineSeries(
     // Hidden circles exist so --ck-line-dots can reveal them. A downsampled line
     // already has a vertex per pixel, and those circles dominate the SVG, so
     // interact draws the hover dot from the path instead.
-    paintPoints(out, points, model, series, run);
+    paintPoints(out, points, model, series, kept);
   }
 }
 
@@ -895,7 +904,7 @@ function appendLinear(
   };
   for (let i = 0; i < values.length; i++) {
     const value = values[i];
-    if (value === null) {
+    if (typeof value !== "number" || !Number.isFinite(value)) {
       if (!model.connectNulls) flush();
       continue;
     }
@@ -1172,8 +1181,8 @@ function pointsFor(
   for (let i = 0; i < series.values.length; i++) {
     const value = series.values[i];
     const plotted = layers ? layers.top[index][i] : value;
-    if (plotted === null || (value === null && !model.connectNulls && !layers)) out[i] = null;
-    else out[i] = { x: xScale.center(i), y: yScale(plotted ?? 0) };
+    if (plotted === null || typeof plotted !== "number" || !Number.isFinite(plotted) || (value === null && !model.connectNulls && !layers)) out[i] = null;
+    else out[i] = { x: xScale.center(i), y: yScale(plotted) };
   }
   return out;
 }

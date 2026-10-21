@@ -80,7 +80,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
       const h = Math.max(1, tile.h - pad * 2);
       const label = `${tile.label}: ${fmt(tile.value, frame.locale, shown)}${tile.group && tile.group !== tile.label ? ` · ${tile.group}` : ""}`;
       const paint = tint(tile.fill, index, inner.length);
-      parts.push(openMark("rect", "tile", label, `x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="6" fill="${paint}"${edge(frame)}`));
+      parts.push(openMark("rect", "tile", label, `x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="6" fill="${paint}"${edge(frame)}`, tile.label, index));
       parts.push("</rect>");
       const name = fit(tile.label, w - 12, 13);
       if (name && w > 36 && h > 22) {
