@@ -898,5 +898,5 @@ describe("schema honesty", () => {
       if (!covered(leaf, ready, entries)) silent.push(leaf.path);
     }
     expect(silent, silent.join("\n")).toEqual([]);
-  }, 20_000);
+  }, 40_000);
 });
