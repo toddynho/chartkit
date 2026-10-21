@@ -190,7 +190,9 @@ function legendMarkup(scale: PaintScale, x: number, y: number, height: number, i
 function styleBlock(chrome: Chrome, id: string, hatch: boolean): string {
   const rim = chrome.scheme === "dark" ? "#141414" : "#ffffff";
   const nodata = hatch ? `.ck-geo-nodata{fill:url(#${id}nd)}` : "";
-  return `<style>.ck-geo-water{fill:${chrome.water}}${nodata}.ck-geo-region{fill:${chrome.land};stroke:${chrome.border};stroke-width:.6px}.ck-geo-point{stroke:${rim};stroke-width:1.25px;fill-opacity:.82}.ck-geo-region:hover,.ck-geo-region:focus,.ck-geo-point:hover,.ck-geo-point:focus{stroke:${chrome.text};stroke-width:1.6px;outline:none}.ck-geo-graticule{fill:none;stroke:${chrome.border};stroke-width:.4;opacity:.45}.ck-geo-inset{fill:none;stroke:${chrome.border};stroke-width:.75}.ck-geo-leader{fill:none;stroke:${chrome.muted};stroke-width:.8}.ck-geo-label,.ck-geo-title{fill:${chrome.text};font-family:ui-sans-serif,system-ui,sans-serif}.ck-geo-label{font-size:11px}.ck-geo-legend-title{font-weight:650}.ck-geo-title{font-weight:600}.ck-geo-tag{fill:${chrome.text};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif;paint-order:stroke;stroke:${chrome.water};stroke-width:3px;stroke-linejoin:round}.ck-geo-muted{fill:${chrome.muted};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif}</style>`;
+  // A stylesheet fill beats the fill attribute. Land belongs only on a points map.
+  const regionFill = hatch ? "" : `fill:${chrome.land};`;
+  return `<style>.ck-geo-water{fill:${chrome.water}}${nodata}.ck-geo-region{${regionFill}stroke:${chrome.border};stroke-width:.6px}.ck-geo-point{stroke:${rim};stroke-width:1.25px;fill-opacity:.82}.ck-geo-region:hover,.ck-geo-region:focus,.ck-geo-point:hover,.ck-geo-point:focus{stroke:${chrome.text};stroke-width:1.6px;outline:none}.ck-geo-graticule{fill:none;stroke:${chrome.border};stroke-width:.4;opacity:.45}.ck-geo-inset{fill:none;stroke:${chrome.border};stroke-width:.75}.ck-geo-leader{fill:none;stroke:${chrome.muted};stroke-width:.8}.ck-geo-label,.ck-geo-title{fill:${chrome.text};font-family:ui-sans-serif,system-ui,sans-serif}.ck-geo-label{font-size:11px}.ck-geo-legend-title{font-weight:650}.ck-geo-title{font-weight:600}.ck-geo-tag{fill:${chrome.text};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif;paint-order:stroke;stroke:${chrome.water};stroke-width:3px;stroke-linejoin:round}.ck-geo-muted{fill:${chrome.muted};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif}</style>`;
 }
 
 function patternDef(chrome: Chrome, id: string): string {
@@ -481,7 +483,7 @@ export async function render(spec: unknown): Promise<string> {
   const kind: ColorScaleName = mark.scale === "diverging" || mark.scale === "threshold" ? mark.scale : "sequential";
   const thresholds = Array.isArray(mark.thresholds) ? mark.thresholds.filter((item): item is number => typeof item === "number") : undefined;
   const choroplethScale = spec.type === "choropleth" && hits.size ? paintScale(kind, [...hits.values()].map((hit) => hit.value), thresholds, colorChannel.format, legendTitle) : null;
-  const points = spec.type === "map-points" ? dotsOf(rows, encoding, chrome) : { dots: [], scale: null };
+  const points = dotsOf(rows, encoding, chrome);
   const scale = choroplethScale ?? points.scale;
   const showLegend = mark.legend !== false && !!scale && (scale.stops.length > 0 || !!scale.swatches?.length || !!scale.sizes?.length);
   const legendW = showLegend && scale ? legendWidth(scale) : 12;

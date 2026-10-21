@@ -68,5 +68,8 @@ export function chromeFor(theme: unknown): Chrome {
   if (name === "" || name === "soft" || name === "auto" || name === "refined" || name === "editorial") return SOFT;
   const named = NAMED[name];
   if (!named) return SOFT;
-  return solid(named[0], named[1], named[2], DARK.has(name));
+  const chrome = solid(named[0], named[1], named[2], DARK.has(name));
+  // Cool slate on Midnight water #12212e. The warm paper mix reads as taupe there.
+  if (name === "midnight") chrome.land = "#3e5264";
+  return chrome;
 }

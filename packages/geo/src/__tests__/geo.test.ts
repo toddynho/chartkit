@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { equalEarth, equirectangular, fitProject, mercator } from "../project";
 import { render } from "../render";
+import { chromeFor } from "../theme";
 import { validate } from "../validate";
 
 function codes(spec: unknown): string[] {
@@ -19,6 +20,25 @@ function meanY(svg: string, name: string): number {
 function spanX(svg: string, name: string): number {
   const xs = [...pathOf(svg, name).matchAll(/-?\d+(?:\.\d+)?/g)].map((item) => Number(item[0])).filter((_, index) => index % 2 === 0);
   return Math.max(...xs) - Math.min(...xs);
+}
+
+/** Rule body for an exact selector. A fill here beats every fill attribute on that class. */
+function styleRule(svg: string, selector: string): string {
+  const style = /<style>([^<]*)<\/style>/.exec(svg)?.[1] ?? "";
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`${escaped}\\{([^}]*)\\}`).exec(style)?.[1] ?? "";
+}
+
+/** Scale colours on regions that have a value. Skips the no-data hatch. */
+function paintedRegionFills(svg: string): string[] {
+  const fills: string[] = [];
+  for (const match of svg.matchAll(/<(?:path|circle)\b([^>]*)>/g)) {
+    const attrs = match[1] ?? "";
+    if (!/\bclass="[^"]*\bck-geo-region\b/.test(attrs) || /\bck-geo-nodata\b/.test(attrs)) continue;
+    const fill = /\bfill="(#[0-9a-fA-F]{6})"/.exec(attrs)?.[1];
+    if (fill) fills.push(fill.toLowerCase());
+  }
+  return fills;
 }
 
 const world = {
@@ -332,5 +352,71 @@ describe("render", () => {
     expect(svg).toContain('data-ck-name="Beta"');
     expect(svg).toContain("ck-geo-nodata");
     expect(codes({ type: "choropleth", encoding: { region: "id", color: "value" }, data: [{ id: "Nope", value: 1 }], mark: { geojson: { type: "FeatureCollection", features: [{ type: "Feature", id: "A", properties: { name: "Alpha" }, geometry: { type: "Polygon", coordinates: [[[0, 0], [1, 0], [1, 1], [0, 0]]] } }] } } })).toContain("CK3051");
+  });
+
+  it("keeps scale fills on choropleth regions and land fill on points maps", async () => {
+    const softLand = chromeFor("soft").land;
+    const midnightLand = chromeFor("midnight").land;
+    expect(softLand).toBe("light-dark(#efe6d6, #2a3338)");
+    expect(midnightLand).toBe("#3e5264");
+
+    const countries = ["NOR", "FRA", "USA", "GBR", "DEU", "BRA", "IND", "CHN", "EGY", "AUS", "ZAF", "JPN"];
+    const worldSvg = await render({
+      type: "choropleth",
+      theme: "soft",
+      data: countries.map((id, index) => ({ id, value: index * 8 })),
+      encoding: { region: "id", color: "value" },
+      mark: { atlas: "world" },
+      a11y: { alt: "Twelve countries take distinct colours from the scale." },
+    });
+    const worldFills = new Set(paintedRegionFills(worldSvg));
+    expect(worldFills.size).toBeGreaterThanOrEqual(8);
+    expect(styleRule(worldSvg, ".ck-geo-region")).not.toMatch(/(?:^|;)fill:/);
+    expect(worldSvg).toContain("ck-geo-nodata");
+    for (const fill of worldFills) expect(softLand).not.toContain(fill);
+
+    const states = ["CA", "TX", "NY", "FL", "IL", "WA", "AK", "HI", "OH", "GA", "AZ", "CO"];
+    const usSvg = await render({
+      type: "choropleth",
+      theme: "midnight",
+      data: states.map((id, index) => ({ id, value: index - 5 })),
+      encoding: { region: "id", color: "value" },
+      mark: { atlas: "us", scale: "diverging" },
+      a11y: { alt: "Twelve states take distinct colours from the scale." },
+    });
+    const usFills = new Set(paintedRegionFills(usSvg));
+    expect(usFills.size).toBeGreaterThanOrEqual(8);
+    expect(styleRule(usSvg, ".ck-geo-region")).not.toMatch(/(?:^|;)fill:/);
+    expect(usSvg).toContain("ck-geo-nodata");
+    for (const fill of usFills) expect(fill).not.toBe(midnightLand);
+
+    const points = await render({
+      type: "map-points",
+      theme: "midnight",
+      data: [{ name: "Tokyo", lat: 35.7, lon: 139.7, pop: 37 }],
+      encoding: { latitude: "lat", longitude: "lon", size: "pop", label: "name" },
+      mark: { atlas: "world" },
+      a11y: { alt: "Tokyo sits on cool slate land." },
+    });
+    expect(styleRule(points, ".ck-geo-region")).toContain(`fill:${midnightLand}`);
+    expect(points).not.toContain("ck-geo-nodata");
+
+    const layered = await render({
+      type: "choropleth",
+      data: [
+        { id: "France", value: 8 },
+        { id: "Germany", value: 3 },
+        { id: "Spain", value: 1 },
+        { name: "Paris", lat: 48.9, lon: 2.3, pop: 11 },
+      ],
+      encoding: { region: "id", color: "value", latitude: "lat", longitude: "lon", size: "pop", label: "name" },
+      mark: { atlas: "eu", labelCount: 1 },
+      a11y: { alt: "France is coloured and Paris is a bubble." },
+    });
+    expect(styleRule(layered, ".ck-geo-region")).not.toMatch(/(?:^|;)fill:/);
+    expect(new Set(paintedRegionFills(layered)).size).toBeGreaterThanOrEqual(3);
+    expect(layered).toContain('class="ck-geo-point"');
+    expect(layered).toContain(">Paris<");
+    expect(layered).toContain("ck-geo-nodata");
   });
 });
