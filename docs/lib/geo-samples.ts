@@ -1,3 +1,6 @@
+import { createRenderer } from "@chartkitdev/core";
+import { bar } from "@chartkitdev/core/charts/bar";
+
 /** Approximate figures for the maps pages. Not a statistical release. */
 
 export const renewable: [string, number][] = [
@@ -101,9 +104,9 @@ export const citySpec = {
     color: "pop",
     label: "name",
   },
-  mark: { atlas: "world", projection: "equalEarth", labelCount: 6 },
+  mark: { atlas: "world", projection: "equalEarth", labelCount: 18 },
   size: { width: 880, height: 520 },
-  a11y: { alt: "Approximate urban-area population in millions. Tokyo, Delhi, and Shanghai are the largest bubbles and are labelled. One accent colour, sized by population." },
+  a11y: { alt: "Approximate urban-area population in millions. The largest cities are labelled. Land is a neutral fill. One accent colour, sized by population." },
 };
 
 /** Approximate metro population change, percent, 2020 to 2023. Same metric as the state map. */
@@ -142,29 +145,32 @@ export function metroChanges(id: string): { name: string; change: number }[] {
   return [{ name: "Statewide", change: statewide?.[1] ?? 0 }];
 }
 
-function escXml(value: string): string {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
+const renderBar = createRenderer([bar]);
+const percent = { style: "number", suffix: "%", decimals: 1, signed: true };
 
-/** Horizontal bars from a shared zero, coloured with the map scale. No card fill of its own. */
-export function metroBarSvg(title: string, rows: { name: string; change: number }[], fill: (value: number) => string, ink = "#1d1d1f"): string {
-  const width = 420;
-  const rowH = 34;
-  const height = 44 + rows.length * rowH + 12;
-  const maxAbs = Math.max(1.5, ...rows.map((row) => Math.abs(row.change)));
-  const mid = 176;
-  const scale = 130 / maxAbs;
-  const bars = rows
-    .map((row, index) => {
-      const y = 44 + index * rowH;
-      const w = Math.max(2, Math.abs(row.change) * scale);
-      const x = row.change >= 0 ? mid : mid - w;
-      const label = `${row.change > 0 ? "+" : ""}${row.change.toFixed(1)}%`;
-      const labelX = row.change >= 0 ? x + w + 6 : x - 6;
-      return `<text x="8" y="${y + 14}" fill="${ink}" font-size="13" font-family="ui-sans-serif,system-ui,sans-serif">${escXml(row.name)}</text><rect x="${x.toFixed(1)}" y="${y}" width="${w.toFixed(1)}" height="16" rx="3" fill="${fill(row.change)}"/><text x="${labelX.toFixed(1)}" y="${y + 13}" text-anchor="${row.change >= 0 ? "start" : "end"}" fill="${ink}" font-size="12" font-family="ui-sans-serif,system-ui,sans-serif">${label}</text>`;
-    })
-    .join("");
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escXml(title)}, population change percent"><title>${escXml(title)}</title><text x="8" y="22" fill="${ink}" font-size="16" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">${escXml(title)}</text><line x1="${mid}" y1="36" x2="${mid}" y2="${height - 10}" stroke="${ink}" stroke-opacity="0.2"/>${bars}</svg>`;
+/** Horizontal metro bars from the core bar chart, on the map's diverging domain. */
+export function metroBarSvg(title: string, rows: { name: string; change: number }[], domain: [number, number], theme: "soft" | "midnight" = "soft"): string {
+  return renderBar({
+    version: "1",
+    type: "bar",
+    title,
+    theme,
+    data: rows.map((row) => ({ name: row.name, change: row.change })),
+    encoding: {
+      x: "name",
+      y: { field: "change", format: percent },
+      color: {
+        field: "change",
+        type: "quantitative",
+        range: ["#b2182b", "#f7f7f7", "#2166ac"],
+        scale: { type: "diverging", midpoint: 0, domain },
+      },
+    },
+    mark: { orientation: "horizontal", labels: true, labelFormat: percent },
+    legend: false,
+    size: { width: 420, height: Math.max(180, 72 + rows.length * 36) },
+    a11y: { alt: `${title}, population change percent.` },
+  });
 }
 
 export function withTheme<T extends { theme?: string }>(spec: T, theme: string): T {

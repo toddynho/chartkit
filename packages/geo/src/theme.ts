@@ -1,5 +1,7 @@
 export interface Chrome {
   water: string;
+  /** Neutral land for a points map. Choropleth no-data stays the hatch. */
+  land: string;
   nodata: string;
   border: string;
   text: string;
@@ -40,6 +42,7 @@ function mix(a: string, b: string, t: number): string {
 function solid(bg: string, text: string, muted: string, dark: boolean): Chrome {
   return {
     water: dark ? mix(bg, "#16324a", 0.55) : mix(bg, "#c5dff0", 0.72),
+    land: dark ? mix(bg, "#c8bfb0", 0.34) : mix(bg, "#efe6d6", 0.92),
     nodata: dark ? mix(bg, "#c4b8a8", 0.22) : mix(bg, "#8a8175", 0.22),
     border: dark ? mix(bg, text, 0.42) : mix(bg, "#1d1d1f", 0.28),
     text,
@@ -51,6 +54,7 @@ function solid(bg: string, text: string, muted: string, dark: boolean): Chrome {
 
 const SOFT: Chrome = {
   water: "light-dark(#d7ebf6, #10202c)",
+  land: "light-dark(#efe6d6, #2a3338)",
   nodata: "light-dark(#d9d4cb, #3a342c)",
   border: "light-dark(#7d93a8, #8aa0b4)",
   text: "light-dark(#1d1d1f, #f5f5f7)",

@@ -260,8 +260,33 @@ describe("render", () => {
     expect(svg).toContain("ck-geo-tag");
     expect(svg).toContain("million");
     expect(svg).not.toContain("linearGradient");
+    expect(svg).not.toContain("ck-geo-nodata");
+    expect(svg).toContain("fill:light-dark(#efe6d6, #2a3338)");
     const mapEnd = svg.indexOf("</g>");
     expect(svg.lastIndexOf("<circle", mapEnd)).toBeLessThan(svg.indexOf(">Tokyo<"));
+
+    const crowded = await render({
+      type: "map-points",
+      title: "Cities",
+      data: [
+        { name: "Tokyo", lat: 35.7, lon: 139.7, pop: 37 },
+        { name: "Delhi", lat: 28.6, lon: 77.2, pop: 33 },
+        { name: "Shanghai", lat: 31.2, lon: 121.5, pop: 29 },
+        { name: "Cairo", lat: 30.0, lon: 31.2, pop: 22 },
+        { name: "Mexico City", lat: 19.4, lon: -99.1, pop: 22 },
+        { name: "New York", lat: 40.7, lon: -74.0, pop: 19 },
+        { name: "Lagos", lat: 6.5, lon: 3.4, pop: 16 },
+        { name: "Buenos Aires", lat: -34.6, lon: -58.4, pop: 15 },
+      ],
+      encoding: { latitude: "lat", longitude: "lon", size: "pop", color: "pop", label: "name" },
+      mark: { atlas: "world", labelCount: 8 },
+      a11y: { alt: "The largest cities are labelled." },
+      size: { width: 880, height: 520 },
+    });
+    for (const name of ["Tokyo", "Delhi", "Cairo", "New York", "Lagos", "Buenos Aires"]) expect(crowded).toContain(`>${name}<`);
+    const groupEnd = crowded.indexOf("</g>");
+    expect(crowded.lastIndexOf("<circle", groupEnd)).toBeLessThan(crowded.indexOf(">Tokyo<"));
+    expect(crowded).not.toContain("ck-geo-nodata");
 
     const canada = await render({
       type: "choropleth",

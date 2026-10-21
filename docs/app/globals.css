@@ -287,6 +287,12 @@ textarea { min-height: 220px; resize: vertical; font-family: var(--mono); font-s
   padding: 8px 8px 4px;
 }
 .map-board .ck-geo-water { fill: var(--bg); }
+.map-board[data-theme="midnight"] {
+  --bg: #12212e;
+  --ck-background: #12212e;
+  background: #12212e;
+  color: #ffffff;
+}
 @media (max-width: 860px) {
   .map-board { grid-template-columns: 1fr; }
 }

@@ -26,7 +26,7 @@ export default async function MapsPage() {
   const bars: Record<string, string> = {};
   for (const [id] of stateChange) {
     const name = stateNames[id] ?? id;
-    bars[id] = metroBarSvg(`${name} metros`, metroChanges(id), scale.fill);
+    bars[id] = metroBarSvg(`${name} metros`, metroChanges(id), scale.domain);
   }
 
   return (
@@ -36,7 +36,7 @@ export default async function MapsPage() {
         Choropleth and bubble maps live in <code>@chartkitdev/geo</code>. The package is unpublished. It is not part of the line chart or <code>@chartkitdev/core/all</code>. Naming an atlas does not fetch anything. Each atlas is its own chunk.
       </p>
       <p>
-        Colour scales are sequential, diverging, and threshold, with a legend and a no-data fill. Points take latitude and longitude, and can be sized and coloured. Themes set water, land, borders, and the no-data fill. Soft follows the page colour scheme. Midnight, Obsidian, Neon, and the other dark presets bake their own ink so a light page cannot wash the type out.
+        Colour scales are sequential, diverging, and threshold, with a legend and a no-data hatch. A bubble map with no choropleth value draws land in a neutral fill instead. Points take latitude and longitude, and can be sized and coloured. Themes set water, land, borders, and the no-data fill. Soft follows the page colour scheme. Midnight, Obsidian, Neon, and the other dark presets bake their own ink so a light page cannot wash the type out.
       </p>
       <h2>What this does not do</h2>
       <p>
@@ -59,7 +59,7 @@ export default async function MapsPage() {
       <ChartView spec={usSpec} />
 
       <h2>Cities</h2>
-      <p>Bubble area follows urban population, in millions. One accent colour, because size and colour would otherwise say the same thing. Labels sit above the bubbles, with a halo, and move aside when a neighbour would cover them.</p>
+      <p>Bubble area follows urban population, in millions. One accent colour, because size and colour would otherwise say the same thing. Land under the bubbles is a neutral fill, not the no-data hatch. The largest cities are labelled, and a short line steps a name aside when a neighbour would cover it.</p>
       <ChartView spec={citySpec} />
 
       <h2>A state and its metros</h2>

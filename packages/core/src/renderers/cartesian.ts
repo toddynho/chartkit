@@ -269,6 +269,8 @@ export interface PlotModel {
   showY2: boolean;
   yGrid: false | "solid" | "dashed" | "dotted";
   legend: boolean;
+  /** Spec asked for a legend. A one-series chart can still hide the series key. */
+  legendOn: boolean;
   legendBox: LegendBox | null;
   exportMark: string;
   colorScale: ColorScale | null;
@@ -568,6 +570,7 @@ function toModel(
     series,
     showY2: shell.showY2 && series.some((item) => item.axis === "y2"),
     legend: shell.legendOn && (series.length > 1 || Boolean(swatches) || ruleLegend.length > 0),
+    legendOn: shell.legendOn,
     sampling: dataSampling(spec) ?? shell.sampling,
     canvas: canvasWanted(spec),
     colorScale,
@@ -708,7 +711,7 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   if (model.legend && model.legendBox) {
     parts.push(paintLegend(model.legendBox, legendItems(model), { plot, width: model.width, height: model.height, preset: model.preset }));
   }
-  if (model.colorScale) parts.push(model.colorScale.legend(plot.left, model.height - 46, cssVar("muted", model.preset.muted)));
+  if (model.colorScale && model.legendOn) parts.push(model.colorScale.legend(plot.left, model.height - 46, cssVar("muted", model.preset.muted)));
 
   parts.push(`</svg>`);
   if (pass !== "off") noteSvg(performance.now() - tSvg);
@@ -1054,7 +1057,7 @@ function bars(
       const height = Math.max(0, barSize - inset);
       const edge = b >= a ? "right" : "left";
       out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra), caption));
-      queueBarLabel(model, series, series.values[i], x, y, width, height, true, labs);
+      queueBarLabel(model, series, series.values[i], x, y, width, height, true, labs, b < a, plot.left, model.width);
     } else {
       const x = start;
       const y = Math.min(a, b);
@@ -1062,7 +1065,7 @@ function bars(
       const width = Math.max(0, barSize - inset);
       const edge = b <= a ? "top" : "bottom";
       out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra), caption));
-      queueBarLabel(model, series, series.values[i], x, y, width, height, false, labs);
+      queueBarLabel(model, series, series.values[i], x, y, width, height, false, labs, false, plot.left, model.width);
     }
   }
   return out.join("");
@@ -1115,23 +1118,39 @@ function queueBarLabel(
   h: number,
   horizontal: boolean,
   labs: Lab[],
+  tipLeft = false,
+  gutter = 0,
+  viewWidth = 0,
 ): void {
   if (!wantLabels(model) || typeof value !== "number") return;
   let pos = model.labelAt || (model.stackTotal ? "inside" : horizontal ? "right" : "top");
   if ((pos === "inside" || pos === "center") && Math.min(w, h) < 16) pos = horizontal ? "right" : "top";
   const text = labelText(model, series, value);
+  const textW = Math.max(8, text.length * 6.8);
   let lx = x + w / 2;
   let ly = y - 4;
   let anchor = "middle";
   if (horizontal) {
     ly = y + h / 2 + 3;
-    if (pos === "left" || pos === "bottom") {
+    const tipSide = model.labelAt === "" || model.labelAt === "outside";
+    if (tipSide && tipLeft) {
+      const outside = x - 4 - textW;
+      if (outside >= gutter + 2) {
+        lx = x - 4;
+        anchor = "end";
+      } else {
+        lx = Math.max(gutter + textW + 2, Math.min(x + w - 2, x + textW + 2));
+        anchor = "end";
+      }
+    } else if (pos === "left" || pos === "bottom") {
       lx = x + 4;
       anchor = "start";
     } else if (pos === "center" || pos === "inside") anchor = "middle";
     else {
       lx = x + w + 4;
       anchor = "start";
+      const limit = viewWidth > 0 ? viewWidth - 4 : lx + textW;
+      if (lx + textW > limit) lx = Math.max(x + 2, limit - textW);
     }
   } else if (pos === "bottom") ly = y + h - 2;
   else if (pos === "center" || pos === "inside") ly = y + Math.min(h - 2, Math.max(12, h / 2)) ;
@@ -1915,6 +1934,9 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
     if (pos === "bottom") bottom += 14;
     if (pos === "left") left += 28;
     if (pos === "right" || (horizontal && (pos === "outside" || pos === ""))) right = Math.max(right, 36);
+    if (horizontal && (model.labelAt === "" || model.labelAt === "right" || model.labelAt === "outside")) {
+      right = Math.max(right, Math.ceil(valueLabelWidth(model) + 16));
+    }
   }
   if (model.stackTotal) {
     if (horizontal) right = Math.max(right, 48);
@@ -1938,7 +1960,7 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
     if (!horizontal && xEnd) top += 32 + extra;
     else if (!horizontal) bottom = 32 + extra;
     else if (xEnd) right = Math.max(right, xGap);
-    else left = Math.max(left, xGap);
+    else left = Math.max(left, xGap + (horizontal && diverges(model) ? 8 : 0));
   }
   const yTick = model.showY ? outsideLen(model.yAxis) : 0;
   const y2Tick = model.showY2 ? outsideLen(model.y2Axis) : 0;
@@ -1990,7 +2012,7 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
     else if (pos === "left") left += space.side;
     else if (pos === "right") right += space.side;
   } else if (model.legend) top += 12 + legendRows(model, left, model.width - right) * 18;
-  if (model.colorScale) bottom += 46;
+  if (model.colorScale && model.legendOn) bottom += 46;
   const inset = model.inset;
   return {
     top: typeof inset.t === "number" ? Math.max(top, inset.t) : top,
@@ -2706,7 +2728,34 @@ function ruleSwatches(
 
 /** Per-point colour from a colour field, a domain map, a constant, or mark.colorRules. */
 function colorLegendFoot(model: PlotModel): number {
-  return model.colorScale ? 46 : 0;
+  return model.colorScale && model.legendOn ? 46 : 0;
+}
+
+/** True when a bar crosses or sits left of zero, so the category gutter stays clear of the tip. */
+function diverges(model: PlotModel): boolean {
+  for (const series of model.series) {
+    if (series.mark !== "bar") continue;
+    for (let i = 0; i < series.values.length; i++) {
+      const value = series.values[i];
+      if (typeof value === "number" && value < 0) return true;
+    }
+  }
+  return false;
+}
+
+/** Widest outside bar label, so the right margin can hold “+7.2%”. */
+function valueLabelWidth(model: PlotModel): number {
+  let width = 0;
+  for (const series of model.series) {
+    if (series.mark !== "bar") continue;
+    for (let i = 0; i < series.values.length; i++) {
+      const value = series.values[i];
+      if (typeof value !== "number") continue;
+      const size = labelText(model, series, value).length * 6.8;
+      if (size > width) width = size;
+    }
+  }
+  return width;
 }
 
 /** The bottom legend's own band, so the x title sits above it instead of in it. */

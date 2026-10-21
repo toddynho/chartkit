@@ -187,9 +187,10 @@ function legendMarkup(scale: PaintScale, x: number, y: number, height: number, i
   return `<defs><linearGradient id="${id}" x1="0" y1="1" x2="0" y2="0">${stops}</linearGradient></defs>${title}<rect x="${round(x)}" y="${round(top)}" width="12" height="${round(bar)}" fill="url(#${id})" rx="2"/>${labels}${nodata ? noDataSwatch(x, y + height - 18, id) : ""}`;
 }
 
-function styleBlock(chrome: Chrome, id: string): string {
+function styleBlock(chrome: Chrome, id: string, hatch: boolean): string {
   const rim = chrome.scheme === "dark" ? "#141414" : "#ffffff";
-  return `<style>.ck-geo-water{fill:${chrome.water}}.ck-geo-nodata{fill:url(#${id}nd)}.ck-geo-region{stroke:${chrome.border};stroke-width:.6px}.ck-geo-point{stroke:${rim};stroke-width:1.15px}.ck-geo-region:hover,.ck-geo-region:focus,.ck-geo-point:hover,.ck-geo-point:focus{stroke:${chrome.text};stroke-width:1.6px;outline:none}.ck-geo-graticule{fill:none;stroke:${chrome.border};stroke-width:.4;opacity:.45}.ck-geo-inset{fill:none;stroke:${chrome.border};stroke-width:.75}.ck-geo-label,.ck-geo-title{fill:${chrome.text};font-family:ui-sans-serif,system-ui,sans-serif}.ck-geo-label{font-size:11px}.ck-geo-legend-title{font-weight:650}.ck-geo-title{font-weight:600}.ck-geo-tag{fill:${chrome.text};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif;paint-order:stroke;stroke:${chrome.water};stroke-width:3px;stroke-linejoin:round}.ck-geo-muted{fill:${chrome.muted};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif}</style>`;
+  const nodata = hatch ? `.ck-geo-nodata{fill:url(#${id}nd)}` : "";
+  return `<style>.ck-geo-water{fill:${chrome.water}}${nodata}.ck-geo-region{fill:${chrome.land};stroke:${chrome.border};stroke-width:.6px}.ck-geo-point{stroke:${rim};stroke-width:1.25px;fill-opacity:.82}.ck-geo-region:hover,.ck-geo-region:focus,.ck-geo-point:hover,.ck-geo-point:focus{stroke:${chrome.text};stroke-width:1.6px;outline:none}.ck-geo-graticule{fill:none;stroke:${chrome.border};stroke-width:.4;opacity:.45}.ck-geo-inset{fill:none;stroke:${chrome.border};stroke-width:.75}.ck-geo-leader{fill:none;stroke:${chrome.muted};stroke-width:.8}.ck-geo-label,.ck-geo-title{fill:${chrome.text};font-family:ui-sans-serif,system-ui,sans-serif}.ck-geo-label{font-size:11px}.ck-geo-legend-title{font-weight:650}.ck-geo-title{font-weight:600}.ck-geo-tag{fill:${chrome.text};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif;paint-order:stroke;stroke:${chrome.water};stroke-width:3px;stroke-linejoin:round}.ck-geo-muted{fill:${chrome.muted};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif}</style>`;
 }
 
 function patternDef(chrome: Chrome, id: string): string {
@@ -197,12 +198,12 @@ function patternDef(chrome: Chrome, id: string): string {
   return `<pattern id="${id}nd" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="${chrome.nodata}"/><path d="M0 6 L6 0 M-1 1 L1 -1 M5 7 L7 5" stroke="${ink}" stroke-width="0.8"/></pattern>`;
 }
 
-function shell(spec: Record<string, unknown>, chrome: Chrome, body: string, patternId = "ckg"): string {
+function shell(spec: Record<string, unknown>, chrome: Chrome, body: string, patternId = "ckg", hatch = false): string {
   const { width, height } = sizeOf(spec);
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : typeof spec.title === "string" ? spec.title : "Map";
   const theme = typeof spec.theme === "string" ? spec.theme : "soft";
   const scheme = chrome.scheme ? ` style="color-scheme:${chrome.scheme}"` : "";
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="group" aria-label="${esc(alt)}" data-ck-type="${esc(String(spec.type))}" data-ck-theme="${esc(theme)}"${scheme}>${styleBlock(chrome, patternId)}<title>${esc(alt)}</title><rect class="ck-geo-water" width="100%" height="100%"/>${body}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="group" aria-label="${esc(alt)}" data-ck-type="${esc(String(spec.type))}" data-ck-theme="${esc(theme)}"${scheme}>${styleBlock(chrome, patternId, hatch)}<title>${esc(alt)}</title><rect class="ck-geo-water" width="100%" height="100%"/>${body}</svg>`;
 }
 
 function projectorFor(name: string, regions: GeoRegion[], box: Box): { project: Projector; point: (lon: number, lat: number) => [number, number]; grid: boolean; frames: InsetFrame[] } {
@@ -243,14 +244,14 @@ function regionHits(rows: Record<string, unknown>[], regionField: string | null,
   return hits;
 }
 
-function regionMarkup(regions: GeoRegion[], project: Projector, hits: Map<string, Hit>, scale: PaintScale | null, format: ScaleFormat): string {
+function regionMarkup(regions: GeoRegion[], project: Projector, hits: Map<string, Hit>, scale: PaintScale | null, format: ScaleFormat, choropleth: boolean): string {
   return regions
     .map((region) => {
       const hit = hits.get(region.id);
       const fill = hit && scale ? scale.fill(hit.value) : "";
-      const shown = hit ? formatNumber(hit.value, format) : "no data";
-      const label = `${region.name}, ${shown}`;
-      const cls = hit ? "ck-geo-region" : "ck-geo-region ck-geo-nodata";
+      const shown = hit ? formatNumber(hit.value, format) : choropleth ? "no data" : region.name;
+      const label = choropleth ? `${region.name}, ${shown}` : region.name;
+      const cls = choropleth && !hit ? "ck-geo-region ck-geo-nodata" : "ck-geo-region";
       const painted = fill ? ` fill="${fill}"` : "";
       const value = hit ? ` data-ck-value="${hit.value}" data-ck-i="${hit.index}"` : ` data-ck-i="-1"`;
       const tail = `${painted}${value} data-ck-id="${esc(region.id)}" data-ck-name="${esc(region.name)}" tabindex="0" aria-label="${esc(label)}"><title>${esc(label)}</title>`;
@@ -365,7 +366,15 @@ function overlaps(a: { x: number; y: number; w: number; h: number }, b: { x: num
   return !(a.x + a.w < b.x || b.x + b.w < a.x || a.y + a.h < b.y || b.y + b.h < a.y);
 }
 
-function pointMarkup(dots: Dot[], point: (lon: number, lat: number) => [number, number], labelCount: number, top: number): string {
+interface TagSpot {
+  tx: number;
+  ty: number;
+  anchor: "start" | "middle" | "end";
+  box: { x: number; y: number; w: number; h: number };
+  leader: string;
+}
+
+function pointMarkup(dots: Dot[], point: (lon: number, lat: number) => [number, number], labelCount: number, frame: Box): string {
   if (!dots.length) return "";
   const sizes = dots.map((dot) => dot.size);
   const lo = Math.min(...sizes);
@@ -385,37 +394,68 @@ function pointMarkup(dots: Dot[], point: (lon: number, lat: number) => [number, 
   }
   const ranked = [...circles].sort((a, b) => b.r - a.r).slice(0, labelCount);
   const placed: { x: number; y: number; w: number; h: number }[] = [];
-  const bubbleBoxes = circles.map((circle) => ({ x: circle.x - circle.r - 1, y: circle.y - circle.r - 1, w: circle.r * 2 + 2, h: circle.r * 2 + 2 }));
+  const bubbleBoxes = circles.map((circle) => ({ x: circle.x - circle.r, y: circle.y - circle.r, w: circle.r * 2, h: circle.r * 2 }));
   const labels: string[] = [];
+  const leaders: string[] = [];
   for (const circle of ranked) {
     if (!circle.dot.label) continue;
-    const width = measureText(circle.dot.label, 11) + 6;
-    const gap = 4;
-    const candidates = [
-      { x: circle.x - width / 2, y: circle.y - circle.r - 14 - gap, anchor: "middle" as const, tx: circle.x },
-      { x: circle.x + circle.r + gap, y: circle.y - 6, anchor: "start" as const, tx: circle.x + circle.r + gap },
-      { x: circle.x - circle.r - gap - width, y: circle.y - 6, anchor: "start" as const, tx: circle.x - circle.r - gap - width },
-      { x: circle.x - width / 2, y: circle.y + circle.r + gap, anchor: "middle" as const, tx: circle.x },
-    ];
-    let chosen: (typeof candidates)[number] | null = null;
-    for (const candidate of candidates) {
-      const box = { x: candidate.x, y: candidate.y, w: width, h: 13 };
-      if (box.y < top) continue;
-      const blocked = bubbleBoxes.some((item, index) => circles[index] !== circle && overlaps(box, item)) || placed.some((item) => overlaps(box, item));
-      if (blocked) continue;
-      chosen = candidate;
-      placed.push(box);
-      break;
-    }
-    if (!chosen) {
-      const fallback = candidates[0];
-      if (!fallback || fallback.y < top) continue;
-      chosen = fallback;
-      placed.push({ x: fallback.x, y: fallback.y, w: width, h: 13 });
-    }
-    labels.push(`<text class="ck-geo-tag" x="${round(chosen.tx)}" y="${round(chosen.y + 11)}" text-anchor="${chosen.anchor}">${esc(circle.dot.label)}</text>`);
+    const width = measureText(circle.dot.label, 11) + 4;
+    const spot = placeTag(circle, width, frame, bubbleBoxes, circles, placed);
+    if (!spot) continue;
+    placed.push(spot.box);
+    if (spot.leader) leaders.push(spot.leader);
+    labels.push(`<text class="ck-geo-tag" x="${round(spot.tx)}" y="${round(spot.ty)}" text-anchor="${spot.anchor}">${esc(circle.dot.label)}</text>`);
   }
-  return marks + labels.join("");
+  return marks + leaders.join("") + labels.join("");
+}
+
+function placeTag(
+  circle: { x: number; y: number; r: number },
+  width: number,
+  frame: Box,
+  bubbles: { x: number; y: number; w: number; h: number }[],
+  circles: { x: number; y: number; r: number }[],
+  placed: { x: number; y: number; w: number; h: number }[],
+): TagSpot | null {
+  const height = 13;
+  const dirs = [
+    { dx: 0, dy: -1, anchor: "middle" as const },
+    { dx: 1, dy: -0.35, anchor: "start" as const },
+    { dx: -1, dy: -0.35, anchor: "end" as const },
+    { dx: 1, dy: 0.55, anchor: "start" as const },
+    { dx: -1, dy: 0.55, anchor: "end" as const },
+    { dx: 0, dy: 1, anchor: "middle" as const },
+    { dx: 0.7, dy: -1, anchor: "start" as const },
+    { dx: -0.7, dy: -1, anchor: "end" as const },
+  ];
+  for (const dist of [circle.r + 8, circle.r + 24, circle.r + 42, circle.r + 64]) {
+    for (const dir of dirs) {
+      const cx = circle.x + dir.dx * dist;
+      const cy = circle.y + dir.dy * dist;
+      const x = dir.anchor === "middle" ? cx - width / 2 : dir.anchor === "end" ? cx - width : cx;
+      const y = cy - height / 2;
+      const box = { x, y, w: width, h: height };
+      if (box.x < frame.x + 2 || box.y < frame.y + 2 || box.x + box.w > frame.x + frame.w - 2 || box.y + box.h > frame.y + frame.h - 2) continue;
+      const hitBubble = bubbles.some((item, index) => circles[index] !== circle && overlaps(box, item));
+      if (hitBubble || overlaps(box, { x: circle.x - circle.r, y: circle.y - circle.r, w: circle.r * 2, h: circle.r * 2 }) || placed.some((item) => overlaps(box, item))) continue;
+      const leader = dist > circle.r + 14 ? leaderOf(circle, box) : "";
+      return { tx: cx, ty: y + 11, anchor: dir.anchor, box, leader };
+    }
+  }
+  return null;
+}
+
+function leaderOf(circle: { x: number; y: number; r: number }, box: { x: number; y: number; w: number; h: number }): string {
+  const tx = box.x + box.w / 2;
+  const ty = box.y + box.h / 2;
+  const dx = tx - circle.x;
+  const dy = ty - circle.y;
+  const len = Math.hypot(dx, dy) || 1;
+  const x1 = circle.x + (dx / len) * (circle.r + 1);
+  const y1 = circle.y + (dy / len) * (circle.r + 1);
+  const x2 = tx - (dx / len) * (box.w / 2 + 2);
+  const y2 = ty - (dy / len) * (box.h / 2 + 2);
+  return `<line class="ck-geo-leader" x1="${round(x1)}" y1="${round(y1)}" x2="${round(x2)}" y2="${round(y2)}"/>`;
 }
 
 export async function render(spec: unknown): Promise<string> {
@@ -456,15 +496,16 @@ export async function render(spec: unknown): Promise<string> {
     const body = `<defs>${patternDef(chrome, id)}</defs>${titleText}<text class="ck-geo-title" x="16" y="${titleH + 28}" font-size="16">Unknown atlas.</text>`;
     return shell(spec, chrome, body, id);
   }
-  let body = `<defs>${patternDef(chrome, id)}<clipPath id="${id}c"><rect x="${round(box.x)}" y="${round(box.y)}" width="${round(box.w)}" height="${round(box.h)}"/></clipPath></defs>${titleText}`;
+  const hatch = spec.type === "choropleth";
+  let body = `<defs>${hatch ? patternDef(chrome, id) : ""}<clipPath id="${id}c"><rect x="${round(box.x)}" y="${round(box.y)}" width="${round(box.w)}" height="${round(box.h)}"/></clipPath></defs>${titleText}`;
   body += `<g clip-path="url(#${id}c)">`;
   if (drawn?.grid) body += graticule(drawn.point);
   if (drawn) {
     for (const frame of drawn.frames) body += `<rect class="ck-geo-inset" x="${round(frame.x)}" y="${round(frame.y)}" width="${round(frame.w)}" height="${round(frame.h)}"/>`;
-    body += regionMarkup(loaded.regions, drawn.project, hits, choroplethScale, colorChannel.format);
+    body += regionMarkup(loaded.regions, drawn.project, hits, choroplethScale, colorChannel.format, spec.type === "choropleth");
   }
-  if (drawn && points.dots.length) body += pointMarkup(points.dots, drawn.point, num(mark.labelCount) ?? 5, box.y);
+  if (drawn && points.dots.length) body += pointMarkup(points.dots, drawn.point, num(mark.labelCount) ?? 12, box);
   body += `</g>`;
   if (showLegend && scale) body += legendMarkup(scale, box.x + box.w + 8, box.y, box.h, id, spec.type === "choropleth");
-  return shell(spec, chrome, body, id);
+  return shell(spec, chrome, body, id, hatch);
 }
