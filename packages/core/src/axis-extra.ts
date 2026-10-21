@@ -42,6 +42,11 @@ function prepare(spec: Record<string, unknown>, shell: ChartShell): void {
   const intent = clientIntent(spec);
   if (intent) shell.intent = intent;
   shell.f = flags(spec);
+  if (!isRecord(spec.layout) || spec.layout.direction !== "rtl") return;
+  const yRaw = axes && isRecord(axes.y) ? axes.y : undefined;
+  if (!yRaw || yRaw.position === undefined) shell.yAxis.end = true;
+  const xScale = xObj && isRecord(xObj.scale) ? xObj.scale : undefined;
+  if (xScale?.reverse !== false) shell.f |= 32;
 }
 
 function flags(spec: Record<string, unknown>): number {

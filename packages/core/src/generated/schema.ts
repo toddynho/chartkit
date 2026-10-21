@@ -74,6 +74,7 @@ export type ChartKitChartSpecV1 = {
   annotations?: Annotation[];
   theme?: Theme;
   size?: Size;
+  layout?: Layout;
   interaction?: Interaction;
   animation?: Animation;
   /**
@@ -3009,6 +3010,106 @@ export interface Size {
          */
         left?: number;
       };
+}
+/**
+ * Small multiples, a composed dashboard, breakpoint rules, and right-to-left layout. The same JSON draws on the server and in the browser.
+ */
+export interface Layout {
+  /**
+   * rtl mirrors a categorical x axis, moves the y axis to the right, and right-aligns the title. The SVG sets dir=rtl. Default ltr.
+   */
+  direction?: "ltr" | "rtl";
+  /**
+   * One panel per value of field. columns and rows set the grid. wrap (default true) flows extra panels onto new rows. scales shared uses one y domain; independent lets each panel scale itself. legend shared draws one legend for the grid.
+   */
+  facet?: {
+    /**
+     * Column that splits the data. A name that is not a field warns CK3041. Omitting it warns CK3040.
+     */
+    field?: string;
+    /**
+     * Panels across. 1 to 12. Outside that range warns CK3042 and the patch clamps it. Omit to choose from the category count.
+     */
+    columns?: number;
+    /**
+     * Panels down. 1 to 12. Outside that range warns CK3043 and the patch clamps it.
+     */
+    rows?: number;
+    /**
+     * Flow extra categories onto new rows. false keeps the grid and warns CK3049 when categories do not fit.
+     */
+    wrap?: boolean;
+    /**
+     * shared (default) locks every panel to the same y domain. independent scales each panel to its own data.
+     */
+    scales?: "shared" | "independent";
+    /**
+     * shared (default) draws one legend under the grid. each repeats the legend in every panel.
+     */
+    legend?: "shared" | "each";
+  };
+  /**
+   * Several charts in one spec. views are chart specs. direction is vertical (default) or horizontal. When views has a chart, the outer spec may omit data, encoding, and metric. Setting this beside facet warns CK3048.
+   */
+  concat?: {
+    /**
+     * vertical stacks the views. horizontal places them in a row.
+     */
+    direction?: "vertical" | "horizontal";
+    /**
+     * Space between views, in px. Default 16.
+     */
+    gap?: number;
+    /**
+     * Chart specs. A view with no type warns CK3045. An empty list warns CK3044.
+     */
+    views?: {}[];
+  };
+  /**
+   * The first rule whose width matches size.width, or the container width when width is auto, overrides the layout. A non-positive maxWidth warns CK3046. columns or rows without a facet field warns CK3047.
+   */
+  breakpoints?: {
+    /**
+     * Match when the chart width is this many px or less.
+     */
+    maxWidth?: number;
+    /**
+     * Match when the chart width is this many px or more.
+     */
+    minWidth?: number;
+    /**
+     * Show or hide the legend at this width.
+     */
+    legend?: boolean;
+    /**
+     * Text and axis direction at this width.
+     */
+    direction?: "ltr" | "rtl";
+    /**
+     * Facet columns at this width.
+     */
+    columns?: number;
+    /**
+     * Facet rows at this width.
+     */
+    rows?: number;
+    /**
+     * Facet wrap at this width.
+     */
+    wrap?: boolean;
+    /**
+     * Facet scale mode at this width.
+     */
+    scales?: "shared" | "independent";
+    /**
+     * Facet legend mode at this width.
+     */
+    facetLegend?: "shared" | "each";
+    /**
+     * Concat direction at this width.
+     */
+    concatDirection?: "vertical" | "horizontal";
+  }[];
 }
 /**
  * What the user can do. Adapters emit events (pointclick, legendtoggle, rangechange) for app code; JSON never contains functions. navigator, sync, and drilldown are JSON too.

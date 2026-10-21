@@ -291,6 +291,8 @@ export interface PlotModel {
   intent?: string;
   /** Scale bits set by the axis extra. 0 keeps the classic scale. */
   f: number;
+  /** Right-to-left: title on the right. The axis extra mirrors x and parks y on the right. */
+  rtl?: boolean;
   /** Extra room on a quantitative x, as fractions of the span. */
   xPad?: { min: number; max: number } | null;
   xClamp?: boolean;
@@ -364,6 +366,7 @@ export interface ChartShell {
   intent?: string;
   /** Scale bits set by the axis extra. 0 keeps the classic scale. */
   f: number;
+  rtl?: boolean;
   lv?: boolean;
   gx?: false | "solid" | "dashed" | "dotted";
 }
@@ -458,6 +461,7 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     y2Axis: { labels: true },
     inset: {},
     f: 0,
+    rtl: isRecord(spec.layout) && spec.layout.direction === "rtl",
   };
   hooks?.prepare(spec, next);
   chartShell = next;
@@ -624,11 +628,13 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   const parts: string[] = [];
   parts.push(openSvg(model));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", model.preset.background)}" />`);
+  const titleX = model.rtl ? model.width - 16 : pad.left;
+  const titleAnchor = model.rtl ? ' text-anchor="end"' : "";
   if (model.title) {
-    parts.push(`<text x="${n(pad.left)}" y="22" fill="${cssVar("text", model.preset.text)}" font-size="15" font-weight="650" font-family="${font()}">${esc(model.title)}</text>`);
+    parts.push(`<text x="${n(titleX)}" y="22"${titleAnchor} fill="${cssVar("text", model.preset.text)}" font-size="15" font-weight="650" font-family="${font()}">${esc(model.title)}</text>`);
   }
   if (model.subtitle) {
-    parts.push(`<text x="${n(pad.left)}" y="${model.title ? 40 : 18}" fill="${cssVar("muted", model.preset.muted)}" font-size="12" font-weight="400" font-family="${font()}">${esc(model.subtitle)}</text>`);
+    parts.push(`<text x="${n(titleX)}" y="${model.title ? 40 : 18}"${titleAnchor} fill="${cssVar("muted", model.preset.muted)}" font-size="12" font-weight="400" font-family="${font()}">${esc(model.subtitle)}</text>`);
   }
   if (model.legend && !model.legendBox) parts.push(legend(model, pad.left, model.title || model.subtitle ? (model.subtitle ? 54 : 36) : 8, plot.right));
 

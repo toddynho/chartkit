@@ -11,7 +11,7 @@ const repoRoot = join(fileURLToPath(new URL(".", import.meta.url)), "../../../..
  * CK3020 and CK3021 each cover the range series and the error-bar wording.
  * CK3020–CK3022 are uncertainty. Time and data is CK3023–CK3026.
  * Hierarchy is CK3027–CK3030. Canvas and large data are CK3031–CK3033.
- * Interaction+ is CK3034–CK3039.
+ * Interaction+ is CK3034–CK3039. Layout is CK3040–CK3049.
  */
 const FAMILIES = new Set([
   "CK1006",
@@ -33,6 +33,7 @@ const TIME_DATA = ["CK3023", "CK3024", "CK3025", "CK3026"];
 const HIERARCHY = ["CK3027", "CK3028", "CK3029", "CK3030"];
 const CANVAS = ["CK3031", "CK3032", "CK3033"];
 const INTERACTION = ["CK3034", "CK3035", "CK3036", "CK3037", "CK3038", "CK3039"];
+const LAYOUT = ["CK3040", "CK3041", "CK3042", "CK3043", "CK3044", "CK3045", "CK3046", "CK3047", "CK3048", "CK3049"];
 
 function walk(dir: string, out: string[]): void {
   for (const name of readdirSync(dir)) {
@@ -75,7 +76,7 @@ describe("CK codes", () => {
     expect(dupes).toEqual([]);
   });
 
-  it("keeps uncertainty on CK3020–CK3022, time and data on CK3023–CK3026, hierarchy on CK3027–CK3030, canvas on CK3031–CK3033, and interaction on CK3034–CK3039", () => {
-    for (const code of [...UNCERTAINTY, ...TIME_DATA, ...HIERARCHY, ...CANVAS, ...INTERACTION]) expect(byCode.has(code), code).toBe(true);
+  it("keeps uncertainty on CK3020–CK3022, time and data on CK3023–CK3026, hierarchy on CK3027–CK3030, canvas on CK3031–CK3033, interaction on CK3034–CK3039, and layout on CK3040–CK3049", () => {
+    for (const code of [...UNCERTAINTY, ...TIME_DATA, ...HIERARCHY, ...CANVAS, ...INTERACTION, ...LAYOUT]) expect(byCode.has(code), code).toBe(true);
   });
 });

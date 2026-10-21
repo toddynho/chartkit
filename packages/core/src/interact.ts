@@ -321,8 +321,24 @@ function tooltipOn(spec: InteractSpec): boolean {
   return tooltip === true || isRecord(tooltip) || TIP_TYPES.has(spec.type ?? "");
 }
 
+function barChart(spec: InteractSpec): boolean {
+  return spec.type === "bar" || spec.type === "bar-range";
+}
+
 function crosshairOn(spec: InteractSpec): boolean {
+  if (barChart(spec)) return isRecord(spec.tooltip) && spec.tooltip.crosshair === true;
   return tooltipOn(spec) && !arcChart(spec.type) && spec.type !== "waterfall" && !(isRecord(spec.tooltip) && spec.tooltip.crosshair === false);
+}
+
+function breakKey(rules: unknown[], width: number): string {
+  for (let i = 0; i < rules.length; i++) {
+    const rule = rules[i];
+    if (!isRecord(rule)) continue;
+    if (typeof rule.maxWidth === "number" && !(width <= rule.maxWidth)) continue;
+    if (typeof rule.minWidth === "number" && !(width >= rule.minWidth)) continue;
+    return String(i);
+  }
+  return "";
 }
 
 function tipFields(spec: InteractSpec): { field: string; title?: string; format?: unknown }[] | null {
@@ -379,7 +395,7 @@ function ensureCss(): void {
   const style = document.createElement("style");
   style.id = "ck-interact-style";
   style.textContent =
-    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-xlabel{font:11px ui-sans-serif,system-ui,sans-serif;fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-pick{stroke:var(--ck-selected,light-dark(#1d1d1f,#f5f5f7));stroke-width:2}[data-ck-dim]{opacity:var(--ck-dim,.32)}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.ck-crumb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px;font:12px/1.3 ui-sans-serif,system-ui,sans-serif;color:light-dark(#1d1d1f,#f5f5f7)}.ck-crumb button{font:inherit;color:inherit;background:transparent;border:1px solid light-dark(#0002,#fff3);border-radius:8px;padding:4px 8px;cursor:pointer}.ck-crumb [aria-current]{font-weight:650}";
+    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-xlabel{font:11px ui-sans-serif,system-ui,sans-serif;fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-pick{stroke:var(--ck-selected,light-dark(#1d1d1f,#f5f5f7));stroke-width:2}[data-ck-dim]{opacity:var(--ck-dim,.32)}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.ck-crumb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px;font:12px/1.3 ui-sans-serif,system-ui,sans-serif;color:light-dark(#1d1d1f,#f5f5f7)}.ck-crumb button{font:inherit;color:inherit;background:transparent;border:1px solid light-dark(#0002,#fff3);border-radius:8px;padding:4px 8px;cursor:pointer}.ck-crumb [aria-current]{font-weight:650}.ck-bar-on{filter:brightness(1.18)}[data-ck-bar-dim]{opacity:.42}";
   document.head.append(style);
 }
 
@@ -829,6 +845,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   let hi = Math.max(0, n - 1);
   const hidden = new Set<string>();
   let alive = true;
+  let breakWatch: ResizeObserver | undefined;
   let focus = 0;
   let hover = buildHoverIndex(0, 0, 1, null);
   let box: Box = { l: 0, t: 0, w: 1, h: 1 };
@@ -1189,7 +1206,111 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     svg.querySelector("[data-ck-crosshair]")?.remove();
     svg.querySelector("[data-ck-xlabel]")?.remove();
     clearDots();
+    clearBars();
     publishHide();
+  }
+
+  function clearBars(): void {
+    svg.querySelectorAll(".ck-bar-on").forEach((node) => node.classList.remove("ck-bar-on"));
+    svg.querySelectorAll("[data-ck-bar-dim]").forEach((node) => node.removeAttribute("data-ck-bar-dim"));
+  }
+
+  function isBar(node: Element): boolean {
+    if (node.localName !== "rect" || node.closest("defs,clipPath")) return false;
+    const fill = node.getAttribute("fill") || "";
+    if (!fill || fill === "none" || fill.startsWith("url(")) return false;
+    const w = +(node.getAttribute("width") || 0);
+    const h = +(node.getAttribute("height") || 0);
+    return w > 8 && h > 4 && w < box.w * 0.9;
+  }
+
+  function barsNear(snapped: number, horizontal: boolean): Element[] {
+    const tol = Math.max(18, box.w / Math.max(4, n));
+    const hits: Element[] = [];
+    const rects = svg.querySelectorAll("rect");
+    for (let i = 0; i < rects.length; i++) {
+      const rect = rects[i];
+      if (!rect || !isBar(rect)) continue;
+      const x = +(rect.getAttribute("x") || 0);
+      const y = +(rect.getAttribute("y") || 0);
+      const w = +(rect.getAttribute("width") || 0);
+      const h = +(rect.getAttribute("height") || 0);
+      const center = horizontal ? y + h / 2 : x + w / 2;
+      if (Math.abs(center - snapped) <= tol) hits.push(rect);
+    }
+    return hits;
+  }
+
+  function paintBars(hits: Element[]): void {
+    const hot = new Set(hits);
+    const rects = svg.querySelectorAll("rect");
+    for (let i = 0; i < rects.length; i++) {
+      const rect = rects[i];
+      if (!rect || !isBar(rect)) continue;
+      if (hot.has(rect)) {
+        rect.classList.add("ck-bar-on");
+        rect.removeAttribute("data-ck-bar-dim");
+      } else {
+        rect.classList.remove("ck-bar-on");
+        rect.setAttribute("data-ck-bar-dim", "");
+      }
+    }
+  }
+
+  function placeBarTip(
+    clientX: number,
+    clientY: number,
+    title: string,
+    rows: { name: string; text: string; color: string }[],
+    hits: Element[],
+    index: number,
+  ): void {
+    if (!hits.length) {
+      placeTip(clientX, clientY, title, rows, [], index);
+      return;
+    }
+    placeTip(clientX, clientY, title, rows, [], index);
+    let x0 = Infinity;
+    let y0 = Infinity;
+    let x1 = -Infinity;
+    let y1 = -Infinity;
+    for (const node of hits) {
+      const x = +(node.getAttribute("x") || 0);
+      const y = +(node.getAttribute("y") || 0);
+      const w = +(node.getAttribute("width") || 0);
+      const h = +(node.getAttribute("height") || 0);
+      if (x < x0) x0 = x;
+      if (y < y0) y0 = y;
+      if (x + w > x1) x1 = x + w;
+      if (y + h > y1) y1 = y + h;
+    }
+    const bounds = host.getBoundingClientRect();
+    const rect = svg.getBoundingClientRect();
+    const vb = (svg.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number);
+    const sx = (rect.width || vb[2] || 1) / (vb[2] || rect.width || 1);
+    const sy = (rect.height || vb[3] || 1) / (vb[3] || rect.height || 1);
+    const width = tip.offsetWidth || 160;
+    const height = tip.offsetHeight || 48;
+    const cx = rect.left + ((x0 + x1) / 2) * sx - bounds.left;
+    const topEdge = rect.top + y0 * sy - bounds.top;
+    const bottomEdge = rect.top + y1 * sy - bounds.top;
+    const horizontal = isRecord(base.mark) && base.mark.orientation === "horizontal";
+    let left = cx - width / 2;
+    let top = topEdge - height - 8;
+    if (horizontal) {
+      const end = rect.left + x1 * sx - bounds.left;
+      left = end + 8;
+      top = (rect.top + ((y0 + y1) / 2) * sy - bounds.top) - height / 2;
+      if (left + width > bounds.width - 4) left = rect.left + x0 * sx - bounds.left - width - 8;
+    } else if (top < 4) {
+      const beside = cx < bounds.width / 2 ? rect.left + x1 * sx - bounds.left + 8 : rect.left + x0 * sx - bounds.left - width - 8;
+      left = beside;
+      top = Math.max(4, topEdge);
+    }
+    left = Math.max(4, Math.min(left, Math.max(4, bounds.width - width - 4)));
+    top = Math.max(4, Math.min(top, Math.max(4, bounds.height - height - 4)));
+    tip.style.left = `${left}px`;
+    tip.style.top = `${top}px`;
   }
 
   function xNum(index: number): number | null {
@@ -1257,6 +1378,23 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       quiet = true;
       focus = index;
       const local = Math.max(0, index - lo);
+      if (barChart(base) && !showCross) {
+        const horizontal = isRecord(base.mark) && base.mark.orientation === "horizontal";
+        const hits = barsNear(crossX(local), horizontal);
+        paintBars(hits);
+        clearDots();
+        svg.querySelector("[data-ck-crosshair]")?.remove();
+        if (showTip) {
+          const rect = svg.getBoundingClientRect();
+          const parts = (svg.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number);
+          const vw = parts[2] || rect.width || 1;
+          const px = crossX(local);
+          const clientX = rect.left + (px / vw) * (rect.width || vw);
+          placeBarTip(clientX, rect.top + (rect.height || 1) / 2, xText(index), entriesAt(index, null), hits, index);
+        }
+        quiet = false;
+        return;
+      }
       moveCross(crossX(local), xText(index));
       if (showTip) {
         const rect = svg.getBoundingClientRect();
@@ -1886,6 +2024,22 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       placeTip(event.clientX, event.clientY, name, rows, [viewPoint(svg, event.clientX, event.clientY)]);
       return;
     }
+    if (barChart(base) && !showCross) {
+      if (!showTip && !keys) return;
+      const point = viewPoint(svg, event.clientX, event.clientY);
+      const horizontal = isRecord(base.mark) && base.mark.orientation === "horizontal";
+      const local = lookupIndex(hover, horizontal ? point.y : point.x);
+      const index = Math.min(n - 1, Math.max(0, lo + local));
+      focus = index;
+      const hits = barsNear(crossX(local), horizontal);
+      paintBars(hits);
+      clearDots();
+      svg.querySelector("[data-ck-crosshair]")?.remove();
+      svg.querySelector("[data-ck-xlabel]")?.remove();
+      if (showTip) placeBarTip(event.clientX, event.clientY, xText(index), entriesAt(index, point.y), hits, index);
+      publishHover();
+      return;
+    }
     if (!showTip && !showCross && !keys) return;
     const point = viewPoint(svg, event.clientX, event.clientY);
     const sceneHit = dataHit(svg);
@@ -2183,6 +2337,26 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
 
   queueCanvas(host, base);
 
+  const widthFixed = isRecord(spec.size) && typeof spec.size.width === "number";
+  const rules = isRecord(spec.layout) && Array.isArray(spec.layout.breakpoints) ? spec.layout.breakpoints : null;
+  if (!widthFixed && rules && rules.length && typeof ResizeObserver !== "undefined") {
+    let seenRule: string | null = null;
+    breakWatch = new ResizeObserver(() => {
+      if (!alive) return;
+      const width = Math.round((host as HTMLElement).clientWidth);
+      if (!(width > 0)) return;
+      const id = breakKey(rules, width);
+      if (id === seenRule) return;
+      seenRule = id;
+      const size = isRecord(base.size) ? { ...base.size, width } : { width };
+      patchSvg(host as PatchHost, options.render({ ...base, size }));
+      const nextSvg = host.querySelector("svg");
+      if (nextSvg instanceof SVGSVGElement) svg = nextSvg;
+      arm();
+    });
+    breakWatch.observe(host);
+  }
+
   return {
     update(next, markup) {
       if (!alive) return;
@@ -2226,6 +2400,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       if (!alive) return;
       alive = false;
       ticket++;
+      breakWatch?.disconnect();
       for (const off of offs) off();
       tip.remove();
       live.remove();

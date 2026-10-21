@@ -18,6 +18,7 @@ interface JsonSchema {
   if?: JsonSchema;
   then?: JsonSchema;
   else?: JsonSchema;
+  not?: JsonSchema;
   minLength?: number;
   maxLength?: number;
   minimum?: number;
@@ -472,6 +473,21 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
   if (node.allOf) {
     for (const sub of node.allOf) check(value, sub, path, ctx);
   }
+  if (node.not) {
+    const before = ctx.out.length;
+    check(value, node.not, path, ctx);
+    const matched = ctx.out.length === before;
+    ctx.out.splice(before);
+    if (matched) {
+      emit(ctx, {
+        code: "CK1006",
+        severity: "error",
+        message: `${showPath(path)} matches a shape that is not allowed here`,
+        path,
+      });
+    }
+  }
+
   if (node.if) {
     const before = ctx.out.length;
     check(value, node.if, path, ctx);

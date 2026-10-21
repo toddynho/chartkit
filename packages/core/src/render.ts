@@ -1,4 +1,5 @@
 import type { Diagnostic } from "./diagnostics";
+import { arrange, directionOf } from "./layout";
 import { cssVar } from "./theme";
 import { esc, font, isRecord } from "./svg";
 
@@ -60,7 +61,15 @@ function renderWith(map: Map<string, ChartRenderer>, spec: unknown, target?: Ren
     } else {
       const chart = map.get(spec.type);
       if (!chart) svg = errorSvg([unregistered(spec.type)]);
-      else svg = chart.render(spec) ?? errorSvg([undrawable(spec.type)]);
+      else {
+        const hostType = spec.type;
+        const draw = (next: Record<string, unknown>) => {
+          const type = typeof next.type === "string" ? next.type : hostType;
+          const inner = map.get(type) ?? chart;
+          return inner.render(next);
+        };
+        svg = arrange(spec, draw) ?? chart.render(spec) ?? errorSvg([undrawable(spec.type)]);
+      }
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -73,9 +82,15 @@ function renderWith(map: Map<string, ChartRenderer>, spec: unknown, target?: Ren
       },
     ]);
   }
+  svg = stampDirection(svg, spec);
   svg = stampInteraction(svg, spec);
   if (target) target.innerHTML = svg;
   return svg;
+}
+
+function stampDirection(svg: string, spec: unknown): string {
+  if (!svg.startsWith("<svg") || !isRecord(spec) || directionOf(spec) !== "rtl" || svg.includes(" dir=")) return svg;
+  return `<svg dir="rtl"${svg.slice(4)}`;
 }
 
 /** Records navigator, sync, and drilldown on the SVG. The controls mount on the client. */

@@ -127,6 +127,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   if (known && type) {
     warnCanvas(spec, type, view.length, diagnostics);
     warnInteraction(spec, type, view, diagnostics);
+    warnLayout(spec, view, diagnostics);
   }
   if (isRecord(spec.encoding)) checkEncoding(spec, spec.encoding, view, diagnostics);
   if (type === "candlestick") checkCandles(spec, view, diagnostics);
@@ -556,6 +557,139 @@ function warnInteraction(spec: Record<string, unknown>, type: string, table: Dat
     hint: fallback ? `use ${fallback}` : "drop key and the category defaults to encoding.x",
     fix,
   });
+}
+
+/** Facet, concat, and breakpoint rules. Each warning carries one JSON Patch. */
+function warnLayout(spec: Record<string, unknown>, table: DataTable | undefined, diagnostics: Diagnostic[]): void {
+  const layout = spec.layout;
+  if (!isRecord(layout)) return;
+  const fields = knownFields(table);
+  const facet = isRecord(layout.facet) ? layout.facet : undefined;
+  const concat = isRecord(layout.concat) ? layout.concat : undefined;
+  if (facet && concat) {
+    diagnostics.push({
+      code: "CK3048",
+      severity: "warning",
+      message: "facet and concat cannot both be set",
+      path: "/layout/concat",
+      hint: "keep the facet or the views, not both",
+      fix: [{ op: "remove", path: "/layout/concat" }],
+    });
+  }
+  if (facet) {
+    const field = facet.field;
+    if (typeof field !== "string" || field === "") {
+      diagnostics.push({
+        code: "CK3040",
+        severity: "warning",
+        message: "facet needs a field",
+        path: "/layout/facet",
+        hint: "name the column that splits the panels",
+        fix: [{ op: "remove", path: "/layout/facet" }],
+      });
+    } else if (!fields.has(field)) {
+      const fallback = table?.fields.find((name) => name !== field);
+      diagnostics.push({
+        code: "CK3041",
+        severity: "warning",
+        message: `facet field ${field} is not a data field`,
+        path: "/layout/facet/field",
+        hint: fallback ? `use ${fallback}` : "drop facet",
+        fix: fallback
+          ? [{ op: "replace", path: "/layout/facet/field", value: fallback }]
+          : [{ op: "remove", path: "/layout/facet" }],
+      });
+    }
+    if (typeof facet.columns === "number" && (facet.columns < 1 || facet.columns > 12)) {
+      diagnostics.push({
+        code: "CK3042",
+        severity: "warning",
+        message: `facet columns ${facet.columns} is outside 1 to 12`,
+        path: "/layout/facet/columns",
+        hint: "use 1 to 12 columns",
+        fix: [{ op: "replace", path: "/layout/facet/columns", value: Math.max(1, Math.min(12, Math.round(facet.columns))) }],
+      });
+    }
+    if (typeof facet.rows === "number" && (facet.rows < 1 || facet.rows > 12)) {
+      diagnostics.push({
+        code: "CK3043",
+        severity: "warning",
+        message: `facet rows ${facet.rows} is outside 1 to 12`,
+        path: "/layout/facet/rows",
+        hint: "use 1 to 12 rows",
+        fix: [{ op: "replace", path: "/layout/facet/rows", value: Math.max(1, Math.min(12, Math.round(facet.rows))) }],
+      });
+    }
+    if (facet.wrap === false && typeof field === "string" && fields.has(field) && table) {
+      const seen = new Set<string>();
+      const column = table.columns[field];
+      if (column) for (let i = 0; i < table.length; i++) seen.add(column[i] == null ? "" : String(column[i]));
+      const cols = typeof facet.columns === "number" && facet.columns >= 1 ? Math.min(12, Math.round(facet.columns)) : Math.min(4, Math.max(1, Math.ceil(Math.sqrt(seen.size))));
+      const rows = typeof facet.rows === "number" && facet.rows >= 1 ? Math.min(12, Math.round(facet.rows)) : Math.ceil(seen.size / cols);
+      if (seen.size > cols * rows) {
+        diagnostics.push({
+          code: "CK3049",
+          severity: "warning",
+          message: "facet has more categories than the grid",
+          path: "/layout/facet/wrap",
+          hint: "wrap flows the extra panels onto new rows",
+          fix: [{ op: "replace", path: "/layout/facet/wrap", value: true }],
+        });
+      }
+    }
+  }
+  if (concat) {
+    const views = concat.views;
+    if (!Array.isArray(views) || views.length === 0) {
+      diagnostics.push({
+        code: "CK3044",
+        severity: "warning",
+        message: "concat needs views",
+        path: "/layout/concat",
+        hint: "add one chart spec per view",
+        fix: [{ op: "remove", path: "/layout/concat" }],
+      });
+    } else {
+      for (let i = 0; i < views.length; i++) {
+        const view = views[i];
+        if (isRecord(view) && typeof view.type === "string" && view.type) continue;
+        diagnostics.push({
+          code: "CK3045",
+          severity: "warning",
+          message: `concat view ${i} has no type`,
+          path: `/layout/concat/views/${i}`,
+          hint: "each view is a chart spec",
+          fix: [{ op: "remove", path: `/layout/concat/views/${i}` }],
+        });
+      }
+    }
+  }
+  const rules = layout.breakpoints;
+  if (!Array.isArray(rules)) return;
+  for (let i = 0; i < rules.length; i++) {
+    const rule = rules[i];
+    if (!isRecord(rule)) continue;
+    if (rule.maxWidth !== undefined && (typeof rule.maxWidth !== "number" || !(rule.maxWidth > 0))) {
+      diagnostics.push({
+        code: "CK3046",
+        severity: "warning",
+        message: "breakpoint maxWidth must be a positive number",
+        path: `/layout/breakpoints/${i}/maxWidth`,
+        hint: "width in px, such as 480",
+        fix: [{ op: "remove", path: `/layout/breakpoints/${i}` }],
+      });
+    }
+    if ((rule.columns !== undefined || rule.rows !== undefined) && !(facet && typeof facet.field === "string" && facet.field)) {
+      diagnostics.push({
+        code: "CK3047",
+        severity: "warning",
+        message: "breakpoint columns need a facet field",
+        path: `/layout/breakpoints/${i}/${rule.columns !== undefined ? "columns" : "rows"}`,
+        hint: "set layout.facet.field first",
+        fix: [{ op: "remove", path: `/layout/breakpoints/${i}/${rule.columns !== undefined ? "columns" : "rows"}` }],
+      });
+    }
+  }
 }
 
 function explicitNone(spec: Record<string, unknown>): string | null {
