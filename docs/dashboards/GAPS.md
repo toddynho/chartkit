@@ -9,6 +9,7 @@ Closed in this change:
 - `mark.track` is `bar` or `row` on `bar-list`. `row` is a full-height wash behind the label, width proportional to the value, with the count in the text token. `bar` stays the short rounded bar. The option is on the on-demand bar-list chunk, and the schema text also lands in validate, mermaid, and global.
 - An axis `title` of `""` is kept and is not drawn. Omitting the title still copies the series name onto the axis. The payments and analytics charts set `axes.y.title` to `""` so a series name is not a y-axis title.
 - Choropleth `mark.nodata: "fill"` paints missing countries with `mark.land` and does not hatch them. `mark.land` and `mark.water` accept `#rrggbb`. The default choropleth is still hatched. A points map still uses the land fill on every region.
+- A heatmap `encoding.color.range` of two or more stops is a continuous ramp. A two-stop range used to paint only the maximum cell in the last stop.
 
 | Product | Detail | Current workaround | Proposed ChartKit option |
 | --- | --- | --- | --- |
@@ -24,4 +25,5 @@ Closed in this change:
 | Plausible | Duration reads as minutes and seconds (`2m 24s`). | The tab label is page text. `format: "duration-ms"` would print `2.4m`. | A duration style that keeps minutes and seconds together. |
 | Google Analytics | Choropleth text and border still ignore `theme.tokens`. An object theme falls through to the soft chrome. | The map spec sets `theme` to the string `soft` or `midnight`, plus `mark.land` and `mark.water`. | `chromeFor` reads `theme.tokens` for text, muted, and border. |
 | Google Analytics | The map legend is a vertical ramp on the right. `legend.position` is not read. | The built-in vertical legend, titled Users, with compact stops. | `legend.position: "bottom"` and a horizontal legend on choropleth. |
+| Google Analytics | A linear colour scale still stretches to the minimum and maximum, so one cell far above the rest washes the others pale. | The hour grid has no outlier: weekday afternoons are the dark end and nights are the light end. | `scale.type: "quantile"` or a clamp on the colour domain. |
 | Sentry | Stacked segments meet flush. There is no gap inside a stack, and only the outer corners round. | `mark.stack` `stack`, `mark.cornerRadius` 2, `mark.gap` 0.28 between bars. | `mark.stackGap` for space between segments. |

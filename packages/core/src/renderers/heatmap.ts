@@ -53,7 +53,7 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
   const counts = [...byDay.values()];
   const max = Math.max(...counts, 1);
   const color = colorEnc?.constant ? paint(colorEnc.constant, frame.preset, 0) : paint(colorEnc?.range?.[colorEnc.range.length - 1], frame.preset, 0);
-  const ramp = colorEnc?.constant ? null : readColorScale(frame.encoding.color, frame.preset, counts, !colorEnc?.range);
+  const ramp = colorEnc?.constant ? null : readColorScale(frame.encoding.color, frame.preset, counts, true);
   const quiet = emptyMark(frame.id, frame.preset);
   const legendH = ramp ? colorLegendHeight : 22;
   const box = calendarLayout(frame, weeks, legendH);
@@ -234,7 +234,8 @@ function renderGrid(spec: Record<string, unknown>): string | null {
   const min = Math.min(...nums, 0);
   const color = colorEnc?.constant ? paint(colorEnc.constant, frame.preset, 0) : paint(undefined, frame.preset, 0);
   const range = colorEnc?.range?.map((item, index) => paint(item, frame.preset, index));
-  const ramp = colorEnc?.constant ? null : readColorScale(frame.encoding.color, frame.preset, nums, !range);
+  // A custom range is still a continuous ramp. Falling back to floor(t * stops) paints every cell but the maximum in the first stop.
+  const ramp = colorEnc?.constant ? null : readColorScale(frame.encoding.color, frame.preset, nums, true);
   const radius = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : Math.min(frame.geometry.cornerRadius, 6);
   const quiet = emptyMark(frame.id, frame.preset);
   const left = 48;

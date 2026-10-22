@@ -875,7 +875,7 @@ body:has(.dash-theme-midnight.dash-keel) { --bg: #1a1625; background: #1a1625; }
 .dash-issues { list-style: none; margin: 0; padding: 0; }
 .dash-issues li { padding: 7px 0; border-top: 1px solid var(--dash-line, var(--line)); }
 .dash-issue-name { display: flex; flex-direction: column; min-width: 0; }
-.dash-issue-name strong { font-size: 13px; font-weight: 650; }
+.dash-issue-name strong { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
 .dash-issue-name span, .dash-issue-seen, .dash-issue-age { color: var(--dash-muted, var(--muted)); font-size: 12px; }
 .dash-count { display: flex; flex-direction: column; align-items: flex-end; font-variant-numeric: tabular-nums; }
 .dash-count b { font-size: 14px; }

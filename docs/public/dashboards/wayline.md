@@ -12,7 +12,7 @@ Default theme: soft.
 
 This period and the previous period.
 
-type line. curve linear, so segments are straight. series[1] dash is dashed. legend.show is false. axes.y.title is empty. The blue series token is #1a73e8 and the comparison is #9aa0a6.
+type line. curve linear, so segments are straight. series[1] dash is dashed. legend.show is false. axes.y.title is empty. The blue series token is #1a73e8 and the comparison is #9aa0a6. The previous period is its own series, not a copy of this one.
 
 ```json
 {
@@ -39,143 +39,143 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
   "data": [
     {
       "date": "2025-09-24",
-      "now": 780,
-      "then": 661
+      "now": 630,
+      "then": 560
     },
     {
       "date": "2025-09-25",
-      "now": 940,
-      "then": 577
+      "now": 655,
+      "then": 471
     },
     {
       "date": "2025-09-26",
-      "now": 940,
-      "then": 689
+      "now": 676,
+      "then": 428
     },
     {
       "date": "2025-09-27",
-      "now": 780,
-      "then": 745
+      "now": 690,
+      "then": 503
     },
     {
       "date": "2025-09-28",
-      "now": 820,
-      "then": 745
+      "now": 625,
+      "then": 587
     },
     {
       "date": "2025-09-29",
-      "now": 700,
-      "then": 689
+      "now": 616,
+      "then": 618
     },
     {
       "date": "2025-09-30",
-      "now": 780,
-      "then": 577
+      "now": 684,
+      "then": 644
     },
     {
       "date": "2025-10-01",
-      "now": 700,
-      "then": 661
+      "now": 771,
+      "then": 610
     },
     {
       "date": "2025-10-02",
-      "now": 820,
-      "then": 689
+      "now": 782,
+      "then": 570
     },
     {
       "date": "2025-10-03",
-      "now": 780,
-      "then": 661
+      "now": 728,
+      "then": 542
     },
     {
       "date": "2025-10-04",
-      "now": 940,
-      "then": 577
+      "now": 717,
+      "then": 584
     },
     {
       "date": "2025-10-05",
-      "now": 940,
-      "then": 689
+      "now": 656,
+      "then": 570
     },
     {
       "date": "2025-10-06",
-      "now": 780,
-      "then": 745
+      "now": 675,
+      "then": 690
     },
     {
       "date": "2025-10-07",
-      "now": 820,
-      "then": 745
+      "now": 732,
+      "then": 717
     },
     {
       "date": "2025-10-08",
-      "now": 700,
-      "then": 689
+      "now": 834,
+      "then": 657
     },
     {
       "date": "2025-10-09",
-      "now": 780,
-      "then": 577
+      "now": 846,
+      "then": 600
     },
     {
       "date": "2025-10-10",
-      "now": 700,
-      "then": 661
+      "now": 950,
+      "then": 621
     },
     {
       "date": "2025-10-11",
-      "now": 820,
-      "then": 689
+      "now": 953,
+      "then": 561
     },
     {
       "date": "2025-10-12",
-      "now": 780,
-      "then": 661
+      "now": 848,
+      "then": 646
     },
     {
       "date": "2025-10-13",
-      "now": 940,
-      "then": 577
+      "now": 797,
+      "then": 776
     },
     {
       "date": "2025-10-14",
-      "now": 940,
-      "then": 689
+      "now": 768,
+      "then": 754
     },
     {
       "date": "2025-10-15",
-      "now": 780,
-      "then": 745
+      "now": 838,
+      "then": 743
     },
     {
       "date": "2025-10-16",
-      "now": 820,
-      "then": 745
+      "now": 949,
+      "then": 734
     },
     {
       "date": "2025-10-17",
-      "now": 700,
-      "then": 689
+      "now": 948,
+      "then": 592
     },
     {
       "date": "2025-10-18",
-      "now": 780,
-      "then": 577
+      "now": 915,
+      "then": 631
     },
     {
       "date": "2025-10-19",
-      "now": 700,
-      "then": 661
+      "now": 859,
+      "then": 755
     },
     {
       "date": "2025-10-20",
-      "now": 820,
-      "then": 689
+      "now": 857,
+      "then": 844
     },
     {
       "date": "2025-10-21",
-      "now": 780,
-      "then": 661
+      "now": 905,
+      "then": 824
     }
   ],
   "encoding": {
@@ -218,7 +218,7 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
     "height": 280
   },
   "a11y": {
-    "alt": "Users rise across 28 days and stay above the previous period."
+    "alt": "Users rise across 28 days and stay mostly above the previous period."
   }
 }
 ```
@@ -227,7 +227,7 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
 
 This period and the previous period.
 
-type line. curve linear, so segments are straight. series[1] dash is dashed. legend.show is false. axes.y.title is empty. The blue series token is #1a73e8 and the comparison is #9aa0a6.
+type line. curve linear, so segments are straight. series[1] dash is dashed. legend.show is false. axes.y.title is empty. The blue series token is #1a73e8 and the comparison is #9aa0a6. The previous period is its own series, not a copy of this one.
 
 ```json
 {
@@ -254,143 +254,143 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
   "data": [
     {
       "date": "2025-09-24",
-      "now": 338,
-      "then": 287
+      "now": 302,
+      "then": 216
     },
     {
       "date": "2025-09-25",
-      "now": 250,
-      "then": 256
+      "now": 318,
+      "then": 221
     },
     {
       "date": "2025-09-26",
-      "now": 294,
-      "then": 210
+      "now": 291,
+      "then": 214
     },
     {
       "date": "2025-09-27",
-      "now": 272,
-      "then": 166
+      "now": 256,
+      "then": 263
     },
     {
       "date": "2025-09-28",
-      "now": 198,
-      "then": 228
+      "now": 273,
+      "then": 253
     },
     {
       "date": "2025-09-29",
-      "now": 242,
-      "then": 274
+      "now": 266,
+      "then": 281
     },
     {
       "date": "2025-09-30",
-      "now": 220,
-      "then": 305
+      "now": 314,
+      "then": 289
     },
     {
       "date": "2025-10-01",
-      "now": 198,
-      "then": 320
+      "now": 346,
+      "then": 252
     },
     {
       "date": "2025-10-02",
-      "now": 242,
-      "then": 320
+      "now": 355,
+      "then": 229
     },
     {
       "date": "2025-10-03",
-      "now": 220,
-      "then": 305
+      "now": 324,
+      "then": 210
     },
     {
       "date": "2025-10-04",
-      "now": 198,
-      "then": 274
+      "now": 288,
+      "then": 261
     },
     {
       "date": "2025-10-05",
-      "now": 242,
-      "then": 228
+      "now": 289,
+      "then": 301
     },
     {
       "date": "2025-10-06",
-      "now": 220,
-      "then": 166
+      "now": 308,
+      "then": 301
     },
     {
       "date": "2025-10-07",
-      "now": 198,
-      "then": 228
+      "now": 341,
+      "then": 327
     },
     {
       "date": "2025-10-08",
-      "now": 242,
-      "then": 274
+      "now": 368,
+      "then": 296
     },
     {
       "date": "2025-10-09",
-      "now": 220,
-      "then": 305
+      "now": 363,
+      "then": 274
     },
     {
       "date": "2025-10-10",
-      "now": 198,
-      "then": 320
+      "now": 378,
+      "then": 230
     },
     {
       "date": "2025-10-11",
-      "now": 242,
-      "then": 320
+      "now": 338,
+      "then": 271
     },
     {
       "date": "2025-10-12",
-      "now": 220,
-      "then": 305
+      "now": 334,
+      "then": 327
     },
     {
       "date": "2025-10-13",
-      "now": 198,
-      "then": 274
+      "now": 332,
+      "then": 352
     },
     {
       "date": "2025-10-14",
-      "now": 242,
-      "then": 228
+      "now": 374,
+      "then": 336
     },
     {
       "date": "2025-10-15",
-      "now": 220,
-      "then": 166
+      "now": 411,
+      "then": 315
     },
     {
       "date": "2025-10-16",
-      "now": 198,
-      "then": 228
+      "now": 430,
+      "then": 261
     },
     {
       "date": "2025-10-17",
-      "now": 242,
-      "then": 274
+      "now": 385,
+      "then": 282
     },
     {
       "date": "2025-10-18",
-      "now": 220,
-      "then": 305
+      "now": 378,
+      "then": 290
     },
     {
       "date": "2025-10-19",
-      "now": 198,
-      "then": 320
+      "now": 362,
+      "then": 329
     },
     {
       "date": "2025-10-20",
-      "now": 242,
-      "then": 320
+      "now": 379,
+      "then": 364
     },
     {
       "date": "2025-10-21",
-      "now": 220,
-      "then": 305
+      "now": 414,
+      "then": 344
     }
   ],
   "encoding": {
@@ -442,7 +442,7 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
 
 This period and the previous period.
 
-type line. curve linear, so segments are straight. series[1] dash is dashed. legend.show is false. axes.y.title is empty. The blue series token is #1a73e8 and the comparison is #9aa0a6.
+type line. curve linear, so segments are straight. series[1] dash is dashed. legend.show is false. axes.y.title is empty. The blue series token is #1a73e8 and the comparison is #9aa0a6. The previous period is its own series, not a copy of this one.
 
 ```json
 {
@@ -469,143 +469,143 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
   "data": [
     {
       "date": "2025-09-24",
-      "now": 172,
-      "then": 146
+      "now": 155,
+      "then": 144
     },
     {
       "date": "2025-09-25",
-      "now": 196,
-      "then": 123
+      "now": 160,
+      "then": 143
     },
     {
       "date": "2025-09-26",
-      "now": 180,
-      "then": 134
+      "now": 164,
+      "then": 126
     },
     {
       "date": "2025-09-27",
-      "now": 196,
-      "then": 129
+      "now": 149,
+      "then": 119
     },
     {
       "date": "2025-09-28",
-      "now": 172,
-      "then": 106
+      "now": 137,
+      "then": 134
     },
     {
       "date": "2025-09-29",
-      "now": 180,
-      "then": 118
+      "now": 141,
+      "then": 149
     },
     {
       "date": "2025-09-30",
-      "now": 148,
-      "then": 112
+      "now": 164,
+      "then": 164
     },
     {
       "date": "2025-10-01",
-      "now": 148,
-      "then": 90
+      "now": 174,
+      "then": 159
     },
     {
       "date": "2025-10-02",
-      "now": 180,
-      "then": 101
+      "now": 177,
+      "then": 148
     },
     {
       "date": "2025-10-03",
-      "now": 172,
-      "then": 95
+      "now": 174,
+      "then": 137
     },
     {
       "date": "2025-10-04",
-      "now": 196,
-      "then": 83
+      "now": 164,
+      "then": 121
     },
     {
       "date": "2025-10-05",
-      "now": 180,
-      "then": 94
+      "now": 159,
+      "then": 135
     },
     {
       "date": "2025-10-06",
-      "now": 196,
-      "then": 89
+      "now": 152,
+      "then": 161
     },
     {
       "date": "2025-10-07",
-      "now": 172,
-      "then": 83
+      "now": 174,
+      "then": 162
     },
     {
       "date": "2025-10-08",
-      "now": 180,
-      "then": 94
+      "now": 173,
+      "then": 157
     },
     {
       "date": "2025-10-09",
-      "now": 148,
-      "then": 89
+      "now": 188,
+      "then": 155
     },
     {
       "date": "2025-10-10",
-      "now": 148,
-      "then": 83
+      "now": 172,
+      "then": 142
     },
     {
       "date": "2025-10-11",
-      "now": 180,
-      "then": 94
+      "now": 172,
+      "then": 134
     },
     {
       "date": "2025-10-12",
       "now": 172,
-      "then": 89
+      "then": 146
     },
     {
       "date": "2025-10-13",
-      "now": 196,
-      "then": 83
+      "now": 163,
+      "then": 161
     },
     {
       "date": "2025-10-14",
-      "now": 180,
-      "then": 94
+      "now": 183,
+      "then": 172
     },
     {
       "date": "2025-10-15",
-      "now": 196,
-      "then": 89
+      "now": 197,
+      "then": 170
     },
     {
       "date": "2025-10-16",
-      "now": 172,
-      "then": 83
+      "now": 189,
+      "then": 169
     },
     {
       "date": "2025-10-17",
-      "now": 180,
-      "then": 94
+      "now": 194,
+      "then": 145
     },
     {
       "date": "2025-10-18",
-      "now": 148,
-      "then": 89
+      "now": 182,
+      "then": 141
     },
     {
       "date": "2025-10-19",
-      "now": 148,
-      "then": 83
+      "now": 183,
+      "then": 155
     },
     {
       "date": "2025-10-20",
-      "now": 180,
-      "then": 94
+      "now": 174,
+      "then": 166
     },
     {
       "date": "2025-10-21",
-      "now": 172,
-      "then": 89
+      "now": 190,
+      "then": 168
     }
   ],
   "encoding": {
@@ -657,7 +657,7 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
 
 This period and the previous period.
 
-type line. curve linear, so segments are straight. series[1] dash is dashed. legend.show is false. axes.y.title is empty. The blue series token is #1a73e8 and the comparison is #9aa0a6.
+type line. curve linear, so segments are straight. series[1] dash is dashed. legend.show is false. axes.y.title is empty. The blue series token is #1a73e8 and the comparison is #9aa0a6. The previous period is its own series, not a copy of this one.
 
 ```json
 {
@@ -684,143 +684,143 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
   "data": [
     {
       "date": "2025-09-24",
-      "now": 1330,
-      "then": 1127
+      "now": 1095,
+      "then": 976
     },
     {
       "date": "2025-09-25",
-      "now": 1120,
-      "then": 1078
+      "now": 1299,
+      "then": 959
     },
     {
       "date": "2025-09-26",
-      "now": 1400,
-      "then": 1029
+      "now": 1275,
+      "then": 877
     },
     {
       "date": "2025-09-27",
-      "now": 1540,
-      "then": 980
+      "now": 1221,
+      "then": 950
     },
     {
       "date": "2025-09-28",
-      "now": 1540,
-      "then": 931
+      "now": 1138,
+      "then": 1079
     },
     {
       "date": "2025-09-29",
-      "now": 1400,
-      "then": 882
+      "now": 1057,
+      "then": 1201
     },
     {
       "date": "2025-09-30",
-      "now": 1120,
-      "then": 833
+      "now": 1216,
+      "then": 1132
     },
     {
       "date": "2025-10-01",
-      "now": 1330,
-      "then": 784
+      "now": 1239,
+      "then": 1156
     },
     {
       "date": "2025-10-02",
-      "now": 1400,
-      "then": 735
+      "now": 1345,
+      "then": 1053
     },
     {
       "date": "2025-10-03",
-      "now": 1330,
-      "then": 686
+      "now": 1390,
+      "then": 931
     },
     {
       "date": "2025-10-04",
-      "now": 1120,
-      "then": 647
+      "now": 1523,
+      "then": 1007
     },
     {
       "date": "2025-10-05",
-      "now": 1400,
-      "then": 647
+      "now": 1550,
+      "then": 1165
     },
     {
       "date": "2025-10-06",
-      "now": 1540,
-      "then": 647
+      "now": 1427,
+      "then": 1310
     },
     {
       "date": "2025-10-07",
-      "now": 1540,
-      "then": 647
+      "now": 1343,
+      "then": 1375
     },
     {
       "date": "2025-10-08",
-      "now": 1400,
-      "then": 647
+      "now": 1457,
+      "then": 1312
     },
     {
       "date": "2025-10-09",
-      "now": 1120,
-      "then": 647
+      "now": 1459,
+      "then": 1065
     },
     {
       "date": "2025-10-10",
-      "now": 1330,
-      "then": 647
+      "now": 1491,
+      "then": 1051
     },
     {
       "date": "2025-10-11",
-      "now": 1400,
-      "then": 647
+      "now": 1523,
+      "then": 1135
     },
     {
       "date": "2025-10-12",
-      "now": 1330,
-      "then": 647
+      "now": 1332,
+      "then": 1200
     },
     {
       "date": "2025-10-13",
-      "now": 1120,
-      "then": 647
+      "now": 1366,
+      "then": 1339
     },
     {
       "date": "2025-10-14",
-      "now": 1400,
-      "then": 647
+      "now": 1473,
+      "then": 1482
     },
     {
       "date": "2025-10-15",
-      "now": 1540,
-      "then": 647
+      "now": 1645,
+      "then": 1295
     },
     {
       "date": "2025-10-16",
-      "now": 1540,
-      "then": 647
+      "now": 1738,
+      "then": 1142
     },
     {
       "date": "2025-10-17",
-      "now": 1400,
-      "then": 647
+      "now": 1670,
+      "then": 1120
     },
     {
       "date": "2025-10-18",
-      "now": 1120,
-      "then": 647
+      "now": 1620,
+      "then": 1276
     },
     {
       "date": "2025-10-19",
-      "now": 1330,
-      "then": 647
+      "now": 1488,
+      "then": 1443
     },
     {
       "date": "2025-10-20",
-      "now": 1400,
-      "then": 647
+      "now": 1517,
+      "then": 1531
     },
     {
       "date": "2025-10-21",
-      "now": 1330,
-      "then": 647
+      "now": 1670,
+      "then": 1482
     }
   ],
   "encoding": {
@@ -946,7 +946,7 @@ type donut. theme.tokens.series is the five channel colours. legend.values print
 
 Weekday against hour.
 
-type heatmap. encoding.color.range is #e8f0fe to #1a73e8. Every cell has a value, so none are hatched.
+type heatmap. encoding.color.range is a continuous blue ramp, #e8f0fe, #aecbfa, #1a73e8. Weekday afternoons are the dark cells and nights stay light. Every cell has a value, so none are hatched.
 
 ```json
 {
@@ -973,142 +973,142 @@ type heatmap. encoding.color.range is #e8f0fe to #1a73e8. Every cell has a value
     {
       "day": "Mon",
       "hour": "00",
-      "users": 29
+      "users": 51
     },
     {
       "day": "Mon",
       "hour": "03",
-      "users": 64
+      "users": 66
     },
     {
       "day": "Mon",
       "hour": "06",
-      "users": 129
+      "users": 128
     },
     {
       "day": "Mon",
       "hour": "09",
-      "users": 208
-    },
-    {
-      "day": "Mon",
-      "hour": "12",
-      "users": 231
-    },
-    {
-      "day": "Mon",
-      "hour": "15",
       "users": 201
     },
     {
       "day": "Mon",
+      "hour": "12",
+      "users": 249
+    },
+    {
+      "day": "Mon",
+      "hour": "15",
+      "users": 202
+    },
+    {
+      "day": "Mon",
       "hour": "18",
-      "users": 132
+      "users": 131
     },
     {
       "day": "Mon",
       "hour": "21",
-      "users": 60
+      "users": 55
     },
     {
       "day": "Tue",
       "hour": "00",
-      "users": 32
+      "users": 50
     },
     {
       "day": "Tue",
       "hour": "03",
-      "users": 67
+      "users": 61
     },
     {
       "day": "Tue",
       "hour": "06",
-      "users": 132
+      "users": 128
     },
     {
       "day": "Tue",
       "hour": "09",
-      "users": 194
+      "users": 203
     },
     {
       "day": "Tue",
       "hour": "12",
-      "users": 234
+      "users": 240
     },
     {
       "day": "Tue",
       "hour": "15",
-      "users": 204
-    },
-    {
-      "day": "Tue",
-      "hour": "18",
-      "users": 135
-    },
-    {
-      "day": "Tue",
-      "hour": "21",
-      "users": 63
-    },
-    {
-      "day": "Wed",
-      "hour": "00",
-      "users": 35
-    },
-    {
-      "day": "Wed",
-      "hour": "03",
-      "users": 70
-    },
-    {
-      "day": "Wed",
-      "hour": "06",
-      "users": 135
-    },
-    {
-      "day": "Wed",
-      "hour": "09",
       "users": 197
     },
     {
+      "day": "Tue",
+      "hour": "18",
+      "users": 135
+    },
+    {
+      "day": "Tue",
+      "hour": "21",
+      "users": 59
+    },
+    {
+      "day": "Wed",
+      "hour": "00",
+      "users": 53
+    },
+    {
+      "day": "Wed",
+      "hour": "03",
+      "users": 61
+    },
+    {
+      "day": "Wed",
+      "hour": "06",
+      "users": 128
+    },
+    {
+      "day": "Wed",
+      "hour": "09",
+      "users": 209
+    },
+    {
       "day": "Wed",
       "hour": "12",
-      "users": 237
+      "users": 241
     },
     {
       "day": "Wed",
       "hour": "15",
-      "users": 207
+      "users": 198
     },
     {
       "day": "Wed",
       "hour": "18",
-      "users": 121
+      "users": 134
     },
     {
       "day": "Wed",
       "hour": "21",
-      "users": 66
+      "users": 59
     },
     {
       "day": "Thu",
       "hour": "00",
-      "users": 38
+      "users": 47
     },
     {
       "day": "Thu",
       "hour": "03",
-      "users": 73
+      "users": 65
     },
     {
       "day": "Thu",
       "hour": "06",
-      "users": 121
+      "users": 122
     },
     {
       "day": "Thu",
       "hour": "09",
-      "users": 200
+      "users": 207
     },
     {
       "day": "Thu",
@@ -1118,82 +1118,82 @@ type heatmap. encoding.color.range is #e8f0fe to #1a73e8. Every cell has a value
     {
       "day": "Thu",
       "hour": "15",
-      "users": 193
+      "users": 207
     },
     {
       "day": "Thu",
       "hour": "18",
-      "users": 124
+      "users": 125
     },
     {
       "day": "Thu",
       "hour": "21",
-      "users": 69
+      "users": 63
     },
     {
       "day": "Fri",
       "hour": "00",
-      "users": 41
+      "users": 60
     },
     {
       "day": "Fri",
       "hour": "03",
-      "users": 59
+      "users": 63
     },
     {
       "day": "Fri",
       "hour": "06",
-      "users": 124
+      "users": 133
     },
     {
       "day": "Fri",
       "hour": "09",
-      "users": 203
+      "users": 201
     },
     {
       "day": "Fri",
       "hour": "12",
-      "users": 243
+      "users": 239
     },
     {
       "day": "Fri",
       "hour": "15",
-      "users": 196
+      "users": 198
     },
     {
       "day": "Fri",
       "hour": "18",
-      "users": 127
+      "users": 124
     },
     {
       "day": "Fri",
       "hour": "21",
-      "users": 72
+      "users": 52
     },
     {
       "day": "Sat",
       "hour": "00",
-      "users": 37
-    },
-    {
-      "day": "Sat",
-      "hour": "03",
       "users": 35
     },
     {
       "day": "Sat",
+      "hour": "03",
+      "users": 32
+    },
+    {
+      "day": "Sat",
       "hour": "06",
-      "users": 62
+      "users": 56
     },
     {
       "day": "Sat",
       "hour": "09",
-      "users": 92
+      "users": 86
     },
     {
       "day": "Sat",
       "hour": "12",
-      "users": 93
+      "users": 101
     },
     {
       "day": "Sat",
@@ -1203,52 +1203,52 @@ type heatmap. encoding.color.range is #e8f0fe to #1a73e8. Every cell has a value
     {
       "day": "Sat",
       "hour": "18",
-      "users": 65
+      "users": 63
     },
     {
       "day": "Sat",
       "hour": "21",
-      "users": 48
+      "users": 30
     },
     {
       "day": "Sun",
       "hour": "00",
-      "users": 23
+      "users": 32
     },
     {
       "day": "Sun",
       "hour": "03",
-      "users": 38
+      "users": 35
     },
     {
       "day": "Sun",
       "hour": "06",
-      "users": 65
+      "users": 59
     },
     {
       "day": "Sun",
       "hour": "09",
-      "users": 95
+      "users": 91
     },
     {
       "day": "Sun",
       "hour": "12",
-      "users": 96
+      "users": 106
     },
     {
       "day": "Sun",
       "hour": "15",
-      "users": 88
+      "users": 91
     },
     {
       "day": "Sun",
       "hour": "18",
-      "users": 68
+      "users": 60
     },
     {
       "day": "Sun",
       "hour": "21",
-      "users": 34
+      "users": 36
     }
   ],
   "encoding": {
@@ -1259,6 +1259,7 @@ type heatmap. encoding.color.range is #e8f0fe to #1a73e8. Every cell has a value
       "title": "Users",
       "range": [
         "#e8f0fe",
+        "#aecbfa",
         "#1a73e8"
       ]
     }
@@ -1788,6 +1789,6 @@ type choropleth. encoding.color.range is the blue ramp. mark.nodata is fill, mar
 - **Metric tabs.** Users, New users, Avg engagement, and Revenue are page tabs. The selected tab is underlined. Each tab is its own line spec.
 - **Comparison.** curve linear keeps the segments straight. The previous period is dash dashed in #9aa0a6. axes.y.title is empty. Midnight uses #8ab4f8 for this period.
 - **Map.** Fifty-two countries use encoding.color.range #aecbfa, #669df6, #1a73e8. mark.nodata fill paints missing countries with mark.land. There is no hatch.
-- **Hour grid.** The heatmap is weekday by hour. color.range is #e8f0fe to #1a73e8 and every cell is filled.
+- **Hour grid.** The heatmap is weekday by hour. color.range is the continuous ramp #e8f0fe, #aecbfa, #1a73e8. Nights are light and weekday afternoons are dark.
 
 https://chartkit.dev/dashboards/wayline

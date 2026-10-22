@@ -180,15 +180,84 @@ function isoDays(start: string, count: number): string[] {
   return Array.from({ length: count }, (_, index) => new Date(origin + index * 86400000).toISOString().slice(0, 10));
 }
 
-function wave(count: number, base: number, amp: number, seed: number): number[] {
+/** Deterministic unit interval. Same seed, same sequence, on every machine. */
+function unit(seed: number): () => number {
+  let state = seed >>> 0 || 1;
+  return () => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+}
+
+interface Shape {
+  seed: number;
+  start: number;
+  end: number;
+  season: number;
+  noise: number;
+  /** Weekly phase in radians, so a comparison series does not copy the current one. */
+  phase?: number;
+  spike?: { at: number; height: number };
+}
+
+/**
+ * Trend, weekly seasonality, noise, and an optional spike.
+ * Nothing is clamped to a ceiling, so peaks are not flat copies of each other.
+ */
+function organic(count: number, shape: Shape): number[] {
+  const rand = unit(shape.seed);
   const out: number[] = [];
-  let value = base;
   for (let index = 0; index < count; index++) {
-    const kick = ((index * seed + 3) % 9) - 4;
-    value = Math.max(base * 0.55, Math.min(base * 1.75, value + kick * amp));
-    out.push(Math.round(value));
+    const t = count <= 1 ? 0 : index / (count - 1);
+    const trend = shape.start + (shape.end - shape.start) * t;
+    const season = Math.sin((index / 7) * Math.PI * 2 + (shape.phase ?? 0)) * shape.season;
+    const noise = (rand() - 0.5) * 2 * shape.noise;
+    let value = trend + season + noise;
+    if (shape.spike) {
+      const distance = Math.abs(index - shape.spike.at);
+      if (distance === 0) value += shape.spike.height;
+      else if (distance === 1) value += shape.spike.height * 0.42;
+      else if (distance === 2) value += shape.spike.height * 0.12;
+    }
+    out.push(value);
   }
   return out;
+}
+
+/** Round a continuous series without pulling different days onto one value. */
+function rounds(values: number[], step = 1): number[] {
+  return values.map((value) => Math.round(value / step) * step);
+}
+
+/** Scale a comparison down, keeping its own shape, until most points sit under the current series. */
+function sitBelow(current: number[], earlier: number[]): number[] {
+  const ratios = earlier.map((value, index) => value / Math.max(current[index] ?? 1, 1e-9)).sort((a, b) => a - b);
+  const pivot = ratios[Math.min(ratios.length - 1, Math.ceil(ratios.length * 0.85) - 1)] ?? 1;
+  const factor = pivot > 0.98 ? 0.98 / pivot : 1;
+  return earlier.map((value) => Math.round(value * factor));
+}
+
+/** A round axis max that leaves the highest point between 80% and 90% of a zero baseline. */
+function headroom(values: number[]): number {
+  const finite = values.filter((value) => Number.isFinite(value));
+  const max = Math.max(...finite);
+  const raw = max / 0.85;
+  const power = 10 ** Math.floor(Math.log10(Math.max(raw, 1e-6)));
+  const steps = [power / 10, power / 5, power / 4, power / 2, power];
+  let best = Math.ceil(raw);
+  let bestGap = Infinity;
+  for (const step of steps) {
+    if (!(step > 0)) continue;
+    const top = Math.ceil((raw - step * 1e-9) / step) * step;
+    const ratio = max / top;
+    if (ratio >= 0.8 && ratio <= 0.9) return top;
+    const gap = Math.abs(ratio - 0.85);
+    if (gap < bestGap) {
+      best = top;
+      bestGap = gap;
+    }
+  }
+  return best;
 }
 
 function scaleTo(values: number[], total: number): number[] {
@@ -232,8 +301,8 @@ function ledger(): Dashboard {
   const kpis = themesFor(light, dark, undefined, true);
   const failed = themesFor(light, dark, { soft: [light.negative], midnight: [dark.negative] });
   const days = isoDays("2025-10-01", 21);
-  const gross = scaleTo(wave(21, 100, 9, 5), 261000);
-  const prior = scaleTo(wave(21, 88, 6, 3), 241000);
+  const gross = scaleTo(organic(21, { seed: 11, start: 6800, end: 15600, season: 900, noise: 750, phase: 0.4, spike: { at: 15, height: 1400 } }), 261000);
+  const prior = sitBelow(gross, scaleTo(organic(21, { seed: 47, start: 5900, end: 11200, season: 650, noise: 380, phase: 2.2 }), 241000));
   const [first, last] = [Date.parse(`${days[0]}T00:00:00Z`), Date.parse(`${days[days.length - 1]}T00:00:00Z`)];
   const volume = days.map((date, index) => ({ date, gross: gross[index], prior: prior[index] }));
   const series = [
@@ -245,7 +314,7 @@ function ledger(): Dashboard {
     [210, 220, 240, 230, 250, 260, 255, 248],
   ];
   const cards = [
-    { label: "Gross", value: 261000, delta: 0.08, format: money, alt: "Gross volume this month is 261 thousand dollars, up 8 percent." },
+    { label: "Gross", value: 261000, delta: 0.14, format: money, alt: "Gross volume this month is 261 thousand dollars, up 14 percent." },
     { label: "Net", value: 248400, delta: 0.07, format: money, alt: "Net of fees is 248 thousand dollars, up 7 percent." },
     { label: "Refunds", value: 12600, delta: -0.11, format: money, goodDirection: "down" as const, alt: "Refunds are 12.6 thousand dollars, down 11 percent." },
     { label: "Fees", value: 8400, delta: 0.02, format: money, alt: "Fees are 8.4 thousand dollars, up 2 percent." },
@@ -288,7 +357,7 @@ function ledger(): Dashboard {
     disclaimer: disclaimer("Stripe"),
     range: "1–21 Oct",
     defaultTheme: mode,
-    headline: { label: "Gross volume", value: "$261K", delta: "+8.0%", good: true },
+    headline: { label: "Gross volume", value: "$261K", delta: "+14%", good: true },
     charts: [
       chart({
         id: "ledger-volume",
@@ -448,7 +517,7 @@ function meter(): Dashboard {
           encoding: {
             x: { field: "date", type: "temporal" },
             y: [
-              { field: "solid", mark: "area" },
+              { field: "solid", mark: "area", scale: { domain: [0, headroom(numbers)] } },
               { field: "tail", mark: "line", dash: "dotted" },
             ],
           },
@@ -492,12 +561,12 @@ function meter(): Dashboard {
     range: "Last 30 days",
     defaultTheme: mode,
     charts: [
-      chart(tabLine("meter-visitors", "Visitors", "18.4K", "+4%", true, wave(30, 2400, 90, 5), "Visitors over 30 days, with the last day still open.")),
-      chart(tabLine("meter-visits", "Visits", "22.1K", "+5%", true, wave(30, 4200, 160, 7), "Visits over 30 days, with the last day still open.")),
-      chart(tabLine("meter-pageviews", "Pageviews", "61.2K", "+6%", true, wave(30, 8200, 280, 4), "Pageviews over 30 days, with the last day still open.")),
-      chart(tabLine("meter-views", "Views per visit", "2.8", "+2%", true, wave(30, 28, 2, 6).map((value) => value / 10), "Views per visit over 30 days.")),
-      chart(tabLine("meter-bounce", "Bounce", "41%", "−3%", true, wave(30, 46, 1, 3).map((value) => value / 100), "Bounce rate over 30 days. Down is the better direction.")),
-      chart(tabLine("meter-duration", "Duration", "2m 24s", "+2%", true, wave(30, 140, 6, 8).map((value) => value * 1000), "Visit duration over 30 days.")),
+      chart(tabLine("meter-visitors", "Visitors", "18.4K", "+4%", true, rounds(organic(30, { seed: 5, start: 1420, end: 1680, season: 380, noise: 140, phase: 0.2, spike: { at: 13, height: 920 } })), "Visitors over 30 days, with one tall day in the middle and the last day still open.")),
+      chart(tabLine("meter-visits", "Visits", "22.1K", "+5%", true, rounds(organic(30, { seed: 19, start: 1680, end: 2100, season: 460, noise: 180, phase: 1.1, spike: { at: 16, height: 1100 } })), "Visits over 30 days, with the last day still open.")),
+      chart(tabLine("meter-pageviews", "Pageviews", "61.2K", "+6%", true, rounds(organic(30, { seed: 23, start: 4200, end: 5600, season: 900, noise: 320, phase: 0.8, spike: { at: 12, height: 1800 } })), "Pageviews over 30 days, with the last day still open.")),
+      chart(tabLine("meter-views", "Views per visit", "2.8", "+2%", true, rounds(organic(30, { seed: 31, start: 2.35, end: 2.95, season: 0.28, noise: 0.16, phase: 2.4 }), 0.01), "Views per visit over 30 days.")),
+      chart(tabLine("meter-bounce", "Bounce", "41%", "−3%", true, rounds(organic(30, { seed: 37, start: 0.48, end: 0.39, season: 0.04, noise: 0.02, phase: 1.7 }), 0.01), "Bounce rate over 30 days. Down is the better direction.")),
+      chart(tabLine("meter-duration", "Duration", "2m 24s", "+2%", true, rounds(organic(30, { seed: 41, start: 118000, end: 146000, season: 12000, noise: 6000, phase: 0.5, spike: { at: 18, height: 28000 } }), 1000), "Visit duration over 30 days.")),
       chart(list("meter-sources", "Sources", "source", [
         { name: "Direct", visits: 2100 },
         { name: "Search", visits: 1760 },
@@ -559,11 +628,13 @@ function wayline(): Dashboard {
   const donutThemes = themesFor(light, dark, channels);
   const heat = themesFor(light, dark, { soft: ["#1a73e8"], midnight: ["#8ab4f8"] });
   const days = isoDays("2025-09-24", 28);
-  const tabLine = (id: string, label: string, value: string, delta: string, good: boolean, base: number, amp: number, seed: number, alt: string): ChartDraft => ({
+  const tabLine = (id: string, label: string, value: string, delta: string, good: boolean, now: number[], then: number[], alt: string): ChartDraft => {
+    const earlier = sitBelow(now, then);
+    return {
     id,
     title: label,
     caption: "This period and the previous period.",
-    note: "type line. curve linear, so segments are straight. series[1] dash is dashed. legend.show is false. axes.y.title is empty. The blue series token is #1a73e8 and the comparison is #9aa0a6.",
+    note: "type line. curve linear, so segments are straight. series[1] dash is dashed. legend.show is false. axes.y.title is empty. The blue series token is #1a73e8 and the comparison is #9aa0a6. The previous period is its own series, not a copy of this one.",
     span: "dash-12",
     place: "tab",
     themes,
@@ -573,7 +644,7 @@ function wayline(): Dashboard {
       themes,
       mode,
       {
-        data: days.map((date, index) => ({ date, now: wave(28, base, amp, seed)[index], then: wave(28, base * 0.84, amp * 0.7, seed + 2)[index] })),
+        data: days.map((date, index) => ({ date, now: now[index], then: earlier[index] })),
         encoding: {
           x: { field: "date", type: "temporal" },
           y: [{ field: "now" }, { field: "then", dash: "dashed" }],
@@ -586,14 +657,19 @@ function wayline(): Dashboard {
       },
       alt,
     ),
-  });
+    };
+  };
   const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const hours = ["00", "03", "06", "09", "12", "15", "18", "21"];
+  const heatRand = unit(17);
   const heatRows = weekdays.flatMap((day, dayIndex) =>
     hours.map((hour, hourIndex) => {
-      const work = dayIndex < 5 ? 1 : 0.35;
-      const bell = Math.exp(-((hourIndex - 4) ** 2) / 5.5);
-      return { day, hour, users: Math.round(18 + 210 * work * bell + ((dayIndex * 3 + hourIndex * 5) % 17)) };
+      const weekend = dayIndex >= 5;
+      const bell = Math.exp(-((hourIndex - 4) ** 2) / 4.2);
+      const night = hourIndex <= 1 || hourIndex >= 7 ? 0.22 : 1;
+      const base = weekend ? 28 : 46;
+      const users = Math.round(base + (weekend ? 70 : 190) * bell * night + heatRand() * (weekend ? 10 : 18));
+      return { day, hour, users };
     }),
   );
   const countries = [
@@ -642,10 +718,10 @@ function wayline(): Dashboard {
     range: "Last 28 days",
     defaultTheme: mode,
     charts: [
-      chart(tabLine("wayline-users", "Users", "24.5K", "+6%", true, 820, 40, 5, "Users rise across 28 days and stay above the previous period.")),
-      chart(tabLine("wayline-new", "New users", "11.2K", "+3%", true, 360, 22, 6, "New users over 28 days, with a dashed previous period.")),
-      chart(tabLine("wayline-engage", "Avg engagement", "3m 24s", "+5%", true, 180, 8, 4, "Average engagement over 28 days.")),
-      chart(tabLine("wayline-revenue", "Revenue", "$48.2K", "+4%", true, 1400, 70, 7, "Revenue over 28 days, with a dashed previous period.")),
+      chart(tabLine("wayline-users", "Users", "24.5K", "+6%", true, rounds(organic(28, { seed: 8, start: 620, end: 910, season: 70, noise: 45, phase: 0.5, spike: { at: 17, height: 160 } })), rounds(organic(28, { seed: 53, start: 540, end: 760, season: 90, noise: 55, phase: 2.6 })), "Users rise across 28 days and stay mostly above the previous period.")),
+      chart(tabLine("wayline-new", "New users", "11.2K", "+3%", true, rounds(organic(28, { seed: 14, start: 280, end: 410, season: 36, noise: 22, phase: 1.2 })), rounds(organic(28, { seed: 61, start: 250, end: 340, season: 42, noise: 28, phase: 3.4 })), "New users over 28 days, with a dashed previous period.")),
+      chart(tabLine("wayline-engage", "Avg engagement", "3m 24s", "+5%", true, rounds(organic(28, { seed: 22, start: 150, end: 190, season: 12, noise: 8, phase: 0.9 })), rounds(organic(28, { seed: 71, start: 140, end: 168, season: 16, noise: 10, phase: 2.1 })), "Average engagement over 28 days.")),
+      chart(tabLine("wayline-revenue", "Revenue", "$48.2K", "+4%", true, rounds(organic(28, { seed: 29, start: 1100, end: 1680, season: 120, noise: 80, phase: 0.3, spike: { at: 11, height: 280 } })), rounds(organic(28, { seed: 83, start: 980, end: 1400, season: 150, noise: 90, phase: 2.8 })), "Revenue over 28 days, with a dashed previous period.")),
       chart({
         id: "wayline-channels",
         title: "Channels",
@@ -671,7 +747,7 @@ function wayline(): Dashboard {
         id: "wayline-hours",
         title: "Users by hour",
         caption: "Weekday against hour.",
-        note: "type heatmap. encoding.color.range is #e8f0fe to #1a73e8. Every cell has a value, so none are hatched.",
+        note: "type heatmap. encoding.color.range is a continuous blue ramp, #e8f0fe, #aecbfa, #1a73e8. Weekday afternoons are the dark cells and nights stay light. Every cell has a value, so none are hatched.",
         span: "dash-6",
         place: "side",
         themes: heat,
@@ -684,7 +760,7 @@ function wayline(): Dashboard {
             encoding: {
               x: "hour",
               y: "day",
-              color: { field: "users", title: "Users", range: ["#e8f0fe", "#1a73e8"] },
+              color: { field: "users", title: "Users", range: ["#e8f0fe", "#aecbfa", "#1a73e8"] },
             },
             mark: { gap: 0.18, cornerRadius: 2 },
             size: { width: 520, height: 280 },
@@ -709,7 +785,7 @@ function wayline(): Dashboard {
       { label: "Metric tabs", detail: "Users, New users, Avg engagement, and Revenue are page tabs. The selected tab is underlined. Each tab is its own line spec." },
       { label: "Comparison", detail: "curve linear keeps the segments straight. The previous period is dash dashed in #9aa0a6. axes.y.title is empty. Midnight uses #8ab4f8 for this period." },
       { label: "Map", detail: "Fifty-two countries use encoding.color.range #aecbfa, #669df6, #1a73e8. mark.nodata fill paints missing countries with mark.land. There is no hatch." },
-      { label: "Hour grid", detail: "The heatmap is weekday by hour. color.range is #e8f0fe to #1a73e8 and every cell is filled." },
+      { label: "Hour grid", detail: "The heatmap is weekday by hour. color.range is the continuous ramp #e8f0fe, #aecbfa, #1a73e8. Nights are light and weekday afternoons are dark." },
     ],
   };
 }
@@ -848,7 +924,7 @@ function keel(): Dashboard {
         title: "Event volume",
         caption: "Error, warning, and info.",
         note: "type bar with encoding.series and mark.stack stack. theme.tokens.series is error, warning, and info. axes.y.title is empty. There is no band and no release rule. The 24h variant is the same bar. The area variant is type stacked-area.",
-        span: "dash-8",
+        span: "dash-6",
         place: "side",
         themes,
         spec: bars14,
@@ -863,7 +939,7 @@ function keel(): Dashboard {
         title: "Response",
         caption: "p50 and p95.",
         note: "type line. This chart's series tokens are the purple accent for p50 and the warning colour for p95. axes.y.title is empty.",
-        span: "dash-4",
+        span: "dash-6",
         place: "side",
         themes: calm,
         spec: spec(
