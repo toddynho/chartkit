@@ -37,6 +37,6 @@ No spec snippet. This row is not a single option that `validate()` can show.
 | Mermaid (chart-ish diagrams only) | native | — | pkg-license (strong) | mermaid/package.json MIT |
 | AntV G2 | native | — | pkg-license (strong) | @antv/g2/package.json MIT |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against b64aa4f4c004.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 64e07159b6f8.
 
 https://chartkit.dev/features.json

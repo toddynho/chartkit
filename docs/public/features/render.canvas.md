@@ -68,6 +68,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~canvas | dts-grep (weak) | @antv/g2/lib/data/wordCloud.d.ts:94 default G canvas renderer |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against b64aa4f4c004.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 64e07159b6f8.
 
 https://chartkit.dev/features.json
