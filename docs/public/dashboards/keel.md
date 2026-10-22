@@ -12,7 +12,7 @@ Default theme: midnight.
 
 Fault, warn, and note.
 
-type bar with encoding.series and mark.stack stack. The 24h variant is the same bar over eight hours. The area variant is type stacked-area. The release band uses color text so the label is not the fault red, and the Ship rule uses labelPosition start so it sits at the bottom of the line.
+type bar with encoding.series and mark.stack stack. The 24h variant is the same bar over eight hours. The area variant is type stacked-area. The release band uses color text so the label is not the fault red. Ship uses labelPosition end, so the label sits above the plot.
 
 ```json
 {
@@ -268,7 +268,7 @@ type bar with encoding.series and mark.stack stack. The 24h variant is the same 
       "axis": "x",
       "value": "16",
       "label": "Ship",
-      "labelPosition": "start",
+      "labelPosition": "end",
       "dash": "solid",
       "color": "muted"
     }
@@ -913,7 +913,7 @@ Fault. 14 events, 3 users.
 ## What produces this look
 
 - **Dark first.** The spec theme defaults to midnight, and the page shell, header, and footer follow that theme. Soft still renders from the toggle.
-- **Release band.** The band colour is the text token, so the Keel 2.4 label is not red on the fault series. Ship uses labelPosition start and the muted token, at the bottom of the line.
+- **Release band.** The band colour is the text token, so the Keel 2.4 label is not red on the fault series. Ship uses labelPosition end and the muted token, above the plot.
 - **Response.** p50 uses a calm colour and p95 a warning colour, set on that card's tokens rather than the fault series.
 - **Issues.** Each row is a bar spec with both axes off, so the seven days read as a histogram. The event count and the user count sit on the right.
 - **Window.** 14d is the stacked bar. 24h is the same bar over eight hours. Area is a stacked-area of the 14 days.

@@ -258,8 +258,9 @@ function regionMarkup(regions: GeoRegion[], project: Projector, hits: Map<string
       const value = hit ? ` data-ck-value="${hit.value}" data-ck-i="${hit.index}"` : ` data-ck-i="-1"`;
       const tail = `${painted}${value} data-ck-id="${esc(region.id)}" data-ck-name="${esc(region.name)}" tabindex="0" aria-label="${esc(label)}"><title>${esc(label)}</title>`;
       if (region.point && !region.polygons.length) {
+        if (!hit) return "";
         const [x, y] = project(region.id, region.point[0], region.point[1]);
-        return `<circle class="${cls}" cx="${round(x)}" cy="${round(y)}" r="4.5"${tail}</circle>`;
+        return `<circle class="${cls}" cx="${round(x)}" cy="${round(y)}" r="3"${tail}</circle>`;
       }
       const d = pathFor(region, project);
       if (!d) return "";

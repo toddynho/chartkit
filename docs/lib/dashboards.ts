@@ -324,25 +324,25 @@ function meter(): Dashboard {
           "Visits peak on Friday at 5,340 and fall over the weekend.",
         ),
       }),
-      list("meter-pages", "Top pages", "page", [
+      chart(list("meter-pages", "Top pages", "page", [
         { name: "/pricing", visits: 1840 },
         { name: "/docs", visits: 1420 },
         { name: "/changelog", visits: 980 },
         { name: "/about", visits: 640 },
         { name: "/status", visits: 410 },
-      ], "Pricing is the most visited page, then docs."),
-      list("meter-sources", "Top sources", "source", [
+      ], "Pricing is the most visited page, then docs.")),
+      chart(list("meter-sources", "Top sources", "source", [
         { name: "Direct", visits: 2100 },
         { name: "Search", visits: 1760 },
         { name: "Newsletter", visits: 940 },
         { name: "Referral", visits: 610 },
         { name: "Social", visits: 280 },
-      ], "Direct is the largest source, then search."),
-      list("meter-devices", "Devices", "device", [
+      ], "Direct is the largest source, then search.")),
+      chart(list("meter-devices", "Devices", "device", [
         { name: "Desktop", visits: 9800 },
         { name: "Mobile", visits: 7420 },
         { name: "Tablet", visits: 1200 },
-      ], "Desktop leads, then mobile."),
+      ], "Desktop leads, then mobile.")),
     ],
     sparks: [],
     notes: [
@@ -437,7 +437,7 @@ function wayline(): Dashboard {
               },
             },
             legend: { values: true },
-            size: { width: 420, height: 400 },
+            size: { width: 400, height: 430 },
           },
           "Search is 10.3 thousand sessions. The centre total is 24.5 thousand.",
         ),
@@ -530,7 +530,7 @@ function keel(): Dashboard {
   }));
   const band = [
     { type: "band", axis: "x", from: "15", to: "16", label: "Keel 2.4", opacity: 0.16, color: "text" },
-    { type: "rule", axis: "x", value: "16", label: "Ship", labelPosition: "start", dash: "solid", color: "muted" },
+    { type: "rule", axis: "x", value: "16", label: "Ship", labelPosition: "end", dash: "solid", color: "muted" },
   ];
   const bars14 = spec(
     "bar",
@@ -610,7 +610,7 @@ function keel(): Dashboard {
         id: "keel-volume",
         title: "Event volume",
         caption: "Fault, warn, and note.",
-        note: "type bar with encoding.series and mark.stack stack. The 24h variant is the same bar over eight hours. The area variant is type stacked-area. The release band uses color text so the label is not the fault red, and the Ship rule uses labelPosition start so it sits at the bottom of the line.",
+        note: "type bar with encoding.series and mark.stack stack. The 24h variant is the same bar over eight hours. The area variant is type stacked-area. The release band uses color text so the label is not the fault red. Ship uses labelPosition end, so the label sits above the plot.",
         span: "dash-12",
         spec: bars14,
         variants: [
@@ -673,7 +673,7 @@ function keel(): Dashboard {
     }),
     notes: [
       { label: "Dark first", detail: "The spec theme defaults to midnight, and the page shell, header, and footer follow that theme. Soft still renders from the toggle." },
-      { label: "Release band", detail: "The band colour is the text token, so the Keel 2.4 label is not red on the fault series. Ship uses labelPosition start and the muted token, at the bottom of the line." },
+      { label: "Release band", detail: "The band colour is the text token, so the Keel 2.4 label is not red on the fault series. Ship uses labelPosition end and the muted token, above the plot." },
       { label: "Response", detail: "p50 uses a calm colour and p95 a warning colour, set on that card's tokens rather than the fault series." },
       { label: "Issues", detail: "Each row is a bar spec with both axes off, so the seven days read as a histogram. The event count and the user count sit on the right." },
       { label: "Window", detail: "14d is the stacked bar. 24h is the same bar over eight hours. Area is a stacked-area of the 14 days." },

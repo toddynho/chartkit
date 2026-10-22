@@ -769,8 +769,12 @@ body:has(.dash-theme-midnight.dash-keel) { --bg: #101114; background: #101114; }
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: 10px;
+  align-items: stretch;
 }
+.dash-grid > * { min-width: 0; }
 .dash-card {
+  margin: 0;
+  height: 100%;
   background: var(--dash-card, #fff);
   color: var(--dash-ink, var(--fg));
   border: 1px solid var(--dash-line, var(--line));
@@ -984,8 +988,12 @@ body:has(.dash-theme-midnight.dash-keel) { --bg: #101114; background: #101114; }
   .dash-top { flex-wrap: wrap; }
   .dash-chip { margin-left: 0; }
   .dash-split { grid-template-columns: 1fr; }
-  .dash-issues li { grid-template-columns: 1fr auto; }
-  .dash-issue-bars { grid-column: 1 / -1; }
+  .dash-card:not(.dash-score) > .chart-host:not(.dash-list),
+  .dash-split .chart-host { min-height: 220px; }
+  .dash-issues li { grid-template-columns: minmax(0, 1fr) minmax(96px, 140px) auto; }
+  .dash-issue-bars { height: 48px; max-height: 48px; }
+  .dash-card .dash-issues .dash-issue-bars svg { width: 100%; height: 48px; max-height: 48px; }
+  .dash-issue-metrics { white-space: nowrap; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition: none !important; }

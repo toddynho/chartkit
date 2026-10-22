@@ -8,6 +8,36 @@ function withTheme(spec: Record<string, unknown>, theme: DashTheme): Record<stri
   return { ...spec, theme };
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** Phone width redraws wide charts so labels stay at body size and ticks thin out. */
+function fitMobile(spec: Record<string, unknown>): Record<string, unknown> {
+  const type = typeof spec.type === "string" ? spec.type : "";
+  if (type === "kpi" || type === "bar-list") return spec;
+  if (type === "donut" || type === "pie") return { ...spec, size: { width: 340, height: 420 } };
+  if (type === "choropleth" || type === "map-points") return { ...spec, size: { width: 360, height: 280 } };
+  const current = isRecord(spec.size) ? spec.size : {};
+  const height = typeof current.height === "number" ? current.height : 240;
+  if (height < 120) return spec;
+  const axes = isRecord(spec.axes) ? spec.axes : {};
+  const axis = (value: unknown) => {
+    if (value === false) return false;
+    return { ...(isRecord(value) ? value : {}), ticks: 4 };
+  };
+  return {
+    ...spec,
+    size: { width: 360, height: 240 },
+    axes: { ...axes, x: axis(axes.x), y: axis(axes.y) },
+  };
+}
+
+function present(spec: Record<string, unknown>, theme: DashTheme, narrow: boolean): Record<string, unknown> {
+  const themed = withTheme(spec, theme);
+  return narrow ? fitMobile(themed) : themed;
+}
+
 function SpecBlock({ spec }: { spec: unknown }) {
   const text = JSON.stringify(spec, null, 2);
   return (
@@ -24,14 +54,14 @@ function StaticChart({ svg, className }: { svg: string; className?: string }) {
   return <div className={className} data-ck-mounted="1" dangerouslySetInnerHTML={{ __html: svg }} />;
 }
 
-function Figure({ chart, theme }: { chart: DashChart; theme: DashTheme }) {
+function Figure({ chart, theme, narrow }: { chart: DashChart; theme: DashTheme; narrow: boolean }) {
   const variants = chart.variants ?? [];
   const [variantId, setVariantId] = useState(variants[0]?.id ?? "");
   const [mapOn, setMapOn] = useState(false);
   const [mapSvg, setMapSvg] = useState("");
   const variant = variants.find((item) => item.id === variantId) ?? variants[0];
-  const spec = withTheme(variant?.spec ?? chart.spec, theme);
-  const svg = variant?.svg ?? chart.svg;
+  const spec = present(variant?.spec ?? chart.spec, theme, narrow);
+  const svg = variant?.svg ?? chart.svg ?? "";
   const list = chart.spec.type === "bar-list";
 
   useEffect(() => {
@@ -39,18 +69,18 @@ function Figure({ chart, theme }: { chart: DashChart; theme: DashTheme }) {
     let alive = true;
     setMapSvg("");
     void import("@chartkitdev/geo").then(async (geo) => {
-      const drawn = await geo.render(withTheme(chart.mapSpec ?? {}, theme));
+      const drawn = await geo.render(present(chart.mapSpec ?? {}, theme, narrow));
       if (alive) setMapSvg(drawn);
     });
     return () => {
       alive = false;
     };
-  }, [mapOn, theme, chart.mapSpec]);
+  }, [mapOn, theme, narrow, chart.mapSpec]);
 
   const body = mapOn ? (
     mapSvg ? <StaticChart svg={mapSvg} className="chart-host chart-preset" /> : <p className="dash-wait">Drawing the map…</p>
   ) : list ? (
-    <StaticChart svg={svg} className="chart-host chart-preset" />
+    <StaticChart svg={svg} className="chart-host chart-preset dash-list" />
   ) : (
     <ChartHost spec={spec} svg={svg} className="chart-host chart-preset" />
   );
@@ -107,7 +137,7 @@ function Figure({ chart, theme }: { chart: DashChart; theme: DashTheme }) {
       ) : (
         body
       )}
-      <SpecBlock spec={mapOn && chart.mapSpec ? withTheme(chart.mapSpec, theme) : spec} />
+      <SpecBlock spec={mapOn && chart.mapSpec ? present(chart.mapSpec, theme, narrow) : spec} />
     </figure>
   );
 }
@@ -122,13 +152,13 @@ function Score({ chart, theme }: { chart: DashChart; theme: DashTheme }) {
   );
 }
 
-function Issues({ rows, theme }: { rows: DashSpark[]; theme: DashTheme }) {
+function Issues({ rows, theme, narrow }: { rows: DashSpark[]; theme: DashTheme; narrow: boolean }) {
   return (
     <section className="dash-card dash-12">
       <h3>Issues</h3>
       <ul className="dash-issues">
         {rows.map((item) => {
-          const spec = withTheme(item.spec, theme);
+          const spec = present(item.spec, theme, narrow);
           return (
             <li key={item.id}>
               <div className="dash-issue-name">
@@ -153,8 +183,17 @@ function Issues({ rows, theme }: { rows: DashSpark[]; theme: DashTheme }) {
 
 export function DashboardStage({ board }: { board: Dashboard }) {
   const [theme, setTheme] = useState<DashTheme>(board.defaultTheme);
+  const [narrow, setNarrow] = useState(false);
   const scores = board.charts.filter((item) => item.spec.type === "kpi");
   const rest = board.charts.filter((item) => item.spec.type !== "kpi");
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 900px)");
+    const apply = () => setNarrow(query.matches);
+    apply();
+    query.addEventListener("change", apply);
+    return () => query.removeEventListener("change", apply);
+  }, []);
 
   return (
     <div className={`dash-shell dash-page dash-${board.slug} dash-theme-${theme}`}>
@@ -177,9 +216,9 @@ export function DashboardStage({ board }: { board: Dashboard }) {
           <Score key={item.id} chart={item} theme={theme} />
         ))}
         {rest.map((item) => (
-          <Figure key={item.id} chart={item} theme={theme} />
+          <Figure key={item.id} chart={item} theme={theme} narrow={narrow} />
         ))}
-        {board.sparks.length ? <Issues rows={board.sparks} theme={theme} /> : null}
+        {board.sparks.length ? <Issues rows={board.sparks} theme={theme} narrow={narrow} /> : null}
       </div>
       <section className="dash-explain">
         <h2>What produces this look</h2>

@@ -480,4 +480,32 @@ describe("render", () => {
     expect(layered).toContain(">Paris<");
     expect(layered).toContain("ck-geo-nodata");
   });
+
+  it("fills named countries, formats a compact legend, and skips islands without data", async () => {
+    const svg = await render({
+      type: "choropleth",
+      theme: "soft",
+      data: [
+        { country: "JPN", sessions: 6200 },
+        { country: "PRT", sessions: 4100 },
+        { country: "CHL", sessions: 2800 },
+        { country: "KEN", sessions: 1900 },
+        { country: "CAN", sessions: 1600 },
+      ],
+      encoding: { region: "country", color: { field: "sessions", title: "Sessions", format: "compact" } },
+      mark: { atlas: "world", projection: "equalEarth", scale: "sequential" },
+      a11y: { alt: "Japan, Portugal, Chile, Kenya, and Canada are filled." },
+    });
+    expect(svg).not.toContain("compact");
+    expect(svg).toContain("6.2K");
+    expect(svg).toContain("1.6K");
+    expect(styleRule(svg, ".ck-geo-region")).not.toMatch(/(?:^|;)fill:/);
+    for (const name of ["Japan", "Portugal", "Chile", "Kenya", "Canada"]) {
+      const tag = new RegExp(`<(?:path|circle)\\b[^>]*data-ck-name="${name}"[^>]*>`).exec(svg)?.[0] ?? "";
+      expect(tag).toMatch(/fill="#[0-9a-fA-F]{6}"/);
+      expect(tag).not.toContain("ck-geo-nodata");
+    }
+    expect(svg).not.toMatch(/<circle\b[^>]*ck-geo-nodata|ck-geo-nodata[^>]*<circle/);
+    expect(svg).not.toMatch(/<circle\b[^>]*class="ck-geo-region ck-geo-nodata"/);
+  });
 });

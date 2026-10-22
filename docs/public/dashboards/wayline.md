@@ -322,8 +322,8 @@ type donut. encoding.y is titled Sessions and formatted compact, so the centre i
     "values": true
   },
   "size": {
-    "width": 420,
-    "height": 400
+    "width": 400,
+    "height": 430
   },
   "a11y": {
     "alt": "Search is 10.3 thousand sessions. The centre total is 24.5 thousand."
@@ -453,7 +453,7 @@ The list is type bar. The map toggle is type choropleth from @chartkitdev/geo, m
 ## What produces this look
 
 - **Scorecards.** Each kpi includes data, so the sparkline is in the card. Bounce rate replaces the old Brief label.
-- **Donut.** The y channel is Sessions with format compact. The hole shows that total. legend.values prints the session count beside the share.
+- **Donut.** The y channel is Sessions with format compact. The hole shows that total. legend.values prints the share and the session count under the ring.
 - **Countries.** The bar sits beside a table. The map toggle renders a choropleth with @chartkitdev/geo, which loads on demand.
 
 https://chartkit.dev/dashboards/wayline
