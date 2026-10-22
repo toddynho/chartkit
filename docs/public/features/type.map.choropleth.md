@@ -37,6 +37,6 @@ No spec snippet from core `validate()`. `@chartkitdev/geo` renders this type. Th
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~geoPath | dts-grep (weak) | @antv/g2/lib/index.d.ts:185 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 64e07159b6f8.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 32e6d8403882.
 
 https://chartkit.dev/features.json

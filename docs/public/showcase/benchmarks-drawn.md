@@ -2,11 +2,11 @@
 
 The measured line bundles and the published round of browser timings, drawn as charts. Losses stay on the page.
 
-Bundle bytes are from docs/data/measured-sizes.json, size script measured 2026-10-22 on `64e07159b6f8990fadea39818d6a2fc857b550a0`, bench bundles measured 2026-10-22. Timings are older round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
+Bundle bytes are from docs/data/measured-sizes.json, size script measured 2026-10-22 on `32e6d84038823aaa52a861e04d23e0dd59374a5c`, bench bundles measured 2026-10-22. Timings are older round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
 
 ## Line chart, gzip
 
-Log scale. ChartKit is the size script. The other bars are the bench line, using the React-external gzip when that row has one. uPlot’s CSS is a separate measured file and is not added to its bar.
+Log scale. ChartKit is the size script and is larger than uPlot. The other bars are the bench line, using the React-external gzip when that row has one. uPlot’s CSS is a separate measured file and is not added to its bar.
 
 ```json
 {
@@ -17,7 +17,7 @@ Log scale. ChartKit is the size script. The other bars are the bench line, using
   "data": [
     {
       "name": "ChartKit",
-      "bytes": 37066
+      "bytes": 38402
     },
     {
       "name": "CK bench",
@@ -89,7 +89,7 @@ Log scale. ChartKit is the size script. The other bars are the bench line, using
     }
   },
   "a11y": {
-    "alt": "ChartKit’s measured line is the smallest bar. ECharts is the largest on this log scale."
+    "alt": "uPlot’s line is the smallest bar. ChartKit’s measured line is larger, 38,402 bytes against uPlot’s 23,276. ECharts is the largest on this log scale."
   }
 }
 ```
