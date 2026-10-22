@@ -566,7 +566,8 @@ function toModel(
   return {
     ...shell,
     labels,
-    x: type === "bar" || type === "combo" ? null : x,
+    // Bars need category bands. A combo of only lines and areas keeps a temporal or linear x.
+    x: type === "bar" || (type === "combo" && series.some((item) => item.mark === "bar")) ? null : x,
     series,
     showY2: shell.showY2 && series.some((item) => item.axis === "y2"),
     legend: shell.legendOn && (series.length > 1 || Boolean(swatches) || ruleLegend.length > 0),

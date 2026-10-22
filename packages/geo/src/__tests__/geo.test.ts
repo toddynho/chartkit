@@ -534,4 +534,24 @@ describe("render", () => {
     });
     expect(ignored).toContain("#006d2c");
   });
+
+  it("fills missing countries with mark.land when nodata is fill", async () => {
+    const svg = await render({
+      type: "choropleth",
+      theme: "soft",
+      data: [
+        { country: "JPN", sessions: 6200 },
+        { country: "USA", sessions: 4100 },
+      ],
+      encoding: { region: "country", color: { field: "sessions", range: ["#aecbfa", "#1a73e8"] } },
+      mark: { atlas: "world", projection: "equalEarth", scale: "sequential", nodata: "fill", land: "#e8eaed", water: "#ffffff" },
+      a11y: { alt: "Japan and the United States are filled. Other countries are plain grey." },
+    });
+    expect(svg).toContain(".ck-geo-nodata{fill:#e8eaed}");
+    expect(svg).toContain(".ck-geo-water{fill:#ffffff}");
+    expect(svg).not.toContain("pattern");
+    expect(svg).not.toContain("#006d2c");
+    expect(styleRule(svg, ".ck-geo-region")).not.toMatch(/(?:^|;)fill:/);
+    expect(svg).toContain("#1a73e8");
+  });
 });

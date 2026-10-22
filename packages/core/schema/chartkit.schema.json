@@ -1107,6 +1107,14 @@
           "default": "hover",
           "description": "Show point markers on lines. Applies to: line, combo."
         },
+        "track": {
+          "enum": [
+            "bar",
+            "row"
+          ],
+          "default": "bar",
+          "description": "Ranked-row track. bar is a short rounded bar. row is a full-height wash behind the label, width proportional to the value, with the count on the right. Applies to: bar-list."
+        },
         "pointSize": {
           "type": "number",
           "minimum": 0,

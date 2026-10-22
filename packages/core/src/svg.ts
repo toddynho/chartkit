@@ -312,7 +312,7 @@ export function readAxis(spec: Record<string, unknown>, key: "x" | "y" | "y2", h
   const marks = axis.tickMarks;
   return {
     on: raw !== false,
-    title: typeof axis.title === "string" && axis.title ? axis.title : undefined,
+    title: typeof axis.title === "string" ? axis.title : undefined,
     count: typeof ticks === "number" ? Math.max(0, Math.min(50, Math.round(ticks))) : undefined,
     values: values && values.length ? values : undefined,
     labels: axis.labels !== false,

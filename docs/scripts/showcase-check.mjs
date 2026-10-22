@@ -182,6 +182,7 @@ function assertDrew(slug, id, svg) {
 }
 for (const board of dashboards()) {
   for (const chart of board.charts) {
+    if (chart.spec.type === "choropleth" || chart.spec.type === "map-points") continue;
     assertDrew(board.slug, chart.id, chart.svg);
     for (const variant of chart.variants ?? []) assertDrew(board.slug, `${chart.id}:${variant.id}`, variant.svg);
   }

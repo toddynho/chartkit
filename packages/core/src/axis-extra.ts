@@ -24,11 +24,11 @@ function prepare(spec: Record<string, unknown>, shell: ChartShell): void {
   const x = readAxis(spec, "x", horizontal);
   const y = readAxis(spec, "y", horizontal);
   const y2 = readAxis(spec, "y2", horizontal);
-  if (!x.title && xObj && typeof xObj.title === "string") x.title = xObj.title;
+  if (x.title == null && xObj && typeof xObj.title === "string") x.title = xObj.title;
   const yTitle = shell.channels.find((channel) => channel.axis === "y" && channel.title);
   const y2Title = shell.channels.find((channel) => channel.axis === "y2" && channel.title);
-  if (!y.title && yTitle?.title) y.title = yTitle.title;
-  if (!y2.title && y2Title?.title) y2.title = y2Title.title;
+  if (y.title == null && yTitle?.title) y.title = yTitle.title;
+  if (y2.title == null && y2Title?.title) y2.title = y2Title.title;
   shell.xAxis = x;
   shell.yAxis = y;
   shell.y2Axis = y2;

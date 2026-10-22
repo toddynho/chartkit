@@ -3,6 +3,7 @@ export const MARK_APPLIES: Record<string, readonly string[]> = {
   curve: ["line", "stacked-area", "combo", "sparkline", "mini-area"],
   sampling: ["line", "stacked-area", "combo", "sparkline", "mini-area", "spike"],
   points: ["line", "combo"],
+  track: ["bar-list"],
   pointSize: ["line", "stacked-area", "combo", "scatter", "errorbar"],
   pointShape: ["line", "stacked-area", "scatter", "combo"],
   pointFill: ["line", "stacked-area", "scatter", "combo"],

@@ -6,13 +6,13 @@ Range: 14 days.
 
 Styled after Sentry's dashboard to show ChartKit's styling flexibility. Not affiliated with or endorsed by Sentry.
 
-Default theme: midnight.
+Default theme: soft.
 
 ## Event volume
 
 Error, warning, and info.
 
-type bar with encoding.series and mark.stack stack. theme.tokens.series is error #fa6769, warning #ff9838, and info #a4a8b4 in the dark tokens. The 24h variant is the same bar. The area variant is type stacked-area. Ship uses labelPosition end, so the label sits above the plot.
+type bar with encoding.series and mark.stack stack. theme.tokens.series is error, warning, and info. axes.y.title is empty. There is no band and no release rule. The 24h variant is the same bar. The area variant is type stacked-area.
 
 ```json
 {
@@ -22,18 +22,18 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
     "preset": "soft",
     "tokens": {
       "background": "transparent",
-      "surface": "#241f33",
-      "text": "#eeeaf6",
-      "muted": "#a39bb0",
-      "grid": "#322b42",
-      "axis": "#3d3550",
-      "accent": "#7b52ff",
-      "positive": "#6dcea0",
-      "negative": "#fa6769",
+      "surface": "#ffffff",
+      "text": "#1f1633",
+      "muted": "#6a6275",
+      "grid": "#eeeaf2",
+      "axis": "#ddd6e6",
+      "accent": "#7553ff",
+      "positive": "#1b7c4d",
+      "negative": "#f55459",
       "series": [
-        "#fa6769",
+        "#f55459",
         "#ff9838",
-        "#a4a8b4"
+        "#8d95a3"
       ]
     }
   },
@@ -264,6 +264,7 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
       "grid": false
     },
     "y": {
+      "title": "",
       "grid": true
     }
   },
@@ -273,32 +274,12 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
   "tooltip": {
     "mode": "index"
   },
-  "annotations": [
-    {
-      "type": "band",
-      "axis": "x",
-      "from": "15",
-      "to": "16",
-      "label": "2.4",
-      "opacity": 0.16,
-      "color": "text"
-    },
-    {
-      "type": "rule",
-      "axis": "x",
-      "value": "16",
-      "label": "Ship",
-      "labelPosition": "end",
-      "dash": "solid",
-      "color": "muted"
-    }
-  ],
   "size": {
     "width": 1100,
-    "height": 280
+    "height": 240
   },
   "a11y": {
-    "alt": "Errors peak on the 16th, inside the 2.4 window."
+    "alt": "Errors are the largest share of events across the 14 days."
   }
 }
 ```
@@ -313,18 +294,18 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
     "preset": "soft",
     "tokens": {
       "background": "transparent",
-      "surface": "#241f33",
-      "text": "#eeeaf6",
-      "muted": "#a39bb0",
-      "grid": "#322b42",
-      "axis": "#3d3550",
-      "accent": "#7b52ff",
-      "positive": "#6dcea0",
-      "negative": "#fa6769",
+      "surface": "#ffffff",
+      "text": "#1f1633",
+      "muted": "#6a6275",
+      "grid": "#eeeaf2",
+      "axis": "#ddd6e6",
+      "accent": "#7553ff",
+      "positive": "#1b7c4d",
+      "negative": "#f55459",
       "series": [
-        "#fa6769",
+        "#f55459",
         "#ff9838",
-        "#a4a8b4"
+        "#8d95a3"
       ]
     }
   },
@@ -465,6 +446,7 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
       "grid": false
     },
     "y": {
+      "title": "",
       "grid": true
     }
   },
@@ -476,7 +458,7 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
   },
   "size": {
     "width": 1100,
-    "height": 280
+    "height": 240
   },
   "a11y": {
     "alt": "Errors peak at noon in the last 24 hours."
@@ -494,18 +476,18 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
     "preset": "soft",
     "tokens": {
       "background": "transparent",
-      "surface": "#241f33",
-      "text": "#eeeaf6",
-      "muted": "#a39bb0",
-      "grid": "#322b42",
-      "axis": "#3d3550",
-      "accent": "#7b52ff",
-      "positive": "#6dcea0",
-      "negative": "#fa6769",
+      "surface": "#ffffff",
+      "text": "#1f1633",
+      "muted": "#6a6275",
+      "grid": "#eeeaf2",
+      "axis": "#ddd6e6",
+      "accent": "#7553ff",
+      "positive": "#1b7c4d",
+      "negative": "#f55459",
       "series": [
-        "#fa6769",
+        "#f55459",
         "#ff9838",
-        "#a4a8b4"
+        "#8d95a3"
       ]
     }
   },
@@ -620,6 +602,7 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
       "grid": false
     },
     "y": {
+      "title": "",
       "grid": true
     }
   },
@@ -631,7 +614,7 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
   },
   "size": {
     "width": 1100,
-    "height": 280
+    "height": 240
   },
   "a11y": {
     "alt": "The stacked area shows the same 14 days as the bars."
@@ -643,7 +626,7 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
 
 p50 and p95.
 
-type line. This chart's theme.tokens.series is purple for p50 and the warning colour for p95, separate from the error series.
+type line. This chart's series tokens are the purple accent for p50 and the warning colour for p95. axes.y.title is empty.
 
 ```json
 {
@@ -653,17 +636,17 @@ type line. This chart's theme.tokens.series is purple for p50 and the warning co
     "preset": "soft",
     "tokens": {
       "background": "transparent",
-      "surface": "#241f33",
-      "text": "#eeeaf6",
-      "muted": "#a39bb0",
-      "grid": "#322b42",
-      "axis": "#3d3550",
-      "accent": "#7b52ff",
-      "positive": "#6dcea0",
-      "negative": "#fa6769",
+      "surface": "#ffffff",
+      "text": "#1f1633",
+      "muted": "#6a6275",
+      "grid": "#eeeaf2",
+      "axis": "#ddd6e6",
+      "accent": "#7553ff",
+      "positive": "#1b7c4d",
+      "negative": "#f55459",
       "series": [
-        "#7b52ff",
-        "#ffb15a"
+        "#7553ff",
+        "#ff9838"
       ]
     }
   },
@@ -717,6 +700,7 @@ type line. This chart's theme.tokens.series is purple for p50 and the warning co
       "grid": false
     },
     "y": {
+      "title": "",
       "grid": true
     }
   },
@@ -727,10 +711,12 @@ type line. This chart's theme.tokens.series is purple for p50 and the warning co
     "mode": "index"
   },
   "mark": {
-    "strokeWidth": 2
+    "curve": "linear",
+    "strokeWidth": 2,
+    "points": "none"
   },
   "size": {
-    "width": 1100,
+    "width": 420,
     "height": 240
   },
   "a11y": {
@@ -741,7 +727,7 @@ type line. This chart's theme.tokens.series is purple for p50 and the warning co
 
 ## Checkout timeout
 
-Error. 27 events, 6 users.
+checkout.pay. Last seen 2 min ago. Age 4d. 27 events, 6 users.
 
 ```json
 {
@@ -751,16 +737,16 @@ Error. 27 events, 6 users.
     "preset": "soft",
     "tokens": {
       "background": "transparent",
-      "surface": "#241f33",
-      "text": "#eeeaf6",
-      "muted": "#a39bb0",
-      "grid": "#322b42",
-      "axis": "#3d3550",
-      "accent": "#7b52ff",
-      "positive": "#6dcea0",
-      "negative": "#fa6769",
+      "surface": "#ffffff",
+      "text": "#1f1633",
+      "muted": "#6a6275",
+      "grid": "#eeeaf2",
+      "axis": "#ddd6e6",
+      "accent": "#7553ff",
+      "positive": "#1b7c4d",
+      "negative": "#f55459",
       "series": [
-        "#7b52ff"
+        "#7553ff"
       ]
     }
   },
@@ -800,7 +786,7 @@ Error. 27 events, 6 users.
   },
   "mark": {
     "cornerRadius": 1,
-    "gap": 0.2
+    "gap": 0.15
   },
   "axes": {
     "x": false,
@@ -813,8 +799,8 @@ Error. 27 events, 6 users.
     "mode": "index"
   },
   "size": {
-    "width": 220,
-    "height": 72
+    "width": 120,
+    "height": 36
   },
   "a11y": {
     "alt": "Checkout timeout over seven days."
@@ -824,7 +810,7 @@ Error. 27 events, 6 users.
 
 ## Map tile retry
 
-Warning. 17 events, 4 users.
+maps.load. Last seen 18 min ago. Age 12d. 17 events, 4 users.
 
 ```json
 {
@@ -834,16 +820,16 @@ Warning. 17 events, 4 users.
     "preset": "soft",
     "tokens": {
       "background": "transparent",
-      "surface": "#241f33",
-      "text": "#eeeaf6",
-      "muted": "#a39bb0",
-      "grid": "#322b42",
-      "axis": "#3d3550",
-      "accent": "#7b52ff",
-      "positive": "#6dcea0",
-      "negative": "#fa6769",
+      "surface": "#ffffff",
+      "text": "#1f1633",
+      "muted": "#6a6275",
+      "grid": "#eeeaf2",
+      "axis": "#ddd6e6",
+      "accent": "#7553ff",
+      "positive": "#1b7c4d",
+      "negative": "#f55459",
       "series": [
-        "#7b52ff"
+        "#7553ff"
       ]
     }
   },
@@ -883,7 +869,7 @@ Warning. 17 events, 4 users.
   },
   "mark": {
     "cornerRadius": 1,
-    "gap": 0.2
+    "gap": 0.15
   },
   "axes": {
     "x": false,
@@ -896,8 +882,8 @@ Warning. 17 events, 4 users.
     "mode": "index"
   },
   "size": {
-    "width": 220,
-    "height": 72
+    "width": 120,
+    "height": 36
   },
   "a11y": {
     "alt": "Map tile retry over seven days."
@@ -907,7 +893,7 @@ Warning. 17 events, 4 users.
 
 ## Queue lag
 
-Info. 27 events, 11 users.
+worker.tick. Last seen 1 hr ago. Age 9d. 27 events, 11 users.
 
 ```json
 {
@@ -917,16 +903,16 @@ Info. 27 events, 11 users.
     "preset": "soft",
     "tokens": {
       "background": "transparent",
-      "surface": "#241f33",
-      "text": "#eeeaf6",
-      "muted": "#a39bb0",
-      "grid": "#322b42",
-      "axis": "#3d3550",
-      "accent": "#7b52ff",
-      "positive": "#6dcea0",
-      "negative": "#fa6769",
+      "surface": "#ffffff",
+      "text": "#1f1633",
+      "muted": "#6a6275",
+      "grid": "#eeeaf2",
+      "axis": "#ddd6e6",
+      "accent": "#7553ff",
+      "positive": "#1b7c4d",
+      "negative": "#f55459",
       "series": [
-        "#7b52ff"
+        "#7553ff"
       ]
     }
   },
@@ -966,7 +952,7 @@ Info. 27 events, 11 users.
   },
   "mark": {
     "cornerRadius": 1,
-    "gap": 0.2
+    "gap": 0.15
   },
   "axes": {
     "x": false,
@@ -979,8 +965,8 @@ Info. 27 events, 11 users.
     "mode": "index"
   },
   "size": {
-    "width": 220,
-    "height": 72
+    "width": 120,
+    "height": 36
   },
   "a11y": {
     "alt": "Queue lag over seven days."
@@ -990,7 +976,7 @@ Info. 27 events, 11 users.
 
 ## Auth clock skew
 
-Error. 14 events, 3 users.
+auth.verify. Last seen 3 hr ago. Age 2d. 14 events, 3 users.
 
 ```json
 {
@@ -1000,16 +986,16 @@ Error. 14 events, 3 users.
     "preset": "soft",
     "tokens": {
       "background": "transparent",
-      "surface": "#241f33",
-      "text": "#eeeaf6",
-      "muted": "#a39bb0",
-      "grid": "#322b42",
-      "axis": "#3d3550",
-      "accent": "#7b52ff",
-      "positive": "#6dcea0",
-      "negative": "#fa6769",
+      "surface": "#ffffff",
+      "text": "#1f1633",
+      "muted": "#6a6275",
+      "grid": "#eeeaf2",
+      "axis": "#ddd6e6",
+      "accent": "#7553ff",
+      "positive": "#1b7c4d",
+      "negative": "#f55459",
       "series": [
-        "#7b52ff"
+        "#7553ff"
       ]
     }
   },
@@ -1049,7 +1035,7 @@ Error. 14 events, 3 users.
   },
   "mark": {
     "cornerRadius": 1,
-    "gap": 0.2
+    "gap": 0.15
   },
   "axes": {
     "x": false,
@@ -1062,8 +1048,8 @@ Error. 14 events, 3 users.
     "mode": "index"
   },
   "size": {
-    "width": 220,
-    "height": 72
+    "width": 120,
+    "height": 36
   },
   "a11y": {
     "alt": "Auth clock skew over seven days."
@@ -1071,12 +1057,176 @@ Error. 14 events, 3 users.
 }
 ```
 
+## Null price
+
+cart.total. Last seen 5 hr ago. Age 6d. 9 events, 2 users.
+
+```json
+{
+  "version": "1",
+  "type": "bar",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#1f1633",
+      "muted": "#6a6275",
+      "grid": "#eeeaf2",
+      "axis": "#ddd6e6",
+      "accent": "#7553ff",
+      "positive": "#1b7c4d",
+      "negative": "#f55459",
+      "series": [
+        "#7553ff"
+      ]
+    }
+  },
+  "data": [
+    {
+      "day": "1",
+      "events": 1
+    },
+    {
+      "day": "2",
+      "events": 0
+    },
+    {
+      "day": "3",
+      "events": 2
+    },
+    {
+      "day": "4",
+      "events": 1
+    },
+    {
+      "day": "5",
+      "events": 3
+    },
+    {
+      "day": "6",
+      "events": 1
+    },
+    {
+      "day": "7",
+      "events": 1
+    }
+  ],
+  "encoding": {
+    "x": "day",
+    "y": "events"
+  },
+  "mark": {
+    "cornerRadius": 1,
+    "gap": 0.15
+  },
+  "axes": {
+    "x": false,
+    "y": false
+  },
+  "legend": {
+    "show": false
+  },
+  "tooltip": {
+    "mode": "index"
+  },
+  "size": {
+    "width": 120,
+    "height": 36
+  },
+  "a11y": {
+    "alt": "Null price over seven days."
+  }
+}
+```
+
+## Webhook 409
+
+hooks.deliver. Last seen 1 day ago. Age 15d. 21 events, 8 users.
+
+```json
+{
+  "version": "1",
+  "type": "bar",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#1f1633",
+      "muted": "#6a6275",
+      "grid": "#eeeaf2",
+      "axis": "#ddd6e6",
+      "accent": "#7553ff",
+      "positive": "#1b7c4d",
+      "negative": "#f55459",
+      "series": [
+        "#7553ff"
+      ]
+    }
+  },
+  "data": [
+    {
+      "day": "1",
+      "events": 3
+    },
+    {
+      "day": "2",
+      "events": 2
+    },
+    {
+      "day": "3",
+      "events": 4
+    },
+    {
+      "day": "4",
+      "events": 3
+    },
+    {
+      "day": "5",
+      "events": 4
+    },
+    {
+      "day": "6",
+      "events": 3
+    },
+    {
+      "day": "7",
+      "events": 2
+    }
+  ],
+  "encoding": {
+    "x": "day",
+    "y": "events"
+  },
+  "mark": {
+    "cornerRadius": 1,
+    "gap": 0.15
+  },
+  "axes": {
+    "x": false,
+    "y": false
+  },
+  "legend": {
+    "show": false
+  },
+  "tooltip": {
+    "mode": "index"
+  },
+  "size": {
+    "width": 120,
+    "height": 36
+  },
+  "a11y": {
+    "alt": "Webhook 409 over seven days."
+  }
+}
+```
+
 ## What produces this look
 
-- **Dark first.** The spec theme defaults to the dark token object: page-adjacent card #241f33, ink #eeeaf6, error #fa6769, warning #ff9838, info #a4a8b4, accent #7b52ff. Soft swaps those tokens.
-- **Release band.** The band colour is the text token, so the 2.4 label is not the error red. Ship uses labelPosition end and the muted token, above the plot.
-- **Response.** p50 uses the purple accent and p95 the warning colour, on that chart's theme.tokens.series.
-- **Issues.** Each row is a bar spec with both axes off and the purple series token, so the seven days read as a histogram. The event count and the user count sit on the right.
-- **Window.** 14d is the stacked bar. 24h is the same bar over eight hours. Area is a stacked-area of the 14 days.
+- **Issues.** The table is the page. Each row has a title, a culprit, last seen, age, a 36px bar spark in the purple series token, an events count, and a users count.
+- **Light first.** The default tokens are the light set: card #ffffff, ink #1f1633, accent #7553ff, error #f55459, warning #ff9838, info #8d95a3. Midnight swaps them.
+- **Volume.** The stacked bar is a secondary card. It has no highlighted band and no release label. 14d, 24h, and Area are variants of that card.
 
 https://chartkit.dev/dashboards/keel

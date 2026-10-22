@@ -1154,6 +1154,10 @@ export interface Mark {
    */
   points?: "none" | "hover" | "always";
   /**
+   * Ranked-row track. bar is a short rounded bar. row is a full-height wash behind the label, width proportional to the value, with the count on the right. Applies to: bar-list.
+   */
+  track?: "bar" | "row";
+  /**
    * Point radius in px. Applies to: line, stacked-area, combo, scatter, errorbar.
    */
   pointSize?: number;

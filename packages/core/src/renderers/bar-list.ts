@@ -28,6 +28,8 @@ export function renderBarList(spec: Record<string, unknown>): string | null {
   if (!rows.length) return null;
   const max = Math.max(...rows.map((row) => row.value), 1);
   const yFormat = isRecord(encoding.y) ? encoding.y.format : undefined;
+  const mark = isRecord(spec.mark) ? spec.mark : {};
+  const rowMode = mark.track === "row";
   const rowH = 28;
   const pad = 6;
   const height = frame.heightFixed ? frame.height : pad * 2 + rows.length * rowH;
@@ -40,16 +42,26 @@ export function renderBarList(spec: Record<string, unknown>): string | null {
   const parts = [openChart({ ...frame, height, renderer: "bar-list" })];
   rows.forEach((row, index) => {
     const y = pad + index * rowH;
+    const text = formatValue(row.value, yFormat, frame.locale);
+    if (rowMode) {
+      const span = Math.max(0, width - 8);
+      const filled = Math.max(12, (row.value / max) * span);
+      parts.push(
+        `<rect data-ck-track="row" x="0" y="${n(y + 2)}" width="${n(filled)}" height="${rowH - 4}" rx="3" fill="${fill}" fill-opacity="0.16" />` +
+          `<text x="8" y="${n(y + 18)}" fill="${ink}" font-size="12" font-weight="560" font-family="${font()}">${esc(row.label)}</text>` +
+          `<text x="${n(width - 4)}" y="${n(y + 18)}" text-anchor="end" fill="${ink}" font-size="12" font-weight="650" font-family="${font()}">${esc(text)}</text>`,
+      );
+      return;
+    }
     const trackY = y + 6;
     const trackH = 16;
     const span = Math.max(0, trackRight - 4);
     const filled = Math.max(8, (row.value / max) * span);
-    const text = formatValue(row.value, yFormat, frame.locale);
     parts.push(
       `<rect data-ck-track="1" x="0" y="${n(trackY)}" width="${n(span)}" height="${trackH}" rx="4" fill="${fill}" fill-opacity="0.14" />` +
         `<rect data-ck-bar="1" x="0" y="${n(trackY)}" width="${n(filled)}" height="${trackH}" rx="4" fill="${fill}" fill-opacity="0.42" />` +
         `<text x="8" y="${n(trackY + 12)}" fill="${ink}" font-size="12" font-weight="560" font-family="${font()}">${esc(row.label)}</text>` +
-        `<text x="${n(width - 4)}" y="${n(trackY + 12)}" text-anchor="end" fill="${muted}" font-size="12" font-weight="650" font-family="${font()}">${esc(text)}</text>`,
+        `<text x="${n(width - 4)}" y="${n(trackY + 12)}" text-anchor="end" fill="${ink}" font-size="12" font-weight="650" font-family="${font()}">${esc(text)}</text>`,
     );
   });
   parts.push(closeChart());

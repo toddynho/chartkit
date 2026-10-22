@@ -27,4 +27,14 @@ describe("bar list", () => {
     expect(svg).not.toContain('data-ck-axis=');
     expect(render(spec)).toContain("ck-chart-error");
   });
+
+  it("draws a full-row wash when mark.track is row", () => {
+    const row = { ...spec, mark: { track: "row" } };
+    expect(validate(row).errors).toEqual([]);
+    const svg = renderBarList(row);
+    expect(svg).toContain('data-ck-track="row"');
+    expect(svg).toContain('height="24"');
+    expect(svg).not.toContain('data-ck-bar="1"');
+    expect(svg).toContain(">1.8K<");
+  });
 });

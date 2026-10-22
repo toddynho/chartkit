@@ -187,12 +187,12 @@ function legendMarkup(scale: PaintScale, x: number, y: number, height: number, i
   return `<defs><linearGradient id="${id}" x1="0" y1="1" x2="0" y2="0">${stops}</linearGradient></defs>${title}<rect x="${round(x)}" y="${round(top)}" width="12" height="${round(bar)}" fill="url(#${id})" rx="2"/>${labels}${nodata ? noDataSwatch(x, y + height - 18, id) : ""}`;
 }
 
-function styleBlock(chrome: Chrome, id: string, hatch: boolean): string {
+function styleBlock(chrome: Chrome, id: string, nodata: "hatch" | "fill" | "off"): string {
   const rim = chrome.scheme === "dark" ? "#141414" : "#ffffff";
-  const nodata = hatch ? `.ck-geo-nodata{fill:url(#${id}nd)}` : "";
-  // A stylesheet fill beats the fill attribute. Land belongs only on a points map.
-  const regionFill = hatch ? "" : `fill:${chrome.land};`;
-  return `<style>.ck-geo-water{fill:${chrome.water}}${nodata}.ck-geo-region{${regionFill}stroke:${chrome.border};stroke-width:.6px}.ck-geo-point{stroke:${rim};stroke-width:1.25px;fill-opacity:.82}.ck-geo-region:hover,.ck-geo-region:focus,.ck-geo-point:hover,.ck-geo-point:focus{stroke:${chrome.text};stroke-width:1.6px;outline:none}.ck-geo-graticule{fill:none;stroke:${chrome.border};stroke-width:.4;opacity:.45}.ck-geo-inset{fill:none;stroke:${chrome.border};stroke-width:.75}.ck-geo-leader{fill:none;stroke:${chrome.muted};stroke-width:.8}.ck-geo-label,.ck-geo-title{fill:${chrome.text};font-family:ui-sans-serif,system-ui,sans-serif}.ck-geo-label{font-size:11px}.ck-geo-legend-title{font-weight:650}.ck-geo-title{font-weight:600}.ck-geo-tag{fill:${chrome.text};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif;paint-order:stroke;stroke:${chrome.water};stroke-width:3px;stroke-linejoin:round}.ck-geo-muted{fill:${chrome.muted};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif}</style>`;
+  const nodataCss = nodata === "hatch" ? `.ck-geo-nodata{fill:url(#${id}nd)}` : nodata === "fill" ? `.ck-geo-nodata{fill:${chrome.land}}` : "";
+  // A stylesheet fill beats the fill attribute. Land belongs on a points map, or on missing choropleth countries when nodata is fill.
+  const regionFill = nodata === "off" ? `fill:${chrome.land};` : "";
+  return `<style>.ck-geo-water{fill:${chrome.water}}${nodataCss}.ck-geo-region{${regionFill}stroke:${chrome.border};stroke-width:.6px}.ck-geo-point{stroke:${rim};stroke-width:1.25px;fill-opacity:.82}.ck-geo-region:hover,.ck-geo-region:focus,.ck-geo-point:hover,.ck-geo-point:focus{stroke:${chrome.text};stroke-width:1.6px;outline:none}.ck-geo-graticule{fill:none;stroke:${chrome.border};stroke-width:.4;opacity:.45}.ck-geo-inset{fill:none;stroke:${chrome.border};stroke-width:.75}.ck-geo-leader{fill:none;stroke:${chrome.muted};stroke-width:.8}.ck-geo-label,.ck-geo-title{fill:${chrome.text};font-family:ui-sans-serif,system-ui,sans-serif}.ck-geo-label{font-size:11px}.ck-geo-legend-title{font-weight:650}.ck-geo-title{font-weight:600}.ck-geo-tag{fill:${chrome.text};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif;paint-order:stroke;stroke:${chrome.water};stroke-width:3px;stroke-linejoin:round}.ck-geo-muted{fill:${chrome.muted};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif}</style>`;
 }
 
 function patternDef(chrome: Chrome, id: string): string {
@@ -200,12 +200,12 @@ function patternDef(chrome: Chrome, id: string): string {
   return `<pattern id="${id}nd" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="${chrome.nodata}"/><path d="M0 6 L6 0 M-1 1 L1 -1 M5 7 L7 5" stroke="${ink}" stroke-width="0.8"/></pattern>`;
 }
 
-function shell(spec: Record<string, unknown>, chrome: Chrome, body: string, patternId = "ckg", hatch = false): string {
+function shell(spec: Record<string, unknown>, chrome: Chrome, body: string, patternId = "ckg", nodata: "hatch" | "fill" | "off" = "off"): string {
   const { width, height } = sizeOf(spec);
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : typeof spec.title === "string" ? spec.title : "Map";
   const theme = typeof spec.theme === "string" ? spec.theme : "soft";
   const scheme = chrome.scheme ? ` style="color-scheme:${chrome.scheme}"` : "";
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="group" aria-label="${esc(alt)}" data-ck-type="${esc(String(spec.type))}" data-ck-theme="${esc(theme)}"${scheme}>${styleBlock(chrome, patternId, hatch)}<title>${esc(alt)}</title><rect class="ck-geo-water" width="100%" height="100%"/>${body}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="group" aria-label="${esc(alt)}" data-ck-type="${esc(String(spec.type))}" data-ck-theme="${esc(theme)}"${scheme}>${styleBlock(chrome, patternId, nodata)}<title>${esc(alt)}</title><rect class="ck-geo-water" width="100%" height="100%"/>${body}</svg>`;
 }
 
 function projectorFor(name: string, regions: GeoRegion[], box: Box): { project: Projector; point: (lon: number, lat: number) => [number, number]; grid: boolean; frames: InsetFrame[] } {
@@ -468,9 +468,9 @@ export async function render(spec: unknown): Promise<string> {
     const chrome = chromeFor(isRecord(spec) ? spec.theme : "soft");
     return shell(isRecord(spec) ? spec : { type: "choropleth", a11y: { alt: "Map" } }, chrome, `<defs>${patternDef(chrome, "ckg")}</defs><text class="ck-geo-title" x="16" y="32" font-size="16">Expected type choropleth or map-points.</text>`);
   }
-  const chrome = chromeFor(spec.theme);
-  const { width, height } = sizeOf(spec);
   const mark = resolveMark(spec);
+  const chrome = paintChrome(chromeFor(spec.theme), mark);
+  const { width, height } = sizeOf(spec);
   const encoding = resolveEncoding(spec);
   const loaded = await load(mark);
   const title = typeof spec.title === "string" ? spec.title : "";
@@ -501,8 +501,8 @@ export async function render(spec: unknown): Promise<string> {
     const body = `<defs>${patternDef(chrome, id)}</defs>${titleText}<text class="ck-geo-title" x="16" y="${titleH + 28}" font-size="16">Unknown atlas.</text>`;
     return shell(spec, chrome, body, id);
   }
-  const hatch = spec.type === "choropleth";
-  let body = `<defs>${hatch ? patternDef(chrome, id) : ""}<clipPath id="${id}c"><rect x="${round(box.x)}" y="${round(box.y)}" width="${round(box.w)}" height="${round(box.h)}"/></clipPath></defs>${titleText}`;
+  const nodataMode: "hatch" | "fill" | "off" = spec.type !== "choropleth" ? "off" : mark.nodata === "fill" ? "fill" : "hatch";
+  let body = `<defs>${nodataMode === "hatch" ? patternDef(chrome, id) : ""}<clipPath id="${id}c"><rect x="${round(box.x)}" y="${round(box.y)}" width="${round(box.w)}" height="${round(box.h)}"/></clipPath></defs>${titleText}`;
   body += `<g clip-path="url(#${id}c)">`;
   if (drawn?.grid) body += graticule(drawn.point);
   if (drawn) {
@@ -511,6 +511,14 @@ export async function render(spec: unknown): Promise<string> {
   }
   if (drawn && points.dots.length) body += pointMarkup(points.dots, drawn.point, num(mark.labelCount) ?? 12, box);
   body += `</g>`;
-  if (showLegend && scale) body += legendMarkup(scale, box.x + box.w + 8, box.y, box.h, id, spec.type === "choropleth");
-  return shell(spec, chrome, body, id, hatch);
+  if (showLegend && scale) body += legendMarkup(scale, box.x + box.w + 8, box.y, box.h, id, nodataMode === "hatch");
+  return shell(spec, chrome, body, id, nodataMode);
+}
+
+function paintChrome(chrome: Chrome, mark: Record<string, unknown>): Chrome {
+  const hex = (value: unknown) => (typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value) ? value : "");
+  const land = hex(mark.land);
+  const water = hex(mark.water);
+  if (!land && !water) return chrome;
+  return { ...chrome, ...(land ? { land } : {}), ...(water ? { water } : {}) };
 }

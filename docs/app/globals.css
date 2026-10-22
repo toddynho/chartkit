@@ -815,21 +815,73 @@ body:has(.dash-theme-midnight.dash-keel) { --bg: #1a1625; background: #1a1625; }
 .dash-table th:last-child, .dash-table td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
 .dash-table th { color: var(--dash-muted, var(--muted)); font-weight: 600; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
 .dash-wait { margin: 24px 0; color: var(--dash-muted, var(--muted)); }
-.dash-issues { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 0; }
-.dash-issues li {
+.dash-tabs {
   display: grid;
-  grid-template-columns: minmax(140px, 1.2fr) minmax(120px, 160px) auto;
-  gap: 8px 16px;
-  align-items: center;
-  padding: 8px 0;
-  border-top: 1px solid var(--dash-line, var(--line));
+  grid-template-columns: repeat(var(--dash-tab-cols, 4), minmax(0, 1fr));
+  background: var(--dash-card, #fff);
+  border: 1px solid var(--dash-line, var(--line));
+  border-radius: 6px;
+  overflow: hidden;
 }
-.dash-issue-name, .dash-issue-metrics { display: flex; flex-direction: column; }
-.dash-issue-metrics { align-items: flex-end; font-variant-numeric: tabular-nums; }
-.dash-issue-metrics b { font-size: 14px; }
-.dash-issues li span { color: var(--dash-muted, var(--muted)); font-size: 12px; }
-.dash-issues .spec-fold { grid-column: 1 / -1; }
-.dash-issue-bars { height: 72px; }
+.dash-tabs button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin: 0;
+  padding: 8px 12px 6px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--dash-muted, var(--muted));
+  text-align: left;
+  cursor: pointer;
+}
+.dash-tabs button[aria-pressed="true"] {
+  color: var(--dash-ink, var(--fg));
+  border-bottom-color: var(--dash-accent, currentColor);
+  background: color-mix(in srgb, var(--dash-accent, #635bff) 8%, transparent);
+}
+.dash-tab-label { font-size: 12px; font-weight: 650; }
+.dash-tab-value { font-size: 22px; font-weight: 650; letter-spacing: -0.03em; color: var(--dash-ink, var(--fg)); line-height: 1.1; }
+.dash-tab-delta { font-size: 12px; font-weight: 650; }
+.dash-tab-delta.up, .dash-headline-row .up { color: var(--dash-positive, #09825d); }
+.dash-tab-delta.down, .dash-headline-row .down { color: var(--dash-negative, #df1b41); }
+.dash-headline { display: flex; flex-direction: column; gap: 2px; margin-bottom: 4px; }
+.dash-headline-row { display: flex; align-items: baseline; gap: 10px; }
+.dash-headline-row b { font-size: 28px; letter-spacing: -0.03em; font-weight: 650; line-height: 1; }
+.dash-specs {
+  background: var(--dash-card, #fff);
+  border: 1px solid var(--dash-line, var(--line));
+  border-radius: 8px;
+  padding: 8px 12px 12px;
+}
+.dash-specs summary { cursor: pointer; font-size: 13px; font-weight: 650; }
+.dash-specs h3 { margin: 12px 0 4px; font-size: 13px; }
+.dash-issue-head, .dash-issues li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) 88px 52px 120px 64px 64px;
+  gap: 6px 12px;
+  align-items: center;
+}
+.dash-issue-head {
+  color: var(--dash-muted, var(--muted));
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 8px 0 2px;
+}
+.dash-issues { list-style: none; margin: 0; padding: 0; }
+.dash-issues li { padding: 7px 0; border-top: 1px solid var(--dash-line, var(--line)); }
+.dash-issue-name { display: flex; flex-direction: column; min-width: 0; }
+.dash-issue-name strong { font-size: 13px; font-weight: 650; }
+.dash-issue-name span, .dash-issue-seen, .dash-issue-age { color: var(--dash-muted, var(--muted)); font-size: 12px; }
+.dash-count { display: flex; flex-direction: column; align-items: flex-end; font-variant-numeric: tabular-nums; }
+.dash-count b { font-size: 14px; }
+.dash-count i { font-style: normal; color: var(--dash-muted, var(--muted)); font-size: 11px; }
+.dash-issue-bars { height: 36px; max-height: 36px; }
+.dash-card .dash-issues .dash-issue-bars svg { width: 100%; height: 36px; max-height: 36px; }
 .dash-explain { padding-top: 8px; }
 .dash-explain h2 { font-size: 1rem; margin: 0 0 8px; }
 .dash-notes { padding-left: 18px; margin: 0; }
@@ -841,6 +893,9 @@ body:has(.dash-theme-midnight.dash-keel) { --bg: #1a1625; background: #1a1625; }
   --dash-ink: #0a2540;
   --dash-muted: #425466;
   --dash-line: #e3e8ee;
+  --dash-accent: #635bff;
+  --dash-positive: #09825d;
+  --dash-negative: #df1b41;
 }
 .dash-ledger .dash-card {
   border-radius: 8px;
@@ -851,6 +906,9 @@ body:has(.dash-theme-midnight.dash-keel) { --bg: #1a1625; background: #1a1625; }
   --dash-ink: #f6f9fc;
   --dash-muted: #adbdcc;
   --dash-line: #1e4060;
+  --dash-accent: #7a73ff;
+  --dash-positive: #0d9263;
+  --dash-negative: #ff4d6a;
 }
 .dash-theme-midnight.dash-ledger .dash-card { box-shadow: none; }
 .dash-meter {
@@ -858,6 +916,10 @@ body:has(.dash-theme-midnight.dash-keel) { --bg: #1a1625; background: #1a1625; }
   --dash-ink: #111827;
   --dash-muted: #6b7280;
   --dash-line: #e5e7eb;
+  --dash-accent: #615fff;
+  --dash-positive: #16a34a;
+  --dash-negative: #ef4444;
+  --dash-tab-cols: 6;
 }
 .dash-meter .dash-card { border-radius: 6px; box-shadow: none; }
 .dash-theme-midnight.dash-meter {
@@ -865,12 +927,19 @@ body:has(.dash-theme-midnight.dash-keel) { --bg: #1a1625; background: #1a1625; }
   --dash-ink: #f9fafb;
   --dash-muted: #9ca3af;
   --dash-line: #374151;
+  --dash-accent: #9d99ff;
+  --dash-positive: #4ade80;
+  --dash-negative: #f87171;
 }
 .dash-wayline {
   --dash-card: #ffffff;
   --dash-ink: #202124;
   --dash-muted: #5f6368;
   --dash-line: #dadce0;
+  --dash-accent: #1a73e8;
+  --dash-positive: #188038;
+  --dash-negative: #d93025;
+  --dash-tab-cols: 4;
 }
 .dash-wayline .dash-card { border-radius: 8px; box-shadow: none; }
 .dash-theme-midnight.dash-wayline {
@@ -878,32 +947,57 @@ body:has(.dash-theme-midnight.dash-keel) { --bg: #1a1625; background: #1a1625; }
   --dash-ink: #e8eaed;
   --dash-muted: #9aa0a6;
   --dash-line: #3c4043;
+  --dash-accent: #8ab4f8;
+  --dash-positive: #81c995;
+  --dash-negative: #f28b82;
 }
 .dash-keel {
-  --dash-card: #241f33;
-  --dash-ink: #eeeaf6;
-  --dash-muted: #a39bb0;
-  --dash-line: rgba(255, 255, 255, 0.08);
-}
-.dash-keel .dash-card { border-radius: 6px; }
-.dash-theme-soft.dash-keel {
   --dash-card: #ffffff;
   --dash-ink: #1f1633;
   --dash-muted: #6a6275;
   --dash-line: #e8e4ef;
+  --dash-accent: #7553ff;
+  --dash-positive: #1b7c4d;
+  --dash-negative: #f55459;
+}
+.dash-keel .dash-card { border-radius: 6px; }
+.dash-theme-midnight.dash-keel {
+  --dash-card: #241f33;
+  --dash-ink: #eeeaf6;
+  --dash-muted: #a39bb0;
+  --dash-line: rgba(255, 255, 255, 0.08);
+  --dash-accent: #7b52ff;
+  --dash-positive: #6dcea0;
+  --dash-negative: #fa6769;
 }
 @media (max-width: 900px) {
   .dash-shell { width: min(1280px, calc(100% - 16px)); margin-top: 8px; }
   .dash-8, .dash-6, .dash-4, .dash-3, .dash-2 { grid-column: span 12; }
+  .dash-ledger .dash-3 { grid-column: span 6; }
+  .dash-meter { --dash-tab-cols: 3; }
+  .dash-wayline { --dash-tab-cols: 2; }
+  .dash-tabs button { padding: 6px 8px 4px; }
+  .dash-tab-value { font-size: 18px; }
   .dash-top { flex-wrap: wrap; }
   .dash-chip { margin-left: 0; }
   .dash-split { grid-template-columns: 1fr; }
   .dash-card:not(.dash-score) > .chart-host:not(.dash-list),
   .dash-split .chart-host { min-height: 220px; }
-  .dash-issues li { grid-template-columns: minmax(0, 1fr) minmax(96px, 140px) auto; }
-  .dash-issue-bars { height: 48px; max-height: 48px; }
-  .dash-card .dash-issues .dash-issue-bars svg { width: 100%; height: 48px; max-height: 48px; }
-  .dash-issue-metrics { white-space: nowrap; }
+  .dash-issue-head { display: none; }
+  .dash-issues li {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "name events users"
+      "meta age spark";
+  }
+  .dash-issue-name { grid-area: name; }
+  .dash-issue-seen { grid-area: meta; }
+  .dash-issue-age { grid-area: age; }
+  .dash-issue-bars { grid-area: spark; height: 36px; max-height: 36px; }
+  .dash-events { grid-area: events; }
+  .dash-users { grid-area: users; }
+  .dash-card .dash-issues .dash-issue-bars svg { width: 100%; height: 36px; max-height: 36px; }
+  .dash-count { white-space: nowrap; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition: none !important; }

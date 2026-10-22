@@ -8,11 +8,200 @@ Styled after Stripe's dashboard to show ChartKit's styling flexibility. Not affi
 
 Default theme: soft.
 
+## Gross volume
+
+Daily gross against the previous period. The total sits above the chart.
+
+type combo. The first series is an area in the blurple series token, strokeWidth 1.75, fillOpacity 0.14, curve linear. The second is a dashed line in the grey series token. legend.show is false. axes.y.title is an empty string, axes.y.labels and both grids are off. axes.x.ticks is the first and last day, so only those two labels draw.
+
+```json
+{
+  "version": "1",
+  "type": "combo",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#0a2540",
+      "muted": "#425466",
+      "grid": "#e6ebf1",
+      "axis": "#c1c9d2",
+      "accent": "#635bff",
+      "positive": "#09825d",
+      "negative": "#df1b41",
+      "series": [
+        "#635bff",
+        "#8898aa"
+      ]
+    }
+  },
+  "data": [
+    {
+      "date": "2025-10-01",
+      "gross": 11359,
+      "prior": 16225
+    },
+    {
+      "date": "2025-10-02",
+      "gross": 15852,
+      "prior": 18599
+    },
+    {
+      "date": "2025-10-03",
+      "gross": 15852,
+      "prior": 13851
+    },
+    {
+      "date": "2025-10-04",
+      "gross": 11359,
+      "prior": 12663
+    },
+    {
+      "date": "2025-10-05",
+      "gross": 12482,
+      "prior": 15038
+    },
+    {
+      "date": "2025-10-06",
+      "gross": 9112,
+      "prior": 10289
+    },
+    {
+      "date": "2025-10-07",
+      "gross": 11359,
+      "prior": 9498
+    },
+    {
+      "date": "2025-10-08",
+      "gross": 9112,
+      "prior": 11872
+    },
+    {
+      "date": "2025-10-09",
+      "gross": 12482,
+      "prior": 9498
+    },
+    {
+      "date": "2025-10-10",
+      "gross": 11359,
+      "prior": 9498
+    },
+    {
+      "date": "2025-10-11",
+      "gross": 15852,
+      "prior": 11872
+    },
+    {
+      "date": "2025-10-12",
+      "gross": 15852,
+      "prior": 9498
+    },
+    {
+      "date": "2025-10-13",
+      "gross": 11359,
+      "prior": 9498
+    },
+    {
+      "date": "2025-10-14",
+      "gross": 12482,
+      "prior": 11872
+    },
+    {
+      "date": "2025-10-15",
+      "gross": 9112,
+      "prior": 9498
+    },
+    {
+      "date": "2025-10-16",
+      "gross": 11359,
+      "prior": 9498
+    },
+    {
+      "date": "2025-10-17",
+      "gross": 9112,
+      "prior": 11872
+    },
+    {
+      "date": "2025-10-18",
+      "gross": 12482,
+      "prior": 9498
+    },
+    {
+      "date": "2025-10-19",
+      "gross": 11359,
+      "prior": 9498
+    },
+    {
+      "date": "2025-10-20",
+      "gross": 15852,
+      "prior": 11872
+    },
+    {
+      "date": "2025-10-21",
+      "gross": 15851,
+      "prior": 9493
+    }
+  ],
+  "encoding": {
+    "x": {
+      "field": "date",
+      "type": "temporal"
+    },
+    "y": [
+      {
+        "field": "gross",
+        "mark": "area"
+      },
+      {
+        "field": "prior",
+        "mark": "line",
+        "dash": "dashed"
+      }
+    ]
+  },
+  "axes": {
+    "x": {
+      "grid": false,
+      "ticks": [
+        1759276800000,
+        1761004800000
+      ]
+    },
+    "y": {
+      "title": "",
+      "labels": false,
+      "grid": false
+    }
+  },
+  "legend": {
+    "show": false
+  },
+  "tooltip": {
+    "mode": "index"
+  },
+  "mark": {
+    "strokeWidth": 1.75,
+    "fillOpacity": 0.14,
+    "curve": "linear",
+    "points": "none",
+    "gradient": false
+  },
+  "size": {
+    "width": 1100,
+    "height": 260
+  },
+  "a11y": {
+    "alt": "Gross volume for 1–21 October totals 261 thousand dollars, above the previous period."
+  }
+}
+```
+
 ## Gross
 
 Gross
 
-type kpi. theme.tokens.series is the blurple spark. surface and grid are transparent so the shell card is the only card. metric.delta is the chip. goodDirection down flips the refund colour. format compact with a dollar prefix.
+type kpi. Compact card: label, value, and a short spark. theme.tokens.surface and grid are transparent. axes are not drawn. No per-card spec toggle.
 
 ```json
 {
@@ -37,14 +226,27 @@ type kpi. theme.tokens.series is the blurple spark. surface and grid are transpa
     }
   },
   "data": [
-    182,
-    176,
-    201,
-    198,
-    214,
-    248,
-    236,
-    261
+    11.359,
+    15.852,
+    15.852,
+    11.359,
+    12.482,
+    9.112,
+    11.359,
+    9.112,
+    12.482,
+    11.359,
+    15.852,
+    15.852,
+    11.359,
+    12.482,
+    9.112,
+    11.359,
+    9.112,
+    12.482,
+    11.359,
+    15.852,
+    15.851
   ],
   "metric": {
     "label": "Gross",
@@ -60,8 +262,8 @@ type kpi. theme.tokens.series is the blurple spark. surface and grid are transpa
     "strokeWidth": 1.5
   },
   "size": {
-    "width": 280,
-    "height": 132
+    "width": 400,
+    "height": 108
   },
   "a11y": {
     "alt": "Gross volume this month is 261 thousand dollars, up 8 percent."
@@ -73,7 +275,7 @@ type kpi. theme.tokens.series is the blurple spark. surface and grid are transpa
 
 Net
 
-type kpi. theme.tokens.series is the blurple spark. surface and grid are transparent so the shell card is the only card. metric.delta is the chip. goodDirection down flips the refund colour. format compact with a dollar prefix.
+type kpi. Compact card: label, value, and a short spark. theme.tokens.surface and grid are transparent. axes are not drawn. No per-card spec toggle.
 
 ```json
 {
@@ -98,14 +300,27 @@ type kpi. theme.tokens.series is the blurple spark. surface and grid are transpa
     }
   },
   "data": [
-    174,
-    168,
-    190,
-    188,
-    202,
-    236,
-    224,
-    248
+    10.517592592592592,
+    14.677777777777777,
+    14.677777777777777,
+    10.517592592592592,
+    11.557407407407407,
+    8.437037037037037,
+    10.517592592592592,
+    8.437037037037037,
+    11.557407407407407,
+    10.517592592592592,
+    14.677777777777777,
+    14.677777777777777,
+    10.517592592592592,
+    11.557407407407407,
+    8.437037037037037,
+    10.517592592592592,
+    8.437037037037037,
+    11.557407407407407,
+    10.517592592592592,
+    14.677777777777777,
+    14.676851851851852
   ],
   "metric": {
     "label": "Net",
@@ -121,8 +336,8 @@ type kpi. theme.tokens.series is the blurple spark. surface and grid are transpa
     "strokeWidth": 1.5
   },
   "size": {
-    "width": 280,
-    "height": 132
+    "width": 400,
+    "height": 108
   },
   "a11y": {
     "alt": "Net of fees is 248 thousand dollars, up 7 percent."
@@ -134,7 +349,7 @@ type kpi. theme.tokens.series is the blurple spark. surface and grid are transpa
 
 Refunds
 
-type kpi. theme.tokens.series is the blurple spark. surface and grid are transparent so the shell card is the only card. metric.delta is the chip. goodDirection down flips the refund colour. format compact with a dollar prefix.
+type kpi. Compact card: label, value, and a short spark. theme.tokens.surface and grid are transparent. axes are not drawn. No per-card spec toggle.
 
 ```json
 {
@@ -183,11 +398,72 @@ type kpi. theme.tokens.series is the blurple spark. surface and grid are transpa
     "strokeWidth": 1.5
   },
   "size": {
-    "width": 280,
-    "height": 132
+    "width": 400,
+    "height": 108
   },
   "a11y": {
     "alt": "Refunds are 12.6 thousand dollars, down 11 percent."
+  }
+}
+```
+
+## Fees
+
+Fees
+
+type kpi. Compact card: label, value, and a short spark. theme.tokens.surface and grid are transparent. axes are not drawn. No per-card spec toggle.
+
+```json
+{
+  "version": "1",
+  "type": "kpi",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#0a2540",
+      "muted": "#425466",
+      "grid": "transparent",
+      "axis": "#c1c9d2",
+      "accent": "#635bff",
+      "positive": "#09825d",
+      "negative": "#df1b41",
+      "series": [
+        "#635bff",
+        "#8898aa"
+      ]
+    }
+  },
+  "data": [
+    6.2,
+    6.4,
+    7.1,
+    6.9,
+    7.6,
+    8,
+    7.9,
+    8.4
+  ],
+  "metric": {
+    "label": "Fees",
+    "value": 8400,
+    "delta": 0.02,
+    "format": {
+      "style": "compact",
+      "prefix": "$"
+    }
+  },
+  "mark": {
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
+  },
+  "size": {
+    "width": 400,
+    "height": 108
+  },
+  "a11y": {
+    "alt": "Fees are 8.4 thousand dollars, up 2 percent."
   }
 }
 ```
@@ -196,7 +472,7 @@ type kpi. theme.tokens.series is the blurple spark. surface and grid are transpa
 
 Accounts
 
-type kpi. theme.tokens.series is the blurple spark. surface and grid are transparent so the shell card is the only card. metric.delta is the chip. goodDirection down flips the refund colour. format compact with a dollar prefix.
+type kpi. Compact card: label, value, and a short spark. theme.tokens.surface and grid are transparent. axes are not drawn. No per-card spec toggle.
 
 ```json
 {
@@ -241,8 +517,8 @@ type kpi. theme.tokens.series is the blurple spark. surface and grid are transpa
     "strokeWidth": 1.5
   },
   "size": {
-    "width": 280,
-    "height": 132
+    "width": 400,
+    "height": 108
   },
   "a11y": {
     "alt": "840 new accounts, up 4 percent."
@@ -250,24 +526,24 @@ type kpi. theme.tokens.series is the blurple spark. surface and grid are transpa
 }
 ```
 
-## Gross volume
+## Payouts
 
-This period against the previous period.
+Payouts
 
-type combo. The first y series is a bar in theme.tokens.series[0]. The second is a dashed line in series[1]. axes.y.grid is solid and axes.x.grid is false, so only horizontal gridlines draw. mark.cornerRadius and mark.gap set the bar shape.
+type kpi. Compact card: label, value, and a short spark. theme.tokens.surface and grid are transparent. axes are not drawn. No per-card spec toggle.
 
 ```json
 {
   "version": "1",
-  "type": "combo",
+  "type": "kpi",
   "theme": {
     "preset": "soft",
     "tokens": {
       "background": "transparent",
-      "surface": "#ffffff",
+      "surface": "transparent",
       "text": "#0a2540",
       "muted": "#425466",
-      "grid": "#e6ebf1",
+      "grid": "transparent",
       "axis": "#c1c9d2",
       "accent": "#635bff",
       "positive": "#09825d",
@@ -279,92 +555,34 @@ type combo. The first y series is a bar in theme.tokens.series[0]. The second is
     }
   },
   "data": [
-    {
-      "month": "Mar",
-      "gross": 182000,
-      "prior": 160000
-    },
-    {
-      "month": "Apr",
-      "gross": 176000,
-      "prior": 171000
-    },
-    {
-      "month": "May",
-      "gross": 201000,
-      "prior": 188000
-    },
-    {
-      "month": "Jun",
-      "gross": 198000,
-      "prior": 190000
-    },
-    {
-      "month": "Jul",
-      "gross": 214000,
-      "prior": 196000
-    },
-    {
-      "month": "Aug",
-      "gross": 248000,
-      "prior": 205000
-    },
-    {
-      "month": "Sep",
-      "gross": 236000,
-      "prior": 210000
-    },
-    {
-      "month": "Oct",
-      "gross": 261000,
-      "prior": 218000
-    }
+    210,
+    220,
+    240,
+    230,
+    250,
+    260,
+    255,
+    248
   ],
-  "encoding": {
-    "x": "month",
-    "y": [
-      {
-        "field": "gross",
-        "title": "This period",
-        "mark": "bar"
-      },
-      {
-        "field": "prior",
-        "title": "Previous period",
-        "mark": "line",
-        "dash": "dashed"
-      }
-    ]
-  },
-  "axes": {
-    "x": {
-      "grid": false
-    },
-    "y": {
-      "grid": true,
-      "format": {
-        "style": "compact",
-        "prefix": "$"
-      }
+  "metric": {
+    "label": "Payouts",
+    "value": 240000,
+    "delta": 0.06,
+    "format": {
+      "style": "compact",
+      "prefix": "$"
     }
-  },
-  "legend": {
-    "position": "top"
-  },
-  "tooltip": {
-    "mode": "index"
   },
   "mark": {
-    "strokeWidth": 2,
-    "cornerRadius": 3,
-    "gap": 0.38
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
   },
   "size": {
-    "width": 1100,
-    "height": 280
+    "width": 400,
+    "height": 108
   },
   "a11y": {
-    "alt": "Gross volume peaks in October at 261 thousand dollars, above the previous period."
+    "alt": "Payouts are 240 thousand dollars, up 6 percent."
   }
 }
 ```
@@ -373,7 +591,7 @@ type combo. The first y series is a bar in theme.tokens.series[0]. The second is
 
 Card, bank, and wallet.
 
-type bar-list. The track and the fill use theme.tokens.series[0]. The value format is compact with a dollar prefix.
+type bar-list with mark.track row. The wash uses series[0]. The amount uses the text token, so Midnight stays readable. The page swaps the soft and midnight SVGs.
 
 ```json
 {
@@ -421,9 +639,12 @@ type bar-list. The track and the fill use theme.tokens.series[0]. The value form
       }
     }
   },
+  "mark": {
+    "track": "row"
+  },
   "size": {
     "width": 520,
-    "height": 108
+    "height": 96
   },
   "a11y": {
     "alt": "Card is the largest method, then bank, then wallet."
@@ -435,7 +656,7 @@ type bar-list. The track and the fill use theme.tokens.series[0]. The value form
 
 Daily failures this period.
 
-type line. This chart's theme.tokens.series is the negative token, so the line is not the volume blurple.
+type line. This chart's series token is the negative colour. axes.y.title is empty so the series name is not an axis title.
 
 ```json
 {
@@ -495,8 +716,7 @@ type line. This chart's theme.tokens.series is the negative token, so the line i
   "encoding": {
     "x": "day",
     "y": {
-      "field": "failed",
-      "title": "Failed"
+      "field": "failed"
     }
   },
   "legend": {
@@ -507,6 +727,7 @@ type line. This chart's theme.tokens.series is the negative token, so the line i
       "grid": false
     },
     "y": {
+      "title": "",
       "grid": true
     }
   },
@@ -514,7 +735,9 @@ type line. This chart's theme.tokens.series is the negative token, so the line i
     "mode": "index"
   },
   "mark": {
-    "strokeWidth": 2
+    "strokeWidth": 1.75,
+    "curve": "linear",
+    "points": "none"
   },
   "size": {
     "width": 520,
@@ -528,9 +751,9 @@ type line. This chart's theme.tokens.series is the negative token, so the line i
 
 ## What produces this look
 
-- **Scorecards.** type kpi. A number array in data is the sparkline. theme.tokens.surface and theme.tokens.grid are transparent, so the page card is the only card. metric.delta is the chip.
-- **Comparison.** combo puts bars and a dashed line on one x axis. series[0] is the blurple bar. series[1] is the slate or cyan comparison line. Only the y grid is on.
-- **Methods.** bar-list is an on-demand chart. It is not in the line or all bundle. A tinted track runs behind the label and the value sits on the right.
-- **Palette.** Colours are theme.tokens on each spec: blurple #635bff, navy text #0a2540, comparison #8898aa, and the negative #df1b41 for failed payments. Midnight swaps those tokens. The page CSS does not paint the marks.
+- **Gross volume.** combo draws a blurple area and a grey dashed prior-period line. legend.show is false. The $261K total and the delta are page text above the chart. axes.y.title is "" so no series name becomes an axis title. axes.y.labels and the grids are off. axes.x.ticks holds the first and last timestamps.
+- **Metrics.** Six kpi specs sit in a 2×3 grid. Each is a label, a value, and a short spark. surface and grid are transparent.
+- **Methods.** bar-list mark.track is row. Amounts use the text token. Soft and Midnight are two SVGs from the two theme objects.
+- **Palette.** theme.tokens: blurple #635bff, navy text #0a2540, comparison #8898aa, negative #df1b41. Midnight swaps those tokens. The page CSS does not paint the marks.
 
 https://chartkit.dev/dashboards/ledger
