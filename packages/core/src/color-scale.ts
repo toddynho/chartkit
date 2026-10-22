@@ -176,7 +176,7 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
   let paint: (value: number) => string;
   let swatches: string[] = [];
   if (kind === "quantize") {
-    swatches = binSwatches(bins, preset, coolBins(min, max, bins, []));
+    swatches = binSwatches(bins, preset, 0);
     paint = (value) => swatches[Math.min(bins - 1, Math.floor(unit(value) * bins))] ?? swatches[0] ?? "#007aff";
   } else if (kind === "threshold") {
     swatches = binSwatches(cuts.length + 1, preset, coolBins(min, max, cuts.length + 1, cuts));

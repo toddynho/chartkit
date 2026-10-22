@@ -164,8 +164,9 @@ function tidyGaps(gaps: AxisGap[], lo: number, hi: number): AxisGap[] {
 
 /**
  * Pixel weights for data segments and the gaps between them.
- * Each break keeps about 16 px. The segment below a break takes `share` of the
- * axis (default 0.4) so a short lower range is not crushed against the gap.
+ * Each break keeps about 16 px. `share` (default 0.4) is the fraction from zero
+ * to the break when that lower segment crosses zero, and the fraction of the
+ * whole segment otherwise, so a short lower range is not crushed against the gap.
  */
 function breakWeights(pieces: { a: number; b: number; gap: boolean; share?: number }[], spanPx: number): number[] {
   const gapFrac = Math.min(0.08, 16 / Math.max(spanPx, 1));
@@ -183,8 +184,7 @@ function breakWeights(pieces: { a: number; b: number; gap: boolean; share?: numb
     let below = i - 1;
     while (below >= 0 && pieces[below].gap) below--;
     if (below < 0 || claimed.has(below)) continue;
-    const raw = pieces[i].share;
-    const share = typeof raw === "number" && raw > 0 ? Math.min(0.7, Math.max(0.15, raw)) : 0.4;
+    const share = breakShare(pieces[below], pieces[i].share);
     fracs[below] = share;
     claimed.add(below);
     claim += share;
@@ -209,6 +209,19 @@ function breakWeights(pieces: { a: number; b: number; gap: boolean; share?: numb
     if (last >= 0) fracs[last] += Math.max(0, 1 - gapSum - claim);
   }
   return fracs;
+}
+
+/** Clamp `share`, then expand it so zero-to-break is that fraction when zero is inside the piece. */
+function breakShare(piece: { a: number; b: number } | undefined, raw: number | undefined): number {
+  let share = typeof raw === "number" && raw > 0 ? Math.min(0.7, Math.max(0.15, raw)) : 0.4;
+  if (!piece) return share;
+  const a = piece.a;
+  const b = piece.b;
+  if (a < 0 && b > 0) {
+    const positive = (b - 0) / (b - a);
+    if (positive > 0.05 && positive < 1) share = Math.min(0.7, share / positive);
+  }
+  return share;
 }
 
 /**

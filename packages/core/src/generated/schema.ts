@@ -2790,7 +2790,7 @@ export interface Axes {
          */
         minorTicks?: number;
         /**
-         * Ranges collapsed to a zigzag across the plot and the series. The segment below a break takes share of the axis, default 0.4. Ticks inside a break are omitted. The axis line stops at the top tick.
+         * Ranges collapsed to a short gap. The break mark is drawn on the axis. When the segment below crosses zero, share is the fraction of the axis from zero to the break (default 0.4); otherwise share is the fraction for that whole segment. Ticks inside a break are omitted. The axis line stops at the top tick.
          *
          * @maxItems 3
          */
@@ -2807,7 +2807,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               }
@@ -2823,7 +2823,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               },
@@ -2837,7 +2837,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               }
@@ -2853,7 +2853,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               },
@@ -2867,7 +2867,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               },
@@ -2881,7 +2881,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               }
@@ -3006,7 +3006,7 @@ export interface Axes {
          */
         minorTicks?: number;
         /**
-         * Ranges collapsed to a zigzag across the plot and the series. The segment below a break takes share of the axis, default 0.4. Ticks inside a break are omitted. The axis line stops at the top tick.
+         * Ranges collapsed to a short gap. The break mark is drawn on the axis. When the segment below crosses zero, share is the fraction of the axis from zero to the break (default 0.4); otherwise share is the fraction for that whole segment. Ticks inside a break are omitted. The axis line stops at the top tick.
          *
          * @maxItems 3
          */
@@ -3023,7 +3023,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               }
@@ -3039,7 +3039,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               },
@@ -3053,7 +3053,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               }
@@ -3069,7 +3069,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               },
@@ -3083,7 +3083,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               },
@@ -3097,7 +3097,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               }
@@ -3222,7 +3222,7 @@ export interface Axes {
          */
         minorTicks?: number;
         /**
-         * Ranges collapsed to a zigzag across the plot and the series. The segment below a break takes share of the axis, default 0.4. Ticks inside a break are omitted. The axis line stops at the top tick.
+         * Ranges collapsed to a short gap. The break mark is drawn on the axis. When the segment below crosses zero, share is the fraction of the axis from zero to the break (default 0.4); otherwise share is the fraction for that whole segment. Ticks inside a break are omitted. The axis line stops at the top tick.
          *
          * @maxItems 3
          */
@@ -3239,7 +3239,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               }
@@ -3255,7 +3255,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               },
@@ -3269,7 +3269,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               }
@@ -3285,7 +3285,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               },
@@ -3299,7 +3299,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               },
@@ -3313,7 +3313,7 @@ export interface Axes {
                  */
                 to: number;
                 /**
-                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
                  */
                 share?: number;
               }

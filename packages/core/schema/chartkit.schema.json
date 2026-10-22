@@ -1700,10 +1700,10 @@
                     "properties": {
                       "from": { "type": "number", "description": "Start of the collapsed range, in data units." },
                       "to": { "type": "number", "description": "End of the collapsed range, in data units." },
-                      "share": { "type": "number", "minimum": 0.15, "maximum": 0.7, "description": "Fraction of the axis given to the segment below this break. Default 0.4." }
+                      "share": { "type": "number", "minimum": 0.15, "maximum": 0.7, "description": "Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4." }
                     }
                   },
-                  "description": "Ranges collapsed to a zigzag across the plot and the series. The segment below a break takes share of the axis, default 0.4. Ticks inside a break are omitted. The axis line stops at the top tick."
+                  "description": "Ranges collapsed to a short gap. The break mark is drawn on the axis. When the segment below crosses zero, share is the fraction of the axis from zero to the break (default 0.4); otherwise share is the fraction for that whole segment. Ticks inside a break are omitted. The axis line stops at the top tick."
                 },
                 "bands": {
                   "description": "Shaded x ranges, or \"weekends\" to shade Saturday and Sunday when x is dates.",
@@ -1888,10 +1888,10 @@
                     "properties": {
                       "from": { "type": "number", "description": "Start of the collapsed range, in data units." },
                       "to": { "type": "number", "description": "End of the collapsed range, in data units." },
-                      "share": { "type": "number", "minimum": 0.15, "maximum": 0.7, "description": "Fraction of the axis given to the segment below this break. Default 0.4." }
+                      "share": { "type": "number", "minimum": 0.15, "maximum": 0.7, "description": "Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4." }
                     }
                   },
-                  "description": "Ranges collapsed to a zigzag across the plot and the series. The segment below a break takes share of the axis, default 0.4. Ticks inside a break are omitted. The axis line stops at the top tick."
+                  "description": "Ranges collapsed to a short gap. The break mark is drawn on the axis. When the segment below crosses zero, share is the fraction of the axis from zero to the break (default 0.4); otherwise share is the fraction for that whole segment. Ticks inside a break are omitted. The axis line stops at the top tick."
                 },
                 "bands": {
                   "type": "array",
@@ -2067,10 +2067,10 @@
                     "properties": {
                       "from": { "type": "number", "description": "Start of the collapsed range, in data units." },
                       "to": { "type": "number", "description": "End of the collapsed range, in data units." },
-                      "share": { "type": "number", "minimum": 0.15, "maximum": 0.7, "description": "Fraction of the axis given to the segment below this break. Default 0.4." }
+                      "share": { "type": "number", "minimum": 0.15, "maximum": 0.7, "description": "Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4." }
                     }
                   },
-                  "description": "Ranges collapsed to a zigzag across the plot and the series. The segment below a break takes share of the axis, default 0.4. Ticks inside a break are omitted. The axis line stops at the top tick."
+                  "description": "Ranges collapsed to a short gap. The break mark is drawn on the axis. When the segment below crosses zero, share is the fraction of the axis from zero to the break (default 0.4); otherwise share is the fraction for that whole segment. Ticks inside a break are omitted. The axis line stops at the top tick."
                 },
                 "bands": {
                   "type": "array",

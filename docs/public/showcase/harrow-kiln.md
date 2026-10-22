@@ -376,7 +376,8 @@ Same firing on a linear scale. The axis skips 200 to 1,800 kW, sits 12 px off th
       "breaks": [
         {
           "from": 200,
-          "to": 1800
+          "to": 1800,
+          "share": 0.4
         }
       ],
       "line": {

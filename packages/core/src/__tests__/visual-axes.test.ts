@@ -126,13 +126,16 @@ describe("visual axes", () => {
     expect(overlap.warnings.some((item) => item.code === "CK3069")).toBe(true);
     const flipped = validate({ ...spec, axes: { y: { breaks: [{ from: 40, to: 10 }] } } });
     expect(flipped.warnings.some((item) => item.code === "CK3061")).toBe(true);
-    const lowerSpan = (share?: number) => {
-      const scale = brokenScale(-40, 2800, 360, 40, [{ from: 200, to: 1800, ...(share == null ? {} : { share }) }], "linear");
-      return Math.abs(scale.at(200) - scale.at(-40));
-    };
-    expect(lowerSpan() / 320).toBeGreaterThan(0.35);
-    expect(lowerSpan() / 320).toBeLessThan(0.45);
+    const scaleOf = (share?: number) => brokenScale(-40, 2800, 360, 40, [{ from: 200, to: 1800, ...(share == null ? {} : { share }) }], "linear");
+    const lowerSpan = (share?: number) => Math.abs(scaleOf(share).at(200) - scaleOf(share).at(-40));
+    const zeroSpan = (share?: number) => Math.abs(scaleOf(share).at(200) - scaleOf(share).at(0));
+    expect(zeroSpan() / 320).toBeGreaterThan(0.36);
+    expect(zeroSpan() / 320).toBeLessThan(0.44);
+    expect(lowerSpan()).toBeGreaterThan(zeroSpan());
     expect(lowerSpan(0.55)).toBeGreaterThan(lowerSpan(0.2) + 40);
+    const named = validate({ ...spec, axes: { y: { breaks: [{ from: 20, to: 60, share: 0.55 }] } } });
+    expect(named.errors.filter((item) => item.path.includes("share"))).toEqual([]);
+    expect(render({ ...spec, axes: { y: { offset: 12, breaks: [{ from: 20, to: 60, share: 0.55 }] } } })).toContain('data-ck-break="1"');
   });
 
   it("spreads a symlog domain that crosses zero", () => {
@@ -276,8 +279,9 @@ describe("visual axes", () => {
     expect(group).toContain("860");
     const quantFills = [...group.matchAll(/<rect[^>]*fill="(#[0-9a-f]{6})"/g)].map((mark) => mark[1]);
     expect(new Set(quantFills).size).toBe(4);
-    expect(channel(quantFills[0] ?? "#000", 2)).toBeGreaterThan(channel(quantFills[0] ?? "#000", 0));
-    expect(channel(quantFills[3] ?? "#000", 0)).toBeGreaterThan(channel(quantFills[3] ?? "#000", 2));
+    const lum = (hex: string) => channel(hex, 0) + channel(hex, 1) + channel(hex, 2);
+    expect(quantFills.every((hex) => channel(hex, 2) > channel(hex, 0))).toBe(true);
+    expect(lum(quantFills[0] ?? "#000")).toBeGreaterThan(lum(quantFills[3] ?? "#fff"));
     const zero = validate(line({ axes: { x: { position: "zero" } } }));
     expect(zero.errors.find((item) => item.code === "CK3068")?.fix).toEqual([
       { op: "remove", path: "/axes/x/position" },

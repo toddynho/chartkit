@@ -135,7 +135,7 @@ export const visualBoards: {
               offset: 12,
               minorTicks: 1,
               ticks: [-20, 0, 100, 2000, 2600],
-              breaks: [{ from: 200, to: 1800 }],
+              breaks: [{ from: 200, to: 1800, share: 0.4 }],
               line: { show: true, width: 1.75, color: "#6b7280" },
               format: kw,
             },

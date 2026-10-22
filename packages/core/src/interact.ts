@@ -759,6 +759,12 @@ function paint(svg: Element, markup: string): boolean {
   return n === need;
 }
 
+/** A custom property that actually paints. `initial` and `transparent` leave the Soft tooltip fallback in place. */
+function painted(value: string): boolean {
+  const token = value.trim().toLowerCase();
+  return token !== "" && token !== "initial" && token !== "inherit" && token !== "unset" && token !== "transparent" && token !== "rgba(0, 0, 0, 0)" && token !== "rgba(0,0,0,0)";
+}
+
 /** Midnight tooltips use the theme surface, not the Soft dark card. A host variable still wins. */
 function useTheme(host: Element, spec: InteractSpec): void {
   const theme = spec.theme;
@@ -770,8 +776,8 @@ function useTheme(host: Element, spec: InteractSpec): void {
   if (!el.style) return;
   const set = (token: string, value: string) => {
     const key = `--ck-${token}`;
-    if (el.style.getPropertyValue(key)) return;
-    if (typeof getComputedStyle === "function" && getComputedStyle(el).getPropertyValue(key).trim()) return;
+    if (painted(el.style.getPropertyValue(key))) return;
+    if (typeof getComputedStyle === "function" && painted(getComputedStyle(el).getPropertyValue(key))) return;
     el.style.setProperty(key, value);
   };
   set("background", preset.background);

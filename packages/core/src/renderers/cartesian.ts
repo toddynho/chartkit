@@ -1538,14 +1538,13 @@ function zigzag(x1: number, y1: number, x2: number, y2: number, stroke: string):
 }
 
 /**
- * A background gap across the plot, with two short parallel diagonals beside the
- * axis squiggle. A full-width wave reads as another series.
+ * A faint gap band across the plot. The break mark itself is the axis zigzag;
+ * a second mark inside the plot reads as a stray glyph.
  */
 function plotBreaks(model: PlotModel, plot: { left: number; top: number; right: number; bottom: number }): string {
   const spans = [...(model.ySpans ?? []), ...(model.y2Spans ?? [])];
   if (!spans.length) return "";
-  const fill = cssVar("background", model.preset.background);
-  const stroke = cssVar("axis", model.preset.axis);
+  const fill = cssVar("muted", model.preset.muted);
   let out = "";
   for (let i = 0; i < spans.length; i++) {
     const span = spans[i];
@@ -1553,11 +1552,7 @@ function plotBreaks(model: PlotModel, plot: { left: number; top: number; right: 
     const y1 = Math.min(span[0], span[1]);
     const y2 = Math.max(span[0], span[1]);
     const height = Math.max(1, y2 - y1);
-    out += `<rect data-ck-break="1" x="${n(plot.left)}" y="${n(y1)}" width="${n(plot.right - plot.left)}" height="${n(height)}" fill="${fill}" />`;
-    const mid = (y1 + y2) / 2;
-    const x = plot.left + 12;
-    const dy = Math.max(3.5, height * 0.32);
-    out += `<path data-ck-break="1" d="M ${n(x)} ${n(mid + dy)} L ${n(x + 6)} ${n(mid - dy)} M ${n(x + 9)} ${n(mid + dy)} L ${n(x + 15)} ${n(mid - dy)}" fill="none" stroke="${stroke}" stroke-width="1.5" stroke-linecap="round" />`;
+    out += `<rect data-ck-break="1" x="${n(plot.left)}" y="${n(y1)}" width="${n(plot.right - plot.left)}" height="${n(height)}" fill="${fill}" fill-opacity="0.16" />`;
   }
   return out;
 }
