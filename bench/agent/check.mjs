@@ -141,6 +141,26 @@ export function needsBrowser(library, source) {
   return false;
 }
 
+/** Every concat view has to draw a mark. A placeholder panel is a bare rect and does not count. */
+function concatViewsDraw(svg, spec) {
+  const views = spec?.layout?.concat?.views;
+  if (!Array.isArray(views) || views.length === 0) return { ok: true };
+  const bodies = typeof svg === "string" ? svg.split(/<g data-ck-view="/).slice(1) : [];
+  if (bodies.length !== views.length) return { ok: false, reason: `expected ${views.length} drawn views, found ${bodies.length}` };
+  const missed = bodies.findIndex((body) => !viewHasMark(body));
+  if (missed >= 0) return { ok: false, reason: `concat view ${missed} did not draw` };
+  return { ok: true };
+}
+
+/** Paths, points, and filled plot rects count. The missing-view panel has no x, and legend swatches are 10×10. */
+function viewHasMark(body) {
+  if (/<path\b|<circle\b|<polygon\b|<polyline\b/.test(body)) return true;
+  const drawn = body.replace(/<defs\b[\s\S]*?<\/defs>/g, "");
+  if (/<(?:rect|line)\b[^>]*(?:data-ck-|aria-label=)/.test(drawn)) return true;
+  const rects = drawn.match(/<rect\b[^>]*>/g) ?? [];
+  return rects.some((rect) => /\sfill=/.test(rect) && /\sx="[\d.-]/.test(rect) && !(/\swidth="10"/.test(rect) && /\sheight="10"/.test(rect)));
+}
+
 function svgHasMarks(text) {
   return /<svg[\s>]/i.test(text) && /<(?:path|rect|circle|polygon|polyline)\b/i.test(text);
 }
@@ -432,7 +452,12 @@ export async function checkSupp(spec, task) {
     renderError = error instanceof Error ? error.message : String(error);
   }
   const drew = typeof svg === "string" && svg.includes("data-ck-type=") && !svg.includes("ck-chart-error") && !svg.includes("Unknown atlas");
-  stages.render = { ok: drew && !renderError, ...(renderError ? { error: renderError } : {}) };
+  const views = concatViewsDraw(svg, spec);
+  stages.render = {
+    ok: drew && !renderError && views.ok,
+    ...(renderError ? { error: renderError } : {}),
+    ...(!views.ok ? { reason: views.reason } : {}),
+  };
 
   const feature = typeof task.pass === "function" ? task.pass(spec) : { ok: true };
   stages.feature = feature?.ok ? { ok: true } : { ok: false, reason: feature?.reason ?? "feature missing" };

@@ -48,7 +48,7 @@ export function render(spec: unknown, target?: RenderTarget | null): string {
 function renderWith(map: Map<string, ChartRenderer>, spec: unknown, target?: RenderTarget | null): string {
   let svg: string;
   try {
-    if (!isRecord(spec) || typeof spec.type !== "string") {
+    if (!isRecord(spec) || (typeof spec.type !== "string" && !concatReady(spec))) {
       svg = errorSvg([
         {
           code: "CK1010",
@@ -56,6 +56,21 @@ function renderWith(map: Map<string, ChartRenderer>, spec: unknown, target?: Ren
           message: "chart spec must be an object with a string type",
           path: "",
           hint: 'import { render } from "@chartkitdev/core/all" registers every v1 chart.',
+        },
+      ]);
+    } else if (typeof spec.type !== "string") {
+      const draw: Draw = (next) => {
+        const type = typeof next.type === "string" ? next.type : "";
+        const inner = map.get(type);
+        return inner ? inner.render(next) : null;
+      };
+      svg = arrangeNow(spec, draw) ?? errorSvg([
+        {
+          code: "CK1010",
+          severity: "error",
+          message: "composed charts need the layout pass",
+          path: "/layout/concat",
+          hint: 'import { render } from "@chartkitdev/core/all", or call mountLayout() before render().',
         },
       ]);
     } else {
@@ -106,6 +121,12 @@ function stampInteraction(svg: string, spec: unknown): string {
   }
   if (!attrs.length) return svg;
   return `<svg ${attrs.join(" ")}${svg.slice(4)}`;
+}
+
+function concatReady(spec: Record<string, unknown>): boolean {
+  const layout = isRecord(spec.layout) ? spec.layout : undefined;
+  const concat = layout && isRecord(layout.concat) ? layout.concat : undefined;
+  return !!concat && Array.isArray(concat.views) && concat.views.some((view) => isRecord(view));
 }
 
 function unregistered(type: string): Diagnostic {
