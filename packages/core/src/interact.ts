@@ -418,7 +418,7 @@ function ensureCss(): void {
   const style = document.createElement("style");
   style.id = "ck-interact-style";
   style.textContent =
-    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-xlabel{font:11px ui-sans-serif,system-ui,sans-serif;fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-pick{stroke:var(--ck-selected,light-dark(#1d1d1f,#f5f5f7));stroke-width:2}[data-ck-dim]{opacity:var(--ck-dim,.32)}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.ck-crumb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px;font:12px/1.3 ui-sans-serif,system-ui,sans-serif;color:light-dark(#1d1d1f,#f5f5f7)}.ck-crumb button{font:inherit;color:inherit;background:transparent;border:1px solid light-dark(#0002,#fff3);border-radius:8px;padding:4px 8px;cursor:pointer}.ck-crumb [aria-current]{font-weight:650}.ck-bar-on{filter:brightness(1.18)}[data-ck-bar-dim]{opacity:.42}";
+    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:var(--ck-surface, light-dark(#fff,#2c2c2e));color:var(--ck-text, light-dark(#1d1d1f,#f5f5f7));box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-xlabel{font:11px ui-sans-serif,system-ui,sans-serif;fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-pick{stroke:var(--ck-selected,light-dark(#1d1d1f,#f5f5f7));stroke-width:2}[data-ck-dim]{opacity:var(--ck-dim,.32)}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.ck-crumb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px;font:12px/1.3 ui-sans-serif,system-ui,sans-serif;color:light-dark(#1d1d1f,#f5f5f7)}.ck-crumb button{font:inherit;color:inherit;background:transparent;border:1px solid light-dark(#0002,#fff3);border-radius:8px;padding:4px 8px;cursor:pointer}.ck-crumb [aria-current]{font-weight:650}.ck-bar-on{filter:brightness(1.18)}[data-ck-bar-dim]{opacity:.42}";
   document.head.append(style);
 }
 
@@ -552,7 +552,83 @@ function tipObstacles(svg: SVGSVGElement, rect: DOMRect, bounds: DOMRect, sx: nu
     const y = Number(node.getAttribute("y"));
     out.push({ l: xOf(x) - 4, t: yOf(y) - 4, r: xOf(x + w) + 4, b: yOf(y + h) + 4 });
   }
+  const notes = svg.querySelectorAll("[data-ck-annotation]");
+  for (let i = 0; i < notes.length; i++) {
+    const node = notes[i];
+    if (!node) continue;
+    const kind = node.getAttribute("data-ck-annotation");
+    if (kind === "band" || kind === "axis-band" || kind === "regression-band" || kind === "marker-line") continue;
+    if (node.localName === "text") {
+      const x = Number(node.getAttribute("x"));
+      const y = Number(node.getAttribute("y"));
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      const w = Math.max(24, (node.textContent?.length ?? 4) * 6.4);
+      const anchor = node.getAttribute("text-anchor");
+      const left = anchor === "end" ? x - w : anchor === "middle" ? x - w / 2 : x;
+      out.push({ l: xOf(left) - 4, t: yOf(y - 12) - 4, r: xOf(left + w) + 4, b: yOf(y + 2) + 4 });
+    } else if (node.localName === "rect") {
+      const x = Number(node.getAttribute("x"));
+      const y = Number(node.getAttribute("y"));
+      const w = Number(node.getAttribute("width"));
+      const h = Number(node.getAttribute("height"));
+      if (![x, y, w, h].every(Number.isFinite) || w > plot.w * 0.9) continue;
+      out.push({ l: xOf(x) - 4, t: yOf(y) - 4, r: xOf(x + w) + 4, b: yOf(y + h) + 4 });
+    }
+  }
   return out;
+}
+
+function tipOverlap(a: TipBox, b: TipBox): boolean {
+  return a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t;
+}
+
+/**
+ * Prefer the requested side, then any side that misses the point and the annotations.
+ * Returns null when every side is blocked, so the caller can fall back.
+ */
+function parkTip(
+  place: number,
+  hostW: number,
+  hostH: number,
+  width: number,
+  height: number,
+  midX: number,
+  midY: number,
+  minX: number,
+  minY: number,
+  maxX: number,
+  maxY: number,
+  anchor: TipBox,
+  obstacles: TipBox[],
+): { left: number; top: number } | null {
+  if (hostW < width + 8 || hostH < height + 8) return null;
+  const gap = 14;
+  const sides = [
+    { left: midX - width / 2, top: minY - height - gap },
+    { left: midX - width / 2, top: maxY + gap },
+    { left: maxX + gap, top: midY - height / 2 },
+    { left: minX - width - gap, top: midY - height / 2 },
+  ];
+  const order = place === 2 ? [1, 0, 2, 3] : place === 3 ? [3, 1, 0, 2] : place === 4 ? [2, 1, 0, 3] : [0, 1, 2, 3];
+  for (let i = 0; i < order.length; i++) {
+    const raw = sides[order[i] ?? 0];
+    if (!raw) continue;
+    const left = raw.left;
+    const top = raw.top;
+    if (left < 4 || top < 4 || left + width > hostW - 4 || top + height > hostH - 4) continue;
+    const card = { l: left, t: top, r: left + width, b: top + height };
+    if (tipOverlap(card, anchor)) continue;
+    let hit = false;
+    for (let k = 0; k < obstacles.length; k++) {
+      const item = obstacles[k];
+      if (item && tipOverlap(card, item)) {
+        hit = true;
+        break;
+      }
+    }
+    if (!hit) return { left, top };
+  }
+  return null;
 }
 
 /**
@@ -683,16 +759,69 @@ function paint(svg: Element, markup: string): boolean {
   return n === need;
 }
 
+/** Midnight tooltips use the theme surface, not the Soft dark card. A host variable still wins. */
+function useTheme(host: Element, spec: InteractSpec): void {
+  const theme = spec.theme;
+  const name = typeof theme === "string" ? theme : isRecord(theme) && typeof theme.name === "string" ? theme.name : "";
+  if (name !== "midnight") return;
+  // Same tokens as `midnight` in theme.ts. Inlined so this entry does not pull every preset.
+  const preset = { background: "#0c0c0c", surface: "#1a1a1a", text: "#ffffff" };
+  const el = host as HTMLElement;
+  if (!el.style) return;
+  const set = (token: string, value: string) => {
+    const key = `--ck-${token}`;
+    if (el.style.getPropertyValue(key)) return;
+    if (typeof getComputedStyle === "function" && getComputedStyle(el).getPropertyValue(key).trim()) return;
+    el.style.setProperty(key, value);
+  };
+  set("background", preset.background);
+  set("surface", preset.surface);
+  set("text", preset.text);
+}
+
 function fade(el: Element, ms: number, from = "0.45", easing = "ease-out"): void {
   if (ms <= 0) return;
   const node = el as SVGSVGElement;
   node.style.transition = "none";
   node.style.opacity = from;
   const curve = easeCss(easing);
+  const drawn = revealPaths(node);
   requestAnimationFrame(() => {
     node.style.transition = `opacity ${ms}ms ${curve}`;
     node.style.opacity = "1";
+    for (let i = 0; i < drawn.length; i++) {
+      const path = drawn[i];
+      if (!path) continue;
+      path.style.transition = `stroke-dashoffset ${ms}ms ${curve}`;
+      path.style.strokeDashoffset = "0";
+    }
   });
+}
+
+/** Line strokes draw in with the same curve. A whole-chart opacity fade is invisible in a still. */
+function revealPaths(node: SVGSVGElement): SVGPathElement[] {
+  const out: SVGPathElement[] = [];
+  const paths = node.querySelectorAll("path");
+  for (let i = 0; i < paths.length; i++) {
+    const path = paths[i];
+    if (!path || path.localName !== "path") continue;
+    const stroke = path.getAttribute("stroke");
+    const fill = path.getAttribute("fill");
+    if (!stroke || stroke === "none" || (fill && fill !== "none") || path.getAttribute("stroke-dasharray")) continue;
+    const measurable = path as SVGPathElement;
+    if (typeof measurable.getTotalLength !== "function") continue;
+    let len = 0;
+    try {
+      len = measurable.getTotalLength();
+    } catch {
+      continue;
+    }
+    if (!(len > 1)) continue;
+    measurable.style.strokeDasharray = String(len);
+    measurable.style.strokeDashoffset = String(len);
+    out.push(measurable);
+  }
+  return out;
 }
 
 /**
@@ -858,6 +987,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
   let svg: SVGSVGElement = found;
   ensureCss();
+  useTheme(host, spec);
   host.setAttribute("data-ck-interact", "1");
   if (getComputedStyle(host).position === "static") (host as HTMLElement).style.position = "relative";
 
@@ -1165,29 +1295,17 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const midX = (minX + maxX) / 2;
     const midY = (minY + maxY) / 2;
     const place = tipSide(base);
-    let top = minY - height - gap;
-    let left = midX - width / 2;
     const plot = plotBox(svg);
     const plotLeft = rect.left + plot.l * sx - bounds.left;
     const plotRight = rect.left + (plot.l + plot.w) * sx - bounds.left;
-    if (place === 2) top = maxY + gap;
-    else if (place > 2) {
-      left = place === 3 ? minX - width - gap : maxX + gap;
-      top = midY - height / 2;
-    } else if (!place) {
+    const obstacles = tipObstacles(svg, rect, bounds, sx, sy, plot);
+    const anchor = { l: minX - 10, t: minY - 10, r: maxX + 10, b: maxY + 10 };
+    const parked = parkTip(place, bounds.width, bounds.height, width, height, midX, midY, minX, minY, maxX, maxY, anchor, obstacles);
+    let top = parked ? parked.top : minY - height - gap;
+    let left = parked ? parked.left : midX - width / 2;
+    if (!parked && !place) {
       const onRight = midX > (plotLeft + plotRight) / 2;
-      const clear = sitTip(
-        tipObstacles(svg, rect, bounds, sx, sy, plot),
-        bounds.width,
-        bounds.height,
-        width,
-        height,
-        midX,
-        minY,
-        onRight,
-        plotLeft,
-        plotRight,
-      );
+      const clear = sitTip(obstacles, bounds.width, bounds.height, width, height, midX, minY, onRight, plotLeft, plotRight);
       if (clear) {
         left = clear.left;
         top = clear.top;
@@ -1199,10 +1317,22 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         if (left + width > bounds.width - 4) left = Math.max(4, flipped);
         if (left < 4) left = Math.max(4, Math.min(midX + gap, bounds.width - width - 4));
       }
-    }
-    if (place && bounds.width > width + 8 && bounds.height > height + 8) {
-      left = Math.max(4, Math.min(left, bounds.width - width - 4));
-      top = Math.max(4, Math.min(top, bounds.height - height - 4));
+    } else if (!parked) {
+      if (place === 2) top = maxY + gap;
+      else if (place > 2) {
+        left = place === 3 ? minX - width - gap : maxX + gap;
+        top = midY - height / 2;
+      }
+      if (bounds.width > width + 8 && bounds.height > height + 8) {
+        left = Math.max(4, Math.min(left, bounds.width - width - 4));
+        top = Math.max(4, Math.min(top, bounds.height - height - 4));
+      }
+      const card = { l: left, t: top, r: left + width, b: top + height };
+      if (tipOverlap(card, anchor)) {
+        const side = maxX + gap + width < bounds.width - 4 ? maxX + gap : minX - width - gap;
+        left = Math.max(4, Math.min(side, bounds.width - width - 4));
+        top = Math.max(4, Math.min(minY, bounds.height - height - 4));
+      }
     }
     tip.style.left = `${left}px`;
     tip.style.top = `${top}px`;

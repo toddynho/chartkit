@@ -2790,7 +2790,7 @@ export interface Axes {
          */
         minorTicks?: number;
         /**
-         * Ranges collapsed to a short zigzag. Ticks inside a break are omitted.
+         * Ranges collapsed to a zigzag across the plot and the series. The segment below a break takes share of the axis, default 0.4. Ticks inside a break are omitted. The axis line stops at the top tick.
          *
          * @maxItems 3
          */
@@ -2806,6 +2806,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               }
             ]
           | [
@@ -2818,6 +2822,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               },
               {
                 /**
@@ -2828,6 +2836,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               }
             ]
           | [
@@ -2840,6 +2852,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               },
               {
                 /**
@@ -2850,6 +2866,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               },
               {
                 /**
@@ -2860,6 +2880,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               }
             ];
         /**
@@ -2982,7 +3006,7 @@ export interface Axes {
          */
         minorTicks?: number;
         /**
-         * Ranges collapsed to a short zigzag. Ticks inside a break are omitted.
+         * Ranges collapsed to a zigzag across the plot and the series. The segment below a break takes share of the axis, default 0.4. Ticks inside a break are omitted. The axis line stops at the top tick.
          *
          * @maxItems 3
          */
@@ -2998,6 +3022,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               }
             ]
           | [
@@ -3010,6 +3038,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               },
               {
                 /**
@@ -3020,6 +3052,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               }
             ]
           | [
@@ -3032,6 +3068,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               },
               {
                 /**
@@ -3042,6 +3082,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               },
               {
                 /**
@@ -3052,6 +3096,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               }
             ];
         /**
@@ -3174,7 +3222,7 @@ export interface Axes {
          */
         minorTicks?: number;
         /**
-         * Ranges collapsed to a short zigzag. Ticks inside a break are omitted.
+         * Ranges collapsed to a zigzag across the plot and the series. The segment below a break takes share of the axis, default 0.4. Ticks inside a break are omitted. The axis line stops at the top tick.
          *
          * @maxItems 3
          */
@@ -3190,6 +3238,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               }
             ]
           | [
@@ -3202,6 +3254,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               },
               {
                 /**
@@ -3212,6 +3268,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               }
             ]
           | [
@@ -3224,6 +3284,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               },
               {
                 /**
@@ -3234,6 +3298,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               },
               {
                 /**
@@ -3244,6 +3312,10 @@ export interface Axes {
                  * End of the collapsed range, in data units.
                  */
                 to: number;
+                /**
+                 * Fraction of the axis given to the segment below this break. Default 0.4.
+                 */
+                share?: number;
               }
             ];
         /**

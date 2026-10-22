@@ -97,7 +97,7 @@ export const visualBoards: {
           },
           animation: { duration: 640, easing: "spring" },
           annotations: [
-            { type: "band", axis: "y", from: -40, to: 0, label: "Banked", opacity: 0.45, z: -1 },
+            { type: "band", axis: "y", from: -40, to: 0, label: "Banked", z: -1 },
             { type: "marker", x: 12, y: 2480, label: "Hearth peak", dx: -72, dy: 16, z: 3 },
           ],
           size: { width: 960, height: 480, padding: { left: 84, bottom: 48 } },

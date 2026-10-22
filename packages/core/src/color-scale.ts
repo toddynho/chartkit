@@ -176,10 +176,10 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
   let paint: (value: number) => string;
   let swatches: string[] = [];
   if (kind === "quantize") {
-    swatches = Array.from({ length: bins }, (_, index) => sample(stops, bins === 1 ? 0 : index / (bins - 1)));
+    swatches = binSwatches(bins, preset);
     paint = (value) => swatches[Math.min(bins - 1, Math.floor(unit(value) * bins))] ?? swatches[0] ?? "#007aff";
   } else if (kind === "threshold") {
-    swatches = Array.from({ length: cuts.length + 1 }, (_, index) => sample(stops, cuts.length === 0 ? 0 : index / cuts.length));
+    swatches = binSwatches(cuts.length + 1, preset);
     paint = (value) => {
       const index = cuts.findIndex((edge) => value < edge);
       return swatches[index < 0 ? cuts.length : index] ?? swatches[0] ?? "#007aff";
@@ -210,8 +210,8 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
         : "";
       const lo = formatTick(min);
       const hi = formatTick(max);
-      if (kind === "threshold") {
-        const labels = swatches.map((_, index) => thresholdLabel(index, cuts));
+      if (kind === "threshold" || kind === "quantize") {
+        const labels = kind === "threshold" ? swatches.map((_, index) => thresholdLabel(index, cuts)) : quantizeLabels(min, max, swatches.length);
         const slot = Math.max(36, ...labels.map((label) => Math.ceil(label.length * 6.6 + 12)));
         const cells = swatches
           .map(
@@ -221,12 +221,6 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
           .join("");
         const names = labels.map((label, index) => tick(label, x + index * slot + slot / 2, "middle")).join("");
         return `<g data-ck-scale="${kind}">${heading}${cells}${names}</g>`;
-      }
-      if (binned) {
-        const cells = swatches
-          .map((color, index) => `<rect x="${n(x + index * swatch)}" y="${n(barY)}" width="12" height="${barH}" rx="1" fill="${color}" data-ck-scale="bin" />`)
-          .join("");
-        return `<g data-ck-scale="${kind}">${heading}${cells}${tick(lo, x, "start")}${tick(hi, x + barW, "end")}</g>`;
       }
       const gradient =
         `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">` +
@@ -241,12 +235,31 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
   };
 }
 
+/** Distinct steps. A sampled sequential ramp collapses the low bins into one blue. */
+const SOFT_BINS = ["#0369a1", "#7c3aed", "#ea580c", "#15803d", "#be123c", "#a16207"];
+const NIGHT_BINS = ["#7dd3fc", "#c084fc", "#fb923c", "#4ade80", "#fb7185", "#fbbf24"];
+
+function binSwatches(count: number, preset: PresetTokens): string[] {
+  const palette = dark(preset) ? NIGHT_BINS : SOFT_BINS;
+  const out: string[] = [];
+  for (let i = 0; i < count; i++) out.push(palette[i % palette.length] ?? palette[0] ?? "#0369a1");
+  return out;
+}
+
 /** `<6`, `6–12`, `≥12` — the cuts, not the data ends. */
 function thresholdLabel(index: number, cuts: number[]): string {
   const last = cuts.length - 1;
   if (index <= 0) return `<${formatTick(cuts[0] ?? 0)}`;
   if (index >= cuts.length) return `≥${formatTick(cuts[last] ?? 0)}`;
   return `${formatTick(cuts[index - 1] ?? 0)}–${formatTick(cuts[index] ?? 0)}`;
+}
+
+/** Every quantize edge, in the same slot size as a threshold label. */
+function quantizeLabels(min: number, max: number, bins: number): string[] {
+  const step = (max - min) / Math.max(1, bins);
+  const out: string[] = [];
+  for (let i = 0; i < bins; i++) out.push(`${formatTick(min + step * i)}–${formatTick(min + step * (i + 1))}`);
+  return out;
 }
 
 function formatTick(value: number): string {

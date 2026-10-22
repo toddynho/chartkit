@@ -761,6 +761,7 @@ function drawLines(
   const stackMode = model.stack === "none" ? null : model.stack;
   const layers = stackMode ? stackLayers(model.series, stackMode) : null;
   const out: string[] = [];
+  out.push(plotBreaks(model, plot));
   const plotWidth = Math.max(1, plot.right - plot.left);
   const shared = sharedSample(model, layers, plotWidth);
   for (const index of paintOrder(model.series, Boolean(stackMode))) {
@@ -908,7 +909,7 @@ function appendLineSeries(
       const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
       out.push(`<path d="${areaPath(points, bottoms, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillPaint}" stroke="none"${indexAttr} />`);
     }
-    pushStroke(out, linePath(points, model.curve), model, series, indexAttr);
+    pushStroke(out, stroked(points, model.curve, series.axis === "y2" ? model.y2Spans : model.ySpans), model, series, indexAttr);
     // Hidden circles exist so --ck-line-dots can reveal them. A downsampled line
     // already has a vertex per pixel, and those circles dominate the SVG, so
     // interact draws the hover dot from the path instead.
@@ -938,7 +939,7 @@ function appendFullLine(
     }
   }
   for (const segment of segments(points, model.connectNulls)) {
-    pushStroke(out, linePath(segment, model.curve), model, series, "");
+    pushStroke(out, stroked(segment, model.curve, series.axis === "y2" ? model.y2Spans : model.ySpans), model, series, "");
   }
   paintPoints(out, points, model, series);
 }
@@ -1520,16 +1521,38 @@ function wantSpine(axis: AxisBox): boolean {
   return Boolean(axis.rule?.on || axis.crosses !== undefined || axis.offset || axis.breaks?.length);
 }
 
-function zigzag(x1: number, y1: number, x2: number, y2: number, stroke: string): string {
+function zigPoints(x1: number, y1: number, x2: number, y2: number, amp: number): string {
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.hypot(dx, dy) || 1;
-  const px = (-dy / len) * 4;
-  const py = (dx / len) * 4;
+  const px = (-dy / len) * amp;
+  const py = (dx / len) * amp;
   const a = 0.25;
   const b = 0.5;
   const c = 0.75;
-  return `<path data-ck-break="1" d="M ${n(x1)} ${n(y1)} L ${n(x1 + dx * a + px)} ${n(y1 + dy * a + py)} L ${n(x1 + dx * b - px)} ${n(y1 + dy * b - py)} L ${n(x1 + dx * c + px)} ${n(y1 + dy * c + py)} L ${n(x2)} ${n(y2)}" fill="none" stroke="${stroke}" stroke-width="1.25" />`;
+  return `L ${n(x1 + dx * a + px)} ${n(y1 + dy * a + py)} L ${n(x1 + dx * b - px)} ${n(y1 + dy * b - py)} L ${n(x1 + dx * c + px)} ${n(y1 + dy * c + py)} L ${n(x2)} ${n(y2)}`;
+}
+
+function zigzag(x1: number, y1: number, x2: number, y2: number, stroke: string): string {
+  return `<path data-ck-break="1" d="M ${n(x1)} ${n(y1)} ${zigPoints(x1, y1, x2, y2, 4)}" fill="none" stroke="${stroke}" stroke-width="1.25" />`;
+}
+
+/** A zigzag across the plot at each break, in the same band the series line uses. */
+function plotBreaks(model: PlotModel, plot: { left: number; top: number; right: number; bottom: number }): string {
+  const spans = [...(model.ySpans ?? []), ...(model.y2Spans ?? [])];
+  if (!spans.length) return "";
+  const stroke = cssVar("axis", model.preset.axis);
+  let out = "";
+  for (let i = 0; i < spans.length; i++) {
+    const span = spans[i];
+    if (!span) continue;
+    const y1 = Math.min(span[0], span[1]);
+    const y2 = Math.max(span[0], span[1]);
+    const mid = (y1 + y2) / 2;
+    const amp = Math.max(3, (y2 - y1) * 0.35);
+    out += `<path data-ck-break="1" d="M ${n(plot.left)} ${n(mid)} ${zigPoints(plot.left, mid, plot.right, mid, amp)}" fill="none" stroke="${stroke}" stroke-width="1.25" />`;
+  }
+  return out;
 }
 
 function spineSegment(vertical: boolean, edge: number, from: number, to: number, stroke: string, width: string, dash: string): string {
@@ -1538,7 +1561,7 @@ function spineSegment(vertical: boolean, edge: number, from: number, to: number,
   return `<line data-ck-axis="line" x1="${n(from)}" y1="${n(edge)}" x2="${n(to)}" y2="${n(edge)}" stroke="${stroke}"${width}${dash} />`;
 }
 
-function ruleLine(side: number, plot: PlotBox, model: PlotModel, axis: AxisBox, crossAt?: number, spans?: Array<[number, number]>): string {
+function ruleLine(side: number, plot: PlotBox, model: PlotModel, axis: AxisBox, crossAt?: number, spans?: Array<[number, number]>, ticks?: number[]): string {
   if (!wantSpine(axis)) return "";
   const rule = axis.rule;
   const dash = rule?.dash === "dashed" ? ' stroke-dasharray="4 3"' : rule?.dash === "dotted" ? ' stroke-dasharray="1 3"' : "";
@@ -1546,8 +1569,13 @@ function ruleLine(side: number, plot: PlotBox, model: PlotModel, axis: AxisBox, 
   const stroke = rule?.color || cssVar("axis", model.preset.axis);
   const edge = spineEdge(side, plot, axis, crossAt);
   const vertical = side < 2;
-  const from = vertical ? plot.top : plot.left;
-  const to = vertical ? plot.bottom : plot.right;
+  let from = vertical ? plot.top : plot.left;
+  let to = vertical ? plot.bottom : plot.right;
+  if (vertical && ticks && ticks.length) {
+    let top = Infinity;
+    for (let i = 0; i < ticks.length; i++) if (ticks[i] < top) top = ticks[i];
+    if (top > from && top < to) from = top;
+  }
   const cuts = (spans ?? [])
     .map((span) => [Math.min(span[0], span[1]), Math.max(span[0], span[1])] as [number, number])
     .filter((span) => span[1] > span[0])
@@ -1602,13 +1630,13 @@ function drawAxes(
   const xCross = crossAt(model, "x", horizontal, xScale, yScale);
   if (model.showY) {
     const side = ySide(model, horizontal);
-    out += ruleLine(side, plot, model, model.yAxis, yCross, model.ySpans);
+    out += ruleLine(side, plot, model, model.yAxis, yCross, model.ySpans, yTicks.map(yScale));
     if (model.yAxis.labels !== false) out += band(yText, yTicks, yScale, model, plot, side, model.yAxis);
     out += minors(yTicks, yScale, side, spineEdge(side, plot, model.yAxis, yCross), model.yAxis, cssVar("axis", model.preset.axis));
   }
   if (model.showY2) {
     const side = model.y2Axis.end !== false ? 1 : 0;
-    out += ruleLine(side, plot, model, model.y2Axis, y2Cross, model.y2Spans);
+    out += ruleLine(side, plot, model, model.y2Axis, y2Cross, model.y2Spans, y2Ticks.map(y2Scale));
     if (model.y2Axis.labels !== false) out += band(y2Text, y2Ticks, y2Scale, model, plot, side, model.y2Axis);
     out += minors(y2Ticks, y2Scale, side, spineEdge(side, plot, model.y2Axis, y2Cross), model.y2Axis, cssVar("axis", model.preset.axis));
   }
@@ -2356,6 +2384,50 @@ function labelStep(model: PlotModel, count: number): number {
 function legendName(model: PlotModel, series: Series): string {
   if (series.legendName) return series.legendName;
   return hooks?.seriesName(model, series) ?? series.name;
+}
+
+function crossesSpan(y0: number, y1: number, span: [number, number]): boolean {
+  const lo = Math.min(span[0], span[1]);
+  const hi = Math.max(span[0], span[1]);
+  return Math.min(y0, y1) < lo + 0.4 && Math.max(y0, y1) > hi - 0.4;
+}
+
+/** Continue a stroke through a break with the same zigzag the axis uses. */
+function withBreaks(points: Pt[], curve: Curve, spans: Array<[number, number]>): string {
+  let d = "";
+  let run: Pt[] = [points[0]];
+  const write = (bridge: string) => {
+    const part = linePath(run, curve);
+    if (!part) return;
+    d += d ? ` ${bridge}${part.replace(/^M\s+/, "L ")}` : part;
+  };
+  for (let i = 1; i < points.length; i++) {
+    const next = points[i];
+    const prev = run[run.length - 1];
+    if (!next || !prev) continue;
+    const span = spans.find((item) => crossesSpan(prev.y, next.y, item));
+    if (!span) {
+      run.push(next);
+      continue;
+    }
+    const lo = Math.min(span[0], span[1]);
+    const hi = Math.max(span[0], span[1]);
+    const first = prev.y < next.y ? lo : hi;
+    const second = prev.y < next.y ? hi : lo;
+    const xAt = (y: number) => prev.x + (next.x - prev.x) * ((y - prev.y) / (next.y - prev.y || 1));
+    run.push({ x: xAt(first), y: first });
+    const amp = Math.max(3, (hi - lo) * 0.35);
+    write("");
+    d += ` ${zigPoints(xAt(first), first, xAt(second), second, amp)}`;
+    run = [{ x: xAt(second), y: second }, next];
+  }
+  write("");
+  return d;
+}
+
+function stroked(points: Pt[], curve: Curve, spans?: Array<[number, number]>): string {
+  if (!spans || spans.length === 0 || points.length < 2) return linePath(points, curve);
+  return withBreaks(points, curve, spans);
 }
 
 function linePath(points: Pt[], curve: Curve): string {

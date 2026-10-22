@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { formatValue, parseSpecifier } from "../format";
 import { attach } from "../interact";
 import { render } from "../extra";
+import { brokenScale } from "../svg";
 import { repair, validate } from "../validate";
 
 const alt = "The foundry load swings from a night surplus to the noon peak.";
@@ -105,7 +106,14 @@ describe("visual axes", () => {
     const svg = render(spec);
     const plain = render({ ...spec, axes: undefined });
     expect(svg).toContain('data-ck-minor="1"');
-    expect(svg).toContain('data-ck-break="1"');
+    expect(svg.split('data-ck-break="1"').length - 1).toBeGreaterThanOrEqual(2);
+    const clipY = Number(/<clipPath[\s\S]*?<rect[^>]* y="([\d.]+)"/.exec(svg)?.[1]);
+    const spineTop = [...svg.matchAll(/data-ck-axis="line"[^>]* y1="([\d.]+)" y2="([\d.]+)"/g)].map((mark) => Math.min(Number(mark[1]), Number(mark[2])));
+    expect(Math.min(...spineTop)).toBeGreaterThan(clipY + 4);
+    const cys = [...svg.matchAll(/\scy="([\d.]+)"/g)].map((mark) => Number(mark[1])).sort((a, b) => a - b);
+    const full = (cys.at(-1) ?? 0) - (cys[0] ?? 0);
+    const lower = (cys.at(-1) ?? 0) - (cys[1] ?? 0);
+    expect(lower).toBeGreaterThan(full * 0.18);
     expect(axisY(svg)).not.toBe(axisY(plain));
     const yLabels = [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map((mark) => mark[0]);
     const plainLabels = [...plain.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map((mark) => mark[0]);
@@ -117,6 +125,13 @@ describe("visual axes", () => {
     expect(overlap.warnings.some((item) => item.code === "CK3069")).toBe(true);
     const flipped = validate({ ...spec, axes: { y: { breaks: [{ from: 40, to: 10 }] } } });
     expect(flipped.warnings.some((item) => item.code === "CK3061")).toBe(true);
+    const lowerSpan = (share?: number) => {
+      const scale = brokenScale(-40, 2800, 360, 40, [{ from: 200, to: 1800, ...(share == null ? {} : { share }) }], "linear");
+      return Math.abs(scale.at(200) - scale.at(-40));
+    };
+    expect(lowerSpan() / 320).toBeGreaterThan(0.35);
+    expect(lowerSpan() / 320).toBeLessThan(0.45);
+    expect(lowerSpan(0.55)).toBeGreaterThan(lowerSpan(0.2) + 40);
   });
 
   it("spreads a symlog domain that crosses zero", () => {
@@ -235,6 +250,29 @@ describe("visual axes", () => {
       size: { width: 420, height: 240 },
     });
     expect(bins).toContain('data-ck-scale="threshold"');
+    const thresholdFills = [...bins.matchAll(/<rect[^>]*fill="(#[0-9a-f]{6})"[^>]*data-ck-scale="bin"/g)].map((mark) => mark[1]);
+    expect(new Set(thresholdFills).size).toBe(3);
+    const quant = render({
+      version: "1",
+      type: "heatmap",
+      theme: "midnight",
+      data: [
+        { bell: "Dawn", room: "Kiln", load: -20 },
+        { bell: "Noon", room: "Kiln", load: 80 },
+        { bell: "Dusk", room: "Kiln", load: 400 },
+        { bell: "Dawn", room: "Yard", load: 860 },
+      ],
+      encoding: { x: "bell", y: "room", color: { field: "load", scale: { type: "quantize", bins: 4 } } },
+      a11y: { alt },
+      size: { width: 480, height: 280 },
+    });
+    const group = /<g data-ck-scale="quantize">([\s\S]*?)<\/g>/.exec(quant)?.[1] ?? "";
+    expect(group.match(/–/g)?.length).toBe(4);
+    expect(group).toContain('font-size="11"');
+    expect(group).toContain("-20");
+    expect(group).toContain("860");
+    const quantFills = [...group.matchAll(/<rect[^>]*fill="(#[0-9a-f]{6})"/g)].map((mark) => mark[1]);
+    expect(new Set(quantFills).size).toBe(4);
     const zero = validate(line({ axes: { x: { position: "zero" } } }));
     expect(zero.errors.find((item) => item.code === "CK3068")?.fix).toEqual([
       { op: "remove", path: "/axes/x/position" },
@@ -242,6 +280,43 @@ describe("visual axes", () => {
     ]);
     const minor = validate(line({ axes: { y: { minor: true } } }));
     expect(minor.errors.find((item) => item.code === "CK3065")?.fix?.[1]?.value).toBe(1);
+    const band = render({
+      version: "1",
+      type: "line",
+      theme: "soft",
+      data: [
+        { hour: 0, load: -8 },
+        { hour: 2, load: 12 },
+      ],
+      encoding: { x: { field: "hour", type: "quantitative" }, y: "load" },
+      annotations: [{ type: "band", axis: "y", from: -12, to: 0, label: "Banked" }],
+      a11y: { alt },
+    });
+    expect(/data-ck-annotation="band"[^>]*fill="([^"]+)"/.exec(band)?.[1]).toContain("--ck-muted");
+    const night = render({ ...band && {}, version: "1", type: "line", theme: "midnight", data: [{ hour: 0, load: -8 }, { hour: 2, load: 12 }], encoding: { x: { field: "hour", type: "quantitative" }, y: "load" }, annotations: [{ type: "band", axis: "y", from: -12, to: 0, label: "Banked" }], a11y: { alt } });
+    expect(/data-ck-annotation="band"[^>]*fill="([^"]+)"/.exec(night)?.[1]).toContain("--ck-muted");
+    const marked = render(line({
+      data: [
+        { bell: "a", load: 4, spare: 2 },
+        { bell: "b", load: 40, spare: 6 },
+        { bell: "c", load: 8, spare: 3 },
+      ],
+      encoding: { x: "bell", y: [{ field: "load" }, { field: "spare" }] },
+      annotations: [{ type: "marker", x: "b", y: 40, label: "Peak", dx: -48, dy: 16 }],
+    }));
+    const box = /data-ck-annotation="marker-box" x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)"/.exec(marked);
+    const dot = /data-ck-annotation="marker" cx="([\d.]+)" cy="([\d.]+)"/.exec(marked);
+    expect(box && dot).toBeTruthy();
+    if (box && dot) {
+      const x = Number(box[1]);
+      const y = Number(box[2]);
+      const w = Number(box[3]);
+      const h = Number(box[4]);
+      const cx = Number(dot[1]);
+      const cy = Number(dot[2]);
+      const covers = cx > x && cx < x + w && cy > y && cy < y + h;
+      expect(covers).toBe(false);
+    }
     const touch = validate(line({ tooltip: { pinTooltip: true, hitSize: 24 } }));
     expect(touch.errors.filter((item) => item.code === "CK3067")).toHaveLength(2);
   });

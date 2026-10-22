@@ -138,12 +138,17 @@ export function symlogTicks(min: number, max: number, constant = 1): number[] {
 export interface AxisGap {
   from: number;
   to: number;
+  /** Fraction of the axis for the segment below this break. Default 0.4. */
+  share?: number;
 }
 
 function tidyGaps(gaps: AxisGap[], lo: number, hi: number): AxisGap[] {
   const list = gaps
     .filter((gap) => gap.to !== gap.from)
-    .map((gap) => (gap.from < gap.to ? { from: gap.from, to: gap.to } : { from: gap.to, to: gap.from }))
+    .map((gap) => {
+      const share = gap.share;
+      return gap.from < gap.to ? { from: gap.from, to: gap.to, share } : { from: gap.to, to: gap.from, share };
+    })
     .filter((gap) => gap.to > lo && gap.from < hi)
     .sort((a, b) => a.from - b.from);
   const out: AxisGap[] = [];
@@ -152,9 +157,58 @@ function tidyGaps(gaps: AxisGap[], lo: number, hi: number): AxisGap[] {
     if (last && gap.from < last.to) continue;
     const from = Math.max(gap.from, lo);
     const to = Math.min(gap.to, hi);
-    if (to > from) out.push({ from, to });
+    if (to > from) out.push({ from, to, share: gap.share });
   }
   return out;
+}
+
+/**
+ * Pixel weights for data segments and the gaps between them.
+ * Each break keeps about 16 px. The segment below a break takes `share` of the
+ * axis (default 0.4) so a short lower range is not crushed against the gap.
+ */
+function breakWeights(pieces: { a: number; b: number; gap: boolean; share?: number }[], spanPx: number): number[] {
+  const gapFrac = Math.min(0.08, 16 / Math.max(spanPx, 1));
+  const fracs = new Array<number>(pieces.length).fill(0);
+  let gapSum = 0;
+  for (let i = 0; i < pieces.length; i++) {
+    if (!pieces[i].gap) continue;
+    fracs[i] = gapFrac;
+    gapSum += gapFrac;
+  }
+  const claimed = new Set<number>();
+  let claim = 0;
+  for (let i = 0; i < pieces.length; i++) {
+    if (!pieces[i].gap) continue;
+    let below = i - 1;
+    while (below >= 0 && pieces[below].gap) below--;
+    if (below < 0 || claimed.has(below)) continue;
+    const raw = pieces[i].share;
+    const share = typeof raw === "number" && raw > 0 ? Math.min(0.7, Math.max(0.15, raw)) : 0.4;
+    fracs[below] = share;
+    claimed.add(below);
+    claim += share;
+  }
+  const rest: number[] = [];
+  for (let i = 0; i < pieces.length; i++) if (!pieces[i].gap && !claimed.has(i)) rest.push(i);
+  const reserve = 0.18 * Math.max(1, rest.length);
+  const cap = Math.max(0.2, 1 - gapSum - reserve);
+  if (claim > cap && claim > 0) {
+    const scale = cap / claim;
+    for (const index of claimed) fracs[index] *= scale;
+    claim *= scale;
+  }
+  const room = Math.max(0, 1 - gapSum - claim);
+  let width = 0;
+  for (const index of rest) width += Math.max(pieces[index].b - pieces[index].a, 1e-9);
+  if (!(width > 0)) width = rest.length || 1;
+  for (const index of rest) fracs[index] = room * (Math.max(pieces[index].b - pieces[index].a, 1e-9) / width);
+  if (!rest.length) {
+    let last = -1;
+    for (let i = 0; i < pieces.length; i++) if (!pieces[i].gap) last = i;
+    if (last >= 0) fracs[last] += Math.max(0, 1 - gapSum - claim);
+  }
+  return fracs;
 }
 
 /**
@@ -189,12 +243,12 @@ export function brokenScale(
     const to = Math.min(Math.max(fwd(gap.from), fwd(gap.to)), end);
     if (!(to > from)) continue;
     if (from > cursor) pieces.push({ a: cursor, b: from, gap: false });
-    pieces.push({ a: from, b: to, gap: true });
+    pieces.push({ a: from, b: to, gap: true, share: gap.share });
     cursor = to;
   }
   if (cursor < end) pieces.push({ a: cursor, b: end, gap: false });
   if (!pieces.some((piece) => piece.gap)) return { at: plain, spans: [] };
-  const weights = pieces.map((piece) => (piece.gap ? Math.max(end - start, 1e-9) * 0.045 : piece.b - piece.a));
+  const weights = breakWeights(pieces, Math.abs(r1 - r0) || 1);
   const total = weights.reduce((sum, weight) => sum + weight, 0) || 1;
   const starts: number[] = [];
   let acc = 0;
@@ -470,7 +524,8 @@ function readBreaks(value: unknown): AxisGap[] | undefined {
   for (const item of value) {
     if (!isRecord(item) || typeof item.from !== "number" || typeof item.to !== "number") continue;
     if (!Number.isFinite(item.from) || !Number.isFinite(item.to) || item.from === item.to) continue;
-    out.push(item.from < item.to ? { from: item.from, to: item.to } : { from: item.to, to: item.from });
+    const share = typeof item.share === "number" && Number.isFinite(item.share) ? item.share : undefined;
+    out.push(item.from < item.to ? { from: item.from, to: item.to, share } : { from: item.to, to: item.from, share });
   }
   return out.length ? out : undefined;
 }
