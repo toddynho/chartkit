@@ -38,6 +38,7 @@ Earlier v1 work. 32 chart types draw: 15 in the first core, eight in Phase 3, fi
 - [x] Linked interactions: an overview navigator, a shared crosshair, tooltip, and zoom, and drilldown into a child spec ([#44](https://github.com/toddynho/chartkit/pull/44))
 - [x] Small multiples, breakpoint rules, composed dashboards, and right-to-left layout ([#45](https://github.com/toddynho/chartkit/pull/45))
 - [x] Maps: choropleth and point maps in unpublished `@chartkitdev/geo` ([#46](https://github.com/toddynho/chartkit/pull/46))
+- [x] Visual axes: tooltip specifiers, units, and a template, tap-to-pin, axis offset and origin crossing, draw order, symlog, minor ticks, axis breaks, and animation easing
 
 ## In progress
 

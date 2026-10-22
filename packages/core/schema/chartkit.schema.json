@@ -507,9 +507,6 @@
     "formatObject": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "style"
-      ],
       "properties": {
         "style": {
           "enum": [
@@ -552,6 +549,10 @@
         "signed": {
           "type": "boolean",
           "description": "Always show + for positive numbers (useful for deltas)."
+        },
+        "specifier": {
+          "type": "string",
+          "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this."
         }
       },
       "description": "Detailed format."
@@ -567,9 +568,10 @@
             "sqrt",
             "time",
             "band",
-            "point"
+            "point",
+            "symlog"
           ],
-          "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band."
+          "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero."
         },
         "domain": {
           "type": "array",
@@ -612,6 +614,11 @@
         "clamp": {
           "type": "boolean",
           "description": "Draw values outside an explicit scale.domain at the domain edge."
+        },
+        "constant": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog."
         }
       },
       "description": "How data values map to positions or sizes. Usually inferred; set only to override."
@@ -780,6 +787,12 @@
             "pointFill": {
               "enum": ["filled", "hollow"],
               "description": "Filled or hollow marker for this series. Overrides mark.pointFill."
+            },
+            "z": {
+              "type": "number",
+              "minimum": -20,
+              "maximum": 20,
+              "description": "Draw order. Higher paints later. Stacked series keep data order."
             }
           },
           "description": "Full y series definition. field, or both lo and hi, is required."
@@ -1661,6 +1674,36 @@
                   "type": "number",
                   "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true."
                 },
+                "offset": {
+                  "type": "number",
+                  "minimum": -80,
+                  "maximum": 80,
+                  "description": "Shift the baseline outward in pixels. Positive moves it away from the plot."
+                },
+                "crosses": {
+                  "type": "number",
+                  "description": "Data value where this axis crosses the other. 0 draws the axis through zero."
+                },
+                "minorTicks": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 8,
+                  "description": "Minor tick marks between major ticks. 0 hides them."
+                },
+                "breaks": {
+                  "type": "array",
+                  "maxItems": 3,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["from", "to"],
+                    "properties": {
+                      "from": { "type": "number", "description": "Start of the collapsed range, in data units." },
+                      "to": { "type": "number", "description": "End of the collapsed range, in data units." }
+                    }
+                  },
+                  "description": "Ranges collapsed to a short zigzag. Ticks inside a break are omitted."
+                },
                 "bands": {
                   "description": "Shaded x ranges, or \"weekends\" to shade Saturday and Sunday when x is dates.",
                   "oneOf": [
@@ -1818,6 +1861,36 @@
                   "type": "number",
                   "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true."
                 },
+                "offset": {
+                  "type": "number",
+                  "minimum": -80,
+                  "maximum": 80,
+                  "description": "Shift the baseline outward in pixels. Positive moves it away from the plot."
+                },
+                "crosses": {
+                  "type": "number",
+                  "description": "Data value where this axis crosses the other. 0 draws the axis through zero."
+                },
+                "minorTicks": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 8,
+                  "description": "Minor tick marks between major ticks. 0 hides them."
+                },
+                "breaks": {
+                  "type": "array",
+                  "maxItems": 3,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["from", "to"],
+                    "properties": {
+                      "from": { "type": "number", "description": "Start of the collapsed range, in data units." },
+                      "to": { "type": "number", "description": "End of the collapsed range, in data units." }
+                    }
+                  },
+                  "description": "Ranges collapsed to a short zigzag. Ticks inside a break are omitted."
+                },
                 "bands": {
                   "type": "array",
                   "items": { "$ref": "#/$defs/axisBand" },
@@ -1965,6 +2038,36 @@
                 "rotate": {
                   "type": "number",
                   "description": "Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true."
+                },
+                "offset": {
+                  "type": "number",
+                  "minimum": -80,
+                  "maximum": 80,
+                  "description": "Shift the baseline outward in pixels. Positive moves it away from the plot."
+                },
+                "crosses": {
+                  "type": "number",
+                  "description": "Data value where this axis crosses the other. 0 draws the axis through zero."
+                },
+                "minorTicks": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 8,
+                  "description": "Minor tick marks between major ticks. 0 hides them."
+                },
+                "breaks": {
+                  "type": "array",
+                  "maxItems": 3,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["from", "to"],
+                    "properties": {
+                      "from": { "type": "number", "description": "Start of the collapsed range, in data units." },
+                      "to": { "type": "number", "description": "End of the collapsed range, in data units." }
+                    }
+                  },
+                  "description": "Ranges collapsed to a short zigzag. Ticks inside a break are omitted."
                 },
                 "bands": {
                   "type": "array",
@@ -2124,6 +2227,10 @@
                       },
                       "format": {
                         "$ref": "#/$defs/format"
+                      },
+                      "unit": {
+                        "type": "string",
+                        "description": "Unit printed after the value, such as cm or kWh."
                       }
                     },
                     "description": "Field with label/format."
@@ -2131,6 +2238,21 @@
                 ]
               },
               "description": "Fields to show, in this order. Omit to keep the encoded series. Strings are field names."
+            },
+            "template": {
+              "type": "string",
+              "description": "Row template. Tokens: {x}, {name}, {value}, {unit}, and data field names. One row per series."
+            },
+            "pin": {
+              "type": "boolean",
+              "default": false,
+              "description": "Tap to pin the tooltip. A second tap or Escape clears it. Pointer leave does not."
+            },
+            "hit": {
+              "type": "number",
+              "minimum": 8,
+              "maximum": 48,
+              "description": "Hit radius in pixels. Larger targets help a finger. Pinning uses 18 when hit is omitted."
             }
           },
           "description": "Tooltip settings."
@@ -2217,6 +2339,12 @@
               "type": "string",
               "description": "Text shown with the annotation."
             },
+            "z": {
+              "type": "number",
+              "minimum": -20,
+              "maximum": 20,
+              "description": "Draw order. Higher paints later. Negative paints under the marks."
+            },
             "color": {
               "$ref": "#/$defs/color"
             }
@@ -2269,6 +2397,12 @@
               "type": "string",
               "description": "Text shown with the annotation."
             },
+            "z": {
+              "type": "number",
+              "minimum": -20,
+              "maximum": 20,
+              "description": "Draw order. Higher paints later. Negative paints under the marks."
+            },
             "color": {
               "$ref": "#/$defs/color"
             }
@@ -2301,6 +2435,12 @@
             "label": {
               "type": "string",
               "description": "Text shown with the annotation."
+            },
+            "z": {
+              "type": "number",
+              "minimum": -20,
+              "maximum": 20,
+              "description": "Draw order. Higher paints later. Negative paints under the marks."
             },
             "color": {
               "$ref": "#/$defs/color"
@@ -2335,6 +2475,12 @@
             "label": {
               "type": "string",
               "description": "Text at the end of the line. Defaults to Mean, Median, or Linear."
+            },
+            "z": {
+              "type": "number",
+              "minimum": -20,
+              "maximum": 20,
+              "description": "Draw order. Higher paints later. Negative paints under the marks."
             },
             "color": { "$ref": "#/$defs/color" }
           },
@@ -2376,6 +2522,12 @@
               "type": "string",
               "description": "Text at the end of the fit. Defaults to Linear fit or Loess."
             },
+            "z": {
+              "type": "number",
+              "minimum": -20,
+              "maximum": 20,
+              "description": "Draw order. Higher paints later. Negative paints under the marks."
+            },
             "color": { "$ref": "#/$defs/color" }
           },
           "description": "Regression overlay: a linear or loess fit, with an optional confidence band. Not a separate chart type."
@@ -2405,6 +2557,12 @@
             "dy": {
               "type": "number",
               "description": "Vertical offset of the text box, in pixels. Negative is up."
+            },
+            "z": {
+              "type": "number",
+              "minimum": -20,
+              "maximum": 20,
+              "description": "Draw order. Higher paints later. Negative paints under the marks."
             },
             "color": { "$ref": "#/$defs/color" }
           },

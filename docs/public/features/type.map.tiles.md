@@ -6,9 +6,9 @@ Raster or vector tile backgrounds
 
 Matrix status: `none`. Verification: `source-review` (strong).
 
-probe hit reviewed: match is treemap "tile" layout
+ChartKit geo draws choropleth and point maps and does not draw a tile layer. The earlier probe hit was treemap layout.
 
-No spec snippet. `@chartkitdev/geo` draws choropleth and point maps. It does not draw a tile or slippy base layer. Highcharts, Plotly, amCharts, and Google Maps do. ECharts tiles are a plugin. This row stays a ChartKit loss.
+No spec snippet. `@chartkitdev/geo` draws choropleth and point maps. It does not draw a tile or slippy base layer.
 
 ## Other libraries
 
@@ -35,6 +35,6 @@ No spec snippet. `@chartkitdev/geo` draws choropleth and point maps. It does not
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | unknown | — | conflict (unknown) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against b64aa4f4c004.
 
 https://chartkit.dev/features.json

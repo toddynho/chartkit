@@ -63,15 +63,43 @@ export function annotationLayers(notes: unknown, geom: AnnotationGeom): { under:
   if (Array.isArray(notes)) {
     for (const item of notes) {
       if (!isRecord(item)) continue;
-      if (item.type === "band") rangeBand(item, geom, under, over, boxes);
-      else if (item.type === "rule") rule(item, geom, over, boxes);
-      else if (item.type === "text") textNote(item, geom, over);
-      else if (item.type === "trendline") trend(item, geom, over, boxes);
-      else if (item.type === "regression") regress(item, geom, under, over, boxes);
-      else if (item.type === "marker") callout(item, geom, over, boxes);
+      const low = typeof item.z === "number" && item.z < 0;
+      const high = typeof item.z === "number" && item.z >= 0;
+      const below = low ? under : over;
+      if (item.type === "band") {
+        const sink = high ? over : under;
+        const at = sink.length;
+        rangeBand(item, geom, sink, high ? over : over, boxes);
+        stampZ(sink, at, item.z);
+      } else if (item.type === "rule") {
+        const at = below.length;
+        rule(item, geom, below, boxes);
+        stampZ(below, at, item.z);
+      } else if (item.type === "text") {
+        const at = below.length;
+        textNote(item, geom, below);
+        stampZ(below, at, item.z);
+      } else if (item.type === "trendline") {
+        const at = below.length;
+        trend(item, geom, below, boxes);
+        stampZ(below, at, item.z);
+      } else if (item.type === "regression") {
+        const at = (low ? under : over).length;
+        regress(item, geom, low ? under : under, low ? under : over, boxes);
+        stampZ(low ? under : over, at, item.z);
+      } else if (item.type === "marker") {
+        const at = below.length;
+        callout(item, geom, below, boxes);
+        stampZ(below, at, item.z);
+      }
     }
   }
   return { under: under.join(""), over: over.join("") };
+}
+
+function stampZ(bucket: string[], at: number, z: unknown): void {
+  if (typeof z !== "number" || !Number.isFinite(z) || !bucket[at]) return;
+  bucket[at] = bucket[at].replace(/<(line|rect|path|text|circle|g)\b/, (tag) => `${tag} data-ck-z="${n(z)}"`);
 }
 
 /** Category index, or the numeric x already stored on a series. Nulls drop out. */

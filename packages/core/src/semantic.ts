@@ -8,6 +8,7 @@ import { namedZone } from "./timezone";
 import { transformIssues } from "./transform";
 import { foreignHierarchy, readHierarchy } from "./hierarchy";
 import { CANVAS_AT, CANVAS_TYPES, pointCount, readRender } from "./render-mode";
+import { parseSpecifier } from "./format";
 import { domainEnds } from "./svg";
 import { keyedDrillChildren, nearMatches, suggestHint } from "./walker";
 
@@ -63,6 +64,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   if (known && isRecord(spec.mark)) warnUnusedMarks(type, spec.mark, diagnostics);
   warnGridWeeks(spec, diagnostics);
   warnUnbuilt(spec, diagnostics);
+  warnVisual(spec, diagnostics);
   checkAnnotations(spec, diagnostics);
   if (isRecord(spec.encoding)) {
     warnSeriesShape(spec.encoding, diagnostics);
@@ -762,7 +764,6 @@ function flag(diagnostics: Diagnostic[], path: string, why: string): void {
 
 /** kind: 0 defined, 3 light|dark, 4 string, 5 number. */
 const UNBUILT: ReadonlyArray<readonly [string, 0 | 3 | 4 | 5, string]> = [
-  ["animation/easing", 0, "ignored; duration only"],
   ["theme/mode", 3, "ignored; preset stays"],
   ["theme/tokens/fontFamily", 4, "ignored; built-in font"],
   ["theme/tokens/fontSize", 5, "ignored; built-in size"],
@@ -776,6 +777,137 @@ function at(root: unknown, path: string): unknown {
     cur = cur[key];
   }
   return cur;
+}
+
+function warnVisual(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  walkSpecifiers(spec, "", diagnostics);
+  const tip = isRecord(spec.tooltip) ? spec.tooltip : undefined;
+  if (tip && typeof tip.template === "string") {
+    const fields = fieldNames(spec);
+    const known = new Set(["x", "name", "value", "unit"]);
+    for (const match of tip.template.matchAll(/\{([A-Za-z_][A-Za-z0-9_]*)\}/g)) {
+      const token = match[1] ?? "";
+      if (known.has(token) || fields.has(token)) continue;
+      diagnostics.push({
+        code: "CK3059",
+        severity: "warning",
+        message: "tooltip template names a missing field",
+        path: "/tooltip/template",
+        hint: "tokens are {x}, {name}, {value}, {unit}, and data field names",
+      });
+      break;
+    }
+  }
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  if (encoding) {
+    for (const key of Object.keys(encoding)) {
+      const list = Array.isArray(encoding[key]) ? encoding[key] : [encoding[key]];
+      for (let i = 0; i < list.length; i++) {
+        const item = list[i];
+        if (!isRecord(item) || !isRecord(item.scale)) continue;
+        const base = Array.isArray(encoding[key]) ? `/encoding/${key}/${i}/scale` : `/encoding/${key}/scale`;
+        if (item.scale.constant !== undefined && item.scale.type !== "symlog") {
+          diagnostics.push({
+            code: "CK3062",
+            severity: "warning",
+            message: "symlog constant must be positive on a symlog scale",
+            path: `${base}/constant`,
+            hint: 'set scale.type to "symlog". constant is the linear half-width around zero. Default 1.',
+          });
+        }
+      }
+    }
+  }
+  const axes = isRecord(spec.axes) ? spec.axes : undefined;
+  if (!axes) return;
+  const xQuant = xIsQuantitative(spec);
+  for (const key of ["x", "y", "y2"] as const) {
+    const axis = axes[key];
+    if (!isRecord(axis)) continue;
+    if ((key === "y" || key === "y2") && typeof axis.crosses === "number" && !xQuant) {
+      diagnostics.push({
+        code: "CK3060",
+        severity: "warning",
+        message: "axis crosses needs a finite value on a quantitative scale",
+        path: `/axes/${key}/crosses`,
+        hint: "axes.y.crosses needs a numeric x. axes.x.crosses: 0 draws the x axis through y = 0.",
+      });
+    }
+    if (!Array.isArray(axis.breaks)) continue;
+    let prev = -Infinity;
+    for (let i = 0; i < axis.breaks.length; i++) {
+      const gap = axis.breaks[i];
+      if (!isRecord(gap) || typeof gap.from !== "number" || typeof gap.to !== "number") continue;
+      if (!(gap.to > gap.from)) {
+        diagnostics.push({
+          code: "CK3061",
+          severity: "warning",
+          message: "axis break from must be below to",
+          path: `/axes/${key}/breaks/${i}/from`,
+          hint: 'swap the ends, for example { "from": 10, "to": 40 }',
+        });
+      }
+      const lo = Math.min(gap.from, gap.to);
+      if (lo < prev) {
+        diagnostics.push({
+          code: "CK3069",
+          severity: "warning",
+          message: "axis breaks overlap",
+          path: `/axes/${key}/breaks/${i}`,
+          hint: "ranges must not share values",
+        });
+      }
+      prev = Math.max(prev, gap.from, gap.to);
+    }
+  }
+}
+
+function walkSpecifiers(node: unknown, path: string, diagnostics: Diagnostic[]): void {
+  if (Array.isArray(node)) {
+    for (let i = 0; i < node.length; i++) walkSpecifiers(node[i], `${path}/${i}`, diagnostics);
+    return;
+  }
+  if (!isRecord(node)) return;
+  if (typeof node.specifier === "string" && !parseSpecifier(node.specifier)) {
+    diagnostics.push({
+      code: "CK3058",
+      severity: "warning",
+      message: "format specifier is not a d3-style pattern",
+      path: path ? `${path}/specifier` : "/specifier",
+      hint: "use .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s",
+    });
+  }
+  for (const key of Object.keys(node)) {
+    if (key === "data") continue;
+    walkSpecifiers(node[key], path ? `${path}/${key}` : `/${key}`, diagnostics);
+  }
+}
+
+function fieldNames(spec: Record<string, unknown>): Set<string> {
+  const names = new Set<string>();
+  const data = spec.data;
+  if (Array.isArray(data)) {
+    for (const row of data) if (isRecord(row)) for (const key of Object.keys(row)) names.add(key);
+  } else if (isRecord(data) && isRecord(data.columns)) {
+    for (const key of Object.keys(data.columns)) names.add(key);
+  }
+  return names;
+}
+
+function xIsQuantitative(spec: Record<string, unknown>): boolean {
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  const x = encoding?.x;
+  if (isRecord(x) && (x.type === "quantitative" || x.type === "temporal")) return true;
+  if (isRecord(x) && isRecord(x.scale) && (x.scale.type === "linear" || x.scale.type === "log" || x.scale.type === "symlog" || x.scale.type === "time")) return true;
+  const data = spec.data;
+  const field = typeof x === "string" ? x : isRecord(x) && typeof x.field === "string" ? x.field : "";
+  if (!field) return false;
+  const column = Array.isArray(data)
+    ? data.map((row) => (isRecord(row) ? row[field] : undefined))
+    : isRecord(data) && isRecord(data.columns) && Array.isArray(data.columns[field])
+      ? (data.columns[field] as unknown[])
+      : [];
+  return column.length > 0 && column.every((value) => typeof value === "number" && Number.isFinite(value));
 }
 
 function warnUnbuilt(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {

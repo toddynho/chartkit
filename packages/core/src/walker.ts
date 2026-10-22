@@ -1,4 +1,5 @@
 import type { Diagnostic, JsonPatchOperation } from "./diagnostics";
+import { parseSpecifier } from "./format";
 import { LEGACY_PROPS, TYPE_REQUIREMENTS } from "./marks";
 import { suggestAlt } from "./suggest";
 
@@ -282,6 +283,47 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
         hint: `mark.points is "none", "hover", or "always". ${value === true ? "true" : "false"} means ${quote(mapped)}.`,
         fix: [{ op: "replace", path: path || "/", value: mapped }],
       });
+    } else if (path.endsWith("/scale/type") && typeof value === "string" && (value === "quantize" || value === "threshold") && !path.includes("/color/")) {
+      emit(ctx, {
+        code: "CK3063",
+        severity: "error",
+        message: "quantize and threshold are colour scales",
+        path,
+        hint: "set encoding.color.scale.type to quantize or threshold. bins sets the quantize width. thresholds sets the cuts.",
+        fix: [{ op: "replace", path, value: "linear" }],
+      });
+    } else if (path.endsWith("/scale/type") && typeof value === "string" && (value === "symLog" || value === "asinh" || value === "bi-symmetric-log" || value === "signed-log")) {
+      emit(ctx, {
+        code: "CK3070",
+        severity: "error",
+        message: "symlog is the signed log scale",
+        path,
+        hint: 'encoding.y.scale.type is "symlog". constant is the linear half-width around zero. Default 1.',
+        fix: [{ op: "replace", path, value: "symlog" }],
+      });
+    } else if (/^\/axes\/(x|y|y2)\/position$/.test(path) && (value === "zero" || value === "origin")) {
+      const side = path.split("/")[2] || "x";
+      emit(ctx, {
+        code: "CK3068",
+        severity: "error",
+        message: "axis zero is crosses",
+        path,
+        hint: "axes.x.crosses: 0 draws the x axis through y = 0. axes.y.crosses needs a numeric x.",
+        fix: [
+          { op: "remove", path },
+          { op: "add", path: `/axes/${side}/crosses`, value: 0 },
+        ],
+      });
+    } else if (path.endsWith("/easing") && typeof value === "string") {
+      const mapped = value === "ease" || value === "easeOut" || value === "ease-out" ? "ease-out" : value === "easeInOut" || value === "ease-in-out" ? "ease-in-out" : value === "easeIn" ? "ease-in-out" : value === "bounce" || value === "spring" ? "spring" : value === "linear" ? "linear" : "";
+      emit(ctx, {
+        code: "CK3066",
+        severity: "error",
+        message: "easing name is not a chartkit curve",
+        path,
+        hint: "easing is linear, ease-out, ease-in-out, or spring.",
+        fix: mapped ? [{ op: "replace", path, value: mapped }] : undefined,
+      });
     } else if (typeof value === "string" && node.enum.includes("number") && node.enum.includes("percent")) {
       const preset = formatPresetFix(value);
       if (preset) {
@@ -292,6 +334,15 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
           path,
           hint: preset.hint,
           fix: [{ op: "replace", path: path || "/", value: preset.value }],
+        });
+      } else if (value.length < 16 && /[.$%,]/.test(value) && /[a-z%]$/.test(value)) {
+        emit(ctx, {
+          code: "CK3058",
+          severity: "error",
+          message: "format specifier is not a d3-style pattern",
+          path,
+          hint: "use .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s",
+          fix: [{ op: "replace", path: path || "/", value: ".2f" }],
         });
       } else {
         const matches = nearMatches(value, node.enum.map(String), 3);
@@ -2041,11 +2092,17 @@ function isTypeBranchNoise(diagnostic: Diagnostic): boolean {
 
 function formatPresetFix(value: string): { hint: string; value: unknown } | undefined {
   const decimals = /^\.(\d+)f$/.exec(value);
-  if (!decimals) return undefined;
-  const n = Number(decimals[1]);
+  if (decimals) {
+    const n = Number(decimals[1]);
+    return {
+      hint: `did you mean "number"? ${n} decimal places is { "style": "number", "decimals": ${n} }.`,
+      value: { style: "number", decimals: n },
+    };
+  }
+  if (!parseSpecifier(value)) return undefined;
   return {
-    hint: `did you mean "number"? ${n} decimal places is { "style": "number", "decimals": ${n} }.`,
-    value: { style: "number", decimals: n },
+    hint: `${quote(value)} is a d3-style specifier. Use { "specifier": ${quote(value)} }.`,
+    value: { specifier: value },
   };
 }
 
@@ -2279,6 +2336,97 @@ function emitUnknownProp(name: string, path: string, props: Record<string, JsonS
       fix: [
         { op: "remove", path: pointer },
         { op: "add", path: join(path, dest), value: next },
+      ],
+    });
+    return;
+  }
+  if ((name === "zIndex" || name === "zindex") && (path === "/encoding/y" || /^\/encoding\/y\/\d+$/.test(path) || /^\/annotations\/\d+$/.test(path))) {
+    const next = typeof value === "number" && Number.isFinite(value) ? value : 1;
+    emit(ctx, {
+      code: "CK3064",
+      severity: "error",
+      message: "zIndex is z on a series or annotation",
+      path: pointer,
+      hint: "higher z paints later. Negative z paints an annotation under the marks. Stacked series keep data order.",
+      fix: [
+        { op: "remove", path: pointer },
+        { op: "add", path: join(path, "z"), value: next },
+      ],
+    });
+    return;
+  }
+  if (/^\/axes\/(x|y|y2)$/.test(path) && (name === "minor" || name === "minorTick" || name === "minorGrid")) {
+    const next = value === false || value === 0 ? 0 : typeof value === "number" ? Math.max(0, Math.min(8, Math.round(value))) : 1;
+    emit(ctx, {
+      code: "CK3065",
+      severity: "error",
+      message: "minor is minorTicks on an axis",
+      path: pointer,
+      hint: "minorTicks is how many marks sit between major ticks, from 0 to 8.",
+      fix: [
+        { op: "remove", path: pointer },
+        { op: "add", path: join(path, "minorTicks"), value: next },
+      ],
+    });
+    return;
+  }
+  if (/^\/axes\/(x|y|y2)$/.test(path) && (name === "zero" || name === "origin" || name === "axisAtZero")) {
+    const next = typeof value === "number" && Number.isFinite(value) ? value : 0;
+    emit(ctx, {
+      code: "CK3068",
+      severity: "error",
+      message: "axis zero is crosses",
+      path: pointer,
+      hint: "axes.x.crosses: 0 draws the x axis through y = 0. axes.y.crosses needs a numeric x.",
+      fix: [
+        { op: "remove", path: pointer },
+        { op: "add", path: join(path, "crosses"), value: next },
+      ],
+    });
+    return;
+  }
+  if (/^\/axes\/(x|y|y2)$/.test(path) && (name === "axisOffset" || name === "offsetPx")) {
+    const next = typeof value === "number" && Number.isFinite(value) ? Math.max(-80, Math.min(80, value)) : 8;
+    emit(ctx, {
+      code: "CK3071",
+      severity: "error",
+      message: "axisOffset is offset",
+      path: pointer,
+      hint: "offset shifts the baseline outward in pixels, from -80 to 80.",
+      fix: [
+        { op: "remove", path: pointer },
+        { op: "add", path: join(path, "offset"), value: next },
+      ],
+    });
+    return;
+  }
+  if (path === "/tooltip" && (name === "pinTooltip" || name === "hitSize" || name === "hitRadius")) {
+    const dest = name === "pinTooltip" ? "pin" : "hit";
+    const next = dest === "pin" ? value !== false : typeof value === "number" ? Math.max(8, Math.min(48, value)) : 18;
+    emit(ctx, {
+      code: "CK3067",
+      severity: "error",
+      message: "touch tooltip keys are pin and hit",
+      path: pointer,
+      hint: "tooltip.pin is tap-to-pin. tooltip.hit is the pixel radius, from 8 to 48.",
+      fix: [
+        { op: "remove", path: pointer },
+        { op: "add", path: join(path, dest), value: next },
+      ],
+    });
+    return;
+  }
+  if (path === "/animation" && name === "ease") {
+    const mapped = value === "linear" ? "linear" : value === "easeInOut" || value === "ease-in-out" ? "ease-in-out" : value === "bounce" || value === "spring" ? "spring" : "ease-out";
+    emit(ctx, {
+      code: "CK3066",
+      severity: "error",
+      message: "easing name is not a chartkit curve",
+      path: pointer,
+      hint: "easing is linear, ease-out, ease-in-out, or spring.",
+      fix: [
+        { op: "remove", path: pointer },
+        { op: "add", path: "/animation/easing", value: mapped },
       ],
     });
     return;

@@ -73,6 +73,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | MarkTypes=boxplot, MarkTypes=box | dts-path (strong) | @antv/g2/lib/spec/mark.d.ts:13, @antv/g2/lib/spec/mark.d.ts:13 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against b64aa4f4c004.
 
 https://chartkit.dev/features.json

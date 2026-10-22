@@ -1,12 +1,51 @@
 # Minor ticks / minor grid
 
-ChartKit: **none**
+ChartKit: **native**
 
 Secondary tick level
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `render` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+axes.y.minorTicks is how many minor ticks sit between major ticks, 0 to 8. minor, minorTick, and minorGrid repair to minorTicks (CK3065).
+
+Source: chartkit:packages/core/src/renderers/cartesian.ts
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40
+    },
+    {
+      "quarter": "Q2",
+      "units": 55
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": "units"
+  },
+  "a11y": {
+    "alt": "Units rose in Q2."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "axes": {
+    "y": {
+      "minorTicks": 1
+    }
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -33,6 +72,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | none | — | dts-absence (absence) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against b64aa4f4c004.
 
 https://chartkit.dev/features.json

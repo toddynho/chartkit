@@ -341,10 +341,10 @@ function breakKey(rules: unknown[], width: number): string {
   return "";
 }
 
-function tipFields(spec: InteractSpec): { field: string; title?: string; format?: unknown }[] | null {
+function tipFields(spec: InteractSpec): { field: string; title?: string; format?: unknown; unit?: string }[] | null {
   const tooltip = spec.tooltip;
   if (!isRecord(tooltip) || !Array.isArray(tooltip.fields)) return null;
-  const out: { field: string; title?: string; format?: unknown }[] = [];
+  const out: { field: string; title?: string; format?: unknown; unit?: string }[] = [];
   for (let i = 0; i < tooltip.fields.length; i++) {
     const item = tooltip.fields[i];
     if (typeof item === "string") {
@@ -354,10 +354,32 @@ function tipFields(spec: InteractSpec): { field: string; title?: string; format?
         field: item.field,
         title: typeof item.title === "string" ? item.title : undefined,
         format: item.format,
+        unit: typeof item.unit === "string" ? item.unit : undefined,
       });
     }
   }
   return out.length ? out : null;
+}
+
+function tipTemplate(spec: InteractSpec): string {
+  return isRecord(spec.tooltip) && typeof spec.tooltip.template === "string" ? spec.tooltip.template : "";
+}
+
+function hitPx(spec: InteractSpec): number {
+  const tip = isRecord(spec.tooltip) ? spec.tooltip : null;
+  const raw = tip && typeof tip.hit === "number" ? tip.hit : tip?.pin === true ? 18 : 8;
+  return Math.max(8, Math.min(48, raw));
+}
+
+function easeCss(name: unknown): string {
+  if (name === "linear") return "linear";
+  if (name === "ease-in-out") return "ease-in-out";
+  if (name === "spring") return "cubic-bezier(0.22, 1.35, 0.36, 1)";
+  return "ease-out";
+}
+
+function easeOf(spec: InteractSpec): string {
+  return isRecord(spec.animation) ? easeCss(spec.animation.easing) : "ease-out";
 }
 
 function tipSide(spec: InteractSpec): number {
@@ -660,13 +682,14 @@ function paint(svg: Element, markup: string): boolean {
   return n === need;
 }
 
-function fade(el: Element, ms: number, from = "0.45"): void {
+function fade(el: Element, ms: number, from = "0.45", easing = "ease-out"): void {
   if (ms <= 0) return;
   const node = el as SVGSVGElement;
   node.style.transition = "none";
   node.style.opacity = from;
+  const curve = easeCss(easing);
   requestAnimationFrame(() => {
-    node.style.transition = `opacity ${ms}ms ease-out`;
+    node.style.transition = `opacity ${ms}ms ${curve}`;
     node.style.opacity = "1";
   });
 }
@@ -699,7 +722,7 @@ function queueCanvas(host: Element, spec?: InteractSpec): void {
   else run();
 }
 
-export function patchSvg(host: PatchHost, markup: string, duration = 0): void {
+export function patchSvg(host: PatchHost, markup: string, duration = 0, easing = "ease-out"): void {
   if (lastMarkup.get(host) === markup) return;
   const current = host.querySelector?.("svg");
   const open = markup.startsWith("<svg") ? markup.indexOf(">") : -1;
@@ -718,7 +741,7 @@ export function patchSvg(host: PatchHost, markup: string, duration = 0): void {
     current.innerHTML = markup.slice(open + 1, close);
   }
   for (let i = 0; i < held.length; i++) current.append(held[i]);
-  fade(current, duration);
+  fade(current, duration, "0.45", easing);
   lastMarkup.set(host, markup);
 }
 
@@ -926,9 +949,9 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   function entriesAt(index: number, pointerY: number | null): { name: string; text: string; color: string }[] {
     const chosen = tipFields(base);
     const grouped = !chosen && series.some((item) => item.match) && !arcChart(base.type);
-    const rows: { name: string; text: string; color: string; raw: number }[] = [];
+    const rows: { name: string; text: string; color: string; raw: number; unit: string }[] = [];
     const yFormat = axisFormat(base, "y");
-    const push = (name: string, raw: unknown, color: string, format?: unknown) => {
+    const push = (name: string, raw: unknown, color: string, format?: unknown, unit = "") => {
       if (raw == null || raw === "") return;
       const num = typeof raw === "number" ? raw : Number(raw);
       rows.push({
@@ -936,6 +959,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         text: fmt(raw, format ?? series.find((s) => s.name === name)?.format ?? yFormat, locale()),
         color,
         raw: Number.isFinite(num) ? num : 0,
+        unit,
       });
     };
     if (chosen) {
@@ -948,6 +972,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           table.cell(item.field, index),
           known ? colorFor(known.name, series.indexOf(known)) : "transparent",
           item.format ?? known?.format,
+          item.unit ?? "",
         );
       }
       return tint(rows, index);
@@ -1096,9 +1121,26 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       if (typeof body === "string") tip.innerHTML = body;
       else tip.append(body);
     } else {
-      tip.innerHTML =
-        (title ? `<div>${esc(title)}</div>` : "") +
-        rows.map((row) => `<div class="ck-row"><i style="background:${row.color}"></i>${esc(row.name)}<b>${esc(row.text)}</b></div>`).join("");
+      const template = tipTemplate(base);
+      const rowHtml = (row: { name: string; text: string; color: string; unit?: string }) => {
+        if (!template) {
+          const shown = row.unit ? `${row.text} ${row.unit}` : row.text;
+          return `<div class="ck-row"><i style="background:${row.color}"></i>${esc(row.name)}<b>${esc(shown)}</b></div>`;
+        }
+        const filled = template.replace(/\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (_all, key: string) => {
+          if (key === "x") return title;
+          if (key === "name") return row.name;
+          if (key === "value") return row.text;
+          if (key === "unit") return row.unit ?? "";
+          if (index >= 0) {
+            const cell = table.cell(key, index);
+            if (cell != null && cell !== "") return fmt(cell, undefined, locale());
+          }
+          return "";
+        });
+        return `<div class="ck-row"><i style="background:${row.color}"></i>${esc(filled)}</div>`;
+      };
+      tip.innerHTML = (title && !template ? `<div>${esc(title)}</div>` : "") + rows.map((row) => rowHtml(row)).join("");
     }
     tip.hidden = false;
     const bounds = host.getBoundingClientRect();
@@ -1226,7 +1268,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
 
   function barsNear(snapped: number, horizontal: boolean): Element[] {
     const span = horizontal ? box.h : box.w;
-    const tol = Math.max(8, (span / Math.max(1, n)) * 0.49);
+    const tol = Math.max(hitPx(base), (span / Math.max(1, n)) * 0.49);
     const hits: Element[] = [];
     const rects = svg.querySelectorAll("rect");
     for (let i = 0; i < rects.length; i++) {
@@ -1530,7 +1572,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       }
     }
     const slot = hover.uniform ? hover.width / Math.max(1, hover.count) : Math.max(24, box.w / 8);
-    const tol = Math.max(slot / 2, 8);
+    const tol = Math.max(slot / 2, hitPx(base));
     let best = Infinity;
     const hits: { x: number; y: number; fill: string | null }[] = [];
     const rects = svg.querySelectorAll("rect");
@@ -1697,7 +1739,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       return;
     }
     const next = partial ? options.render(nextSpec) : markup ?? options.render(base);
-    patchSvg(host as PatchHost, next, ms);
+    patchSvg(host as PatchHost, next, ms, easeOf(base));
     if (focusable()) svg.setAttribute("tabindex", "0");
     dim();
     paintPick();
@@ -1989,6 +2031,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function hoverMove(event: PointerEvent | MouseEvent): void {
+    if (pinned) return;
     arm(1);
     if (base.type === "waterfall") {
       const mark = (event.target as Element | null)?.closest?.("[data-ck-mark]");
@@ -2074,12 +2117,34 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
 
   arm();
   paintTable();
-  fade(svg, durationMs(spec, n), "0");
+  fade(svg, durationMs(spec, n), "0", easeOf(spec));
   if (picked.points.length || picked.series.length) paintPick();
 
+  let pinned = false;
   if (showTip || showCross) {
     on(svg, "pointermove", hoverMove as EventListener);
-    on(svg, "pointerleave", () => hideHover());
+    on(svg, "pointerleave", () => {
+      if (!pinned) hideHover();
+    });
+  }
+  if (showTip && isRecord(base.tooltip) && base.tooltip.pin === true) {
+    on(svg, "pointerdown", ((event: PointerEvent) => {
+      if (pinned) {
+        pinned = false;
+        tip.removeAttribute("data-ck-pin");
+        hideHover();
+        return;
+      }
+      hoverMove(event);
+      pinned = true;
+      tip.setAttribute("data-ck-pin", "1");
+    }) as EventListener);
+    on(window, "keydown", ((event: KeyboardEvent) => {
+      if (event.key !== "Escape" || !pinned) return;
+      pinned = false;
+      tip.removeAttribute("data-ck-pin");
+      hideHover();
+    }) as EventListener);
   }
   if (legend) dim();
   on(svg, "click", ((event: MouseEvent) => {
@@ -2376,7 +2441,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         return;
       }
       if (lo === 0 && hi === n - 1 && hidden.size === 0 && markup) {
-        patchSvg(host as PatchHost, markup, durationMs(next, n));
+        patchSvg(host as PatchHost, markup, durationMs(next, n), easeOf(next));
         if (focusable()) svg.setAttribute("tabindex", "0");
         dim();
         paintPick();
