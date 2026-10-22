@@ -1,6 +1,8 @@
 # Harbor Ledger
 
-A payments overview: four scorecards, a sparkline on each, and gross volume against the prior period.
+Payments for 1–21 October.
+
+Range: 1–21 Oct.
 
 Inspired by common SaaS dashboard styles. ChartKit is not affiliated with any product.
 
@@ -8,9 +10,9 @@ Default theme: soft.
 
 ## Gross
 
-Scorecard with the eight-month series drawn under the value.
+Gross
 
-type kpi. data draws the sparkline. metric.format is compact, metric.delta is the chip, and goodDirection down flips the refund colour.
+type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25 keep it a thin line with a light fill. metric.delta is the chip. goodDirection down flips the refund colour.
 
 ```json
 {
@@ -33,9 +35,13 @@ type kpi. data draws the sparkline. metric.format is compact, metric.delta is th
     "delta": 0.08,
     "format": "compact"
   },
+  "mark": {
+    "fillOpacity": 0.14,
+    "strokeWidth": 1.25
+  },
   "size": {
-    "width": 240,
-    "height": 148
+    "width": 280,
+    "height": 132
   },
   "a11y": {
     "alt": "Gross volume this month is 261 thousand dollars, up 8 percent."
@@ -45,9 +51,9 @@ type kpi. data draws the sparkline. metric.format is compact, metric.delta is th
 
 ## Net
 
-Scorecard with the eight-month series drawn under the value.
+Net
 
-type kpi. data draws the sparkline. metric.format is compact, metric.delta is the chip, and goodDirection down flips the refund colour.
+type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25 keep it a thin line with a light fill. metric.delta is the chip. goodDirection down flips the refund colour.
 
 ```json
 {
@@ -70,9 +76,13 @@ type kpi. data draws the sparkline. metric.format is compact, metric.delta is th
     "delta": 0.07,
     "format": "compact"
   },
+  "mark": {
+    "fillOpacity": 0.14,
+    "strokeWidth": 1.25
+  },
   "size": {
-    "width": 240,
-    "height": 148
+    "width": 280,
+    "height": 132
   },
   "a11y": {
     "alt": "Net of fees is 248 thousand dollars, up 7 percent."
@@ -82,9 +92,9 @@ type kpi. data draws the sparkline. metric.format is compact, metric.delta is th
 
 ## Refunds
 
-Scorecard with the eight-month series drawn under the value.
+Refunds
 
-type kpi. data draws the sparkline. metric.format is compact, metric.delta is the chip, and goodDirection down flips the refund colour.
+type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25 keep it a thin line with a light fill. metric.delta is the chip. goodDirection down flips the refund colour.
 
 ```json
 {
@@ -108,9 +118,13 @@ type kpi. data draws the sparkline. metric.format is compact, metric.delta is th
     "format": "compact",
     "goodDirection": "down"
   },
+  "mark": {
+    "fillOpacity": 0.14,
+    "strokeWidth": 1.25
+  },
   "size": {
-    "width": 240,
-    "height": 148
+    "width": 280,
+    "height": 132
   },
   "a11y": {
     "alt": "Refunds are 12.6 thousand dollars, down 11 percent."
@@ -120,9 +134,9 @@ type kpi. data draws the sparkline. metric.format is compact, metric.delta is th
 
 ## Accounts
 
-Scorecard with the eight-month series drawn under the value.
+Accounts
 
-type kpi. data draws the sparkline. metric.format is compact, metric.delta is the chip, and goodDirection down flips the refund colour.
+type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25 keep it a thin line with a light fill. metric.delta is the chip. goodDirection down flips the refund colour.
 
 ```json
 {
@@ -145,9 +159,13 @@ type kpi. data draws the sparkline. metric.format is compact, metric.delta is th
     "delta": 0.04,
     "format": "compact"
   },
+  "mark": {
+    "fillOpacity": 0.14,
+    "strokeWidth": 1.25
+  },
   "size": {
-    "width": 240,
-    "height": 148
+    "width": 280,
+    "height": 132
   },
   "a11y": {
     "alt": "840 new accounts, up 4 percent."
@@ -157,9 +175,9 @@ type kpi. data draws the sparkline. metric.format is compact, metric.delta is th
 
 ## Gross volume
 
-This period is an area. The prior period is a dashed line on the same axis.
+This period against the prior period.
 
-type combo. The first y series is mark area. The second is mark line and dash dashed. axes.y.format is compact. Theme tokens recolor both series.
+type combo. The first y series is mark area with a light fill from --ck-area-opacity. The second is mark line and dash dashed, in a contrasting token. tooltip.mode index.
 
 ```json
 {
@@ -236,9 +254,15 @@ type combo. The first y series is mark area. The second is mark line and dash da
   "legend": {
     "position": "top"
   },
+  "tooltip": {
+    "mode": "index"
+  },
+  "mark": {
+    "strokeWidth": 2.25
+  },
   "size": {
-    "width": 760,
-    "height": 300
+    "width": 1100,
+    "height": 280
   },
   "a11y": {
     "alt": "Gross volume peaks in October at 261 thousand, above the prior period."
@@ -246,10 +270,129 @@ type combo. The first y series is mark area. The second is mark line and dash da
 }
 ```
 
-## Options
+## Payments by method
 
-- **Scorecards.** type kpi. A number array in data is the sparkline under the value. metric.delta is the chip.
-- **Comparison.** combo puts an area and a dashed line on one x axis. dash dashed is the prior period.
-- **Tokens.** The page sets --ck-series-1, --ck-series-2, and --ck-area-opacity. Soft and Midnight swap those variables. No preset is added to the bundle.
+Card, bank, and wallet.
+
+type bar-list, loaded from @chartkitdev/core/charts/bar-list. No axes. A tinted track sits behind the label and the value is right-aligned.
+
+```json
+{
+  "version": "1",
+  "type": "bar-list",
+  "theme": "soft",
+  "data": [
+    {
+      "method": "Card",
+      "amount": 168400
+    },
+    {
+      "method": "Bank",
+      "amount": 64200
+    },
+    {
+      "method": "Wallet",
+      "amount": 28400
+    }
+  ],
+  "encoding": {
+    "x": "method",
+    "y": {
+      "field": "amount",
+      "format": "compact"
+    }
+  },
+  "size": {
+    "width": 520,
+    "height": 108
+  },
+  "a11y": {
+    "alt": "Card is the largest method, then bank, then wallet."
+  }
+}
+```
+
+## Failed payments
+
+Daily failures this period.
+
+type line. The card overrides --ck-series-1 with a warning colour so failures are not the indigo volume series.
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "theme": "soft",
+  "data": [
+    {
+      "day": "14",
+      "failed": 18
+    },
+    {
+      "day": "15",
+      "failed": 22
+    },
+    {
+      "day": "16",
+      "failed": 16
+    },
+    {
+      "day": "17",
+      "failed": 14
+    },
+    {
+      "day": "18",
+      "failed": 19
+    },
+    {
+      "day": "19",
+      "failed": 11
+    },
+    {
+      "day": "20",
+      "failed": 9
+    },
+    {
+      "day": "21",
+      "failed": 8
+    }
+  ],
+  "encoding": {
+    "x": "day",
+    "y": {
+      "field": "failed",
+      "title": "Failed"
+    }
+  },
+  "legend": {
+    "show": false
+  },
+  "axes": {
+    "x": {
+      "title": "October"
+    },
+    "y": {
+      "title": "Failed"
+    }
+  },
+  "tooltip": {
+    "mode": "index"
+  },
+  "size": {
+    "width": 520,
+    "height": 180
+  },
+  "a11y": {
+    "alt": "Failed payments peak at 22 on the 15th and fall to 8 on the 21st."
+  }
+}
+```
+
+## What produces this look
+
+- **Scorecards.** type kpi. A number array in data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25 keep the line thin and the fill light. metric.delta is the chip.
+- **Comparison.** combo puts an area and a dashed line on one x axis. The prior series uses a warm second token so the dash stays visible on the area.
+- **Methods.** bar-list is an on-demand chart. It is not in the line or all bundle. A tinted track runs behind the label and the value sits on the right.
+- **Tokens.** The page sets --ck-series-1 and --ck-series-2 from --dash-series-*. Soft and Midnight swap those variables. The accent is an indigo chosen for this page.
 
 https://chartkit.dev/dashboards/ledger

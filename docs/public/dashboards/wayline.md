@@ -1,6 +1,8 @@
 # Wayline
 
-Sessions over time, a channel donut, a country bar, and four scorecards.
+Acquisition for the last 8 weeks.
+
+Range: Last 8 weeks.
 
 Inspired by common SaaS dashboard styles. ChartKit is not affiliated with any product.
 
@@ -8,24 +10,38 @@ Default theme: soft.
 
 ## Sessions
 
-Scorecard.
+Sessions
 
-type kpi. metric.delta is the comparison chip. metric.format is compact, percent, or number.
+type kpi with data for the sparkline. Bounce rate uses format percent and goodDirection down.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
   "theme": "soft",
+  "data": [
+    18.2,
+    19.4,
+    18.8,
+    21.1,
+    22.4,
+    21.6,
+    23.8,
+    24.5
+  ],
   "metric": {
     "label": "Sessions",
     "value": 24500,
     "delta": 0.06,
     "format": "compact"
   },
+  "mark": {
+    "fillOpacity": 0.14,
+    "strokeWidth": 1.25
+  },
   "size": {
-    "width": 220,
-    "height": 96
+    "width": 280,
+    "height": 132
   },
   "a11y": {
     "alt": "Sessions this week are 24.5 thousand, up 6 percent."
@@ -35,24 +51,38 @@ type kpi. metric.delta is the comparison chip. metric.format is compact, percent
 
 ## Engaged
 
-Scorecard.
+Engaged
 
-type kpi. metric.delta is the comparison chip. metric.format is compact, percent, or number.
+type kpi with data for the sparkline. Bounce rate uses format percent and goodDirection down.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
   "theme": "soft",
+  "data": [
+    8.1,
+    8.4,
+    8.2,
+    9.4,
+    10.1,
+    9.8,
+    10.6,
+    11.2
+  ],
   "metric": {
     "label": "Engaged",
     "value": 11200,
     "delta": 0.03,
     "format": "compact"
   },
+  "mark": {
+    "fillOpacity": 0.14,
+    "strokeWidth": 1.25
+  },
   "size": {
-    "width": 220,
-    "height": 96
+    "width": 280,
+    "height": 132
   },
   "a11y": {
     "alt": "Engaged sessions are 11.2 thousand, up 3 percent."
@@ -60,53 +90,82 @@ type kpi. metric.delta is the comparison chip. metric.format is compact, percent
 }
 ```
 
-## Brief
+## Bounce rate
 
-Scorecard.
+Bounce rate
 
-type kpi. metric.delta is the comparison chip. metric.format is compact, percent, or number.
+type kpi with data for the sparkline. Bounce rate uses format percent and goodDirection down.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
   "theme": "soft",
+  "data": [
+    0.44,
+    0.42,
+    0.43,
+    0.41,
+    0.4,
+    0.39,
+    0.38,
+    0.38
+  ],
   "metric": {
-    "label": "Brief",
+    "label": "Bounce rate",
     "value": 0.38,
     "delta": -0.02,
-    "format": "percent"
+    "format": "percent",
+    "goodDirection": "down"
+  },
+  "mark": {
+    "fillOpacity": 0.14,
+    "strokeWidth": 1.25
   },
   "size": {
-    "width": 220,
-    "height": 96
+    "width": 280,
+    "height": 132
   },
   "a11y": {
-    "alt": "Brief sessions are 38 percent, down 2 points."
+    "alt": "Bounce rate is 38 percent, down 2 points."
   }
 }
 ```
 
 ## Minutes
 
-Scorecard.
+Minutes
 
-type kpi. metric.delta is the comparison chip. metric.format is compact, percent, or number.
+type kpi with data for the sparkline. Bounce rate uses format percent and goodDirection down.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
   "theme": "soft",
+  "data": [
+    2.8,
+    2.9,
+    3,
+    3.1,
+    3.2,
+    3.1,
+    3.3,
+    3.4
+  ],
   "metric": {
     "label": "Minutes",
     "value": 3.4,
     "delta": 0.05,
     "format": "number"
   },
+  "mark": {
+    "fillOpacity": 0.14,
+    "strokeWidth": 1.25
+  },
   "size": {
-    "width": 220,
-    "height": 96
+    "width": 280,
+    "height": 132
   },
   "a11y": {
     "alt": "Average minutes are 3.4, up 5 percent."
@@ -116,7 +175,7 @@ type kpi. metric.delta is the comparison chip. metric.format is compact, percent
 
 ## Sessions
 
-This period is solid. The comparison period is dashed.
+This period and the prior period.
 
 type line. The second y series sets dash dashed. Both share encoding.x.
 
@@ -192,9 +251,15 @@ type line. The second y series sets dash dashed. Both share encoding.x.
   "legend": {
     "position": "top"
   },
+  "tooltip": {
+    "mode": "index"
+  },
+  "mark": {
+    "strokeWidth": 2.25
+  },
   "size": {
-    "width": 520,
-    "height": 280
+    "width": 720,
+    "height": 320
   },
   "a11y": {
     "alt": "Sessions rise from 18.2 to 24.5 thousand, staying above the prior period."
@@ -204,9 +269,9 @@ type line. The second y series sets dash dashed. Both share encoding.x.
 
 ## Channels
 
-Five slices, coloured from one sequential range.
+Share of sessions.
 
-type donut. encoding.color.range is five var(--ck-wayline-N) steps, so Soft and Midnight recolour the slices.
+type donut. encoding.y is titled Sessions and formatted compact, so the centre is the total sessions. legend.values prints the share and the session count under the ring. color.range is var(--ck-wayline-1) through var(--ck-wayline-5).
 
 ```json
 {
@@ -216,28 +281,32 @@ type donut. encoding.color.range is five var(--ck-wayline-N) steps, so Soft and 
   "data": [
     {
       "channel": "Search",
-      "share": 42
+      "sessions": 10290
     },
     {
       "channel": "Direct",
-      "share": 24
+      "sessions": 5880
     },
     {
       "channel": "Mail",
-      "share": 16
+      "sessions": 3920
     },
     {
       "channel": "Social",
-      "share": 11
+      "sessions": 2695
     },
     {
       "channel": "Referral",
-      "share": 7
+      "sessions": 1715
     }
   ],
   "encoding": {
     "x": "channel",
-    "y": "share",
+    "y": {
+      "field": "sessions",
+      "title": "Sessions",
+      "format": "compact"
+    },
     "color": {
       "field": "channel",
       "range": [
@@ -249,21 +318,24 @@ type donut. encoding.color.range is five var(--ck-wayline-N) steps, so Soft and 
       ]
     }
   },
+  "legend": {
+    "values": true
+  },
   "size": {
-    "width": 320,
-    "height": 280
+    "width": 420,
+    "height": 400
   },
   "a11y": {
-    "alt": "Search is 42 percent of sessions. Referral is 7 percent."
+    "alt": "Search is 10.3 thousand sessions. The centre total is 24.5 thousand."
   }
 }
 ```
 
 ## Countries
 
-A bar stands in for a map. The same rows can feed a choropleth.
+Sessions by country.
 
-type bar, mark.orientation horizontal. A choropleth would use type choropleth, encoding.region, and mark.atlas world from @chartkitdev/geo.
+The list is type bar. The map toggle is type choropleth from @chartkitdev/geo, mark.atlas world, encoding.region set to the ISO code. Geo is on demand and is not in the line or all bundle.
 
 ```json
 {
@@ -294,7 +366,10 @@ type bar, mark.orientation horizontal. A choropleth would use type choropleth, e
   ],
   "encoding": {
     "x": "country",
-    "y": "sessions"
+    "y": {
+      "field": "sessions",
+      "format": "compact"
+    }
   },
   "mark": {
     "orientation": "horizontal"
@@ -311,8 +386,8 @@ type bar, mark.orientation horizontal. A choropleth would use type choropleth, e
     }
   },
   "size": {
-    "width": 760,
-    "height": 240
+    "width": 640,
+    "height": 260
   },
   "a11y": {
     "alt": "Japan has the most sessions, then Portugal."
@@ -320,10 +395,65 @@ type bar, mark.orientation horizontal. A choropleth would use type choropleth, e
 }
 ```
 
-## Options
+### Map
 
-- **Dashed comparison.** The prior series is a y object with dash dashed. It is the same chart, not an overlay image.
-- **Donut.** color.range points at --ck-wayline-1 through --ck-wayline-5. The page defines a lighter set in Midnight.
-- **Country.** This page uses a bar. The note on the chart is the choropleth alternative.
+```json
+{
+  "version": "1",
+  "type": "choropleth",
+  "theme": "soft",
+  "data": [
+    {
+      "country": "JPN",
+      "sessions": 6200
+    },
+    {
+      "country": "PRT",
+      "sessions": 4100
+    },
+    {
+      "country": "CHL",
+      "sessions": 2800
+    },
+    {
+      "country": "KEN",
+      "sessions": 1900
+    },
+    {
+      "country": "CAN",
+      "sessions": 1600
+    }
+  ],
+  "encoding": {
+    "region": "country",
+    "color": {
+      "field": "sessions",
+      "title": "Sessions",
+      "format": "compact"
+    }
+  },
+  "mark": {
+    "atlas": "world",
+    "projection": "equalEarth",
+    "scale": "sequential"
+  },
+  "legend": {
+    "position": "bottom"
+  },
+  "size": {
+    "width": 720,
+    "height": 340
+  },
+  "a11y": {
+    "alt": "Japan has the most sessions, then Portugal. Countries without a row are hatched."
+  }
+}
+```
+
+## What produces this look
+
+- **Scorecards.** Each kpi includes data, so the sparkline is in the card. Bounce rate replaces the old Brief label.
+- **Donut.** The y channel is Sessions with format compact. The hole shows that total. legend.values prints the session count beside the share.
+- **Countries.** The bar sits beside a table. The map toggle renders a choropleth with @chartkitdev/geo, which loads on demand.
 
 https://chartkit.dev/dashboards/wayline

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DashboardStage } from "@/components/DashboardStage";
 import { dashboardBySlug, dashboards } from "@/lib/dashboards";
@@ -24,19 +23,5 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
 export default function DashboardPage({ params }: { params: { slug: string } }) {
   const board = dashboardBySlug(params.slug);
   if (!board) notFound();
-  return (
-    <div className="wrap section">
-      <p className="kicker">
-        <Link href="/dashboards">Dashboards</Link>
-        {" · "}
-        {board.product}
-      </p>
-      <h1>{board.title}</h1>
-      <p className="lede">{board.lede}</p>
-      <p>
-        <a href={`/dashboards/${board.slug}.md`}>{board.slug}.md</a> is the same board for an agent.
-      </p>
-      <DashboardStage board={board} />
-    </div>
-  );
+  return <DashboardStage board={board} />;
 }

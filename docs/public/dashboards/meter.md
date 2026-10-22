@@ -1,14 +1,177 @@
 # Quiet Meter
 
-A minimal visits view: one accent, a large area, and two horizontal lists.
+Audience for the last 7 days.
+
+Range: Last 7 days.
 
 Inspired by common SaaS dashboard styles. ChartKit is not affiliated with any product.
 
 Default theme: soft.
 
+## Visitors
+
+Visitors
+
+type kpi above the chart. metric.delta is the change. Bounce uses goodDirection down.
+
+```json
+{
+  "version": "1",
+  "type": "kpi",
+  "theme": "soft",
+  "data": [
+    2400,
+    2620,
+    2510,
+    2800,
+    3010,
+    2680,
+    2400
+  ],
+  "metric": {
+    "label": "Visitors",
+    "value": 18420,
+    "delta": 0.04,
+    "format": "compact"
+  },
+  "mark": {
+    "fillOpacity": 0.14,
+    "strokeWidth": 1.25
+  },
+  "size": {
+    "width": 280,
+    "height": 132
+  },
+  "a11y": {
+    "alt": "Visitors are 18.4 thousand, up 4 percent."
+  }
+}
+```
+
+## Pageviews
+
+Pageviews
+
+type kpi above the chart. metric.delta is the change. Bounce uses goodDirection down.
+
+```json
+{
+  "version": "1",
+  "type": "kpi",
+  "theme": "soft",
+  "data": [
+    4200,
+    4600,
+    4480,
+    5100,
+    5340,
+    3900,
+    3720
+  ],
+  "metric": {
+    "label": "Pageviews",
+    "value": 61200,
+    "delta": 0.06,
+    "format": "compact"
+  },
+  "mark": {
+    "fillOpacity": 0.14,
+    "strokeWidth": 1.25
+  },
+  "size": {
+    "width": 280,
+    "height": 132
+  },
+  "a11y": {
+    "alt": "Pageviews are 61.2 thousand, up 6 percent."
+  }
+}
+```
+
+## Bounce
+
+Bounce
+
+type kpi above the chart. metric.delta is the change. Bounce uses goodDirection down.
+
+```json
+{
+  "version": "1",
+  "type": "kpi",
+  "theme": "soft",
+  "data": [
+    0.46,
+    0.44,
+    0.45,
+    0.42,
+    0.4,
+    0.41,
+    0.39
+  ],
+  "metric": {
+    "label": "Bounce",
+    "value": 0.41,
+    "delta": -0.03,
+    "format": "percent",
+    "goodDirection": "down"
+  },
+  "mark": {
+    "fillOpacity": 0.14,
+    "strokeWidth": 1.25
+  },
+  "size": {
+    "width": 280,
+    "height": 132
+  },
+  "a11y": {
+    "alt": "Bounce is 41 percent, down 3 points."
+  }
+}
+```
+
+## Duration
+
+Duration
+
+type kpi above the chart. metric.delta is the change. Bounce uses goodDirection down.
+
+```json
+{
+  "version": "1",
+  "type": "kpi",
+  "theme": "soft",
+  "data": [
+    2.1,
+    2.2,
+    2,
+    2.4,
+    2.6,
+    2.3,
+    2.4
+  ],
+  "metric": {
+    "label": "Duration",
+    "value": 2.4,
+    "delta": 0.02,
+    "format": "number"
+  },
+  "mark": {
+    "fillOpacity": 0.14,
+    "strokeWidth": 1.25
+  },
+  "size": {
+    "width": 280,
+    "height": 132
+  },
+  "a11y": {
+    "alt": "Duration is 2.4 minutes, up 2 percent."
+  }
+}
+```
+
 ## Visits
 
-One series, area on, legend off, monotone curve.
+One series.
 
 type line, mark.area and mark.curve monotone, legend.show false. A single --ck-series-1 token is the only colour.
 
@@ -70,9 +233,12 @@ type line, mark.area and mark.curve monotone, legend.show false. A single --ck-s
       "format": "compact"
     }
   },
+  "tooltip": {
+    "mode": "index"
+  },
   "size": {
-    "width": 760,
-    "height": 320
+    "width": 1100,
+    "height": 280
   },
   "a11y": {
     "alt": "Visits peak on Friday at 5,340 and fall over the weekend."
@@ -82,14 +248,14 @@ type line, mark.area and mark.curve monotone, legend.show false. A single --ck-s
 
 ## Top pages
 
-Horizontal bars, one colour, no legend.
+Top pages
 
-type bar, mark.orientation horizontal, legend.show false. The same series token paints every bar.
+type bar-list. No axes. The track is a light tint of the series token, the label sits on it, and the value is right-aligned.
 
 ```json
 {
   "version": "1",
-  "type": "bar",
+  "type": "bar-list",
   "theme": "soft",
   "data": [
     {
@@ -115,25 +281,14 @@ type bar, mark.orientation horizontal, legend.show false. The same series token 
   ],
   "encoding": {
     "x": "page",
-    "y": "visits"
-  },
-  "mark": {
-    "orientation": "horizontal"
-  },
-  "legend": {
-    "show": false
-  },
-  "axes": {
-    "x": {
-      "title": "Page"
-    },
     "y": {
-      "title": "Visits"
+      "field": "visits",
+      "format": "compact"
     }
   },
   "size": {
-    "width": 420,
-    "height": 260
+    "width": 360,
+    "height": 152
   },
   "a11y": {
     "alt": "Pricing is the most visited page, then docs."
@@ -143,14 +298,14 @@ type bar, mark.orientation horizontal, legend.show false. The same series token 
 
 ## Top sources
 
-The same bar spec, with a different category field.
+Top sources
 
-Same horizontal bar options as the page list. No second palette.
+type bar-list. No axes. The track is a light tint of the series token, the label sits on it, and the value is right-aligned.
 
 ```json
 {
   "version": "1",
-  "type": "bar",
+  "type": "bar-list",
   "theme": "soft",
   "data": [
     {
@@ -176,25 +331,14 @@ Same horizontal bar options as the page list. No second palette.
   ],
   "encoding": {
     "x": "source",
-    "y": "visits"
-  },
-  "mark": {
-    "orientation": "horizontal"
-  },
-  "legend": {
-    "show": false
-  },
-  "axes": {
-    "x": {
-      "title": "Source"
-    },
     "y": {
-      "title": "Visits"
+      "field": "visits",
+      "format": "compact"
     }
   },
   "size": {
-    "width": 420,
-    "height": 260
+    "width": 360,
+    "height": 152
   },
   "a11y": {
     "alt": "Direct is the largest source, then search."
@@ -202,9 +346,52 @@ Same horizontal bar options as the page list. No second palette.
 }
 ```
 
-## Options
+## Devices
 
+Devices
+
+type bar-list. No axes. The track is a light tint of the series token, the label sits on it, and the value is right-aligned.
+
+```json
+{
+  "version": "1",
+  "type": "bar-list",
+  "theme": "soft",
+  "data": [
+    {
+      "device": "Desktop",
+      "visits": 9800
+    },
+    {
+      "device": "Mobile",
+      "visits": 7420
+    },
+    {
+      "device": "Tablet",
+      "visits": 1200
+    }
+  ],
+  "encoding": {
+    "x": "device",
+    "y": {
+      "field": "visits",
+      "format": "compact"
+    }
+  },
+  "size": {
+    "width": 360,
+    "height": 96
+  },
+  "a11y": {
+    "alt": "Desktop leads, then mobile."
+  }
+}
+```
+
+## What produces this look
+
+- **Stats.** Four kpi specs sit above the chart. Each has a delta. Bounce uses goodDirection down and format percent.
 - **One accent.** Every mark uses --ck-series-1. The page does not set a range.
-- **Lists.** Horizontal bars are mark.orientation horizontal. Categories stay on x in the spec; the chart draws them down the side.
+- **Lists.** Top pages, sources, and devices are type bar-list. The chart is on demand from @chartkitdev/core/charts/bar-list and is not part of the line or all bundle.
 
 https://chartkit.dev/dashboards/meter
