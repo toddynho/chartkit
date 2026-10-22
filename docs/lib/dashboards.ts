@@ -5,6 +5,11 @@ import { validate } from "@chartkitdev/core/validate";
 
 export type DashTheme = "soft" | "midnight";
 
+export interface DashThemes {
+  soft: Record<string, unknown>;
+  midnight: Record<string, unknown>;
+}
+
 export interface DashVariant {
   id: string;
   label: string;
@@ -23,9 +28,10 @@ export interface DashChart {
   title: string;
   caption: string;
   note: string;
-  span: "dash-12" | "dash-8" | "dash-6" | "dash-4" | "dash-3";
+  span: "dash-12" | "dash-8" | "dash-6" | "dash-4" | "dash-3" | "dash-2";
   spec: Record<string, unknown>;
   svg: string;
+  themes: DashThemes;
   variants?: DashVariant[];
   mapSpec?: Record<string, unknown>;
   table?: DashTable;
@@ -40,6 +46,7 @@ export interface DashSpark {
   users: number;
   spec: Record<string, unknown>;
   svg: string;
+  themes: DashThemes;
 }
 
 export interface Dashboard {
@@ -47,11 +54,24 @@ export interface Dashboard {
   product: string;
   title: string;
   lede: string;
+  disclaimer: string;
   range: string;
   defaultTheme: DashTheme;
   charts: DashChart[];
   sparks: DashSpark[];
   notes: { label: string; detail: string }[];
+}
+
+interface Ink {
+  card: string;
+  ink: string;
+  muted: string;
+  grid: string;
+  axis: string;
+  accent: string;
+  positive: string;
+  negative: string;
+  series: string[];
 }
 
 interface ChartDraft {
@@ -61,6 +81,7 @@ interface ChartDraft {
   note: string;
   span: DashChart["span"];
   spec: Record<string, unknown>;
+  themes: DashThemes;
   variants?: { id: string; label: string; spec: Record<string, unknown> }[];
   mapSpec?: Record<string, unknown>;
   table?: DashTable;
@@ -74,6 +95,7 @@ interface SparkDraft {
   events: number;
   users: number;
   spec: Record<string, unknown>;
+  themes: DashThemes;
 }
 
 function draw(spec: Record<string, unknown>): string {
@@ -96,13 +118,42 @@ function spark(draft: SparkDraft): DashSpark {
   return { ...draft, svg: draw(draft.spec) };
 }
 
-function spec(type: string, theme: DashTheme, body: Record<string, unknown>, alt: string): Record<string, unknown> {
-  return { version: "1", type, theme, ...body, a11y: { alt } };
+function themeOf(ink: Ink, series = ink.series, bare = false): Record<string, unknown> {
+  return {
+    preset: "soft",
+    tokens: {
+      background: "transparent",
+      surface: bare ? "transparent" : ink.card,
+      text: ink.ink,
+      muted: ink.muted,
+      grid: bare ? "transparent" : ink.grid,
+      axis: ink.axis,
+      accent: ink.accent,
+      positive: ink.positive,
+      negative: ink.negative,
+      series,
+    },
+  };
+}
+
+function themesFor(light: Ink, dark: Ink, series?: { soft: string[]; midnight: string[] }, bare = false): DashThemes {
+  return {
+    soft: themeOf(light, series?.soft ?? light.series, bare),
+    midnight: themeOf(dark, series?.midnight ?? dark.series, bare),
+  };
+}
+
+function spec(type: string, themes: DashThemes, mode: DashTheme, body: Record<string, unknown>, alt: string): Record<string, unknown> {
+  return { version: "1", type, theme: themes[mode], ...body, a11y: { alt } };
+}
+
+function disclaimer(product: string): string {
+  return `Styled after ${product}'s dashboard to show ChartKit's styling flexibility. Not affiliated with or endorsed by ${product}.`;
 }
 
 const ledgerMonths = ["Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"];
-const ledgerGross = [182, 176, 201, 198, 214, 248, 236, 261];
-const ledgerPrior = [160, 171, 188, 190, 196, 205, 210, 218];
+const ledgerGross = [182000, 176000, 201000, 198000, 214000, 248000, 236000, 261000];
+const ledgerPrior = [160000, 171000, 188000, 190000, 196000, 205000, 210000, 218000];
 
 const meterDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const meterVisits = [4200, 4600, 4480, 5100, 5340, 3900, 3720];
@@ -114,20 +165,26 @@ const waylineThen = [16.4, 17.1, 17.8, 18.2, 18.9, 19.4, 19.1, 20.2];
 const keelDays = ["8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21"];
 const keelHours = ["00", "03", "06", "09", "12", "15", "18", "21"];
 
+const money = { style: "compact", prefix: "$" };
+
 function score(
   id: string,
-  theme: DashTheme,
-  item: { label: string; value: number; delta: number; format?: string; goodDirection?: "down"; data?: number[]; alt: string; note: string },
+  themes: DashThemes,
+  mode: DashTheme,
+  span: DashChart["span"],
+  item: { label: string; value: number; delta: number; format?: unknown; goodDirection?: "down"; data?: number[]; alt: string; note: string },
 ): ChartDraft {
   return {
     id,
     title: item.label,
     caption: item.label,
     note: item.note,
-    span: "dash-4",
+    span,
+    themes,
     spec: spec(
       "kpi",
-      theme,
+      themes,
+      mode,
       {
         data: item.data,
         metric: {
@@ -137,7 +194,7 @@ function score(
           format: item.format ?? "compact",
           ...(item.goodDirection ? { goodDirection: item.goodDirection } : {}),
         },
-        mark: { fillOpacity: 0.14, strokeWidth: 1.25 },
+        mark: { fillOpacity: 0.16, strokeWidth: 1.5 },
         size: { width: 280, height: 132 },
       },
       item.alt,
@@ -146,77 +203,107 @@ function score(
 }
 
 function ledger(): Dashboard {
-  const theme: DashTheme = "soft";
+  const mode: DashTheme = "soft";
+  const light: Ink = {
+    card: "#ffffff",
+    ink: "#0a2540",
+    muted: "#425466",
+    grid: "#e6ebf1",
+    axis: "#c1c9d2",
+    accent: "#635bff",
+    positive: "#09825d",
+    negative: "#df1b41",
+    series: ["#635bff", "#8898aa"],
+  };
+  const dark: Ink = {
+    card: "#0f2942",
+    ink: "#f6f9fc",
+    muted: "#adbdcc",
+    grid: "#1c3f5c",
+    axis: "#2c5270",
+    accent: "#7a73ff",
+    positive: "#0d9263",
+    negative: "#ff4d6a",
+    series: ["#7a73ff", "#80e9ff"],
+  };
+  const themes = themesFor(light, dark);
+  const kpis = themesFor(light, dark, undefined, true);
+  const failed = themesFor(light, dark, { soft: [light.negative], midnight: [dark.negative] });
   const volume = ledgerMonths.map((month, index) => ({ month, gross: ledgerGross[index], prior: ledgerPrior[index] }));
   const series = [
-    ledgerGross,
+    ledgerGross.map((value) => value / 1000),
     [174, 168, 190, 188, 202, 236, 224, 248],
     [18, 16, 15, 17, 14, 13, 14, 12],
     [620, 640, 710, 690, 760, 800, 790, 840],
   ];
-  const kpis = [
-    { label: "Gross", value: 261000, delta: 0.08, alt: "Gross volume this month is 261 thousand dollars, up 8 percent.", data: series[0] },
-    { label: "Net", value: 248400, delta: 0.07, alt: "Net of fees is 248 thousand dollars, up 7 percent.", data: series[1] },
-    { label: "Refunds", value: 12600, delta: -0.11, goodDirection: "down" as const, alt: "Refunds are 12.6 thousand dollars, down 11 percent.", data: series[2] },
+  const cards = [
+    { label: "Gross", value: 261000, delta: 0.08, format: money, alt: "Gross volume this month is 261 thousand dollars, up 8 percent.", data: series[0] },
+    { label: "Net", value: 248400, delta: 0.07, format: money, alt: "Net of fees is 248 thousand dollars, up 7 percent.", data: series[1] },
+    { label: "Refunds", value: 12600, delta: -0.11, format: money, goodDirection: "down" as const, alt: "Refunds are 12.6 thousand dollars, down 11 percent.", data: series[2] },
     { label: "Accounts", value: 840, delta: 0.04, alt: "840 new accounts, up 4 percent.", data: series[3] },
   ].map((item, index) =>
-    score(`ledger-kpi-${index}`, theme, {
+    score(`ledger-kpi-${index}`, kpis, mode, "dash-4", {
       ...item,
-      note: "type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25 keep it a thin line with a light fill. metric.delta is the chip. goodDirection down flips the refund colour.",
+      note: "type kpi. theme.tokens.series is the blurple spark. surface and grid are transparent so the shell card is the only card. metric.delta is the chip. goodDirection down flips the refund colour. format compact with a dollar prefix.",
     }),
   );
   return {
     slug: "ledger",
-    product: "Harbor Ledger",
-    title: "Harbor Ledger",
+    product: "Stripe",
+    title: "Stripe-style payments",
     lede: "Payments for 1–21 October.",
+    disclaimer: disclaimer("Stripe"),
     range: "1–21 Oct",
-    defaultTheme: theme,
+    defaultTheme: mode,
     charts: [
-      ...kpis.map(chart),
+      ...cards.map(chart),
       chart({
         id: "ledger-volume",
         title: "Gross volume",
-        caption: "This period against the prior period.",
-        note: "type combo. The first y series is mark area with a light fill from --ck-area-opacity. The second is mark line and dash dashed, in a contrasting token. tooltip.mode index.",
+        caption: "This period against the previous period.",
+        note: "type combo. The first y series is a bar in theme.tokens.series[0]. The second is a dashed line in series[1]. axes.y.grid is solid and axes.x.grid is false, so only horizontal gridlines draw. mark.cornerRadius and mark.gap set the bar shape.",
         span: "dash-12",
+        themes,
         spec: spec(
           "combo",
-          theme,
+          themes,
+          mode,
           {
             data: volume,
             encoding: {
               x: "month",
               y: [
-                { field: "gross", title: "This period", mark: "area" },
-                { field: "prior", title: "Prior period", mark: "line", dash: "dashed" },
+                { field: "gross", title: "This period", mark: "bar" },
+                { field: "prior", title: "Previous period", mark: "line", dash: "dashed" },
               ],
             },
-            axes: { x: { title: "Month" }, y: { title: "Thousand USD", format: "compact" } },
+            axes: { x: { grid: false }, y: { grid: true, format: money } },
             legend: { position: "top" },
             tooltip: { mode: "index" },
-            mark: { strokeWidth: 2.25 },
+            mark: { strokeWidth: 2, cornerRadius: 3, gap: 0.38 },
             size: { width: 1100, height: 280 },
           },
-          "Gross volume peaks in October at 261 thousand, above the prior period.",
+          "Gross volume peaks in October at 261 thousand dollars, above the previous period.",
         ),
       }),
       chart({
         id: "ledger-methods",
         title: "Payments by method",
         caption: "Card, bank, and wallet.",
-        note: "type bar-list, loaded from @chartkitdev/core/charts/bar-list. No axes. A tinted track sits behind the label and the value is right-aligned.",
+        note: "type bar-list. The track and the fill use theme.tokens.series[0]. The value format is compact with a dollar prefix.",
         span: "dash-6",
+        themes,
         spec: spec(
           "bar-list",
-          theme,
+          themes,
+          mode,
           {
             data: [
               { method: "Card", amount: 168400 },
               { method: "Bank", amount: 64200 },
               { method: "Wallet", amount: 28400 },
             ],
-            encoding: { x: "method", y: { field: "amount", format: "compact" } },
+            encoding: { x: "method", y: { field: "amount", format: money } },
             size: { width: 520, height: 108 },
           },
           "Card is the largest method, then bank, then wallet.",
@@ -226,12 +313,13 @@ function ledger(): Dashboard {
         id: "ledger-failed",
         title: "Failed payments",
         caption: "Daily failures this period.",
-        note: "type line. The card overrides --ck-series-1 with a warning colour so failures are not the indigo volume series.",
+        note: "type line. This chart's theme.tokens.series is the negative token, so the line is not the volume blurple.",
         span: "dash-6",
-        cardClass: "dash-alert",
+        themes: failed,
         spec: spec(
           "line",
-          theme,
+          failed,
+          mode,
           {
             data: [
               { day: "14", failed: 18 },
@@ -245,8 +333,9 @@ function ledger(): Dashboard {
             ],
             encoding: { x: "day", y: { field: "failed", title: "Failed" } },
             legend: { show: false },
-            axes: { x: { title: "October" }, y: { title: "Failed" } },
+            axes: { x: { grid: false }, y: { grid: true } },
             tooltip: { mode: "index" },
+            mark: { strokeWidth: 2 },
             size: { width: 520, height: 180 },
           },
           "Failed payments peak at 22 on the 15th and fall to 8 on the 21st.",
@@ -255,37 +344,65 @@ function ledger(): Dashboard {
     ],
     sparks: [],
     notes: [
-      { label: "Scorecards", detail: "type kpi. A number array in data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25 keep the line thin and the fill light. metric.delta is the chip." },
-      { label: "Comparison", detail: "combo puts an area and a dashed line on one x axis. The prior series uses a warm second token so the dash stays visible on the area." },
+      { label: "Scorecards", detail: "type kpi. A number array in data is the sparkline. theme.tokens.surface and theme.tokens.grid are transparent, so the page card is the only card. metric.delta is the chip." },
+      { label: "Comparison", detail: "combo puts bars and a dashed line on one x axis. series[0] is the blurple bar. series[1] is the slate or cyan comparison line. Only the y grid is on." },
       { label: "Methods", detail: "bar-list is an on-demand chart. It is not in the line or all bundle. A tinted track runs behind the label and the value sits on the right." },
-      { label: "Tokens", detail: "The page sets --ck-series-1 and --ck-series-2 from --dash-series-*. Soft and Midnight swap those variables. The accent is an indigo chosen for this page." },
+      { label: "Palette", detail: "Colours are theme.tokens on each spec: blurple #635bff, navy text #0a2540, comparison #8898aa, and the negative #df1b41 for failed payments. Midnight swaps those tokens. The page CSS does not paint the marks." },
     ],
   };
 }
 
 function meter(): Dashboard {
-  const theme: DashTheme = "soft";
+  const mode: DashTheme = "soft";
+  const light: Ink = {
+    card: "#ffffff",
+    ink: "#111827",
+    muted: "#6b7280",
+    grid: "#f3f4f6",
+    axis: "#e5e7eb",
+    accent: "#615fff",
+    positive: "#16a34a",
+    negative: "#ef4444",
+    series: ["#615fff"],
+  };
+  const dark: Ink = {
+    card: "#1f2937",
+    ink: "#f9fafb",
+    muted: "#9ca3af",
+    grid: "#374151",
+    axis: "#4b5563",
+    accent: "#9d99ff",
+    positive: "#4ade80",
+    negative: "#f87171",
+    series: ["#9d99ff"],
+  };
+  const themes = themesFor(light, dark);
+  const kpis = themesFor(light, dark, undefined, true);
   const days = meterDays.map((day, index) => ({ day, visits: meterVisits[index] }));
   const stats = [
     { label: "Visitors", value: 18420, delta: 0.04, data: [2400, 2620, 2510, 2800, 3010, 2680, 2400], alt: "Visitors are 18.4 thousand, up 4 percent." },
-    { label: "Pageviews", value: 61200, delta: 0.06, data: meterVisits, alt: "Pageviews are 61.2 thousand, up 6 percent." },
+    { label: "Visits", value: 22140, delta: 0.05, data: meterVisits, alt: "Visits are 22.1 thousand, up 5 percent." },
+    { label: "Pageviews", value: 61200, delta: 0.06, data: [8200, 9100, 8800, 10200, 10800, 7600, 6500], alt: "Pageviews are 61.2 thousand, up 6 percent." },
+    { label: "Views per visit", value: 2.8, delta: 0.02, format: "number", data: [2.4, 2.5, 2.6, 2.7, 2.9, 2.6, 2.8], alt: "Views per visit are 2.8, up 2 percent." },
     { label: "Bounce", value: 0.41, delta: -0.03, format: "percent", goodDirection: "down" as const, data: [0.46, 0.44, 0.45, 0.42, 0.4, 0.41, 0.39], alt: "Bounce is 41 percent, down 3 points." },
-    { label: "Duration", value: 2.4, delta: 0.02, format: "number", data: [2.1, 2.2, 2.0, 2.4, 2.6, 2.3, 2.4], alt: "Duration is 2.4 minutes, up 2 percent." },
+    { label: "Duration", value: 144000, delta: 0.02, format: "duration-ms", data: [120000, 128000, 132000, 140000, 150000, 136000, 144000], alt: "Duration is 2.4 minutes, up 2 percent." },
   ].map((item, index) =>
-    score(`meter-kpi-${index}`, theme, {
+    score(`meter-kpi-${index}`, kpis, mode, "dash-2", {
       ...item,
-      note: "type kpi above the chart. metric.delta is the change. Bounce uses goodDirection down.",
+      note: "type kpi. Six cards share one indigo series token. Bounce uses goodDirection down. Duration uses format duration-ms.",
     }),
   );
   const list = (id: string, title: string, field: string, rows: { name: string; visits: number }[], alt: string): ChartDraft => ({
     id,
     title,
     caption: title,
-    note: "type bar-list. No axes. The track is a light tint of the series token, the label sits on it, and the value is right-aligned.",
+    note: "type bar-list. The track is a light tint of theme.tokens.series[0]. The label sits on the track and the value is right-aligned.",
     span: "dash-3",
+    themes,
     spec: spec(
       "bar-list",
-      theme,
+      themes,
+      mode,
       {
         data: rows.map((row) => ({ [field]: row.name, visits: row.visits })),
         encoding: { x: field, y: { field: "visits", format: "compact" } },
@@ -296,28 +413,31 @@ function meter(): Dashboard {
   });
   return {
     slug: "meter",
-    product: "Quiet Meter",
-    title: "Quiet Meter",
+    product: "Plausible",
+    title: "Plausible-style analytics",
     lede: "Audience for the last 7 days.",
+    disclaimer: disclaimer("Plausible"),
     range: "Last 7 days",
-    defaultTheme: theme,
+    defaultTheme: mode,
     charts: [
       ...stats.map(chart),
       chart({
         id: "meter-visits",
         title: "Visits",
         caption: "One series.",
-        note: "type line, mark.area and mark.curve monotone, legend.show false. A single --ck-series-1 token is the only colour.",
+        note: "type line. mark.area, mark.curve monotone, and mark.fillOpacity 0.14. legend.show is false. Both grids are off. The only colour is theme.tokens.series[0].",
         span: "dash-12",
+        themes,
         spec: spec(
           "line",
-          theme,
+          themes,
+          mode,
           {
             data: days,
             encoding: { x: "day", y: { field: "visits", title: "Visits" } },
-            mark: { area: true, curve: "monotone" },
+            mark: { area: true, curve: "monotone", fillOpacity: 0.14, strokeWidth: 2 },
             legend: { show: false },
-            axes: { x: { title: "Day" }, y: { title: "Visits", format: "compact" } },
+            axes: { x: { grid: false }, y: { grid: false, format: "compact" } },
             tooltip: { mode: "index" },
             size: { width: 1100, height: 280 },
           },
@@ -346,15 +466,45 @@ function meter(): Dashboard {
     ],
     sparks: [],
     notes: [
-      { label: "Stats", detail: "Four kpi specs sit above the chart. Each has a delta. Bounce uses goodDirection down and format percent." },
-      { label: "One accent", detail: "Every mark uses --ck-series-1. The page does not set a range." },
+      { label: "Stats", detail: "Six kpi specs sit in one row. Each has a delta. Bounce uses goodDirection down and format percent. Duration uses format duration-ms." },
+      { label: "One accent", detail: "Every mark uses theme.tokens.series, an indigo #615fff. The area fill is mark.fillOpacity 0.14. Midnight swaps the same tokens to #9d99ff." },
       { label: "Lists", detail: "Top pages, sources, and devices are type bar-list. The chart is on demand from @chartkitdev/core/charts/bar-list and is not part of the line or all bundle." },
     ],
   };
 }
 
 function wayline(): Dashboard {
-  const theme: DashTheme = "soft";
+  const mode: DashTheme = "soft";
+  const channels = {
+    soft: ["#1a73e8", "#12b5cb", "#e8710a", "#e52592", "#9334e6"],
+    midnight: ["#8ab4f8", "#78d9ec", "#fcad70", "#f48fb1", "#d7aefb"],
+  };
+  const light: Ink = {
+    card: "#ffffff",
+    ink: "#202124",
+    muted: "#5f6368",
+    grid: "#e8eaed",
+    axis: "#dadce0",
+    accent: "#1a73e8",
+    positive: "#188038",
+    negative: "#d93025",
+    series: ["#1a73e8", "#9aa0a6"],
+  };
+  const dark: Ink = {
+    card: "#292a2d",
+    ink: "#e8eaed",
+    muted: "#9aa0a6",
+    grid: "#3c4043",
+    axis: "#5f6368",
+    accent: "#8ab4f8",
+    positive: "#81c995",
+    negative: "#f28b82",
+    series: ["#8ab4f8", "#9aa0a6"],
+  };
+  const themes = themesFor(light, dark);
+  const kpis = themesFor(light, dark, undefined, true);
+  const donutThemes = themesFor(light, dark, channels);
+  const barThemes = themesFor(light, dark, { soft: [light.accent], midnight: [dark.accent] });
   const weeks = waylineWeeks.map((week, index) => ({ week, now: waylineNow[index], then: waylineThen[index] }));
   const channelRows = [
     { channel: "Search", sessions: 10290 },
@@ -370,71 +520,73 @@ function wayline(): Dashboard {
     { code: "KEN", country: "Kenya", sessions: 1900 },
     { code: "CAN", country: "Canada", sessions: 1600 },
   ];
+  const ramp = ["#aecbfa", "#669df6", "#1a73e8"];
   const scores = [
     { label: "Sessions", value: 24500, delta: 0.06, format: "compact", data: waylineNow, alt: "Sessions this week are 24.5 thousand, up 6 percent." },
     { label: "Engaged", value: 11200, delta: 0.03, format: "compact", data: [8.1, 8.4, 8.2, 9.4, 10.1, 9.8, 10.6, 11.2], alt: "Engaged sessions are 11.2 thousand, up 3 percent." },
     { label: "Bounce rate", value: 0.38, delta: -0.02, format: "percent", goodDirection: "down" as const, data: [0.44, 0.42, 0.43, 0.41, 0.4, 0.39, 0.38, 0.38], alt: "Bounce rate is 38 percent, down 2 points." },
     { label: "Minutes", value: 3.4, delta: 0.05, format: "number", data: [2.8, 2.9, 3.0, 3.1, 3.2, 3.1, 3.3, 3.4], alt: "Average minutes are 3.4, up 5 percent." },
   ].map((item, index) =>
-    score(`wayline-kpi-${index}`, theme, {
+    score(`wayline-kpi-${index}`, kpis, mode, "dash-4", {
       ...item,
-      note: "type kpi with data for the sparkline. Bounce rate uses format percent and goodDirection down.",
+      note: "type kpi. The spark uses the blue series token. Bounce rate uses format percent and goodDirection down.",
     }),
   );
   return {
     slug: "wayline",
-    product: "Wayline",
-    title: "Wayline",
+    product: "Google Analytics",
+    title: "Google Analytics-style traffic report",
     lede: "Acquisition for the last 8 weeks.",
+    disclaimer: disclaimer("Google Analytics"),
     range: "Last 8 weeks",
-    defaultTheme: theme,
+    defaultTheme: mode,
     charts: [
       ...scores.map(chart),
       chart({
         id: "wayline-sessions",
         title: "Sessions",
-        caption: "This period and the prior period.",
-        note: "type line. The second y series sets dash dashed. Both share encoding.x.",
+        caption: "This period and the previous period.",
+        note: "type line. series[0] is solid blue. series[1] is a dashed gray comparison. axes.y.grid is on and axes.x.grid is off. legend.position is top.",
         span: "dash-8",
+        themes,
         spec: spec(
           "line",
-          theme,
+          themes,
+          mode,
           {
             data: weeks,
             encoding: {
               x: "week",
               y: [
                 { field: "now", title: "This period" },
-                { field: "then", title: "Prior period", dash: "dashed" },
+                { field: "then", title: "Previous period", dash: "dashed" },
               ],
             },
-            axes: { x: { title: "Week" }, y: { title: "Thousand sessions" } },
+            axes: { x: { grid: false }, y: { grid: true } },
             legend: { position: "top" },
             tooltip: { mode: "index" },
             mark: { strokeWidth: 2.25 },
             size: { width: 720, height: 320 },
           },
-          "Sessions rise from 18.2 to 24.5 thousand, staying above the prior period.",
+          "Sessions rise from 18.2 to 24.5 thousand, staying above the previous period.",
         ),
       }),
       chart({
         id: "wayline-channels",
         title: "Channels",
         caption: "Share of sessions.",
-        note: "type donut. encoding.y is titled Sessions and formatted compact, so the centre is the total sessions. legend.values prints the share and the session count under the ring. color.range is var(--ck-wayline-1) through var(--ck-wayline-5).",
+        note: "type donut. This chart's theme.tokens.series is the five channel colours, so the slices do not use a page CSS variable. legend.values prints the share and the session count. The y channel is Sessions with format compact, so the centre is the total.",
         span: "dash-3",
+        themes: donutThemes,
         spec: spec(
           "donut",
-          theme,
+          donutThemes,
+          mode,
           {
             data: channelRows,
             encoding: {
               x: "channel",
               y: { field: "sessions", title: "Sessions", format: "compact" },
-              color: {
-                field: "channel",
-                range: ["var(--ck-wayline-1)", "var(--ck-wayline-2)", "var(--ck-wayline-3)", "var(--ck-wayline-4)", "var(--ck-wayline-5)"],
-              },
             },
             legend: { values: true },
             size: { width: 400, height: 430 },
@@ -446,34 +598,37 @@ function wayline(): Dashboard {
         id: "wayline-countries",
         title: "Countries",
         caption: "Sessions by country.",
-        note: "The list is type bar. The map toggle is type choropleth from @chartkitdev/geo, mark.atlas world, encoding.region set to the ISO code. Geo is on demand and is not in the line or all bundle.",
+        note: "The list is type bar in the blue series token. The map is type choropleth. encoding.color.range is the blue ramp #aecbfa to #1a73e8. The map theme is the string soft or midnight because a token object does not change water, land, or legend text.",
         span: "dash-12",
+        themes: barThemes,
         table: {
           title: "Top countries",
           columns: ["Country", "Sessions"],
           rows: countries.map((row) => [row.country, row.sessions.toLocaleString("en-GB")]),
         },
-        mapSpec: spec(
-          "choropleth",
-          theme,
-          {
-            data: countries.map((row) => ({ country: row.code, sessions: row.sessions })),
-            encoding: { region: "country", color: { field: "sessions", title: "Sessions", format: "compact" } },
-            mark: { atlas: "world", projection: "equalEarth", scale: "sequential" },
-            legend: { position: "bottom" },
-            size: { width: 720, height: 340 },
+        mapSpec: {
+          version: "1",
+          type: "choropleth",
+          theme: mode,
+          data: countries.map((row) => ({ country: row.code, sessions: row.sessions })),
+          encoding: {
+            region: "country",
+            color: { field: "sessions", title: "Sessions", format: "compact", range: ramp },
           },
-          "Japan has the most sessions, then Portugal. Countries without a row are hatched.",
-        ),
+          mark: { atlas: "world", projection: "equalEarth", scale: "sequential" },
+          size: { width: 720, height: 340 },
+          a11y: { alt: "Japan has the most sessions, then Portugal. Countries without a row are hatched." },
+        },
         spec: spec(
           "bar",
-          theme,
+          barThemes,
+          mode,
           {
             data: countries.map((row) => ({ country: row.country, sessions: row.sessions })),
             encoding: { x: "country", y: { field: "sessions", format: "compact" } },
-            mark: { orientation: "horizontal" },
+            mark: { orientation: "horizontal", cornerRadius: 2 },
             legend: { show: false },
-            axes: { x: { title: "Country" }, y: { title: "Sessions" } },
+            axes: { x: { grid: false }, y: { grid: true } },
             size: { width: 640, height: 260 },
           },
           "Japan has the most sessions, then Portugal.",
@@ -482,20 +637,54 @@ function wayline(): Dashboard {
     ],
     sparks: [],
     notes: [
-      { label: "Scorecards", detail: "Each kpi includes data, so the sparkline is in the card. Bounce rate replaces the old Brief label." },
-      { label: "Donut", detail: "The y channel is Sessions with format compact. The hole shows that total. legend.values prints the share and the session count under the ring." },
-      { label: "Countries", detail: "The bar sits beside a table. The map toggle renders a choropleth with @chartkitdev/geo, which loads on demand." },
+      { label: "Scorecards", detail: "Each kpi includes data, so the sparkline is in the card. The spark colour is the blue series token." },
+      { label: "Comparison", detail: "The sessions line uses #1a73e8 for this period and a dashed #9aa0a6 for the previous period. Midnight uses #8ab4f8 for this period." },
+      { label: "Donut", detail: "theme.tokens.series is Search blue, Direct teal, Mail orange, Social pink, and Referral purple. legend.values prints the share and the session count under the ring." },
+      { label: "Countries", detail: "The bar uses the blue series token. The map toggle renders a choropleth whose sequential ramp is encoding.color.range. Geo loads on demand." },
     ],
   };
 }
 
 function keelLevels(days: string[], counts: number[][]): Record<string, string | number>[] {
-  const levels = ["Fault", "Warn", "Note"];
+  const levels = ["Error", "Warning", "Info"];
   return days.flatMap((day, index) => levels.map((level, levelIndex) => ({ day, level, events: counts[index]?.[levelIndex] ?? 0 })));
 }
 
 function keel(): Dashboard {
-  const theme: DashTheme = "midnight";
+  const mode: DashTheme = "midnight";
+  const levels = {
+    soft: ["#f55459", "#ff9838", "#8d95a3"],
+    midnight: ["#fa6769", "#ff9838", "#a4a8b4"],
+  };
+  const response = {
+    soft: ["#7553ff", "#ff9838"],
+    midnight: ["#7b52ff", "#ffb15a"],
+  };
+  const light: Ink = {
+    card: "#ffffff",
+    ink: "#1f1633",
+    muted: "#6a6275",
+    grid: "#eeeaf2",
+    axis: "#ddd6e6",
+    accent: "#7553ff",
+    positive: "#1b7c4d",
+    negative: "#f55459",
+    series: levels.soft,
+  };
+  const dark: Ink = {
+    card: "#241f33",
+    ink: "#eeeaf6",
+    muted: "#a39bb0",
+    grid: "#322b42",
+    axis: "#3d3550",
+    accent: "#7b52ff",
+    positive: "#6dcea0",
+    negative: "#fa6769",
+    series: levels.midnight,
+  };
+  const themes = themesFor(light, dark, levels);
+  const calm = themesFor(light, dark, response);
+  const bars = themesFor(light, dark, { soft: ["#7553ff"], midnight: ["#7b52ff"] });
   const counts14 = [
     [22, 14, 12],
     [28, 16, 14],
@@ -524,57 +713,61 @@ function keel(): Dashboard {
   ];
   const areaRows = keelDays.map((day, index) => ({
     day,
-    Fault: counts14[index]?.[0] ?? 0,
-    Warn: counts14[index]?.[1] ?? 0,
-    Note: counts14[index]?.[2] ?? 0,
+    Error: counts14[index]?.[0] ?? 0,
+    Warning: counts14[index]?.[1] ?? 0,
+    Info: counts14[index]?.[2] ?? 0,
   }));
   const band = [
-    { type: "band", axis: "x", from: "15", to: "16", label: "Keel 2.4", opacity: 0.16, color: "text" },
+    { type: "band", axis: "x", from: "15", to: "16", label: "2.4", opacity: 0.16, color: "text" },
     { type: "rule", axis: "x", value: "16", label: "Ship", labelPosition: "end", dash: "solid", color: "muted" },
   ];
   const bars14 = spec(
     "bar",
-    theme,
+    themes,
+    mode,
     {
       data: keelLevels(keelDays, counts14),
       encoding: { x: "day", y: "events", series: "level" },
-      mark: { stack: "stack" },
-      axes: { x: { title: "October" }, y: { title: "Events" } },
+      mark: { stack: "stack", cornerRadius: 2, gap: 0.28 },
+      axes: { x: { grid: false }, y: { grid: true } },
       legend: { position: "top" },
       tooltip: { mode: "index" },
       annotations: band,
       size: { width: 1100, height: 280 },
     },
-    "Faults peak on the 16th, inside the Keel 2.4 window.",
+    "Errors peak on the 16th, inside the 2.4 window.",
   );
   const bars24 = spec(
     "bar",
-    theme,
+    themes,
+    mode,
     {
       data: keelLevels(keelHours, counts24),
       encoding: { x: "day", y: "events", series: "level" },
-      mark: { stack: "stack" },
-      axes: { x: { title: "Hour" }, y: { title: "Events" } },
+      mark: { stack: "stack", cornerRadius: 2, gap: 0.28 },
+      axes: { x: { grid: false }, y: { grid: true } },
       legend: { position: "top" },
       tooltip: { mode: "index" },
       size: { width: 1100, height: 280 },
     },
-    "Faults peak at noon in the last 24 hours.",
+    "Errors peak at noon in the last 24 hours.",
   );
   const area = spec(
     "stacked-area",
-    theme,
+    themes,
+    mode,
     {
       data: areaRows,
       encoding: {
         x: "day",
         y: [
-          { field: "Fault", title: "Fault" },
-          { field: "Warn", title: "Warn" },
-          { field: "Note", title: "Note" },
+          { field: "Error", title: "Error" },
+          { field: "Warning", title: "Warning" },
+          { field: "Info", title: "Info" },
         ],
       },
-      axes: { x: { title: "October" }, y: { title: "Events" } },
+      mark: { fillOpacity: 0.85 },
+      axes: { x: { grid: false }, y: { grid: true } },
       legend: { position: "top" },
       tooltip: { mode: "index" },
       size: { width: 1100, height: 280 },
@@ -593,25 +786,27 @@ function keel(): Dashboard {
     [0, 1, 1, 8, 3, 1, 0],
   ];
   const issueNames: { name: string; level: string; users: number }[] = [
-    { name: "Checkout timeout", level: "Fault", users: 6 },
-    { name: "Map tile retry", level: "Warn", users: 4 },
-    { name: "Queue lag", level: "Note", users: 11 },
-    { name: "Auth clock skew", level: "Fault", users: 3 },
+    { name: "Checkout timeout", level: "Error", users: 6 },
+    { name: "Map tile retry", level: "Warning", users: 4 },
+    { name: "Queue lag", level: "Info", users: 11 },
+    { name: "Auth clock skew", level: "Error", users: 3 },
   ];
   return {
     slug: "keel",
-    product: "Keel",
-    title: "Keel",
+    product: "Sentry",
+    title: "Sentry-style issues",
     lede: "Issues for the last 14 days.",
+    disclaimer: disclaimer("Sentry"),
     range: "14 days",
-    defaultTheme: theme,
+    defaultTheme: mode,
     charts: [
       chart({
         id: "keel-volume",
         title: "Event volume",
-        caption: "Fault, warn, and note.",
-        note: "type bar with encoding.series and mark.stack stack. The 24h variant is the same bar over eight hours. The area variant is type stacked-area. The release band uses color text so the label is not the fault red. Ship uses labelPosition end, so the label sits above the plot.",
+        caption: "Error, warning, and info.",
+        note: "type bar with encoding.series and mark.stack stack. theme.tokens.series is error #fa6769, warning #ff9838, and info #a4a8b4 in the dark tokens. The 24h variant is the same bar. The area variant is type stacked-area. Ship uses labelPosition end, so the label sits above the plot.",
         span: "dash-12",
+        themes,
         spec: bars14,
         variants: [
           { id: "14d", label: "14d", spec: bars14 },
@@ -623,12 +818,13 @@ function keel(): Dashboard {
         id: "keel-latency",
         title: "Response",
         caption: "p50 and p95.",
-        note: "type line. The card sets --ck-series-1 to a calm colour and --ck-series-2 to a warning colour, so p50 does not use the fault red.",
+        note: "type line. This chart's theme.tokens.series is purple for p50 and the warning colour for p95, separate from the error series.",
         span: "dash-12",
-        cardClass: "dash-calm",
+        themes: calm,
         spec: spec(
           "line",
-          theme,
+          calm,
+          mode,
           {
             data: hours.map((hour, index) => ({ hour, p50: latency[0]?.[index], p95: latency[1]?.[index] })),
             encoding: {
@@ -638,9 +834,10 @@ function keel(): Dashboard {
                 { field: "p95", title: "p95" },
               ],
             },
-            axes: { x: { title: "Hour" }, y: { title: "Milliseconds" } },
+            axes: { x: { grid: false }, y: { grid: true } },
             legend: { position: "top" },
             tooltip: { mode: "index" },
+            mark: { strokeWidth: 2 },
             size: { width: 1100, height: 240 },
           },
           "p95 peaks at 410 milliseconds at noon. p50 stays under 140.",
@@ -656,12 +853,15 @@ function keel(): Dashboard {
         detail: item.level,
         events,
         users: item.users,
+        themes: bars,
         spec: spec(
           "bar",
-          theme,
+          bars,
+          mode,
           {
             data: series.map((value, day) => ({ day: String(day + 1), events: value })),
             encoding: { x: "day", y: "events" },
+            mark: { cornerRadius: 1, gap: 0.2 },
             axes: { x: false, y: false },
             legend: { show: false },
             tooltip: { mode: "index" },
@@ -672,10 +872,10 @@ function keel(): Dashboard {
       });
     }),
     notes: [
-      { label: "Dark first", detail: "The spec theme defaults to midnight, and the page shell, header, and footer follow that theme. Soft still renders from the toggle." },
-      { label: "Release band", detail: "The band colour is the text token, so the Keel 2.4 label is not red on the fault series. Ship uses labelPosition end and the muted token, above the plot." },
-      { label: "Response", detail: "p50 uses a calm colour and p95 a warning colour, set on that card's tokens rather than the fault series." },
-      { label: "Issues", detail: "Each row is a bar spec with both axes off, so the seven days read as a histogram. The event count and the user count sit on the right." },
+      { label: "Dark first", detail: "The spec theme defaults to the dark token object: page-adjacent card #241f33, ink #eeeaf6, error #fa6769, warning #ff9838, info #a4a8b4, accent #7b52ff. Soft swaps those tokens." },
+      { label: "Release band", detail: "The band colour is the text token, so the 2.4 label is not the error red. Ship uses labelPosition end and the muted token, above the plot." },
+      { label: "Response", detail: "p50 uses the purple accent and p95 the warning colour, on that chart's theme.tokens.series." },
+      { label: "Issues", detail: "Each row is a bar spec with both axes off and the purple series token, so the seven days read as a histogram. The event count and the user count sit on the right." },
       { label: "Window", detail: "14d is the stacked bar. 24h is the same bar over eight hours. Area is a stacked-area of the 14 days." },
     ],
   };
@@ -699,7 +899,7 @@ export function dashboardMarkdown(board: Dashboard): string {
     "",
     `Range: ${board.range}.`,
     "",
-    "Inspired by common SaaS dashboard styles. ChartKit is not affiliated with any product.",
+    board.disclaimer,
     "",
     `Default theme: ${board.defaultTheme}.`,
     "",

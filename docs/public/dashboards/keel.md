@@ -1,233 +1,251 @@
-# Keel
+# Sentry-style issues
 
 Issues for the last 14 days.
 
 Range: 14 days.
 
-Inspired by common SaaS dashboard styles. ChartKit is not affiliated with any product.
+Styled after Sentry's dashboard to show ChartKit's styling flexibility. Not affiliated with or endorsed by Sentry.
 
 Default theme: midnight.
 
 ## Event volume
 
-Fault, warn, and note.
+Error, warning, and info.
 
-type bar with encoding.series and mark.stack stack. The 24h variant is the same bar over eight hours. The area variant is type stacked-area. The release band uses color text so the label is not the fault red. Ship uses labelPosition end, so the label sits above the plot.
+type bar with encoding.series and mark.stack stack. theme.tokens.series is error #fa6769, warning #ff9838, and info #a4a8b4 in the dark tokens. The 24h variant is the same bar. The area variant is type stacked-area. Ship uses labelPosition end, so the label sits above the plot.
 
 ```json
 {
   "version": "1",
   "type": "bar",
-  "theme": "midnight",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#241f33",
+      "text": "#eeeaf6",
+      "muted": "#a39bb0",
+      "grid": "#322b42",
+      "axis": "#3d3550",
+      "accent": "#7b52ff",
+      "positive": "#6dcea0",
+      "negative": "#fa6769",
+      "series": [
+        "#fa6769",
+        "#ff9838",
+        "#a4a8b4"
+      ]
+    }
+  },
   "data": [
     {
       "day": "8",
-      "level": "Fault",
+      "level": "Error",
       "events": 22
     },
     {
       "day": "8",
-      "level": "Warn",
+      "level": "Warning",
       "events": 14
     },
     {
       "day": "8",
-      "level": "Note",
+      "level": "Info",
       "events": 12
     },
     {
       "day": "9",
-      "level": "Fault",
+      "level": "Error",
       "events": 28
     },
     {
       "day": "9",
-      "level": "Warn",
+      "level": "Warning",
       "events": 16
     },
     {
       "day": "9",
-      "level": "Note",
+      "level": "Info",
       "events": 14
     },
     {
       "day": "10",
-      "level": "Fault",
+      "level": "Error",
       "events": 24
     },
     {
       "day": "10",
-      "level": "Warn",
+      "level": "Warning",
       "events": 18
     },
     {
       "day": "10",
-      "level": "Note",
+      "level": "Info",
       "events": 11
     },
     {
       "day": "11",
-      "level": "Fault",
+      "level": "Error",
       "events": 30
     },
     {
       "day": "11",
-      "level": "Warn",
+      "level": "Warning",
       "events": 15
     },
     {
       "day": "11",
-      "level": "Note",
+      "level": "Info",
       "events": 13
     },
     {
       "day": "12",
-      "level": "Fault",
+      "level": "Error",
       "events": 26
     },
     {
       "day": "12",
-      "level": "Warn",
+      "level": "Warning",
       "events": 17
     },
     {
       "day": "12",
-      "level": "Note",
+      "level": "Info",
       "events": 16
     },
     {
       "day": "13",
-      "level": "Fault",
+      "level": "Error",
       "events": 18
     },
     {
       "day": "13",
-      "level": "Warn",
+      "level": "Warning",
       "events": 12
     },
     {
       "day": "13",
-      "level": "Note",
+      "level": "Info",
       "events": 10
     },
     {
       "day": "14",
-      "level": "Fault",
+      "level": "Error",
       "events": 16
     },
     {
       "day": "14",
-      "level": "Warn",
+      "level": "Warning",
       "events": 9
     },
     {
       "day": "14",
-      "level": "Note",
+      "level": "Info",
       "events": 8
     },
     {
       "day": "15",
-      "level": "Fault",
+      "level": "Error",
       "events": 40
     },
     {
       "day": "15",
-      "level": "Warn",
+      "level": "Warning",
       "events": 22
     },
     {
       "day": "15",
-      "level": "Note",
+      "level": "Info",
       "events": 18
     },
     {
       "day": "16",
-      "level": "Fault",
+      "level": "Error",
       "events": 52
     },
     {
       "day": "16",
-      "level": "Warn",
+      "level": "Warning",
       "events": 30
     },
     {
       "day": "16",
-      "level": "Note",
+      "level": "Info",
       "events": 16
     },
     {
       "day": "17",
-      "level": "Fault",
+      "level": "Error",
       "events": 44
     },
     {
       "day": "17",
-      "level": "Warn",
+      "level": "Warning",
       "events": 28
     },
     {
       "day": "17",
-      "level": "Note",
+      "level": "Info",
       "events": 22
     },
     {
       "day": "18",
-      "level": "Fault",
+      "level": "Error",
       "events": 33
     },
     {
       "day": "18",
-      "level": "Warn",
+      "level": "Warning",
       "events": 20
     },
     {
       "day": "18",
-      "level": "Note",
+      "level": "Info",
       "events": 24
     },
     {
       "day": "19",
-      "level": "Fault",
+      "level": "Error",
       "events": 21
     },
     {
       "day": "19",
-      "level": "Warn",
+      "level": "Warning",
       "events": 14
     },
     {
       "day": "19",
-      "level": "Note",
+      "level": "Info",
       "events": 15
     },
     {
       "day": "20",
-      "level": "Fault",
+      "level": "Error",
       "events": 18
     },
     {
       "day": "20",
-      "level": "Warn",
+      "level": "Warning",
       "events": 12
     },
     {
       "day": "20",
-      "level": "Note",
+      "level": "Info",
       "events": 14
     },
     {
       "day": "21",
-      "level": "Fault",
+      "level": "Error",
       "events": 16
     },
     {
       "day": "21",
-      "level": "Warn",
+      "level": "Warning",
       "events": 11
     },
     {
       "day": "21",
-      "level": "Note",
+      "level": "Info",
       "events": 13
     }
   ],
@@ -237,14 +255,16 @@ type bar with encoding.series and mark.stack stack. The 24h variant is the same 
     "series": "level"
   },
   "mark": {
-    "stack": "stack"
+    "stack": "stack",
+    "cornerRadius": 2,
+    "gap": 0.28
   },
   "axes": {
     "x": {
-      "title": "October"
+      "grid": false
     },
     "y": {
-      "title": "Events"
+      "grid": true
     }
   },
   "legend": {
@@ -259,7 +279,7 @@ type bar with encoding.series and mark.stack stack. The 24h variant is the same 
       "axis": "x",
       "from": "15",
       "to": "16",
-      "label": "Keel 2.4",
+      "label": "2.4",
       "opacity": 0.16,
       "color": "text"
     },
@@ -278,7 +298,7 @@ type bar with encoding.series and mark.stack stack. The 24h variant is the same 
     "height": 280
   },
   "a11y": {
-    "alt": "Faults peak on the 16th, inside the Keel 2.4 window."
+    "alt": "Errors peak on the 16th, inside the 2.4 window."
   }
 }
 ```
@@ -289,126 +309,144 @@ type bar with encoding.series and mark.stack stack. The 24h variant is the same 
 {
   "version": "1",
   "type": "bar",
-  "theme": "midnight",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#241f33",
+      "text": "#eeeaf6",
+      "muted": "#a39bb0",
+      "grid": "#322b42",
+      "axis": "#3d3550",
+      "accent": "#7b52ff",
+      "positive": "#6dcea0",
+      "negative": "#fa6769",
+      "series": [
+        "#fa6769",
+        "#ff9838",
+        "#a4a8b4"
+      ]
+    }
+  },
   "data": [
     {
       "day": "00",
-      "level": "Fault",
+      "level": "Error",
       "events": 6
     },
     {
       "day": "00",
-      "level": "Warn",
+      "level": "Warning",
       "events": 3
     },
     {
       "day": "00",
-      "level": "Note",
+      "level": "Info",
       "events": 2
     },
     {
       "day": "03",
-      "level": "Fault",
+      "level": "Error",
       "events": 4
     },
     {
       "day": "03",
-      "level": "Warn",
+      "level": "Warning",
       "events": 2
     },
     {
       "day": "03",
-      "level": "Note",
+      "level": "Info",
       "events": 2
     },
     {
       "day": "06",
-      "level": "Fault",
+      "level": "Error",
       "events": 5
     },
     {
       "day": "06",
-      "level": "Warn",
+      "level": "Warning",
       "events": 3
     },
     {
       "day": "06",
-      "level": "Note",
+      "level": "Info",
       "events": 1
     },
     {
       "day": "09",
-      "level": "Fault",
+      "level": "Error",
       "events": 8
     },
     {
       "day": "09",
-      "level": "Warn",
+      "level": "Warning",
       "events": 4
     },
     {
       "day": "09",
-      "level": "Note",
+      "level": "Info",
       "events": 3
     },
     {
       "day": "12",
-      "level": "Fault",
+      "level": "Error",
       "events": 14
     },
     {
       "day": "12",
-      "level": "Warn",
+      "level": "Warning",
       "events": 7
     },
     {
       "day": "12",
-      "level": "Note",
+      "level": "Info",
       "events": 4
     },
     {
       "day": "15",
-      "level": "Fault",
+      "level": "Error",
       "events": 11
     },
     {
       "day": "15",
-      "level": "Warn",
+      "level": "Warning",
       "events": 6
     },
     {
       "day": "15",
-      "level": "Note",
+      "level": "Info",
       "events": 3
     },
     {
       "day": "18",
-      "level": "Fault",
+      "level": "Error",
       "events": 7
     },
     {
       "day": "18",
-      "level": "Warn",
+      "level": "Warning",
       "events": 4
     },
     {
       "day": "18",
-      "level": "Note",
+      "level": "Info",
       "events": 2
     },
     {
       "day": "21",
-      "level": "Fault",
+      "level": "Error",
       "events": 4
     },
     {
       "day": "21",
-      "level": "Warn",
+      "level": "Warning",
       "events": 2
     },
     {
       "day": "21",
-      "level": "Note",
+      "level": "Info",
       "events": 2
     }
   ],
@@ -418,14 +456,16 @@ type bar with encoding.series and mark.stack stack. The 24h variant is the same 
     "series": "level"
   },
   "mark": {
-    "stack": "stack"
+    "stack": "stack",
+    "cornerRadius": 2,
+    "gap": 0.28
   },
   "axes": {
     "x": {
-      "title": "Hour"
+      "grid": false
     },
     "y": {
-      "title": "Events"
+      "grid": true
     }
   },
   "legend": {
@@ -439,7 +479,7 @@ type bar with encoding.series and mark.stack stack. The 24h variant is the same 
     "height": 280
   },
   "a11y": {
-    "alt": "Faults peak at noon in the last 24 hours."
+    "alt": "Errors peak at noon in the last 24 hours."
   }
 }
 ```
@@ -450,116 +490,137 @@ type bar with encoding.series and mark.stack stack. The 24h variant is the same 
 {
   "version": "1",
   "type": "stacked-area",
-  "theme": "midnight",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#241f33",
+      "text": "#eeeaf6",
+      "muted": "#a39bb0",
+      "grid": "#322b42",
+      "axis": "#3d3550",
+      "accent": "#7b52ff",
+      "positive": "#6dcea0",
+      "negative": "#fa6769",
+      "series": [
+        "#fa6769",
+        "#ff9838",
+        "#a4a8b4"
+      ]
+    }
+  },
   "data": [
     {
       "day": "8",
-      "Fault": 22,
-      "Warn": 14,
-      "Note": 12
+      "Error": 22,
+      "Warning": 14,
+      "Info": 12
     },
     {
       "day": "9",
-      "Fault": 28,
-      "Warn": 16,
-      "Note": 14
+      "Error": 28,
+      "Warning": 16,
+      "Info": 14
     },
     {
       "day": "10",
-      "Fault": 24,
-      "Warn": 18,
-      "Note": 11
+      "Error": 24,
+      "Warning": 18,
+      "Info": 11
     },
     {
       "day": "11",
-      "Fault": 30,
-      "Warn": 15,
-      "Note": 13
+      "Error": 30,
+      "Warning": 15,
+      "Info": 13
     },
     {
       "day": "12",
-      "Fault": 26,
-      "Warn": 17,
-      "Note": 16
+      "Error": 26,
+      "Warning": 17,
+      "Info": 16
     },
     {
       "day": "13",
-      "Fault": 18,
-      "Warn": 12,
-      "Note": 10
+      "Error": 18,
+      "Warning": 12,
+      "Info": 10
     },
     {
       "day": "14",
-      "Fault": 16,
-      "Warn": 9,
-      "Note": 8
+      "Error": 16,
+      "Warning": 9,
+      "Info": 8
     },
     {
       "day": "15",
-      "Fault": 40,
-      "Warn": 22,
-      "Note": 18
+      "Error": 40,
+      "Warning": 22,
+      "Info": 18
     },
     {
       "day": "16",
-      "Fault": 52,
-      "Warn": 30,
-      "Note": 16
+      "Error": 52,
+      "Warning": 30,
+      "Info": 16
     },
     {
       "day": "17",
-      "Fault": 44,
-      "Warn": 28,
-      "Note": 22
+      "Error": 44,
+      "Warning": 28,
+      "Info": 22
     },
     {
       "day": "18",
-      "Fault": 33,
-      "Warn": 20,
-      "Note": 24
+      "Error": 33,
+      "Warning": 20,
+      "Info": 24
     },
     {
       "day": "19",
-      "Fault": 21,
-      "Warn": 14,
-      "Note": 15
+      "Error": 21,
+      "Warning": 14,
+      "Info": 15
     },
     {
       "day": "20",
-      "Fault": 18,
-      "Warn": 12,
-      "Note": 14
+      "Error": 18,
+      "Warning": 12,
+      "Info": 14
     },
     {
       "day": "21",
-      "Fault": 16,
-      "Warn": 11,
-      "Note": 13
+      "Error": 16,
+      "Warning": 11,
+      "Info": 13
     }
   ],
   "encoding": {
     "x": "day",
     "y": [
       {
-        "field": "Fault",
-        "title": "Fault"
+        "field": "Error",
+        "title": "Error"
       },
       {
-        "field": "Warn",
-        "title": "Warn"
+        "field": "Warning",
+        "title": "Warning"
       },
       {
-        "field": "Note",
-        "title": "Note"
+        "field": "Info",
+        "title": "Info"
       }
     ]
   },
+  "mark": {
+    "fillOpacity": 0.85
+  },
   "axes": {
     "x": {
-      "title": "October"
+      "grid": false
     },
     "y": {
-      "title": "Events"
+      "grid": true
     }
   },
   "legend": {
@@ -582,13 +643,30 @@ type bar with encoding.series and mark.stack stack. The 24h variant is the same 
 
 p50 and p95.
 
-type line. The card sets --ck-series-1 to a calm colour and --ck-series-2 to a warning colour, so p50 does not use the fault red.
+type line. This chart's theme.tokens.series is purple for p50 and the warning colour for p95, separate from the error series.
 
 ```json
 {
   "version": "1",
   "type": "line",
-  "theme": "midnight",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#241f33",
+      "text": "#eeeaf6",
+      "muted": "#a39bb0",
+      "grid": "#322b42",
+      "axis": "#3d3550",
+      "accent": "#7b52ff",
+      "positive": "#6dcea0",
+      "negative": "#fa6769",
+      "series": [
+        "#7b52ff",
+        "#ffb15a"
+      ]
+    }
+  },
   "data": [
     {
       "hour": "00",
@@ -636,10 +714,10 @@ type line. The card sets --ck-series-1 to a calm colour and --ck-series-2 to a w
   },
   "axes": {
     "x": {
-      "title": "Hour"
+      "grid": false
     },
     "y": {
-      "title": "Milliseconds"
+      "grid": true
     }
   },
   "legend": {
@@ -647,6 +725,9 @@ type line. The card sets --ck-series-1 to a calm colour and --ck-series-2 to a w
   },
   "tooltip": {
     "mode": "index"
+  },
+  "mark": {
+    "strokeWidth": 2
   },
   "size": {
     "width": 1100,
@@ -660,13 +741,29 @@ type line. The card sets --ck-series-1 to a calm colour and --ck-series-2 to a w
 
 ## Checkout timeout
 
-Fault. 27 events, 6 users.
+Error. 27 events, 6 users.
 
 ```json
 {
   "version": "1",
   "type": "bar",
-  "theme": "midnight",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#241f33",
+      "text": "#eeeaf6",
+      "muted": "#a39bb0",
+      "grid": "#322b42",
+      "axis": "#3d3550",
+      "accent": "#7b52ff",
+      "positive": "#6dcea0",
+      "negative": "#fa6769",
+      "series": [
+        "#7b52ff"
+      ]
+    }
+  },
   "data": [
     {
       "day": "1",
@@ -701,6 +798,10 @@ Fault. 27 events, 6 users.
     "x": "day",
     "y": "events"
   },
+  "mark": {
+    "cornerRadius": 1,
+    "gap": 0.2
+  },
   "axes": {
     "x": false,
     "y": false
@@ -723,13 +824,29 @@ Fault. 27 events, 6 users.
 
 ## Map tile retry
 
-Warn. 17 events, 4 users.
+Warning. 17 events, 4 users.
 
 ```json
 {
   "version": "1",
   "type": "bar",
-  "theme": "midnight",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#241f33",
+      "text": "#eeeaf6",
+      "muted": "#a39bb0",
+      "grid": "#322b42",
+      "axis": "#3d3550",
+      "accent": "#7b52ff",
+      "positive": "#6dcea0",
+      "negative": "#fa6769",
+      "series": [
+        "#7b52ff"
+      ]
+    }
+  },
   "data": [
     {
       "day": "1",
@@ -764,6 +881,10 @@ Warn. 17 events, 4 users.
     "x": "day",
     "y": "events"
   },
+  "mark": {
+    "cornerRadius": 1,
+    "gap": 0.2
+  },
   "axes": {
     "x": false,
     "y": false
@@ -786,13 +907,29 @@ Warn. 17 events, 4 users.
 
 ## Queue lag
 
-Note. 27 events, 11 users.
+Info. 27 events, 11 users.
 
 ```json
 {
   "version": "1",
   "type": "bar",
-  "theme": "midnight",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#241f33",
+      "text": "#eeeaf6",
+      "muted": "#a39bb0",
+      "grid": "#322b42",
+      "axis": "#3d3550",
+      "accent": "#7b52ff",
+      "positive": "#6dcea0",
+      "negative": "#fa6769",
+      "series": [
+        "#7b52ff"
+      ]
+    }
+  },
   "data": [
     {
       "day": "1",
@@ -827,6 +964,10 @@ Note. 27 events, 11 users.
     "x": "day",
     "y": "events"
   },
+  "mark": {
+    "cornerRadius": 1,
+    "gap": 0.2
+  },
   "axes": {
     "x": false,
     "y": false
@@ -849,13 +990,29 @@ Note. 27 events, 11 users.
 
 ## Auth clock skew
 
-Fault. 14 events, 3 users.
+Error. 14 events, 3 users.
 
 ```json
 {
   "version": "1",
   "type": "bar",
-  "theme": "midnight",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#241f33",
+      "text": "#eeeaf6",
+      "muted": "#a39bb0",
+      "grid": "#322b42",
+      "axis": "#3d3550",
+      "accent": "#7b52ff",
+      "positive": "#6dcea0",
+      "negative": "#fa6769",
+      "series": [
+        "#7b52ff"
+      ]
+    }
+  },
   "data": [
     {
       "day": "1",
@@ -890,6 +1047,10 @@ Fault. 14 events, 3 users.
     "x": "day",
     "y": "events"
   },
+  "mark": {
+    "cornerRadius": 1,
+    "gap": 0.2
+  },
   "axes": {
     "x": false,
     "y": false
@@ -912,10 +1073,10 @@ Fault. 14 events, 3 users.
 
 ## What produces this look
 
-- **Dark first.** The spec theme defaults to midnight, and the page shell, header, and footer follow that theme. Soft still renders from the toggle.
-- **Release band.** The band colour is the text token, so the Keel 2.4 label is not red on the fault series. Ship uses labelPosition end and the muted token, above the plot.
-- **Response.** p50 uses a calm colour and p95 a warning colour, set on that card's tokens rather than the fault series.
-- **Issues.** Each row is a bar spec with both axes off, so the seven days read as a histogram. The event count and the user count sit on the right.
+- **Dark first.** The spec theme defaults to the dark token object: page-adjacent card #241f33, ink #eeeaf6, error #fa6769, warning #ff9838, info #a4a8b4, accent #7b52ff. Soft swaps those tokens.
+- **Release band.** The band colour is the text token, so the 2.4 label is not the error red. Ship uses labelPosition end and the muted token, above the plot.
+- **Response.** p50 uses the purple accent and p95 the warning colour, on that chart's theme.tokens.series.
+- **Issues.** Each row is a bar spec with both axes off and the purple series token, so the seven days read as a histogram. The event count and the user count sit on the right.
 - **Window.** 14d is the stacked bar. 24h is the same bar over eight hours. Area is a stacked-area of the 14 days.
 
 https://chartkit.dev/dashboards/keel

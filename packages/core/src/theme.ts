@@ -281,7 +281,7 @@ function themeRecord(theme: unknown): Record<string, unknown> | undefined {
 }
 
 function colorOverride(value: unknown): string | undefined {
-  return typeof value === "string" && /^(?:var\(|#|rgb|hsl|oklch)/.test(value) ? value : undefined;
+  return typeof value === "string" && /^(?:var\(|#|rgb|hsl|oklch|transparent$)/.test(value) ? value : undefined;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

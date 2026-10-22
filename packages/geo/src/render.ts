@@ -1,4 +1,4 @@
-import { formatNumber, paintScale, parseFormat, POINT_PALETTE, sizeStops, type PaintScale, type ScaleFormat } from "./color";
+import { formatNumber, hexRange, paintScale, parseFormat, POINT_PALETTE, sizeStops, type PaintScale, type ScaleFormat } from "./color";
 import { directoryIndex, matchRegion, type DirectoryEntry } from "./match";
 import { albersUsa, equalEarth, equirectangular, fitProject, mercator, type Box, type InsetFrame } from "./project";
 import { esc, fieldName, isRecord, num, resolveEncoding, resolveMark, round, rowsOf, sizeOf } from "./spec";
@@ -283,6 +283,7 @@ interface Channel {
   field: string | null;
   format: ScaleFormat;
   title: string;
+  range?: readonly string[];
 }
 
 function channelOf(value: unknown): Channel {
@@ -292,6 +293,7 @@ function channelOf(value: unknown): Channel {
       field: typeof value.field === "string" && value.field ? value.field : null,
       format: parseFormat(value.format),
       title: typeof value.title === "string" ? value.title : "",
+      range: hexRange(value.range),
     };
   }
   return { field: null, format: {}, title: "" };
@@ -323,7 +325,7 @@ function dotsOf(rows: Record<string, unknown>[], encoding: Record<string, unknow
   const numeric = draft.every((dot) => dot.colorRaw == null || num(dot.colorRaw) != null);
   const colorValues = draft.map((dot) => num(dot.colorRaw)).filter((value): value is number => value != null);
   const sameField = !!(sizeField && colorField && sizeField === colorField && numeric);
-  const scale = !sameField && colorField && numeric && colorValues.length ? paintScale("sequential", colorValues, undefined, colorChannel.format, colorChannel.title) : null;
+  const scale = !sameField && colorField && numeric && colorValues.length ? paintScale("sequential", colorValues, undefined, colorChannel.format, colorChannel.title, colorChannel.range) : null;
   const categories = new Map<string, string>();
   const dots = draft.map((dot) => {
     let color = chrome.accent;
@@ -483,7 +485,7 @@ export async function render(spec: unknown): Promise<string> {
   const hits = spec.type === "choropleth" ? regionHits(rows, regionField, valueField, loaded.atlas, loaded.entries) : new Map<string, Hit>();
   const kind: ColorScaleName = mark.scale === "diverging" || mark.scale === "threshold" ? mark.scale : "sequential";
   const thresholds = Array.isArray(mark.thresholds) ? mark.thresholds.filter((item): item is number => typeof item === "number") : undefined;
-  const choroplethScale = spec.type === "choropleth" && hits.size ? paintScale(kind, [...hits.values()].map((hit) => hit.value), thresholds, colorChannel.format, legendTitle) : null;
+  const choroplethScale = spec.type === "choropleth" && hits.size ? paintScale(kind, [...hits.values()].map((hit) => hit.value), thresholds, colorChannel.format, legendTitle, kind === "sequential" ? colorChannel.range : undefined) : null;
   const points = dotsOf(rows, encoding, chrome);
   const scale = choroplethScale ?? points.scale;
   const showLegend = mark.legend !== false && !!scale && (scale.stops.length > 0 || !!scale.swatches?.length || !!scale.sizes?.length);

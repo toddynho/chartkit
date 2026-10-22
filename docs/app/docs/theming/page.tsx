@@ -133,11 +133,11 @@ const spec = { version: "1", type: "bar", theme: { tokens: { series } } };`}
       <BrandPalette />
       <h2>Dashboards</h2>
       <p>
-        The <Link href="/dashboards">dashboard pages</Link> keep the palette in CSS: <code>--ck-series-*</code>,{" "}
-        <code>--ck-text</code>, <code>--ck-area-opacity</code>, and a few page variables such as{" "}
-        <code>--ck-wayline-1</code>. The JSON specs stay on <code>soft</code> or <code>midnight</code>. Harbor Ledger,
-        Quiet Meter, Wayline, and Keel are original boards. Inspired by common SaaS dashboard styles. ChartKit is not
-        affiliated with any product.
+        The <Link href="/dashboards">dashboard pages</Link> put the palette on <code>theme.tokens</code>: series, text,
+        grid, positive, and negative. Stripe-style payments, Plausible-style analytics, the Google Analytics-style
+        traffic report, and Sentry-style issues each ship a light and a dark token object. The page CSS styles the
+        shell. ChartKit is not affiliated with or endorsed by those products. Gaps that still need a spec option are
+        listed in <code>docs/dashboards/GAPS.md</code>.
       </p>
       <h2>Presets</h2>
       <p>

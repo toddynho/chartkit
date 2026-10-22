@@ -22,8 +22,8 @@ export default function ShowcasePage() {
       </p>
       <h2>Dashboards</h2>
       <p className="lede">
-        Four more boards, each a JSON spec plus a token override. Inspired by common SaaS dashboard styles. ChartKit is
-        not affiliated with any product.
+        Four more boards, styled after Stripe, Plausible, Google Analytics, and Sentry. Colour comes from theme.tokens.
+        ChartKit is not affiliated with or endorsed by those products.
       </p>
       <div className="gallery-index">
         {dashboards().map((board) => {

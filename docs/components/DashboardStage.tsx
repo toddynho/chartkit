@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { DashChart, DashSpark, DashTheme, Dashboard } from "@/lib/dashboards";
+import type { DashChart, DashSpark, DashTheme, DashThemes, Dashboard } from "@/lib/dashboards";
 import { ChartHost } from "./ChartHost";
 
-function withTheme(spec: Record<string, unknown>, theme: DashTheme): Record<string, unknown> {
-  return { ...spec, theme };
+function withTheme(spec: Record<string, unknown>, theme: DashTheme, themes: DashThemes): Record<string, unknown> {
+  const type = typeof spec.type === "string" ? spec.type : "";
+  if (type === "choropleth" || type === "map-points") return { ...spec, theme };
+  return { ...spec, theme: themes[theme] };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -33,8 +35,8 @@ function fitMobile(spec: Record<string, unknown>): Record<string, unknown> {
   };
 }
 
-function present(spec: Record<string, unknown>, theme: DashTheme, narrow: boolean): Record<string, unknown> {
-  const themed = withTheme(spec, theme);
+function present(spec: Record<string, unknown>, theme: DashTheme, themes: DashThemes, narrow: boolean): Record<string, unknown> {
+  const themed = withTheme(spec, theme, themes);
   return narrow ? fitMobile(themed) : themed;
 }
 
@@ -60,7 +62,7 @@ function Figure({ chart, theme, narrow }: { chart: DashChart; theme: DashTheme; 
   const [mapOn, setMapOn] = useState(false);
   const [mapSvg, setMapSvg] = useState("");
   const variant = variants.find((item) => item.id === variantId) ?? variants[0];
-  const spec = present(variant?.spec ?? chart.spec, theme, narrow);
+  const spec = present(variant?.spec ?? chart.spec, theme, chart.themes, narrow);
   const svg = variant?.svg ?? chart.svg ?? "";
   const list = chart.spec.type === "bar-list";
 
@@ -69,7 +71,7 @@ function Figure({ chart, theme, narrow }: { chart: DashChart; theme: DashTheme; 
     let alive = true;
     setMapSvg("");
     void import("@chartkitdev/geo").then(async (geo) => {
-      const drawn = await geo.render(present(chart.mapSpec ?? {}, theme, narrow));
+      const drawn = await geo.render(present(chart.mapSpec ?? {}, theme, chart.themes, narrow));
       if (alive) setMapSvg(drawn);
     });
     return () => {
@@ -137,15 +139,15 @@ function Figure({ chart, theme, narrow }: { chart: DashChart; theme: DashTheme; 
       ) : (
         body
       )}
-      <SpecBlock spec={mapOn && chart.mapSpec ? present(chart.mapSpec, theme, narrow) : spec} />
+      <SpecBlock spec={mapOn && chart.mapSpec ? present(chart.mapSpec, theme, chart.themes, narrow) : spec} />
     </figure>
   );
 }
 
 function Score({ chart, theme }: { chart: DashChart; theme: DashTheme }) {
-  const spec = withTheme(chart.spec, theme);
+  const spec = withTheme(chart.spec, theme, chart.themes);
   return (
-    <article className="dash-card dash-4 dash-score">
+    <article className={`dash-card ${chart.span} dash-score`}>
       <ChartHost spec={spec} svg={chart.svg} className="chart-host chart-preset" />
       <SpecBlock spec={spec} />
     </article>
@@ -158,7 +160,7 @@ function Issues({ rows, theme, narrow }: { rows: DashSpark[]; theme: DashTheme; 
       <h3>Issues</h3>
       <ul className="dash-issues">
         {rows.map((item) => {
-          const spec = present(item.spec, theme, narrow);
+          const spec = present(item.spec, theme, item.themes, narrow);
           return (
             <li key={item.id}>
               <div className="dash-issue-name">
@@ -199,8 +201,9 @@ export function DashboardStage({ board }: { board: Dashboard }) {
     <div className={`dash-shell dash-page dash-${board.slug} dash-theme-${theme}`}>
       <header className="dash-top">
         <div className="dash-id">
-          <h1>{board.product}</h1>
+          <h1>{board.title}</h1>
           <p>{board.lede}</p>
+          <p className="dash-disclaimer">{board.disclaimer}</p>
         </div>
         <span className="dash-chip">{board.range}</span>
         <div className="theme-switch" role="group" aria-label="Chart theme">
@@ -230,8 +233,7 @@ export function DashboardStage({ board }: { board: Dashboard }) {
           ))}
         </ul>
         <p className="dash-affiliation">
-          Inspired by common SaaS dashboard styles. ChartKit is not affiliated with any product.{" "}
-          <a href={`/dashboards/${board.slug}.md`}>{board.slug}.md</a>
+          {board.disclaimer} <a href={`/dashboards/${board.slug}.md`}>{board.slug}.md</a>
         </p>
       </section>
     </div>

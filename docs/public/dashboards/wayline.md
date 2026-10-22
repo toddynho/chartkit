@@ -1,10 +1,10 @@
-# Wayline
+# Google Analytics-style traffic report
 
 Acquisition for the last 8 weeks.
 
 Range: Last 8 weeks.
 
-Inspired by common SaaS dashboard styles. ChartKit is not affiliated with any product.
+Styled after Google Analytics's dashboard to show ChartKit's styling flexibility. Not affiliated with or endorsed by Google Analytics.
 
 Default theme: soft.
 
@@ -12,13 +12,30 @@ Default theme: soft.
 
 Sessions
 
-type kpi with data for the sparkline. Bounce rate uses format percent and goodDirection down.
+type kpi. The spark uses the blue series token. Bounce rate uses format percent and goodDirection down.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#202124",
+      "muted": "#5f6368",
+      "grid": "transparent",
+      "axis": "#dadce0",
+      "accent": "#1a73e8",
+      "positive": "#188038",
+      "negative": "#d93025",
+      "series": [
+        "#1a73e8",
+        "#9aa0a6"
+      ]
+    }
+  },
   "data": [
     18.2,
     19.4,
@@ -36,8 +53,8 @@ type kpi with data for the sparkline. Bounce rate uses format percent and goodDi
     "format": "compact"
   },
   "mark": {
-    "fillOpacity": 0.14,
-    "strokeWidth": 1.25
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
   },
   "size": {
     "width": 280,
@@ -53,13 +70,30 @@ type kpi with data for the sparkline. Bounce rate uses format percent and goodDi
 
 Engaged
 
-type kpi with data for the sparkline. Bounce rate uses format percent and goodDirection down.
+type kpi. The spark uses the blue series token. Bounce rate uses format percent and goodDirection down.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#202124",
+      "muted": "#5f6368",
+      "grid": "transparent",
+      "axis": "#dadce0",
+      "accent": "#1a73e8",
+      "positive": "#188038",
+      "negative": "#d93025",
+      "series": [
+        "#1a73e8",
+        "#9aa0a6"
+      ]
+    }
+  },
   "data": [
     8.1,
     8.4,
@@ -77,8 +111,8 @@ type kpi with data for the sparkline. Bounce rate uses format percent and goodDi
     "format": "compact"
   },
   "mark": {
-    "fillOpacity": 0.14,
-    "strokeWidth": 1.25
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
   },
   "size": {
     "width": 280,
@@ -94,13 +128,30 @@ type kpi with data for the sparkline. Bounce rate uses format percent and goodDi
 
 Bounce rate
 
-type kpi with data for the sparkline. Bounce rate uses format percent and goodDirection down.
+type kpi. The spark uses the blue series token. Bounce rate uses format percent and goodDirection down.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#202124",
+      "muted": "#5f6368",
+      "grid": "transparent",
+      "axis": "#dadce0",
+      "accent": "#1a73e8",
+      "positive": "#188038",
+      "negative": "#d93025",
+      "series": [
+        "#1a73e8",
+        "#9aa0a6"
+      ]
+    }
+  },
   "data": [
     0.44,
     0.42,
@@ -119,8 +170,8 @@ type kpi with data for the sparkline. Bounce rate uses format percent and goodDi
     "goodDirection": "down"
   },
   "mark": {
-    "fillOpacity": 0.14,
-    "strokeWidth": 1.25
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
   },
   "size": {
     "width": 280,
@@ -136,13 +187,30 @@ type kpi with data for the sparkline. Bounce rate uses format percent and goodDi
 
 Minutes
 
-type kpi with data for the sparkline. Bounce rate uses format percent and goodDirection down.
+type kpi. The spark uses the blue series token. Bounce rate uses format percent and goodDirection down.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#202124",
+      "muted": "#5f6368",
+      "grid": "transparent",
+      "axis": "#dadce0",
+      "accent": "#1a73e8",
+      "positive": "#188038",
+      "negative": "#d93025",
+      "series": [
+        "#1a73e8",
+        "#9aa0a6"
+      ]
+    }
+  },
   "data": [
     2.8,
     2.9,
@@ -160,8 +228,8 @@ type kpi with data for the sparkline. Bounce rate uses format percent and goodDi
     "format": "number"
   },
   "mark": {
-    "fillOpacity": 0.14,
-    "strokeWidth": 1.25
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
   },
   "size": {
     "width": 280,
@@ -175,15 +243,32 @@ type kpi with data for the sparkline. Bounce rate uses format percent and goodDi
 
 ## Sessions
 
-This period and the prior period.
+This period and the previous period.
 
-type line. The second y series sets dash dashed. Both share encoding.x.
+type line. series[0] is solid blue. series[1] is a dashed gray comparison. axes.y.grid is on and axes.x.grid is off. legend.position is top.
 
 ```json
 {
   "version": "1",
   "type": "line",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#202124",
+      "muted": "#5f6368",
+      "grid": "#e8eaed",
+      "axis": "#dadce0",
+      "accent": "#1a73e8",
+      "positive": "#188038",
+      "negative": "#d93025",
+      "series": [
+        "#1a73e8",
+        "#9aa0a6"
+      ]
+    }
+  },
   "data": [
     {
       "week": "W1",
@@ -235,17 +320,17 @@ type line. The second y series sets dash dashed. Both share encoding.x.
       },
       {
         "field": "then",
-        "title": "Prior period",
+        "title": "Previous period",
         "dash": "dashed"
       }
     ]
   },
   "axes": {
     "x": {
-      "title": "Week"
+      "grid": false
     },
     "y": {
-      "title": "Thousand sessions"
+      "grid": true
     }
   },
   "legend": {
@@ -262,7 +347,7 @@ type line. The second y series sets dash dashed. Both share encoding.x.
     "height": 320
   },
   "a11y": {
-    "alt": "Sessions rise from 18.2 to 24.5 thousand, staying above the prior period."
+    "alt": "Sessions rise from 18.2 to 24.5 thousand, staying above the previous period."
   }
 }
 ```
@@ -271,13 +356,33 @@ type line. The second y series sets dash dashed. Both share encoding.x.
 
 Share of sessions.
 
-type donut. encoding.y is titled Sessions and formatted compact, so the centre is the total sessions. legend.values prints the share and the session count under the ring. color.range is var(--ck-wayline-1) through var(--ck-wayline-5).
+type donut. This chart's theme.tokens.series is the five channel colours, so the slices do not use a page CSS variable. legend.values prints the share and the session count. The y channel is Sessions with format compact, so the centre is the total.
 
 ```json
 {
   "version": "1",
   "type": "donut",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#202124",
+      "muted": "#5f6368",
+      "grid": "#e8eaed",
+      "axis": "#dadce0",
+      "accent": "#1a73e8",
+      "positive": "#188038",
+      "negative": "#d93025",
+      "series": [
+        "#1a73e8",
+        "#12b5cb",
+        "#e8710a",
+        "#e52592",
+        "#9334e6"
+      ]
+    }
+  },
   "data": [
     {
       "channel": "Search",
@@ -306,16 +411,6 @@ type donut. encoding.y is titled Sessions and formatted compact, so the centre i
       "field": "sessions",
       "title": "Sessions",
       "format": "compact"
-    },
-    "color": {
-      "field": "channel",
-      "range": [
-        "var(--ck-wayline-1)",
-        "var(--ck-wayline-2)",
-        "var(--ck-wayline-3)",
-        "var(--ck-wayline-4)",
-        "var(--ck-wayline-5)"
-      ]
     }
   },
   "legend": {
@@ -335,13 +430,29 @@ type donut. encoding.y is titled Sessions and formatted compact, so the centre i
 
 Sessions by country.
 
-The list is type bar. The map toggle is type choropleth from @chartkitdev/geo, mark.atlas world, encoding.region set to the ISO code. Geo is on demand and is not in the line or all bundle.
+The list is type bar in the blue series token. The map is type choropleth. encoding.color.range is the blue ramp #aecbfa to #1a73e8. The map theme is the string soft or midnight because a token object does not change water, land, or legend text.
 
 ```json
 {
   "version": "1",
   "type": "bar",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#202124",
+      "muted": "#5f6368",
+      "grid": "#e8eaed",
+      "axis": "#dadce0",
+      "accent": "#1a73e8",
+      "positive": "#188038",
+      "negative": "#d93025",
+      "series": [
+        "#1a73e8"
+      ]
+    }
+  },
   "data": [
     {
       "country": "Japan",
@@ -372,17 +483,18 @@ The list is type bar. The map toggle is type choropleth from @chartkitdev/geo, m
     }
   },
   "mark": {
-    "orientation": "horizontal"
+    "orientation": "horizontal",
+    "cornerRadius": 2
   },
   "legend": {
     "show": false
   },
   "axes": {
     "x": {
-      "title": "Country"
+      "grid": false
     },
     "y": {
-      "title": "Sessions"
+      "grid": true
     }
   },
   "size": {
@@ -429,16 +541,18 @@ The list is type bar. The map toggle is type choropleth from @chartkitdev/geo, m
     "color": {
       "field": "sessions",
       "title": "Sessions",
-      "format": "compact"
+      "format": "compact",
+      "range": [
+        "#aecbfa",
+        "#669df6",
+        "#1a73e8"
+      ]
     }
   },
   "mark": {
     "atlas": "world",
     "projection": "equalEarth",
     "scale": "sequential"
-  },
-  "legend": {
-    "position": "bottom"
   },
   "size": {
     "width": 720,
@@ -452,8 +566,9 @@ The list is type bar. The map toggle is type choropleth from @chartkitdev/geo, m
 
 ## What produces this look
 
-- **Scorecards.** Each kpi includes data, so the sparkline is in the card. Bounce rate replaces the old Brief label.
-- **Donut.** The y channel is Sessions with format compact. The hole shows that total. legend.values prints the share and the session count under the ring.
-- **Countries.** The bar sits beside a table. The map toggle renders a choropleth with @chartkitdev/geo, which loads on demand.
+- **Scorecards.** Each kpi includes data, so the sparkline is in the card. The spark colour is the blue series token.
+- **Comparison.** The sessions line uses #1a73e8 for this period and a dashed #9aa0a6 for the previous period. Midnight uses #8ab4f8 for this period.
+- **Donut.** theme.tokens.series is Search blue, Direct teal, Mail orange, Social pink, and Referral purple. legend.values prints the share and the session count under the ring.
+- **Countries.** The bar uses the blue series token. The map toggle renders a choropleth whose sequential ramp is encoding.color.range. Geo loads on demand.
 
 https://chartkit.dev/dashboards/wayline

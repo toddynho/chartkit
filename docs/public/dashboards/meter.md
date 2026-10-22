@@ -1,10 +1,10 @@
-# Quiet Meter
+# Plausible-style analytics
 
 Audience for the last 7 days.
 
 Range: Last 7 days.
 
-Inspired by common SaaS dashboard styles. ChartKit is not affiliated with any product.
+Styled after Plausible's dashboard to show ChartKit's styling flexibility. Not affiliated with or endorsed by Plausible.
 
 Default theme: soft.
 
@@ -12,13 +12,29 @@ Default theme: soft.
 
 Visitors
 
-type kpi above the chart. metric.delta is the change. Bounce uses goodDirection down.
+type kpi. Six cards share one indigo series token. Bounce uses goodDirection down. Duration uses format duration-ms.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#111827",
+      "muted": "#6b7280",
+      "grid": "transparent",
+      "axis": "#e5e7eb",
+      "accent": "#615fff",
+      "positive": "#16a34a",
+      "negative": "#ef4444",
+      "series": [
+        "#615fff"
+      ]
+    }
+  },
   "data": [
     2400,
     2620,
@@ -35,8 +51,8 @@ type kpi above the chart. metric.delta is the change. Bounce uses goodDirection 
     "format": "compact"
   },
   "mark": {
-    "fillOpacity": 0.14,
-    "strokeWidth": 1.25
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
   },
   "size": {
     "width": 280,
@@ -48,17 +64,33 @@ type kpi above the chart. metric.delta is the change. Bounce uses goodDirection 
 }
 ```
 
-## Pageviews
+## Visits
 
-Pageviews
+Visits
 
-type kpi above the chart. metric.delta is the change. Bounce uses goodDirection down.
+type kpi. Six cards share one indigo series token. Bounce uses goodDirection down. Duration uses format duration-ms.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#111827",
+      "muted": "#6b7280",
+      "grid": "transparent",
+      "axis": "#e5e7eb",
+      "accent": "#615fff",
+      "positive": "#16a34a",
+      "negative": "#ef4444",
+      "series": [
+        "#615fff"
+      ]
+    }
+  },
   "data": [
     4200,
     4600,
@@ -69,14 +101,70 @@ type kpi above the chart. metric.delta is the change. Bounce uses goodDirection 
     3720
   ],
   "metric": {
+    "label": "Visits",
+    "value": 22140,
+    "delta": 0.05,
+    "format": "compact"
+  },
+  "mark": {
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
+  },
+  "size": {
+    "width": 280,
+    "height": 132
+  },
+  "a11y": {
+    "alt": "Visits are 22.1 thousand, up 5 percent."
+  }
+}
+```
+
+## Pageviews
+
+Pageviews
+
+type kpi. Six cards share one indigo series token. Bounce uses goodDirection down. Duration uses format duration-ms.
+
+```json
+{
+  "version": "1",
+  "type": "kpi",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#111827",
+      "muted": "#6b7280",
+      "grid": "transparent",
+      "axis": "#e5e7eb",
+      "accent": "#615fff",
+      "positive": "#16a34a",
+      "negative": "#ef4444",
+      "series": [
+        "#615fff"
+      ]
+    }
+  },
+  "data": [
+    8200,
+    9100,
+    8800,
+    10200,
+    10800,
+    7600,
+    6500
+  ],
+  "metric": {
     "label": "Pageviews",
     "value": 61200,
     "delta": 0.06,
     "format": "compact"
   },
   "mark": {
-    "fillOpacity": 0.14,
-    "strokeWidth": 1.25
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
   },
   "size": {
     "width": 280,
@@ -88,17 +176,89 @@ type kpi above the chart. metric.delta is the change. Bounce uses goodDirection 
 }
 ```
 
-## Bounce
+## Views per visit
 
-Bounce
+Views per visit
 
-type kpi above the chart. metric.delta is the change. Bounce uses goodDirection down.
+type kpi. Six cards share one indigo series token. Bounce uses goodDirection down. Duration uses format duration-ms.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#111827",
+      "muted": "#6b7280",
+      "grid": "transparent",
+      "axis": "#e5e7eb",
+      "accent": "#615fff",
+      "positive": "#16a34a",
+      "negative": "#ef4444",
+      "series": [
+        "#615fff"
+      ]
+    }
+  },
+  "data": [
+    2.4,
+    2.5,
+    2.6,
+    2.7,
+    2.9,
+    2.6,
+    2.8
+  ],
+  "metric": {
+    "label": "Views per visit",
+    "value": 2.8,
+    "delta": 0.02,
+    "format": "number"
+  },
+  "mark": {
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
+  },
+  "size": {
+    "width": 280,
+    "height": 132
+  },
+  "a11y": {
+    "alt": "Views per visit are 2.8, up 2 percent."
+  }
+}
+```
+
+## Bounce
+
+Bounce
+
+type kpi. Six cards share one indigo series token. Bounce uses goodDirection down. Duration uses format duration-ms.
+
+```json
+{
+  "version": "1",
+  "type": "kpi",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#111827",
+      "muted": "#6b7280",
+      "grid": "transparent",
+      "axis": "#e5e7eb",
+      "accent": "#615fff",
+      "positive": "#16a34a",
+      "negative": "#ef4444",
+      "series": [
+        "#615fff"
+      ]
+    }
+  },
   "data": [
     0.46,
     0.44,
@@ -116,8 +276,8 @@ type kpi above the chart. metric.delta is the change. Bounce uses goodDirection 
     "goodDirection": "down"
   },
   "mark": {
-    "fillOpacity": 0.14,
-    "strokeWidth": 1.25
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
   },
   "size": {
     "width": 280,
@@ -133,31 +293,47 @@ type kpi above the chart. metric.delta is the change. Bounce uses goodDirection 
 
 Duration
 
-type kpi above the chart. metric.delta is the change. Bounce uses goodDirection down.
+type kpi. Six cards share one indigo series token. Bounce uses goodDirection down. Duration uses format duration-ms.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#111827",
+      "muted": "#6b7280",
+      "grid": "transparent",
+      "axis": "#e5e7eb",
+      "accent": "#615fff",
+      "positive": "#16a34a",
+      "negative": "#ef4444",
+      "series": [
+        "#615fff"
+      ]
+    }
+  },
   "data": [
-    2.1,
-    2.2,
-    2,
-    2.4,
-    2.6,
-    2.3,
-    2.4
+    120000,
+    128000,
+    132000,
+    140000,
+    150000,
+    136000,
+    144000
   ],
   "metric": {
     "label": "Duration",
-    "value": 2.4,
+    "value": 144000,
     "delta": 0.02,
-    "format": "number"
+    "format": "duration-ms"
   },
   "mark": {
-    "fillOpacity": 0.14,
-    "strokeWidth": 1.25
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
   },
   "size": {
     "width": 280,
@@ -173,13 +349,29 @@ type kpi above the chart. metric.delta is the change. Bounce uses goodDirection 
 
 One series.
 
-type line, mark.area and mark.curve monotone, legend.show false. A single --ck-series-1 token is the only colour.
+type line. mark.area, mark.curve monotone, and mark.fillOpacity 0.14. legend.show is false. Both grids are off. The only colour is theme.tokens.series[0].
 
 ```json
 {
   "version": "1",
   "type": "line",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#111827",
+      "muted": "#6b7280",
+      "grid": "#f3f4f6",
+      "axis": "#e5e7eb",
+      "accent": "#615fff",
+      "positive": "#16a34a",
+      "negative": "#ef4444",
+      "series": [
+        "#615fff"
+      ]
+    }
+  },
   "data": [
     {
       "day": "Mon",
@@ -219,17 +411,19 @@ type line, mark.area and mark.curve monotone, legend.show false. A single --ck-s
   },
   "mark": {
     "area": true,
-    "curve": "monotone"
+    "curve": "monotone",
+    "fillOpacity": 0.14,
+    "strokeWidth": 2
   },
   "legend": {
     "show": false
   },
   "axes": {
     "x": {
-      "title": "Day"
+      "grid": false
     },
     "y": {
-      "title": "Visits",
+      "grid": false,
       "format": "compact"
     }
   },
@@ -250,13 +444,29 @@ type line, mark.area and mark.curve monotone, legend.show false. A single --ck-s
 
 Top pages
 
-type bar-list. No axes. The track is a light tint of the series token, the label sits on it, and the value is right-aligned.
+type bar-list. The track is a light tint of theme.tokens.series[0]. The label sits on the track and the value is right-aligned.
 
 ```json
 {
   "version": "1",
   "type": "bar-list",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#111827",
+      "muted": "#6b7280",
+      "grid": "#f3f4f6",
+      "axis": "#e5e7eb",
+      "accent": "#615fff",
+      "positive": "#16a34a",
+      "negative": "#ef4444",
+      "series": [
+        "#615fff"
+      ]
+    }
+  },
   "data": [
     {
       "page": "/pricing",
@@ -300,13 +510,29 @@ type bar-list. No axes. The track is a light tint of the series token, the label
 
 Top sources
 
-type bar-list. No axes. The track is a light tint of the series token, the label sits on it, and the value is right-aligned.
+type bar-list. The track is a light tint of theme.tokens.series[0]. The label sits on the track and the value is right-aligned.
 
 ```json
 {
   "version": "1",
   "type": "bar-list",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#111827",
+      "muted": "#6b7280",
+      "grid": "#f3f4f6",
+      "axis": "#e5e7eb",
+      "accent": "#615fff",
+      "positive": "#16a34a",
+      "negative": "#ef4444",
+      "series": [
+        "#615fff"
+      ]
+    }
+  },
   "data": [
     {
       "source": "Direct",
@@ -350,13 +576,29 @@ type bar-list. No axes. The track is a light tint of the series token, the label
 
 Devices
 
-type bar-list. No axes. The track is a light tint of the series token, the label sits on it, and the value is right-aligned.
+type bar-list. The track is a light tint of theme.tokens.series[0]. The label sits on the track and the value is right-aligned.
 
 ```json
 {
   "version": "1",
   "type": "bar-list",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#111827",
+      "muted": "#6b7280",
+      "grid": "#f3f4f6",
+      "axis": "#e5e7eb",
+      "accent": "#615fff",
+      "positive": "#16a34a",
+      "negative": "#ef4444",
+      "series": [
+        "#615fff"
+      ]
+    }
+  },
   "data": [
     {
       "device": "Desktop",
@@ -390,8 +632,8 @@ type bar-list. No axes. The track is a light tint of the series token, the label
 
 ## What produces this look
 
-- **Stats.** Four kpi specs sit above the chart. Each has a delta. Bounce uses goodDirection down and format percent.
-- **One accent.** Every mark uses --ck-series-1. The page does not set a range.
+- **Stats.** Six kpi specs sit in one row. Each has a delta. Bounce uses goodDirection down and format percent. Duration uses format duration-ms.
+- **One accent.** Every mark uses theme.tokens.series, an indigo #615fff. The area fill is mark.fillOpacity 0.14. Midnight swaps the same tokens to #9d99ff.
 - **Lists.** Top pages, sources, and devices are type bar-list. The chart is on demand from @chartkitdev/core/charts/bar-list and is not part of the line or all bundle.
 
 https://chartkit.dev/dashboards/meter

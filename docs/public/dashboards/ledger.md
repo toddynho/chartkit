@@ -1,10 +1,10 @@
-# Harbor Ledger
+# Stripe-style payments
 
 Payments for 1–21 October.
 
 Range: 1–21 Oct.
 
-Inspired by common SaaS dashboard styles. ChartKit is not affiliated with any product.
+Styled after Stripe's dashboard to show ChartKit's styling flexibility. Not affiliated with or endorsed by Stripe.
 
 Default theme: soft.
 
@@ -12,13 +12,30 @@ Default theme: soft.
 
 Gross
 
-type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25 keep it a thin line with a light fill. metric.delta is the chip. goodDirection down flips the refund colour.
+type kpi. theme.tokens.series is the blurple spark. surface and grid are transparent so the shell card is the only card. metric.delta is the chip. goodDirection down flips the refund colour. format compact with a dollar prefix.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#0a2540",
+      "muted": "#425466",
+      "grid": "transparent",
+      "axis": "#c1c9d2",
+      "accent": "#635bff",
+      "positive": "#09825d",
+      "negative": "#df1b41",
+      "series": [
+        "#635bff",
+        "#8898aa"
+      ]
+    }
+  },
   "data": [
     182,
     176,
@@ -33,11 +50,14 @@ type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25
     "label": "Gross",
     "value": 261000,
     "delta": 0.08,
-    "format": "compact"
+    "format": {
+      "style": "compact",
+      "prefix": "$"
+    }
   },
   "mark": {
-    "fillOpacity": 0.14,
-    "strokeWidth": 1.25
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
   },
   "size": {
     "width": 280,
@@ -53,13 +73,30 @@ type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25
 
 Net
 
-type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25 keep it a thin line with a light fill. metric.delta is the chip. goodDirection down flips the refund colour.
+type kpi. theme.tokens.series is the blurple spark. surface and grid are transparent so the shell card is the only card. metric.delta is the chip. goodDirection down flips the refund colour. format compact with a dollar prefix.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#0a2540",
+      "muted": "#425466",
+      "grid": "transparent",
+      "axis": "#c1c9d2",
+      "accent": "#635bff",
+      "positive": "#09825d",
+      "negative": "#df1b41",
+      "series": [
+        "#635bff",
+        "#8898aa"
+      ]
+    }
+  },
   "data": [
     174,
     168,
@@ -74,11 +111,14 @@ type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25
     "label": "Net",
     "value": 248400,
     "delta": 0.07,
-    "format": "compact"
+    "format": {
+      "style": "compact",
+      "prefix": "$"
+    }
   },
   "mark": {
-    "fillOpacity": 0.14,
-    "strokeWidth": 1.25
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
   },
   "size": {
     "width": 280,
@@ -94,13 +134,30 @@ type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25
 
 Refunds
 
-type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25 keep it a thin line with a light fill. metric.delta is the chip. goodDirection down flips the refund colour.
+type kpi. theme.tokens.series is the blurple spark. surface and grid are transparent so the shell card is the only card. metric.delta is the chip. goodDirection down flips the refund colour. format compact with a dollar prefix.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#0a2540",
+      "muted": "#425466",
+      "grid": "transparent",
+      "axis": "#c1c9d2",
+      "accent": "#635bff",
+      "positive": "#09825d",
+      "negative": "#df1b41",
+      "series": [
+        "#635bff",
+        "#8898aa"
+      ]
+    }
+  },
   "data": [
     18,
     16,
@@ -115,12 +172,15 @@ type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25
     "label": "Refunds",
     "value": 12600,
     "delta": -0.11,
-    "format": "compact",
+    "format": {
+      "style": "compact",
+      "prefix": "$"
+    },
     "goodDirection": "down"
   },
   "mark": {
-    "fillOpacity": 0.14,
-    "strokeWidth": 1.25
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
   },
   "size": {
     "width": 280,
@@ -136,13 +196,30 @@ type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25
 
 Accounts
 
-type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25 keep it a thin line with a light fill. metric.delta is the chip. goodDirection down flips the refund colour.
+type kpi. theme.tokens.series is the blurple spark. surface and grid are transparent so the shell card is the only card. metric.delta is the chip. goodDirection down flips the refund colour. format compact with a dollar prefix.
 
 ```json
 {
   "version": "1",
   "type": "kpi",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "transparent",
+      "text": "#0a2540",
+      "muted": "#425466",
+      "grid": "transparent",
+      "axis": "#c1c9d2",
+      "accent": "#635bff",
+      "positive": "#09825d",
+      "negative": "#df1b41",
+      "series": [
+        "#635bff",
+        "#8898aa"
+      ]
+    }
+  },
   "data": [
     620,
     640,
@@ -160,8 +237,8 @@ type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25
     "format": "compact"
   },
   "mark": {
-    "fillOpacity": 0.14,
-    "strokeWidth": 1.25
+    "fillOpacity": 0.16,
+    "strokeWidth": 1.5
   },
   "size": {
     "width": 280,
@@ -175,55 +252,72 @@ type kpi. data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25
 
 ## Gross volume
 
-This period against the prior period.
+This period against the previous period.
 
-type combo. The first y series is mark area with a light fill from --ck-area-opacity. The second is mark line and dash dashed, in a contrasting token. tooltip.mode index.
+type combo. The first y series is a bar in theme.tokens.series[0]. The second is a dashed line in series[1]. axes.y.grid is solid and axes.x.grid is false, so only horizontal gridlines draw. mark.cornerRadius and mark.gap set the bar shape.
 
 ```json
 {
   "version": "1",
   "type": "combo",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#0a2540",
+      "muted": "#425466",
+      "grid": "#e6ebf1",
+      "axis": "#c1c9d2",
+      "accent": "#635bff",
+      "positive": "#09825d",
+      "negative": "#df1b41",
+      "series": [
+        "#635bff",
+        "#8898aa"
+      ]
+    }
+  },
   "data": [
     {
       "month": "Mar",
-      "gross": 182,
-      "prior": 160
+      "gross": 182000,
+      "prior": 160000
     },
     {
       "month": "Apr",
-      "gross": 176,
-      "prior": 171
+      "gross": 176000,
+      "prior": 171000
     },
     {
       "month": "May",
-      "gross": 201,
-      "prior": 188
+      "gross": 201000,
+      "prior": 188000
     },
     {
       "month": "Jun",
-      "gross": 198,
-      "prior": 190
+      "gross": 198000,
+      "prior": 190000
     },
     {
       "month": "Jul",
-      "gross": 214,
-      "prior": 196
+      "gross": 214000,
+      "prior": 196000
     },
     {
       "month": "Aug",
-      "gross": 248,
-      "prior": 205
+      "gross": 248000,
+      "prior": 205000
     },
     {
       "month": "Sep",
-      "gross": 236,
-      "prior": 210
+      "gross": 236000,
+      "prior": 210000
     },
     {
       "month": "Oct",
-      "gross": 261,
-      "prior": 218
+      "gross": 261000,
+      "prior": 218000
     }
   ],
   "encoding": {
@@ -232,11 +326,11 @@ type combo. The first y series is mark area with a light fill from --ck-area-opa
       {
         "field": "gross",
         "title": "This period",
-        "mark": "area"
+        "mark": "bar"
       },
       {
         "field": "prior",
-        "title": "Prior period",
+        "title": "Previous period",
         "mark": "line",
         "dash": "dashed"
       }
@@ -244,11 +338,14 @@ type combo. The first y series is mark area with a light fill from --ck-area-opa
   },
   "axes": {
     "x": {
-      "title": "Month"
+      "grid": false
     },
     "y": {
-      "title": "Thousand USD",
-      "format": "compact"
+      "grid": true,
+      "format": {
+        "style": "compact",
+        "prefix": "$"
+      }
     }
   },
   "legend": {
@@ -258,14 +355,16 @@ type combo. The first y series is mark area with a light fill from --ck-area-opa
     "mode": "index"
   },
   "mark": {
-    "strokeWidth": 2.25
+    "strokeWidth": 2,
+    "cornerRadius": 3,
+    "gap": 0.38
   },
   "size": {
     "width": 1100,
     "height": 280
   },
   "a11y": {
-    "alt": "Gross volume peaks in October at 261 thousand, above the prior period."
+    "alt": "Gross volume peaks in October at 261 thousand dollars, above the previous period."
   }
 }
 ```
@@ -274,13 +373,30 @@ type combo. The first y series is mark area with a light fill from --ck-area-opa
 
 Card, bank, and wallet.
 
-type bar-list, loaded from @chartkitdev/core/charts/bar-list. No axes. A tinted track sits behind the label and the value is right-aligned.
+type bar-list. The track and the fill use theme.tokens.series[0]. The value format is compact with a dollar prefix.
 
 ```json
 {
   "version": "1",
   "type": "bar-list",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#0a2540",
+      "muted": "#425466",
+      "grid": "#e6ebf1",
+      "axis": "#c1c9d2",
+      "accent": "#635bff",
+      "positive": "#09825d",
+      "negative": "#df1b41",
+      "series": [
+        "#635bff",
+        "#8898aa"
+      ]
+    }
+  },
   "data": [
     {
       "method": "Card",
@@ -299,7 +415,10 @@ type bar-list, loaded from @chartkitdev/core/charts/bar-list. No axes. A tinted 
     "x": "method",
     "y": {
       "field": "amount",
-      "format": "compact"
+      "format": {
+        "style": "compact",
+        "prefix": "$"
+      }
     }
   },
   "size": {
@@ -316,13 +435,29 @@ type bar-list, loaded from @chartkitdev/core/charts/bar-list. No axes. A tinted 
 
 Daily failures this period.
 
-type line. The card overrides --ck-series-1 with a warning colour so failures are not the indigo volume series.
+type line. This chart's theme.tokens.series is the negative token, so the line is not the volume blurple.
 
 ```json
 {
   "version": "1",
   "type": "line",
-  "theme": "soft",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#0a2540",
+      "muted": "#425466",
+      "grid": "#e6ebf1",
+      "axis": "#c1c9d2",
+      "accent": "#635bff",
+      "positive": "#09825d",
+      "negative": "#df1b41",
+      "series": [
+        "#df1b41"
+      ]
+    }
+  },
   "data": [
     {
       "day": "14",
@@ -369,14 +504,17 @@ type line. The card overrides --ck-series-1 with a warning colour so failures ar
   },
   "axes": {
     "x": {
-      "title": "October"
+      "grid": false
     },
     "y": {
-      "title": "Failed"
+      "grid": true
     }
   },
   "tooltip": {
     "mode": "index"
+  },
+  "mark": {
+    "strokeWidth": 2
   },
   "size": {
     "width": 520,
@@ -390,9 +528,9 @@ type line. The card overrides --ck-series-1 with a warning colour so failures ar
 
 ## What produces this look
 
-- **Scorecards.** type kpi. A number array in data is the sparkline. mark.fillOpacity 0.14 and mark.strokeWidth 1.25 keep the line thin and the fill light. metric.delta is the chip.
-- **Comparison.** combo puts an area and a dashed line on one x axis. The prior series uses a warm second token so the dash stays visible on the area.
+- **Scorecards.** type kpi. A number array in data is the sparkline. theme.tokens.surface and theme.tokens.grid are transparent, so the page card is the only card. metric.delta is the chip.
+- **Comparison.** combo puts bars and a dashed line on one x axis. series[0] is the blurple bar. series[1] is the slate or cyan comparison line. Only the y grid is on.
 - **Methods.** bar-list is an on-demand chart. It is not in the line or all bundle. A tinted track runs behind the label and the value sits on the right.
-- **Tokens.** The page sets --ck-series-1 and --ck-series-2 from --dash-series-*. Soft and Midnight swap those variables. The accent is an indigo chosen for this page.
+- **Palette.** Colours are theme.tokens on each spec: blurple #635bff, navy text #0a2540, comparison #8898aa, and the negative #df1b41 for failed payments. Midnight swaps those tokens. The page CSS does not paint the marks.
 
 https://chartkit.dev/dashboards/ledger

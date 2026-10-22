@@ -1,28 +1,28 @@
 [
   {
     "slug": "ledger",
-    "title": "Harbor Ledger",
+    "title": "Stripe-style payments",
     "href": "https://chartkit.dev/dashboards/ledger",
     "markdown": "https://chartkit.dev/dashboards/ledger.md",
     "theme": "soft"
   },
   {
     "slug": "meter",
-    "title": "Quiet Meter",
+    "title": "Plausible-style analytics",
     "href": "https://chartkit.dev/dashboards/meter",
     "markdown": "https://chartkit.dev/dashboards/meter.md",
     "theme": "soft"
   },
   {
     "slug": "wayline",
-    "title": "Wayline",
+    "title": "Google Analytics-style traffic report",
     "href": "https://chartkit.dev/dashboards/wayline",
     "markdown": "https://chartkit.dev/dashboards/wayline.md",
     "theme": "soft"
   },
   {
     "slug": "keel",
-    "title": "Keel",
+    "title": "Sentry-style issues",
     "href": "https://chartkit.dev/dashboards/keel",
     "markdown": "https://chartkit.dev/dashboards/keel.md",
     "theme": "midnight"

@@ -127,12 +127,22 @@ export function sizeStops(values: number[], format: ScaleFormat): SizeStop[] {
   return picked.map((value) => ({ value, label: formatNumber(value, format) }));
 }
 
+const HEX6 = /^#[0-9a-fA-F]{6}$/;
+
+/** Two or more #rrggbb stops. Anything else leaves the built-in ramp. */
+export function hexRange(value: unknown): readonly string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const stops = value.filter((item): item is string => typeof item === "string" && HEX6.test(item));
+  return stops.length >= 2 ? stops : undefined;
+}
+
 export function paintScale(
   kind: ColorScaleName,
   values: number[],
   thresholds: number[] | undefined,
   format: ScaleFormat = {},
   title = "",
+  sequential?: readonly string[],
 ): PaintScale {
   const finite = values.filter((value) => Number.isFinite(value));
   const dataLo = finite.length ? Math.min(...finite) : 0;
@@ -165,7 +175,8 @@ export function paintScale(
   const nice = niceTicks(dataLo, dataHi, 5);
   const lo = nice.lo;
   const hi = nice.hi;
-  const rampStops = kind === "diverging" ? DIVERGING : SEQUENTIAL;
+  const custom = kind === "sequential" ? hexRange(sequential) : undefined;
+  const rampStops = kind === "diverging" ? DIVERGING : custom ?? SEQUENTIAL;
   const pivot = kind === "diverging" && lo < 0 && hi > 0 ? 0 : (lo + hi) / 2;
   const span = Math.max(hi - lo, 1e-9);
   const fill = (value: number) => {

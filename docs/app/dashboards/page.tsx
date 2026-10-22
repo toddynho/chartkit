@@ -5,7 +5,7 @@ import { pageMeta } from "@/lib/site";
 
 export const metadata = pageMeta(
   "Dashboards",
-  "Four ChartKit dashboards. Each one is JSON specs plus a token override, in Soft and Midnight.",
+  "Four ChartKit dashboards styled after Stripe, Plausible, Google Analytics, and Sentry. Chart colour comes from the spec.",
   "/dashboards",
 );
 
@@ -15,8 +15,9 @@ export default function DashboardsPage() {
     <div className="wrap section">
       <h1>Dashboards</h1>
       <p className="lede">
-        Four original boards. Each chart is a ChartKit JSON spec. Colour and type come from a token override on the page,
-        not a new bundle preset. Inspired by common SaaS dashboard styles. ChartKit is not affiliated with any product.
+        Four boards styled after familiar dashboards, so the range of ChartKit&apos;s styling is visible. Each chart is a
+        JSON spec. Colour, grid, and series come from theme.tokens. The page CSS styles the shell. ChartKit is not
+        affiliated with or endorsed by those products.
       </p>
       <div className="gallery-index">
         {boards.map((board) => {

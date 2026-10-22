@@ -507,5 +507,31 @@ describe("render", () => {
     }
     expect(svg).not.toMatch(/<circle\b[^>]*ck-geo-nodata|ck-geo-nodata[^>]*<circle/);
     expect(svg).not.toMatch(/<circle\b[^>]*class="ck-geo-region ck-geo-nodata"/);
+    expect(svg).toContain("#006d2c");
+  });
+
+  it("paints a sequential ramp from encoding.color.range and keeps the green default otherwise", async () => {
+    const blue = await render({
+      type: "choropleth",
+      theme: "soft",
+      data: [
+        { country: "JPN", sessions: 6200 },
+        { country: "CAN", sessions: 1600 },
+      ],
+      encoding: { region: "country", color: { field: "sessions", title: "Sessions", format: "compact", range: ["#e8f0fe", "#1a73e8"] } },
+      mark: { atlas: "world", projection: "equalEarth", scale: "sequential" },
+      a11y: { alt: "Japan is the darker blue." },
+    });
+    expect(blue).toContain("#1a73e8");
+    expect(blue).not.toContain("#006d2c");
+    expect(blue).not.toContain("#edf8e9");
+    const ignored = await render({
+      type: "choropleth",
+      data: [{ country: "JPN", sessions: 6200 }, { country: "CAN", sessions: 1600 }],
+      encoding: { region: "country", color: { field: "sessions", range: ["navy"] } },
+      mark: { atlas: "world", scale: "sequential" },
+      a11y: { alt: "A one-stop range stays on the green ramp." },
+    });
+    expect(ignored).toContain("#006d2c");
   });
 });
