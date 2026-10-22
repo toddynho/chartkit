@@ -216,8 +216,8 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
     "mode": "index"
   },
   "size": {
-    "width": 1100,
-    "height": 280
+    "width": 420,
+    "height": 148
   },
   "a11y": {
     "alt": "Users rise across 28 days and stay mostly above the previous period."
@@ -433,8 +433,8 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
     "mode": "index"
   },
   "size": {
-    "width": 1100,
-    "height": 280
+    "width": 420,
+    "height": 148
   },
   "a11y": {
     "alt": "New users over 28 days, with a dashed previous period."
@@ -650,8 +650,8 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
     "mode": "index"
   },
   "size": {
-    "width": 1100,
-    "height": 280
+    "width": 420,
+    "height": 148
   },
   "a11y": {
     "alt": "Average engagement over 28 days."
@@ -867,8 +867,8 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
     "mode": "index"
   },
   "size": {
-    "width": 1100,
-    "height": 280
+    "width": 420,
+    "height": 148
   },
   "a11y": {
     "alt": "Revenue over 28 days, with a dashed previous period."
@@ -1053,16 +1053,16 @@ type bar. A small realtime card. axes are off so the bars fill the card. The ser
 }
 ```
 
-## Channels
+## New users by channel
 
-Share of sessions.
+Horizontal bars for the five channels.
 
-type donut. theme.tokens.series is the five channel colours. legend.values prints the share. The centre is the total.
+type bar with mark.orientation horizontal. The series token is #1a73e8. legend.show is false.
 
 ```json
 {
   "version": "1",
-  "type": "donut",
+  "type": "bar",
   "theme": {
     "preset": "soft",
     "tokens": {
@@ -1077,10 +1077,7 @@ type donut. theme.tokens.series is the five channel colours. legend.values print
       "negative": "#d93025",
       "series": [
         "#1a73e8",
-        "#12b5cb",
-        "#e8710a",
-        "#e52592",
-        "#9334e6"
+        "#9aa0a6"
       ],
       "fontFamily": "Roboto, sans-serif",
       "fontSize": 12
@@ -1089,51 +1086,594 @@ type donut. theme.tokens.series is the five channel colours. legend.values print
   "data": [
     {
       "channel": "Search",
-      "sessions": 10290
+      "users": 6380
     },
     {
       "channel": "Direct",
-      "sessions": 5880
+      "users": 3646
     },
     {
       "channel": "Mail",
-      "sessions": 3920
+      "users": 2430
     },
     {
       "channel": "Social",
-      "sessions": 2695
+      "users": 1671
     },
     {
       "channel": "Referral",
-      "sessions": 1715
+      "users": 1063
     }
   ],
   "encoding": {
     "x": "channel",
     "y": {
-      "field": "sessions",
-      "title": "Sessions",
+      "field": "users",
+      "title": "New users",
       "format": "compact"
     }
   },
+  "mark": {
+    "orientation": "horizontal",
+    "gap": 0.32,
+    "cornerRadius": 2
+  },
+  "axes": {
+    "x": {
+      "title": "",
+      "grid": false
+    },
+    "y": {
+      "title": "",
+      "grid": false
+    }
+  },
   "legend": {
-    "values": true
+    "show": false
   },
   "size": {
-    "width": 400,
-    "height": 430
+    "width": 300,
+    "height": 180
   },
   "a11y": {
-    "alt": "Search is 10.3 thousand sessions. The centre total is 24.5 thousand."
+    "alt": "Search brings the most new users. Referral brings the fewest."
   }
 }
 ```
 
-## Users by hour
+## User activity over time
 
-Weekday against hour.
+30 days, 7 days, or 1 day.
 
-type heatmap. encoding.color.range is a continuous blue ramp, #e8f0fe, #aecbfa, #1a73e8. Weekday afternoons are the dark cells and nights stay light. Every cell has a value, so none are hatched.
+type line. The card switches 30 days, 7 days, and 1 day. The series token is #1a73e8. legend.show is false.
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#202124",
+      "muted": "#5f6368",
+      "grid": "#e8eaed",
+      "axis": "#dadce0",
+      "accent": "#1a73e8",
+      "positive": "#188038",
+      "negative": "#d93025",
+      "series": [
+        "#1a73e8",
+        "#9aa0a6"
+      ],
+      "fontFamily": "Roboto, sans-serif",
+      "fontSize": 12
+    }
+  },
+  "data": [
+    {
+      "date": "2025-09-24",
+      "users": 630
+    },
+    {
+      "date": "2025-09-25",
+      "users": 655
+    },
+    {
+      "date": "2025-09-26",
+      "users": 676
+    },
+    {
+      "date": "2025-09-27",
+      "users": 690
+    },
+    {
+      "date": "2025-09-28",
+      "users": 625
+    },
+    {
+      "date": "2025-09-29",
+      "users": 616
+    },
+    {
+      "date": "2025-09-30",
+      "users": 684
+    },
+    {
+      "date": "2025-10-01",
+      "users": 771
+    },
+    {
+      "date": "2025-10-02",
+      "users": 782
+    },
+    {
+      "date": "2025-10-03",
+      "users": 728
+    },
+    {
+      "date": "2025-10-04",
+      "users": 717
+    },
+    {
+      "date": "2025-10-05",
+      "users": 656
+    },
+    {
+      "date": "2025-10-06",
+      "users": 675
+    },
+    {
+      "date": "2025-10-07",
+      "users": 732
+    },
+    {
+      "date": "2025-10-08",
+      "users": 834
+    },
+    {
+      "date": "2025-10-09",
+      "users": 827
+    },
+    {
+      "date": "2025-10-10",
+      "users": 883
+    },
+    {
+      "date": "2025-10-11",
+      "users": 793
+    },
+    {
+      "date": "2025-10-12",
+      "users": 781
+    },
+    {
+      "date": "2025-10-13",
+      "users": 778
+    },
+    {
+      "date": "2025-10-14",
+      "users": 768
+    },
+    {
+      "date": "2025-10-15",
+      "users": 838
+    },
+    {
+      "date": "2025-10-16",
+      "users": 949
+    },
+    {
+      "date": "2025-10-17",
+      "users": 948
+    },
+    {
+      "date": "2025-10-18",
+      "users": 915
+    },
+    {
+      "date": "2025-10-19",
+      "users": 859
+    },
+    {
+      "date": "2025-10-20",
+      "users": 857
+    },
+    {
+      "date": "2025-10-21",
+      "users": 905
+    }
+  ],
+  "encoding": {
+    "x": {
+      "field": "date",
+      "type": "temporal"
+    },
+    "y": "users"
+  },
+  "mark": {
+    "curve": "linear",
+    "strokeWidth": 2,
+    "points": "none"
+  },
+  "axes": {
+    "x": {
+      "grid": false,
+      "ticks": "ends"
+    },
+    "y": {
+      "title": "",
+      "grid": true
+    }
+  },
+  "legend": {
+    "show": false
+  },
+  "size": {
+    "width": 300,
+    "height": 150
+  },
+  "a11y": {
+    "alt": "User activity across 30 days."
+  }
+}
+```
+
+### 30 days
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#202124",
+      "muted": "#5f6368",
+      "grid": "#e8eaed",
+      "axis": "#dadce0",
+      "accent": "#1a73e8",
+      "positive": "#188038",
+      "negative": "#d93025",
+      "series": [
+        "#1a73e8",
+        "#9aa0a6"
+      ],
+      "fontFamily": "Roboto, sans-serif",
+      "fontSize": 12
+    }
+  },
+  "data": [
+    {
+      "date": "2025-09-24",
+      "users": 630
+    },
+    {
+      "date": "2025-09-25",
+      "users": 655
+    },
+    {
+      "date": "2025-09-26",
+      "users": 676
+    },
+    {
+      "date": "2025-09-27",
+      "users": 690
+    },
+    {
+      "date": "2025-09-28",
+      "users": 625
+    },
+    {
+      "date": "2025-09-29",
+      "users": 616
+    },
+    {
+      "date": "2025-09-30",
+      "users": 684
+    },
+    {
+      "date": "2025-10-01",
+      "users": 771
+    },
+    {
+      "date": "2025-10-02",
+      "users": 782
+    },
+    {
+      "date": "2025-10-03",
+      "users": 728
+    },
+    {
+      "date": "2025-10-04",
+      "users": 717
+    },
+    {
+      "date": "2025-10-05",
+      "users": 656
+    },
+    {
+      "date": "2025-10-06",
+      "users": 675
+    },
+    {
+      "date": "2025-10-07",
+      "users": 732
+    },
+    {
+      "date": "2025-10-08",
+      "users": 834
+    },
+    {
+      "date": "2025-10-09",
+      "users": 827
+    },
+    {
+      "date": "2025-10-10",
+      "users": 883
+    },
+    {
+      "date": "2025-10-11",
+      "users": 793
+    },
+    {
+      "date": "2025-10-12",
+      "users": 781
+    },
+    {
+      "date": "2025-10-13",
+      "users": 778
+    },
+    {
+      "date": "2025-10-14",
+      "users": 768
+    },
+    {
+      "date": "2025-10-15",
+      "users": 838
+    },
+    {
+      "date": "2025-10-16",
+      "users": 949
+    },
+    {
+      "date": "2025-10-17",
+      "users": 948
+    },
+    {
+      "date": "2025-10-18",
+      "users": 915
+    },
+    {
+      "date": "2025-10-19",
+      "users": 859
+    },
+    {
+      "date": "2025-10-20",
+      "users": 857
+    },
+    {
+      "date": "2025-10-21",
+      "users": 905
+    }
+  ],
+  "encoding": {
+    "x": {
+      "field": "date",
+      "type": "temporal"
+    },
+    "y": "users"
+  },
+  "mark": {
+    "curve": "linear",
+    "strokeWidth": 2,
+    "points": "none"
+  },
+  "axes": {
+    "x": {
+      "grid": false,
+      "ticks": "ends"
+    },
+    "y": {
+      "title": "",
+      "grid": true
+    }
+  },
+  "legend": {
+    "show": false
+  },
+  "size": {
+    "width": 300,
+    "height": 150
+  },
+  "a11y": {
+    "alt": "User activity across 30 days."
+  }
+}
+```
+
+### 7 days
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#202124",
+      "muted": "#5f6368",
+      "grid": "#e8eaed",
+      "axis": "#dadce0",
+      "accent": "#1a73e8",
+      "positive": "#188038",
+      "negative": "#d93025",
+      "series": [
+        "#1a73e8",
+        "#9aa0a6"
+      ],
+      "fontFamily": "Roboto, sans-serif",
+      "fontSize": 12
+    }
+  },
+  "data": [
+    {
+      "date": "2025-10-15",
+      "users": 760
+    },
+    {
+      "date": "2025-10-16",
+      "users": 775
+    },
+    {
+      "date": "2025-10-17",
+      "users": 826
+    },
+    {
+      "date": "2025-10-18",
+      "users": 793
+    },
+    {
+      "date": "2025-10-19",
+      "users": 786
+    },
+    {
+      "date": "2025-10-20",
+      "users": 876
+    },
+    {
+      "date": "2025-10-21",
+      "users": 920
+    }
+  ],
+  "encoding": {
+    "x": {
+      "field": "date",
+      "type": "temporal"
+    },
+    "y": "users"
+  },
+  "mark": {
+    "curve": "linear",
+    "strokeWidth": 2,
+    "points": "none"
+  },
+  "axes": {
+    "x": {
+      "grid": false,
+      "ticks": "ends"
+    },
+    "y": {
+      "title": "",
+      "grid": true
+    }
+  },
+  "legend": {
+    "show": false
+  },
+  "size": {
+    "width": 300,
+    "height": 150
+  },
+  "a11y": {
+    "alt": "User activity across 7 days."
+  }
+}
+```
+
+### 1 day
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#202124",
+      "muted": "#5f6368",
+      "grid": "#e8eaed",
+      "axis": "#dadce0",
+      "accent": "#1a73e8",
+      "positive": "#188038",
+      "negative": "#d93025",
+      "series": [
+        "#1a73e8",
+        "#9aa0a6"
+      ],
+      "fontFamily": "Roboto, sans-serif",
+      "fontSize": 12
+    }
+  },
+  "data": [
+    {
+      "hour": "00",
+      "users": 120
+    },
+    {
+      "hour": "04",
+      "users": 80
+    },
+    {
+      "hour": "08",
+      "users": 210
+    },
+    {
+      "hour": "12",
+      "users": 340
+    },
+    {
+      "hour": "16",
+      "users": 290
+    },
+    {
+      "hour": "20",
+      "users": 160
+    }
+  ],
+  "encoding": {
+    "x": "hour",
+    "y": "users"
+  },
+  "mark": {
+    "curve": "linear",
+    "strokeWidth": 2,
+    "points": "none"
+  },
+  "axes": {
+    "x": {
+      "grid": false
+    },
+    "y": {
+      "title": "",
+      "grid": true
+    }
+  },
+  "legend": {
+    "show": false
+  },
+  "size": {
+    "width": 300,
+    "height": 150
+  },
+  "a11y": {
+    "alt": "User activity across one day."
+  }
+}
+```
+
+## Cohort
+
+Users remaining by period.
+
+type heatmap. Rows are cohorts and columns are periods. color.range is #e8f0fe, #aecbfa, #1a73e8. Later periods are lighter.
 
 ```json
 {
@@ -1160,289 +1700,149 @@ type heatmap. encoding.color.range is a continuous blue ramp, #e8f0fe, #aecbfa, 
   },
   "data": [
     {
-      "day": "Mon",
-      "hour": "00",
-      "users": 51
+      "cohort": "Cohort A",
+      "period": "0",
+      "users": 93
     },
     {
-      "day": "Mon",
-      "hour": "03",
-      "users": 66
+      "cohort": "Cohort A",
+      "period": "1",
+      "users": 89
     },
     {
-      "day": "Mon",
-      "hour": "06",
-      "users": 128
+      "cohort": "Cohort A",
+      "period": "2",
+      "users": 79
     },
     {
-      "day": "Mon",
-      "hour": "09",
-      "users": 201
+      "cohort": "Cohort A",
+      "period": "3",
+      "users": 70
     },
     {
-      "day": "Mon",
-      "hour": "12",
-      "users": 249
+      "cohort": "Cohort A",
+      "period": "4",
+      "users": 64
     },
     {
-      "day": "Mon",
-      "hour": "15",
-      "users": 202
+      "cohort": "Cohort A",
+      "period": "5",
+      "users": 54
     },
     {
-      "day": "Mon",
-      "hour": "18",
-      "users": 131
+      "cohort": "Cohort A",
+      "period": "6",
+      "users": 48
     },
     {
-      "day": "Mon",
-      "hour": "21",
-      "users": 55
+      "cohort": "Cohort B",
+      "period": "0",
+      "users": 93
     },
     {
-      "day": "Tue",
-      "hour": "00",
-      "users": 50
+      "cohort": "Cohort B",
+      "period": "1",
+      "users": 84
     },
     {
-      "day": "Tue",
-      "hour": "03",
-      "users": 61
+      "cohort": "Cohort B",
+      "period": "2",
+      "users": 77
     },
     {
-      "day": "Tue",
-      "hour": "06",
-      "users": 128
+      "cohort": "Cohort B",
+      "period": "3",
+      "users": 68
     },
     {
-      "day": "Tue",
-      "hour": "09",
-      "users": 203
+      "cohort": "Cohort B",
+      "period": "4",
+      "users": 58
     },
     {
-      "day": "Tue",
-      "hour": "12",
-      "users": 240
+      "cohort": "Cohort B",
+      "period": "5",
+      "users": 48
     },
     {
-      "day": "Tue",
-      "hour": "15",
-      "users": 197
+      "cohort": "Cohort B",
+      "period": "6",
+      "users": 38
     },
     {
-      "day": "Tue",
-      "hour": "18",
-      "users": 135
+      "cohort": "Cohort C",
+      "period": "0",
+      "users": 97
     },
     {
-      "day": "Tue",
-      "hour": "21",
-      "users": 59
-    },
-    {
-      "day": "Wed",
-      "hour": "00",
-      "users": 53
-    },
-    {
-      "day": "Wed",
-      "hour": "03",
-      "users": 61
-    },
-    {
-      "day": "Wed",
-      "hour": "06",
-      "users": 128
-    },
-    {
-      "day": "Wed",
-      "hour": "09",
-      "users": 209
-    },
-    {
-      "day": "Wed",
-      "hour": "12",
-      "users": 241
-    },
-    {
-      "day": "Wed",
-      "hour": "15",
-      "users": 198
-    },
-    {
-      "day": "Wed",
-      "hour": "18",
-      "users": 134
-    },
-    {
-      "day": "Wed",
-      "hour": "21",
-      "users": 59
-    },
-    {
-      "day": "Thu",
-      "hour": "00",
-      "users": 47
-    },
-    {
-      "day": "Thu",
-      "hour": "03",
-      "users": 65
-    },
-    {
-      "day": "Thu",
-      "hour": "06",
-      "users": 122
-    },
-    {
-      "day": "Thu",
-      "hour": "09",
-      "users": 207
-    },
-    {
-      "day": "Thu",
-      "hour": "12",
-      "users": 240
-    },
-    {
-      "day": "Thu",
-      "hour": "15",
-      "users": 207
-    },
-    {
-      "day": "Thu",
-      "hour": "18",
-      "users": 125
-    },
-    {
-      "day": "Thu",
-      "hour": "21",
-      "users": 63
-    },
-    {
-      "day": "Fri",
-      "hour": "00",
-      "users": 60
-    },
-    {
-      "day": "Fri",
-      "hour": "03",
-      "users": 63
-    },
-    {
-      "day": "Fri",
-      "hour": "06",
-      "users": 133
-    },
-    {
-      "day": "Fri",
-      "hour": "09",
-      "users": 201
-    },
-    {
-      "day": "Fri",
-      "hour": "12",
-      "users": 239
-    },
-    {
-      "day": "Fri",
-      "hour": "15",
-      "users": 198
-    },
-    {
-      "day": "Fri",
-      "hour": "18",
-      "users": 124
-    },
-    {
-      "day": "Fri",
-      "hour": "21",
-      "users": 52
-    },
-    {
-      "day": "Sat",
-      "hour": "00",
-      "users": 35
-    },
-    {
-      "day": "Sat",
-      "hour": "03",
-      "users": 32
-    },
-    {
-      "day": "Sat",
-      "hour": "06",
-      "users": 56
-    },
-    {
-      "day": "Sat",
-      "hour": "09",
-      "users": 86
-    },
-    {
-      "day": "Sat",
-      "hour": "12",
-      "users": 101
-    },
-    {
-      "day": "Sat",
-      "hour": "15",
+      "cohort": "Cohort C",
+      "period": "1",
       "users": 85
     },
     {
-      "day": "Sat",
-      "hour": "18",
-      "users": 63
+      "cohort": "Cohort C",
+      "period": "2",
+      "users": 74
     },
     {
-      "day": "Sat",
-      "hour": "21",
-      "users": 30
+      "cohort": "Cohort C",
+      "period": "3",
+      "users": 65
     },
     {
-      "day": "Sun",
-      "hour": "00",
-      "users": 32
+      "cohort": "Cohort C",
+      "period": "4",
+      "users": 55
     },
     {
-      "day": "Sun",
-      "hour": "03",
-      "users": 35
+      "cohort": "Cohort C",
+      "period": "5",
+      "users": 46
     },
     {
-      "day": "Sun",
-      "hour": "06",
+      "cohort": "Cohort C",
+      "period": "6",
+      "users": 34
+    },
+    {
+      "cohort": "Cohort D",
+      "period": "0",
+      "users": 93
+    },
+    {
+      "cohort": "Cohort D",
+      "period": "1",
+      "users": 86
+    },
+    {
+      "cohort": "Cohort D",
+      "period": "2",
+      "users": 73
+    },
+    {
+      "cohort": "Cohort D",
+      "period": "3",
       "users": 59
     },
     {
-      "day": "Sun",
-      "hour": "09",
-      "users": 91
+      "cohort": "Cohort D",
+      "period": "4",
+      "users": 53
     },
     {
-      "day": "Sun",
-      "hour": "12",
-      "users": 106
+      "cohort": "Cohort D",
+      "period": "5",
+      "users": 38
     },
     {
-      "day": "Sun",
-      "hour": "15",
-      "users": 91
-    },
-    {
-      "day": "Sun",
-      "hour": "18",
-      "users": 60
-    },
-    {
-      "day": "Sun",
-      "hour": "21",
-      "users": 36
+      "cohort": "Cohort D",
+      "period": "6",
+      "users": 30
     }
   ],
   "encoding": {
-    "x": "hour",
-    "y": "day",
+    "x": "period",
+    "y": "cohort",
     "color": {
       "field": "users",
       "title": "Users",
@@ -1458,11 +1858,11 @@ type heatmap. encoding.color.range is a continuous blue ramp, #e8f0fe, #aecbfa, 
     "cornerRadius": 2
   },
   "size": {
-    "width": 520,
-    "height": 280
+    "width": 300,
+    "height": 180
   },
   "a11y": {
-    "alt": "Users peak on weekday afternoons and fall overnight."
+    "alt": "Each cohort fades across the seven periods."
   }
 }
 ```
@@ -1714,8 +2114,8 @@ type choropleth. encoding.color.range is the blue ramp. mark.nodata is fill, mar
     "position": "bottom"
   },
   "size": {
-    "width": 1100,
-    "height": 420
+    "width": 280,
+    "height": 180
   },
   "a11y": {
     "alt": "Users across more than forty countries. Countries without a row are plain grey."
@@ -1966,8 +2366,8 @@ type choropleth. encoding.color.range is the blue ramp. mark.nodata is fill, mar
     "position": "bottom"
   },
   "size": {
-    "width": 1100,
-    "height": 420
+    "width": 280,
+    "height": 180
   },
   "a11y": {
     "alt": "Users across more than forty countries. Countries without a row are plain grey."
@@ -1977,9 +2377,9 @@ type choropleth. encoding.color.range is the blue ramp. mark.nodata is fill, mar
 
 ## What produces this look
 
-- **Metric tabs.** Users, New users, Avg engagement, and Revenue are page tabs. The selected tab is underlined. Each tab is its own line spec.
+- **Snapshot grid.** Eight cards in two rows of four: users with a metric strip, last 30 minutes, insights, new users by channel, a sessions table, a map with a country table, user activity over time, and a cohort heatmap. There is no donut.
 - **Comparison.** curve linear keeps the segments straight. The previous period is dash dashed in #9aa0a6. axes.y.title is empty. Midnight uses #8ab4f8 for this period.
 - **Map.** Fifty-two countries use encoding.color.range #aecbfa, #669df6, #1a73e8. mark.nodata fill paints missing countries with mark.land. There is no hatch.
-- **Hour grid.** The heatmap is weekday by hour. color.range is the continuous ramp #e8f0fe, #aecbfa, #1a73e8. Nights are light and weekday afternoons are dark.
+- **Cohort.** The heatmap rows are cohorts and the columns are periods 0 through 6. color.range is #e8f0fe, #aecbfa, #1a73e8.
 
 https://chartkit.dev/dashboards/wayline

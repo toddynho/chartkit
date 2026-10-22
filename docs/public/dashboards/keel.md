@@ -760,7 +760,7 @@ checkout.pay. Last seen 2 min ago. Age 4d. 27 events, 6 users.
       "positive": "#1b7c4d",
       "negative": "#f55459",
       "series": [
-        "#7553ff"
+        "#c7c2cc"
       ],
       "fontFamily": "Inter, sans-serif",
       "fontSize": 12
@@ -845,7 +845,7 @@ maps.load. Last seen 18 min ago. Age 12d. 17 events, 4 users.
       "positive": "#1b7c4d",
       "negative": "#f55459",
       "series": [
-        "#7553ff"
+        "#c7c2cc"
       ],
       "fontFamily": "Inter, sans-serif",
       "fontSize": 12
@@ -930,7 +930,7 @@ worker.tick. Last seen 1 hr ago. Age 9d. 27 events, 11 users.
       "positive": "#1b7c4d",
       "negative": "#f55459",
       "series": [
-        "#7553ff"
+        "#c7c2cc"
       ],
       "fontFamily": "Inter, sans-serif",
       "fontSize": 12
@@ -1015,7 +1015,7 @@ auth.verify. Last seen 3 hr ago. Age 2d. 14 events, 3 users.
       "positive": "#1b7c4d",
       "negative": "#f55459",
       "series": [
-        "#7553ff"
+        "#c7c2cc"
       ],
       "fontFamily": "Inter, sans-serif",
       "fontSize": 12
@@ -1100,7 +1100,7 @@ cart.total. Last seen 5 hr ago. Age 6d. 9 events, 2 users.
       "positive": "#1b7c4d",
       "negative": "#f55459",
       "series": [
-        "#7553ff"
+        "#c7c2cc"
       ],
       "fontFamily": "Inter, sans-serif",
       "fontSize": 12
@@ -1185,7 +1185,7 @@ hooks.deliver. Last seen 1 day ago. Age 15d. 21 events, 8 users.
       "positive": "#1b7c4d",
       "negative": "#f55459",
       "series": [
-        "#7553ff"
+        "#c7c2cc"
       ],
       "fontFamily": "Inter, sans-serif",
       "fontSize": 12
@@ -1251,7 +1251,7 @@ hooks.deliver. Last seen 1 day ago. Age 15d. 21 events, 8 users.
 
 ## What produces this look
 
-- **Issues.** Each row has a checkbox, a title, a culprit, tags, last seen, age, a trend spark with its count, events, users, priority, and an assignee placeholder.
+- **Issues.** Each row has a checkbox, a title, a culprit, tags, last seen, age, a grey trend spark with its count, events, users, priority, and an assignee placeholder. The spark series token is #c7c2cc.
 - **Light first.** The default tokens are the light set: card #ffffff, ink #1f1633, accent #7553ff, error #f55459, warning #ff9838, info #8d95a3. Midnight swaps them.
 - **Volume.** The stacked bar is a secondary card. It has no highlighted band and no release label. 14d, 24h, and Area are variants of that card.
 

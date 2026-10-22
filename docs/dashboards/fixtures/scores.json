@@ -49,5 +49,12 @@
         "overlap": 0.814
       }
     }
+  },
+  "page": {
+    "note": "Whole-page side-by-side MAE. Both panels are scaled to width 900 and cropped from the top to the reference aspect. The ChartKit panel includes the banner above the product frame. Plot scores above are unchanged.",
+    "stripe": { "mae": 14.49, "mismatch": 0.0961 },
+    "plausible": { "mae": 11.55, "mismatch": 0.0808 },
+    "ga": { "mae": 15.08, "mismatch": 0.12 },
+    "sentry": { "mae": 11.91, "mismatch": 0.1059 }
   }
 }

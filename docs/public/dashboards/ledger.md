@@ -777,9 +777,8 @@ type line. This chart's series token is the negative colour. axes.y.title is emp
 
 ## What produces this look
 
-- **Gross volume.** combo draws a blurple area and a grey dashed prior-period line. headline draws the total, the comparison, and the delta pill. axes.x.ticks is ends. theme.tokens.fontFamily is Inter.
-- **Metrics.** Six kpi specs sit in a 2×3 grid. Each is a label, a value, and a short spark. surface and grid are transparent.
-- **Methods.** bar-list mark.track is row. Amounts use the text token. Soft and Midnight are two SVGs from the two theme objects.
+- **Gross volume.** The page is this one card. combo draws a blurple area and a grey dashed prior-period line. headline draws the total, the comparison, and the delta pill. axes.x.ticks is ends. theme.tokens.fontFamily is Inter.
+- **Reference.** No current public Home screenshot showed the gross-volume chart with a today/yesterday comparison and a metric grid. The page matches the May 2020 gross-volume card at its own width, about 1030px. The kpi and method specs stay in View spec and are not drawn.
 - **Palette.** theme.tokens: blurple #635bff, navy text #0a2540, comparison #8898aa, negative #df1b41. Midnight swaps those tokens. The page CSS does not paint the marks.
 
 https://chartkit.dev/dashboards/ledger

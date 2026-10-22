@@ -4,7 +4,7 @@ import { render as renderExtra } from "@chartkitdev/core/extra";
 import { validate } from "@chartkitdev/core/validate";
 
 export type DashTheme = "soft" | "midnight";
-export type DashPlace = "metric" | "hero" | "side" | "tab" | "list" | "map" | "realtime";
+export type DashPlace = "metric" | "hero" | "side" | "tab" | "list" | "map" | "realtime" | "hbar" | "activity" | "cohort";
 
 export interface DashThemes {
   soft: Record<string, unknown>;
@@ -458,9 +458,8 @@ function ledger(): Dashboard {
     ],
     sparks: [],
     notes: [
-      { label: "Gross volume", detail: "combo draws a blurple area and a grey dashed prior-period line. headline draws the total, the comparison, and the delta pill. axes.x.ticks is ends. theme.tokens.fontFamily is Inter." },
-      { label: "Metrics", detail: "Six kpi specs sit in a 2×3 grid. Each is a label, a value, and a short spark. surface and grid are transparent." },
-      { label: "Methods", detail: "bar-list mark.track is row. Amounts use the text token. Soft and Midnight are two SVGs from the two theme objects." },
+      { label: "Gross volume", detail: "The page is this one card. combo draws a blurple area and a grey dashed prior-period line. headline draws the total, the comparison, and the delta pill. axes.x.ticks is ends. theme.tokens.fontFamily is Inter." },
+      { label: "Reference", detail: "No current public Home screenshot showed the gross-volume chart with a today/yesterday comparison and a metric grid. The page matches the May 2020 gross-volume card at its own width, about 1030px. The kpi and method specs stay in View spec and are not drawn." },
       { label: "Palette", detail: "theme.tokens: blurple #635bff, navy text #0a2540, comparison #8898aa, negative #df1b41. Midnight swaps those tokens. The page CSS does not paint the marks." },
     ],
   };
@@ -599,10 +598,6 @@ function meter(): Dashboard {
 
 function wayline(): Dashboard {
   const mode: DashTheme = "soft";
-  const channels = {
-    soft: ["#1a73e8", "#12b5cb", "#e8710a", "#e52592", "#9334e6"],
-    midnight: ["#8ab4f8", "#78d9ec", "#fcad70", "#f48fb1", "#d7aefb"],
-  };
   const light: Ink = {
     card: "#ffffff",
     ink: "#202124",
@@ -627,7 +622,6 @@ function wayline(): Dashboard {
   };
   const face = "Roboto, sans-serif";
   const themes = themesFor(light, dark, undefined, false, face);
-  const donutThemes = themesFor(light, dark, channels, false, face);
   const heat = themesFor(light, dark, { soft: ["#1a73e8"], midnight: ["#8ab4f8"] }, false, face);
   const days = isoDays("2025-09-24", 28);
   const tabLine = (id: string, label: string, value: string, delta: string, good: boolean, now: number[], then: number[], alt: string): ChartDraft => {
@@ -655,24 +649,21 @@ function wayline(): Dashboard {
         legend: { show: false },
         axes: { x: { grid: false }, y: openY },
         tooltip: { mode: "index" },
-        size: { width: 1100, height: 280 },
+        size: { width: 420, height: 148 },
       },
       alt,
     ),
     };
   };
-  const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const hours = ["00", "03", "06", "09", "12", "15", "18", "21"];
-  const heatRand = unit(17);
-  const heatRows = weekdays.flatMap((day, dayIndex) =>
-    hours.map((hour, hourIndex) => {
-      const weekend = dayIndex >= 5;
-      const bell = Math.exp(-((hourIndex - 4) ** 2) / 4.2);
-      const night = hourIndex <= 1 || hourIndex >= 7 ? 0.22 : 1;
-      const base = weekend ? 28 : 46;
-      const users = Math.round(base + (weekend ? 70 : 190) * bell * night + heatRand() * (weekend ? 10 : 18));
-      return { day, hour, users };
-    }),
+  const cohorts = ["Cohort A", "Cohort B", "Cohort C", "Cohort D"];
+  const periods = ["0", "1", "2", "3", "4", "5", "6"];
+  const cohortRand = unit(17);
+  const cohortRows = cohorts.flatMap((cohort, cohortIndex) =>
+    periods.map((period, periodIndex) => ({
+      cohort,
+      period,
+      users: Math.max(8, Math.round(92 - periodIndex * (8 + cohortIndex) + cohortRand() * 6)),
+    })),
   );
   const countries = [
     ["USA", 9200], ["JPN", 7100], ["GBR", 5400], ["DEU", 4800], ["BRA", 4300], ["IND", 3900], ["FRA", 3600], ["AUS", 2800],
@@ -701,7 +692,7 @@ function wayline(): Dashboard {
       water: theme === "midnight" ? "#202124" : "#ffffff",
     },
     legend: { show: true, position: "bottom" },
-    size: { width: 1100, height: 420 },
+    size: { width: 280, height: 180 },
     a11y: { alt: "Users across more than forty countries. Countries without a row are plain grey." },
   });
   const channelRows = [
@@ -749,48 +740,129 @@ function wayline(): Dashboard {
       }),
       chart({
         id: "wayline-channels",
-        title: "Channels",
-        caption: "Share of sessions.",
-        note: "type donut. theme.tokens.series is the five channel colours. legend.values prints the share. The centre is the total.",
-        span: "dash-6",
-        place: "side",
-        themes: donutThemes,
+        title: "New users by channel",
+        caption: "Horizontal bars for the five channels.",
+        note: "type bar with mark.orientation horizontal. The series token is #1a73e8. legend.show is false.",
+        span: "dash-3",
+        place: "hbar",
+        themes,
         spec: spec(
-          "donut",
-          donutThemes,
+          "bar",
+          themes,
           mode,
           {
-            data: channelRows,
-            encoding: { x: "channel", y: { field: "sessions", title: "Sessions", format: "compact" } },
-            legend: { values: true },
-            size: { width: 400, height: 430 },
+            data: channelRows.map((row) => ({ channel: row.channel, users: Math.round(row.sessions * 0.62) })),
+            encoding: { x: "channel", y: { field: "users", title: "New users", format: "compact" } },
+            mark: { orientation: "horizontal", gap: 0.32, cornerRadius: 2 },
+            axes: { x: { title: "", grid: false }, y: { title: "", grid: false } },
+            legend: { show: false },
+            size: { width: 300, height: 180 },
           },
-          "Search is 10.3 thousand sessions. The centre total is 24.5 thousand.",
+          "Search brings the most new users. Referral brings the fewest.",
         ),
       }),
       chart({
-        id: "wayline-hours",
-        title: "Users by hour",
-        caption: "Weekday against hour.",
-        note: "type heatmap. encoding.color.range is a continuous blue ramp, #e8f0fe, #aecbfa, #1a73e8. Weekday afternoons are the dark cells and nights stay light. Every cell has a value, so none are hatched.",
-        span: "dash-6",
-        place: "side",
+        id: "wayline-activity",
+        title: "User activity over time",
+        caption: "30 days, 7 days, or 1 day.",
+        note: "type line. The card switches 30 days, 7 days, and 1 day. The series token is #1a73e8. legend.show is false.",
+        span: "dash-3",
+        place: "activity",
+        themes,
+        spec: spec(
+          "line",
+          themes,
+          mode,
+          {
+            data: days.map((date, index) => ({ date, users: rounds(organic(28, { seed: 8, start: 620, end: 910, season: 70, noise: 45, phase: 0.5 }))[index] })),
+            encoding: { x: { field: "date", type: "temporal" }, y: "users" },
+            mark: { curve: "linear", strokeWidth: 2, points: "none" },
+            axes: { x: { grid: false, ticks: "ends" }, y: openY },
+            legend: { show: false },
+            size: { width: 300, height: 150 },
+          },
+          "User activity across 30 days.",
+        ),
+        variants: [
+          {
+            id: "30",
+            label: "30 days",
+            spec: spec(
+              "line",
+              themes,
+              mode,
+              {
+                data: days.map((date, index) => ({ date, users: rounds(organic(28, { seed: 8, start: 620, end: 910, season: 70, noise: 45, phase: 0.5 }))[index] })),
+                encoding: { x: { field: "date", type: "temporal" }, y: "users" },
+                mark: { curve: "linear", strokeWidth: 2, points: "none" },
+                axes: { x: { grid: false, ticks: "ends" }, y: openY },
+                legend: { show: false },
+                size: { width: 300, height: 150 },
+              },
+              "User activity across 30 days.",
+            ),
+          },
+          {
+            id: "7",
+            label: "7 days",
+            spec: spec(
+              "line",
+              themes,
+              mode,
+              {
+                data: days.slice(-7).map((date, index) => ({ date, users: rounds(organic(7, { seed: 19, start: 740, end: 910, season: 40, noise: 30, phase: 1.1 }))[index] })),
+                encoding: { x: { field: "date", type: "temporal" }, y: "users" },
+                mark: { curve: "linear", strokeWidth: 2, points: "none" },
+                axes: { x: { grid: false, ticks: "ends" }, y: openY },
+                legend: { show: false },
+                size: { width: 300, height: 150 },
+              },
+              "User activity across 7 days.",
+            ),
+          },
+          {
+            id: "1",
+            label: "1 day",
+            spec: spec(
+              "line",
+              themes,
+              mode,
+              {
+                data: ["00", "04", "08", "12", "16", "20"].map((hour, index) => ({ hour, users: [120, 80, 210, 340, 290, 160][index] })),
+                encoding: { x: "hour", y: "users" },
+                mark: { curve: "linear", strokeWidth: 2, points: "none" },
+                axes: { x: { grid: false }, y: openY },
+                legend: { show: false },
+                size: { width: 300, height: 150 },
+              },
+              "User activity across one day.",
+            ),
+          },
+        ],
+      }),
+      chart({
+        id: "wayline-cohort",
+        title: "Cohort",
+        caption: "Users remaining by period.",
+        note: "type heatmap. Rows are cohorts and columns are periods. color.range is #e8f0fe, #aecbfa, #1a73e8. Later periods are lighter.",
+        span: "dash-3",
+        place: "cohort",
         themes: heat,
         spec: spec(
           "heatmap",
           heat,
           mode,
           {
-            data: heatRows,
+            data: cohortRows,
             encoding: {
-              x: "hour",
-              y: "day",
+              x: "period",
+              y: "cohort",
               color: { field: "users", title: "Users", range: ["#e8f0fe", "#aecbfa", "#1a73e8"] },
             },
             mark: { gap: 0.18, cornerRadius: 2 },
-            size: { width: 520, height: 280 },
+            size: { width: 300, height: 180 },
           },
-          "Users peak on weekday afternoons and fall overnight.",
+          "Each cohort fades across the seven periods.",
         ),
       }),
       chart({
@@ -807,10 +879,10 @@ function wayline(): Dashboard {
     ],
     sparks: [],
     notes: [
-      { label: "Metric tabs", detail: "Users, New users, Avg engagement, and Revenue are page tabs. The selected tab is underlined. Each tab is its own line spec." },
+      { label: "Snapshot grid", detail: "Eight cards in two rows of four: users with a metric strip, last 30 minutes, insights, new users by channel, a sessions table, a map with a country table, user activity over time, and a cohort heatmap. There is no donut." },
       { label: "Comparison", detail: "curve linear keeps the segments straight. The previous period is dash dashed in #9aa0a6. axes.y.title is empty. Midnight uses #8ab4f8 for this period." },
       { label: "Map", detail: "Fifty-two countries use encoding.color.range #aecbfa, #669df6, #1a73e8. mark.nodata fill paints missing countries with mark.land. There is no hatch." },
-      { label: "Hour grid", detail: "The heatmap is weekday by hour. color.range is the continuous ramp #e8f0fe, #aecbfa, #1a73e8. Nights are light and weekday afternoons are dark." },
+      { label: "Cohort", detail: "The heatmap rows are cohorts and the columns are periods 0 through 6. color.range is #e8f0fe, #aecbfa, #1a73e8." },
     ],
   };
 }
@@ -855,6 +927,7 @@ function keel(): Dashboard {
   const themes = themesFor(light, dark, levels);
   const calm = themesFor(light, dark, response);
   const bars = themesFor(light, dark, { soft: ["#7553ff"], midnight: ["#7b52ff"] });
+  const sparkTone = themesFor(light, dark, { soft: ["#c7c2cc"], midnight: ["#9a93a6"] });
   const keelDays = ["8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21"];
   const keelHours = ["00", "03", "06", "09", "12", "15", "18", "21"];
   const counts14 = [
@@ -1003,10 +1076,10 @@ function keel(): Dashboard {
         tags: item.tags,
         priority: item.priority,
         assignee: item.assignee,
-        themes: bars,
+        themes: sparkTone,
         spec: spec(
           "bar",
-          bars,
+          sparkTone,
           mode,
           {
             data: item.series.map((value, day) => ({ day: String(day + 1), events: value })),
@@ -1022,7 +1095,7 @@ function keel(): Dashboard {
       });
     }),
     notes: [
-      { label: "Issues", detail: "Each row has a checkbox, a title, a culprit, tags, last seen, age, a trend spark with its count, events, users, priority, and an assignee placeholder." },
+      { label: "Issues", detail: "Each row has a checkbox, a title, a culprit, tags, last seen, age, a grey trend spark with its count, events, users, priority, and an assignee placeholder. The spark series token is #c7c2cc." },
       { label: "Light first", detail: "The default tokens are the light set: card #ffffff, ink #1f1633, accent #7553ff, error #f55459, warning #ff9838, info #8d95a3. Midnight swaps them." },
       { label: "Volume", detail: "The stacked bar is a secondary card. It has no highlighted band and no release label. 14d, 24h, and Area are variants of that card." },
     ],
