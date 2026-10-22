@@ -2041,6 +2041,11 @@ function appendRules(out: string[], model: PlotModel, cx: number, cy: number, x:
   }
 }
 
+/** Inter tabular digits at these sizes run about 0.68em wide. Measured on the $261K headline. */
+function headlineInk(text: string, size: number): number {
+  return Math.ceil(text.length * size * 0.68);
+}
+
 function headlineSvg(model: PlotModel): string {
   const head = model.headline;
   if (!head) return "";
@@ -2058,15 +2063,17 @@ function headlineSvg(model: PlotModel): string {
     out += `<text x="12" y="${y}" fill="${muted}" font-size="12" font-weight="500" font-family="${font()}">${esc(head.label)}</text>`;
     y += 26;
   }
-  out += `<text data-ck-headline="1" x="12" y="${y + 8}" fill="${text}" font-size="28" font-weight="650" font-family="${font()}">${esc(head.value)}</text>`;
-  let x = 20 + Math.max(24, head.value.length * 15);
+  const valueSize = 28;
+  const compareSize = 20;
+  out += `<text data-ck-headline="1" x="12" y="${y + 8}" fill="${text}" font-size="${valueSize}" font-weight="650" font-family="${font()}">${esc(head.value)}</text>`;
+  let x = 12 + headlineInk(head.value, valueSize) + 14;
   if (head.compare) {
-    out += `<text x="${x}" y="${y + 6}" fill="${muted}" font-size="20" font-weight="500" font-family="${font()}">${esc(head.compare)}</text>`;
-    x += head.compare.length * 11 + 12;
+    out += `<text x="${n(x)}" y="${y + 8}" fill="${muted}" font-size="${compareSize}" font-weight="500" font-family="${font()}">${esc(head.compare)}</text>`;
+    x += headlineInk(head.compare, compareSize) + 12;
   }
   if (head.delta) {
-    const w = head.delta.length * 7.2 + 16;
-    const pillY = y - 8;
+    const w = headlineInk(head.delta, 12) + 18;
+    const pillY = y - 12;
     out += `<rect data-ck-delta="1" x="${n(x)}" y="${n(pillY)}" width="${n(w)}" height="22" rx="11" fill="${tone}" fill-opacity="0.16" />`;
     out += `<text x="${n(x + w / 2)}" y="${n(pillY + 15)}" text-anchor="middle" fill="${tone}" font-size="12" font-weight="650" font-family="${font()}">${esc(head.delta)}</text>`;
   }

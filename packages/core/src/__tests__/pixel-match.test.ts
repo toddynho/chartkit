@@ -57,6 +57,9 @@ describe("pixel-match spec options", () => {
     expect(svg).toContain('data-ck-headline="1"');
     expect(svg).toContain(">$261K<");
     expect(svg).toContain(">$228K<");
+    const valueAt = Number(svg.match(/data-ck-headline="1" x="([\d.]+)"/)?.[1]);
+    const compareAt = Number(svg.match(/>\$261K<\/text><text x="([\d.]+)"/)?.[1]);
+    expect(compareAt).toBeGreaterThan(valueAt + 90);
     expect(svg).toContain('data-ck-delta="1"');
     expect(svg).toContain(">+14%<");
     expect(svg).toContain('data-ck-chrome-bg="#ffffff"');
