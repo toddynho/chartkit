@@ -7,6 +7,7 @@ import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { tasks } from "../../bench/agent/tasks.mjs";
+import { dashboardMarkdown, dashboards } from "../lib/dashboards.ts";
 import { showcaseBoards } from "../lib/showcase.ts";
 
 const docsRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -174,4 +175,6 @@ const index = {
 };
 publish(join(publicDir, "showcase.json"), `${JSON.stringify(index, null, 2)}\n`);
 for (const board of boards) publish(join(publicDir, "showcase", `${board.slug}.md`), markdown(board));
+const dashboardDir = join(publicDir, "dashboards");
+for (const board of dashboards()) publish(join(dashboardDir, `${board.slug}.md`), dashboardMarkdown(board));
 console.log(`showcase ok: ${boards.length} boards, ${boards.reduce((sum, board) => sum + board.charts.length + (board.mermaid?.length ?? 0) + (board.repairs?.length ?? 0), 0)} charts`);

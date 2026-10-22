@@ -12,6 +12,7 @@ export function Footer() {
         <Link href="/docs">Docs</Link>
         <Link href="/examples">Examples</Link>
         <Link href="/showcase">Showcase</Link>
+        <Link href="/dashboards">Dashboards</Link>
         <Link href="/playground">Playground</Link>
         <Link href="/benchmarks">Benchmarks</Link>
         <Link href="/agents">Agents</Link>

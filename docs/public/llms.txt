@@ -8,7 +8,8 @@
 - version "1". a11y.alt required. data is rows, not {"values":[...]}. Field rules: llms-full.txt.
 - Maps: @chartkitdev/geo (unpublished). choropleth or map-points. atlas world|us|canada|eu. No tiles.
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
-- Options: interaction.navigator, interaction.sync: "group", interaction.drilldown: {children: {<x value>: spec}}, layout.facet: {field, columns}, layout.concat: {views, direction}, layout.breakpoints: [{maxWidth, legend:false}], layout.direction: "rtl", render: "auto", mark.sampling: "lttb". 100000.
+- Options: interaction.navigator, interaction.sync, interaction.drilldown, layout.facet, layout.concat, layout.breakpoints, layout.direction rtl, render auto, mark.sampling lttb. 100000.
+- Dashboards: /dashboards/ledger.md /dashboards/meter.md /dashboards/wayline.md /dashboards/keel.md
 
 Features: https://chartkit.dev/features.json
 Types: line,bar,donut,pie,stacked-area,scatter,combo,heatmap,gauge,kpi,sparkline,mini-area,progress-ring,spike,candlestick,histogram,boxplot,radar,funnel,treemap,sankey,bullet,waterfall,gantt,timeline,quadrant,venn,journey,area-range,bar-range,errorbar,sunburst

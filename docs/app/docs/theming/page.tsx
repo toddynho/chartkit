@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BrandPalette } from "@/components/BrandPalette";
 import { CodeBlock } from "@/components/CodeBlock";
 import { ThemeShowcase } from "@/components/ThemeShowcase";
@@ -130,6 +131,14 @@ const spec = { version: "1", type: "bar", theme: { tokens: { series } } };`}
         label="ts"
       />
       <BrandPalette />
+      <h2>Dashboards</h2>
+      <p>
+        The <Link href="/dashboards">dashboard pages</Link> keep the palette in CSS: <code>--ck-series-*</code>,{" "}
+        <code>--ck-text</code>, <code>--ck-area-opacity</code>, and a few page variables such as{" "}
+        <code>--ck-wayline-1</code>. The JSON specs stay on <code>soft</code> or <code>midnight</code>. Harbor Ledger,
+        Quiet Meter, Wayline, and Keel are original boards. Inspired by common SaaS dashboard styles. ChartKit is not
+        affiliated with any product.
+      </p>
       <h2>Presets</h2>
       <p>
         Soft, refined, editorial, and midnight are built in. The older names ({THEMES.join(", ")}) register when you
