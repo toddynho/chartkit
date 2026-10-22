@@ -876,6 +876,183 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
 }
 ```
 
+## Last 30 minutes
+
+Users in the last half hour.
+
+type bar. A small realtime card. axes are off so the bars fill the card. The series token is #1a73e8.
+
+```json
+{
+  "version": "1",
+  "type": "bar",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "background": "transparent",
+      "surface": "#ffffff",
+      "text": "#202124",
+      "muted": "#5f6368",
+      "grid": "#e8eaed",
+      "axis": "#dadce0",
+      "accent": "#1a73e8",
+      "positive": "#188038",
+      "negative": "#d93025",
+      "series": [
+        "#1a73e8",
+        "#9aa0a6"
+      ],
+      "fontFamily": "Roboto, sans-serif",
+      "fontSize": 12
+    }
+  },
+  "data": [
+    {
+      "minute": "1",
+      "users": 8
+    },
+    {
+      "minute": "2",
+      "users": 14
+    },
+    {
+      "minute": "3",
+      "users": 9
+    },
+    {
+      "minute": "4",
+      "users": 15
+    },
+    {
+      "minute": "5",
+      "users": 10
+    },
+    {
+      "minute": "6",
+      "users": 16
+    },
+    {
+      "minute": "7",
+      "users": 11
+    },
+    {
+      "minute": "8",
+      "users": 17
+    },
+    {
+      "minute": "9",
+      "users": 12
+    },
+    {
+      "minute": "10",
+      "users": 18
+    },
+    {
+      "minute": "11",
+      "users": 13
+    },
+    {
+      "minute": "12",
+      "users": 8
+    },
+    {
+      "minute": "13",
+      "users": 14
+    },
+    {
+      "minute": "14",
+      "users": 9
+    },
+    {
+      "minute": "15",
+      "users": 15
+    },
+    {
+      "minute": "16",
+      "users": 10
+    },
+    {
+      "minute": "17",
+      "users": 16
+    },
+    {
+      "minute": "18",
+      "users": 11
+    },
+    {
+      "minute": "19",
+      "users": 17
+    },
+    {
+      "minute": "20",
+      "users": 12
+    },
+    {
+      "minute": "21",
+      "users": 18
+    },
+    {
+      "minute": "22",
+      "users": 13
+    },
+    {
+      "minute": "23",
+      "users": 8
+    },
+    {
+      "minute": "24",
+      "users": 20
+    },
+    {
+      "minute": "25",
+      "users": 15
+    },
+    {
+      "minute": "26",
+      "users": 21
+    },
+    {
+      "minute": "27",
+      "users": 16
+    },
+    {
+      "minute": "28",
+      "users": 22
+    },
+    {
+      "minute": "29",
+      "users": 17
+    },
+    {
+      "minute": "30",
+      "users": 23
+    }
+  ],
+  "encoding": {
+    "x": "minute",
+    "y": "users"
+  },
+  "axes": {
+    "x": false,
+    "y": false
+  },
+  "legend": {
+    "show": false
+  },
+  "mark": {
+    "gap": 0.2,
+    "cornerRadius": 1
+  },
+  "size": {
+    "width": 280,
+    "height": 72
+  },
+  "a11y": {
+    "alt": "Users in each of the last 30 minutes."
+  }
+}
+```
+
 ## Channels
 
 Share of sessions.

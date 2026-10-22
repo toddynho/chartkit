@@ -52,6 +52,8 @@ export function render(spec: unknown, target?: Parameters<typeof draw>[1]): stri
   return draw(spec, target);
 }
 
+export { formatValue } from "./format";
+
 const jobs = new WeakMap<object, number>();
 const tips = new WeakMap<object, { destroy(): void }>();
 

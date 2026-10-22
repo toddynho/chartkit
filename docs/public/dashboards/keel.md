@@ -1251,7 +1251,7 @@ hooks.deliver. Last seen 1 day ago. Age 15d. 21 events, 8 users.
 
 ## What produces this look
 
-- **Issues.** The table is the page. Each row has a title, a culprit, last seen, age, a 36px bar spark in the purple series token, an events count, and a users count.
+- **Issues.** Each row has a checkbox, a title, a culprit, tags, last seen, age, a trend spark with its count, events, users, priority, and an assignee placeholder.
 - **Light first.** The default tokens are the light set: card #ffffff, ink #1f1633, accent #7553ff, error #f55459, warning #ff9838, info #8d95a3. Midnight swaps them.
 - **Volume.** The stacked bar is a secondary card. It has no highlighted band and no release label. 14d, 24h, and Area are variants of that card.
 

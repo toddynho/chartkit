@@ -61,6 +61,18 @@ function formatDuration(value: number): string {
   return sign + (step === 1 ? Math.round(abs) : Math.round(n * 10) / 10) + (step === 1 ? "ms" : step === 1e3 ? "s" : step === 6e4 ? "m" : "h");
 }
 
+/** Minutes and seconds together: 144000 → `2m 24s`. Hours join in when the span reaches one hour. */
+function formatDurationHm(value: number): string {
+  const sign = value < 0 ? "-" : "";
+  let seconds = Math.round(Math.abs(value) / 1000);
+  const hours = Math.floor(seconds / 3600);
+  seconds -= hours * 3600;
+  const minutes = Math.floor(seconds / 60);
+  seconds -= minutes * 60;
+  if (hours > 0) return seconds ? `${sign}${hours}h ${minutes}m ${seconds}s` : `${sign}${hours}h ${minutes}m`;
+  return `${sign}${minutes}m ${seconds}s`;
+}
+
 function formatDate(value: number, style: string, locale: string, zone: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
@@ -82,6 +94,7 @@ function body(value: number, fmt: Fmt, locale: string, zone: string): string {
   const style = fmt.style;
   if (style === "bytes") return formatBytes(value);
   if (style === "duration-ms") return formatDuration(value);
+  if (style === "duration-hm") return formatDurationHm(value);
   if (style === "date" || style === "time" || style === "datetime" || style === "month" || style === "year" || style === "weekday") {
     return formatDate(value, style, locale, zone);
   }

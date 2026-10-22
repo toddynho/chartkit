@@ -79,6 +79,9 @@ describe("mark labels use the encoding format", () => {
     expect(formatAxisValue(10000, { ...gbp, decimals: 2 }, "en-US", [0, 10000])).toBe("£10,000.00");
     expect(formatAxisValue(10000, { ...gbp, minimumFractionDigits: 2 }, "en-US", [0, 10000])).toBe("£10,000.00");
     expect(formatValue(2100, gbp, "en-US")).toBe("£2,100.00");
+    expect(formatValue(144000, "duration-hm", "en-US")).toBe("2m 24s");
+    expect(formatValue(144000, { style: "duration-hm" }, "en-US")).toBe("2m 24s");
+    expect(formatValue(3720000, "duration-hm", "en-US")).toBe("1h 2m");
   });
 
   it("formats funnel, bullet, treemap, histogram, candlestick, and bar labels", () => {

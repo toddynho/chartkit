@@ -133,40 +133,73 @@ function Tabs({ charts, active, onPick }: { charts: DashChart[]; active: number;
 function Issues({ rows, theme, narrow }: { rows: DashSpark[]; theme: DashTheme; narrow: boolean }) {
   return (
     <section className="dash-card dash-12 dash-feed">
-      <h3>Issues</h3>
+      <h3>Feed</h3>
       <div className="dash-issue-head" aria-hidden="true">
+        <span />
         <span>Issue</span>
         <span>Last seen</span>
         <span>Age</span>
         <span>Trend</span>
         <span>Events</span>
         <span>Users</span>
+        <span>Priority</span>
+        <span>Assignee</span>
       </div>
       <ul className="dash-issues">
         {rows.map((item) => {
           const spec = present(item.spec, theme, item.themes, narrow);
           return (
             <li key={item.id}>
+              <input className="dash-check" type="checkbox" aria-label={`Select ${item.name}`} />
               <div className="dash-issue-name">
                 <strong>{item.name}</strong>
-                <span>{item.detail}</span>
+                <span className="dash-culprit">{item.detail}</span>
+                <span className="dash-tags">
+                  {item.tags.map((tag) => (
+                    <i key={tag}>{tag}</i>
+                  ))}
+                </span>
               </div>
               <span className="dash-issue-seen">{item.seen}</span>
               <span className="dash-issue-age">{item.age}</span>
-              <ChartHost spec={spec} svg={item.svg} className="chart-host chart-preset dash-issue-bars" />
+              <span className="dash-trend">
+                <ChartHost spec={spec} svg={item.svg} className="chart-host chart-preset dash-issue-bars" />
+                <b>{item.events}</b>
+              </span>
               <span className="dash-count dash-events">
                 <b>{item.events}</b>
-                <i>events</i>
               </span>
               <span className="dash-count dash-users">
                 <b>{item.users}</b>
-                <i>users</i>
               </span>
+              <span className="dash-priority">{item.priority}</span>
+              <span className="dash-assignee">{item.assignee}</span>
             </li>
           );
         })}
       </ul>
     </section>
+  );
+}
+
+function ThemeSwitch({ theme, onChange }: { theme: DashTheme; onChange: (theme: DashTheme) => void }) {
+  return (
+    <div className="theme-switch" role="group" aria-label="Chart theme">
+      {(["soft", "midnight"] as const).map((item) => (
+        <button key={item} type="button" aria-pressed={theme === item} onClick={() => onChange(item)}>
+          {item === "soft" ? "Soft" : "Midnight"}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function SearchBox() {
+  return (
+    <label className="dash-search">
+      <span className="ico ico-search" aria-hidden="true" />
+      <input type="search" placeholder="Search" aria-label="Search" />
+    </label>
   );
 }
 
@@ -214,12 +247,14 @@ export function DashboardStage({ board }: { board: Dashboard }) {
   const [narrow, setNarrow] = useState(false);
   const [tab, setTab] = useState(0);
   const [list, setList] = useState(0);
+  const [reportsOpen, setReportsOpen] = useState(true);
   const tabs = board.charts.filter((item) => item.place === "tab");
   const metrics = board.charts.filter((item) => item.place === "metric");
   const hero = board.charts.find((item) => item.place === "hero");
   const lists = board.charts.filter((item) => item.place === "list");
   const sides = board.charts.filter((item) => item.place === "side");
   const maps = board.charts.filter((item) => item.place === "map");
+  const live = board.charts.filter((item) => item.place === "realtime");
   const active = tabs[tab] ?? tabs[0];
   const activeList = lists[list] ?? lists[0];
 
@@ -235,34 +270,100 @@ export function DashboardStage({ board }: { board: Dashboard }) {
   const sideCards = sides.map((item) => <Side key={item.id} chart={item} theme={theme} narrow={narrow} />);
   const mapCards = maps.map((item) => <MapCard key={item.id} chart={item} theme={theme} narrow={narrow} />);
 
-  const nav = ["Home", "Activity", "Customers", "Balances", "Products"];
+  const stripeNav = ["Home", "Activity", "Customers", "Balances", "Products"];
+  const rail = ["Home", "Reports", "Explore", "Settings"];
+  const reportNav = ["Snapshot", "Realtime", "Acquisition", "Engagement"];
+  const feedNav = ["Feed", "Issues", "Explore", "Stats"];
+  const identity = (
+    <div className="dash-id">
+      <h1>{board.title}</h1>
+      <p>{board.lede}</p>
+      <p className="dash-disclaimer">{board.disclaimer}</p>
+    </div>
+  );
   return (
     <div className={`dash-shell dash-page dash-${board.slug} dash-theme-${theme}`}>
-      <aside className="dash-nav" aria-label="Sections">
-        <div className="dash-mark" aria-hidden="true">N</div>
-        <nav>
-          {nav.map((item, index) => (
-            <button key={item} type="button" aria-current={index === 0 ? "page" : undefined}>
-              {item}
+      {board.slug === "ledger" ? (
+        <aside className="dash-nav" aria-label="Sections">
+          <div className="dash-mark" aria-hidden="true">N</div>
+          <nav>
+            {stripeNav.map((item, index) => (
+              <button key={item} type="button" aria-current={index === 0 ? "page" : undefined}>
+                <span className={`ico ico-${index}`} aria-hidden="true" />
+                {item}
+              </button>
+            ))}
+          </nav>
+        </aside>
+      ) : null}
+      {board.slug === "wayline" ? (
+        <>
+          <aside className="dash-rail" aria-label="Sections">
+            <div className="dash-mark" aria-hidden="true">N</div>
+            {rail.map((item, index) => (
+              <button key={item} type="button" aria-label={item} aria-current={index === 1 ? "page" : undefined}>
+                <span className={`ico ico-${index}`} aria-hidden="true" />
+              </button>
+            ))}
+          </aside>
+          <aside className={`dash-reports ${reportsOpen ? "open" : "shut"}`} aria-label="Reports">
+            <button type="button" className="dash-reports-toggle" aria-expanded={reportsOpen} onClick={() => setReportsOpen((open) => !open)}>
+              Reports
             </button>
-          ))}
-        </nav>
-      </aside>
+            {reportsOpen ? (
+              <nav>
+                {reportNav.map((item, index) => (
+                  <button key={item} type="button" aria-current={index === 0 ? "page" : undefined}>
+                    {item}
+                  </button>
+                ))}
+              </nav>
+            ) : null}
+          </aside>
+        </>
+      ) : null}
+      {board.slug === "keel" ? (
+        <aside className="dash-nav dash-rail-dark" aria-label="Sections">
+          <div className="dash-mark" aria-hidden="true">N</div>
+          <nav>
+            {feedNav.map((item, index) => (
+              <button key={item} type="button" aria-current={index === 0 ? "page" : undefined}>
+                <span className={`ico ico-${index}`} aria-hidden="true" />
+                {item}
+              </button>
+            ))}
+          </nav>
+        </aside>
+      ) : null}
       <div className="dash-main">
+      {board.slug === "ledger" ? (
+        <div className="dash-searchbar">
+          <SearchBox />
+          <ThemeSwitch theme={theme} onChange={setTheme} />
+        </div>
+      ) : null}
+      {board.slug === "meter" ? (
+        <div className="dash-plausible-bar">
+          <button type="button" className="dash-picker">example.com</button>
+          <span className="dash-live"><i />12</span>
+          <button type="button" className="dash-filter">Filter</button>
+          <button type="button" className="dash-picker">{board.range}</button>
+          <ThemeSwitch theme={theme} onChange={setTheme} />
+        </div>
+      ) : null}
+      {board.slug === "keel" ? (
+        <div className="dash-feedbar">
+          <button type="button" className="dash-picker">Project</button>
+          <button type="button" className="dash-picker">Environment</button>
+          <button type="button" className="dash-picker">{board.range}</button>
+          <SearchBox />
+          <ThemeSwitch theme={theme} onChange={setTheme} />
+        </div>
+      ) : null}
       <header className="dash-top">
-        <div className="dash-id">
-          <h1>{board.title}</h1>
-          <p>{board.lede}</p>
-          <p className="dash-disclaimer">{board.disclaimer}</p>
-        </div>
-        <span className="dash-chip">{board.range}</span>
-        <div className="theme-switch" role="group" aria-label="Chart theme">
-          {(["soft", "midnight"] as const).map((item) => (
-            <button key={item} type="button" aria-pressed={theme === item} onClick={() => setTheme(item)}>
-              {item === "soft" ? "Soft" : "Midnight"}
-            </button>
-          ))}
-        </div>
+        {identity}
+        {board.slug === "meter" || board.slug === "ledger" || board.slug === "keel" ? null : <span className="dash-chip">{board.range}</span>}
+        {board.slug === "wayline" ? <ThemeSwitch theme={theme} onChange={setTheme} /> : null}
       </header>
       <div className="dash-grid">
         {board.slug === "keel" ? issues : null}
@@ -286,6 +387,12 @@ export function DashboardStage({ board }: { board: Dashboard }) {
             <ChartHost spec={present(item.spec, theme, item.themes, narrow)} svg={item.svg} className="chart-host chart-preset" />
           </article>
         ))}
+        {live.map((item) => (
+          <article key={item.id} className={`dash-card ${item.span} dash-realtime`}>
+            <h3>{item.title}</h3>
+            <ChartView chart={item} theme={theme} narrow={narrow} spec={present(item.spec, theme, item.themes, narrow)} svg={item.svg} />
+          </article>
+        ))}
         {activeList ? (
           <figure className="dash-card dash-12">
             <div className="dash-seg" role="tablist" aria-label="Ranked lists">
@@ -294,6 +401,10 @@ export function DashboardStage({ board }: { board: Dashboard }) {
                   {item.title}
                 </button>
               ))}
+            </div>
+            <div className="dash-list-head" aria-hidden="true">
+              <span>{activeList.title}</span>
+              <span>Visitors</span>
             </div>
             <ChartView chart={activeList} theme={theme} narrow={narrow} spec={present(activeList.spec, theme, activeList.themes, narrow)} svg={activeList.svg} />
           </figure>

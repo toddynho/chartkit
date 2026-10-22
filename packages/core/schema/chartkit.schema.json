@@ -517,6 +517,7 @@
             "currency",
             "bytes",
             "duration-ms",
+            "duration-hm",
             "date",
             "time",
             "datetime",
@@ -524,7 +525,7 @@
             "year",
             "weekday"
           ],
-          "description": "Preset. 'number' 1,234.5 · 'integer' 1,235 · 'compact' 1.2K · 'percent' treats 0.25 as 25% · 'percent-raw' treats 25 as 25% · 'currency' uses USD unless formatObject is used · 'bytes' 1.2 MB · 'duration-ms' 1.2s · 'date' Oct 16, 2026 · 'time' 08:42 · 'datetime' · 'month' Oct · 'year' 2026 · 'weekday' Fri."
+          "description": "Preset. 'number' 1,234.5 · 'integer' 1,235 · 'compact' 1.2K · 'percent' treats 0.25 as 25% · 'percent-raw' treats 25 as 25% · 'currency' uses USD unless formatObject is used · 'bytes' 1.2 MB · 'duration-ms' 1.2s · 'duration-hm' 2m 24s · 'date' Oct 16, 2026 · 'time' 08:42 · 'datetime' · 'month' Oct · 'year' 2026 · 'weekday' Fri."
         },
         {
           "$ref": "#/$defs/formatObject"
@@ -548,11 +549,12 @@
             "currency",
             "bytes",
             "duration-ms",
+            "duration-hm",
             "date",
             "time",
             "datetime"
           ],
-          "description": "Base format style."
+          "description": "Base format style. 'duration-hm' prints minutes and seconds, such as 2m 24s."
         },
         "decimals": {
           "type": "integer",

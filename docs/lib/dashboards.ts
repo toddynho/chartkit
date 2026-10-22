@@ -1,10 +1,10 @@
-import { isExtra, render as renderCore } from "@chartkitdev/core/all";
+import { formatValue, isExtra, render as renderCore } from "@chartkitdev/core/all";
 import { renderBarList } from "@chartkitdev/core/charts/bar-list";
 import { render as renderExtra } from "@chartkitdev/core/extra";
 import { validate } from "@chartkitdev/core/validate";
 
 export type DashTheme = "soft" | "midnight";
-export type DashPlace = "metric" | "hero" | "side" | "tab" | "list" | "map";
+export type DashPlace = "metric" | "hero" | "side" | "tab" | "list" | "map" | "realtime";
 
 export interface DashThemes {
   soft: Record<string, unknown>;
@@ -45,6 +45,9 @@ export interface DashSpark {
   age: string;
   events: number;
   users: number;
+  tags: string[];
+  priority: string;
+  assignee: string;
   spec: Record<string, unknown>;
   svg: string;
   themes: DashThemes;
@@ -99,6 +102,9 @@ interface SparkDraft {
   age: string;
   events: number;
   users: number;
+  tags: string[];
+  priority: string;
+  assignee: string;
   spec: Record<string, unknown>;
   themes: DashThemes;
 }
@@ -384,7 +390,7 @@ function ledger(): Dashboard {
             legend: { show: false },
             tooltip: { mode: "index", background: "light-dark(#ffffff,#0f2942)", radius: 6, shadow: "0 2px 5px rgba(50,50,93,.18)", crosshairColor: "#635bff" },
             headline: { label: "Gross volume", value: "$261K", compare: "$228K", delta: "+14%", tone: "positive" },
-            mark: { strokeWidth: 1.75, fillOpacity: 0.14, curve: "linear", points: "none", gradient: true },
+            mark: { strokeWidth: 2, fillOpacity: 0.18, curve: "linear", points: "none", gradient: true },
             size: { width: 1100, height: 340 },
           },
           "Gross volume for 1–21 October totals 261 thousand dollars, above the previous period.",
@@ -525,14 +531,14 @@ function meter(): Dashboard {
       ),
     };
   };
-  const list = (id: string, title: string, field: string, rows: { name: string; visits: number }[], alt: string): ChartDraft => ({
+  const list = (id: string, title: string, field: string, rows: { name: string; visits: number }[], alt: string, wash: string): ChartDraft => ({
     id,
     title,
     caption: title,
-    note: "type bar-list, mark.track row. A full-height wash in series[0] sits behind the label. The count uses the text token and sits on the right.",
+    note: "type bar-list, mark.track row. A full-height wash in series[0] sits behind the label. The count uses the text token and sits on the right. The page draws a Visitors column header.",
     span: "dash-12",
     place: "list",
-    themes,
+    themes: themesFor(light, dark, { soft: [wash], midnight: [wash] }),
     spec: spec(
       "bar-list",
       themes,
@@ -560,32 +566,33 @@ function meter(): Dashboard {
       chart(tabLine("meter-pageviews", "Pageviews", "61.2K", "+6%", true, rounds(organic(30, { seed: 23, start: 4200, end: 5600, season: 900, noise: 320, phase: 0.8, spike: { at: 12, height: 1800 } })), "Pageviews over 30 days, with the last day still open.")),
       chart(tabLine("meter-views", "Views per visit", "2.8", "+2%", true, rounds(organic(30, { seed: 31, start: 2.35, end: 2.95, season: 0.28, noise: 0.16, phase: 2.4 }), 0.01), "Views per visit over 30 days.")),
       chart(tabLine("meter-bounce", "Bounce", "41%", "−3%", true, rounds(organic(30, { seed: 37, start: 0.48, end: 0.39, season: 0.04, noise: 0.02, phase: 1.7 }), 0.01), "Bounce rate over 30 days. Down is the better direction.")),
-      chart(tabLine("meter-duration", "Duration", "2m 24s", "+2%", true, rounds(organic(30, { seed: 41, start: 118000, end: 146000, season: 12000, noise: 6000, phase: 0.5, spike: { at: 18, height: 28000 } }), 1000), "Visit duration over 30 days.")),
+      chart(tabLine("meter-duration", "Duration", formatValue(144000, "duration-hm", "en-US"), "+2%", true, rounds(organic(30, { seed: 41, start: 118000, end: 146000, season: 12000, noise: 6000, phase: 0.5, spike: { at: 18, height: 28000 } }), 1000), "Visit duration over 30 days.")),
       chart(list("meter-sources", "Sources", "source", [
         { name: "Direct", visits: 2100 },
         { name: "Search", visits: 1760 },
         { name: "Newsletter", visits: 940 },
         { name: "Referral", visits: 610 },
         { name: "Social", visits: 280 },
-      ], "Direct is the largest source, then search.")),
+      ], "Direct is the largest source, then search.", "#fb923c")),
       chart(list("meter-pages", "Pages", "page", [
         { name: "/pricing", visits: 1840 },
         { name: "/docs", visits: 1420 },
         { name: "/changelog", visits: 980 },
         { name: "/about", visits: 640 },
         { name: "/status", visits: 410 },
-      ], "Pricing is the most visited page, then docs.")),
+      ], "Pricing is the most visited page, then docs.", "#818cf8")),
       chart(list("meter-devices", "Devices", "device", [
         { name: "Desktop", visits: 9800 },
         { name: "Mobile", visits: 7420 },
         { name: "Tablet", visits: 1200 },
-      ], "Desktop leads, then mobile.")),
+      ], "Desktop leads, then mobile.", "#6366f1")),
     ],
     sparks: [],
     notes: [
       { label: "Metric tabs", detail: "The strip is page state: label, number, and delta, with an underline on the selected tab. Choosing a tab shows that tab's spec. There is no sparkline in the strip." },
       { label: "Daily line", detail: "30 points, curve linear, points always, a light y grid, and a soft area. mark.partial dots the last segment and mark.partialOpacity paints that segment at 0.06. The series token is #615fff. Midnight uses #9d99ff." },
-      { label: "Lists", detail: "Sources, Pages, and Devices are one bar-list at a time. mark.track row paints a full-width wash. The chart is on demand and is not in the line or all bundle." },
+      { label: "Lists", detail: "Sources, Pages, and Devices are one bar-list at a time. mark.track row paints a pale orange or indigo wash. The page adds a Visitors column header. The chart is on demand and is not in the line or all bundle." },
+      { label: "Duration", detail: "The Duration tab is formatValue(144000, \"duration-hm\"), which prints 2m 24s." },
     ],
   };
 }
@@ -715,8 +722,31 @@ function wayline(): Dashboard {
     charts: [
       chart(tabLine("wayline-users", "Users", "24.5K", "+6%", true, rounds(organic(28, { seed: 8, start: 620, end: 910, season: 70, noise: 45, phase: 0.5, spike: { at: 17, height: 160 } })), rounds(organic(28, { seed: 53, start: 540, end: 760, season: 90, noise: 55, phase: 2.6 })), "Users rise across 28 days and stay mostly above the previous period.")),
       chart(tabLine("wayline-new", "New users", "11.2K", "+3%", true, rounds(organic(28, { seed: 14, start: 280, end: 410, season: 36, noise: 22, phase: 1.2 })), rounds(organic(28, { seed: 61, start: 250, end: 340, season: 42, noise: 28, phase: 3.4 })), "New users over 28 days, with a dashed previous period.")),
-      chart(tabLine("wayline-engage", "Avg engagement", "3m 24s", "+5%", true, rounds(organic(28, { seed: 22, start: 150, end: 190, season: 12, noise: 8, phase: 0.9 })), rounds(organic(28, { seed: 71, start: 140, end: 168, season: 16, noise: 10, phase: 2.1 })), "Average engagement over 28 days.")),
+      chart(tabLine("wayline-engage", "Avg engagement", formatValue(204000, "duration-hm", "en-US"), "+5%", true, rounds(organic(28, { seed: 22, start: 150, end: 190, season: 12, noise: 8, phase: 0.9 })), rounds(organic(28, { seed: 71, start: 140, end: 168, season: 16, noise: 10, phase: 2.1 })), "Average engagement over 28 days.")),
       chart(tabLine("wayline-revenue", "Revenue", "$48.2K", "+4%", true, rounds(organic(28, { seed: 29, start: 1100, end: 1680, season: 120, noise: 80, phase: 0.3, spike: { at: 11, height: 280 } })), rounds(organic(28, { seed: 83, start: 980, end: 1400, season: 150, noise: 90, phase: 2.8 })), "Revenue over 28 days, with a dashed previous period.")),
+      chart({
+        id: "wayline-live",
+        title: "Last 30 minutes",
+        caption: "Users in the last half hour.",
+        note: "type bar. A small realtime card. axes are off so the bars fill the card. The series token is #1a73e8.",
+        span: "dash-4",
+        place: "realtime",
+        themes,
+        spec: spec(
+          "bar",
+          themes,
+          mode,
+          {
+            data: Array.from({ length: 30 }, (_, index) => ({ minute: String(index + 1), users: Math.round(8 + ((index * 17) % 11) + (index > 22 ? 6 : 0)) })),
+            encoding: { x: "minute", y: "users" },
+            axes: { x: false, y: false },
+            legend: { show: false },
+            mark: { gap: 0.2, cornerRadius: 1 },
+            size: { width: 280, height: 72 },
+          },
+          "Users in each of the last 30 minutes.",
+        ),
+      }),
       chart({
         id: "wayline-channels",
         title: "Channels",
@@ -897,13 +927,13 @@ function keel(): Dashboard {
     [80, 90, 110, 140, 120, 95],
     [210, 240, 320, 410, 360, 250],
   ];
-  const issues: { name: string; culprit: string; seen: string; age: string; users: number; series: number[] }[] = [
-    { name: "Checkout timeout", culprit: "checkout.pay", seen: "2 min ago", age: "4d", users: 6, series: [2, 4, 9, 6, 3, 2, 1] },
-    { name: "Map tile retry", culprit: "maps.load", seen: "18 min ago", age: "12d", users: 4, series: [1, 1, 2, 5, 4, 2, 2] },
-    { name: "Queue lag", culprit: "worker.tick", seen: "1 hr ago", age: "9d", users: 11, series: [6, 5, 4, 4, 3, 3, 2] },
-    { name: "Auth clock skew", culprit: "auth.verify", seen: "3 hr ago", age: "2d", users: 3, series: [0, 1, 1, 8, 3, 1, 0] },
-    { name: "Null price", culprit: "cart.total", seen: "5 hr ago", age: "6d", users: 2, series: [1, 0, 2, 1, 3, 1, 1] },
-    { name: "Webhook 409", culprit: "hooks.deliver", seen: "1 day ago", age: "15d", users: 8, series: [3, 2, 4, 3, 4, 3, 2] },
+  const issues: { name: string; culprit: string; seen: string; age: string; users: number; series: number[]; tags: string[]; priority: string; assignee: string }[] = [
+    { name: "Checkout timeout", culprit: "checkout.pay", seen: "2 min ago", age: "4d", users: 6, series: [2, 4, 9, 6, 3, 2, 1], tags: ["browser", "checkout"], priority: "High", assignee: "Unassigned" },
+    { name: "Map tile retry", culprit: "maps.load", seen: "18 min ago", age: "12d", users: 4, series: [1, 1, 2, 5, 4, 2, 2], tags: ["network"], priority: "Medium", assignee: "Unassigned" },
+    { name: "Queue lag", culprit: "worker.tick", seen: "1 hr ago", age: "9d", users: 11, series: [6, 5, 4, 4, 3, 3, 2], tags: ["worker"], priority: "High", assignee: "Unassigned" },
+    { name: "Auth clock skew", culprit: "auth.verify", seen: "3 hr ago", age: "2d", users: 3, series: [0, 1, 1, 8, 3, 1, 0], tags: ["auth"], priority: "Low", assignee: "Unassigned" },
+    { name: "Null price", culprit: "cart.total", seen: "5 hr ago", age: "6d", users: 2, series: [1, 0, 2, 1, 3, 1, 1], tags: ["cart"], priority: "Medium", assignee: "Unassigned" },
+    { name: "Webhook 409", culprit: "hooks.deliver", seen: "1 day ago", age: "15d", users: 8, series: [3, 2, 4, 3, 4, 3, 2], tags: ["api"], priority: "Low", assignee: "Unassigned" },
   ];
   return {
     slug: "keel",
@@ -970,6 +1000,9 @@ function keel(): Dashboard {
         age: item.age,
         events,
         users: item.users,
+        tags: item.tags,
+        priority: item.priority,
+        assignee: item.assignee,
         themes: bars,
         spec: spec(
           "bar",
@@ -989,7 +1022,7 @@ function keel(): Dashboard {
       });
     }),
     notes: [
-      { label: "Issues", detail: "The table is the page. Each row has a title, a culprit, last seen, age, a 36px bar spark in the purple series token, an events count, and a users count." },
+      { label: "Issues", detail: "Each row has a checkbox, a title, a culprit, tags, last seen, age, a trend spark with its count, events, users, priority, and an assignee placeholder." },
       { label: "Light first", detail: "The default tokens are the light set: card #ffffff, ink #1f1633, accent #7553ff, error #f55459, warning #ff9838, info #8d95a3. Midnight swaps them." },
       { label: "Volume", detail: "The stacked bar is a secondary card. It has no highlighted band and no release label. 14d, 24h, and Area are variants of that card." },
     ],

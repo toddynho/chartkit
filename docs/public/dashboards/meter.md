@@ -1266,7 +1266,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16. mark.p
 
 Sources
 
-type bar-list, mark.track row. A full-height wash in series[0] sits behind the label. The count uses the text token and sits on the right.
+type bar-list, mark.track row. A full-height wash in series[0] sits behind the label. The count uses the text token and sits on the right. The page draws a Visitors column header.
 
 ```json
 {
@@ -1338,7 +1338,7 @@ type bar-list, mark.track row. A full-height wash in series[0] sits behind the l
 
 Pages
 
-type bar-list, mark.track row. A full-height wash in series[0] sits behind the label. The count uses the text token and sits on the right.
+type bar-list, mark.track row. A full-height wash in series[0] sits behind the label. The count uses the text token and sits on the right. The page draws a Visitors column header.
 
 ```json
 {
@@ -1410,7 +1410,7 @@ type bar-list, mark.track row. A full-height wash in series[0] sits behind the l
 
 Devices
 
-type bar-list, mark.track row. A full-height wash in series[0] sits behind the label. The count uses the text token and sits on the right.
+type bar-list, mark.track row. A full-height wash in series[0] sits behind the label. The count uses the text token and sits on the right. The page draws a Visitors column header.
 
 ```json
 {
@@ -1474,6 +1474,7 @@ type bar-list, mark.track row. A full-height wash in series[0] sits behind the l
 
 - **Metric tabs.** The strip is page state: label, number, and delta, with an underline on the selected tab. Choosing a tab shows that tab's spec. There is no sparkline in the strip.
 - **Daily line.** 30 points, curve linear, points always, a light y grid, and a soft area. mark.partial dots the last segment and mark.partialOpacity paints that segment at 0.06. The series token is #615fff. Midnight uses #9d99ff.
-- **Lists.** Sources, Pages, and Devices are one bar-list at a time. mark.track row paints a full-width wash. The chart is on demand and is not in the line or all bundle.
+- **Lists.** Sources, Pages, and Devices are one bar-list at a time. mark.track row paints a pale orange or indigo wash. The page adds a Visitors column header. The chart is on demand and is not in the line or all bundle.
+- **Duration.** The Duration tab is formatValue(144000, "duration-hm"), which prints 2m 24s.
 
 https://chartkit.dev/dashboards/meter

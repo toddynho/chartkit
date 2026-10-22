@@ -191,8 +191,8 @@ type combo. headline draws $261K, the comparison, and a positive delta pill. The
     "tone": "positive"
   },
   "mark": {
-    "strokeWidth": 1.75,
-    "fillOpacity": 0.14,
+    "strokeWidth": 2,
+    "fillOpacity": 0.18,
     "curve": "linear",
     "points": "none",
     "gradient": true

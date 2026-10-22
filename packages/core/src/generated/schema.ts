@@ -220,6 +220,7 @@ export type Format =
       | "currency"
       | "bytes"
       | "duration-ms"
+      | "duration-hm"
       | "date"
       | "time"
       | "datetime"
@@ -966,7 +967,7 @@ export interface Encoding {
  */
 export interface FormatObject {
   /**
-   * Base format style.
+   * Base format style. 'duration-hm' prints minutes and seconds, such as 2m 24s.
    */
   style:
     | "number"
@@ -976,6 +977,7 @@ export interface FormatObject {
     | "currency"
     | "bytes"
     | "duration-ms"
+    | "duration-hm"
     | "date"
     | "time"
     | "datetime";
@@ -1130,6 +1132,7 @@ export interface Metric {
         | "currency"
         | "bytes"
         | "duration-ms"
+        | "duration-hm"
         | "date"
         | "time"
         | "datetime"
@@ -1155,6 +1158,7 @@ export interface Metric {
         | "currency"
         | "bytes"
         | "duration-ms"
+        | "duration-hm"
         | "date"
         | "time"
         | "datetime"
@@ -1291,6 +1295,7 @@ export interface Mark {
         | "currency"
         | "bytes"
         | "duration-ms"
+        | "duration-hm"
         | "date"
         | "time"
         | "datetime"
@@ -2712,6 +2717,7 @@ export interface Axes {
               | "currency"
               | "bytes"
               | "duration-ms"
+              | "duration-hm"
               | "date"
               | "time"
               | "datetime"
@@ -2819,6 +2825,7 @@ export interface Axes {
               | "currency"
               | "bytes"
               | "duration-ms"
+              | "duration-hm"
               | "date"
               | "time"
               | "datetime"
@@ -2926,6 +2933,7 @@ export interface Axes {
               | "currency"
               | "bytes"
               | "duration-ms"
+              | "duration-hm"
               | "date"
               | "time"
               | "datetime"

@@ -1,0 +1,53 @@
+{
+  "note": "Test-only silhouettes. Approximate values read off the reference plot. Not used by the pages.",
+  "scores": {
+    "stripe": {
+      "before": {
+        "mae": 8.24,
+        "mismatch": 0.0888,
+        "overlap": 0.0
+      },
+      "after": {
+        "mae": 1.96,
+        "mismatch": 0.0294,
+        "overlap": 0.821
+      }
+    },
+    "plausible": {
+      "before": {
+        "mae": 7.12,
+        "mismatch": 0.0287,
+        "overlap": 0.092
+      },
+      "after": {
+        "mae": 5.5,
+        "mismatch": 0.0173,
+        "overlap": 0.927
+      }
+    },
+    "ga": {
+      "before": {
+        "mae": 5.34,
+        "mismatch": 0.0424,
+        "overlap": 0.034
+      },
+      "after": {
+        "mae": 2.94,
+        "mismatch": 0.0237,
+        "overlap": 0.622
+      }
+    },
+    "sentry": {
+      "before": {
+        "mae": 9.31,
+        "mismatch": 0.1673,
+        "overlap": 0.975
+      },
+      "after": {
+        "mae": 5.53,
+        "mismatch": 0.0827,
+        "overlap": 0.814
+      }
+    }
+  }
+}
