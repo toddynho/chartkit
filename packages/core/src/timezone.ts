@@ -125,18 +125,23 @@ export function zonedTimeTicks(min: number, max: number, count: number, zone: st
   const origin = wall(min, zone);
   let day = Date.UTC(origin.year, origin.month - 1, origin.day) - 86400000;
   const out: number[] = [];
-  for (let guard = 0; guard < 8 && out.length < 16; guard++) {
+  const dayStep = step >= 1440 ? Math.max(1, Math.round(step / 1440)) : 1;
+  const guards = Math.ceil(span / 86400000) + 3;
+  const finish = (ticks: number[]) => {
+    if (ticks.length && span >= 2 * 86400000 && max - ticks[ticks.length - 1] > 60000) ticks.push(max);
+    return ticks.length ? ticks : [min, max];
+  };
+  for (let guard = 0; guard < guards; guard++) {
     const date = new Date(day);
     for (let minute = 0; minute < 1440; minute += step) {
       const hit = wallUtc(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate(), Math.floor(minute / 60), minute % 60, zone);
       if (hit === null || hit < min) continue;
-      if (hit > max) return out.length ? out : [min, max];
+      if (hit > max) return finish(out);
       out.push(hit);
-      if (out.length >= 16) return out;
     }
-    day += 86400000;
+    day += dayStep * 86400000;
   }
-  return out.length ? out : [min, max];
+  return finish(out);
 }
 
 /** Tooltip instant. Date and time, in the spec zone, never the host zone. */

@@ -768,6 +768,12 @@
               "type": "boolean",
               "description": "Fill under this line (line/combo)."
             },
+            "fillOpacity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Area or bar fill opacity for this series, 0–1. Overrides mark.fillOpacity."
+            },
             "pointShape": {
               "enum": ["circle", "square", "diamond", "triangle", "cross", "none"],
               "description": "Marker for this series. Overrides mark.pointShape. Applies to: line, stacked-area, scatter, combo."

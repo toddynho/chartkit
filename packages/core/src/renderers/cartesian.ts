@@ -209,6 +209,8 @@ export interface Series {
   bandOpacity?: number;
   dash: string;
   area: boolean;
+  /** Area or bar fill opacity. Omit to use the chart mark. */
+  fillOpacity?: number;
   shape?: string;
   radius?: number;
   hollow?: boolean;
@@ -544,6 +546,7 @@ function toModel(
         mark: markKind,
         dash: channel.dash,
         area: markKind === "area" || channel.area === true || mark.area === true || type === "stacked-area" || type === "mini-area",
+        fillOpacity: channel.fillOpacity,
         shape: channel.pointShape,
         radius: channel.pointSize,
         hollow: channel.pointHollow || undefined,
@@ -866,7 +869,7 @@ function appendLineSeries(
     const indexAttr = ` data-ck-sample="${sampled.mode}" data-ck-i="${kept.join(" ")}"${scaleAttr}`;
     if (area) {
       const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
-      out.push(`<path d="${areaPath(points, bottoms, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillPaint}" stroke="none"${indexAttr} />`);
+      out.push(`<path d="${areaPath(points, bottoms, model.curve)}" fill="${fill}" fill-opacity="${areaFade(model, series)}" stroke="none"${indexAttr} />`);
     }
     pushStroke(out, linePath(points, model.curve), model, series, indexAttr);
     // Hidden circles exist so --ck-line-dots can reveal them. A downsampled line
@@ -894,7 +897,7 @@ function appendFullLine(
     const bottoms = bottomPoints(series, index, layers, xScale, yScale, model);
     const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
     for (const [top, bottom] of pairSegments(points, bottoms, model.connectNulls)) {
-      out.push(`<path d="${areaPath(top, bottom, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillPaint}" stroke="none" />`);
+      out.push(`<path d="${areaPath(top, bottom, model.curve)}" fill="${fill}" fill-opacity="${areaFade(model, series)}" stroke="none" />`);
     }
   }
   for (const segment of segments(points, model.connectNulls)) {
@@ -1047,7 +1050,8 @@ function bars(
     const inset = slots > 1 ? 2 : 0;
     const fill = series.colors?.[i] ?? series.color;
     const caption = series.ruleLabels?.[i] ?? "";
-    const extra = (series.colors ? ` data-ck-name="${esc(series.name)}" data-ck-i="${i}"` : "") + (caption ? ` data-ck-rule="${esc(caption)}"` : "");
+    const fade = series.fillOpacity === undefined ? "" : ` fill-opacity="${n(series.fillOpacity)}"`;
+    const extra = fade + (series.colors ? ` data-ck-name="${esc(series.name)}" data-ck-i="${i}"` : "") + (caption ? ` data-ck-rule="${esc(caption)}"` : "");
     const outer = !layers || Math.abs((value ?? baseline) - layers.top[layers.top.length - 1][i]) <= 1e-6;
     const radius = outer ? model.cornerRadius : 0;
     const useVar = outer && model.radiusVar;
@@ -1663,6 +1667,20 @@ function along(
   const side = model.xAxis.end ? 2 : 3;
   const edge = model.xAxis.end ? plot.top : plot.bottom;
   const keep = model.xAxis.skip === false;
+  // The domain end stays. An earlier label that would cover it is the one that drops.
+  let endAt = -1;
+  if (!angle && !keep) {
+    for (let i = values.length - 1; i >= 0; i--) {
+      const label = labels[i];
+      if (!label) continue;
+      const x = at(values[i]);
+      if (x < plot.left - slack || x > plot.right + slack) continue;
+      endAt = i;
+      break;
+    }
+  }
+  const endLabel = endAt >= 0 ? labels[endAt] : "";
+  const reserved = endAt >= 0 ? at(values[endAt]) - ((endLabel.length || 1) * 6.4) / 2 : Infinity;
   let out = "";
   let last = -Infinity;
   for (let i = 0; i < values.length; i++) {
@@ -1670,6 +1688,10 @@ function along(
     if (!label) continue;
     const x = at(values[i]);
     const rows = linesOf(model.xAxis, label);
+    if (!angle && !keep && i !== endAt) {
+      const text = rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label;
+      if (x + ((text.length || 1) * 6.4) / 2 + 8 > reserved) continue;
+    }
     const drawn = alongOne(label, x, y, angle, plot, slack, fill, family, keep ? -Infinity : last, rows, model.width);
     if (!drawn) continue;
     out += tickInk(side, edge, x, model.xAxis, ink);
@@ -2431,6 +2453,7 @@ interface YChannel {
   pointShape: string;
   pointSize?: number;
   pointHollow: boolean;
+  fillOpacity?: number;
   lock?: [number | null, number | null];
   pad?: { min: number; max: number } | null;
   clamp?: boolean;
@@ -2455,6 +2478,7 @@ function readYChannels(y: unknown): YChannel[] {
       pointShape: glyphOf(item.pointShape),
       pointSize: typeof item.pointSize === "number" ? item.pointSize : undefined,
       pointHollow: item.pointFill === "hollow",
+      fillOpacity: unitOpacity(item.fillOpacity),
       lock: scale ? domainEnds(scale.domain) : undefined,
       pad: scalePad(item),
       clamp: scaleClamp(item),
@@ -2490,6 +2514,19 @@ function modelClamp(scale: (value: number) => number, domain: [number, number], 
   const lo = Math.min(domain[0], domain[1]);
   const hi = Math.max(domain[0], domain[1]);
   return (value) => scale(value < lo ? lo : value > hi ? hi : value);
+}
+
+function unitOpacity(value: unknown): number | undefined {
+  if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
+  if (value < 0) return 0;
+  if (value > 1) return 1;
+  return value;
+}
+
+/** Series opacity wins. A gradient still owns the stop alphas, so the path stays at 1. */
+function areaFade(model: PlotModel, series: Series): string {
+  if (model.gradient) return "1";
+  return series.fillOpacity === undefined ? model.fillPaint : n(series.fillOpacity);
 }
 
 function dashAttr(dash: string): string {
@@ -2927,9 +2964,12 @@ export function timeTicks(min: number, max: number, count: number, zone = "UTC")
   }
   const start = Math.ceil(min / step) * step;
   const out: number[] = [];
-  for (let value = start; value <= max + step * 0.001 && out.length < 12; value += step) {
+  for (let value = start; value <= max + step * 0.001; value += step) {
     if (value >= min - step * 0.001) out.push(value);
   }
+  // A 12-tick cap used to stop a month of days in the middle. The last instant
+  // is a tick when the nice step lands short of it, so the axis reaches the data.
+  if (out.length && span >= 2 * 86400000 && max - out[out.length - 1] > 60000) out.push(max);
   return out.length ? out : [min, max];
 }
 

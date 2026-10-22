@@ -275,8 +275,8 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
     "mode": "index"
   },
   "size": {
-    "width": 1100,
-    "height": 240
+    "width": 620,
+    "height": 260
   },
   "a11y": {
     "alt": "Errors are the largest share of events across the 14 days."
@@ -457,8 +457,8 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
     "mode": "index"
   },
   "size": {
-    "width": 1100,
-    "height": 240
+    "width": 620,
+    "height": 260
   },
   "a11y": {
     "alt": "Errors peak at noon in the last 24 hours."
@@ -613,8 +613,8 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
     "mode": "index"
   },
   "size": {
-    "width": 1100,
-    "height": 240
+    "width": 620,
+    "height": 260
   },
   "a11y": {
     "alt": "The stacked area shows the same 14 days as the bars."
@@ -716,8 +716,8 @@ type line. This chart's series tokens are the purple accent for p50 and the warn
     "points": "none"
   },
   "size": {
-    "width": 420,
-    "height": 240
+    "width": 620,
+    "height": 260
   },
   "a11y": {
     "alt": "p95 peaks at 410 milliseconds at noon. p50 stays under 140."

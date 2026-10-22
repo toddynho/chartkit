@@ -250,6 +250,10 @@ export type YChannel =
        */
       area?: boolean;
       /**
+       * Area or bar fill opacity for this series, 0–1. Overrides mark.fillOpacity.
+       */
+      fillOpacity?: number;
+      /**
        * Marker for this series. Overrides mark.pointShape. Applies to: line, stacked-area, scatter, combo.
        */
       pointShape?: "circle" | "square" | "diamond" | "triangle" | "cross" | "none";

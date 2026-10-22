@@ -10,6 +10,7 @@ Closed in this change:
 - An axis `title` of `""` is kept and is not drawn. Omitting the title still copies the series name onto the axis. The payments and analytics charts set `axes.y.title` to `""` so a series name is not a y-axis title.
 - Choropleth `mark.nodata: "fill"` paints missing countries with `mark.land` and does not hatch them. `mark.land` and `mark.water` accept `#rrggbb`. The default choropleth is still hatched. A points map still uses the land fill on every region.
 - A heatmap `encoding.color.range` of two or more stops is a continuous ramp. A two-stop range used to paint only the maximum cell in the last stop.
+- A y series `fillOpacity` overrides `mark.fillOpacity` for that series. The analytics partial day is a dotted area at `0.06` under the same series colour, lighter than the solid area at `0.16`.
 
 | Product | Detail | Current workaround | Proposed ChartKit option |
 | --- | --- | --- | --- |
@@ -20,7 +21,7 @@ Closed in this change:
 | All four | Metric tabs (label, value, delta, selected underline) are not a chart. | The strip is page state. The selected tab renders that tab's spec. One "View spec" control lists every spec on the page. | A `metric-tabs` chart, or a selected state on a row of `kpi` specs. |
 | Stripe | A category axis cannot label only the first and last category. `axes.x.ticks: 2` steps through the categories and does not pin the last one. | Gross volume uses a temporal x and `axes.x.ticks` set to the first and last timestamps. | `axes.x.ticks: "ends"` for category axes. |
 | Stripe | The period total and delta sit in the card, not in the plot. | Page text above the chart. `legend.show` is false. | A chart headline slot: value and delta, drawn by the spec. |
-| Plausible | The current, still-open day is a dotted continuation of the same line. | Two series in one combo. The area is null on the last day. A dotted line covers the last segment. Both use the same series token. | `mark.partial` with a dash that applies from the last point only. |
+| Plausible | The current, still-open day is a dotted continuation of the same line. | Two areas in one combo. The solid area is null on the last day. The last segment is a second area with `dash: "dotted"` and `fillOpacity: 0.06`. Both use the same series token. | `mark.partial` with a dash that applies from the last point only. |
 | Plausible | Choosing a headline stat replots the main chart and outlines that stat. | The tab strip is page state. It swaps which spec the chart host draws. | A host interaction. Not a paint option. |
 | Plausible | Duration reads as minutes and seconds (`2m 24s`). | The tab label is page text. `format: "duration-ms"` would print `2.4m`. | A duration style that keeps minutes and seconds together. |
 | Google Analytics | Choropleth text and border still ignore `theme.tokens`. An object theme falls through to the soft chrome. | The map spec sets `theme` to the string `soft` or `midnight`, plus `mark.land` and `mark.water`. | `chromeFor` reads `theme.tokens` for text, muted, and border. |

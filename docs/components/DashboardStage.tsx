@@ -29,16 +29,18 @@ function fitMobile(spec: Record<string, unknown>): Record<string, unknown> {
   const height = typeof current.height === "number" ? current.height : 240;
   if (height < 120) return spec;
   const axes = isRecord(spec.axes) ? spec.axes : {};
-  const axis = (value: unknown) => {
+  const encoding = isRecord(spec.encoding) ? spec.encoding : {};
+  const temporalX = isRecord(encoding.x) && encoding.x.type === "temporal";
+  const axis = (value: unknown, hold: boolean) => {
     if (value === false) return false;
     const currentAxis = isRecord(value) ? value : {};
-    if (Array.isArray(currentAxis.ticks)) return currentAxis;
+    if (hold || Array.isArray(currentAxis.ticks)) return currentAxis;
     return { ...currentAxis, ticks: 4 };
   };
   return {
     ...spec,
     size: { width: 360, height: 240 },
-    axes: { ...axes, x: axis(axes.x), y: axis(axes.y) },
+    axes: { ...axes, x: axis(axes.x, temporalX), y: axis(axes.y, false) },
   };
 }
 

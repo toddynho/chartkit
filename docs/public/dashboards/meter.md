@@ -12,7 +12,7 @@ Default theme: soft.
 
 Daily series. The last segment is dotted.
 
-type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The area series is null on the last day. A second line, dash dotted, covers the last segment. Both series tokens are the same indigo.
+type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The solid area stops on the day before the last. The last segment is a second area, dash dotted, fillOpacity 0.06, in the same indigo.
 
 ```json
 {
@@ -206,8 +206,9 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
       },
       {
         "field": "tail",
-        "mark": "line",
-        "dash": "dotted"
+        "mark": "area",
+        "dash": "dotted",
+        "fillOpacity": 0.06
       }
     ]
   },
@@ -248,7 +249,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
 
 Daily series. The last segment is dotted.
 
-type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The area series is null on the last day. A second line, dash dotted, covers the last segment. Both series tokens are the same indigo.
+type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The solid area stops on the day before the last. The last segment is a second area, dash dotted, fillOpacity 0.06, in the same indigo.
 
 ```json
 {
@@ -442,8 +443,9 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
       },
       {
         "field": "tail",
-        "mark": "line",
-        "dash": "dotted"
+        "mark": "area",
+        "dash": "dotted",
+        "fillOpacity": 0.06
       }
     ]
   },
@@ -484,7 +486,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
 
 Daily series. The last segment is dotted.
 
-type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The area series is null on the last day. A second line, dash dotted, covers the last segment. Both series tokens are the same indigo.
+type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The solid area stops on the day before the last. The last segment is a second area, dash dotted, fillOpacity 0.06, in the same indigo.
 
 ```json
 {
@@ -678,8 +680,9 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
       },
       {
         "field": "tail",
-        "mark": "line",
-        "dash": "dotted"
+        "mark": "area",
+        "dash": "dotted",
+        "fillOpacity": 0.06
       }
     ]
   },
@@ -720,7 +723,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
 
 Daily series. The last segment is dotted.
 
-type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The area series is null on the last day. A second line, dash dotted, covers the last segment. Both series tokens are the same indigo.
+type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The solid area stops on the day before the last. The last segment is a second area, dash dotted, fillOpacity 0.06, in the same indigo.
 
 ```json
 {
@@ -914,8 +917,9 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
       },
       {
         "field": "tail",
-        "mark": "line",
-        "dash": "dotted"
+        "mark": "area",
+        "dash": "dotted",
+        "fillOpacity": 0.06
       }
     ]
   },
@@ -956,7 +960,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
 
 Daily series. The last segment is dotted.
 
-type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The area series is null on the last day. A second line, dash dotted, covers the last segment. Both series tokens are the same indigo.
+type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The solid area stops on the day before the last. The last segment is a second area, dash dotted, fillOpacity 0.06, in the same indigo.
 
 ```json
 {
@@ -1150,8 +1154,9 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
       },
       {
         "field": "tail",
-        "mark": "line",
-        "dash": "dotted"
+        "mark": "area",
+        "dash": "dotted",
+        "fillOpacity": 0.06
       }
     ]
   },
@@ -1192,7 +1197,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
 
 Daily series. The last segment is dotted.
 
-type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The area series is null on the last day. A second line, dash dotted, covers the last segment. Both series tokens are the same indigo.
+type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The solid area stops on the day before the last. The last segment is a second area, dash dotted, fillOpacity 0.06, in the same indigo.
 
 ```json
 {
@@ -1386,8 +1391,9 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
       },
       {
         "field": "tail",
-        "mark": "line",
-        "dash": "dotted"
+        "mark": "area",
+        "dash": "dotted",
+        "fillOpacity": 0.06
       }
     ]
   },
@@ -1629,7 +1635,7 @@ type bar-list, mark.track row. A full-height wash in series[0] sits behind the l
 ## What produces this look
 
 - **Metric tabs.** The strip is page state: label, number, and delta, with an underline on the selected tab. Choosing a tab shows that tab's spec. There is no sparkline in the strip.
-- **Daily line.** 30 points, curve linear, points always, a light y grid, and a soft area. The last day is a second series with dash dotted. Both series tokens are #615fff. Midnight uses #9d99ff.
+- **Daily line.** 30 points, curve linear, points always, a light y grid, and a soft area under the solid line. The last day is a second area, dash dotted, fillOpacity 0.06. Both series tokens are #615fff. Midnight uses #9d99ff.
 - **Lists.** Sources, Pages, and Devices are one bar-list at a time. mark.track row paints a full-width wash. The chart is on demand and is not in the line or all bundle.
 
 https://chartkit.dev/dashboards/meter

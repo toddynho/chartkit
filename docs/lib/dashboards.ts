@@ -503,7 +503,7 @@ function meter(): Dashboard {
       id,
       title: label,
       caption: "Daily series. The last segment is dotted.",
-      note: "type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The area series is null on the last day. A second line, dash dotted, covers the last segment. Both series tokens are the same indigo.",
+      note: "type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The solid area stops on the day before the last. The last segment is a second area, dash dotted, fillOpacity 0.06, in the same indigo.",
       span: "dash-12",
       place: "tab",
       themes,
@@ -518,7 +518,7 @@ function meter(): Dashboard {
             x: { field: "date", type: "temporal" },
             y: [
               { field: "solid", mark: "area", scale: { domain: [0, headroom(numbers)] } },
-              { field: "tail", mark: "line", dash: "dotted" },
+              { field: "tail", mark: "area", dash: "dotted", fillOpacity: 0.06 },
             ],
           },
           mark: { curve: "linear", points: "always", pointSize: 2.5, fillOpacity: 0.16, strokeWidth: 1.75, gradient: false },
@@ -590,7 +590,7 @@ function meter(): Dashboard {
     sparks: [],
     notes: [
       { label: "Metric tabs", detail: "The strip is page state: label, number, and delta, with an underline on the selected tab. Choosing a tab shows that tab's spec. There is no sparkline in the strip." },
-      { label: "Daily line", detail: "30 points, curve linear, points always, a light y grid, and a soft area. The last day is a second series with dash dotted. Both series tokens are #615fff. Midnight uses #9d99ff." },
+      { label: "Daily line", detail: "30 points, curve linear, points always, a light y grid, and a soft area under the solid line. The last day is a second area, dash dotted, fillOpacity 0.06. Both series tokens are #615fff. Midnight uses #9d99ff." },
       { label: "Lists", detail: "Sources, Pages, and Devices are one bar-list at a time. mark.track row paints a full-width wash. The chart is on demand and is not in the line or all bundle." },
     ],
   };
@@ -856,7 +856,7 @@ function keel(): Dashboard {
       axes: { x: { grid: false }, y: { title: "", grid: true } },
       legend: { position: "top" },
       tooltip: { mode: "index" },
-      size: { width: 1100, height: 240 },
+      size: { width: 620, height: 260 },
     },
     "Errors are the largest share of events across the 14 days.",
   );
@@ -871,7 +871,7 @@ function keel(): Dashboard {
       axes: { x: { grid: false }, y: { title: "", grid: true } },
       legend: { position: "top" },
       tooltip: { mode: "index" },
-      size: { width: 1100, height: 240 },
+      size: { width: 620, height: 260 },
     },
     "Errors peak at noon in the last 24 hours.",
   );
@@ -893,7 +893,7 @@ function keel(): Dashboard {
       axes: { x: { grid: false }, y: { title: "", grid: true } },
       legend: { position: "top" },
       tooltip: { mode: "index" },
-      size: { width: 1100, height: 240 },
+      size: { width: 620, height: 260 },
     },
     "The stacked area shows the same 14 days as the bars.",
   );
@@ -959,7 +959,7 @@ function keel(): Dashboard {
             legend: { position: "top" },
             tooltip: { mode: "index" },
             mark: { curve: "linear", strokeWidth: 2, points: "none" },
-            size: { width: 420, height: 240 },
+            size: { width: 620, height: 260 },
           },
           "p95 peaks at 410 milliseconds at noon. p50 stays under 140.",
         ),

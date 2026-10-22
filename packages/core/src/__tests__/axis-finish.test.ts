@@ -59,6 +59,39 @@ describe("axis finishing", () => {
     expect(labels.filter((label) => label.includes("Oct"))).toHaveLength(2);
   });
 
+  it("paints one area at the mark opacity and a dotted tail at its own fillOpacity", () => {
+    const spec = {
+      version: "1",
+      type: "combo",
+      data: [
+        { date: "2025-10-19", solid: 3, tail: null },
+        { date: "2025-10-20", solid: 4, tail: 4 },
+        { date: "2025-10-21", solid: null, tail: 5 },
+      ],
+      encoding: {
+        x: { field: "date", type: "temporal" },
+        y: [
+          { field: "solid", mark: "area" },
+          { field: "tail", mark: "area", dash: "dotted", fillOpacity: 0.06 },
+        ],
+      },
+      mark: { fillOpacity: 0.16, curve: "linear", points: "none", gradient: false },
+      legend: { show: false },
+      a11y: { alt },
+      size: { width: 420, height: 220 },
+    };
+    expect(validate(spec).ok).toBe(true);
+    const svg = render(spec);
+    expect(svg).toContain('fill-opacity="0.16"');
+    expect(svg).toContain('fill-opacity="0.06"');
+    expect(svg).toContain('stroke-dasharray="1.5 3"');
+    const fills = [...svg.matchAll(/<path d="([^"]+)" fill="[^"]+" fill-opacity="([^"]+)"/g)];
+    const light = fills.find((match) => match[2] === "0.06");
+    const solid = fills.find((match) => match[2] === "0.16");
+    const xs = (d: string) => [...d.matchAll(/[\d.]+/g)].map(Number).filter((_, index) => index % 2 === 0);
+    expect(Math.max(...xs(light?.[1] ?? ""))).toBeGreaterThan(Math.max(...xs(solid?.[1] ?? "0")));
+  });
+
   it("treats an empty axis title as hidden and still copies a missing title from the series", () => {
     const hidden = draw({
       ...spec({ legend: { show: false }, axes: { y: { title: "" }, y2: false } }),
