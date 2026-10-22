@@ -8,6 +8,22 @@ export function fieldName(value: unknown): string | null {
   return null;
 }
 
+/** Top-level atlas is mark.atlas. A spec that only sets atlas still selects that atlas. */
+export function resolveMark(spec: Record<string, unknown>): Record<string, unknown> {
+  const mark = isRecord(spec.mark) ? { ...spec.mark } : {};
+  if (typeof mark.atlas !== "string" && typeof spec.atlas === "string") mark.atlas = spec.atlas;
+  return mark;
+}
+
+/** location is region. lat and lon are latitude and longitude. */
+export function resolveEncoding(spec: Record<string, unknown>): Record<string, unknown> {
+  const encoding = isRecord(spec.encoding) ? { ...spec.encoding } : {};
+  if (encoding.region == null && encoding.location != null) encoding.region = encoding.location;
+  if (encoding.latitude == null && encoding.lat != null) encoding.latitude = encoding.lat;
+  if (encoding.longitude == null && encoding.lon != null) encoding.longitude = encoding.lon;
+  return encoding;
+}
+
 export function rowsOf(spec: Record<string, unknown>): Record<string, unknown>[] {
   return Array.isArray(spec.data) ? spec.data.filter(isRecord) : [];
 }

@@ -1,7 +1,7 @@
 import { suggestAtlas, suggestRegion, directoryIndex, matchRegion, type DirectoryEntry } from "./match";
 import { regionsFromGeoJSON, regionsFromTopology } from "./topo";
 import { ATLAS_NAMES, type AtlasName, type Diagnostic, type ValidationResult } from "./types";
-import { fieldName, isRecord, num, pointer, rowsOf } from "./spec";
+import { fieldName, isRecord, num, pointer, resolveEncoding, resolveMark, rowsOf } from "./spec";
 
 function result(diagnostics: Diagnostic[]): ValidationResult {
   const errors = diagnostics.filter((item) => item.severity === "error");
@@ -59,8 +59,8 @@ export function validate(spec: unknown): ValidationResult {
   const type = spec.type;
   if (type !== "choropleth" && type !== "map-points") return result([]);
   const diagnostics: Diagnostic[] = [];
-  const mark = isRecord(spec.mark) ? spec.mark : {};
-  const encoding = isRecord(spec.encoding) ? spec.encoding : {};
+  const mark = resolveMark(spec);
+  const encoding = resolveEncoding(spec);
   const rows = rowsOf(spec);
   const atlas = typeof mark.atlas === "string" ? mark.atlas : "";
   const inline = inlineEntries(mark);
@@ -151,8 +151,11 @@ export function validate(spec: unknown): ValidationResult {
   }
 
   if (type === "map-points") {
+    const rawEncoding = isRecord(spec.encoding) ? spec.encoding : {};
     const latField = fieldName(encoding.latitude);
     const lonField = fieldName(encoding.longitude);
+    const latPath = fieldName(rawEncoding.latitude) || !fieldName(rawEncoding.lat) ? "/encoding/latitude" : "/encoding/lat";
+    const lonPath = fieldName(rawEncoding.longitude) || !fieldName(rawEncoding.lon) ? "/encoding/longitude" : "/encoding/lon";
     if (!latField || !lonField) {
       const numeric = numericFields(rows);
       const latitude = numeric.find((field) => /lat/i.test(field)) ?? numeric[0];
@@ -162,7 +165,7 @@ export function validate(spec: unknown): ValidationResult {
         severity: "warning",
         message: "Latitude and longitude fields are missing.",
         path: "/encoding/latitude",
-        hint: latitude && longitude ? `Use ${latitude} and ${longitude}.` : "Set encoding.latitude and encoding.longitude.",
+        hint: "Set encoding.latitude to lat and encoding.longitude to lon.",
         fix:
           latitude && longitude
             ? [
@@ -189,8 +192,8 @@ export function validate(spec: unknown): ValidationResult {
           path: "/encoding/latitude",
           hint: `${latField} holds longitudes and ${lonField} holds latitudes.`,
           fix: [
-            { op: "replace", path: "/encoding/latitude", value: lonField },
-            { op: "replace", path: "/encoding/longitude", value: latField },
+            { op: "replace", path: latPath, value: lonField },
+            { op: "replace", path: lonPath, value: latField },
           ],
         });
       } else {

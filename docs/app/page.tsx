@@ -51,7 +51,7 @@ export default function HomePage() {
           <div className="stats">
             <Link className="stat" href="/benchmarks">
               <b>{headline.lineGzipLabel}</b>
-              <span>gzip, line chart. Next is {headline.nextLib} at {headline.nextGzipBytes} B</span>
+              <span>gzip, line chart. Loss to {headline.nextLib} at {headline.nextGzipBytes} B</span>
             </Link>
             <Link className="stat" href="/benchmarks">
               <b>{headline.ssrLabel}</b>

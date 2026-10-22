@@ -6,7 +6,7 @@ Round 13, measured 2026-10-18 on phase 2 `d8dcc5a`. These are the harness number
 
 | | ChartKit | Next or note |
 | --- | ---: | --- |
-| Line chart, gzip | **14,858 B** | uPlot 23,109 B. `scripts/size.mjs` on that commit. Harness minimal line is 14,987 B |
+| Line chart, gzip | **34,554 B** | Loss to uPlot at 23,276 B (JS). Stylesheet is 762 B more, summed 24,038. `scripts/size.mjs` on `038cf5d`. Harness minimal line is 34,767 B |
 | Server render, 1k line | **0.85 ms** | ECharts 6.65 ms mean. uPlot, Chart.js, and Recharts produced no chart without a DOM |
 | Agent, no docs, then repair() | **20/42 → 42/42** | Not re-run for round 13. Recharts, ECharts, and Chart.js were already 42/42 with no docs |
 | Initial, 12 cells | wins all | Even 1M is 23.6 ms vs uPlot 26.5 ms |
@@ -24,7 +24,7 @@ Canvas line, measured 2026-10-21, median of 5, Playwright Chromium, 640×360, sa
 | 100k | 8.2 | 9.1 | 13.1 | 20.1 | 17.6 | 29.0 | 18.1 | 23.0 |
 | 1M | 16.5 | 17.1 | 20.8 | 27.7 | 25.1 | 20.6 | 21.8 | 20.9 |
 
-Canvas losses: render is slower than SVG at 10k (7.8 vs 7.3), 100k (9.1 vs 8.2), and 1M (17.1 vs 16.5). First paint is slower than SVG at those sizes (21.8 vs 13.1, 20.1 vs 13.1, 27.7 vs 20.8) and slower than uPlot (14.5, 17.6, 25.1). The 1M update is slower than SVG (21.8 vs 20.6) and slower than uPlot (21.8 vs 20.9). Canvas wins the 10k and 100k updates against both SVG and uPlot. There is no first-paint crossover, so `auto` stays on SVG at 10k and switches at 100,000 rows, where the update win is large. 1M first paint is 27.7 ms and the update is 21.8 ms. `scripts/size.mjs` line is 34,427 bytes gzip, 412 bytes over main `9c1dbdc` (34,015). Facets, concatenation, breakpoints, and right-to-left layout load with `all` and `extra`, not with `createRenderer([line])`. The typed canvas sampler and the painter stay out of the line bundle. `@chartkitdev/core/all` is 64,137 bytes gzip (main 57,650). The canvas painter is a separate chunk, 57,127 bytes gzip (main 56,817). `interact` is 17,641 (main 16,637). `validate` is 32,206 (main 31,177). extra is 88,495 (main 82,076).
+Canvas losses: render is slower than SVG at 10k (7.8 vs 7.3), 100k (9.1 vs 8.2), and 1M (17.1 vs 16.5). First paint is slower than SVG at those sizes (21.8 vs 13.1, 20.1 vs 13.1, 27.7 vs 20.8) and slower than uPlot (14.5, 17.6, 25.1). The 1M update is slower than SVG (21.8 vs 20.6) and slower than uPlot (21.8 vs 20.9). Canvas wins the 10k and 100k updates against both SVG and uPlot. There is no first-paint crossover, so `auto` stays on SVG at 10k and switches at 100,000 rows, where the update win is large. 1M first paint is 27.7 ms and the update is 21.8 ms. `scripts/size.mjs` line is 34,554 bytes gzip, 539 bytes over main `9c1dbdc` (34,015). Facets, concatenation, breakpoints, and right-to-left layout load with `all` and `extra`, not with `createRenderer([line])`. The typed canvas sampler and the painter stay out of the line bundle. `@chartkitdev/core/all` is 64,372 bytes gzip (main 57,650). The canvas painter is a separate chunk, 57,127 bytes gzip (main 56,817). `interact` is 17,641 (main 16,637). `validate` is 32,206 (main 31,177). extra is 88,495 (main 82,076).
 
 **[Documentation](https://chartkit.dev)** | **[When to use](https://chartkit.dev/when-to-use)** | **[Benchmarks](https://chartkit.dev/benchmarks)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[Roadmap](ROADMAP.md)** | **[llms.txt](docs/public/llms.txt)**
 

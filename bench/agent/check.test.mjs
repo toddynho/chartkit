@@ -21,6 +21,71 @@ await build({
 });
 const suite = await import(`${pathToFileURL(outfile).href}?t=${Date.now()}`);
 
+test("supplementary suite is tracked apart from the 42-task set", () => {
+  const ids = [
+    "canvas-sensor",
+    "nav-pageviews",
+    "sync-cpu",
+    "drill-region",
+    "facet-temp",
+    "concat-dash",
+    "rtl-visitors",
+    "bp-legend",
+    "geo-renewables",
+    "geo-cities",
+    "mermaid-xy",
+    "waterfall-cash",
+    "sankey-funnel",
+    "box-latency",
+  ];
+  assert.equal(suite.suppTasks.length, ids.length);
+  assert.deepEqual(suite.suppTasks.map((task) => task.id), ids);
+  const main = new Set(suite.tasks.map((task) => task.id));
+  const named = /\b(navigator|drilldown|breakpoints|sampling|lttb|facet|concat|choropleth|map-points)\b/i;
+  for (const task of suite.suppTasks) {
+    assert.equal(main.has(task.id), false);
+    assert.ok(task.prompt.length > 20);
+    assert.equal(named.test(task.prompt), false, task.id);
+    assert.ok(task.data !== undefined);
+    assert.equal(task.expect.type, task.type);
+    assert.equal(typeof task.expect.feature, "string");
+    assert.equal(typeof task.pass, "function");
+  }
+  assert.equal(typeof suite.suppTasks.find((task) => task.id === "mermaid-xy").data, "string");
+  assert.match(suite.suppTasks.find((task) => task.id === "mermaid-xy").data, /xychart-beta/);
+});
+
+test("supp scoring requires the feature and treats a map without an atlas as a failure", async () => {
+  const views = suite.suppTasks.find((task) => task.id === "nav-pageviews");
+  const bare = {
+    version: "1",
+    type: "line",
+    data: views.data,
+    encoding: { x: "date", y: "views" },
+    a11y: { alt: "Page views rise over the week." },
+  };
+  const missed = await suite.checkSupp(bare, views);
+  assert.equal(missed.ok, false);
+  assert.equal(missed.stages.feature.ok, false);
+  assert.equal(missed.stages.values.ok, true);
+  const hit = await suite.checkSupp({ ...bare, interaction: { navigator: true } }, views);
+  assert.equal(hit.ok, true, JSON.stringify(hit.stages));
+
+  const world = suite.suppTasks.find((task) => task.id === "geo-renewables");
+  const unmapped = {
+    version: "1",
+    type: "choropleth",
+    data: world.data,
+    encoding: { region: "country", color: "share" },
+    a11y: { alt: "Norway uses more renewables than France." },
+  };
+  const noAtlas = await suite.checkSupp(unmapped, world);
+  assert.equal(noAtlas.ok, false);
+  assert.equal(noAtlas.stages.validate.ok, false);
+  const mapped = await suite.checkSupp({ ...unmapped, mark: { atlas: "world" } }, world);
+  assert.equal(mapped.ok, true, JSON.stringify(mapped.stages));
+});
+
 test("task set spans every v1 chart type", () => {
   assert.ok(suite.tasks.length >= 30 && suite.tasks.length <= 50);
   const ids = new Set(suite.tasks.map((task) => task.id));

@@ -19,7 +19,8 @@ await build({
 });
 const suite = await import(pathToFileURL(outfile).href);
 const started = new Date().toISOString();
-const agent = await suite.runAgent({ tasks: suite.tasks });
+const tasks = process.env.BENCH_SUITE === "supp" ? suite.suppTasks : suite.tasks;
+const agent = await suite.runAgent({ tasks });
 const out = process.env.BENCH_AGENT_OUT || join(benchRoot, "results/agent.json");
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, JSON.stringify({

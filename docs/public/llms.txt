@@ -1,6 +1,6 @@
 # ChartKit JSON spec
 
-> @chartkitdev/core v0.5.0 · https://chartkit.dev/schema/v1.json
+> @chartkitdev/core v0.5.0 https://chartkit.dev/schema/v1.json
 > v1 @chartkitdev/core/all. repair, validate: @chartkitdev/core/validate.
 
 ## Rules
@@ -8,10 +8,10 @@
 - version "1". a11y.alt required. data is rows, not {"values":[...]}. Field rules: llms-full.txt.
 - Maps: @chartkitdev/geo (unpublished). choropleth or map-points. atlas world|us|canada|eu. No tiles.
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
-- render svg|canvas|auto. sampling lttb|minmax|none. /large.
+- Options: interaction.navigator, interaction.sync: "group", interaction.drilldown: {children: {<x value>: spec}}, layout.facet: {field, columns}, layout.concat: {views, direction}, layout.breakpoints: [{maxWidth, legend:false}], layout.direction: "rtl", render: "auto", mark.sampling: "lttb". 100000.
 
-Features (21 libraries, sourced): https://chartkit.dev/features.json
-Types: line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi, sparkline, mini-area, progress-ring, spike, candlestick, histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, area-range, bar-range, errorbar, sunburst
+Features: https://chartkit.dev/features.json
+Types: line,bar,donut,pie,stacked-area,scatter,combo,heatmap,gauge,kpi,sparkline,mini-area,progress-ring,spike,candlestick,histogram,boxplot,radar,funnel,treemap,sankey,bullet,waterfall,gantt,timeline,quadrant,venn,journey,area-range,bar-range,errorbar,sunburst
 
 ```json
 {"version":"1","type":"line","data":[{"quarter":"Q1","units":40},{"quarter":"Q2","units":55}],"encoding":{"x":"quarter","y":"units"},"a11y":{"alt":"Units rose in Q2."}}
@@ -23,10 +23,6 @@ Types: line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi,
 
 ```json
 {"version":"1","type":"donut","data":[{"x":"Oak","y":8},{"x":"Pine","y":5}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"Oak is larger."}}
-```
-
-```json
-{"version":"1","type":"pie","data":[{"x":"Oak","y":8},{"x":"Pine","y":5}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"Oak is larger."}}
 ```
 
 ```json

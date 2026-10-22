@@ -60,7 +60,16 @@ describe("published JSON examples", () => {
     it(`${file} has one valid, drawable spec per chart type`, () => {
       const specs = fencedSpecs(file);
       const types = specs.map((spec) => (spec as { type?: string }).type);
-      expect([...types].sort()).toEqual([...CHART_TYPES].sort());
+      const expected = file === "docs/public/llms.txt" ? CHART_TYPES.filter((type) => type !== "pie") : CHART_TYPES;
+      expect([...types].sort()).toEqual([...expected].sort());
+      if (file === "docs/public/llms.txt") {
+        const text = readFileSync(join(repoRoot, file), "utf8");
+        expect(text).toContain("navigator");
+        expect(text).toContain("drilldown");
+        expect(text).toContain("breakpoints");
+        expect(text).toContain("100000");
+        expect(Buffer.byteLength(text)).toBeLessThanOrEqual(6400);
+      }
       for (const spec of specs) {
         const type = (spec as { type?: string }).type ?? "";
         const result = PHASE4.has(type) ? validatePhase4(spec) : validate(spec);

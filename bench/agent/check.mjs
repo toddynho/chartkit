@@ -6,6 +6,9 @@ import { pathToFileURL, fileURLToPath } from "node:url";
 import { randomBytes } from "node:crypto";
 import { build } from "esbuild";
 import { createRenderer } from "../../packages/core/src/render.ts";
+import { charts as coreCharts } from "../../packages/core/src/all.ts";
+import { charts as extraCharts } from "../../packages/core/src/extra.ts";
+import { render as renderGeo, validate as validateGeo } from "../../packages/geo/src/index.ts";
 import { repair, validate } from "../../packages/core/src/validate.ts";
 import { line } from "../../packages/core/src/charts/line.ts";
 import { bar } from "../../packages/core/src/charts/bar.ts";
@@ -28,6 +31,7 @@ import { noDocsHint, officialReference } from "./docs.mjs";
 const render = createRenderer([
   line, bar, donut, stackedArea, scatter, combo, heatmap, gauge, kpi, sparkline, miniArea, progressRing, spike, candlestick,
 ]);
+const fullRender = createRenderer([...coreCharts, ...extraCharts]);
 
 export { repair };
 
@@ -403,6 +407,43 @@ export function checkChartKit(spec, task) {
   const metricOk = task.expect.metric === undefined || containsValue([spec?.metric?.value], task.expect.metric);
   const deltaOk = task.expect.delta === undefined || containsValue([spec?.metric?.delta], task.expect.delta);
   stages.values = { ok: valuesOk && metricOk && deltaOk };
+
+  const ok = Object.values(stages).every((stage) => stage.ok);
+  return { ok, stages };
+}
+
+/** Supp tasks: full renderer, geo warnings are errors, and task.pass checks the feature. */
+export async function checkSupp(spec, task) {
+  const stages = {};
+  const validation = validate(spec);
+  const mapType = spec?.type === "choropleth" || spec?.type === "map-points";
+  const geo = mapType ? validateGeo(spec) : { errors: [], warnings: [] };
+  const geoNotes = [...(geo.errors ?? []), ...(geo.warnings ?? [])];
+  stages.validate = {
+    ok: validation.ok && geoNotes.length === 0,
+    errors: [...validation.errors, ...geoNotes].slice(0, 8).map(formatDiagnostic),
+  };
+
+  let svg = "";
+  let renderError;
+  try {
+    svg = mapType ? await renderGeo(spec) : fullRender(spec);
+  } catch (error) {
+    renderError = error instanceof Error ? error.message : String(error);
+  }
+  const drew = typeof svg === "string" && svg.includes("data-ck-type=") && !svg.includes("ck-chart-error") && !svg.includes("Unknown atlas");
+  stages.render = { ok: drew && !renderError, ...(renderError ? { error: renderError } : {}) };
+
+  const feature = typeof task.pass === "function" ? task.pass(spec) : { ok: true };
+  stages.feature = feature?.ok ? { ok: true } : { ok: false, reason: feature?.reason ?? "feature missing" };
+
+  const aliases = task.expect?.typeFree ? null : task.expect?.aliases ?? [task.expect?.type];
+  stages.type = { ok: aliases == null || aliases.includes(spec?.type), actual: spec?.type ?? null };
+
+  const values = task.expect?.values ?? [];
+  const evidence = [];
+  collectNumbers(spec, evidence);
+  stages.values = { ok: values.every((value) => containsValue(evidence, value)) };
 
   const ok = Object.values(stages).every((stage) => stage.ok);
   return { ok, stages };

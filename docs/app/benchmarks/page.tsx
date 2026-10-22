@@ -53,8 +53,9 @@ export default function BenchmarksPage() {
       <h2>Bundle size</h2>
       <p>
         ChartKit’s line entry is {headline.lineGzipBytes} bytes gzip ({headline.lineGzipLabel}), from{" "}
-        <code>scripts/size.mjs</code> on phase 2 <code>{CORE_COMMIT}</code>. It is still the smallest. Next is{" "}
-        {headline.nextLib} at {headline.nextGzipBytes} bytes. The harness minimal line on the same day is 14,987 bytes.
+        <code>scripts/size.mjs</code> on <code>{headline.sizeCommit}</code>, measured {headline.sizeMeasured}.{" "}
+        {headline.bundleLoss} {headline.lineWins} The harness minimal line on that run is {headline.harnessLineBytes}{" "}
+        bytes. {headline.donutWin}
       </p>
       <ChartView spec={raceSpec(bundleRace)} />
       <p className="meta">{bundleRace.caption}</p>

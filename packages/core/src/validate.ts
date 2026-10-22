@@ -58,6 +58,21 @@ export function validate(spec: unknown, data?: unknown): ValidationResult {
     });
   }
 
+  if (mapType(spec)) {
+    for (let index = diagnostics.length - 1; index >= 0; index -= 1) {
+      const item = diagnostics[index];
+      if (item.code === "CK1005" && item.path === "/type") diagnostics.splice(index, 1);
+      else if (item.code === "CK1002" && GEO_FIELD.test(item.path)) diagnostics.splice(index, 1);
+    }
+    diagnostics.push({
+      code: "CK3057",
+      severity: "warning",
+      message: "field rules for this map live in @chartkitdev/geo",
+      path: "/type",
+      hint: 'import { validate } from "@chartkitdev/geo". Core leaves atlas, region, and latitude to that package.',
+    });
+  }
+
   diagnostics.sort((a, b) => {
     const rank = repairRank(a) - repairRank(b);
     if (rank !== 0) return rank;
@@ -133,6 +148,13 @@ function repairRank(diagnostic: Diagnostic): number {
 }
 
 const PHASE4 = " gantt timeline quadrant venn journey ";
+const MAPS = " choropleth map-points ";
+const GEO_FIELD = /^\/(?:atlas|region|latitude|longitude|location|lat|lon|mark\/(?:atlas|geojson|topojson|projection|scale|thresholds|labelCount|legend)|encoding\/(?:region|latitude|longitude|location|lat|lon|label))$/;
+
+function mapType(spec: unknown): string {
+  if (!isRecord(spec) || typeof spec.type !== "string") return "";
+  return MAPS.includes(` ${spec.type} `) ? spec.type : "";
+}
 
 function phase4Type(spec: unknown): string {
   if (!isRecord(spec) || typeof spec.type !== "string") return "";

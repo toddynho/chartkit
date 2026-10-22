@@ -11,13 +11,13 @@ Machine-readable copy: https://chartkit.dev/benchmarks.json (schema https://char
 - Browser: Playwright Chromium, a 640×360 line, median of 5. Shapes are even x, jittered x, and gapped timestamps. ChartKit initial is mount(); the aligned update is mount().update().
 - Updates: The aligned update starts at the top of a requestAnimationFrame. The harness awaits the library's own completion, then reads the clock from a MessageChannel task after that frame's style, layout, and paint. GPU and raster time is not in the number. ChartKit is measured through mount(element, spec).update(spec), the same shape as uPlot's setData. The figure is the median of five samples.
 - Sampling: mark.sampling defaults to auto and minmax-downsamples a line longer than twice the plot width. 1,000 points stay complete. The samplingNone rows draw every point and use the same aligned update timer.
-- Bundle: gzip -9. ChartKit’s headline line is scripts/size.mjs. Competitor rows and the harness chartkit-minimal line are the bench harness. uPlot adds its stylesheet, gzipped separately. `scripts/size.mjs` line is 14,858 bytes. `/all` on that script is 26,673 bytes.
+- Bundle: gzip -9. ChartKit’s headline line is scripts/size.mjs. Competitor rows and the harness chartkit-minimal line are the bench harness. uPlot’s JS and stylesheet are gzipped separately and the uPlot row sums those two responses. The JS figure is the loss named in the headline. `scripts/size.mjs` line is 34,554 bytes. `/all` on that script is 64,372 bytes.
 - Server render: Mean and median of 8 calls after 2 warmups, a 1,000 point line. supported false means no chart without a DOM. Recharts returned an empty wrapper.
 - Agents: claude-sonnet-4-5, temperature 0, 42 tasks, one run on 2026-10-16. Not re-run for round 13. Official means the library docs were in the prompt. ChartKit docs are llms.txt. repair() is a no-model step on ChartKit's no-docs first try and is not a second model call. Nivo and uPlot were not in the agent eval.
 
 ## Headline
 
-- Smallest line chart: **14,858 bytes** gzip, `scripts/size.mjs` on phase 2 `d8dcc5a`. Next is uPlot at 23,109 bytes. The harness minimal line is 14,987 bytes.
+- Line chart: **34,554 bytes** gzip, `scripts/size.mjs` on `038cf5d`, measured 2026-10-21. That is a loss to uPlot at 23,276 bytes. The stylesheet is 762 bytes more, a separate response, and the two sum to 24,038, still smaller than ChartKit. It is still smaller than Chart.js (49,374), Recharts (96,213, React external), Nivo (96,583, React external), Observable Plot (97,723), and ECharts (162,991). The harness minimal line is 34,767 bytes. The harness donut is 14,391 bytes and is smaller than Chart.js (46,922), Nivo (75,518, React external), Recharts (90,090, React external), and ECharts (122,174). uPlot and Observable Plot have no donut.
 - Initial render: ChartKit is faster than uPlot in all 12 cells. Even 1,000,000 points is 23.6 ms vs 26.5 ms.
 - Aligned update: ChartKit wins 6 of 12 cells against uPlot and loses the 6 listed below. It is not a sweep.
 - Server render: **0.85 ms** mean (median 0.85 ms).
@@ -25,6 +25,7 @@ Machine-readable copy: https://chartkit.dev/benchmarks.json (schema https://char
 
 ## Losses
 
+- Line bundle: ChartKit 34,554 bytes gzip, uPlot 23,276 bytes of JS. The stylesheet is 762 bytes more (24,038 summed).
 - Aligned update, even x, 1,000 points: ChartKit 1.5 ms, uPlot 1.2 ms.
 - Aligned update, even x, 10,000 points: ChartKit 1.9 ms, uPlot 1.7 ms.
 - Aligned update, jittered x, 1,000 points: ChartKit 1.6 ms, uPlot 1.4 ms.
@@ -39,17 +40,17 @@ Machine-readable copy: https://chartkit.dev/benchmarks.json (schema https://char
 
 | Library | Entry | Bytes | Note |
 | --- | --- | ---: | --- |
-| ChartKit | size script line, phase 2 d8dcc5a | 14,858 |  |
-| ChartKit | harness minimal line | 14,987 |  |
-| ChartKit | harness minimal bar | 13,022 |  |
-| ChartKit | harness minimal donut | 6,683 |  |
-| ChartKit | harness /all | 26,715 |  |
-| uPlot | line plus stylesheet | 23,109 |  |
-| Chart.js | line | 49,234 |  |
-| Observable Plot | line | 97,215 |  |
-| Recharts | line, React external | 95,807 | React external |
-| Nivo | line, React external | 95,493 | React external |
-| ECharts | echarts/core plus one series | 162,391 |  |
+| ChartKit | size script line, 038cf5d | 34,554 |  |
+| ChartKit | harness minimal line | 34,767 |  |
+| ChartKit | harness minimal bar | 34,617 |  |
+| ChartKit | harness minimal donut | 14,391 |  |
+| ChartKit | harness /all | 64,614 |  |
+| uPlot | line plus stylesheet | 24,038 |  |
+| Chart.js | line | 49,374 |  |
+| Observable Plot | line | 97,723 |  |
+| Recharts | line, React external | 96,213 | React external |
+| Nivo | line, React external | 96,583 | React external |
+| ECharts | echarts/core plus one series | 162,991 |  |
 
 ## Browser, milliseconds, ChartKit mount().update() vs uPlot setData
 
