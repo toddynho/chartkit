@@ -202,8 +202,18 @@ describe("visual axes", () => {
     frames[0]?.(0);
     expect(node.style.transition).toContain("linear");
     expect(node.style.transition).toContain("80ms");
+    const springHost = document.createElement("div");
+    document.body.append(springHost);
+    const spring = line({ animation: { duration: 80, easing: "spring" } });
+    springHost.innerHTML = render(spring);
+    attach(springHost, spring, { render });
+    const springNode = springHost.querySelector("svg") as SVGSVGElement;
+    frames.at(-1)?.(0);
+    expect(springNode.style.transition).toContain("cubic-bezier(0.22, 1.35, 0.36, 1)");
+    expect(springNode.style.transition).toContain("80ms");
     window.requestAnimationFrame = real;
     host.remove();
+    springHost.remove();
   });
 
   it("points quantize and threshold at the colour scale, and still paints bins", () => {

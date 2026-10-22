@@ -379,7 +379,8 @@ function easeCss(name: unknown): string {
 }
 
 function easeOf(spec: InteractSpec): string {
-  return isRecord(spec.animation) ? easeCss(spec.animation.easing) : "ease-out";
+  const name = isRecord(spec.animation) ? spec.animation.easing : 0;
+  return typeof name === "string" ? name : "ease-out";
 }
 
 function tipSide(spec: InteractSpec): number {
