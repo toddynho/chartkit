@@ -34,7 +34,9 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
         "#f55459",
         "#ff9838",
         "#8d95a3"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -257,6 +259,8 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
   "mark": {
     "stack": "stack",
     "cornerRadius": 2,
+    "radiusEnds": "all",
+    "stackGap": 2,
     "gap": 0.28
   },
   "axes": {
@@ -306,7 +310,9 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
         "#f55459",
         "#ff9838",
         "#8d95a3"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -439,6 +445,8 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
   "mark": {
     "stack": "stack",
     "cornerRadius": 2,
+    "radiusEnds": "all",
+    "stackGap": 2,
     "gap": 0.28
   },
   "axes": {
@@ -488,7 +496,9 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
         "#f55459",
         "#ff9838",
         "#8d95a3"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -595,7 +605,9 @@ type bar with encoding.series and mark.stack stack. theme.tokens.series is error
     ]
   },
   "mark": {
-    "fillOpacity": 0.85
+    "fillOpacity": 0.85,
+    "stackGap": 2,
+    "gradient": true
   },
   "axes": {
     "x": {
@@ -647,7 +659,9 @@ type line. This chart's series tokens are the purple accent for p50 and the warn
       "series": [
         "#7553ff",
         "#ff9838"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -747,7 +761,9 @@ checkout.pay. Last seen 2 min ago. Age 4d. 27 events, 6 users.
       "negative": "#f55459",
       "series": [
         "#7553ff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -830,7 +846,9 @@ maps.load. Last seen 18 min ago. Age 12d. 17 events, 4 users.
       "negative": "#f55459",
       "series": [
         "#7553ff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -913,7 +931,9 @@ worker.tick. Last seen 1 hr ago. Age 9d. 27 events, 11 users.
       "negative": "#f55459",
       "series": [
         "#7553ff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -996,7 +1016,9 @@ auth.verify. Last seen 3 hr ago. Age 2d. 14 events, 3 users.
       "negative": "#f55459",
       "series": [
         "#7553ff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -1079,7 +1101,9 @@ cart.total. Last seen 5 hr ago. Age 6d. 9 events, 2 users.
       "negative": "#f55459",
       "series": [
         "#7553ff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -1162,7 +1186,9 @@ hooks.deliver. Last seen 1 day ago. Age 15d. 21 events, 8 users.
       "negative": "#f55459",
       "series": [
         "#7553ff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [

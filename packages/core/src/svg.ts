@@ -265,6 +265,8 @@ export interface AxisSpec {
   on: boolean;
   title?: string;
   count?: number;
+  /** First and last label only. */
+  ends?: boolean;
   values?: number[];
   labels: boolean;
   /** Right or top, rather than the default left or bottom. */
@@ -301,7 +303,8 @@ export function readAxis(spec: Record<string, unknown>, key: "x" | "y" | "y2", h
   const raw = axes ? axes[key] : undefined;
   const axis = isRecord(raw) ? raw : {};
   const ticks = axis.ticks;
-  const values = Array.isArray(ticks) ? ticks.filter((item): item is number => typeof item === "number" && Number.isFinite(item)) : undefined;
+  const ends = ticks === "ends";
+  const values = !ends && Array.isArray(ticks) ? ticks.filter((item): item is number => typeof item === "number" && Number.isFinite(item)) : undefined;
   const pos = axis.position;
   const drawnVertical = key === "x" ? horizontal : !horizontal;
   let end = key === "y2";
@@ -313,7 +316,8 @@ export function readAxis(spec: Record<string, unknown>, key: "x" | "y" | "y2", h
   return {
     on: raw !== false,
     title: typeof axis.title === "string" ? axis.title : undefined,
-    count: typeof ticks === "number" ? Math.max(0, Math.min(50, Math.round(ticks))) : undefined,
+    count: !ends && typeof ticks === "number" ? Math.max(0, Math.min(50, Math.round(ticks))) : undefined,
+    ends,
     values: values && values.length ? values : undefined,
     labels: axis.labels !== false,
     end,

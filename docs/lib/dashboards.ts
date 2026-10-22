@@ -142,7 +142,7 @@ function spark(draft: SparkDraft): DashSpark {
   return { ...draft, svg: draw(draft.spec) };
 }
 
-function themeOf(ink: Ink, series = ink.series, bare = false): Record<string, unknown> {
+function themeOf(ink: Ink, series = ink.series, bare = false, family = "Inter, sans-serif"): Record<string, unknown> {
   return {
     preset: "soft",
     tokens: {
@@ -156,14 +156,16 @@ function themeOf(ink: Ink, series = ink.series, bare = false): Record<string, un
       positive: ink.positive,
       negative: ink.negative,
       series,
+      fontFamily: family,
+      fontSize: 12,
     },
   };
 }
 
-function themesFor(light: Ink, dark: Ink, series?: { soft: string[]; midnight: string[] }, bare = false): DashThemes {
+function themesFor(light: Ink, dark: Ink, series?: { soft: string[]; midnight: string[] }, bare = false, family = "Inter, sans-serif"): DashThemes {
   return {
-    soft: themeOf(light, series?.soft ?? light.series, bare),
-    midnight: themeOf(dark, series?.midnight ?? dark.series, bare),
+    soft: themeOf(light, series?.soft ?? light.series, bare, family),
+    midnight: themeOf(dark, series?.midnight ?? dark.series, bare, family),
   };
 }
 
@@ -303,7 +305,6 @@ function ledger(): Dashboard {
   const days = isoDays("2025-10-01", 21);
   const gross = scaleTo(organic(21, { seed: 11, start: 6800, end: 15600, season: 900, noise: 750, phase: 0.4, spike: { at: 15, height: 1400 } }), 261000);
   const prior = sitBelow(gross, scaleTo(organic(21, { seed: 47, start: 5900, end: 11200, season: 650, noise: 380, phase: 2.2 }), 241000));
-  const [first, last] = [Date.parse(`${days[0]}T00:00:00Z`), Date.parse(`${days[days.length - 1]}T00:00:00Z`)];
   const volume = days.map((date, index) => ({ date, gross: gross[index], prior: prior[index] }));
   const series = [
     gross.map((value) => value / 1000),
@@ -357,13 +358,12 @@ function ledger(): Dashboard {
     disclaimer: disclaimer("Stripe"),
     range: "1–21 Oct",
     defaultTheme: mode,
-    headline: { label: "Gross volume", value: "$261K", delta: "+14%", good: true },
     charts: [
       chart({
         id: "ledger-volume",
         title: "Gross volume",
         caption: "Daily gross against the previous period. The total sits above the chart.",
-        note: "type combo. The first series is an area in the blurple series token, strokeWidth 1.75, fillOpacity 0.14, curve linear. The second is a dashed line in the grey series token. legend.show is false. axes.y.title is an empty string, axes.y.labels and both grids are off. axes.x.ticks is the first and last day, so only those two labels draw.",
+        note: "type combo. headline draws $261K, the comparison, and a positive delta pill. The area fades toward the baseline. The prior series is a dashed line. legend.show is false. axes.y.title is empty, y labels and grids are off. axes.x.ticks is ends.",
         span: "dash-12",
         place: "hero",
         themes,
@@ -380,11 +380,12 @@ function ledger(): Dashboard {
                 { field: "prior", mark: "line", dash: "dashed" },
               ],
             },
-            axes: { x: { grid: false, ticks: [first, last] }, y: quietY },
+            axes: { x: { grid: false, ticks: "ends" }, y: quietY },
             legend: { show: false },
-            tooltip: { mode: "index" },
-            mark: { strokeWidth: 1.75, fillOpacity: 0.14, curve: "linear", points: "none", gradient: false },
-            size: { width: 1100, height: 260 },
+            tooltip: { mode: "index", background: "light-dark(#ffffff,#0f2942)", radius: 6, shadow: "0 2px 5px rgba(50,50,93,.18)", crosshairColor: "#635bff" },
+            headline: { label: "Gross volume", value: "$261K", compare: "$228K", delta: "+14%", tone: "positive" },
+            mark: { strokeWidth: 1.75, fillOpacity: 0.14, curve: "linear", points: "none", gradient: true },
+            size: { width: 1100, height: 340 },
           },
           "Gross volume for 1–21 October totals 261 thousand dollars, above the previous period.",
         ),
@@ -451,7 +452,7 @@ function ledger(): Dashboard {
     ],
     sparks: [],
     notes: [
-      { label: "Gross volume", detail: "combo draws a blurple area and a grey dashed prior-period line. legend.show is false. The $261K total and the delta are page text above the chart. axes.y.title is \"\" so no series name becomes an axis title. axes.y.labels and the grids are off. axes.x.ticks holds the first and last timestamps." },
+      { label: "Gross volume", detail: "combo draws a blurple area and a grey dashed prior-period line. headline draws the total, the comparison, and the delta pill. axes.x.ticks is ends. theme.tokens.fontFamily is Inter." },
       { label: "Metrics", detail: "Six kpi specs sit in a 2×3 grid. Each is a label, a value, and a short spark. surface and grid are transparent." },
       { label: "Methods", detail: "bar-list mark.track is row. Amounts use the text token. Soft and Midnight are two SVGs from the two theme objects." },
       { label: "Palette", detail: "theme.tokens: blurple #635bff, navy text #0a2540, comparison #8898aa, negative #df1b41. Midnight swaps those tokens. The page CSS does not paint the marks." },
@@ -494,16 +495,12 @@ function meter(): Dashboard {
     numbers: number[],
     alt: string,
   ): ChartDraft => {
-    const data = days.map((date, index) => ({
-      date,
-      solid: index === days.length - 1 ? null : numbers[index],
-      tail: index < days.length - 2 ? null : numbers[index],
-    }));
+    const data = days.map((date, index) => ({ date, value: numbers[index] }));
     return {
       id,
       title: label,
       caption: "Daily series. The last segment is dotted.",
-      note: "type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The solid area stops on the day before the last. The last segment is a second area, dash dotted, fillOpacity 0.06, in the same indigo.",
+      note: "type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16. mark.partial is dotted and mark.partialOpacity is 0.06, so the last segment is a dotted stroke over a lighter fill. axes.y.title is empty.",
       span: "dash-12",
       place: "tab",
       themes,
@@ -516,15 +513,12 @@ function meter(): Dashboard {
           data,
           encoding: {
             x: { field: "date", type: "temporal" },
-            y: [
-              { field: "solid", mark: "area", scale: { domain: [0, headroom(numbers)] } },
-              { field: "tail", mark: "area", dash: "dotted", fillOpacity: 0.06 },
-            ],
+            y: [{ field: "value", mark: "area", scale: { domain: [0, headroom(numbers)] } }],
           },
-          mark: { curve: "linear", points: "always", pointSize: 2.5, fillOpacity: 0.16, strokeWidth: 1.75, gradient: false },
+          mark: { curve: "linear", points: "always", pointSize: 2.5, fillOpacity: 0.16, partial: "dotted", partialOpacity: 0.06, strokeWidth: 1.75, gradient: false },
           legend: { show: false },
           axes: { x: { grid: false }, y: openY },
-          tooltip: { mode: "index" },
+          tooltip: { mode: "index", background: "light-dark(#ffffff,#1f2937)", radius: 8, shadow: "0 4px 16px rgba(17,24,39,.12)", crosshairColor: "#615fff" },
           size: { width: 1100, height: 280 },
         },
         alt,
@@ -590,7 +584,7 @@ function meter(): Dashboard {
     sparks: [],
     notes: [
       { label: "Metric tabs", detail: "The strip is page state: label, number, and delta, with an underline on the selected tab. Choosing a tab shows that tab's spec. There is no sparkline in the strip." },
-      { label: "Daily line", detail: "30 points, curve linear, points always, a light y grid, and a soft area under the solid line. The last day is a second area, dash dotted, fillOpacity 0.06. Both series tokens are #615fff. Midnight uses #9d99ff." },
+      { label: "Daily line", detail: "30 points, curve linear, points always, a light y grid, and a soft area. mark.partial dots the last segment and mark.partialOpacity paints that segment at 0.06. The series token is #615fff. Midnight uses #9d99ff." },
       { label: "Lists", detail: "Sources, Pages, and Devices are one bar-list at a time. mark.track row paints a full-width wash. The chart is on demand and is not in the line or all bundle." },
     ],
   };
@@ -624,9 +618,10 @@ function wayline(): Dashboard {
     negative: "#f28b82",
     series: ["#8ab4f8", "#9aa0a6"],
   };
-  const themes = themesFor(light, dark);
-  const donutThemes = themesFor(light, dark, channels);
-  const heat = themesFor(light, dark, { soft: ["#1a73e8"], midnight: ["#8ab4f8"] });
+  const face = "Roboto, sans-serif";
+  const themes = themesFor(light, dark, undefined, false, face);
+  const donutThemes = themesFor(light, dark, channels, false, face);
+  const heat = themesFor(light, dark, { soft: ["#1a73e8"], midnight: ["#8ab4f8"] }, false, face);
   const days = isoDays("2025-09-24", 28);
   const tabLine = (id: string, label: string, value: string, delta: string, good: boolean, now: number[], then: number[], alt: string): ChartDraft => {
     const earlier = sitBelow(now, then);
@@ -698,7 +693,7 @@ function wayline(): Dashboard {
       land: theme === "midnight" ? "#3c4043" : "#e8eaed",
       water: theme === "midnight" ? "#202124" : "#ffffff",
     },
-    legend: { show: true },
+    legend: { show: true, position: "bottom" },
     size: { width: 1100, height: 420 },
     a11y: { alt: "Users across more than forty countries. Countries without a row are plain grey." },
   });
@@ -852,7 +847,7 @@ function keel(): Dashboard {
     {
       data: keelLevels(keelDays, counts14),
       encoding: { x: "day", y: "events", series: "level" },
-      mark: { stack: "stack", cornerRadius: 2, gap: 0.28 },
+      mark: { stack: "stack", cornerRadius: 2, radiusEnds: "all", stackGap: 2, gap: 0.28 },
       axes: { x: { grid: false }, y: { title: "", grid: true } },
       legend: { position: "top" },
       tooltip: { mode: "index" },
@@ -867,7 +862,7 @@ function keel(): Dashboard {
     {
       data: keelLevels(keelHours, counts24),
       encoding: { x: "day", y: "events", series: "level" },
-      mark: { stack: "stack", cornerRadius: 2, gap: 0.28 },
+      mark: { stack: "stack", cornerRadius: 2, radiusEnds: "all", stackGap: 2, gap: 0.28 },
       axes: { x: { grid: false }, y: { title: "", grid: true } },
       legend: { position: "top" },
       tooltip: { mode: "index" },
@@ -889,7 +884,7 @@ function keel(): Dashboard {
           { field: "Info", title: "Info" },
         ],
       },
-      mark: { fillOpacity: 0.85 },
+      mark: { fillOpacity: 0.85, stackGap: 2, gradient: true },
       axes: { x: { grid: false }, y: { title: "", grid: true } },
       legend: { position: "top" },
       tooltip: { mode: "index" },

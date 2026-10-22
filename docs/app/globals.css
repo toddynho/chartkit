@@ -702,10 +702,61 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   .gallery-index, .mermaid-pair, .repair-pair { grid-template-columns: 1fr; }
   .board-12, .board-8, .board-6, .board-4 { grid-column: span 12; }
 }
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/inter-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/inter-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/inter-latin-600-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/inter-latin-700-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/roboto-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/roboto-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/roboto-latin-700-normal.woff2") format("woff2");
+}
 body:has(.dash-shell) .site-header,
 body:has(.dash-shell) .site-footer,
 body:has(.dash-shell) .skip { display: none; }
+.dash-theme-midnight { color-scheme: dark; }
 body:has(.dash-shell.dash-theme-midnight) {
+  color-scheme: dark;
   --bg: #101114;
   --bg-elev: #17191e;
   --fg: #f3f1ee;
@@ -722,14 +773,63 @@ body:has(.dash-theme-midnight.dash-wayline) { --bg: #202124; background: #202124
 body:has(.dash-keel:not(.dash-theme-midnight)) { background: #faf9fb; }
 body:has(.dash-theme-midnight.dash-keel) { --bg: #1a1625; background: #1a1625; }
 .dash-shell {
-  width: min(1280px, calc(100% - 28px));
-  margin: 18px auto 48px;
+  width: 100%;
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
 }
-.dash-page {
-  --ck-font-family: var(--sans);
+.dash-nav {
+  border-right: 1px solid var(--dash-line, var(--line));
+  padding: 16px 12px;
+  background: var(--dash-card, #fff);
+}
+.dash-mark {
+  width: 32px;
+  height: 32px;
+  margin: 0 0 16px 8px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--dash-accent, #635bff);
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+}
+.dash-nav nav { display: flex; flex-direction: column; gap: 2px; }
+.dash-nav button {
+  border: 0;
+  background: transparent;
+  color: var(--dash-muted, var(--muted));
+  text-align: left;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font: 500 14px/1.2 Inter, sans-serif;
+  cursor: pointer;
+}
+.dash-wayline .dash-nav button { font-family: Roboto, sans-serif; }
+.dash-nav button[aria-current="page"] {
+  background: color-mix(in srgb, var(--dash-accent, #635bff) 14%, transparent);
+  color: var(--dash-ink, var(--fg));
+  font-weight: 600;
+}
+.dash-main {
+  min-width: 0;
+  padding: 18px 20px 48px;
   display: grid;
   gap: 14px;
+  align-content: start;
 }
+.dash-page {
+  --ck-font-family: Inter, sans-serif;
+  font-family: Inter, sans-serif;
+}
+.dash-wayline.dash-page {
+  --ck-font-family: Roboto, sans-serif;
+  font-family: Roboto, sans-serif;
+}
+.dash-wayline .ck-geo-label,
+.dash-wayline .ck-geo-title { font-family: Roboto, sans-serif; }
 .dash-top {
   display: flex;
   align-items: center;
@@ -971,7 +1071,20 @@ body:has(.dash-theme-midnight.dash-keel) { --bg: #1a1625; background: #1a1625; }
   --dash-negative: #fa6769;
 }
 @media (max-width: 900px) {
-  .dash-shell { width: min(1280px, calc(100% - 16px)); margin-top: 8px; }
+  .dash-shell { grid-template-columns: 1fr; }
+  .dash-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-right: 0;
+    border-bottom: 1px solid var(--dash-line, var(--line));
+    padding: 8px;
+    overflow: auto;
+  }
+  .dash-mark { margin: 0 4px 0 0; flex: none; }
+  .dash-nav nav { flex-direction: row; }
+  .dash-nav button { white-space: nowrap; padding: 6px 8px; }
+  .dash-main { padding: 12px 8px 32px; }
   .dash-8, .dash-6, .dash-4, .dash-3, .dash-2 { grid-column: span 12; }
   .dash-ledger .dash-3 { grid-column: span 6; }
   .dash-meter { --dash-tab-cols: 3; }

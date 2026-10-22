@@ -21,6 +21,10 @@ export interface PresetTokens {
    * --ck-series-N does not cover the spec. Unset for theme tokens.
    */
   explicit?: boolean;
+  /** Written onto the chart as --ck-font-family when the spec sets it. */
+  fontFamily?: string;
+  /** Tick and axis-title size in px. Omitted keeps the 11px default. */
+  fontSize?: number;
 }
 
 /** Render-time geometry. Gap moves bar positions, so it is chosen here rather than live from CSS. */
@@ -182,7 +186,11 @@ export function definePreset(name: string, delta: Partial<PresetTokens>): Preset
 }
 
 export function resolvePreset(theme: unknown): PresetTokens {
-  const base = presets.get(presetName(theme)) ?? midnight;
+  const name = presetName(theme);
+  const mode = isRecord(theme) && theme.mode === "dark" ? "dark" : isRecord(theme) && theme.mode === "light" ? "light" : "auto";
+  let base = presets.get(name) ?? midnight;
+  if (mode === "dark" && name !== "midnight") base = midnight;
+  else if (mode === "light" && name === "midnight") base = auto;
   const tokens = themeRecord(theme);
   if (!tokens) return base;
   const next: PresetTokens = { ...base };
@@ -193,7 +201,23 @@ export function resolvePreset(theme: unknown): PresetTokens {
   if (Array.isArray(tokens.series)) next.series = tokens.series.filter((item): item is string => typeof item === "string" && item.length > 0);
   if (Array.isArray(tokens.lines)) next.lines = tokens.lines.filter((item): item is string => typeof item === "string" && item.length > 0);
   else if (Array.isArray(tokens.series)) next.lines = next.series;
+  const family = typeFamily(tokens.fontFamily);
+  if (family) next.fontFamily = family;
+  const size = typeSize(tokens.fontSize);
+  if (size) next.fontSize = size;
   return next;
+}
+
+function typeFamily(value: unknown): string {
+  if (typeof value !== "string") return "";
+  const text = value.trim().replace(/["<>;]/g, "");
+  return text.length > 0 && text.length <= 80 ? text : "";
+}
+
+function typeSize(value: unknown): number | undefined {
+  if (typeof value !== "number" || !Number.isFinite(value)) return;
+  const size = Math.round(value);
+  return size >= 6 && size <= 32 ? size : undefined;
 }
 
 export function resolveGeometry(theme: unknown): PresetGeometry {

@@ -34,7 +34,7 @@ function fitMobile(spec: Record<string, unknown>): Record<string, unknown> {
   const axis = (value: unknown, hold: boolean) => {
     if (value === false) return false;
     const currentAxis = isRecord(value) ? value : {};
-    if (hold || Array.isArray(currentAxis.ticks)) return currentAxis;
+    if (hold || Array.isArray(currentAxis.ticks) || currentAxis.ticks === "ends") return currentAxis;
     return { ...currentAxis, ticks: 4 };
   };
   return {
@@ -235,8 +235,20 @@ export function DashboardStage({ board }: { board: Dashboard }) {
   const sideCards = sides.map((item) => <Side key={item.id} chart={item} theme={theme} narrow={narrow} />);
   const mapCards = maps.map((item) => <MapCard key={item.id} chart={item} theme={theme} narrow={narrow} />);
 
+  const nav = ["Home", "Activity", "Customers", "Balances", "Products"];
   return (
     <div className={`dash-shell dash-page dash-${board.slug} dash-theme-${theme}`}>
+      <aside className="dash-nav" aria-label="Sections">
+        <div className="dash-mark" aria-hidden="true">N</div>
+        <nav>
+          {nav.map((item, index) => (
+            <button key={item} type="button" aria-current={index === 0 ? "page" : undefined}>
+              {item}
+            </button>
+          ))}
+        </nav>
+      </aside>
+      <div className="dash-main">
       <header className="dash-top">
         <div className="dash-id">
           <h1>{board.title}</h1>
@@ -256,17 +268,6 @@ export function DashboardStage({ board }: { board: Dashboard }) {
         {board.slug === "keel" ? issues : null}
         {hero ? (
           <figure className={`dash-card ${hero.span} dash-hero`}>
-            {board.headline ? (
-              <div className="dash-headline">
-                <span className="dash-tab-label">{board.headline.label}</span>
-                <span className="dash-headline-row">
-                  <b>{board.headline.value}</b>
-                  <span className={board.headline.good ? "up" : "down"}>{board.headline.delta}</span>
-                </span>
-              </div>
-            ) : (
-              <h3>{hero.title}</h3>
-            )}
             <ChartView chart={hero} theme={theme} narrow={narrow} spec={present(hero.spec, theme, hero.themes, narrow)} svg={hero.svg} />
           </figure>
         ) : null}
@@ -315,6 +316,7 @@ export function DashboardStage({ board }: { board: Dashboard }) {
           {board.disclaimer} <a href={`/dashboards/${board.slug}.md`}>{board.slug}.md</a>
         </p>
       </section>
+      </div>
     </div>
   );
 }

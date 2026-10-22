@@ -12,7 +12,7 @@ Default theme: soft.
 
 Daily series. The last segment is dotted.
 
-type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The solid area stops on the day before the last. The last segment is a second area, dash dotted, fillOpacity 0.06, in the same indigo.
+type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16. mark.partial is dotted and mark.partialOpacity is 0.06, so the last segment is a dotted stroke over a lighter fill. axes.y.title is empty.
 
 ```json
 {
@@ -33,159 +33,131 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
       "series": [
         "#615fff",
         "#615fff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
     {
       "date": "2025-09-22",
-      "solid": 1422,
-      "tail": null
+      "value": 1422
     },
     {
       "date": "2025-09-23",
-      "solid": 1832,
-      "tail": null
+      "value": 1832
     },
     {
       "date": "2025-09-24",
-      "solid": 1712,
-      "tail": null
+      "value": 1712
     },
     {
       "date": "2025-09-25",
-      "solid": 1639,
-      "tail": null
+      "value": 1639
     },
     {
       "date": "2025-09-26",
-      "solid": 1287,
-      "tail": null
+      "value": 1287
     },
     {
       "date": "2025-09-27",
-      "solid": 1046,
-      "tail": null
+      "value": 1046
     },
     {
       "date": "2025-09-28",
-      "solid": 1229,
-      "tail": null
+      "value": 1229
     },
     {
       "date": "2025-09-29",
-      "solid": 1480,
-      "tail": null
+      "value": 1480
     },
     {
       "date": "2025-09-30",
-      "solid": 1704,
-      "tail": null
+      "value": 1704
     },
     {
       "date": "2025-10-01",
-      "solid": 1950,
-      "tail": null
+      "value": 1950
     },
     {
       "date": "2025-10-02",
-      "solid": 1482,
-      "tail": null
+      "value": 1482
     },
     {
       "date": "2025-10-03",
-      "solid": 1305,
-      "tail": null
+      "value": 1305
     },
     {
       "date": "2025-10-04",
-      "solid": 1534,
-      "tail": null
+      "value": 1534
     },
     {
       "date": "2025-10-05",
-      "solid": 2253,
-      "tail": null
+      "value": 2253
     },
     {
       "date": "2025-10-06",
-      "solid": 1909,
-      "tail": null
+      "value": 1909
     },
     {
       "date": "2025-10-07",
-      "solid": 2100,
-      "tail": null
+      "value": 2100
     },
     {
       "date": "2025-10-08",
-      "solid": 1902,
-      "tail": null
+      "value": 1902
     },
     {
       "date": "2025-10-09",
-      "solid": 1635,
-      "tail": null
+      "value": 1635
     },
     {
       "date": "2025-10-10",
-      "solid": 1457,
-      "tail": null
+      "value": 1457
     },
     {
       "date": "2025-10-11",
-      "solid": 1092,
-      "tail": null
+      "value": 1092
     },
     {
       "date": "2025-10-12",
-      "solid": 1490,
-      "tail": null
+      "value": 1490
     },
     {
       "date": "2025-10-13",
-      "solid": 1643,
-      "tail": null
+      "value": 1643
     },
     {
       "date": "2025-10-14",
-      "solid": 2026,
-      "tail": null
+      "value": 2026
     },
     {
       "date": "2025-10-15",
-      "solid": 2002,
-      "tail": null
+      "value": 2002
     },
     {
       "date": "2025-10-16",
-      "solid": 1757,
-      "tail": null
+      "value": 1757
     },
     {
       "date": "2025-10-17",
-      "solid": 1407,
-      "tail": null
+      "value": 1407
     },
     {
       "date": "2025-10-18",
-      "solid": 1408,
-      "tail": null
+      "value": 1408
     },
     {
       "date": "2025-10-19",
-      "solid": 1403,
-      "tail": null
+      "value": 1403
     },
     {
       "date": "2025-10-20",
-      "solid": 1747,
-      "tail": 1747
+      "value": 1747
     },
     {
       "date": "2025-10-21",
-      "solid": null,
-      "tail": 1940
+      "value": 1940
     }
   ],
   "encoding": {
@@ -195,7 +167,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     },
     "y": [
       {
-        "field": "solid",
+        "field": "value",
         "mark": "area",
         "scale": {
           "domain": [
@@ -203,12 +175,6 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
             2700
           ]
         }
-      },
-      {
-        "field": "tail",
-        "mark": "area",
-        "dash": "dotted",
-        "fillOpacity": 0.06
       }
     ]
   },
@@ -217,6 +183,8 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     "points": "always",
     "pointSize": 2.5,
     "fillOpacity": 0.16,
+    "partial": "dotted",
+    "partialOpacity": 0.06,
     "strokeWidth": 1.75,
     "gradient": false
   },
@@ -233,7 +201,11 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     }
   },
   "tooltip": {
-    "mode": "index"
+    "mode": "index",
+    "background": "light-dark(#ffffff,#1f2937)",
+    "radius": 8,
+    "shadow": "0 4px 16px rgba(17,24,39,.12)",
+    "crosshairColor": "#615fff"
   },
   "size": {
     "width": 1100,
@@ -249,7 +221,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
 
 Daily series. The last segment is dotted.
 
-type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The solid area stops on the day before the last. The last segment is a second area, dash dotted, fillOpacity 0.06, in the same indigo.
+type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16. mark.partial is dotted and mark.partialOpacity is 0.06, so the last segment is a dotted stroke over a lighter fill. axes.y.title is empty.
 
 ```json
 {
@@ -270,159 +242,131 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
       "series": [
         "#615fff",
         "#615fff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
     {
       "date": "2025-09-22",
-      "solid": 1998,
-      "tail": null
+      "value": 1998
     },
     {
       "date": "2025-09-23",
-      "solid": 1934,
-      "tail": null
+      "value": 1934
     },
     {
       "date": "2025-09-24",
-      "solid": 1940,
-      "tail": null
+      "value": 1940
     },
     {
       "date": "2025-09-25",
-      "solid": 1398,
-      "tail": null
+      "value": 1398
     },
     {
       "date": "2025-09-26",
-      "solid": 1115,
-      "tail": null
+      "value": 1115
     },
     {
       "date": "2025-09-27",
-      "solid": 1576,
-      "tail": null
+      "value": 1576
     },
     {
       "date": "2025-09-28",
-      "solid": 1871,
-      "tail": null
+      "value": 1871
     },
     {
       "date": "2025-09-29",
-      "solid": 2028,
-      "tail": null
+      "value": 2028
     },
     {
       "date": "2025-09-30",
-      "solid": 2097,
-      "tail": null
+      "value": 2097
     },
     {
       "date": "2025-10-01",
-      "solid": 1985,
-      "tail": null
+      "value": 1985
     },
     {
       "date": "2025-10-02",
-      "solid": 1516,
-      "tail": null
+      "value": 1516
     },
     {
       "date": "2025-10-03",
-      "solid": 1469,
-      "tail": null
+      "value": 1469
     },
     {
       "date": "2025-10-04",
-      "solid": 1442,
-      "tail": null
+      "value": 1442
     },
     {
       "date": "2025-10-05",
-      "solid": 2130,
-      "tail": null
+      "value": 2130
     },
     {
       "date": "2025-10-06",
-      "solid": 2369,
-      "tail": null
+      "value": 2369
     },
     {
       "date": "2025-10-07",
-      "solid": 2731,
-      "tail": null
+      "value": 2731
     },
     {
       "date": "2025-10-08",
-      "solid": 3166,
-      "tail": null
+      "value": 3166
     },
     {
       "date": "2025-10-09",
-      "solid": 2146,
-      "tail": null
+      "value": 2146
     },
     {
       "date": "2025-10-10",
-      "solid": 1453,
-      "tail": null
+      "value": 1453
     },
     {
       "date": "2025-10-11",
-      "solid": 1658,
-      "tail": null
+      "value": 1658
     },
     {
       "date": "2025-10-12",
-      "solid": 2118,
-      "tail": null
+      "value": 2118
     },
     {
       "date": "2025-10-13",
-      "solid": 2299,
-      "tail": null
+      "value": 2299
     },
     {
       "date": "2025-10-14",
-      "solid": 2286,
-      "tail": null
+      "value": 2286
     },
     {
       "date": "2025-10-15",
-      "solid": 2165,
-      "tail": null
+      "value": 2165
     },
     {
       "date": "2025-10-16",
-      "solid": 1656,
-      "tail": null
+      "value": 1656
     },
     {
       "date": "2025-10-17",
-      "solid": 1640,
-      "tail": null
+      "value": 1640
     },
     {
       "date": "2025-10-18",
-      "solid": 1715,
-      "tail": null
+      "value": 1715
     },
     {
       "date": "2025-10-19",
-      "solid": 2051,
-      "tail": null
+      "value": 2051
     },
     {
       "date": "2025-10-20",
-      "solid": 2618,
-      "tail": 2618
+      "value": 2618
     },
     {
       "date": "2025-10-21",
-      "solid": null,
-      "tail": 2649
+      "value": 2649
     }
   ],
   "encoding": {
@@ -432,7 +376,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     },
     "y": [
       {
-        "field": "solid",
+        "field": "value",
         "mark": "area",
         "scale": {
           "domain": [
@@ -440,12 +384,6 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
             3800
           ]
         }
-      },
-      {
-        "field": "tail",
-        "mark": "area",
-        "dash": "dotted",
-        "fillOpacity": 0.06
       }
     ]
   },
@@ -454,6 +392,8 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     "points": "always",
     "pointSize": 2.5,
     "fillOpacity": 0.16,
+    "partial": "dotted",
+    "partialOpacity": 0.06,
     "strokeWidth": 1.75,
     "gradient": false
   },
@@ -470,7 +410,11 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     }
   },
   "tooltip": {
-    "mode": "index"
+    "mode": "index",
+    "background": "light-dark(#ffffff,#1f2937)",
+    "radius": 8,
+    "shadow": "0 4px 16px rgba(17,24,39,.12)",
+    "crosshairColor": "#615fff"
   },
   "size": {
     "width": 1100,
@@ -486,7 +430,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
 
 Daily series. The last segment is dotted.
 
-type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The solid area stops on the day before the last. The last segment is a second area, dash dotted, fillOpacity 0.06, in the same indigo.
+type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16. mark.partial is dotted and mark.partialOpacity is 0.06, so the last segment is a dotted stroke over a lighter fill. axes.y.title is empty.
 
 ```json
 {
@@ -507,159 +451,131 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
       "series": [
         "#615fff",
         "#615fff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
     {
       "date": "2025-09-22",
-      "solid": 4682,
-      "tail": null
+      "value": 4682
     },
     {
       "date": "2025-09-23",
-      "solid": 5054,
-      "tail": null
+      "value": 5054
     },
     {
       "date": "2025-09-24",
-      "solid": 4808,
-      "tail": null
+      "value": 4808
     },
     {
       "date": "2025-09-25",
-      "solid": 4048,
-      "tail": null
+      "value": 4048
     },
     {
       "date": "2025-09-26",
-      "solid": 3676,
-      "tail": null
+      "value": 3676
     },
     {
       "date": "2025-09-27",
-      "solid": 3891,
-      "tail": null
+      "value": 3891
     },
     {
       "date": "2025-09-28",
-      "solid": 4247,
-      "tail": null
+      "value": 4247
     },
     {
       "date": "2025-09-29",
-      "solid": 5319,
-      "tail": null
+      "value": 5319
     },
     {
       "date": "2025-09-30",
-      "solid": 5292,
-      "tail": null
+      "value": 5292
     },
     {
       "date": "2025-10-01",
-      "solid": 5360,
-      "tail": null
+      "value": 5360
     },
     {
       "date": "2025-10-02",
-      "solid": 4418,
-      "tail": null
+      "value": 4418
     },
     {
       "date": "2025-10-03",
-      "solid": 4626,
-      "tail": null
+      "value": 4626
     },
     {
       "date": "2025-10-04",
-      "solid": 5557,
-      "tail": null
+      "value": 5557
     },
     {
       "date": "2025-10-05",
-      "solid": 5673,
-      "tail": null
+      "value": 5673
     },
     {
       "date": "2025-10-06",
-      "solid": 5583,
-      "tail": null
+      "value": 5583
     },
     {
       "date": "2025-10-07",
-      "solid": 5647,
-      "tail": null
+      "value": 5647
     },
     {
       "date": "2025-10-08",
-      "solid": 5267,
-      "tail": null
+      "value": 5267
     },
     {
       "date": "2025-10-09",
-      "solid": 4814,
-      "tail": null
+      "value": 4814
     },
     {
       "date": "2025-10-10",
-      "solid": 4056,
-      "tail": null
+      "value": 4056
     },
     {
       "date": "2025-10-11",
-      "solid": 4068,
-      "tail": null
+      "value": 4068
     },
     {
       "date": "2025-10-12",
-      "solid": 5027,
-      "tail": null
+      "value": 5027
     },
     {
       "date": "2025-10-13",
-      "solid": 5851,
-      "tail": null
+      "value": 5851
     },
     {
       "date": "2025-10-14",
-      "solid": 6357,
-      "tail": null
+      "value": 6357
     },
     {
       "date": "2025-10-15",
-      "solid": 6032,
-      "tail": null
+      "value": 6032
     },
     {
       "date": "2025-10-16",
-      "solid": 5185,
-      "tail": null
+      "value": 5185
     },
     {
       "date": "2025-10-17",
-      "solid": 4506,
-      "tail": null
+      "value": 4506
     },
     {
       "date": "2025-10-18",
-      "solid": 4872,
-      "tail": null
+      "value": 4872
     },
     {
       "date": "2025-10-19",
-      "solid": 5259,
-      "tail": null
+      "value": 5259
     },
     {
       "date": "2025-10-20",
-      "solid": 5928,
-      "tail": 5928
+      "value": 5928
     },
     {
       "date": "2025-10-21",
-      "solid": null,
-      "tail": 6385
+      "value": 6385
     }
   ],
   "encoding": {
@@ -669,7 +585,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     },
     "y": [
       {
-        "field": "solid",
+        "field": "value",
         "mark": "area",
         "scale": {
           "domain": [
@@ -677,12 +593,6 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
             7600
           ]
         }
-      },
-      {
-        "field": "tail",
-        "mark": "area",
-        "dash": "dotted",
-        "fillOpacity": 0.06
       }
     ]
   },
@@ -691,6 +601,8 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     "points": "always",
     "pointSize": 2.5,
     "fillOpacity": 0.16,
+    "partial": "dotted",
+    "partialOpacity": 0.06,
     "strokeWidth": 1.75,
     "gradient": false
   },
@@ -707,7 +619,11 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     }
   },
   "tooltip": {
-    "mode": "index"
+    "mode": "index",
+    "background": "light-dark(#ffffff,#1f2937)",
+    "radius": 8,
+    "shadow": "0 4px 16px rgba(17,24,39,.12)",
+    "crosshairColor": "#615fff"
   },
   "size": {
     "width": 1100,
@@ -723,7 +639,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
 
 Daily series. The last segment is dotted.
 
-type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The solid area stops on the day before the last. The last segment is a second area, dash dotted, fillOpacity 0.06, in the same indigo.
+type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16. mark.partial is dotted and mark.partialOpacity is 0.06, so the last segment is a dotted stroke over a lighter fill. axes.y.title is empty.
 
 ```json
 {
@@ -744,159 +660,131 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
       "series": [
         "#615fff",
         "#615fff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
     {
       "date": "2025-09-22",
-      "solid": 2.46,
-      "tail": null
+      "value": 2.46
     },
     {
       "date": "2025-09-23",
-      "solid": 2.2,
-      "tail": null
+      "value": 2.2
     },
     {
       "date": "2025-09-24",
-      "solid": 2,
-      "tail": null
+      "value": 2
     },
     {
       "date": "2025-09-25",
-      "solid": 2.25,
-      "tail": null
+      "value": 2.25
     },
     {
       "date": "2025-09-26",
-      "solid": 2.21,
-      "tail": null
+      "value": 2.21
     },
     {
       "date": "2025-09-27",
-      "solid": 2.71,
-      "tail": null
+      "value": 2.71
     },
     {
       "date": "2025-09-28",
-      "solid": 2.82,
-      "tail": null
+      "value": 2.82
     },
     {
       "date": "2025-09-29",
-      "solid": 2.54,
-      "tail": null
+      "value": 2.54
     },
     {
       "date": "2025-09-30",
-      "solid": 2.4,
-      "tail": null
+      "value": 2.4
     },
     {
       "date": "2025-10-01",
-      "solid": 2.25,
-      "tail": null
+      "value": 2.25
     },
     {
       "date": "2025-10-02",
-      "solid": 2.41,
-      "tail": null
+      "value": 2.41
     },
     {
       "date": "2025-10-03",
-      "solid": 2.65,
-      "tail": null
+      "value": 2.65
     },
     {
       "date": "2025-10-04",
-      "solid": 2.88,
-      "tail": null
+      "value": 2.88
     },
     {
       "date": "2025-10-05",
-      "solid": 2.86,
-      "tail": null
+      "value": 2.86
     },
     {
       "date": "2025-10-06",
-      "solid": 2.7,
-      "tail": null
+      "value": 2.7
     },
     {
       "date": "2025-10-07",
-      "solid": 2.77,
-      "tail": null
+      "value": 2.77
     },
     {
       "date": "2025-10-08",
-      "solid": 2.42,
-      "tail": null
+      "value": 2.42
     },
     {
       "date": "2025-10-09",
-      "solid": 2.5300000000000002,
-      "tail": null
+      "value": 2.5300000000000002
     },
     {
       "date": "2025-10-10",
-      "solid": 2.69,
-      "tail": null
+      "value": 2.69
     },
     {
       "date": "2025-10-11",
-      "solid": 2.79,
-      "tail": null
+      "value": 2.79
     },
     {
       "date": "2025-10-12",
-      "solid": 3.19,
-      "tail": null
+      "value": 3.19
     },
     {
       "date": "2025-10-13",
-      "solid": 3.13,
-      "tail": null
+      "value": 3.13
     },
     {
       "date": "2025-10-14",
-      "solid": 2.66,
-      "tail": null
+      "value": 2.66
     },
     {
       "date": "2025-10-15",
-      "solid": 2.57,
-      "tail": null
+      "value": 2.57
     },
     {
       "date": "2025-10-16",
-      "solid": 2.64,
-      "tail": null
+      "value": 2.64
     },
     {
       "date": "2025-10-17",
-      "solid": 2.93,
-      "tail": null
+      "value": 2.93
     },
     {
       "date": "2025-10-18",
-      "solid": 3.0700000000000003,
-      "tail": null
+      "value": 3.0700000000000003
     },
     {
       "date": "2025-10-19",
-      "solid": 3.15,
-      "tail": null
+      "value": 3.15
     },
     {
       "date": "2025-10-20",
-      "solid": 3.14,
-      "tail": 3.14
+      "value": 3.14
     },
     {
       "date": "2025-10-21",
-      "solid": null,
-      "tail": 2.83
+      "value": 2.83
     }
   ],
   "encoding": {
@@ -906,7 +794,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     },
     "y": [
       {
-        "field": "solid",
+        "field": "value",
         "mark": "area",
         "scale": {
           "domain": [
@@ -914,12 +802,6 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
             3.8000000000000003
           ]
         }
-      },
-      {
-        "field": "tail",
-        "mark": "area",
-        "dash": "dotted",
-        "fillOpacity": 0.06
       }
     ]
   },
@@ -928,6 +810,8 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     "points": "always",
     "pointSize": 2.5,
     "fillOpacity": 0.16,
+    "partial": "dotted",
+    "partialOpacity": 0.06,
     "strokeWidth": 1.75,
     "gradient": false
   },
@@ -944,7 +828,11 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     }
   },
   "tooltip": {
-    "mode": "index"
+    "mode": "index",
+    "background": "light-dark(#ffffff,#1f2937)",
+    "radius": 8,
+    "shadow": "0 4px 16px rgba(17,24,39,.12)",
+    "crosshairColor": "#615fff"
   },
   "size": {
     "width": 1100,
@@ -960,7 +848,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
 
 Daily series. The last segment is dotted.
 
-type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The solid area stops on the day before the last. The last segment is a second area, dash dotted, fillOpacity 0.06, in the same indigo.
+type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16. mark.partial is dotted and mark.partialOpacity is 0.06, so the last segment is a dotted stroke over a lighter fill. axes.y.title is empty.
 
 ```json
 {
@@ -981,159 +869,131 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
       "series": [
         "#615fff",
         "#615fff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
     {
       "date": "2025-09-22",
-      "solid": 0.51,
-      "tail": null
+      "value": 0.51
     },
     {
       "date": "2025-09-23",
-      "solid": 0.5,
-      "tail": null
+      "value": 0.5
     },
     {
       "date": "2025-09-24",
-      "solid": 0.45,
-      "tail": null
+      "value": 0.45
     },
     {
       "date": "2025-09-25",
-      "solid": 0.41000000000000003,
-      "tail": null
+      "value": 0.41000000000000003
     },
     {
       "date": "2025-09-26",
-      "solid": 0.42,
-      "tail": null
+      "value": 0.42
     },
     {
       "date": "2025-09-27",
-      "solid": 0.45,
-      "tail": null
+      "value": 0.45
     },
     {
       "date": "2025-09-28",
-      "solid": 0.48,
-      "tail": null
+      "value": 0.48
     },
     {
       "date": "2025-09-29",
-      "solid": 0.5,
-      "tail": null
+      "value": 0.5
     },
     {
       "date": "2025-09-30",
-      "solid": 0.47000000000000003,
-      "tail": null
+      "value": 0.47000000000000003
     },
     {
       "date": "2025-10-01",
-      "solid": 0.45,
-      "tail": null
+      "value": 0.45
     },
     {
       "date": "2025-10-02",
-      "solid": 0.41000000000000003,
-      "tail": null
+      "value": 0.41000000000000003
     },
     {
       "date": "2025-10-03",
-      "solid": 0.4,
-      "tail": null
+      "value": 0.4
     },
     {
       "date": "2025-10-04",
-      "solid": 0.45,
-      "tail": null
+      "value": 0.45
     },
     {
       "date": "2025-10-05",
-      "solid": 0.45,
-      "tail": null
+      "value": 0.45
     },
     {
       "date": "2025-10-06",
-      "solid": 0.47000000000000003,
-      "tail": null
+      "value": 0.47000000000000003
     },
     {
       "date": "2025-10-07",
-      "solid": 0.46,
-      "tail": null
+      "value": 0.46
     },
     {
       "date": "2025-10-08",
-      "solid": 0.41000000000000003,
-      "tail": null
+      "value": 0.41000000000000003
     },
     {
       "date": "2025-10-09",
-      "solid": 0.4,
-      "tail": null
+      "value": 0.4
     },
     {
       "date": "2025-10-10",
-      "solid": 0.39,
-      "tail": null
+      "value": 0.39
     },
     {
       "date": "2025-10-11",
-      "solid": 0.42,
-      "tail": null
+      "value": 0.42
     },
     {
       "date": "2025-10-12",
-      "solid": 0.43,
-      "tail": null
+      "value": 0.43
     },
     {
       "date": "2025-10-13",
-      "solid": 0.45,
-      "tail": null
+      "value": 0.45
     },
     {
       "date": "2025-10-14",
-      "solid": 0.42,
-      "tail": null
+      "value": 0.42
     },
     {
       "date": "2025-10-15",
-      "solid": 0.41000000000000003,
-      "tail": null
+      "value": 0.41000000000000003
     },
     {
       "date": "2025-10-16",
-      "solid": 0.36,
-      "tail": null
+      "value": 0.36
     },
     {
       "date": "2025-10-17",
-      "solid": 0.37,
-      "tail": null
+      "value": 0.37
     },
     {
       "date": "2025-10-18",
-      "solid": 0.38,
-      "tail": null
+      "value": 0.38
     },
     {
       "date": "2025-10-19",
-      "solid": 0.44,
-      "tail": null
+      "value": 0.44
     },
     {
       "date": "2025-10-20",
-      "solid": 0.43,
-      "tail": 0.43
+      "value": 0.43
     },
     {
       "date": "2025-10-21",
-      "solid": null,
-      "tail": 0.43
+      "value": 0.43
     }
   ],
   "encoding": {
@@ -1143,7 +1003,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     },
     "y": [
       {
-        "field": "solid",
+        "field": "value",
         "mark": "area",
         "scale": {
           "domain": [
@@ -1151,12 +1011,6 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
             0.6
           ]
         }
-      },
-      {
-        "field": "tail",
-        "mark": "area",
-        "dash": "dotted",
-        "fillOpacity": 0.06
       }
     ]
   },
@@ -1165,6 +1019,8 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     "points": "always",
     "pointSize": 2.5,
     "fillOpacity": 0.16,
+    "partial": "dotted",
+    "partialOpacity": 0.06,
     "strokeWidth": 1.75,
     "gradient": false
   },
@@ -1181,7 +1037,11 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     }
   },
   "tooltip": {
-    "mode": "index"
+    "mode": "index",
+    "background": "light-dark(#ffffff,#1f2937)",
+    "radius": 8,
+    "shadow": "0 4px 16px rgba(17,24,39,.12)",
+    "crosshairColor": "#615fff"
   },
   "size": {
     "width": 1100,
@@ -1197,7 +1057,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
 
 Daily series. The last segment is dotted.
 
-type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid on, legend off, axes.y.title empty. The solid area stops on the day before the last. The last segment is a second area, dash dotted, fillOpacity 0.06, in the same indigo.
+type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16. mark.partial is dotted and mark.partialOpacity is 0.06, so the last segment is a dotted stroke over a lighter fill. axes.y.title is empty.
 
 ```json
 {
@@ -1218,159 +1078,131 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
       "series": [
         "#615fff",
         "#615fff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
     {
       "date": "2025-09-22",
-      "solid": 121000,
-      "tail": null
+      "value": 121000
     },
     {
       "date": "2025-09-23",
-      "solid": 137000,
-      "tail": null
+      "value": 137000
     },
     {
       "date": "2025-09-24",
-      "solid": 134000,
-      "tail": null
+      "value": 134000
     },
     {
       "date": "2025-09-25",
-      "solid": 117000,
-      "tail": null
+      "value": 117000
     },
     {
       "date": "2025-09-26",
-      "solid": 115000,
-      "tail": null
+      "value": 115000
     },
     {
       "date": "2025-09-27",
-      "solid": 109000,
-      "tail": null
+      "value": 109000
     },
     {
       "date": "2025-09-28",
-      "solid": 113000,
-      "tail": null
+      "value": 113000
     },
     {
       "date": "2025-09-29",
-      "solid": 127000,
-      "tail": null
+      "value": 127000
     },
     {
       "date": "2025-09-30",
-      "solid": 136000,
-      "tail": null
+      "value": 136000
     },
     {
       "date": "2025-10-01",
-      "solid": 141000,
-      "tail": null
+      "value": 141000
     },
     {
       "date": "2025-10-02",
-      "solid": 126000,
-      "tail": null
+      "value": 126000
     },
     {
       "date": "2025-10-03",
-      "solid": 123000,
-      "tail": null
+      "value": 123000
     },
     {
       "date": "2025-10-04",
-      "solid": 120000,
-      "tail": null
+      "value": 120000
     },
     {
       "date": "2025-10-05",
-      "solid": 131000,
-      "tail": null
+      "value": 131000
     },
     {
       "date": "2025-10-06",
-      "solid": 136000,
-      "tail": null
+      "value": 136000
     },
     {
       "date": "2025-10-07",
-      "solid": 146000,
-      "tail": null
+      "value": 146000
     },
     {
       "date": "2025-10-08",
-      "solid": 152000,
-      "tail": null
+      "value": 152000
     },
     {
       "date": "2025-10-09",
-      "solid": 151000,
-      "tail": null
+      "value": 151000
     },
     {
       "date": "2025-10-10",
-      "solid": 155000,
-      "tail": null
+      "value": 155000
     },
     {
       "date": "2025-10-11",
-      "solid": 131000,
-      "tail": null
+      "value": 131000
     },
     {
       "date": "2025-10-12",
-      "solid": 140000,
-      "tail": null
+      "value": 140000
     },
     {
       "date": "2025-10-13",
-      "solid": 145000,
-      "tail": null
+      "value": 145000
     },
     {
       "date": "2025-10-14",
-      "solid": 156000,
-      "tail": null
+      "value": 156000
     },
     {
       "date": "2025-10-15",
-      "solid": 145000,
-      "tail": null
+      "value": 145000
     },
     {
       "date": "2025-10-16",
-      "solid": 144000,
-      "tail": null
+      "value": 144000
     },
     {
       "date": "2025-10-17",
-      "solid": 131000,
-      "tail": null
+      "value": 131000
     },
     {
       "date": "2025-10-18",
-      "solid": 132000,
-      "tail": null
+      "value": 132000
     },
     {
       "date": "2025-10-19",
-      "solid": 134000,
-      "tail": null
+      "value": 134000
     },
     {
       "date": "2025-10-20",
-      "solid": 153000,
-      "tail": 153000
+      "value": 153000
     },
     {
       "date": "2025-10-21",
-      "solid": null,
-      "tail": 157000
+      "value": 157000
     }
   ],
   "encoding": {
@@ -1380,7 +1212,7 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     },
     "y": [
       {
-        "field": "solid",
+        "field": "value",
         "mark": "area",
         "scale": {
           "domain": [
@@ -1388,12 +1220,6 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
             190000
           ]
         }
-      },
-      {
-        "field": "tail",
-        "mark": "area",
-        "dash": "dotted",
-        "fillOpacity": 0.06
       }
     ]
   },
@@ -1402,6 +1228,8 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     "points": "always",
     "pointSize": 2.5,
     "fillOpacity": 0.16,
+    "partial": "dotted",
+    "partialOpacity": 0.06,
     "strokeWidth": 1.75,
     "gradient": false
   },
@@ -1418,7 +1246,11 @@ type combo. curve linear, points always, pointSize 2.5, fillOpacity 0.16, y grid
     }
   },
   "tooltip": {
-    "mode": "index"
+    "mode": "index",
+    "background": "light-dark(#ffffff,#1f2937)",
+    "radius": 8,
+    "shadow": "0 4px 16px rgba(17,24,39,.12)",
+    "crosshairColor": "#615fff"
   },
   "size": {
     "width": 1100,
@@ -1455,7 +1287,9 @@ type bar-list, mark.track row. A full-height wash in series[0] sits behind the l
       "series": [
         "#615fff",
         "#615fff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -1525,7 +1359,9 @@ type bar-list, mark.track row. A full-height wash in series[0] sits behind the l
       "series": [
         "#615fff",
         "#615fff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -1595,7 +1431,9 @@ type bar-list, mark.track row. A full-height wash in series[0] sits behind the l
       "series": [
         "#615fff",
         "#615fff"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -1635,7 +1473,7 @@ type bar-list, mark.track row. A full-height wash in series[0] sits behind the l
 ## What produces this look
 
 - **Metric tabs.** The strip is page state: label, number, and delta, with an underline on the selected tab. Choosing a tab shows that tab's spec. There is no sparkline in the strip.
-- **Daily line.** 30 points, curve linear, points always, a light y grid, and a soft area under the solid line. The last day is a second area, dash dotted, fillOpacity 0.06. Both series tokens are #615fff. Midnight uses #9d99ff.
+- **Daily line.** 30 points, curve linear, points always, a light y grid, and a soft area. mark.partial dots the last segment and mark.partialOpacity paints that segment at 0.06. The series token is #615fff. Midnight uses #9d99ff.
 - **Lists.** Sources, Pages, and Devices are one bar-list at a time. mark.track row paints a full-width wash. The chart is on demand and is not in the line or all bundle.
 
 https://chartkit.dev/dashboards/meter

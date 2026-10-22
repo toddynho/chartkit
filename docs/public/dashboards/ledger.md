@@ -12,7 +12,7 @@ Default theme: soft.
 
 Daily gross against the previous period. The total sits above the chart.
 
-type combo. The first series is an area in the blurple series token, strokeWidth 1.75, fillOpacity 0.14, curve linear. The second is a dashed line in the grey series token. legend.show is false. axes.y.title is an empty string, axes.y.labels and both grids are off. axes.x.ticks is the first and last day, so only those two labels draw.
+type combo. headline draws $261K, the comparison, and a positive delta pill. The area fades toward the baseline. The prior series is a dashed line. legend.show is false. axes.y.title is empty, y labels and grids are off. axes.x.ticks is ends.
 
 ```json
 {
@@ -33,7 +33,9 @@ type combo. The first series is an area in the blurple series token, strokeWidth
       "series": [
         "#635bff",
         "#8898aa"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -163,10 +165,7 @@ type combo. The first series is an area in the blurple series token, strokeWidth
   "axes": {
     "x": {
       "grid": false,
-      "ticks": [
-        1759276800000,
-        1761004800000
-      ]
+      "ticks": "ends"
     },
     "y": {
       "title": "",
@@ -178,18 +177,29 @@ type combo. The first series is an area in the blurple series token, strokeWidth
     "show": false
   },
   "tooltip": {
-    "mode": "index"
+    "mode": "index",
+    "background": "light-dark(#ffffff,#0f2942)",
+    "radius": 6,
+    "shadow": "0 2px 5px rgba(50,50,93,.18)",
+    "crosshairColor": "#635bff"
+  },
+  "headline": {
+    "label": "Gross volume",
+    "value": "$261K",
+    "compare": "$228K",
+    "delta": "+14%",
+    "tone": "positive"
   },
   "mark": {
     "strokeWidth": 1.75,
     "fillOpacity": 0.14,
     "curve": "linear",
     "points": "none",
-    "gradient": false
+    "gradient": true
   },
   "size": {
     "width": 1100,
-    "height": 260
+    "height": 340
   },
   "a11y": {
     "alt": "Gross volume for 1–21 October totals 261 thousand dollars, above the previous period."
@@ -222,7 +232,9 @@ type kpi. Compact card: label, value, and a short spark. theme.tokens.surface an
       "series": [
         "#635bff",
         "#8898aa"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -296,7 +308,9 @@ type kpi. Compact card: label, value, and a short spark. theme.tokens.surface an
       "series": [
         "#635bff",
         "#8898aa"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -370,7 +384,9 @@ type kpi. Compact card: label, value, and a short spark. theme.tokens.surface an
       "series": [
         "#635bff",
         "#8898aa"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -432,7 +448,9 @@ type kpi. Compact card: label, value, and a short spark. theme.tokens.surface an
       "series": [
         "#635bff",
         "#8898aa"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -493,7 +511,9 @@ type kpi. Compact card: label, value, and a short spark. theme.tokens.surface an
       "series": [
         "#635bff",
         "#8898aa"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -551,7 +571,9 @@ type kpi. Compact card: label, value, and a short spark. theme.tokens.surface an
       "series": [
         "#635bff",
         "#8898aa"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -612,7 +634,9 @@ type bar-list with mark.track row. The wash uses series[0]. The amount uses the 
       "series": [
         "#635bff",
         "#8898aa"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -676,7 +700,9 @@ type line. This chart's series token is the negative colour. axes.y.title is emp
       "negative": "#df1b41",
       "series": [
         "#df1b41"
-      ]
+      ],
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -751,7 +777,7 @@ type line. This chart's series token is the negative colour. axes.y.title is emp
 
 ## What produces this look
 
-- **Gross volume.** combo draws a blurple area and a grey dashed prior-period line. legend.show is false. The $261K total and the delta are page text above the chart. axes.y.title is "" so no series name becomes an axis title. axes.y.labels and the grids are off. axes.x.ticks holds the first and last timestamps.
+- **Gross volume.** combo draws a blurple area and a grey dashed prior-period line. headline draws the total, the comparison, and the delta pill. axes.x.ticks is ends. theme.tokens.fontFamily is Inter.
 - **Metrics.** Six kpi specs sit in a 2×3 grid. Each is a label, a value, and a short spark. surface and grid are transparent.
 - **Methods.** bar-list mark.track is row. Amounts use the text token. Soft and Midnight are two SVGs from the two theme objects.
 - **Palette.** theme.tokens: blurple #635bff, navy text #0a2540, comparison #8898aa, negative #df1b41. Midnight swaps those tokens. The page CSS does not paint the marks.

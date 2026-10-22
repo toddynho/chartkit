@@ -33,7 +33,9 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
       "series": [
         "#1a73e8",
         "#9aa0a6"
-      ]
+      ],
+      "fontFamily": "Roboto, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -248,7 +250,9 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
       "series": [
         "#1a73e8",
         "#9aa0a6"
-      ]
+      ],
+      "fontFamily": "Roboto, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -463,7 +467,9 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
       "series": [
         "#1a73e8",
         "#9aa0a6"
-      ]
+      ],
+      "fontFamily": "Roboto, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -678,7 +684,9 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
       "series": [
         "#1a73e8",
         "#9aa0a6"
-      ]
+      ],
+      "fontFamily": "Roboto, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -896,7 +904,9 @@ type donut. theme.tokens.series is the five channel colours. legend.values print
         "#e8710a",
         "#e52592",
         "#9334e6"
-      ]
+      ],
+      "fontFamily": "Roboto, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -966,7 +976,9 @@ type heatmap. encoding.color.range is a continuous blue ramp, #e8f0fe, #aecbfa, 
       "negative": "#d93025",
       "series": [
         "#1a73e8"
-      ]
+      ],
+      "fontFamily": "Roboto, sans-serif",
+      "fontSize": 12
     }
   },
   "data": [
@@ -1521,7 +1533,8 @@ type choropleth. encoding.color.range is the blue ramp. mark.nodata is fill, mar
     "water": "#ffffff"
   },
   "legend": {
-    "show": true
+    "show": true,
+    "position": "bottom"
   },
   "size": {
     "width": 1100,
@@ -1772,7 +1785,8 @@ type choropleth. encoding.color.range is the blue ramp. mark.nodata is fill, mar
     "water": "#202124"
   },
   "legend": {
-    "show": true
+    "show": true,
+    "position": "bottom"
   },
   "size": {
     "width": 1100,

@@ -206,6 +206,12 @@ describe("validate", () => {
 });
 
 describe("render", () => {
+  it("draws a horizontal legend when legend.position is bottom", async () => {
+    const svg = await render({ ...world, legend: { position: "bottom" } });
+    expect(svg).toContain('x2="1" y2="0"');
+    expect(svg).not.toContain('x2="0" y2="0"');
+  });
+
   it("draws a world choropleth with a legend, alias hits, and a no-data country", async () => {
     const svg = await render(world);
     expect(svg).toContain('data-ck-type="choropleth"');

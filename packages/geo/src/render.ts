@@ -138,6 +138,29 @@ function titleLayout(text: string, width: number): { size: number; y: number; ba
   return { size, y, band };
 }
 
+function legendSide(spec: Record<string, unknown>): "bottom" | "right" {
+  return isRecord(spec.legend) && spec.legend.position === "bottom" ? "bottom" : "right";
+}
+
+function horizontalLegend(scale: PaintScale, x: number, y: number, width: number, id: string): string {
+  const title = scale.title ? `<text class="ck-geo-label ck-geo-legend-title" x="${round(x)}" y="${round(y + 11)}">${esc(scale.title)}</text>` : "";
+  const barY = y + (scale.title ? 18 : 2);
+  if (scale.swatches?.length) {
+    const marks = scale.swatches
+      .map((swatch, index) => {
+        const at = x + index * 88;
+        return `<rect x="${round(at)}" y="${round(barY)}" width="12" height="8" fill="${swatch.color}" rx="2"/><text class="ck-geo-label" x="${round(at + 16)}" y="${round(barY + 8)}">${esc(swatch.label)}</text>`;
+      })
+      .join("");
+    return `${title}${marks}`;
+  }
+  const stops = scale.stops.map((stop) => `<stop offset="${Math.round(stop.offset * 100)}%" stop-color="${stop.color}"/>`).join("");
+  const lo = scale.stops[0];
+  const hi = scale.stops[scale.stops.length - 1];
+  const barW = Math.max(48, width - 4);
+  return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">${stops}</linearGradient></defs>${title}<rect x="${round(x)}" y="${round(barY)}" width="${round(barW)}" height="8" fill="url(#${id})" rx="2"/><text class="ck-geo-label" x="${round(x)}" y="${round(barY + 20)}">${esc(lo?.label ?? "")}</text><text class="ck-geo-label" text-anchor="end" x="${round(x + barW)}" y="${round(barY + 20)}">${esc(hi?.label ?? "")}</text>`;
+}
+
 function legendWidth(scale: PaintScale): number {
   const labels = [scale.title, ...(scale.stops.map((stop) => stop.label)), ...(scale.swatches ?? []).map((swatch) => swatch.label), ...(scale.sizes ?? []).map((stop) => stop.label), "No data"];
   let widest = 0;
@@ -489,8 +512,10 @@ export async function render(spec: unknown): Promise<string> {
   const points = dotsOf(rows, encoding, chrome);
   const scale = choroplethScale ?? points.scale;
   const showLegend = mark.legend !== false && !!scale && (scale.stops.length > 0 || !!scale.swatches?.length || !!scale.sizes?.length);
-  const legendW = showLegend && scale ? legendWidth(scale) : 12;
-  const box: Box = { x: 8, y: titleH, w: width - 16 - legendW, h: height - titleH - 10 };
+  const bottomLegend = showLegend && scale ? legendSide(spec) === "bottom" : false;
+  const legendW = showLegend && scale && !bottomLegend ? legendWidth(scale) : 12;
+  const legendH = bottomLegend ? 40 : 0;
+  const box: Box = { x: 8, y: titleH, w: width - 16 - legendW, h: height - titleH - 10 - legendH };
   const explicit = typeof mark.projection === "string" ? mark.projection : "";
   const known = ["equirectangular", "mercator", "equalEarth", "albersUsa", "fit"];
   const projection = known.includes(explicit) ? explicit : defaultProjection(loaded.atlas);
@@ -511,7 +536,11 @@ export async function render(spec: unknown): Promise<string> {
   }
   if (drawn && points.dots.length) body += pointMarkup(points.dots, drawn.point, num(mark.labelCount) ?? 12, box);
   body += `</g>`;
-  if (showLegend && scale) body += legendMarkup(scale, box.x + box.w + 8, box.y, box.h, id, nodataMode === "hatch");
+  if (showLegend && scale) {
+    body += bottomLegend
+      ? horizontalLegend(scale, box.x, box.y + box.h + 6, box.w, id)
+      : legendMarkup(scale, box.x + box.w + 8, box.y, box.h, id, nodataMode === "hatch");
+  }
   return shell(spec, chrome, body, id, nodataMode);
 }
 

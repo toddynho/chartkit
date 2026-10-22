@@ -62,6 +62,31 @@ export type ChartKitChartSpecV1 = {
    * Visible secondary line under the title.
    */
   subtitle?: string;
+  /**
+   * Figure, comparison, and delta pill drawn above the plot.
+   */
+  headline?: {
+    /**
+     * Small label above the value.
+     */
+    label?: string;
+    /**
+     * Primary figure, drawn in the chart.
+     */
+    value?: string;
+    /**
+     * Secondary comparison figure, in the muted colour.
+     */
+    compare?: string;
+    /**
+     * Change badge, drawn as a pill.
+     */
+    delta?: string;
+    /**
+     * Pill colour. positive uses the positive token, negative the negative token.
+     */
+    tone?: "positive" | "negative" | "neutral";
+  };
   data?: Data;
   encoding?: Encoding;
   metric?: Metric;
@@ -361,6 +386,22 @@ export type Tooltip =
        * Where the card sits. auto tries above, then below, then beside the point.
        */
       position?: "auto" | "top" | "bottom" | "left" | "right";
+      /**
+       * Tooltip card fill. A CSS colour. The page reads it from the chart.
+       */
+      background?: string;
+      /**
+       * Tooltip corner radius in px.
+       */
+      radius?: number;
+      /**
+       * Tooltip box-shadow. A CSS shadow value.
+       */
+      shadow?: string;
+      /**
+       * Crosshair stroke. A CSS colour.
+       */
+      crosshairColor?: string;
       /**
        * Fields to show, in this order. Omit to keep the encoded series. Strings are field names.
        */
@@ -1213,6 +1254,22 @@ export interface Mark {
    * Spacing between bars/cells as a 0–1 fraction of the band. Applies to: bar, combo, heatmap, candlestick.
    */
   gap?: number;
+  /**
+   * Pixel gap between stacked segments. Applies to: bar, stacked-area, combo.
+   */
+  stackGap?: number;
+  /**
+   * Which bar corners round. outer rounds the end away from the baseline. all rounds every corner. Applies to: bar.
+   */
+  radiusEnds?: "outer" | "all";
+  /**
+   * Dash the last segment only. The area still covers the whole series, including that segment. Applies to: line, stacked-area, combo.
+   */
+  partial?: "dashed" | "dotted";
+  /**
+   * Fill opacity of the last area segment. The earlier area keeps mark.fillOpacity. Applies to: line, stacked-area, combo.
+   */
+  partialOpacity?: number;
   /**
    * Draw value labels on the marks. Applies to: bar, donut, pie, line, stacked-area, scatter. Outside pie and donut labels use leader lines. Overlapping labels are skipped.
    */
@@ -2664,9 +2721,9 @@ export interface Axes {
             )
           | FormatObject;
         /**
-         * Approximate tick count, or the exact tick values.
+         * Approximate tick count, the exact tick values, or "ends" for the first and last label only.
          */
-        ticks?: number | [number, ...number[]];
+        ticks?: number | "ends" | [number, ...number[]];
         /**
          * Grid lines from this axis.
          */
@@ -2771,9 +2828,9 @@ export interface Axes {
             )
           | FormatObject;
         /**
-         * Approximate tick count, or the exact tick values.
+         * Approximate tick count, the exact tick values, or "ends" for the first and last label only.
          */
-        ticks?: number | [number, ...number[]];
+        ticks?: number | "ends" | [number, ...number[]];
         /**
          * Grid lines from this axis.
          */
@@ -2878,9 +2935,9 @@ export interface Axes {
             )
           | FormatObject;
         /**
-         * Approximate tick count, or the exact tick values.
+         * Approximate tick count, the exact tick values, or "ends" for the first and last label only.
          */
-        ticks?: number | [number, ...number[]];
+        ticks?: number | "ends" | [number, ...number[]];
         /**
          * Grid lines from this axis.
          */

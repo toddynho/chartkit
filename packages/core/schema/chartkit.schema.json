@@ -70,6 +70,33 @@
       "type": "string",
       "description": "Visible secondary line under the title."
     },
+    "headline": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Small label above the value."
+        },
+        "value": {
+          "type": "string",
+          "description": "Primary figure, drawn in the chart."
+        },
+        "compare": {
+          "type": "string",
+          "description": "Secondary comparison figure, in the muted colour."
+        },
+        "delta": {
+          "type": "string",
+          "description": "Change badge, drawn as a pill."
+        },
+        "tone": {
+          "enum": ["positive", "negative", "neutral"],
+          "description": "Pill colour. positive uses the positive token, negative the negative token."
+        }
+      },
+      "description": "Figure, comparison, and delta pill drawn above the plot."
+    },
     "data": {
       "$ref": "#/$defs/data"
     },
@@ -1194,6 +1221,26 @@
           "maximum": 0.95,
           "description": "Spacing between bars/cells as a 0–1 fraction of the band. Applies to: bar, combo, heatmap, candlestick."
         },
+        "stackGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 24,
+          "description": "Pixel gap between stacked segments. Applies to: bar, stacked-area, combo."
+        },
+        "radiusEnds": {
+          "enum": ["outer", "all"],
+          "description": "Which bar corners round. outer rounds the end away from the baseline. all rounds every corner. Applies to: bar."
+        },
+        "partial": {
+          "enum": ["dashed", "dotted"],
+          "description": "Dash the last segment only. The area still covers the whole series, including that segment. Applies to: line, stacked-area, combo."
+        },
+        "partialOpacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fill opacity of the last area segment. The earlier area keeps mark.fillOpacity. Applies to: line, stacked-area, combo."
+        },
         "labels": {
           "type": "boolean",
           "default": false,
@@ -1565,6 +1612,10 @@
                       "maximum": 50
                     },
                     {
+                      "const": "ends",
+                      "description": "Label only the first and last tick."
+                    },
+                    {
                       "type": "array",
                       "minItems": 1,
                       "maxItems": 50,
@@ -1573,7 +1624,7 @@
                       }
                     }
                   ],
-                  "description": "Approximate tick count, or the exact tick values."
+                  "description": "Approximate tick count, the exact tick values, or \"ends\" for the first and last label only."
                 },
                 "grid": {
                   "oneOf": [
@@ -1722,6 +1773,10 @@
                       "maximum": 50
                     },
                     {
+                      "const": "ends",
+                      "description": "Label only the first and last tick."
+                    },
+                    {
                       "type": "array",
                       "minItems": 1,
                       "maxItems": 50,
@@ -1730,7 +1785,7 @@
                       }
                     }
                   ],
-                  "description": "Approximate tick count, or the exact tick values."
+                  "description": "Approximate tick count, the exact tick values, or \"ends\" for the first and last label only."
                 },
                 "grid": {
                   "oneOf": [
@@ -1870,6 +1925,10 @@
                       "maximum": 50
                     },
                     {
+                      "const": "ends",
+                      "description": "Label only the first and last tick."
+                    },
+                    {
                       "type": "array",
                       "minItems": 1,
                       "maxItems": 50,
@@ -1878,7 +1937,7 @@
                       }
                     }
                   ],
-                  "description": "Approximate tick count, or the exact tick values."
+                  "description": "Approximate tick count, the exact tick values, or \"ends\" for the first and last label only."
                 },
                 "grid": {
                   "oneOf": [
@@ -2115,6 +2174,24 @@
               ],
               "default": "auto",
               "description": "Where the card sits. auto tries above, then below, then beside the point."
+            },
+            "background": {
+              "type": "string",
+              "description": "Tooltip card fill. A CSS colour. The page reads it from the chart."
+            },
+            "radius": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 24,
+              "description": "Tooltip corner radius in px."
+            },
+            "shadow": {
+              "type": "string",
+              "description": "Tooltip box-shadow. A CSS shadow value."
+            },
+            "crosshairColor": {
+              "type": "string",
+              "description": "Crosshair stroke. A CSS colour."
             },
             "fields": {
               "type": "array",

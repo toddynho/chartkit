@@ -6,7 +6,7 @@ Dark theme / auto light-dark
 
 Matrix status: `native`. Verification: `dts-path` (strong).
 
-dark preset, or auto light/dark by default; theme.mode light|dark warns CK3012 since PR #16
+dark preset, or auto light/dark by default; theme.mode dark uses the midnight colour base and theme.mode light uses the soft colour base
 
 Source: chartkit:packages/core/src/generated/schema.ts:315
 
