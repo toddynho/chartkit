@@ -926,12 +926,41 @@ body:has(.dash-page.dash-theme-midnight.dash-keel) { --bg: #1a1625; background: 
 .dash-snapshot {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: 208px auto;
   gap: 12px;
   align-items: stretch;
 }
 .dash-snapshot > * { min-width: 0; }
+.dash-snapshot > .dash-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+}
 .dash-snapshot .dash-3, .dash-snapshot .dash-12, .dash-snapshot .dash-4 { grid-column: auto; }
 .dash-snapshot .dash-tabs { border: 0; border-radius: 0; background: transparent; border-bottom: 1px solid var(--dash-line, var(--line)); }
+.dash-wayline .dash-usercard .dash-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.dash-wayline .dash-usercard { padding-left: 6px; padding-right: 6px; }
+.dash-wayline .dash-usercard .dash-tabs button { padding: 4px 1px 2px; min-width: 0; }
+.dash-wayline .dash-usercard .dash-tab-label {
+  font-size: 8px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  white-space: pre-line;
+}
+.dash-wayline .dash-usercard .dash-tab-value {
+  font-size: 14px;
+  line-height: 1.15;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+}
+.dash-wayline .dash-usercard .dash-tab-delta { font-size: 11px; white-space: nowrap; }
+.dash-usercard .chart-host { flex: 1 1 auto; min-height: 0; }
+.dash-snapshot .dash-realtime .chart-host { flex: 0 0 auto; }
+.dash-snapshot .dash-realtime h3 { margin-bottom: 2px; }
+.dash-home { margin-top: 4px; }
 .dash-mini { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
 .dash-mini caption { text-align: left; font-weight: 650; font-size: 12px; margin-bottom: 4px; }
 .dash-mini td { padding: 3px 0; border-bottom: 1px solid var(--dash-line, var(--line)); }
@@ -1042,6 +1071,7 @@ body:has(.dash-page.dash-theme-midnight.dash-keel) { --bg: #1a1625; background: 
 }
 .dash-seg button[aria-pressed="true"] { background: var(--dash-ink, var(--fg)); color: var(--dash-card, var(--bg)); }
 .dash-card .chart-host svg { width: 100%; height: auto; }
+.dash-usercard .chart-host svg { width: 100%; height: 100%; }
 .dash-12 { grid-column: span 12; }
 .dash-8 { grid-column: span 8; }
 .dash-6 { grid-column: span 6; }
@@ -1228,7 +1258,9 @@ body:has(.dash-page.dash-theme-midnight.dash-keel) { --bg: #1a1625; background: 
 }
 @media (max-width: 900px) {
   .dash-shell, .dash-shell.dash-wayline, .dash-shell.dash-meter, .dash-shell.dash-keel, .dash-shell.dash-ledger { grid-template-columns: 1fr; }
-  .dash-snapshot { grid-template-columns: 1fr; }
+  .dash-snapshot { grid-template-columns: 1fr; grid-template-rows: none; }
+  .dash-usercard .chart-host { min-height: 168px; }
+  .dash-wayline .dash-usercard .dash-tab-value { font-size: 16px; }
   .dash-iconrail { width: 100%; flex-direction: row; }
   .dash-iconrail nav { flex-direction: row; }
   .dash-sort { margin-left: 0; }

@@ -12,7 +12,7 @@ Default theme: soft.
 
 Daily gross against the previous period. The total sits above the chart.
 
-type combo. headline draws $261K, the comparison, and a positive delta pill. The area fades toward the baseline. The prior series is a dashed line. legend.show is false. axes.y.title is empty, y labels and grids are off. axes.x.ticks is ends.
+type combo. The gross series is a solid #5469d4 line with no gradient. headline draws Gross volume, a large $261K, and $228K with the delta pill on the right. The prior series is a dashed line. legend.show is false. axes.y.title is empty, y labels and grids are off. axes.x.ticks is ends.
 
 ```json
 {
@@ -31,8 +31,8 @@ type combo. headline draws $261K, the comparison, and a positive delta pill. The
       "positive": "#09825d",
       "negative": "#df1b41",
       "series": [
-        "#635bff",
-        "#8898aa"
+        "#5469d4",
+        "#a3acb9"
       ],
       "fontFamily": "Inter, sans-serif",
       "fontSize": 12
@@ -153,7 +153,7 @@ type combo. headline draws $261K, the comparison, and a positive delta pill. The
     "y": [
       {
         "field": "gross",
-        "mark": "area"
+        "mark": "line"
       },
       {
         "field": "prior",
@@ -181,7 +181,7 @@ type combo. headline draws $261K, the comparison, and a positive delta pill. The
     "background": "light-dark(#ffffff,#0f2942)",
     "radius": 6,
     "shadow": "0 2px 5px rgba(50,50,93,.18)",
-    "crosshairColor": "#635bff"
+    "crosshairColor": "#5469d4"
   },
   "headline": {
     "label": "Gross volume",
@@ -191,15 +191,15 @@ type combo. headline draws $261K, the comparison, and a positive delta pill. The
     "tone": "positive"
   },
   "mark": {
-    "strokeWidth": 2,
-    "fillOpacity": 0.18,
+    "strokeWidth": 4,
+    "fillOpacity": 0,
     "curve": "linear",
     "points": "none",
-    "gradient": true
+    "gradient": false
   },
   "size": {
     "width": 1100,
-    "height": 340
+    "height": 400
   },
   "a11y": {
     "alt": "Gross volume for 1–21 October totals 261 thousand dollars, above the previous period."
@@ -777,8 +777,8 @@ type line. This chart's series token is the negative colour. axes.y.title is emp
 
 ## What produces this look
 
-- **Gross volume.** The page is this one card. combo draws a blurple area and a grey dashed prior-period line. headline draws the total, the comparison, and the delta pill. axes.x.ticks is ends. theme.tokens.fontFamily is Inter.
-- **Reference.** No current public Home screenshot showed the gross-volume chart with a today/yesterday comparison and a metric grid. The page matches the May 2020 gross-volume card at its own width, about 1030px. The kpi and method specs stay in View spec and are not drawn.
+- **Gross volume.** The top card is a solid #5469d4 line and a grey dashed prior-period line, with no gradient. headline draws Gross volume, a large total, and the comparison with its delta pill on the right. axes.x.ticks is ends. theme.tokens.fontFamily is Inter.
+- **Home.** Under the card, six kpi specs and the method and failed-payment charts use the same navy, blurple, and card chrome. No current public Home screenshot was available, so this section follows that visual language.
 - **Palette.** theme.tokens: blurple #635bff, navy text #0a2540, comparison #8898aa, negative #df1b41. Midnight swaps those tokens. The page CSS does not paint the marks.
 
 https://chartkit.dev/dashboards/ledger

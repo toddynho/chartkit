@@ -209,15 +209,16 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
     },
     "y": {
       "title": "",
-      "grid": true
+      "grid": true,
+      "position": "right"
     }
   },
   "tooltip": {
     "mode": "index"
   },
   "size": {
-    "width": 420,
-    "height": 148
+    "width": 320,
+    "height": 140
   },
   "a11y": {
     "alt": "Users rise across 28 days and stay mostly above the previous period."
@@ -426,15 +427,16 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
     },
     "y": {
       "title": "",
-      "grid": true
+      "grid": true,
+      "position": "right"
     }
   },
   "tooltip": {
     "mode": "index"
   },
   "size": {
-    "width": 420,
-    "height": 148
+    "width": 320,
+    "height": 140
   },
   "a11y": {
     "alt": "New users over 28 days, with a dashed previous period."
@@ -442,7 +444,8 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
 }
 ```
 
-## Avg engagement
+## Avg. engagement
+time
 
 This period and the previous period.
 
@@ -643,15 +646,16 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
     },
     "y": {
       "title": "",
-      "grid": true
+      "grid": true,
+      "position": "right"
     }
   },
   "tooltip": {
     "mode": "index"
   },
   "size": {
-    "width": 420,
-    "height": 148
+    "width": 320,
+    "height": 140
   },
   "a11y": {
     "alt": "Average engagement over 28 days."
@@ -860,15 +864,16 @@ type line. curve linear, so segments are straight. series[1] dash is dashed. leg
     },
     "y": {
       "title": "",
-      "grid": true
+      "grid": true,
+      "position": "right"
     }
   },
   "tooltip": {
     "mode": "index"
   },
   "size": {
-    "width": 420,
-    "height": 148
+    "width": 320,
+    "height": 140
   },
   "a11y": {
     "alt": "Revenue over 28 days, with a dashed previous period."
@@ -1673,7 +1678,7 @@ type line. The card switches 30 days, 7 days, and 1 day. The series token is #1a
 
 Users remaining by period.
 
-type heatmap. Rows are cohorts and columns are periods. color.range is #e8f0fe, #aecbfa, #1a73e8. Later periods are lighter.
+type heatmap. Rows are week ranges. Columns are Week 0 through Week 4 across the top of the grid. Later cohorts leave the unfinished periods null, so the grid is a triangle. color.range is #e8f0fe, #aecbfa, #1a73e8.
 
 ```json
 {
@@ -1700,144 +1705,129 @@ type heatmap. Rows are cohorts and columns are periods. color.range is #e8f0fe, 
   },
   "data": [
     {
-      "cohort": "Cohort A",
-      "period": "0",
+      "cohort": "Sep 22 - Sep 28",
+      "period": "Week 0",
       "users": 93
     },
     {
-      "cohort": "Cohort A",
-      "period": "1",
-      "users": 89
+      "cohort": "Sep 22 - Sep 28",
+      "period": "Week 1",
+      "users": 87
     },
     {
-      "cohort": "Cohort A",
-      "period": "2",
-      "users": 79
+      "cohort": "Sep 22 - Sep 28",
+      "period": "Week 2",
+      "users": 75
     },
     {
-      "cohort": "Cohort A",
-      "period": "3",
-      "users": 70
-    },
-    {
-      "cohort": "Cohort A",
-      "period": "4",
+      "cohort": "Sep 22 - Sep 28",
+      "period": "Week 3",
       "users": 64
     },
     {
-      "cohort": "Cohort A",
-      "period": "5",
-      "users": 54
+      "cohort": "Sep 22 - Sep 28",
+      "period": "Week 4",
+      "users": 56
     },
     {
-      "cohort": "Cohort A",
-      "period": "6",
-      "users": 48
+      "cohort": "Sep 29 - Oct 5",
+      "period": "Week 0",
+      "users": 94
     },
     {
-      "cohort": "Cohort B",
-      "period": "0",
-      "users": 93
-    },
-    {
-      "cohort": "Cohort B",
-      "period": "1",
-      "users": 84
-    },
-    {
-      "cohort": "Cohort B",
-      "period": "2",
-      "users": 77
-    },
-    {
-      "cohort": "Cohort B",
-      "period": "3",
-      "users": 68
-    },
-    {
-      "cohort": "Cohort B",
-      "period": "4",
-      "users": 58
-    },
-    {
-      "cohort": "Cohort B",
-      "period": "5",
-      "users": 48
-    },
-    {
-      "cohort": "Cohort B",
-      "period": "6",
-      "users": 38
-    },
-    {
-      "cohort": "Cohort C",
-      "period": "0",
-      "users": 97
-    },
-    {
-      "cohort": "Cohort C",
-      "period": "1",
+      "cohort": "Sep 29 - Oct 5",
+      "period": "Week 1",
       "users": 85
     },
     {
-      "cohort": "Cohort C",
-      "period": "2",
-      "users": 74
+      "cohort": "Sep 29 - Oct 5",
+      "period": "Week 2",
+      "users": 71
     },
     {
-      "cohort": "Cohort C",
-      "period": "3",
-      "users": 65
+      "cohort": "Sep 29 - Oct 5",
+      "period": "Week 3",
+      "users": 60
     },
     {
-      "cohort": "Cohort C",
-      "period": "4",
-      "users": 55
+      "cohort": "Sep 29 - Oct 5",
+      "period": "Week 4",
+      "users": null
     },
     {
-      "cohort": "Cohort C",
-      "period": "5",
-      "users": 46
+      "cohort": "Oct 6 - Oct 12",
+      "period": "Week 0",
+      "users": 95
     },
     {
-      "cohort": "Cohort C",
-      "period": "6",
-      "users": 34
+      "cohort": "Oct 6 - Oct 12",
+      "period": "Week 1",
+      "users": 83
     },
     {
-      "cohort": "Cohort D",
-      "period": "0",
+      "cohort": "Oct 6 - Oct 12",
+      "period": "Week 2",
+      "users": 70
+    },
+    {
+      "cohort": "Oct 6 - Oct 12",
+      "period": "Week 3",
+      "users": null
+    },
+    {
+      "cohort": "Oct 6 - Oct 12",
+      "period": "Week 4",
+      "users": null
+    },
+    {
+      "cohort": "Oct 13 - Oct 19",
+      "period": "Week 0",
       "users": 93
     },
     {
-      "cohort": "Cohort D",
-      "period": "1",
-      "users": 86
+      "cohort": "Oct 13 - Oct 19",
+      "period": "Week 1",
+      "users": 79
     },
     {
-      "cohort": "Cohort D",
-      "period": "2",
-      "users": 73
+      "cohort": "Oct 13 - Oct 19",
+      "period": "Week 2",
+      "users": null
     },
     {
-      "cohort": "Cohort D",
-      "period": "3",
-      "users": 59
+      "cohort": "Oct 13 - Oct 19",
+      "period": "Week 3",
+      "users": null
     },
     {
-      "cohort": "Cohort D",
-      "period": "4",
-      "users": 53
+      "cohort": "Oct 13 - Oct 19",
+      "period": "Week 4",
+      "users": null
     },
     {
-      "cohort": "Cohort D",
-      "period": "5",
-      "users": 38
+      "cohort": "Oct 20 - Oct 26",
+      "period": "Week 0",
+      "users": 97
     },
     {
-      "cohort": "Cohort D",
-      "period": "6",
-      "users": 30
+      "cohort": "Oct 20 - Oct 26",
+      "period": "Week 1",
+      "users": null
+    },
+    {
+      "cohort": "Oct 20 - Oct 26",
+      "period": "Week 2",
+      "users": null
+    },
+    {
+      "cohort": "Oct 20 - Oct 26",
+      "period": "Week 3",
+      "users": null
+    },
+    {
+      "cohort": "Oct 20 - Oct 26",
+      "period": "Week 4",
+      "users": null
     }
   ],
   "encoding": {
@@ -1858,11 +1848,11 @@ type heatmap. Rows are cohorts and columns are periods. color.range is #e8f0fe, 
     "cornerRadius": 2
   },
   "size": {
-    "width": 300,
-    "height": 180
+    "width": 340,
+    "height": 210
   },
   "a11y": {
-    "alt": "Each cohort fades across the seven periods."
+    "alt": "Each cohort is a triangle: later weeks are null once the cohort has not reached them."
   }
 }
 ```
@@ -2380,6 +2370,6 @@ type choropleth. encoding.color.range is the blue ramp. mark.nodata is fill, mar
 - **Snapshot grid.** Eight cards in two rows of four: users with a metric strip, last 30 minutes, insights, new users by channel, a sessions table, a map with a country table, user activity over time, and a cohort heatmap. There is no donut.
 - **Comparison.** curve linear keeps the segments straight. The previous period is dash dashed in #9aa0a6. axes.y.title is empty. Midnight uses #8ab4f8 for this period.
 - **Map.** Fifty-two countries use encoding.color.range #aecbfa, #669df6, #1a73e8. mark.nodata fill paints missing countries with mark.land. There is no hatch.
-- **Cohort.** The heatmap rows are cohorts and the columns are periods 0 through 6. color.range is #e8f0fe, #aecbfa, #1a73e8.
+- **Cohort.** Rows are week ranges such as Sep 22 - Sep 28. Week 0 through Week 4 sit across the top. Later cohorts leave unfinished weeks null, so the cells form a triangle. color.range is #e8f0fe, #aecbfa, #1a73e8.
 
 https://chartkit.dev/dashboards/wayline

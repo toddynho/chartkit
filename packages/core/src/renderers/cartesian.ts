@@ -2059,23 +2059,29 @@ function headlineSvg(model: PlotModel): string {
   let y = model.title ? 36 : 16;
   if (model.subtitle) y += 16;
   let out = "";
+  const labelSize = 14;
+  const valueSize = 40;
+  const compareSize = 22;
+  const deltaSize = 13;
   if (head.label) {
-    out += `<text x="12" y="${y}" fill="${muted}" font-size="12" font-weight="500" font-family="${font()}">${esc(head.label)}</text>`;
-    y += 26;
+    out += `<text x="12" y="${y}" fill="${muted}" font-size="${labelSize}" font-weight="500" font-family="${font()}">${esc(head.label)}</text>`;
+    y += 24;
   }
-  const valueSize = 28;
-  const compareSize = 20;
-  out += `<text data-ck-headline="1" x="12" y="${y + 8}" fill="${text}" font-size="${valueSize}" font-weight="650" font-family="${font()}">${esc(head.value)}</text>`;
-  let x = 12 + headlineInk(head.value, valueSize) + 14;
+  const baseline = y + valueSize - 8;
+  out += `<text data-ck-headline="1" x="12" y="${baseline}" fill="${text}" font-size="${valueSize}" font-weight="650" font-family="${font()}">${esc(head.value)}</text>`;
+  const edge = model.width - 16;
+  const deltaW = head.delta ? headlineInk(head.delta, deltaSize) + 22 : 0;
+  const compareW = head.compare ? headlineInk(head.compare, compareSize) : 0;
+  const between = head.compare && head.delta ? 10 : 0;
+  const compareX = edge - deltaW - between - compareW;
   if (head.compare) {
-    out += `<text x="${n(x)}" y="${y + 8}" fill="${muted}" font-size="${compareSize}" font-weight="500" font-family="${font()}">${esc(head.compare)}</text>`;
-    x += headlineInk(head.compare, compareSize) + 12;
+    out += `<text x="${n(compareX)}" y="${baseline}" fill="${muted}" font-size="${compareSize}" font-weight="500" font-family="${font()}">${esc(head.compare)}</text>`;
   }
   if (head.delta) {
-    const w = headlineInk(head.delta, 12) + 18;
-    const pillY = y - 12;
-    out += `<rect data-ck-delta="1" x="${n(x)}" y="${n(pillY)}" width="${n(w)}" height="22" rx="11" fill="${tone}" fill-opacity="0.16" />`;
-    out += `<text x="${n(x + w / 2)}" y="${n(pillY + 15)}" text-anchor="middle" fill="${tone}" font-size="12" font-weight="650" font-family="${font()}">${esc(head.delta)}</text>`;
+    const pillX = edge - deltaW;
+    const pillY = baseline - 20;
+    out += `<rect data-ck-delta="1" x="${n(pillX)}" y="${n(pillY)}" width="${n(deltaW)}" height="24" rx="12" fill="${tone}" fill-opacity="0.16" />`;
+    out += `<text x="${n(pillX + deltaW / 2)}" y="${n(pillY + 16)}" text-anchor="middle" fill="${tone}" font-size="${deltaSize}" font-weight="650" font-family="${font()}">${esc(head.delta)}</text>`;
   }
   return out;
 }
@@ -2138,7 +2144,7 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
   let bottom = 12;
   if (model.title) top += 20;
   if (model.subtitle) top += 18;
-  if (model.headline) top += (model.headline.label ? 22 : 0) + 36;
+  if (model.headline) top += (model.headline.label ? 26 : 0) + 56;
   if (wantLabels(model)) {
     const pos = model.labelAt || "top";
     if (pos === "top" || pos === "outside" || pos === "") top += 16;

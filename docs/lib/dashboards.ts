@@ -306,6 +306,7 @@ function ledger(): Dashboard {
     series: ["#7a73ff", "#80e9ff"],
   };
   const themes = themesFor(light, dark);
+  const volumeThemes = themesFor(light, dark, { soft: ["#5469d4", "#a3acb9"], midnight: ["#8ea2ff", "#9aa8b8"] });
   const kpis = themesFor(light, dark, undefined, true);
   const failed = themesFor(light, dark, { soft: [light.negative], midnight: [dark.negative] });
   const days = isoDays("2025-10-01", 21);
@@ -369,29 +370,29 @@ function ledger(): Dashboard {
         id: "ledger-volume",
         title: "Gross volume",
         caption: "Daily gross against the previous period. The total sits above the chart.",
-        note: "type combo. headline draws $261K, the comparison, and a positive delta pill. The area fades toward the baseline. The prior series is a dashed line. legend.show is false. axes.y.title is empty, y labels and grids are off. axes.x.ticks is ends.",
+        note: "type combo. The gross series is a solid #5469d4 line with no gradient. headline draws Gross volume, a large $261K, and $228K with the delta pill on the right. The prior series is a dashed line. legend.show is false. axes.y.title is empty, y labels and grids are off. axes.x.ticks is ends.",
         span: "dash-12",
         place: "hero",
-        themes,
+        themes: volumeThemes,
         spec: spec(
           "combo",
-          themes,
+          volumeThemes,
           mode,
           {
             data: volume,
             encoding: {
               x: { field: "date", type: "temporal" },
               y: [
-                { field: "gross", mark: "area" },
+                { field: "gross", mark: "line" },
                 { field: "prior", mark: "line", dash: "dashed" },
               ],
             },
             axes: { x: { grid: false, ticks: "ends" }, y: quietY },
             legend: { show: false },
-            tooltip: { mode: "index", background: "light-dark(#ffffff,#0f2942)", radius: 6, shadow: "0 2px 5px rgba(50,50,93,.18)", crosshairColor: "#635bff" },
+            tooltip: { mode: "index", background: "light-dark(#ffffff,#0f2942)", radius: 6, shadow: "0 2px 5px rgba(50,50,93,.18)", crosshairColor: "#5469d4" },
             headline: { label: "Gross volume", value: "$261K", compare: "$228K", delta: "+14%", tone: "positive" },
-            mark: { strokeWidth: 2, fillOpacity: 0.18, curve: "linear", points: "none", gradient: true },
-            size: { width: 1100, height: 340 },
+            mark: { strokeWidth: 4, fillOpacity: 0, curve: "linear", points: "none", gradient: false },
+            size: { width: 1100, height: 400 },
           },
           "Gross volume for 1–21 October totals 261 thousand dollars, above the previous period.",
         ),
@@ -458,8 +459,8 @@ function ledger(): Dashboard {
     ],
     sparks: [],
     notes: [
-      { label: "Gross volume", detail: "The page is this one card. combo draws a blurple area and a grey dashed prior-period line. headline draws the total, the comparison, and the delta pill. axes.x.ticks is ends. theme.tokens.fontFamily is Inter." },
-      { label: "Reference", detail: "No current public Home screenshot showed the gross-volume chart with a today/yesterday comparison and a metric grid. The page matches the May 2020 gross-volume card at its own width, about 1030px. The kpi and method specs stay in View spec and are not drawn." },
+      { label: "Gross volume", detail: "The top card is a solid #5469d4 line and a grey dashed prior-period line, with no gradient. headline draws Gross volume, a large total, and the comparison with its delta pill on the right. axes.x.ticks is ends. theme.tokens.fontFamily is Inter." },
+      { label: "Home", detail: "Under the card, six kpi specs and the method and failed-payment charts use the same navy, blurple, and card chrome. No current public Home screenshot was available, so this section follows that visual language." },
       { label: "Palette", detail: "theme.tokens: blurple #635bff, navy text #0a2540, comparison #8898aa, negative #df1b41. Midnight swaps those tokens. The page CSS does not paint the marks." },
     ],
   };
@@ -647,23 +648,26 @@ function wayline(): Dashboard {
         },
         mark: { curve: "linear", strokeWidth: 2, points: "none" },
         legend: { show: false },
-        axes: { x: { grid: false }, y: openY },
+        axes: { x: { grid: false }, y: { title: "", grid: true, position: "right" } },
         tooltip: { mode: "index" },
-        size: { width: 420, height: 148 },
+        size: { width: 320, height: 140 },
       },
       alt,
     ),
     };
   };
-  const cohorts = ["Cohort A", "Cohort B", "Cohort C", "Cohort D"];
-  const periods = ["0", "1", "2", "3", "4", "5", "6"];
+  const cohorts = ["Sep 22 - Sep 28", "Sep 29 - Oct 5", "Oct 6 - Oct 12", "Oct 13 - Oct 19", "Oct 20 - Oct 26"];
+  const periods = ["Week 0", "Week 1", "Week 2", "Week 3", "Week 4"];
   const cohortRand = unit(17);
   const cohortRows = cohorts.flatMap((cohort, cohortIndex) =>
-    periods.map((period, periodIndex) => ({
-      cohort,
-      period,
-      users: Math.max(8, Math.round(92 - periodIndex * (8 + cohortIndex) + cohortRand() * 6)),
-    })),
+    periods.map((period, periodIndex) => {
+      const open = periodIndex <= periods.length - 1 - cohortIndex;
+      return {
+        cohort,
+        period,
+        users: open ? Math.max(8, Math.round(92 - periodIndex * (10 + cohortIndex) + cohortRand() * 6)) : null,
+      };
+    }),
   );
   const countries = [
     ["USA", 9200], ["JPN", 7100], ["GBR", 5400], ["DEU", 4800], ["BRA", 4300], ["IND", 3900], ["FRA", 3600], ["AUS", 2800],
@@ -713,7 +717,7 @@ function wayline(): Dashboard {
     charts: [
       chart(tabLine("wayline-users", "Users", "24.5K", "+6%", true, rounds(organic(28, { seed: 8, start: 620, end: 910, season: 70, noise: 45, phase: 0.5, spike: { at: 17, height: 160 } })), rounds(organic(28, { seed: 53, start: 540, end: 760, season: 90, noise: 55, phase: 2.6 })), "Users rise across 28 days and stay mostly above the previous period.")),
       chart(tabLine("wayline-new", "New users", "11.2K", "+3%", true, rounds(organic(28, { seed: 14, start: 280, end: 410, season: 36, noise: 22, phase: 1.2 })), rounds(organic(28, { seed: 61, start: 250, end: 340, season: 42, noise: 28, phase: 3.4 })), "New users over 28 days, with a dashed previous period.")),
-      chart(tabLine("wayline-engage", "Avg engagement", formatValue(204000, "duration-hm", "en-US"), "+5%", true, rounds(organic(28, { seed: 22, start: 150, end: 190, season: 12, noise: 8, phase: 0.9 })), rounds(organic(28, { seed: 71, start: 140, end: 168, season: 16, noise: 10, phase: 2.1 })), "Average engagement over 28 days.")),
+      chart(tabLine("wayline-engage", "Avg. engagement\ntime", formatValue(204000, "duration-hm", "en-US"), "+5%", true, rounds(organic(28, { seed: 22, start: 150, end: 190, season: 12, noise: 8, phase: 0.9 })), rounds(organic(28, { seed: 71, start: 140, end: 168, season: 16, noise: 10, phase: 2.1 })), "Average engagement over 28 days.")),
       chart(tabLine("wayline-revenue", "Revenue", "$48.2K", "+4%", true, rounds(organic(28, { seed: 29, start: 1100, end: 1680, season: 120, noise: 80, phase: 0.3, spike: { at: 11, height: 280 } })), rounds(organic(28, { seed: 83, start: 980, end: 1400, season: 150, noise: 90, phase: 2.8 })), "Revenue over 28 days, with a dashed previous period.")),
       chart({
         id: "wayline-live",
@@ -844,7 +848,7 @@ function wayline(): Dashboard {
         id: "wayline-cohort",
         title: "Cohort",
         caption: "Users remaining by period.",
-        note: "type heatmap. Rows are cohorts and columns are periods. color.range is #e8f0fe, #aecbfa, #1a73e8. Later periods are lighter.",
+        note: "type heatmap. Rows are week ranges. Columns are Week 0 through Week 4 across the top of the grid. Later cohorts leave the unfinished periods null, so the grid is a triangle. color.range is #e8f0fe, #aecbfa, #1a73e8.",
         span: "dash-3",
         place: "cohort",
         themes: heat,
@@ -860,9 +864,9 @@ function wayline(): Dashboard {
               color: { field: "users", title: "Users", range: ["#e8f0fe", "#aecbfa", "#1a73e8"] },
             },
             mark: { gap: 0.18, cornerRadius: 2 },
-            size: { width: 300, height: 180 },
+            size: { width: 340, height: 210 },
           },
-          "Each cohort fades across the seven periods.",
+          "Each cohort is a triangle: later weeks are null once the cohort has not reached them.",
         ),
       }),
       chart({
@@ -882,7 +886,7 @@ function wayline(): Dashboard {
       { label: "Snapshot grid", detail: "Eight cards in two rows of four: users with a metric strip, last 30 minutes, insights, new users by channel, a sessions table, a map with a country table, user activity over time, and a cohort heatmap. There is no donut." },
       { label: "Comparison", detail: "curve linear keeps the segments straight. The previous period is dash dashed in #9aa0a6. axes.y.title is empty. Midnight uses #8ab4f8 for this period." },
       { label: "Map", detail: "Fifty-two countries use encoding.color.range #aecbfa, #669df6, #1a73e8. mark.nodata fill paints missing countries with mark.land. There is no hatch." },
-      { label: "Cohort", detail: "The heatmap rows are cohorts and the columns are periods 0 through 6. color.range is #e8f0fe, #aecbfa, #1a73e8." },
+      { label: "Cohort", detail: "Rows are week ranges such as Sep 22 - Sep 28. Week 0 through Week 4 sit across the top. Later cohorts leave unfinished weeks null, so the cells form a triangle. color.range is #e8f0fe, #aecbfa, #1a73e8." },
     ],
   };
 }

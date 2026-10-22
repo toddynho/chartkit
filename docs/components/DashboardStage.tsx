@@ -241,6 +241,7 @@ export function DashboardStage({ board }: { board: Dashboard }) {
   const [list, setList] = useState(0);
   const [reportsOpen, setReportsOpen] = useState(true);
   const tabs = board.charts.filter((item) => item.place === "tab");
+  const metrics = board.charts.filter((item) => item.place === "metric");
   const hero = board.charts.find((item) => item.place === "hero");
   const lists = board.charts.filter((item) => item.place === "list");
   const sides = board.charts.filter((item) => item.place === "side");
@@ -360,10 +361,22 @@ export function DashboardStage({ board }: { board: Dashboard }) {
               </label>
             </header>
           ) : null}
-          {board.slug === "ledger" && hero ? (
-            <figure className="dash-card dash-solo dash-hero">
-              <ChartView chart={hero} theme={theme} narrow={narrow} spec={present(hero.spec, theme, hero.themes, narrow)} svg={hero.svg} />
-            </figure>
+          {board.slug === "ledger" ? (
+            <>
+              {hero ? (
+                <figure className="dash-card dash-solo dash-hero">
+                  <ChartView chart={hero} theme={theme} narrow={narrow} spec={present(hero.spec, theme, hero.themes, narrow)} svg={hero.svg} />
+                </figure>
+              ) : null}
+              <div className="dash-grid dash-home">
+                {metrics.map((item) => (
+                  <article key={item.id} className={`dash-card ${item.span} dash-score`}>
+                    <ChartHost spec={present(item.spec, theme, item.themes, narrow)} svg={item.svg} className="chart-host chart-preset" />
+                  </article>
+                ))}
+                {sideCards}
+              </div>
+            </>
           ) : null}
           {board.slug === "meter" && active ? (
             <div className="dash-grid">
@@ -393,7 +406,7 @@ export function DashboardStage({ board }: { board: Dashboard }) {
           ) : null}
           {board.slug === "wayline" ? (
             <div className="dash-snapshot">
-              <article className="dash-card dash-users">
+              <article className="dash-card dash-usercard">
                 <Tabs charts={tabs} active={tab} onPick={setTab} />
                 {active ? <ChartView chart={active} theme={theme} narrow={narrow} spec={present(active.spec, theme, active.themes, narrow)} svg={active.svg} /> : null}
               </article>
