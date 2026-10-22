@@ -107,6 +107,7 @@ describe("visual axes", () => {
     const plain = render({ ...spec, axes: undefined });
     expect(svg).toContain('data-ck-minor="1"');
     expect(svg.split('data-ck-break="1"').length - 1).toBeGreaterThanOrEqual(2);
+    expect(svg).toMatch(/<rect[^>]*data-ck-break="1"[^>]*fill="/);
     const clipY = Number(/<clipPath[\s\S]*?<rect[^>]* y="([\d.]+)"/.exec(svg)?.[1]);
     const spineTop = [...svg.matchAll(/data-ck-axis="line"[^>]* y1="([\d.]+)" y2="([\d.]+)"/g)].map((mark) => Math.min(Number(mark[1]), Number(mark[2])));
     expect(Math.min(...spineTop)).toBeGreaterThan(clipY + 4);
@@ -252,6 +253,8 @@ describe("visual axes", () => {
     expect(bins).toContain('data-ck-scale="threshold"');
     const thresholdFills = [...bins.matchAll(/<rect[^>]*fill="(#[0-9a-f]{6})"[^>]*data-ck-scale="bin"/g)].map((mark) => mark[1]);
     expect(new Set(thresholdFills).size).toBe(3);
+    const channel = (hex: string, index: number) => Number.parseInt(hex.slice(1 + index * 2, 3 + index * 2), 16);
+    expect(channel(thresholdFills[0] ?? "#000", 2)).toBeGreaterThan(channel(thresholdFills[2] ?? "#fff", 2));
     const quant = render({
       version: "1",
       type: "heatmap",
@@ -273,6 +276,8 @@ describe("visual axes", () => {
     expect(group).toContain("860");
     const quantFills = [...group.matchAll(/<rect[^>]*fill="(#[0-9a-f]{6})"/g)].map((mark) => mark[1]);
     expect(new Set(quantFills).size).toBe(4);
+    expect(channel(quantFills[0] ?? "#000", 2)).toBeGreaterThan(channel(quantFills[0] ?? "#000", 0));
+    expect(channel(quantFills[3] ?? "#000", 0)).toBeGreaterThan(channel(quantFills[3] ?? "#000", 2));
     const zero = validate(line({ axes: { x: { position: "zero" } } }));
     expect(zero.errors.find((item) => item.code === "CK3068")?.fix).toEqual([
       { op: "remove", path: "/axes/x/position" },
@@ -316,6 +321,36 @@ describe("visual axes", () => {
       const cy = Number(dot[2]);
       const covers = cx > x && cx < x + w && cy > y && cy < y + h;
       expect(covers).toBe(false);
+      expect(Math.hypot(x + w / 2 - cx, y + h / 2 - cy)).toBeLessThan(140);
+    }
+    const high = render({
+      version: "1",
+      type: "line",
+      data: [
+        { hour: 0, load: 8 },
+        { hour: 1, load: 100 },
+        { hour: 2, load: 12 },
+      ],
+      encoding: {
+        x: { field: "hour", type: "quantitative" },
+        y: { field: "load", scale: { domain: [0, 108], nice: false, zero: false } },
+      },
+      annotations: [{ type: "marker", x: 1, y: 100, label: "Peak", dx: -72, dy: 14 }],
+      size: { width: 520, height: 280, padding: { top: 36 } },
+      a11y: { alt },
+    });
+    const highBox = /data-ck-annotation="marker-box" x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)"/.exec(high);
+    const highDot = /data-ck-annotation="marker" cx="([\d.]+)" cy="([\d.]+)"/.exec(high);
+    expect(highBox && highDot).toBeTruthy();
+    if (highBox && highDot) {
+      const hx = Number(highBox[1]);
+      const hy = Number(highBox[2]);
+      const hw = Number(highBox[3]);
+      const hh = Number(highBox[4]);
+      const cx = Number(highDot[1]);
+      const cy = Number(highDot[2]);
+      expect(cx > hx && cx < hx + hw && cy > hy && cy < hy + hh).toBe(false);
+      expect(Math.hypot(hx + hw / 2 - cx, hy + hh / 2 - cy)).toBeLessThan(120);
     }
     const touch = validate(line({ tooltip: { pinTooltip: true, hitSize: 24 } }));
     expect(touch.errors.filter((item) => item.code === "CK3067")).toHaveLength(2);

@@ -414,36 +414,38 @@ function seriesSegments(geom: AnnotationGeom): Seg[] {
 
 function placeBox(plot: PlotBox, px: number, py: number, w: number, h: number, dx: number | null, dy: number | null, taken: Box[], segs: Seg[]): Box {
   const point: Box = { x: px - 8, y: py - 8, w: 16, h: 16 };
-  const gap = 8;
+  // The label may sit just above the plot. The peak is often on the top edge, and the note is drawn outside the clip.
+  const ceiling = Math.max(4, plot.top - 30);
   const options: Box[] = [];
-  if (dx !== null || dy !== null) options.push({ x: px + (dx ?? 12), y: py + (dy ?? -h - gap), w, h });
-  options.push(
-    { x: px + gap, y: py - h - gap, w, h },
-    { x: px - w - gap, y: py - h - gap, w, h },
-    { x: px + gap, y: py + gap, w, h },
-    { x: px - w - gap, y: py + gap, w, h },
-    { x: px - w / 2, y: py - h - gap, w, h },
-    { x: px - w / 2, y: py + gap, w, h },
-    { x: px + gap, y: py - h / 2, w, h },
-    { x: px - w - gap, y: py - h / 2, w, h },
-    { x: plot.left + 8, y: plot.top + 8, w, h },
-    { x: plot.right - w - 8, y: plot.top + 8, w, h },
-  );
-  const blocked = (box: Box) => taken.some((other) => hit(box, other)) || hit(box, point) || segs.some((seg) => segHits(box, seg, 6));
+  if (dx !== null || dy !== null) options.push({ x: px + (dx ?? 10), y: py + (dy ?? -h - 10), w, h });
+  for (const gap of [8, 18, 32, 48]) {
+    options.push({ x: px - w - gap, y: py - h - gap, w, h });
+    options.push({ x: px - w / 2, y: py - h - gap, w, h });
+    options.push({ x: px + gap, y: py - h - gap, w, h });
+    options.push({ x: px - w - gap, y: py - h * 0.5, w, h });
+  }
+  const blocked = (box: Box) => taken.some((other) => hit(box, other)) || hit(box, point) || segs.some((seg) => segHits(box, seg, 4));
+  const onSheet = (box: Box) => box.x >= plot.left + 1 && box.y >= ceiling && box.x + box.w <= plot.right - 1 && box.y + box.h <= plot.bottom - 1;
   for (const box of options) {
-    if (!fits(plot, box)) continue;
-    if (blocked(box)) continue;
+    if (!onSheet(box) || blocked(box)) continue;
     return box;
   }
-  let best = clampBox(plot, options[0] ?? { x: px, y: py, w, h });
+  let best = { x: px - w - 8, y: Math.max(ceiling, py - h - 8), w, h };
   let score = Infinity;
   for (const raw of options) {
-    const box = clampBox(plot, raw);
-    let area = hit(box, point) ? 8 : 0;
-    for (const other of taken) if (hit(box, other)) area += 2;
-    for (const seg of segs) if (segHits(box, seg, 6)) area += 3;
-    if (area < score) {
-      score = area;
+    const box = {
+      x: Math.min(Math.max(plot.left + 2, raw.x), plot.right - w - 2),
+      y: Math.min(Math.max(ceiling, raw.y), plot.bottom - h - 2),
+      w,
+      h,
+    };
+    const dist = Math.hypot(box.x + w / 2 - px, box.y + h / 2 - py);
+    let penalty = 0;
+    if (hit(box, point)) penalty += 500;
+    for (const other of taken) if (hit(box, other)) penalty += 120;
+    for (const seg of segs) if (segHits(box, seg, 4)) penalty += 160;
+    if (dist + penalty < score) {
+      score = dist + penalty;
       best = box;
     }
   }

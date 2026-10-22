@@ -176,10 +176,10 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
   let paint: (value: number) => string;
   let swatches: string[] = [];
   if (kind === "quantize") {
-    swatches = binSwatches(bins, preset);
+    swatches = binSwatches(bins, preset, coolBins(min, max, bins, []));
     paint = (value) => swatches[Math.min(bins - 1, Math.floor(unit(value) * bins))] ?? swatches[0] ?? "#007aff";
   } else if (kind === "threshold") {
-    swatches = binSwatches(cuts.length + 1, preset);
+    swatches = binSwatches(cuts.length + 1, preset, coolBins(min, max, cuts.length + 1, cuts));
     paint = (value) => {
       const index = cuts.findIndex((edge) => value < edge);
       return swatches[index < 0 ? cuts.length : index] ?? swatches[0] ?? "#007aff";
@@ -235,15 +235,57 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
   };
 }
 
-/** Distinct steps. A sampled sequential ramp collapses the low bins into one blue. */
-const SOFT_BINS = ["#0369a1", "#7c3aed", "#ea580c", "#15803d", "#be123c", "#a16207"];
-const NIGHT_BINS = ["#7dd3fc", "#c084fc", "#fb923c", "#4ade80", "#fb7185", "#fbbf24"];
+/** Light to dark. Steps are far enough apart that neighbouring bins do not collapse. */
+const SOFT_SEQ = ["#93c5fd", "#3b82f6", "#1d4ed8", "#1e3a8a", "#172554"];
+const NIGHT_SEQ = ["#e0f2fe", "#7dd3fc", "#38bdf8", "#0284c7", "#0369a1"];
+const SOFT_COOL = ["#93c5fd", "#2563eb", "#1e3a8a"];
+const NIGHT_COOL = ["#e0f2fe", "#38bdf8", "#0369a1"];
+const SOFT_WARM = ["#fdba74", "#fb923c", "#ea580c", "#c2410c", "#7c2d12"];
+const NIGHT_WARM = ["#fdba74", "#fb923c", "#ea580c", "#c2410c", "#9a3412"];
 
-function binSwatches(count: number, preset: PresetTokens): string[] {
-  const palette = dark(preset) ? NIGHT_BINS : SOFT_BINS;
+/** Bins that sit entirely below zero, plus the bin that contains zero when the domain crosses it. */
+function coolBins(min: number, max: number, count: number, cuts: number[]): number {
+  if (!(min < 0 && max > 0) || count < 2) return 0;
+  if (cuts.length) {
+    let below = 0;
+    for (const cut of cuts) {
+      if (cut <= 0) below += 1;
+      else break;
+    }
+    return Math.min(count - 1, Math.max(1, below));
+  }
+  const step = (max - min) / count;
+  let below = 0;
+  for (let i = 0; i < count; i++) {
+    if (min + step * (i + 1) <= 0) below += 1;
+    else break;
+  }
+  return Math.min(count - 1, Math.max(1, below));
+}
+
+function pickStops(palette: string[], count: number): string[] {
+  if (count <= 0) return [];
+  if (count === 1) return [palette[Math.min(palette.length - 1, 1)] ?? palette[0] ?? "#1d4ed8"];
   const out: string[] = [];
-  for (let i = 0; i < count; i++) out.push(palette[i % palette.length] ?? palette[0] ?? "#0369a1");
+  for (let i = 0; i < count; i++) {
+    const index = Math.round((i / (count - 1)) * (palette.length - 1));
+    out.push(palette[index] ?? palette[palette.length - 1] ?? "#1d4ed8");
+  }
   return out;
+}
+
+/**
+ * Ordered bins. A domain that crosses zero diverges: cool on the negative side,
+ * warm light-to-dark on the positive side. Otherwise one sequential ramp.
+ */
+function binSwatches(count: number, preset: PresetTokens, coolCount: number): string[] {
+  const night = dark(preset);
+  if (coolCount > 0 && coolCount < count) {
+    const cool = pickStops(night ? NIGHT_COOL : SOFT_COOL, coolCount).reverse();
+    const warm = pickStops(night ? NIGHT_WARM : SOFT_WARM, count - coolCount);
+    return [...cool, ...warm];
+  }
+  return pickStops(night ? NIGHT_SEQ : SOFT_SEQ, count);
 }
 
 /** `<6`, `6–12`, `≥12` — the cuts, not the data ends. */

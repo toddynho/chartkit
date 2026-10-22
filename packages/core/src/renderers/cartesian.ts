@@ -1537,10 +1537,14 @@ function zigzag(x1: number, y1: number, x2: number, y2: number, stroke: string):
   return `<path data-ck-break="1" d="M ${n(x1)} ${n(y1)} ${zigPoints(x1, y1, x2, y2, 4)}" fill="none" stroke="${stroke}" stroke-width="1.25" />`;
 }
 
-/** A zigzag across the plot at each break, in the same band the series line uses. */
+/**
+ * A background gap across the plot, with two short parallel diagonals beside the
+ * axis squiggle. A full-width wave reads as another series.
+ */
 function plotBreaks(model: PlotModel, plot: { left: number; top: number; right: number; bottom: number }): string {
   const spans = [...(model.ySpans ?? []), ...(model.y2Spans ?? [])];
   if (!spans.length) return "";
+  const fill = cssVar("background", model.preset.background);
   const stroke = cssVar("axis", model.preset.axis);
   let out = "";
   for (let i = 0; i < spans.length; i++) {
@@ -1548,9 +1552,12 @@ function plotBreaks(model: PlotModel, plot: { left: number; top: number; right: 
     if (!span) continue;
     const y1 = Math.min(span[0], span[1]);
     const y2 = Math.max(span[0], span[1]);
+    const height = Math.max(1, y2 - y1);
+    out += `<rect data-ck-break="1" x="${n(plot.left)}" y="${n(y1)}" width="${n(plot.right - plot.left)}" height="${n(height)}" fill="${fill}" />`;
     const mid = (y1 + y2) / 2;
-    const amp = Math.max(3, (y2 - y1) * 0.35);
-    out += `<path data-ck-break="1" d="M ${n(plot.left)} ${n(mid)} ${zigPoints(plot.left, mid, plot.right, mid, amp)}" fill="none" stroke="${stroke}" stroke-width="1.25" />`;
+    const x = plot.left + 12;
+    const dy = Math.max(3.5, height * 0.32);
+    out += `<path data-ck-break="1" d="M ${n(x)} ${n(mid + dy)} L ${n(x + 6)} ${n(mid - dy)} M ${n(x + 9)} ${n(mid + dy)} L ${n(x + 15)} ${n(mid - dy)}" fill="none" stroke="${stroke}" stroke-width="1.5" stroke-linecap="round" />`;
   }
   return out;
 }

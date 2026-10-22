@@ -198,7 +198,6 @@ Hearth paints over the flue. The axis crosses zero, with minor ticks. The night 
       "from": -40,
       "to": 0,
       "label": "Banked",
-      "opacity": 0.45,
       "z": -1
     },
     {
@@ -206,8 +205,8 @@ Hearth paints over the flue. The axis crosses zero, with minor ticks. The night 
       "x": 12,
       "y": 2480,
       "label": "Hearth peak",
-      "dx": -72,
-      "dy": 16,
+      "dx": -8,
+      "dy": -28,
       "z": 3
     }
   ],

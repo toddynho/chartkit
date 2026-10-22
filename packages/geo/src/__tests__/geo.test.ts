@@ -420,6 +420,7 @@ describe("render", () => {
     const midnightLand = chromeFor("midnight").land;
     expect(softLand).toBe("light-dark(#efe6d6, #2a3338)");
     expect(midnightLand).toBe("#3e5264");
+    expect(chromeFor("midnight").water).toBe("#0c0c0c");
 
     const countries = ["NOR", "FRA", "USA", "GBR", "DEU", "BRA", "IND", "CHN", "EGY", "AUS", "ZAF", "JPN"];
     const worldSvg = await render({
