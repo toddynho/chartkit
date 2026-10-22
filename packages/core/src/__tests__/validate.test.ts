@@ -1338,4 +1338,111 @@ describe("diagnostic codes", () => {
     expect(points.errors.filter((item) => item.code === "CK1005" || item.code === "CK1002")).toEqual([]);
     expect(points.ok).toBe(true);
   });
+
+  it("CK1005 maps bubble and choropleth aliases onto the map types", () => {
+    for (const alias of ["bubble-map", "bubble map", "map"]) {
+      const result = validate({ ...base, type: alias });
+      expect(result.errors.find((item) => item.code === "CK1005")?.fix, alias).toEqual([{ op: "replace", path: "/type", value: "map-points" }]);
+      expect(result.errors.find((item) => item.code === "CK1005")?.hint).toContain("map-points");
+    }
+    for (const alias of ["choropleth-map", "heat map of countries"]) {
+      const result = validate({ ...base, type: alias });
+      expect(result.errors.find((item) => item.code === "CK1005")?.fix, alias).toEqual([{ op: "replace", path: "/type", value: "choropleth" }]);
+      expect(result.errors.find((item) => item.code === "CK1005")?.hint).toContain("choropleth");
+    }
+  });
+
+  it("CK1009 moves loose feature keys onto interaction, layout, and mark", () => {
+    const navigator = repair({ ...base, navigator: { height: 40 } });
+    expect(navigator.ok).toBe(true);
+    expect(navigator.spec).not.toHaveProperty("navigator");
+    expect((navigator.spec as { interaction: unknown }).interaction).toEqual({ navigator: { height: 40 } });
+
+    const drillChild = { type: "bar", data: base.data, encoding: base.encoding, a11y: base.a11y };
+    const drilled = repair({ ...base, drilldown: { children: { Jan: drillChild } } });
+    expect(drilled.ok).toBe(true);
+    expect((drilled.spec as { interaction: { drilldown: { children: unknown } } }).interaction.drilldown.children).toEqual({ Jan: drillChild });
+
+    const breakpoints = repair({ ...base, breakpoints: [{ maxWidth: 480, legend: false }] });
+    expect(breakpoints.ok).toBe(true);
+    expect((breakpoints.spec as { layout: unknown }).layout).toEqual({ breakpoints: [{ maxWidth: 480, legend: false }] });
+
+    const rtl = repair({ ...base, rtl: true });
+    expect(rtl.ok).toBe(true);
+    expect((rtl.spec as { layout: unknown }).layout).toEqual({ direction: "rtl" });
+
+    const direction = repair({ ...base, direction: "rtl" });
+    expect((direction.spec as { layout: { direction: string } }).layout.direction).toBe("rtl");
+
+    const sampled = repair({ ...base, sampling: "lttb" });
+    expect(sampled.ok).toBe(true);
+    expect((sampled.spec as { mark: unknown }).mark).toEqual({ sampling: "lttb" });
+
+    const columnar = validate({
+      ...base,
+      data: { columns: { month: ["Jan", "Feb"], revenue: [10, 12] }, sampling: "lttb" },
+    });
+    expect(columnar.errors.some((item) => item.path === "/data/sampling")).toBe(false);
+    expect(columnar.ok).toBe(true);
+  });
+
+  it("CK1009 unwraps an options object onto the parents", () => {
+    const fixed = repair({
+      ...base,
+      options: {
+        navigator: true,
+        sync: "host-a",
+        rtl: true,
+        sampling: "minmax",
+        render: "auto",
+      },
+    });
+    expect(fixed.ok).toBe(true);
+    expect(fixed.spec).not.toHaveProperty("options");
+    expect((fixed.spec as { interaction: unknown }).interaction).toEqual({ navigator: true, sync: "host-a" });
+    expect((fixed.spec as { layout: unknown }).layout).toEqual({ direction: "rtl" });
+    expect((fixed.spec as { mark: unknown; render: unknown }).mark).toEqual({ sampling: "minmax" });
+    expect((fixed.spec as { render: unknown }).render).toBe("auto");
+  });
+
+  it("CK1009 moves layout.facet.type onto the spec type", () => {
+    const fixed = repair({ ...base, type: "line", layout: { facet: { field: "month", type: "bar", columns: 2 } } });
+    expect(fixed.ok).toBe(true);
+    expect((fixed.spec as { type: string }).type).toBe("bar");
+    expect((fixed.spec as { layout: { facet: unknown } }).layout.facet).toEqual({ field: "month", columns: 2 });
+  });
+
+  it("CK1009 turns type concat and dashboard into layout.concat", () => {
+    const bar = { type: "bar", data: base.data, encoding: base.encoding, a11y: base.a11y };
+    const donut = { data: [{ x: "A", y: 1 }], encoding: { x: "x", y: "y" }, a11y: base.a11y, mark: "donut" };
+    const fixed = repair({ ...base, type: "dashboard", views: [bar, donut], direction: "vertical" });
+    expect(fixed.ok).toBe(true);
+    expect(fixed.spec).not.toHaveProperty("views");
+    const layout = (fixed.spec as { layout: { concat: { views: { type: string }[]; direction: string } } }).layout;
+    expect(layout.concat.direction).toBe("vertical");
+    expect(layout.concat.views.map((view) => view.type)).toEqual(["bar", "donut"]);
+  });
+
+  it("CK1009 keys drilldown children by the clicked x value", () => {
+    const child = { type: "bar", data: [{ store: "N1", sales: 50 }], encoding: { x: "store", y: "sales" }, a11y: base.a11y };
+    const regions = {
+      ...base,
+      data: [
+        { region: "North", sales: 90 },
+        { region: "South", sales: 60 },
+      ],
+      encoding: { x: "region", y: "sales" },
+    };
+    const placeholder = validate({ ...regions, interaction: { drilldown: { children: { chart: child } } } });
+    const hint = placeholder.errors.find((item) => item.path === "/interaction/drilldown/children");
+    expect(hint?.hint).toContain("clicked x value");
+    expect(hint?.fix).toEqual([{ op: "replace", path: "/interaction/drilldown/children", value: { North: child, South: child } }]);
+    const keyed = repair({ ...regions, interaction: { drilldown: { children: { chart: child } } } });
+    expect((keyed.spec as { interaction: { drilldown: { children: Record<string, { type: string }> } } }).interaction.drilldown.children.North.type).toBe("bar");
+
+    const listed = repair({ ...regions, interaction: { drilldown: { children: [child, { ...child, type: "line" }] } } });
+    const children = (listed.spec as { interaction: { drilldown: { children: Record<string, { type: string }> } } }).interaction.drilldown.children;
+    expect(children.North.type).toBe("bar");
+    expect(children.South.type).toBe("line");
+  });
 });

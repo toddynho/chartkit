@@ -952,6 +952,7 @@ function chartTypeName(raw: string, root: unknown): string | undefined {
 }
 
 function emitUnknownType(value: unknown, ctx: Ctx): void {
+  if (ctx.skipUnknown.has("/type")) return;
   const raw = typeof value === "string" ? value : String(value);
   const kebab = raw.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`).replace(/^-/, "");
   const alias = aliasFor(raw, ctx.rootValue);
@@ -1021,6 +1022,9 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   if (value === "columnrange" || value === "column-range" || value === "rangebar" || value === "range-bar" || value === "floating-bar") return { type: "bar-range", kind: "rename" };
   if (value === "error-bar" || value === "error-bars" || value === "errorbars") return { type: "errorbar", kind: "rename" };
   if (value === "sun-burst" || value === "sunburstchart" || value === "sunburst-chart" || value === "partition") return { type: "sunburst", kind: "rename" };
+  const folded = value.trim().toLowerCase().replace(/[_]+/g, " ").replace(/-/g, " ").replace(/\s+/g, " ");
+  if (folded === "bubble map" || folded === "map") return { type: "map-points", kind: "rename" };
+  if (folded === "choropleth map" || folded === "heat map of countries") return { type: "choropleth", kind: "rename" };
   return undefined;
 }
 
@@ -1080,7 +1084,11 @@ function noteMisplaced(spec: Record<string, unknown>, ctx: Ctx): void {
   const layoutBag: Record<string, unknown> | null = isPlainObject(spec.layout) ? null : {};
   const interactionBag: Record<string, unknown> | null = isPlainObject(spec.interaction) ? null : {};
 
+  const placedLayout = new Set<string>();
+  const placedInteraction = new Set<string>();
   const putLayout = (key: string, value: unknown, fix: JsonPatchOperation[]) => {
+    if (placedLayout.has(key)) return;
+    placedLayout.add(key);
     if (layoutBag) {
       layoutBag[key] = value;
       return;
@@ -1089,6 +1097,8 @@ function noteMisplaced(spec: Record<string, unknown>, ctx: Ctx): void {
     if (layout[key] === undefined) fix.push({ op: "add", path: `/layout/${key}`, value });
   };
   const putInteraction = (key: string, value: unknown, fix: JsonPatchOperation[]) => {
+    if (placedInteraction.has(key)) return;
+    placedInteraction.add(key);
     if (interactionBag) {
       interactionBag[key] = value;
       return;
@@ -1109,6 +1119,13 @@ function noteMisplaced(spec: Record<string, unknown>, ctx: Ctx): void {
   if (navMove) moves.push(navMove);
   const drillMove = drillFeature(spec, ctx, putInteraction);
   if (drillMove) moves.push(drillMove);
+  const samplingMove = samplingFeature(spec, ctx);
+  if (samplingMove) moves.push(samplingMove);
+  for (const move of looseFeatures(spec, ctx, putLayout, putInteraction)) moves.push(move);
+  const facetType = facetTypeFeature(spec, ctx);
+  if (facetType) moves.push(facetType);
+  const optionsMove = optionsFeature(spec, ctx, putLayout, putInteraction);
+  if (optionsMove) moves.push(optionsMove);
 
   if (layoutBag && Object.keys(layoutBag).length > 0) {
     moves.find((move) => move.layout)?.fix.unshift({ op: "add", path: "/layout", value: layoutBag });
@@ -1179,34 +1196,59 @@ function concatFeature(
   const sources: string[] = [];
   if (spec.charts !== undefined) sources.push("/charts");
   if (spec.views !== undefined) sources.push("/views");
+  if (spec.concat !== undefined) sources.push("/concat");
   if (layout?.charts !== undefined) sources.push("/layout/charts");
-  const direction = layout?.direction === "vertical" || layout?.direction === "horizontal" ? layout.direction : undefined;
-  if (sources.length === 0 && !direction) return undefined;
+  const dashboard = spec.type === "concat" || spec.type === "dashboard";
+  const topFlow = spec.direction === "vertical" || spec.direction === "horizontal" ? spec.direction : undefined;
+  const concatFlow = isPlainObject(spec.concat) && (spec.concat.direction === "vertical" || spec.concat.direction === "horizontal") ? spec.concat.direction : undefined;
+  const direction = topFlow ?? concatFlow ?? (layout?.direction === "vertical" || layout?.direction === "horizontal" ? layout.direction : undefined);
+  if (sources.length === 0 && !direction && !dashboard) return undefined;
   let views: unknown[] | undefined;
+  if (isPlainObject(spec.concat) && Array.isArray(spec.concat.views)) views = spec.concat.views;
   for (const source of sources) {
-    const raw = source === "/charts" ? spec.charts : source === "/views" ? spec.views : layout?.charts;
+    const raw = source === "/charts" ? spec.charts : source === "/views" ? spec.views : source === "/concat" ? spec.concat : layout?.charts;
     views ??= viewsPayload(raw);
   }
+  if (views) views = views.map((view) => withViewType(view));
   const fix: JsonPatchOperation[] = [];
   const concat: Record<string, unknown> = {};
   if (views) concat.views = views;
   if (direction) concat.direction = direction;
+  if (isPlainObject(spec.concat) && typeof spec.concat.gap === "number") concat.gap = spec.concat.gap;
   if (Object.keys(concat).length > 0) putLayout("concat", concat, fix);
   for (const source of sources) {
     ctx.skipUnknown.add(source);
-    if (views) fix.push({ op: "remove", path: source });
+    if (views || source === "/concat") fix.push({ op: "remove", path: source });
   }
-  if (direction) {
+  if (topFlow) {
+    ctx.skipUnknown.add("/direction");
+    fix.push({ op: "remove", path: "/direction" });
+  }
+  if (direction && !topFlow) {
     ctx.explained.add("/layout/direction");
     fix.push({ op: "remove", path: "/layout/direction" });
   }
+  if (dashboard) {
+    const host = views?.map((view) => (isPlainObject(view) && typeof view.type === "string" ? view.type : "")).find((type) => type && type !== "concat" && type !== "dashboard") ?? "line";
+    fix.push({ op: "replace", path: "/type", value: host });
+    ctx.skipMissing.add("|type");
+    ctx.skipUnknown.add("/type");
+  }
   return {
-    path: sources[0] ?? "/layout/direction",
-    message: "several charts are layout.concat.views",
-    hint: 'layout.concat.views is a list of chart specs. direction "vertical" or "horizontal" is layout.concat.direction. layout.direction is "ltr" or "rtl".',
+    path: dashboard ? "/type" : sources[0] ?? (topFlow ? "/direction" : "/layout/direction"),
+    message: dashboard ? "a dashboard is layout.concat" : "several charts are layout.concat.views",
+    hint: 'layout.concat.views is a list of chart specs, each with a type. layout.concat is { views, direction }. direction "vertical" or "horizontal" is layout.concat.direction. type "concat" and type "dashboard" are not chart types. layout.direction is "ltr" or "rtl".',
     fix,
     layout: true,
   };
+}
+
+function withViewType(view: unknown): unknown {
+  if (!isPlainObject(view)) return view;
+  if (typeof view.type === "string" && view.type && view.type !== "concat" && view.type !== "dashboard") return view;
+  const mark = typeof view.mark === "string" ? view.mark : undefined;
+  const named = mark ? aliasFor(mark, view)?.type ?? ((CHART_TYPES as readonly string[]).includes(mark) ? mark : undefined) : undefined;
+  return { ...view, type: named ?? "line" };
 }
 
 function viewsPayload(value: unknown): unknown[] | undefined {
@@ -1372,7 +1414,8 @@ function drillFeature(
     Object.assign(children, item.children);
     if (!key && isPlainObject(item.value) && typeof item.value.key === "string" && item.value.key) key = item.value.key;
   }
-  const drill: Record<string, unknown> = { children };
+  const keyed = keyedDrillChildren(spec, children);
+  const drill: Record<string, unknown> = { children: keyed ?? children };
   if (key) drill.key = key;
   const fix: JsonPatchOperation[] = [];
   putInteraction("drilldown", drill, fix);
@@ -1383,7 +1426,7 @@ function drillFeature(
   return {
     path: found[0]?.path ?? "/click",
     message: "a child chart is interaction.drilldown",
-    hint: "Clicking a category swaps in interaction.drilldown.children, keyed by that category. click, onClick, and interactions are not spec keys.",
+    hint: "Clicking a category swaps in interaction.drilldown.children, keyed by the clicked x value. click, onClick, and interactions are not spec keys.",
     fix,
     interaction: true,
   };
@@ -1411,6 +1454,282 @@ function childMap(value: unknown): Record<string, unknown> | undefined {
   if (value.click !== undefined) return childMap(value.click);
   if (value.onClick !== undefined) return childMap(value.onClick);
   return undefined;
+}
+
+const DRILL_PLACEHOLDER = new Set(["chart", "child", "spec", "default", "detail", "view", "series", "plot", "item", "graph", "drill", "drilldown"]);
+
+/** Children keyed by the clicked x value, when those values can be read from the data. */
+export function keyedDrillChildren(spec: unknown, children: unknown): Record<string, unknown> | undefined {
+  if (!isPlainObject(spec)) return undefined;
+  const encoding = isPlainObject(spec.encoding) ? spec.encoding : undefined;
+  const field = fieldName(encoding?.x);
+  if (!field) return undefined;
+  const rows = rowsForField(spec.data, field);
+  if (!rows) return undefined;
+  const seen: string[] = [];
+  for (const row of rows) {
+    const cell = row[field];
+    if (cell == null || cell === "") continue;
+    const label = String(cell);
+    if (!seen.includes(label)) seen.push(label);
+  }
+  if (seen.length === 0) return undefined;
+  if (!shouldRekeyChildren(children, seen)) return undefined;
+  const specs = drillSpecs(children);
+  if (!specs) return undefined;
+  if (specs.length !== 1 && specs.length !== seen.length) return undefined;
+  const keyed: Record<string, unknown> = {};
+  for (let i = 0; i < seen.length; i++) keyed[seen[i]] = specs.length === 1 ? specs[0] : specs[i];
+  return keyed;
+}
+
+function shouldRekeyChildren(children: unknown, categories: string[]): boolean {
+  if (Array.isArray(children)) return children.some((item) => isPlainObject(item));
+  if (!isPlainObject(children)) return false;
+  const keys = Object.keys(children);
+  if (keys.length === 0 || keys.every((key) => categories.includes(key))) return false;
+  return keys.every((key) => DRILL_PLACEHOLDER.has(key.trim().toLowerCase()));
+}
+
+function drillSpecs(children: unknown): Record<string, unknown>[] | undefined {
+  const list = Array.isArray(children) ? children : isPlainObject(children) ? Object.values(children) : [];
+  const specs = list.filter((item): item is Record<string, unknown> => isPlainObject(item));
+  return specs.length > 0 ? specs : undefined;
+}
+
+function rowsForField(data: unknown, field: string): Record<string, unknown>[] | undefined {
+  if (Array.isArray(data)) {
+    const rows = data.filter((item): item is Record<string, unknown> => isPlainObject(item) && field in item);
+    return rows.length > 0 ? rows : undefined;
+  }
+  if (!isPlainObject(data)) return undefined;
+  if (isPlainObject(data.columns) && Array.isArray((data.columns as Record<string, unknown>)[field])) {
+    const columns = data.columns as Record<string, unknown[]>;
+    const list = columns[field];
+    return list.map((_, index) => {
+      const row: Record<string, unknown> = {};
+      for (const [key, column] of Object.entries(columns)) row[key] = Array.isArray(column) ? column[index] : undefined;
+      return row;
+    });
+  }
+  for (const value of Object.values(data)) {
+    if (!Array.isArray(value)) continue;
+    const rows = value.filter((item): item is Record<string, unknown> => isPlainObject(item) && field in item);
+    if (rows.length > 0) return rows;
+  }
+  return undefined;
+}
+
+function samplingFeature(spec: Record<string, unknown>, ctx: Ctx): FeatureMove | undefined {
+  const top = spec.sampling;
+  const data = isPlainObject(spec.data) ? spec.data : undefined;
+  const nested = data && data.columns === undefined ? data.sampling : undefined;
+  if (top === undefined && nested === undefined) return undefined;
+  const value = top !== undefined ? top : nested;
+  const fix: JsonPatchOperation[] = [];
+  const mark = isPlainObject(spec.mark) ? spec.mark : undefined;
+  if (!mark) fix.push({ op: "add", path: "/mark", value: { sampling: value } });
+  else if (mark.sampling === undefined) fix.push({ op: "add", path: "/mark/sampling", value });
+  if (top !== undefined) {
+    ctx.skipUnknown.add("/sampling");
+    fix.push({ op: "remove", path: "/sampling" });
+  }
+  if (nested !== undefined && data) {
+    fix.push({ op: "remove", path: "/data/sampling" });
+  }
+  return {
+    path: top !== undefined ? "/sampling" : "/data/sampling",
+    message: "sampling belongs in mark.sampling",
+    hint: 'mark.sampling is "lttb", "minmax", "auto", or "none". A top-level sampling and data.sampling on a row object move there. A columnar table may still set data.sampling.',
+    fix,
+  };
+}
+
+function looseFeatures(
+  spec: Record<string, unknown>,
+  ctx: Ctx,
+  putLayout: (key: string, value: unknown, fix: JsonPatchOperation[]) => void,
+  putInteraction: (key: string, value: unknown, fix: JsonPatchOperation[]) => void,
+): FeatureMove[] {
+  const moves: FeatureMove[] = [];
+  if (spec.navigator !== undefined) {
+    const fix: JsonPatchOperation[] = [];
+    const value = typeof spec.navigator === "boolean" ? spec.navigator : navigatorValue(spec.navigator);
+    putInteraction("navigator", value, fix);
+    ctx.skipUnknown.add("/navigator");
+    fix.push({ op: "remove", path: "/navigator" });
+    moves.push({
+      path: "/navigator",
+      message: "navigator belongs in interaction.navigator",
+      hint: 'interaction.navigator is true or { height }. It is not a top-level key.',
+      fix,
+      interaction: true,
+    });
+  }
+  if (spec.drilldown !== undefined) {
+    const fix: JsonPatchOperation[] = [];
+    putInteraction("drilldown", drillPayload(spec, spec.drilldown), fix);
+    ctx.skipUnknown.add("/drilldown");
+    fix.push({ op: "remove", path: "/drilldown" });
+    moves.push({
+      path: "/drilldown",
+      message: "drilldown belongs in interaction.drilldown",
+      hint: "interaction.drilldown.children is keyed by the clicked x value. drilldown is not a top-level key.",
+      fix,
+      interaction: true,
+    });
+  }
+  if (spec.breakpoints !== undefined) {
+    const fix: JsonPatchOperation[] = [];
+    putLayout("breakpoints", spec.breakpoints, fix);
+    ctx.skipUnknown.add("/breakpoints");
+    fix.push({ op: "remove", path: "/breakpoints" });
+    moves.push({
+      path: "/breakpoints",
+      message: "breakpoints belong in layout.breakpoints",
+      hint: "Hide the legend on a narrow chart with layout.breakpoints: [{ maxWidth, legend: false }].",
+      fix,
+      layout: true,
+    });
+  }
+  if (spec.rtl !== undefined) {
+    const fix: JsonPatchOperation[] = [];
+    putLayout("direction", spec.rtl === false || spec.rtl === "ltr" ? "ltr" : "rtl", fix);
+    ctx.skipUnknown.add("/rtl");
+    fix.push({ op: "remove", path: "/rtl" });
+    moves.push({
+      path: "/rtl",
+      message: "rtl belongs in layout.direction",
+      hint: 'Right to left is layout.direction: "rtl". rtl: true is not a spec key.',
+      fix,
+      layout: true,
+    });
+  }
+  if (typeof spec.direction === "string" && (spec.direction === "rtl" || spec.direction === "ltr")) {
+    const fix: JsonPatchOperation[] = [];
+    putLayout("direction", spec.direction, fix);
+    ctx.skipUnknown.add("/direction");
+    fix.push({ op: "remove", path: "/direction" });
+    moves.push({
+      path: "/direction",
+      message: "direction belongs in layout.direction",
+      hint: 'layout.direction is "ltr" or "rtl". "vertical" and "horizontal" are layout.concat.direction.',
+      fix,
+      layout: true,
+    });
+  }
+  return moves;
+}
+
+function drillPayload(spec: Record<string, unknown>, value: unknown): unknown {
+  if (Array.isArray(value)) {
+    const keyed = keyedDrillChildren(spec, value);
+    return { children: keyed ?? {} };
+  }
+  if (!isPlainObject(value)) return { children: {} };
+  if (value.children !== undefined || typeof value.key === "string") {
+    const keyed = keyedDrillChildren(spec, value.children);
+    return keyed ? { ...value, children: keyed } : value;
+  }
+  if (typeof value.type === "string") {
+    const keyed = keyedDrillChildren(spec, [value]);
+    return { children: keyed ?? { detail: value } };
+  }
+  const keyed = keyedDrillChildren(spec, value);
+  return { children: keyed ?? value };
+}
+
+function facetTypeFeature(spec: Record<string, unknown>, ctx: Ctx): FeatureMove | undefined {
+  const layout = isPlainObject(spec.layout) ? spec.layout : undefined;
+  const facet = layout && isPlainObject(layout.facet) ? layout.facet : undefined;
+  if (!facet || typeof facet.type !== "string" || facet.type === "") return undefined;
+  const named = aliasFor(facet.type, spec)?.type ?? facet.type;
+  const fix: JsonPatchOperation[] = [];
+  if (spec.type !== named) fix.push({ op: typeof spec.type === "string" ? "replace" : "add", path: "/type", value: named });
+  ctx.skipUnknown.add("/layout/facet/type");
+  fix.push({ op: "remove", path: "/layout/facet/type" });
+  ctx.skipMissing.add("|type");
+  return {
+    path: "/layout/facet/type",
+    message: "the chart type belongs on the spec",
+    hint: "layout.facet sets field and columns. Move layout.facet.type to the spec's top-level type.",
+    fix,
+  };
+}
+
+function optionsFeature(
+  spec: Record<string, unknown>,
+  ctx: Ctx,
+  putLayout: (key: string, value: unknown, fix: JsonPatchOperation[]) => void,
+  putInteraction: (key: string, value: unknown, fix: JsonPatchOperation[]) => void,
+): FeatureMove | undefined {
+  if (!isPlainObject(spec.options)) return undefined;
+  const options = spec.options;
+  const fix: JsonPatchOperation[] = [];
+  const take = (key: string): unknown => {
+    if (options[key] === undefined) return undefined;
+    ctx.skipUnknown.add(`/options/${key}`);
+    return options[key];
+  };
+  const interaction = isPlainObject(options.interaction) ? options.interaction : undefined;
+  if (interaction) {
+    ctx.skipUnknown.add("/options/interaction");
+    if (interaction.navigator !== undefined) putInteraction("navigator", typeof interaction.navigator === "boolean" ? interaction.navigator : navigatorValue(interaction.navigator), fix);
+    if (interaction.drilldown !== undefined) putInteraction("drilldown", drillPayload(spec, interaction.drilldown), fix);
+    const id = interaction.sync !== undefined ? syncId(interaction.sync) : undefined;
+    if (id) putInteraction("sync", id, fix);
+  }
+  const layout = isPlainObject(options.layout) ? options.layout : undefined;
+  if (layout) {
+    ctx.skipUnknown.add("/options/layout");
+    if (layout.facet !== undefined) putLayout("facet", facetPayload(layout.facet), fix);
+    if (layout.concat !== undefined) putLayout("concat", layout.concat, fix);
+    if (layout.breakpoints !== undefined) putLayout("breakpoints", layout.breakpoints, fix);
+    if (layout.direction === "ltr" || layout.direction === "rtl") putLayout("direction", layout.direction, fix);
+  }
+  const navigator = take("navigator");
+  if (navigator !== undefined) putInteraction("navigator", typeof navigator === "boolean" ? navigator : navigatorValue(navigator), fix);
+  const drilldown = take("drilldown");
+  if (drilldown !== undefined) putInteraction("drilldown", drillPayload(spec, drilldown), fix);
+  const sync = take("sync");
+  if (sync !== undefined) {
+    const id = syncId(sync);
+    if (id) putInteraction("sync", id, fix);
+  }
+  const breakpoints = take("breakpoints");
+  if (breakpoints !== undefined) putLayout("breakpoints", breakpoints, fix);
+  const facet = take("facet");
+  if (facet !== undefined) putLayout("facet", facetPayload(facet), fix);
+  let concat = take("concat");
+  const direction = take("direction");
+  if (direction === "ltr" || direction === "rtl") putLayout("direction", direction, fix);
+  else if (direction === "horizontal" || direction === "vertical") {
+    concat = isPlainObject(concat) ? { ...concat, direction } : concat !== undefined ? { views: concat, direction } : { direction };
+  }
+  if (concat !== undefined) putLayout("concat", concat, fix);
+  const rtl = take("rtl");
+  if (rtl !== undefined) putLayout("direction", rtl === false || rtl === "ltr" ? "ltr" : "rtl", fix);
+  const sampling = take("sampling");
+  const dataSampling = isPlainObject(spec.data) && spec.data.columns === undefined && spec.data.sampling !== undefined;
+  if (sampling !== undefined && spec.sampling === undefined && !dataSampling) {
+    const mark = isPlainObject(spec.mark) ? spec.mark : undefined;
+    if (!mark) fix.push({ op: "add", path: "/mark", value: { sampling } });
+    else if (mark.sampling === undefined) fix.push({ op: "add", path: "/mark/sampling", value: sampling });
+  }
+  const renderMode = take("render");
+  if ((renderMode === "svg" || renderMode === "canvas" || renderMode === "auto") && spec.render === undefined) {
+    fix.push({ op: "add", path: "/render", value: renderMode });
+  }
+  ctx.skipUnknown.add("/options");
+  fix.push({ op: "remove", path: "/options" });
+  return {
+    path: "/options",
+    message: "options unwraps onto interaction, layout, and mark",
+    hint: "There is no options object. interaction holds navigator, sync, and drilldown. layout holds facet, concat, breakpoints, and direction. mark.sampling and render sit on the spec.",
+    fix,
+    layout: true,
+    interaction: true,
+  };
 }
 
 function noteChartType(spec: Record<string, unknown>, ctx: Ctx): void {

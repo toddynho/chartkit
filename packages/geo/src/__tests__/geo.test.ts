@@ -104,6 +104,8 @@ describe("validate", () => {
     const atlas = validate({ type: "choropleth", mark: { atlas: "usa" }, encoding: { region: "country", color: "share" }, data: [] });
     expect(atlas.warnings.map((item) => item.code)).toContain("CK3050");
     expect(atlas.warnings[0]?.fix?.[0]).toMatchObject({ path: "/mark/atlas", value: "us" });
+    const atlasHint = atlas.warnings.find((item) => item.code === "CK3050")?.hint ?? "";
+    for (const name of ["world", "us", "canada", "eu"]) expect(atlasHint).toContain(name);
 
     const region = validate({
       type: "choropleth",

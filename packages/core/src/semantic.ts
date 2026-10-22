@@ -9,7 +9,7 @@ import { transformIssues } from "./transform";
 import { foreignHierarchy, readHierarchy } from "./hierarchy";
 import { CANVAS_AT, CANVAS_TYPES, pointCount, readRender } from "./render-mode";
 import { domainEnds } from "./svg";
-import { nearMatches, suggestHint } from "./walker";
+import { keyedDrillChildren, nearMatches, suggestHint } from "./walker";
 
 const CHART_TYPES = new Set([
   "line",
@@ -518,14 +518,26 @@ function warnInteraction(spec: Record<string, unknown>, type: string, table: Dat
   }
   if (interaction.drilldown === undefined) return;
   const drill = interaction.drilldown;
-  const children = isRecord(drill) ? drill.children : undefined;
+  const children = isRecord(drill) ? drill.children : Array.isArray(drill) ? drill : undefined;
+  const keyed = keyedDrillChildren(spec, children);
+  if (keyed) {
+    diagnostics.push({
+      code: "CK1009",
+      severity: "error",
+      message: "drilldown children are keyed by the clicked x value",
+      path: "/interaction/drilldown/children",
+      hint: "children are keyed by the clicked x value, one chart spec per category.",
+      fix: [{ op: children !== undefined ? "replace" : "add", path: "/interaction/drilldown/children", value: keyed }],
+    });
+    return;
+  }
   if (!isRecord(children) || Object.keys(children).length === 0) {
     diagnostics.push({
       code: "CK3037",
       severity: "warning",
       message: "drilldown needs a children map",
       path: "/interaction/drilldown",
-      hint: "map a category to a child spec",
+      hint: "children are keyed by the clicked x value",
       fix: [{ op: "remove", path: "/interaction/drilldown" }],
     });
     return;

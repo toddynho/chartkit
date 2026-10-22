@@ -1,6 +1,6 @@
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { CODE_LIBRARIES } from "./capabilities.mjs";
-import { LIBRARY_LABEL, checkChartKit, executeAnswer, extractJson, extractModule, libraryUse, promptFor, scoreModule } from "./check.mjs";
+import { LIBRARY_LABEL, checkChartKit, checkSupp, executeAnswer, extractJson, extractModule, libraryUse, promptFor, scoreModule } from "./check.mjs";
 import { docsManifest } from "./docs.mjs";
 import { askModel, selectProvider } from "./provider.mjs";
 import { tasks as defaultTasks } from "./tasks.mjs";
@@ -129,7 +129,8 @@ async function attempt(selected, task, library, prompt, ask, getBrowser) {
   try {
     if (library === "chartkit") {
       const spec = extractJson(text);
-      return { ...checkChartKit(spec, task), usage, output: text };
+      const scored = typeof task.pass === "function" ? await checkSupp(spec, task) : checkChartKit(spec, task);
+      return { ...scored, usage, output: text };
     }
     const source = extractModule(text);
     const use = libraryUse(source, library);
