@@ -21,6 +21,7 @@ export const FOOTER: FooterColumn[] = [
       { href: "/docs", label: "Docs", hint: "Getting started" },
       { href: "/examples", label: "Examples", hint: "One spec per chart" },
       { href: "/showcase", label: "Showcase", hint: "Finished charts" },
+      { href: "/dashboards", label: "Dashboards", hint: "Product-style pages" },
       { href: "/playground", label: "Playground", hint: "Edit a spec" },
       { href: "/convert", label: "Convert", hint: "Chart.js, Recharts, ECharts" },
       { href: `${SITE.github}/blob/main/ROADMAP.md`, label: "Roadmap", hint: "Planned work", external: true },

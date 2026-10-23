@@ -176,10 +176,10 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
   let paint: (value: number) => string;
   let swatches: string[] = [];
   if (kind === "quantize") {
-    swatches = Array.from({ length: bins }, (_, index) => sample(stops, bins === 1 ? 0 : index / (bins - 1)));
+    swatches = binSwatches(bins, preset, 0);
     paint = (value) => swatches[Math.min(bins - 1, Math.floor(unit(value) * bins))] ?? swatches[0] ?? "#007aff";
   } else if (kind === "threshold") {
-    swatches = Array.from({ length: cuts.length + 1 }, (_, index) => sample(stops, cuts.length === 0 ? 0 : index / cuts.length));
+    swatches = binSwatches(cuts.length + 1, preset, coolBins(min, max, cuts.length + 1, cuts));
     paint = (value) => {
       const index = cuts.findIndex((edge) => value < edge);
       return swatches[index < 0 ? cuts.length : index] ?? swatches[0] ?? "#007aff";
@@ -210,8 +210,8 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
         : "";
       const lo = formatTick(min);
       const hi = formatTick(max);
-      if (kind === "threshold") {
-        const labels = swatches.map((_, index) => thresholdLabel(index, cuts));
+      if (kind === "threshold" || kind === "quantize") {
+        const labels = kind === "threshold" ? swatches.map((_, index) => thresholdLabel(index, cuts)) : quantizeLabels(min, max, swatches.length);
         const slot = Math.max(36, ...labels.map((label) => Math.ceil(label.length * 6.6 + 12)));
         const cells = swatches
           .map(
@@ -221,12 +221,6 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
           .join("");
         const names = labels.map((label, index) => tick(label, x + index * slot + slot / 2, "middle")).join("");
         return `<g data-ck-scale="${kind}">${heading}${cells}${names}</g>`;
-      }
-      if (binned) {
-        const cells = swatches
-          .map((color, index) => `<rect x="${n(x + index * swatch)}" y="${n(barY)}" width="12" height="${barH}" rx="1" fill="${color}" data-ck-scale="bin" />`)
-          .join("");
-        return `<g data-ck-scale="${kind}">${heading}${cells}${tick(lo, x, "start")}${tick(hi, x + barW, "end")}</g>`;
       }
       const gradient =
         `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">` +
@@ -241,12 +235,73 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
   };
 }
 
+/** Light to dark. Steps are far enough apart that neighbouring bins do not collapse. */
+const SOFT_SEQ = ["#93c5fd", "#3b82f6", "#1d4ed8", "#1e3a8a", "#172554"];
+const NIGHT_SEQ = ["#e0f2fe", "#7dd3fc", "#38bdf8", "#0284c7", "#0369a1"];
+const SOFT_COOL = ["#93c5fd", "#2563eb", "#1e3a8a"];
+const NIGHT_COOL = ["#e0f2fe", "#38bdf8", "#0369a1"];
+const SOFT_WARM = ["#fdba74", "#fb923c", "#ea580c", "#c2410c", "#7c2d12"];
+const NIGHT_WARM = ["#fdba74", "#fb923c", "#ea580c", "#c2410c", "#9a3412"];
+
+/** Bins that sit entirely below zero, plus the bin that contains zero when the domain crosses it. */
+function coolBins(min: number, max: number, count: number, cuts: number[]): number {
+  if (!(min < 0 && max > 0) || count < 2) return 0;
+  if (cuts.length) {
+    let below = 0;
+    for (const cut of cuts) {
+      if (cut <= 0) below += 1;
+      else break;
+    }
+    return Math.min(count - 1, Math.max(1, below));
+  }
+  const step = (max - min) / count;
+  let below = 0;
+  for (let i = 0; i < count; i++) {
+    if (min + step * (i + 1) <= 0) below += 1;
+    else break;
+  }
+  return Math.min(count - 1, Math.max(1, below));
+}
+
+function pickStops(palette: string[], count: number): string[] {
+  if (count <= 0) return [];
+  if (count === 1) return [palette[Math.min(palette.length - 1, 1)] ?? palette[0] ?? "#1d4ed8"];
+  const out: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const index = Math.round((i / (count - 1)) * (palette.length - 1));
+    out.push(palette[index] ?? palette[palette.length - 1] ?? "#1d4ed8");
+  }
+  return out;
+}
+
+/**
+ * Ordered bins. A domain that crosses zero diverges: cool on the negative side,
+ * warm light-to-dark on the positive side. Otherwise one sequential ramp.
+ */
+function binSwatches(count: number, preset: PresetTokens, coolCount: number): string[] {
+  const night = dark(preset);
+  if (coolCount > 0 && coolCount < count) {
+    const cool = pickStops(night ? NIGHT_COOL : SOFT_COOL, coolCount).reverse();
+    const warm = pickStops(night ? NIGHT_WARM : SOFT_WARM, count - coolCount);
+    return [...cool, ...warm];
+  }
+  return pickStops(night ? NIGHT_SEQ : SOFT_SEQ, count);
+}
+
 /** `<6`, `6–12`, `≥12` — the cuts, not the data ends. */
 function thresholdLabel(index: number, cuts: number[]): string {
   const last = cuts.length - 1;
   if (index <= 0) return `<${formatTick(cuts[0] ?? 0)}`;
   if (index >= cuts.length) return `≥${formatTick(cuts[last] ?? 0)}`;
   return `${formatTick(cuts[index - 1] ?? 0)}–${formatTick(cuts[index] ?? 0)}`;
+}
+
+/** Every quantize edge, in the same slot size as a threshold label. */
+function quantizeLabels(min: number, max: number, bins: number): string[] {
+  const step = (max - min) / Math.max(1, bins);
+  const out: string[] = [];
+  for (let i = 0; i < bins; i++) out.push(`${formatTick(min + step * i)}–${formatTick(min + step * (i + 1))}`);
+  return out;
 }
 
 function formatTick(value: number): string {

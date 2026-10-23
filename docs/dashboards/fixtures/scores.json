@@ -1,0 +1,60 @@
+{
+  "note": "Test-only silhouettes. Approximate values read off the reference plot. Not used by the pages.",
+  "scores": {
+    "stripe": {
+      "before": {
+        "mae": 8.24,
+        "mismatch": 0.0888,
+        "overlap": 0.0
+      },
+      "after": {
+        "mae": 1.96,
+        "mismatch": 0.0294,
+        "overlap": 0.821
+      }
+    },
+    "plausible": {
+      "before": {
+        "mae": 7.12,
+        "mismatch": 0.0287,
+        "overlap": 0.092
+      },
+      "after": {
+        "mae": 5.5,
+        "mismatch": 0.0173,
+        "overlap": 0.927
+      }
+    },
+    "ga": {
+      "before": {
+        "mae": 5.34,
+        "mismatch": 0.0424,
+        "overlap": 0.034
+      },
+      "after": {
+        "mae": 2.94,
+        "mismatch": 0.0237,
+        "overlap": 0.622
+      }
+    },
+    "sentry": {
+      "before": {
+        "mae": 9.31,
+        "mismatch": 0.1673,
+        "overlap": 0.975
+      },
+      "after": {
+        "mae": 5.53,
+        "mismatch": 0.0827,
+        "overlap": 0.814
+      }
+    }
+  },
+  "page": {
+    "note": "Whole-page side-by-side MAE. Both panels are scaled to width 900 and cropped from the top to the reference aspect. The ChartKit panel includes the banner above the product frame. Plot scores above are unchanged. The Stripe page now continues under the gross-volume card, so its page score includes that Home section.",
+    "stripe": { "mae": 11.09, "mismatch": 0.0889 },
+    "plausible": { "mae": 11.55, "mismatch": 0.0808 },
+    "ga": { "mae": 15.03, "mismatch": 0.1182 },
+    "sentry": { "mae": 11.91, "mismatch": 0.1059 }
+  }
+}

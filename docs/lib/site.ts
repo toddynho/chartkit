@@ -29,6 +29,7 @@ export const NAV = [
   { href: "/convert", label: "Convert" },
   { href: "/examples", label: "Examples" },
   { href: "/showcase", label: "Showcase" },
+  { href: "/dashboards", label: "Dashboards" },
   { href: "/playground", label: "Playground" },
   { href: "/benchmarks", label: "Benchmarks" },
   { href: "/features", label: "Features" },

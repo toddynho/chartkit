@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChartHost } from "@/components/ChartHost";
+import { dashboards } from "@/lib/dashboards";
 import { showcaseBoards } from "@/lib/showcase";
 import { pageMeta } from "@/lib/site";
 
@@ -19,6 +20,27 @@ export default function ShowcasePage() {
         range bands, floating bars, whiskers, a zoned hour axis, and a custom element. Specs are checked before the
         page builds. The sample data is fictional.
       </p>
+      <h2>Dashboards</h2>
+      <p className="lede">
+        Four more boards, styled after Stripe, Plausible, Google Analytics, and Sentry. Colour comes from theme.tokens.
+        ChartKit is not affiliated with or endorsed by those products.
+      </p>
+      <div className="gallery-index">
+        {dashboards().map((board) => {
+          const cover = board.charts.find((chart) => chart.spec.type !== "kpi") ?? board.charts[0];
+          return (
+            <article key={board.slug} className={`board-card dash-${board.slug}`}>
+              <p className="kicker">{board.defaultTheme === "midnight" ? "Dark first" : "Soft first"}</p>
+              <h3>
+                <Link href={`/dashboards/${board.slug}`}>{board.title}</Link>
+              </h3>
+              <p>{board.lede}</p>
+              {cover ? <ChartHost spec={cover.spec} svg={cover.svg} className="chart-host chart-preset" /> : null}
+            </article>
+          );
+        })}
+      </div>
+      <h2>Boards</h2>
       <div className="gallery-index">
         {boards.map((board) => {
           const cover = board.charts[0] ?? board.mermaid?.[0]?.chart;

@@ -1,12 +1,50 @@
 # Touch-friendly tooltip
 
-ChartKit: **unknown**
+ChartKit: **native**
 
 Tap/press to show tooltips on touch devices
 
-Matrix status: `unknown`. Verification: `unverified` (unknown).
+Matrix status: `native`. Verification: `render` (strong).
 
-No spec snippet. This ChartKit cell is unknown.
+tooltip.pin keeps the tooltip after a tap until Escape or a second tap. tooltip.hit is the hit target in px, from 8 to 48, and 18 when pin is set and hit is omitted. pinTooltip and hitSize repair to pin and hit (CK3067).
+
+Source: chartkit:packages/core/src/interact.ts
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40
+    },
+    {
+      "quarter": "Q2",
+      "units": 55
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": "units"
+  },
+  "a11y": {
+    "alt": "Units rose in Q2."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "tooltip": {
+    "pin": true,
+    "hit": 28
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -33,6 +71,6 @@ No spec snippet. This ChartKit cell is unknown.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | unknown | ~touch | unverified (unknown) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 6ec84d7091db.
 
 https://chartkit.dev/features.json

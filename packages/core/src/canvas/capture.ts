@@ -5,7 +5,7 @@ import { beginScene, endScene, lineBuffers, rectBuffers, takeMark, type SceneFra
 import { readIngest, setCapture, type CaptureArgs } from "./scene-hook";
 import { notedLinearColumn, sampleSeries, sampleTyped } from "../sampling";
 import { renderPlotted, type Layers, type PlotModel, type Series, type XScale } from "../renderers/cartesian";
-import { clamp } from "../svg";
+import { clamp, n } from "../svg";
 import { lineStroke } from "../theme";
 
 function strokeOf(series: Series, model: PlotModel): string {
@@ -131,8 +131,8 @@ function captureLine(
   mark.stroke = strokeOf(series, model);
   mark.strokeWidth = model.strokeWidth;
   mark.strokePaint = model.strokePaint;
-  mark.fillPaint = model.fillPaint;
-  mark.fillOpacity = model.fillOpacity;
+  mark.fillPaint = series.fillOpacity === undefined ? model.fillPaint : n(series.fillOpacity);
+  mark.fillOpacity = series.fillOpacity === undefined ? model.fillOpacity : series.fillOpacity;
   mark.dash = series.dash === "dashed" ? "6 4" : series.dash === "dotted" ? "1.5 3" : "";
   mark.gradient = model.gradient && area;
   mark.curve = model.curve;

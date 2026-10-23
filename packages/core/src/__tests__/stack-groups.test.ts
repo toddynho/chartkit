@@ -117,7 +117,7 @@ describe("stack groups", () => {
       encoding: { x: "x", y: { field: "a", stack: 2 } },
       a11y: { alt },
     });
-    expect(number.errors.some((item) => item.code === "CK3058" && item.hint?.includes("seats"))).toBe(true);
+    expect(number.errors.some((item) => item.code === "CK3072" && item.hint?.includes("seats"))).toBe(true);
     expect(repair(number.errors[0] ? { version: "1", type: "bar", data: [{ x: "Mon", a: 1 }], encoding: { x: "x", y: { field: "a", stack: 2 } }, a11y: { alt } } : {}).spec).toMatchObject({
       encoding: { y: { stack: "2" } },
     });
@@ -147,7 +147,7 @@ describe("stack groups", () => {
       encoding: { x: "x", y: { field: "a", stack: "seats" } },
       a11y: { alt },
     });
-    expect(named.diagnostics.some((item) => item.code === "CK3058")).toBe(false);
+    expect(named.diagnostics.some((item) => item.code === "CK3072")).toBe(false);
 
     const donut = validate({
       version: "1",
@@ -156,6 +156,6 @@ describe("stack groups", () => {
       encoding: { x: "x", y: { field: "a", stack: "seats" } },
       a11y: { alt },
     });
-    expect(donut.warnings.some((item) => item.code === "CK3058")).toBe(true);
+    expect(donut.warnings.some((item) => item.code === "CK3072")).toBe(true);
   });
 });

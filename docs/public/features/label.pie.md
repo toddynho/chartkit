@@ -10,40 +10,7 @@ mark.labels and mark.labelPosition outside draw leader lines on pie and donut. L
 
 Source: packages/core/src/generated/schema.ts:898
 
-## ChartKit spec
-
-```json
-{
-  "version": "1",
-  "type": "pie",
-  "data": [
-    {
-      "x": "Oak",
-      "y": 8
-    },
-    {
-      "x": "Pine",
-      "y": 5
-    }
-  ],
-  "encoding": {
-    "x": "x",
-    "y": "y"
-  },
-  "a11y": {
-    "alt": "Oak is larger."
-  },
-  "size": {
-    "width": 640,
-    "height": 260
-  },
-  "mark": {
-    "labelPosition": "outside"
-  }
-}
-```
-
-This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
+No spec snippet. This row is not a single option that `validate()` can show.
 
 ## Other libraries
 
@@ -70,6 +37,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~connector | dts-grep (weak) | @antv/g2/lib/index.d.ts:79 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 6ec84d7091db.
 
 https://chartkit.dev/features.json

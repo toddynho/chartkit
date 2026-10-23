@@ -53,7 +53,7 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
   const counts = [...byDay.values()];
   const max = Math.max(...counts, 1);
   const color = colorEnc?.constant ? paint(colorEnc.constant, frame.preset, 0) : paint(colorEnc?.range?.[colorEnc.range.length - 1], frame.preset, 0);
-  const ramp = colorEnc?.constant ? null : readColorScale(frame.encoding.color, frame.preset, counts, !colorEnc?.range);
+  const ramp = colorEnc?.constant ? null : readColorScale(frame.encoding.color, frame.preset, counts, true);
   const quiet = emptyMark(frame.id, frame.preset);
   const legendH = ramp ? colorLegendHeight : 22;
   const box = calendarLayout(frame, weeks, legendH);
@@ -234,14 +234,17 @@ function renderGrid(spec: Record<string, unknown>): string | null {
   const min = Math.min(...nums, 0);
   const color = colorEnc?.constant ? paint(colorEnc.constant, frame.preset, 0) : paint(undefined, frame.preset, 0);
   const range = colorEnc?.range?.map((item, index) => paint(item, frame.preset, index));
-  const ramp = colorEnc?.constant ? null : readColorScale(frame.encoding.color, frame.preset, nums, !range);
+  // A custom range is still a continuous ramp. Falling back to floor(t * stops) paints every cell but the maximum in the first stop.
+  const ramp = colorEnc?.constant ? null : readColorScale(frame.encoding.color, frame.preset, nums, true);
   const radius = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : Math.min(frame.geometry.cornerRadius, 6);
   const quiet = emptyMark(frame.id, frame.preset);
-  const left = 48;
-  const top = (frame.title ? 42 : 28) + (frame.subtitle ? 16 : 0);
+  const yInk = ys.reduce((max, label) => Math.max(max, label.length * 6.8), 0);
+  const left = Math.max(48, Math.ceil(yInk + 16));
+  const xLabelBand = 16;
+  const top = (frame.title ? 42 : 28) + (frame.subtitle ? 16 : 0) + xLabelBand;
   const legendH = ramp ? colorLegendHeight : 0;
   const plotW = frame.width - left - 16;
-  const plotH = frame.height - top - 22 - legendH;
+  const plotH = frame.height - top - 8 - legendH;
   const gapFrac = typeof frame.mark.gap === "number" ? frame.mark.gap : 0.15;
   const bandW = plotW / xs.length;
   const bandH = plotH / Math.max(1, ys.length);
@@ -261,9 +264,11 @@ function renderGrid(spec: Record<string, unknown>): string | null {
     const row = ys.indexOf(y);
     parts.push(text(left - 8, top + row * bandH + bandH / 2 + 4, y, cssVar("muted", frame.preset.muted), 11, "400", "end"));
   }
+  const longestX = xs.reduce((max, label) => Math.max(max, label.length), 1);
+  const xSize = Math.max(8, Math.min(11, Math.floor((bandW * 0.9) / (longestX * 0.56))));
   for (const x of xs) {
     const col = xs.indexOf(x);
-    parts.push(text(left + col * bandW + bandW / 2, top + plotH + 14, x, cssVar("muted", frame.preset.muted), 11, "400", "middle"));
+    parts.push(text(left + col * bandW + bandW / 2, top - 6, x, cssVar("muted", frame.preset.muted), xSize, "400", "middle"));
   }
   if (canvas && !cellsMark) parts.push(`<g data-ck-layer="marks">`);
   for (const x of xs) {

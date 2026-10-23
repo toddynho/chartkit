@@ -12,12 +12,29 @@ import type { ColorScale } from "../color-scale";
 import { exportList, readColor } from "../frame";
 import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
 import { layoutPaint } from "../layout-hook";
-import { boxId, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, round, scaleClamp, scalePad, ticks } from "../svg";
+import { boxId, brokenScale, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, round, scaleClamp, scalePad, symlogTicks, ticks } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
+
+export interface Headline {
+  label: string;
+  value: string;
+  compare: string;
+  delta: string;
+  tone: "positive" | "negative" | "neutral";
+}
+
+export interface TipChrome {
+  background: string;
+  radius?: number;
+  shadow: string;
+  crosshair: string;
+}
 
 export interface AxisBox {
   title?: string;
   count?: number;
+  /** First and last label only. */
+  ends?: boolean;
   labels: boolean;
   /** Non-default side. Set when the axis extras are mounted. */
   end?: boolean;
@@ -31,6 +48,10 @@ export interface AxisBox {
   rule?: { on: boolean; color?: string; width?: number; dash?: string };
   tick?: string;
   tickLen?: number;
+  offset?: number;
+  crosses?: number;
+  minor?: number;
+  breaks?: { from: number; to: number }[];
 }
 
 export interface Pad {
@@ -209,12 +230,16 @@ export interface Series {
   bandOpacity?: number;
   dash: string;
   area: boolean;
+  /** Area or bar fill opacity. Omit to use the chart mark. */
+  fillOpacity?: number;
   shape?: string;
   radius?: number;
   hollow?: boolean;
   format?: unknown;
   /** encoding.y[].stack. Series that share it, on the same axis, stack. A name used once does not. */
   stackId?: string;
+  /** Higher paints later. Stacked series ignore it. */
+  z?: number;
 }
 
 export interface PlotModel {
@@ -262,6 +287,16 @@ export interface PlotModel {
   cornerRadius: number;
   /** When true, bar radius is var(--ck-bar-radius), outer end only. */
   radiusVar: boolean;
+  /** Pixel gap between stacked segments. */
+  stackGap: number;
+  /** outer rounds the end away from the baseline. all rounds every corner. */
+  radiusEnds: "outer" | "all";
+  /** Dash applied to the last segment only. */
+  partial: "" | "dashed" | "dotted";
+  /** Fill opacity of the last area segment. Omit to keep one fill. */
+  partialOpacity?: number;
+  headline?: Headline;
+  tip?: TipChrome;
   gap: number;
   labelsOn: boolean;
   pointShape: string;
@@ -292,6 +327,14 @@ export interface PlotModel {
   y2Format: unknown;
   yLog: boolean;
   y2Log: boolean;
+  ySym: boolean;
+  y2Sym: boolean;
+  symC: number;
+  symC2: number;
+  /** Pixel spans of axis breaks, filled while the scales are built. */
+  ySpans?: Array<[number, number]>;
+  y2Spans?: Array<[number, number]>;
+  xSpans?: Array<[number, number]>;
   notes: unknown;
   bands?: { x?: unknown; y?: unknown; y2?: unknown };
   xAxis: AxisBox;
@@ -349,6 +392,12 @@ export interface ChartShell {
   connectNulls: boolean;
   cornerRadius: number;
   radiusVar: boolean;
+  stackGap: number;
+  radiusEnds: "outer" | "all";
+  partial: "" | "dashed" | "dotted";
+  partialOpacity?: number;
+  headline?: Headline;
+  tip?: TipChrome;
   gap: number;
   labelsOn: boolean;
   pointShape: string;
@@ -371,6 +420,10 @@ export interface ChartShell {
   y2Format: unknown;
   yLog: boolean;
   y2Log: boolean;
+  ySym: boolean;
+  y2Sym: boolean;
+  symC: number;
+  symC2: number;
   xAxis: AxisBox;
   yAxis: AxisBox;
   y2Axis: AxisBox;
@@ -389,6 +442,33 @@ function shellStamp(spec: Record<string, unknown>): string {
 }
 
 let chartShell: ChartShell | null = null;
+
+function cssText(value: unknown, limit: number): string {
+  if (typeof value !== "string") return "";
+  const text = value.trim().replace(/["<>]/g, "");
+  return text.length > 0 && text.length <= limit ? text : "";
+}
+
+function readHeadline(spec: Record<string, unknown>): Headline | undefined {
+  if (!isRecord(spec.headline)) return;
+  const label = cssText(spec.headline.label, 80);
+  const value = cssText(spec.headline.value, 40);
+  const compare = cssText(spec.headline.compare, 40);
+  const delta = cssText(spec.headline.delta, 24);
+  const tone = spec.headline.tone === "negative" || spec.headline.tone === "neutral" ? spec.headline.tone : spec.headline.tone === "positive" ? "positive" : "";
+  if (!label && !value && !compare && !delta && !tone) return;
+  return { label, value, compare, delta, tone: tone || "positive" };
+}
+
+function readTip(spec: Record<string, unknown>): TipChrome | undefined {
+  if (!isRecord(spec.tooltip)) return;
+  const background = cssText(spec.tooltip.background, 80);
+  const shadow = cssText(spec.tooltip.shadow, 80);
+  const crosshair = cssText(spec.tooltip.crosshairColor, 80);
+  const radius = typeof spec.tooltip.radius === "number" && Number.isFinite(spec.tooltip.radius) ? clamp(spec.tooltip.radius, 0, 24) : undefined;
+  if (!background && !shadow && !crosshair && radius === undefined) return;
+  return { background, shadow, crosshair, radius };
+}
 
 /** Theme, channels, and geometry. Reused when a later spec only replaces `data`. */
 function shellFor(spec: Record<string, unknown>): ChartShell {
@@ -448,6 +528,12 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     connectNulls: mark.connectNulls === true,
     cornerRadius: radiusSet ? (mark.cornerRadius as number) : geometry.cornerRadius,
     radiusVar: !radiusSet,
+    stackGap: typeof mark.stackGap === "number" ? clamp(mark.stackGap, 0, 24) : 0,
+    radiusEnds: mark.radiusEnds === "all" ? "all" : "outer",
+    partial: mark.partial === "dashed" || mark.partial === "dotted" ? mark.partial : "",
+    partialOpacity: typeof mark.partialOpacity === "number" ? clamp(mark.partialOpacity, 0, 1) : undefined,
+    headline: readHeadline(spec),
+    tip: readTip(spec),
     gap: typeof mark.gap === "number" ? mark.gap : geometry.gap,
     labelsOn: mark.labels === true,
     pointShape: glyphOf(mark.pointShape),
@@ -469,6 +555,10 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     y2Format: axisFormat(spec, "y2", channels),
     yLog: channels.some((channel) => channel.axis === "y" && channel.log),
     y2Log: channels.some((channel) => channel.axis === "y2" && channel.log),
+    ySym: channels.some((channel) => channel.axis === "y" && channel.sym),
+    y2Sym: channels.some((channel) => channel.axis === "y2" && channel.sym),
+    symC: channels.find((channel) => channel.axis === "y" && channel.sym)?.symC ?? 1,
+    symC2: channels.find((channel) => channel.axis === "y2" && channel.sym)?.symC ?? 1,
     xAxis: { labels: true },
     yAxis: { labels: true },
     y2Axis: { labels: true },
@@ -552,11 +642,13 @@ function toModel(
         mark: markKind,
         dash: channel.dash,
         area: markKind === "area" || channel.area === true || mark.area === true || type === "stacked-area" || type === "mini-area",
+        fillOpacity: channel.fillOpacity,
         shape: channel.pointShape,
         radius: channel.pointSize,
         hollow: channel.pointHollow || undefined,
         format: channel.format,
         stackId: channel.stack,
+        z: channel.z,
       };
     });
   }
@@ -579,7 +671,8 @@ function toModel(
     barSlot: planned.barSlot,
     barSlots: planned.barSlots,
     labels,
-    x: type === "bar" || type === "combo" ? null : x,
+    // Bars need category bands. A combo of only lines and areas keeps a temporal or linear x.
+    x: type === "bar" || (type === "combo" && series.some((item) => item.mark === "bar")) ? null : x,
     series,
     showY2: shell.showY2 && series.some((item) => item.axis === "y2"),
     legend: shell.legendOn && (series.length > 1 || Boolean(swatches) || ruleLegend.length > 0),
@@ -600,6 +693,7 @@ function toModel(
 }
 
 function modelToSvg(model: PlotModel, draw: MarkDraw): string {
+  labelPx = model.preset.fontSize ?? 11;
   const tScale = performance.now();
   const horizontal = model.orientation === "horizontal" && model.type === "bar";
   const yDomain = domain(model, "y");
@@ -621,13 +715,15 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   const yRev = model.f & 8;
   const yFrom = horizontal ? (yRev ? plot.right : plot.left) : yRev ? plot.top : plot.bottom;
   const yTo = horizontal ? (yRev ? plot.left : plot.right) : yRev ? plot.bottom : plot.top;
-  const yScaleRaw = model.yLog ? logScale(yDomain[0], yDomain[1], yFrom, yTo) : linear(yDomain[0], yDomain[1], yFrom, yTo);
-  const yScale = modelClamp(yScaleRaw, yDomain, axisClamps(model, "y"));
+  const yMapped = brokenScale(yDomain[0], yDomain[1], yFrom, yTo, model.yAxis.breaks, model.ySym ? "symlog" : model.yLog ? "log" : "linear", model.symC);
+  model.ySpans = yMapped.spans;
+  const yScale = modelClamp(yMapped.at, yDomain, axisClamps(model, "y"));
   const y2Rev = model.f & 16;
   const y2From = y2Rev ? plot.top : plot.bottom;
   const y2To = y2Rev ? plot.bottom : plot.top;
-  const y2ScaleRaw = model.y2Log ? logScale(y2Domain[0], y2Domain[1], y2From, y2To) : linear(y2Domain[0], y2Domain[1], y2From, y2To);
-  const y2Scale = modelClamp(y2ScaleRaw, y2Domain, axisClamps(model, "y2"));
+  const y2Mapped = brokenScale(y2Domain[0], y2Domain[1], y2From, y2To, model.y2Axis.breaks, model.y2Sym ? "symlog" : model.y2Log ? "log" : "linear", model.symC2);
+  model.y2Spans = y2Mapped.spans;
+  const y2Scale = modelClamp(y2Mapped.at, y2Domain, axisClamps(model, "y2"));
   const xScale = xPosition(model, count, plot.left, plot.right, plot.top, plot.bottom, horizontal);
   const pass = capturing()
     ? runCapture({
@@ -658,6 +754,7 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   if (model.subtitle) {
     parts.push(`<text x="${n(titleX)}" y="${model.title ? 40 : 18}"${titleAnchor} fill="${cssVar("muted", model.preset.muted)}" font-size="12" font-weight="400" font-family="${font()}">${esc(model.subtitle)}</text>`);
   }
+  if (model.headline) parts.push(headlineSvg(model));
   if (model.legend && !model.legendBox) parts.push(legend(model, pad.left, model.title || model.subtitle ? (model.subtitle ? 54 : 36) : 8, plot.right));
 
   const clip = boxId(model.id, plot.left, plot.top, plotW, plotH);
@@ -731,6 +828,13 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   return parts.join("");
 }
 
+function paintOrder(series: Series[], stacked: boolean): number[] {
+  const order = series.map((_, index) => index);
+  if (stacked || !series.some((item) => typeof item.z === "number")) return order;
+  order.sort((a, b) => (series[a]?.z ?? 0) - (series[b]?.z ?? 0) || a - b);
+  return order;
+}
+
 function drawLines(
   model: PlotModel,
   xScale: XScale,
@@ -740,13 +844,16 @@ function drawLines(
   _horizontal: boolean,
 ): string {
   const layers = model.layers;
+  const stacked = model.stack !== "none" || Boolean(layers?.on.some(Boolean));
   const out: string[] = [];
+  out.push(plotBreaks(model, plot));
   const plotWidth = Math.max(1, plot.right - plot.left);
   const shared = sharedSample(model, layers, plotWidth);
-  model.series.forEach((series, index) => {
-    if (series.mark === "bar") return;
+  for (const index of paintOrder(model.series, stacked)) {
+    const series = model.series[index];
+    if (!series || series.mark === "bar") continue;
     appendLineSeries(out, model, series, index, layers, xScale, series.axis === "y2" ? y2Scale : yScale, plotWidth, shared);
-  });
+  }
   const held = bag();
   let late = "";
   if (layers && totalHook && legacyTotals(model)) late += totalHook(model, layers, xScale, yScale, false, held);
@@ -764,15 +871,17 @@ function drawBars(
   horizontal: boolean,
 ): string {
   const layers = model.layers;
+  const stacked = model.stack !== "none" || Boolean(layers?.on.some(Boolean));
   const out: string[] = [];
   const labs: Lab[] = [];
   const barSeries = model.series.filter((series) => series.mark === "bar");
-  model.series.forEach((series, index) => {
-    if (series.mark !== "bar") return;
+  for (const index of paintOrder(model.series, stacked)) {
+    const series = model.series[index];
+    if (!series || series.mark !== "bar") continue;
     const scale = series.axis === "y2" ? y2Scale : yScale;
     const barIndex = model.series.slice(0, index).filter((item) => item.mark === "bar").length;
     out.push(bars(model, series, index, barSeries.length, layers, xScale, scale, plot, horizontal, barIndex, labs));
-  });
+  }
   const held = bag();
   let late = "";
   if (layers && totalHook && legacyTotals(model)) late += totalHook(model, layers, xScale, yScale, horizontal, held);
@@ -792,28 +901,36 @@ function drawCombo(
   horizontal: boolean,
 ): string {
   const layers = model.layers;
+  const stacked = model.stack !== "none" || Boolean(layers?.on.some(Boolean));
   const out: string[] = [];
   const labs: Lab[] = [];
   const barSeries = model.series.filter((series) => series.mark === "bar");
   const plotWidth = Math.max(1, plot.right - plot.left);
   const shared = sharedSample(model, layers, plotWidth);
-  if (rangePainter) {
+  const ordered = paintOrder(model.series, stacked);
+  const ranked = ordered.some((index, place) => index !== place);
+  if (rangePainter && !ranked) {
     model.series.forEach((series, index) => {
       if (series.mark !== "range") return;
       const scale = series.axis === "y2" ? y2Scale : yScale;
       out.push(rangePainter?.(series, index, (i) => xScale.center(i), scale) ?? "");
     });
   }
-  model.series.forEach((series, index) => {
+  for (const index of ordered) {
+    const series = model.series[index];
+    if (!series) continue;
     const scale = series.axis === "y2" ? y2Scale : yScale;
-    if (series.mark === "range") return;
+    if (series.mark === "range") {
+      if (ranked && rangePainter) out.push(rangePainter(series, index, (i) => xScale.center(i), scale) ?? "");
+      continue;
+    }
     if (series.mark === "bar") {
       const barIndex = model.series.slice(0, index).filter((item) => item.mark === "bar").length;
       out.push(bars(model, series, index, barSeries.length, layers, xScale, scale, plot, horizontal, barIndex, labs));
-      return;
+      continue;
     }
     appendLineSeries(out, model, series, index, layers, xScale, scale, plotWidth, shared);
-  });
+  }
   const held = bag();
   const fill = cssVar("text", model.preset.text);
   let late = placeLineLabels(model, layers, xScale, yScale, y2Scale, held);
@@ -891,9 +1008,9 @@ function appendLineSeries(
     const indexAttr = ` data-ck-sample="${sampled.mode}" data-ck-i="${kept.join(" ")}"${scaleAttr}`;
     if (area) {
       const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
-      out.push(`<path d="${areaPath(points, bottoms, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillPaint}" stroke="none"${indexAttr} />`);
+    paintAreas(out, gapTops(points, model, index, layers), bottoms, model, series, fill, indexAttr);
     }
-    pushStroke(out, linePath(points, model.curve), model, series, indexAttr);
+    paintStroke(out, points, model, series, indexAttr);
     // Hidden circles exist so --ck-line-dots can reveal them. A downsampled line
     // already has a vertex per pixel, and those circles dominate the SVG, so
     // interact draws the hover dot from the path instead.
@@ -910,7 +1027,7 @@ function appendFullLine(
   xScale: XScale,
   yScale: (value: number) => number,
 ): void {
-  if (!layerOn(layers, index) && model.curve === "linear" && !series.area && model.type !== "stacked-area" && model.dots === "off" && !markerShape(model, series)) {
+  if (!layerOn(layers, index) && model.curve === "linear" && !series.area && model.type !== "stacked-area" && model.dots === "off" && !markerShape(model, series) && !model.partial) {
     appendLinear(out, model, series, xScale, yScale);
     return;
   }
@@ -918,12 +1035,10 @@ function appendFullLine(
   if (series.area || model.type === "stacked-area") {
     const bottoms = bottomPoints(series, index, layers, xScale, yScale, model);
     const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
-    for (const [top, bottom] of pairSegments(points, bottoms, model.connectNulls)) {
-      out.push(`<path d="${areaPath(top, bottom, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillPaint}" stroke="none" />`);
-    }
+    paintAreas(out, gapTops(points, model, index, layers), bottoms, model, series, fill, "");
   }
   for (const segment of segments(points, model.connectNulls)) {
-    pushStroke(out, linePath(segment, model.curve), model, series, "");
+    paintStroke(out, segment, model, series, "");
   }
   paintPoints(out, points, model, series);
 }
@@ -959,9 +1074,56 @@ function strokeOf(series: Series, model: PlotModel): string {
 }
 
 /** Crisp stroke, and a blurred copy under it when mark.glow is set. */
-function pushStroke(out: string[], d: string, model: PlotModel, series: Series, extra: string): void {
+function gapTops(points: (Pt | null)[], model: PlotModel, index: number, layers: Layers | null): (Pt | null)[] {
+  if (!layers || model.stackGap <= 0 || index >= layers.top.length - 1) return points;
+  const gap = model.stackGap;
+  const out: (Pt | null)[] = new Array(points.length);
+  for (let i = 0; i < points.length; i++) {
+    const point = points[i];
+    out[i] = point ? { x: point.x, y: point.y + gap } : null;
+  }
+  return out;
+}
+
+function paintAreas(
+  out: string[],
+  tops: (Pt | null)[],
+  bottoms: (Pt | null)[],
+  model: PlotModel,
+  series: Series,
+  fill: string,
+  extra: string,
+): void {
+  const emit = (top: (Pt | null)[], bottom: (Pt | null)[], opacity: string) => {
+    for (const [above, below] of pairSegments(top, bottom, model.connectNulls)) {
+      if (above.length < 2) continue;
+      out.push(`<path d="${areaPath(above, below, model.curve)}" fill="${fill}" fill-opacity="${opacity}" stroke="none"${extra} />`);
+    }
+  };
+  const fade = areaFade(model, series);
+  if (model.partialOpacity === undefined || tops.length < 2) {
+    emit(tops, bottoms, fade);
+    return;
+  }
+  emit(tops.slice(0, -1), bottoms.slice(0, -1), fade);
+  emit(tops.slice(-2), bottoms.slice(-2), n(model.partialOpacity));
+}
+
+/** Solid stroke, then a dashed or dotted last segment when mark.partial is set. */
+function paintStroke(out: string[], points: Pt[], model: PlotModel, series: Series, extra: string): void {
+  const spans = series.axis === "y2" ? model.y2Spans : model.ySpans;
+  if (model.partial && points.length >= 2) {
+    const head = points.slice(0, -1);
+    if (head.length >= 2) pushStroke(out, stroked(head, model.curve, spans), model, series, extra);
+    pushStroke(out, stroked(points.slice(-2), model.curve, spans), model, series, extra, model.partial);
+    return;
+  }
+  pushStroke(out, stroked(points, model.curve, spans), model, series, extra);
+}
+
+function pushStroke(out: string[], d: string, model: PlotModel, series: Series, extra: string, dash = series.dash): void {
   const stroke = strokeOf(series, model);
-  const base = `fill="none" stroke="${stroke}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)}`;
+  const base = `fill="none" stroke="${stroke}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(dash)}`;
   if (model.glow) out.push(`<path d="${d}" ${base} stroke-width="${n(model.strokeWidth + 2.5)}" filter="url(#${model.id}glow)" pointer-events="none" />`);
   out.push(`<path d="${d}" ${base} stroke-width="${model.strokePaint}"${extra} />`);
 }
@@ -1032,13 +1194,14 @@ function barMark(
   edge: "top" | "bottom" | "left" | "right",
   fill: string,
   extra = "",
+  ends: "outer" | "all" = "outer",
 ): string {
   const rect = `<rect x="${n(x)}" y="${n(y)}" width="${n(width)}" height="${n(height)}" fill="${fill}"${extra}`;
   if (width <= 0 || height <= 0 || (!useVar && radius < 0.5)) return `${rect} />`;
   const cap = useVar
     ? `min(var(--ck-bar-radius, ${n(radius)}) * 1px, ${n(width / 2)}px, ${n(height / 2)}px)`
     : `min(${n(radius)}px, ${n(width / 2)}px, ${n(height / 2)}px)`;
-  const round = edge === "top" ? `${cap} ${cap} 0 0` : edge === "bottom" ? `0 0 ${cap} ${cap}` : edge === "right" ? `0 ${cap} ${cap} 0` : `${cap} 0 0 ${cap}`;
+  const round = ends === "all" ? `${cap}` : edge === "top" ? `${cap} ${cap} 0 0` : edge === "bottom" ? `0 0 ${cap} ${cap}` : edge === "right" ? `0 ${cap} ${cap} 0` : `${cap} 0 0 ${cap}`;
   return `${rect} style="clip-path:inset(0 round ${round})" />`;
 }
 
@@ -1073,25 +1236,39 @@ function bars(
     const inset = slots > 1 ? 2 : 0;
     const fill = series.colors?.[i] ?? series.color;
     const caption = series.ruleLabels?.[i] ?? "";
-    const extra = (series.colors ? ` data-ck-name="${esc(series.name)}" data-ck-i="${i}"` : "") + (caption ? ` data-ck-rule="${esc(caption)}"` : "");
+    const fade = series.fillOpacity === undefined ? "" : ` fill-opacity="${n(series.fillOpacity)}"`;
+    const extra = fade + (series.colors ? ` data-ck-name="${esc(series.name)}" data-ck-i="${i}"` : "") + (caption ? ` data-ck-rule="${esc(caption)}"` : "");
     const outer = !stacked || Boolean(layers?.crest[index]);
-    const radius = outer ? model.cornerRadius : 0;
-    const useVar = outer && model.radiusVar;
+    const roundEnds = model.radiusEnds === "all" || (stacked && model.stackGap > 0) ? "all" : "outer";
+    const radius = outer || roundEnds === "all" ? model.cornerRadius : 0;
+    const useVar = (outer || roundEnds === "all") && model.radiusVar;
+    const split = stacked && model.stackGap > 0 && !outer ? model.stackGap : 0;
     if (horizontal) {
-      const y = start;
-      const x = Math.min(a, b);
-      const width = Math.max(0, Math.abs(b - a));
+      let y = start;
+      let x = Math.min(a, b);
+      let width = Math.max(0, Math.abs(b - a));
       const height = Math.max(0, barSize - inset);
+      if (split) {
+        if (b >= a) width = Math.max(0, width - split);
+        else {
+          x += split;
+          width = Math.max(0, width - split);
+        }
+      }
       const edge = b >= a ? "right" : "left";
-      out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra), caption));
+      out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra, roundEnds), caption));
       queueBarLabel(model, series, series.values[i], x, y, width, height, true, labs, b < a, plot.left, model.width);
     } else {
       const x = start;
-      const y = Math.min(a, b);
-      const height = Math.max(0, Math.abs(b - a));
+      let y = Math.min(a, b);
+      let height = Math.max(0, Math.abs(b - a));
       const width = Math.max(0, barSize - inset);
+      if (split) {
+        if (b <= a) y += split;
+        height = Math.max(0, height - split);
+      }
       const edge = b <= a ? "top" : "bottom";
-      out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra), caption));
+      out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra, roundEnds), caption));
       queueBarLabel(model, series, series.values[i], x, y, width, height, false, labs, false, plot.left, model.width);
     }
   }
@@ -1452,7 +1629,13 @@ function xPosition(
     min = padded[0];
     max = padded[1];
   }
-  const scale = linear(min, max, spanStart, spanEnd);
+  if (typeof model.yAxis.crosses === "number") {
+    if (model.yAxis.crosses < min) min = model.yAxis.crosses;
+    if (model.yAxis.crosses > max) max = model.yAxis.crosses;
+  }
+  const mapped = brokenScale(min, max, spanStart, spanEnd, model.xAxis.breaks, "linear", 1);
+  model.xSpans = mapped.spans;
+  const scale = mapped.at;
   return {
     center: (index) => scale(model.x?.[index] ?? min),
     band: (index) => {
@@ -1468,11 +1651,13 @@ function xPosition(
 
 /** Set for one draw when the layout chunk is mounted and the chart is rtl. */
 let textDir = "";
+/** Tick and axis-title size. 11 unless theme.tokens.fontSize is set. */
+let labelPx = 11;
 
 function axText(x: number, y: number, anchor: string, body: string, fill: string, family: string, angle = 0, weight = "", rows?: string[] | null): string {
   const spin = angle ? ` transform="rotate(${n(angle)} ${n(x)} ${n(y)})"` : "";
   const text = rows ? rows.map((row, i) => `<tspan x="${n(x)}" dy="${i ? 12 : 0}">${esc(row)}</tspan>`).join("") : esc(body);
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="11"${weight} font-family="${family}"${textDir}${spin}>${text}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${labelPx}"${weight} font-family="${family}"${textDir}${spin}>${text}</text>`;
 }
 
 function wrapWords(text: string, width: number, lines: number): string[] {
@@ -1562,15 +1747,101 @@ function tickInk(side: number, edge: number, at: number, axis: AxisBox, stroke: 
   return `<line x1="${n(x1)}" y1="${n(y1)}" x2="${n(x2)}" y2="${n(y2)}" stroke="${stroke}" />`;
 }
 
-function ruleLine(side: number, plot: PlotBox, model: PlotModel, axis: AxisBox): string {
+function shifted(side: number, base: number, axis: AxisBox): number {
+  const shift = axis.offset || 0;
+  if (side === 0 || side === 2) return base - shift;
+  return base + shift;
+}
+
+function outerEdge(side: number, plot: PlotBox, axis: AxisBox): number {
+  const base = side === 0 ? plot.left : side === 1 ? plot.right : side === 2 ? plot.top : plot.bottom;
+  return shifted(side, base, axis);
+}
+
+function spineEdge(side: number, plot: PlotBox, axis: AxisBox, crossAt?: number): number {
+  if (typeof crossAt === "number" && Number.isFinite(crossAt)) return shifted(side, crossAt, axis);
+  return outerEdge(side, plot, axis);
+}
+
+function wantSpine(axis: AxisBox): boolean {
+  if (axis.rule && axis.rule.on === false && !axis.breaks?.length) return false;
+  return Boolean(axis.rule?.on || axis.crosses !== undefined || axis.offset || axis.breaks?.length);
+}
+
+function zigPoints(x1: number, y1: number, x2: number, y2: number, amp: number): string {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = Math.hypot(dx, dy) || 1;
+  const px = (-dy / len) * amp;
+  const py = (dx / len) * amp;
+  const a = 0.25;
+  const b = 0.5;
+  const c = 0.75;
+  return `L ${n(x1 + dx * a + px)} ${n(y1 + dy * a + py)} L ${n(x1 + dx * b - px)} ${n(y1 + dy * b - py)} L ${n(x1 + dx * c + px)} ${n(y1 + dy * c + py)} L ${n(x2)} ${n(y2)}`;
+}
+
+function zigzag(x1: number, y1: number, x2: number, y2: number, stroke: string): string {
+  return `<path data-ck-break="1" d="M ${n(x1)} ${n(y1)} ${zigPoints(x1, y1, x2, y2, 4)}" fill="none" stroke="${stroke}" stroke-width="1.25" />`;
+}
+
+/**
+ * A faint gap band across the plot. The break mark itself is the axis zigzag;
+ * a second mark inside the plot reads as a stray glyph.
+ */
+function plotBreaks(model: PlotModel, plot: { left: number; top: number; right: number; bottom: number }): string {
+  const spans = [...(model.ySpans ?? []), ...(model.y2Spans ?? [])];
+  if (!spans.length) return "";
+  const fill = cssVar("muted", model.preset.muted);
+  let out = "";
+  for (let i = 0; i < spans.length; i++) {
+    const span = spans[i];
+    if (!span) continue;
+    const y1 = Math.min(span[0], span[1]);
+    const y2 = Math.max(span[0], span[1]);
+    const height = Math.max(1, y2 - y1);
+    out += `<rect data-ck-break="1" x="${n(plot.left)}" y="${n(y1)}" width="${n(plot.right - plot.left)}" height="${n(height)}" fill="${fill}" fill-opacity="0.16" />`;
+  }
+  return out;
+}
+
+function spineSegment(vertical: boolean, edge: number, from: number, to: number, stroke: string, width: string, dash: string): string {
+  if (!(to > from + 0.5)) return "";
+  if (vertical) return `<line data-ck-axis="line" x1="${n(edge)}" y1="${n(from)}" x2="${n(edge)}" y2="${n(to)}" stroke="${stroke}"${width}${dash} />`;
+  return `<line data-ck-axis="line" x1="${n(from)}" y1="${n(edge)}" x2="${n(to)}" y2="${n(edge)}" stroke="${stroke}"${width}${dash} />`;
+}
+
+function ruleLine(side: number, plot: PlotBox, model: PlotModel, axis: AxisBox, crossAt?: number, spans?: Array<[number, number]>, ticks?: number[]): string {
+  if (!wantSpine(axis)) return "";
   const rule = axis.rule;
-  if (!rule?.on) return "";
-  const dash = rule.dash === "dashed" ? ' stroke-dasharray="4 3"' : rule.dash === "dotted" ? ' stroke-dasharray="1 3"' : "";
-  const width = rule.width ? ` stroke-width="${n(rule.width)}"` : "";
-  const stroke = rule.color || cssVar("axis", model.preset.axis);
-  const edge = side === 0 ? plot.left : side === 1 ? plot.right : side === 2 ? plot.top : plot.bottom;
-  if (side < 2) return `<line data-ck-axis="line" x1="${n(edge)}" y1="${n(plot.top)}" x2="${n(edge)}" y2="${n(plot.bottom)}" stroke="${stroke}"${width}${dash} />`;
-  return `<line data-ck-axis="line" x1="${n(plot.left)}" y1="${n(edge)}" x2="${n(plot.right)}" y2="${n(edge)}" stroke="${stroke}"${width}${dash} />`;
+  const dash = rule?.dash === "dashed" ? ' stroke-dasharray="4 3"' : rule?.dash === "dotted" ? ' stroke-dasharray="1 3"' : "";
+  const width = rule?.width ? ` stroke-width="${n(rule.width)}"` : "";
+  const stroke = rule?.color || cssVar("axis", model.preset.axis);
+  const edge = spineEdge(side, plot, axis, crossAt);
+  const vertical = side < 2;
+  let from = vertical ? plot.top : plot.left;
+  let to = vertical ? plot.bottom : plot.right;
+  if (vertical && ticks && ticks.length) {
+    let top = Infinity;
+    for (let i = 0; i < ticks.length; i++) if (ticks[i] < top) top = ticks[i];
+    if (top > from && top < to) from = top;
+  }
+  const cuts = (spans ?? [])
+    .map((span) => [Math.min(span[0], span[1]), Math.max(span[0], span[1])] as [number, number])
+    .filter((span) => span[1] > span[0])
+    .sort((a, b) => a[0] - b[0]);
+  if (!cuts.length) return spineSegment(vertical, edge, from, to, stroke, width, dash);
+  let out = "";
+  let cursor = from;
+  for (const [lo, hi] of cuts) {
+    const start = Math.max(lo, from);
+    const end = Math.min(hi, to);
+    if (!(end > start)) continue;
+    if (start > cursor) out += spineSegment(vertical, edge, cursor, start, stroke, width, dash);
+    out += vertical ? zigzag(edge, start, edge, end, stroke) : zigzag(start, edge, end, edge, stroke);
+    cursor = end;
+  }
+  if (cursor < to) out += spineSegment(vertical, edge, cursor, to, stroke, width, dash);
+  return out;
 }
 
 /** 0 left, 1 right, 2 top, 3 bottom. */
@@ -1603,22 +1874,62 @@ function drawAxes(
   xScale: XScale,
 ): string {
   let out = "";
+  const yCross = crossAt(model, "y", horizontal, xScale);
+  const y2Cross = crossAt(model, "y2", horizontal, xScale);
+  const xCross = crossAt(model, "x", horizontal, xScale, yScale);
   if (model.showY) {
     const side = ySide(model, horizontal);
-    out += ruleLine(side, plot, model, model.yAxis);
+    out += ruleLine(side, plot, model, model.yAxis, yCross, model.ySpans, yTicks.map(yScale));
     if (model.yAxis.labels !== false) out += band(yText, yTicks, yScale, model, plot, side, model.yAxis);
+    out += minors(yTicks, yScale, side, spineEdge(side, plot, model.yAxis, yCross), model.yAxis, cssVar("axis", model.preset.axis));
   }
   if (model.showY2) {
     const side = model.y2Axis.end !== false ? 1 : 0;
-    out += ruleLine(side, plot, model, model.y2Axis);
+    out += ruleLine(side, plot, model, model.y2Axis, y2Cross, model.y2Spans, y2Ticks.map(y2Scale));
     if (model.y2Axis.labels !== false) out += band(y2Text, y2Ticks, y2Scale, model, plot, side, model.y2Axis);
+    out += minors(y2Ticks, y2Scale, side, spineEdge(side, plot, model.y2Axis, y2Cross), model.y2Axis, cssVar("axis", model.preset.axis));
   }
   if (model.showX) {
-    out += ruleLine(xSide(model, horizontal), plot, model, model.xAxis);
+    const side = xSide(model, horizontal);
+    out += ruleLine(side, plot, model, model.xAxis, xCross, model.xSpans);
     if (model.xAxis.labels !== false) out += xBand(model, xScale, count, horizontal, plot);
+    const xValues = model.x && !horizontal ? resolveTicks(model, "x", xScale.min, xScale.max, model.xAxis.count ?? 6, false) : null;
+    if (xValues) out += minors(xValues, (value) => xScale.at(value), side, spineEdge(side, plot, model.xAxis, xCross), model.xAxis, cssVar("axis", model.preset.axis));
   }
   out += axisTitles(model, plot, horizontal);
   return out;
+}
+
+function crossAt(model: PlotModel, key: "x" | "y" | "y2", horizontal: boolean, xScale: XScale, yScale?: (value: number) => number): number | undefined {
+  if (horizontal) return undefined;
+  const axis = key === "x" ? model.xAxis : key === "y2" ? model.y2Axis : model.yAxis;
+  if (typeof axis.crosses !== "number") return undefined;
+  if (key === "x") return yScale?.(axis.crosses);
+  if (!model.x) return undefined;
+  return xScale.at(axis.crosses);
+}
+
+function minors(values: number[], at: (value: number) => number, side: number, edge: number, axis: AxisBox, stroke: string): string {
+  const count = axis.minor || 0;
+  if (count < 1 || values.length < 2) return "";
+  let marks = "";
+  for (let i = 0; i < values.length - 1; i++) {
+    const from = values[i];
+    const to = values[i + 1];
+    if (typeof from !== "number" || typeof to !== "number" || from === to) continue;
+    for (let k = 1; k <= count; k++) {
+      const pos = at(from + ((to - from) * k) / (count + 1));
+      if (!Number.isFinite(pos)) continue;
+      const dir = 1;
+      const len = 3;
+      const x2 = side === 0 ? edge - dir * len : side === 1 ? edge + dir * len : pos;
+      const y2 = side === 2 ? edge - dir * len : side === 3 ? edge + dir * len : pos;
+      const x1 = side < 2 ? edge : pos;
+      const y1 = side < 2 ? pos : edge;
+      marks += `<line x1="${n(x1)}" y1="${n(y1)}" x2="${n(x2)}" y2="${n(y2)}" stroke="${stroke}" />`;
+    }
+  }
+  return marks ? `<g data-ck-minor="${count}">${marks}</g>` : "";
 }
 
 function band(
@@ -1633,7 +1944,7 @@ function band(
   const fill = cssVar("muted", model.preset.muted);
   const family = font();
   const ink = cssVar("axis", model.preset.axis);
-  const edge = side === 0 ? plot.left : side === 1 ? plot.right : side === 2 ? plot.top : plot.bottom;
+  const edge = outerEdge(side, plot, axis);
   const angle = axis.rotate || 0;
   const skip = axis.skip !== false;
   let out = "";
@@ -1668,8 +1979,8 @@ function xBand(model: PlotModel, xScale: XScale, count: number, horizontal: bool
   const family = font();
   const ink = cssVar("axis", model.preset.axis);
   const side = xSide(model, horizontal);
-  const edge = side === 0 ? plot.left : side === 1 ? plot.right : side === 2 ? plot.top : plot.bottom;
-  const y = model.xAxis.end && !horizontal ? plot.top - 18 : plot.bottom + 16;
+  const edge = outerEdge(side, plot, model.xAxis);
+  const y = (model.xAxis.end && !horizontal ? plot.top - 18 : plot.bottom + 16) + (model.xAxis.end && !horizontal ? -(model.xAxis.offset || 0) : model.xAxis.offset || 0);
   const keep = model.xAxis.skip === false;
   const seq = horizontal
     ? null
@@ -1718,7 +2029,7 @@ function timeBand(model: PlotModel, xScale: XScale, plot: PlotBox): string {
   const min = xScale.min;
   const max = xScale.max;
   const width = Math.max(1, plot.right - plot.left);
-  const explicit = model.xAxis.count !== undefined || Boolean(model.xAxis.values?.length);
+  const explicit = model.xAxis.ends || model.xAxis.count !== undefined || Boolean(model.xAxis.values?.length);
   const at = (value: number) => xScale.at(value);
   if (explicit || model.zone === "UTC") {
     const values = explicit
@@ -1765,13 +2076,27 @@ function along(
   slack: number,
 ): string {
   const angle = xAngle(model);
-  const y = model.xAxis.end ? plot.top - 18 : plot.bottom + 16;
+  const y = (model.xAxis.end ? plot.top - 18 : plot.bottom + 16) + (model.xAxis.end ? -(model.xAxis.offset || 0) : model.xAxis.offset || 0);
   const fill = cssVar("muted", model.preset.muted);
   const family = font();
   const ink = cssVar("axis", model.preset.axis);
   const side = model.xAxis.end ? 2 : 3;
-  const edge = model.xAxis.end ? plot.top : plot.bottom;
+  const edge = outerEdge(side, plot, model.xAxis);
   const keep = model.xAxis.skip === false;
+  // The domain end stays. An earlier label that would cover it is the one that drops.
+  let endAt = -1;
+  if (!angle && !keep) {
+    for (let i = values.length - 1; i >= 0; i--) {
+      const label = labels[i];
+      if (!label) continue;
+      const x = at(values[i]);
+      if (x < plot.left - slack || x > plot.right + slack) continue;
+      endAt = i;
+      break;
+    }
+  }
+  const endLabel = endAt >= 0 ? labels[endAt] : "";
+  const reserved = endAt >= 0 ? at(values[endAt]) - ((endLabel.length || 1) * 6.4) / 2 : Infinity;
   let out = "";
   let last = -Infinity;
   for (let i = 0; i < values.length; i++) {
@@ -1779,6 +2104,10 @@ function along(
     if (!label) continue;
     const x = at(values[i]);
     const rows = linesOf(model.xAxis, label);
+    if (!angle && !keep && i !== endAt) {
+      const text = rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label;
+      if (x + ((text.length || 1) * 6.4) / 2 + 8 > reserved) continue;
+    }
     const drawn = alongOne(label, x, y, angle, plot, slack, fill, family, keep ? -Infinity : last, rows, model.width);
     if (!drawn) continue;
     out += tickInk(side, edge, x, model.xAxis, ink);
@@ -1896,6 +2225,7 @@ export function xAngle(model: PlotModel): number {
 }
 
 function xStep(model: PlotModel, count: number, angle: number): number {
+  if (model.xAxis.ends && count > 1) return count - 1;
   const target = model.xAxis.count;
   if (target === 0) return 0;
   if (target !== undefined) return Math.max(1, Math.ceil(count / Math.max(1, target)));
@@ -1999,6 +2329,68 @@ function appendRules(out: string[], model: PlotModel, cx: number, cy: number, x:
   }
 }
 
+/** Inter tabular digits at these sizes run about 0.68em wide. Measured on the $261K headline. */
+function headlineInk(text: string, size: number): number {
+  return Math.ceil(text.length * size * 0.68);
+}
+
+function headlineSvg(model: PlotModel): string {
+  const head = model.headline;
+  if (!head) return "";
+  const text = cssVar("text", model.preset.text);
+  if (!head.label && !head.value && !head.compare && !head.delta) {
+    const swatch = head.tone === "negative" ? cssVar("negative", model.preset.negative) : head.tone === "neutral" ? cssVar("muted", model.preset.muted) : cssVar("positive", model.preset.positive);
+    return `<rect data-ck-headline="1" x="12" y="12" width="12" height="12" rx="6" fill="${swatch}" />`;
+  }
+  const muted = cssVar("muted", model.preset.muted);
+  const tone = head.tone === "negative" ? cssVar("negative", model.preset.negative) : head.tone === "neutral" ? muted : cssVar("positive", model.preset.positive);
+  let y = model.title ? 36 : 16;
+  if (model.subtitle) y += 16;
+  let out = "";
+  const labelSize = 14;
+  const valueSize = 40;
+  const compareSize = 22;
+  const deltaSize = 13;
+  if (head.label) {
+    out += `<text x="12" y="${y}" fill="${muted}" font-size="${labelSize}" font-weight="500" font-family="${font()}">${esc(head.label)}</text>`;
+    y += 24;
+  }
+  const baseline = y + valueSize - 8;
+  out += `<text data-ck-headline="1" x="12" y="${baseline}" fill="${text}" font-size="${valueSize}" font-weight="650" font-family="${font()}">${esc(head.value)}</text>`;
+  const edge = model.width - 16;
+  const deltaW = head.delta ? headlineInk(head.delta, deltaSize) + 22 : 0;
+  const compareW = head.compare ? headlineInk(head.compare, compareSize) : 0;
+  const between = head.compare && head.delta ? 10 : 0;
+  const compareX = edge - deltaW - between - compareW;
+  if (head.compare) {
+    out += `<text x="${n(compareX)}" y="${baseline}" fill="${muted}" font-size="${compareSize}" font-weight="500" font-family="${font()}">${esc(head.compare)}</text>`;
+  }
+  if (head.delta) {
+    const pillX = edge - deltaW;
+    const pillY = baseline - 20;
+    out += `<rect data-ck-delta="1" x="${n(pillX)}" y="${n(pillY)}" width="${n(deltaW)}" height="24" rx="12" fill="${tone}" fill-opacity="0.16" />`;
+    out += `<text x="${n(pillX + deltaW / 2)}" y="${n(pillY + 16)}" text-anchor="middle" fill="${tone}" font-size="${deltaSize}" font-weight="650" font-family="${font()}">${esc(head.delta)}</text>`;
+  }
+  return out;
+}
+
+function svgStyle(model: PlotModel): string {
+  let style = "font-variant-numeric:tabular-nums;font-feature-settings:'tnum'";
+  if (model.preset.fontFamily) style += `;--ck-font-family:${model.preset.fontFamily}`;
+  return style;
+}
+
+function tipAttrs(model: PlotModel): string {
+  const tip = model.tip;
+  if (!tip) return "";
+  let out = "";
+  if (tip.background) out += ` data-ck-chrome-bg="${esc(tip.background)}"`;
+  if (tip.radius !== undefined) out += ` data-ck-chrome-radius="${n(tip.radius)}"`;
+  if (tip.shadow) out += ` data-ck-chrome-shadow="${esc(tip.shadow)}"`;
+  if (tip.crosshair) out += ` data-ck-xhair="${esc(tip.crosshair)}"`;
+  return out;
+}
+
 function openSvg(model: PlotModel): string {
   const width = model.responsive ? "100%" : String(model.width);
   const described = model.description ? ` aria-describedby="${model.id}-d"` : "";
@@ -2006,8 +2398,10 @@ function openSvg(model: PlotModel): string {
   const exported = model.exportMark ? ` data-ck-export="${esc(model.exportMark)}"` : "";
   const canvas = model.canvas ? ` data-ck-render="canvas"` : "";
   const sceneAttr = capturing() ? ` data-ck-scene="1"` : "";
+  const gap = model.stackGap > 0 ? ` data-ck-stack-gap="${n(model.stackGap)}"` : "";
+  const partialFade = model.partialOpacity !== undefined ? ` data-ck-partial-opacity="${n(model.partialOpacity)}"` : "";
   const desc = model.description ? `<desc id="${model.id}-d">${esc(model.description)}</desc>` : `<desc>${esc(model.alt)}</desc>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent}${exported}${canvas}${sceneAttr} style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent}${exported}${canvas}${sceneAttr}${gap}${partialFade}${tipAttrs(model)} style="${svgStyle(model)}">` +
     `<title>${esc(model.title || model.alt)}</title>${desc}`;
 }
 
@@ -2038,6 +2432,7 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
   let bottom = 12;
   if (model.title) top += 20;
   if (model.subtitle) top += 18;
+  if (model.headline) top += (model.headline.label ? 26 : 0) + 56;
   if (wantLabels(model)) {
     const pos = model.labelAt || "top";
     if (pos === "top" || pos === "outside" || pos === "") top += 16;
@@ -2235,7 +2630,9 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
   }
   const lock = axisLock(model, axis);
   const log = axis === "y2" ? model.y2Log : model.yLog;
-  if (log) {
+  const sym = axis === "y2" ? model.y2Sym : model.ySym;
+  if ((axis === "y" || axis === "y2") && typeof model.xAxis.crosses === "number") consider(model.xAxis.crosses);
+  if (log && !sym) {
     if (!seen || !(max > 0)) return pinDomain([1, 10], lock);
     const lo = min > 0 ? min : max / 10;
     return pinDomain(logNice(lo, max), lock);
@@ -2278,6 +2675,7 @@ function strokeGutter(model: PlotModel, axis: "y" | "y2", span: number): number 
 
 export function resolveTicks(model: PlotModel, key: "x" | "y" | "y2", min: number, max: number, count: number, log: boolean): number[] {
   const axis = key === "y" ? model.yAxis : key === "y2" ? model.y2Axis : model.xAxis;
+  if (axis.ends) return max - min > 1e-9 ? [min, max] : [min];
   const values = axis.values;
   if (values && values.length) {
     const out: number[] = [];
@@ -2285,7 +2683,12 @@ export function resolveTicks(model: PlotModel, key: "x" | "y" | "y2", min: numbe
     return out;
   }
   if (count <= 0) return [];
-  return log ? logTicks(min, max) : ticks(min, max, count);
+  const sym = key === "y" ? model.ySym : key === "y2" ? model.y2Sym : false;
+  const constant = key === "y2" ? model.symC2 : model.symC;
+  const raw = sym ? symlogTicks(min, max, constant) : log ? logTicks(min, max) : ticks(min, max, count);
+  const gaps = axis.breaks;
+  if (!gaps?.length) return raw;
+  return raw.filter((value) => gaps.every((gap) => value <= gap.from || value >= gap.to));
 }
 
 function seriesLabelBoxes(
@@ -2322,6 +2725,7 @@ function seriesLabelBoxes(
 }
 
 function labelStep(model: PlotModel, count: number): number {
+  if (model.xAxis.ends && count > 1) return count - 1;
   const target = model.xAxis.count;
   if (target === 0) return 0;
   if (target !== undefined) return Math.max(1, Math.ceil(count / Math.max(1, target)));
@@ -2331,6 +2735,50 @@ function labelStep(model: PlotModel, count: number): number {
 function legendName(model: PlotModel, series: Series): string {
   if (series.legendName) return series.legendName;
   return hooks?.seriesName(model, series) ?? series.name;
+}
+
+function crossesSpan(y0: number, y1: number, span: [number, number]): boolean {
+  const lo = Math.min(span[0], span[1]);
+  const hi = Math.max(span[0], span[1]);
+  return Math.min(y0, y1) < lo + 0.4 && Math.max(y0, y1) > hi - 0.4;
+}
+
+/** Continue a stroke through a break with the same zigzag the axis uses. */
+function withBreaks(points: Pt[], curve: Curve, spans: Array<[number, number]>): string {
+  let d = "";
+  let run: Pt[] = [points[0]];
+  const write = (bridge: string) => {
+    const part = linePath(run, curve);
+    if (!part) return;
+    d += d ? ` ${bridge}${part.replace(/^M\s+/, "L ")}` : part;
+  };
+  for (let i = 1; i < points.length; i++) {
+    const next = points[i];
+    const prev = run[run.length - 1];
+    if (!next || !prev) continue;
+    const span = spans.find((item) => crossesSpan(prev.y, next.y, item));
+    if (!span) {
+      run.push(next);
+      continue;
+    }
+    const lo = Math.min(span[0], span[1]);
+    const hi = Math.max(span[0], span[1]);
+    const first = prev.y < next.y ? lo : hi;
+    const second = prev.y < next.y ? hi : lo;
+    const xAt = (y: number) => prev.x + (next.x - prev.x) * ((y - prev.y) / (next.y - prev.y || 1));
+    run.push({ x: xAt(first), y: first });
+    const amp = Math.max(3, (hi - lo) * 0.35);
+    write("");
+    d += ` ${zigPoints(xAt(first), first, xAt(second), second, amp)}`;
+    run = [{ x: xAt(second), y: second }, next];
+  }
+  write("");
+  return d;
+}
+
+function stroked(points: Pt[], curve: Curve, spans?: Array<[number, number]>): string {
+  if (!spans || spans.length === 0 || points.length < 2) return linePath(points, curve);
+  return withBreaks(points, curve, spans);
 }
 
 function linePath(points: Pt[], curve: Curve): string {
@@ -2553,11 +3001,15 @@ interface YChannel {
   dash: string;
   area: boolean;
   log: boolean;
+  sym: boolean;
+  symC: number;
+  z?: number;
   format?: unknown;
   pointShape: string;
   pointSize?: number;
   pointHollow: boolean;
   stack?: string;
+  fillOpacity?: number;
   lock?: [number | null, number | null];
   pad?: { min: number; max: number } | null;
   clamp?: boolean;
@@ -2566,8 +3018,8 @@ interface YChannel {
 function readYChannels(y: unknown): YChannel[] {
   const list = Array.isArray(y) ? y : y === undefined ? [] : [y];
   return list.map((item) => {
-    if (typeof item === "string") return { field: item, axis: "y" as const, dash: "solid", area: false, log: false, pointShape: "", pointHollow: false };
-    if (!isRecord(item)) return { axis: "y" as const, dash: "solid", area: false, log: false, pointShape: "", pointHollow: false };
+    if (typeof item === "string") return { field: item, axis: "y" as const, dash: "solid", area: false, log: false, sym: false, symC: 1, pointShape: "", pointHollow: false };
+    if (!isRecord(item)) return { axis: "y" as const, dash: "solid", area: false, log: false, sym: false, symC: 1, pointShape: "", pointHollow: false };
     const scale = isRecord(item.scale) ? item.scale : undefined;
     return {
       field: typeof item.field === "string" ? item.field : undefined,
@@ -2578,11 +3030,15 @@ function readYChannels(y: unknown): YChannel[] {
       dash: item.dash === "dashed" || item.dash === "dotted" ? item.dash : "solid",
       area: item.area === true,
       log: scale?.type === "log",
+      sym: scale?.type === "symlog",
+      symC: typeof scale?.constant === "number" && scale.constant > 0 ? scale.constant : 1,
+      z: typeof item.z === "number" && Number.isFinite(item.z) ? item.z : undefined,
       format: item.format,
       pointShape: glyphOf(item.pointShape),
       pointSize: typeof item.pointSize === "number" ? item.pointSize : undefined,
       pointHollow: item.pointFill === "hollow",
       stack: typeof item.stack === "string" && item.stack.length > 0 ? item.stack : undefined,
+      fillOpacity: unitOpacity(item.fillOpacity),
       lock: scale ? domainEnds(scale.domain) : undefined,
       pad: scalePad(item),
       clamp: scaleClamp(item),
@@ -2618,6 +3074,19 @@ function modelClamp(scale: (value: number) => number, domain: [number, number], 
   const lo = Math.min(domain[0], domain[1]);
   const hi = Math.max(domain[0], domain[1]);
   return (value) => scale(value < lo ? lo : value > hi ? hi : value);
+}
+
+function unitOpacity(value: unknown): number | undefined {
+  if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
+  if (value < 0) return 0;
+  if (value > 1) return 1;
+  return value;
+}
+
+/** Series opacity wins. A gradient still owns the stop alphas, so the path stays at 1. */
+function areaFade(model: PlotModel, series: Series): string {
+  if (model.gradient) return "1";
+  return series.fillOpacity === undefined ? model.fillPaint : n(series.fillOpacity);
 }
 
 function dashAttr(dash: string): string {
@@ -3056,9 +3525,12 @@ export function timeTicks(min: number, max: number, count: number, zone = "UTC")
   }
   const start = Math.ceil(min / step) * step;
   const out: number[] = [];
-  for (let value = start; value <= max + step * 0.001 && out.length < 12; value += step) {
+  for (let value = start; value <= max + step * 0.001; value += step) {
     if (value >= min - step * 0.001) out.push(value);
   }
+  // A 12-tick cap used to stop a month of days in the middle. The last instant
+  // is a tick when the nice step lands short of it, so the axis reaches the data.
+  if (out.length && span >= 2 * 86400000 && max - out[out.length - 1] > 60000) out.push(max);
   return out.length ? out : [min, max];
 }
 

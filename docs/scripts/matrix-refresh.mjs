@@ -331,6 +331,60 @@ function concretePath(cell) {
 
 function applyFeature(spec, feature) {
   if (feature.id === "tooltip.custom") return false;
+  if (feature.id === "mark.zindex") {
+    spec.data = [
+      { quarter: "Q1", units: 40, other: 22 },
+      { quarter: "Q2", units: 55, other: 18 },
+    ];
+    spec.encoding = { x: "quarter", y: [{ field: "units", z: 2 }, { field: "other", z: 0 }] };
+    spec.annotations = [{ type: "rule", axis: "y", value: 30, z: -1, label: "Floor" }];
+    spec.a11y = { alt: "Units stay above the other series." };
+    return true;
+  }
+  if (feature.id === "scale.symlog") {
+    spec.encoding = { x: "quarter", y: { field: "units", scale: { type: "symlog", constant: 1 } } };
+    spec.a11y = { alt: "Units rose in Q2, on a signed log." };
+    return true;
+  }
+  if (feature.id === "scale.quantize") {
+    spec.type = "heatmap";
+    spec.data = [
+      { bay: "Ash", bell: "02", kiln: -12 },
+      { bay: "Elm", bell: "14", kiln: 80 },
+      { bay: "Oak", bell: "14", kiln: 420 },
+    ];
+    spec.encoding = { x: "bell", y: "bay", color: { field: "kiln", scale: { type: "quantize", bins: 4 } } };
+    spec.a11y = { alt: "Oak is the hottest bay." };
+    return true;
+  }
+  if (feature.id === "axis.ticks.minor") {
+    spec.axes = { y: { minorTicks: 1 } };
+    return true;
+  }
+  if (feature.id === "axis.breaks") {
+    spec.axes = { y: { breaks: [{ from: 45, to: 52 }] } };
+    return true;
+  }
+  if (feature.id === "axis.offset") {
+    spec.axes = { x: { crosses: 0, line: true }, y: { offset: 12 } };
+    return true;
+  }
+  if (feature.id === "tooltip.format") {
+    spec.encoding = { x: "quarter", y: { field: "units", format: { specifier: ",.0f" } } };
+    spec.tooltip = {
+      template: "{name} {value} {unit}",
+      fields: [{ field: "units", format: { specifier: ",.0f" }, unit: "u" }],
+    };
+    return true;
+  }
+  if (feature.id === "tooltip.touch") {
+    spec.tooltip = { pin: true, hit: 28 };
+    return true;
+  }
+  if (feature.id === "animation.duration") {
+    spec.animation = { duration: 280, easing: "spring" };
+    return true;
+  }
   if (feature.id === "interaction.drilldown") {
     const x = spec.encoding?.x;
     const key = typeof x === "string" ? x : x?.field || "quarter";
@@ -698,6 +752,7 @@ function main() {
     notScored: matrix.notScored,
     taxonomy: matrix.taxonomy,
     features,
+    dashboards: JSON.parse(readFileSync(join(docsRoot, "data/dashboards.json"), "utf8")),
     synonyms: synonymObject,
     coverage: matrix.coverage,
     converters: {

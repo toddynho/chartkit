@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { librariesExceptChartkit, matrix } from "@/lib/matrix";
+import { dashboards } from "@/lib/dashboards";
 import { showcaseBoards } from "@/lib/showcase";
 import { chartTypes, examples } from "@/lib/specs";
 
@@ -36,6 +37,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/features",
     "/showcase",
     "/showcase.json",
+    "/dashboards",
+    ...dashboards().flatMap((board) => [`/dashboards/${board.slug}`, `/dashboards/${board.slug}.md`]),
     "/features.json",
     "/when-to-use",
     ...matrix().features.flatMap((feature) => [`/features/${feature.id}`, `/features/${feature.id}.md`]),

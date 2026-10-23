@@ -6,24 +6,11 @@ Regions coloured by value
 
 Matrix status: `native`. Verification: `source-review` (strong).
 
-`@chartkitdev/geo` draws `type: "choropleth"`. The package is unpublished and is not in the line or `all` bundles. Atlases: `world`, `us`, `canada`, `eu`, loaded on demand, or caller GeoJSON/TopoJSON. Scales: sequential, diverging, threshold, plus a no-data fill. Core `validate()` does not accept this type. Geo `validate()` uses CK3050–CK3056.
+@chartkitdev/geo, unpublished, not in the line or all bundles. No tiles, no pan/zoom, no US counties, no NUTS-2. Small states missing from Natural Earth 110m, including Malta, are points.
 
-Losses that are not a separate scored row: no pan or zoom, no US counties, and no NUTS-1/2/3. Small states missing from Natural Earth 110m, including Malta, are points. Tile basemaps stay `none`. See `type.map.tiles`.
+Source: packages/geo/src/render.ts
 
-## ChartKit spec
-
-```json
-{
-  "version": "1",
-  "type": "choropleth",
-  "data": [{ "country": "Norway", "share": 98 }, { "country": "UK", "share": 46 }, { "country": "USA", "share": 23 }],
-  "encoding": { "region": "country", "color": "share" },
-  "mark": { "atlas": "world", "scale": "sequential" },
-  "a11y": { "alt": "Norway's renewable share is higher than the UK and the US." }
-}
-```
-
-Rendered by `@chartkitdev/geo`, not by core `validate()` / `render()`.
+No spec snippet from core `validate()`. `@chartkitdev/geo` renders this type. The package is unpublished and is not in the line or all bundles. Its own `validate()` reports CK3050–CK3056.
 
 ## Other libraries
 
@@ -50,6 +37,6 @@ Rendered by `@chartkitdev/geo`, not by core `validate()` / `render()`.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~geoPath | dts-grep (weak) | @antv/g2/lib/index.d.ts:185 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 6ec84d7091db.
 
 https://chartkit.dev/features.json

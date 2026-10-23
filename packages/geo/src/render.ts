@@ -1,7 +1,7 @@
-import { formatNumber, paintScale, parseFormat, POINT_PALETTE, sizeStops, type PaintScale, type ScaleFormat } from "./color";
+import { formatNumber, hexRange, paintScale, parseFormat, POINT_PALETTE, sizeStops, type PaintScale, type ScaleFormat } from "./color";
 import { directoryIndex, matchRegion, type DirectoryEntry } from "./match";
 import { albersUsa, equalEarth, equirectangular, fitProject, mercator, type Box, type InsetFrame } from "./project";
-import { esc, fieldName, isRecord, num, resolveEncoding, resolveMark, round, rowsOf, sizeOf } from "./spec";
+import { esc, fieldName, isRecord, num, resolveEncoding, resolveMark, round, rowsOf, sizeOf, tooltipColumns, tooltipExtra } from "./spec";
 import { chromeFor, type Chrome } from "./theme";
 import { regionsFromGeoJSON, regionsFromTopology, type GeoRegion, type LonLat } from "./topo";
 import type { AtlasName, ColorScaleName } from "./types";
@@ -138,6 +138,29 @@ function titleLayout(text: string, width: number): { size: number; y: number; ba
   return { size, y, band };
 }
 
+function legendSide(spec: Record<string, unknown>): "bottom" | "right" {
+  return isRecord(spec.legend) && spec.legend.position === "bottom" ? "bottom" : "right";
+}
+
+function horizontalLegend(scale: PaintScale, x: number, y: number, width: number, id: string): string {
+  const title = scale.title ? `<text class="ck-geo-label ck-geo-legend-title" x="${round(x)}" y="${round(y + 11)}">${esc(scale.title)}</text>` : "";
+  const barY = y + (scale.title ? 18 : 2);
+  if (scale.swatches?.length) {
+    const marks = scale.swatches
+      .map((swatch, index) => {
+        const at = x + index * 88;
+        return `<rect x="${round(at)}" y="${round(barY)}" width="12" height="8" fill="${swatch.color}" rx="2"/><text class="ck-geo-label" x="${round(at + 16)}" y="${round(barY + 8)}">${esc(swatch.label)}</text>`;
+      })
+      .join("");
+    return `${title}${marks}`;
+  }
+  const stops = scale.stops.map((stop) => `<stop offset="${Math.round(stop.offset * 100)}%" stop-color="${stop.color}"/>`).join("");
+  const lo = scale.stops[0];
+  const hi = scale.stops[scale.stops.length - 1];
+  const barW = Math.max(48, width - 4);
+  return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">${stops}</linearGradient></defs>${title}<rect x="${round(x)}" y="${round(barY)}" width="${round(barW)}" height="8" fill="url(#${id})" rx="2"/><text class="ck-geo-label" x="${round(x)}" y="${round(barY + 20)}">${esc(lo?.label ?? "")}</text><text class="ck-geo-label" text-anchor="end" x="${round(x + barW)}" y="${round(barY + 20)}">${esc(hi?.label ?? "")}</text>`;
+}
+
 function legendWidth(scale: PaintScale): number {
   const labels = [scale.title, ...(scale.stops.map((stop) => stop.label)), ...(scale.swatches ?? []).map((swatch) => swatch.label), ...(scale.sizes ?? []).map((stop) => stop.label), "No data"];
   let widest = 0;
@@ -187,12 +210,12 @@ function legendMarkup(scale: PaintScale, x: number, y: number, height: number, i
   return `<defs><linearGradient id="${id}" x1="0" y1="1" x2="0" y2="0">${stops}</linearGradient></defs>${title}<rect x="${round(x)}" y="${round(top)}" width="12" height="${round(bar)}" fill="url(#${id})" rx="2"/>${labels}${nodata ? noDataSwatch(x, y + height - 18, id) : ""}`;
 }
 
-function styleBlock(chrome: Chrome, id: string, hatch: boolean): string {
+function styleBlock(chrome: Chrome, id: string, nodata: "hatch" | "fill" | "off"): string {
   const rim = chrome.scheme === "dark" ? "#141414" : "#ffffff";
-  const nodata = hatch ? `.ck-geo-nodata{fill:url(#${id}nd)}` : "";
-  // A stylesheet fill beats the fill attribute. Land belongs only on a points map.
-  const regionFill = hatch ? "" : `fill:${chrome.land};`;
-  return `<style>.ck-geo-water{fill:${chrome.water}}${nodata}.ck-geo-region{${regionFill}stroke:${chrome.border};stroke-width:.6px}.ck-geo-point{stroke:${rim};stroke-width:1.25px;fill-opacity:.82}.ck-geo-region:hover,.ck-geo-region:focus,.ck-geo-point:hover,.ck-geo-point:focus{stroke:${chrome.text};stroke-width:1.6px;outline:none}.ck-geo-graticule{fill:none;stroke:${chrome.border};stroke-width:.4;opacity:.45}.ck-geo-inset{fill:none;stroke:${chrome.border};stroke-width:.75}.ck-geo-leader{fill:none;stroke:${chrome.muted};stroke-width:.8}.ck-geo-label,.ck-geo-title{fill:${chrome.text};font-family:ui-sans-serif,system-ui,sans-serif}.ck-geo-label{font-size:11px}.ck-geo-legend-title{font-weight:650}.ck-geo-title{font-weight:600}.ck-geo-tag{fill:${chrome.text};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif;paint-order:stroke;stroke:${chrome.water};stroke-width:3px;stroke-linejoin:round}.ck-geo-muted{fill:${chrome.muted};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif}</style>`;
+  const nodataCss = nodata === "hatch" ? `.ck-geo-nodata{fill:url(#${id}nd)}` : nodata === "fill" ? `.ck-geo-nodata{fill:${chrome.land}}` : "";
+  // A stylesheet fill beats the fill attribute. Land belongs on a points map, or on missing choropleth countries when nodata is fill.
+  const regionFill = nodata === "off" ? `fill:${chrome.land};` : "";
+  return `<style>.ck-geo-water{fill:${chrome.water}}${nodataCss}.ck-geo-region{${regionFill}stroke:${chrome.border};stroke-width:.6px}.ck-geo-point{stroke:${rim};stroke-width:1.25px;fill-opacity:.82}.ck-geo-region:hover,.ck-geo-region:focus,.ck-geo-point:hover,.ck-geo-point:focus{stroke:${chrome.text};stroke-width:1.6px;outline:none}.ck-geo-graticule{fill:none;stroke:${chrome.border};stroke-width:.4;opacity:.45}.ck-geo-inset{fill:none;stroke:${chrome.border};stroke-width:.75}.ck-geo-leader{fill:none;stroke:${chrome.muted};stroke-width:.8}.ck-geo-label,.ck-geo-title{fill:${chrome.text};font-family:ui-sans-serif,system-ui,sans-serif}.ck-geo-label{font-size:11px}.ck-geo-legend-title{font-weight:650}.ck-geo-title{font-weight:600}.ck-geo-tag{fill:${chrome.text};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif;paint-order:stroke;stroke:${chrome.water};stroke-width:3px;stroke-linejoin:round}.ck-geo-muted{fill:${chrome.muted};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif}</style>`;
 }
 
 function patternDef(chrome: Chrome, id: string): string {
@@ -200,12 +223,12 @@ function patternDef(chrome: Chrome, id: string): string {
   return `<pattern id="${id}nd" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="${chrome.nodata}"/><path d="M0 6 L6 0 M-1 1 L1 -1 M5 7 L7 5" stroke="${ink}" stroke-width="0.8"/></pattern>`;
 }
 
-function shell(spec: Record<string, unknown>, chrome: Chrome, body: string, patternId = "ckg", hatch = false): string {
+function shell(spec: Record<string, unknown>, chrome: Chrome, body: string, patternId = "ckg", nodata: "hatch" | "fill" | "off" = "off"): string {
   const { width, height } = sizeOf(spec);
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : typeof spec.title === "string" ? spec.title : "Map";
   const theme = typeof spec.theme === "string" ? spec.theme : "soft";
   const scheme = chrome.scheme ? ` style="color-scheme:${chrome.scheme}"` : "";
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="group" aria-label="${esc(alt)}" data-ck-type="${esc(String(spec.type))}" data-ck-theme="${esc(theme)}"${scheme}>${styleBlock(chrome, patternId, hatch)}<title>${esc(alt)}</title><rect class="ck-geo-water" width="100%" height="100%"/>${body}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="group" aria-label="${esc(alt)}" data-ck-type="${esc(String(spec.type))}" data-ck-theme="${esc(theme)}"${scheme}>${styleBlock(chrome, patternId, nodata)}<title>${esc(alt)}</title><rect class="ck-geo-water" width="100%" height="100%"/>${body}</svg>`;
 }
 
 function projectorFor(name: string, regions: GeoRegion[], box: Box): { project: Projector; point: (lon: number, lat: number) => [number, number]; grid: boolean; frames: InsetFrame[] } {
@@ -246,20 +269,33 @@ function regionHits(rows: Record<string, unknown>[], regionField: string | null,
   return hits;
 }
 
-function regionMarkup(regions: GeoRegion[], project: Projector, hits: Map<string, Hit>, scale: PaintScale | null, format: ScaleFormat, choropleth: boolean): string {
+function regionMarkup(
+  regions: GeoRegion[],
+  project: Projector,
+  hits: Map<string, Hit>,
+  scale: PaintScale | null,
+  format: ScaleFormat,
+  choropleth: boolean,
+  rows: Record<string, unknown>[],
+  tips: string[],
+  skip: Set<string>,
+): string {
   return regions
     .map((region) => {
       const hit = hits.get(region.id);
       const fill = hit && scale ? scale.fill(hit.value) : "";
       const shown = hit ? formatNumber(hit.value, format) : choropleth ? "no data" : region.name;
-      const label = choropleth ? `${region.name}, ${shown}` : region.name;
+      const base = choropleth ? `${region.name}, ${shown}` : region.name;
+      const extra = hit ? tooltipExtra(rows[hit.index] ?? {}, tips, skip) : "";
+      const label = extra ? `${base}, ${extra}` : base;
       const cls = choropleth && !hit ? "ck-geo-region ck-geo-nodata" : "ck-geo-region";
       const painted = fill ? ` fill="${fill}"` : "";
       const value = hit ? ` data-ck-value="${hit.value}" data-ck-i="${hit.index}"` : ` data-ck-i="-1"`;
       const tail = `${painted}${value} data-ck-id="${esc(region.id)}" data-ck-name="${esc(region.name)}" tabindex="0" aria-label="${esc(label)}"><title>${esc(label)}</title>`;
       if (region.point && !region.polygons.length) {
+        if (!hit) return "";
         const [x, y] = project(region.id, region.point[0], region.point[1]);
-        return `<circle class="${cls}" cx="${round(x)}" cy="${round(y)}" r="4.5"${tail}</circle>`;
+        return `<circle class="${cls}" cx="${round(x)}" cy="${round(y)}" r="3"${tail}</circle>`;
       }
       const d = pathFor(region, project);
       if (!d) return "";
@@ -276,12 +312,14 @@ interface Dot {
   color: string;
   label: string;
   value: number | null;
+  detail: string;
 }
 
 interface Channel {
   field: string | null;
   format: ScaleFormat;
   title: string;
+  range?: readonly string[];
 }
 
 function channelOf(value: unknown): Channel {
@@ -291,12 +329,13 @@ function channelOf(value: unknown): Channel {
       field: typeof value.field === "string" && value.field ? value.field : null,
       format: parseFormat(value.format),
       title: typeof value.title === "string" ? value.title : "",
+      range: hexRange(value.range),
     };
   }
   return { field: null, format: {}, title: "" };
 }
 
-function dotsOf(rows: Record<string, unknown>[], encoding: Record<string, unknown>, chrome: Chrome): { dots: Dot[]; scale: PaintScale | null } {
+function dotsOf(rows: Record<string, unknown>[], encoding: Record<string, unknown>, chrome: Chrome, tips: string[]): { dots: Dot[]; scale: PaintScale | null } {
   const latField = fieldName(encoding.latitude);
   const lonField = fieldName(encoding.longitude);
   const sizeChannel = channelOf(encoding.size);
@@ -322,7 +361,7 @@ function dotsOf(rows: Record<string, unknown>[], encoding: Record<string, unknow
   const numeric = draft.every((dot) => dot.colorRaw == null || num(dot.colorRaw) != null);
   const colorValues = draft.map((dot) => num(dot.colorRaw)).filter((value): value is number => value != null);
   const sameField = !!(sizeField && colorField && sizeField === colorField && numeric);
-  const scale = !sameField && colorField && numeric && colorValues.length ? paintScale("sequential", colorValues, undefined, colorChannel.format, colorChannel.title) : null;
+  const scale = !sameField && colorField && numeric && colorValues.length ? paintScale("sequential", colorValues, undefined, colorChannel.format, colorChannel.title, colorChannel.range) : null;
   const categories = new Map<string, string>();
   const dots = draft.map((dot) => {
     let color = chrome.accent;
@@ -336,7 +375,8 @@ function dotsOf(rows: Record<string, unknown>[], encoding: Record<string, unknow
       color = categories.get(key) ?? chrome.accent;
       value = num(dot.colorRaw);
     }
-    return { index: dot.index, lon: dot.lon, lat: dot.lat, size: dot.size, color, label: dot.label, value };
+    const skip = new Set([latField, lonField, sizeField, colorField, labelField].filter((field): field is string => !!field));
+    return { index: dot.index, lon: dot.lon, lat: dot.lat, size: dot.size, color, label: dot.label, value, detail: tooltipExtra(rows[dot.index] ?? {}, tips, skip) };
   });
   if (sameField) {
     const sizes = sizeStops(draft.map((dot) => dot.size), sizeChannel.format.suffix || sizeChannel.format.percent ? sizeChannel.format : colorChannel.format);
@@ -390,7 +430,7 @@ function pointMarkup(dots: Dot[], point: (lon: number, lat: number) => [number, 
     const t = (dot.size - lo) / span;
     const radius = 3.5 + Math.sqrt(Math.max(0, t)) * 16;
     const name = dot.label || `${dot.lat}, ${dot.lon}`;
-    const text = dot.value == null ? name : `${name}, ${dot.value}`;
+    const text = [dot.value == null ? name : `${name}, ${dot.value}`, dot.detail].filter(Boolean).join(", ");
     circles.push({ x, y, r: radius, dot });
     marks += `<circle class="ck-geo-point" cx="${round(x)}" cy="${round(y)}" r="${round(radius)}" fill="${dot.color}" data-ck-i="${dot.index}" data-ck-id="${dot.index}" data-ck-name="${esc(name)}"${dot.value == null ? "" : ` data-ck-value="${dot.value}"`} tabindex="0" aria-label="${esc(text)}"><title>${esc(text)}</title></circle>`;
   }
@@ -465,9 +505,9 @@ export async function render(spec: unknown): Promise<string> {
     const chrome = chromeFor(isRecord(spec) ? spec.theme : "soft");
     return shell(isRecord(spec) ? spec : { type: "choropleth", a11y: { alt: "Map" } }, chrome, `<defs>${patternDef(chrome, "ckg")}</defs><text class="ck-geo-title" x="16" y="32" font-size="16">Expected type choropleth or map-points.</text>`);
   }
-  const chrome = chromeFor(spec.theme);
-  const { width, height } = sizeOf(spec);
   const mark = resolveMark(spec);
+  const chrome = paintChrome(chromeFor(spec.theme), mark);
+  const { width, height } = sizeOf(spec);
   const encoding = resolveEncoding(spec);
   const loaded = await load(mark);
   const title = typeof spec.title === "string" ? spec.title : "";
@@ -482,12 +522,15 @@ export async function render(spec: unknown): Promise<string> {
   const hits = spec.type === "choropleth" ? regionHits(rows, regionField, valueField, loaded.atlas, loaded.entries) : new Map<string, Hit>();
   const kind: ColorScaleName = mark.scale === "diverging" || mark.scale === "threshold" ? mark.scale : "sequential";
   const thresholds = Array.isArray(mark.thresholds) ? mark.thresholds.filter((item): item is number => typeof item === "number") : undefined;
-  const choroplethScale = spec.type === "choropleth" && hits.size ? paintScale(kind, [...hits.values()].map((hit) => hit.value), thresholds, colorChannel.format, legendTitle) : null;
-  const points = dotsOf(rows, encoding, chrome);
+  const choroplethScale = spec.type === "choropleth" && hits.size ? paintScale(kind, [...hits.values()].map((hit) => hit.value), thresholds, colorChannel.format, legendTitle, kind === "sequential" ? colorChannel.range : undefined) : null;
+  const tips = tooltipColumns(spec);
+  const points = dotsOf(rows, encoding, chrome, tips);
   const scale = choroplethScale ?? points.scale;
   const showLegend = mark.legend !== false && !!scale && (scale.stops.length > 0 || !!scale.swatches?.length || !!scale.sizes?.length);
-  const legendW = showLegend && scale ? legendWidth(scale) : 12;
-  const box: Box = { x: 8, y: titleH, w: width - 16 - legendW, h: height - titleH - 10 };
+  const bottomLegend = showLegend && scale ? legendSide(spec) === "bottom" : false;
+  const legendW = showLegend && scale && !bottomLegend ? legendWidth(scale) : 12;
+  const legendH = bottomLegend ? 40 : 0;
+  const box: Box = { x: 8, y: titleH, w: width - 16 - legendW, h: height - titleH - 10 - legendH };
   const explicit = typeof mark.projection === "string" ? mark.projection : "";
   const known = ["equirectangular", "mercator", "equalEarth", "albersUsa", "fit"];
   const projection = known.includes(explicit) ? explicit : defaultProjection(loaded.atlas);
@@ -498,16 +541,29 @@ export async function render(spec: unknown): Promise<string> {
     const body = `<defs>${patternDef(chrome, id)}</defs>${titleText}<text class="ck-geo-title" x="16" y="${titleH + 28}" font-size="16">Unknown atlas.</text>`;
     return shell(spec, chrome, body, id);
   }
-  const hatch = spec.type === "choropleth";
-  let body = `<defs>${hatch ? patternDef(chrome, id) : ""}<clipPath id="${id}c"><rect x="${round(box.x)}" y="${round(box.y)}" width="${round(box.w)}" height="${round(box.h)}"/></clipPath></defs>${titleText}`;
+  const nodataMode: "hatch" | "fill" | "off" = spec.type !== "choropleth" ? "off" : mark.nodata === "fill" ? "fill" : "hatch";
+  let body = `<defs>${nodataMode === "hatch" ? patternDef(chrome, id) : ""}<clipPath id="${id}c"><rect x="${round(box.x)}" y="${round(box.y)}" width="${round(box.w)}" height="${round(box.h)}"/></clipPath></defs>${titleText}`;
   body += `<g clip-path="url(#${id}c)">`;
   if (drawn?.grid) body += graticule(drawn.point);
   if (drawn) {
     for (const frame of drawn.frames) body += `<rect class="ck-geo-inset" x="${round(frame.x)}" y="${round(frame.y)}" width="${round(frame.w)}" height="${round(frame.h)}"/>`;
-    body += regionMarkup(loaded.regions, drawn.project, hits, choroplethScale, colorChannel.format, spec.type === "choropleth");
+    const skip = new Set([regionField, valueField].filter((field): field is string => !!field));
+    body += regionMarkup(loaded.regions, drawn.project, hits, choroplethScale, colorChannel.format, spec.type === "choropleth", rows, tips, skip);
   }
   if (drawn && points.dots.length) body += pointMarkup(points.dots, drawn.point, num(mark.labelCount) ?? 12, box);
   body += `</g>`;
-  if (showLegend && scale) body += legendMarkup(scale, box.x + box.w + 8, box.y, box.h, id, spec.type === "choropleth");
-  return shell(spec, chrome, body, id, hatch);
+  if (showLegend && scale) {
+    body += bottomLegend
+      ? horizontalLegend(scale, box.x, box.y + box.h + 6, box.w, id)
+      : legendMarkup(scale, box.x + box.w + 8, box.y, box.h, id, nodataMode === "hatch");
+  }
+  return shell(spec, chrome, body, id, nodataMode);
+}
+
+function paintChrome(chrome: Chrome, mark: Record<string, unknown>): Chrome {
+  const hex = (value: unknown) => (typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value) ? value : "");
+  const land = hex(mark.land);
+  const water = hex(mark.water);
+  if (!land && !water) return chrome;
+  return { ...chrome, ...(land ? { land } : {}), ...(water ? { water } : {}) };
 }

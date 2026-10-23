@@ -106,6 +106,194 @@ export function logScale(d0: number, d1: number, r0: number, r1: number): (value
   return (value) => r0 + ((Math.log10(Math.max(value, Number.MIN_VALUE)) - a) / span) * (r1 - r0);
 }
 
+/** Signed log. `constant` is the half-width of the linear region around zero. */
+export function symlogScale(d0: number, d1: number, r0: number, r1: number, constant = 1): (value: number) => number {
+  const c = constant > 0 ? constant : 1;
+  const a = Math.asinh(d0 / c);
+  const b = Math.asinh(d1 / c);
+  const span = b - a || 1;
+  return (value) => r0 + ((Math.asinh(value / c) - a) / span) * (r1 - r0);
+}
+
+/** Ticks at zero and at powers of ten times the symlog constant. */
+export function symlogTicks(min: number, max: number, constant = 1): number[] {
+  const c = constant > 0 ? constant : 1;
+  const out: number[] = [];
+  const push = (value: number) => {
+    if (value < min - 1e-6 || value > max + 1e-6) return;
+    const next = round(value);
+    if (!out.includes(next)) out.push(next);
+  };
+  push(0);
+  for (let exp = -1; exp <= 6; exp++) {
+    const step = c * 10 ** exp;
+    push(-step);
+    push(step);
+  }
+  if (out.length < 2) return ticks(min, max, 5);
+  out.sort((a, b) => a - b);
+  return out.slice(0, 8);
+}
+
+export interface AxisGap {
+  from: number;
+  to: number;
+  /** Fraction of the axis for the segment below this break. Default 0.4. */
+  share?: number;
+}
+
+function tidyGaps(gaps: AxisGap[], lo: number, hi: number): AxisGap[] {
+  const list = gaps
+    .filter((gap) => gap.to !== gap.from)
+    .map((gap) => {
+      const share = gap.share;
+      return gap.from < gap.to ? { from: gap.from, to: gap.to, share } : { from: gap.to, to: gap.from, share };
+    })
+    .filter((gap) => gap.to > lo && gap.from < hi)
+    .sort((a, b) => a.from - b.from);
+  const out: AxisGap[] = [];
+  for (const gap of list) {
+    const last = out[out.length - 1];
+    if (last && gap.from < last.to) continue;
+    const from = Math.max(gap.from, lo);
+    const to = Math.min(gap.to, hi);
+    if (to > from) out.push({ from, to, share: gap.share });
+  }
+  return out;
+}
+
+/**
+ * Pixel weights for data segments and the gaps between them.
+ * Each break keeps about 16 px. `share` (default 0.4) is the fraction from zero
+ * to the break when that lower segment crosses zero, and the fraction of the
+ * whole segment otherwise, so a short lower range is not crushed against the gap.
+ */
+function breakWeights(pieces: { a: number; b: number; gap: boolean; share?: number }[], spanPx: number): number[] {
+  const gapFrac = Math.min(0.08, 16 / Math.max(spanPx, 1));
+  const fracs = new Array<number>(pieces.length).fill(0);
+  let gapSum = 0;
+  for (let i = 0; i < pieces.length; i++) {
+    if (!pieces[i].gap) continue;
+    fracs[i] = gapFrac;
+    gapSum += gapFrac;
+  }
+  const claimed = new Set<number>();
+  let claim = 0;
+  for (let i = 0; i < pieces.length; i++) {
+    if (!pieces[i].gap) continue;
+    let below = i - 1;
+    while (below >= 0 && pieces[below].gap) below--;
+    if (below < 0 || claimed.has(below)) continue;
+    const share = breakShare(pieces[below], pieces[i].share);
+    fracs[below] = share;
+    claimed.add(below);
+    claim += share;
+  }
+  const rest: number[] = [];
+  for (let i = 0; i < pieces.length; i++) if (!pieces[i].gap && !claimed.has(i)) rest.push(i);
+  const reserve = 0.18 * Math.max(1, rest.length);
+  const cap = Math.max(0.2, 1 - gapSum - reserve);
+  if (claim > cap && claim > 0) {
+    const scale = cap / claim;
+    for (const index of claimed) fracs[index] *= scale;
+    claim *= scale;
+  }
+  const room = Math.max(0, 1 - gapSum - claim);
+  let width = 0;
+  for (const index of rest) width += Math.max(pieces[index].b - pieces[index].a, 1e-9);
+  if (!(width > 0)) width = rest.length || 1;
+  for (const index of rest) fracs[index] = room * (Math.max(pieces[index].b - pieces[index].a, 1e-9) / width);
+  if (!rest.length) {
+    let last = -1;
+    for (let i = 0; i < pieces.length; i++) if (!pieces[i].gap) last = i;
+    if (last >= 0) fracs[last] += Math.max(0, 1 - gapSum - claim);
+  }
+  return fracs;
+}
+
+/** Clamp `share`, then expand it so zero-to-break is that fraction when zero is inside the piece. */
+function breakShare(piece: { a: number; b: number } | undefined, raw: number | undefined): number {
+  let share = typeof raw === "number" && raw > 0 ? Math.min(0.7, Math.max(0.15, raw)) : 0.4;
+  if (!piece) return share;
+  const a = piece.a;
+  const b = piece.b;
+  if (a < 0 && b > 0) {
+    const positive = (b - 0) / (b - a);
+    if (positive > 0.05 && positive < 1) share = Math.min(0.7, share / positive);
+  }
+  return share;
+}
+
+/**
+ * Map a domain onto a range, collapsing each break to a short fraction of the span.
+ * `spans` are the pixel intervals of those breaks, low to high.
+ */
+export function brokenScale(
+  d0: number,
+  d1: number,
+  r0: number,
+  r1: number,
+  gaps: AxisGap[] | undefined,
+  kind: "linear" | "log" | "symlog",
+  constant = 1,
+): { at: (value: number) => number; spans: Array<[number, number]> } {
+  const plain = kind === "log" ? logScale(d0, d1, r0, r1) : kind === "symlog" ? symlogScale(d0, d1, r0, r1, constant) : linear(d0, d1, r0, r1);
+  const c = constant > 0 ? constant : 1;
+  const fwd = (value: number) => (kind === "log" ? Math.log10(Math.max(value, 1e-12)) : kind === "symlog" ? Math.asinh(value / c) : value);
+  const a0 = fwd(d0);
+  const a1 = fwd(d1);
+  if (!(gaps && gaps.length) || a0 === a1) return { at: plain, spans: [] };
+  const lo = Math.min(d0, d1);
+  const hi = Math.max(d0, d1);
+  const cuts = tidyGaps(gaps, lo, hi);
+  if (!cuts.length) return { at: plain, spans: [] };
+  const start = Math.min(a0, a1);
+  const end = Math.max(a0, a1);
+  const pieces: { a: number; b: number; gap: boolean }[] = [];
+  let cursor = start;
+  for (const gap of cuts) {
+    const from = Math.max(Math.min(fwd(gap.from), fwd(gap.to)), start);
+    const to = Math.min(Math.max(fwd(gap.from), fwd(gap.to)), end);
+    if (!(to > from)) continue;
+    if (from > cursor) pieces.push({ a: cursor, b: from, gap: false });
+    pieces.push({ a: from, b: to, gap: true, share: gap.share });
+    cursor = to;
+  }
+  if (cursor < end) pieces.push({ a: cursor, b: end, gap: false });
+  if (!pieces.some((piece) => piece.gap)) return { at: plain, spans: [] };
+  const weights = breakWeights(pieces, Math.abs(r1 - r0) || 1);
+  const total = weights.reduce((sum, weight) => sum + weight, 0) || 1;
+  const starts: number[] = [];
+  let acc = 0;
+  for (const weight of weights) {
+    starts.push(acc / total);
+    acc += weight;
+  }
+  const unit = (value: number) => {
+    const x = Math.min(end, Math.max(start, fwd(value)));
+    for (let i = 0; i < pieces.length; i++) {
+      const piece = pieces[i];
+      if (x > piece.b && i < pieces.length - 1) continue;
+      const u = piece.b === piece.a ? 0 : (x - piece.a) / (piece.b - piece.a);
+      return starts[i] + Math.max(0, Math.min(1, u)) * (weights[i] / total);
+    }
+    return 0;
+  };
+  const at = (value: number) => {
+    const u = a0 <= a1 ? unit(value) : 1 - unit(value);
+    return r0 + u * (r1 - r0);
+  };
+  const spans: Array<[number, number]> = [];
+  for (let i = 0; i < pieces.length; i++) {
+    if (!pieces[i].gap) continue;
+    const share = weights[i] / total;
+    const u0 = a0 <= a1 ? starts[i] : 1 - (starts[i] + share);
+    const u1 = a0 <= a1 ? starts[i] + share : 1 - starts[i];
+    spans.push([r0 + Math.min(u0, u1) * (r1 - r0), r0 + Math.max(u0, u1) * (r1 - r0)]);
+  }
+  return { at, spans };
+}
+
 export function logTicks(min: number, max: number): number[] {
   if (!(max > 0) || !(min > 0)) return [1];
   const start = Math.floor(Math.log10(min));
@@ -265,6 +453,8 @@ export interface AxisSpec {
   on: boolean;
   title?: string;
   count?: number;
+  /** First and last label only. */
+  ends?: boolean;
   values?: number[];
   labels: boolean;
   /** Right or top, rather than the default left or bottom. */
@@ -281,6 +471,13 @@ export interface AxisSpec {
   /** inside, outside, or none. */
   tick?: string;
   tickLen?: number;
+  /** Positive shifts the baseline away from the plot, in pixels. */
+  offset?: number;
+  /** Data value where this axis crosses the other. */
+  crosses?: number;
+  /** Minor marks between major ticks. */
+  minor?: number;
+  breaks?: AxisGap[];
 }
 
 function axisRule(value: unknown): AxisRule | undefined {
@@ -301,7 +498,8 @@ export function readAxis(spec: Record<string, unknown>, key: "x" | "y" | "y2", h
   const raw = axes ? axes[key] : undefined;
   const axis = isRecord(raw) ? raw : {};
   const ticks = axis.ticks;
-  const values = Array.isArray(ticks) ? ticks.filter((item): item is number => typeof item === "number" && Number.isFinite(item)) : undefined;
+  const ends = ticks === "ends";
+  const values = !ends && Array.isArray(ticks) ? ticks.filter((item): item is number => typeof item === "number" && Number.isFinite(item)) : undefined;
   const pos = axis.position;
   const drawnVertical = key === "x" ? horizontal : !horizontal;
   let end = key === "y2";
@@ -310,10 +508,14 @@ export function readAxis(spec: Record<string, unknown>, key: "x" | "y" | "y2", h
   }
   const at = axis.titlePosition;
   const marks = axis.tickMarks;
+  const offset = typeof axis.offset === "number" && Number.isFinite(axis.offset) ? Math.max(-80, Math.min(80, axis.offset)) : undefined;
+  const crosses = typeof axis.crosses === "number" && Number.isFinite(axis.crosses) ? axis.crosses : undefined;
+  const minor = typeof axis.minorTicks === "number" && Number.isFinite(axis.minorTicks) ? Math.max(0, Math.min(8, Math.round(axis.minorTicks))) : undefined;
   return {
     on: raw !== false,
-    title: typeof axis.title === "string" && axis.title ? axis.title : undefined,
-    count: typeof ticks === "number" ? Math.max(0, Math.min(50, Math.round(ticks))) : undefined,
+    title: typeof axis.title === "string" ? axis.title : undefined,
+    count: !ends && typeof ticks === "number" ? Math.max(0, Math.min(50, Math.round(ticks))) : undefined,
+    ends,
     values: values && values.length ? values : undefined,
     labels: axis.labels !== false,
     end,
@@ -326,7 +528,23 @@ export function readAxis(spec: Record<string, unknown>, key: "x" | "y" | "y2", h
     rule: axisRule(axis.line),
     tick: marks === "inside" || marks === "outside" || marks === "none" ? marks : undefined,
     tickLen: typeof axis.tickLength === "number" && Number.isFinite(axis.tickLength) ? Math.max(0, Math.min(24, axis.tickLength)) : undefined,
+    offset,
+    crosses,
+    minor: minor || undefined,
+    breaks: readBreaks(axis.breaks),
   };
+}
+
+function readBreaks(value: unknown): AxisGap[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const out: AxisGap[] = [];
+  for (const item of value) {
+    if (!isRecord(item) || typeof item.from !== "number" || typeof item.to !== "number") continue;
+    if (!Number.isFinite(item.from) || !Number.isFinite(item.to) || item.from === item.to) continue;
+    const share = typeof item.share === "number" && Number.isFinite(item.share) ? item.share : undefined;
+    out.push(item.from < item.to ? { from: item.from, to: item.to, share } : { from: item.to, to: item.from, share });
+  }
+  return out.length ? out : undefined;
 }
 
 export function pickTicks(min: number, max: number, count: number, values?: number[], log = false): number[] {
@@ -352,7 +570,8 @@ export function clientIntent(spec: Record<string, unknown>): string {
   if (a11y?.dataTable === true) bits.push("table");
   if (isRecord(spec.legend) && spec.legend.interactive === true) bits.push("legend");
   if (spec.tooltip === false || isRecord(spec.tooltip)) bits.push("tip");
-  if (spec.animation === true || isRecord(spec.animation)) bits.push("anim");
+  if (spec.animation === true) bits.push("anim");
+  else if (isRecord(spec.animation)) bits.push(typeof spec.animation.easing === "string" ? `anim:${spec.animation.easing}` : "anim");
   if (isRecord(spec.interaction)) bits.push("ix");
   return bits.join(" ");
 }
