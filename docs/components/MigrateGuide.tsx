@@ -15,7 +15,7 @@ const copy: Record<
     call: `import { fromChartJs } from "@chartkitdev/convert";
 
 const { spec, warnings } = fromChartJs(config);`,
-    note: "Radar, polarArea, time-scale adapters, plugins such as annotation, scriptable options, canvas gradients, and a third y axis come back as warnings. A per-point colour array keeps the first colour and warns. Several stack ids are not grouped stacks in ChartKit.",
+    note: "Radar, polarArea, time-scale adapters, plugins such as annotation, scriptable options, canvas gradients, and a third y axis come back as warnings. A per-point colour array keeps the first colour and warns. A stack id is a stack group: series that share it stack, and a stack id used once stays beside the others.",
   },
   recharts: {
     title: "Migrate from Recharts",
@@ -33,7 +33,7 @@ const { spec, warnings } = fromRecharts(jsx);`,
     call: `import { fromECharts } from "@chartkitdev/convert";
 
 const { spec, warnings } = fromECharts(option);`,
-    note: "ChartKit stacks every series of a cartesian chart, or none of them. If only some series set stack, the result is a combo and a warning, rather than a silent stacked area. Heatmap, gauge, candlestick, radar, graph, map, visualMap, dataZoom, toolbox, and symbolSize functions are warnings.",
+    note: "A stack name is a stack group. Series that share it stack, and a series without one stays unstacked, including a line beside a stacked area. Heatmap, gauge, candlestick, radar, graph, map, visualMap, dataZoom, toolbox, and symbolSize functions are warnings.",
   },
 };
 

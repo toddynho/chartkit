@@ -8,6 +8,7 @@ import {
   num,
   text,
   uniqueSlug,
+  stackName,
   Used,
   warn,
   type ConvertResult,
@@ -67,7 +68,7 @@ export function fromChartJs(input: unknown): ConvertResult {
   if (horizontal) mapped.push("horizontal bar");
 
   const mixed = new Set(kinds).size > 1;
-  const stacked = scales.stacked || datasets.some((item) => item.stack != null);
+  const scalesStacked = scales.stacked;
   const filled = datasets.some((item) => item.fill === true || item.fill === "origin");
   const scatterLike = kinds.every((item) => item === "scatter" || item === "bubble");
   const pieLike = kinds.every((item) => item === "pie" || item === "doughnut");
@@ -85,12 +86,13 @@ export function fromChartJs(input: unknown): ConvertResult {
     mapped.push("combo");
   } else if (kinds[0] === "bar") {
     spec = wideSpec(labels, datasets, kinds, title, "bar", used, `${base}/data/datasets`, warnings);
-    if (stacked) {
-      (spec.mark as Record<string, unknown>).stack = "stack";
-      mapped.push("bar stacked");
-    } else mapped.push(datasets.length > 1 ? "bar grouped" : "bar");
+    const groups = new Set(datasets.map((item) => stackName(item.stack) ?? (scalesStacked ? "stack" : "")).filter(Boolean));
+    if (scalesStacked) (spec.mark as Record<string, unknown>).stack = "stack";
+    if (groups.size > 1) mapped.push("grouped stacks");
+    else if (groups.size === 1) mapped.push("bar stacked");
+    else mapped.push(datasets.length > 1 ? "bar grouped" : "bar");
     if (horizontal) (spec.mark as Record<string, unknown>).orientation = "horizontal";
-  } else if (stacked && filled) {
+  } else if (scalesStacked && filled) {
     spec = wideSpec(labels, datasets, kinds, title, "stacked-area", used, `${base}/data/datasets`, warnings);
     mapped.push("stacked area");
   } else {
@@ -218,6 +220,7 @@ function wideSpec(
     used.mark(`${path}/${index}/label`);
     used.mark(`${path}/${index}/data`);
     used.mark(`${path}/${index}/type`);
+    const stack = stackName(dataset.stack);
     if (dataset.stack != null) used.mark(`${path}/${index}/stack`);
     const values = Array.isArray(dataset.data) ? dataset.data : [];
     values.forEach((item, row) => {
@@ -225,6 +228,7 @@ function wideSpec(
       rows[row][field] = num(item);
     });
     const channel: Record<string, unknown> = { field, title: name };
+    if (stack) channel.stack = stack;
     const kind = kinds[index] || "line";
     if (type === "combo") channel.mark = kind === "bar" ? "bar" : "line";
     if (kind === "line" && (dataset.fill === true || dataset.fill === "origin")) channel.area = true;

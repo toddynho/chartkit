@@ -25,7 +25,7 @@ export const whenToUseFaqs: FaqItem[] = [
   },
   {
     question: "How well do coding agents do on the first try?",
-    answer: `The agent eval was not re-run for round 13. The recorded run is 2026-10-16, claude-sonnet-4-5, temperature 0, 42 tasks. ChartKit with no docs: ${published.agents[0].noDocsFirst}/42 first, 42/42 within two tries, and 42/42 after repair() with no model call. With llms.txt in the prompt: 42/42 first try, mean 131.1 output tokens. Recharts, ECharts, and Chart.js were 42/42 with no docs, at higher token counts. Nivo and uPlot were not in that eval.`,
+    answer: `The agent eval was not re-run for round 13. The recorded run is Round 6, 2026-10-16, claude-sonnet-4-5, temperature 0, 42 tasks. ChartKit with no docs: ${published.agents[0].noDocsFirst}/42 first, 42/42 within two tries, and 42/42 after repair() with no model call. With llms.txt in the prompt: 42/42 first try, mean ${published.agents[0].tokensOfficial} output tokens. Recharts, ECharts, and Chart.js were 42/42 with no docs. Nivo and uPlot were not in that eval.`,
   },
   {
     question: "Where does ChartKit lose?",

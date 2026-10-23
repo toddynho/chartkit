@@ -260,6 +260,10 @@ export type YChannel =
        * Filled or hollow marker for this series. Overrides mark.pointFill.
        */
       pointFill?: "filled" | "hollow";
+      /**
+       * Stack group. Series that share this name stack together. A name used once draws that series unstacked. Omit it to follow mark.stack.
+       */
+      stack?: string;
     };
 /**
  * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.

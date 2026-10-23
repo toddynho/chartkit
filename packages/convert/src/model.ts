@@ -118,6 +118,12 @@ export function text(value: unknown): string | undefined {
   return trimmed || undefined;
 }
 
+/** Chart.js stack, Recharts stackId, and ECharts stack. A number is a group name too. */
+export function stackName(value: unknown): string | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  return text(value);
+}
+
 export function altText(title: string | undefined, sentence: string): string {
   const body = title ? `${title}. ${sentence}` : sentence;
   return body.length >= 10 ? body : `${body} Values are plotted.`;

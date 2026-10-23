@@ -70,7 +70,7 @@ export function benchmarksPayload() {
       "Aligned update, gapped timestamps, 100,000 points: ChartKit 3.5 ms, uPlot 3.4 ms.",
       "Steady hover at 100k, painted median: ChartKit 16.5 ms, uPlot 16.2 ms.",
       "First hover, painted median: ChartKit 20.8 / 15.9 / 16.5 ms at about 50 / 200 / 500 ms after mount. uPlot 4 / 4.6 / 4.9 ms.",
-      "No-docs agent first try is 20/42. That eval was not re-run for round 13. repair() reaches 42/42. The other libraries in the eval were already 42/42 with no docs.",
+      "No-docs agent first try is 21/42. Recharts, ECharts, and Chart.js were 42/42 with no docs. That eval was not re-run for round 13. repair() reaches 42/42.",
     ],
     urls: {
       html: "https://chartkit.dev/benchmarks",

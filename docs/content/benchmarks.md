@@ -21,7 +21,7 @@ Machine-readable copy: https://chartkit.dev/benchmarks.json (schema https://char
 - Initial render: ChartKit is faster than uPlot in all 12 cells. Even 1,000,000 points is 23.6 ms vs 26.5 ms.
 - Aligned update: ChartKit wins 6 of 12 cells against uPlot and loses the 6 listed below. It is not a sweep.
 - Server render: **0.85 ms** mean (median 0.85 ms).
-- `repair()`, no model call, no docs: **20/42 → 42/42**. That agent run is 2026-10-16, not round 13.
+- `repair()`, no model call, no docs: **21/42 → 42/42**. That agent run is 2026-10-16, not round 13.
 
 ## Losses
 
@@ -34,7 +34,7 @@ Machine-readable copy: https://chartkit.dev/benchmarks.json (schema https://char
 - Aligned update, gapped timestamps, 100,000 points: ChartKit 3.5 ms, uPlot 3.4 ms.
 - Steady hover at 100k, painted median: ChartKit 16.5 ms, uPlot 16.2 ms.
 - First hover, painted median: ChartKit 20.8 / 15.9 / 16.5 ms at about 50 / 200 / 500 ms after mount. uPlot 4 / 4.6 / 4.9 ms.
-- No-docs agent first try is 20/42. That eval was not re-run for round 13. repair() reaches 42/42. The other libraries in the eval were already 42/42 with no docs.
+- No-docs agent first try is 21/42. Recharts, ECharts, and Chart.js were 42/42 with no docs. That eval was not re-run for round 13. repair() reaches 42/42.
 
 ## Bundle, gzip -9
 
@@ -119,10 +119,10 @@ Tasks: 42. Model: claude-sonnet-4-5. Temperature: 0.
 
 | Library | No docs, first | No docs, within two | Official, first | Official, within two | Mean first-try tokens, no docs / official |
 | --- | --- | --- | --- | --- | --- |
-| ChartKit | 20 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 139.4 / 131.1 |
-| Recharts | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 223.3 / 236.6 |
-| ECharts | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 334.2 / 367.2 |
-| Chart.js | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 294.6 / 260.9 |
+| ChartKit | 21 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 139.3 / 132.4 |
+| Recharts | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 221.9 / 236.5 |
+| ECharts | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 331.7 / 362.6 |
+| Chart.js | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 295 / 258.4 |
 | Nivo | not in this eval |  |  |  |  |
 | uPlot | not in this eval |  |  |  |  |
 

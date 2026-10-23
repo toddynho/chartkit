@@ -16,6 +16,7 @@ export type Severity = "error" | "warning";
  * Hierarchy uses CK3027–CK3030. Canvas and large data use CK3031–CK3033.
  * Interaction+ uses CK3034–CK3039. Layout uses CK3040–CK3049.
  * Geo uses CK3050–CK3056 in @chartkitdev/geo. CK3057 hands a map spec to that package.
+ * CK3058 is the y-channel stack group.
  */
 export interface Diagnostic {
   code: string;

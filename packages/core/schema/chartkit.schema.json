@@ -780,6 +780,11 @@
             "pointFill": {
               "enum": ["filled", "hollow"],
               "description": "Filled or hollow marker for this series. Overrides mark.pointFill."
+            },
+            "stack": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Stack group. Series that share this name stack together. A name used once draws that series unstacked. Omit it to follow mark.stack."
             }
           },
           "description": "Full y series definition. field, or both lo and hi, is required."

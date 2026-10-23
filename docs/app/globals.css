@@ -694,7 +694,8 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   min-height: 320px;
 }
 .convert-pane figcaption { font-weight: 650; margin-bottom: 8px; }
-.convert-original, .convert-canvas { width: 100%; height: 320px; }
+.convert-original, .convert-canvas, .convert-pane .chart-host { width: 100%; height: 320px; }
+.convert-pane .chart-host svg { width: 100%; height: 320px; }
 .convert-pre {
   max-height: 320px;
   overflow: auto;

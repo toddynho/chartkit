@@ -7,6 +7,7 @@ import {
   isRecord,
   num,
   text,
+  stackName,
   uniqueSlug,
   Used,
   warn,
@@ -86,8 +87,9 @@ export function fromECharts(input: unknown): ConvertResult {
     const type = mixed ? "combo" : kinds[0] === "bar" ? "bar" : allStacked && area ? "stacked-area" : stacked ? "combo" : "line";
     spec = cartesianSpec(labels, series, kinds, title, type, used, warnings);
     if (type === "bar" && stacked) {
-      spec.mark = { ...(isRecord(spec.mark) ? spec.mark : {}), stack: "stack" };
-      mapped.push("bar stacked");
+      const ids = new Set(series.map((item) => stackName(item.stack)).filter(Boolean));
+      if (allStacked && ids.size <= 1) spec.mark = { ...(isRecord(spec.mark) ? spec.mark : {}), stack: "stack" };
+      mapped.push(!allStacked || ids.size > 1 ? "grouped stacks" : "bar stacked");
     } else if (type === "bar") mapped.push(series.length > 1 ? "bar grouped" : "bar");
     else if (type === "stacked-area") mapped.push("stacked area");
     else if (type === "combo") mapped.push("combo");
@@ -220,6 +222,8 @@ function cartesianSpec(
       rows[row][field] = num(raw);
     });
     const channel: Record<string, unknown> = { field, title: name };
+    const stack = stackName(item.stack);
+    if (stack) channel.stack = stack;
     if (type === "combo") channel.mark = kinds[index] === "bar" ? "bar" : "line";
     if (kinds[index] === "line" && item.areaStyle != null) channel.area = true;
     const color = seriesColor(item, index, used, warnings);
@@ -239,10 +243,6 @@ function cartesianSpec(
     a11y: { alt: altText(title, `${text(channels[0]?.title) || "The series"} is plotted.`) },
   };
   if (smooth) spec.mark = { curve: "monotone" };
-  const stacked = series.filter((item) => item.stack != null);
-  if (stacked.length && stacked.length < series.length) {
-    warnings.push(warn("CK8104", "Only some series set stack. ChartKit stacks every series or none, so the stack was not applied.", "/series"));
-  }
   if (annotations.length) spec.annotations = annotations;
   return spec;
 }

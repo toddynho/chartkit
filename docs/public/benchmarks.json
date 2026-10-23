@@ -31,7 +31,7 @@
     },
     "ssrMeanMs": 0.85,
     "repairNoDocs": {
-      "first": 20,
+      "first": 21,
       "afterRepair": 42
     }
   },
@@ -393,12 +393,12 @@
   "agents": [
     {
       "lib": "ChartKit",
-      "noDocsFirst": 20,
+      "noDocsFirst": 21,
       "noDocsWithinTwo": 42,
       "officialFirst": 42,
       "officialWithinTwo": 42,
-      "tokensNoDocs": 139.4,
-      "tokensOfficial": 131.1,
+      "tokensNoDocs": 139.3,
+      "tokensOfficial": 132.4,
       "inEval": true
     },
     {
@@ -407,8 +407,8 @@
       "noDocsWithinTwo": 42,
       "officialFirst": 42,
       "officialWithinTwo": 42,
-      "tokensNoDocs": 223.3,
-      "tokensOfficial": 236.6,
+      "tokensNoDocs": 221.9,
+      "tokensOfficial": 236.5,
       "inEval": true
     },
     {
@@ -417,8 +417,8 @@
       "noDocsWithinTwo": 42,
       "officialFirst": 42,
       "officialWithinTwo": 42,
-      "tokensNoDocs": 334.2,
-      "tokensOfficial": 367.2,
+      "tokensNoDocs": 331.7,
+      "tokensOfficial": 362.6,
       "inEval": true
     },
     {
@@ -427,8 +427,8 @@
       "noDocsWithinTwo": 42,
       "officialFirst": 42,
       "officialWithinTwo": 42,
-      "tokensNoDocs": 294.6,
-      "tokensOfficial": 260.9,
+      "tokensNoDocs": 295,
+      "tokensOfficial": 258.4,
       "inEval": true
     },
     {
@@ -462,7 +462,7 @@
     "Aligned update, gapped timestamps, 100,000 points: ChartKit 3.5 ms, uPlot 3.4 ms.",
     "Steady hover at 100k, painted median: ChartKit 16.5 ms, uPlot 16.2 ms.",
     "First hover, painted median: ChartKit 20.8 / 15.9 / 16.5 ms at about 50 / 200 / 500 ms after mount. uPlot 4 / 4.6 / 4.9 ms.",
-    "No-docs agent first try is 20/42. That eval was not re-run for round 13. repair() reaches 42/42. The other libraries in the eval were already 42/42 with no docs."
+    "No-docs agent first try is 21/42. Recharts, ECharts, and Chart.js were 42/42 with no docs. That eval was not re-run for round 13. repair() reaches 42/42."
   ],
   "urls": {
     "html": "https://chartkit.dev/benchmarks",
@@ -487,9 +487,9 @@
       "lineWins": "It is still smaller than Chart.js (49,374), Recharts (96,213, React external), Nivo (96,583, React external), Observable Plot (97,723), and ECharts (162,991).",
       "donutWin": "The harness donut is 14,391 bytes and is smaller than Chart.js (46,922), Nivo (75,518, React external), Recharts (90,090, React external), and ECharts (122,174). uPlot and Observable Plot have no donut.",
       "ssrLabel": "0.85 ms",
-      "repairFrom": "20/42",
+      "repairFrom": "21/42",
       "repairTo": "42/42",
-      "repair": "20/42 → 42/42"
+      "repair": "21/42 → 42/42"
     },
     "browserRows": [
       {
@@ -689,11 +689,11 @@
     "agentRows": [
       {
         "lib": "ChartKit",
-        "noFirst": "20 / 42",
+        "noFirst": "21 / 42",
         "noTwo": "42 / 42",
         "offFirst": "42 / 42",
         "offTwo": "42 / 42",
-        "tokens": "139.4 / 131.1"
+        "tokens": "139.3 / 132.4"
       },
       {
         "lib": "Recharts",
@@ -701,7 +701,7 @@
         "noTwo": "42 / 42",
         "offFirst": "42 / 42",
         "offTwo": "42 / 42",
-        "tokens": "223.3 / 236.6"
+        "tokens": "221.9 / 236.5"
       },
       {
         "lib": "ECharts",
@@ -709,7 +709,7 @@
         "noTwo": "42 / 42",
         "offFirst": "42 / 42",
         "offTwo": "42 / 42",
-        "tokens": "334.2 / 367.2"
+        "tokens": "331.7 / 362.6"
       },
       {
         "lib": "Chart.js",
@@ -717,7 +717,7 @@
         "noTwo": "42 / 42",
         "offFirst": "42 / 42",
         "offTwo": "42 / 42",
-        "tokens": "294.6 / 260.9"
+        "tokens": "295.0 / 258.4"
       }
     ]
   }

@@ -8,7 +8,7 @@ Round 13, measured 2026-10-18 on phase 2 `d8dcc5a`. These are the harness number
 | --- | ---: | --- |
 | Line chart, gzip | **34,554 B** | Loss to uPlot at 23,276 B (JS). Stylesheet is 762 B more, summed 24,038. `scripts/size.mjs` on `038cf5d`. Harness minimal line is 34,767 B |
 | Server render, 1k line | **0.85 ms** | ECharts 6.65 ms mean. uPlot, Chart.js, and Recharts produced no chart without a DOM |
-| Agent, no docs, then repair() | **20/42 → 42/42** | Not re-run for round 13. Recharts, ECharts, and Chart.js were already 42/42 with no docs |
+| Agent, no docs, then repair() | **21/42 → 42/42** | Round 6, 2026-10-16. Not re-run for round 13. Recharts, ECharts, and Chart.js were already 42/42 with no docs |
 | Initial, 12 cells | wins all | Even 1M is 23.6 ms vs uPlot 26.5 ms |
 | Aligned update | wins 6 of 12 | Losses: even 1k 1.5 vs 1.2, even 10k 1.9 vs 1.7, jitter 1k 1.6 vs 1.4, gapped 1k 1.6 vs 1.4, gapped 10k 1.9 vs 1.6, gapped 100k 3.5 vs 3.4 |
 | First hover, painted | 20.8 / 15.9 / 16.5 ms | uPlot 4 / 4.6 / 4.9 ms, at about 50 / 200 / 500 ms after mount |

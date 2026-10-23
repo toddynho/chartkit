@@ -114,6 +114,10 @@ describe("Chart.js", () => {
     const result = convert(chartJsSample);
     expect(result.source).toBe("chartjs");
     expect(result.spec?.type).toBe("bar");
+    expect(result.spec?.mark).toMatchObject({ stack: "stack" });
+    const chartBars = (result.spec?.encoding as { y: { title?: string; stack?: string }[] }).y;
+    expect(chartBars.find((item) => item.title === "Chat")?.stack).toBe("tickets");
+    expect(chartBars.find((item) => item.title === "Inbox")?.stack).toBeUndefined();
     expect(result.warnings.some((item) => item.path.includes("annotation"))).toBe(true);
     expect(result.warnings.some((item) => item.code === "CK8105")).toBe(false);
 
@@ -132,9 +136,11 @@ describe("Recharts", () => {
     const result = fromRecharts(rechartsSample);
     expect(result.spec?.type).toBe("combo");
     expect(result.spec?.mark).not.toMatchObject({ stack: "stack" });
-    expect(codes(result)).toContain("CK8104");
-    expect(JSON.stringify(result.spec?.encoding)).toContain('"mark":"bar"');
-    expect(result.spec?.annotations).toEqual([expect.objectContaining({ type: "rule", value: 60 })]);
+    expect(codes(result)).not.toContain("CK8104");
+    const seats = (result.spec?.encoding as { y: { title?: string; mark?: string; stack?: string }[] }).y;
+    expect(seats.filter((item) => item.mark === "bar").map((item) => item.stack)).toEqual(["seats", "seats"]);
+    expect(seats.find((item) => item.title === "Goal")?.stack).toBeUndefined();
+    expect(result.spec?.annotations).toEqual([expect.objectContaining({ type: "rule", value: 60, label: "Cap", labelPosition: "center" })]);
     expect(codes(result)).not.toContain("CK8105");
 
     const pie = fromRecharts(`<PieChart width={200} height={200}>
@@ -162,10 +168,12 @@ describe("ECharts", () => {
     expect(area.spec?.type).toBe("combo");
     expect(area.spec?.title).toBe("Requests by tier");
     expect(codes(area)).not.toContain("CK8105");
-    expect(codes(area)).toContain("CK8104");
+    expect(codes(area)).not.toContain("CK8104");
     expect(area.warnings.some((item) => item.path.endsWith("/color") || item.path.endsWith("/type"))).toBe(false);
-    const channels = (area.spec?.encoding as { y: { field: string; color?: string }[] }).y;
-    expect(channels.find((item) => item.field === "jobs")?.color).toBe("#c4554a");
+    const channels = (area.spec?.encoding as { y: { field: string; color?: string; stack?: string; area?: boolean }[] }).y;
+    expect(channels.find((item) => item.field === "web")?.stack).toBe("req");
+    expect(channels.find((item) => item.field === "jobs")).toMatchObject({ stack: "req", color: "#c4554a", area: true });
+    expect(channels.find((item) => item.field === "cap")?.stack).toBeUndefined();
     expect(channels.find((item) => item.field === "cap")?.color).toBe("#888");
 
     const donut = fromECharts({

@@ -49,18 +49,17 @@ export default function HomePage() {
           </div>
           <div className="stats">
             <Link className="stat" href="/benchmarks#agents">
-              <b>20/42</b>
-              <span>no docs, first try. Recharts, ECharts, and Chart.js were already 42/42</span>
-            </Link>
-            <Link className="stat" href="/benchmarks#agents">
               <b>42/42</b>
-              <span>with the docs, first try. Mean 131.1 output tokens</span>
+              <span>with the docs, first try. Mean 132.4 output tokens</span>
             </Link>
             <Link className="stat" href="/agents">
               <b>repair()</b>
-              <span>no docs, 20/42 to 42/42, no model call</span>
+              <span>no docs, 21/42 to 42/42, no model call</span>
             </Link>
           </div>
+          <p>
+            <Link href="/benchmarks#agents">See full benchmarks, losses included</Link>
+          </p>
         </div>
       </section>
       <div className="hero-stage">
@@ -73,14 +72,13 @@ export default function HomePage() {
           <article className="card">
             <h3>Agents get it right</h3>
             <p>
-              Measured 2026-10-16 with claude-sonnet-4-5 at temperature 0, 42 tasks. ChartKit with no docs scored 20/42
-              on the first try. With llms.txt in the prompt it scored 42/42 on the first try, at a mean of 131.1 output
-              tokens. Recharts with its docs used a mean of 236.6 output tokens. <code>repair()</code> is a no-model
-              step: that no-docs run went from 20/42 to 42/42. Recharts, ECharts, and Chart.js scored 42/42 with no
-              docs. The eval was not re-run for round 13. The headline numbers use the full docs file.
+              Measured 2026-10-16 with claude-sonnet-4-5 at temperature 0, 42 tasks. With llms.txt in the prompt,
+              ChartKit scored 42/42 on the first try, at a mean of 132.4 output tokens. <code>repair()</code> takes
+              the no-docs first try from 21/42 to 42/42 with no model call. Round 6 is the current scoreboard in
+              BENCHMARKS.md. The eval was not re-run for round 13.
             </p>
             <p>
-              <Link href="/benchmarks#agents">Methodology</Link>
+              <Link href="/benchmarks#agents">See full benchmarks, losses included</Link>
               {" · "}
               <Link href="/agents">The agent loop</Link>
             </p>
@@ -192,8 +190,7 @@ export default function HomePage() {
             <h3>repair()</h3>
             <p>
               Applies the safe patches validate already produced. It does not invent data. With no docs, repair() takes
-              20/42 to 42/42 with no model call. With the docs, the first try is already 42/42. Recharts, ECharts, and
-              Chart.js were 42/42 with no docs.
+              21/42 to 42/42 with no model call. With the docs, the first try is already 42/42.
             </p>
             <Link href="/agents">The agent loop</Link>
           </article>

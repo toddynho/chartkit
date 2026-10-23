@@ -13,6 +13,7 @@ const repoRoot = join(fileURLToPath(new URL(".", import.meta.url)), "../../../..
  * Hierarchy is CK3027–CK3030. Canvas and large data are CK3031–CK3033.
  * Interaction+ is CK3034–CK3039. Layout is CK3040–CK3049.
  * Geo is CK3050–CK3056, in @chartkitdev/geo. CK3057 is the core handoff for map specs.
+ * CK3058 is the y-channel stack group: a bad value, and a stack on a chart that cannot use one.
  */
 const FAMILIES = new Set([
   "CK1006",
@@ -27,6 +28,7 @@ const FAMILIES = new Set([
   "CK3017",
   "CK3020",
   "CK3021",
+  "CK3058",
 ]);
 
 const UNCERTAINTY = ["CK3020", "CK3021", "CK3022"];

@@ -6,6 +6,7 @@ import {
   isRecord,
   num,
   text,
+  stackName,
   uniqueSlug,
   Used,
   warn,
@@ -60,16 +61,20 @@ export function fromRecharts(input: unknown): ConvertResult {
   }
 
   const names = new Set(series.map((child) => child.name));
-  const stacked = series.some((child) => child.props.stackId != null);
+  const stackIds = series.map((child) => stackName(child.props.stackId));
+  const stacked = stackIds.some(Boolean);
+  const allStacked = stackIds.length > 0 && stackIds.every(Boolean);
   const mixed = names.size > 1;
   let type = "line";
   if (mixed || node.name === "ComposedChart") type = "combo";
   else if (node.name === "BarChart" || names.has("Bar")) type = "bar";
-  else if ((node.name === "AreaChart" || names.has("Area")) && stacked) type = "stacked-area";
+  else if ((node.name === "AreaChart" || names.has("Area")) && allStacked) type = "stacked-area";
   else type = "line";
 
   const spec = wideSpec(data, series, xField, type, title, node, warnings);
-  if (type === "bar" && stacked) mapped.push("bar stacked");
+  const distinct = new Set(stackIds.filter(Boolean));
+  if (type === "bar" && distinct.size > 1) mapped.push("grouped stacks");
+  else if (type === "bar" && stacked) mapped.push("bar stacked");
   else if (type === "bar") mapped.push(series.length > 1 ? "bar grouped" : "bar");
   else if (type === "stacked-area") mapped.push("stacked area");
   else if (type === "combo") mapped.push("combo");
@@ -164,6 +169,8 @@ function wideSpec(
       row[field] = num(data[rowIndex]?.[key]);
     });
     const channel: Record<string, unknown> = { field, title: name };
+    const stack = stackName(child.props.stackId);
+    if (stack) channel.stack = stack;
     if (type === "combo") channel.mark = child.name === "Bar" ? "bar" : "line";
     if (child.name === "Area" || node.name === "AreaChart") channel.area = true;
     const color = colorOf(child.props.stroke ?? child.props.fill, warnings, `${child.name}/stroke`);
@@ -189,7 +196,7 @@ function wideSpec(
         axis: y != null ? "y" : "x",
         value: y != null ? y : x,
         ...(child.props.strokeDasharray ? { dash: "dashed" } : {}),
-        ...(text(child.props.label) ? { label: text(child.props.label) } : {}),
+        ...(text(child.props.label) ? { label: text(child.props.label), labelPosition: "center" } : {}),
       });
     } else if (child.name === "ReferenceArea") {
       const from = num(child.props.y1);
@@ -209,22 +216,6 @@ function wideSpec(
     encoding: { x: { field: "cat", title: xField }, y: channels.length === 1 ? channels[0] : channels },
     a11y: { alt: altText(title, `${text(channels[0]?.title) || "The series"} is plotted by ${xField}.`) },
   };
-  const stackedBars = series.filter((child) => child.name === "Bar" && child.props.stackId != null);
-  const bars = series.filter((child) => child.name === "Bar");
-  const besideBars = series.some((child) => child.name === "Line" || child.name === "Area" || child.name === "Scatter");
-  if (stackedBars.length && stackedBars.length === bars.length && type === "combo" && !besideBars) {
-    spec.mark = { ...(isRecord(spec.mark) ? spec.mark : {}), stack: "stack" };
-  } else if (series.some((child) => child.props.stackId != null) && type === "combo") {
-    warnings.push(
-      warn(
-        "CK8104",
-        besideBars
-          ? "A combo stack includes every series, so the line would move. stackId was not applied."
-          : "stackId is not applied when series disagree on the stack.",
-        "stackId",
-      ),
-    );
-  }
   if (curve) spec.mark = { ...(isRecord(spec.mark) ? spec.mark : {}), curve };
   if (annotations.length) spec.annotations = annotations;
   return spec;

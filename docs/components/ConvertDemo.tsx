@@ -2,7 +2,7 @@
 
 import { render } from "@chartkitdev/core/all";
 import { convert, parseJsx, parseLiteral, samples, type ConvertResult, type JsxNode } from "@chartkitdev/convert";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createElement } from "react";
 import { ChartHost } from "./ChartHost";
 
@@ -16,10 +16,17 @@ export function ConvertDemo({ initial = "chartjs" }: { initial?: string }) {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [originalError, setOriginalError] = useState("");
   const [reactChart, setReactChart] = useState<ReactNode>(null);
+  const [frame, setFrame] = useState({ width: 640, height: 320 });
 
   const result = useMemo<ConvertResult>(() => convert(text), [text]);
   const specText = result.spec ? JSON.stringify(result.spec, null, 2) : "";
-  const svg = result.spec ? render(result.spec) : "";
+  const preview = useMemo(() => {
+    if (!result.spec) return null;
+    const size = result.spec.size;
+    const previous = size && typeof size === "object" && !Array.isArray(size) ? (size as Record<string, unknown>) : {};
+    return { ...result.spec, size: { ...previous, width: frame.width, height: frame.height } };
+  }, [result.spec, frame]);
+  const svg = preview ? render(preview) : "";
   const diff = useMemo(() => lineDiff(text, specText || "(no spec)"), [text, specText]);
 
   useEffect(() => {
@@ -75,6 +82,19 @@ export function ConvertDemo({ initial = "chartjs" }: { initial?: string }) {
     };
   }, [text, result.source, reactChart]);
 
+  useLayoutEffect(() => {
+    const host = originalRef.current;
+    if (!host) return;
+    const measure = () => {
+      const width = Math.max(280, Math.round(host.clientWidth));
+      setFrame((prev) => (prev.width === width && prev.height === 320 ? prev : { width, height: 320 }));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(host);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="convert" data-convert-demo="on">
       <div className="convert-toolbar">
@@ -121,7 +141,7 @@ export function ConvertDemo({ initial = "chartjs" }: { initial?: string }) {
         <figure className="convert-pane">
           <figcaption>ChartKit</figcaption>
           {result.spec && svg ? (
-            <ChartHost key={specText} spec={result.spec} svg={svg} className="chart-host" />
+            <ChartHost key={specText} spec={preview} svg={svg} className="chart-host" />
           ) : (
             <p>No ChartKit spec for this input.</p>
           )}
@@ -174,7 +194,9 @@ async function paintOriginal(
     if (box.dead) return;
     const canvas = document.createElement("canvas");
     host.appendChild(canvas);
-    const chart = new mod.default(canvas, parsed.value as never);
+    const config = parsed.value as { options?: Record<string, unknown> };
+    config.options = { ...(config.options ?? {}), responsive: true, maintainAspectRatio: false };
+    const chart = new mod.default(canvas, config as never);
     box.destroy = () => chart.destroy();
     if (box.dead) box.destroy();
     return;
