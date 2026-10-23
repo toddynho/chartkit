@@ -2,7 +2,7 @@
 
 The measured line bundles and the published round of browser timings, drawn as charts. Losses stay on the page.
 
-Bundle bytes are from docs/data/measured-sizes.json, size script measured 2026-10-21 on `038cf5dbc383d157df8838747c1db263db78727c`, bench bundles measured 2026-10-21. Timings are older round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
+Bundle bytes are from docs/data/measured-sizes.json, size script measured 2026-10-22 on `32e6d84038823aaa52a861e04d23e0dd59374a5c`, bench bundles measured 2026-10-22. Timings are older round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
 
 ## Line chart, gzip
 
@@ -17,11 +17,11 @@ Log scale. ChartKit is the size script and is larger than uPlot. The other bars 
   "data": [
     {
       "name": "ChartKit",
-      "bytes": 34554
+      "bytes": 38402
     },
     {
       "name": "CK bench",
-      "bytes": 34767
+      "bytes": 37290
     },
     {
       "name": "uPlot",
@@ -89,7 +89,7 @@ Log scale. ChartKit is the size script and is larger than uPlot. The other bars 
     }
   },
   "a11y": {
-    "alt": "uPlot’s line is the smallest bar. ChartKit’s measured line is larger, 34,554 bytes against uPlot’s 23,276. ECharts is the largest on this log scale."
+    "alt": "uPlot’s line is the smallest bar. ChartKit’s measured line is larger, 38,402 bytes against uPlot’s 23,276. ECharts is the largest on this log scale."
   }
 }
 ```

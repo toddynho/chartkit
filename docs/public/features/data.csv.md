@@ -35,6 +35,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.sankey | dts-path (strong) | mermaid/dist/config.type.d.ts:233 sankey-beta takes CSV rows |
 | AntV G2 | native | ~csv | dts-grep (weak) | @antv/g2/lib/spec/data.d.ts:7 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 32e6d8403882.
 
 https://chartkit.dev/features.json

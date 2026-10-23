@@ -212,6 +212,7 @@ function probes(leaf: Leaf): unknown[] {
       },
     });
   }
+  if (leaf.path.endsWith("/breaks")) push([{ from: 1, to: 4 }]);
   if (leaf.path === "/encoding/color/scale/thresholds") push([1200, 2000]);
   if (leaf.path === "/encoding/color/scale/scheme") push("teal");
   if (leaf.path === "/mark/palette") push(["#c0ffee", "#111111"]);
@@ -249,6 +250,19 @@ function apply(host: Record<string, unknown>, path: string, value: unknown): Rec
   if (path.startsWith("/annotations/")) spec.annotations = [annotationSeed(path)];
   if (path.startsWith("/transform/")) {
     spec.transform = [{ type: "filter", field: "region", eq: "EU" }];
+  }
+  if (/^\/axes\/(x|y|y2)\/breaks\//.test(path)) {
+    const key = path.split("/")[2] ?? "x";
+    const axes = isRecord(spec.axes) ? spec.axes : {};
+    const box = isRecord(axes[key]) ? axes[key] : {};
+    const breaks = Array.isArray(box.breaks) ? box.breaks : [{}];
+    if (!isRecord(breaks[0])) breaks[0] = {};
+    const row = breaks[0] as Record<string, unknown>;
+    if (typeof row.from !== "number") row.from = 1;
+    if (typeof row.to !== "number") row.to = key === "x" ? 2 : 40;
+    box.breaks = breaks;
+    axes[key] = box;
+    spec.axes = axes;
   }
   if (/^\/axes\/(x|y|y2)\/bands\//.test(path)) {
     const key = path.split("/")[2] ?? "x";
@@ -696,9 +710,10 @@ describe("schema honesty", () => {
     expect(title.left < label.right && label.left < title.right && title.top < label.bottom && label.top < title.bottom).toBe(false);
   });
 
-  it("warns for easing and font family, and accepts selection", () => {
+  it("runs easing, and warns for font family, and accepts selection", () => {
     const easing = validate({ ...line, animation: { easing: "linear" } });
-    expect(easing.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/animation/easing")).toBe(true);
+    expect(easing.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/animation/easing")).toBe(false);
+    expect(render({ ...line, animation: { easing: "linear" } })).toContain("anim:linear");
     const select = validate({ ...line, interaction: { select: "point" } });
     expect(select.ok).toBe(true);
     expect(select.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/interaction/select")).toBe(false);

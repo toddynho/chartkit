@@ -16,6 +16,10 @@
   --chart-negative: #be123c;
   --chart-grid: rgb(0 0 0 / 0.06);
   --max: 1120px;
+  /* Midnight theme token from packages/core/src/theme.ts. Boards, maps, and tooltips use this, not a per-page navy. */
+  --ck-midnight-background: #0c0c0c;
+  --ck-midnight-surface: #1a1a1a;
+  --ck-midnight-text: #ffffff;
 }
 
 .dark {
@@ -288,10 +292,12 @@ textarea { min-height: 220px; resize: vertical; font-family: var(--mono); font-s
 }
 .map-board .ck-geo-water { fill: var(--bg); }
 .map-board[data-theme="midnight"] {
-  --bg: #12212e;
-  --ck-background: #12212e;
-  background: #12212e;
-  color: #ffffff;
+  --bg: var(--ck-midnight-background);
+  --ck-background: var(--ck-midnight-background);
+  --ck-surface: var(--ck-midnight-surface);
+  --ck-text: var(--ck-midnight-text);
+  background: var(--ck-midnight-background);
+  color: var(--ck-midnight-text);
 }
 @media (max-width: 860px) {
   .map-board { grid-template-columns: 1fr; }
@@ -472,8 +478,8 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   --card-line: rgba(246, 249, 252, 0.14);
 }
 .board-card.board-theme-midnight:not(.kpi-card) {
-  --card-bg: #0c0c0c;
-  --card-ink: #ffffff;
+  --card-bg: var(--ck-midnight-background);
+  --card-ink: var(--ck-midnight-text);
   --card-muted: #8a8a8a;
   --card-line: #262626;
   color-scheme: dark;
@@ -666,7 +672,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .dark .look-stage.look-refined { background: #18181b; }
 .look-stage.look-editorial { background: #f6f9fc; color: #0a2540; }
 .dark .look-stage.look-editorial { background: #12182b; color: #f6f9fc; }
-.look-stage.look-midnight { background: #0c0c0c; }
+.look-stage.look-midnight { background: var(--ck-midnight-background); color: var(--ck-midnight-text); }
 .look-grid { display: grid; grid-template-columns: 1.4fr 0.8fr; gap: 12px; }
 .swatches { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; }
 .swatch {

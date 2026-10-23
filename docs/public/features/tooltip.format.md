@@ -1,14 +1,14 @@
 # Tooltip value formatting
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Format numbers/dates in tooltips
 
-Matrix status: `partial`. Verification: `dts-path` (strong).
+Matrix status: `native`. Verification: `render` (strong).
 
-tooltip reuses the channel format, and a tooltip.fields item can set its own format preset
+A format preset, or {specifier} for .2f, ,.0f, $,.0f, .1%, .2e, +.1f, and s. tooltip.fields[].unit and tooltip.template with {x}, {name}, {value}, {unit}, and data field names. A d3-style string repairs to {specifier}. An unknown pattern is CK3058. A missing template token is CK3059.
 
-Source: chartkit:packages/core/src/generated/schema.ts:136
+Source: chartkit:packages/core/src/format.ts
 
 ## ChartKit spec
 
@@ -30,7 +30,9 @@ Source: chartkit:packages/core/src/generated/schema.ts:136
     "x": "quarter",
     "y": {
       "field": "units",
-      "format": "compact"
+      "format": {
+        "specifier": ",.0f"
+      }
     }
   },
   "a11y": {
@@ -39,6 +41,18 @@ Source: chartkit:packages/core/src/generated/schema.ts:136
   "size": {
     "width": 640,
     "height": 260
+  },
+  "tooltip": {
+    "template": "{name} {value} {unit}",
+    "fields": [
+      {
+        "field": "units",
+        "format": {
+          "specifier": ",.0f"
+        },
+        "unit": "u"
+      }
+    ]
   }
 }
 ```
@@ -70,6 +84,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~items\|valueFormatter | dts-grep (weak) | @antv/g2/lib/runtime/transform.d.ts:10 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 32e6d8403882.
 
 https://chartkit.dev/features.json

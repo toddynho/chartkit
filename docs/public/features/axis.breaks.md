@@ -1,12 +1,56 @@
 # Axis breaks
 
-ChartKit: **none**
+ChartKit: **native**
 
 Skip a range of an axis (gaps, weekends)
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `render` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+axes.y.breaks is a list of {from, to}, up to three gaps. Ticks inside a gap are omitted and the spine draws a zigzag. Overlapping gaps warn CK3069. from must be below to (CK3061).
+
+Source: chartkit:packages/core/src/svg.ts
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40
+    },
+    {
+      "quarter": "Q2",
+      "units": 55
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": "units"
+  },
+  "a11y": {
+    "alt": "Units rose in Q2."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "axes": {
+    "y": {
+      "breaks": [
+        {
+          "from": 45,
+          "to": 52
+        }
+      ]
+    }
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -33,6 +77,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~breaks | dts-grep (weak) | @antv/g2/lib/runtime/constant.d.ts:10 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 32e6d8403882.
 
 https://chartkit.dev/features.json

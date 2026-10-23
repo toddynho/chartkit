@@ -148,7 +148,7 @@ function sameErrors(a: ValidationResult, b: ValidationResult): boolean {
 
 /** CK1009 repair hints sort first. Agents and the harness keep only the first few errors. */
 function repairRank(diagnostic: Diagnostic): number {
-  if (diagnostic.code === "CK1009") return 0;
+  if (diagnostic.code === "CK1009" || /^CK30(5[8-9]|6\d|7[0-2])$/.test(diagnostic.code)) return 0;
   if (diagnostic.code === "CK1005") return 1;
   return 2;
 }

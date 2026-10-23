@@ -260,6 +260,10 @@ export type YChannel =
        * Filled or hollow marker for this series. Overrides mark.pointFill.
        */
       pointFill?: "filled" | "hollow";
+      /**
+       * Draw order. Higher paints later. Stacked series keep data order.
+       */
+      z?: number;
     };
 /**
  * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
@@ -368,8 +372,24 @@ export type Tooltip =
              */
             title?: string;
             format?: Format;
+            /**
+             * Unit printed after the value, such as cm or kWh.
+             */
+            unit?: string;
           }
       )[];
+      /**
+       * Row template. Tokens: {x}, {name}, {value}, {unit}, and data field names. One row per series.
+       */
+      template?: string;
+      /**
+       * Tap to pin the tooltip. A second tap or Escape clears it. Pointer leave does not.
+       */
+      pin?: boolean;
+      /**
+       * Hit radius in pixels. Larger targets help a finger. Pinning uses 18 when hit is omitted.
+       */
+      hit?: number;
     };
 /**
  * A reference mark drawn on the chart.
@@ -397,6 +417,10 @@ export type Annotation =
        * Text shown with the annotation.
        */
       label?: string;
+      /**
+       * Draw order. Higher paints later. Negative paints under the marks.
+       */
+      z?: number;
       color?: Color;
     }
   | {
@@ -421,6 +445,10 @@ export type Annotation =
        * Text shown with the annotation.
        */
       label?: string;
+      /**
+       * Draw order. Higher paints later. Negative paints under the marks.
+       */
+      z?: number;
       color?: Color;
     }
   | {
@@ -437,6 +465,10 @@ export type Annotation =
        * Text shown with the annotation.
        */
       label: string;
+      /**
+       * Draw order. Higher paints later. Negative paints under the marks.
+       */
+      z?: number;
       color?: Color;
     }
   | {
@@ -461,6 +493,10 @@ export type Annotation =
        * Text at the end of the line. Defaults to Mean, Median, or Linear.
        */
       label?: string;
+      /**
+       * Draw order. Higher paints later. Negative paints under the marks.
+       */
+      z?: number;
       color?: Color;
     }
   | {
@@ -489,6 +525,10 @@ export type Annotation =
        * Text at the end of the fit. Defaults to Linear fit or Loess.
        */
       label?: string;
+      /**
+       * Draw order. Higher paints later. Negative paints under the marks.
+       */
+      z?: number;
       color?: Color;
     }
   | {
@@ -513,6 +553,10 @@ export type Annotation =
        * Vertical offset of the text box, in pixels. Negative is up.
        */
       dy?: number;
+      /**
+       * Draw order. Higher paints later. Negative paints under the marks.
+       */
+      z?: number;
       color?: Color;
     };
 /**
@@ -922,7 +966,7 @@ export interface FormatObject {
   /**
    * Base format style.
    */
-  style:
+  style?:
     | "number"
     | "compact"
     | "percent"
@@ -953,15 +997,19 @@ export interface FormatObject {
    * Always show + for positive numbers (useful for deltas).
    */
   signed?: boolean;
+  /**
+   * d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as ".2f" is repaired to this.
+   */
+  specifier?: string;
 }
 /**
  * How data values map to positions or sizes. Usually inferred; set only to override.
  */
 export interface Scale {
   /**
-   * Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band.
+   * Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.
    */
-  type?: "linear" | "log" | "sqrt" | "time" | "band" | "point";
+  type?: "linear" | "log" | "sqrt" | "time" | "band" | "point" | "symlog";
   /**
    * Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.
    *
@@ -999,6 +1047,10 @@ export interface Scale {
    * Draw values outside an explicit scale.domain at the domain edge.
    */
   clamp?: boolean;
+  /**
+   * Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.
+   */
+  constant?: number;
 }
 /**
  * Colour scale. Sequential and diverging are continuous; quantize and threshold are binned.
@@ -2726,6 +2778,115 @@ export interface Axes {
          */
         rotate?: number;
         /**
+         * Shift the baseline outward in pixels. Positive moves it away from the plot.
+         */
+        offset?: number;
+        /**
+         * Data value where this axis crosses the other. 0 draws the axis through zero.
+         */
+        crosses?: number;
+        /**
+         * Minor tick marks between major ticks. 0 hides them.
+         */
+        minorTicks?: number;
+        /**
+         * Ranges collapsed to a short gap. The break mark is drawn on the axis. When the segment below crosses zero, share is the fraction of the axis from zero to the break (default 0.4); otherwise share is the fraction for that whole segment. Ticks inside a break are omitted. The axis line stops at the top tick.
+         *
+         * @maxItems 3
+         */
+        breaks?:
+          | []
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ]
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ]
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ];
+        /**
          * Shaded x ranges, or "weekends" to shade Saturday and Sunday when x is dates.
          */
         bands?: "weekends" | AxisBand[];
@@ -2833,6 +2994,115 @@ export interface Axes {
          */
         rotate?: number;
         /**
+         * Shift the baseline outward in pixels. Positive moves it away from the plot.
+         */
+        offset?: number;
+        /**
+         * Data value where this axis crosses the other. 0 draws the axis through zero.
+         */
+        crosses?: number;
+        /**
+         * Minor tick marks between major ticks. 0 hides them.
+         */
+        minorTicks?: number;
+        /**
+         * Ranges collapsed to a short gap. The break mark is drawn on the axis. When the segment below crosses zero, share is the fraction of the axis from zero to the break (default 0.4); otherwise share is the fraction for that whole segment. Ticks inside a break are omitted. The axis line stops at the top tick.
+         *
+         * @maxItems 3
+         */
+        breaks?:
+          | []
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ]
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ]
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ];
+        /**
          * Shaded y ranges, such as a target zone.
          */
         bands?: AxisBand[];
@@ -2939,6 +3209,115 @@ export interface Axes {
          * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true.
          */
         rotate?: number;
+        /**
+         * Shift the baseline outward in pixels. Positive moves it away from the plot.
+         */
+        offset?: number;
+        /**
+         * Data value where this axis crosses the other. 0 draws the axis through zero.
+         */
+        crosses?: number;
+        /**
+         * Minor tick marks between major ticks. 0 hides them.
+         */
+        minorTicks?: number;
+        /**
+         * Ranges collapsed to a short gap. The break mark is drawn on the axis. When the segment below crosses zero, share is the fraction of the axis from zero to the break (default 0.4); otherwise share is the fraction for that whole segment. Ticks inside a break are omitted. The axis line stops at the top tick.
+         *
+         * @maxItems 3
+         */
+        breaks?:
+          | []
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ]
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ]
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ];
         /**
          * Shaded ranges on the second y axis.
          */
