@@ -71,7 +71,7 @@ describe("MCP tools", () => {
     await withClient(async (client) => {
       const listed = await client.listTools();
       const names = listed.tools.map((tool) => tool.name).sort();
-      expect(names).toEqual(["get_example", "list_chart_types", "lookup_feature", "render", "repair", "validate"]);
+      expect(names).toEqual(["get_example", "list_chart_types", "lookup_feature", "render", "render_chart", "repair", "validate"]);
       for (const tool of listed.tools) {
         if (tool.name === "list_chart_types") continue;
         expect(tool.inputSchema.type).toBe("object");
@@ -245,12 +245,46 @@ describe("MCP resources", () => {
   });
 });
 
+describe("render_chart", () => {
+  it("returns the cloud image URL and the repairs", async () => {
+    fetchSpy.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          ok: true,
+          url: "https://cloud.chartkit.dev/render?spec=%7B%7D&format=svg",
+          watermark: true,
+          applied: [{ op: "add", path: "/a11y" }],
+          warnings: [],
+          errors: [],
+          spec: { version: "1", type: "bar" },
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      ),
+    );
+    await withClient(async (client) => {
+      const body = payload(
+        (await client.callTool({ name: "render_chart", arguments: { spec: { version: "1", type: "bar" }, format: "svg" } })) as ToolText,
+      ) as { url: string; applied: { path: string }[]; watermark: boolean };
+      expect(body.url).toContain("https://cloud.chartkit.dev/render");
+      expect(body.applied[0]?.path).toBe("/a11y");
+      expect(body.watermark).toBe(true);
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      const called = String(fetchSpy.mock.calls[0]?.[0]);
+      expect(called).toBe("https://cloud.chartkit.dev/render");
+    });
+  });
+});
+
 describe("source", () => {
-  it("does not call the network from this package", () => {
+  it("keeps network calls inside render_chart", () => {
     const files = readdirSync(join(pkgRoot, "src")).filter((name) => name.endsWith(".ts") && !name.endsWith(".test.ts"));
-    const combined = files.map((name) => readFileSync(join(pkgRoot, "src", name), "utf8")).join("\n");
+    const local = files.filter((name) => name !== "render-chart.ts");
+    const combined = local.map((name) => readFileSync(join(pkgRoot, "src", name), "utf8")).join("\n");
     expect(combined).not.toMatch(/\bfetch\s*\(/);
     expect(combined).not.toMatch(/node:https|node:http|https\.request|http\.request/);
+    const cloud = readFileSync(join(pkgRoot, "src/render-chart.ts"), "utf8");
+    expect(cloud).toContain("https://cloud.chartkit.dev");
+    expect(cloud).toContain("fetcher(`${origin}/render`");
   });
 });
 

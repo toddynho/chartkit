@@ -24,6 +24,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/playground",
     "/benchmarks",
     "/agents",
+    "/cloud",
+    "/docs/cloud",
     "/demo",
     "/large",
     "/interaction",

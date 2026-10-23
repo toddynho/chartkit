@@ -1,0 +1,26 @@
+{
+  "name": "@chartkitdev/cloud",
+  "version": "0.0.0",
+  "private": true,
+  "description": "ChartKit Cloud render service. Free SVG and PNG renders. An API key removes the chartkit.dev mark. Not published.",
+  "type": "module",
+  "scripts": {
+    "dev": "node --experimental-strip-types src/cli.ts",
+    "start": "node --experimental-strip-types src/cli.ts",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "bench": "node --experimental-strip-types src/latency.ts"
+  },
+  "dependencies": {
+    "@chartkitdev/core": "*",
+    "@resvg/resvg-wasm": "^2.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

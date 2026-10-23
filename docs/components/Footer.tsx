@@ -15,6 +15,7 @@ export function Footer() {
         <Link href="/playground">Playground</Link>
         <Link href="/benchmarks">Benchmarks</Link>
         <Link href="/agents">Agents</Link>
+        <Link href="/cloud">Cloud</Link>
         <Link href="/features">Features</Link>
         <Link href="/compare">Compare</Link>
         <a href={`${SITE.github}/blob/main/ROADMAP.md`}>Roadmap</a>

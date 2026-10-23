@@ -17,6 +17,8 @@ const start: { href: string; label: string; external?: boolean }[] = [
   { href: "/docs/migrate", label: "Migrate from v0" },
   { href: "/docs/mermaid", label: "Mermaid or Markdown" },
   { href: "/docs/mcp", label: "MCP server" },
+  { href: "/docs/cloud", label: "Cloud render" },
+  { href: "/cloud", label: "Cloud" },
   { href: `${SITE.github}/blob/main/ROADMAP.md`, label: "Roadmap", external: true },
 ];
 

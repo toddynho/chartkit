@@ -77,7 +77,7 @@ const render = createRenderer([line]);`}
       </ul>
       <p>
         Then read the <Link href="/docs/spec">spec reference</Link>, the{" "}
-        <Link href="/docs/theming">theming tokens</Link>, or the{" "}
+        <Link href="/docs/theming">theming tokens</Link>, the <Link href="/cloud">Cloud render API</Link>, or the{" "}
         <Link href="/examples">examples</Link>.
       </p>
     </>
