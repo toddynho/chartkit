@@ -187,6 +187,27 @@ describe("validate", () => {
     const typo = validate({ type: "choropleth", atlas: "usa", encoding: { region: "id", color: "n" }, data: [] });
     expect(typo.warnings.find((item) => item.code === "CK3050")?.message).toContain("usa");
 
+    const cities = validate({
+      type: "map-points",
+      encoding: { latitude: "lat", longitude: "lon" },
+      data: [
+        { city: "Chicago", lat: 41.88, lon: -87.63 },
+        { city: "Houston", lat: 29.76, lon: -95.37 },
+      ],
+    });
+    expect(cities.warnings.find((item) => item.code === "CK3050")?.fix?.[0]?.value).toEqual({ atlas: "us" });
+
+    const states = validate({
+      type: "choropleth",
+      encoding: { region: "state", color: "n" },
+      data: [
+        { state: "California", n: 1 },
+        { state: "Texas", n: 2 },
+      ],
+    });
+    const stateFix = states.warnings.find((item) => item.code === "CK3050")?.fix?.[0]?.value;
+    expect(stateFix === "us" || (stateFix && typeof stateFix === "object" && stateFix.atlas === "us")).toBe(true);
+
     const points = validate({
       type: "map-points",
       atlas: "world",
@@ -306,6 +327,15 @@ describe("render", () => {
     expect(cities).toContain("<circle");
     expect(cities).toContain(">Paris<");
     expect(cities).not.toContain("Unknown atlas");
+
+    const tipped = await render({
+      type: "map-points",
+      atlas: "us",
+      data: [{ name: "Chicago", lat: 41.88, lon: -87.63, pop: 2700000 }],
+      encoding: { latitude: "lat", longitude: "lon", label: "name", tooltip: "pop" },
+      a11y: { alt: "Chicago is marked." },
+    });
+    expect(tipped).toContain("<title>Chicago, pop 2700000</title>");
   });
 
   it("draws bubbles, labels the largest, and accepts Canada and the EU", async () => {

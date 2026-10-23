@@ -3428,7 +3428,7 @@ export interface Layout {
     legend?: "shared" | "each";
   };
   /**
-   * Several charts in one spec. views are chart specs. direction is vertical (default) or horizontal. columns wraps them into a grid; a view may set span to cover more than one column. When views has a chart, the outer spec may omit data, encoding, and metric. Setting this beside facet warns CK3048.
+   * Several charts in one spec. views are chart specs. direction is vertical (default) or horizontal. columns wraps them into a grid; a view may set span to cover more than one column. When views has a chart, the outer spec may omit type, data, encoding, and metric. Setting this beside facet warns CK3048.
    */
   concat?: {
     /**

@@ -1288,7 +1288,7 @@ function concatFeature(
   return {
     path: dashboard ? "/type" : sources[0] ?? (topFlow ? "/direction" : "/layout/direction"),
     message: dashboard ? "a dashboard is layout.concat" : "several charts are layout.concat.views",
-    hint: 'layout.concat.views is a list of chart specs, each with a type. layout.concat is { views, direction }. direction "vertical" or "horizontal" is layout.concat.direction. type "concat" and type "dashboard" are not chart types. layout.direction is "ltr" or "rtl".',
+    hint: 'layout.concat.views is a list of chart specs, each with a type. layout.concat is { views, direction }. direction "vertical" or "horizontal" is layout.concat.direction. type "concat" and type "dashboard" are not chart types. When views is set, the outer spec may omit type. layout.direction is "ltr" or "rtl".',
     fix,
     layout: true,
   };
@@ -2200,6 +2200,52 @@ function labelWord(value: string, ctx: Ctx): boolean {
   return true;
 }
 
+/** axes.y.min is not an axis key. The limit lives on encoding.y.scale.domain, and the same for x. */
+function axisLimit(name: string, path: string, pointer: string, value: unknown, ctx: Ctx): boolean {
+  const match = /^\/axes\/(x|y|y2)$/.exec(path);
+  if (!match || (name !== "min" && name !== "max")) return false;
+  const axis = match[1] ?? "y";
+  const root = isPlainObject(ctx.rootValue) ? ctx.rootValue : {};
+  const axes = isPlainObject(root.axes) ? root.axes : {};
+  const box = isPlainObject(axes[axis]) ? axes[axis] : {};
+  const other = name === "min" ? "max" : "min";
+  ctx.skipUnknown.add(join(path, other));
+  const min = typeof box.min === "number" ? box.min : name === "min" && typeof value === "number" ? value : null;
+  const max = typeof box.max === "number" ? box.max : name === "max" && typeof value === "number" ? value : null;
+  const channel = axis === "x" ? "x" : "y";
+  const where = axis === "y2" ? "encoding.y.scale.domain on the series with axis y2" : `encoding.${channel}.scale.domain`;
+  const fix: JsonPatchOperation[] = [{ op: "remove", path: pointer }];
+  if (typeof box[other] === "number") fix.push({ op: "remove", path: join(path, other) });
+  if (axis !== "y2") {
+    const moved = domainPatch(root, channel, [min, max]);
+    if (moved) fix.push(...moved);
+  }
+  emit(ctx, {
+    code: "CK1002",
+    severity: "error",
+    message: `unknown property ${quote(name)}`,
+    path: pointer,
+    hint: `Axis ${name} is not a limit. Move it to ${where}.`,
+    fix,
+  });
+  return true;
+}
+
+function domainPatch(root: Record<string, unknown>, channel: "x" | "y", domain: [number | null, number | null]): JsonPatchOperation[] | null {
+  if (domain[0] === null && domain[1] === null) return null;
+  const encoding = isPlainObject(root.encoding) ? root.encoding : undefined;
+  if (!encoding) return [{ op: "add", path: "/encoding", value: { [channel]: { scale: { domain } } } }];
+  const current = encoding[channel];
+  if (typeof current === "string") {
+    return [{ op: "replace", path: `/encoding/${channel}`, value: { field: current, scale: { domain } } }];
+  }
+  if (Array.isArray(current) || !isPlainObject(current)) return null;
+  if (!isPlainObject(current.scale)) return [{ op: "add", path: `/encoding/${channel}/scale`, value: { domain } }];
+  const existing = Array.isArray(current.scale.domain) ? current.scale.domain : [null, null];
+  const next = [domain[0] ?? existing[0] ?? null, domain[1] ?? existing[1] ?? null];
+  return [{ op: Array.isArray(current.scale.domain) ? "replace" : "add", path: `/encoding/${channel}/scale/domain`, value: next }];
+}
+
 function markHome(path: string): string | null {
   if (path === "/mark" || path === "/encoding/y" || /^\/encoding\/y\/\d+$/.test(path)) return path;
   return null;
@@ -2280,6 +2326,7 @@ const POS_NAMES = new Set(["top", "bottom", "left", "right", "center", "inside",
 function emitUnknownProp(name: string, path: string, props: Record<string, JsonSchema>, ctx: Ctx, value?: unknown): void {
   const pointer = join(path, name);
   if (ctx.skipUnknown.has(pointer)) return;
+  if (axisLimit(name, path, pointer, value, ctx)) return;
   if (markMistake(name, path, pointer, value, ctx)) return;
   if (/^\/mark\/colorRules\/\d+$/.test(path) && (name === "name" || name === "title")) {
     let rule: unknown = ctx.rootValue;
@@ -2461,7 +2508,7 @@ function emitUnknownProp(name: string, path: string, props: Record<string, JsonS
   });
 }
 
-/** A composed dashboard carries its data on each view, so the outer spec may omit data, encoding, and metric. */
+/** A composed dashboard carries its data on each view, so the outer spec may omit type, data, encoding, and metric. */
 function concatViews(value: unknown): boolean {
   if (!isPlainObject(value) || !isPlainObject(value.layout) || !isPlainObject(value.layout.concat)) return false;
   const views = value.layout.concat.views;
@@ -2475,7 +2522,7 @@ function emitMissing(name: string, path: string, parent: Record<string, unknown>
     emitAltRequired(ctx);
     return;
   }
-  if (path === "" && concatViews(ctx.rootValue) && (name === "data" || name === "encoding" || name === "metric")) return;
+  if (path === "" && concatViews(ctx.rootValue) && (name === "type" || name === "data" || name === "encoding" || name === "metric")) return;
   if (path === "" && name === "type") {
     emit(ctx, {
       code: "CK1003",
