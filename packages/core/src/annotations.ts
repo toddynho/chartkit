@@ -244,7 +244,7 @@ function rule(item: Record<string, unknown>, geom: AnnotationGeom, over: string[
   const vertical = (axis === "x") !== Boolean(geom.flip);
   const { plot } = geom;
   if (vertical) {
-    const y = where === "start" ? plot.bottom - 4 : where === "center" ? (plot.top + plot.bottom) / 2 : plot.top + 12;
+    const y = where === "start" ? plot.bottom - 4 : where === "center" ? (plot.top + plot.bottom) / 2 : Math.max(14, plot.top - 16);
     over.push(label(item.label, atPx + 4, y, "start", color));
     boxes.push({ x: atPx + 4, y: y - 11, w: item.label.length * 6.3, h: 14 });
     return;

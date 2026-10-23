@@ -247,7 +247,7 @@ isolation.globalAutoOmitsExtraCharts = !globalAuto.code.includes(extraMark) && !
 
 const extra = await gzipOf(join(src, "extra.ts"));
 const canvasPainter = await gzipOf(join(src, "canvas/hydrate.ts"));
-const extraTypes = ["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst"];
+const extraTypes = ["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst", "bar-list"];
 const chartSizes = {};
 for (const name of extraTypes) chartSizes[name] = await gzipOf(join(src, "charts", `${name}.ts`));
 if (all.code.includes('data-ck-renderer="histogram"') || all.code.includes('data-ck-mark="whisker"')) {
@@ -295,7 +295,7 @@ const measured = {
 for (const name of extraTypes) measured[name] = chartSizes[name].gzipBytes;
 const budget = JSON.parse(readFileSync(join(root, "scripts/size-budget.json"), "utf8"));
 const failures = [];
-for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "element", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "elementLine", "extra", "canvas", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid", "geo", "geoWorld", "geoUs", "geoCanada", "geoEu"]) {
+for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "element", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "elementLine", "extra", "canvas", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst", "bar-list", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid", "geo", "geoWorld", "geoUs", "geoCanada", "geoEu"]) {
   if (typeof budget[key] !== "number") failures.push(`${key} budget missing`);
   else if (measured[key] > budget[key]) failures.push(`${key} gzip ${measured[key]} > budget ${budget[key]}`);
 }

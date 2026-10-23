@@ -764,9 +764,6 @@ function flag(diagnostics: Diagnostic[], path: string, why: string): void {
 
 /** kind: 0 defined, 3 light|dark, 4 string, 5 number. */
 const UNBUILT: ReadonlyArray<readonly [string, 0 | 3 | 4 | 5, string]> = [
-  ["theme/mode", 3, "ignored; preset stays"],
-  ["theme/tokens/fontFamily", 4, "ignored; built-in font"],
-  ["theme/tokens/fontSize", 5, "ignored; built-in size"],
   ["axes/y2/grid", 0, "ignored; no y2 grid"],
 ];
 

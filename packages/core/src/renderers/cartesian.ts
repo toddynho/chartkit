@@ -15,9 +15,26 @@ import { layoutPaint } from "../layout-hook";
 import { boxId, brokenScale, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, round, scaleClamp, scalePad, symlogTicks, ticks } from "../svg";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
+export interface Headline {
+  label: string;
+  value: string;
+  compare: string;
+  delta: string;
+  tone: "positive" | "negative" | "neutral";
+}
+
+export interface TipChrome {
+  background: string;
+  radius?: number;
+  shadow: string;
+  crosshair: string;
+}
+
 export interface AxisBox {
   title?: string;
   count?: number;
+  /** First and last label only. */
+  ends?: boolean;
   labels: boolean;
   /** Non-default side. Set when the axis extras are mounted. */
   end?: boolean;
@@ -213,6 +230,8 @@ export interface Series {
   bandOpacity?: number;
   dash: string;
   area: boolean;
+  /** Area or bar fill opacity. Omit to use the chart mark. */
+  fillOpacity?: number;
   shape?: string;
   radius?: number;
   hollow?: boolean;
@@ -260,6 +279,16 @@ export interface PlotModel {
   cornerRadius: number;
   /** When true, bar radius is var(--ck-bar-radius), outer end only. */
   radiusVar: boolean;
+  /** Pixel gap between stacked segments. */
+  stackGap: number;
+  /** outer rounds the end away from the baseline. all rounds every corner. */
+  radiusEnds: "outer" | "all";
+  /** Dash applied to the last segment only. */
+  partial: "" | "dashed" | "dotted";
+  /** Fill opacity of the last area segment. Omit to keep one fill. */
+  partialOpacity?: number;
+  headline?: Headline;
+  tip?: TipChrome;
   gap: number;
   labelsOn: boolean;
   pointShape: string;
@@ -355,6 +384,12 @@ export interface ChartShell {
   connectNulls: boolean;
   cornerRadius: number;
   radiusVar: boolean;
+  stackGap: number;
+  radiusEnds: "outer" | "all";
+  partial: "" | "dashed" | "dotted";
+  partialOpacity?: number;
+  headline?: Headline;
+  tip?: TipChrome;
   gap: number;
   labelsOn: boolean;
   pointShape: string;
@@ -399,6 +434,33 @@ function shellStamp(spec: Record<string, unknown>): string {
 }
 
 let chartShell: ChartShell | null = null;
+
+function cssText(value: unknown, limit: number): string {
+  if (typeof value !== "string") return "";
+  const text = value.trim().replace(/["<>]/g, "");
+  return text.length > 0 && text.length <= limit ? text : "";
+}
+
+function readHeadline(spec: Record<string, unknown>): Headline | undefined {
+  if (!isRecord(spec.headline)) return;
+  const label = cssText(spec.headline.label, 80);
+  const value = cssText(spec.headline.value, 40);
+  const compare = cssText(spec.headline.compare, 40);
+  const delta = cssText(spec.headline.delta, 24);
+  const tone = spec.headline.tone === "negative" || spec.headline.tone === "neutral" ? spec.headline.tone : spec.headline.tone === "positive" ? "positive" : "";
+  if (!label && !value && !compare && !delta && !tone) return;
+  return { label, value, compare, delta, tone: tone || "positive" };
+}
+
+function readTip(spec: Record<string, unknown>): TipChrome | undefined {
+  if (!isRecord(spec.tooltip)) return;
+  const background = cssText(spec.tooltip.background, 80);
+  const shadow = cssText(spec.tooltip.shadow, 80);
+  const crosshair = cssText(spec.tooltip.crosshairColor, 80);
+  const radius = typeof spec.tooltip.radius === "number" && Number.isFinite(spec.tooltip.radius) ? clamp(spec.tooltip.radius, 0, 24) : undefined;
+  if (!background && !shadow && !crosshair && radius === undefined) return;
+  return { background, shadow, crosshair, radius };
+}
 
 /** Theme, channels, and geometry. Reused when a later spec only replaces `data`. */
 function shellFor(spec: Record<string, unknown>): ChartShell {
@@ -458,6 +520,12 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     connectNulls: mark.connectNulls === true,
     cornerRadius: radiusSet ? (mark.cornerRadius as number) : geometry.cornerRadius,
     radiusVar: !radiusSet,
+    stackGap: typeof mark.stackGap === "number" ? clamp(mark.stackGap, 0, 24) : 0,
+    radiusEnds: mark.radiusEnds === "all" ? "all" : "outer",
+    partial: mark.partial === "dashed" || mark.partial === "dotted" ? mark.partial : "",
+    partialOpacity: typeof mark.partialOpacity === "number" ? clamp(mark.partialOpacity, 0, 1) : undefined,
+    headline: readHeadline(spec),
+    tip: readTip(spec),
     gap: typeof mark.gap === "number" ? mark.gap : geometry.gap,
     labelsOn: mark.labels === true,
     pointShape: glyphOf(mark.pointShape),
@@ -566,6 +634,7 @@ function toModel(
         mark: markKind,
         dash: channel.dash,
         area: markKind === "area" || channel.area === true || mark.area === true || type === "stacked-area" || type === "mini-area",
+        fillOpacity: channel.fillOpacity,
         shape: channel.pointShape,
         radius: channel.pointSize,
         hollow: channel.pointHollow || undefined,
@@ -589,7 +658,8 @@ function toModel(
   return {
     ...shell,
     labels,
-    x: type === "bar" || type === "combo" ? null : x,
+    // Bars need category bands. A combo of only lines and areas keeps a temporal or linear x.
+    x: type === "bar" || (type === "combo" && series.some((item) => item.mark === "bar")) ? null : x,
     series,
     showY2: shell.showY2 && series.some((item) => item.axis === "y2"),
     legend: shell.legendOn && (series.length > 1 || Boolean(swatches) || ruleLegend.length > 0),
@@ -610,6 +680,7 @@ function toModel(
 }
 
 function modelToSvg(model: PlotModel, draw: MarkDraw): string {
+  labelPx = model.preset.fontSize ?? 11;
   const tScale = performance.now();
   const horizontal = model.orientation === "horizontal" && model.type === "bar";
   const yDomain = domain(model, "y");
@@ -670,6 +741,7 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   if (model.subtitle) {
     parts.push(`<text x="${n(titleX)}" y="${model.title ? 40 : 18}"${titleAnchor} fill="${cssVar("muted", model.preset.muted)}" font-size="12" font-weight="400" font-family="${font()}">${esc(model.subtitle)}</text>`);
   }
+  if (model.headline) parts.push(headlineSvg(model));
   if (model.legend && !model.legendBox) parts.push(legend(model, pad.left, model.title || model.subtitle ? (model.subtitle ? 54 : 36) : 8, plot.right));
 
   const clip = boxId(model.id, plot.left, plot.top, plotW, plotH);
@@ -907,9 +979,9 @@ function appendLineSeries(
     const indexAttr = ` data-ck-sample="${sampled.mode}" data-ck-i="${kept.join(" ")}"${scaleAttr}`;
     if (area) {
       const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
-      out.push(`<path d="${areaPath(points, bottoms, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillPaint}" stroke="none"${indexAttr} />`);
+    paintAreas(out, gapTops(points, model, index, layers), bottoms, model, series, fill, indexAttr);
     }
-    pushStroke(out, stroked(points, model.curve, series.axis === "y2" ? model.y2Spans : model.ySpans), model, series, indexAttr);
+    paintStroke(out, points, model, series, indexAttr);
     // Hidden circles exist so --ck-line-dots can reveal them. A downsampled line
     // already has a vertex per pixel, and those circles dominate the SVG, so
     // interact draws the hover dot from the path instead.
@@ -926,7 +998,7 @@ function appendFullLine(
   xScale: XScale,
   yScale: (value: number) => number,
 ): void {
-  if (!layers && model.curve === "linear" && !series.area && model.type !== "stacked-area" && model.dots === "off" && !markerShape(model, series)) {
+  if (!layers && model.curve === "linear" && !series.area && model.type !== "stacked-area" && model.dots === "off" && !markerShape(model, series) && !model.partial) {
     appendLinear(out, model, series, xScale, yScale);
     return;
   }
@@ -934,12 +1006,10 @@ function appendFullLine(
   if (series.area || model.type === "stacked-area") {
     const bottoms = bottomPoints(series, index, layers, xScale, yScale, model);
     const fill = model.gradient ? `url(#${model.id}-g${index})` : series.color;
-    for (const [top, bottom] of pairSegments(points, bottoms, model.connectNulls)) {
-      out.push(`<path d="${areaPath(top, bottom, model.curve)}" fill="${fill}" fill-opacity="${model.gradient ? 1 : model.fillPaint}" stroke="none" />`);
-    }
+    paintAreas(out, gapTops(points, model, index, layers), bottoms, model, series, fill, "");
   }
   for (const segment of segments(points, model.connectNulls)) {
-    pushStroke(out, stroked(segment, model.curve, series.axis === "y2" ? model.y2Spans : model.ySpans), model, series, "");
+    paintStroke(out, segment, model, series, "");
   }
   paintPoints(out, points, model, series);
 }
@@ -975,9 +1045,56 @@ function strokeOf(series: Series, model: PlotModel): string {
 }
 
 /** Crisp stroke, and a blurred copy under it when mark.glow is set. */
-function pushStroke(out: string[], d: string, model: PlotModel, series: Series, extra: string): void {
+function gapTops(points: (Pt | null)[], model: PlotModel, index: number, layers: Layers | null): (Pt | null)[] {
+  if (!layers || model.stackGap <= 0 || index >= layers.top.length - 1) return points;
+  const gap = model.stackGap;
+  const out: (Pt | null)[] = new Array(points.length);
+  for (let i = 0; i < points.length; i++) {
+    const point = points[i];
+    out[i] = point ? { x: point.x, y: point.y + gap } : null;
+  }
+  return out;
+}
+
+function paintAreas(
+  out: string[],
+  tops: (Pt | null)[],
+  bottoms: (Pt | null)[],
+  model: PlotModel,
+  series: Series,
+  fill: string,
+  extra: string,
+): void {
+  const emit = (top: (Pt | null)[], bottom: (Pt | null)[], opacity: string) => {
+    for (const [above, below] of pairSegments(top, bottom, model.connectNulls)) {
+      if (above.length < 2) continue;
+      out.push(`<path d="${areaPath(above, below, model.curve)}" fill="${fill}" fill-opacity="${opacity}" stroke="none"${extra} />`);
+    }
+  };
+  const fade = areaFade(model, series);
+  if (model.partialOpacity === undefined || tops.length < 2) {
+    emit(tops, bottoms, fade);
+    return;
+  }
+  emit(tops.slice(0, -1), bottoms.slice(0, -1), fade);
+  emit(tops.slice(-2), bottoms.slice(-2), n(model.partialOpacity));
+}
+
+/** Solid stroke, then a dashed or dotted last segment when mark.partial is set. */
+function paintStroke(out: string[], points: Pt[], model: PlotModel, series: Series, extra: string): void {
+  const spans = series.axis === "y2" ? model.y2Spans : model.ySpans;
+  if (model.partial && points.length >= 2) {
+    const head = points.slice(0, -1);
+    if (head.length >= 2) pushStroke(out, stroked(head, model.curve, spans), model, series, extra);
+    pushStroke(out, stroked(points.slice(-2), model.curve, spans), model, series, extra, model.partial);
+    return;
+  }
+  pushStroke(out, stroked(points, model.curve, spans), model, series, extra);
+}
+
+function pushStroke(out: string[], d: string, model: PlotModel, series: Series, extra: string, dash = series.dash): void {
   const stroke = strokeOf(series, model);
-  const base = `fill="none" stroke="${stroke}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(series.dash)}`;
+  const base = `fill="none" stroke="${stroke}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(dash)}`;
   if (model.glow) out.push(`<path d="${d}" ${base} stroke-width="${n(model.strokeWidth + 2.5)}" filter="url(#${model.id}glow)" pointer-events="none" />`);
   out.push(`<path d="${d}" ${base} stroke-width="${model.strokePaint}"${extra} />`);
 }
@@ -1048,13 +1165,14 @@ function barMark(
   edge: "top" | "bottom" | "left" | "right",
   fill: string,
   extra = "",
+  ends: "outer" | "all" = "outer",
 ): string {
   const rect = `<rect x="${n(x)}" y="${n(y)}" width="${n(width)}" height="${n(height)}" fill="${fill}"${extra}`;
   if (width <= 0 || height <= 0 || (!useVar && radius < 0.5)) return `${rect} />`;
   const cap = useVar
     ? `min(var(--ck-bar-radius, ${n(radius)}) * 1px, ${n(width / 2)}px, ${n(height / 2)}px)`
     : `min(${n(radius)}px, ${n(width / 2)}px, ${n(height / 2)}px)`;
-  const round = edge === "top" ? `${cap} ${cap} 0 0` : edge === "bottom" ? `0 0 ${cap} ${cap}` : edge === "right" ? `0 ${cap} ${cap} 0` : `${cap} 0 0 ${cap}`;
+  const round = ends === "all" ? `${cap}` : edge === "top" ? `${cap} ${cap} 0 0` : edge === "bottom" ? `0 0 ${cap} ${cap}` : edge === "right" ? `0 ${cap} ${cap} 0` : `${cap} 0 0 ${cap}`;
   return `${rect} style="clip-path:inset(0 round ${round})" />`;
 }
 
@@ -1088,25 +1206,39 @@ function bars(
     const inset = slots > 1 ? 2 : 0;
     const fill = series.colors?.[i] ?? series.color;
     const caption = series.ruleLabels?.[i] ?? "";
-    const extra = (series.colors ? ` data-ck-name="${esc(series.name)}" data-ck-i="${i}"` : "") + (caption ? ` data-ck-rule="${esc(caption)}"` : "");
+    const fade = series.fillOpacity === undefined ? "" : ` fill-opacity="${n(series.fillOpacity)}"`;
+    const extra = fade + (series.colors ? ` data-ck-name="${esc(series.name)}" data-ck-i="${i}"` : "") + (caption ? ` data-ck-rule="${esc(caption)}"` : "");
     const outer = !layers || Math.abs((value ?? baseline) - layers.top[layers.top.length - 1][i]) <= 1e-6;
-    const radius = outer ? model.cornerRadius : 0;
-    const useVar = outer && model.radiusVar;
+    const roundEnds = model.radiusEnds === "all" || (Boolean(layers) && model.stackGap > 0) ? "all" : "outer";
+    const radius = outer || roundEnds === "all" ? model.cornerRadius : 0;
+    const useVar = (outer || roundEnds === "all") && model.radiusVar;
+    const split = Boolean(layers) && model.stackGap > 0 && !outer ? model.stackGap : 0;
     if (horizontal) {
-      const y = start;
-      const x = Math.min(a, b);
-      const width = Math.max(0, Math.abs(b - a));
+      let y = start;
+      let x = Math.min(a, b);
+      let width = Math.max(0, Math.abs(b - a));
       const height = Math.max(0, barSize - inset);
+      if (split) {
+        if (b >= a) width = Math.max(0, width - split);
+        else {
+          x += split;
+          width = Math.max(0, width - split);
+        }
+      }
       const edge = b >= a ? "right" : "left";
-      out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra), caption));
+      out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra, roundEnds), caption));
       queueBarLabel(model, series, series.values[i], x, y, width, height, true, labs, b < a, plot.left, model.width);
     } else {
       const x = start;
-      const y = Math.min(a, b);
-      const height = Math.max(0, Math.abs(b - a));
+      let y = Math.min(a, b);
+      let height = Math.max(0, Math.abs(b - a));
       const width = Math.max(0, barSize - inset);
+      if (split) {
+        if (b <= a) y += split;
+        height = Math.max(0, height - split);
+      }
       const edge = b <= a ? "top" : "bottom";
-      out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra), caption));
+      out.push(withTitle(barMark(x, y, width, height, radius, useVar, edge, fill, extra, roundEnds), caption));
       queueBarLabel(model, series, series.values[i], x, y, width, height, false, labs, false, plot.left, model.width);
     }
   }
@@ -1406,11 +1538,13 @@ function xPosition(
 
 /** Set for one draw when the layout chunk is mounted and the chart is rtl. */
 let textDir = "";
+/** Tick and axis-title size. 11 unless theme.tokens.fontSize is set. */
+let labelPx = 11;
 
 function axText(x: number, y: number, anchor: string, body: string, fill: string, family: string, angle = 0, weight = "", rows?: string[] | null): string {
   const spin = angle ? ` transform="rotate(${n(angle)} ${n(x)} ${n(y)})"` : "";
   const text = rows ? rows.map((row, i) => `<tspan x="${n(x)}" dy="${i ? 12 : 0}">${esc(row)}</tspan>`).join("") : esc(body);
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="11"${weight} font-family="${family}"${textDir}${spin}>${text}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${labelPx}"${weight} font-family="${family}"${textDir}${spin}>${text}</text>`;
 }
 
 function wrapWords(text: string, width: number, lines: number): string[] {
@@ -1782,7 +1916,7 @@ function timeBand(model: PlotModel, xScale: XScale, plot: PlotBox): string {
   const min = xScale.min;
   const max = xScale.max;
   const width = Math.max(1, plot.right - plot.left);
-  const explicit = model.xAxis.count !== undefined || Boolean(model.xAxis.values?.length);
+  const explicit = model.xAxis.ends || model.xAxis.count !== undefined || Boolean(model.xAxis.values?.length);
   const at = (value: number) => xScale.at(value);
   if (explicit || model.zone === "UTC") {
     const values = explicit
@@ -1836,6 +1970,20 @@ function along(
   const side = model.xAxis.end ? 2 : 3;
   const edge = outerEdge(side, plot, model.xAxis);
   const keep = model.xAxis.skip === false;
+  // The domain end stays. An earlier label that would cover it is the one that drops.
+  let endAt = -1;
+  if (!angle && !keep) {
+    for (let i = values.length - 1; i >= 0; i--) {
+      const label = labels[i];
+      if (!label) continue;
+      const x = at(values[i]);
+      if (x < plot.left - slack || x > plot.right + slack) continue;
+      endAt = i;
+      break;
+    }
+  }
+  const endLabel = endAt >= 0 ? labels[endAt] : "";
+  const reserved = endAt >= 0 ? at(values[endAt]) - ((endLabel.length || 1) * 6.4) / 2 : Infinity;
   let out = "";
   let last = -Infinity;
   for (let i = 0; i < values.length; i++) {
@@ -1843,6 +1991,10 @@ function along(
     if (!label) continue;
     const x = at(values[i]);
     const rows = linesOf(model.xAxis, label);
+    if (!angle && !keep && i !== endAt) {
+      const text = rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label;
+      if (x + ((text.length || 1) * 6.4) / 2 + 8 > reserved) continue;
+    }
     const drawn = alongOne(label, x, y, angle, plot, slack, fill, family, keep ? -Infinity : last, rows, model.width);
     if (!drawn) continue;
     out += tickInk(side, edge, x, model.xAxis, ink);
@@ -1960,6 +2112,7 @@ export function xAngle(model: PlotModel): number {
 }
 
 function xStep(model: PlotModel, count: number, angle: number): number {
+  if (model.xAxis.ends && count > 1) return count - 1;
   const target = model.xAxis.count;
   if (target === 0) return 0;
   if (target !== undefined) return Math.max(1, Math.ceil(count / Math.max(1, target)));
@@ -2063,6 +2216,68 @@ function appendRules(out: string[], model: PlotModel, cx: number, cy: number, x:
   }
 }
 
+/** Inter tabular digits at these sizes run about 0.68em wide. Measured on the $261K headline. */
+function headlineInk(text: string, size: number): number {
+  return Math.ceil(text.length * size * 0.68);
+}
+
+function headlineSvg(model: PlotModel): string {
+  const head = model.headline;
+  if (!head) return "";
+  const text = cssVar("text", model.preset.text);
+  if (!head.label && !head.value && !head.compare && !head.delta) {
+    const swatch = head.tone === "negative" ? cssVar("negative", model.preset.negative) : head.tone === "neutral" ? cssVar("muted", model.preset.muted) : cssVar("positive", model.preset.positive);
+    return `<rect data-ck-headline="1" x="12" y="12" width="12" height="12" rx="6" fill="${swatch}" />`;
+  }
+  const muted = cssVar("muted", model.preset.muted);
+  const tone = head.tone === "negative" ? cssVar("negative", model.preset.negative) : head.tone === "neutral" ? muted : cssVar("positive", model.preset.positive);
+  let y = model.title ? 36 : 16;
+  if (model.subtitle) y += 16;
+  let out = "";
+  const labelSize = 14;
+  const valueSize = 40;
+  const compareSize = 22;
+  const deltaSize = 13;
+  if (head.label) {
+    out += `<text x="12" y="${y}" fill="${muted}" font-size="${labelSize}" font-weight="500" font-family="${font()}">${esc(head.label)}</text>`;
+    y += 24;
+  }
+  const baseline = y + valueSize - 8;
+  out += `<text data-ck-headline="1" x="12" y="${baseline}" fill="${text}" font-size="${valueSize}" font-weight="650" font-family="${font()}">${esc(head.value)}</text>`;
+  const edge = model.width - 16;
+  const deltaW = head.delta ? headlineInk(head.delta, deltaSize) + 22 : 0;
+  const compareW = head.compare ? headlineInk(head.compare, compareSize) : 0;
+  const between = head.compare && head.delta ? 10 : 0;
+  const compareX = edge - deltaW - between - compareW;
+  if (head.compare) {
+    out += `<text x="${n(compareX)}" y="${baseline}" fill="${muted}" font-size="${compareSize}" font-weight="500" font-family="${font()}">${esc(head.compare)}</text>`;
+  }
+  if (head.delta) {
+    const pillX = edge - deltaW;
+    const pillY = baseline - 20;
+    out += `<rect data-ck-delta="1" x="${n(pillX)}" y="${n(pillY)}" width="${n(deltaW)}" height="24" rx="12" fill="${tone}" fill-opacity="0.16" />`;
+    out += `<text x="${n(pillX + deltaW / 2)}" y="${n(pillY + 16)}" text-anchor="middle" fill="${tone}" font-size="${deltaSize}" font-weight="650" font-family="${font()}">${esc(head.delta)}</text>`;
+  }
+  return out;
+}
+
+function svgStyle(model: PlotModel): string {
+  let style = "font-variant-numeric:tabular-nums;font-feature-settings:'tnum'";
+  if (model.preset.fontFamily) style += `;--ck-font-family:${model.preset.fontFamily}`;
+  return style;
+}
+
+function tipAttrs(model: PlotModel): string {
+  const tip = model.tip;
+  if (!tip) return "";
+  let out = "";
+  if (tip.background) out += ` data-ck-chrome-bg="${esc(tip.background)}"`;
+  if (tip.radius !== undefined) out += ` data-ck-chrome-radius="${n(tip.radius)}"`;
+  if (tip.shadow) out += ` data-ck-chrome-shadow="${esc(tip.shadow)}"`;
+  if (tip.crosshair) out += ` data-ck-xhair="${esc(tip.crosshair)}"`;
+  return out;
+}
+
 function openSvg(model: PlotModel): string {
   const width = model.responsive ? "100%" : String(model.width);
   const described = model.description ? ` aria-describedby="${model.id}-d"` : "";
@@ -2070,8 +2285,10 @@ function openSvg(model: PlotModel): string {
   const exported = model.exportMark ? ` data-ck-export="${esc(model.exportMark)}"` : "";
   const canvas = model.canvas ? ` data-ck-render="canvas"` : "";
   const sceneAttr = capturing() ? ` data-ck-scene="1"` : "";
+  const gap = model.stackGap > 0 ? ` data-ck-stack-gap="${n(model.stackGap)}"` : "";
+  const partialFade = model.partialOpacity !== undefined ? ` data-ck-partial-opacity="${n(model.partialOpacity)}"` : "";
   const desc = model.description ? `<desc id="${model.id}-d">${esc(model.description)}</desc>` : `<desc>${esc(model.alt)}</desc>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent}${exported}${canvas}${sceneAttr} style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent}${exported}${canvas}${sceneAttr}${gap}${partialFade}${tipAttrs(model)} style="${svgStyle(model)}">` +
     `<title>${esc(model.title || model.alt)}</title>${desc}`;
 }
 
@@ -2102,6 +2319,7 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
   let bottom = 12;
   if (model.title) top += 20;
   if (model.subtitle) top += 18;
+  if (model.headline) top += (model.headline.label ? 26 : 0) + 56;
   if (wantLabels(model)) {
     const pos = model.labelAt || "top";
     if (pos === "top" || pos === "outside" || pos === "") top += 16;
@@ -2328,6 +2546,7 @@ function strokeGutter(model: PlotModel, axis: "y" | "y2", span: number): number 
 
 export function resolveTicks(model: PlotModel, key: "x" | "y" | "y2", min: number, max: number, count: number, log: boolean): number[] {
   const axis = key === "y" ? model.yAxis : key === "y2" ? model.y2Axis : model.xAxis;
+  if (axis.ends) return max - min > 1e-9 ? [min, max] : [min];
   const values = axis.values;
   if (values && values.length) {
     const out: number[] = [];
@@ -2377,6 +2596,7 @@ function seriesLabelBoxes(
 }
 
 function labelStep(model: PlotModel, count: number): number {
+  if (model.xAxis.ends && count > 1) return count - 1;
   const target = model.xAxis.count;
   if (target === 0) return 0;
   if (target !== undefined) return Math.max(1, Math.ceil(count / Math.max(1, target)));
@@ -2658,6 +2878,7 @@ interface YChannel {
   pointShape: string;
   pointSize?: number;
   pointHollow: boolean;
+  fillOpacity?: number;
   lock?: [number | null, number | null];
   pad?: { min: number; max: number } | null;
   clamp?: boolean;
@@ -2685,6 +2906,7 @@ function readYChannels(y: unknown): YChannel[] {
       pointShape: glyphOf(item.pointShape),
       pointSize: typeof item.pointSize === "number" ? item.pointSize : undefined,
       pointHollow: item.pointFill === "hollow",
+      fillOpacity: unitOpacity(item.fillOpacity),
       lock: scale ? domainEnds(scale.domain) : undefined,
       pad: scalePad(item),
       clamp: scaleClamp(item),
@@ -2720,6 +2942,19 @@ function modelClamp(scale: (value: number) => number, domain: [number, number], 
   const lo = Math.min(domain[0], domain[1]);
   const hi = Math.max(domain[0], domain[1]);
   return (value) => scale(value < lo ? lo : value > hi ? hi : value);
+}
+
+function unitOpacity(value: unknown): number | undefined {
+  if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
+  if (value < 0) return 0;
+  if (value > 1) return 1;
+  return value;
+}
+
+/** Series opacity wins. A gradient still owns the stop alphas, so the path stays at 1. */
+function areaFade(model: PlotModel, series: Series): string {
+  if (model.gradient) return "1";
+  return series.fillOpacity === undefined ? model.fillPaint : n(series.fillOpacity);
 }
 
 function dashAttr(dash: string): string {
@@ -3157,9 +3392,12 @@ export function timeTicks(min: number, max: number, count: number, zone = "UTC")
   }
   const start = Math.ceil(min / step) * step;
   const out: number[] = [];
-  for (let value = start; value <= max + step * 0.001 && out.length < 12; value += step) {
+  for (let value = start; value <= max + step * 0.001; value += step) {
     if (value >= min - step * 0.001) out.push(value);
   }
+  // A 12-tick cap used to stop a month of days in the middle. The last instant
+  // is a tick when the nice step lands short of it, so the axis reaches the data.
+  if (out.length && span >= 2 * 86400000 && max - out[out.length - 1] > 60000) out.push(max);
   return out.length ? out : [min, max];
 }
 

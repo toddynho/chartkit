@@ -25,6 +25,8 @@ export function ramp(stops: readonly string[], t: number): string {
 export interface ScaleFormat {
   /** Data is already in percent points: 50 formats as 50%. */
   percent?: boolean;
+  /** Intl compact notation: 7000 formats as 7K. */
+  compact?: boolean;
   suffix?: string;
   decimals?: number;
 }
@@ -49,14 +51,20 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
-/** `%` and `percent-raw` both mean the number is already a percent. */
+/** `%` and `percent-raw` both mean the number is already a percent. `compact` uses short notation. */
 export function parseFormat(format: unknown): ScaleFormat {
   if (format === "%" || format === "percent" || format === "percent-raw") return { percent: true };
+  if (format === "compact") return { compact: true };
+  if (format === "integer") return { decimals: 0 };
+  if (format === "number") return {};
   if (typeof format === "string") return format ? { suffix: format.startsWith(" ") || format.startsWith("%") ? format : ` ${format}` } : {};
   if (!isRecord(format)) return {};
   const style = typeof format.style === "string" ? format.style : "";
   const decimals = typeof format.decimals === "number" ? format.decimals : undefined;
   if (style === "%" || style === "percent" || style === "percent-raw") return { percent: true, decimals };
+  if (style === "compact") return { compact: true, decimals };
+  if (style === "integer") return { decimals: 0 };
+  if (style === "number") return decimals != null ? { decimals } : {};
   const suffix = typeof format.suffix === "string" ? format.suffix : "";
   return suffix || decimals != null ? { suffix, decimals } : {};
 }
@@ -64,6 +72,10 @@ export function parseFormat(format: unknown): ScaleFormat {
 export function formatNumber(value: number, format: ScaleFormat): string {
   if (!Number.isFinite(value)) return "";
   const cleaned = Object.is(value, -0) ? 0 : value;
+  if (format.compact) {
+    const digits = format.decimals ?? 1;
+    return new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: digits }).format(cleaned);
+  }
   const decimals = format.decimals ?? (Number.isInteger(cleaned) ? 0 : Math.abs(cleaned) >= 10 ? 0 : 1);
   const text = cleaned.toFixed(decimals).replace(/\.0+$/, "");
   if (format.percent) return `${text}%`;
@@ -115,12 +127,22 @@ export function sizeStops(values: number[], format: ScaleFormat): SizeStop[] {
   return picked.map((value) => ({ value, label: formatNumber(value, format) }));
 }
 
+const HEX6 = /^#[0-9a-fA-F]{6}$/;
+
+/** Two or more #rrggbb stops. Anything else leaves the built-in ramp. */
+export function hexRange(value: unknown): readonly string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const stops = value.filter((item): item is string => typeof item === "string" && HEX6.test(item));
+  return stops.length >= 2 ? stops : undefined;
+}
+
 export function paintScale(
   kind: ColorScaleName,
   values: number[],
   thresholds: number[] | undefined,
   format: ScaleFormat = {},
   title = "",
+  sequential?: readonly string[],
 ): PaintScale {
   const finite = values.filter((value) => Number.isFinite(value));
   const dataLo = finite.length ? Math.min(...finite) : 0;
@@ -153,7 +175,8 @@ export function paintScale(
   const nice = niceTicks(dataLo, dataHi, 5);
   const lo = nice.lo;
   const hi = nice.hi;
-  const rampStops = kind === "diverging" ? DIVERGING : SEQUENTIAL;
+  const custom = kind === "sequential" ? hexRange(sequential) : undefined;
+  const rampStops = kind === "diverging" ? DIVERGING : custom ?? SEQUENTIAL;
   const pivot = kind === "diverging" && lo < 0 && hi > 0 ? 0 : (lo + hi) / 2;
   const span = Math.max(hi - lo, 1e-9);
   const fill = (value: number) => {

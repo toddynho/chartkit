@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BrandPalette } from "@/components/BrandPalette";
 import { CodeBlock } from "@/components/CodeBlock";
 import { ThemeShowcase } from "@/components/ThemeShowcase";
@@ -130,6 +131,14 @@ const spec = { version: "1", type: "bar", theme: { tokens: { series } } };`}
         label="ts"
       />
       <BrandPalette />
+      <h2>Dashboards</h2>
+      <p>
+        The <Link href="/dashboards">dashboard pages</Link> put the palette on <code>theme.tokens</code>: series, text,
+        grid, positive, and negative. Stripe-style payments, Plausible-style analytics, the Google Analytics-style
+        traffic report, and Sentry-style issues each ship a light and a dark token object. The page CSS styles the
+        shell. ChartKit is not affiliated with or endorsed by those products. Gaps that still need a spec option are
+        listed in <code>docs/dashboards/GAPS.md</code>.
+      </p>
       <h2>Presets</h2>
       <p>
         Soft, refined, editorial, and midnight are built in. The older names ({THEMES.join(", ")}) register when you

@@ -77,6 +77,7 @@ const CHART_TYPES = [
   "bar-range",
   "errorbar",
   "sunburst",
+  "bar-list",
 ] as const;
 
 /** Types whose field rules live outside this schema. They stay out of the enum and in the CK1005 list. */

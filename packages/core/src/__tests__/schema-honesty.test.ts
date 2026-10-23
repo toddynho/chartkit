@@ -721,7 +721,8 @@ describe("schema honesty", () => {
     expect(fields.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/tooltip/fields")).toBe(false);
     expect(fields.ok).toBe(true);
     const font = validate({ ...line, theme: { tokens: { fontFamily: "Georgia" } } });
-    expect(font.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/theme/tokens/fontFamily")).toBe(true);
+    expect(font.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/theme/tokens/fontFamily")).toBe(false);
+    expect(render({ ...line, theme: { tokens: { fontFamily: "Georgia" } } })).toContain("--ck-font-family:Georgia");
     const labels = validate({ ...line, mark: { labels: true } });
     expect(labels.ok).toBe(true);
     expect(labels.warnings.some((warning) => warning.code === "CK3012" && warning.path === "/mark/labels")).toBe(false);

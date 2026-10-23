@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { line } from "../charts/line";
 import { createRenderer } from "../render";
+import { formatTimeLabel, timeTicks } from "../renderers/cartesian";
+import { zonedTimeTicks } from "../timezone";
 
 const render = createRenderer([line]);
 
@@ -76,5 +78,44 @@ describe("time axis", () => {
 
     const year = labels(chart("en-US", Date.UTC(2018, 0, 1), 40 * 24 * 60 * 60 * 1000, 40));
     expect(year).toContain("2020");
+  });
+
+  it("labels a 30-day UTC span through the last day, and a zoned span reaches the end", () => {
+    const min = Date.parse("2025-09-22T00:00:00Z");
+    const max = Date.parse("2025-10-21T00:00:00Z");
+    const ticks = timeTicks(min, max, 14);
+    expect(ticks.length).toBeGreaterThan(12);
+    expect(ticks[ticks.length - 1]).toBe(max);
+    expect(formatTimeLabel(max, max - min, "en-US", undefined)).toBe("Oct 21");
+    const days = Array.from({ length: 30 }, (_, index) => ({
+      x: new Date(min + index * 86400000).toISOString().slice(0, 10),
+      y: 10 + (index % 4),
+    }));
+    const wide = labels(render({
+      version: "1",
+      type: "line",
+      data: days,
+      encoding: { x: { field: "x", type: "temporal" }, y: "y" },
+      mark: { curve: "linear", points: "none" },
+      size: { width: 1100, height: 280 },
+      a11y: { alt: "Visitors across thirty days." },
+    }));
+    const dates = wide.filter((label) => /^(Sep|Oct) /.test(label));
+    expect(dates.at(-1)).toBe("Oct 21");
+    expect(dates).toContain("Oct 17");
+    const phone = labels(render({
+      version: "1",
+      type: "line",
+      data: days,
+      encoding: { x: { field: "x", type: "temporal" }, y: "y" },
+      mark: { curve: "linear", points: "none" },
+      size: { width: 360, height: 240 },
+      a11y: { alt: "Visitors across thirty days." },
+    }));
+    expect(phone.filter((label) => /^(Sep|Oct) /.test(label)).at(-1)).toBe("Oct 21");
+
+    const zoned = zonedTimeTicks(min, max, 14, "America/New_York");
+    expect(zoned[zoned.length - 1]).toBe(max);
+    expect(max - zoned[0]).toBeGreaterThan(20 * 86400000);
   });
 });

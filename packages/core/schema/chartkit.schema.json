@@ -49,12 +49,13 @@
         "area-range",
         "bar-range",
         "errorbar",
-        "sunburst"
+        "sunburst",
+        "bar-list"
       ],
       "examples": [
         "line"
       ],
-      "description": "Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. Nested children, encoding.path, or encoding.id with encoding.parent draw nested levels; a flat treemap stays one level. 'sunburst': concentric rings for that same hierarchy. Colour follows the top-level branch. mark.innerRadius is the hole (0.28 when omitted) and mark.depth caps the rings. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar. 'area-range': a band between low and high, with an optional centre line from y. Several bands are a y list of {lo, hi}. 'bar-range': a floating bar from low to high per category. 'errorbar': whiskers on a point or a bar, from low and high or from encoding.error as ± around y. A combo y item with mark range and lo/hi draws that band under the other series."
+      "description": "Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. Nested children, encoding.path, or encoding.id with encoding.parent draw nested levels; a flat treemap stays one level. 'sunburst': concentric rings for that same hierarchy. Colour follows the top-level branch. mark.innerRadius is the hole (0.28 when omitted) and mark.depth caps the rings. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar. 'area-range': a band between low and high, with an optional centre line from y. Several bands are a y list of {lo, hi}. 'bar-range': a floating bar from low to high per category. 'errorbar': whiskers on a point or a bar, from low and high or from encoding.error as ± around y. A combo y item with mark range and lo/hi draws that band under the other series. 'bar-list': Ranked rows with no axes. A tinted track runs behind the label and the value sits at the right. Load it from @chartkitdev/core/charts/bar-list. It is not in the line or all bundle."
     },
     "id": {
       "type": "string",
@@ -68,6 +69,33 @@
     "subtitle": {
       "type": "string",
       "description": "Visible secondary line under the title."
+    },
+    "headline": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Small label above the value."
+        },
+        "value": {
+          "type": "string",
+          "description": "Primary figure, drawn in the chart."
+        },
+        "compare": {
+          "type": "string",
+          "description": "Secondary comparison figure, in the muted colour."
+        },
+        "delta": {
+          "type": "string",
+          "description": "Change badge, drawn as a pill."
+        },
+        "tone": {
+          "enum": ["positive", "negative", "neutral"],
+          "description": "Pill colour. positive uses the positive token, negative the negative token."
+        }
+      },
+      "description": "Figure, comparison, and delta pill drawn above the plot."
     },
     "data": {
       "$ref": "#/$defs/data"
@@ -489,6 +517,7 @@
             "currency",
             "bytes",
             "duration-ms",
+            "duration-hm",
             "date",
             "time",
             "datetime",
@@ -496,7 +525,7 @@
             "year",
             "weekday"
           ],
-          "description": "Preset. 'number' 1,234.5 · 'integer' 1,235 · 'compact' 1.2K · 'percent' treats 0.25 as 25% · 'percent-raw' treats 25 as 25% · 'currency' uses USD unless formatObject is used · 'bytes' 1.2 MB · 'duration-ms' 1.2s · 'date' Oct 16, 2026 · 'time' 08:42 · 'datetime' · 'month' Oct · 'year' 2026 · 'weekday' Fri."
+          "description": "Preset. 'number' 1,234.5 · 'integer' 1,235 · 'compact' 1.2K · 'percent' treats 0.25 as 25% · 'percent-raw' treats 25 as 25% · 'currency' uses USD unless formatObject is used · 'bytes' 1.2 MB · 'duration-ms' 1.2s · 'duration-hm' 2m 24s · 'date' Oct 16, 2026 · 'time' 08:42 · 'datetime' · 'month' Oct · 'year' 2026 · 'weekday' Fri."
         },
         {
           "$ref": "#/$defs/formatObject"
@@ -517,11 +546,12 @@
             "currency",
             "bytes",
             "duration-ms",
+            "duration-hm",
             "date",
             "time",
             "datetime"
           ],
-          "description": "Base format style."
+          "description": "Base format style. 'duration-hm' prints minutes and seconds, such as 2m 24s."
         },
         "decimals": {
           "type": "integer",
@@ -773,6 +803,12 @@
             "area": {
               "type": "boolean",
               "description": "Fill under this line (line/combo)."
+            },
+            "fillOpacity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Area or bar fill opacity for this series, 0–1. Overrides mark.fillOpacity."
             },
             "pointShape": {
               "enum": ["circle", "square", "diamond", "triangle", "cross", "none"],
@@ -1119,6 +1155,14 @@
           "default": "hover",
           "description": "Show point markers on lines. Applies to: line, combo."
         },
+        "track": {
+          "enum": [
+            "bar",
+            "row"
+          ],
+          "default": "bar",
+          "description": "Ranked-row track. bar is a short rounded bar. row is a full-height wash behind the label, width proportional to the value, with the count on the right. Applies to: bar-list."
+        },
         "pointSize": {
           "type": "number",
           "minimum": 0,
@@ -1191,6 +1235,26 @@
           "minimum": 0,
           "maximum": 0.95,
           "description": "Spacing between bars/cells as a 0–1 fraction of the band. Applies to: bar, combo, heatmap, candlestick."
+        },
+        "stackGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 24,
+          "description": "Pixel gap between stacked segments. Applies to: bar, stacked-area, combo."
+        },
+        "radiusEnds": {
+          "enum": ["outer", "all"],
+          "description": "Which bar corners round. outer rounds the end away from the baseline. all rounds every corner. Applies to: bar."
+        },
+        "partial": {
+          "enum": ["dashed", "dotted"],
+          "description": "Dash the last segment only. The area still covers the whole series, including that segment. Applies to: line, stacked-area, combo."
+        },
+        "partialOpacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fill opacity of the last area segment. The earlier area keeps mark.fillOpacity. Applies to: line, stacked-area, combo."
         },
         "labels": {
           "type": "boolean",
@@ -1563,6 +1627,10 @@
                       "maximum": 50
                     },
                     {
+                      "const": "ends",
+                      "description": "Label only the first and last tick."
+                    },
+                    {
                       "type": "array",
                       "minItems": 1,
                       "maxItems": 50,
@@ -1571,7 +1639,7 @@
                       }
                     }
                   ],
-                  "description": "Approximate tick count, or the exact tick values."
+                  "description": "Approximate tick count, the exact tick values, or \"ends\" for the first and last label only."
                 },
                 "grid": {
                   "oneOf": [
@@ -1751,6 +1819,10 @@
                       "maximum": 50
                     },
                     {
+                      "const": "ends",
+                      "description": "Label only the first and last tick."
+                    },
+                    {
                       "type": "array",
                       "minItems": 1,
                       "maxItems": 50,
@@ -1759,7 +1831,7 @@
                       }
                     }
                   ],
-                  "description": "Approximate tick count, or the exact tick values."
+                  "description": "Approximate tick count, the exact tick values, or \"ends\" for the first and last label only."
                 },
                 "grid": {
                   "oneOf": [
@@ -1930,6 +2002,10 @@
                       "maximum": 50
                     },
                     {
+                      "const": "ends",
+                      "description": "Label only the first and last tick."
+                    },
+                    {
                       "type": "array",
                       "minItems": 1,
                       "maxItems": 50,
@@ -1938,7 +2014,7 @@
                       }
                     }
                   ],
-                  "description": "Approximate tick count, or the exact tick values."
+                  "description": "Approximate tick count, the exact tick values, or \"ends\" for the first and last label only."
                 },
                 "grid": {
                   "oneOf": [
@@ -2206,6 +2282,24 @@
               ],
               "default": "auto",
               "description": "Where the card sits. auto tries above, then below, then beside the point."
+            },
+            "background": {
+              "type": "string",
+              "description": "Tooltip card fill. A CSS colour. The page reads it from the chart."
+            },
+            "radius": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 24,
+              "description": "Tooltip corner radius in px."
+            },
+            "shadow": {
+              "type": "string",
+              "description": "Tooltip box-shadow. A CSS shadow value."
+            },
+            "crosshairColor": {
+              "type": "string",
+              "description": "Crosshair stroke. A CSS colour."
             },
             "fields": {
               "type": "array",

@@ -7,6 +7,7 @@ import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { tasks } from "../../bench/agent/tasks.mjs";
+import { dashboardMarkdown, dashboards } from "../lib/dashboards.ts";
 import { showcaseBoards } from "../lib/showcase.ts";
 
 const docsRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -174,4 +175,18 @@ const index = {
 };
 publish(join(publicDir, "showcase.json"), `${JSON.stringify(index, null, 2)}\n`);
 for (const board of boards) publish(join(publicDir, "showcase", `${board.slug}.md`), markdown(board));
+const dashboardDir = join(publicDir, "dashboards");
+function assertDrew(slug, id, svg) {
+  if (!svg || !/<svg[\s>]/.test(svg)) throw new Error(`${slug} ${id} did not draw`);
+  if (!/<(?:path|rect|circle|polygon|polyline|line)\b/.test(svg)) throw new Error(`${slug} ${id} drew no mark`);
+}
+for (const board of dashboards()) {
+  for (const chart of board.charts) {
+    if (chart.spec.type === "choropleth" || chart.spec.type === "map-points") continue;
+    assertDrew(board.slug, chart.id, chart.svg);
+    for (const variant of chart.variants ?? []) assertDrew(board.slug, `${chart.id}:${variant.id}`, variant.svg);
+  }
+  for (const spark of board.sparks) assertDrew(board.slug, spark.id, spark.svg);
+  publish(join(dashboardDir, `${board.slug}.md`), dashboardMarkdown(board));
+}
 console.log(`showcase ok: ${boards.length} boards, ${boards.reduce((sum, board) => sum + board.charts.length + (board.mermaid?.length ?? 0) + (board.repairs?.length ?? 0), 0)} charts`);

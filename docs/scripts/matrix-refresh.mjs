@@ -752,6 +752,7 @@ function main() {
     notScored: matrix.notScored,
     taxonomy: matrix.taxonomy,
     features,
+    dashboards: JSON.parse(readFileSync(join(docsRoot, "data/dashboards.json"), "utf8")),
     synonyms: synonymObject,
     coverage: matrix.coverage,
   };
