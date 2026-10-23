@@ -1,39 +1,41 @@
 import Link from "next/link";
-import { SITE } from "@/lib/site";
+import { FOOTER, type FooterLink } from "@/lib/footer";
 
 export function Footer() {
   return (
     <footer className="site-footer">
-      <div>
+      <div className="footer-brand">
         <strong>ChartKit</strong>
         <p>One JSON spec. SVG out. Any framework.</p>
       </div>
-      <nav aria-label="Footer">
-        <Link href="/docs">Docs</Link>
-        <Link href="/examples">Examples</Link>
-        <Link href="/showcase">Showcase</Link>
-        <Link href="/playground">Playground</Link>
-        <Link href="/benchmarks">Benchmarks</Link>
-        <Link href="/agents">Agents</Link>
-        <Link href="/cloud">Cloud</Link>
-        <Link href="/features">Features</Link>
-        <Link href="/compare">Compare</Link>
-        <a href={`${SITE.github}/blob/main/ROADMAP.md`}>Roadmap</a>
-        <Link href="/when-to-use">When to use</Link>
-        <Link href="/demo">Demo</Link>
-        <Link href="/large">Large data</Link>
-        <Link href="/interaction">Interaction</Link>
-        <Link href="/layouts">Layout</Link>
-        <Link href="/maps">Maps</Link>
-        <a href="/llms.txt">llms.txt</a>
-        <a href="/features.json">features.json</a>
-        <a href="/showcase.json">showcase.json</a>
-        <a href="/benchmarks.json">benchmarks.json</a>
-        <a href="/benchmarks.md">benchmarks.md</a>
-        <a href="/llms-full.txt">llms-full.txt</a>
-        <a href="/schema/v1.json">Schema</a>
-      </nav>
+      <div className="footer-columns">
+        {FOOTER.map((column) => (
+          <nav key={column.title} aria-label={column.title} className={column.title === "For agents" ? "footer-col footer-agents" : "footer-col"}>
+            <details open>
+              <summary>
+                <h2>{column.title}</h2>
+              </summary>
+              {column.note ? <p className="footer-note">{column.note}</p> : null}
+              <ul>
+                {column.links.map((link) => (
+                  <li key={link.href}>
+                    <FooterAnchor link={link} />
+                    <span className="footer-hint">{link.hint}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </nav>
+        ))}
+      </div>
       <p className="legal">© 2026 ChartKit. MIT license.</p>
     </footer>
   );
+}
+
+function FooterAnchor({ link }: { link: FooterLink }) {
+  if (link.external || /\.(txt|json|md)$/.test(link.href)) {
+    return <a href={link.href}>{link.label}</a>;
+  }
+  return <Link href={link.href}>{link.label}</Link>;
 }
