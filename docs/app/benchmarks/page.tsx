@@ -250,7 +250,8 @@ export default function BenchmarksPage() {
 
       <h2 id="agents">Agent eval</h2>
       <p>
-        Not re-run for round {ROUND}. One model, claude-sonnet-4-5, temperature 0, one run on {AGENT_MEASURED}, 42 tasks. “Official” means
+        Round 6 is the scoreboard for this table, recorded in BENCHMARKS.md. It was not re-run for round {ROUND}. One
+        model, {published.model}, temperature {published.temperature}, one run on {AGENT_MEASURED}, 42 tasks. “Official” means
         the library’s docs were in the prompt. ChartKit’s docs are <Link href="/llms.txt">llms.txt</Link>, taken from
         the Phase 1 branch and not edited on this site. The previous llms.txt, the React-only v0 file, scored 18/42 in
         an earlier run.

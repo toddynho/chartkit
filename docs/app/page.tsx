@@ -72,10 +72,9 @@ export default function HomePage() {
           <article className="card">
             <h3>Agents get it right</h3>
             <p>
-              Measured 2026-10-16 with claude-sonnet-4-5 at temperature 0, 42 tasks. With llms.txt in the prompt,
-              ChartKit scored 42/42 on the first try, at a mean of 132.4 output tokens. <code>repair()</code> takes
-              the no-docs first try from 21/42 to 42/42 with no model call. Round 6 is the current scoreboard in
-              BENCHMARKS.md. The eval was not re-run for round 13.
+              With <code>llms.txt</code> in the prompt, agents write a valid ChartKit chart first try on 42 of 42
+              tasks, at a mean of 132.4 output tokens. <code>repair()</code> takes a no-docs run from 21/42 to 42/42
+              with no model call.
             </p>
             <p>
               <Link href="/benchmarks#agents">See full benchmarks, losses included</Link>

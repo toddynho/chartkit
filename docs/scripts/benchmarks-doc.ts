@@ -35,7 +35,7 @@ export function benchmarksPayload() {
         "mark.sampling defaults to auto and minmax-downsamples a line longer than twice the plot width. 1,000 points stay complete. The samplingNone rows draw every point and use the same aligned update timer.",
       bundle: "gzip -9. ChartKit’s headline line is scripts/size.mjs. Competitor rows and the harness chartkit-minimal line are the bench harness. uPlot’s JS and stylesheet are gzipped separately and the uPlot row sums those two responses. The JS figure is the loss named in the headline.",
       ssr: "Mean and median of 8 calls after 2 warmups, a 1,000 point line. supported false means no chart without a DOM. Recharts returned an empty wrapper.",
-      agents: `${published.model}, temperature ${published.temperature}, ${published.tasks} tasks, one run on ${AGENT_MEASURED}. Not re-run for round 13. Official means the library docs were in the prompt. ChartKit docs are llms.txt. repair() is a no-model step on ChartKit's no-docs first try and is not a second model call. Nivo and uPlot were not in the agent eval.`,
+      agents: `Round 6 is the scoreboard. ${published.model}, temperature ${published.temperature}, ${published.tasks} tasks, one run on ${AGENT_MEASURED}. Not re-run for round ${ROUND}. Official means the library docs were in the prompt. ChartKit docs are llms.txt. repair() is a no-model step on ChartKit's no-docs first try and is not a second model call. Nivo and uPlot were not in the agent eval.`,
     },
     headline: {
       lineGzipBytes: published.bundleGzip.find((row) => row.id === "chartkit-line")?.bytes,
