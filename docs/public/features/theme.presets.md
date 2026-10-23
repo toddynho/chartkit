@@ -70,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | ~theme | dts-grep (weak) | mermaid/dist/utils.d.ts:11 default, neutral, dark, forest, base |
 | AntV G2 | native | ~theme | dts-grep (weak) | @antv/g2/lib/index.d.ts:105 light, dark, classic, academy |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against e79729672133.
 
 https://chartkit.dev/features.json

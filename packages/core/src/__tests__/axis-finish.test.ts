@@ -34,6 +34,77 @@ function attr(svg: string, title: string, name: "x" | "y"): string {
 describe("axis finishing", () => {
   const draw = createRenderer([line]);
 
+  it("keeps a time axis on a line-and-area combo and can label only the ends", () => {
+    const days = ["2025-10-01", "2025-10-02", "2025-10-03", "2025-10-04"];
+    const ticks = [Date.parse("2025-10-01T00:00:00Z"), Date.parse("2025-10-04T00:00:00Z")];
+    const svg = render({
+      version: "1",
+      type: "combo",
+      data: days.map((date, index) => ({ date, gross: 10 + index, prior: 8 + index })),
+      encoding: {
+        x: { field: "date", type: "temporal" },
+        y: [
+          { field: "gross", mark: "area" },
+          { field: "prior", mark: "line", dash: "dashed" },
+        ],
+      },
+      axes: { x: { ticks }, y: { title: "", labels: false, grid: false } },
+      legend: { show: false },
+      a11y: { alt },
+      size: { width: 420, height: 220 },
+    });
+    expect(svg).toContain("Oct");
+    expect(svg).not.toContain(">This period<");
+    const labels = [...svg.matchAll(/<text[^>]*>([^<]+)<\/text>/g)].map((match) => match[1]);
+    expect(labels.filter((label) => label.includes("Oct"))).toHaveLength(2);
+  });
+
+  it("paints one area at the mark opacity and a dotted tail at its own fillOpacity", () => {
+    const spec = {
+      version: "1",
+      type: "combo",
+      data: [
+        { date: "2025-10-19", solid: 3, tail: null },
+        { date: "2025-10-20", solid: 4, tail: 4 },
+        { date: "2025-10-21", solid: null, tail: 5 },
+      ],
+      encoding: {
+        x: { field: "date", type: "temporal" },
+        y: [
+          { field: "solid", mark: "area" },
+          { field: "tail", mark: "area", dash: "dotted", fillOpacity: 0.06 },
+        ],
+      },
+      mark: { fillOpacity: 0.16, curve: "linear", points: "none", gradient: false },
+      legend: { show: false },
+      a11y: { alt },
+      size: { width: 420, height: 220 },
+    };
+    expect(validate(spec).ok).toBe(true);
+    const svg = render(spec);
+    expect(svg).toContain('fill-opacity="0.16"');
+    expect(svg).toContain('fill-opacity="0.06"');
+    expect(svg).toContain('stroke-dasharray="1.5 3"');
+    const fills = [...svg.matchAll(/<path d="([^"]+)" fill="[^"]+" fill-opacity="([^"]+)"/g)];
+    const light = fills.find((match) => match[2] === "0.06");
+    const solid = fills.find((match) => match[2] === "0.16");
+    const xs = (d: string) => [...d.matchAll(/[\d.]+/g)].map(Number).filter((_, index) => index % 2 === 0);
+    expect(Math.max(...xs(light?.[1] ?? ""))).toBeGreaterThan(Math.max(...xs(solid?.[1] ?? "0")));
+  });
+
+  it("treats an empty axis title as hidden and still copies a missing title from the series", () => {
+    const hidden = draw({
+      ...spec({ legend: { show: false }, axes: { y: { title: "" }, y2: false } }),
+      encoding: { x: "month", y: { field: "revenue", title: "This period" } },
+    });
+    expect(hidden).not.toContain(">This period<");
+    const copied = draw({
+      ...spec({ legend: { show: false }, axes: { y2: false } }),
+      encoding: { x: "month", y: { field: "revenue", title: "This period" } },
+    });
+    expect(copied).toContain(">This period<");
+  });
+
   it("places titles, rotates y, wraps ticks, draws the baseline, and marks ticks on x, y, and y2", () => {
     const shared = {
       titlePosition: "start" as const,

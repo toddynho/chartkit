@@ -183,7 +183,7 @@ describe("layout", () => {
               type: "bar",
               title: "Orders",
               data: months.map((month, index) => ({ month, value: 80 + index * 6 })),
-              encoding: { x: "month", y: { field: "value", title: "Orders", format: { style: "integer" }, color: "series-3" } },
+              encoding: { x: "month", y: { field: "value", title: "Orders", format: "integer", color: "series-3" } },
               a11y: { alt: "Orders rise." },
             },
             {
@@ -370,6 +370,63 @@ describe("layout", () => {
     expect(svg).toContain("Cargo");
     expect(svg).toContain(">tons<");
     expect(svg).toContain('aria-label="Total 65 tons"');
+  });
+
+  it("draws concat views when the outer spec has no type", () => {
+    const svg = render({
+      version: "1",
+      a11y: { alt: "Orders and cargo." },
+      layout: {
+        concat: {
+          direction: "vertical",
+          views: [
+            {
+              version: "1",
+              type: "bar",
+              data: [
+                { dock: "A", ships: 12 },
+                { dock: "B", ships: 9 },
+              ],
+              encoding: { x: "dock", y: "ships" },
+              a11y: { alt: "Dock A is busier." },
+            },
+            {
+              version: "1",
+              type: "donut",
+              data: [
+                { kind: "Grain", tons: 40 },
+                { kind: "Oil", tons: 25 },
+              ],
+              encoding: { x: "kind", y: "tons" },
+              a11y: { alt: "Grain is the largest share." },
+            },
+          ],
+        },
+      },
+    });
+    expect(svg).toContain('data-ck-type="concat"');
+    expect(svg).toContain('data-ck-views="2"');
+    expect(svg).toContain("<rect");
+    expect(svg).toContain('aria-label="Total 65 tons"');
+    expect(validate({
+      version: "1",
+      a11y: { alt: "Orders and cargo." },
+      layout: {
+        concat: {
+          views: [
+            {
+              type: "donut",
+              data: [
+                { kind: "Grain", tons: 40 },
+                { kind: "Oil", tons: 25 },
+              ],
+              encoding: { label: "kind", value: "tons" },
+              a11y: { alt: "Grain is the largest share." },
+            },
+          ],
+        },
+      },
+    }).ok).toBe(false);
   });
 
   it("warns CK3040 through CK3048 and patches the spec", () => {

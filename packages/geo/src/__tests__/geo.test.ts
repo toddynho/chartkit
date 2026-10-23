@@ -187,6 +187,27 @@ describe("validate", () => {
     const typo = validate({ type: "choropleth", atlas: "usa", encoding: { region: "id", color: "n" }, data: [] });
     expect(typo.warnings.find((item) => item.code === "CK3050")?.message).toContain("usa");
 
+    const cities = validate({
+      type: "map-points",
+      encoding: { latitude: "lat", longitude: "lon" },
+      data: [
+        { city: "Chicago", lat: 41.88, lon: -87.63 },
+        { city: "Houston", lat: 29.76, lon: -95.37 },
+      ],
+    });
+    expect(cities.warnings.find((item) => item.code === "CK3050")?.fix?.[0]?.value).toEqual({ atlas: "us" });
+
+    const states = validate({
+      type: "choropleth",
+      encoding: { region: "state", color: "n" },
+      data: [
+        { state: "California", n: 1 },
+        { state: "Texas", n: 2 },
+      ],
+    });
+    const stateFix = states.warnings.find((item) => item.code === "CK3050")?.fix?.[0]?.value;
+    expect(stateFix === "us" || (stateFix && typeof stateFix === "object" && stateFix.atlas === "us")).toBe(true);
+
     const points = validate({
       type: "map-points",
       atlas: "world",
@@ -206,6 +227,12 @@ describe("validate", () => {
 });
 
 describe("render", () => {
+  it("draws a horizontal legend when legend.position is bottom", async () => {
+    const svg = await render({ ...world, legend: { position: "bottom" } });
+    expect(svg).toContain('x2="1" y2="0"');
+    expect(svg).not.toContain('x2="0" y2="0"');
+  });
+
   it("draws a world choropleth with a legend, alias hits, and a no-data country", async () => {
     const svg = await render(world);
     expect(svg).toContain('data-ck-type="choropleth"');
@@ -306,6 +333,15 @@ describe("render", () => {
     expect(cities).toContain("<circle");
     expect(cities).toContain(">Paris<");
     expect(cities).not.toContain("Unknown atlas");
+
+    const tipped = await render({
+      type: "map-points",
+      atlas: "us",
+      data: [{ name: "Chicago", lat: 41.88, lon: -87.63, pop: 2700000 }],
+      encoding: { latitude: "lat", longitude: "lon", label: "name", tooltip: "pop" },
+      a11y: { alt: "Chicago is marked." },
+    });
+    expect(tipped).toContain("<title>Chicago, pop 2700000</title>");
   });
 
   it("draws bubbles, labels the largest, and accepts Canada and the EU", async () => {
@@ -420,6 +456,7 @@ describe("render", () => {
     const midnightLand = chromeFor("midnight").land;
     expect(softLand).toBe("light-dark(#efe6d6, #2a3338)");
     expect(midnightLand).toBe("#3e5264");
+    expect(chromeFor("midnight").water).toBe("#0c0c0c");
 
     const countries = ["NOR", "FRA", "USA", "GBR", "DEU", "BRA", "IND", "CHN", "EGY", "AUS", "ZAF", "JPN"];
     const worldSvg = await render({
@@ -479,5 +516,79 @@ describe("render", () => {
     expect(layered).toContain('class="ck-geo-point"');
     expect(layered).toContain(">Paris<");
     expect(layered).toContain("ck-geo-nodata");
+  });
+
+  it("fills named countries, formats a compact legend, and skips islands without data", async () => {
+    const svg = await render({
+      type: "choropleth",
+      theme: "soft",
+      data: [
+        { country: "JPN", sessions: 6200 },
+        { country: "PRT", sessions: 4100 },
+        { country: "CHL", sessions: 2800 },
+        { country: "KEN", sessions: 1900 },
+        { country: "CAN", sessions: 1600 },
+      ],
+      encoding: { region: "country", color: { field: "sessions", title: "Sessions", format: "compact" } },
+      mark: { atlas: "world", projection: "equalEarth", scale: "sequential" },
+      a11y: { alt: "Japan, Portugal, Chile, Kenya, and Canada are filled." },
+    });
+    expect(svg).not.toContain("compact");
+    expect(svg).toContain("6.2K");
+    expect(svg).toContain("1.6K");
+    expect(styleRule(svg, ".ck-geo-region")).not.toMatch(/(?:^|;)fill:/);
+    for (const name of ["Japan", "Portugal", "Chile", "Kenya", "Canada"]) {
+      const tag = new RegExp(`<(?:path|circle)\\b[^>]*data-ck-name="${name}"[^>]*>`).exec(svg)?.[0] ?? "";
+      expect(tag).toMatch(/fill="#[0-9a-fA-F]{6}"/);
+      expect(tag).not.toContain("ck-geo-nodata");
+    }
+    expect(svg).not.toMatch(/<circle\b[^>]*ck-geo-nodata|ck-geo-nodata[^>]*<circle/);
+    expect(svg).not.toMatch(/<circle\b[^>]*class="ck-geo-region ck-geo-nodata"/);
+    expect(svg).toContain("#006d2c");
+  });
+
+  it("paints a sequential ramp from encoding.color.range and keeps the green default otherwise", async () => {
+    const blue = await render({
+      type: "choropleth",
+      theme: "soft",
+      data: [
+        { country: "JPN", sessions: 6200 },
+        { country: "CAN", sessions: 1600 },
+      ],
+      encoding: { region: "country", color: { field: "sessions", title: "Sessions", format: "compact", range: ["#e8f0fe", "#1a73e8"] } },
+      mark: { atlas: "world", projection: "equalEarth", scale: "sequential" },
+      a11y: { alt: "Japan is the darker blue." },
+    });
+    expect(blue).toContain("#1a73e8");
+    expect(blue).not.toContain("#006d2c");
+    expect(blue).not.toContain("#edf8e9");
+    const ignored = await render({
+      type: "choropleth",
+      data: [{ country: "JPN", sessions: 6200 }, { country: "CAN", sessions: 1600 }],
+      encoding: { region: "country", color: { field: "sessions", range: ["navy"] } },
+      mark: { atlas: "world", scale: "sequential" },
+      a11y: { alt: "A one-stop range stays on the green ramp." },
+    });
+    expect(ignored).toContain("#006d2c");
+  });
+
+  it("fills missing countries with mark.land when nodata is fill", async () => {
+    const svg = await render({
+      type: "choropleth",
+      theme: "soft",
+      data: [
+        { country: "JPN", sessions: 6200 },
+        { country: "USA", sessions: 4100 },
+      ],
+      encoding: { region: "country", color: { field: "sessions", range: ["#aecbfa", "#1a73e8"] } },
+      mark: { atlas: "world", projection: "equalEarth", scale: "sequential", nodata: "fill", land: "#e8eaed", water: "#ffffff" },
+      a11y: { alt: "Japan and the United States are filled. Other countries are plain grey." },
+    });
+    expect(svg).toContain(".ck-geo-nodata{fill:#e8eaed}");
+    expect(svg).toContain(".ck-geo-water{fill:#ffffff}");
+    expect(svg).not.toContain("pattern");
+    expect(svg).not.toContain("#006d2c");
+    expect(styleRule(svg, ".ck-geo-region")).not.toMatch(/(?:^|;)fill:/);
+    expect(svg).toContain("#1a73e8");
   });
 });

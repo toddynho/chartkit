@@ -19,7 +19,7 @@ export type ChartKitChartSpecV1 = {
    */
   version: "1";
   /**
-   * Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. Nested children, encoding.path, or encoding.id with encoding.parent draw nested levels; a flat treemap stays one level. 'sunburst': concentric rings for that same hierarchy. Colour follows the top-level branch. mark.innerRadius is the hole (0.28 when omitted) and mark.depth caps the rings. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar. 'area-range': a band between low and high, with an optional centre line from y. Several bands are a y list of {lo, hi}. 'bar-range': a floating bar from low to high per category. 'errorbar': whiskers on a point or a bar, from low and high or from encoding.error as ± around y. A combo y item with mark range and lo/hi draws that band under the other series.
+   * Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. Nested children, encoding.path, or encoding.id with encoding.parent draw nested levels; a flat treemap stays one level. 'sunburst': concentric rings for that same hierarchy. Colour follows the top-level branch. mark.innerRadius is the hole (0.28 when omitted) and mark.depth caps the rings. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar. 'area-range': a band between low and high, with an optional centre line from y. Several bands are a y list of {lo, hi}. 'bar-range': a floating bar from low to high per category. 'errorbar': whiskers on a point or a bar, from low and high or from encoding.error as ± around y. A combo y item with mark range and lo/hi draws that band under the other series. 'bar-list': Ranked rows with no axes. A tinted track runs behind the label and the value sits at the right. Load it from @chartkitdev/core/charts/bar-list. It is not in the line or all bundle.
    */
   type:
     | "line"
@@ -48,7 +48,8 @@ export type ChartKitChartSpecV1 = {
     | "area-range"
     | "bar-range"
     | "errorbar"
-    | "sunburst";
+    | "sunburst"
+    | "bar-list";
   /**
    * Optional stable id (used for keys, events, test hooks).
    */
@@ -61,6 +62,31 @@ export type ChartKitChartSpecV1 = {
    * Visible secondary line under the title.
    */
   subtitle?: string;
+  /**
+   * Figure, comparison, and delta pill drawn above the plot.
+   */
+  headline?: {
+    /**
+     * Small label above the value.
+     */
+    label?: string;
+    /**
+     * Primary figure, drawn in the chart.
+     */
+    value?: string;
+    /**
+     * Secondary comparison figure, in the muted colour.
+     */
+    compare?: string;
+    /**
+     * Change badge, drawn as a pill.
+     */
+    delta?: string;
+    /**
+     * Pill colour. positive uses the positive token, negative the negative token.
+     */
+    tone?: "positive" | "negative" | "neutral";
+  };
   data?: Data;
   encoding?: Encoding;
   metric?: Metric;
@@ -194,6 +220,7 @@ export type Format =
       | "currency"
       | "bytes"
       | "duration-ms"
+      | "duration-hm"
       | "date"
       | "time"
       | "datetime"
@@ -249,6 +276,10 @@ export type YChannel =
        */
       area?: boolean;
       /**
+       * Area or bar fill opacity for this series, 0–1. Overrides mark.fillOpacity.
+       */
+      fillOpacity?: number;
+      /**
        * Marker for this series. Overrides mark.pointShape. Applies to: line, stacked-area, scatter, combo.
        */
       pointShape?: "circle" | "square" | "diamond" | "triangle" | "cross" | "none";
@@ -260,6 +291,10 @@ export type YChannel =
        * Filled or hollow marker for this series. Overrides mark.pointFill.
        */
       pointFill?: "filled" | "hollow";
+      /**
+       * Draw order. Higher paints later. Stacked series keep data order.
+       */
+      z?: number;
     };
 /**
  * A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.
@@ -357,6 +392,22 @@ export type Tooltip =
        */
       position?: "auto" | "top" | "bottom" | "left" | "right";
       /**
+       * Tooltip card fill. A CSS colour. The page reads it from the chart.
+       */
+      background?: string;
+      /**
+       * Tooltip corner radius in px.
+       */
+      radius?: number;
+      /**
+       * Tooltip box-shadow. A CSS shadow value.
+       */
+      shadow?: string;
+      /**
+       * Crosshair stroke. A CSS colour.
+       */
+      crosshairColor?: string;
+      /**
        * Fields to show, in this order. Omit to keep the encoded series. Strings are field names.
        */
       fields?: (
@@ -368,8 +419,24 @@ export type Tooltip =
              */
             title?: string;
             format?: Format;
+            /**
+             * Unit printed after the value, such as cm or kWh.
+             */
+            unit?: string;
           }
       )[];
+      /**
+       * Row template. Tokens: {x}, {name}, {value}, {unit}, and data field names. One row per series.
+       */
+      template?: string;
+      /**
+       * Tap to pin the tooltip. A second tap or Escape clears it. Pointer leave does not.
+       */
+      pin?: boolean;
+      /**
+       * Hit radius in pixels. Larger targets help a finger. Pinning uses 18 when hit is omitted.
+       */
+      hit?: number;
     };
 /**
  * A reference mark drawn on the chart.
@@ -397,6 +464,10 @@ export type Annotation =
        * Text shown with the annotation.
        */
       label?: string;
+      /**
+       * Draw order. Higher paints later. Negative paints under the marks.
+       */
+      z?: number;
       color?: Color;
     }
   | {
@@ -421,6 +492,10 @@ export type Annotation =
        * Text shown with the annotation.
        */
       label?: string;
+      /**
+       * Draw order. Higher paints later. Negative paints under the marks.
+       */
+      z?: number;
       color?: Color;
     }
   | {
@@ -437,6 +512,10 @@ export type Annotation =
        * Text shown with the annotation.
        */
       label: string;
+      /**
+       * Draw order. Higher paints later. Negative paints under the marks.
+       */
+      z?: number;
       color?: Color;
     }
   | {
@@ -461,6 +540,10 @@ export type Annotation =
        * Text at the end of the line. Defaults to Mean, Median, or Linear.
        */
       label?: string;
+      /**
+       * Draw order. Higher paints later. Negative paints under the marks.
+       */
+      z?: number;
       color?: Color;
     }
   | {
@@ -489,6 +572,10 @@ export type Annotation =
        * Text at the end of the fit. Defaults to Linear fit or Loess.
        */
       label?: string;
+      /**
+       * Draw order. Higher paints later. Negative paints under the marks.
+       */
+      z?: number;
       color?: Color;
     }
   | {
@@ -513,6 +600,10 @@ export type Annotation =
        * Vertical offset of the text box, in pixels. Negative is up.
        */
       dy?: number;
+      /**
+       * Draw order. Higher paints later. Negative paints under the marks.
+       */
+      z?: number;
       color?: Color;
     };
 /**
@@ -920,9 +1011,9 @@ export interface Encoding {
  */
 export interface FormatObject {
   /**
-   * Base format style.
+   * Base format style. 'duration-hm' prints minutes and seconds, such as 2m 24s.
    */
-  style:
+  style?:
     | "number"
     | "compact"
     | "percent"
@@ -930,6 +1021,7 @@ export interface FormatObject {
     | "currency"
     | "bytes"
     | "duration-ms"
+    | "duration-hm"
     | "date"
     | "time"
     | "datetime";
@@ -953,15 +1045,19 @@ export interface FormatObject {
    * Always show + for positive numbers (useful for deltas).
    */
   signed?: boolean;
+  /**
+   * d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as ".2f" is repaired to this.
+   */
+  specifier?: string;
 }
 /**
  * How data values map to positions or sizes. Usually inferred; set only to override.
  */
 export interface Scale {
   /**
-   * Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band.
+   * Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.
    */
-  type?: "linear" | "log" | "sqrt" | "time" | "band" | "point";
+  type?: "linear" | "log" | "sqrt" | "time" | "band" | "point" | "symlog";
   /**
    * Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.
    *
@@ -999,6 +1095,10 @@ export interface Scale {
    * Draw values outside an explicit scale.domain at the domain edge.
    */
   clamp?: boolean;
+  /**
+   * Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.
+   */
+  constant?: number;
 }
 /**
  * Colour scale. Sequential and diverging are continuous; quantize and threshold are binned.
@@ -1084,6 +1184,7 @@ export interface Metric {
         | "currency"
         | "bytes"
         | "duration-ms"
+        | "duration-hm"
         | "date"
         | "time"
         | "datetime"
@@ -1109,6 +1210,7 @@ export interface Metric {
         | "currency"
         | "bytes"
         | "duration-ms"
+        | "duration-hm"
         | "date"
         | "time"
         | "datetime"
@@ -1152,6 +1254,10 @@ export interface Mark {
    * Show point markers on lines. Applies to: line, combo.
    */
   points?: "none" | "hover" | "always";
+  /**
+   * Ranked-row track. bar is a short rounded bar. row is a full-height wash behind the label, width proportional to the value, with the count on the right. Applies to: bar-list.
+   */
+  track?: "bar" | "row";
   /**
    * Point radius in px. Applies to: line, stacked-area, combo, scatter, errorbar.
    */
@@ -1205,6 +1311,22 @@ export interface Mark {
    */
   gap?: number;
   /**
+   * Pixel gap between stacked segments. Applies to: bar, stacked-area, combo.
+   */
+  stackGap?: number;
+  /**
+   * Which bar corners round. outer rounds the end away from the baseline. all rounds every corner. Applies to: bar.
+   */
+  radiusEnds?: "outer" | "all";
+  /**
+   * Dash the last segment only. The area still covers the whole series, including that segment. Applies to: line, stacked-area, combo.
+   */
+  partial?: "dashed" | "dotted";
+  /**
+   * Fill opacity of the last area segment. The earlier area keeps mark.fillOpacity. Applies to: line, stacked-area, combo.
+   */
+  partialOpacity?: number;
+  /**
    * Draw value labels on the marks. Applies to: bar, donut, pie, line, stacked-area, scatter. Outside pie and donut labels use leader lines. Overlapping labels are skipped.
    */
   labels?: boolean;
@@ -1225,6 +1347,7 @@ export interface Mark {
         | "currency"
         | "bytes"
         | "duration-ms"
+        | "duration-hm"
         | "date"
         | "time"
         | "datetime"
@@ -2646,6 +2769,7 @@ export interface Axes {
               | "currency"
               | "bytes"
               | "duration-ms"
+              | "duration-hm"
               | "date"
               | "time"
               | "datetime"
@@ -2655,9 +2779,9 @@ export interface Axes {
             )
           | FormatObject;
         /**
-         * Approximate tick count, or the exact tick values.
+         * Approximate tick count, the exact tick values, or "ends" for the first and last label only.
          */
-        ticks?: number | [number, ...number[]];
+        ticks?: number | "ends" | [number, ...number[]];
         /**
          * Grid lines from this axis.
          */
@@ -2725,6 +2849,115 @@ export interface Axes {
          * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true.
          */
         rotate?: number;
+        /**
+         * Shift the baseline outward in pixels. Positive moves it away from the plot.
+         */
+        offset?: number;
+        /**
+         * Data value where this axis crosses the other. 0 draws the axis through zero.
+         */
+        crosses?: number;
+        /**
+         * Minor tick marks between major ticks. 0 hides them.
+         */
+        minorTicks?: number;
+        /**
+         * Ranges collapsed to a short gap. The break mark is drawn on the axis. When the segment below crosses zero, share is the fraction of the axis from zero to the break (default 0.4); otherwise share is the fraction for that whole segment. Ticks inside a break are omitted. The axis line stops at the top tick.
+         *
+         * @maxItems 3
+         */
+        breaks?:
+          | []
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ]
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ]
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ];
         /**
          * Shaded x ranges, or "weekends" to shade Saturday and Sunday when x is dates.
          */
@@ -2753,6 +2986,7 @@ export interface Axes {
               | "currency"
               | "bytes"
               | "duration-ms"
+              | "duration-hm"
               | "date"
               | "time"
               | "datetime"
@@ -2762,9 +2996,9 @@ export interface Axes {
             )
           | FormatObject;
         /**
-         * Approximate tick count, or the exact tick values.
+         * Approximate tick count, the exact tick values, or "ends" for the first and last label only.
          */
-        ticks?: number | [number, ...number[]];
+        ticks?: number | "ends" | [number, ...number[]];
         /**
          * Grid lines from this axis.
          */
@@ -2832,6 +3066,115 @@ export interface Axes {
          * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true.
          */
         rotate?: number;
+        /**
+         * Shift the baseline outward in pixels. Positive moves it away from the plot.
+         */
+        offset?: number;
+        /**
+         * Data value where this axis crosses the other. 0 draws the axis through zero.
+         */
+        crosses?: number;
+        /**
+         * Minor tick marks between major ticks. 0 hides them.
+         */
+        minorTicks?: number;
+        /**
+         * Ranges collapsed to a short gap. The break mark is drawn on the axis. When the segment below crosses zero, share is the fraction of the axis from zero to the break (default 0.4); otherwise share is the fraction for that whole segment. Ticks inside a break are omitted. The axis line stops at the top tick.
+         *
+         * @maxItems 3
+         */
+        breaks?:
+          | []
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ]
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ]
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ];
         /**
          * Shaded y ranges, such as a target zone.
          */
@@ -2860,6 +3203,7 @@ export interface Axes {
               | "currency"
               | "bytes"
               | "duration-ms"
+              | "duration-hm"
               | "date"
               | "time"
               | "datetime"
@@ -2869,9 +3213,9 @@ export interface Axes {
             )
           | FormatObject;
         /**
-         * Approximate tick count, or the exact tick values.
+         * Approximate tick count, the exact tick values, or "ends" for the first and last label only.
          */
-        ticks?: number | [number, ...number[]];
+        ticks?: number | "ends" | [number, ...number[]];
         /**
          * Grid lines from this axis.
          */
@@ -2939,6 +3283,115 @@ export interface Axes {
          * Tick label rotation in degrees. When omitted, crowded category labels rotate about -40 degrees unless autoSkip is true.
          */
         rotate?: number;
+        /**
+         * Shift the baseline outward in pixels. Positive moves it away from the plot.
+         */
+        offset?: number;
+        /**
+         * Data value where this axis crosses the other. 0 draws the axis through zero.
+         */
+        crosses?: number;
+        /**
+         * Minor tick marks between major ticks. 0 hides them.
+         */
+        minorTicks?: number;
+        /**
+         * Ranges collapsed to a short gap. The break mark is drawn on the axis. When the segment below crosses zero, share is the fraction of the axis from zero to the break (default 0.4); otherwise share is the fraction for that whole segment. Ticks inside a break are omitted. The axis line stops at the top tick.
+         *
+         * @maxItems 3
+         */
+        breaks?:
+          | []
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ]
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ]
+          | [
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              },
+              {
+                /**
+                 * Start of the collapsed range, in data units.
+                 */
+                from: number;
+                /**
+                 * End of the collapsed range, in data units.
+                 */
+                to: number;
+                /**
+                 * Fraction of the axis from zero to this break when the segment below crosses zero; otherwise the fraction for that whole segment. Default 0.4.
+                 */
+                share?: number;
+              }
+            ];
         /**
          * Shaded ranges on the second y axis.
          */
@@ -3049,7 +3502,7 @@ export interface Layout {
     legend?: "shared" | "each";
   };
   /**
-   * Several charts in one spec. views are chart specs. direction is vertical (default) or horizontal. columns wraps them into a grid; a view may set span to cover more than one column. When views has a chart, the outer spec may omit data, encoding, and metric. Setting this beside facet warns CK3048.
+   * Several charts in one spec. views are chart specs. direction is vertical (default) or horizontal. columns wraps them into a grid; a view may set span to cover more than one column. When views has a chart, the outer spec may omit type, data, encoding, and metric. Setting this beside facet warns CK3048.
    */
   concat?: {
     /**

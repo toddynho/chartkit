@@ -49,6 +49,7 @@ const charts = [
   "bar-range",
   "errorbar",
   "sunburst",
+  "bar-list",
 ];
 
 const themes = [

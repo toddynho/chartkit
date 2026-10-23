@@ -16,6 +16,10 @@ const schema = schemaJson as unknown as Parameters<typeof walkSchema>[1];
  * A string is parsed as JSON first (CK1001 on failure). All diagnostics are returned in one pass.
  */
 export function validate(spec: unknown, data?: unknown): ValidationResult {
+  return validateLevel(spec, data, 0);
+}
+
+function validateLevel(spec: unknown, data: unknown, depth: number): ValidationResult {
   if (typeof spec === "string") {
     try {
       spec = JSON.parse(spec) as unknown;
@@ -69,9 +73,11 @@ export function validate(spec: unknown, data?: unknown): ValidationResult {
       severity: "warning",
       message: "field rules for this map live in @chartkitdev/geo",
       path: "/type",
-      hint: 'import { validate } from "@chartkitdev/geo". Core leaves atlas, region, and latitude to that package.',
+      hint: 'import { validate } from "@chartkitdev/geo". Core leaves atlas, region, latitude, and encoding.tooltip to that package.',
     });
   }
+
+  if (depth < 4 && isRecord(spec)) appendNested(spec, diagnostics, depth);
 
   diagnostics.sort((a, b) => {
     const rank = repairRank(a) - repairRank(b);
@@ -142,14 +148,64 @@ function sameErrors(a: ValidationResult, b: ValidationResult): boolean {
 
 /** CK1009 repair hints sort first. Agents and the harness keep only the first few errors. */
 function repairRank(diagnostic: Diagnostic): number {
-  if (diagnostic.code === "CK1009") return 0;
+  if (diagnostic.code === "CK1009" || /^CK30(5[8-9]|6\d|7[0-2])$/.test(diagnostic.code)) return 0;
   if (diagnostic.code === "CK1005") return 1;
   return 2;
 }
 
 const PHASE4 = " gantt timeline quadrant venn journey ";
 const MAPS = " choropleth map-points ";
-const GEO_FIELD = /^\/(?:atlas|region|latitude|longitude|location|lat|lon|mark\/(?:atlas|geojson|topojson|projection|scale|thresholds|labelCount|legend)|encoding\/(?:region|latitude|longitude|location|lat|lon|label))$/;
+const GEO_FIELD = /^\/(?:atlas|region|latitude|longitude|location|lat|lon|mark\/(?:atlas|geojson|topojson|projection|scale|thresholds|labelCount|legend)|encoding\/(?:region|latitude|longitude|location|lat|lon|label|tooltip))$/;
+
+/** Each concat view and drilldown child is a chart spec. Paths and patches stay on the parent. */
+function appendNested(spec: Record<string, unknown>, diagnostics: Diagnostic[], depth: number): void {
+  for (const nested of nestedChartSpecs(spec)) {
+    const child = typeof nested.spec.version === "string" ? nested.spec : { ...nested.spec, version: typeof spec.version === "string" ? spec.version : "1" };
+    const inner = validateLevel(child, undefined, depth + 1);
+    for (const item of inner.diagnostics) diagnostics.push(prefixDiagnostic(item, nested.path));
+  }
+}
+
+function nestedChartSpecs(spec: Record<string, unknown>): { path: string; spec: Record<string, unknown> }[] {
+  const out: { path: string; spec: Record<string, unknown> }[] = [];
+  const layout = isRecord(spec.layout) ? spec.layout : undefined;
+  const concat = layout && isRecord(layout.concat) ? layout.concat : undefined;
+  const views = concat && Array.isArray(concat.views) ? concat.views : [];
+  for (let index = 0; index < views.length; index += 1) {
+    const view = views[index];
+    if (isRecord(view)) out.push({ path: `/layout/concat/views/${index}`, spec: view });
+  }
+  const interaction = isRecord(spec.interaction) ? spec.interaction : undefined;
+  const drill = interaction && isRecord(interaction.drilldown) ? interaction.drilldown : undefined;
+  const children = drill && isRecord(drill.children) ? drill.children : undefined;
+  if (children) {
+    for (const [key, child] of Object.entries(children)) {
+      if (isRecord(child)) out.push({ path: `/interaction/drilldown/children/${escapePointer(key)}`, spec: child });
+    }
+  }
+  return out;
+}
+
+function prefixDiagnostic(diagnostic: Diagnostic, base: string): Diagnostic {
+  return {
+    ...diagnostic,
+    path: joinPointer(base, diagnostic.path),
+    fix: diagnostic.fix?.map((op) => ({
+      ...op,
+      path: joinPointer(base, op.path),
+      ...(op.from ? { from: joinPointer(base, op.from) } : {}),
+    })),
+  };
+}
+
+function joinPointer(base: string, path: string): string {
+  if (!path) return base;
+  return path.startsWith("/") ? `${base}${path}` : `${base}/${path}`;
+}
+
+function escapePointer(value: string): string {
+  return value.replace(/~/g, "~0").replace(/\//g, "~1");
+}
 
 function mapType(spec: unknown): string {
   if (!isRecord(spec) || typeof spec.type !== "string") return "";

@@ -49,11 +49,13 @@ function noteFormat(ids: Set<string>, value: unknown) {
   if (style === "compact") add(ids, "format.compact");
   if (style === "percent" || style === "percent-raw" || style === "currency" || style === "number") add(ids, "format.number");
   if (style === "date" || style === "time" || style === "datetime") add(ids, "format.date");
+  if (isRecord(value) && typeof value.specifier === "string") add(ids, "tooltip.format");
 }
 
 function walkScale(ids: Set<string>, scale: unknown) {
   if (!isRecord(scale)) return;
   if (scale.type === "log") add(ids, "scale.log");
+  if (scale.type === "symlog") add(ids, "scale.symlog");
   if (scale.type === "linear") add(ids, "scale.linear");
   if (scale.nice === false) add(ids, "scale.nice");
   if (scale.reverse === true) add(ids, "scale.reverse");
@@ -152,11 +154,16 @@ export function optionsIn(spec: unknown): OptionLink[] {
     }
   }
   if (isRecord(spec.size) && isRecord(spec.size.padding)) add(ids, "layout.margin");
+  if (isRecord(spec.animation)) {
+    if (typeof spec.animation.duration === "number" || typeof spec.animation.easing === "string") add(ids, "animation.duration");
+  }
   if (isRecord(spec.tooltip)) {
     if (spec.tooltip.fields) add(ids, "tooltip.fields");
     if (typeof spec.tooltip.position === "string") add(ids, "tooltip.position");
     if (spec.tooltip.crosshair === true || spec.tooltip.crosshairLabel === true) add(ids, "tooltip.crosshair");
     if (spec.tooltip.mode === "index") add(ids, "tooltip.shared");
+    if (typeof spec.tooltip.template === "string") add(ids, "tooltip.format");
+    if (spec.tooltip.pin === true || typeof spec.tooltip.hit === "number") add(ids, "tooltip.touch");
     const fields = Array.isArray(spec.tooltip.fields) ? spec.tooltip.fields : [];
     for (const field of fields) if (isRecord(field)) noteFormat(ids, field.format);
   }
@@ -164,6 +171,9 @@ export function optionsIn(spec: unknown): OptionLink[] {
     for (const [key, axis] of Object.entries(spec.axes)) {
       if (!isRecord(axis)) continue;
       if (typeof axis.title === "string") add(ids, "axis.title");
+      if (typeof axis.minorTicks === "number") add(ids, "axis.ticks.minor");
+      if (Array.isArray(axis.breaks)) add(ids, "axis.breaks");
+      if (typeof axis.offset === "number" || typeof axis.crosses === "number") add(ids, "axis.offset");
       if (typeof axis.rotate === "number") add(ids, "axis.ticks.rotate");
       if (Array.isArray(axis.ticks)) add(ids, "axis.ticks.values");
       if (typeof axis.position === "string") add(ids, "axis.position");
@@ -179,6 +189,7 @@ export function optionsIn(spec: unknown): OptionLink[] {
     for (const item of list) {
       if (!isRecord(item)) continue;
       if (item.axis === "y2") add(ids, "scale.multi");
+      if (typeof item.z === "number") add(ids, "mark.zindex");
       if (typeof item.pointShape === "string") add(ids, "mark.point.shape");
       if (typeof item.dash === "string") add(ids, "mark.stroke.dash");
       noteFormat(ids, item.format);
@@ -204,6 +215,7 @@ export function optionsIn(spec: unknown): OptionLink[] {
       if (mark.type === "regression") add(ids, "type.regression");
       if (typeof mark.labelPosition === "string") add(ids, "annotation.label.position");
       if (typeof mark.dash === "string") add(ids, "annotation.style");
+      if (typeof mark.z === "number") add(ids, "mark.zindex");
     }
   }
   if (encoding.color && (type === "bar" || type === "scatter" || type === "pie" || type === "donut")) add(ids, "mark.color.point");

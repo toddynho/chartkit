@@ -522,15 +522,15 @@ function legend(
   const valueWidth = frame.legendValues ? 112 : 68;
   return slices
     .map((slice, index) => {
-      const dy = y + index * 20;
+      const dy = y + index * 22;
       const pct = formatValue(slice.percent / 100, "percent", frame.locale);
       const extra = frame.legendValues ? ` ${formatValue(slice.value, valueFormat, frame.locale)}` : "";
       const labelX = x + 16;
       const label = fitLabel(slice.label, Math.max(12, valueRight - valueWidth - labelX));
       return (
         `<rect x="${n(x)}" y="${n(dy)}" width="10" height="10" rx="2" fill="${slice.color}" />` +
-        text(labelX, dy + 9, label, cssVar("muted", frame.preset.muted), 12, "400", "start") +
-        text(valueRight, dy + 9, `${pct}${extra}`, cssVar("text", frame.preset.text), 12, "600", "end")
+        text(labelX, dy + 11, label, cssVar("muted", frame.preset.muted), 14, "400", "start") +
+        text(valueRight, dy + 11, `${pct}${extra}`, cssVar("text", frame.preset.text), 14, "600", "end")
       );
     })
     .join("");

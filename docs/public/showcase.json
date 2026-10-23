@@ -998,6 +998,55 @@
         "editorial",
         "midnight"
       ]
+    },
+    {
+      "slug": "harrow-kiln",
+      "number": 29,
+      "title": "Harrow kiln",
+      "types": [
+        "line",
+        "heatmap"
+      ],
+      "options": [
+        "a11y.alt",
+        "animation.duration",
+        "annotation.band",
+        "annotation.marker",
+        "axis.breaks",
+        "axis.offset",
+        "axis.ticks.minor",
+        "axis.ticks.values",
+        "axis.title",
+        "format.locale",
+        "layout.margin",
+        "legend.continuous",
+        "legend.interactive",
+        "legend.position",
+        "mark.point.size",
+        "mark.point.visibility",
+        "mark.zindex",
+        "scale.domain",
+        "scale.linear",
+        "scale.nice",
+        "scale.quantize",
+        "scale.symlog",
+        "theme.presets",
+        "tooltip.fields",
+        "tooltip.format",
+        "tooltip.position",
+        "tooltip.shared",
+        "tooltip.touch",
+        "type.heatmap",
+        "type.line",
+        "type.line.smooth"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
     }
   ]
 }

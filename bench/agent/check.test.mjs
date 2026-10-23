@@ -86,6 +86,44 @@ test("supp scoring requires the feature and treats a map without an atlas as a f
   assert.equal(mapped.ok, true, JSON.stringify(mapped.stages));
 });
 
+test("concat scoring fails when a view draws nothing and passes when every view draws", async () => {
+  const task = suite.suppTasks.find((item) => item.id === "concat-dash");
+  const signups = {
+    version: "1",
+    type: "bar",
+    data: task.data.signups,
+    encoding: { x: "month", y: "signups" },
+    a11y: { alt: "Signups rise." },
+  };
+  const plans = {
+    version: "1",
+    type: "donut",
+    data: task.data.plans,
+    encoding: { x: "plan", y: "share" },
+    a11y: { alt: "Free is the larger share." },
+  };
+  const host = {
+    version: "1",
+    a11y: { alt: "Signups above, plan share below." },
+    layout: { concat: { direction: "vertical", views: [signups, plans] } },
+  };
+  const drawn = await suite.checkSupp(host, task);
+  assert.equal(drawn.ok, true, JSON.stringify(drawn.stages));
+
+  const blank = {
+    ...host,
+    layout: {
+      concat: {
+        direction: "vertical",
+        views: [signups, { ...plans, encoding: { label: "plan", value: "share" } }],
+      },
+    },
+  };
+  const missed = await suite.checkSupp(blank, task);
+  assert.equal(missed.ok, false);
+  assert.equal(missed.stages.render.ok, false);
+});
+
 test("task set spans every v1 chart type", () => {
   assert.ok(suite.tasks.length >= 30 && suite.tasks.length <= 50);
   const ids = new Set(suite.tasks.map((task) => task.id));

@@ -341,10 +341,10 @@ function breakKey(rules: unknown[], width: number): string {
   return "";
 }
 
-function tipFields(spec: InteractSpec): { field: string; title?: string; format?: unknown }[] | null {
+function tipFields(spec: InteractSpec): { field: string; title?: string; format?: unknown; unit?: string }[] | null {
   const tooltip = spec.tooltip;
   if (!isRecord(tooltip) || !Array.isArray(tooltip.fields)) return null;
-  const out: { field: string; title?: string; format?: unknown }[] = [];
+  const out: { field: string; title?: string; format?: unknown; unit?: string }[] = [];
   for (let i = 0; i < tooltip.fields.length; i++) {
     const item = tooltip.fields[i];
     if (typeof item === "string") {
@@ -354,10 +354,33 @@ function tipFields(spec: InteractSpec): { field: string; title?: string; format?
         field: item.field,
         title: typeof item.title === "string" ? item.title : undefined,
         format: item.format,
+        unit: typeof item.unit === "string" ? item.unit : undefined,
       });
     }
   }
   return out.length ? out : null;
+}
+
+function tipTemplate(spec: InteractSpec): string {
+  return isRecord(spec.tooltip) && typeof spec.tooltip.template === "string" ? spec.tooltip.template : "";
+}
+
+function hitPx(spec: InteractSpec): number {
+  const tip = isRecord(spec.tooltip) ? spec.tooltip : null;
+  const raw = tip && typeof tip.hit === "number" ? tip.hit : tip?.pin === true ? 18 : 8;
+  return Math.max(8, Math.min(48, raw));
+}
+
+function easeCss(name: unknown): string {
+  if (name === "linear") return "linear";
+  if (name === "ease-in-out") return "ease-in-out";
+  if (name === "spring") return "cubic-bezier(0.22, 1.35, 0.36, 1)";
+  return "ease-out";
+}
+
+function easeOf(spec: InteractSpec): string {
+  const name = isRecord(spec.animation) ? spec.animation.easing : 0;
+  return typeof name === "string" ? name : "ease-out";
 }
 
 function tipSide(spec: InteractSpec): number {
@@ -390,12 +413,24 @@ function esc(value: string): string {
   return value.replace(/[&<>"]/g, (ch) => (ch === "&" ? "&amp;" : ch === "<" ? "&lt;" : ch === ">" ? "&gt;" : "&quot;"));
 }
 
+function applyTipChrome(host: Element, svg: SVGSVGElement): void {
+  if (!(host instanceof HTMLElement)) return;
+  const bg = svg.getAttribute("data-ck-chrome-bg");
+  const radius = svg.getAttribute("data-ck-chrome-radius");
+  const shadow = svg.getAttribute("data-ck-chrome-shadow");
+  const hair = svg.getAttribute("data-ck-xhair");
+  if (bg) host.style.setProperty("--ck-tip-bg", bg);
+  if (radius) host.style.setProperty("--ck-tip-radius", `${radius}px`);
+  if (shadow) host.style.setProperty("--ck-tip-shadow", shadow);
+  if (hair) host.style.setProperty("--ck-xhair", hair);
+}
+
 function ensureCss(): void {
   if (typeof document === "undefined" || document.getElementById("ck-interact-style")) return;
   const style = document.createElement("style");
   style.id = "ck-interact-style";
   style.textContent =
-    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:10px;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:light-dark(#fff,#2c2c2e);color:light-dark(#1d1d1f,#f5f5f7);box-shadow:0 8px 24px #0003;font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:light-dark(#0006,#fff8);stroke-dasharray:3 3}.ck-xlabel{font:11px ui-sans-serif,system-ui,sans-serif;fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-pick{stroke:var(--ck-selected,light-dark(#1d1d1f,#f5f5f7));stroke-width:2}[data-ck-dim]{opacity:var(--ck-dim,.32)}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.ck-crumb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px;font:12px/1.3 ui-sans-serif,system-ui,sans-serif;color:light-dark(#1d1d1f,#f5f5f7)}.ck-crumb button{font:inherit;color:inherit;background:transparent;border:1px solid light-dark(#0002,#fff3);border-radius:8px;padding:4px 8px;cursor:pointer}.ck-crumb [aria-current]{font-weight:650}.ck-bar-on{filter:brightness(1.18)}[data-ck-bar-dim]{opacity:.42}";
+    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:var(--ck-tip-radius,10px);font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:var(--ck-tip-bg,var(--ck-surface, light-dark(#fff,#2c2c2e)));color:var(--ck-text, light-dark(#1d1d1f,#f5f5f7));box-shadow:var(--ck-tip-shadow,0 8px 24px #0003);font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:var(--ck-xhair,light-dark(#0006,#fff8));stroke-dasharray:3 3}.ck-xlabel{font:11px ui-sans-serif,system-ui,sans-serif;fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-pick{stroke:var(--ck-selected,light-dark(#1d1d1f,#f5f5f7));stroke-width:2}[data-ck-dim]{opacity:var(--ck-dim,.32)}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.ck-crumb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px;font:12px/1.3 ui-sans-serif,system-ui,sans-serif;color:light-dark(#1d1d1f,#f5f5f7)}.ck-crumb button{font:inherit;color:inherit;background:transparent;border:1px solid light-dark(#0002,#fff3);border-radius:8px;padding:4px 8px;cursor:pointer}.ck-crumb [aria-current]{font-weight:650}.ck-bar-on{filter:brightness(1.18)}[data-ck-bar-dim]{opacity:.42}";
   document.head.append(style);
 }
 
@@ -529,7 +564,83 @@ function tipObstacles(svg: SVGSVGElement, rect: DOMRect, bounds: DOMRect, sx: nu
     const y = Number(node.getAttribute("y"));
     out.push({ l: xOf(x) - 4, t: yOf(y) - 4, r: xOf(x + w) + 4, b: yOf(y + h) + 4 });
   }
+  const notes = svg.querySelectorAll("[data-ck-annotation]");
+  for (let i = 0; i < notes.length; i++) {
+    const node = notes[i];
+    if (!node) continue;
+    const kind = node.getAttribute("data-ck-annotation");
+    if (kind === "band" || kind === "axis-band" || kind === "regression-band" || kind === "marker-line") continue;
+    if (node.localName === "text") {
+      const x = Number(node.getAttribute("x"));
+      const y = Number(node.getAttribute("y"));
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      const w = Math.max(24, (node.textContent?.length ?? 4) * 6.4);
+      const anchor = node.getAttribute("text-anchor");
+      const left = anchor === "end" ? x - w : anchor === "middle" ? x - w / 2 : x;
+      out.push({ l: xOf(left) - 4, t: yOf(y - 12) - 4, r: xOf(left + w) + 4, b: yOf(y + 2) + 4 });
+    } else if (node.localName === "rect") {
+      const x = Number(node.getAttribute("x"));
+      const y = Number(node.getAttribute("y"));
+      const w = Number(node.getAttribute("width"));
+      const h = Number(node.getAttribute("height"));
+      if (![x, y, w, h].every(Number.isFinite) || w > plot.w * 0.9) continue;
+      out.push({ l: xOf(x) - 4, t: yOf(y) - 4, r: xOf(x + w) + 4, b: yOf(y + h) + 4 });
+    }
+  }
   return out;
+}
+
+function tipOverlap(a: TipBox, b: TipBox): boolean {
+  return a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t;
+}
+
+/**
+ * Prefer the requested side, then any side that misses the point and the annotations.
+ * Returns null when every side is blocked, so the caller can fall back.
+ */
+function parkTip(
+  place: number,
+  hostW: number,
+  hostH: number,
+  width: number,
+  height: number,
+  midX: number,
+  midY: number,
+  minX: number,
+  minY: number,
+  maxX: number,
+  maxY: number,
+  anchor: TipBox,
+  obstacles: TipBox[],
+): { left: number; top: number } | null {
+  if (hostW < width + 8 || hostH < height + 8) return null;
+  const gap = 14;
+  const sides = [
+    { left: midX - width / 2, top: minY - height - gap },
+    { left: midX - width / 2, top: maxY + gap },
+    { left: maxX + gap, top: midY - height / 2 },
+    { left: minX - width - gap, top: midY - height / 2 },
+  ];
+  const order = place === 2 ? [1, 0, 2, 3] : place === 3 ? [3, 1, 0, 2] : place === 4 ? [2, 1, 0, 3] : [0, 1, 2, 3];
+  for (let i = 0; i < order.length; i++) {
+    const raw = sides[order[i] ?? 0];
+    if (!raw) continue;
+    const left = raw.left;
+    const top = raw.top;
+    if (left < 4 || top < 4 || left + width > hostW - 4 || top + height > hostH - 4) continue;
+    const card = { l: left, t: top, r: left + width, b: top + height };
+    if (tipOverlap(card, anchor)) continue;
+    let hit = false;
+    for (let k = 0; k < obstacles.length; k++) {
+      const item = obstacles[k];
+      if (item && tipOverlap(card, item)) {
+        hit = true;
+        break;
+      }
+    }
+    if (!hit) return { left, top };
+  }
+  return null;
 }
 
 /**
@@ -660,15 +771,75 @@ function paint(svg: Element, markup: string): boolean {
   return n === need;
 }
 
-function fade(el: Element, ms: number, from = "0.45"): void {
+/** A custom property that actually paints. `initial` and `transparent` leave the Soft tooltip fallback in place. */
+function painted(value: string): boolean {
+  const token = value.trim().toLowerCase();
+  return token !== "" && token !== "initial" && token !== "inherit" && token !== "unset" && token !== "transparent" && token !== "rgba(0, 0, 0, 0)" && token !== "rgba(0,0,0,0)";
+}
+
+/** Midnight tooltips use the theme surface, not the Soft dark card. A host variable still wins. */
+function useTheme(host: Element, spec: InteractSpec): void {
+  const theme = spec.theme;
+  const name = typeof theme === "string" ? theme : isRecord(theme) && typeof theme.name === "string" ? theme.name : "";
+  if (name !== "midnight") return;
+  // Same tokens as `midnight` in theme.ts. Inlined so this entry does not pull every preset.
+  const preset = { background: "#0c0c0c", surface: "#1a1a1a", text: "#ffffff" };
+  const el = host as HTMLElement;
+  if (!el.style) return;
+  const set = (token: string, value: string) => {
+    const key = `--ck-${token}`;
+    if (painted(el.style.getPropertyValue(key))) return;
+    if (typeof getComputedStyle === "function" && painted(getComputedStyle(el).getPropertyValue(key))) return;
+    el.style.setProperty(key, value);
+  };
+  set("background", preset.background);
+  set("surface", preset.surface);
+  set("text", preset.text);
+}
+
+function fade(el: Element, ms: number, from = "0.45", easing = "ease-out"): void {
   if (ms <= 0) return;
   const node = el as SVGSVGElement;
   node.style.transition = "none";
   node.style.opacity = from;
+  const curve = easeCss(easing);
+  const drawn = revealPaths(node);
   requestAnimationFrame(() => {
-    node.style.transition = `opacity ${ms}ms ease-out`;
+    node.style.transition = `opacity ${ms}ms ${curve}`;
     node.style.opacity = "1";
+    for (let i = 0; i < drawn.length; i++) {
+      const path = drawn[i];
+      if (!path) continue;
+      path.style.transition = `stroke-dashoffset ${ms}ms ${curve}`;
+      path.style.strokeDashoffset = "0";
+    }
   });
+}
+
+/** Line strokes draw in with the same curve. A whole-chart opacity fade is invisible in a still. */
+function revealPaths(node: SVGSVGElement): SVGPathElement[] {
+  const out: SVGPathElement[] = [];
+  const paths = node.querySelectorAll("path");
+  for (let i = 0; i < paths.length; i++) {
+    const path = paths[i];
+    if (!path || path.localName !== "path") continue;
+    const stroke = path.getAttribute("stroke");
+    const fill = path.getAttribute("fill");
+    if (!stroke || stroke === "none" || (fill && fill !== "none") || path.getAttribute("stroke-dasharray")) continue;
+    const measurable = path as SVGPathElement;
+    if (typeof measurable.getTotalLength !== "function") continue;
+    let len = 0;
+    try {
+      len = measurable.getTotalLength();
+    } catch {
+      continue;
+    }
+    if (!(len > 1)) continue;
+    measurable.style.strokeDasharray = String(len);
+    measurable.style.strokeDashoffset = String(len);
+    out.push(measurable);
+  }
+  return out;
 }
 
 /**
@@ -699,7 +870,7 @@ function queueCanvas(host: Element, spec?: InteractSpec): void {
   else run();
 }
 
-export function patchSvg(host: PatchHost, markup: string, duration = 0): void {
+export function patchSvg(host: PatchHost, markup: string, duration = 0, easing = "ease-out"): void {
   if (lastMarkup.get(host) === markup) return;
   const current = host.querySelector?.("svg");
   const open = markup.startsWith("<svg") ? markup.indexOf(">") : -1;
@@ -718,7 +889,7 @@ export function patchSvg(host: PatchHost, markup: string, duration = 0): void {
     current.innerHTML = markup.slice(open + 1, close);
   }
   for (let i = 0; i < held.length; i++) current.append(held[i]);
-  fade(current, duration);
+  fade(current, duration, "0.45", easing);
   lastMarkup.set(host, markup);
 }
 
@@ -834,7 +1005,9 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
   let svg: SVGSVGElement = found;
   ensureCss();
+  useTheme(host, spec);
   host.setAttribute("data-ck-interact", "1");
+  applyTipChrome(host, found);
   if (getComputedStyle(host).position === "static") (host as HTMLElement).style.position = "relative";
 
   let base = spec;
@@ -926,9 +1099,9 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   function entriesAt(index: number, pointerY: number | null): { name: string; text: string; color: string }[] {
     const chosen = tipFields(base);
     const grouped = !chosen && series.some((item) => item.match) && !arcChart(base.type);
-    const rows: { name: string; text: string; color: string; raw: number }[] = [];
+    const rows: { name: string; text: string; color: string; raw: number; unit: string }[] = [];
     const yFormat = axisFormat(base, "y");
-    const push = (name: string, raw: unknown, color: string, format?: unknown) => {
+    const push = (name: string, raw: unknown, color: string, format?: unknown, unit = "") => {
       if (raw == null || raw === "") return;
       const num = typeof raw === "number" ? raw : Number(raw);
       rows.push({
@@ -936,6 +1109,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         text: fmt(raw, format ?? series.find((s) => s.name === name)?.format ?? yFormat, locale()),
         color,
         raw: Number.isFinite(num) ? num : 0,
+        unit,
       });
     };
     if (chosen) {
@@ -948,6 +1122,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
           table.cell(item.field, index),
           known ? colorFor(known.name, series.indexOf(known)) : "transparent",
           item.format ?? known?.format,
+          item.unit ?? "",
         );
       }
       return tint(rows, index);
@@ -1096,9 +1271,26 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       if (typeof body === "string") tip.innerHTML = body;
       else tip.append(body);
     } else {
-      tip.innerHTML =
-        (title ? `<div>${esc(title)}</div>` : "") +
-        rows.map((row) => `<div class="ck-row"><i style="background:${row.color}"></i>${esc(row.name)}<b>${esc(row.text)}</b></div>`).join("");
+      const template = tipTemplate(base);
+      const rowHtml = (row: { name: string; text: string; color: string; unit?: string }) => {
+        if (!template) {
+          const shown = row.unit ? `${row.text} ${row.unit}` : row.text;
+          return `<div class="ck-row"><i style="background:${row.color}"></i>${esc(row.name)}<b>${esc(shown)}</b></div>`;
+        }
+        const filled = template.replace(/\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (_all, key: string) => {
+          if (key === "x") return title;
+          if (key === "name") return row.name;
+          if (key === "value") return row.text;
+          if (key === "unit") return row.unit ?? "";
+          if (index >= 0) {
+            const cell = table.cell(key, index);
+            if (cell != null && cell !== "") return fmt(cell, undefined, locale());
+          }
+          return "";
+        });
+        return `<div class="ck-row"><i style="background:${row.color}"></i>${esc(filled)}</div>`;
+      };
+      tip.innerHTML = (title && !template ? `<div>${esc(title)}</div>` : "") + rows.map((row) => rowHtml(row)).join("");
     }
     tip.hidden = false;
     const bounds = host.getBoundingClientRect();
@@ -1122,29 +1314,17 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     const midX = (minX + maxX) / 2;
     const midY = (minY + maxY) / 2;
     const place = tipSide(base);
-    let top = minY - height - gap;
-    let left = midX - width / 2;
     const plot = plotBox(svg);
     const plotLeft = rect.left + plot.l * sx - bounds.left;
     const plotRight = rect.left + (plot.l + plot.w) * sx - bounds.left;
-    if (place === 2) top = maxY + gap;
-    else if (place > 2) {
-      left = place === 3 ? minX - width - gap : maxX + gap;
-      top = midY - height / 2;
-    } else if (!place) {
+    const obstacles = tipObstacles(svg, rect, bounds, sx, sy, plot);
+    const anchor = { l: minX - 10, t: minY - 10, r: maxX + 10, b: maxY + 10 };
+    const parked = parkTip(place, bounds.width, bounds.height, width, height, midX, midY, minX, minY, maxX, maxY, anchor, obstacles);
+    let top = parked ? parked.top : minY - height - gap;
+    let left = parked ? parked.left : midX - width / 2;
+    if (!parked && !place) {
       const onRight = midX > (plotLeft + plotRight) / 2;
-      const clear = sitTip(
-        tipObstacles(svg, rect, bounds, sx, sy, plot),
-        bounds.width,
-        bounds.height,
-        width,
-        height,
-        midX,
-        minY,
-        onRight,
-        plotLeft,
-        plotRight,
-      );
+      const clear = sitTip(obstacles, bounds.width, bounds.height, width, height, midX, minY, onRight, plotLeft, plotRight);
       if (clear) {
         left = clear.left;
         top = clear.top;
@@ -1156,10 +1336,22 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         if (left + width > bounds.width - 4) left = Math.max(4, flipped);
         if (left < 4) left = Math.max(4, Math.min(midX + gap, bounds.width - width - 4));
       }
-    }
-    if (place && bounds.width > width + 8 && bounds.height > height + 8) {
-      left = Math.max(4, Math.min(left, bounds.width - width - 4));
-      top = Math.max(4, Math.min(top, bounds.height - height - 4));
+    } else if (!parked) {
+      if (place === 2) top = maxY + gap;
+      else if (place > 2) {
+        left = place === 3 ? minX - width - gap : maxX + gap;
+        top = midY - height / 2;
+      }
+      if (bounds.width > width + 8 && bounds.height > height + 8) {
+        left = Math.max(4, Math.min(left, bounds.width - width - 4));
+        top = Math.max(4, Math.min(top, bounds.height - height - 4));
+      }
+      const card = { l: left, t: top, r: left + width, b: top + height };
+      if (tipOverlap(card, anchor)) {
+        const side = maxX + gap + width < bounds.width - 4 ? maxX + gap : minX - width - gap;
+        left = Math.max(4, Math.min(side, bounds.width - width - 4));
+        top = Math.max(4, Math.min(minY, bounds.height - height - 4));
+      }
     }
     tip.style.left = `${left}px`;
     tip.style.top = `${top}px`;
@@ -1226,7 +1418,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
 
   function barsNear(snapped: number, horizontal: boolean): Element[] {
     const span = horizontal ? box.h : box.w;
-    const tol = Math.max(8, (span / Math.max(1, n)) * 0.49);
+    const tol = Math.max(hitPx(base), (span / Math.max(1, n)) * 0.49);
     const hits: Element[] = [];
     const rects = svg.querySelectorAll("rect");
     for (let i = 0; i < rects.length; i++) {
@@ -1530,7 +1722,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       }
     }
     const slot = hover.uniform ? hover.width / Math.max(1, hover.count) : Math.max(24, box.w / 8);
-    const tol = Math.max(slot / 2, 8);
+    const tol = Math.max(slot / 2, hitPx(base));
     let best = Infinity;
     const hits: { x: number; y: number; fill: string | null }[] = [];
     const rects = svg.querySelectorAll("rect");
@@ -1697,7 +1889,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       return;
     }
     const next = partial ? options.render(nextSpec) : markup ?? options.render(base);
-    patchSvg(host as PatchHost, next, ms);
+    patchSvg(host as PatchHost, next, ms, easeOf(base));
     if (focusable()) svg.setAttribute("tabindex", "0");
     dim();
     paintPick();
@@ -1989,6 +2181,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function hoverMove(event: PointerEvent | MouseEvent): void {
+    if (pinned) return;
     arm(1);
     if (base.type === "waterfall") {
       const mark = (event.target as Element | null)?.closest?.("[data-ck-mark]");
@@ -2074,12 +2267,34 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
 
   arm();
   paintTable();
-  fade(svg, durationMs(spec, n), "0");
+  fade(svg, durationMs(spec, n), "0", easeOf(spec));
   if (picked.points.length || picked.series.length) paintPick();
 
+  let pinned = false;
   if (showTip || showCross) {
     on(svg, "pointermove", hoverMove as EventListener);
-    on(svg, "pointerleave", () => hideHover());
+    on(svg, "pointerleave", () => {
+      if (!pinned) hideHover();
+    });
+  }
+  if (showTip && isRecord(base.tooltip) && base.tooltip.pin === true) {
+    on(svg, "pointerdown", ((event: PointerEvent) => {
+      if (pinned) {
+        pinned = false;
+        tip.removeAttribute("data-ck-pin");
+        hideHover();
+        return;
+      }
+      hoverMove(event);
+      pinned = true;
+      tip.setAttribute("data-ck-pin", "1");
+    }) as EventListener);
+    on(window, "keydown", ((event: KeyboardEvent) => {
+      if (event.key !== "Escape" || !pinned) return;
+      pinned = false;
+      tip.removeAttribute("data-ck-pin");
+      hideHover();
+    }) as EventListener);
   }
   if (legend) dim();
   on(svg, "click", ((event: MouseEvent) => {
@@ -2376,7 +2591,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         return;
       }
       if (lo === 0 && hi === n - 1 && hidden.size === 0 && markup) {
-        patchSvg(host as PatchHost, markup, durationMs(next, n));
+        patchSvg(host as PatchHost, markup, durationMs(next, n), easeOf(next));
         if (focusable()) svg.setAttribute("tabindex", "0");
         dim();
         paintPick();

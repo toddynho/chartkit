@@ -1,12 +1,52 @@
 # Symlog / signed log scale
 
-ChartKit: **none**
+ChartKit: **native**
 
 Log-like scale that handles zero and negatives
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `render` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+encoding.y.scale.type is symlog. constant is the linear half-width around zero, default 1. asinh, symLog, and signed-log repair to symlog (CK3070). A constant on any other scale warns CK3062.
+
+Source: chartkit:packages/core/src/svg.ts
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40
+    },
+    {
+      "quarter": "Q2",
+      "units": 55
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": {
+      "field": "units",
+      "scale": {
+        "type": "symlog",
+        "constant": 1
+      }
+    }
+  },
+  "a11y": {
+    "alt": "Units rose in Q2, on a signed log."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -33,6 +73,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | unknown | ~symlog\|Symlog | unverified (unknown) | — |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against e79729672133.
 
 https://chartkit.dev/features.json

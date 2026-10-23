@@ -338,6 +338,35 @@ describe("remaining chart renderers", () => {
     expect(svg).toMatchSnapshot();
   });
 
+  it("interpolates a two-stop heatmap range instead of painting only the maximum cell", () => {
+    const svg = render({
+      version: "1",
+      type: "heatmap",
+      data: [
+        { hour: "9", row: "Mon", load: 10 },
+        { hour: "10", row: "Mon", load: 55 },
+        { hour: "9", row: "Tue", load: 30 },
+        { hour: "10", row: "Tue", load: 100 },
+      ],
+      encoding: { x: "hour", y: "row", color: { field: "load", range: ["#e8f0fe", "#1a73e8"] } },
+      locale: "en-US",
+      a11y: { alt: "Tuesday at 10 is the darkest cell, and the middle values sit between the two stops." },
+    });
+    const fills = new Map<string, string>();
+    for (const match of svg.matchAll(/fill="(#[0-9a-fA-F]{6})"[^>]*aria-label="([^"]+)"/g)) {
+      fills.set(match[2] ?? "", (match[1] ?? "").toLowerCase());
+    }
+    const low = fills.get("9, Mon: 10");
+    const mid = fills.get("9, Tue: 30");
+    const high = fills.get("10, Tue: 100");
+    expect(low).toBe("#e8f0fe");
+    expect(high).toBe("#1a73e8");
+    expect(mid).toBeTruthy();
+    expect(mid).not.toBe(low);
+    expect(mid).not.toBe(high);
+    expect(fills.get("10, Mon: 55")).not.toBe(low);
+  });
+
   it("colors a falling candle with the negative token", () => {
     const svg = render({
       version: "1",
