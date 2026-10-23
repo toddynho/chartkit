@@ -10,37 +10,7 @@ type pie draws a solid pie. startAngle, padAngle, cornerRadius, sort, other, and
 
 Source: packages/core/src/generated/schema.ts:24
 
-## ChartKit spec
-
-```json
-{
-  "version": "1",
-  "type": "pie",
-  "data": [
-    {
-      "x": "Oak",
-      "y": 8
-    },
-    {
-      "x": "Pine",
-      "y": 5
-    }
-  ],
-  "encoding": {
-    "x": "x",
-    "y": "y"
-  },
-  "a11y": {
-    "alt": "Oak is larger."
-  },
-  "size": {
-    "width": 640,
-    "height": 260
-  }
-}
-```
-
-This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
+No spec snippet. This row is not a single option that `validate()` can show.
 
 ## Other libraries
 
@@ -67,6 +37,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.pie | dts-path (strong) | mermaid/dist/config.type.d.ts:223 |
 | AntV G2 | native | ~polar | dts-grep (weak) | @antv/g2/lib/index.d.ts:53 interval + theta coordinate |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against ddab4856d750.
 
 https://chartkit.dev/features.json

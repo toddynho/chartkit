@@ -9,6 +9,25 @@ interface Fmt {
   prefix?: string;
   suffix?: string;
   signed?: boolean;
+  /** Thousands separators. A specifier without a comma turns them off. */
+  group?: boolean;
+}
+
+/** `.2f`, `,.0f`, `$,.0f`, `.1%`, `.2e`, `+.1f`, and `s`. Null when it is not a specifier. */
+export function parseSpecifier(source: string): Fmt | null {
+  const match = /^([+ ])?(\$)?(,)?(?:\.(\d+))?([fdegs%])$/.exec(source.trim());
+  if (!match) return null;
+  const signed = match[1] === "+";
+  const dollar = match[2] === "$";
+  const group = match[3] === ",";
+  const decimals = match[4] !== undefined ? Number(match[4]) : undefined;
+  const type = match[5];
+  const prefix = dollar ? "$" : undefined;
+  if (type === "s") return { style: "compact", decimals, signed, prefix, group };
+  if (type === "%") return { style: "percent", decimals: decimals ?? 0, signed, group };
+  if (type === "e" || type === "g") return { style: "exponent", decimals: decimals ?? 0, signed, prefix, group };
+  if (type === "d") return { style: "integer", signed, prefix, group };
+  return { style: "number", decimals, signed, prefix, group: group || false };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -16,7 +35,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function normalize(format: unknown): Fmt {
-  if (typeof format === "string") return { style: format };
+  if (typeof format === "string") return parseSpecifier(format) ?? { style: format };
+  if (isRecord(format) && typeof format.specifier === "string") {
+    const parsed = parseSpecifier(format.specifier);
+    if (parsed) {
+      if (typeof format.prefix === "string") parsed.prefix = format.prefix;
+      if (typeof format.suffix === "string") parsed.suffix = format.suffix;
+      if (format.signed === true) parsed.signed = true;
+      return parsed;
+    }
+  }
   if (isRecord(format) && typeof format.style === "string") {
     return {
       style: format.style,
@@ -98,8 +126,13 @@ function body(value: number, fmt: Fmt, locale: string, zone: string): string {
   if (style === "date" || style === "time" || style === "datetime" || style === "month" || style === "year" || style === "weekday") {
     return formatDate(value, style, locale, zone);
   }
-  if (style === "integer") return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(value);
+  if (style === "exponent") return value.toExponential(fmt.decimals ?? 0);
+  if (style === "integer") {
+    return new Intl.NumberFormat(locale, { maximumFractionDigits: 0, useGrouping: fmt.group === false ? false : undefined }).format(value);
+  }
   const options: Intl.NumberFormatOptions = digits(fmt, style === "compact" || style === "percent" || style === "percent-raw" ? 1 : 2);
+  if (fmt.group === false) options.useGrouping = false;
+  else if (fmt.group === true) options.useGrouping = true;
   if (style === "compact") options.notation = "compact";
   else if (style === "percent" || style === "percent-raw") options.style = "percent";
   else if (style === "currency") {

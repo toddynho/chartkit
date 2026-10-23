@@ -39853,20 +39853,22 @@
       "agentRelevance": 1,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:zIndex)['\"`]|(?:^|[\\s{,;])\\w*(?:zIndex)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:zIndex)"
+            "ChartKitChartSpecV1.encoding.y.z",
+            "ChartKitChartSpecV1.annotations.z"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:zIndex)['\"`]|(?:^|[\\s{,;])\\w*(?:zIndex)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:zIndex)"
+              "kind": "render",
+              "path": "ChartKitChartSpecV1.encoding.y.z",
+              "loc": "chartkit:packages/core/src/renderers/cartesian.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "encoding.y[].z and annotations[].z. Higher paints later. Stacked series keep data order. z below 0 paints an annotation under the marks. zIndex repairs to z (CK3064).",
+          "verified": "render",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "native",
@@ -40954,20 +40956,22 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:symlog)['\"`]|(?:^|[\\s{,;])\\w*(?:symlog)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:symlog)"
+            "ChartKitChartSpecV1.encoding.y.scale.type=symlog",
+            "ChartKitChartSpecV1.encoding.y.scale.constant"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:symlog)['\"`]|(?:^|[\\s{,;])\\w*(?:symlog)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:symlog)"
+              "kind": "render",
+              "path": "ChartKitChartSpecV1.encoding.y.scale.type=symlog",
+              "loc": "chartkit:packages/core/src/svg.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "encoding.y.scale.type is symlog. constant is the linear half-width around zero, default 1. asinh, symLog, and signed-log repair to symlog (CK3070). A constant on any other scale warns CK3062.",
+          "verified": "render",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "none",
@@ -42743,20 +42747,22 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:quantize)['\"`]|(?:^|[\\s{,;])\\w*(?:quantize)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:quantize)"
+            "ChartKitChartSpecV1.encoding.color.scale.type=quantize",
+            "ChartKitChartSpecV1.encoding.color.scale.thresholds"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:quantize)['\"`]|(?:^|[\\s{,;])\\w*(?:quantize)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:quantize)"
+              "kind": "render",
+              "path": "ChartKitChartSpecV1.encoding.color.scale.type=quantize",
+              "loc": "chartkit:packages/core/src/color-scale.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "encoding.color.scale.type quantize or threshold. bins sets the quantize width. thresholds sets the cuts. On x or y the same words are an error and the hint points at the colour scale (CK3063).",
+          "verified": "render",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "none",
@@ -50603,20 +50609,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:minor)['\"`]|(?:^|[\\s{,;])\\w*(?:minor)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:minor)"
+            "ChartKitChartSpecV1.axes.y.minorTicks"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:minor)['\"`]|(?:^|[\\s{,;])\\w*(?:minor)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:minor)"
+              "kind": "render",
+              "path": "ChartKitChartSpecV1.axes.y.minorTicks",
+              "loc": "chartkit:packages/core/src/renderers/cartesian.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "axes.y.minorTicks is how many minor ticks sit between major ticks, 0 to 8. minor, minorTick, and minorGrid repair to minorTicks (CK3065).",
+          "verified": "render",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "unknown",
@@ -52488,20 +52495,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:breaks)['\"`]|(?:^|[\\s{,;])\\w*(?:breaks)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:breaks)"
+            "ChartKitChartSpecV1.axes.y.breaks"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:breaks)['\"`]|(?:^|[\\s{,;])\\w*(?:breaks)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:breaks)"
+              "kind": "render",
+              "path": "ChartKitChartSpecV1.axes.y.breaks",
+              "loc": "chartkit:packages/core/src/svg.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "axes.y.breaks is a list of {from, to}, up to three gaps. Ticks inside a gap are omitted and the spine draws a zigzag. Overlapping gaps warn CK3069. from must be below to (CK3061).",
+          "verified": "render",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "none",
@@ -53201,14 +53209,21 @@
       "agentRelevance": 1,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:offset)['\"`]|(?:^|[\\s{,;])\\w*(?:offset)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:offset)"
+            "ChartKitChartSpecV1.axes.x.crosses",
+            "ChartKitChartSpecV1.axes.y.offset"
           ],
-          "evidence": [],
-          "note": "probe hit reviewed: match in React animation hook",
-          "verified": "source-review",
+          "evidence": [
+            {
+              "kind": "render",
+              "path": "ChartKitChartSpecV1.axes.x.crosses",
+              "loc": "chartkit:packages/core/src/renderers/cartesian.ts"
+            }
+          ],
+          "note": "axes.x.crosses is the y value the x axis passes through, so 0 draws it through zero. axes.y.crosses needs a quantitative x (CK3060). axes.y.offset shifts the axis in px, from -80 to 80. position zero, and the keys zero, origin, and axisAtZero, repair to crosses (CK3068). axisOffset repairs to offset (CK3071).",
+          "verified": "render",
           "strength": "strong"
         },
         "chartjs": {
@@ -56935,20 +56950,21 @@
       "agentRelevance": 3,
       "cells": {
         "chartkit": {
-          "status": "partial",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "ChartKitChartSpecV1.encoding.y.format"
+            "ChartKitChartSpecV1.encoding.y.format.specifier",
+            "ChartKitChartSpecV1.tooltip.template"
           ],
           "evidence": [
             {
-              "kind": "dts-path",
-              "path": "ChartKitChartSpecV1.encoding.y.format",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:136"
+              "kind": "render",
+              "path": "ChartKitChartSpecV1.encoding.y.format.specifier",
+              "loc": "chartkit:packages/core/src/format.ts"
             }
           ],
-          "note": "tooltip reuses the channel format, and a tooltip.fields item can set its own format preset",
-          "verified": "dts-path",
+          "note": "A format preset, or {specifier} for .2f, ,.0f, $,.0f, .1%, .2e, +.1f, and s. tooltip.fields[].unit and tooltip.template with {x}, {name}, {value}, {unit}, and data field names. A d3-style string repairs to {specifier}. An unknown pattern is CK3058. A missing template token is CK3059.",
+          "verified": "render",
           "strength": "strong"
         },
         "chartjs": {
@@ -58442,13 +58458,22 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "unknown",
+          "status": "native",
           "tier": null,
-          "apiPaths": [],
-          "evidence": [],
-          "note": "",
-          "verified": "unverified",
-          "strength": "unknown"
+          "apiPaths": [
+            "ChartKitChartSpecV1.tooltip.pin",
+            "ChartKitChartSpecV1.tooltip.hit"
+          ],
+          "evidence": [
+            {
+              "kind": "render",
+              "path": "ChartKitChartSpecV1.tooltip.pin",
+              "loc": "chartkit:packages/core/src/interact.ts"
+            }
+          ],
+          "note": "tooltip.pin keeps the tooltip after a tap until Escape or a second tap. tooltip.hit is the hit target in px, from 8 to 48, and 18 when pin is set and hit is omitted. pinTooltip and hitSize repair to pin and hit (CK3067).",
+          "verified": "render",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "native",
@@ -69340,20 +69365,21 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "partial",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "ChartKitChartSpecV1.animation.duration"
+            "ChartKitChartSpecV1.animation.duration",
+            "ChartKitChartSpecV1.animation.easing=spring"
           ],
           "evidence": [
             {
-              "kind": "dts-path",
+              "kind": "render",
               "path": "ChartKitChartSpecV1.animation.duration",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:407"
+              "loc": "chartkit:packages/core/src/interact.ts"
             }
           ],
-          "note": "duration works (client interact); easing warns CK3012 since PR #16",
-          "verified": "dts-path",
+          "note": "animation.duration is milliseconds. 0 disables the fade. animation.easing is linear, ease-out, ease-in-out, or spring, and the curve is applied. Reduced motion and series over 2000 points skip it. ease and easeOut repair to ease-out (CK3066).",
+          "verified": "render",
           "strength": "strong"
         },
         "chartjs": {

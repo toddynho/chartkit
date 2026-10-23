@@ -6,24 +6,11 @@ Markers or bubbles at coordinates
 
 Matrix status: `native`. Verification: `source-review` (strong).
 
-`@chartkitdev/geo` draws `type: "map-points"`. Latitude, longitude, size, and colour are fields. The largest points can be labelled. The same atlas chunks as the choropleth are the basemap. Unpublished, and not in the line or `all` bundles.
+@chartkitdev/geo, unpublished, not in the line or all bundles. No tiles, no pan/zoom, no US counties, no NUTS-2. Small states missing from Natural Earth 110m, including Malta, are points.
 
-This ties libraries whose point maps are native. Nivo and visx are manual, so those rows rank as a ChartKit win. There is still no tile layer (`type.map.tiles` stays none) and no pan or zoom.
+Source: packages/geo/src/render.ts
 
-## ChartKit spec
-
-```json
-{
-  "version": "1",
-  "type": "map-points",
-  "data": [{ "name": "Tokyo", "lat": 35.7, "lon": 139.7, "pop": 37 }],
-  "encoding": { "latitude": "lat", "longitude": "lon", "size": "pop", "color": "pop", "label": "name" },
-  "mark": { "atlas": "world", "labelCount": 5 },
-  "a11y": { "alt": "Tokyo is the largest bubble." }
-}
-```
-
-Rendered by `@chartkitdev/geo`, not by core `validate()` / `render()`.
+No spec snippet from core `validate()`. `@chartkitdev/geo` renders this type. The package is unpublished and is not in the line or all bundles. Its own `validate()` reports CK3050–CK3056.
 
 ## Other libraries
 
@@ -50,6 +37,6 @@ Rendered by `@chartkitdev/geo`, not by core `validate()` / `render()`.
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~geoView | dts-grep (weak) | @antv/g2/lib/index.d.ts:184 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against ddab4856d750.
 
 https://chartkit.dev/features.json

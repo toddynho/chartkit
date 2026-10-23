@@ -1,14 +1,55 @@
 # Axis offset / origin crossing
 
-ChartKit: **none**
+ChartKit: **native**
 
 Move axis to cross at zero or offset it from the plot
 
-Matrix status: `none`. Verification: `source-review` (strong).
+Matrix status: `native`. Verification: `render` (strong).
 
-probe hit reviewed: match in React animation hook
+axes.x.crosses is the y value the x axis passes through, so 0 draws it through zero. axes.y.crosses needs a quantitative x (CK3060). axes.y.offset shifts the axis in px, from -80 to 80. position zero, and the keys zero, origin, and axisAtZero, repair to crosses (CK3068). axisOffset repairs to offset (CK3071).
 
-No spec snippet. ChartKit does not support this feature.
+Source: chartkit:packages/core/src/renderers/cartesian.ts
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "line",
+  "data": [
+    {
+      "quarter": "Q1",
+      "units": 40
+    },
+    {
+      "quarter": "Q2",
+      "units": 55
+    }
+  ],
+  "encoding": {
+    "x": "quarter",
+    "y": "units"
+  },
+  "a11y": {
+    "alt": "Units rose in Q2."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  },
+  "axes": {
+    "x": {
+      "crosses": 0,
+      "line": true
+    },
+    "y": {
+      "offset": 12
+    }
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -35,6 +76,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~position | dts-grep (weak) | @antv/g2/lib/index.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against ddab4856d750.
 
 https://chartkit.dev/features.json

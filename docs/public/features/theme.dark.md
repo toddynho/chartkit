@@ -6,7 +6,7 @@ Dark theme / auto light-dark
 
 Matrix status: `native`. Verification: `dts-path` (strong).
 
-dark preset, or auto light/dark by default; theme.mode dark uses the midnight colour base and theme.mode light uses the soft colour base
+dark preset, or auto light/dark by default; theme.mode light|dark warns CK3012 since PR #16
 
 Source: chartkit:packages/core/src/generated/schema.ts:315
 
@@ -70,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | ~darkMode\|dark | dts-grep (weak) | mermaid/dist/utils.d.ts:25 |
 | AntV G2 | native | ~dark | dts-grep (weak) | @antv/g2/lib/index.d.ts:106 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against ddab4856d750.
 
 https://chartkit.dev/features.json

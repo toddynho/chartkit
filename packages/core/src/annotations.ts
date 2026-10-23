@@ -63,15 +63,43 @@ export function annotationLayers(notes: unknown, geom: AnnotationGeom): { under:
   if (Array.isArray(notes)) {
     for (const item of notes) {
       if (!isRecord(item)) continue;
-      if (item.type === "band") rangeBand(item, geom, under, over, boxes);
-      else if (item.type === "rule") rule(item, geom, over, boxes);
-      else if (item.type === "text") textNote(item, geom, over);
-      else if (item.type === "trendline") trend(item, geom, over, boxes);
-      else if (item.type === "regression") regress(item, geom, under, over, boxes);
-      else if (item.type === "marker") callout(item, geom, over, boxes);
+      const low = typeof item.z === "number" && item.z < 0;
+      const high = typeof item.z === "number" && item.z >= 0;
+      const below = low ? under : over;
+      if (item.type === "band") {
+        const sink = high ? over : under;
+        const at = sink.length;
+        rangeBand(item, geom, sink, high ? over : over, boxes);
+        stampZ(sink, at, item.z);
+      } else if (item.type === "rule") {
+        const at = below.length;
+        rule(item, geom, below, boxes);
+        stampZ(below, at, item.z);
+      } else if (item.type === "text") {
+        const at = below.length;
+        textNote(item, geom, below);
+        stampZ(below, at, item.z);
+      } else if (item.type === "trendline") {
+        const at = below.length;
+        trend(item, geom, below, boxes);
+        stampZ(below, at, item.z);
+      } else if (item.type === "regression") {
+        const at = (low ? under : over).length;
+        regress(item, geom, low ? under : under, low ? under : over, boxes);
+        stampZ(low ? under : over, at, item.z);
+      } else if (item.type === "marker") {
+        const at = below.length;
+        callout(item, geom, below, boxes);
+        stampZ(below, at, item.z);
+      }
     }
   }
   return { under: under.join(""), over: over.join("") };
+}
+
+function stampZ(bucket: string[], at: number, z: unknown): void {
+  if (typeof z !== "number" || !Number.isFinite(z) || !bucket[at]) return;
+  bucket[at] = bucket[at].replace(/<(line|rect|path|text|circle|g)\b/, (tag) => `${tag} data-ck-z="${n(z)}"`);
 }
 
 /** Category index, or the numeric x already stored on a series. Nulls drop out. */
@@ -191,8 +219,8 @@ function shade(
   if (a === null || b === null) return;
   const rect = clipRect(strip(axis, a, b, geom.plot, geom.flip), geom.plot);
   if (!rect) return;
-  const opacity = typeof item.opacity === "number" ? item.opacity : 0.12;
-  const color = markColor(item.color, geom.preset);
+  const opacity = typeof item.opacity === "number" ? item.opacity : bandDark(geom.preset) ? 0.28 : 0.16;
+  const color = bandInk(item.color, geom.preset);
   under.push(`<rect data-ck-annotation="${kind}" x="${n(rect.x)}" y="${n(rect.y)}" width="${n(rect.w)}" height="${n(rect.h)}" fill="${color}" fill-opacity="${n(opacity)}" stroke="none" />`);
   if (typeof item.label === "string" && item.label) {
     const vertical = (axis === "x") !== Boolean(geom.flip);
@@ -341,7 +369,7 @@ function callout(item: Record<string, unknown>, geom: AnnotationGeom, over: stri
   const h = 22;
   const dx = typeof item.dx === "number" ? item.dx : null;
   const dy = typeof item.dy === "number" ? item.dy : null;
-  const box = placeBox(geom.plot, px, py, w, h, dx, dy, boxes);
+  const box = placeBox(geom.plot, px, py, w, h, dx, dy, boxes, seriesSegments(geom));
   boxes.push(box);
   const [lx, ly] = aim(px, py, box);
   const { preset } = geom;
@@ -353,44 +381,109 @@ function callout(item: Record<string, unknown>, geom: AnnotationGeom, over: stri
   );
 }
 
-function placeBox(plot: PlotBox, px: number, py: number, w: number, h: number, dx: number | null, dy: number | null, taken: Box[]): Box {
+interface Seg {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+function seriesSegments(geom: AnnotationGeom): Seg[] {
+  const list = geom.samples;
+  if (!list) return [];
+  const out: Seg[] = [];
+  for (let s = 0; s < list.length; s++) {
+    const series = list[s];
+    if (!series) continue;
+    let prev: { x: number; y: number } | null = null;
+    for (let i = 0; i < series.pts.length; i++) {
+      const pt = series.pts[i];
+      if (!pt) continue;
+      const x = geom.xAt(pt.x);
+      const y = geom.yAt(pt.y, series.axis);
+      if (x === null || y === null) {
+        prev = null;
+        continue;
+      }
+      if (prev) out.push({ x1: prev.x, y1: prev.y, x2: x, y2: y });
+      prev = { x, y };
+    }
+  }
+  return out;
+}
+
+function placeBox(plot: PlotBox, px: number, py: number, w: number, h: number, dx: number | null, dy: number | null, taken: Box[], segs: Seg[]): Box {
   const point: Box = { x: px - 8, y: py - 8, w: 16, h: 16 };
-  const gap = 8;
+  // The label may sit just above the plot. The peak is often on the top edge, and the note is drawn outside the clip.
+  const ceiling = Math.max(4, plot.top - 30);
   const options: Box[] = [];
-  if (dx !== null || dy !== null) options.push({ x: px + (dx ?? 12), y: py + (dy ?? -h - gap), w, h });
-  options.push(
-    { x: px + gap, y: py - h - gap, w, h },
-    { x: px - w - gap, y: py - h - gap, w, h },
-    { x: px + gap, y: py + gap, w, h },
-    { x: px - w - gap, y: py + gap, w, h },
-    { x: px - w / 2, y: py - h - gap, w, h },
-    { x: px - w / 2, y: py + gap, w, h },
-    { x: px + gap, y: py - h / 2, w, h },
-    { x: px - w - gap, y: py - h / 2, w, h },
-  );
+  if (dx !== null || dy !== null) options.push({ x: px + (dx ?? 10), y: py + (dy ?? -h - 10), w, h });
+  for (const gap of [8, 18, 32, 48]) {
+    options.push({ x: px - w - gap, y: py - h - gap, w, h });
+    options.push({ x: px - w / 2, y: py - h - gap, w, h });
+    options.push({ x: px + gap, y: py - h - gap, w, h });
+    options.push({ x: px - w - gap, y: py - h * 0.5, w, h });
+  }
+  const blocked = (box: Box) => taken.some((other) => hit(box, other)) || hit(box, point) || segs.some((seg) => segHits(box, seg, 4));
+  const onSheet = (box: Box) => box.x >= plot.left + 1 && box.y >= ceiling && box.x + box.w <= plot.right - 1 && box.y + box.h <= plot.bottom - 1;
   for (const box of options) {
-    if (!fits(plot, box)) continue;
-    if (taken.some((other) => hit(box, other)) || hit(box, point)) continue;
+    if (!onSheet(box) || blocked(box)) continue;
     return box;
   }
-  let best = clampBox(plot, options[0] ?? { x: px, y: py, w, h });
+  let best = { x: px - w - 8, y: Math.max(ceiling, py - h - 8), w, h };
   let score = Infinity;
   for (const raw of options) {
-    const box = clampBox(plot, raw);
-    let area = hit(box, point) ? 4 : 0;
-    for (const other of taken) if (hit(box, other)) area += 1;
-    if (area < score) {
-      score = area;
+    const box = {
+      x: Math.min(Math.max(plot.left + 2, raw.x), plot.right - w - 2),
+      y: Math.min(Math.max(ceiling, raw.y), plot.bottom - h - 2),
+      w,
+      h,
+    };
+    const dist = Math.hypot(box.x + w / 2 - px, box.y + h / 2 - py);
+    let penalty = 0;
+    if (hit(box, point)) penalty += 500;
+    for (const other of taken) if (hit(box, other)) penalty += 120;
+    for (const seg of segs) if (segHits(box, seg, 4)) penalty += 160;
+    if (dist + penalty < score) {
+      score = dist + penalty;
       best = box;
     }
   }
   return best;
 }
 
+function segHits(box: Box, seg: Seg, pad: number): boolean {
+  const left = box.x - pad;
+  const top = box.y - pad;
+  const right = box.x + box.w + pad;
+  const bottom = box.y + box.h + pad;
+  const inside = (x: number, y: number) => x >= left && x <= right && y >= top && y <= bottom;
+  if (inside(seg.x1, seg.y1) || inside(seg.x2, seg.y2)) return true;
+  return (
+    segCross(seg.x1, seg.y1, seg.x2, seg.y2, left, top, right, top) ||
+    segCross(seg.x1, seg.y1, seg.x2, seg.y2, left, bottom, right, bottom) ||
+    segCross(seg.x1, seg.y1, seg.x2, seg.y2, left, top, left, bottom) ||
+    segCross(seg.x1, seg.y1, seg.x2, seg.y2, right, top, right, bottom)
+  );
+}
+
+function segCross(ax: number, ay: number, bx: number, by: number, cx: number, cy: number, dx: number, dy: number): boolean {
+  const abx = bx - ax;
+  const aby = by - ay;
+  const cdx = dx - cx;
+  const cdy = dy - cy;
+  const den = abx * cdy - aby * cdx;
+  if (den === 0) return false;
+  const t = ((cx - ax) * cdy - (cy - ay) * cdx) / den;
+  const u = ((cx - ax) * aby - (cy - ay) * abx) / den;
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+}
+
 function placeLineLabel(text: string, x: number, y: number, _axis: "x" | "y" | "y2", geom: AnnotationGeom, color: string, kind: string, over: string[], boxes: Box[]): void {
   const w = text.length * 6.3;
   const h = 14;
   const point: Box = { x: x - 6, y: y - 6, w: 12, h: 12 };
+  const segs = seriesSegments(geom);
   const options: Box[] = [];
   for (const lift of [14, 30, 46]) {
     for (const gap of [10, 24, 40]) {
@@ -402,7 +495,7 @@ function placeLineLabel(text: string, x: number, y: number, _axis: "x" | "y" | "
   let chosen: Box | null = null;
   for (const box of options) {
     if (!fits(geom.plot, box)) continue;
-    if (hit(box, point) || boxes.some((other) => hit(box, other))) continue;
+    if (hit(box, point) || boxes.some((other) => hit(box, other)) || segs.some((seg) => segHits(box, seg, 6))) continue;
     chosen = box;
     break;
   }
@@ -617,6 +710,16 @@ function inside(x: number, y: number, plot: PlotBox): [number, number] {
 function dashAttr(dash: unknown, fallback: "solid" | "dashed" | "dotted"): string {
   const kind = dash === "solid" || dash === "dashed" || dash === "dotted" ? dash : fallback;
   return kind === "dashed" ? ' stroke-dasharray="4 3"' : kind === "dotted" ? ' stroke-dasharray="1.5 3"' : "";
+}
+
+function bandDark(preset: PresetTokens): boolean {
+  return preset.background === "#0c0c0c" || preset.text === "#ffffff";
+}
+
+/** A neutral wash. Accent matches the first series, so an uncoloured band disappears into it. */
+function bandInk(color: unknown, preset: PresetTokens): string {
+  if (typeof color === "string" && color.length > 0) return paint(color, preset, 0);
+  return cssVar("muted", preset.muted);
 }
 
 function markColor(color: unknown, preset: PresetTokens): string {

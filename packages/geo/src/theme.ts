@@ -69,7 +69,11 @@ export function chromeFor(theme: unknown): Chrome {
   const named = NAMED[name];
   if (!named) return SOFT;
   const chrome = solid(named[0], named[1], named[2], DARK.has(name));
-  // Cool slate on Midnight water #12212e. The warm paper mix reads as taupe there.
-  if (name === "midnight") chrome.land = "#3e5264";
+  // Midnight water is the theme background token, the same #0c0c0c as the chart card.
+  // Land stays a cool slate; the warm paper mix reads as taupe on that black.
+  if (name === "midnight") {
+    chrome.water = named[0];
+    chrome.land = "#3e5264";
+  }
   return chrome;
 }

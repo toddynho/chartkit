@@ -1,7 +1,7 @@
 import { formatNumber, hexRange, paintScale, parseFormat, POINT_PALETTE, sizeStops, type PaintScale, type ScaleFormat } from "./color";
 import { directoryIndex, matchRegion, type DirectoryEntry } from "./match";
 import { albersUsa, equalEarth, equirectangular, fitProject, mercator, type Box, type InsetFrame } from "./project";
-import { esc, fieldName, isRecord, num, resolveEncoding, resolveMark, round, rowsOf, sizeOf } from "./spec";
+import { esc, fieldName, isRecord, num, resolveEncoding, resolveMark, round, rowsOf, sizeOf, tooltipColumns, tooltipExtra } from "./spec";
 import { chromeFor, type Chrome } from "./theme";
 import { regionsFromGeoJSON, regionsFromTopology, type GeoRegion, type LonLat } from "./topo";
 import type { AtlasName, ColorScaleName } from "./types";
@@ -269,13 +269,25 @@ function regionHits(rows: Record<string, unknown>[], regionField: string | null,
   return hits;
 }
 
-function regionMarkup(regions: GeoRegion[], project: Projector, hits: Map<string, Hit>, scale: PaintScale | null, format: ScaleFormat, choropleth: boolean): string {
+function regionMarkup(
+  regions: GeoRegion[],
+  project: Projector,
+  hits: Map<string, Hit>,
+  scale: PaintScale | null,
+  format: ScaleFormat,
+  choropleth: boolean,
+  rows: Record<string, unknown>[],
+  tips: string[],
+  skip: Set<string>,
+): string {
   return regions
     .map((region) => {
       const hit = hits.get(region.id);
       const fill = hit && scale ? scale.fill(hit.value) : "";
       const shown = hit ? formatNumber(hit.value, format) : choropleth ? "no data" : region.name;
-      const label = choropleth ? `${region.name}, ${shown}` : region.name;
+      const base = choropleth ? `${region.name}, ${shown}` : region.name;
+      const extra = hit ? tooltipExtra(rows[hit.index] ?? {}, tips, skip) : "";
+      const label = extra ? `${base}, ${extra}` : base;
       const cls = choropleth && !hit ? "ck-geo-region ck-geo-nodata" : "ck-geo-region";
       const painted = fill ? ` fill="${fill}"` : "";
       const value = hit ? ` data-ck-value="${hit.value}" data-ck-i="${hit.index}"` : ` data-ck-i="-1"`;
@@ -300,6 +312,7 @@ interface Dot {
   color: string;
   label: string;
   value: number | null;
+  detail: string;
 }
 
 interface Channel {
@@ -322,7 +335,7 @@ function channelOf(value: unknown): Channel {
   return { field: null, format: {}, title: "" };
 }
 
-function dotsOf(rows: Record<string, unknown>[], encoding: Record<string, unknown>, chrome: Chrome): { dots: Dot[]; scale: PaintScale | null } {
+function dotsOf(rows: Record<string, unknown>[], encoding: Record<string, unknown>, chrome: Chrome, tips: string[]): { dots: Dot[]; scale: PaintScale | null } {
   const latField = fieldName(encoding.latitude);
   const lonField = fieldName(encoding.longitude);
   const sizeChannel = channelOf(encoding.size);
@@ -362,7 +375,8 @@ function dotsOf(rows: Record<string, unknown>[], encoding: Record<string, unknow
       color = categories.get(key) ?? chrome.accent;
       value = num(dot.colorRaw);
     }
-    return { index: dot.index, lon: dot.lon, lat: dot.lat, size: dot.size, color, label: dot.label, value };
+    const skip = new Set([latField, lonField, sizeField, colorField, labelField].filter((field): field is string => !!field));
+    return { index: dot.index, lon: dot.lon, lat: dot.lat, size: dot.size, color, label: dot.label, value, detail: tooltipExtra(rows[dot.index] ?? {}, tips, skip) };
   });
   if (sameField) {
     const sizes = sizeStops(draft.map((dot) => dot.size), sizeChannel.format.suffix || sizeChannel.format.percent ? sizeChannel.format : colorChannel.format);
@@ -416,7 +430,7 @@ function pointMarkup(dots: Dot[], point: (lon: number, lat: number) => [number, 
     const t = (dot.size - lo) / span;
     const radius = 3.5 + Math.sqrt(Math.max(0, t)) * 16;
     const name = dot.label || `${dot.lat}, ${dot.lon}`;
-    const text = dot.value == null ? name : `${name}, ${dot.value}`;
+    const text = [dot.value == null ? name : `${name}, ${dot.value}`, dot.detail].filter(Boolean).join(", ");
     circles.push({ x, y, r: radius, dot });
     marks += `<circle class="ck-geo-point" cx="${round(x)}" cy="${round(y)}" r="${round(radius)}" fill="${dot.color}" data-ck-i="${dot.index}" data-ck-id="${dot.index}" data-ck-name="${esc(name)}"${dot.value == null ? "" : ` data-ck-value="${dot.value}"`} tabindex="0" aria-label="${esc(text)}"><title>${esc(text)}</title></circle>`;
   }
@@ -509,7 +523,8 @@ export async function render(spec: unknown): Promise<string> {
   const kind: ColorScaleName = mark.scale === "diverging" || mark.scale === "threshold" ? mark.scale : "sequential";
   const thresholds = Array.isArray(mark.thresholds) ? mark.thresholds.filter((item): item is number => typeof item === "number") : undefined;
   const choroplethScale = spec.type === "choropleth" && hits.size ? paintScale(kind, [...hits.values()].map((hit) => hit.value), thresholds, colorChannel.format, legendTitle, kind === "sequential" ? colorChannel.range : undefined) : null;
-  const points = dotsOf(rows, encoding, chrome);
+  const tips = tooltipColumns(spec);
+  const points = dotsOf(rows, encoding, chrome, tips);
   const scale = choroplethScale ?? points.scale;
   const showLegend = mark.legend !== false && !!scale && (scale.stops.length > 0 || !!scale.swatches?.length || !!scale.sizes?.length);
   const bottomLegend = showLegend && scale ? legendSide(spec) === "bottom" : false;
@@ -532,7 +547,8 @@ export async function render(spec: unknown): Promise<string> {
   if (drawn?.grid) body += graticule(drawn.point);
   if (drawn) {
     for (const frame of drawn.frames) body += `<rect class="ck-geo-inset" x="${round(frame.x)}" y="${round(frame.y)}" width="${round(frame.w)}" height="${round(frame.h)}"/>`;
-    body += regionMarkup(loaded.regions, drawn.project, hits, choroplethScale, colorChannel.format, spec.type === "choropleth");
+    const skip = new Set([regionField, valueField].filter((field): field is string => !!field));
+    body += regionMarkup(loaded.regions, drawn.project, hits, choroplethScale, colorChannel.format, spec.type === "choropleth", rows, tips, skip);
   }
   if (drawn && points.dots.length) body += pointMarkup(points.dots, drawn.point, num(mark.labelCount) ?? 12, box);
   body += `</g>`;

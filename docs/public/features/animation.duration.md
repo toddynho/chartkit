@@ -1,14 +1,14 @@
 # Duration and easing
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Control animation length and curve
 
-Matrix status: `partial`. Verification: `dts-path` (strong).
+Matrix status: `native`. Verification: `render` (strong).
 
-duration works (client interact); easing warns CK3012 since PR #16
+animation.duration is milliseconds. 0 disables the fade. animation.easing is linear, ease-out, ease-in-out, or spring, and the curve is applied. Reduced motion and series over 2000 points skip it. ease and easeOut repair to ease-out (CK3066).
 
-Source: chartkit:packages/core/src/generated/schema.ts:407
+Source: chartkit:packages/core/src/interact.ts
 
 ## ChartKit spec
 
@@ -38,7 +38,8 @@ Source: chartkit:packages/core/src/generated/schema.ts:407
     "height": 260
   },
   "animation": {
-    "duration": 200
+    "duration": 280,
+    "easing": "spring"
   }
 }
 ```
@@ -70,6 +71,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~duration\|easing | dts-grep (weak) | @antv/g2/lib/animation/types.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 40b908be291d.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against ddab4856d750.
 
 https://chartkit.dev/features.json
