@@ -39,6 +39,78 @@ function numericFields(rows: Record<string, unknown>[]): string[] {
   return keys;
 }
 
+/**
+ * A missing or distant atlas name follows the points or the region keys.
+ * All-US cities suggest us. A close typo such as usa still wins on spelling.
+ */
+function suggestAtlasFor(
+  atlas: string,
+  type: unknown,
+  rows: Record<string, unknown>[],
+  encoding: Record<string, unknown>,
+): { name: string; distance: number } {
+  const textual = suggestAtlas(atlas || "world");
+  const fromData = atlasFromData(type, rows, encoding);
+  if (fromData && (!atlas || textual.distance > 2)) return { name: fromData, distance: 0 };
+  return textual;
+}
+
+function atlasFromData(type: unknown, rows: Record<string, unknown>[], encoding: Record<string, unknown>): string | null {
+  if (type === "map-points") return atlasFromPoints(rows, encoding);
+  if (type === "choropleth") return atlasFromRegions(rows, fieldName(encoding.region) ?? fieldName(encoding.x));
+  return null;
+}
+
+function atlasFromPoints(rows: Record<string, unknown>[], encoding: Record<string, unknown>): string | null {
+  const latField = fieldName(encoding.latitude);
+  const lonField = fieldName(encoding.longitude);
+  if (!latField || !lonField) return null;
+  const points: Array<[number, number]> = [];
+  for (const row of rows) {
+    const lat = num(row[latField]);
+    const lon = num(row[lonField]);
+    if (lat == null || lon == null) continue;
+    points.push(Math.abs(lat) > 90 && Math.abs(lon) <= 90 ? [lon, lat] : [lat, lon]);
+  }
+  if (!points.length) return null;
+  if (points.every(([lat, lon]) => inUs(lat, lon))) return "us";
+  if (points.every(([lat, lon]) => inCanada(lat, lon))) return "canada";
+  if (points.every(([lat, lon]) => inEu(lat, lon))) return "eu";
+  return null;
+}
+
+function inUs(lat: number, lon: number): boolean {
+  const continental = lat >= 24.5 && lat <= 49.4 && lon >= -125 && lon <= -66.5;
+  const alaska = lat >= 51 && lat <= 71.5 && lon >= -170 && lon <= -129;
+  const hawaii = lat >= 18.5 && lat <= 22.5 && lon >= -160.5 && lon <= -154.5;
+  return continental || alaska || hawaii;
+}
+
+function inCanada(lat: number, lon: number): boolean {
+  return lat >= 41.6 && lat <= 83 && lon >= -141 && lon <= -52 && !inUs(lat, lon);
+}
+
+function inEu(lat: number, lon: number): boolean {
+  return lat >= 34 && lat <= 71.5 && lon >= -11 && lon <= 40 && !inUs(lat, lon);
+}
+
+function atlasFromRegions(rows: Record<string, unknown>[], field: string | null): string | null {
+  if (!field) return null;
+  const keys: string[] = [];
+  for (const row of rows) {
+    const raw = row[field];
+    if (raw == null || raw === "") continue;
+    const key = String(raw);
+    if (!keys.includes(key)) keys.push(key);
+  }
+  if (!keys.length) return null;
+  for (const name of ["us", "canada", "eu", "world"]) {
+    const index = directoryIndex(name);
+    if (keys.every((key) => matchRegion(index, key))) return name;
+  }
+  return null;
+}
+
 function column(rows: Record<string, unknown>[], field: string): number[] {
   const out: number[] = [];
   for (const row of rows) {
@@ -67,7 +139,7 @@ export function validate(spec: unknown): ValidationResult {
   const knownAtlas = (ATLAS_NAMES as readonly string[]).includes(atlas);
 
   if (!inline && !knownAtlas) {
-    const suggestion = suggestAtlas(atlas || "world");
+    const suggestion = suggestAtlasFor(atlas, type, rows, encoding);
     const name = atlas || "missing";
     diagnostics.push({
       code: "CK3050",

@@ -1445,4 +1445,85 @@ describe("diagnostic codes", () => {
     expect(children.North.type).toBe("bar");
     expect(children.South.type).toBe("line");
   });
+
+  it("omits the outer type when layout.concat.views is set", () => {
+    const view = { type: "bar", data: base.data, encoding: base.encoding, a11y: base.a11y };
+    const spec = { version: "1", layout: { concat: { views: [view], direction: "vertical" } }, a11y: base.a11y };
+    const result = validate(spec);
+    expect(result.errors.find((item) => item.code === "CK1003" && item.message.includes("type"))).toBeUndefined();
+    expect(result.ok).toBe(true);
+  });
+
+  it("validates a concat donut view and a drilldown child as their own specs", () => {
+    const donut = {
+      type: "donut",
+      data: [
+        { plan: "Free", share: 70 },
+        { plan: "Pro", share: 30 },
+      ],
+      encoding: { label: "plan", value: "share" },
+      a11y: base.a11y,
+    };
+    const hosted = validate({
+      version: "1",
+      type: "bar",
+      data: base.data,
+      encoding: base.encoding,
+      a11y: base.a11y,
+      layout: { concat: { views: [donut] } },
+    });
+    const moved = hosted.errors.find((item) => item.code === "CK1009" && item.path === "/layout/concat/views/0/encoding");
+    expect(moved?.hint).toContain("encoding.x");
+    expect(moved?.fix).toEqual([
+      { op: "move", from: "/layout/concat/views/0/encoding/label", path: "/layout/concat/views/0/encoding/x" },
+      { op: "move", from: "/layout/concat/views/0/encoding/value", path: "/layout/concat/views/0/encoding/y" },
+    ]);
+    const repaired = repair({
+      version: "1",
+      type: "bar",
+      data: base.data,
+      encoding: base.encoding,
+      a11y: base.a11y,
+      layout: { concat: { views: [donut] } },
+    });
+    expect(repaired.ok).toBe(true);
+    const view = (repaired.spec as { layout: { concat: { views: { encoding: Record<string, string> }[] } } }).layout.concat.views[0];
+    expect(view?.encoding).toEqual({ x: "plan", y: "share" });
+
+    const child = validate({
+      ...base,
+      interaction: { drilldown: { children: { Feb: donut } } },
+    });
+    expect(child.errors.find((item) => item.path === "/interaction/drilldown/children/Feb/encoding")?.code).toBe("CK1009");
+  });
+
+  it("CK1002 moves axes min and max onto the encoding scale domain", () => {
+    const both = validate({ ...base, axes: { y: { min: 0, max: 20 }, x: { min: 1 } } });
+    const y = both.errors.find((item) => item.path === "/axes/y/min");
+    expect(y?.code).toBe("CK1002");
+    expect(y?.hint).toContain("encoding.y.scale.domain");
+    expect(y?.fix).toEqual([
+      { op: "remove", path: "/axes/y/min" },
+      { op: "remove", path: "/axes/y/max" },
+      { op: "replace", path: "/encoding/y", value: { field: "revenue", scale: { domain: [0, 20] } } },
+    ]);
+    const x = both.errors.find((item) => item.path === "/axes/x/min");
+    expect(x?.hint).toContain("encoding.x.scale.domain");
+    const fixed = repair({ ...base, axes: { y: { min: 0, max: 20, title: "Revenue" } } });
+    expect(fixed.ok).toBe(true);
+    expect((fixed.spec as { encoding: { y: { scale: { domain: number[] } } } }).encoding.y.scale.domain).toEqual([0, 20]);
+    expect((fixed.spec as { axes: { y: { title?: string; min?: number } } }).axes.y).toEqual({ title: "Revenue" });
+  });
+
+  it("allows encoding.tooltip on map types", () => {
+    const points = validate({
+      version: "1",
+      type: "map-points",
+      data: [{ city: "Chicago", lat: 41.88, lon: -87.63, pop: 2700000 }],
+      encoding: { latitude: "lat", longitude: "lon", tooltip: "pop" },
+      a11y: { alt: "Chicago is marked." },
+    });
+    expect(points.errors.filter((item) => item.code === "CK1002")).toEqual([]);
+    expect(points.ok).toBe(true);
+  });
 });

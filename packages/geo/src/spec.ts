@@ -24,6 +24,33 @@ export function resolveEncoding(spec: Record<string, unknown>): Record<string, u
   return encoding;
 }
 
+/** Columns a map hover should add. encoding.tooltip and tooltip.fields both count. */
+export function tooltipColumns(spec: Record<string, unknown>): string[] {
+  const names: string[] = [];
+  const push = (value: unknown) => {
+    if (typeof value === "string" && value) names.push(value);
+    else if (Array.isArray(value)) for (const item of value) push(item);
+    else if (isRecord(value)) {
+      if (typeof value.field === "string" && value.field) names.push(value.field);
+      if (Array.isArray(value.fields)) for (const item of value.fields) push(item);
+    }
+  };
+  if (isRecord(spec.encoding)) push(spec.encoding.tooltip);
+  if (isRecord(spec.tooltip)) push(spec.tooltip.fields);
+  return [...new Set(names)];
+}
+
+export function tooltipExtra(row: Record<string, unknown>, fields: string[], skip: Set<string>): string {
+  const parts: string[] = [];
+  for (const field of fields) {
+    if (skip.has(field)) continue;
+    const value = row[field];
+    if (value == null || value === "") continue;
+    parts.push(`${field} ${value}`);
+  }
+  return parts.join(", ");
+}
+
 export function rowsOf(spec: Record<string, unknown>): Record<string, unknown>[] {
   return Array.isArray(spec.data) ? spec.data.filter(isRecord) : [];
 }
