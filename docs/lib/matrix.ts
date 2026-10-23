@@ -73,6 +73,14 @@ export interface MatrixFile {
     unknown: number;
     byStatus: Record<string, number>;
   };
+  converters?: {
+    package: string;
+    published: boolean;
+    sources: string[];
+    demo: string;
+    guides: string[];
+    note: string;
+  };
 }
 
 const RANK: Record<string, number> = {

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ChartView } from "@/components/ChartView";
-import { headline } from "@/lib/benchmarks";
 import { heroSpec, chartTypes, examples } from "@/lib/specs";
 import { snippetsFor } from "@/lib/snippets";
 import { FrameworkTabs } from "@/components/FrameworkTabs";
@@ -35,31 +34,31 @@ export default function HomePage() {
       <section className="hero">
         <div>
           <p className="kicker">ChartKit v1</p>
-          <h1>Charts from one JSON spec.</h1>
+          <h1>Charts become data.</h1>
           <p className="lede">
-            Any framework. Built for agents. ChartKit is a fast, tiny charting library: one JSON spec renders SVG in
-            React, Vue, Svelte, or the plain DOM, and AI agents get it right.
+            An agent or your backend can write a chart. The spec is JSON, so a server, a database, an LLM, or Mermaid
+            can produce it. The same object renders in React, Vue, Svelte, vanilla JavaScript, and server SVG.
           </p>
           <div className="actions">
             <Link className="btn btn-primary" href="/docs">
               Get started
             </Link>
-            <Link className="btn btn-ghost" href="/examples">
-              Browse examples
+            <Link className="btn btn-ghost" href="/convert">
+              Convert a chart
             </Link>
           </div>
           <div className="stats">
-            <Link className="stat" href="/benchmarks">
-              <b>{headline.lineGzipLabel}</b>
-              <span>gzip, line chart. Loss to {headline.nextLib} at {headline.nextGzipBytes} B</span>
-            </Link>
-            <Link className="stat" href="/benchmarks">
-              <b>{headline.ssrLabel}</b>
-              <span>server render</span>
-            </Link>
             <Link className="stat" href="/benchmarks#agents">
               <b>20/42</b>
-              <span>no docs, first try. 42/42 with the docs</span>
+              <span>no docs, first try. Recharts, ECharts, and Chart.js were already 42/42</span>
+            </Link>
+            <Link className="stat" href="/benchmarks#agents">
+              <b>42/42</b>
+              <span>with the docs, first try. Mean 131.1 output tokens</span>
+            </Link>
+            <Link className="stat" href="/agents">
+              <b>repair()</b>
+              <span>no docs, 20/42 to 42/42, no model call</span>
             </Link>
           </div>
         </div>
@@ -67,6 +66,96 @@ export default function HomePage() {
       <div className="hero-stage">
         <LiveSpec spec={heroSpec} mode="hero" />
       </div>
+
+      <section className="section" aria-labelledby="why-switch">
+        <h2 id="why-switch">Why switch</h2>
+        <div className="grid-2">
+          <article className="card">
+            <h3>Agents get it right</h3>
+            <p>
+              Measured 2026-10-16 with claude-sonnet-4-5 at temperature 0, 42 tasks. ChartKit with no docs scored 20/42
+              on the first try. With llms.txt in the prompt it scored 42/42 on the first try, at a mean of 131.1 output
+              tokens. Recharts with its docs used a mean of 236.6 output tokens. <code>repair()</code> is a no-model
+              step: that no-docs run went from 20/42 to 42/42. Recharts, ECharts, and Chart.js scored 42/42 with no
+              docs. The eval was not re-run for round 13. The headline numbers use the full docs file.
+            </p>
+            <p>
+              <Link href="/benchmarks#agents">Methodology</Link>
+              {" · "}
+              <Link href="/agents">The agent loop</Link>
+            </p>
+          </article>
+          <article className="card">
+            <h3>Charts from anywhere</h3>
+            <p>
+              A spec can come from a server render, a database row, LLM output, or Mermaid. The page does not need a
+              new chart component for each of those sources.
+            </p>
+            <p>
+              <Link href="/docs/mermaid">Mermaid and Markdown</Link>
+              {" · "}
+              <Link href="/docs">Render a spec</Link>
+            </p>
+          </article>
+          <article className="card">
+            <h3>One spec</h3>
+            <p>
+              The same JSON renders in React, Vue, Svelte, vanilla JavaScript, and as server SVG. Adapters and the
+              server render share the object.
+            </p>
+            <p>
+              <Link href="/docs/react">React</Link>
+              {" · "}
+              <Link href="/docs/vue">Vue</Link>
+              {" · "}
+              <Link href="/docs/svelte">Svelte</Link>
+              {" · "}
+              <Link href="/docs/vanilla">Vanilla</Link>
+            </p>
+          </article>
+          <article className="card">
+            <h3>Easy restyling</h3>
+            <p>
+              Theme tokens restyle every chart that shares the spec. Soft is the default. Refined, editorial, and
+              midnight are built in. A brand palette overrides the tokens.
+            </p>
+            <p>
+              <Link href="/docs/theming">Theme tokens</Link>
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section className="section" aria-labelledby="switching">
+        <h2 id="switching">Switching is cheap</h2>
+        <p className="lede">Move one chart. Leave the rest of the page on the library it already uses.</p>
+        <div className="grid-3">
+          <article className="card">
+            <h3>Convert a config</h3>
+            <p>
+              Paste Chart.js, Recharts, or ECharts. The converter shows that library's chart beside the ChartKit chart,
+              with the spec, the warnings, and a diff.
+            </p>
+            <Link href="/convert">Open the converter</Link>
+          </article>
+          <article className="card">
+            <h3>Read the guide</h3>
+            <p>
+              <Link href="/docs/migrate/chartjs">Chart.js</Link>
+              {", "}
+              <Link href="/docs/migrate/recharts">Recharts</Link>
+              {", and "}
+              <Link href="/docs/migrate/echarts">ECharts</Link>
+              . Each guide lists what maps and what comes back as a warning.
+            </p>
+          </article>
+          <article className="card">
+            <h3>One chart at a time</h3>
+            <p>Render a single spec from React, Vue, Svelte, or vanilla. The other charts on the page can stay.</p>
+            <Link href="/docs">Getting started</Link>
+          </article>
+        </div>
+      </section>
 
       <section className="section">
         <h2>Soft, then the other looks</h2>
@@ -102,8 +191,9 @@ export default function HomePage() {
           <article className="card">
             <h3>repair()</h3>
             <p>
-              Applies the safe patches validate already produced. It does not invent data. The measured run was 20/42
-              on the first try with no docs, and 42/42 on the first try with the docs.
+              Applies the safe patches validate already produced. It does not invent data. With no docs, repair() takes
+              20/42 to 42/42 with no model call. With the docs, the first try is already 42/42. Recharts, ECharts, and
+              Chart.js were 42/42 with no docs.
             </p>
             <Link href="/agents">The agent loop</Link>
           </article>
