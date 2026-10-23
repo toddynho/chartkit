@@ -70,6 +70,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | ~dateFormat | dts-grep (weak) | mermaid/dist/diagrams/gantt/ganttDb.d.ts:9 gantt axis |
 | AntV G2 | native | ~time | dts-grep (weak) | @antv/g2/lib/index.d.ts:11 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 6ec84d7091db.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against c0ed28f0cadd.
 
 https://chartkit.dev/features.json

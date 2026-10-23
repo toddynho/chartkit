@@ -37,6 +37,6 @@ No spec snippet. This row is not a single option that `validate()` can show.
 | Mermaid (chart-ish diagrams only) | native | ~postRenderCallback | dts-grep (weak) | mermaid/dist/mermaid.d.ts:34 |
 | AntV G2 | native | ~afterrender\|on | dts-grep (weak) | @antv/g2/lib/index.d.ts:2 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 6ec84d7091db.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against c0ed28f0cadd.
 
 https://chartkit.dev/features.json
