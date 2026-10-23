@@ -489,6 +489,31 @@ export function DashboardStage({ board }: { board: Dashboard }) {
               <div className="dash-grid">{sideCards}</div>
             </>
           ) : null}
+          {board.slug !== "ledger" && board.slug !== "meter" && board.slug !== "wayline" && board.slug !== "keel" ? (
+            <div className="dash-grid">
+              <p className="dash-12 dash-range">{board.range}</p>
+              {board.charts.map((item) => {
+                if (item.spec.type === "choropleth" || item.spec.type === "map-points") {
+                  return <MapCard key={item.id} chart={item} theme={theme} narrow={narrow} />;
+                }
+                if (item.place === "metric") {
+                  return (
+                    <article key={item.id} className={`dash-card ${item.span} dash-score`}>
+                      <ChartHost spec={present(item.spec, theme, item.themes, narrow)} svg={item.svg} className="chart-host chart-preset" />
+                    </article>
+                  );
+                }
+                if (item.place === "hero") {
+                  return (
+                    <figure key={item.id} className={`dash-card ${item.span} dash-hero`}>
+                      <ChartView chart={item} theme={theme} narrow={narrow} spec={present(item.spec, theme, item.themes, narrow)} svg={item.svg} />
+                    </figure>
+                  );
+                }
+                return <Side key={item.id} chart={item} theme={theme} narrow={narrow} />;
+              })}
+            </div>
+          ) : null}
           {docs}
         </div>
       </div>
