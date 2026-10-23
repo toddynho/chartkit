@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export function RemoveWatermark({ action }: { action: string }) {
+export function RemoveWatermark({ action, priceLabel }: { action: string; priceLabel: string }) {
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
 
@@ -25,10 +25,13 @@ export function RemoveWatermark({ action }: { action: string }) {
   }
 
   return (
-    <div className="actions">
-      <button className="btn btn-primary" type="button" onClick={checkout} disabled={pending}>
-        {pending ? "Contacting Stripe..." : "Remove the watermark"}
-      </button>
+    <div>
+      <div className="actions">
+        <button className="btn btn-primary" type="button" onClick={checkout} disabled={pending}>
+          {pending ? "Contacting Stripe..." : "Remove the watermark"}
+        </button>
+        <p className="cloud-price">{priceLabel}</p>
+      </div>
       <p className="cloud-status" role="status">
         {message}
       </p>

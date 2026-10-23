@@ -20,18 +20,14 @@ export function stripeReady(config: StripeConfig): boolean {
   return Boolean(config.secretKey && config.priceId);
 }
 
-/** Creates a Checkout Session for the price Todd configures. Does not create a product or a price. */
+/** Creates a Checkout Session for the configured price. Does not create a product or a price. */
 export async function createCheckout(
   config: StripeConfig,
   origin: string,
   fetcher: typeof fetch,
 ): Promise<{ url: string } | { error: string; status: number }> {
   if (!config.secretKey || !config.priceId) {
-    return {
-      status: 503,
-      error:
-        "Stripe is not configured. Set STRIPE_SECRET_KEY, STRIPE_PRICE_ID, and STRIPE_WEBHOOK_SECRET. The price is a placeholder for Todd to decide. This service does not create a Stripe product or price.",
-    };
+    return { status: 503, error: "Pricing is not available yet." };
   }
   const body = new URLSearchParams();
   body.set("mode", config.mode);

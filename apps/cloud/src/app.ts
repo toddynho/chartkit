@@ -1,6 +1,6 @@
 import type { RepairResult } from "@chartkitdev/core/validate";
-import type { ChartStore } from "./charts.ts";
-import { memoryCharts } from "./charts.ts";
+import type { ChartStore, StoredChart } from "./charts.ts";
+import { chartStoreFromEnv } from "./charts.ts";
 import { cacheKey, drawSpec, parseSpec, readFrame, repairSpec, type Frame } from "./draw.ts";
 import { keyStoreFromEnv, type KeyStore } from "./keys.ts";
 import { clientIp, memoryLimiter, type RateLimiter } from "./limit.ts";
@@ -37,7 +37,7 @@ export interface CloudApp {
 
 export function createApp(deps: CloudDeps = {}): CloudApp {
   const keys = deps.keys ?? keyStoreFromEnv();
-  const charts = deps.charts ?? memoryCharts();
+  const charts = deps.charts ?? chartStoreFromEnv();
   const limiter = deps.limiter ?? memoryLimiter();
   const stripe = deps.stripe ?? stripeFromEnv();
   const fetcher = deps.fetch ?? fetch;
@@ -57,24 +57,24 @@ export function createApp(deps: CloudDeps = {}): CloudApp {
       const limited = limiter.take(clientIp(request));
       if (!limited.ok) return limitedResponse(request, limited.limit, limited.retryAfter);
 
-      if (path === "/render" && request.method === "GET") return renderGet(request, url, keys, cache);
+      if (path === "/render" && request.method === "GET") return renderGet(request, url, cache);
       if (path === "/render" && request.method === "POST") return renderPost(request, url, keys, charts, cache);
       if (path === "/charts" && request.method === "POST") return storeChart(request, url, keys, charts);
       if (path === "/validate" && request.method === "POST") return validatePost(request);
       const stored = path.match(/^\/c\/([A-Za-z0-9_-]{8,32})(?:\.(svg|png))?$/);
-      if (stored && request.method === "GET") return renderStored(request, url, stored[1] ?? "", stored[2], keys, charts, cache);
+      if (stored && request.method === "GET") return renderStored(request, url, stored[1] ?? "", stored[2], charts, cache);
       return json(404, { ok: false, error: "Not found." });
     },
   };
 }
 
-async function renderGet(request: Request, url: URL, keys: KeyStore, cache: Map<string, Cached>): Promise<Response> {
+async function renderGet(request: Request, url: URL, cache: Map<string, Cached>): Promise<Response> {
   const raw = url.searchParams.get("spec");
   if (!raw) return imageError(400, "Missing spec.", "Pass spec as JSON or base64url on the query string, or POST /render.");
   if (raw.length > MAX_BODY) return imageError(413, "Spec is too large for a GET URL.", "POST /charts stores the spec and returns a short image URL.");
   const spec = parseSpec(raw);
   if (spec instanceof Error) return imageError(400, "Spec is not JSON.", spec.message);
-  return renderKnown(request, url, spec, keys, cache, false);
+  return renderMarked(request, url, spec, cache);
 }
 
 async function renderPost(request: Request, url: URL, keys: KeyStore, charts: ChartStore, cache: Map<string, Cached>): Promise<Response> {
@@ -85,10 +85,11 @@ async function renderPost(request: Request, url: URL, keys: KeyStore, charts: Ch
   if (spec instanceof Error) return json(400, { ok: false, error: `spec is not JSON: ${spec.message}` });
   const frame = frameFrom(url, body);
   if (typeof frame === "string") return json(400, { ok: false, error: frame });
-  const access = await accessFor(request, url, keys, body.key);
+  const access = await accessFor(request, keys);
   frame.watermark = access.watermark;
   const drawn = await cachedDraw(spec, frame, access.state, cache);
-  const share = await shareUrl(url.origin, drawn.result.spec, frame, access, charts);
+  const marked = access.watermark || !drawn.result.ok;
+  const share = await shareUrl(url.origin, drawn.result.spec, frame, marked, charts);
   return json(
     drawn.status,
     {
@@ -97,7 +98,7 @@ async function renderPost(request: Request, url: URL, keys: KeyStore, charts: Ch
       width: drawn.width,
       height: drawn.height,
       url: share,
-      watermark: frame.watermark,
+      watermark: marked,
       svg: frame.format === "svg" ? drawn.svg : undefined,
       png: frame.format === "png" ? Buffer.from(drawn.body).toString("base64") : undefined,
       spec: drawn.result.spec,
@@ -118,19 +119,16 @@ async function storeChart(request: Request, url: URL, keys: KeyStore, charts: Ch
   if (spec instanceof Error) return json(400, { ok: false, error: `spec is not JSON: ${spec.message}` });
   const frame = frameFrom(url, body);
   if (typeof frame === "string") return json(400, { ok: false, error: frame });
-  const access = await accessFor(request, url, keys, body.key);
-  frame.watermark = false;
+  const access = await accessFor(request, keys);
+  frame.watermark = access.watermark;
   const drawn = await drawSpec(spec, { ...frame, format: "svg" });
   if (!drawn.result.ok) {
-    return json(422, payload(drawn, ""), metaHeaders(drawn.result, { "X-ChartKit-Watermark": "1", "Cache-Control": "no-store" }));
+    return json(422, payload(drawn, ""), metaHeaders(drawn.result, { "X-ChartKit-Watermark": "1", "X-ChartKit-Key": access.state, "Cache-Control": "no-store" }));
   }
-  const stored = await charts.put(drawn.result.spec);
-  const query = new URLSearchParams();
-  if (!access.watermark && access.key) query.set("key", access.key);
-  const suffix = query.toString() ? `?${query}` : "";
-  const svgUrl = `${url.origin}/c/${stored.id}.svg${suffix}`;
-  const pngUrl = `${url.origin}/c/${stored.id}.png${suffix}`;
-  return json(200, { ...payload(drawn, svgUrl), id: stored.id, url: svgUrl, svgUrl, pngUrl, watermark: access.watermark }, metaHeaders(drawn.result, { "X-ChartKit-Watermark": access.watermark ? "1" : "0", "Cache-Control": "no-store" }));
+  const stored = await charts.put(drawn.result.spec, !access.watermark);
+  const svgUrl = `${url.origin}/c/${stored.id}.svg`;
+  const pngUrl = `${url.origin}/c/${stored.id}.png${frame.scale !== 1 ? `?scale=${frame.scale}` : ""}`;
+  return json(200, { ...payload(drawn, svgUrl), id: stored.id, url: svgUrl, svgUrl, pngUrl, watermark: access.watermark }, metaHeaders(drawn.result, { "X-ChartKit-Watermark": access.watermark ? "1" : "0", "X-ChartKit-Key": access.state, "Cache-Control": "no-store" }));
 }
 
 async function validatePost(request: Request): Promise<Response> {
@@ -159,29 +157,34 @@ async function renderStored(
   url: URL,
   id: string,
   extension: string | undefined,
-  keys: KeyStore,
   charts: ChartStore,
   cache: Map<string, Cached>,
 ): Promise<Response> {
   const stored = await charts.get(id);
   if (!stored) return imageError(404, "Unknown chart.", "POST /charts returns the id.");
   if (extension) url.searchParams.set("format", extension);
-  return renderKnown(request, url, stored.spec, keys, cache, true);
+  url.searchParams.delete("key");
+  return renderImage(request, url, stored.spec, !stored.clean, cache, true);
 }
 
-async function renderKnown(
+/** GET /render is always marked. A key in the query or Authorization header is ignored. */
+async function renderMarked(request: Request, url: URL, spec: unknown, cache: Map<string, Cached>): Promise<Response> {
+  url.searchParams.delete("key");
+  return renderImage(request, url, spec, true, cache, false);
+}
+
+async function renderImage(
   request: Request,
   url: URL,
   spec: unknown,
-  keys: KeyStore,
+  watermark: boolean,
   cache: Map<string, Cached>,
   stored: boolean,
 ): Promise<Response> {
   const frame = readFrame(url.searchParams);
   if (typeof frame === "string") return imageError(400, "Bad render query.", frame);
-  const access = await accessFor(request, url, keys, undefined);
-  frame.watermark = access.watermark;
-  const drawn = await cachedDraw(spec, frame, access.state, cache);
+  frame.watermark = watermark;
+  const drawn = await cachedDraw(spec, frame, "absent", cache);
   if (request.headers.get("if-none-match") === `"${drawn.etag}"`) {
     return new Response(null, { status: 304, headers: drawn.headers });
   }
@@ -232,33 +235,38 @@ async function cachedDraw(spec: unknown, frame: Frame, state: string, cache: Map
   return { ...entry, headers };
 }
 
-async function accessFor(request: Request, url: URL, keys: KeyStore, bodyKey: unknown): Promise<{ watermark: boolean; key?: string; state: string }> {
-  const header = request.headers.get("authorization");
-  const bearer = header?.toLowerCase().startsWith("bearer ") ? header.slice(7).trim() : "";
-  const query = url.searchParams.get("key")?.trim() ?? "";
-  const fromBody = typeof bodyKey === "string" ? bodyKey.trim() : "";
-  const key = bearer || query || fromBody;
-  if (!key) return { watermark: true, state: "absent" };
-  const valid = await keys.check(key);
-  return valid ? { watermark: false, key, state: "valid" } : { watermark: true, key, state: "invalid" };
+/** Authorization is the only key. Query and body keys are ignored so they never land in an image URL. */
+async function accessFor(request: Request, keys: KeyStore): Promise<{ watermark: boolean; state: string }> {
+  const header = request.headers.get("authorization") ?? "";
+  const bearer = header.toLowerCase().startsWith("bearer ") ? header.slice(7).trim() : "";
+  if (!bearer) return { watermark: true, state: "absent" };
+  const valid = await keys.check(bearer);
+  return valid ? { watermark: false, state: "valid" } : { watermark: true, state: "invalid" };
 }
 
-async function shareUrl(origin: string, spec: unknown, frame: Frame, access: { watermark: boolean; key?: string }, charts: ChartStore): Promise<string> {
+async function shareUrl(origin: string, spec: unknown, frame: Frame, watermark: boolean, charts: ChartStore): Promise<string> {
+  if (!watermark) {
+    const stored = await charts.put(spec, true);
+    return storedUrl(origin, stored, frame);
+  }
   const json = JSON.stringify(spec);
+  if (json.length > 1800) {
+    const stored = await charts.put(spec, false);
+    return storedUrl(origin, stored, frame);
+  }
   const params = new URLSearchParams();
   params.set("format", frame.format);
-  if (frame.scale !== 1) params.set("scale", String(frame.scale));
-  if (!access.watermark && access.key) params.set("key", access.key);
-  if (json.length > 1800) {
-    const stored = await charts.put(spec);
-    const query = params.toString();
-    return `${origin}/c/${stored.id}.${frame.format}${query ? `?${query}` : ""}`;
-  }
   params.set("spec", json);
+  if (frame.scale !== 1) params.set("scale", String(frame.scale));
   if (frame.w) params.set("w", String(frame.w));
   if (frame.h) params.set("h", String(frame.h));
   if (frame.theme) params.set("theme", frame.theme);
   return `${origin}/render?${params}`;
+}
+
+function storedUrl(origin: string, stored: StoredChart, frame: Frame): string {
+  const scale = frame.scale !== 1 ? `?scale=${frame.scale}` : "";
+  return `${origin}/c/${stored.id}.${frame.format}${scale}`;
 }
 
 function payload(drawn: { result: RepairResult; width: number; height: number; svg: string }, url: string) {
@@ -316,7 +324,7 @@ async function successPage(url: URL, keys: KeyStore): Promise<Response> {
   const sessionId = url.searchParams.get("session_id") ?? "";
   const key = sessionId ? await keys.findBySession(sessionId) : null;
   const body = key
-    ? `<h1>Your ChartKit key</h1><p>Send it as <code>Authorization: Bearer</code> or <code>?key=</code>. It removes the chartkit.dev mark. Keep it private. The image URL will show the key if you put it in an img src.</p><pre>${escapeHtml(key)}</pre>`
+    ? `<h1>Your ChartKit key</h1><p>Send it as <code>Authorization: Bearer</code> on <code>POST /charts</code> or <code>POST /render</code>. The response URL is a stored chart with the mark removed. That URL has no secret. Keep this key private, and do not put it in an image address.</p><pre>${escapeHtml(key)}</pre>`
     : `<h1>Key not ready</h1><p>Stripe has not confirmed this checkout yet. The webhook issues the key, and this page reads it back.</p>`;
   return html(200, body);
 }

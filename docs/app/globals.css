@@ -579,11 +579,13 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   align-items: start;
 }
 .repair-pair { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-.cloud-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 8px 0 20px; }
+.cloud-page.prose { max-width: 980px; }
+.cloud-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin: 8px 0 20px; }
 .cloud-grid figure { margin: 0; }
 .cloud-grid figcaption { margin-top: 8px; color: var(--muted); font-size: 0.92rem; }
 .cloud-grid img { width: 100%; height: auto; display: block; background: #fff; border: 1px solid var(--line); border-radius: 12px; }
 .cloud-grid .night img { background: #0c0c0c; border-color: #262626; }
+.cloud-price { margin: 0; align-self: center; color: var(--muted); }
 .cloud-status { min-height: 1.4em; margin: 8px 0 0; }
 .option-list { list-style: none; padding: 0; margin: 0 0 28px; }
 .option-list li {

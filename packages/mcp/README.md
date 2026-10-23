@@ -15,7 +15,7 @@ The local `render` tool accepts `format: "svg"` only. PNG from that tool would a
 | `validate` | `spec` object or JSON string | The object from `@chartkitdev/core` `validate()`: `ok`, `diagnostics`, `errors`, `warnings`. Diagnostics include JSON Patch `fix` arrays. |
 | `repair` | `spec` object or JSON string | The object from `repair()`: repaired `spec`, remaining diagnostics, and `applied` patches. The input is not mutated. |
 | `render` | `spec`, optional `format: "svg"` | SVG string from `@chartkitdev/core/extra` (every chart type, including the extras), plus `width` and `height` in pixels. A percentage attribute falls back to the viewBox. |
-| `render_chart` | `spec`, optional `format` (`svg` or `png`), `w`, `h`, `scale`, `theme`, `key` | ChartKit Cloud image URL plus `applied` repairs, warnings, and errors. A key removes the chartkit.dev mark. |
+| `render_chart` | `spec`, optional `format` (`svg` or `png`), `w`, `h`, `scale`, `theme`, `key` | ChartKit Cloud image URL plus `applied` repairs, warnings, and errors. A key is sent as `Authorization: Bearer` and removes the chartkit.dev mark. The returned URL does not contain the key. |
 | `lookup_feature` | `query` string | Matching matrix rows: ChartKit's status, the spec snippet or `null`, `https://chartkit.dev/features/<id>`, and every other library's status. `partial` is not native. |
 | `list_chart_types` | none | Chart types in the bundled examples, with filenames. |
 | `get_example` | `type` string | Example specs for that type, filename, or example id. |

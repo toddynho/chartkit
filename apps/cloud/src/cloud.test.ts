@@ -4,7 +4,7 @@ import { render } from "@chartkitdev/core/extra";
 import { describe, expect, it, vi } from "vitest";
 import { createApp } from "./app.ts";
 import { chartBody } from "./watermark.ts";
-import { memoryCharts } from "./charts.ts";
+import { kvCharts, memoryCharts } from "./charts.ts";
 import { kvKeys, memoryKeys } from "./keys.ts";
 import { memoryLimiter } from "./limit.ts";
 import { forRaster } from "./png.ts";
@@ -60,14 +60,16 @@ describe("watermark and parity", () => {
     expect(response.headers.get("etag")).toMatch(/^"[0-9a-f]+"$/);
   });
 
-  it("drops the mark for a valid key and keeps it for a bad key", async () => {
+  it("stores an unmarked chart behind a key-free URL", async () => {
     const { app, keys } = appFor();
     const issued = await keys.issue();
-    const clean = await app.handle(get(bar, { key: issued.key }));
-    const svg = await clean.text();
-    expect(clean.headers.get("x-chartkit-watermark")).toBe("0");
-    expect(clean.headers.get("x-chartkit-key")).toBe("valid");
-    expect(svg).toBe(render(bar));
+    const queryKey = await app.handle(get(bar, { key: issued.key }));
+    expect(queryKey.headers.get("x-chartkit-watermark")).toBe("1");
+    expect(queryKey.headers.get("x-chartkit-key")).toBe("absent");
+    expect(await queryKey.text()).toContain("data-ck-watermark");
+    const headerGet = await app.handle(new Request(get(bar).url, { headers: { authorization: `Bearer ${issued.key}` } }));
+    expect(headerGet.headers.get("x-chartkit-watermark")).toBe("1");
+    expect(await headerGet.text()).toContain("data-ck-watermark");
     const bearer = await app.handle(
       new Request("http://cloud.local/render", {
         method: "POST",
@@ -78,10 +80,38 @@ describe("watermark and parity", () => {
     const body = (await bearer.json()) as { watermark: boolean; svg: string; url: string };
     expect(body.watermark).toBe(false);
     expect(body.svg).toBe(render(bar));
-    expect(body.url).toContain(`key=${issued.key}`);
-    const bad = await app.handle(get(bar, { key: "ck_test_nope" }));
+    expect(body.url).toMatch(/^http:\/\/cloud\.local\/c\/[A-Za-z0-9_-]{16}\.svg$/);
+    expect(body.url).not.toContain("key=");
+    expect(body.url).not.toContain(issued.key);
+    const image = await app.handle(new Request(body.url));
+    expect(image.headers.get("x-chartkit-watermark")).toBe("0");
+    expect(await image.text()).toBe(render(bar));
+    const leaked = await app.handle(new Request(`${body.url}?key=${issued.key}`));
+    expect(await leaked.text()).toBe(render(bar));
+    const sneaky = await app.handle(
+      new Request(`http://cloud.local/charts?key=${issued.key}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ spec: bar, key: issued.key }),
+      }),
+    );
+    const hidden = (await sneaky.json()) as { watermark: boolean; url: string };
+    expect(hidden.watermark).toBe(true);
+    expect(hidden.url).not.toContain(issued.key);
+    const marked = await app.handle(new Request(hidden.url));
+    expect(await marked.text()).toContain("data-ck-watermark");
+    const bad = await app.handle(
+      new Request("http://cloud.local/render", {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: "Bearer ck_test_nope" },
+        body: JSON.stringify({ spec: bar }),
+      }),
+    );
+    const badBody = (await bad.json()) as { watermark: boolean; url: string; svg: string };
     expect(bad.headers.get("x-chartkit-key")).toBe("invalid");
-    expect(await bad.text()).toContain("data-ck-watermark");
+    expect(badBody.watermark).toBe(true);
+    expect(badBody.url).not.toContain("key=");
+    expect(badBody.svg).toContain("data-ck-watermark");
   });
 
   it("uses a light mark on Midnight and a dark mark on the default theme", async () => {
@@ -159,8 +189,15 @@ describe("rate limit and keys", () => {
     const { app, keys } = appFor(2);
     const issued = await keys.issue();
     expect((await app.handle(get(bar))).status).toBe(200);
-    expect((await app.handle(get(bar, { key: issued.key }))).status).toBe(200);
-    const blocked = await app.handle(get(bar, { key: issued.key }));
+    const keyed = await app.handle(
+      new Request("http://cloud.local/render", {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: `Bearer ${issued.key}` },
+        body: JSON.stringify({ spec: bar }),
+      }),
+    );
+    expect(keyed.status).toBe(200);
+    const blocked = await app.handle(get(bar));
     expect(blocked.status).toBe(429);
     expect(blocked.headers.get("retry-after")).toBeTruthy();
     expect(blocked.headers.get("cache-control")).toBe("no-store");
@@ -202,8 +239,21 @@ describe("rate limit and keys", () => {
     const html = await page.text();
     const key = html.match(/ck_test_[a-z0-9]+/)?.[0] ?? "";
     expect(key).toBeTruthy();
-    const image = await app.handle(get(bar, { key }));
+    expect(html).not.toContain("?key=");
+    const created = await app.handle(
+      new Request("http://cloud.local/charts", {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
+        body: JSON.stringify({ spec: bar }),
+      }),
+    );
+    const stored = (await created.json()) as { url: string; watermark: boolean };
+    expect(stored.watermark).toBe(false);
+    expect(stored.url).not.toContain("key=");
+    expect(stored.url).not.toContain(key);
+    const image = await app.handle(new Request(stored.url));
     expect(await image.text()).toBe(render(bar));
+    expect(image.headers.get("x-chartkit-watermark")).toBe("0");
   });
 
   it("refuses checkout when Stripe is not configured and does not create a product", async () => {
@@ -219,7 +269,7 @@ describe("rate limit and keys", () => {
     expect(response.status).toBe(503);
     const body = (await response.json()) as { price: string; error: string };
     expect(body.price).toBe("placeholder");
-    expect(body.error).toContain("STRIPE_PRICE_ID");
+    expect(body.error).toBe("Pricing is not available yet.");
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -233,6 +283,23 @@ describe("rate limit and keys", () => {
     expect(await keys.check("ck_test_known")).toBe(true);
     expect(await keys.check("ck_test_missing")).toBe(false);
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe("https://kv.example");
+  });
+
+  it("stores the clean flag without the key", async () => {
+    const rows = new Map<string, string>();
+    const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
+      const command = JSON.parse(String(init?.body)) as [string, string, string?];
+      if (command[0] === "GET") return new Response(JSON.stringify({ result: rows.get(command[1]) ?? null }));
+      rows.set(command[1], command[2] ?? "");
+      return new Response(JSON.stringify({ result: "OK" }));
+    });
+    const charts = kvCharts({ url: "https://kv.example", token: "token", fetch: fetchMock });
+    const clean = await charts.put(bar, true);
+    expect(await charts.get(clean.id)).toEqual({ id: clean.id, spec: bar, clean: true });
+    const marked = await charts.put(bar, false);
+    expect(marked.id).not.toBe(clean.id);
+    expect((await charts.get(marked.id))?.clean).toBe(false);
+    expect([...rows.values()].join("")).not.toContain("ck_test_");
   });
 });
 

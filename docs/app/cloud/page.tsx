@@ -1,6 +1,6 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { RemoveWatermark } from "@/components/RemoveWatermark";
-import { cloudBase, liveLight, liveMidnight, snippets } from "@/lib/cloud";
+import { cloudBase, cloudSpec, liveLight, liveMidnight, snippets } from "@/lib/cloud";
 import { pageMeta } from "@/lib/site";
 
 export const metadata = pageMeta(
@@ -10,8 +10,9 @@ export const metadata = pageMeta(
 );
 
 export default function CloudPage() {
+  const priceLabel = process.env.NEXT_PUBLIC_CHARTKIT_PRICE_LABEL?.trim() || "Pricing coming soon";
   return (
-    <div className="wrap section prose">
+    <div className="wrap section prose cloud-page">
       <p className="kicker">ChartKit Cloud</p>
       <h1>Free forever. Pay only to remove the mark.</h1>
       <p className="lede">
@@ -20,21 +21,21 @@ export default function CloudPage() {
       </p>
       <div className="cloud-grid">
         <figure>
-          <img src={liveLight} alt="Lane C has more. Free render with the chartkit.dev mark." width={640} height={336} />
-          <figcaption>Light. The mark sits in a reserved band under the chart.</figcaption>
+          <img src={liveLight} alt={`${cloudSpec.a11y.alt} Free render with the chartkit.dev mark.`} width={960} height={496} />
+          <figcaption>Light. Revenue area with a target line. The mark sits in a reserved band under the chart.</figcaption>
         </figure>
         <figure className="night">
-          <img src={liveMidnight} alt="The same chart in Midnight, with the mark." width={640} height={336} />
-          <figcaption>Midnight. The mark follows the dark card.</figcaption>
+          <img src={liveMidnight} alt="Revenue and target in Midnight, with the mark." width={960} height={496} />
+          <figcaption>Midnight. The same chart. The mark follows the dark card.</figcaption>
         </figure>
       </div>
       <h2>Use it as an image</h2>
       <p>
-        <code>GET /render</code> returns SVG or PNG, so it works as an <code>img</code> src in email, Slack, a GitHub
-        README, or Markdown. <code>POST /render</code> takes the JSON body and returns the image URL plus the repairs
-        and warnings from <code>validate()</code> and <code>repair()</code>. <code>POST /charts</code> stores a large
-        spec and returns a short URL. <code>POST /validate</code> returns the CK codes, the JSON Patch fixes, and the
-        repaired spec.
+        <code>GET /render</code> returns a marked SVG or PNG, so it works as an <code>img</code> src in email, Slack, a
+        GitHub README, or Markdown. That URL has no API key. <code>POST /render</code> takes the JSON body and returns
+        the image URL plus the repairs and warnings from <code>validate()</code> and <code>repair()</code>.{" "}
+        <code>POST /charts</code> stores the spec and returns a short URL. <code>POST /validate</code> returns the CK
+        codes, the JSON Patch fixes, and the repaired spec.
       </p>
       <CodeBlock code={snippets.img} label="html" />
       <CodeBlock code={snippets.curl} label="shell" />
@@ -48,12 +49,13 @@ export default function CloudPage() {
       </p>
       <h2>Remove the watermark</h2>
       <p>
-        Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>?key=</code>. A valid key removes the mark. An
-        invalid key leaves it. The image URL has to carry the key for an <code>img</code> tag, because an image
-        request cannot set a header. The price is a placeholder. Todd chooses it in Stripe. This repo does not create
-        a product or a price.
+        Send the key as <code>Authorization: Bearer</code> on <code>POST /charts</code> or <code>POST /render</code>. A
+        valid key stores the chart and returns a stable URL such as <code>/c/&lt;id&gt;.svg</code>. That URL has no
+        secret. A plain GET serves the unmarked image. An invalid key leaves the mark. <code>GET /render</code> always
+        includes the mark, so an image address never carries a key.
       </p>
-      <RemoveWatermark action={`${cloudBase}/checkout`} />
+      <CodeBlock code={snippets.clean} label="js" />
+      <RemoveWatermark action={`${cloudBase}/checkout`} priceLabel={priceLabel} />
       <p>
         Free use is limited to 120 renders a minute per IP. The limit is the same with or without a key. It blocks
         abuse. It is not a quota you can pay to raise. The API reference is on <a href="/docs/cloud">Cloud render</a>.

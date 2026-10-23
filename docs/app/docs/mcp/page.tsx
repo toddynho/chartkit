@@ -53,7 +53,8 @@ export default function McpPage() {
         <li>
           <code>render_chart(spec)</code> calls ChartKit Cloud and returns the image URL plus the repairs and warnings.
           <code>format</code> is <code>svg</code> or <code>png</code>. Set <code>CHARTKIT_CLOUD_KEY</code> to remove the
-          mark. This is the one tool that uses the network. See <a href="/docs/cloud">Cloud render</a>.
+          mark. The key is sent as <code>Authorization: Bearer</code>. The image URL does not contain it. This is the
+          one tool that uses the network. See <a href="/docs/cloud">Cloud render</a>.
         </li>
         <li>
           <code>lookup_feature(query)</code> searches the matrix. The result has ChartKit&apos;s status, the spec

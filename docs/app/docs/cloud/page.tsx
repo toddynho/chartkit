@@ -29,24 +29,27 @@ export default function CloudDocsPage() {
       <p>
         <code>spec</code> is URL-encoded JSON or base64url JSON. <code>format</code> is <code>svg</code> (default) or{" "}
         <code>png</code>. <code>w</code> and <code>h</code> set the pixel size. <code>scale</code> is the PNG zoom,
-        from 1 to 4. <code>theme</code> is a preset name such as <code>midnight</code>. <code>key</code> removes the
-        mark when it is valid.
+        from 1 to 4. <code>theme</code> is a preset name such as <code>midnight</code>. This GET always includes the
+        mark. A key on the query string is ignored, so an image URL stays free of secrets.
       </p>
       <CodeBlock code={snippets.img} label="html" />
       <h2>POST /render</h2>
       <CodeBlock code={snippets.fetch} label="js" />
       <p>
-        The JSON body is <code>spec</code>, <code>format</code>, <code>w</code>, <code>h</code>, <code>scale</code>,{" "}
-        <code>theme</code>, and an optional <code>key</code>. The same key can be sent as{" "}
-        <code>Authorization: Bearer</code>. The body includes <code>url</code>, <code>applied</code>,{" "}
-        <code>warnings</code>, <code>errors</code>, and either <code>svg</code> or base64 <code>png</code>. A spec
-        longer than 1,800 characters is stored, and <code>url</code> is the short <code>/c/&lt;id&gt;</code> image.
+        The JSON body is <code>spec</code>, <code>format</code>, <code>w</code>, <code>h</code>, <code>scale</code>, and{" "}
+        <code>theme</code>. Send a key only as <code>Authorization: Bearer</code>. The body includes <code>url</code>,{" "}
+        <code>applied</code>, <code>warnings</code>, <code>errors</code>, and either <code>svg</code> or base64{" "}
+        <code>png</code>. A valid key stores the repaired spec and returns <code>/c/&lt;id&gt;.svg</code> (or{" "}
+        <code>.png</code>) with no secret in the query. Without a key, a short spec keeps a <code>GET /render</code>{" "}
+        URL and a spec longer than 1,800 characters is stored with the mark.
       </p>
       <h2>POST /charts and POST /validate</h2>
       <p>
         <code>POST /charts</code> stores the repaired spec and returns <code>id</code>, <code>svgUrl</code>, and{" "}
-        <code>pngUrl</code>. The same spec returns the same id. <code>POST /validate</code> does not draw. It returns
-        the repaired spec, <code>applied</code>, and the remaining diagnostics.
+        <code>pngUrl</code>. The same spec and the same mark state return the same id. A valid{" "}
+        <code>Authorization: Bearer</code> stores it unmarked. <code>GET /c/&lt;id&gt;</code> serves that stored image
+        and does not read a key. <code>POST /validate</code> does not draw. It returns the repaired spec,{" "}
+        <code>applied</code>, and the remaining diagnostics.
       </p>
       <h2>Headers</h2>
       <ul>
@@ -73,12 +76,16 @@ export default function CloudDocsPage() {
       </p>
       <h2>Keys</h2>
       <p>
-        <Link href="/cloud">Remove the watermark</Link> starts Stripe Checkout. The price is a placeholder. Todd sets{" "}
-        <code>STRIPE_SECRET_KEY</code>, <code>STRIPE_PRICE_ID</code>, and <code>STRIPE_WEBHOOK_SECRET</code>. A
-        recurring price also needs <code>STRIPE_CHECKOUT_MODE=subscription</code>. The webhook is{" "}
-        <code>POST /stripe/webhook</code>. It issues one key per Checkout Session. The success page shows that key.
-        Hosted keys live in Vercel KV or Upstash (<code>KV_REST_API_URL</code> and <code>KV_REST_API_TOKEN</code>).
-        Without KV, the process keeps keys in memory.
+        <Link href="/cloud">Remove the watermark</Link> starts checkout. Pricing is coming soon. When checkout is
+        available, <code>POST /stripe/webhook</code> issues one key per completed Checkout Session, and the success
+        page shows that key. Send it as <code>Authorization: Bearer</code> on <code>POST /charts</code> or{" "}
+        <code>POST /render</code>. Use the returned <code>/c/&lt;id&gt;</code> URL in an <code>img</code>. Do not put
+        the key in that URL.
+      </p>
+      <CodeBlock code={snippets.clean} label="js" />
+      <p>
+        Hosted keys and stored charts use Vercel KV or Upstash when <code>KV_REST_API_URL</code> and{" "}
+        <code>KV_REST_API_TOKEN</code> are set. Without KV, the process keeps them in memory.
       </p>
       <p>
         PNG uses resvg wasm with Inter and Roboto bundled in the service. SVG text stays on the library font stack.
