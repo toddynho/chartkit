@@ -4,12 +4,42 @@ import { CopyButton } from "@/components/CopyButton";
 import { headline, published, ROUND } from "@/lib/benchmarks";
 import { pageMeta } from "@/lib/site";
 import { AGENT_PROMPT } from "@/lib/specs";
+import feed from "@/public/recipes.json";
 
 export const metadata = pageMeta(
   "Agents",
-  "How AI agents should use ChartKit: llms.txt, the JSON Schema, and the validate then repair loop.",
+  "How AI agents should use ChartKit: llms.txt, the JSON Schema, dashboard recipes, and the validate then repair loop.",
   "/agents",
 );
+
+interface ClosedRow {
+  key: string;
+  values?: string[];
+  also?: string[];
+  effect: string;
+}
+
+interface PromptRow {
+  id: string;
+  prompt: string;
+  onMain: boolean;
+  markdown: string;
+}
+
+interface RecipeRow {
+  id: string;
+  prompt: string;
+  markdown: string;
+  onMain: boolean;
+  note: string;
+  keys: string[];
+  spec: unknown;
+  adapted?: string[];
+}
+
+const closed = feed.closed as ClosedRow[];
+const prompts = feed.prompts as PromptRow[];
+const recipes = feed.recipes as RecipeRow[];
 
 export default function AgentsPage() {
   return (
@@ -25,7 +55,10 @@ export default function AgentsPage() {
           <a href="/llms.txt">llms.txt</a> — the rules, the repair loop, and one spec per chart type.
         </li>
         <li>
-          <a href="/llms-full.txt">llms-full.txt</a> — the longer reference.
+          <a href="/llms-full.txt">llms-full.txt</a> — the longer reference, including the closed dashboard keys.
+        </li>
+        <li>
+          <a href="/recipes.json">recipes.json</a> — copy-paste dashboard specs, the closed-key list, and one prompt per dashboard page.
         </li>
         <li>
           <a href="/schema/v1.json">schema/v1.json</a> — the JSON Schema.
@@ -69,6 +102,52 @@ const svg = render(ready);`}
           does not invent rows.
         </li>
       </ol>
+      <h2>Shell and chart</h2>
+      <p>{feed.shell}</p>
+      <h2>Closed keys</h2>
+      <p>
+        Round 1 unlocked these spec keys. The same list is in <a href="/recipes.json">recipes.json</a> and{" "}
+        <a href="/llms-full.txt">llms-full.txt</a>.
+      </p>
+      <ul>
+        {closed.map((row) => (
+          <li key={row.key}>
+            <code>{row.key}</code>
+            {row.values ? ` ${row.values.join(" | ")}` : ""}
+            {row.also ? `. Also ${row.also.join(", ")}` : ""}
+            {". "}
+            {row.effect}
+          </li>
+        ))}
+      </ul>
+      <h2>Golden prompts</h2>
+      <p>One prompt per dashboard page. {feed.unmerged}</p>
+      <ul>
+        {prompts.map((row) => (
+          <li key={row.id}>
+            <a href={row.markdown}>{row.markdown}</a>
+            {row.onMain ? "" : " (not merged)"}
+            <CodeBlock code={row.prompt} label="prompt" />
+          </li>
+        ))}
+      </ul>
+      <h2>Cookbook</h2>
+      <p>Each recipe is one spec from a dashboard page. The Vercel area is taken from the unmerged edge page.</p>
+      {recipes.map((row) => (
+        <section key={row.id}>
+          <h3>{row.prompt}</h3>
+          <p>
+            <a href={row.markdown}>{row.markdown}</a>
+            {row.onMain ? "" : " (not on main)"}
+            {". Keys: "}
+            {row.keys.map((key) => (
+              <code key={key}>{key} </code>
+            ))}
+          </p>
+          <p>{row.note}</p>
+          <CodeBlock code={JSON.stringify(row.spec, null, 2)} label="json" />
+        </section>
+      ))}
       <h2>Paste this into a system prompt</h2>
       <CodeBlock code={AGENT_PROMPT} label="prompt" />
       <CopyButton text={AGENT_PROMPT} label="Copy prompt" />

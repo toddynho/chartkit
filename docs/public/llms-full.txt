@@ -46,6 +46,28 @@ A canvas run on 2026-10-21, same harness, sampling auto, median of 5: canvas ren
 - `interaction.navigator` is `true` or `{ "height" }` from 28 to 96. The client mounts an overview and a range slider from the interaction extra. Arrow keys, Home, and End move it. The server SVG records `data-ck-nav` and does not include the slider. `interaction.sync` is a group id. Charts with that id share the crosshair, tooltip, and x window, matched on the x value. `interaction.drilldown` is `{ "key", "children" }`. Each child is a JSON spec. A click, Enter, or Space on a bar, slice, or node swaps to the matching child. Back and Escape pop. The server SVG lists the keys on `data-ck-drill` and does not include the breadcrumb. A navigator on a chart with no x window is CK3034. A height outside 28 to 96 is CK3035. An empty sync id is CK3036. A drilldown with no children is CK3037. A child with no type is CK3038. A key that is not a field is CK3039. Each warning includes a JSON Patch.
 - `layout.facet` is `{ field, columns, rows, wrap, scales, legend }`. `field` splits the rows into one panel each. `columns` and `rows` are 1 to 12. `wrap` defaults to true. `scales` `shared` locks every panel to one y domain, and bars include 0. `independent` scales each panel. `legend` `shared` draws one legend under the grid. A missing field is CK3040. An unknown field is CK3041. columns or rows outside 1 to 12 are CK3042 and CK3043. `wrap: false` with more categories than the grid is CK3049. `layout.concat` is `{ direction, gap, views }`. `direction` is `vertical` or `horizontal`. Each view is a chart spec. When `views` has a chart, the outer spec may omit data, encoding, and metric. An empty list is CK3044. A view with no type is CK3045. Facet and concat together is CK3048. `layout.breakpoints` is a list. Each rule may set `maxWidth`, `minWidth`, `legend`, `direction`, `columns`, `rows`, `wrap`, `scales`, `facetLegend`, and `concatDirection`. The first match wins, from `size.width`, or from the container width when width is `auto`. A non-positive maxWidth is CK3046. columns or rows without a facet field is CK3047. `layout.direction` `rtl` sets `dir=rtl`, mirrors a categorical x axis, moves the y axis to the right, and right-aligns the title. https://chartkit.dev/layouts. On a bar or bar-range chart, hover brightens that bar and dims the others, and the tooltip sits on the bar. A dashed crosshair is drawn only when `tooltip.crosshair` is true.
 
+## Dashboards
+
+Page CSS owns the page grid, cards, and tabs. The JSON spec owns colour, grid, axes, marks, and legends.
+
+Round 1 unlocked the keys below. Copy-paste specs are in https://chartkit.dev/recipes.json. Four pages are on main: https://chartkit.dev/dashboards/ledger.md https://chartkit.dev/dashboards/meter.md https://chartkit.dev/dashboards/wayline.md https://chartkit.dev/dashboards/keel.md. signal, folio, cycle, edge, pulse, and retain are on pull request 53 (branch `cursor/dashboards-2-25e9`) and are not on main.
+
+- `mark.track` is `bar` or `row` on `bar-list`. `row` is a full-height wash behind the label. `bar` is the short rounded bar.
+- `axes.x.title`, `axes.y.title`, and `axes.y2.title` of `""` are kept and are not drawn. Omitting the title still copies the series name onto the axis.
+- `headline.label`, `headline.value`, `headline.compare`, `headline.delta`, and `headline.tone` (`positive`, `negative`, or `neutral`) draw the label, the value, the comparison, and the delta pill.
+- `mark.partial` is `dashed` or `dotted` and dashes the last segment. `mark.partialOpacity` paints that segment's area at its own opacity.
+- `theme.tokens` accepts `transparent`. Scorecards set `theme.tokens.surface` and `theme.tokens.grid` to `transparent`. `theme.tokens.background` can be `transparent` too.
+- `format` value `duration-hm` prints `2m 24s` for 144000. It is accepted on `axes.x.format`, `axes.y.format`, `axes.y2.format`, `encoding.y.format`, and `encoding.y[].format`.
+- `encoding.color.range` of two or more `#rrggbb` stops is a choropleth sequential ramp and a heatmap continuous ramp. A one-stop or non-hex range is ignored. The default choropleth ramp stays green.
+- `mark.nodata` `fill` paints missing countries with `mark.land` and does not hatch them. `mark.land` and `mark.water` accept `#rrggbb`.
+- `encoding.y[].fillOpacity` overrides `mark.fillOpacity` for that series.
+- `theme.tokens.fontFamily` is written as `--ck-font-family`. `theme.tokens.fontSize` sets tick and axis-title size.
+- `theme.mode` `dark` starts from the midnight colour base. `light` on the midnight preset starts from the soft colour base. Geometry stays on the named preset.
+- `tooltip.background`, `tooltip.radius`, `tooltip.shadow`, and `tooltip.crosshairColor` are recorded on the chart and read by the tooltip card.
+- `axes.x.ticks`, `axes.y.ticks`, and `axes.y2.ticks` accept `ends`, which labels only the first and last tick. Gross volume sets `axes.x.ticks` to `ends`.
+- `legend.position` `bottom` on a choropleth draws a horizontal ramp.
+- `mark.stackGap` opens a pixel gap between stacked segments. `mark.radiusEnds` `all` rounds every corner. `outer` rounds the end away from the baseline.
+
 ## Repair loop
 
 1. `const result = validate(spec)`.

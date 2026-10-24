@@ -11,10 +11,12 @@
 - Chart.js, Recharts, ECharts: https://chartkit.dev/convert
 - Render: https://cloud.chartkit.dev/render marked.
 - Options: interaction.navigator, interaction.sync, interaction.drilldown, layout.facet, layout.concat, layout.breakpoints, layout.direction rtl, render auto, mark.sampling lttb. 100000.
-- Dashboards: /dashboards/ledger.md meter.md wayline.md keel.md
+- Shell: page CSS owns grid, cards, tabs. Spec owns colour, grid, axes, marks, legends.
+- Cookbook: https://chartkit.dev/recipes.json
+- On main: /dashboards/ledger.md meter.md wayline.md keel.md. PR 53, not merged: signal folio cycle edge pulse retain.
 
 Features: https://chartkit.dev/features.json
-Types: line,bar,donut,pie,stacked-area,scatter,combo,heatmap,gauge,kpi,sparkline,mini-area,progress-ring,spike,candlestick,histogram,boxplot,radar,funnel,treemap,sankey,bullet,waterfall,gantt,timeline,quadrant,venn,journey,area-range,bar-range,errorbar,sunburst
+Types: one spec each below. pie is a type with no hole.
 
 ```json
 {"version":"1","type":"line","data":[{"quarter":"Q1","units":40},{"quarter":"Q2","units":55}],"encoding":{"x":"quarter","y":"units"},"a11y":{"alt":"Units rose in Q2."}}

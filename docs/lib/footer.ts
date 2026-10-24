@@ -51,6 +51,7 @@ export const FOOTER: FooterColumn[] = [
     note: "Machine-readable files for AI coding agents",
     links: [
       { href: "/llms.txt", label: "llms.txt", hint: "compact API guide" },
+      { href: "/recipes.json", label: "recipes.json", hint: "dashboard cookbook" },
       { href: "/llms-full.txt", label: "llms-full.txt", hint: "full field rules" },
       { href: "/features.json", label: "features.json", hint: "feature matrix" },
       { href: "/showcase.json", label: "showcase.json", hint: "example catalog" },

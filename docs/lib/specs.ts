@@ -1082,7 +1082,9 @@ import { render } from "@chartkitdev/core/all"
 
 If validate(spec).ok is false, render repair(spec).spec when that result is ok.
 Do not invent keys. Schema: https://chartkit.dev/schema/v1.json
-Reference: https://chartkit.dev/llms.txt`;
+Reference: https://chartkit.dev/llms.txt
+Page CSS owns the page grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends.
+Dashboard recipes and the ten page prompts: https://chartkit.dev/recipes.json`;
 
 export const THEMES = [
   "midnight",

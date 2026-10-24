@@ -1,0 +1,1586 @@
+{
+  "shell": "Page CSS owns the page grid, cards, and tabs. The JSON spec owns colour, grid, axes, marks, and legends.",
+  "unmerged": "signal, folio, cycle, edge, pulse, and retain are on pull request 53 (branch cursor/dashboards-2-25e9) and are not on main. ledger, meter, wayline, and keel are on main.",
+  "closed": [
+    {
+      "key": "mark.track",
+      "values": [
+        "bar",
+        "row"
+      ],
+      "effect": "On bar-list, row is a full-height wash behind the label. bar is the short rounded bar."
+    },
+    {
+      "key": "axes.x.title",
+      "values": [
+        ""
+      ],
+      "also": [
+        "axes.y.title",
+        "axes.y2.title"
+      ],
+      "effect": "An empty string is kept and is not drawn. Omitting the title still copies the series name onto the axis."
+    },
+    {
+      "key": "headline.label",
+      "also": [
+        "headline.value",
+        "headline.compare",
+        "headline.delta",
+        "headline.tone"
+      ],
+      "effect": "Draws a label, a value, a comparison figure, and a delta pill. tone is positive, negative, or neutral."
+    },
+    {
+      "key": "mark.partial",
+      "values": [
+        "dashed",
+        "dotted"
+      ],
+      "effect": "Dashes the last segment."
+    },
+    {
+      "key": "mark.partialOpacity",
+      "effect": "Paints the last segment's area at its own opacity. The earlier area keeps mark.fillOpacity."
+    },
+    {
+      "key": "theme.tokens.surface",
+      "values": [
+        "transparent"
+      ],
+      "also": [
+        "theme.tokens.background",
+        "theme.tokens.grid"
+      ],
+      "effect": "theme.tokens accepts the keyword transparent. Scorecards set surface and grid to transparent so the shell card is the only card."
+    },
+    {
+      "key": "axes.y.format",
+      "values": [
+        "duration-hm"
+      ],
+      "also": [
+        "axes.x.format",
+        "axes.y2.format",
+        "encoding.y.format",
+        "encoding.y[].format"
+      ],
+      "effect": "duration-hm prints 2m 24s for 144000."
+    },
+    {
+      "key": "encoding.color.range",
+      "effect": "Two or more #rrggbb stops. A choropleth uses them as a sequential ramp. A heatmap uses them as a continuous ramp. A one-stop or non-hex range is ignored. The default choropleth ramp stays green."
+    },
+    {
+      "key": "mark.nodata",
+      "values": [
+        "fill"
+      ],
+      "effect": "Choropleth fill paints missing countries with mark.land and does not hatch them."
+    },
+    {
+      "key": "mark.land",
+      "also": [
+        "mark.water"
+      ],
+      "effect": "Choropleth land and water accept #rrggbb."
+    },
+    {
+      "key": "encoding.y[].fillOpacity",
+      "effect": "A y series fillOpacity overrides mark.fillOpacity for that series."
+    },
+    {
+      "key": "theme.tokens.fontFamily",
+      "effect": "Written as --ck-font-family on the chart."
+    },
+    {
+      "key": "theme.tokens.fontSize",
+      "effect": "Sets tick and axis-title size."
+    },
+    {
+      "key": "theme.mode",
+      "values": [
+        "dark",
+        "light",
+        "auto"
+      ],
+      "effect": "dark starts from the midnight colour base. light on the midnight preset starts from the soft colour base. Geometry stays on the named preset."
+    },
+    {
+      "key": "tooltip.background",
+      "also": [
+        "tooltip.radius",
+        "tooltip.shadow",
+        "tooltip.crosshairColor"
+      ],
+      "effect": "Recorded on the chart and read by the tooltip card."
+    },
+    {
+      "key": "axes.x.ticks",
+      "values": [
+        "ends"
+      ],
+      "also": [
+        "axes.y.ticks",
+        "axes.y2.ticks"
+      ],
+      "effect": "ends labels only the first and last tick. Gross volume sets axes.x.ticks to ends."
+    },
+    {
+      "key": "legend.position",
+      "values": [
+        "bottom"
+      ],
+      "effect": "On a choropleth, bottom draws a horizontal ramp."
+    },
+    {
+      "key": "mark.stackGap",
+      "effect": "Pixel gap between stacked segments on bar, stacked-area, and combo."
+    },
+    {
+      "key": "mark.radiusEnds",
+      "values": [
+        "all",
+        "outer"
+      ],
+      "effect": "all rounds every corner of a bar. outer rounds the end away from the baseline."
+    }
+  ],
+  "pages": [
+    {
+      "slug": "ledger",
+      "title": "Stripe-style payments",
+      "styledAfter": "Stripe",
+      "onMain": true,
+      "page": "/dashboards/ledger",
+      "markdown": "/dashboards/ledger.md"
+    },
+    {
+      "slug": "meter",
+      "title": "Plausible-style analytics",
+      "styledAfter": "Plausible",
+      "onMain": true,
+      "page": "/dashboards/meter",
+      "markdown": "/dashboards/meter.md"
+    },
+    {
+      "slug": "wayline",
+      "title": "Google Analytics-style traffic report",
+      "styledAfter": "Google Analytics",
+      "onMain": true,
+      "page": "/dashboards/wayline",
+      "markdown": "/dashboards/wayline.md"
+    },
+    {
+      "slug": "keel",
+      "title": "Sentry-style issues",
+      "styledAfter": "Sentry",
+      "onMain": true,
+      "page": "/dashboards/keel",
+      "markdown": "/dashboards/keel.md"
+    },
+    {
+      "slug": "signal",
+      "title": "Datadog-style monitors",
+      "styledAfter": "Datadog and Grafana",
+      "onMain": false,
+      "page": "/dashboards/signal",
+      "markdown": "/dashboards/signal.md",
+      "pr": 53,
+      "branch": "cursor/dashboards-2-25e9"
+    },
+    {
+      "slug": "folio",
+      "title": "Robinhood-style portfolio",
+      "styledAfter": "Robinhood and Coinbase",
+      "onMain": false,
+      "page": "/dashboards/folio",
+      "markdown": "/dashboards/folio.md",
+      "pr": 53,
+      "branch": "cursor/dashboards-2-25e9"
+    },
+    {
+      "slug": "cycle",
+      "title": "Linear-style insights",
+      "styledAfter": "Linear",
+      "onMain": false,
+      "page": "/dashboards/cycle",
+      "markdown": "/dashboards/cycle.md",
+      "pr": 53,
+      "branch": "cursor/dashboards-2-25e9"
+    },
+    {
+      "slug": "edge",
+      "title": "Vercel-style analytics",
+      "styledAfter": "Vercel",
+      "onMain": false,
+      "page": "/dashboards/edge",
+      "markdown": "/dashboards/edge.md",
+      "pr": 53,
+      "branch": "cursor/dashboards-2-25e9"
+    },
+    {
+      "slug": "pulse",
+      "title": "Fitness-style activity",
+      "styledAfter": "Apple Fitness and Apple Health",
+      "onMain": false,
+      "page": "/dashboards/pulse",
+      "markdown": "/dashboards/pulse.md",
+      "pr": 53,
+      "branch": "cursor/dashboards-2-25e9"
+    },
+    {
+      "slug": "retain",
+      "title": "ChartMogul-style revenue",
+      "styledAfter": "ChartMogul and Mixpanel",
+      "onMain": false,
+      "page": "/dashboards/retain",
+      "markdown": "/dashboards/retain.md",
+      "pr": 53,
+      "branch": "cursor/dashboards-2-25e9"
+    }
+  ],
+  "prompts": [
+    {
+      "id": "ledger",
+      "prompt": "Stripe-style payments. Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/ledger.md",
+      "page": "/dashboards/ledger",
+      "markdown": "/dashboards/ledger.md",
+      "onMain": true
+    },
+    {
+      "id": "meter",
+      "prompt": "Plausible-style analytics. Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/meter.md",
+      "page": "/dashboards/meter",
+      "markdown": "/dashboards/meter.md",
+      "onMain": true
+    },
+    {
+      "id": "wayline",
+      "prompt": "Google Analytics-style traffic report. Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/wayline.md",
+      "page": "/dashboards/wayline",
+      "markdown": "/dashboards/wayline.md",
+      "onMain": true
+    },
+    {
+      "id": "keel",
+      "prompt": "Sentry-style issues. Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/keel.md",
+      "page": "/dashboards/keel",
+      "markdown": "/dashboards/keel.md",
+      "onMain": true
+    },
+    {
+      "id": "signal",
+      "prompt": "Datadog-style monitors. Not on main (pull request 53). Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/signal.md",
+      "page": "/dashboards/signal",
+      "markdown": "/dashboards/signal.md",
+      "onMain": false,
+      "pr": 53,
+      "branch": "cursor/dashboards-2-25e9"
+    },
+    {
+      "id": "folio",
+      "prompt": "Robinhood-style portfolio. Not on main (pull request 53). Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/folio.md",
+      "page": "/dashboards/folio",
+      "markdown": "/dashboards/folio.md",
+      "onMain": false,
+      "pr": 53,
+      "branch": "cursor/dashboards-2-25e9"
+    },
+    {
+      "id": "cycle",
+      "prompt": "Linear-style insights. Not on main (pull request 53). Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/cycle.md",
+      "page": "/dashboards/cycle",
+      "markdown": "/dashboards/cycle.md",
+      "onMain": false,
+      "pr": 53,
+      "branch": "cursor/dashboards-2-25e9"
+    },
+    {
+      "id": "edge",
+      "prompt": "Vercel-style analytics. Not on main (pull request 53). Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/edge.md",
+      "page": "/dashboards/edge",
+      "markdown": "/dashboards/edge.md",
+      "onMain": false,
+      "pr": 53,
+      "branch": "cursor/dashboards-2-25e9"
+    },
+    {
+      "id": "pulse",
+      "prompt": "Fitness-style activity. Not on main (pull request 53). Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/pulse.md",
+      "page": "/dashboards/pulse",
+      "markdown": "/dashboards/pulse.md",
+      "onMain": false,
+      "pr": 53,
+      "branch": "cursor/dashboards-2-25e9"
+    },
+    {
+      "id": "retain",
+      "prompt": "ChartMogul-style revenue. Not on main (pull request 53). Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/retain.md",
+      "page": "/dashboards/retain",
+      "markdown": "/dashboards/retain.md",
+      "onMain": false,
+      "pr": 53,
+      "branch": "cursor/dashboards-2-25e9"
+    }
+  ],
+  "recipes": [
+    {
+      "id": "stripe-gross-volume",
+      "prompt": "Stripe-style gross volume: headline, and axes.x.ticks ends.",
+      "page": "/dashboards/ledger",
+      "markdown": "/dashboards/ledger.md",
+      "onMain": true,
+      "keys": [
+        "headline",
+        "axes.x.ticks",
+        "axes.y.title"
+      ],
+      "source": "docs/public/dashboards/ledger.md ## Gross volume",
+      "note": "The page sets axes.x.ticks to ends. axes.y.ticks and axes.y2.ticks accept the same ends value. axes.y.title is an empty string, so the series name is not drawn as a title.",
+      "spec": {
+        "version": "1",
+        "type": "combo",
+        "theme": {
+          "preset": "soft",
+          "tokens": {
+            "background": "transparent",
+            "surface": "#ffffff",
+            "text": "#0a2540",
+            "muted": "#425466",
+            "grid": "#e6ebf1",
+            "axis": "#c1c9d2",
+            "accent": "#635bff",
+            "positive": "#09825d",
+            "negative": "#df1b41",
+            "series": [
+              "#5469d4",
+              "#a3acb9"
+            ],
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": 12
+          }
+        },
+        "data": [
+          {
+            "date": "2025-10-01",
+            "gross": 7500,
+            "prior": 7961
+          },
+          {
+            "date": "2025-10-02",
+            "gross": 8620,
+            "prior": 7944
+          },
+          {
+            "date": "2025-10-03",
+            "gross": 9081,
+            "prior": 7096
+          },
+          {
+            "date": "2025-10-04",
+            "gross": 8349,
+            "prior": 7638
+          },
+          {
+            "date": "2025-10-05",
+            "gross": 9104,
+            "prior": 8690
+          },
+          {
+            "date": "2025-10-06",
+            "gross": 9577,
+            "prior": 9803
+          },
+          {
+            "date": "2025-10-07",
+            "gross": 9304,
+            "prior": 10456
+          },
+          {
+            "date": "2025-10-08",
+            "gross": 11710,
+            "prior": 10760
+          },
+          {
+            "date": "2025-10-09",
+            "gross": 11749,
+            "prior": 10190
+          },
+          {
+            "date": "2025-10-10",
+            "gross": 12269,
+            "prior": 9735
+          },
+          {
+            "date": "2025-10-11",
+            "gross": 12951,
+            "prior": 9728
+          },
+          {
+            "date": "2025-10-12",
+            "gross": 11780,
+            "prior": 11267
+          },
+          {
+            "date": "2025-10-13",
+            "gross": 12182,
+            "prior": 11938
+          },
+          {
+            "date": "2025-10-14",
+            "gross": 13356,
+            "prior": 12841
+          },
+          {
+            "date": "2025-10-15",
+            "gross": 15447,
+            "prior": 13164
+          },
+          {
+            "date": "2025-10-16",
+            "gross": 17614,
+            "prior": 12561
+          },
+          {
+            "date": "2025-10-17",
+            "gross": 16635,
+            "prior": 12708
+          },
+          {
+            "date": "2025-10-18",
+            "gross": 16040,
+            "prior": 12002
+          },
+          {
+            "date": "2025-10-19",
+            "gross": 15859,
+            "prior": 13143
+          },
+          {
+            "date": "2025-10-20",
+            "gross": 15665,
+            "prior": 14109
+          },
+          {
+            "date": "2025-10-21",
+            "gross": 16208,
+            "prior": 14611
+          }
+        ],
+        "encoding": {
+          "x": {
+            "field": "date",
+            "type": "temporal"
+          },
+          "y": [
+            {
+              "field": "gross",
+              "mark": "line"
+            },
+            {
+              "field": "prior",
+              "mark": "line",
+              "dash": "dashed"
+            }
+          ]
+        },
+        "axes": {
+          "x": {
+            "grid": false,
+            "ticks": "ends"
+          },
+          "y": {
+            "title": "",
+            "labels": false,
+            "grid": false
+          }
+        },
+        "legend": {
+          "show": false
+        },
+        "tooltip": {
+          "mode": "index",
+          "background": "light-dark(#ffffff,#0f2942)",
+          "radius": 6,
+          "shadow": "0 2px 5px rgba(50,50,93,.18)",
+          "crosshairColor": "#5469d4"
+        },
+        "headline": {
+          "label": "Gross volume",
+          "value": "$261K",
+          "compare": "$228K",
+          "delta": "+14%",
+          "tone": "positive"
+        },
+        "mark": {
+          "strokeWidth": 4,
+          "fillOpacity": 0,
+          "curve": "linear",
+          "points": "none",
+          "gradient": false
+        },
+        "size": {
+          "width": 1100,
+          "height": 400
+        },
+        "a11y": {
+          "alt": "Gross volume for 1\u201321 October totals 261 thousand dollars, above the previous period."
+        }
+      }
+    },
+    {
+      "id": "vercel-area-partial",
+      "prompt": "Vercel-style area: mark.partial dashes the last segment and mark.partialOpacity fades its fill.",
+      "page": "/dashboards/edge",
+      "markdown": "/dashboards/edge.md",
+      "onMain": false,
+      "keys": [
+        "mark.partial",
+        "mark.partialOpacity",
+        "mark.area"
+      ],
+      "source": "origin/cursor/dashboards-2-25e9 docs/public/dashboards/edge.md Visitors area. Pull request 53 is not merged, so this page is not on main.",
+      "note": "type line with mark.area true. mark.partial is dashed. mark.partialOpacity is 0.05. axes.y.title is empty and y labels are off.",
+      "spec": {
+        "version": "1",
+        "type": "line",
+        "theme": {
+          "preset": "soft",
+          "tokens": {
+            "background": "transparent",
+            "surface": "#ffffff",
+            "text": "#171717",
+            "muted": "#666666",
+            "grid": "#ebebeb",
+            "axis": "#d4d4d4",
+            "accent": "#171717",
+            "positive": "#0070f3",
+            "negative": "#e00",
+            "series": [
+              "#171717",
+              "#0070f3"
+            ],
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": 12
+          }
+        },
+        "data": [
+          {
+            "date": "2025-09-20",
+            "visitors": 2456
+          },
+          {
+            "date": "2025-09-21",
+            "visitors": 2936
+          },
+          {
+            "date": "2025-09-22",
+            "visitors": 2948
+          },
+          {
+            "date": "2025-09-23",
+            "visitors": 2796
+          },
+          {
+            "date": "2025-09-24",
+            "visitors": 2655
+          },
+          {
+            "date": "2025-09-25",
+            "visitors": 2866
+          },
+          {
+            "date": "2025-09-26",
+            "visitors": 3021
+          },
+          {
+            "date": "2025-09-27",
+            "visitors": 3406
+          },
+          {
+            "date": "2025-09-28",
+            "visitors": 3707
+          },
+          {
+            "date": "2025-09-29",
+            "visitors": 3790
+          },
+          {
+            "date": "2025-09-30",
+            "visitors": 3833
+          },
+          {
+            "date": "2025-10-01",
+            "visitors": 3663
+          },
+          {
+            "date": "2025-10-02",
+            "visitors": 3679
+          },
+          {
+            "date": "2025-10-03",
+            "visitors": 3968
+          }
+        ],
+        "encoding": {
+          "x": {
+            "field": "date",
+            "type": "temporal"
+          },
+          "y": {
+            "field": "visitors"
+          }
+        },
+        "axes": {
+          "x": {
+            "grid": false,
+            "ticks": "ends"
+          },
+          "y": {
+            "title": "",
+            "labels": false,
+            "grid": false
+          }
+        },
+        "legend": {
+          "show": false
+        },
+        "mark": {
+          "area": true,
+          "strokeWidth": 1.75,
+          "curve": "linear",
+          "points": "none",
+          "fillOpacity": 0.12,
+          "gradient": false,
+          "partial": "dashed",
+          "partialOpacity": 0.05
+        },
+        "size": {
+          "width": 720,
+          "height": 280
+        },
+        "a11y": {
+          "alt": "Visitors rise across the fortnight. The last segment is dashed."
+        }
+      }
+    },
+    {
+      "id": "bar-list-track-row",
+      "prompt": "Bar list with mark.track row: a full-height wash behind the label.",
+      "page": "/dashboards/ledger",
+      "markdown": "/dashboards/ledger.md",
+      "onMain": true,
+      "keys": [
+        "mark.track"
+      ],
+      "source": "docs/public/dashboards/ledger.md ## Payments by method",
+      "note": "mark.track row is the full-height wash. mark.track bar is the short rounded bar. bar-list loads from @chartkitdev/core/charts/bar-list and is not in the line or all bundle.",
+      "spec": {
+        "version": "1",
+        "type": "bar-list",
+        "theme": {
+          "preset": "soft",
+          "tokens": {
+            "background": "transparent",
+            "surface": "#ffffff",
+            "text": "#0a2540",
+            "muted": "#425466",
+            "grid": "#e6ebf1",
+            "axis": "#c1c9d2",
+            "accent": "#635bff",
+            "positive": "#09825d",
+            "negative": "#df1b41",
+            "series": [
+              "#635bff",
+              "#8898aa"
+            ],
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": 12
+          }
+        },
+        "data": [
+          {
+            "method": "Card",
+            "amount": 168400
+          },
+          {
+            "method": "Bank",
+            "amount": 64200
+          },
+          {
+            "method": "Wallet",
+            "amount": 28400
+          }
+        ],
+        "encoding": {
+          "x": "method",
+          "y": {
+            "field": "amount",
+            "format": {
+              "style": "compact",
+              "prefix": "$"
+            }
+          }
+        },
+        "mark": {
+          "track": "row"
+        },
+        "size": {
+          "width": 520,
+          "height": 96
+        },
+        "a11y": {
+          "alt": "Card is the largest method, then bank, then wallet."
+        }
+      }
+    },
+    {
+      "id": "transparent-scorecard",
+      "prompt": "Transparent scorecard: theme.tokens.surface and theme.tokens.grid are transparent.",
+      "page": "/dashboards/ledger",
+      "markdown": "/dashboards/ledger.md",
+      "onMain": true,
+      "keys": [
+        "theme.tokens.surface",
+        "theme.tokens.grid",
+        "theme.tokens.background"
+      ],
+      "source": "docs/public/dashboards/ledger.md ## Gross",
+      "note": "theme.tokens accepts the keyword transparent. The shell card is the only card. background, surface, and grid are transparent on this kpi.",
+      "spec": {
+        "version": "1",
+        "type": "kpi",
+        "theme": {
+          "preset": "soft",
+          "tokens": {
+            "background": "transparent",
+            "surface": "transparent",
+            "text": "#0a2540",
+            "muted": "#425466",
+            "grid": "transparent",
+            "axis": "#c1c9d2",
+            "accent": "#635bff",
+            "positive": "#09825d",
+            "negative": "#df1b41",
+            "series": [
+              "#635bff",
+              "#8898aa"
+            ],
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": 12
+          }
+        },
+        "data": [
+          7.5,
+          8.62,
+          9.081,
+          8.349,
+          9.104,
+          9.577,
+          9.304,
+          11.71,
+          11.749,
+          12.269,
+          12.951,
+          11.78,
+          12.182,
+          13.356,
+          15.447,
+          17.614,
+          16.635,
+          16.04,
+          15.859,
+          15.665,
+          16.208
+        ],
+        "metric": {
+          "label": "Gross",
+          "value": 261000,
+          "delta": 0.14,
+          "format": {
+            "style": "compact",
+            "prefix": "$"
+          }
+        },
+        "mark": {
+          "fillOpacity": 0.16,
+          "strokeWidth": 1.5
+        },
+        "size": {
+          "width": 400,
+          "height": 108
+        },
+        "a11y": {
+          "alt": "Gross volume this month is 261 thousand dollars, up 14 percent."
+        }
+      }
+    },
+    {
+      "id": "ga-choropleth-range",
+      "prompt": "Google Analytics-style choropleth: encoding.color.range is a sequential ramp.",
+      "page": "/dashboards/wayline",
+      "markdown": "/dashboards/wayline.md",
+      "onMain": true,
+      "keys": [
+        "encoding.color.range",
+        "mark.nodata",
+        "mark.land",
+        "mark.water",
+        "legend.position"
+      ],
+      "source": "docs/public/dashboards/wayline.md ## Countries",
+      "note": "encoding.color.range of two or more #rrggbb stops paints the sequential ramp. This map uses #aecbfa, #669df6, #1a73e8. mark.nodata fill uses mark.land instead of a hatch. legend.position bottom draws a horizontal ramp. theme is the string soft. Choropleth renders from @chartkitdev/geo, which is unpublished.",
+      "spec": {
+        "version": "1",
+        "type": "choropleth",
+        "theme": "soft",
+        "data": [
+          {
+            "country": "USA",
+            "sessions": 9200
+          },
+          {
+            "country": "JPN",
+            "sessions": 7100
+          },
+          {
+            "country": "GBR",
+            "sessions": 5400
+          },
+          {
+            "country": "DEU",
+            "sessions": 4800
+          },
+          {
+            "country": "BRA",
+            "sessions": 4300
+          },
+          {
+            "country": "IND",
+            "sessions": 3900
+          },
+          {
+            "country": "FRA",
+            "sessions": 3600
+          },
+          {
+            "country": "AUS",
+            "sessions": 2800
+          },
+          {
+            "country": "CAN",
+            "sessions": 2600
+          },
+          {
+            "country": "MEX",
+            "sessions": 2100
+          },
+          {
+            "country": "ESP",
+            "sessions": 1900
+          },
+          {
+            "country": "ITA",
+            "sessions": 1800
+          },
+          {
+            "country": "KOR",
+            "sessions": 1700
+          },
+          {
+            "country": "IDN",
+            "sessions": 1600
+          },
+          {
+            "country": "NLD",
+            "sessions": 1400
+          },
+          {
+            "country": "POL",
+            "sessions": 1300
+          },
+          {
+            "country": "TUR",
+            "sessions": 1250
+          },
+          {
+            "country": "ARG",
+            "sessions": 1200
+          },
+          {
+            "country": "ZAF",
+            "sessions": 1100
+          },
+          {
+            "country": "SWE",
+            "sessions": 980
+          },
+          {
+            "country": "CHE",
+            "sessions": 940
+          },
+          {
+            "country": "BEL",
+            "sessions": 900
+          },
+          {
+            "country": "PRT",
+            "sessions": 860
+          },
+          {
+            "country": "NOR",
+            "sessions": 820
+          },
+          {
+            "country": "AUT",
+            "sessions": 780
+          },
+          {
+            "country": "DNK",
+            "sessions": 740
+          },
+          {
+            "country": "FIN",
+            "sessions": 700
+          },
+          {
+            "country": "IRL",
+            "sessions": 680
+          },
+          {
+            "country": "CZE",
+            "sessions": 640
+          },
+          {
+            "country": "GRC",
+            "sessions": 610
+          },
+          {
+            "country": "ROU",
+            "sessions": 580
+          },
+          {
+            "country": "UKR",
+            "sessions": 540
+          },
+          {
+            "country": "COL",
+            "sessions": 720
+          },
+          {
+            "country": "CHL",
+            "sessions": 690
+          },
+          {
+            "country": "PER",
+            "sessions": 640
+          },
+          {
+            "country": "EGY",
+            "sessions": 600
+          },
+          {
+            "country": "MAR",
+            "sessions": 560
+          },
+          {
+            "country": "NGA",
+            "sessions": 530
+          },
+          {
+            "country": "KEN",
+            "sessions": 490
+          },
+          {
+            "country": "SAU",
+            "sessions": 760
+          },
+          {
+            "country": "ARE",
+            "sessions": 710
+          },
+          {
+            "country": "THA",
+            "sessions": 670
+          },
+          {
+            "country": "VNM",
+            "sessions": 640
+          },
+          {
+            "country": "MYS",
+            "sessions": 600
+          },
+          {
+            "country": "PHL",
+            "sessions": 570
+          },
+          {
+            "country": "NZL",
+            "sessions": 520
+          },
+          {
+            "country": "CHN",
+            "sessions": 2400
+          },
+          {
+            "country": "KAZ",
+            "sessions": 430
+          },
+          {
+            "country": "UZB",
+            "sessions": 380
+          },
+          {
+            "country": "FJI",
+            "sessions": 140
+          },
+          {
+            "country": "TZA",
+            "sessions": 360
+          },
+          {
+            "country": "PNG",
+            "sessions": 180
+          }
+        ],
+        "encoding": {
+          "region": "country",
+          "color": {
+            "field": "sessions",
+            "title": "Users",
+            "format": "compact",
+            "range": [
+              "#aecbfa",
+              "#669df6",
+              "#1a73e8"
+            ]
+          }
+        },
+        "mark": {
+          "atlas": "world",
+          "projection": "equalEarth",
+          "scale": "sequential",
+          "nodata": "fill",
+          "land": "#e8eaed",
+          "water": "#ffffff"
+        },
+        "legend": {
+          "show": true,
+          "position": "bottom"
+        },
+        "size": {
+          "width": 280,
+          "height": 180
+        },
+        "a11y": {
+          "alt": "Users across more than forty countries. Countries without a row are plain grey."
+        }
+      }
+    },
+    {
+      "id": "sentry-stacked-gap",
+      "prompt": "Sentry-style stacked bars: mark.stackGap and mark.radiusEnds all.",
+      "page": "/dashboards/keel",
+      "markdown": "/dashboards/keel.md",
+      "onMain": true,
+      "keys": [
+        "mark.stackGap",
+        "mark.radiusEnds",
+        "mark.stack"
+      ],
+      "source": "docs/public/dashboards/keel.md ## Event volume",
+      "note": "mark.stack is stack. mark.stackGap is 2. mark.radiusEnds all rounds every corner. axes.y.title is an empty string.",
+      "spec": {
+        "version": "1",
+        "type": "bar",
+        "theme": {
+          "preset": "soft",
+          "tokens": {
+            "background": "transparent",
+            "surface": "#ffffff",
+            "text": "#1f1633",
+            "muted": "#6a6275",
+            "grid": "#eeeaf2",
+            "axis": "#ddd6e6",
+            "accent": "#7553ff",
+            "positive": "#1b7c4d",
+            "negative": "#f55459",
+            "series": [
+              "#f55459",
+              "#ff9838",
+              "#8d95a3"
+            ],
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": 12
+          }
+        },
+        "data": [
+          {
+            "day": "8",
+            "level": "Error",
+            "events": 22
+          },
+          {
+            "day": "8",
+            "level": "Warning",
+            "events": 14
+          },
+          {
+            "day": "8",
+            "level": "Info",
+            "events": 12
+          },
+          {
+            "day": "9",
+            "level": "Error",
+            "events": 28
+          },
+          {
+            "day": "9",
+            "level": "Warning",
+            "events": 16
+          },
+          {
+            "day": "9",
+            "level": "Info",
+            "events": 14
+          },
+          {
+            "day": "10",
+            "level": "Error",
+            "events": 24
+          },
+          {
+            "day": "10",
+            "level": "Warning",
+            "events": 18
+          },
+          {
+            "day": "10",
+            "level": "Info",
+            "events": 11
+          },
+          {
+            "day": "11",
+            "level": "Error",
+            "events": 30
+          },
+          {
+            "day": "11",
+            "level": "Warning",
+            "events": 15
+          },
+          {
+            "day": "11",
+            "level": "Info",
+            "events": 13
+          },
+          {
+            "day": "12",
+            "level": "Error",
+            "events": 26
+          },
+          {
+            "day": "12",
+            "level": "Warning",
+            "events": 17
+          },
+          {
+            "day": "12",
+            "level": "Info",
+            "events": 16
+          },
+          {
+            "day": "13",
+            "level": "Error",
+            "events": 18
+          },
+          {
+            "day": "13",
+            "level": "Warning",
+            "events": 12
+          },
+          {
+            "day": "13",
+            "level": "Info",
+            "events": 10
+          },
+          {
+            "day": "14",
+            "level": "Error",
+            "events": 16
+          },
+          {
+            "day": "14",
+            "level": "Warning",
+            "events": 9
+          },
+          {
+            "day": "14",
+            "level": "Info",
+            "events": 8
+          },
+          {
+            "day": "15",
+            "level": "Error",
+            "events": 40
+          },
+          {
+            "day": "15",
+            "level": "Warning",
+            "events": 22
+          },
+          {
+            "day": "15",
+            "level": "Info",
+            "events": 18
+          },
+          {
+            "day": "16",
+            "level": "Error",
+            "events": 52
+          },
+          {
+            "day": "16",
+            "level": "Warning",
+            "events": 30
+          },
+          {
+            "day": "16",
+            "level": "Info",
+            "events": 16
+          },
+          {
+            "day": "17",
+            "level": "Error",
+            "events": 44
+          },
+          {
+            "day": "17",
+            "level": "Warning",
+            "events": 28
+          },
+          {
+            "day": "17",
+            "level": "Info",
+            "events": 22
+          },
+          {
+            "day": "18",
+            "level": "Error",
+            "events": 33
+          },
+          {
+            "day": "18",
+            "level": "Warning",
+            "events": 20
+          },
+          {
+            "day": "18",
+            "level": "Info",
+            "events": 24
+          },
+          {
+            "day": "19",
+            "level": "Error",
+            "events": 21
+          },
+          {
+            "day": "19",
+            "level": "Warning",
+            "events": 14
+          },
+          {
+            "day": "19",
+            "level": "Info",
+            "events": 15
+          },
+          {
+            "day": "20",
+            "level": "Error",
+            "events": 18
+          },
+          {
+            "day": "20",
+            "level": "Warning",
+            "events": 12
+          },
+          {
+            "day": "20",
+            "level": "Info",
+            "events": 14
+          },
+          {
+            "day": "21",
+            "level": "Error",
+            "events": 16
+          },
+          {
+            "day": "21",
+            "level": "Warning",
+            "events": 11
+          },
+          {
+            "day": "21",
+            "level": "Info",
+            "events": 13
+          }
+        ],
+        "encoding": {
+          "x": "day",
+          "y": "events",
+          "series": "level"
+        },
+        "mark": {
+          "stack": "stack",
+          "cornerRadius": 2,
+          "radiusEnds": "all",
+          "stackGap": 2,
+          "gap": 0.28
+        },
+        "axes": {
+          "x": {
+            "grid": false
+          },
+          "y": {
+            "title": "",
+            "grid": true
+          }
+        },
+        "legend": {
+          "position": "top"
+        },
+        "tooltip": {
+          "mode": "index"
+        },
+        "size": {
+          "width": 620,
+          "height": 260
+        },
+        "a11y": {
+          "alt": "Errors are the largest share of events across the 14 days."
+        }
+      }
+    },
+    {
+      "id": "plausible-duration-hm",
+      "prompt": "Plausible-style duration: axes.y.format duration-hm prints 2m 24s for 144000.",
+      "page": "/dashboards/meter",
+      "markdown": "/dashboards/meter.md",
+      "onMain": true,
+      "keys": [
+        "axes.y.format",
+        "mark.partial",
+        "mark.partialOpacity"
+      ],
+      "source": "docs/public/dashboards/meter.md ## Duration",
+      "note": "The page tab is formatValue(144000, \"duration-hm\"), which prints 2m 24s. The published chart spec did not set an axis format. This recipe adds axes.y.format duration-hm so the ticks use that preset. encoding.y.format and encoding.y[].format accept the same preset. mark.partial is dotted and mark.partialOpacity is 0.06.",
+      "spec": {
+        "version": "1",
+        "type": "combo",
+        "theme": {
+          "preset": "soft",
+          "tokens": {
+            "background": "transparent",
+            "surface": "#ffffff",
+            "text": "#111827",
+            "muted": "#6b7280",
+            "grid": "#f3f4f6",
+            "axis": "#e5e7eb",
+            "accent": "#615fff",
+            "positive": "#16a34a",
+            "negative": "#ef4444",
+            "series": [
+              "#615fff",
+              "#615fff"
+            ],
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": 12
+          }
+        },
+        "data": [
+          {
+            "date": "2025-09-22",
+            "value": 121000
+          },
+          {
+            "date": "2025-09-23",
+            "value": 137000
+          },
+          {
+            "date": "2025-09-24",
+            "value": 134000
+          },
+          {
+            "date": "2025-09-25",
+            "value": 117000
+          },
+          {
+            "date": "2025-09-26",
+            "value": 115000
+          },
+          {
+            "date": "2025-09-27",
+            "value": 109000
+          },
+          {
+            "date": "2025-09-28",
+            "value": 113000
+          },
+          {
+            "date": "2025-09-29",
+            "value": 127000
+          },
+          {
+            "date": "2025-09-30",
+            "value": 136000
+          },
+          {
+            "date": "2025-10-01",
+            "value": 141000
+          },
+          {
+            "date": "2025-10-02",
+            "value": 126000
+          },
+          {
+            "date": "2025-10-03",
+            "value": 123000
+          },
+          {
+            "date": "2025-10-04",
+            "value": 120000
+          },
+          {
+            "date": "2025-10-05",
+            "value": 131000
+          },
+          {
+            "date": "2025-10-06",
+            "value": 136000
+          },
+          {
+            "date": "2025-10-07",
+            "value": 146000
+          },
+          {
+            "date": "2025-10-08",
+            "value": 152000
+          },
+          {
+            "date": "2025-10-09",
+            "value": 151000
+          },
+          {
+            "date": "2025-10-10",
+            "value": 155000
+          },
+          {
+            "date": "2025-10-11",
+            "value": 131000
+          },
+          {
+            "date": "2025-10-12",
+            "value": 140000
+          },
+          {
+            "date": "2025-10-13",
+            "value": 145000
+          },
+          {
+            "date": "2025-10-14",
+            "value": 156000
+          },
+          {
+            "date": "2025-10-15",
+            "value": 145000
+          },
+          {
+            "date": "2025-10-16",
+            "value": 144000
+          },
+          {
+            "date": "2025-10-17",
+            "value": 131000
+          },
+          {
+            "date": "2025-10-18",
+            "value": 132000
+          },
+          {
+            "date": "2025-10-19",
+            "value": 134000
+          },
+          {
+            "date": "2025-10-20",
+            "value": 153000
+          },
+          {
+            "date": "2025-10-21",
+            "value": 157000
+          }
+        ],
+        "encoding": {
+          "x": {
+            "field": "date",
+            "type": "temporal"
+          },
+          "y": [
+            {
+              "field": "value",
+              "mark": "area",
+              "scale": {
+                "domain": [
+                  0,
+                  190000
+                ]
+              }
+            }
+          ]
+        },
+        "mark": {
+          "curve": "linear",
+          "points": "always",
+          "pointSize": 2.5,
+          "fillOpacity": 0.16,
+          "partial": "dotted",
+          "partialOpacity": 0.06,
+          "strokeWidth": 1.75,
+          "gradient": false
+        },
+        "legend": {
+          "show": false
+        },
+        "axes": {
+          "x": {
+            "grid": false
+          },
+          "y": {
+            "title": "",
+            "grid": true,
+            "format": "duration-hm"
+          }
+        },
+        "tooltip": {
+          "mode": "index",
+          "background": "light-dark(#ffffff,#1f2937)",
+          "radius": 8,
+          "shadow": "0 4px 16px rgba(17,24,39,.12)",
+          "crosshairColor": "#615fff"
+        },
+        "size": {
+          "width": 1100,
+          "height": 280
+        },
+        "a11y": {
+          "alt": "Visit duration over 30 days."
+        }
+      },
+      "adapted": [
+        "axes.y.format"
+      ]
+    }
+  ]
+}
