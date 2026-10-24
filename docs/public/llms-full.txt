@@ -50,7 +50,7 @@ A canvas run on 2026-10-21, same harness, sampling auto, median of 5: canvas ren
 
 Page CSS owns the page grid, cards, and tabs. The JSON spec owns colour, grid, axes, marks, and legends.
 
-Round 1 unlocked the keys below. Copy-paste specs are in https://chartkit.dev/recipes.json. Four pages are on main: https://chartkit.dev/dashboards/ledger.md https://chartkit.dev/dashboards/meter.md https://chartkit.dev/dashboards/wayline.md https://chartkit.dev/dashboards/keel.md. signal, folio, cycle, edge, pulse, and retain are on pull request 53 (branch `cursor/dashboards-2-25e9`) and are not on main.
+Round 1 unlocked the keys below. Copy-paste specs are in https://chartkit.dev/recipes.json. All ten dashboard pages are on main: https://chartkit.dev/dashboards/ledger.md https://chartkit.dev/dashboards/meter.md https://chartkit.dev/dashboards/wayline.md https://chartkit.dev/dashboards/keel.md https://chartkit.dev/dashboards/signal.md https://chartkit.dev/dashboards/folio.md https://chartkit.dev/dashboards/cycle.md https://chartkit.dev/dashboards/edge.md https://chartkit.dev/dashboards/pulse.md https://chartkit.dev/dashboards/retain.md.
 
 - `mark.track` is `bar` or `row` on `bar-list`. `row` is a full-height wash behind the label. `bar` is the short rounded bar.
 - `axes.x.title`, `axes.y.title`, and `axes.y2.title` of `""` are kept and are not drawn. Omitting the title still copies the series name onto the axis.

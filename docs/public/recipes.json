@@ -1,6 +1,5 @@
 {
   "shell": "Page CSS owns the page grid, cards, and tabs. The JSON spec owns colour, grid, axes, marks, and legends.",
-  "unmerged": "signal, folio, cycle, edge, pulse, and retain are on pull request 53 (branch cursor/dashboards-2-25e9) and are not on main. ledger, meter, wayline, and keel are on main.",
   "closed": [
     {
       "key": "mark.track",
@@ -183,61 +182,49 @@
       "slug": "signal",
       "title": "Datadog-style monitors",
       "styledAfter": "Datadog and Grafana",
-      "onMain": false,
+      "onMain": true,
       "page": "/dashboards/signal",
-      "markdown": "/dashboards/signal.md",
-      "pr": 53,
-      "branch": "cursor/dashboards-2-25e9"
+      "markdown": "/dashboards/signal.md"
     },
     {
       "slug": "folio",
       "title": "Robinhood-style portfolio",
       "styledAfter": "Robinhood and Coinbase",
-      "onMain": false,
+      "onMain": true,
       "page": "/dashboards/folio",
-      "markdown": "/dashboards/folio.md",
-      "pr": 53,
-      "branch": "cursor/dashboards-2-25e9"
+      "markdown": "/dashboards/folio.md"
     },
     {
       "slug": "cycle",
       "title": "Linear-style insights",
       "styledAfter": "Linear",
-      "onMain": false,
+      "onMain": true,
       "page": "/dashboards/cycle",
-      "markdown": "/dashboards/cycle.md",
-      "pr": 53,
-      "branch": "cursor/dashboards-2-25e9"
+      "markdown": "/dashboards/cycle.md"
     },
     {
       "slug": "edge",
       "title": "Vercel-style analytics",
       "styledAfter": "Vercel",
-      "onMain": false,
+      "onMain": true,
       "page": "/dashboards/edge",
-      "markdown": "/dashboards/edge.md",
-      "pr": 53,
-      "branch": "cursor/dashboards-2-25e9"
+      "markdown": "/dashboards/edge.md"
     },
     {
       "slug": "pulse",
       "title": "Fitness-style activity",
       "styledAfter": "Apple Fitness and Apple Health",
-      "onMain": false,
+      "onMain": true,
       "page": "/dashboards/pulse",
-      "markdown": "/dashboards/pulse.md",
-      "pr": 53,
-      "branch": "cursor/dashboards-2-25e9"
+      "markdown": "/dashboards/pulse.md"
     },
     {
       "slug": "retain",
       "title": "ChartMogul-style revenue",
       "styledAfter": "ChartMogul and Mixpanel",
-      "onMain": false,
+      "onMain": true,
       "page": "/dashboards/retain",
-      "markdown": "/dashboards/retain.md",
-      "pr": 53,
-      "branch": "cursor/dashboards-2-25e9"
+      "markdown": "/dashboards/retain.md"
     }
   ],
   "prompts": [
@@ -271,57 +258,45 @@
     },
     {
       "id": "signal",
-      "prompt": "Datadog-style monitors. Not on main (pull request 53). Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/signal.md",
+      "prompt": "Datadog-style monitors. Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/signal.md",
       "page": "/dashboards/signal",
       "markdown": "/dashboards/signal.md",
-      "onMain": false,
-      "pr": 53,
-      "branch": "cursor/dashboards-2-25e9"
+      "onMain": true
     },
     {
       "id": "folio",
-      "prompt": "Robinhood-style portfolio. Not on main (pull request 53). Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/folio.md",
+      "prompt": "Robinhood-style portfolio. Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/folio.md",
       "page": "/dashboards/folio",
       "markdown": "/dashboards/folio.md",
-      "onMain": false,
-      "pr": 53,
-      "branch": "cursor/dashboards-2-25e9"
+      "onMain": true
     },
     {
       "id": "cycle",
-      "prompt": "Linear-style insights. Not on main (pull request 53). Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/cycle.md",
+      "prompt": "Linear-style insights. Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/cycle.md",
       "page": "/dashboards/cycle",
       "markdown": "/dashboards/cycle.md",
-      "onMain": false,
-      "pr": 53,
-      "branch": "cursor/dashboards-2-25e9"
+      "onMain": true
     },
     {
       "id": "edge",
-      "prompt": "Vercel-style analytics. Not on main (pull request 53). Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/edge.md",
+      "prompt": "Vercel-style analytics. Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/edge.md",
       "page": "/dashboards/edge",
       "markdown": "/dashboards/edge.md",
-      "onMain": false,
-      "pr": 53,
-      "branch": "cursor/dashboards-2-25e9"
+      "onMain": true
     },
     {
       "id": "pulse",
-      "prompt": "Fitness-style activity. Not on main (pull request 53). Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/pulse.md",
+      "prompt": "Fitness-style activity. Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/pulse.md",
       "page": "/dashboards/pulse",
       "markdown": "/dashboards/pulse.md",
-      "onMain": false,
-      "pr": 53,
-      "branch": "cursor/dashboards-2-25e9"
+      "onMain": true
     },
     {
       "id": "retain",
-      "prompt": "ChartMogul-style revenue. Not on main (pull request 53). Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/retain.md",
+      "prompt": "ChartMogul-style revenue. Page CSS owns the grid, cards, and tabs. The spec owns colour, grid, axes, marks, and legends. https://chartkit.dev/dashboards/retain.md",
       "page": "/dashboards/retain",
       "markdown": "/dashboards/retain.md",
-      "onMain": false,
-      "pr": 53,
-      "branch": "cursor/dashboards-2-25e9"
+      "onMain": true
     }
   ],
   "recipes": [
@@ -534,13 +509,13 @@
       "prompt": "Vercel-style area: mark.partial dashes the last segment and mark.partialOpacity fades its fill.",
       "page": "/dashboards/edge",
       "markdown": "/dashboards/edge.md",
-      "onMain": false,
+      "onMain": true,
       "keys": [
         "mark.partial",
         "mark.partialOpacity",
         "mark.area"
       ],
-      "source": "origin/cursor/dashboards-2-25e9 docs/public/dashboards/edge.md Visitors area. Pull request 53 is not merged, so this page is not on main.",
+      "source": "docs/public/dashboards/edge.md Visitors area.",
       "note": "type line with mark.area true. mark.partial is dashed. mark.partialOpacity is 0.05. axes.y.title is empty and y labels are off.",
       "spec": {
         "version": "1",
