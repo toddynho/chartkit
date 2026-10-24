@@ -37,6 +37,6 @@ No spec snippet. This row is not a single option that `validate()` can show.
 | Mermaid (chart-ish diagrams only) | native | MermaidConfig.pie | dts-path (strong) | mermaid/dist/config.type.d.ts:223 |
 | AntV G2 | native | ~polar | dts-grep (weak) | @antv/g2/lib/index.d.ts:53 interval + theta coordinate |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 6ee06d7ac9aa.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 92347dd72bcd.
 
 https://chartkit.dev/features.json

@@ -1,8 +1,6 @@
 # ChartKit JSON spec
-
 > @chartkitdev/core https://chartkit.dev/schema/v1.json
-> @chartkitdev/core/all. repair+validate @chartkitdev/core/validate.
-
+> @chartkitdev/core/all. repair+validate.
 ## Rules
 
 - version "1". a11y.alt required. data is rows, not {"values":[...]}. llms-full.txt.
@@ -11,11 +9,10 @@
 - Chart.js, Recharts, ECharts: https://chartkit.dev/convert
 - Render: https://cloud.chartkit.dev/render marked.
 - Options: interaction.navigator, interaction.sync, interaction.drilldown, layout.facet, layout.concat, layout.breakpoints, layout.direction rtl, render auto, mark.sampling lttb. 100000.
-- Dashboards: /dashboards/ledger.md meter.md wayline.md keel.md
+- Dashboards: /dashboards/{ledger,meter,wayline,keel,signal,folio,cycle,edge,pulse,retain}.md
 
 Features: https://chartkit.dev/features.json
 Types: line,bar,donut,pie,stacked-area,scatter,combo,heatmap,gauge,kpi,sparkline,mini-area,progress-ring,spike,candlestick,histogram,boxplot,radar,funnel,treemap,sankey,bullet,waterfall,gantt,timeline,quadrant,venn,journey,area-range,bar-range,errorbar,sunburst
-
 ```json
 {"version":"1","type":"line","data":[{"quarter":"Q1","units":40},{"quarter":"Q2","units":55}],"encoding":{"x":"quarter","y":"units"},"a11y":{"alt":"Units rose in Q2."}}
 ```

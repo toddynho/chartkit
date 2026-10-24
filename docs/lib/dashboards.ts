@@ -1,3 +1,4 @@
+import { round2 } from "./dashboards-round2.ts";
 import { formatValue, isExtra, render as renderCore } from "@chartkitdev/core/all";
 import { renderBarList } from "@chartkitdev/core/charts/bar-list";
 import { render as renderExtra } from "@chartkitdev/core/extra";
@@ -67,7 +68,7 @@ export interface Dashboard {
   notes: { label: string; detail: string }[];
 }
 
-interface Ink {
+export interface Ink {
   card: string;
   ink: string;
   muted: string;
@@ -79,7 +80,7 @@ interface Ink {
   series: string[];
 }
 
-interface ChartDraft {
+export interface ChartDraft {
   id: string;
   title: string;
   caption: string;
@@ -124,8 +125,10 @@ function draw(spec: Record<string, unknown>): string {
   return svg;
 }
 
-function chart(draft: ChartDraft): DashChart {
-  if (draft.spec.type === "choropleth" || draft.spec.type === "map-points") return { ...draft, svg: "" };
+export function chart(draft: ChartDraft): DashChart {
+  if (draft.spec.type === "choropleth" || draft.spec.type === "map-points") {
+    return { ...draft, svg: "", variants: draft.variants?.map((item) => ({ ...item, svg: "" })) };
+  }
   const variants = draft.variants?.map((item) => ({ ...item, svg: draw(item.spec) }));
   if (draft.spec.type === "bar-list") {
     const size = isRecord(draft.spec.size) ? draft.spec.size : {};
@@ -148,7 +151,7 @@ function spark(draft: SparkDraft): DashSpark {
   return { ...draft, svg: draw(draft.spec) };
 }
 
-function themeOf(ink: Ink, series = ink.series, bare = false, family = "Inter, sans-serif"): Record<string, unknown> {
+export function themeOf(ink: Ink, series = ink.series, bare = false, family = "Inter, sans-serif"): Record<string, unknown> {
   return {
     preset: "soft",
     tokens: {
@@ -168,22 +171,22 @@ function themeOf(ink: Ink, series = ink.series, bare = false, family = "Inter, s
   };
 }
 
-function themesFor(light: Ink, dark: Ink, series?: { soft: string[]; midnight: string[] }, bare = false, family = "Inter, sans-serif"): DashThemes {
+export function themesFor(light: Ink, dark: Ink, series?: { soft: string[]; midnight: string[] }, bare = false, family = "Inter, sans-serif"): DashThemes {
   return {
     soft: themeOf(light, series?.soft ?? light.series, bare, family),
     midnight: themeOf(dark, series?.midnight ?? dark.series, bare, family),
   };
 }
 
-function spec(type: string, themes: DashThemes, mode: DashTheme, body: Record<string, unknown>, alt: string): Record<string, unknown> {
+export function spec(type: string, themes: DashThemes, mode: DashTheme, body: Record<string, unknown>, alt: string): Record<string, unknown> {
   return { version: "1", type, theme: themes[mode], ...body, a11y: { alt } };
 }
 
-function disclaimer(product: string): string {
+export function disclaimer(product: string): string {
   return `Styled after ${product}'s dashboard to show ChartKit's styling flexibility. Not affiliated with or endorsed by ${product}.`;
 }
 
-function isoDays(start: string, count: number): string[] {
+export function isoDays(start: string, count: number): string[] {
   const origin = Date.parse(`${start}T00:00:00Z`);
   return Array.from({ length: count }, (_, index) => new Date(origin + index * 86400000).toISOString().slice(0, 10));
 }
@@ -197,7 +200,7 @@ function unit(seed: number): () => number {
   };
 }
 
-interface Shape {
+export interface Shape {
   seed: number;
   start: number;
   end: number;
@@ -212,7 +215,7 @@ interface Shape {
  * Trend, weekly seasonality, noise, and an optional spike.
  * Nothing is clamped to a ceiling, so peaks are not flat copies of each other.
  */
-function organic(count: number, shape: Shape): number[] {
+export function organic(count: number, shape: Shape): number[] {
   const rand = unit(shape.seed);
   const out: number[] = [];
   for (let index = 0; index < count; index++) {
@@ -233,12 +236,12 @@ function organic(count: number, shape: Shape): number[] {
 }
 
 /** Round a continuous series without pulling different days onto one value. */
-function rounds(values: number[], step = 1): number[] {
+export function rounds(values: number[], step = 1): number[] {
   return values.map((value) => Math.round(value / step) * step);
 }
 
 /** Scale a comparison down, keeping its own shape, until most points sit under the current series. */
-function sitBelow(current: number[], earlier: number[]): number[] {
+export function sitBelow(current: number[], earlier: number[]): number[] {
   const ratios = earlier.map((value, index) => value / Math.max(current[index] ?? 1, 1e-9)).sort((a, b) => a - b);
   const pivot = ratios[Math.min(ratios.length - 1, Math.ceil(ratios.length * 0.85) - 1)] ?? 1;
   const factor = pivot > 0.98 ? 0.98 / pivot : 1;
@@ -1106,7 +1109,7 @@ function keel(): Dashboard {
   };
 }
 
-const built = [ledger(), meter(), wayline(), keel()];
+const built = [ledger(), meter(), wayline(), keel(), ...round2()];
 
 export function dashboards(): Dashboard[] {
   return built;

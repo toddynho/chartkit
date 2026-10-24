@@ -22,7 +22,7 @@ export default function ShowcasePage() {
       </p>
       <h2>Dashboards</h2>
       <p className="lede">
-        Four more boards, styled after Stripe, Plausible, Google Analytics, and Sentry. Colour comes from theme.tokens.
+        Ten boards, styled after familiar dashboards. Colour comes from theme.tokens. Fonts are Inter or Roboto.
         ChartKit is not affiliated with or endorsed by those products.
       </p>
       <div className="gallery-index">
