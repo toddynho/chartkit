@@ -1,0 +1,1635 @@
+[
+  {
+    "slug": "",
+    "group": "Start",
+    "title": "Overview",
+    "lede": "A JSON spec any agent \u2014 or your backend \u2014 can write. Edit it below; the render panel updates immediately.",
+    "description": "A JSON spec any agent \u2014 or your backend \u2014 can write. Edit it below; the render panel updates immediately.",
+    "tryIntro": "Charts become data. Edit the JSON, or use the options rail beside it \u2014 Soft / Midnight, area / line / bar. The far-right column is the live response.",
+    "sections": [
+      {
+        "title": "Install",
+        "paragraphs": [
+          "Add the core package. Framework adapters are optional; the same spec works in React, Vue, Svelte, vanilla, or as server SVG."
+        ],
+        "list": [],
+        "code": [
+          "`npm i @chartkitdev/core`"
+        ]
+      },
+      {
+        "title": "Validate",
+        "paragraphs": [
+          "Before you render, `validate()` returns structured CK codes with JSON Pointers. Agents loop locally \u2014 no model round-trip required for most fixes.",
+          "For agents",
+          "Point at `llms.txt`, emit a spec, then `validate()`. On failure, `repair()` applies JSON Patch locally \u2014 lifting first-try failures without another model call. Then `render()` (or SSR `renderToString`)."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Next",
+        "paragraphs": [
+          "Pick your runtime, or jump into concepts if you already have a spec. Every page has a `.md` twin and machine indexes for agents."
+        ],
+        "list": [],
+        "code": []
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "react",
+    "group": "Start",
+    "title": "React",
+    "lede": "A thin adapter over the same JSON spec. Ship `<Chart spec={\u2026} />` in client components, or render SVG on the server for App Router RSC \u2014 agents never learn a React-only API.",
+    "description": "A thin adapter over the same JSON spec. Ship `<Chart spec={\u2026} />` in client components, or render SVG on the server for App Router RSC \u2014 agents never learn a React-only API.",
+    "tryIntro": "Charts become data. Edit the JSON, or use the options rail beside it \u2014 Soft / Midnight, area / line / bar, Client / RSC, all-charts vs slim line. The far-right column is the live response.",
+    "sections": [
+      {
+        "title": "Install",
+        "paragraphs": [
+          "Pull the React adapter. It depends on `@chartkitdev/core` (zero runtime deps) and peers React 18+. The same spec works in Vue, Svelte, vanilla, or Node SVG.",
+          "Migrating from v0.4? Swap `@derpdaderp/chartkit` for `@chartkitdev/react`. Component props still work; prefer `<Chart spec={\u2026} />` for new code. See migrate notes."
+        ],
+        "list": [],
+        "code": [
+          "`npm i @chartkitdev/react`"
+        ]
+      },
+      {
+        "title": "<Chart />",
+        "paragraphs": [
+          "Import `Chart` from `@chartkitdev/react`. Pass a v1 `ChartSpec` \u2014 `version`, `type`, `data`, `encoding`, and required `a11y.alt`. Defaults to every chart via `@chartkitdev/core/all`."
+        ],
+        "list": [],
+        "code": [
+          "`import { Chart } from \"@chartkitdev/react\"; import type { ChartSpec } from \"@chartkitdev/core\"; const spec: ChartSpec = { version: \"1\", type: \"line\", data: [ { week: \"W1\", signups: 18 }, { week: \"W2\", signups: 28 }, { week: \"W3\", signups: 24 }, { week: \"W4\", signups: 42 }, { week: \"W5\", signups: 38 }, { week: \"W6\", signups: 56 }, { week: \"W7\", signups: 62 }, { week: \"W8\", signups: 86 } ], encoding: { x: \"week\", y: \"signups\" }, theme: \"soft\", a11y: { alt: \"Weekly signups rose from 18 to 86.\" } }; export function Panel() { return <Chart spec={spec} />; }`"
+        ]
+      },
+      {
+        "title": "Next.js App Router",
+        "paragraphs": [
+          "The React package build starts with `\"use client\"`, so importing `Chart` (or `LineChart`) from a Server Component pulls it into the client boundary. That is the right path for hydration and interact.",
+          "Honest split: `<Chart />` is the client adapter. Static email/PDF/RSC first paint uses core `render()` (or vanilla `renderToString`). Same spec either way \u2014 that is the switch pitch."
+        ],
+        "list": [
+          "Client chart \u2014 put `<Chart />` in a file with `\"use client\"`, or nest it under a client parent.",
+          "RSC SSR SVG \u2014 call `render()` from `@chartkitdev/core/all` in a Server Component and inject the SVG string. No React chart runtime on the wire."
+        ],
+        "code": [
+          "`// app/dashboard/chart.tsx \u2014 Server Component (no \"use client\") import { render } from \"@chartkitdev/core/all\"; import type { ChartSpec } from \"@chartkitdev/core\"; const spec: ChartSpec = { /* same v1 spec */ }; export function ServerChart() { const svg = render(spec); return ( <div role=\"img\" aria-label={spec.a11y.alt} dangerouslySetInnerHTML={{ __html: svg }} /> ); }`"
+        ]
+      },
+      {
+        "title": "TypeScript",
+        "paragraphs": [
+          "`ChartSpec` comes from `@chartkitdev/core` (generated from `chartkit.schema.json`). `ChartProps` accepts `spec`, optional `className` / `style`, and optional `render` for a slim bundle. Autocomplete covers every leaf the schema knows."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Slim bundle",
+        "paragraphs": [
+          "Default `<Chart />` ships every chart. Pass `render` from `createRenderer([line])` when a page only needs one type. Budgets from `size-budget.json`: core line 8.8 KB gzip, core all 20.9 KB gzip (React + framework external).",
+          "Caveat (product): the slim `createRenderer([line])` path may omit axis extras unless mounted \u2014 titles/ticks can silently no-op. Prefer `core/all` until bundles docs spell the opt-in. Mock notes the honesty gap from PLAN Decision 1."
+        ],
+        "list": [],
+        "code": [
+          "`import { Chart } from \"@chartkitdev/react\"; import { createRenderer } from \"@chartkitdev/core\"; import { line } from \"@chartkitdev/core/charts/line\"; const render = createRenderer([line]); export function SlimLine({ spec }) { return <Chart spec={spec} render={render} />; }`"
+        ]
+      },
+      {
+        "title": "Component API (still supported)",
+        "paragraphs": [
+          "Dashboard components (`LineChart`, `KpiCard`, \u2026) keep their props. `theme` is required on those; on a JSON spec it defaults to `auto`. Prop keys like `dataKey` are not spec keys \u2014 agents should emit the v1 JSON.",
+          "For agents",
+          "Emit v1 JSON (`a11y.alt` required). Validate with `@chartkitdev/core/validate`. Render with `<Chart />` or core `render()`. Point models at `llms.txt` \u2014 not at JSX prop tables."
+        ],
+        "list": [],
+        "code": [
+          "`import { LineChart } from \"@chartkitdev/react\"; <LineChart data={rows} dataKey=\"signups\" theme=\"midnight\" responsive />`"
+        ]
+      },
+      {
+        "title": "Next",
+        "paragraphs": [
+          "Same adapter pattern in Vue and Svelte, or jump to Spec anatomy if you already have JSON. Every page ships a `.md` twin for agents."
+        ],
+        "list": [],
+        "code": []
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "vue",
+    "group": "Start",
+    "title": "Vue",
+    "lede": "A thin Vue 3 adapter over the same JSON spec. Ship `<Chart :spec=\"\u2026\" />` in SFCs \u2014 SVG is produced during render, so Nuxt and Vue SSR include it without a React-style client boundary.",
+    "description": "A thin Vue 3 adapter over the same JSON spec. Ship `<Chart :spec=\"\u2026\" />` in SFCs \u2014 SVG is produced during render, so Nuxt and Vue SSR include it without a React-style client bounda",
+    "tryIntro": "Charts become data. Edit the JSON, or use the options rail beside it \u2014 Soft / Midnight, area / line / bar, Client / SSR, all-charts vs slim line. The far-right column is the live response.",
+    "sections": [
+      {
+        "title": "Install",
+        "paragraphs": [
+          "Pull the Vue adapter. It depends on `@chartkitdev/core` (zero runtime deps) and peers Vue 3.4+. Optional peer `@vue/server-renderer` only if you call `@chartkitdev/vue/ssr`. Same spec as React, Svelte, vanilla, or Node SVG.",
+          "Optional SSR peer: `@vue/server-renderer` \u22653.4 is listed as an optional peer for the `./ssr` entry. Client-only apps can skip it. Budgets from `size-budget.json` (framework externalized): Vue adapter 274 B gzip."
+        ],
+        "list": [],
+        "code": [
+          "`npm i @chartkitdev/vue`"
+        ]
+      },
+      {
+        "title": "<Chart />",
+        "paragraphs": [
+          "Import `Chart` from `@chartkitdev/vue`. Bind a v1 `ChartSpec` with `:spec` \u2014 `version`, `type`, `data`, `encoding`, and required `a11y.alt`. Defaults to every chart via `@chartkitdev/core/all`. Spec changes recompute the SVG string and replace the element HTML; unmount drops the node."
+        ],
+        "list": [],
+        "code": [
+          "`<script setup lang=\"ts\"> import { Chart } from \"@chartkitdev/vue\"; import type { ChartSpec } from \"@chartkitdev/core\"; const spec: ChartSpec = { version: \"1\", type: \"line\", data: [ { week: \"W1\", signups: 18 }, { week: \"W2\", signups: 28 }, { week: \"W3\", signups: 24 }, { week: \"W4\", signups: 42 }, { week: \"W5\", signups: 38 }, { week: \"W6\", signups: 56 }, { week: \"W7\", signups: 62 }, { week: \"W8\", signups: 86 } ], encoding: { x: \"week\", y: \"signups\" }, theme: \"soft\", a11y: { alt: \"Weekly signups rose from 18 to 86.\" } }; </script> <template> <Chart :spec=\"spec\" class=\"panel-chart\" /> </template>`"
+        ]
+      },
+      {
+        "title": "Nuxt",
+        "paragraphs": [
+          "Unlike the React adapter (which starts with `\"use client\"`), the Vue `Chart` draws during render \u2014 Nuxt SSR and `vue/server-renderer` include the SVG in the first HTML. Two paths:",
+          "Honest split: client and Nuxt SSR both use the same `<Chart />`. Reach for `@chartkitdev/vue/ssr` when you need a string; for pure SVG without the Vue wrapper, core `render()` still works. Same JSON either way \u2014 that is the switch pitch."
+        ],
+        "list": [
+          "SFC in a page / layout \u2014 drop `<Chart :spec />` in a `.vue` component. Universal by default.",
+          "String SSR \u2014 `renderToString` from `@chartkitdev/vue/ssr` in a Nitro handler or server utility when you need the HTML string (email, edge, agent tool)."
+        ],
+        "code": [
+          "`<!-- components/PanelChart.vue \u2014 works in Nuxt pages & layouts --> <script setup lang=\"ts\"> import { Chart } from \"@chartkitdev/vue\"; import type { ChartSpec } from \"@chartkitdev/core\"; const props = defineProps<{ spec: ChartSpec }>(); </script> <template> <Chart :spec=\"spec\" /> </template>`",
+          "`// server/api/chart.get.ts \u2014 or any Nitro handler import { renderToString } from \"@chartkitdev/vue/ssr\"; import type { ChartSpec } from \"@chartkitdev/core\"; export default defineEventHandler(async () => { const spec: ChartSpec = { /* same v1 spec */ }; const html = await renderToString(spec); return html; // wrapper div + core SVG string inside });`"
+        ]
+      },
+      {
+        "title": "renderToString",
+        "paragraphs": [
+          "The `./ssr` entry wraps `createSSRApp` + `vue/server-renderer`. Returns a Promise of HTML; the SVG inside is what core would emit."
+        ],
+        "list": [],
+        "code": [
+          "`import { renderToString } from \"@chartkitdev/vue/ssr\"; const html = await renderToString(spec); // optional slim: await renderToString(spec, createRenderer([line]))`"
+        ]
+      },
+      {
+        "title": "TypeScript",
+        "paragraphs": [
+          "`ChartSpec` comes from `@chartkitdev/core` (generated from `chartkit.schema.json`). `ChartProps` accepts required `spec` and optional `render` for a slim bundle. Attrs (class, style, aria-*) fall through onto the wrapper `div` via `inheritAttrs: false` + spread."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Slim bundle",
+        "paragraphs": [
+          "Default `<Chart />` ships every chart. Pass `:render` from `createRenderer([line])` when a page only needs one type. Budgets from `size-budget.json`: Vue adapter 274 B gzip (framework external), core line 8.8 KB, core all 20.9 KB.",
+          "Caveat (product): the slim `createRenderer([line])` path may omit axis extras unless mounted \u2014 titles/ticks can silently no-op. Prefer `core/all` until bundles docs spell the opt-in. Mock notes the honesty gap from PLAN Decision 1."
+        ],
+        "list": [],
+        "code": [
+          "`<script setup lang=\"ts\"> import { Chart } from \"@chartkitdev/vue\"; import { createRenderer } from \"@chartkitdev/core\"; import { line } from \"@chartkitdev/core/charts/line\"; import type { ChartSpec } from \"@chartkitdev/core\"; const render = createRenderer([line]); defineProps<{ spec: ChartSpec }>(); </script> <template> <Chart :spec=\"spec\" :render=\"render\" /> </template>`"
+        ]
+      },
+      {
+        "title": "Reactivity",
+        "paragraphs": [
+          "Pass a reactive `spec` (ref / reactive / computed). The component\u2019s computed SVG tracks it \u2014 no imperative `update()` call. That mirrors vanilla\u2019s `mount().update()` without exposing the handle. For agents emitting static JSON, treat the object as immutable and replace the whole spec.",
+          "For agents",
+          "Emit v1 JSON (`a11y.alt` required). Validate with `@chartkitdev/core/validate`. Render with `<Chart :spec />`, `vue/ssr` `renderToString`, or core `render()`. Point models at `llms.txt` \u2014 not at Vue prop tables."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Next",
+        "paragraphs": [
+          "Same adapter pattern in Svelte, or jump to Spec anatomy if you already have JSON. Every page ships a `.md` twin for agents."
+        ],
+        "list": [],
+        "code": []
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "svelte",
+    "group": "Start",
+    "title": "Svelte",
+    "lede": "A thin Svelte adapter over the same JSON spec. Ship `<Chart {spec} />` \u2014 SVG is rendered in the template with `{@html}`, so SvelteKit SSR includes it without an `onMount` dance or a separate SSR entry.",
+    "description": "A thin Svelte adapter over the same JSON spec. Ship `<Chart {spec} />` \u2014 SVG is rendered in the template with `{@html}`, so SvelteKit SSR includes it without an `onMount` dance or ",
+    "tryIntro": "Charts become data. Edit the JSON, or use the options rail beside it \u2014 Soft / Midnight, area / line / bar, Client / Kit SSR, all-charts vs slim line. The far-right column is the live response.",
+    "sections": [
+      {
+        "title": "Install",
+        "paragraphs": [
+          "Pull the Svelte adapter. It depends on `@chartkitdev/core` (zero runtime deps) and peers Svelte 4 or 5. The package ships `.svelte` source \u2014 your app\u2019s compiler builds it (including SvelteKit). Same spec as React, Vue, vanilla, or Node SVG.",
+          "Svelte 4 + 5: the component uses `export let` and `$:`, which Svelte 5 still compiles. No runes required. Budgets from `size-budget.json` (framework externalized): Svelte adapter 446 B gzip (client compile)."
+        ],
+        "list": [],
+        "code": [
+          "`npm i @chartkitdev/svelte`"
+        ]
+      },
+      {
+        "title": "<Chart />",
+        "paragraphs": [
+          "Import `Chart` from `@chartkitdev/svelte`. Pass a v1 `ChartSpec` as `spec` (or shorthand `{spec}`) \u2014 `version`, `type`, `data`, `encoding`, and required `a11y.alt`. Defaults to every chart via `@chartkitdev/core/all`. Spec changes recompute `$: svg = render(spec)`; destroying the component removes the node."
+        ],
+        "list": [],
+        "code": [
+          "`<script lang=\"ts\"> import { Chart } from \"@chartkitdev/svelte\"; import type { ChartSpec } from \"@chartkitdev/core\"; const spec: ChartSpec = { version: \"1\", type: \"line\", data: [ { week: \"W1\", signups: 18 }, { week: \"W2\", signups: 28 }, { week: \"W3\", signups: 24 }, { week: \"W4\", signups: 42 }, { week: \"W5\", signups: 38 }, { week: \"W6\", signups: 56 }, { week: \"W7\", signups: 62 }, { week: \"W8\", signups: 86 } ], encoding: { x: \"week\", y: \"signups\" }, theme: \"soft\", a11y: { alt: \"Weekly signups rose from 18 to 86.\" } }; </script> <Chart {spec} class=\"panel-chart\" />`"
+        ]
+      },
+      {
+        "title": "SvelteKit",
+        "paragraphs": [
+          "There is no `@chartkitdev/svelte/ssr` entry \u2014 you do not need one. Markup uses `{@html svg}` in the template, so Kit\u2019s SSR pass already emits the SVG in the first HTML. Load the spec on the server if you want; hydrate with the same component.",
+          "Honest split: client and Kit SSR use the same `<Chart />`. For a bare SVG string without the Svelte wrapper (email, edge, agent tool), call core `render()`. Same JSON either way \u2014 that is the switch pitch."
+        ],
+        "list": [
+          "Page / layout \u2014 drop `<Chart {spec} />` in a `.svelte` route. Universal by default.",
+          "Server load \u2014 fetch or build the v1 JSON in `+page.server.ts`, pass it as `data.spec`. Agents can emit that JSON anywhere."
+        ],
+        "code": [
+          "`<!-- src/routes/dashboard/+page.svelte --> <script lang=\"ts\"> import { Chart } from \"@chartkitdev/svelte\"; import type { ChartSpec } from \"@chartkitdev/core\"; export let data: { spec: ChartSpec }; </script> <Chart spec={data.spec} />`",
+          "`// src/routes/dashboard/+page.server.ts import type { ChartSpec } from \"@chartkitdev/core\"; import type { PageServerLoad } from \"./$types\"; export const load: PageServerLoad = async () => { const spec: ChartSpec = { /* same v1 spec */ }; return { spec }; };`"
+        ]
+      },
+      {
+        "title": "TypeScript",
+        "paragraphs": [
+          "`ChartSpec` comes from `@chartkitdev/core`. `ChartProps` accepts required `spec`, optional `render`, plus `class` / `style` forwarded onto the wrapper `div`. Types ship beside the `.svelte` source in `index.d.ts`."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Slim bundle",
+        "paragraphs": [
+          "Default `<Chart />` ships every chart. Pass `render` from `createRenderer([line])` when a page only needs one type. Budgets from `size-budget.json`: Svelte adapter 446 B gzip (framework external), core line 8.8 KB, core all 20.9 KB.",
+          "Caveat (product): the slim `createRenderer([line])` path may omit axis extras unless mounted \u2014 titles/ticks can silently no-op. Prefer `core/all` until bundles docs spell the opt-in. Mock notes the honesty gap from PLAN Decision 1."
+        ],
+        "list": [],
+        "code": [
+          "`<script lang=\"ts\"> import { Chart } from \"@chartkitdev/svelte\"; import { createRenderer } from \"@chartkitdev/core\"; import { line } from \"@chartkitdev/core/charts/line\"; import type { ChartSpec } from \"@chartkitdev/core\"; export let spec: ChartSpec; const render = createRenderer([line]); </script> <Chart {spec} {render} />`"
+        ]
+      },
+      {
+        "title": "Component API",
+        "paragraphs": [
+          "Legacy Svelte component API on purpose: `export let` + `$:` so both Svelte 4 and 5 compile it. Imperative `$set` / `$destroy` work if you mount manually; in Kit routes, prefer props. Do not put chart drawing in `onMount` \u2014 that would break SSR.",
+          "For agents",
+          "Emit v1 JSON (`a11y.alt` required). Validate with `@chartkitdev/core/validate`. Render with `<Chart {spec} />` or core `render()`. Point models at `llms.txt` \u2014 not at Svelte prop tables."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Next",
+        "paragraphs": [
+          "Same adapter pattern in vanilla (`mount()`), or jump to Spec anatomy if you already have JSON. Every page ships a `.md` twin for agents."
+        ],
+        "list": [],
+        "code": []
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "vanilla",
+    "group": "Start",
+    "title": "Vanilla",
+    "lede": "No framework. Import `mount` and `renderToString` from `@chartkitdev/vanilla`, or load a CDN global \u2014 same v1 JSON as React, Vue, and Svelte. The SVG comes from `@chartkitdev/core`; the adapter is a 240 B mount helper.",
+    "description": "No framework. Import `mount` and `renderToString` from `@chartkitdev/vanilla`, or load a CDN global \u2014 same v1 JSON as React, Vue, and Svelte. The SVG comes from `@chartkitdev/core`",
+    "tryIntro": "Charts become data. Edit the JSON, or use the options rail \u2014 Soft / Midnight, area / line / bar, ESM `mount` vs CDN global, all-charts vs slim line. The far-right column is the live response.",
+    "sections": [
+      {
+        "title": "Install",
+        "paragraphs": [
+          "Pull the vanilla adapter. It depends on `@chartkitdev/core` (zero runtime deps) and has no framework peers. ESM + CJS builds ship from the package root. Same v1 spec as React, Vue, Svelte, or a bare Node SVG string.",
+          "Size: budgets from `size-budget.json` (framework externalized): vanilla adapter 240 B gzip, core line 8.8 KB, core all 20.9 KB. CDN global bytes are mock-plausible until a published `chartkit.global.js` lands."
+        ],
+        "list": [],
+        "code": [
+          "`npm i @chartkitdev/vanilla`"
+        ]
+      },
+      {
+        "title": "`mount()`",
+        "paragraphs": [
+          "Import `mount` from `@chartkitdev/vanilla`. Pass an element you already own and a v1 `ChartSpec` \u2014 `version`, `type`, `data`, `encoding`, required `a11y.alt`. Defaults to every chart via `@chartkitdev/core/all`. Returns `{ update(spec), destroy() }`. No wrapper node is inserted; SVG is written to `el.innerHTML`. Matching SVG skips the DOM write."
+        ],
+        "list": [],
+        "code": [
+          "`import { mount } from \"@chartkitdev/vanilla\"; const spec = { version: \"1\", type: \"line\", data: [ { week: \"W1\", signups: 18 }, { week: \"W2\", signups: 28 }, { week: \"W3\", signups: 24 }, { week: \"W4\", signups: 42 }, { week: \"W5\", signups: 38 }, { week: \"W6\", signups: 56 }, { week: \"W7\", signups: 62 }, { week: \"W8\", signups: 86 } ], encoding: { x: \"week\", y: \"signups\" }, theme: \"soft\", a11y: { alt: \"Weekly signups rose from 18 to 86.\" } }; const chart = mount(document.querySelector(\"#chart\"), spec); chart.update(nextSpec); chart.destroy();`"
+        ]
+      },
+      {
+        "title": "ESM",
+        "paragraphs": [
+          "The package is `\"type\": \"module\"`. Use native ESM in the browser with an import map, or let Vite / esbuild / Rollup resolve `@chartkitdev/vanilla` and its `@chartkitdev/core` dependency. Tree-shake with `createRenderer` when you only need one chart type (see Slim).",
+          "mock-plausible: jsDelivr `+esm` paths follow the published `0.5.0` package shape; pin the version in production. Subpath `core/all` must resolve to the built file your bundler or CDN exposes."
+        ],
+        "list": [],
+        "code": [
+          "`<script type=\"importmap\"> { \"imports\": { \"@chartkitdev/vanilla\": \"https://cdn.jsdelivr.net/npm/@chartkitdev/vanilla@0.5.0/+esm\", \"@chartkitdev/core\": \"https://cdn.jsdelivr.net/npm/@chartkitdev/core@0.5.0/+esm\", \"@chartkitdev/core/all\": \"https://cdn.jsdelivr.net/npm/@chartkitdev/core@0.5.0/dist/all.js\" } } </script> <script type=\"module\"> import { mount } from \"@chartkitdev/vanilla\"; mount(document.querySelector(\"#chart\"), spec); </script>`"
+        ]
+      },
+      {
+        "title": "CDN global",
+        "paragraphs": [
+          "For a script tag with no bundler, load a UMD/IIFE build that attaches `ChartKit` on `globalThis`. Showcase demos call this `chartkit.global.js`. Call `ChartKit.mount(el, spec)` the same way as the ESM export.",
+          "mock-plausible: today\u2019s `@chartkitdev/vanilla` tsup config emits ESM + CJS only \u2014 no IIFE entry yet. IA and showcase name `chartkit.global.js`; this page shows the intended drop-in. Prefer ESM until the global build ships."
+        ],
+        "list": [],
+        "code": [
+          "`<div id=\"chart\"></div> <script src=\"https://cdn.jsdelivr.net/npm/@chartkitdev/vanilla@0.5.0/dist/chartkit.global.js\"></script> <script> ChartKit.mount(document.querySelector(\"#chart\"), { version: \"1\", type: \"line\", data: [{ week: \"W1\", signups: 18 }, { week: \"W2\", signups: 28 }], encoding: { x: \"week\", y: \"signups\" }, a11y: { alt: \"Signups rose from W1 to W2.\" } }); </script>`"
+        ]
+      },
+      {
+        "title": "`renderToString()`",
+        "paragraphs": [
+          "Same SVG core returns, with no DOM. Use it in Node, edge workers, emails, or any server that writes HTML. Optional second arg is a `render` from `createRenderer([...])`.",
+          "Honest split: `mount` owns the element lifecycle; `renderToString` is the SVG string for first paint. Hydrate by calling `mount` on the same node with the same spec \u2014 matching SVG skips a rewrite."
+        ],
+        "list": [],
+        "code": [
+          "`import { renderToString } from \"@chartkitdev/vanilla\"; const svg = renderToString(spec); // <div id=\"chart\">${svg}</div> \u2014 hydrate later with mount() if needed`"
+        ]
+      },
+      {
+        "title": "TypeScript",
+        "paragraphs": [
+          "`ChartSpec` comes from `@chartkitdev/core`. Vanilla exports `MountElement`, `MountOptions` (`render?`), and `MountedChart` (`update` / `destroy`). Types ship beside the ESM build in `dist/index.d.ts`."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Slim bundle",
+        "paragraphs": [
+          "Default `mount` / `renderToString` ship every chart via `core/all`. Pass `{ render }` from `createRenderer([line])` when a page only needs one type. Budgets: vanilla 240 B, core line 8.8 KB, core all 20.9 KB gzip.",
+          "Caveat (product): the slim `createRenderer([line])` path may omit axis extras unless mounted \u2014 titles/ticks can silently no-op. Prefer `core/all` until bundles docs spell the opt-in. Mock notes the honesty gap from PLAN Decision 1."
+        ],
+        "list": [],
+        "code": [
+          "`import { mount } from \"@chartkitdev/vanilla\"; import { createRenderer } from \"@chartkitdev/core\"; import { line } from \"@chartkitdev/core/charts/line\"; const render = createRenderer([line]); mount(document.querySelector(\"#chart\"), spec, { render });`"
+        ]
+      },
+      {
+        "title": "API",
+        "paragraphs": [
+          "For agents",
+          "Emit v1 JSON (`a11y.alt` required). Validate with `@chartkitdev/core/validate`. Render with `mount(el, spec)`, `renderToString(spec)`, or core `render()`. Point models at `llms.txt` \u2014 not at framework prop tables."
+        ],
+        "list": [
+          "`mount(el, spec, options?)` \u2192 `MountedChart` \u2014 draws into `el`; optional `options.render`.",
+          "`chart.update(spec)` \u2014 redraw; no-op after `destroy`; skips write when SVG matches.",
+          "`chart.destroy()` \u2014 clears `innerHTML`; further updates do nothing.",
+          "`renderToString(spec, render?)` \u2192 SVG string; default render is `core/all`."
+        ],
+        "code": []
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "markdown",
+    "group": "Start",
+    "title": "Markdown",
+    "lede": "Put a ChartKit v1 spec in a fenced code block. Agents copy it from `llms.txt`, CI validates every ````json` example, and the same fence renders in MDX, READMEs, and `.md` page twins \u2014 no React required.",
+    "description": "Put a ChartKit v1 spec in a fenced code block. Agents copy it from `llms.txt`, CI validates every ````json` example, and the same fence renders in MDX, READMEs, and `.md` page twin",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "What you need",
+        "paragraphs": [
+          "No adapter install for raw fences. A ChartKit spec is ordinary JSON inside a Markdown code fence. Published docs already ship one drawable example per chart type in `llms.txt` / `llms-full.txt` / `packages/core/README.md`, and `docs-spec.test.ts` parses every ````json` block, runs `validate()`, and asserts `render()` draws it.",
+          "mock-plausible: showcase demos name `@chartkitdev/markdown` as a remark/MDX helper that turns fences into SVG. It is not in `size-budget.json` yet. Until it ships, extract the JSON and call `@chartkitdev/core` (or any adapter) yourself."
+        ],
+        "list": [],
+        "code": [
+          "`npm i @chartkitdev/markdown`"
+        ]
+      },
+      {
+        "title": "Try a fence",
+        "paragraphs": [
+          "Edit the JSON body, or flip Type / Theme / Fence language / Bundle. The response rail shows how the same spec would be labeled when an agent or MDX pipeline picks it up."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Fence syntax",
+        "paragraphs": [
+          "Today\u2019s published corpus uses the `json` language tag. The body is a full v1 `ChartSpec` \u2014 `version`, `type`, `data`, `encoding`, required `a11y.alt` (\u226510 chars). Same object React, Vue, Svelte, and vanilla mount.",
+          "Optional tag: a dedicated ````chartkit` (or ````chartkit json`) fence is mock-plausible for MDX highlighters and the remark plugin. CI already accepts plain ````json` \u2014 prefer that until the plugin lands."
+        ],
+        "list": [],
+        "code": [
+          "````json { \"version\": \"1\", \"type\": \"line\", \"data\": [ { \"week\": \"W1\", \"signups\": 18 }, { \"week\": \"W2\", \"signups\": 28 }, { \"week\": \"W3\", \"signups\": 24 }, { \"week\": \"W4\", \"signups\": 42 }, { \"week\": \"W5\", \"signups\": 38 }, { \"week\": \"W6\", \"signups\": 56 }, { \"week\": \"W7\", \"signups\": 62 }, { \"week\": \"W8\", \"signups\": 86 } ], \"encoding\": { \"x\": \"week\", \"y\": \"signups\" }, \"theme\": \"soft\", \"a11y\": { \"alt\": \"Weekly signups rose from 18 to 86.\" } } ````"
+        ]
+      },
+      {
+        "title": "Agents & llms.txt",
+        "paragraphs": [
+          "Point models at `https://chartkit.dev/llms.txt` (\u22646.4 KB index) or `/llms-full.txt`. Both are fenced JSON examples agents can scrape. The playground accepts `?spec=` / `#spec=` base64url so an agent can hand a user a live link. For bug reports, Copy as issue wraps the spec + diagnostics in Markdown."
+        ],
+        "list": [
+          "Extract \u2014 regex ````json\\n([\\s\\S]*?)```` (same pattern as `docs-spec.test.ts`).",
+          "Validate \u2014 `import { validate } from \"@chartkitdev/core/validate\"`.",
+          "Render \u2014 core `render()`, any adapter, or MCP `render_svg` (planned)."
+        ],
+        "code": []
+      },
+      {
+        "title": "MDX & remark",
+        "paragraphs": [
+          "In a Next.js / Contentlayer / Astro MDX pipeline, map fenced ChartKit blocks to a component that calls `render()` or `<Chart spec={...} />`. The docs site already has `mdx-components.tsx`; a ChartKit-specific remakr helper is the planned `@chartkitdev/markdown` package."
+        ],
+        "list": [],
+        "code": [
+          "`import { Chart } from \"@chartkitdev/react\"; import type { MDXComponents } from \"mdx/types\"; export function useMDXComponents(components: MDXComponents): MDXComponents { return { ...components, // remark-chartkit turns ```json ChartSpecs into <Chart /> Chart, }; }`"
+        ]
+      },
+      {
+        "title": "Mermaid fences",
+        "paragraphs": [
+          "A ````mermaid` fence is not a ChartKit spec. Convert with `fromMermaidAsync` (playground Mermaid tab; lazy `mermaid/phase4` chunk in showcase demos), then edit the resulting v1 JSON. Supported diagrams and approximations live on `/docs/mermaid` \u2014 this Start page only shows the handoff.",
+          "Real API name: docs-ia and showcase cite `fromMermaidAsync`. MCP plans a `from_mermaid` tool. Exact export path may move \u2014 treat converter snippets as mock-plausible until `/docs/mermaid` ships."
+        ],
+        "list": [],
+        "code": [
+          "````mermaid xychart-beta title Weekly signups x-axis [W1, W2, W3, W4, W5, W6, W7, W8] y-axis \"Signups\" 0 --> 100 line [18, 28, 24, 42, 38, 56, 62, 86] ````"
+        ]
+      },
+      {
+        "title": ".md twins",
+        "paragraphs": [
+          "Every docs HTML page gets a Markdown twin (`/docs/markdown.md`, `/docs/options/axes.x.rotate.md`, \u2026) with `<link rel=\"alternate\" type=\"text/markdown\">`, like the existing `/benchmarks.md`. Agents that prefer text over DOM fetch the twin; fenced specs inside stay CI-checked."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "What validates",
+        "paragraphs": [
+          "For agents",
+          "Emit a ````json` ChartKit v1 block. Do not invent JSX props. Run `validate()` \u2192 `repair()` \u2192 `render()`. Prefer `llms.txt` over scraping framework Start pages."
+        ],
+        "list": [
+          "````json` body parses as JSON and passes `validate()` with zero errors.",
+          "`render(spec)` does not emit `ck-chart-error`; SVG includes `data-ck-type`.",
+          "One example per core chart type in `llms.txt`, `llms-full.txt`, and the core README (enforced by `docs-spec.test.ts`).",
+          "`a11y.alt` required, 10\u2013500 characters."
+        ],
+        "code": []
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "spec-anatomy",
+    "group": "Concepts",
+    "title": "Spec anatomy",
+    "lede": "A ChartKit chart is one JSON object \u2014 schema `https://chartkit.dev/schema/v1.json`. Required: `version`, `type`, `a11y`. Most charts also need `data` + `encoding`. Everything else (`mark`, `axes`, `theme`, \u2026) has defaults. Same object in React, Vue, Svelte, vanilla, Markdown, and Node SVG.",
+    "description": "A ChartKit chart is one JSON object \u2014 schema `https://chartkit.dev/schema/v1.json`. Required: `version`, `type`, `a11y`. Most charts also need `data` + `encoding`. Everything else ",
+    "tryIntro": "Edit the JSON or use the rail \u2014 Type / Theme focus different layers of the anatomy. The response path names which top-level keys the current view emphasizes.",
+    "sections": [
+      {
+        "title": "Top-level map",
+        "paragraphs": [
+          "From `chartkit.schema.json` \u2014 every key a v1 spec may carry. Status notes what Concepts pages cover next."
+        ],
+        "list": [],
+        "code": [
+          "`$schema optional const URL version \"1\" required type line | bar | donut | \u2026 required (14 core enums) id string title string subtitle string data row[] | number[] | columns usually required by type encoding x, y, series, color, size, usually required by type open, high, low, close, volume metric value, min, max, \u2026 gauge \u00b7 kpi \u00b7 progress-ring mark curve, sampling, stack, \u2026 options object \u2014 not the type axes x \u00b7 y \u00b7 y2 legend boolean | { show, position, \u2026 } tooltip boolean | { show, mode, \u2026 } annotations rule | band | text[] theme preset string | { preset, mode, tokens } size width, height, padding, \u2026 interaction hover, zoom, pan, brush, \u2026 animation boolean | { duration, easing } locale string a11y { alt } required (alt 10\u2013500 chars)`"
+        ]
+      },
+      {
+        "title": "Required & by-type",
+        "paragraphs": [
+          "Field types on channels are `quantitative`, `temporal`, `ordinal`, or `nominal` \u2014 never `categorical` (repairs to nominal as CK1007)."
+        ],
+        "list": [
+          "Always \u2014 `version`, `type`, `a11y.alt`.",
+          "Series charts (line, bar, donut, stacked-area, scatter, combo, heatmap, sparkline, mini-area, spike, candlestick) \u2014 `data`. Line/bar/donut/stacked-area/combo also require `encoding.x` + `encoding.y`. Scatter needs `x`+`y`. Heatmap needs `x`+`color`.",
+          "Metric charts (gauge, kpi, progress-ring) \u2014 `metric.value` (not top-level `value`).",
+          "Candlestick \u2014 `encoding.open`, `high`, `low`, `close` (optional `volume`)."
+        ],
+        "code": []
+      },
+      {
+        "title": "Layers that draw",
+        "paragraphs": [
+          "Think in four layers. Later Concepts pages go deep on each."
+        ],
+        "list": [
+          "Identity \u2014 `version`, `type`, `id`, `title`, `subtitle`.",
+          "Data & channels \u2014 `data` (rows, number array, or `data.columns`) + `encoding` (+ `metric` when needed).",
+          "Marks & layout \u2014 `mark` (curve, sampling, stack, orientation, \u2026), `axes`, `size`, `legend`.",
+          "Chrome & runtime \u2014 `theme`, `tooltip`, `annotations`, `interaction`, `animation`, `a11y`. Some keys validate today but only draw with `core/interact` or warn CK3012 \u2014 see Bundles."
+        ],
+        "code": []
+      },
+      {
+        "title": "Richer example",
+        "paragraphs": [
+          "Same line with mark, axes, theme, and size filled in. Defaults would look fine without them \u2014 this is explicit authoring."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"version\": \"1\", \"type\": \"line\", \"title\": \"Weekly signups\", \"data\": [ { \"week\": \"W1\", \"signups\": 18 }, { \"week\": \"W2\", \"signups\": 28 }, { \"week\": \"W3\", \"signups\": 24 }, { \"week\": \"W4\", \"signups\": 42 }, { \"week\": \"W5\", \"signups\": 38 }, { \"week\": \"W6\", \"signups\": 56 }, { \"week\": \"W7\", \"signups\": 62 }, { \"week\": \"W8\", \"signups\": 86 } ], \"encoding\": { \"x\": \"week\", \"y\": \"signups\" }, \"mark\": { \"curve\": \"monotone\", \"area\": true, \"sampling\": \"auto\" }, \"axes\": { \"x\": { \"title\": \"Week\" }, \"y\": { \"title\": \"Signups\", \"grid\": true } }, \"theme\": \"soft\", \"size\": { \"height\": 280 }, \"legend\": false, \"a11y\": { \"alt\": \"Weekly signups rose from 18 to 86.\" } }`"
+        ]
+      },
+      {
+        "title": "What is not the type",
+        "paragraphs": [],
+        "list": [
+          "`mark` is an options object (`curve`, `sampling`, \u2026), not `\"line\"`. A string `mark` is a CK1009 repair.",
+          "`encoding.y.axis` is `\"y\"` or `\"y2\"`, not a title object \u2014 titles live under `axes.y.title`.",
+          "Aliases like `type: \"pie\"` \u2192 `donut`, `\"area\"` \u2192 `stacked-area` / `mini-area`, `\"point\"` \u2192 `scatter` (CK1005).",
+          "React component props are a separate API. Agents writing JSON should ignore JSX tables and use this schema."
+        ],
+        "code": []
+      },
+      {
+        "title": "Machine block",
+        "paragraphs": [
+          "Rendered docs pages carry the live spec next to the SVG as `<script type=\"application/json\" data-ck-spec>`. Option pages add `id=\"ck-option\"`. Prefer those blocks (and `.md` twins) over scraping prose.",
+          "For agents",
+          "Start from the minimal shape. Set `type` from the 14-core enum. Put measures in `encoding` or `metric`, never invent top-level `value`. Run `validate()` \u2192 `repair()` before `render()`."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Next",
+        "paragraphs": [
+          "Go deep on Data (rows vs `data.columns`), then Encoding & channels. Chart-type pages show a minimal spec per type."
+        ],
+        "list": [],
+        "code": []
+      }
+    ],
+    "aliases": [
+      "concepts/spec"
+    ]
+  },
+  {
+    "slug": "data",
+    "group": "Concepts",
+    "title": "Data",
+    "lede": "`data` is what you plot \u2014 a plain array of row objects, not `{ \"values\": [...] }`. Sparkline, mini-area, and spike also accept a number array. For large series, prefer columnar `{ \"columns\": { \"field\": [...] } }`. Field names in `encoding` must match keys (or column names).",
+    "description": "`data` is what you plot \u2014 a plain array of row objects, not `{ \"values\": [...] }`. Sparkline, mini-area, and spike also accept a number array. For large series, prefer columnar `{ ",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "Rows (default)",
+        "paragraphs": [
+          "One object per record. Keys are field names; values are numbers, strings (ISO 8601 on temporal fields), booleans, or `null` (missing). This is the shape in every Start example and in `llms.txt`."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"version\": \"1\", \"type\": \"line\", \"data\": [ { \"week\": \"W1\", \"signups\": 18 }, { \"week\": \"W2\", \"signups\": 28 }, { \"week\": \"W3\", \"signups\": 24 }, { \"week\": \"W4\", \"signups\": 42 }, { \"week\": \"W5\", \"signups\": 38 }, { \"week\": \"W6\", \"signups\": 56 }, { \"week\": \"W7\", \"signups\": 62 }, { \"week\": \"W8\", \"signups\": 86 } ], \"encoding\": { \"x\": \"week\", \"y\": \"signups\" }, \"theme\": \"soft\", \"a11y\": { \"alt\": \"Weekly signups rose from 18 to 86.\" } }`"
+        ]
+      },
+      {
+        "title": "Try a shape",
+        "paragraphs": [
+          "Edit the JSON or flip Type / Theme / Shape (rows \u00b7 columns \u00b7 numbers). The response path shows which `$defs/data` branch you are on. Numbers only apply to sparkline / mini-area / spike \u2014 other types stay on rows in this mock."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "`data.columns`",
+        "paragraphs": [
+          "Columnar form: equal-length arrays keyed by field name. Preferred for 10k+ points. In JS, arrays may be typed arrays (`Float64Array`). Encoding still names fields the same way \u2014 `encoding.x: \"week\"` reads `data.columns.week`.",
+          "Same chart: rows and columns above are equivalent for this line. Pick columns when agents or ETL already emit field\u2192array maps, or when you want to avoid object-per-row overhead."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"version\": \"1\", \"type\": \"line\", \"data\": { \"columns\": { \"week\": [\"W1\", \"W2\", \"W3\", \"W4\", \"W5\", \"W6\", \"W7\", \"W8\"], \"signups\": [18, 28, 24, 42, 38, 56, 62, 86] } }, \"encoding\": { \"x\": \"week\", \"y\": \"signups\" }, \"theme\": \"soft\", \"a11y\": { \"alt\": \"Weekly signups rose from 18 to 86.\" } }`"
+        ]
+      },
+      {
+        "title": "Number array",
+        "paragraphs": [
+          "Sparkline, mini-area, and spike may use a plain `number | null` array. The implicit field is `value`; x is the index. Other chart types require row objects or columns."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"version\": \"1\", \"type\": \"sparkline\", \"data\": [18, 28, 24, 42, 38, 56, 62, 86], \"a11y\": { \"alt\": \"Signups rose across eight weeks.\" } }`"
+        ]
+      },
+      {
+        "title": "Not `data.values`",
+        "paragraphs": [
+          "Vega-style `{ \"data\": { \"values\": [...] } }` is invalid. `validate` reports CK1009; `repair()` moves `values` up so `data` is the array. Do not look for a `columns` key inside that repair \u2014 it is specifically the values unwrap."
+        ],
+        "list": [],
+        "code": [
+          "`// invalid { \"data\": { \"values\": [{ \"week\": \"W1\", \"signups\": 18 }] } } // repaired { \"data\": [{ \"week\": \"W1\", \"signups\": 18 }] }`"
+        ]
+      },
+      {
+        "title": "Nulls & order",
+        "paragraphs": [],
+        "list": [
+          "`null` is a missing point \u2014 drawn as a gap unless `mark.connectNulls: true`.",
+          "Sampling and path drawing assume each series is already ordered by x.",
+          "Axis extents use every finite value before sampling (see Spec / Marks).",
+          "Cell types: number, string, boolean, null \u2014 no nested objects in a cell."
+        ],
+        "code": []
+      },
+      {
+        "title": "Metric charts",
+        "paragraphs": [
+          "Gauge, kpi, and progress-ring put the number in `metric: { value, min?, max?, delta?, label? }` \u2014 not top-level `value`. A one-row `data` table used as a sparkline beside a KPI can stay; a `data` object of metric fields is repaired into `metric` (CK1009).",
+          "For agents",
+          "Default to a row array. Use `data.columns` for wide/long columnar payloads. Never wrap rows in `values`. Match `encoding` field names to keys. Then `validate()`."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Next",
+        "paragraphs": [
+          "Encoding binds fields to channels (`x`, `y`, `color`, \u2026). Scales and axes sit on top of those channels."
+        ],
+        "list": [],
+        "code": []
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "encoding",
+    "group": "Concepts",
+    "title": "Encoding",
+    "lede": "`encoding` binds data fields to visual channels. The same names work for every chart type: `x` is category or time, `y` is the measured value(s). Switching `type` between line, bar, donut, stacked-area, or combo needs no re-encoding. Each channel is a field name string, or `{ field, type?, title?, format?, scale? }`.",
+    "description": "`encoding` binds data fields to visual channels. The same names work for every chart type: `x` is category or time, `y` is the measured value(s). Switching `type` between line, bar",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "Channels",
+        "paragraphs": [
+          "From `$defs/encoding`. Only set the channels your mark needs \u2014 line/bar want `x`+`y`; scatter may add `size`/`color`; candlestick uses `open`/`high`/`low`/`close`/`volume`."
+        ],
+        "list": [],
+        "code": [
+          "`encoding.x // category or time (donut: slice; heatmap calendar: date) encoding.y // measured value(s) \u2014 one field, or y[] for wide multi-series encoding.series // long data: split rows by this field (not with y[]) encoding.color // field, or { value } constant; heatmap: value field encoding.size // scatter bubble radius field encoding.open | high | low | close | volume // candlestick`"
+        ]
+      },
+      {
+        "title": "Shorthand vs object",
+        "paragraphs": [
+          "A plain string is the field name. Expand to an object when you need measurement type, title, format, or scale. Type is inferred when omitted: numbers \u2192 quantitative, ISO dates / epoch ms on x \u2192 temporal, other strings \u2192 nominal."
+        ],
+        "list": [],
+        "code": [
+          "`// shorthand \"encoding\": { \"x\": \"week\", \"y\": \"signups\" } // full channel \"encoding\": { \"x\": { \"field\": \"week\", \"type\": \"ordinal\", \"title\": \"Week\" }, \"y\": { \"field\": \"signups\", \"type\": \"quantitative\", \"format\": \"compact\", \"title\": \"Signups\" } }`"
+        ]
+      },
+      {
+        "title": "Try a channel focus",
+        "paragraphs": [
+          "Edit the JSON or flip Type / Theme / Focus (x\u00b7y \u00b7 wide \u00b7 series \u00b7 color \u00b7 size). The response path names the encoding branch. The mock chart still draws the Overview area; Focus only labels the channel story."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Wide `y[]` vs long `series`",
+        "paragraphs": [
+          "Multi-series data comes in two shapes. Wide: one column per series \u2014 `encoding.y` is an array of fields (or yChannel objects). Long: one value column plus a splitter \u2014 set `encoding.series` to that field. Do not combine `encoding.series` with an array `encoding.y` (CK2006).",
+          "y extras: on a yChannel object you can set `mark` (combo: line|bar|area), `axis: \"y\"|\"y2\"`, `color`, `dash`, and `area` (fill under a line)."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"version\": \"1\", \"type\": \"line\", \"data\": [ { \"week\": \"W1\", \"trial\": 18, \"paid\": 8 }, { \"week\": \"W2\", \"trial\": 28, \"paid\": 12 }, { \"week\": \"W3\", \"trial\": 24, \"paid\": 14 } ], \"encoding\": { \"x\": \"week\", \"y\": [ { \"field\": \"trial\", \"title\": \"Trial\" }, { \"field\": \"paid\", \"title\": \"Paid\", \"dash\": \"dashed\" } ] }, \"a11y\": { \"alt\": \"Trial and paid signups by week.\" } }`",
+          "`{ \"version\": \"1\", \"type\": \"line\", \"data\": [ { \"week\": \"W1\", \"plan\": \"trial\", \"n\": 18 }, { \"week\": \"W1\", \"plan\": \"paid\", \"n\": 8 }, { \"week\": \"W2\", \"plan\": \"trial\", \"n\": 28 }, { \"week\": \"W2\", \"plan\": \"paid\", \"n\": 12 } ], \"encoding\": { \"x\": \"week\", \"y\": \"n\", \"series\": \"plan\" }, \"a11y\": { \"alt\": \"Trial and paid signups by week.\" } }`"
+        ]
+      },
+      {
+        "title": "Color & size",
+        "paragraphs": [
+          "`encoding.color` accepts a field (categorical or sequential), a full colorChannel with optional `range`, or `{ \"value\": \"#0071e3\" }` for a constant. Heatmaps use color for the value field. `encoding.size` is scatter-only \u2014 bubble radius; object form may set `range: [min, max]` px (default `[3, 24]`)."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"version\": \"1\", \"type\": \"scatter\", \"data\": [ { \"x\": 12, \"y\": 40, \"users\": 120, \"plan\": \"trial\" }, { \"x\": 28, \"y\": 62, \"users\": 340, \"plan\": \"paid\" }, { \"x\": 44, \"y\": 55, \"users\": 210, \"plan\": \"trial\" } ], \"encoding\": { \"x\": \"x\", \"y\": \"y\", \"size\": { \"field\": \"users\", \"range\": [4, 28] }, \"color\": \"plan\" }, \"a11y\": { \"alt\": \"Scatter of engagement by plan; bubble size is users.\" } }`"
+        ]
+      },
+      {
+        "title": "Candlestick: OHLC (+ volume)",
+        "paragraphs": [
+          "Candlestick does not invent a magic row shape \u2014 it uses explicit channels: `open`, `high`, `low`, `close`, and optional `volume` (draws a volume pane when present). `x` is still the time field."
+        ],
+        "list": [],
+        "code": [
+          "`\"encoding\": { \"x\": \"date\", \"open\": \"o\", \"high\": \"h\", \"low\": \"l\", \"close\": \"c\", \"volume\": \"vol\" }`"
+        ]
+      },
+      {
+        "title": "One vocabulary, switch type",
+        "paragraphs": [
+          "Legacy prop names (`dataKey`, `categoryKey`, `timeKey`, `xKey`/`yKey`, `sizeKey`, \u2026) all fold into `encoding`. Change `\"type\": \"line\"` \u2192 `\"bar\"` or `\"donut\"` without renaming fields \u2014 donut uses `x` for the slice category and `y` for the value.",
+          "For agents",
+          "Emit `encoding.x` + `encoding.y` (or metric). Prefer shorthand strings. Use `y[]` or `series`, never both. Match field names to data keys. Then `validate()` \u2014 apply CK2001 fixes when a field is missing."
+        ],
+        "list": [
+          "Field names in encoding must match `data` keys (or column names) \u2014 mismatch \u2192 CK2001.",
+          "Quantitative channels need numbers \u2014 non-numeric \u2192 CK2002.",
+          "Date-looking strings with the wrong type warn CK2003 (prefer `type: \"temporal\"`).",
+          "`scale` lives on the channel (data mapping). Axes are display only \u2014 see Scales next."
+        ],
+        "code": []
+      },
+      {
+        "title": "Next",
+        "paragraphs": [
+          "Scales sit on the channel (`encoding.*.scale`) \u2014 domain, log/sqrt/time/band, zero, nice, reverse. Axes only control ticks and labels."
+        ],
+        "list": [],
+        "code": []
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "scales",
+    "group": "Concepts",
+    "title": "Scales",
+    "lede": "A scale maps data values to positions (or sizes). It lives on the channel \u2014 `encoding.x.scale` / `encoding.y.scale` \u2014 not on the axis. Axes are display only (title, ticks, format). Usually inferred from the field\u2019s measurement type; set `scale` only to override.",
+    "description": "A scale maps data values to positions (or sizes). It lives on the channel \u2014 `encoding.x.scale` / `encoding.y.scale` \u2014 not on the axis. Axes are display only (title, ticks, format).",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "On the channel",
+        "paragraphs": [
+          "From `$defs/scale`. Attach under any full channel object (`x`, `y`, `color`, `size`, \u2026). Shorthand field strings have no place for scale \u2014 expand to `{ \"field\", \"scale\" }` when you need an override."
+        ],
+        "list": [],
+        "code": [
+          "`\"encoding\": { \"x\": \"week\", \"y\": { \"field\": \"signups\", \"scale\": { \"type\": \"linear\", \"domain\": [0, 100], \"zero\": true, \"nice\": true, \"reverse\": false } } }`"
+        ]
+      },
+      {
+        "title": "scale.type",
+        "paragraphs": [
+          "Enum: `linear`, `log`, `sqrt`, `time`, `band`, `point`. Inferred from field type when omitted: quantitative \u2192 linear, temporal \u2192 time, nominal/ordinal \u2192 band. Legacy `xScaleType` / `yScaleType` map here."
+        ],
+        "list": [
+          "`log` needs strictly positive values \u2014 zeros or negatives \u2192 CK3001 (use `sqrt`, filter, or offset).",
+          "`band` / `point` for categories; `domain` can list the ordered categories.",
+          "`time` pairs with temporal fields (ISO strings or epoch ms)."
+        ],
+        "code": []
+      },
+      {
+        "title": "Try a scale focus",
+        "paragraphs": [
+          "Edit the JSON or flip Type / Theme / Focus (infer \u00b7 domain \u00b7 log \u00b7 zero \u00b7 reverse). The response path names the scale option. The mock chart still draws the Overview area; Focus only labels the scale story."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "domain",
+        "paragraphs": [
+          "Explicit `[min, max]` for continuous scales, or an ordered list of categories for band/point. Use `null` on one side to keep that end automatic \u2014 e.g. `[0, null]` pins the floor. Legacy axis `min`/`max` belong here as `encoding.y.scale.domain`, not on `axes.y`."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"version\": \"1\", \"type\": \"line\", \"data\": [ { \"week\": \"W1\", \"signups\": 18 }, { \"week\": \"W2\", \"signups\": 28 }, { \"week\": \"W3\", \"signups\": 42 }, { \"week\": \"W4\", \"signups\": 86 } ], \"encoding\": { \"x\": \"week\", \"y\": { \"field\": \"signups\", \"scale\": { \"domain\": [0, 100] } } }, \"a11y\": { \"alt\": \"Weekly signups on a 0\u2013100 scale.\" } }`"
+        ]
+      },
+      {
+        "title": "zero \u00b7 nice \u00b7 reverse",
+        "paragraphs": [],
+        "list": [
+          "`zero` \u2014 force the domain to include 0. Default true for bar/area, false for line/scatter.",
+          "`nice` \u2014 round the domain to tidy tick values. Default true.",
+          "`reverse` \u2014 flip the direction of the scale (high at the bottom / left)."
+        ],
+        "code": [
+          "`\"encoding\": { \"x\": { \"field\": \"date\", \"type\": \"temporal\" }, \"y\": { \"field\": \"price\", \"scale\": { \"zero\": false, \"nice\": true } } }`"
+        ]
+      },
+      {
+        "title": "log & sqrt",
+        "paragraphs": [
+          "Use `\"type\": \"log\"` for orders of magnitude, `\"sqrt\"` when you want compression without forbidding zero. Log with any value \u2264 0 fails validation (CK3001) \u2014 prefer sqrt, filter non-positive rows, or offset the data."
+        ],
+        "list": [],
+        "code": [
+          "`\"encoding\": { \"x\": \"week\", \"y\": { \"field\": \"bytes\", \"type\": \"quantitative\", \"format\": \"bytes\", \"scale\": { \"type\": \"log\" } } }`"
+        ]
+      },
+      {
+        "title": "About `range`",
+        "paragraphs": [
+          "`$defs/scale` does not take a `range` property. Output ranges live on the channel that needs them:",
+          "Position scales map into the plot area automatically; you pin extents with `domain`, not a pixel range."
+        ],
+        "list": [
+          "`encoding.color.range` \u2014 colors in order (categorical) or low\u2192high (sequential).",
+          "`encoding.size.range` \u2014 `[min, max]` point radius in px (default `[3, 24]`)."
+        ],
+        "code": []
+      },
+      {
+        "title": "Scales vs axes",
+        "paragraphs": [
+          "Scale = data mapping (domain, type, zero\u2026). Axis = chrome (title, tick count, label format). Putting min/max on the axis is a legacy habit \u2014 in v1 they belong on `encoding.*.scale.domain`. See Axes next.",
+          "For agents",
+          "Omit `scale` unless you need a fixed domain, log/sqrt, or `zero: false` on a line. Never put min/max on `axes`. After setting `type: \"log\"`, validate \u2014 apply CK3001 fixes if values \u2264 0."
+        ],
+        "list": [],
+        "code": []
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "axes",
+    "group": "Concepts",
+    "title": "Axes",
+    "lede": "`axes` is display-only chrome: titles, tick count, label format, grid, and side. Scale domains and scale type live on `encoding.<channel>.scale` \u2014 not here. Each of `axes.x`, `axes.y`, and `axes.y2` may be `false` (hide), `true` (defaults), or an options object.",
+    "description": "`axes` is display-only chrome: titles, tick count, label format, grid, and side. Scale domains and scale type live on `encoding.<channel>.scale` \u2014 not here. Each of `axes.x`, `axes",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "Shape",
+        "paragraphs": [
+          "From `$defs/axes`. Defaults: x bottom, y left, y2 right. Title defaults to the channel title (none for time axes). Format defaults to the channel format."
+        ],
+        "list": [],
+        "code": [
+          "`\"axes\": { \"x\": { \"title\": \"Week\", \"ticks\": 8, \"grid\": false }, \"y\": { \"title\": \"Signups\", \"format\": \"compact\", \"ticks\": 5, \"grid\": \"dashed\", \"labels\": true, \"position\": \"left\" } }`"
+        ]
+      },
+      {
+        "title": "Options",
+        "paragraphs": [
+          "There is no `rotate` (or min/max) on `axes`. Domain and scale type stay on the channel; label crowding is handled by tick count and format, not a rotate flag."
+        ],
+        "list": [
+          "`title` \u2014 axis title string.",
+          "`format` \u2014 tick label format (preset or format object); same vocabulary as channel `format`.",
+          "`ticks` \u2014 approximate tick count (integer 0\u201350).",
+          "`grid` \u2014 `true`/`false`, or `\"solid\"` | `\"dashed\"` | `\"dotted\"`.",
+          "`labels` \u2014 show tick labels (default `true`).",
+          "`position` \u2014 `top` | `bottom` | `left` | `right`."
+        ],
+        "code": []
+      },
+      {
+        "title": "Try an axes focus",
+        "paragraphs": [
+          "Edit the JSON or flip Type / Theme / Focus (defaults \u00b7 title \u00b7 ticks \u00b7 grid \u00b7 hide \u00b7 y2). The response path names the axes branch. The mock chart still draws the Overview area; Focus only labels the axes story."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Hide an axis",
+        "paragraphs": [
+          "Set the key to `false` to remove that axis entirely. `true` is explicit defaults (same as omitting the key for most charts)."
+        ],
+        "list": [],
+        "code": [
+          "`\"axes\": { \"x\": false, \"y\": { \"grid\": true, \"ticks\": 4 } }`"
+        ]
+      },
+      {
+        "title": "Grid",
+        "paragraphs": [
+          "Grid lines are drawn from the axis you configure. Boolean on/off, or a dash style. Legacy `showGrid` / `grid.horizontal` map to `axes.y.grid` and `axes.x.grid`."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"version\": \"1\", \"type\": \"line\", \"data\": [ { \"week\": \"W1\", \"signups\": 18 }, { \"week\": \"W2\", \"signups\": 28 }, { \"week\": \"W3\", \"signups\": 42 }, { \"week\": \"W4\", \"signups\": 86 } ], \"encoding\": { \"x\": \"week\", \"y\": \"signups\" }, \"axes\": { \"x\": { \"grid\": false, \"title\": \"Week\" }, \"y\": { \"grid\": \"dotted\", \"format\": \"compact\", \"title\": \"Signups\" } }, \"a11y\": { \"alt\": \"Weekly signups with a dotted y grid.\" } }`"
+        ]
+      },
+      {
+        "title": "Second axis (`y2`)",
+        "paragraphs": [
+          "`axes.y2` is the right-hand axis for series with `encoding.y[].axis: \"y2\"` (combo / dual-scale lines). Configuring `axes.y2` with no y series on y2 \u2014 or the reverse \u2014 is CK3002."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"version\": \"1\", \"type\": \"combo\", \"data\": [ { \"week\": \"W1\", \"signups\": 18, \"revenue\": 2400 }, { \"week\": \"W2\", \"signups\": 28, \"revenue\": 3100 }, { \"week\": \"W3\", \"signups\": 42, \"revenue\": 4800 } ], \"encoding\": { \"x\": \"week\", \"y\": [ { \"field\": \"signups\", \"mark\": \"bar\", \"title\": \"Signups\" }, { \"field\": \"revenue\", \"mark\": \"line\", \"axis\": \"y2\", \"title\": \"Revenue\" } ] }, \"axes\": { \"y\": { \"title\": \"Signups\" }, \"y2\": { \"title\": \"Revenue\", \"format\": \"currency\", \"position\": \"right\" } }, \"a11y\": { \"alt\": \"Signups as bars and revenue on a right axis.\" } }`"
+        ]
+      },
+      {
+        "title": "Axes vs scales",
+        "paragraphs": [
+          "Legacy `yAxisLeft={{ min, max, tickCount, format }}` splits in v1: `min`/`max` \u2192 `encoding.y.scale.domain`; `tickCount`/`format`/`unit`-as-title \u2192 `axes.y`. Labels `xLabel` / `yLabel` / `yLabelRight` \u2192 `axes.x.title` / `axes.y.title` / `axes.y2.title`.",
+          "For agents",
+          "Set titles, ticks, format, and grid on `axes`. Put min/max and log/linear on `encoding.*.scale`. If you add `axes.y2`, also set `axis: \"y2\"` on a y series (or drop y2) \u2014 then `validate()`."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Next",
+        "paragraphs": [
+          "Themes & tokens set colors, surfaces, and series palettes. Axis and grid strokes pick up theme tokens (`axis`, `grid`, `muted`) unless you override elsewhere."
+        ],
+        "list": [],
+        "code": []
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "themes-tokens",
+    "group": "Concepts",
+    "title": "Themes & tokens",
+    "lede": "`theme` sets look and feel: a preset name (17 + `auto`), or `{ preset, mode, tokens }`. Theme by tokens, not hex \u2014 every token is also read from CSS variables `--ck-<token>` and `--ck-series-N` on the container, so a host design system can style charts with no JS. Default `\"auto\"`.",
+    "description": "`theme` sets look and feel: a preset name (17 + `auto`), or `{ preset, mode, tokens }`. Theme by tokens, not hex \u2014 every token is also read from CSS variables `--ck-<token>` and `-",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "Presets",
+        "paragraphs": [
+          "From `$defs/theme` / `themes.ts`. Dark (13): `midnight`, `emerald`, `mono`, `slate`, `arctic`, `orchid`, `obsidian`, `neon`, `mocha`, `owl`, `retro`, `copper`, `rose`. Light (4): `sunset`, `silver`, `pearl`, `latte`. Plus `auto` \u2014 follows host CSS variables and `prefers-color-scheme`.",
+          "Docs shell note: the try-it Theme chips use Soft and Midnight. `midnight` is a shipped dark preset. Soft is the mock docs accent (not in the schema enum) \u2014 swap to a real preset name in production specs."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"version\": \"1\", \"type\": \"line\", \"data\": [ { \"week\": \"W1\", \"signups\": 18 }, { \"week\": \"W2\", \"signups\": 28 }, { \"week\": \"W3\", \"signups\": 42 }, { \"week\": \"W4\", \"signups\": 86 } ], \"encoding\": { \"x\": \"week\", \"y\": \"signups\" }, \"theme\": \"midnight\", \"a11y\": { \"alt\": \"Weekly signups on midnight.\" } }`"
+        ]
+      },
+      {
+        "title": "Try Soft \u2194 Midnight",
+        "paragraphs": [
+          "Flip the Theme chips (already in the Overview shell) \u2014 Soft vs Midnight. Use Focus to label preset \u00b7 tokens \u00b7 mode \u00b7 CSS \u00b7 series. The response path tracks the theme story; the chart recolors with the chip."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Object form: preset \u00b7 mode \u00b7 tokens",
+        "paragraphs": [
+          "Use the object when you need light/dark force or token overrides on top of a base preset."
+        ],
+        "list": [
+          "`mode`: `auto` (default) | `light` | `dark` \u2014 force or follow `prefers-color-scheme`.",
+          "In React, `useAutoTheme({ light: \"sunset\", dark: \"midnight\" })` picks a preset from the host scheme."
+        ],
+        "code": [
+          "`\"theme\": { \"preset\": \"midnight\", \"mode\": \"dark\", \"tokens\": { \"accent\": \"var(--brand)\", \"series\": [\"#5ac8fa\", \"#34c759\", \"#ff9f0a\"] } }`"
+        ]
+      },
+      {
+        "title": "Token keys",
+        "paragraphs": [
+          "Override individually under `theme.tokens`. Values are CSS colors or `var(--x)`.",
+          "Legacy per-mark colors (`upColor`, `downColor`, `trackColor`, \u2026) fold into these tokens or `encoding.color`."
+        ],
+        "list": [],
+        "code": [
+          "`background // chart background surface // card / tooltip text // primary text muted // secondary text, tick labels grid // grid lines axis // axis lines accent // single-series default highlight positive // good / up (deltas, up candles) negative // bad / down fontFamily // CSS font-family fontSize // base size in px (6\u201332) series[] // categorical palette (1\u201324 colors)`"
+        ]
+      },
+      {
+        "title": "CSS variables `--ck-*`",
+        "paragraphs": [
+          "Resolution order: CSS custom properties on the chart container, then token overrides, then the preset. Set host variables once \u2014 charts inherit with no re-render for dark mode.",
+          "shadcn / Tailwind: map `--chart-1..5` into `--ck-series-N` and `--ck-accent`. With `theme: \"auto\"`, the chart follows the host without a preset name."
+        ],
+        "list": [],
+        "code": [
+          "`.app { --ck-background: canvas; --ck-surface: var(--card); --ck-text: var(--foreground); --ck-muted: var(--muted-foreground); --ck-grid: color-mix(in oklab, var(--border) 80%, transparent); --ck-axis: var(--border); --ck-accent: var(--chart-1); --ck-positive: var(--chart-2); --ck-negative: var(--destructive); --ck-series-1: var(--chart-1); --ck-series-2: var(--chart-2); --ck-series-3: var(--chart-3); /* \u2026 through --ck-series-12 */ }`"
+        ]
+      },
+      {
+        "title": "Series palette",
+        "paragraphs": [
+          "`tokens.series` is the categorical order. Default falls back to `var(--ck-series-1..12)`, then the preset. Too many series for the palette warns CK4002 \u2014 shorten groups or extend `series`. Text contrast below WCAG AA warns CK4004 on the offending token.",
+          "For agents",
+          "Emit `\"theme\": \"midnight\"` (or `\"auto\"`) unless the host already sets `--ck-*`. Override only the tokens you need. Do not invent preset names outside the enum. Then `validate()`."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Next",
+        "paragraphs": [
+          "Bundles control which chart types ship in the client package \u2014 pair a theme with the bundle your page actually imports."
+        ],
+        "list": [],
+        "code": []
+      }
+    ],
+    "aliases": [
+      "concepts/themes"
+    ]
+  },
+  {
+    "slug": "bundles",
+    "group": "Concepts",
+    "title": "Bundles",
+    "lede": "Pick an entry that matches the charts and features you need. Budgets below are gzip -9 bytes from `scripts/size-budget.json` (r19). `npm run size` fails when a measured entry grows past its budget. Adapters exclude core and the framework.",
+    "description": "Pick an entry that matches the charts and features you need. Budgets below are gzip -9 bytes from `scripts/size-budget.json` (r19). `npm run size` fails when a measured entry grows",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "Entry points",
+        "paragraphs": [
+          "From `@chartkitdev/core` package exports. Prefer the smallest entry that covers your `type` and features."
+        ],
+        "list": [],
+        "code": [
+          "`@chartkitdev/core // createRenderer / register \u2014 no charts until you add them @chartkitdev/core/charts/<type> // one renderer (e.g. charts/line) \u2192 createRenderer([line]) @chartkitdev/core/all // core v1 charts + themes + mountAxes + mountLayout @chartkitdev/core/extra // all + phase-3/4 types (histogram \u2026 sunburst) @chartkitdev/core/validate // validate() + repair \u2014 no SVG @chartkitdev/core/interact // tooltips, hover, click, selection (after SVG is in the DOM) @chartkitdev/core/interact/extra // optional interact add-ons @chartkitdev/core/canvas/* // canvas painter chunk (opt-in, not in line/all SVG path)`"
+        ]
+      },
+      {
+        "title": "Gzip budgets",
+        "paragraphs": [
+          "Exact ceilings from `r19/scripts/size-budget.json`. Method: esbuild `--bundle --minify`, gzip -9. Adapter rows are the adapter only (core + framework external)."
+        ],
+        "list": [],
+        "code": [
+          "`line 34,554 B // createRenderer([line]) headline all 64,372 B // @chartkitdev/core/all extra 88,723 B // @chartkitdev/core/extra validate 34,425 B interact 17,641 B interactExtra 3,780 B // @chartkitdev/core/interact/extra canvas 57,396 B mermaid 39,758 B global 126,877 B // chartkit.global.js (IIFE) globalAuto 89,096 B globalMermaid 40,376 B vue / svelte 802 / 962 B vanilla / element 1,571 / 1,821 B`"
+        ]
+      },
+      {
+        "title": "Try a bundle focus",
+        "paragraphs": [
+          "Flip Bundle chips (All / Line \u2014 already in the shell) or Focus (line \u00b7 all \u00b7 extra \u00b7 interact \u00b7 global). The response path names the entry; kpi text shows the budget bytes."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Minimal path: `charts/<type>` + `createRenderer`",
+        "paragraphs": [
+          "Smallest client path for one chart type. Import the renderer, then build a `render` function. Line budget: 34,554 B gzip (33.7 KB).",
+          "Does not include: other chart types, `mountLayout()` (facets, concatenation, breakpoints, RTL), the canvas painter, `interact`, phase-3/4 extras, or Mermaid. Themes past what you register yourself are opt-in via `@chartkitdev/core/themes/*`."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { line } from \"@chartkitdev/core/charts/line\"; export const render = createRenderer([line]); // Pass `render` into <Chart render={render} /> or call render(spec)`"
+        ]
+      },
+      {
+        "title": "Decision 1 \u2014 axis extras on the minimal path",
+        "paragraphs": [
+          "From `chartkit-plan/PLAN.md`: PR #16 axis features (`title`, `ticks`, rotation, `position`, `reverse`, `nice`, padding, description, line `legend.values`) only paint when `axis-extra` is mounted. `core/all`, `extra`, and every adapter mount it. `createRenderer([line])` does not. On that path those options produce identical SVG with no warning \u2014 a silent no-op.",
+          "Until N1 lands, prefer `@chartkitdev/core/all` (or an adapter default) when you need axis chrome. Do not assume the 33.7 KB line entry draws every `axes.*` field."
+        ],
+        "list": [
+          "Option (a): mount axis extras on the minimal path too (~+1,176 B measured historically; still under uPlot/visx).",
+          "Option (b): keep the headline line budget; ship an explicit opt-in (e.g. `@chartkitdev/core/axes`) plus a dev-time warning when an unmounted option is set."
+        ],
+        "code": []
+      },
+      {
+        "title": "`core/all`",
+        "paragraphs": [
+          "Registers core v1 charts (line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi, sparkline, mini-area, progress-ring, spike, candlestick), all theme presets, `mountAxes()`, and `mountLayout()`. Budget: 64,372 B (62.9 KB).",
+          "Does not include: phase-3/4 types (histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, area-range, bar-range, errorbar, sunburst) \u2014 those are `extra`. Does not import `interact` (static SVG string stays the same). Does not include the canvas painter or Mermaid."
+        ],
+        "list": [],
+        "code": [
+          "`import { render } from \"@chartkitdev/core/all\"; const svg = render(spec);`"
+        ]
+      },
+      {
+        "title": "`core/extra`",
+        "paragraphs": [
+          "Everything in `all`, plus the extra chart types listed above. Budget: 88,723 B (86.6 KB). MCP `render` and several adapter SSR helpers use this entry so every type validates and draws.",
+          "Does not include: `interact` (still attach separately), geo atlas chunks (separate package), or the IIFE globals."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "`interact` & `interact/extra`",
+        "paragraphs": [
+          "Client interaction for an SVG already in the DOM \u2014 tooltips, hover, click/selection, navigator hooks, sync groups. `all` does not import this module. Budgets: interact 17,641 B, interact/extra 3,780 B.",
+          "Does not include: chart renderers or validate. Pair with `all` / `extra` / a slim `createRenderer`."
+        ],
+        "list": [],
+        "code": [
+          "`import { attach } from \"@chartkitdev/core/interact\"; // after render(spec) \u2192 svg is in the document const handle = attach(el, spec); handle.patchSvg(/* next svg */); // when the spec changes handle.destroy();`"
+        ]
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "options",
+    "group": "Reference",
+    "title": "Options",
+    "lede": "mock-plausible Reference \u2014 index of schema leaf paths (~420 leaves \u2192 ~195 pages). Status from the planned manifest: `drawn` \u00b7 `interact` \u00b7 `core/all` \u00b7 `CK3012` \u00b7 `chunk`. Prod URL: `/docs/options` (extensionless).",
+    "description": "mock-plausible Reference \u2014 index of schema leaf paths (~420 leaves \u2192 ~195 pages). Status from the planned manifest: `drawn` \u00b7 `interact` \u00b7 `core/all` \u00b7 `CK3012` \u00b7 `chunk`. Prod URL",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "Status legend",
+        "paragraphs": [
+          "Every leaf page carries one status. CI probes `drawn` options so a page cannot claim an effect that does nothing. Soft / refined are docs mock accents, not schema enums."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Browse leaves",
+        "paragraphs": [
+          "Filter by status or type the path. Rows link to planned `/docs/options/<path>` pages (mocked as anchors). Sample set only \u2014 full index is generated from the schema."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Try a leaf",
+        "paragraphs": [
+          "Pick a sample path. The spec toggles that option; the response rail shows status + a mock-plausible before/after note. Chips flatten for exploration \u2014 not a full option-page probe."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Leaf page shape",
+        "paragraphs": [
+          "Each `/docs/options/<path>` follows docs-ia: facts table (type, default, applies-to, status, CK codes), before/after live pair, variants, copy buttons, matrix row, and `<script type=\"application/json\" id=\"ck-option\">`. This index is the browse surface; leaf mocks are out of scope for this page."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"path\": \"mark.sampling\", \"type\": \"number|enum\", \"default\": null, \"appliesTo\": [\"line\", \"area\", \"bar\", \"scatter\"], \"status\": \"drawn\", \"chunk\": \"core\", \"example\": \"examples/02-rich-line.json\" }`"
+        ]
+      },
+      {
+        "title": "Machine indexes",
+        "paragraphs": [
+          "Build emits `/options.json` (all paths + status + example). `llms-full.txt` is generated from it \u2014 no hand edits. Agents prefer the JSON; humans use this page.",
+          "For agents",
+          "CI: every schema leaf \u2192 option page + example; every `drawn` status has a probe that changes the SVG. CK3012 warnings are listed on Errors with the accepted-not-applied list."
+        ],
+        "list": [],
+        "code": []
+      }
+    ],
+    "aliases": [
+      "reference"
+    ]
+  },
+  {
+    "slug": "errors",
+    "group": "Reference",
+    "title": "Errors",
+    "lede": "mock-plausible Reference \u2014 CK code index from `validate()` / `diagnostics.ts`. Stable codes, JSON Pointers, hints, and optional `fix` (RFC 6902). Prod URL: `/docs/errors` (extensionless). Sample rows from `chartkit/spec/SPEC.md` + Phase-4.",
+    "description": "mock-plausible Reference \u2014 CK code index from `validate()` / `diagnostics.ts`. Stable codes, JSON Pointers, hints, and optional `fix` (RFC 6902). Prod URL: `/docs/errors` (extensio",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "Code ranges",
+        "paragraphs": [
+          "Codes are never reused. Messages may improve; the code stays stable. `render()` never throws \u2014 errors paint an inline error SVG; warnings still draw."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Browse codes",
+        "paragraphs": [
+          "Filter by range or severity. Rows link to planned `/docs/errors/<CKxxxx>` pages. Repair column shows when `repair()` / a `fix` patch is offered."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Try a diagnostic",
+        "paragraphs": [
+          "Pick a CK code. The center spec is a minimal failing case; the response rail shows the diagnostic (code, pointer, hint) and Apply fix when a patch exists. Soft = docs mock accent."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Diagnostic shape",
+        "paragraphs": [
+          "Mirrors jsonlint-core: stable `code`, `severity`, `message`, JSON Pointer `path`, `hint`, optional `fix`. All diagnostics return in one pass. Agents apply `repair()` locally \u2014 no model round-trip for most fixes."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"code\": \"CK2001\", \"severity\": \"error\", \"message\": \"field \\\"Revenue\\\" not found in data\", \"path\": \"/encoding/y/field\", \"hint\": \"available fields: month, revenue; did you mean \\\"revenue\\\"?\", \"fix\": [ { \"op\": \"replace\", \"path\": \"/encoding/y/field\", \"value\": \"revenue\" } ] }`"
+        ]
+      },
+      {
+        "title": "Machine indexes",
+        "paragraphs": [
+          "Build emits `/errors.json` (every CK code + example pointer). Leaf pages at `/docs/errors/<CKxxxx>` carry message, cause, pointer example, repair patch, and the CK3012 accepted-not-applied list.",
+          "For agents",
+          "Point at `llms.txt`, emit a spec, `validate()`. On failure, `repair()` applies JSON Patch locally. CK3012 warnings mean the key is accepted but not drawn yet \u2014 do not loop forever on those."
+        ],
+        "list": [],
+        "code": []
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "themes",
+    "group": "Reference",
+    "title": "Themes",
+    "lede": "mock-plausible Reference \u2014 preset gallery: Soft (default), refined, editorial, midnight, plus 16 importable presets from `@chartkitdev/core/themes`. Same 6-chart board in every preset. Prod URL: `/docs/themes` (extensionless). For tokens & `--ck-*` see Concepts \u00b7 Themes & tokens.",
+    "description": "mock-plausible Reference \u2014 preset gallery: Soft (default), refined, editorial, midnight, plus 16 importable presets from `@chartkitdev/core/themes`. Same 6-chart board in every pre",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "Built-in presets",
+        "paragraphs": [
+          "Omit `theme`, or set `\"soft\"` / `\"auto\"`, for Soft. Soft and refined/editorial use `light-dark()` so the page `color-scheme` wins. Midnight is the opt-in dark card; unknown names still resolve there."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Importable presets (16)",
+        "paragraphs": [
+          "Register with `import \"@chartkitdev/core/themes\"` (or a single file). Then `theme: \"mocha\"` etc. resolve. Soft in docs mocks is an accent shorthand \u2014 schema Soft = built-in `soft`."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "6-chart board",
+        "paragraphs": [
+          "docs-ia: the same board in every preset \u2014 line \u00b7 bar \u00b7 area \u00b7 donut \u00b7 scatter \u00b7 kpi. Toggle light/dark below; the board and response rail follow the selected preset.",
+          "Active: `soft`"
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Try a preset",
+        "paragraphs": [
+          "Pick a preset and scheme. Spec gets `theme`; the response paints a Soft-mock board tile for that preset (mock-plausible \u2014 not live `render()`)."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: full token tables and `--ck-*` CSS variables \u2014 those live on Themes & tokens (Concepts). This page is the preset gallery board."
+        ],
+        "list": [],
+        "code": [
+          "`import \"@chartkitdev/core/themes\"; // or: import { mocha } from \"@chartkitdev/core/themes/mocha\"; const spec = { version: \"1\", type: \"line\", theme: \"mocha\", data: { /* \u2026 */ }, encoding: { x: { field: \"month\" }, y: { field: \"value\" } }, a11y: { alt: \"Monthly value\" }, };`"
+        ]
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "validate",
+    "group": "Agents",
+    "title": "Validate",
+    "lede": "mock-plausible Agents \u2014 loop start: `validate()` \u2192 `repair()` \u2192 `render()`. Structured CK diagnostics with JSON Pointers. Agents loop locally \u2014 no model round-trip for most fixes. Prod URL: `/agents` (extensionless). Full CK catalog on Errors.",
+    "description": "mock-plausible Agents \u2014 loop start: `validate()` \u2192 `repair()` \u2192 `render()`. Structured CK diagnostics with JSON Pointers. Agents loop locally \u2014 no model round-trip for most fixes. ",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "Validate \u2192 repair \u2192 render",
+        "paragraphs": [
+          "Point at `llms.txt`, emit a spec, then `validate()`. On failure, `repair()` applies JSON Patch locally. Then `render()` (or SSR `renderToString`). This page is step 1.",
+          "For agents",
+          "`ok: true` means zero errors (warnings allowed). Every diagnostic carries a stable `code`, a JSON Pointer `path`, optional `hint`, and often a `fix` patch for `repair()`."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "validate()",
+        "paragraphs": [
+          "`validate(spec, data?)` runs structural checks from the v1 JSON Schema plus data-aware field, scale, and design diagnostics. A string is parsed as JSON first (`CK1001` on failure). All diagnostics return in one pass \u2014 sorted with repairable codes first."
+        ],
+        "list": [],
+        "code": [
+          "`import { validate } from \"@chartkitdev/core/validate\"; const result = validate(spec); // result.ok \u00b7 result.errors \u00b7 result.warnings \u00b7 result.diagnostics if (!result.ok) { for (const d of result.errors) { console.log(d.code, d.path, d.message); // d.hint \u00b7 d.fix (RFC 6902 JSON Patch ops) } }`"
+        ]
+      },
+      {
+        "title": "Diagnostic shape",
+        "paragraphs": [
+          "Codes are stable (`CK1xxx` structure, `CK2xxx` data, `CK3xxx` semantics, `CK4xxx` design). Messages may improve; codes do not. Browse the full catalog on Errors."
+        ],
+        "list": [],
+        "code": [
+          "`type Diagnostic = { code: string; // e.g. \"CK2001\" severity: \"error\" | \"warning\"; message: string; path: string; // JSON Pointer; \"\" = root hint?: string; fix?: JsonPatchOperation[]; // RFC 6902 \u2014 for repair() };`"
+        ]
+      },
+      {
+        "title": "JSON Pointer",
+        "paragraphs": [
+          "Each diagnostic `path` is an RFC 6901 JSON Pointer into the spec (e.g. `/encoding/y/field`). Click a pointer in the try-it rail to highlight that key in the editor. Agents use the same path for `fix` ops \u2014 no fuzzy string surgery."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Try validate()",
+        "paragraphs": [
+          "Pick a case. The center editor holds the spec; the Response rail shows mock-plausible `validate()` output \u2014 codes, pointers, hints, and whether a `fix` is available for repair."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "ValidationResult",
+        "paragraphs": [
+          "`ok` is true when there are no errors. Warnings (e.g. `CK3012` accepted-not-applied, `CK1011` phase4 field rules) do not fail validation."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"ok\": false, \"errors\": [{ \"code\": \"CK2001\", \"path\": \"/encoding/y/field\", /* \u2026 */ }], \"warnings\": [], \"diagnostics\": [/* errors + warnings, repair-ranked */] }`"
+        ]
+      }
+    ],
+    "aliases": [
+      "reference/validate",
+      "agents"
+    ]
+  },
+  {
+    "slug": "repair",
+    "group": "Agents",
+    "title": "repair",
+    "lede": "mock-plausible Agents \u2014 step 2 of the loop: `validate()` \u2192 `repair()` \u2192 `render()`. Applies safe RFC 6902 JSON Patch ops from diagnostic `fix` fields, revalidates, repeats. Prod URL: `/agents/repair` (extensionless). Start at Validate.",
+    "description": "mock-plausible Agents \u2014 step 2 of the loop: `validate()` \u2192 `repair()` \u2192 `render()`. Applies safe RFC 6902 JSON Patch ops from diagnostic `fix` fields, revalidates, repeats. Prod UR",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "Validate \u2192 repair \u2192 render",
+        "paragraphs": [
+          "`repair()` lifts first-try failures without another model call. It only applies patches the validator already proposed \u2014 nothing invented beyond `fix`.",
+          "For agents",
+          "Playground diagnostics expose Apply fix (one patch) and Repair all (`repair()` loop). CK1001 invalid JSON has no `fix` \u2014 parse first. CK3012 warnings stay as accepted-not-applied."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "repair()",
+        "paragraphs": [
+          "`repair(spec, data?)` clones the input, collects `fix` ops from current errors, applies them with `applyPatch`, revalidates, and repeats up to a few rounds. Stops when `ok`, when no patch applies, or when errors stop changing. Returns `RepairResult`: the repaired `spec`, `applied` patches, plus the usual `ok` / diagnostics."
+        ],
+        "list": [],
+        "code": [
+          "`import { validate, repair } from \"@chartkitdev/core/validate\"; const before = validate(spec); if (!before.ok) { const after = repair(spec); // after.spec \u2014 patched clone (input not mutated) // after.applied \u2014 RFC 6902 ops that landed, in order // after.ok \u2014 revalidate result }`"
+        ]
+      },
+      {
+        "title": "JSON Patch (RFC 6902)",
+        "paragraphs": [
+          "Each diagnostic may carry `fix: JsonPatchOperation[]`. Agents can apply a single op (Apply fix) or run the full loop (Repair all). Ops use the same JSON Pointers as `path`."
+        ],
+        "list": [],
+        "code": [
+          "{ \"op\": \"replace\", \"path\": \"/encoding/y/field\", \"value\": \"revenue\" }",
+          "{ \"op\": \"add\", \"path\": \"/a11y\", \"value\": { \"alt\": \"Monthly revenue\" } }",
+          "{ \"op\": \"replace\", \"path\": \"/type\", \"value\": \"donut\" }"
+        ]
+      },
+      {
+        "title": "Try repair()",
+        "paragraphs": [
+          "Pick a broken case. Broken shows validate() errors; Apply fix applies the first patch; Repair all runs the mock loop. Unrepairable CK1001 stays broken \u2014 no `fix`."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "RepairResult",
+        "paragraphs": [
+          "Extends `ValidationResult` with the repaired `spec` and the `applied` patch list. Input is never mutated.",
+          "Does not invent fields: only ops from diagnostic `fix` arrays. Paths already gone are skipped. Max rounds keep pathological loops from spinning."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"ok\": true, \"spec\": { /* patched clone */ }, \"applied\": [ { \"op\": \"replace\", \"path\": \"/encoding/y/field\", \"value\": \"revenue\" } ], \"errors\": [], \"warnings\": [], \"diagnostics\": [] }`"
+        ]
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "render",
+    "group": "Agents",
+    "title": "render",
+    "lede": "mock-plausible Agents \u2014 step 3 of the loop: `validate()` \u2192 `repair()` \u2192 `render()`. Turns a ChartSpec into SVG (core `render` / adapter `renderToString`). Playground hash handoff + SVG\u00b7PNG export. Prod URL: `/agents/render` (extensionless). Arrive from repair.",
+    "description": "mock-plausible Agents \u2014 step 3 of the loop: `validate()` \u2192 `repair()` \u2192 `render()`. Turns a ChartSpec into SVG (core `render` / adapter `renderToString`). Playground hash handoff +",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "Validate \u2192 repair \u2192 render",
+        "paragraphs": [
+          "`render()` is the loop end. After validate/repair, agents draw once \u2014 no model call. Core returns an SVG string (or error SVG); adapters expose the same bytes as `renderToString`.",
+          "For agents",
+          "Ship the SVG string from `render`/`renderToString`. Playground can rasterize to PNG (2\u00d7 canvas) and share via `/playground#<encodeURIComponent(spec)>`. Prefer validate \u2192 repair before render so agents don\u2019t paint error SVGs."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "render()",
+        "paragraphs": [
+          "`render(spec, target?)` looks up `spec.type` in the shared registry, draws SVG, and optionally writes `target.innerHTML`. It does not validate and does not throw on bad input \u2014 unknown types return an error SVG (`CK1010`). Import `@chartkitdev/core/all` (or register charts) before calling."
+        ],
+        "list": [],
+        "code": [
+          "`import { render } from \"@chartkitdev/core/all\"; const svg = render(spec); // SVG string render(spec, el); // also sets el.innerHTML // Unregistered type \u2192 error SVG (CK1010), not a throw`"
+        ]
+      },
+      {
+        "title": "renderToString",
+        "paragraphs": [
+          "Adapters wrap the same core draw for SSR. Vanilla / React return the SVG string synchronously; Vue\u2019s `@chartkitdev/vue/ssr` is async through `vue/server-renderer`. SvelteKit SSR includes the SVG from the component."
+        ],
+        "list": [],
+        "code": [
+          "`import { renderToString } from \"@chartkitdev/vanilla\"; const svg = renderToString(spec); // = core render(spec) import { renderToString } from \"@chartkitdev/vue/ssr\"; const html = await renderToString(spec); // includes SVG`"
+        ]
+      },
+      {
+        "title": "SVG \u00b7 PNG",
+        "paragraphs": [
+          "SVG is the source of truth from `render`. PNG is a client export \u2014 playground draws the SVG onto a 2\u00d7 canvas and downloads `chartkit.png`. Agents that need pixels should keep the SVG and rasterize at the edge.",
+          "`image/svg+xml` blob from the returned string. Download as `chartkit.svg`. Works in SSR, email, and Markdown fences.",
+          "Rasterize current SVG at 2\u00d7 via `canvas.toBlob`. Fills page `--bg` behind the chart. Not returned by core `render()`."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Playground hash handoff",
+        "paragraphs": [
+          "Share and agent handoff use the URL hash \u2014 same helper as docs \u201cOpen in the playground\u201d:",
+          "Playground `SpecEditor` reads `location.hash` on load, `JSON.parse(decodeURIComponent(...))`, and fills the editor. Share writes the hash and copies the full URL. Agents can append a repaired spec and open the link for a human review."
+        ],
+        "list": [],
+        "code": [
+          "`const href = `/playground#${encodeURIComponent(JSON.stringify(spec))}`; // SpecEditor on mount: // JSON.parse(decodeURIComponent(location.hash.slice(1)))`"
+        ]
+      },
+      {
+        "title": "Try render()",
+        "paragraphs": [
+          "Pick a ready case (or the unrepaired CK1010 error SVG). Format toggles Chart / SVG source / PNG raster preview. Open in Playground builds the hash handoff URL (mock)."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "RenderResult (mock)",
+        "paragraphs": [
+          "Core returns a string. This mock wraps it so agents can see status, format, byte size, and the playground href beside the chart.",
+          "Does not validate: call `validate`/`repair` first. `render` still paints an error SVG so agents get a visible failure instead of a throw."
+        ],
+        "list": [],
+        "code": [
+          "`type RenderResult = { ok: boolean; // false when error SVG (CK1010 / CK1006) svg: string; // always present format: \"svg\" | \"png\"; // png = client raster of svg playgroundHref: string; // /playground#\u2026 diagnostics?: Diagnostic[]; // when ok === false };`"
+        ]
+      }
+    ],
+    "aliases": []
+  },
+  {
+    "slug": "llms-txt",
+    "group": "Agents",
+    "title": "llms.txt",
+    "lede": "mock-plausible Agents \u2014 published LLM indexes: `llms.txt` (\u22646400 B), `llms-full.txt`, and `llms.json`. Served from `docs/public/` at extensionless prod URLs. Facts below match the repo on disk (core v0.5.0).",
+    "description": "mock-plausible Agents \u2014 published LLM indexes: `llms.txt` (\u22646400 B), `llms-full.txt`, and `llms.json`. Served from `docs/public/` at extensionless prod URLs. Facts below match the ",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "Three indexes",
+        "paragraphs": [
+          "Agents get one of three files. The short index is the with-docs prompt in the agent eval. Full text adds field rules; JSON is structured for tooling.",
+          "Rules, repair loop pointers, Mermaid note, and one fenced JSON spec per chart type (27 types). Cap enforced in `mermaid.test.ts`.",
+          "Longer rules (encoding repairs, Phase 4, combo, sampling), same drawable examples, plus choosing-a-library context from benchmarks.",
+          "`$schema` \u2192 `llms-schema.json`. Packages, exports, themes, hooks, `resources.llmsTxt` / `llmsFullTxt` / `llmsJson`."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "\u22646400 B index",
+        "paragraphs": [
+          "The with-docs bench cuts every library\u2019s official text to ChartKit\u2019s `llms.txt` byte length. The repo ships exactly at the ceiling:"
+        ],
+        "list": [],
+        "code": [
+          "`// packages/core/src/__tests__/mermaid.test.ts const text = readFileSync(\"docs/public/llms.txt\", \"utf8\"); expect(text).toMatch(/fromMermaid|toSpec/); expect(Buffer.byteLength(text)).toBeLessThanOrEqual(6400);`"
+        ]
+      },
+      {
+        "title": "What\u2019s inside llms.txt",
+        "paragraphs": [
+          "Header pins `@chartkitdev/core v0.5.0` and `schema/v1.json`. Rules cover `version`, `a11y.alt`, row-shaped `data`, `repair()`, Phase 4, and Mermaid. Then one minimal valid spec per type:",
+          "`docs-spec.test.ts` parses every ````json` fence in `llms.txt`, `llms-full.txt`, and `packages/core/README.md`, runs `validate` / `validatePhase4`, and asserts `render()` draws (no `ck-chart-error`)."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Serving \u00b7 discovery",
+        "paragraphs": [
+          "Static files under `docs/public/`. Next config sets plain text / JSON headers and `Cache-Control: public, max-age=86400`. Layout exposes `ai:llms` / `ai:llms-full` and `<link rel=\"alternate\" type=\"text/plain\">`. `/.well-known/llms.txt` re-reads `public/llms.txt` (or redirects to prod)."
+        ],
+        "list": [],
+        "code": [
+          "`https://chartkit.dev/llms.txt https://chartkit.dev/llms-full.txt https://chartkit.dev/llms.json https://chartkit.dev/schema/v1.json`"
+        ]
+      },
+      {
+        "title": "Generated indexes",
+        "paragraphs": [
+          "These three files are the agent indexes \u2014 checked into `docs/public/`, verified by tests, listed in the sitemap, and linked from Footer + Agents. They are not regenerated every build like `BENCHMARKS.md`; edit them when the spec surface changes, keep `llms.txt` \u22646400 B, and keep one drawable example per type."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Try the indexes",
+        "paragraphs": [
+          "Pick a file. The Response rail shows a live excerpt from the repo copy (mock-plausible GET). Soft = docs mock accent."
+        ],
+        "list": [],
+        "code": []
+      }
+    ],
+    "aliases": [
+      "agents/llms"
+    ]
+  },
+  {
+    "slug": "mcp",
+    "group": "Agents",
+    "title": "MCP",
+    "lede": "mock-plausible Agents \u2014 `@chartkitdev/mcp` stdio server with a Flint-style few tools (not one per chart). Tools call `@chartkitdev/core` on the host; no network. Strategy names below; Soft = docs mock accent.",
+    "description": "mock-plausible Agents \u2014 `@chartkitdev/mcp` stdio server with a Flint-style few tools (not one per chart). Tools call `@chartkitdev/core` on the host; no network. Strategy names bel",
+    "tryIntro": "",
+    "sections": [
+      {
+        "title": "Six tools \u00b7 Flint-style",
+        "paragraphs": [
+          "Strategy surface: few tools that cover the whole catalog. Checkout today also exposes `repair`, `lookup_feature`, and `get_example` under shorter names (`validate` / `render`). This mock uses the strategy names for the try-it.",
+          "Chart types from bundled examples, with filenames. Specs themselves come from `get_schema` / examples.",
+          "JSON Schema fragment (or resource slice) for one chart type. Resource `chartkit://schema/v1.json` already ships the full v1 schema.",
+          "Core `validate()`: `ok`, diagnostics, errors, warnings, JSON Patch `fix` arrays. Spec is not mutated."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Resources",
+        "paragraphs": [
+          "Bundled at build time \u2014 not fetched over the network.",
+          "Copy of the short agent index. Same rules + one drawable example per type.",
+          "ChartKit v1 JSON Schema from `packages/core/schema/chartkit.schema.json`."
+        ],
+        "list": [],
+        "code": []
+      },
+      {
+        "title": "Cursor \u00b7 Claude",
+        "paragraphs": [
+          "After publish, the same `mcpServers` block goes in `.cursor/mcp.json`, Claude Desktop config, or project `.mcp.json`. Until then, point `command` at the checkout `node \u2026/cli.js`."
+        ],
+        "list": [],
+        "code": [
+          "`{ \"mcpServers\": { \"chartkit\": { \"command\": \"npx\", \"args\": [\"-y\", \"@chartkitdev/mcp\"] } } }`",
+          "`npm run build --workspace=@chartkitdev/mcp node packages/mcp/dist/cli.js`"
+        ]
+      },
+      {
+        "title": "Try a tool",
+        "paragraphs": [
+          "Pick a tool. The editor shows a mock call; the Response rail shows a plausible JSON result. Soft = docs mock accent."
+        ],
+        "list": [],
+        "code": []
+      }
+    ],
+    "aliases": [
+      "agents/mcp"
+    ]
+  }
+]

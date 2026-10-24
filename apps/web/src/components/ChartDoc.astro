@@ -1,0 +1,151 @@
+---
+import {
+  chipsForChart,
+  specForChart,
+  type ChartDoc,
+} from "../data/docs-catalog";
+import PageNav from "./PageNav.astro";
+import Prose from "./Prose.astro";
+import SpecEditor from "./SpecEditor.astro";
+
+interface Props {
+  chart: ChartDoc;
+}
+
+const { chart } = Astro.props;
+const href = `/docs/charts/${chart.type}`;
+const spec = specForChart(chart);
+---
+
+<div class="facts" aria-label={`${chart.title} facts`}>
+  {
+    chart.facts.map((fact) => (
+      <span class="fact">
+        <span class="fact__k">{fact.k}</span>
+        {fact.k === "Status" ? (
+          <span class:list={["status-pill", fact.v === "drawn" || fact.v === "in the library" ? "is-drawn" : "is-planned"]}>{fact.v}</span>
+        ) : (
+          <span class="fact__v">{fact.v}</span>
+        )}
+      </span>
+    ))
+  }
+  <span class="fact">
+    <span class="fact__k">Family</span>
+    <span class="fact__v">{chart.family}</span>
+  </span>
+</div>
+
+<h2>Minimal spec</h2>
+<p>
+  {
+    chart.type === "area" ? (
+      <>
+        This page is a filled line. The spec uses{' '}
+        <code>type</code>
+        {' '}
+        <code>line</code>
+        {' '}and{' '}
+        <code>mark.area</code>. Edit the JSON, or use the options beside it. The right column is the response.
+      </>
+    ) : (
+      <>
+        Set{' '}
+        <code>type</code>
+        {' '}to{' '}
+        <code>{chart.type}</code>. Edit the JSON, or use the options beside it. The right column is the response.
+      </>
+    )
+  }
+</p>
+<SpecEditor spec={spec} chips={chipsForChart(chart.type)} hint="Options sit beside the JSON — the response is on the right" />
+
+{
+  chart.anatomy.length ? (
+    <>
+      <h2>Anatomy</h2>
+      <ol class="anatomy">
+        {chart.anatomy.map((item) => (
+          <li>
+            <Prose text={item.replace(/^\d+(?=\S)/, "").replace(/^\d+\s*/, "")} />
+          </li>
+        ))}
+      </ol>
+    </>
+  ) : null
+}
+
+{
+  chart.options.length ? (
+    <>
+      <h2>Options that apply</h2>
+      <p>
+        Paths from the current library. A drawn status means the field ships in{' '}
+        <code>@chartkitdev/core</code>.
+      </p>
+      <table class="opt-table">
+        <thead>
+          <tr>
+            <th>Path</th>
+            <th>Role</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {chart.options.map((option) => (
+            <tr>
+              <td>
+                <Prose text={option.path} />
+              </td>
+              <td class="muted">
+                <Prose text={option.role} />
+              </td>
+              <td>
+                <span class:list={["status-pill", option.status === "drawn" || option.status === "in the library" ? "is-drawn" : "is-planned"]}>
+                  {option.status || "noted"}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
+  ) : null
+}
+
+{
+  chart.notes.map((section) => (
+    <section>
+      <h2>{section.title}</h2>
+      {section.paragraphs.map((paragraph) => (
+        <p>
+          <Prose text={paragraph} />
+        </p>
+      ))}
+      {section.list.length ? (
+        <ul>
+          {section.list.map((item) => (
+            <li>
+              <Prose text={item} />
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {section.code.map((code) => (
+        <figure class="code">
+          <figcaption>sample</figcaption>
+          <pre><code>{code}</code></pre>
+        </figure>
+      ))}
+    </section>
+  ))
+}
+
+<p>
+  <a href="/docs/encoding">Encoding</a>
+  {" · "}
+  <a href="/docs/themes-tokens">Themes & tokens</a>
+  {" · "}
+  <a href={`https://chartkit.dev/docs/charts/${chart.type}`}>Current chartkit.dev page</a>
+</p>
+<PageNav href={href} />

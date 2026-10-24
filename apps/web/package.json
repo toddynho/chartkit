@@ -1,0 +1,28 @@
+{
+  "name": "chartkit-web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Astro marketing site and docs shell for chartkit.dev. The Next.js app in docs/ still serves the live site.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "predev": "npm run build --workspace=@chartkitdev/core",
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
+    "prebuild": "npm run build --workspace=@chartkitdev/core",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "precheck": "npm run build --workspace=@chartkitdev/core",
+    "check": "ASTRO_TELEMETRY_DISABLED=1 astro check"
+  },
+  "dependencies": {
+    "@chartkitdev/core": "*",
+    "@fontsource/inter": "^5.3.0",
+    "astro": "^7.4.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "typescript": "^5.3.3"
+  }
+}

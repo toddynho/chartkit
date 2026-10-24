@@ -1,0 +1,31 @@
+---
+import { neighbors } from "../data/docs-catalog";
+
+interface Props {
+  href: string;
+}
+
+const { href } = Astro.props;
+const { prev, next } = neighbors(href);
+---
+
+{
+  prev || next ? (
+    <nav class="page-nav" aria-label="Page">
+      {prev ? (
+        <a class="page-nav__link" href={prev.href}>
+          <span class="page-nav__dir">Previous</span>
+          <span class="page-nav__title">{prev.label}</span>
+        </a>
+      ) : (
+        <span />
+      )}
+      {next ? (
+        <a class="page-nav__link page-nav__link--next" href={next.href}>
+          <span class="page-nav__dir">Next</span>
+          <span class="page-nav__title">{next.label}</span>
+        </a>
+      ) : null}
+    </nav>
+  ) : null
+}

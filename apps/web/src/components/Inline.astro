@@ -1,0 +1,21 @@
+---
+import type { InlinePart } from "../data/doc-pages";
+
+interface Props {
+  parts: InlinePart[];
+}
+
+const { parts } = Astro.props;
+---
+
+{
+  parts.map((part) =>
+    typeof part === "string" ? (
+      part
+    ) : "code" in part ? (
+      <code>{part.code}</code>
+    ) : (
+      <a href={part.href}>{part.label}</a>
+    ),
+  )
+}

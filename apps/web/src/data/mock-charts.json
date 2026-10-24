@@ -1,0 +1,2007 @@
+[
+  {
+    "type": "area",
+    "label": "Area",
+    "family": "Core",
+    "title": "Area",
+    "lede": "A JSON spec any agent can emit \u2014 beautiful by default. Volume and magnitude over an ordered domain, with filled series from `@chartkitdev/core`.",
+    "description": "A JSON spec any agent can emit \u2014 beautiful by default. Volume and magnitude over an ordered domain, with filled series from `@chartkitdev/core`.",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/area"
+      },
+      {
+        "k": "Size",
+        "v": "17.1 KB gzip"
+      },
+      {
+        "k": "Status",
+        "v": "drawn"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.y`",
+        "role": "Y field / scale for magnitude",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.curve`",
+        "role": "smooth \u00b7 linear \u00b7 step",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.fillOpacity`",
+        "role": "Opacity of the filled area",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.stack`",
+        "role": "Stack multiple series",
+        "status": "drawn"
+      },
+      {
+        "path": "`axis.x.label`",
+        "role": "X axis title",
+        "status": "drawn"
+      },
+      {
+        "path": "`axis.y.label`",
+        "role": "Y axis title",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026",
+        "status": "drawn"
+      },
+      {
+        "path": "`tooltip`",
+        "role": "Hover fields / format",
+        "status": "drawn"
+      }
+    ],
+    "anatomy": [
+      "1Axes \u2014 ordered domain on X, quantitative scale on Y. Labels and ticks come from the theme unless you override.",
+      "2Filled series \u2014 area under the curve from `series[].data`. Curve, stack, and fill opacity live on the mark; fill is always on for area.",
+      "3Tooltip \u2014 hover read of domain + value. Agents rarely need to configure this for a first render."
+    ],
+    "notes": []
+  },
+  {
+    "type": "line",
+    "label": "Line",
+    "family": "Core",
+    "title": "Line",
+    "lede": "A JSON spec any agent can emit \u2014 beautiful by default. Trends over an ordered domain, rendered from `@chartkitdev/core`.",
+    "description": "A JSON spec any agent can emit \u2014 beautiful by default. Trends over an ordered domain, rendered from `@chartkitdev/core`.",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/line"
+      },
+      {
+        "k": "Size",
+        "v": "16.6 KB gzip"
+      },
+      {
+        "k": "Status",
+        "v": "drawn"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.y.scale`",
+        "role": "Y scale domain / nice",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.curve`",
+        "role": "smooth \u00b7 linear \u00b7 step",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.markers`",
+        "role": "Point markers on / off",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.fill`",
+        "role": "Optional area under the line",
+        "status": "drawn"
+      },
+      {
+        "path": "`axis.x.label`",
+        "role": "X axis title",
+        "status": "drawn"
+      },
+      {
+        "path": "`axis.y.label`",
+        "role": "Y axis title",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026",
+        "status": "drawn"
+      },
+      {
+        "path": "`tooltip`",
+        "role": "Hover fields / format",
+        "status": "drawn"
+      }
+    ],
+    "anatomy": [
+      "1Axes \u2014 ordered domain on X, quantitative scale on Y. Labels and ticks come from the theme unless you override.",
+      "2Series \u2014 one or more lines from `series[].data`. Curve, markers, and optional area fill live on the mark.",
+      "3Tooltip \u2014 hover read of domain + value. Agents rarely need to configure this for a first render."
+    ],
+    "notes": []
+  },
+  {
+    "type": "bar",
+    "label": "Bar",
+    "family": "Core",
+    "title": "Bar",
+    "lede": "A JSON spec any agent can emit \u2014 beautiful by default. Categories and magnitudes as bars from `@chartkitdev/core`. Vertical or horizontal; stack or group with `encoding.series`.",
+    "description": "A JSON spec any agent can emit \u2014 beautiful by default. Categories and magnitudes as bars from `@chartkitdev/core`. Vertical or horizontal; stack or group with `encoding.series`.",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/bar"
+      },
+      {
+        "k": "Size",
+        "v": "33.6 KB gzip"
+      },
+      {
+        "k": "Status",
+        "v": "drawn"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x` / `encoding.y`",
+        "role": "Category + quantitative magnitude",
+        "status": "drawn"
+      },
+      {
+        "path": "`encoding.series`",
+        "role": "Group or stack multiple series",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.orientation`",
+        "role": "vertical \u00b7 horizontal (default vertical)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.stack`",
+        "role": "none \u00b7 stack \u00b7 percent",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.cornerRadius`",
+        "role": "Rounded corners in px (0\u201340)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.gap`",
+        "role": "Band gap fraction 0\u20130.95",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.fillOpacity`",
+        "role": "Bar fill opacity 0\u20131",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.labels` / `mark.labelFormat`",
+        "role": "Value labels on bars",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.stackTotal`",
+        "role": "Label stack totals (also stacks)",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "drawn"
+      }
+    ],
+    "anatomy": [
+      "1Axes \u2014 category band on X (or Y when `mark.orientation` is `horizontal`), quantitative scale on the other. Tick labels come from the theme unless you override.",
+      "2Bars \u2014 one mark per category (or per series \u00d7 category). `mark.gap`, `mark.cornerRadius`, `mark.stack`, and `mark.fillOpacity` shape the fill.",
+      "3Tooltip \u2014 hover read of category + value (and series when stacked/grouped). Agents rarely need to configure this for a first render."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: phase-3 `bar-range` / `errorbar` (those are `extra`), `interact`, or Mermaid. Stacked example with horizontal bars: `examples/03-bar-stacked.json` (`mark.stack: \"stack\"`, `mark.orientation: \"horizontal\"`)."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { bar } from \"@chartkitdev/core/charts/bar\"; export const render = createRenderer([bar]); // Adapters default to core/all \u2014 pass `render` to stay minimal. // Measured bar path: 34,373 B gzip (chartkit-minimal, measured-sizes.json).`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "donut",
+    "label": "Donut",
+    "family": "Core",
+    "title": "Donut",
+    "lede": "A JSON spec any agent can emit \u2014 beautiful by default. Part-to-whole slices with a hole from `@chartkitdev/core`. Use `type: \"pie\"` for a solid disk (`innerRadius` defaults to 0); donut defaults to `0.6`.",
+    "description": "A JSON spec any agent can emit \u2014 beautiful by default. Part-to-whole slices with a hole from `@chartkitdev/core`. Use `type: \"pie\"` for a solid disk (`innerRadius` defaults to 0); ",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/donut"
+      },
+      {
+        "k": "Size",
+        "v": "13.9 KB gzip"
+      },
+      {
+        "k": "Status",
+        "v": "drawn"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x` / `encoding.y`",
+        "role": "Slice name + value",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.innerRadius`",
+        "role": "Hole fraction 0\u20130.95 (donut default 0.6)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.padAngle`",
+        "role": "Gap between slices in degrees (donut default 2)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.sort`",
+        "role": "none \u00b7 asc \u00b7 desc",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.other`",
+        "role": "Fold small slices into Other",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.cornerRadius`",
+        "role": "Rounded slice corners in px",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.labels` / `labelPosition`",
+        "role": "Value labels; outside uses leaders",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.explode` / `offset`",
+        "role": "Pull named slices out from centre",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.startAngle`",
+        "role": "Arc start in degrees (0 = top)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.palette`",
+        "role": "Override theme slice colours",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "drawn"
+      }
+    ],
+    "anatomy": [
+      "1Slices \u2014 one arc per category from `encoding.x` / `encoding.y`. `mark.sort`, `mark.other`, and `mark.padAngle` control order, small-slice folding, and gaps.",
+      "2Hole \u2014 `mark.innerRadius` (donut default `0.6`). Set `0` or use `type: \"pie\"` for a solid pie. Optional center KPI is common in product UIs (mock-plausible in the try rail).",
+      "3Labels / tooltip \u2014 `mark.labels` with leader lines outside; hover still works via `interact`. Agents rarely need tooltip config for a first render."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: `interact` (attach for hover/selection), phase-3 extras, or Mermaid. For a solid pie prefer `type: \"pie\"` rather than forcing `innerRadius: 0` on donut \u2014 both are valid; pie\u2019s defaults (`innerRadius` 0, `padAngle` 0) match the solid-disk look."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { donut } from \"@chartkitdev/core/charts/donut\"; export const render = createRenderer([donut]); // Pie: import { pie } from \"@chartkitdev/core/charts/pie\"; // Measured donut path: 14,266 B gzip (chartkit-minimal, measured-sizes.json).`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "combo",
+    "label": "Combo",
+    "family": "Core",
+    "title": "Combo",
+    "lede": "A JSON spec any agent can emit \u2014 beautiful by default. Mixed marks on a shared X axis from `@chartkitdev/core`. Put each series\u2019 mark on `encoding.y[].mark` (`bar`, `line`, `area`, or `range`) and send a secondary scale to `axis: \"y2\"`.",
+    "description": "A JSON spec any agent can emit \u2014 beautiful by default. Mixed marks on a shared X axis from `@chartkitdev/core`. Put each series\u2019 mark on `encoding.y[].mark` (`bar`, `line`, `area`,",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/combo"
+      },
+      {
+        "k": "Size",
+        "v": "in core/all \u00b7 62.9 KB"
+      },
+      {
+        "k": "Status",
+        "v": "drawn"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.y` (array)",
+        "role": "One channel object per series",
+        "status": "drawn"
+      },
+      {
+        "path": "`encoding.y[].mark`",
+        "role": "line \u00b7 bar \u00b7 area \u00b7 range",
+        "status": "drawn"
+      },
+      {
+        "path": "`encoding.y[].axis`",
+        "role": "y \u00b7 y2 (default y)",
+        "status": "drawn"
+      },
+      {
+        "path": "`encoding.y[].lo` / `hi`",
+        "role": "Range band fields when mark is range",
+        "status": "drawn"
+      },
+      {
+        "path": "`axes.y2`",
+        "role": "Secondary axis title, format, hide",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.points` / `pointSize`",
+        "role": "Markers on combo lines",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.stack`",
+        "role": "Stack combo bars (none \u00b7 stack \u00b7 percent)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.gap`",
+        "role": "Bar band gap on combo bars",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.curve`",
+        "role": "Line / area interpolation",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "drawn"
+      }
+    ],
+    "anatomy": [
+      "1Shared X \u2014 one categorical/temporal domain for every series. Bars, lines, areas, and range bands all align on the same band scale.",
+      "2Layered marks \u2014 per-series `encoding.y[].mark`: `bar`, `line`, `area`, or `range` (lo/hi band under other series). Global `mark.*` (points, stack, gap) still apply where the schema says \u201ccombo\u201d.",
+      "3y2 \u2014 set `axis: \"y2\"` on a channel and configure `axes.y2` (title, format). Independent scale for rates, percents, or a second unit."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: phase-3 extras, `interact`, or Mermaid. A lone bar or line is cheaper as `charts/bar` / `charts/line`; use combo when marks or axes actually differ."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { combo } from \"@chartkitdev/core/charts/combo\"; export const render = createRenderer([combo]); // Combo mounts axes + range-band helpers with the renderer. // No separate measured-sizes \u201ccombo\u201d row \u2014 prefer core/all in hosts (64,372 B gzip).`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "gauge",
+    "label": "Gauge",
+    "family": "Core",
+    "title": "Gauge",
+    "lede": "A JSON spec any agent can emit \u2014 beautiful by default. A single value on an arc from `@chartkitdev/core`. Put the number in `metric` (not top-level `data`) \u2014 value, min, max, optional target and colored bands.",
+    "description": "A JSON spec any agent can emit \u2014 beautiful by default. A single value on an arc from `@chartkitdev/core`. Put the number in `metric` (not top-level `data`) \u2014 value, min, max, optio",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/gauge"
+      },
+      {
+        "k": "Size",
+        "v": "in core/all \u00b7 62.9 KB"
+      },
+      {
+        "k": "Status",
+        "v": "drawn"
+      }
+    ],
+    "options": [
+      {
+        "path": "`metric.value`",
+        "role": "Current reading (required)",
+        "status": "drawn"
+      },
+      {
+        "path": "`metric.min` / `max`",
+        "role": "Scale bounds (default 0 / 100)",
+        "status": "drawn"
+      },
+      {
+        "path": "`metric.target`",
+        "role": "Target marker on the arc",
+        "status": "drawn"
+      },
+      {
+        "path": "`metric.bands`",
+        "role": "Colored from/to ranges",
+        "status": "drawn"
+      },
+      {
+        "path": "`metric.label` / `format`",
+        "role": "Center label + number format",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.startAngle` / `endAngle`",
+        "role": "Arc sweep in degrees (0 = top)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.strokeWidth`",
+        "role": "Arc thickness in px",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.linecap`",
+        "role": "butt \u00b7 round \u00b7 square (default round)",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "drawn"
+      }
+    ],
+    "anatomy": [
+      "1Arc scale \u2014 from `metric.min` to `metric.max` (defaults 0\u2013100). Shape the sweep with `mark.startAngle` / `mark.endAngle` and thickness with `mark.strokeWidth`.",
+      "2Value \u2014 `metric.value` fills the arc (and drives the center readout). Format via `metric.format`.",
+      "3Target & bands \u2014 `metric.target` marks a goal; `metric.bands[]` paint good/warn/bad ranges (`from`, `to`, `color`, `label`)."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: `interact`, phase-3 extras, or a linear bar gauge (use `bullet`). Do not put `value` at the top level of the spec \u2014 validators expect it under `metric`."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { gauge } from \"@chartkitdev/core/charts/gauge\"; export const render = createRenderer([gauge]); // No separate measured-sizes \u201cgauge\u201d row \u2014 prefer core/all in hosts (64,372 B gzip). // progress-ring / kpi reuse $defs/metric with different renderers.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "heatmap",
+    "label": "Heatmap",
+    "family": "Core",
+    "title": "Heatmap",
+    "lede": "A JSON spec any agent can emit \u2014 beautiful by default. Color-encoded cells from `@chartkitdev/core`. Required channels are `encoding.x` and `encoding.color`. Add `encoding.y` (or `mark.layout: \"grid\"`) for a matrix; omit `y` or set `mark.layout: \"calendar\"` for a week\u00d7weekday calendar.",
+    "description": "A JSON spec any agent can emit \u2014 beautiful by default. Color-encoded cells from `@chartkitdev/core`. Required channels are `encoding.x` and `encoding.color`. Add `encoding.y` (or `",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/heatmap"
+      },
+      {
+        "k": "Size",
+        "v": "in core/all \u00b7 62.9 KB"
+      },
+      {
+        "k": "Status",
+        "v": "drawn"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x`",
+        "role": "Column / date (calendar) / category (grid)",
+        "status": "drawn"
+      },
+      {
+        "path": "`encoding.color`",
+        "role": "Required value field \u2192 cell fill",
+        "status": "drawn"
+      },
+      {
+        "path": "`encoding.y`",
+        "role": "Row category; implies grid when layout omitted",
+        "status": "drawn"
+      },
+      {
+        "path": "`encoding.color.scale.scheme`",
+        "role": "blue \u00b7 teal \u00b7 orange \u00b7 violet",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.layout`",
+        "role": "calendar \u00b7 grid",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.weeks`",
+        "role": "Calendar columns (1\u2013104; default 52)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.gap`",
+        "role": "Spacing between cells (0\u20130.95)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.cornerRadius`",
+        "role": "Rounded cell corners in px",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "drawn"
+      }
+    ],
+    "anatomy": [
+      "1Layout \u2014 `mark.layout: \"calendar\"` (date `x`, weeks\u00d7weekdays; `mark.weeks` caps columns) or `\"grid\"` / implied grid when `encoding.y` is set (x\u00d7y categories).",
+      "2Color channel \u2014 required `encoding.color` (the cell value). Optional `scale.scheme`: blue \u00b7 teal \u00b7 orange \u00b7 violet; or `range` / sequential \u00b7 diverging \u00b7 quantize \u00b7 threshold.",
+      "3Cell chrome \u2014 `mark.gap` (0\u20131 band fraction) and `mark.cornerRadius`. Calendar cells stay square-ish (cap 32px); unsized calendars stay at 12px."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: putting the value on `encoding.y` (that is the row for grid). Color lives on `encoding.color`. Sampling (`mark.sampling`) is ignored for heatmap (CK3010)."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { heatmap } from \"@chartkitdev/core/charts/heatmap\"; export const render = createRenderer([heatmap]); // No separate measured-sizes \u201cheatmap\u201d row \u2014 prefer core/all in hosts (64,372 B gzip). // encoding.x + encoding.color required; y or mark.layout selects grid vs calendar.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "candlestick",
+    "label": "Candlestick",
+    "family": "Core",
+    "title": "Candle",
+    "lede": "A JSON spec any agent can emit \u2014 beautiful by default. OHLC bodies and wicks from `@chartkitdev/core`. Schema type is `candlestick`. Required channels: `encoding.x`, `open`, `high`, `low`, `close`. Optional `encoding.volume` draws a volume pane under the price plot.",
+    "description": "A JSON spec any agent can emit \u2014 beautiful by default. OHLC bodies and wicks from `@chartkitdev/core`. Schema type is `candlestick`. Required channels: `encoding.x`, `open`, `high`",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/candlestick"
+      },
+      {
+        "k": "Size",
+        "v": "in core/all \u00b7 62.9 KB"
+      },
+      {
+        "k": "Status",
+        "v": "drawn"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x`",
+        "role": "Time or category for each candle",
+        "status": "drawn"
+      },
+      {
+        "path": "`encoding.open` / `high` / `low` / `close`",
+        "role": "Required OHLC fields",
+        "status": "drawn"
+      },
+      {
+        "path": "`encoding.volume`",
+        "role": "Optional volume \u2192 under-pane bars",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.gap`",
+        "role": "Body spacing in band (default 0.3)",
+        "status": "drawn"
+      },
+      {
+        "path": "`interaction.zoom`",
+        "role": "Default `x` for candlestick",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme` positive / negative",
+        "role": "Up / down body & wick colors",
+        "status": "drawn"
+      },
+      {
+        "path": "`render`",
+        "role": "svg \u00b7 canvas \u00b7 auto (canvas OK for candles)",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme` preset",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "drawn"
+      }
+    ],
+    "anatomy": [
+      "1OHLC candle \u2014 body from open\u2192close; wick from high\u2192low. Up uses theme `positive`, down uses `negative`. Channels: `encoding.open` / `high` / `low` / `close`.",
+      "2Volume pane \u2014 when `encoding.volume` is set, a ~20% height bar strip under the price plot (same up/down colors at lower opacity).",
+      "3Gap & zoom \u2014 `mark.gap` (default 0.3) sets body width in the band. Wheel/pinch zoom defaults to `interaction.zoom: \"x\"` for candlestick (elsewhere default `none`)."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: putting OHLC on `encoding.y`. Use the dedicated `open`/`high`/`low`/`close` channels. Volume is optional; omit it to hide the under-pane."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { candlestick } from \"@chartkitdev/core/charts/candlestick\"; export const render = createRenderer([candlestick]); // No separate measured-sizes \u201ccandlestick\u201d row \u2014 prefer core/all (64,372 B gzip). // type string is candlestick; docs nav label is Candle.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "scatter",
+    "label": "Scatter",
+    "family": "Core",
+    "title": "Scatter",
+    "lede": "A JSON spec any agent can emit \u2014 beautiful by default. Points by two quantitative fields from `@chartkitdev/core`. Optional `encoding.size` makes bubbles; optional `encoding.color` splits categories. Log scales on `x`/`y` are common when values span orders of magnitude.",
+    "description": "A JSON spec any agent can emit \u2014 beautiful by default. Points by two quantitative fields from `@chartkitdev/core`. Optional `encoding.size` makes bubbles; optional `encoding.color`",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/scatter"
+      },
+      {
+        "k": "Size",
+        "v": "in core/all \u00b7 62.9 KB"
+      },
+      {
+        "k": "Status",
+        "v": "drawn"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x` / `y`",
+        "role": "Quantitative position (required)",
+        "status": "drawn"
+      },
+      {
+        "path": "`encoding.x.scale` / `y.scale`",
+        "role": "linear \u00b7 log \u00b7 sqrt \u00b7 \u2026",
+        "status": "drawn"
+      },
+      {
+        "path": "`encoding.size`",
+        "role": "Bubble field + range [min, max] px",
+        "status": "drawn"
+      },
+      {
+        "path": "`encoding.color`",
+        "role": "Category field or constant color",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.pointShape`",
+        "role": "circle \u00b7 square \u00b7 diamond \u00b7 \u2026",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.pointSize`",
+        "role": "Default radius when size channel omitted",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.opacity`",
+        "role": "Point opacity 0\u20131 (scatter, spike)",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "drawn"
+      }
+    ],
+    "anatomy": [
+      "1Position \u2014 quantitative `encoding.x` and `encoding.y` (required). Set `scale.type` to `log`, `linear`, `sqrt`, etc. when the domain needs it.",
+      "2Size (bubble) \u2014 optional `encoding.size` with `field` and `range` `[minPx, maxPx]`. Scatter-only size channel in the schema.",
+      "3Color \u2014 optional `encoding.color` (category field or constant). Marker shape/radius also via `mark.pointShape` / `mark.pointSize`; `mark.opacity` applies to scatter."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: treating size as a second y. Bubble size is `encoding.size` only. Chart-size width/height stays under top-level `size` (not the encoding channel)."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { scatter } from \"@chartkitdev/core/charts/scatter\"; export const render = createRenderer([scatter]); // No separate measured-sizes \u201cscatter\u201d row \u2014 prefer core/all (64,372 B gzip). // encoding.size is the bubble channel; omit it for fixed mark.pointSize dots.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "kpi",
+    "label": "KPI",
+    "family": "Core",
+    "title": "Kpi",
+    "lede": "A JSON spec any agent can emit \u2014 beautiful by default. Metric card from `@chartkitdev/core`: `metric.label`, `metric.value`, `metric.delta`, optional sparkline from a plain `data` number array. Put value/delta under `metric`, not at the top level.",
+    "description": "A JSON spec any agent can emit \u2014 beautiful by default. Metric card from `@chartkitdev/core`: `metric.label`, `metric.value`, `metric.delta`, optional sparkline from a plain `data` ",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/kpi"
+      },
+      {
+        "k": "Size",
+        "v": "in core/all \u00b7 62.9 KB"
+      },
+      {
+        "k": "Status",
+        "v": "drawn"
+      }
+    ],
+    "options": [
+      {
+        "path": "`metric.value`",
+        "role": "Current value (required)",
+        "status": "drawn"
+      },
+      {
+        "path": "`metric.label`",
+        "role": "Short visible label",
+        "status": "drawn"
+      },
+      {
+        "path": "`metric.delta`",
+        "role": "Change vs prior period (fraction by default)",
+        "status": "drawn"
+      },
+      {
+        "path": "`metric.format`",
+        "role": "compact \u00b7 number \u00b7 currency \u00b7 percent \u00b7 \u2026",
+        "status": "drawn"
+      },
+      {
+        "path": "`metric.deltaFormat`",
+        "role": "Default percent with signed: true",
+        "status": "drawn"
+      },
+      {
+        "path": "`metric.goodDirection`",
+        "role": "up \u00b7 down \u2014 which delta direction is good",
+        "status": "drawn"
+      },
+      {
+        "path": "`data`",
+        "role": "Optional plain number[] sparkline",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "drawn"
+      }
+    ],
+    "anatomy": [
+      "1Metric \u2014 `metric.label` + required `metric.value`. Format with `metric.format` (`compact`, `number`, `currency`, \u2026).",
+      "2Delta \u2014 `metric.delta` as a fraction (0.125 = +12.5%) unless `deltaFormat` says otherwise. `goodDirection` `up`|`down` sets positive/negative color.",
+      "3Sparkline \u2014 optional plain number array in `data`. Sampling ignored on kpi (CK3010)."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: top-level `value`/`delta` (use `metric`). Encoding x/y are unused \u2014 for a standalone sparkline chart use `type: \"sparkline\"`."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { kpi } from \"@chartkitdev/core/charts/kpi\"; export const render = createRenderer([kpi]); // No separate measured-sizes \u201ckpi\u201d row \u2014 prefer core/all (64,372 B gzip). // Put value/delta under metric; optional data: number[] draws the sparkline.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "sparkline",
+    "label": "Sparkline",
+    "family": "Core",
+    "title": "Sparkline",
+    "lede": "A JSON spec any agent can emit \u2014 beautiful by default. Tiny axis-less trend line from `@chartkitdev/core`. `data` may be a plain number array (field name is `value`, x is the index). Default height is 32px \u2014 built for inline use beside a KPI or label.",
+    "description": "A JSON spec any agent can emit \u2014 beautiful by default. Tiny axis-less trend line from `@chartkitdev/core`. `data` may be a plain number array (field name is `value`, x is the index",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/sparkline"
+      },
+      {
+        "k": "Size",
+        "v": "in core/all \u00b7 62.9 KB"
+      },
+      {
+        "k": "Status",
+        "v": "drawn"
+      }
+    ],
+    "options": [
+      {
+        "path": "`data`",
+        "role": "Plain number[] (or row objects)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.strokeWidth`",
+        "role": "Line width in px",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.curve`",
+        "role": "monotone \u00b7 linear \u00b7 \u2026 (smooth \u2192 monotone)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.fill`",
+        "role": "Fill under the line (line, sparkline)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.gradient`",
+        "role": "Fade fill toward baseline",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.glow`",
+        "role": "Soft glow on Soft / midnight",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.sample`",
+        "role": "auto \u00b7 minmax \u00b7 lttb \u00b7 none",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "drawn"
+      }
+    ],
+    "anatomy": [
+      "1Data \u2014 plain `number[]` (sparkline, mini-area, spike). Field is `value`; x is the index. Row objects with encoding also work.",
+      "2Stroke \u2014 `mark.strokeWidth`, `mark.curve` (`monotone` default; smooth/spline/basis repair to monotone), optional `mark.glow`.",
+      "3Fill \u2014 `mark.fill` under the line; `mark.gradient` fades toward the baseline. Prefer `type: \"mini-area\"` when fill is the point."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: axes, legends, or a metric card chrome \u2014 embed the SVG inline. For label + value + delta + spark, use `type: \"kpi\"` with `data`."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { sparkline } from \"@chartkitdev/core/charts/sparkline\"; export const render = createRenderer([sparkline]); // No separate measured-sizes \u201csparkline\u201d row \u2014 prefer core/all (64,372 B gzip). // Default height 32px. For a filled inline chart use type: \"mini-area\".`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "mini-area",
+    "label": "Mini area",
+    "family": "Core",
+    "title": "Mini-area",
+    "lede": "A JSON spec any agent can emit \u2014 beautiful by default. Tiny axis-less filled area from `@chartkitdev/core`. Like sparkline, `data` may be a plain number array \u2014 but the fill is the point. Use when the trend band matters more than a single stroke.",
+    "description": "A JSON spec any agent can emit \u2014 beautiful by default. Tiny axis-less filled area from `@chartkitdev/core`. Like sparkline, `data` may be a plain number array \u2014 but the fill is the",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/mini-area"
+      },
+      {
+        "k": "Size",
+        "v": "in core/all \u00b7 62.9 KB"
+      },
+      {
+        "k": "Status",
+        "v": "drawn"
+      }
+    ],
+    "options": [
+      {
+        "path": "`data`",
+        "role": "Plain number[] (or row objects)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.gradient`",
+        "role": "Fade fill toward baseline",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.fillOpacity`",
+        "role": "Area fill opacity 0\u20131",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.strokeWidth`",
+        "role": "Top-edge line width in px",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.curve`",
+        "role": "monotone \u00b7 linear \u00b7 \u2026 (smooth \u2192 monotone)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.sample`",
+        "role": "auto \u00b7 minmax \u00b7 lttb \u00b7 none",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.connectNulls`",
+        "role": "Draw through missing values",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "drawn"
+      }
+    ],
+    "anatomy": [
+      "1Data \u2014 plain `number[]` (sparkline, mini-area, spike). Field is `value`; x is the index.",
+      "2Fill \u2014 always drawn for mini-area. `mark.gradient` fades toward the baseline; `mark.fillOpacity` tunes strength.",
+      "3Stroke / curve \u2014 `mark.strokeWidth` on the top edge; `mark.curve` (`monotone` default). Sampling via `mark.sample`."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: stacked layers or axes \u2014 that is `stacked-area` / `line`. Mini-area is a single series band for inline chrome."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { miniArea } from \"@chartkitdev/core/charts/mini-area\"; export const render = createRenderer([miniArea]); // No separate measured-sizes \u201cmini-area\u201d row \u2014 prefer core/all (64,372 B gzip). // type must be \"mini-area\". For stroke-only inline use type: \"sparkline\".`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "progress-ring",
+    "label": "Progress ring",
+    "family": "Core",
+    "title": "Progress-ring",
+    "lede": "A JSON spec any agent can emit \u2014 beautiful by default. Circular progress for a single value between `metric.min` and `metric.max` from `@chartkitdev/core`. Put value/min/max under `metric`, not at the top level \u2014 same pattern as gauge and kpi.",
+    "description": "A JSON spec any agent can emit \u2014 beautiful by default. Circular progress for a single value between `metric.min` and `metric.max` from `@chartkitdev/core`. Put value/min/max under ",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/progress-ring"
+      },
+      {
+        "k": "Size",
+        "v": "in core/all \u00b7 62.9 KB"
+      },
+      {
+        "k": "Status",
+        "v": "drawn"
+      }
+    ],
+    "options": [
+      {
+        "path": "`metric.value`",
+        "role": "Current value (required)",
+        "status": "drawn"
+      },
+      {
+        "path": "`metric.min` / `max`",
+        "role": "Scale bounds (defaults 0 / 100)",
+        "status": "drawn"
+      },
+      {
+        "path": "`metric.label`",
+        "role": "Short visible label",
+        "status": "drawn"
+      },
+      {
+        "path": "`metric.format`",
+        "role": "Preset or format object (decimals, suffix\u2026)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.strokeWidth`",
+        "role": "Arc width in px",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.startAngle` / `endAngle`",
+        "role": "Arc angles in degrees",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.cornerRadius`",
+        "role": "Arc end style / rounding",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "drawn"
+      }
+    ],
+    "anatomy": [
+      "1Metric \u2014 required `metric.value`; scale via `metric.min` (default 0) and `metric.max` (default 100). Optional `label` and `format`.",
+      "2Arc \u2014 `mark.strokeWidth` sets arc width; `mark.startAngle` / `endAngle` (degrees; 0 = top of \u2026 gauge/donut convention \u2014 progress-ring uses degrees, clockwise). `mark.cornerRadius` / end style apply.",
+      "3Track \u2014 background ring under the progress arc (mock chip; production uses theme track tokens)."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: gauge bands/target needle, or donut category slices. Progress-ring is one value on a circular scale."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { progressRing } from \"@chartkitdev/core/charts/progress-ring\"; export const render = createRenderer([progressRing]); // No separate measured-sizes \u201cprogress-ring\u201d row \u2014 prefer core/all (64,372 B gzip). // Put value/min/max under metric. For a semicircle with bands use type: \"gauge\".`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "spike",
+    "label": "Spike",
+    "family": "Core",
+    "title": "Spike",
+    "lede": "A JSON spec any agent can emit \u2014 beautiful by default. Event/spike chart from `@chartkitdev/core`: thin vertical spikes from a baseline over time. Last of the schema Core 14 \u2014 plain `number[]` data also works (field `value`, x = index).",
+    "description": "A JSON spec any agent can emit \u2014 beautiful by default. Event/spike chart from `@chartkitdev/core`: thin vertical spikes from a baseline over time. Last of the schema Core 14 \u2014 plai",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/spike"
+      },
+      {
+        "k": "Size",
+        "v": "in core/all \u00b7 62.9 KB"
+      },
+      {
+        "k": "Status",
+        "v": "drawn"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x` / `y`",
+        "role": "Time/category \u00d7 magnitude (or plain number[])",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.baseline`",
+        "role": "Value spikes rise from (spike only)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.strokeWidth`",
+        "role": "Stem width in px",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.opacity`",
+        "role": "Mark opacity 0\u20131 (scatter, spike)",
+        "status": "drawn"
+      },
+      {
+        "path": "`mark.sample`",
+        "role": "auto \u00b7 minmax \u00b7 lttb \u00b7 none",
+        "status": "drawn"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "drawn"
+      }
+    ],
+    "anatomy": [
+      "1Series \u2014 `encoding.x` (time/category) + `encoding.y` (magnitude), or plain `number[]`.",
+      "2Baseline \u2014 `mark.baseline` (spike-only). Values rise from this level; zeros sit on the baseline.",
+      "3Stem \u2014 `mark.strokeWidth`, `mark.opacity` (scatter + spike). Sampling via `mark.sample`."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: bar width or stacking. Spikes are stems from a baseline \u2014 good for event/intensity series over time."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { spike } from \"@chartkitdev/core/charts/spike\"; export const render = createRenderer([spike]); // No separate measured-sizes \u201cspike\u201d row \u2014 prefer core/all (64,372 B gzip). // mark.baseline is spike-only. For thick category bars use type: \"bar\".`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "histogram",
+    "label": "Histogram",
+    "family": "Statistical",
+    "title": "Histogram",
+    "lede": "mock-plausible Statistical \u2014 first of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten `mark` for exploration.",
+    "description": "mock-plausible Statistical \u2014 first of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten `mark` for explora",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/histogram"
+      },
+      {
+        "k": "Size",
+        "v": "planned \u00b7 Statistical"
+      },
+      {
+        "k": "Status",
+        "v": "planned"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x`",
+        "role": "Quantitative field to bin (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.y`",
+        "role": "Optional pre-binned count",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`mark.bins`",
+        "role": "Bin count when rule is count (default 8)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`mark.bin`",
+        "role": "count \u00b7 width \u00b7 sturges \u00b7 sqrt \u00b7 fd",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`mark.binWidth`",
+        "role": "Width when mark.bin is width",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`mark.showCount`",
+        "role": "Bin-count badge (schema corner badge)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "mock-plausible"
+      }
+    ],
+    "anatomy": [
+      "1Field \u2014 quantitative `encoding.x` (required to bin). Plain values or a named field like `ms`.",
+      "2Bin rule \u2014 `mark.bins` (default 8), `mark.binWidth`, or `mark.bin`: `count` \u00b7 `width` \u00b7 `sturges` \u00b7 `sqrt` \u00b7 `fd`.",
+      "3Bars \u2014 equal-width bins; height = count (or pre-binned `encoding.y`). Optional count badge in the top-right corner."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: treating histogram as a Core 14 type. For category bars without binning use `type: \"bar\"`. Next Statistical: Boxplot."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { histogram } from \"@chartkitdev/core/charts/histogram\"; export const render = createRenderer([histogram]); // Statistical / mock-plausible docs page \u2014 not schema Core 14. // hist repairs to histogram; encoding.value \u2192 encoding.x when x is missing.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "boxplot",
+    "label": "Box plot",
+    "family": "Statistical",
+    "title": "Boxplot",
+    "lede": "mock-plausible Statistical \u2014 second of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten options for exploration.",
+    "description": "mock-plausible Statistical \u2014 second of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten options for explo",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/boxplot"
+      },
+      {
+        "k": "Size",
+        "v": "planned \u00b7 Statistical"
+      },
+      {
+        "k": "Status",
+        "v": "planned"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x`",
+        "role": "Category / group (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.y`",
+        "role": "Raw observations (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`mark.outliers`",
+        "role": "Show / hide points outside 1.5 IQR (try chip)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`mark.orientation`",
+        "role": "vertical \u00b7 horizontal (try chip)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`mark.median`",
+        "role": "Draw median line inside the box",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "mock-plausible"
+      }
+    ],
+    "anatomy": [
+      "1Category \u2014 `encoding.x` groups observations (e.g. `region`). Required.",
+      "2Box + median \u2014 Q1\u2013Q3 box; median line across the box. Built from raw `encoding.y` values.",
+      "3Whiskers + outliers \u2014 whiskers to the 1.5 IQR fence; points beyond draw as outlier dots."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: treating boxplot as a Core 14 type. For binned distributions use `type: \"histogram\"`. Next Statistical: Radar."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { boxplot } from \"@chartkitdev/core/charts/boxplot\"; export const render = createRenderer([boxplot]); // Statistical / mock-plausible docs page \u2014 not schema Core 14. // box and box-plot repair to boxplot.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "radar",
+    "label": "Radar",
+    "family": "Statistical",
+    "title": "Radar",
+    "lede": "mock-plausible Statistical \u2014 third of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten options for exploration.",
+    "description": "mock-plausible Statistical \u2014 third of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten options for explor",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/radar"
+      },
+      {
+        "k": "Size",
+        "v": "planned \u00b7 Statistical"
+      },
+      {
+        "k": "Status",
+        "v": "planned"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x`",
+        "role": "Spoke label (\u2265 3 required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.y`",
+        "role": "One field or list of series fields",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`mark.fill`",
+        "role": "Fill under each polygon (try chip)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`mark.rings`",
+        "role": "Number of concentric grid rings",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "mock-plausible"
+      }
+    ],
+    "anatomy": [
+      "1Spokes \u2014 `encoding.x` labels (\u2265 3). Rings and spoke lines are drawn automatically.",
+      "2Series \u2014 `encoding.y` as one field or a list; one polygon per field.",
+      "3Scale \u2014 values from zero to the max in the spec; optional fill under each polygon."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: treating radar as a Core 14 type. For category comparison without radial axes use `type: \"bar\"`. Next Statistical: Funnel."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { radar } from \"@chartkitdev/core/charts/radar\"; export const render = createRenderer([radar]); // Statistical / mock-plausible docs page \u2014 not schema Core 14. // spider / spiderweb may repair to radar in some pipelines.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "funnel",
+    "label": "Funnel",
+    "family": "Statistical",
+    "title": "Funnel",
+    "lede": "mock-plausible Statistical \u2014 fourth of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten options for exploration.",
+    "description": "mock-plausible Statistical \u2014 fourth of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten options for explo",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/funnel"
+      },
+      {
+        "k": "Size",
+        "v": "planned \u00b7 Statistical"
+      },
+      {
+        "k": "Status",
+        "v": "planned"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x`",
+        "role": "Stage label (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.y`",
+        "role": "Stage value (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`mark.shape`",
+        "role": "bar (default) \u00b7 trapezoid",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`mark.labels`",
+        "role": "Show stage / value labels (try chip)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "mock-plausible"
+      }
+    ],
+    "anatomy": [
+      "1Stages \u2014 `encoding.x` labels in data order (required).",
+      "2Values \u2014 `encoding.y`; width \u221d value; first stage = full width.",
+      "3Shape \u2014 `mark.shape` `bar` (centered rounded bars) or `trapezoid` (connected steps)."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: treating funnel as a Core 14 type. For category bars without stage narrowing use `type: \"bar\"`. Next Statistical: Treemap."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { funnel } from \"@chartkitdev/core/charts/funnel\"; export const render = createRenderer([funnel]); // Statistical / mock-plausible docs page \u2014 not schema Core 14. // Stages render in data order; negatives clamp to zero.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "treemap",
+    "label": "Treemap",
+    "family": "Statistical",
+    "title": "Treemap",
+    "lede": "mock-plausible Statistical \u2014 fifth of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten options for exploration.",
+    "description": "mock-plausible Statistical \u2014 fifth of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten options for explor",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/treemap"
+      },
+      {
+        "k": "Size",
+        "v": "planned \u00b7 Statistical"
+      },
+      {
+        "k": "Status",
+        "v": "planned"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x`",
+        "role": "Tile label (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.y`",
+        "role": "Size measure (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.color`",
+        "role": "Optional group / series color",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.path` / `id`+`parent`",
+        "role": "Nested hierarchy (flat stays one level)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "mock-plausible"
+      }
+    ],
+    "anatomy": [
+      "1Tile \u2014 `encoding.x` label (required). Labels truncate to fit.",
+      "2Size \u2014 `encoding.y` measure; non-positive sizes skipped.",
+      "3Group \u2014 optional `encoding.color`; siblings share a series color with tint shifts."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: treating treemap as a Core 14 type. For concentric hierarchy rings see sunburst (beyond Statistical 8). Next Statistical: Sankey."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { treemap } from \"@chartkitdev/core/charts/treemap\"; export const render = createRenderer([treemap]); // Statistical / mock-plausible docs page \u2014 not schema Core 14. // name/size/value/parent repair onto x, y, and color.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "sankey",
+    "label": "Sankey",
+    "family": "Statistical",
+    "title": "Sankey",
+    "lede": "mock-plausible Statistical \u2014 sixth of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten options for exploration.",
+    "description": "mock-plausible Statistical \u2014 sixth of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten options for explor",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/sankey"
+      },
+      {
+        "k": "Size",
+        "v": "planned \u00b7 Statistical"
+      },
+      {
+        "k": "Status",
+        "v": "planned"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.source`",
+        "role": "Node the flow leaves (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.target`",
+        "role": "Node the flow enters (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.y`",
+        "role": "Flow amount / link thickness",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`mark.nodeWidth`",
+        "role": "Node bar width (try chip)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "mock-plausible"
+      }
+    ],
+    "anatomy": [
+      "1Source \u2014 `encoding.source` (or `from`) \u2014 node the flow leaves.",
+      "2Target \u2014 `encoding.target` (or `to`) \u2014 node the flow enters.",
+      "3Flow \u2014 `encoding.y` (or `value`); sets link thickness. Nodes columnize from the graph."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: treating sankey as a Core 14 type. A cycle in the graph stops at the last column. Next Statistical: Bullet."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { sankey } from \"@chartkitdev/core/charts/sankey\"; export const render = createRenderer([sankey]); // Statistical / mock-plausible docs page \u2014 not schema Core 14. // from/to/value repair onto source, target, and y.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "bullet",
+    "label": "Bullet",
+    "family": "Statistical",
+    "title": "Bullet",
+    "lede": "mock-plausible Statistical \u2014 seventh of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten options for exploration.",
+    "description": "mock-plausible Statistical \u2014 seventh of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten options for expl",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/bullet"
+      },
+      {
+        "k": "Size",
+        "v": "planned \u00b7 Statistical"
+      },
+      {
+        "k": "Status",
+        "v": "planned"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x`",
+        "role": "Row label (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.y`",
+        "role": "Measure value (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.target`",
+        "role": "Goal marker",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`mark.ranges`",
+        "role": "Band fields, worst \u2192 best",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "mock-plausible"
+      }
+    ],
+    "anatomy": [
+      "1Bands \u2014 `mark.ranges` field names, worst \u2192 best; each value is the band\u2019s upper edge.",
+      "2Measure \u2014 `encoding.y` bar drawn over the bands.",
+      "3Target \u2014 `encoding.target` marker (tick) across the track."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: treating bullet as a Core 14 type. For a semicircular scale use Core `type: \"gauge\"`. Next Statistical: Waterfall."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { bullet } from \"@chartkitdev/core/charts/bullet\"; export const render = createRenderer([bullet]); // Statistical / mock-plausible docs page \u2014 not schema Core 14. // type.gauge.linear (features) \u2192 type: \"bullet\". // bullet-chart repairs to bullet.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "waterfall",
+    "label": "Waterfall",
+    "family": "Statistical",
+    "title": "Waterfall",
+    "lede": "mock-plausible Statistical \u2014 last of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten options for exploration.",
+    "description": "mock-plausible Statistical \u2014 last of docs-ia Statistical 8. Not in schema Core 14 (`line`\u2026`candlestick`). This page is a planned docs mock; try-it chips flatten options for explora",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/waterfall"
+      },
+      {
+        "k": "Size",
+        "v": "planned \u00b7 Statistical"
+      },
+      {
+        "k": "Status",
+        "v": "planned"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x`",
+        "role": "Step label (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.y`",
+        "role": "Delta / amount (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`mark.total`",
+        "role": "Field name; true \u2192 absolute total bar",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "mock-plausible"
+      }
+    ],
+    "anatomy": [
+      "1Total \u2014 row with `mark.total` field true; bar from zero to absolute value.",
+      "2Delta \u2014 `encoding.y` floats from the running total (gain or loss).",
+      "3Close \u2014 final absolute total; connectors optional between steps."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: treating waterfall as a Core 14 type. Cumulative line charts stay `type: \"line\"`. Next Planning: Gantt."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { waterfall } from \"@chartkitdev/core/charts/waterfall\"; export const render = createRenderer([waterfall]); // Statistical / mock-plausible docs page \u2014 not schema Core 14. // Last of Statistical 8. Next Planning: Gantt. // waterfall-chart repairs to waterfall.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "gantt",
+    "label": "Gantt",
+    "family": "Planning",
+    "title": "Gantt",
+    "lede": "mock-plausible Planning \u2014 first of docs-ia Planning 5. Not in schema Core 14 (`line`\u2026`candlestick`). Phase-4 / `validatePhase4` type. This page is a planned docs mock; try-it chips flatten options for exploration.",
+    "description": "mock-plausible Planning \u2014 first of docs-ia Planning 5. Not in schema Core 14 (`line`\u2026`candlestick`). Phase-4 / `validatePhase4` type. This page is a planned docs mock; try-it chips",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/gantt"
+      },
+      {
+        "k": "Size",
+        "v": "planned \u00b7 Planning"
+      },
+      {
+        "k": "Status",
+        "v": "planned"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x`",
+        "role": "Task label (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.y`",
+        "role": "Section / swimlane",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.open` / `close`",
+        "role": "Start / end dates",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.source` / `target`",
+        "role": "id \u2192 depends (elbows)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "mock-plausible"
+      }
+    ],
+    "anatomy": [
+      "1Bars \u2014 `start`/`end` (or duration); `progress` fills; status colors done / active / crit.",
+      "2Sections \u2014 `encoding.y` groups rows (Plan / Build / Launch).",
+      "3Depends & milestones \u2014 elbow connectors from `depends`; diamonds for milestones; optional today marker."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: treating gantt as a Core 14 type. For event spikes over time use `type: \"spike\"`. Next Planning: Timeline."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { gantt } from \"@chartkitdev/core/charts/gantt\"; export const render = createRenderer([gantt]); // Planning / mock-plausible docs page \u2014 not schema Core 14. // First of Planning 5. validatePhase4 (CK14xx). // gantt-chart repairs to gantt.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "timeline",
+    "label": "Timeline",
+    "family": "Planning",
+    "title": "Timeline",
+    "lede": "mock-plausible Planning \u2014 second of docs-ia Planning 5. Not in schema Core 14 (`line`\u2026`candlestick`). Phase-4 / `validatePhase4` type. This page is a planned docs mock; try-it chips flatten options for exploration.",
+    "description": "mock-plausible Planning \u2014 second of docs-ia Planning 5. Not in schema Core 14 (`line`\u2026`candlestick`). Phase-4 / `validatePhase4` type. This page is a planned docs mock; try-it chip",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/timeline"
+      },
+      {
+        "k": "Size",
+        "v": "planned \u00b7 Planning"
+      },
+      {
+        "k": "Status",
+        "v": "planned"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x`",
+        "role": "Event / period label (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`date` / `start`",
+        "role": "Event instant",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.open` / `close`",
+        "role": "Period start / end",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`kind`",
+        "role": "event \u00b7 period (or era)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "mock-plausible"
+      }
+    ],
+    "anatomy": [
+      "1Axis \u2014 shared UTC date line with gantt.",
+      "2Events \u2014 `date` (or `start`) markers; labels alternate above/below.",
+      "3Periods \u2014 `kind: \"period\"` spans from `start` to `end`; overlaps stack."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: treating timeline as a Core 14 type. For task bars with dependencies use `type: \"gantt\"`. Next Planning: Quadrant."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { timeline } from \"@chartkitdev/core/charts/timeline\"; export const render = createRenderer([timeline]); // Planning / mock-plausible docs page \u2014 not schema Core 14. // Second of Planning 5. validatePhase4 (CK1405). // timeline-chart repairs to timeline.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "quadrant",
+    "label": "Quadrant",
+    "family": "Planning",
+    "title": "Quadrant",
+    "lede": "mock-plausible Planning \u2014 third of docs-ia Planning 5. Not in schema Core 14 (`line`\u2026`candlestick`). Phase-4 / `validatePhase4` type. This page is a planned docs mock; try-it chips flatten options for exploration.",
+    "description": "mock-plausible Planning \u2014 third of docs-ia Planning 5. Not in schema Core 14 (`line`\u2026`candlestick`). Phase-4 / `validatePhase4` type. This page is a planned docs mock; try-it chips",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/quadrant"
+      },
+      {
+        "k": "Size",
+        "v": "planned \u00b7 Planning"
+      },
+      {
+        "k": "Status",
+        "v": "planned"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x` / `y`",
+        "role": "Numeric coords (domain 0..1 default)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`quadrants`",
+        "role": "Four labels: TL \u00b7 TR \u00b7 BL \u00b7 BR",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.size` / `color`",
+        "role": "Point radius; semantic or palette color",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`subtitle`",
+        "role": "Chart subtitle",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "mock-plausible"
+      }
+    ],
+    "anatomy": [
+      "1Quadrants \u2014 four tinted regions from `quadrants[]` (TL \u00b7 TR \u00b7 BL \u00b7 BR).",
+      "2Axes \u2014 `encoding.x/y.title` low|high labels; domain defaults 0..1.",
+      "3Points \u2014 named markers with optional `size` and semantic `color`."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: treating quadrant as a Core 14 type. For free scatter without tinted regions use `type: \"scatter\"`. Next Planning: Venn."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { quadrant } from \"@chartkitdev/core/charts/quadrant\"; export const render = createRenderer([quadrant]); // Planning / mock-plausible docs page \u2014 not schema Core 14. // Third of Planning 5. validatePhase4 (CK1406, CK1412). // quadrant-chart repairs to quadrant.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "venn",
+    "label": "Venn",
+    "family": "Planning",
+    "title": "Venn",
+    "lede": "mock-plausible Planning \u2014 fourth of docs-ia Planning 5. Not in schema Core 14 (`line`\u2026`candlestick`). Phase-4 type; not in core schema enum. This page is a planned docs mock; try-it chips flatten options for exploration.",
+    "description": "mock-plausible Planning \u2014 fourth of docs-ia Planning 5. Not in schema Core 14 (`line`\u2026`candlestick`). Phase-4 type; not in core schema enum. This page is a planned docs mock; try-i",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/venn"
+      },
+      {
+        "k": "Size",
+        "v": "planned \u00b7 Planning"
+      },
+      {
+        "k": "Status",
+        "v": "planned"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x`",
+        "role": "Set name or `A+B` intersection",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.y`",
+        "role": "Size (area weight)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "mock-plausible"
+      }
+    ],
+    "anatomy": [
+      "1Sets \u2014 single-name rows; circle area from `encoding.y` size.",
+      "2Pairwise \u2014 `A+B` rows; two-set overlap solved to match size.",
+      "3Triple \u2014 `A+B+C` best-effort; caption notes approximate areas."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: treating venn as a Core 14 type. Exact three-set areas are approximate \u2014 the chart captions that. Next Planning: Journey."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { venn } from \"@chartkitdev/core/charts/venn\"; export const render = createRenderer([venn]); // Planning / mock-plausible docs page \u2014 not schema Core 14. // Fourth of Planning 5. validatePhase4 (CK1407, CK1408). // venn-chart repairs to venn.`"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "journey",
+    "label": "Journey",
+    "family": "Planning",
+    "title": "Journey",
+    "lede": "mock-plausible Planning \u2014 last of docs-ia Planning 5 (last chart type in this mock series). Not in schema Core 14 (`line`\u2026`candlestick`). Phase-4 / `validatePhase4` type. This page is a planned docs mock; try-it chips flatten options for exploration.",
+    "description": "mock-plausible Planning \u2014 last of docs-ia Planning 5 (last chart type in this mock series). Not in schema Core 14 (`line`\u2026`candlestick`). Phase-4 / `validatePhase4` type. This page",
+    "facts": [
+      {
+        "k": "Import",
+        "v": "@chartkitdev/core/charts/journey"
+      },
+      {
+        "k": "Size",
+        "v": "planned \u00b7 Planning"
+      },
+      {
+        "k": "Status",
+        "v": "planned"
+      }
+    ],
+    "options": [
+      {
+        "path": "`encoding.x`",
+        "role": "Step label (required)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.y`",
+        "role": "Score 1\u20135",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.series`",
+        "role": "Section band",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`encoding.color`",
+        "role": "Actors (comma-separated)",
+        "status": "mock-plausible"
+      },
+      {
+        "path": "`theme`",
+        "role": "soft \u00b7 midnight \u00b7 \u2026 (Soft = docs mock accent)",
+        "status": "mock-plausible"
+      }
+    ],
+    "anatomy": [
+      "1Sections \u2014 `encoding.series` groups steps (Browse \u2192 Done).",
+      "2Score \u2014 `encoding.y` 1\u20135; face or number; token by band.",
+      "3Actors \u2014 comma-separated chips on the step and in the legend."
+    ],
+    "notes": [
+      {
+        "title": "Import",
+        "paragraphs": [
+          "Does not include: treating journey as a Core 14 type. For stage drop-off without scores use `type: \"funnel\"`. Chart types mock series ends here \u2014 next Reference: Options."
+        ],
+        "list": [],
+        "code": [
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { journey } from \"@chartkitdev/core/charts/journey\"; export const render = createRenderer([journey]); // Planning / mock-plausible docs page \u2014 not schema Core 14. // Last of Planning 5. validatePhase4 (CK1400, CK1409, CK1410). // user-journey repairs to journey.`"
+        ]
+      }
+    ]
+  }
+]

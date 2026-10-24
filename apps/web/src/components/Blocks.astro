@@ -1,0 +1,41 @@
+---
+import type { Block } from "../data/doc-pages";
+import Inline from "./Inline.astro";
+
+interface Props {
+  blocks: Block[];
+}
+
+const { blocks } = Astro.props;
+---
+
+{
+  blocks.map((block) =>
+    block.type === "p" ? (
+      <p>
+        <Inline parts={block.parts} />
+      </p>
+    ) : block.type === "ul" ? (
+      <ul>
+        {block.items.map((item) => (
+          <li>
+            <Inline parts={item} />
+          </li>
+        ))}
+      </ul>
+    ) : block.type === "code" ? (
+      <figure class="code">
+        <figcaption>{block.label}</figcaption>
+        <pre><code>{block.code}</code></pre>
+      </figure>
+    ) : (
+      <ul>
+        {block.items.map((item) => (
+          <li>
+            <a href={item.href}>{item.label}</a>
+          </li>
+        ))}
+      </ul>
+    ),
+  )
+}

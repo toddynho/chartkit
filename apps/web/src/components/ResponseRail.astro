@@ -1,0 +1,70 @@
+---
+import { paintSpec } from "../lib/chartkit";
+
+interface Props {
+  spec: Record<string, unknown>;
+}
+
+const { spec } = Astro.props;
+const result = paintSpec(spec);
+const json = JSON.stringify(spec, null, 2);
+---
+
+<div
+  class:list={["response", !result.ok && "is-error"]}
+  id="docs-response"
+  data-theme={result.theme === "midnight" ? "midnight" : "soft"}
+  aria-live="polite"
+>
+  <div class="response__chrome">
+    <span class="response__method">core</span>
+    <span class="response__path">validate + render</span>
+    <span class="response__status" id="response-status">{result.status}</span>
+  </div>
+  <div class="response__tabs" role="tablist" aria-label="Response view">
+    <button type="button" class="response__tab is-on" data-tab="chart" role="tab" aria-selected="true">Chart</button>
+    <button type="button" class="response__tab" data-tab="json" role="tab" aria-selected="false">JSON</button>
+  </div>
+  <div class="response__body">
+    <div class="response__panel" data-panel="chart">
+      <div class="response__meta">
+        <span class="response__title" id="response-title">{result.title}</span>
+        <span class="response__badge" id="response-badge">{result.badge}</span>
+      </div>
+      <div id="response-chart" set:html={result.svg} />
+      <ul id="response-errors" hidden={result.issues.length === 0}>
+        {
+          result.issues.map((issue) => (
+            <li>
+              <code>{issue.code}</code>
+              {' '}
+              <span>{issue.path}</span>
+              {' '}
+              {issue.message}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <pre class="response__json" data-panel="json" id="response-json" hidden>{json}</pre>
+  </div>
+  <p class="response__footer" id="response-ok">{result.footer}</p>
+</div>
+
+<script>
+  const root = document.getElementById("docs-response");
+  const tabs = root?.querySelectorAll<HTMLButtonElement>(".response__tab") ?? [];
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const name = tab.dataset.tab;
+      tabs.forEach((peer) => {
+        const on = peer === tab;
+        peer.classList.toggle("is-on", on);
+        peer.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      root?.querySelectorAll<HTMLElement>("[data-panel]").forEach((panel) => {
+        panel.hidden = panel.dataset.panel !== name;
+      });
+    });
+  });
+</script>
