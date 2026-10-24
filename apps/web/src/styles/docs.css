@@ -259,7 +259,20 @@
 .response__title { font-weight: 600; }
 .response__badge { font-size: 11px; color: var(--muted); padding: 2px 8px; border-radius: 980px; background: rgba(0, 0, 0, 0.04); }
 .response[data-theme="midnight"] #response-chart { background: #0f1115; border-radius: 12px; }
-.preview-svg { display: block; width: 100%; height: auto; }
+#response-chart svg { display: block; width: 100%; height: auto; }
+#response-errors {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+#response-errors li { padding: 8px 10px; border-radius: 10px; background: rgba(229, 72, 77, 0.08); color: #1d1d1f; }
+#response-errors code { font-weight: 700; color: #9f1239; }
+#response-errors span { color: var(--muted); margin-right: 4px; }
+#response-errors[hidden] { display: none; }
 .response__json {
   margin: 0;
   max-height: 320px;

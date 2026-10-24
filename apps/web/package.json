@@ -8,12 +8,16 @@
     "node": ">=22.23.4"
   },
   "scripts": {
+    "predev": "npm run build --workspace=@chartkitdev/core",
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
+    "prebuild": "npm run build --workspace=@chartkitdev/core",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "precheck": "npm run build --workspace=@chartkitdev/core",
     "check": "ASTRO_TELEMETRY_DISABLED=1 astro check"
   },
   "dependencies": {
+    "@chartkitdev/core": "*",
     "@fontsource/inter": "^5.3.0",
     "astro": "^7.4.2"
   },

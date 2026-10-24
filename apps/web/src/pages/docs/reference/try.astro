@@ -4,18 +4,23 @@ import SpecEditor from "../../../components/SpecEditor.astro";
 import { articleChips, articleSpec } from "../../../data/docs-catalog";
 import Docs from "../../../layouts/Docs.astro";
 
-const description = "Editable ChartKit spec, chips beside the JSON, and an illustrative response rail.";
+const description = "Editable ChartKit spec. The response rail validates and renders it with @chartkitdev/core.";
 ---
 
 <Docs
   title="Playground"
   description={description}
-  lede="Edit a spec, or switch Line, Bar, and Donut. The response rail draws from that JSON."
+  lede="Edit a spec, or switch Line, Bar, and Donut. The response rail validates and renders that JSON."
   href="/docs/reference/try"
 >
   <p>
-    This is the same editor as the rest of the docs. The rail does not call <code>@chartkitdev/core</code> or Cloud, and
-    it does not run <code>validate()</code>.
+    This is the same editor as the chart pages.{' '}
+    <code>validate()</code>
+    {' '}and{' '}
+    <code>render()</code>
+    {' '}run from{' '}
+    <code>@chartkitdev/core</code>
+    {' '}in this page. Invalid specs show CK codes and no chart. Cloud is not called.
   </p>
   <SpecEditor spec={articleSpec} chips={articleChips} hint="Options sit beside the JSON — the response is on the right" />
   <ResponseRail slot="rail" spec={articleSpec} />

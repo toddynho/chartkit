@@ -11,11 +11,15 @@ interface Props {
 const { spec, chips, title = "Interactive spec", hint = "Options sit beside the JSON" } = Astro.props;
 const initial = JSON.stringify(spec, null, 2);
 
+function at(source: Record<string, unknown>, path: string): unknown {
+  return path.split(".").reduce<unknown>((current, key) => {
+    if (current && typeof current === "object") return (current as Record<string, unknown>)[key];
+    return undefined;
+  }, source);
+}
+
 function pressed(group: ChipGroup, value: string): boolean {
-  const current = spec[group.key];
-  if (typeof current === "boolean") return String(current) === value;
-  if (current == null && group.options[0]?.value === value) return true;
-  return String(current ?? "") === value;
+  return String(at(spec, group.key) ?? "") === value;
 }
 ---
 
@@ -57,19 +61,22 @@ function pressed(group: ChipGroup, value: string): boolean {
     </div>
   </div>
   <p class="spec-try__note">
-    The response rail draws an illustrative chart from this JSON. It does not call <code>@chartkitdev/core</code> or Cloud,
-    and it does not run <code>validate()</code>.
+    The response rail runs <code>validate()</code>
+    {' '}and <code>render()</code>
+    {' '}from <code>@chartkitdev/core</code>
+    {' '}in this page. It does not call Cloud.
   </p>
 </div>
 
 <script>
-  import { previewSvg, type PreviewSpec } from "../lib/preview-svg";
-  import { samples } from "../data/samples";
+  import { paintSpec } from "../lib/chartkit";
+  import { trySamples } from "../data/live-specs";
 
   const editor = document.getElementById("spec-try");
   const input = document.getElementById("spec-input") as HTMLTextAreaElement | null;
   const status = document.getElementById("spec-status");
   const chartPanel = document.getElementById("response-chart");
+  const errorList = document.getElementById("response-errors");
   const jsonPanel = document.getElementById("response-json");
   const response = document.getElementById("docs-response");
   const titleEl = document.getElementById("response-title");
@@ -77,66 +84,95 @@ function pressed(group: ChipGroup, value: string): boolean {
   const statusCode = document.getElementById("response-status");
   const okEl = document.getElementById("response-ok");
 
-  function paint(spec: PreviewSpec, raw: string, ok: boolean, detail?: string) {
-    if (chartPanel) {
-      chartPanel.innerHTML = ok ? previewSvg(spec) : "";
-    }
-    if (jsonPanel) jsonPanel.textContent = raw;
-    response?.setAttribute("data-theme", spec.theme === "midnight" ? "midnight" : "soft");
-    response?.classList.toggle("is-error", !ok);
-    if (titleEl) titleEl.textContent = ok ? spec.title || spec.type || "Spec" : "Spec";
-    if (badgeEl) badgeEl.textContent = spec.theme === "midnight" ? "Midnight" : "Soft";
-    if (statusCode) statusCode.textContent = ok ? "200" : "400";
-    if (okEl) okEl.textContent = ok ? "Illustrative preview · validate() not called" : detail || "Spec is not JSON";
-    if (status) status.textContent = ok ? "valid · ready" : "invalid JSON";
+  function readPath(spec: unknown, path: string): unknown {
+    return path.split(".").reduce<unknown>((current, key) => {
+      if (current && typeof current === "object") return (current as Record<string, unknown>)[key];
+      return undefined;
+    }, spec);
   }
 
-  function read(): { ok: true; spec: PreviewSpec; raw: string } | { ok: false; raw: string; detail: string } {
+  function writePath(spec: Record<string, unknown>, path: string, value: string) {
+    const keys = path.split(".");
+    let current: Record<string, unknown> = spec;
+    for (const key of keys.slice(0, -1)) {
+      const next = current[key];
+      if (!next || typeof next !== "object" || Array.isArray(next)) current[key] = {};
+      current = current[key] as Record<string, unknown>;
+    }
+    const leaf = keys[keys.length - 1];
+    current[leaf] = value === "true" ? true : value === "false" ? false : value;
+  }
+
+  function showIssues(issues: { code: string; path: string; message: string }[]) {
+    if (!errorList) return;
+    errorList.replaceChildren();
+    for (const issue of issues) {
+      const item = document.createElement("li");
+      const code = document.createElement("code");
+      code.textContent = issue.code;
+      const path = document.createElement("span");
+      path.textContent = issue.path;
+      item.append(code, " ", path, " ", issue.message);
+      errorList.append(item);
+    }
+    errorList.hidden = issues.length === 0;
+  }
+
+  function render() {
     const raw = input?.value ?? "";
+    let parsed: unknown = raw;
+    let pretty = raw;
     try {
-      return { ok: true, spec: JSON.parse(raw) as PreviewSpec, raw: JSON.stringify(JSON.parse(raw), null, 2) };
-    } catch (error) {
-      return { ok: false, raw, detail: error instanceof Error ? error.message : "Spec is not JSON" };
+      parsed = JSON.parse(raw) as unknown;
+      pretty = JSON.stringify(parsed, null, 2);
+    } catch {
+      parsed = raw;
     }
+    const result = paintSpec(parsed);
+    if (chartPanel) chartPanel.innerHTML = result.svg;
+    showIssues(result.issues);
+    if (jsonPanel) jsonPanel.textContent = pretty;
+    response?.setAttribute("data-theme", result.theme === "midnight" ? "midnight" : "soft");
+    response?.classList.toggle("is-error", !result.ok);
+    if (titleEl) titleEl.textContent = result.title;
+    if (badgeEl) badgeEl.textContent = result.badge;
+    if (statusCode) statusCode.textContent = result.status;
+    if (okEl) okEl.textContent = result.footer;
+    if (status) status.textContent = result.ok ? "valid · rendered" : result.issues[0]?.code ?? "invalid";
+    if (parsed && typeof parsed === "object") syncChips(parsed as Record<string, unknown>);
   }
 
-  function syncChips(spec: PreviewSpec) {
+  function syncChips(spec: Record<string, unknown>) {
     editor?.querySelectorAll<HTMLButtonElement>(".spec-chip").forEach((button) => {
       const key = button.dataset.key;
       const value = button.dataset.value;
       if (!key || value == null) return;
-      const current = (spec as Record<string, unknown>)[key];
-      const on = String(current) === value;
+      const on = String(readPath(spec, key) ?? "") === value;
       button.classList.toggle("is-on", on);
       button.setAttribute("aria-pressed", on ? "true" : "false");
     });
   }
 
-  function render() {
-    const result = read();
-    if (!result.ok) {
-      paint({}, result.raw, false, result.detail);
-      return;
-    }
-    paint(result.spec, result.raw, true);
-    syncChips(result.spec);
-  }
-
   editor?.querySelectorAll<HTMLButtonElement>(".spec-chip").forEach((button) => {
     button.addEventListener("click", () => {
-      const result = read();
-      if (!result.ok || !input) return;
+      if (!input) return;
+      let current: Record<string, unknown>;
+      try {
+        current = JSON.parse(input.value) as Record<string, unknown>;
+      } catch {
+        return;
+      }
       const key = button.dataset.key;
       const value = button.dataset.value;
       if (!key || value == null) return;
-      const next: Record<string, unknown> = { ...result.spec };
-      if (key === "type" && value in samples) {
-        const sample = samples[value as keyof typeof samples];
-        Object.assign(next, sample, { theme: next.theme ?? "soft", title: next.title });
+      if (key === "type" && value in trySamples) {
+        const sample = structuredClone(trySamples[value as keyof typeof trySamples]);
+        sample.theme = typeof current.theme === "string" ? current.theme : "soft";
+        input.value = JSON.stringify(sample, null, 2);
       } else {
-        next[key] = value === "true" ? true : value === "false" ? false : value;
+        writePath(current, key, value);
+        input.value = JSON.stringify(current, null, 2);
       }
-      input.value = JSON.stringify(next, null, 2);
       render();
     });
   });

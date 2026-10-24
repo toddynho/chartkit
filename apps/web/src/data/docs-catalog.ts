@@ -1,8 +1,8 @@
 import articlesJson from "./mock-articles.json";
 import chartsJson from "./mock-charts.json";
+import { withTruth } from "./chart-truth";
 import { chartTypes } from "./chart-types";
-import { samples } from "./samples";
-import type { PreviewSpec } from "../lib/preview-svg";
+import { specForType, type LiveSpec } from "./live-specs";
 
 export type DocSection = {
   title: string;
@@ -99,7 +99,107 @@ const extras: DocArticle[] = [
   },
 ];
 
-export const docArticles: DocArticle[] = [...fromMocks, ...extras];
+const honestLedes: Record<string, string> = {
+  "": "ChartKit v1 is a JSON spec plus @chartkitdev/core. The core has zero dependencies, validates the spec, and renders SVG. Adapters pass that spec through. They do not add chart logic.",
+  react: "The React adapter renders the same spec as the other adapters. Pass spec to Chart. The older dashboard components still exist, and their props are not spec keys.",
+  vue: "Vue 3 binds the spec with :spec. Server rendering uses renderToString from @chartkitdev/vue/ssr.",
+  svelte: "The component uses export let, so Svelte 4 and Svelte 5 both compile it. SvelteKit SSR includes the SVG.",
+  vanilla: "mount writes the SVG into an element you already have. update keeps that element. renderToString is the SVG string from core.",
+  markdown: "A chartkit fence is a v1 spec. The markdown package renders it with core. It does not invent a second chart language.",
+  "spec-anatomy": "The schema is https://chartkit.dev/schema/v1.json. validate() checks the schema and the data. render() does not validate. Unknown types return an error SVG and do not throw.",
+  "themes-tokens": "Soft is the default. Omit theme, or set auto or soft. midnight is the opt-in dark card. refined and editorial are built in. Other preset names fall through to midnight until you import @chartkitdev/core/themes/all. Hosts override tokens with --ck-*.",
+  themes: "Soft is the default. theme midnight is the opt-in dark card. Presets such as mocha, emerald, and slate resolve after importing @chartkitdev/core/themes/all.",
+  options: "Paths are schema fields: mark.curve, mark.points, mark.area, axes.x.title. mark.markers and mark.fill are not fields. soft, refined, editorial, and midnight are real theme names.",
+  errors: "Codes are stable: CK1xxx structure, CK2xxx data, CK3xxx semantics, CK4xxx design. CK1001 is invalid JSON. This rail shows those codes and does not draw a chart when validate() fails.",
+  validate: "validate() returns every diagnostic in one pass. repair() applies the safe JSON Patch fixes and does not mutate the input. render() does not validate.",
+  repair: "repair() applies the safe JSON Patch on each error and revalidates. It does not invent data. A missing or unknown type is reported first.",
+  render: "render() from @chartkitdev/core/all draws the core charts. @chartkitdev/core/extra adds histogram through rose and the planning charts. render() does not validate and does not throw.",
+  "llms-txt": "llms.txt is the short agent index: the rules, the repair loop, and one spec per chart type. chartkit.dev still serves that file from the Next.js app.",
+  mcp: "@chartkitdev/mcp is not on npm yet. The server speaks stdio and calls validate, repair, and render in-process. render_chart is the one tool that calls Cloud.",
+};
+
+function scrubText(value: string): string {
+  return value
+    .replaceAll(/mock-plausible\s*/gi, "")
+    .replaceAll("mark.markers", "mark.points")
+    .replaceAll(/mark\.fill(?![A-Za-z])/g, "mark.area")
+    .replaceAll("axis.x.label", "axes.x.title")
+    .replaceAll("axis.y.label", "axes.y.title")
+    .replaceAll("Soft = docs mock accent.", "")
+    .replaceAll(
+      "Soft in docs mocks is an accent shorthand — schema Soft = built-in `soft`.",
+      '`theme: "soft"` is the built-in Soft preset, the same as omitting theme.',
+    )
+    .replaceAll(/\s{2,}/g, " ")
+    .trim();
+}
+
+function presentArticle(article: DocArticle): DocArticle {
+  const lede = honestLedes[article.slug] ?? scrubText(article.lede);
+  let sections = article.sections.map((section) => ({
+    title: scrubText(section.title),
+    paragraphs: section.paragraphs.map(scrubText).filter(Boolean),
+    list: section.list.map(scrubText).filter(Boolean),
+    code: section.code.map(scrubText),
+  }));
+  if (article.slug === "") {
+    sections = [
+      {
+        title: "Install",
+        paragraphs: [
+          "Install core, then the adapter for the framework you render in. @chartkitdev/element, @chartkitdev/geo, and @chartkitdev/mcp are in this repo and are not on npm yet.",
+        ],
+        list: [],
+        code: ["npm install @chartkitdev/core\nnpm install @chartkitdev/react"],
+      },
+      {
+        title: "A valid spec",
+        paragraphs: [
+          'version is "1". a11y.alt is one sentence and is required. data is an array of row objects. The chart type goes in type. mark is an options object. Gauge, kpi, and progress-ring put the number in metric.',
+        ],
+        list: [],
+        code: [],
+      },
+      {
+        title: "Render",
+        paragraphs: [
+          "render from @chartkitdev/core/all registers the core charts. Histogram through rose, and the planning charts, render from @chartkitdev/core/extra. This docs site runs validate() and then render() in the browser. It does not call Cloud.",
+        ],
+        list: [],
+        code: [
+          'import { render } from "@chartkitdev/core/all";\nimport { validate, repair } from "@chartkitdev/core/validate";\n\nconst result = validate(spec);\nconst svg = render(result.ok ? spec : repair(spec).spec);',
+        ],
+      },
+    ];
+  }
+  if (article.slug === "react" || article.slug === "vue" || article.slug === "svelte" || article.slug === "vanilla") {
+    const pkg = `@chartkitdev/${article.slug}`;
+    sections = [
+      {
+        title: "Install",
+        paragraphs: [`Packages publish as @chartkitdev/*. The adapter depends on @chartkitdev/core.`],
+        list: [],
+        code: [`npm install ${pkg}`],
+      },
+      {
+        title: "The spec",
+        paragraphs: ["The same JSON renders in every adapter. Framework props are not spec keys."],
+        list: [],
+        code: [],
+      },
+      ...sections.slice(0, 2),
+    ];
+  }
+  return {
+    ...article,
+    lede,
+    description: lede.slice(0, 180),
+    tryIntro: scrubText(article.tryIntro),
+    sections,
+  };
+}
+
+export const docArticles: DocArticle[] = [...fromMocks, ...extras].map(presentArticle);
 
 export const chartDocs = chartsJson as ChartDoc[];
 
@@ -125,9 +225,9 @@ export function activeDocsHref(path: string): string {
 
 export function chartPage(type: string): ChartDoc {
   const known = chartById.get(type);
-  if (known) return known;
+  if (known) return withTruth(known);
   const fallback = chartTypes.find((chart) => chart.type === type);
-  return {
+  return withTruth({
     type,
     label: fallback?.title ?? type,
     family: "Library",
@@ -144,56 +244,17 @@ export function chartPage(type: string): ChartDoc {
       {
         title: "This URL",
         paragraphs: [
-          `\`type\` is \`${type}\`. The locked docs mock series covers Core, Statistical, and Planning. This type keeps its production URL and is not a separate group in the left nav.`,
+          `\`type\` is \`${type}\`. The left nav lists Core, Statistical, and Planning. This type keeps its production URL and is not a separate group there.`,
         ],
         list: [],
         code: [],
       },
     ],
-  };
+  });
 }
 
-const weekly = [
-  { week: "W1", signups: 18 },
-  { week: "W2", signups: 28 },
-  { week: "W3", signups: 24 },
-  { week: "W4", signups: 42 },
-  { week: "W5", signups: 38 },
-  { week: "W6", signups: 56 },
-  { week: "W7", signups: 62 },
-  { week: "W8", signups: 86 },
-];
-
-export function specForChart(chart: ChartDoc): PreviewSpec {
-  const base = {
-    version: "1",
-    type: chart.type,
-    title: chart.title,
-    theme: "soft",
-    data: weekly,
-    encoding: { x: "week", y: "signups" },
-    a11y: { alt: `${chart.title} example. Illustrative data, not a live metric.` },
-  };
-  if (chart.type === "line" || chart.type === "area" || chart.type === "mini-area" || chart.type === "sparkline") {
-    return { ...base, smooth: true, markers: true, fill: chart.type === "area" || chart.type === "mini-area" };
-  }
-  if (chart.type === "donut" || chart.type === "pie") {
-    return {
-      version: "1",
-      type: chart.type,
-      title: chart.title,
-      theme: "soft",
-      legend: true,
-      data: [
-        { channel: "Organic", visits: 48 },
-        { channel: "Paid", visits: 27 },
-        { channel: "Direct", visits: 25 },
-      ],
-      encoding: { x: "channel", y: "visits" },
-      a11y: { alt: `${chart.title} example with three shares.` },
-    };
-  }
-  return { ...base, legend: true };
+export function specForChart(chart: ChartDoc): LiveSpec {
+  return specForType(chart.type);
 }
 
 const themeChips: ChipGroup = {
@@ -205,35 +266,38 @@ const themeChips: ChipGroup = {
   ],
 };
 
+const lineChips: ChipGroup[] = [
+  themeChips,
+  {
+    label: "Curve",
+    key: "mark.curve",
+    options: [
+      { label: "Smooth", value: "monotone" },
+      { label: "Linear", value: "linear" },
+    ],
+  },
+  {
+    label: "Points",
+    key: "mark.points",
+    options: [
+      { label: "On", value: "always" },
+      { label: "Off", value: "none" },
+    ],
+  },
+  {
+    label: "Area fill",
+    key: "mark.area",
+    options: [
+      { label: "On", value: "true" },
+      { label: "Off", value: "false" },
+    ],
+  },
+];
+
 export function chipsForChart(type: string): ChipGroup[] {
-  if (type === "line" || type === "area" || type === "mini-area" || type === "sparkline") {
-    return [
-      themeChips,
-      {
-        label: "Curve",
-        key: "smooth",
-        options: [
-          { label: "Smooth", value: "true" },
-          { label: "Linear", value: "false" },
-        ],
-      },
-      {
-        label: "Markers",
-        key: "markers",
-        options: [
-          { label: "On", value: "true" },
-          { label: "Off", value: "false" },
-        ],
-      },
-      {
-        label: "Area fill",
-        key: "fill",
-        options: [
-          { label: "On", value: "true" },
-          { label: "Off", value: "false" },
-        ],
-      },
-    ];
+  if (type === "line" || type === "area") return lineChips;
+  if (type === "gauge" || type === "kpi" || type === "progress-ring" || type === "sparkline" || type === "mini-area") {
+    return [themeChips];
   }
   return [
     themeChips,
@@ -248,11 +312,7 @@ export function chipsForChart(type: string): ChipGroup[] {
   ];
 }
 
-export const articleSpec: PreviewSpec = {
-  ...samples.line,
-  title: "Weekly signups",
-  theme: "soft",
-};
+export const articleSpec: LiveSpec = specForType("line");
 
 export const articleChips: ChipGroup[] = [
   themeChips,

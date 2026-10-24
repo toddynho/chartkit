@@ -28,7 +28,7 @@ npm run check --workspace=chartkit-web
 | --- | --- | --- |
 | Role | Next public site. Marketing and docs shell. | What chartkit.dev serves today. |
 | Dev | `npm run dev:web` | `npm run dev` |
-| Content | Click-through docs from the locked mocks, plus the marketing pages | Full docs, demos, benchmarks, llms.txt |
+| Content | Click-through docs. The response rail validates and renders with `@chartkitdev/core`. Marketing pages stay illustrative. | Full docs, demos, benchmarks, llms.txt |
 | Hosting | Not wired | Existing production app |
 
 Chart-type paths match the current docs (`/docs/charts/line` and the rest) so a later move can keep URLs. `llms.txt`, the schema, and the measured pages stay on the Next.js app until cutover.
@@ -54,7 +54,7 @@ The left nav is Start, Concepts, Chart types (Core, Statistical, Planning), Refe
 
 ## Try it
 
-Chart-type pages follow the Line template: facts, an editable spec, chips beside the JSON, anatomy, an options table, and a response rail. Other docs pages use the same editor with theme and chart-type chips. The rail draws an illustrative SVG and echoes the JSON. It does not call `@chartkitdev/core`, Cloud, or `validate()`.
+Chart-type pages follow the Line template: facts, an editable spec, chips beside the JSON, anatomy, an options table, and a response rail. The rail runs `validate()` and `render()` from `@chartkitdev/core` in the page (core charts from `/all`, the rest from `/extra`, planning charts through `validatePhase4`). It does not call Cloud. An invalid spec shows the CK codes and does not draw a chart. `npm run dev:web` builds core first.
 
 ## Tokens
 
@@ -63,7 +63,7 @@ Global CSS is `src/styles/global.css`. Inter at a 15px body. Page `#f5f5f7`, ink
 ## Next migration steps
 
 1. Move one Next.js docs route at a time into this app, starting with getting started and the chart types. Keep the Next.js app running until the URL exists here.
-2. Replace the try-it response with `validate` / `render` from core, or with Cloud. Keep the spec, chips, and response rail.
+2. The docs response rail already runs `validate()` and `render()` from `@chartkitdev/core`. The homepage stage is still illustrative SVG.
 3. Fill pricing only when the amounts are real. The live Cloud offer (a key removes the mark, and 120/minute is not a paid quota) is not this mock.
 4. Serve `llms.txt`, `llms-full.txt`, and `schema/v1.json` from this app at the same paths.
 5. Switch the host, then remove `docs/` if nothing else imports it.
