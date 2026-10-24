@@ -1,0 +1,101 @@
+---
+import Base from "../layouts/Base.astro";
+import Pricing from "../components/Pricing.astro";
+import { SITE } from "../data/site";
+import { chartTypes, galleryTypes } from "../data/chart-types";
+import { cloudCurl } from "../data/samples";
+
+const gallery = galleryTypes.map((type) => chartTypes.find((chart) => chart.type === type)).filter((chart) => chart != null);
+---
+
+<Base title="Charts become data" description={SITE.description}>
+  <div class="wrap">
+    <section class="hero" aria-labelledby="home-title">
+      <p class="kicker">Agent-first charts</p>
+      <h1 id="home-title">Charts become data.</h1>
+      <p class="lede">
+        An agent, a server, or a database writes one JSON spec. Core renders SVG, with no runtime dependencies. The same
+        object renders in React, Vue, Svelte, vanilla JavaScript, and on the server. The open-source library draws no
+        watermark.
+      </p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/docs">Read the docs</a>
+        <a class="btn btn-secondary" href="#cloud">Cloud API</a>
+      </div>
+      <div class="switch">
+        <h2>Why switch</h2>
+        <div class="switch-grid">
+          <article class="card">
+            <h3>Agents get a spec</h3>
+            <p>
+              With the docs in the prompt, a measured run wrote a valid chart on 42 of 42 tasks, at a mean of 132.4
+              output tokens. <code>repair()</code> took a no-docs run from 21/42 to 42/42 with no model call. Round 6,
+              2026-10-16. Not re-run for round 13.
+            </p>
+            <p><a href="https://chartkit.dev/benchmarks#agents">Benchmarks, losses included</a></p>
+          </article>
+          <article class="card">
+            <h3>One object</h3>
+            <p>
+              React, Vue, Svelte, vanilla JavaScript, and server SVG take the same JSON. Adapters do not add a second
+              chart API. The older React dashboard props are a different interface.
+            </p>
+            <p><a href="/docs/concepts/adapters">Adapters</a></p>
+          </article>
+          <article class="card">
+            <h3>Losses included</h3>
+            <p>
+              A minimal line is 34,554 bytes gzip. uPlot is 23,276. First hover is slower than uPlot. The comparison
+              table in the repo README is the record.
+            </p>
+            <p><a href="https://chartkit.dev/benchmarks">Full benchmarks</a></p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="cloud" aria-labelledby="cloud-title">
+      <h2 id="cloud-title">Cloud API</h2>
+      <p class="lede">
+        A marked chart for any agent or app. <code>GET /render</code> returns an image.{' '}
+        <code>POST /render</code> returns the image URL plus the repairs and warnings from <code>validate()</code> and{' '}
+        <code>repair()</code>.
+      </p>
+      <figure class="code">
+        <figcaption>shell</figcaption>
+        <pre><code>{cloudCurl}</code></pre>
+      </figure>
+      <p>
+        <code>GET /render</code> always includes the chartkit.dev mark, so an image address never carries a key. A key
+        on <code>POST /charts</code> or <code>POST /render</code> stores an unmarked chart. The open-source library
+        never draws the mark.
+      </p>
+      <p><a href="/cloud">Cloud page</a></p>
+    </section>
+
+    <Pricing />
+
+    <section class="section" id="gallery" aria-labelledby="gallery-title">
+      <h2 id="gallery-title">Gallery</h2>
+      <p class="lede">
+        Chart types the spec can name. These tiles are placeholders. Previews move here with the docs.
+      </p>
+      <div class="gallery-grid">
+        {
+          gallery.map((chart) => (
+            <a class="card" href={`/docs/charts/${chart.type}`}>
+              <span class="ph" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </span>
+              <h3>{chart.title}</h3>
+              <p>{chart.summary}</p>
+            </a>
+          ))
+        }
+      </div>
+      <p><a href="/docs/charts">All chart types</a></p>
+    </section>
+  </div>
+</Base>

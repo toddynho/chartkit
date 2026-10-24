@@ -1,0 +1,23 @@
+---
+import Base from "./Base.astro";
+import DocsNav from "../components/DocsNav.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  lede?: string;
+}
+
+const { title, description, lede } = Astro.props;
+---
+
+<Base title={title} description={description}>
+  <div class="docs-shell">
+    <DocsNav />
+    <article class="docs-main">
+      <h1>{title}</h1>
+      {lede ? <p class="lede">{lede}</p> : null}
+      <slot />
+    </article>
+  </div>
+</Base>

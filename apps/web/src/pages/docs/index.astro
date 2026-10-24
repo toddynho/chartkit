@@ -1,0 +1,29 @@
+---
+import Docs from "../../layouts/Docs.astro";
+import MigrationNote from "../../components/MigrationNote.astro";
+import { lineSample } from "../../data/samples";
+
+const description = "Install ChartKit and render a JSON spec. This page is the Astro docs shell, not the full guide.";
+---
+
+<Docs title="Getting started" description={description} lede="ChartKit v1 is a JSON spec plus @chartkitdev/core. The core validates the spec and renders SVG. Adapters pass that object through.">
+  <MigrationNote href="https://chartkit.dev/docs" />
+  <p>
+    <a href="/docs/install">Install</a> core and an adapter, or render on the server with no framework. The rules for a
+    valid spec are on <a href="/docs/concepts/spec">the spec</a>.
+  </p>
+  <figure class="code">
+    <figcaption>json</figcaption>
+    <pre><code>{lineSample}</code></pre>
+  </figure>
+  <p>
+    Chart pages will put an editable spec, sample chips, and a response rail next to this kind of example.{' '}
+    <a href="/docs/reference/try">Try it</a> is that shell. It does not render a chart yet.
+  </p>
+  <ul>
+    <li><a href="/docs/concepts">Concepts</a></li>
+    <li><a href="/docs/charts">Chart types</a></li>
+    <li><a href="/docs/reference">Reference</a></li>
+    <li><a href="/docs/agents">Agents</a></li>
+  </ul>
+</Docs>

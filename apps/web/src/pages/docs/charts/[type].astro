@@ -1,0 +1,26 @@
+---
+import Docs from "../../../layouts/Docs.astro";
+import MigrationNote from "../../../components/MigrationNote.astro";
+import { chartTypes, type ChartType } from "../../../data/chart-types";
+
+export function getStaticPaths() {
+  return chartTypes.map((chart) => ({
+    params: { type: chart.type },
+    props: { chart },
+  }));
+}
+
+interface Props {
+  chart: ChartType;
+}
+
+const { chart } = Astro.props;
+---
+
+<Docs title={chart.title} description={`${chart.title} charts in ChartKit. Stub page. ${chart.summary}`} lede={chart.summary}>
+  <MigrationNote href={`https://chartkit.dev/docs/charts/${chart.type}`} />
+  <p>
+    <code>type</code> is <code>{chart.type}</code>. Field notes and a rendered example stay on the current page until
+    this one is filled in. The editor pattern those pages should use is <a href="/docs/reference/try">Try it</a>.
+  </p>
+</Docs>

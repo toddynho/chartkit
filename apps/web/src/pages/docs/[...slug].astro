@@ -1,0 +1,24 @@
+---
+import Docs from "../../layouts/Docs.astro";
+import Blocks from "../../components/Blocks.astro";
+import MigrationNote from "../../components/MigrationNote.astro";
+import { docPages, type DocPage } from "../../data/doc-pages";
+
+export function getStaticPaths() {
+  return docPages.map((page) => ({
+    params: { slug: page.slug },
+    props: { page },
+  }));
+}
+
+interface Props {
+  page: DocPage;
+}
+
+const { page } = Astro.props;
+---
+
+<Docs title={page.title} description={page.description} lede={page.lede}>
+  {page.current ? <MigrationNote href={page.current} /> : null}
+  <Blocks blocks={page.blocks} />
+</Docs>

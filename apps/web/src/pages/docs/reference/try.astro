@@ -1,0 +1,18 @@
+---
+import Docs from "../../../layouts/Docs.astro";
+import TryIt from "../../../components/TryIt.astro";
+
+const description = "Editable ChartKit spec, sample chips, and a response rail. The rail does not render or call Cloud.";
+---
+
+<Docs
+  title="Try it"
+  description={description}
+  lede="Stripe-style docs keep a live request beside the prose. This page is that shell: an editable spec, chips, and a response rail."
+>
+  <p>
+    Line, Bar, and Donut load a small valid spec. Watermark toggles a Cloud request flag and leaves the JSON alone.
+    The response echoes both. It does not call <code>@chartkitdev/core</code> or Cloud, and it does not return SVG.
+  </p>
+  <TryIt />
+</Docs>

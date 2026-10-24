@@ -1,0 +1,25 @@
+---
+import Docs from "../../../layouts/Docs.astro";
+import MigrationNote from "../../../components/MigrationNote.astro";
+import { chartTypes } from "../../../data/chart-types";
+---
+
+<Docs
+  title="Chart types"
+  description="Every ChartKit chart type, as a stub page. Notes and live specs still live on the Next.js docs."
+  lede="Each type has a route under /docs/charts. The notes, examples, and live editor have not moved."
+>
+  <MigrationNote href="https://chartkit.dev/docs" />
+  <ul class="type-list">
+    {
+      chartTypes.map((chart) => (
+        <li>
+          <a href={`/docs/charts/${chart.type}`}>
+            <strong>{chart.title}</strong>
+            <span>{chart.summary}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</Docs>

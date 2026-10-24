@@ -1,0 +1,46 @@
+---
+import { docsNav } from "../data/nav";
+import { canonicalPath, isCurrent } from "../data/site";
+
+const path = canonicalPath(Astro.url.pathname);
+---
+
+<nav class="docs-side" aria-label="Documentation">
+  {
+    docsNav.map((group) => (
+      <div>
+        <p class="nav-label">{group.label}</p>
+        <ul>
+          {group.items.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isCurrent(item.href, path) ? "page" : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+</nav>
+<details class="docs-jump">
+  <summary>Documentation sections</summary>
+  <nav aria-label="Documentation">
+    {
+      docsNav.map((group) => (
+        <div>
+          <p class="nav-label">{group.label}</p>
+          <ul>
+            {group.items.map((item) => (
+              <li>
+                <a href={item.href} aria-current={isCurrent(item.href, path) ? "page" : undefined}>
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </nav>
+</details>
