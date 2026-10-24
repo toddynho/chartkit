@@ -6,7 +6,7 @@ Licence requires visible attribution or a branding link.
 
 Matrix status: `none`. Verification: `pkg-license` (strong).
 
-MIT — package.json says MIT, but the GitHub repo has no LICENSE file (GitHub API license=null).
+MIT. LICENSE at the repo root.
 
 Source: packages/*/package.json
 

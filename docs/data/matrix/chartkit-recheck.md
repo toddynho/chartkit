@@ -141,3 +141,15 @@ Rechecked on radial-bar and rose. Both load from `@chartkitdev/core/charts/<type
 | type.polar.radialbar | native | `type: "radial-bar"` draws categories around a circle. Grouped is the default. `mark.stack` `stack` or `percent` runs outward. `radialBar`, `polar-bar`, and `polar` repair to radial-bar. A progress ring stays the single-value type. |
 | type.polar.area | native | `type: "rose"` keeps equal angles and maps the value to the radius. `polarArea`, `nightingale`, and `rose-chart` repair to rose. |
 | layout.polar.coords | partial | `layout.coordinate` `polar` draws on radial-bar and rose. A bar repairs to radial-bar, and a pie or donut repairs to rose (CK3077). Other marks stay cartesian and the coordinate is removed. |
+
+## Main bfdc62b
+
+Checked against main `bfdc62b` (PR #60). No new feature rows. A cell changed only when the published status contradicted the repo.
+
+| id | status | correction |
+|---|---|---|
+| framework.mcp | native | `@chartkitdev/mcp` is `packages/mcp`. The old note said the repo had no MCP package. The server is not on npm yet. Tools: validate, repair, render (svg), render_chart (Cloud), lookup_feature, list_chart_types, get_example. |
+| meta.license.permissive | native | Root `LICENSE` is MIT. The old note said the repo had no LICENSE file. |
+| meta.license.paid | none | Same licence note. No paid tier. |
+| meta.license.attrib | none | Same licence note. MIT does not require a chart branding mark. |
+| type.finance.volume | partial | `encoding.volume` draws the volume subplot under candlestick prices. General multi-pane layout is still absent, so this stays partial. |

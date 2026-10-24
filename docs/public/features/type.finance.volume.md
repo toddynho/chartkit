@@ -6,7 +6,7 @@ Separate stacked panes sharing x (price + volume)
 
 Matrix status: `partial`. Verification: `dts-path` (strong).
 
-candlestick volume bars
+encoding.volume draws a volume subplot under candlestick prices. It is not a general multi-pane layout.
 
 Source: chartkit:packages/core/src/generated/schema.ts:585
 
