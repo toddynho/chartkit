@@ -50,6 +50,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/benchmarks.md",
     "/benchmarks.schema.json",
     "/llms.txt",
+    "/recipes.json",
     "/llms-full.txt",
     ...chartTypes.map((item) => `/docs/charts/${item.type}`),
     ...examples.map((item) => `/examples/${item.slug}`),

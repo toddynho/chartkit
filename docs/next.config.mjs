@@ -112,6 +112,14 @@ const nextConfig = {
         ],
       },
       {
+        source: "/recipes.json",
+        headers: [
+          { key: "Content-Type", value: "application/json; charset=utf-8" },
+          { key: "Cache-Control", value: "public, max-age=86400" },
+          { key: "Access-Control-Allow-Origin", value: "*" },
+        ],
+      },
+      {
         source: "/llms.json",
         headers: [
           { key: "Content-Type", value: "application/json; charset=utf-8" },
