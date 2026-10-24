@@ -60,7 +60,9 @@ if (!result.ok) {
           <code>type</code> is the chart. <code>mark</code> is options: curve, sampling, stack, layout. Not a string.
         </li>
         <li>
-          Gauge, kpi, and progress-ring use <code>metric</code>: value, min, max, delta, label.
+          Gauge, kpi, and progress-ring use <code>metric</code>: value, min, max, delta, label.{" "}
+          <code>mark.rings</code> stacks activity rings. <code>encoding.volume</code> draws a pane under candles.{" "}
+          <code>metric.thresholds</code> colours a kpi from the value.
         </li>
         <li>
           Donut uses <code>encoding.x</code> for the slice label and <code>encoding.y</code> for the value.

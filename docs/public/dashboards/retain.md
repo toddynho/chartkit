@@ -12,7 +12,7 @@ Default theme: soft.
 
 Monthly recurring revenue.
 
-type kpi. format compact with a dollar prefix.
+type kpi. format compact with a dollar prefix. metric.thresholds colours the surface: red under 120 thousand, sand from there, teal from 180 thousand.
 
 ```json
 {
@@ -55,7 +55,21 @@ type kpi. format compact with a dollar prefix.
     "format": {
       "style": "compact",
       "prefix": "$"
-    }
+    },
+    "thresholds": [
+      {
+        "value": 0,
+        "color": "#d92d20"
+      },
+      {
+        "value": 120000,
+        "color": "#f4b183"
+      },
+      {
+        "value": 180000,
+        "color": "#1f8a70"
+      }
+    ]
   },
   "mark": {
     "fillOpacity": 0.16,
@@ -75,7 +89,7 @@ type kpi. format compact with a dollar prefix.
 
 Paying customers.
 
-type kpi.
+type kpi. metric.thresholds colours the surface teal from 450 customers.
 
 ```json
 {
@@ -115,7 +129,21 @@ type kpi.
     "label": "Customers",
     "value": 510,
     "delta": 0.05,
-    "format": "compact"
+    "format": "compact",
+    "thresholds": [
+      {
+        "value": 0,
+        "color": "#d92d20"
+      },
+      {
+        "value": 300,
+        "color": "#f4b183"
+      },
+      {
+        "value": 450,
+        "color": "#1f8a70"
+      }
+    ]
   },
   "mark": {
     "fillOpacity": 0.16,
@@ -135,7 +163,7 @@ type kpi.
 
 Logo churn.
 
-type kpi. goodDirection down.
+type kpi. goodDirection down. metric.thresholds colours the surface teal under 3 percent, sand from 3, and red from 5.
 
 ```json
 {
@@ -180,7 +208,21 @@ type kpi. goodDirection down.
       "decimals": 1,
       "suffix": "%"
     },
-    "goodDirection": "down"
+    "goodDirection": "down",
+    "thresholds": [
+      {
+        "value": 0,
+        "color": "#1f8a70"
+      },
+      {
+        "value": 3,
+        "color": "#f4b183"
+      },
+      {
+        "value": 5,
+        "color": "#d92d20"
+      }
+    ]
   },
   "mark": {
     "fillOpacity": 0.16,
@@ -616,7 +658,7 @@ type heatmap. Later cohorts leave unfinished months null, so the grid is a trian
 
 ## What produces this look
 
-- **Revenue.** MRR movement is a stacked area in teal #1f8a70, a lighter green, and sand. Scorecards use compact dollars, a customer count, and percent churn.
+- **Revenue.** MRR movement is a stacked area in teal #1f8a70, a lighter green, and sand. Scorecards use compact dollars, a customer count, and percent churn. metric.thresholds paints each card from the value.
 - **Product.** The funnel uses #7856ff. The cohort heatmap is a triangle: later months are null. fontFamily is Inter.
 - **Data.** Months, customers, and stages are fictional.
 

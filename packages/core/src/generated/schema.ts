@@ -917,7 +917,7 @@ export interface Encoding {
         scale?: Scale;
       };
   /**
-   * Candlestick only: volume field; when present, a volume pane is drawn.
+   * Candlestick only: volume field. When set, bars are drawn under the price plot.
    */
   volume?:
     | FieldName
@@ -1243,6 +1243,425 @@ export interface Metric {
      */
     label?: string;
   }[];
+  /**
+   * Colour the kpi surface from the value. The last step at or below metric.value wins. Applies to: kpi.
+   *
+   * @minItems 1
+   * @maxItems 8
+   */
+  thresholds?:
+    | [
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        }
+      ]
+    | [
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        }
+      ]
+    | [
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        }
+      ]
+    | [
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        }
+      ]
+    | [
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        }
+      ]
+    | [
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        }
+      ]
+    | [
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        }
+      ]
+    | [
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * The step applies when metric.value is at or above this.
+           */
+          value: number;
+          color: Color;
+          /**
+           * Name for the step. Not drawn.
+           */
+          label?: string;
+        }
+      ];
 }
 /**
  * Visual options for the marks. An object, not the chart type (the type goes in type). Each option lists the types it applies to; options that do not apply to the chosen type are ignored with warning CK3010.
@@ -2691,6 +3110,569 @@ export interface Mark {
    * Arc end style. Applies to: gauge, progress-ring.
    */
   linecap?: "butt" | "round" | "square";
+  /**
+   * Concentric activity rings, outer first. Each item is {value, max, color, label}. Applies to: progress-ring.
+   *
+   * @minItems 1
+   * @maxItems 8
+   */
+  rings?:
+    | [
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        }
+      ]
+    | [
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        }
+      ]
+    | [
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        }
+      ]
+    | [
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        }
+      ]
+    | [
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        }
+      ]
+    | [
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        }
+      ]
+    | [
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        }
+      ]
+    | [
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        },
+        {
+          /**
+           * Progress toward max.
+           */
+          value: number;
+          /**
+           * Goal for this ring. Defaults to 1.
+           */
+          max?: number;
+          color?: Color;
+          /**
+           * Short name drawn under the rings.
+           */
+          label?: string;
+        }
+      ];
   /**
    * Value spikes rise from. Applies to: spike.
    */

@@ -8,57 +8,11 @@ Styled after Apple Fitness and Apple Health to show ChartKit's styling flexibili
 
 Default theme: soft.
 
-## Move
+## Activity
 
-Move
+Move, exercise, and stand.
 
-type progress-ring. One ring. The series token is #ff375f. Three rings sit side by side because one spec draws one ring.
-
-```json
-{
-  "version": "1",
-  "type": "progress-ring",
-  "theme": {
-    "preset": "soft",
-    "tokens": {
-      "background": "transparent",
-      "surface": "transparent",
-      "text": "#1d1d1f",
-      "muted": "#6e6e73",
-      "grid": "transparent",
-      "axis": "#d2d2d7",
-      "accent": "#ff375f",
-      "positive": "#30d158",
-      "negative": "#ff375f",
-      "series": [
-        "#ff375f"
-      ],
-      "fontFamily": "Inter, sans-serif",
-      "fontSize": 12
-    }
-  },
-  "metric": {
-    "label": "Move",
-    "value": 530,
-    "min": 0,
-    "max": 600,
-    "format": "compact"
-  },
-  "size": {
-    "width": 220,
-    "height": 180
-  },
-  "a11y": {
-    "alt": "Move is 530 of a 600 goal."
-  }
-}
-```
-
-## Exercise
-
-Exercise
-
-type progress-ring. One ring. The series token is #30d158. Three rings sit side by side because one spec draws one ring.
+type progress-ring. mark.rings draws three concentric rings: move #ff375f, exercise #30d158, stand #0a84ff. The first ring is the outside.
 
 ```json
 {
@@ -77,52 +31,8 @@ type progress-ring. One ring. The series token is #30d158. Three rings sit side 
       "positive": "#30d158",
       "negative": "#ff375f",
       "series": [
-        "#30d158"
-      ],
-      "fontFamily": "Inter, sans-serif",
-      "fontSize": 12
-    }
-  },
-  "metric": {
-    "label": "Exercise",
-    "value": 32,
-    "min": 0,
-    "max": 45,
-    "format": "compact"
-  },
-  "size": {
-    "width": 220,
-    "height": 180
-  },
-  "a11y": {
-    "alt": "Exercise is 32 minutes toward a 45 minute scale."
-  }
-}
-```
-
-## Stand
-
-Stand
-
-type progress-ring. One ring. The series token is #0a84ff. Three rings sit side by side because one spec draws one ring.
-
-```json
-{
-  "version": "1",
-  "type": "progress-ring",
-  "theme": {
-    "preset": "soft",
-    "tokens": {
-      "background": "transparent",
-      "surface": "transparent",
-      "text": "#1d1d1f",
-      "muted": "#6e6e73",
-      "grid": "transparent",
-      "axis": "#d2d2d7",
-      "accent": "#ff375f",
-      "positive": "#30d158",
-      "negative": "#ff375f",
-      "series": [
+        "#ff375f",
+        "#30d158",
         "#0a84ff"
       ],
       "fontFamily": "Inter, sans-serif",
@@ -130,18 +40,39 @@ type progress-ring. One ring. The series token is #0a84ff. Three rings sit side 
     }
   },
   "metric": {
-    "label": "Stand",
-    "value": 10,
+    "label": "Today",
+    "value": 530,
     "min": 0,
-    "max": 12,
-    "format": "compact"
+    "max": 600
+  },
+  "mark": {
+    "rings": [
+      {
+        "value": 530,
+        "max": 600,
+        "color": "#ff375f",
+        "label": "Move"
+      },
+      {
+        "value": 32,
+        "max": 45,
+        "color": "#30d158",
+        "label": "Exercise"
+      },
+      {
+        "value": 10,
+        "max": 12,
+        "color": "#0a84ff",
+        "label": "Stand"
+      }
+    ]
   },
   "size": {
-    "width": 220,
-    "height": 180
+    "width": 460,
+    "height": 320
   },
   "a11y": {
-    "alt": "Stand is 10 hours of a 12 hour goal."
+    "alt": "Move is 530 of 600, exercise is 32 of 45 minutes, and stand is 10 of 12 hours."
   }
 }
 ```
@@ -244,8 +175,8 @@ type bar. Exercise minutes and stand hours are grouped. Move stays on its ring s
     "cornerRadius": 3
   },
   "size": {
-    "width": 680,
-    "height": 240
+    "width": 520,
+    "height": 280
   },
   "a11y": {
     "alt": "Exercise minutes and stand hours across seven days."
@@ -416,7 +347,7 @@ type line. The series token is #ff375f.
 
 ## What produces this look
 
-- **Rings.** Three progress-ring specs: move #ff375f, exercise #30d158, stand #0a84ff. A single spec cannot draw three concentric rings. That gap is in GAPS.md.
+- **Rings.** One progress-ring. mark.rings draws move #ff375f, exercise #30d158, and stand #0a84ff. The first ring is the outside.
 - **Week.** Grouped bars for exercise minutes and stand hours. Move stays on its ring so the larger unit does not flatten the other two.
 - **Type.** fontFamily is Inter. The system face used by the reference products is not shipped. The page background is #f5f5f7.
 

@@ -171,6 +171,8 @@ function probes(leaf: Leaf): unknown[] {
   if (leaf.types.has("array")) {
     if (leaf.path.endsWith("/ticks")) push([1234, 2500]);
     else if (leaf.path.endsWith("/bands")) push([{ from: 0, to: 40, label: "Low", color: "#c0ffee" }]);
+    else if (leaf.path === "/mark/rings") push([{ value: 3, max: 8, color: "#c0ffee", label: "Move" }, { value: 1, max: 2, color: "#111111", label: "Stand" }]);
+    else if (leaf.path === "/metric/thresholds") push([{ value: 0, color: "#c0ffee" }, { value: 50, color: "#111111" }]);
     else if (leaf.path.endsWith("/fields")) push([{ field: "revenue", title: "ProbeLabel" }]);
     else if (leaf.path.endsWith("/ranges")) push(["cost"]);
     else if (leaf.path.includes("/color/")) push(["#c0ffee", "#111111"]);
@@ -280,6 +282,24 @@ function apply(host: Record<string, unknown>, path: string, value: unknown): Rec
   if (path.startsWith("/metric/bands/")) {
     const metric = isRecord(spec.metric) ? spec.metric : { value: 64, label: "Capacity used", min: 0, max: 100 };
     spec.metric = { ...metric, bands: [{ from: 0, to: 100, label: "Low", color: "#c0ffee" }] };
+  }
+  if (path.startsWith("/metric/thresholds/")) {
+    const metric = isRecord(spec.metric) ? spec.metric : { value: 64, label: "Capacity used", min: 0, max: 100 };
+    const steps = Array.isArray(metric.thresholds) ? metric.thresholds : [{}];
+    if (!isRecord(steps[0])) steps[0] = {};
+    const row = steps[0] as Record<string, unknown>;
+    if (typeof row.value !== "number") row.value = 0;
+    if (typeof row.color !== "string") row.color = "#c0ffee";
+    spec.metric = { ...metric, thresholds: steps };
+  }
+  if (path.startsWith("/mark/rings/")) {
+    const mark = isRecord(spec.mark) ? spec.mark : {};
+    const rings = Array.isArray(mark.rings) ? mark.rings : [{}];
+    if (!isRecord(rings[0])) rings[0] = {};
+    const row = rings[0] as Record<string, unknown>;
+    if (typeof row.value !== "number") row.value = 3;
+    if (typeof row.max !== "number") row.max = 8;
+    spec.mark = { ...mark, rings };
   }
   if (path.startsWith("/metric/deltaFormat") || path === "/metric/goodDirection") {
     const metric = isRecord(spec.metric) ? spec.metric : { value: 64, label: "Capacity used", min: 0, max: 100 };
@@ -428,6 +448,7 @@ function hosts(): Host[] {
     ["heatmap", { version: "1", type: "heatmap", data: rows, encoding: { x: "month", y: "region", color: "revenue" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["split", { version: "1", type: "bar", data: rows, encoding: { x: "month", y: "revenue" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["gauge", { version: "1", type: "gauge", metric: { value: 64, label: "Capacity used", min: 0, max: 100, target: 80 }, a11y: { alt }, size: { width: 420, height: 220 } }],
+    ["progress-ring", { version: "1", type: "progress-ring", metric: { value: 3, label: "Done", min: 0, max: 8 }, a11y: { alt }, size: { width: 220, height: 220 } }],
     ["kpi", { version: "1", type: "kpi", metric: { value: 64, label: "Capacity used", min: 0, max: 100 }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["candle", { version: "1", type: "candlestick", data: rows, encoding: { x: "date", open: "open", high: "high", low: "low", close: "close" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["sankey", { version: "1", type: "sankey", data: rows, encoding: { source: "source", target: "target", y: "value" }, a11y: { alt }, size: { width: 420, height: 220 } }],

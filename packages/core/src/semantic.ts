@@ -10,6 +10,7 @@ import { foreignHierarchy, readHierarchy } from "./hierarchy";
 import { CANVAS_AT, CANVAS_TYPES, pointCount, readRender } from "./render-mode";
 import { parseSpecifier } from "./format";
 import { domainEnds } from "./svg";
+import { gapChecks } from "./gaps-checks";
 import { polarChecks } from "./polar-checks";
 import { keyedDrillChildren, nearMatches, suggestHint } from "./walker";
 
@@ -65,6 +66,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   const known = type !== undefined && CHART_TYPES.has(type);
 
   if (known && isRecord(spec.mark)) warnUnusedMarks(type, spec.mark, diagnostics);
+  gapChecks(spec, diagnostics);
   polarChecks(spec, diagnostics);
   warnGridWeeks(spec, diagnostics);
   warnUnbuilt(spec, diagnostics);
