@@ -152,6 +152,20 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
     return;
   }
 
+  if (/^\/encoding\/y(?:\/\d+)?\/stack$/.test(path) && !(typeof value === "string" && value.length > 0)) {
+    const named = typeof value === "number" && Number.isFinite(value) ? String(value) : value === true ? "stack" : "";
+    emit(ctx, {
+      code: "CK3072",
+      severity: "error",
+      message: `encoding.y[].stack is a group name, got ${describe(value)}`,
+      path,
+      hint: "series that share encoding.y[].stack stack together. A name used by one series draws unstacked. Example: seats.",
+      fix: named ? [{ op: "replace", path, value: named }] : [{ op: "remove", path }],
+    });
+    ctx.depth -= 1;
+    return;
+  }
+
   if (node.type) {
     const types = Array.isArray(node.type) ? node.type : [node.type];
     if (!types.some((t) => typeMatches(value, t))) {

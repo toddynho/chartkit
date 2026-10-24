@@ -292,6 +292,10 @@ export type YChannel =
        */
       pointFill?: "filled" | "hollow";
       /**
+       * Stack group. Series that share this name stack together. A name used once draws that series unstacked. Omit it to follow mark.stack.
+       */
+      stack?: string;
+      /**
        * Draw order. Higher paints later. Stacked series keep data order.
        */
       z?: number;

@@ -8,7 +8,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: "ChartKit — Charts from one JSON spec",
+    default: "ChartKit — Charts become data",
     template: "%s · ChartKit",
   },
   description: SITE.description,
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     "charting library",
   ],
   openGraph: {
-    title: "ChartKit — Charts from one JSON spec",
+    title: "ChartKit — Charts become data",
     description: SITE.description,
     url: SITE.url,
     siteName: "ChartKit",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ChartKit — Charts from one JSON spec",
+    title: "ChartKit — Charts become data",
     description: SITE.description,
   },
   alternates: { canonical: SITE.url },

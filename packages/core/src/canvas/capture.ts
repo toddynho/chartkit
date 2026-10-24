@@ -4,7 +4,7 @@
 import { beginScene, endScene, lineBuffers, rectBuffers, takeMark, type SceneFrame } from "./sink";
 import { readIngest, setCapture, type CaptureArgs } from "./scene-hook";
 import { notedLinearColumn, sampleSeries, sampleTyped } from "../sampling";
-import { renderPlotted, stackLayers, type Layers, type PlotModel, type Series, type XScale } from "../renderers/cartesian";
+import { renderPlotted, type Layers, type PlotModel, type Series, type XScale } from "../renderers/cartesian";
 import { clamp, n } from "../svg";
 import { lineStroke } from "../theme";
 
@@ -99,20 +99,16 @@ function captureMarks(
   scene: SceneFrame,
 ): void {
   const horizontal = model.orientation === "horizontal" && model.type === "bar";
-  const stackMode = model.stack === "none" ? null : model.stack;
-  const layered = stackMode && model.type !== "bar" ? stackLayers(model.series, stackMode === "percent" ? "percent" : "stack") : null;
-  const barLayers = stackMode && model.type === "bar" ? stackLayers(model.series, stackMode === "percent" ? "percent" : "stack") : null;
+  const layers = model.layers;
   const plotWidth = Math.max(1, plot.right - plot.left);
-  let barSlot = 0;
-  const barCount = model.series.filter((series) => series.mark === "bar").length || model.series.length;
+  const barCount = model.barSlots || model.series.filter((series) => series.mark === "bar").length || model.series.length;
   model.series.forEach((series, index) => {
     const scale = series.axis === "y2" ? y2Scale : yScale;
     if (series.mark === "bar" || model.type === "bar") {
-      captureBars(model, series, index, barLayers, xScale, scale, plot, horizontal, barSlot, barCount, scene);
-      barSlot += 1;
+      captureBars(model, series, index, layers, xScale, scale, plot, horizontal, model.barSlot[index] ?? 0, barCount, scene);
       return;
     }
-    captureLine(model, series, index, layered, xScale, scale, plotWidth, scene);
+    captureLine(model, series, index, layers, xScale, scale, plotWidth, scene);
   });
 }
 
@@ -127,6 +123,7 @@ function captureLine(
   scene: SceneFrame,
 ): void {
   const raw = series.values;
+  const stacked = Boolean(layers?.on[index]);
   const area = series.area || model.type === "stacked-area" || model.type === "mini-area";
   const mark = takeMark();
   mark.kind = area ? "area" : "line";
@@ -141,11 +138,11 @@ function captureLine(
   mark.curve = model.curve;
   mark.name = series.name;
   mark.rows = raw.length;
-  mark.ys = layers ? layers.top[index] : raw;
+  mark.ys = stacked ? layers!.top[index] : raw;
   mark.axis = series.axis;
   mark.xs = model.x instanceof Float64Array ? model.x : null;
   mark.baseline = area ? yScale(0) : null;
-  if (!layers && raw instanceof Float64Array && !hasGap(raw, raw.length) && !model.yLog && !(series.axis === "y2" && model.y2Log)) {
+  if (!stacked && raw instanceof Float64Array && !hasGap(raw, raw.length) && !model.yLog && !(series.axis === "y2" && model.y2Log)) {
     const xs = model.x instanceof Float64Array ? model.x : null;
     const sampled = sampleTyped(model.sampling, xs, raw, raw.length, plotWidth);
     const n = sampled.reduced ? sampled.length : raw.length;
@@ -159,8 +156,8 @@ function captureLine(
     scene.marks.push(mark);
     return;
   }
-  const top = layers ? layers.top[index] : raw;
-  const sampled = layers ? null : sampleSeries(model.sampling, model.x, raw, raw.length, plotWidth, model.connectNulls);
+  const top = stacked ? layers!.top[index] : raw;
+  const sampled = stacked ? null : sampleSeries(model.sampling, model.x, raw, raw.length, plotWidth, model.connectNulls);
   const runs = sampled?.reduced ? sampled.runs : [null];
   let written = 0;
   const breaks = sampled?.reduced ? Math.max(0, sampled.runs.length - 1) : 0;
@@ -186,7 +183,7 @@ function captureLine(
   mark.x = buf.x;
   mark.y = buf.y;
   mark.n = written;
-  if (area && layers) {
+  if (area && stacked && layers) {
     const base = lineBuffers(written);
     let b = 0;
     for (const run of runs) {
@@ -284,14 +281,15 @@ function captureBars(
   scene: SceneFrame,
 ): void {
   const gap = clamp(model.gap, 0, 0.9);
-  const slot = layers ? 0 : barIndex;
-  const slots = layers ? 1 : Math.max(1, barCount);
+  const stacked = Boolean(layers?.on[index]);
+  const slot = barIndex;
+  const slots = Math.max(1, barCount);
   const rect = rectBuffers(series.values.length * 4);
   let n = 0;
   for (let i = 0; i < series.values.length; i++) {
-    const value = layers ? layers.top[index][i] : series.values[i];
-    if (value === null && !layers) continue;
-    const baseline = layers ? layers.bottom[index][i] : 0;
+    const value = stacked ? layers!.top[index][i] : series.values[i];
+    if (value === null && !stacked) continue;
+    const baseline = stacked ? layers!.bottom[index][i] : 0;
     const band = xScale.band(i);
     const inner = band.size * (1 - gap);
     const barSize = inner / slots;
