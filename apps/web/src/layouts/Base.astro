@@ -10,16 +10,18 @@ import { SITE, canonicalPath } from "../data/site";
 interface Props {
   title: string;
   description: string;
+  /** Lock the page to the light marketing palette. Docs stay theme-aware. */
+  tone?: "light";
 }
 
-const { title, description } = Astro.props;
+const { title, description, tone } = Astro.props;
 const path = canonicalPath(Astro.url.pathname);
 const documentTitle = path === "/" ? `${SITE.name} — ${title}` : `${title} · ${SITE.name}`;
 const canonical = new URL(path, Astro.site ?? SITE.url).href;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class={tone === "light" ? "tone-light" : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

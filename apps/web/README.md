@@ -37,7 +37,7 @@ Do not delete `docs/` to “finish” the migration. Point chartkit.dev at `apps
 
 ## Routes
 
-- `/` — hero, why switch, Cloud API, pricing (numbers TBD), gallery placeholders
+- `/` — product hero (chart carousel, chart/JSON hover, Free watermark preview), why switch, Cloud API, pricing (numbers TBD), gallery placeholders
 - `/cloud` — Cloud API stub and the same pricing block
 - `/docs` — docs shell
 - `/docs/install`
