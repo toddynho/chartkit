@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MCP · Agents · ChartKit Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --bg-elev: #ffffff;
+      --fg: #1d1d1f;
+      --muted: #6e6e73;
+      --line: rgba(0,0,0,0.08);
+      --accent: #0071e3;
+      --brand-kit: #0ea5e9;
+      --radius-ui: 980px;
+      --radius-card: 14px;
+      --radius-code: 12px;
+      --sidebar-w: 248px;
+      --preview-w: 520px;
+      --header-h: 44px;
+      --ease-out-expo: cubic-bezier(0,0,0.5,1);
+      --ease-nav: cubic-bezier(0.4,0,0.6,1);
+      --dur-fast: 200ms;
+      --dur: 320ms;
+      --code-bg: #fbfbfd;
+      --soft-fill: #0071e3;
+      --soft-sky: #0ea5e9;
+      --callout-bg: rgba(0,113,227,0.05);
+      --callout-border: rgba(0,113,227,0.14);
+      --midnight-bg: #0f1115;
+      --midnight-fg: #f5f5f7;
+      --midnight-muted: #86868b;
+      --midnight-line: rgba(255,255,255,0.08);
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      font-size:14.5px;
+      line-height:1.5;
+      letter-spacing:-0.011em;
+      color:var(--fg);
+      background:var(--bg);
+      -webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit;text-decoration:none}
+    :focus{outline:none}
+    :focus-visible{outline:3px solid rgba(0,113,227,0.45);outline-offset:3px;border-radius:6px}
+    button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;padding:0}
+
+    /* ── Header ── */
+    .site-header{
+      position:sticky;top:0;z-index:100;height:var(--header-h);
+      background:rgba(245,245,247,0.65);
+      backdrop-filter:saturate(180%) blur(20px);
+      -webkit-backdrop-filter:saturate(180%) blur(20px);
+      border-bottom:1px solid transparent;
+      transition:background var(--dur) var(--ease-nav),border-color var(--dur) var(--ease-nav),box-shadow var(--dur) var(--ease-nav);
+    }
+    .site-header.is-scrolled{
+      background:rgba(255,255,255,0.82);
+      border-bottom-color:rgba(0,0,0,0.07);
+      box-shadow:0 .5px 0 rgba(0,0,0,0.03),0 8px 24px rgba(0,0,0,0.04);
+    }
+    .site-header__inner{
+      width:100%;padding:0 20px;height:100%;
+      display:flex;align-items:center;gap:20px;
+    }
+    .logo{
+      display:inline-flex;align-items:center;gap:7px;
+      font-size:13px;font-weight:600;letter-spacing:-0.02em;
+      transition:opacity var(--dur-fast) var(--ease-nav);flex-shrink:0;
+    }
+    .logo:hover{opacity:.7}
+    .logo__mark{display:block;width:16px;height:16px}
+    .logo__kit{color:var(--brand-kit)}
+
+    .nav{
+      display:flex;align-items:center;gap:22px;
+      font-size:12px;color:var(--muted);margin-left:8px;
+    }
+    .nav a{
+      color:var(--muted);
+      transition:color var(--dur) var(--ease-nav);
+    }
+    .nav a:hover{color:var(--fg)}
+    .nav a.is-active{color:var(--fg);font-weight:500}
+
+    .header-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+    .search-pill{
+      display:inline-flex;align-items:center;gap:8px;
+      height:28px;padding:0 10px 0 11px;
+      border-radius:8px;
+      background:rgba(0,0,0,0.04);
+      border:1px solid rgba(0,0,0,0.06);
+      color:var(--muted);font-size:12px;
+      transition:background var(--dur-fast) var(--ease-nav),border-color var(--dur-fast) var(--ease-nav);
+      cursor:default;user-select:none;
+    }
+    .search-pill:hover{background:rgba(0,0,0,0.055);border-color:rgba(0,0,0,0.09)}
+    .search-pill__icon{opacity:.55;display:flex}
+    .search-pill__label{opacity:.85}
+    .search-pill__kbd{
+      margin-left:4px;display:inline-flex;align-items:center;justify-content:center;
+      height:18px;min-width:18px;padding:0 5px;
+      border-radius:5px;font-size:10.5px;font-weight:500;
+      background:var(--bg-elev);border:1px solid rgba(0,0,0,0.08);
+      color:var(--muted);font-family:inherit;letter-spacing:-0.02em;
+    }
+    .nav-ext{
+      font-size:12px;color:var(--muted);
+      transition:color var(--dur) var(--ease-nav);
+    }
+    .nav-ext:hover{color:var(--fg)}
+
+    .sidebar-toggle{
+      display:none;align-items:center;justify-content:center;
+      width:32px;height:32px;border-radius:8px;color:var(--fg);
+      transition:background var(--dur-fast) var(--ease-nav);
+    }
+    .sidebar-toggle:hover{background:rgba(0,0,0,0.05)}
+    .sidebar-toggle svg{display:block}
+
+    /* ── Full-bleed shell ── */
+    .shell{
+      width:100%;
+      display:grid;
+      grid-template-columns:var(--sidebar-w) minmax(0,1fr) var(--preview-w);
+      gap:0;
+      min-height:calc(100vh - var(--header-h));
+      align-items:start;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar{
+      position:sticky;top:var(--header-h);
+      height:calc(100vh - var(--header-h));
+      overflow-y:auto;overflow-x:hidden;
+      padding:24px 12px 40px 16px;
+      border-right:1px solid var(--line);
+      background:rgba(245,245,247,0.55);
+      scrollbar-width:thin;
+      scrollbar-color:rgba(0,0,0,0.12) transparent;
+    }
+    .sidebar::-webkit-scrollbar{width:6px}
+    .sidebar::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.12);border-radius:6px}
+
+    .side-section{margin-bottom:20px}
+    .side-section__label{
+      display:block;margin:0 0 5px 10px;
+      font-size:11px;font-weight:600;
+      letter-spacing:0.055em;text-transform:uppercase;
+      color:rgba(110,110,115,0.92);
+    }
+    .side-nav{list-style:none;margin:0;padding:0}
+    .side-nav a{
+      position:relative;
+      display:flex;align-items:center;
+      padding:6px 10px 6px 12px;margin:1px 0;
+      font-size:13px;line-height:1.35;letter-spacing:-0.01em;
+      font-weight:400;
+      color:rgba(29,29,31,0.72);
+      border-radius:8px;
+      transition:
+        background var(--dur) var(--ease-out-expo),
+        color var(--dur) var(--ease-out-expo),
+        font-weight var(--dur-fast) var(--ease-nav),
+        box-shadow var(--dur) var(--ease-out-expo);
+    }
+    .side-nav a::before{
+      content:"";
+      position:absolute;left:0;top:50%;
+      width:2px;height:0;
+      border-radius:2px;
+      background:var(--fg);
+      transform:translateY(-50%);
+      opacity:0;
+      transition:height var(--dur) var(--ease-out-expo),opacity var(--dur) var(--ease-out-expo);
+    }
+    .side-nav a:hover{
+      background:rgba(0,0,0,0.03);
+      color:var(--fg);
+    }
+    .side-nav a.is-active{
+      background:rgba(0,0,0,0.045);
+      color:var(--fg);
+      font-weight:600;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,0.025);
+    }
+    .side-nav a.is-active::before{
+      height:14px;opacity:0.85;
+    }
+    .side-nav a.side-nav__more{
+      color:var(--muted);font-size:12.5px;font-weight:400;
+    }
+    .side-nav a.side-nav__more:hover{color:var(--accent)}
+    .side-nav a.side-nav__more.is-active{color:var(--fg)}
+
+    .side-footer{
+      margin-top:8px;padding-top:16px;
+      border-top:1px solid var(--line);
+    }
+    .side-footer a{
+      display:flex;align-items:center;gap:7px;
+      padding:6px 10px;margin:1px 0;
+      font-size:12.5px;color:var(--muted);
+      border-radius:8px;
+      transition:color var(--dur-fast) var(--ease-nav),background var(--dur-fast) var(--ease-nav);
+    }
+    .side-footer a:hover{color:var(--fg);background:rgba(0,0,0,0.03)}
+    .side-footer svg{opacity:.55;flex-shrink:0}
+
+    /* ── Main / prose ── */
+    .main{
+      min-width:0;
+      padding:32px 36px 72px;
+      /* fill the fluid center column — no artificial 720 cap */
+    }
+    .breadcrumb{
+      display:flex;align-items:center;gap:6px;
+      margin:0 0 16px;
+      font-size:12px;color:var(--muted);
+    }
+    .breadcrumb a{color:var(--muted);transition:color var(--dur-fast) var(--ease-nav)}
+    .breadcrumb a:hover{color:var(--fg)}
+    .breadcrumb__sep{opacity:.4}
+    .breadcrumb__current{color:var(--fg);font-weight:500}
+
+    .prose h1{
+      margin:0 0 10px;
+      font-size:32px;font-weight:600;
+      letter-spacing:-0.028em;line-height:1.15;
+    }
+    .prose .lede{
+      margin:0 0 28px;
+      font-size:16.5px;line-height:1.45;
+      letter-spacing:-0.01em;color:var(--muted);
+      max-width:46em;
+    }
+    .prose h2{
+      margin:36px 0 12px;
+      font-size:20px;font-weight:600;
+      letter-spacing:-0.022em;line-height:1.25;
+      scroll-margin-top:calc(var(--header-h) + 16px);
+    }
+    .prose h2:first-of-type{margin-top:4px}
+    .prose p{
+      margin:0 0 14px;
+      font-size:14.5px;line-height:1.6;
+      color:rgba(29,29,31,0.88);
+      max-width:52em;
+    }
+    .prose p a{color:var(--accent);transition:opacity var(--dur-fast) var(--ease-nav)}
+    .prose p a:hover{opacity:.7}
+    .prose code{
+      font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+      font-size:12.5px;font-weight:500;
+      padding:1.5px 5px;border-radius:5px;
+      background:rgba(0,0,0,0.045);
+      color:var(--fg);
+    }
+    .prose pre code{padding:0;background:none;font-weight:400;font-size:12.5px}
+
+    .code-block{
+      position:relative;margin:14px 0 20px;
+      border-radius:var(--radius-code);
+      background:var(--code-bg);
+      border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+      overflow:hidden;
+    }
+    .code-block__bar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:8px 12px;
+      background:linear-gradient(180deg,#fbfbfd 0%,#f5f5f7 100%);
+      border-bottom:1px solid rgba(0,0,0,0.06);
+    }
+    .code-block__lang{
+      font-size:11px;font-weight:500;color:var(--muted);
+      font-variant-numeric:tabular-nums;
+    }
+    .code-block__copy{
+      font-size:11px;font-weight:500;color:var(--muted);
+      padding:3px 8px;border-radius:6px;
+      transition:background var(--dur-fast) var(--ease-nav),color var(--dur-fast) var(--ease-nav);
+    }
+    .code-block__copy:hover{background:rgba(0,0,0,0.05);color:var(--fg)}
+    .code-block pre{
+      margin:0;padding:14px 16px 16px;
+      overflow-x:auto;
+      font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+      font-size:12.5px;line-height:1.6;
+      color:var(--fg);
+    }
+
+    /* ── Try-it playground (Stripe energy) ── */
+    .try{
+      margin:8px 0 28px;
+      border-radius:16px;
+      background:var(--bg-elev);
+      border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02),0 10px 28px rgba(0,0,0,0.045);
+      overflow:hidden;
+    }
+    .try__bar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:10px 14px;
+      background:linear-gradient(180deg,#fbfbfd 0%,#f5f5f7 100%);
+      border-bottom:1px solid rgba(0,0,0,0.06);
+    }
+    .try__title{
+      font-size:12px;font-weight:600;letter-spacing:-0.01em;
+      color:var(--fg);
+    }
+    .try__hint{
+      font-size:11px;color:var(--muted);font-weight:400;
+    }
+    .try__body{padding:14px 14px 16px}
+    .try__split{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 196px;
+      gap:14px;
+      align-items:stretch;
+    }
+    .chips{
+      display:flex;flex-direction:column;gap:12px;
+      padding:12px 12px 14px;
+      border-radius:var(--radius-code);
+      background:rgba(0,0,0,0.02);
+      border:1px solid rgba(0,0,0,0.06);
+      align-self:stretch;
+    }
+    .chip-row{display:flex;flex-direction:column;align-items:stretch;gap:6px}
+    .chip-row__opts{display:flex;flex-wrap:wrap;gap:6px}
+    .chip-row__label{
+      font-size:10.5px;font-weight:600;color:rgba(110,110,115,0.95);
+      letter-spacing:0.04em;text-transform:uppercase;
+    }
+    .chip{
+      display:inline-flex;align-items:center;justify-content:center;
+      height:28px;padding:0 11px;flex:1 1 auto;min-width:0;
+      font-size:12px;font-weight:500;letter-spacing:-0.01em;
+      color:rgba(29,29,31,0.72);
+      background:rgba(0,0,0,0.035);
+      border:1px solid transparent;
+      border-radius:980px;
+      transition:
+        background var(--dur-fast) var(--ease-out-expo),
+        color var(--dur-fast) var(--ease-out-expo),
+        border-color var(--dur-fast) var(--ease-out-expo),
+        box-shadow var(--dur-fast) var(--ease-out-expo),
+        transform var(--dur-fast) var(--ease-out-expo);
+    }
+    .chip:hover{
+      background:rgba(0,0,0,0.055);
+      color:var(--fg);
+    }
+    .chip:active{transform:scale(0.97)}
+    .chip.is-on{
+      background:rgba(0,0,0,0.06);
+      color:var(--fg);
+      border-color:rgba(0,0,0,0.08);
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,0.02);
+      font-weight:600;
+    }
+    .chip.is-on[data-accent="soft"]{
+      background:rgba(0,113,227,0.1);
+      border-color:rgba(0,113,227,0.18);
+      color:var(--accent);
+      box-shadow:none;
+    }
+    .chip.is-on[data-accent="midnight"]{
+      background:rgba(15,17,21,0.9);
+      border-color:rgba(15,17,21,0.95);
+      color:#f5f5f7;
+      box-shadow:none;
+    }
+
+    .spec-editor{
+      position:relative;
+      border-radius:var(--radius-code);
+      background:var(--code-bg);
+      border:1px solid rgba(0,0,0,0.07);
+      overflow:hidden;
+      min-width:0;
+      display:flex;flex-direction:column;
+    }
+    .spec-editor textarea{flex:1 1 auto}
+    .spec-editor__bar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:7px 12px;
+      border-bottom:1px solid rgba(0,0,0,0.06);
+      background:linear-gradient(180deg,#fbfbfd 0%,#f5f5f7 100%);
+    }
+    .spec-editor__lang{
+      font-size:11px;font-weight:500;color:var(--muted);
+    }
+    .spec-editor__status{
+      font-size:11px;font-weight:500;
+      font-variant-numeric:tabular-nums;
+      color:#30a46c;
+      transition:color var(--dur-fast) var(--ease-nav);
+    }
+    .spec-editor__status.is-err{color:#e5484d}
+    .spec-editor__status.is-idle{color:var(--muted)}
+    .spec-editor textarea{
+      display:block;width:100%;
+      min-height:280px;max-height:440px;
+      margin:0;padding:14px 16px 16px;
+      border:none;resize:vertical;
+      background:transparent;
+      font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+      font-size:12.5px;line-height:1.6;
+      letter-spacing:-0.01em;
+      color:var(--fg);
+      tab-size:2;
+      outline:none;
+    }
+    .spec-editor textarea:focus{
+      box-shadow:inset 0 0 0 1.5px rgba(0,113,227,0.22);
+    }
+
+    /* Agent callout */
+    .callout{
+      margin:28px 0 8px;
+      padding:16px 18px;
+      border-radius:var(--radius-card);
+      background:var(--callout-bg);
+      border:1px solid var(--callout-border);
+    }
+    .callout__eyebrow{
+      display:flex;align-items:center;gap:7px;
+      margin:0 0 6px;
+      font-size:11px;font-weight:600;
+      letter-spacing:0.05em;text-transform:uppercase;
+      color:var(--accent);
+    }
+    .callout__eyebrow svg{flex-shrink:0}
+    .callout h3{
+      margin:0 0 6px;
+      font-size:15.5px;font-weight:600;
+      letter-spacing:-0.018em;line-height:1.3;
+    }
+    .callout p{
+      margin:0;
+      font-size:13.5px;line-height:1.5;
+      color:rgba(29,29,31,0.78);
+      max-width:none;
+    }
+    .callout code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:12px;font-weight:500;
+      padding:1px 4px;border-radius:4px;
+      background:rgba(0,113,227,0.08);
+    }
+    .callout__steps{
+      display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;
+    }
+    .callout__step{
+      display:inline-flex;align-items:center;gap:5px;
+      padding:4px 10px;
+      font-size:11.5px;font-weight:500;
+      border-radius:980px;
+      background:rgba(255,255,255,0.7);
+      border:1px solid rgba(0,113,227,0.12);
+      color:var(--fg);
+    }
+    .callout__step span{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:16px;height:16px;border-radius:50%;
+      font-size:10px;font-weight:600;
+      background:var(--accent);color:#fff;
+    }
+
+    /* Prev / Next */
+    .page-nav{
+      display:grid;grid-template-columns:1fr 1fr;
+      gap:12px;margin-top:48px;padding-top:28px;
+      border-top:1px solid var(--line);
+    }
+    .page-nav__link{
+      display:flex;flex-direction:column;gap:3px;
+      padding:14px 16px;
+      border-radius:12px;
+      border:1px solid rgba(0,0,0,0.07);
+      background:var(--bg-elev);
+      transition:border-color var(--dur-fast) var(--ease-nav),box-shadow var(--dur) var(--ease-out-expo),transform var(--dur) var(--ease-out-expo);
+    }
+    .page-nav__link:hover{
+      border-color:rgba(0,113,227,0.25);
+      box-shadow:0 4px 16px rgba(0,0,0,0.05);
+      transform:translateY(-1px);
+    }
+    .page-nav__link--next{align-items:flex-end;text-align:right}
+    .page-nav__dir{
+      font-size:11px;font-weight:500;color:var(--muted);
+      letter-spacing:0.02em;
+    }
+    .page-nav__title{
+      font-size:14px;font-weight:600;
+      letter-spacing:-0.015em;color:var(--accent);
+    }
+
+    /* ── Right: Stripe-style response rail ── */
+    .preview-rail{
+      position:sticky;top:var(--header-h);
+      height:calc(100vh - var(--header-h));
+      padding:18px 20px 28px 16px;
+      border-left:1px solid rgba(0,0,0,0.07);
+      background:
+        radial-gradient(120% 80% at 100% 0%,rgba(0,113,227,0.06) 0%,transparent 55%),
+        linear-gradient(180deg,#eef0f4 0%,#f5f5f7 42%,#f5f5f7 100%);
+      overflow-y:auto;
+      scrollbar-width:thin;
+      scrollbar-color:rgba(0,0,0,0.12) transparent;
+    }
+    .preview-rail__label{
+      display:flex;align-items:center;justify-content:space-between;
+      margin:0 0 12px 2px;
+      font-size:11px;font-weight:600;
+      letter-spacing:0.055em;text-transform:uppercase;
+      color:rgba(110,110,115,0.95);
+    }
+    .preview-rail__live{
+      display:inline-flex;align-items:center;gap:6px;
+      font-size:10.5px;font-weight:600;letter-spacing:0.02em;
+      text-transform:uppercase;color:#30a46c;
+    }
+    .preview-rail__live::before{
+      content:"";width:6px;height:6px;border-radius:50%;
+      background:#30a46c;box-shadow:0 0 0 3px rgba(48,164,108,0.18);
+    }
+    .response{
+      border-radius:12px;
+      background:#0a2540;
+      border:1px solid rgba(255,255,255,0.06);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.04) inset,
+        0 10px 28px rgba(10,37,64,0.18),
+        0 28px 64px rgba(10,37,64,0.16);
+      overflow:hidden;
+      color:#f6f9fc;
+      transform:translateY(0);
+      transition:
+        box-shadow var(--dur) var(--ease-out-expo),
+        transform var(--dur) var(--ease-out-expo),
+        background var(--dur) var(--ease-out-expo),
+        border-color var(--dur) var(--ease-out-expo);
+    }
+    .response.is-tick{
+      transform:translateY(-2px);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.06) inset,
+        0 14px 36px rgba(10,37,64,0.24),
+        0 36px 72px rgba(10,37,64,0.2);
+    }
+    .response.is-midnight{
+      background:#05070a;
+      border-color:rgba(255,255,255,0.08);
+    }
+    .response__chrome{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:11px 14px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.03);
+    }
+    .response.is-midnight .response__chrome{background:rgba(255,255,255,0.02)}
+    .response__req{
+      display:flex;align-items:center;gap:8px;min-width:0;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:11.5px;font-weight:500;
+    }
+    .response__method{
+      flex:0 0 auto;
+      padding:2px 7px;
+      border-radius:4px;
+      font-size:10px;font-weight:700;letter-spacing:0.04em;
+      color:#0a2540;background:#7a73ff;
+    }
+    .response__path{
+      color:rgba(246,249,252,0.78);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .response__status{
+      flex:0 0 auto;
+      display:inline-flex;align-items:center;gap:5px;
+      padding:3px 8px;border-radius:980px;
+      font-size:11px;font-weight:600;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      color:#3ecf8e;background:rgba(62,207,142,0.12);
+      border:1px solid rgba(62,207,142,0.22);
+    }
+    .response__status::before{
+      content:"";width:6px;height:6px;border-radius:50%;background:currentColor;
+    }
+    .response__tabs{
+      display:flex;gap:0;padding:0 10px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      background:rgba(0,0,0,0.12);
+    }
+    .response__tab{
+      appearance:none;border:none;background:transparent;cursor:pointer;
+      padding:9px 12px 10px;
+      font-size:12px;font-weight:500;letter-spacing:-0.01em;
+      color:rgba(246,249,252,0.72);
+      border-bottom:2px solid transparent;margin-bottom:-1px;
+      transition:color var(--dur-fast) var(--ease-nav),border-color var(--dur-fast) var(--ease-nav);
+    }
+    .response__tab:hover{color:rgba(246,249,252,0.85)}
+    .response__tab.is-on{
+      color:#f6f9fc;
+      border-bottom-color:#7a73ff;
+      font-weight:600;
+    }
+    .response__body{padding:16px 16px 12px}
+    .response__panel[hidden]{display:none!important}
+    .response__meta{
+      display:flex;align-items:baseline;justify-content:space-between;
+      margin-bottom:4px;gap:8px;
+    }
+    .response__title{
+      font-size:15px;font-weight:600;letter-spacing:-0.02em;
+      color:#f6f9fc;
+    }
+    .response.is-midnight .response__title{color:var(--midnight-fg)}
+    .response__badge{
+      font-size:10.5px;font-weight:500;color:rgba(246,249,252,0.62);
+      padding:2px 8px;border-radius:980px;background:rgba(255,255,255,0.08);
+      text-transform:capitalize;
+    }
+    .response.is-midnight .response__badge{
+      background:rgba(255,255,255,0.08);
+      color:var(--midnight-muted);
+    }
+    .response__value{
+      display:flex;align-items:baseline;gap:8px;margin-bottom:10px;
+    }
+    .response__kpi{
+      font-size:30px;font-weight:600;letter-spacing:-0.03em;
+      line-height:1;font-variant-numeric:tabular-nums;
+      color:#fff;
+    }
+    .response.is-midnight .response__kpi{color:var(--midnight-fg)}
+    .response__delta{font-size:12px;font-weight:500;color:#3ecf8e}
+    .response__chart{
+      margin:0 -2px 2px;min-height:200px;
+      padding:10px 8px 4px;
+      border-radius:10px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    .response.is-midnight .response__chart{background:rgba(255,255,255,0.03)}
+    .response__chart svg{display:block;width:100%;height:auto}
+    .response__chart .fade-in{
+      animation:chartFade 380ms var(--ease-out-expo) both;
+    }
+    @keyframes chartFade{
+      from{opacity:0;transform:translateY(4px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    .response__json{
+      margin:0;padding:12px 14px;
+      border-radius:10px;
+      background:rgba(0,0,0,0.28);
+      border:1px solid rgba(255,255,255,0.06);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:11.5px;line-height:1.55;
+      color:rgba(246,249,252,0.82);
+      white-space:pre-wrap;word-break:break-word;
+      max-height:320px;overflow:auto;
+    }
+    .response__json .k{color:#a5b4fc}
+    .response__json .s{color:#86efac}
+    .response__json .n{color:#fcd34d}
+
+    .response__footer{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:8px;padding:10px 14px 12px;
+      border-top:1px solid rgba(255,255,255,0.08);
+      font-size:11px;font-weight:500;
+      color:rgba(246,249,252,0.55);
+      font-variant-numeric:tabular-nums;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    .response.is-midnight .response__footer{
+      border-top-color:rgba(255,255,255,0.08);
+      color:var(--midnight-muted);
+    }
+    .response__ok{color:#3ecf8e}
+    .response.is-midnight .response__ok{color:#3dd68c}
+    .response__latency{opacity:.9}
+    .response__endpoint{display:none} /* legacy hook kept for JS */
+
+    .preview-rail__note{
+      margin:14px 2px 0;
+      font-size:11.5px;line-height:1.45;
+      color:var(--muted);
+      max-width:34em;
+    }
+
+    .sidebar-backdrop{
+      display:none;position:fixed;inset:0;z-index:80;
+      background:rgba(29,29,31,0.28);
+      backdrop-filter:blur(2px);
+      -webkit-backdrop-filter:blur(2px);
+      opacity:0;pointer-events:none;
+      transition:opacity var(--dur) var(--ease-nav);
+    }
+    .sidebar-backdrop.is-open{opacity:1;pointer-events:auto}
+
+    /* ── Responsive ── */
+    @media (max-width:1100px){
+      .shell{grid-template-columns:var(--sidebar-w) minmax(0,1fr)}
+      .preview-rail{
+        position:relative;top:auto;height:auto;
+        grid-column:2;grid-row:2;
+        border-left:none;border-top:1px solid var(--line);
+        padding:8px 28px 40px;
+        background:transparent;
+      }
+      .response{max-width:560px}
+      .try__split{grid-template-columns:1fr}
+      .chips{flex-direction:row;flex-wrap:wrap;gap:10px 14px}
+      .chip-row{flex:1 1 140px}
+    }
+    @media (max-width:900px){
+      .shell{grid-template-columns:1fr}
+      .sidebar{
+        position:fixed;left:0;top:var(--header-h);bottom:0;z-index:90;
+        width:min(280px,86vw);height:auto;
+        padding:20px 14px 40px;
+        background:rgba(255,255,255,0.96);
+        border-right:1px solid rgba(0,0,0,0.08);
+        box-shadow:8px 0 32px rgba(0,0,0,0.08);
+        transform:translateX(-105%);
+        transition:transform var(--dur) var(--ease-out-expo);
+      }
+      .sidebar.is-open{transform:translateX(0)}
+      .sidebar-backdrop{display:block}
+      .sidebar-toggle{display:inline-flex}
+      .main{padding:28px 18px 48px;max-width:none}
+      .preview-rail{
+        grid-column:1;grid-row:auto;
+        padding:0 18px 56px;
+      }
+      .response{max-width:none}
+      .nav a:not(.is-active){display:none}
+      .search-pill__label{display:none}
+      .prose h1{font-size:28px}
+      .prose .lede{font-size:15.5px}
+      .chip-row__label{flex-basis:100%;margin-bottom:2px}
+    }
+    @media (max-width:520px){
+      .site-header__inner{padding:0 14px;gap:12px}
+      .main{padding:24px 14px 40px}
+      .preview-rail{padding:0 14px 48px}
+      .page-nav{grid-template-columns:1fr}
+      .page-nav__link--next{align-items:flex-start;text-align:left}
+      .nav-ext{display:none}
+      .response__kpi{font-size:24px}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      html{scroll-behavior:auto}
+      *,*::before,*::after{
+        animation-duration:.01ms!important;
+        animation-iteration-count:1!important;
+        transition-duration:.01ms!important;
+        transition-delay:0ms!important;
+      }
+      .page-nav__link:hover,.response.is-tick{transform:none}
+    }
+
+    /* Line page: facts, anatomy, options */
+    .facts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 28px}
+    .fact{
+      display:inline-flex;align-items:center;gap:7px;
+      padding:6px 11px;border-radius:980px;
+      background:var(--bg-elev);border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+      font-size:12px;font-weight:500;color:rgba(29,29,31,0.78);max-width:100%;
+    }
+    .fact__k{font-size:10.5px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted)}
+    .fact__v{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:11.5px;font-weight:500;color:var(--fg);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:min(42vw,320px);
+    }
+    .fact__badge{
+      display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:980px;
+      font-size:11px;font-weight:600;color:#30a46c;background:rgba(48,164,108,0.1);
+      border:1px solid rgba(48,164,108,0.18);
+    }
+    .fact__badge::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+    .prose ul{margin:0 0 14px;padding:0 0 0 1.15em;max-width:52em;color:rgba(29,29,31,0.88);font-size:14.5px;line-height:1.6}
+    .prose li{margin:0 0 6px}
+    .anatomy{
+      display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;
+      margin:8px 0;padding:16px;border-radius:var(--radius-card);
+      background:var(--bg-elev);border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+    }
+    .anatomy__svg svg{display:block;width:100%;height:auto}
+    .anatomy__list{list-style:none;margin:0;padding:4px 0 0;display:flex;flex-direction:column;gap:10px}
+    .anatomy__list li{margin:0;display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45;color:rgba(29,29,31,0.85)}
+    .anatomy__n{
+      flex:0 0 auto;width:20px;height:20px;border-radius:50%;
+      display:inline-flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:600;background:rgba(0,113,227,0.1);color:var(--accent);
+    }
+    .anatomy__list strong{font-weight:600;color:var(--fg)}
+    .opt-table{
+      width:100%;max-width:52em;border-collapse:separate;border-spacing:0;
+      margin:8px 0;font-size:13px;border:1px solid rgba(0,0,0,0.07);
+      border-radius:12px;overflow:hidden;background:var(--bg-elev);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+    }
+    .opt-table th,.opt-table td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(0,0,0,0.06);vertical-align:middle}
+    .opt-table th{font-size:11px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);background:rgba(0,0,0,0.02)}
+    .opt-table tr:last-child td{border-bottom:none}
+    .opt-table code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:500;padding:1px 5px;border-radius:5px;background:rgba(0,0,0,0.04)}
+    .opt-table .muted{color:var(--muted);font-size:12.5px}
+    .status-pill{
+      display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:980px;
+      font-size:11px;font-weight:600;color:#30a46c;background:rgba(48,164,108,0.1);
+      border:1px solid rgba(48,164,108,0.16);white-space:nowrap;
+    }
+    .status-pill::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+    .also-see{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+    .also-see a{
+      display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:980px;
+      font-size:12.5px;font-weight:500;background:var(--bg-elev);border:1px solid rgba(0,0,0,0.07);color:var(--fg);
+      transition:border-color var(--dur-fast) var(--ease-nav),box-shadow var(--dur) var(--ease-out-expo),transform var(--dur) var(--ease-out-expo);
+    }
+    .also-see a:hover{border-color:rgba(0,113,227,0.28);box-shadow:0 4px 14px rgba(0,0,0,0.05);transform:translateY(-1px);color:var(--accent)}
+    @media (max-width:1100px){.anatomy{grid-template-columns:1fr}}
+    @media (max-width:520px){.fact__v{max-width:56vw}}
+    @media (prefers-reduced-motion:reduce){.also-see a:hover{transform:none}}
+  
+    /* Options index (Reference) — additive, shell unchanged */
+    .opt-search{
+      display:flex;align-items:center;gap:10px;
+      margin:0 0 18px;padding:10px 12px;
+      border-radius:12px;background:var(--bg-elev);
+      border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+    }
+    .opt-search__icon{opacity:.45;display:flex;flex-shrink:0}
+    .opt-search__input{
+      flex:1;min-width:0;border:0;background:transparent;
+      font:inherit;font-size:13.5px;color:var(--fg);outline:none;
+    }
+    .opt-search__input::placeholder{color:var(--muted)}
+    .opt-search__meta{font-size:11.5px;color:var(--muted);white-space:nowrap}
+    .opt-filters{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 22px}
+    .opt-filters .chip{font-size:12px}
+    .opt-group{margin:0 0 28px}
+    .opt-group__head{
+      display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+      margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,0.06);
+    }
+    .opt-group__title{
+      margin:0;font-size:13px;font-weight:600;letter-spacing:-0.01em;
+    }
+    .opt-group__count{font-size:11.5px;color:var(--muted)}
+    .opt-table td a.opt-path{
+      color:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:12px;font-weight:500;padding:1px 5px;border-radius:5px;
+      background:rgba(0,0,0,0.04);transition:background var(--dur-fast) var(--ease-nav),color var(--dur-fast) var(--ease-nav);
+    }
+    .opt-table td a.opt-path:hover{background:rgba(0,113,227,0.1);color:var(--accent)}
+    .status-pill[data-s="drawn"]{color:#047857;background:rgba(16,185,129,0.12)}
+    .status-pill[data-s="interact"]{color:#1d4ed8;background:rgba(59,130,246,0.12)}
+    .status-pill[data-s="core-all"]{color:#6d28d9;background:rgba(139,92,246,0.12)}
+    .status-pill[data-s="ck3012"]{color:#b45309;background:rgba(245,158,11,0.14)}
+    .status-pill[data-s="chunk"]{color:#0e7490;background:rgba(14,165,233,0.12)}
+    .status-pill[data-s="mock"]{color:#047857;background:rgba(16,185,129,0.12)}
+    .opt-legend{
+      display:flex;flex-wrap:wrap;gap:8px 14px;margin:0 0 22px;
+      padding:12px 14px;border-radius:12px;
+      background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.05);
+    }
+    .opt-legend__item{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+    .opt-legend__item .status-pill{font-size:11px}
+    tr.is-hidden{display:none}
+    .opt-group.is-empty{display:none}
+
+  
+    .fact-row{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}
+    .fact{display:flex;flex-direction:column;gap:3px;min-width:140px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.05)}
+    .fact__k{font-size:10.5px;font-weight:600;letter-spacing:0.06em;color:var(--muted)}
+    .fact__v{font-size:12.5px;font-weight:500;letter-spacing:-0.01em}
+    .fact__badge{display:inline-flex;align-items:center;gap:6px;width:fit-content;padding:3px 8px;border-radius:999px;font-size:11.5px;font-weight:600}
+    .also-see{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 20px}
+    .also-see a{display:inline-flex;padding:6px 11px;border-radius:999px;font-size:12.5px;font-weight:500;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.06);transition:background var(--dur-fast) var(--ease-nav),border-color var(--dur-fast) var(--ease-nav)}
+    .also-see a:hover{background:rgba(0,113,227,0.08);border-color:rgba(0,113,227,0.18);color:var(--accent)}
+    .stack-note{font-size:13px;color:var(--muted);max-width:52em}
+
+  
+    .status-pill[data-s="error"]{color:#b91c1c;background:rgba(239,68,68,0.12)}
+    .status-pill[data-s="warning"]{color:#b45309;background:rgba(245,158,11,0.14)}
+    .status-pill[data-s="info"]{color:#1d4ed8;background:rgba(59,130,246,0.12)}
+    .ck-code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:12px;font-weight:600;letter-spacing:-0.02em;
+      color:var(--accent);
+    }
+    .ck-code a{color:inherit}
+    .ck-code a:hover{text-decoration:underline}
+    .opt-table td.msg{font-size:12.5px;max-width:28em}
+    .repair-pill{
+      display:inline-flex;align-items:center;gap:4px;
+      padding:2px 7px;border-radius:999px;font-size:11px;font-weight:600;
+      background:rgba(16,185,129,0.12);color:#047857;
+    }
+    .repair-pill[data-r="no"]{background:rgba(0,0,0,0.04);color:var(--muted);font-weight:500}
+
+  
+    .loop-steps{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 22px}
+    .loop-step{
+      display:flex;align-items:center;gap:8px;
+      padding:10px 14px;border-radius:12px;
+      border:1px solid rgba(0,0,0,0.07);background:var(--bg-elev);
+      font-size:13px;font-weight:600;letter-spacing:-0.015em;
+    }
+    .loop-step__n{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:22px;height:22px;border-radius:999px;font-size:11px;
+      background:rgba(0,0,0,0.06);color:var(--muted);
+    }
+    .loop-step.is-on{border-color:rgba(0,113,227,0.4);box-shadow:0 0 0 3px rgba(0,113,227,0.12)}
+    .loop-step.is-on .loop-step__n{background:rgba(0,113,227,0.14);color:#1d4ed8}
+    .loop-step a{color:inherit;text-decoration:none}
+    .loop-step a:hover{color:var(--link)}
+    .diag-list{display:flex;flex-direction:column;gap:8px;margin:12px 0 20px}
+    .diag-card{
+      border:1px solid rgba(0,0,0,0.07);border-radius:12px;background:var(--bg-elev);
+      padding:12px 14px;display:grid;grid-template-columns:auto 1fr auto;gap:8px 12px;align-items:start;
+    }
+    .diag-card__code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;font-weight:600}
+    .diag-card__msg{font-size:13px;grid-column:2 / -1}
+    .diag-card__meta{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+    .diag-card__meta code{font-size:11.5px}
+    .pointer-chip{
+      display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;
+      background:rgba(0,113,227,0.08);color:#1d4ed8;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;cursor:pointer;border:0;
+    }
+    .pointer-chip:hover{background:rgba(0,113,227,0.14)}
+
+  
+    .loop-steps{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 22px}
+    .loop-step{
+      display:flex;align-items:center;gap:8px;
+      padding:10px 14px;border-radius:12px;
+      border:1px solid rgba(0,0,0,0.07);background:var(--bg-elev);
+      font-size:13px;font-weight:600;letter-spacing:-0.015em;
+    }
+    .loop-step__n{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:22px;height:22px;border-radius:999px;font-size:11px;
+      background:rgba(0,0,0,0.06);color:var(--muted);
+    }
+    .loop-step.is-on{border-color:rgba(0,113,227,0.4);box-shadow:0 0 0 3px rgba(0,113,227,0.12)}
+    .loop-step.is-on .loop-step__n{background:rgba(0,113,227,0.14);color:#1d4ed8}
+    .loop-step a{color:inherit;text-decoration:none}
+    .loop-step a:hover{color:var(--link)}
+    .patch-list{display:flex;flex-direction:column;gap:8px;margin:12px 0 20px}
+    .patch-card{
+      border:1px solid rgba(0,0,0,0.07);border-radius:12px;background:var(--bg-elev);
+      padding:12px 14px;display:flex;flex-direction:column;gap:8px;
+    }
+    .patch-card__bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+    .patch-card__op{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;
+      padding:2px 8px;border-radius:999px;background:rgba(16,185,129,0.12);color:#047857;
+    }
+    .patch-card pre{
+      margin:0;padding:10px 12px;border-radius:8px;background:rgba(0,0,0,0.03);
+      font-size:12px;overflow:auto;line-height:1.45;
+    }
+    .apply-row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+    .apply-btn{
+      appearance:none;border:1px solid rgba(0,113,227,0.35);background:rgba(0,113,227,0.1);
+      color:#1d4ed8;font-size:12px;font-weight:600;padding:6px 12px;border-radius:999px;cursor:pointer;
+    }
+    .apply-btn:hover{background:rgba(0,113,227,0.16)}
+    .apply-btn[data-kind="all"]{background:rgba(16,185,129,0.14);border-color:rgba(16,185,129,0.4);color:#047857}
+    .apply-btn:disabled{opacity:.45;cursor:not-allowed}
+
+  
+    .output-list{display:flex;flex-direction:column;gap:8px;margin:12px 0 20px}
+    .output-card{
+      border:1px solid rgba(0,0,0,0.07);border-radius:12px;background:var(--bg-elev);
+      padding:12px 14px;display:flex;flex-direction:column;gap:6px;
+    }
+    .output-card__bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+    .output-card__fmt{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;
+      padding:2px 8px;border-radius:999px;background:rgba(0,113,227,0.1);color:#1d4ed8;
+    }
+    .output-card p{margin:0;font-size:13px;color:var(--muted);line-height:1.45}
+    .hash-box{
+      margin:12px 0 20px;padding:12px 14px;border-radius:12px;
+      border:1px solid rgba(0,0,0,0.07);background:rgba(0,0,0,0.02);
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.5;
+      overflow:auto;word-break:break-all;
+    }
+    .hash-box strong{font-family:Inter,system-ui,sans-serif;font-size:11px;letter-spacing:0.04em;
+      text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+    .play-link{
+      display:inline-flex;align-items:center;gap:6px;margin-top:8px;
+      padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600;
+      background:rgba(0,113,227,0.1);color:#1d4ed8;border:1px solid rgba(0,113,227,0.28);
+      text-decoration:none;
+    }
+    .play-link:hover{background:rgba(0,113,227,0.16)}
+    .response__chart.is-png{
+      background:
+        linear-gradient(45deg, rgba(0,0,0,0.04) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(0,0,0,0.04) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.04) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.04) 75%);
+      background-size:16px 16px;
+      background-position:0 0,0 8px,8px -8px,-8px 0;
+      border-radius:10px;padding:8px;
+    }
+    .response__chart .png-badge{
+      position:absolute;top:10px;right:10px;
+      font-size:10px;font-weight:700;letter-spacing:0.06em;
+      padding:3px 7px;border-radius:999px;background:#111827;color:#fff;
+    }
+    .response__chart{position:relative}
+    .svg-source{
+      margin:0;padding:12px;border-radius:10px;background:#0f1115;color:#e5e7eb;
+      font-size:11px;line-height:1.45;max-height:280px;overflow:auto;
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-all;
+    }
+
+  
+    .file-list{display:flex;flex-direction:column;gap:8px;margin:12px 0 20px}
+    .file-card{
+      border:1px solid rgba(0,0,0,0.07);border-radius:12px;background:var(--bg-elev);
+      padding:12px 14px;display:flex;flex-direction:column;gap:6px;
+    }
+    .file-card__bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+    .file-card__name{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;font-weight:600;
+    }
+    .file-card__bytes{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;
+      padding:2px 8px;border-radius:999px;background:rgba(0,0,0,0.05);color:var(--muted);
+    }
+    .file-card__bytes.is-cap{
+      background:rgba(16,185,129,0.12);color:#047857;font-weight:600;
+    }
+    .file-card p{margin:0;font-size:13px;color:var(--muted);line-height:1.45}
+    .cap-meter{
+      margin:12px 0 20px;padding:14px;border-radius:12px;
+      border:1px solid rgba(0,0,0,0.07);background:var(--bg-elev);
+    }
+    .cap-meter__bar{
+      height:10px;border-radius:999px;background:rgba(0,0,0,0.06);overflow:hidden;margin:8px 0;
+    }
+    .cap-meter__fill{
+      height:100%;border-radius:999px;background:linear-gradient(90deg,#0071e3,#0ea5e9);
+      width:100%;
+    }
+    .cap-meter__meta{
+      display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+      font-size:12px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    }
+    .type-grid{
+      display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 18px;
+    }
+    .type-pill{
+      font-size:11.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+      padding:3px 8px;border-radius:999px;background:rgba(0,113,227,0.08);color:#1d4ed8;
+    }
+    .llms-pre{
+      margin:0;padding:12px;border-radius:10px;background:#0f1115;color:#e5e7eb;
+      font-size:11px;line-height:1.45;max-height:320px;overflow:auto;
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word;
+    }
+    .response__chart .llms-pre{max-height:260px}
+
+
+    .tool-grid{display:flex;flex-direction:column;gap:8px;margin:12px 0 20px}
+    .tool-card{
+      border:1px solid rgba(0,0,0,0.07);border-radius:12px;background:var(--bg-elev);
+      padding:12px 14px;display:flex;flex-direction:column;gap:6px;
+    }
+    .tool-card__bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+    .tool-card__name{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;font-weight:600;
+    }
+    .tool-card__in{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;
+      padding:2px 8px;border-radius:999px;background:rgba(0,0,0,0.05);color:var(--muted);
+    }
+    .tool-card p{margin:0;font-size:13px;color:var(--muted);line-height:1.45}
+    .status-pill[data-s="planned"]{color:#b45309;background:rgba(245,158,11,0.14)}
+    .status-pill[data-s="checkout"]{color:#1d4ed8;background:rgba(59,130,246,0.12)}
+    .mcp-pre{
+      margin:0;padding:12px;border-radius:10px;background:#0f1115;color:#e5e7eb;
+      font-size:11px;line-height:1.45;max-height:280px;overflow:auto;
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word;
+    }
+    .response__chart .mcp-pre{max-height:240px}
+    .chip-row__opts .chip{font-size:11.5px}
+
+  </style>
+</head>
+<body>
+  <header class="site-header" id="site-header">
+    <div class="site-header__inner">
+      <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Open sidebar" aria-expanded="false" aria-controls="sidebar">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+          <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <a class="logo" href="/" aria-label="ChartKit home">
+        <svg class="logo__mark" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <rect x="1" y="9" width="3.2" height="6" rx="0.8" fill="#1d1d1f"/>
+          <rect x="6.4" y="5.5" width="3.2" height="9.5" rx="0.8" fill="#1d1d1f"/>
+          <rect x="11.8" y="2" width="3.2" height="13" rx="0.8" fill="#0ea5e9"/>
+        </svg>
+        <span>Chart<span class="logo__kit">Kit</span></span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="#docs" class="is-active">Docs</a>
+        <a href="#playground">Playground</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#github">GitHub</a>
+      </nav>
+      <div class="header-right">
+        <div class="search-pill" aria-hidden="true" title="Search (visual only)">
+          <span class="search-pill__icon">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="3.5" stroke="currentColor" stroke-width="1.3"/><path d="M7.8 7.8L10.5 10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </span>
+          <span class="search-pill__label">Search docs</span>
+          <kbd class="search-pill__kbd">⌘K</kbd>
+        </div>
+        <a class="nav-ext" href="#benchmarks">Benchmarks</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
+
+  <div class="shell">
+    <aside class="sidebar" id="sidebar" aria-label="Documentation">
+      <div class="side-section">
+        <span class="side-section__label">Start</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs.html" data-nav>Overview</a></li>
+          <li><a href="chartkit-mock-docs-react.html" data-nav>React</a></li>
+          <li><a href="chartkit-mock-docs-vue.html" data-nav>Vue</a></li>
+          <li><a href="chartkit-mock-docs-svelte.html" data-nav>Svelte</a></li>
+          <li><a href="chartkit-mock-docs-vanilla.html" data-nav>Vanilla</a></li>
+          <li><a href="chartkit-mock-docs-markdown.html" data-nav>Markdown</a></li>
+        </ul>
+      </div>
+
+      <div class="side-section">
+        <span class="side-section__label">Concepts</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs-spec-anatomy.html" data-nav>Spec anatomy</a></li>
+          <li><a href="chartkit-mock-docs-data.html" data-nav>Data</a></li>
+          <li><a href="chartkit-mock-docs-encoding.html" data-nav>Encoding</a></li>
+          <li><a href="chartkit-mock-docs-scales.html" data-nav>Scales</a></li>
+          <li><a href="chartkit-mock-docs-axes.html" data-nav>Axes</a></li>
+          <li><a href="chartkit-mock-docs-themes-tokens.html" data-nav>Themes &amp; tokens</a></li>
+          <li><a href="chartkit-mock-docs-bundles.html" data-nav>Bundles</a></li>
+        </ul>
+      </div>
+
+      <div class="side-section">
+        <span class="side-section__label">Chart types</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs-area.html" data-nav>Area</a></li>
+          <li><a href="chartkit-mock-docs-line.html" data-nav>Line</a></li>
+          <li><a href="chartkit-mock-docs-bar.html" data-nav>Bar</a></li>
+          <li><a href="chartkit-mock-docs-donut.html" data-nav>Donut</a></li>
+          <li><a href="chartkit-mock-docs-combo.html" data-nav>Combo</a></li>
+          <li><a href="chartkit-mock-docs-gauge.html" data-nav>Gauge</a></li>
+          <li><a href="chartkit-mock-docs-heatmap.html" data-nav>Heatmap</a></li>
+          <li><a href="chartkit-mock-docs-candle.html" data-nav>Candle</a></li>
+          <li><a href="chartkit-mock-docs-scatter.html" data-nav>Scatter</a></li>
+          <li><a href="chartkit-mock-docs-kpi.html" data-nav>Kpi</a></li>
+          <li><a href="chartkit-mock-docs-sparkline.html" data-nav>Sparkline</a></li>
+          <li><a href="chartkit-mock-docs-mini-area.html" data-nav>Mini-area</a></li>
+          <li><a href="chartkit-mock-docs-progress-ring.html" data-nav>Progress-ring</a></li>
+          <li><a href="chartkit-mock-docs-spike.html" data-nav>Spike</a></li>
+          <li><a href="chartkit-mock-docs-histogram.html" data-nav>Histogram</a></li>
+          <li><a href="chartkit-mock-docs-boxplot.html" data-nav>Boxplot</a></li>
+          <li><a href="chartkit-mock-docs-radar.html" data-nav>Radar</a></li>
+          <li><a href="chartkit-mock-docs-funnel.html" data-nav>Funnel</a></li>
+          <li><a href="chartkit-mock-docs-treemap.html" data-nav>Treemap</a></li>
+          <li><a href="chartkit-mock-docs-sankey.html" data-nav>Sankey</a></li>
+          <li><a href="chartkit-mock-docs-bullet.html" data-nav>Bullet</a></li>
+          <li><a href="chartkit-mock-docs-waterfall.html" data-nav>Waterfall</a></li>
+          <li><a href="chartkit-mock-docs-gantt.html" data-nav>Gantt</a></li>
+          <li><a href="chartkit-mock-docs-timeline.html" data-nav>Timeline</a></li>
+          <li><a href="chartkit-mock-docs-quadrant.html" data-nav>Quadrant</a></li>
+          <li><a href="chartkit-mock-docs-venn.html" data-nav>Venn</a></li>
+          <li><a href="chartkit-mock-docs-journey.html" data-nav>Journey</a></li>
+        </ul>
+      </div>
+
+      <div class="side-section">
+        <span class="side-section__label">Reference</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs-options.html" data-nav>Options</a></li>
+          <li><a href="chartkit-mock-docs-errors.html" data-nav>Errors <span style="opacity:.55;font-size:11px;margin-left:4px">CK codes</span></a></li>
+          <li><a href="chartkit-mock-docs-themes.html" data-nav>Themes</a></li>
+        </ul>
+      </div>
+
+      <div class="side-section">
+        <span class="side-section__label">Agents</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs-validate.html" data-nav>Validate</a></li>
+          <li><a href="chartkit-mock-docs-repair.html" data-nav>repair</a></li>
+          <li><a href="chartkit-mock-docs-render.html" data-nav>render</a></li>
+          <li><a href="chartkit-mock-docs-llms-txt.html" data-nav>llms.txt</a></li>
+          <li><a href="chartkit-mock-docs-mcp.html" class="is-active" data-nav>MCP</a></li>
+        </ul>
+      </div>
+
+      <div class="side-footer">
+        <a href="#playground">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4 7.5l2-2 2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Playground
+        </a>
+        <a href="#gallery">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="4.2" height="4.2" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="7.3" y="1.5" width="4.2" height="4.2" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1.5" y="7.3" width="4.2" height="4.2" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="7.3" y="7.3" width="4.2" height="4.2" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+          Gallery
+        </a>
+        <a href="#benchmarks">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M2.5 10.5V6.5M6.5 10.5V3.5M10.5 10.5V7.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Benchmarks
+        </a>
+      </div>
+    </aside>
+
+                                                                                        <main class="main prose" id="main">
+      
+      
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="chartkit-mock-docs.html">Docs</a>
+        <span class="breadcrumb__sep" aria-hidden="true">/</span>
+        <a href="#agents">Agents</a>
+        <span class="breadcrumb__sep" aria-hidden="true">/</span>
+        <span class="breadcrumb__current">MCP</span>
+      </nav>
+
+      <h1 id="mcp">MCP</h1>
+      <p class="lede" style="margin-bottom:12px"><span class="status-pill" data-s="mock">mock-plausible</span> <span class="status-pill">Agents</span> — <code>@chartkitdev/mcp</code> stdio server with a <strong>Flint-style few tools</strong> (not one per chart). Tools call <code>@chartkitdev/core</code> on the host; no network. Strategy names below; Soft = docs mock accent.</p>
+
+      <div class="fact-row" aria-label="Page facts">
+        <div class="fact">
+          <span class="fact__k">PACKAGE</span>
+          <span class="fact__v">@chartkitdev/mcp · v0.5.0</span>
+        </div>
+        <div class="fact">
+          <span class="fact__k">TRANSPORT</span>
+          <span class="fact__v">stdio · MCP SDK</span>
+        </div>
+        <div class="fact">
+          <span class="fact__k">STATUS</span>
+          <span class="fact__badge" style="background:rgba(245,158,11,0.14);color:#b45309">install coming soon</span>
+        </div>
+      </div>
+
+      <aside class="callout" aria-labelledby="callout-title">
+        <p class="callout__eyebrow">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.3"/><path d="M6 3.5v3M6 8.2v.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Not on npm yet
+        </p>
+        <h3 id="callout-title">Publish is gated · checkout works</h3>
+        <p><code>npx @chartkitdev/mcp</code> will not resolve until Todd publishes. From a repo checkout: <code>npm run build --workspace=@chartkitdev/mcp</code> then <code>node packages/mcp/dist/cli.js</code>. Point Cursor / Claude at that command. Do not write logs to stdout.</p>
+        <div class="callout__steps" aria-hidden="true">
+          <span class="callout__step"><span>1</span> list / schema</span>
+          <span class="callout__step"><span>2</span> validate → render</span>
+          <span class="callout__step"><span>3</span> suggest / to_code</span>
+        </div>
+      </aside>
+
+      <h2 id="tools">Six tools · Flint-style</h2>
+      <p>Strategy surface: few tools that cover the whole catalog. Checkout today also exposes <code>repair</code>, <code>lookup_feature</code>, and <code>get_example</code> under shorter names (<code>validate</code> / <code>render</code>). This mock uses the strategy names for the try-it.</p>
+      <div class="tool-grid" aria-label="MCP tools">
+        <div class="tool-card">
+          <div class="tool-card__bar">
+            <span class="tool-card__name">list_chart_types</span>
+            <span class="tool-card__in">none</span>
+            <span class="status-pill" data-s="checkout">checkout</span>
+          </div>
+          <p>Chart types from bundled examples, with filenames. Specs themselves come from <code>get_schema</code> / examples.</p>
+        </div>
+        <div class="tool-card">
+          <div class="tool-card__bar">
+            <span class="tool-card__name">get_schema(type)</span>
+            <span class="tool-card__in">type</span>
+            <span class="status-pill" data-s="planned">planned</span>
+          </div>
+          <p>JSON Schema fragment (or resource slice) for one chart type. Resource <code>chartkit://schema/v1.json</code> already ships the full v1 schema.</p>
+        </div>
+        <div class="tool-card">
+          <div class="tool-card__bar">
+            <span class="tool-card__name">validate_chart</span>
+            <span class="tool-card__in">spec</span>
+            <span class="status-pill" data-s="checkout">≈ validate</span>
+          </div>
+          <p>Core <code>validate()</code>: <code>ok</code>, diagnostics, errors, warnings, JSON Patch <code>fix</code> arrays. Spec is not mutated.</p>
+        </div>
+        <div class="tool-card">
+          <div class="tool-card__bar">
+            <span class="tool-card__name">render_chart</span>
+            <span class="tool-card__in">spec · format?</span>
+            <span class="status-pill" data-s="checkout">≈ render</span>
+          </div>
+          <p>Local SVG via <code>@chartkitdev/core/extra</code> (every type). No data leaves the host. PNG is not implemented (no native/wasm rasterizer).</p>
+        </div>
+        <div class="tool-card">
+          <div class="tool-card__bar">
+            <span class="tool-card__name">suggest_chart</span>
+            <span class="tool-card__in">data · goal</span>
+            <span class="status-pill" data-s="planned">planned</span>
+          </div>
+          <p>Pick a type from row shape + goal string; return a starter spec the agent can validate next.</p>
+        </div>
+        <div class="tool-card">
+          <div class="tool-card__bar">
+            <span class="tool-card__name">to_code</span>
+            <span class="tool-card__in">spec · framework</span>
+            <span class="status-pill" data-s="planned">planned</span>
+          </div>
+          <p>Emit React / Vue / Svelte / vanilla mount snippets for a valid spec. Adapters stay thin over core.</p>
+        </div>
+      </div>
+
+      <h2 id="resources">Resources</h2>
+      <p>Bundled at build time — not fetched over the network.</p>
+      <div class="file-list" aria-label="MCP resources">
+        <div class="file-card">
+          <div class="file-card__bar">
+            <span class="file-card__name">chartkit://llms.txt</span>
+            <span class="file-card__bytes">≤6400 B</span>
+            <span class="status-pill" data-s="checkout">bundled</span>
+          </div>
+          <p>Copy of the short agent index. Same rules + one drawable example per type.</p>
+        </div>
+        <div class="file-card">
+          <div class="file-card__bar">
+            <span class="file-card__name">chartkit://schema/v1.json</span>
+            <span class="file-card__bytes">v1 schema</span>
+            <span class="status-pill" data-s="checkout">bundled</span>
+          </div>
+          <p>ChartKit v1 JSON Schema from <code>packages/core/schema/chartkit.schema.json</code>.</p>
+        </div>
+      </div>
+
+      <h2 id="clients">Cursor · Claude</h2>
+      <p>After publish, the same <code>mcpServers</code> block goes in <code>.cursor/mcp.json</code>, Claude Desktop config, or project <code>.mcp.json</code>. Until then, point <code>command</code> at the checkout <code>node …/cli.js</code>.</p>
+      <div class="code-block">
+        <div class="code-block__bar">
+          <span class="code-block__lang">json · after publish</span>
+          <button class="code-block__copy" type="button" data-copy='{
+  "mcpServers": {
+    "chartkit": {
+      "command": "npx",
+      "args": ["-y", "@chartkitdev/mcp"]
+    }
+  }
+}'>Copy</button>
+        </div>
+        <pre><code>{
+  "mcpServers": {
+    "chartkit": {
+      "command": "npx",
+      "args": ["-y", "@chartkitdev/mcp"]
+    }
+  }
+}</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-block__bar">
+          <span class="code-block__lang">shell · checkout</span>
+          <button class="code-block__copy" type="button" data-copy="npm run build --workspace=@chartkitdev/mcp
+node packages/mcp/dist/cli.js">Copy</button>
+        </div>
+        <pre><code>npm run build --workspace=@chartkitdev/mcp
+node packages/mcp/dist/cli.js</code></pre>
+      </div>
+      <div class="hash-box">
+        <strong>Claude Code · after publish</strong>
+        claude mcp add chartkit -- npx -y @chartkitdev/mcp
+      </div>
+
+      <h2 id="try-leaf">Try a tool</h2>
+      <p>Pick a tool. The editor shows a mock call; the Response rail shows a plausible JSON result. Soft = docs mock accent.</p>
+
+      <div class="try" id="try">
+        <div class="try__bar">
+          <span class="try__title">MCP tool call</span>
+          <span class="try__hint">Tool updates Response →</span>
+        </div>
+        <div class="try__body">
+          <div class="try__split">
+            <div class="spec-editor">
+              <div class="spec-editor__bar">
+                <span class="spec-editor__lang" id="editor-lang">list_chart_types</span>
+                <span class="spec-editor__status" id="spec-status">stdio · mock</span>
+              </div>
+              <textarea id="spec-input" spellcheck="false" aria-label="MCP tool arguments" readonly></textarea>
+            </div>
+            <div class="chips" role="group" aria-label="MCP tool settings">
+              <div class="chip-row" data-chip-group="tool">
+                <span class="chip-row__label">Tool</span>
+                <div class="chip-row__opts">
+                  <button type="button" class="chip is-on" data-key="tool" data-value="list_chart_types">list</button>
+                  <button type="button" class="chip" data-key="tool" data-value="get_schema">schema</button>
+                  <button type="button" class="chip" data-key="tool" data-value="validate_chart">validate</button>
+                  <button type="button" class="chip" data-key="tool" data-value="render_chart">render</button>
+                  <button type="button" class="chip" data-key="tool" data-value="suggest_chart">suggest</button>
+                  <button type="button" class="chip" data-key="tool" data-value="to_code">to_code</button>
+                </div>
+              </div>
+              <div class="chip-row" data-chip-group="view">
+                <span class="chip-row__label">Rail</span>
+                <div class="chip-row__opts">
+                  <button type="button" class="chip is-on" data-key="view" data-value="chart">Result</button>
+                  <button type="button" class="chip" data-key="view" data-value="json">Meta</button>
+                </div>
+              </div>
+              <p class="try__footnote" style="margin:4px 0 0;font-size:12px;color:var(--muted)">Mock-plausible payloads. Checkout tool names may differ until the strategy rename ships.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 id="also-see">Also see</h2>
+      <div class="also-see">
+        <a href="chartkit-mock-docs-validate.html">Validate</a>
+        <a href="chartkit-mock-docs-repair.html">repair</a>
+        <a href="chartkit-mock-docs-render.html">render</a>
+        <a href="chartkit-mock-docs-llms-txt.html">llms.txt</a>
+        <a href="chartkit-mock-docs-errors.html">Errors</a>
+      </div>
+
+      <nav class="page-nav" aria-label="Page">
+        <a class="page-nav__link" href="chartkit-mock-docs-llms-txt.html">
+          <span class="page-nav__dir">← Previous</span>
+          <span class="page-nav__title">llms.txt</span>
+        </a>
+        <a class="page-nav__link page-nav__link--next" href="chartkit-mock-docs.html" data-nav>
+          <span class="page-nav__dir">Next →</span>
+          <span class="page-nav__title">Overview</span>
+        </a>
+      </nav>
+
+    </main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <aside class="preview-rail" aria-label="Live render">
+      <div class="preview-rail__label">
+        <span>Response</span>
+        <span class="preview-rail__live">Live</span>
+      </div>
+      <div class="response" id="response" aria-live="polite">
+        <div class="response__chrome">
+          <div class="response__req">
+            <span class="response__method">TOOL</span>
+            <span class="response__path" id="response-path">list_chart_types</span>
+            <span class="response__endpoint" id="response-endpoint" hidden>mcp · Soft</span>
+          </div>
+          <span class="response__status" id="response-status">ok</span>
+        </div>
+        <div class="response__tabs" role="tablist" aria-label="Response view">
+          <button type="button" class="response__tab is-on" data-tab="chart" role="tab" aria-selected="true">Result</button>
+          <button type="button" class="response__tab" data-tab="json" role="tab" aria-selected="false">Meta</button>
+        </div>
+        <div class="response__body">
+          <div class="response__panel" data-panel="chart" id="panel-chart">
+            <div class="response__meta">
+              <span class="response__title" id="response-title">list_chart_types</span>
+              <span class="response__badge" id="response-badge">Soft</span>
+            </div>
+            <div class="response__value">
+              <span class="response__kpi" id="response-kpi">27 types</span>
+              <span class="response__delta" id="response-delta">bundled examples · local</span>
+            </div>
+            <div class="response__chart" id="response-chart"></div>
+          </div>
+          <div class="response__panel" data-panel="json" id="panel-json" hidden>
+            <pre class="response__json" id="response-json"></pre>
+          </div>
+        </div>
+        <div class="response__footer">
+          <span class="response__ok" id="response-ok">ok · application/json</span>
+          <span class="response__latency" id="response-latency">1.2ms</span>
+        </div>
+      </div>
+      <p class="preview-rail__note">Pick a Flint-style tool; this rail shows a mock-plausible JSON result — Result or Meta.</p>
+    </aside>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+<script>
+    // Agents · MCP — @chartkitdev/mcp Flint-style tools. Soft = docs mock accent.
+    (function () {
+      var TOOLS = {"list_chart_types": {"title": "list_chart_types", "kpi": "27 types", "delta": "bundled examples \u00b7 local", "status": "checkout", "args": "{\n  /* no arguments */\n}", "result": {"types": [{"type": "line", "examples": ["01-minimal-line.json"]}, {"type": "bar", "examples": ["02-minimal-bar.json"]}, {"type": "donut", "examples": ["03-minimal-donut.json"]}, {"type": "stacked-area", "examples": ["04-stacked-area.json"]}, {"type": "scatter", "examples": ["05-scatter.json"]}, {"type": "gantt", "examples": ["phase4-gantt.json"]}, {"type": "journey", "examples": ["phase4-journey.json"]}], "count": 27, "note": "Truncated mock list \u2014 full catalog is 27 types in the package examples."}}, "get_schema": {"title": "get_schema", "kpi": "type \u00b7 line", "delta": "schema fragment \u00b7 planned", "status": "planned", "args": "{\n  \"type\": \"line\"\n}", "result": {"type": "line", "whenToUse": "Trend over an ordered x (time or category).", "$ref": "https://chartkit.dev/schema/v1.json#/$defs/line", "required": ["version", "type", "data", "encoding", "a11y"], "encoding": {"x": "string field", "y": "number field", "color": "optional series"}, "resource": "chartkit://schema/v1.json"}}, "validate_chart": {"title": "validate_chart", "kpi": "ok \u00b7 0 errors", "delta": "\u2248 validate \u00b7 checkout", "status": "checkout", "args": "{\n  \"spec\": {\n    \"version\": \"1\",\n    \"type\": \"line\",\n    \"data\": [{\"quarter\":\"Q1\",\"units\":40},{\"quarter\":\"Q2\",\"units\":55}],\n    \"encoding\": {\"x\":\"quarter\",\"y\":\"units\"},\n    \"a11y\": {\"alt\":\"Units rose in Q2.\"}\n  }\n}", "result": {"ok": true, "errors": [], "warnings": [], "diagnostics": [], "mapsTo": "validate"}}, "render_chart": {"title": "render_chart", "kpi": "SVG \u00b7 640\u00d7360", "delta": "local \u00b7 no network", "status": "checkout", "args": "{\n  \"spec\": {\n    \"version\": \"1\",\n    \"type\": \"bar\",\n    \"data\": [{\"lane\":\"A\",\"stops\":12},{\"lane\":\"C\",\"stops\":15}],\n    \"encoding\": {\"x\":\"lane\",\"y\":\"stops\"},\n    \"a11y\": {\"alt\":\"Lane C has more.\"}\n  },\n  \"format\": \"svg\"\n}", "result": {"format": "svg", "width": 640, "height": 360, "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"640\" height=\"360\" viewBox=\"0 0 640 360\" role=\"img\" aria-label=\"Lane C has more.\"><!-- mock truncated --><\/svg>", "mapsTo": "render", "png": "not implemented \u2014 no native/wasm rasterizer in the package"}}, "suggest_chart": {"title": "suggest_chart", "kpi": "bar \u00b7 starter", "delta": "planned \u00b7 mock", "status": "planned", "args": "{\n  \"data\": [\n    {\"lane\":\"A\",\"stops\":12},\n    {\"lane\":\"B\",\"stops\":9},\n    {\"lane\":\"C\",\"stops\":15}\n  ],\n  \"goal\": \"Compare stops across lanes\"\n}", "result": {"type": "bar", "reason": "Categorical x + numeric y; goal is comparison.", "spec": {"version": "1", "type": "bar", "data": [{"lane": "A", "stops": 12}, {"lane": "B", "stops": 9}, {"lane": "C", "stops": 15}], "encoding": {"x": "lane", "y": "stops"}, "a11y": {"alt": "Stops by lane; C is highest."}}, "next": ["validate_chart", "render_chart"]}}, "to_code": {"title": "to_code", "kpi": "react \u00b7 snippet", "delta": "planned \u00b7 mock", "status": "planned", "args": "{\n  \"spec\": {\n    \"version\": \"1\",\n    \"type\": \"line\",\n    \"data\": [{\"quarter\":\"Q1\",\"units\":40},{\"quarter\":\"Q2\",\"units\":55}],\n    \"encoding\": {\"x\":\"quarter\",\"y\":\"units\"},\n    \"a11y\": {\"alt\":\"Units rose in Q2.\"}\n  },\n  \"framework\": \"react\"\n}", "result": {"framework": "react", "package": "@chartkitdev/react", "code": "import { Chart } from \"@chartkitdev/react\";\n\nconst spec = {\n  version: \"1\",\n  type: \"line\",\n  data: [{ quarter: \"Q1\", units: 40 }, { quarter: \"Q2\", units: 55 }],\n  encoding: { x: \"quarter\", y: \"units\" },\n  a11y: { alt: \"Units rose in Q2.\" },\n};\n\nexport function UnitsChart() {\n  return <Chart spec={spec} />;\n}\n"}}};
+
+      var header = document.getElementById("site-header");
+      var sidebar = document.getElementById("sidebar");
+      var toggle = document.getElementById("sidebar-toggle");
+      var backdrop = document.getElementById("sidebar-backdrop");
+      var textarea = document.getElementById("spec-input");
+      var statusEl = document.getElementById("spec-status");
+      var editorLang = document.getElementById("editor-lang");
+      var response = document.getElementById("response");
+      var chartEl = document.getElementById("response-chart");
+      var pathEl = document.getElementById("response-path");
+      var statusHttp = document.getElementById("response-status");
+      var titleEl = document.getElementById("response-title");
+      var badgeEl = document.getElementById("response-badge");
+      var kpiEl = document.getElementById("response-kpi");
+      var deltaEl = document.getElementById("response-delta");
+      var latencyEl = document.getElementById("response-latency");
+      var okEl = document.getElementById("response-ok");
+      var jsonEl = document.getElementById("response-json");
+      var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      var state = { tool: "list_chart_types", view: "chart" };
+
+      function pretty(obj) { return JSON.stringify(obj, null, 2); }
+
+      function setChip(group, value) {
+        document.querySelectorAll('[data-chip-group="' + group + '"] .chip').forEach(function (btn) {
+          btn.classList.toggle("is-on", btn.getAttribute("data-value") === value);
+        });
+      }
+
+      function setTab(view) {
+        state.view = view;
+        setChip("view", view);
+        document.querySelectorAll(".response__tab").forEach(function (tab) {
+          var on = tab.getAttribute("data-tab") === (view === "json" ? "json" : "chart");
+          tab.classList.toggle("is-on", on);
+          tab.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        document.getElementById("panel-chart").hidden = view === "json";
+        document.getElementById("panel-json").hidden = view !== "json";
+      }
+
+      function run() {
+        var t = TOOLS[state.tool];
+        pathEl.textContent = state.tool;
+        statusHttp.textContent = "ok";
+        statusHttp.style.color = "#059669";
+        titleEl.textContent = t.title;
+        badgeEl.textContent = "Soft";
+        kpiEl.textContent = t.kpi;
+        deltaEl.textContent = t.delta;
+        statusEl.textContent = t.status + " · mock";
+        editorLang.textContent = t.title;
+        okEl.textContent = "ok · application/json";
+        latencyEl.textContent = (0.8 + Math.random() * 1.4).toFixed(1) + "ms";
+
+        textarea.value = t.args;
+
+        chartEl.innerHTML = '<pre class="mcp-pre"></pre>';
+        chartEl.querySelector("pre").textContent = pretty(t.result);
+
+        jsonEl.textContent = pretty({
+          package: "@chartkitdev/mcp",
+          version: "0.5.0",
+          transport: "stdio",
+          tool: state.tool,
+          status: t.status,
+          published: false,
+          network: false,
+          strategy: "Flint-style few tools",
+          resources: ["chartkit://llms.txt", "chartkit://schema/v1.json"],
+          checkoutTools: ["validate", "repair", "render", "lookup_feature", "list_chart_types", "get_example"],
+          result: t.result
+        });
+        setTab(state.view);
+
+        if (!reduceMotion && response) {
+          response.animate(
+            [{ transform: "translateY(2px)", opacity: 0.92 }, { transform: "none", opacity: 1 }],
+            { duration: 220, easing: "cubic-bezier(0,0,0.5,1)" }
+          );
+        }
+      }
+
+      document.querySelectorAll("[data-key]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var key = btn.getAttribute("data-key");
+          var value = btn.getAttribute("data-value");
+          if (key === "view") { setTab(value); return; }
+          state[key] = value;
+          setChip(key, value);
+          run();
+        });
+      });
+
+      document.querySelectorAll(".response__tab").forEach(function (tab) {
+        tab.addEventListener("click", function () {
+          setTab(tab.getAttribute("data-tab") === "json" ? "json" : "chart");
+        });
+      });
+
+      document.querySelectorAll("[data-copy]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var text = btn.getAttribute("data-copy") || "";
+          navigator.clipboard.writeText(text).then(function () {
+            var prev = btn.textContent;
+            btn.textContent = "Copied";
+            setTimeout(function () { btn.textContent = prev; }, 1100);
+          }).catch(function () {});
+        });
+      });
+
+      if (header) {
+        var onScroll = function () { header.classList.toggle("is-scrolled", window.scrollY > 4); };
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+      }
+      function setSidebar(open) {
+        if (!sidebar) return;
+        sidebar.classList.toggle("is-open", open);
+        if (backdrop) backdrop.classList.toggle("is-on", open);
+        document.body.style.overflow = open ? "hidden" : "";
+      }
+      if (toggle) toggle.addEventListener("click", function () { setSidebar(!sidebar.classList.contains("is-open")); });
+      if (backdrop) backdrop.addEventListener("click", function () { setSidebar(false); });
+
+      run();
+    })();
+  </script>
+
+
+</body></html>
