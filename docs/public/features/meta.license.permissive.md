@@ -6,7 +6,7 @@ MIT/Apache/BSD/ISC with no revenue cap or branding condition. partial = permissi
 
 Matrix status: `native`. Verification: `pkg-license` (strong).
 
-MIT — package.json says MIT, but the GitHub repo has no LICENSE file (GitHub API license=null).
+MIT. LICENSE at the repo root.
 
 Source: packages/*/package.json
 
