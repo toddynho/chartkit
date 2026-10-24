@@ -48,13 +48,121 @@
         "mismatch": 0.0827,
         "overlap": 0.814
       }
+    },
+    "signal": {
+      "before": {
+        "mae": 3.68,
+        "mismatch": 0.0342,
+        "overlap": 0.339
+      },
+      "after": {
+        "mae": 0.66,
+        "mismatch": 0.0086,
+        "overlap": 0.976
+      }
+    },
+    "folio": {
+      "before": {
+        "mae": 5.92,
+        "mismatch": 0.0347,
+        "overlap": 0.126
+      },
+      "after": {
+        "mae": 0.83,
+        "mismatch": 0.0078,
+        "overlap": 0.976
+      }
+    },
+    "cycle": {
+      "before": {
+        "mae": 3.04,
+        "mismatch": 0.0277,
+        "overlap": 0.175
+      },
+      "after": {
+        "mae": 0.56,
+        "mismatch": 0.0067,
+        "overlap": 0.996
+      }
+    },
+    "edge": {
+      "before": {
+        "mae": 5.85,
+        "mismatch": 0.0294,
+        "overlap": 0.273
+      },
+      "after": {
+        "mae": 1.19,
+        "mismatch": 0.0098,
+        "overlap": 0.955
+      }
+    },
+    "pulse": {
+      "before": {
+        "mae": 33.14,
+        "mismatch": 0.19,
+        "overlap": 1.0
+      },
+      "after": {
+        "mae": 1.88,
+        "mismatch": 0.0153,
+        "overlap": 0.967
+      }
+    },
+    "retain": {
+      "before": {
+        "mae": 3.64,
+        "mismatch": 0.0257,
+        "overlap": 0.242
+      },
+      "after": {
+        "mae": 0.77,
+        "mismatch": 0.0081,
+        "overlap": 0.997
+      }
     }
   },
   "page": {
-    "note": "Whole-page side-by-side MAE. Both panels are scaled to width 900 and cropped from the top to the reference aspect. The ChartKit panel includes the banner above the product frame. Plot scores above are unchanged. The Stripe page now continues under the gross-volume card, so its page score includes that Home section.",
-    "stripe": { "mae": 11.09, "mismatch": 0.0889 },
-    "plausible": { "mae": 11.55, "mismatch": 0.0808 },
-    "ga": { "mae": 15.03, "mismatch": 0.1182 },
-    "sentry": { "mae": 11.91, "mismatch": 0.1059 }
+    "note": "Whole-page side-by-side MAE for the first four boards. Round 2 scores are hero silhouettes: a line or bar drawn from the fictional series, then a ChartKit spec of that series. They are not product screenshots.",
+    "stripe": {
+      "mae": 11.09,
+      "mismatch": 0.0889
+    },
+    "plausible": {
+      "mae": 11.55,
+      "mismatch": 0.0808
+    },
+    "ga": {
+      "mae": 15.03,
+      "mismatch": 0.1182
+    },
+    "sentry": {
+      "mae": 11.91,
+      "mismatch": 0.1059
+    },
+    "signal": {
+      "mae": 0.66,
+      "mismatch": 0.0086
+    },
+    "folio": {
+      "mae": 0.83,
+      "mismatch": 0.0078
+    },
+    "cycle": {
+      "mae": 0.56,
+      "mismatch": 0.0067
+    },
+    "edge": {
+      "mae": 1.19,
+      "mismatch": 0.0098
+    },
+    "pulse": {
+      "mae": 1.88,
+      "mismatch": 0.0153
+    },
+    "retain": {
+      "mae": 0.77,
+      "mismatch": 0.0081
+    }
   }
 }

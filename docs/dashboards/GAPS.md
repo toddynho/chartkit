@@ -30,3 +30,11 @@ Closed in this change:
 | Google Analytics | A linear colour scale still stretches to the minimum and maximum, so one cell far above the rest washes the others pale. | The cohort cells stay in a narrow band, so later periods stay lighter without one outlier washing the grid. | `scale.type: "quantile"` or a clamp on the colour domain. |
 
 The Stripe gross-volume card matches the May 2020 reference. stripe.com and the public dashboard-basics page do not show a current Home, so the metric grid and the method and failed-payment charts sit under that card in the same visual language. The Google Analytics page is the Reports snapshot: two rows of four cards. Titles and disclaimers sit in a banner above the product frame.
+
+Round 2 adds six pages: Datadog and Grafana, Robinhood and Coinbase, Linear, Vercel, Apple Fitness and Apple Health, and ChartMogul and Mixpanel. Same rules: no logos, wordmarks, icons, proprietary fonts, or real data. Shell type is Inter, except the monitor page, which uses Roboto. Chart colour still comes from the spec.
+
+| Product | Detail | Current workaround | Proposed ChartKit option |
+| --- | --- | --- | --- |
+| Apple Fitness | Three concentric activity rings in one mark. | Three `progress-ring` specs sit side by side. | `mark.rings`: a list of `{value, max, color}`. |
+| Robinhood | Volume bars drawn in a subplot under the candles. | Volume is a separate bar chart beside the candlestick. | `encoding.volume` on `candlestick`, painted under the price plot. |
+| Grafana | A stat panel paints its background from a threshold on the value. | The scorecard is a `kpi` or `gauge` on a flat card. | `metric.thresholds` colour the chart surface. |

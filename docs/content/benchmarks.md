@@ -17,7 +17,7 @@ Machine-readable copy: https://chartkit.dev/benchmarks.json (schema https://char
 
 ## Headline
 
-- Line chart: **40,979 bytes** gzip, `scripts/size.mjs` on `6ec84d7`, measured 2026-10-23. That is a loss to uPlot at 23,276 bytes. The stylesheet is 762 bytes more, a separate response, and the two sum to 24,038, still smaller than ChartKit. It is still smaller than Chart.js (49,374), Recharts (96,213, React external), Nivo (96,583, React external), Observable Plot (97,723), and ECharts (162,991). The harness minimal line is 41,178 bytes. The harness donut is 15,085 bytes and is smaller than Chart.js (46,922), Nivo (75,518, React external), Recharts (90,090, React external), and ECharts (122,174). uPlot and Observable Plot have no donut.
+- Line chart: **40,979 bytes** gzip, `scripts/size.mjs` on `92347dd`, measured 2026-10-24. That is a loss to uPlot at 23,276 bytes. The stylesheet is 762 bytes more, a separate response, and the two sum to 24,038, still smaller than ChartKit. It is still smaller than Chart.js (49,374), Recharts (96,213, React external), Nivo (96,583, React external), Observable Plot (97,723), and ECharts (162,991). The harness minimal line is 41,178 bytes. The harness donut is 15,085 bytes and is smaller than Chart.js (46,922), Nivo (75,518, React external), Recharts (90,090, React external), and ECharts (122,174). uPlot and Observable Plot have no donut.
 - Initial render: ChartKit is faster than uPlot in all 12 cells. Even 1,000,000 points is 23.6 ms vs 26.5 ms.
 - Aligned update: ChartKit wins 6 of 12 cells against uPlot and loses the 6 listed below. It is not a sweep.
 - Server render: **0.85 ms** mean (median 0.85 ms).
@@ -40,7 +40,7 @@ Machine-readable copy: https://chartkit.dev/benchmarks.json (schema https://char
 
 | Library | Entry | Bytes | Note |
 | --- | --- | ---: | --- |
-| ChartKit | size script line, 6ec84d7 | 40,979 |  |
+| ChartKit | size script line, 92347dd | 40,979 |  |
 | ChartKit | harness minimal line | 41,178 |  |
 | ChartKit | harness minimal bar | 40,752 |  |
 | ChartKit | harness minimal donut | 15,085 |  |

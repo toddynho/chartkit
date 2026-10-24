@@ -19,8 +19,8 @@
   },
   "headline": {
     "lineGzipBytes": 40979,
-    "lineGzipCommit": "6ec84d7",
-    "lineGzipMeasured": "2026-10-23",
+    "lineGzipCommit": "92347dd",
+    "lineGzipMeasured": "2026-10-24",
     "otherFigures": "round 13, measured 2026-10-18 on phase 2 d8dcc5a, except the agent eval and the bundle rows",
     "bundleVsUplot": {
       "chartkitBytes": 40979,
@@ -39,7 +39,7 @@
     {
       "id": "chartkit-line",
       "lib": "ChartKit",
-      "entry": "size script line, 6ec84d7",
+      "entry": "size script line, 92347dd",
       "bytes": 40979,
       "reactExternal": false
     },
@@ -480,8 +480,8 @@
       "uplotJsBytes": "23,276",
       "uplotCssBytes": "762",
       "uplotSumBytes": "24,038",
-      "sizeCommit": "6ec84d7",
-      "sizeMeasured": "2026-10-23",
+      "sizeCommit": "92347dd",
+      "sizeMeasured": "2026-10-24",
       "harnessLineBytes": "41,178",
       "bundleLoss": "That is a loss to uPlot at 23,276 bytes. The stylesheet is 762 bytes more, a separate response, and the two sum to 24,038, still smaller than ChartKit.",
       "lineWins": "It is still smaller than Chart.js (49,374), Recharts (96,213, React external), Nivo (96,583, React external), Observable Plot (97,723), and ECharts (162,991).",
