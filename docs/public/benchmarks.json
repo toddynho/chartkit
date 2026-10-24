@@ -19,7 +19,7 @@
   },
   "headline": {
     "lineGzipBytes": 40979,
-    "lineGzipCommit": "92347dd",
+    "lineGzipCommit": "236653a",
     "lineGzipMeasured": "2026-10-24",
     "otherFigures": "round 13, measured 2026-10-18 on phase 2 d8dcc5a, except the agent eval and the bundle rows",
     "bundleVsUplot": {
@@ -39,7 +39,7 @@
     {
       "id": "chartkit-line",
       "lib": "ChartKit",
-      "entry": "size script line, 92347dd",
+      "entry": "size script line, 236653a",
       "bytes": 40979,
       "reactExternal": false
     },
@@ -480,7 +480,7 @@
       "uplotJsBytes": "23,276",
       "uplotCssBytes": "762",
       "uplotSumBytes": "24,038",
-      "sizeCommit": "92347dd",
+      "sizeCommit": "236653a",
       "sizeMeasured": "2026-10-24",
       "harnessLineBytes": "41,178",
       "bundleLoss": "That is a loss to uPlot at 23,276 bytes. The stylesheet is 762 bytes more, a separate response, and the two sum to 24,038, still smaller than ChartKit.",
