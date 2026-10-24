@@ -926,9 +926,13 @@ body:has(.dash-page.dash-theme-midnight.dash-keel) { --bg: #1a1625; background: 
   font: 500 14px/1.2 Inter, sans-serif;
   cursor: pointer;
 }
-.dash-shell.dash-meter, .dash-shell.dash-ledger { grid-template-columns: minmax(0, 1fr); }
+.dash-shell.dash-meter, .dash-shell.dash-ledger,
+.dash-shell.dash-signal, .dash-shell.dash-folio, .dash-shell.dash-cycle,
+.dash-shell.dash-edge, .dash-shell.dash-pulse, .dash-shell.dash-retain { grid-template-columns: minmax(0, 1fr); }
 .dash-meter .dash-main { width: min(1120px, 100%); margin: 0 auto; }
 .dash-ledger .dash-main { width: min(1030px, 100%); margin: 0 auto; }
+.dash-signal .dash-main, .dash-folio .dash-main, .dash-cycle .dash-main,
+.dash-edge .dash-main, .dash-pulse .dash-main, .dash-retain .dash-main { width: min(1120px, 100%); margin: 0 auto; }
 .dash-shell.dash-wayline { grid-template-columns: 56px auto minmax(0, 1fr); }
 .dash-shell.dash-keel { grid-template-columns: 64px minmax(0, 1fr); }
 .dash-rail {
@@ -1181,8 +1185,10 @@ body:has(.dash-page.dash-theme-midnight.dash-keel) { --bg: #1a1625; background: 
 .dash-score {
   display: grid;
   gap: 2px;
-  padding-bottom: 4px;
+  padding: 4px 8px 2px;
 }
+.dash-score .chart-host { min-width: 0; }
+.dash-score .chart-host svg { width: 100%; height: auto; }
 .dash-split { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(180px, 0.7fr); gap: 12px; align-items: center; }
 .dash-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .dash-table caption { text-align: left; font-weight: 650; margin-bottom: 6px; }

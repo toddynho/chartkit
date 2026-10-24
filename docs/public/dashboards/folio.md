@@ -572,7 +572,7 @@ type kpi. The delta is the day change.
 
 Share of the portfolio.
 
-type bar-list, mark.track row. Names are generic.
+type bar-list, mark.track row. Names are generic. The label and amount use the text token: near-black on Soft, white on Midnight.
 
 ```json
 {
@@ -583,7 +583,7 @@ type bar-list, mark.track row. Names are generic.
     "tokens": {
       "background": "transparent",
       "surface": "#ffffff",
-      "text": "#111111",
+      "text": "#0a0a0a",
       "muted": "#6b6b6b",
       "grid": "#ececec",
       "axis": "#d0d0d0",
@@ -630,8 +630,8 @@ type bar-list, mark.track row. Names are generic.
     "track": "row"
   },
   "size": {
-    "width": 980,
-    "height": 140
+    "width": 640,
+    "height": 148
   },
   "a11y": {
     "alt": "The broad fund is the largest holding, then the north index, cash, and a bond sleeve."
