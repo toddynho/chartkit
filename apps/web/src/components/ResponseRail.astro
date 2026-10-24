@@ -1,0 +1,52 @@
+---
+import { previewSvg, type PreviewSpec } from "../lib/preview-svg";
+
+interface Props {
+  spec: PreviewSpec;
+}
+
+const { spec } = Astro.props;
+const svg = previewSvg(spec);
+const json = JSON.stringify(spec, null, 2);
+---
+
+<div class="response" id="docs-response" data-theme={spec.theme === "midnight" ? "midnight" : "soft"} aria-live="polite">
+  <div class="response__chrome">
+    <span class="response__method">POST</span>
+    <span class="response__path">/preview</span>
+    <span class="response__status" id="response-status">200</span>
+  </div>
+  <div class="response__tabs" role="tablist" aria-label="Response view">
+    <button type="button" class="response__tab is-on" data-tab="chart" role="tab" aria-selected="true">Chart</button>
+    <button type="button" class="response__tab" data-tab="json" role="tab" aria-selected="false">JSON</button>
+  </div>
+  <div class="response__body">
+    <div class="response__panel" data-panel="chart">
+      <div class="response__meta">
+        <span class="response__title" id="response-title">{spec.title || spec.type || "Spec"}</span>
+        <span class="response__badge" id="response-badge">{spec.theme === "midnight" ? "Midnight" : "Soft"}</span>
+      </div>
+      <div id="response-chart" set:html={svg} />
+    </div>
+    <pre class="response__json" data-panel="json" id="response-json" hidden>{json}</pre>
+  </div>
+  <p class="response__footer" id="response-ok">Illustrative preview · validate() not called</p>
+</div>
+
+<script>
+  const root = document.getElementById("docs-response");
+  const tabs = root?.querySelectorAll<HTMLButtonElement>(".response__tab") ?? [];
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const name = tab.dataset.tab;
+      tabs.forEach((peer) => {
+        const on = peer === tab;
+        peer.classList.toggle("is-on", on);
+        peer.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      root?.querySelectorAll<HTMLElement>("[data-panel]").forEach((panel) => {
+        panel.hidden = panel.dataset.panel !== name;
+      });
+    });
+  });
+</script>

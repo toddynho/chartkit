@@ -28,7 +28,7 @@ npm run check --workspace=chartkit-web
 | --- | --- | --- |
 | Role | Next public site. Marketing and docs shell. | What chartkit.dev serves today. |
 | Dev | `npm run dev:web` | `npm run dev` |
-| Content | Stub routes, tokens, try-it layout | Full docs, demos, benchmarks, llms.txt |
+| Content | Click-through docs from the locked mocks, plus the marketing pages | Full docs, demos, benchmarks, llms.txt |
 | Hosting | Not wired | Existing production app |
 
 Chart-type paths match the current docs (`/docs/charts/line` and the rest) so a later move can keep URLs. `llms.txt`, the schema, and the measured pages stay on the Next.js app until cutover.
@@ -39,18 +39,22 @@ Do not delete `docs/` to “finish” the migration. Point chartkit.dev at `apps
 
 - `/` — product hero (chart carousel, chart/JSON hover, Free watermark preview), why switch, Cloud API, pricing (numbers TBD), gallery placeholders
 - `/cloud` — Cloud API stub and the same pricing block
-- `/docs` — docs shell
-- `/docs/install`
-- `/docs/concepts`, `/docs/concepts/spec`, `/docs/concepts/adapters`, `/docs/concepts/themes`
-- `/docs/charts` and `/docs/charts/<type>`
-- `/docs/reference`, `/docs/reference/try`, `/docs/reference/validate`
-- `/docs/agents`, `/docs/agents/mcp`, `/docs/agents/llms`
+- `/docs` — Overview
+- Start: `/docs/react`, `/docs/vue`, `/docs/svelte`, `/docs/vanilla`, `/docs/markdown`
+- Concepts: `/docs/spec-anatomy`, `/docs/data`, `/docs/encoding`, `/docs/scales`, `/docs/axes`, `/docs/themes-tokens`, `/docs/bundles`
+- Chart types in the left nav, grouped Core, Statistical, and Planning: `/docs/charts/<type>` (`area`, `line`, `bar`, `donut`, `combo`, `gauge`, `heatmap`, `candlestick`, `scatter`, `kpi`, `sparkline`, `mini-area`, `progress-ring`, `spike`, `histogram`, `boxplot`, `radar`, `funnel`, `treemap`, `sankey`, `bullet`, `waterfall`, `gantt`, `timeline`, `quadrant`, `venn`, `journey`)
+- `/docs/charts` — every type, including library URLs that are not in the left nav (`pie`, `stacked-area`, `area-range`, `bar-range`, `errorbar`, `radial-bar`, `rose`)
+- Reference: `/docs/options`, `/docs/errors`, `/docs/themes`
+- Agents: `/docs/validate`, `/docs/repair`, `/docs/render`, `/docs/llms-txt`, `/docs/mcp`
+- `/docs/reference/try` — playground (sidebar footer)
+- Extra pages kept for older links: `/docs/install`, `/docs/concepts/adapters`
+- Aliases of the pages above: `/docs/concepts/spec`, `/docs/concepts/themes`, `/docs/reference`, `/docs/reference/validate`, `/docs/agents`, `/docs/agents/llms`, `/docs/agents/mcp`
 
-The left nav groups are Start, Concepts, Chart types, Reference, and Agents. Chart types in the nav are All types, Line, Bar, and Donut. The index lists every type.
+The left nav is Start, Concepts, Chart types (Core, Statistical, Planning), Reference, and Agents. Links are extensionless.
 
 ## Try it
 
-`/docs/reference/try` is the pattern for later docs pages: an editable spec, chips (Line, Bar, Donut, Watermark), and a response rail. Watermark is a Cloud request flag, not a spec field. The rail echoes JSON. It does not call Cloud or `@chartkitdev/core`.
+Chart-type pages follow the Line template: facts, an editable spec, chips beside the JSON, anatomy, an options table, and a response rail. Other docs pages use the same editor with theme and chart-type chips. The rail draws an illustrative SVG and echoes the JSON. It does not call `@chartkitdev/core`, Cloud, or `validate()`.
 
 ## Tokens
 

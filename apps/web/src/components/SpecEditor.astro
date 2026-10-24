@@ -1,0 +1,146 @@
+---
+import type { ChipGroup } from "../data/docs-catalog";
+
+interface Props {
+  spec: Record<string, unknown>;
+  chips: ChipGroup[];
+  title?: string;
+  hint?: string;
+}
+
+const { spec, chips, title = "Interactive spec", hint = "Options sit beside the JSON" } = Astro.props;
+const initial = JSON.stringify(spec, null, 2);
+
+function pressed(group: ChipGroup, value: string): boolean {
+  const current = spec[group.key];
+  if (typeof current === "boolean") return String(current) === value;
+  if (current == null && group.options[0]?.value === value) return true;
+  return String(current ?? "") === value;
+}
+---
+
+<div class="spec-try" id="spec-try">
+  <div class="spec-try__bar">
+    <span class="spec-try__title">{title}</span>
+    <span class="spec-try__hint">{hint}</span>
+  </div>
+  <div class="spec-try__split">
+    <div class="spec-editor">
+      <div class="spec-editor__bar">
+        <span>spec.json</span>
+        <span id="spec-status">valid · ready</span>
+      </div>
+      <label class="sr" for="spec-input">Editable chart specification</label>
+      <textarea id="spec-input" spellcheck="false">{initial}</textarea>
+    </div>
+    <div class="spec-chips" role="group" aria-label="Spec options">
+      {
+        chips.map((group) => (
+          <div class="chip-row">
+            <span class="chip-row__label">{group.label}</span>
+            <div class="chip-row__opts">
+              {group.options.map((option) => (
+                <button
+                  type="button"
+                  class:list={["spec-chip", pressed(group, option.value) && "is-on"]}
+                  data-key={group.key}
+                  data-value={option.value}
+                  aria-pressed={pressed(group, option.value) ? "true" : "false"}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+  <p class="spec-try__note">
+    The response rail draws an illustrative chart from this JSON. It does not call <code>@chartkitdev/core</code> or Cloud,
+    and it does not run <code>validate()</code>.
+  </p>
+</div>
+
+<script>
+  import { previewSvg, type PreviewSpec } from "../lib/preview-svg";
+  import { samples } from "../data/samples";
+
+  const editor = document.getElementById("spec-try");
+  const input = document.getElementById("spec-input") as HTMLTextAreaElement | null;
+  const status = document.getElementById("spec-status");
+  const chartPanel = document.getElementById("response-chart");
+  const jsonPanel = document.getElementById("response-json");
+  const response = document.getElementById("docs-response");
+  const titleEl = document.getElementById("response-title");
+  const badgeEl = document.getElementById("response-badge");
+  const statusCode = document.getElementById("response-status");
+  const okEl = document.getElementById("response-ok");
+
+  function paint(spec: PreviewSpec, raw: string, ok: boolean, detail?: string) {
+    if (chartPanel) {
+      chartPanel.innerHTML = ok ? previewSvg(spec) : "";
+    }
+    if (jsonPanel) jsonPanel.textContent = raw;
+    response?.setAttribute("data-theme", spec.theme === "midnight" ? "midnight" : "soft");
+    response?.classList.toggle("is-error", !ok);
+    if (titleEl) titleEl.textContent = ok ? spec.title || spec.type || "Spec" : "Spec";
+    if (badgeEl) badgeEl.textContent = spec.theme === "midnight" ? "Midnight" : "Soft";
+    if (statusCode) statusCode.textContent = ok ? "200" : "400";
+    if (okEl) okEl.textContent = ok ? "Illustrative preview · validate() not called" : detail || "Spec is not JSON";
+    if (status) status.textContent = ok ? "valid · ready" : "invalid JSON";
+  }
+
+  function read(): { ok: true; spec: PreviewSpec; raw: string } | { ok: false; raw: string; detail: string } {
+    const raw = input?.value ?? "";
+    try {
+      return { ok: true, spec: JSON.parse(raw) as PreviewSpec, raw: JSON.stringify(JSON.parse(raw), null, 2) };
+    } catch (error) {
+      return { ok: false, raw, detail: error instanceof Error ? error.message : "Spec is not JSON" };
+    }
+  }
+
+  function syncChips(spec: PreviewSpec) {
+    editor?.querySelectorAll<HTMLButtonElement>(".spec-chip").forEach((button) => {
+      const key = button.dataset.key;
+      const value = button.dataset.value;
+      if (!key || value == null) return;
+      const current = (spec as Record<string, unknown>)[key];
+      const on = String(current) === value;
+      button.classList.toggle("is-on", on);
+      button.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+
+  function render() {
+    const result = read();
+    if (!result.ok) {
+      paint({}, result.raw, false, result.detail);
+      return;
+    }
+    paint(result.spec, result.raw, true);
+    syncChips(result.spec);
+  }
+
+  editor?.querySelectorAll<HTMLButtonElement>(".spec-chip").forEach((button) => {
+    button.addEventListener("click", () => {
+      const result = read();
+      if (!result.ok || !input) return;
+      const key = button.dataset.key;
+      const value = button.dataset.value;
+      if (!key || value == null) return;
+      const next: Record<string, unknown> = { ...result.spec };
+      if (key === "type" && value in samples) {
+        const sample = samples[value as keyof typeof samples];
+        Object.assign(next, sample, { theme: next.theme ?? "soft", title: next.title });
+      } else {
+        next[key] = value === "true" ? true : value === "false" ? false : value;
+      }
+      input.value = JSON.stringify(next, null, 2);
+      render();
+    });
+  });
+
+  input?.addEventListener("input", render);
+  render();
+</script>

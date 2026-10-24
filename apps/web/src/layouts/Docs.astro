@@ -1,23 +1,49 @@
 ---
+import "../styles/docs.css";
 import Base from "./Base.astro";
 import DocsNav from "../components/DocsNav.astro";
+import Prose from "../components/Prose.astro";
+import { crumbsFor } from "../data/docs-catalog";
 
 interface Props {
   title: string;
   description: string;
   lede?: string;
+  href: string;
 }
 
-const { title, description, lede } = Astro.props;
+const { title, description, lede, href } = Astro.props;
+const crumbs = crumbsFor(href);
 ---
 
-<Base title={title} description={description}>
-  <div class="docs-shell">
+<Base tone="light" title={title} description={description}>
+  <div class="docs-frame">
     <DocsNav />
     <article class="docs-main">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        {
+          crumbs.map((crumb, index) => (
+            <>
+              {index > 0 ? <span class="breadcrumb__sep" aria-hidden="true">/</span> : null}
+              {index === crumbs.length - 1 || !crumb.href ? (
+                <span class={index === crumbs.length - 1 ? "breadcrumb__current" : undefined}>{crumb.label}</span>
+              ) : (
+                <a href={crumb.href}>{crumb.label}</a>
+              )}
+            </>
+          ))
+        }
+      </nav>
       <h1>{title}</h1>
-      {lede ? <p class="lede">{lede}</p> : null}
+      {lede ? <p class="lede"><Prose text={lede} /></p> : null}
       <slot />
     </article>
+    <aside class="docs-rail" aria-label="Response">
+      <div class="docs-rail__label">
+        <span>Response</span>
+        <span>Illustrative</span>
+      </div>
+      <slot name="rail" />
+    </aside>
   </div>
 </Base>

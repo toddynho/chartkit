@@ -1,24 +1,29 @@
 ---
+import DocArticle from "../../components/DocArticle.astro";
+import ResponseRail from "../../components/ResponseRail.astro";
+import { articleHref, articleSpec, docArticles, type DocArticle as Article } from "../../data/docs-catalog";
 import Docs from "../../layouts/Docs.astro";
-import Blocks from "../../components/Blocks.astro";
-import MigrationNote from "../../components/MigrationNote.astro";
-import { docPages, type DocPage } from "../../data/doc-pages";
 
 export function getStaticPaths() {
-  return docPages.map((page) => ({
-    params: { slug: page.slug },
-    props: { page },
-  }));
+  return docArticles.flatMap((article) => {
+    if (!article.slug) return [];
+    const paths = [article.slug, ...article.aliases];
+    return paths.map((slug) => ({
+      params: { slug },
+      props: { article, here: `/docs/${slug}` },
+    }));
+  });
 }
 
 interface Props {
-  page: DocPage;
+  article: Article;
+  here: string;
 }
 
-const { page } = Astro.props;
+const { article, here } = Astro.props;
 ---
 
-<Docs title={page.title} description={page.description} lede={page.lede}>
-  {page.current ? <MigrationNote href={page.current} /> : null}
-  <Blocks blocks={page.blocks} />
+<Docs title={article.title} description={article.description} lede={article.lede} href={articleHref(article)}>
+  <DocArticle article={article} here={here} />
+  <ResponseRail slot="rail" spec={articleSpec} />
 </Docs>

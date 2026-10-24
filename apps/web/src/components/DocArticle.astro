@@ -1,0 +1,63 @@
+---
+import type { DocArticle } from "../data/docs-catalog";
+import { articleChips, articleHref, articleSpec } from "../data/docs-catalog";
+import PageNav from "./PageNav.astro";
+import Prose from "./Prose.astro";
+import SpecEditor from "./SpecEditor.astro";
+
+interface Props {
+  article: DocArticle;
+  here: string;
+}
+
+const { article, here } = Astro.props;
+const canonical = articleHref(article);
+---
+
+{
+  here !== canonical ? (
+    <p class="note">
+      This path still works. The docs nav links to <a href={canonical}>{article.title}</a>.
+    </p>
+  ) : null
+}
+{article.tryIntro ? <p><Prose text={article.tryIntro} /></p> : null}
+<SpecEditor spec={articleSpec} chips={articleChips} />
+{
+  article.sections.map((section) => (
+    <section>
+      <h2>{section.title}</h2>
+      {section.paragraphs.map((paragraph) => (
+        <p>
+          <Prose text={paragraph} />
+        </p>
+      ))}
+      {section.list.length ? (
+        <ul>
+          {section.list.map((item) => (
+            <li>
+              <Prose text={item.replace(/^\d+(?=\S)/, "").replace(/^\d+\s*/, "")} />
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {section.code.map((code) => (
+        <figure class="code">
+          <figcaption>sample</figcaption>
+          <pre><code>{code}</code></pre>
+        </figure>
+      ))}
+    </section>
+  ))
+}
+{
+  article.slug === "concepts/adapters" ? (
+    <ul>
+      <li><a href="/docs/react">React</a></li>
+      <li><a href="/docs/vue">Vue</a></li>
+      <li><a href="/docs/svelte">Svelte</a></li>
+      <li><a href="/docs/vanilla">Vanilla</a></li>
+    </ul>
+  ) : null
+}
+<PageNav href={canonical} />
