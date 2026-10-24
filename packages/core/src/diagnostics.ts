@@ -17,6 +17,7 @@ export type Severity = "error" | "warning";
  * Interaction+ uses CK3034–CK3039. Layout uses CK3040–CK3049.
  * Geo uses CK3050–CK3056 in @chartkitdev/geo. CK3057 hands a map spec to that package.
  * Visual axes use CK3058–CK3071. CK3072 is the y-channel stack group.
+ * Polar, radial bar, and rose use CK3073–CK3080.
  */
 export interface Diagnostic {
   code: string;

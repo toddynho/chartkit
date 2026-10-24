@@ -1,12 +1,64 @@
 # Coordinate systems (polar, transpose, geo)
 
-ChartKit: **none**
+ChartKit: **partial**
 
 Switch coordinate system of the same marks
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `partial`. Verification: `dts-path` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+layout.coordinate polar draws on radial-bar and rose. A bar repairs to radial-bar, and a pie or donut repairs to rose. Other marks stay cartesian and the coordinate is removed.
+
+Source: chartkit:packages/core/src/charts/radial-bar.ts:1
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "radial-bar",
+  "data": [
+    {
+      "desk": "Music",
+      "weeknight": 186,
+      "saturday": 210
+    },
+    {
+      "desk": "Talk",
+      "weeknight": 74,
+      "saturday": 48
+    },
+    {
+      "desk": "News",
+      "weeknight": 36,
+      "saturday": 22
+    },
+    {
+      "desk": "Sky",
+      "weeknight": 18,
+      "saturday": 16
+    }
+  ],
+  "encoding": {
+    "x": "desk",
+    "y": [
+      "weeknight",
+      "saturday"
+    ]
+  },
+  "layout": {
+    "coordinate": "polar"
+  },
+  "a11y": {
+    "alt": "Saturday music runs longer, and talk shrinks."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -33,6 +85,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | unknown | — | conflict (unknown) | — |
 | AntV G2 | native | ~coordinate | dts-grep (weak) | @antv/g2/lib/index.d.ts:52 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 92347dd72bcd.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 236653ac9462.
 
 https://chartkit.dev/features.json

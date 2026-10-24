@@ -1,0 +1,24 @@
+{
+  "version": "1",
+  "id": "lumen-radial-bar",
+  "type": "radial-bar",
+  "title": "Lumen, minutes by desk",
+  "data": [
+    { "desk": "Music", "weeknight": 186, "saturday": 210 },
+    { "desk": "Talk", "weeknight": 74, "saturday": 48 },
+    { "desk": "News", "weeknight": 36, "saturday": 22 },
+    { "desk": "Sky", "weeknight": 18, "saturday": 16 },
+    { "desk": "Spots", "weeknight": 28, "saturday": 40 },
+    { "desk": "Ident", "weeknight": 8, "saturday": 6 }
+  ],
+  "encoding": {
+    "x": "desk",
+    "y": [
+      { "field": "weeknight", "title": "Weeknight" },
+      { "field": "saturday", "title": "Saturday" }
+    ]
+  },
+  "mark": { "innerRadius": 0.34, "padAngle": 2, "cornerRadius": 4 },
+  "layout": { "coordinate": "polar" },
+  "a11y": { "alt": "Saturday music runs longer, and talk shrinks." }
+}

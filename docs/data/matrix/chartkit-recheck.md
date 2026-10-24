@@ -131,3 +131,13 @@ A cell moved to native only when a runtime probe changed the SVG or the client D
 | interaction.navigator | native | `interaction.navigator` mounts an overview and a keyboard range slider from the interaction extra. The SVG records `data-ck-nav`. CK3034 and CK3035. |
 | interaction.sync | native | `interaction.sync` shares the crosshair, tooltip, and x window by x value. The SVG records `data-ck-sync`. CK3036. |
 | interaction.drilldown | native | `interaction.drilldown.children` swaps in a child spec. Click, Enter, or Space drills. Back and Escape pop. The SVG records `data-ck-drill`. CK3037–CK3039. |
+
+## Polar
+
+Rechecked on radial-bar and rose. Both load from `@chartkitdev/core/charts/<type>`, so `createRenderer([line])` does not include them. `layout.coordinate` `polar` is not a live transpose of every mark.
+
+| id | status | correction |
+|---|---|---|
+| type.polar.radialbar | native | `type: "radial-bar"` draws categories around a circle. Grouped is the default. `mark.stack` `stack` or `percent` runs outward. `radialBar`, `polar-bar`, and `polar` repair to radial-bar. A progress ring stays the single-value type. |
+| type.polar.area | native | `type: "rose"` keeps equal angles and maps the value to the radius. `polarArea`, `nightingale`, and `rose-chart` repair to rose. |
+| layout.polar.coords | partial | `layout.coordinate` `polar` draws on radial-bar and rose. A bar repairs to radial-bar, and a pie or donut repairs to rose (CK3077). Other marks stay cartesian and the coordinate is removed. |

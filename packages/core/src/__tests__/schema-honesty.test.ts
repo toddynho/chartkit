@@ -438,6 +438,8 @@ function hosts(): Host[] {
     ["errorbar", { version: "1", type: "errorbar", data: rows, encoding: { x: "month", y: "revenue", error: "cost" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     ["treemap", { version: "1", type: "treemap", data: [deepTree], encoding: { x: "name", y: "value" }, a11y: { alt }, size: { width: 420, height: 280 } }],
     ["sunburst", { version: "1", type: "sunburst", data: [deepTree], encoding: { x: "name", y: "value" }, a11y: { alt }, size: { width: 420, height: 280 } }],
+    ["radial-bar", { version: "1", type: "radial-bar", data: rows, encoding: { x: "month", y: ["revenue", "cost"] }, a11y: { alt }, size: { width: 420, height: 280 } }],
+    ["rose", { version: "1", type: "rose", data: rows, encoding: { x: "month", y: "revenue" }, a11y: { alt }, size: { width: 420, height: 280 } }],
     [
       "trace",
       {
@@ -566,6 +568,8 @@ const ENTRY_FILES: Array<[string, string]> = [
   ["bar-range", "barRange"],
   ["errorbar", "errorbar"],
   ["sunburst", "sunburst"],
+  ["radial-bar", "radialBar"],
+  ["rose", "rose"],
 ];
 
 const FRESH_ENTRY = new Set(["line", "bar", "stacked-area", "combo", "sparkline", "mini-area"]);

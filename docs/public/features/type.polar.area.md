@@ -1,12 +1,57 @@
 # Polar area / rose / nightingale
 
-ChartKit: **none**
+ChartKit: **native**
 
 Sectors of equal angle with radius as value
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+Equal angles, radius from the value. Loaded from @chartkitdev/core/charts/rose. polar-area, nightingale, and rose-chart repair to rose.
+
+Source: chartkit:packages/core/src/charts/rose.ts:1
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "rose",
+  "data": [
+    {
+      "place": "Hale",
+      "listeners": 4200
+    },
+    {
+      "place": "Mill",
+      "listeners": 3100
+    },
+    {
+      "place": "Quay",
+      "listeners": 5600
+    },
+    {
+      "place": "Ridge",
+      "listeners": 1800
+    }
+  ],
+  "encoding": {
+    "x": "place",
+    "y": "listeners"
+  },
+  "layout": {
+    "coordinate": "polar"
+  },
+  "a11y": {
+    "alt": "Quay is the largest share of the evening audience."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 
@@ -33,6 +78,6 @@ No spec snippet. ChartKit does not support this feature.
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~polar | dts-grep (weak) | @antv/g2/lib/index.d.ts:53 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 92347dd72bcd.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 236653ac9462.
 
 https://chartkit.dev/features.json

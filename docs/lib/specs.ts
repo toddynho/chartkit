@@ -3,6 +3,8 @@ import companyTimeline from "../../packages/core/examples/25-timeline.json";
 import priorityQuadrant from "../../packages/core/examples/26-quadrant.json";
 import featureVenn from "../../packages/core/examples/27-venn.json";
 import checkoutJourney from "../../packages/core/examples/28-journey.json";
+import lumenRadial from "../../packages/core/examples/34-radial-bar.json";
+import lumenRose from "../../packages/core/examples/35-rose.json";
 
 export interface Spec {
   version: "1";
@@ -21,6 +23,7 @@ export interface Spec {
   locale?: string;
   subtitle?: string;
   annotations?: unknown;
+  layout?: Record<string, unknown>;
 }
 
 export interface Example {
@@ -315,6 +318,26 @@ export const chartTypes: ChartTypeDoc[] = [
     title: "Journey",
     summary: "Sections and steps, with a 1–5 score and actor chips.",
     notes: ["The score is a face on a five-step scale. actors is a comma-separated list."],
+  },
+  {
+    type: "radial-bar",
+    title: "Radial bar",
+    summary: "Categories around a circle. Length is the radius. Series sit side by side unless they stack outward.",
+    notes: [
+      "encoding.x is the category. encoding.y is one field or a list.",
+      "mark.stack stack or percent runs outward. The hole, gap, and corner radius are mark options.",
+      "The chart loads from @chartkitdev/core/charts/radial-bar. createRenderer([line]) does not include it.",
+    ],
+  },
+  {
+    type: "rose",
+    title: "Rose",
+    summary: "Equal angles, with the radius as the value. Polar area and nightingale use this type.",
+    notes: [
+      "encoding.x is the category. encoding.y is the radius.",
+      "polarArea, nightingale, and rose-chart repair to rose.",
+      "The chart loads from @chartkitdev/core/charts/rose. createRenderer([line]) does not include it.",
+    ],
   },
 ];
 
@@ -1054,6 +1077,22 @@ export const examples: Example[] = [
     type: "journey",
     blurb: "Browse is easy. Payment is where the score drops.",
     spec: checkoutJourney as Spec,
+  },
+  {
+    slug: "lumen-radial-bar",
+    title: "Lumen desks",
+    group: "Polar",
+    type: "radial-bar",
+    blurb: "Weeknight and Saturday minutes around the dial.",
+    spec: lumenRadial as Spec,
+  },
+  {
+    slug: "lumen-rose",
+    title: "Saturday audience",
+    group: "Polar",
+    type: "rose",
+    blurb: "Equal angles. Quay reaches farthest.",
+    spec: lumenRose as Spec,
   },
 ];
 

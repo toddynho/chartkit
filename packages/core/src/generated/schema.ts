@@ -19,7 +19,7 @@ export type ChartKitChartSpecV1 = {
    */
   version: "1";
   /**
-   * Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. Nested children, encoding.path, or encoding.id with encoding.parent draw nested levels; a flat treemap stays one level. 'sunburst': concentric rings for that same hierarchy. Colour follows the top-level branch. mark.innerRadius is the hole (0.28 when omitted) and mark.depth caps the rings. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar. 'area-range': a band between low and high, with an optional centre line from y. Several bands are a y list of {lo, hi}. 'bar-range': a floating bar from low to high per category. 'errorbar': whiskers on a point or a bar, from low and high or from encoding.error as ± around y. A combo y item with mark range and lo/hi draws that band under the other series. 'bar-list': Ranked rows with no axes. A tinted track runs behind the label and the value sits at the right. Load it from @chartkitdev/core/charts/bar-list. It is not in the line or all bundle.
+   * Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. Nested children, encoding.path, or encoding.id with encoding.parent draw nested levels; a flat treemap stays one level. 'sunburst': concentric rings for that same hierarchy. Colour follows the top-level branch. mark.innerRadius is the hole (0.28 when omitted) and mark.depth caps the rings. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar. 'area-range': a band between low and high, with an optional centre line from y. Several bands are a y list of {lo, hi}. 'bar-range': a floating bar from low to high per category. 'errorbar': whiskers on a point or a bar, from low and high or from encoding.error as ± around y. A combo y item with mark range and lo/hi draws that band under the other series. 'bar-list': Ranked rows with no axes. A tinted track runs behind the label and the value sits at the right. Load it from @chartkitdev/core/charts/bar-list. It is not in the line or all bundle. 'radial-bar': category on x, radius on y, bars around a circle. Several y fields group side by side unless mark.stack is stack or percent. 'rose': equal angles, and the radius is the value (a nightingale rose). Both use polar coordinates and load from @chartkitdev/core/charts/<type>. They are not in the line bundle. layout.coordinate polar on bar, pie, or donut repairs onto radial-bar or rose (CK3077).
    */
   type:
     | "line"
@@ -49,7 +49,9 @@ export type ChartKitChartSpecV1 = {
     | "bar-range"
     | "errorbar"
     | "sunburst"
-    | "bar-list";
+    | "bar-list"
+    | "radial-bar"
+    | "rose";
   /**
    * Optional stable id (used for keys, events, test hooks).
    */
@@ -1299,7 +1301,7 @@ export interface Mark {
    */
   connectNulls?: boolean;
   /**
-   * Stacking for multiple series. 'percent' normalises each x to 100%. Applies to: bar, stacked-area (default 'stack'), combo bars.
+   * Stacking for multiple series. 'percent' normalises each x to 100%. Applies to: bar, stacked-area (default 'stack'), combo bars, radial-bar, rose. On a polar chart, none groups the sectors and stack or percent runs outward from the hole.
    */
   stack?: "none" | "stack" | "percent";
   /**
@@ -1307,11 +1309,11 @@ export interface Mark {
    */
   orientation?: "vertical" | "horizontal";
   /**
-   * Rounded corners in px. Applies to: bar, donut, pie, heatmap.
+   * Rounded corners in px. Applies to: bar, donut, pie, heatmap, radial-bar, rose. A radial bar rounds the outer end.
    */
   cornerRadius?: number;
   /**
-   * Spacing between bars/cells as a 0–1 fraction of the band. Applies to: bar, combo, heatmap, candlestick.
+   * Spacing between bars/cells as a 0–1 fraction of the band. Applies to: bar, combo, heatmap, candlestick, radial-bar, rose. On a grouped polar chart it is the share of the category left between series.
    */
   gap?: number;
   /**
@@ -1331,7 +1333,7 @@ export interface Mark {
    */
   partialOpacity?: number;
   /**
-   * Draw value labels on the marks. Applies to: bar, donut, pie, line, stacked-area, scatter. Outside pie and donut labels use leader lines. Overlapping labels are skipped.
+   * Draw value labels on the marks. Applies to: bar, donut, pie, line, stacked-area, scatter, radial-bar, rose. Outside pie and donut labels use leader lines. Overlapping labels are skipped. A polar value is drawn on a sector tall enough to hold it.
    */
   labels?: boolean;
   /**
@@ -1369,7 +1371,7 @@ export interface Mark {
    */
   stackTotal?: boolean;
   /**
-   * Hole size as a 0–0.95 fraction of the radius. Donut defaults to 0.6. Pie defaults to 0. Sunburst uses 0.28 when this is omitted. Applies to: donut, pie, sunburst.
+   * Hole size as a 0–0.95 fraction of the radius. Donut defaults to 0.6. Pie defaults to 0. Sunburst uses 0.28 when this is omitted. Radial-bar defaults to 0.34. Rose defaults to 0. Above 0.85 on a polar chart warns CK3075. Applies to: donut, pie, sunburst, radial-bar, rose.
    */
   innerRadius?: number;
   /**
@@ -1377,7 +1379,7 @@ export interface Mark {
    */
   depth?: number;
   /**
-   * Gap between slices in degrees. Donut defaults to 2. Pie defaults to 0. Applies to: donut, pie.
+   * Gap between slices in degrees. Donut defaults to 2. Pie defaults to 0. Radial-bar defaults to 2. Rose defaults to 1.2. Above 8 degrees on a polar chart warns CK3076. Applies to: donut, pie, radial-bar, rose.
    */
   padAngle?: number;
   /**
@@ -2678,7 +2680,7 @@ export interface Mark {
    */
   weeks?: number;
   /**
-   * Arc start in degrees (0 = top, clockwise). Applies to: gauge, progress-ring, donut, pie.
+   * Arc start in degrees (0 = top, clockwise). Applies to: gauge, progress-ring, donut, pie, radial-bar, rose. Polar charts start at 0, the top of the circle.
    */
   startAngle?: number;
   /**
@@ -3476,6 +3478,10 @@ export interface Layout {
    * rtl mirrors a categorical x axis, moves the y axis to the right, and right-aligns the title. The SVG sets dir=rtl. Default ltr.
    */
   direction?: "ltr" | "rtl";
+  /**
+   * Coordinate system. polar is angle and radius, and it is how radial-bar and rose draw. Setting polar on bar repairs the type to radial-bar. On pie or donut it repairs to rose. On any other type the patch removes it (CK3077). cartesian on radial-bar or rose warns CK3078 and the patch sets polar.
+   */
+  coordinate?: "cartesian" | "polar";
   /**
    * One panel per value of field. columns and rows set the grid. wrap (default true) flows extra panels onto new rows. scales shared uses one y domain; independent lets each panel scale itself. legend shared draws one legend for the grid.
    */

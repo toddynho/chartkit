@@ -71,8 +71,8 @@ Every chart type and major variant. Status native = a first-class type/series/ma
 | **Pie chart** <br><sub>`type.pie` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ✎ | ● | ● | ● | ● | · | · | ● | ● | ● |
 | **Donut chart** <br><sub>`type.donut` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ✎ | ● | ● | ● | ● | · | · | ● | ? | ● |
 | **Semi-circle / partial arc pie** <br><sub>`type.pie.semi`</sub> | ● | ● | ● | ● | ● | ◐ | ● | ● | ● | ● | · | · | ● | ● | ● | ● | ? | · | ● | ? | ● |
-| **Radial bar** <br><sub>`type.polar.radialbar`</sub> | ◐ | · | ● | ● | ● | ● | ● | ◐ | ✎ | ● | ◐ | ✎ | ◐ | ● | ● | · | · | · | ●ᴾ | · | ● |
-| **Polar area / rose / nightingale** <br><sub>`type.polar.area`</sub> | · | ● | ◐ | ● | ● | ● | ● | ◐ | ✎ | ● | · | ✎ | ● | ● | ● | · | · | · | ✎ | · | ● |
+| **Radial bar** <br><sub>`type.polar.radialbar`</sub> | ● | · | ● | ● | ● | ● | ● | ◐ | ✎ | ● | ◐ | ✎ | ◐ | ● | ● | · | · | · | ●ᴾ | · | ● |
+| **Polar area / rose / nightingale** <br><sub>`type.polar.area`</sub> | ● | ● | ◐ | ● | ● | ● | ● | ◐ | ✎ | ● | · | ✎ | ● | ● | ● | · | · | · | ✎ | · | ● |
 | **Radar / spider chart** <br><sub>`type.radar` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ✎ | ● | · | ✎ | ✎ | ● | ● | · | · | · | ● | ● | ● |
 | **Gauge / dial** <br><sub>`type.gauge` ★</sub> | ● | ✎ | ✎ | ● | ● | ● | ✎ | ✎ | ✎ | ◐ | ◐ | · | ✎ | ● | ● | ● | · | · | ● | · | ● |
 | **Linear gauge / progress bar** <br><sub>`type.gauge.linear`</sub> | ◐ | · | · | ✎ | ◐ | ◐ | ◐ | · | ✎ | ? | ● | ✎ | ✎ | ●ᴱ | ✎ | ? | · | · | ✎ | · | ✎ |
@@ -320,7 +320,7 @@ Sizing, margins, titles, faceting
 | **Caption / footnote / source** <br><sub>`layout.caption` ★</sub> | · | · | · | ✎ | ● | ✎ | · | ✎ | · | · | · | ● | · | ● | ✎ | · | · | · | · | · | · |
 | **Small multiples / faceting** <br><sub>`layout.facet` ★</sub> | · | ✎ | ✎ | ● | ✎ | ● | ✎ | ✎ | ✎ | ? | · | ● | ● | · | ✎ | ? | ✎ | ✎ | ✎ | · | ● |
 | **Composed dashboards / concatenation** <br><sub>`layout.concat`</sub> | · | · | · | ● | · | ● | · | ? | · | · | · | · | ● | ? | · | ● | · | ● | · | · | ● |
-| **Coordinate systems (polar, transpose, geo)** <br><sub>`layout.polar.coords`</sub> | · | ● | ● | ● | ● | ● | ? | ● | ● | ? | · | ● | ● | ● | ● | · | · | ? | ● | ? | ● |
+| **Coordinate systems (polar, transpose, geo)** <br><sub>`layout.polar.coords`</sub> | ◐ | ● | ● | ● | ● | ● | ? | ● | ● | ? | · | ● | ● | ● | ● | · | · | ? | ● | ? | ● |
 | **Auto layout around legend/labels** <br><sub>`layout.legend.space`</sub> | ? | ● | ◐ | ● | ● | ● | · | · | · | · | · | ● | ● | ● | ● | ● | ◐ | · | ● | · | ● |
 
 ## Theming (`theme`)

@@ -40,6 +40,10 @@ export function load(type: string): Promise<ChartRenderer | undefined> {
       return import("./charts/errorbar").then((mod) => mod.errorbar);
     case "sunburst":
       return import("./charts/sunburst").then((mod) => mod.sunburst);
+    case "radial-bar":
+      return import("./charts/radial-bar").then((mod) => mod.radialBar);
+    case "rose":
+      return import("./charts/rose").then((mod) => mod.rose);
     default:
       return Promise.resolve(undefined);
   }

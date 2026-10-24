@@ -6,7 +6,7 @@
 
 import { readTooltip } from "./tooltip-slot";
 
-const EXTRA = new Set(["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey"]);
+const EXTRA = new Set(["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "radial-bar", "rose"]);
 
 export interface TipController {
   destroy(): void;

@@ -50,6 +50,8 @@ const charts = [
   "errorbar",
   "sunburst",
   "bar-list",
+  "radial-bar",
+  "rose",
 ];
 
 const themes = [

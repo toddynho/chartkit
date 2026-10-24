@@ -126,7 +126,9 @@ const TYPE_FOR = {
   "mark.color.conditional": "line",
   "type.donut": "donut",
   "type.pie.semi": "donut",
-  "type.polar.radialbar": "progress-ring",
+  "type.polar.radialbar": "radial-bar",
+  "type.polar.area": "rose",
+  "layout.polar.coords": "radial-bar",
   "type.radar": "radar",
   "type.gauge": "gauge",
   "type.gauge.linear": "bullet",
@@ -185,6 +187,35 @@ function badgeOf(cell) {
   return cell.status || "unknown";
 }
 
+const POLAR_BASES = {
+  "radial-bar": {
+    version: "1",
+    type: "radial-bar",
+    data: [
+      { desk: "Music", weeknight: 186, saturday: 210 },
+      { desk: "Talk", weeknight: 74, saturday: 48 },
+      { desk: "News", weeknight: 36, saturday: 22 },
+      { desk: "Sky", weeknight: 18, saturday: 16 },
+    ],
+    encoding: { x: "desk", y: ["weeknight", "saturday"] },
+    layout: { coordinate: "polar" },
+    a11y: { alt: "Saturday music runs longer, and talk shrinks." },
+  },
+  rose: {
+    version: "1",
+    type: "rose",
+    data: [
+      { place: "Hale", listeners: 4200 },
+      { place: "Mill", listeners: 3100 },
+      { place: "Quay", listeners: 5600 },
+      { place: "Ridge", listeners: 1800 },
+    ],
+    encoding: { x: "place", y: "listeners" },
+    layout: { coordinate: "polar" },
+    a11y: { alt: "Quay is the largest share of the evening audience." },
+  },
+};
+
 function loadBases() {
   const text = readFileSync(join(publicDir, "llms.txt"), "utf8");
   const bases = {};
@@ -192,7 +223,7 @@ function loadBases() {
     const spec = JSON.parse(match[1]);
     bases[spec.type] = spec;
   }
-  return bases;
+  return { ...POLAR_BASES, ...bases };
 }
 
 function setPath(root, parts, value) {
@@ -467,6 +498,10 @@ function applyFeature(spec, feature) {
     }
     spec.layout = { breakpoints: [{ maxWidth: 480, legend: false }] };
     spec.a11y = { alt: "The legend hides below 480px." };
+    return true;
+  }
+  if (feature.id === "layout.polar.coords") {
+    spec.layout = { ...(spec.layout && typeof spec.layout === "object" ? spec.layout : {}), coordinate: "polar" };
     return true;
   }
   if (feature.id === "format.rtl") {

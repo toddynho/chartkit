@@ -1,23 +1,23 @@
 {
-  "commit": "92347dd72bcd5e904729a3a36dacd5ccb4570933",
-  "coreCommit": "b98a96f286a6964f90160f778e73dedd52ef5c75",
-  "coreMatchesMain": true,
+  "commit": "236653ac94626ec33ef01d0112f8aa7cf09e0d9f",
+  "coreCommit": "cc0cfbd9409bbdc82f8d9b9c915e6f0d5bfe7764",
+  "coreMatchesMain": false,
   "sizeScript": {
     "command": "node scripts/size.mjs",
     "method": "esbuild --bundle --minify, gzip level 9, platform node. line is createRenderer([line]) from packages/core/src. all is packages/core/src/all.ts.",
-    "measuredAt": "2026-10-24T12:31:03.765Z",
+    "measuredAt": "2026-10-24T13:20:39.104Z",
     "measured": {
       "line": 40979,
-      "all": 71390
+      "all": 71398
     },
     "minBytes": {
       "line": 115656,
-      "all": 203497
+      "all": 203517
     }
   },
   "bench": {
     "command": "node bench/run.mjs --skip-browser --skip-ssr --skip-agent",
-    "measuredAt": "2026-10-24T12:30:52.844Z",
+    "measuredAt": "2026-10-24T13:20:27.452Z",
     "method": "esbuild --bundle --minify, platform browser, NODE_ENV=production, gzip level 9, brotli quality 11. ChartKit entries bundle packages/core/src. Competitor entries use the pinned package and only the import that chart needs. ECharts uses echarts/core plus one chart, its grid component when the chart has axes, and CanvasRenderer.",
     "versions": {
       "@chartkitdev/core": "0.5.0",

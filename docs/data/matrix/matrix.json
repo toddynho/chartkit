@@ -10940,19 +10940,19 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "partial",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "ChartKitChartSpecV1.type=progress-ring"
+            "ChartKitChartSpecV1.type=radial-bar"
           ],
           "evidence": [
             {
               "kind": "dts-path",
-              "path": "ChartKitChartSpecV1.type=progress-ring",
-              "loc": "chartkit:packages/core/src/generated/schema.ts:24"
+              "path": "ChartKitChartSpecV1.type=radial-bar",
+              "loc": "chartkit:packages/core/src/charts/radial-bar.ts:1"
             }
           ],
-          "note": "single-value ring only",
+          "note": "Grouped bars around a circle. mark.stack stack or percent runs outward. Loaded from @chartkitdev/core/charts/radial-bar. A progress ring remains the single-value type.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -11315,20 +11315,21 @@
       "agentRelevance": 1,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:polarArea)['\"`]|(?:^|[\\s{,;])\\w*(?:polarArea)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:polarArea)"
+            "ChartKitChartSpecV1.type=rose"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:polarArea)['\"`]|(?:^|[\\s{,;])\\w*(?:polarArea)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:polarArea)"
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.type=rose",
+              "loc": "chartkit:packages/core/src/charts/rose.ts:1"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "Equal angles, radius from the value. Loaded from @chartkitdev/core/charts/rose. polar-area, nightingale, and rose-chart repair to rose.",
+          "verified": "dts-path",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "native",
@@ -73607,20 +73608,21 @@
       "agentRelevance": 1,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "partial",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:coordinate)['\"`]|(?:^|[\\s{,;])\\w*(?:coordinate)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:coordinate)"
+            "ChartKitChartSpecV1.layout.coordinate=polar"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:coordinate)['\"`]|(?:^|[\\s{,;])\\w*(?:coordinate)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:coordinate)"
+              "kind": "dts-path",
+              "path": "ChartKitChartSpecV1.layout.coordinate=polar",
+              "loc": "chartkit:packages/core/src/charts/radial-bar.ts:1"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "layout.coordinate polar draws on radial-bar and rose. A bar repairs to radial-bar, and a pie or donut repairs to rose. Other marks stay cartesian and the coordinate is removed.",
+          "verified": "dts-path",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "native",

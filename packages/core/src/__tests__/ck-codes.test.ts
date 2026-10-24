@@ -15,6 +15,7 @@ const repoRoot = join(fileURLToPath(new URL(".", import.meta.url)), "../../../..
  * Geo is CK3050–CK3056, in @chartkitdev/geo. CK3057 is the core handoff for map specs.
  * Visual axes are CK3058–CK3071.
  * CK3072 is the y-channel stack group: a bad value, and a stack on a chart that cannot use one.
+ * Polar, radial bar, and rose are CK3073–CK3080.
  */
 const FAMILIES = new Set([
   "CK1006",
@@ -41,6 +42,7 @@ const LAYOUT = ["CK3040", "CK3041", "CK3042", "CK3043", "CK3044", "CK3045", "CK3
 const GEO = ["CK3050", "CK3051", "CK3052", "CK3053", "CK3054", "CK3055", "CK3056", "CK3057"];
 const VISUAL = ["CK3058", "CK3059", "CK3060", "CK3061", "CK3062", "CK3063", "CK3064", "CK3065", "CK3066", "CK3067", "CK3068", "CK3069", "CK3070", "CK3071"];
 const STACK = ["CK3072"];
+const POLAR = ["CK3073", "CK3074", "CK3075", "CK3076", "CK3077", "CK3078", "CK3079", "CK3080"];
 
 function walk(dir: string, out: string[]): void {
   for (const name of readdirSync(dir)) {
@@ -83,7 +85,7 @@ describe("CK codes", () => {
     expect(dupes).toEqual([]);
   });
 
-  it("keeps uncertainty on CK3020–CK3022, time and data on CK3023–CK3026, hierarchy on CK3027–CK3030, canvas on CK3031–CK3033, interaction on CK3034–CK3039, layout on CK3040–CK3049, geo on CK3050–CK3057, visual axes on CK3058–CK3071, and stack groups on CK3072", () => {
-    for (const code of [...UNCERTAINTY, ...TIME_DATA, ...HIERARCHY, ...CANVAS, ...INTERACTION, ...LAYOUT, ...GEO, ...VISUAL, ...STACK]) expect(byCode.has(code), code).toBe(true);
+  it("keeps uncertainty on CK3020–CK3022, time and data on CK3023–CK3026, hierarchy on CK3027–CK3030, canvas on CK3031–CK3033, interaction on CK3034–CK3039, layout on CK3040–CK3049, geo on CK3050–CK3057, visual axes on CK3058–CK3071, stack groups on CK3072, and polar on CK3073–CK3080", () => {
+    for (const code of [...UNCERTAINTY, ...TIME_DATA, ...HIERARCHY, ...CANVAS, ...INTERACTION, ...LAYOUT, ...GEO, ...VISUAL, ...STACK, ...POLAR]) expect(byCode.has(code), code).toBe(true);
   });
 });

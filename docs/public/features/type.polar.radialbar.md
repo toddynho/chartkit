@@ -1,29 +1,55 @@
 # Radial bar
 
-ChartKit: **partial**
+ChartKit: **native**
 
 Bars bent around a circle
 
-Matrix status: `partial`. Verification: `dts-path` (strong).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-single-value ring only
+Grouped bars around a circle. mark.stack stack or percent runs outward. Loaded from @chartkitdev/core/charts/radial-bar. A progress ring remains the single-value type.
 
-Source: chartkit:packages/core/src/generated/schema.ts:24
+Source: chartkit:packages/core/src/charts/radial-bar.ts:1
 
 ## ChartKit spec
 
 ```json
 {
   "version": "1",
-  "type": "progress-ring",
-  "metric": {
-    "label": "Done",
-    "value": 3,
-    "min": 0,
-    "max": 8
+  "type": "radial-bar",
+  "data": [
+    {
+      "desk": "Music",
+      "weeknight": 186,
+      "saturday": 210
+    },
+    {
+      "desk": "Talk",
+      "weeknight": 74,
+      "saturday": 48
+    },
+    {
+      "desk": "News",
+      "weeknight": 36,
+      "saturday": 22
+    },
+    {
+      "desk": "Sky",
+      "weeknight": 18,
+      "saturday": 16
+    }
+  ],
+  "encoding": {
+    "x": "desk",
+    "y": [
+      "weeknight",
+      "saturday"
+    ]
+  },
+  "layout": {
+    "coordinate": "polar"
   },
   "a11y": {
-    "alt": "3 of 8 are done."
+    "alt": "Saturday music runs longer, and talk shrinks."
   },
   "size": {
     "width": 640,
@@ -59,6 +85,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | none | — | dts-absence (absence) | — |
 | AntV G2 | native | ~radial | dts-grep (weak) | @antv/g2/lib/index.d.ts:58 |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 92347dd72bcd.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 236653ac9462.
 
 https://chartkit.dev/features.json
