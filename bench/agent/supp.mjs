@@ -194,7 +194,8 @@ export const suppTasks = [
     (spec) => {
       const aliases = new Set(["choropleth", "choropleth-map", "heat map of countries"]);
       if (!aliases.has(spec?.type)) return miss("type choropleth");
-      if (field(spec?.encoding?.region) !== "country" || field(spec?.encoding?.color) !== "share") return miss("region country and color share");
+      const region = field(spec?.encoding?.region) ?? field(spec?.encoding?.location);
+      if (region !== "country" || field(spec?.encoding?.color) !== "share") return miss("region country and color share");
       return ok();
     },
   ),

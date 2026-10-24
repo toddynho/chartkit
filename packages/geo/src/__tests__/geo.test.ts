@@ -188,7 +188,7 @@ describe("validate", () => {
     expect(typo.warnings.find((item) => item.code === "CK3050")?.message).toContain("usa");
 
     const cities = validate({
-      type: "map-points",
+      type: "bubble-map",
       encoding: { latitude: "lat", longitude: "lon" },
       data: [
         { city: "Chicago", lat: 41.88, lon: -87.63 },
@@ -196,6 +196,15 @@ describe("validate", () => {
       ],
     });
     expect(cities.warnings.find((item) => item.code === "CK3050")?.fix?.[0]?.value).toEqual({ atlas: "us" });
+
+    const aliased = validate({
+      type: "bubble map",
+      mark: { atlas: "us" },
+      encoding: { lat: "lat", lon: "lon" },
+      data: [{ lat: 41.88, lon: -87.63 }],
+    });
+    expect(aliased.warnings.map((item) => item.code)).not.toContain("CK3050");
+    expect(aliased.warnings.map((item) => item.code)).not.toContain("CK3055");
 
     const states = validate({
       type: "choropleth",

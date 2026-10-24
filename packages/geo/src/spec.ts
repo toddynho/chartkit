@@ -15,6 +15,17 @@ export function resolveMark(spec: Record<string, unknown>): Record<string, unkno
   return mark;
 }
 
+/** bubble-map and choropleth-map are the two map types. */
+export function mapKind(type: unknown): "choropleth" | "map-points" | "" {
+  if (typeof type !== "string") return "";
+  if (type === "choropleth" || type === "map-points") return type;
+  const folded = type.trim().replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase().replace(/[_]+/g, " ").replace(/-/g, " ").replace(/\s+/g, " ");
+  const compact = folded.replace(/ /g, "");
+  if (compact === "bubblemap" || folded === "map") return "map-points";
+  if (compact === "choroplethmap" || folded === "heat map of countries") return "choropleth";
+  return "";
+}
+
 /** location is region. lat and lon are latitude and longitude. */
 export function resolveEncoding(spec: Record<string, unknown>): Record<string, unknown> {
   const encoding = isRecord(spec.encoding) ? { ...spec.encoding } : {};

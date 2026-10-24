@@ -209,7 +209,17 @@ function escapePointer(value: string): string {
 
 function mapType(spec: unknown): string {
   if (!isRecord(spec) || typeof spec.type !== "string") return "";
-  return MAPS.includes(` ${spec.type} `) ? spec.type : "";
+  return canonicalMapType(spec.type);
+}
+
+/** bubble-map, map, and choropleth-map are the map types. Geo runs on the first pass. */
+function canonicalMapType(type: string): string {
+  if (MAPS.includes(` ${type} `)) return type;
+  const folded = type.trim().replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase().replace(/[_]+/g, " ").replace(/-/g, " ").replace(/\s+/g, " ");
+  const compact = folded.replace(/ /g, "");
+  if (compact === "bubblemap" || folded === "map") return "map-points";
+  if (compact === "choroplethmap" || folded === "heat map of countries") return "choropleth";
+  return "";
 }
 
 function phase4Type(spec: unknown): string {
