@@ -72,6 +72,6 @@ This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render
 | Mermaid (chart-ish diagrams only) | native | ~showAxisLine\|xAxis | dts-grep (weak) | mermaid/dist/themes/theme-redux.d.ts:149 xyChart.xAxis.showLabel etc. |
 | AntV G2 | native | ~axis | dts-grep (weak) | @antv/g2/lib/index.d.ts:110 axis: false |
 
-Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against c0ed28f0cadd.
+Other libraries were checked on 2026-10-18 against types and schemas, not by rendering. ChartKit was rechecked on 2026-10-19 against 6ee06d7ac9aa.
 
 https://chartkit.dev/features.json
