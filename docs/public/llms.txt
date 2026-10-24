@@ -1,6 +1,6 @@
 # ChartKit JSON spec
 
-> @chartkitdev/core v0.5.0 https://chartkit.dev/schema/v1.json
+> @chartkitdev/core https://chartkit.dev/schema/v1.json
 > @chartkitdev/core/all. repair+validate @chartkitdev/core/validate.
 
 ## Rules
@@ -8,9 +8,10 @@
 - version "1". a11y.alt required. data is rows, not {"values":[...]}. llms-full.txt.
 - Maps: @chartkitdev/geo unpublished. choropleth|map-points. atlas world|us|canada|eu. No tiles.
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
+- Chart.js, Recharts, ECharts: https://chartkit.dev/convert
 - Render: https://cloud.chartkit.dev/render marked.
 - Options: interaction.navigator, interaction.sync, interaction.drilldown, layout.facet, layout.concat, layout.breakpoints, layout.direction rtl, render auto, mark.sampling lttb. 100000.
-- Dashboards: /dashboards/ledger.md /dashboards/meter.md /dashboards/wayline.md /dashboards/keel.md
+- Dashboards: /dashboards/ledger.md meter.md wayline.md keel.md
 
 Features: https://chartkit.dev/features.json
 Types: line,bar,donut,pie,stacked-area,scatter,combo,heatmap,gauge,kpi,sparkline,mini-area,progress-ring,spike,candlestick,histogram,boxplot,radar,funnel,treemap,sankey,bullet,waterfall,gantt,timeline,quadrant,venn,journey,area-range,bar-range,errorbar,sunburst

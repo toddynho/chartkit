@@ -11,21 +11,21 @@ Machine-readable copy: https://chartkit.dev/benchmarks.json (schema https://char
 - Browser: Playwright Chromium, a 640×360 line, median of 5. Shapes are even x, jittered x, and gapped timestamps. ChartKit initial is mount(); the aligned update is mount().update().
 - Updates: The aligned update starts at the top of a requestAnimationFrame. The harness awaits the library's own completion, then reads the clock from a MessageChannel task after that frame's style, layout, and paint. GPU and raster time is not in the number. ChartKit is measured through mount(element, spec).update(spec), the same shape as uPlot's setData. The figure is the median of five samples.
 - Sampling: mark.sampling defaults to auto and minmax-downsamples a line longer than twice the plot width. 1,000 points stay complete. The samplingNone rows draw every point and use the same aligned update timer.
-- Bundle: gzip -9. ChartKit’s headline line is scripts/size.mjs. Competitor rows and the harness chartkit-minimal line are the bench harness. uPlot’s JS and stylesheet are gzipped separately and the uPlot row sums those two responses. The JS figure is the loss named in the headline. `scripts/size.mjs` line is 40,230 bytes. `/all` on that script is 70,619 bytes.
+- Bundle: gzip -9. ChartKit’s headline line is scripts/size.mjs. Competitor rows and the harness chartkit-minimal line are the bench harness. uPlot’s JS and stylesheet are gzipped separately and the uPlot row sums those two responses. The JS figure is the loss named in the headline. `scripts/size.mjs` line is 40,979 bytes. `/all` on that script is 71,390 bytes.
 - Server render: Mean and median of 8 calls after 2 warmups, a 1,000 point line. supported false means no chart without a DOM. Recharts returned an empty wrapper.
-- Agents: claude-sonnet-4-5, temperature 0, 42 tasks, one run on 2026-10-16. Not re-run for round 13. Official means the library docs were in the prompt. ChartKit docs are llms.txt. repair() is a no-model step on ChartKit's no-docs first try and is not a second model call. Nivo and uPlot were not in the agent eval.
+- Agents: Round 6 is the scoreboard. claude-sonnet-4-5, temperature 0, 42 tasks, one run on 2026-10-16. Not re-run for round 13. Official means the library docs were in the prompt. ChartKit docs are llms.txt. repair() is a no-model step on ChartKit's no-docs first try and is not a second model call. Nivo and uPlot were not in the agent eval.
 
 ## Headline
 
-- Line chart: **40,230 bytes** gzip, `scripts/size.mjs` on `ddab485`, measured 2026-10-23. That is a loss to uPlot at 23,276 bytes. The stylesheet is 762 bytes more, a separate response, and the two sum to 24,038, still smaller than ChartKit. It is still smaller than Chart.js (49,374), Recharts (96,213, React external), Nivo (96,583, React external), Observable Plot (97,723), and ECharts (162,991). The harness minimal line is 40,433 bytes. The harness donut is 15,085 bytes and is smaller than Chart.js (46,922), Nivo (75,518, React external), Recharts (90,090, React external), and ECharts (122,174). uPlot and Observable Plot have no donut.
+- Line chart: **40,979 bytes** gzip, `scripts/size.mjs` on `6ec84d7`, measured 2026-10-23. That is a loss to uPlot at 23,276 bytes. The stylesheet is 762 bytes more, a separate response, and the two sum to 24,038, still smaller than ChartKit. It is still smaller than Chart.js (49,374), Recharts (96,213, React external), Nivo (96,583, React external), Observable Plot (97,723), and ECharts (162,991). The harness minimal line is 41,178 bytes. The harness donut is 15,085 bytes and is smaller than Chart.js (46,922), Nivo (75,518, React external), Recharts (90,090, React external), and ECharts (122,174). uPlot and Observable Plot have no donut.
 - Initial render: ChartKit is faster than uPlot in all 12 cells. Even 1,000,000 points is 23.6 ms vs 26.5 ms.
 - Aligned update: ChartKit wins 6 of 12 cells against uPlot and loses the 6 listed below. It is not a sweep.
 - Server render: **0.85 ms** mean (median 0.85 ms).
-- `repair()`, no model call, no docs: **20/42 → 42/42**. That agent run is 2026-10-16, not round 13.
+- `repair()`, no model call, no docs: **21/42 → 42/42**. That agent run is 2026-10-16, not round 13.
 
 ## Losses
 
-- Line bundle: ChartKit 40,230 bytes gzip, uPlot 23,276 bytes of JS. The stylesheet is 762 bytes more (24,038 summed).
+- Line bundle: ChartKit 40,979 bytes gzip, uPlot 23,276 bytes of JS. The stylesheet is 762 bytes more (24,038 summed).
 - Aligned update, even x, 1,000 points: ChartKit 1.5 ms, uPlot 1.2 ms.
 - Aligned update, even x, 10,000 points: ChartKit 1.9 ms, uPlot 1.7 ms.
 - Aligned update, jittered x, 1,000 points: ChartKit 1.6 ms, uPlot 1.4 ms.
@@ -34,17 +34,17 @@ Machine-readable copy: https://chartkit.dev/benchmarks.json (schema https://char
 - Aligned update, gapped timestamps, 100,000 points: ChartKit 3.5 ms, uPlot 3.4 ms.
 - Steady hover at 100k, painted median: ChartKit 16.5 ms, uPlot 16.2 ms.
 - First hover, painted median: ChartKit 20.8 / 15.9 / 16.5 ms at about 50 / 200 / 500 ms after mount. uPlot 4 / 4.6 / 4.9 ms.
-- No-docs agent first try is 20/42. That eval was not re-run for round 13. repair() reaches 42/42. The other libraries in the eval were already 42/42 with no docs.
+- No-docs agent first try is 21/42. Recharts, ECharts, and Chart.js were 42/42 with no docs. That eval was not re-run for round 13. repair() reaches 42/42.
 
 ## Bundle, gzip -9
 
 | Library | Entry | Bytes | Note |
 | --- | --- | ---: | --- |
-| ChartKit | size script line, ddab485 | 40,230 |  |
-| ChartKit | harness minimal line | 40,433 |  |
-| ChartKit | harness minimal bar | 40,054 |  |
+| ChartKit | size script line, 6ec84d7 | 40,979 |  |
+| ChartKit | harness minimal line | 41,178 |  |
+| ChartKit | harness minimal bar | 40,752 |  |
 | ChartKit | harness minimal donut | 15,085 |  |
-| ChartKit | harness /all | 70,928 |  |
+| ChartKit | harness /all | 71,734 |  |
 | uPlot | line plus stylesheet | 24,038 |  |
 | Chart.js | line | 49,374 |  |
 | Observable Plot | line | 97,723 |  |
@@ -119,10 +119,10 @@ Tasks: 42. Model: claude-sonnet-4-5. Temperature: 0.
 
 | Library | No docs, first | No docs, within two | Official, first | Official, within two | Mean first-try tokens, no docs / official |
 | --- | --- | --- | --- | --- | --- |
-| ChartKit | 20 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 139.4 / 131.1 |
-| Recharts | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 223.3 / 236.6 |
-| ECharts | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 334.2 / 367.2 |
-| Chart.js | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 294.6 / 260.9 |
+| ChartKit | 21 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 139.3 / 132.4 |
+| Recharts | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 221.9 / 236.5 |
+| ECharts | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 331.7 / 362.6 |
+| Chart.js | 42 / 42 | 42 / 42 | 42 / 42 | 42 / 42 | 295 / 258.4 |
 | Nivo | not in this eval |  |  |  |  |
 | uPlot | not in this eval |  |  |  |  |
 

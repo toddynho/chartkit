@@ -20,6 +20,7 @@ import {
   initial1m,
   raceSpec,
   samplingRows,
+  published,
   ssrRace,
   ssrRows,
   updateMethod,
@@ -249,7 +250,8 @@ export default function BenchmarksPage() {
 
       <h2 id="agents">Agent eval</h2>
       <p>
-        Not re-run for round {ROUND}. One model, claude-sonnet-4-5, temperature 0, one run on {AGENT_MEASURED}, 42 tasks. “Official” means
+        Round 6 is the scoreboard for this table, recorded in BENCHMARKS.md. It was not re-run for round {ROUND}. One
+        model, {published.model}, temperature {published.temperature}, one run on {AGENT_MEASURED}, 42 tasks. “Official” means
         the library’s docs were in the prompt. ChartKit’s docs are <Link href="/llms.txt">llms.txt</Link>, taken from
         the Phase 1 branch and not edited on this site. The previous llms.txt, the React-only v0 file, scored 18/42 in
         an earlier run.
@@ -281,9 +283,12 @@ export default function BenchmarksPage() {
         </table>
       </div>
       <p>
-        ChartKit’s first try with no docs is {headline.repairFrom}. <code>repair()</code>, with no model call, takes
-        that same output to {headline.repairTo}. With the official docs, the first try is already 42/42, at a mean of
-        131.1 output tokens against 236.6 for Recharts. The other libraries have no repair step. Phase 1 grew llms.txt
+        ChartKit’s first try with no docs is {headline.repairFrom}. Recharts, ECharts, and Chart.js were 42/42 with no
+        docs. <code>repair()</code>, with no model call, takes that ChartKit output to {headline.repairTo}. With the
+        official docs, ChartKit’s first try is already 42/42, at a mean of {published.agents[0].tokensOfficial} output
+        tokens. Recharts with its docs used a mean of {published.agents[1].tokensOfficial}, ECharts{" "}
+        {published.agents[2].tokensOfficial}, and Chart.js {published.agents[3].tokensOfficial}. The other libraries
+        have no repair step. Phase 1 grew llms.txt
         to 8,274 bytes, about 1.9 KB more than the competitor excerpts. A ChartKit-only rerun with the file cut to
         6,329 bytes scored 41/42 on the first try. The miss was a combo axis, CK3002, which <code>repair()</code> does
         not patch. The headline numbers use the full file. <Link href="/agents">How to use the loop</Link>.

@@ -236,6 +236,8 @@ export interface Series {
   radius?: number;
   hollow?: boolean;
   format?: unknown;
+  /** encoding.y[].stack. Series that share it, on the same axis, stack. A name used once does not. */
+  stackId?: string;
   /** Higher paints later. Stacked series ignore it. */
   z?: number;
 }
@@ -259,6 +261,12 @@ export interface PlotModel {
   /** Marks paint on a canvas overlay. Chrome stays in this SVG. */
   canvas?: boolean;
   stack: "none" | "stack" | "percent";
+  /** Per-series stack groups. Null when every group has a single member. */
+  layers: Layers | null;
+  /** Bar slot for each series. Members of one stack group share a slot. */
+  barSlot: number[];
+  /** How many bar slots the category band is split into. */
+  barSlots: number;
   orientation: "vertical" | "horizontal";
   fillOpacity: number;
   /** Emitted fill-opacity. A var() when the spec did not set mark.fillOpacity. */
@@ -639,6 +647,7 @@ function toModel(
         radius: channel.pointSize,
         hollow: channel.pointHollow || undefined,
         format: channel.format,
+        stackId: channel.stack,
         z: channel.z,
       };
     });
@@ -654,9 +663,13 @@ function toModel(
   const colorScale = applyPointColors(table, encoding, mark, preset, series, labels, type === "bar" || type === "combo");
   const ruleLegend = colorScale ? [] : ruleSwatches(series, readRules(mark), preset, baseLabelOf(mark));
   const swatches = colorScale || ruleLegend.length ? undefined : categorySwatches(spec, series, labels);
+  const planned = planStacks(series, shell.stack);
 
   return {
     ...shell,
+    layers: planned.layers,
+    barSlot: planned.barSlot,
+    barSlots: planned.barSlots,
     labels,
     // Bars need category bands. A combo of only lines and areas keeps a temporal or linear x.
     x: type === "bar" || (type === "combo" && series.some((item) => item.mark === "bar")) ? null : x,
@@ -830,20 +843,20 @@ function drawLines(
   plot: { left: number; top: number; right: number; bottom: number },
   _horizontal: boolean,
 ): string {
-  const stackMode = model.stack === "none" ? null : model.stack;
-  const layers = stackMode ? stackLayers(model.series, stackMode) : null;
+  const layers = model.layers;
+  const stacked = model.stack !== "none" || Boolean(layers?.on.some(Boolean));
   const out: string[] = [];
   out.push(plotBreaks(model, plot));
   const plotWidth = Math.max(1, plot.right - plot.left);
   const shared = sharedSample(model, layers, plotWidth);
-  for (const index of paintOrder(model.series, Boolean(stackMode))) {
+  for (const index of paintOrder(model.series, stacked)) {
     const series = model.series[index];
     if (!series || series.mark === "bar") continue;
     appendLineSeries(out, model, series, index, layers, xScale, series.axis === "y2" ? y2Scale : yScale, plotWidth, shared);
   }
   const held = bag();
   let late = "";
-  if (layers && totalHook) late += totalHook(model, layers, xScale, yScale, false, held);
+  if (layers && totalHook && legacyTotals(model)) late += totalHook(model, layers, xScale, yScale, false, held);
   late += placeLineLabels(model, layers, xScale, yScale, y2Scale, held);
   if (late) model.late += late;
   return out.join("");
@@ -857,12 +870,12 @@ function drawBars(
   plot: { left: number; top: number; right: number; bottom: number },
   horizontal: boolean,
 ): string {
-  const stackMode = model.stack === "none" ? null : model.stack;
-  const layers = stackMode ? stackLayers(model.series, stackMode) : null;
+  const layers = model.layers;
+  const stacked = model.stack !== "none" || Boolean(layers?.on.some(Boolean));
   const out: string[] = [];
   const labs: Lab[] = [];
   const barSeries = model.series.filter((series) => series.mark === "bar");
-  for (const index of paintOrder(model.series, Boolean(stackMode))) {
+  for (const index of paintOrder(model.series, stacked)) {
     const series = model.series[index];
     if (!series || series.mark !== "bar") continue;
     const scale = series.axis === "y2" ? y2Scale : yScale;
@@ -871,7 +884,7 @@ function drawBars(
   }
   const held = bag();
   let late = "";
-  if (layers && totalHook) late += totalHook(model, layers, xScale, yScale, horizontal, held);
+  if (layers && totalHook && legacyTotals(model)) late += totalHook(model, layers, xScale, yScale, horizontal, held);
   const fill = cssVar("text", model.preset.text);
   for (const lab of labs) late += held.put(lab.text, lab.x, lab.y, lab.anchor, fill);
   if (late) model.late += late;
@@ -887,14 +900,14 @@ function drawCombo(
   plot: { left: number; top: number; right: number; bottom: number },
   horizontal: boolean,
 ): string {
-  const stackMode = model.stack === "none" ? null : model.stack;
-  const layers = stackMode ? stackLayers(model.series, stackMode) : null;
+  const layers = model.layers;
+  const stacked = model.stack !== "none" || Boolean(layers?.on.some(Boolean));
   const out: string[] = [];
   const labs: Lab[] = [];
   const barSeries = model.series.filter((series) => series.mark === "bar");
   const plotWidth = Math.max(1, plot.right - plot.left);
   const shared = sharedSample(model, layers, plotWidth);
-  const ordered = paintOrder(model.series, Boolean(stackMode));
+  const ordered = paintOrder(model.series, stacked);
   const ranked = ordered.some((index, place) => index !== place);
   if (rangePainter && !ranked) {
     model.series.forEach((series, index) => {
@@ -927,9 +940,24 @@ function drawCombo(
 }
 
 function sharedSample(model: PlotModel, layers: Layers | null, plotWidth: number): ReturnType<typeof sampleSeries> | null {
-  if (!layers || model.series.length === 0) return null;
-  const top = layers.top[layers.top.length - 1];
+  if (!layers?.uniform || model.series.length === 0) return null;
+  let top = layers.top[layers.top.length - 1];
+  for (let i = layers.crest.length - 1; i >= 0; i--) {
+    if (layers.on[i] && layers.crest[i]) {
+      top = layers.top[i];
+      break;
+    }
+  }
   return sampleSeries(model.sampling, model.x, top, top.length, plotWidth, true);
+}
+
+/** Stack totals stay the whole-chart sum. A named stack group does not invent that sum. */
+function legacyTotals(model: PlotModel): boolean {
+  return model.stack !== "none" && model.series.every((item) => !item.stackId);
+}
+
+function layerOn(layers: Layers | null, index: number): boolean {
+  return Boolean(layers?.on[index]);
 }
 
 function appendLineSeries(
@@ -943,7 +971,8 @@ function appendLineSeries(
   plotWidth: number,
   shared: ReturnType<typeof sampleSeries> | null,
 ): void {
-  const ys = layers ? layers.top[index] : series.values;
+  const stacked = layerOn(layers, index);
+  const ys = stacked ? layers!.top[index] : series.values;
   const sampled = shared ?? sampleSeries(model.sampling, model.x, ys, series.values.length, plotWidth, model.connectNulls);
   if (!sampled.reduced) {
     appendFullLine(out, model, series, index, layers, xScale, yScale);
@@ -956,7 +985,7 @@ function appendLineSeries(
     const kept: number[] = [];
     for (let k = 0; k < run.length; k++) {
       const i = run[k];
-      const raw = layers ? layers.top[index][i] : series.values[i];
+      const raw = stacked ? layers!.top[index][i] : series.values[i];
       if (typeof raw !== "number" || !Number.isFinite(raw)) continue;
       const x = xScale.center(i);
       const y = yScale(raw);
@@ -964,7 +993,7 @@ function appendLineSeries(
       points.push({ x, y });
       kept.push(i);
       if (area) {
-        const base = layers ? layers.bottom[index][i] : 0;
+        const base = stacked ? layers!.bottom[index][i] : 0;
         bottoms.push({ x, y: yScale(typeof base === "number" && Number.isFinite(base) ? base : 0) });
       }
     }
@@ -973,7 +1002,7 @@ function appendLineSeries(
     const v1 = ys[kept[kept.length - 1]];
     const log = series.axis === "y2" ? model.y2Log : model.yLog;
     const scaleAttr =
-      !layers && !log && typeof v0 === "number" && typeof v1 === "number" && v0 !== v1
+      !stacked && !log && typeof v0 === "number" && typeof v1 === "number" && v0 !== v1
         ? ` data-ck-ys="${n(points[0].y)},${n(points[points.length - 1].y)},${n(v0)},${n(v1)},${index}"`
         : "";
     const indexAttr = ` data-ck-sample="${sampled.mode}" data-ck-i="${kept.join(" ")}"${scaleAttr}`;
@@ -998,7 +1027,7 @@ function appendFullLine(
   xScale: XScale,
   yScale: (value: number) => number,
 ): void {
-  if (!layers && model.curve === "linear" && !series.area && model.type !== "stacked-area" && model.dots === "off" && !markerShape(model, series) && !model.partial) {
+  if (!layerOn(layers, index) && model.curve === "linear" && !series.area && model.type !== "stacked-area" && model.dots === "off" && !markerShape(model, series) && !model.partial) {
     appendLinear(out, model, series, xScale, yScale);
     return;
   }
@@ -1191,12 +1220,13 @@ function bars(
 ): string {
   const gap = clamp(model.gap, 0, 0.9);
   const out: string[] = [];
-  const slot = layers ? 0 : barIndex;
-  const slots = layers ? 1 : Math.max(1, barCount);
+  const stacked = layerOn(layers, index);
+  const slot = model.barSlot[index] ?? (stacked ? 0 : barIndex);
+  const slots = model.barSlots || (stacked ? 1 : Math.max(1, barCount));
   for (let i = 0; i < series.values.length; i++) {
-    const value = layers ? layers.top[index][i] : series.values[i];
-    if (value === null && !layers) continue;
-    const baseline = layers ? layers.bottom[index][i] : 0;
+    const value = stacked ? layers!.top[index][i] : series.values[i];
+    if (value === null && !stacked) continue;
+    const baseline = stacked ? layers!.bottom[index][i] : 0;
     const band = xScale.band(i);
     const inner = band.size * (1 - gap);
     const barSize = inner / slots;
@@ -1208,11 +1238,11 @@ function bars(
     const caption = series.ruleLabels?.[i] ?? "";
     const fade = series.fillOpacity === undefined ? "" : ` fill-opacity="${n(series.fillOpacity)}"`;
     const extra = fade + (series.colors ? ` data-ck-name="${esc(series.name)}" data-ck-i="${i}"` : "") + (caption ? ` data-ck-rule="${esc(caption)}"` : "");
-    const outer = !layers || Math.abs((value ?? baseline) - layers.top[layers.top.length - 1][i]) <= 1e-6;
-    const roundEnds = model.radiusEnds === "all" || (Boolean(layers) && model.stackGap > 0) ? "all" : "outer";
+    const outer = !stacked || Boolean(layers?.crest[index]);
+    const roundEnds = model.radiusEnds === "all" || (stacked && model.stackGap > 0) ? "all" : "outer";
     const radius = outer || roundEnds === "all" ? model.cornerRadius : 0;
     const useVar = (outer || roundEnds === "all") && model.radiusVar;
-    const split = Boolean(layers) && model.stackGap > 0 && !outer ? model.stackGap : 0;
+    const split = stacked && model.stackGap > 0 && !outer ? model.stackGap : 0;
     if (horizontal) {
       let y = start;
       let x = Math.min(a, b);
@@ -1361,7 +1391,7 @@ function placeLineLabels(
     for (let i = 0; i < series.values.length; i++) {
       const value = series.values[i];
       if (typeof value !== "number" || !labelIndex(model.labelEnds, i, first, last)) continue;
-      const plotted = layers ? layers.top[index]?.[i] : value;
+      const plotted = layerOn(layers, index) ? layers!.top[index]?.[i] : value;
       if (typeof plotted !== "number") continue;
       out += held.put(labelText(model, series, value), xScale.center(i) + shift[0], scale(plotted) + shift[1], shift[2], fill);
     }
@@ -1385,8 +1415,8 @@ function pointsFor(
   const out: (Pt | null)[] = new Array(series.values.length);
   for (let i = 0; i < series.values.length; i++) {
     const value = series.values[i];
-    const plotted = layers ? layers.top[index][i] : value;
-    if (plotted === null || typeof plotted !== "number" || !Number.isFinite(plotted) || (value === null && !model.connectNulls && !layers)) out[i] = null;
+    const plotted = layerOn(layers, index) ? layers!.top[index][i] : value;
+    if (plotted === null || typeof plotted !== "number" || !Number.isFinite(plotted) || (value === null && !model.connectNulls && !layerOn(layers, index))) out[i] = null;
     else out[i] = { x: xScale.center(i), y: yScale(plotted) };
   }
   return out;
@@ -1403,9 +1433,9 @@ function bottomPoints(
   const out: (Pt | null)[] = new Array(series.values.length);
   for (let i = 0; i < series.values.length; i++) {
     const value = series.values[i];
-    if (value === null && !layers && !model.connectNulls) out[i] = null;
+    if (value === null && !layerOn(layers, index) && !model.connectNulls) out[i] = null;
     else {
-      const baseline = layers ? layers.bottom[index][i] : 0;
+      const baseline = layerOn(layers, index) ? layers!.bottom[index][i] : 0;
       out[i] = { x: xScale.center(i), y: yScale(baseline) };
     }
   }
@@ -1415,6 +1445,12 @@ function bottomPoints(
 export interface Layers {
   top: number[][];
   bottom: number[][];
+  /** Series that share a stack group with at least one other series. */
+  on: boolean[];
+  /** Last member of its group. An unstacked series is its own crest. */
+  crest: boolean[];
+  /** Every non-range series is in one group, so sampling can share the top. */
+  uniform: boolean;
 }
 
 export function stackLayers(series: Series[], mode: "stack" | "percent"): Layers {
@@ -1436,7 +1472,84 @@ export function stackLayers(series: Series[], mode: "stack" | "percent"): Layers
       top[s][i] = base;
     }
   }
-  return { top, bottom };
+  const many = series.length >= 2;
+  return {
+    top,
+    bottom,
+    on: series.map(() => many),
+    crest: series.map((_, index) => !many || index === series.length - 1),
+    uniform: many,
+  };
+}
+
+/** Named groups stack with each other. A name used once, or omitted when mark.stack is none, stays raw. */
+export function planStacks(series: Series[], mode: "none" | "stack" | "percent"): { layers: Layers | null; barSlot: number[]; barSlots: number } {
+  const count = series.reduce((max, item) => Math.max(max, item.values.length), 0);
+  const keys = series.map((item) => {
+    if (item.mark === "range") return "";
+    if (item.stackId) return `${item.axis}:${item.stackId}`;
+    if (mode !== "none") return `${item.axis}:*`;
+    return "";
+  });
+  const groups = new Map<string, number[]>();
+  keys.forEach((key, index) => {
+    if (!key) return;
+    const list = groups.get(key);
+    if (list) list.push(index);
+    else groups.set(key, [index]);
+  });
+  const on = series.map(() => false);
+  const crest = series.map(() => true);
+  const top = series.map(() => Array<number>(count).fill(0));
+  const bottom = series.map(() => Array<number>(count).fill(0));
+  let stacking = false;
+  const percent = mode === "percent";
+  for (const indexes of groups.values()) {
+    if (indexes.length < 2) continue;
+    stacking = true;
+    for (const index of indexes) on[index] = true;
+    for (let k = 0; k < indexes.length - 1; k++) crest[indexes[k]] = false;
+    for (let i = 0; i < count; i++) {
+      let base = 0;
+      let total = 0;
+      if (percent) {
+        for (const index of indexes) total += num(series[index].values[i]);
+        if (total === 0) total = 1;
+      }
+      for (const index of indexes) {
+        const raw = num(series[index].values[i]);
+        const value = percent ? (raw / total) * 100 : raw;
+        bottom[index][i] = base;
+        base += value;
+        top[index][i] = base;
+      }
+    }
+  }
+  const barSlot: number[] = [];
+  const seen = new Map<string, number>();
+  let slots = 0;
+  series.forEach((item, index) => {
+    if (item.mark !== "bar") {
+      barSlot.push(0);
+      return;
+    }
+    const key = on[index] ? keys[index] : `#${index}`;
+    const slot = seen.get(key);
+    if (slot !== undefined) {
+      barSlot.push(slot);
+      return;
+    }
+    seen.set(key, slots);
+    barSlot.push(slots);
+    slots += 1;
+  });
+  const active = series.filter((item) => item.mark !== "range").length;
+  const only = groups.size === 1 ? [...groups.values()][0] : undefined;
+  return {
+    layers: stacking ? { top, bottom, on, crest, uniform: Boolean(only && only.length === active && active >= 2) } : null,
+    barSlot,
+    barSlots: Math.max(1, slots),
+  };
 }
 
 export interface XScale {
@@ -2469,7 +2582,16 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
     if (value < min) min = value;
     if (value > max) max = value;
   };
-  if (model.stack !== "none" && axis === "y") {
+  const grouped = model.layers?.on.some((flag, index) => flag && model.series[index]?.axis === axis) ?? false;
+  if (grouped && model.layers) {
+    for (let s = 0; s < model.series.length; s++) {
+      if (model.series[s].axis !== axis) continue;
+      if (model.layers.on[s]) {
+        for (const value of model.layers.top[s]) consider(value);
+        for (const value of model.layers.bottom[s]) consider(value);
+      } else considerRaw(model.series[s]);
+    }
+  } else if (model.stack !== "none" && axis === "y" && model.series.every((item) => !item.stackId)) {
     const layers = stackLayers(model.series, model.stack === "percent" ? "percent" : "stack");
     for (let s = 0; s < model.series.length; s++) {
       if (model.series[s].axis !== "y") continue;
@@ -2497,6 +2619,13 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
         consider(value);
       }
       if (values.length > 0 && finite === values.length) noteDense(values);
+    }
+  }
+  function considerRaw(series: Series): void {
+    const values = series.values;
+    for (let i = 0; i < values.length; i++) {
+      const value = values[i];
+      if (typeof value === "number") consider(value);
     }
   }
   const lock = axisLock(model, axis);
@@ -2571,7 +2700,7 @@ function seriesLabelBoxes(
 ): { x: number; y: number; w: number; h: number }[] {
   if (!wantLabels(model) || horizontal) return [];
   const pos = model.labelAt || "top";
-  const layers = model.stack === "none" ? null : stackLayers(model.series, model.stack === "percent" ? "percent" : "stack");
+  const layers = model.layers;
   const boxes: { x: number; y: number; w: number; h: number }[] = [];
   model.series.forEach((series, index) => {
     if (series.mark === "bar") return;
@@ -2582,7 +2711,7 @@ function seriesLabelBoxes(
     for (let i = 0; i < series.values.length; i++) {
       const value = series.values[i];
       if (typeof value !== "number" || !labelIndex(model.labelEnds, i, first, last)) continue;
-      const plotted = layers ? layers.top[index]?.[i] : value;
+      const plotted = layerOn(layers, index) ? layers!.top[index]?.[i] : value;
       if (typeof plotted !== "number") continue;
       const text = labelText(model, series, value);
       const x = xScale.center(i) + shift[0];
@@ -2813,7 +2942,8 @@ function zeroDefault(type: string, mark: Record<string, unknown>, series: Series
 function axisIncludesZero(model: PlotModel, axis: "y" | "y2"): boolean {
   if (model.f & (axis === "y2" ? 1024 : 512)) return Boolean(model.f & (axis === "y2" ? 128 : 64));
   if (model.type === "bar" || model.type === "stacked-area" || model.type === "mini-area") return true;
-  if (model.stack !== "none" && axis === "y") return true;
+  if (model.stack !== "none" && axis === "y" && model.series.every((item) => !item.stackId)) return true;
+  if (model.layers?.on.some((flag, index) => flag && model.series[index]?.axis === axis)) return true;
   for (let i = 0; i < model.series.length; i++) {
     const item = model.series[i];
     if (item.axis !== axis) continue;
@@ -2878,6 +3008,7 @@ interface YChannel {
   pointShape: string;
   pointSize?: number;
   pointHollow: boolean;
+  stack?: string;
   fillOpacity?: number;
   lock?: [number | null, number | null];
   pad?: { min: number; max: number } | null;
@@ -2906,6 +3037,7 @@ function readYChannels(y: unknown): YChannel[] {
       pointShape: glyphOf(item.pointShape),
       pointSize: typeof item.pointSize === "number" ? item.pointSize : undefined,
       pointHollow: item.pointFill === "hollow",
+      stack: typeof item.stack === "string" && item.stack.length > 0 ? item.stack : undefined,
       fillOpacity: unitOpacity(item.fillOpacity),
       lock: scale ? domainEnds(scale.domain) : undefined,
       pad: scalePad(item),
@@ -3018,6 +3150,7 @@ function pivotBars(
       mark: "bar" as const,
       dash: "solid",
       area: false,
+      stackId: channel.stack,
     })),
   };
 }

@@ -755,6 +755,18 @@ function main() {
     dashboards: JSON.parse(readFileSync(join(docsRoot, "data/dashboards.json"), "utf8")),
     synonyms: synonymObject,
     coverage: matrix.coverage,
+    converters: {
+      package: "@chartkitdev/convert",
+      published: false,
+      sources: ["chartjs", "recharts", "echarts"],
+      demo: "https://chartkit.dev/convert",
+      guides: [
+        "https://chartkit.dev/docs/migrate/chartjs",
+        "https://chartkit.dev/docs/migrate/recharts",
+        "https://chartkit.dev/docs/migrate/echarts",
+      ],
+      note: "Chart.js, Recharts, and ECharts configs convert to a ChartKit spec. Output is passed through validate() and repair(). Unsupported options return structured warnings.",
+    },
   };
 
   mkdirSync(featureDir, { recursive: true });

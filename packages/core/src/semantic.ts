@@ -70,6 +70,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
     warnSeriesShape(spec.encoding, diagnostics);
     checkDomains(spec.encoding, diagnostics);
     warnChannelExtras(spec.encoding, diagnostics);
+    if (known && type) warnStackGroups(type, spec.encoding, diagnostics);
   }
 
   checkTimezone(spec, diagnostics);
@@ -943,6 +944,27 @@ function warnUnusedMarks(type: string, mark: Record<string, unknown>, diagnostic
       message: `"mark.${key}" has no effect on type ${JSON.stringify(type)}`,
       path: `/mark/${key}`,
       hint: `applies to: ${applies.join(", ")}. Remove it or change the type`,
+    });
+  }
+}
+
+const STACK_TYPES = new Set(["bar", "stacked-area", "combo", "line"]);
+
+function warnStackGroups(type: string, encoding: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  if (STACK_TYPES.has(type)) return;
+  const y = encoding.y;
+  const list = Array.isArray(y) ? y : y === undefined ? [] : [y];
+  for (let i = 0; i < list.length; i++) {
+    const item = list[i];
+    if (!isRecord(item) || typeof item.stack !== "string" || item.stack.length === 0) continue;
+    const path = Array.isArray(y) ? `/encoding/y/${i}/stack` : `/encoding/y/stack`;
+    diagnostics.push({
+      code: "CK3072",
+      severity: "warning",
+      message: `"encoding.y[].stack" has no effect on type ${JSON.stringify(type)}`,
+      path,
+      hint: "stack groups apply to bar, stacked-area, combo, and line. Remove it or change the type",
+      fix: [{ op: "remove", path }],
     });
   }
 }

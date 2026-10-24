@@ -1,7 +1,8 @@
 /**
  * Round 13 browser and SSR figures, measured 2026-10-18 on phase 2
  * `d8dcc5a` (PR #10). Medians are the middle of five samples in the jsonl rows.
- * The agent eval was not re-run; those scores stay the 2026-10-16 run.
+ * The agent table is Round 6, the current scoreboard in BENCHMARKS.md.
+ * That run is 2026-10-16 and was not re-run for round 13.
  * Bundle bytes are read from docs/data/measured-sizes.json, not from that commit.
  */
 import { measuredBundle } from "./bundle-measured.ts";
@@ -29,9 +30,9 @@ export const headline = {
   lineWins: measuredBundle.headline.lineWins,
   donutWin: measuredBundle.headline.donutWin,
   ssrLabel: "0.85 ms",
-  repairFrom: "20/42",
+  repairFrom: "21/42",
   repairTo: "42/42",
-  repair: "20/42 → 42/42",
+  repair: "21/42 → 42/42",
 };
 
 export interface Race {
@@ -164,10 +165,10 @@ export const ssrRows = [
 ] as const;
 
 export const agentRows = [
-  { lib: "ChartKit", noFirst: "20 / 42", noTwo: "42 / 42", offFirst: "42 / 42", offTwo: "42 / 42", tokens: "139.4 / 131.1" },
-  { lib: "Recharts", noFirst: "42 / 42", noTwo: "42 / 42", offFirst: "42 / 42", offTwo: "42 / 42", tokens: "223.3 / 236.6" },
-  { lib: "ECharts", noFirst: "42 / 42", noTwo: "42 / 42", offFirst: "42 / 42", offTwo: "42 / 42", tokens: "334.2 / 367.2" },
-  { lib: "Chart.js", noFirst: "42 / 42", noTwo: "42 / 42", offFirst: "42 / 42", offTwo: "42 / 42", tokens: "294.6 / 260.9" },
+  { lib: "ChartKit", noFirst: "21 / 42", noTwo: "42 / 42", offFirst: "42 / 42", offTwo: "42 / 42", tokens: "139.3 / 132.4" },
+  { lib: "Recharts", noFirst: "42 / 42", noTwo: "42 / 42", offFirst: "42 / 42", offTwo: "42 / 42", tokens: "221.9 / 236.5" },
+  { lib: "ECharts", noFirst: "42 / 42", noTwo: "42 / 42", offFirst: "42 / 42", offTwo: "42 / 42", tokens: "331.7 / 362.6" },
+  { lib: "Chart.js", noFirst: "42 / 42", noTwo: "42 / 42", offFirst: "42 / 42", offTwo: "42 / 42", tokens: "295.0 / 258.4" },
 ] as const;
 
 /** Machine-readable round 13 timings, plus the current bundle measurement. Display strings above must match these values. */
@@ -216,10 +217,10 @@ export const published = {
     { lib: "Observable Plot", meanMs: null, medianMs: null, supported: false },
   ],
   agents: [
-    { lib: "ChartKit", noDocsFirst: 20, noDocsWithinTwo: 42, officialFirst: 42, officialWithinTwo: 42, tokensNoDocs: 139.4, tokensOfficial: 131.1, inEval: true },
-    { lib: "Recharts", noDocsFirst: 42, noDocsWithinTwo: 42, officialFirst: 42, officialWithinTwo: 42, tokensNoDocs: 223.3, tokensOfficial: 236.6, inEval: true },
-    { lib: "ECharts", noDocsFirst: 42, noDocsWithinTwo: 42, officialFirst: 42, officialWithinTwo: 42, tokensNoDocs: 334.2, tokensOfficial: 367.2, inEval: true },
-    { lib: "Chart.js", noDocsFirst: 42, noDocsWithinTwo: 42, officialFirst: 42, officialWithinTwo: 42, tokensNoDocs: 294.6, tokensOfficial: 260.9, inEval: true },
+    { lib: "ChartKit", noDocsFirst: 21, noDocsWithinTwo: 42, officialFirst: 42, officialWithinTwo: 42, tokensNoDocs: 139.3, tokensOfficial: 132.4, inEval: true },
+    { lib: "Recharts", noDocsFirst: 42, noDocsWithinTwo: 42, officialFirst: 42, officialWithinTwo: 42, tokensNoDocs: 221.9, tokensOfficial: 236.5, inEval: true },
+    { lib: "ECharts", noDocsFirst: 42, noDocsWithinTwo: 42, officialFirst: 42, officialWithinTwo: 42, tokensNoDocs: 331.7, tokensOfficial: 362.6, inEval: true },
+    { lib: "Chart.js", noDocsFirst: 42, noDocsWithinTwo: 42, officialFirst: 42, officialWithinTwo: 42, tokensNoDocs: 295, tokensOfficial: 258.4, inEval: true },
     { lib: "Nivo", noDocsFirst: null, noDocsWithinTwo: null, officialFirst: null, officialWithinTwo: null, tokensNoDocs: null, tokensOfficial: null, inEval: false },
     { lib: "uPlot", noDocsFirst: null, noDocsWithinTwo: null, officialFirst: null, officialWithinTwo: null, tokensNoDocs: null, tokensOfficial: null, inEval: false },
   ],

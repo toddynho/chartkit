@@ -824,6 +824,11 @@
               "enum": ["filled", "hollow"],
               "description": "Filled or hollow marker for this series. Overrides mark.pointFill."
             },
+            "stack": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Stack group. Series that share this name stack together. A name used once draws that series unstacked. Omit it to follow mark.stack."
+            },
             "z": {
               "type": "number",
               "minimum": -20,

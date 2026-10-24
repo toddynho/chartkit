@@ -4,7 +4,7 @@ export const SITE = {
   name: "ChartKit",
   url: "https://chartkit.dev",
   description:
-    "A fast, tiny JSON-spec charting library for React, Vue, Svelte, and vanilla JavaScript. Agents validate and repair the spec, then render SVG.",
+    "JSON-spec charts. An agent, a server, a database, or Mermaid can write the spec. The same object renders in React, Vue, Svelte, vanilla JavaScript, and server SVG.",
   github: "https://github.com/toddynho/chartkit",
 };
 
@@ -26,6 +26,7 @@ export function pageMeta(title: string, description: string, path: string): Meta
 
 export const NAV = [
   { href: "/docs", label: "Docs" },
+  { href: "/convert", label: "Convert" },
   { href: "/examples", label: "Examples" },
   { href: "/showcase", label: "Showcase" },
   { href: "/dashboards", label: "Dashboards" },
