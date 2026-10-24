@@ -34,6 +34,7 @@ export const NAV = [
   { href: "/benchmarks", label: "Benchmarks" },
   { href: "/features", label: "Features" },
   { href: "/agents", label: "Agents" },
+  { href: "/cloud", label: "Cloud" },
 ] as const;
 
 export const THEME_BOOT = `(function(){try{var s=localStorage.getItem("ck-theme");var dark=s==="dark"||(s!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",dark);document.documentElement.style.colorScheme=dark?"dark":"light";}catch(e){}})();`;

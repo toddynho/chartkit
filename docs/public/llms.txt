@@ -1,14 +1,15 @@
 # ChartKit JSON spec
 
-> @chartkitdev/core v0.5.0 https://chartkit.dev/schema/v1.json
-> v1 @chartkitdev/core/all. repair, validate: @chartkitdev/core/validate.
+> @chartkitdev/core https://chartkit.dev/schema/v1.json
+> @chartkitdev/core/all. repair+validate @chartkitdev/core/validate.
 
 ## Rules
 
 - version "1". a11y.alt required. data is rows, not {"values":[...]}. llms-full.txt.
-- Maps: @chartkitdev/geo (unpublished). choropleth or map-points. atlas world|us|canada|eu. No tiles.
+- Maps: @chartkitdev/geo unpublished. choropleth|map-points. atlas world|us|canada|eu. No tiles.
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
 - Chart.js, Recharts, ECharts: https://chartkit.dev/convert
+- Render: https://cloud.chartkit.dev/render marked.
 - Options: interaction.navigator, interaction.sync, interaction.drilldown, layout.facet, layout.concat, layout.breakpoints, layout.direction rtl, render auto, mark.sampling lttb. 100000.
 - Dashboards: /dashboards/ledger.md meter.md wayline.md keel.md
 
@@ -18,123 +19,93 @@ Types: line,bar,donut,pie,stacked-area,scatter,combo,heatmap,gauge,kpi,sparkline
 ```json
 {"version":"1","type":"line","data":[{"quarter":"Q1","units":40},{"quarter":"Q2","units":55}],"encoding":{"x":"quarter","y":"units"},"a11y":{"alt":"Units rose in Q2."}}
 ```
-
 ```json
 {"version":"1","type":"bar","data":[{"lane":"A","stops":12},{"lane":"C","stops":15}],"encoding":{"x":"lane","y":"stops"},"a11y":{"alt":"Lane C has more."}}
 ```
-
 ```json
 {"version":"1","type":"donut","data":[{"x":"Oak","y":8},{"x":"Pine","y":5}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"Oak is larger."}}
 ```
-
 ```json
 {"version":"1","type":"stacked-area","data":[{"x":"A","a":2,"b":3},{"x":"B","a":4,"b":2}],"encoding":{"x":"x","y":["a","b"]},"a11y":{"alt":"B is higher."}}
 ```
-
 ```json
 {"version":"1","type":"scatter","data":[{"x":16,"y":3},{"x":22,"y":5}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"Y peaks at 22."}}
 ```
-
 ```json
 {"version":"1","type":"combo","data":[{"week":"W1","orders":30,"rate":0.4},{"week":"W2","orders":36,"rate":0.55}],"encoding":{"x":"week","y":[{"field":"orders","mark":"bar"},{"field":"rate","mark":"line","axis":"y2"}]},"axes":{"y2":{"title":"Rate"}},"a11y":{"alt":"Both rose."}}
 ```
-
 ```json
 {"version":"1","type":"heatmap","data":[{"x":"A","y":"L","v":1},{"x":"B","y":"L","v":4}],"encoding":{"x":"x","y":"y","color":"v"},"a11y":{"alt":"B is darker."}}
 ```
-
 ```json
 {"version":"1","type":"gauge","metric":{"label":"Load","value":64,"min":0,"max":100},"a11y":{"alt":"Load is 64."}}
 ```
-
 ```json
 {"version":"1","type":"kpi","metric":{"label":"N","value":18,"delta":-0.05},"a11y":{"alt":"Count is 18."}}
 ```
-
 ```json
 {"version":"1","type":"sparkline","data":[4,6,5,9,8],"a11y":{"alt":"It ends higher."}}
 ```
-
 ```json
 {"version":"1","type":"mini-area","data":[2,3,3,6,5],"a11y":{"alt":"It ends higher."}}
 ```
-
 ```json
 {"version":"1","type":"progress-ring","metric":{"label":"Done","value":3,"min":0,"max":8},"a11y":{"alt":"3 of 8 are done."}}
 ```
-
 ```json
 {"version":"1","type":"spike","data":[{"x":"t1","y":0},{"x":"t2","y":6}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"t2 spikes."}}
 ```
-
 ```json
 {"version":"1","type":"candlestick","data":[{"x":"D1","o":5,"h":7,"l":4,"c":6}],"encoding":{"x":"x","open":"o","high":"h","low":"l","close":"c"},"a11y":{"alt":"D1 closed up."}}
 ```
-
 ```json
 {"version":"1","type":"histogram","data":[{"x":1},{"x":2},{"x":2},{"x":8}],"encoding":{"x":"x"},"mark":{"bins":2},"a11y":{"alt":"Most are low."}}
 ```
-
 ```json
 {"version":"1","type":"boxplot","data":[{"x":"A","y":1},{"x":"A","y":9},{"x":"B","y":2},{"x":"B","y":4}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"A is wider."}}
 ```
-
 ```json
 {"version":"1","type":"radar","data":[{"x":"S","a":4,"b":2},{"x":"C","a":2,"b":5},{"x":"E","a":3,"b":4}],"encoding":{"x":"x","y":["a","b"]},"a11y":{"alt":"B leads on C."}}
 ```
-
 ```json
 {"version":"1","type":"funnel","data":[{"x":"A","y":80},{"x":"B","y":12}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"12 of 80 pay."}}
 ```
-
 ```json
 {"version":"1","type":"treemap","data":[{"x":"Oak","y":8,"c":"W"},{"x":"Steel","y":6,"c":"M"}],"encoding":{"x":"x","y":"y","color":"c"},"a11y":{"alt":"Oak is larger."}}
 ```
-
 ```json
 {"version":"1","type":"sankey","data":[{"s":"A","t":"B","y":10},{"s":"B","t":"C","y":6}],"encoding":{"source":"s","target":"t","y":"y"},"a11y":{"alt":"Flow leaves B."}}
 ```
-
 ```json
 {"version":"1","type":"bullet","data":[{"x":"R","y":275,"t":250,"g":300}],"encoding":{"x":"x","y":"y","target":"t"},"mark":{"ranges":["g"]},"a11y":{"alt":"R beats target."}}
 ```
-
 ```json
 {"version":"1","type":"waterfall","data":[{"x":"Open","y":120,"total":true},{"x":"Won","y":40},{"x":"Close","y":160,"total":true}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"Close is up."}}
 ```
-
 ```json
 {"version":"1","type":"area-range","data":[{"month":"Jan","y":40,"lo":36,"hi":48},{"month":"Feb","y":55,"lo":46,"hi":66}],"encoding":{"x":"month","y":"y","low":"lo","high":"hi"},"a11y":{"alt":"It widens."}}
 ```
-
 ```json
 {"version":"1","type":"bar-range","data":[{"month":"Jan","min":-2,"max":6},{"month":"Jul","min":17,"max":29}],"encoding":{"x":"month","low":"min","high":"max"},"a11y":{"alt":"July is warm."}}
 ```
-
 ```json
 {"version":"1","type":"errorbar","data":[{"assay":"A","mean":5.2,"lo":4.9,"hi":5.5}],"encoding":{"x":"assay","y":"mean","low":"lo","high":"hi"},"a11y":{"alt":"A reads 5.2."}}
 ```
-
 ```json
 {"version":"1","type":"sunburst","data":[{"name":"A","children":[{"name":"B","value":3},{"name":"C","value":1}]}],"a11y":{"alt":"B leads A."}}
 ```
-
 ```json
 {"version":"1","type":"gantt","data":[{"id":"a","task":"A","start":"2026-03-02","end":"2026-03-13"},{"id":"b","task":"B","start":"2026-04-06","milestone":true,"depends":"a"}],"a11y":{"alt":"B follows A."}}
 ```
-
 ```json
 {"version":"1","type":"timeline","data":[{"label":"Start","date":"2014-06-01"},{"label":"Span","start":"2024-01-01","end":"2026-01-01","kind":"period"}],"a11y":{"alt":"It starts in 2014."}}
 ```
-
 ```json
 {"version":"1","type":"quadrant","quadrants":["A","B","C","D"],"data":[{"name":"SSO","x":0.2,"y":0.8},{"name":"R","x":0.8,"y":0.3}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"SSO is a win."}}
 ```
-
 ```json
 {"version":"1","type":"venn","data":[{"set":"A","size":12},{"set":"B","size":8},{"set":"A+B","size":3}],"a11y":{"alt":"A and B overlap."}}
 ```
-
 ```json
 {"version":"1","type":"journey","data":[{"section":"Pay","step":"Card","score":2,"actors":"Shop"}],"a11y":{"alt":"Card scores 2."}}
 ```

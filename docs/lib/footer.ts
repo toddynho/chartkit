@@ -13,7 +13,6 @@ export interface FooterColumn {
   links: FooterLink[];
 }
 
-/** Product does not list Cloud until that page is on this branch. */
 export const FOOTER: FooterColumn[] = [
   {
     title: "Product",
@@ -24,6 +23,7 @@ export const FOOTER: FooterColumn[] = [
       { href: "/dashboards", label: "Dashboards", hint: "Product-style pages" },
       { href: "/playground", label: "Playground", hint: "Edit a spec" },
       { href: "/convert", label: "Convert", hint: "Chart.js, Recharts, ECharts" },
+      { href: "/cloud", label: "Cloud", hint: "Hosted SVG and PNG" },
       { href: `${SITE.github}/blob/main/ROADMAP.md`, label: "Roadmap", hint: "Planned work", external: true },
     ],
   },

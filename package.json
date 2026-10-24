@@ -7,6 +7,7 @@
   },
   "workspaces": [
     "packages/*",
+    "apps/*",
     "docs"
   ],
   "scripts": {
@@ -14,7 +15,7 @@
     "build": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/react && npm run build --workspace=@chartkitdev/vue && npm run build --workspace=@chartkitdev/svelte && npm run build --workspace=@chartkitdev/vanilla && npm run build --workspace=@chartkitdev/element && npm run build --workspace=@chartkitdev/markdown && npm run build --workspace=@derpdaderp/chartkit && npm run build --workspace=@chartkitdev/mcp && npm run build --workspace=@chartkitdev/geo && npm run build --workspace=chartkit-docs",
     "build:lib": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/react && npm run build --workspace=@chartkitdev/vue && npm run build --workspace=@chartkitdev/svelte && npm run build --workspace=@chartkitdev/vanilla && npm run build --workspace=@chartkitdev/element && npm run build --workspace=@chartkitdev/markdown && npm run build --workspace=@derpdaderp/chartkit && npm run build --workspace=@chartkitdev/mcp && npm run build --workspace=@chartkitdev/geo && npm run build --workspace=@chartkitdev/convert",
     "build:docs": "npm run build --workspace=chartkit-docs",
-    "test": "npm run test:run --workspace=@chartkitdev/core && npm run test:run --workspace=@chartkitdev/react && npm run test:run --workspace=@chartkitdev/vue && npm run test:run --workspace=@chartkitdev/svelte && npm run test:run --workspace=@chartkitdev/vanilla && npm run test:run --workspace=@chartkitdev/element && npm run test:run --workspace=@chartkitdev/markdown && npm run test:run --workspace=@derpdaderp/chartkit && npm run test:run --workspace=@chartkitdev/mcp && npm run test:run --workspace=@chartkitdev/geo && npm run test:run --workspace=@chartkitdev/convert && node --test --test-force-exit bench/agent/check.test.mjs",
+    "test": "npm run test:run --workspace=@chartkitdev/core && npm run test:run --workspace=@chartkitdev/react && npm run test:run --workspace=@chartkitdev/vue && npm run test:run --workspace=@chartkitdev/svelte && npm run test:run --workspace=@chartkitdev/vanilla && npm run test:run --workspace=@chartkitdev/element && npm run test:run --workspace=@chartkitdev/markdown && npm run test:run --workspace=@derpdaderp/chartkit && npm run test:run --workspace=@chartkitdev/mcp && npm run test:run --workspace=@chartkitdev/geo && npm run test:run --workspace=@chartkitdev/convert && npm run test:run --workspace=@chartkitdev/cloud && node --test --test-force-exit bench/agent/check.test.mjs",
     "bench": "node bench/run.mjs",
     "bench:core": "node scripts/bench.mjs",
     "size": "node scripts/size.mjs",

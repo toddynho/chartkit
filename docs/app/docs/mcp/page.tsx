@@ -32,7 +32,8 @@ export default function McpPage() {
       <p>
         The server speaks stdio. It calls <code>validate</code> and <code>repair</code> from{" "}
         <code>@chartkitdev/core/validate</code>, and it renders with <code>@chartkitdev/core/extra</code>, which
-        includes every chart type. It does not call the network. Feature answers are a copy of{" "}
+        includes every chart type. Those tools do not call the network. <code>render_chart</code> does: it asks ChartKit
+        Cloud for an image URL. Feature answers are a copy of{" "}
         <a href="/features.json">features.json</a> bundled at build time, synonyms included. A <code>partial</code>{" "}
         cell is not reported as native, and every other library&apos;s status is returned with ChartKit&apos;s.
       </p>
@@ -46,7 +47,14 @@ export default function McpPage() {
         </li>
         <li>
           <code>render(spec, {`{ format: "svg" }`})</code> returns the SVG string, plus width and height. PNG is not
-          implemented. A rasterizer would add a native or wasm dependency, and this package does not include one.
+          implemented on this local tool. A rasterizer would add a native or wasm dependency, and this package does not
+          include one.
+        </li>
+        <li>
+          <code>render_chart(spec)</code> calls ChartKit Cloud and returns the image URL plus the repairs and warnings.
+          <code>format</code> is <code>svg</code> or <code>png</code>. Set <code>CHARTKIT_CLOUD_KEY</code> to remove the
+          mark. The key is sent as <code>Authorization: Bearer</code>. The image URL does not contain it. This is the
+          one tool that uses the network. See <a href="/docs/cloud">Cloud render</a>.
         </li>
         <li>
           <code>lookup_feature(query)</code> searches the matrix. The result has ChartKit&apos;s status, the spec

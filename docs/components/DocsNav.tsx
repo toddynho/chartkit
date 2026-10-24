@@ -20,6 +20,8 @@ const start: { href: string; label: string; external?: boolean }[] = [
   { href: "/docs/migrate/recharts", label: "From Recharts" },
   { href: "/docs/migrate/echarts", label: "From ECharts" },
   { href: "/docs/mcp", label: "MCP server" },
+  { href: "/docs/cloud", label: "Cloud render" },
+  { href: "/cloud", label: "Cloud" },
   { href: `${SITE.github}/blob/main/ROADMAP.md`, label: "Roadmap", external: true },
 ];
 
