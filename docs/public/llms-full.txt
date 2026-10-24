@@ -1,7 +1,7 @@
 # ChartKit JSON spec (full)
 
 > @chartkitdev/core v0.5.0 · schema https://chartkit.dev/schema/v1.json
-> `import { render } from "@chartkitdev/core/all"` for the core set, or `@chartkitdev/core/extra` for histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, area-range, bar-range, errorbar, and sunburst
+> `import { render } from "@chartkitdev/core/all"` for the core set, or `@chartkitdev/core/extra` for histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, area-range, bar-range, errorbar, sunburst, radial-bar, and rose
 > `import { repair, validate } from "@chartkitdev/core/validate"`
 
 The JSON spec is the agent interface. The React section at the bottom is a different API. Do not copy React props (`dataKey`, `leftAxis`, `GaugeChart value`) into a spec.
@@ -469,6 +469,10 @@ Each example below is a minimal valid spec.
   "a11y": { "alt": "Search is most of Ads." }
 }
 ```
+
+## Polar
+
+`radial-bar` and `rose` load from `@chartkitdev/core/charts/radial-bar`, `@chartkitdev/core/charts/rose`, and `@chartkitdev/core/extra`. A radial bar groups categories around a circle. `mark.stack` `stack` or `percent` runs outward from the hole. A rose keeps equal angles and maps the value to the radius. `layout.coordinate` `polar` is the frame for those two types. On a bar it repairs the type to radial-bar, and on a pie or donut to rose. On any other type the coordinate is removed. `polar`, `radialBar`, and `polar-bar` repair to radial-bar. `polarArea`, `nightingale`, and `rose-chart` repair to rose. Negative radii, a hole past 0.85, a gap past 8 degrees, and a radius domain that excludes zero are CK3073–CK3080. `createRenderer([line])` does not include either chart.
 
 ## errorbar
 

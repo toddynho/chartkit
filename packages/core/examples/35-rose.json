@@ -1,0 +1,21 @@
+{
+  "version": "1",
+  "id": "lumen-rose",
+  "type": "rose",
+  "title": "Saturday audience",
+  "data": [
+    { "place": "Hale", "listeners": 4200 },
+    { "place": "Mill", "listeners": 3100 },
+    { "place": "Quay", "listeners": 5600 },
+    { "place": "Ridge", "listeners": 1800 },
+    { "place": "Yard", "listeners": 2400 },
+    { "place": "Orchard", "listeners": 3900 }
+  ],
+  "encoding": {
+    "x": "place",
+    "y": { "field": "listeners", "title": "Listeners" }
+  },
+  "mark": { "padAngle": 1.2, "labels": true },
+  "layout": { "coordinate": "polar" },
+  "a11y": { "alt": "Quay is the largest share of the evening audience." }
+}

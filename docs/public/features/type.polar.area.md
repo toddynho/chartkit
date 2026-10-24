@@ -1,12 +1,57 @@
 # Polar area / rose / nightingale
 
-ChartKit: **none**
+ChartKit: **native**
 
 Sectors of equal angle with radius as value
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `dts-path` (strong).
 
-No spec snippet. ChartKit does not support this feature.
+Equal angles, radius from the value. Loaded from @chartkitdev/core/charts/rose. polar-area, nightingale, and rose-chart repair to rose.
+
+Source: chartkit:packages/core/src/charts/rose.ts:1
+
+## ChartKit spec
+
+```json
+{
+  "version": "1",
+  "type": "rose",
+  "data": [
+    {
+      "place": "Hale",
+      "listeners": 4200
+    },
+    {
+      "place": "Mill",
+      "listeners": 3100
+    },
+    {
+      "place": "Quay",
+      "listeners": 5600
+    },
+    {
+      "place": "Ridge",
+      "listeners": 1800
+    }
+  ],
+  "encoding": {
+    "x": "place",
+    "y": "listeners"
+  },
+  "layout": {
+    "coordinate": "polar"
+  },
+  "a11y": {
+    "alt": "Quay is the largest share of the evening audience."
+  },
+  "size": {
+    "width": 640,
+    "height": 260
+  }
+}
+```
+
+This snippet passed `validate()` (or `validatePhase4()` for phase 4) and `render()` did not return `ck-chart-error`.
 
 ## Other libraries
 

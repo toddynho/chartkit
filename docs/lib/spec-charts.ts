@@ -331,6 +331,57 @@ export const specPages: Record<string, SpecPage> = {
     ],
     example: specExample("checkout-journey"),
   },
+  "radial-bar": {
+    title: "Radial bar",
+    summary: "Categories around a circle. Bar length is the radius. Several series sit side by side unless they stack.",
+    fields: [
+      "type is radial-bar. It loads from @chartkitdev/core/charts/radial-bar, and from extra. createRenderer([line]) does not include it.",
+      "encoding.x is the category. encoding.y is one field or a list. encoding.series splits one y field into series.",
+      "The default is grouped. mark.stack stack or percent runs outward from the hole.",
+      "mark.innerRadius defaults to 0.34. mark.padAngle defaults to 2. mark.cornerRadius defaults to 3. mark.startAngle is degrees clockwise from the top.",
+      "layout.coordinate polar is the frame. cartesian on this type is CK3078.",
+      "radialBar, radial-bars, polar-bar, and polar repair to radial-bar. Rose is the equal-angle type.",
+      "A negative radius is CK3073. Fewer than three categories warns CK3074. A hole above 0.85 is CK3075. A gap above 8 degrees is CK3076. More than 16 categories warns CK3079. A radius domain that excludes zero is CK3080.",
+    ],
+    example: `{
+  "version": "1",
+  "type": "radial-bar",
+  "data": [
+    { "desk": "Music", "weeknight": 186, "saturday": 210 },
+    { "desk": "Talk", "weeknight": 74, "saturday": 48 },
+    { "desk": "News", "weeknight": 36, "saturday": 22 }
+  ],
+  "encoding": { "x": "desk", "y": ["weeknight", "saturday"] },
+  "mark": { "innerRadius": 0.34, "padAngle": 2 },
+  "layout": { "coordinate": "polar" },
+  "a11y": { "alt": "Saturday music runs longer, and talk shrinks." }
+}`,
+  },
+  rose: {
+    title: "Rose",
+    summary: "Equal angles. The radius is the value. This is the polar-area and nightingale chart.",
+    fields: [
+      "type is rose. It loads from @chartkitdev/core/charts/rose, and from extra. createRenderer([line]) does not include it.",
+      "encoding.x is the category. encoding.y is the radius. Angles stay equal.",
+      "mark.innerRadius defaults to 0. mark.padAngle defaults to 1.2. mark.labels prints the value when the sector is tall enough.",
+      "layout.coordinate polar is the frame.",
+      "polarArea, polar-area, nightingale, rose-chart, and rosechart repair to rose.",
+      "layout.coordinate polar on a pie or donut repairs the type to rose. On a bar it repairs to radial-bar. On any other type the coordinate is removed (CK3077).",
+    ],
+    example: `{
+  "version": "1",
+  "type": "rose",
+  "data": [
+    { "place": "Hale", "listeners": 4200 },
+    { "place": "Quay", "listeners": 5600 },
+    { "place": "Orchard", "listeners": 3900 }
+  ],
+  "encoding": { "x": "place", "y": "listeners" },
+  "mark": { "padAngle": 1.2, "labels": true },
+  "layout": { "coordinate": "polar" },
+  "a11y": { "alt": "Quay is the largest share of the evening audience." }
+}`,
+  },
 };
 
 function specExample(slug: string): string {

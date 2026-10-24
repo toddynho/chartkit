@@ -1047,6 +1047,33 @@
         "editorial",
         "midnight"
       ]
+    },
+    {
+      "slug": "lumen-desk",
+      "number": 30,
+      "title": "Lumen desk",
+      "types": [
+        "radial-bar",
+        "rose"
+      ],
+      "options": [
+        "a11y.alt",
+        "format.locale",
+        "label.show",
+        "layout.polar.coords",
+        "legend.position",
+        "theme.presets",
+        "tooltip.format",
+        "type.polar.area",
+        "type.polar.radialbar"
+      ],
+      "theme": "soft",
+      "themes": [
+        "soft",
+        "refined",
+        "editorial",
+        "midnight"
+      ]
     }
   ]
 }

@@ -78,6 +78,8 @@ const CHART_TYPES = [
   "errorbar",
   "sunburst",
   "bar-list",
+  "radial-bar",
+  "rose",
 ] as const;
 
 /** Types whose field rules live outside this schema. They stay out of the enum and in the CK1005 list. */
@@ -1100,6 +1102,12 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   if (value === "sun-burst" || value === "sunburstchart" || value === "sunburst-chart" || value === "partition") return { type: "sunburst", kind: "rename" };
   const folded = value.trim().replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase().replace(/[_]+/g, " ").replace(/-/g, " ").replace(/\s+/g, " ");
   const compact = folded.replace(/ /g, "");
+  if (compact === "radialbar" || compact === "radialbars" || compact === "polarbar" || folded === "polar") {
+    return { type: "radial-bar", kind: "rename", note: 'Bars around a circle are type "radial-bar". Equal-angle sectors are type "rose".' };
+  }
+  if (compact === "polararea" || compact === "rosechart" || folded === "nightingale" || folded === "rose chart") {
+    return { type: "rose", kind: "rename", note: 'A nightingale rose is type "rose".' };
+  }
   if (compact === "bubblemap" || folded === "map") return { type: "map-points", kind: "rename" };
   if (compact === "choroplethmap" || folded === "heat map of countries") return { type: "choropleth", kind: "rename" };
   return undefined;

@@ -105,6 +105,8 @@ export function optionsIn(spec: unknown): OptionLink[] {
   if (type === "sunburst") add(ids, "type.sunburst");
   if (type === "venn") add(ids, "type.venn");
   if (type === "radar") add(ids, "type.radar");
+  if (type === "radial-bar") add(ids, "type.polar.radialbar");
+  if (type === "rose") add(ids, "type.polar.area");
   if (type === "boxplot") add(ids, "type.boxplot");
   if (type === "candlestick") add(ids, "type.candlestick");
   if (type === "mini-area") add(ids, "type.area");
@@ -154,6 +156,7 @@ export function optionsIn(spec: unknown): OptionLink[] {
     }
   }
   if (isRecord(spec.size) && isRecord(spec.size.padding)) add(ids, "layout.margin");
+  if (isRecord(spec.layout) && spec.layout.coordinate === "polar") add(ids, "layout.polar.coords");
   if (isRecord(spec.animation)) {
     if (typeof spec.animation.duration === "number" || typeof spec.animation.easing === "string") add(ids, "animation.duration");
   }
