@@ -149,7 +149,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
     if (showVolume && candle.volume !== null) {
       const vy = volScale(candle.volume);
       parts.push(
-        `<rect x="${n(x - bodyW / 2)}" y="${n(vy)}" width="${n(bodyW)}" height="${n(Math.max(0, plot.bottom - vy))}" fill="${color}" fill-opacity="0.35" />`,
+        `<rect data-ck-mark="volume" x="${n(x - bodyW / 2)}" y="${n(vy)}" width="${n(bodyW)}" height="${n(Math.max(0, plot.bottom - vy))}" fill="${color}" fill-opacity="0.35" />`,
       );
     }
     parts.push(`</g>`);

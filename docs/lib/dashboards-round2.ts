@@ -250,13 +250,20 @@ function folio(): Dashboard {
   const days = isoDays("2025-09-15", 20);
   const close = rounds(organic(20, { seed: 31, start: 128, end: 156, season: 4, noise: 2.2, phase: 0.3, spike: { at: 11, height: 8 } }), 0.01);
   targets.push({ slug: "folio", kind: "line", color: "#00c805", values: close });
+  const volume = rounds(organic(20, { seed: 32, start: 40, end: 70, season: 12, noise: 8, phase: 1.1 }), 1);
   const candles = close.map((price, index) => {
     const open = index === 0 ? price - 1.2 : close[index - 1] ?? price;
     const high = Math.max(open, price) + 1.4;
     const low = Math.min(open, price) - 1.1;
-    return { date: days[index], open: Math.round(open * 100) / 100, high: Math.round(high * 100) / 100, low: Math.round(low * 100) / 100, close: price };
+    return {
+      date: days[index],
+      open: Math.round(open * 100) / 100,
+      high: Math.round(high * 100) / 100,
+      low: Math.round(low * 100) / 100,
+      close: price,
+      volume: volume[index],
+    };
   });
-  const volume = rounds(organic(20, { seed: 32, start: 40, end: 70, season: 12, noise: 8, phase: 1.1 }), 1);
   return {
     slug: "folio",
     product: "Robinhood and Coinbase",
@@ -270,8 +277,8 @@ function folio(): Dashboard {
         id: "folio-price",
         title: "Price",
         caption: "Daily open, high, low, and close.",
-        note: "type candlestick. Rising sessions use the positive token. Falling sessions use the negative token. headline draws the last close.",
-        span: "dash-8",
+        note: "type candlestick. Rising sessions use the positive token. Falling sessions use the negative token. encoding.volume draws the bars under the candles. headline draws the last close.",
+        span: "dash-12",
         place: "hero",
         themes,
         spec: spec(
@@ -280,36 +287,13 @@ function folio(): Dashboard {
           mode,
           {
             data: candles,
-            encoding: { x: { field: "date", type: "temporal" }, open: "open", high: "high", low: "low", close: "close" },
+            encoding: { x: { field: "date", type: "temporal" }, open: "open", high: "high", low: "low", close: "close", volume: "volume" },
             axes: { x: { grid: false, ticks: "ends" }, y: openY },
             legend: { show: false },
             headline: { label: "Last close", value: "$156", compare: "$128", delta: "+22%", tone: "positive" },
-            size: { width: 720, height: 320 },
+            size: { width: 980, height: 400 },
           },
-          "The close rises from 128 to 156 across the twenty sessions.",
-        ),
-      }),
-      chart({
-        id: "folio-volume",
-        title: "Volume",
-        caption: "Daily volume, fictional units.",
-        note: "type bar. One series in the ink token. No axis title.",
-        span: "dash-4",
-        place: "side",
-        themes: themesFor(light, dark, { soft: ["#111111"], midnight: ["#f5f5f7"] }),
-        spec: spec(
-          "bar",
-          themesFor(light, dark, { soft: ["#111111"], midnight: ["#f5f5f7"] }),
-          mode,
-          {
-            data: days.map((date, index) => ({ date, volume: volume[index] })),
-            encoding: { x: { field: "date", type: "temporal" }, y: { field: "volume" } },
-            axes: { x: { grid: false, ticks: 4 }, y: quietY },
-            legend: { show: false },
-            mark: { gap: 0.35, cornerRadius: 2 },
-            size: { width: 320, height: 320 },
-          },
-          "Volume is uneven and higher toward the end of the period.",
+          "The close rises from 128 to 156 across the twenty sessions. Volume sits under the candles.",
         ),
       }),
       chart({
@@ -371,7 +355,7 @@ function folio(): Dashboard {
     ],
     sparks: [],
     notes: [
-      { label: "Price", detail: "A candlestick uses positive #00c805 and negative #ff5000. headline shows the last close. Volume is a separate bar chart, because a volume subplot under the candles is not one spec." },
+      { label: "Price", detail: "A candlestick uses positive #00c805 and negative #ff5000. headline shows the last close. encoding.volume paints the daily volume under the candles." },
       { label: "Type", detail: "fontFamily is Inter. The shell is white with black ink. Midnight swaps to #1c1c1e. No wordmark and no mark icon." },
       { label: "Data", detail: "The sessions and holdings are generated. They are not a market." },
     ],
@@ -713,23 +697,6 @@ function pulse(): Dashboard {
   const stand = [8, 10, 7, 12, 11, 9, 10];
   const heart = rounds(organic(24, { seed: 61, start: 62, end: 78, season: 8, noise: 4, phase: 0.6 }), 1);
   targets.push({ slug: "pulse", kind: "bar", color: "#ff375f", values: move });
-  const ring = (id: string, label: string, value: number, max: number, color: string, alt: string) =>
-    chart({
-      id,
-      title: label,
-      caption: label,
-      note: `type progress-ring. One ring. The series token is ${color}. Three rings sit side by side because one spec draws one ring.`,
-      span: "dash-4",
-      place: "metric",
-      themes: themesFor(light, dark, { soft: [color], midnight: [color] }, true),
-      spec: spec(
-        "progress-ring",
-        themesFor(light, dark, { soft: [color], midnight: [color] }, true),
-        mode,
-        { metric: { label, value, min: 0, max, format: "compact" }, size: { width: 220, height: 180 } },
-        alt,
-      ),
-    });
   return {
     slug: "pulse",
     product: "Apple Fitness and Apple Health",
@@ -739,15 +706,38 @@ function pulse(): Dashboard {
     range: "This week",
     defaultTheme: mode,
     charts: [
-      ring("pulse-move", "Move", 530, 600, "#ff375f", "Move is 530 of a 600 goal."),
-      ring("pulse-exercise", "Exercise", 32, 45, "#30d158", "Exercise is 32 minutes toward a 45 minute scale."),
-      ring("pulse-stand", "Stand", 10, 12, "#0a84ff", "Stand is 10 hours of a 12 hour goal."),
+      chart({
+        id: "pulse-rings",
+        title: "Activity",
+        caption: "Move, exercise, and stand.",
+        note: "type progress-ring. mark.rings draws three concentric rings: move #ff375f, exercise #30d158, stand #0a84ff. The first ring is the outside.",
+        span: "dash-6",
+        place: "metric",
+        themes: themesFor(light, dark, { soft: ["#ff375f", "#30d158", "#0a84ff"], midnight: ["#ff375f", "#30d158", "#0a84ff"] }, true),
+        spec: spec(
+          "progress-ring",
+          themesFor(light, dark, { soft: ["#ff375f", "#30d158", "#0a84ff"], midnight: ["#ff375f", "#30d158", "#0a84ff"] }, true),
+          mode,
+          {
+            metric: { label: "Today", value: 530, min: 0, max: 600 },
+            mark: {
+              rings: [
+                { value: 530, max: 600, color: "#ff375f", label: "Move" },
+                { value: 32, max: 45, color: "#30d158", label: "Exercise" },
+                { value: 10, max: 12, color: "#0a84ff", label: "Stand" },
+              ],
+            },
+            size: { width: 460, height: 320 },
+          },
+          "Move is 530 of 600, exercise is 32 of 45 minutes, and stand is 10 of 12 hours.",
+        ),
+      }),
       chart({
         id: "pulse-week",
         title: "Week",
         caption: "Move, exercise, and stand by day.",
         note: "type bar. Exercise minutes and stand hours are grouped. Move stays on its ring so its larger unit does not flatten these two.",
-        span: "dash-8",
+        span: "dash-6",
         place: "side",
         themes,
         spec: spec(
@@ -760,7 +750,7 @@ function pulse(): Dashboard {
             axes: { x: { grid: false }, y: openY },
             legend: { show: true },
             mark: { gap: 0.3, cornerRadius: 3 },
-            size: { width: 680, height: 240 },
+            size: { width: 520, height: 280 },
           },
           "Exercise minutes and stand hours across seven days.",
         ),
@@ -791,7 +781,7 @@ function pulse(): Dashboard {
     ],
     sparks: [],
     notes: [
-      { label: "Rings", detail: "Three progress-ring specs: move #ff375f, exercise #30d158, stand #0a84ff. A single spec cannot draw three concentric rings. That gap is in GAPS.md." },
+      { label: "Rings", detail: "One progress-ring. mark.rings draws move #ff375f, exercise #30d158, and stand #0a84ff. The first ring is the outside." },
       { label: "Week", detail: "Grouped bars for exercise minutes and stand hours. Move stays on its ring so the larger unit does not flatten the other two." },
       { label: "Type", detail: "fontFamily is Inter. The system face used by the reference products is not shipped. The page background is #f5f5f7." },
     ],
@@ -851,31 +841,31 @@ function retain(): Dashboard {
         id: "retain-mrr",
         title: "MRR",
         caption: "Monthly recurring revenue.",
-        note: "type kpi. format compact with a dollar prefix.",
+        note: "type kpi. format compact with a dollar prefix. metric.thresholds colours the surface: red under 120 thousand, sand from there, teal from 180 thousand.",
         span: "dash-3",
         place: "metric",
         themes: kpis,
-        spec: spec("kpi", kpis, mode, { data: mrr, metric: { label: "MRR", value: 197000, delta: 0.11, format: money }, mark: { fillOpacity: 0.16, strokeWidth: 1.5 }, size: { width: 300, height: 96 } }, "MRR is 197 thousand dollars, up 11 percent."),
+        spec: spec("kpi", kpis, mode, { data: mrr, metric: { label: "MRR", value: 197000, delta: 0.11, format: money, thresholds: [{ value: 0, color: "#d92d20" }, { value: 120000, color: "#f4b183" }, { value: 180000, color: "#1f8a70" }] }, mark: { fillOpacity: 0.16, strokeWidth: 1.5 }, size: { width: 300, height: 96 } }, "MRR is 197 thousand dollars, up 11 percent."),
       }),
       chart({
         id: "retain-customers",
         title: "Customers",
         caption: "Paying customers.",
-        note: "type kpi.",
+        note: "type kpi. metric.thresholds colours the surface teal from 450 customers.",
         span: "dash-3",
         place: "metric",
         themes: kpis,
-        spec: spec("kpi", kpis, mode, { data: [420, 438, 451, 470, 488, 510], metric: { label: "Customers", value: 510, delta: 0.05, format: "compact" }, mark: { fillOpacity: 0.16, strokeWidth: 1.5 }, size: { width: 300, height: 96 } }, "510 customers, up 5 percent."),
+        spec: spec("kpi", kpis, mode, { data: [420, 438, 451, 470, 488, 510], metric: { label: "Customers", value: 510, delta: 0.05, format: "compact", thresholds: [{ value: 0, color: "#d92d20" }, { value: 300, color: "#f4b183" }, { value: 450, color: "#1f8a70" }] }, mark: { fillOpacity: 0.16, strokeWidth: 1.5 }, size: { width: 300, height: 96 } }, "510 customers, up 5 percent."),
       }),
       chart({
         id: "retain-churn",
         title: "Churn",
         caption: "Logo churn.",
-        note: "type kpi. goodDirection down.",
+        note: "type kpi. goodDirection down. metric.thresholds colours the surface teal under 3 percent, sand from 3, and red from 5.",
         span: "dash-3",
         place: "metric",
         themes: kpis,
-        spec: spec("kpi", kpis, mode, { data: [3.4, 3.1, 2.9, 2.7, 2.6, 2.4], metric: { label: "Churn", value: 2.4, delta: -0.08, format: { style: "number", decimals: 1, suffix: "%" }, goodDirection: "down" }, mark: { fillOpacity: 0.16, strokeWidth: 1.5 }, size: { width: 300, height: 96 } }, "Logo churn is 2.4 percent, down 8 percent."),
+        spec: spec("kpi", kpis, mode, { data: [3.4, 3.1, 2.9, 2.7, 2.6, 2.4], metric: { label: "Churn", value: 2.4, delta: -0.08, format: { style: "number", decimals: 1, suffix: "%" }, goodDirection: "down", thresholds: [{ value: 0, color: "#1f8a70" }, { value: 3, color: "#f4b183" }, { value: 5, color: "#d92d20" }] }, mark: { fillOpacity: 0.16, strokeWidth: 1.5 }, size: { width: 300, height: 96 } }, "Logo churn is 2.4 percent, down 8 percent."),
       }),
       chart({
         id: "retain-area",
@@ -949,7 +939,7 @@ function retain(): Dashboard {
     ],
     sparks: [],
     notes: [
-      { label: "Revenue", detail: "MRR movement is a stacked area in teal #1f8a70, a lighter green, and sand. Scorecards use compact dollars, a customer count, and percent churn." },
+      { label: "Revenue", detail: "MRR movement is a stacked area in teal #1f8a70, a lighter green, and sand. Scorecards use compact dollars, a customer count, and percent churn. metric.thresholds paints each card from the value." },
       { label: "Product", detail: "The funnel uses #7856ff. The cohort heatmap is a triangle: later months are null. fontFamily is Inter." },
       { label: "Data", detail: "Months, customers, and stages are fictional." },
     ],

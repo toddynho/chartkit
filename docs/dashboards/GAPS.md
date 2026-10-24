@@ -33,8 +33,8 @@ The Stripe gross-volume card matches the May 2020 reference. stripe.com and the 
 
 Round 2 adds six pages: Datadog and Grafana, Robinhood and Coinbase, Linear, Vercel, Apple Fitness and Apple Health, and ChartMogul and Mixpanel. Same rules: no logos, wordmarks, icons, proprietary fonts, or real data. Shell type is Inter, except the monitor page, which uses Roboto. Chart colour still comes from the spec.
 
-| Product | Detail | Current workaround | Proposed ChartKit option |
-| --- | --- | --- | --- |
-| Apple Fitness | Three concentric activity rings in one mark. | Three `progress-ring` specs sit side by side. | `mark.rings`: a list of `{value, max, color}`. |
-| Robinhood | Volume bars drawn in a subplot under the candles. | Volume is a separate bar chart beside the candlestick. | `encoding.volume` on `candlestick`, painted under the price plot. |
-| Grafana | A stat panel paints its background from a threshold on the value. | The scorecard is a `kpi` or `gauge` on a flat card. | `metric.thresholds` colour the chart surface. |
+Closed for those pages:
+
+- `mark.rings` on `progress-ring` is a list of `{value, max, color, label}`. The first ring is the outside. The activity page draws move, exercise, and stand in one spec.
+- `encoding.volume` on `candlestick` names the volume field. The bars sit under the price plot. The portfolio page sets it on the candle spec.
+- `metric.thresholds` on `kpi` is a list of `{value, color}`. The surface uses the last step at or below `metric.value`. The revenue scorecards use it. A value under every step uses the first colour.

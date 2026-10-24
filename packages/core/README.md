@@ -206,6 +206,8 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
 
 ## kpi
 
+`metric.thresholds` is `{value, color}` steps. The surface uses the last step at or below `metric.value`.
+
 ```json
 {
   "version": "1",
@@ -239,6 +241,8 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
 
 ## progress-ring
 
+`mark.rings` draws concentric rings, outer first. Each item is `{value, max, color, label}`. Without it, the ring is `metric`.
+
 ```json
 {
   "version": "1",
@@ -265,6 +269,8 @@ Not published yet. See [docs/migrate.md](../../docs/migrate.md).
 ```
 
 ## candlestick
+
+`encoding.volume` names the volume field. Those bars sit under the candles.
 
 ```json
 {

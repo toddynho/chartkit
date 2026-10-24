@@ -42,6 +42,7 @@ export const MARK_APPLIES: Record<string, readonly string[]> = {
   startAngle: ["gauge", "progress-ring", "donut", "pie", "radial-bar", "rose"],
   endAngle: ["gauge", "progress-ring"],
   linecap: ["gauge", "progress-ring"],
+  rings: ["progress-ring"],
   baseline: ["spike"],
   shape: ["funnel"],
   bins: ["histogram"],

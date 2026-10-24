@@ -8,7 +8,7 @@
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
 - Chart.js, Recharts, ECharts: https://chartkit.dev/convert
 - Render: https://cloud.chartkit.dev/render marked.
-- Options: interaction.navigator, interaction.sync, interaction.drilldown, layout.facet, layout.concat, layout.breakpoints, layout.direction rtl, render auto, mark.sampling lttb. 100000.
+- Options: interaction.navigator, interaction.sync, interaction.drilldown, layout.facet, layout.concat, layout.breakpoints, layout.direction rtl, render auto, mark.sampling lttb, mark.rings, encoding.volume, metric.thresholds. 100000.
 - Shell: page CSS owns grid, cards, tabs. Spec owns colour, grid, axes, marks, legends.
 - Cookbook: https://chartkit.dev/recipes.json
 - Dashboards: /dashboards/{ledger,meter,wayline,keel,signal,folio,cycle,edge,pulse,retain}.md

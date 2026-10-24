@@ -1024,7 +1024,7 @@
         },
         "volume": {
           "$ref": "#/$defs/channel",
-          "description": "Candlestick only: volume field; when present, a volume pane is drawn."
+          "description": "Candlestick only: volume field. When set, bars are drawn under the price plot."
         },
         "source": {
           "$ref": "#/$defs/channel",
@@ -1440,6 +1440,36 @@
           "default": "round",
           "description": "Arc end style. Applies to: gauge, progress-ring."
         },
+        "rings": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["value"],
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "Progress toward max."
+              },
+              "max": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "description": "Goal for this ring. Defaults to 1."
+              },
+              "color": {
+                "$ref": "#/$defs/color"
+              },
+              "label": {
+                "type": "string",
+                "description": "Short name drawn under the rings."
+              }
+            },
+            "description": "One concentric ring."
+          },
+          "description": "Concentric activity rings, outer first. Each item is {value, max, color, label}. Applies to: progress-ring."
+        },
         "baseline": {
           "type": "number",
           "default": 0,
@@ -1596,6 +1626,31 @@
             "description": "A colored range."
           },
           "description": "Colored ranges on the gauge, e.g. good/warn/bad."
+        },
+        "thresholds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["value", "color"],
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "The step applies when metric.value is at or above this."
+              },
+              "color": {
+                "$ref": "#/$defs/color"
+              },
+              "label": {
+                "type": "string",
+                "description": "Name for the step. Not drawn."
+              }
+            },
+            "description": "One colour step."
+          },
+          "description": "Colour the kpi surface from the value. The last step at or below metric.value wins. Applies to: kpi."
         }
       },
       "examples": [
