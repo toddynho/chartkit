@@ -27,7 +27,6 @@ interface Prompt {
 
 interface Feed {
   shell: string;
-  unmerged: string;
   closed: { key: string }[];
   prompts: Prompt[];
   recipes: Recipe[];
@@ -53,7 +52,8 @@ describe("dashboard cookbook", () => {
     expect(Buffer.byteLength(llms)).toBeLessThanOrEqual(6400);
     expect(llms).toContain("page CSS owns grid, cards, tabs. Spec owns colour, grid, axes, marks, legends.");
     expect(llms).toContain("https://chartkit.dev/recipes.json");
-    expect(llms).toContain("PR 53, not merged");
+    expect(llms).toContain("/dashboards/{ledger,meter,wayline,keel,signal,folio,cycle,edge,pulse,retain}.md");
+    expect(llms).not.toContain("PR 53");
     expect(llms).toContain("ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.");
   });
 
@@ -84,15 +84,25 @@ describe("dashboard cookbook", () => {
     }
     expect(feed.shell).toMatch(/page grid, cards, and tabs/);
     expect(feed.prompts).toHaveLength(10);
-    expect(feed.prompts.filter((row) => row.onMain).map((row) => row.id)).toEqual(["ledger", "meter", "wayline", "keel"]);
-    const pending = feed.prompts.filter((row) => !row.onMain);
-    expect(pending.map((row) => row.id)).toEqual(["signal", "folio", "cycle", "edge", "pulse", "retain"]);
-    for (const row of pending) {
-      expect(row.pr).toBe(53);
-      expect(row.prompt).toContain("Not on main");
+    expect(feed.prompts.filter((row) => row.onMain).map((row) => row.id)).toEqual([
+      "ledger",
+      "meter",
+      "wayline",
+      "keel",
+      "signal",
+      "folio",
+      "cycle",
+      "edge",
+      "pulse",
+      "retain",
+    ]);
+    for (const row of feed.prompts) {
+      expect(row.prompt).not.toContain("Not on main");
       expect(row.prompt).toContain(`https://chartkit.dev${row.markdown}`);
     }
-    expect(feed.unmerged).toContain("not on main");
+    const edge = feed.recipes.find((row) => row.id === "vercel-area-partial");
+    expect(edge?.onMain).toBe(true);
+    expect(edge?.markdown).toBe("/dashboards/edge.md");
   });
 
   it("draws each recipe with the key it names", async () => {

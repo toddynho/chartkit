@@ -121,7 +121,7 @@ const svg = render(ready);`}
         ))}
       </ul>
       <h2>Golden prompts</h2>
-      <p>One prompt per dashboard page. {feed.unmerged}</p>
+      <p>One prompt per dashboard page. All ten are on main.</p>
       <ul>
         {prompts.map((row) => (
           <li key={row.id}>
@@ -132,7 +132,10 @@ const svg = render(ready);`}
         ))}
       </ul>
       <h2>Cookbook</h2>
-      <p>Each recipe is one spec from a dashboard page. The Vercel area is taken from the unmerged edge page.</p>
+      <p>
+        Each recipe is one spec from a dashboard page. The Vercel area is the visitors chart on{" "}
+        <a href="/dashboards/edge">/dashboards/edge</a>.
+      </p>
       {recipes.map((row) => (
         <section key={row.id}>
           <h3>{row.prompt}</h3>
