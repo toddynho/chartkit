@@ -1339,16 +1339,31 @@ describe("diagnostic codes", () => {
     expect(points.ok).toBe(true);
   });
 
-  it("CK1005 maps bubble and choropleth aliases onto the map types", () => {
-    for (const alias of ["bubble-map", "bubble map", "map"]) {
-      const result = validate({ ...base, type: alias });
-      expect(result.errors.find((item) => item.code === "CK1005")?.fix, alias).toEqual([{ op: "replace", path: "/type", value: "map-points" }]);
-      expect(result.errors.find((item) => item.code === "CK1005")?.hint).toContain("map-points");
+  it("accepts bubble and choropleth aliases as map types", () => {
+    for (const alias of ["bubble-map", "bubble map", "bubbleMap", "map"]) {
+      const result = validate({
+        version: "1",
+        type: alias,
+        data: [{ name: "Paris", lat: 48.9, lon: 2.3 }],
+        encoding: { latitude: "lat", longitude: "lon", label: "name" },
+        a11y: { alt: "Paris is marked." },
+      });
+      expect(result.errors.filter((item) => item.code === "CK1005" || item.code === "CK1002"), alias).toEqual([]);
+      expect(result.warnings.some((item) => item.code === "CK3057"), alias).toBe(true);
+      expect(result.ok, alias).toBe(true);
     }
     for (const alias of ["choropleth-map", "heat map of countries"]) {
-      const result = validate({ ...base, type: alias });
-      expect(result.errors.find((item) => item.code === "CK1005")?.fix, alias).toEqual([{ op: "replace", path: "/type", value: "choropleth" }]);
-      expect(result.errors.find((item) => item.code === "CK1005")?.hint).toContain("choropleth");
+      const result = validate({
+        version: "1",
+        type: alias,
+        atlas: "us",
+        data: [{ state: "CA", share: 1 }],
+        encoding: { region: "state" },
+        mark: { atlas: "us" },
+        a11y: { alt: "California is marked." },
+      });
+      expect(result.errors.filter((item) => item.code === "CK1005" || item.code === "CK1002"), alias).toEqual([]);
+      expect(result.ok, alias).toBe(true);
     }
   });
 
@@ -1410,6 +1425,51 @@ describe("diagnostic codes", () => {
     expect(fixed.ok).toBe(true);
     expect((fixed.spec as { type: string }).type).toBe("bar");
     expect((fixed.spec as { layout: { facet: unknown } }).layout.facet).toEqual({ field: "month", columns: 2 });
+  });
+
+  it("CK1009 merges concat view lists and keeps an existing direction", () => {
+    const bar = { type: "bar", data: base.data, encoding: base.encoding, a11y: base.a11y };
+    const donut = { type: "donut", data: [{ x: "A", y: 1 }], encoding: { x: "x", y: "y" }, a11y: base.a11y };
+    const fixed = repair({
+      ...base,
+      charts: [bar],
+      views: [donut],
+      layout: { concat: { direction: "vertical", gap: 8 } },
+    });
+    expect(fixed.ok).toBe(true);
+    expect(fixed.spec).not.toHaveProperty("charts");
+    expect(fixed.spec).not.toHaveProperty("views");
+    const concat = (fixed.spec as { layout: { concat: { views: { type: string }[]; direction: string; gap: number } } }).layout.concat;
+    expect(concat.direction).toBe("vertical");
+    expect(concat.gap).toBe(8);
+    expect(concat.views.map((view) => view.type)).toEqual(["bar", "donut"]);
+
+    const wrapped = repair({
+      ...base,
+      options: { charts: [bar], direction: "vertical", concat: { gap: 12 } },
+      views: [donut],
+    });
+    expect(wrapped.ok).toBe(true);
+    expect(wrapped.spec).not.toHaveProperty("options");
+    expect(wrapped.spec).not.toHaveProperty("views");
+    const fromOptions = (wrapped.spec as { layout: { concat: { views: { type: string }[]; direction: string; gap: number } } }).layout.concat;
+    expect(fromOptions.direction).toBe("vertical");
+    expect(fromOptions.gap).toBe(12);
+    expect(fromOptions.views.map((view) => view.type)).toEqual(["donut", "bar"]);
+  });
+
+  it("CK1009 maps sharedScale onto layout.facet.scales", () => {
+    const shared = repair({ ...base, layout: { facet: { field: "month", columns: 2, sharedScale: true } } });
+    expect(shared.ok).toBe(true);
+    expect((shared.spec as { layout: { facet: unknown } }).layout.facet).toEqual({ field: "month", columns: 2, scales: "shared" });
+
+    const same = repair({ ...base, layout: { facet: { field: "month", columns: 2, scales: "same" } } });
+    expect(same.ok).toBe(true);
+    expect((same.spec as { layout: { facet: { scales: string } } }).layout.facet.scales).toBe("shared");
+
+    const moved = repair({ ...base, facet: { field: "month", sharedScale: true } });
+    expect(moved.ok).toBe(true);
+    expect((moved.spec as { layout: { facet: unknown } }).layout.facet).toEqual({ field: "month", scales: "shared" });
   });
 
   it("CK1009 turns type concat and dashboard into layout.concat", () => {

@@ -1,7 +1,7 @@
 import { suggestAtlas, suggestRegion, directoryIndex, matchRegion, type DirectoryEntry } from "./match";
 import { regionsFromGeoJSON, regionsFromTopology } from "./topo";
 import { ATLAS_NAMES, type AtlasName, type Diagnostic, type ValidationResult } from "./types";
-import { fieldName, isRecord, num, pointer, resolveEncoding, resolveMark, rowsOf } from "./spec";
+import { fieldName, isRecord, mapKind, num, pointer, resolveEncoding, resolveMark, rowsOf } from "./spec";
 
 function result(diagnostics: Diagnostic[]): ValidationResult {
   const errors = diagnostics.filter((item) => item.severity === "error");
@@ -128,8 +128,10 @@ function column(rows: Record<string, unknown>[], field: string): number[] {
  */
 export function validate(spec: unknown): ValidationResult {
   if (!isRecord(spec)) return result([]);
-  const type = spec.type;
-  if (type !== "choropleth" && type !== "map-points") return result([]);
+  const kind = mapKind(spec.type);
+  if (!kind) return result([]);
+  if (spec.type !== kind) return validate({ ...spec, type: kind });
+  const type = kind;
   const diagnostics: Diagnostic[] = [];
   const mark = resolveMark(spec);
   const encoding = resolveEncoding(spec);

@@ -9,6 +9,7 @@ import { createRenderer } from "../../packages/core/src/render.ts";
 import { charts as coreCharts } from "../../packages/core/src/all.ts";
 import { charts as extraCharts } from "../../packages/core/src/extra.ts";
 import { render as renderGeo, validate as validateGeo } from "../../packages/geo/src/index.ts";
+import { mapKind } from "../../packages/geo/src/spec.ts";
 import { repair, validate } from "../../packages/core/src/validate.ts";
 import { line } from "../../packages/core/src/charts/line.ts";
 import { bar } from "../../packages/core/src/charts/bar.ts";
@@ -436,7 +437,8 @@ export function checkChartKit(spec, task) {
 export async function checkSupp(spec, task) {
   const stages = {};
   const validation = validate(spec);
-  const mapType = spec?.type === "choropleth" || spec?.type === "map-points";
+  const kind = mapKind(spec?.type);
+  const mapType = kind === "choropleth" || kind === "map-points";
   const geo = mapType ? validateGeo(spec) : { errors: [], warnings: [] };
   const geoNotes = [...(geo.errors ?? []), ...(geo.warnings ?? [])];
   stages.validate = {

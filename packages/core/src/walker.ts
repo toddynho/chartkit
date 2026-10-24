@@ -370,6 +370,16 @@ function check(value: unknown, schema: JsonSchema, path: string, ctx: Ctx): void
           fix: matches[0] ? [{ op: "replace", path: path || "/", value: matches[0] }] : undefined,
         });
       }
+    } else if (isFacetScales(path, node) && scaleWord(value)) {
+      const word = scaleWord(value);
+      emit(ctx, {
+        code: "CK1007",
+        severity: "error",
+        message: `${quote(value)} is not one of ${node.enum.map((item) => quote(item)).join(", ")}`,
+        path,
+        hint: 'layout.facet.scales is "shared" or "independent". sharedScale true means "shared" (one y domain).',
+        fix: word ? [{ op: "replace", path: path || "/", value: word }] : undefined,
+      });
     } else {
       const named = typeof value === "string" ? PLACE_ALIAS[path.endsWith("/position") ? value : ""] ?? FIELD_TYPE_ALIAS[value] : undefined;
       const alias = named && node.enum.includes(named) ? named : undefined;
@@ -1088,9 +1098,10 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   if (value === "columnrange" || value === "column-range" || value === "rangebar" || value === "range-bar" || value === "floating-bar") return { type: "bar-range", kind: "rename" };
   if (value === "error-bar" || value === "error-bars" || value === "errorbars") return { type: "errorbar", kind: "rename" };
   if (value === "sun-burst" || value === "sunburstchart" || value === "sunburst-chart" || value === "partition") return { type: "sunburst", kind: "rename" };
-  const folded = value.trim().toLowerCase().replace(/[_]+/g, " ").replace(/-/g, " ").replace(/\s+/g, " ");
-  if (folded === "bubble map" || folded === "map") return { type: "map-points", kind: "rename" };
-  if (folded === "choropleth map" || folded === "heat map of countries") return { type: "choropleth", kind: "rename" };
+  const folded = value.trim().replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase().replace(/[_]+/g, " ").replace(/-/g, " ").replace(/\s+/g, " ");
+  const compact = folded.replace(/ /g, "");
+  if (compact === "bubblemap" || folded === "map") return { type: "map-points", kind: "rename" };
+  if (compact === "choroplethmap" || folded === "heat map of countries") return { type: "choropleth", kind: "rename" };
   return undefined;
 }
 
@@ -1150,17 +1161,30 @@ function noteMisplaced(spec: Record<string, unknown>, ctx: Ctx): void {
   const layoutBag: Record<string, unknown> | null = isPlainObject(spec.layout) ? null : {};
   const interactionBag: Record<string, unknown> | null = isPlainObject(spec.interaction) ? null : {};
 
-  const placedLayout = new Set<string>();
+  const layoutOps = new Map<string, JsonPatchOperation>();
   const placedInteraction = new Set<string>();
   const putLayout = (key: string, value: unknown, fix: JsonPatchOperation[]) => {
-    if (placedLayout.has(key)) return;
-    placedLayout.add(key);
+    if (value === undefined) return;
     if (layoutBag) {
-      layoutBag[key] = value;
+      layoutBag[key] = mergeLayoutValue(layoutBag[key], value);
       return;
     }
     const layout = spec.layout as Record<string, unknown>;
-    if (layout[key] === undefined) fix.push({ op: "add", path: `/layout/${key}`, value });
+    const existing = layoutOps.get(key);
+    const base = existing ? existing.value : layout[key];
+    const merged = mergeLayoutValue(base, value);
+    if (existing) {
+      existing.value = merged;
+      return;
+    }
+    if (JSON.stringify(layout[key]) === JSON.stringify(merged)) return;
+    const op: JsonPatchOperation = {
+      op: layout[key] === undefined ? "add" : "replace",
+      path: `/layout/${key}`,
+      value: merged,
+    };
+    layoutOps.set(key, op);
+    fix.push(op);
   };
   const putInteraction = (key: string, value: unknown, fix: JsonPatchOperation[]) => {
     if (placedInteraction.has(key)) return;
@@ -1250,7 +1274,14 @@ function facetFeature(
 
 function facetPayload(value: unknown): unknown {
   if (typeof value === "string" && value) return { field: value };
-  return value;
+  if (!isPlainObject(value) || value.scales !== undefined) return value;
+  const scales = facetScaleWord(value);
+  if (!scales) return value;
+  const next: Record<string, unknown> = { ...value, scales };
+  for (const key of Object.keys(next)) {
+    if (FACET_SCALE_KEYS.has(key.toLowerCase())) delete next[key];
+  }
+  return next;
 }
 
 function concatFeature(
@@ -1259,43 +1290,58 @@ function concatFeature(
   putLayout: (key: string, value: unknown, fix: JsonPatchOperation[]) => void,
 ): FeatureMove | undefined {
   const layout = isPlainObject(spec.layout) ? spec.layout : undefined;
+  const options = isPlainObject(spec.options) ? spec.options : undefined;
+  const optionLayout = options && isPlainObject(options.layout) ? options.layout : undefined;
+  const pairs: [string, unknown][] = [
+    ["/charts", spec.charts],
+    ["/views", spec.views],
+    ["/concat", spec.concat],
+    ["/layout/charts", layout?.charts],
+    ["/options/charts", options?.charts],
+    ["/options/views", options?.views],
+    ["/options/concat", options?.concat],
+    ["/options/layout/charts", optionLayout?.charts],
+    ["/options/layout/concat", optionLayout?.concat],
+  ];
   const sources: string[] = [];
-  if (spec.charts !== undefined) sources.push("/charts");
-  if (spec.views !== undefined) sources.push("/views");
-  if (spec.concat !== undefined) sources.push("/concat");
-  if (layout?.charts !== undefined) sources.push("/layout/charts");
-  const dashboard = spec.type === "concat" || spec.type === "dashboard";
-  const topFlow = spec.direction === "vertical" || spec.direction === "horizontal" ? spec.direction : undefined;
-  const concatFlow = isPlainObject(spec.concat) && (spec.concat.direction === "vertical" || spec.concat.direction === "horizontal") ? spec.concat.direction : undefined;
-  const direction = topFlow ?? concatFlow ?? (layout?.direction === "vertical" || layout?.direction === "horizontal" ? layout.direction : undefined);
-  if (sources.length === 0 && !direction && !dashboard) return undefined;
-  let views: unknown[] | undefined;
-  if (isPlainObject(spec.concat) && Array.isArray(spec.concat.views)) views = spec.concat.views;
-  for (const source of sources) {
-    const raw = source === "/charts" ? spec.charts : source === "/views" ? spec.views : source === "/concat" ? spec.concat : layout?.charts;
-    views ??= viewsPayload(raw);
+  const views: unknown[] = [];
+  let foundViews = false;
+  for (const [source, raw] of pairs) {
+    if (raw === undefined) continue;
+    sources.push(source);
+    const list = concatViewsOf(raw);
+    if (!list) continue;
+    foundViews = true;
+    for (const view of list) views.push(withViewType(view));
   }
-  if (views) views = views.map((view) => withViewType(view));
+  const dashboard = spec.type === "concat" || spec.type === "dashboard";
+  const topFlow = flowOf(spec);
+  const direction = topFlow ?? flowOf(spec.concat) ?? flowOf(options?.concat) ?? flowOf(optionLayout?.concat) ?? flowOf(layout);
+  if (sources.length === 0 && !direction && !dashboard) return undefined;
   const fix: JsonPatchOperation[] = [];
   const concat: Record<string, unknown> = {};
-  if (views) concat.views = views;
+  if (views.length > 0) concat.views = views;
   if (direction) concat.direction = direction;
-  if (isPlainObject(spec.concat) && typeof spec.concat.gap === "number") concat.gap = spec.concat.gap;
+  const gap = gapOf(spec.concat) ?? gapOf(options?.concat) ?? gapOf(optionLayout?.concat);
+  if (gap !== undefined) concat.gap = gap;
   if (Object.keys(concat).length > 0) putLayout("concat", concat, fix);
   for (const source of sources) {
     ctx.skipUnknown.add(source);
-    if (views || source === "/concat") fix.push({ op: "remove", path: source });
+    if (foundViews || source === "/concat" || source.endsWith("/concat")) fix.push({ op: "remove", path: source });
   }
   if (topFlow) {
     ctx.skipUnknown.add("/direction");
     fix.push({ op: "remove", path: "/direction" });
   }
-  if (direction && !topFlow) {
+  if (direction && !topFlow && (layout?.direction === "vertical" || layout?.direction === "horizontal")) {
     ctx.explained.add("/layout/direction");
     fix.push({ op: "remove", path: "/layout/direction" });
   }
   if (dashboard) {
-    const host = views?.map((view) => (isPlainObject(view) && typeof view.type === "string" ? view.type : "")).find((type) => type && type !== "concat" && type !== "dashboard") ?? "line";
+    const existing = isPlainObject(layout?.concat) && Array.isArray(layout.concat.views) ? layout.concat.views : [];
+    const host = [...existing, ...views]
+      .map((view) => (isPlainObject(view) && typeof view.type === "string" ? view.type : ""))
+      .find((type) => type && type !== "concat" && type !== "dashboard") ?? "line";
     fix.push({ op: "replace", path: "/type", value: host });
     ctx.skipMissing.add("|type");
     ctx.skipUnknown.add("/type");
@@ -1322,6 +1368,87 @@ function viewsPayload(value: unknown): unknown[] | undefined {
   if (!isPlainObject(value)) return undefined;
   const views = Object.values(value).filter((item) => isPlainObject(item));
   return views.length > 0 ? views : undefined;
+}
+
+function concatViewsOf(value: unknown): unknown[] | undefined {
+  if (Array.isArray(value)) return value;
+  if (!isPlainObject(value)) return undefined;
+  if (Array.isArray(value.views)) return value.views;
+  return viewsPayload(value);
+}
+
+function flowOf(value: unknown): "vertical" | "horizontal" | undefined {
+  if (!isPlainObject(value)) return undefined;
+  return value.direction === "vertical" || value.direction === "horizontal" ? value.direction : undefined;
+}
+
+function gapOf(value: unknown): number | undefined {
+  return isPlainObject(value) && typeof value.gap === "number" ? value.gap : undefined;
+}
+
+function concatRest(value: unknown): unknown {
+  if (Array.isArray(value)) return undefined;
+  if (!isPlainObject(value) || !Object.prototype.hasOwnProperty.call(value, "views")) return value;
+  const rest = { ...value };
+  delete rest.views;
+  return Object.keys(rest).length > 0 ? rest : undefined;
+}
+
+function mergeLayoutValue(current: unknown, extra: unknown): unknown {
+  if (current === undefined) return extra;
+  if (isPlainObject(current) && isPlainObject(extra)) {
+    const out: Record<string, unknown> = { ...current };
+    for (const [key, item] of Object.entries(extra)) {
+      out[key] = key === "views" ? mergeViewLists(out.views, item) : item;
+    }
+    return out;
+  }
+  return extra;
+}
+
+function mergeViewLists(current: unknown, extra: unknown): unknown[] {
+  const first = Array.isArray(current) ? current : [];
+  const second = Array.isArray(extra) ? extra : [];
+  const seen = new Set(first.map((item) => JSON.stringify(item)));
+  const out = [...first];
+  for (const item of second) {
+    const key = JSON.stringify(item);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+  }
+  return out;
+}
+
+const FACET_SCALE_KEYS = new Set(["sharedscale", "sharedscales", "samescale", "sharescale", "yscale", "scale"]);
+
+function scaleWord(value: unknown): "shared" | "independent" | undefined {
+  if (value === true) return "shared";
+  if (value === false) return "independent";
+  if (typeof value === "string") {
+    const word = value.trim().toLowerCase();
+    if (word === "true" || word === "shared" || word === "same" || word === "sync" || word === "locked" || word === "common" || word === "together") return "shared";
+    if (word === "false" || word === "independent" || word === "separate") return "independent";
+    return undefined;
+  }
+  if (isPlainObject(value)) {
+    if (value.shared === true || value.y === "shared") return "shared";
+    if (value.shared === false || value.y === "independent") return "independent";
+  }
+  return undefined;
+}
+
+function facetScaleWord(value: Record<string, unknown>): "shared" | "independent" | undefined {
+  for (const [key, item] of Object.entries(value)) {
+    if (!FACET_SCALE_KEYS.has(key.toLowerCase())) continue;
+    const word = scaleWord(item);
+    if (word) return word;
+  }
+  return undefined;
+}
+
+function isFacetScales(path: string, node: { enum?: unknown[] }): boolean {
+  return path.endsWith("/scales") && node.enum?.includes("shared") === true && node.enum.includes("independent") === true;
 }
 
 function breakpointFeature(
@@ -1749,7 +1876,7 @@ function optionsFeature(
   if (layout) {
     ctx.skipUnknown.add("/options/layout");
     if (layout.facet !== undefined) putLayout("facet", facetPayload(layout.facet), fix);
-    if (layout.concat !== undefined) putLayout("concat", layout.concat, fix);
+    if (layout.concat !== undefined) putLayout("concat", concatRest(layout.concat), fix);
     if (layout.breakpoints !== undefined) putLayout("breakpoints", layout.breakpoints, fix);
     if (layout.direction === "ltr" || layout.direction === "rtl") putLayout("direction", layout.direction, fix);
   }
@@ -1772,7 +1899,7 @@ function optionsFeature(
   else if (direction === "horizontal" || direction === "vertical") {
     concat = isPlainObject(concat) ? { ...concat, direction } : concat !== undefined ? { views: concat, direction } : { direction };
   }
-  if (concat !== undefined) putLayout("concat", concat, fix);
+  if (concat !== undefined) putLayout("concat", concatRest(concat), fix);
   const rtl = take("rtl");
   if (rtl !== undefined) putLayout("direction", rtl === false || rtl === "ltr" ? "ltr" : "rtl", fix);
   const sampling = take("sampling");
@@ -2341,6 +2468,27 @@ const POS_NAMES = new Set(["top", "bottom", "left", "right", "center", "inside",
 function emitUnknownProp(name: string, path: string, props: Record<string, JsonSchema>, ctx: Ctx, value?: unknown): void {
   const pointer = join(path, name);
   if (ctx.skipUnknown.has(pointer)) return;
+  if (path === "/layout/facet" && FACET_SCALE_KEYS.has(name.toLowerCase())) {
+    const word = scaleWord(value);
+    if (word) {
+      const root = isPlainObject(ctx.rootValue) ? ctx.rootValue : {};
+      const layout = isPlainObject(root.layout) ? root.layout : undefined;
+      const facet = layout && isPlainObject(layout.facet) ? layout.facet : undefined;
+      const fix: JsonPatchOperation[] = [{ op: "remove", path: pointer }];
+      const scales = facet?.scales;
+      if (scales === undefined) fix.push({ op: "add", path: "/layout/facet/scales", value: word });
+      else if (scales !== "shared" && scales !== "independent") fix.push({ op: "replace", path: "/layout/facet/scales", value: word });
+      emit(ctx, {
+        code: "CK1009",
+        severity: "error",
+        message: "shared scales are layout.facet.scales",
+        path: pointer,
+        hint: 'layout.facet.scales is "shared" or "independent". sharedScale true means "shared" (one y domain).',
+        fix,
+      });
+      return;
+    }
+  }
   if (axisLimit(name, path, pointer, value, ctx)) return;
   if (markMistake(name, path, pointer, value, ctx)) return;
   if (/^\/mark\/colorRules\/\d+$/.test(path) && (name === "name" || name === "title")) {

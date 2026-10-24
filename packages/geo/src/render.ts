@@ -1,7 +1,7 @@
 import { formatNumber, hexRange, paintScale, parseFormat, POINT_PALETTE, sizeStops, type PaintScale, type ScaleFormat } from "./color";
 import { directoryIndex, matchRegion, type DirectoryEntry } from "./match";
 import { albersUsa, equalEarth, equirectangular, fitProject, mercator, type Box, type InsetFrame } from "./project";
-import { esc, fieldName, isRecord, num, resolveEncoding, resolveMark, round, rowsOf, sizeOf, tooltipColumns, tooltipExtra } from "./spec";
+import { esc, fieldName, isRecord, mapKind, num, resolveEncoding, resolveMark, round, rowsOf, sizeOf, tooltipColumns, tooltipExtra } from "./spec";
 import { chromeFor, type Chrome } from "./theme";
 import { regionsFromGeoJSON, regionsFromTopology, type GeoRegion, type LonLat } from "./topo";
 import type { AtlasName, ColorScaleName } from "./types";
@@ -501,10 +501,16 @@ function leaderOf(circle: { x: number; y: number; r: number }, box: { x: number;
 }
 
 export async function render(spec: unknown): Promise<string> {
-  if (!isRecord(spec) || (spec.type !== "choropleth" && spec.type !== "map-points")) {
-    const chrome = chromeFor(isRecord(spec) ? spec.theme : "soft");
-    return shell(isRecord(spec) ? spec : { type: "choropleth", a11y: { alt: "Map" } }, chrome, `<defs>${patternDef(chrome, "ckg")}</defs><text class="ck-geo-title" x="16" y="32" font-size="16">Expected type choropleth or map-points.</text>`);
+  if (!isRecord(spec)) {
+    const chrome = chromeFor("soft");
+    return shell({ type: "choropleth", a11y: { alt: "Map" } }, chrome, `<defs>${patternDef(chrome, "ckg")}</defs><text class="ck-geo-title" x="16" y="32" font-size="16">Expected type choropleth or map-points.</text>`);
   }
+  const chartKind = mapKind(spec.type);
+  if (!chartKind) {
+    const chrome = chromeFor(spec.theme);
+    return shell(spec, chrome, `<defs>${patternDef(chrome, "ckg")}</defs><text class="ck-geo-title" x="16" y="32" font-size="16">Expected type choropleth or map-points.</text>`);
+  }
+  if (spec.type !== chartKind) return render({ ...spec, type: chartKind });
   const mark = resolveMark(spec);
   const chrome = paintChrome(chromeFor(spec.theme), mark);
   const { width, height } = sizeOf(spec);

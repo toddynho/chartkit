@@ -84,6 +84,24 @@ test("supp scoring requires the feature and treats a map without an atlas as a f
   assert.equal(noAtlas.stages.validate.ok, false);
   const mapped = await suite.checkSupp({ ...unmapped, mark: { atlas: "world" } }, world);
   assert.equal(mapped.ok, true, JSON.stringify(mapped.stages));
+
+  const located = await suite.checkSupp({
+    ...unmapped,
+    mark: { atlas: "world" },
+    encoding: { location: "country", color: "share" },
+  }, world);
+  assert.equal(located.ok, true, JSON.stringify(located.stages));
+
+  const cities = suite.suppTasks.find((task) => task.id === "geo-cities");
+  const bubbles = await suite.checkSupp({
+    version: "1",
+    type: "bubble-map",
+    data: cities.data,
+    encoding: { latitude: "lat", longitude: "lon" },
+    mark: { atlas: "us" },
+    a11y: { alt: "Chicago and Houston." },
+  }, cities);
+  assert.equal(bubbles.ok, true, JSON.stringify(bubbles.stages));
 });
 
 test("concat scoring fails when a view draws nothing and passes when every view draws", async () => {
