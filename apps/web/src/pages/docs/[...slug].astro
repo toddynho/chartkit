@@ -1,7 +1,7 @@
 ---
 import DocArticle from "../../components/DocArticle.astro";
 import ResponseRail from "../../components/ResponseRail.astro";
-import { articleHref, articleSpec, docArticles, type DocArticle as Article } from "../../data/docs-catalog";
+import { articleChips, articleHref, articleSpec, docArticles, type DocArticle as Article } from "../../data/docs-catalog";
 import Docs from "../../layouts/Docs.astro";
 
 export function getStaticPaths() {
@@ -28,5 +28,5 @@ const { article, here } = Astro.props;
 
 <Docs title={article.title} description={article.description} lede={article.lede} href={articleHref(article)}>
   <DocArticle article={article} here={here} />
-  <ResponseRail slot="rail" spec={articleSpec} />
+  <ResponseRail slot="rail" spec={articleSpec} chips={articleChips} />
 </Docs>

@@ -1,6 +1,6 @@
 ---
 import type { DocArticle } from "../data/docs-catalog";
-import { articleChips, articleHref, articleSpec } from "../data/docs-catalog";
+import { articleHref, articleSpec } from "../data/docs-catalog";
 import PageNav from "./PageNav.astro";
 import Prose from "./Prose.astro";
 import SpecEditor from "./SpecEditor.astro";
@@ -23,7 +23,7 @@ const canonical = articleHref(article);
   ) : null
 }
 {article.tryIntro ? <p><Prose text={article.tryIntro} /></p> : null}
-<SpecEditor spec={articleSpec} chips={articleChips} />
+<SpecEditor spec={articleSpec} />
 {article.slug === "" ? <StackSample heading /> : null}
 {
   article.sections.filter((section) => !(article.slug === "" && section.title === "Install")).map((section) => (

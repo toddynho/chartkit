@@ -1,84 +1,33 @@
 ---
-import type { ChipGroup } from "../data/docs-catalog";
-
 interface Props {
   spec: Record<string, unknown>;
-  chips: ChipGroup[];
   title?: string;
-  hint?: string;
 }
 
-const { spec, chips, title = "Interactive spec", hint = "Options sit beside the JSON" } = Astro.props;
+const { spec, title = "Spec" } = Astro.props;
 const initial = JSON.stringify(spec, null, 2);
-
-function at(source: Record<string, unknown>, path: string): unknown {
-  return path.split(".").reduce<unknown>((current, key) => {
-    if (current && typeof current === "object") return (current as Record<string, unknown>)[key];
-    return undefined;
-  }, source);
-}
-
-function pressed(group: ChipGroup, value: string): boolean {
-  return String(at(spec, group.key) ?? "") === value;
-}
 ---
 
 <div class="spec-try" id="spec-try">
   <div class="spec-try__bar">
     <span class="spec-try__title">{title}</span>
-    <span class="spec-try__hint">{hint}</span>
   </div>
   <div class="spec-unit">
     <div class="spec-editor__bar">
       <span>spec.json</span>
       <span id="spec-status">valid · ready</span>
     </div>
-    <div class="spec-try__split">
-      <div class="spec-editor">
-        <label class="sr" for="spec-input">Editable chart specification</label>
-        <textarea id="spec-input" spellcheck="false">{initial}</textarea>
-      </div>
-      {
-        chips.length ? (
-          <div class="spec-chips" role="group" aria-label="Spec options">
-            {
-              chips.map((group) => (
-                <div class="chip-row">
-                  <span class="chip-row__label">{group.label}</span>
-                  <div class="chip-row__opts">
-                    {group.options.map((option) => (
-                      <button
-                        type="button"
-                        class:list={["spec-chip", pressed(group, option.value) && "is-on"]}
-                        data-key={group.key}
-                        data-value={option.value}
-                        aria-pressed={pressed(group, option.value) ? "true" : "false"}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))
-            }
-          </div>
-        ) : null
-      }
+    <div class="spec-editor">
+      <label class="sr" for="spec-input">Editable chart specification</label>
+      <textarea id="spec-input" spellcheck="false">{initial}</textarea>
     </div>
   </div>
-  <p class="spec-try__note">
-    The response rail runs <code>validate()</code>
-    {' '}and <code>render()</code>
-    {' '}from <code>@chartkitdev/core</code>
-    {' '}in this page. It does not call Cloud.
-  </p>
 </div>
 
 <script>
   import { paintSpec } from "../lib/chartkit";
   import { trySamples } from "../data/live-specs";
 
-  const editor = document.getElementById("spec-try");
   const input = document.getElementById("spec-input") as HTMLTextAreaElement | null;
   const status = document.getElementById("spec-status");
   const chartPanel = document.getElementById("response-chart");
@@ -149,7 +98,7 @@ function pressed(group: ChipGroup, value: string): boolean {
   }
 
   function syncChips(spec: Record<string, unknown>) {
-    editor?.querySelectorAll<HTMLButtonElement>(".spec-chip").forEach((button) => {
+    document.querySelectorAll<HTMLButtonElement>(".spec-chip").forEach((button) => {
       const key = button.dataset.key;
       const value = button.dataset.value;
       if (!key || value == null) return;
@@ -159,7 +108,7 @@ function pressed(group: ChipGroup, value: string): boolean {
     });
   }
 
-  editor?.querySelectorAll<HTMLButtonElement>(".spec-chip").forEach((button) => {
+  document.querySelectorAll<HTMLButtonElement>(".spec-chip").forEach((button) => {
     button.addEventListener("click", () => {
       if (!input) return;
       let current: Record<string, unknown>;

@@ -1,7 +1,7 @@
 ---
 import DocArticle from "../../components/DocArticle.astro";
 import ResponseRail from "../../components/ResponseRail.astro";
-import { articleBySlug, articleSpec } from "../../data/docs-catalog";
+import { articleBySlug, articleChips, articleSpec } from "../../data/docs-catalog";
 import Docs from "../../layouts/Docs.astro";
 
 const article = articleBySlug("");
@@ -10,5 +10,5 @@ if (!article) throw new Error("Docs overview is missing from the catalog.");
 
 <Docs title={article.title} description={article.description} lede={article.lede} href="/docs">
   <DocArticle article={article} here="/docs" />
-  <ResponseRail slot="rail" spec={articleSpec} />
+  <ResponseRail slot="rail" spec={articleSpec} chips={articleChips} />
 </Docs>

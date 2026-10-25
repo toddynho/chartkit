@@ -9,6 +9,10 @@
   padding: 8px 20px 72px;
 }
 
+.docs-frame:not(:has(.rail-stack)) {
+  grid-template-columns: 248px minmax(0, 1fr);
+}
+
 .docs-menu { display: none; grid-column: 1 / -1; }
 
 .docs-sidebar {
@@ -295,15 +299,6 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
   overflow: hidden;
 }
 
-.spec-try__split {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(180px, 28%, 240px);
-  gap: 0;
-  align-items: stretch;
-}
-
-.spec-try__split:not(:has(.spec-chips)) { grid-template-columns: minmax(0, 1fr); }
-
 .spec-editor {
   display: flex;
   flex-direction: column;
@@ -344,14 +339,15 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
   font: 12px/1.55 var(--mono);
 }
 
-.spec-chips {
-  border-left: 1px solid rgba(0, 0, 0, 0.06);
-  background: #fafafa;
-  padding: 12px 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
+.rail-options {
+  margin-top: 10px;
+  padding: 10px 12px 12px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 16px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02);
+  display: grid;
+  gap: 10px;
 }
 
 .chip-row { margin: 0; }
@@ -386,9 +382,8 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
   font-weight: 600;
 }
 
-.spec-try__note, .response__footer { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
-
 .docs-rail { position: sticky; top: calc(var(--header) + 16px); padding-top: 22px; }
+.docs-rail:empty { display: none; }
 
 .response__method {
   padding: 2px 6px;
@@ -403,7 +398,7 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
 .response__status { margin-left: auto; color: #1f7a4d; font-weight: 700; }
 .response.is-error .response__status { color: #e5484d; }
 
-.response__tabs { display: flex; gap: 4px; padding: 8px 10px 0; }
+.response__tabs { display: flex; gap: 2px; padding: 0; }
 .response__tab {
   border: 0;
   background: transparent;
@@ -416,8 +411,9 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
 }
 .response__tab.is-on { color: #1d1d1f; background: rgba(0, 0, 0, 0.05); }
 
-.response__body { padding: 8px 12px 12px; }
-.response__meta { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.response__body { padding: 0; }
+.response__panel[data-panel="chart"] { padding: 8px 10px 10px; }
+.response__meta { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
 .response__title { font-weight: 600; }
 .response__badge { font-size: 11px; color: var(--muted); padding: 2px 8px; border-radius: 980px; background: rgba(0, 0, 0, 0.04); }
 .response[data-theme="midnight"] #response-chart { background: #0f1115; border-radius: 12px; }
@@ -435,13 +431,42 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
 #response-errors code { font-weight: 700; color: #9f1239; }
 #response-errors span { color: var(--muted); margin-right: 4px; }
 #response-errors[hidden] { display: none; }
-.response__json {
-  margin: 0;
-  max-height: 320px;
-  overflow: auto;
+.response__json-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   background: #fafafa;
   font-size: 11px;
+  color: var(--muted);
+}
+
+.response__copy {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+  color: #1d1d1f;
+  border-radius: 980px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.response__copy:hover { background: rgba(0, 0, 0, 0.03); }
+
+.response__json {
+  margin: 0;
+  max-height: 440px;
+  padding: 8px 10px 12px;
+  overflow: auto;
+  border: 0;
+  border-radius: 0;
   box-shadow: none;
+  background: #fafafa;
+  font-size: 11px;
+  line-height: 1.45;
 }
 
 .anatomy { margin: 0 0 1rem; padding-left: 1.2rem; color: var(--muted); }
@@ -476,8 +501,6 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
 @media (max-width: 1100px) {
   .docs-frame { grid-template-columns: 220px minmax(0, 1fr); }
   .docs-rail { grid-column: 1 / -1; position: static; padding-top: 0; }
-  .spec-try__split { grid-template-columns: 1fr; }
-  .spec-chips { border-left: 0; border-top: 1px solid rgba(0, 0, 0, 0.06); }
 }
 
 @media (max-width: 860px) {

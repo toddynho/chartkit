@@ -5,11 +5,6 @@ import { articleChips, articleSpec } from "../data/docs-catalog";
 ---
 
 <div class="home-try">
-  <SpecEditor
-    spec={articleSpec}
-    chips={articleChips}
-    title="Spec"
-    hint="Line, bar, or donut. Chips update the chart."
-  />
-  <ResponseRail spec={articleSpec} />
+  <SpecEditor spec={articleSpec} title="Spec" />
+  <ResponseRail spec={articleSpec} chips={articleChips} />
 </div>
