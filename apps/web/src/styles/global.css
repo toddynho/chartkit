@@ -145,7 +145,7 @@ code {
 .site-header.is-scrolled {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 40;
   height: var(--header);
   background: #fff;
   backdrop-filter: none;

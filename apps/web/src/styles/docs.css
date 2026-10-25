@@ -13,6 +13,8 @@
 .docs-sidebar {
   position: sticky;
   top: var(--header);
+  z-index: 1;
+  isolation: isolate;
   height: calc(100vh - var(--header));
   overflow: auto;
   padding: 22px 12px 32px 4px;
