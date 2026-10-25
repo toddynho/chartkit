@@ -1,5 +1,6 @@
 import { drawChart } from "../lib/paint-chart";
 import { applyTheme } from "../lib/spec-text";
+import { paintField } from "./color-code";
 
 interface IssueNode {
   code?: string;
@@ -33,6 +34,11 @@ export function mountLiveSpec(root: HTMLElement): void {
   if (!input || !frame || !status) return;
   const preview = frame;
   const statusEl = status;
+  const specInput = input;
+
+  function syncPaint(): void {
+    paintField(specInput);
+  }
 
   let theme = themeSelect?.value ?? "site";
   let timer = 0;
@@ -75,9 +81,11 @@ export function mountLiveSpec(root: HTMLElement): void {
   }
 
   input.addEventListener("input", () => {
+    syncPaint();
     window.clearTimeout(timer);
     timer = window.setTimeout(() => draw(input.value, theme), 160);
   });
+  input.addEventListener("scroll", syncPaint);
 
   themeSelect?.addEventListener("change", () => {
     theme = themeSelect.value;
@@ -88,6 +96,7 @@ export function mountLiveSpec(root: HTMLElement): void {
     try {
       const parsed = JSON.parse(decodeURIComponent(window.location.hash.slice(1))) as unknown;
       input.value = JSON.stringify(parsed, null, 2);
+      syncPaint();
       draw(input.value, theme);
     } catch {
       statusEl.textContent = "The link hash is not JSON.";
@@ -123,6 +132,7 @@ export function mountLiveSpec(root: HTMLElement): void {
       const result = repair(parsed);
       keepStatus = true;
       input.value = JSON.stringify(result.spec, null, 2);
+      syncPaint();
       draw(input.value, theme);
       showIssues(issuesOf(result));
       const count = result.applied.length;
@@ -176,4 +186,6 @@ export function mountLiveSpec(root: HTMLElement): void {
     };
     image.src = url;
   });
+
+  syncPaint();
 }

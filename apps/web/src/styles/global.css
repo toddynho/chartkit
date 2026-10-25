@@ -42,6 +42,12 @@
 
   :root:not(.tone-light) .brand__lockup--light { display: none; }
   :root:not(.tone-light) .brand__lockup--dark { display: block; }
+
+  :root:not(.tone-light) .tok-key { color: #e6b35a; }
+  :root:not(.tone-light) .tok-str,
+  :root:not(.tone-light) .tok-num { color: #79b8ff; }
+  :root:not(.tone-light) .tok-kw { color: #f5f5f7; }
+  :root:not(.tone-light) .tok-cm { color: #a1a1a6; }
 }
 
 * { box-sizing: border-box; }
@@ -147,18 +153,20 @@ code {
 }
 
 .site-header__inner {
-  max-width: var(--max);
+  width: min(var(--max), calc(100% - 2.5rem));
   margin: 0 auto;
-  padding: 0 28px;
+  padding: 0;
   height: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 16px;
+  column-gap: 16px;
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
+  justify-self: start;
   color: var(--ink);
   text-decoration: none;
   flex-shrink: 0;
@@ -167,11 +175,11 @@ code {
 
 .brand:hover { text-decoration: none; opacity: 0.7; }
 
-/* Wordmark viewBox is 280×56 with the mark at 22px. Frame the ink in the 44px bar. */
+/* Wordmark viewBox is 280×56. Crop to the ink so the mark sits on the content edge. */
 .brand__lockup {
   display: block;
-  width: 168px;
-  height: 44px;
+  width: 148px;
+  height: 28px;
   overflow: hidden;
 }
 
@@ -182,14 +190,23 @@ code {
   width: 280px;
   height: 56px;
   max-width: none;
-  margin-top: -6px;
+  margin-top: -13px;
+  margin-left: -24px;
 }
 
 .primary {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 22px;
-  margin-left: auto;
+  min-width: 0;
+}
+
+.header-end {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
 .primary a, .icon-btn, .nav-more summary {
@@ -217,11 +234,15 @@ code {
   flex-shrink: 0;
 }
 
-.nav-more { display: block; position: relative; }
+.nav-more { display: flex; align-items: center; position: relative; }
 
 .nav-more__main { display: none; }
 
 .nav-more summary {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 8px;
   cursor: pointer;
   list-style: none;
   color: var(--ink);
@@ -261,34 +282,65 @@ code {
 
 .site-footer {
   border-top: 1px solid var(--line);
-  padding: 1.5rem var(--content) 2.5rem;
+  padding: 2.75rem 0 2rem;
   color: var(--muted);
   font-size: 0.86rem;
+  background: var(--bg-elev);
 }
 
-.site-footer .footer-row {
-  width: min(var(--max), 100%);
+.footer-inner {
+  width: min(var(--max), calc(100% - 2.5rem));
   margin: 0 auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1.25rem;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.9fr) minmax(0, 1.6fr);
+  gap: 2.25rem 3rem;
+  align-items: start;
+}
+
+.footer-brand .brand__lockup { width: 148px; }
+
+.footer-pitch {
+  margin: 0.85rem 0 0;
+  max-width: 22rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.footer-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem 1.75rem;
+}
+
+.footer-cols h2 {
+  margin: 0 0 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.footer-cols a {
+  display: block;
+  width: fit-content;
+  padding: 0.18rem 0;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.92rem;
 }
 
 .site-footer .brand:hover { text-decoration: none; }
 
-.site-footer strong { color: var(--ink); font-weight: 600; }
-
-.site-footer nav { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; }
-
-.site-footer a { text-decoration: none; }
-
-.site-footer a:hover { text-decoration: underline; }
+.site-footer a:hover { color: var(--accent); text-decoration: none; }
 
 .legal {
-  width: min(var(--max), 100%);
-  margin: 0.8rem auto 0;
+  width: min(var(--max), calc(100% - 2.5rem));
+  margin: 1.75rem auto 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.78rem;
 }
 
 .wrap {
@@ -521,6 +573,17 @@ pre code {
   font-size: 0.8rem;
 }
 
+pre.shiki {
+  background: var(--bg) !important;
+  color: var(--ink);
+}
+
+.tok-key { color: #9a6700; }
+.tok-str { color: #0550ae; }
+.tok-num { color: #0550ae; }
+.tok-kw { color: #1d1d1f; }
+.tok-cm { color: #6e6e73; }
+
 .docs-shell {
   width: min(var(--max), calc(100% - 2.5rem));
   margin: 0 auto;
@@ -675,10 +738,12 @@ pre code {
   .docs-side { display: none; }
   .docs-jump { display: block; }
   .hero { padding-top: 2.2rem; }
+  .site-header__inner { display: flex; padding: 0; column-gap: 12px; }
+  .primary { margin-left: auto; justify-content: flex-end; }
   .primary a:not(.nav-cta) { display: none; }
-  .nav-more { display: block; }
+  .nav-more { display: flex; }
   .nav-more__main { display: contents; }
-  .site-header__inner { padding: 0 16px; gap: 12px; }
+  .footer-inner, .footer-cols { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

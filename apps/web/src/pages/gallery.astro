@@ -1,0 +1,36 @@
+---
+import Base from "../layouts/Base.astro";
+import { chartTypes, galleryTypes } from "../data/chart-types";
+import { gallerySvg } from "../data/hero-slides";
+
+const gallery = galleryTypes
+  .map((type) => {
+    const chart = chartTypes.find((item) => item.type === type);
+    return chart ? { ...chart, svg: gallerySvg(chart.type) } : null;
+  })
+  .filter((chart) => chart != null);
+
+const description = "Eight ChartKit examples painted with core. Open a card for the spec.";
+---
+
+<Base tone="light" title="Gallery" description={description}>
+  <div class="wrap">
+    <section class="hero" aria-labelledby="gallery-title">
+      <p class="kicker">Gallery</p>
+      <h1 id="gallery-title">Gallery</h1>
+      <p class="lede">Eight examples painted with <code>@chartkitdev/core</code>. Open a card for the spec.</p>
+    </section>
+    <div class="gallery-grid">
+      {
+        gallery.map((chart) => (
+          <a class="card" href={`/docs/charts/${chart.type}`}>
+            <span class="gallery-chart" aria-hidden="true" set:html={chart.svg} />
+            <h3>{chart.title}</h3>
+            <p>{chart.summary}</p>
+          </a>
+        ))
+      }
+    </div>
+    <p><a href="/docs/charts">All chart types</a></p>
+  </div>
+</Base>

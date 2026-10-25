@@ -1,26 +1,28 @@
 ---
 import "../styles/docs.css";
 import Base from "../layouts/Base.astro";
-import Pricing from "../components/Pricing.astro";
 import TryIt from "../components/TryIt.astro";
+import { highlight } from "../lib/highlight";
 import { cloudCurl } from "../data/samples";
 
 const description =
-  "ChartKit Cloud returns an SVG or PNG for a JSON spec. Free images carry a watermark. Pro figures on this page are drafts.";
+  "ChartKit Cloud renders a JSON spec on ChartKit’s server. Free images include a watermark. Pro removes it. Prices on the pricing page are drafts.";
+const curl = await highlight(cloudCurl, "bash");
 ---
 
 <Base tone="light" title="Cloud" description={description}>
   <div class="wrap">
     <section class="hero" aria-labelledby="cloud-page-title">
       <p class="kicker">ChartKit Cloud</p>
-      <h1 id="cloud-page-title">A chart as an image.</h1>
+      <h1 id="cloud-page-title">Use the server. Skip the setup.</h1>
       <p class="lede">
-        Any agent or app can request a render. Free images carry a small chartkit.dev mark. The open-source library
-        never draws that mark. Pro, below, is a draft price: included renders, then a meter.
+        ChartKit’s server turns a JSON spec into an image, so an agent or app can ship a chart without standing up a
+        renderer. Free images include a small chartkit.dev watermark. Pro removes the mark. A bundle of renders is
+        included, then use is metered. Those figures are drafts.
       </p>
       <div class="actions">
-        <a class="btn btn-primary" href="#pricing">Pricing</a>
-        <a class="btn btn-secondary" href="#try">Try a spec</a>
+        <a class="btn btn-primary" href="#try">Try a spec</a>
+        <a class="btn btn-secondary" href="/pricing">Pricing</a>
       </div>
     </section>
 
@@ -28,18 +30,23 @@ const description =
       <h2 id="render-title">Render</h2>
       <p>
         <code>GET /render</code> returns SVG or PNG, so it works as an <code>img</code> src. That URL has no API key.{' '}
-        <code>POST /render</code> takes the JSON body and returns the image URL plus the repairs and warnings.{' '}
-        <code>POST /charts</code> stores the spec and returns a short URL. <code>POST /validate</code> returns the CK
-        codes, the JSON Patch, and the repaired spec.
+        <code>POST /render</code> takes the JSON body and returns the image URL plus the repairs and warnings from{' '}
+        <code>validate()</code> and <code>repair()</code>. <code>POST /charts</code> stores the spec and returns a short
+        URL. <code>POST /validate</code> returns the CK codes, the JSON Patch, and the repaired spec.
       </p>
       <figure class="code">
         <figcaption>shell</figcaption>
-        <pre><code>{cloudCurl}</code></pre>
+        <Fragment set:html={curl} />
       </figure>
       <p>
         GitHub READMEs display PNG. Add <code>format=png</code>. SVG is the default everywhere else. Add{' '}
         <code>theme=midnight</code>, <code>w</code>, <code>h</code>, and <code>scale</code> on the query string. A spec
         can be URL-encoded JSON or base64url.
+      </p>
+      <p>
+        <code>GET /render</code> always includes the chartkit.dev mark, so an image address never carries a key. A key
+        on <code>POST /charts</code> or <code>POST /render</code> stores an unmarked chart. The mark is a Cloud flag.
+        It is not a field in the spec. The library never draws it.
       </p>
       <p class="note">
         The API reference stays on <a href="https://chartkit.dev/docs/cloud">Cloud render</a>. This page does not proxy
@@ -54,6 +61,8 @@ const description =
       <TryIt />
     </section>
 
-    <Pricing />
+    <p>
+      <a href="/pricing">Free watermark and the Pro draft</a>
+    </p>
   </div>
 </Base>

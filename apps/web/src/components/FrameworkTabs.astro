@@ -1,9 +1,25 @@
 ---
+import { frameworkLanguage, highlight } from "../lib/highlight";
+
 interface Props {
   snippets: { id: string; label: string; code: string }[];
 }
 
 const { snippets } = Astro.props;
+
+function panel(html: string, id: string, hidden: boolean): string {
+  return html.replace(
+    /<pre class="shiki[^"]*"/,
+    `<pre class="shiki fw-code" data-fw-panel="${id}"${hidden ? " hidden" : ""}`,
+  );
+}
+
+const blocks = await Promise.all(
+  snippets.map(async (item, index) => ({
+    ...item,
+    html: panel(await highlight(item.code, frameworkLanguage(item.id)), item.id, index !== 0),
+  })),
+);
 ---
 
 <div class="fw-tabs" data-frameworks>
@@ -20,13 +36,7 @@ const { snippets } = Astro.props;
     <span data-fw-label>React</span>
     <button type="button" data-fw-copy>Copy code</button>
   </div>
-  {
-    snippets.map((item, index) => (
-      <pre class="fw-code" data-fw-panel={item.id} hidden={index === 0 ? undefined : true}>
-        <code>{item.code}</code>
-      </pre>
-    ))
-  }
+  {blocks.map((item) => <Fragment set:html={item.html} />)}
 </div>
 
 <script>

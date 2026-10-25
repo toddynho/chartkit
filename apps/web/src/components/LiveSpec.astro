@@ -6,17 +6,34 @@ interface Props {
   svg: string;
   mode?: "compact" | "full";
   themes?: string[];
+  docsHref?: string;
+  docsLabel?: string;
 }
 
-const { spec, svg, mode = "compact", themes = [] } = Astro.props;
+const { spec, svg, mode = "compact", themes = [], docsHref, docsLabel } = Astro.props;
 const text = pretty(spec);
+const specId = mode === "full" ? "spec-json" : undefined;
 ---
 
 <div class:list={["live-editor", mode === "full" && "live-editor--full"]} data-live-spec data-mode={mode}>
-  <div class="ck-frame preview" data-preview set:html={svg} />
+  <div class="live-editor__preview">
+    <p class="live-pane__kicker" id={mode === "full" ? "live-preview-label" : undefined}>Preview</p>
+    <div
+      class="ck-frame preview"
+      data-preview
+      aria-labelledby={mode === "full" ? "live-preview-label" : undefined}
+      set:html={svg}
+    />
+  </div>
   <div class="live-editor__side">
-    <label for={mode === "full" ? "spec-json" : undefined}>Chart spec (JSON)</label>
-    <textarea id={mode === "full" ? "spec-json" : undefined} data-spec-input spellcheck="false">{text}</textarea>
+    <div class="live-pane__head">
+      <label for={specId}>Spec</label>
+      {docsHref && docsLabel ? <a class="live-docs" href={docsHref}>{docsLabel}</a> : null}
+    </div>
+    <div class="code-field">
+      <pre class="code-field__paint" aria-hidden="true" data-spec-paint></pre>
+      <textarea id={specId} class="code-field__input" data-spec-input spellcheck="false">{text}</textarea>
+    </div>
     <div class="live-actions">
       {
         mode === "full" ? (

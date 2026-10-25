@@ -5,11 +5,11 @@ import BrandLockup from "./BrandLockup.astro";
 
 const path = canonicalPath(Astro.url.pathname);
 const docsHere = path === "/docs" || path.startsWith("/docs/");
-const dashHere = path === "/dashboards" || path.startsWith("/dashboards/");
+const dashHere = path === "/dashboard" || path === "/dashboards" || path.startsWith("/dashboards/");
 
 function mark(href: string): "page" | undefined {
   if (href === "/docs") return docsHere ? "page" : undefined;
-  if (href === "/dashboards") return dashHere ? "page" : undefined;
+  if (href === "/dashboard" || href === "/dashboards") return dashHere ? "page" : undefined;
   if (href === "/showcase" || href === "/features" || href === "/examples") {
     return path === href || path.startsWith(`${href}/`) ? "page" : undefined;
   }
@@ -31,8 +31,9 @@ function mark(href: string): "page" | undefined {
           </a>
         ))
       }
-      <a class="nav-cta" href="/#cloud">Try Cloud API</a>
+      <a class="nav-cta" href="/cloud">Try Cloud</a>
     </nav>
+    <div class="header-end">
     <a class="icon-btn" href={SITE.github} aria-label="ChartKit on GitHub">
       <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true">
         <path
@@ -62,6 +63,7 @@ function mark(href: string): "page" | undefined {
         }
       </div>
     </details>
+    </div>
   </div>
 </header>
 

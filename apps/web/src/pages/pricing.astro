@@ -1,0 +1,21 @@
+---
+import Base from "../layouts/Base.astro";
+import Pricing from "../components/Pricing.astro";
+
+const description =
+  "Free Cloud images include a watermark. Pro removes it. The dollar amounts on this page are drafts, not a published price.";
+---
+
+<Base tone="light" title="Pricing" description={description}>
+  <div class="wrap">
+    <section class="hero" aria-labelledby="pricing-page-title">
+      <p class="kicker"><a href="/cloud">Cloud</a></p>
+      <h1 id="pricing-page-title">Pricing</h1>
+      <p class="lede">
+        Free Cloud images carry a watermark. Pro removes it, with included renders and a meter after that. The amounts
+        below are the draft already on this site. They are not a new price.
+      </p>
+    </section>
+    <Pricing />
+  </div>
+</Base>

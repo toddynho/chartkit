@@ -3,6 +3,7 @@ import "../../styles/surfaces.css";
 import Base from "../../layouts/Base.astro";
 import FrameworkTabs from "../../components/FrameworkTabs.astro";
 import LiveSpec from "../../components/LiveSpec.astro";
+import { chartByType } from "../../data/chart-types";
 import { loadExample, loadExamplesIndex } from "../../lib/surfaces";
 
 export function getStaticPaths() {
@@ -10,19 +11,26 @@ export function getStaticPaths() {
 }
 
 const example = loadExample(Astro.params.slug ?? "");
+const typeTitle = chartByType(example.type)?.title ?? example.type;
 ---
 
 <Base title={example.title} description={example.blurb} tone="light">
   <div class="wrap surface">
     <header class="hero">
-      <p class="kicker">{example.type}</p>
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="/examples">Examples</a>
+        <span class="crumbs__sep" aria-hidden="true">/</span>
+        <span aria-current="page">{example.title}</span>
+      </nav>
       <h1>{example.title}</h1>
       <p class="lede">{example.blurb}</p>
     </header>
-    <LiveSpec spec={example.spec} svg={example.svg} />
-    <p>
-      <a href={`/docs/charts/${example.type}`}>{example.type} reference</a>
-    </p>
+    <LiveSpec
+      spec={example.spec}
+      svg={example.svg}
+      docsHref={`/docs/charts/${example.type}`}
+      docsLabel={`Docs → ${typeTitle}`}
+    />
     <h2>Same spec</h2>
     <FrameworkTabs snippets={example.snippets} />
   </div>

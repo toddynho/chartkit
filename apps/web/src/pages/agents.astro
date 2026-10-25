@@ -1,7 +1,10 @@
 ---
 import "../styles/docs.css";
 import Base from "../layouts/Base.astro";
+import { articleHref, docArticles } from "../data/docs-catalog";
 import { gallerySvg } from "../data/hero-slides";
+
+const agentDocs = docArticles.filter((article) => article.group === "Agents");
 
 const chart = gallerySvg("line");
 const description =
@@ -87,6 +90,18 @@ const description =
           <code>@chartkitdev/mcp</code> is not on npm yet. The server speaks stdio. <code>render_chart</code> is the tool
           that calls Cloud.
         </li>
+      </ul>
+    </section>
+
+    <section class="section" aria-labelledby="agent-docs-title">
+      <h2 id="agent-docs-title">In the docs</h2>
+      <p>The same short list as the docs Agents group. Chart pages stay in the docs nav.</p>
+      <ul>
+        {agentDocs.map((article) => (
+          <li>
+            <a href={articleHref(article)}>{article.title}</a>
+          </li>
+        ))}
       </ul>
     </section>
   </div>

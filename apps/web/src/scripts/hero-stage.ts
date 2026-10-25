@@ -37,8 +37,6 @@ const rail = document.getElementById("type-rail");
 const progress = document.getElementById("type-progress");
 const tilt = document.getElementById("stage-tilt");
 const live = document.getElementById("hero-live");
-const watermark = document.getElementById("stage-wm");
-const planLabel = document.getElementById("chart-plan");
 
 if (stage && wrap && rail && titleEl && kpiEl && deltaEl && chromeEl && ghostPre && slides.length > 0) {
   const chartSlot = wrap;
@@ -218,24 +216,6 @@ if (stage && wrap && rail && titleEl && kpiEl && deltaEl && chromeEl && ghostPre
       stage.classList.remove("is-hover-chart", "is-hover-json");
     });
   }
-
-  const planButtons = stage.querySelectorAll<HTMLButtonElement>(".stage-plan button");
-  planButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const free = button.dataset.plan !== "pro";
-      watermark?.classList.toggle("is-on", free);
-      if (planLabel) {
-        planLabel.textContent = free ? "Free · watermarked" : "Pro · clean";
-        planLabel.classList.toggle("is-pro", !free);
-      }
-      planButtons.forEach((peer) => {
-        const on = peer === button;
-        peer.classList.toggle("is-on", on);
-        peer.setAttribute("aria-pressed", on ? "true" : "false");
-      });
-      if (live) live.textContent = free ? "Free Cloud preview, watermark on" : "Pro preview, watermark off";
-    });
-  });
 
   if (!reduce && finePointer && tilt) {
     let frame = 0;
