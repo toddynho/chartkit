@@ -153,6 +153,11 @@ code {
   gap: 16px;
 }
 
+.is-docs .site-header__inner {
+  max-width: none;
+  width: 100%;
+}
+
 .brand {
   display: inline-flex;
   align-items: center;
@@ -260,6 +265,12 @@ code {
   gap: 0.4rem 1.25rem;
   align-items: baseline;
   justify-content: space-between;
+}
+
+.is-docs .site-footer .footer-row,
+.is-docs .legal {
+  width: 100%;
+  max-width: none;
 }
 
 .site-footer strong { color: var(--ink); font-weight: 600; }
@@ -506,9 +517,10 @@ pre code {
 }
 
 .docs-shell {
-  width: min(var(--max), calc(100% - 2.5rem));
-  margin: 0 auto;
-  padding: 1.6rem 0 3.5rem;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 1.6rem 1.25rem 3.5rem;
   display: grid;
   grid-template-columns: var(--nav) minmax(0, 1fr);
   gap: 2.25rem;

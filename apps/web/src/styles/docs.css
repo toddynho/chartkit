@@ -1,11 +1,12 @@
 .docs-frame {
-  width: min(1180px, calc(100% - 2rem));
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   display: grid;
   grid-template-columns: 248px minmax(0, 1fr) 300px;
   gap: 8px 28px;
   align-items: start;
-  padding: 8px 0 72px;
+  padding: 8px 20px 72px;
 }
 
 .docs-menu { display: none; grid-column: 1 / -1; }
@@ -348,6 +349,6 @@
   .docs-sidebar.is-open { transform: none; }
   .docs-backdrop { position: fixed; inset: var(--header) 0 0 0; background: rgba(0, 0, 0, 0.28); z-index: 25; }
   .docs-backdrop.is-open { display: block; }
-  .docs-frame { grid-template-columns: 1fr; width: min(100% - 1.5rem, 1180px); }
+  .docs-frame { grid-template-columns: 1fr; width: 100%; max-width: none; padding-inline: 12px; }
   .page-nav { grid-template-columns: 1fr; }
 }

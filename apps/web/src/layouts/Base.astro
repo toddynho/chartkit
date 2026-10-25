@@ -16,12 +16,13 @@ interface Props {
 
 const { title, description, tone } = Astro.props;
 const path = canonicalPath(Astro.url.pathname);
+const docsPage = path === "/docs" || path.startsWith("/docs/");
 const documentTitle = path === "/" ? `${SITE.name} — ${title}` : `${title} · ${SITE.name}`;
 const canonical = new URL(path, Astro.site ?? SITE.url).href;
 ---
 
 <!doctype html>
-<html lang="en" class={tone === "light" ? "tone-light" : undefined}>
+<html lang="en" class:list={[tone === "light" && "tone-light", docsPage && "is-docs"]}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
