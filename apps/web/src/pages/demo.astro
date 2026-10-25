@@ -1,0 +1,48 @@
+---
+import "../styles/surfaces.css";
+import Base from "../layouts/Base.astro";
+import ChartMount from "../components/ChartMount.astro";
+import { loadDemo } from "../lib/batch3";
+
+const demo = loadDemo();
+const description = "An observability dashboard rendered with ChartKit specs. The cards stack on a phone instead of clipping.";
+---
+
+<Base title="Demo" description={description} tone="light">
+  <div class="wrap surface">
+    <h1>Observability</h1>
+    <p class="lede">
+      Same specs as the gallery, laid out as a dashboard. On a narrow screen the cards stack instead of clipping.
+    </p>
+    <div class="dash">
+      {
+        demo.kpis.map((chart) => (
+          <article class="card">
+            <ChartMount spec={chart.spec} svg={chart.svg} alt={chart.alt} />
+          </article>
+        ))
+      }
+      <article class="card span-2">
+        <ChartMount spec={demo.throughput.spec} svg={demo.throughput.svg} alt={demo.throughput.alt} />
+      </article>
+      <article class="card span-2">
+        <ChartMount spec={demo.services.spec} svg={demo.services.svg} alt={demo.services.alt} />
+      </article>
+    </div>
+    <section class="section">
+      <h2>In-place update</h2>
+      <p class="lede">
+        Ten thousand points, replaced through <code>mount().update()</code>. The number is the time from the top of an
+        animation frame until a message task after paint. It does not include GPU time, and it is not a bench result.
+      </p>
+      <div class="ck-frame" data-stream-host></div>
+      <p class="meta" data-stream-readout>No update measured yet.</p>
+    </section>
+    <p class="meta"><a href="/large">One million points on canvas</a></p>
+  </div>
+</Base>
+
+<script>
+  import "../scripts/mount-charts.ts";
+  import "../scripts/stream-demo.ts";
+</script>

@@ -1,0 +1,21 @@
+---
+import Docs from "../layouts/Docs.astro";
+import PageNav from "./PageNav.astro";
+import ResponseRail from "./ResponseRail.astro";
+import { articleSpec } from "../data/docs-catalog";
+
+interface Props {
+  title: string;
+  description: string;
+  href: string;
+  lede?: string;
+}
+
+const { title, description, href, lede } = Astro.props;
+---
+
+<Docs title={title} description={description} href={href} lede={lede}>
+  <slot />
+  <PageNav href={href} />
+  <ResponseRail slot="rail" spec={articleSpec} />
+</Docs>

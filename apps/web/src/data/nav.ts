@@ -20,4 +20,12 @@ export const moreNav: NavItem[] = [
   { href: "/features", label: "Features" },
   { href: "/benchmarks", label: "Benchmarks" },
   { href: "/playground", label: "Playground" },
+  { href: "/convert", label: "Convert" },
+  { href: "/compare", label: "Compare" },
+  { href: "/maps", label: "Maps" },
+  { href: "/demo", label: "Demo" },
+  { href: "/large", label: "Large data" },
+  { href: "/interaction", label: "Interaction" },
+  { href: "/layouts", label: "Layout" },
+  { href: "/when-to-use", label: "When to use" },
 ];

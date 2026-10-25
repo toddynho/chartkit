@@ -123,6 +123,16 @@
 .breadcrumb__current { color: #1d1d1f; }
 
 .docs-main .lede { font-size: 17px; line-height: 1.45; max-width: 42rem; }
+.docs-main img { max-width: 100%; height: auto; border-radius: 12px; }
+.docs-main pre { overflow-x: auto; }
+.callout {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  background: #fff;
+  margin: 0 0 1rem;
+}
+.callout strong { display: block; margin-bottom: 0.25rem; }
 
 .facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; }
 

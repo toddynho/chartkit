@@ -39,6 +39,8 @@ export const articleSections: Record<string, DocSection[]> = {
     ]),
     section("Server", [
       "App Router can render the SVG on the server with `renderToString` from `react-dom/server`. The older dashboard components still exist. Their props are not spec keys.",
+    ], [], [
+      'import { renderToString } from "react-dom/server";\nimport { Chart } from "@chartkitdev/react";\n\nconst html = renderToString(<Chart spec={spec} />);',
     ]),
   ],
   vue: [
@@ -46,13 +48,16 @@ export const articleSections: Record<string, DocSection[]> = {
     section("Chart", ["Bind the spec with `:spec`. The SVG is produced during render."], [], [
       '<script setup>\nimport { Chart } from "@chartkitdev/vue";\n</script>\n\n<template>\n  <Chart :spec="spec" />\n</template>',
     ]),
-    section("Server", ["`renderToString` from `@chartkitdev/vue/ssr` includes the SVG."]),
+    section("Server", ["`renderToString` from `@chartkitdev/vue/ssr` includes the SVG."], [], [
+      'import { renderToString } from "@chartkitdev/vue/ssr";\n\nconst html = await renderToString(spec);',
+    ]),
   ],
   svelte: [
     section("Install", ["Svelte 4 and Svelte 5 both compile the component."], [], ["npm install @chartkitdev/svelte"]),
     section("Chart", ["The component uses `export let spec`. SvelteKit SSR includes the SVG."], [], [
       '<script>\n  import { Chart } from "@chartkitdev/svelte";\n</script>\n\n<Chart {spec} />',
     ]),
+    section("Server", ["SvelteKit renders the SVG during SSR. No extra server entry is required."]),
   ],
   vanilla: [
     section("Install", ["No framework. `mount` writes into an element you already have."], [], [
@@ -63,7 +68,7 @@ export const articleSections: Record<string, DocSection[]> = {
       ["`update` keeps that element. `destroy` clears it. `renderToString` is the SVG string from core."],
       [],
       [
-        'import { mount } from "@chartkitdev/vanilla";\n\nconst chart = mount(document.querySelector("#chart"), spec);\nchart.update(spec);',
+        'import { mount, renderToString } from "@chartkitdev/vanilla";\n\nconst chart = mount(document.querySelector("#chart"), spec);\nchart.update(spec);\nconst svg = renderToString(spec);',
       ],
     ),
   ],

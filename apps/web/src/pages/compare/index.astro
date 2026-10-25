@@ -1,0 +1,56 @@
+---
+import "../../styles/surfaces.css";
+import Base from "../../layouts/Base.astro";
+import { loadCompareIndex } from "../../lib/batch3";
+
+const page = loadCompareIndex();
+const description = "ChartKit against 20 charting libraries. Every feature row is in the table, losses next to wins, with verification and source.";
+---
+
+<Base title="Compare" description={description} tone="light">
+  <div class="wrap surface prose">
+    <h1>Compare</h1>
+    <p class="lede">
+      ChartKit against {page.rivals.length} libraries, generated from the feature matrix. A loss is a feature the other
+      library scores higher on. A win is the reverse. Unknown cells are not counted as either. Nothing is dropped to
+      make the list shorter.
+    </p>
+    <p>
+      Other libraries were checked on {page.dateChecked} against types and schemas, not by rendering, so a typed option
+      can overstate what draws. ChartKit was rechecked on {page.chartkitRechecked} against main <code>{page.chartkitCommit}</code>.
+      Radar, treemap, sankey, and funnel are native. Tooltips, zoom, and pan are native in the client runtime. The static
+      SVG does not paint them. <a href="/features#method">Method</a>. <a href="/features.json">features.json</a>. Timed
+      numbers, including the losses, stay on <a href="/benchmarks">Benchmarks</a>.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Library</th>
+            <th>Version</th>
+            <th class="num">ChartKit ahead</th>
+            <th class="num">ChartKit behind</th>
+            <th class="num">Same</th>
+            <th class="num">Unknown</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            page.rivals.map(({ library, win, loss, tie, unknown }) => (
+              <tr>
+                <th scope="row">
+                  <a href={`/compare/${library.id}`}>{library.name}</a>
+                </th>
+                <td>{library.version}</td>
+                <td class="num win">{win}</td>
+                <td class="num loss">{loss}</td>
+                <td class="num">{tie}</td>
+                <td class="num">{unknown}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</Base>

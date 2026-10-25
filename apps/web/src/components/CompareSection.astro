@@ -1,0 +1,65 @@
+---
+import type { CompareRow } from "../lib/batch3";
+
+interface Props {
+  title: string;
+  rows: CompareRow[];
+  library: string;
+}
+
+const { title, rows, library } = Astro.props;
+---
+
+{
+  rows.length > 0 ? (
+    <section>
+      <h2>
+        {title} ({rows.length})
+      </h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>ChartKit</th>
+              <th>{library}</th>
+              <th>Their option</th>
+              <th>Their check</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr>
+                <th scope="row">
+                  <a href={`/features/${row.id}`}>{row.label}</a>
+                </th>
+                <td>
+                  <span class={`badge badge-${row.ours}`}>{row.ours}</span>
+                  {row.badge !== row.ours ? (
+                    <span class="cell-note">
+                      badge {row.badge}; ranks as {row.ours}
+                    </span>
+                  ) : null}
+                </td>
+                <td>
+                  <span class={`badge badge-${row.theirs}`}>{row.theirs}</span>
+                  {row.tier ? ` ${row.tier}` : ""}
+                </td>
+                <td>
+                  <code>{row.option}</code>
+                </td>
+                <td>
+                  {row.verified} ({row.strength})
+                </td>
+                <td>
+                  <code>{row.source}</code>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  ) : null
+}

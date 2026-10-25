@@ -1,0 +1,146 @@
+---
+import "../styles/surfaces.css";
+import Base from "../layouts/Base.astro";
+import { loadConvert } from "../lib/batch3";
+import { lineDiff } from "../lib/line-diff";
+import { scriptJson } from "../lib/spec-text";
+
+const page = loadConvert();
+const starter = page.samples[0];
+if (!starter) throw new Error("convert samples missing");
+const specText = starter.spec ? JSON.stringify(starter.spec, null, 2) : "";
+const diff = lineDiff(starter.source, specText || "(no spec)");
+const guides = [
+  { href: "/docs/migrate/chartjs", label: "Chart.js" },
+  { href: "/docs/migrate/recharts", label: "Recharts" },
+  { href: "/docs/migrate/echarts", label: "ECharts" },
+];
+const coverage = [
+  ["chartjs", "Chart.js"],
+  ["recharts", "Recharts"],
+  ["echarts", "ECharts"],
+] as const;
+const description = "Paste a Chart.js, Recharts, or ECharts config and compare it with the ChartKit spec, warnings, and chart.";
+const labels: Record<string, string> = { chartjs: "Chart.js", recharts: "Recharts", echarts: "ECharts" };
+---
+
+<Base title="Convert a chart" description={description} tone="light">
+  <div class="wrap surface">
+    <h1>Convert a chart</h1>
+    <p class="lede">
+      Paste a Chart.js config, Recharts JSX, or an ECharts option. The converter returns a ChartKit spec after <code>validate()</code> and <code>repair()</code>, plus a warning for anything it does not map. Chart.js, Recharts, and ECharts load on this page only. They are not part of the ChartKit bundles. <code>@chartkitdev/convert</code> is unpublished.
+    </p>
+    <div class="convert" data-convert-demo>
+      <div class="convert-toolbar">
+        {
+          page.samples.map((item) => (
+            <button
+              type="button"
+              class={item.id === starter.id ? "btn btn-primary" : "btn btn-secondary"}
+              aria-pressed={item.id === starter.id ? "true" : "false"}
+              data-sample={item.id}
+            >
+              {item.label} sample
+            </button>
+          ))
+        }
+      </div>
+      <label class="convert-label" for="convert-source">Chart.js config, Recharts JSX, or an ECharts option</label>
+      <textarea id="convert-source" class="convert-source" spellcheck="false">{starter.source}</textarea>
+      <p class="convert-meta" data-convert-meta>
+        Detected source: {starter.detected ? labels[starter.detected] : "none"}. Chart.js, Recharts, and ECharts load on this page only.
+      </p>
+      <div class="convert-grid">
+        <figure class="convert-pane">
+          <figcaption>Original{starter.detected ? `, ${labels[starter.detected]}` : ""}</figcaption>
+          <div class="convert-original" data-original-host="1"></div>
+          <p role="alert" data-original-error hidden> </p>
+        </figure>
+        <figure class="convert-pane">
+          <figcaption>ChartKit</figcaption>
+          <div class="ck-frame" data-convert-chart set:html={starter.svg} />
+        </figure>
+      </div>
+      <section aria-labelledby="convert-warnings">
+        <h2 id="convert-warnings">Warnings</h2>
+        <div data-convert-warnings>
+          {
+            starter.warnings.length === 0 ? (
+              <p>No warnings. Every key the converter read was mapped.</p>
+            ) : (
+              <ul class="convert-warnings">
+                {starter.warnings.map((warning) => (
+                  <li>
+                    <code>{warning.code}</code> {warning.path ? <code>{warning.path}</code> : null} {warning.message}
+                  </li>
+                ))}
+              </ul>
+            )
+          }
+        </div>
+      </section>
+      <section aria-labelledby="convert-spec">
+        <h2 id="convert-spec">Spec</h2>
+        <pre class="convert-pre"><code data-convert-spec>{specText || "null"}</code></pre>
+      </section>
+      <section aria-labelledby="convert-diff">
+        <h2 id="convert-diff">Source → ChartKit spec</h2>
+        <pre class="convert-pre convert-diff" aria-label="Line diff from source to ChartKit spec" data-convert-diff>
+          {
+            diff.map((row) => (
+              <div class={row.op === "+" ? "diff-add" : row.op === "-" ? "diff-del" : "diff-same"}>
+                {row.op === " " ? " " : row.op}
+                {row.text}
+              </div>
+            ))
+          }
+        </pre>
+      </section>
+      <script is:inline id="convert-samples" type="application/json" set:html={scriptJson(page.samples.map((item) => ({ id: item.id, label: item.label, source: item.source })))} />
+    </div>
+    <section class="section" aria-labelledby="coverage">
+      <h2 id="coverage">Conversion coverage</h2>
+      <p>These lists are the converter's own coverage table. A mapped item is produced in the spec. An unsupported item is returned as a warning.</p>
+      <div class="convert-coverage">
+        {
+          coverage.map(([id, label]) => {
+            const table = page.coverage[id];
+            if (!table) return null;
+            return (
+              <article class="card">
+                <h3>{label}</h3>
+                <h4>Mapped</h4>
+                <ul>
+                  {table.mapped.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+                <h4>Unsupported</h4>
+                <ul>
+                  {table.unsupported.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </article>
+            );
+          })
+        }
+      </div>
+      <p>
+        Guides:{" "}
+        {
+          guides.map((guide, index) => (
+            <span>
+              {index > 0 ? ", " : null}
+              <a href={guide.href}>{guide.label}</a>
+            </span>
+          ))
+        }.
+      </p>
+    </section>
+  </div>
+</Base>
+
+<script>
+  import "../scripts/convert-demo.ts";
+</script>

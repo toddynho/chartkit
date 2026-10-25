@@ -1,0 +1,31 @@
+---
+import "../styles/surfaces.css";
+import Base from "../layouts/Base.astro";
+import ChartMount from "../components/ChartMount.astro";
+import { loadInteraction } from "../lib/batch3";
+
+const page = loadInteraction();
+const description = "A range navigator, synchronised charts, and drilldown. All three are JSON keys on the spec.";
+---
+
+<Base title="Interaction" description={description} tone="light">
+  <div class="wrap surface">
+    <h1>Interaction</h1>
+    <p class="lede">
+      The overview, the shared cursor, and the drilldown are keys on the spec. The server SVG records them and does not include the controls.
+    </p>
+    <h2>Overview</h2>
+    <p>Drag the window, or focus it and use the arrow keys. The chart shows that range. The overview keeps the whole series.</p>
+    <ChartMount spec={page.navigator.spec} svg={page.navigator.svg} alt={page.navigator.alt} />
+    <h2>Synchronised charts</h2>
+    <p>These three share <code>interaction.sync</code>. The crosshair, tooltip, and x zoom follow the month, not the row index.</p>
+    {page.synced.map((chart) => <ChartMount spec={chart.spec} svg={chart.svg} alt={chart.alt} />)}
+    <h2>Drilldown</h2>
+    <p>The bars take a pointer. Choose North. Enter or Space does the same when the chart is focused. Back, or Escape, returns to the regions.</p>
+    <ChartMount spec={page.sales.spec} svg={page.sales.svg} alt={page.sales.alt} />
+  </div>
+</Base>
+
+<script>
+  import "../scripts/mount-charts.ts";
+</script>

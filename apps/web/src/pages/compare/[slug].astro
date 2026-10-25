@@ -1,0 +1,41 @@
+---
+import "../../styles/surfaces.css";
+import Base from "../../layouts/Base.astro";
+import CompareSection from "../../components/CompareSection.astro";
+import { loadCompare, loadCompareIndex } from "../../lib/batch3";
+
+export function getStaticPaths() {
+  return loadCompareIndex().rivals.map(({ library }) => ({ params: { slug: library.id } }));
+}
+
+const page = loadCompare(Astro.params.slug ?? "");
+const library = page.library;
+const description = `Every scored feature for ChartKit and ${library.name}, with losses, wins, verification, and source.`;
+---
+
+<Base title={`ChartKit vs ${library.name}`} description={description} tone="light">
+  <div class="wrap surface prose">
+    <p class="kicker"><a href="/compare">Compare</a></p>
+    <h1>ChartKit vs {library.name}</h1>
+    <p class="lede">
+      {library.name} {library.version}, checked {library.dateChecked}. {page.counts.loss} features where {library.name} ranks
+      higher, {page.counts.win} where ChartKit ranks higher, {page.counts.tie} the same, {page.counts.unknown} with an
+      unknown cell. Ranks are native, then partial, plugin, manual, and none. Unknown is not a win. The ChartKit column
+      is that matrix status. A warns badge is a none cell that validate() warns about, so it ranks as none. Each heading
+      count is the number of rows in that table.
+    </p>
+    <p>
+      Package <code>{library.package}</code>. Licence {library.license}. Escape hatch: {library.escapeHatch}.{" "}
+      <a href={library.docs}>Docs</a>. Cells for {library.name} are type or schema checks, not render tests. ChartKit was
+      rechecked {page.chartkitRechecked} against main <code>{page.chartkitCommit}</code>.
+    </p>
+    <p>{page.size}</p>
+    <p>
+      {page.perf} <a href="/benchmarks">Full timings</a>.
+    </p>
+    <CompareSection title={`${library.name} ahead`} rows={page.loss} library={library.name} />
+    <CompareSection title="ChartKit ahead" rows={page.win} library={library.name} />
+    <CompareSection title="Unverified" rows={page.unknown} library={library.name} />
+    <CompareSection title="Same status" rows={page.tie} library={library.name} />
+  </div>
+</Base>

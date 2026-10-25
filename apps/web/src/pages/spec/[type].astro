@@ -1,0 +1,34 @@
+---
+import "../../styles/surfaces.css";
+import Base from "../../layouts/Base.astro";
+import ChartMount from "../../components/ChartMount.astro";
+import { loadSpec, loadSpecIndex } from "../../lib/batch3";
+
+export function getStaticPaths() {
+  return loadSpecIndex().pages.map((page) => ({ params: { type: page.type } }));
+}
+
+const page = loadSpec(Astro.params.type ?? "");
+---
+
+<Base title={page.title} description={page.summary} tone="light">
+  <div class="wrap surface prose">
+    <p class="kicker"><a href="/spec">Spec</a></p>
+    <h1 id={page.type}>{page.title}</h1>
+    <p class="lede">{page.summary}</p>
+    <h2 id="fields">Fields</h2>
+    <ul>
+      {page.fields.map((field) => <li>{field}</li>)}
+    </ul>
+    <h2 id="example">Example</h2>
+    <ChartMount spec={page.chart.spec} svg={page.chart.svg} alt={page.chart.alt} />
+    <pre><code>{page.example}</code></pre>
+    <p>
+      The same object is the <code>spec</code> prop for <code>@chartkitdev/react</code>, <code>@chartkitdev/vue</code>, and <code>@chartkitdev/svelte</code>, and the argument to <code>mount</code> in <code>@chartkitdev/vanilla</code>.
+    </p>
+  </div>
+</Base>
+
+<script>
+  import "../../scripts/mount-charts.ts";
+</script>

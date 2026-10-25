@@ -8,18 +8,25 @@
     "node": ">=22.23.4"
   },
   "scripts": {
-    "paint": "node --experimental-strip-types scripts/paint-dashboards.ts && node --experimental-strip-types scripts/paint-surfaces.ts",
-    "predev": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/geo && npm run paint",
+    "paint": "node --experimental-strip-types scripts/paint-dashboards.ts && node --experimental-strip-types scripts/paint-surfaces.ts && node --experimental-strip-types scripts/paint-batch3.ts",
+    "predev": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/geo && npm run build --workspace=@chartkitdev/vanilla && npm run build --workspace=@chartkitdev/convert && npm run paint",
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
-    "prebuild": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/geo && npm run paint",
+    "prebuild": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/geo && npm run build --workspace=@chartkitdev/vanilla && npm run build --workspace=@chartkitdev/convert && npm run paint",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
-    "precheck": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/geo && npm run paint",
+    "precheck": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/geo && npm run build --workspace=@chartkitdev/vanilla && npm run build --workspace=@chartkitdev/convert && npm run paint",
     "check": "ASTRO_TELEMETRY_DISABLED=1 astro check"
   },
   "dependencies": {
+    "@chartkitdev/convert": "*",
     "@chartkitdev/core": "*",
     "@chartkitdev/geo": "*",
+    "@chartkitdev/vanilla": "*",
+    "chart.js": "^4.6.1",
+    "echarts": "^5.6.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^2.15.4",
     "@fontsource/inter": "^5.3.0",
     "@fontsource/roboto": "^5.2.8",
     "astro": "^7.4.2"

@@ -1,0 +1,44 @@
+---
+import DocsPage from "../../../components/DocsPage.astro";
+
+const description = "Move from @derpdaderp/chartkit to the @chartkitdev packages and the v1 JSON spec.";
+const shell = `npm uninstall @derpdaderp/chartkit
+npm install @chartkitdev/react @chartkitdev/core`;
+---
+
+<DocsPage title="Migrate from v0" description={description} href="/docs/migrate">
+  <p>
+    ChartKit v0 was a React component library published as <code>@derpdaderp/chartkit</code>. v1 keeps a React adapter and adds a JSON spec that Vue, Svelte, vanilla DOM, and Node all render.
+  </p>
+  <div class="table-wrap">
+    <table class="opt-table">
+      <thead>
+        <tr>
+          <th>Before</th>
+          <th>After</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>@derpdaderp/chartkit</code></td>
+          <td><code>@chartkitdev/react</code> for components, <code>@chartkitdev/core</code> for the spec</td>
+        </tr>
+        <tr>
+          <td>Component props such as dataKey and leftAxis</td>
+          <td>A spec: version, type, data, encoding, a11y.alt</td>
+        </tr>
+        <tr>
+          <td>React only</td>
+          <td>React, Vue, Svelte, vanilla, and renderToString</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <figure class="code"><figcaption>shell</figcaption><pre><code>{shell}</code></pre></figure>
+  <p>
+    <code>@chartkitdev/react</code> still exports <code>LineChart</code>, <code>KpiCard</code>, and the other dashboard components. Their props are not spec keys. New code should pass <code>spec</code> to <code>Chart</code>. A compatibility shim remains available as <code>@derpdaderp/chartkit</code> for existing imports.
+  </p>
+  <p>
+    From another library: <a href="/docs/migrate/chartjs">Chart.js</a>, <a href="/docs/migrate/recharts">Recharts</a>, <a href="/docs/migrate/echarts">ECharts</a>.
+  </p>
+</DocsPage>

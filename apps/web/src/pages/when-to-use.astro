@@ -1,0 +1,33 @@
+---
+import "../styles/surfaces.css";
+import Base from "../layouts/Base.astro";
+import { loadWhenToUse } from "../lib/batch3";
+import { scriptJson } from "../lib/spec-text";
+
+const page = loadWhenToUse();
+const description = "When ChartKit is the right chart library, when it is not, and the round 13 numbers behind that choice.";
+---
+
+<Base title="When to use ChartKit" description={description} tone="light">
+  <Fragment slot="head">
+    <script is:inline type="application/ld+json" set:html={scriptJson(page.jsonLd)} />
+  </Fragment>
+  <div class="wrap surface prose">
+    <h1>When to use ChartKit</h1>
+    <p class="lede">
+      A direct answer, then the losses. The numbers are round 13 and match <a href="/benchmarks.json">benchmarks.json</a>.
+    </p>
+    {
+      page.faqs.map((item) => (
+        <section>
+          <h2>{item.question}</h2>
+          <p>{item.answer}</p>
+        </section>
+      ))
+    }
+    <p>
+      Pairwise pages: <a href="/compare/recharts">Recharts</a>, <a href="/compare/chartjs">Chart.js</a>,{" "}
+      <a href="/compare/echarts">ECharts</a>, <a href="/compare/nivo">Nivo</a>.
+    </p>
+  </div>
+</Base>

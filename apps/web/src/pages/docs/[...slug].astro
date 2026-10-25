@@ -6,7 +6,7 @@ import Docs from "../../layouts/Docs.astro";
 
 export function getStaticPaths() {
   return docArticles.flatMap((article) => {
-    if (!article.slug) return [];
+    if (!article.slug || article.slug === "mcp") return [];
     const paths = [article.slug, ...article.aliases];
     return paths.map((slug) => ({
       params: { slug },
