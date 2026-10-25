@@ -1,0 +1,200 @@
+---
+import { forceTheme, pretty, scriptJson } from "../lib/spec-text";
+import type { RepairCard, StackSnippet, SurfaceChart } from "../lib/surface-types";
+
+interface Props {
+  charts: SurfaceChart[];
+  mermaid?: {
+    id: string;
+    title: string;
+    caption: string;
+    source: string;
+    warnings: { code?: string; message: string }[];
+    chart: SurfaceChart;
+  }[];
+  repairs?: RepairCard[];
+  stacks?: StackSnippet[];
+}
+
+const { charts, mermaid = [], repairs = [], stacks } = Astro.props;
+const stackList = stacks ?? [];
+
+function shown(spec: Record<string, unknown>): Record<string, unknown> {
+  return forceTheme(spec, "soft");
+}
+---
+
+<div data-showcase>
+  <div class="theme-switch" role="radiogroup" aria-label="Chart theme">
+    {["soft", "refined", "editorial", "midnight"].map((name) => (
+      <button type="button" role="radio" data-theme-pick={name} aria-checked={name === "soft" ? "true" : "false"}>
+        {name}
+      </button>
+    ))}
+  </div>
+  <div class="board-grid">
+    {
+      charts.map((chart) => {
+        const kpi = chart.spec.type === "kpi";
+        const spec = shown(chart.spec);
+        return (
+          <figure class:list={["board-card", chart.span, "board-theme-soft", kpi && "kpi-card"]} data-board-card>
+            {kpi ? null : (
+              <figcaption>
+                <h3>{chart.title}</h3>
+                <p>{chart.caption}</p>
+              </figcaption>
+            )}
+            <div class="ck-frame chart-preset" data-chart-frame data-spec={scriptJson(chart.spec)} set:html={chart.svg} />
+            {kpi ? <p class="kpi-note">{chart.caption}</p> : null}
+            <div class="spec-tools">
+              <p class="spec-actions">
+                <button type="button" data-copy-spec>Copy spec</button>
+                <a data-play href={`/playground#${encodeURIComponent(JSON.stringify(spec))}`}>Open in playground</a>
+              </p>
+              <details class="spec-fold">
+                <summary>View spec</summary>
+                <pre class="spec-block"><code data-spec-text>{pretty(spec)}</code></pre>
+              </details>
+            </div>
+          </figure>
+        );
+      })
+    }
+    {
+      stackList.length ? (
+        <div class="board-card board-12 board-theme-soft" data-board-card data-stack>
+          <h3>The same spec, in each stack</h3>
+          <div class="theme-switch" role="tablist" aria-label="Adapter">
+            {stackList.map((snippet, index) => (
+              <button
+                type="button"
+                role="tab"
+                data-stack-pick={snippet.id}
+                data-stack-feature={snippet.feature}
+                data-stack-label={snippet.label}
+                aria-selected={index === 0 ? "true" : "false"}
+              >
+                {snippet.label}
+              </button>
+            ))}
+          </div>
+          {stackList.map((snippet, index) => (
+            <pre class="spec-block" data-stack-panel={snippet.id} hidden={index === 0 ? undefined : true}>
+              <code>{snippet.code}</code>
+            </pre>
+          ))}
+          <p class="spec-actions">
+            <button type="button" data-stack-copy>Copy {stackList[0].label}</button>
+            <a data-stack-link href={`/features/${stackList[0].feature}`}>{stackList[0].label} in the matrix</a>
+          </p>
+        </div>
+      ) : null
+    }
+    {
+      mermaid.map((card) => {
+        const spec = shown(card.chart.spec);
+        return (
+          <article class="board-card board-12 mermaid-pair board-theme-soft" data-board-card>
+            <div>
+              <h3>{card.title}</h3>
+              <p>{card.caption}</p>
+              <pre class="spec-block"><code>{card.source}</code></pre>
+              {card.warnings.length ? (
+                <ul class="live-issues">
+                  {card.warnings.map((warning) => (
+                    <li>
+                      {warning.code ? `${warning.code} ` : ""}
+                      {warning.message}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>fromMermaid returned this spec with no warnings. validatePhase4 passed.</p>
+              )}
+            </div>
+            <div>
+              <div class="ck-frame chart-preset" data-chart-frame data-spec={scriptJson(card.chart.spec)} set:html={card.chart.svg} />
+              <div class="spec-tools">
+                <p class="spec-actions">
+                  <button type="button" data-copy-spec>Copy spec</button>
+                  <a data-play href={`/playground#${encodeURIComponent(JSON.stringify(spec))}`}>Open in playground</a>
+                </p>
+                <details class="spec-fold">
+                  <summary>View spec</summary>
+                  <pre class="spec-block"><code data-spec-text>{pretty(spec)}</code></pre>
+                </details>
+              </div>
+            </div>
+          </article>
+        );
+      })
+    }
+    {
+      repairs.map((item) => {
+        const spec = item.repaired ? shown(item.repaired) : null;
+        return (
+          <article class="board-card board-12 board-theme-soft" data-board-card>
+            <h3>{item.title}</h3>
+            <p>{item.caption}</p>
+            <div class="repair-pair">
+              <div>
+                <h4>Broken</h4>
+                <pre class="spec-block"><code>{pretty(item.broken)}</code></pre>
+                <ul class="live-issues">
+                  {item.errors.map((error) => (
+                    <li>
+                      {error.code} {error.path} — {error.message}
+                      {error.hint ? ` ${error.hint}` : ""}
+                    </li>
+                  ))}
+                  {item.warnings.map((warning) => (
+                    <li>
+                      {warning.code} {warning.path} — {warning.message}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4>After repair</h4>
+                {item.svg ? (
+                  <div class="ck-frame chart-preset" data-chart-frame data-spec={scriptJson(item.repaired)} set:html={item.svg} />
+                ) : null}
+                {item.applied.length ? (
+                  <ol class="live-issues">
+                    {item.applied.map((patch) => (
+                      <li>
+                        {patch.op} {patch.path}
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p>repair() applied no patch. The warning stays.</p>
+                )}
+                {spec ? (
+                  <div class="spec-tools">
+                    <p class="spec-actions">
+                      <button type="button" data-copy-spec>Copy spec</button>
+                      <a data-play href={`/playground#${encodeURIComponent(JSON.stringify(spec))}`}>Open in playground</a>
+                    </p>
+                    <details class="spec-fold">
+                      <summary>View spec</summary>
+                      <pre class="spec-block"><code data-spec-text>{pretty(spec)}</code></pre>
+                    </details>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </article>
+        );
+      })
+    }
+  </div>
+</div>
+
+<script>
+  import { mountShowcase } from "../scripts/showcase-stage";
+
+  const root = document.querySelector("[data-showcase]");
+  if (root instanceof HTMLElement) mountShowcase(root);
+</script>

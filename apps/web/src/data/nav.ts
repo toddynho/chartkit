@@ -12,3 +12,12 @@ export const primaryNav: NavItem[] = [
   { href: "/#pricing", label: "Pricing" },
   { href: "/#gallery", label: "Gallery" },
 ];
+
+/** Batch 2 product pages. They live in the header More menu so the bar stays one line. */
+export const moreNav: NavItem[] = [
+  { href: "/showcase", label: "Showcase" },
+  { href: "/examples", label: "Examples" },
+  { href: "/features", label: "Features" },
+  { href: "/benchmarks", label: "Benchmarks" },
+  { href: "/playground", label: "Playground" },
+];

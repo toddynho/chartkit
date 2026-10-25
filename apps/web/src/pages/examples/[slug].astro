@@ -1,0 +1,29 @@
+---
+import "../../styles/surfaces.css";
+import Base from "../../layouts/Base.astro";
+import FrameworkTabs from "../../components/FrameworkTabs.astro";
+import LiveSpec from "../../components/LiveSpec.astro";
+import { loadExample, loadExamplesIndex } from "../../lib/surfaces";
+
+export function getStaticPaths() {
+  return loadExamplesIndex().examples.map((example) => ({ params: { slug: example.slug } }));
+}
+
+const example = loadExample(Astro.params.slug ?? "");
+---
+
+<Base title={example.title} description={example.blurb} tone="light">
+  <div class="wrap surface">
+    <header class="hero">
+      <p class="kicker">{example.type}</p>
+      <h1>{example.title}</h1>
+      <p class="lede">{example.blurb}</p>
+    </header>
+    <LiveSpec spec={example.spec} svg={example.svg} />
+    <p>
+      <a href={`/docs/charts/${example.type}`}>{example.type} reference</a>
+    </p>
+    <h2>Same spec</h2>
+    <FrameworkTabs snippets={example.snippets} />
+  </div>
+</Base>

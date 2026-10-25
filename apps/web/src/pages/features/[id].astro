@@ -1,0 +1,120 @@
+---
+import "../../styles/surfaces.css";
+import Base from "../../layouts/Base.astro";
+import { optionText, pretty } from "../../lib/spec-text";
+import { loadFeature, loadFeatureIndex } from "../../lib/surfaces";
+
+export function getStaticPaths() {
+  return loadFeatureIndex().features.map((feature) => ({ params: { id: feature.id } }));
+}
+
+const data = loadFeatureIndex();
+const feature = loadFeature(Astro.params.id ?? "");
+const chartkit = feature.cells.chartkit;
+const others = data.libraries.filter((library) => library.id !== "chartkit");
+
+function emptyNote(badge: string): string {
+  if (badge === "warns") return "No spec snippet. The option is accepted and validate() warns. It is not drawn.";
+  if (badge === "none") return "No spec snippet. ChartKit does not support this.";
+  if (badge === "unknown") return "No spec snippet. This ChartKit cell is unknown.";
+  return "No spec snippet. This row is not a single chart option validate() can show.";
+}
+---
+
+<Base title={feature.label} description={`${feature.desc} ChartKit: ${feature.badge}.`} tone="light">
+  <div class="wrap surface">
+    <p class="kicker">
+      <a href="/features">Features</a>
+      {" · "}
+      <a href={`/features#${feature.category}`}>{feature.category}</a>
+    </p>
+    <h1>{feature.label}</h1>
+    <p><span class={`badge badge-${feature.badge}`}>{feature.badge}</span></p>
+    <p class="lede">{feature.desc}</p>
+    <p>
+      Matrix status <code>{chartkit.status}</code>
+      {chartkit.tier ? ` (${chartkit.tier})` : ""}. Verification <code>{chartkit.verified}</code> ({chartkit.strength}
+      ).
+      {chartkit.apiPaths.length ? (
+        <>
+          {" "}
+          ChartKit option: <code>{chartkit.apiPaths.join(", ")}</code>.
+        </>
+      ) : null}
+    </p>
+    {chartkit.note ? <p>{chartkit.note}</p> : null}
+    {chartkit.assessed ? <p>Unverified claim: {chartkit.assessed}</p> : null}
+    {
+      chartkit.source.length ? (
+        <p>
+          Source: <code>{chartkit.source.join(", ")}</code>
+        </p>
+      ) : null
+    }
+    {
+      feature.spec && feature.svg ? (
+        <>
+          <h2>ChartKit spec</h2>
+          {feature.id === "type.map.choropleth" || feature.id === "type.map.points" ? (
+            <p>
+              Rendered by <code>@chartkitdev/geo</code>. Core <code>validate()</code> does not accept map types. The geo
+              package has its own <code>validate()</code> (CK3050–CK3056). The SVG is the server render.
+            </p>
+          ) : (
+            <p>Passed <code>validate()</code> during <code>npm run matrix:refresh</code>. The SVG is the server render.</p>
+          )}
+          <div class="ck-frame" set:html={feature.svg} />
+          <pre class="spec-block"><code>{pretty(feature.spec)}</code></pre>
+        </>
+      ) : (
+        <p>{emptyNote(feature.badge)}</p>
+      )
+    }
+    <h2>Other libraries</h2>
+    <p>
+      Option names are the paths recorded in the matrix. A grep-only cell names the identifier that matched, not a
+      render test. Markdown copy: <a href={`/features/${feature.id}.md`}>{feature.id}.md</a>.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Library</th>
+            <th>Status</th>
+            <th>Option</th>
+            <th>Verification</th>
+            <th>Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            others.map((library) => {
+              const cell = feature.cells[library.id];
+              return (
+                <tr>
+                  <th scope="row">
+                    <a href={`/compare/${library.id}`}>{library.name}</a>
+                  </th>
+                  <td>
+                    <span class={`badge badge-${cell?.status ?? "unknown"}`}>{cell?.status ?? "unknown"}</span>
+                    {cell?.tier ? ` ${cell.tier}` : ""}
+                  </td>
+                  <td>
+                    <code>{optionText(cell)}</code>
+                    {cell?.note ? <span class="cell-note">{cell.note}</span> : null}
+                  </td>
+                  <td>
+                    {cell?.verified ?? "—"} ({cell?.strength ?? "unknown"})
+                  </td>
+                  <td>
+                    <code>{cell?.source[0] ?? "—"}</code>
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</Base>

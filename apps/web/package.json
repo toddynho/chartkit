@@ -8,7 +8,7 @@
     "node": ">=22.23.4"
   },
   "scripts": {
-    "paint": "node --experimental-strip-types scripts/paint-dashboards.ts",
+    "paint": "node --experimental-strip-types scripts/paint-dashboards.ts && node --experimental-strip-types scripts/paint-surfaces.ts",
     "predev": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/geo && npm run paint",
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
     "prebuild": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/geo && npm run paint",
