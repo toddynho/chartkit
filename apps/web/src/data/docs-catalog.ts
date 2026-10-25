@@ -3,7 +3,7 @@ import chartsJson from "./mock-charts.json";
 import { articleSections } from "./article-copy";
 import { withTruth } from "./chart-truth";
 import { chartTypes } from "./chart-types";
-import { specForType, type LiveSpec } from "./live-specs";
+import { docsSpecForType, type LiveSpec } from "./live-specs";
 
 export type DocSection = {
   title: string;
@@ -210,7 +210,7 @@ export function chartPage(type: string): ChartDoc {
 }
 
 export function specForChart(chart: ChartDoc): LiveSpec {
-  return specForType(chart.type);
+  return docsSpecForType(chart.type);
 }
 
 const themeChips: ChipGroup = {
@@ -270,7 +270,7 @@ export function chipsForChart(type: string): ChipGroup[] {
   ];
 }
 
-export const articleSpec: LiveSpec = specForType("line");
+export const articleSpec: LiveSpec = docsSpecForType("line");
 
 export const articleChips: ChipGroup[] = [
   themeChips,

@@ -31,6 +31,7 @@ import timeline from "../../../../packages/core/examples/25-timeline.json";
 import treemap from "../../../../packages/core/examples/20-treemap.json";
 import venn from "../../../../packages/core/examples/27-venn.json";
 import waterfall from "../../../../packages/core/examples/23-waterfall.json";
+import { densifyDemo } from "./dense-series";
 
 export type LiveSpec = Record<string, unknown>;
 
@@ -93,8 +94,13 @@ export function specForType(type: string): LiveSpec {
   return byType[type] ?? byType.line;
 }
 
+/** Docs try-it copy. Core examples stay short; this clone is the dense series. */
+export function docsSpecForType(type: string): LiveSpec {
+  return densifyDemo(specForType(type));
+}
+
 export const trySamples = {
-  line: byType.line,
-  bar: byType.bar,
-  donut: byType.donut,
+  line: docsSpecForType("line"),
+  bar: docsSpecForType("bar"),
+  donut: docsSpecForType("donut"),
 } as const;
