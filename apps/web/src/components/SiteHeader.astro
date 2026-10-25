@@ -1,6 +1,7 @@
 ---
 import { SITE, canonicalPath } from "../data/site";
 import { moreNav, primaryNav } from "../data/nav";
+import BrandLockup from "./BrandLockup.astro";
 
 const path = canonicalPath(Astro.url.pathname);
 const docsHere = path === "/docs" || path.startsWith("/docs/");
@@ -20,14 +21,7 @@ function mark(href: string): "page" | undefined {
 
 <header class="site-header" id="site-header">
   <div class="site-header__inner">
-    <a class="brand" href="/" aria-label="ChartKit home">
-      <svg class="mark" viewBox="0 0 16 16" aria-hidden="true">
-        <rect x="1" y="9" width="3.2" height="6" rx="0.8" fill="currentColor"></rect>
-        <rect x="6.4" y="5.5" width="3.2" height="9.5" rx="0.8" fill="currentColor"></rect>
-        <rect x="11.8" y="2" width="3.2" height="13" rx="0.8" fill="#0ea5e9"></rect>
-      </svg>
-      <span>Chart<span class="kit">Kit</span></span>
-    </a>
+    <BrandLockup />
     <nav class="primary" aria-label="Primary">
       {
         primaryNav.map((item) => (
