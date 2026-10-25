@@ -1,0 +1,11 @@
+---
+interface Props {
+  href: string;
+}
+
+const { href } = Astro.props;
+---
+
+<p class="note">
+  <a href={href}>Current page</a> on the Next.js site. This route is a stub so the shell can be reviewed before the content moves.
+</p>

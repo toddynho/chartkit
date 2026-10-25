@@ -1,0 +1,59 @@
+---
+import "../styles/docs.css";
+import Base from "../layouts/Base.astro";
+import Pricing from "../components/Pricing.astro";
+import TryIt from "../components/TryIt.astro";
+import { cloudCurl } from "../data/samples";
+
+const description =
+  "ChartKit Cloud returns an SVG or PNG for a JSON spec. Free images carry a watermark. Pro figures on this page are drafts.";
+---
+
+<Base tone="light" title="Cloud" description={description}>
+  <div class="wrap">
+    <section class="hero" aria-labelledby="cloud-page-title">
+      <p class="kicker">ChartKit Cloud</p>
+      <h1 id="cloud-page-title">A chart as an image.</h1>
+      <p class="lede">
+        Any agent or app can request a render. Free images carry a small chartkit.dev mark. The open-source library
+        never draws that mark. Pro, below, is a draft price: included renders, then a meter.
+      </p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#pricing">Pricing</a>
+        <a class="btn btn-secondary" href="#try">Try a spec</a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="render-title">
+      <h2 id="render-title">Render</h2>
+      <p>
+        <code>GET /render</code> returns SVG or PNG, so it works as an <code>img</code> src. That URL has no API key.{' '}
+        <code>POST /render</code> takes the JSON body and returns the image URL plus the repairs and warnings.{' '}
+        <code>POST /charts</code> stores the spec and returns a short URL. <code>POST /validate</code> returns the CK
+        codes, the JSON Patch, and the repaired spec.
+      </p>
+      <figure class="code">
+        <figcaption>shell</figcaption>
+        <pre><code>{cloudCurl}</code></pre>
+      </figure>
+      <p>
+        GitHub READMEs display PNG. Add <code>format=png</code>. SVG is the default everywhere else. Add{' '}
+        <code>theme=midnight</code>, <code>w</code>, <code>h</code>, and <code>scale</code> on the query string. A spec
+        can be URL-encoded JSON or base64url.
+      </p>
+      <p class="note">
+        The API reference stays on <a href="https://chartkit.dev/docs/cloud">Cloud render</a>. This page does not proxy
+        the API. The chart under the curl is <code>validate()</code> and <code>render()</code> from{' '}
+        <code>@chartkitdev/core</code>.
+      </p>
+    </section>
+
+    <section class="section" id="try" aria-labelledby="try-title">
+      <h2 id="try-title">Try the spec</h2>
+      <p class="lede">Edit the JSON or switch Line, Bar, and Donut. Invalid JSON shows a CK code and no chart.</p>
+      <TryIt />
+    </section>
+
+    <Pricing />
+  </div>
+</Base>

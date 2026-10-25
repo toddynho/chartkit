@@ -1,0 +1,15 @@
+---
+import ResponseRail from "./ResponseRail.astro";
+import SpecEditor from "./SpecEditor.astro";
+import { articleChips, articleSpec } from "../data/docs-catalog";
+---
+
+<div class="home-try">
+  <SpecEditor
+    spec={articleSpec}
+    chips={articleChips}
+    title="Spec"
+    hint="Line, bar, or donut. Chips update the chart."
+  />
+  <ResponseRail spec={articleSpec} />
+</div>

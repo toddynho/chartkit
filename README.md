@@ -192,6 +192,19 @@ Full documentation and examples at **[chartkit.dev](https://chartkit.dev)**
 - [Themes](https://chartkit.dev/docs/theming)
 - [Live demo](https://chartkit.dev/demo)
 
+## Public site (Astro)
+
+The next marketing site and docs shell is [`apps/web`](apps/web) (`chartkit-web`). It is an Astro app. [chartkit.dev](https://chartkit.dev) still serves the Next.js app in [`docs/`](docs). Both stay installed. `apps/web` does not replace `docs/` until the pages have moved and the host is pointed at it on purpose.
+
+```bash
+npm run dev:web
+npm run build:web
+```
+
+`npm run dev` and `npm run build:docs` still start and build the Next.js docs. Astro 7 needs Node 22.23.4 or newer. The rest of this repo allows Node 20.
+
+Routes in the scaffold: `/` (hero, Cloud API, pricing, gallery), `/cloud`, and `/docs` with Start, Concepts, Chart types, Reference, and Agents. Chart-type URLs match the current site (`/docs/charts/<type>`). Content on those routes is a stub. See [apps/web/README.md](apps/web/README.md).
+
 ## Author
 
 Created by [@toddo](https://x.com/toddo), founder of [BuySellAds](https://buysellads.com).

@@ -1,0 +1,100 @@
+---
+import { heroSlides, peekSparkline } from "../data/hero-slides";
+
+const slides = heroSlides();
+const first = slides[0];
+const peek = peekSparkline();
+const clientSlides = slides.map(({ label, title, kpi, delta, chrome, json, svg }) => ({
+  label,
+  title,
+  kpi,
+  delta,
+  chrome,
+  json,
+  svg,
+}));
+---
+
+<section class="stage-band" aria-label="Product">
+  <div class="stage" id="hero-stage">
+    <div class="stage__ghost" id="stage-ghost">
+      <pre id="ghost-pre" set:html={first.json} />
+    </div>
+    <div class="stage__chip">
+      <span class="stage__chip-dot" aria-hidden="true"></span>
+      repair() · 21/42 → 42/42
+    </div>
+    <aside class="stage__peek">
+      <span class="stage__peek-label">Sparkline · example</span>
+      <div set:html={peek} />
+    </aside>
+    <div class="stage__ground" aria-hidden="true"></div>
+    <div class="stage__tilt" id="stage-tilt">
+      <div class="stage__surface" id="stage-surface">
+        <div class="stage__chrome">
+          <div class="stage__dots" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div class="stage__chrome-end">
+            <div class="stage-plan" role="group" aria-label="Free Cloud watermark preview">
+              <button type="button" class="is-on" data-plan="free" aria-pressed="true">Free</button>
+              <button type="button" data-plan="pro" aria-pressed="false">Pro</button>
+            </div>
+            <span class="stage__chrome-label" id="chrome-label">{first.chrome}</span>
+          </div>
+        </div>
+        <div class="stage__body">
+          <div class="stage__meta">
+            <span class="stage__title" id="chart-title">{first.title}</span>
+            <span class="stage__badge" id="chart-plan">Free · watermarked</span>
+          </div>
+          <div class="stage__value">
+            <span class="stage__value-num" id="chart-kpi">{first.kpi}</span>
+            <span class="stage__value-delta" id="chart-delta">{first.delta}</span>
+          </div>
+          <div class="chart-stage">
+            <div class="chart-wrap" id="chart-slot" set:html={first.svg} />
+            <div class="stage-wm is-on" id="stage-wm" aria-hidden="true">
+              <span class="stage-wm__mark">chartkit.dev</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="sr" id="hero-live" aria-live="polite"></p>
+  </div>
+</section>
+
+<div class="type-rail-wrap">
+  <div class="type-rail" id="type-rail" role="tablist" aria-label="Chart types">
+    {
+      slides.map((chart, index) => (
+        <button
+          type="button"
+          class:list={["type-btn", index === 0 && "is-active"]}
+          role="tab"
+          id={`hero-tab-${chart.id}`}
+          aria-selected={index === 0 ? "true" : "false"}
+          aria-controls="chart-slot"
+          aria-label={`${chart.label} chart`}
+          tabindex={index === 0 ? 0 : -1}
+          data-index={index}
+        >
+          <svg class="type-btn__icon" viewBox="0 0 24 20" fill="none" aria-hidden="true" set:html={chart.icon} />
+          <span class="type-btn__label">{chart.label}</span>
+          <span class="type-btn__underline" aria-hidden="true" />
+        </button>
+      ))
+    }
+  </div>
+  <div class="type-progress" aria-hidden="true"><div class="type-progress__bar" id="type-progress"></div></div>
+</div>
+
+<div class="stage-proof" id="stage-proof">
+  <p>
+    <strong>42/42</strong> first try with the docs<span class="sep" aria-hidden="true"></span><strong>repair()</strong> lifts
+    21/42 → 42/42 with no model call
+  </p>
+</div>
+
+<script id="hero-slides" type="application/json" is:inline set:html={JSON.stringify(clientSlides).replaceAll("<", "\\u003c")}
+></script>
+<script src="../scripts/hero-stage.ts"></script>

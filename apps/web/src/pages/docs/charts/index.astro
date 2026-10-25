@@ -1,0 +1,58 @@
+---
+import { chartTypes } from "../../../data/chart-types";
+import { chartDocs } from "../../../data/docs-catalog";
+import Docs from "../../../layouts/Docs.astro";
+
+const families = ["Core", "Statistical", "Planning"] as const;
+const inNav = new Set(chartDocs.map((chart) => chart.type));
+const library = chartTypes.filter((chart) => !inNav.has(chart.type));
+const description = "ChartKit chart types. Core, Statistical, and Planning are in the left nav. Other production URLs stay reachable here.";
+---
+
+<Docs
+  title="Chart types"
+  description={description}
+  lede="Each type has an extensionless page at /docs/charts/<type>. The left nav lists Core, Statistical, and Planning. Types that are on chartkit.dev and outside that series stay in Library."
+  href="/docs/charts"
+>
+  {
+    families.map((family) => (
+      <section>
+        <h2>{family}</h2>
+        <ul class="type-list">
+          {chartDocs
+            .filter((chart) => chart.family === family)
+            .map((chart) => (
+              <li>
+                <a href={`/docs/charts/${chart.type}`}>
+                  <strong>{chart.label}</strong>
+                  <span>{chart.lede}</span>
+                </a>
+              </li>
+            ))}
+        </ul>
+      </section>
+    ))
+  }
+  <section>
+    <h2>Library</h2>
+    <p>These production URLs are real pages. They are not a fourth group in the left nav.</p>
+    <ul class="type-list">
+      {
+        library.map((chart) => (
+          <li>
+            <a href={`/docs/charts/${chart.type}`}>
+              <strong>{chart.title}</strong>
+              <span>{chart.summary}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+  <p slot="rail" class="spec-try__note">
+    Open a chart type to edit its spec. The response rail runs <code>validate()</code>
+    {' '}and <code>render()</code>
+    {' '}from <code>@chartkitdev/core</code>. It does not call Cloud.
+  </p>
+</Docs>

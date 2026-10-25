@@ -1,0 +1,148 @@
+---
+import "../styles/hero.css";
+import "../styles/docs.css";
+import Base from "../layouts/Base.astro";
+import Pricing from "../components/Pricing.astro";
+import HeroStage from "../components/HeroStage.astro";
+import TryIt from "../components/TryIt.astro";
+import { SITE } from "../data/site";
+import { chartTypes, galleryTypes } from "../data/chart-types";
+import { gallerySvg } from "../data/hero-slides";
+import { cloudCurl } from "../data/samples";
+
+const gallery = galleryTypes
+  .map((type) => {
+    const chart = chartTypes.find((item) => item.type === type);
+    return chart ? { ...chart, svg: gallerySvg(chart.type) } : null;
+  })
+  .filter((chart) => chart != null);
+---
+
+<Base tone="light" title="Charts become data" description={SITE.description}>
+  <section class="home-hero" id="hero" aria-labelledby="home-title">
+    <p class="home-hero__eyebrow">ChartKit v1</p>
+    <h1 id="home-title">Charts become data.</h1>
+    <p class="home-hero__lede">
+      A JSON spec any agent — or your backend — can write. One object. Every framework.
+    </p>
+    <div class="home-hero__actions">
+      <a class="home-btn" href="#cloud">
+        Try the Cloud API <span class="home-btn__chev" aria-hidden="true">›</span>
+      </a>
+      <a class="home-link" href="/docs">Read the docs</a>
+    </div>
+  </section>
+
+  <HeroStage />
+
+  <section class="home-why" id="home-why" aria-labelledby="why-title">
+    <div class="home-why__inner">
+      <div class="home-why__intro">
+        <h2 id="why-title">Why teams switch.</h2>
+        <p>Agent-first charts. One JSON object. The comparison includes the losses.</p>
+      </div>
+      <div class="home-why__rows">
+        <article class="home-why__row">
+          <span class="home-why__num">01</span>
+          <h3>Agents get a spec.</h3>
+          <p>
+            With the docs in the prompt, a measured run wrote a valid chart on 42 of 42 tasks.
+            <code>repair()</code> took a no-docs run from 21/42 to 42/42 with no model call. Round 6, 2026-10-16. Not
+            re-run since.
+          </p>
+          <a class="home-more" href="https://chartkit.dev/benchmarks#agents">Benchmarks</a>
+        </article>
+        <article class="home-why__row">
+          <span class="home-why__num">02</span>
+          <h3>One object.</h3>
+          <p>
+            React, Vue, Svelte, vanilla JavaScript, and server SVG take the same JSON. Adapters do not add a second
+            chart API.
+          </p>
+          <a class="home-more" href="/docs/concepts/adapters">Adapters</a>
+        </article>
+        <article class="home-why__row">
+          <span class="home-why__num">03</span>
+          <h3>Losses included.</h3>
+          <p>
+            A minimal line is 34,554 bytes gzip. uPlot is 23,276. First hover is slower than uPlot. The comparison
+            table in the repo README is the record.
+          </p>
+          <a class="home-more" href="https://chartkit.dev/benchmarks">Full benchmarks</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-agents" id="agents" aria-labelledby="agents-title">
+    <div class="home-agents__inner">
+      <div>
+        <h2 id="agents-title">Built for agents.</h2>
+        <p>
+          The spec is the interface. An agent writes JSON,{' '}
+          <code>validate()</code>
+          {' '}lists every CK code, and{' '}
+          <code>repair()</code>
+          {' '}applies the safe patch with no model call.{' '}
+          <code>render()</code>
+          {' '}returns SVG.
+        </p>
+        <p>
+          <a class="home-more" href="/agents">The agent loop</a>
+        </p>
+      </div>
+      <ol class="home-agents__steps">
+        <li>
+          <strong>Write</strong> one v1 spec.{' '}
+          <code>a11y.alt</code> is required.
+        </li>
+        <li>
+          <strong>Check</strong> with <code>validate()</code>. Codes stay stable.
+        </li>
+        <li><strong>Repair</strong> the safe mistakes. The input is not mutated.</li>
+        <li><strong>Render</strong> from core, or ask Cloud for an image.</li>
+      </ol>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="section" id="cloud" aria-labelledby="cloud-title">
+      <h2 id="cloud-title">Cloud API</h2>
+      <p class="lede">
+        A marked chart for any agent or app. <code>GET /render</code> returns an image.{' '}
+        <code>POST /render</code> returns the image URL plus the repairs and warnings from <code>validate()</code> and{' '}
+        <code>repair()</code>.
+      </p>
+      <figure class="code">
+        <figcaption>shell</figcaption>
+        <pre><code>{cloudCurl}</code></pre>
+      </figure>
+      <p>
+        <code>GET /render</code> always includes the chartkit.dev mark, so an image address never carries a key. A key
+        on <code>POST /charts</code> or <code>POST /render</code> stores an unmarked chart. The mark is a Cloud flag.
+        It is not a field in the spec. The library never draws it. The chart below is local core, not a Cloud call.
+      </p>
+      <TryIt />
+      <p><a href="/cloud">Cloud page</a></p>
+    </section>
+
+    <Pricing />
+
+    <section class="section" id="gallery" aria-labelledby="gallery-title">
+      <h2 id="gallery-title">Gallery</h2>
+      <p class="lede">Eight examples painted with <code>@chartkitdev/core</code>. Open a card for the spec.</p>
+      <div class="gallery-grid">
+        {
+          gallery.map((chart) => (
+            <a class="card" href={`/docs/charts/${chart.type}`}>
+              <span class="gallery-chart" aria-hidden="true" set:html={chart.svg} />
+              <h3>{chart.title}</h3>
+              <p>{chart.summary}</p>
+            </a>
+          ))
+        }
+      </div>
+      <p><a href="/docs/charts">All chart types</a></p>
+    </section>
+  </div>
+</Base>
