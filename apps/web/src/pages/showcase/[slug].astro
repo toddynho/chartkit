@@ -1,74 +1,9 @@
 ---
-import "@fontsource/roboto/latin-400.css";
-import "@fontsource/roboto/latin-500.css";
-import "@fontsource/roboto/latin-700.css";
-import "../../styles/surfaces.css";
-import Base from "../../layouts/Base.astro";
-import ShowcaseBoard from "../../components/ShowcaseBoard.astro";
-import { loadShowcase, loadShowcaseIndex } from "../../lib/surfaces";
+import { loadShowcaseIndex } from "../../lib/surfaces";
 
 export function getStaticPaths() {
   return loadShowcaseIndex().boards.map((board) => ({ params: { slug: board.slug } }));
 }
 
-const slug = Astro.params.slug ?? "";
-const board = loadShowcase(slug);
+return Astro.redirect("/gallery", 307);
 ---
-
-<Base title={board.title} description={board.lede} tone="light">
-  <Fragment slot="head">
-    <link rel="alternate" type="text/markdown" href={`/showcase/${board.slug}.md`} />
-  </Fragment>
-  <div class="wrap surface">
-    <header class="hero">
-      <p class="kicker">
-        <a href="/showcase">Showcase</a>
-        {" · "}
-        {String(board.number).padStart(2, "0")}
-      </p>
-      <h1>{board.title}</h1>
-      <p class="lede">{board.lede}</p>
-      {
-        board.sources ? (
-          <p>
-            Bundle bytes are from <code>docs/data/measured-sizes.json</code>, measured {board.sources.sizeMeasured} on{" "}
-            <code>{board.sources.sizeCommit}</code> for the size script and {board.sources.benchMeasured} for the bench
-            bundles. Timings are older round {board.sources.round}, measured {board.sources.roundMeasured} on{" "}
-            <code>{board.sources.roundCommit}</code>, from <code>benchmarks.json</code>. They were not re-run with these
-            bundles.
-          </p>
-        ) : null
-      }
-    </header>
-    <ShowcaseBoard charts={board.charts} mermaid={board.mermaid} repairs={board.repairs} stacks={board.stacks} />
-    {
-      board.losses?.length ? (
-        <>
-          <h2>Losses</h2>
-          <ul>
-            {board.losses.map((loss) => (
-              <li>
-                <strong class="loss">{loss.label}</strong> {loss.detail}
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : null
-    }
-    <h2>Options used</h2>
-    <p>
-      Each link is a row in the feature matrix. The list is the options these specs set.{" "}
-      <a href={`/showcase/${board.slug}.md`}>{board.slug}.md</a> is the same board for an agent.
-    </p>
-    <ul class="option-list">
-      {
-        board.options.map((option) => (
-          <li>
-            <a href={`/features/${option.id}`}>{option.label}</a>
-            <code>{option.id}</code>
-          </li>
-        ))
-      }
-    </ul>
-  </div>
-</Base>

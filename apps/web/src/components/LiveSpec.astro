@@ -28,7 +28,11 @@ const specId = mode === "full" ? "spec-json" : undefined;
   <div class="live-editor__side">
     <div class="live-pane__head">
       <label for={specId}>Spec</label>
-      {docsHref && docsLabel ? <a class="live-docs" href={docsHref}>{docsLabel}</a> : null}
+      {docsHref && docsLabel ? (
+        <a class="live-docs" href={docsHref}>{docsLabel}</a>
+      ) : mode === "full" ? (
+        <a class="live-docs" data-docs hidden href="/docs/charts">Docs</a>
+      ) : null}
     </div>
     <div class="code-field">
       <pre class="code-field__paint" aria-hidden="true" data-spec-paint></pre>
@@ -54,7 +58,7 @@ const specId = mode === "full" ? "spec-json" : undefined;
             <button type="button" data-png>PNG</button>
           </>
         ) : (
-          <a data-play href={`/playground#${encodeURIComponent(text)}`}>Open in playground</a>
+          <a data-play href={`/examples#${encodeURIComponent(text)}`}>Edit in Examples</a>
         )
       }
     </div>

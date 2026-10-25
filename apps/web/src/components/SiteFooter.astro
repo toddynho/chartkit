@@ -1,6 +1,9 @@
 ---
 import BrandLockup from "./BrandLockup.astro";
+import { loadCompareIndex } from "../lib/batch3";
 import { SITE } from "../data/site";
+
+const rivals = loadCompareIndex().rivals;
 
 const columns = [
   {
@@ -10,9 +13,7 @@ const columns = [
       { href: "/cloud#pricing", label: "Pricing" },
       { href: "/dashboards", label: "Dashboards" },
       { href: "/examples", label: "Examples" },
-      { href: "/playground", label: "Playground" },
       { href: "/gallery", label: "Gallery" },
-      { href: "/showcase", label: "Showcase" },
     ],
   },
   {
@@ -32,7 +33,18 @@ const columns = [
       { href: "/docs/validate", label: "Validate and repair" },
       { href: "/llms.txt", label: "llms.txt" },
       { href: "/docs/mcp", label: "MCP" },
+      { href: "/features", label: "Features" },
       { href: "/benchmarks", label: "Benchmarks" },
+    ],
+  },
+  {
+    label: "Compare",
+    links: [
+      { href: "/compare", label: "All libraries" },
+      ...rivals.map(({ library }) => ({
+        href: `/compare/${library.id}`,
+        label: `ChartKit vs ${library.name}`,
+      })),
     ],
   },
 ];

@@ -33,6 +33,15 @@ const description = `Every scored feature for ChartKit and ${library.name}, with
     <p>
       {page.perf} <a href="/benchmarks">Full timings</a>.
     </p>
+    <p>
+      {
+        library.id === "chartjs" || library.id === "recharts" || library.id === "echarts" ? (
+          <a href={`/convert?source=${library.id}`}>Convert from {library.name} to ChartKit</a>
+        ) : (
+          <a href="/convert">Convert from Chart.js, Recharts, or ECharts</a>
+        )
+      }
+    </p>
     <CompareSection title={`${library.name} ahead`} rows={page.loss} library={library.name} />
     <CompareSection title="ChartKit ahead" rows={page.win} library={library.name} />
     <CompareSection title="Unverified" rows={page.unknown} library={library.name} />

@@ -1,17 +1,18 @@
 ---
-import { heroSlides, peekSparkline } from "../data/hero-slides";
+import { heroEditHref, heroSlides, peekSparkline } from "../data/hero-slides";
 
 const slides = heroSlides();
 const first = slides[0];
 const peek = peekSparkline();
-const clientSlides = slides.map(({ label, title, kpi, delta, chrome, json, svg }) => ({
-  label,
-  title,
-  kpi,
-  delta,
-  chrome,
-  json,
-  svg,
+const clientSlides = slides.map((slide) => ({
+  label: slide.label,
+  title: slide.title,
+  kpi: slide.kpi,
+  delta: slide.delta,
+  chrome: slide.chrome,
+  json: slide.json,
+  svg: slide.svg,
+  edit: heroEditHref(slide.type),
 }));
 ---
 
@@ -25,7 +26,7 @@ const clientSlides = slides.map(({ label, title, kpi, delta, chrome, json, svg }
       No extra model call
     </div>
     <aside class="stage__peek">
-      <span class="stage__peek-label">Sparkline · example</span>
+      <span class="stage__peek-label">Sparkline · example <a class="stage-edit" href={heroEditHref("sparkline")}>Edit</a></span>
       <div set:html={peek} />
     </aside>
     <div class="stage__ground" aria-hidden="true"></div>
@@ -35,6 +36,7 @@ const clientSlides = slides.map(({ label, title, kpi, delta, chrome, json, svg }
           <div class="stage__dots" aria-hidden="true"><span></span><span></span><span></span></div>
           <div class="stage__chrome-end">
             <span class="stage__chrome-label" id="chrome-label">{first.chrome}</span>
+            <a class="stage-edit" id="stage-edit" href={heroEditHref(first.type)}>Edit spec</a>
           </div>
         </div>
         <div class="stage__body">

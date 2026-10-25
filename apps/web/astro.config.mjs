@@ -21,7 +21,11 @@ export default defineConfig({
     format: "directory",
   },
   redirects: {
-    "/play": { status: 307, destination: "/playground" },
+    "/play": { status: 307, destination: "/examples" },
+    "/playground": { status: 307, destination: "/examples" },
+    "/demo": { status: 307, destination: "/dashboards" },
+    "/showcase": { status: 307, destination: "/gallery" },
+    "/maps": { status: 307, destination: "/gallery#maps" },
     "/getting-started": { status: 307, destination: "/docs" },
     "/components": { status: 307, destination: "/docs" },
     "/components/line-chart": { status: 307, destination: "/docs/charts/line" },

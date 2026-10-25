@@ -1,15 +1,18 @@
 ---
 import ChartStack from "./ChartStack.astro";
+import EditChart from "./EditChart.astro";
 import type { PaintedChart, ThemeName } from "../lib/dashboard-types";
 
 interface Props {
   chart: PaintedChart;
   theme: ThemeName;
   showTitle?: boolean;
+  specs?: Record<string, string>;
 }
 
 const { chart, theme } = Astro.props;
 const showTitle = Astro.props.showTitle !== false;
+const specs = Astro.props.specs ?? {};
 const panels = chart.variants.length
   ? chart.variants
   : [{ id: chart.id, label: "", alt: chart.alt, frames: chart.frames }];
@@ -41,6 +44,7 @@ const multi = panels.length > 1;
     panels.map((panel, index) => (
       <div data-panel={multi ? panel.id : undefined} hidden={multi && index !== 0 ? true : undefined}>
         <ChartStack frames={panel.frames} theme={theme} alt={panel.alt} live={!multi || index === 0} />
+        <EditChart spec={specs[panel.id]} />
       </div>
     ))
   }

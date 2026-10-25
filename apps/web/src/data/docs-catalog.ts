@@ -334,12 +334,22 @@ export const docsNav: NavGroup[] = [
   },
   {
     label: "Charts",
-    blocks: (["Core", "Statistical", "Planning"] as const).map((family) => ({
-      label: family,
-      items: chartDocs
-        .filter((chart) => chart.family === family)
-        .map((chart) => ({ href: `/docs/charts/${chart.type}`, label: chart.label })),
-    })),
+    blocks: [
+      ...(["Core", "Statistical", "Planning"] as const).map((family) => ({
+        label: family,
+        items: chartDocs
+          .filter((chart) => chart.family === family)
+          .map((chart) => ({ href: `/docs/charts/${chart.type}`, label: chart.label })),
+      })),
+      {
+        label: "Maps",
+        items: [
+          { href: "/gallery#map-world", label: "World choropleth" },
+          { href: "/gallery#map-us", label: "United States" },
+          { href: "/gallery#map-cities", label: "Cities" },
+        ],
+      },
+    ],
   },
   {
     label: "Lookup",

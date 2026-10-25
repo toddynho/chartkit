@@ -1,10 +1,12 @@
 ---
 import "../../styles/surfaces.css";
 import Base from "../../layouts/Base.astro";
-import { loadExamplesIndex } from "../../lib/surfaces";
+import LiveSpec from "../../components/LiveSpec.astro";
+import { loadExamplesIndex, loadPlayground } from "../../lib/surfaces";
 
 const data = loadExamplesIndex();
-const description = "A gallery of ChartKit specs, including gantt, timeline, quadrant, venn, and journey.";
+const playground = loadPlayground();
+const description = "Edit a ChartKit spec, then browse the example catalog.";
 ---
 
 <Base title="Examples" description={description} tone="light">
@@ -12,8 +14,12 @@ const description = "A gallery of ChartKit specs, including gantt, timeline, qua
     <header class="hero">
       <p class="kicker">Examples</p>
       <h1>Examples</h1>
-      <p class="lede">Every card is a v1 spec, rendered to SVG on the server. Open one to edit the JSON and see the chart update.</p>
+      <p class="lede">
+        Edit the spec. The preview renders with <code>@chartkitdev/core</code>, and maps with <code>@chartkitdev/geo</code>.
+        Validate and Repair call the same functions an agent would. Share puts the spec in the URL hash.
+      </p>
     </header>
+    <LiveSpec spec={playground.spec} svg={playground.svg} mode="full" themes={playground.themes} />
     <nav class="filters" aria-label="Example groups">
       {data.groups.map((group) => <a href={`#${group.id}`}>{group.label}</a>)}
     </nav>
@@ -26,7 +32,7 @@ const description = "A gallery of ChartKit specs, including gantt, timeline, qua
               .filter((example) => example.groupId === group.id)
               .map((example) => (
                 <article class="card">
-                  <div class="cover-frame" role="img" aria-label={example.alt} set:html={example.svg} />
+                  <a class="cover-frame" href={`/examples/${example.slug}`} aria-label={example.alt} set:html={example.svg} />
                   <h3>{example.title}</h3>
                   <p>{example.blurb}</p>
                   <a href={`/examples/${example.slug}`}>Edit spec</a>

@@ -18,7 +18,7 @@ export function mountShowcase(root: HTMLElement): void {
       const tools = frame.parentElement?.querySelector("[data-spec-text]");
       if (tools) tools.textContent = pretty(spec);
       const play = frame.parentElement?.querySelector<HTMLAnchorElement>("[data-play]");
-      if (play) play.href = `/playground#${encodeURIComponent(JSON.stringify(spec))}`;
+      if (play) play.href = `/examples#${encodeURIComponent(JSON.stringify(spec))}`;
     });
   }
 

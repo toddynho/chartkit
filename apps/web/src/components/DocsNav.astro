@@ -70,14 +70,17 @@ function mark(type: string): "line" | "bar" | "ring" | "grid" | "dot" {
                   <span class="side-count">{block.items.length}</span>
                 </summary>
                 <ul class="side-nav">
-                  {block.items.map((item) => (
+                  {block.items.map((item) => {
+                    const type = item.href.startsWith("/docs/charts/") ? item.href.slice("/docs/charts/".length) : "";
+                    return (
                     <li data-chart-item data-label={item.label.toLowerCase()}>
                       <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class={selected(item.href) ? "is-active" : undefined}>
-                        <span class:list={["type-mark", `type-mark--${mark(item.href.slice("/docs/charts/".length))}`]} aria-hidden="true"></span>
+                        {type ? <span class:list={["type-mark", `type-mark--${mark(type)}`]} aria-hidden="true"></span> : null}
                         {item.label}
                       </a>
                     </li>
-                  ))}
+                    );
+                  })}
                 </ul>
               </details>
             ))}

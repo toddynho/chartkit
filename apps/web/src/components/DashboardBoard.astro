@@ -1,8 +1,9 @@
 ---
 import ChartCard from "./ChartCard.astro";
 import ChartStack from "./ChartStack.astro";
+import EditChart from "./EditChart.astro";
 import SpecGroup from "./SpecGroup.astro";
-import type { PaintedBoard } from "../lib/dashboard-types";
+import type { PaintedBoard, PaintedChart } from "../lib/dashboard-types";
 
 interface Props {
   board: PaintedBoard;
@@ -25,6 +26,24 @@ const activity = board.charts.find((chart) => chart.place === "activity");
 const cohort = board.charts.find((chart) => chart.place === "cohort");
 const map = board.charts.find((chart) => chart.place === "map");
 const special = board.slug === "ledger" || board.slug === "meter" || board.slug === "wayline" || board.slug === "keel";
+
+function specText(heading: string): string | undefined {
+  return board.specBlocks.find((block) => block.heading === heading)?.specs[theme].wide;
+}
+
+function specsFor(chart: PaintedChart): Record<string, string> {
+  const specs: Record<string, string> = {};
+  const base = specText(chart.title);
+  if (chart.variants.length === 0) {
+    if (base) specs[chart.id] = base;
+    return specs;
+  }
+  for (const variant of chart.variants) {
+    const text = specText(`${chart.title} · ${variant.label}`) ?? base;
+    if (text) specs[variant.id] = text;
+  }
+  return specs;
+}
 
 const liveCountries = [
   ["United States", "42"],
@@ -80,12 +99,12 @@ const mapCountries = [
   {
     board.slug === "ledger" && (
       <div class="d-grid">
-        {hero ? <ChartCard chart={hero} theme={theme} showTitle={false} /> : null}
+        {hero ? <ChartCard specs={specsFor(hero)} chart={hero} theme={theme} showTitle={false} /> : null}
         {metrics.map((chart) => (
-          <ChartCard chart={chart} theme={theme} showTitle={false} />
+          <ChartCard specs={specsFor(chart)} chart={chart} theme={theme} showTitle={false} />
         ))}
         {sides.map((chart) => (
-          <ChartCard chart={chart} theme={theme} />
+          <ChartCard specs={specsFor(chart)} chart={chart} theme={theme} />
         ))}
       </div>
     )
@@ -113,6 +132,7 @@ const mapCountries = [
           {tabs.map((chart, index) => (
             <div class="d-card span-dash-12" data-panel={chart.id} hidden={index !== 0 ? true : undefined}>
               <ChartStack frames={chart.frames} theme={theme} alt={chart.alt} live={index === 0} />
+              <EditChart spec={specText(chart.title)} />
             </div>
           ))}
         </div>
@@ -134,6 +154,7 @@ const mapCountries = [
                       <span>Visitors</span>
                     </div>
                     <ChartStack frames={chart.frames} theme={theme} alt={chart.alt} live={index === 0} />
+                    <EditChart spec={specText(chart.title)} />
                   </div>
                 ))}
               </div>
@@ -167,6 +188,7 @@ const mapCountries = [
             {tabs.map((chart, index) => (
               <div data-panel={chart.id} hidden={index !== 0 ? true : undefined}>
                 <ChartStack frames={chart.frames} theme={theme} alt={chart.alt} live={index === 0} />
+                <EditChart spec={specText(chart.title)} />
               </div>
             ))}
           </div>
@@ -176,6 +198,7 @@ const mapCountries = [
             <section class="d-card">
               <h3>{realtime.title}</h3>
               <ChartStack frames={realtime.frames} theme={theme} alt={realtime.alt} />
+              <EditChart spec={specText(realtime.title)} />
               <table class="mini">
                 <caption>Top countries</caption>
                 <tbody>
@@ -196,7 +219,7 @@ const mapCountries = [
           <p>Search brings more new users than the other channels.</p>
           <p>The newest cohort is still in its first period.</p>
         </section>
-        {hbar ? <ChartCard chart={hbar} theme={theme} /> : null}
+        {hbar ? <ChartCard specs={specsFor(hbar)} chart={hbar} theme={theme} /> : null}
         <section class="d-card">
           <h3>Sessions by channel</h3>
           <table class="mini">
@@ -215,6 +238,7 @@ const mapCountries = [
             <section class="d-card">
               <h3>Users by country</h3>
               <ChartStack frames={map.frames} theme={theme} alt={map.alt} />
+              <EditChart spec={specText(map.title)} />
               <table class="mini">
                 <tbody>
                   {mapCountries.map(([name, count]) => (
@@ -228,8 +252,8 @@ const mapCountries = [
             </section>
           )
         }
-        {activity ? <ChartCard chart={activity} theme={theme} /> : null}
-        {cohort ? <ChartCard chart={cohort} theme={theme} /> : null}
+        {activity ? <ChartCard specs={specsFor(activity)} chart={activity} theme={theme} /> : null}
+        {cohort ? <ChartCard specs={specsFor(cohort)} chart={cohort} theme={theme} /> : null}
       </div>
     )
   }
@@ -274,6 +298,7 @@ const mapCountries = [
                       <td>
                         <div class="issue-spark">
                           <ChartStack frames={spark.frames} theme={theme} alt={spark.alt} />
+                          <EditChart spec={specText(spark.name)} />
                         </div>
                       </td>
                       <td>{spark.events}</td>
@@ -289,7 +314,7 @@ const mapCountries = [
         }
         <div class="d-grid">
           {sides.map((chart) => (
-            <ChartCard chart={chart} theme={theme} />
+            <ChartCard specs={specsFor(chart)} chart={chart} theme={theme} />
           ))}
         </div>
       </div>
@@ -300,7 +325,7 @@ const mapCountries = [
     !special && (
       <div class="d-grid">
         {board.charts.map((chart) => (
-          <ChartCard
+          <ChartCard specs={specsFor(chart)}
             chart={chart}
             theme={theme}
             showTitle={chart.place !== "metric" && chart.place !== "hero" && chart.place !== "tab"}

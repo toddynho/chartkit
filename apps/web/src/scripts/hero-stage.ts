@@ -6,6 +6,7 @@ type Slide = {
   chrome: string;
   json: string;
   svg: string;
+  edit: string;
 };
 
 function readSlides(): Slide[] {
@@ -59,6 +60,8 @@ if (stage && wrap && rail && titleEl && kpiEl && deltaEl && chromeEl && ghostPre
     chartDelta.textContent = chart.delta;
     chartChrome.textContent = chart.chrome;
     chartGhost.innerHTML = chart.json;
+    const edit = document.getElementById("stage-edit");
+    if (edit instanceof HTMLAnchorElement) edit.href = chart.edit;
   }
 
   function renderChart(chart: Slide, animate: boolean) {
