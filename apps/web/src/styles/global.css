@@ -203,7 +203,9 @@ code {
   flex-shrink: 0;
 }
 
-.nav-more { display: none; position: relative; }
+.nav-more { display: block; position: relative; }
+
+.nav-more__main { display: none; }
 
 .nav-more summary {
   cursor: pointer;
@@ -659,6 +661,7 @@ pre code {
   .hero { padding-top: 2.2rem; }
   .primary a:not(.nav-cta) { display: none; }
   .nav-more { display: block; }
+  .nav-more__main { display: contents; }
   .site-header__inner { padding: 0 16px; gap: 12px; }
 }
 

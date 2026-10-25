@@ -1,0 +1,294 @@
+---
+import "../styles/surfaces.css";
+import Base from "../layouts/Base.astro";
+import { loadBenchmarksPage } from "../lib/surfaces";
+
+const page = loadBenchmarksPage();
+const h = page.headline;
+const description =
+  "Published ChartKit benchmark numbers: bundle size, browser render, server render, sampling, and the agent eval. Losses included.";
+---
+
+<Base title="Benchmarks" description={description} tone="light">
+  <Fragment slot="head">
+    <link rel="alternate" type="text/markdown" href="/benchmarks.md" />
+  </Fragment>
+  <div class="wrap surface">
+    <header class="hero">
+      <p class="kicker">Benchmarks</p>
+      <h1>Benchmarks</h1>
+      <p class="lede">
+        Round {page.round}, measured {page.measured} on phase 2 <code>{page.coreCommit}</code>. Five browser samples,
+        Playwright Chromium, a 640×360 line, three x spacings. This page does not re-time the libraries. The same
+        numbers are in <a href="/benchmarks.json">benchmarks.json</a> (schema{" "}
+        <a href="/benchmarks.schema.json">benchmarks.schema.json</a>) and <a href="/benchmarks.md">benchmarks.md</a>.
+        The agent eval was not re-run; it stays {page.agentMeasured}.
+      </p>
+    </header>
+    <p>{page.updateMethod}</p>
+
+    <h2>Bundle size</h2>
+    <p>
+      ChartKit’s line entry is {h.lineGzipBytes} bytes gzip ({h.lineGzipLabel}), from <code>scripts/size.mjs</code> on{" "}
+      <code>{h.sizeCommit}</code>, measured {h.sizeMeasured}. {h.bundleLoss} {h.lineWins} The harness minimal line on
+      that run is {h.harnessLineBytes} bytes. {h.donutWin}
+    </p>
+    <div class="ck-frame" role="img" aria-label={page.bundle.alt} set:html={page.bundle.svg} />
+    <p class="board-meta">{page.bundle.caption}</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Library</th>
+            <th class="num">gzip bytes</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          {page.bundleRows.map((row) => (
+            <tr>
+              <td>{row.lib}</td>
+              <td class="num">{row.gzip}</td>
+              <td>{row.note}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Browser render</h2>
+    <p>
+      ChartKit wins the initial render in all 12 cells against uPlot. Even 1,000,000 points is 23.6 ms vs 26.5 ms. The
+      aligned update wins 6 of 12 and loses 6. The losses are in the table, not a footnote: even 1k (1.5 vs 1.2), even
+      10k (1.9 vs 1.7), jittered 1k (1.6 vs 1.4), and gapped timestamps at 1k (1.6 vs 1.4), 10k (1.9 vs 1.6), and 100k
+      (3.5 vs 3.4).
+    </p>
+    <div class="grid-2">
+      <article class="card">
+        <div class="ck-frame" role="img" aria-label={page.initial1k.alt} set:html={page.initial1k.svg} />
+        <p>{page.initial1k.caption}</p>
+      </article>
+      <article class="card">
+        <div class="ck-frame" role="img" aria-label={page.initial100k.alt} set:html={page.initial100k.svg} />
+        <p>{page.initial100k.caption}</p>
+      </article>
+    </div>
+    <article class="card">
+      <div class="ck-frame" role="img" aria-label={page.initial1m.alt} set:html={page.initial1m.svg} />
+      <p>{page.initial1m.caption}</p>
+    </article>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>X spacing</th>
+            <th>Points</th>
+            <th class="num">ChartKit initial</th>
+            <th class="num">uPlot initial</th>
+            <th class="num">ChartKit update</th>
+            <th class="num">uPlot update</th>
+            <th>Call</th>
+          </tr>
+        </thead>
+        <tbody>
+          {page.browserRows.map((row) => (
+            <tr>
+              <td>{row.shape}</td>
+              <td>{row.points}</td>
+              <td class="num">{row.ckI}</td>
+              <td class="num">{row.upI}</td>
+              <td class="num">{row.ckU}</td>
+              <td class="num">{row.upU}</td>
+              <td class={row.tone === "loss" ? "loss" : undefined}>{row.call}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p>
+      In these 12 cells ChartKit is also faster than Chart.js and Observable Plot on both the initial and the aligned
+      update. Even 1,000,000 points: Chart.js updates in 189.8 ms and Plot in 1,295.8 ms. ECharts, Recharts, and Nivo
+      are not in the round 13 browser rows, so this page does not give them a browser millisecond.
+    </p>
+
+    <h2>Canvas line</h2>
+    <p>
+      Measured {page.canvas.measured}, median of 5, Playwright Chromium, 640×360, sampling auto. This is not a re-time
+      of round {page.round}. Canvas loses first paint at every size in this table. Sampling none was not re-timed.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Points</th>
+            {page.canvas.heads.map((head) => <th class="num">{head}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {page.canvas.rows.map((row) => (
+            <tr>
+              <td>{row.points}</td>
+              {row.cells.map((cell) => <td class="num">{cell}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p>Canvas loses first paint at every size: {page.canvas.losses}.</p>
+
+    <h2>Hover</h2>
+    <p>
+      Steady hover at 100,000 points is close. ChartKit’s painted median is 16.5 ms and uPlot’s is 16.2 ms. First hover
+      on a fresh chart is not close: uPlot paints in 4 to 4.9 ms, and ChartKit paints in 15.9 to 20.8 ms.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Library</th>
+            <th class="num">Tip ms</th>
+            <th class="num">Painted median ms</th>
+            <th class="num">Painted p95 ms</th>
+          </tr>
+        </thead>
+        <tbody>
+          {page.hoverRows.map((row) => (
+            <tr>
+              <td>{row.lib}</td>
+              <td class="num">{row.tip}</td>
+              <td class="num">{row.painted}</td>
+              <td class="num">{row.p95}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>First hover</th>
+            <th class="num">ChartKit painted</th>
+            <th class="num">ChartKit max</th>
+            <th class="num">uPlot painted</th>
+            <th class="num">uPlot max</th>
+          </tr>
+        </thead>
+        <tbody>
+          {page.firstHoverRows.map((row) => (
+            <tr>
+              <td>{row.delay}</td>
+              <td class="num">{row.ck}</td>
+              <td class="num">{row.ckMax}</td>
+              <td class="num">{row.uplot}</td>
+              <td class="num">{row.uplotMax}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Downsampling</h2>
+    <div class="note">
+      <strong>The fast large-series times use sampling.</strong>
+      <code>mark.sampling</code> defaults to <code>auto</code>, which minmax-downsamples a line once it is longer than
+      twice the plot width. 1,000 points stay complete. 10k, 100k, and 1M do not. With sampling off, ChartKit draws
+      every point:
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Points, sampling none</th>
+            <th class="num">Initial ms</th>
+            <th class="num">Update ms</th>
+          </tr>
+        </thead>
+        <tbody>
+          {page.samplingRows.map((row) => (
+            <tr>
+              <td>{row.points}</td>
+              <td class="num">{row.initial}</td>
+              <td class="num">{row.update}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p>
+      These sampling-none times use the same fair update timer. At 1,000,000 points that is 471.8 ms to draw and 462.4
+      ms to update, not the old two-frame figure.
+    </p>
+
+    <h2>Server render</h2>
+    <div class="ck-frame" role="img" aria-label={page.ssr.alt} set:html={page.ssr.svg} />
+    <p class="board-meta">{page.ssr.caption}</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Library</th>
+            <th class="num">Mean ms</th>
+            <th class="num">Median ms</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {page.ssrRows.map((row) => (
+            <tr>
+              <td>{row.lib}</td>
+              <td class="num">{row.mean}</td>
+              <td class="num">{row.median}</td>
+              <td>{row.status}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="agents">Agent eval</h2>
+    <p>
+      Round 6 is the scoreboard for this table, recorded in BENCHMARKS.md. It was not re-run for round {page.round}. One
+      model, {page.published.model}, temperature {page.published.temperature}, one run on {page.agentMeasured},{" "}
+      {page.published.tasks} tasks. “Official” means the library’s docs were in the prompt. ChartKit’s docs are{" "}
+      <a href="/llms.txt">llms.txt</a>, taken from the Phase 1 branch and not edited on this site. The previous
+      llms.txt, the React-only v0 file, scored 18/42 in an earlier run.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Library</th>
+            <th>No docs, first</th>
+            <th>No docs, within two</th>
+            <th>Official, first</th>
+            <th>Official, within two</th>
+            <th>Mean first-try tokens, no docs / official</th>
+          </tr>
+        </thead>
+        <tbody>
+          {page.agentRows.map((row) => (
+            <tr>
+              <td>{row.lib}</td>
+              <td>{row.noFirst}</td>
+              <td>{row.noTwo}</td>
+              <td>{row.offFirst}</td>
+              <td>{row.offTwo}</td>
+              <td>{row.tokens}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p>
+      ChartKit’s first try with no docs is {h.repairFrom}. Recharts, ECharts, and Chart.js were 42/42 with no docs.{" "}
+      <code>repair()</code>, with no model call, takes that ChartKit output to {h.repairTo}. With the official docs,
+      ChartKit’s first try is already 42/42, at a mean of {page.published.tokensOfficial[0]} output tokens. Recharts
+      with its docs used a mean of {page.published.tokensOfficial[1]}, ECharts {page.published.tokensOfficial[2]}, and
+      Chart.js {page.published.tokensOfficial[3]}. The other libraries have no repair step. Phase 1 grew llms.txt to
+      8,274 bytes, about 1.9 KB more than the competitor excerpts. A ChartKit-only rerun with the file cut to 6,329
+      bytes scored 41/42 on the first try. The miss was a combo axis, CK3002, which <code>repair()</code> does not
+      patch. The headline numbers use the full file. <a href="/agents">How to use the loop</a>.
+    </p>
+  </div>
+</Base>

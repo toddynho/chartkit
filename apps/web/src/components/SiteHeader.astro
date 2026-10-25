@@ -1,12 +1,17 @@
 ---
 import { SITE, canonicalPath } from "../data/site";
-import { primaryNav } from "../data/nav";
+import { moreNav, primaryNav } from "../data/nav";
 
 const path = canonicalPath(Astro.url.pathname);
 const docsHere = path === "/docs" || path.startsWith("/docs/");
+const dashHere = path === "/dashboards" || path.startsWith("/dashboards/");
 
 function mark(href: string): "page" | undefined {
   if (href === "/docs") return docsHere ? "page" : undefined;
+  if (href === "/dashboards") return dashHere ? "page" : undefined;
+  if (href === "/showcase" || href === "/features" || href === "/examples") {
+    return path === href || path.startsWith(`${href}/`) ? "page" : undefined;
+  }
   if (href === "/agents") return path === "/agents" ? "page" : undefined;
   if (href.startsWith("/#")) return undefined;
   return path === href ? "page" : undefined;
@@ -42,10 +47,19 @@ function mark(href: string): "page" | undefined {
       </svg>
     </a>
     <details class="nav-more">
-      <summary>Menu</summary>
+      <summary>More</summary>
       <div class="nav-more__panel">
+        <div class="nav-more__main">
+          {
+            primaryNav.map((item) => (
+              <a href={item.href} aria-current={mark(item.href)}>
+                {item.label}
+              </a>
+            ))
+          }
+        </div>
         {
-          primaryNav.map((item) => (
+          moreNav.map((item) => (
             <a href={item.href} aria-current={mark(item.href)}>
               {item.label}
             </a>

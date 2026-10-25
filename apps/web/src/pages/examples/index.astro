@@ -1,0 +1,40 @@
+---
+import "../../styles/surfaces.css";
+import Base from "../../layouts/Base.astro";
+import { loadExamplesIndex } from "../../lib/surfaces";
+
+const data = loadExamplesIndex();
+const description = "A gallery of ChartKit specs, including gantt, timeline, quadrant, venn, and journey.";
+---
+
+<Base title="Examples" description={description} tone="light">
+  <div class="wrap surface">
+    <header class="hero">
+      <p class="kicker">Examples</p>
+      <h1>Examples</h1>
+      <p class="lede">Every card is a v1 spec, rendered to SVG on the server. Open one to edit the JSON and see the chart update.</p>
+    </header>
+    <nav class="filters" aria-label="Example groups">
+      {data.groups.map((group) => <a href={`#${group.id}`}>{group.label}</a>)}
+    </nav>
+    {
+      data.groups.map((group) => (
+        <section id={group.id} class="section">
+          <h2>{group.label}</h2>
+          <div class="example-grid">
+            {data.examples
+              .filter((example) => example.groupId === group.id)
+              .map((example) => (
+                <article class="card">
+                  <div class="cover-frame" role="img" aria-label={example.alt} set:html={example.svg} />
+                  <h3>{example.title}</h3>
+                  <p>{example.blurb}</p>
+                  <a href={`/examples/${example.slug}`}>Edit spec</a>
+                </article>
+              ))}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</Base>

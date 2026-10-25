@@ -1,0 +1,53 @@
+---
+import { pretty } from "../lib/spec-text";
+
+interface Props {
+  spec: Record<string, unknown>;
+  svg: string;
+  mode?: "compact" | "full";
+  themes?: string[];
+}
+
+const { spec, svg, mode = "compact", themes = [] } = Astro.props;
+const text = pretty(spec);
+---
+
+<div class:list={["live-editor", mode === "full" && "live-editor--full"]} data-live-spec data-mode={mode}>
+  <div class="ck-frame preview" data-preview set:html={svg} />
+  <div class="live-editor__side">
+    <label for={mode === "full" ? "spec-json" : undefined}>Chart spec (JSON)</label>
+    <textarea id={mode === "full" ? "spec-json" : undefined} data-spec-input spellcheck="false">{text}</textarea>
+    <div class="live-actions">
+      {
+        mode === "full" ? (
+          <>
+            <label class="theme-label">
+              Theme
+              <select data-theme>
+                <option value="site">Match site</option>
+                {themes.map((name) => (
+                  <option value={name}>{name}</option>
+                ))}
+              </select>
+            </label>
+            <button type="button" data-validate>Validate</button>
+            <button type="button" class="is-primary" data-repair>Repair</button>
+            <button type="button" data-share>Share</button>
+            <button type="button" data-svg>SVG</button>
+            <button type="button" data-png>PNG</button>
+          </>
+        ) : (
+          <a data-play href={`/playground#${encodeURIComponent(text)}`}>Open in playground</a>
+        )
+      }
+    </div>
+    <p class="live-status" data-status role="status">Showing the published spec.</p>
+    <ul class="live-issues" data-issues />
+  </div>
+</div>
+
+<script>
+  import { mountLiveSpec } from "../scripts/live-spec";
+
+  document.querySelectorAll<HTMLElement>("[data-live-spec]").forEach((node) => mountLiveSpec(node));
+</script>

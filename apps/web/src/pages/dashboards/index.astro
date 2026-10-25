@@ -1,0 +1,38 @@
+---
+import "@fontsource/roboto/latin-400.css";
+import "@fontsource/roboto/latin-500.css";
+import "@fontsource/roboto/latin-700.css";
+import "../../styles/dashboards.css";
+import Base from "../../layouts/Base.astro";
+import { loadIndex } from "../../lib/dashboards";
+
+const { boards } = loadIndex();
+const description =
+  "Ten ChartKit dashboards. Chart colour comes from the spec. ChartKit is not affiliated with the products they are styled after.";
+---
+
+<Base title="Dashboards" description={description} tone="light">
+  <div class="wrap">
+    <header class="hero">
+      <p class="kicker">Dashboards</p>
+      <h1>Dashboards</h1>
+      <p class="lede">
+        Ten boards styled after familiar dashboards, so the range of ChartKit's styling is visible. Each chart is a
+        JSON spec. Colour, grid, and series come from theme.tokens. The page CSS styles the shell. Fonts are Inter or
+        Roboto. ChartKit is not affiliated with or endorsed by those products.
+      </p>
+    </header>
+    <div class="board-index">
+      {
+        boards.map((board) => (
+          <a class:list={["card", "board-card", board.defaultTheme === "midnight" && "board-card--night"]} href={`/dashboards/${board.slug}`}>
+            <p class="kicker">{board.defaultTheme === "midnight" ? "Dark first" : "Soft first"}</p>
+            <h2>{board.title}</h2>
+            <p>{board.lede}</p>
+            <div class="ck-frame cover-frame" role="img" aria-label={board.coverAlt} set:html={board.coverSvg} />
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</Base>
