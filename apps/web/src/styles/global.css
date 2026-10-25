@@ -488,6 +488,22 @@ a.card:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
   text-transform: uppercase;
 }
 
+.use-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.use-card--email { grid-column: 1 / -1; }
+
+.use-card--email h3 { font-size: 1.35rem; letter-spacing: -0.03em; }
+
+.use-card h3 { margin-bottom: 0.35rem; }
+
+.use-card p:last-child { margin-bottom: 0.85rem; }
+
+#why, #uses, #fast, #pricing { scroll-margin-top: 56px; }
+
 .home-agents {
   max-width: 1120px;
   margin: 0 auto;
@@ -810,7 +826,8 @@ pre.shiki {
 .missing { padding: 2rem 0 3rem; }
 
 @media (max-width: 860px) {
-  .switch-grid, .price-grid, .try, .docs-shell, .home-try, .home-agents__inner { grid-template-columns: 1fr; }
+  .switch-grid, .price-grid, .use-grid, .try, .docs-shell, .home-try, .home-agents__inner { grid-template-columns: 1fr; }
+  .use-card--email { grid-column: auto; }
   .home-agents { padding: 20px 16px 4px; }
   .home-agents__inner { padding: 20px 16px; }
   .docs-side { display: none; }

@@ -1,68 +1,83 @@
 ---
-import "../styles/docs.css";
 import Base from "../layouts/Base.astro";
-import TryIt from "../components/TryIt.astro";
+import Pricing from "../components/Pricing.astro";
 import { highlight } from "../lib/highlight";
 import { cloudCurl } from "../data/samples";
 
 const description =
-  "ChartKit Cloud renders a JSON spec on ChartKit’s server. Free images include a watermark. Pro removes it. Prices on the pricing page are drafts.";
+  "ChartKit Cloud returns SVG or PNG from a JSON spec. Free images include a watermark. Pro removes it. The dollar amounts are drafts.";
 const curl = await highlight(cloudCurl, "bash");
+
+const uses = [
+  {
+    title: "README / docs images",
+    text: "A README or a docs page can point at the image. PNG for GitHub. SVG elsewhere.",
+  },
+  {
+    title: "Agent artifacts",
+    text: "An agent posts a spec and keeps the file. The artifact is an image, ready to attach.",
+  },
+  {
+    title: "Server-side reports",
+    text: "The server that builds the report asks for the image and drops it in. No chart package on that host.",
+  },
+  {
+    title: "Anywhere an img is enough",
+    text: "If the page can show an image, it can show the chart. The chart runtime stays off the client.",
+  },
+];
 ---
 
 <Base tone="light" title="Cloud" description={description}>
   <div class="wrap">
     <section class="hero" aria-labelledby="cloud-page-title">
-      <p class="kicker">ChartKit Cloud</p>
-      <h1 id="cloud-page-title">Use the server. Skip the setup.</h1>
-      <p class="lede">
-        ChartKit’s server turns a JSON spec into an image, so an agent or app can ship a chart without standing up a
-        renderer. Free images include a small chartkit.dev watermark. Pro removes the mark. A bundle of renders is
-        included, then use is metered. Those figures are drafts.
-      </p>
+      <p class="kicker">Cloud</p>
+      <h1 id="cloud-page-title">Post a spec. Get the image.</h1>
+      <p class="lede">SVG or PNG back from one JSON spec. No renderer to host. Fast to put in an app.</p>
       <div class="actions">
-        <a class="btn btn-primary" href="#try">Try a spec</a>
-        <a class="btn btn-secondary" href="/pricing">Pricing</a>
+        <a class="btn btn-primary" href="#uses">Use cases</a>
+        <a class="btn btn-secondary" href="#pricing">Free and Pro</a>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="render-title">
-      <h2 id="render-title">Render</h2>
-      <p>
-        <code>GET /render</code> returns SVG or PNG, so it works as an <code>img</code> src. That URL has no API key.{' '}
-        <code>POST /render</code> takes the JSON body and returns the image URL plus the repairs and warnings from{' '}
-        <code>validate()</code> and <code>repair()</code>. <code>POST /charts</code> stores the spec and returns a short
-        URL. <code>POST /validate</code> returns the CK codes, the JSON Patch, and the repaired spec.
-      </p>
+    <section class="section" id="why" aria-labelledby="why-cloud">
+      <h2 id="why-cloud">Why Cloud</h2>
+      <p class="lede">POST the spec. The response is the chart. The app that already sends mail, writes the README, or builds the report can take that image.</p>
+    </section>
+
+    <section class="section" id="uses" aria-labelledby="uses-title">
+      <h2 id="uses-title">Use cases</h2>
+      <div class="use-grid">
+        <article class="card use-card use-card--email">
+          <p class="kicker">Email</p>
+          <h3>Charts in the inbox</h3>
+          <p>
+            Render returns SVG or PNG, so the chart is an image. Email shows it. A JavaScript chart runtime does not run there.
+          </p>
+        </article>
+        {
+          uses.map((item) => (
+            <article class="card use-card">
+              <h3>{item.title}</h3>
+              <p>{item.text}</p>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="section" id="fast" aria-labelledby="fast-title">
+      <h2 id="fast-title">How fast</h2>
+      <p class="lede">One request. The response is the image.</p>
       <figure class="code">
         <figcaption>shell</figcaption>
         <Fragment set:html={curl} />
       </figure>
-      <p>
-        GitHub READMEs display PNG. Add <code>format=png</code>. SVG is the default everywhere else. Add{' '}
-        <code>theme=midnight</code>, <code>w</code>, <code>h</code>, and <code>scale</code> on the query string. A spec
-        can be URL-encoded JSON or base64url.
-      </p>
-      <p>
-        <code>GET /render</code> always includes the chartkit.dev mark, so an image address never carries a key. A key
-        on <code>POST /charts</code> or <code>POST /render</code> stores an unmarked chart. The mark is a Cloud flag.
-        It is not a field in the spec. The library never draws it.
-      </p>
       <p class="note">
-        The API reference stays on <a href="https://chartkit.dev/docs/cloud">Cloud render</a>. This page does not proxy
-        the API. The chart under the curl is <code>validate()</code> and <code>render()</code> from{' '}
-        <code>@chartkitdev/core</code>.
+        The API reference is <a href="https://chartkit.dev/docs/cloud">Cloud render</a>.
       </p>
     </section>
 
-    <section class="section" id="try" aria-labelledby="try-title">
-      <h2 id="try-title">Try the spec</h2>
-      <p class="lede">Edit the JSON or switch Line, Bar, and Donut. Invalid JSON shows a CK code and no chart.</p>
-      <TryIt />
-    </section>
-
-    <p>
-      <a href="/pricing">Free watermark and the Pro draft</a>
-    </p>
+    <Pricing />
   </div>
 </Base>

@@ -48,6 +48,7 @@ export default defineConfig({
     "/docs/svelte": { status: 307, destination: "/docs?framework=svelte" },
     "/docs/vanilla": { status: 307, destination: "/docs?framework=vanilla" },
     "/dashboard": { status: 307, destination: "/dashboards" },
+    "/pricing": { status: 307, destination: "/cloud#pricing" },
   },
   vite: {
     resolve: {
