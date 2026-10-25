@@ -54,7 +54,7 @@
       "docs": "https://chartkit.dev",
       "escapeHatch": "none (no plugin/custom-mark API; only lifecycle hooks)",
       "license": "MIT",
-      "licenseNote": "package.json says MIT, but the GitHub repo has no LICENSE file (GitHub API license=null).",
+      "licenseNote": "MIT. LICENSE at the repo root.",
       "licenseField": "MIT",
       "npmWeeklyDownloads": {
         "package": "@chartkitdev/core",
@@ -23222,7 +23222,7 @@
               "loc": "chartkit:packages/core/src/generated/schema.ts:585"
             }
           ],
-          "note": "candlestick volume bars",
+          "note": "encoding.volume draws a volume subplot under candlestick prices. It is not a general multi-pane layout.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -84853,20 +84853,21 @@
       "agentRelevance": 1,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:mcp)['\"`]|(?:^|[\\s{,;])\\w*(?:mcp)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:mcp)"
+            "@chartkitdev/mcp"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:mcp)['\"`]|(?:^|[\\s{,;])\\w*(?:mcp)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:mcp)"
+              "kind": "source-review",
+              "path": "@chartkitdev/mcp",
+              "loc": "packages/mcp/src/server.ts"
             }
           ],
-          "note": "no MCP package in the repo",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "@chartkitdev/mcp in packages/mcp. Not on npm yet. Tools: validate, repair, render (svg), render_chart (Cloud), lookup_feature, list_chart_types, get_example.",
+          "verified": "source-review",
+          "strength": "strong"
         },
         "chartjs": {
           "status": "none",
@@ -94883,7 +94884,7 @@
               "loc": "packages/*/package.json"
             }
           ],
-          "note": "MIT — package.json says MIT, but the GitHub repo has no LICENSE file (GitHub API license=null).",
+          "note": "MIT. LICENSE at the repo root.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95202,7 +95203,7 @@
               "loc": "packages/*/package.json"
             }
           ],
-          "note": "MIT — package.json says MIT, but the GitHub repo has no LICENSE file (GitHub API license=null).",
+          "note": "MIT. LICENSE at the repo root.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95521,7 +95522,7 @@
               "loc": "packages/*/package.json"
             }
           ],
-          "note": "MIT — package.json says MIT, but the GitHub repo has no LICENSE file (GitHub API license=null).",
+          "note": "MIT. LICENSE at the repo root.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95824,29 +95825,29 @@
   ],
   "coverage": {
     "cells": 5523,
-    "strong": 1883,
-    "weak": 1731,
-    "absence": 1465,
-    "unknown": 444,
+    "strong": 1912,
+    "weak": 1730,
+    "absence": 1438,
+    "unknown": 443,
     "byStatus": {
-      "native": 2711,
-      "unknown": 444,
+      "native": 2754,
+      "unknown": 443,
       "manual": 425,
-      "none": 1516,
-      "partial": 289,
+      "none": 1481,
+      "partial": 282,
       "plugin": 138
     },
     "perLibrary": {
       "chartkit": {
-        "strong": 168,
-        "weak": 32,
-        "absence": 60,
-        "unknown": 6,
-        "native": 164,
-        "partial": 18,
+        "strong": 197,
+        "weak": 31,
+        "absence": 33,
+        "unknown": 4,
+        "native": 207,
+        "partial": 11,
         "plugin": 0,
         "manual": 0,
-        "none": 78
+        "none": 43
       },
       "chartjs": {
         "strong": 44,

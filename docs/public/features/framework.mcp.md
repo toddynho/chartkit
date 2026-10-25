@@ -1,14 +1,16 @@
 # MCP server / agent tool
 
-ChartKit: **none**
+ChartKit: **native**
 
 Official Model Context Protocol server or agent tooling
 
-Matrix status: `none`. Verification: `dts-absence` (absence).
+Matrix status: `native`. Verification: `source-review` (strong).
 
-no MCP package in the repo
+@chartkitdev/mcp in packages/mcp. Not on npm yet. Tools: validate, repair, render (svg), render_chart (Cloud), lookup_feature, list_chart_types, get_example.
 
-No spec snippet. ChartKit does not support this feature.
+Source: packages/mcp/src/server.ts
+
+No spec snippet. This row is not a single chart option that validate() can show.
 
 ## Other libraries
 
