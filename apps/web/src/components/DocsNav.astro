@@ -1,12 +1,23 @@
 ---
 import { activeDocsHref, chartDocs, docsNav, isAgentPath } from "../data/docs-catalog";
 import { canonicalPath } from "../data/site";
-import { stacks } from "../data/stacks";
 
 const path = canonicalPath(Astro.url.pathname);
 const current = activeDocsHref(path);
 const chartType = path.startsWith("/docs/charts/") ? path.slice("/docs/charts/".length) : "";
 const currentFamily = chartDocs.find((chart) => chart.type === chartType)?.family ?? "";
+
+function sectionFor(): string {
+  if (path === "/docs/charts" || path.startsWith("/docs/charts/")) return "Charts";
+  for (const group of docsNav) {
+    for (const block of group.blocks) {
+      if (block.items.some((item) => selected(item.href))) return group.label;
+    }
+  }
+  return "Start";
+}
+
+const activeSection = sectionFor();
 
 function selected(href: string): boolean {
   if (current === href || path === href) return true;
@@ -33,30 +44,32 @@ function mark(type: string): "line" | "bar" | "ring" | "grid" | "dot" {
 </button>
 <div class="docs-backdrop" id="docs-backdrop" hidden></div>
 <aside class="docs-sidebar" id="docs-sidebar" aria-label="Documentation">
-  <div class="stack-chips" role="group" aria-label="Framework">
+  <div class="docs-tabs" role="tablist" aria-label="Sections">
     {
-      stacks.map((stack) => (
-        <button type="button" class="stack-chip" data-stack-chip={stack.id} aria-pressed="false" title={stack.label}>
-          <span class="stack-chip__icon" aria-hidden="true">
-            {stack.id === "react" ? (
-              <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.2" fill="none" stroke="currentColor" stroke-width="1.3"></circle><circle cx="8" cy="8" r="5.2" fill="none" stroke="currentColor" stroke-width="1.1"></circle></svg>
-            ) : stack.id === "vue" ? (
-              <svg viewBox="0 0 16 16"><path d="M3 4.5h10L8 13Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg>
-            ) : stack.id === "svelte" ? (
-              <svg viewBox="0 0 16 16"><path d="M4 11c2.5 2 6-1 8-5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
-            ) : (
-              <svg viewBox="0 0 16 16"><path d="M6.2 4.2 3.4 8l2.8 3.8M9.8 4.2 12.6 8 9.8 11.8" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            )}
-          </span>
-          <span class="stack-chip__label">{stack.id === "vanilla" ? "JS" : stack.label}</span>
+      docsNav.map((group) => (
+        <button
+          type="button"
+          role="tab"
+          id={`docs-tab-${group.label}`}
+          aria-controls={`docs-panel-${group.label}`}
+          aria-selected={group.label === activeSection ? "true" : "false"}
+          data-docs-section={group.label}
+        >
+          {group.label}
         </button>
       ))
     }
   </div>
   {
     docsNav.map((group) => (
-      <div class="side-section">
-        <span class="side-section__label">{group.label}</span>
+      <div
+        class="side-section"
+        id={`docs-panel-${group.label}`}
+        role="tabpanel"
+        aria-labelledby={`docs-tab-${group.label}`}
+        data-docs-panel={group.label}
+        hidden={group.label !== activeSection}
+      >
         {group.label === "Charts" ? (
           <div class="side-charts">
             <label class="side-search">
@@ -127,6 +140,22 @@ function mark(type: string): "line" | "bar" | "ring" | "grid" | "dot" {
   mountStackChips();
 
   const sidebar = document.getElementById("docs-sidebar");
+  const sectionTabs = sidebar?.querySelectorAll<HTMLButtonElement>("[data-docs-section]") ?? [];
+  const sectionPanels = sidebar?.querySelectorAll<HTMLElement>("[data-docs-panel]") ?? [];
+  const showSection = (name: string) => {
+    sectionTabs.forEach((tab) => {
+      tab.setAttribute("aria-selected", tab.dataset.docsSection === name ? "true" : "false");
+    });
+    sectionPanels.forEach((panel) => {
+      panel.hidden = panel.dataset.docsPanel !== name;
+    });
+  };
+  sectionTabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const name = tab.dataset.docsSection;
+      if (name) showSection(name);
+    });
+  });
   const toggle = document.getElementById("docs-menu");
   const backdrop = document.getElementById("docs-backdrop");
 
