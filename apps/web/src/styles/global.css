@@ -40,8 +40,8 @@
 
   :root:not(.tone-light) .nav-cta { color: var(--link); }
 
-  :root:not(.tone-light) .brand__lockup--light { display: none; }
-  :root:not(.tone-light) .brand__lockup--dark { display: block; }
+  :root:not(.tone-light) .brand__mark--light { display: none; }
+  :root:not(.tone-light) .brand__mark--dark { display: flex; }
 
   :root:not(.tone-light) .site-header,
   :root:not(.tone-light) .site-header.is-scrolled {
@@ -167,32 +167,39 @@ code {
 .brand {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   justify-self: start;
   color: var(--ink);
   text-decoration: none;
   flex-shrink: 0;
-  line-height: 0;
+  line-height: 1;
 }
 
 .brand:hover { text-decoration: none; opacity: 0.7; }
 
-/* Wordmark viewBox is 280×56. Crop to the ink so the mark sits on the content edge. */
-.brand__lockup {
-  display: block;
-  width: 148px;
-  height: 28px;
-  overflow: hidden;
+.brand__mark {
+  display: flex;
+  width: 22px;
+  height: 22px;
+  flex: none;
 }
 
-.brand__lockup--dark { display: none; }
+.brand__mark--dark { display: none; }
 
-.brand__lockup svg {
+.brand__mark svg {
   display: block;
-  width: 280px;
-  height: 56px;
+  width: 22px;
+  height: 22px;
   max-width: none;
-  margin-top: -13px;
-  margin-left: -24px;
+}
+
+.brand__word {
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--ink);
 }
 
 .primary {
@@ -297,8 +304,6 @@ code {
   gap: 2.25rem 3rem;
   align-items: start;
 }
-
-.footer-brand .brand__lockup { width: 148px; }
 
 .footer-pitch {
   margin: 0.85rem 0 0;

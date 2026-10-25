@@ -1,24 +1,23 @@
 ---
-import wordmarkLight from "../../public/brand/wordmark-light.svg?raw";
-import wordmarkDark from "../../public/brand/wordmark-dark.svg?raw";
+import markLight from "../../public/brand/mark-light.svg?raw";
+import markDark from "../../public/brand/mark-dark.svg?raw";
 
 /**
- * S5b Mono · R5 lockup. The handoff SVG includes a preview plate
- * (page-colored rounded rect). That plate is not part of the mark,
- * so the header drops it and frames the 22px mark + Inter 600 word.
+ * Live lockup: the 32px mark, drawn at 22px, plus Inter 600 “ChartKit”.
+ * The wordmark SVGs are preview plates (280×56). They are not the header
+ * or footer logo — cropping them clips the kit handle.
  */
-const plate = /<rect width="280" height="56" rx="10" fill="#[0-9a-fA-F]{6}"\/>/;
-
-function lockup(file: string, svg: string): string {
-  if (!plate.test(svg)) throw new Error(`Missing preview plate in ${file}`);
-  return svg.replace(plate, "").replace("<svg ", '<svg aria-hidden="true" focusable="false" ');
+function icon(file: string, svg: string): string {
+  if (!svg.includes('viewBox="0 0 32 32"')) throw new Error(`Unexpected mark asset in ${file}`);
+  return svg.replace("<svg ", '<svg aria-hidden="true" focusable="false" ');
 }
 
-const light = lockup("wordmark-light.svg", wordmarkLight);
-const dark = lockup("wordmark-dark.svg", wordmarkDark);
+const light = icon("mark-light.svg", markLight);
+const dark = icon("mark-dark.svg", markDark);
 ---
 
 <a class="brand" href="/" aria-label="ChartKit home">
-  <span class="brand__lockup brand__lockup--light" set:html={light} />
-  <span class="brand__lockup brand__lockup--dark" set:html={dark} />
+  <span class="brand__mark brand__mark--light" set:html={light} />
+  <span class="brand__mark brand__mark--dark" set:html={dark} />
+  <span class="brand__word">ChartKit</span>
 </a>
