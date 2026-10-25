@@ -24,6 +24,8 @@
   --nav: 13.75rem;
   --radius: 12px;
   --content: 1.25rem;
+  --code-well: #f3f1ec;
+  --code-well-line: rgba(55, 53, 47, 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -36,6 +38,8 @@
     --line: rgba(245, 245, 247, 0.14);
     --link: #4da3ff;
     --shadow: none;
+    --code-well: #1c1c1e;
+    --code-well-line: rgba(245, 245, 247, 0.14);
   }
 
   :root:not(.tone-light) .nav-cta { color: var(--link); }
@@ -586,25 +590,30 @@ a.card:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
 
 pre {
   margin: 0;
-  padding: 0.85rem 0.95rem;
+  padding: 0.75rem 0.85rem;
   overflow: auto;
-  background: var(--bg-elev);
-  border: 1px solid var(--line);
+  background: var(--code-well);
+  border: 1px solid var(--code-well-line);
   border-radius: 10px;
-  line-height: 1.45;
-  box-shadow: var(--shadow);
+  line-height: 1.5;
+  box-shadow: none;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
 }
 
 pre code {
   background: none;
   border: 0;
   padding: 0;
-  font-size: 0.8rem;
+  font-size: inherit;
+  font-family: inherit;
 }
 
 pre.shiki {
-  background: var(--bg) !important;
+  background: var(--code-well) !important;
   color: var(--ink);
+  border: 1px solid var(--code-well-line);
 }
 
 .tok-key { color: #9a6700; }

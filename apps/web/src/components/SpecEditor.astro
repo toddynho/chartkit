@@ -19,7 +19,10 @@ const initial = JSON.stringify(spec, null, 2);
     </div>
     <div class="spec-editor">
       <label class="sr" for="spec-input">Editable chart specification</label>
-      <textarea id="spec-input" spellcheck="false">{initial}</textarea>
+      <div class="code-field">
+        <pre class="code-field__paint" aria-hidden="true" data-spec-paint></pre>
+        <textarea id="spec-input" class="code-field__input" spellcheck="false">{initial}</textarea>
+      </div>
     </div>
   </div>
 </div>
@@ -27,6 +30,7 @@ const initial = JSON.stringify(spec, null, 2);
 <script>
   import { paintSpec } from "../lib/chartkit";
   import { trySamples } from "../data/live-specs";
+  import { highlightSource, paintField } from "../scripts/color-code";
 
   const input = document.getElementById("spec-input") as HTMLTextAreaElement | null;
   const status = document.getElementById("spec-status");
@@ -86,7 +90,11 @@ const initial = JSON.stringify(spec, null, 2);
     const result = paintSpec(parsed);
     if (chartPanel) chartPanel.innerHTML = result.svg;
     showIssues(result.issues);
-    if (jsonPanel) jsonPanel.textContent = pretty;
+    if (jsonPanel) jsonPanel.innerHTML = highlightSource(pretty, "json");
+    if (input) {
+      paintField(input);
+      input.parentElement?.classList.add("is-painted");
+    }
     response?.setAttribute("data-theme", result.theme === "midnight" ? "midnight" : "soft");
     response?.classList.toggle("is-error", !result.ok);
     if (titleEl) titleEl.textContent = result.title;
@@ -133,5 +141,8 @@ const initial = JSON.stringify(spec, null, 2);
   });
 
   input?.addEventListener("input", render);
+  input?.addEventListener("scroll", () => {
+    if (input) paintField(input);
+  });
   render();
 </script>

@@ -325,19 +325,56 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
   color: var(--muted);
 }
 
-#spec-input {
-  display: block;
-  width: 100%;
+.spec-editor .code-field {
+  position: relative;
   flex: 1 1 auto;
   min-height: 280px;
-  margin: 0;
+  background: var(--code-well);
+}
+
+.spec-editor .code-field__input,
+.spec-editor .code-field__paint {
+  font: 12px/1.55 var(--mono);
+  letter-spacing: 0;
+  tab-size: 2;
+  white-space: pre;
   padding: 12px 14px;
+  min-height: 280px;
+  border-radius: 0;
+}
+
+.spec-editor .code-field__input {
+  display: block;
+  width: 100%;
+  margin: 0;
   border: 0;
   resize: vertical;
-  background: #fafafa;
-  color: #1d1d1f;
-  font: 12px/1.55 var(--mono);
+  background: var(--code-well);
+  color: var(--ink);
+  caret-color: var(--ink);
 }
+
+.spec-editor .code-field.is-painted .code-field__input {
+  color: transparent;
+  background: transparent;
+}
+
+.spec-editor .code-field__input { position: relative; z-index: 1; }
+
+.spec-editor .code-field__paint {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  margin: 0;
+  overflow: auto;
+  pointer-events: none;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  scrollbar-width: none;
+}
+
+.spec-editor .code-field__paint::-webkit-scrollbar { display: none; }
 
 .rail-options {
   margin-top: 10px;
@@ -437,8 +474,8 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
   justify-content: space-between;
   gap: 8px;
   padding: 6px 10px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  background: #fafafa;
+  border-bottom: 1px solid var(--code-well-line);
+  background: var(--code-well);
   font-size: 11px;
   color: var(--muted);
 }
@@ -464,9 +501,11 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
   border: 0;
   border-radius: 0;
   box-shadow: none;
-  background: #fafafa;
+  background: var(--code-well);
+  color: var(--ink);
+  font-family: var(--mono);
   font-size: 11px;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .anatomy { margin: 0 0 1rem; padding-left: 1.2rem; color: var(--muted); }
