@@ -1,4 +1,23 @@
-import { heroCharts } from "../data/hero-charts";
+type Slide = {
+  label: string;
+  title: string;
+  kpi: string;
+  delta: string;
+  chrome: string;
+  json: string;
+  svg: string;
+};
+
+function readSlides(): Slide[] {
+  try {
+    const parsed = JSON.parse(document.getElementById("hero-slides")?.textContent || "[]") as Slide[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+const slides = readSlides();
 
 const ROTATE_MS = 4000;
 const PAUSE_MS = 8000;
@@ -21,7 +40,7 @@ const live = document.getElementById("hero-live");
 const watermark = document.getElementById("stage-wm");
 const planLabel = document.getElementById("chart-plan");
 
-if (stage && wrap && rail && titleEl && kpiEl && deltaEl && chromeEl && ghostPre) {
+if (stage && wrap && rail && titleEl && kpiEl && deltaEl && chromeEl && ghostPre && slides.length > 0) {
   const chartSlot = wrap;
   const chartTitle = titleEl;
   const chartKpi = kpiEl;
@@ -36,7 +55,7 @@ if (stage && wrap && rail && titleEl && kpiEl && deltaEl && chromeEl && ghostPre
 
   const buttons = () => [...rail.querySelectorAll<HTMLButtonElement>(".type-btn")];
 
-  function setMeta(chart: (typeof heroCharts)[number]) {
+  function setMeta(chart: Slide) {
     chartTitle.textContent = chart.title;
     chartKpi.textContent = chart.kpi;
     chartDelta.textContent = chart.delta;
@@ -44,7 +63,7 @@ if (stage && wrap && rail && titleEl && kpiEl && deltaEl && chromeEl && ghostPre
     chartGhost.innerHTML = chart.json;
   }
 
-  function renderChart(chart: (typeof heroCharts)[number], animate: boolean) {
+  function renderChart(chart: Slide, animate: boolean) {
     if (!animate || reduce) {
       if (swapTimer) {
         window.clearTimeout(swapTimer);
@@ -110,7 +129,7 @@ if (stage && wrap && rail && titleEl && kpiEl && deltaEl && chromeEl && ghostPre
     restartProgress();
     timer = window.setInterval(() => {
       if (paused) return;
-      goTo((index + 1) % heroCharts.length, false);
+      goTo((index + 1) % slides.length, false);
     }, ROTATE_MS);
   }
 
@@ -141,9 +160,9 @@ if (stage && wrap && rail && titleEl && kpiEl && deltaEl && chromeEl && ghostPre
     }
     index = next;
     syncRail();
-    renderChart(heroCharts[index], true);
+    renderChart(slides[index], true);
     if (fromUser) {
-      if (live) live.textContent = `${heroCharts[index].label} chart, ${heroCharts[index].title}`;
+      if (live) live.textContent = `${slides[index].label} chart, ${slides[index].title}`;
       pauseAuto(PAUSE_MS);
       return;
     }

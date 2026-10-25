@@ -28,7 +28,7 @@ npm run check --workspace=chartkit-web
 | --- | --- | --- |
 | Role | Next public site. Marketing and docs shell. | What chartkit.dev serves today. |
 | Dev | `npm run dev:web` | `npm run dev` |
-| Content | Click-through docs. The response rail validates and renders with `@chartkitdev/core`. Marketing pages stay illustrative. | Full docs, demos, benchmarks, llms.txt |
+| Content | Marketing and docs. Hero, gallery, and the response rail render with `@chartkitdev/core`. | Full docs, demos, benchmarks, llms.txt |
 | Hosting | Not wired | Existing production app |
 
 Chart-type paths match the current docs (`/docs/charts/line` and the rest) so a later move can keep URLs. `llms.txt`, the schema, and the measured pages stay on the Next.js app until cutover.
@@ -37,8 +37,9 @@ Do not delete `docs/` to “finish” the migration. Point chartkit.dev at `apps
 
 ## Routes
 
-- `/` — product hero (chart carousel, chart/JSON hover, Free watermark preview), why switch, Cloud API, pricing (numbers TBD), gallery placeholders
-- `/cloud` — Cloud API stub and the same pricing block
+- `/` — product hero (core-rendered carousel, chart/JSON hover, Free watermark preview), why switch, agents, Cloud API with a live spec, draft pricing, gallery
+- `/cloud` — Cloud API, the same live spec, and draft pricing
+- `/agents` — agent loop. Nav Agents points here. `llms.txt` stays on the Next.js app
 - `/docs` — Overview
 - Start: `/docs/react`, `/docs/vue`, `/docs/svelte`, `/docs/vanilla`, `/docs/markdown`
 - Concepts: `/docs/spec-anatomy`, `/docs/data`, `/docs/encoding`, `/docs/scales`, `/docs/axes`, `/docs/themes-tokens`, `/docs/bundles`
@@ -63,7 +64,7 @@ Global CSS is `src/styles/global.css`. Inter at a 15px body. Page `#f5f5f7`, ink
 ## Next migration steps
 
 1. Move one Next.js docs route at a time into this app, starting with getting started and the chart types. Keep the Next.js app running until the URL exists here.
-2. The docs response rail already runs `validate()` and `render()` from `@chartkitdev/core`. The homepage stage is still illustrative SVG.
+2. The homepage stage, gallery, and docs response rail already run `validate()` and `render()` from `@chartkitdev/core`. Pro pricing on the page is the draft set ($29/mo, 10,000 renders, $0.002).
 3. Fill pricing only when the amounts are real. The live Cloud offer (a key removes the mark, and 120/minute is not a paid quota) is not this mock.
 4. Serve `llms.txt`, `llms-full.txt`, and `schema/v1.json` from this app at the same paths.
 5. Switch the host, then remove `docs/` if nothing else imports it.

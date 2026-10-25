@@ -1,0 +1,93 @@
+---
+import "../styles/docs.css";
+import Base from "../layouts/Base.astro";
+import { gallerySvg } from "../data/hero-slides";
+
+const chart = gallerySvg("line");
+const description =
+  "ChartKit agents write one JSON spec, validate it, repair the safe mistakes, and render SVG. llms.txt still ships from the Next.js app.";
+---
+
+<Base tone="light" title="Agents" description={description}>
+  <div class="wrap">
+    <section class="hero" aria-labelledby="agents-page-title">
+      <p class="kicker">Agents</p>
+      <h1 id="agents-page-title">The spec is the interface.</h1>
+      <p class="lede">
+        An agent writes JSON. <code>validate()</code> returns every CK code in one pass.{' '}
+        <code>repair()</code> applies the safe JSON Patch and does not call a model.{' '}
+        <code>render()</code> returns SVG. No other chart library in the eval has a schema and a repair function.
+      </p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/docs/validate">Validate and repair</a>
+        <a class="btn btn-secondary" href="/docs/charts/line">Line chart</a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="loop-title">
+      <h2 id="loop-title">The loop</h2>
+      <div class="card-grid">
+        <article class="card">
+          <h3>1. Write</h3>
+          <p>
+            <code>version</code> is <code>"1"</code>. <code>data</code> is an array of rows. <code>a11y.alt</code> is one
+            sentence and is required. Gauge, kpi, and progress-ring put the number in <code>metric</code>.
+          </p>
+        </article>
+        <article class="card">
+          <h3>2. Validate</h3>
+          <p>
+            <code>validate()</code> checks the schema and the data. <code>CK1001</code> is invalid JSON.{' '}
+            <code>CK1004</code> is a missing required field such as <code>a11y</code>.
+          </p>
+        </article>
+        <article class="card">
+          <h3>3. Repair</h3>
+          <p>
+            <code>repair()</code> returns a spec and the patch it applied. It does not invent data. A missing or unknown
+            type is reported first.
+          </p>
+        </article>
+        <article class="card">
+          <h3>4. Render</h3>
+          <p>
+            Core charts come from <code>@chartkitdev/core/all</code>. Histogram through rose, and the planning charts,
+            come from <code>@chartkitdev/core/extra</code>. <code>render()</code> does not validate and does not throw.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="measured-title">
+      <h2 id="measured-title">What the eval measured</h2>
+      <p>
+        With the docs in the prompt, a measured run wrote a valid chart on 42 of 42 tasks. <code>repair()</code> took a
+        no-docs run from 21/42 to 42/42 with no model call. Round 6, 2026-10-16. That run was not repeated for later
+        rounds. Losses stay in the benchmark table.
+      </p>
+      <p>
+        <a href="https://chartkit.dev/benchmarks#agents">Benchmarks, losses included</a>
+      </p>
+      <div class="agent-chart" set:html={chart}></div>
+      <p class="note">The line above is the same example spec the docs try-it paints, rendered here with core.</p>
+    </section>
+
+    <section class="section" aria-labelledby="prompt-title">
+      <h2 id="prompt-title">What to give the model</h2>
+      <ul>
+        <li>
+          <a href="https://chartkit.dev/llms.txt">llms.txt</a> on the live site: the rules, the repair loop, and one spec
+          per chart type. This Astro app does not serve that file yet.
+        </li>
+        <li>
+          <a href="https://chartkit.dev/schema/v1.json">schema/v1.json</a> is the JSON Schema.
+        </li>
+        <li>
+          <a href="/docs/llms-txt">llms.txt notes</a> and <a href="/docs/mcp">MCP</a> in these docs.{' '}
+          <code>@chartkitdev/mcp</code> is not on npm yet. The server speaks stdio. <code>render_chart</code> is the tool
+          that calls Cloud.
+        </li>
+      </ul>
+    </section>
+  </div>
+</Base>

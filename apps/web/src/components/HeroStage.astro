@@ -1,7 +1,18 @@
 ---
-import { heroCharts } from "../data/hero-charts";
+import { heroSlides, peekSparkline } from "../data/hero-slides";
 
-const first = heroCharts[0];
+const slides = heroSlides();
+const first = slides[0];
+const peek = peekSparkline();
+const clientSlides = slides.map(({ label, title, kpi, delta, chrome, json, svg }) => ({
+  label,
+  title,
+  kpi,
+  delta,
+  chrome,
+  json,
+  svg,
+}));
 ---
 
 <section class="stage-band" aria-label="Product">
@@ -14,24 +25,8 @@ const first = heroCharts[0];
       repair() · 21/42 → 42/42
     </div>
     <aside class="stage__peek">
-      <span class="stage__peek-label">Sample · p95</span>
-      <svg viewBox="0 0 130 48" role="img" aria-label="Illustrative latency sparkline, not a measured benchmark">
-        <defs>
-          <linearGradient id="peekFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#30a46c" stop-opacity="0.28"></stop>
-            <stop offset="100%" stop-color="#30a46c" stop-opacity="0.02"></stop>
-          </linearGradient>
-        </defs>
-        <path
-          d="M0,34 C16,30 26,24 44,26 C62,28 72,16 88,14 C104,12 114,18 130,8 L130,48 L0,48 Z"
-          fill="url(#peekFill)"></path>
-        <path
-          d="M0,34 C16,30 26,24 44,26 C62,28 72,16 88,14 C104,12 114,18 130,8"
-          fill="none"
-          stroke="#30a46c"
-          stroke-width="1.75"
-          stroke-linecap="round"></path>
-      </svg>
+      <span class="stage__peek-label">Sparkline · example</span>
+      <div set:html={peek} />
     </aside>
     <div class="stage__ground" aria-hidden="true"></div>
     <div class="stage__tilt" id="stage-tilt">
@@ -71,7 +66,7 @@ const first = heroCharts[0];
 <div class="type-rail-wrap">
   <div class="type-rail" id="type-rail" role="tablist" aria-label="Chart types">
     {
-      heroCharts.map((chart, index) => (
+      slides.map((chart, index) => (
         <button
           type="button"
           class:list={["type-btn", index === 0 && "is-active"]}
@@ -100,4 +95,6 @@ const first = heroCharts[0];
   </p>
 </div>
 
+<script id="hero-slides" type="application/json" is:inline set:html={JSON.stringify(clientSlides).replaceAll("<", "\\u003c")}
+></script>
 <script src="../scripts/hero-stage.ts"></script>

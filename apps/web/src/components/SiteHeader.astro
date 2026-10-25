@@ -1,15 +1,13 @@
 ---
 import { SITE, canonicalPath } from "../data/site";
 import { primaryNav } from "../data/nav";
-import { isAgentPath } from "../data/docs-catalog";
 
 const path = canonicalPath(Astro.url.pathname);
-const agentsHere = isAgentPath(path);
-const docsHere = (path === "/docs" || path.startsWith("/docs/")) && !agentsHere;
+const docsHere = path === "/docs" || path.startsWith("/docs/");
 
 function mark(href: string): "page" | undefined {
   if (href === "/docs") return docsHere ? "page" : undefined;
-  if (href === "/docs/validate") return agentsHere ? "page" : undefined;
+  if (href === "/agents") return path === "/agents" ? "page" : undefined;
   if (href.startsWith("/#")) return undefined;
   return path === href ? "page" : undefined;
 }

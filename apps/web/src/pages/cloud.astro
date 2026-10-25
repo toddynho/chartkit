@@ -1,24 +1,26 @@
 ---
+import "../styles/docs.css";
 import Base from "../layouts/Base.astro";
 import Pricing from "../components/Pricing.astro";
+import TryIt from "../components/TryIt.astro";
 import { cloudCurl } from "../data/samples";
 
 const description =
-  "ChartKit Cloud returns an SVG or PNG for a JSON spec. Marked renders need no key. Pricing numbers are not set.";
+  "ChartKit Cloud returns an SVG or PNG for a JSON spec. Free images carry a watermark. Pro figures on this page are drafts.";
 ---
 
-<Base title="Cloud" description={description}>
+<Base tone="light" title="Cloud" description={description}>
   <div class="wrap">
     <section class="hero" aria-labelledby="cloud-page-title">
       <p class="kicker">ChartKit Cloud</p>
       <h1 id="cloud-page-title">A chart as an image.</h1>
       <p class="lede">
         Any agent or app can request a render. Free images carry a small chartkit.dev mark. The open-source library
-        never draws that mark. What Pro includes, and what the meter charges, is not decided.
+        never draws that mark. Pro, below, is a draft price: included renders, then a meter.
       </p>
       <div class="actions">
         <a class="btn btn-primary" href="#pricing">Pricing</a>
-        <a class="btn btn-secondary" href="/docs/reference/try">Try the spec shell</a>
+        <a class="btn btn-secondary" href="#try">Try a spec</a>
       </div>
     </section>
 
@@ -40,10 +42,16 @@ const description =
         can be URL-encoded JSON or base64url.
       </p>
       <p class="note">
-        The API reference and the live examples stay on <a href="https://chartkit.dev/docs/cloud">Cloud render</a> and{' '}
-        <a href="https://chartkit.dev/cloud">the current Cloud page</a> until this shell replaces them. This app does
-        not proxy the API.
+        The API reference stays on <a href="https://chartkit.dev/docs/cloud">Cloud render</a>. This page does not proxy
+        the API. The chart under the curl is <code>validate()</code> and <code>render()</code> from{' '}
+        <code>@chartkitdev/core</code>.
       </p>
+    </section>
+
+    <section class="section" id="try" aria-labelledby="try-title">
+      <h2 id="try-title">Try the spec</h2>
+      <p class="lede">Edit the JSON or switch Line, Bar, and Donut. Invalid JSON shows a CK code and no chart.</p>
+      <TryIt />
     </section>
 
     <Pricing />

@@ -1,74 +1,15 @@
 ---
-import { lineSample, samples } from "../data/samples";
+import ResponseRail from "./ResponseRail.astro";
+import SpecEditor from "./SpecEditor.astro";
+import { articleChips, articleSpec } from "../data/docs-catalog";
 ---
 
-<div class="try" data-try>
-  <section class="try-pane" aria-labelledby="try-spec">
-    <div class="try-bar">
-      <h2 id="try-spec">Spec</h2>
-      <div class="chips" role="group" aria-label="Spec samples and Cloud watermark">
-        <button type="button" class="chip" data-sample="line">Line</button>
-        <button type="button" class="chip" data-sample="bar">Bar</button>
-        <button type="button" class="chip" data-sample="donut">Donut</button>
-        <button type="button" class="chip" data-watermark aria-pressed="true">Watermark</button>
-      </div>
-    </div>
-    <label class="sr" for="chart-spec">Chart spec JSON</label>
-    <textarea id="chart-spec" data-spec spellcheck="false">{lineSample}</textarea>
-    <p class="hint">Watermark is a Cloud request flag. It is not a field in the spec.</p>
-  </section>
-  <section class="try-pane" aria-labelledby="try-response">
-    <div class="try-bar">
-      <h2 id="try-response">Response</h2>
-    </div>
-    <pre><code data-response aria-live="polite">This rail echoes the spec when JavaScript runs. It does not call Cloud.</code></pre>
-  </section>
+<div class="home-try">
+  <SpecEditor
+    spec={articleSpec}
+    chips={articleChips}
+    title="Spec"
+    hint="Line, bar, or donut. Chips update the chart."
+  />
+  <ResponseRail spec={articleSpec} />
 </div>
-
-<script define:vars={{ samples }}>
-  const root = document.querySelector("[data-try]");
-  if (root) {
-    const spec = root.querySelector("[data-spec]");
-    const out = root.querySelector("[data-response]");
-    const watermark = root.querySelector("[data-watermark]");
-
-    const paint = () => {
-      const marked = watermark.getAttribute("aria-pressed") === "true";
-      let body;
-      try {
-        body = {
-          scaffold: true,
-          ok: true,
-          request: { watermark: marked, format: "svg" },
-          note: "This rail does not call Cloud or @chartkitdev/core.",
-          spec: JSON.parse(spec.value),
-        };
-      } catch (error) {
-        body = {
-          scaffold: true,
-          ok: false,
-          error: "Spec is not JSON.",
-          detail: error instanceof Error ? error.message : String(error),
-        };
-      }
-      out.textContent = JSON.stringify(body, null, 2);
-    };
-
-    spec.addEventListener("input", paint);
-    watermark.addEventListener("click", () => {
-      const on = watermark.getAttribute("aria-pressed") === "true";
-      watermark.setAttribute("aria-pressed", on ? "false" : "true");
-      paint();
-    });
-    root.querySelectorAll("[data-sample]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const key = button.getAttribute("data-sample");
-        if (key && samples[key]) {
-          spec.value = JSON.stringify(samples[key], null, 2);
-          paint();
-        }
-      });
-    });
-    paint();
-  }
-</script>

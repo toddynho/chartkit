@@ -1,6 +1,6 @@
 /*
-  Homepage hero. Ported from the locked marketing mock.
-  Stage art is illustrative. It is not a render from @chartkitdev/core.
+  Homepage hero. The stage charts are painted with @chartkitdev/core.
+  The diagonal chartkit.dev mark is a Free Cloud preview, not part of the SVG.
 */
 
 :root {
@@ -440,7 +440,7 @@
 .stage__value-delta {
   font-size: 13px;
   font-weight: 500;
-  color: #30a46c;
+  color: var(--muted);
 }
 
 .chart-stage { position: relative; }

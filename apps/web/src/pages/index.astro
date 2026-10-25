@@ -1,14 +1,20 @@
 ---
 import "../styles/hero.css";
+import "../styles/docs.css";
 import Base from "../layouts/Base.astro";
 import Pricing from "../components/Pricing.astro";
 import HeroStage from "../components/HeroStage.astro";
+import TryIt from "../components/TryIt.astro";
 import { SITE } from "../data/site";
 import { chartTypes, galleryTypes } from "../data/chart-types";
+import { gallerySvg } from "../data/hero-slides";
 import { cloudCurl } from "../data/samples";
 
 const gallery = galleryTypes
-  .map((type) => chartTypes.find((chart) => chart.type === type))
+  .map((type) => {
+    const chart = chartTypes.find((item) => item.type === type);
+    return chart ? { ...chart, svg: gallerySvg(chart.type) } : null;
+  })
   .filter((chart) => chart != null);
 ---
 
@@ -68,6 +74,37 @@ const gallery = galleryTypes
     </div>
   </section>
 
+  <section class="home-agents" id="agents" aria-labelledby="agents-title">
+    <div class="home-agents__inner">
+      <div>
+        <h2 id="agents-title">Built for agents.</h2>
+        <p>
+          The spec is the interface. An agent writes JSON,{' '}
+          <code>validate()</code>
+          {' '}lists every CK code, and{' '}
+          <code>repair()</code>
+          {' '}applies the safe patch with no model call.{' '}
+          <code>render()</code>
+          {' '}returns SVG.
+        </p>
+        <p>
+          <a class="home-more" href="/agents">The agent loop</a>
+        </p>
+      </div>
+      <ol class="home-agents__steps">
+        <li>
+          <strong>Write</strong> one v1 spec.{' '}
+          <code>a11y.alt</code> is required.
+        </li>
+        <li>
+          <strong>Check</strong> with <code>validate()</code>. Codes stay stable.
+        </li>
+        <li><strong>Repair</strong> the safe mistakes. The input is not mutated.</li>
+        <li><strong>Render</strong> from core, or ask Cloud for an image.</li>
+      </ol>
+    </div>
+  </section>
+
   <div class="wrap">
     <section class="section" id="cloud" aria-labelledby="cloud-title">
       <h2 id="cloud-title">Cloud API</h2>
@@ -82,9 +119,10 @@ const gallery = galleryTypes
       </figure>
       <p>
         <code>GET /render</code> always includes the chartkit.dev mark, so an image address never carries a key. A key
-        on <code>POST /charts</code> or <code>POST /render</code> stores an unmarked chart. The open-source library
-        never draws the mark.
+        on <code>POST /charts</code> or <code>POST /render</code> stores an unmarked chart. The mark is a Cloud flag.
+        It is not a field in the spec. The library never draws it. The chart below is local core, not a Cloud call.
       </p>
+      <TryIt />
       <p><a href="/cloud">Cloud page</a></p>
     </section>
 
@@ -92,18 +130,12 @@ const gallery = galleryTypes
 
     <section class="section" id="gallery" aria-labelledby="gallery-title">
       <h2 id="gallery-title">Gallery</h2>
-      <p class="lede">
-        Chart types the spec can name. These tiles are placeholders. Previews move here with the docs.
-      </p>
+      <p class="lede">Eight examples painted with <code>@chartkitdev/core</code>. Open a card for the spec.</p>
       <div class="gallery-grid">
         {
           gallery.map((chart) => (
             <a class="card" href={`/docs/charts/${chart.type}`}>
-              <span class="ph" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-              </span>
+              <span class="gallery-chart" aria-hidden="true" set:html={chart.svg} />
               <h3>{chart.title}</h3>
               <p>{chart.summary}</p>
             </a>

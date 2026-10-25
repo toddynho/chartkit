@@ -1,5 +1,6 @@
 import articlesJson from "./mock-articles.json";
 import chartsJson from "./mock-charts.json";
+import { articleSections } from "./article-copy";
 import { withTruth } from "./chart-truth";
 import { chartTypes } from "./chart-types";
 import { specForType, type LiveSpec } from "./live-specs";
@@ -107,8 +108,8 @@ const honestLedes: Record<string, string> = {
   vanilla: "mount writes the SVG into an element you already have. update keeps that element. renderToString is the SVG string from core.",
   markdown: "A chartkit fence is a v1 spec. The markdown package renders it with core. It does not invent a second chart language.",
   "spec-anatomy": "The schema is https://chartkit.dev/schema/v1.json. validate() checks the schema and the data. render() does not validate. Unknown types return an error SVG and do not throw.",
-  "themes-tokens": "Soft is the default. Omit theme, or set auto or soft. midnight is the opt-in dark card. refined and editorial are built in. Other preset names fall through to midnight until you import @chartkitdev/core/themes/all. Hosts override tokens with --ck-*.",
-  themes: "Soft is the default. theme midnight is the opt-in dark card. Presets such as mocha, emerald, and slate resolve after importing @chartkitdev/core/themes/all.",
+  "themes-tokens": "Soft is the default. Omit theme, or set auto or soft. refined and editorial are built in. midnight is the opt-in dark card. Other names need @chartkitdev/core/themes/all, which this site's renderer loads. Hosts override tokens with --ck-*.",
+  themes: "Chips on this site: soft, refined, midnight, and emerald. Soft is the default. Emerald and the other named presets resolve because the renderer imports @chartkitdev/core/all.",
   options: "Paths are schema fields: mark.curve, mark.points, mark.area, axes.x.title. mark.markers and mark.fill are not fields. soft, refined, editorial, and midnight are real theme names.",
   errors: "Codes are stable: CK1xxx structure, CK2xxx data, CK3xxx semantics, CK4xxx design. CK1001 is invalid JSON. This rail shows those codes and does not draw a chart when validate() fails.",
   validate: "validate() returns every diagnostic in one pass. repair() applies the safe JSON Patch fixes and does not mutate the input. render() does not validate.",
@@ -136,65 +137,20 @@ function scrubText(value: string): string {
 
 function presentArticle(article: DocArticle): DocArticle {
   const lede = honestLedes[article.slug] ?? scrubText(article.lede);
-  let sections = article.sections.map((section) => ({
-    title: scrubText(section.title),
-    paragraphs: section.paragraphs.map(scrubText).filter(Boolean),
-    list: section.list.map(scrubText).filter(Boolean),
-    code: section.code.map(scrubText),
-  }));
-  if (article.slug === "") {
-    sections = [
-      {
-        title: "Install",
-        paragraphs: [
-          "Install core, then the adapter for the framework you render in. @chartkitdev/element, @chartkitdev/geo, and @chartkitdev/mcp are in this repo and are not on npm yet.",
-        ],
-        list: [],
-        code: ["npm install @chartkitdev/core\nnpm install @chartkitdev/react"],
-      },
-      {
-        title: "A valid spec",
-        paragraphs: [
-          'version is "1". a11y.alt is one sentence and is required. data is an array of row objects. The chart type goes in type. mark is an options object. Gauge, kpi, and progress-ring put the number in metric.',
-        ],
-        list: [],
-        code: [],
-      },
-      {
-        title: "Render",
-        paragraphs: [
-          "render from @chartkitdev/core/all registers the core charts. Histogram through rose, and the planning charts, render from @chartkitdev/core/extra. This docs site runs validate() and then render() in the browser. It does not call Cloud.",
-        ],
-        list: [],
-        code: [
-          'import { render } from "@chartkitdev/core/all";\nimport { validate, repair } from "@chartkitdev/core/validate";\n\nconst result = validate(spec);\nconst svg = render(result.ok ? spec : repair(spec).spec);',
-        ],
-      },
-    ];
-  }
-  if (article.slug === "react" || article.slug === "vue" || article.slug === "svelte" || article.slug === "vanilla") {
-    const pkg = `@chartkitdev/${article.slug}`;
-    sections = [
-      {
-        title: "Install",
-        paragraphs: [`Packages publish as @chartkitdev/*. The adapter depends on @chartkitdev/core.`],
-        list: [],
-        code: [`npm install ${pkg}`],
-      },
-      {
-        title: "The spec",
-        paragraphs: ["The same JSON renders in every adapter. Framework props are not spec keys."],
-        list: [],
-        code: [],
-      },
-      ...sections.slice(0, 2),
-    ];
-  }
+  const written = articleSections[article.slug];
+  const sections = written
+    ? written
+    : article.sections.map((section) => ({
+        title: scrubText(section.title),
+        paragraphs: section.paragraphs.map(scrubText).filter(Boolean),
+        list: section.list.map(scrubText).filter(Boolean),
+        code: section.code.map(scrubText),
+      }));
   return {
     ...article,
     lede,
     description: lede.slice(0, 180),
-    tryIntro: scrubText(article.tryIntro),
+    tryIntro: written ? "" : scrubText(article.tryIntro),
     sections,
   };
 }
@@ -260,9 +216,11 @@ export function specForChart(chart: ChartDoc): LiveSpec {
 const themeChips: ChipGroup = {
   label: "Theme",
   key: "theme",
-  options: [
+    options: [
     { label: "Soft", value: "soft" },
+    { label: "Refined", value: "refined" },
     { label: "Midnight", value: "midnight" },
+    { label: "Emerald", value: "emerald" },
   ],
 };
 
