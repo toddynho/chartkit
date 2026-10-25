@@ -1,6 +1,12 @@
 ---
 import { pretty } from "../lib/spec-text";
 
+interface ExampleChoice {
+  slug: string;
+  title: string;
+  group: string;
+}
+
 interface Props {
   spec: Record<string, unknown>;
   svg: string;
@@ -8,14 +14,36 @@ interface Props {
   themes?: string[];
   docsHref?: string;
   docsLabel?: string;
+  examples?: ExampleChoice[];
+  activeSlug?: string;
 }
 
-const { spec, svg, mode = "compact", themes = [], docsHref, docsLabel } = Astro.props;
+const {
+  spec,
+  svg,
+  mode = "compact",
+  themes = [],
+  docsHref,
+  docsLabel,
+  examples = [],
+  activeSlug = "",
+} = Astro.props;
 const text = pretty(spec);
+const grouped = new Map<string, ExampleChoice[]>();
+for (const item of examples) {
+  const list = grouped.get(item.group) ?? [];
+  list.push(item);
+  grouped.set(item.group, list);
+}
 const specId = mode === "full" ? "spec-json" : undefined;
 ---
 
-<div class:list={["live-editor", mode === "full" && "live-editor--full"]} data-live-spec data-mode={mode}>
+<div
+  class:list={["live-editor", mode === "full" && "live-editor--full"]}
+  data-live-spec
+  data-mode={mode}
+  data-active-slug={activeSlug || undefined}
+>
   <div class="live-editor__preview">
     <p class="live-pane__kicker" id={mode === "full" ? "live-preview-label" : undefined}>Preview</p>
     <div
@@ -26,6 +54,26 @@ const specId = mode === "full" ? "spec-json" : undefined;
     />
   </div>
   <div class="live-editor__side">
+    {
+      mode === "full" && examples.length > 0 ? (
+        <label class="theme-label example-label">
+          Example
+          <select data-example>
+            {
+              [...grouped.entries()].map(([group, items]) => (
+                <optgroup label={group}>
+                  {items.map((item) => (
+                    <option value={item.slug} selected={item.slug === activeSlug}>
+                      {item.title}
+                    </option>
+                  ))}
+                </optgroup>
+              ))
+            }
+          </select>
+        </label>
+      ) : null
+    }
     <div class="live-pane__head">
       <label for={specId}>Spec</label>
       {docsHref && docsLabel ? (

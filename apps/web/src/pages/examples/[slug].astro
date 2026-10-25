@@ -4,18 +4,20 @@ import Base from "../../layouts/Base.astro";
 import FrameworkTabs from "../../components/FrameworkTabs.astro";
 import LiveSpec from "../../components/LiveSpec.astro";
 import { chartByType } from "../../data/chart-types";
-import { loadExample, loadExamplesIndex } from "../../lib/surfaces";
+import { loadExample, loadExamplesIndex, loadPlayground } from "../../lib/surfaces";
 
 export function getStaticPaths() {
   return loadExamplesIndex().examples.map((example) => ({ params: { slug: example.slug } }));
 }
 
+const catalog = loadExamplesIndex();
 const example = loadExample(Astro.params.slug ?? "");
+const { themes } = loadPlayground();
 const typeTitle = chartByType(example.type)?.title ?? example.type;
 ---
 
 <Base title={example.title} description={example.blurb} tone="light">
-  <div class="wrap surface">
+  <div class="wrap surface example-play">
     <header class="hero">
       <nav class="crumbs" aria-label="Breadcrumb">
         <a href="/examples">Examples</a>
@@ -28,6 +30,10 @@ const typeTitle = chartByType(example.type)?.title ?? example.type;
     <LiveSpec
       spec={example.spec}
       svg={example.svg}
+      mode="full"
+      themes={themes}
+      examples={catalog.examples}
+      activeSlug={example.slug}
       docsHref={`/docs/charts/${example.type}`}
       docsLabel={`Docs → ${typeTitle}`}
     />

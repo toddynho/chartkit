@@ -40,6 +40,7 @@ export function mountLiveSpec(root: HTMLElement): void {
   const status = root.querySelector<HTMLElement>("[data-status]");
   const list = root.querySelector<HTMLElement>("[data-issues]");
   const themeSelect = root.querySelector<HTMLSelectElement>("[data-theme]");
+  const exampleSelect = root.querySelector<HTMLSelectElement>("[data-example]");
   const play = root.querySelector<HTMLAnchorElement>("[data-play]");
   const docs = root.querySelector<HTMLAnchorElement>("[data-docs]");
   if (!input || !frame || !status) return;
@@ -126,10 +127,25 @@ export function mountLiveSpec(root: HTMLElement): void {
     draw(input.value, theme);
   });
 
+  exampleSelect?.addEventListener("change", () => {
+    const slug = exampleSelect.value;
+    if (!slug) return;
+    const sameExample = slug === root.dataset.activeSlug;
+    if (sameExample && window.location.hash.length <= 1) return;
+    window.location.assign(`/examples/${slug}`);
+  });
+
   if (mode === "full" && window.location.hash.length > 1) {
     try {
       const parsed = JSON.parse(decodeURIComponent(window.location.hash.slice(1))) as unknown;
       input.value = JSON.stringify(parsed, null, 2);
+      if (exampleSelect) {
+        const custom = document.createElement("option");
+        custom.value = "";
+        custom.textContent = "Shared spec";
+        exampleSelect.prepend(custom);
+        exampleSelect.value = "";
+      }
       syncPaint();
       draw(input.value, theme);
     } catch {
@@ -182,7 +198,7 @@ export function mountLiveSpec(root: HTMLElement): void {
   root.querySelector("[data-share]")?.addEventListener("click", () => {
     void (async () => {
       const hash = `#${encodeURIComponent(input.value)}`;
-      const url = `${window.location.origin}/examples${hash}`;
+      const url = `${window.location.origin}${window.location.pathname}${hash}`;
       window.history.replaceState(null, "", hash);
       try {
         await navigator.clipboard.writeText(url);

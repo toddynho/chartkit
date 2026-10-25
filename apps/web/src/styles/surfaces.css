@@ -450,6 +450,23 @@
 
 .theme-label { display: flex; flex-direction: column; gap: 4px; font-size: 0.78rem; color: var(--muted); }
 .theme-label select { min-width: 9rem; }
+.example-label select {
+  width: 100%;
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+.example-play .hero { padding: 1.35rem 0 0.85rem; }
+.example-play .hero h1 { max-width: 28ch; }
+.example-play .section { padding-top: 1.5rem; }
+.example-grid a.card .edit-spec { color: var(--link); font-size: 0.92rem; }
+.example-grid a.card.is-loaded {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
+}
 
 .live-status { margin: 0; color: var(--muted); font-size: 0.86rem; }
 .live-issues { margin: 0; padding-left: 1.1rem; font-family: var(--mono); font-size: 12.5px; }
