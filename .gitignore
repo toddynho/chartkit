@@ -4,6 +4,7 @@ node_modules/
 # Build outputs
 dist/
 .astro/
+apps/web/.generated/
 .next/
 packages/mcp/data/
 out/

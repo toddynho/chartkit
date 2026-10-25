@@ -8,17 +8,20 @@
     "node": ">=22.23.4"
   },
   "scripts": {
-    "predev": "npm run build --workspace=@chartkitdev/core",
+    "paint": "node --experimental-strip-types scripts/paint-dashboards.ts",
+    "predev": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/geo && npm run paint",
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
-    "prebuild": "npm run build --workspace=@chartkitdev/core",
+    "prebuild": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/geo && npm run paint",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
-    "precheck": "npm run build --workspace=@chartkitdev/core",
+    "precheck": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/geo && npm run paint",
     "check": "ASTRO_TELEMETRY_DISABLED=1 astro check"
   },
   "dependencies": {
     "@chartkitdev/core": "*",
+    "@chartkitdev/geo": "*",
     "@fontsource/inter": "^5.3.0",
+    "@fontsource/roboto": "^5.2.8",
     "astro": "^7.4.2"
   },
   "devDependencies": {

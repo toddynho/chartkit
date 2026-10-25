@@ -4,9 +4,11 @@ import { primaryNav } from "../data/nav";
 
 const path = canonicalPath(Astro.url.pathname);
 const docsHere = path === "/docs" || path.startsWith("/docs/");
+const dashHere = path === "/dashboards" || path.startsWith("/dashboards/");
 
 function mark(href: string): "page" | undefined {
   if (href === "/docs") return docsHere ? "page" : undefined;
+  if (href === "/dashboards") return dashHere ? "page" : undefined;
   if (href === "/agents") return path === "/agents" ? "page" : undefined;
   if (href.startsWith("/#")) return undefined;
   return path === href ? "page" : undefined;

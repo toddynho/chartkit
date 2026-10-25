@@ -1,0 +1,37 @@
+---
+import type { StringPair, ThemeName } from "../lib/dashboard-types";
+
+interface Props {
+  frames: Record<ThemeName, StringPair>;
+  theme: ThemeName;
+  alt: string;
+  live?: boolean;
+}
+
+const { frames, theme, alt } = Astro.props;
+const live = Astro.props.live !== false;
+const themes: ThemeName[] = ["soft", "midnight"];
+---
+
+<div class="ck-host" data-chart-host>
+  <div
+    class="ck-frame"
+    data-chart-frame
+    data-shown={live ? `${theme}:wide` : undefined}
+    role="img"
+    aria-label={alt}
+  >
+    {live ? <Fragment set:html={frames[theme].wide} /> : null}
+  </div>
+  {
+    themes.flatMap((name) => {
+      const pair = frames[name];
+      const widths = pair.wide === pair.narrow ? (["wide"] as const) : (["wide", "narrow"] as const);
+      return widths.map((width) => (
+        <template data-svg={name} data-width={width}>
+          <Fragment set:html={pair[width]} />
+        </template>
+      ));
+    })
+  }
+</div>

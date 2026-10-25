@@ -1,0 +1,34 @@
+---
+import type { SpecBlock, ThemeName } from "../lib/dashboard-types";
+
+interface Props {
+  block: SpecBlock;
+}
+
+const { block } = Astro.props;
+const themes: ThemeName[] = ["soft", "midnight"];
+---
+
+<div class="spec-group">
+  <h3>{block.heading}</h3>
+  {
+    themes.map((theme) => {
+      const pair = block.specs[theme];
+      const same = pair.wide === pair.narrow;
+      return (
+        <>
+          <div class="spec-block" data-spec-theme={theme} data-spec-width={same ? "both" : "wide"}>
+            <pre><code>{pair.wide}</code></pre>
+          </div>
+          {
+            !same && (
+              <div class="spec-block" data-spec-theme={theme} data-spec-width="narrow">
+                <pre><code>{pair.narrow}</code></pre>
+              </div>
+            )
+          }
+        </>
+      );
+    })
+  }
+</div>

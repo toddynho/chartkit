@@ -1,0 +1,48 @@
+---
+import ChartStack from "./ChartStack.astro";
+import type { PaintedChart, ThemeName } from "../lib/dashboard-types";
+
+interface Props {
+  chart: PaintedChart;
+  theme: ThemeName;
+  showTitle?: boolean;
+}
+
+const { chart, theme } = Astro.props;
+const showTitle = Astro.props.showTitle !== false;
+const panels = chart.variants.length
+  ? chart.variants
+  : [{ id: chart.id, label: "", alt: chart.alt, frames: chart.frames }];
+const multi = panels.length > 1;
+---
+
+<section
+  class:list={["d-card", `span-${chart.span}`, chart.place === "metric" && "d-card--metric"]}
+  data-switch={multi ? true : undefined}
+  aria-label={showTitle ? undefined : chart.title}
+>
+  {
+    (showTitle || multi) && (
+      <header class="d-cap">
+        {showTitle ? <h3>{chart.title}</h3> : <span class="sr">{chart.title}</span>}
+        {multi ? (
+          <div class="seg" role="group" aria-label={`${chart.title} view`}>
+            {panels.map((panel, index) => (
+              <button type="button" data-pick={panel.id} aria-pressed={index === 0 ? "true" : "false"}>
+                {panel.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </header>
+    )
+  }
+  {
+    panels.map((panel, index) => (
+      <div data-panel={multi ? panel.id : undefined} hidden={multi && index !== 0 ? true : undefined}>
+        <ChartStack frames={panel.frames} theme={theme} alt={panel.alt} live={!multi || index === 0} />
+      </div>
+    ))
+  }
+  <slot />
+</section>

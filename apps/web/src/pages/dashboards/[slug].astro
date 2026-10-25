@@ -1,0 +1,24 @@
+---
+import "@fontsource/roboto/latin-400.css";
+import "@fontsource/roboto/latin-500.css";
+import "@fontsource/roboto/latin-700.css";
+import "../../styles/dashboards.css";
+import Base from "../../layouts/Base.astro";
+import DashboardBoard from "../../components/DashboardBoard.astro";
+import { loadBoard, loadIndex } from "../../lib/dashboards";
+
+export function getStaticPaths() {
+  return loadIndex().boards.map((board) => ({ params: { slug: board.slug } }));
+}
+
+const slug = Astro.params.slug;
+if (!slug) throw new Error("Missing dashboard slug");
+const board = loadBoard(slug);
+---
+
+<Base title={board.title} description={board.lede} tone="light">
+  <link slot="head" rel="alternate" type="text/markdown" href={`/dashboards/${board.slug}.md`} title={`${board.title} markdown`} />
+  <div class="wrap">
+    <DashboardBoard board={board} />
+  </div>
+</Base>

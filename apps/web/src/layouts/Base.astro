@@ -36,6 +36,7 @@ const canonical = new URL(path, Astro.site ?? SITE.url).href;
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE.name} />
+    <slot name="head" />
   </head>
   <body>
     <a class="skip" href="#content">Skip to content</a>

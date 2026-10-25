@@ -1,0 +1,334 @@
+---
+import ChartCard from "./ChartCard.astro";
+import ChartStack from "./ChartStack.astro";
+import SpecGroup from "./SpecGroup.astro";
+import type { PaintedBoard } from "../lib/dashboard-types";
+
+interface Props {
+  board: PaintedBoard;
+}
+
+const { board } = Astro.props;
+const theme = board.defaultTheme;
+const byPlace = (place: string) => board.charts.filter((chart) => chart.place === place);
+const hero = board.charts.find((chart) => chart.place === "hero");
+const metrics = byPlace("metric");
+const sides = byPlace("side");
+const tabs = byPlace("tab");
+const lists = byPlace("list");
+const realtime = board.charts.find((chart) => chart.place === "realtime");
+const hbar = board.charts.find((chart) => chart.place === "hbar");
+const activity = board.charts.find((chart) => chart.place === "activity");
+const cohort = board.charts.find((chart) => chart.place === "cohort");
+const map = board.charts.find((chart) => chart.place === "map");
+const special = board.slug === "ledger" || board.slug === "meter" || board.slug === "wayline" || board.slug === "keel";
+
+const liveCountries = [
+  ["United States", "42"],
+  ["Japan", "18"],
+  ["Germany", "11"],
+  ["Brazil", "9"],
+  ["India", "7"],
+];
+const sessions = [
+  ["Search", "10,290"],
+  ["Direct", "5,880"],
+  ["Mail", "3,920"],
+  ["Social", "2,695"],
+  ["Referral", "1,715"],
+];
+const mapCountries = [
+  ["United States", "9,200"],
+  ["Japan", "7,100"],
+  ["United Kingdom", "5,400"],
+  ["Germany", "4,800"],
+  ["Brazil", "4,300"],
+];
+---
+
+<div class="board" data-board data-theme={theme}>
+  <header class="board-hero">
+    <p class="kicker">{board.product}</p>
+    <h1>{board.title}</h1>
+    <p class="lede">{board.lede}</p>
+    <p class="note">{board.disclaimer}</p>
+    <div class="board-tools">
+      <p class="board-range">{board.range}</p>
+      <div class="seg" role="group" aria-label="Chart theme">
+        <button type="button" data-set-theme="soft" aria-pressed={theme === "soft" ? "true" : "false"}>Soft</button>
+        <button type="button" data-set-theme="midnight" aria-pressed={theme === "midnight" ? "true" : "false"}>Midnight</button>
+      </div>
+      <a href={`/dashboards/${board.slug}.md`}>{board.slug}.md</a>
+      <a href="/dashboards">All dashboards</a>
+    </div>
+  </header>
+
+  {
+    board.slug === "meter" && (
+      <p class="board-meta">
+        <span>example.com</span>
+        <span>
+          <i class="live-dot" aria-hidden="true"></i>12 current
+        </span>
+      </p>
+    )
+  }
+
+  {
+    board.slug === "ledger" && (
+      <div class="d-grid">
+        {hero ? <ChartCard chart={hero} theme={theme} showTitle={false} /> : null}
+        {metrics.map((chart) => (
+          <ChartCard chart={chart} theme={theme} showTitle={false} />
+        ))}
+        {sides.map((chart) => (
+          <ChartCard chart={chart} theme={theme} />
+        ))}
+      </div>
+    )
+  }
+
+  {
+    board.slug === "meter" && tabs[0] && (
+      <div class="d-stack">
+        <div data-switch>
+          <div class="stat-tabs" role="tablist" aria-label="Metrics">
+            {tabs.map((chart, index) => (
+              <button
+                type="button"
+                role="tab"
+                data-pick={chart.id}
+                aria-selected={index === 0 ? "true" : "false"}
+                aria-pressed={index === 0 ? "true" : "false"}
+              >
+                <span class="tab-label">{chart.tab?.label}</span>
+                <span class="tab-value">{chart.tab?.value}</span>
+                <span class:list={["tab-delta", chart.tab?.good ? "up" : "down"]}>{chart.tab?.delta}</span>
+              </button>
+            ))}
+          </div>
+          {tabs.map((chart, index) => (
+            <div class="d-card span-dash-12" data-panel={chart.id} hidden={index !== 0 ? true : undefined}>
+              <ChartStack frames={chart.frames} theme={theme} alt={chart.alt} live={index === 0} />
+            </div>
+          ))}
+        </div>
+        {
+          lists[0] && (
+            <section class="d-card">
+              <div data-switch>
+                <div class="seg" role="group" aria-label="Ranked lists">
+                  {lists.map((chart, index) => (
+                    <button type="button" data-pick={chart.id} aria-pressed={index === 0 ? "true" : "false"}>
+                      {chart.title}
+                    </button>
+                  ))}
+                </div>
+                {lists.map((chart, index) => (
+                  <div data-panel={chart.id} hidden={index !== 0 ? true : undefined}>
+                    <div class="list-head" aria-hidden="true">
+                      <span>{chart.title}</span>
+                      <span>Visitors</span>
+                    </div>
+                    <ChartStack frames={chart.frames} theme={theme} alt={chart.alt} live={index === 0} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )
+        }
+      </div>
+    )
+  }
+
+  {
+    board.slug === "wayline" && (
+      <div class="snapshot">
+        <section class="d-card">
+          <div data-switch>
+            <div class="stat-tabs" role="tablist" aria-label="Acquisition">
+              {tabs.map((chart, index) => (
+                <button
+                  type="button"
+                  role="tab"
+                  data-pick={chart.id}
+                  aria-selected={index === 0 ? "true" : "false"}
+                  aria-pressed={index === 0 ? "true" : "false"}
+                >
+                  <span class="tab-label">{chart.tab?.label}</span>
+                  <span class="tab-value">{chart.tab?.value}</span>
+                  <span class:list={["tab-delta", chart.tab?.good ? "up" : "down"]}>{chart.tab?.delta}</span>
+                </button>
+              ))}
+            </div>
+            {tabs.map((chart, index) => (
+              <div data-panel={chart.id} hidden={index !== 0 ? true : undefined}>
+                <ChartStack frames={chart.frames} theme={theme} alt={chart.alt} live={index === 0} />
+              </div>
+            ))}
+          </div>
+        </section>
+        {
+          realtime && (
+            <section class="d-card">
+              <h3>{realtime.title}</h3>
+              <ChartStack frames={realtime.frames} theme={theme} alt={realtime.alt} />
+              <table class="mini">
+                <caption>Top countries</caption>
+                <tbody>
+                  {liveCountries.map(([name, count]) => (
+                    <tr>
+                      <td>{name}</td>
+                      <td>{count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          )
+        }
+        <section class="d-card">
+          <h3>Insights</h3>
+          <p>Weekday afternoons carry the most users.</p>
+          <p>Search brings more new users than the other channels.</p>
+          <p>The newest cohort is still in its first period.</p>
+        </section>
+        {hbar ? <ChartCard chart={hbar} theme={theme} /> : null}
+        <section class="d-card">
+          <h3>Sessions by channel</h3>
+          <table class="mini">
+            <tbody>
+              {sessions.map(([name, count]) => (
+                <tr>
+                  <td>{name}</td>
+                  <td>{count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+        {
+          map && (
+            <section class="d-card">
+              <h3>Users by country</h3>
+              <ChartStack frames={map.frames} theme={theme} alt={map.alt} />
+              <table class="mini">
+                <tbody>
+                  {mapCountries.map(([name, count]) => (
+                    <tr>
+                      <td>{name}</td>
+                      <td>{count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          )
+        }
+        {activity ? <ChartCard chart={activity} theme={theme} /> : null}
+        {cohort ? <ChartCard chart={cohort} theme={theme} /> : null}
+      </div>
+    )
+  }
+
+  {
+    board.slug === "keel" && (
+      <div class="d-stack">
+        {
+          board.sparks.length > 0 && (
+            <div class="d-card issue-wrap">
+              <table class="issue-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Issue</th>
+                    <th>Last seen</th>
+                    <th>Age</th>
+                    <th>Trend</th>
+                    <th>Events</th>
+                    <th>Users</th>
+                    <th>Priority</th>
+                    <th>Assignee</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {board.sparks.map((spark) => (
+                    <tr>
+                      <td>
+                        <input class="issue-check" type="checkbox" aria-label={`Select ${spark.name}`} />
+                      </td>
+                      <td>
+                        <strong>{spark.name}</strong>
+                        <span class="issue-detail">{spark.detail}</span>
+                        <span class="tags">
+                          {spark.tags.map((tag) => (
+                            <i>{tag}</i>
+                          ))}
+                        </span>
+                      </td>
+                      <td>{spark.seen}</td>
+                      <td>{spark.age}</td>
+                      <td>
+                        <div class="issue-spark">
+                          <ChartStack frames={spark.frames} theme={theme} alt={spark.alt} />
+                        </div>
+                      </td>
+                      <td>{spark.events}</td>
+                      <td>{spark.users}</td>
+                      <td>{spark.priority}</td>
+                      <td>{spark.assignee}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        }
+        <div class="d-grid">
+          {sides.map((chart) => (
+            <ChartCard chart={chart} theme={theme} />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  {
+    !special && (
+      <div class="d-grid">
+        {board.charts.map((chart) => (
+          <ChartCard
+            chart={chart}
+            theme={theme}
+            showTitle={chart.place !== "metric" && chart.place !== "hero" && chart.place !== "tab"}
+          />
+        ))}
+      </div>
+    )
+  }
+
+  <details class="spec-details">
+    <summary>View spec</summary>
+    {board.specBlocks.map((block) => (
+      <SpecGroup block={block} />
+    ))}
+  </details>
+
+  <section class="spec-notes" aria-labelledby="look-title">
+    <h2 id="look-title">What produces this look</h2>
+    <ul>
+      {board.notes.map((note) => (
+        <li>
+          <strong>{note.label}.</strong> {note.detail}
+        </li>
+      ))}
+    </ul>
+    <p class="note">
+      {board.disclaimer} <a href={`/dashboards/${board.slug}.md`}>{board.slug}.md</a>
+    </p>
+  </section>
+</div>
+
+<script>
+  import "../scripts/dashboard-stage.ts";
+</script>
