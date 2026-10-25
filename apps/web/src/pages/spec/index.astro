@@ -1,0 +1,27 @@
+---
+import "../../styles/surfaces.css";
+import Base from "../../layouts/Base.astro";
+import { loadSpecIndex } from "../../lib/batch3";
+
+const page = loadSpecIndex();
+const description = "JSON spec charts. The same v1 object in React, Vue, Svelte, and vanilla.";
+---
+
+<Base title="JSON spec charts" description={description} tone="light">
+  <div class="wrap surface prose">
+    <h1 id="spec">JSON spec charts</h1>
+    <p class="lede">
+      These types use the same v1 spec in React, Vue, Svelte, and vanilla. The chart type goes in <code>type</code>. <code>a11y.alt</code> is required.
+    </p>
+    <ul>
+      {
+        page.pages.map((item) => (
+          <li>
+            <a href={`/spec/${item.type}`}>{item.title}</a>
+            <span> — {item.summary}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Base>

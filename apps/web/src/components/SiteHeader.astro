@@ -15,6 +15,7 @@ function mark(href: string): "page" | undefined {
   }
   if (href === "/agents") return path === "/agents" ? "page" : undefined;
   if (href.startsWith("/#")) return undefined;
+  if (moreNav.some((item) => item.href === href) && (path === href || path.startsWith(`${href}/`))) return "page";
   return path === href ? "page" : undefined;
 }
 ---

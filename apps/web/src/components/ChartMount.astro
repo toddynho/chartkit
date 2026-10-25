@@ -1,0 +1,24 @@
+---
+import { scriptJson } from "../lib/spec-text";
+
+interface Props {
+  spec: unknown;
+  svg: string;
+  alt: string;
+  preset?: boolean;
+  geo?: boolean;
+}
+
+const { spec, svg, alt, preset = false, geo = false } = Astro.props;
+---
+
+<div
+  class:list={["ck-frame", preset && "chart-preset"]}
+  data-ck-mount={geo ? undefined : ""}
+  data-geo={geo ? "" : undefined}
+  role="img"
+  aria-label={alt}
+>
+  {geo ? null : <script is:inline type="application/json" set:html={scriptJson(spec)} />}
+  <Fragment set:html={svg} />
+</div>

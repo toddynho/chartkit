@@ -51,6 +51,13 @@ const canonical = articleHref(article);
   ))
 }
 {
+  article.slug === "markdown" ? (
+    <p>
+      <a href="/docs/mermaid">Mermaid or Markdown</a> is the converter: supported chart kinds, the global scripts, and the limits.
+    </p>
+  ) : null
+}
+{
   article.slug === "concepts/adapters" ? (
     <ul>
       <li><a href="/docs/react">React</a></li>

@@ -310,6 +310,25 @@ export const docsNav: NavGroup[] = [
     ],
   },
   {
+    label: "Guides",
+    blocks: [
+      {
+        label: "",
+        items: [
+          { href: "/docs/theming", label: "Theming" },
+          { href: "/docs/mermaid", label: "Mermaid or Markdown" },
+          { href: "/docs/web-component", label: "Web component" },
+          { href: "/docs/spec", label: "Spec reference" },
+          { href: "/docs/migrate", label: "Migrate from v0" },
+          { href: "/docs/migrate/chartjs", label: "From Chart.js" },
+          { href: "/docs/migrate/recharts", label: "From Recharts" },
+          { href: "/docs/migrate/echarts", label: "From ECharts" },
+          { href: "/docs/cloud", label: "Cloud render" },
+        ],
+      },
+    ],
+  },
+  {
     label: "Concepts",
     blocks: [
       {
@@ -356,7 +375,10 @@ export const docsNav: NavGroup[] = [
         items: links(
           fromMocks
             .filter((article) => article.group === "Agents")
-            .map((article) => ({ slug: article.slug, label: article.title === "llms.txt" ? "llms.txt" : article.title })),
+            .map((article) => ({
+              slug: article.slug,
+              label: article.title === "llms.txt" ? "llms.txt" : article.slug === "mcp" ? "MCP server" : article.title,
+            })),
         ),
       },
     ],

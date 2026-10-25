@@ -1,0 +1,46 @@
+---
+import "../styles/surfaces.css";
+import Base from "../layouts/Base.astro";
+import ChartMount from "../components/ChartMount.astro";
+import { loadLayouts } from "../lib/batch3";
+
+const page = loadLayouts();
+const description = "Small multiples, a composed dashboard, breakpoint rules, and a right-to-left chart. All four are JSON keys on the spec.";
+---
+
+<Base title="Layout" description={description} tone="light">
+  <div class="wrap surface">
+    <h1>Layout</h1>
+    <p class="lede">
+      Facets, concatenated views, breakpoint rules, and right-to-left text are keys on the spec. One JSON document draws the whole figure.
+    </p>
+    <h2>Small multiples</h2>
+    <p>
+      <code>layout.facet.field</code> splits the rows. These eight cities share one y domain and one legend. With shared scales, the y title and ticks sit on the outer column and the x ticks sit on the bottom row.
+    </p>
+    <ChartMount spec={page.facet.spec} svg={page.facet.svg} alt={page.facet.alt} />
+    <h2>Dashboard</h2>
+    <p>
+      <code>layout.concat.columns</code> wraps the views. The arrivals line sets <code>span: 2</code>, so it sits above the dock bars and the cargo donut. The title belongs to the outer spec.
+    </p>
+    <ChartMount spec={page.dashboard.spec} svg={page.dashboard.svg} alt={page.dashboard.alt} />
+    <h2>Breakpoints</h2>
+    <p>The same facet uses four columns until the width is 560 or below, then two. Each panel stays tall enough for the ticks.</p>
+    <figure class="code">
+      <figcaption>json</figcaption>
+      <pre><code>{page.rule}</code></pre>
+    </figure>
+    <ChartMount spec={page.wide.spec} svg={page.wide.svg} alt={page.wide.alt} />
+    <ChartMount spec={page.narrow.spec} svg={page.narrow.svg} alt={page.narrow.alt} />
+    <h2>Right to left</h2>
+    <p>
+      <code>layout.direction</code> is <code>rtl</code>. The first city sits on the right, every bar is drawn, and the y axis follows it. The line below uses Hebrew month labels.
+    </p>
+    <ChartMount spec={page.rtl.spec} svg={page.rtl.svg} alt={page.rtl.alt} />
+    <ChartMount spec={page.hebrew.spec} svg={page.hebrew.svg} alt={page.hebrew.alt} />
+  </div>
+</Base>
+
+<script>
+  import "../scripts/mount-charts.ts";
+</script>

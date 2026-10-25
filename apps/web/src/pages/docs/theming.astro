@@ -1,0 +1,145 @@
+---
+import "../../styles/surfaces.css";
+import DocsPage from "../../components/DocsPage.astro";
+import ChartMount from "../../components/ChartMount.astro";
+import { loadTheming } from "../../lib/batch3";
+
+const page = loadTheming();
+const description = "Soft is the default ChartKit look. Switch refined, editorial, and midnight, or derive a palette from a brand colour.";
+const lightCss = `.chart-host {
+  --ck-background: transparent;
+  --ck-text: #1d1d1f;
+  --ck-muted: #6e6e73;
+  --ck-grid: rgb(0 0 0 / 0.06);
+  --ck-positive: #047857;
+  --ck-negative: #be123c;
+  --ck-font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.dark .chart-host {
+  --ck-text: #f5f5f7;
+  --ck-muted: #98989d;
+  --ck-grid: rgb(245 245 247 / 0.08);
+  --ck-positive: #30d158;
+  --ck-negative: #ff453a;
+}`;
+const shadcn = `.chart-host {
+  --ck-series-1: var(--chart-1);
+  --ck-series-2: var(--chart-2);
+  --ck-series-3: var(--chart-3);
+  --ck-series-4: var(--chart-4);
+  --ck-series-5: var(--chart-5);
+}`;
+const tokens = `{
+  "version": "1",
+  "type": "bar",
+  "theme": {
+    "tokens": {
+      "series": ["#007aff", "#34c759", "#ff9500", "#af52de"]
+    }
+  }
+}`;
+const brand = `import { paletteFromBrand } from "@chartkitdev/core/themes/brand";
+
+const series = paletteFromBrand("#007aff", "light");
+const spec = { version: "1", type: "bar", theme: { tokens: { series } } };`;
+---
+
+<DocsPage title="Theming" description={description} href="/docs/theming">
+  <p>
+    Soft is the default. Omit <code>theme</code>, or set <code>"auto"</code> or <code>"soft"</code>. The plot is transparent and the colours follow the page: <code>light-dark()</code> tracks <code>prefers-color-scheme</code> and an ancestor's <code>color-scheme</code>. The optional card is <code>#f5f5f7</code> in light and <code>#1c1c1e</code> in dark. <code>--ck-*</code> still overrides, and <code>--chart-N</code> is the next fallback.
+  </p>
+  <p>
+    <code>refined</code> and <code>editorial</code> are built-in names. <code>theme: "midnight"</code> is the opt-in dark card. Any other name still falls through to midnight until you import that preset from <code>@chartkitdev/core/themes/all</code>.
+  </p>
+  <div data-looks>
+    <div class="look-switch" role="group" aria-label="Chart look">
+      {
+        page.looks.map((look) => (
+          <button type="button" class={look.id === "soft" ? "btn btn-primary" : "btn btn-secondary"} aria-pressed={look.id === "soft" ? "true" : "false"} data-look-id={look.id}>
+            {look.label}
+          </button>
+        ))
+      }
+    </div>
+    <p class="meta" data-look-detail>{page.looks[0]?.detail}</p>
+    {
+      page.looks.map((look) => (
+        <div class={`look-stage look-${look.id}`} data-look={look.id} data-detail={look.detail} hidden={look.id === "soft" ? undefined : true}>
+          <div class="look-grid">
+            {look.charts.map((chart) => (
+              <ChartMount spec={chart.spec} svg={chart.svg} alt={chart.alt} preset />
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+  <p>This next chart leaves <code>theme</code> unset, so it is Soft with this page's text and grid tokens on top.</p>
+  <ChartMount spec={page.swatch.spec} svg={page.swatch.svg} alt={page.swatch.alt} />
+  <h2>Tokens</h2>
+  <div class="table-wrap">
+    <table class="opt-table">
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          page.tokens.map((row) => (
+            <tr>
+              <td><code>{row.token}</code></td>
+              <td>{row.role}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+  <h2>Light and dark</h2>
+  <figure class="code"><figcaption>css</figcaption><pre><code>{lightCss}</code></pre></figure>
+  <p>
+    Muted text has to clear 4.5:1 against the page. The midnight muted color <code>#8a8a8a</code> does not, on white, which is one reason the page default is <code>auto</code> and the host sets <code>--ck-muted</code>. To use a shadcn palette, point the series variables at yours:
+  </p>
+  <figure class="code"><figcaption>css</figcaption><pre><code>{shadcn}</code></pre></figure>
+  <h2>theme.tokens.series</h2>
+  <p>
+    A spec can replace the series list without a preset name. The base stays Soft unless you set <code>preset</code>. <code>lines</code> defaults to the same list, so thin strokes follow the fills unless you pass a darker set.
+  </p>
+  <figure class="code"><figcaption>json</figcaption><pre><code>{tokens}</code></pre></figure>
+  <h2>paletteFromBrand</h2>
+  <p>
+    <code>paletteFromBrand</code> is opt-in. It is not in the line bundle and it is not the default theme. Pass one hex colour, or a list, and <code>"light"</code> or <code>"dark"</code>. Put the result on <code>theme.tokens.series</code>.
+  </p>
+  <figure class="code"><figcaption>ts</figcaption><pre><code>{brand}</code></pre></figure>
+  <div data-brand>
+    <div class="brand-row">
+      <label>
+        Brand colour
+        <input type="color" value="#007aff" aria-label="Brand colour" />
+      </label>
+      <p class="meta" data-brand-caption>
+        <code>paletteFromBrand("#007aff", "light")</code> from <code>@chartkitdev/core/themes/brand</code>. The page scheme picks light or dark. Every colour clears 3:1 on white or on <code>#09090b</code>, not on this card.
+      </p>
+    </div>
+    <p class="status" data-brand-status hidden></p>
+    <div class="swatches" data-brand-swatches aria-hidden="true"></div>
+    <div class="ck-frame" data-brand-chart></div>
+  </div>
+  <h2>Dashboards</h2>
+  <p>
+    The <a href="/dashboards">dashboard pages</a> put the palette on <code>theme.tokens</code>: series, text, grid, positive, and negative. Each board ships a light and a dark token object. The page CSS styles the shell. Fonts are Inter or Roboto. ChartKit is not affiliated with or endorsed by those products. Gaps that still need a spec option are listed in <code>docs/dashboards/GAPS.md</code>.
+  </p>
+  <h2>Presets</h2>
+  <p>
+    Soft, refined, editorial, and midnight are built in. The older names ({page.themes.join(", ")}) register when you import <code>@chartkitdev/core/themes/all</code>. Set <code>theme</code> to that name. Several of those muted colours are under 4.5:1 on their own background, which is why Soft is the default.
+  </p>
+</DocsPage>
+
+<script>
+  import "../../scripts/mount-charts.ts";
+  import "../../scripts/theme-board.ts";
+  import "../../scripts/brand-palette.ts";
+</script>
