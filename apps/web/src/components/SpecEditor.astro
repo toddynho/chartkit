@@ -28,35 +28,41 @@ function pressed(group: ChipGroup, value: string): boolean {
     <span class="spec-try__title">{title}</span>
     <span class="spec-try__hint">{hint}</span>
   </div>
-  <div class="spec-try__split">
-    <div class="spec-editor">
-      <div class="spec-editor__bar">
-        <span>spec.json</span>
-        <span id="spec-status">valid · ready</span>
-      </div>
-      <label class="sr" for="spec-input">Editable chart specification</label>
-      <textarea id="spec-input" spellcheck="false">{initial}</textarea>
+  <div class="spec-unit">
+    <div class="spec-editor__bar">
+      <span>spec.json</span>
+      <span id="spec-status">valid · ready</span>
     </div>
-    <div class="spec-chips" role="group" aria-label="Spec options">
+    <div class="spec-try__split">
+      <div class="spec-editor">
+        <label class="sr" for="spec-input">Editable chart specification</label>
+        <textarea id="spec-input" spellcheck="false">{initial}</textarea>
+      </div>
       {
-        chips.map((group) => (
-          <div class="chip-row">
-            <span class="chip-row__label">{group.label}</span>
-            <div class="chip-row__opts">
-              {group.options.map((option) => (
-                <button
-                  type="button"
-                  class:list={["spec-chip", pressed(group, option.value) && "is-on"]}
-                  data-key={group.key}
-                  data-value={option.value}
-                  aria-pressed={pressed(group, option.value) ? "true" : "false"}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+        chips.length ? (
+          <div class="spec-chips" role="group" aria-label="Spec options">
+            {
+              chips.map((group) => (
+                <div class="chip-row">
+                  <span class="chip-row__label">{group.label}</span>
+                  <div class="chip-row__opts">
+                    {group.options.map((option) => (
+                      <button
+                        type="button"
+                        class:list={["spec-chip", pressed(group, option.value) && "is-on"]}
+                        data-key={group.key}
+                        data-value={option.value}
+                        aria-pressed={pressed(group, option.value) ? "true" : "false"}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))
+            }
           </div>
-        ))
+        ) : null
       }
     </div>
   </div>
