@@ -136,7 +136,7 @@ code {
   color: var(--bg);
   padding: 0.4rem 0.7rem;
   border-radius: 8px;
-  z-index: 40;
+  z-index: 50;
 }
 
 .skip:focus { top: 0.75rem; }
