@@ -56,13 +56,13 @@ function fencedSpecs(relativePath: string): unknown[] {
 }
 
 describe("published JSON examples", () => {
-  for (const file of ["docs/public/llms.txt", "docs/public/llms-full.txt", "packages/core/README.md"]) {
+  for (const file of ["catalog/public/llms.txt", "catalog/public/llms-full.txt", "packages/core/README.md"]) {
     it(`${file} has one valid, drawable spec per chart type`, () => {
       const specs = fencedSpecs(file);
       const types = specs.map((spec) => (spec as { type?: string }).type);
-      const expected = file === "docs/public/llms.txt" ? CHART_TYPES.filter((type) => type !== "pie") : CHART_TYPES;
+      const expected = file === "catalog/public/llms.txt" ? CHART_TYPES.filter((type) => type !== "pie") : CHART_TYPES;
       expect([...types].sort()).toEqual([...expected].sort());
-      if (file === "docs/public/llms.txt") {
+      if (file === "catalog/public/llms.txt") {
         const text = readFileSync(join(repoRoot, file), "utf8");
         expect(text).toContain("navigator");
         expect(text).toContain("drilldown");

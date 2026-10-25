@@ -1,13 +1,13 @@
 {
   "$schema": "https://context7.com/schema/context7.json",
   "projectTitle": "ChartKit",
-  "description": "JSON-spec SVG chart library. Round 7 benchmarks, including losses, are in docs/public/benchmarks.md.",
-  "folders": ["docs/public", "docs/content", "packages/core"],
-  "excludeFolders": ["packages/core/src", "packages/core/dist", "docs/.next"],
+  "description": "JSON-spec SVG chart library. Round 7 benchmarks, including losses, are in catalog/content/benchmarks.md.",
+  "folders": ["catalog/public", "catalog/content", "packages/core"],
+  "excludeFolders": ["packages/core/src", "packages/core/dist"],
   "excludeFiles": [],
   "rules": [
     "Prefer the JSON spec over React component props such as dataKey.",
-    "Cite benchmark losses as well as wins. The numbers are in docs/public/benchmarks.md.",
+    "Cite benchmark losses as well as wins. The numbers are in catalog/content/benchmarks.md.",
     "a11y.alt is required. Tooltip, zoom, pan, brush, and animation run in @chartkitdev/core/interact when the spec sets them. The static SVG does not paint them."
   ]
 }

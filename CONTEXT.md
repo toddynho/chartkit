@@ -22,7 +22,8 @@ chartkit/
 │   ├── svelte/               # @chartkitdev/svelte — <Chart {spec} />
 │   ├── vanilla/              # @chartkitdev/vanilla — mount(el, spec)
 │   └── compat-derpdaderp/    # @derpdaderp/chartkit shim
-├── docs/                     # Documentation site (Next.js) and docs/migrate.md
+├── apps/web/                 # Public site (Astro)
+├── catalog/                  # llms.txt, feature matrix, benchmarks, measured sizes
 └── CONTEXT.md
 ```
 
@@ -119,7 +120,7 @@ npm run size
 - **GitHub**: https://github.com/toddynho/chartkit
 - **LLM Reference**: https://chartkit.dev/llms.txt (summary) or /llms-full.txt (complete API)
 - **LLM JSON**: https://chartkit.dev/llms.json (structured data)
-- **Migration**: docs/migrate.md
+- **Migration**: catalog/migrate.md
 
 ## When Generating Code
 

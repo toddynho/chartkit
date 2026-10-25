@@ -15,8 +15,8 @@ const examplesDir = join(dataDir, "examples");
 rmSync(dataDir, { recursive: true, force: true });
 mkdirSync(examplesDir, { recursive: true });
 
-cpSync(join(repoRoot, "docs/public/features.json"), join(dataDir, "features.json"));
-cpSync(join(repoRoot, "docs/public/llms.txt"), join(dataDir, "llms.txt"));
+cpSync(join(repoRoot, "catalog/public/features.json"), join(dataDir, "features.json"));
+cpSync(join(repoRoot, "catalog/public/llms.txt"), join(dataDir, "llms.txt"));
 cpSync(join(repoRoot, "packages/core/schema/chartkit.schema.json"), join(dataDir, "schema.json"));
 
 const examples = readdirSync(join(repoRoot, "packages/core/examples")).filter((name) => name.endsWith(".json"));

@@ -32,8 +32,8 @@ interface Feed {
   recipes: Recipe[];
 }
 
-const feed = JSON.parse(readFileSync(join(repoRoot, "docs/public/recipes.json"), "utf8")) as Feed;
-const llms = readFileSync(join(repoRoot, "docs/public/llms.txt"), "utf8");
+const feed = JSON.parse(readFileSync(join(repoRoot, "catalog/public/recipes.json"), "utf8")) as Feed;
+const llms = readFileSync(join(repoRoot, "catalog/public/llms.txt"), "utf8");
 
 function at(spec: Record<string, unknown>, key: string): boolean {
   if (key.includes("[]")) return at(spec, key.replace("[]", ""));

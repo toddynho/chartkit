@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 function findRepoRoot(start) {
   let dir = start;
   for (let i = 0; i < 8; i++) {
-    if (existsSync(join(dir, "docs/public/llms.txt")) && existsSync(join(dir, "bench/agent/docs/sources.json"))) return dir;
+    if (existsSync(join(dir, "catalog/public/llms.txt")) && existsSync(join(dir, "bench/agent/docs/sources.json"))) return dir;
     const parent = dirname(dir);
     if (parent === dir) break;
     dir = parent;

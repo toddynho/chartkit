@@ -10,7 +10,7 @@ const src = join(root, "packages/core/src");
 const entry = join(tmpdir(), "chartkit-mermaid-sheet-entry.ts");
 const outfile = join(tmpdir(), "chartkit-mermaid-sheet.mjs");
 const htmlPath = join(tmpdir(), "chartkit-mermaid-sheet.html");
-const pngPath = join(root, "docs/public/mermaid-sheet.png");
+const pngPath = join(root, "catalog/public/mermaid-sheet.png");
 
 writeFileSync(
   entry,

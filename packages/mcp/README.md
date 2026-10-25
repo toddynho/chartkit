@@ -4,7 +4,7 @@ MCP server for [ChartKit](https://chartkit.dev). It speaks stdio through the off
 
 **This package is not published to npm yet.** Todd publishes it himself, and only when he says so. It is not in the repo's publish workflow. The `npx @chartkitdev/mcp` commands below are the setup to use after that publish. Until then they will not install the server.
 
-`validate`, `repair`, `render`, `lookup_feature`, `list_chart_types`, and `get_example` make no network calls. They use `@chartkitdev/core` and a copy of `docs/public/features.json`, `llms.txt`, the v1 JSON Schema, and the example specs that the build copies into the package. Feature statuses come from that file. This package does not invent them. `render_chart` is the exception: it POSTs the spec to ChartKit Cloud and returns the image URL plus repairs.
+`validate`, `repair`, `render`, `lookup_feature`, `list_chart_types`, and `get_example` make no network calls. They use `@chartkitdev/core` and a copy of `catalog/public/features.json`, `llms.txt`, the v1 JSON Schema, and the example specs that the build copies into the package. Feature statuses come from that file. This package does not invent them. `render_chart` is the exception: it POSTs the spec to ChartKit Cloud and returns the image URL plus repairs.
 
 The local `render` tool accepts `format: "svg"` only. PNG from that tool would add a rasterizer to this package, and it does not include one. `render_chart` can ask Cloud for PNG.
 

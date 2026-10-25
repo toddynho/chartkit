@@ -1,6 +1,6 @@
 /**
  * Paint dashboard SVGs with @chartkitdev/core and @chartkitdev/geo.
- * Specs come from docs/lib/dashboards.ts, the same module the Next.js pages use.
+ * Specs come from catalog/lib/dashboards.ts.
  * Output is apps/web/.generated/dashboards and is not committed.
  */
 import { mkdirSync, readdirSync, writeFileSync } from "node:fs";
@@ -11,7 +11,7 @@ import { renderBarList } from "@chartkitdev/core/charts/bar-list";
 import { render as renderExtra } from "@chartkitdev/core/extra";
 import { validate } from "@chartkitdev/core/validate";
 import { render as renderGeo } from "@chartkitdev/geo";
-import { dashboards, type DashChart, type DashSpark, type Dashboard, type DashThemes } from "../../../docs/lib/dashboards.ts";
+import { dashboards, type DashChart, type DashSpark, type Dashboard, type DashThemes } from "../../../catalog/lib/dashboards.ts";
 import type { PaintedBoard, PaintedChart, SpecBlock, StringPair, ThemeName, ThemeText } from "../src/lib/dashboard-types.ts";
 import { present, type DashTheme } from "./dashboard-present.ts";
 
@@ -196,7 +196,7 @@ async function paintSpark(spark: DashSpark, fallback: ThemeName, blocks: SpecBlo
 
 const started = Date.now();
 const boards = dashboards();
-const mdSlugs = readdirSync(join(root, "docs/public/dashboards"))
+const mdSlugs = readdirSync(join(root, "catalog/public/dashboards"))
   .filter((name) => name.endsWith(".md"))
   .map((name) => name.slice(0, -3))
   .sort();
@@ -230,6 +230,6 @@ for (const board of boards) {
 
 writeFileSync(
   join(outDir, "index.json"),
-  JSON.stringify({ source: "docs/lib/dashboards.ts", boards: index }),
+  JSON.stringify({ source: "catalog/lib/dashboards.ts", boards: index }),
 );
 console.log(`dashboards painted in ${((Date.now() - started) / 1000).toFixed(1)}s, rendered ${rendered}, reused ${reused}`);

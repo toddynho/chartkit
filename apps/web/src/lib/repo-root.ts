@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 export function repoRoot(): string {
   let dir = process.cwd();
   for (let hop = 0; hop < 6; hop++) {
-    if (existsSync(join(dir, "docs/public/llms.txt")) && existsSync(join(dir, "apps/web/package.json"))) return dir;
+    if (existsSync(join(dir, "catalog/public/llms.txt")) && existsSync(join(dir, "apps/web/package.json"))) return dir;
     const parent = dirname(dir);
     if (parent === dir) break;
     dir = parent;

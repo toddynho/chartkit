@@ -26,11 +26,11 @@ Canvas line, measured 2026-10-21, median of 5, Playwright Chromium, 640×360, sa
 
 Canvas losses: render is slower than SVG at 10k (7.8 vs 7.3), 100k (9.1 vs 8.2), and 1M (17.1 vs 16.5). First paint is slower than SVG at those sizes (21.8 vs 13.1, 20.1 vs 13.1, 27.7 vs 20.8) and slower than uPlot (14.5, 17.6, 25.1). The 1M update is slower than SVG (21.8 vs 20.6) and slower than uPlot (21.8 vs 20.9). Canvas wins the 10k and 100k updates against both SVG and uPlot. There is no first-paint crossover, so `auto` stays on SVG at 10k and switches at 100,000 rows, where the update win is large. 1M first paint is 27.7 ms and the update is 21.8 ms. `scripts/size.mjs` line is 34,554 bytes gzip, 539 bytes over main `9c1dbdc` (34,015). Facets, concatenation, breakpoints, and right-to-left layout load with `all` and `extra`, not with `createRenderer([line])`. The typed canvas sampler and the painter stay out of the line bundle. `@chartkitdev/core/all` is 64,372 bytes gzip (main 57,650). The canvas painter is a separate chunk, 57,127 bytes gzip (main 56,817). `interact` is 17,641 (main 16,637). `validate` is 32,206 (main 31,177). extra is 88,495 (main 82,076).
 
-**[Documentation](https://chartkit.dev)** | **[When to use](https://chartkit.dev/when-to-use)** | **[Benchmarks](https://chartkit.dev/benchmarks)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[Roadmap](ROADMAP.md)** | **[llms.txt](docs/public/llms.txt)**
+**[Documentation](https://chartkit.dev)** | **[When to use](https://chartkit.dev/when-to-use)** | **[Benchmarks](https://chartkit.dev/benchmarks)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[Roadmap](ROADMAP.md)** | **[llms.txt](catalog/public/llms.txt)**
 
 ---
 
-`@chartkitdev/core` has zero runtime dependencies and renders SVG from the spec. The adapters depend on that core and on their framework. One minimal valid spec for each chart type is in [packages/core/README.md](packages/core/README.md) and [docs/public/llms.txt](docs/public/llms.txt).
+`@chartkitdev/core` has zero runtime dependencies and renders SVG from the spec. The adapters depend on that core and on their framework. One minimal valid spec for each chart type is in [packages/core/README.md](packages/core/README.md) and [catalog/public/llms.txt](catalog/public/llms.txt).
 
 ## Installation
 
@@ -46,7 +46,7 @@ npm install @chartkitdev/vanilla
 
 `@chartkitdev/geo` is in this repo and is not on npm. Choropleth and point maps are not part of the line or `all` bundles. Each atlas is its own chunk. There is no tile layer.
 
-`@derpdaderp/chartkit` remains as a compatibility shim (not published from this branch). See [docs/migrate.md](docs/migrate.md).
+`@derpdaderp/chartkit` remains as a compatibility shim (not published from this branch). See [catalog/migrate.md](catalog/migrate.md).
 
 ## JSON spec
 
@@ -192,18 +192,15 @@ Full documentation and examples at **[chartkit.dev](https://chartkit.dev)**
 - [Themes](https://chartkit.dev/docs/theming)
 - [Live demo](https://chartkit.dev/demo)
 
-## Public site (Astro)
+## Public site
 
-The next marketing site and docs shell is [`apps/web`](apps/web) (`chartkit-web`). It is an Astro app. [chartkit.dev](https://chartkit.dev) still serves the Next.js app in [`docs/`](docs). Both stay installed. `apps/web` does not replace `docs/` until the pages have moved and the host is pointed at it on purpose.
+[`apps/web`](apps/web) (`chartkit-web`) is the only public site. `npm run dev` and `npm run dev:web` start it at http://localhost:4321. Astro 7 needs Node 22.23.4 or newer. The library packages still allow Node 20.
 
-```bash
-npm run dev:web
-npm run build:web
-```
+`llms.txt`, the feature matrix, measured sizes, and benchmarks live in [`catalog/`](catalog). That folder is source data, not a second site.
 
-`npm run dev` and `npm run build:docs` still start and build the Next.js docs. Astro 7 needs Node 22.23.4 or newer. The rest of this repo allows Node 20.
+Merging this repo does not deploy chartkit.dev. The manual steps are in [apps/web/README.md](apps/web/README.md).
 
-Routes in the scaffold: `/` (hero, Cloud API, pricing, gallery), `/cloud`, and `/docs` with Start, Concepts, Chart types, Reference, and Agents. Chart-type URLs match the current site (`/docs/charts/<type>`). Content on those routes is a stub. See [apps/web/README.md](apps/web/README.md).
+People coming from `@derpdaderp/chartkit` and the prop-based dashboard components use one docs page: [Upgrading from v0](https://chartkit.dev/docs/migrate).
 
 ## Author
 

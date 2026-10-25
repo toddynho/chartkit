@@ -120,7 +120,7 @@ export function recordedAgentSection() {
   lines.push(`| None (the run above) | ${mainPass} / ${mainN} | Vega-Lite-shaped specs |`);
   const extraNotes = [];
   for (const [file, label] of [
-    ["supp-llms.json", "`docs/public/llms.txt` as shipped (recorded as 5.9 KB)"],
+    ["supp-llms.json", "`catalog/public/llms.txt` as shipped (recorded as 5.9 KB)"],
     ["supp-examples.json", "the 15 `packages/core/examples/*.json` files (recorded as 6.2 KB, plus one hint sentence)"],
   ]) {
     const extra = load(file);

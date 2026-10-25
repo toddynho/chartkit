@@ -11,6 +11,6 @@ export function notifyOnce(): void {
     "[@derpdaderp/chartkit] This package has moved to @chartkitdev/react. " +
       "This compatibility shim re-exports that package and logs this notice once in development. " +
       "Install @chartkitdev/react (and @chartkitdev/core for the JSON spec). " +
-      "See docs/migrate.md for the rename and the npm deprecate command.",
+      "See catalog/migrate.md for the rename and the npm deprecate command.",
   );
 }

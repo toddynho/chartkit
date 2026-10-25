@@ -1,6 +1,6 @@
 /**
  * Paint compare, maps, demo, interaction, layouts, spec charts, theming,
- * convert coverage, and the when-to-use FAQ. Specs stay in docs/lib.
+ * convert coverage, and the when-to-use FAQ. Specs stay in catalog/lib.
  * Output is apps/web/.generated and is not committed.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -30,7 +30,7 @@ register(pathToFileURL(join(scriptDir, "json-import-hook.mjs")).href, {
   parentURL: import.meta.url,
 });
 
-process.chdir(join(root, "docs"));
+process.chdir(join(root, "catalog"));
 
 function write(file: string, value: unknown): void {
   mkdirSync(dirname(file), { recursive: true });
@@ -52,15 +52,15 @@ function preset(spec: unknown): boolean {
   return typeof theme === "string" && theme.length > 0 && theme !== "auto";
 }
 
-const matrixLib = await import("../../../docs/lib/matrix.ts");
-const measured = await import("../../../docs/lib/measured.ts");
-const geoSamples = await import("../../../docs/lib/geo-samples.ts");
+const matrixLib = await import("../../../catalog/lib/matrix.ts");
+const measured = await import("../../../catalog/lib/measured.ts");
+const geoSamples = await import("../../../catalog/lib/geo-samples.ts");
 const { paintScale, render: renderGeo } = await import("@chartkitdev/geo");
-const { whenToUseFaqs } = await import("../../../docs/lib/faq.ts");
-const { SITE } = await import("../../../docs/lib/site.ts");
-const { specPages } = await import("../../../docs/lib/spec-charts.ts");
-const { chartTypes, THEMES, TOKENS, minimalSpec } = await import("../../../docs/lib/specs.ts");
-const { snippets } = await import("../../../docs/lib/cloud.ts");
+const { whenToUseFaqs } = await import("../../../catalog/lib/faq.ts");
+const { SITE } = await import("../../../catalog/lib/site.ts");
+const { specPages } = await import("../../../catalog/lib/spec-charts.ts");
+const { chartTypes, THEMES, TOKENS, minimalSpec } = await import("../../../catalog/lib/specs.ts");
+const { snippets } = await import("../../../catalog/lib/cloud.ts");
 const convertLib = await import("@chartkitdev/convert");
 
 function paintCompare(): number {

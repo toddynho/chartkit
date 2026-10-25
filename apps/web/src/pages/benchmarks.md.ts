@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
 import { MARKDOWN, artifact } from "../lib/artifacts";
 
-/** The benchmarks write-up Next reads from docs/content/benchmarks.md. */
-export const GET: APIRoute = () => artifact("docs/content/benchmarks.md", MARKDOWN);
+/** Benchmarks write-up from catalog/content/benchmarks.md. */
+export const GET: APIRoute = () => artifact("catalog/content/benchmarks.md", MARKDOWN);

@@ -1514,8 +1514,8 @@
     "slug": "llms-txt",
     "group": "Agents",
     "title": "llms.txt",
-    "lede": "mock-plausible Agents \u2014 published LLM indexes: `llms.txt` (\u22646400 B), `llms-full.txt`, and `llms.json`. Served from `docs/public/` at extensionless prod URLs. Facts below match the repo on disk (core v0.5.0).",
-    "description": "mock-plausible Agents \u2014 published LLM indexes: `llms.txt` (\u22646400 B), `llms-full.txt`, and `llms.json`. Served from `docs/public/` at extensionless prod URLs. Facts below match the ",
+    "lede": "mock-plausible Agents \u2014 published LLM indexes: `llms.txt` (\u22646400 B), `llms-full.txt`, and `llms.json`. Served from `catalog/public/` at extensionless prod URLs. Facts below match the repo on disk (core v0.5.0).",
+    "description": "mock-plausible Agents \u2014 published LLM indexes: `llms.txt` (\u22646400 B), `llms-full.txt`, and `llms.json`. Served from `catalog/public/` at extensionless prod URLs. Facts below match the ",
     "tryIntro": "",
     "sections": [
       {
@@ -1536,7 +1536,7 @@
         ],
         "list": [],
         "code": [
-          "`// packages/core/src/__tests__/mermaid.test.ts const text = readFileSync(\"docs/public/llms.txt\", \"utf8\"); expect(text).toMatch(/fromMermaid|toSpec/); expect(Buffer.byteLength(text)).toBeLessThanOrEqual(6400);`"
+          "`// packages/core/src/__tests__/mermaid.test.ts const text = readFileSync(\"catalog/public/llms.txt\", \"utf8\"); expect(text).toMatch(/fromMermaid|toSpec/); expect(Buffer.byteLength(text)).toBeLessThanOrEqual(6400);`"
         ]
       },
       {
@@ -1551,7 +1551,7 @@
       {
         "title": "Serving \u00b7 discovery",
         "paragraphs": [
-          "Static files under `docs/public/`. Next config sets plain text / JSON headers and `Cache-Control: public, max-age=86400`. Layout exposes `ai:llms` / `ai:llms-full` and `<link rel=\"alternate\" type=\"text/plain\">`. `/.well-known/llms.txt` re-reads `public/llms.txt` (or redirects to prod)."
+          "Static files under `catalog/public/`. Next config sets plain text / JSON headers and `Cache-Control: public, max-age=86400`. Layout exposes `ai:llms` / `ai:llms-full` and `<link rel=\"alternate\" type=\"text/plain\">`. `/.well-known/llms.txt` re-reads `public/llms.txt` (or redirects to prod)."
         ],
         "list": [],
         "code": [
@@ -1561,7 +1561,7 @@
       {
         "title": "Generated indexes",
         "paragraphs": [
-          "These three files are the agent indexes \u2014 checked into `docs/public/`, verified by tests, listed in the sitemap, and linked from Footer + Agents. They are not regenerated every build like `BENCHMARKS.md`; edit them when the spec surface changes, keep `llms.txt` \u22646400 B, and keep one drawable example per type."
+          "These three files are the agent indexes \u2014 checked into `catalog/public/`, verified by tests, listed in the sitemap, and linked from Footer + Agents. They are not regenerated every build like `BENCHMARKS.md`; edit them when the spec surface changes, keep `llms.txt` \u22646400 B, and keep one drawable example per type."
         ],
         "list": [],
         "code": []

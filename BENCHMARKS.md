@@ -197,7 +197,7 @@ These are not the published protocol. The context files were not part of the che
 | Context | ChartKit pass | Failures |
 |---|---:|---|
 | None (the run above) | 1 / 42 | Vega-Lite-shaped specs |
-| `docs/public/llms.txt` as shipped (recorded as 5.9 KB) | 18 / 42 | donut ×3, combo ×3, heatmap ×3, gauge ×3, kpi ×3, sparkline ×3, mini-area ×3, progress-ring ×3 |
+| `catalog/public/llms.txt` as shipped (recorded as 5.9 KB) | 18 / 42 | donut ×3, combo ×3, heatmap ×3, gauge ×3, kpi ×3, sparkline ×3, mini-area ×3, progress-ring ×3 |
 | the 15 `packages/core/examples/*.json` files (recorded as 6.2 KB, plus one hint sentence) | 40 / 42 | heatmap ×2 |
 
 supp-llms.json failures: donut-traffic, donut-budget, donut-survey, combo-margin, combo-orders, combo-weather, heat-load, heat-commits, heat-sales, gauge-done, gauge-cpu, gauge-nps, kpi-revenue, kpi-errors, kpi-uptime, spark-latency, spark-sales, spark-queue, mini-balance, mini-cpu, mini-signups, ring-uptime, ring-storage, ring-tasks. supp-llms.json: 92434 input tokens, 6805 output tokens, about $0.38 at the same list price. supp-examples.json failures: heat-load, heat-sales. supp-examples.json: 92098 input tokens, 6283 output tokens, about $0.37 at the same list price.

@@ -115,7 +115,7 @@ const honestLedes: Record<string, string> = {
   validate: "validate() returns every diagnostic in one pass. repair() applies the safe JSON Patch fixes and does not mutate the input. render() does not validate.",
   repair: "repair() applies the safe JSON Patch on each error and revalidates. It does not invent data. A missing or unknown type is reported first.",
   render: "render() from @chartkitdev/core/all draws the core charts. @chartkitdev/core/extra adds histogram through rose and the planning charts. render() does not validate and does not throw.",
-  "llms-txt": "llms.txt is the short agent index: the rules, the repair loop, and one spec per chart type. chartkit.dev still serves that file from the Next.js app.",
+  "llms-txt": "llms.txt is the short agent index: the rules, the repair loop, and one spec per chart type. This site serves it at /llms.txt.",
   mcp: "@chartkitdev/mcp is not on npm yet. The server speaks stdio and calls validate, repair, and render in-process. render_chart is the one tool that calls Cloud.",
 };
 
@@ -326,7 +326,7 @@ export const docsNav: NavGroup[] = [
           { href: "/docs/mermaid", label: "Mermaid" },
           { href: "/docs/web-component", label: "Web component" },
           { href: "/docs/spec", label: "Spec" },
-          { href: "/docs/migrate", label: "Migrate" },
+          { href: "/docs/migrate", label: "Upgrading from v0" },
           { href: "/docs/cloud", label: "Cloud render" },
         ],
       },

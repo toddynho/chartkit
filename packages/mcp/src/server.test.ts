@@ -54,8 +54,8 @@ afterEach(() => {
 
 describe("bundled data", () => {
   it("copies features.json, llms.txt, the schema, and the examples without edits", () => {
-    expect(sha(join(pkgRoot, "data/features.json"))).toBe(sha(join(repoRoot, "docs/public/features.json")));
-    expect(readFileSync(join(pkgRoot, "data/llms.txt"), "utf8")).toBe(readFileSync(join(repoRoot, "docs/public/llms.txt"), "utf8"));
+    expect(sha(join(pkgRoot, "data/features.json"))).toBe(sha(join(repoRoot, "catalog/public/features.json")));
+    expect(readFileSync(join(pkgRoot, "data/llms.txt"), "utf8")).toBe(readFileSync(join(repoRoot, "catalog/public/llms.txt"), "utf8"));
     expect(readFileSync(join(pkgRoot, "data/schema.json"), "utf8")).toBe(
       readFileSync(join(repoRoot, "packages/core/schema/chartkit.schema.json"), "utf8"),
     );
@@ -140,7 +140,7 @@ describe("MCP tools", () => {
   });
 
   it("looks up features from the bundled matrix, including synonyms and competitors", async () => {
-    const matrix = JSON.parse(readFileSync(join(repoRoot, "docs/public/features.json"), "utf8")) as {
+    const matrix = JSON.parse(readFileSync(join(repoRoot, "catalog/public/features.json"), "utf8")) as {
       features: {
         id: string;
         label: string;
@@ -236,7 +236,7 @@ describe("MCP resources", () => {
       expect(uris).toEqual(["chartkit://llms.txt", "chartkit://schema/v1.json"]);
 
       const llms = await client.readResource({ uri: "chartkit://llms.txt" });
-      expect(textOf(llms.contents[0])).toBe(readFileSync(join(repoRoot, "docs/public/llms.txt"), "utf8"));
+      expect(textOf(llms.contents[0])).toBe(readFileSync(join(repoRoot, "catalog/public/llms.txt"), "utf8"));
       const schema = await client.readResource({ uri: "chartkit://schema/v1.json" });
       expect(textOf(schema.contents[0])).toBe(readFileSync(join(repoRoot, "packages/core/schema/chartkit.schema.json"), "utf8"));
       expect(schema.contents[0]?.mimeType).toBe("application/json");

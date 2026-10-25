@@ -1,6 +1,6 @@
 # ChartKit docs mocks
 
-Static HTML/CSS design mocks for the left-nav docs information architecture. **Draft only — not production.** They are here so the layout can be clicked through locally. They are not the ChartKit docs site and are not wired into the Next.js app under `docs/`.
+Static HTML/CSS design mocks for the left-nav docs information architecture. **Draft only — not production.** They are here so the layout can be clicked through locally. They are not the ChartKit site in `apps/web`.
 
 ## Click through locally
 

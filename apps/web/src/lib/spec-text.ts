@@ -28,7 +28,7 @@ export function scriptJson(value: unknown): string {
   return JSON.stringify(value).replace(/</g, "\\u003c");
 }
 
-/** Same trimming as `optionText` in docs/lib/matrix.ts. */
+/** Same trimming as `optionText` in catalog/lib/matrix.ts. */
 export function optionText(cell: { apiPaths?: string[] } | undefined): string {
   const paths = cell?.apiPaths ?? [];
   const concrete = paths.filter((path) => !path.startsWith("~"));
