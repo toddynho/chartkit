@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Themes · Reference · ChartKit Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --bg-elev: #ffffff;
+      --fg: #1d1d1f;
+      --muted: #6e6e73;
+      --line: rgba(0,0,0,0.08);
+      --accent: #0071e3;
+      --brand-kit: #0ea5e9;
+      --radius-ui: 980px;
+      --radius-card: 14px;
+      --radius-code: 12px;
+      --sidebar-w: 248px;
+      --preview-w: 520px;
+      --header-h: 44px;
+      --ease-out-expo: cubic-bezier(0,0,0.5,1);
+      --ease-nav: cubic-bezier(0.4,0,0.6,1);
+      --dur-fast: 200ms;
+      --dur: 320ms;
+      --code-bg: #fbfbfd;
+      --soft-fill: #0071e3;
+      --soft-sky: #0ea5e9;
+      --callout-bg: rgba(0,113,227,0.05);
+      --callout-border: rgba(0,113,227,0.14);
+      --midnight-bg: #0f1115;
+      --midnight-fg: #f5f5f7;
+      --midnight-muted: #86868b;
+      --midnight-line: rgba(255,255,255,0.08);
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      font-size:14.5px;
+      line-height:1.5;
+      letter-spacing:-0.011em;
+      color:var(--fg);
+      background:var(--bg);
+      -webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit;text-decoration:none}
+    :focus{outline:none}
+    :focus-visible{outline:3px solid rgba(0,113,227,0.45);outline-offset:3px;border-radius:6px}
+    button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;padding:0}
+
+    /* ── Header ── */
+    .site-header{
+      position:sticky;top:0;z-index:100;height:var(--header-h);
+      background:rgba(245,245,247,0.65);
+      backdrop-filter:saturate(180%) blur(20px);
+      -webkit-backdrop-filter:saturate(180%) blur(20px);
+      border-bottom:1px solid transparent;
+      transition:background var(--dur) var(--ease-nav),border-color var(--dur) var(--ease-nav),box-shadow var(--dur) var(--ease-nav);
+    }
+    .site-header.is-scrolled{
+      background:rgba(255,255,255,0.82);
+      border-bottom-color:rgba(0,0,0,0.07);
+      box-shadow:0 .5px 0 rgba(0,0,0,0.03),0 8px 24px rgba(0,0,0,0.04);
+    }
+    .site-header__inner{
+      width:100%;padding:0 20px;height:100%;
+      display:flex;align-items:center;gap:20px;
+    }
+    .logo{
+      display:inline-flex;align-items:center;gap:7px;
+      font-size:13px;font-weight:600;letter-spacing:-0.02em;
+      transition:opacity var(--dur-fast) var(--ease-nav);flex-shrink:0;
+    }
+    .logo:hover{opacity:.7}
+    .logo__mark{display:block;width:16px;height:16px}
+    .logo__kit{color:var(--brand-kit)}
+
+    .nav{
+      display:flex;align-items:center;gap:22px;
+      font-size:12px;color:var(--muted);margin-left:8px;
+    }
+    .nav a{
+      color:var(--muted);
+      transition:color var(--dur) var(--ease-nav);
+    }
+    .nav a:hover{color:var(--fg)}
+    .nav a.is-active{color:var(--fg);font-weight:500}
+
+    .header-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+    .search-pill{
+      display:inline-flex;align-items:center;gap:8px;
+      height:28px;padding:0 10px 0 11px;
+      border-radius:8px;
+      background:rgba(0,0,0,0.04);
+      border:1px solid rgba(0,0,0,0.06);
+      color:var(--muted);font-size:12px;
+      transition:background var(--dur-fast) var(--ease-nav),border-color var(--dur-fast) var(--ease-nav);
+      cursor:default;user-select:none;
+    }
+    .search-pill:hover{background:rgba(0,0,0,0.055);border-color:rgba(0,0,0,0.09)}
+    .search-pill__icon{opacity:.55;display:flex}
+    .search-pill__label{opacity:.85}
+    .search-pill__kbd{
+      margin-left:4px;display:inline-flex;align-items:center;justify-content:center;
+      height:18px;min-width:18px;padding:0 5px;
+      border-radius:5px;font-size:10.5px;font-weight:500;
+      background:var(--bg-elev);border:1px solid rgba(0,0,0,0.08);
+      color:var(--muted);font-family:inherit;letter-spacing:-0.02em;
+    }
+    .nav-ext{
+      font-size:12px;color:var(--muted);
+      transition:color var(--dur) var(--ease-nav);
+    }
+    .nav-ext:hover{color:var(--fg)}
+
+    .sidebar-toggle{
+      display:none;align-items:center;justify-content:center;
+      width:32px;height:32px;border-radius:8px;color:var(--fg);
+      transition:background var(--dur-fast) var(--ease-nav);
+    }
+    .sidebar-toggle:hover{background:rgba(0,0,0,0.05)}
+    .sidebar-toggle svg{display:block}
+
+    /* ── Full-bleed shell ── */
+    .shell{
+      width:100%;
+      display:grid;
+      grid-template-columns:var(--sidebar-w) minmax(0,1fr) var(--preview-w);
+      gap:0;
+      min-height:calc(100vh - var(--header-h));
+      align-items:start;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar{
+      position:sticky;top:var(--header-h);
+      height:calc(100vh - var(--header-h));
+      overflow-y:auto;overflow-x:hidden;
+      padding:24px 12px 40px 16px;
+      border-right:1px solid var(--line);
+      background:rgba(245,245,247,0.55);
+      scrollbar-width:thin;
+      scrollbar-color:rgba(0,0,0,0.12) transparent;
+    }
+    .sidebar::-webkit-scrollbar{width:6px}
+    .sidebar::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.12);border-radius:6px}
+
+    .side-section{margin-bottom:20px}
+    .side-section__label{
+      display:block;margin:0 0 5px 10px;
+      font-size:11px;font-weight:600;
+      letter-spacing:0.055em;text-transform:uppercase;
+      color:rgba(110,110,115,0.92);
+    }
+    .side-nav{list-style:none;margin:0;padding:0}
+    .side-nav a{
+      position:relative;
+      display:flex;align-items:center;
+      padding:6px 10px 6px 12px;margin:1px 0;
+      font-size:13px;line-height:1.35;letter-spacing:-0.01em;
+      font-weight:400;
+      color:rgba(29,29,31,0.72);
+      border-radius:8px;
+      transition:
+        background var(--dur) var(--ease-out-expo),
+        color var(--dur) var(--ease-out-expo),
+        font-weight var(--dur-fast) var(--ease-nav),
+        box-shadow var(--dur) var(--ease-out-expo);
+    }
+    .side-nav a::before{
+      content:"";
+      position:absolute;left:0;top:50%;
+      width:2px;height:0;
+      border-radius:2px;
+      background:var(--fg);
+      transform:translateY(-50%);
+      opacity:0;
+      transition:height var(--dur) var(--ease-out-expo),opacity var(--dur) var(--ease-out-expo);
+    }
+    .side-nav a:hover{
+      background:rgba(0,0,0,0.03);
+      color:var(--fg);
+    }
+    .side-nav a.is-active{
+      background:rgba(0,0,0,0.045);
+      color:var(--fg);
+      font-weight:600;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,0.025);
+    }
+    .side-nav a.is-active::before{
+      height:14px;opacity:0.85;
+    }
+    .side-nav a.side-nav__more{
+      color:var(--muted);font-size:12.5px;font-weight:400;
+    }
+    .side-nav a.side-nav__more:hover{color:var(--accent)}
+    .side-nav a.side-nav__more.is-active{color:var(--fg)}
+
+    .side-footer{
+      margin-top:8px;padding-top:16px;
+      border-top:1px solid var(--line);
+    }
+    .side-footer a{
+      display:flex;align-items:center;gap:7px;
+      padding:6px 10px;margin:1px 0;
+      font-size:12.5px;color:var(--muted);
+      border-radius:8px;
+      transition:color var(--dur-fast) var(--ease-nav),background var(--dur-fast) var(--ease-nav);
+    }
+    .side-footer a:hover{color:var(--fg);background:rgba(0,0,0,0.03)}
+    .side-footer svg{opacity:.55;flex-shrink:0}
+
+    /* ── Main / prose ── */
+    .main{
+      min-width:0;
+      padding:32px 36px 72px;
+      /* fill the fluid center column — no artificial 720 cap */
+    }
+    .breadcrumb{
+      display:flex;align-items:center;gap:6px;
+      margin:0 0 16px;
+      font-size:12px;color:var(--muted);
+    }
+    .breadcrumb a{color:var(--muted);transition:color var(--dur-fast) var(--ease-nav)}
+    .breadcrumb a:hover{color:var(--fg)}
+    .breadcrumb__sep{opacity:.4}
+    .breadcrumb__current{color:var(--fg);font-weight:500}
+
+    .prose h1{
+      margin:0 0 10px;
+      font-size:32px;font-weight:600;
+      letter-spacing:-0.028em;line-height:1.15;
+    }
+    .prose .lede{
+      margin:0 0 28px;
+      font-size:16.5px;line-height:1.45;
+      letter-spacing:-0.01em;color:var(--muted);
+      max-width:46em;
+    }
+    .prose h2{
+      margin:36px 0 12px;
+      font-size:20px;font-weight:600;
+      letter-spacing:-0.022em;line-height:1.25;
+      scroll-margin-top:calc(var(--header-h) + 16px);
+    }
+    .prose h2:first-of-type{margin-top:4px}
+    .prose p{
+      margin:0 0 14px;
+      font-size:14.5px;line-height:1.6;
+      color:rgba(29,29,31,0.88);
+      max-width:52em;
+    }
+    .prose p a{color:var(--accent);transition:opacity var(--dur-fast) var(--ease-nav)}
+    .prose p a:hover{opacity:.7}
+    .prose code{
+      font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+      font-size:12.5px;font-weight:500;
+      padding:1.5px 5px;border-radius:5px;
+      background:rgba(0,0,0,0.045);
+      color:var(--fg);
+    }
+    .prose pre code{padding:0;background:none;font-weight:400;font-size:12.5px}
+
+    .code-block{
+      position:relative;margin:14px 0 20px;
+      border-radius:var(--radius-code);
+      background:var(--code-bg);
+      border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+      overflow:hidden;
+    }
+    .code-block__bar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:8px 12px;
+      background:linear-gradient(180deg,#fbfbfd 0%,#f5f5f7 100%);
+      border-bottom:1px solid rgba(0,0,0,0.06);
+    }
+    .code-block__lang{
+      font-size:11px;font-weight:500;color:var(--muted);
+      font-variant-numeric:tabular-nums;
+    }
+    .code-block__copy{
+      font-size:11px;font-weight:500;color:var(--muted);
+      padding:3px 8px;border-radius:6px;
+      transition:background var(--dur-fast) var(--ease-nav),color var(--dur-fast) var(--ease-nav);
+    }
+    .code-block__copy:hover{background:rgba(0,0,0,0.05);color:var(--fg)}
+    .code-block pre{
+      margin:0;padding:14px 16px 16px;
+      overflow-x:auto;
+      font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+      font-size:12.5px;line-height:1.6;
+      color:var(--fg);
+    }
+
+    /* ── Try-it playground (Stripe energy) ── */
+    .try{
+      margin:8px 0 28px;
+      border-radius:16px;
+      background:var(--bg-elev);
+      border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02),0 10px 28px rgba(0,0,0,0.045);
+      overflow:hidden;
+    }
+    .try__bar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:10px 14px;
+      background:linear-gradient(180deg,#fbfbfd 0%,#f5f5f7 100%);
+      border-bottom:1px solid rgba(0,0,0,0.06);
+    }
+    .try__title{
+      font-size:12px;font-weight:600;letter-spacing:-0.01em;
+      color:var(--fg);
+    }
+    .try__hint{
+      font-size:11px;color:var(--muted);font-weight:400;
+    }
+    .try__body{padding:14px 14px 16px}
+    .try__split{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 196px;
+      gap:14px;
+      align-items:stretch;
+    }
+    .chips{
+      display:flex;flex-direction:column;gap:12px;
+      padding:12px 12px 14px;
+      border-radius:var(--radius-code);
+      background:rgba(0,0,0,0.02);
+      border:1px solid rgba(0,0,0,0.06);
+      align-self:stretch;
+    }
+    .chip-row{display:flex;flex-direction:column;align-items:stretch;gap:6px}
+    .chip-row__opts{display:flex;flex-wrap:wrap;gap:6px}
+    .chip-row__label{
+      font-size:10.5px;font-weight:600;color:rgba(110,110,115,0.95);
+      letter-spacing:0.04em;text-transform:uppercase;
+    }
+    .chip{
+      display:inline-flex;align-items:center;justify-content:center;
+      height:28px;padding:0 11px;flex:1 1 auto;min-width:0;
+      font-size:12px;font-weight:500;letter-spacing:-0.01em;
+      color:rgba(29,29,31,0.72);
+      background:rgba(0,0,0,0.035);
+      border:1px solid transparent;
+      border-radius:980px;
+      transition:
+        background var(--dur-fast) var(--ease-out-expo),
+        color var(--dur-fast) var(--ease-out-expo),
+        border-color var(--dur-fast) var(--ease-out-expo),
+        box-shadow var(--dur-fast) var(--ease-out-expo),
+        transform var(--dur-fast) var(--ease-out-expo);
+    }
+    .chip:hover{
+      background:rgba(0,0,0,0.055);
+      color:var(--fg);
+    }
+    .chip:active{transform:scale(0.97)}
+    .chip.is-on{
+      background:rgba(0,0,0,0.06);
+      color:var(--fg);
+      border-color:rgba(0,0,0,0.08);
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,0.02);
+      font-weight:600;
+    }
+    .chip.is-on[data-accent="soft"]{
+      background:rgba(0,113,227,0.1);
+      border-color:rgba(0,113,227,0.18);
+      color:var(--accent);
+      box-shadow:none;
+    }
+    .chip.is-on[data-accent="midnight"]{
+      background:rgba(15,17,21,0.9);
+      border-color:rgba(15,17,21,0.95);
+      color:#f5f5f7;
+      box-shadow:none;
+    }
+
+    .spec-editor{
+      position:relative;
+      border-radius:var(--radius-code);
+      background:var(--code-bg);
+      border:1px solid rgba(0,0,0,0.07);
+      overflow:hidden;
+      min-width:0;
+      display:flex;flex-direction:column;
+    }
+    .spec-editor textarea{flex:1 1 auto}
+    .spec-editor__bar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:7px 12px;
+      border-bottom:1px solid rgba(0,0,0,0.06);
+      background:linear-gradient(180deg,#fbfbfd 0%,#f5f5f7 100%);
+    }
+    .spec-editor__lang{
+      font-size:11px;font-weight:500;color:var(--muted);
+    }
+    .spec-editor__status{
+      font-size:11px;font-weight:500;
+      font-variant-numeric:tabular-nums;
+      color:#30a46c;
+      transition:color var(--dur-fast) var(--ease-nav);
+    }
+    .spec-editor__status.is-err{color:#e5484d}
+    .spec-editor__status.is-idle{color:var(--muted)}
+    .spec-editor textarea{
+      display:block;width:100%;
+      min-height:280px;max-height:440px;
+      margin:0;padding:14px 16px 16px;
+      border:none;resize:vertical;
+      background:transparent;
+      font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+      font-size:12.5px;line-height:1.6;
+      letter-spacing:-0.01em;
+      color:var(--fg);
+      tab-size:2;
+      outline:none;
+    }
+    .spec-editor textarea:focus{
+      box-shadow:inset 0 0 0 1.5px rgba(0,113,227,0.22);
+    }
+
+    /* Agent callout */
+    .callout{
+      margin:28px 0 8px;
+      padding:16px 18px;
+      border-radius:var(--radius-card);
+      background:var(--callout-bg);
+      border:1px solid var(--callout-border);
+    }
+    .callout__eyebrow{
+      display:flex;align-items:center;gap:7px;
+      margin:0 0 6px;
+      font-size:11px;font-weight:600;
+      letter-spacing:0.05em;text-transform:uppercase;
+      color:var(--accent);
+    }
+    .callout__eyebrow svg{flex-shrink:0}
+    .callout h3{
+      margin:0 0 6px;
+      font-size:15.5px;font-weight:600;
+      letter-spacing:-0.018em;line-height:1.3;
+    }
+    .callout p{
+      margin:0;
+      font-size:13.5px;line-height:1.5;
+      color:rgba(29,29,31,0.78);
+      max-width:none;
+    }
+    .callout code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:12px;font-weight:500;
+      padding:1px 4px;border-radius:4px;
+      background:rgba(0,113,227,0.08);
+    }
+    .callout__steps{
+      display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;
+    }
+    .callout__step{
+      display:inline-flex;align-items:center;gap:5px;
+      padding:4px 10px;
+      font-size:11.5px;font-weight:500;
+      border-radius:980px;
+      background:rgba(255,255,255,0.7);
+      border:1px solid rgba(0,113,227,0.12);
+      color:var(--fg);
+    }
+    .callout__step span{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:16px;height:16px;border-radius:50%;
+      font-size:10px;font-weight:600;
+      background:var(--accent);color:#fff;
+    }
+
+    /* Prev / Next */
+    .page-nav{
+      display:grid;grid-template-columns:1fr 1fr;
+      gap:12px;margin-top:48px;padding-top:28px;
+      border-top:1px solid var(--line);
+    }
+    .page-nav__link{
+      display:flex;flex-direction:column;gap:3px;
+      padding:14px 16px;
+      border-radius:12px;
+      border:1px solid rgba(0,0,0,0.07);
+      background:var(--bg-elev);
+      transition:border-color var(--dur-fast) var(--ease-nav),box-shadow var(--dur) var(--ease-out-expo),transform var(--dur) var(--ease-out-expo);
+    }
+    .page-nav__link:hover{
+      border-color:rgba(0,113,227,0.25);
+      box-shadow:0 4px 16px rgba(0,0,0,0.05);
+      transform:translateY(-1px);
+    }
+    .page-nav__link--next{align-items:flex-end;text-align:right}
+    .page-nav__dir{
+      font-size:11px;font-weight:500;color:var(--muted);
+      letter-spacing:0.02em;
+    }
+    .page-nav__title{
+      font-size:14px;font-weight:600;
+      letter-spacing:-0.015em;color:var(--accent);
+    }
+
+    /* ── Right: Stripe-style response rail ── */
+    .preview-rail{
+      position:sticky;top:var(--header-h);
+      height:calc(100vh - var(--header-h));
+      padding:18px 20px 28px 16px;
+      border-left:1px solid rgba(0,0,0,0.07);
+      background:
+        radial-gradient(120% 80% at 100% 0%,rgba(0,113,227,0.06) 0%,transparent 55%),
+        linear-gradient(180deg,#eef0f4 0%,#f5f5f7 42%,#f5f5f7 100%);
+      overflow-y:auto;
+      scrollbar-width:thin;
+      scrollbar-color:rgba(0,0,0,0.12) transparent;
+    }
+    .preview-rail__label{
+      display:flex;align-items:center;justify-content:space-between;
+      margin:0 0 12px 2px;
+      font-size:11px;font-weight:600;
+      letter-spacing:0.055em;text-transform:uppercase;
+      color:rgba(110,110,115,0.95);
+    }
+    .preview-rail__live{
+      display:inline-flex;align-items:center;gap:6px;
+      font-size:10.5px;font-weight:600;letter-spacing:0.02em;
+      text-transform:uppercase;color:#30a46c;
+    }
+    .preview-rail__live::before{
+      content:"";width:6px;height:6px;border-radius:50%;
+      background:#30a46c;box-shadow:0 0 0 3px rgba(48,164,108,0.18);
+    }
+    .response{
+      border-radius:12px;
+      background:#0a2540;
+      border:1px solid rgba(255,255,255,0.06);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.04) inset,
+        0 10px 28px rgba(10,37,64,0.18),
+        0 28px 64px rgba(10,37,64,0.16);
+      overflow:hidden;
+      color:#f6f9fc;
+      transform:translateY(0);
+      transition:
+        box-shadow var(--dur) var(--ease-out-expo),
+        transform var(--dur) var(--ease-out-expo),
+        background var(--dur) var(--ease-out-expo),
+        border-color var(--dur) var(--ease-out-expo);
+    }
+    .response.is-tick{
+      transform:translateY(-2px);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.06) inset,
+        0 14px 36px rgba(10,37,64,0.24),
+        0 36px 72px rgba(10,37,64,0.2);
+    }
+    .response.is-midnight{
+      background:#05070a;
+      border-color:rgba(255,255,255,0.08);
+    }
+    .response__chrome{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:11px 14px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.03);
+    }
+    .response.is-midnight .response__chrome{background:rgba(255,255,255,0.02)}
+    .response__req{
+      display:flex;align-items:center;gap:8px;min-width:0;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:11.5px;font-weight:500;
+    }
+    .response__method{
+      flex:0 0 auto;
+      padding:2px 7px;
+      border-radius:4px;
+      font-size:10px;font-weight:700;letter-spacing:0.04em;
+      color:#0a2540;background:#7a73ff;
+    }
+    .response__path{
+      color:rgba(246,249,252,0.78);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .response__status{
+      flex:0 0 auto;
+      display:inline-flex;align-items:center;gap:5px;
+      padding:3px 8px;border-radius:980px;
+      font-size:11px;font-weight:600;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      color:#3ecf8e;background:rgba(62,207,142,0.12);
+      border:1px solid rgba(62,207,142,0.22);
+    }
+    .response__status::before{
+      content:"";width:6px;height:6px;border-radius:50%;background:currentColor;
+    }
+    .response__tabs{
+      display:flex;gap:0;padding:0 10px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      background:rgba(0,0,0,0.12);
+    }
+    .response__tab{
+      appearance:none;border:none;background:transparent;cursor:pointer;
+      padding:9px 12px 10px;
+      font-size:12px;font-weight:500;letter-spacing:-0.01em;
+      color:rgba(246,249,252,0.72);
+      border-bottom:2px solid transparent;margin-bottom:-1px;
+      transition:color var(--dur-fast) var(--ease-nav),border-color var(--dur-fast) var(--ease-nav);
+    }
+    .response__tab:hover{color:rgba(246,249,252,0.85)}
+    .response__tab.is-on{
+      color:#f6f9fc;
+      border-bottom-color:#7a73ff;
+      font-weight:600;
+    }
+    .response__body{padding:16px 16px 12px}
+    .response__panel[hidden]{display:none!important}
+    .response__meta{
+      display:flex;align-items:baseline;justify-content:space-between;
+      margin-bottom:4px;gap:8px;
+    }
+    .response__title{
+      font-size:15px;font-weight:600;letter-spacing:-0.02em;
+      color:#f6f9fc;
+    }
+    .response.is-midnight .response__title{color:var(--midnight-fg)}
+    .response__badge{
+      font-size:10.5px;font-weight:500;color:rgba(246,249,252,0.62);
+      padding:2px 8px;border-radius:980px;background:rgba(255,255,255,0.08);
+      text-transform:capitalize;
+    }
+    .response.is-midnight .response__badge{
+      background:rgba(255,255,255,0.08);
+      color:var(--midnight-muted);
+    }
+    .response__value{
+      display:flex;align-items:baseline;gap:8px;margin-bottom:10px;
+    }
+    .response__kpi{
+      font-size:30px;font-weight:600;letter-spacing:-0.03em;
+      line-height:1;font-variant-numeric:tabular-nums;
+      color:#fff;
+    }
+    .response.is-midnight .response__kpi{color:var(--midnight-fg)}
+    .response__delta{font-size:12px;font-weight:500;color:#3ecf8e}
+    .response__chart{
+      margin:0 -2px 2px;min-height:200px;
+      padding:10px 8px 4px;
+      border-radius:10px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    .response.is-midnight .response__chart{background:rgba(255,255,255,0.03)}
+    .response__chart svg{display:block;width:100%;height:auto}
+    .response__chart .fade-in{
+      animation:chartFade 380ms var(--ease-out-expo) both;
+    }
+    @keyframes chartFade{
+      from{opacity:0;transform:translateY(4px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    .response__json{
+      margin:0;padding:12px 14px;
+      border-radius:10px;
+      background:rgba(0,0,0,0.28);
+      border:1px solid rgba(255,255,255,0.06);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:11.5px;line-height:1.55;
+      color:rgba(246,249,252,0.82);
+      white-space:pre-wrap;word-break:break-word;
+      max-height:320px;overflow:auto;
+    }
+    .response__json .k{color:#a5b4fc}
+    .response__json .s{color:#86efac}
+    .response__json .n{color:#fcd34d}
+
+    .response__footer{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:8px;padding:10px 14px 12px;
+      border-top:1px solid rgba(255,255,255,0.08);
+      font-size:11px;font-weight:500;
+      color:rgba(246,249,252,0.55);
+      font-variant-numeric:tabular-nums;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    .response.is-midnight .response__footer{
+      border-top-color:rgba(255,255,255,0.08);
+      color:var(--midnight-muted);
+    }
+    .response__ok{color:#3ecf8e}
+    .response.is-midnight .response__ok{color:#3dd68c}
+    .response__latency{opacity:.9}
+    .response__endpoint{display:none} /* legacy hook kept for JS */
+
+    .preview-rail__note{
+      margin:14px 2px 0;
+      font-size:11.5px;line-height:1.45;
+      color:var(--muted);
+      max-width:34em;
+    }
+
+    .sidebar-backdrop{
+      display:none;position:fixed;inset:0;z-index:80;
+      background:rgba(29,29,31,0.28);
+      backdrop-filter:blur(2px);
+      -webkit-backdrop-filter:blur(2px);
+      opacity:0;pointer-events:none;
+      transition:opacity var(--dur) var(--ease-nav);
+    }
+    .sidebar-backdrop.is-open{opacity:1;pointer-events:auto}
+
+    /* ── Responsive ── */
+    @media (max-width:1100px){
+      .shell{grid-template-columns:var(--sidebar-w) minmax(0,1fr)}
+      .preview-rail{
+        position:relative;top:auto;height:auto;
+        grid-column:2;grid-row:2;
+        border-left:none;border-top:1px solid var(--line);
+        padding:8px 28px 40px;
+        background:transparent;
+      }
+      .response{max-width:560px}
+      .try__split{grid-template-columns:1fr}
+      .chips{flex-direction:row;flex-wrap:wrap;gap:10px 14px}
+      .chip-row{flex:1 1 140px}
+    }
+    @media (max-width:900px){
+      .shell{grid-template-columns:1fr}
+      .sidebar{
+        position:fixed;left:0;top:var(--header-h);bottom:0;z-index:90;
+        width:min(280px,86vw);height:auto;
+        padding:20px 14px 40px;
+        background:rgba(255,255,255,0.96);
+        border-right:1px solid rgba(0,0,0,0.08);
+        box-shadow:8px 0 32px rgba(0,0,0,0.08);
+        transform:translateX(-105%);
+        transition:transform var(--dur) var(--ease-out-expo);
+      }
+      .sidebar.is-open{transform:translateX(0)}
+      .sidebar-backdrop{display:block}
+      .sidebar-toggle{display:inline-flex}
+      .main{padding:28px 18px 48px;max-width:none}
+      .preview-rail{
+        grid-column:1;grid-row:auto;
+        padding:0 18px 56px;
+      }
+      .response{max-width:none}
+      .nav a:not(.is-active){display:none}
+      .search-pill__label{display:none}
+      .prose h1{font-size:28px}
+      .prose .lede{font-size:15.5px}
+      .chip-row__label{flex-basis:100%;margin-bottom:2px}
+    }
+    @media (max-width:520px){
+      .site-header__inner{padding:0 14px;gap:12px}
+      .main{padding:24px 14px 40px}
+      .preview-rail{padding:0 14px 48px}
+      .page-nav{grid-template-columns:1fr}
+      .page-nav__link--next{align-items:flex-start;text-align:left}
+      .nav-ext{display:none}
+      .response__kpi{font-size:24px}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      html{scroll-behavior:auto}
+      *,*::before,*::after{
+        animation-duration:.01ms!important;
+        animation-iteration-count:1!important;
+        transition-duration:.01ms!important;
+        transition-delay:0ms!important;
+      }
+      .page-nav__link:hover,.response.is-tick{transform:none}
+    }
+
+    /* Line page: facts, anatomy, options */
+    .facts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 28px}
+    .fact{
+      display:inline-flex;align-items:center;gap:7px;
+      padding:6px 11px;border-radius:980px;
+      background:var(--bg-elev);border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+      font-size:12px;font-weight:500;color:rgba(29,29,31,0.78);max-width:100%;
+    }
+    .fact__k{font-size:10.5px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted)}
+    .fact__v{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:11.5px;font-weight:500;color:var(--fg);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:min(42vw,320px);
+    }
+    .fact__badge{
+      display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:980px;
+      font-size:11px;font-weight:600;color:#30a46c;background:rgba(48,164,108,0.1);
+      border:1px solid rgba(48,164,108,0.18);
+    }
+    .fact__badge::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+    .prose ul{margin:0 0 14px;padding:0 0 0 1.15em;max-width:52em;color:rgba(29,29,31,0.88);font-size:14.5px;line-height:1.6}
+    .prose li{margin:0 0 6px}
+    .anatomy{
+      display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;
+      margin:8px 0;padding:16px;border-radius:var(--radius-card);
+      background:var(--bg-elev);border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+    }
+    .anatomy__svg svg{display:block;width:100%;height:auto}
+    .anatomy__list{list-style:none;margin:0;padding:4px 0 0;display:flex;flex-direction:column;gap:10px}
+    .anatomy__list li{margin:0;display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45;color:rgba(29,29,31,0.85)}
+    .anatomy__n{
+      flex:0 0 auto;width:20px;height:20px;border-radius:50%;
+      display:inline-flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:600;background:rgba(0,113,227,0.1);color:var(--accent);
+    }
+    .anatomy__list strong{font-weight:600;color:var(--fg)}
+    .opt-table{
+      width:100%;max-width:52em;border-collapse:separate;border-spacing:0;
+      margin:8px 0;font-size:13px;border:1px solid rgba(0,0,0,0.07);
+      border-radius:12px;overflow:hidden;background:var(--bg-elev);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+    }
+    .opt-table th,.opt-table td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(0,0,0,0.06);vertical-align:middle}
+    .opt-table th{font-size:11px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);background:rgba(0,0,0,0.02)}
+    .opt-table tr:last-child td{border-bottom:none}
+    .opt-table code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:500;padding:1px 5px;border-radius:5px;background:rgba(0,0,0,0.04)}
+    .opt-table .muted{color:var(--muted);font-size:12.5px}
+    .status-pill{
+      display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:980px;
+      font-size:11px;font-weight:600;color:#30a46c;background:rgba(48,164,108,0.1);
+      border:1px solid rgba(48,164,108,0.16);white-space:nowrap;
+    }
+    .status-pill::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+    .also-see{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+    .also-see a{
+      display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:980px;
+      font-size:12.5px;font-weight:500;background:var(--bg-elev);border:1px solid rgba(0,0,0,0.07);color:var(--fg);
+      transition:border-color var(--dur-fast) var(--ease-nav),box-shadow var(--dur) var(--ease-out-expo),transform var(--dur) var(--ease-out-expo);
+    }
+    .also-see a:hover{border-color:rgba(0,113,227,0.28);box-shadow:0 4px 14px rgba(0,0,0,0.05);transform:translateY(-1px);color:var(--accent)}
+    @media (max-width:1100px){.anatomy{grid-template-columns:1fr}}
+    @media (max-width:520px){.fact__v{max-width:56vw}}
+    @media (prefers-reduced-motion:reduce){.also-see a:hover{transform:none}}
+  
+    /* Options index (Reference) — additive, shell unchanged */
+    .opt-search{
+      display:flex;align-items:center;gap:10px;
+      margin:0 0 18px;padding:10px 12px;
+      border-radius:12px;background:var(--bg-elev);
+      border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+    }
+    .opt-search__icon{opacity:.45;display:flex;flex-shrink:0}
+    .opt-search__input{
+      flex:1;min-width:0;border:0;background:transparent;
+      font:inherit;font-size:13.5px;color:var(--fg);outline:none;
+    }
+    .opt-search__input::placeholder{color:var(--muted)}
+    .opt-search__meta{font-size:11.5px;color:var(--muted);white-space:nowrap}
+    .opt-filters{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 22px}
+    .opt-filters .chip{font-size:12px}
+    .opt-group{margin:0 0 28px}
+    .opt-group__head{
+      display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+      margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,0.06);
+    }
+    .opt-group__title{
+      margin:0;font-size:13px;font-weight:600;letter-spacing:-0.01em;
+    }
+    .opt-group__count{font-size:11.5px;color:var(--muted)}
+    .opt-table td a.opt-path{
+      color:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:12px;font-weight:500;padding:1px 5px;border-radius:5px;
+      background:rgba(0,0,0,0.04);transition:background var(--dur-fast) var(--ease-nav),color var(--dur-fast) var(--ease-nav);
+    }
+    .opt-table td a.opt-path:hover{background:rgba(0,113,227,0.1);color:var(--accent)}
+    .status-pill[data-s="drawn"]{color:#047857;background:rgba(16,185,129,0.12)}
+    .status-pill[data-s="interact"]{color:#1d4ed8;background:rgba(59,130,246,0.12)}
+    .status-pill[data-s="core-all"]{color:#6d28d9;background:rgba(139,92,246,0.12)}
+    .status-pill[data-s="ck3012"]{color:#b45309;background:rgba(245,158,11,0.14)}
+    .status-pill[data-s="chunk"]{color:#0e7490;background:rgba(14,165,233,0.12)}
+    .status-pill[data-s="mock"]{color:#047857;background:rgba(16,185,129,0.12)}
+    .opt-legend{
+      display:flex;flex-wrap:wrap;gap:8px 14px;margin:0 0 22px;
+      padding:12px 14px;border-radius:12px;
+      background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.05);
+    }
+    .opt-legend__item{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+    .opt-legend__item .status-pill{font-size:11px}
+    tr.is-hidden{display:none}
+    .opt-group.is-empty{display:none}
+
+  
+    .fact-row{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}
+    .fact{display:flex;flex-direction:column;gap:3px;min-width:140px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.05)}
+    .fact__k{font-size:10.5px;font-weight:600;letter-spacing:0.06em;color:var(--muted)}
+    .fact__v{font-size:12.5px;font-weight:500;letter-spacing:-0.01em}
+    .fact__badge{display:inline-flex;align-items:center;gap:6px;width:fit-content;padding:3px 8px;border-radius:999px;font-size:11.5px;font-weight:600}
+    .also-see{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 20px}
+    .also-see a{display:inline-flex;padding:6px 11px;border-radius:999px;font-size:12.5px;font-weight:500;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.06);transition:background var(--dur-fast) var(--ease-nav),border-color var(--dur-fast) var(--ease-nav)}
+    .also-see a:hover{background:rgba(0,113,227,0.08);border-color:rgba(0,113,227,0.18);color:var(--accent)}
+    .stack-note{font-size:13px;color:var(--muted);max-width:52em}
+
+  
+    .status-pill[data-s="error"]{color:#b91c1c;background:rgba(239,68,68,0.12)}
+    .status-pill[data-s="warning"]{color:#b45309;background:rgba(245,158,11,0.14)}
+    .status-pill[data-s="info"]{color:#1d4ed8;background:rgba(59,130,246,0.12)}
+    .ck-code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:12px;font-weight:600;letter-spacing:-0.02em;
+      color:var(--accent);
+    }
+    .ck-code a{color:inherit}
+    .ck-code a:hover{text-decoration:underline}
+    .opt-table td.msg{font-size:12.5px;max-width:28em}
+    .repair-pill{
+      display:inline-flex;align-items:center;gap:4px;
+      padding:2px 7px;border-radius:999px;font-size:11px;font-weight:600;
+      background:rgba(16,185,129,0.12);color:#047857;
+    }
+    .repair-pill[data-r="no"]{background:rgba(0,0,0,0.04);color:var(--muted);font-weight:500}
+
+  
+    .theme-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0 22px}
+    .theme-tile{border-radius:12px;border:1px solid rgba(0,0,0,0.07);background:var(--bg-elev);overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.02)}
+    .theme-tile__bar{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;font-size:11px;font-weight:600;letter-spacing:-0.01em;border-bottom:1px solid rgba(0,0,0,0.05);color:var(--muted)}
+    .theme-tile__body{padding:8px 8px 6px;min-height:88px}
+    .preset-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0 22px}
+    @media (max-width:1100px){.preset-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.theme-board{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    .preset-card{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;border:1px solid rgba(0,0,0,0.07);background:var(--bg-elev);cursor:pointer;text-align:left;transition:border-color var(--dur-fast) var(--ease-nav),box-shadow var(--dur-fast) var(--ease-nav),transform var(--dur-fast) var(--ease-nav)}
+    .preset-card:hover{border-color:rgba(0,113,227,0.28);transform:translateY(-1px)}
+    .preset-card.is-on{border-color:rgba(0,113,227,0.45);box-shadow:0 0 0 3px rgba(0,113,227,0.12)}
+    .preset-card__name{font-size:13px;font-weight:600;letter-spacing:-0.015em}
+    .preset-card__meta{font-size:11px;color:var(--muted)}
+    .preset-swatch{display:flex;height:28px;border-radius:8px;overflow:hidden;border:1px solid rgba(0,0,0,0.06)}
+    .preset-swatch span{flex:1}
+    .preset-card__chiprow{display:flex;flex-wrap:wrap;gap:4px}
+    .preset-kind{display:inline-flex;padding:2px 7px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:0.02em;background:rgba(0,0,0,0.04);color:var(--muted)}
+    .preset-kind[data-k="built-in"]{background:rgba(0,113,227,0.1);color:#1d4ed8}
+    .preset-kind[data-k="import"]{background:rgba(16,185,129,0.12);color:#047857}
+    .mode-toggle{display:inline-flex;gap:4px;padding:3px;border-radius:10px;background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.06)}
+    .mode-toggle .chip{border:0;background:transparent}
+    .mode-toggle .chip.is-on{background:var(--bg-elev);box-shadow:0 1px 2px rgba(0,0,0,0.06)}
+
+  </style>
+</head>
+<body>
+  <header class="site-header" id="site-header">
+    <div class="site-header__inner">
+      <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Open sidebar" aria-expanded="false" aria-controls="sidebar">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+          <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <a class="logo" href="/" aria-label="ChartKit home">
+        <svg class="logo__mark" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <rect x="1" y="9" width="3.2" height="6" rx="0.8" fill="#1d1d1f"/>
+          <rect x="6.4" y="5.5" width="3.2" height="9.5" rx="0.8" fill="#1d1d1f"/>
+          <rect x="11.8" y="2" width="3.2" height="13" rx="0.8" fill="#0ea5e9"/>
+        </svg>
+        <span>Chart<span class="logo__kit">Kit</span></span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="#docs" class="is-active">Docs</a>
+        <a href="#playground">Playground</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#github">GitHub</a>
+      </nav>
+      <div class="header-right">
+        <div class="search-pill" aria-hidden="true" title="Search (visual only)">
+          <span class="search-pill__icon">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="3.5" stroke="currentColor" stroke-width="1.3"/><path d="M7.8 7.8L10.5 10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </span>
+          <span class="search-pill__label">Search docs</span>
+          <kbd class="search-pill__kbd">⌘K</kbd>
+        </div>
+        <a class="nav-ext" href="#benchmarks">Benchmarks</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
+
+  <div class="shell">
+    <aside class="sidebar" id="sidebar" aria-label="Documentation">
+      <div class="side-section">
+        <span class="side-section__label">Start</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs.html" data-nav>Overview</a></li>
+          <li><a href="chartkit-mock-docs-react.html" data-nav>React</a></li>
+          <li><a href="chartkit-mock-docs-vue.html" data-nav>Vue</a></li>
+          <li><a href="chartkit-mock-docs-svelte.html" data-nav>Svelte</a></li>
+          <li><a href="chartkit-mock-docs-vanilla.html" data-nav>Vanilla</a></li>
+          <li><a href="chartkit-mock-docs-markdown.html" data-nav>Markdown</a></li>
+        </ul>
+      </div>
+
+      <div class="side-section">
+        <span class="side-section__label">Concepts</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs-spec-anatomy.html" data-nav>Spec anatomy</a></li>
+          <li><a href="chartkit-mock-docs-data.html" data-nav>Data</a></li>
+          <li><a href="chartkit-mock-docs-encoding.html" data-nav>Encoding</a></li>
+          <li><a href="chartkit-mock-docs-scales.html" data-nav>Scales</a></li>
+          <li><a href="chartkit-mock-docs-axes.html" data-nav>Axes</a></li>
+          <li><a href="chartkit-mock-docs-themes-tokens.html" data-nav>Themes &amp; tokens</a></li>
+          <li><a href="chartkit-mock-docs-bundles.html" data-nav>Bundles</a></li>
+        </ul>
+      </div>
+
+      <div class="side-section">
+        <span class="side-section__label">Chart types</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs-area.html" data-nav>Area</a></li>
+          <li><a href="chartkit-mock-docs-line.html" data-nav>Line</a></li>
+          <li><a href="chartkit-mock-docs-bar.html" data-nav>Bar</a></li>
+          <li><a href="chartkit-mock-docs-donut.html" data-nav>Donut</a></li>
+          <li><a href="chartkit-mock-docs-combo.html" data-nav>Combo</a></li>
+          <li><a href="chartkit-mock-docs-gauge.html" data-nav>Gauge</a></li>
+          <li><a href="chartkit-mock-docs-heatmap.html" data-nav>Heatmap</a></li>
+          <li><a href="chartkit-mock-docs-candle.html" data-nav>Candle</a></li>
+          <li><a href="chartkit-mock-docs-scatter.html" data-nav>Scatter</a></li>
+          <li><a href="chartkit-mock-docs-kpi.html" data-nav>Kpi</a></li>
+          <li><a href="chartkit-mock-docs-sparkline.html" data-nav>Sparkline</a></li>
+          <li><a href="chartkit-mock-docs-mini-area.html" data-nav>Mini-area</a></li>
+          <li><a href="chartkit-mock-docs-progress-ring.html" data-nav>Progress-ring</a></li>
+          <li><a href="chartkit-mock-docs-spike.html" data-nav>Spike</a></li>
+          <li><a href="chartkit-mock-docs-histogram.html" data-nav>Histogram</a></li>
+          <li><a href="chartkit-mock-docs-boxplot.html" data-nav>Boxplot</a></li>
+          <li><a href="chartkit-mock-docs-radar.html" data-nav>Radar</a></li>
+          <li><a href="chartkit-mock-docs-funnel.html" data-nav>Funnel</a></li>
+          <li><a href="chartkit-mock-docs-treemap.html" data-nav>Treemap</a></li>
+          <li><a href="chartkit-mock-docs-sankey.html" data-nav>Sankey</a></li>
+          <li><a href="chartkit-mock-docs-bullet.html" data-nav>Bullet</a></li>
+          <li><a href="chartkit-mock-docs-waterfall.html" data-nav>Waterfall</a></li>
+          <li><a href="chartkit-mock-docs-gantt.html" data-nav>Gantt</a></li>
+          <li><a href="chartkit-mock-docs-timeline.html" data-nav>Timeline</a></li>
+          <li><a href="chartkit-mock-docs-quadrant.html" data-nav>Quadrant</a></li>
+          <li><a href="chartkit-mock-docs-venn.html" data-nav>Venn</a></li>
+          <li><a href="chartkit-mock-docs-journey.html" data-nav>Journey</a></li>
+        </ul>
+      </div>
+
+      <div class="side-section">
+        <span class="side-section__label">Reference</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs-options.html" data-nav>Options</a></li>
+          <li><a href="chartkit-mock-docs-errors.html" data-nav>Errors <span style="opacity:.55;font-size:11px;margin-left:4px">CK codes</span></a></li>
+          <li><a href="chartkit-mock-docs-themes.html" class="is-active" data-nav>Themes</a></li>
+        </ul>
+      </div>
+
+      <div class="side-section">
+        <span class="side-section__label">Agents</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs-validate.html" data-nav>Validate</a></li>
+          <li><a href="chartkit-mock-docs-repair.html" data-nav>repair</a></li>
+          <li><a href="chartkit-mock-docs-render.html" data-nav>render</a></li>
+          <li><a href="chartkit-mock-docs-llms-txt.html" data-nav>llms.txt</a></li>
+          <li><a href="chartkit-mock-docs-mcp.html" data-nav>MCP</a></li>
+        </ul>
+      </div>
+
+      <div class="side-footer">
+        <a href="#playground">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4 7.5l2-2 2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Playground
+        </a>
+        <a href="#gallery">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="4.2" height="4.2" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="7.3" y="1.5" width="4.2" height="4.2" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1.5" y="7.3" width="4.2" height="4.2" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="7.3" y="7.3" width="4.2" height="4.2" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+          Gallery
+        </a>
+        <a href="#benchmarks">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M2.5 10.5V6.5M6.5 10.5V3.5M10.5 10.5V7.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Benchmarks
+        </a>
+      </div>
+    </aside>
+
+                                                                                        <main class="main prose" id="main">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="chartkit-mock-docs.html">Docs</a>
+        <span class="breadcrumb__sep" aria-hidden="true">/</span>
+        <a href="#reference">Reference</a>
+        <span class="breadcrumb__sep" aria-hidden="true">/</span>
+        <span class="breadcrumb__current">Themes</span>
+      </nav>
+
+      <h1 id="themes-ref">Themes</h1>
+      <p class="lede" style="margin-bottom:12px"><span class="status-pill" data-s="mock">mock-plausible</span> <span class="status-pill">Reference</span> — preset gallery: Soft (default), refined, editorial, midnight, plus 16 importable presets from <code>@chartkitdev/core/themes</code>. Same 6-chart board in every preset. Prod URL: <code>/docs/themes</code> (extensionless). For tokens &amp; <code>--ck-*</code> see <a href="chartkit-mock-docs-themes-tokens.html">Concepts · Themes &amp; tokens</a>.</p>
+
+      <div class="fact-row" aria-label="Page facts">
+        <div class="fact">
+          <span class="fact__k">SOURCE</span>
+          <span class="fact__v">theme.ts · themes/*</span>
+        </div>
+        <div class="fact">
+          <span class="fact__k">SIZE</span>
+          <span class="fact__v">planned · Reference</span>
+        </div>
+        <div class="fact">
+          <span class="fact__k">STATUS</span>
+          <span class="fact__badge" style="background:rgba(245,158,11,0.14);color:#b45309">planned</span>
+        </div>
+      </div>
+
+      <h2 id="built-in">Built-in presets</h2>
+      <p>Omit <code>theme</code>, or set <code>"soft"</code> / <code>"auto"</code>, for Soft. Soft and refined/editorial use <code>light-dark()</code> so the page <code>color-scheme</code> wins. Midnight is the opt-in dark card; unknown names still resolve there.</p>
+      <div class="preset-grid" id="built-in-grid" role="listbox" aria-label="Built-in presets">
+          <button type="button" class="preset-card is-on" data-preset="soft" data-kind="built-in">
+            <div class="preset-swatch" aria-hidden="true" style="background:#f5f5f7"><span style="background:#007aff"></span><span style="background:#34c759"></span><span style="background:#ff9500"></span><span style="background:#af52de"></span></div>
+            <div class="preset-card__name">soft</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="built-in">built-in</span>
+              <span class="preset-card__meta">default · light-dark()</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="refined" data-kind="built-in">
+            <div class="preset-swatch" aria-hidden="true" style="background:#fafafa"><span style="background:#3b82f6"></span><span style="background:#e11d48"></span><span style="background:#fbbf24"></span><span style="background:#10b981"></span></div>
+            <div class="preset-card__name">refined</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="built-in">built-in</span>
+              <span class="preset-card__meta">zinc · tight geometry</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="editorial" data-kind="built-in">
+            <div class="preset-swatch" aria-hidden="true" style="background:#f6f9fc"><span style="background:#4f46e5"></span><span style="background:#f97316"></span><span style="background:#059669"></span><span style="background:#fbbf24"></span></div>
+            <div class="preset-card__name">editorial</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="built-in">built-in</span>
+              <span class="preset-card__meta">indigo · points always</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="midnight" data-kind="built-in">
+            <div class="preset-swatch" aria-hidden="true" style="background:#0c0c0c"><span style="background:#22c55e"></span><span style="background:#3b82f6"></span><span style="background:#a855f7"></span><span style="background:#f59e0b"></span></div>
+            <div class="preset-card__name">midnight</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="built-in">built-in</span>
+              <span class="preset-card__meta">dark card · fallback</span>
+            </div>
+          </button>
+      </div>
+
+      <h2 id="importable">Importable presets (16)</h2>
+      <p>Register with <code>import "@chartkitdev/core/themes"</code> (or a single file). Then <code>theme: "mocha"</code> etc. resolve. Soft in docs mocks is an accent shorthand — schema Soft = built-in <code>soft</code>.</p>
+      <div class="preset-grid" id="import-grid" role="listbox" aria-label="Importable presets">
+          <button type="button" class="preset-card" data-preset="emerald" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#0a0a0a"><span style="background:#10b981"></span><span style="background:#0ea5e9"></span><span style="background:#8b5cf6"></span><span style="background:#f59e0b"></span></div>
+            <div class="preset-card__name">emerald</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="mono" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#000000"><span style="background:#50e3c2"></span><span style="background:#0070f3"></span><span style="background:#7928ca"></span><span style="background:#f5a623"></span></div>
+            <div class="preset-card__name">mono</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="slate" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#0d1117"><span style="background:#3fb950"></span><span style="background:#58a6ff"></span><span style="background:#a371f7"></span><span style="background:#d29922"></span></div>
+            <div class="preset-card__name">slate</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="arctic" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#2e3440"><span style="background:#88c0d0"></span><span style="background:#81a1c1"></span><span style="background:#b48ead"></span><span style="background:#ebcb8b"></span></div>
+            <div class="preset-card__name">arctic</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="orchid" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#282a36"><span style="background:#50fa7b"></span><span style="background:#8be9fd"></span><span style="background:#bd93f9"></span><span style="background:#ffb86c"></span></div>
+            <div class="preset-card__name">orchid</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="obsidian" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#282c34"><span style="background:#98c379"></span><span style="background:#61afef"></span><span style="background:#c678dd"></span><span style="background:#e5c07b"></span></div>
+            <div class="preset-card__name">obsidian</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="neon" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#1a1b26"><span style="background:#9ece6a"></span><span style="background:#7aa2f7"></span><span style="background:#bb9af7"></span><span style="background:#e0af68"></span></div>
+            <div class="preset-card__name">neon</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="mocha" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#1e1e2e"><span style="background:#a6e3a1"></span><span style="background:#89b4fa"></span><span style="background:#cba6f7"></span><span style="background:#fab387"></span></div>
+            <div class="preset-card__name">mocha</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="owl" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#011627"><span style="background:#22da6e"></span><span style="background:#82aaff"></span><span style="background:#c792ea"></span><span style="background:#ffcb8b"></span></div>
+            <div class="preset-card__name">owl</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="retro" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#262335"><span style="background:#72f1b8"></span><span style="background:#36f9f6"></span><span style="background:#fe4450"></span><span style="background:#fede5d"></span></div>
+            <div class="preset-card__name">retro</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="copper" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#282828"><span style="background:#b8bb26"></span><span style="background:#83a598"></span><span style="background:#d3869b"></span><span style="background:#fabd2f"></span></div>
+            <div class="preset-card__name">copper</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="rose" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#191724"><span style="background:#31748f"></span><span style="background:#9ccfd8"></span><span style="background:#c4a7e7"></span><span style="background:#f6c177"></span></div>
+            <div class="preset-card__name">rose</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="sunset" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#ffffff"><span style="background:#059669"></span><span style="background:#0284c7"></span><span style="background:#7c3aed"></span><span style="background:#d97706"></span></div>
+            <div class="preset-card__name">sunset</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="silver" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#ffffff"><span style="background:#1a7f37"></span><span style="background:#0969da"></span><span style="background:#8250df"></span><span style="background:#bf8700"></span></div>
+            <div class="preset-card__name">silver</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="pearl" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#fafafa"><span style="background:#50a14f"></span><span style="background:#4078f2"></span><span style="background:#a626a4"></span><span style="background:#c18401"></span></div>
+            <div class="preset-card__name">pearl</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+          <button type="button" class="preset-card" data-preset="latte" data-kind="import">
+            <div class="preset-swatch" aria-hidden="true" style="background:#eff1f5"><span style="background:#40a02b"></span><span style="background:#1e66f5"></span><span style="background:#8839ef"></span><span style="background:#df8e1d"></span></div>
+            <div class="preset-card__name">latte</div>
+            <div class="preset-card__chiprow">
+              <span class="preset-kind" data-k="import">import</span>
+              <span class="preset-card__meta">@chartkitdev/core/themes</span>
+            </div>
+          </button>
+      </div>
+
+      <h2 id="board">6-chart board</h2>
+      <p>docs-ia: the same board in every preset — line · bar · area · donut · scatter · kpi. Toggle light/dark below; the board and response rail follow the selected preset.</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 10px">
+        <p style="margin:0;font-size:13px;color:var(--muted)">Active: <code id="active-preset-label">soft</code></p>
+        <div class="mode-toggle" role="group" aria-label="Color scheme">
+          <button type="button" class="chip is-on" data-mode="light">Light</button>
+          <button type="button" class="chip" data-mode="dark">Dark</button>
+        </div>
+      </div>
+      <div class="theme-board" id="theme-board" aria-label="Six chart board"></div>
+
+      <h2 id="try-leaf">Try a preset</h2>
+      <p>Pick a preset and scheme. Spec gets <code>theme</code>; the response paints a Soft-mock board tile for that preset (mock-plausible — not live <code>render()</code>).</p>
+
+      <div class="try" id="try">
+        <div class="try__bar">
+          <span class="try__title">Interactive spec</span>
+          <span class="try__hint">Preset + scheme update the board →</span>
+        </div>
+        <div class="try__body">
+          <div class="try__split">
+            <div class="spec-editor">
+              <div class="spec-editor__bar">
+                <span class="spec-editor__lang">spec.json</span>
+                <span class="spec-editor__status" id="spec-status">valid · ready</span>
+              </div>
+              <textarea id="spec-input" spellcheck="false" aria-label="Editable chart specification"></textarea>
+            </div>
+            <div class="chips" role="group" aria-label="Theme probe settings">
+              <div class="chip-row" data-chip-group="preset">
+                <span class="chip-row__label">Preset</span>
+                <div class="chip-row__opts">
+                  <button type="button" class="chip is-on" data-key="preset" data-value="soft" data-accent="soft">Soft</button>
+                  <button type="button" class="chip" data-key="preset" data-value="refined">Refined</button>
+                  <button type="button" class="chip" data-key="preset" data-value="editorial">Editorial</button>
+                  <button type="button" class="chip" data-key="preset" data-value="midnight" data-accent="midnight">Midnight</button>
+                  <button type="button" class="chip" data-key="preset" data-value="mocha">Mocha</button>
+                  <button type="button" class="chip" data-key="preset" data-value="rose">Rose</button>
+                </div>
+              </div>
+              <div class="chip-row" data-chip-group="scheme">
+                <span class="chip-row__label">Scheme</span>
+                <div class="chip-row__opts">
+                  <button type="button" class="chip is-on" data-key="scheme" data-value="light">Light</button>
+                  <button type="button" class="chip" data-key="scheme" data-value="dark">Dark</button>
+                </div>
+              </div>
+              <div class="chip-row" data-chip-group="focus">
+                <span class="chip-row__label">Focus</span>
+                <div class="chip-row__opts">
+                  <button type="button" class="chip is-on" data-key="focus" data-value="line">Line</button>
+                  <button type="button" class="chip" data-key="focus" data-value="bar">Bar</button>
+                  <button type="button" class="chip" data-key="focus" data-value="donut">Donut</button>
+                  <button type="button" class="chip" data-key="focus" data-value="kpi">KPI</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 id="import">Import</h2>
+      <div class="code-block">
+        <div class="code-block__bar">
+          <span class="code-block__lang">ts · themes</span>
+          <button class="code-block__copy" type="button" data-copy="import &quot;@chartkitdev/core/themes&quot;;
+// or: import { mocha } from &quot;@chartkitdev/core/themes/mocha&quot;;
+
+const spec = {
+  version: &quot;1&quot;,
+  type: &quot;line&quot;,
+  theme: &quot;mocha&quot;,
+  // ...
+};">Copy</button>
+        </div>
+        <pre><code>import "@chartkitdev/core/themes";
+// or: import { mocha } from "@chartkitdev/core/themes/mocha";
+
+const spec = {
+  version: "1",
+  type: "line",
+  theme: "mocha",
+  data: { /* … */ },
+  encoding: { x: { field: "month" }, y: { field: "value" } },
+  a11y: { alt: "Monthly value" },
+};</code></pre>
+      </div>
+      <p class="stack-note"><strong>Does not include:</strong> full token tables and <code>--ck-*</code> CSS variables — those live on <a href="chartkit-mock-docs-themes-tokens.html">Themes &amp; tokens</a> (Concepts). This page is the preset gallery board.</p>
+
+      <h2 id="also-see">Also see</h2>
+      <div class="also-see">
+        <a href="chartkit-mock-docs-errors.html">Errors</a>
+        <a href="chartkit-mock-docs-themes-tokens.html">Themes &amp; tokens</a>
+        <a href="chartkit-mock-docs-bundles.html">Bundles</a>
+        <a href="chartkit-mock-docs-validate.html">Validate → repair → render</a>
+        <a href="chartkit-mock-docs-options.html">Options</a>
+      </div>
+
+      <nav class="page-nav" aria-label="Page">
+        <a class="page-nav__link" href="chartkit-mock-docs-errors.html">
+          <span class="page-nav__dir">← Previous</span>
+          <span class="page-nav__title">Errors</span>
+        </a>
+        <a class="page-nav__link page-nav__link--next" href="chartkit-mock-docs-validate.html" data-nav>
+          <span class="page-nav__dir">Next →</span>
+          <span class="page-nav__title">Validate</span>
+        </a>
+      </nav>
+
+    </main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <aside class="preview-rail" aria-label="Live render">
+      <div class="preview-rail__label">
+        <span>Response</span>
+        <span class="preview-rail__live">Live</span>
+      </div>
+      <div class="response" id="response" aria-live="polite">
+        <div class="response__chrome">
+          <div class="response__req">
+            <span class="response__method">POST</span>
+            <span class="response__path" id="response-path">/v1/charts/render?theme=soft&amp;scheme=light</span>
+            <span class="response__endpoint" id="response-endpoint" hidden>render · Soft · line</span>
+          </div>
+          <span class="response__status" id="response-status">200</span>
+        </div>
+        <div class="response__tabs" role="tablist" aria-label="Response view">
+          <button type="button" class="response__tab is-on" data-tab="chart" role="tab" aria-selected="true">Chart</button>
+          <button type="button" class="response__tab" data-tab="json" role="tab" aria-selected="false">JSON</button>
+        </div>
+        <div class="response__body">
+          <div class="response__panel" data-panel="chart" id="panel-chart">
+            <div class="response__meta">
+              <span class="response__title" id="response-title">Theme board</span>
+              <span class="response__badge" id="response-badge">Soft</span>
+            </div>
+            <div class="response__value">
+              <span class="response__kpi" id="response-kpi">soft</span>
+              <span class="response__delta" id="response-delta">built-in · light</span>
+            </div>
+            <div class="response__chart" id="response-chart"></div>
+          </div>
+          <div class="response__panel" data-panel="json" id="panel-json" hidden>
+            <pre class="response__json" id="response-json"></pre>
+          </div>
+        </div>
+        <div class="response__footer">
+          <span class="response__ok" id="response-ok">validate OK · 0 errors</span>
+          <span class="response__latency" id="response-latency">0.8ms</span>
+        </div>
+      </div>
+      <p class="preview-rail__note">Pick a preset; this rail shows a mock-plausible board tile for that theme — Chart or JSON.</p>
+    </aside>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <script>
+    // Themes Reference gallery — mock-plausible. Soft = docs mock accent / built-in soft.
+    (function () {
+      var PRESETS = {"soft": {"kind": "built-in", "bg": "#f5f5f7", "accent": "#007aff", "series": ["#007aff", "#34c759", "#ff9500", "#af52de"], "meta": "default \u00b7 light-dark()", "dark": false}, "refined": {"kind": "built-in", "bg": "#fafafa", "accent": "#3b82f6", "series": ["#3b82f6", "#e11d48", "#fbbf24", "#10b981"], "meta": "zinc \u00b7 tight geometry", "dark": false}, "editorial": {"kind": "built-in", "bg": "#f6f9fc", "accent": "#4f46e5", "series": ["#4f46e5", "#f97316", "#059669", "#fbbf24"], "meta": "indigo \u00b7 points always", "dark": false}, "midnight": {"kind": "built-in", "bg": "#0c0c0c", "accent": "#22d3ee", "series": ["#22c55e", "#3b82f6", "#a855f7", "#f59e0b"], "meta": "dark card \u00b7 fallback", "dark": true}, "emerald": {"kind": "import", "bg": "#0a0a0a", "accent": "#06b6d4", "series": ["#10b981", "#0ea5e9", "#8b5cf6", "#f59e0b"], "meta": "importable", "dark": true}, "mono": {"kind": "import", "bg": "#000000", "accent": "#ffffff", "series": ["#50e3c2", "#0070f3", "#7928ca", "#f5a623"], "meta": "importable", "dark": true}, "slate": {"kind": "import", "bg": "#0d1117", "accent": "#58a6ff", "series": ["#3fb950", "#58a6ff", "#a371f7", "#d29922"], "meta": "importable", "dark": true}, "arctic": {"kind": "import", "bg": "#2e3440", "accent": "#88c0d0", "series": ["#88c0d0", "#81a1c1", "#b48ead", "#ebcb8b"], "meta": "importable", "dark": true}, "orchid": {"kind": "import", "bg": "#282a36", "accent": "#bd93f9", "series": ["#50fa7b", "#8be9fd", "#bd93f9", "#ffb86c"], "meta": "importable", "dark": true}, "obsidian": {"kind": "import", "bg": "#282c34", "accent": "#61afef", "series": ["#98c379", "#61afef", "#c678dd", "#e5c07b"], "meta": "importable", "dark": true}, "neon": {"kind": "import", "bg": "#1a1b26", "accent": "#7aa2f7", "series": ["#9ece6a", "#7aa2f7", "#bb9af7", "#e0af68"], "meta": "importable", "dark": true}, "mocha": {"kind": "import", "bg": "#1e1e2e", "accent": "#89b4fa", "series": ["#a6e3a1", "#89b4fa", "#cba6f7", "#fab387"], "meta": "importable", "dark": true}, "owl": {"kind": "import", "bg": "#011627", "accent": "#82aaff", "series": ["#22da6e", "#82aaff", "#c792ea", "#ffcb8b"], "meta": "importable", "dark": true}, "retro": {"kind": "import", "bg": "#262335", "accent": "#ff7edb", "series": ["#72f1b8", "#36f9f6", "#fe4450", "#fede5d"], "meta": "importable", "dark": true}, "copper": {"kind": "import", "bg": "#282828", "accent": "#fabd2f", "series": ["#b8bb26", "#83a598", "#d3869b", "#fabd2f"], "meta": "importable", "dark": true}, "rose": {"kind": "import", "bg": "#191724", "accent": "#c4a7e7", "series": ["#31748f", "#9ccfd8", "#c4a7e7", "#f6c177"], "meta": "importable", "dark": true}, "sunset": {"kind": "import", "bg": "#ffffff", "accent": "#f59e0b", "series": ["#059669", "#0284c7", "#7c3aed", "#d97706"], "meta": "importable", "dark": false}, "silver": {"kind": "import", "bg": "#ffffff", "accent": "#0969da", "series": ["#1a7f37", "#0969da", "#8250df", "#bf8700"], "meta": "importable", "dark": false}, "pearl": {"kind": "import", "bg": "#fafafa", "accent": "#4078f2", "series": ["#50a14f", "#4078f2", "#a626a4", "#c18401"], "meta": "importable", "dark": false}, "latte": {"kind": "import", "bg": "#eff1f5", "accent": "#1e66f5", "series": ["#40a02b", "#1e66f5", "#8839ef", "#df8e1d"], "meta": "importable", "dark": false}};
+
+      var input = document.getElementById("spec-input");
+      var statusEl = document.getElementById("spec-status");
+      var badgeEl = document.getElementById("response-badge");
+      var deltaEl = document.getElementById("response-delta");
+      var chartHost = document.getElementById("response-chart");
+      var responseEl = document.getElementById("response");
+      var pathLabel = document.getElementById("response-path");
+      var kpiVal = document.getElementById("response-kpi");
+      var titleEl = document.getElementById("response-title");
+      var jsonEl = document.getElementById("response-json");
+      var okEl = document.getElementById("response-ok");
+      var statusHttp = document.getElementById("response-status");
+      var boardEl = document.getElementById("theme-board");
+      var activeLabel = document.getElementById("active-preset-label");
+
+      var state = { preset: "soft", scheme: "light", focus: "line" };
+
+      function meta() { return PRESETS[state.preset] || PRESETS.soft; }
+
+      function boardBg(m) {
+        if (state.scheme === "dark") return m.dark ? m.bg : "#0c0c0c";
+        return m.dark ? "#f5f5f7" : (m.bg === "transparent" ? "#ffffff" : m.bg);
+      }
+
+      function textColor(m) {
+        var bg = boardBg(m);
+        var hex = (bg || "#fff").replace("#", "");
+        if (hex.length === 3) hex = hex.split("").map(function (c) { return c + c; }).join("");
+        var r = parseInt(hex.slice(0, 2), 16) || 0;
+        var g = parseInt(hex.slice(2, 4), 16) || 0;
+        var b = parseInt(hex.slice(4, 6), 16) || 0;
+        var lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+        return lum > 0.55 ? "#1d1d1f" : "#f5f5f7";
+      }
+
+      function mutedColor(fg) { return fg === "#f5f5f7" ? "#86868b" : "#6e6e73"; }
+
+      function miniLine(series, w, h) {
+        var pts = [12, 22, 16, 28, 20, 30];
+        var pad = 6;
+        var xs = pts.map(function (_, i) { return pad + (i * (w - pad * 2)) / (pts.length - 1); });
+        var ys = pts.map(function (v) { return h - pad - ((v - 12) / 18) * (h - pad * 2); });
+        var d = xs.map(function (x, i) { return (i ? "L" : "M") + x.toFixed(1) + "," + ys[i].toFixed(1); }).join(" ");
+        return '<path d="' + d + '" fill="none" stroke="' + series[0] + '" stroke-width="2" stroke-linecap="round"/>';
+      }
+
+      function miniBar(series, w, h) {
+        var vals = [0.45, 0.7, 0.55, 0.85, 0.6];
+        var gap = 4, bw = (w - gap * (vals.length + 1)) / vals.length;
+        return vals.map(function (v, i) {
+          var bh = v * (h - 12);
+          var x = gap + i * (bw + gap);
+          var y = h - 6 - bh;
+          return '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="2" fill="' + series[i % series.length] + '"/>';
+        }).join("");
+      }
+
+      function miniArea(series, w, h) {
+        var pts = [10, 18, 14, 24, 20, 26];
+        var pad = 6;
+        var xs = pts.map(function (_, i) { return pad + (i * (w - pad * 2)) / (pts.length - 1); });
+        var ys = pts.map(function (v) { return h - pad - ((v - 10) / 16) * (h - pad * 2); });
+        var line = xs.map(function (x, i) { return (i ? "L" : "M") + x.toFixed(1) + "," + ys[i].toFixed(1); }).join(" ");
+        var area = line + " L" + xs[xs.length - 1].toFixed(1) + "," + (h - pad) + " L" + xs[0].toFixed(1) + "," + (h - pad) + " Z";
+        return '<path d="' + area + '" fill="' + series[0] + '" opacity="0.25"/><path d="' + line + '" fill="none" stroke="' + series[0] + '" stroke-width="2"/>';
+      }
+
+      function miniDonut(series, w, h) {
+        var cx = w / 2, cy = h / 2, r = Math.min(w, h) / 2 - 6, ri = r * 0.58;
+        var parts = [0.4, 0.35, 0.25], a = -Math.PI / 2, paths = [];
+        parts.forEach(function (p, i) {
+          var a2 = a + p * Math.PI * 2;
+          var x1 = cx + r * Math.cos(a), y1 = cy + r * Math.sin(a);
+          var x2 = cx + r * Math.cos(a2), y2 = cy + r * Math.sin(a2);
+          var xi1 = cx + ri * Math.cos(a2), yi1 = cy + ri * Math.sin(a2);
+          var xi2 = cx + ri * Math.cos(a), yi2 = cy + ri * Math.sin(a);
+          var large = p > 0.5 ? 1 : 0;
+          paths.push('<path d="M' + x1.toFixed(1) + "," + y1.toFixed(1) + " A" + r + "," + r + " 0 " + large + " 1 " + x2.toFixed(1) + "," + y2.toFixed(1) + " L" + xi1.toFixed(1) + "," + yi1.toFixed(1) + " A" + ri + "," + ri + " 0 " + large + " 0 " + xi2.toFixed(1) + "," + yi2.toFixed(1) + ' Z" fill="' + series[i % series.length] + '"/>');
+          a = a2;
+        });
+        return paths.join("");
+      }
+
+      function miniScatter(series, w, h) {
+        var pts = [[0.15,0.6],[0.3,0.35],[0.45,0.7],[0.6,0.4],[0.75,0.55],[0.85,0.25]];
+        return pts.map(function (p, i) {
+          var x = 8 + p[0] * (w - 16), y = 8 + p[1] * (h - 16);
+          return '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.2" fill="' + series[i % series.length] + '"/>';
+        }).join("");
+      }
+
+      function miniKpi(series, w, h, fg, muted) {
+        return '<text x="10" y="28" fill="' + muted + '" font-size="10" font-family="Inter,system-ui,sans-serif">Revenue</text>' +
+          '<text x="10" y="54" fill="' + fg + '" font-size="22" font-weight="600" font-family="Inter,system-ui,sans-serif">$48.2k</text>' +
+          '<text x="10" y="72" fill="' + series[0] + '" font-size="11" font-family="Inter,system-ui,sans-serif">▲ 12.4%</text>';
+      }
+
+      function tile(name, drawFn, m) {
+        var bg = boardBg(m), fg = textColor(m), muted = mutedColor(fg), w = 160, h = 72;
+        return '<div class="theme-tile" style="background:' + bg + ';border-color:rgba(0,0,0,0.08)">' +
+          '<div class="theme-tile__bar" style="color:' + muted + ';border-color:rgba(127,127,127,0.15)">' + name +
+          '<span style="width:8px;height:8px;border-radius:50%;background:' + m.accent + '"></span></div>' +
+          '<div class="theme-tile__body"><svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h + '" aria-hidden="true">' +
+          drawFn(m.series, w, h, fg, muted) + '</svg></div></div>';
+      }
+
+      function paintBoard() {
+        var m = meta();
+        if (activeLabel) activeLabel.textContent = state.preset + " · " + state.scheme;
+        boardEl.innerHTML = tile("line", miniLine, m) + tile("bar", miniBar, m) + tile("area", miniArea, m) +
+          tile("donut", miniDonut, m) + tile("scatter", miniScatter, m) + tile("kpi", miniKpi, m);
+      }
+
+      function paintResponse() {
+        var m = meta(), focus = state.focus;
+        var drawers = { line: miniLine, bar: miniBar, area: miniArea, donut: miniDonut, scatter: miniScatter, kpi: miniKpi };
+        var fn = drawers[focus] || miniLine;
+        var bg = boardBg(m), fg = textColor(m), muted = mutedColor(fg), w = 400, h = 150;
+        chartHost.innerHTML = '<div style="padding:8px 4px 0">' +
+          '<div style="font-size:13px;font-weight:600;letter-spacing:-0.02em;margin:0 0 2px">Theme board · ' + focus + '</div>' +
+          '<div style="font-size:11.5px;color:' + muted + ';margin:0 0 10px">' + state.preset + ' · ' + state.scheme + ' · mock-plausible</div>' +
+          '<div style="border-radius:10px;background:' + bg + ';padding:10px">' +
+          '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h + '" role="img" aria-label="Theme focus chart">' +
+          fn(m.series, w, h, fg, muted) + '</svg></div></div>';
+      }
+
+      function buildSpec() {
+        return {
+          version: "1",
+          type: state.focus === "kpi" ? "kpi" : state.focus,
+          id: "theme-board",
+          title: "Theme board",
+          theme: state.preset,
+          data: { columns: { month: ["Jan","Feb","Mar","Apr","May","Jun"], value: [12,18,15,22,19,26] } },
+          encoding: { x: { field: "month" }, y: { field: "value" } },
+          a11y: { alt: "Theme board probe for " + state.preset }
+        };
+      }
+
+      function syncChipsFromState() {
+        document.querySelectorAll(".try .chip[data-key]").forEach(function (btn) {
+          var k = btn.getAttribute("data-key");
+          btn.classList.toggle("is-on", state[k] === btn.getAttribute("data-value"));
+        });
+        document.querySelectorAll(".preset-card").forEach(function (card) {
+          card.classList.toggle("is-on", card.getAttribute("data-preset") === state.preset);
+        });
+        document.querySelectorAll(".mode-toggle .chip").forEach(function (btn) {
+          btn.classList.toggle("is-on", btn.getAttribute("data-mode") === state.scheme);
+        });
+      }
+
+      function render() {
+        syncChipsFromState();
+        var m = meta();
+        input.value = JSON.stringify(buildSpec(), null, 2);
+        statusEl.textContent = "valid · ready";
+        if (badgeEl) {
+          if (state.preset === "soft") badgeEl.textContent = state.scheme === "dark" ? "Soft · dark" : "Soft";
+          else badgeEl.textContent = state.preset.charAt(0).toUpperCase() + state.preset.slice(1);
+        }
+        if (deltaEl) deltaEl.textContent = m.kind + " · " + state.scheme;
+        if (pathLabel) pathLabel.textContent = "/v1/charts/render?theme=" + state.preset + "&scheme=" + state.scheme;
+        if (kpiVal) kpiVal.textContent = state.preset;
+        if (titleEl) titleEl.textContent = "Theme board";
+        if (jsonEl) jsonEl.textContent = JSON.stringify({ theme: state.preset, scheme: state.scheme, kind: m.kind, series: m.series, accent: m.accent }, null, 2);
+        if (okEl) okEl.textContent = "validate OK · 0 errors";
+        if (statusHttp) statusHttp.textContent = "200";
+        if (responseEl) {
+          responseEl.classList.toggle("is-midnight", state.scheme === "dark" || state.preset === "midnight");
+          responseEl.classList.add("is-tick");
+          setTimeout(function () { responseEl.classList.remove("is-tick"); }, 420);
+        }
+        paintBoard();
+        paintResponse();
+      }
+
+      document.querySelectorAll(".try .chip[data-key]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          state[btn.getAttribute("data-key")] = btn.getAttribute("data-value");
+          render();
+        });
+      });
+      document.querySelectorAll(".preset-card").forEach(function (card) {
+        card.addEventListener("click", function () {
+          state.preset = card.getAttribute("data-preset");
+          render();
+        });
+      });
+      document.querySelectorAll(".mode-toggle .chip").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          state.scheme = btn.getAttribute("data-mode");
+          render();
+        });
+      });
+      document.querySelectorAll(".response__tab").forEach(function (tab) {
+        tab.addEventListener("click", function () {
+          var name = tab.getAttribute("data-tab");
+          document.querySelectorAll(".response__tab").forEach(function (b) {
+            var on = b === tab;
+            b.classList.toggle("is-on", on);
+            b.setAttribute("aria-selected", on ? "true" : "false");
+          });
+          document.querySelectorAll(".response__panel").forEach(function (panel) {
+            panel.hidden = panel.getAttribute("data-panel") !== name;
+          });
+        });
+      });
+      var header = document.querySelector(".site-header");
+      if (header) {
+        var onScroll = function () { header.classList.toggle("is-scrolled", window.scrollY > 4); };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        onScroll();
+      }
+      document.querySelectorAll("[data-copy]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var t = btn.getAttribute("data-copy") || "";
+          if (navigator.clipboard) navigator.clipboard.writeText(t).catch(function () {});
+          btn.textContent = "Copied";
+          setTimeout(function () { btn.textContent = "Copy"; }, 1200);
+        });
+      });
+      render();
+    })();
+
+  </script>
+</body>
+</html>

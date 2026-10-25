@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Errors · Reference · ChartKit Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --bg-elev: #ffffff;
+      --fg: #1d1d1f;
+      --muted: #6e6e73;
+      --line: rgba(0,0,0,0.08);
+      --accent: #0071e3;
+      --brand-kit: #0ea5e9;
+      --radius-ui: 980px;
+      --radius-card: 14px;
+      --radius-code: 12px;
+      --sidebar-w: 248px;
+      --preview-w: 520px;
+      --header-h: 44px;
+      --ease-out-expo: cubic-bezier(0,0,0.5,1);
+      --ease-nav: cubic-bezier(0.4,0,0.6,1);
+      --dur-fast: 200ms;
+      --dur: 320ms;
+      --code-bg: #fbfbfd;
+      --soft-fill: #0071e3;
+      --soft-sky: #0ea5e9;
+      --callout-bg: rgba(0,113,227,0.05);
+      --callout-border: rgba(0,113,227,0.14);
+      --midnight-bg: #0f1115;
+      --midnight-fg: #f5f5f7;
+      --midnight-muted: #86868b;
+      --midnight-line: rgba(255,255,255,0.08);
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      font-size:14.5px;
+      line-height:1.5;
+      letter-spacing:-0.011em;
+      color:var(--fg);
+      background:var(--bg);
+      -webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit;text-decoration:none}
+    :focus{outline:none}
+    :focus-visible{outline:3px solid rgba(0,113,227,0.45);outline-offset:3px;border-radius:6px}
+    button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;padding:0}
+
+    /* ── Header ── */
+    .site-header{
+      position:sticky;top:0;z-index:100;height:var(--header-h);
+      background:rgba(245,245,247,0.65);
+      backdrop-filter:saturate(180%) blur(20px);
+      -webkit-backdrop-filter:saturate(180%) blur(20px);
+      border-bottom:1px solid transparent;
+      transition:background var(--dur) var(--ease-nav),border-color var(--dur) var(--ease-nav),box-shadow var(--dur) var(--ease-nav);
+    }
+    .site-header.is-scrolled{
+      background:rgba(255,255,255,0.82);
+      border-bottom-color:rgba(0,0,0,0.07);
+      box-shadow:0 .5px 0 rgba(0,0,0,0.03),0 8px 24px rgba(0,0,0,0.04);
+    }
+    .site-header__inner{
+      width:100%;padding:0 20px;height:100%;
+      display:flex;align-items:center;gap:20px;
+    }
+    .logo{
+      display:inline-flex;align-items:center;gap:7px;
+      font-size:13px;font-weight:600;letter-spacing:-0.02em;
+      transition:opacity var(--dur-fast) var(--ease-nav);flex-shrink:0;
+    }
+    .logo:hover{opacity:.7}
+    .logo__mark{display:block;width:16px;height:16px}
+    .logo__kit{color:var(--brand-kit)}
+
+    .nav{
+      display:flex;align-items:center;gap:22px;
+      font-size:12px;color:var(--muted);margin-left:8px;
+    }
+    .nav a{
+      color:var(--muted);
+      transition:color var(--dur) var(--ease-nav);
+    }
+    .nav a:hover{color:var(--fg)}
+    .nav a.is-active{color:var(--fg);font-weight:500}
+
+    .header-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+    .search-pill{
+      display:inline-flex;align-items:center;gap:8px;
+      height:28px;padding:0 10px 0 11px;
+      border-radius:8px;
+      background:rgba(0,0,0,0.04);
+      border:1px solid rgba(0,0,0,0.06);
+      color:var(--muted);font-size:12px;
+      transition:background var(--dur-fast) var(--ease-nav),border-color var(--dur-fast) var(--ease-nav);
+      cursor:default;user-select:none;
+    }
+    .search-pill:hover{background:rgba(0,0,0,0.055);border-color:rgba(0,0,0,0.09)}
+    .search-pill__icon{opacity:.55;display:flex}
+    .search-pill__label{opacity:.85}
+    .search-pill__kbd{
+      margin-left:4px;display:inline-flex;align-items:center;justify-content:center;
+      height:18px;min-width:18px;padding:0 5px;
+      border-radius:5px;font-size:10.5px;font-weight:500;
+      background:var(--bg-elev);border:1px solid rgba(0,0,0,0.08);
+      color:var(--muted);font-family:inherit;letter-spacing:-0.02em;
+    }
+    .nav-ext{
+      font-size:12px;color:var(--muted);
+      transition:color var(--dur) var(--ease-nav);
+    }
+    .nav-ext:hover{color:var(--fg)}
+
+    .sidebar-toggle{
+      display:none;align-items:center;justify-content:center;
+      width:32px;height:32px;border-radius:8px;color:var(--fg);
+      transition:background var(--dur-fast) var(--ease-nav);
+    }
+    .sidebar-toggle:hover{background:rgba(0,0,0,0.05)}
+    .sidebar-toggle svg{display:block}
+
+    /* ── Full-bleed shell ── */
+    .shell{
+      width:100%;
+      display:grid;
+      grid-template-columns:var(--sidebar-w) minmax(0,1fr) var(--preview-w);
+      gap:0;
+      min-height:calc(100vh - var(--header-h));
+      align-items:start;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar{
+      position:sticky;top:var(--header-h);
+      height:calc(100vh - var(--header-h));
+      overflow-y:auto;overflow-x:hidden;
+      padding:24px 12px 40px 16px;
+      border-right:1px solid var(--line);
+      background:rgba(245,245,247,0.55);
+      scrollbar-width:thin;
+      scrollbar-color:rgba(0,0,0,0.12) transparent;
+    }
+    .sidebar::-webkit-scrollbar{width:6px}
+    .sidebar::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.12);border-radius:6px}
+
+    .side-section{margin-bottom:20px}
+    .side-section__label{
+      display:block;margin:0 0 5px 10px;
+      font-size:11px;font-weight:600;
+      letter-spacing:0.055em;text-transform:uppercase;
+      color:rgba(110,110,115,0.92);
+    }
+    .side-nav{list-style:none;margin:0;padding:0}
+    .side-nav a{
+      position:relative;
+      display:flex;align-items:center;
+      padding:6px 10px 6px 12px;margin:1px 0;
+      font-size:13px;line-height:1.35;letter-spacing:-0.01em;
+      font-weight:400;
+      color:rgba(29,29,31,0.72);
+      border-radius:8px;
+      transition:
+        background var(--dur) var(--ease-out-expo),
+        color var(--dur) var(--ease-out-expo),
+        font-weight var(--dur-fast) var(--ease-nav),
+        box-shadow var(--dur) var(--ease-out-expo);
+    }
+    .side-nav a::before{
+      content:"";
+      position:absolute;left:0;top:50%;
+      width:2px;height:0;
+      border-radius:2px;
+      background:var(--fg);
+      transform:translateY(-50%);
+      opacity:0;
+      transition:height var(--dur) var(--ease-out-expo),opacity var(--dur) var(--ease-out-expo);
+    }
+    .side-nav a:hover{
+      background:rgba(0,0,0,0.03);
+      color:var(--fg);
+    }
+    .side-nav a.is-active{
+      background:rgba(0,0,0,0.045);
+      color:var(--fg);
+      font-weight:600;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,0.025);
+    }
+    .side-nav a.is-active::before{
+      height:14px;opacity:0.85;
+    }
+    .side-nav a.side-nav__more{
+      color:var(--muted);font-size:12.5px;font-weight:400;
+    }
+    .side-nav a.side-nav__more:hover{color:var(--accent)}
+    .side-nav a.side-nav__more.is-active{color:var(--fg)}
+
+    .side-footer{
+      margin-top:8px;padding-top:16px;
+      border-top:1px solid var(--line);
+    }
+    .side-footer a{
+      display:flex;align-items:center;gap:7px;
+      padding:6px 10px;margin:1px 0;
+      font-size:12.5px;color:var(--muted);
+      border-radius:8px;
+      transition:color var(--dur-fast) var(--ease-nav),background var(--dur-fast) var(--ease-nav);
+    }
+    .side-footer a:hover{color:var(--fg);background:rgba(0,0,0,0.03)}
+    .side-footer svg{opacity:.55;flex-shrink:0}
+
+    /* ── Main / prose ── */
+    .main{
+      min-width:0;
+      padding:32px 36px 72px;
+      /* fill the fluid center column — no artificial 720 cap */
+    }
+    .breadcrumb{
+      display:flex;align-items:center;gap:6px;
+      margin:0 0 16px;
+      font-size:12px;color:var(--muted);
+    }
+    .breadcrumb a{color:var(--muted);transition:color var(--dur-fast) var(--ease-nav)}
+    .breadcrumb a:hover{color:var(--fg)}
+    .breadcrumb__sep{opacity:.4}
+    .breadcrumb__current{color:var(--fg);font-weight:500}
+
+    .prose h1{
+      margin:0 0 10px;
+      font-size:32px;font-weight:600;
+      letter-spacing:-0.028em;line-height:1.15;
+    }
+    .prose .lede{
+      margin:0 0 28px;
+      font-size:16.5px;line-height:1.45;
+      letter-spacing:-0.01em;color:var(--muted);
+      max-width:46em;
+    }
+    .prose h2{
+      margin:36px 0 12px;
+      font-size:20px;font-weight:600;
+      letter-spacing:-0.022em;line-height:1.25;
+      scroll-margin-top:calc(var(--header-h) + 16px);
+    }
+    .prose h2:first-of-type{margin-top:4px}
+    .prose p{
+      margin:0 0 14px;
+      font-size:14.5px;line-height:1.6;
+      color:rgba(29,29,31,0.88);
+      max-width:52em;
+    }
+    .prose p a{color:var(--accent);transition:opacity var(--dur-fast) var(--ease-nav)}
+    .prose p a:hover{opacity:.7}
+    .prose code{
+      font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+      font-size:12.5px;font-weight:500;
+      padding:1.5px 5px;border-radius:5px;
+      background:rgba(0,0,0,0.045);
+      color:var(--fg);
+    }
+    .prose pre code{padding:0;background:none;font-weight:400;font-size:12.5px}
+
+    .code-block{
+      position:relative;margin:14px 0 20px;
+      border-radius:var(--radius-code);
+      background:var(--code-bg);
+      border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+      overflow:hidden;
+    }
+    .code-block__bar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:8px 12px;
+      background:linear-gradient(180deg,#fbfbfd 0%,#f5f5f7 100%);
+      border-bottom:1px solid rgba(0,0,0,0.06);
+    }
+    .code-block__lang{
+      font-size:11px;font-weight:500;color:var(--muted);
+      font-variant-numeric:tabular-nums;
+    }
+    .code-block__copy{
+      font-size:11px;font-weight:500;color:var(--muted);
+      padding:3px 8px;border-radius:6px;
+      transition:background var(--dur-fast) var(--ease-nav),color var(--dur-fast) var(--ease-nav);
+    }
+    .code-block__copy:hover{background:rgba(0,0,0,0.05);color:var(--fg)}
+    .code-block pre{
+      margin:0;padding:14px 16px 16px;
+      overflow-x:auto;
+      font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+      font-size:12.5px;line-height:1.6;
+      color:var(--fg);
+    }
+
+    /* ── Try-it playground (Stripe energy) ── */
+    .try{
+      margin:8px 0 28px;
+      border-radius:16px;
+      background:var(--bg-elev);
+      border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02),0 10px 28px rgba(0,0,0,0.045);
+      overflow:hidden;
+    }
+    .try__bar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:10px 14px;
+      background:linear-gradient(180deg,#fbfbfd 0%,#f5f5f7 100%);
+      border-bottom:1px solid rgba(0,0,0,0.06);
+    }
+    .try__title{
+      font-size:12px;font-weight:600;letter-spacing:-0.01em;
+      color:var(--fg);
+    }
+    .try__hint{
+      font-size:11px;color:var(--muted);font-weight:400;
+    }
+    .try__body{padding:14px 14px 16px}
+    .try__split{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 196px;
+      gap:14px;
+      align-items:stretch;
+    }
+    .chips{
+      display:flex;flex-direction:column;gap:12px;
+      padding:12px 12px 14px;
+      border-radius:var(--radius-code);
+      background:rgba(0,0,0,0.02);
+      border:1px solid rgba(0,0,0,0.06);
+      align-self:stretch;
+    }
+    .chip-row{display:flex;flex-direction:column;align-items:stretch;gap:6px}
+    .chip-row__opts{display:flex;flex-wrap:wrap;gap:6px}
+    .chip-row__label{
+      font-size:10.5px;font-weight:600;color:rgba(110,110,115,0.95);
+      letter-spacing:0.04em;text-transform:uppercase;
+    }
+    .chip{
+      display:inline-flex;align-items:center;justify-content:center;
+      height:28px;padding:0 11px;flex:1 1 auto;min-width:0;
+      font-size:12px;font-weight:500;letter-spacing:-0.01em;
+      color:rgba(29,29,31,0.72);
+      background:rgba(0,0,0,0.035);
+      border:1px solid transparent;
+      border-radius:980px;
+      transition:
+        background var(--dur-fast) var(--ease-out-expo),
+        color var(--dur-fast) var(--ease-out-expo),
+        border-color var(--dur-fast) var(--ease-out-expo),
+        box-shadow var(--dur-fast) var(--ease-out-expo),
+        transform var(--dur-fast) var(--ease-out-expo);
+    }
+    .chip:hover{
+      background:rgba(0,0,0,0.055);
+      color:var(--fg);
+    }
+    .chip:active{transform:scale(0.97)}
+    .chip.is-on{
+      background:rgba(0,0,0,0.06);
+      color:var(--fg);
+      border-color:rgba(0,0,0,0.08);
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,0.02);
+      font-weight:600;
+    }
+    .chip.is-on[data-accent="soft"]{
+      background:rgba(0,113,227,0.1);
+      border-color:rgba(0,113,227,0.18);
+      color:var(--accent);
+      box-shadow:none;
+    }
+    .chip.is-on[data-accent="midnight"]{
+      background:rgba(15,17,21,0.9);
+      border-color:rgba(15,17,21,0.95);
+      color:#f5f5f7;
+      box-shadow:none;
+    }
+
+    .spec-editor{
+      position:relative;
+      border-radius:var(--radius-code);
+      background:var(--code-bg);
+      border:1px solid rgba(0,0,0,0.07);
+      overflow:hidden;
+      min-width:0;
+      display:flex;flex-direction:column;
+    }
+    .spec-editor textarea{flex:1 1 auto}
+    .spec-editor__bar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:7px 12px;
+      border-bottom:1px solid rgba(0,0,0,0.06);
+      background:linear-gradient(180deg,#fbfbfd 0%,#f5f5f7 100%);
+    }
+    .spec-editor__lang{
+      font-size:11px;font-weight:500;color:var(--muted);
+    }
+    .spec-editor__status{
+      font-size:11px;font-weight:500;
+      font-variant-numeric:tabular-nums;
+      color:#30a46c;
+      transition:color var(--dur-fast) var(--ease-nav);
+    }
+    .spec-editor__status.is-err{color:#e5484d}
+    .spec-editor__status.is-idle{color:var(--muted)}
+    .spec-editor textarea{
+      display:block;width:100%;
+      min-height:280px;max-height:440px;
+      margin:0;padding:14px 16px 16px;
+      border:none;resize:vertical;
+      background:transparent;
+      font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+      font-size:12.5px;line-height:1.6;
+      letter-spacing:-0.01em;
+      color:var(--fg);
+      tab-size:2;
+      outline:none;
+    }
+    .spec-editor textarea:focus{
+      box-shadow:inset 0 0 0 1.5px rgba(0,113,227,0.22);
+    }
+
+    /* Agent callout */
+    .callout{
+      margin:28px 0 8px;
+      padding:16px 18px;
+      border-radius:var(--radius-card);
+      background:var(--callout-bg);
+      border:1px solid var(--callout-border);
+    }
+    .callout__eyebrow{
+      display:flex;align-items:center;gap:7px;
+      margin:0 0 6px;
+      font-size:11px;font-weight:600;
+      letter-spacing:0.05em;text-transform:uppercase;
+      color:var(--accent);
+    }
+    .callout__eyebrow svg{flex-shrink:0}
+    .callout h3{
+      margin:0 0 6px;
+      font-size:15.5px;font-weight:600;
+      letter-spacing:-0.018em;line-height:1.3;
+    }
+    .callout p{
+      margin:0;
+      font-size:13.5px;line-height:1.5;
+      color:rgba(29,29,31,0.78);
+      max-width:none;
+    }
+    .callout code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:12px;font-weight:500;
+      padding:1px 4px;border-radius:4px;
+      background:rgba(0,113,227,0.08);
+    }
+    .callout__steps{
+      display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;
+    }
+    .callout__step{
+      display:inline-flex;align-items:center;gap:5px;
+      padding:4px 10px;
+      font-size:11.5px;font-weight:500;
+      border-radius:980px;
+      background:rgba(255,255,255,0.7);
+      border:1px solid rgba(0,113,227,0.12);
+      color:var(--fg);
+    }
+    .callout__step span{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:16px;height:16px;border-radius:50%;
+      font-size:10px;font-weight:600;
+      background:var(--accent);color:#fff;
+    }
+
+    /* Prev / Next */
+    .page-nav{
+      display:grid;grid-template-columns:1fr 1fr;
+      gap:12px;margin-top:48px;padding-top:28px;
+      border-top:1px solid var(--line);
+    }
+    .page-nav__link{
+      display:flex;flex-direction:column;gap:3px;
+      padding:14px 16px;
+      border-radius:12px;
+      border:1px solid rgba(0,0,0,0.07);
+      background:var(--bg-elev);
+      transition:border-color var(--dur-fast) var(--ease-nav),box-shadow var(--dur) var(--ease-out-expo),transform var(--dur) var(--ease-out-expo);
+    }
+    .page-nav__link:hover{
+      border-color:rgba(0,113,227,0.25);
+      box-shadow:0 4px 16px rgba(0,0,0,0.05);
+      transform:translateY(-1px);
+    }
+    .page-nav__link--next{align-items:flex-end;text-align:right}
+    .page-nav__dir{
+      font-size:11px;font-weight:500;color:var(--muted);
+      letter-spacing:0.02em;
+    }
+    .page-nav__title{
+      font-size:14px;font-weight:600;
+      letter-spacing:-0.015em;color:var(--accent);
+    }
+
+    /* ── Right: Stripe-style response rail ── */
+    .preview-rail{
+      position:sticky;top:var(--header-h);
+      height:calc(100vh - var(--header-h));
+      padding:18px 20px 28px 16px;
+      border-left:1px solid rgba(0,0,0,0.07);
+      background:
+        radial-gradient(120% 80% at 100% 0%,rgba(0,113,227,0.06) 0%,transparent 55%),
+        linear-gradient(180deg,#eef0f4 0%,#f5f5f7 42%,#f5f5f7 100%);
+      overflow-y:auto;
+      scrollbar-width:thin;
+      scrollbar-color:rgba(0,0,0,0.12) transparent;
+    }
+    .preview-rail__label{
+      display:flex;align-items:center;justify-content:space-between;
+      margin:0 0 12px 2px;
+      font-size:11px;font-weight:600;
+      letter-spacing:0.055em;text-transform:uppercase;
+      color:rgba(110,110,115,0.95);
+    }
+    .preview-rail__live{
+      display:inline-flex;align-items:center;gap:6px;
+      font-size:10.5px;font-weight:600;letter-spacing:0.02em;
+      text-transform:uppercase;color:#30a46c;
+    }
+    .preview-rail__live::before{
+      content:"";width:6px;height:6px;border-radius:50%;
+      background:#30a46c;box-shadow:0 0 0 3px rgba(48,164,108,0.18);
+    }
+    .response{
+      border-radius:12px;
+      background:#0a2540;
+      border:1px solid rgba(255,255,255,0.06);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.04) inset,
+        0 10px 28px rgba(10,37,64,0.18),
+        0 28px 64px rgba(10,37,64,0.16);
+      overflow:hidden;
+      color:#f6f9fc;
+      transform:translateY(0);
+      transition:
+        box-shadow var(--dur) var(--ease-out-expo),
+        transform var(--dur) var(--ease-out-expo),
+        background var(--dur) var(--ease-out-expo),
+        border-color var(--dur) var(--ease-out-expo);
+    }
+    .response.is-tick{
+      transform:translateY(-2px);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.06) inset,
+        0 14px 36px rgba(10,37,64,0.24),
+        0 36px 72px rgba(10,37,64,0.2);
+    }
+    .response.is-midnight{
+      background:#05070a;
+      border-color:rgba(255,255,255,0.08);
+    }
+    .response__chrome{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:11px 14px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.03);
+    }
+    .response.is-midnight .response__chrome{background:rgba(255,255,255,0.02)}
+    .response__req{
+      display:flex;align-items:center;gap:8px;min-width:0;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:11.5px;font-weight:500;
+    }
+    .response__method{
+      flex:0 0 auto;
+      padding:2px 7px;
+      border-radius:4px;
+      font-size:10px;font-weight:700;letter-spacing:0.04em;
+      color:#0a2540;background:#7a73ff;
+    }
+    .response__path{
+      color:rgba(246,249,252,0.78);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .response__status{
+      flex:0 0 auto;
+      display:inline-flex;align-items:center;gap:5px;
+      padding:3px 8px;border-radius:980px;
+      font-size:11px;font-weight:600;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      color:#3ecf8e;background:rgba(62,207,142,0.12);
+      border:1px solid rgba(62,207,142,0.22);
+    }
+    .response__status::before{
+      content:"";width:6px;height:6px;border-radius:50%;background:currentColor;
+    }
+    .response__tabs{
+      display:flex;gap:0;padding:0 10px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      background:rgba(0,0,0,0.12);
+    }
+    .response__tab{
+      appearance:none;border:none;background:transparent;cursor:pointer;
+      padding:9px 12px 10px;
+      font-size:12px;font-weight:500;letter-spacing:-0.01em;
+      color:rgba(246,249,252,0.72);
+      border-bottom:2px solid transparent;margin-bottom:-1px;
+      transition:color var(--dur-fast) var(--ease-nav),border-color var(--dur-fast) var(--ease-nav);
+    }
+    .response__tab:hover{color:rgba(246,249,252,0.85)}
+    .response__tab.is-on{
+      color:#f6f9fc;
+      border-bottom-color:#7a73ff;
+      font-weight:600;
+    }
+    .response__body{padding:16px 16px 12px}
+    .response__panel[hidden]{display:none!important}
+    .response__meta{
+      display:flex;align-items:baseline;justify-content:space-between;
+      margin-bottom:4px;gap:8px;
+    }
+    .response__title{
+      font-size:15px;font-weight:600;letter-spacing:-0.02em;
+      color:#f6f9fc;
+    }
+    .response.is-midnight .response__title{color:var(--midnight-fg)}
+    .response__badge{
+      font-size:10.5px;font-weight:500;color:rgba(246,249,252,0.62);
+      padding:2px 8px;border-radius:980px;background:rgba(255,255,255,0.08);
+      text-transform:capitalize;
+    }
+    .response.is-midnight .response__badge{
+      background:rgba(255,255,255,0.08);
+      color:var(--midnight-muted);
+    }
+    .response__value{
+      display:flex;align-items:baseline;gap:8px;margin-bottom:10px;
+    }
+    .response__kpi{
+      font-size:30px;font-weight:600;letter-spacing:-0.03em;
+      line-height:1;font-variant-numeric:tabular-nums;
+      color:#fff;
+    }
+    .response.is-midnight .response__kpi{color:var(--midnight-fg)}
+    .response__delta{font-size:12px;font-weight:500;color:#3ecf8e}
+    .response__chart{
+      margin:0 -2px 2px;min-height:200px;
+      padding:10px 8px 4px;
+      border-radius:10px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    .response.is-midnight .response__chart{background:rgba(255,255,255,0.03)}
+    .response__chart svg{display:block;width:100%;height:auto}
+    .response__chart .fade-in{
+      animation:chartFade 380ms var(--ease-out-expo) both;
+    }
+    @keyframes chartFade{
+      from{opacity:0;transform:translateY(4px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    .response__json{
+      margin:0;padding:12px 14px;
+      border-radius:10px;
+      background:rgba(0,0,0,0.28);
+      border:1px solid rgba(255,255,255,0.06);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:11.5px;line-height:1.55;
+      color:rgba(246,249,252,0.82);
+      white-space:pre-wrap;word-break:break-word;
+      max-height:320px;overflow:auto;
+    }
+    .response__json .k{color:#a5b4fc}
+    .response__json .s{color:#86efac}
+    .response__json .n{color:#fcd34d}
+
+    .response__footer{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:8px;padding:10px 14px 12px;
+      border-top:1px solid rgba(255,255,255,0.08);
+      font-size:11px;font-weight:500;
+      color:rgba(246,249,252,0.55);
+      font-variant-numeric:tabular-nums;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    .response.is-midnight .response__footer{
+      border-top-color:rgba(255,255,255,0.08);
+      color:var(--midnight-muted);
+    }
+    .response__ok{color:#3ecf8e}
+    .response.is-midnight .response__ok{color:#3dd68c}
+    .response__latency{opacity:.9}
+    .response__endpoint{display:none} /* legacy hook kept for JS */
+
+    .preview-rail__note{
+      margin:14px 2px 0;
+      font-size:11.5px;line-height:1.45;
+      color:var(--muted);
+      max-width:34em;
+    }
+
+    .sidebar-backdrop{
+      display:none;position:fixed;inset:0;z-index:80;
+      background:rgba(29,29,31,0.28);
+      backdrop-filter:blur(2px);
+      -webkit-backdrop-filter:blur(2px);
+      opacity:0;pointer-events:none;
+      transition:opacity var(--dur) var(--ease-nav);
+    }
+    .sidebar-backdrop.is-open{opacity:1;pointer-events:auto}
+
+    /* ── Responsive ── */
+    @media (max-width:1100px){
+      .shell{grid-template-columns:var(--sidebar-w) minmax(0,1fr)}
+      .preview-rail{
+        position:relative;top:auto;height:auto;
+        grid-column:2;grid-row:2;
+        border-left:none;border-top:1px solid var(--line);
+        padding:8px 28px 40px;
+        background:transparent;
+      }
+      .response{max-width:560px}
+      .try__split{grid-template-columns:1fr}
+      .chips{flex-direction:row;flex-wrap:wrap;gap:10px 14px}
+      .chip-row{flex:1 1 140px}
+    }
+    @media (max-width:900px){
+      .shell{grid-template-columns:1fr}
+      .sidebar{
+        position:fixed;left:0;top:var(--header-h);bottom:0;z-index:90;
+        width:min(280px,86vw);height:auto;
+        padding:20px 14px 40px;
+        background:rgba(255,255,255,0.96);
+        border-right:1px solid rgba(0,0,0,0.08);
+        box-shadow:8px 0 32px rgba(0,0,0,0.08);
+        transform:translateX(-105%);
+        transition:transform var(--dur) var(--ease-out-expo);
+      }
+      .sidebar.is-open{transform:translateX(0)}
+      .sidebar-backdrop{display:block}
+      .sidebar-toggle{display:inline-flex}
+      .main{padding:28px 18px 48px;max-width:none}
+      .preview-rail{
+        grid-column:1;grid-row:auto;
+        padding:0 18px 56px;
+      }
+      .response{max-width:none}
+      .nav a:not(.is-active){display:none}
+      .search-pill__label{display:none}
+      .prose h1{font-size:28px}
+      .prose .lede{font-size:15.5px}
+      .chip-row__label{flex-basis:100%;margin-bottom:2px}
+    }
+    @media (max-width:520px){
+      .site-header__inner{padding:0 14px;gap:12px}
+      .main{padding:24px 14px 40px}
+      .preview-rail{padding:0 14px 48px}
+      .page-nav{grid-template-columns:1fr}
+      .page-nav__link--next{align-items:flex-start;text-align:left}
+      .nav-ext{display:none}
+      .response__kpi{font-size:24px}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      html{scroll-behavior:auto}
+      *,*::before,*::after{
+        animation-duration:.01ms!important;
+        animation-iteration-count:1!important;
+        transition-duration:.01ms!important;
+        transition-delay:0ms!important;
+      }
+      .page-nav__link:hover,.response.is-tick{transform:none}
+    }
+
+    /* Line page: facts, anatomy, options */
+    .facts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 28px}
+    .fact{
+      display:inline-flex;align-items:center;gap:7px;
+      padding:6px 11px;border-radius:980px;
+      background:var(--bg-elev);border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+      font-size:12px;font-weight:500;color:rgba(29,29,31,0.78);max-width:100%;
+    }
+    .fact__k{font-size:10.5px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted)}
+    .fact__v{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:11.5px;font-weight:500;color:var(--fg);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:min(42vw,320px);
+    }
+    .fact__badge{
+      display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:980px;
+      font-size:11px;font-weight:600;color:#30a46c;background:rgba(48,164,108,0.1);
+      border:1px solid rgba(48,164,108,0.18);
+    }
+    .fact__badge::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+    .prose ul{margin:0 0 14px;padding:0 0 0 1.15em;max-width:52em;color:rgba(29,29,31,0.88);font-size:14.5px;line-height:1.6}
+    .prose li{margin:0 0 6px}
+    .anatomy{
+      display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;
+      margin:8px 0;padding:16px;border-radius:var(--radius-card);
+      background:var(--bg-elev);border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+    }
+    .anatomy__svg svg{display:block;width:100%;height:auto}
+    .anatomy__list{list-style:none;margin:0;padding:4px 0 0;display:flex;flex-direction:column;gap:10px}
+    .anatomy__list li{margin:0;display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45;color:rgba(29,29,31,0.85)}
+    .anatomy__n{
+      flex:0 0 auto;width:20px;height:20px;border-radius:50%;
+      display:inline-flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:600;background:rgba(0,113,227,0.1);color:var(--accent);
+    }
+    .anatomy__list strong{font-weight:600;color:var(--fg)}
+    .opt-table{
+      width:100%;max-width:52em;border-collapse:separate;border-spacing:0;
+      margin:8px 0;font-size:13px;border:1px solid rgba(0,0,0,0.07);
+      border-radius:12px;overflow:hidden;background:var(--bg-elev);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+    }
+    .opt-table th,.opt-table td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(0,0,0,0.06);vertical-align:middle}
+    .opt-table th{font-size:11px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);background:rgba(0,0,0,0.02)}
+    .opt-table tr:last-child td{border-bottom:none}
+    .opt-table code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:500;padding:1px 5px;border-radius:5px;background:rgba(0,0,0,0.04)}
+    .opt-table .muted{color:var(--muted);font-size:12.5px}
+    .status-pill{
+      display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:980px;
+      font-size:11px;font-weight:600;color:#30a46c;background:rgba(48,164,108,0.1);
+      border:1px solid rgba(48,164,108,0.16);white-space:nowrap;
+    }
+    .status-pill::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+    .also-see{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+    .also-see a{
+      display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:980px;
+      font-size:12.5px;font-weight:500;background:var(--bg-elev);border:1px solid rgba(0,0,0,0.07);color:var(--fg);
+      transition:border-color var(--dur-fast) var(--ease-nav),box-shadow var(--dur) var(--ease-out-expo),transform var(--dur) var(--ease-out-expo);
+    }
+    .also-see a:hover{border-color:rgba(0,113,227,0.28);box-shadow:0 4px 14px rgba(0,0,0,0.05);transform:translateY(-1px);color:var(--accent)}
+    @media (max-width:1100px){.anatomy{grid-template-columns:1fr}}
+    @media (max-width:520px){.fact__v{max-width:56vw}}
+    @media (prefers-reduced-motion:reduce){.also-see a:hover{transform:none}}
+  
+    /* Options index (Reference) — additive, shell unchanged */
+    .opt-search{
+      display:flex;align-items:center;gap:10px;
+      margin:0 0 18px;padding:10px 12px;
+      border-radius:12px;background:var(--bg-elev);
+      border:1px solid rgba(0,0,0,0.07);
+      box-shadow:0 1px 2px rgba(0,0,0,0.02);
+    }
+    .opt-search__icon{opacity:.45;display:flex;flex-shrink:0}
+    .opt-search__input{
+      flex:1;min-width:0;border:0;background:transparent;
+      font:inherit;font-size:13.5px;color:var(--fg);outline:none;
+    }
+    .opt-search__input::placeholder{color:var(--muted)}
+    .opt-search__meta{font-size:11.5px;color:var(--muted);white-space:nowrap}
+    .opt-filters{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 22px}
+    .opt-filters .chip{font-size:12px}
+    .opt-group{margin:0 0 28px}
+    .opt-group__head{
+      display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+      margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,0.06);
+    }
+    .opt-group__title{
+      margin:0;font-size:13px;font-weight:600;letter-spacing:-0.01em;
+    }
+    .opt-group__count{font-size:11.5px;color:var(--muted)}
+    .opt-table td a.opt-path{
+      color:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:12px;font-weight:500;padding:1px 5px;border-radius:5px;
+      background:rgba(0,0,0,0.04);transition:background var(--dur-fast) var(--ease-nav),color var(--dur-fast) var(--ease-nav);
+    }
+    .opt-table td a.opt-path:hover{background:rgba(0,113,227,0.1);color:var(--accent)}
+    .status-pill[data-s="drawn"]{color:#047857;background:rgba(16,185,129,0.12)}
+    .status-pill[data-s="interact"]{color:#1d4ed8;background:rgba(59,130,246,0.12)}
+    .status-pill[data-s="core-all"]{color:#6d28d9;background:rgba(139,92,246,0.12)}
+    .status-pill[data-s="ck3012"]{color:#b45309;background:rgba(245,158,11,0.14)}
+    .status-pill[data-s="chunk"]{color:#0e7490;background:rgba(14,165,233,0.12)}
+    .status-pill[data-s="mock"]{color:#047857;background:rgba(16,185,129,0.12)}
+    .opt-legend{
+      display:flex;flex-wrap:wrap;gap:8px 14px;margin:0 0 22px;
+      padding:12px 14px;border-radius:12px;
+      background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.05);
+    }
+    .opt-legend__item{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+    .opt-legend__item .status-pill{font-size:11px}
+    tr.is-hidden{display:none}
+    .opt-group.is-empty{display:none}
+
+  
+    .fact-row{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}
+    .fact{display:flex;flex-direction:column;gap:3px;min-width:140px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.05)}
+    .fact__k{font-size:10.5px;font-weight:600;letter-spacing:0.06em;color:var(--muted)}
+    .fact__v{font-size:12.5px;font-weight:500;letter-spacing:-0.01em}
+    .fact__badge{display:inline-flex;align-items:center;gap:6px;width:fit-content;padding:3px 8px;border-radius:999px;font-size:11.5px;font-weight:600}
+    .also-see{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 20px}
+    .also-see a{display:inline-flex;padding:6px 11px;border-radius:999px;font-size:12.5px;font-weight:500;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.06);transition:background var(--dur-fast) var(--ease-nav),border-color var(--dur-fast) var(--ease-nav)}
+    .also-see a:hover{background:rgba(0,113,227,0.08);border-color:rgba(0,113,227,0.18);color:var(--accent)}
+    .stack-note{font-size:13px;color:var(--muted);max-width:52em}
+
+  
+    .status-pill[data-s="error"]{color:#b91c1c;background:rgba(239,68,68,0.12)}
+    .status-pill[data-s="warning"]{color:#b45309;background:rgba(245,158,11,0.14)}
+    .status-pill[data-s="info"]{color:#1d4ed8;background:rgba(59,130,246,0.12)}
+    .ck-code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:12px;font-weight:600;letter-spacing:-0.02em;
+      color:var(--accent);
+    }
+    .ck-code a{color:inherit}
+    .ck-code a:hover{text-decoration:underline}
+    .opt-table td.msg{font-size:12.5px;max-width:28em}
+    .repair-pill{
+      display:inline-flex;align-items:center;gap:4px;
+      padding:2px 7px;border-radius:999px;font-size:11px;font-weight:600;
+      background:rgba(16,185,129,0.12);color:#047857;
+    }
+    .repair-pill[data-r="no"]{background:rgba(0,0,0,0.04);color:var(--muted);font-weight:500}
+
+  </style>
+</head>
+<body>
+  <header class="site-header" id="site-header">
+    <div class="site-header__inner">
+      <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Open sidebar" aria-expanded="false" aria-controls="sidebar">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+          <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <a class="logo" href="/" aria-label="ChartKit home">
+        <svg class="logo__mark" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <rect x="1" y="9" width="3.2" height="6" rx="0.8" fill="#1d1d1f"/>
+          <rect x="6.4" y="5.5" width="3.2" height="9.5" rx="0.8" fill="#1d1d1f"/>
+          <rect x="11.8" y="2" width="3.2" height="13" rx="0.8" fill="#0ea5e9"/>
+        </svg>
+        <span>Chart<span class="logo__kit">Kit</span></span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="#docs" class="is-active">Docs</a>
+        <a href="#playground">Playground</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#github">GitHub</a>
+      </nav>
+      <div class="header-right">
+        <div class="search-pill" aria-hidden="true" title="Search (visual only)">
+          <span class="search-pill__icon">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="3.5" stroke="currentColor" stroke-width="1.3"/><path d="M7.8 7.8L10.5 10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </span>
+          <span class="search-pill__label">Search docs</span>
+          <kbd class="search-pill__kbd">⌘K</kbd>
+        </div>
+        <a class="nav-ext" href="#benchmarks">Benchmarks</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
+
+  <div class="shell">
+    <aside class="sidebar" id="sidebar" aria-label="Documentation">
+      <div class="side-section">
+        <span class="side-section__label">Start</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs.html" data-nav>Overview</a></li>
+          <li><a href="chartkit-mock-docs-react.html" data-nav>React</a></li>
+          <li><a href="chartkit-mock-docs-vue.html" data-nav>Vue</a></li>
+          <li><a href="chartkit-mock-docs-svelte.html" data-nav>Svelte</a></li>
+          <li><a href="chartkit-mock-docs-vanilla.html" data-nav>Vanilla</a></li>
+          <li><a href="chartkit-mock-docs-markdown.html" data-nav>Markdown</a></li>
+        </ul>
+      </div>
+
+      <div class="side-section">
+        <span class="side-section__label">Concepts</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs-spec-anatomy.html" data-nav>Spec anatomy</a></li>
+          <li><a href="chartkit-mock-docs-data.html" data-nav>Data</a></li>
+          <li><a href="chartkit-mock-docs-encoding.html" data-nav>Encoding</a></li>
+          <li><a href="chartkit-mock-docs-scales.html" data-nav>Scales</a></li>
+          <li><a href="chartkit-mock-docs-axes.html" data-nav>Axes</a></li>
+          <li><a href="chartkit-mock-docs-themes-tokens.html" data-nav>Themes &amp; tokens</a></li>
+          <li><a href="chartkit-mock-docs-bundles.html" data-nav>Bundles</a></li>
+        </ul>
+      </div>
+
+      <div class="side-section">
+        <span class="side-section__label">Chart types</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs-area.html" data-nav>Area</a></li>
+          <li><a href="chartkit-mock-docs-line.html" data-nav>Line</a></li>
+          <li><a href="chartkit-mock-docs-bar.html" data-nav>Bar</a></li>
+          <li><a href="chartkit-mock-docs-donut.html" data-nav>Donut</a></li>
+          <li><a href="chartkit-mock-docs-combo.html" data-nav>Combo</a></li>
+          <li><a href="chartkit-mock-docs-gauge.html" data-nav>Gauge</a></li>
+          <li><a href="chartkit-mock-docs-heatmap.html" data-nav>Heatmap</a></li>
+          <li><a href="chartkit-mock-docs-candle.html" data-nav>Candle</a></li>
+          <li><a href="chartkit-mock-docs-scatter.html" data-nav>Scatter</a></li>
+          <li><a href="chartkit-mock-docs-kpi.html" data-nav>Kpi</a></li>
+          <li><a href="chartkit-mock-docs-sparkline.html" data-nav>Sparkline</a></li>
+          <li><a href="chartkit-mock-docs-mini-area.html" data-nav>Mini-area</a></li>
+          <li><a href="chartkit-mock-docs-progress-ring.html" data-nav>Progress-ring</a></li>
+          <li><a href="chartkit-mock-docs-spike.html" data-nav>Spike</a></li>
+          <li><a href="chartkit-mock-docs-histogram.html" data-nav>Histogram</a></li>
+          <li><a href="chartkit-mock-docs-boxplot.html" data-nav>Boxplot</a></li>
+          <li><a href="chartkit-mock-docs-radar.html" data-nav>Radar</a></li>
+          <li><a href="chartkit-mock-docs-funnel.html" data-nav>Funnel</a></li>
+          <li><a href="chartkit-mock-docs-treemap.html" data-nav>Treemap</a></li>
+          <li><a href="chartkit-mock-docs-sankey.html" data-nav>Sankey</a></li>
+          <li><a href="chartkit-mock-docs-bullet.html" data-nav>Bullet</a></li>
+          <li><a href="chartkit-mock-docs-waterfall.html" data-nav>Waterfall</a></li>
+          <li><a href="chartkit-mock-docs-gantt.html" data-nav>Gantt</a></li>
+          <li><a href="chartkit-mock-docs-timeline.html" data-nav>Timeline</a></li>
+          <li><a href="chartkit-mock-docs-quadrant.html" data-nav>Quadrant</a></li>
+          <li><a href="chartkit-mock-docs-venn.html" data-nav>Venn</a></li>
+          <li><a href="chartkit-mock-docs-journey.html" data-nav>Journey</a></li>
+        </ul>
+      </div>
+
+      <div class="side-section">
+        <span class="side-section__label">Reference</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs-options.html" data-nav>Options</a></li>
+          <li><a href="chartkit-mock-docs-errors.html" class="is-active" data-nav>Errors <span style="opacity:.55;font-size:11px;margin-left:4px">CK codes</span></a></li>
+          <li><a href="chartkit-mock-docs-themes.html" data-nav>Themes</a></li>
+        </ul>
+      </div>
+
+      <div class="side-section">
+        <span class="side-section__label">Agents</span>
+        <ul class="side-nav">
+          <li><a href="chartkit-mock-docs-validate.html" data-nav>Validate</a></li>
+          <li><a href="chartkit-mock-docs-repair.html" data-nav>repair</a></li>
+          <li><a href="chartkit-mock-docs-render.html" data-nav>render</a></li>
+          <li><a href="chartkit-mock-docs-llms-txt.html" data-nav>llms.txt</a></li>
+          <li><a href="chartkit-mock-docs-mcp.html" data-nav>MCP</a></li>
+        </ul>
+      </div>
+
+      <div class="side-footer">
+        <a href="#playground">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4 7.5l2-2 2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Playground
+        </a>
+        <a href="#gallery">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="4.2" height="4.2" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="7.3" y="1.5" width="4.2" height="4.2" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1.5" y="7.3" width="4.2" height="4.2" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="7.3" y="7.3" width="4.2" height="4.2" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+          Gallery
+        </a>
+        <a href="#benchmarks">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M2.5 10.5V6.5M6.5 10.5V3.5M10.5 10.5V7.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Benchmarks
+        </a>
+      </div>
+    </aside>
+
+                                                                                        <main class="main prose" id="main">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="chartkit-mock-docs.html">Docs</a>
+        <span class="breadcrumb__sep" aria-hidden="true">/</span>
+        <a href="#reference">Reference</a>
+        <span class="breadcrumb__sep" aria-hidden="true">/</span>
+        <span class="breadcrumb__current">Errors</span>
+      </nav>
+
+      <h1 id="errors">Errors</h1>
+      <p class="lede" style="margin-bottom:12px"><span class="status-pill" data-s="mock">mock-plausible</span> <span class="status-pill">Reference</span> — CK code index from <code>validate()</code> / <code>diagnostics.ts</code>. Stable codes, JSON Pointers, hints, and optional <code>fix</code> (RFC 6902). Prod URL: <code>/docs/errors</code> (extensionless). Sample rows from <code>chartkit/spec/SPEC.md</code> + Phase-4.</p>
+
+      <div class="fact-row" aria-label="Page facts">
+        <div class="fact">
+          <span class="fact__k">SOURCE</span>
+          <span class="fact__v" title="Diagnostics + validate">diagnostics.ts · validate.ts · validate-phase4.ts</span>
+        </div>
+        <div class="fact">
+          <span class="fact__k">SIZE</span>
+          <span class="fact__v">planned · Reference</span>
+        </div>
+        <div class="fact">
+          <span class="fact__k">STATUS</span>
+          <span class="fact__badge" style="background:rgba(245,158,11,0.14);color:#b45309">planned</span>
+        </div>
+      </div>
+
+      <h2 id="ranges">Code ranges</h2>
+      <p>Codes are never reused. Messages may improve; the code stays stable. <code>render()</code> never throws — errors paint an inline error SVG; warnings still draw.</p>
+      <div class="opt-legend" aria-label="CK ranges">
+        <span class="opt-legend__item"><span class="status-pill" data-s="error">CK1xxx</span> spec structure</span>
+        <span class="opt-legend__item"><span class="status-pill" data-s="error">CK2xxx</span> data &amp; encoding</span>
+        <span class="opt-legend__item"><span class="status-pill" data-s="error">CK3xxx</span> semantic / scale</span>
+        <span class="opt-legend__item"><span class="status-pill" data-s="warning">CK4xxx</span> design &amp; a11y advice</span>
+        <span class="opt-legend__item"><span class="status-pill" data-s="error">CK14xx</span> Phase-4 planning types</span>
+        <span class="opt-legend__item"><span class="status-pill" data-s="warning">CK8xxx</span> Mermaid convert</span>
+      </div>
+
+      <h2 id="browse">Browse codes</h2>
+      <p>Filter by range or severity. Rows link to planned <code>/docs/errors/&lt;CKxxxx&gt;</code> pages. Repair column shows when <code>repair()</code> / a <code>fix</code> patch is offered.</p>
+
+      <div class="opt-search" role="search">
+        <span class="opt-search__icon" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.25" stroke="currentColor" stroke-width="1.3"/><path d="M9.2 9.2L12 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </span>
+        <input class="opt-search__input" id="err-q" type="search" placeholder="Filter — e.g. CK2001, a11y, journey" aria-label="Filter CK codes" autocomplete="off" />
+        <span class="opt-search__meta" id="err-count">22 shown</span>
+      </div>
+      <div class="opt-filters chips" role="group" aria-label="Severity / range filter" id="err-filters">
+        <button type="button" class="chip is-on" data-filter="all">All</button>
+        <button type="button" class="chip" data-filter="error">error</button>
+        <button type="button" class="chip" data-filter="warning">warning</button>
+        <button type="button" class="chip" data-filter="ck1">CK1xxx</button>
+        <button type="button" class="chip" data-filter="ck2">CK2xxx</button>
+        <button type="button" class="chip" data-filter="ck3">CK3xxx</button>
+        <button type="button" class="chip" data-filter="ck14">CK14xx</button>
+      </div>
+
+      <div class="opt-group" data-group="ck1" id="group-ck1">
+        <div class="opt-group__head">
+          <h3 class="opt-group__title" id="ck1xxx">CK1xxx · structure</h3>
+          <span class="opt-group__count">8 sample codes</span>
+        </div>
+        <table class="opt-table">
+          <thead><tr><th>Code</th><th>Sev</th><th>Message</th><th>Pointer</th><th>Repair</th></tr></thead>
+          <tbody>
+            <tr data-sev="error" data-range="ck1" data-code="CK1001" data-q="invalid json parse"><td class="ck-code"><a href="#CK1001">CK1001</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">invalid JSON: {parser message}</td><td><code></code></td><td><span class="repair-pill" data-r="no">—</span></td></tr>
+            <tr data-sev="error" data-range="ck1" data-code="CK1002" data-q="unknown property colour"><td class="ck-code"><a href="#CK1002">CK1002</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">unknown property "{name}"</td><td><code>/{path}/{name}</code></td><td><span class="repair-pill">fix</span></td></tr>
+            <tr data-sev="error" data-range="ck1" data-code="CK1003" data-q="missing required"><td class="ck-code"><a href="#CK1003">CK1003</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">missing required property "{name}"</td><td><code>parent</code></td><td><span class="repair-pill" data-r="no">hint</span></td></tr>
+            <tr data-sev="error" data-range="ck1" data-code="CK1004" data-q="a11y alt required"><td class="ck-code"><a href="#CK1004">CK1004</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">a11y.alt is required</td><td><code>/a11y</code></td><td><span class="repair-pill">fix</span></td></tr>
+            <tr data-sev="error" data-range="ck1" data-code="CK1005" data-q="unknown chart type pie"><td class="ck-code"><a href="#CK1005">CK1005</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">unknown chart type "{value}"</td><td><code>/type</code></td><td><span class="repair-pill">fix</span></td></tr>
+            <tr data-sev="error" data-range="ck1" data-code="CK1009" data-q="vega-lite shape unwrap"><td class="ck-code"><a href="#CK1009">CK1009</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">spec shape looks like Vega-Lite / legacy (unwrap)</td><td><code>varies</code></td><td><span class="repair-pill">fix</span></td></tr>
+            <tr data-sev="error" data-range="ck1" data-code="CK1010" data-q="no renderer registered"><td class="ck-code"><a href="#CK1010">CK1010</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">no renderer registered for type</td><td><code>/type</code></td><td><span class="repair-pill" data-r="no">hint</span></td></tr>
+            <tr data-sev="warning" data-range="ck1" data-code="CK1011" data-q="phase4 async validate"><td class="ck-code"><a href="#CK1011">CK1011</a></td><td><span class="status-pill" data-s="warning">warning</span></td><td class="msg muted">Phase-4 type needs async validate</td><td><code>/type</code></td><td><span class="repair-pill" data-r="no">hint</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="opt-group" data-group="ck2" id="group-ck2">
+        <div class="opt-group__head">
+          <h3 class="opt-group__title" id="ck2xxx">CK2xxx · data &amp; encoding</h3>
+          <span class="opt-group__count">5 sample codes</span>
+        </div>
+        <table class="opt-table">
+          <thead><tr><th>Code</th><th>Sev</th><th>Message</th><th>Pointer</th><th>Repair</th></tr></thead>
+          <tbody>
+            <tr data-sev="error" data-range="ck2" data-code="CK2001" data-q="field not found revenue"><td class="ck-code"><a href="#CK2001">CK2001</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">field "{f}" not found in data</td><td><code>/encoding/{ch}/field</code></td><td><span class="repair-pill">fix</span></td></tr>
+            <tr data-sev="error" data-range="ck2" data-code="CK2002" data-q="non-numeric values"><td class="ck-code"><a href="#CK2002">CK2002</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">field "{f}" has non-numeric values</td><td><code>channel</code></td><td><span class="repair-pill" data-r="no">hint</span></td></tr>
+            <tr data-sev="warning" data-range="ck2" data-code="CK2003" data-q="looks like dates temporal"><td class="ck-code"><a href="#CK2003">CK2003</a></td><td><span class="status-pill" data-s="warning">warning</span></td><td class="msg muted">"{f}" looks like dates but type is "{t}"</td><td><code>/encoding/x</code></td><td><span class="repair-pill">fix</span></td></tr>
+            <tr data-sev="error" data-range="ck2" data-code="CK2004" data-q="data is empty"><td class="ck-code"><a href="#CK2004">CK2004</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">data is empty</td><td><code>/data</code></td><td><span class="repair-pill" data-r="no">hint</span></td></tr>
+            <tr data-sev="error" data-range="ck2" data-code="CK2005" data-q="columns different lengths"><td class="ck-code"><a href="#CK2005">CK2005</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">columns have different lengths</td><td><code>/data/columns</code></td><td><span class="repair-pill" data-r="no">hint</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="opt-group" data-group="ck3" id="group-ck3">
+        <div class="opt-group__head">
+          <h3 class="opt-group__title" id="ck3xxx">CK3xxx · semantic</h3>
+          <span class="opt-group__count">4 sample codes</span>
+        </div>
+        <table class="opt-table">
+          <thead><tr><th>Code</th><th>Sev</th><th>Message</th><th>Pointer</th><th>Repair</th></tr></thead>
+          <tbody>
+            <tr data-sev="error" data-range="ck3" data-code="CK3001" data-q="log scale positive"><td class="ck-code"><a href="#CK3001">CK3001</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">log scale requires positive values</td><td><code>/encoding/{ch}/scale/type</code></td><td><span class="repair-pill" data-r="no">hint</span></td></tr>
+            <tr data-sev="error" data-range="ck3" data-code="CK3003" data-q="candlestick high low"><td class="ck-code"><a href="#CK3003">CK3003</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">candlestick row {i}: high &lt; max(open, close)</td><td><code>/data/{i}</code></td><td><span class="repair-pill" data-r="no">hint</span></td></tr>
+            <tr data-sev="warning" data-range="ck3" data-code="CK3010" data-q="mark option no effect"><td class="ck-code"><a href="#CK3010">CK3010</a></td><td><span class="status-pill" data-s="warning">warning</span></td><td class="msg muted">"mark.{opt}" has no effect on type "{type}"</td><td><code>/mark/{opt}</code></td><td><span class="repair-pill" data-r="no">hint</span></td></tr>
+            <tr data-sev="warning" data-range="ck3" data-code="CK3012" data-q="accepted not applied yet animation easing"><td class="ck-code"><a href="#CK3012">CK3012</a></td><td><span class="status-pill" data-s="warning">warning</span></td><td class="msg muted">accepted, not applied yet (easing / select / tooltip.fields / fontFamily)</td><td><code>varies</code></td><td><span class="repair-pill" data-r="no">roadmap</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="opt-group" data-group="ck14" id="group-ck14">
+        <div class="opt-group__head">
+          <h3 class="opt-group__title" id="ck14xx">CK14xx · Phase-4 planning</h3>
+          <span class="opt-group__count">5 sample codes</span>
+        </div>
+        <table class="opt-table">
+          <thead><tr><th>Code</th><th>Sev</th><th>Message</th><th>Pointer</th><th>Repair</th></tr></thead>
+          <tbody>
+            <tr data-sev="error" data-range="ck14" data-code="CK1400" data-q="user-journey repair journey type"><td class="ck-code"><a href="#CK1400">CK1400</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">unknown / alias Phase-4 type (e.g. user-journey → journey)</td><td><code>/type</code></td><td><span class="repair-pill">fix</span></td></tr>
+            <tr data-sev="error" data-range="ck14" data-code="CK1401" data-q="gantt missing start"><td class="ck-code"><a href="#CK1401">CK1401</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">gantt row missing a start date</td><td><code>/data/{i}</code></td><td><span class="repair-pill">fix</span></td></tr>
+            <tr data-sev="error" data-range="ck14" data-code="CK1407" data-q="venn sets 2 or 3"><td class="ck-code"><a href="#CK1407">CK1407</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">venn needs 2 or 3 sets</td><td><code>/data</code></td><td><span class="repair-pill">fix</span></td></tr>
+            <tr data-sev="error" data-range="ck14" data-code="CK1409" data-q="journey score 1..5"><td class="ck-code"><a href="#CK1409">CK1409</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">journey score missing or outside 1..5</td><td><code>/data/{i}</code></td><td><span class="repair-pill">fix</span></td></tr>
+            <tr data-sev="error" data-range="ck14" data-code="CK1410" data-q="journey missing section"><td class="ck-code"><a href="#CK1410">CK1410</a></td><td><span class="status-pill" data-s="error">error</span></td><td class="msg muted">journey step is missing a section</td><td><code>/data/{i}</code></td><td><span class="repair-pill">fix</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="try-leaf">Try a diagnostic</h2>
+      <p>Pick a CK code. The center spec is a minimal failing case; the response rail shows the diagnostic (code, pointer, hint) and Apply fix when a patch exists. Soft = docs mock accent.</p>
+
+      <div class="try" id="try">
+        <div class="try__bar">
+          <span class="try__title">Interactive spec</span>
+          <span class="try__hint">Code chip drives the failing spec →</span>
+        </div>
+        <div class="try__body">
+          <div class="try__split">
+            <div class="spec-editor">
+              <div class="spec-editor__bar">
+                <span class="spec-editor__lang">spec.json</span>
+                <span class="spec-editor__status" id="spec-status">1 error · ready</span>
+              </div>
+              <textarea id="spec-input" spellcheck="false" aria-label="Editable chart specification"></textarea>
+            </div>
+            <div class="chips" role="group" aria-label="Diagnostic probe settings">
+              <div class="chip-row" data-chip-group="code">
+                <span class="chip-row__label">Code</span>
+                <div class="chip-row__opts">
+                  <button type="button" class="chip is-on" data-key="code" data-value="CK2001">CK2001</button>
+                  <button type="button" class="chip" data-key="code" data-value="CK1004">CK1004</button>
+                  <button type="button" class="chip" data-key="code" data-value="CK1005">CK1005</button>
+                  <button type="button" class="chip" data-key="code" data-value="CK3012">CK3012</button>
+                  <button type="button" class="chip" data-key="code" data-value="CK1409">CK1409</button>
+                </div>
+              </div>
+              <div class="chip-row" data-chip-group="theme">
+                <span class="chip-row__label">Theme</span>
+                <div class="chip-row__opts">
+                  <button type="button" class="chip is-on" data-key="theme" data-value="soft" data-accent="soft">Soft</button>
+                  <button type="button" class="chip" data-key="theme" data-value="midnight" data-accent="midnight">Midnight</button>
+                </div>
+              </div>
+              <div class="chip-row" data-chip-group="fix">
+                <span class="chip-row__label">Repair</span>
+                <div class="chip-row__opts">
+                  <button type="button" class="chip is-on" data-key="fix" data-value="off">Broken</button>
+                  <button type="button" class="chip" data-key="fix" data-value="on">Apply fix</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 id="shape">Diagnostic shape</h2>
+      <p>Mirrors jsonlint-core: stable <code>code</code>, <code>severity</code>, <code>message</code>, JSON Pointer <code>path</code>, <code>hint</code>, optional <code>fix</code>. All diagnostics return in one pass. Agents apply <code>repair()</code> locally — no model round-trip for most fixes.</p>
+      <div class="code-block">
+        <div class="code-block__bar">
+          <span class="code-block__lang">json · diagnostic (CK2001)</span>
+          <button class="code-block__copy" type="button" data-copy='{"code":"CK2001","severity":"error","message":"field \"Revenue\" not found in data","path":"/encoding/y/field","hint":"available fields: month, revenue; did you mean \"revenue\"?","fix":[{"op":"replace","path":"/encoding/y/field","value":"revenue"}]}'>Copy</button>
+        </div>
+        <pre><code>{
+  "code": "CK2001",
+  "severity": "error",
+  "message": "field \"Revenue\" not found in data",
+  "path": "/encoding/y/field",
+  "hint": "available fields: month, revenue; did you mean \"revenue\"?",
+  "fix": [
+    { "op": "replace", "path": "/encoding/y/field", "value": "revenue" }
+  ]
+}</code></pre>
+      </div>
+
+      <h2 id="machine">Machine indexes</h2>
+      <p>Build emits <code>/errors.json</code> (every CK code + example pointer). Leaf pages at <code>/docs/errors/&lt;CKxxxx&gt;</code> carry message, cause, pointer example, repair patch, and the CK3012 accepted-not-applied list.</p>
+      <aside class="callout" aria-labelledby="callout-errors">
+        <p class="callout__eyebrow">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.3"/><path d="M6 3.5v3M6 8.2v.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          For agents
+        </p>
+        <h3 id="callout-errors">Validate → repair → render</h3>
+        <p>Point at <code>llms.txt</code>, emit a spec, <code>validate()</code>. On failure, <code>repair()</code> applies JSON Patch locally. CK3012 warnings mean the key is accepted but not drawn yet — do not loop forever on those.</p>
+      </aside>
+
+      <h2 id="also-see">Also see</h2>
+      <div class="also-see">
+        <a href="chartkit-mock-docs-options.html">Options</a>
+        <a href="chartkit-mock-docs-themes.html">Themes</a>
+        <a href="chartkit-mock-docs-bundles.html">Bundles</a>
+        <a href="chartkit-mock-docs-spec-anatomy.html">Spec anatomy</a>
+        <a href="chartkit-mock-docs-validate.html">Validate → repair → render</a>
+      </div>
+
+      <nav class="page-nav" aria-label="Page">
+        <a class="page-nav__link" href="chartkit-mock-docs-options.html">
+          <span class="page-nav__dir">← Previous</span>
+          <span class="page-nav__title">Options</span>
+        </a>
+        <a class="page-nav__link page-nav__link--next" href="chartkit-mock-docs-themes.html" data-nav>
+          <span class="page-nav__dir">Next →</span>
+          <span class="page-nav__title">Themes</span>
+        </a>
+      </nav>
+
+    </main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <aside class="preview-rail" aria-label="Live render">
+      <div class="preview-rail__label">
+        <span>Response</span>
+        <span class="preview-rail__live">Live</span>
+      </div>
+      <div class="response" id="response" aria-live="polite">
+        <div class="response__chrome">
+          <div class="response__req">
+            <span class="response__method">POST</span>
+            <span class="response__path" id="response-path">/v1/validate?code=CK2001&amp;theme=soft</span>
+            <span class="response__endpoint" id="response-endpoint" hidden>render · Soft · line</span>
+          </div>
+          <span class="response__status" id="response-status">422</span>
+        </div>
+        <div class="response__tabs" role="tablist" aria-label="Response view">
+          <button type="button" class="response__tab is-on" data-tab="chart" role="tab" aria-selected="true">Chart</button>
+          <button type="button" class="response__tab" data-tab="json" role="tab" aria-selected="false">JSON</button>
+        </div>
+        <div class="response__body">
+          <div class="response__panel" data-panel="chart" id="panel-chart">
+            <div class="response__meta">
+              <span class="response__title" id="response-title">Diagnostic</span>
+              <span class="response__badge" id="response-badge">Soft</span>
+            </div>
+            <div class="response__value">
+              <span class="response__kpi" id="response-kpi">CK2001</span>
+              <span class="response__delta" id="response-delta">error · /encoding/y/field</span>
+            </div>
+            <div class="response__chart" id="response-chart"></div>
+          </div>
+          <div class="response__panel" data-panel="json" id="panel-json" hidden>
+            <pre class="response__json" id="response-json"></pre>
+          </div>
+        </div>
+        <div class="response__footer">
+          <span class="response__ok" id="response-ok">1 error · CK2001</span>
+          <span class="response__latency" id="response-latency">0.8ms</span>
+        </div>
+      </div>
+      <p class="preview-rail__note">Edit the failing spec in the center; this rail shows validate() output — Chart or JSON.</p>
+    </aside>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <script>
+    // Errors index — mock-plausible Reference. Soft = docs mock accent.
+    // Sample diagnostics from chartkit/spec/SPEC.md + ck-main validate / phase4.
+    (function () {
+      var input = document.getElementById("spec-input");
+      var statusEl = document.getElementById("spec-status");
+      var badgeEl = document.getElementById("response-badge");
+      var deltaEl = document.getElementById("response-delta");
+      var chartHost = document.getElementById("response-chart");
+      var responseEl = document.getElementById("response");
+      var pathLabel = document.getElementById("response-path");
+      var kpiVal = document.getElementById("response-kpi");
+      var titleEl = document.getElementById("response-title");
+      var jsonEl = document.getElementById("response-json");
+      var okEl = document.getElementById("response-ok");
+      var statusHttp = document.getElementById("response-status");
+
+      var CASES = {
+        CK2001: {
+          sev: "error",
+          path: "/encoding/y/field",
+          message: 'field "Revenue" not found in data',
+          hint: 'available fields: month, revenue; did you mean "revenue"?',
+          fix: [{ op: "replace", path: "/encoding/y/field", value: "revenue" }],
+          broken: function (theme) {
+            return {
+              version: "1", type: "line", id: "err-ck2001", title: "Field miss",
+              data: { columns: { month: ["Jan", "Feb", "Mar"], revenue: [12, 18, 15] } },
+              encoding: { x: { field: "month" }, y: { field: "Revenue" } },
+              theme: theme, a11y: { alt: "Revenue by month" }
+            };
+          },
+          fixed: function (theme) {
+            var s = this.broken(theme); s.encoding.y.field = "revenue"; return s;
+          }
+        },
+        CK1004: {
+          sev: "error",
+          path: "/a11y",
+          message: "a11y.alt is required",
+          hint: 'describe the key takeaway in one sentence; suggested: "Values rise from Jan to Mar"',
+          fix: [{ op: "add", path: "/a11y", value: { alt: "Values rise from Jan to Mar" } }],
+          broken: function (theme) {
+            return {
+              version: "1", type: "line", id: "err-ck1004", title: "Missing alt",
+              data: { columns: { month: ["Jan", "Feb", "Mar"], value: [4, 7, 9] } },
+              encoding: { x: { field: "month" }, y: { field: "value" } },
+              theme: theme
+            };
+          },
+          fixed: function (theme) {
+            var s = this.broken(theme); s.a11y = { alt: "Values rise from Jan to Mar" }; return s;
+          }
+        },
+        CK1005: {
+          sev: "error",
+          path: "/type",
+          message: 'unknown chart type "pie"',
+          hint: 'did you mean "donut"? maps pie → donut + mark.innerRadius: 0',
+          fix: [
+            { op: "replace", path: "/type", value: "donut" },
+            { op: "add", path: "/mark", value: { innerRadius: 0 } }
+          ],
+          broken: function (theme) {
+            return {
+              version: "1", type: "pie", id: "err-ck1005", title: "Pie alias",
+              data: { columns: { slice: ["A", "B", "C"], value: [40, 35, 25] } },
+              encoding: { x: { field: "slice" }, y: { field: "value" } },
+              theme: theme, a11y: { alt: "Share of A B C" }
+            };
+          },
+          fixed: function (theme) {
+            var s = this.broken(theme); s.type = "donut"; s.mark = { innerRadius: 0 }; return s;
+          }
+        },
+        CK3012: {
+          sev: "warning",
+          path: "/animation/easing",
+          message: "animation.easing is accepted, not applied yet",
+          hint: "CK3012 — roadmap; do not repair-loop on this warning",
+          fix: null,
+          broken: function (theme) {
+            return {
+              version: "1", type: "line", id: "err-ck3012", title: "CK3012 warn",
+              data: { columns: { month: ["Jan", "Feb", "Mar"], value: [4, 7, 9] } },
+              encoding: { x: { field: "month" }, y: { field: "value" } },
+              animation: { easing: "easeOut" },
+              theme: theme, a11y: { alt: "Rising values" }
+            };
+          },
+          fixed: function (theme) { return this.broken(theme); }
+        },
+        CK1409: {
+          sev: "error",
+          path: "/data/1",
+          message: "journey score 9 is outside 1..5",
+          hint: "Scores run from 1 (painful) to 5 (delighted).",
+          fix: [{ op: "replace", path: "/data/1/score", value: 5 }],
+          broken: function (theme) {
+            return {
+              version: "1", type: "journey", id: "err-ck1409", title: "Checkout",
+              data: [
+                { step: "Land", score: 5, section: "Browse", actors: "Shopper" },
+                { step: "Pay", score: 9, section: "Pay", actors: "Shopper" }
+              ],
+              encoding: {
+                x: { field: "step" }, y: { field: "score" },
+                series: { field: "section" }, color: { field: "actors" }
+              },
+              theme: theme, a11y: { alt: "Checkout journey scores" }
+            };
+          },
+          fixed: function (theme) {
+            var s = this.broken(theme); s.data[1].score = 5; return s;
+          }
+        }
+      };
+
+      var state = { code: "CK2001", theme: "soft", fix: "off" };
+
+      function syncFromChips() {
+        document.querySelectorAll(".try .chip[data-key]").forEach(function (btn) {
+          var k = btn.getAttribute("data-key");
+          if (btn.classList.contains("is-on") && k) state[k] = btn.getAttribute("data-value");
+        });
+      }
+
+      function paintDiag(c, meta, repaired) {
+        var soft = state.theme !== "midnight";
+        var fg = soft ? "#1d1d1f" : "#f5f5f7";
+        var muted = soft ? "#6e6e73" : "#86868b";
+        var accent = soft ? "#0071e3" : "#7dd3fc";
+        var bad = soft ? "#b91c1c" : "#fca5a5";
+        var warn = soft ? "#b45309" : "#fbbf24";
+        var ok = soft ? "#047857" : "#6ee7b7";
+        var sevColor = meta.sev === "warning" ? warn : bad;
+        if (repaired && meta.fix) sevColor = ok;
+        var title = repaired && meta.fix ? "Repaired" : (meta.sev === "warning" ? "Warning" : "Error");
+        var body =
+          '<div style="padding:10px 6px 4px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace">' +
+          '<div style="font-size:12px;font-weight:700;color:' + sevColor + ';letter-spacing:-0.02em">' +
+          "error[" + c + "]: " + meta.message + "</div>" +
+          '<div style="margin-top:8px;font-size:11.5px;color:' + muted + '">at <span style="color:' + accent + '">' + meta.path + "</span></div>" +
+          '<div style="margin-top:6px;font-size:11.5px;color:' + muted + ';line-height:1.45">hint: ' + meta.hint + "</div>";
+        if (meta.fix) {
+          body +=
+            '<div style="margin-top:10px;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,' + (soft ? "0.04" : "0.25") + ');font-size:11px;color:' + fg + ';white-space:pre-wrap">' +
+            "fix: " + JSON.stringify(meta.fix, null, 2) + "</div>";
+        } else {
+          body +=
+            '<div style="margin-top:10px;font-size:11.5px;color:' + muted + '">no automatic fix — accepted / roadmap</div>';
+        }
+        body +=
+          '<div style="margin-top:12px;font-size:11px;color:' + muted + '">' + title +
+          (repaired && meta.fix ? " · validate OK" : "") + "</div></div>";
+        chartHost.innerHTML = body;
+      }
+
+      function render() {
+        syncFromChips();
+        var meta = CASES[state.code] || CASES.CK2001;
+        var repaired = state.fix === "on";
+        var spec = repaired ? meta.fixed(state.theme) : meta.broken(state.theme);
+        input.value = JSON.stringify(spec, null, 2);
+        var stillBad = !(repaired && meta.fix);
+        statusEl.textContent = stillBad
+          ? (meta.sev === "warning" ? "1 warning · ready" : "1 error · ready")
+          : "valid · repaired";
+        if (badgeEl) badgeEl.textContent = state.theme === "midnight" ? "Midnight" : "Soft";
+        if (deltaEl) deltaEl.textContent = meta.sev + " · " + meta.path;
+        if (pathLabel) pathLabel.textContent = "/v1/validate?code=" + state.code + "&theme=" + state.theme;
+        if (kpiVal) kpiVal.textContent = state.code;
+        if (titleEl) titleEl.textContent = stillBad ? "Diagnostic" : "Repaired";
+        if (jsonEl) {
+          jsonEl.textContent = JSON.stringify({
+            code: state.code,
+            severity: meta.sev,
+            message: meta.message,
+            path: meta.path,
+            hint: meta.hint,
+            fix: meta.fix,
+            repaired: repaired && !!meta.fix
+          }, null, 2);
+        }
+        if (okEl) {
+          okEl.textContent = stillBad
+            ? (meta.sev === "warning" ? "1 warning · " + state.code : "1 error · " + state.code)
+            : "validate OK · 0 errors";
+        }
+        if (statusHttp) statusHttp.textContent = stillBad && meta.sev === "error" ? "422" : "200";
+        if (responseEl) {
+          responseEl.classList.toggle("is-midnight", state.theme === "midnight");
+          responseEl.classList.add("is-tick");
+          setTimeout(function () { responseEl.classList.remove("is-tick"); }, 420);
+        }
+        paintDiag(state.code, meta, repaired);
+      }
+
+      document.querySelectorAll(".try .chip[data-key]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var key = btn.getAttribute("data-key");
+          document.querySelectorAll('.try .chip[data-key="' + key + '"]').forEach(function (b) { b.classList.remove("is-on"); });
+          btn.classList.add("is-on");
+          render();
+        });
+      });
+
+      var q = document.getElementById("err-q");
+      var countEl = document.getElementById("err-count");
+      var filter = "all";
+      function applyFilter() {
+        var term = (q && q.value || "").trim().toLowerCase();
+        var shown = 0;
+        document.querySelectorAll(".opt-group").forEach(function (g) {
+          var rows = g.querySelectorAll("tbody tr");
+          var visible = 0;
+          rows.forEach(function (tr) {
+            var sev = tr.getAttribute("data-sev") || "";
+            var range = tr.getAttribute("data-range") || "";
+            var code = (tr.getAttribute("data-code") || "").toLowerCase();
+            var blob = (tr.getAttribute("data-q") || "") + " " + code + " " + (tr.textContent || "").toLowerCase();
+            var okFilter =
+              filter === "all" ||
+              filter === sev ||
+              filter === range;
+            var okTerm = !term || blob.indexOf(term) !== -1;
+            var show = okFilter && okTerm;
+            tr.classList.toggle("is-hidden", !show);
+            if (show) { visible++; shown++; }
+          });
+          g.classList.toggle("is-empty", visible === 0);
+        });
+        if (countEl) countEl.textContent = shown + " shown";
+      }
+      if (q) q.addEventListener("input", applyFilter);
+      document.querySelectorAll("#err-filters .chip").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll("#err-filters .chip").forEach(function (b) { b.classList.remove("is-on"); });
+          btn.classList.add("is-on");
+          filter = btn.getAttribute("data-filter") || "all";
+          applyFilter();
+        });
+      });
+
+      document.querySelectorAll(".response__tab").forEach(function (tab) {
+        tab.addEventListener("click", function () {
+          var name = tab.getAttribute("data-tab");
+          document.querySelectorAll(".response__tab").forEach(function (b) {
+            var on = b === tab;
+            b.classList.toggle("is-on", on);
+            b.setAttribute("aria-selected", on ? "true" : "false");
+          });
+          document.querySelectorAll(".response__panel").forEach(function (panel) {
+            panel.hidden = panel.getAttribute("data-panel") !== name;
+          });
+        });
+      });
+
+      var header = document.querySelector(".site-header");
+      if (header) {
+        var onScroll = function () { header.classList.toggle("is-scrolled", window.scrollY > 4); };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        onScroll();
+      }
+
+      document.querySelectorAll("[data-copy]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var t = btn.getAttribute("data-copy") || "";
+          if (navigator.clipboard) navigator.clipboard.writeText(t).catch(function () {});
+          btn.textContent = "Copied";
+          setTimeout(function () { btn.textContent = "Copy"; }, 1200);
+        });
+      });
+
+      render();
+      applyFilter();
+    })();
+  </script>
+
+</body>
+</html>
