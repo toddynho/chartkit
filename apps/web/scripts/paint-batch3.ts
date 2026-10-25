@@ -56,7 +56,8 @@ const matrixLib = await import("../../../catalog/lib/matrix.ts");
 const measured = await import("../../../catalog/lib/measured.ts");
 const geoSamples = await import("../../../catalog/lib/geo-samples.ts");
 const { paintScale, render: renderGeo } = await import("@chartkitdev/geo");
-const { whenToUseFaqs } = await import("../../../catalog/lib/faq.ts");
+const { headline, published, CORE_COMMIT, MEASURED, ROUND } = await import("../../../catalog/lib/benchmarks.ts");
+const { perfBrief, sizeBrief, whenToUseFaqs } = await import("./site-copy.ts");
 const { SITE } = await import("../../../catalog/lib/site.ts");
 const { specPages } = await import("../../../catalog/lib/spec-charts.ts");
 const { chartTypes, THEMES, TOKENS, minimalSpec } = await import("../../../catalog/lib/specs.ts");
@@ -65,6 +66,42 @@ const convertLib = await import("@chartkitdev/convert");
 
 function paintCompare(): number {
   const data = matrixLib.matrix();
+  const sizes = measured.measuredSizes();
+  const sizeFacts = {
+    commit: sizes.commit,
+    coreCommit: sizes.coreCommit,
+    coreMatchesMain: sizes.coreMatchesMain,
+    command: sizes.sizeScript.command,
+    measuredAt: sizes.sizeScript.measuredAt,
+    lineBytes: sizes.sizeScript.measured.line,
+    benchCommand: sizes.bench.command,
+    benchMeasuredAt: sizes.bench.measuredAt,
+    rows: sizes.bench.rows,
+  };
+  const perfFacts = {
+    round: ROUND,
+    measured: MEASURED,
+    coreCommit: CORE_COMMIT,
+    sizeCommit: sizes.commit,
+    hoverSteady100k: published.hoverSteady100k.map((row) => ({ lib: row.lib, paintedMs: row.paintedMs })),
+    ssrMs: published.ssr.map((row) => ({
+      lib: row.lib,
+      meanMs: row.meanMs,
+      medianMs: row.medianMs,
+      supported: row.supported,
+    })),
+    browserMs: published.browser.map((row) => ({
+      shape: row.shape,
+      points: row.points,
+      chartkit: row.chartkit,
+      uplot: row.uplot,
+    })),
+    firstHoverPainted: published.firstHoverPainted.map((row) => ({
+      afterMountMs: row.afterMountMs,
+      chartkit: row.chartkit,
+      uplot: row.uplot,
+    })),
+  };
   const rivals = matrixLib.librariesExceptChartkit().map((library) => {
     const rows = matrixLib.compareRows(library.id);
     for (const row of rows) {
@@ -100,8 +137,8 @@ function paintCompare(): number {
       chartkitCommit: data.chartkitCommit,
       chartkitRechecked: data.chartkitRechecked,
       counts,
-      size: measured.sizeParagraph(library),
-      perf: measured.perfParagraph(library.id, library.name),
+      size: sizeBrief(sizeFacts, library),
+      perf: perfBrief(library.id, library.name, perfFacts),
       loss: sections.loss.map(slim),
       win: sections.win.map(slim),
       unknown: sections.unknown.map(slim),
@@ -243,12 +280,26 @@ function paintConvert(): void {
 }
 
 function paintCopy(): void {
+  const chartkitAgent = published.agents[0];
+  if (chartkitAgent.noDocsFirst == null || chartkitAgent.tokensOfficial == null) {
+    throw new Error("ChartKit agent headline is missing");
+  }
+  const faqs = whenToUseFaqs({
+    lineGzipBytes: headline.lineGzipBytes,
+    ssrLabel: headline.ssrLabel,
+    sizeCommit: headline.sizeCommit,
+    sizeMeasured: headline.sizeMeasured,
+    bundleLoss: headline.bundleLoss,
+    harnessLineBytes: headline.harnessLineBytes,
+    noDocsFirst: chartkitAgent.noDocsFirst,
+    tokensOfficial: chartkitAgent.tokensOfficial,
+  });
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "FAQPage",
-        mainEntity: whenToUseFaqs.map((item) => ({
+        mainEntity: faqs.map((item) => ({
           "@type": "Question",
           name: item.question,
           acceptedAnswer: { "@type": "Answer", text: item.answer },
@@ -273,7 +324,7 @@ function paintCopy(): void {
       },
     ],
   };
-  write(join(out, "when-to-use.json"), { faqs: whenToUseFaqs, jsonLd });
+  write(join(out, "when-to-use.json"), { faqs, jsonLd });
   write(join(out, "reference.json"), {
     types: chartTypes.map((item) => ({ type: item.type, summary: item.summary })),
   });

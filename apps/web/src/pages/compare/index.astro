@@ -11,16 +11,15 @@ const description = "ChartKit against 20 charting libraries. Every feature row i
   <div class="wrap surface prose">
     <h1>Compare</h1>
     <p class="lede">
-      ChartKit against {page.rivals.length} libraries, generated from the feature matrix. A loss is a feature the other
-      library scores higher on. A win is the reverse. Unknown cells are not counted as either. Nothing is dropped to
-      make the list shorter.
+      ChartKit against {page.rivals.length} libraries, from the feature matrix. A loss is a feature the other library
+      scores higher on. A win is the reverse. Unknown cells count as neither. Every scored row stays in the table.
     </p>
     <p>
-      Other libraries were checked on {page.dateChecked} against types and schemas, not by rendering, so a typed option
-      can overstate what draws. ChartKit was rechecked on {page.chartkitRechecked} against main <code>{page.chartkitCommit}</code>.
-      Radar, treemap, sankey, and funnel are native. Tooltips, zoom, and pan are native in the client runtime. The static
-      SVG does not paint them. <a href="/features#method">Method</a>. <a href="/features.json">features.json</a>. Timed
-      numbers, including the losses, stay on <a href="/benchmarks">Benchmarks</a>. The paste converter covers Chart.js,
+      Other libraries were checked on {page.dateChecked} against types and schemas, not by rendering. A typed option can
+      overstate what draws. ChartKit was rechecked on {page.chartkitRechecked} against main <code>{page.chartkitCommit}</code>.
+      Radar, treemap, sankey, and funnel are native. Tooltip, zoom, and pan are native in the client runtime. The static
+      SVG does not paint them. <a href="/features#method">Method</a>. <a href="/features.json">features.json</a>. Timings,
+      losses included, are on <a href="/benchmarks">Benchmarks</a>. The paste converter covers Chart.js,
       Recharts, and ECharts: <a href="/convert">convert a chart</a>.
     </p>
     <div class="table-wrap">

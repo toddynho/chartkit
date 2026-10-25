@@ -28,7 +28,7 @@ const labels: Record<string, string> = { chartjs: "Chart.js", recharts: "Rechart
   <div class="wrap surface">
     <h1>Convert a chart</h1>
     <p class="lede">
-      Paste a Chart.js config, Recharts JSX, or an ECharts option. The converter returns a ChartKit spec after <code>validate()</code> and <code>repair()</code>, plus a warning for anything it does not map. Chart.js, Recharts, and ECharts load on this page only. They are not part of the ChartKit bundles. <code>@chartkitdev/convert</code> is unpublished.
+      Paste a Chart.js config, Recharts JSX, or an ECharts option. The result is a ChartKit spec after <code>validate()</code> and <code>repair()</code>, plus a warning for each unmapped key. Chart.js, Recharts, and ECharts load on this page only. <code>@chartkitdev/convert</code> is unpublished.
     </p>
     <div class="convert" data-convert-demo>
       <div class="convert-toolbar">
@@ -48,7 +48,7 @@ const labels: Record<string, string> = { chartjs: "Chart.js", recharts: "Rechart
       <label class="convert-label" for="convert-source">Chart.js config, Recharts JSX, or an ECharts option</label>
       <textarea id="convert-source" class="convert-source" spellcheck="false">{starter.source}</textarea>
       <p class="convert-meta" data-convert-meta>
-        Detected source: {starter.detected ? labels[starter.detected] : "none"}. Chart.js, Recharts, and ECharts load on this page only.
+        Detected source: {starter.detected ? labels[starter.detected] : "none"}.
       </p>
       <div class="convert-grid">
         <figure class="convert-pane">
@@ -100,7 +100,7 @@ const labels: Record<string, string> = { chartjs: "Chart.js", recharts: "Rechart
     </div>
     <section class="section" aria-labelledby="coverage">
       <h2 id="coverage">Conversion coverage</h2>
-      <p>These lists are the converter's own coverage table. A mapped item is produced in the spec. An unsupported item is returned as a warning.</p>
+      <p>Mapped keys land in the spec. Unsupported keys come back as warnings.</p>
       <div class="convert-coverage">
         {
           coverage.map(([id, label]) => {
