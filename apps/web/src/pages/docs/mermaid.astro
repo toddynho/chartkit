@@ -28,7 +28,7 @@ rehype().use(rehypeParse).use(rehypeChartkit);`;
 
 <DocsPage title="Use Mermaid or Markdown" description={description} href="/docs/mermaid">
   <p>
-    <code>fromMermaid</code> reads the chart syntax models already write and returns a ChartKit v1 spec plus warnings. <code>toSpec</code> accepts that syntax or a ChartKit JSON object. The converters live in <code>@chartkitdev/core/mermaid</code> and are not part of the line bundle.
+    <code>fromMermaid</code> reads chart syntax models already write and returns a v1 spec plus warnings. <code>toSpec</code> accepts that syntax or a ChartKit JSON object. Both live in <code>@chartkitdev/core/mermaid</code> and are not part of the line bundle.
   </p>
   <figure class="code"><figcaption>ts</figcaption><pre><code>{ts}</code></pre></figure>
   <h2>Charts</h2>
@@ -55,7 +55,7 @@ rehype().use(rehypeParse).use(rehypeChartkit);`;
   </p>
   <figure class="code"><figcaption>ts</figcaption><pre><code>{auto}</code></pre></figure>
   <p>
-    <code>dist/chartkit.global.js</code> draws the core charts and includes <code>ChartKit.autoRender</code>, <code>ChartKit.fromMermaid</code>, and <code>ChartKit.toSpec</code>. <code>dist/chartkit.auto.global.js</code> is the same auto-render without the Mermaid parser. With <code>data-chartkit-mermaid</code> and a Mermaid block on the page, it loads the sibling <code>chartkit.mermaid.global.js</code>. That file loads <code>chartkit.mermaid-phase4.global.js</code> from the same directory when the page has a gantt, timeline, quadrant, venn, or journey diagram. Histogram through journey load the sibling <code>chartkit.&lt;type&gt;.global.js</code> from that same directory. Unsupported Mermaid blocks stay as source.
+    <code>dist/chartkit.global.js</code> draws the core charts and includes <code>ChartKit.autoRender</code>, <code>ChartKit.fromMermaid</code>, and <code>ChartKit.toSpec</code>. <code>dist/chartkit.auto.global.js</code> is auto-render without the Mermaid parser. <code>data-chartkit-mermaid</code> loads the sibling <code>chartkit.mermaid.global.js</code>, which loads <code>chartkit.mermaid-phase4.global.js</code> for gantt, timeline, quadrant, venn, and journey. Histogram through journey load <code>chartkit.&lt;type&gt;.global.js</code> from that same directory. Unsupported Mermaid blocks stay as source.
   </p>
   <figure class="code"><figcaption>html</figcaption><pre><code>{html}</code></pre></figure>
   <p>
@@ -64,7 +64,7 @@ rehype().use(rehypeParse).use(rehypeChartkit);`;
   <figure class="code"><figcaption>ts</figcaption><pre><code>{remark}</code></pre></figure>
   <h2>Limits</h2>
   <p>
-    Column names come from the axis and series titles. A single series with no title uses the y-axis title. Nothing named falls back to <code>x</code> and <code>value</code>. A line whose scale is far from the bars is drawn on <code>axis: "y2"</code>. A y-axis range on <code>xychart</code> is drawn from <code>encoding.y.scale.domain</code>. <code>axes.y</code> is display-only. Radar draws a positive max from that same domain and still starts at zero, with a polygon graticule. A treemap keeps one group level. Quadrant point radius is not drawn. <code>showData</code> prints the value in the legend.
+    Column names come from the axis and series titles. One untitled series uses the y-axis title. With no names, the fields are <code>x</code> and <code>value</code>. A line whose scale is far from the bars uses <code>axis: "y2"</code>. A y-axis range on <code>xychart</code> becomes <code>encoding.y.scale.domain</code>. <code>axes.y</code> is display-only. Radar draws a positive max from that domain, still starts at zero, and uses a polygon graticule. A treemap keeps one group level. Quadrant point radius is not drawn. <code>showData</code> prints the value in the legend.
   </p>
   <h2>Security</h2>
   <p>

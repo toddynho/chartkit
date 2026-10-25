@@ -76,14 +76,13 @@ const description =
         <code>schema-path</code>, <code>dts-index</code>, <code>runtime-probe</code>, and <code>source-review</code>{" "}
         are strong. <code>dts-absence</code> is a moderate check that a none claim did not match an identifier.{" "}
         <code>dts-grep</code>, <code>dts-mechanism</code>, <code>npm</code>, and <code>doc-cited</code> are weak.{" "}
-        <code>conflict</code> and <code>unverified</code> are unknown. Of {data.coverage.cells} cells, the coverage
-        block in <a href="/features.json">features.json</a> is the count.
+        <code>conflict</code> and <code>unverified</code> are unknown. Counts are the coverage block in{" "}
+        <a href="/features.json">features.json</a>.
       </p>
       <p>{data.synonymsNote}</p>
       <p>
-        The source files live in <code>catalog/data/matrix/</code>. <code>npm run matrix:refresh</code> rewrites this
-        page's data. Refresh monthly, or when a scored library ships a release, then re-check the ChartKit column
-        against current main before publishing. The steps are in <code>catalog/data/matrix/README.md</code>.
+        Source files are in <code>catalog/data/matrix/</code>. <code>npm run matrix:refresh</code> rewrites this data.
+        Steps are in <code>catalog/data/matrix/README.md</code>.
       </p>
       {
         gzip?.minimalLine != null ? (
@@ -91,7 +90,7 @@ const description =
             ChartKit line gzip in <a href="/features.json">features.json</a> is {gzip.minimalLine.toLocaleString("en-US")}{" "}
             bytes from {gzip.source}, commit <code>{gzip.commit}</code>, measured {gzip.measured}. {gzip.method}{" "}
             {gzip.note} Libraries the bench remeasured store that run on <code>bundleGzip</code>. The rest keep the
-            matrix extract and say so on <code>bundleGzip.measured</code>.
+            matrix extract and say so in <code>bundleGzip.measured</code>.
           </p>
         ) : null
       }

@@ -38,7 +38,7 @@ export const articleSections: Record<string, DocSection[]> = {
       'import { Chart } from "@chartkitdev/react";\n\nexport function Panel() {\n  return <Chart spec={spec} />;\n}',
     ]),
     section("Server", [
-      "App Router can render the SVG on the server with `renderToString` from `react-dom/server`. The older dashboard components still exist. Their props are not spec keys.",
+      "App Router can render the SVG on the server with `renderToString` from `react-dom/server`. The older dashboard components (`LineChart`, `KpiCard`, and the rest) still exist. Pass `spec` to `Chart` for new charts.",
     ], [], [
       'import { renderToString } from "react-dom/server";\nimport { Chart } from "@chartkitdev/react";\n\nconst html = renderToString(<Chart spec={spec} />);',
     ]),
@@ -175,7 +175,7 @@ export const articleSections: Record<string, DocSection[]> = {
   ],
   "llms-txt": [
     section("Where it lives", [
-      "`llms.txt` is the short agent index: the rules, the repair loop, and one spec per chart type. This site serves it at `/llms.txt`.",
+      "`/llms.txt` is the short agent index: the rules, the repair loop, and one spec per chart type. `/llms-full.txt` is the long file. This site serves both.",
     ]),
   ],
   mcp: [
