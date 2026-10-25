@@ -42,9 +42,9 @@ export const chartTypes: ChartType[] = [
   { type: "journey", title: "Journey", summary: "Steps with a score and actors." },
   { type: "radial-bar", title: "Radial bar", summary: "Categories around a circle. Length is the radius." },
   { type: "rose", title: "Rose", summary: "Equal angles. The radius is the value." },
+  { type: "sunburst", title: "Sunburst", summary: "Concentric rings for a hierarchy. Colour follows the top branch." },
+  { type: "bar-list", title: "Bar list", summary: "Ranked rows. A track behind the label, the value on the right." },
 ];
-
-export const galleryTypes = ["line", "bar", "donut", "combo", "heatmap", "gauge", "kpi", "candlestick"] as const;
 
 export function chartByType(type: string): ChartType | undefined {
   return chartTypes.find((chart) => chart.type === type);

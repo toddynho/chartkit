@@ -1,5 +1,5 @@
 import { paintSpec } from "../lib/chartkit";
-import { specForType, type LiveSpec } from "./live-specs";
+import { docsSpecForType, specForType, type LiveSpec } from "./live-specs";
 import { heroChartMeta, type HeroChartMeta } from "./hero-charts";
 
 export type HeroSlide = HeroChartMeta & {
@@ -90,5 +90,17 @@ export function peekSparkline(): string {
 export function gallerySvg(type: string): string {
   const spec = stageSpec(type);
   spec.size = { width: 480, height: 200 };
+  return paintSpec(spec).svg;
+}
+
+/** Compact gallery tile. Uses the dense docs series, not the short hero example. */
+export function galleryTileSvg(type: string): string {
+  const spec = docsSpecForType(type);
+  delete spec.title;
+  delete spec.subtitle;
+  if (type === "bar-list") spec.size = { width: 480 };
+  else if (type === "sparkline" || type === "mini-area") spec.size = { width: 480, height: 88 };
+  else if (type === "candlestick") spec.size = { width: 560, height: 240 };
+  else spec.size = { width: 480, height: 168 };
   return paintSpec(spec).svg;
 }

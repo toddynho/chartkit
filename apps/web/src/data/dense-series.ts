@@ -1,8 +1,8 @@
 import type { LiveSpec } from "./live-specs";
 
 /**
- * Production-weight rows for docs try-it charts.
- * Core example JSON stays small; only the docs copies are expanded.
+ * Production-weight rows for docs try-it and the gallery.
+ * Core example JSON stays small; only these copies are expanded.
  */
 
 const DAY = 86_400_000;
@@ -61,6 +61,7 @@ function series(count: number, seed: number, base: number, trend: number, amp: n
 const LINE_POINTS = 80;
 const BAR_MONTHS = 24;
 const HEATMAP_DAYS = 84;
+const CANDLE_SESSIONS = 1000;
 
 function lineRows(): Record<string, unknown>[] {
   const random = rng(11);
@@ -171,13 +172,14 @@ function densify(spec: LiveSpec): void {
       let price = 42;
       const rows: Record<string, unknown>[] = [];
       let cursor = 0;
-      while (rows.length < 80) {
+      while (rows.length < CANDLE_SESSIONS) {
         const weekday = new Date(START + cursor * DAY).getUTCDay();
         if (weekday !== 0 && weekday !== 6) {
+          const anchor = 42 + rows.length * 0.035;
           const open = round(price, 2);
-          const close = round(Math.max(12, open + (random() - 0.48) * 1.7), 2);
-          const high = round(Math.max(open, close) + random() * 0.9, 2);
-          const low = round(Math.min(open, close) - random() * 0.9, 2);
+          const close = round(Math.max(8, open + (anchor - open) * 0.02 + (random() - 0.5) * 1.15), 2);
+          const high = round(Math.max(open, close) + random() * 0.55, 2);
+          const low = round(Math.min(open, close) - random() * 0.55, 2);
           rows.push({
             date: day(cursor),
             open,
@@ -191,7 +193,7 @@ function densify(spec: LiveSpec): void {
         cursor += 1;
       }
       spec.data = rows;
-      alt(spec, "Eighty sessions. The close drifts upward from 42, with ordinary daily ranges.");
+      alt(spec, "About one thousand sessions. The close drifts upward from 42, with ordinary daily ranges.");
       return;
     }
     case "spike": {
@@ -442,6 +444,64 @@ function densify(spec: LiveSpec): void {
       alt(spec, "Fourteen bets. SSO is a quick win. Checkout is a big bet. PDF export is high effort and low impact.");
       return;
     }
+    case "sunburst": {
+      spec.data = [
+        {
+          name: "Organic",
+          children: [
+            { name: "Search", value: 4200 },
+            { name: "Referral", value: 1800 },
+            { name: "Direct", value: 2460 },
+          ],
+        },
+        {
+          name: "Paid",
+          children: [
+            { name: "Search ads", value: 2600 },
+            { name: "Social", value: 940 },
+            { name: "Display", value: 610 },
+          ],
+        },
+        {
+          name: "Owned",
+          children: [
+            { name: "Email", value: 1540 },
+            { name: "Newsletter", value: 820 },
+            { name: "Push", value: 310 },
+          ],
+        },
+        {
+          name: "Partner",
+          children: [
+            { name: "Affiliates", value: 740 },
+            { name: "Resellers", value: 480 },
+            { name: "Events", value: 220 },
+          ],
+        },
+      ];
+      alt(spec, "Organic search is the largest leaf. Partner events are the smallest. Four branches, three leaves each.");
+      return;
+    }
+    case "bar-list": {
+      spec.data = [
+        { page: "/docs/charts/line", visits: 18420 },
+        { page: "/pricing", visits: 15110 },
+        { page: "/docs", visits: 12840 },
+        { page: "/gallery", visits: 9720 },
+        { page: "/docs/charts/bar", visits: 8640 },
+        { page: "/cloud", visits: 7410 },
+        { page: "/docs/charts/candlestick", visits: 6880 },
+        { page: "/playground", visits: 5320 },
+        { page: "/docs/charts/heatmap", visits: 4910 },
+        { page: "/agents", visits: 3760 },
+        { page: "/docs/theming", visits: 2980 },
+        { page: "/benchmarks", visits: 2140 },
+        { page: "/docs/charts/gantt", visits: 1660 },
+        { page: "/showcase", visits: 980 },
+      ];
+      alt(spec, "Line docs lead fourteen pages. Showcase is the shortest row.");
+      return;
+    }
     case "journey": {
       spec.data = [
         { section: "Browse", step: "Land on the product", score: 5, actors: "Shopper" },
@@ -476,4 +536,5 @@ export const denseCounts = {
   line: LINE_POINTS,
   bar: BAR_MONTHS,
   heatmap: HEATMAP_DAYS,
+  candlestick: CANDLE_SESSIONS,
 };

@@ -24,6 +24,7 @@ import radialBar from "../../../../packages/core/examples/34-radial-bar.json";
 import rose from "../../../../packages/core/examples/35-rose.json";
 import sankey from "../../../../packages/core/examples/21-sankey.json";
 import scatter from "../../../../packages/core/examples/06-scatter.json";
+import sunburst from "../../../../packages/core/examples/33-sunburst.json";
 import sparkline from "../../../../packages/core/examples/12-sparkline.json";
 import spike from "../../../../packages/core/examples/14-spike.json";
 import stackedArea from "../../../../packages/core/examples/05-stacked-area.json";
@@ -81,6 +82,20 @@ const byType: Record<string, LiveSpec> = {
   journey: dress(journey),
   "radial-bar": dress(radialBar),
   rose: dress(rose),
+  sunburst: dress(sunburst),
+  "bar-list": {
+    version: "1",
+    type: "bar-list",
+    theme: "soft",
+    size: railSize,
+    data: [
+      { page: "/pricing", visits: 1840 },
+      { page: "/docs", visits: 1420 },
+      { page: "/gallery", visits: 980 },
+    ],
+    encoding: { x: "page", y: { field: "visits", format: "compact" } },
+    a11y: { alt: "Pricing leads the page list." },
+  },
 };
 
 /** Filled line. There is no `type: "area"`. */

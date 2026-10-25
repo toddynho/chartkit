@@ -1,16 +1,34 @@
 ---
 import Base from "../layouts/Base.astro";
-import { chartTypes, galleryTypes } from "../data/chart-types";
-import { gallerySvg } from "../data/hero-slides";
+import { chartByType, chartTypes } from "../data/chart-types";
+import { chartDocs, chartPage } from "../data/docs-catalog";
+import { galleryTileSvg } from "../data/hero-slides";
 
-const gallery = galleryTypes
-  .map((type) => {
-    const chart = chartTypes.find((item) => item.type === type);
-    return chart ? { ...chart, svg: gallerySvg(chart.type) } : null;
-  })
-  .filter((chart) => chart != null);
+const families = ["Core", "Statistical", "Planning"] as const;
+const inCatalog = new Set(chartDocs.map((chart) => chart.type));
 
-const description = "Eight ChartKit examples painted with core. Open a card for the spec.";
+function tile(type: string, title: string) {
+  const svg = galleryTileSvg(type);
+  if (!svg.includes("<svg") || svg.includes("ck-chart-error")) {
+    throw new Error(`Gallery could not paint ${type}`);
+  }
+  const summary = chartByType(type)?.summary ?? chartPage(type).lede;
+  return { type, title, summary, svg };
+}
+
+const groups = [
+  ...families.map((family) => ({
+    family,
+    charts: chartDocs.filter((chart) => chart.family === family).map((chart) => tile(chart.type, chart.label)),
+  })),
+  {
+    family: "Library",
+    charts: chartTypes.filter((chart) => !inCatalog.has(chart.type)).map((chart) => tile(chart.type, chart.title)),
+  },
+];
+
+const count = groups.reduce((total, group) => total + group.charts.length, 0);
+const description = `${count} ChartKit chart types, each painted with @chartkitdev/core. Open a card for the spec.`;
 ---
 
 <Base tone="light" title="Gallery" description={description}>
@@ -18,19 +36,28 @@ const description = "Eight ChartKit examples painted with core. Open a card for 
     <section class="hero" aria-labelledby="gallery-title">
       <p class="kicker">Gallery</p>
       <h1 id="gallery-title">Gallery</h1>
-      <p class="lede">Eight examples painted with <code>@chartkitdev/core</code>. Open a card for the spec.</p>
+      <p class="lede">
+        {count} chart types painted with <code>@chartkitdev/core</code>. Core, Statistical, Planning, and the rest of the library. Open a card for the spec.
+      </p>
     </section>
-    <div class="gallery-grid">
-      {
-        gallery.map((chart) => (
-          <a class="card" href={`/docs/charts/${chart.type}`}>
-            <span class="gallery-chart" aria-hidden="true" set:html={chart.svg} />
-            <h3>{chart.title}</h3>
-            <p>{chart.summary}</p>
-          </a>
-        ))
-      }
-    </div>
-    <p><a href="/docs/charts">All chart types</a></p>
+    {
+      groups.map((group) => (
+        <section class="gallery-family" aria-labelledby={`gallery-${group.family.toLowerCase()}`}>
+          <h2 id={`gallery-${group.family.toLowerCase()}`}>
+            {group.family}
+            <span> · {group.charts.length}</span>
+          </h2>
+          <div class="gallery-grid">
+            {group.charts.map((chart) => (
+              <a class="card" href={`/docs/charts/${chart.type}`} data-chart={chart.type}>
+                <span class="gallery-chart" aria-hidden="true" set:html={chart.svg} />
+                <h3>{chart.title}</h3>
+                <p>{chart.summary}</p>
+              </a>
+            ))}
+          </div>
+        </section>
+      ))
+    }
   </div>
 </Base>

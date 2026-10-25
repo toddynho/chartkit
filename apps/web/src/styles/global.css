@@ -541,6 +541,32 @@ a.card:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
 
 .gallery-chart svg { display: block; width: 100%; height: auto; }
 
+.gallery-family { margin: 1.75rem 0 0.7rem; }
+
+.gallery-family h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.gallery-family h2 span {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.gallery-grid .card { padding: 0.65rem 0.7rem 0.75rem; }
+
+.gallery-grid .card h3 {
+  margin: 0 0 0.15rem;
+  font-size: 0.92rem;
+}
+
+.gallery-grid .card p {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
 .agent-chart {
   margin: 8px 0 18px;
   padding: 12px;
