@@ -1,6 +1,7 @@
 export const SITE = {
   name: "ChartKit",
   url: "https://chartkit.dev",
+  version: "0.5.0",
   description:
     "JSON-spec charts. An agent, a server, a database, or Mermaid can write the spec. The same object renders in React, Vue, Svelte, vanilla JavaScript, and server SVG.",
   github: "https://github.com/toddynho/chartkit",

@@ -1,5 +1,6 @@
 ---
 import BrandLockup from "./BrandLockup.astro";
+import { SITE } from "../data/site";
 
 const columns = [
   {
@@ -9,6 +10,7 @@ const columns = [
       { href: "/pricing", label: "Pricing" },
       { href: "/dashboard", label: "Dashboard" },
       { href: "/examples", label: "Examples" },
+      { href: "/playground", label: "Playground" },
       { href: "/gallery", label: "Gallery" },
       { href: "/showcase", label: "Showcase" },
     ],
@@ -55,7 +57,15 @@ const columns = [
       }
     </div>
   </div>
-  <p class="legal">© ChartKit. MIT license. chartkit.dev still serves the Next.js app while this site is in review.</p>
+  <p class="legal">
+    <span>© ChartKit</span>
+    <span aria-hidden="true"> · </span>
+    <span>MIT</span>
+    <span aria-hidden="true"> · </span>
+    <span>{SITE.version}</span>
+    <span aria-hidden="true"> · </span>
+    <a href={SITE.github}>GitHub</a>
+  </p>
 </footer>
 
 <script>

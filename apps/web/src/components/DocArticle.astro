@@ -4,6 +4,7 @@ import { articleChips, articleHref, articleSpec } from "../data/docs-catalog";
 import PageNav from "./PageNav.astro";
 import Prose from "./Prose.astro";
 import SpecEditor from "./SpecEditor.astro";
+import StackSample from "./StackSample.astro";
 
 interface Props {
   article: DocArticle;
@@ -23,8 +24,9 @@ const canonical = articleHref(article);
 }
 {article.tryIntro ? <p><Prose text={article.tryIntro} /></p> : null}
 <SpecEditor spec={articleSpec} chips={articleChips} />
+{article.slug === "" ? <StackSample heading /> : null}
 {
-  article.sections.map((section) => (
+  article.sections.filter((section) => !(article.slug === "" && section.title === "Install")).map((section) => (
     <section>
       <h2>{section.title}</h2>
       {section.paragraphs.map((paragraph) => (
@@ -60,10 +62,10 @@ const canonical = articleHref(article);
 {
   article.slug === "concepts/adapters" ? (
     <ul>
-      <li><a href="/docs/react">React</a></li>
-      <li><a href="/docs/vue">Vue</a></li>
-      <li><a href="/docs/svelte">Svelte</a></li>
-      <li><a href="/docs/vanilla">Vanilla</a></li>
+      <li><a href="/docs?framework=react">React</a></li>
+      <li><a href="/docs?framework=vue">Vue</a></li>
+      <li><a href="/docs?framework=svelte">Svelte</a></li>
+      <li><a href="/docs?framework=vanilla">Vanilla</a></li>
     </ul>
   ) : null
 }

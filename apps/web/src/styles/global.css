@@ -43,6 +43,12 @@
   :root:not(.tone-light) .brand__lockup--light { display: none; }
   :root:not(.tone-light) .brand__lockup--dark { display: block; }
 
+  :root:not(.tone-light) .site-header,
+  :root:not(.tone-light) .site-header.is-scrolled {
+    background: var(--bg-elev);
+    border-bottom-color: var(--line);
+  }
+
   :root:not(.tone-light) .tok-key { color: #e6b35a; }
   :root:not(.tone-light) .tok-str,
   :root:not(.tone-light) .tok-num { color: #79b8ff; }
@@ -135,21 +141,16 @@ code {
 
 .skip:focus { top: 0.75rem; }
 
-.site-header {
+.site-header,
+.site-header.is-scrolled {
   position: sticky;
   top: 0;
   z-index: 20;
   height: var(--header);
-  background: color-mix(in srgb, var(--bg) 65%, transparent);
-  backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid transparent;
-  transition: background 320ms cubic-bezier(0.4, 0, 0.6, 1), border-color 320ms cubic-bezier(0.4, 0, 0.6, 1), box-shadow 320ms cubic-bezier(0.4, 0, 0.6, 1);
-}
-
-.site-header.is-scrolled {
-  background: color-mix(in srgb, var(--bg-elev) 82%, transparent);
-  border-bottom-color: var(--line);
-  box-shadow: 0 0.5px 0 rgba(0, 0, 0, 0.03), 0 8px 24px rgba(0, 0, 0, 0.04);
+  background: #fff;
+  backdrop-filter: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: none;
 }
 
 .site-header__inner {
@@ -341,7 +342,30 @@ code {
   padding-top: 1rem;
   border-top: 1px solid var(--line);
   font-size: 0.78rem;
+  color: var(--muted);
 }
+
+.legal a { color: var(--muted); text-decoration: none; }
+.legal a:hover { color: var(--ink); }
+
+.stack-sample [data-stack-panel],
+.fw-tabs:not(.is-ready) [data-fw-panel] { display: none; }
+
+html:not([data-stack]) .stack-sample [data-stack-panel="react"],
+html[data-stack="react"] .stack-sample [data-stack-panel="react"],
+html[data-stack="vue"] .stack-sample [data-stack-panel="vue"],
+html[data-stack="svelte"] .stack-sample [data-stack-panel="svelte"],
+html[data-stack="vanilla"] .stack-sample [data-stack-panel="vanilla"],
+html:not([data-stack]) .fw-tabs:not(.is-ready) [data-fw-panel="react"],
+html[data-stack="react"] .fw-tabs:not(.is-ready) [data-fw-panel="react"],
+html[data-stack="vue"] .fw-tabs:not(.is-ready) [data-fw-panel="vue"],
+html[data-stack="svelte"] .fw-tabs:not(.is-ready) [data-fw-panel="svelte"],
+html[data-stack="vanilla"] .fw-tabs:not(.is-ready) [data-fw-panel="vanilla"] {
+  display: block;
+}
+
+.fw-tabs.is-ready [data-fw-panel] { display: none; }
+.fw-tabs.is-ready [data-fw-panel].is-on { display: block; }
 
 .wrap {
   width: min(var(--max), calc(100% - 2.5rem));

@@ -41,6 +41,26 @@ const canonical = new URL(path, Astro.site ?? SITE.url).href;
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE.name} />
+    <script is:inline>
+      (function () {
+        var allowed = { react: 1, vue: 1, svelte: 1, vanilla: 1 };
+        var query = "";
+        try {
+          query = new URLSearchParams(location.search).get("framework") || "";
+        } catch (e) {}
+        var saved = "";
+        try {
+          saved = localStorage.getItem("ck-fw") || "";
+        } catch (e) {}
+        var stack = allowed[query] ? query : allowed[saved] ? saved : "react";
+        if (allowed[query]) {
+          try {
+            localStorage.setItem("ck-fw", query);
+          } catch (e) {}
+        }
+        document.documentElement.dataset.stack = stack;
+      })();
+    </script>
     <slot name="head" />
   </head>
   <body>

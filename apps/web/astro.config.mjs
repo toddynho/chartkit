@@ -43,6 +43,10 @@ export default defineConfig({
     "/themes": { status: 307, destination: "/docs/theming" },
     "/about": { status: 307, destination: "/agents" },
     "/docs/agents/mcp": { status: 307, destination: "/docs/mcp" },
+    "/docs/react": { status: 307, destination: "/docs?framework=react" },
+    "/docs/vue": { status: 307, destination: "/docs?framework=vue" },
+    "/docs/svelte": { status: 307, destination: "/docs?framework=svelte" },
+    "/docs/vanilla": { status: 307, destination: "/docs?framework=vanilla" },
   },
   vite: {
     resolve: {

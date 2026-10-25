@@ -7,17 +7,17 @@ interface Props {
 
 const { snippets } = Astro.props;
 
-function panel(html: string, id: string, hidden: boolean): string {
+function panel(html: string, id: string): string {
   return html.replace(
     /<pre class="shiki[^"]*"/,
-    `<pre class="shiki fw-code" data-fw-panel="${id}"${hidden ? " hidden" : ""}`,
+    `<pre class="shiki fw-code" data-fw-panel="${id}"`,
   );
 }
 
 const blocks = await Promise.all(
-  snippets.map(async (item, index) => ({
+  snippets.map(async (item) => ({
     ...item,
-    html: panel(await highlight(item.code, frameworkLanguage(item.id)), item.id, index !== 0),
+    html: panel(await highlight(item.code, frameworkLanguage(item.id)), item.id),
   })),
 );
 ---

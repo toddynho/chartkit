@@ -7,6 +7,7 @@ import {
 import PageNav from "./PageNav.astro";
 import Prose from "./Prose.astro";
 import SpecEditor from "./SpecEditor.astro";
+import StackSample from "./StackSample.astro";
 
 interface Props {
   chart: ChartDoc;
@@ -59,6 +60,7 @@ const spec = specForChart(chart);
   }
 </p>
 <SpecEditor spec={spec} chips={chipsForChart(chart.type)} hint="Options sit beside the JSON — the response is on the right" />
+<StackSample />
 
 {
   chart.anatomy.length ? (
