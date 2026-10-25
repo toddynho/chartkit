@@ -6,7 +6,7 @@ export type NavItem = {
 /** Site header. The docs sidebar lives in `docs-catalog.ts`. */
 export const primaryNav: NavItem[] = [
   { href: "/docs", label: "Docs" },
-  { href: "/dashboard", label: "Dashboard" },
+  { href: "/dashboards", label: "Dashboards" },
   { href: "/cloud", label: "Cloud" },
   { href: "/agents", label: "Agents" },
   { href: "/gallery", label: "Gallery" },

@@ -4,35 +4,20 @@ import "@fontsource/roboto/latin-500.css";
 import "@fontsource/roboto/latin-700.css";
 import "../../styles/dashboards.css";
 import Base from "../../layouts/Base.astro";
-import { loadIndex } from "../../lib/dashboards";
+import DashboardBoard from "../../components/DashboardBoard.astro";
+import { loadBoard, loadIndex } from "../../lib/dashboards";
 
-const { boards } = loadIndex();
-const description =
-  "Ten ChartKit dashboards. Chart colour comes from the spec. ChartKit is not affiliated with the products they are styled after.";
+const boards = loadIndex().boards.map((card) => loadBoard(card.slug));
+const description = "Ten ChartKit layouts: payments, analytics, traffic, issues, monitors, a portfolio, cycle time, an edge log, activity, and revenue.";
 ---
 
 <Base title="Dashboards" description={description} tone="light">
-  <div class="wrap">
+  <div class="wrap dash-index">
     <header class="hero">
       <p class="kicker">Dashboards</p>
       <h1>Dashboards</h1>
-      <p class="lede">
-        Ten boards styled after familiar dashboards, so the range of ChartKit's styling is visible. Each chart is a
-        JSON spec. Colour, grid, and series come from theme.tokens. The page CSS styles the shell. Fonts are Inter or
-        Roboto. ChartKit is not affiliated with or endorsed by those products.
-      </p>
+      <p class="lede">Ten layouts. Hero and KPIs, tabs, a map, a cohort, a ranked list, an issue table.</p>
     </header>
-    <div class="board-index">
-      {
-        boards.map((board) => (
-          <a class:list={["card", "board-card", board.defaultTheme === "midnight" && "board-card--night"]} href={`/dashboards/${board.slug}`}>
-            <p class="kicker">{board.defaultTheme === "midnight" ? "Dark first" : "Soft first"}</p>
-            <h2>{board.title}</h2>
-            <p>{board.lede}</p>
-            <div class="ck-frame cover-frame" role="img" aria-label={board.coverAlt} set:html={board.coverSvg} />
-          </a>
-        ))
-      }
-    </div>
+    {boards.map((board) => <DashboardBoard board={board} embed />)}
   </div>
 </Base>

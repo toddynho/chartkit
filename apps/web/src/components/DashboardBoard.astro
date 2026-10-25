@@ -6,9 +6,12 @@ import type { PaintedBoard } from "../lib/dashboard-types";
 
 interface Props {
   board: PaintedBoard;
+  /** Index embed shows the chart layout. Spec, notes, and the affiliation line stay on the board page. */
+  embed?: boolean;
 }
 
 const { board } = Astro.props;
+const embed = Astro.props.embed === true;
 const theme = board.defaultTheme;
 const byPlace = (place: string) => board.charts.filter((chart) => chart.place === place);
 const hero = board.charts.find((chart) => chart.place === "hero");
@@ -46,20 +49,20 @@ const mapCountries = [
 ];
 ---
 
-<div class="board" data-board data-theme={theme}>
+<div class:list={["board", embed && "board--embed"]} data-board data-theme={theme} id={embed ? board.slug : undefined}>
   <header class="board-hero">
-    <p class="kicker">{board.product}</p>
-    <h1>{board.title}</h1>
+    {embed ? null : <p class="kicker">{board.product}</p>}
+    {embed ? <h2>{board.title}</h2> : <h1>{board.title}</h1>}
     <p class="lede">{board.lede}</p>
-    <p class="note">{board.disclaimer}</p>
+    {embed ? null : <p class="note">{board.disclaimer}</p>}
     <div class="board-tools">
       <p class="board-range">{board.range}</p>
       <div class="seg" role="group" aria-label="Chart theme">
         <button type="button" data-set-theme="soft" aria-pressed={theme === "soft" ? "true" : "false"}>Soft</button>
         <button type="button" data-set-theme="midnight" aria-pressed={theme === "midnight" ? "true" : "false"}>Midnight</button>
       </div>
-      <a href={`/dashboards/${board.slug}.md`}>{board.slug}.md</a>
-      <a href="/dashboards">All dashboards</a>
+      {embed ? null : <a href={`/dashboards/${board.slug}.md`}>{board.slug}.md</a>}
+      {embed ? null : <a href="/dashboards">All dashboards</a>}
     </div>
   </header>
 
@@ -307,26 +310,34 @@ const mapCountries = [
     )
   }
 
-  <details class="spec-details">
-    <summary>View spec</summary>
-    {board.specBlocks.map((block) => (
-      <SpecGroup block={block} />
-    ))}
-  </details>
+  {
+    embed ? null : (
+      <details class="spec-details">
+        <summary>View spec</summary>
+        {board.specBlocks.map((block) => (
+          <SpecGroup block={block} />
+        ))}
+      </details>
+    )
+  }
 
-  <section class="spec-notes" aria-labelledby="look-title">
-    <h2 id="look-title">What produces this look</h2>
-    <ul>
-      {board.notes.map((note) => (
-        <li>
-          <strong>{note.label}.</strong> {note.detail}
-        </li>
-      ))}
-    </ul>
-    <p class="note">
-      {board.disclaimer} <a href={`/dashboards/${board.slug}.md`}>{board.slug}.md</a>
-    </p>
-  </section>
+  {
+    embed ? null : (
+      <section class="spec-notes" aria-labelledby={`${board.slug}-look`}>
+        <h2 id={`${board.slug}-look`}>What produces this look</h2>
+        <ul>
+          {board.notes.map((note) => (
+            <li>
+              <strong>{note.label}.</strong> {note.detail}
+            </li>
+          ))}
+        </ul>
+        <p class="note">
+          {board.disclaimer} <a href={`/dashboards/${board.slug}.md`}>{board.slug}.md</a>
+        </p>
+      </section>
+    )
+  }
 </div>
 
 <script>

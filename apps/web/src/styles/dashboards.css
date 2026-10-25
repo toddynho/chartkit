@@ -5,6 +5,19 @@
 
 .board-hero { padding-top: 2.4rem; }
 
+.dash-index .board--embed {
+  border-top: 1px solid var(--line);
+  margin-top: 0.5rem;
+}
+
+.dash-index .board--embed .board-hero {
+  padding-top: 1.5rem;
+}
+
+.dash-index .board--embed .board-hero h2 {
+  font-size: 1.45rem;
+}
+
 .board-hero h1 { max-width: 18ch; }
 
 .board-tools {

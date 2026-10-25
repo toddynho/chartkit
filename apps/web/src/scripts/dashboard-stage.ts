@@ -62,5 +62,6 @@ function boot(root: HTMLElement): void {
   window.matchMedia("(max-width: 900px)").addEventListener("change", () => paintVisible(root));
 }
 
-const root = document.querySelector("[data-board]");
-if (root instanceof HTMLElement) boot(root);
+document.querySelectorAll("[data-board]").forEach((root) => {
+  if (root instanceof HTMLElement) boot(root);
+});
