@@ -154,6 +154,29 @@ export interface RaceChart {
   caption: string;
 }
 
+export interface HomeStoryChart {
+  id: string;
+  title: string;
+  caption: string;
+  alt: string;
+  spec: Record<string, unknown>;
+  svg: string;
+}
+
+export interface HomeStory {
+  source: string;
+  round: number;
+  measured: string;
+  coreCommit: string;
+  lede: string;
+  lineGzipBytes: string;
+  uplotJsBytes: string;
+  uplotCssBytes: string;
+  uplotSumBytes: string;
+  sizeMeasured: string;
+  charts: HomeStoryChart[];
+}
+
 export interface BenchmarksPage {
   source: string;
   round: number;

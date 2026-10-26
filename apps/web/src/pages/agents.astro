@@ -31,28 +31,28 @@ const description =
       <h2 id="loop-title">The loop</h2>
       <div class="card-grid">
         <article class="card">
-          <h3>1. Write</h3>
+          <h3>Write</h3>
           <p>
             <code>version</code> is <code>"1"</code>. <code>data</code> is an array of rows. <code>a11y.alt</code> is one
             sentence and is required. Gauge, kpi, and progress-ring put the number in <code>metric</code>.
           </p>
         </article>
         <article class="card">
-          <h3>2. Validate</h3>
+          <h3>Validate</h3>
           <p>
             <code>validate()</code> checks the schema and the data. <code>CK1001</code> is invalid JSON.{' '}
             <code>CK1004</code> is a missing required field such as <code>a11y</code>.
           </p>
         </article>
         <article class="card">
-          <h3>3. Repair</h3>
+          <h3>Repair</h3>
           <p>
             <code>repair()</code> returns a spec and the patch it applied. It does not invent data. A missing or unknown
             type is reported first.
           </p>
         </article>
         <article class="card">
-          <h3>4. Render</h3>
+          <h3>Render</h3>
           <p>
             Core charts come from <code>@chartkitdev/core/all</code>. Histogram through rose, and the planning charts,
             come from <code>@chartkitdev/core/extra</code>. <code>render()</code> does not validate and does not throw.
