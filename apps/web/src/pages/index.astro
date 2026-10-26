@@ -1,28 +1,68 @@
 ---
 import "../styles/hero.css";
+import "../styles/docs.css";
+import "../styles/surfaces.css";
 import Base from "../layouts/Base.astro";
+import ChartMount from "../components/ChartMount.astro";
 import HeroStage from "../components/HeroStage.astro";
+import HomeStart from "../components/HomeStart.astro";
 import { SITE } from "../data/site";
+import { loadHomeStory } from "../lib/surfaces";
 
 /** Swap this string to change the homepage headline. */
-const heroTitle = "Ship the chart, not the chart code.";
-const heroLede = "JSON spec in → chart out. Switch engines without a rewrite.";
+const heroTitle = "Pass a spec. ChartKit draws the chart.";
+const heroLede =
+  "ChartKit is a JavaScript library. Agents and developers pass a ChartSpec. They do not write the chart implementation.";
+const story = loadHomeStory();
+const leadChart = story.charts.find((chart) => chart.id === "initial");
+const sideCharts = story.charts.filter((chart) => chart.id !== "initial");
 ---
 
-<Base tone="light" title={heroTitle} description={SITE.description}>
+<Base tone="light" title={heroTitle} description={heroLede || SITE.description}>
   <section class="home-hero" id="hero" aria-labelledby="home-title">
     <p class="home-hero__eyebrow">ChartKit v1</p>
     <h1 id="home-title">{heroTitle}</h1>
     <p class="home-hero__lede">{heroLede}</p>
     <div class="home-hero__actions">
-      <a class="home-btn" href="/cloud">
-        Try Cloud <span class="home-btn__chev" aria-hidden="true">›</span>
+      <a class="home-btn" href="/docs">
+        Get started <span class="home-btn__chev" aria-hidden="true">›</span>
       </a>
-      <a class="home-link" href="/docs">Read the docs</a>
+      <a class="home-link" href="/cloud">Cloud</a>
     </div>
   </section>
 
+  <HomeStart />
+
   <HeroStage />
+
+  <section class="home-story" id="measured" aria-labelledby="story-title">
+    <div class="home-story__intro">
+      <h2 id="story-title">Measured.</h2>
+      <p>
+        {story.lede} <a href="/benchmarks">Benchmarks</a>.
+      </p>
+    </div>
+    <div class="home-story__grid">
+      {
+        leadChart ? (
+          <article class="home-story__card home-story__card--wide">
+            <h3>{leadChart.title}</h3>
+            <ChartMount spec={leadChart.spec} svg={leadChart.svg} alt={leadChart.alt} />
+            <p>{leadChart.caption}</p>
+          </article>
+        ) : null
+      }
+      {
+        sideCharts.map((chart) => (
+          <article class="home-story__card">
+            <h3>{chart.title}</h3>
+            <ChartMount spec={chart.spec} svg={chart.svg} alt={chart.alt} />
+            <p>{chart.caption}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
 
   <section class="home-routes" aria-label="Product">
     <a class="home-route" href="/cloud">
@@ -30,7 +70,7 @@ const heroLede = "JSON spec in → chart out. Switch engines without a rewrite."
       <p>
         Post a spec, get SVG or PNG. Email, docs, and reports use the image. Free includes a watermark. Pro removes it.
       </p>
-      <span class="home-route__go">Try Cloud</span>
+      <span class="home-route__go">Open Cloud</span>
     </a>
     <a class="home-route" href="/dashboards">
       <h2>Dashboards</h2>
@@ -76,7 +116,6 @@ const heroLede = "JSON spec in → chart out. Switch engines without a rewrite."
       </div>
       <div class="home-why__rows">
         <article class="home-why__row">
-          <span class="home-why__num">01</span>
           <h3>Agents get a chart.</h3>
           <p>
             An agent writes a JSON spec and gets a chart back. Validate and repair fix the safe mistakes without another
@@ -86,7 +125,6 @@ const heroLede = "JSON spec in → chart out. Switch engines without a rewrite."
           <a class="home-more" href="/agents">Agents</a>
         </article>
         <article class="home-why__row">
-          <span class="home-why__num">02</span>
           <h3>One object.</h3>
           <p>
             React, Vue, Svelte, vanilla JavaScript, and server SVG take the same JSON. Adapters do not add a second
@@ -95,11 +133,11 @@ const heroLede = "JSON spec in → chart out. Switch engines without a rewrite."
           <a class="home-more" href="/docs/concepts/adapters">Adapters</a>
         </article>
         <article class="home-why__row">
-          <span class="home-why__num">03</span>
           <h3>Losses included.</h3>
           <p>
-            A minimal line is 34,554 bytes gzip. uPlot is 23,276. First hover is slower than uPlot. The comparison
-            table in the repo README is the record.
+            The size-script line is {story.lineGzipBytes} bytes gzip, measured {story.sizeMeasured}. uPlot’s JavaScript
+            is {story.uplotJsBytes} bytes. The stylesheet is {story.uplotCssBytes} bytes more, and the two sum to{" "}
+            {story.uplotSumBytes}. First hover is slower than uPlot. The comparison table is the record.
           </p>
           <a class="home-more" href="/benchmarks">Benchmarks</a>
         </article>
@@ -107,3 +145,7 @@ const heroLede = "JSON spec in → chart out. Switch engines without a rewrite."
     </div>
   </section>
 </Base>
+
+<script>
+  import "../scripts/mount-charts.ts";
+</script>

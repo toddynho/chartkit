@@ -324,9 +324,92 @@ function paintPlayground(): void {
   });
 }
 
+function pointsLabel(points: number): string {
+  if (points >= 1_000_000) return "1M";
+  if (points >= 1000) return `${points / 1000}k`;
+  return String(points);
+}
+
+/** Homepage story charts. Same published rows as the benchmarks page. */
+function paintHomeStory(): void {
+  const even = benchmarks.published.browser.filter((row) => row.shape === "even");
+  const initialData = even.flatMap((row) => [
+    { points: pointsLabel(row.points), library: "ChartKit", ms: row.chartkit.initial },
+    { points: pointsLabel(row.points), library: "uPlot", ms: row.uplot.initial },
+  ]);
+  const ms = (value: number) => value.toFixed(1);
+  const pairs = even.map(
+    (row) => `${pointsLabel(row.points)} is ${ms(row.chartkit.initial)} ms against uPlot ${ms(row.uplot.initial)} ms`,
+  );
+  const sampled = even.filter((row) => row.points > 1000).map((row) => pointsLabel(row.points));
+  const losses = benchmarks.browserRows.filter((row) => row.tone === "loss").length;
+  const hover = benchmarks.firstHoverRows.find((row) => row.delay.includes("200")) ?? benchmarks.firstHoverRows[0];
+  const initialSpec = {
+    version: "1",
+    id: "home-initial-even",
+    type: "bar",
+    theme: "soft",
+    data: initialData,
+    encoding: { x: "points", y: "ms", series: "library" },
+    axes: { x: { title: "Points" }, y: { title: "Milliseconds" } },
+    legend: { position: "bottom" },
+    tooltip: { mode: "index", position: "top" },
+    size: { width: 980, height: 380 },
+    a11y: {
+      alt: `Even x, initial render, round ${benchmarks.ROUND}, ${benchmarks.MEASURED}. ${pairs.join(". ")}. ChartKit is ahead in each of these four cells. ${sampled.join(", ")} use sampling auto. 1,000 points stay complete.`,
+    },
+  };
+  const bundleSpec = {
+    ...benchmarks.raceSpec(benchmarks.bundleRace),
+    theme: "soft",
+    axes: { y: { title: "KB gzip" } },
+    size: { width: 640, height: 320 },
+  };
+  const ssrSpec = {
+    ...benchmarks.raceSpec(benchmarks.ssrRace),
+    theme: "soft",
+    axes: { y: { title: "Milliseconds" } },
+    size: { width: 640, height: 320 },
+  };
+  delete bundleSpec.title;
+  delete ssrSpec.title;
+  const painted = (id: string, title: string, caption: string, spec: Record<string, unknown>) => ({
+    id,
+    title,
+    caption,
+    alt: altOf(spec, title),
+    spec,
+    svg: renderChart(spec),
+  });
+
+  write(join(out, "home", "story.json"), {
+    source: "catalog/lib/benchmarks.ts",
+    round: benchmarks.ROUND,
+    measured: benchmarks.MEASURED,
+    coreCommit: benchmarks.CORE_COMMIT,
+    lede: `Round ${benchmarks.ROUND}, measured ${benchmarks.MEASURED} on ${benchmarks.CORE_COMMIT}. First paint on the wide chart is ahead of uPlot. The gzip chart is a loss to uPlot. First hover is slower: ${hover.delay}, ChartKit paints in ${hover.ck} ms and uPlot in ${hover.uplot} ms.`,
+    lineGzipBytes: benchmarks.headline.lineGzipBytes,
+    uplotJsBytes: benchmarks.headline.uplotJsBytes,
+    uplotCssBytes: benchmarks.headline.uplotCssBytes,
+    uplotSumBytes: benchmarks.headline.uplotSumBytes,
+    sizeMeasured: benchmarks.headline.sizeMeasured,
+    charts: [
+      painted(
+        "initial",
+        "First paint vs uPlot",
+        `Even x, median of five, Playwright Chromium, 640×360. ${pairs.join(". ")}. ChartKit wins each of these initial cells. ${sampled.join(", ")} use sampling auto. 1,000 points stay complete. The aligned update loses ${losses} of ${benchmarks.browserRows.length} cells. That comparison is not on this chart.`,
+        initialSpec,
+      ),
+      painted("bundle", benchmarks.bundleRace.title, benchmarks.bundleRace.caption, bundleSpec),
+      painted("ssr", benchmarks.ssrRace.title, benchmarks.ssrRace.caption, ssrSpec),
+    ],
+  });
+}
+
 const showcaseCount = paintShowcase();
 const exampleCount = paintExamples();
 const featureCharts = paintFeatures();
 paintBenchmarks();
 paintPlayground();
-console.log(`painted showcase ${showcaseCount}, examples ${exampleCount}, feature charts ${featureCharts}, benchmarks, playground`);
+paintHomeStory();
+console.log(`painted showcase ${showcaseCount}, examples ${exampleCount}, feature charts ${featureCharts}, benchmarks, playground, home story`);

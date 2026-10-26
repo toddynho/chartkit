@@ -1,0 +1,28 @@
+---
+import FrameworkChips from "./FrameworkChips.astro";
+import StackSample from "./StackSample.astro";
+import { agentSwitchPrompt } from "../data/agent-prompt";
+---
+
+<section class="home-start" id="get-started" aria-label="Get started">
+  <article class="home-start__card">
+    <h2>Install</h2>
+    <p>
+      Core, then the adapter. The framework chip is the same one the docs remember.
+      <a href="/docs/install">Install notes</a>.
+    </p>
+    <FrameworkChips />
+    <StackSample />
+    <button type="button" class="home-copy" data-copy-install>Copy install</button>
+  </article>
+  <article class="home-start__card">
+    <h2>Tell your agent</h2>
+    <p>Paste this when you want the charts switched to ChartKit. The app stays JavaScript.</p>
+    <pre class="home-prompt" data-agent-prompt>{agentSwitchPrompt}</pre>
+    <button type="button" class="home-copy" data-copy-prompt>Copy prompt</button>
+  </article>
+</section>
+
+<script>
+  import "../scripts/home-start";
+</script>

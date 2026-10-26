@@ -6,6 +6,7 @@ import type {
   ExamplesIndex,
   FeatureFile,
   FeatureIndex,
+  HomeStory,
   PlaygroundFile,
   ShowcaseBoard,
   ShowcaseIndex,
@@ -51,6 +52,10 @@ export function loadFeature(id: string): FeatureFile {
 
 export function loadBenchmarksPage(): BenchmarksPage {
   return JSON.parse(readGenerated("benchmarks", "page.json")) as BenchmarksPage;
+}
+
+export function loadHomeStory(): HomeStory {
+  return JSON.parse(readGenerated("home", "story.json")) as HomeStory;
 }
 
 export function loadPlayground(): PlaygroundFile {
