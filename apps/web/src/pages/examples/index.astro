@@ -2,24 +2,36 @@
 import "../../styles/surfaces.css";
 import Base from "../../layouts/Base.astro";
 import LiveSpec from "../../components/LiveSpec.astro";
-import { loadExamplesIndex, loadPlayground } from "../../lib/surfaces";
+import { loadExample, loadExamplesIndex, loadPlayground } from "../../lib/surfaces";
 
 const data = loadExamplesIndex();
-const playground = loadPlayground();
-const description = "Edit a ChartKit spec, then browse the example catalog.";
+const starter = loadExample(data.examples[0]?.slug ?? "");
+const { themes } = loadPlayground();
+const description = "Edit a ChartKit spec and preview it. Pick an example to load that spec.";
 ---
 
 <Base title="Examples" description={description} tone="light">
-  <div class="wrap surface">
+  <div class="wrap surface example-play">
     <header class="hero">
       <p class="kicker">Examples</p>
       <h1>Examples</h1>
       <p class="lede">
-        Edit the spec. The preview renders with <code>@chartkitdev/core</code>, and maps with <code>@chartkitdev/geo</code>.
-        Validate and Repair call the same functions an agent would. Share puts the spec in the URL hash.
+        The preview on the left follows the spec on the right. Validate, repair, share, and SVG or PNG export use
+        <code>@chartkitdev/core</code>, and maps use <code>@chartkitdev/geo</code>. Pick an example to load its spec.
       </p>
     </header>
-    <LiveSpec spec={playground.spec} svg={playground.svg} mode="full" themes={playground.themes} />
+    <LiveSpec
+      spec={starter.spec}
+      svg={starter.svg}
+      mode="full"
+      themes={themes}
+      examples={data.examples}
+      activeSlug={starter.slug}
+    />
+    <section class="section">
+      <h2>Catalog</h2>
+      <p class="lede">Open a card to load that spec into the editor.</p>
+    </section>
     <nav class="filters" aria-label="Example groups">
       {data.groups.map((group) => <a href={`#${group.id}`}>{group.label}</a>)}
     </nav>
@@ -31,12 +43,15 @@ const description = "Edit a ChartKit spec, then browse the example catalog.";
             {data.examples
               .filter((example) => example.groupId === group.id)
               .map((example) => (
-                <article class="card">
-                  <a class="cover-frame" href={`/examples/${example.slug}`} aria-label={example.alt} set:html={example.svg} />
+                <a
+                  class:list={["card", example.slug === starter.slug && "is-loaded"]}
+                  href={`/examples/${example.slug}`}
+                >
+                  <div class="cover-frame" role="img" aria-label={example.alt} set:html={example.svg} />
                   <h3>{example.title}</h3>
                   <p>{example.blurb}</p>
-                  <a href={`/examples/${example.slug}`}>Edit spec</a>
-                </article>
+                  <span class="edit-spec">{example.slug === starter.slug ? "In the editor" : "Edit spec"}</span>
+                </a>
               ))}
           </div>
         </section>

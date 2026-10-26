@@ -22,7 +22,7 @@ export default defineConfig({
   },
   redirects: {
     "/play": { status: 307, destination: "/examples" },
-    "/playground": { status: 307, destination: "/examples" },
+    // /playground is a page. Old share links are /playground#spec, and a static meta refresh drops the fragment.
     "/demo": { status: 307, destination: "/dashboards" },
     "/showcase": { status: 307, destination: "/gallery" },
     "/maps": { status: 307, destination: "/gallery#maps" },
