@@ -472,10 +472,10 @@ function canvasLossLine(rows) {
   return `Canvas loses first paint at every size: ${paints.join("; ")}. Render is slower at every size: ${renders.join("; ")}. Updates: ${updates.join("; ")}.`;
 }
 
-/** Canvas line measured separately from round 13. Numbers come from docs/data/canvas-bench.json. */
+/** Canvas line measured separately from round 13. Numbers come from catalog/data/canvas-bench.json. */
 function canvasReportLines() {
-  const file = join(dirname(fileURLToPath(import.meta.url)), "../../docs/data/canvas-bench.json");
-  if (!existsSync(file)) return ["Canvas comparison: `docs/data/canvas-bench.json` is missing."];
+  const file = join(dirname(fileURLToPath(import.meta.url)), "../../catalog/data/canvas-bench.json");
+  if (!existsSync(file)) return ["Canvas comparison: `catalog/data/canvas-bench.json` is missing."];
   const bench = JSON.parse(readFileSync(file, "utf8"));
   const rows = Array.isArray(bench.rows) ? bench.rows : [];
   const at = (id, points) => rows.find((row) => row.id === id && row.points === points);

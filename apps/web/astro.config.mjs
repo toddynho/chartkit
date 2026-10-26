@@ -9,7 +9,7 @@ import { defineConfig } from "astro/config";
  */
 const cookieV2 = fileURLToPath(new URL("../../node_modules/astro/node_modules/cookie/dist/index.js", import.meta.url));
 
-/** Static marketing + docs shell. Not wired to production hosting. */
+/** Static site for chartkit.dev. Todd deploys apps/web/dist by hand. */
 export default defineConfig({
   site: "https://chartkit.dev",
   trailingSlash: "ignore",
@@ -44,6 +44,10 @@ export default defineConfig({
     "/components/candlestick-chart": { status: 307, destination: "/docs/charts/candlestick" },
     "/hooks": { status: 307, destination: "/docs" },
     "/utilities": { status: 307, destination: "/docs/spec" },
+    "/utilities/legend": { status: 307, destination: "/docs/spec" },
+    "/utilities/annotations": { status: 307, destination: "/docs/spec" },
+    "/utilities/responsive-chart": { status: 307, destination: "/docs/spec" },
+    "/.well-known/llms.txt": { status: 307, destination: "/llms.txt" },
     "/themes": { status: 307, destination: "/docs/theming" },
     "/about": { status: 307, destination: "/agents" },
     "/docs/agents/mcp": { status: 307, destination: "/docs/mcp" },

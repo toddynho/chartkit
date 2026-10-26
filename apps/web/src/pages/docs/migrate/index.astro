@@ -1,12 +1,12 @@
 ---
 import DocsPage from "../../../components/DocsPage.astro";
 
-const description = "Move from @derpdaderp/chartkit to the @chartkitdev packages and the v1 JSON spec.";
+const description = "Upgrading from @derpdaderp/chartkit and the prop-based dashboard components to the v1 JSON spec.";
 const shell = `npm uninstall @derpdaderp/chartkit
 npm install @chartkitdev/react @chartkitdev/core`;
 ---
 
-<DocsPage title="Migrate from v0" description={description} href="/docs/migrate">
+<DocsPage title="Upgrading from v0" description={description} href="/docs/migrate">
   <p>
     ChartKit v0 was a React component library published as <code>@derpdaderp/chartkit</code>. v1 keeps a React adapter and adds a JSON spec that Vue, Svelte, vanilla DOM, and Node all render.
   </p>

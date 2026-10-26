@@ -1,6 +1,6 @@
 /**
  * Paint showcase, examples, feature specs, benchmark races, and the playground
- * hero with @chartkitdev/core. Specs stay in docs/lib and docs/public. Output
+ * hero with @chartkitdev/core. Specs stay in catalog/lib and catalog/public. Output
  * is apps/web/.generated and is not committed.
  */
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
@@ -18,12 +18,12 @@ register(pathToFileURL(join(scriptDir, "json-import-hook.mjs")).href, {
   parentURL: import.meta.url,
 });
 
-process.chdir(join(root, "docs"));
+process.chdir(join(root, "catalog"));
 
-const { showcaseBoards } = await import("../../../docs/lib/showcase.ts");
-const { examples, exampleGroups, heroSpec, THEMES } = await import("../../../docs/lib/specs.ts");
-const { FRAMEWORKS, snippetsFor } = await import("../../../docs/lib/snippets.ts");
-const benchmarks = await import("../../../docs/lib/benchmarks.ts");
+const { showcaseBoards } = await import("../../../catalog/lib/showcase.ts");
+const { examples, exampleGroups, heroSpec, THEMES } = await import("../../../catalog/lib/specs.ts");
+const { FRAMEWORKS, snippetsFor } = await import("../../../catalog/lib/snippets.ts");
+const benchmarks = await import("../../../catalog/lib/benchmarks.ts");
 
 function altOf(spec: unknown, fallback: string): string {
   if (typeof spec !== "object" || spec === null) return fallback;
@@ -131,9 +131,9 @@ function paintShowcase(): number {
   sameSet(
     "showcase markdown",
     boards.map((board) => board.slug),
-    names(join(root, "docs/public/showcase"), ".md"),
+    names(join(root, "catalog/public/showcase"), ".md"),
   );
-  write(join(out, "showcase", "index.json"), { source: "docs/lib/showcase.ts", boards: cards });
+  write(join(out, "showcase", "index.json"), { source: "catalog/lib/showcase.ts", boards: cards });
   return boards.length;
 }
 
@@ -167,12 +167,12 @@ function paintExamples(): number {
       alt: file.alt,
     };
   });
-  write(join(out, "examples", "index.json"), { source: "docs/lib/specs.ts", groups, examples: cards });
+  write(join(out, "examples", "index.json"), { source: "catalog/lib/specs.ts", groups, examples: cards });
   return examples.length;
 }
 
 function paintFeatures(): number {
-  const data = JSON.parse(readFileSync(join(root, "docs/public/features.json"), "utf8")) as {
+  const data = JSON.parse(readFileSync(join(root, "catalog/public/features.json"), "utf8")) as {
     schemaVersion: string;
     generated: string;
     chartkitCommit: string;
@@ -217,10 +217,10 @@ function paintFeatures(): number {
   sameSet(
     "feature markdown",
     data.features.map((feature) => feature.id),
-    names(join(root, "docs/public/features"), ".md"),
+    names(join(root, "catalog/public/features"), ".md"),
   );
   write(join(out, "features", "index.json"), {
-    source: "docs/public/features.json",
+    source: "catalog/public/features.json",
     schemaVersion: data.schemaVersion,
     generated: data.generated,
     chartkitCommit: data.chartkitCommit,
@@ -249,7 +249,7 @@ function race(race: { alt: string; caption: string; rows: { lib: string; value: 
 
 function paintBenchmarks(): void {
   benchmarks.assertPublishedMatchesDisplay();
-  const bench = JSON.parse(readFileSync(join(root, "docs/data/canvas-bench.json"), "utf8")) as {
+  const bench = JSON.parse(readFileSync(join(root, "catalog/data/canvas-bench.json"), "utf8")) as {
     measured?: string;
     rows: { id: string; points: number; renderMs?: number | null; initialMs?: number | null; updateMs?: number | null }[];
   };
@@ -281,7 +281,7 @@ function paintBenchmarks(): void {
   }
   const headline = benchmarks.headline;
   write(join(out, "benchmarks", "page.json"), {
-    source: "docs/lib/benchmarks.ts",
+    source: "catalog/lib/benchmarks.ts",
     round: benchmarks.ROUND,
     measured: benchmarks.MEASURED,
     coreCommit: benchmarks.CORE_COMMIT,

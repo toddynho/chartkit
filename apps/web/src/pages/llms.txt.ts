@@ -1,4 +1,4 @@
 import type { APIRoute } from "astro";
 import { TEXT, artifact } from "../lib/artifacts";
 
-export const GET: APIRoute = () => artifact("docs/public/llms.txt", TEXT);
+export const GET: APIRoute = () => artifact("catalog/public/llms.txt", TEXT);

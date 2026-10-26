@@ -1,6 +1,6 @@
 /**
- * Let Node load docs/lib from the paint scripts.
- * JSON default-imports, extensionless `./specs`, and Next's `@/` alias.
+ * Let Node load catalog/lib from the paint scripts.
+ * JSON default-imports, extensionless `./specs`, and the `@/` alias those modules use.
  */
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -9,9 +9,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 function docsRoot(parentURL) {
   if (!parentURL?.startsWith("file:")) return null;
   const file = fileURLToPath(parentURL);
-  const at = file.indexOf("/docs/");
+  const at = file.indexOf("/catalog/");
   if (at < 0) return null;
-  return file.slice(0, at + "/docs".length);
+  return file.slice(0, at + "/catalog".length);
 }
 
 export async function resolve(specifier, context, nextResolve) {

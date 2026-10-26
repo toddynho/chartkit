@@ -11,7 +11,7 @@ export type DocPage = {
   title: string;
   description: string;
   lede: string;
-  /** Absolute URL of the current Next.js page, when one exists. */
+  /** Absolute URL for this topic, when one exists. */
   current?: string;
   blocks: Block[];
 };
@@ -264,8 +264,8 @@ export const docPages: DocPage[] = [
   {
     slug: "agents/llms",
     title: "llms.txt",
-    description: "The prompt file agents read. The Next.js site still serves it.",
-    lede: "llms.txt is the short context. llms-full.txt is the long one. Both are generated with the current docs site.",
+    description: "The prompt file agents read. This site serves it at /llms.txt.",
+    lede: "llms.txt is the short context. llms-full.txt is the long one. Both are files in catalog/public.",
     current: "https://chartkit.dev/llms.txt",
     blocks: [
       {

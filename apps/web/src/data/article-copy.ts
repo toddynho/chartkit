@@ -175,7 +175,7 @@ export const articleSections: Record<string, DocSection[]> = {
   ],
   "llms-txt": [
     section("Where it lives", [
-      "`llms.txt` is the short agent index: the rules, the repair loop, and one spec per chart type. chartkit.dev still serves that file from the Next.js app. This Astro app links to it and does not replace it.",
+      "`llms.txt` is the short agent index: the rules, the repair loop, and one spec per chart type. This site serves it at `/llms.txt`.",
     ]),
   ],
   mcp: [

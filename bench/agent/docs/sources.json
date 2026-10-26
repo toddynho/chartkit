@@ -1,12 +1,12 @@
 {
   "retrieved": "2026-10-16",
   "capBytes": 6335,
-  "capFile": "docs/public/llms.txt",
+  "capFile": "catalog/public/llms.txt",
   "libraries": {
     "chartkit": {
       "title": "ChartKit llms.txt",
       "url": "https://chartkit.dev/llms.txt",
-      "file": "docs/public/llms.txt",
+      "file": "catalog/public/llms.txt",
       "note": "Full file. This length is the cap. The other libraries are cut to this many bytes."
     },
     "recharts": {

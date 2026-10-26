@@ -39,5 +39,3 @@ scripts/design/.out/
 *.tgz
 .turbo/
 
-# Internal docs (continuation prompts, notes)
-docs/docs/

@@ -361,7 +361,7 @@ describe("toSpec", () => {
 
 describe("llms.txt", () => {
   it("mentions Mermaid import and stays within 6400 bytes", () => {
-    const text = readFileSync(join(repoRoot, "docs/public/llms.txt"), "utf8");
+    const text = readFileSync(join(repoRoot, "catalog/public/llms.txt"), "utf8");
     expect(text).toContain("ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.");
     expect(Buffer.byteLength(text)).toBeLessThanOrEqual(6400);
   });

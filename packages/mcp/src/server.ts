@@ -116,7 +116,7 @@ export function createServer(): McpServer {
     {
       title: "Look up a feature in the matrix",
       description:
-        "Search the bundled copy of docs/public/features.json, including its synonym index. Returns ChartKit's published status, the matrix spec snippet (or null), the docs URL https://chartkit.dev/features/<id>, and every other library's status from the same row. Statuses are native, partial, plugin, manual, none, or unknown. partial, plugin, and manual are not native support. Nothing in this tool is a hand-typed claim: if the file has no row, matches is empty.",
+        "Search the bundled copy of catalog/public/features.json, including its synonym index. Returns ChartKit's published status, the matrix spec snippet (or null), the docs URL https://chartkit.dev/features/<id>, and every other library's status from the same row. Statuses are native, partial, plugin, manual, none, or unknown. partial, plugin, and manual are not native support. Nothing in this tool is a hand-typed claim: if the file has no row, matches is empty.",
       inputSchema: {
         query: z.string().min(1).describe('Feature id, label, or words such as "rotate labels" or "dual axis".'),
       },

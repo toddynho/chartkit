@@ -5,8 +5,8 @@ export type ChartType = {
 };
 
 /**
- * Type ids match `docs/lib/specs.ts` so migrated URLs can stay `/docs/charts/<type>`.
- * Summaries are one line. The notes and live examples stay on the Next.js site.
+ * Type ids match `catalog/lib/specs.ts` so migrated URLs can stay `/docs/charts/<type>`.
+ * Summaries are one line.
  */
 export const chartTypes: ChartType[] = [
   { type: "line", title: "Line", summary: "A trend across ordered categories." },
