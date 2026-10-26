@@ -282,6 +282,30 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
 
 .docs-main h1 { font-size: clamp(2rem, 4vw, 2.6rem); letter-spacing: -0.03em; }
 
+.docs-main.docs-main--browse h1 {
+  margin: 0 0 0.2rem;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+}
+
+.docs-main--browse .docs-top { margin-bottom: 8px; }
+.docs-main--browse .docs-top .breadcrumb { margin-bottom: 0; }
+.docs-main--browse .gallery-family:first-of-type { margin-top: 0.35rem; }
+
+.docs-type { display: flex; flex-direction: column; }
+
+.docs-type__open {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.docs-type__open:hover { text-decoration: none; }
+
+.gallery-grid .docs-type:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+}
+
 .breadcrumb {
   display: flex;
   flex-wrap: wrap;

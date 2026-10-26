@@ -2,6 +2,7 @@
 import { chartByType, chartTypes } from "../../../data/chart-types";
 import { chartDocs, chartPage } from "../../../data/docs-catalog";
 import { galleryTileSvg } from "../../../data/hero-slides";
+import { docsSpecForType } from "../../../data/live-specs";
 import { loadMaps } from "../../../lib/batch3";
 import Docs from "../../../layouts/Docs.astro";
 
@@ -9,13 +10,24 @@ const families = ["Core", "Statistical", "Planning"] as const;
 const inCatalog = new Set(chartDocs.map((chart) => chart.type));
 const maps = loadMaps();
 
+function editHref(spec: unknown): string {
+  return `/examples#${encodeURIComponent(JSON.stringify(spec))}`;
+}
+
 function tile(type: string, title: string) {
   const svg = galleryTileSvg(type);
   if (!svg.includes("<svg") || svg.includes("ck-chart-error")) {
     throw new Error(`Chart types could not paint ${type}`);
   }
   const summary = chartByType(type)?.summary ?? chartPage(type).lede;
-  return { id: type, title, summary, svg, href: `/docs/charts/${type}` };
+  return {
+    id: type,
+    title,
+    summary,
+    svg,
+    href: `/docs/charts/${type}`,
+    edit: editHref(docsSpecForType(type)),
+  };
 }
 
 const groups = [
@@ -28,49 +40,47 @@ const groups = [
   {
     id: "library",
     family: "Library",
-    note: "These production URLs are real pages. They are not a fourth group in the left nav.",
+    note: "",
     charts: chartTypes.filter((chart) => !inCatalog.has(chart.type)).map((chart) => tile(chart.type, chart.title)),
   },
   {
     id: "maps",
     family: "Maps",
-    note: "Choropleth and point maps are painted with @chartkitdev/geo. They are not core schema types, and there is no tile layer.",
+    note: "Choropleth and point maps. No tile layer, and no pan or zoom. Atlases ship in the geo package. They are not part of @chartkitdev/core.",
     charts: [
       {
         id: "map-world",
         title: "World choropleth",
-        summary: "Renewable share of electricity.",
+        summary: "Renewable share of electricity. Sequential scale, hatched where a country has no row.",
         svg: maps.world.svg,
-        href: "/gallery#map-world",
+        href: editHref(maps.world.spec),
+        edit: editHref(maps.world.spec),
       },
       {
         id: "map-us",
         title: "United States",
-        summary: "Population change, 2020–2023.",
+        summary: "Population change, 2020–2023. Red is a loss, blue is a gain.",
         svg: maps.us.svg,
-        href: "/gallery#map-us",
+        href: editHref(maps.us.spec),
+        edit: editHref(maps.us.spec),
       },
       {
         id: "map-cities",
         title: "Cities",
-        summary: "Largest urban areas.",
+        summary: "Largest urban areas. Bubble area is population, in millions.",
         svg: maps.cities.svg,
-        href: "/gallery#map-cities",
+        href: editHref(maps.cities.spec),
+        edit: editHref(maps.cities.spec),
       },
     ],
   },
 ];
 
 const count = groups.reduce((total, group) => total + group.charts.length, 0);
-const description = `${count} ChartKit chart types, with a preview of each. Core, Statistical, and Planning stay in the left nav.`;
+const description = `${count} ChartKit charts. Open a preview for the doc, or edit the same spec as Gallery.`;
 ---
 
-<Docs
-  title="Chart types"
-  description={description}
-  lede="Each type has an extensionless page under /docs/charts/. The left nav lists Core, Statistical, and Planning. Other production URLs stay under Library."
-  href="/docs/charts"
->
+<Docs browse title="Chart types" description={description} href="/docs/charts">
   {
     groups.map((group) => (
       <section class="gallery-family" id={group.id} aria-labelledby={`docs-charts-${group.id}`}>
@@ -80,13 +90,25 @@ const description = `${count} ChartKit chart types, with a preview of each. Core
         </h2>
         {group.note ? <p class="gallery-note">{group.note}</p> : null}
         <div class="gallery-grid">
-          {group.charts.map((chart) => (
-            <a class="card" href={chart.href}>
-              <span class="gallery-chart" aria-hidden="true" set:html={chart.svg} />
-              <h3>{chart.title}</h3>
-              <p>{chart.summary}</p>
-            </a>
-          ))}
+          {group.charts.map((chart) =>
+            chart.href === chart.edit ? (
+              <a class="card" id={chart.id} href={chart.href}>
+                <span class="gallery-chart" aria-hidden="true" set:html={chart.svg} />
+                <h3>{chart.title}</h3>
+                <p>{chart.summary}</p>
+                <span class="gallery-edit">Edit spec</span>
+              </a>
+            ) : (
+              <article class="card docs-type" id={chart.id}>
+                <a class="docs-type__open" href={chart.href}>
+                  <span class="gallery-chart" aria-hidden="true" set:html={chart.svg} />
+                  <h3>{chart.title}</h3>
+                  <p>{chart.summary}</p>
+                </a>
+                <a class="gallery-edit" href={chart.edit}>Edit spec</a>
+              </article>
+            ),
+          )}
         </div>
       </section>
     ))
