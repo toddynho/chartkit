@@ -324,57 +324,83 @@ function paintPlayground(): void {
   });
 }
 
-function pointsLabel(points: number): string {
-  if (points >= 1_000_000) return "1M";
-  if (points >= 1000) return `${points / 1000}k`;
-  return String(points);
+function bytesLabel(value: number): string {
+  return value.toLocaleString("en-US");
+}
+
+function msLabel(value: number): string {
+  return String(value);
+}
+
+/** One horizontal log bar per library. Values are already measured; this only draws them. */
+function comparisonSpec(
+  id: string,
+  rows: { lib: string; value: number }[],
+  yTitle: string,
+  alt: string,
+  width: number,
+  height: number,
+): Record<string, unknown> {
+  return {
+    version: "1",
+    id,
+    type: "bar",
+    theme: "soft",
+    data: rows.map((row) => ({ lib: row.lib, value: row.value })),
+    encoding: {
+      x: "lib",
+      y: { field: "value", title: yTitle, scale: { type: "log" } },
+    },
+    mark: { orientation: "horizontal", gap: 0.28 },
+    legend: false,
+    axes: { y: { title: yTitle } },
+    tooltip: { position: "top", fields: [{ field: "value", title: yTitle }] },
+    size: { width, height },
+    a11y: { alt },
+  };
 }
 
 /** Homepage story charts. Same published rows as the benchmarks page. */
 function paintHomeStory(): void {
-  const even = benchmarks.published.browser.filter((row) => row.shape === "even");
-  const initialData = even.flatMap((row) => [
-    { points: pointsLabel(row.points), library: "ChartKit", ms: row.chartkit.initial },
-    { points: pointsLabel(row.points), library: "uPlot", ms: row.uplot.initial },
-  ]);
-  const ms = (value: number) => value.toFixed(1);
-  const pairs = even.map(
-    (row) => `${pointsLabel(row.points)} is ${ms(row.chartkit.initial)} ms against uPlot ${ms(row.uplot.initial)} ms`,
+  const sizeIds = ["chartkit-line", "uplot", "chartjs", "plot", "recharts", "nivo", "echarts"] as const;
+  const sizeRows = sizeIds
+    .map((id) => {
+      const row = benchmarks.published.bundleGzip.find((item) => item.id === id);
+      if (!row) throw new Error(`published bundle is missing ${id}`);
+      return row;
+    })
+    .sort((a, b) => a.bytes - b.bytes);
+  const sizeBits = sizeRows.map((row) => {
+    const note = row.reactExternal ? ", React external" : row.id === "uplot" ? ", JS plus stylesheet" : "";
+    return `${row.lib} ${bytesLabel(row.bytes)}${note}`;
+  });
+  const sizeCaption = `Gzip bytes, log scale, smaller toward the top. ${sizeBits.join(". ")}. ChartKit is scripts/size.mjs on ${benchmarks.headline.sizeCommit}, measured ${benchmarks.headline.sizeMeasured}. uPlot is smaller. Every other library here is larger.`;
+  const sizeAlt = `Line chart gzip. ${sizeBits.join(". ")}. uPlot is the smallest. ChartKit is next.`;
+
+  const hoverRows = [...benchmarks.published.hoverSteady100k].sort((a, b) => a.paintedMs - b.paintedMs);
+  const hoverBits = hoverRows.map((row) => `${row.lib} ${msLabel(row.paintedMs)} ms`);
+  const hoverChartkit = hoverRows.find((row) => row.lib === "ChartKit");
+  const hoverUplot = hoverRows.find((row) => row.lib === "uPlot");
+  const hoverGap =
+    hoverChartkit && hoverUplot ? Math.round((hoverChartkit.paintedMs - hoverUplot.paintedMs) * 10) / 10 : 0;
+  const hoverAhead =
+    hoverGap > 0
+      ? `uPlot is ${msLabel(hoverGap)} ms ahead of ChartKit.`
+      : hoverGap < 0
+        ? `ChartKit is ${msLabel(Math.abs(hoverGap))} ms ahead of uPlot.`
+        : "ChartKit and uPlot match.";
+  const hoverCaption = `Painted median at 100,000 points, log scale. ${hoverBits.join(". ")}. ${hoverAhead} Nivo is not in these hover rows.`;
+  const hoverAlt = `Steady hover at 100,000 points. ${hoverBits.join(". ")}.`;
+
+  const ssrRows = benchmarks.published.ssr.filter(
+    (row): row is (typeof benchmarks.published.ssr)[number] & { meanMs: number } => typeof row.meanMs === "number",
   );
-  const sampled = even.filter((row) => row.points > 1000).map((row) => pointsLabel(row.points));
-  const losses = benchmarks.browserRows.filter((row) => row.tone === "loss").length;
-  const hover = benchmarks.firstHoverRows.find((row) => row.delay.includes("200")) ?? benchmarks.firstHoverRows[0];
-  const initialSpec = {
-    version: "1",
-    id: "home-initial-even",
-    type: "bar",
-    theme: "soft",
-    data: initialData,
-    encoding: { x: "points", y: "ms", series: "library" },
-    axes: { x: { title: "Points" }, y: { title: "Milliseconds" } },
-    legend: { position: "bottom" },
-    tooltip: { mode: "index", position: "top" },
-    size: { width: 980, height: 380 },
-    a11y: {
-      alt: `Even x, initial render, round ${benchmarks.ROUND}, ${benchmarks.MEASURED}. ${pairs.join(". ")}. ChartKit is ahead in each of these four cells. ${sampled.join(", ")} use sampling auto. 1,000 points stay complete.`,
-    },
-  };
-  const { title: _bundleTitle, ...bundleRest } = benchmarks.raceSpec(benchmarks.bundleRace);
-  const bundleSpec = {
-    ...bundleRest,
-    theme: "soft",
-    axes: { y: { title: "KB gzip" } },
-    size: { width: 640, height: 320 },
-  };
-  const { title: _ssrTitle, ...ssrRest } = benchmarks.raceSpec(benchmarks.ssrRace);
-  const ssrSpec = {
-    ...ssrRest,
-    theme: "soft",
-    axes: { y: { title: "Milliseconds" } },
-    size: { width: 640, height: 320 },
-  };
-  void _bundleTitle;
-  void _ssrTitle;
+  const ssrSorted = [...ssrRows].sort((a, b) => a.meanMs - b.meanMs);
+  const ssrBits = ssrSorted.map((row) => `${row.lib} ${msLabel(row.meanMs)} ms`);
+  const ssrMissing = benchmarks.published.ssr.filter((row) => row.supported === false).map((row) => row.lib);
+  const ssrCaption = `Mean of 8 calls after 2 warmups, a 1,000 point line, log scale. ${ssrBits.join(". ")}. ${ssrMissing.join(", ")} did not produce a chart without a DOM.`;
+  const ssrAlt = `Server render of a 1,000 point line. ${ssrBits.join(". ")}. ${ssrMissing.join(", ")} produced no chart without a DOM.`;
+
   const painted = (id: string, title: string, caption: string, spec: Record<string, unknown>) => ({
     id,
     title,
@@ -389,7 +415,7 @@ function paintHomeStory(): void {
     round: benchmarks.ROUND,
     measured: benchmarks.MEASURED,
     coreCommit: benchmarks.CORE_COMMIT,
-    lede: `Round ${benchmarks.ROUND}, measured ${benchmarks.MEASURED} on ${benchmarks.CORE_COMMIT}. First paint on the wide chart is ahead of uPlot. The gzip chart is a loss to uPlot. First hover is slower: ${hover.delay}, ChartKit paints in ${hover.ck} ms and uPlot in ${hover.uplot} ms.`,
+    lede: `ChartKit versus other charting libraries. Round ${benchmarks.ROUND}, measured ${benchmarks.MEASURED}.`,
     lineGzipBytes: benchmarks.headline.lineGzipBytes,
     uplotJsBytes: benchmarks.headline.uplotJsBytes,
     uplotCssBytes: benchmarks.headline.uplotCssBytes,
@@ -397,13 +423,23 @@ function paintHomeStory(): void {
     sizeMeasured: benchmarks.headline.sizeMeasured,
     charts: [
       painted(
-        "initial",
-        "First paint vs uPlot",
-        `Even x, median of five, Playwright Chromium, 640×360. ${pairs.join(". ")}. ChartKit wins each of these initial cells. ${sampled.join(", ")} use sampling auto. 1,000 points stay complete. The aligned update loses ${losses} of ${benchmarks.browserRows.length} cells. That comparison is not on this chart.`,
-        initialSpec,
+        "size",
+        "Line chart, gzip",
+        sizeCaption,
+        comparisonSpec("home-line-gzip", sizeRows.map((row) => ({ lib: row.lib, value: row.bytes })), "Gzip bytes", sizeAlt, 980, 420),
       ),
-      painted("bundle", benchmarks.bundleRace.title, benchmarks.bundleRace.caption, bundleSpec),
-      painted("ssr", benchmarks.ssrRace.title, benchmarks.ssrRace.caption, ssrSpec),
+      painted(
+        "hover",
+        "Hover at 100,000 points",
+        hoverCaption,
+        comparisonSpec("home-hover-100k", hoverRows.map((row) => ({ lib: row.lib, value: row.paintedMs })), "Milliseconds", hoverAlt, 640, 340),
+      ),
+      painted(
+        "ssr",
+        "Server render, 1,000 points",
+        ssrCaption,
+        comparisonSpec("home-ssr-1k", ssrSorted.map((row) => ({ lib: row.lib, value: row.meanMs })), "Milliseconds", ssrAlt, 640, 280),
+      ),
     ],
   });
 }

@@ -15,8 +15,8 @@ const heroLines = heroTitle.split(/(?<=\.)\s+/);
 const heroLede =
   "Write ChartSpec once. Validate and repair fix the safe mistakes. Adapters and Cloud don’t invent a second API. ChartKit is still a JavaScript library — agents and developers pass a ChartSpec; they do not write the chart implementation.";
 const story = loadHomeStory();
-const leadChart = story.charts.find((chart) => chart.id === "initial");
-const sideCharts = story.charts.filter((chart) => chart.id !== "initial");
+const leadChart = story.charts.find((chart) => chart.id === "size");
+const sideCharts = story.charts.filter((chart) => chart.id !== "size");
 ---
 
 <Base tone="light" title={heroTitle} description={heroLede || SITE.description}>
@@ -40,7 +40,7 @@ const sideCharts = story.charts.filter((chart) => chart.id !== "initial");
 
   <section class="home-story" id="measured" aria-labelledby="story-title">
     <div class="home-story__intro">
-      <h2 id="story-title">Measured.</h2>
+      <h2 id="story-title">Measured</h2>
       <p>
         {story.lede} <a href="/benchmarks">Benchmarks</a>.
       </p>
