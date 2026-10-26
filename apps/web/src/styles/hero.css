@@ -160,6 +160,41 @@
 
 .home-start .code { margin: 0; }
 
+.home-start .stack-sample--copy pre { padding-right: 2.6rem; }
+
+.home-start .code-copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ck-code-comment, var(--muted));
+  cursor: pointer;
+}
+
+.home-start .code-copy:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ck-code-fg, var(--ink));
+}
+
+.home-start .code-copy svg { width: 16px; height: 16px; display: block; }
+
+.home-start .code-copy__glyph--check { display: none; }
+
+.home-start .code-copy.is-copied { color: var(--ck-code-keyword, var(--accent)); }
+
+.home-start .code-copy.is-copied .code-copy__glyph--copy { display: none; }
+
+.home-start .code-copy.is-copied .code-copy__glyph--check { display: block; }
+
 .home-start .code figcaption {
   position: absolute;
   width: 1px;

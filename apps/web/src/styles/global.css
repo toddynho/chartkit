@@ -404,6 +404,8 @@ code {
 .stack-sample [data-stack-panel],
 .fw-tabs:not(.is-ready) [data-fw-panel] { display: none; }
 
+.stack-sample__block { position: relative; min-width: 0; }
+
 html:not([data-stack]) .stack-sample [data-stack-panel="react"],
 html[data-stack="react"] .stack-sample [data-stack-panel="react"],
 html[data-stack="vue"] .stack-sample [data-stack-panel="vue"],

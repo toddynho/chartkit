@@ -2,6 +2,10 @@ import { mountStackChips } from "./stack-pref";
 
 function restore(button: HTMLButtonElement, previous: string): void {
   window.setTimeout(() => {
+    if (button.classList.contains("code-copy")) {
+      button.classList.remove("is-copied");
+      return;
+    }
     button.textContent = previous;
   }, 2000);
 }
@@ -33,16 +37,17 @@ function statusFor(button: HTMLButtonElement): HTMLElement | null {
 }
 
 async function writeClipboard(button: HTMLButtonElement, text: string): Promise<void> {
+  const icon = button.classList.contains("code-copy");
   const previous = button.dataset.label ?? button.textContent ?? "Copy";
-  button.dataset.label = previous;
+  if (!icon) button.dataset.label = previous;
   const status = statusFor(button);
   if (!text) {
-    button.textContent = "Copy failed";
+    if (!icon) button.textContent = "Copy failed";
     if (status) status.textContent = "Nothing to copy.";
     restore(button, previous);
     return;
   }
-  button.textContent = "Copying";
+  if (!icon) button.textContent = "Copying";
   if (status) status.textContent = "";
   let ok = false;
   try {
@@ -51,7 +56,8 @@ async function writeClipboard(button: HTMLButtonElement, text: string): Promise<
   } catch {
     ok = copyWithCommand(text);
   }
-  button.textContent = ok ? "Copied" : "Copy failed";
+  if (icon) button.classList.toggle("is-copied", ok);
+  else button.textContent = ok ? "Copied" : "Copy failed";
   if (status) status.textContent = ok ? "Copied." : "Copy failed.";
   restore(button, previous);
 }
@@ -59,7 +65,9 @@ async function writeClipboard(button: HTMLButtonElement, text: string): Promise<
 function visibleInstall(root: ParentNode): string {
   const panels = root.querySelectorAll<HTMLElement>("[data-stack-panel]");
   const visible = [...panels].find((panel) => getComputedStyle(panel).display !== "none");
-  return visible?.querySelector("code")?.textContent?.trim() ?? "";
+  const text = visible?.querySelector("code")?.textContent ?? "";
+  const install = text.replace(/^\s+/, "").split(/\n\n/, 1)[0] ?? "";
+  return install.replace(/^[ \t]+/, "");
 }
 
 export function mountHomeStart(root: ParentNode = document): void {
