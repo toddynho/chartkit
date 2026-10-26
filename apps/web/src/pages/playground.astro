@@ -1,0 +1,26 @@
+---
+import Base from "../layouts/Base.astro";
+
+const description = "The ChartKit playground is the examples editor. Shared spec links open there.";
+---
+
+<Base title="Playground" description={description} tone="light">
+  <meta slot="head" name="robots" content="noindex" />
+  <script slot="head" is:inline>
+    location.replace("/examples" + location.hash);
+  </script>
+  <div class="wrap surface">
+    <header class="hero">
+      <p class="kicker">Playground</p>
+      <h1>Playground</h1>
+      <p class="lede">
+        The editor lives on Examples. A shared spec in the link hash opens there.
+        <a id="playground-next" href="/examples">Open the editor</a>.
+      </p>
+    </header>
+  </div>
+</Base>
+<script is:inline>
+  const link = document.getElementById("playground-next");
+  if (link) link.setAttribute("href", "/examples" + location.hash);
+</script>
