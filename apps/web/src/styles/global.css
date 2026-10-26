@@ -239,39 +239,15 @@ code {
   gap: 2px;
 }
 
-.gh-star {
-  display: inline-flex;
-  align-items: stretch;
-  height: 26px;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  border-radius: 6px;
-  background: #f6f8fa;
-  color: #1d1d1f;
+.header-end .github-button {
+  color: var(--muted);
   font-size: 12px;
   font-weight: 600;
-  line-height: 1;
+  line-height: 20px;
   text-decoration: none;
-  overflow: hidden;
 }
 
-.gh-star__main,
-.gh-star__count {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 0 8px;
-}
-
-.gh-star__main svg { display: block; width: 14px; height: 14px; max-width: none; }
-
-.gh-star__count {
-  border-left: 1px solid rgba(0, 0, 0, 0.14);
-  background: #fff;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-
-.gh-star:hover { color: #1d1d1f; text-decoration: none; border-color: rgba(0, 0, 0, 0.28); }
+.header-end iframe { display: block; max-width: none; }
 
 .primary a, .icon-btn {
   color: var(--muted);
