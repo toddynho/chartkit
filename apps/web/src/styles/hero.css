@@ -33,13 +33,14 @@
 
 .home-hero h1 {
   margin: 0 auto 14px;
-  max-width: 14em;
-  font-size: clamp(2.35rem, 5.2vw, 3.5rem);
+  max-width: 12em;
+  font-size: clamp(2.2rem, 5vw, 3.35rem);
   font-weight: 600;
-  line-height: 1.05;
+  line-height: 1.08;
   letter-spacing: -0.028em;
-  text-wrap: balance;
 }
+
+.home-hero__line { display: block; }
 
 .home-hero__lede {
   margin: 0 auto 26px;
@@ -1018,7 +1019,7 @@
 }
 
 @media (max-width: 520px) {
-  .home-hero h1 { max-width: 16em; }
+  .home-hero h1 { max-width: none; }
   .home-routes, .home-bands { grid-template-columns: 1fr; padding-inline: 16px; }
 }
 
