@@ -197,6 +197,21 @@
 
 .home-copy:hover { opacity: 0.68; }
 
+.home-copy-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 10px 0 0;
+}
+
+.home-copy-row .home-copy { margin-top: 0; }
+
+.home-copy-status {
+  min-height: 1.2em;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .home-story {
   max-width: 1120px;
   margin: 0 auto;

@@ -13,13 +13,19 @@ import { agentSwitchPrompt } from "../data/agent-prompt";
     </p>
     <FrameworkChips />
     <StackSample />
-    <button type="button" class="home-copy" data-copy-install>Copy install</button>
+    <p class="home-copy-row">
+      <button type="button" class="home-copy" data-copy-install>Copy install</button>
+      <span class="home-copy-status" data-copy-status role="status"></span>
+    </p>
   </article>
   <article class="home-start__card">
     <h2>Tell your agent</h2>
     <p>Paste this when you want the charts switched to ChartKit. The app stays JavaScript.</p>
     <pre class="home-prompt" data-agent-prompt>{agentSwitchPrompt}</pre>
-    <button type="button" class="home-copy" data-copy-prompt>Copy prompt</button>
+    <p class="home-copy-row">
+      <button type="button" class="home-copy" data-copy-prompt>Copy prompt</button>
+      <span class="home-copy-status" data-copy-status role="status"></span>
+    </p>
   </article>
 </section>
 
