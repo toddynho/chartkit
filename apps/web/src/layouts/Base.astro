@@ -22,7 +22,7 @@ const canonical = new URL(path, Astro.site ?? SITE.url).href;
 ---
 
 <!doctype html>
-<html lang="en" class:list={[tone === "light" && "tone-light", docsPage && "is-docs"]}>
+<html lang="en" class:list={["code-theme", tone === "light" && "tone-light", docsPage && "is-docs"]}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

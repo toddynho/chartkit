@@ -11,16 +11,30 @@ interface Props {
   description: string;
   lede?: string;
   href: string;
+  /** Chart-type index: breadcrumb and a compact title, then the gallery grid. */
+  browse?: boolean;
 }
 
-const { title, description, lede, href } = Astro.props;
+const { title, description, lede, href, browse = false } = Astro.props;
 const crumbs = crumbsFor(href);
 ---
 
 <Base tone="light" title={title} description={description}>
+  <script slot="head" is:inline>
+    try {
+      var stored = localStorage.getItem("ck-docs-rail-width");
+      if (stored && /^\d{2,4}$/.test(stored) && matchMedia("(min-width: 1101px)").matches) {
+        var n = Number(stored);
+        var max = Math.max(260, Math.round(window.innerWidth - 248 - 56 - 320));
+        if (n >= 220 && n <= 9999) {
+          document.documentElement.style.setProperty("--docs-rail-width", Math.min(max, Math.max(260, n)) + "px");
+        }
+      }
+    } catch (e) {}
+  </script>
   <div class="docs-frame">
     <DocsNav />
-    <article class="docs-main">
+    <article class:list={["docs-main", browse && "docs-main--browse"]}>
       <div class="docs-top">
         <nav class="breadcrumb" aria-label="Breadcrumb">
           {
@@ -36,14 +50,32 @@ const crumbs = crumbsFor(href);
             ))
           }
         </nav>
-        <FrameworkChips />
+        {browse ? null : <FrameworkChips />}
       </div>
       <h1>{title}</h1>
-      {lede ? <p class="lede"><Prose text={lede} /></p> : null}
+      {!browse && lede ? <p class="lede"><Prose text={lede} /></p> : null}
       <slot />
     </article>
-    <aside class="docs-rail" aria-label="Response">
+    <aside class="docs-rail" id="docs-rail" aria-label="Response">
+      <div
+        class="docs-splitter"
+        id="docs-rail-split"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize response column"
+        aria-controls="docs-rail"
+        aria-valuemin="260"
+        aria-valuemax="9999"
+        aria-valuenow="380"
+        tabindex="0"
+      ></div>
       <slot name="rail" />
     </aside>
   </div>
 </Base>
+
+<script>
+  import { mountDocsSplit } from "../scripts/docs-split";
+
+  mountDocsSplit();
+</script>

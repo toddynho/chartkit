@@ -1,80 +1,116 @@
 ---
-import { chartTypes } from "../../../data/chart-types";
-import { chartDocs } from "../../../data/docs-catalog";
+import { chartByType, chartTypes } from "../../../data/chart-types";
+import { chartDocs, chartPage } from "../../../data/docs-catalog";
+import { galleryTileSvg } from "../../../data/hero-slides";
+import { docsSpecForType } from "../../../data/live-specs";
+import { loadMaps } from "../../../lib/batch3";
 import Docs from "../../../layouts/Docs.astro";
 
 const families = ["Core", "Statistical", "Planning"] as const;
-const inNav = new Set(chartDocs.map((chart) => chart.type));
-const library = chartTypes.filter((chart) => !inNav.has(chart.type));
-const description = "ChartKit chart types. Core, Statistical, and Planning are in the left nav. Other production URLs stay reachable here.";
+const inCatalog = new Set(chartDocs.map((chart) => chart.type));
+const maps = loadMaps();
+
+function editHref(spec: unknown): string {
+  return `/examples#${encodeURIComponent(JSON.stringify(spec))}`;
+}
+
+function tile(type: string, title: string) {
+  const svg = galleryTileSvg(type);
+  if (!svg.includes("<svg") || svg.includes("ck-chart-error")) {
+    throw new Error(`Chart types could not paint ${type}`);
+  }
+  const summary = chartByType(type)?.summary ?? chartPage(type).lede;
+  return {
+    id: type,
+    title,
+    summary,
+    svg,
+    href: `/docs/charts/${type}`,
+    edit: editHref(docsSpecForType(type)),
+  };
+}
+
+const groups = [
+  ...families.map((family) => ({
+    id: family.toLowerCase(),
+    family,
+    note: "",
+    charts: chartDocs.filter((chart) => chart.family === family).map((chart) => tile(chart.type, chart.label)),
+  })),
+  {
+    id: "library",
+    family: "Library",
+    note: "",
+    charts: chartTypes.filter((chart) => !inCatalog.has(chart.type)).map((chart) => tile(chart.type, chart.title)),
+  },
+  {
+    id: "maps",
+    family: "Maps",
+    note: "Choropleth and point maps. No tile layer, and no pan or zoom. Atlases ship in the geo package. They are not part of @chartkitdev/core.",
+    charts: [
+      {
+        id: "map-world",
+        title: "World choropleth",
+        summary: "Renewable share of electricity. Sequential scale, hatched where a country has no row.",
+        svg: maps.world.svg,
+        href: editHref(maps.world.spec),
+        edit: editHref(maps.world.spec),
+      },
+      {
+        id: "map-us",
+        title: "United States",
+        summary: "Population change, 2020–2023. Red is a loss, blue is a gain.",
+        svg: maps.us.svg,
+        href: editHref(maps.us.spec),
+        edit: editHref(maps.us.spec),
+      },
+      {
+        id: "map-cities",
+        title: "Cities",
+        summary: "Largest urban areas. Bubble area is population, in millions.",
+        svg: maps.cities.svg,
+        href: editHref(maps.cities.spec),
+        edit: editHref(maps.cities.spec),
+      },
+    ],
+  },
+];
+
+const count = groups.reduce((total, group) => total + group.charts.length, 0);
+const description = `${count} ChartKit charts. Open a preview for the doc, or edit the same spec as Gallery.`;
 ---
 
-<Docs
-  title="Chart types"
-  description={description}
-  lede="Each type has an extensionless page under /docs/charts/. The left nav lists Core, Statistical, and Planning. Other production URLs stay under Library."
-  href="/docs/charts"
->
+<Docs browse title="Chart types" description={description} href="/docs/charts">
   {
-    families.map((family) => (
-      <section>
-        <h2>{family}</h2>
-        <ul class="type-list">
-          {chartDocs
-            .filter((chart) => chart.family === family)
-            .map((chart) => (
-              <li>
-                <a href={`/docs/charts/${chart.type}`}>
-                  <strong>{chart.label}</strong>
-                  <span>{chart.lede}</span>
+    groups.map((group) => (
+      <section class="gallery-family" id={group.id} aria-labelledby={`docs-charts-${group.id}`}>
+        <h2 id={`docs-charts-${group.id}`}>
+          {group.family}
+          <span> · {group.charts.length}</span>
+        </h2>
+        {group.note ? <p class="gallery-note">{group.note}</p> : null}
+        <div class="gallery-grid">
+          {group.charts.map((chart) =>
+            chart.href === chart.edit ? (
+              <a class="card" id={chart.id} href={chart.href}>
+                <span class="gallery-chart" aria-hidden="true" set:html={chart.svg} />
+                <h3>{chart.title}</h3>
+                <p>{chart.summary}</p>
+                <span class="gallery-edit">Edit spec</span>
+              </a>
+            ) : (
+              <article class="card docs-type" id={chart.id}>
+                <a class="docs-type__open" href={chart.href}>
+                  <span class="gallery-chart" aria-hidden="true" set:html={chart.svg} />
+                  <h3>{chart.title}</h3>
+                  <p>{chart.summary}</p>
                 </a>
-              </li>
-            ))}
-        </ul>
+                <a class="gallery-edit" href={chart.edit}>Edit spec</a>
+              </article>
+            ),
+          )}
+        </div>
       </section>
     ))
   }
-  <section>
-    <h2>Library</h2>
-    <p>These production URLs are real pages. They are not a fourth group in the left nav.</p>
-    <ul class="type-list">
-      {
-        library.map((chart) => (
-          <li>
-            <a href={`/docs/charts/${chart.type}`}>
-              <strong>{chart.title}</strong>
-              <span>{chart.summary}</span>
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
-  <section id="maps">
-    <h2>Maps</h2>
-    <p>
-      Choropleth and point maps are painted with <code>@chartkitdev/geo</code>. They are not core schema types. Open one in
-      the gallery to edit the spec. There is no tile layer.
-    </p>
-    <ul class="type-list">
-      <li>
-        <a href="/gallery#map-world">
-          <strong>World choropleth</strong>
-          <span>Renewable share of electricity.</span>
-        </a>
-      </li>
-      <li>
-        <a href="/gallery#map-us">
-          <strong>United States</strong>
-          <span>Population change, 2020–2023.</span>
-        </a>
-      </li>
-      <li>
-        <a href="/gallery#map-cities">
-          <strong>Cities</strong>
-          <span>Largest urban areas.</span>
-        </a>
-      </li>
-    </ul>
-  </section>
 </Docs>
