@@ -23,8 +23,8 @@ const crumbs = crumbsFor(href);
       var stored = localStorage.getItem("ck-docs-rail-width");
       if (stored && /^\d{2,4}$/.test(stored) && matchMedia("(min-width: 1101px)").matches) {
         var n = Number(stored);
-        var max = Math.max(260, Math.min(760, Math.round(window.innerWidth - 624)));
-        if (n >= 220 && n <= 960) {
+        var max = Math.max(260, Math.round(window.innerWidth - 248 - 56 - 320));
+        if (n >= 220 && n <= 9999) {
           document.documentElement.style.setProperty("--docs-rail-width", Math.min(max, Math.max(260, n)) + "px");
         }
       }
@@ -63,7 +63,7 @@ const crumbs = crumbsFor(href);
         aria-label="Resize response column"
         aria-controls="docs-rail"
         aria-valuemin="260"
-        aria-valuemax="760"
+        aria-valuemax="9999"
         aria-valuenow="380"
         tabindex="0"
       ></div>

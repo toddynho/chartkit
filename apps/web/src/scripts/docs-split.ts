@@ -6,7 +6,10 @@
 
 const KEY = "ck-docs-rail-width";
 const MIN = 260;
-const MAX_CAP = 760;
+/** Keep the article readable. There is no upper cap beyond this. */
+const CENTER_MIN = 320;
+const SIDEBAR = 248;
+const GUTTERS = 56;
 const WIDE = "(min-width: 1101px)";
 
 function readStored(): number | null {
@@ -14,7 +17,7 @@ function readStored(): number | null {
     const raw = localStorage.getItem(KEY);
     if (!raw || !/^\d{2,4}$/.test(raw)) return null;
     const value = Number(raw);
-    return value >= 220 && value <= 960 ? value : null;
+    return value >= 220 && value <= 9999 ? value : null;
   } catch {
     return null;
   }
@@ -43,7 +46,7 @@ export function mountDocsSplit(): void {
 
   const limits = () => {
     const frame = rail.parentElement?.getBoundingClientRect().width ?? window.innerWidth;
-    const max = Math.max(MIN, Math.min(MAX_CAP, Math.round(frame - 248 - 56 - 320)));
+    const max = Math.max(MIN, Math.round(frame - SIDEBAR - GUTTERS - CENTER_MIN));
     return { min: MIN, max };
   };
 

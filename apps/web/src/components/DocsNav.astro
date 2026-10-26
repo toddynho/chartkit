@@ -48,6 +48,7 @@ function familyOpen(label: string): boolean {
 </button>
 <div class="docs-backdrop" id="docs-backdrop" hidden></div>
 <aside class="docs-sidebar" id="docs-sidebar" aria-label="Documentation">
+  <div class="docs-sidebar__sticky">
   <div class="docs-tabs" role="tablist" aria-label="Doc sections">
     {
       segments.map((group) => (
@@ -138,6 +139,7 @@ function familyOpen(label: string): boolean {
       </div>
     ) : null
   }
+  </div>
 </aside>
 
 <script>

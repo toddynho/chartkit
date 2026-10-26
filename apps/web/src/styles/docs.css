@@ -16,15 +16,26 @@
 .docs-menu { display: none; grid-column: 1 / -1; }
 
 .docs-sidebar {
-  position: sticky;
-  top: var(--header);
+  align-self: stretch;
+  position: relative;
   z-index: 1;
   isolation: isolate;
+  min-height: calc(100vh - var(--header));
+  margin-top: -8px;
+  border-right: 1px solid rgba(55, 53, 47, 0.08);
+  background: var(--bg);
+}
+
+@media (min-width: 1101px) {
+  .docs-sidebar { margin-bottom: -72px; }
+}
+
+.docs-sidebar__sticky {
+  position: sticky;
+  top: var(--header);
   height: calc(100vh - var(--header));
   overflow: auto;
   padding: 22px 12px 32px 4px;
-  border-right: 1px solid var(--line);
-  background: rgba(245, 245, 247, 0.55);
 }
 
 .docs-tabs {
@@ -35,9 +46,9 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 2px;
   margin: 0 0 12px;
-  padding: 3px;
-  background: #eceae6;
-  border-radius: 10px;
+  padding: 2px;
+  background: linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05)), var(--bg);
+  border-radius: 9px;
 }
 
 .docs-tabs button {
@@ -144,7 +155,7 @@
   z-index: 4;
   margin: 0 0 16px;
   padding: 2px 0 10px;
-  background: #fff;
+  background: var(--bg);
 }
 
 .docs-top .breadcrumb { margin-bottom: 8px; }
@@ -152,12 +163,12 @@
 .stack-chips {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 2px;
   margin: 0;
-  padding: 3px;
-  background: #f3f1ec;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 12px;
+  padding: 2px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 0;
+  border-radius: 10px;
 }
 
 .stack-chip {
@@ -179,7 +190,8 @@
 }
 
 .stack-chip__icon { display: flex; width: 16px; height: 16px; }
-.stack-chip__icon svg { width: 16px; height: 16px; }
+.stack-chip__icon img,
+.stack-chip__icon svg { width: 16px; height: 16px; display: block; }
 .stack-chip__label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 
 .stack-chip:hover { color: #1d1d1f; background: rgba(0, 0, 0, 0.03); }
@@ -749,10 +761,18 @@ html.is-rail-drag * {
     bottom: 0;
     width: min(300px, 88vw);
     height: auto;
+    min-height: 0;
+    margin: 0;
+    overflow: auto;
     transform: translateX(-105%);
     background: #f5f5f7;
     border-right: 1px solid var(--line);
     transition: transform 320ms cubic-bezier(0, 0, 0.5, 1);
+  }
+  .docs-sidebar__sticky {
+    position: static;
+    height: auto;
+    overflow: visible;
     padding: 16px 12px 32px;
   }
   .docs-sidebar.is-open { transform: none; }
