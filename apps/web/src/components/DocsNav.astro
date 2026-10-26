@@ -1,23 +1,26 @@
 ---
-import { activeDocsHref, chartDocs, docsNav, isAgentPath } from "../data/docs-catalog";
+import { chartIcon, mapIcon } from "../data/chart-icons";
+import { activeDocsHref, docsNav, isAgentPath } from "../data/docs-catalog";
 import { canonicalPath } from "../data/site";
 
 const path = canonicalPath(Astro.url.pathname);
 const current = activeDocsHref(path);
-const chartType = path.startsWith("/docs/charts/") ? path.slice("/docs/charts/".length) : "";
-const currentFamily = chartDocs.find((chart) => chart.type === chartType)?.family ?? "";
+const segments = docsNav.filter((group) => group.label !== "Charts");
+const charts = docsNav.find((group) => group.label === "Charts");
+const currentFamily = charts?.blocks.find((block) => block.items.some((item) => item.href === path))?.label ?? "";
 
 function sectionFor(): string {
-  if (path === "/docs/charts" || path.startsWith("/docs/charts/")) return "Charts";
-  for (const group of docsNav) {
+  if (path === "/docs/charts" || path.startsWith("/docs/charts/")) return "";
+  for (const group of segments) {
     for (const block of group.blocks) {
       if (block.items.some((item) => selected(item.href))) return group.label;
     }
   }
-  return "Start";
+  return "";
 }
 
 const activeSection = sectionFor();
+const openSegment = activeSection || "Start";
 
 function selected(href: string): boolean {
   if (current === href || path === href) return true;
@@ -25,14 +28,15 @@ function selected(href: string): boolean {
   return false;
 }
 
-function mark(type: string): "line" | "bar" | "ring" | "grid" | "dot" {
-  if (type === "line" || type === "area" || type === "sparkline" || type === "mini-area" || type === "stacked-area") {
-    return "line";
-  }
-  if (type === "bar" || type === "histogram" || type === "waterfall" || type === "funnel" || type === "bullet") return "bar";
-  if (type === "donut" || type === "pie" || type === "gauge" || type === "progress-ring" || type === "radar") return "ring";
-  if (type === "heatmap" || type === "treemap") return "grid";
-  return "dot";
+function glyphFor(href: string): string {
+  if (href.startsWith("/docs/charts/")) return chartIcon(href.slice("/docs/charts/".length));
+  if (href.startsWith("/gallery#map")) return mapIcon;
+  return "";
+}
+
+function familyOpen(label: string): boolean {
+  if (currentFamily) return label === currentFamily;
+  return label === "Core";
 }
 ---
 
@@ -44,15 +48,15 @@ function mark(type: string): "line" | "bar" | "ring" | "grid" | "dot" {
 </button>
 <div class="docs-backdrop" id="docs-backdrop" hidden></div>
 <aside class="docs-sidebar" id="docs-sidebar" aria-label="Documentation">
-  <div class="docs-tabs" role="tablist" aria-label="Sections">
+  <div class="docs-tabs" role="tablist" aria-label="Doc sections">
     {
-      docsNav.map((group) => (
+      segments.map((group) => (
         <button
           type="button"
           role="tab"
           id={`docs-tab-${group.label}`}
           aria-controls={`docs-panel-${group.label}`}
-          aria-selected={group.label === activeSection ? "true" : "false"}
+          aria-selected={group.label === openSegment ? "true" : "false"}
           data-docs-section={group.label}
         >
           {group.label}
@@ -61,76 +65,78 @@ function mark(type: string): "line" | "bar" | "ring" | "grid" | "dot" {
     }
   </div>
   {
-    docsNav.map((group) => (
+    segments.map((group) => (
       <div
-        class="side-section"
+        class="side-section side-segment"
         id={`docs-panel-${group.label}`}
         role="tabpanel"
         aria-labelledby={`docs-tab-${group.label}`}
         data-docs-panel={group.label}
-        hidden={group.label !== activeSection}
+        hidden={group.label !== openSegment}
       >
-        {group.label === "Charts" ? (
-          <div class="side-charts">
-            <label class="side-search">
-              <span class="visually-hidden">Find a chart type</span>
-              <input type="search" placeholder="Find a chart" data-chart-search autocomplete="off" />
-            </label>
-            {group.blocks.map((block) => (
-              <details class="side-fold" data-chart-fold data-open-default={block.label === currentFamily ? "1" : "0"} open={block.label === currentFamily}>
-                <summary>
-                  {block.label}
-                  <span class="side-count">{block.items.length}</span>
-                </summary>
-                <ul class="side-nav">
-                  {block.items.map((item) => {
-                    const type = item.href.startsWith("/docs/charts/") ? item.href.slice("/docs/charts/".length) : "";
-                    return (
-                    <li data-chart-item data-label={item.label.toLowerCase()}>
-                      <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class={selected(item.href) ? "is-active" : undefined}>
-                        {type ? <span class:list={["type-mark", `type-mark--${mark(type)}`]} aria-hidden="true"></span> : null}
-                        {item.label}
-                      </a>
-                    </li>
-                    );
-                  })}
-                </ul>
-              </details>
-            ))}
-            <p class="side-empty" data-chart-empty hidden>No chart type</p>
-          </div>
-        ) : (
-          group.blocks.map((block) =>
-            block.label === "For agents" ? (
-              <details class="side-fold" open={isAgentPath(path)}>
-                <summary>{block.label}</summary>
-                <ul class="side-nav side-nav--compact">
-                  {block.items.map((item) => (
-                    <li>
-                      <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class={selected(item.href) ? "is-active" : undefined}>
-                        {item.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            ) : (
-              <ul class:list={["side-nav", group.label === "Lookup" && "side-nav--compact"]}>
+        {group.blocks.map((block) =>
+          block.label === "For agents" ? (
+            <details class="side-fold" open={isAgentPath(path)}>
+              <summary>{block.label}</summary>
+              <ul class="side-nav side-nav--compact">
                 {block.items.map((item) => (
                   <li>
-                    <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class:list={[selected(item.href) && "is-active", item.quiet && "is-quiet"]}>
-                      {item.quiet ? <span class="side-also">Also</span> : null}
+                    <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class={selected(item.href) ? "is-active" : undefined}>
                       {item.label}
-                      {item.hint ? <span class="side-hint">{item.hint}</span> : null}
                     </a>
                   </li>
                 ))}
               </ul>
-            ),
-          )
+            </details>
+          ) : (
+            <ul class:list={["side-nav", group.label === "Lookup" && "side-nav--compact"]}>
+              {block.items.map((item) => (
+                <li>
+                  <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class:list={[selected(item.href) && "is-active", item.quiet && "is-quiet"]}>
+                    {item.quiet ? <span class="side-also">Also</span> : null}
+                    {item.label}
+                    {item.hint ? <span class="side-hint">{item.hint}</span> : null}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ),
         )}
       </div>
     ))
+  }
+  {
+    charts ? (
+      <div class="side-charts" aria-labelledby="docs-charts-label">
+        <span class="side-section__label" id="docs-charts-label">Charts</span>
+        <label class="side-search">
+          <span class="visually-hidden">Find a chart type</span>
+          <input type="search" placeholder="Find a chart" data-chart-search autocomplete="off" />
+        </label>
+        {charts.blocks.map((block) => (
+          <details class="side-fold" data-chart-fold data-open-default={familyOpen(block.label) ? "1" : "0"} open={familyOpen(block.label)}>
+            <summary>
+              {block.label}
+              <span class="side-count">{block.items.length}</span>
+            </summary>
+            <ul class="side-nav">
+              {block.items.map((item) => {
+                const glyph = glyphFor(item.href);
+                return (
+                  <li data-chart-item data-label={item.label.toLowerCase()}>
+                    <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class={selected(item.href) ? "is-active" : undefined}>
+                      {glyph ? <svg class="type-icon" viewBox="0 0 24 20" fill="none" aria-hidden="true" set:html={glyph} /> : null}
+                      {item.label}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </details>
+        ))}
+        <p class="side-empty" data-chart-empty hidden>No chart type</p>
+      </div>
+    ) : null
   }
 </aside>
 
@@ -140,7 +146,7 @@ function mark(type: string): "line" | "bar" | "ring" | "grid" | "dot" {
   mountStackChips();
 
   const sidebar = document.getElementById("docs-sidebar");
-  const sectionTabs = sidebar?.querySelectorAll<HTMLButtonElement>("[data-docs-section]") ?? [];
+  const sectionTabs = [...(sidebar?.querySelectorAll<HTMLButtonElement>("[data-docs-section]") ?? [])];
   const sectionPanels = sidebar?.querySelectorAll<HTMLElement>("[data-docs-panel]") ?? [];
   const showSection = (name: string) => {
     sectionTabs.forEach((tab) => {
@@ -150,9 +156,18 @@ function mark(type: string): "line" | "bar" | "ring" | "grid" | "dot" {
       panel.hidden = panel.dataset.docsPanel !== name;
     });
   };
-  sectionTabs.forEach((tab) => {
+  sectionTabs.forEach((tab, index) => {
     tab.addEventListener("click", () => {
       const name = tab.dataset.docsSection;
+      if (name) showSection(name);
+    });
+    tab.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+      event.preventDefault();
+      const delta = event.key === "ArrowRight" ? 1 : -1;
+      const next = sectionTabs[(index + delta + sectionTabs.length) % sectionTabs.length];
+      next?.focus();
+      const name = next?.dataset.docsSection;
       if (name) showSection(name);
     });
   });

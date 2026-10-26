@@ -1,6 +1,6 @@
 /**
  * Lightweight tokenizer for editable JSON and for static blocks Shiki did not paint.
- * Token colors live in global.css so light pages and docs dark stay calm.
+ * Token colors are `--ck-code-*` on `html.code-theme` in global.css.
  */
 
 function escapeHtml(value: string): string {
