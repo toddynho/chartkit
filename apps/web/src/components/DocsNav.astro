@@ -1,9 +1,39 @@
 ---
-import { activeDocsHref, docsNav } from "../data/docs-catalog";
+import { activeDocsHref, chartDocs, docsNav, isAgentPath } from "../data/docs-catalog";
 import { canonicalPath } from "../data/site";
 
 const path = canonicalPath(Astro.url.pathname);
 const current = activeDocsHref(path);
+const chartType = path.startsWith("/docs/charts/") ? path.slice("/docs/charts/".length) : "";
+const currentFamily = chartDocs.find((chart) => chart.type === chartType)?.family ?? "";
+
+function sectionFor(): string {
+  if (path === "/docs/charts" || path.startsWith("/docs/charts/")) return "Charts";
+  for (const group of docsNav) {
+    for (const block of group.blocks) {
+      if (block.items.some((item) => selected(item.href))) return group.label;
+    }
+  }
+  return "Start";
+}
+
+const activeSection = sectionFor();
+
+function selected(href: string): boolean {
+  if (current === href || path === href) return true;
+  if (href === "/docs/migrate" && path.startsWith("/docs/migrate/")) return true;
+  return false;
+}
+
+function mark(type: string): "line" | "bar" | "ring" | "grid" | "dot" {
+  if (type === "line" || type === "area" || type === "sparkline" || type === "mini-area" || type === "stacked-area") {
+    return "line";
+  }
+  if (type === "bar" || type === "histogram" || type === "waterfall" || type === "funnel" || type === "bullet") return "bar";
+  if (type === "donut" || type === "pie" || type === "gauge" || type === "progress-ring" || type === "radar") return "ring";
+  if (type === "heatmap" || type === "treemap") return "grid";
+  return "dot";
+}
 ---
 
 <button class="docs-menu" id="docs-menu" type="button" aria-expanded="false" aria-controls="docs-sidebar">
@@ -14,37 +44,118 @@ const current = activeDocsHref(path);
 </button>
 <div class="docs-backdrop" id="docs-backdrop" hidden></div>
 <aside class="docs-sidebar" id="docs-sidebar" aria-label="Documentation">
+  <div class="docs-tabs" role="tablist" aria-label="Sections">
+    {
+      docsNav.map((group) => (
+        <button
+          type="button"
+          role="tab"
+          id={`docs-tab-${group.label}`}
+          aria-controls={`docs-panel-${group.label}`}
+          aria-selected={group.label === activeSection ? "true" : "false"}
+          data-docs-section={group.label}
+        >
+          {group.label}
+        </button>
+      ))
+    }
+  </div>
   {
     docsNav.map((group) => (
-      <div class="side-section">
-        <span class="side-section__label">{group.label}</span>
-        {group.blocks.map((block) => (
-          <div>
-            {block.label ? <span class="side-sub">{block.label}</span> : null}
-            <ul class="side-nav">
-              {block.items.map((item) => (
-                <li>
-                  <a href={item.href} aria-current={current === item.href ? "page" : undefined} class={current === item.href ? "is-active" : undefined}>
-                    {item.label}
-                    {item.hint ? <span class="side-hint">{item.hint}</span> : null}
-                  </a>
-                </li>
-              ))}
-            </ul>
+      <div
+        class="side-section"
+        id={`docs-panel-${group.label}`}
+        role="tabpanel"
+        aria-labelledby={`docs-tab-${group.label}`}
+        data-docs-panel={group.label}
+        hidden={group.label !== activeSection}
+      >
+        {group.label === "Charts" ? (
+          <div class="side-charts">
+            <label class="side-search">
+              <span class="visually-hidden">Find a chart type</span>
+              <input type="search" placeholder="Find a chart" data-chart-search autocomplete="off" />
+            </label>
+            {group.blocks.map((block) => (
+              <details class="side-fold" data-chart-fold data-open-default={block.label === currentFamily ? "1" : "0"} open={block.label === currentFamily}>
+                <summary>
+                  {block.label}
+                  <span class="side-count">{block.items.length}</span>
+                </summary>
+                <ul class="side-nav">
+                  {block.items.map((item) => {
+                    const type = item.href.startsWith("/docs/charts/") ? item.href.slice("/docs/charts/".length) : "";
+                    return (
+                    <li data-chart-item data-label={item.label.toLowerCase()}>
+                      <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class={selected(item.href) ? "is-active" : undefined}>
+                        {type ? <span class:list={["type-mark", `type-mark--${mark(type)}`]} aria-hidden="true"></span> : null}
+                        {item.label}
+                      </a>
+                    </li>
+                    );
+                  })}
+                </ul>
+              </details>
+            ))}
+            <p class="side-empty" data-chart-empty hidden>No chart type</p>
           </div>
-        ))}
+        ) : (
+          group.blocks.map((block) =>
+            block.label === "For agents" ? (
+              <details class="side-fold" open={isAgentPath(path)}>
+                <summary>{block.label}</summary>
+                <ul class="side-nav side-nav--compact">
+                  {block.items.map((item) => (
+                    <li>
+                      <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class={selected(item.href) ? "is-active" : undefined}>
+                        {item.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : (
+              <ul class:list={["side-nav", group.label === "Lookup" && "side-nav--compact"]}>
+                {block.items.map((item) => (
+                  <li>
+                    <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class:list={[selected(item.href) && "is-active", item.quiet && "is-quiet"]}>
+                      {item.quiet ? <span class="side-also">Also</span> : null}
+                      {item.label}
+                      {item.hint ? <span class="side-hint">{item.hint}</span> : null}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ),
+          )
+        )}
       </div>
     ))
   }
-  <div class="side-footer">
-    <a href="/docs/reference/try" aria-current={path === "/docs/reference/try" ? "page" : undefined} class={path === "/docs/reference/try" ? "is-active" : undefined}>Playground</a>
-    <a href="/#gallery">Gallery</a>
-    <a href="/benchmarks">Benchmarks</a>
-  </div>
 </aside>
 
 <script>
+  import { mountStackChips } from "../scripts/stack-pref";
+
+  mountStackChips();
+
   const sidebar = document.getElementById("docs-sidebar");
+  const sectionTabs = sidebar?.querySelectorAll<HTMLButtonElement>("[data-docs-section]") ?? [];
+  const sectionPanels = sidebar?.querySelectorAll<HTMLElement>("[data-docs-panel]") ?? [];
+  const showSection = (name: string) => {
+    sectionTabs.forEach((tab) => {
+      tab.setAttribute("aria-selected", tab.dataset.docsSection === name ? "true" : "false");
+    });
+    sectionPanels.forEach((panel) => {
+      panel.hidden = panel.dataset.docsPanel !== name;
+    });
+  };
+  sectionTabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const name = tab.dataset.docsSection;
+      if (name) showSection(name);
+    });
+  });
   const toggle = document.getElementById("docs-menu");
   const backdrop = document.getElementById("docs-backdrop");
 
@@ -58,4 +169,27 @@ const current = activeDocsHref(path);
   toggle?.addEventListener("click", () => setOpen(!sidebar?.classList.contains("is-open")));
   backdrop?.addEventListener("click", () => setOpen(false));
   sidebar?.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => setOpen(false)));
+
+  const search = sidebar?.querySelector<HTMLInputElement>("[data-chart-search]");
+  const folds = sidebar?.querySelectorAll<HTMLDetailsElement>("[data-chart-fold]") ?? [];
+  const empty = sidebar?.querySelector<HTMLElement>("[data-chart-empty]");
+  search?.addEventListener("input", () => {
+    const query = search.value.trim().toLowerCase();
+    let shown = 0;
+    folds.forEach((fold) => {
+      let any = false;
+      fold.querySelectorAll<HTMLElement>("[data-chart-item]").forEach((item) => {
+        const match = !query || (item.dataset.label ?? "").includes(query);
+        item.hidden = !match;
+        if (match) {
+          any = true;
+          shown += 1;
+        }
+      });
+      fold.hidden = !any;
+      if (query) fold.open = any;
+      else fold.open = fold.dataset.openDefault === "1";
+    });
+    if (empty) empty.hidden = shown > 0;
+  });
 </script>

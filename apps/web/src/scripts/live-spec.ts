@@ -1,5 +1,6 @@
-import { drawChart } from "../lib/paint-chart";
+import { chartType, drawChart } from "../lib/paint-chart";
 import { applyTheme } from "../lib/spec-text";
+import { paintField } from "./color-code";
 
 interface IssueNode {
   code?: string;
@@ -9,6 +10,16 @@ interface IssueNode {
 
 function issuesOf(result: { errors?: IssueNode[] }): string[] {
   return (result.errors ?? []).map((error) => `${error.code ?? ""} ${error.path ?? ""} ${error.message ?? ""}`.trim());
+}
+
+const GEO = new Set(["choropleth", "map-points"]);
+
+async function paintSvg(spec: unknown): Promise<string> {
+  if (GEO.has(chartType(spec))) {
+    const { render } = await import("@chartkitdev/geo");
+    return render(spec);
+  }
+  return drawChart(spec);
 }
 
 function download(blob: Blob, name: string): void {
@@ -30,13 +41,37 @@ export function mountLiveSpec(root: HTMLElement): void {
   const list = root.querySelector<HTMLElement>("[data-issues]");
   const themeSelect = root.querySelector<HTMLSelectElement>("[data-theme]");
   const play = root.querySelector<HTMLAnchorElement>("[data-play]");
+  const docs = root.querySelector<HTMLAnchorElement>("[data-docs]");
   if (!input || !frame || !status) return;
   const preview = frame;
   const statusEl = status;
+  const specInput = input;
+
+  function syncDocs(source: string): void {
+    if (!docs) return;
+    let type = "";
+    try {
+      type = chartType(JSON.parse(source));
+    } catch {
+      type = "";
+    }
+    if (!type || GEO.has(type)) {
+      docs.hidden = true;
+      return;
+    }
+    docs.hidden = false;
+    docs.href = `/docs/charts/${type}`;
+    docs.textContent = `Docs → ${type}`;
+  }
+
+  function syncPaint(): void {
+    paintField(specInput);
+  }
 
   let theme = themeSelect?.value ?? "site";
   let timer = 0;
   let keepStatus = false;
+  let paintGen = 0;
 
   function showIssues(items: string[]): void {
     if (!list) return;
@@ -58,26 +93,33 @@ export function mountLiveSpec(root: HTMLElement): void {
       return;
     }
     const themed = applyTheme(parsed, themeName);
-    try {
-      preview.innerHTML = drawChart(themed);
-      preview.classList.toggle("chart-preset", themeName !== "site" && themeName !== "");
-    } catch (error) {
-      statusEl.textContent = error instanceof Error ? error.message : "Render failed";
-      return;
-    }
-    if (play) play.href = `/playground#${encodeURIComponent(source)}`;
-    if (keepStatus) {
-      keepStatus = false;
-      return;
-    }
-    statusEl.textContent = themeName === "site" ? "Rendered." : `Rendered with the ${themeName} theme.`;
-    showIssues([]);
+    const generation = ++paintGen;
+    void paintSvg(themed)
+      .then((svg) => {
+        if (generation !== paintGen) return;
+        preview.innerHTML = svg;
+        preview.classList.toggle("chart-preset", themeName !== "site" && themeName !== "");
+        if (play) play.href = `/examples#${encodeURIComponent(source)}`;
+        syncDocs(source);
+        if (keepStatus) {
+          keepStatus = false;
+          return;
+        }
+        statusEl.textContent = themeName === "site" ? "Rendered." : `Rendered with the ${themeName} theme.`;
+        showIssues([]);
+      })
+      .catch((error: unknown) => {
+        if (generation !== paintGen) return;
+        statusEl.textContent = error instanceof Error ? error.message : "Render failed";
+      });
   }
 
   input.addEventListener("input", () => {
+    syncPaint();
     window.clearTimeout(timer);
     timer = window.setTimeout(() => draw(input.value, theme), 160);
   });
+  input.addEventListener("scroll", syncPaint);
 
   themeSelect?.addEventListener("change", () => {
     theme = themeSelect.value;
@@ -88,6 +130,7 @@ export function mountLiveSpec(root: HTMLElement): void {
     try {
       const parsed = JSON.parse(decodeURIComponent(window.location.hash.slice(1))) as unknown;
       input.value = JSON.stringify(parsed, null, 2);
+      syncPaint();
       draw(input.value, theme);
     } catch {
       statusEl.textContent = "The link hash is not JSON.";
@@ -103,8 +146,9 @@ export function mountLiveSpec(root: HTMLElement): void {
         statusEl.textContent = error instanceof Error ? error.message : "Invalid JSON";
         return;
       }
-      const { validate } = await import("@chartkitdev/core/validate");
-      const result = validate(parsed);
+      const result = GEO.has(chartType(parsed))
+        ? (await import("@chartkitdev/geo")).validate(parsed)
+        : (await import("@chartkitdev/core/validate")).validate(parsed);
       showIssues(issuesOf(result));
       statusEl.textContent = result.ok ? "Valid." : `${result.errors.length} diagnostic${result.errors.length === 1 ? "" : "s"}.`;
     })();
@@ -123,6 +167,7 @@ export function mountLiveSpec(root: HTMLElement): void {
       const result = repair(parsed);
       keepStatus = true;
       input.value = JSON.stringify(result.spec, null, 2);
+      syncPaint();
       draw(input.value, theme);
       showIssues(issuesOf(result));
       const count = result.applied.length;
@@ -137,7 +182,7 @@ export function mountLiveSpec(root: HTMLElement): void {
   root.querySelector("[data-share]")?.addEventListener("click", () => {
     void (async () => {
       const hash = `#${encodeURIComponent(input.value)}`;
-      const url = `${window.location.origin}/playground${hash}`;
+      const url = `${window.location.origin}/examples${hash}`;
       window.history.replaceState(null, "", hash);
       try {
         await navigator.clipboard.writeText(url);
@@ -176,4 +221,7 @@ export function mountLiveSpec(root: HTMLElement): void {
     };
     image.src = url;
   });
+
+  syncPaint();
+  syncDocs(input.value);
 }

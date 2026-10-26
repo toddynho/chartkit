@@ -285,6 +285,24 @@ const truth: Record<string, Truth> = {
       "polarArea, nightingale, and rose-chart repair to rose.",
     ],
   },
+  sunburst: {
+    summary: "Concentric rings for a hierarchy. Colour follows the top-level branch.",
+    entry: "@chartkitdev/core/charts/sunburst",
+    bundle: "@chartkitdev/core/extra",
+    notes: [
+      "Nested children, encoding.path, or encoding.id with encoding.parent.",
+      "mark.innerRadius is the hole. mark.depth caps the rings.",
+    ],
+  },
+  "bar-list": {
+    summary: "Ranked rows with no axes. A track sits behind the label and the value sits on the right.",
+    entry: "@chartkitdev/core/charts/bar-list",
+    bundle: "@chartkitdev/core/charts/bar-list",
+    notes: [
+      "Not in the line or all bundle. Call renderBarList from @chartkitdev/core/charts/bar-list.",
+      "encoding.x is the label. encoding.y is the value.",
+    ],
+  },
 };
 
 export function withTruth(chart: ChartDoc): ChartDoc {

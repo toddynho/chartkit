@@ -1,0 +1,9 @@
+---
+interface Props {
+  spec?: string;
+}
+
+const { spec } = Astro.props;
+---
+
+{spec ? <a class="chart-edit" href={`/examples#${encodeURIComponent(spec)}`}>Edit</a> : null}

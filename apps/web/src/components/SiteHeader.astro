@@ -1,21 +1,16 @@
 ---
 import { SITE, canonicalPath } from "../data/site";
-import { moreNav, primaryNav } from "../data/nav";
+import { primaryNav } from "../data/nav";
 import BrandLockup from "./BrandLockup.astro";
 
 const path = canonicalPath(Astro.url.pathname);
 const docsHere = path === "/docs" || path.startsWith("/docs/");
-const dashHere = path === "/dashboards" || path.startsWith("/dashboards/");
+const dashHere = path === "/dashboard" || path === "/dashboards" || path.startsWith("/dashboards/");
 
 function mark(href: string): "page" | undefined {
   if (href === "/docs") return docsHere ? "page" : undefined;
   if (href === "/dashboards") return dashHere ? "page" : undefined;
-  if (href === "/showcase" || href === "/features" || href === "/examples") {
-    return path === href || path.startsWith(`${href}/`) ? "page" : undefined;
-  }
-  if (href === "/agents") return path === "/agents" ? "page" : undefined;
-  if (href.startsWith("/#")) return undefined;
-  if (moreNav.some((item) => item.href === href) && (path === href || path.startsWith(`${href}/`))) return "page";
+  if (href === "/examples") return path === "/examples" || path.startsWith("/examples/") ? "page" : undefined;
   return path === href ? "page" : undefined;
 }
 ---
@@ -31,37 +26,18 @@ function mark(href: string): "page" | undefined {
           </a>
         ))
       }
-      <a class="nav-cta" href="/#cloud">Try Cloud API</a>
+      <a class="nav-cta" href="/cloud">Try Cloud</a>
     </nav>
-    <a class="icon-btn" href={SITE.github} aria-label="ChartKit on GitHub">
-      <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true">
-        <path
-          fill="currentColor"
-          d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-        ></path>
-      </svg>
-    </a>
-    <details class="nav-more">
-      <summary>More</summary>
-      <div class="nav-more__panel">
-        <div class="nav-more__main">
-          {
-            primaryNav.map((item) => (
-              <a href={item.href} aria-current={mark(item.href)}>
-                {item.label}
-              </a>
-            ))
-          }
-        </div>
-        {
-          moreNav.map((item) => (
-            <a href={item.href} aria-current={mark(item.href)}>
-              {item.label}
-            </a>
-          ))
-        }
-      </div>
-    </details>
+    <div class="header-end">
+      <a class="icon-btn" href={SITE.github} aria-label="ChartKit on GitHub">
+        <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+          ></path>
+        </svg>
+      </a>
+    </div>
   </div>
 </header>
 

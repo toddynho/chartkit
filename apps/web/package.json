@@ -29,7 +29,8 @@
     "recharts": "^2.15.4",
     "@fontsource/inter": "^5.3.0",
     "@fontsource/roboto": "^5.2.8",
-    "astro": "^7.4.2"
+    "astro": "^7.4.2",
+    "shiki": "^4.5.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",

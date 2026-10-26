@@ -1,0 +1,40 @@
+---
+import { stacks } from "../data/stacks";
+
+interface Props {
+  heading?: boolean;
+}
+
+const { heading = false } = Astro.props;
+---
+
+<section class:list={["stack-sample", !heading && "stack-sample--quiet"]} aria-label="Install for the selected framework">
+  {
+    heading ? (
+      <>
+        <h2>Install</h2>
+        <p>
+          Install core, then the adapter for the framework chip in the docs nav. That choice is remembered for snippets
+          on this site.
+        </p>
+      </>
+    ) : null
+  }
+  {
+    stacks.map((stack) => (
+      <figure class="code" data-stack-panel={stack.id}>
+        <figcaption>{stack.label}</figcaption>
+        <pre>
+          <code>{`${stack.install}\n\n${stack.snippet}`}</code>
+        </pre>
+      </figure>
+    ))
+  }
+  {
+    heading ? (
+      <p class="note">
+        Also: <a href="/docs/markdown">MD fences</a> take the same spec. Markdown is not a fifth app stack.
+      </p>
+    ) : null
+  }
+</section>

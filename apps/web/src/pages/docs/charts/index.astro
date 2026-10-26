@@ -50,9 +50,31 @@ const description = "ChartKit chart types. Core, Statistical, and Planning are i
       }
     </ul>
   </section>
-  <p slot="rail" class="spec-try__note">
-    Open a chart type to edit its spec. The response rail runs <code>validate()</code>
-    {' '}and <code>render()</code>
-    {' '}from <code>@chartkitdev/core</code>. It does not call Cloud.
-  </p>
+  <section id="maps">
+    <h2>Maps</h2>
+    <p>
+      Choropleth and point maps are painted with <code>@chartkitdev/geo</code>. They are not core schema types. Open one in
+      the gallery to edit the spec. There is no tile layer.
+    </p>
+    <ul class="type-list">
+      <li>
+        <a href="/gallery#map-world">
+          <strong>World choropleth</strong>
+          <span>Renewable share of electricity.</span>
+        </a>
+      </li>
+      <li>
+        <a href="/gallery#map-us">
+          <strong>United States</strong>
+          <span>Population change, 2020–2023.</span>
+        </a>
+      </li>
+      <li>
+        <a href="/gallery#map-cities">
+          <strong>Cities</strong>
+          <span>Largest urban areas.</span>
+        </a>
+      </li>
+    </ul>
+  </section>
 </Docs>

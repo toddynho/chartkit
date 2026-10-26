@@ -2,7 +2,7 @@
 import ChartDoc from "../../../components/ChartDoc.astro";
 import ResponseRail from "../../../components/ResponseRail.astro";
 import { chartTypes } from "../../../data/chart-types";
-import { chartDocs, chartPage, specForChart } from "../../../data/docs-catalog";
+import { chartDocs, chartPage, chipsForChart, specForChart } from "../../../data/docs-catalog";
 import Docs from "../../../layouts/Docs.astro";
 
 export function getStaticPaths() {
@@ -17,5 +17,5 @@ const href = `/docs/charts/${chart.type}`;
 
 <Docs title={chart.title} description={chart.description} lede={chart.lede} href={href}>
   <ChartDoc chart={chart} />
-  <ResponseRail slot="rail" spec={spec} />
+  <ResponseRail slot="rail" spec={spec} chips={chipsForChart(chart.type)} />
 </Docs>

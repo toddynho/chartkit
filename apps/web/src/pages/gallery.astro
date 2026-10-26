@@ -1,0 +1,116 @@
+---
+import Base from "../layouts/Base.astro";
+import { chartByType, chartTypes } from "../data/chart-types";
+import { chartDocs, chartPage } from "../data/docs-catalog";
+import { galleryTileSvg } from "../data/hero-slides";
+import { docsSpecForType } from "../data/live-specs";
+import { loadMaps } from "../lib/batch3";
+
+const families = ["Core", "Statistical", "Planning"] as const;
+const inCatalog = new Set(chartDocs.map((chart) => chart.type));
+const maps = loadMaps();
+
+function editHref(spec: unknown): string {
+  return `/examples#${encodeURIComponent(JSON.stringify(spec))}`;
+}
+
+function tile(type: string, title: string) {
+  const svg = galleryTileSvg(type);
+  if (!svg.includes("<svg") || svg.includes("ck-chart-error")) {
+    throw new Error(`Gallery could not paint ${type}`);
+  }
+  const summary = chartByType(type)?.summary ?? chartPage(type).lede;
+  return {
+    id: type,
+    title,
+    summary,
+    svg,
+    href: editHref(docsSpecForType(type)),
+  };
+}
+
+const groups = [
+  ...families.map((family) => ({
+    id: family.toLowerCase(),
+    family,
+    charts: chartDocs.filter((chart) => chart.family === family).map((chart) => tile(chart.type, chart.label)),
+  })),
+  {
+    id: "library",
+    family: "Library",
+    charts: chartTypes.filter((chart) => !inCatalog.has(chart.type)).map((chart) => tile(chart.type, chart.title)),
+  },
+  {
+    id: "maps",
+    family: "Maps",
+    charts: [
+      {
+        id: "map-world",
+        title: "World choropleth",
+        summary: "Renewable share of electricity. Sequential scale, hatched where a country has no row.",
+        svg: maps.world.svg,
+        href: editHref(maps.world.spec),
+        docs: "",
+      },
+      {
+        id: "map-us",
+        title: "United States",
+        summary: "Population change, 2020–2023. Red is a loss, blue is a gain.",
+        svg: maps.us.svg,
+        href: editHref(maps.us.spec),
+        docs: "",
+      },
+      {
+        id: "map-cities",
+        title: "Cities",
+        summary: "Largest urban areas. Bubble area is population, in millions.",
+        svg: maps.cities.svg,
+        href: editHref(maps.cities.spec),
+        docs: "",
+      },
+    ],
+  },
+];
+
+const count = groups.reduce((total, group) => total + group.charts.length, 0);
+const description = `${count} ChartKit charts, including maps. Open a card to edit the spec.`;
+---
+
+<Base tone="light" title="Gallery" description={description}>
+  <div class="wrap">
+    <section class="hero" aria-labelledby="gallery-title">
+      <p class="kicker">Gallery</p>
+      <h1 id="gallery-title">Gallery</h1>
+      <p class="lede">
+        {count} charts. Core, Statistical, Planning, the rest of the library, and maps from <code>@chartkitdev/geo</code>.
+        Open a card to edit the spec in Examples.
+      </p>
+    </section>
+    {
+      groups.map((group) => (
+        <section class="gallery-family" id={group.id} aria-labelledby={`gallery-${group.id}`}>
+          <h2 id={`gallery-${group.id}`}>
+            {group.family}
+            <span> · {group.charts.length}</span>
+          </h2>
+          {group.id === "maps" ? (
+            <p class="gallery-note">
+              Choropleth and point maps. No tile layer, and no pan or zoom. Atlases ship in the geo package. They are not
+              part of <code>@chartkitdev/core</code>.
+            </p>
+          ) : null}
+          <div class="gallery-grid">
+            {group.charts.map((chart) => (
+              <a class="card" id={chart.id} href={chart.href} data-chart={chart.id}>
+                <span class="gallery-chart" aria-hidden="true" set:html={chart.svg} />
+                <h3>{chart.title}</h3>
+                <p>{chart.summary}</p>
+                <span class="gallery-edit">Edit spec</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</Base>

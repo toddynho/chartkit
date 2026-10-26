@@ -1,17 +1,18 @@
 ---
-import { heroSlides, peekSparkline } from "../data/hero-slides";
+import { heroEditHref, heroSlides, peekSparkline } from "../data/hero-slides";
 
 const slides = heroSlides();
 const first = slides[0];
 const peek = peekSparkline();
-const clientSlides = slides.map(({ label, title, kpi, delta, chrome, json, svg }) => ({
-  label,
-  title,
-  kpi,
-  delta,
-  chrome,
-  json,
-  svg,
+const clientSlides = slides.map((slide) => ({
+  label: slide.label,
+  title: slide.title,
+  kpi: slide.kpi,
+  delta: slide.delta,
+  chrome: slide.chrome,
+  json: slide.json,
+  svg: slide.svg,
+  edit: heroEditHref(slide.type),
 }));
 ---
 
@@ -22,10 +23,10 @@ const clientSlides = slides.map(({ label, title, kpi, delta, chrome, json, svg }
     </div>
     <div class="stage__chip">
       <span class="stage__chip-dot" aria-hidden="true"></span>
-      repair() · 21/42 → 42/42
+      No extra model call
     </div>
     <aside class="stage__peek">
-      <span class="stage__peek-label">Sparkline · example</span>
+      <span class="stage__peek-label">Sparkline · example <a class="stage-edit" href={heroEditHref("sparkline")}>Edit</a></span>
       <div set:html={peek} />
     </aside>
     <div class="stage__ground" aria-hidden="true"></div>
@@ -34,17 +35,13 @@ const clientSlides = slides.map(({ label, title, kpi, delta, chrome, json, svg }
         <div class="stage__chrome">
           <div class="stage__dots" aria-hidden="true"><span></span><span></span><span></span></div>
           <div class="stage__chrome-end">
-            <div class="stage-plan" role="group" aria-label="Free Cloud watermark preview">
-              <button type="button" class="is-on" data-plan="free" aria-pressed="true">Free</button>
-              <button type="button" data-plan="pro" aria-pressed="false">Pro</button>
-            </div>
             <span class="stage__chrome-label" id="chrome-label">{first.chrome}</span>
+            <a class="stage-edit" id="stage-edit" href={heroEditHref(first.type)}>Edit spec</a>
           </div>
         </div>
         <div class="stage__body">
           <div class="stage__meta">
             <span class="stage__title" id="chart-title">{first.title}</span>
-            <span class="stage__badge" id="chart-plan">Free · watermarked</span>
           </div>
           <div class="stage__value">
             <span class="stage__value-num" id="chart-kpi">{first.kpi}</span>
@@ -52,9 +49,6 @@ const clientSlides = slides.map(({ label, title, kpi, delta, chrome, json, svg }
           </div>
           <div class="chart-stage">
             <div class="chart-wrap" id="chart-slot" set:html={first.svg} />
-            <div class="stage-wm is-on" id="stage-wm" aria-hidden="true">
-              <span class="stage-wm__mark">chartkit.dev</span>
-            </div>
           </div>
         </div>
       </div>
@@ -89,9 +83,14 @@ const clientSlides = slides.map(({ label, title, kpi, delta, chrome, json, svg }
 </div>
 
 <div class="stage-proof" id="stage-proof">
+  <p class="stage-proof__lead">Built so an agent can ship a chart without another round trip.</p>
   <p>
-    <strong>42/42</strong> first try with the docs<span class="sep" aria-hidden="true"></span><strong>repair()</strong> lifts
-    21/42 → 42/42 with no model call
+    JSON spec in, chart out. <code>validate()</code> and <code>repair()</code> fix the safe mistakes on the spec, with no
+    extra model call.
+  </p>
+  <p class="stage-proof__proof">
+    In one measured run, 42 of 42 specs were valid on the first try with the docs in the prompt. <code>repair()</code>
+    lifted a no-docs run from 21/42 to 42/42.
   </p>
 </div>
 

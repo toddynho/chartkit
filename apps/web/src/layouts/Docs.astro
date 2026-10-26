@@ -2,6 +2,7 @@
 import "../styles/docs.css";
 import Base from "./Base.astro";
 import DocsNav from "../components/DocsNav.astro";
+import FrameworkChips from "../components/FrameworkChips.astro";
 import Prose from "../components/Prose.astro";
 import { crumbsFor } from "../data/docs-catalog";
 
@@ -20,29 +21,28 @@ const crumbs = crumbsFor(href);
   <div class="docs-frame">
     <DocsNav />
     <article class="docs-main">
-      <nav class="breadcrumb" aria-label="Breadcrumb">
-        {
-          crumbs.map((crumb, index) => (
-            <>
-              {index > 0 ? <span class="breadcrumb__sep" aria-hidden="true">/</span> : null}
-              {index === crumbs.length - 1 || !crumb.href ? (
-                <span class={index === crumbs.length - 1 ? "breadcrumb__current" : undefined}>{crumb.label}</span>
-              ) : (
-                <a href={crumb.href}>{crumb.label}</a>
-              )}
-            </>
-          ))
-        }
-      </nav>
+      <div class="docs-top">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          {
+            crumbs.map((crumb, index) => (
+              <>
+                {index > 0 ? <span class="breadcrumb__sep" aria-hidden="true">/</span> : null}
+                {index === crumbs.length - 1 || !crumb.href ? (
+                  <span class={index === crumbs.length - 1 ? "breadcrumb__current" : undefined}>{crumb.label}</span>
+                ) : (
+                  <a href={crumb.href}>{crumb.label}</a>
+                )}
+              </>
+            ))
+          }
+        </nav>
+        <FrameworkChips />
+      </div>
       <h1>{title}</h1>
       {lede ? <p class="lede"><Prose text={lede} /></p> : null}
       <slot />
     </article>
     <aside class="docs-rail" aria-label="Response">
-      <div class="docs-rail__label">
-        <span>Response</span>
-        <span>@chartkitdev/core</span>
-      </div>
       <slot name="rail" />
     </aside>
   </div>

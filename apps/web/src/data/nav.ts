@@ -3,29 +3,12 @@ export type NavItem = {
   label: string;
 };
 
-/** Site header. The docs sidebar lives in `docs-catalog.ts`. */
+/** Lean header. Pricing lives on /cloud#pricing. Compare lives in the footer. */
 export const primaryNav: NavItem[] = [
-  { href: "/docs", label: "Docs" },
-  { href: "/dashboards", label: "Dashboards" },
   { href: "/cloud", label: "Cloud" },
+  { href: "/dashboards", label: "Dashboards" },
   { href: "/agents", label: "Agents" },
-  { href: "/#pricing", label: "Pricing" },
-  { href: "/#gallery", label: "Gallery" },
-];
-
-/** Batch 2 product pages. They live in the header More menu so the bar stays one line. */
-export const moreNav: NavItem[] = [
-  { href: "/showcase", label: "Showcase" },
+  { href: "/gallery", label: "Gallery" },
   { href: "/examples", label: "Examples" },
-  { href: "/features", label: "Features" },
-  { href: "/benchmarks", label: "Benchmarks" },
-  { href: "/playground", label: "Playground" },
-  { href: "/convert", label: "Convert" },
-  { href: "/compare", label: "Compare" },
-  { href: "/maps", label: "Maps" },
-  { href: "/demo", label: "Demo" },
-  { href: "/large", label: "Large data" },
-  { href: "/interaction", label: "Interaction" },
-  { href: "/layouts", label: "Layout" },
-  { href: "/when-to-use", label: "When to use" },
+  { href: "/docs", label: "Docs" },
 ];

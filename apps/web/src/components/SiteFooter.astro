@@ -1,35 +1,89 @@
 ---
-import { SITE } from "../data/site";
 import BrandLockup from "./BrandLockup.astro";
+import { loadCompareIndex } from "../lib/batch3";
+import { SITE } from "../data/site";
+
+const rivals = loadCompareIndex().rivals;
+
+const columns = [
+  {
+    label: "Product",
+    links: [
+      { href: "/cloud", label: "Cloud" },
+      { href: "/cloud#pricing", label: "Pricing" },
+      { href: "/dashboards", label: "Dashboards" },
+      { href: "/examples", label: "Examples" },
+      { href: "/gallery", label: "Gallery" },
+    ],
+  },
+  {
+    label: "Docs",
+    links: [
+      { href: "/docs", label: "Overview" },
+      { href: "/docs/charts", label: "Chart types" },
+      { href: "/docs/spec", label: "Spec" },
+      { href: "/docs/theming", label: "Theming" },
+      { href: "/docs/migrate", label: "Migrate" },
+    ],
+  },
+  {
+    label: "Agents",
+    links: [
+      { href: "/agents", label: "Overview" },
+      { href: "/docs/validate", label: "Validate and repair" },
+      { href: "/llms.txt", label: "llms.txt" },
+      { href: "/docs/mcp", label: "MCP" },
+      { href: "/features", label: "Features" },
+      { href: "/benchmarks", label: "Benchmarks" },
+    ],
+  },
+  {
+    label: "Compare",
+    links: [
+      { href: "/compare", label: "All libraries" },
+      ...rivals.map(({ library }) => ({
+        href: `/compare/${library.id}`,
+        label: `ChartKit vs ${library.name}`,
+      })),
+    ],
+  },
+];
 ---
 
 <footer class="site-footer">
-  <div class="footer-row">
-    <BrandLockup />
-    <nav aria-label="Footer">
-      <a href="/docs">Docs</a>
-      <a href="/dashboards">Dashboards</a>
-      <a href="/showcase">Showcase</a>
-      <a href="/examples">Examples</a>
-      <a href="/features">Features</a>
-      <a href="/benchmarks">Benchmarks</a>
-      <a href="/playground">Playground</a>
-      <a href="/convert">Convert</a>
-      <a href="/compare">Compare</a>
-      <a href="/maps">Maps</a>
-      <a href="/demo">Demo</a>
-      <a href="/large">Large data</a>
-      <a href="/interaction">Interaction</a>
-      <a href="/layouts">Layout</a>
-      <a href="/when-to-use">When to use</a>
-      <a href="/cloud">Cloud</a>
-      <a href="/agents">Agents</a>
-      <a href="/#pricing">Pricing</a>
-      <a href="/#gallery">Gallery</a>
-      <a href={SITE.github}>GitHub</a>
-    </nav>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <BrandLockup />
+      <p class="footer-pitch">Ship the chart, not the chart code.</p>
+    </div>
+    <div class="footer-cols">
+      {
+        columns.map((column) => (
+          <nav aria-label={column.label}>
+            <h2>{column.label}</h2>
+            {column.links.map((link) => (
+              <a href={link.href}>{link.label}</a>
+            ))}
+          </nav>
+        ))
+      }
+    </div>
   </div>
   <p class="legal">
-    ChartKit. MIT license. chartkit.dev still serves the Next.js app while this site is in review.
+    <span>© ChartKit</span>
+    <span aria-hidden="true"> · </span>
+    <span>MIT</span>
+    <span aria-hidden="true"> · </span>
+    <span>{SITE.version}</span>
+    <span aria-hidden="true"> · </span>
+    <a href={SITE.github}>GitHub</a>
+    <span aria-hidden="true"> · </span>
+    <span>Charts by <a href="https://x.com/toddo">Toto</a></span>
   </p>
 </footer>
+
+<script>
+  import { colorizePage } from "../scripts/color-code";
+
+  colorizePage();
+</script>

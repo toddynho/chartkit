@@ -1,5 +1,6 @@
 import type { ValidationResult } from "@chartkitdev/core";
 import { isExtra, render as renderCore } from "@chartkitdev/core/all";
+import { renderBarList } from "@chartkitdev/core/charts/bar-list";
 import { render as renderExtra } from "@chartkitdev/core/extra";
 import { validate } from "@chartkitdev/core/validate";
 import { validatePhase4 } from "@chartkitdev/core/validate/phase4";
@@ -76,7 +77,7 @@ export function paintSpec(input: unknown): RailResult {
       footer: issues.length === 1 ? "1 error from validate()" : `${issues.length} errors from validate()`,
     };
   }
-  const svg = isExtra(type) ? renderExtra(spec) : renderCore(spec);
+  const svg = type === "bar-list" && isRecord(spec) ? (renderBarList(spec) ?? "") : isExtra(type) ? renderExtra(spec) : renderCore(spec);
   const warnings = issuesFrom(checked, "warning");
   return {
     ok: true,

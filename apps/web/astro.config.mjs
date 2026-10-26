@@ -21,7 +21,11 @@ export default defineConfig({
     format: "directory",
   },
   redirects: {
-    "/play": { status: 307, destination: "/playground" },
+    "/play": { status: 307, destination: "/examples" },
+    "/playground": { status: 307, destination: "/examples" },
+    "/demo": { status: 307, destination: "/dashboards" },
+    "/showcase": { status: 307, destination: "/gallery" },
+    "/maps": { status: 307, destination: "/gallery#maps" },
     "/getting-started": { status: 307, destination: "/docs" },
     "/components": { status: 307, destination: "/docs" },
     "/components/line-chart": { status: 307, destination: "/docs/charts/line" },
@@ -43,6 +47,12 @@ export default defineConfig({
     "/themes": { status: 307, destination: "/docs/theming" },
     "/about": { status: 307, destination: "/agents" },
     "/docs/agents/mcp": { status: 307, destination: "/docs/mcp" },
+    "/docs/react": { status: 307, destination: "/docs?framework=react" },
+    "/docs/vue": { status: 307, destination: "/docs?framework=vue" },
+    "/docs/svelte": { status: 307, destination: "/docs?framework=svelte" },
+    "/docs/vanilla": { status: 307, destination: "/docs?framework=vanilla" },
+    "/dashboard": { status: 307, destination: "/dashboards" },
+    "/pricing": { status: 307, destination: "/cloud#pricing" },
   },
   vite: {
     resolve: {

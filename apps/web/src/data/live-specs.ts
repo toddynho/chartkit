@@ -24,6 +24,7 @@ import radialBar from "../../../../packages/core/examples/34-radial-bar.json";
 import rose from "../../../../packages/core/examples/35-rose.json";
 import sankey from "../../../../packages/core/examples/21-sankey.json";
 import scatter from "../../../../packages/core/examples/06-scatter.json";
+import sunburst from "../../../../packages/core/examples/33-sunburst.json";
 import sparkline from "../../../../packages/core/examples/12-sparkline.json";
 import spike from "../../../../packages/core/examples/14-spike.json";
 import stackedArea from "../../../../packages/core/examples/05-stacked-area.json";
@@ -31,6 +32,7 @@ import timeline from "../../../../packages/core/examples/25-timeline.json";
 import treemap from "../../../../packages/core/examples/20-treemap.json";
 import venn from "../../../../packages/core/examples/27-venn.json";
 import waterfall from "../../../../packages/core/examples/23-waterfall.json";
+import { densifyDemo } from "./dense-series";
 
 export type LiveSpec = Record<string, unknown>;
 
@@ -80,6 +82,20 @@ const byType: Record<string, LiveSpec> = {
   journey: dress(journey),
   "radial-bar": dress(radialBar),
   rose: dress(rose),
+  sunburst: dress(sunburst),
+  "bar-list": {
+    version: "1",
+    type: "bar-list",
+    theme: "soft",
+    size: railSize,
+    data: [
+      { page: "/pricing", visits: 1840 },
+      { page: "/docs", visits: 1420 },
+      { page: "/gallery", visits: 980 },
+    ],
+    encoding: { x: "page", y: { field: "visits", format: "compact" } },
+    a11y: { alt: "Pricing leads the page list." },
+  },
 };
 
 /** Filled line. There is no `type: "area"`. */
@@ -93,8 +109,13 @@ export function specForType(type: string): LiveSpec {
   return byType[type] ?? byType.line;
 }
 
+/** Docs try-it copy. Core examples stay short; this clone is the dense series. */
+export function docsSpecForType(type: string): LiveSpec {
+  return densifyDemo(specForType(type));
+}
+
 export const trySamples = {
-  line: byType.line,
-  bar: byType.bar,
-  donut: byType.donut,
+  line: docsSpecForType("line"),
+  bar: docsSpecForType("bar"),
+  donut: docsSpecForType("donut"),
 } as const;
