@@ -359,20 +359,22 @@ function paintHomeStory(): void {
       alt: `Even x, initial render, round ${benchmarks.ROUND}, ${benchmarks.MEASURED}. ${pairs.join(". ")}. ChartKit is ahead in each of these four cells. ${sampled.join(", ")} use sampling auto. 1,000 points stay complete.`,
     },
   };
+  const { title: _bundleTitle, ...bundleRest } = benchmarks.raceSpec(benchmarks.bundleRace);
   const bundleSpec = {
-    ...benchmarks.raceSpec(benchmarks.bundleRace),
+    ...bundleRest,
     theme: "soft",
     axes: { y: { title: "KB gzip" } },
     size: { width: 640, height: 320 },
   };
+  const { title: _ssrTitle, ...ssrRest } = benchmarks.raceSpec(benchmarks.ssrRace);
   const ssrSpec = {
-    ...benchmarks.raceSpec(benchmarks.ssrRace),
+    ...ssrRest,
     theme: "soft",
     axes: { y: { title: "Milliseconds" } },
     size: { width: 640, height: 320 },
   };
-  delete bundleSpec.title;
-  delete ssrSpec.title;
+  void _bundleTitle;
+  void _ssrTitle;
   const painted = (id: string, title: string, caption: string, spec: Record<string, unknown>) => ({
     id,
     title,
