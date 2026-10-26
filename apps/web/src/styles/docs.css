@@ -462,8 +462,64 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
   font-weight: 600;
 }
 
-.docs-rail { position: sticky; top: calc(var(--header) + 16px); padding-top: 22px; }
+.docs-rail {
+  --rail-surface: #fbfbfd;
+  align-self: stretch;
+  min-height: calc(100vh - var(--header));
+  margin-top: -8px;
+  margin-right: -20px;
+  margin-bottom: -72px;
+  padding: 16px 18px 40px 16px;
+  background: var(--rail-surface);
+  border-left: 1px solid rgba(55, 53, 47, 0.08);
+}
+
 .docs-rail:empty { display: none; }
+
+.docs-rail .rail-stack {
+  position: sticky;
+  top: calc(var(--header) + 16px);
+  background: transparent;
+}
+
+.docs-rail .response,
+.docs-rail .rail-options {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.docs-rail .response { overflow: visible; }
+
+.docs-rail .response__chrome {
+  background: transparent;
+  border-bottom: 0;
+  padding: 2px 2px 8px;
+}
+
+.docs-rail .response__panel[data-panel="chart"],
+.docs-rail #response-chart {
+  background: transparent;
+}
+
+.docs-rail .response__panel[data-panel="json"] {
+  margin: 2px 0 0;
+  overflow: hidden;
+  background: var(--code-well);
+  border: 1px solid var(--code-well-line);
+  border-radius: 12px;
+}
+
+.docs-rail .response__json,
+.docs-rail .response__json-bar {
+  background: var(--code-well);
+}
+
+.docs-rail .rail-options {
+  margin-top: 14px;
+  padding: 0 2px;
+}
 
 .response__method {
   padding: 2px 6px;
@@ -582,7 +638,15 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
 
 @media (max-width: 1100px) {
   .docs-frame { grid-template-columns: 220px minmax(0, 1fr); }
-  .docs-rail { grid-column: 1 / -1; position: static; padding-top: 0; }
+  .docs-rail {
+    grid-column: 1 / -1;
+    min-height: 0;
+    margin: 8px -20px 0;
+    padding: 16px 20px 28px;
+    border-left: 0;
+    border-top: 1px solid rgba(55, 53, 47, 0.08);
+  }
+  .docs-rail .rail-stack { position: static; }
 }
 
 @media (max-width: 860px) {
@@ -617,5 +681,6 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
   .docs-backdrop { position: fixed; inset: var(--header) 0 0 0; background: rgba(0, 0, 0, 0.28); z-index: 25; }
   .docs-backdrop.is-open { display: block; }
   .docs-frame { grid-template-columns: 1fr; width: 100%; max-width: none; padding-inline: 12px; }
+  .docs-rail { margin-inline: -12px; padding-inline: 12px; }
   .page-nav { grid-template-columns: 1fr; }
 }
