@@ -8,7 +8,7 @@ npm install @chartkitdev/react @chartkitdev/core`;
 
 <DocsPage title="Upgrading from v0" description={description} href="/docs/migrate">
   <p>
-    ChartKit v0 was a React component library published as <code>@derpdaderp/chartkit</code>. v1 keeps a React adapter and adds a JSON spec that Vue, Svelte, vanilla DOM, and Node all render.
+    v0 was the React component library <code>@derpdaderp/chartkit</code>. v1 is a JSON spec. React, Vue, Svelte, vanilla DOM, and Node render that same object.
   </p>
   <div class="table-wrap">
     <table class="opt-table">
@@ -36,7 +36,7 @@ npm install @chartkitdev/react @chartkitdev/core`;
   </div>
   <figure class="code"><figcaption>shell</figcaption><pre><code>{shell}</code></pre></figure>
   <p>
-    <code>@chartkitdev/react</code> still exports <code>LineChart</code>, <code>KpiCard</code>, and the other dashboard components. Their props are not spec keys. New code should pass <code>spec</code> to <code>Chart</code>. A compatibility shim remains available as <code>@derpdaderp/chartkit</code> for existing imports.
+    <code>@chartkitdev/react</code> still exports <code>LineChart</code>, <code>KpiCard</code>, and the other dashboard components. Their props are not spec keys. New charts pass <code>spec</code> to <code>Chart</code>. <code>@derpdaderp/chartkit</code> remains a compatibility shim for existing imports.
   </p>
   <p>
     From another library: <a href="/docs/migrate/chartjs">Chart.js</a>, <a href="/docs/migrate/recharts">Recharts</a>, <a href="/docs/migrate/echarts">ECharts</a>.

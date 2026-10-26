@@ -8,7 +8,7 @@ const agentDocs = docArticles.filter((article) => article.group === "Agents");
 
 const chart = gallerySvg("line");
 const description =
-  "ChartKit agents write one JSON spec, validate it, repair the safe mistakes, and render SVG. llms.txt is at /llms.txt.";
+  "Agents write one JSON spec, validate it, repair the safe mistakes, and render SVG. llms.txt is at /llms.txt.";
 ---
 
 <Base tone="light" title="Agents" description={description}>
@@ -17,9 +17,7 @@ const description =
       <p class="kicker">Agents</p>
       <h1 id="agents-page-title">The spec is the interface.</h1>
       <p class="lede">
-        An agent writes JSON. <code>validate()</code> returns every CK code in one pass.{' '}
-        <code>repair()</code> applies the safe JSON Patch and does not call a model.{' '}
-        <code>render()</code> returns SVG. No other chart library in the eval has a schema and a repair function.
+        An agent writes JSON. <code>validate()</code> returns every CK code in one pass. <code>repair()</code> applies the safe JSON Patch and does not call a model. <code>render()</code> returns SVG. No other library in the eval has a schema and a repair function.
       </p>
       <div class="actions">
         <a class="btn btn-primary" href="/docs/validate">Validate and repair</a>
@@ -65,8 +63,8 @@ const description =
       <h2 id="measured-title">What the eval measured</h2>
       <p>
         With the docs in the prompt, a measured run wrote a valid chart on 42 of 42 tasks. <code>repair()</code> took a
-        no-docs run from 21/42 to 42/42 with no model call. Round 6, 2026-10-16. That run was not repeated for later
-        rounds. Losses stay in the benchmark table.
+        no-docs run from 21/42 to 42/42 with no model call. Round 6, 2026-10-16. Not re-run since. Losses stay on the
+        benchmark page.
       </p>
       <p>
         <a href="https://chartkit.dev/benchmarks#agents">Benchmarks, losses included</a>
@@ -79,14 +77,14 @@ const description =
       <h2 id="prompt-title">What to give the model</h2>
       <ul>
         <li>
-          <a href="https://chartkit.dev/llms.txt">llms.txt</a> on the live site: the rules, the repair loop, and one spec
-          per chart type. This Astro app does not serve that file yet.
+          <a href="/llms.txt">llms.txt</a> is the short index: the rules, the repair loop, and one spec per chart type.{' '}
+          <a href="/llms-full.txt">llms-full.txt</a> is the long file.
         </li>
         <li>
-          <a href="https://chartkit.dev/schema/v1.json">schema/v1.json</a> is the JSON Schema.
+          <a href="/schema/v1.json">schema/v1.json</a> is the JSON Schema.
         </li>
         <li>
-          <a href="/docs/llms-txt">llms.txt notes</a> and <a href="/docs/mcp">MCP</a> in these docs.{' '}
+          <a href="/docs/llms-txt">llms.txt notes</a> and <a href="/docs/mcp">MCP</a>.{' '}
           <code>@chartkitdev/mcp</code> is not on npm yet. The server speaks stdio. <code>render_chart</code> is the tool
           that calls Cloud.
         </li>

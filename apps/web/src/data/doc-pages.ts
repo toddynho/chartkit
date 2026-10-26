@@ -62,8 +62,8 @@ export const docPages: DocPage[] = [
   {
     slug: "concepts",
     title: "Concepts",
-    description: "The spec, the adapters, and the themes. Stub pages for the Astro docs shell.",
-    lede: "Three ideas carry the product. The spec is the interface. Adapters only draw it. Theme tokens restyle every chart that shares it.",
+    description: "The spec, the adapters, and the themes.",
+    lede: "The spec is the interface. Adapters only draw it. Theme tokens restyle every chart that shares it.",
     blocks: [
       {
         type: "links",
@@ -183,8 +183,8 @@ export const docPages: DocPage[] = [
   {
     slug: "reference",
     title: "Reference",
-    description: "Where the spec reference, the try-it rail, and validate() will live.",
-    lede: "This section is the shell for the API reference. The try-it page is the pattern later chart pages should reuse.",
+    description: "The spec reference, the try-it rail, and validate().",
+    lede: "Try it edits a spec. Validate and repair report CK codes and a JSON Patch.",
     blocks: [
       {
         type: "links",
@@ -200,7 +200,7 @@ export const docPages: DocPage[] = [
     slug: "reference/validate",
     title: "Validate and repair",
     description: "validate() reports CK codes. repair() returns a spec and a JSON Patch, with no model call.",
-    lede: "A chart page will show the codes beside the spec. This route only reserves the place.",
+    lede: "validate() reports CK codes. repair() returns a spec and a JSON Patch, with no model call.",
     blocks: [
       {
         type: "p",
@@ -216,7 +216,7 @@ export const docPages: DocPage[] = [
           { code: "POST /validate" },
           " return the same warnings and the repaired spec. The ",
           { href: "/docs/reference/try", label: "try-it rail" },
-          " does not call either one yet.",
+          " runs validate() and render() in the page. It does not call Cloud.",
         ],
       },
     ],
@@ -250,13 +250,15 @@ export const docPages: DocPage[] = [
     slug: "agents/mcp",
     title: "MCP",
     description: "The ChartKit MCP server exposes chart tools, including render_chart, to an agent.",
-    lede: "@chartkitdev/mcp is the server in this repo. Agents can call render_chart from it.",
+    lede: "@chartkitdev/mcp is not on npm yet. The server speaks stdio. render_chart is the tool that calls Cloud.",
     current: "https://chartkit.dev/docs/mcp",
     blocks: [
       {
         type: "p",
         parts: [
-          "Tool names, arguments, and the install steps stay on the current MCP page until this route is filled in. Cloud renders from an agent use the same spec as the library.",
+          "Tool names and install steps are on ",
+          { href: "/docs/mcp", label: "MCP" },
+          ". Cloud renders from an agent use the same spec as the library.",
         ],
       },
     ],
@@ -271,14 +273,14 @@ export const docPages: DocPage[] = [
       {
         type: "ul",
         items: [
-          [{ href: "https://chartkit.dev/llms.txt", label: "llms.txt" }],
-          [{ href: "https://chartkit.dev/llms-full.txt", label: "llms-full.txt" }],
-          [{ href: "https://chartkit.dev/schema/v1.json", label: "schema/v1.json" }],
+          [{ href: "/llms.txt", label: "llms.txt" }],
+          [{ href: "/llms-full.txt", label: "llms-full.txt" }],
+          [{ href: "/schema/v1.json", label: "schema/v1.json" }],
         ],
       },
       {
         type: "p",
-        parts: ["This Astro app does not publish those files yet. Cutting over means serving them from here, at the same paths."],
+        parts: ["This app serves those files at /llms.txt, /llms-full.txt, and /schema/v1.json."],
       },
     ],
   },

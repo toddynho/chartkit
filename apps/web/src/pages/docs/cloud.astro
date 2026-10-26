@@ -8,10 +8,10 @@ const description = "Render a ChartKit spec to SVG or PNG. Free, with a chartkit
 
 <DocsPage title="Cloud render" description={description} href="/docs/cloud">
   <p>
-    ChartKit Cloud renders a spec for any agent or app. There is no signup. Free images include a small <code>chartkit.dev</code> mark, linked to <a href="/cloud">/cloud</a>. A valid API key removes the mark. The mark is applied by this service. <code>@chartkitdev/core</code> does not draw it, and the core bundles do not include it.
+    ChartKit Cloud renders a spec for any agent or app. There is no signup. Free images include a small <code>chartkit.dev</code> mark, linked to <a href="/cloud">/cloud</a>. A valid API key removes the mark. This service draws the mark. <code>@chartkitdev/core</code> does not, and the core bundles do not include it.
   </p>
   <p>
-    Every render runs <code>validate()</code> and <code>repair()</code> first. The response headers carry the applied JSON Patch, the warning codes, and the error codes. <code>POST</code> also returns them as JSON, so an agent can learn from the call. <code>render_chart</code> on <code>@chartkitdev/mcp</code> returns the image URL plus those repairs. The package is not published yet.
+    Every render runs <code>validate()</code> and <code>repair()</code> first. Response headers carry the JSON Patch, the warning codes, and the error codes. <code>POST</code> also returns them as JSON. <code>render_chart</code> on <code>@chartkitdev/mcp</code> returns the image URL plus those repairs. The package is not published yet.
   </p>
   <h2>GET /render</h2>
   <p>

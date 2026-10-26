@@ -114,7 +114,7 @@ const description =
     <h2>Canvas line</h2>
     <p>
       Measured {page.canvas.measured}, median of 5, Playwright Chromium, 640×360, sampling auto. This is not a re-time
-      of round {page.round}. Canvas loses first paint at every size in this table. Sampling none was not re-timed.
+      of round {page.round}. Sampling none was not re-timed.
     </p>
     <div class="table-wrap">
       <table>
@@ -248,11 +248,10 @@ const description =
 
     <h2 id="agents">Agent eval</h2>
     <p>
-      Round 6 is the scoreboard for this table, recorded in BENCHMARKS.md. It was not re-run for round {page.round}. One
-      model, {page.published.model}, temperature {page.published.temperature}, one run on {page.agentMeasured},{" "}
-      {page.published.tasks} tasks. “Official” means the library’s docs were in the prompt. ChartKit’s docs are{" "}
-      <a href="/llms.txt">llms.txt</a>, taken from the Phase 1 branch and not edited on this site. The previous
-      llms.txt, the React-only v0 file, scored 18/42 in an earlier run.
+      Round 6, recorded in BENCHMARKS.md. Not re-run for round {page.round}. One model, {page.published.model}, temperature{" "}
+      {page.published.temperature}, one run on {page.agentMeasured}, {page.published.tasks} tasks. “Official” means the
+      library’s docs were in the prompt. ChartKit’s docs are <a href="/llms.txt">llms.txt</a>. The previous file, the
+      React-only v0 text, scored 18/42 in an earlier run.
     </p>
     <div class="table-wrap">
       <table>

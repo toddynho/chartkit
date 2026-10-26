@@ -24,7 +24,7 @@ const page = loadSpec(Astro.params.type ?? "");
     <ChartMount spec={page.chart.spec} svg={page.chart.svg} alt={page.chart.alt} />
     <pre><code>{page.example}</code></pre>
     <p>
-      The same object is the <code>spec</code> prop for <code>@chartkitdev/react</code>, <code>@chartkitdev/vue</code>, and <code>@chartkitdev/svelte</code>, and the argument to <code>mount</code> in <code>@chartkitdev/vanilla</code>.
+      Pass this object as <code>spec</code> in React, Vue, and Svelte, or to <code>mount</code> in <code>@chartkitdev/vanilla</code>.
     </p>
   </div>
 </Base>

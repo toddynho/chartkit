@@ -101,8 +101,8 @@ const extras: DocArticle[] = [
 ];
 
 const honestLedes: Record<string, string> = {
-  "": "ChartKit v1 is a JSON spec plus @chartkitdev/core. The core has zero dependencies, validates the spec, and renders SVG. Adapters pass that spec through. They do not add chart logic.",
-  react: "The React adapter renders the same spec as the other adapters. Pass spec to Chart. The older dashboard components still exist, and their props are not spec keys.",
+  "": "ChartKit v1 is a JSON spec plus @chartkitdev/core. Core has zero dependencies. It validates the spec and renders SVG. Adapters pass that spec through. They do not add chart logic.",
+  react: "Pass spec to Chart. The same JSON renders in the other adapters. LineChart, KpiCard, and the other dashboard components still exist. Their props are not spec keys.",
   vue: "Vue 3 binds the spec with :spec. Server rendering uses renderToString from @chartkitdev/vue/ssr.",
   svelte: "The component uses export let, so Svelte 4 and Svelte 5 both compile it. SvelteKit SSR includes the SVG.",
   vanilla: "mount writes the SVG into an element you already have. update keeps that element. renderToString is the SVG string from core.",
@@ -115,7 +115,12 @@ const honestLedes: Record<string, string> = {
   validate: "validate() returns every diagnostic in one pass. repair() applies the safe JSON Patch fixes and does not mutate the input. render() does not validate.",
   repair: "repair() applies the safe JSON Patch on each error and revalidates. It does not invent data. A missing or unknown type is reported first.",
   render: "render() from @chartkitdev/core/all draws the core charts. @chartkitdev/core/extra adds histogram through rose and the planning charts. render() does not validate and does not throw.",
-  "llms-txt": "llms.txt is the short agent index: the rules, the repair loop, and one spec per chart type. This site serves it at /llms.txt.",
+  "llms-txt": "/llms.txt is the short agent index: the rules, the repair loop, and one spec per chart type. /llms-full.txt is the long file. This site serves both.",
+  data: "data is an array of row objects, not { \"values\": [...] }. Sparkline, mini-area, and spike may use a number array. Wide tables may use columns.",
+  encoding: "encoding binds field names to channels. x is the category or time. y is the measure. The same names work across chart types.",
+  scales: "A scale maps values to position. It lives on encoding, not on the axis. Set it only to override the inferred type.",
+  axes: "axes is titles, ticks, format, grid, and side. Domain and scale type stay on encoding.",
+  bundles: "@chartkitdev/core/all is the core set. @chartkitdev/core/extra adds histogram through the planning charts. createRenderer keeps a page to the charts you pass.",
   mcp: "@chartkitdev/mcp is not on npm yet. The server speaks stdio and calls validate, repair, and render in-process. render_chart is the one tool that calls Cloud.",
 };
 

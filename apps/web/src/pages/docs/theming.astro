@@ -101,7 +101,7 @@ const spec = { version: "1", type: "bar", theme: { tokens: { series } } };`;
   <h2>Light and dark</h2>
   <figure class="code"><figcaption>css</figcaption><pre><code>{lightCss}</code></pre></figure>
   <p>
-    Muted text has to clear 4.5:1 against the page. The midnight muted color <code>#8a8a8a</code> does not, on white, which is one reason the page default is <code>auto</code> and the host sets <code>--ck-muted</code>. To use a shadcn palette, point the series variables at yours:
+    Muted text has to clear 4.5:1 against the page. Midnight's <code>#8a8a8a</code> does not, on white, so the page default is <code>auto</code> and the host sets <code>--ck-muted</code>. Point the series variables at a shadcn palette:
   </p>
   <figure class="code"><figcaption>css</figcaption><pre><code>{shadcn}</code></pre></figure>
   <h2>theme.tokens.series</h2>
@@ -130,7 +130,7 @@ const spec = { version: "1", type: "bar", theme: { tokens: { series } } };`;
   </div>
   <h2>Dashboards</h2>
   <p>
-    The <a href="/dashboards">dashboard pages</a> put the palette on <code>theme.tokens</code>: series, text, grid, positive, and negative. Each board ships a light and a dark token object. The page CSS styles the shell. Fonts are Inter or Roboto. ChartKit is not affiliated with or endorsed by those products. Gaps that still need a spec option are listed in <code>catalog/dashboards/GAPS.md</code>.
+    The <a href="/dashboards">dashboard pages</a> set series, text, grid, positive, and negative on <code>theme.tokens</code>. Each board has a light and a dark token object. Page CSS styles the shell. Fonts are Inter or Roboto. ChartKit is not affiliated with those products. Gaps that still need a spec option are in <code>catalog/dashboards/GAPS.md</code>.
   </p>
   <h2>Presets</h2>
   <p>

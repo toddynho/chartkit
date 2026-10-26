@@ -129,13 +129,16 @@ Dashboard components in `@chartkitdev/react` (`LineChart`, `KpiCard`, and the re
 
 ## Features
 
-- **14 Chart Components** - Lines, bars, areas, donuts, gauges, heatmaps, and more
-- **Soft by default** - An omitted theme uses the Soft look, light or dark with the page. `refined`, `editorial`, and `midnight` are built in. More presets are opt-in imports.
-- **No third-party runtime dependencies in core** - Pure SVG. The core package depends on nothing. Each adapter depends on the core and its framework.
-- **TypeScript First** - Full type safety with autocomplete for every prop
-- **Dual Y-Axis** - Display multiple scales in LineChart
-- **Responsive** - Charts automatically resize to fit their container
-- **Client interaction** - Tooltip, zoom, pan, brush, and animation run in the interaction runtime. Keyboard, the data table, and legend clicks stay off unless set. `tooltip.fields` chooses the rows and their order, with a label and a format preset. `tooltip.position` is `auto`, `top`, `bottom`, `left`, or `right`. `tooltip.crosshairLabel` prints the x value on the guide. `interaction.select` is `point` or `series` (Shift, Ctrl, or Meta adds; Escape or a background click clears) and emits `pointclick`, `seriesclick`, `legendclick`, and `selectionchange`. React and Next pass `onPointClick`, `onSeriesClick`, `onLegendClick`, `selection`, and `onSelectionChange`. Vue emits those names. Svelte dispatches them. Vanilla takes the same callbacks on `mount`. Legend hover highlights the series. `--ck-dim` and `--ck-selected` style the marks. `interaction.navigator` adds an overview and a keyboard range slider. `interaction.sync` shares the crosshair, tooltip, and x window across charts with the same id. `interaction.drilldown.children` maps a category to a child spec; click, Enter, or Space drills, and Back or Escape returns. The server SVG records those options and does not include the controls. CK3034–CK3039 warn, with a JSON Patch, when the config cannot be drawn. `animation.easing` and `theme.tokens.fontFamily` warn CK3012.
+- **JSON spec** — `version`, `type`, `data`, `encoding`, and a required `a11y.alt`. Adapters do not add chart keys.
+- **Soft by default** — Omit `theme`, or set `"auto"` or `"soft"`. `refined`, `editorial`, and `midnight` are built in. Other presets are opt-in imports.
+- **Core has no runtime dependencies** — SVG from the spec. Each adapter depends on core and its framework.
+- **TypeScript** — The spec and the adapter props are typed.
+- **Second axis** — `encoding.*.axis: "y2"`, with the title in `axes.y2.title`.
+- **Responsive** — Charts resize to fit their container.
+- **Client interaction** — Tooltip, zoom, pan, brush, and animation run in `@chartkitdev/core/interact`. Keyboard, the data table, and legend clicks stay off unless set. The server SVG records the options and does not include the controls.
+- **Tooltip** — `tooltip.fields` chooses the rows, their order, a label, and a format preset. `tooltip.position` is `auto`, `top`, `bottom`, `left`, or `right`. `tooltip.crosshairLabel` prints the x value on the guide.
+- **Select** — `interaction.select` is `point` or `series`. Shift, Ctrl, or Meta adds. Escape or a background click clears. Events: `pointclick`, `seriesclick`, `legendclick`, `selectionchange`. React and Next pass `onPointClick`, `onSeriesClick`, `onLegendClick`, `selection`, and `onSelectionChange`. Vue emits those names. Svelte dispatches them. Vanilla takes the same callbacks on `mount`. Legend hover highlights the series. `--ck-dim` and `--ck-selected` style the marks.
+- **Navigator, sync, drilldown** — `interaction.navigator` is an overview and a keyboard range. `interaction.sync` shares the crosshair, tooltip, and x window. `interaction.drilldown.children` maps a category to a child spec. Click, Enter, or Space drills. Back or Escape returns. CK3034–CK3039 warn, with a JSON Patch, when the config cannot be drawn. `animation.easing` and `theme.tokens.fontFamily` warn CK3012.
 
 ## Components
 
