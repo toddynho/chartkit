@@ -479,6 +479,149 @@ describe("attach", () => {
     ctl.destroy();
   });
 
+  it("eases the tooltip between line and bar anchors and snaps on the way in", () => {
+    const laid = (width: number, height: number) =>
+      ({ x: 0, y: 0, left: 0, top: 0, width, height, right: width, bottom: height, toJSON() { return {}; } }) as DOMRect;
+    const move = (svg: Element, x: number, y: number) => {
+      svg.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: y, bubbles: true }));
+    };
+
+    const line = lineSpec({ legend: false });
+    const lineHost = hostOf(line);
+    const lineCtl = attach(lineHost, line, { render });
+    const sheet = document.getElementById("ck-interact-style")?.textContent ?? "";
+    expect(sheet).toContain("[data-ck-tip]{transition:left 160ms ease-out,top 160ms ease-out}");
+    expect(sheet).toContain("@media (prefers-reduced-motion:reduce){[data-ck-tip]{transition:none}}");
+    const lineSvg = lineHost.querySelector("svg")!;
+    const lineBox = laid(720, 280);
+    lineHost.getBoundingClientRect = () => lineBox;
+    lineSvg.getBoundingClientRect = () => lineBox;
+    const plot = lineSvg.querySelector("clipPath rect")!;
+    const at = (fraction: number) => Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * fraction;
+    move(lineSvg, at(0.1), 80);
+    const lineTip = lineHost.querySelector("[data-ck-tip]") as HTMLElement;
+    const firstLeft = lineTip.style.left;
+    expect(lineTip.hidden).toBe(false);
+    expect(lineTip.textContent).toContain("Jan");
+    expect(lineTip.getAttribute("data-ck-tip-motion")).toBe("snap");
+    expect(lineTip.style.transition).toBe("");
+    expect(Number.isFinite(Number.parseFloat(firstLeft))).toBe(true);
+    move(lineSvg, at(0.875), 80);
+    expect(lineTip.style.left).not.toBe(firstLeft);
+    expect(lineTip.textContent).toContain("Apr");
+    expect(lineTip.getAttribute("data-ck-tip-motion")).toBe("ease");
+    expect(lineTip.style.transition).toBe("");
+    const settled = lineTip.style.left;
+    const settledTop = lineTip.style.top;
+    move(lineSvg, at(0.9), 96);
+    expect(lineTip.style.left).toBe(settled);
+    expect(lineTip.style.top).toBe(settledTop);
+    expect(lineTip.textContent).toContain("Apr");
+    expect(lineTip.getAttribute("data-ck-tip-motion")).toBe("ease");
+    lineSvg.dispatchEvent(new PointerEvent("pointerleave", { bubbles: true }));
+    expect(lineTip.hidden).toBe(true);
+    expect(lineTip.style.transition).toBe("none");
+    move(lineSvg, at(0.1), 80);
+    expect(lineTip.hidden).toBe(false);
+    expect(lineTip.getAttribute("data-ck-tip-motion")).toBe("snap");
+    expect(lineTip.textContent).toContain("Jan");
+    lineCtl.destroy();
+
+    const bar: InteractSpec = {
+      version: "1",
+      type: "bar",
+      data: [
+        { region: "North", revenue: 186000 },
+        { region: "West", revenue: 164000 },
+        { region: "South", revenue: 142000 },
+        { region: "East", revenue: 128000 },
+      ],
+      encoding: { x: "region", y: "revenue" },
+      legend: false,
+      size: { width: 640, height: 280 },
+      a11y: { alt },
+    };
+    const barHost = hostOf(bar);
+    const barCtl = attach(barHost, bar, { render });
+    const barSvg = barHost.querySelector("svg")!;
+    const barBox = laid(640, 280);
+    barHost.getBoundingClientRect = () => barBox;
+    barSvg.getBoundingClientRect = () => barBox;
+    const bars = Array.from(barSvg.querySelectorAll("rect")).filter((node) => (node.getAttribute("fill") || "").includes("series"));
+    const north = bars[0]!;
+    const east = bars[bars.length - 1]!;
+    const nx = Number(north.getAttribute("x")) + Number(north.getAttribute("width")) / 2;
+    const ny = Number(north.getAttribute("y")) + 8;
+    const ex = Number(east.getAttribute("x")) + Number(east.getAttribute("width")) / 2;
+    move(barSvg, nx, ny);
+    const barTip = barHost.querySelector("[data-ck-tip]") as HTMLElement;
+    const northLeft = barTip.style.left;
+    expect(barTip.textContent).toContain("North");
+    expect(barTip.getAttribute("data-ck-tip-motion")).toBe("snap");
+    move(barSvg, ex, ny);
+    expect(barTip.style.left).not.toBe(northLeft);
+    expect(barTip.textContent).toContain("East");
+    expect(barTip.getAttribute("data-ck-tip-motion")).toBe("ease");
+    const eastLeft = barTip.style.left;
+    move(barSvg, ex, ny + 6);
+    expect(barTip.style.left).toBe(eastLeft);
+    expect(barTip.getAttribute("data-ck-tip-motion")).toBe("ease");
+    barCtl.destroy();
+  });
+
+  it("keeps the tooltip still when reduced motion is on", () => {
+    const previous = window.matchMedia;
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes("reduce"),
+      media: query,
+      addEventListener() {},
+      removeEventListener() {},
+      addListener() {},
+      removeListener() {},
+      dispatchEvent() {
+        return false;
+      },
+      onchange: null,
+    })) as typeof window.matchMedia;
+    try {
+      const spec = lineSpec({ legend: false });
+      const host = hostOf(spec);
+      const ctl = attach(host, spec, { render });
+      const svg = host.querySelector("svg")!;
+      const plot = svg.querySelector("clipPath rect")!;
+      const at = (fraction: number) => Number(plot.getAttribute("x")) + Number(plot.getAttribute("width")) * fraction;
+      svg.dispatchEvent(new PointerEvent("pointermove", { clientX: at(0.1), clientY: 80, bubbles: true }));
+      const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+      expect(tip.getAttribute("data-ck-tip-motion")).toBe("snap");
+      expect(tip.style.transition).toBe("none");
+      svg.dispatchEvent(new PointerEvent("pointermove", { clientX: at(0.875), clientY: 80, bubbles: true }));
+      expect(tip.textContent).toContain("Apr");
+      expect(tip.getAttribute("data-ck-tip-motion")).toBe("snap");
+      expect(tip.style.transition).toBe("none");
+      ctl.destroy();
+    } finally {
+      window.matchMedia = previous;
+    }
+  });
+
+  it("eases the tooltip when the keyboard moves to another datum", async () => {
+    const spec = lineSpec({ a11y: { alt, keyboard: true } });
+    const host = hostOf(spec);
+    const ctl = attach(host, spec, { render });
+    await ctl.ready;
+    const svg = host.querySelector("svg")!;
+    svg.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
+    const tip = host.querySelector("[data-ck-tip]") as HTMLElement;
+    expect(tip.hidden).toBe(false);
+    expect(tip.textContent).toContain("Feb");
+    expect(tip.getAttribute("data-ck-tip-motion")).toBe("snap");
+    svg.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
+    expect(tip.textContent).toContain("Mar");
+    expect(tip.getAttribute("data-ck-tip-motion")).toBe("ease");
+    expect(tip.style.transition).not.toBe("none");
+    ctl.destroy();
+  });
+
   it("draws a bar crosshair only when the spec asks for one", () => {
     const spec: InteractSpec = {
       version: "1",

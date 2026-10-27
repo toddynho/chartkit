@@ -430,7 +430,7 @@ function ensureCss(): void {
   const style = document.createElement("style");
   style.id = "ck-interact-style";
   style.textContent =
-    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:var(--ck-tip-radius,10px);font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:var(--ck-tip-bg,var(--ck-surface, light-dark(#fff,#2c2c2e)));color:var(--ck-text, light-dark(#1d1d1f,#f5f5f7));box-shadow:var(--ck-tip-shadow,0 8px 24px #0003);font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:var(--ck-xhair,light-dark(#0006,#fff8));stroke-dasharray:3 3}.ck-xlabel{font:11px ui-sans-serif,system-ui,sans-serif;fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-pick{stroke:var(--ck-selected,light-dark(#1d1d1f,#f5f5f7));stroke-width:2}[data-ck-dim]{opacity:var(--ck-dim,.32)}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.ck-crumb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px;font:12px/1.3 ui-sans-serif,system-ui,sans-serif;color:light-dark(#1d1d1f,#f5f5f7)}.ck-crumb button{font:inherit;color:inherit;background:transparent;border:1px solid light-dark(#0002,#fff3);border-radius:8px;padding:4px 8px;cursor:pointer}.ck-crumb [aria-current]{font-weight:650}.ck-bar-on{filter:brightness(1.18)}[data-ck-bar-dim]{opacity:.42}";
+    ".ck-tip{position:absolute;z-index:5;pointer-events:none;padding:8px 10px;border-radius:var(--ck-tip-radius,10px);font:12px/1.35 ui-sans-serif,system-ui,sans-serif;background:var(--ck-tip-bg,var(--ck-surface, light-dark(#fff,#2c2c2e)));color:var(--ck-text, light-dark(#1d1d1f,#f5f5f7));box-shadow:var(--ck-tip-shadow,0 8px 24px #0003);font-variant-numeric:tabular-nums}.ck-row{display:flex;align-items:center;gap:6px}.ck-tip b{margin-left:auto;padding-left:12px}.ck-tip i{width:8px;height:8px;border-radius:2px;flex:none}.ck-xhair{stroke:var(--ck-xhair,light-dark(#0006,#fff8));stroke-dasharray:3 3}.ck-xlabel{font:11px ui-sans-serif,system-ui,sans-serif;fill:light-dark(#1d1d1f,#f5f5f7);stroke:light-dark(#fff,#1c1c1e);stroke-width:3px;paint-order:stroke;pointer-events:none}.ck-pick{stroke:var(--ck-selected,light-dark(#1d1d1f,#f5f5f7));stroke-width:2}[data-ck-dim]{opacity:var(--ck-dim,.32)}.ck-clip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.ck-crumb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px;font:12px/1.3 ui-sans-serif,system-ui,sans-serif;color:light-dark(#1d1d1f,#f5f5f7)}.ck-crumb button{font:inherit;color:inherit;background:transparent;border:1px solid light-dark(#0002,#fff3);border-radius:8px;padding:4px 8px;cursor:pointer}.ck-crumb [aria-current]{font-weight:650}.ck-bar-on{filter:brightness(1.18)}[data-ck-bar-dim]{opacity:.42}[data-ck-tip]{transition:left 160ms ease-out,top 160ms ease-out}@media (prefers-reduced-motion:reduce){[data-ck-tip]{transition:none}}";
   document.head.append(style);
 }
 
@@ -1031,6 +1031,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   tip.setAttribute("data-ck-tip", "");
   tip.setAttribute("role", "tooltip");
   tip.hidden = true;
+  let tipIndex = -1;
   const live = document.createElement("div");
   live.className = "ck-clip";
   live.setAttribute("aria-live", "polite");
@@ -1251,6 +1252,40 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     }
   }
 
+  /** Snap on show and while the tip follows the pointer. Ease when the hovered datum changes. */
+  function pinTip(left: number, top: number, snap: boolean, index: number): void {
+    if (!snap && index >= 0 && index === tipIndex) {
+      const dl = Math.abs(left - Number.parseFloat(tip.style.left));
+      const dt = Math.abs(top - Number.parseFloat(tip.style.top));
+      if (dl < 0.5 && dt < 0.5) return;
+    }
+    const hop = !snap && !reducedMotion() && index >= 0 && tipIndex >= 0 && index !== tipIndex;
+    tipIndex = index;
+    if (hop) {
+      // Retarget from the in-flight box. A later move on this datum must not cancel it.
+      tip.style.removeProperty("transition");
+      tip.style.left = `${left}px`;
+      tip.style.top = `${top}px`;
+      tip.setAttribute("data-ck-tip-motion", "ease");
+      return;
+    }
+    tip.style.transition = "none";
+    tip.style.left = `${left}px`;
+    tip.style.top = `${top}px`;
+    tip.setAttribute("data-ck-tip-motion", "snap");
+    // Pointer-follow charts have no datum index. Leave the snap in place so the tip sticks to the cursor.
+    if (reducedMotion() || index < 0) return;
+    // Commit the snap so the next datum eases from here, not from 0,0.
+    void tip.offsetWidth;
+    tip.style.removeProperty("transition");
+  }
+
+  function dropTip(): void {
+    tip.hidden = true;
+    tip.style.transition = "none";
+    tipIndex = -1;
+  }
+
   function placeTip(
     clientX: number,
     clientY: number,
@@ -1258,14 +1293,16 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     rows: { name: string; text: string; color: string }[],
     marks: { x: number; y: number }[],
     index = -1,
+    commit = true,
   ): void {
     if (!showTip) return;
+    const snap = tip.hidden || reducedMotion();
     const custom = options.tooltip ?? readTooltip(host);
     if (custom) {
       const body = custom({ title, index, x: title, rows });
       tip.replaceChildren();
       if (body == null || body === "") {
-        tip.hidden = true;
+        dropTip();
         return;
       }
       if (typeof body === "string") tip.innerHTML = body;
@@ -1293,6 +1330,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       tip.innerHTML = (title && !template ? `<div>${esc(title)}</div>` : "") + rows.map((row) => rowHtml(row)).join("");
     }
     tip.hidden = false;
+    if (!commit) return;
     const bounds = host.getBoundingClientRect();
     const rect = svg.getBoundingClientRect();
     const vb = (svg.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number);
@@ -1353,8 +1391,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         top = Math.max(4, Math.min(minY, bounds.height - height - 4));
       }
     }
-    tip.style.left = `${left}px`;
-    tip.style.top = `${top}px`;
+    pinTip(left, top, snap, index);
   }
 
   function moveCross(x: number, title: string): void {
@@ -1394,7 +1431,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   }
 
   function hideHover(): void {
-    tip.hidden = true;
+    dropTip();
     svg.querySelector("[data-ck-crosshair]")?.remove();
     svg.querySelector("[data-ck-xlabel]")?.remove();
     clearDots();
@@ -1458,11 +1495,13 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     hits: Element[],
     index: number,
   ): void {
+    const snap = tip.hidden || reducedMotion();
     if (!hits.length) {
       placeTip(clientX, clientY, title, rows, [], index);
       return;
     }
-    placeTip(clientX, clientY, title, rows, [], index);
+    placeTip(clientX, clientY, title, rows, [], index, false);
+    if (tip.hidden) return;
     let x0 = Infinity;
     let y0 = Infinity;
     let x1 = -Infinity;
@@ -1500,8 +1539,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     }
     left = Math.max(4, Math.min(left, Math.max(4, bounds.width - width - 4)));
     top = Math.max(4, Math.min(top, Math.max(4, bounds.height - height - 4)));
-    tip.style.left = `${left}px`;
-    tip.style.top = `${top}px`;
+    pinTip(left, top, snap, index);
   }
 
   function xNum(index: number): number | null {

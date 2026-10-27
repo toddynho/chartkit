@@ -32,7 +32,7 @@ export type ExtraHook = [
   (local: number) => number,
   (x: number, title: string) => void,
   (index: number, pointerY: number | null) => TipRow[],
-  (clientX: number, clientY: number, title: string, rows: TipRow[], marks: { x: number; y: number }[]) => void,
+  (clientX: number, clientY: number, title: string, rows: TipRow[], marks: { x: number; y: number }[], index?: number) => void,
   (index: number) => string,
   () => number,
   (value: number) => void,
@@ -124,7 +124,7 @@ export function armExtras(a: ExtraHook): void {
       moveCross(crossX(next - lo), xText(next));
       if (showTip) {
         const bounds = svg.getBoundingClientRect();
-        placeTip(bounds.left + 24, bounds.top + 24, xText(next), entriesAt(next, null), []);
+        placeTip(bounds.left + 24, bounds.top + 24, xText(next), entriesAt(next, null), [], next);
       }
     }) as EventListener);
   }
