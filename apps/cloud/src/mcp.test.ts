@@ -49,6 +49,11 @@ describe("POST /mcp", () => {
     expect(tool?.inputSchema.properties.format.default).toBe("svg");
     expect(tool?.inputSchema.properties.format.description).toMatch(/cannot display SVG/);
     expect(tool?.inputSchema.properties.scale.description).toMatch(/Prefer 2 or higher/);
+    expect(tool?.description).toMatch(/#ffffff/);
+    expect(tool?.description).toMatch(/background/);
+    const background = tool?.inputSchema.properties as { background?: { description?: string } };
+    expect(background.background?.description).toMatch(/#ffffff/);
+    expect(background.background?.description).toMatch(/transparent/);
 
     const called = await app.handle(
       rpc("tools/call", { name: "render_chart", arguments: { spec: bar, format: "svg", key: "ck_test_known" } }),

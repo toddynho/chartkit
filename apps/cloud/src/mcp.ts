@@ -10,7 +10,7 @@ const SUPPORTED = new Set(["2024-11-05", "2025-03-26", "2025-06-18"]);
 const TOOL = {
   name: "render_chart",
   description:
-    "Render a ChartKit spec on this Cloud service. Returns the image URL plus repairs, warnings, and errors. Omit format, or pass svg. SVG is the default: it skips the resvg pass and stays sharp when attached in chat. Pass png only when the host cannot display SVG, such as email, a GitHub README image, or some Slack clients. When format is png, set scale to 2 or higher for HiDPI. Free renders include a chartkit.dev mark. Pass key, or send Authorization: Bearer, to remove it. The key is not part of the image URL.",
+    "Render a ChartKit spec on this Cloud service. Returns the image URL plus repairs, warnings, and errors. Omit format, or pass svg. SVG is the default: it skips the resvg pass and stays sharp when attached in chat. Pass png only when the host cannot display SVG, such as email, a GitHub README image, or some Slack clients. When format is png, set scale to 2 or higher for HiDPI. The chart background defaults to #ffffff so Soft labels stay readable on a dark lightbox. Pass background to override that plate. Use theme midnight, or a dark background with a dark theme, when the host is dark. Pass background transparent to keep the plot clear. Free renders include a chartkit.dev mark. Pass key, or send Authorization: Bearer, to remove it. The key is not part of the image URL.",
   inputSchema: {
     type: "object",
     properties: {
@@ -28,7 +28,15 @@ const TOOL = {
         type: "number",
         description: "PNG zoom from 1 to 4. Prefer 2 or higher when format is png so the raster stays sharp on HiDPI. Ignored for svg.",
       },
-      theme: { type: "string" },
+      theme: {
+        type: "string",
+        description: 'Preset name such as "soft" or "midnight". midnight is an opaque dark plate with light text. Use it when the host is dark.',
+      },
+      background: {
+        type: "string",
+        description:
+          "Chart background CSS color. Hex, rgb(), hsl(), oklch(), or transparent. Omit for #ffffff. This wins over the Soft transparent plot and over theme.tokens.background. Pass transparent to keep the plot clear. Named colors such as white are rejected.",
+      },
       key: { type: "string", description: "Sent as Authorization: Bearer. Omitted from the image URL." },
     },
     required: ["spec"],
@@ -101,7 +109,7 @@ async function callTool(id: JsonRpcId, params: unknown, request: Request, render
   const args = isRecord(params.arguments) ? params.arguments : null;
   if (!args || !("spec" in args)) return toolError(id, "render_chart expects { spec }.");
   const body: Record<string, unknown> = { spec: args.spec };
-  for (const name of ["format", "w", "h", "scale", "theme"] as const) {
+  for (const name of ["format", "w", "h", "scale", "theme", "background"] as const) {
     const value = args[name];
     if (typeof value === "string" || typeof value === "number") body[name] = value;
   }

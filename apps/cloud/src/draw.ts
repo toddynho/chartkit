@@ -13,9 +13,22 @@ export interface Frame {
   h?: number;
   scale: number;
   theme?: string;
+  /**
+   * Plate color written to theme.tokens.background.
+   * Omitted on a transparent Soft/Refined/Editorial preset becomes CLOUD_PLATE.
+   */
+  background?: string;
   format: "svg" | "png";
   watermark: boolean;
 }
+
+/**
+ * Opaque stand-in for the white page Soft was designed to sit on.
+ * Chat lightboxes are often black; a transparent plot leaves dark axis ink on that black.
+ */
+export const CLOUD_PLATE = "#ffffff";
+
+const TRANSPARENT_PRESETS = new Set(["auto", "soft", "refined", "editorial"]);
 
 export interface Drawn {
   status: number;
@@ -29,7 +42,9 @@ export interface Drawn {
 
 export async function drawSpec(input: unknown, frame: Frame): Promise<Drawn> {
   const framed = withFrame(input, frame);
-  const result = check(framed);
+  const checked = check(framed);
+  const spec = applyCloudPlate(checked.spec, frame);
+  const result = spec === checked.spec ? checked : { ...checked, spec };
   const drawn = result.ok ? render(result.spec) : "";
   const failed = !result.ok || drawn.includes("ck-chart-error");
   const svg = presentSvg(failed ? errorPicture(result) : drawn, {
@@ -88,7 +103,9 @@ export function readFrame(source: { get(name: string): string | null }): Frame |
   if (w === "bad" || h === "bad" || scale === "bad") return "w, h, and scale must be numbers in range";
   const theme = source.get("theme") || undefined;
   if (theme && !/^[A-Za-z0-9-]{1,32}$/.test(theme)) return "theme must be a short name";
-  return { format, w, h, scale: scale ?? 1, theme, watermark: true };
+  const background = readBackground(source.get("background"));
+  if (background === "bad") return "background must be a CSS color such as #ffffff, rgb(), hsl(), oklch(), or transparent";
+  return { format, w, h, scale: scale ?? 1, theme, background, watermark: true };
 }
 
 function check(spec: unknown): RepairResult {
@@ -107,6 +124,57 @@ function withFrame(spec: unknown, frame: Frame): unknown {
     next.size = size;
   }
   return next;
+}
+
+/**
+ * Soft, Refined, and Editorial leave the plot transparent so a web page shows through.
+ * A Cloud file has no page. Paint #ffffff unless the agent set a color, or the preset is already opaque.
+ * `background=transparent` keeps the clear plot. `theme=midnight` keeps its dark plate.
+ */
+function applyCloudPlate(spec: unknown, frame: Frame): unknown {
+  if (!isRecord(spec)) return spec;
+  const color = frame.background ?? (explicitBackground(spec.theme) ? undefined : transparentPreset(spec.theme) ? CLOUD_PLATE : undefined);
+  if (!color) return spec;
+  return { ...spec, theme: themeWithBackground(spec.theme, color) };
+}
+
+function explicitBackground(theme: unknown): string | undefined {
+  if (!isRecord(theme) || !isRecord(theme.tokens)) return undefined;
+  const value = theme.tokens.background;
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+/** Mirrors resolvePreset: unknown names and mode "dark" use midnight, which is already opaque. */
+function transparentPreset(theme: unknown): boolean {
+  const name = presetName(theme);
+  const mode = isRecord(theme) && (theme.mode === "dark" || theme.mode === "light") ? theme.mode : "auto";
+  const known = name === "midnight" || TRANSPARENT_PRESETS.has(name);
+  if (!known) return false;
+  if (mode === "dark" && name !== "midnight") return false;
+  if (mode === "light" && name === "midnight") return true;
+  return TRANSPARENT_PRESETS.has(name);
+}
+
+function presetName(theme: unknown): string {
+  if (typeof theme === "string" && theme) return theme;
+  if (isRecord(theme) && typeof theme.preset === "string" && theme.preset) return theme.preset;
+  return "auto";
+}
+
+function themeWithBackground(theme: unknown, color: string): Record<string, unknown> {
+  if (typeof theme === "string" && theme) return { preset: theme, tokens: { background: color } };
+  if (!isRecord(theme)) return { preset: "soft", tokens: { background: color } };
+  const tokens = isRecord(theme.tokens) ? { ...theme.tokens, background: color } : { background: color };
+  const preset = typeof theme.preset === "string" && theme.preset ? theme.preset : "soft";
+  return { ...theme, preset, tokens };
+}
+
+/** Same colors core will keep on theme.tokens.background. Named colors such as white are rejected. */
+function readBackground(value: string | null): string | undefined | "bad" {
+  if (value == null || value === "") return undefined;
+  const color = value.trim();
+  if (color.length > 80 || !/^(?:var\(|#|rgb|hsl|oklch|transparent$)/.test(color)) return "bad";
+  return color;
 }
 
 function errorPicture(result: RepairResult): string {

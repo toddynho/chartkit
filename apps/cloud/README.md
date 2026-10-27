@@ -100,6 +100,8 @@ The rate limit is 120 a minute per IP. On Cloudflare the IP is `cf-connecting-ip
 
 Cloud SVGs add an outer margin so a chat attachment is not flush with the image edge: 24px on top, 16px on each side, and 12px under the 16px watermark band. The library drawing is unchanged. A keyed render gets the same margin without the mark. `/cloud` marketing previews are local SVGs and do not use this margin.
 
+Soft's plot is transparent so a web page shows through. Cloud paints `#ffffff` when that preset (or Refined or Editorial) would otherwise be clear, so dark labels stay readable on a black lightbox. Pass `background` (`#112233`, `rgb()`, `hsl()`, `oklch()`, or `transparent`) on the query string or JSON body to override. `background` wins over `theme.tokens.background`. `theme=midnight` keeps its dark plate. PNG uses the same color.
+
 ### Point the Astro site at a deploy
 
 `apps/web` bakes example URLs from `PUBLIC_CHARTKIT_CLOUD_URL`. `NEXT_PUBLIC_CHARTKIT_CLOUD_URL` still works. Unset, the examples stay on `https://cloud.chartkit.dev` and the site build still succeeds.
