@@ -33,7 +33,7 @@ export function createServer(): McpServer {
         "validate returns that function's diagnostics, including JSON Patch fixes.",
         "repair applies those fixes and returns the repaired spec plus whatever diagnostics remain.",
         "render returns SVG from @chartkitdev/core/extra (every chart type, including the extra types). PNG is not available from that local tool.",
-        "render_chart calls ChartKit Cloud and returns the image URL plus repairs and warnings. Free images include a chartkit.dev mark. CHARTKIT_CLOUD_KEY or the key argument is sent as Authorization: Bearer and is not part of the returned URL. A valid key returns a stored chart with the mark removed. The other tools do not use the network.",
+        "render_chart calls ChartKit Cloud and returns the image URL plus repairs and warnings. Omit format, or pass svg. Pass png only when the host cannot display SVG, and set scale to 2 or higher for that PNG. Free images include a chartkit.dev mark. CHARTKIT_CLOUD_KEY or the key argument is sent as Authorization: Bearer and is not part of the returned URL. A valid key returns a stored chart with the mark removed. The other tools do not use the network.",
         "lookup_feature reads the bundled copy of features.json. Statuses are that file's cells. partial is not native. Every other library is listed, including none.",
         "list_chart_types and get_example return the example specs shipped with this package.",
         "Resources are the bundled llms.txt and the ChartKit v1 JSON Schema.",
@@ -92,13 +92,16 @@ export function createServer(): McpServer {
     {
       title: "Render a spec on ChartKit Cloud",
       description:
-        "POST the spec to ChartKit Cloud and return the image URL plus the repairs and warnings from validate()+repair(). format is svg or png. Free renders include a chartkit.dev mark. Pass key, or set CHARTKIT_CLOUD_KEY, to remove it. The key is sent as Authorization: Bearer. The returned URL does not contain the key. CHARTKIT_CLOUD_URL overrides the default https://cloud.chartkit.dev. This tool calls the network. The other tools do not.",
+        "POST the spec to ChartKit Cloud and return the image URL plus the repairs and warnings from validate()+repair(). Omit format, or pass svg. SVG is the default: it skips the resvg pass and stays sharp when attached in chat. Pass png only when the host cannot display SVG, such as email, a GitHub README image, or some Slack clients. When format is png, set scale to 2 or higher for HiDPI. Free renders include a chartkit.dev mark. Pass key, or set CHARTKIT_CLOUD_KEY, to remove it. The key is sent as Authorization: Bearer. The returned URL does not contain the key. CHARTKIT_CLOUD_URL overrides the default https://cloud.chartkit.dev. This tool calls the network. The other tools do not.",
       inputSchema: {
         spec: specField,
-        format: z.enum(["svg", "png"]).optional().describe('Image format. Default "svg".'),
+        format: z
+          .enum(["svg", "png"])
+          .optional()
+          .describe('Image format. Omit this or pass "svg". Pass "png" only when the host cannot display SVG (email, a GitHub README image, some Slack clients).'),
         w: z.number().optional().describe("Width in pixels."),
         h: z.number().optional().describe("Height in pixels."),
-        scale: z.number().optional().describe("PNG zoom, from 1 to 4."),
+        scale: z.number().optional().describe("PNG zoom, from 1 to 4. Prefer 2 or higher when format is png. Ignored for svg."),
         theme: z.string().optional().describe('Preset name, such as "midnight".'),
         key: z.string().optional().describe("API key that removes the chartkit.dev mark."),
       },

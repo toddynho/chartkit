@@ -10,15 +10,24 @@ const SUPPORTED = new Set(["2024-11-05", "2025-03-26", "2025-06-18"]);
 const TOOL = {
   name: "render_chart",
   description:
-    "Render a ChartKit spec on this Cloud service. Returns the image URL plus repairs, warnings, and errors. SVG is the default. PNG is rasterized in-process. Free renders include a chartkit.dev mark. Pass key, or send Authorization: Bearer, to remove it. The key is not part of the image URL.",
+    "Render a ChartKit spec on this Cloud service. Returns the image URL plus repairs, warnings, and errors. Omit format, or pass svg. SVG is the default: it skips the resvg pass and stays sharp when attached in chat. Pass png only when the host cannot display SVG, such as email, a GitHub README image, or some Slack clients. When format is png, set scale to 2 or higher for HiDPI. Free renders include a chartkit.dev mark. Pass key, or send Authorization: Bearer, to remove it. The key is not part of the image URL.",
   inputSchema: {
     type: "object",
     properties: {
       spec: { description: "ChartKit spec object or JSON string." },
-      format: { type: "string", enum: ["svg", "png"] },
+      format: {
+        type: "string",
+        enum: ["svg", "png"],
+        default: "svg",
+        description:
+          "Image format. Omit this or pass svg. SVG is the default and the format to attach in chat. Pass png only when the host cannot display SVG (email, a GitHub README image, some Slack clients).",
+      },
       w: { type: "number" },
       h: { type: "number" },
-      scale: { type: "number" },
+      scale: {
+        type: "number",
+        description: "PNG zoom from 1 to 4. Prefer 2 or higher when format is png so the raster stays sharp on HiDPI. Ignored for svg.",
+      },
       theme: { type: "string" },
       key: { type: "string", description: "Sent as Authorization: Bearer. Omitted from the image URL." },
     },

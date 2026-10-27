@@ -3,7 +3,7 @@ import { repair } from "@chartkitdev/core/validate";
 import { render } from "@chartkitdev/core/extra";
 import { describe, expect, it, vi } from "vitest";
 import { createApp } from "./app.ts";
-import { chartBody } from "./watermark.ts";
+import { chartBody, EMBED_PAD_BOTTOM, EMBED_PAD_TOP, EMBED_PAD_X } from "./watermark.ts";
 import { kvCharts, memoryCharts } from "./charts.ts";
 import { kvKeys, memoryKeys } from "./keys.ts";
 import { memoryLimiter } from "./limit.ts";
@@ -35,6 +35,18 @@ function get(spec: unknown, query: Record<string, string> = {}) {
   return new Request(`http://cloud.local/render?${params}`);
 }
 
+/** Keyed Cloud SVGs stay padded, and the drawing underneath still matches the library. */
+function expectClean(svg: string) {
+  expect(svg).toContain('data-ck-embed="1"');
+  expect(svg).not.toContain("data-ck-watermark");
+  const cloud = chartBody(svg);
+  const library = chartBody(render(bar));
+  expect(cloud.drawing).toBe(library.drawing);
+  expect(cloud.width).toBe(library.width);
+  expect(cloud.height).toBe(library.height);
+  expect(svg).toContain(`viewBox="-${EMBED_PAD_X} -${EMBED_PAD_TOP} `);
+}
+
 describe("watermark and parity", () => {
   it("matches the library SVG aside from the reserved mark", async () => {
     const { app } = appFor();
@@ -52,9 +64,22 @@ describe("watermark and parity", () => {
     expect(marked.drawing).toBe(library.drawing);
     expect(marked.width).toBe(library.width);
     expect(marked.height).toBe(library.height);
+    expect(svg).toContain('data-ck-embed="1"');
     const open = svg.match(/<svg\b[^>]*>/)?.[0] ?? "";
-    const box = open.match(/viewBox="0 0 ([0-9.]+) ([0-9.]+)"/);
-    expect(Number(box?.[2])).toBe(library.height + 16);
+    const box = open.match(/viewBox="(-?[0-9.]+) (-?[0-9.]+) ([0-9.]+) ([0-9.]+)"/);
+    const view = box?.slice(1, 5).map(Number) ?? [];
+    // Library viewBox is 0 0 <width> <height>. Cloud used to add only the 16px watermark band
+    // (0 0 640 256 for this bar, top grid 14px from the edge, 4px under the mark).
+    // The embed margin is viewBox-only: 24 top, 16 each side, 12 under that band.
+    expect(view).toEqual([
+      -EMBED_PAD_X,
+      -EMBED_PAD_TOP,
+      library.width + EMBED_PAD_X * 2,
+      library.height + EMBED_PAD_TOP + EMBED_PAD_BOTTOM + 16,
+    ]);
+    const markY = Number(svg.match(/data-ck-watermark="1"[\s\S]*?\by="([0-9.]+)"/)?.[1]);
+    expect(markY).toBe(library.height + 12);
+    expect((view[1] ?? 0) + (view[3] ?? 0) - markY).toBe(16);
     expect(response.headers.get("x-chartkit-watermark")).toBe("1");
     expect(response.headers.get("cache-control")).toBe("public, max-age=31536000, immutable");
     expect(response.headers.get("etag")).toMatch(/^"[0-9a-f]+"$/);
@@ -79,15 +104,15 @@ describe("watermark and parity", () => {
     );
     const body = (await bearer.json()) as { watermark: boolean; svg: string; url: string };
     expect(body.watermark).toBe(false);
-    expect(body.svg).toBe(render(bar));
+    expectClean(body.svg);
     expect(body.url).toMatch(/^http:\/\/cloud\.local\/c\/[A-Za-z0-9_-]{16}\.svg$/);
     expect(body.url).not.toContain("key=");
     expect(body.url).not.toContain(issued.key);
     const image = await app.handle(new Request(body.url));
     expect(image.headers.get("x-chartkit-watermark")).toBe("0");
-    expect(await image.text()).toBe(render(bar));
+    expectClean(await image.text());
     const leaked = await app.handle(new Request(`${body.url}?key=${issued.key}`));
-    expect(await leaked.text()).toBe(render(bar));
+    expectClean(await leaked.text());
     const sneaky = await app.handle(
       new Request(`http://cloud.local/charts?key=${issued.key}`, {
         method: "POST",
@@ -252,7 +277,7 @@ describe("rate limit and keys", () => {
     expect(stored.url).not.toContain("key=");
     expect(stored.url).not.toContain(key);
     const image = await app.handle(new Request(stored.url));
-    expect(await image.text()).toBe(render(bar));
+    expectClean(await image.text());
     expect(image.headers.get("x-chartkit-watermark")).toBe("0");
   });
 

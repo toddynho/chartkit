@@ -4,7 +4,7 @@ import { repair, type RepairResult } from "@chartkitdev/core/validate";
 import { repairPhase4 } from "@chartkitdev/core/validate/phase4";
 import { canonical } from "./charts.ts";
 import { rasterize } from "./png.ts";
-import { applyWatermark, themeIsDark } from "./watermark.ts";
+import { presentSvg, themeIsDark } from "./watermark.ts";
 
 const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);
 
@@ -32,11 +32,10 @@ export async function drawSpec(input: unknown, frame: Frame): Promise<Drawn> {
   const result = check(framed);
   const drawn = result.ok ? render(result.spec) : "";
   const failed = !result.ok || drawn.includes("ck-chart-error");
-  const svg = failed
-    ? applyWatermark(errorPicture(result), false)
-    : frame.watermark
-      ? applyWatermark(drawn, themeIsDark(frame.theme, drawn))
-      : drawn;
+  const svg = presentSvg(failed ? errorPicture(result) : drawn, {
+    watermark: failed || frame.watermark,
+    dark: failed ? false : themeIsDark(frame.theme, drawn),
+  });
   const size = svgSize(svg);
   if (frame.format === "png") {
     const png = await rasterize(svg, frame.scale);

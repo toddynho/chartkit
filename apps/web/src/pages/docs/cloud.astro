@@ -15,7 +15,7 @@ const description = "Render a ChartKit spec to SVG or PNG. Free, with a chartkit
   </p>
   <h2>GET /render</h2>
   <p>
-    <code>spec</code> is URL-encoded JSON or base64url JSON. <code>format</code> is <code>svg</code> (default) or <code>png</code>. <code>w</code> and <code>h</code> set the pixel size. <code>scale</code> is the PNG zoom, from 1 to 4. <code>theme</code> is a preset name such as <code>midnight</code>. This GET always includes the mark. A key on the query string is ignored, so an image URL stays free of secrets.
+    <code>spec</code> is URL-encoded JSON or base64url JSON. Omit <code>format</code>, or pass <code>svg</code>. SVG is the default: it skips rasterizing and stays sharp in chat. Pass <code>png</code> only when the host cannot display SVG, such as email, a GitHub README image, or some Slack clients. <code>w</code> and <code>h</code> set the pixel size. <code>scale</code> is the PNG zoom, from 1 to 4. Prefer 2 or higher when the format is PNG. <code>theme</code> is a preset name such as <code>midnight</code>. This GET always includes the mark. A key on the query string is ignored, so an image URL stays free of secrets.
   </p>
   <figure class="code"><figcaption>html</figcaption><pre><code>{snippets.img}</code></pre></figure>
   <h2>POST /render</h2>
@@ -46,5 +46,5 @@ const description = "Render a ChartKit spec to SVG or PNG. Free, with a chartkit
   <p>
     Hosted keys and stored charts use Vercel KV or Upstash when <code>KV_REST_API_URL</code> and <code>KV_REST_API_TOKEN</code> are set. A Workers deploy reads those same variables from Worker secrets. Without them, the process keeps keys and charts in memory.
   </p>
-  <p>PNG uses resvg wasm with Inter and Roboto bundled in the service. SVG text stays on the library font stack.</p>
+  <p>PNG uses resvg wasm with Inter and Roboto bundled in the service. SVG text stays on the library font stack. Agents should omit <code>format</code> and attach the SVG. PNG is the fallback for a host that cannot show SVG.</p>
 </DocsPage>

@@ -96,7 +96,9 @@ The rate limit is 120 a minute per IP. On Cloudflare the IP is `cf-connecting-ip
 - `GET /render` and `POST /render`
 - `POST /validate`
 - `POST /charts` and `GET /c/<id>.svg` or `.png`
-- `POST /mcp` — stateless [Streamable HTTP](https://modelcontextprotocol.io). One tool, `render_chart`, which calls the same render path. `GET /mcp` is 405. This is not `@chartkitdev/mcp` on stdio.
+- `POST /mcp` — stateless [Streamable HTTP](https://modelcontextprotocol.io). One tool, `render_chart`, which calls the same render path. Omit `format`, or pass `svg`. Pass `png` only when the host cannot display SVG (email, a GitHub README image, some Slack clients), and then set `scale` to 2 or higher. `GET /mcp` is 405. This is not `@chartkitdev/mcp` on stdio.
+
+Cloud SVGs add an outer margin so a chat attachment is not flush with the image edge: 24px on top, 16px on each side, and 12px under the 16px watermark band. The library drawing is unchanged. A keyed render gets the same margin without the mark. `/cloud` marketing previews are local SVGs and do not use this margin.
 
 ### Point the Astro site at a deploy
 
