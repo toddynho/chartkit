@@ -114,6 +114,16 @@ export function docsSpecForType(type: string): LiveSpec {
   return densifyDemo(specForType(type));
 }
 
+/**
+ * Homepage carousel and hero. These five look empty at the short example length.
+ * Every other type stays on that short example.
+ */
+const CAROUSEL_DENSE = new Set(["stacked-area", "heatmap", "spike", "candlestick", "progress-ring"]);
+
+export function carouselSpecForType(type: string): LiveSpec {
+  return CAROUSEL_DENSE.has(type) ? docsSpecForType(type) : specForType(type);
+}
+
 /** Overview rail. Eight points, not the densified docs series. */
 export const overviewLine: LiveSpec = {
   version: "1",

@@ -60,8 +60,10 @@ function series(count: number, seed: number, base: number, trend: number, amp: n
 
 const LINE_POINTS = 80;
 const BAR_MONTHS = 24;
-const HEATMAP_DAYS = 84;
-const CANDLE_SESSIONS = 1000;
+const HEATMAP_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
+const HEATMAP_HOURS = 24;
+const CANDLE_SESSIONS = 150;
+const SPIKE_BUCKETS = 120;
 
 function lineRows(): Record<string, unknown>[] {
   const random = rng(11);
@@ -159,12 +161,26 @@ function densify(spec: LiveSpec): void {
     }
     case "heatmap": {
       const random = rng(71);
-      spec.data = Array.from({ length: HEATMAP_DAYS }, (_, index) => {
-        const weekend = index % 7 >= 5;
-        const value = weekend ? Math.round(random() * 3) : Math.round(2 + random() * 9 + Math.sin(index / 7) * 2);
-        return { date: day(index), value };
+      const rows: Record<string, unknown>[] = [];
+      HEATMAP_DAYS.forEach((dayName, dayIndex) => {
+        const weekend = dayIndex >= 5;
+        for (let hour = 0; hour < HEATMAP_HOURS; hour++) {
+          const work = hour >= 9 && hour <= 17;
+          const evening = hour >= 18 && hour <= 21;
+          const base = weekend ? (hour >= 11 && hour <= 16 ? 4 : 1) : work ? 9 : evening ? 5 : hour >= 7 ? 3 : 1;
+          const value = Math.max(0, Math.round(base + Math.sin((hour / 24) * Math.PI * 2 + dayIndex) * 1.4 + (random() - 0.45) * (weekend ? 2 : 3)));
+          rows.push({ day: dayName, hour: String(hour).padStart(2, "0"), value });
+        }
       });
-      alt(spec, "Twelve weeks of daily activity. Weekdays run hotter than weekends.");
+      spec.data = rows;
+      spec.encoding = {
+        x: "hour",
+        y: "day",
+        color: { field: "value", type: "quantitative" },
+      };
+      // weeks on a grid warns CK3012. The calendar example stays in core JSON.
+      spec.mark = { layout: "grid" };
+      alt(spec, "Requests by weekday and hour. Weekday afternoons run hottest; nights and weekends stay quiet.");
       return;
     }
     case "candlestick": {
@@ -193,19 +209,30 @@ function densify(spec: LiveSpec): void {
         cursor += 1;
       }
       spec.data = rows;
-      alt(spec, "About one thousand sessions. The close drifts upward from 42, with ordinary daily ranges.");
+      alt(spec, "One hundred fifty sessions. The close drifts upward from 42, with ordinary daily ranges.");
       return;
     }
     case "spike": {
       const random = rng(91);
-      spec.data = Array.from({ length: 80 }, (_, index) => {
+      spec.data = Array.from({ length: SPIKE_BUCKETS }, (_, index) => {
         const minutes = index * 5;
         const time = `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
-        const burst = random() > 0.9;
+        const burst = random() > 0.92;
         const count = burst ? Math.round(10 + random() * 28) : Math.round(random() * 3);
         return { time, count };
       });
-      alt(spec, "Blocked requests over 80 five-minute buckets, mostly quiet with a few spikes.");
+      alt(spec, "Blocked requests over 120 five-minute buckets, mostly quiet with a few spikes.");
+      return;
+    }
+    case "progress-ring": {
+      const metric = isRecord(spec.metric) ? { ...spec.metric } : {};
+      metric.label = "Storage";
+      metric.value = 58;
+      metric.min = 0;
+      metric.max = 100;
+      metric.format = { style: "number", decimals: 0, suffix: "%" };
+      spec.metric = metric;
+      alt(spec, "Storage is 58 percent full.");
       return;
     }
     case "sparkline":
@@ -535,6 +562,7 @@ export function densifyDemo(spec: LiveSpec): LiveSpec {
 export const denseCounts = {
   line: LINE_POINTS,
   bar: BAR_MONTHS,
-  heatmap: HEATMAP_DAYS,
+  heatmap: HEATMAP_DAYS.length * HEATMAP_HOURS,
   candlestick: CANDLE_SESSIONS,
+  spike: SPIKE_BUCKETS,
 };

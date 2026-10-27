@@ -2,7 +2,7 @@ import { paintSpec } from "../lib/chartkit";
 import { loadMaps } from "../lib/batch3";
 import { chartTypes } from "./chart-types";
 import { chartDocs } from "./docs-catalog";
-import { docsSpecForType, specForType } from "./live-specs";
+import { carouselSpecForType, docsSpecForType } from "./live-specs";
 import { brandTheme, galleryTheme, SERIES } from "./marketing-theme";
 
 export type Slide = {
@@ -127,7 +127,7 @@ export function homeSlides(): Slide[] {
       .map((chart) => ({ type: chart.type, label: chart.title, lede: chart.summary })),
   ];
   const slides = ordered.map((chart) => {
-    const raw = colorCategories(heatOrange(structuredClone(specForType(chart.type)) as Record<string, unknown>));
+    const raw = colorCategories(heatOrange(structuredClone(carouselSpecForType(chart.type)) as Record<string, unknown>));
     const title = typeof raw.title === "string" && raw.title ? raw.title : chart.label;
     return slideFrom(chart.label, title, chart.lede, raw);
   });
