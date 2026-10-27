@@ -1,8 +1,9 @@
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { CODE_LIBRARIES } from "./capabilities.mjs";
-import { LIBRARY_LABEL, checkChartKit, checkSupp, executeAnswer, extractJson, extractModule, libraryUse, promptFor, scoreModule } from "./check.mjs";
+import { LIBRARY_LABEL, checkChartKit, checkSupp, executeAnswer, extractJson, extractModule, libraryUse, promptFor, repair, scoreModule } from "./check.mjs";
 import { docsManifest } from "./docs.mjs";
 import { askModel, selectProvider } from "./provider.mjs";
+import { scoreAgent } from "./score.mjs";
 import { tasks as defaultTasks } from "./tasks.mjs";
 
 export function formatFeedback(result) {
@@ -99,6 +100,7 @@ export async function runAgent({ env = process.env, tasks = defaultTasks, ask = 
     },
     usage: results.reduce((sum, row) => addUsage(addUsage(sum, row.usage), row.second?.usage), { input_tokens: 0, output_tokens: 0 }),
     results,
+    scoreboard: scoreAgent(results),
   };
 }
 
@@ -109,11 +111,32 @@ function addUsage(sum, usage) {
   };
 }
 
+/** repair() is local. A pass here does not spend another model call. */
+async function chartkitRepairPasses(attemptResult, task) {
+  if (!attemptResult || attemptResult.ok) return false;
+  let spec;
+  try {
+    spec = extractJson(attemptResult.output ?? "");
+  } catch {
+    return false;
+  }
+  const fixed = repair(spec);
+  if (!fixed?.spec) return false;
+  const checked = typeof task.pass === "function" ? await checkSupp(fixed.spec, task) : checkChartKit(fixed.spec, task);
+  return checked.ok === true;
+}
+
 async function scoreOne(selected, task, library, prompt, ask, getBrowser) {
   const first = await attempt(selected, task, library, prompt, ask, getBrowser);
-  if (!shouldRepair(first)) return { id: task.id, library, ...first, second: null };
+  if (library === "chartkit" && await chartkitRepairPasses(first, task)) {
+    return { id: task.id, library, ...first, second: null, repaired: true };
+  }
+  if (!shouldRepair(first)) return { id: task.id, library, ...first, second: null, repaired: false };
   const second = await attempt(selected, task, library, repairPrompt(prompt, first), ask, getBrowser);
-  return { id: task.id, library, ...first, second };
+  if (library === "chartkit" && await chartkitRepairPasses(second, task)) {
+    return { id: task.id, library, ...first, second: { ...second, repaired: true }, repaired: false };
+  }
+  return { id: task.id, library, ...first, second, repaired: false };
 }
 
 async function attempt(selected, task, library, prompt, ask, getBrowser) {

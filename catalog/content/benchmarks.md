@@ -128,6 +128,8 @@ Tasks: 42. Model: claude-sonnet-4-5. Temperature: 0.
 
 ChartKit's no-docs first try plus `repair()` is 42/42. Official first try is already 42/42. The other libraries have no repair step. Nivo and uPlot were not in this eval, so this file does not invent scores for them.
 
+The token harness now also runs Observable Plot and a model matrix (`npm run bench:agent-matrix`, with-docs by default). This table is still the 2026-10-16 claude-sonnet-4-5 scoreboard. Homepage token figures stay illustrative until that matrix is published.
+
 A ChartKit-only rerun with llms.txt cut to 6,329 bytes scored 41/42 on the first try. The miss was combo axis CK3002, which repair() does not patch. The headline uses the full docs file.
 
 ## Canvas line, 2026-10-21

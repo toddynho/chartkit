@@ -1,0 +1,15 @@
+{
+  "priceSource": "Stub list prices in USD per 1,000,000 tokens so the harness can compute cost/100. These are not vendor quotes. Replace inputPerMillion and outputPerMillion from the provider's price page before publishing a dollar figure. Checked in 2026-10-27.",
+  "publishedDocs": "official",
+  "models": [
+    { "provider": "anthropic", "model": "claude-haiku-5-5", "inputPerMillion": 1, "outputPerMillion": 5 },
+    { "provider": "anthropic", "model": "claude-sonnet-5-5", "inputPerMillion": 3, "outputPerMillion": 15 },
+    { "provider": "anthropic", "model": "claude-opus-5-5", "inputPerMillion": 15, "outputPerMillion": 75 },
+    { "provider": "anthropic", "model": "claude-fable-5-1", "inputPerMillion": 10, "outputPerMillion": 50 },
+    { "provider": "openai", "model": "gpt-6-luna", "inputPerMillion": 0.25, "outputPerMillion": 2 },
+    { "provider": "openai", "model": "gpt-6.1-terra", "inputPerMillion": 1.25, "outputPerMillion": 10 },
+    { "provider": "openai", "model": "gpt-6.1-sol", "inputPerMillion": 2.5, "outputPerMillion": 15 },
+    { "provider": "openai", "model": "gpt-6-astra", "inputPerMillion": 5, "outputPerMillion": 30 },
+    { "provider": "xai", "model": "grok-4.7", "inputPerMillion": 2, "outputPerMillion": 10 }
+  ]
+}

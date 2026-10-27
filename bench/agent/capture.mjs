@@ -106,9 +106,37 @@ export function typesFromOption(option) {
   return types;
 }
 
-const CAPTURED = /^(?:chart\.js(?:\/auto)?|echarts(?:\/core)?)$/;
+const PLOT_MARKS = new Set([
+  "area", "areaX", "areaY", "arrow", "auto", "barX", "barY",
+  "cell", "cellX", "cellY", "circle", "dot", "dotX", "dotY", "hexagon",
+  "line", "lineX", "lineY", "link", "rect", "rectX", "rectY",
+  "ruleX", "ruleY", "spike", "text", "textX", "textY", "tickX", "tickY",
+  "vector", "vectorX", "vectorY",
+]);
 
-/** Wrap Chart.js and ECharts so the checker can read series data from the chart, not from meta. */
+function plotWrapper(real, names) {
+  const marks = [...PLOT_MARKS].filter((name) => names.includes(name));
+  const others = names.filter((name) => name !== "plot" && !PLOT_MARKS.has(name));
+  return `
+    import * as real from ${JSON.stringify(real)};
+    ${marks.map((name) => `export const ${name} = (...args) => {
+      (globalThis.__ckPlotMarks ??= []).push({ name: ${JSON.stringify(name)}, data: args[0] });
+      return real.${name}(...args);
+    };`).join("\n")}
+    export function plot(...args) {
+      const node = real.plot(...args);
+      const svg = node?.querySelector?.("svg") ?? node;
+      const cls = svg?.getAttribute?.("class");
+      if (cls) (globalThis.__ckPlotClass ??= []).push(cls);
+      return node;
+    }
+    ${others.map((name) => `export const ${name} = real.${name};`).join("\n")}
+  `;
+}
+
+const CAPTURED = /^(?:chart\.js(?:\/auto)?|echarts(?:\/core)?|@observablehq\/plot)$/;
+
+/** Wrap Chart.js, ECharts, and Observable Plot so the checker can read series data from the chart, not from meta. */
 export function libraryCapturePlugin() {
   return {
     name: "library-capture",
@@ -124,7 +152,11 @@ export function libraryCapturePlugin() {
       build.onLoad({ filter: /.*/, namespace: "ck-capture" }, async (args) => {
         const real = require.resolve(args.path);
         const names = await exportNames(real);
-        const contents = args.path.startsWith("chart.js") ? chartWrapper(real, names) : echartsWrapper(real, names);
+        const contents = args.path.startsWith("chart.js")
+          ? chartWrapper(real, names)
+          : args.path.startsWith("echarts")
+            ? echartsWrapper(real, names)
+            : plotWrapper(real, names);
         return { contents, resolveDir: dirname(real) };
       });
     },

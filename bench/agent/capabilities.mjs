@@ -1,5 +1,23 @@
 /** Which config types count as a hit for each code library. null means the library has no such chart, so the honest answer is unsupported. */
 export const ACCEPTED = {
+  // Observable Plot mark names. "combo" is recorded when a bar mark and a line mark are both used.
+  // Donut, gauge, kpi, progress-ring, and candlestick have no mark; a substitute chart does not pass.
+  plot: {
+    line: ["line", "lineY", "lineX"],
+    bar: ["barY", "barX"],
+    donut: null,
+    "stacked-area": ["areaY", "areaX", "area"],
+    scatter: ["dot", "dotX", "dotY"],
+    combo: ["combo"],
+    heatmap: ["cell", "cellX", "cellY"],
+    gauge: null,
+    kpi: null,
+    sparkline: ["line", "lineY", "lineX"],
+    "mini-area": ["areaY", "areaX", "area"],
+    "progress-ring": null,
+    spike: ["spike"],
+    candlestick: null,
+  },
   chartjs: {
     line: ["line"],
     bar: ["bar"],
@@ -50,4 +68,4 @@ export const ACCEPTED = {
   },
 };
 
-export const CODE_LIBRARIES = ["recharts", "echarts", "chartjs"];
+export const CODE_LIBRARIES = ["plot", "chartjs", "recharts", "echarts"];

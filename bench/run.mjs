@@ -64,7 +64,7 @@ if (!skip.agent) {
 } else {
   result.agent = {
     status: "not yet run",
-    reason: "Skipped with --skip-agent. Set OPENAI_API_KEY or ANTHROPIC_API_KEY and run without that flag.",
+    reason: "Skipped with --skip-agent. Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or XAI_API_KEY and run without that flag. The publishable token matrix is npm run bench:agent-matrix.",
     taskCount: tasks.length,
   };
 }

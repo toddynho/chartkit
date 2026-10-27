@@ -1,9 +1,10 @@
 /**
  * PLACEHOLDER token-eval figures.
  *
- * These numbers are invented. Replace this module with the real token-eval
- * JSON when it exists, set `illustrative` to false, and the homepage drops
- * the "Illustrative numbers…" caption. Bar widths are value / max, not measurements.
+ * These numbers are invented. Replace this module with the scoreboard from
+ * `bench/results/agent/matrix/summary-official.json` (median output tokens and
+ * median calls on working charts), set `illustrative` to false, and the homepage
+ * drops the "Illustrative numbers…" caption. Bar widths are value / max, not measurements.
  * The comparison rows are a labeled track (name, width, tokens · calls), not a
  * chart-type mock — carousel and showcase charts stay real ChartKit renders.
  */
