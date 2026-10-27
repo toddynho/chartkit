@@ -182,7 +182,19 @@ html[data-stack="vanilla"] .home-card .stack-chip[data-stack-chip="vanilla"] {
 }
 .home-card .stack-sample--quiet { margin: 0; flex: 1; }
 .home-card .stack-sample__block { position: relative; flex: 1; display: flex; flex-direction: column; }
-.home-card .stack-sample__block .code { flex: 1; display: flex; flex-direction: column; min-height: 248px; }
+.home-card .stack-sample__block .code { flex: 1; flex-direction: column; min-height: 248px; }
+
+/* display:flex on every panel outranked .stack-sample [data-stack-panel] { display: none }
+   and stacked React, Vue, Svelte, and JS. Hide again, then show only the active framework. */
+.home-card .stack-sample [data-stack-panel] { display: none; }
+
+html:not([data-stack]) .home-card .stack-sample [data-stack-panel="react"],
+html[data-stack="react"] .home-card .stack-sample [data-stack-panel="react"],
+html[data-stack="vue"] .home-card .stack-sample [data-stack-panel="vue"],
+html[data-stack="svelte"] .home-card .stack-sample [data-stack-panel="svelte"],
+html[data-stack="vanilla"] .home-card .stack-sample [data-stack-panel="vanilla"] {
+  display: flex;
+}
 .home-card .code { margin: 0; }
 .home-card .code figcaption {
   margin: 0;
