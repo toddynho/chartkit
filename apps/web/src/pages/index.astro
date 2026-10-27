@@ -84,20 +84,20 @@ const icon = (d: string) =>
       <div class="section-head">
         <p class="eyebrow eyebrow--blue">For the agent</p>
         <h2 id="tokens-title">Fewer tokens per chart</h2>
-        <p>An agent writes a short spec instead of chart code, and gets it right without a retry. Same task, same model, five libraries.</p>
+        <p>If you're building an agent that draws charts, point it here.</p>
       </div>
       <div class="stat-grid">
         {
           tokens.stats.map((stat) => (
             <article class:list={["stat-card", stat.ink && "stat-card--ink"]}>
-              <p class="stat-num">
+              <p class:list={["stat-num", stat.range && "stat-num--range"]}>
                 {stat.value}
-                <span>{stat.suffix}</span>
+                {stat.suffix ? <span>{stat.suffix}</span> : null}
               </p>
               <p>
                 {stat.repair ? (
                   <>
-                    model calls per working chart, <code>repair()</code> handles the rest
+                    model calls per working chart. <code>repair()</code> does not add a model call.
                   </>
                 ) : (
                   stat.body
@@ -110,7 +110,7 @@ const icon = (d: string) =>
       <div class="token-card">
         <div class="token-card__head">
           <h3>Output tokens per working chart</h3>
-          <p>median · {tokens.prompts} prompts · includes retries</p>
+          <p>{tokens.barLabel}</p>
         </div>
         <div class="token-rows">
           {
@@ -120,20 +120,14 @@ const icon = (d: string) =>
                 <div class="token-row__track" aria-hidden="true">
                   <div class="token-row__fill" style={`width:${row.width}`} />
                 </div>
-                <div class="token-row__val">
-                  {row.tokens} <span>· {row.calls} calls</span>
-                </div>
+                <div class="token-row__val">{row.tokens}</div>
               </div>
             ))
           }
         </div>
-        {
-          tokens.illustrative ? (
-            <p class="token-note">
-              Illustrative numbers pending the token eval. Method: same {tokens.prompts} chart prompts and model, each library's docs in context, count output tokens until <code>validate()</code> or a render passes; retries count. <a href="/benchmarks">Eval design →</a>
-            </p>
-          ) : null
-        }
+        <p class="token-note">
+          {tokens.noteLead} <a href="/agents#eval">Eval design →</a>
+        </p>
       </div>
     </section>
 
