@@ -11,7 +11,7 @@ const description = "Render a ChartKit spec to SVG or PNG. Free, with a chartkit
     ChartKit Cloud renders a spec for any agent or app. There is no signup. Free images include a small <code>chartkit.dev</code> mark, linked to <a href="/cloud">/cloud</a>. A valid API key removes the mark. This service draws the mark. <code>@chartkitdev/core</code> does not, and the core bundles do not include it.
   </p>
   <p>
-    Every render runs <code>validate()</code> and <code>repair()</code> first. Response headers carry the JSON Patch, the warning codes, and the error codes. <code>POST</code> also returns them as JSON. <code>render_chart</code> on <code>@chartkitdev/mcp</code> returns the image URL plus those repairs. The package is not published yet.
+    Every render runs <code>validate()</code> and <code>repair()</code> first. Response headers carry the JSON Patch, the warning codes, and the error codes. <code>POST</code> also returns them as JSON. <code>render_chart</code> on <code>@chartkitdev/mcp</code> returns the image URL plus those repairs. The package is not published yet. Example URLs on this site use <code>https://cloud.chartkit.dev</code> unless the site build sets <code>PUBLIC_CHARTKIT_CLOUD_URL</code>.
   </p>
   <h2>GET /render</h2>
   <p>
@@ -44,7 +44,7 @@ const description = "Render a ChartKit spec to SVG or PNG. Free, with a chartkit
   </p>
   <figure class="code"><figcaption>js</figcaption><pre><code>{snippets.clean}</code></pre></figure>
   <p>
-    Hosted keys and stored charts use Vercel KV or Upstash when <code>KV_REST_API_URL</code> and <code>KV_REST_API_TOKEN</code> are set. Without KV, the process keeps them in memory.
+    Hosted keys and stored charts use Vercel KV or Upstash when <code>KV_REST_API_URL</code> and <code>KV_REST_API_TOKEN</code> are set. A Workers deploy reads those same variables from Worker secrets. Without them, the process keeps keys and charts in memory.
   </p>
   <p>PNG uses resvg wasm with Inter and Roboto bundled in the service. SVG text stays on the library font stack.</p>
 </DocsPage>

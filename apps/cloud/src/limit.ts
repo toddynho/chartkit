@@ -38,6 +38,8 @@ export function memoryLimiter(limit = FREE_LIMIT, windowMs = WINDOW_MS, now: () 
 }
 
 export function clientIp(request: Request): string {
+  const cf = request.headers.get("cf-connecting-ip")?.trim();
+  if (cf) return cf;
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
     const first = forwarded.split(",")[0]?.trim();

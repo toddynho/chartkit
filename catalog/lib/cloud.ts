@@ -1,7 +1,12 @@
-/** Public render origin. Live examples use NEXT_PUBLIC_CHARTKIT_CLOUD_URL when the docs server points at a local process. */
+/** Documented placeholder. Paint prefers PUBLIC_CHARTKIT_CLOUD_URL, then NEXT_PUBLIC_CHARTKIT_CLOUD_URL. */
 export const PUBLIC_CLOUD = "https://cloud.chartkit.dev";
 
-export const cloudBase = process.env.NEXT_PUBLIC_CHARTKIT_CLOUD_URL || PUBLIC_CLOUD;
+export function cloudOrigin(env: NodeJS.ProcessEnv = process.env): string {
+  const raw = env.PUBLIC_CHARTKIT_CLOUD_URL || env.NEXT_PUBLIC_CHARTKIT_CLOUD_URL || PUBLIC_CLOUD;
+  return raw.replace(/\/+$/, "");
+}
+
+export const cloudBase = cloudOrigin();
 
 /** Showcase line from the looks page. The cloud examples use this instead of the two-row llms.txt bar. */
 export const cloudSpec = {
@@ -39,13 +44,13 @@ export function renderPath(theme?: "midnight"): string {
 export const liveLight = `${cloudBase}${renderPath()}`;
 export const liveMidnight = `${cloudBase}${renderPath("midnight")}`;
 
-const publicLight = `${PUBLIC_CLOUD}${renderPath()}`;
-const publicPng = `${PUBLIC_CLOUD}${renderPath().replace("format=svg", "format=png")}`;
+const publicLight = `${cloudBase}${renderPath()}`;
+const publicPng = `${cloudBase}${renderPath().replace("format=svg", "format=png")}`;
 
 export const snippets = {
   img: `<img\n  alt="${alt}"\n  src="${publicLight}"\n/>`,
-  curl: `curl -sG "${PUBLIC_CLOUD}/render" \\\n  --data-urlencode 'spec=${specJson}' \\\n  --data-urlencode format=svg \\\n  --data-urlencode w=960 \\\n  --data-urlencode h=480 \\\n  -o chart.svg`,
-  fetch: `const spec = ${specJson};\n\nconst res = await fetch("${PUBLIC_CLOUD}/render", {\n  method: "POST",\n  headers: { "content-type": "application/json" },\n  body: JSON.stringify({ spec, format: "svg", w: 960, h: 480 }),\n});\nconst { url, applied, warnings, svg } = await res.json();`,
-  clean: `const spec = ${specJson};\n\nconst res = await fetch("${PUBLIC_CLOUD}/charts", {\n  method: "POST",\n  headers: {\n    "content-type": "application/json",\n    authorization: \`Bearer \${process.env.CHARTKIT_CLOUD_KEY}\`,\n  },\n  body: JSON.stringify({ spec }),\n});\nconst { url } = await res.json();\n// url is /c/<id>.svg. It does not contain the key.\nconst img = \`<img alt="${alt}" src="\${url}">\`;`,
+  curl: `curl -sG "${cloudBase}/render" \\\n  --data-urlencode 'spec=${specJson}' \\\n  --data-urlencode format=svg \\\n  --data-urlencode w=960 \\\n  --data-urlencode h=480 \\\n  -o chart.svg`,
+  fetch: `const spec = ${specJson};\n\nconst res = await fetch("${cloudBase}/render", {\n  method: "POST",\n  headers: { "content-type": "application/json" },\n  body: JSON.stringify({ spec, format: "svg", w: 960, h: 480 }),\n});\nconst { url, applied, warnings, svg } = await res.json();`,
+  clean: `const spec = ${specJson};\n\nconst res = await fetch("${cloudBase}/charts", {\n  method: "POST",\n  headers: {\n    "content-type": "application/json",\n    authorization: \`Bearer \${process.env.CHARTKIT_CLOUD_KEY}\`,\n  },\n  body: JSON.stringify({ spec }),\n});\nconst { url } = await res.json();\n// url is /c/<id>.svg. It does not contain the key.\nconst img = \`<img alt="${alt}" src="\${url}">\`;`,
   markdown: `![${alt}](${publicPng})`,
 };
