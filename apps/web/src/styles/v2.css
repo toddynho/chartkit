@@ -126,22 +126,48 @@
 }
 
 .home-card h2 { margin: 0 0 4px; font-size: 16px; letter-spacing: -0.01em; }
-.home-card > p { margin: 0 0 16px; color: var(--ink-2); font-size: 14px; line-height: 1.5; }
+
+/* Title and subtitle on the left, framework chips on the right, one row.
+   When the card is too narrow for both, the chips drop under the copy. */
+.home-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 12px;
+  margin: 0 0 16px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.home-card__copy {
+  flex: 1 1 9rem;
+  min-width: min(100%, 9rem);
+  align-self: start;
+}
+
+.home-card__copy p { margin: 0; color: var(--ink-2); font-size: 14px; line-height: 1.5; }
+
+.home-card__chips {
+  display: flex;
+  justify-content: flex-end;
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+  margin-left: auto;
+  flex: 0 1 auto;
+}
 
 .home-card .stack-chips {
   display: inline-flex;
   flex-wrap: wrap;
   gap: 0;
-  margin: 0 0 14px;
+  margin: 0;
   padding: 3px;
+  width: max-content;
+  max-width: 100%;
   background: #ebebed;
   border-radius: 12px;
-}
-
-/* Matches the framework chip row so both dark wells start and end together. */
-.home-card__align {
-  height: 38px;
-  margin: 0 0 14px;
 }
 
 .home-card .stack-chip {
@@ -179,6 +205,28 @@ html[data-stack="vanilla"] .home-card .stack-chip[data-stack-chip="vanilla"] {
   display: flex;
   flex-direction: column;
   min-height: 280px;
+  margin: 0;
+}
+
+/* Share one header track and one well track so the dark wells stay level
+   after the chips move into the install header. */
+@media (min-width: 702px) {
+  .home-cards {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: 14px;
+    row-gap: 0;
+  }
+
+  .home-card {
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: span 2;
+    align-content: start;
+    min-width: 0;
+  }
+
+  .home-card__head { align-self: stretch; }
 }
 .home-card .stack-sample--quiet { margin: 0; flex: 1; }
 .home-card .stack-sample__block { position: relative; flex: 1; display: flex; flex-direction: column; }
