@@ -1,3 +1,5 @@
+import { chartkitCloudUrl } from "./cloud-url";
+
 /** Small valid specs for the try-it shell. Not a catalog of every chart. */
 export const samples = {
   line: {
@@ -35,7 +37,7 @@ export const samples = {
 export const lineSample = JSON.stringify(samples.line, null, 2);
 
 /** GET /render on the public Cloud origin. The query spec is the line sample above. */
-export const cloudCurl = `curl -sG "https://cloud.chartkit.dev/render" \\
+export const cloudCurl = `curl -sG "${chartkitCloudUrl()}/render" \\
   --data-urlencode 'spec=${JSON.stringify(samples.line)}' \\
   --data-urlencode format=svg \\
   -o chart.svg`;

@@ -34,6 +34,10 @@ npm run build:web
 
 The site is the static files in `apps/web/dist`. Upload that directory to the chartkit.dev host, or serve it from there.
 
+## Cloud render URL
+
+Curl samples, the Cloud page, and the docs snippets use `https://cloud.chartkit.dev` unless the build has `PUBLIC_CHARTKIT_CLOUD_URL`. `NEXT_PUBLIC_CHARTKIT_CLOUD_URL` still works. An unset variable does not fail the build. Set it to the workers.dev host from `wrangler deploy` when the marketing site should call that worker. The paint step that writes the docs snippets sees the variable too, so set it for `npm run build:web`. See [apps/cloud/README.md](../cloud/README.md).
+
 `npm run build` builds the libraries and then this app. `npm run start` serves the built `dist` with `astro preview` (build first). [`nixpacks.toml`](../../nixpacks.toml) uses Node 22, `npm run build`, and `npm run start` when a host builds the repo that way.
 
 Preview the production build locally:

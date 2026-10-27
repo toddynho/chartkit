@@ -2,13 +2,15 @@
 import "../styles/v2.css";
 import Base from "../layouts/Base.astro";
 import { highlight } from "../lib/highlight";
+import { chartkitCloudUrl } from "../data/cloud-url";
 import { showcaseSvgs } from "../data/marketing-charts";
 
 const proDraft = true;
 const description =
   "ChartKit Cloud returns SVG or PNG from a JSON spec. Free images include a watermark. Pro pricing is not on sale yet.";
 const shots = showcaseSvgs();
-const curl = `curl -sG "https://cloud.chartkit.dev/render" \\
+const cloudUrl = chartkitCloudUrl();
+const curl = `curl -sG "${cloudUrl}/render" \\
   --data-urlencode 'spec={"version":"1","type":"line","data":[{"q":"Q1","v":40},{"q":"Q2","v":55}],"encoding":{"x":"q","y":"v"},"a11y":{"alt":"Units rose from Q1 to Q2."}}' \\
   --data-urlencode format=svg \\
   -o chart.svg`;
@@ -89,7 +91,7 @@ const icon = (d: string) =>
               <div class="mock-readme">
                 <div class="readme-tab">README.md</div>
                 <strong># acme-metrics</strong>
-                <p class="readme-img">![signups](https://cloud.chartkit.dev/render?spec=…&amp;format=png)</p>
+                <p class="readme-img">{`![signups](${cloudUrl}/render?spec=…&format=png)`}</p>
                 <Fragment set:html={shots.readme} />
               </div>
             </div>

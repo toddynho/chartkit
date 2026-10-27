@@ -1,14 +1,18 @@
-import { createRequire } from "node:module";
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const require = createRequire(import.meta.url);
-const here = dirname(fileURLToPath(import.meta.url));
-const fontsDir = join(here, "../fonts");
+import type { InitInput } from "@resvg/resvg-wasm";
 
 let ready: Promise<void> | undefined;
-let fonts: Uint8Array[] | undefined;
+let wasmSource: InitInput | undefined;
+let fontBytes: Uint8Array[] | undefined;
+
+/**
+ * Worker entry calls this with the wasm module and the bundled faces.
+ * Node tests leave it unset and read the same files from disk.
+ */
+export function installRasterAssets(assets: { wasm: InitInput; fonts: ArrayBuffer[] }): void {
+  if (ready) return;
+  wasmSource = assets.wasm;
+  fontBytes = assets.fonts.map((font) => (font instanceof Uint8Array ? font : new Uint8Array(font)));
+}
 
 export async function rasterize(svg: string, scale: number): Promise<Uint8Array> {
   await loadWasm();
@@ -39,21 +43,35 @@ function darkSvg(svg: string): boolean {
 }
 
 function fontBuffers(): Uint8Array[] {
-  if (!fonts) {
-    fonts = [readFileSync(join(fontsDir, "Inter-Regular.ttf")), readFileSync(join(fontsDir, "Roboto-Regular.ttf"))];
-  }
-  return fonts;
+  if (!fontBytes) throw new Error("ChartKit fonts are not loaded.");
+  return fontBytes;
 }
 
 function loadWasm(): Promise<void> {
   if (!ready) {
     ready = (async () => {
       const { initWasm } = await import("@resvg/resvg-wasm");
-      const wasmPath = require.resolve("@resvg/resvg-wasm/index_bg.wasm");
-      await initWasm(readFileSync(wasmPath));
+      if (!wasmSource) wasmSource = await nodeWasmBytes();
+      if (!fontBytes) fontBytes = await nodeFontBytes();
+      await initWasm(wasmSource);
     })();
   }
   return ready;
+}
+
+async function nodeWasmBytes(): Promise<Uint8Array> {
+  const { readFileSync } = await import("node:fs");
+  const { createRequire } = await import("node:module");
+  const require = createRequire(import.meta.url);
+  return readFileSync(require.resolve("@resvg/resvg-wasm/index_bg.wasm"));
+}
+
+async function nodeFontBytes(): Promise<Uint8Array[]> {
+  const { readFileSync } = await import("node:fs");
+  const { dirname, join } = await import("node:path");
+  const { fileURLToPath } = await import("node:url");
+  const dir = join(dirname(fileURLToPath(import.meta.url)), "../fonts");
+  return [readFileSync(join(dir, "Inter-Regular.ttf")), readFileSync(join(dir, "Roboto-Regular.ttf"))];
 }
 
 function resolveVars(input: string): string {

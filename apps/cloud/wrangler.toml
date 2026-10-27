@@ -1,0 +1,45 @@
+# ChartKit Cloud on Cloudflare Workers.
+# `npm run deploy` bundles src/worker.ts to dist/worker.js, then runs `wrangler deploy`.
+# Deploy from a shell that has CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.
+# This file has no secrets. Do not put the API token here.
+name = "chartkit-cloud"
+main = "dist/worker.js"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+# workers.dev URL: https://chartkit-cloud.<account-subdomain>.workers.dev
+# Wrangler prints the real host. The account subdomain is not stored in this repo.
+
+# Custom hostname. Leave commented until the chartkit.dev zone is on this account.
+# Uncommenting without the zone makes deploy fail.
+# [[routes]]
+# pattern = "cloud.chartkit.dev"
+# custom_domain = true
+
+# Optional REST secrets, set with `wrangler secret put`, not in this file:
+# KV_REST_API_URL, KV_REST_API_TOKEN (Vercel KV or Upstash; keys and stored charts)
+# CHARTKIT_DEV_KEYS (comma-separated test keys that remove the mark)
+# STRIPE_SECRET_KEY, STRIPE_PRICE_ID, STRIPE_WEBHOOK_SECRET (checkout stays off until these exist)
+
+# Native Cloudflare KV. Not read by the worker yet. In-memory, or the REST vars above, is enough to test.
+# [[kv_namespaces]]
+# binding = "CHARTKIT_KV"
+# id = "00000000000000000000000000000000"
+
+# Hashed image bytes. Not read by the worker yet.
+# Repeats use the content hash, Cache-Control, and the Workers Cache API.
+# [[r2_buckets]]
+# binding = "CHARTKIT_CACHE"
+# bucket_name = "chartkit-cloud-cache"
+
+# wasm-bindgen needs the wasm bytes or a Module. Fonts are raw bytes.
+[[rules]]
+type = "CompiledWasm"
+globs = ["**/*.wasm"]
+fallthrough = true
+
+[[rules]]
+type = "Data"
+globs = ["**/*.ttf"]
+fallthrough = true

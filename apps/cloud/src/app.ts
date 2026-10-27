@@ -4,6 +4,7 @@ import { chartStoreFromEnv } from "./charts.ts";
 import { cacheKey, drawSpec, parseSpec, readFrame, repairSpec, type Frame } from "./draw.ts";
 import { keyStoreFromEnv, type KeyStore } from "./keys.ts";
 import { clientIp, memoryLimiter, type RateLimiter } from "./limit.ts";
+import { handleMcp } from "./mcp.ts";
 import { createCheckout, stripeFromEnv, verifyStripe, type StripeConfig } from "./stripe.ts";
 
 const EXPOSE = "ETag, X-ChartKit-Repairs, X-ChartKit-Warnings, X-ChartKit-Errors, X-ChartKit-Ok, X-ChartKit-Repair-Patch, X-ChartKit-Watermark, X-ChartKit-Cache, X-ChartKit-Key, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After";
@@ -57,6 +58,13 @@ export function createApp(deps: CloudDeps = {}): CloudApp {
       const limited = limiter.take(clientIp(request));
       if (!limited.ok) return limitedResponse(request, limited.limit, limited.retryAfter);
 
+      if (path === "/mcp") {
+        return handleMcp(request, async (call) => {
+          const nextUrl = new URL("/render", url.origin);
+          const next = new Request(nextUrl, { method: "POST", headers: call.headers, body: call.body });
+          return renderPost(next, nextUrl, keys, charts, cache);
+        });
+      }
       if (path === "/render" && request.method === "GET") return renderGet(request, url, cache);
       if (path === "/render" && request.method === "POST") return renderPost(request, url, keys, charts, cache);
       if (path === "/charts" && request.method === "POST") return storeChart(request, url, keys, charts);
@@ -412,13 +420,13 @@ function cors(input: Headers | Response): Headers | Response {
     const headers = new Headers(input.headers);
     headers.set("access-control-allow-origin", "*");
     headers.set("access-control-allow-methods", "GET, POST, OPTIONS");
-    headers.set("access-control-allow-headers", "authorization, content-type");
+    headers.set("access-control-allow-headers", "authorization, content-type, accept, mcp-protocol-version");
     headers.set("access-control-expose-headers", EXPOSE);
     return new Response(input.body, { status: input.status, headers });
   }
   input.set("access-control-allow-origin", "*");
   input.set("access-control-allow-methods", "GET, POST, OPTIONS");
-  input.set("access-control-allow-headers", "authorization, content-type");
+  input.set("access-control-allow-headers", "authorization, content-type, accept, mcp-protocol-version");
   input.set("access-control-expose-headers", EXPOSE);
   input.set("x-content-type-options", "nosniff");
   return input;
