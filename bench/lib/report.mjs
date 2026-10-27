@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { docsManifest } from "../agent/docs.mjs";
+import { GALLERY_TYPES } from "../browser/chart-types.mjs";
 import { chartkitAfterRepair, currentCheck, currentRepair, efficiencyFromRows, formatMean, loadRecordedRows } from "./efficiency.mjs";
 import { recordedAgentSection } from "./recorded-agent.mjs";
 
@@ -151,19 +152,28 @@ export function renderReport(result) {
 function chartPaintLines(browser) {
   const charts = browser?.charts;
   if (!charts) return [];
-  const lines = ["### ChartKit chart types", ""];
+  const lines = ["### Chart type paint", ""];
   if (browser.chartMethod) {
     lines.push(browser.chartMethod);
     lines.push("");
   }
-  lines.push("Homepage row `area` is native `stacked-area`. `gzipBytes` and `ssrMs` are null until a later phase. A full run writes the same cells to `bench/results/latest.json` under `browser.charts` and to `bench/results/paint.json`. One-sample runs write `bench/results/paint-smoke.json` and are not published medians.");
+  lines.push("Homepage row `area` is native `stacked-area`. `gzipBytes` and `ssrMs` are null until a later phase. A full run writes the same cells to `bench/results/latest.json` under `browser.charts` and to `bench/results/paint.json`. One-sample runs write `bench/results/paint-smoke.json` and are not published medians. Unsupported cells are an honest omit: no native chart of that shape, and no invented time.");
   lines.push("");
   lines.push("| Chart | Homepage | Library | Variant | Renderer | N | Status | Initial ms | Update ms | gzip | SSR ms | N means |");
   lines.push("|---|---|---|---|---|---:|---|---:|---:|---:|---:|---|");
-  for (const row of charts) {
+  const chartOrder = new Map(GALLERY_TYPES.map((id, index) => [id, index]));
+  const shown = charts.slice().sort((a, b) => {
+    const byChart = (chartOrder.get(a.chart) ?? 99) - (chartOrder.get(b.chart) ?? 99);
+    if (byChart) return byChart;
+    if (a.points !== b.points) return a.points - b.points;
+    return String(a.library).localeCompare(String(b.library));
+  });
+  for (const row of shown) {
     const gzip = row.gzipBytes == null ? "—" : String(row.gzipBytes);
     const ssr = row.ssrMs == null ? "—" : ms(row.ssrMs);
-    const detail = row.status === "ok" ? (row.nMeaning ?? "") : `${row.nMeaning ?? ""}${row.error ? ` (${row.error})` : ""}`;
+    const detail = row.status === "ok"
+      ? (row.nMeaning ?? "")
+      : [row.nMeaning, row.method, row.error].filter(Boolean).join(" — ");
     const note = detail.replaceAll("|", "/").replace(/\s+/g, " ").trim();
     lines.push(`| ${row.chart ?? row.id} | ${row.homepageRow ?? "—"} | ${row.library ?? row.id} | ${row.variant ?? "—"} | ${row.renderer ?? "—"} | ${row.points} | ${row.status} | ${ms(row.initialMs)} | ${ms(row.updateMs)} | ${gzip} | ${ssr} | ${note} |`);
   }
@@ -172,10 +182,12 @@ function chartPaintLines(browser) {
     lines.push("No chart-type cells in this run.");
     return lines;
   }
-  const failed = charts.filter((row) => row.status !== "ok");
+  const failed = charts.filter((row) => row.status !== "ok" && row.status !== "unsupported");
+  const unsupported = charts.filter((row) => row.status === "unsupported");
   lines.push(failed.length
-    ? `Chart-type cells that are not ok: ${failed.map((row) => `${row.chart} n=${row.points} ${row.status}`).join(", ")}.`
-    : "Every chart-type cell in this run is ok.");
+    ? `Chart-type cells that failed: ${failed.map((row) => `${row.library} ${row.chart} n=${row.points} ${row.status}`).join(", ")}.`
+    : "Every timed chart-type cell in this run is ok.");
+  if (unsupported.length) lines.push(`${unsupported.length} cells are unsupported: the library has no native chart of that shape, and the time is null.`);
   return lines;
 }
 

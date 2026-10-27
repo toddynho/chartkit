@@ -47,8 +47,8 @@ export const PAINT_STATUSES = ["ok", "unsupported", "blocked", "error", "timeout
 export const PAINT_SCHEMA = {
   version: 1,
   statuses: PAINT_STATUSES,
-  phase: 1,
-  librariesThisPhase: ["ChartKit"],
+  phase: 2,
+  librariesThisPhase: ["ChartKit", "uPlot", "Chart.js", "ECharts", "Recharts", "Nivo", "Observable Plot"],
   fields: [
     "chart",
     "homepageRow",
@@ -75,7 +75,7 @@ export const PAINT_SCHEMA = {
 };
 
 export const CHART_METHOD =
-  "Phase 1 paints ChartKit only, one gallery type from apps/web/src/data/chart-types.ts. There is no type id area. The homepage row area is native stacked-area (full size, four series). A single filled line stays type line with mark.area true. mini-area is the small no-axis fill and has its own row. Line multi-size, canvas, and sampling-none cells are projected from the existing line sweep and are not measured again. The timer matches that sweep: build data before the clock, assign the SVG to innerHTML, then wait for two animation frames. The reported time is the median of BENCH_SAMPLES fresh pages (default 5) at 640×360. An error SVG (ck-chart-error) fails the sample. ChartKit updates are a second full SVG replacement, the same as the line row. gzipBytes and ssrMs are null in this phase. " +
+  "Phase 2 paints ChartKit and the libraries already timed on the line sweep: uPlot, Chart.js, ECharts, Recharts, Nivo, and Observable Plot. One cell per gallery type from apps/web/src/data/chart-types.ts. There is no type id area. The homepage row area is native stacked-area (full size, four series). A single filled line stays type line with mark.area true. mini-area is one filled series with the axes off, in the same 640×360 frame. Line cells are projected from the existing line sweep and are not measured again. Every other native cell uses the same point count as the ChartKit cell for that type, and the same data shape. The timer matches the line sweep: build data before the clock, paint, then wait for two animation frames. ECharts also waits for finished. The reported time is the median of BENCH_SAMPLES fresh pages (default 5) at 640×360. ChartKit updates are a second full SVG replacement. An error SVG (ck-chart-error) fails the sample. A cell is status unsupported, with a reason and no invented time, when that library has no native chart of that shape. Stand-ins are not timed: a pie made from bars, a waterfall made from a transparent helper bar, a histogram made from bars we binned ourselves, a sparkline made by hiding the axes on the line cell, a spike drawn as a bar, Plot.spike (a fixed-pixel vector), the uPlot candlestick demo path, an ECharts custom series, or the ECharts timeline playback control. Nivo cells use the 0.99.0 package for that chart, the same version as the pinned line, bar, and pie. A missing license key is status blocked. This phase does not add commercial libraries. gzipBytes and ssrMs stay null until a later phase. " +
   PAINT_SCHEMA.later;
 
 export const chartTypeDefs = [
@@ -400,6 +400,8 @@ export function chartTypeAdapters() {
   return chartTypeDefs.map((def) => ({
     id: `chartkit-${def.id}`,
     suite: "chart-types",
+    library: "ChartKit",
+    renderer: "svg",
     chart: def.id,
     homepageRow: def.homepageRow,
     nMeaning: def.nMeaning,

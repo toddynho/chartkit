@@ -5,6 +5,7 @@ import { build } from "esbuild";
 import { chromium } from "playwright";
 import { browserAdapters } from "./adapters.mjs";
 import { CHART_METHOD, PAINT_SCHEMA, classifyStatus } from "./chart-types.mjs";
+import { unsupportedPaintCells } from "./rivals.mjs";
 
 const benchRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = join(benchRoot, ".out/browser");
@@ -86,7 +87,7 @@ function paintCell(adapter, points, extra) {
     points,
     nMeaning: adapter.nMeaning ?? null,
     why: adapter.why ?? null,
-    method: adapter.why ?? null,
+    method: adapter.method ?? adapter.why ?? null,
     status: extra.status,
     initialMs: extra.initialMs ?? null,
     updateMs: extra.updateMs ?? null,
@@ -140,6 +141,11 @@ async function bundleAdapters() {
   return files;
 }
 
+function libraryOf(adapter, info) {
+  if (info?.library && info.library !== adapter.id) return info.library;
+  return adapter.library || info?.library || adapter.id;
+}
+
 function record(target, adapter, points, fields) {
   const row = {
     id: adapter.id,
@@ -187,8 +193,8 @@ export async function measureBrowser() {
         }
         if (skipLarger) {
           record(target, file.adapter, points, {
-            library: file.adapter.chart ? "ChartKit" : file.id,
-            renderer: null,
+            library: file.adapter.library ?? file.id,
+            renderer: file.adapter.renderer ?? null,
             status: "skipped",
             error: "Skipped because the previous size failed or timed out.",
             samples: 0,
@@ -210,7 +216,19 @@ export async function measureBrowser() {
           try {
             await page.setContent(html);
             await page.addScriptTag({ path: file.outfile, type: "module" });
-            const result = await page.evaluate((n) => globalThis.__bench.run(n), points);
+            const result = await new Promise((resolve, reject) => {
+              const timer = setTimeout(() => reject(new Error(`Timeout ${timeout}ms exceeded`)), timeout);
+              page.evaluate((n) => globalThis.__bench.run(n), points).then(
+                (value) => {
+                  clearTimeout(timer);
+                  resolve(value);
+                },
+                (error) => {
+                  clearTimeout(timer);
+                  reject(error);
+                },
+              );
+            });
             info = await page.evaluate(() => ({
               library: globalThis.__bench.library,
               renderer: globalThis.__bench.renderer,
@@ -229,8 +247,8 @@ export async function measureBrowser() {
             ? classifyStatus(failed || "")
             : (failed || "").toLowerCase().includes("timeout") ? "timeout" : "error";
           record(target, file.adapter, points, {
-            library: info.library,
-            renderer: info.renderer,
+            library: libraryOf(file.adapter, info),
+            renderer: info.renderer ?? file.adapter.renderer ?? null,
             status,
             error: failed || "A sample did not finish.",
             samples: samples.length,
@@ -239,8 +257,8 @@ export async function measureBrowser() {
           continue;
         }
         record(target, file.adapter, points, {
-          library: info.library,
-          renderer: info.renderer,
+          library: libraryOf(file.adapter, info),
+          renderer: info.renderer ?? file.adapter.renderer ?? null,
           status: "ok",
           error: null,
           samples: SAMPLES,
@@ -259,6 +277,8 @@ export async function measureBrowser() {
   } finally {
     await browser.close();
   }
+  const chartSweep = files.some((file) => file.adapter.suite === "chart-types");
+  if (chartSweep) charts.push(...unsupportedPaintCells({ only: ONLY, types: TYPES }));
   return {
     method: `Playwright Chromium. Each sample is a fresh page. Reported times are the median of ${SAMPLES} samples. Data is makeSeries(n, seed) generated inside the page and excluded from the timer. x[i] = i. Every library does its own update, then waits for the same two animation frames. ECharts also waits for its finished event before those frames. ChartKit replaces innerHTML with a new SVG (curve linear, points none, sampling auto, which is minmax above twice the plot width) and returns that synchronous build as renderMs before the two frames. ChartKit canvas is the same line with render canvas. It paints sampled points straight onto a canvas and builds SVG for the axes only, and renderMs includes that paint. It does not build the mark DOM. ChartKit sampling none is the same SVG line with mark.sampling none, measured only at 100k and 1M. An error SVG (ck-chart-error) fails that sample. uPlot uses setData. Chart.js uses update('none') and {x,y} points. ECharts uses setOption on a canvas renderer with sampling left off. Recharts and Nivo use flushSync. Observable Plot replaces the SVG node. Width 640, height 360. Memory is the median performance.memory.usedJSHeapSize when Chromium exposes it. A failed size skips larger sizes for that library. Chart-type cells are in charts, not in rows.`,
     chartMethod: CHART_METHOD,

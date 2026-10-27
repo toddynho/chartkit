@@ -18,9 +18,11 @@ npm run bench -- --skip-agent
 
 ### Chart types
 
-The browser sweep also paints every gallery type ChartKit ships (`apps/web/src/data/chart-types.ts`, 35 types). Cells land in `browser.charts` inside `bench/results/latest.json` when bundle, browser, and SSR all run, and in `bench/results/paint.json` (median of 5) or `bench/results/paint-smoke.json` (any other sample count). The line comparison table is unchanged: chart-type rows are not mixed into it.
+The browser sweep paints every gallery type (`apps/web/src/data/chart-types.ts`, 35 types) for ChartKit and for the libraries already on the line sweep: uPlot, Chart.js, ECharts, Recharts, Nivo, and Observable Plot. Cells land in `browser.charts` inside `bench/results/latest.json` when bundle, browser, and SSR all run, and in `bench/results/paint.json` (median of 5) or `bench/results/paint-smoke.json` (any other sample count). The line comparison table is unchanged: chart-type rows are not mixed into it.
 
-There is no `type: "area"`. The homepage row **area** is native **stacked-area** (full size, four series). A filled line is still `line` with `mark.area: true`. `mini-area` is the small chart with no axes.
+There is no `type: "area"`. The homepage row **area** is native **stacked-area** (full size, four series). A filled line is still `line` with `mark.area: true`. `mini-area` is one filled series with the axes off, still in the 640×360 frame.
+
+A rival cell is timed only when that library has a native chart of the same shape. The point count is the ChartKit cell's N. Line cells are copied from the line sweep, so line is not measured twice. `unsupported` is written with a reason and a null time. It is not a silent omit and it is not a stand-in: no pie made from bars, no waterfall made from a transparent helper bar, no histogram made from bars the harness binned, no sparkline made by hiding axes on the line cell, no spike drawn as a bar. uPlot's candlestick demo path, ECharts' custom series, and the ECharts timeline playback control are not native charts. Nivo uses the 0.99.0 package for that shape (the same version as the pinned line, bar, and pie), including stream with `offsetType: "none"` for stacked area. The Nivo scatter cell uses that package's canvas renderer. The SVG scatter builds one node per point and does not finish inside the sample timeout at 100,000. Recharts and Nivo stacked-area throw `Maximum call stack size exceeded` at 100,000 x values inside their own domain or stack walk. That cell is status `error`. Plot's histogram is `binX`, so Plot does the binning. Commercial libraries are a later phase. A missing license key is `blocked`, not a reason to drop the rest of that set.
 
 The timer matches the line row: data is built before the clock, the SVG is assigned to `innerHTML`, then two animation frames. Size is 640×360. An error SVG fails the sample. `gzipBytes` and `ssrMs` are null until a later phase. Line multi-size, canvas, and sampling-none cells are copied from the line sweep so line is not measured twice. Those numbers are this paint protocol, not the hover-steady figure in `catalog/public/benchmarks.json`.
 
@@ -46,7 +48,7 @@ Point counts are the fair N for that chart, not a copy of the line's 100,000:
 | gauge, kpi, progress-ring | 1 | One metric. KPI's sparkline stays 24 and is not N. |
 | venn | 3 sets | Largest supported Venn. Four or more is unsupported. |
 
-Later paint, bundle, and SSR phases add the other libraries on the same cell, including commercial compare-matrix rivals (Highcharts, amCharts, ApexCharts community and commercial builds, AG Charts enterprise, MUI X Pro and Premium, and the same class of product) from the published npm or CDN build a customer would install. Record license and watermark limits. A missing license key is `status: "blocked"` with a note, not a silent omission and not a reason to drop the rest of that set. `unsupported` means that library has no native chart of that type. This phase does not invent those cells.
+Later bundle and SSR phases, and the commercial paint pass, add the rest of the compare matrix (Highcharts, amCharts, ApexCharts community and commercial builds, AG Charts enterprise, MUI X Pro and Premium, and the same class of product) from the published npm or CDN build a customer would install. Record license and watermark limits. A missing license key is `status: "blocked"` with a note, not a silent omission and not a reason to drop the rest of that set. This phase does not publish those cells and does not change the homepage.
 
 ```bash
 BENCH_SAMPLES=1 BENCH_LIBS=chartkit-bar,chartkit-donut npm run bench -- --skip-bundle --skip-ssr --skip-agent
@@ -55,6 +57,6 @@ BENCH_SKIP_CHARTS=1 npm run bench -- --skip-agent
 node bench/browser/probe.mjs
 ```
 
-`BENCH_TYPES` limits the type sweep (ids such as `bar`, not `chartkit-bar`). `BENCH_LIBS` limits adapter ids and still applies. `BENCH_CHART_POINTS` keeps only type sizes that are in that list. `BENCH_RESUME=1` reuses ok cells in `bench/results/paint-checkpoint.jsonl` when their sample count matches `BENCH_SAMPLES`, so a one-sample smoke is not reused as a median of 5. `node bench/browser/probe.mjs` renders each spec in Node and does not time the browser protocol.
+`BENCH_TYPES` limits the type sweep (ids such as `bar`, not `chartkit-bar`). `BENCH_LIBS` limits adapter ids and still applies. `BENCH_CHART_POINTS` keeps only type sizes that are in that list. `BENCH_RESUME=1` reuses ok cells in `bench/results/paint-checkpoint.jsonl` when their sample count matches `BENCH_SAMPLES`, so a one-sample smoke is not reused as a median of 5. A chart-type sample that does not finish in time is status `timeout` (180s at 100,000 points). `node bench/browser/probe.mjs` renders each ChartKit spec in Node and does not time the browser protocol.
 
 Dependencies live in this directory and are pinned in `package.json`. The first `npm run bench` needs `npm install` here and `npx playwright install chromium`. The GitHub Actions workflow `Benchmarks` is `workflow_dispatch` and runs the non-LLM sections.
