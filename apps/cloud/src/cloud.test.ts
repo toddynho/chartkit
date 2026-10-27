@@ -4,7 +4,8 @@ import { render } from "@chartkitdev/core/extra";
 import { describe, expect, it, vi } from "vitest";
 import { createApp } from "./app.ts";
 import { CLOUD_PLATE } from "./draw.ts";
-import { chartBody, EMBED_PAD_BOTTOM, EMBED_PAD_TOP, EMBED_PAD_X } from "./watermark.ts";
+import { inflateSync } from "node:zlib";
+import { chartBody, EMBED_PAD_BOTTOM, EMBED_PAD_TOP, EMBED_PAD_X, presentSvg } from "./watermark.ts";
 import { kvCharts, memoryCharts } from "./charts.ts";
 import { kvKeys, memoryKeys } from "./keys.ts";
 import { memoryLimiter } from "./limit.ts";
@@ -73,7 +74,7 @@ describe("watermark and parity", () => {
     const view = box?.slice(1, 5).map(Number) ?? [];
     // Library viewBox is 0 0 <width> <height>. Cloud used to add only the 16px watermark band
     // (0 0 640 256 for this bar, top grid 14px from the edge, 4px under the mark).
-    // The embed margin is viewBox-only: 24 top, 16 each side, 12 under that band.
+    // The embed margin is 24 top, 16 each side, 12 under that band. The plate rect covers it.
     expect(view).toEqual([
       -EMBED_PAD_X,
       -EMBED_PAD_TOP,
@@ -378,6 +379,316 @@ describe("background plate", () => {
     expect(await bad.text()).toContain("background must be a CSS color");
   });
 });
+
+describe("embed plate", () => {
+  it("moves the percentage plate onto the padded viewBox and folds it back for parity", () => {
+    const source = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="240" viewBox="0 0 640 240"><title>T</title><desc>D</desc><rect width="100%" height="100%" fill="var(--ck-background, #ffffff)" /><text y="8" font-size="12">Hi</text></svg>`;
+    const svg = presentSvg(source, { watermark: true, dark: false });
+    const plate = readPlate(svg);
+    const view = readView(svg);
+    expect(plate.kind).toBe("bleed");
+    expect(plate).toMatchObject(view);
+    expect(plate.fill).toBe("var(--ck-background, #ffffff)");
+    expect(svg).not.toContain('width="100%" height="100%"');
+    expect(chartBody(svg)).toEqual(chartBody(source));
+    const marked = svg.indexOf("data-ck-watermark");
+    expect(marked).toBeGreaterThan(svg.indexOf('data-ck-plate="bleed"'));
+    expect(svg.endsWith("</svg>")).toBe(true);
+  });
+
+  it("underlays a chart that has no full-bleed rect", () => {
+    const source = `<svg xmlns="http://www.w3.org/2000/svg" width="280" height="112" viewBox="0 0 280 112"><rect x="0.5" y="0.5" width="279" height="111" fill="#f5f5f7" /></svg>`;
+    const svg = presentSvg(source, { watermark: false, dark: false, plate: "#ffffff" });
+    const plate = readPlate(svg);
+    expect(plate.kind).toBe("underlay");
+    expect(plate).toMatchObject(readView(svg));
+    expect(plate.fill).toBe("#ffffff");
+    expect(svg).toContain('x="0.5"');
+    expect(chartBody(svg)).toEqual(chartBody(source));
+  });
+
+  it("keeps combo, heatmap, pie, donut, kpi, and sparkline off the plate edge", async () => {
+    const { app } = appFor();
+    const specs: Record<string, unknown> = {
+      combo: {
+        version: "1",
+        type: "combo",
+        data: [
+          { month: "Jan", revenue: 100, margin: 0.2 },
+          { month: "Feb", revenue: 140, margin: 0.24 },
+          { month: "Mar", revenue: 130, margin: 0.22 },
+        ],
+        encoding: {
+          x: "month",
+          y: [
+            { field: "revenue", title: "Revenue", mark: "bar" },
+            { field: "margin", title: "Margin", mark: "line", axis: "y2", format: "percent" },
+          ],
+        },
+        axes: { y2: { title: "Margin", format: "percent" } },
+        a11y: { alt: "Revenue and margin both finished the quarter higher than they started." },
+      },
+      heatmap: {
+        version: "1",
+        type: "heatmap",
+        data: [
+          { date: "2026-01-01", value: 1 },
+          { date: "2026-01-02", value: 4 },
+          { date: "2026-01-03", value: 2 },
+        ],
+        encoding: { x: { field: "date", type: "temporal" }, color: { field: "value", type: "quantitative" } },
+        mark: { layout: "calendar", weeks: 12 },
+        a11y: { alt: "Activity was highest on January 2 and quieter the day before and after." },
+      },
+      pie: {
+        version: "1",
+        type: "pie",
+        title: "Share of revenue",
+        data: [
+          { label: "Search", value: 42 },
+          { label: "Direct", value: 28 },
+          { label: "Social", value: 18 },
+        ],
+        encoding: { x: "label", y: "value" },
+        mark: { labels: true, labelPosition: "outside", padAngle: 1.5 },
+        a11y: { alt: "Search is the largest share of revenue." },
+      },
+      donut: {
+        version: "1",
+        type: "donut",
+        data: [
+          { label: "Search", value: 42 },
+          { label: "Direct", value: 28 },
+          { label: "Social", value: 18 },
+        ],
+        encoding: { x: "label", y: "value" },
+        mark: { innerRadius: 0.6 },
+        a11y: { alt: "Search is the largest traffic source." },
+      },
+      kpi: {
+        version: "1",
+        type: "kpi",
+        metric: { label: "Revenue", value: 125000, delta: 0.125, format: "compact" },
+        data: [10, 12, 9, 14, 18, 17],
+        a11y: { alt: "Revenue is 125,000, up 12.5 percent versus the previous period." },
+      },
+      sparkline: {
+        version: "1",
+        type: "sparkline",
+        data: [10, 25, 15, 30, 22, 28],
+        a11y: { alt: "The sparkline trends upward from 10 to 28, with a dip in the middle." },
+      },
+    };
+    for (const [type, spec] of Object.entries(specs)) {
+      const svg = await (await app.handle(get(spec))).text();
+      const plate = readPlate(svg);
+      const view = readView(svg);
+      expect(plate, type).toMatchObject(view);
+      expect(plate.fill, type).toContain(type === "kpi" ? CLOUD_PLATE : `var(--ck-background, ${CLOUD_PLATE})`);
+      expect(svg, type).not.toContain('width="100%" height="100%"');
+      const body = chartBody(svg);
+      expect(body.drawing, type).not.toContain("data-ck-plate");
+      if (type === "kpi") expect(body.drawing, type).not.toContain('width="100%"');
+      else expect(body.drawing, type).toContain(`<rect width="100%" height="100%" fill="var(--ck-background, ${CLOUD_PLATE})" />`);
+      const gap = inkGap(svg);
+      // Combo swatches sit at y=8 and calendar month labels at y=11. The plate has to
+      // cover the negative margin or that ink is a few pixels from the white edge.
+      expect(Number.isFinite(gap.top), type).toBe(true);
+      expect(gap.top, `${type} top ${gap.top}`).toBeGreaterThanOrEqual(20);
+      expect(gap.left, `${type} left ${gap.left}`).toBeGreaterThanOrEqual(12);
+      expect(gap.bottom, `${type} bottom ${gap.bottom}`).toBeGreaterThanOrEqual(12);
+    }
+  });
+
+  it("rasters the padded corner in the plate color", async () => {
+    const { app } = appFor();
+    const combo = {
+      version: "1",
+      type: "combo",
+      data: [
+        { month: "Jan", revenue: 100, margin: 0.2 },
+        { month: "Feb", revenue: 140, margin: 0.24 },
+      ],
+      encoding: {
+        x: "month",
+        y: [
+          { field: "revenue", title: "Revenue", mark: "bar" },
+          { field: "margin", title: "Margin", mark: "line", axis: "y2", format: "percent" },
+        ],
+      },
+      a11y: { alt: "Revenue and margin both rose." },
+    };
+    const png = new Uint8Array(await (await app.handle(get(combo, { format: "png", scale: "1" }))).arrayBuffer());
+    const image = decodePng(png);
+    const view = readView(await (await app.handle(get(combo))).text());
+    expect(image.width).toBe(view.w);
+    expect(image.height).toBe(view.h);
+    expect(sample(image, 0, 0)).toEqual([255, 255, 255, 255]);
+    expect(sample(image, 8, 8)).toEqual([255, 255, 255, 255]);
+    const swatch = (await (await app.handle(get(combo))).text()).match(/<rect x="([^"]+)" y="([^"]+)" width="10" height="10"/);
+    expect(swatch).toBeTruthy();
+    const sx = Math.round(Number(swatch?.[1]) - view.x + 5);
+    const sy = Math.round(Number(swatch?.[2]) - view.y + 5);
+    const ink = sample(image, sx, sy);
+    expect(ink[3]).toBe(255);
+    expect(ink[0] + ink[1] + ink[2]).toBeLessThan(700);
+    const night = new Uint8Array(await (await app.handle(get({ ...bar, theme: "midnight" }, { format: "png", scale: "1" }))).arrayBuffer());
+    expect(sample(decodePng(night), 0, 0)).toEqual([12, 12, 12, 255]);
+    const clear = new Uint8Array(await (await app.handle(get(bar, { format: "png", scale: "1", background: "transparent" }))).arrayBuffer());
+    expect(sample(decodePng(clear), 0, 0)[3]).toBe(0);
+  });
+});
+
+function readView(svg: string): { x: number; y: number; w: number; h: number } {
+  const raw = svg.match(/\bviewBox="([^"]+)"/)?.[1]?.trim().split(/[\s,]+/).map(Number) ?? [];
+  return { x: raw[0] ?? 0, y: raw[1] ?? 0, w: raw[2] ?? 0, h: raw[3] ?? 0 };
+}
+
+function readPlate(svg: string): { kind: string; x: number; y: number; w: number; h: number; fill: string } {
+  const tag = svg.match(/<rect\b[^>]*\bdata-ck-plate="([^"]+)"[^>]*>/)?.[0] ?? "";
+  const kind = svg.match(/\bdata-ck-plate="([^"]+)"/)?.[1] ?? "";
+  const num = (name: string) => Number(tag.match(new RegExp(`\\b${name}="([^"]+)"`))?.[1]);
+  const fill = tag.match(/\bfill="([^"]*)"/)?.[1] ?? "";
+  return { kind, x: num("x"), y: num("y"), w: num("width"), h: num("height"), fill };
+}
+
+/** Gap from the viewBox edge to the nearest ink, ignoring the plate and defs. */
+function inkGap(svg: string): { top: number; left: number; bottom: number } {
+  const view = readView(svg);
+  const body = svg.replace(/<defs[\s\S]*?<\/defs>/g, "").replace(/<a\b[^>]*\bdata-ck-watermark="1"[\s\S]*?<\/a>/g, "");
+  let top = Infinity;
+  let left = Infinity;
+  let bottom = -Infinity;
+  const consider = (x: number, y: number, right = x, low = y) => {
+    if (Number.isFinite(y)) top = Math.min(top, y);
+    if (Number.isFinite(low)) bottom = Math.max(bottom, low);
+    if (Number.isFinite(x)) left = Math.min(left, x);
+    if (Number.isFinite(right)) left = Math.min(left, right);
+  };
+  for (const tag of body.matchAll(/<(text|rect|circle)\b[^>]*>/g)) {
+    const el = tag[0];
+    if (el.includes("data-ck-plate=") || el.includes('width="100%"')) continue;
+    const n = (name: string) => {
+      const value = el.match(new RegExp(`\\b${name}="([^"]+)"`))?.[1];
+      if (!value || value.endsWith("%")) return undefined;
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    };
+    if (tag[1] === "text") {
+      const y = n("y");
+      const size = n("font-size") ?? 12;
+      const x = n("x");
+      if (y !== undefined) consider(x ?? Infinity, y - size * 0.8, x, y);
+      continue;
+    }
+    if (tag[1] === "rect") {
+      const x = n("x") ?? 0;
+      const y = n("y") ?? 0;
+      const w = n("width");
+      const h = n("height");
+      consider(x, y, x, y + (h ?? 0));
+      if (w !== undefined) left = Math.min(left, x);
+      continue;
+    }
+    const cx = n("cx");
+    const cy = n("cy");
+    const r = n("r") ?? 0;
+    if (cx !== undefined && cy !== undefined) consider(cx - r, cy - r, cx - r, cy + r);
+  }
+  for (const path of body.matchAll(/\bd="([^"]+)"/g)) {
+    const d = path[1] ?? "";
+    if (/[ACQSTVHacqstvh]/.test(d)) continue;
+    const nums = d.match(/-?(?:\d+\.\d+|\d+|\.\d+)/g)?.map(Number) ?? [];
+    for (let i = 0; i + 1 < nums.length; i += 2) consider(nums[i] ?? Infinity, nums[i + 1] ?? Infinity);
+  }
+  return {
+    top: top - view.y,
+    left: left - view.x,
+    bottom: view.y + view.h - bottom,
+  };
+}
+
+function sample(image: { width: number; data: Uint8Array }, x: number, y: number): [number, number, number, number] {
+  const i = (y * image.width + x) * 4;
+  return [image.data[i] ?? 0, image.data[i + 1] ?? 0, image.data[i + 2] ?? 0, image.data[i + 3] ?? 0];
+}
+
+function decodePng(png: Uint8Array): { width: number; height: number; data: Uint8Array } {
+  let offset = 8;
+  let width = 0;
+  let height = 0;
+  let colorType = 6;
+  const idat: Uint8Array[] = [];
+  while (offset + 8 <= png.length) {
+    const length = u32(png, offset);
+    const type = String.fromCharCode(png[offset + 4] ?? 0, png[offset + 5] ?? 0, png[offset + 6] ?? 0, png[offset + 7] ?? 0);
+    const data = png.subarray(offset + 8, offset + 8 + length);
+    if (type === "IHDR") {
+      width = u32(png, offset + 8);
+      height = u32(png, offset + 12);
+      colorType = png[offset + 17] ?? 6;
+    } else if (type === "IDAT") idat.push(data);
+    else if (type === "IEND") break;
+    offset += 12 + length;
+  }
+  const raw = inflateSync(Buffer.concat(idat.map((part) => Buffer.from(part))));
+  const channels = colorType === 6 ? 4 : colorType === 2 ? 3 : colorType === 4 ? 2 : 1;
+  const stride = width * channels;
+  const out = new Uint8Array(width * height * 4);
+  let src = 0;
+  let prev = new Uint8Array(stride);
+  for (let y = 0; y < height; y++) {
+    const filter = raw[src++] ?? 0;
+    const row = raw.subarray(src, src + stride);
+    src += stride;
+    const recon = new Uint8Array(stride);
+    for (let i = 0; i < stride; i++) {
+      const left = i >= channels ? (recon[i - channels] ?? 0) : 0;
+      const up = prev[i] ?? 0;
+      const ul = i >= channels ? (prev[i - channels] ?? 0) : 0;
+      const value = row[i] ?? 0;
+      if (filter === 1) recon[i] = (value + left) & 255;
+      else if (filter === 2) recon[i] = (value + up) & 255;
+      else if (filter === 3) recon[i] = (value + Math.floor((left + up) / 2)) & 255;
+      else if (filter === 4) recon[i] = (value + paeth(left, up, ul)) & 255;
+      else recon[i] = value;
+    }
+    prev = recon;
+    for (let x = 0; x < width; x++) {
+      const i = x * channels;
+      const o = (y * width + x) * 4;
+      if (channels === 4) {
+        out[o] = recon[i] ?? 0;
+        out[o + 1] = recon[i + 1] ?? 0;
+        out[o + 2] = recon[i + 2] ?? 0;
+        out[o + 3] = recon[i + 3] ?? 0;
+      } else if (channels === 3) {
+        out[o] = recon[i] ?? 0;
+        out[o + 1] = recon[i + 1] ?? 0;
+        out[o + 2] = recon[i + 2] ?? 0;
+        out[o + 3] = 255;
+      } else {
+        out[o] = out[o + 1] = out[o + 2] = recon[i] ?? 0;
+        out[o + 3] = channels === 2 ? (recon[i + 1] ?? 255) : 255;
+      }
+    }
+  }
+  return { width, height, data: out };
+}
+
+function paeth(a: number, b: number, c: number): number {
+  const p = a + b - c;
+  const pa = Math.abs(p - a);
+  const pb = Math.abs(p - b);
+  const pc = Math.abs(p - c);
+  if (pa <= pb && pa <= pc) return a;
+  if (pb <= pc) return b;
+  return c;
+}
+
+function u32(buf: Uint8Array, offset: number): number {
+  return ((buf[offset] ?? 0) * 16777216 + ((buf[offset + 1] ?? 0) << 16) + ((buf[offset + 2] ?? 0) << 8) + (buf[offset + 3] ?? 0)) >>> 0;
+}
 
 describe("png", () => {
   it("resolves CSS fallbacks and returns a PNG", async () => {

@@ -47,9 +47,13 @@ export async function drawSpec(input: unknown, frame: Frame): Promise<Drawn> {
   const result = spec === checked.spec ? checked : { ...checked, spec };
   const drawn = result.ok ? render(result.spec) : "";
   const failed = !result.ok || drawn.includes("ck-chart-error");
+  const dark = failed ? false : themeIsDark(frame.theme, drawn);
+  const theme = isRecord(result.spec) ? result.spec.theme : undefined;
+  const plate = failed ? CLOUD_PLATE : explicitBackground(theme) ?? (dark ? "#0c0c0c" : CLOUD_PLATE);
   const svg = presentSvg(failed ? errorPicture(result) : drawn, {
     watermark: failed || frame.watermark,
-    dark: failed ? false : themeIsDark(frame.theme, drawn),
+    dark,
+    plate,
   });
   const size = svgSize(svg);
   if (frame.format === "png") {
