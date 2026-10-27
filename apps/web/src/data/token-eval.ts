@@ -10,14 +10,19 @@
  * not add a model call.
  *
  * Homepage freeze: each bar is the median of that library across the finished
- * models (Claude + GPT-6). Grok 4.7 is pending and excluded. The ~3× headline
- * rounds the next library's median divided by ChartKit's. Bar widths are
- * value / max, not a chart-type mock.
+ * models (Claude, GPT-6, and Grok). The ~N× headline rounds the next library's
+ * median divided by ChartKit's. Bar widths are value / max, not a chart-type mock.
  *
  * No cost/100 figure. The harness list prices are stubs, not vendor quotes.
  */
 export const TOKEN_LIBRARIES = ["ChartKit", "Plot", "Chart.js", "Recharts", "ECharts"] as const;
 export type TokenLibrary = (typeof TOKEN_LIBRARIES)[number];
+
+export type TokenCoverage = {
+  text: string;
+  /** Library cell this sentence footnotes. The median stays on the row. */
+  mark?: TokenLibrary;
+};
 
 export type TokenModel = {
   name: string;
@@ -25,6 +30,8 @@ export type TokenModel = {
   group: "Claude" | "GPT-6" | "Grok";
   /** null until the model finishes the harness. */
   tokens: Record<TokenLibrary, number> | null;
+  /** Coverage for this row. Medians are not rewritten to look cleaner. */
+  coverage?: TokenCoverage[];
 };
 
 const models: TokenModel[] = [
@@ -68,7 +75,21 @@ const models: TokenModel[] = [
       group: "GPT-6",
       tokens: { ChartKit: 88, Plot: 266, "Chart.js": 492, Recharts: 1358, ECharts: 536 },
     },
-    { name: "Grok 4.7", group: "Grok", tokens: null },
+    {
+      name: "Grok 4.7",
+      group: "Grok",
+      tokens: { ChartKit: 78.5, Plot: 166, "Chart.js": 444.5, Recharts: 365, ECharts: 284 },
+      coverage: [
+        { text: "ChartKit 42/42 working, first try 100%." },
+        { text: "Plot 26 working (15 declined, 1 DNF spike-alerts)." },
+        { text: "ECharts 36 working (5 declined, 1 DNF ring-tasks)." },
+        { text: "Chart.js 24 working (18 declined)." },
+        {
+          mark: "Recharts",
+          text: "Recharts is 5 working and 19 DNF. That median is unreliable. Most failures were browser render.",
+        },
+      ],
+    },
 ];
 
 export const TOKEN_EVAL = {
@@ -174,11 +195,12 @@ export function tokenSection(): {
     pending.length === 0
       ? ""
       : `${pending.join(", ")} ${pending.length === 1 ? "is" : "are"} pending and excluded. `;
+  const groups = [...new Set(models.map((model) => model.group))];
 
   return {
     tasks: TOKEN_EVAL.tasks,
-    barLabel: `median · Claude + GPT-6 · ${models.length} models`,
-    noteLead: `Median across the ${models.length} finished models (${listNames(models.map(modelLabel))}). ${pendingSentence}~${Math.round(times)}× rounds ${next.name}'s median divided by ChartKit's (${formatTokens(next.tokens)} / ${formatTokens(chartkit.tokens)}, ${times.toFixed(1)}×). By model, ChartKit uses ${formatRatio(Math.min(...ratios))}–${formatRatio(Math.max(...ratios))}× fewer output tokens than the next library. ${TOKEN_EVAL.tasks} tasks; docs capped to the length of ChartKit llms.txt; tokens summed until a chart is drawn; did-not-finish runs excluded from the median. ChartKit median model calls are ${TOKEN_EVAL.chartkitCalls.toFixed(1)}.`,
+    barLabel: `median · ${groups.join(", ")} · ${models.length} models`,
+    noteLead: `Median of ${models.length} finished models (${listNames(models.map(modelLabel))}). ${pendingSentence}~${Math.round(times)}× rounds ${next.name}'s median divided by ChartKit's (${formatTokens(next.tokens)} / ${formatTokens(chartkit.tokens)}, ${times.toFixed(1)}×). By model, ChartKit uses ${formatRatio(Math.min(...ratios))}–${formatRatio(Math.max(...ratios))}× fewer output tokens than the next library. ${TOKEN_EVAL.tasks} tasks; docs capped to the length of ChartKit llms.txt; tokens summed until a chart is drawn; did-not-finish runs excluded from the median. ChartKit median model calls are ${TOKEN_EVAL.chartkitCalls.toFixed(1)}.`,
     stats: [
       {
         value: `${formatTokens(Math.min(...chartkitValues))}–${formatTokens(Math.max(...chartkitValues))}`,
@@ -208,12 +230,23 @@ export function tokenSection(): {
   };
 }
 
-export type ScoreCell = { text: string; us: boolean };
+export type ScoreCell = { text: string; us: boolean; mark?: string };
+export type ScoreNote = { mark?: string; library?: TokenLibrary; text: string };
+
+function footnoteNotes(coverage: TokenCoverage[] | undefined): ScoreNote[] {
+  let n = 0;
+  return (coverage ?? []).map((note) => {
+    if (!note.mark) return { text: note.text };
+    n += 1;
+    return { text: note.text, library: note.mark, mark: String(n) };
+  });
+}
 export type ScoreRow = {
   name: string;
   pending: boolean;
   cells: ScoreCell[];
   versus: string;
+  notes: ScoreNote[];
 };
 
 export function tokenScoreboard(): {
@@ -231,12 +264,15 @@ export function tokenScoreboard(): {
     sha: TOKEN_EVAL.harnessSha,
     calls: TOKEN_EVAL.chartkitCalls.toFixed(1),
     rows: TOKEN_EVAL.models.map((model) => {
+      const notes = footnoteNotes(model.coverage);
+      const markFor = new Map(notes.filter((note) => note.library).map((note) => [note.library, note.mark]));
       if (!model.tokens) {
         return {
           name: model.name,
           pending: true,
           cells: TOKEN_LIBRARIES.map((library) => ({ text: "pending", us: library === "ChartKit" })),
           versus: "—",
+          notes,
         };
       }
       const tokens = model.tokens;
@@ -247,8 +283,10 @@ export function tokenScoreboard(): {
         cells: TOKEN_LIBRARIES.map((library) => ({
           text: formatTokens(tokens[library]),
           us: library === "ChartKit",
+          mark: markFor.get(library),
         })),
         versus: `${formatRatio(next.tokens / tokens.ChartKit)}×`,
+        notes,
       };
     }),
   };

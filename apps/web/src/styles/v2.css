@@ -1083,6 +1083,7 @@ html[data-stack="vanilla"] .home-card .stack-sample [data-stack-panel="vanilla"]
 .scoreboard th.us { color: var(--ink); font-weight: 600; }
 .scoreboard td.us { color: var(--ink); font-weight: 600; }
 .scoreboard tr.is-pending td { color: var(--muted); font-weight: 400; }
+.scoreboard sup { font-size: 0.7em; line-height: 0; }
 .defaults .give-row { grid-template-columns: 180px 1fr; align-items: baseline; }
 .lab-note { max-width: 68ch; margin: 0; }
 

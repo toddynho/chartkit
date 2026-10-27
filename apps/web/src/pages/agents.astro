@@ -98,11 +98,11 @@ const defaults = [
     <section class="agent-block" id="eval" aria-labelledby="eval-title">
       <div class="section-intro">
         <h2 id="eval-title">Output tokens per working chart</h2>
-        <p>Median by model, with docs. ChartKit median calls are {board.calls}. Grok 4.7 has not finished.</p>
+        <p>Median by model, with docs. ChartKit median calls are {board.calls}.</p>
       </div>
       <div class="compare-table-wrap">
         <table class="compare-table scoreboard">
-          <caption class="sr">Median output tokens per working chart. Pending models are marked pending.</caption>
+          <caption class="sr">Median output tokens per working chart by model.</caption>
           <thead>
             <tr>
               <th scope="col">Model</th>
@@ -122,7 +122,10 @@ const defaults = [
                 <tr class:list={[row.pending && "is-pending"]}>
                   <th scope="row">{row.name}</th>
                   {row.cells.map((cell) => (
-                    <td class:list={["num", cell.us && "us"]}>{cell.text}</td>
+                    <td class:list={["num", cell.us && "us"]}>
+                      {cell.text}
+                      {cell.mark ? <sup>{cell.mark}</sup> : null}
+                    </td>
                   ))}
                   <td class="num">{row.versus}</td>
                 </tr>
@@ -131,9 +134,24 @@ const defaults = [
           </tbody>
         </table>
       </div>
+      {
+        board.rows
+          .filter((row) => row.notes.length > 0)
+          .map((row) => (
+            <p class="token-note">
+              <strong>{row.name}.</strong>{" "}
+              {row.notes.map((note) => (
+                <>
+                  {note.mark ? <sup>{note.mark}</sup> : null}
+                  {note.text}{" "}
+                </>
+              ))}
+            </p>
+          ))
+      }
       <p class="token-note">
         {board.tasks} tasks. Each library's docs are capped to the length of ChartKit <a href="/llms.txt">llms.txt</a>. Output tokens are summed until a chart is drawn. Did-not-finish runs are excluded from the median. ChartKit median model calls are {board.calls}; <code>repair()</code> does not add a model call. Harness tip <a href={`${SITE.github}/pull/${board.pr}`}>PR #{board.pr}</a>, commit <a href={`${SITE.github}/commit/${board.sha}`}>{board.sha}</a>.
-        The homepage bars are the median of these finished rows. Grok 4.7 stays pending until that run lands.
+        The homepage bars are the median of these {board.rows.filter((row) => !row.pending).length} finished rows.
       </p>
     </section>
 
