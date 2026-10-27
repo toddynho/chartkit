@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { render as renderAll } from "../all";
 import { render } from "../extra";
-import { distanceFor, intersectionArea } from "../renderers/extra/venn";
+import { distanceFor, intersectionArea, lensCenter, regionCenter, regionMargin } from "../renderers/extra/venn";
 import { repairPhase4, validatePhase4 } from "../validate-phase4";
 import { validate, validateAsync } from "../validate";
 
@@ -92,6 +92,73 @@ describe("phase 4 charts", () => {
     expect(trio.match(/data-ck-mark="set"/g)?.length).toBe(3);
     expect(trio).toContain("3-set areas are approximate");
     expect(trio).toContain("90");
+  });
+
+  it("centers venn counts in the overlap they describe", () => {
+    const pair = render({
+      version: "1",
+      type: "venn",
+      data: [
+        { set: "Search", size: 100 },
+        { set: "Filters", size: 25 },
+        { set: "Search+Filters", size: 10 },
+      ],
+      encoding: { x: "set", y: "size" },
+      a11y: { alt: "Search is the larger set." },
+    });
+    const pairCircles = readCircles(pair);
+    const pairLabel = readOverlaps(pair)[0];
+    expect(pairLabel?.text).toBe("10");
+    expect(pairLabel?.middle).toBe(true);
+    for (const circle of pairCircles) expect(distance(pairLabel, circle)).toBeLessThan(circle.r - 8);
+    const smaller = pairCircles[0].r < pairCircles[1].r ? pairCircles[0] : pairCircles[1];
+    const midX = (pairCircles[0].x + pairCircles[1].x) / 2;
+    expect(Math.abs(pairLabel.x - smaller.x)).toBeLessThan(Math.abs(midX - smaller.x) - 4);
+
+    const trio = render(load("27-venn.json"));
+    const circles = readCircles(trio);
+    const labels = readOverlaps(trio);
+    expect(labels.map((label) => label.text)).toEqual(["410", "220", "140", "90"]);
+    expect(labels.every((label) => label.middle)).toBe(true);
+    for (const label of labels) {
+      const inside = circles.filter((circle) => label.sets.includes(circle.name));
+      const outside = circles.filter((circle) => !label.sets.includes(circle.name));
+      expect(inside).toHaveLength(label.sets.length);
+      for (const circle of inside) expect(distance(label, circle)).toBeLessThan(circle.r - 8);
+      for (const circle of outside) expect(distance(label, circle)).toBeGreaterThan(circle.r + 6);
+    }
+    for (let i = 0; i < labels.length; i++) {
+      for (let j = i + 1; j < labels.length; j++) expect(distance(labels[i], labels[j])).toBeGreaterThan(28);
+    }
+    const names = readNames(trio);
+    expect(names.map((label) => label.text).sort()).toEqual(["Filters", "Saved views", "Search"]);
+    for (const label of names) {
+      const own = circles.find((circle) => circle.name === label.text);
+      expect(own).toBeTruthy();
+      expect(boxClearsCircle(label, own!, 4)).toBe(true);
+      for (const count of labels) expect(boxesHit(label, count)).toBe(false);
+    }
+  });
+
+  it("finds the visual center of a lens and of a three-circle region", () => {
+    const wide = { x: 0, y: 0, r: 10 };
+    const narrow = { x: 12, y: 0, r: 6 };
+    const lens = lensCenter(wide, narrow);
+    expect(lens).toEqual({ x: 8, y: 0 });
+    expect(regionMargin(lens, [wide, narrow], [])).toBeCloseTo(2, 5);
+
+    const circles = [
+      { x: 0, y: 0, r: 6 },
+      { x: 6, y: 0, r: 6 },
+      { x: 3, y: 5.2, r: 6 },
+    ];
+    expect(nearBest(regionCenter(circles, []), circles, [])).toBe(true);
+    const exclusive = [circles[0], circles[1]];
+    const cut = [circles[2]];
+    const pair = regionCenter(exclusive, cut);
+    expect(nearBest(pair, exclusive, cut)).toBe(true);
+    expect(regionMargin(pair, exclusive, cut)).toBeGreaterThan(0.4);
+    expect(pair.y).toBeLessThan(-0.2);
   });
 
   it("keeps two-circle overlap close to the requested area", () => {
@@ -252,3 +319,93 @@ describe("phase 4 charts", () => {
     host.remove();
   });
 });
+
+interface Spot {
+  x: number;
+  y: number;
+  text: string;
+  sets: string[];
+  middle: boolean;
+  hw: number;
+  hh: number;
+}
+
+interface CircleSpot {
+  name: string;
+  x: number;
+  y: number;
+  r: number;
+}
+
+function readCircles(svg: string): CircleSpot[] {
+  return [...svg.matchAll(/<circle\b[^>]*data-ck-mark="set"[^>]*>/g)].map((match) => {
+    const tag = match[0];
+    const label = /aria-label="([^"]+)"/.exec(tag)?.[1] ?? "";
+    return {
+      name: label.split(":")[0],
+      x: numAttr(tag, "cx"),
+      y: numAttr(tag, "cy"),
+      r: numAttr(tag, "r"),
+    };
+  });
+}
+
+function readOverlaps(svg: string): Spot[] {
+  return [...svg.matchAll(/<text\b([^>]*data-ck-mark="overlap"[^>]*)>([\s\S]*?)<\/text>/g)].map((match) => {
+    const attrs = match[1];
+    const text = match[2].replace(/<title>[\s\S]*?<\/title>/g, "").trim();
+    const label = /aria-label="([^"]+)"/.exec(attrs)?.[1] ?? "";
+    const sets = label.slice(0, label.lastIndexOf(":")).split("+").map((part) => part.trim());
+    return { x: numAttr(attrs, "x"), y: numAttr(attrs, "y"), text, sets, middle: attrs.includes('dominant-baseline="middle"'), hw: text.length * 4.2, hh: 7 };
+  });
+}
+
+function readNames(svg: string): Spot[] {
+  return [...svg.matchAll(/<text\b([^>]*)>([^<]+)<\/text>/g)]
+    .filter((match) => !match[1].includes("data-ck-mark") && ["Search", "Filters", "Saved views"].includes(match[2]))
+    .map((match) => ({
+      x: numAttr(match[1], "x"),
+      y: numAttr(match[1], "y"),
+      text: match[2],
+      sets: [],
+      middle: match[1].includes('dominant-baseline="middle"'),
+      hw: match[2].length * 4.4,
+      hh: 8,
+    }));
+}
+
+function numAttr(tag: string, name: string): number {
+  return Number(new RegExp(`${name}="([^"]+)"`).exec(tag)?.[1]);
+}
+
+function distance(a: { x: number; y: number }, b: { x: number; y: number }): number {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function boxesHit(a: Spot, b: Spot): boolean {
+  return Math.abs(a.x - b.x) < a.hw + b.hw && Math.abs(a.y - b.y) < a.hh + b.hh;
+}
+
+function boxClearsCircle(label: Spot, circle: CircleSpot, gap: number): boolean {
+  const x = Math.max(label.x - label.hw, Math.min(circle.x, label.x + label.hw));
+  const y = Math.max(label.y - label.hh, Math.min(circle.y, label.y + label.hh));
+  return Math.hypot(circle.x - x, circle.y - y) >= circle.r + gap;
+}
+
+function nearBest(point: { x: number; y: number }, interior: { x: number; y: number; r: number }[], exterior: { x: number; y: number; r: number }[]): boolean {
+  let best = -Infinity;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const circle of interior) {
+    minX = Math.min(minX, circle.x - circle.r);
+    minY = Math.min(minY, circle.y - circle.r);
+    maxX = Math.max(maxX, circle.x + circle.r);
+    maxY = Math.max(maxY, circle.y + circle.r);
+  }
+  for (let x = minX; x <= maxX; x += 0.3) {
+    for (let y = minY; y <= maxY; y += 0.3) best = Math.max(best, regionMargin({ x, y }, interior, exterior));
+  }
+  return regionMargin(point, interior, exterior) >= best - 0.45;
+}
