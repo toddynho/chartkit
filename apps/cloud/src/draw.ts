@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { render } from "@chartkitdev/core/extra";
+import { render as renderExtra } from "@chartkitdev/core/extra";
+import { renderBarList } from "@chartkitdev/core/charts/bar-list";
 import { repair, type RepairResult } from "@chartkitdev/core/validate";
 import { repairPhase4 } from "@chartkitdev/core/validate/phase4";
 import { canonical } from "./charts.ts";
@@ -44,9 +45,11 @@ export async function drawSpec(input: unknown, frame: Frame): Promise<Drawn> {
   const framed = withFrame(input, frame);
   const checked = check(framed);
   const spec = applyCloudPlate(checked.spec, frame);
-  const result = spec === checked.spec ? checked : { ...checked, spec };
+  let result = spec === checked.spec ? checked : { ...checked, spec };
   const drawn = result.ok ? render(result.spec) : "";
-  const failed = !result.ok || drawn.includes("ck-chart-error");
+  const failure = result.ok ? drawFailure(result.spec, drawn) : null;
+  if (failure) result = failResult(result, failure);
+  const failed = !result.ok;
   const dark = failed ? false : themeIsDark(frame.theme, drawn);
   const theme = isRecord(result.spec) ? result.spec.theme : undefined;
   const plate = failed ? CLOUD_PLATE : explicitBackground(theme) ?? (dark ? "#0c0c0c" : CLOUD_PLATE);
@@ -115,6 +118,38 @@ export function readFrame(source: { get(name: string): string | null }): Frame |
 function check(spec: unknown): RepairResult {
   const type = isRecord(spec) && typeof spec.type === "string" ? spec.type : "";
   return PHASE4.has(type) ? repairPhase4(spec) : repair(spec);
+}
+
+/**
+ * Gallery charts the extra bundle leaves on their own entry.
+ * bar-list stays out of line and all. Cloud still draws the docs try-it spec.
+ */
+function render(spec: unknown): string {
+  if (isRecord(spec) && spec.type === "bar-list") return renderBarList(spec) ?? "";
+  return renderExtra(spec);
+}
+
+/** Repair can accept a type the worker cannot draw. Say so instead of a generic picture. */
+function drawFailure(spec: unknown, drawn: string): RepairResult["errors"][number] | null {
+  if (drawn && !drawn.includes("ck-chart-error")) return null;
+  const type = isRecord(spec) && typeof spec.type === "string" ? spec.type : "unknown";
+  const unsupported = !drawn || drawn.includes("no renderer registered");
+  return {
+    code: unsupported ? "CK1010" : "CK1006",
+    severity: "error",
+    path: "/type",
+    message: unsupported ? `type "${type}" is unsupported on Cloud` : `renderer for "${type}" could not draw this spec`,
+    hint: unsupported ? "This type is not loaded by the Cloud worker." : undefined,
+  };
+}
+
+function failResult(result: RepairResult, error: RepairResult["errors"][number]): RepairResult {
+  return {
+    ...result,
+    ok: false,
+    errors: [error, ...result.errors],
+    diagnostics: [error, ...result.diagnostics],
+  };
 }
 
 function withFrame(spec: unknown, frame: Frame): unknown {

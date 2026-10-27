@@ -1,5 +1,5 @@
 import { seriesPoints } from "../../annotations";
-import { axisTitleMarks, categoryX, chooseTicks, lockDomain, placedNotes } from "../../chrome";
+import { CHROME_TOP, axisTitleMarks, categoryX, chooseTicks, lockDomain, placedNotes } from "../../chrome";
 import type { DataTable } from "../../data";
 import { fieldOf } from "../../frame";
 import { cssVar, paint } from "../../theme";
@@ -208,7 +208,7 @@ export function renderAreaRange(spec: Record<string, unknown>): string | null {
   const legend = byWidth(bands).map((band) => ({ name: band.name, color: band.color, opacity: band.opacity }));
   if (showLine && line) legend.push({ name: line.name, color: line.color, opacity: 1 });
   const legendBelow = frame.legend === "bottom";
-  if (legend.length > 1 && !legendBelow) box.top = Math.max(box.top, frame.title ? (frame.subtitle ? 72 : 58) : frame.subtitle ? 52 : 36);
+  if (legend.length > 1 && !legendBelow) box.top = Math.max(box.top, frame.title ? (frame.subtitle ? 72 : 58) : frame.subtitle ? 52 : 36 + (CHROME_TOP - 14));
   const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const slot = (box.right - box.left) / Math.max(1, labels.length);
   const xAt = (index: number) => box.left + slot * index + slot / 2;
@@ -227,7 +227,7 @@ export function renderAreaRange(spec: Record<string, unknown>): string | null {
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
   parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: xAt(index), text: label })), box));
   parts.push(axisLine(frame, box));
-  if (legend.length > 1 && !legendBelow) parts.push(legendRow(legend, box.left, frame.title ? (frame.subtitle ? 56 : 40) : frame.subtitle ? 32 : 14, cssVar("text", frame.preset.text)));
+  if (legend.length > 1 && !legendBelow) parts.push(legendRow(legend, box.left, frame.title ? (frame.subtitle ? 56 : 40) : frame.subtitle ? 32 : CHROME_TOP, cssVar("text", frame.preset.text)));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
   parts.push(notes.under);

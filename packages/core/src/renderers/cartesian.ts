@@ -10,6 +10,7 @@ import { canvasWanted } from "../render-mode";
 import { beginFrame, dataSampling, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import type { ColorScale } from "../color-scale";
 import { exportList, readColor } from "../frame";
+import { CHROME_TOP } from "../chrome";
 import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
 import { layoutPaint } from "../layout-hook";
 import { boxId, brokenScale, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, round, scaleClamp, scalePad, symlogTicks, ticks } from "../svg";
@@ -749,13 +750,13 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   const titleX = paint ? paint.titleX(Boolean(model.rtl), model.width, pad.left) : pad.left;
   const titleAnchor = paint ? paint.titleAttr(Boolean(model.rtl)) : "";
   if (model.title) {
-    parts.push(`<text x="${n(titleX)}" y="22"${titleAnchor} fill="${cssVar("text", model.preset.text)}" font-size="15" font-weight="650" font-family="${font()}">${esc(model.title)}</text>`);
+    parts.push(`<text x="${n(titleX)}" y="${CHROME_TOP}"${titleAnchor} fill="${cssVar("text", model.preset.text)}" font-size="15" font-weight="650" font-family="${font()}">${esc(model.title)}</text>`);
   }
   if (model.subtitle) {
     parts.push(`<text x="${n(titleX)}" y="${model.title ? 40 : 18}"${titleAnchor} fill="${cssVar("muted", model.preset.muted)}" font-size="12" font-weight="400" font-family="${font()}">${esc(model.subtitle)}</text>`);
   }
   if (model.headline) parts.push(headlineSvg(model));
-  if (model.legend && !model.legendBox) parts.push(legend(model, pad.left, model.title || model.subtitle ? (model.subtitle ? 54 : 36) : 8, plot.right));
+  if (model.legend && !model.legendBox) parts.push(legend(model, pad.left, model.subtitle ? 54 : model.title ? 36 : CHROME_TOP, plot.right));
 
   const clip = boxId(model.id, plot.left, plot.top, plotW, plotH);
   parts.push(`<defs>${clipPath(clip, plot.left, plot.top, plotW, plotH)}`);
@@ -2516,7 +2517,11 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
     else if (pos === "bottom") bottom += space.band;
     else if (pos === "left") left += space.side;
     else if (pos === "right") right += space.side;
-  } else if (model.legend) top += 12 + legendRows(model, left, model.width - right) * 18;
+  } else if (model.legend) {
+    top += 12 + legendRows(model, left, model.width - right) * 18;
+    // The swatch used to start at y=8. Drop the plot by the same amount the legend moved.
+    if (!model.title && !model.subtitle) top += CHROME_TOP - 8;
+  }
   if (model.colorScale && model.legendOn) bottom += 46;
   const inset = model.inset;
   return {
@@ -2667,7 +2672,10 @@ function strokeGutter(model: PlotModel, axis: "y" | "y2", span: number): number 
   let top = compact ? 2 : 14;
   if (!compact && model.title) top += 20;
   if (!compact && model.subtitle) top += 18;
-  if (!compact && model.legend && (!model.legendBox || model.legendBox.position === "top")) top += 30;
+  if (!compact && model.legend && (!model.legendBox || model.legendBox.position === "top")) {
+    top += 30;
+    if (!model.title && !model.subtitle && !model.legendBox) top += CHROME_TOP - 8;
+  }
   const bottom = compact ? 2 : model.showX ? 32 : 12;
   const plotH = Math.max(24, model.height - top - bottom);
   return Math.max((air / plotH) * span, compact ? 0 : span * 0.06);

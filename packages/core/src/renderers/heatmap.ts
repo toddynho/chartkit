@@ -1,5 +1,5 @@
 import { colorLegendHeight, readColorScale, scaleLabel } from "../color-scale";
-import { heading } from "../chrome";
+import { CHROME_TOP, heading } from "../chrome";
 import { cssVar, paint } from "../theme";
 import { formatValue } from "../format";
 import { asNumber, column, fieldOf, readColor, readFrame, readTable, type Frame } from "../frame";
@@ -64,7 +64,8 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
     box.legendY += head;
   }
   // Subtitle baseline is 40. Keep the month band under that, and the cells under the band.
-  const monthFloor = frame.subtitle ? (frame.title ? 54 : 32) : frame.title ? 36 : 11;
+  // With no title, month labels share the cartesian title baseline instead of sitting at y=11.
+  const monthFloor = frame.subtitle ? (frame.title ? 54 : 32) : frame.title ? 36 : CHROME_TOP;
   const monthDrop = Math.max(0, monthFloor - (box.oy + 11));
   if (monthDrop) {
     box.oy += monthDrop;

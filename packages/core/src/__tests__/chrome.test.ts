@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createRenderer } from "../render";
 import { line } from "../charts/line";
+import { CHROME_TOP } from "../chrome";
 import { render } from "../extra";
 
 const alt = "Chrome is visible on this chart.";
@@ -89,6 +90,50 @@ describe("shared cartesian chrome", () => {
     const svg = render(spec) ?? "";
     for (const tick of ["0", "20", "42", "60", "80"]) expect(svg).toContain(`>${tick}<`);
     expect(horizontalGrids(svg).length).toBe(5);
+  });
+
+  it("places untitled combo, heatmap, and range legends on the title band", () => {
+    const combo = render({
+      version: "1",
+      type: "combo",
+      data: [
+        { month: "Jan", revenue: 100, margin: 0.2 },
+        { month: "Feb", revenue: 140, margin: 0.24 },
+      ],
+      encoding: {
+        x: "month",
+        y: [
+          { field: "revenue", title: "Revenue", mark: "bar" },
+          { field: "margin", title: "Margin", mark: "line", axis: "y2" },
+        ],
+      },
+      a11y: { alt: "Revenue and margin." },
+    });
+    const swatch = combo.match(/<rect x="[^"]+" y="([^"]+)" width="10" height="10"/);
+    expect(Number(swatch?.[1])).toBe(CHROME_TOP);
+
+    const heat = render({
+      version: "1",
+      type: "heatmap",
+      data: [
+        { date: "2026-01-01", value: 1 },
+        { date: "2026-01-02", value: 4 },
+      ],
+      encoding: { x: { field: "date", type: "temporal" }, color: "value" },
+      mark: { layout: "calendar", weeks: 8 },
+      a11y: { alt: "Two days in January." },
+    });
+    const months = [...heat.matchAll(/<text x="[^"]+" y="([^"]+)"[^>]*>(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)<\/text>/g)];
+    expect(months.length).toBeGreaterThan(0);
+    for (const month of months) expect(Number(month[1])).toBeGreaterThanOrEqual(CHROME_TOP);
+
+    const range = render(
+      xy("area-range", {
+        encoding: { x: "month", y: [{ lo: "lo", hi: "hi" }, { field: "value" }] },
+      }),
+    );
+    const rangeSwatch = range.match(/<rect x="[^"]+" y="([^"]+)" width="10" height="10"/);
+    expect(Number(rangeSwatch?.[1])).toBe(CHROME_TOP);
   });
 
   it("emits mark.glow on a combo line", () => {
