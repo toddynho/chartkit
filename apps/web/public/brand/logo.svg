@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <g transform="translate(16 16) scale(0.86) translate(-16 -16)">
+    <path fill="currentColor" fill-rule="evenodd" d="M11.6 9V5.7C11.6 4.49 12.59 3.5 13.8 3.5h4.4c1.21 0 2.2.99 2.2 2.2V9h-2.2V6.4c0-.52-.43-.95-.95-.95h-2.5c-.52 0-.95.43-.95.95V9Z"/>
+    <path fill="currentColor" d="M9 9h14c4.92 0 6 1.08 6 6v7c0 4.92-1.08 6-6 6H9c-4.92 0-6-1.08-6-6v-7c0-4.92 1.08-6 6-6Z"/>
+    <rect class="logo-bars" x="9.8" y="20.4" width="3.2" height="5" rx="1.05"/>
+    <rect class="logo-bars" x="14.4" y="17.4" width="3.2" height="8" rx="1.05"/>
+    <rect class="logo-bars" x="19" y="13.8" width="3.2" height="11.6" rx="1.05"/>
+  </g>
+</svg>

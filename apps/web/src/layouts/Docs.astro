@@ -25,7 +25,7 @@ const crumbs = crumbsFor(href);
       var stored = localStorage.getItem("ck-docs-rail-width");
       if (stored && /^\d{2,4}$/.test(stored) && matchMedia("(min-width: 1101px)").matches) {
         var n = Number(stored);
-        var max = Math.max(260, Math.round(window.innerWidth - 248 - 56 - 320));
+        var max = Math.max(280, Math.round(window.innerWidth - 220 - 56 - 340));
         if (n >= 220 && n <= 9999) {
           document.documentElement.style.setProperty("--docs-rail-width", Math.min(max, Math.max(260, n)) + "px");
         }

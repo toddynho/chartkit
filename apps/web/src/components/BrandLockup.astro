@@ -1,23 +1,17 @@
 ---
-import markLight from "../../public/brand/mark-light.svg?raw";
-import markDark from "../../public/brand/mark-dark.svg?raw";
+import logo from "../../public/brand/logo.svg?raw";
 
-/**
- * Live lockup: the 32px mark, drawn at 22px, plus Inter 600 “ChartKit”.
- * The wordmark SVGs are preview plates (280×56). They are not the header
- * or footer logo — cropping them clips the kit handle.
- */
-function icon(file: string, svg: string): string {
-  if (!svg.includes('viewBox="0 0 32 32"')) throw new Error(`Unexpected mark asset in ${file}`);
-  return svg.replace("<svg ", '<svg aria-hidden="true" focusable="false" ');
+interface Props {
+  size?: 24 | 22;
+  tag?: string;
 }
 
-const light = icon("mark-light.svg", markLight);
-const dark = icon("mark-dark.svg", markDark);
+const { size = 24, tag } = Astro.props;
+const svg = logo.replace("<svg ", '<svg aria-hidden="true" focusable="false" ');
 ---
 
-<a class="brand" href="/" aria-label="ChartKit home">
-  <span class="brand__mark brand__mark--light" set:html={light} />
-  <span class="brand__mark brand__mark--dark" set:html={dark} />
+<a class:list={["brand", size === 22 && "brand--footer"]} href="/" aria-label="ChartKit home">
+  <span class="brand__mark" style={`width:${size}px;height:${size}px`} set:html={svg} />
   <span class="brand__word">ChartKit</span>
+  {tag ? <span class="brand__tag">{tag}</span> : null}
 </a>

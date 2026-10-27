@@ -1,83 +1,192 @@
 ---
+import "../styles/v2.css";
 import Base from "../layouts/Base.astro";
-import Pricing from "../components/Pricing.astro";
 import { highlight } from "../lib/highlight";
-import { cloudCurl } from "../data/samples";
+import { showcaseSvgs } from "../data/marketing-charts";
 
+const proDraft = true;
 const description =
-  "ChartKit Cloud returns SVG or PNG from a JSON spec. Free images include a watermark. Pro removes it. The dollar amounts are drafts.";
-const curl = await highlight(cloudCurl, "bash");
+  "ChartKit Cloud returns SVG or PNG from a JSON spec. Free images include a watermark. Pro pricing is not on sale yet.";
+const shots = showcaseSvgs();
+const curl = `curl -sG "https://cloud.chartkit.dev/render" \\
+  --data-urlencode 'spec={"version":"1","type":"line","data":[{"q":"Q1","v":40},{"q":"Q2","v":55}],"encoding":{"x":"q","y":"v"},"a11y":{"alt":"Units rose from Q1 to Q2."}}' \\
+  --data-urlencode format=svg \\
+  -o chart.svg`;
+const code = await highlight(curl, "bash");
 
-const uses = [
-  {
-    title: "README / docs images",
-    text: "A README or a docs page can point at the image. PNG for GitHub. SVG elsewhere.",
-  },
-  {
-    title: "Agent artifacts",
-    text: "An agent posts a spec and keeps the file. The artifact is an image, ready to attach.",
-  },
-  {
-    title: "Server-side reports",
-    text: "The server that builds the report asks for the image and drops it in. No chart package on that host.",
-  },
-  {
-    title: "Anywhere an img is enough",
-    text: "If the page can show an image, it can show the chart. The chart runtime stays off the client.",
-  },
-];
+const icon = (d: string) =>
+  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"></path></svg>`;
 ---
 
 <Base tone="light" title="Cloud" description={description}>
-  <div class="wrap">
-    <section class="hero" aria-labelledby="cloud-page-title">
-      <p class="kicker">Cloud</p>
-      <h1 id="cloud-page-title">Post a spec. Get the image.</h1>
-      <p class="lede">SVG or PNG back from one JSON spec. No renderer to host. Fast to put in an app.</p>
-      <div class="actions">
-        <a class="btn btn-primary" href="#uses">Use cases</a>
-        <a class="btn btn-secondary" href="#pricing">Free and Pro</a>
+  <div class="v2">
+    <section class="split">
+      <div>
+        <p class="eyebrow eyebrow--blue">ChartKit Cloud</p>
+        <h1 class="v2-h1 v2-h1--54">Post a spec.<br />Get the image.</h1>
+        <p class="v2-lead v2-lead--left">One JSON spec in, SVG or PNG out. Nothing to host, no chart runtime on the client.</p>
+        <div class="v2-actions">
+          <a class="btn-lg" href="/docs/cloud">Render your first chart</a>
+          <a class="btn-text" href="#pricing">Pricing</a>
+        </div>
+      </div>
+      <div class="cloud-stack">
+        <div class="cloud-spec">
+          <div class="cloud-spec__bar"><span>spec.json</span><span>POST /render</span></div>
+          <div>{'{'} </div>
+          <div>&nbsp;&nbsp;"type": "bar",</div>
+          <div>&nbsp;&nbsp;"data": [ {"{"} "month": "Jan", "signups": 72 {"}"}, … ]</div>
+          <div>{'}'}</div>
+        </div>
+        <div class="cloud-status">↓ 200 OK · image/svg+xml</div>
+        <div class="cloud-chart">
+          <h2>Signups by month</h2>
+          <Fragment set:html={shots.cloud} />
+          <p class="wm">chartkit.dev</p>
+        </div>
       </div>
     </section>
 
-    <section class="section" id="why" aria-labelledby="why-cloud">
-      <h2 id="why-cloud">Why Cloud</h2>
-      <p class="lede">POST the spec. The response is the chart. The app that already sends mail, writes the README, or builds the report can take that image.</p>
-    </section>
-
-    <section class="section" id="uses" aria-labelledby="uses-title">
-      <h2 id="uses-title">Use cases</h2>
-      <div class="use-grid">
-        <article class="card use-card use-card--email">
-          <p class="kicker">Email</p>
-          <h3>Charts in the inbox</h3>
-          <p>
-            Render returns SVG or PNG, so the chart is an image. Email shows it. A JavaScript chart runtime does not run there.
-          </p>
+    <section aria-labelledby="uses-title">
+      <div class="section-intro">
+        <h2 id="uses-title">Where an image is enough</h2>
+        <p>If it can show an <code>&lt;img&gt;</code>, it can show the chart. The runtime never ships.</p>
+      </div>
+      <div class="tile-grid tile-grid--cloud">
+        <article class="show-tile show-tile--short" style="background:#17181a;color:#fff">
+          <div class="show-tile__copy">
+            <div class="show-tile__kicker">
+              <span class="show-tile__icon" style="background:rgba(255,255,255,.12)" set:html={icon("M4 6h16v12H4zM4 6l8 7 8-7")} />
+              <span class="show-tile__eye">Email</span>
+            </div>
+            <h3>Charts in the inbox</h3>
+            <p>Mail clients run no JavaScript. An image renders everywhere.</p>
+          </div>
+          <div class="show-tile__well">
+            <div class="show-tile__panel">
+              <div class="mock-mail">
+                <header><span class="avatar"></span><div><strong>Weekly metrics</strong><div>metrics@acme · 9:41</div></div></header>
+                <p>Signups, Jan–Aug.</p>
+                <Fragment set:html={shots.email} />
+                <div class="skel"></div>
+                <div class="skel w2"></div>
+              </div>
+            </div>
+            <div class="show-tile__fade" style="background:linear-gradient(180deg,#17181a 0%,transparent 100%)"></div>
+          </div>
         </article>
-        {
-          uses.map((item) => (
-            <article class="card use-card">
-              <h3>{item.title}</h3>
-              <p>{item.text}</p>
-            </article>
-          ))
-        }
+        <article class="show-tile show-tile--short" style="background:#eef3fb;color:#17181a">
+          <div class="show-tile__copy">
+            <div class="show-tile__kicker">
+              <span class="show-tile__icon" style="background:#fff;color:#0a63e6" set:html={icon("M6 4h12v16H6zM9 8h6M9 12h6")} />
+              <span class="show-tile__eye">Docs</span>
+            </div>
+            <h3>README and docs</h3>
+            <p>Point the image tag at a render URL. PNG for GitHub, SVG elsewhere.</p>
+          </div>
+          <div class="show-tile__well">
+            <div class="show-tile__panel">
+              <div class="mock-readme">
+                <div class="readme-tab">README.md</div>
+                <strong># acme-metrics</strong>
+                <p class="readme-img">![signups](https://cloud.chartkit.dev/render?spec=…&amp;format=png)</p>
+                <Fragment set:html={shots.readme} />
+              </div>
+            </div>
+            <div class="show-tile__fade" style="background:linear-gradient(180deg,#eef3fb 0%,transparent 100%)"></div>
+          </div>
+        </article>
+        <article class="show-tile show-tile--short" style="background:#0a63e6;color:#fff">
+          <div class="show-tile__copy">
+            <div class="show-tile__kicker">
+              <span class="show-tile__icon" style="background:rgba(255,255,255,.18)" set:html={icon("M5 12.5l4.5 4.5L19 7.5")} />
+              <span class="show-tile__eye">Agents</span>
+            </div>
+            <h3>Agent artifacts</h3>
+            <p>An agent posts a spec and attaches the file. No render step on its side.</p>
+          </div>
+          <div class="show-tile__well">
+            <div class="show-tile__panel">
+              <div class="mock-chat">
+                <div class="bubble">Chart the Q3 signups.</div>
+                <p>Attached the render.</p>
+                <Fragment set:html={shots.agent} />
+                <div class="file-pill">signups-q3.svg · 4.1 KB</div>
+              </div>
+            </div>
+            <div class="show-tile__fade" style="background:linear-gradient(180deg,#0a63e6 0%,transparent 100%)"></div>
+          </div>
+        </article>
+        <article class="show-tile show-tile--short" style="background:#f1f1ee;color:#17181a">
+          <div class="show-tile__copy">
+            <div class="show-tile__kicker">
+              <span class="show-tile__icon" style="background:#fff;color:#17181a" set:html={icon("M6 3h9l3 3v15H6z")} />
+              <span class="show-tile__eye">Reports</span>
+            </div>
+            <h3>Server-side reports</h3>
+            <p>The server building the PDF fetches the image and drops it in.</p>
+          </div>
+          <div class="show-tile__well">
+            <div class="show-tile__panel">
+              <div class="mock-pdf">
+                <div class="pdf-kicker">Q3 BOARD REPORT · p. 4 / 12</div>
+                <strong>Signups</strong>
+                <div class="skel"></div>
+                <div class="pdf-charts">
+                  <Fragment set:html={shots.reportA} />
+                  <Fragment set:html={shots.reportB} />
+                </div>
+              </div>
+            </div>
+            <div class="show-tile__fade" style="background:linear-gradient(180deg,#f1f1ee 0%,transparent 100%)"></div>
+          </div>
+        </article>
       </div>
     </section>
 
-    <section class="section" id="fast" aria-labelledby="fast-title">
-      <h2 id="fast-title">How fast</h2>
-      <p class="lede">One request. The response is the image.</p>
-      <figure class="code">
-        <figcaption>shell</figcaption>
-        <Fragment set:html={curl} />
-      </figure>
-      <p class="note">
-        The API reference is <a href="https://chartkit.dev/docs/cloud">Cloud render</a>.
-      </p>
+    <section style="padding:72px 0" aria-labelledby="request-title">
+      <div class="section-intro">
+        <h2 id="request-title">One request</h2>
+        <p>No SDK. The response body is the file.</p>
+      </div>
+      <div class="curl">
+        <div class="curl-label">shell</div>
+        <Fragment set:html={code} />
+      </div>
+      <p class="center-note">Full parameters in the <a href="/docs/cloud">render reference</a>.</p>
     </section>
 
-    <Pricing />
+    <section id="pricing" style="padding-bottom:88px" aria-labelledby="pricing-title">
+      <div class="section-intro">
+        <h2 id="pricing-title">Pricing</h2>
+        <p>Free renders carry a small chartkit.dev mark. A key removes it.</p>
+      </div>
+      <div class="price-row">
+        <article class="price-card">
+          <div class="price-card__top"><h3>Free</h3><div class="price-card__amt">$0</div></div>
+          <ul>
+            <li><span class="yes">✓</span>No key needed</li>
+            <li><span class="yes">✓</span>120 renders / min per IP</li>
+            <li><span class="yes">✓</span>Same spec, same output as Pro</li>
+            <li><span class="no">–</span><span style="color:#55575c">chartkit.dev mark on the image</span></li>
+          </ul>
+          <a class="btn-outline" href="/docs/cloud">Start rendering</a>
+        </article>
+        <article class="price-card price-card--pro">
+          <div class="price-card__top">
+            <h3>Pro</h3>
+            <div class="price-card__amt">{proDraft ? "Coming soon" : "$29 / mo"}</div>
+          </div>
+          <ul>
+            <li><span class="yes">✓</span>Mark removed</li>
+            <li><span class="yes">✓</span>10,000 renders included</li>
+            <li><span class="yes">✓</span>$0.002 per render after</li>
+            <li><span class="yes">✓</span>Higher rate limits</li>
+          </ul>
+          <a class="btn-ink" href="https://github.com/toddynho/chartkit">{proDraft ? "Join the waitlist" : "Get a key"}</a>
+        </article>
+      </div>
+      {proDraft ? <p class="draft-note">Pro pricing is indicative and may change before launch.</p> : null}
+    </section>
   </div>
 </Base>

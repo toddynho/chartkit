@@ -1,53 +1,82 @@
 ---
 import { SITE, canonicalPath } from "../data/site";
-import { primaryNav } from "../data/nav";
+import { docsNavLinks, primaryNav } from "../data/nav";
 import BrandLockup from "./BrandLockup.astro";
 
+interface Props {
+  variant?: "site" | "docs";
+}
+
+const { variant = "site" } = Astro.props;
 const path = canonicalPath(Astro.url.pathname);
 const docsHere = path === "/docs" || path.startsWith("/docs/");
 const dashHere = path === "/dashboard" || path === "/dashboards" || path.startsWith("/dashboards/");
+const onCloud = path === "/cloud";
+const links = variant === "docs" ? docsNavLinks : primaryNav;
 
 function mark(href: string): "page" | undefined {
   if (href === "/docs") return docsHere ? "page" : undefined;
   if (href === "/dashboards") return dashHere ? "page" : undefined;
-  if (href === "/examples") return path === "/examples" || path.startsWith("/examples/") ? "page" : undefined;
   return path === href ? "page" : undefined;
 }
 ---
 
-<header class="site-header" id="site-header">
+<header class:list={["site-header", variant === "docs" && "site-header--docs"]} id="site-header">
   <div class="site-header__inner">
-    <BrandLockup />
+    <BrandLockup tag={variant === "docs" ? "Docs" : undefined} />
+    {
+      variant === "docs" ? (
+        <form class="docs-search" role="search" action="/docs" method="get">
+          <label class="sr" for="docs-search">Search docs</label>
+          <input id="docs-search" type="search" placeholder="Search docs" data-docs-search autocomplete="off" />
+          <kbd>⌘K</kbd>
+        </form>
+      ) : null
+    }
     <nav class="primary" aria-label="Primary">
       {
-        primaryNav.map((item) => (
+        links.map((item) => (
           <a href={item.href} aria-current={mark(item.href)}>
             {item.label}
           </a>
         ))
       }
-      <a class="nav-cta" href="/cloud">Try Cloud</a>
     </nav>
     <div class="header-end">
-      <a
-        class="github-button"
-        href={SITE.github}
-        data-icon="octicon-star"
-        data-show-count="true"
-        data-color-scheme="no-preference: light; light: light; dark: light;"
-        aria-label="Star toddynho/chartkit on GitHub"
-        >Star</a
-      >
+      <a class="star-chip" href={SITE.github} aria-label="Star toddynho/chartkit on GitHub">
+        <span aria-hidden="true">★</span> Star <strong>7</strong>
+      </a>
+      {
+        variant === "docs" ? null : (
+          <a class="btn-ink header-cta" href={onCloud ? "/cloud#pricing" : "/docs"}>
+            {onCloud ? "Get a key" : "Get started"}
+          </a>
+        )
+      }
     </div>
   </div>
 </header>
 
-<script is:inline async defer src="https://buttons.github.io/buttons.js"></script>
 <script>
-  const header = document.getElementById("site-header");
-  if (header) {
-    const onScroll = () => header.classList.toggle("is-scrolled", window.scrollY > 6);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
+  const input = document.querySelector<HTMLInputElement>("[data-docs-search]");
+  if (input) {
+    const filter = () => {
+      const query = input.value.trim().toLowerCase();
+      document.querySelectorAll<HTMLElement>("#docs-sidebar a").forEach((link) => {
+        const row = link.closest("li");
+        if (!row) return;
+        row.hidden = query.length > 0 && !(link.textContent ?? "").toLowerCase().includes(query);
+      });
+      document.querySelectorAll<HTMLElement>("#docs-sidebar details").forEach((fold) => {
+        if (query.length > 0) fold.setAttribute("open", "");
+      });
+    };
+    input.addEventListener("input", filter);
+    window.addEventListener("keydown", (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        input.focus();
+      }
+    });
   }
 </script>

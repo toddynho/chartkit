@@ -1,8 +1,8 @@
 ---
-import "../../styles/surfaces.css";
+import "../../styles/v2.css";
 import Base from "../../layouts/Base.astro";
-import CompareSection from "../../components/CompareSection.astro";
 import { loadCompare, loadCompareIndex } from "../../lib/batch3";
+import { chartkitLineBytes, kb, rivalLineBytes } from "../../lib/line-gzip";
 
 export function getStaticPaths() {
   return loadCompareIndex().rivals.map(({ library }) => ({ params: { slug: library.id } }));
@@ -10,40 +10,166 @@ export function getStaticPaths() {
 
 const page = loadCompare(Astro.params.slug ?? "");
 const library = page.library;
-const description = `Every scored feature for ChartKit and ${library.name}, with losses, wins, verification, and source.`;
+const description = `ChartKit vs ${library.name}. ${page.counts.loss} where ${library.name} ranks higher, ${page.counts.win} where ChartKit ranks higher, ${page.counts.tie} the same, ${page.counts.unknown} unknown.`;
+const ckBytes = chartkitLineBytes();
+const theirBytes = rivalLineBytes(library.id);
+const convert =
+  library.id === "chartjs" || library.id === "recharts" || library.id === "echarts"
+    ? `/convert?source=${library.id}`
+    : "/convert";
+
+const buckets = [
+  { id: "loss", n: page.counts.loss, label: `${library.name} ahead`, rows: page.loss },
+  { id: "win", n: page.counts.win, label: "ChartKit ahead", rows: page.win },
+  { id: "tie", n: page.counts.tie, label: "Same", rows: page.tie },
+  { id: "unk", n: page.counts.unknown, label: "Unknown", rows: page.unknown },
+];
+const total = buckets.reduce((sum, bucket) => sum + bucket.n, 0) || 1;
+const colors = ["#17181a", "#0a63e6", "#cfcfcb", "#e6e6e2"];
+
+function rankClass(rank: string): string {
+  const known = ["none", "native", "manual", "partial", "plugin", "unknown"];
+  return known.includes(rank) ? rank : "unknown";
+}
 ---
 
 <Base title={`ChartKit vs ${library.name}`} description={description} tone="light">
-  <div class="wrap surface prose">
-    <p class="kicker"><a href="/compare">Compare</a></p>
-    <h1>ChartKit vs {library.name}</h1>
-    <p class="lede">
-      {library.name} {library.version}, checked {library.dateChecked}. {page.counts.loss} where {library.name} ranks
-      higher, {page.counts.win} where ChartKit ranks higher, {page.counts.tie} the same, {page.counts.unknown} unknown.
-      Rank order is native, partial, plugin, manual, none. Unknown is not a win. A warns badge is a none cell that
-      validate() warns about, so it ranks as none.
-    </p>
-    <p>
-      Package <code>{library.package}</code>. Licence {library.license}. Escape hatch: {library.escapeHatch}.{" "}
-      <a href={library.docs}>Docs</a>. {library.name} cells are type or schema checks, not render tests. ChartKit was
-      rechecked {page.chartkitRechecked} against main <code>{page.chartkitCommit}</code>.
-    </p>
-    <p>{page.size}</p>
-    <p>
-      {page.perf} <a href="/benchmarks">Full timings</a>.
-    </p>
-    <p>
+  <div class="v2" data-compare data-active="loss">
+    <section class="compare-hero">
+      <div>
+        <p class="crumb"><a href="/compare">Compare</a> / {library.name}</p>
+        <h1 class="v2-h1 v2-h1--50">ChartKit vs {library.name}</h1>
+        <p class="v2-lead v2-lead--left">
+          Feature-by-feature against {library.name} {library.version}, checked {library.dateChecked}. Rank order is native › partial › plugin › manual › none. Unknown is not a win.
+        </p>
+        <div class="v2-actions">
+          <a class="btn-lg" href={convert}>Convert from {library.name}</a>
+          <a class="btn-text" href="/benchmarks">Full timings →</a>
+        </div>
+      </div>
+      <figure class="facts">
+        <div><span>Package</span><span><code>{library.package}</code></span></div>
+        <div><span>Licence</span><span>{library.license}</span></div>
+        <div>
+          <span>Line chart, gzip</span>
+          <span>{theirBytes == null ? "—" : kb(theirBytes)}</span>
+        </div>
+        <div>
+          <span>ChartKit line, gzip</span>
+          <span class="win">{kb(ckBytes)}</span>
+        </div>
+        <div><span>Escape hatch</span><span>{library.escapeHatch}</span></div>
+        <figcaption>
+          {library.name} cells are type or schema checks, not render tests. ChartKit rechecked {page.chartkitRechecked} on <code>{page.chartkitCommit}</code>.
+        </figcaption>
+      </figure>
+    </section>
+
+    <div class="tally-grid" role="tablist" aria-label="Score">
       {
-        library.id === "chartjs" || library.id === "recharts" || library.id === "echarts" ? (
-          <a href={`/convert?source=${library.id}`}>Convert from {library.name} to ChartKit</a>
-        ) : (
-          <a href="/convert">Convert from Chart.js, Recharts, or ECharts</a>
-        )
+        buckets.map((bucket, index) => (
+          <button type="button" class:list={["tally", index === 0 && "is-on"]} data-bucket={bucket.id} role="tab" aria-selected={index === 0 ? "true" : "false"}>
+            <strong>{bucket.n}</strong>
+            <span>{bucket.label}</span>
+          </button>
+        ))
       }
+    </div>
+    <div class="mix" aria-hidden="true">
+      {buckets.map((bucket, index) => <i style={`width:${(bucket.n / total) * 100}%;background:${colors[index]}`} />)}
+    </div>
+    <div class="mix-legend">
+      {buckets.map((bucket, index) => <span><i class="bench-dot" style={`position:static;display:inline-block;width:8px;height:8px;background:${colors[index]};transform:none;margin-right:6px`}></i>{bucket.label}</span>)}
+    </div>
+
+    <div class="table-head">
+      <h2 data-table-title>{library.name} ahead ({page.counts.loss})</h2>
+      <p>A warns badge is a none cell that validate() warns about, so it ranks as none.</p>
+    </div>
+    <div class="compare-table-wrap">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>ChartKit</th>
+            <th>{library.name}</th>
+            <th>Their option</th>
+            <th>Check</th>
+            <th>Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            buckets.flatMap((bucket) =>
+              bucket.rows.map((row, index) => (
+                <tr data-row data-bucket={bucket.id} hidden={bucket.id !== "loss" || index >= 10}>
+                  <th scope="row"><a href={`/features/${row.id}`}>{row.label}</a></th>
+                  <td><span class={`rank rank-${rankClass(row.ours)}`}>{row.ours}</span></td>
+                  <td><span class={`rank rank-${rankClass(row.theirs)}`}>{row.theirs}</span></td>
+                  <td><span class="clip" title={row.option}>{row.option}</span></td>
+                  <td>{row.verified} · {row.strength}</td>
+                  <td><span class="clip" title={row.source}>{row.source}</span></td>
+                </tr>
+              )),
+            )
+          }
+        </tbody>
+      </table>
+      <div class="table-more">
+        <span data-showing>Showing 10 of {page.counts.loss}</span>
+        <button type="button" data-expand>Show all {page.counts.loss} →</button>
+      </div>
+    </div>
+    <p class="compare-foot">
+      {page.perf} <a href="/benchmarks">Full timings</a>. {page.size}
     </p>
-    <CompareSection title={`${library.name} ahead`} rows={page.loss} library={library.name} />
-    <CompareSection title="ChartKit ahead" rows={page.win} library={library.name} />
-    <CompareSection title="Unverified" rows={page.unknown} library={library.name} />
-    <CompareSection title="Same status" rows={page.tie} library={library.name} />
   </div>
 </Base>
+
+<script>
+  const root = document.querySelector<HTMLElement>("[data-compare]");
+  if (root) {
+    const rows = [...root.querySelectorAll<HTMLElement>("[data-row]")];
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>("button[data-bucket]")];
+    const title = root.querySelector<HTMLElement>("[data-table-title]");
+    const showing = root.querySelector<HTMLElement>("[data-showing]");
+    const expand = root.querySelector<HTMLButtonElement>("[data-expand]");
+    let active = "loss";
+    let open = false;
+
+    const labelFor = (id: string) => buttons.find((button) => button.dataset.bucket === id)?.querySelector("span")?.textContent ?? id;
+
+    function paint(): void {
+      const matching = rows.filter((row) => row.dataset.bucket === active);
+      rows.forEach((row) => {
+        const mine = row.dataset.bucket === active;
+        const index = matching.indexOf(row);
+        row.hidden = !mine || (!open && index >= 10);
+      });
+      const shown = Math.min(matching.length, open ? matching.length : 10);
+      if (title) title.textContent = `${labelFor(active)} (${matching.length})`;
+      if (showing) showing.textContent = matching.length > 10 && !open ? `Showing ${shown} of ${matching.length}` : `Showing ${matching.length}`;
+      if (expand) {
+        expand.hidden = matching.length <= 10;
+        expand.textContent = open ? "Show less" : `Show all ${matching.length} →`;
+      }
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        active = button.dataset.bucket ?? "loss";
+        open = false;
+        buttons.forEach((item) => {
+          const on = item === button;
+          item.classList.toggle("is-on", on);
+          item.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        paint();
+      });
+    });
+    expand?.addEventListener("click", () => {
+      open = !open;
+      paint();
+    });
+  }
+</script>

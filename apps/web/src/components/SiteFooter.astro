@@ -1,99 +1,88 @@
 ---
 import BrandLockup from "./BrandLockup.astro";
-import { loadCompareIndex } from "../lib/batch3";
-import { SITE } from "../data/site";
+import { SITE, canonicalPath } from "../data/site";
 
-const rivals = loadCompareIndex().rivals;
+const docs = canonicalPath(Astro.url.pathname) === "/docs" || canonicalPath(Astro.url.pathname).startsWith("/docs/");
 
-const linkColumns = [
+const columns = [
   {
     label: "Product",
     links: [
       { href: "/cloud", label: "Cloud" },
-      { href: "/cloud#pricing", label: "Pricing" },
       { href: "/dashboards", label: "Dashboards" },
-      { href: "/examples", label: "Examples" },
       { href: "/gallery", label: "Gallery" },
+      { href: "/cloud#pricing", label: "Pricing" },
     ],
   },
   {
     label: "Docs",
     links: [
       { href: "/docs", label: "Overview" },
-      { href: "/docs/charts", label: "Chart types" },
       { href: "/docs/spec", label: "Spec" },
+      { href: "/docs/charts", label: "Chart types" },
       { href: "/docs/theming", label: "Theming" },
-      { href: "/docs/migrate", label: "Upgrading from v0" },
     ],
   },
   {
     label: "Agents",
     links: [
-      { href: "/agents", label: "Overview" },
       { href: "/docs/validate", label: "Validate and repair" },
-      { href: "/llms.txt", label: "llms.txt" },
       { href: "/docs/mcp", label: "MCP" },
-      { href: "/features", label: "Features" },
+      { href: "/llms.txt", label: "llms.txt" },
       { href: "/benchmarks", label: "Benchmarks" },
     ],
   },
 ];
-
-const compareLinks = [
-  { href: "/compare", label: "All libraries" },
-  ...rivals.map(({ library }) => ({
-    href: `/compare/${library.id}`,
-    label: `ChartKit vs ${library.name}`,
-  })),
-];
 ---
 
-<footer class="site-footer">
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <BrandLockup />
-      <p class="footer-pitch">One spec. Every framework. Built for agents.</p>
-    </div>
-    <div class="footer-cols">
-      {
-        linkColumns.map((column) => (
-          <nav aria-label={column.label}>
-            <h2>{column.label}</h2>
-            {column.links.map((link) => (
-              <a href={link.href}>{link.label}</a>
-            ))}
-          </nav>
-        ))
-      }
-    </div>
-    <nav class="footer-compare" aria-label="Compare">
-      <h2>Compare</h2>
-      <div class="footer-compare__links">
-        {compareLinks.map((link) => (
-          <a href={link.href}>{link.label}</a>
-        ))}
-      </div>
-    </nav>
-  </div>
-  <p class="legal">
-    <span class="legal__meta">
-      <span>© ChartKit</span>
-      <span aria-hidden="true"> · </span>
-      <span>MIT</span>
-      <span aria-hidden="true"> · </span>
-      <span>{SITE.version}</span>
-      <span aria-hidden="true"> · </span>
-      <a class="legal__github" href={SITE.github} aria-label="ChartKit on GitHub">
-        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-          <path
-            fill="currentColor"
-            d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-          ></path>
-        </svg>
-      </a>
-    </span>
-    <a class="legal__credit" href="https://x.com/toddo">built by @toddo</a>
-  </p>
+<footer class:list={["site-footer", docs && "site-footer--docs"]}>
+  {
+    docs ? (
+      <p class="legal legal--docs">
+        <span class="legal__meta">
+          © ChartKit · MIT · {SITE.version}
+          <span aria-hidden="true"> · </span>
+          <a class="legal__credit" href="https://x.com/toddo">built by @toddo</a>
+        </span>
+        <span class="legal__end">
+          <a href={SITE.github}>GitHub</a>
+          <a href="/llms.txt">llms.txt</a>
+          <a href={`${SITE.github}/releases`}>Changelog</a>
+          <a href="/compare">Compare</a>
+        </span>
+      </p>
+    ) : (
+      <>
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <BrandLockup size={22} />
+            <p class="footer-pitch">
+              <span>One spec.</span>
+              <span>Every framework.</span>
+              <span>Built for agents.</span>
+            </p>
+          </div>
+          {
+            columns.map((column) => (
+              <nav aria-label={column.label}>
+                <h2>{column.label}</h2>
+                {column.links.map((link) => (
+                  <a href={link.href}>{link.label}</a>
+                ))}
+              </nav>
+            ))
+          }
+        </div>
+        <p class="legal">
+          <span class="legal__meta">© ChartKit · MIT · {SITE.version}</span>
+          <span class="legal__end">
+            <a class="legal__credit" href="https://x.com/toddo">built by @toddo</a>
+            <a href="/compare">Compare ChartKit with 20 libraries →</a>
+          </span>
+        </p>
+      </>
+    )
+  }
 </footer>
 
 <script>

@@ -1,7 +1,11 @@
 ---
-import "@fontsource/inter/latin-400.css";
-import "@fontsource/inter/latin-500.css";
-import "@fontsource/inter/latin-600.css";
+import "@fontsource/geist/latin-400.css";
+import "@fontsource/geist/latin-500.css";
+import "@fontsource/geist/latin-600.css";
+import "@fontsource/geist/latin-700.css";
+import "@fontsource/geist-mono/latin-400.css";
+import "@fontsource/geist-mono/latin-500.css";
+import "@fontsource/geist-mono/latin-600.css";
 import "../styles/global.css";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
@@ -66,7 +70,7 @@ const canonical = new URL(path, Astro.site ?? SITE.url).href;
   </head>
   <body>
     <a class="skip" href="#content">Skip to content</a>
-    <SiteHeader />
+    <SiteHeader variant={docsPage ? "docs" : "site"} />
     <main id="content">
       <slot />
     </main>

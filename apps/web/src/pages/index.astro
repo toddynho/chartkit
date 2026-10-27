@@ -1,155 +1,215 @@
 ---
-import "../styles/hero.css";
-import "../styles/docs.css";
-import "../styles/surfaces.css";
+import "../styles/v2.css";
 import Base from "../layouts/Base.astro";
-import ChartMount from "../components/ChartMount.astro";
-import HeroStage from "../components/HeroStage.astro";
 import HomeStart from "../components/HomeStart.astro";
 import { SITE } from "../data/site";
-import { loadHomeStory } from "../lib/surfaces";
+import { homeSlides, showcaseSvgs } from "../data/marketing-charts";
+import { proofFigures, speedPlot } from "../data/home-bench";
 
-/** Swap this string to change the homepage headline. */
-const heroTitle = "One spec. Every framework. Built for agents.";
-const heroLines = heroTitle.split(/(?<=\.)\s+/);
-const heroLede =
-  "Write ChartSpec once. Validate and repair fix the safe mistakes. Adapters and Cloud don’t invent a second API. ChartKit is still a JavaScript library — agents and developers pass a ChartSpec; they do not write the chart implementation.";
-const story = loadHomeStory();
-const leadChart = story.charts.find((chart) => chart.id === "speed");
-const sideCharts = story.charts.filter((chart) => chart.id !== "speed");
+const title = "One spec. Every framework. Built for agents.";
+const lede =
+  "Write a JSON ChartSpec once. Render it in React, Vue, Svelte, vanilla JS, or on the server. Agents write the spec; they never write the chart.";
+const slides = homeSlides();
+const shots = showcaseSvgs();
+const proof = proofFigures();
+const bench = speedPlot();
+
+const icon = (d: string) =>
+  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"></path></svg>`;
 ---
 
-<Base tone="light" title={heroTitle} description={heroLede || SITE.description}>
-  <section class="home-hero" id="hero" aria-labelledby="home-title">
-    <p class="home-hero__eyebrow">ChartKit v1</p>
-    <h1 id="home-title">
-      {heroLines.map((line) => <span class="home-hero__line">{line}</span>)}
-    </h1>
-    <p class="home-hero__lede">{heroLede}</p>
-    <div class="home-hero__actions">
-      <a class="home-btn" href="/docs">
-        Get started <span class="home-btn__chev" aria-hidden="true">›</span>
-      </a>
-      <a class="home-link" href="/cloud">Cloud</a>
-    </div>
-  </section>
+<Base tone="light" title={title} description={lede || SITE.description}>
+  <div class="v2">
+    <section class="home-hero" aria-labelledby="home-title">
+      <p class="eyebrow">ChartKit v1 · MIT</p>
+      <h1 class="v2-h1" id="home-title">
+        One spec.<br />Every framework.<br />Built for agents.
+      </h1>
+      <p class="v2-lead">{lede}</p>
+      <div class="v2-actions">
+        <a class="btn-lg" href="/docs">Get started</a>
+        <a class="btn-text" href="/cloud">Cloud →</a>
+      </div>
+    </section>
 
-  <HomeStart />
+    <HomeStart />
 
-  <HeroStage />
+    <section class="carousel-wrap" aria-labelledby="types-title">
+      <h2 class="sr" id="types-title">Chart types</h2>
+      <div class="carousel-card" data-carousel>
+        {
+          slides.map((slide, index) => (
+            <div class="carousel-slide" data-slide={index} hidden={index !== 0}>
+              <div class="carousel-spec">
+                <div class="carousel-spec__bar">
+                  <span>spec.json</span>
+                  <span>{slide.bytes}</span>
+                </div>
+                <pre set:html={slide.html} />
+              </div>
+              <div class="carousel-view">
+                <div class="carousel-view__head">
+                  <h2>{slide.title}</h2>
+                  <span class="carousel-view__type">{slide.label}</span>
+                </div>
+                <p class="carousel-view__sub">{slide.subtitle}</p>
+                <div class="carousel-chart" set:html={slide.svg} />
+              </div>
+            </div>
+          ))
+        }
+        <div class="carousel-pills" role="tablist" aria-label="Chart type">
+          {
+            slides.map((slide, index) => (
+              <button type="button" class:list={["type-pill", index === 0 && "is-on"]} data-pill role="tab" aria-selected={index === 0 ? "true" : "false"}>
+                <span class="dot" aria-hidden="true" />
+                {slide.label[0].toUpperCase() + slide.label.slice(1)}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+      <p class="carousel-caption">18 chart types · one spec shape · click any to pin it</p>
+    </section>
 
-  <section class="home-story" id="measured" aria-labelledby="story-title">
-    <div class="home-story__intro">
-      <h2 id="story-title">Measured</h2>
-      <p>
-        {story.lede}<br />
+    <section class="proof" aria-labelledby="proof-title">
+      <h2 id="proof-title">Built so an agent ships a chart in one pass</h2>
+      <p class="v2-lead">
+        <code>validate()</code> returns every error in one pass. <code>repair()</code> fixes the safe mistakes and does not call a model.
+      </p>
+      <div class="stat-grid">
+        <article class="stat-card">
+          <p class="stat-num">{proof.first}<span>/{proof.tasks}</span></p>
+          <p>specs valid on the first try with the docs in the prompt</p>
+        </article>
+        <article class="stat-card">
+          <p class="stat-num">{proof.repairFrom}<span>→{proof.repairTo}</span></p>
+          <p>no-docs run after <code>repair()</code>, zero extra model calls</p>
+        </article>
+        <article class="stat-card">
+          <p class="stat-num">{proof.gzipKb}<span> KB</span></p>
+          <p>gzipped line chart, from scripts/size.mjs ({proof.gzipBytes.toLocaleString("en-US")} bytes)</p>
+        </article>
+        <article class="stat-card">
+          <p class="stat-num">{proof.ssrMs}<span> ms</span></p>
+          <p>server render, 1,000-point line, no DOM</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="measured" id="measured" aria-labelledby="measured-title">
+      <h2 id="measured-title">Measured</h2>
+      <p class="v2-lead">
+        Hover-to-paint time at 100,000 points, by chart type. Round {proof.round}, {proof.measured} measured the line chart; the remaining types run in a later round.
         <a href="/benchmarks">Method and raw data →</a>
       </p>
-    </div>
-    <div class="home-story__grid">
-      {
-        leadChart ? (
-          <article class="home-story__card home-story__card--wide">
-            {leadChart.title ? <h3>{leadChart.title}</h3> : null}
-            <ChartMount spec={leadChart.spec} svg={leadChart.svg} alt={leadChart.alt} hydrate={false} edit={false} />
-            <p>{leadChart.caption}</p>
-          </article>
-        ) : null
-      }
-      {
-        sideCharts.map((chart) => (
-          <article class="home-story__card">
-            <h3>{chart.title}</h3>
-            <ChartMount spec={chart.spec} svg={chart.svg} alt={chart.alt} />
-            <p>{chart.caption}</p>
-          </article>
-        ))
-      }
-    </div>
-  </section>
-
-  <section class="home-routes" aria-label="Product">
-    <a class="home-route" href="/cloud">
-      <h2>Cloud</h2>
-      <p>
-        Post a spec, get SVG or PNG. Email, docs, and reports use the image. Free includes a watermark. Pro removes it.
-      </p>
-      <span class="home-route__go">Open Cloud</span>
-    </a>
-    <a class="home-route" href="/dashboards">
-      <h2>Dashboards</h2>
-      <p>Ten layouts on one page. A payments home, analytics, traffic, issues, and the rest.</p>
-      <span class="home-route__go">Open Dashboards</span>
-    </a>
-    <a class="home-route" href="/agents">
-      <h2>Agents</h2>
-      <p>JSON spec in, chart out. Validate and repair the safe mistakes without another model call.</p>
-      <span class="home-route__go">For agents</span>
-    </a>
-    <a class="home-route" href="/gallery">
-      <h2>Gallery</h2>
-      <p>Every chart type, including maps. Open a card to edit the spec.</p>
-      <span class="home-route__go">Browse the gallery</span>
-    </a>
-  </section>
-
-  <section class="home-bands" aria-label="Highlights">
-    <a class="home-band" href="/large">
-      <h2>Large data</h2>
-      <p>A million-point trace, sampled or on canvas, and a live stream.</p>
-    </a>
-    <a class="home-band" href="/interaction">
-      <h2>Interaction</h2>
-      <p>Overview, a shared cursor, and drilldown. Each one is a key on the spec.</p>
-    </a>
-    <a class="home-band" href="/layouts">
-      <h2>Layout</h2>
-      <p>Facets, concatenated views, breakpoints, and right-to-left text.</p>
-    </a>
-    <a class="home-band" href="/when-to-use">
-      <h2>When to use</h2>
-      <p>When ChartKit is the right library, and when it is not.</p>
-    </a>
-  </section>
-
-  <section class="home-why" id="home-why" aria-labelledby="why-title">
-    <div class="home-why__inner">
-      <div class="home-why__intro">
-        <h2 id="why-title">Why teams switch.</h2>
-        <p>Agent-first charts. One JSON object. The comparison includes the losses. <a href="/features">Features</a>.</p>
+      <div class="bench-card">
+        <div class="bench-legend">
+          {
+            bench.libs.map((lib, index) => (
+              <span style={index === 0 ? "font-weight:600;color:#17181a" : undefined}>
+                <i style={`background:${lib.color}`} />
+                {lib.name}
+              </span>
+            ))
+          }
+        </div>
+        {
+          bench.rows.map((row) => (
+            <div class:list={["bench-row", !row.measured && "is-pending"]}>
+              <div class="bench-row__label">
+                {row.type}
+                {row.note ? <small>{row.note}</small> : null}
+              </div>
+              <div class="bench-track">
+                {row.dots.map((dot) => (
+                  <span class="bench-dot" title={dot.title} style={`left:${dot.left};width:${dot.size};height:${dot.size};background:${dot.fill};box-shadow:${dot.ring}`} />
+                ))}
+              </div>
+            </div>
+          ))
+        }
+        <div class="bench-axis">
+          {bench.ticks.map((tick) => <span style={`left:${tick.left}`}>{tick.label}</span>)}
+        </div>
+        <p class="bench-note">
+          Solid dots are round {proof.round} line hover, painted median, from benchmarks.json. Hollow dots are not measurements. A library with no native chart for that row has no dot.
+        </p>
       </div>
-      <div class="home-why__rows">
-        <article class="home-why__row">
-          <h3>Agents get a chart.</h3>
-          <p>
-            An agent writes a JSON spec and gets a chart back. Validate and repair fix the safe mistakes without another
-            model call. In one measured run, 42 of 42 were valid on the first try with the docs in the prompt.{' '}
-            <code>repair()</code> lifted a no-docs run from 21/42 to 42/42. Round 6, 2026-10-16. Not re-run since.
-          </p>
-          <a class="home-more" href="/agents">Agents</a>
-        </article>
-        <article class="home-why__row">
-          <h3>One object.</h3>
-          <p>
-            React, Vue, Svelte, vanilla JavaScript, and server SVG take the same JSON. Adapters do not add a second
-            chart API.
-          </p>
-          <a class="home-more" href="/docs/concepts/adapters">Adapters</a>
-        </article>
-        <article class="home-why__row">
-          <h3>Losses included.</h3>
-          <p>
-            The size-script line is {story.lineGzipBytes} bytes gzip, measured {story.sizeMeasured}. uPlot’s JavaScript
-            is {story.uplotJsBytes} bytes. The stylesheet is {story.uplotCssBytes} bytes more, and the two sum to{" "}
-            {story.uplotSumBytes}. First hover is slower than uPlot. The comparison table is the record.
-          </p>
-          <a class="home-more" href="/benchmarks">Benchmarks</a>
-        </article>
+    </section>
+
+    <section class="products" aria-label="Product">
+      <div class="tile-grid">
+        <a class="show-tile" href="/cloud" style="background:#17181a;color:#fff">
+          <div class="show-tile__copy">
+            <div class="show-tile__kicker">
+              <span class="show-tile__icon" style="background:rgba(255,255,255,.12)" set:html={icon("M7 18h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.2 9.5 4.25 4.25 0 0 0 7 18z")} />
+              <span class="show-tile__eye">Cloud</span>
+            </div>
+            <h3>Post a spec. Get the image.</h3>
+            <p>SVG or PNG from one request. Email, READMEs and PDF reports can show a chart with no runtime.</p>
+          </div>
+          <div class="show-tile__well">
+            <div class="show-tile__panel">
+              <div class="panel-meta"><span>POST /render</span><em>200 · image/svg+xml</em></div>
+              <div class="panel-code">{'{ "type": "bar", "data": [ … ] }'}</div>
+              <p class="panel-title">Signups by month</p>
+              <Fragment set:html={shots.cloud} />
+              <p class="wm">chartkit.dev</p>
+            </div>
+            <div class="show-tile__fade" style="background:linear-gradient(180deg,#17181a 0%,transparent 100%)"></div>
+          </div>
+        </a>
+        <a class="show-tile" href="/dashboards" style="background:#eef3fb;color:#17181a">
+          <div class="show-tile__copy">
+            <div class="show-tile__kicker">
+              <span class="show-tile__icon" style="background:#fff;color:#0a63e6" set:html={icon("M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z")} />
+              <span class="show-tile__eye">Dashboards</span>
+            </div>
+            <h3>Ten layouts, one page.</h3>
+            <p>Payments, analytics, traffic, issues. Every panel is a ChartSpec sharing one cursor.</p>
+          </div>
+          <div class="show-tile__well">
+            <div class="show-tile__panel">
+              <div class="kpi-grid">
+                <div class="kpi"><span>Revenue</span><strong>$84.2k</strong><Fragment set:html={shots.revenue} /></div>
+                <div class="kpi"><span>Orders</span><strong>1,204</strong><Fragment set:html={shots.orders} /></div>
+                <div class="kpi"><span>Sessions</span><strong>42k</strong><Fragment set:html={shots.sessions} /></div>
+                <div class="kpi"><span>Errors</span><strong>0.2%</strong><Fragment set:html={shots.errors} /></div>
+              </div>
+            </div>
+            <div class="show-tile__fade" style="background:linear-gradient(180deg,#eef3fb 0%,transparent 100%)"></div>
+          </div>
+        </a>
+        <a class="show-tile" href="/agents" style="background:#0a63e6;color:#fff">
+          <div class="show-tile__copy">
+            <div class="show-tile__kicker">
+              <span class="show-tile__icon" style="background:rgba(255,255,255,.18)" set:html={icon("M5 12.5l4.5 4.5L19 7.5")} />
+              <span class="show-tile__eye">Agents</span>
+            </div>
+            <h3>Valid on the first try.</h3>
+            <p>validate() and repair() fix the safe mistakes in the spec. No second model call.</p>
+          </div>
+          <div class="show-tile__well">
+            <div class="show-tile__panel">
+              <div class="log">
+                <div class="dim">&gt; validate(spec)</div>
+                <div class="bad">✕ encoding.y: "signup" not in data</div>
+                <div class="dim">&gt; repair(spec)</div>
+                <div class="ok">✓ encoding.y → "signups"</div>
+                <div class="ok">✓ valid · 0 model calls</div>
+              </div>
+              <p class="panel-title">Signups by month</p>
+              <Fragment set:html={shots.agent} />
+            </div>
+            <div class="show-tile__fade" style="background:linear-gradient(180deg,#0a63e6 0%,transparent 100%)"></div>
+          </div>
+        </a>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </Base>
 
 <script>
-  import "../scripts/mount-charts.ts";
+  import "../scripts/home-carousel";
 </script>

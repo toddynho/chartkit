@@ -1,106 +1,133 @@
 ---
-import "../styles/docs.css";
+import "../styles/v2.css";
 import Base from "../layouts/Base.astro";
-import { articleHref, docArticles } from "../data/docs-catalog";
-import { gallerySvg } from "../data/hero-slides";
+import { agentSwitchPrompt } from "../data/agent-prompt";
+import { proofFigures } from "../data/home-bench";
 
-const agentDocs = docArticles.filter((article) => article.group === "Agents");
-
-const chart = gallerySvg("line");
+const proof = proofFigures();
 const description =
-  "Agents write one JSON spec, validate it, repair the safe mistakes, and render SVG. llms.txt is at /llms.txt.";
+  "An agent writes JSON. validate() returns every error in one pass, repair() fixes the safe ones without a model call, render() returns SVG.";
+
+const steps = [
+  {
+    n: "01",
+    tag: "model",
+    title: "Write",
+    body: 'version is "1". data is an array of rows. a11y.alt is one factual sentence. Gauge, kpi and progress-ring put the number in metric.',
+    code: "spec.json",
+  },
+  {
+    n: "02",
+    tag: "no model",
+    title: "Validate",
+    body: "Checks the schema and the data. Every CK code comes back in one pass: CK1001 is invalid JSON, CK1004 a missing required field.",
+    code: "validate(spec)",
+  },
+  {
+    n: "03",
+    tag: "no model",
+    title: "Repair",
+    body: "Returns a spec and the JSON Patch it applied. Never invents data. A missing or unknown type is reported first.",
+    code: "repair(spec)",
+  },
+  {
+    n: "04",
+    tag: "no model",
+    title: "Render",
+    body: "Core charts from @chartkitdev/core/all. Histogram through rose, and the planning charts, come from core/extra. render() does not validate and does not throw.",
+    code: "render(spec)",
+  },
+];
+
+const give = [
+  { href: "/llms.txt", file: "llms.txt", what: "Short index: rules, repair loop, one spec per chart type" },
+  { href: "/llms-full.txt", file: "llms-full.txt", what: "The long file, every option documented" },
+  { href: "/schema/v1.json", file: "schema/v1.json", what: "JSON Schema for the spec" },
+  { href: "/docs/mcp", file: "@chartkitdev/mcp", what: "stdio server; render_chart calls Cloud. Not on npm yet" },
+];
 ---
 
 <Base tone="light" title="Agents" description={description}>
-  <div class="wrap">
-    <section class="hero" aria-labelledby="agents-page-title">
-      <p class="kicker">Agents</p>
-      <h1 id="agents-page-title">The spec is the interface.</h1>
-      <p class="lede">
-        An agent writes JSON. <code>validate()</code> returns every CK code in one pass. <code>repair()</code> applies the safe JSON Patch and does not call a model. <code>render()</code> returns SVG. No other library in the eval has a schema and a repair function.
-      </p>
-      <div class="actions">
-        <a class="btn btn-primary" href="/docs/validate">Validate and repair</a>
-        <a class="btn btn-secondary" href="/docs/charts/line">Line chart</a>
+  <div class="v2">
+    <section class="split">
+      <div>
+        <p class="eyebrow">Agents</p>
+        <h1 class="v2-h1 v2-h1--54">The spec is the interface.</h1>
+        <p class="v2-lead v2-lead--left">
+          An agent writes JSON. <code>validate()</code> returns every error in one pass, <code>repair()</code> fixes the safe ones without a model call, <code>render()</code> returns SVG.
+        </p>
+        <div class="v2-actions">
+          <a class="btn-lg" href="/llms.txt">Get llms.txt</a>
+          <a class="btn-text" href="/docs/mcp">MCP server →</a>
+        </div>
+      </div>
+      <div class="agent-term">
+        <header>agent session</header>
+        <div class="dim">&gt; validate(spec)</div>
+        <div class="bad">✕ CK1004 a11y.alt is required</div>
+        <div class="bad">✕ CK1021 encoding.y "signup" not in data</div>
+        <div class="dim">&gt; repair(spec)</div>
+        <div class="ok">✓ /a11y/alt ← "Signups by month, Jan–Aug"</div>
+        <div class="ok">✓ /encoding/y "signup" → "signups"</div>
+        <div class="dim">&gt; render(spec)</div>
+        <div>&lt;svg viewBox="0 0 640 360"&gt;… 4.1 KB · 0 model calls</div>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="loop-title">
-      <h2 id="loop-title">The loop</h2>
-      <div class="card-grid">
-        <article class="card">
-          <h3>Write</h3>
-          <p>
-            <code>version</code> is <code>"1"</code>. <code>data</code> is an array of rows. <code>a11y.alt</code> is one
-            sentence and is required. Gauge, kpi, and progress-ring put the number in <code>metric</code>.
-          </p>
+    <section aria-labelledby="loop-title">
+      <div class="section-intro">
+        <h2 id="loop-title">The loop</h2>
+        <p>Four calls. The model is only in the first one.</p>
+      </div>
+      <div class="loop-grid">
+        {
+          steps.map((step) => (
+            <article class="loop-card">
+              <header>
+                <span class="step-n">{step.n}</span>
+                <span class:list={["tag", step.tag === "model" ? "tag--model" : "tag--none"]}>{step.tag}</span>
+              </header>
+              <h3>{step.title}</h3>
+              <p>{step.body}</p>
+              <code class="chip-code">{step.code}</code>
+            </article>
+          ))
+        }
+      </div>
+      <div class="two-up">
+        <article class="ink-card">
+          <h2>What the eval measured</h2>
+          <p class="ink-stat">{proof.first}<span>/{proof.tasks}</span></p>
+          <p>valid first try, docs in prompt</p>
+          <p class="ink-stat">{proof.repairFrom}<span>→{proof.repairTo}</span></p>
+          <p>no-docs run after repair()</p>
+          <p>Round 6, 2026-10-16. Not re-run since. <a href="/benchmarks">Benchmarks, losses included →</a></p>
         </article>
-        <article class="card">
-          <h3>Validate</h3>
-          <p>
-            <code>validate()</code> checks the schema and the data. <code>CK1001</code> is invalid JSON.{' '}
-            <code>CK1004</code> is a missing required field such as <code>a11y</code>.
-          </p>
-        </article>
-        <article class="card">
-          <h3>Repair</h3>
-          <p>
-            <code>repair()</code> returns a spec and the patch it applied. It does not invent data. A missing or unknown
-            type is reported first.
-          </p>
-        </article>
-        <article class="card">
-          <h3>Render</h3>
-          <p>
-            Core charts come from <code>@chartkitdev/core/all</code>. Histogram through rose, and the planning charts,
-            come from <code>@chartkitdev/core/extra</code>. <code>render()</code> does not validate and does not throw.
-          </p>
+        <article class="plain-card">
+          <h2>What to give the model</h2>
+          {
+            give.map((item) => (
+              <a class="give-row" href={item.href}>
+                <strong>{item.file}</strong>
+                <span>{item.what}</span>
+              </a>
+            ))
+          }
         </article>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="measured-title">
-      <h2 id="measured-title">What the eval measured</h2>
-      <p>
-        With the docs in the prompt, a measured run wrote a valid chart on 42 of 42 tasks. <code>repair()</code> took a
-        no-docs run from 21/42 to 42/42 with no model call. Round 6, 2026-10-16. Not re-run since. Losses stay on the
-        benchmark page.
-      </p>
-      <p>
-        <a href="https://chartkit.dev/benchmarks#agents">Benchmarks, losses included</a>
-      </p>
-      <div class="agent-chart" set:html={chart}></div>
-      <p class="note">The line above is the same example spec the docs try-it paints, rendered here with core.</p>
-    </section>
-
-    <section class="section" aria-labelledby="prompt-title">
-      <h2 id="prompt-title">What to give the model</h2>
-      <ul>
-        <li>
-          <a href="/llms.txt">llms.txt</a> is the short index: the rules, the repair loop, and one spec per chart type.{' '}
-          <a href="/llms-full.txt">llms-full.txt</a> is the long file.
-        </li>
-        <li>
-          <a href="/schema/v1.json">schema/v1.json</a> is the JSON Schema.
-        </li>
-        <li>
-          <a href="/docs/llms-txt">llms.txt notes</a> and <a href="/docs/mcp">MCP</a>.{' '}
-          <code>@chartkitdev/mcp</code> is not on npm yet. The server speaks stdio. <code>render_chart</code> is the tool
-          that calls Cloud.
-        </li>
-      </ul>
-    </section>
-
-    <section class="section" aria-labelledby="agent-docs-title">
-      <h2 id="agent-docs-title">In the docs</h2>
-      <p>The same short list as the docs Agents group. Chart pages stay in the docs nav.</p>
-      <ul>
-        {agentDocs.map((article) => (
-          <li>
-            <a href={articleHref(article)}>{article.title}</a>
-          </li>
-        ))}
-      </ul>
+    <section class="cta-band">
+      <div>
+        <h2>Paste this into your agent.</h2>
+        <p>One prompt switches a project to ChartKit. The app stays JavaScript; the agent writes specs, not chart code.</p>
+        <pre class="sr" data-agent-prompt>{agentSwitchPrompt}</pre>
+      </div>
+      <button type="button" class="btn-ink" data-copy-prompt>Copy prompt</button>
     </section>
   </div>
 </Base>
+
+<script>
+  import "../scripts/home-start";
+</script>

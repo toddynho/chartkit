@@ -5,10 +5,10 @@
  */
 
 const KEY = "ck-docs-rail-width";
-const MIN = 260;
+const MIN = 280;
 /** Keep the article readable. There is no upper cap beyond this. */
-const CENTER_MIN = 320;
-const SIDEBAR = 248;
+const CENTER_MIN = 340;
+const SIDEBAR = 220;
 const GUTTERS = 56;
 const WIDE = "(min-width: 1101px)";
 

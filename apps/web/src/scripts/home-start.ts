@@ -77,7 +77,7 @@ export function mountHomeStart(root: ParentNode = document): void {
   mountStackChips(root);
   root.querySelectorAll<HTMLButtonElement>("[data-copy-install]").forEach((button) => {
     button.addEventListener("click", () => {
-      const card = button.closest(".home-start__card") ?? root;
+      const card = button.closest(".home-card") ?? root;
       void writeClipboard(button, visibleInstall(card));
     });
   });

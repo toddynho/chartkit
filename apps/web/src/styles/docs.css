@@ -3,14 +3,14 @@
   max-width: none;
   margin: 0;
   display: grid;
-  grid-template-columns: 248px minmax(0, 1fr) var(--docs-rail-width, 34%);
+  grid-template-columns: 220px minmax(0, 1fr) var(--docs-rail-width, 380px);
   gap: 8px 28px;
   align-items: start;
   padding: 8px 20px 72px;
 }
 
 .docs-frame:not(:has(.rail-stack)) {
-  grid-template-columns: 248px minmax(0, 1fr);
+  grid-template-columns: 220px minmax(0, 1fr);
 }
 
 .docs-menu { display: none; grid-column: 1 / -1; }
@@ -22,7 +22,7 @@
   isolation: isolate;
   min-height: calc(100vh - var(--header));
   margin-top: -8px;
-  border-right: 1px solid rgba(55, 53, 47, 0.08);
+  border-right: 1px solid var(--line);
   background: var(--bg);
 }
 
@@ -35,7 +35,7 @@
   top: var(--header);
   height: calc(100vh - var(--header));
   overflow: auto;
-  padding: 22px 12px 32px 4px;
+  padding: 24px 16px 32px 24px;
 }
 
 .docs-tabs {
@@ -45,29 +45,29 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 2px;
-  margin: 0 0 12px;
-  padding: 2px;
-  background: linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05)), var(--bg);
-  border-radius: 9px;
+  margin: 0 0 16px;
+  padding: 3px;
+  background: #ebebed;
+  border-radius: 999px;
 }
 
 .docs-tabs button {
   border: 0;
   background: transparent;
-  color: #6e6e73;
+  color: var(--ink-2);
   font: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 13px;
+  font-weight: 500;
   padding: 6px 2px;
-  border-radius: 8px;
+  border-radius: 999px;
   cursor: pointer;
 }
 
 .docs-tabs button[aria-selected="true"] {
   background: #fff;
-  color: #1d1d1f;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .docs-tabs button:hover { color: #1d1d1f; }
@@ -75,8 +75,8 @@
 .side-section { margin-bottom: 8px; }
 
 .side-segment {
-  max-height: 11.5rem;
-  overflow: auto;
+  max-height: none;
+  overflow: visible;
   margin-bottom: 4px;
 }
 
@@ -278,9 +278,9 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
 .stack-sample--quiet { margin: 8px 0 22px; }
 .stack-sample--quiet .code { margin-bottom: 0; }
 
-.docs-main { min-width: 0; padding: 22px 0 24px; }
+.docs-main { min-width: 0; max-width: 760px; padding: 36px 40px 96px; }
 
-.docs-main h1 { font-size: clamp(2rem, 4vw, 2.6rem); letter-spacing: -0.03em; }
+.docs-main h1 { font-size: 40px; letter-spacing: -0.03em; line-height: 1.05; text-wrap: balance; }
 
 .docs-main.docs-main--browse h1 {
   margin: 0 0 0.2rem;
