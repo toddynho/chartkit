@@ -1,15 +1,13 @@
 /**
- * Drag the docs response column. Width is a percentage until the reader
- * chooses one, then a pixel value in localStorage. Below 1100px the rail
- * stacks and this stays idle.
+ * Drag the try-it card from the pill on its left edge.
+ * panelW is the card width, stored in --try (default 380, clamp 280 … viewport−560).
+ * Chart height is --chart-h = round(panelW * 0.6). Below 1100px the rail stacks and this stays idle.
  */
 
 const KEY = "ck-docs-rail-width";
 const MIN = 280;
-/** Keep the article readable. There is no upper cap beyond this. */
-const CENTER_MIN = 340;
-const SIDEBAR = 260;
-const GUTTERS = 56;
+/** Leave the sidebar and the article room. panelW max is the viewport minus this. */
+const VIEWPORT_GUTTER = 560;
 const WIDE = "(min-width: 1101px)";
 
 function readStored(): number | null {
@@ -37,32 +35,34 @@ function clamp(value: number, min: number, max: number): number {
 
 export function mountDocsSplit(): void {
   const rail = document.getElementById("docs-rail");
-  const splitter = document.getElementById("docs-rail-split");
-  if (!rail || !splitter || splitter.dataset.ready === "1" || !rail.querySelector(".rail-stack")) return;
-  splitter.dataset.ready = "1";
+  const card = rail?.querySelector<HTMLElement>(".docs-try") ?? null;
+  const handle = document.getElementById("docs-handle");
+  if (!rail || !card || !handle || handle.dataset.ready === "1" || !rail.querySelector(".rail-stack")) return;
+  handle.dataset.ready = "1";
 
   const wide = window.matchMedia(WIDE);
   let preferred = readStored();
 
   const limits = () => {
-    const frame = rail.parentElement?.getBoundingClientRect().width ?? window.innerWidth;
-    const max = Math.max(MIN, Math.round(frame - SIDEBAR - GUTTERS - CENTER_MIN));
+    const max = Math.max(MIN, Math.round(window.innerWidth - VIEWPORT_GUTTER));
     return { min: MIN, max };
   };
 
-  const paintAria = (width: number) => {
+  const paintAria = (panelW: number) => {
     const { min, max } = limits();
-    const shown = Math.round(width);
-    splitter.setAttribute("aria-valuemin", String(min));
-    splitter.setAttribute("aria-valuemax", String(max));
-    splitter.setAttribute("aria-valuenow", String(shown));
-    splitter.setAttribute("aria-valuetext", `${shown} pixels`);
+    const shown = Math.round(panelW);
+    handle.setAttribute("aria-valuemin", String(min));
+    handle.setAttribute("aria-valuemax", String(max));
+    handle.setAttribute("aria-valuenow", String(shown));
+    handle.setAttribute("aria-valuetext", `${shown} pixels`);
   };
 
-  const apply = (width: number) => {
+  const apply = (panelW: number) => {
     const { min, max } = limits();
-    const next = Math.round(clamp(width, min, max));
-    document.documentElement.style.setProperty("--docs-rail-width", `${next}px`);
+    const next = Math.round(clamp(panelW, min, max));
+    const root = document.documentElement;
+    root.style.setProperty("--try", `${next}px`);
+    root.style.setProperty("--chart-h", `${Math.round(next * 0.6)}px`);
     paintAria(next);
     return next;
   };
@@ -70,8 +70,10 @@ export function mountDocsSplit(): void {
   const layout = () => {
     if (!wide.matches) return;
     if (preferred == null) {
-      document.documentElement.style.removeProperty("--docs-rail-width");
-      paintAria(rail.getBoundingClientRect().width);
+      const root = document.documentElement;
+      root.style.removeProperty("--try");
+      root.style.removeProperty("--chart-h");
+      paintAria(card.getBoundingClientRect().width);
       return;
     }
     apply(preferred);
@@ -81,37 +83,37 @@ export function mountDocsSplit(): void {
   wide.addEventListener("change", layout);
   window.addEventListener("resize", layout);
 
-  splitter.addEventListener("pointerdown", (event) => {
+  handle.addEventListener("pointerdown", (event) => {
     if (!wide.matches || event.button !== 0) return;
     event.preventDefault();
-    splitter.focus();
+    handle.focus();
     const startX = event.clientX;
-    const startW = rail.getBoundingClientRect().width;
-    splitter.classList.add("is-dragging");
+    const startW = card.getBoundingClientRect().width;
+    handle.classList.add("is-dragging");
     document.documentElement.classList.add("is-rail-drag");
-    splitter.setPointerCapture(event.pointerId);
+    handle.setPointerCapture(event.pointerId);
 
     const move = (ev: PointerEvent) => {
       preferred = apply(startW - (ev.clientX - startX));
     };
     const end = (ev: PointerEvent) => {
-      splitter.classList.remove("is-dragging");
+      handle.classList.remove("is-dragging");
       document.documentElement.classList.remove("is-rail-drag");
-      splitter.removeEventListener("pointermove", move);
-      splitter.removeEventListener("pointerup", end);
-      splitter.removeEventListener("pointercancel", end);
+      handle.removeEventListener("pointermove", move);
+      handle.removeEventListener("pointerup", end);
+      handle.removeEventListener("pointercancel", end);
       if (preferred != null) writeStored(preferred);
-      if (splitter.hasPointerCapture(ev.pointerId)) splitter.releasePointerCapture(ev.pointerId);
+      if (handle.hasPointerCapture(ev.pointerId)) handle.releasePointerCapture(ev.pointerId);
     };
-    splitter.addEventListener("pointermove", move);
-    splitter.addEventListener("pointerup", end);
-    splitter.addEventListener("pointercancel", end);
+    handle.addEventListener("pointermove", move);
+    handle.addEventListener("pointerup", end);
+    handle.addEventListener("pointercancel", end);
   });
 
-  splitter.addEventListener("keydown", (event) => {
+  handle.addEventListener("keydown", (event) => {
     if (!wide.matches) return;
     const { min, max } = limits();
-    const current = rail.getBoundingClientRect().width;
+    const current = card.getBoundingClientRect().width;
     const step = event.shiftKey ? 48 : 16;
     let next: number | null = null;
     if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = current + step;

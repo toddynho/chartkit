@@ -3,7 +3,7 @@
   max-width: none;
   margin: 0;
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr) var(--docs-rail-width, 380px);
+  grid-template-columns: 260px minmax(0, 1fr) calc(var(--try, 380px) + 36px);
   gap: 8px 28px;
   align-items: start;
   padding: 8px 20px 72px;
@@ -435,13 +435,6 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
   letter-spacing: -0.01em;
 }
 
-.rail-note {
-  margin: 12px 4px 0;
-  font-size: 12px;
-  color: #8b8d93;
-  line-height: 1.5;
-}
-
 .spec-chip__dot {
   width: 8px;
   height: 8px;
@@ -644,23 +637,27 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
   font-weight: 600;
 }
 
+/* Inset try-it card. --try is the card width; page bg shows in the padding around it. */
 .docs-rail {
-  --rail-surface: #fbfbfd;
   position: relative;
   align-self: stretch;
-  min-height: calc(100vh - var(--header));
-  margin-top: -8px;
-  margin-right: -20px;
-  margin-bottom: -72px;
-  padding: 16px 18px 40px 16px;
-  background: var(--rail-surface);
-  border-left: 1px solid rgba(55, 53, 47, 0.08);
+  min-height: 0;
+  margin: 0;
+  padding: 0 12px 40px 24px;
+  background: transparent;
+  border: 0;
 }
 
-.docs-splitter {
+.docs-try-slot {
+  position: relative;
+  width: var(--try, 380px);
+  max-width: 100%;
+}
+
+.docs-handle {
   position: absolute;
   z-index: 4;
-  left: -8px;
+  left: 0;
   top: 0;
   bottom: 0;
   width: 16px;
@@ -668,25 +665,15 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
   padding: 0;
   border: 0;
   background: transparent;
+  transform: translateX(-50%);
   cursor: col-resize;
   touch-action: none;
 }
 
-.docs-splitter::before {
+.docs-handle::after {
   content: "";
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 2px;
-  transform: translateX(-50%);
-  background: transparent;
-}
-
-.docs-splitter::after {
-  content: "";
-  position: absolute;
-  top: 28vh;
+  top: 50%;
   left: 50%;
   width: 4px;
   height: 28px;
@@ -695,16 +682,11 @@ html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"] {
   background: rgba(55, 53, 47, 0.28);
 }
 
-.docs-splitter:hover::before,
-.docs-splitter:focus-visible::before,
-.docs-splitter.is-dragging::before {
-  background: rgba(0, 113, 227, 0.45);
-}
-
-.docs-splitter:hover::after,
-.docs-splitter:focus-visible::after,
-.docs-splitter.is-dragging::after {
+.docs-handle:hover::after,
+.docs-handle:focus-visible::after,
+.docs-handle.is-dragging::after {
   background: #0071e3;
+  height: 44px;
 }
 
 html.is-rail-drag,
@@ -721,38 +703,54 @@ html.is-rail-drag * {
   background: transparent;
 }
 
-.docs-rail .response {
+.docs-try {
+  container-type: inline-size;
   background: #fff;
-  border: 1px solid #e6e6e2;
+  border: 1px solid var(--line);
   border-radius: 14px;
   box-shadow: none;
   overflow: hidden;
 }
 
-.docs-rail .rail-options {
+.docs-try .rail-options {
   background: transparent;
   border: 0;
+  border-top: 1px solid var(--line);
   border-radius: 0;
   box-shadow: none;
   margin: 0;
-  padding: 0 18px 16px;
+  padding: 12px 16px 14px;
 }
 
-.docs-rail .response { overflow: visible; }
-
-.docs-rail .response__chrome {
+.docs-try .response__chrome {
   background: #fff;
-  border-bottom: 1px solid #e6e6e2;
+  border-bottom: 1px solid var(--line);
   padding: 10px 12px;
 }
 
-.docs-rail .response__panel[data-panel="chart"],
-.docs-rail #response-chart {
+.docs-try .response__panel[data-panel="chart"],
+.docs-try #response-chart {
   background: transparent;
 }
 
-.docs-rail .response__panel[data-panel="json"] {
-  margin: 2px 0 0;
+.docs-try #response-chart {
+  height: var(--chart-h, calc(var(--try, 380px) * 0.6));
+}
+
+.docs-try #response-chart svg {
+  width: 100%;
+  height: 100%;
+}
+
+.docs-try__caption {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #8b8d93;
+  line-height: 1.5;
+}
+
+.docs-try .response__panel[data-panel="json"] {
+  margin: 12px;
   overflow: hidden;
   background: var(--ck-code-bg, var(--code-well));
   border: 1px solid var(--ck-code-line, var(--code-well-line));
@@ -760,17 +758,17 @@ html.is-rail-drag * {
   color: var(--ck-code-fg, var(--ink));
 }
 
-.docs-rail .response__json,
-.docs-rail .response__json-bar {
+.docs-try .response__json,
+.docs-try .response__json-bar {
   background: var(--ck-code-bg, var(--code-well));
 }
 
-.docs-rail .response__json-bar {
+.docs-try .response__json-bar {
   color: var(--ck-code-comment, var(--muted));
   border-bottom-color: var(--ck-code-line, var(--code-well-line));
 }
 
-.docs-rail .chip-row__label {
+.docs-try .chip-row__label {
   font-family: var(--mono);
   font-size: 10px;
   font-weight: 500;
@@ -894,16 +892,19 @@ html.is-rail-drag * {
 
 @media (max-width: 1100px) {
   .docs-frame { grid-template-columns: 260px minmax(0, 1fr); }
-  .docs-splitter { display: none; }
+  .docs-handle,
+  .docs-try__caption { display: none; }
   .docs-rail {
     grid-column: 1 / -1;
     min-height: 0;
-    margin: 8px -20px 0;
-    padding: 16px 20px 28px;
-    border-left: 0;
-    border-top: 1px solid rgba(55, 53, 47, 0.08);
+    margin: 28px 0 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
   }
   .docs-rail .rail-stack { position: static; }
+  .docs-try-slot { width: 100%; }
+  .docs-try #response-chart { height: calc(100cqi * 0.6); }
 }
 
 @media (max-width: 860px) {
@@ -946,6 +947,6 @@ html.is-rail-drag * {
   .docs-backdrop { position: fixed; inset: var(--header) 0 0 0; background: rgba(0, 0, 0, 0.28); z-index: 25; }
   .docs-backdrop.is-open { display: block; }
   .docs-frame { grid-template-columns: 1fr; width: 100%; max-width: none; padding-inline: 12px; }
-  .docs-rail { margin-inline: -12px; padding-inline: 12px; }
+  .docs-rail { margin-inline: 0; padding-inline: 0; }
   .page-nav { grid-template-columns: 1fr; }
 }

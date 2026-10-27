@@ -27,7 +27,8 @@
   --nav: 13.75rem;
   --radius: 14px;
   --content: 1.25rem;
-  --docs-rail-width: 380px;
+  --try: 380px;
+  --chart-h: calc(var(--try) * 0.6);
   --code-well: #1b1c1f;
   --code-well-line: transparent;
 }
