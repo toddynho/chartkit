@@ -360,6 +360,248 @@ function comparisonSpec(
   };
 }
 
+interface SpeedDot {
+  library: string;
+  /** Milliseconds. Measured rows use published medians. Other rows are layout slots. */
+  ms: number;
+  row: number;
+  type: string;
+  measured: boolean;
+}
+
+const SPEED_LIBS = [
+  { name: "ChartKit", color: "#0071e3" },
+  { name: "uPlot", color: "#2c2c2e" },
+  { name: "Chart.js", color: "#6e6e73" },
+  { name: "Observable Plot", color: "#8e8e93" },
+  { name: "Recharts", color: "#a8a8ad" },
+  { name: "ECharts", color: "#c5c5c9" },
+] as const;
+
+/**
+ * Libraries that do not have a native chart of that type.
+ * catalog/public/features/type.scatter.md — uPlot is partial, not a scatter type.
+ * catalog/public/features/type.donut.md — uPlot is none, Observable Plot is manual.
+ * catalog/data/measured-sizes.json — those two donut rows are unsupported.
+ * catalog/public/features/type.heatmap.md — uPlot manual, Chart.js plugin, Recharts manual.
+ * Area and bar are native for every library in this legend.
+ */
+const SPEED_OMIT: Record<string, readonly string[]> = {
+  scatter: ["uPlot"],
+  donut: ["uPlot", "Observable Plot"],
+  heatmap: ["uPlot", "Chart.js", "Recharts"],
+};
+
+/**
+ * Layout-only x positions, in milliseconds. Not timings.
+ * They are spaced so a pending row reads as a strip, and none of them
+ * equals a published line median.
+ */
+const SPEED_PLACEHOLDER_MS: Record<string, Record<string, number>> = {
+  area: { ChartKit: 14, uPlot: 23, "Chart.js": 34, "Observable Plot": 39, Recharts: 58, ECharts: 2400 },
+  bar: { ChartKit: 11, uPlot: 19, "Chart.js": 31, "Observable Plot": 42, Recharts: 66, ECharts: 1800 },
+  scatter: { ChartKit: 15, "Chart.js": 26, "Observable Plot": 44, Recharts: 72, ECharts: 3200 },
+  donut: { ChartKit: 8, "Chart.js": 21, Recharts: 33, ECharts: 700 },
+  heatmap: { ChartKit: 18, "Observable Plot": 47, ECharts: 1500 },
+};
+
+const SPEED_ROWS = [
+  { type: "line", y: 6, pending: false },
+  { type: "area", y: 5, pending: true },
+  { type: "bar", y: 4, pending: true },
+  { type: "scatter", y: 3, pending: true },
+  { type: "donut", y: 2, pending: true },
+  { type: "heatmap", y: 1, pending: true },
+] as const;
+
+function speedDots(hover: readonly { lib: string; paintedMs: number }[]): SpeedDot[] {
+  const painted = new Map(hover.map((row) => [row.lib, row.paintedMs]));
+  const dots: SpeedDot[] = [];
+  for (const lib of SPEED_LIBS) {
+    const ms = painted.get(lib.name);
+    if (typeof ms !== "number") throw new Error(`published line hover is missing ${lib.name}`);
+    dots.push({ library: lib.name, ms, row: 6, type: "line", measured: true });
+  }
+  for (const row of SPEED_ROWS) {
+    if (row.type === "line") continue;
+    const slots = SPEED_PLACEHOLDER_MS[row.type];
+    if (!slots) throw new Error(`speed plot has no layout slots for ${row.type}`);
+    const omit = new Set(SPEED_OMIT[row.type] ?? []);
+    for (const lib of SPEED_LIBS) {
+      if (omit.has(lib.name)) continue;
+      const ms = slots[lib.name];
+      if (typeof ms !== "number") throw new Error(`speed plot layout is missing ${row.type} ${lib.name}`);
+      if ([...painted.values()].includes(ms)) {
+        throw new Error(`speed plot placeholder ${row.type} ${lib.name} collides with a published median`);
+      }
+      dots.push({ library: lib.name, ms, row: row.y, type: row.type, measured: false });
+    }
+  }
+  return dots;
+}
+
+function speedSpec(dots: SpeedDot[], alt: string): Record<string, unknown> {
+  return {
+    version: "1",
+    id: "home-speed-by-type",
+    type: "scatter",
+    theme: "soft",
+    data: dots.map((dot) => ({
+      library: dot.library,
+      ms: dot.ms,
+      row: dot.row,
+      ...(dot.measured ? { measured: true } : { placeholder: true }),
+    })),
+    encoding: {
+      x: { field: "ms", scale: { type: "log", domain: [3, 8000] }, format: "duration-ms" },
+      y: { field: "row", scale: { domain: [0.42, 6.58], nice: false, zero: false } },
+      color: {
+        field: "library",
+        domain: SPEED_LIBS.map((lib) => lib.name),
+        range: SPEED_LIBS.map((lib) => lib.color),
+      },
+    },
+    mark: { pointFill: "hollow", pointSize: 6, opacity: 1 },
+    axes: {
+      x: { ticks: [5, 10, 50, 100, 500, 1000, 5000] },
+      y: { ticks: [6, 5, 4, 3, 2, 1], grid: "dashed" },
+    },
+    tooltip: false,
+    size: { width: 980, height: 460, padding: { left: 112, right: 28, top: 4, bottom: 4 } },
+    a11y: { alt },
+  };
+}
+
+function xmlText(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function roundPx(value: number): string {
+  const rounded = Math.round(value * 100) / 100;
+  return String(rounded);
+}
+
+/** Hollow markers become filled circles. Measured points keep a white ring so near-ties stay readable. */
+function solidifyCircle(tag: string, ring = false): string {
+  const stroke = /stroke="([^"]+)"/.exec(tag)?.[1];
+  if (!stroke) return tag;
+  let next = tag.replace(/fill="none"/, `fill="${stroke}"`).replace(/fill-opacity="[^"]+"/, 'fill-opacity="1"');
+  if (ring) {
+    next = next.replace(/ stroke="[^"]+"/, ' stroke="#ffffff"').replace(/ stroke-width="1\.5"/, ' stroke-width="1.25"');
+  } else {
+    next = next.replace(/ stroke="[^"]+"/, "").replace(/ stroke-width="1\.5"/, "");
+  }
+  return next;
+}
+
+/**
+ * Scatter has one pointFill for the whole chart, and y is quantitative.
+ * The painted SVG is what the homepage shows: measured points filled,
+ * pending points left hollow, row names (and "pending") in the margin,
+ * legend centered.
+ */
+function finishSpeedSvg(svg: string, dots: SpeedDot[]): string {
+  let next = svg.replace(/<circle\b[^>]*data-ck-i="(\d+)"[^>]*>[\s\S]*?<\/circle>/g, (full, index) => {
+    const dot = dots[Number(index)];
+    if (!dot) return full;
+    const label = dot.measured
+      ? `${dot.library}, line, ${dot.ms} ms`
+      : `${dot.library}, ${dot.type}, placeholder, not measured`;
+    let tag = full
+      .replace(/aria-label="[^"]*"/, `aria-label="${xmlText(label)}"`)
+      .replace(/<title>[\s\S]*?<\/title>/, `<title>${xmlText(label)}</title>`);
+    if (dot.measured) tag = solidifyCircle(tag, true);
+    return tag;
+  });
+  next = next.replace(/<circle\b(?![^>]*data-ck-i=)[^>]*\/>/g, (tag) => solidifyCircle(tag));
+  next = layoutSpeedLegend(next, 980);
+  next = liftMeasuredChartKit(next);
+  next = labelSpeedRows(next);
+  assertSpeedSvg(next, dots);
+  return next;
+}
+
+function layoutSpeedLegend(svg: string, width: number): string {
+  const itemRe =
+    /<circle cx="([0-9.]+)" cy="([0-9.]+)" r="4\.5"([^>/]*)\/>\s*<text x="([0-9.]+)" y="([0-9.]+)"([^>]*)>([^<]*)<\/text>/g;
+  const items = [...svg.matchAll(itemRe)];
+  if (items.length < 2 || items[0].index === undefined) return svg;
+  const textWidth = (label: string) => label.length * 6.6;
+  const gap = 22;
+  const spans = items.map((item) => 11 + textWidth(item[7] ?? ""));
+  const total = 4.5 + spans.reduce((sum, span) => sum + span, 0) + gap * (items.length - 1);
+  let center = (width - total) / 2 + 4.5;
+  const cy = items[0][2] ?? "0";
+  const textY = items[0][5] ?? "0";
+  const pieces: string[] = [];
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    const label = item?.[7] ?? "";
+    const textX = center + 11;
+    pieces.push(
+      `<circle cx="${roundPx(center)}" cy="${cy}" r="4.5"${item?.[3] ?? ""}/><text x="${roundPx(textX)}" y="${textY}"${item?.[6] ?? ""}>${label}</text>`,
+    );
+    center += (spans[i] ?? 0) + gap;
+  }
+  const last = items[items.length - 1];
+  const start = items[0].index;
+  const end = (last?.index ?? start) + (last?.[0].length ?? 0);
+  return svg.slice(0, start) + pieces.join("") + svg.slice(end);
+}
+
+/** ChartKit's line point is a fraction of a pixel from uPlot. Paint it last so the blue stays visible. */
+function liftMeasuredChartKit(svg: string): string {
+  const re = /<circle\b(?=[^>]*data-ck-name="ChartKit")(?=[^>]*data-ck-i="0")[^>]*>[\s\S]*?<\/circle>/;
+  const match = re.exec(svg);
+  if (!match || match.index === undefined) return svg;
+  const circle = match[0];
+  const without = svg.slice(0, match.index) + svg.slice(match.index + circle.length);
+  const close = without.indexOf("</g>");
+  if (close < 0) return svg;
+  return without.slice(0, close) + circle + without.slice(close);
+}
+
+function labelSpeedRows(svg: string): string {
+  const rows = new Map(SPEED_ROWS.map((row) => [String(row.y), row]));
+  return svg.replace(/<text\b([^>]*text-anchor="end"[^>]*)>([1-6])<\/text>/g, (full, attrs: string, digit: string) => {
+    const row = rows.get(digit);
+    if (!row) return full;
+    const name = `<text${attrs}>${row.type}</text>`;
+    if (!row.pending) return name;
+    const y = / y="([0-9.]+)"/.exec(attrs);
+    if (!y) return name;
+    const pendingAttrs = attrs
+      .replace(/ y="[0-9.]+"/, ` y="${roundPx(Number(y[1]) + 13)}"`)
+      .replace(/font-size="11"/, 'font-size="10"')
+      .replace(/fill="[^"]*"/, 'fill="#a1a1a6"');
+    return `${name}<text${pendingAttrs}>pending</text>`;
+  });
+}
+
+function assertSpeedSvg(svg: string, dots: SpeedDot[]): void {
+  if (!svg.includes(">line</text>")) throw new Error("speed plot is missing the line row label");
+  const pending = svg.match(/>pending<\/text>/g)?.length ?? 0;
+  if (pending !== 5) throw new Error(`speed plot expected 5 pending labels, found ${pending}`);
+  for (const row of SPEED_ROWS) {
+    if (!svg.includes(`>${row.type}</text>`)) throw new Error(`speed plot is missing the ${row.type} label`);
+  }
+  for (const dot of dots) {
+    if (dot.measured) {
+      if (!svg.includes(`${dot.library}, line, ${dot.ms} ms`)) {
+        throw new Error(`speed plot dropped the published ${dot.library} line median`);
+      }
+    } else if (svg.includes(`${dot.ms}ms`) || svg.includes(`${dot.ms} ms`)) {
+      throw new Error(`placeholder ${dot.ms} leaked into the speed plot as a time`);
+    }
+  }
+  const chartkitLine = /<circle\b(?=[^>]*data-ck-name="ChartKit")(?=[^>]*data-ck-i="0")[^>]*>/.exec(svg)?.[0] ?? "";
+  if (!chartkitLine.includes('fill="#0071e3"')) throw new Error("ChartKit line point is not filled");
+  if (!svg.includes('fill="none"')) throw new Error("speed plot has no hollow placeholder");
+  for (const tick of ["5ms", "10ms", "50ms", "100ms", "500ms", "1s", "5s"]) {
+    if (!svg.includes(`>${tick}</text>`)) throw new Error(`speed plot is missing the ${tick} tick`);
+  }
+}
+
 /** Homepage story charts. Same published rows as the benchmarks page. */
 function paintHomeStory(): void {
   const sizeIds = ["chartkit-line", "uplot", "chartjs", "plot", "recharts", "nivo", "echarts"] as const;
@@ -410,18 +652,35 @@ function paintHomeStory(): void {
     svg: renderChart(spec),
   });
 
+  const speedDotsRows = speedDots(benchmarks.published.hoverSteady100k);
+  const speedBits = speedDotsRows
+    .filter((dot) => dot.measured)
+    .map((dot) => `${dot.library} ${msLabel(dot.ms)} ms`);
+  const speedAlt = `Hover-to-paint at 100,000 points by chart type. Line chart, painted median: ${speedBits.join(", ")}. Area, bar, scatter, donut, and heatmap marks are placeholders, not measurements. Libraries without a native type are omitted from those rows.`;
+  const speedCaption =
+    "Milliseconds, log scale; left is faster. Solid dots are measured. Hollow dots are placeholders until the harness runs that type. Libraries without a native type are omitted from that row.";
+  const speedChartSpec = speedSpec(speedDotsRows, speedAlt);
+
   write(join(out, "home", "story.json"), {
     source: "catalog/lib/benchmarks.ts",
     round: benchmarks.ROUND,
     measured: benchmarks.MEASURED,
     coreCommit: benchmarks.CORE_COMMIT,
-    lede: `ChartKit versus other charting libraries. Round ${benchmarks.ROUND}, measured ${benchmarks.MEASURED}.`,
+    lede: `Hover-to-paint time at 100,000 points, by chart type. Round ${benchmarks.ROUND}, ${benchmarks.MEASURED} measured the line chart; the remaining types run in round ${benchmarks.ROUND + 1}.`,
     lineGzipBytes: benchmarks.headline.lineGzipBytes,
     uplotJsBytes: benchmarks.headline.uplotJsBytes,
     uplotCssBytes: benchmarks.headline.uplotCssBytes,
     uplotSumBytes: benchmarks.headline.uplotSumBytes,
     sizeMeasured: benchmarks.headline.sizeMeasured,
     charts: [
+      {
+        id: "speed",
+        title: "",
+        caption: speedCaption,
+        alt: speedAlt,
+        spec: speedChartSpec,
+        svg: finishSpeedSvg(renderChart(speedChartSpec), speedDotsRows),
+      },
       painted(
         "size",
         "Line chart, gzip",

@@ -15,8 +15,8 @@ const heroLines = heroTitle.split(/(?<=\.)\s+/);
 const heroLede =
   "Write ChartSpec once. Validate and repair fix the safe mistakes. Adapters and Cloud don’t invent a second API. ChartKit is still a JavaScript library — agents and developers pass a ChartSpec; they do not write the chart implementation.";
 const story = loadHomeStory();
-const leadChart = story.charts.find((chart) => chart.id === "size");
-const sideCharts = story.charts.filter((chart) => chart.id !== "size");
+const leadChart = story.charts.find((chart) => chart.id === "speed");
+const sideCharts = story.charts.filter((chart) => chart.id !== "speed");
 ---
 
 <Base tone="light" title={heroTitle} description={heroLede || SITE.description}>
@@ -42,15 +42,16 @@ const sideCharts = story.charts.filter((chart) => chart.id !== "size");
     <div class="home-story__intro">
       <h2 id="story-title">Measured</h2>
       <p>
-        {story.lede} <a href="/benchmarks">Benchmarks</a>.
+        {story.lede}<br />
+        <a href="/benchmarks">Method and raw data →</a>
       </p>
     </div>
     <div class="home-story__grid">
       {
         leadChart ? (
           <article class="home-story__card home-story__card--wide">
-            <h3>{leadChart.title}</h3>
-            <ChartMount spec={leadChart.spec} svg={leadChart.svg} alt={leadChart.alt} />
+            {leadChart.title ? <h3>{leadChart.title}</h3> : null}
+            <ChartMount spec={leadChart.spec} svg={leadChart.svg} alt={leadChart.alt} hydrate={false} edit={false} />
             <p>{leadChart.caption}</p>
           </article>
         ) : null

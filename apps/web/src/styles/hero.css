@@ -272,6 +272,8 @@
   line-height: 1.5;
 }
 
+.home-story__intro a { white-space: nowrap; }
+
 .home-story__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -288,6 +290,16 @@
 }
 
 .home-story__card--wide { grid-column: 1 / -1; }
+
+.home-story__card--wide > p {
+  max-width: 44rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.home-story__card--wide .ck-frame {
+  --ck-grid: rgb(0 0 0 / 0.16);
+}
 
 .home-story__card h3 {
   margin: 0 0 8px;
