@@ -1,3 +1,4 @@
+import { CHROME_TOP } from "../../chrome";
 import { column, fieldOf, type Frame } from "../../frame";
 import { cssVar } from "../../theme";
 import { isRecord, n } from "../../svg";
@@ -22,7 +23,8 @@ export function renderFunnel(spec: Record<string, unknown>): string | null {
   const vertical = pos === "left" || pos === "right";
   const legendBand = legend && !vertical ? 22 : 0;
   const legendSide = legend && vertical ? Math.min(168, 28 + Math.max(...items.map(([label]) => label.length), 1) * 7) : 0;
-  const top = (frame.title ? 44 : 20) + (frame.subtitle ? 18 : 0) + (pos === "top" ? legendBand : 0);
+  const legendLift = pos === "top" && !frame.title ? CHROME_TOP - 8 : 0;
+  const top = (frame.title ? 44 : 20) + (frame.subtitle ? 18 : 0) + (pos === "top" ? legendBand : 0) + legendLift;
   const bottomPad = 16 + (pos === "bottom" ? legendBand : 0);
   const plotLeft = 156 + (pos === "left" ? legendSide : 0);
   const plotRight = 28 + (pos === "right" ? legendSide : 0);
@@ -62,7 +64,7 @@ export function renderFunnel(spec: Record<string, unknown>): string | null {
   if (legend && items.length) {
     const ink = cssVar("text", frame.preset.text);
     let x = pos === "right" ? frame.width - legendSide : 16;
-    let y = pos === "bottom" ? frame.height - 20 : pos === "top" ? (frame.title ? 28 : 8) + (frame.subtitle ? 18 : 0) : top;
+    let y = pos === "bottom" ? frame.height - 20 : pos === "top" ? (frame.title ? 28 : CHROME_TOP) + (frame.subtitle ? 18 : 0) : top;
     const marks = items.map(([label, color]) => {
       const bit = `<rect x="${n(x)}" y="${n(y)}" width="10" height="10" rx="2" fill="${color}" />${text(x + 14, y + 9, label, ink, 12, "500")}`;
       if (vertical) y += 18;

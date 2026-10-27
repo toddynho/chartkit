@@ -10,10 +10,16 @@ export interface PlotRect {
   bottom: number;
 }
 
+/**
+ * Title baseline. Untitled top chrome (legends, calendar month labels) uses the
+ * same inset. A legend swatch or month label near y=8 sits flush on a card.
+ */
+export const CHROME_TOP = 22;
+
 /** Title, then the subtitle under it. Empty when neither is set. */
 export function heading(frame: Frame, x = 16): string {
   const bits: string[] = [];
-  if (frame.title) bits.push(ink(x, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
+  if (frame.title) bits.push(ink(x, CHROME_TOP, frame.title, cssVar("text", frame.preset.text), 15, "650"));
   if (frame.subtitle) bits.push(ink(x, frame.title ? 40 : 18, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
   return bits.join("");
 }

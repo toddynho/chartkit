@@ -179,6 +179,61 @@ describe("repair, cache, and errors", () => {
     expect(repair(broken).ok).toBe(true);
   });
 
+  it("draws a bar list that repair accepts", async () => {
+    const { app } = appFor();
+    const spec = {
+      version: "1",
+      type: "bar-list",
+      data: [
+        { page: "/pricing", visits: 1840 },
+        { page: "/docs", visits: 1420 },
+      ],
+      encoding: { x: "page", y: "visits" },
+      a11y: { alt: "Pricing leads the page list." },
+    };
+    const response = await app.handle(
+      new Request("http://cloud.local/render", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ spec, format: "svg" }),
+      }),
+    );
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { ok: boolean; svg: string; errors: unknown[] };
+    expect(body.ok).toBe(true);
+    expect(body.errors).toEqual([]);
+    expect(body.svg).toContain('data-ck-type="bar-list"');
+    expect(body.svg).toContain(">/pricing<");
+    expect(body.svg).not.toContain("could not draw");
+    expect(body.svg).not.toContain("not drawable");
+  });
+
+  it("names a type Cloud does not load instead of a generic undrawable picture", async () => {
+    const { app } = appFor();
+    const spec = {
+      version: "1",
+      type: "choropleth",
+      atlas: "us",
+      data: [{ state: "CA", share: 1 }],
+      encoding: { region: "state" },
+      a11y: { alt: "California is marked." },
+    };
+    const response = await app.handle(
+      new Request("http://cloud.local/render", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ spec, format: "svg" }),
+      }),
+    );
+    expect(response.status).toBe(422);
+    const body = (await response.json()) as { ok: boolean; svg: string; errors: { code: string; message: string }[] };
+    expect(body.ok).toBe(false);
+    expect(body.errors[0]?.code).toBe("CK1010");
+    expect(body.errors[0]?.message).toContain('type "choropleth" is unsupported on Cloud');
+    expect(body.svg).toContain("unsupported on Cloud");
+    expect(body.svg).not.toContain("The spec is not drawable.");
+  });
+
   it("accepts base64url specs and returns an error image for a spec repair cannot draw", async () => {
     const { app } = appFor();
     const encoded = Buffer.from(JSON.stringify(bar)).toString("base64url");

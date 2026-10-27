@@ -6,6 +6,7 @@ export default defineConfig({
     alias: [
       { find: "@chartkitdev/core/validate/phase4", replacement: path.resolve(__dirname, "../../packages/core/src/validate-phase4.ts") },
       { find: "@chartkitdev/core/validate", replacement: path.resolve(__dirname, "../../packages/core/src/validate.ts") },
+      { find: "@chartkitdev/core/charts/bar-list", replacement: path.resolve(__dirname, "../../packages/core/src/charts/bar-list.ts") },
       { find: "@chartkitdev/core/extra", replacement: path.resolve(__dirname, "../../packages/core/src/extra.ts") },
     ],
   },

@@ -12,6 +12,7 @@ const core = join(cloud, "../../packages/core/src");
 
 const entries = {
   "@chartkitdev/core/extra": join(core, "extra.ts"),
+  "@chartkitdev/core/charts/bar-list": join(core, "charts/bar-list.ts"),
   "@chartkitdev/core/validate": join(core, "validate.ts"),
   "@chartkitdev/core/validate/phase4": join(core, "validate-phase4.ts"),
 };
