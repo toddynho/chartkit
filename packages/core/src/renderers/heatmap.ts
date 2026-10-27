@@ -56,7 +56,9 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
   const ramp = colorEnc?.constant ? null : readColorScale(frame.encoding.color, frame.preset, counts, true);
   const quiet = emptyMark(frame.id, frame.preset);
   const legendH = ramp ? colorLegendHeight : 22;
-  const box = calendarLayout(frame, weeks, legendH);
+  // Untitled month labels share the title baseline. Sized charts keep that inset inside the requested height.
+  const topReserve = frame.title || frame.subtitle ? 0 : Math.max(0, CHROME_TOP - 11);
+  const box = calendarLayout(frame, weeks, legendH, topReserve);
   const head = (frame.title ? 28 : 0) + (frame.subtitle ? 16 : 0);
   if (head) {
     box.oy += head;
@@ -158,7 +160,7 @@ const MAX_CELL_RATIO = 1.5;
  * stay square or at most 1.5:1 and never pass 32px. Leftover width or height
  * centres the grid. The legend sits under the first week.
  */
-function calendarLayout(frame: Frame, weeks: number, legendH: number): CalendarBox {
+function calendarLayout(frame: Frame, weeks: number, legendH: number, topReserve = 0): CalendarBox {
   if (!frame.widthFixed && !frame.heightFixed) {
     const cell = 12;
     const gap = typeof frame.mark.gap === "number" ? Math.round(12 * frame.mark.gap) : 3;
@@ -170,16 +172,16 @@ function calendarLayout(frame: Frame, weeks: number, legendH: number): CalendarB
       pitchX: pitch,
       pitchY: pitch,
       ox: 0,
-      oy: 0,
+      oy: topReserve,
       width: DAY_LABEL_W + weeks * pitch + 4,
-      height: gridH + 8 + legendH,
+      height: topReserve + gridH + 8 + legendH,
       legendX: DAY_LABEL_W,
-      legendY: gridH + 6,
+      legendY: topReserve + gridH + 6,
     };
   }
   const frac = typeof frame.mark.gap === "number" ? Math.min(0.55, Math.max(0, frame.mark.gap)) : 0.2;
   const padX = DAY_LABEL_W + 8;
-  const padY = MONTH_LABEL_H + legendH + 12;
+  const padY = MONTH_LABEL_H + legendH + 12 + topReserve;
   const maxPitch = MAX_CELL / (1 - frac);
   const widthPitch = frame.widthFixed ? Math.max(4, (frame.width - padX) / weeks) : null;
   const heightPitch = frame.heightFixed ? Math.max(4, (frame.height - padY) / 7) : null;
@@ -190,10 +192,10 @@ function calendarLayout(frame: Frame, weeks: number, legendH: number): CalendarB
   const gridW = DAY_LABEL_W + weeks * pitchX;
   const gridH = MONTH_LABEL_H + 7 * pitchY;
   const width = frame.widthFixed ? frame.width : gridW + 4;
-  const height = frame.heightFixed ? frame.height : gridH + 8 + legendH;
+  const height = frame.heightFixed ? frame.height : topReserve + gridH + 8 + legendH;
   const blockH = gridH + 8 + legendH;
   const ox = frame.widthFixed ? Math.max(0, (width - 4 - gridW) / 2) : 0;
-  const oy = frame.heightFixed ? Math.max(0, (height - blockH) / 2) : 0;
+  const oy = frame.heightFixed ? Math.max(topReserve, (height - blockH) / 2) : topReserve;
   return {
     cellW: Math.max(2, pitchX * (1 - frac)),
     cellH: Math.max(2, pitchY * (1 - frac)),
