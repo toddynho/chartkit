@@ -3,7 +3,8 @@ import { repair } from "@chartkitdev/core/validate";
 import { render } from "@chartkitdev/core/extra";
 import { describe, expect, it, vi } from "vitest";
 import { createApp } from "./app.ts";
-import { chartBody } from "./watermark.ts";
+import { CLOUD_PLATE } from "./draw.ts";
+import { chartBody, EMBED_PAD_BOTTOM, EMBED_PAD_TOP, EMBED_PAD_X } from "./watermark.ts";
 import { kvCharts, memoryCharts } from "./charts.ts";
 import { kvKeys, memoryKeys } from "./keys.ts";
 import { memoryLimiter } from "./limit.ts";
@@ -35,6 +36,23 @@ function get(spec: unknown, query: Record<string, string> = {}) {
   return new Request(`http://cloud.local/render?${params}`);
 }
 
+/** Keyed Cloud SVGs stay padded. The plate fallback is the only drawing difference from the library. */
+function expectClean(svg: string) {
+  expect(svg).toContain('data-ck-embed="1"');
+  expect(svg).not.toContain("data-ck-watermark");
+  expectSameDrawing(svg, render(bar));
+  expect(svg).toContain(`viewBox="-${EMBED_PAD_X} -${EMBED_PAD_TOP} `);
+}
+
+function expectSameDrawing(svg: string, source: string) {
+  const cloud = chartBody(svg);
+  const library = chartBody(source);
+  const plate = `var(--ck-background, ${CLOUD_PLATE})`;
+  expect(cloud.drawing.replaceAll(plate, "var(--ck-background, transparent)")).toBe(library.drawing);
+  expect(cloud.width).toBe(library.width);
+  expect(cloud.height).toBe(library.height);
+}
+
 describe("watermark and parity", () => {
   it("matches the library SVG aside from the reserved mark", async () => {
     const { app } = appFor();
@@ -47,14 +65,24 @@ describe("watermark and parity", () => {
     expect(svg).toContain('data-ck-watermark="1"');
     expect(svg).toContain('href="https://chartkit.dev/cloud"');
     expect(svg).toContain(">chartkit.dev</text>");
-    const marked = chartBody(svg);
     const library = chartBody(plain);
-    expect(marked.drawing).toBe(library.drawing);
-    expect(marked.width).toBe(library.width);
-    expect(marked.height).toBe(library.height);
+    expectSameDrawing(svg, plain);
+    expect(svg).toContain('data-ck-embed="1"');
     const open = svg.match(/<svg\b[^>]*>/)?.[0] ?? "";
-    const box = open.match(/viewBox="0 0 ([0-9.]+) ([0-9.]+)"/);
-    expect(Number(box?.[2])).toBe(library.height + 16);
+    const box = open.match(/viewBox="(-?[0-9.]+) (-?[0-9.]+) ([0-9.]+) ([0-9.]+)"/);
+    const view = box?.slice(1, 5).map(Number) ?? [];
+    // Library viewBox is 0 0 <width> <height>. Cloud used to add only the 16px watermark band
+    // (0 0 640 256 for this bar, top grid 14px from the edge, 4px under the mark).
+    // The embed margin is viewBox-only: 24 top, 16 each side, 12 under that band.
+    expect(view).toEqual([
+      -EMBED_PAD_X,
+      -EMBED_PAD_TOP,
+      library.width + EMBED_PAD_X * 2,
+      library.height + EMBED_PAD_TOP + EMBED_PAD_BOTTOM + 16,
+    ]);
+    const markY = Number(svg.match(/data-ck-watermark="1"[\s\S]*?\by="([0-9.]+)"/)?.[1]);
+    expect(markY).toBe(library.height + 12);
+    expect((view[1] ?? 0) + (view[3] ?? 0) - markY).toBe(16);
     expect(response.headers.get("x-chartkit-watermark")).toBe("1");
     expect(response.headers.get("cache-control")).toBe("public, max-age=31536000, immutable");
     expect(response.headers.get("etag")).toMatch(/^"[0-9a-f]+"$/);
@@ -79,15 +107,15 @@ describe("watermark and parity", () => {
     );
     const body = (await bearer.json()) as { watermark: boolean; svg: string; url: string };
     expect(body.watermark).toBe(false);
-    expect(body.svg).toBe(render(bar));
+    expectClean(body.svg);
     expect(body.url).toMatch(/^http:\/\/cloud\.local\/c\/[A-Za-z0-9_-]{16}\.svg$/);
     expect(body.url).not.toContain("key=");
     expect(body.url).not.toContain(issued.key);
     const image = await app.handle(new Request(body.url));
     expect(image.headers.get("x-chartkit-watermark")).toBe("0");
-    expect(await image.text()).toBe(render(bar));
+    expectClean(await image.text());
     const leaked = await app.handle(new Request(`${body.url}?key=${issued.key}`));
-    expect(await leaked.text()).toBe(render(bar));
+    expectClean(await leaked.text());
     const sneaky = await app.handle(
       new Request(`http://cloud.local/charts?key=${issued.key}`, {
         method: "POST",
@@ -252,7 +280,7 @@ describe("rate limit and keys", () => {
     expect(stored.url).not.toContain("key=");
     expect(stored.url).not.toContain(key);
     const image = await app.handle(new Request(stored.url));
-    expect(await image.text()).toBe(render(bar));
+    expectClean(await image.text());
     expect(image.headers.get("x-chartkit-watermark")).toBe("0");
   });
 
@@ -300,6 +328,54 @@ describe("rate limit and keys", () => {
     expect(marked.id).not.toBe(clean.id);
     expect((await charts.get(marked.id))?.clean).toBe(false);
     expect([...rows.values()].join("")).not.toContain("ck_test_");
+  });
+});
+
+describe("background plate", () => {
+  it("paints an opaque white plate on Soft so a black lightbox can still show the labels", async () => {
+    const { app } = appFor();
+    const svg = await (await app.handle(get(bar))).text();
+    expect(svg).toContain(`var(--ck-background, ${CLOUD_PLATE})`);
+    expect(svg).not.toContain("var(--ck-background, transparent)");
+    expect(forRaster(svg, false)).toContain(`fill="${CLOUD_PLATE}"`);
+    expect(forRaster(svg, false)).not.toContain("transparent");
+    const png = await app.handle(get(bar, { format: "png", scale: "1" }));
+    expect(png.headers.get("content-type")).toBe("image/png");
+    expect(Buffer.from(new Uint8Array(await png.arrayBuffer()).subarray(0, 8)).toString("hex")).toBe("89504e470d0a1a0a");
+  });
+
+  it("accepts a background query or body color and keeps midnight opaque", async () => {
+    const { app } = appFor();
+    const painted = await (await app.handle(get(bar, { background: "#112233" }))).text();
+    expect(painted).toContain("var(--ck-background, #112233)");
+    expect(forRaster(painted, false)).toContain('fill="#112233"');
+    const clear = await (await app.handle(get(bar, { background: "transparent" }))).text();
+    expect(clear).toContain("var(--ck-background, transparent)");
+    const night = await (await app.handle(get({ ...bar, theme: "midnight" }))).text();
+    expect(night).toContain("var(--ck-background, #0c0c0c)");
+    expect(night).not.toContain(`var(--ck-background, ${CLOUD_PLATE})`);
+    const clearSpec = await (await app.handle(get({ ...bar, theme: { tokens: { background: "transparent" } } }))).text();
+    expect(clearSpec).toContain("var(--ck-background, transparent)");
+    const darkMode = await (await app.handle(get({ ...bar, theme: { mode: "dark" } }))).text();
+    expect(darkMode).toContain("var(--ck-background, #0c0c0c)");
+    const specPlate = { ...bar, theme: { preset: "soft", tokens: { background: "#eef2ff" } } };
+    const kept = await (await app.handle(get(specPlate))).text();
+    expect(kept).toContain("var(--ck-background, #eef2ff)");
+    const won = await (await app.handle(get(specPlate, { background: "#112233" }))).text();
+    expect(won).toContain("var(--ck-background, #112233)");
+    expect(won).not.toContain("#eef2ff");
+    const posted = await app.handle(
+      new Request("http://cloud.local/render", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ spec: bar, background: "#abcdef" }),
+      }),
+    );
+    const body = (await posted.json()) as { svg: string };
+    expect(body.svg).toContain("var(--ck-background, #abcdef)");
+    const bad = await app.handle(get(bar, { background: "white" }));
+    expect(bad.status).toBe(400);
+    expect(await bad.text()).toContain("background must be a CSS color");
   });
 });
 

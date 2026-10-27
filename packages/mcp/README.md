@@ -6,7 +6,7 @@ MCP server for [ChartKit](https://chartkit.dev). It speaks stdio through the off
 
 `validate`, `repair`, `render`, `lookup_feature`, `list_chart_types`, and `get_example` make no network calls. They use `@chartkitdev/core` and a copy of `catalog/public/features.json`, `llms.txt`, the v1 JSON Schema, and the example specs that the build copies into the package. Feature statuses come from that file. This package does not invent them. `render_chart` is the exception: it POSTs the spec to ChartKit Cloud and returns the image URL plus repairs.
 
-The local `render` tool accepts `format: "svg"` only. PNG from that tool would add a rasterizer to this package, and it does not include one. `render_chart` can ask Cloud for PNG.
+The local `render` tool accepts `format: "svg"` only. PNG from that tool would add a rasterizer to this package, and it does not include one. `render_chart` can ask Cloud for PNG. Omit `format`, or pass `svg`, unless the host cannot display SVG.
 
 ## Tools
 
@@ -15,7 +15,7 @@ The local `render` tool accepts `format: "svg"` only. PNG from that tool would a
 | `validate` | `spec` object or JSON string | The object from `@chartkitdev/core` `validate()`: `ok`, `diagnostics`, `errors`, `warnings`. Diagnostics include JSON Patch `fix` arrays. |
 | `repair` | `spec` object or JSON string | The object from `repair()`: repaired `spec`, remaining diagnostics, and `applied` patches. The input is not mutated. |
 | `render` | `spec`, optional `format: "svg"` | SVG string from `@chartkitdev/core/extra` (every chart type, including the extras), plus `width` and `height` in pixels. A percentage attribute falls back to the viewBox. |
-| `render_chart` | `spec`, optional `format` (`svg` or `png`), `w`, `h`, `scale`, `theme`, `key` | ChartKit Cloud image URL plus `applied` repairs, warnings, and errors. A key is sent as `Authorization: Bearer` and removes the chartkit.dev mark. The returned URL does not contain the key. |
+| `render_chart` | `spec`, optional `format` (omit or `svg`; `png` only when the host cannot display SVG), `w`, `h`, `scale` (prefer 2 or higher for PNG), `theme`, `background` (omit for `#ffffff`; CSS color or `transparent`), `key` | ChartKit Cloud image URL plus `applied` repairs, warnings, and errors. A key is sent as `Authorization: Bearer` and removes the chartkit.dev mark. The returned URL does not contain the key. `theme` `midnight` is the dark plate. |
 | `lookup_feature` | `query` string | Matching matrix rows: ChartKit's status, the spec snippet or `null`, `https://chartkit.dev/features/<id>`, and every other library's status. `partial` is not native. |
 | `list_chart_types` | none | Chart types in the bundled examples, with filenames. |
 | `get_example` | `type` string | Example specs for that type, filename, or example id. |

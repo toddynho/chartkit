@@ -269,6 +269,7 @@ async function shareUrl(origin: string, spec: unknown, frame: Frame, watermark: 
   if (frame.w) params.set("w", String(frame.w));
   if (frame.h) params.set("h", String(frame.h));
   if (frame.theme) params.set("theme", frame.theme);
+  if (frame.background) params.set("background", frame.background);
   return `${origin}/render?${params}`;
 }
 
@@ -294,7 +295,7 @@ function payload(drawn: { result: RepairResult; width: number; height: number; s
 
 function frameFrom(url: URL, body: Record<string, unknown>): Frame | string {
   const source = new URLSearchParams(url.searchParams);
-  for (const name of ["format", "w", "h", "scale", "theme"] as const) {
+  for (const name of ["format", "w", "h", "scale", "theme", "background"] as const) {
     const value = body[name];
     if (typeof value === "string" || typeof value === "number") source.set(name, String(value));
   }

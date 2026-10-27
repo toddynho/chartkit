@@ -7,6 +7,7 @@ export interface RenderChartInput {
   h?: number;
   scale?: number;
   theme?: string;
+  background?: string;
   key?: string;
   origin?: string;
   fetch?: typeof fetch;
@@ -43,6 +44,7 @@ export async function renderChart(input: RenderChartInput): Promise<RenderChartR
         h: input.h,
         scale: input.scale,
         theme: input.theme,
+        background: input.background,
       }),
     });
   } catch (error) {

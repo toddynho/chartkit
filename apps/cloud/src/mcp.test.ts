@@ -36,9 +36,24 @@ describe("POST /mcp", () => {
   it("lists render_chart and renders through the same path", async () => {
     const app = appFor();
     const listed = await app.handle(rpc("tools/list"));
-    const tools = (await listed.json()) as { result: { tools: { name: string }[] } };
+    const tools = (await listed.json()) as {
+      result: { tools: { name: string; description: string; inputSchema: { properties: { format: { default?: string; description?: string; enum?: string[] }; scale: { description?: string } } } }[] };
+    };
     expect(listed.headers.get("content-type")).toContain("application/json");
     expect(tools.result.tools.map((tool) => tool.name)).toEqual(["render_chart"]);
+    const tool = tools.result.tools[0];
+    expect(tool?.description).toMatch(/Omit format, or pass svg/);
+    expect(tool?.description).toMatch(/GitHub README image/);
+    expect(tool?.description).toMatch(/scale to 2 or higher/);
+    expect(tool?.inputSchema.properties.format.enum).toEqual(["svg", "png"]);
+    expect(tool?.inputSchema.properties.format.default).toBe("svg");
+    expect(tool?.inputSchema.properties.format.description).toMatch(/cannot display SVG/);
+    expect(tool?.inputSchema.properties.scale.description).toMatch(/Prefer 2 or higher/);
+    expect(tool?.description).toMatch(/#ffffff/);
+    expect(tool?.description).toMatch(/background/);
+    const background = tool?.inputSchema.properties as { background?: { description?: string } };
+    expect(background.background?.description).toMatch(/#ffffff/);
+    expect(background.background?.description).toMatch(/transparent/);
 
     const called = await app.handle(
       rpc("tools/call", { name: "render_chart", arguments: { spec: bar, format: "svg", key: "ck_test_known" } }),
