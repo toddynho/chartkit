@@ -78,7 +78,7 @@ export const specPages: Record<string, SpecPage> = {
       "type is funnel.",
       "encoding.x is the stage label. encoding.y is the value.",
       "Negative values are drawn as zero. The first stage sets the full width.",
-      "mark.shape bar (the default) draws centered rounded bars. trapezoid connects each stage to the next.",
+      "mark.shape trapezoid (the default) draws one tapering funnel. Each stage shares its bottom edge with the next stage. bar draws centered rounded bars.",
     ],
     example: `{
   "version": "1",

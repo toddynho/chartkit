@@ -1410,7 +1410,7 @@
     "anatomy": [
       "1Stages \u2014 `encoding.x` labels in data order (required).",
       "2Values \u2014 `encoding.y`; width \u221d value; first stage = full width.",
-      "3Shape \u2014 `mark.shape` `bar` (centered rounded bars) or `trapezoid` (connected steps)."
+      "3Shape \u2014 `mark.shape` `trapezoid` (the default, one tapering funnel) or `bar` (centered rounded bars)."
     ],
     "notes": [
       {

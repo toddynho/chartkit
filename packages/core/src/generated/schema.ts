@@ -3678,7 +3678,7 @@ export interface Mark {
    */
   baseline?: number;
   /**
-   * Funnel geometry. bar draws centered rounded bars and is the default. trapezoid connects each stage to the next. Applies to: funnel.
+   * Funnel geometry. trapezoid is the default: each stage shares its bottom edge with the next stage and the width tapers with the value. bar draws centered rounded bars. Applies to: funnel.
    */
   shape?: "bar" | "trapezoid";
   /**

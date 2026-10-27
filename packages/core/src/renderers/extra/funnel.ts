@@ -2,9 +2,13 @@ import { CHROME_TOP } from "../../chrome";
 import { column, fieldOf, type Frame } from "../../frame";
 import { cssVar } from "../../theme";
 import { isRecord, n } from "../../svg";
-import { fill, fmt, formatPercent, num, openMark, str, text, valueFormat, viewOf } from "./plot";
+import { fill, fit, fmt, formatPercent, num, openMark, str, text, valueFormat, viewOf } from "./plot";
 
-/** Stages in data order. Centered rounded bars are the default; `mark.shape` `"trapezoid"` connects them. */
+/**
+ * Stages in data order. The default is one tapering funnel: each stage is a
+ * trapezoid whose bottom edge is the next stage's top. `mark.shape` `"bar"`
+ * keeps centered rounded bars.
+ */
 export function renderFunnel(spec: Record<string, unknown>): string | null {
   const view = viewOf(spec, "funnel", 640, 400);
   if (!view) return null;
@@ -29,37 +33,46 @@ export function renderFunnel(spec: Record<string, unknown>): string | null {
   const plotLeft = 156 + (pos === "left" ? legendSide : 0);
   const plotRight = 28 + (pos === "right" ? legendSide : 0);
   const band = (frame.height - top - bottomPad) / stages.length;
-  const plotW = frame.width - plotLeft - plotRight;
+  const plotW = Math.max(0, frame.width - plotLeft - plotRight);
   const cx = plotLeft + plotW / 2;
   const labelX = pos === "left" ? 8 + legendSide : 16;
-  const trapezoid = frame.mark.shape === "trapezoid";
+  const bars = frame.mark.shape === "bar";
   const shown = valueFormat(frame, spec, frame.encoding.y);
+  const colorEach = Boolean(legend) || Boolean(fieldOf(frame.encoding.color));
+  const widths = stages.map((stage) => funnelSpan(stage[1], max, plotW));
+  const mouth = funnelMouth(widths);
   stages.forEach(([label, value], index) => {
     const prev = index === 0 ? value : stages[index - 1][1];
     const conversion = prev > 0 ? value / prev : 0;
     const y0 = top + index * band;
-    const barH = Math.max(22, band * 0.7);
-    const y = y0 + (band - barH) / 2;
-    const w0 = Math.max(barH, (value / max) * plotW);
-    const next = stages[index + 1]?.[1] ?? value;
-    const w1 = Math.max(barH, (next / max) * plotW);
     const valueText = fmt(value, frame.locale, shown);
     const pct = formatPercent(conversion, frame.locale);
     const tip = index === 0 ? `${label}: ${valueText} (start)` : `${label}: ${valueText} · ${pct} of previous`;
-    const color = legend ? fill(frame, index) : fill(frame, 0);
-    if (trapezoid) {
-      const y1 = y + barH;
-      const d = `M${n(cx - w0 / 2)} ${n(y)} L${n(cx + w0 / 2)} ${n(y)} L${n(cx + w1 / 2)} ${n(y1)} L${n(cx - w1 / 2)} ${n(y1)} Z`;
-      parts.push(openMark("path", "stage", tip, `d="${d}" fill="${color}"`));
-      parts.push("</path>");
-    } else {
+    const color = colorEach ? fill(frame, index) : fill(frame, 0);
+    const valueLine = index === 0 ? valueText : `${valueText} · ${pct}`;
+    let mid = y0 + band / 2;
+    if (bars) {
+      const barH = Math.max(22, band * 0.7);
+      const y = y0 + (band - barH) / 2;
+      const w0 = Math.max(barH, (value / max) * plotW);
       const radius = Math.min(10, barH / 2);
       parts.push(openMark("rect", "stage", tip, `x="${n(cx - w0 / 2)}" y="${n(y)}" width="${n(w0)}" height="${n(barH)}" rx="${n(radius)}" fill="${color}"`));
       parts.push("</rect>");
+      mid = y + barH / 2;
+    } else {
+      const y1 = top + (index + 1) * band;
+      const gap = funnelGap(frame);
+      const inset = ((y1 - y0) * gap) / 2;
+      const topY = y0 + inset;
+      const botY = y1 - inset;
+      const wTop = funnelLerp(widths[index], index + 1 < widths.length ? widths[index + 1] : mouth, y0, y1, topY);
+      const wBot = funnelLerp(widths[index], index + 1 < widths.length ? widths[index + 1] : mouth, y0, y1, botY);
+      const d = `M${n(cx - wTop / 2)} ${n(topY)} L${n(cx + wTop / 2)} ${n(topY)} L${n(cx + wBot / 2)} ${n(botY)} L${n(cx - wBot / 2)} ${n(botY)} Z`;
+      parts.push(openMark("path", "stage", tip, `d="${d}" fill="${color}" stroke="${color}" stroke-width="0.6" stroke-linejoin="bevel"`));
+      parts.push("</path>");
+      mid = (topY + botY) / 2;
     }
-    const mid = y + barH / 2;
-    parts.push(text(labelX, mid - 6, label, cssVar("text", frame.preset.text), 14, "650"));
-    parts.push(text(labelX, mid + 12, index === 0 ? valueText : `${valueText} · ${pct}`, cssVar("muted", frame.preset.muted), 12, "500"));
+    pushStageLabel(parts, frame, labelX, mid, band, plotLeft, label, valueLine);
   });
   if (legend && items.length) {
     const ink = cssVar("text", frame.preset.text);
@@ -74,6 +87,53 @@ export function renderFunnel(spec: Record<string, unknown>): string | null {
     parts.push(`<g data-ck-legend="${pos}">${marks.join("")}</g>`);
   }
   return view.done();
+}
+
+/** Width at a stage boundary. A small floor keeps a zero from collapsing the hit target. */
+function funnelSpan(value: number, max: number, plotW: number): number {
+  const floor = plotW <= 0 ? 0 : Math.min(8, Math.max(2, plotW * 0.04));
+  return Math.max(floor, (value / max) * plotW);
+}
+
+/**
+ * Bottom of the last stage. A drop continues partway so the mouth is not a
+ * rectangle; a rise or a flat run keeps the last value's width.
+ */
+function funnelMouth(widths: number[]): number {
+  const last = widths[widths.length - 1] ?? 0;
+  if (widths.length < 2) return last * 0.62;
+  const prev = widths[widths.length - 2];
+  if (prev <= last) return last;
+  const floor = Math.min(8, last);
+  return Math.max(floor, last - (prev - last) * 0.55);
+}
+
+/** Explicit `mark.gap` opens a slit. The theme gap stays off so the body stays one piece. */
+function funnelGap(frame: Frame): number {
+  const gap = frame.mark.gap;
+  return typeof gap === "number" && gap > 0 ? Math.min(0.7, gap) : 0;
+}
+
+function funnelLerp(from: number, to: number, y0: number, y1: number, y: number): number {
+  const span = y1 - y0;
+  const t = span ? (y - y0) / span : 0;
+  return from + (to - from) * t;
+}
+
+function pushStageLabel(parts: string[], frame: Frame, x: number, mid: number, band: number, plotLeft: number, label: string, valueLine: string): void {
+  const ink = cssVar("text", frame.preset.text);
+  const muted = cssVar("muted", frame.preset.muted);
+  if (band >= 32) {
+    parts.push(text(x, mid - 6, label, ink, 14, "650"));
+    parts.push(text(x, mid + 12, valueLine, muted, 12, "500"));
+    return;
+  }
+  if (band >= 22) {
+    parts.push(text(x, mid - 4, label, ink, 12, "650"));
+    parts.push(text(x, mid + 9, valueLine, muted, 11, "500"));
+    return;
+  }
+  parts.push(text(x, mid + 4, fit(`${label}  ${valueLine}`, Math.max(24, plotLeft - x - 8), 11), ink, 11, "600"));
 }
 
 /** A legend object or `legend: true`. Omitted stays unlabeled, since each stage already has a caption. */

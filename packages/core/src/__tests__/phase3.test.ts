@@ -16,6 +16,27 @@ function load(name: string): Record<string, unknown> {
   return JSON.parse(readFileSync(join(examples, name), "utf8")) as Record<string, unknown>;
 }
 
+/** Trapezoid corners: top-left, top-right, bottom-right, bottom-left. */
+function stagePaths(svg: string): number[][] {
+  return [...svg.matchAll(/<path d="M([\d.-]+) ([\d.-]+) L([\d.-]+) ([\d.-]+) L([\d.-]+) ([\d.-]+) L([\d.-]+) ([\d.-]+) Z"/g)].map((match) => match.slice(1).map(Number));
+}
+
+/** Adjacent stages share the bottom/top edge, and each top is narrower than the one above. */
+function sharesFunnelEdge(paths: number[][]): void {
+  expect(paths.length).toBeGreaterThan(1);
+  for (let index = 0; index < paths.length - 1; index++) {
+    const stage = paths[index];
+    const next = paths[index + 1];
+    expect(stage[5]).toBe(next[1]);
+    expect(stage[7]).toBe(next[1]);
+    expect(stage[4]).toBe(next[2]);
+    expect(stage[6]).toBe(next[0]);
+    expect(stage[2] - stage[0]).toBeGreaterThan(next[2] - next[0]);
+  }
+  const last = paths[paths.length - 1];
+  expect(last[2] - last[0]).toBeGreaterThan(last[4] - last[6]);
+}
+
 describe("phase 3 charts", () => {
   for (const name of phase3) {
     it(`${name} validates, repeats, and draws a Soft SVG`, () => {
@@ -119,8 +140,11 @@ describe("phase 3 charts", () => {
     expect(radar).toContain("Speed");
     const funnel = render(load("19-funnel.json"));
     expect(funnel.match(/data-ck-mark="stage"/g)).toHaveLength(5);
-    expect(funnel).toContain('rx="');
+    expect(funnel).not.toMatch(/<rect [^>]*data-ck-mark="stage"/);
     expect(funnel).toContain("%");
+    const funnelPaths = stagePaths(funnel);
+    expect(funnelPaths).toHaveLength(5);
+    sharesFunnelEdge(funnelPaths);
     const trapezoid = render({
       version: "1",
       type: "funnel",
@@ -137,6 +161,32 @@ describe("phase 3 charts", () => {
     expect(trapezoid).toContain("Visit: 80 (start)");
     expect(trapezoid).not.toContain("100% of previous");
     expect(trapezoid).toContain("of previous");
+    sharesFunnelEdge(stagePaths(trapezoid));
+    const bars = render({
+      version: "1",
+      type: "funnel",
+      data: [
+        { stage: "Visit", count: 80 },
+        { stage: "Pay", count: 12 },
+      ],
+      encoding: { x: "stage", y: "count" },
+      mark: { shape: "bar" },
+      a11y: { alt: "12 of 80 visits pay." },
+    });
+    expect(bars.match(/<rect [^>]*data-ck-mark="stage"/g)).toHaveLength(2);
+    expect(bars).toContain('rx="');
+    const colored = render({
+      version: "1",
+      type: "funnel",
+      data: [
+        { stage: "Visit", count: 80 },
+        { stage: "Pay", count: 12 },
+      ],
+      encoding: { x: "stage", y: "count", color: "stage" },
+      a11y: { alt: "12 of 80 visits pay." },
+    });
+    expect(colored).toContain("--ck-series-1");
+    expect(colored).toContain("--ck-series-2");
     const tiles = render(load("20-treemap.json"));
     expect(tiles.match(/data-ck-mark="tile"/g)).toHaveLength(12);
     expect(tiles).toContain("color-mix(");
