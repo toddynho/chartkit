@@ -5,6 +5,7 @@ import HomeStart from "../components/HomeStart.astro";
 import { SITE } from "../data/site";
 import { homeSlides, showcaseSvgs } from "../data/marketing-charts";
 import { proofFigures, speedPlot } from "../data/home-bench";
+import { tokenSection } from "../data/token-eval";
 
 const title = "One spec. Every framework. Built for agents.";
 const lede =
@@ -13,6 +14,7 @@ const slides = homeSlides();
 const shots = showcaseSvgs();
 const proof = proofFigures();
 const bench = speedPlot();
+const tokens = tokenSection();
 
 const icon = (d: string) =>
   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"></path></svg>`;
@@ -21,7 +23,7 @@ const icon = (d: string) =>
 <Base tone="light" title={title} description={lede || SITE.description}>
   <div class="v2">
     <section class="home-hero" aria-labelledby="home-title">
-      <p class="eyebrow">ChartKit v1 · MIT</p>
+      <p class="eyebrow eyebrow--blue">ChartKit v1 · MIT</p>
       <h1 class="v2-h1" id="home-title">
         One spec.<br />Every framework.<br />Built for agents.
       </h1>
@@ -31,8 +33,6 @@ const icon = (d: string) =>
         <a class="btn-text" href="/cloud">Cloud →</a>
       </div>
     </section>
-
-    <HomeStart />
 
     <section class="carousel-wrap" aria-labelledby="types-title">
       <h2 class="sr" id="types-title">Chart types</h2>
@@ -72,68 +72,109 @@ const icon = (d: string) =>
       <p class="carousel-caption">18 chart types · one spec shape · click any to pin it</p>
     </section>
 
-    <section class="proof" aria-labelledby="proof-title">
-      <h2 id="proof-title">Built so an agent ships a chart in one pass</h2>
-      <p class="v2-lead">
-        <code>validate()</code> returns every error in one pass. <code>repair()</code> fixes the safe mistakes and does not call a model.
-      </p>
+    <HomeStart />
+
+    <section class="agent-tokens" aria-labelledby="tokens-title">
+      <div class="section-head">
+        <p class="eyebrow eyebrow--blue">For the agent</p>
+        <h2 id="tokens-title">Fewer tokens per chart</h2>
+        <p>An agent writes a short spec instead of chart code, and gets it right without a retry. Same task, same model, five libraries.</p>
+      </div>
       <div class="stat-grid">
-        <article class="stat-card">
-          <p class="stat-num">{proof.first}<span>/{proof.tasks}</span></p>
-          <p>specs valid on the first try with the docs in the prompt</p>
-        </article>
-        <article class="stat-card">
-          <p class="stat-num">{proof.repairFrom}<span>→{proof.repairTo}</span></p>
-          <p>no-docs run after <code>repair()</code>, zero extra model calls</p>
-        </article>
-        <article class="stat-card">
-          <p class="stat-num">{proof.gzipKb}<span> KB</span></p>
-          <p>gzipped line chart, from scripts/size.mjs ({proof.gzipBytes.toLocaleString("en-US")} bytes)</p>
-        </article>
-        <article class="stat-card">
-          <p class="stat-num">{proof.ssrMs}<span> ms</span></p>
-          <p>server render, 1,000-point line, no DOM</p>
-        </article>
+        {
+          tokens.stats.map((stat) => (
+            <article class:list={["stat-card", stat.ink && "stat-card--ink"]}>
+              <p class="stat-num">
+                {stat.value}
+                <span>{stat.suffix}</span>
+              </p>
+              <p>
+                {stat.repair ? (
+                  <>
+                    model calls per working chart, <code>repair()</code> handles the rest
+                  </>
+                ) : (
+                  stat.body
+                )}
+              </p>
+            </article>
+          ))
+        }
+      </div>
+      <div class="token-card">
+        <div class="token-card__head">
+          <h3>Output tokens per working chart</h3>
+          <p>median · {tokens.prompts} prompts · includes retries</p>
+        </div>
+        <div class="token-rows">
+          {
+            tokens.bars.map((row) => (
+              <div class:list={["token-row", row.first && "is-us"]}>
+                <div class="token-row__name">{row.name}</div>
+                <div class="token-row__track" aria-hidden="true">
+                  <div class="token-row__fill" style={`width:${row.width}`} />
+                </div>
+                <div class="token-row__val">
+                  {row.tokens} <span>· {row.calls} calls</span>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+        {
+          tokens.illustrative ? (
+            <p class="token-note">
+              Illustrative numbers pending the token eval. Method: same {tokens.prompts} chart prompts and model, each library's docs in context, count output tokens until <code>validate()</code> or a render passes; retries count. <a href="/benchmarks">Eval design →</a>
+            </p>
+          ) : null
+        }
       </div>
     </section>
 
     <section class="measured" id="measured" aria-labelledby="measured-title">
-      <h2 id="measured-title">Measured</h2>
-      <p class="v2-lead">
-        Hover-to-paint time at 100,000 points, by chart type. Round {proof.round}, {proof.measured} measured the line chart; the remaining types run in a later round.
-        <a href="/benchmarks">Method and raw data →</a>
-      </p>
+      <div class="section-head">
+        <p class="eyebrow eyebrow--blue">For the user</p>
+        <h2 id="measured-title">Faster on the page</h2>
+        <p>
+          {proof.gzipKb} KB gzipped, no DOM needed on the server, and the chart paints in milliseconds in the browser. Hover-to-paint at 100,000 points, by chart type. <a href="/benchmarks">Method and raw data →</a>
+        </p>
+      </div>
       <div class="bench-card">
         <div class="bench-legend">
           {
             bench.libs.map((lib, index) => (
-              <span style={index === 0 ? "font-weight:600;color:#17181a" : undefined}>
+              <span class:list={[index === 0 && "is-us"]}>
                 <i style={`background:${lib.color}`} />
                 {lib.name}
               </span>
             ))
           }
         </div>
-        {
-          bench.rows.map((row) => (
-            <div class:list={["bench-row", !row.measured && "is-pending"]}>
-              <div class="bench-row__label">
-                {row.type}
-                {row.note ? <small>{row.note}</small> : null}
+        <div class="bench-plot">
+          {
+            bench.rows.map((row) => (
+              <div class:list={["bench-row", !row.measured && "is-pending"]}>
+                <div class="bench-row__label">
+                  {row.type}
+                  {row.note ? <small>{row.note}</small> : null}
+                </div>
+                <div class="bench-track">
+                  {row.dots.map((dot) => (
+                    <span class="bench-dot" title={dot.title} style={`left:${dot.left};width:${dot.size};height:${dot.size};background:${dot.fill};box-shadow:${dot.ring}`} />
+                  ))}
+                </div>
               </div>
-              <div class="bench-track">
-                {row.dots.map((dot) => (
-                  <span class="bench-dot" title={dot.title} style={`left:${dot.left};width:${dot.size};height:${dot.size};background:${dot.fill};box-shadow:${dot.ring}`} />
-                ))}
-              </div>
-            </div>
-          ))
-        }
+            ))
+          }
+        </div>
         <div class="bench-axis">
-          {bench.ticks.map((tick) => <span style={`left:${tick.left}`}>{tick.label}</span>)}
+          <div></div>
+          <div class="bench-axis__ticks">
+            {bench.ticks.map((tick) => <span style={`left:${tick.left}`}>{tick.label}</span>)}
+          </div>
         </div>
         <p class="bench-note">
-          Solid dots are round {proof.round} line hover, painted median, from benchmarks.json. Hollow dots are not measurements. A library with no native chart for that row has no dot.
+          Milliseconds, log scale; left is faster. Round {proof.round}, {proof.measured} measured the line chart (solid). Hollow dots are placeholders until round {proof.round + 1} runs the other types. Libraries without a native type are omitted from that row.
         </p>
       </div>
     </section>
