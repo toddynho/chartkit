@@ -5,11 +5,13 @@ interface Props {
   heading?: boolean;
   /** Copy icon on the code block. Used by the homepage install card. */
   copy?: boolean;
+  /** Text Copy pill in the code header. Used by docs install. */
+  pill?: boolean;
   /** Homepage card: one npm line, then the snippet. */
   oneLine?: boolean;
 }
 
-const { heading = false, copy = false, oneLine = false } = Astro.props;
+const { heading = false, copy = false, pill = false, oneLine = false } = Astro.props;
 
 function escapeHtml(value: string): string {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
@@ -23,30 +25,28 @@ function installFor(stack: Stack): string {
 /** One line of HTML so a newline inside <pre> cannot indent `npm install`. */
 function sampleBlock(stack: Stack): string {
   const code = escapeHtml(`${installFor(stack)}\n\n${stack.snippet}`);
-  const caption = oneLine ? "shell" : stack.label;
-  return `<figure class="code" data-stack-panel="${stack.id}"><figcaption>${escapeHtml(caption)}</figcaption><pre><code>${code}</code></pre></figure>`;
+  const caption = oneLine && !pill ? "shell" : stack.label;
+  const copy = pill ? `<button type="button" class="copy-pill" data-copy-block>Copy</button>` : "";
+  return `<figure class="code" data-stack-panel="${stack.id}"><figcaption><span>${escapeHtml(caption)}</span>${copy}</figcaption><pre><code>${code}</code></pre></figure>`;
 }
 ---
 
 <section
-  class:list={["stack-sample", !heading && "stack-sample--quiet", copy && "stack-sample--copy"]}
+  class:list={["stack-sample", !heading && "stack-sample--quiet", copy && "stack-sample--copy", pill && "stack-sample--pill"]}
   aria-label="Install for the selected framework"
 >
   {
     heading ? (
       <>
         <h2>Install</h2>
-        <p>
-          Install core, then the adapter for the framework chip in the docs nav. That choice is remembered for snippets
-          on this site.
-        </p>
+        <p>Install core, then the adapter for your framework. The chip above sets snippets across the docs.</p>
       </>
     ) : null
   }
   <div class="stack-sample__block">
     <Fragment set:html={stacks.map(sampleBlock).join("")} />
     {
-      copy ? (
+      copy && !pill ? (
         <>
           <button type="button" class="code-copy" data-copy-install aria-label="Copy install command">
             <svg class="code-copy__glyph code-copy__glyph--copy" viewBox="0 0 16 16" aria-hidden="true">
@@ -70,3 +70,24 @@ function sampleBlock(stack: Stack): string {
     ) : null
   }
 </section>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>("[data-copy-block]").forEach((button) => {
+    if (button.dataset.ready === "1") return;
+    button.dataset.ready = "1";
+    button.addEventListener("click", async () => {
+      const text = button.closest("figure")?.querySelector("code")?.textContent ?? "";
+      const previous = button.textContent ?? "Copy";
+      try {
+        await navigator.clipboard.writeText(text.replace(/^\n/, "").replace(/\s+$/, ""));
+        button.textContent = "Copied";
+      } catch {
+        button.textContent = "Copy";
+        return;
+      }
+      window.setTimeout(() => {
+        button.textContent = previous === "Copied" ? "Copy" : previous;
+      }, 1200);
+    });
+  });
+</script>

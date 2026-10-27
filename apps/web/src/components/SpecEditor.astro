@@ -1,34 +1,28 @@
 ---
 interface Props {
   spec: Record<string, unknown>;
-  title?: string;
 }
 
-const { spec, title = "Spec" } = Astro.props;
+const { spec } = Astro.props;
 const initial = JSON.stringify(spec, null, 2);
 ---
 
 <div class="spec-try" id="spec-try">
-  <div class="spec-try__bar">
-    <span class="spec-try__title">{title}</span>
-  </div>
-  <div class="spec-unit">
+  <div class="spec-editor">
     <div class="spec-editor__bar">
       <span>spec.json</span>
-      <span id="spec-status">valid · ready</span>
+      <span id="spec-status" class="validity is-ok">200 · valid</span>
     </div>
-    <div class="spec-editor">
-      <label class="sr" for="spec-input">Editable chart specification</label>
-      <div class="code-field">
-        <pre class="code-field__paint" aria-hidden="true" data-spec-paint></pre>
-        <textarea id="spec-input" class="code-field__input" spellcheck="false">{initial}</textarea>
-      </div>
+    <label class="sr" for="spec-input">Editable chart specification</label>
+    <div class="code-field">
+      <pre class="code-field__paint" aria-hidden="true" data-spec-paint></pre>
+      <textarea id="spec-input" class="code-field__input" spellcheck="false">{initial}</textarea>
     </div>
   </div>
 </div>
 
 <script>
-  import { paintSpec } from "../lib/chartkit";
+  import { chartPreview, paintSpec, statusPill } from "../lib/chartkit";
   import { trySamples } from "../data/live-specs";
   import { highlightSource, paintField } from "../scripts/color-code";
 
@@ -88,7 +82,8 @@ const initial = JSON.stringify(spec, null, 2);
       parsed = raw;
     }
     const result = paintSpec(parsed);
-    if (chartPanel) chartPanel.innerHTML = result.svg;
+    const drawn = paintSpec(chartPreview(parsed));
+    if (chartPanel) chartPanel.innerHTML = drawn.svg || result.svg;
     showIssues(result.issues);
     if (jsonPanel) jsonPanel.innerHTML = highlightSource(pretty, "json");
     if (input) {
@@ -99,9 +94,17 @@ const initial = JSON.stringify(spec, null, 2);
     response?.classList.toggle("is-error", !result.ok);
     if (titleEl) titleEl.textContent = result.title;
     if (badgeEl) badgeEl.textContent = result.badge;
-    if (statusCode) statusCode.textContent = result.status;
+    if (statusCode) {
+      statusCode.textContent = statusPill(result);
+      statusCode.classList.toggle("is-ok", result.ok);
+      statusCode.classList.toggle("is-bad", !result.ok);
+    }
     if (okEl) okEl.textContent = result.footer;
-    if (status) status.textContent = result.ok ? "valid · rendered" : result.issues[0]?.code ?? "invalid";
+    if (status) {
+      status.textContent = statusPill(result);
+      status.classList.toggle("is-ok", result.ok);
+      status.classList.toggle("is-bad", !result.ok);
+    }
     if (parsed && typeof parsed === "object") syncChips(parsed as Record<string, unknown>);
   }
 

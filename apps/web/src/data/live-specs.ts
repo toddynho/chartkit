@@ -114,8 +114,30 @@ export function docsSpecForType(type: string): LiveSpec {
   return densifyDemo(specForType(type));
 }
 
+/** Overview rail. Eight points, not the densified docs series. */
+export const overviewLine: LiveSpec = {
+  version: "1",
+  type: "line",
+  title: "Weekday revenue",
+  theme: "soft",
+  a11y: { alt: "Weekday revenue rising from 148 to 240 over Q1 2025." },
+  data: [
+    { date: "2025-01-06", revenue: 148 },
+    { date: "2025-01-07", revenue: 166 },
+    { date: "2025-01-08", revenue: 172 },
+    { date: "2025-01-09", revenue: 190 },
+    { date: "2025-01-10", revenue: 184 },
+    { date: "2025-01-13", revenue: 205 },
+    { date: "2025-01-14", revenue: 198 },
+    { date: "2025-01-15", revenue: 240 },
+  ],
+  encoding: { x: "date", y: "revenue" },
+  mark: { curve: "monotone", points: "none" },
+  size: railSize,
+};
+
 export const trySamples = {
-  line: docsSpecForType("line"),
-  bar: docsSpecForType("bar"),
-  donut: docsSpecForType("donut"),
+  line: overviewLine,
+  bar: specForType("bar"),
+  donut: specForType("donut"),
 } as const;

@@ -3,7 +3,7 @@ import chartsJson from "./mock-charts.json";
 import { articleSections } from "./article-copy";
 import { withTruth } from "./chart-truth";
 import { chartTypes } from "./chart-types";
-import { docsSpecForType, type LiveSpec } from "./live-specs";
+import { docsSpecForType, trySamples, type LiveSpec } from "./live-specs";
 
 export type DocSection = {
   title: string;
@@ -40,7 +40,7 @@ export type ChartDoc = {
   notes: DocSection[];
 };
 
-export type ChipOption = { label: string; value: string };
+export type ChipOption = { label: string; value: string; swatch?: string };
 export type ChipGroup = { label: string; key: string; options: ChipOption[] };
 
 type NavLink = { href: string; label: string; hint?: string; quiet?: boolean };
@@ -221,11 +221,11 @@ export function specForChart(chart: ChartDoc): LiveSpec {
 const themeChips: ChipGroup = {
   label: "Theme",
   key: "theme",
-    options: [
-    { label: "Soft", value: "soft" },
-    { label: "Refined", value: "refined" },
-    { label: "Midnight", value: "midnight" },
-    { label: "Emerald", value: "emerald" },
+  options: [
+    { label: "Soft", value: "soft", swatch: "#0a63e6" },
+    { label: "Refined", value: "refined", swatch: "#17181a" },
+    { label: "Midnight", value: "midnight", swatch: "#9ecbff" },
+    { label: "Emerald", value: "emerald", swatch: "#137333" },
   ],
 };
 
@@ -275,7 +275,8 @@ export function chipsForChart(type: string): ChipGroup[] {
   ];
 }
 
-export const articleSpec: LiveSpec = docsSpecForType("line");
+/** Overview try-it. Short on purpose so the rail is not an 80-point scribble. */
+export const articleSpec: LiveSpec = trySamples.line;
 
 export const articleChips: ChipGroup[] = [
   themeChips,
@@ -290,6 +291,11 @@ export const articleChips: ChipGroup[] = [
   },
 ];
 
+const catalogTypes = new Set(chartDocs.map((chart) => chart.type));
+/** Core + statistical + planning + library + three maps. Gallery uses the same sum. */
+export const galleryChartCount =
+  chartDocs.length + chartTypes.filter((chart) => !catalogTypes.has(chart.type)).length + 3;
+
 function links(items: { slug?: string; href?: string; label: string; hint?: string }[]): NavLink[] {
   return items.map((item) => ({
     href: item.href ?? (item.slug ? `/docs/${item.slug}` : "/docs"),
@@ -298,20 +304,39 @@ function links(items: { slug?: string; href?: string; label: string; hint?: stri
   }));
 }
 
-const agentOrder = ["validate", "repair", "render", "llms-txt", "mcp"];
-const agentArticles = agentOrder
-  .map((slug) => fromMocks.find((article) => article.slug === slug))
-  .filter((article) => article != null);
+const conceptArticles = fromMocks.filter((article) => article.group === "Concepts");
+const specSlugs = new Set(["spec-anatomy", "data", "encoding", "scales", "axes"]);
 
 export const docsNav: NavGroup[] = [
   {
     label: "Start",
     blocks: [
       {
-        label: "",
+        label: "Start",
         items: [
           { href: "/docs", label: "Overview" },
-          { href: "/docs/markdown", label: "MD fences", quiet: true },
+          { href: "/docs/markdown", label: "MD fences" },
+          { href: "/docs/install", label: "Install notes" },
+          { href: "/docs/migrate", label: "Upgrading from v0" },
+        ],
+      },
+      {
+        label: "Charts",
+        items: [
+          { href: "/docs/charts/line", label: "Line" },
+          { href: "/docs/charts/bar", label: "Bar" },
+          { href: "/docs/charts/area", label: "Area" },
+          { href: "/docs/charts/donut", label: "Donut" },
+          { href: "/docs/charts", label: `All ${galleryChartCount} types` },
+        ],
+      },
+      {
+        label: "Agents",
+        items: [
+          { href: "/docs/validate", label: "Validate" },
+          { href: "/docs/repair", label: "Repair" },
+          { href: "/docs/llms-txt", label: "llms.txt" },
+          { href: "/docs/mcp", label: "MCP" },
         ],
       },
     ],
@@ -320,38 +345,26 @@ export const docsNav: NavGroup[] = [
     label: "Concepts",
     blocks: [
       {
-        label: "",
+        label: "Spec",
+        items: links(
+          conceptArticles
+            .filter((article) => specSlugs.has(article.slug))
+            .map((article) => ({ slug: article.slug, label: article.title })),
+        ),
+      },
+      {
+        label: "Rendering",
         items: [
           ...links(
-            fromMocks
-              .filter((article) => article.group === "Concepts")
+            conceptArticles
+              .filter((article) => !specSlugs.has(article.slug))
               .map((article) => ({ slug: article.slug, label: article.title })),
           ),
           { href: "/docs/theming", label: "Theming" },
           { href: "/docs/mermaid", label: "Mermaid" },
           { href: "/docs/web-component", label: "Web component" },
           { href: "/docs/spec", label: "Spec" },
-          { href: "/docs/migrate", label: "Upgrading from v0" },
           { href: "/docs/cloud", label: "Cloud render" },
-        ],
-      },
-    ],
-  },
-  {
-    label: "Charts",
-    blocks: [
-      ...(["Core", "Statistical", "Planning"] as const).map((family) => ({
-        label: family,
-        items: chartDocs
-          .filter((chart) => chart.family === family)
-          .map((chart) => ({ href: `/docs/charts/${chart.type}`, label: chart.label })),
-      })),
-      {
-        label: "Maps",
-        items: [
-          { href: "/gallery#map-world", label: "World choropleth" },
-          { href: "/gallery#map-us", label: "United States" },
-          { href: "/gallery#map-cities", label: "Cities" },
         ],
       },
     ],
@@ -360,34 +373,20 @@ export const docsNav: NavGroup[] = [
     label: "Lookup",
     blocks: [
       {
-        label: "",
-        items: links(
-          fromMocks
-            .filter((article) => article.group === "Reference")
-            .map((article) => ({
-              slug: article.slug,
-              label: article.title === "Themes" ? "Themes" : article.title,
-              hint: article.slug === "errors" ? "CK codes" : undefined,
-            })),
-        ),
-      },
-      {
-        label: "For agents",
-        items: links(
-          agentArticles.map((article) => ({
-            slug: article.slug,
-            label:
-              article.slug === "llms-txt"
-                ? "llms.txt"
-                : article.slug === "mcp"
-                  ? "MCP"
-                  : article.slug === "repair"
-                    ? "Repair"
-                    : article.slug === "render"
-                      ? "Render"
-                      : article.title,
-          })),
-        ),
+        label: "Reference",
+        items: [
+          ...links(
+            fromMocks
+              .filter((article) => article.group === "Reference")
+              .map((article) => ({
+                slug: article.slug,
+                label: article.title,
+                hint: article.slug === "errors" ? "CK codes" : undefined,
+              })),
+          ),
+          { href: "/schema/v1.json", label: "Schema v1" },
+          { href: "/docs/concepts/adapters", label: "Adapters" },
+        ],
       },
     ],
   },
@@ -399,10 +398,27 @@ const sequence: Crumb[] = docsNav.flatMap((group) =>
   group.blocks.flatMap((block) => block.items.map((item) => ({ href: item.href, label: item.label }))),
 );
 
+const chartCrumbs: Crumb[] = [
+  ...(["Core", "Statistical", "Planning"] as const).flatMap((family) =>
+    chartDocs.filter((chart) => chart.family === family).map((chart) => ({ href: `/docs/charts/${chart.type}`, label: chart.label })),
+  ),
+  ...chartTypes
+    .filter((chart) => !catalogTypes.has(chart.type))
+    .map((chart) => ({ href: `/docs/charts/${chart.type}`, label: chart.title })),
+];
+
 export function neighbors(href: string): { prev?: Crumb; next?: Crumb } {
   const index = sequence.findIndex((item) => item.href === href);
-  if (index < 0) return {};
-  return { prev: sequence[index - 1], next: sequence[index + 1] };
+  if (index >= 0) return { prev: sequence[index - 1], next: sequence[index + 1] };
+  const chartIndex = chartCrumbs.findIndex((item) => item.href === href);
+  if (chartIndex >= 0) {
+    return {
+      prev: chartCrumbs[chartIndex - 1] ?? { href: "/docs/charts", label: "All types" },
+      next: chartCrumbs[chartIndex + 1],
+    };
+  }
+  if (href === "/docs/charts") return { prev: { href: "/docs/charts/donut", label: "Donut" }, next: chartCrumbs[0] };
+  return {};
 }
 
 export function crumbsFor(href: string): Crumb[] {

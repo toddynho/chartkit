@@ -12,6 +12,7 @@ const cookieV2 = fileURLToPath(new URL("../../node_modules/astro/node_modules/co
 /** Static site for chartkit.dev. Todd deploys apps/web/dist by hand. */
 export default defineConfig({
   site: "https://chartkit.dev",
+  devToolbar: { enabled: false },
   trailingSlash: "ignore",
   server: {
     host: true,

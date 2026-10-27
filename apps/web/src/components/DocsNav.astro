@@ -1,42 +1,28 @@
 ---
-import { chartIcon, mapIcon } from "../data/chart-icons";
-import { activeDocsHref, docsNav, isAgentPath } from "../data/docs-catalog";
+import { activeDocsHref, docsNav } from "../data/docs-catalog";
 import { canonicalPath } from "../data/site";
 
 const path = canonicalPath(Astro.url.pathname);
 const current = activeDocsHref(path);
-const segments = docsNav.filter((group) => group.label !== "Charts");
-const charts = docsNav.find((group) => group.label === "Charts");
-const currentFamily = charts?.blocks.find((block) => block.items.some((item) => item.href === path))?.label ?? "";
+const shortcutCharts = new Set(["/docs/charts/line", "/docs/charts/bar", "/docs/charts/area", "/docs/charts/donut"]);
 
 function sectionFor(): string {
-  if (path === "/docs/charts" || path.startsWith("/docs/charts/")) return "";
-  for (const group of segments) {
+  if (path === "/docs/charts" || path.startsWith("/docs/charts/")) return "Start";
+  for (const group of docsNav) {
     for (const block of group.blocks) {
       if (block.items.some((item) => selected(item.href))) return group.label;
     }
   }
-  return "";
+  return "Start";
 }
 
-const activeSection = sectionFor();
-const openSegment = activeSection || "Start";
+const openSegment = sectionFor();
 
 function selected(href: string): boolean {
   if (current === href || path === href) return true;
   if (href === "/docs/migrate" && path.startsWith("/docs/migrate/")) return true;
+  if (href === "/docs/charts" && (path === "/docs/charts" || (path.startsWith("/docs/charts/") && !shortcutCharts.has(path)))) return true;
   return false;
-}
-
-function glyphFor(href: string): string {
-  if (href.startsWith("/docs/charts/")) return chartIcon(href.slice("/docs/charts/".length));
-  if (href.startsWith("/gallery#map")) return mapIcon;
-  return "";
-}
-
-function familyOpen(label: string): boolean {
-  if (currentFamily) return label === currentFamily;
-  return label === "Core";
 }
 ---
 
@@ -49,96 +35,50 @@ function familyOpen(label: string): boolean {
 <div class="docs-backdrop" id="docs-backdrop" hidden></div>
 <aside class="docs-sidebar" id="docs-sidebar" aria-label="Documentation">
   <div class="docs-sidebar__sticky">
-  <div class="docs-tabs" role="tablist" aria-label="Doc sections">
+    <div class="docs-tabs" role="tablist" aria-label="Doc sections">
+      {
+        docsNav.map((group) => (
+          <button
+            type="button"
+            role="tab"
+            id={`docs-tab-${group.label}`}
+            aria-controls={`docs-panel-${group.label}`}
+            aria-selected={group.label === openSegment ? "true" : "false"}
+            data-docs-section={group.label}
+          >
+            {group.label}
+          </button>
+        ))
+      }
+    </div>
     {
-      segments.map((group) => (
-        <button
-          type="button"
-          role="tab"
-          id={`docs-tab-${group.label}`}
-          aria-controls={`docs-panel-${group.label}`}
-          aria-selected={group.label === openSegment ? "true" : "false"}
-          data-docs-section={group.label}
+      docsNav.map((group) => (
+        <div
+          class="side-segment"
+          id={`docs-panel-${group.label}`}
+          role="tabpanel"
+          aria-labelledby={`docs-tab-${group.label}`}
+          data-docs-panel={group.label}
+          hidden={group.label !== openSegment}
         >
-          {group.label}
-        </button>
-      ))
-    }
-  </div>
-  {
-    segments.map((group) => (
-      <div
-        class="side-section side-segment"
-        id={`docs-panel-${group.label}`}
-        role="tabpanel"
-        aria-labelledby={`docs-tab-${group.label}`}
-        data-docs-panel={group.label}
-        hidden={group.label !== openSegment}
-      >
-        {group.blocks.map((block) =>
-          block.label === "For agents" ? (
-            <details class="side-fold" open={isAgentPath(path)}>
-              <summary>{block.label}</summary>
-              <ul class="side-nav side-nav--compact">
+          {group.blocks.map((block) => (
+            <div class="side-block">
+              {block.label ? <div class="side-section__label">{block.label}</div> : null}
+              <ul class="side-nav">
                 {block.items.map((item) => (
                   <li>
-                    <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class={selected(item.href) ? "is-active" : undefined}>
+                    <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class:list={[selected(item.href) && "is-active"]}>
                       {item.label}
+                      {item.hint ? <span class="side-hint">{item.hint}</span> : null}
                     </a>
                   </li>
                 ))}
               </ul>
-            </details>
-          ) : (
-            <ul class:list={["side-nav", group.label === "Lookup" && "side-nav--compact"]}>
-              {block.items.map((item) => (
-                <li>
-                  <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class:list={[selected(item.href) && "is-active", item.quiet && "is-quiet"]}>
-                    {item.quiet ? <span class="side-also">Also</span> : null}
-                    {item.label}
-                    {item.hint ? <span class="side-hint">{item.hint}</span> : null}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ),
-        )}
-      </div>
-    ))
-  }
-  {
-    charts ? (
-      <div class="side-charts" aria-labelledby="docs-charts-label">
-        <span class="side-section__label" id="docs-charts-label">Charts</span>
-        <label class="side-search">
-          <span class="visually-hidden">Find a chart type</span>
-          <input type="search" placeholder="Find a chart" data-chart-search autocomplete="off" />
-        </label>
-        {charts.blocks.map((block) => (
-          <details class="side-fold" data-chart-fold data-open-default={familyOpen(block.label) ? "1" : "0"} open={familyOpen(block.label)}>
-            <summary>
-              {block.label}
-              <span class="side-count">{block.items.length}</span>
-            </summary>
-            <ul class="side-nav">
-              {block.items.map((item) => {
-                const glyph = glyphFor(item.href);
-                return (
-                  <li data-chart-item data-label={item.label.toLowerCase()}>
-                    <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class={selected(item.href) ? "is-active" : undefined}>
-                      {glyph ? <svg class="type-icon" viewBox="0 0 24 20" fill="none" aria-hidden="true" set:html={glyph} /> : null}
-                      {item.label}
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </details>
-        ))}
-        <p class="side-empty" data-chart-empty hidden>No chart type</p>
-      </div>
-    ) : null
-  }
+            </div>
+          ))}
+        </div>
+      ))
+    }
   </div>
 </aside>
 
@@ -186,27 +126,4 @@ function familyOpen(label: string): boolean {
   toggle?.addEventListener("click", () => setOpen(!sidebar?.classList.contains("is-open")));
   backdrop?.addEventListener("click", () => setOpen(false));
   sidebar?.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => setOpen(false)));
-
-  const search = sidebar?.querySelector<HTMLInputElement>("[data-chart-search]");
-  const folds = sidebar?.querySelectorAll<HTMLDetailsElement>("[data-chart-fold]") ?? [];
-  const empty = sidebar?.querySelector<HTMLElement>("[data-chart-empty]");
-  search?.addEventListener("input", () => {
-    const query = search.value.trim().toLowerCase();
-    let shown = 0;
-    folds.forEach((fold) => {
-      let any = false;
-      fold.querySelectorAll<HTMLElement>("[data-chart-item]").forEach((item) => {
-        const match = !query || (item.dataset.label ?? "").includes(query);
-        item.hidden = !match;
-        if (match) {
-          any = true;
-          shown += 1;
-        }
-      });
-      fold.hidden = !any;
-      if (query) fold.open = any;
-      else fold.open = fold.dataset.openDefault === "1";
-    });
-    if (empty) empty.hidden = shown > 0;
-  });
 </script>

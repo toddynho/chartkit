@@ -63,7 +63,7 @@ export function paintSpec(input: unknown): RailResult {
   const type = isRecord(spec) && typeof spec.type === "string" ? spec.type : "";
   const checked = PHASE4.has(type) ? validatePhase4(spec) : validate(spec);
   const theme = themeName(spec);
-  const badge = theme === "soft" || theme === "auto" ? "Soft" : theme;
+  const badge = `${type || "chart"} · ${theme === "auto" ? "soft" : theme}`;
   if (!checked.ok) {
     const issues = issuesFrom(checked, "error");
     return {
@@ -91,6 +91,26 @@ export function paintSpec(input: unknown): RailResult {
       ? `Rendered with @chartkitdev/core · ${warnings.length} warning${warnings.length === 1 ? "" : "s"}`
       : "validate() ok · rendered with @chartkitdev/core",
   };
+}
+
+/** Status pill copy. Valid is "200 · valid", not a bare status code. */
+export function statusPill(result: RailResult): string {
+  if (result.ok) return "200 · valid";
+  const issue = result.issues[0];
+  if (!issue) return "400 · invalid";
+  if (issue.code === "CK1001") return "CK1001 · invalid JSON";
+  const detail = issue.message.replace(/\.$/, "");
+  const text = `${issue.code} · ${detail}`;
+  return text.length > 56 ? issue.code : text;
+}
+
+/** Rail chart omits the spec title so the meta row is the only title. */
+export function chartPreview(spec: unknown): unknown {
+  if (!isRecord(spec)) return spec;
+  const copy = { ...spec };
+  delete copy.title;
+  delete copy.subtitle;
+  return copy;
 }
 
 function parseOrRaw(input: string): unknown {

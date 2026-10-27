@@ -1,6 +1,7 @@
 import { paintSpec } from "../lib/chartkit";
 import { docsSpecForType, specForType, type LiveSpec } from "./live-specs";
 import { heroChartMeta, type HeroChartMeta } from "./hero-charts";
+import { brandTheme } from "./marketing-theme";
 
 export type HeroSlide = HeroChartMeta & {
   title: string;
@@ -19,7 +20,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function stageSpec(type: string): LiveSpec {
   const spec = structuredClone(specForType(type));
-  spec.theme = "soft";
+  spec.theme = brandTheme;
+  spec.tooltip = true;
   spec.size = type === "sparkline" ? { width: 640, height: 180 } : stageSize;
   return spec;
 }

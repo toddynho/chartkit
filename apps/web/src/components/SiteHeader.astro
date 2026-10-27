@@ -33,26 +33,28 @@ function mark(href: string): "page" | undefined {
         </form>
       ) : null
     }
-    <nav class="primary" aria-label="Primary">
-      {
-        links.map((item) => (
-          <a href={item.href} aria-current={mark(item.href)}>
-            {item.label}
-          </a>
-        ))
-      }
-    </nav>
-    <div class="header-end">
-      <a class="star-chip" href={SITE.github} aria-label="Star toddynho/chartkit on GitHub">
-        <span aria-hidden="true">★</span> Star <strong>7</strong>
-      </a>
-      {
-        variant === "docs" ? null : (
-          <a class="btn-ink header-cta" href={onCloud ? "/cloud#pricing" : "/docs"}>
-            {onCloud ? "Get a key" : "Get started"}
-          </a>
-        )
-      }
+    <div class="header-cluster">
+      <nav class="primary" aria-label="Primary">
+        {
+          links.map((item) => (
+            <a href={item.href} aria-current={mark(item.href)}>
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+      <div class="header-end">
+        <a class="star-chip" href={SITE.github} aria-label="Star toddynho/chartkit on GitHub">
+          <span aria-hidden="true">★</span> Star <strong>7</strong>
+        </a>
+        {
+          variant === "docs" ? null : (
+            <a class="btn-ink header-cta" href={onCloud ? "/cloud#pricing" : "/docs"}>
+              {onCloud ? "Get a key" : "Get started"}
+            </a>
+          )
+        }
+      </div>
     </div>
   </div>
 </header>

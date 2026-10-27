@@ -1,5 +1,5 @@
 ---
-import { paintSpec } from "../lib/chartkit";
+import { chartPreview, paintSpec, statusPill } from "../lib/chartkit";
 import type { ChipGroup } from "../data/docs-catalog";
 
 interface Props {
@@ -9,7 +9,9 @@ interface Props {
 
 const { spec, chips = [] } = Astro.props;
 const result = paintSpec(spec);
+const drawn = paintSpec(chartPreview(spec));
 const json = JSON.stringify(spec, null, 2);
+const pill = statusPill(result);
 
 function at(source: Record<string, unknown>, path: string): unknown {
   return path.split(".").reduce<unknown>((current, key) => {
@@ -24,6 +26,7 @@ function pressed(group: ChipGroup, value: string): boolean {
 ---
 
 <div class="rail-stack">
+  <h2 class="rail-title">Try it</h2>
   <div
     class:list={["response", !result.ok && "is-error"]}
     id="docs-response"
@@ -35,7 +38,7 @@ function pressed(group: ChipGroup, value: string): boolean {
         <button type="button" class="response__tab is-on" data-tab="chart" role="tab" aria-selected="true">Chart</button>
         <button type="button" class="response__tab" data-tab="json" role="tab" aria-selected="false">JSON</button>
       </div>
-      <span class="response__status" id="response-status">{result.status}</span>
+      <span class:list={["response__status", "validity", result.ok ? "is-ok" : "is-bad"]} id="response-status">{pill}</span>
     </div>
     <div class="response__body">
       <div class="response__panel" data-panel="chart">
@@ -43,7 +46,7 @@ function pressed(group: ChipGroup, value: string): boolean {
           <span class="response__title" id="response-title">{result.title}</span>
           <span class="response__badge" id="response-badge">{result.badge}</span>
         </div>
-        <div id="response-chart" set:html={result.svg} />
+        <div id="response-chart" set:html={drawn.svg || result.svg} />
         <ul id="response-errors" hidden={result.issues.length === 0}>
           {
             result.issues.map((issue) => (
@@ -66,33 +69,35 @@ function pressed(group: ChipGroup, value: string): boolean {
         <pre class="response__json" id="response-json">{json}</pre>
       </div>
     </div>
-  </div>
-  {
-    chips.length ? (
-      <div class="rail-options" role="group" aria-label="Spec options">
-        {
-          chips.map((group) => (
-            <div class="chip-row">
-              <span class="chip-row__label">{group.label}</span>
-              <div class="chip-row__opts">
-                {group.options.map((option) => (
-                  <button
-                    type="button"
-                    class:list={["spec-chip", pressed(group, option.value) && "is-on"]}
-                    data-key={group.key}
-                    data-value={option.value}
-                    aria-pressed={pressed(group, option.value) ? "true" : "false"}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+    {
+      chips.length ? (
+        <div class="rail-options" role="group" aria-label="Spec options">
+          {
+            chips.map((group) => (
+              <div class="chip-row">
+                <span class="chip-row__label">{group.label}</span>
+                <div class="chip-row__opts">
+                  {group.options.map((option) => (
+                    <button
+                      type="button"
+                      class:list={["spec-chip", pressed(group, option.value) && "is-on"]}
+                      data-key={group.key}
+                      data-value={option.value}
+                      aria-pressed={pressed(group, option.value) ? "true" : "false"}
+                    >
+                      {option.swatch ? <span class="spec-chip__dot" style={`background:${option.swatch}`} aria-hidden="true" /> : null}
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))
-        }
-      </div>
-    ) : null
-  }
+            ))
+          }
+        </div>
+      ) : null
+    }
+  </div>
+  <p class="rail-note">Drag the left edge to resize. This panel runs <code>validate()</code> then <code>render()</code> in the browser. It does not call Cloud.</p>
 </div>
 
 <script>

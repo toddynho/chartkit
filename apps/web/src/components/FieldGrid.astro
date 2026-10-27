@@ -1,0 +1,23 @@
+---
+import { galleryChartCount } from "../data/docs-catalog";
+
+const fields = [
+  { k: "version", v: 'Always "1"' },
+  { k: "type", v: `One of ${galleryChartCount} chart types` },
+  { k: "data", v: "Array of row objects" },
+  { k: "encoding", v: "Field → x, y, color, size" },
+  { k: "a11y.alt", v: "One factual sentence. Required" },
+  { k: "mark", v: "Options for the mark" },
+];
+---
+
+<div class="field-grid" aria-label="Spec fields">
+  {
+    fields.map((field) => (
+      <div class="field-card">
+        <code>{field.k}</code>
+        <p>{field.v}</p>
+      </div>
+    ))
+  }
+</div>

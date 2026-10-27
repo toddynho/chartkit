@@ -1,6 +1,7 @@
 ---
 import type { DocArticle } from "../data/docs-catalog";
 import { articleHref, articleSpec } from "../data/docs-catalog";
+import FieldGrid from "./FieldGrid.astro";
 import PageNav from "./PageNav.astro";
 import Prose from "./Prose.astro";
 import SpecEditor from "./SpecEditor.astro";
@@ -22,9 +23,20 @@ const canonical = articleHref(article);
     </p>
   ) : null
 }
-{article.tryIntro ? <p><Prose text={article.tryIntro} /></p> : null}
+{
+  article.slug === "" ? (
+    <>
+      <h2>Try it</h2>
+      <p>Edit the spec. The panel on the right validates and renders on every keystroke.</p>
+    </>
+  ) : article.tryIntro ? (
+    <p>
+      <Prose text={article.tryIntro} />
+    </p>
+  ) : null
+}
 <SpecEditor spec={articleSpec} />
-{article.slug === "" ? <StackSample heading /> : null}
+{article.slug === "" ? <StackSample heading pill oneLine /> : null}
 {
   article.sections.filter((section) => !(article.slug === "" && section.title === "Install")).map((section) => (
     <section>
@@ -43,9 +55,9 @@ const canonical = articleHref(article);
           ))}
         </ul>
       ) : null}
+      {section.title === "A valid spec" ? <FieldGrid /> : null}
       {section.code.map((code) => (
         <figure class="code">
-          <figcaption>sample</figcaption>
           <pre><code>{code}</code></pre>
         </figure>
       ))}

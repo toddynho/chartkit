@@ -116,10 +116,13 @@
 }
 
 .home-card {
+  display: flex;
+  flex-direction: column;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 20px;
+  min-height: 100%;
 }
 
 .home-card h2 { margin: 0 0 4px; font-size: 16px; letter-spacing: -0.01em; }
@@ -133,6 +136,12 @@
   padding: 3px;
   background: #ebebed;
   border-radius: 12px;
+}
+
+/* Matches the framework chip row so both dark wells start and end together. */
+.home-card__align {
+  height: 38px;
+  margin: 0 0 14px;
 }
 
 .home-card .stack-chip {
@@ -164,8 +173,16 @@ html[data-stack="vanilla"] .home-card .stack-chip[data-stack-chip="vanilla"] {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
-.home-card .stack-sample--quiet { margin: 0; }
-.home-card .stack-sample__block { position: relative; }
+.home-card .stack-sample,
+.home-card .prompt-block {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+}
+.home-card .stack-sample--quiet { margin: 0; flex: 1; }
+.home-card .stack-sample__block { position: relative; flex: 1; display: flex; flex-direction: column; }
+.home-card .stack-sample__block .code { flex: 1; display: flex; flex-direction: column; min-height: 248px; }
 .home-card .code { margin: 0; }
 .home-card .code figcaption {
   margin: 0;
@@ -186,6 +203,8 @@ html[data-stack="vanilla"] .home-card .stack-chip[data-stack-chip="vanilla"] {
   border-radius: 0 0 12px 12px;
   padding: 8px 16px 16px;
   white-space: pre-wrap;
+  flex: 1 1 auto;
+  min-height: 220px;
 }
 .home-card .code-copy {
   position: absolute;
@@ -199,7 +218,7 @@ html[data-stack="vanilla"] .home-card .stack-chip[data-stack-chip="vanilla"] {
   height: 24px;
 }
 
-.prompt-block { position: relative; background: var(--ck-code-bg); border-radius: 12px; }
+.prompt-block { position: relative; background: var(--ck-code-bg); border-radius: 12px; min-height: 280px; }
 .prompt-block__bar {
   display: flex;
   justify-content: space-between;
@@ -239,10 +258,14 @@ html[data-stack="vanilla"] .home-card .stack-chip[data-stack-chip="vanilla"] {
   border-radius: 16px;
   overflow: hidden;
 }
+.carousel-stage {
+  height: 480px;
+}
 .carousel-slide {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  min-height: 360px;
+  height: 100%;
+  min-height: 0;
 }
 .carousel-slide[hidden] { display: none; }
 .carousel-spec {
@@ -250,6 +273,10 @@ html[data-stack="vanilla"] .home-card .stack-chip[data-stack-chip="vanilla"] {
   color: var(--ck-code-fg);
   padding: 22px 24px;
   min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 .carousel-spec__bar {
   display: flex;
@@ -269,7 +296,9 @@ html[data-stack="vanilla"] .home-card .stack-chip[data-stack-chip="vanilla"] {
   font-size: 12.5px;
   line-height: 1.7;
   white-space: pre-wrap;
-  max-height: 420px;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
   overflow: auto;
 }
 .carousel-view {
@@ -277,7 +306,9 @@ html[data-stack="vanilla"] .home-card .stack-chip[data-stack-chip="vanilla"] {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 360px;
+  min-height: 0;
+  height: 100%;
+  overflow: visible;
 }
 .carousel-view__head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
 .carousel-view h2 { margin: 0; font-size: 16px; }
@@ -288,10 +319,11 @@ html[data-stack="vanilla"] .home-card .stack-chip[data-stack-chip="vanilla"] {
   text-transform: uppercase;
   color: var(--muted);
 }
-.carousel-view__sub { margin: 0 0 18px; color: var(--ink-2); font-size: 13px; }
-.carousel-chart { flex: 1; min-height: 220px; display: flex; align-items: center; }
+.carousel-view__sub { margin: 4px 0 12px; color: var(--ink-2); font-size: 13px; }
+.carousel-chart { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.carousel-chart__host { flex: 1; min-height: 0; display: flex; align-items: center; }
 .carousel-chart .ck-svg,
-.carousel-chart svg { display: block; width: 100%; height: auto; }
+.carousel-chart svg { display: block; width: 100%; height: 100%; max-height: 100%; }
 .carousel-chart.is-in { animation: ck-rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
 @keyframes ck-rise {
   from { opacity: 0; transform: translateY(6px); }
@@ -995,7 +1027,9 @@ html[data-stack="vanilla"] .home-card .stack-chip[data-stack-chip="vanilla"] {
 
 @media (max-width: 860px) {
   .v2-h1, .v2-h1--54, .v2-h1--50 { font-size: 40px; }
+  .carousel-stage { height: 760px; }
   .carousel-slide, .split, .compare-hero, .cta-band, .tally-grid { grid-template-columns: 1fr; }
+  .carousel-slide { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
   .show-tile, .show-tile--short { height: auto; min-height: 380px; }
   .give-row { grid-template-columns: 1fr; }
 }
