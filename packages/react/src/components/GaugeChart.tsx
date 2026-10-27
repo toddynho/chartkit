@@ -64,7 +64,7 @@ export function GaugeChart({
   min = 0,
   max = 100,
   size = 200,
-  strokeWidth = 16,
+  strokeWidth,
   theme,
   startAngle = -135,
   endAngle = 135,
@@ -80,10 +80,11 @@ export function GaugeChart({
   style,
 }: GaugeChartProps) {
   const t = themes[theme];
+  const arcWidth = strokeWidth ?? Math.min(28, Math.max(18, size * 0.11));
 
   const center = size / 2;
-  const radius = (size - strokeWidth * 2 - 20) / 2; // Extra padding for labels
-  const innerRadius = radius - strokeWidth / 2;
+  const radius = (size - arcWidth * 2 - 36) / 2; // Extra padding for labels
+  const innerRadius = radius - arcWidth / 2;
 
   // Calculate the total angle span
   const angleSpan = endAngle - startAngle;
@@ -119,12 +120,12 @@ export function GaugeChart({
       const angle = valueToAngle(tickValue);
       const angleRad = ((angle - 90) * Math.PI) / 180;
 
-      const innerX = center + (radius - strokeWidth / 2 - 4) * Math.cos(angleRad);
-      const innerY = center + (radius - strokeWidth / 2 - 4) * Math.sin(angleRad);
-      const outerX = center + (radius + strokeWidth / 2 + 2) * Math.cos(angleRad);
-      const outerY = center + (radius + strokeWidth / 2 + 2) * Math.sin(angleRad);
-      const labelX = center + (radius + strokeWidth / 2 + 14) * Math.cos(angleRad);
-      const labelY = center + (radius + strokeWidth / 2 + 14) * Math.sin(angleRad);
+      const innerX = center + (radius + arcWidth / 2 + 2) * Math.cos(angleRad);
+      const innerY = center + (radius + arcWidth / 2 + 2) * Math.sin(angleRad);
+      const outerX = center + (radius + arcWidth / 2 + 9) * Math.cos(angleRad);
+      const outerY = center + (radius + arcWidth / 2 + 9) * Math.sin(angleRad);
+      const labelX = center + (radius + arcWidth / 2 + 20) * Math.cos(angleRad);
+      const labelY = center + (radius + arcWidth / 2 + 20) * Math.sin(angleRad);
 
       result.push({
         value: tickValue,
@@ -137,11 +138,11 @@ export function GaugeChart({
       });
     }
     return result;
-  }, [min, max, tickCount, radius, strokeWidth, center]);
+  }, [min, max, tickCount, radius, arcWidth, center, startAngle, endAngle]);
 
-  // Calculate needle position
+  // Calculate needle position — same angle as the value arc, ending on its inner edge.
   const needleAngleRad = ((currentAngle - 90) * Math.PI) / 180;
-  const needleLength = radius - strokeWidth / 2 - 8;
+  const needleLength = innerRadius;
   const needleX = center + needleLength * Math.cos(needleAngleRad);
   const needleY = center + needleLength * Math.sin(needleAngleRad);
 
@@ -163,10 +164,12 @@ export function GaugeChart({
     if (target === undefined) return null;
     const angle = valueToAngle(target);
     const angleRad = ((angle - 90) * Math.PI) / 180;
-    const x = center + radius * Math.cos(angleRad);
-    const y = center + radius * Math.sin(angleRad);
-    return { x, y, angle };
-  }, [target, radius, center]);
+    const x1 = center + (radius + arcWidth / 2 + 2) * Math.cos(angleRad);
+    const y1 = center + (radius + arcWidth / 2 + 2) * Math.sin(angleRad);
+    const x2 = center + (radius + arcWidth / 2 + 12) * Math.cos(angleRad);
+    const y2 = center + (radius + arcWidth / 2 + 12) * Math.sin(angleRad);
+    return { x1, y1, x2, y2 };
+  }, [target, radius, arcWidth, center, startAngle, endAngle, min, max]);
 
   const containerStyle: CSSProperties = {
     position: 'relative',
@@ -177,27 +180,28 @@ export function GaugeChart({
 
   return (
     <div className={className} style={containerStyle}>
-      <svg width={size} height={size} style={{ marginTop: -size * 0.15 }}>
+      <svg width={size} height={size} style={{ marginTop: -size * 0.15 }} data-ck-target={target}>
         {/* Background arc */}
         <path
           d={describeArc(startAngle, endAngle, radius)}
           fill="none"
           stroke={t.gridLine}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
+          strokeWidth={arcWidth}
+          strokeLinecap="butt"
         />
 
         {/* Range segments (if provided) */}
         {ranges?.map((range, i) => {
           const rangeStart = valueToAngle(Math.max(min, range.min));
           const rangeEnd = valueToAngle(Math.min(max, range.max));
+          const bandRadius = radius - arcWidth / 2 - 6;
           return (
             <path
               key={i}
-              d={describeArc(rangeStart, rangeEnd, radius)}
+              d={describeArc(rangeStart, rangeEnd, bandRadius)}
               fill="none"
               stroke={range.color}
-              strokeWidth={strokeWidth}
+              strokeWidth={Math.max(3, arcWidth * 0.28)}
               strokeLinecap="butt"
               opacity={0.3}
             />
@@ -209,8 +213,8 @@ export function GaugeChart({
           d={describeArc(startAngle, currentAngle, radius)}
           fill="none"
           stroke={valueColor}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
+          strokeWidth={arcWidth}
+          strokeLinecap="butt"
           style={{ transition: 'all 0.5s ease-out' }}
         />
 
@@ -241,18 +245,18 @@ export function GaugeChart({
             </g>
           ))}
 
-        {/* Target marker */}
+        {/* Target is a tick on the scale, not a floating handle. */}
         {targetMarker && (
-          <g>
-            <circle
-              cx={targetMarker.x}
-              cy={targetMarker.y}
-              r={6}
-              fill={t.bgCard}
-              stroke={t.accent}
-              strokeWidth={2}
-            />
-          </g>
+          <line
+            x1={targetMarker.x1}
+            y1={targetMarker.y1}
+            x2={targetMarker.x2}
+            y2={targetMarker.y2}
+            stroke={t.text}
+            strokeWidth={1.75}
+          >
+            <title>{`Target ${format(target ?? 0)}`}</title>
+          </line>
         )}
 
         {/* Needle */}
@@ -293,7 +297,7 @@ export function GaugeChart({
           <>
             <div
               style={{
-                fontSize: size * 0.15,
+                fontSize: size * 0.2,
                 fontWeight: 700,
                 fontFamily: 'JetBrains Mono, monospace',
                 color: valueColor,
@@ -304,9 +308,9 @@ export function GaugeChart({
             {label && (
               <div
                 style={{
-                  fontSize: size * 0.07,
+                  fontSize: 12,
                   color: t.textSecondary,
-                  marginTop: '4px',
+                  marginTop: 10,
                 }}
               >
                 {label}
