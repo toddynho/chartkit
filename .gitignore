@@ -33,6 +33,8 @@ coverage/
 bench/last-run.json
 bench/.out/
 bench/results/partial.json
+bench/results/paint-smoke.json
+bench/results/paint-checkpoint.jsonl
 bench/results/agent/conditions/
 scripts/.interact-out/
 scripts/design/.out/

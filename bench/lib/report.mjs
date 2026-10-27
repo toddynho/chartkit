@@ -65,6 +65,8 @@ export function renderReport(result) {
   lines.push("");
   lines.push(browserVerdict(result.browser.rows));
   lines.push("");
+  lines.push(...chartPaintLines(result.browser));
+  lines.push("");
   const frameNote = updateFrameNote(result.browser.rows);
   if (frameNote) {
     lines.push(frameNote);
@@ -144,6 +146,37 @@ export function renderReport(result) {
   lines.push("Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` limits a run. `BENCH_DOCS=none` (the default) is the no-docs condition: one paragraph per library. `BENCH_DOCS=official` prepends that library's own doc. A finished run is also written to `bench/results/agent/conditions/`, which is gitignored local scratch and is not the published scoreboard. A failed validate, render, compile, or library-use check is sent back once.");
   lines.push("");
   return lines.join("\n");
+}
+
+function chartPaintLines(browser) {
+  const charts = browser?.charts;
+  if (!charts) return [];
+  const lines = ["### ChartKit chart types", ""];
+  if (browser.chartMethod) {
+    lines.push(browser.chartMethod);
+    lines.push("");
+  }
+  lines.push("Homepage row `area` is native `stacked-area`. `gzipBytes` and `ssrMs` are null until a later phase. A full run writes the same cells to `bench/results/latest.json` under `browser.charts` and to `bench/results/paint.json`. One-sample runs write `bench/results/paint-smoke.json` and are not published medians.");
+  lines.push("");
+  lines.push("| Chart | Homepage | Library | Variant | Renderer | N | Status | Initial ms | Update ms | gzip | SSR ms | N means |");
+  lines.push("|---|---|---|---|---|---:|---|---:|---:|---:|---:|---|");
+  for (const row of charts) {
+    const gzip = row.gzipBytes == null ? "—" : String(row.gzipBytes);
+    const ssr = row.ssrMs == null ? "—" : ms(row.ssrMs);
+    const detail = row.status === "ok" ? (row.nMeaning ?? "") : `${row.nMeaning ?? ""}${row.error ? ` (${row.error})` : ""}`;
+    const note = detail.replaceAll("|", "/").replace(/\s+/g, " ").trim();
+    lines.push(`| ${row.chart ?? row.id} | ${row.homepageRow ?? "—"} | ${row.library ?? row.id} | ${row.variant ?? "—"} | ${row.renderer ?? "—"} | ${row.points} | ${row.status} | ${ms(row.initialMs)} | ${ms(row.updateMs)} | ${gzip} | ${ssr} | ${note} |`);
+  }
+  lines.push("");
+  if (charts.length === 0) {
+    lines.push("No chart-type cells in this run.");
+    return lines;
+  }
+  const failed = charts.filter((row) => row.status !== "ok");
+  lines.push(failed.length
+    ? `Chart-type cells that are not ok: ${failed.map((row) => `${row.chart} n=${row.points} ${row.status}`).join(", ")}.`
+    : "Every chart-type cell in this run is ok.");
+  return lines;
 }
 
 function bundleVerdict(rows) {
