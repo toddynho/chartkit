@@ -595,10 +595,7 @@ function toModel(
   let x: ArrayLike<number | null> | null = null;
   let xTemporal = false;
   if (table.kind === "numbers") {
-    const count = table.length;
-    const indexes = new Float64Array(count);
-    for (let i = 0; i < count; i++) indexes[i] = i;
-    x = indexes;
+    x = indexAxis(table.length);
   } else if (shell.xField && table.columns[shell.xField]) {
     const raw = table.columns[shell.xField];
     if (shell.continuousX && (isTypedArray(raw) || columnNumeric(raw))) {
@@ -999,6 +996,7 @@ function appendLineSeries(
       }
     }
     if (points.length === 0) continue;
+    if (area && points.length > 48 && flatY(bottoms)) collapseArea(points, bottoms);
     const v0 = ys[kept[0]];
     const v1 = ys[kept[kept.length - 1]];
     const log = series.axis === "y2" ? model.y2Log : model.yLog;
@@ -2551,6 +2549,7 @@ function floatExtent(values: Float64Array): { min: number; max: number; dense: b
 function linearExtent(values: Float64Array): { min: number; max: number; linear: boolean } | null {
   const count = values.length;
   if (count === 0) return null;
+  if (indexAxes.has(values)) return { min: 0, max: Math.max(0, count - 1), linear: true };
   let min = Infinity;
   let max = -Infinity;
   const first = values[0];
@@ -2802,9 +2801,58 @@ function linePath(points: Pt[], curve: Curve): string {
 function areaPath(top: Pt[], bottom: Pt[], curve: Curve): string {
   if (top.length === 0) return "";
   const forward = linePath(top, curve);
+  if (flatY(bottom) && top.length > 1) {
+    const y = bottom[0].y;
+    return `${forward} L ${n(top[top.length - 1].x)} ${n(y)} L ${n(top[0].x)} ${n(y)} Z`;
+  }
   const back = [...bottom].reverse();
   const backward = linePath(back, curve).replace(/^M/, "L");
   return `${forward} ${backward} Z`;
+}
+
+function flatY(points: Pt[]): boolean {
+  if (points.length < 2) return false;
+  const y = points[0].y;
+  for (let i = 1; i < points.length; i++) if (points[i].y !== y) return false;
+  return true;
+}
+
+/** One vertex per pixel column, the one farthest from the baseline. */
+function collapseArea(top: Pt[], bottom: Pt[]): void {
+  if (top.length < 2 || bottom.length !== top.length) return;
+  const base = bottom[0].y;
+  const edge: Pt[] = [];
+  let last = NaN;
+  let best = top[0];
+  let bestD = -1;
+  const flush = () => {
+    if (last !== last) return;
+    edge.push(best);
+  };
+  for (let i = 0; i < top.length; i++) {
+    const point = top[i];
+    const col = Math.round(point.x);
+    if (col !== last) {
+      flush();
+      last = col;
+      best = point;
+      bestD = Math.abs(point.y - base);
+      continue;
+    }
+    const dist = Math.abs(point.y - base);
+    if (dist >= bestD) {
+      bestD = dist;
+      best = point;
+    }
+  }
+  flush();
+  if (edge.length < 2) return;
+  top.length = 0;
+  bottom.length = 0;
+  for (let i = 0; i < edge.length; i++) {
+    top.push(edge[i]);
+    bottom.push({ x: edge[i].x, y: base });
+  }
 }
 
 /**
@@ -3599,7 +3647,27 @@ export function tickText(values: number[], model: PlotModel, format: unknown): s
 
 function asNumbers(column: ArrayLike<unknown>): ArrayLike<number | null> {
   if (isTypedArray(column)) return column as ArrayLike<number | null>;
+  if (Array.isArray(column)) {
+    for (let i = 0; i < column.length; i++) {
+      const value = column[i];
+      if (value !== null && typeof value !== "number") return mapNumbers(column, toNullableNumber);
+    }
+    return column as (number | null)[];
+  }
   return mapNumbers(column, toNullableNumber);
+}
+
+const indexAxes = new WeakSet<Float64Array>();
+let indexAxisCache: Float64Array | null = null;
+
+/** x[i] = i. Reused for the same length so a second paint does not fill it again. */
+function indexAxis(count: number): Float64Array {
+  if (indexAxisCache && indexAxisCache.length === count) return indexAxisCache;
+  const indexes = new Float64Array(count);
+  for (let i = 0; i < count; i++) indexes[i] = i;
+  indexAxisCache = indexes;
+  indexAxes.add(indexes);
+  return indexes;
 }
 
 function mapNumbers(column: ArrayLike<unknown>, convert: (value: unknown) => number | null): (number | null)[] {

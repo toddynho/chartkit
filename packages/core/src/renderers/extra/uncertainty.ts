@@ -4,22 +4,23 @@ import type { DataTable } from "../../data";
 import { fieldOf } from "../../frame";
 import { cssVar, paint } from "../../theme";
 import { esc, font, isRecord, n } from "../../svg";
-import { bandPath, intervalLabel, nestedOpacity } from "../../range-band";
+import { dataSampling, readSamplingMode, samplingThreshold } from "../../sampling";
+import { bandPath, denseBand, denseLine, intervalLabel, nestedOpacity } from "../../range-band";
 import { axisLine, clip, domainTicks, fmt, gapOf, hGrid, num, openMark, plotBox, scaleOf, str, text, valueFormat, viewOf, xLabels, yLabels } from "./plot";
 
 interface Band {
   name: string;
   color: string;
   explicit: boolean;
-  lo: (number | null)[];
-  hi: (number | null)[];
+  lo: ArrayLike<number | null>;
+  hi: ArrayLike<number | null>;
   opacity: number;
 }
 
 interface Line {
   name: string;
   color: string;
-  values: (number | null)[];
+  values: ArrayLike<number | null>;
 }
 
 function titleOf(value: unknown, fallback: string): string {
@@ -39,8 +40,11 @@ function colorOf(value: unknown, preset: Parameters<typeof paint>[1], index: num
   return paint(color, preset, index);
 }
 
-function columnNums(table: DataTable, field: string | undefined): (number | null)[] {
+function columnNums(table: DataTable, field: string | undefined): ArrayLike<number | null> {
   if (!field) return [];
+  const values = table.columns[field];
+  if (!values) return [];
+  if (ArrayBuffer.isView(values) && !(values instanceof DataView)) return values as ArrayLike<number>;
   return num(table, field);
 }
 
@@ -147,6 +151,52 @@ function labelsOf(table: DataTable, field: string | undefined): string[] {
   return Array.from({ length: table.length }, (_, index) => (column ? str(column[index]) : String(index + 1)));
 }
 
+/** Six ticks, the same indexes `xLabels` would keep from a full category list. */
+function xTickLabels(
+  table: DataTable,
+  field: string | undefined,
+  count: number,
+  xAt: (index: number) => number,
+): { x: number; text: string }[] {
+  if (count < 1) return [];
+  const step = count > 8 ? Math.ceil(count / 6) : 1;
+  const column = field ? table.columns[field] : undefined;
+  const out: { x: number; text: string }[] = [];
+  for (let i = 0; i < count; i += step) out.push({ x: xAt(i), text: column ? str(column[i]) : String(i + 1) });
+  return out;
+}
+
+function notesWanted(spec: Record<string, unknown>): boolean {
+  if (Array.isArray(spec.annotations) && spec.annotations.length > 0) return true;
+  const axes = isRecord(spec.axes) ? spec.axes : undefined;
+  if (!axes) return false;
+  for (const key of ["x", "y", "y2"]) {
+    const node = axes[key];
+    if (isRecord(node) && node.bands != null && node.bands !== false) return true;
+  }
+  return false;
+}
+
+function midPoints(lo: ArrayLike<number | null>, hi: ArrayLike<number | null>): (number | null)[] {
+  const count = Math.min(lo.length, hi.length);
+  const out = new Array<number | null>(count);
+  for (let i = 0; i < count; i++) {
+    const a = lo[i];
+    const b = hi[i];
+    out[i] = a == null || b == null ? null : (a + b) / 2;
+  }
+  return out;
+}
+
+function maskValues(values: ArrayLike<number | null>, from: number, keepBefore: boolean): (number | null)[] {
+  const out = new Array<number | null>(values.length);
+  for (let i = 0; i < values.length; i++) {
+    const keep = keepBefore ? i <= from : i >= from;
+    out[i] = keep ? (values[i] ?? null) : null;
+  }
+  return out;
+}
+
 function legendRow(items: { name: string; color: string; opacity: number }[], x: number, y: number, fill: string): string {
   if (items.length < 2) return "";
   let cx = x;
@@ -174,7 +224,7 @@ function bandOnset(bands: Band[]): number {
   return start;
 }
 
-function linePath(values: (number | null)[], xAt: (index: number) => number, yAt: (value: number) => number): string {
+function linePath(values: ArrayLike<number | null>, xAt: (index: number) => number, yAt: (value: number) => number): string {
   let d = "";
   let open = false;
   for (let i = 0; i < values.length; i++) {
@@ -196,7 +246,10 @@ export function renderAreaRange(spec: Record<string, unknown>): string | null {
   const { bands, line } = readBands(frame.encoding, table, frame.preset);
   if (!bands.length) return null;
   const showLine = frame.mark.line !== false && line !== null;
-  const labels = labelsOf(table, fieldOf(frame.encoding.x));
+  const xField = fieldOf(frame.encoding.x);
+  const count = table.length;
+  const annotated = notesWanted(spec);
+  const labels = annotated ? labelsOf(table, xField) : [];
   const columns: ArrayLike<number | null>[] = [];
   for (const band of bands) {
     columns.push(band.lo, band.hi);
@@ -210,29 +263,29 @@ export function renderAreaRange(spec: Record<string, unknown>): string | null {
   const legendBelow = frame.legend === "bottom";
   if (legend.length > 1 && !legendBelow) box.top = Math.max(box.top, frame.title ? (frame.subtitle ? 72 : 58) : frame.subtitle ? 52 : 36 + (CHROME_TOP - 14));
   const yAt = scaleOf(y0, y1, box.bottom, box.top);
-  const slot = (box.right - box.left) / Math.max(1, labels.length);
+  const slot = (box.right - box.left) / Math.max(1, count);
   const xAt = (index: number) => box.left + slot * index + slot / 2;
-  const sampleYs = showLine && line
-    ? line.values
-    : bands[0]
-      ? bands[0].lo.map((lo, index) => {
-          const hi = bands[0].hi[index];
-          return lo === null || hi === null ? null : (lo + hi) / 2;
-        })
-      : [];
-  const notes = placedNotes(spec, frame, box, categoryX(labels, xAt), yAt, [
-    { name: line?.name ?? bands[0]?.name ?? "band", axis: "y", pts: seriesPoints(null, sampleYs) },
-  ], labels);
+  const notes = annotated
+    ? placedNotes(spec, frame, box, categoryX(labels, xAt), yAt, [
+        {
+          name: line?.name ?? bands[0]?.name ?? "band",
+          axis: "y",
+          pts: seriesPoints(null, showLine && line ? line.values : bands[0] ? midPoints(bands[0].lo, bands[0].hi) : []),
+        },
+      ], labels)
+    : { under: "", over: "" };
+  const mode = dataSampling(spec) ?? readSamplingMode(frame.mark.sampling);
+  const decimate = mode !== "none" && count > samplingThreshold(box.right - box.left) && frame.mark.strokeDash !== true;
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
-  parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: xAt(index), text: label })), box));
+  parts.push(xLabels(frame, spec, xTickLabels(table, xField, count, xAt), box));
   parts.push(axisLine(frame, box));
   if (legend.length > 1 && !legendBelow) parts.push(legendRow(legend, box.left, frame.title ? (frame.subtitle ? 56 : 40) : frame.subtitle ? 32 : CHROME_TOP, cssVar("text", frame.preset.text)));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
   parts.push(notes.under);
   for (const band of byWidth(bands)) {
-    const d = bandPath(band.lo, band.hi, xAt, yAt);
+    const d = (decimate ? denseBand(band.lo, band.hi, xAt, yAt) : null) ?? bandPath(band.lo, band.hi, xAt, yAt);
     if (!d) continue;
     const outline = frame.mark.stroke === true ? ` stroke="${band.color}" stroke-width="1.25" stroke-linejoin="round"` : ` stroke="none"`;
     parts.push(`<path d="${d}" fill="${band.color}" fill-opacity="${n(band.opacity)}"${outline} data-ck-mark="band" data-ck-series="${esc(band.name)}" aria-label="${esc(band.name)}"><title>${esc(band.name)}</title></path>`);
@@ -242,12 +295,12 @@ export function renderAreaRange(spec: Record<string, unknown>): string | null {
     const from = bandOnset(bands);
     const segments = dash && from > 0 && from < line.values.length
       ? [
-          { values: line.values.map((value, index) => (index <= from ? value : null)), dashed: false },
-          { values: line.values.map((value, index) => (index >= from ? value : null)), dashed: true },
+          { values: maskValues(line.values, from, true), dashed: false },
+          { values: maskValues(line.values, from, false), dashed: true },
         ]
       : [{ values: line.values, dashed: dash }];
     for (const segment of segments) {
-      const d = linePath(segment.values, xAt, yAt);
+      const d = (decimate && !segment.dashed ? denseLine(segment.values, xAt, yAt) : null) ?? linePath(segment.values, xAt, yAt);
       if (!d) continue;
       const pattern = segment.dashed ? ' stroke-dasharray="6 4"' : "";
       parts.push(`<path d="${d}" fill="none" stroke="${line.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"${pattern} data-ck-mark="line" data-ck-series="${esc(line.name)}" />`);

@@ -14,6 +14,18 @@ export const CANVAS_TYPES = new Set(["line", "stacked-area", "scatter", "bar", "
  */
 export const CANVAS_AT = 100_000;
 
+/**
+ * A scatter past this many points paints on canvas unless `render` is `"svg"`.
+ * One circle per point is what made 100k scatter ~28× behind canvas rivals.
+ */
+export const SCATTER_CANVAS_AT = 4_000;
+
+/**
+ * A heatmap past this many cells paints those cells on canvas unless `render` is `"svg"`.
+ * Axes and the legend stay in the SVG.
+ */
+export const HEATMAP_CANVAS_AT = 800;
+
 export type RenderMode = "svg" | "canvas" | "auto";
 
 export function readRender(value: unknown): RenderMode {
@@ -35,10 +47,15 @@ export function pointCount(data: unknown): number {
 }
 
 export function canvasWanted(spec: { type?: unknown; render?: unknown; data?: unknown }): boolean {
-  const mode = readRender(spec.render);
-  if (mode === "svg") return false;
   const type = typeof spec.type === "string" ? spec.type : "";
-  if (!CANVAS_TYPES.has(type)) return false;
-  if (mode === "canvas") return true;
-  return pointCount(spec.data) >= CANVAS_AT;
+  const mode = readRender(spec.render);
+  if (mode === "canvas") return CANVAS_TYPES.has(type);
+  if (mode === "auto") return CANVAS_TYPES.has(type) && pointCount(spec.data) >= CANVAS_AT;
+  // Explicit `render: "svg"` stays on SVG. An omitted mode still uses canvas for
+  // marks that cannot be one node per point.
+  if (spec.render != null) return false;
+  const n = pointCount(spec.data);
+  if (type === "scatter" && n >= SCATTER_CANVAS_AT) return true;
+  if (type === "heatmap" && n >= HEATMAP_CANVAS_AT) return true;
+  return false;
 }

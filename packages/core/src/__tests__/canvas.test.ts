@@ -8,7 +8,7 @@ import { renderCandlestick } from "../renderers/candlestick";
 import { renderHeatmap } from "../renderers/heatmap";
 import { renderScatter } from "../renderers/scatter";
 import { renderStackedArea } from "../renderers/cartesian";
-import { CANVAS_AT } from "../render-mode";
+import { CANVAS_AT, SCATTER_CANVAS_AT, canvasWanted } from "../render-mode";
 import { repair, validate } from "../validate";
 
 const alt = "The series is drawn.";
@@ -194,6 +194,39 @@ describe("large-data warnings", () => {
     const columnar = line({ data: { columns: { x: big.data.map((row) => row.x), y: big.data.map((row) => row.y) }, sampling: "none" } }, CANVAS_AT);
     const other = validate(columnar).warnings.find((item) => item.code === "CK3032");
     expect(other?.path).toBe("/data/sampling");
+  });
+
+  it("paints a dense scatter on the canvas scene instead of one circle per row", () => {
+    const n = SCATTER_CANVAS_AT;
+    const x = new Float64Array(n);
+    const y = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      x[i] = i;
+      y[i] = (i % 17) + 10;
+    }
+    const spec = {
+      version: "1",
+      type: "scatter",
+      data: { columns: { x, y } },
+      encoding: { x: "x", y: "y" },
+      a11y: { alt },
+      size: { width: 640, height: 360 },
+    };
+    expect(canvasWanted(spec)).toBe(true);
+    expect(canvasWanted({ ...spec, render: "svg" })).toBe(false);
+    expect(canvasWanted({ ...spec, data: { columns: { x: x.slice(0, 12), y: y.slice(0, 12) } } })).toBe(false);
+    const scene = beginScene();
+    try {
+      const svg = renderScatter(spec) ?? "";
+      expect(svg).toContain('data-ck-render="canvas"');
+      expect(svg).toContain('data-ck-scene="1"');
+      expect(svg).not.toContain("<circle");
+      expect(scene.marks[0]?.kind).toBe("scatter");
+      expect(scene.marks[0]?.n).toBe(n);
+      expect(scene.marks[0]?.fills).toBeNull();
+    } finally {
+      endScene();
+    }
   });
 
   it("warns CK3033 for canvas on a type without a painter", () => {

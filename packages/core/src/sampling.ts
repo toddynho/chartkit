@@ -222,7 +222,8 @@ function sampleDense(
   const len = end - start;
   const cap = Math.max(2, target);
   if (len <= cap) return copyRange(start, end);
-  if (mode === "minmax" && ys instanceof Float64Array && (xs === null || notedLinear(xs))) return minmaxIndex(ys, start, end, cap);
+  // Index buckets match an arithmetic x. A plain number[] (mini-area) uses them too.
+  if (mode === "minmax" && (xs === null || notedLinear(xs))) return minmaxIndex(ys as ArrayLike<number>, start, end, cap);
   if (mode === "minmax" && xs instanceof Float64Array && ys instanceof Float64Array) {
     const walked = minmaxSorted(xs, ys, start, end, cap);
     if (walked) return walked;
@@ -268,7 +269,7 @@ function minmaxSorted(xs: Float64Array, ys: Float64Array, start: number, end: nu
  * Min/max inside equal index buckets. Matches x-based buckets when x is linear in the index.
  * Ties keep the earlier point. The first and last indexes are always kept.
  */
-function minmaxIndex(ys: Float64Array, start: number, end: number, target: number): Int32Array {
+function minmaxIndex(ys: ArrayLike<number>, start: number, end: number, target: number): Int32Array {
   const last = end - 1;
   const len = last - start;
   const buckets = Math.max(1, Math.floor((target - 2) / 2));

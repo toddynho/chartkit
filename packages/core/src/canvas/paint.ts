@@ -295,7 +295,7 @@ function drawMark(svg: SVGSVGElement, ctx: CanvasRenderingContext2D, mark: Scene
     return;
   }
   if (mark.kind === "scatter") {
-    drawScatter(svg, ctx, mark);
+    drawScatter(svg, ctx, mark, plot);
     return;
   }
   if (mark.n < 1) return;
@@ -307,9 +307,12 @@ function drawMark(svg: SVGSVGElement, ctx: CanvasRenderingContext2D, mark: Scene
   ctx.setLineDash(dashOf(mark.dash));
   if (mark.kind === "area") {
     ctx.beginPath();
-    trace(ctx, mark);
+    const edge = mark.n > 64 ? traceEnvelope(ctx, mark) : (trace(ctx, mark), null);
     if (mark.rectN > 0) {
       for (let i = mark.rectN - 1; i >= 0; i--) ctx.lineTo(mark.x[i], mark.rects[i]);
+    } else if (mark.baseline !== null && edge) {
+      ctx.lineTo(edge.x1, mark.baseline);
+      ctx.lineTo(edge.x0, mark.baseline);
     } else if (mark.baseline !== null) {
       ctx.lineTo(mark.x[mark.n - 1], mark.baseline);
       ctx.lineTo(mark.x[0], mark.baseline);
@@ -329,9 +332,59 @@ function drawMark(svg: SVGSVGElement, ctx: CanvasRenderingContext2D, mark: Scene
     ctx.globalAlpha = 1;
   }
   ctx.beginPath();
-  trace(ctx, mark);
+  if (mark.kind === "area" && mark.n > 64) traceEnvelope(ctx, mark);
+  else trace(ctx, mark);
   ctx.strokeStyle = stroke;
   ctx.stroke();
+}
+
+/** One y per pixel column, the sample farthest from the baseline. A min/max zigzag fill is a self-intersecting polygon and rasterizes very slowly. */
+function traceEnvelope(ctx: CanvasRenderingContext2D, mark: SceneMark): { x0: number; x1: number } | null {
+  const n = mark.n;
+  const baseline = mark.baseline;
+  let x0 = 0;
+  let x1 = 0;
+  let have = false;
+  let last = NaN;
+  let bestX = 0;
+  let bestY = 0;
+  let bestD = -1;
+  const flush = () => {
+    if (last !== last) return;
+    if (!have) {
+      ctx.moveTo(bestX, bestY);
+      x0 = bestX;
+      have = true;
+    } else ctx.lineTo(bestX, bestY);
+    x1 = bestX;
+  };
+  for (let i = 0; i < n; i++) {
+    const x = mark.x[i];
+    const y = mark.y[i];
+    if (x !== x || y !== y) {
+      flush();
+      last = NaN;
+      bestD = -1;
+      continue;
+    }
+    const col = Math.round(x);
+    if (col !== last) {
+      flush();
+      last = col;
+      bestX = x;
+      bestY = y;
+      bestD = baseline === null ? 0 : Math.abs(y - baseline);
+      continue;
+    }
+    const dist = baseline === null ? 0 : Math.abs(y - baseline);
+    if (dist >= bestD) {
+      bestD = dist;
+      bestX = x;
+      bestY = y;
+    }
+  }
+  flush();
+  return have ? { x0, x1 } : null;
 }
 
 function renderDirectScene(spec: Record<string, unknown>, reuseKey: string): { svg: string; frame: SceneFrame } | null {
@@ -354,11 +407,24 @@ function renderDirectScene(spec: Record<string, unknown>, reuseKey: string): { s
   }
 }
 
-function drawScatter(svg: SVGSVGElement, ctx: CanvasRenderingContext2D, mark: SceneMark): void {
+let dotLayer: HTMLCanvasElement | null = null;
+
+function drawScatter(
+  svg: SVGSVGElement,
+  ctx: CanvasRenderingContext2D,
+  mark: SceneMark,
+  plot: NonNullable<SceneFrame["plot"]>,
+): void {
   const shape = mark.shape || "circle";
-  for (let i = 0; i < mark.n; i++) {
+  const n = mark.n;
+  if (n < 1 || shape === "none") return;
+  if (!mark.hollow && shape === "circle" && sameDot(mark)) {
+    drawDotLayer(svg, ctx, mark, plot);
+    return;
+  }
+  for (let i = 0; i < n; i++) {
     const r = mark.rects[i] || 0;
-    if (r <= 0 || shape === "none") continue;
+    if (r <= 0) continue;
     const color = paintOf(svg, mark.fills?.[i] || mark.color);
     const x = mark.x[i];
     const y = mark.y[i];
@@ -375,6 +441,72 @@ function drawScatter(svg: SVGSVGElement, ctx: CanvasRenderingContext2D, mark: Sc
       ctx.globalAlpha = 1;
     }
   }
+}
+
+function sameDot(mark: SceneMark): boolean {
+  const n = mark.n;
+  const r = mark.rects[0] || 0;
+  if (!(r > 0)) return false;
+  const fills = mark.fills;
+  const color = fills?.[0];
+  for (let i = 1; i < n; i++) {
+    if ((mark.rects[i] || 0) !== r) return false;
+    if (fills && fills[i] !== color) return false;
+  }
+  return true;
+}
+
+/**
+ * One offscreen layer, then a single blit. Each dot is its own fill so overlap
+ * stacks; a single compound path would union them and hide the density.
+ * Marks at or under 3 device pixels are rects. Larger marks stay circles.
+ */
+function drawDotLayer(
+  svg: SVGSVGElement,
+  ctx: CanvasRenderingContext2D,
+  mark: SceneMark,
+  plot: NonNullable<SceneFrame["plot"]>,
+): void {
+  const transform = ctx.getTransform();
+  const scaleX = transform.a > 0 ? transform.a : 1;
+  const scaleY = transform.d > 0 ? transform.d : 1;
+  const plotW = Math.max(1, plot.right - plot.left);
+  const plotH = Math.max(1, plot.bottom - plot.top);
+  const width = Math.max(1, Math.round(plotW * scaleX));
+  const height = Math.max(1, Math.round(plotH * scaleY));
+  if (!dotLayer) dotLayer = document.createElement("canvas");
+  if (dotLayer.width !== width) dotLayer.width = width;
+  if (dotLayer.height !== height) dotLayer.height = height;
+  const layer = dotLayer.getContext("2d");
+  if (!layer) return;
+  layer.setTransform(1, 0, 0, 1, 0, 0);
+  layer.clearRect(0, 0, width, height);
+  const color = paintOf(svg, mark.fills?.[0] || mark.color);
+  const radius = (mark.rects[0] || 0) * scaleX;
+  layer.fillStyle = color;
+  layer.globalAlpha = mark.fillOpacity;
+  const n = mark.n;
+  const xs = mark.x;
+  const ys = mark.y;
+  if (radius <= 3) {
+    const d = Math.max(1, radius * 2);
+    for (let i = 0; i < n; i++) {
+      layer.fillRect((xs[i] - plot.left) * scaleX - radius, (ys[i] - plot.top) * scaleY - radius, d, d);
+    }
+  } else {
+    for (let i = 0; i < n; i++) {
+      const x = (xs[i] - plot.left) * scaleX;
+      const y = (ys[i] - plot.top) * scaleY;
+      layer.beginPath();
+      layer.arc(x, y, radius, 0, Math.PI * 2);
+      layer.fill();
+    }
+  }
+  layer.globalAlpha = 1;
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.drawImage(dotLayer, plot.left * scaleX, plot.top * scaleY);
+  ctx.restore();
 }
 
 function traceGlyph(ctx: CanvasRenderingContext2D, shape: string, x: number, y: number, r: number): void {
@@ -736,18 +868,41 @@ function hitFor(frame: SceneFrame): DataHit | null {
   return hit;
 }
 
+let identityDots: Int32Array | null = null;
+
+function identityIndex(n: number): Int32Array {
+  if (!identityDots || identityDots.length < n) {
+    const next = new Int32Array(Math.max(n, (identityDots?.length ?? 256) * 2));
+    for (let i = 0; i < next.length; i++) next[i] = i;
+    identityDots = next;
+  }
+  return identityDots.subarray(0, n);
+}
+
 function scatterHit(frame: SceneFrame, mark: SceneMark, plot: NonNullable<SceneFrame["plot"]>): DataHit {
   const n = mark.n;
-  const px = new Float32Array(n);
-  const py = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    px[i] = mark.x[i];
-    py[i] = mark.y[i];
-  }
   const plotWidth = plot.right - plot.left || 1;
   const plotHeight = plot.bottom - plot.top || 1;
-  const index = mark.indexes ?? new Int32Array(n);
-  const grid = buildScatterGrid(px, py, n, mark.fills ?? [], mark.names ?? [], index, plot.left, plot.top, plotWidth, plotHeight);
+  let grid: ReturnType<typeof buildScatterGrid> | null = null;
+  const ensure = () => {
+    if (grid) return grid;
+    const px = new Float32Array(n);
+    const py = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      px[i] = mark.x[i];
+      py[i] = mark.y[i];
+    }
+    const index = mark.indexes ?? identityIndex(n);
+    grid = buildScatterGrid(px, py, n, mark.fills ?? [], mark.names ?? [], index, plot.left, plot.top, plotWidth, plotHeight);
+    return grid;
+  };
+  const nearest = (x: number, y: number, radius?: number) => {
+    const found = nearestScatter(ensure(), x, y, radius);
+    if (!found) return null;
+    if (!found.color) found.color = mark.color;
+    if (!found.name) found.name = mark.name || "y";
+    return found;
+  };
   return {
     kind: "scatter",
     count: frame.count || n,
@@ -762,14 +917,15 @@ function scatterHit(frame: SceneFrame, mark: SceneMark, plot: NonNullable<SceneF
     stride: 0,
     xs: null,
     series: [],
-    grid,
-    nearest: (x, y) => nearestScatter(grid, x, y),
+    nearest: (x, y) => nearest(x, y),
     indexAt: (at) => {
-      const found = nearestScatter(grid, at, plot.top + plotHeight / 2, Math.max(plotWidth, plotHeight));
+      const found = nearest(at, plot.top + plotHeight / 2, Math.max(plotWidth, plotHeight));
       return found ? found.index : 0;
     },
     pixelAt: (at) => {
-      for (let i = 0; i < n; i++) if (index[i] === at) return px[i];
+      const built = ensure();
+      const index = built.index;
+      for (let i = 0; i < n; i++) if (index[i] === at) return built.px[i];
       return plot.left;
     },
   };

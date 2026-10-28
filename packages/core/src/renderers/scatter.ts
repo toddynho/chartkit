@@ -21,11 +21,13 @@ import {
   wantsZero,
 } from "../frame";
 import { activeScene, lineBuffers, rectBuffers, takeMark, type SceneMark } from "../canvas/sink";
-import { canvasWanted } from "../render-mode";
+import { canvasWanted, SCATTER_CANVAS_AT } from "../render-mode";
 import { boxId, clipPath, closeChart, domainEnds, esc, font, isRecord, linear, logNice, logScale, logTicks, n, openChart, padExtent, pickTicks, readAxis, readInset, scaleClamp, scalePad } from "../svg";
 
 /** Scatter / bubble. encoding.x and encoding.y are quantitative; size and color are optional. */
 export function renderScatter(spec: Record<string, unknown>): string | null {
+  const dense = renderDenseScatter(spec);
+  if (dense !== undefined) return dense;
   const table = readTable(spec);
   if (!table) return null;
   const frame = readFrame(spec, { width: 640, height: 360 });
@@ -353,6 +355,287 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   if (footer && ramp) parts.push(ramp.legend(plot.left, frame.height - colorLegendHeight, scaleLabel(preset)));
   parts.push(closeChart());
   return parts.join("");
+}
+
+/**
+ * Monochrome quantitative scatter past `SCATTER_CANVAS_AT`.
+ * The canvas scene stores one x/y per finite row and draws them in one fill.
+ * A string render (SSR, or `render: "svg"` is not this function) falls through
+ * until the caller decides. This returns undefined when the spec needs the
+ * general renderer: size, colour, log, labels, glyphs, rules, or annotations.
+ */
+function renderDenseScatter(spec: Record<string, unknown>): string | null | undefined {
+  if (spec.render === "svg") return undefined;
+  if (Array.isArray(spec.annotations) && spec.annotations.length > 0) return undefined;
+  if (readRules(spec.mark).length > 0) return undefined;
+  const mark = isRecord(spec.mark) ? spec.mark : undefined;
+  const yEnc = isRecord(spec.encoding) && isRecord((spec.encoding as { y?: unknown }).y) ? (spec.encoding as { y: Record<string, unknown> }).y : undefined;
+  const shape = glyphOf(yEnc?.pointShape) || glyphOf(mark?.pointShape) || "circle";
+  if (shape !== "circle") return undefined;
+  if (yEnc?.pointFill === "hollow" || mark?.pointFill === "hollow") return undefined;
+  const labelAt = named(mark?.labelPosition, ["top", "bottom", "left", "right", "center", "inside", "outside"]);
+  if (mark?.labels === true || labelAt !== "" || mark?.labelFormat !== undefined) return undefined;
+
+  const table = readTable(spec);
+  if (!table || table.length < SCATTER_CANVAS_AT) return undefined;
+  const frame = readFrame(spec, { width: 640, height: 360 });
+  if (scaleTypeOf(frame.encoding.x) === "log" || scaleTypeOf(frame.encoding.y) === "log") return undefined;
+  if (readSizeRange(frame.encoding.size)) return undefined;
+  const colorEnc = readColor(frame.encoding.color);
+  if (colorEnc?.field || colorEnc?.domain || colorEnc?.range) return undefined;
+
+  const xField = fieldOf(frame.encoding.x);
+  const yField = fieldOf(frame.encoding.y);
+  const xRaw = xField ? table.columns[xField] : undefined;
+  const yRaw = yField ? table.columns[yField] : undefined;
+  if (!xRaw || !yRaw) return undefined;
+  const nRows = Math.min(table.length, xRaw.length, yRaw.length);
+  const xDomain = padDomain(resolveDomain(xRaw as ArrayLike<number>, frame.encoding.x, wantsZero(frame.encoding.x, false)), frame.encoding.x);
+  const yDomain = padDomain(resolveDomain(yRaw as ArrayLike<number>, frame.encoding.y, wantsZero(frame.encoding.y, false)), frame.encoding.y);
+
+  let finite = 0;
+  const bothTyped = xRaw instanceof Float64Array && yRaw instanceof Float64Array;
+  if (bothTyped) {
+    const xs = xRaw as Float64Array;
+    const ys = yRaw as Float64Array;
+    for (let i = 0; i < nRows; i++) {
+      const x = xs[i];
+      const y = ys[i];
+      if (x === x && y === y) finite += 1;
+    }
+  } else {
+    for (let i = 0; i < nRows; i++) {
+      const x = xRaw[i];
+      const y = yRaw[i];
+      if (typeof x === "number" && typeof y === "number" && x === x && y === y) finite += 1;
+    }
+  }
+  if (finite < SCATTER_CANVAS_AT) return undefined;
+
+  const preset = withPalette(frame.preset, spec.mark);
+  const color = colorEnc?.constant ? paint(colorEnc.constant, preset, 0) : paint(undefined, preset, 0);
+  const opacity = typeof frame.mark.opacity === "number" ? frame.mark.opacity : 0.75;
+  const explicitR = typeof frame.mark.pointSize === "number";
+  const baseR = explicitR ? (frame.mark.pointSize as number) : Math.max(6, frame.geometry.pointSize);
+
+  let top = frame.title ? 38 : 16;
+  if (frame.subtitle) top += 18;
+  const showX = axisOn(spec, "x");
+  const showY = axisOn(spec, "y");
+  const xFormat = channelFormat(frame.encoding.x);
+  const yFormat = channelFormat(frame.encoding.y);
+  const yAxis = readAxis(spec, "y");
+  const xAxis = readAxis(spec, "x");
+  const yTicks = pickTicks(yDomain[0], yDomain[1], yAxis.count ?? 5, yAxis.values, false);
+  let left = showY ? 56 : 16;
+  if (showY) {
+    let label = 0;
+    for (let i = 0; i < yTicks.length; i++) {
+      const size = formatAxisValue(yTicks[i], yFormat, frame.locale, yTicks).length * 6.7;
+      if (size > label) label = size;
+    }
+    left = Math.max(56, Math.ceil(label + 14));
+  }
+  const inset = readInset(spec);
+  const yRight = yAxis.end;
+  let plotLeft = showY && yAxis.labels && !yRight ? left : 16;
+  let plotRight = frame.width - (showY && yAxis.labels && yRight ? left : 16);
+  let plotTop = top;
+  let plotBottom = frame.height - (showX && xAxis.labels ? (xAxis.end ? 16 : 36) : 16);
+  if (xAxis.end && showX && xAxis.labels) plotTop += 28;
+  if (yAxis.title) {
+    if (yRight) plotRight -= 16;
+    else plotLeft += 16;
+  }
+  if (xAxis.title) {
+    if (xAxis.end) plotTop += 22;
+    else plotBottom -= 16;
+  }
+  if (inset.l !== undefined) plotLeft = Math.max(plotLeft, inset.l);
+  if (inset.r !== undefined) plotRight = Math.min(plotRight, frame.width - inset.r);
+  if (inset.t !== undefined) plotTop = Math.max(plotTop, inset.t);
+  if (inset.b !== undefined) plotBottom = Math.min(plotBottom, frame.height - inset.b);
+  const plot = { left: plotLeft, top: plotTop, right: Math.max(plotLeft + 1, plotRight), bottom: Math.max(plotTop + 1, plotBottom) };
+  const xRev = scaleReverse(frame.encoding.x);
+  const yRev = scaleReverse(frame.encoding.y);
+  const xScale = clampScale(
+    linear(xDomain[0], xDomain[1], xRev ? plot.right : plot.left, xRev ? plot.left : plot.right),
+    xDomain,
+    scaleClamp(frame.encoding.x),
+  );
+  const yScale = clampScale(
+    linear(yDomain[0], yDomain[1], yRev ? plot.top : plot.bottom, yRev ? plot.bottom : plot.top),
+    yDomain,
+    scaleClamp(frame.encoding.y),
+  );
+  const radius = cloudRadius(finite, plot.right - plot.left, plot.bottom - plot.top, baseR, explicitR);
+  const xTicks = pickTicks(xDomain[0], xDomain[1], xAxis.count ?? 5, xAxis.values, false);
+  const grid = gridStyle(spec);
+  const canvas = canvasWanted(spec);
+  const parts: string[] = [];
+  parts.push(openChart({ ...frame, renderer: "scatter", canvas }));
+  parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
+  if (frame.title) parts.push(label(plot.left, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
+  if (frame.subtitle) parts.push(label(plot.left, frame.title ? 40 : 18, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
+  if (grid && showY) {
+    const dash = grid === "dashed" ? ' stroke-dasharray="3 3"' : grid === "dotted" ? ' stroke-dasharray="1 3"' : "";
+    for (const tick of yTicks) {
+      const y = yScale(tick);
+      parts.push(`<line x1="${n(plot.left)}" y1="${n(y)}" x2="${n(plot.right)}" y2="${n(y)}" stroke="${cssVar("grid", frame.preset.grid)}"${dash} />`);
+    }
+  }
+  const clip = boxId(frame.id, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top);
+  parts.push(`<defs>${clipPath(clip, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top)}</defs>`);
+  parts.push(`<g clip-path="url(#${clip})">`);
+  const scene = activeScene();
+  if (scene) {
+    scene.plot = plot;
+    scene.width = frame.width;
+    scene.height = frame.height;
+    scene.count = finite;
+    scene.xMin = xDomain[0];
+    scene.xMax = xDomain[1];
+    scene.yMin = yDomain[0];
+    scene.yMax = yDomain[1];
+    scene.key = `scatter|${frame.width}|${frame.height}|${finite}|${xDomain[0]}|${xDomain[1]}|${yDomain[0]}|${yDomain[1]}|circle|${opacity}|${radius}`;
+    const sceneMark = takeMark();
+    sceneMark.kind = "scatter";
+    sceneMark.shape = "circle";
+    sceneMark.hollow = false;
+    sceneMark.fillOpacity = opacity;
+    sceneMark.color = color;
+    sceneMark.name = yField || "y";
+    sceneMark.n = finite;
+    sceneMark.rows = nRows;
+    const bufs = lineBuffers(finite);
+    sceneMark.x = bufs.x;
+    sceneMark.y = bufs.y;
+    sceneMark.rects = rectBuffers(finite);
+    sceneMark.rects.fill(radius, 0, finite);
+    sceneMark.rectN = finite;
+    sceneMark.fills = null;
+    sceneMark.names = null;
+    const skipped = finite !== nRows;
+    sceneMark.indexes = skipped ? new Int32Array(finite) : null;
+    scene.marks.push(sceneMark);
+    writeDots(sceneMark.x, sceneMark.y, sceneMark.indexes, xRaw, yRaw, nRows, xScale, yScale);
+  } else {
+    const xs = new Float64Array(finite);
+    const ys = new Float64Array(finite);
+    writeDots(xs, ys, null, xRaw, yRaw, nRows, xScale, yScale);
+    parts.push(canvas ? `<g data-ck-layer="marks">` : "");
+    parts.push(circleRun(xs, ys, finite, radius, color, opacity, yField || "y", plot));
+    if (canvas) parts.push(`</g>`);
+  }
+  parts.push("</g>");
+  if (showY && yAxis.labels) {
+    for (const tick of yTicks) {
+      const y = yScale(tick) + 4;
+      parts.push(
+        yRight
+          ? label(plot.right + 8, y, formatAxisValue(tick, yFormat, frame.locale, yTicks), cssVar("muted", frame.preset.muted), 11, "400", "start")
+          : label(plot.left - 8, y, formatAxisValue(tick, yFormat, frame.locale, yTicks), cssVar("muted", frame.preset.muted), 11, "400", "end"),
+      );
+    }
+  }
+  if (showY && yAxis.title) {
+    const x = yRight ? frame.width - 12 : 12;
+    parts.push(rotated(x, (plot.top + plot.bottom) / 2, yAxis.title, cssVar("muted", frame.preset.muted), yRight ? 90 : -90));
+  }
+  if (showX && xAxis.labels) {
+    const angle = xAxis.rotate ?? 0;
+    for (const tick of xTicks) {
+      const x = xScale(tick);
+      const y = xAxis.end ? plot.top - 18 : plot.bottom + 16;
+      parts.push(angle ? rotated(x, y, formatAxisValue(tick, xFormat, frame.locale, xTicks), cssVar("muted", frame.preset.muted), angle) : label(x, y, formatAxisValue(tick, xFormat, frame.locale, xTicks), cssVar("muted", frame.preset.muted), 11, "400", "middle"));
+    }
+  }
+  if (showX && xAxis.title) {
+    parts.push(label((plot.left + plot.right) / 2, xAxis.end ? plot.top - 40 : frame.height - 6, xAxis.title, cssVar("muted", frame.preset.muted), 11, "500", "middle"));
+  }
+  parts.push(closeChart());
+  return parts.join("");
+}
+
+function writeDots(
+  xs: Float64Array,
+  ys: Float64Array,
+  indexes: Int32Array | null,
+  xRaw: ArrayLike<unknown>,
+  yRaw: ArrayLike<unknown>,
+  nRows: number,
+  xScale: (value: number) => number,
+  yScale: (value: number) => number,
+): void {
+  let n = 0;
+  if (xRaw instanceof Float64Array && yRaw instanceof Float64Array) {
+    for (let i = 0; i < nRows; i++) {
+      const x = xRaw[i];
+      const y = yRaw[i];
+      if (x !== x || y !== y) continue;
+      xs[n] = xScale(x);
+      ys[n] = yScale(y);
+      if (indexes) indexes[n] = i;
+      n += 1;
+    }
+    return;
+  }
+  for (let i = 0; i < nRows; i++) {
+    const x = xRaw[i];
+    const y = yRaw[i];
+    if (typeof x !== "number" || typeof y !== "number" || x !== x || y !== y) continue;
+    xs[n] = xScale(x);
+    ys[n] = yScale(y);
+    if (indexes) indexes[n] = i;
+    n += 1;
+  }
+}
+
+/** Shrink a default marker once the cloud would paint as a solid brick. An explicit pointSize stays. */
+function cloudRadius(count: number, plotW: number, plotH: number, base: number, explicit: boolean): number {
+  if (explicit || !(base > 0)) return base;
+  const area = Math.max(1, plotW * plotH);
+  const cover = count * Math.PI * base * base;
+  if (cover <= area * 8) return base;
+  return Math.max(1.25, base * Math.sqrt((area * 8) / cover));
+}
+
+/** One path of circles. Past a pixel per point, the string keeps one circle per pixel; the canvas painter still draws every row. */
+function circleRun(
+  xs: Float64Array,
+  ys: Float64Array,
+  count: number,
+  radius: number,
+  color: string,
+  opacity: number,
+  name: string,
+  plot: { left: number; top: number; right: number; bottom: number },
+): string {
+  const w = Math.max(1, Math.ceil(plot.right - plot.left));
+  const h = Math.max(1, Math.ceil(plot.bottom - plot.top));
+  const cull = count > w * h;
+  const seen = cull ? new Uint8Array(w * h) : null;
+  const rr = n(radius);
+  const d = n(radius * 2);
+  const cmds: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const x = xs[i];
+    const y = ys[i];
+    if (seen) {
+      let cx = Math.round(x - plot.left);
+      let cy = Math.round(y - plot.top);
+      if (cx < 0) cx = 0;
+      else if (cx >= w) cx = w - 1;
+      if (cy < 0) cy = 0;
+      else if (cy >= h) cy = h - 1;
+      const at = cy * w + cx;
+      if (seen[at]) continue;
+      seen[at] = 1;
+    }
+    cmds.push(`M${n(x)} ${n(y)}m-${rr},0a${rr},${rr} 0 1 1 ${d},0a${rr},${rr} 0 1 1 -${d},0`);
+  }
+  if (cmds.length === 0) return "";
+  return `<path d="${cmds.join("")}" fill="${color}" fill-opacity="${n(opacity)}" data-ck-mark="point" data-ck-name="${esc(name)}" />`;
 }
 
 function logDomain(values: number[], channel: unknown): [number, number] {
