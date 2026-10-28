@@ -10,6 +10,13 @@
     "bench:agent-matrix": "node agent-matrix.mjs"
   },
   "dependencies": {
+    "@amcharts/amcharts5": "5.21.2",
+    "@antv/g2": "5.4.8",
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.1",
+    "@mui/material": "9.5.0",
+    "@mui/system": "9.5.0",
+    "@mui/x-charts": "9.15.0",
     "@nivo/bar": "0.99.0",
     "@nivo/boxplot": "0.99.0",
     "@nivo/bullet": "0.99.0",
@@ -25,13 +32,24 @@
     "@nivo/sunburst": "0.99.0",
     "@nivo/treemap": "0.99.0",
     "@observablehq/plot": "0.6.17",
+    "@tremor/react": "3.18.7",
+    "@visx/visx": "4.0.0",
+    "ag-charts-community": "14.2.0",
+    "ag-charts-enterprise": "14.2.0",
+    "apexcharts": "8.3.1",
     "chart.js": "4.5.1",
     "echarts": "6.1.0",
     "esbuild": "0.25.0",
+    "highcharts": "13.1.1",
+    "lightweight-charts": "5.2.1",
+    "mermaid": "11.17.2",
+    "plotly.js-dist-min": "4.1.2",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "recharts": "3.10.1",
-    "uplot": "1.6.32"
+    "uplot": "1.6.32",
+    "vega-lite": "6.4.3",
+    "victory": "37.3.6"
   },
   "devDependencies": {
     "playwright": "1.64.1"

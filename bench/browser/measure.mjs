@@ -5,6 +5,7 @@ import { build } from "esbuild";
 import { chromium } from "playwright";
 import { browserAdapters } from "./adapters.mjs";
 import { CHART_METHOD, PAINT_SCHEMA, classifyStatus } from "./chart-types.mjs";
+import { ELEVEN_TYPES, PHASE3_CHARTS, phase3AdapterIds, unsupportedPhase3Cells } from "./phase3.mjs";
 import { unsupportedPaintCells } from "./rivals.mjs";
 
 const benchRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -17,9 +18,17 @@ const SIZES = process.env.BENCH_POINTS
 const SAMPLES = Number(process.env.BENCH_SAMPLES || 5);
 const ONLY = process.env.BENCH_LIBS ? new Set(process.env.BENCH_LIBS.split(",").map((id) => id.trim()).filter(Boolean)) : null;
 const TYPES = process.env.BENCH_TYPES ? new Set(process.env.BENCH_TYPES.split(",").map((id) => id.trim()).filter(Boolean)) : null;
+const PHASE = process.env.BENCH_PHASE || "";
+const phase3Ids = phase3AdapterIds();
 
 function includeAdapter(adapter) {
   if (process.env.BENCH_SKIP_CHARTS === "1" && adapter.suite === "chart-types") return false;
+  if (PHASE === "3") {
+    if (adapter.suite !== "chart-types") return false;
+    if (!PHASE3_CHARTS.has(adapter.chart)) return false;
+    const chartkitFocus = adapter.id.startsWith("chartkit-") && PHASE3_CHARTS.has(adapter.chart);
+    if (!phase3Ids.has(adapter.id) && !chartkitFocus) return false;
+  }
   if (ONLY && !ONLY.has(adapter.id)) return false;
   if (TYPES && adapter.suite === "chart-types" && !TYPES.has(adapter.chart)) return false;
   return true;
@@ -278,7 +287,15 @@ export async function measureBrowser() {
     await browser.close();
   }
   const chartSweep = files.some((file) => file.adapter.suite === "chart-types");
-  if (chartSweep) charts.push(...unsupportedPaintCells({ only: ONLY, types: TYPES }));
+  if (chartSweep) {
+    if (PHASE === "3") {
+      charts.push(...unsupportedPaintCells({ types: ELEVEN_TYPES }));
+      charts.push(...unsupportedPhase3Cells({ types: PHASE3_CHARTS }));
+    } else {
+      charts.push(...unsupportedPaintCells({ only: ONLY, types: TYPES }));
+      charts.push(...unsupportedPhase3Cells({ only: ONLY, types: TYPES }));
+    }
+  }
   return {
     method: `Playwright Chromium. Each sample is a fresh page. Reported times are the median of ${SAMPLES} samples. Data is makeSeries(n, seed) generated inside the page and excluded from the timer. x[i] = i. Every library does its own update, then waits for the same two animation frames. ECharts also waits for its finished event before those frames. ChartKit replaces innerHTML with a new SVG (curve linear, points none, sampling auto, which is minmax above twice the plot width) and returns that synchronous build as renderMs before the two frames. ChartKit canvas is the same line with render canvas. It paints sampled points straight onto a canvas and builds SVG for the axes only, and renderMs includes that paint. It does not build the mark DOM. ChartKit sampling none is the same SVG line with mark.sampling none, measured only at 100k and 1M. An error SVG (ck-chart-error) fails that sample. uPlot uses setData. Chart.js uses update('none') and {x,y} points. ECharts uses setOption on a canvas renderer with sampling left off. Recharts and Nivo use flushSync. Observable Plot replaces the SVG node. Width 640, height 360. Memory is the median performance.memory.usedJSHeapSize when Chromium exposes it. A failed size skips larger sizes for that library. Chart-type cells are in charts, not in rows.`,
     chartMethod: CHART_METHOD,

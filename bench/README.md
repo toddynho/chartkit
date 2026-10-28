@@ -73,7 +73,11 @@ Point counts are the fair N for that chart, not a copy of the line's 100,000:
 | gauge, kpi, progress-ring | 1 | One metric. KPI's sparkline stays 24 and is not N. |
 | venn | 3 sets | Largest supported Venn. Four or more is unsupported. |
 
-Later bundle and SSR phases, and the commercial paint pass, add the rest of the compare matrix (Highcharts, amCharts, ApexCharts community and commercial builds, AG Charts enterprise, MUI X Pro and Premium, and the same class of product) from the published npm or CDN build a customer would install. Record license and watermark limits. A missing license key is `status: "blocked"` with a note, not a silent omission and not a reason to drop the rest of that set. This phase does not publish those cells and does not change the homepage.
+Phase 3 (`BENCH_PHASE=3`) adds the rest of the compare matrix and times the eleven types that had no Phase-2 rival ok cell: bar-list, gantt, journey, kpi, progress-ring, quadrant, sparkline, spike, timeline, venn, and waterfall. ChartKit is painted again for those eleven. Phase-2 rivals stay unsupported there and are not repainted. Candlestick is included only where a Phase-3 library has a native OHLC series, because Phase 2 had ECharts alone. A cell is timed only for a native chart. Credits, logos, and trial watermarks stay visible. A library that will not paint without a license key is `status: "blocked"`. Pins and the commercial notes are in `chartMethod` on `bench/results/paint.json`. This pass does not change the homepage.
+
+```bash
+BENCH_PHASE=3 BENCH_SAMPLES=5 npm run bench -- --skip-bundle --skip-ssr --skip-agent
+```
 
 ```bash
 BENCH_SAMPLES=1 BENCH_LIBS=chartkit-bar,chartkit-donut npm run bench -- --skip-bundle --skip-ssr --skip-agent
