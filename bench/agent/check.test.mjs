@@ -354,6 +354,7 @@ test("chart.js needs a browser and echarts SSR init does not", () => {
   assert.equal(suite.needsBrowser("echarts", 'echarts.init(null, null, { renderer: "svg", ssr: true })'), false);
   assert.equal(suite.needsBrowser("echarts", 'echarts.init(document.getElementById("c"))'), true);
   assert.equal(suite.needsBrowser("recharts", 'import { LineChart } from "recharts";'), true);
+  assert.equal(suite.needsBrowser("plot", 'import * as Plot from "@observablehq/plot";\nPlot.plot();\n'), true);
 });
 
 test("validator errors are fed back once", async () => {
@@ -485,10 +486,16 @@ test("no-docs prompts name the npm package and give each library one paragraph",
   assert.match(official, /renderToSVGString/);
   const plain = suite.promptFor(task, "echarts", "none");
   assert.doesNotMatch(plain, /Official reference/);
+  const plotPrompt = suite.codePrompt(task, "plot");
+  assert.match(plotPrompt, /npm package "@observablehq\/plot"/);
+  assert.match(plotPrompt, /lineY/);
+  assert.match(plotPrompt, /outerHTML/);
+  const donut = suite.tasks.find((item) => item.id === "donut-traffic");
+  assert.match(suite.codePrompt(donut, "plot"), /unsupported: true/);
   const manifest = suite.docsManifest();
   const byName = Object.fromEntries(manifest.map((item) => [item.library, item]));
   const lengths = [];
-  for (const library of ["chartkit", "recharts", "echarts", "chartjs"]) {
+  for (const library of ["chartkit", "plot", "recharts", "echarts", "chartjs"]) {
     assert.ok(byName[library].bytes > 1000, library);
     assert.ok(byName[library].url, library);
     assert.ok(byName[library].bytes <= byName.chartkit.bytes, `${library} ${byName[library].bytes}`);
@@ -620,6 +627,71 @@ test("echarts node SVG keeps series numbers off meta", async () => {
   assert.equal(result.stages.values.ok, true, JSON.stringify(result.stages));
   assert.equal(result.stages.type.ok, false, JSON.stringify(result.stages.type));
   assert.equal(result.stages.type.actual, "bar");
+});
+
+test("observable plot scores a drawn mark and rejects a hand-written svg", () => {
+  const task = suite.tasks.find((item) => item.id === "line-revenue");
+  const source = 'import * as Plot from "@observablehq/plot";\nexport function render(){ return Plot.plot({}); }\n';
+  const rendered = '<svg class="plot-d6a7b5"><path d="M0 0" /></svg>';
+  const passed = suite.scoreModule({
+    meta: { type: "line" },
+    render() { return rendered; },
+  }, task, "plot", {
+    source,
+    rendered,
+    facts: { plotMarks: 1, plotClass: "plot-d6a7b5", plotted: [120, 150, 132], chartTypes: ["lineY"] },
+  });
+  assert.equal(passed.ok, true, JSON.stringify(passed.stages));
+  const handwritten = suite.scoreModule({
+    meta: { type: "lineY" },
+    render() { return "<svg><path /></svg>"; },
+  }, task, "plot", {
+    source,
+    rendered: "<svg><path /></svg>",
+    facts: { plotMarks: 1, plotted: [120, 150, 132], chartTypes: ["lineY"] },
+  });
+  assert.equal(handwritten.stages.library.ok, false);
+  const donut = suite.tasks.find((item) => item.id === "donut-traffic");
+  const honest = suite.scoreModule({ meta: { unsupported: true, reason: "no arc mark" }, render() { return ""; } }, donut, "plot");
+  assert.equal(honest.ok, true);
+  assert.equal(honest.status, "unsupported");
+  const invented = suite.scoreModule({ meta: { type: "barY" }, render() { return "<svg></svg>"; } }, donut, "plot");
+  assert.equal(invented.ok, false);
+  const used = suite.libraryUse('import * as Plot from "@observablehq/plot";\nexport function render(){ return Plot.plot(); }\n', "plot");
+  assert.equal(used.imports, true);
+  assert.equal(used.uses, true);
+});
+
+test("chartkit repair() accepts a fix without a second model call", async () => {
+  const task = suite.tasks.find((item) => item.id === "line-revenue");
+  let calls = 0;
+  const result = await suite.runAgent({
+    env: { OPENAI_API_KEY: "test", BENCH_LLM_PROVIDER: "openai", BENCH_LIBRARIES: "chartkit" },
+    tasks: [task],
+    ask: async () => {
+      calls += 1;
+      return {
+        text: JSON.stringify({
+          version: "2",
+          type: "line",
+          data: task.data,
+          encoding: { x: "month", y: "revenue" },
+          a11y: { alt: "Revenue rose, then eased." },
+        }),
+        usage: { input_tokens: 40, output_tokens: 18 },
+      };
+    },
+  });
+  assert.equal(calls, 1, JSON.stringify(result.results[0].stages));
+  assert.equal(result.results[0].ok, false);
+  assert.equal(result.results[0].repaired, true);
+  assert.equal(result.results[0].second, null);
+  const board = result.scoreboard.find((item) => item.library === "chartkit");
+  assert.equal(board.workingCharts, 1);
+  assert.equal(board.calls.median, 1);
+  assert.equal(board.outputTokens.median, 18);
+  assert.equal(board.dnf.count, 0);
+  assert.equal(board.firstTry.passed, 0);
 });
 
 test("scatter points keep both x and y", async () => {
@@ -838,4 +910,37 @@ test("series-field bars count one rect per category per series value", () => {
     a11y: { alt: "South leads sales." },
   }, single);
   assert.equal(plain.ok, true, JSON.stringify(plain.stages));
+});
+
+test("observable plot draws in Playwright and the checker reads the mark", { timeout: 120000 }, async () => {
+  const { chromium } = await import("playwright");
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const source = [
+      'import * as Plot from "@observablehq/plot";',
+      "const data = [{ month: \"Jan\", revenue: 120 }, { month: \"Feb\", revenue: 150 }, { month: \"Mar\", revenue: 132 }];",
+      "export function render() {",
+      "  const node = Plot.plot({ width: 320, height: 180, marks: [Plot.lineY(data, { x: \"month\", y: \"revenue\" })] });",
+      "  document.body.append(node);",
+      "  return node.outerHTML;",
+      "}",
+      'export const meta = { type: "lineY", values: [1] };',
+    ].join("\n");
+    const executed = await suite.renderInBrowser(browser, source);
+    assert.equal(executed.renderError, null, executed.renderError?.message);
+    assert.ok(executed.facts.plotMarks > 0, JSON.stringify(executed.facts));
+    assert.match(executed.rendered, /<svg[\s>]/);
+    assert.match(executed.rendered, /class="plot-/);
+    assert.ok(executed.facts.plotted.includes(120), JSON.stringify(executed.facts.plotted));
+    assert.ok(executed.facts.chartTypes.includes("lineY"), JSON.stringify(executed.facts.chartTypes));
+    const task = suite.tasks.find((item) => item.id === "line-revenue");
+    const result = suite.scoreModule(executed.mod, task, "plot", {
+      source,
+      rendered: executed.rendered,
+      facts: executed.facts,
+    });
+    assert.equal(result.ok, true, JSON.stringify(result.stages));
+  } finally {
+    await browser.close();
+  }
 });

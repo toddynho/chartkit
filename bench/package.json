@@ -5,7 +5,9 @@
   "description": "Reproducible ChartKit comparisons. Pinned libraries, esbuild minify, gzip -9, brotli q11.",
   "scripts": {
     "bench": "node run.mjs",
-    "test": "node --test --test-force-exit agent/check.test.mjs"
+    "test": "node --test --test-force-exit agent/check.test.mjs agent/provider.test.mjs agent/score.test.mjs agent/matrix.test.mjs",
+    "bench:agent": "node agent-only.mjs",
+    "bench:agent-matrix": "node agent-matrix.mjs"
   },
   "dependencies": {
     "@nivo/bar": "0.99.0",

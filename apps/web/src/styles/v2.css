@@ -482,6 +482,7 @@ html[data-stack="vanilla"] .home-card .stack-sample [data-stack-panel="vanilla"]
   letter-spacing: -0.03em;
   line-height: 1;
 }
+.stat-num--range { font-size: 26px; letter-spacing: -0.04em; }
 .stat-num span { color: #a0a2a7; font-weight: 500; }
 .stat-card--ink .stat-num span { color: inherit; opacity: 0.45; }
 .stat-card p { margin: 0; color: var(--ink-2); font-size: 14px; line-height: 1.45; }
@@ -515,7 +516,7 @@ html[data-stack="vanilla"] .home-card .stack-sample [data-stack-panel="vanilla"]
 .token-rows { display: flex; flex-direction: column; gap: 9px; }
 .token-row {
   display: grid;
-  grid-template-columns: 120px minmax(0, 1fr) 150px;
+  grid-template-columns: 120px minmax(0, 1fr) 84px;
   gap: 14px;
   align-items: center;
   font-size: 13px;
@@ -531,6 +532,8 @@ html[data-stack="vanilla"] .home-card .stack-sample [data-stack-panel="vanilla"]
   font-size: 12px;
   color: var(--ink-2);
   font-weight: 400;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 .token-row__val span { color: #a0a2a7; font-weight: 400; }
 .token-note {
@@ -1072,6 +1075,17 @@ html[data-stack="vanilla"] .home-card .stack-sample [data-stack-panel="vanilla"]
   cursor: pointer;
 }
 .compare-foot { margin: 14px 0 64px; color: var(--muted); font-size: 13px; max-width: 70ch; }
+.agent-block { padding-bottom: 64px; }
+.scoreboard { min-width: 760px; }
+.scoreboard th.num,
+.scoreboard td.num { text-align: right; }
+.scoreboard td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.scoreboard th.us { color: var(--ink); font-weight: 600; }
+.scoreboard td.us { color: var(--ink); font-weight: 600; }
+.scoreboard tr.is-pending td { color: var(--muted); font-weight: 400; }
+.scoreboard sup { font-size: 0.7em; line-height: 0; }
+.defaults .give-row { grid-template-columns: 180px 1fr; align-items: baseline; }
+.lab-note { max-width: 68ch; margin: 0; }
 
 .mock-mail, .mock-readme, .mock-chat, .mock-pdf { color: #17181a; font-size: 12px; }
 .mock-mail header, .mock-chat header { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
@@ -1096,7 +1110,8 @@ html[data-stack="vanilla"] .home-card .stack-sample [data-stack-panel="vanilla"]
 
 @media (max-width: 640px) {
   .token-row { grid-template-columns: 1fr; gap: 4px; }
-  .token-row__name { text-align: left; }
+  .token-row__name, .token-row__val { text-align: left; }
+  .defaults .give-row { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

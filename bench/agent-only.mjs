@@ -20,6 +20,8 @@ await build({
 const suite = await import(pathToFileURL(outfile).href);
 const started = new Date().toISOString();
 const tasks = process.env.BENCH_SUITE === "supp" ? suite.suppTasks : suite.tasks;
+// Published one-model path. BENCH_DOCS=none keeps the optional no-docs condition.
+process.env.BENCH_DOCS ||= "official";
 const agent = await suite.runAgent({ tasks });
 const out = process.env.BENCH_AGENT_OUT || join(benchRoot, "results/agent.json");
 mkdirSync(dirname(out), { recursive: true });
@@ -28,7 +30,7 @@ writeFileSync(out, JSON.stringify({
   finished: new Date().toISOString(),
   env: {
     BENCH_LIBRARIES: process.env.BENCH_LIBRARIES ?? null,
-    BENCH_DOCS: process.env.BENCH_DOCS ?? "none",
+    BENCH_DOCS: process.env.BENCH_DOCS ?? "official",
   },
   agent,
 }, null, 2));

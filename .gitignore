@@ -36,6 +36,7 @@ bench/results/partial.json
 bench/results/paint-smoke.json
 bench/results/paint-checkpoint.jsonl
 bench/results/agent/conditions/
+bench/results/agent/matrix/
 scripts/.interact-out/
 scripts/design/.out/
 
