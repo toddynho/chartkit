@@ -303,7 +303,7 @@ Round 6 official, one model, one run, computed from `bench/results/agent/round-6
 
 ## Token matrix
 
-The homepage “fewer tokens per working chart” claim uses this harness. The round-6 first-try means above stay the historical scoreboard. Homepage figures stay illustrative until a with-docs matrix run is published.
+The homepage “fewer tokens per working chart” claim uses this harness. The round-6 first-try means above stay the historical scoreboard. The homepage and /agents scoreboard publish the with-docs medians from this matrix (Claude, GPT-6, and Grok). A re-run writes bench/results/agent/matrix/summary-official.json and does not overwrite those pages.
 
 Published condition: `BENCH_DOCS=official` (each library's own doc, cut to ChartKit `llms.txt`). `BENCH_DOCS=none` is the optional no-docs condition.
 

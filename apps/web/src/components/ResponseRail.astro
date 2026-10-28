@@ -27,12 +27,26 @@ function pressed(group: ChipGroup, value: string): boolean {
 
 <div class="rail-stack">
   <h2 class="rail-title">Try it</h2>
-  <div
-    class:list={["response", !result.ok && "is-error"]}
-    id="docs-response"
-    data-theme={result.theme === "midnight" ? "midnight" : "soft"}
-    aria-live="polite"
-  >
+  <div class="docs-try-slot">
+    <div
+      class="docs-handle"
+      id="docs-handle"
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Resize try-it panel"
+      aria-describedby="docs-try-caption"
+      aria-controls="docs-response"
+      aria-valuemin="280"
+      aria-valuemax="9999"
+      aria-valuenow="380"
+      tabindex="0"
+    ></div>
+    <div
+      class:list={["docs-try", "response", !result.ok && "is-error"]}
+      id="docs-response"
+      data-theme={result.theme === "midnight" ? "midnight" : "soft"}
+      aria-live="polite"
+    >
     <div class="response__chrome">
       <div class="response__tabs" role="tablist" aria-label="Response view">
         <button type="button" class="response__tab is-on" data-tab="chart" role="tab" aria-selected="true">Chart</button>
@@ -97,7 +111,8 @@ function pressed(group: ChipGroup, value: string): boolean {
       ) : null
     }
   </div>
-  <p class="rail-note">Drag the left edge to resize. This panel runs <code>validate()</code> then <code>render()</code> in the browser. It does not call Cloud.</p>
+  </div>
+  <p class="docs-try__caption" id="docs-try-caption">Drag the left edge to resize.</p>
 </div>
 
 <script>

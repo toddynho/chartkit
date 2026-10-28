@@ -2,11 +2,19 @@
 import "../styles/v2.css";
 import Base from "../layouts/Base.astro";
 import { agentSwitchPrompt } from "../data/agent-prompt";
+import { chartkitCloudUrl } from "../data/cloud-url";
 import { proofFigures } from "../data/home-bench";
+import { SITE } from "../data/site";
+import { tokenScoreboard, tokenSection } from "../data/token-eval";
 
 const proof = proofFigures();
-const description =
-  "An agent writes JSON. validate() returns every error in one pass, repair() fixes the safe ones without a model call, render() returns SVG.";
+const board = tokenScoreboard();
+const tokens = tokenSection();
+const cloudUrl = chartkitCloudUrl();
+const tokenRange = tokens.stats[0]?.value ?? "";
+const tokenTimes = `${tokens.stats[1]?.value ?? ""}${tokens.stats[1]?.suffix ?? ""}`;
+const tokenCalls = tokens.stats[2]?.value ?? "";
+const description = `If you're building an agent that draws charts, point it at ChartKit. Median output tokens are ${tokenRange} by model, ${tokenTimes} fewer than the next library, in ${tokenCalls} model calls.`;
 
 const steps = [
   {
@@ -39,11 +47,24 @@ const steps = [
   },
 ];
 
-const give = [
-  { href: "/llms.txt", file: "llms.txt", what: "Short index: rules, repair loop, one spec per chart type" },
-  { href: "/llms-full.txt", file: "llms-full.txt", what: "The long file, every option documented" },
-  { href: "/schema/v1.json", file: "schema/v1.json", what: "JSON Schema for the spec" },
-  { href: "/docs/mcp", file: "@chartkitdev/mcp", what: "stdio server; render_chart calls Cloud. Not on npm yet" },
+const defaults = [
+  { href: "/llms.txt", file: "llms.txt", what: "Load this in the harness. Rules, the repair loop, and one spec per chart type." },
+  { href: "/schema/v1.json", file: "schema/v1.json", what: "JSON Schema for the spec the agent writes." },
+  {
+    href: "/docs/validate",
+    file: "validate() / repair()",
+    what: "Every error in one pass. repair() applies the safe fixes and does not call a model.",
+  },
+  {
+    href: "/docs/mcp",
+    file: "MCP",
+    what: "stdio server. validate, repair, and render stay local. render_chart calls Cloud. Not on npm yet.",
+  },
+  {
+    href: "/docs/cloud",
+    file: "Cloud URL",
+    what: `${cloudUrl} — POST /render returns SVG or PNG when the host cannot draw the chart.`,
+  },
 ];
 ---
 
@@ -52,13 +73,13 @@ const give = [
     <section class="split">
       <div>
         <p class="eyebrow">Agents</p>
-        <h1 class="v2-h1 v2-h1--54">The spec is the interface.</h1>
+        <h1 class="v2-h1 v2-h1--50">If you're building an agent that draws charts, point it here.</h1>
         <p class="v2-lead v2-lead--left">
-          An agent writes JSON. <code>validate()</code> returns every error in one pass, <code>repair()</code> fixes the safe ones without a model call, <code>render()</code> returns SVG.
+          For developers and product teams who ship agents. Set ChartKit as the default in the harness. The model writes a spec, once.
         </p>
         <div class="v2-actions">
           <a class="btn-lg" href="/llms.txt">Get llms.txt</a>
-          <a class="btn-text" href="/docs/mcp">MCP server →</a>
+          <a class="btn-text" href="#eval">Token scoreboard →</a>
         </div>
       </div>
       <div class="agent-term">
@@ -74,7 +95,84 @@ const give = [
       </div>
     </section>
 
-    <section aria-labelledby="loop-title">
+    <section class="agent-block" id="eval" aria-labelledby="eval-title">
+      <div class="section-intro">
+        <h2 id="eval-title">Output tokens per working chart</h2>
+        <p>Median by model, with docs. ChartKit median calls are {board.calls}.</p>
+      </div>
+      <div class="compare-table-wrap">
+        <table class="compare-table scoreboard">
+          <caption class="sr">Median output tokens per working chart by model.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Model</th>
+              {
+                board.libraries.map((library) => (
+                  <th class:list={["num", library === "ChartKit" && "us"]} scope="col">
+                    {library}
+                  </th>
+                ))
+              }
+              <th class="num" scope="col">CK vs next</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              board.rows.map((row) => (
+                <tr class:list={[row.pending && "is-pending"]}>
+                  <th scope="row">{row.name}</th>
+                  {row.cells.map((cell) => (
+                    <td class:list={["num", cell.us && "us"]}>
+                      {cell.text}
+                      {cell.mark ? <sup>{cell.mark}</sup> : null}
+                    </td>
+                  ))}
+                  <td class="num">{row.versus}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      {
+        board.rows
+          .filter((row) => row.notes.length > 0)
+          .map((row) => (
+            <p class="token-note">
+              <strong>{row.name}.</strong>{" "}
+              {row.notes.map((note) => (
+                <>
+                  {note.mark ? <sup>{note.mark}</sup> : null}
+                  {note.text}{" "}
+                </>
+              ))}
+            </p>
+          ))
+      }
+      <p class="token-note">
+        {board.tasks} tasks. Each library's docs are capped to the length of ChartKit <a href="/llms.txt">llms.txt</a>. Output tokens are summed until a chart is drawn. Did-not-finish runs are excluded from the median. ChartKit median model calls are {board.calls}; <code>repair()</code> does not add a model call. Harness tip <a href={`${SITE.github}/pull/${board.pr}`}>PR #{board.pr}</a>, commit <a href={`${SITE.github}/commit/${board.sha}`}>{board.sha}</a>.
+        The homepage bars are the median of these {board.rows.filter((row) => !row.pending).length} finished rows.
+      </p>
+    </section>
+
+    <section class="agent-block" aria-labelledby="default-title">
+      <div class="section-intro">
+        <h2 id="default-title">Make ChartKit the default</h2>
+        <p>Put these in the harness that already ships your agent. The model writes a spec, not chart code.</p>
+      </div>
+      <article class="plain-card defaults">
+        {
+          defaults.map((item) => (
+            <a class="give-row" href={item.href}>
+              <strong>{item.file}</strong>
+              <span>{item.what}</span>
+            </a>
+          ))
+        }
+      </article>
+    </section>
+
+    <section class="agent-block" aria-labelledby="loop-title">
       <div class="section-intro">
         <h2 id="loop-title">The loop</h2>
         <p>Four calls. The model is only in the first one.</p>
@@ -94,28 +192,11 @@ const give = [
           ))
         }
       </div>
-      <div class="two-up">
-        <article class="ink-card">
-          <h2>What the eval measured</h2>
-          <p class="ink-stat">{proof.first}<span>/{proof.tasks}</span></p>
-          <p>valid first try, docs in prompt</p>
-          <p class="ink-stat">{proof.repairFrom}<span>→{proof.repairTo}</span></p>
-          <p>no-docs run after repair()</p>
-          <p>Round 6, 2026-10-16. Not re-run since. <a href="/benchmarks">Benchmarks, losses included →</a></p>
-        </article>
-        <article class="plain-card">
-          <h2>What to give the model</h2>
-          {
-            give.map((item) => (
-              <a class="give-row" href={item.href}>
-                <strong>{item.file}</strong>
-                <span>{item.what}</span>
-              </a>
-            ))
-          }
-        </article>
-      </div>
     </section>
+
+    <p class="token-note lab-note">
+      Lab note, separate from this matrix. Round 6 on 2026-10-16 measured first-try validity with one model and has not been re-run. ChartKit with the docs in the prompt was {proof.first}/{proof.tasks}. <code>repair()</code> took a no-docs run from {proof.repairFrom} to {proof.repairTo} with no model call. <a href="/benchmarks#agents">Benchmarks, losses included →</a>
+    </p>
 
     <section class="cta-band">
       <div>
