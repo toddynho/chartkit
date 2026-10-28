@@ -46,9 +46,17 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   }
   if (candles.length === 0) return null;
 
-  const prices = candles.flatMap((candle) => [candle.high, candle.low]);
-  const pad = (Math.max(...prices) - Math.min(...prices)) * 0.08 || 1;
-  const fitted = resolveDomain([Math.min(...prices) - pad, Math.max(...prices) + pad], frame.encoding.high, wantsZero(frame.encoding.high, false));
+  let lo = Infinity;
+  let hi = -Infinity;
+  let maxVol = 1;
+  for (let i = 0; i < candles.length; i++) {
+    const candle = candles[i];
+    if (candle.high > hi) hi = candle.high;
+    if (candle.low < lo) lo = candle.low;
+    if (candle.volume !== null && candle.volume > maxVol) maxVol = candle.volume;
+  }
+  const pad = (hi - lo) * 0.08 || 1;
+  const fitted = resolveDomain([lo - pad, hi + pad], frame.encoding.high, wantsZero(frame.encoding.high, false));
   const domain = lockDomain(fitted[0], fitted[1], [frame.encoding.open, frame.encoding.high, frame.encoding.low, frame.encoding.close, frame.encoding.y]);
   const showVolume = volumeF !== undefined;
   const showX = axisOn(spec, "x");
@@ -77,7 +85,6 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   const grid = gridStyle(spec);
   const up = cssVar("positive", frame.preset.positive);
   const down = cssVar("negative", frame.preset.negative);
-  const maxVol = Math.max(...candles.map((candle) => candle.volume ?? 0), 1);
   const volScale = linear(0, maxVol, plot.bottom, plot.bottom - volumeH);
 
   const canvas = canvasWanted(spec);
@@ -170,10 +177,11 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
     }
   }
   const xAt = (index: number) => plot.left + slot * index + slot / 2;
-  const names = candles.map((candle) => candle.label);
-  const notes = placedNotes(spec, frame, plot, categoryX(names, xAt), (value) => yScale(value), [
-    { name: "close", axis: "y", pts: seriesPoints(null, candles.map((candle) => candle.close)) },
-  ], names);
+  const notes = spec.annotations
+    ? placedNotes(spec, frame, plot, categoryX(candles.map((candle) => candle.label), xAt), (value) => yScale(value), [
+        { name: "close", axis: "y", pts: seriesPoints(null, candles.map((candle) => candle.close)) },
+      ], candles.map((candle) => candle.label))
+    : { under: "", over: "" };
   parts.push(notes.over);
   parts.push(axisTitleMarks(frame, spec, plot));
   parts.push(closeChart());
@@ -181,5 +189,5 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
 }
 
 function text(x: number, y: number, value: string, fill: string, size: number, weight: string, anchor = "start"): string {
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}" font-family="${font()}">${esc(value)}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
 }

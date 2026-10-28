@@ -219,20 +219,44 @@ function renderGrid(spec: Record<string, unknown>): string | null {
   const yField = fieldOf(frame.encoding.y);
   const xs: string[] = [];
   const ys: string[] = [];
-  const values = new Map<string, number>();
+  const xIndex = new Map<string, number>();
+  const yIndex = new Map<string, number>();
   const xCol = column(table, xField);
   const yCol = column(table, yField);
   const cCol = column(table, colorEnc?.field);
+  const xOfRow = new Int32Array(table.length);
+  const yOfRow = new Int32Array(table.length);
+  const vOfRow = new Float64Array(table.length);
   for (let i = 0; i < table.length; i++) {
     const x = xCol[i] === null || xCol[i] === undefined ? "" : String(xCol[i]);
     const y = yField ? (yCol[i] === null || yCol[i] === undefined ? "" : String(yCol[i])) : colorEnc?.title || "Value";
+    let xi = xIndex.get(x);
+    if (xi === undefined) {
+      xi = xs.length;
+      xs.push(x);
+      xIndex.set(x, xi);
+    }
+    let yi = yIndex.get(y);
+    if (yi === undefined) {
+      yi = ys.length;
+      ys.push(y);
+      yIndex.set(y, yi);
+    }
+    xOfRow[i] = xi;
+    yOfRow[i] = yi;
     const value = asNumber(cCol[i]);
-    if (!xs.includes(x)) xs.push(x);
-    if (!ys.includes(y)) ys.push(y);
-    if (value !== null) values.set(`${x}\0${y}`, value);
+    vOfRow[i] = value === null ? Number.NaN : value;
   }
   if (xs.length === 0) return null;
-  const nums = [...values.values()];
+  const grid = new Float64Array(xs.length * ys.length);
+  grid.fill(Number.NaN);
+  const nums: number[] = [];
+  for (let i = 0; i < table.length; i++) {
+    const value = vOfRow[i];
+    if (value !== value) continue;
+    grid[yOfRow[i] * xs.length + xOfRow[i]] = value;
+    nums.push(value);
+  }
   const max = Math.max(...nums, 1);
   const min = Math.min(...nums, 0);
   const color = colorEnc?.constant ? paint(colorEnc.constant, frame.preset, 0) : paint(undefined, frame.preset, 0);
@@ -263,34 +287,35 @@ function renderGrid(spec: Record<string, unknown>): string | null {
   parts.push(`<defs>${quiet.def}</defs>`);
   const titled = heading(frame, left);
   if (titled) parts.push(titled);
-  for (const y of ys) {
-    const row = ys.indexOf(y);
-    parts.push(text(left - 8, top + row * bandH + bandH / 2 + 4, y, cssVar("muted", frame.preset.muted), 11, "400", "end"));
+  for (let row = 0; row < ys.length; row++) {
+    parts.push(text(left - 8, top + row * bandH + bandH / 2 + 4, ys[row] ?? "", cssVar("muted", frame.preset.muted), 11, "400", "end"));
   }
   const longestX = xs.reduce((max, label) => Math.max(max, label.length), 1);
   const xSize = Math.max(8, Math.min(11, Math.floor((bandW * 0.9) / (longestX * 0.56))));
-  for (const x of xs) {
-    const col = xs.indexOf(x);
-    parts.push(text(left + col * bandW + bandW / 2, top - 6, x, cssVar("muted", frame.preset.muted), xSize, "400", "middle"));
+  for (let col = 0; col < xs.length; col++) {
+    parts.push(text(left + col * bandW + bandW / 2, top - 6, xs[col] ?? "", cssVar("muted", frame.preset.muted), xSize, "400", "middle"));
   }
   if (canvas && !cellsMark) parts.push(`<g data-ck-layer="marks">`);
-  for (const x of xs) {
-    for (const y of ys) {
-      const value = values.get(`${x}\0${y}`);
-      const col = xs.indexOf(x);
-      const row = ys.indexOf(y);
-      const missing = value === undefined;
-      const label = `${x}, ${y}: ${missing ? "no value" : formatValue(value, channelFormatOf(frame.encoding.color), frame.locale)}`;
+  const colorFormat = channelFormatOf(frame.encoding.color);
+  const cols = xs.length;
+  for (let col = 0; col < cols; col++) {
+    for (let row = 0; row < ys.length; row++) {
+      const value = grid[row * cols + col];
+      const missing = value !== value;
       const t = missing ? 0 : max === min ? 1 : (value - min) / (max - min);
       const fill = missing ? quiet.fill : ramp ? ramp.paint(value) : range ? range[Math.min(range.length - 1, Math.floor(t * (range.length - 1)))] : color;
       const opacity = missing || range || ramp ? 1 : opacityStep(t);
-      const edge = missing ? ` stroke="${quiet.stroke}" stroke-width="1" data-ck-empty="1"` : "";
       const rx = left + col * bandW + insetX;
       const ry = top + row * bandH + insetY;
       const rw = Math.max(1, bandW - insetX * 2);
       const rh = Math.max(1, bandH - insetY * 2);
-      if (cellsMark) pushRect(cellsMark, rx, ry, rw, rh, missing ? quiet.stroke : fill);
-      else parts.push(
+      if (cellsMark) {
+        pushRect(cellsMark, rx, ry, rw, rh, missing ? quiet.stroke : fill);
+        continue;
+      }
+      const label = `${xs[col] ?? ""}, ${ys[row] ?? ""}: ${missing ? "no value" : formatValue(value, colorFormat, frame.locale)}`;
+      const edge = missing ? ` stroke="${quiet.stroke}" stroke-width="1" data-ck-empty="1"` : "";
+      parts.push(
         `<rect x="${n(rx)}" y="${n(ry)}" width="${n(rw)}" height="${n(rh)}" rx="${n(radius)}" fill="${fill}" fill-opacity="${n(opacity)}"${edge} aria-label="${esc(label)}"><title>${esc(label)}</title></rect>`,
       );
     }
@@ -378,5 +403,5 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function text(x: number, y: number, value: string, fill: string, size: number, weight = "400", anchor = "start"): string {
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}" font-family="${font()}">${esc(value)}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
 }

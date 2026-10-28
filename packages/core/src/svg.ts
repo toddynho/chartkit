@@ -433,7 +433,7 @@ export function openChart(chart: ChartOpen): string {
   const canvas = chart.canvas ? ` data-ck-render="canvas"` : "";
   const scene = capturing() ? ` data-ck-scene="1"` : "";
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}" class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}"${exported}${canvas}${scene} style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}" class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}"${exported}${canvas}${scene} style="font-family:${font()};font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
     `<title>${esc(chart.title || chart.alt)}</title><desc>${esc(chart.alt)}</desc>`
   );
 }

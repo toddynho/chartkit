@@ -301,9 +301,9 @@ function facetSvg(spec: Record<string, unknown>, draw: Draw): string | null {
       : "";
   const titleX = rtl ? w - 8 : 8;
   const anchor = rtl ? ' text-anchor="end" direction="ltr" unicode-bidi="isolate"' : "";
-  const title = spec.title ? `<text x="${titleX}" y="20"${anchor} fill="${ink.text}" font-size="15" font-weight="650" font-family="${font()}">${esc(String(spec.title))}</text>` : "";
+  const title = spec.title ? `<text x="${titleX}" y="20"${anchor} fill="${ink.text}" font-size="15" font-weight="650">${esc(String(spec.title))}</text>` : "";
   const subtitle = spec.subtitle
-    ? `<text x="${titleX}" y="${spec.title ? 38 : 18}"${anchor} fill="${ink.muted}" font-size="12" font-family="${font()}">${esc(String(spec.subtitle))}</text>`
+    ? `<text x="${titleX}" y="${spec.title ? 38 : 18}"${anchor} fill="${ink.muted}" font-size="12">${esc(String(spec.subtitle))}</text>`
     : "";
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : String(spec.title ?? "Small multiples");
   return (
@@ -666,7 +666,7 @@ function concatFrame(
   const bidi = rtl ? ' direction="ltr" unicode-bidi="isolate"' : "";
   const ink = themeInk(spec.theme);
   const title = spec.title
-    ? `<text x="${rtl ? width - 8 : 8}" y="20"${rtl ? ` text-anchor="end"${bidi}` : ""} fill="${ink.text}" font-size="15" font-weight="650" font-family="${font()}">${esc(String(spec.title))}</text>`
+    ? `<text x="${rtl ? width - 8 : 8}" y="20"${rtl ? ` text-anchor="end"${bidi}` : ""} fill="${ink.text}" font-size="15" font-weight="650">${esc(String(spec.title))}</text>`
     : "";
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(alt)}" class="ck-chart" data-ck-type="concat" data-ck-views="${parts.length}" data-ck-flow="${flow}" data-ck-cols="${cols}" data-ck-rows="${rows}"${rtl ? ' dir="rtl"' : ""}>` +
@@ -679,7 +679,7 @@ function missingView(view: Record<string, unknown>, width: number, height: numbe
   const ink = themeInk(theme);
   return (
     `<rect width="${width}" height="${height}" rx="8" fill="${ink.background}" stroke="${ink.grid}"/>` +
-    `<text x="12" y="24" fill="${ink.text}" font-size="13" font-family="${font()}">${esc(title)}</text>`
+    `<text x="12" y="24" fill="${ink.text}" font-size="13">${esc(title)}</text>`
   );
 }
 
@@ -705,7 +705,7 @@ function sharedLegend(names: string[], inks: string[], x: number, y: number, wid
     }
     bits.push(
       `<rect x="${cx}" y="${y}" width="10" height="10" rx="2" fill="${ink}" data-ck-legend-swatch="${esc(name)}"/>` +
-        `<text x="${cx + 16}" y="${y + 9}" fill="${text}" font-size="12" font-family="${font()}">${esc(name)}</text>`,
+        `<text x="${cx + 16}" y="${y + 9}" fill="${text}" font-size="12">${esc(name)}</text>`,
     );
     cx += need + 12;
   }

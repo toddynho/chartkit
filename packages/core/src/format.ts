@@ -101,6 +101,27 @@ function formatDurationHm(value: number): string {
   return `${sign}${minutes}m ${seconds}s`;
 }
 
+const numberFormats = new Map<string, Intl.NumberFormat>();
+const dateFormats = new Map<string, Intl.DateTimeFormat>();
+
+function numberFormat(locale: string, options: Intl.NumberFormatOptions): Intl.NumberFormat {
+  const key = `${locale}\0${JSON.stringify(options)}`;
+  const hit = numberFormats.get(key);
+  if (hit) return hit;
+  const format = new Intl.NumberFormat(locale, options);
+  numberFormats.set(key, format);
+  return format;
+}
+
+function dateFormat(locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  const key = `${locale}\0${JSON.stringify(options)}`;
+  const hit = dateFormats.get(key);
+  if (hit) return hit;
+  const format = new Intl.DateTimeFormat(locale, options);
+  dateFormats.set(key, format);
+  return format;
+}
+
 function formatDate(value: number, style: string, locale: string, zone: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
@@ -114,7 +135,7 @@ function formatDate(value: number, style: string, locale: string, zone: string):
     options.minute = "2-digit";
   }
   if (style === "weekday") options.weekday = "short";
-  return new Intl.DateTimeFormat(locale, options).format(date);
+  return dateFormat(locale, options).format(date);
 }
 
 function body(value: number, fmt: Fmt, locale: string, zone: string): string {
@@ -128,7 +149,7 @@ function body(value: number, fmt: Fmt, locale: string, zone: string): string {
   }
   if (style === "exponent") return value.toExponential(fmt.decimals ?? 0);
   if (style === "integer") {
-    return new Intl.NumberFormat(locale, { maximumFractionDigits: 0, useGrouping: fmt.group === false ? false : undefined }).format(value);
+    return numberFormat(locale, { maximumFractionDigits: 0, useGrouping: fmt.group === false ? false : undefined }).format(value);
   }
   const options: Intl.NumberFormatOptions = digits(fmt, style === "compact" || style === "percent" || style === "percent-raw" ? 1 : 2);
   if (fmt.group === false) options.useGrouping = false;
@@ -139,7 +160,7 @@ function body(value: number, fmt: Fmt, locale: string, zone: string): string {
     options.style = "currency";
     options.currency = fmt.currency ?? "USD";
   }
-  return new Intl.NumberFormat(locale, options).format(style === "percent-raw" ? value / 100 : value);
+  return numberFormat(locale, options).format(style === "percent-raw" ? value / 100 : value);
 }
 
 function fractionsLocked(fmt: Fmt): boolean {

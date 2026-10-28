@@ -167,7 +167,7 @@ export function paintLegend(box: LegendBox, items: LegendItem[], frame: LegendFr
   const parts: string[] = [];
   const body = y + (box.title ? 16 : 0);
   if (box.title) {
-    parts.push(`<text x="${n(x)}" y="${n(y + 11)}" fill="${fill}" font-size="11" font-weight="650" font-family="${font()}">${esc(box.title)}</text>`);
+    parts.push(`<text x="${n(x)}" y="${n(y + 11)}" fill="${fill}" font-size="11" font-weight="650">${esc(box.title)}</text>`);
   }
   rows.forEach((row, index) => {
     const page = Math.floor(index / Math.max(1, per));
@@ -181,7 +181,7 @@ export function paintLegend(box: LegendBox, items: LegendItem[], frame: LegendFr
       const symbol = box.symbols[item.name] || item.symbol || box.symbol;
       const mark = icon(symbol, cx, rowY, item.color);
       const value = item.value ? ` ${item.value}` : "";
-      const text = `<text x="${n(cx + 16)}" y="${n(rowY + 9)}" fill="${fill}" font-size="12" font-family="${font()}">${esc(item.name + value)}</text>`;
+      const text = `<text x="${n(cx + 16)}" y="${n(rowY + 9)}" fill="${fill}" font-size="12">${esc(item.name + value)}</text>`;
       const out = `${mark}${text}`;
       cx += itemWidth(item);
       return out;
@@ -194,7 +194,7 @@ export function paintLegend(box: LegendBox, items: LegendItem[], frame: LegendFr
     parts.push(
       `<g data-ck-legend-pager>` +
         `<g data-ck-legend-page="prev" role="button" tabindex="0"><path d="M${n(x + 8)} ${n(py + 3)}l-5 5 5 5" fill="none" stroke="${muted}" stroke-width="1.4" /></g>` +
-        `<text data-ck-legend-count="1" x="${n(x + 16)}" y="${n(py + 11)}" fill="${muted}" font-size="11" font-family="${font()}">1/${pages}</text>` +
+        `<text data-ck-legend-count="1" x="${n(x + 16)}" y="${n(py + 11)}" fill="${muted}" font-size="11">1/${pages}</text>` +
         `<g data-ck-legend-page="next" role="button" tabindex="0"><path d="M${n(x + 48)} ${n(py + 3)}l5 5-5 5" fill="none" stroke="${muted}" stroke-width="1.4" /></g>` +
         `</g>`,
     );

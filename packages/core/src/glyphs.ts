@@ -52,7 +52,7 @@ export function bag(): Bag {
         if (left < ox + ow && left + w > ox && top < oy + oh && top + 11 > oy) return "";
       }
       boxes.push(left, top, w, 11);
-      return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="10" font-family="${font()}">${esc(text)}</text>`;
+      return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="10">${esc(text)}</text>`;
     },
   };
 }

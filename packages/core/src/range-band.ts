@@ -2,6 +2,142 @@ import type { DataTable } from "./data";
 import { esc, isRecord, n } from "./svg";
 import { mountRange, type Series } from "./renderers/cartesian";
 
+/**
+ * Pixel envelope of a dense band. Null when the series is not at least two
+ * points per pixel, so the caller keeps the exact path. A null that crosses
+ * into a new pixel starts a new run, so a gap stays open.
+ */
+export function denseBand(
+  lo: ArrayLike<number | null>,
+  hi: ArrayLike<number | null>,
+  xAt: (index: number) => number,
+  yAt: (value: number) => number,
+): string | null {
+  const count = Math.min(lo.length, hi.length);
+  if (count < 4) return null;
+  const x0 = xAt(0);
+  const x1 = xAt(count - 1);
+  const left = Math.min(x0, x1);
+  const span = Math.abs(x1 - x0);
+  const buckets = Math.max(1, Math.ceil(span));
+  if (buckets < 2 || count < buckets * 2) return null;
+  const top = new Float64Array(buckets);
+  const bot = new Float64Array(buckets);
+  top.fill(Infinity);
+  bot.fill(-Infinity);
+  const seam = new Uint8Array(buckets);
+  const denom = buckets - 1;
+  let gap = false;
+  let prev = -1;
+  for (let i = 0; i < count; i++) {
+    const a = lo[i];
+    const b = hi[i];
+    if (a === null || b === null || !Number.isFinite(a) || !Number.isFinite(b)) {
+      gap = true;
+      continue;
+    }
+    let k = Math.round(((xAt(i) - left) / (span || 1)) * denom);
+    if (k < 0) k = 0;
+    else if (k >= buckets) k = buckets - 1;
+    if (gap && prev >= 0 && k !== prev) seam[k] = 1;
+    gap = false;
+    prev = k;
+    const hiV = a > b ? a : b;
+    const loV = a < b ? a : b;
+    const t = yAt(hiV);
+    const bm = yAt(loV);
+    if (t < top[k]) top[k] = t;
+    if (bm > bot[k]) bot[k] = bm;
+  }
+  const xOf = (k: number) => left + (k / denom) * span;
+  const parts: string[] = [];
+  let from = -1;
+  const flush = (to: number) => {
+    if (from < 0 || to <= from) return;
+    let d = `M ${n(xOf(from))} ${n(top[from])}`;
+    for (let k = from + 1; k < to; k++) d += ` L ${n(xOf(k))} ${n(top[k])}`;
+    for (let k = to - 1; k >= from; k--) d += ` L ${n(xOf(k))} ${n(bot[k])}`;
+    parts.push(`${d} Z`);
+    from = -1;
+  };
+  for (let k = 0; k < buckets; k++) {
+    if (!Number.isFinite(top[k]) || seam[k]) flush(k);
+    if (!Number.isFinite(top[k])) continue;
+    if (from < 0) from = k;
+  }
+  flush(buckets);
+  return parts.length ? parts.join(" ") : null;
+}
+
+/**
+ * Min and max of a dense line in each pixel, in index order. Null when the
+ * series is not dense enough to decimate. A null that enters a new pixel
+ * breaks the stroke.
+ */
+export function denseLine(
+  values: ArrayLike<number | null>,
+  xAt: (index: number) => number,
+  yAt: (value: number) => number,
+): string | null {
+  const count = values.length;
+  if (count < 4) return null;
+  const x0 = xAt(0);
+  const x1 = xAt(count - 1);
+  const left = Math.min(x0, x1);
+  const span = Math.abs(x1 - x0);
+  const buckets = Math.max(1, Math.ceil(span));
+  if (buckets < 2 || count < buckets * 2) return null;
+  const loI = new Int32Array(buckets);
+  const hiI = new Int32Array(buckets);
+  loI.fill(-1);
+  hiI.fill(-1);
+  const seam = new Uint8Array(buckets);
+  const denom = buckets - 1;
+  let gap = false;
+  let prev = -1;
+  for (let i = 0; i < count; i++) {
+    const value = values[i];
+    if (value === null || !Number.isFinite(value)) {
+      gap = true;
+      continue;
+    }
+    let k = Math.round(((xAt(i) - left) / (span || 1)) * denom);
+    if (k < 0) k = 0;
+    else if (k >= buckets) k = buckets - 1;
+    if (gap && prev >= 0 && k !== prev) seam[k] = 1;
+    gap = false;
+    prev = k;
+    const lo = loI[k];
+    if (lo < 0 || value < (values[lo] as number) || (value === values[lo] && i < lo)) loI[k] = i;
+    const hi = hiI[k];
+    if (hi < 0 || value > (values[hi] as number) || (value === values[hi] && i < hi)) hiI[k] = i;
+  }
+  let d = "";
+  let open = false;
+  const emit = (index: number) => {
+    const value = values[index];
+    if (value === null || !Number.isFinite(value)) return;
+    d += `${open ? "L" : "M"} ${n(xAt(index))} ${n(yAt(value as number))} `;
+    open = true;
+  };
+  for (let k = 0; k < buckets; k++) {
+    const a = loI[k];
+    const b = hiI[k];
+    if (a < 0 || seam[k]) open = false;
+    if (a < 0) continue;
+    if (b < 0 || a === b) emit(a);
+    else if (a < b) {
+      emit(a);
+      emit(b);
+    } else {
+      emit(b);
+      emit(a);
+    }
+  }
+  const trimmed = d.trim();
+  return trimmed || null;
+}
+
 /** Closed band between lo and hi. Nulls break the run. Shared by combo and area-range. */
 export function bandPath(
   lo: ArrayLike<number | null>,

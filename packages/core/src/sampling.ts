@@ -38,6 +38,29 @@ export function resolveSampling(mode: SamplingMode, count: number, plotWidth: nu
 }
 
 let frame = 0;
+
+const minmaxMemo = new WeakMap<object, { frame: number; target: number; length: number; index: Int32Array }>();
+
+/**
+ * Min, max, and minmax indexes in one pass. The sampler reuses the indexes
+ * when it asks for this exact target on the same column.
+ */
+export function extentAndMinmax(values: Float64Array, target: number, xs?: Float64Array | null): { min: number; max: number; dense: boolean } {
+  const sink = { min: Infinity, max: -Infinity, dense: true, indexAxis: false };
+  const cap = Math.max(2, target);
+  const index = minmaxIndex(values, 0, values.length, cap, sink, xs);
+  if (sink.dense && Number.isFinite(sink.min) && Number.isFinite(sink.max) && values.length > cap) {
+    minmaxMemo.set(values, { frame, target: cap, length: values.length, index });
+  }
+  if (sink.indexAxis && xs) noteLinear(xs);
+  return sink;
+}
+
+function recallMinmax(values: object, cap: number, length: number): Int32Array | null {
+  const hit = minmaxMemo.get(values);
+  if (!hit || hit.frame !== frame || hit.target !== cap || hit.length !== length) return null;
+  return hit.index;
+}
 const denseNote = new WeakMap<object, { frame: number; length: number }>();
 const linearNote = new WeakMap<object, number>();
 
@@ -222,7 +245,12 @@ function sampleDense(
   const len = end - start;
   const cap = Math.max(2, target);
   if (len <= cap) return copyRange(start, end);
-  if (mode === "minmax" && ys instanceof Float64Array && (xs === null || notedLinear(xs))) return minmaxIndex(ys, start, end, cap);
+  if (mode === "minmax" && start === 0 && typeof ys === "object" && ys !== null) {
+    const recalled = recallMinmax(ys, cap, end);
+    if (recalled) return recalled;
+  }
+  // Index buckets match an arithmetic x. A plain number[] (mini-area) uses them too.
+  if (mode === "minmax" && (xs === null || notedLinear(xs))) return minmaxIndex(ys as ArrayLike<number>, start, end, cap);
   if (mode === "minmax" && xs instanceof Float64Array && ys instanceof Float64Array) {
     const walked = minmaxSorted(xs, ys, start, end, cap);
     if (walked) return walked;
@@ -268,13 +296,37 @@ function minmaxSorted(xs: Float64Array, ys: Float64Array, start: number, end: nu
  * Min/max inside equal index buckets. Matches x-based buckets when x is linear in the index.
  * Ties keep the earlier point. The first and last indexes are always kept.
  */
-function minmaxIndex(ys: Float64Array, start: number, end: number, target: number): Int32Array {
+function minmaxIndex(
+  ys: ArrayLike<number>,
+  start: number,
+  end: number,
+  target: number,
+  sink?: { min: number; max: number; dense: boolean; indexAxis?: boolean },
+  xs?: Float64Array | null,
+): Int32Array {
   const last = end - 1;
   const len = last - start;
   const buckets = Math.max(1, Math.floor((target - 2) / 2));
   const minI = new Int32Array(buckets);
   const maxI = new Int32Array(buckets);
   minI.fill(-1);
+  let indexOk = Boolean(sink && xs && start === 0 && xs.length === end && end > 1 && xs[0] === 0 && xs[end - 1] === end - 1);
+  if (sink) {
+    const y0 = ys[start];
+    const y1 = ys[last];
+    if (y0 !== y0) sink.dense = false;
+    else {
+      if (y0 < sink.min) sink.min = y0;
+      if (y0 > sink.max) sink.max = y0;
+    }
+    if (last !== start) {
+      if (y1 !== y1) sink.dense = false;
+      else {
+        if (y1 < sink.min) sink.min = y1;
+        if (y1 > sink.max) sink.max = y1;
+      }
+    }
+  }
   for (let bucket = 0; bucket < buckets; bucket++) {
     let from = start + 1 + Math.floor((bucket * len) / buckets);
     let to = start + 1 + Math.floor(((bucket + 1) * len) / buckets);
@@ -285,20 +337,48 @@ function minmaxIndex(ys: Float64Array, start: number, end: number, target: numbe
     let maxV = -Infinity;
     let lo = -1;
     let hi = -1;
-    for (let i = from; i < to; i++) {
-      const y = ys[i];
-      if (y < minV) {
-        minV = y;
-        lo = i;
+    if (sink) {
+      let gmin = sink.min;
+      let gmax = sink.max;
+      let dense = sink.dense;
+      for (let i = from; i < to; i++) {
+        if (indexOk && xs![i] !== i) indexOk = false;
+        const y = ys[i];
+        if (y !== y) {
+          dense = false;
+          continue;
+        }
+        if (y < gmin) gmin = y;
+        if (y > gmax) gmax = y;
+        if (y < minV) {
+          minV = y;
+          lo = i;
+        }
+        if (y > maxV) {
+          maxV = y;
+          hi = i;
+        }
       }
-      if (y > maxV) {
-        maxV = y;
-        hi = i;
+      sink.min = gmin;
+      sink.max = gmax;
+      sink.dense = dense;
+    } else {
+      for (let i = from; i < to; i++) {
+        const y = ys[i];
+        if (y < minV) {
+          minV = y;
+          lo = i;
+        }
+        if (y > maxV) {
+          maxV = y;
+          hi = i;
+        }
       }
     }
     minI[bucket] = lo;
     maxI[bucket] = hi;
   }
+  if (sink) sink.indexAxis = indexOk;
   return pack(minI, maxI, buckets, start, last);
 }
 

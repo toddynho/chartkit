@@ -48,8 +48,8 @@ export function renderBarList(spec: Record<string, unknown>): string | null {
       const filled = Math.max(12, (row.value / max) * span);
       parts.push(
         `<rect data-ck-track="row" x="0" y="${n(y + 2)}" width="${n(filled)}" height="${rowH - 4}" rx="3" fill="${fill}" fill-opacity="0.16" />` +
-          `<text x="8" y="${n(y + 18)}" fill="${ink}" font-size="12" font-weight="560" font-family="${font()}">${esc(row.label)}</text>` +
-          `<text x="${n(width - 4)}" y="${n(y + 18)}" text-anchor="end" fill="${ink}" font-size="12" font-weight="650" font-family="${font()}">${esc(text)}</text>`,
+          `<text x="8" y="${n(y + 18)}" fill="${ink}" font-size="12" font-weight="560">${esc(row.label)}</text>` +
+          `<text x="${n(width - 4)}" y="${n(y + 18)}" text-anchor="end" fill="${ink}" font-size="12" font-weight="650">${esc(text)}</text>`,
       );
       return;
     }
@@ -60,8 +60,8 @@ export function renderBarList(spec: Record<string, unknown>): string | null {
     parts.push(
       `<rect data-ck-track="1" x="0" y="${n(trackY)}" width="${n(span)}" height="${trackH}" rx="4" fill="${fill}" fill-opacity="0.14" />` +
         `<rect data-ck-bar="1" x="0" y="${n(trackY)}" width="${n(filled)}" height="${trackH}" rx="4" fill="${fill}" fill-opacity="0.42" />` +
-        `<text x="8" y="${n(trackY + 12)}" fill="${ink}" font-size="12" font-weight="560" font-family="${font()}">${esc(row.label)}</text>` +
-        `<text x="${n(width - 4)}" y="${n(trackY + 12)}" text-anchor="end" fill="${ink}" font-size="12" font-weight="650" font-family="${font()}">${esc(text)}</text>`,
+        `<text x="8" y="${n(trackY + 12)}" fill="${ink}" font-size="12" font-weight="560">${esc(row.label)}</text>` +
+        `<text x="${n(width - 4)}" y="${n(trackY + 12)}" text-anchor="end" fill="${ink}" font-size="12" font-weight="650">${esc(text)}</text>`,
     );
   });
   parts.push(closeChart());
