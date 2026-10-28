@@ -1,4 +1,5 @@
 import { chartTypeAdapters } from "./chart-types.mjs";
+import { phase3Adapters } from "./phase3.mjs";
 import { rivalAdapters } from "./rivals.mjs";
 
 const prelude = `
@@ -373,4 +374,5 @@ export const browserAdapters = [
   { id: "plot", source: plot, library: "Observable Plot", renderer: "svg", ...lineRival },
   ...chartTypeAdapters(),
   ...rivalAdapters(),
+  ...phase3Adapters(),
 ];

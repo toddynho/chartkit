@@ -2,7 +2,7 @@
  * Phase 2 paint cells for the libraries already on the line sweep.
  * A cell is native only when that library has a real chart of that shape.
  * Unsupported cells are written with a reason and no time. Nothing is invented.
- * Commercial libraries are not in this phase. A missing license key would be
+ * Commercial libraries are phase 3 (phase3.mjs). A missing license key is
  * status blocked, and that status is still part of the schema.
  */
 
