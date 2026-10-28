@@ -1,3 +1,6 @@
+import { chartTypeAdapters } from "./chart-types.mjs";
+import { rivalAdapters } from "./rivals.mjs";
+
 const prelude = `
 import { makeSeries } from "../lib/series.mjs";
 function heap() {
@@ -53,6 +56,7 @@ function spec(xs, ys) {
 globalThis.__bench = {
   library: ${JSON.stringify(library)},
   renderer: "svg",
+  chart: "line",
   async run(n) {
     const host = document.createElement("div");
     document.getElementById("root").replaceChildren(host);
@@ -294,6 +298,7 @@ function spec(xs, ys) {
 globalThis.__bench = {
   library: "ChartKit canvas",
   renderer: "canvas",
+  chart: "line",
   async run(n) {
     const host = document.createElement("div");
     host.style.cssText = "position:relative;width:640px;height:360px";
@@ -315,14 +320,57 @@ globalThis.__bench = {
 `;
 }
 
+const lineWhy = "Existing line sweep. sampling auto is the homepage line. canvas and sampling-none are variants of the same type. These cells use the two-frame paint protocol, not the hover-steady figure in catalog/public/benchmarks.json.";
+const lineRival = {
+  chart: "line",
+  homepageRow: "line",
+  variant: null,
+  nMeaning: "points in one series; x[i] = i",
+  why: lineWhy,
+  method: "Projected from the existing line sweep. The type matrix does not paint line a second time.",
+};
+
 export const browserAdapters = [
-  { id: "chartkit", source: chartkitSource("auto", "ChartKit") },
-  { id: "chartkit-canvas", source: chartkitCanvasSource() },
-  { id: "chartkit-full", source: chartkitSource("none", "ChartKit sampling none"), sizes: [100_000, 1_000_000] },
-  { id: "uplot", source: uplot },
-  { id: "chartjs", source: chartjs },
-  { id: "echarts", source: echarts },
-  { id: "recharts", source: recharts },
-  { id: "nivo", source: nivo },
-  { id: "plot", source: plot },
+  {
+    id: "chartkit",
+    source: chartkitSource("auto", "ChartKit"),
+    library: "ChartKit",
+    renderer: "svg",
+    chart: "line",
+    homepageRow: "line",
+    variant: "sampling-auto",
+    nMeaning: "points in one series; x[i] = i",
+    why: lineWhy,
+  },
+  {
+    id: "chartkit-canvas",
+    source: chartkitCanvasSource(),
+    library: "ChartKit canvas",
+    renderer: "canvas",
+    chart: "line",
+    homepageRow: "line",
+    variant: "canvas",
+    nMeaning: "points in one series; x[i] = i",
+    why: lineWhy,
+  },
+  {
+    id: "chartkit-full",
+    source: chartkitSource("none", "ChartKit sampling none"),
+    library: "ChartKit sampling none",
+    renderer: "svg",
+    sizes: [100_000, 1_000_000],
+    chart: "line",
+    homepageRow: "line",
+    variant: "sampling-none",
+    nMeaning: "points in one series; x[i] = i",
+    why: lineWhy,
+  },
+  { id: "uplot", source: uplot, library: "uPlot", renderer: "canvas", ...lineRival },
+  { id: "chartjs", source: chartjs, library: "Chart.js", renderer: "canvas", ...lineRival },
+  { id: "echarts", source: echarts, library: "ECharts", renderer: "canvas", ...lineRival },
+  { id: "recharts", source: recharts, library: "Recharts", renderer: "svg", ...lineRival },
+  { id: "nivo", source: nivo, library: "Nivo", renderer: "svg", ...lineRival },
+  { id: "plot", source: plot, library: "Observable Plot", renderer: "svg", ...lineRival },
+  ...chartTypeAdapters(),
+  ...rivalAdapters(),
 ];

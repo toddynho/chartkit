@@ -23,9 +23,20 @@ const versions = {
   "chart.js": version("chart.js"),
   recharts: version("recharts"),
   echarts: version("echarts"),
-  "@nivo/line": version("@nivo/line"),
   "@nivo/bar": version("@nivo/bar"),
+  "@nivo/boxplot": version("@nivo/boxplot"),
+  "@nivo/bullet": version("@nivo/bullet"),
+  "@nivo/funnel": version("@nivo/funnel"),
+  "@nivo/heatmap": version("@nivo/heatmap"),
+  "@nivo/line": version("@nivo/line"),
   "@nivo/pie": version("@nivo/pie"),
+  "@nivo/radar": version("@nivo/radar"),
+  "@nivo/radial-bar": version("@nivo/radial-bar"),
+  "@nivo/sankey": version("@nivo/sankey"),
+  "@nivo/scatterplot": version("@nivo/scatterplot"),
+  "@nivo/stream": version("@nivo/stream"),
+  "@nivo/sunburst": version("@nivo/sunburst"),
+  "@nivo/treemap": version("@nivo/treemap"),
   "@observablehq/plot": version("@observablehq/plot"),
   react: version("react"),
   "react-dom": version("react-dom"),
@@ -69,6 +80,8 @@ if (!skip.agent) {
   };
 }
 
+if (result.browser?.charts) writePaint(result);
+
 if (!result.bundle || !result.browser || !result.ssr) {
   console.log("Partial run. BENCHMARKS.md is written only when bundle, browser, and ssr all run.");
   mkdirSync(join(benchRoot, "results"), { recursive: true });
@@ -82,6 +95,26 @@ if (!result.bundle || !result.browser || !result.ssr) {
   console.log("wrote BENCHMARKS.md and bench/results/latest.json");
 }
 await stop();
+
+function writePaint(result) {
+  const browser = result.browser;
+  const smoke = browser.samples !== 5;
+  const name = smoke ? "paint-smoke.json" : "paint.json";
+  const payload = {
+    kind: smoke ? "smoke" : "median",
+    disclaimer: smoke
+      ? "Not a published median. BENCH_SAMPLES was not 5. Do not map these timings onto the homepage."
+      : "Median of 5 fresh pages. Homepage hover-steady numbers are a different protocol and stay in catalog/public/benchmarks.json.",
+    measuredAt: result.machine?.measuredAt ?? null,
+    samples: browser.samples,
+    chartMethod: browser.chartMethod ?? null,
+    paintSchema: browser.paintSchema ?? null,
+    charts: browser.charts,
+  };
+  mkdirSync(join(benchRoot, "results"), { recursive: true });
+  writeFileSync(join(benchRoot, "results", name), JSON.stringify(payload, null, 2));
+  console.log(`wrote bench/results/${name}`);
+}
 
 async function loadRunAgent() {
   const outfile = join(benchRoot, ".out/agent-suite.mjs");
