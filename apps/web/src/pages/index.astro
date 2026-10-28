@@ -136,7 +136,7 @@ const icon = (d: string) =>
         <p class="eyebrow eyebrow--blue">For the user</p>
         <h2 id="measured-title">Faster on the page</h2>
         <p>
-          {proof.gzipKb} KB gzipped, no DOM needed on the server, and the chart paints in milliseconds in the browser. Hover-to-paint at 100,000 points, by chart type. <a href="/benchmarks">Method and raw data →</a>
+          {proof.gzipKb} KB gzipped, and the server draws the chart with no DOM. The plot is initial paint by chart type, the median of five fresh pages. <a href="/benchmarks">Benchmarks</a> keeps the hover-steady line, a different measurement.
         </p>
       </div>
       <div class="bench-card">
@@ -157,10 +157,11 @@ const icon = (d: string) =>
                 <div class="bench-row__label">
                   {row.type}
                   {row.note ? <small>{row.note}</small> : null}
+                  <span class="sr">{row.summary}</span>
                 </div>
                 <div class="bench-track">
                   {row.dots.map((dot) => (
-                    <span class="bench-dot" title={dot.title} style={`left:${dot.left};width:${dot.size};height:${dot.size};background:${dot.fill};box-shadow:${dot.ring}`} />
+                    <span class="bench-dot" role="img" aria-label={dot.title} title={dot.title} style={`left:${dot.left};width:${dot.size};height:${dot.size};background:${dot.fill};box-shadow:${dot.ring}`} />
                   ))}
                 </div>
               </div>
@@ -174,7 +175,7 @@ const icon = (d: string) =>
           </div>
         </div>
         <p class="bench-note">
-          Milliseconds, log scale; left is faster. Round {proof.round}, {proof.measured} measured the line chart (solid). Hollow dots are placeholders until round {proof.round + 1} runs the other types. Libraries without a native type are omitted from that row.
+          Milliseconds, log scale; left is faster. Each solid dot is the initial-paint median, two frames at 640×360, measured {bench.measuredOn}{bench.commit ? ` on ${bench.commit}` : ""}. The dot title includes the update median from the same cell. Line is sampling auto at 100,000 points. Area is native stacked-area at 100,000 x positions with four series. Bar is 48 categories, scatter is 100,000 points, donut is 8 slices, and heatmap is 1,200 cells. Libraries without a native type, and cells that errored, are omitted.
         </p>
       </div>
     </section>
