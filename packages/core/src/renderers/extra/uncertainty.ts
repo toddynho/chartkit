@@ -203,7 +203,7 @@ function legendRow(items: { name: string; color: string; opacity: number }[], x:
   const out: string[] = [];
   for (const item of items) {
     const soft = item.opacity < 1 ? ` fill-opacity="${n(Math.min(0.85, item.opacity + 0.28))}"` : "";
-    out.push(`<rect x="${n(cx)}" y="${n(y)}" width="10" height="10" rx="2" fill="${item.color}"${soft} /><text x="${n(cx + 14)}" y="${n(y + 9)}" fill="${fill}" font-size="12" font-family="${font()}">${esc(item.name)}</text>`);
+    out.push(`<rect x="${n(cx)}" y="${n(y)}" width="10" height="10" rx="2" fill="${item.color}"${soft} /><text x="${n(cx + 14)}" y="${n(y + 9)}" fill="${fill}" font-size="12">${esc(item.name)}</text>`);
     cx += 22 + item.name.length * 6.6;
   }
   return out.join("");

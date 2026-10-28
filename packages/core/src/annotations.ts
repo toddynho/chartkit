@@ -655,7 +655,7 @@ function median(values: number[]): number {
 }
 
 function label(text: string, x: number, y: number, anchor: string, color: string, kind = "rule"): string {
-  return `<text data-ck-annotation="${kind}" x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${color}" font-size="11" font-weight="600" font-family="${font()}">${esc(text)}</text>`;
+  return `<text data-ck-annotation="${kind}" x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${color}" font-size="11" font-weight="600">${esc(text)}</text>`;
 }
 
 function axisOf(item: Record<string, unknown>): "x" | "y" | "y2" {

@@ -403,5 +403,5 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function text(x: number, y: number, value: string, fill: string, size: number, weight = "400", anchor = "start"): string {
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}" font-family="${font()}">${esc(value)}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
 }

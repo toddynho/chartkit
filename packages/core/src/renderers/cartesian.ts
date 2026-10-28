@@ -7,7 +7,7 @@ import { formatZoned, zoneOf, zonedTimeTicks } from "../timezone";
 import { formatAxisValue, formatValue } from "../format";
 import { bag, glyphOf, marker, named, nudge, type Bag } from "../glyphs";
 import { canvasWanted } from "../render-mode";
-import { beginFrame, dataSampling, noteDense, noteLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
+import { beginFrame, dataSampling, extentAndMinmax, noteDense, noteLinear, notedLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import type { ColorScale } from "../color-scale";
 import { exportList, readColor } from "../frame";
 import { CHROME_TOP } from "../chrome";
@@ -747,10 +747,10 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   const titleX = paint ? paint.titleX(Boolean(model.rtl), model.width, pad.left) : pad.left;
   const titleAnchor = paint ? paint.titleAttr(Boolean(model.rtl)) : "";
   if (model.title) {
-    parts.push(`<text x="${n(titleX)}" y="${CHROME_TOP}"${titleAnchor} fill="${cssVar("text", model.preset.text)}" font-size="15" font-weight="650" font-family="${font()}">${esc(model.title)}</text>`);
+    parts.push(`<text x="${n(titleX)}" y="${CHROME_TOP}"${titleAnchor} fill="${cssVar("text", model.preset.text)}" font-size="15" font-weight="650">${esc(model.title)}</text>`);
   }
   if (model.subtitle) {
-    parts.push(`<text x="${n(titleX)}" y="${model.title ? 40 : 18}"${titleAnchor} fill="${cssVar("muted", model.preset.muted)}" font-size="12" font-weight="400" font-family="${font()}">${esc(model.subtitle)}</text>`);
+    parts.push(`<text x="${n(titleX)}" y="${model.title ? 40 : 18}"${titleAnchor} fill="${cssVar("muted", model.preset.muted)}" font-size="12" font-weight="400">${esc(model.subtitle)}</text>`);
   }
   if (model.headline) parts.push(headlineSvg(model));
   if (model.legend && !model.legendBox) parts.push(legend(model, pad.left, model.subtitle ? 54 : model.title ? 36 : CHROME_TOP, plot.right));
@@ -1656,7 +1656,7 @@ let labelPx = 11;
 function axText(x: number, y: number, anchor: string, body: string, fill: string, family: string, angle = 0, weight = "", rows?: string[] | null): string {
   const spin = angle ? ` transform="rotate(${n(angle)} ${n(x)} ${n(y)})"` : "";
   const text = rows ? rows.map((row, i) => `<tspan x="${n(x)}" dy="${i ? 12 : 0}">${esc(row)}</tspan>`).join("") : esc(body);
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${labelPx}"${weight} font-family="${family}"${textDir}${spin}>${text}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${labelPx}"${weight}${textDir}${spin}>${text}</text>`;
 }
 
 function wrapWords(text: string, width: number, lines: number): string[] {
@@ -2275,7 +2275,7 @@ function legend(model: PlotModel, x: number, y: number, maxRight: number): strin
         cx = x;
         cy += 18;
       }
-      out.push(`<rect x="${n(cx)}" y="${n(cy)}" width="10" height="10" rx="2" fill="${item.color}" /><text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12" font-family="${font()}">${esc(item.name)}</text>`);
+      out.push(`<rect x="${n(cx)}" y="${n(cy)}" width="10" height="10" rx="2" fill="${item.color}" /><text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12">${esc(item.name)}</text>`);
       cx += width;
     }
     appendRules(out, model, cx, cy, x, maxRight);
@@ -2305,7 +2305,7 @@ function legendSeries(model: PlotModel, x: number, y: number, maxRight: number):
       cx = x;
       cy += 18;
     }
-    out.push(`${legendIcon(model, series, cx, cy)}<text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12" font-family="${font()}">${esc(name)}</text>`);
+    out.push(`${legendIcon(model, series, cx, cy)}<text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12">${esc(name)}</text>`);
     cx += width;
   }
   appendRules(out, model, cx, cy, x, maxRight);
@@ -2323,7 +2323,7 @@ function appendRules(out: string[], model: PlotModel, cx: number, cy: number, x:
       item.symbol === "square"
         ? `<rect x="${n(cx)}" y="${n(cy)}" width="10" height="10" rx="2" fill="${item.color}" />`
         : `<circle cx="${n(cx + 5)}" cy="${n(cy + 5)}" r="4.5" fill="${item.color}" stroke="${cssVar("background", model.preset.background)}" stroke-width="1.5" />`;
-    out.push(`${swatch}<text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12" font-family="${font()}">${esc(item.name)}</text>`);
+    out.push(`${swatch}<text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12">${esc(item.name)}</text>`);
     cx += width;
   }
 }
@@ -2351,30 +2351,30 @@ function headlineSvg(model: PlotModel): string {
   const compareSize = 22;
   const deltaSize = 13;
   if (head.label) {
-    out += `<text x="12" y="${y}" fill="${muted}" font-size="${labelSize}" font-weight="500" font-family="${font()}">${esc(head.label)}</text>`;
+    out += `<text x="12" y="${y}" fill="${muted}" font-size="${labelSize}" font-weight="500">${esc(head.label)}</text>`;
     y += 24;
   }
   const baseline = y + valueSize - 8;
-  out += `<text data-ck-headline="1" x="12" y="${baseline}" fill="${text}" font-size="${valueSize}" font-weight="650" font-family="${font()}">${esc(head.value)}</text>`;
+  out += `<text data-ck-headline="1" x="12" y="${baseline}" fill="${text}" font-size="${valueSize}" font-weight="650">${esc(head.value)}</text>`;
   const edge = model.width - 16;
   const deltaW = head.delta ? headlineInk(head.delta, deltaSize) + 22 : 0;
   const compareW = head.compare ? headlineInk(head.compare, compareSize) : 0;
   const between = head.compare && head.delta ? 10 : 0;
   const compareX = edge - deltaW - between - compareW;
   if (head.compare) {
-    out += `<text x="${n(compareX)}" y="${baseline}" fill="${muted}" font-size="${compareSize}" font-weight="500" font-family="${font()}">${esc(head.compare)}</text>`;
+    out += `<text x="${n(compareX)}" y="${baseline}" fill="${muted}" font-size="${compareSize}" font-weight="500">${esc(head.compare)}</text>`;
   }
   if (head.delta) {
     const pillX = edge - deltaW;
     const pillY = baseline - 20;
     out += `<rect data-ck-delta="1" x="${n(pillX)}" y="${n(pillY)}" width="${n(deltaW)}" height="24" rx="12" fill="${tone}" fill-opacity="0.16" />`;
-    out += `<text x="${n(pillX + deltaW / 2)}" y="${n(pillY + 16)}" text-anchor="middle" fill="${tone}" font-size="${deltaSize}" font-weight="650" font-family="${font()}">${esc(head.delta)}</text>`;
+    out += `<text x="${n(pillX + deltaW / 2)}" y="${n(pillY + 16)}" text-anchor="middle" fill="${tone}" font-size="${deltaSize}" font-weight="650">${esc(head.delta)}</text>`;
   }
   return out;
 }
 
 function svgStyle(model: PlotModel): string {
-  let style = "font-variant-numeric:tabular-nums;font-feature-settings:'tnum'";
+  let style = `font-family:${font()};font-variant-numeric:tabular-nums;font-feature-settings:'tnum'`;
   if (model.preset.fontFamily) style += `;--ck-font-family:${model.preset.fontFamily}`;
   return style;
 }
@@ -2545,11 +2545,20 @@ function floatExtent(values: Float64Array): { min: number; max: number; dense: b
   return { min, max, dense };
 }
 
+/** x[i] === i for every index. One compare per point, no stride multiply. */
+function isIndexAxis(values: Float64Array): boolean {
+  const count = values.length;
+  if (!(count > 1) || values[0] !== 0 || values[count - 1] !== count - 1) return false;
+  for (let i = 1; i < count - 1; i++) if (values[i] !== i) return false;
+  return true;
+}
+
 /** Extent plus an exact arithmetic-sequence check. Used for x, where index buckets need a linear axis. */
 function linearExtent(values: Float64Array): { min: number; max: number; linear: boolean } | null {
   const count = values.length;
   if (count === 0) return null;
-  if (indexAxes.has(values)) return { min: 0, max: Math.max(0, count - 1), linear: true };
+  if (indexAxes.has(values) || notedLinear(values)) return { min: 0, max: Math.max(0, count - 1), linear: true };
+  if (count > 1 && isIndexAxis(values)) return { min: 0, max: count - 1, linear: true };
   let min = Infinity;
   let max = -Infinity;
   const first = values[0];
@@ -2607,6 +2616,16 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
       if (series.axis !== axis) continue;
       const values = series.values;
       if (values instanceof Float64Array) {
+        if (model.type === "line" && values.length > 2048) {
+          const xs = model.x instanceof Float64Array && model.x.length === values.length ? model.x : null;
+          const scanned = extentAndMinmax(values, Math.max(2, (model.width - 68) * 2), xs);
+          if (Number.isFinite(scanned.min) && Number.isFinite(scanned.max)) {
+            consider(scanned.min);
+            consider(scanned.max);
+            if (scanned.dense) noteDense(values);
+            continue;
+          }
+        }
         const extent = floatExtent(values);
         if (extent) {
           consider(extent.min);

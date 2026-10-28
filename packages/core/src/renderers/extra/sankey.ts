@@ -97,7 +97,7 @@ export function renderSankey(spec: Record<string, unknown>): string | null {
     const first = layer[index] === 0;
     const anchor = first ? "end" : "start";
     const x = first ? node.x - 10 : node.x + nodeW + 10;
-    parts.push(`<text x="${n(x)}" y="${n(node.y + node.h / 2 + 4)}" text-anchor="${anchor}" fill="${cssVar("text", frame.preset.text)}" stroke="${cssVar("surface", frame.preset.surface)}" stroke-width="4" paint-order="stroke" font-size="12" font-weight="600" font-family="${font()}">${fit(name, 96, 12)}</text>`);
+    parts.push(`<text x="${n(x)}" y="${n(node.y + node.h / 2 + 4)}" text-anchor="${anchor}" fill="${cssVar("text", frame.preset.text)}" stroke="${cssVar("surface", frame.preset.surface)}" stroke-width="4" paint-order="stroke" font-size="12" font-weight="600">${fit(name, 96, 12)}</text>`);
   });
   return view.done();
 }

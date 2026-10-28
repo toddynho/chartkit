@@ -26,6 +26,19 @@ export const SCATTER_CANVAS_AT = 4_000;
  */
 export const HEATMAP_CANVAS_AT = 800;
 
+/**
+ * A mini-area past this many points paints on canvas unless `render` is `"svg"`.
+ * The sampled SVG path is larger than the plot, and parsing it costs more than a
+ * one-pass canvas fill of the same silhouette.
+ */
+export const MINI_CANVAS_AT = 64;
+
+/**
+ * A candlestick past this many candles paints bodies on canvas unless `render` is `"svg"`.
+ * `Math.max` of every price used to throw, and one SVG node per candle cannot match a canvas series.
+ */
+export const CANDLE_CANVAS_AT = 2_000;
+
 export type RenderMode = "svg" | "canvas" | "auto";
 
 export function readRender(value: unknown): RenderMode {
@@ -57,5 +70,7 @@ export function canvasWanted(spec: { type?: unknown; render?: unknown; data?: un
   const n = pointCount(spec.data);
   if (type === "scatter" && n >= SCATTER_CANVAS_AT) return true;
   if (type === "heatmap" && n >= HEATMAP_CANVAS_AT) return true;
+  if (type === "mini-area" && n >= MINI_CANVAS_AT) return true;
+  if (type === "candlestick" && n >= CANDLE_CANVAS_AT) return true;
   return false;
 }

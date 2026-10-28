@@ -163,8 +163,8 @@ function errorSvg(errors: Diagnostic[]): string {
   const text = lines
     .map((line, index) => {
       const hint = line.hint ? ` — ${line.hint}` : "";
-      return `<text x="16" y="${32 + index * 22}" fill="${cssVar("text", "#111827")}" font-size="13" font-family="${font()}">${esc(`error[${line.code}]: ${line.message}${hint}`)}</text>`;
+      return `<text x="16" y="${32 + index * 22}" fill="${cssVar("text", "#111827")}" font-size="13">${esc(`error[${line.code}]: ${line.message}${hint}`)}</text>`;
     })
     .join("");
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="720" height="${height}" viewBox="0 0 720 ${height}" role="img" aria-label="${esc(label)}" class="ck-chart ck-chart-error">${text}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="720" height="${height}" viewBox="0 0 720 ${height}" role="img" aria-label="${esc(label)}" class="ck-chart ck-chart-error" style="font-family:${font()}">${text}</svg>`;
 }

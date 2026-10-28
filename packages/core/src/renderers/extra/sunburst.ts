@@ -99,7 +99,7 @@ export function renderSunburst(spec: Record<string, unknown>): string | null {
         defs.push(`<path id="${id}" d="M ${n(sx)} ${n(sy)} A ${n(radius)} ${n(radius)} 0 ${large} ${sweep} ${n(ex)} ${n(ey)}" fill="none" />`);
         const ink = inkByDepth.get(depth) ?? labelInk(paintFill);
         parts.push(
-          `<text fill="${ink}" font-size="11" font-weight="650" font-family="${font()}" data-ck-depth="${depth}"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${esc(text)}</textPath></text>`,
+          `<text fill="${ink}" font-size="11" font-weight="650" data-ck-depth="${depth}"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${esc(text)}</textPath></text>`,
         );
       }
     }
@@ -132,8 +132,8 @@ export function renderSunburst(spec: Record<string, unknown>): string | null {
   if (holePx > 22) {
     const ink = cssVar("text", frame.preset.text);
     const sub = root.name ? fmt(total, frame.locale, shown) : "";
-    parts.push(`<text x="${n(cx)}" y="${n(cy + (sub ? -2 : 4))}" text-anchor="middle" fill="${ink}" font-size="13" font-weight="650" font-family="${font()}">${esc(fit(centre, holePx * 1.6, 13) || centre)}</text>`);
-    if (sub) parts.push(`<text x="${n(cx)}" y="${n(cy + 14)}" text-anchor="middle" fill="${cssVar("muted", frame.preset.muted)}" font-size="11" font-family="${font()}">${esc(sub)}</text>`);
+    parts.push(`<text x="${n(cx)}" y="${n(cy + (sub ? -2 : 4))}" text-anchor="middle" fill="${ink}" font-size="13" font-weight="650">${esc(fit(centre, holePx * 1.6, 13) || centre)}</text>`);
+    if (sub) parts.push(`<text x="${n(cx)}" y="${n(cy + 14)}" text-anchor="middle" fill="${cssVar("muted", frame.preset.muted)}" font-size="11">${esc(sub)}</text>`);
   }
   if (legend) {
     let x = 12;
@@ -141,7 +141,7 @@ export function renderSunburst(spec: Record<string, unknown>): string | null {
     branches.forEach((node, index) => {
       const color = colors[index] ?? fill(frame, index);
       const name = fit(node.name, 88, 12) || node.name;
-      parts.push(`<rect x="${n(x)}" y="${n(y - 10)}" width="10" height="10" rx="2" fill="${color}" /><text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12" font-family="${font()}">${esc(name)}</text>`);
+      parts.push(`<rect x="${n(x)}" y="${n(y - 10)}" width="10" height="10" rx="2" fill="${color}" /><text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12">${esc(name)}</text>`);
       x += 14 + Math.min(name.length, 12) * 7 + 14;
     });
   }

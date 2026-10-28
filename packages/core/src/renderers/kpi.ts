@@ -146,5 +146,5 @@ function inkFor(color: string, fallback: string): string {
 }
 
 function text(x: number, y: number, value: string, fill: string, size: number, weight: string): string {
-  return `<text x="${n(x)}" y="${n(y)}" fill="${fill}" font-size="${size}" font-weight="${weight}" font-family="${font()}">${esc(value)}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" fill="${fill}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
 }

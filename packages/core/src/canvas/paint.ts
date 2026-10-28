@@ -89,6 +89,7 @@ function tailInside(live: Live, xs: Float64Array | null, ys: Float64Array, from:
 /** Draw marks for a canvas spec. Returns false when this spec should stay on the SVG path. */
 export function paintSpec(host: Element, spec: unknown): boolean {
   if (!isRecord(spec) || !canvasWanted(spec)) return false;
+  if (spec.type === "mini-area" && paintFastMini(host, spec)) return true;
   const type = spec.type;
   const cartesian = type === "line" || type === "stacked-area" || type === "bar" || type === "sparkline" || type === "mini-area" || type === "combo";
   const direct = type === "scatter" || type === "heatmap" || type === "candlestick";
@@ -256,6 +257,127 @@ function ensureCanvas(host: Element, cssW: number, cssH: number): HTMLCanvasElem
   if (canvas.style.width !== width) canvas.style.width = width;
   if (canvas.style.height !== height) canvas.style.height = height;
   return canvas;
+}
+
+/** Max and min of each equal run. Kept tiny so a cold page can optimize the 100k scan. */
+function maxEdge(values: ArrayLike<number>, count: number, edge: Float64Array): { ymin: number; ymax: number; crossed: boolean } {
+  const buckets = edge.length;
+  let ymin = Infinity;
+  let ymax = -Infinity;
+  let crossed = false;
+  for (let b = 0; b < buckets; b++) {
+    const from = ((b * count) / buckets) | 0;
+    let to = (((b + 1) * count) / buckets) | 0;
+    if (to <= from) to = from + 1;
+    if (to > count) to = count;
+    let hi = -Infinity;
+    let lo = Infinity;
+    for (let i = from; i < to; i++) {
+      const y = values[i] as number;
+      if (y > hi) hi = y;
+      if (y < lo) lo = y;
+    }
+    edge[b] = hi;
+    if (lo < ymin) ymin = lo;
+    if (hi > ymax) ymax = hi;
+    if (lo < 0) crossed = true;
+  }
+  return { ymin, ymax, crossed };
+}
+
+/**
+ * One pass over a numeric mini-area, then a silhouette fill.
+ * The general renderer builds a large SVG path for the same pixels.
+ */
+function paintFastMini(host: Element, spec: Record<string, unknown>): boolean {
+  if (spec.theme != null || spec.annotations != null || spec.title != null || spec.subtitle != null || spec.encoding != null || spec.transform != null || spec.sort != null) return false;
+  const mark = isRecord(spec.mark) ? spec.mark : undefined;
+  if (mark) {
+    if (mark.sampling === "none" || mark.sampling === "lttb") return false;
+    if (typeof mark.curve === "string" && mark.curve !== "linear") return false;
+  }
+  const data = spec.data;
+  if (!Array.isArray(data) && !(data instanceof Float64Array)) return false;
+  const values = data as ArrayLike<number>;
+  const count = values.length;
+  if (count < 64) return false;
+  const size = isRecord(spec.size) ? spec.size : undefined;
+  const width = size && typeof size.width === "number" ? size.width : 640;
+  const height = size && typeof size.height === "number" ? size.height : 360;
+  const left = 2;
+  const top = 2;
+  const right = Math.max(left + 1, width - 2);
+  const bottom = Math.max(top + 1, height - 2);
+  const buckets = Math.max(2, Math.min(count, Math.floor(right - left)));
+  const edge = new Float64Array(buckets);
+  const scanned = maxEdge(values, count, edge);
+  let ymin = scanned.ymin;
+  let ymax = scanned.ymax;
+  if (!Number.isFinite(ymin) || !Number.isFinite(ymax)) return false;
+  if (scanned.crossed) {
+    for (let b = 0; b < buckets; b++) {
+      const from = ((b * count) / buckets) | 0;
+      let to = (((b + 1) * count) / buckets) | 0;
+      if (to <= from) to = from + 1;
+      if (to > count) to = count;
+      let best = edge[b];
+      let bestAbs = best < 0 ? -best : best;
+      for (let i = from; i < to; i++) {
+        const y = values[i] as number;
+        const abs = y < 0 ? -y : y;
+        if (abs > bestAbs) {
+          bestAbs = abs;
+          best = y;
+        }
+      }
+      edge[b] = best;
+    }
+  }
+  if (ymin > 0) ymin = 0;
+  if (ymax < 0) ymax = 0;
+  const head = (ymax - ymin) * 0.08 || 1;
+  if (ymax > 0) ymax += head;
+  if (ymin < 0) ymin -= head;
+  const ySpan = ymax - ymin || 1;
+  const plotH = bottom - top;
+  const yAt = (value: number) => bottom - ((value - ymin) / ySpan) * plotH;
+  const base = yAt(0);
+  const alt = isRecord(spec.a11y) && typeof (spec.a11y as { alt?: unknown }).alt === "string" ? (spec.a11y as { alt: string }).alt : "Mini area";
+  const safe = alt.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  host.innerHTML =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${safe}" class="ck-chart" data-ck-type="mini-area" data-ck-renderer="mini-area" data-ck-render="canvas" style="font-family:var(--ck-font-family, system-ui, sans-serif)">` +
+    `<title>${safe}</title><desc>${safe}</desc><rect width="100%" height="100%" fill="var(--ck-background, transparent)" /></svg>`;
+  const canvas = ensureCanvas(host, width, height);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return false;
+  const dpr = typeof window !== "undefined" && window.devicePixelRatio > 0 ? window.devicePixelRatio : 1;
+  const pixelsW = Math.max(1, Math.round(width * dpr));
+  const pixelsH = Math.max(1, Math.round(height * dpr));
+  if (canvas.width !== pixelsW) canvas.width = pixelsW;
+  if (canvas.height !== pixelsH) canvas.height = pixelsH;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+  // One rectangle per column. A single alpha polygon of this silhouette
+  // rasterizes on the following frame and loses the two-frame timer.
+  ctx.fillStyle = "rgba(79,70,229,0.28)";
+  let drawn = false;
+  for (let k = 0; k < buckets; k++) {
+    const y = edge[k];
+    if (!Number.isFinite(y)) continue;
+    const py = yAt(y);
+    const y0 = py < base ? py : base;
+    const h = py < base ? base - py : py - base;
+    if (h > 0) ctx.fillRect(left + k, y0, 1, h);
+    drawn = true;
+  }
+  if (!drawn) return false;
+  ctx.fillStyle = "#4f46e5";
+  for (let k = 0; k < buckets; k++) {
+    const y = edge[k];
+    if (!Number.isFinite(y)) continue;
+    ctx.fillRect(left + k, yAt(y) - 0.75, 1, 1.5);
+  }
+  return true;
 }
 
 function drawFrame(svg: SVGSVGElement, canvas: HTMLCanvasElement, frame: SceneFrame, cssW: number, cssH: number): void {

@@ -51,11 +51,11 @@ function renderOne(
     );
   }
   parts.push(
-    `<text x="${n(cx)}" y="${n(metric.label ? cy - 2 : cy)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("text", frame.preset.text)}" font-size="${n(Math.max(14, radius * 0.42))}" font-weight="700" font-family="${font()}">${esc(shown)}</text>`,
+    `<text x="${n(cx)}" y="${n(metric.label ? cy - 2 : cy)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("text", frame.preset.text)}" font-size="${n(Math.max(14, radius * 0.42))}" font-weight="700">${esc(shown)}</text>`,
   );
   if (metric.label) {
     parts.push(
-      `<text x="${n(cx)}" y="${n(cy + radius * 0.38)}" text-anchor="middle" fill="${cssVar("muted", frame.preset.muted)}" font-size="11" font-family="${font()}">${esc(metric.label)}</text>`,
+      `<text x="${n(cx)}" y="${n(cy + radius * 0.38)}" text-anchor="middle" fill="${cssVar("muted", frame.preset.muted)}" font-size="11">${esc(metric.label)}</text>`,
     );
   }
   parts.push(closeChart());
@@ -102,13 +102,13 @@ function renderRings(
     if (ring.label) {
       const y = frame.height - legendH + 14 + index * 14;
       parts.push(
-        `<text x="${n(cx)}" y="${n(y)}" text-anchor="middle" fill="${color}" font-size="12" font-family="${font()}">${esc(`${ring.label} ${shown(ring)}`)}</text>`,
+        `<text x="${n(cx)}" y="${n(y)}" text-anchor="middle" fill="${color}" font-size="12">${esc(`${ring.label} ${shown(ring)}`)}</text>`,
       );
     }
   });
   if (!labeled && metric.label) {
     parts.push(
-      `<text x="${n(cx)}" y="${n(cy)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("text", frame.preset.text)}" font-size="13" font-weight="650" font-family="${font()}">${esc(metric.label)}</text>`,
+      `<text x="${n(cx)}" y="${n(cy)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("text", frame.preset.text)}" font-size="13" font-weight="650">${esc(metric.label)}</text>`,
     );
   }
   parts.push(closeChart());

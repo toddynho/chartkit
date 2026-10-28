@@ -231,5 +231,5 @@ function text(
   mark?: string,
 ): string {
   const tagged = mark ? ` data-ck-mark="${mark}"` : "";
-  return `<text${tagged} x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" dominant-baseline="middle" fill="${fill}" font-size="${size}" font-weight="${weight}" font-family="${font()}">${esc(value)}</text>`;
+  return `<text${tagged} x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" dominant-baseline="middle" fill="${fill}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
 }

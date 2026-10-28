@@ -24,7 +24,7 @@ export function viewOf(spec: Record<string, unknown>, renderer: string, width: n
 }
 
 export function text(x: number, y: number, value: string, fill: string, size: number, weight = "400", anchor = "start"): string {
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}" font-family="${font()}">${esc(value)}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
 }
 
 /** Opens a mark that can hold a `<title>`, so a static SVG still has a tooltip. */

@@ -204,9 +204,9 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
       const barW = binned ? Math.max(48, swatches.length * swatch - 4) : 148;
       const labelY = barY + barH + 16;
       const tick = (text: string, at: number, anchor: string) =>
-        `<text x="${n(at)}" y="${n(labelY)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-family="${font()}">${esc(text)}</text>`;
+        `<text x="${n(at)}" y="${n(labelY)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}">${esc(text)}</text>`;
       const heading = title
-        ? `<text x="${n(x)}" y="${n(y + 11)}" fill="${fill}" font-size="${size}" font-weight="650" font-family="${font()}" data-ck-scale-title="${esc(title)}">${esc(title)}</text>`
+        ? `<text x="${n(x)}" y="${n(y + 11)}" fill="${fill}" font-size="${size}" font-weight="650" data-ck-scale-title="${esc(title)}">${esc(title)}</text>`
         : "";
       const lo = formatTick(min);
       const hi = formatTick(max);

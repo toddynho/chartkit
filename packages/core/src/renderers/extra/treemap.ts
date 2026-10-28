@@ -97,7 +97,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
     const y = frame.height - 8;
     for (const [name, color] of colors) {
       parts.push(`<rect x="${n(x)}" y="${n(y - 10)}" width="10" height="10" rx="2" fill="${color}" />`);
-      parts.push(`<text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12" font-family="${font()}">${fit(name, 80, 12)}</text>`);
+      parts.push(`<text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12">${fit(name, 80, 12)}</text>`);
       x += 14 + Math.min(name.length, 12) * 7 + 14;
     }
   }
@@ -176,7 +176,7 @@ function fits(value: string, width: number, size: number): boolean {
 }
 
 function inkText(x: number, y: number, value: string, fill: string, size: number, weight = "650"): string {
-  return `<text x="${n(x)}" y="${n(y)}" fill="${labelInk(fill)}" font-size="${size}" font-weight="${weight}" font-family="${font()}">${esc(value)}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" fill="${labelInk(fill)}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
 }
 
 function share(part: number, whole: number): string {
@@ -252,7 +252,7 @@ function renderLevels(spec: Record<string, unknown>): string | null | undefined 
     branches.forEach((node, index) => {
       const color = colors[index] ?? fill(frame, index);
       const name = fit(node.name, 88, 12) || node.name;
-      parts.push(`<rect x="${n(x)}" y="${n(y - 10)}" width="10" height="10" rx="2" fill="${color}" /><text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12" font-family="${font()}">${esc(name)}</text>`);
+      parts.push(`<rect x="${n(x)}" y="${n(y - 10)}" width="10" height="10" rx="2" fill="${color}" /><text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12">${esc(name)}</text>`);
       x += 14 + Math.min(name.length, 12) * 7 + 14;
     });
   }

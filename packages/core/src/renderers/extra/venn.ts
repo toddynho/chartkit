@@ -462,7 +462,7 @@ function placeSetName(
 }
 
 function setName(x: number, y: number, value: string, preset: Frame["preset"], size: number): string {
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("text", preset.text)}" font-size="${size}" font-weight="650" font-family="${font()}">${esc(value)}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("text", preset.text)}" font-size="${size}" font-weight="650">${esc(value)}</text>`;
 }
 
 function countText(x: number, y: number, value: string, label: string, preset: Frame["preset"], size: number): string {
@@ -471,7 +471,7 @@ function countText(x: number, y: number, value: string, label: string, preset: F
       "text",
       "overlap",
       label,
-      `x="${n(x)}" y="${n(y)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("text", preset.text)}" stroke="${cssVar("surface", preset.surface)}" stroke-width="3.5" paint-order="stroke" font-size="${size}" font-weight="650" font-family="${font()}"`,
+      `x="${n(x)}" y="${n(y)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("text", preset.text)}" stroke="${cssVar("surface", preset.surface)}" stroke-width="3.5" paint-order="stroke" font-size="${size}" font-weight="650"`,
     ) + `${esc(value)}</text>`
   );
 }
@@ -480,7 +480,7 @@ function tooMany(spec: Record<string, unknown>, names: string[]): string {
   const extra = names.slice(3).join(", ");
   const message = `Venn draws 2 or 3 sets. "${extra}" is past that. Remove it, or split it into its own chart.`;
   const alt = isAlt(spec) || message;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="680" height="120" viewBox="0 0 680 120" role="img" aria-label="${esc(alt)}" class="ck-chart ck-chart-error" data-ck-type="venn"><text x="16" y="36" fill="${cssVar("text", "#111827")}" font-size="14" font-family="${font()}">${esc(message)}</text></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="680" height="120" viewBox="0 0 680 120" role="img" aria-label="${esc(alt)}" class="ck-chart ck-chart-error" data-ck-type="venn"><text x="16" y="36" fill="${cssVar("text", "#111827")}" font-size="14">${esc(message)}</text></svg>`;
 }
 
 function isAlt(spec: Record<string, unknown>): string {

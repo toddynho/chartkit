@@ -694,9 +694,9 @@ function scaleReverse(channel: unknown): boolean {
 }
 
 function rotated(x: number, y: number, value: string, fill: string, angle: number): string {
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="middle" fill="${fill}" font-size="11" font-weight="500" font-family="${font()}" transform="rotate(${n(angle)} ${n(x)} ${n(y)})">${esc(value)}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="middle" fill="${fill}" font-size="11" font-weight="500" transform="rotate(${n(angle)} ${n(x)} ${n(y)})">${esc(value)}</text>`;
 }
 
 function label(x: number, y: number, value: string, fill: string, size: number, weight: string, anchor = "start"): string {
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}" font-family="${font()}">${esc(value)}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
 }

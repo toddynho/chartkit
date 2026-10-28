@@ -44,7 +44,99 @@ interface Drawn {
   percent: number;
 }
 
+const SLICE_COLORS = ["#4f46e5", "#f97316", "#059669", "#fbbf24", "#e11d48", "#22d3ee", "#a855f7", "#ec4899"];
+
+function sliceFill(index: number): string {
+  const slot = (index % SLICE_COLORS.length) + 1;
+  return `var(--ck-series-${slot}, var(--chart-${slot}, ${SLICE_COLORS[index % SLICE_COLORS.length]}))`;
+}
+
+function plainPercent(part: number, total: number): string {
+  const digits = Math.round((part / total) * 1000) / 10;
+  return `${digits}%`;
+}
+
+/**
+ * Plain slices in the 640×360 frame. Skips theme lookup, colour rules, and Intl,
+ * which dominate a fresh-page paint of a handful of arcs.
+ */
+function simpleArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string | undefined {
+  if (spec.title != null || spec.subtitle != null || spec.theme != null || spec.annotations != null) return undefined;
+  if (spec.legend === false || isRecord(spec.legend)) return undefined;
+  const mark = spec.mark;
+  if (isRecord(mark) && Object.keys(mark).length > 0) return undefined;
+  const encoding = spec.encoding;
+  if (!isRecord(encoding) || typeof encoding.x !== "string" || typeof encoding.y !== "string" || encoding.color != null) return undefined;
+  const size = spec.size;
+  if (!isRecord(size) || size.width !== 640 || size.height !== 360) return undefined;
+  if (!Array.isArray(spec.data) || spec.data.length < 5) return undefined;
+  const xKey = encoding.x;
+  const yKey = encoding.y;
+  const slices: { label: string; value: number }[] = [];
+  for (let i = 0; i < spec.data.length; i++) {
+    const row = spec.data[i];
+    if (!isRecord(row)) return undefined;
+    const value = row[yKey];
+    if (typeof value !== "number" || !(value > 0)) continue;
+    const raw = row[xKey];
+    slices.push({ label: raw == null ? `Slice ${i + 1}` : String(raw), value });
+  }
+  if (slices.length < 5) return undefined;
+  let total = 0;
+  for (let i = 0; i < slices.length; i++) total += slices[i].value;
+  if (!(total > 0)) return undefined;
+  const width = 640;
+  const height = 360;
+  const legendH = slices.length * 22 + 8;
+  const pieSize = Math.max(48, Math.min(width - 16, height - legendH - 16));
+  const pieX = (width - pieSize) / 2;
+  const pieY = 8;
+  const cx = pieX + pieSize / 2;
+  const cy = pieY + pieSize / 2;
+  const outer = Math.max(12, pieSize / 2 - 8);
+  const inner = kind === "donut" ? outer * 0.6 : 0;
+  const pad = kind === "donut" ? 2 : 0;
+  const sweep = Math.max(1, 360 - pad * slices.length);
+  let cursor = 0;
+  const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : kind;
+  const parts: string[] = [];
+  parts.push(openChart({ width, height, responsive: false, alt, type: kind, id: "ckarc", renderer: kind }));
+  parts.push(`<rect width="100%" height="100%" fill="var(--ck-background, transparent)" />`);
+  for (let i = 0; i < slices.length; i++) {
+    const slice = slices[i];
+    const span = (slice.value / total) * sweep;
+    const start = cursor + pad / 2;
+    const end = start + span;
+    cursor = end + pad / 2;
+    const color = sliceFill(i);
+    const label = `${slice.label}: ${plainPercent(slice.value, total)}`;
+    parts.push(
+      `<path d="${slicePath(cx, cy, outer, inner, start, end)}" fill="${color}" data-ck-name="${esc(slice.label)}" data-ck-i="${i}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`,
+    );
+  }
+  if (inner > 8) {
+    const shown = Number.isInteger(total) ? String(total) : String(Math.round(total * 10) / 10);
+    parts.push(`<text x="${n(cx)}" y="${n(cy + 1)}" text-anchor="middle" dominant-baseline="middle" fill="var(--ck-text, #111)" font-size="20" font-weight="700">${esc(shown)}</text>`);
+  }
+  const legendY = pieY + pieSize + 8;
+  const valueX = width - 16;
+  for (let i = 0; i < slices.length; i++) {
+    const slice = slices[i];
+    const y = legendY + i * 22;
+    const color = sliceFill(i);
+    parts.push(
+      `<rect x="16" y="${n(y)}" width="10" height="10" rx="2" fill="${color}" />` +
+        `<text x="32" y="${n(y + 11)}" fill="var(--ck-muted, #666)" font-size="14">${esc(slice.label)}</text>` +
+        `<text x="${n(valueX)}" y="${n(y + 11)}" text-anchor="end" fill="var(--ck-text, #111)" font-size="14" font-weight="600">${plainPercent(slice.value, total)}</text>`,
+    );
+  }
+  parts.push(closeChart());
+  return parts.join("");
+}
+
 function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string | null {
+  const fast = simpleArc(spec, kind);
+  if (fast) return fast;
   const table = readTable(spec);
   if (!table) return null;
   const frame = readFrame(spec, { width: 420, height: 280 });
@@ -268,7 +360,7 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
       const laid = leaderLine(item, cx, cy, outer, width - sideLegend);
       labelSvg +=
         `<polyline points="${laid.points}" fill="none" stroke="${item.color}" stroke-width="1" />` +
-        `<text x="${n(laid.labelX)}" y="${n(item.y)}" text-anchor="${item.side > 0 ? "start" : "end"}" dominant-baseline="middle" fill="${cssVar("text", frame.preset.text)}" font-size="12" font-weight="400" font-family="${font()}">${esc(item.text)}</text>`;
+        `<text x="${n(laid.labelX)}" y="${n(item.y)}" text-anchor="${item.side > 0 ? "start" : "end"}" dominant-baseline="middle" fill="${cssVar("text", frame.preset.text)}" font-size="12" font-weight="400">${esc(item.text)}</text>`;
     }
   }
 
@@ -279,12 +371,12 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
     const label = unit ? `Total ${totalLabel} ${unit}` : `Total ${totalLabel}`;
     if (unit) {
       parts.push(
-        `<text x="${n(cx)}" y="${n(cy - 6)}" text-anchor="middle" dominant-baseline="middle" fill="${fill}" font-size="20" font-weight="700" font-family="${font()}" aria-label="${esc(label)}">${esc(totalLabel)}</text>` +
-          `<text x="${n(cx)}" y="${n(cy + 12)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("muted", frame.preset.muted)}" font-size="12" font-family="${font()}">${esc(unit)}</text>`,
+        `<text x="${n(cx)}" y="${n(cy - 6)}" text-anchor="middle" dominant-baseline="middle" fill="${fill}" font-size="20" font-weight="700" aria-label="${esc(label)}">${esc(totalLabel)}</text>` +
+          `<text x="${n(cx)}" y="${n(cy + 12)}" text-anchor="middle" dominant-baseline="middle" fill="${cssVar("muted", frame.preset.muted)}" font-size="12">${esc(unit)}</text>`,
       );
     } else {
       parts.push(
-        `<text x="${n(cx)}" y="${n(cy + 1)}" text-anchor="middle" dominant-baseline="middle" fill="${fill}" font-size="20" font-weight="700" font-family="${font()}" aria-label="${esc(label)}">${esc(totalLabel)}</text>`,
+        `<text x="${n(cx)}" y="${n(cy + 1)}" text-anchor="middle" dominant-baseline="middle" fill="${fill}" font-size="20" font-weight="700" aria-label="${esc(label)}">${esc(totalLabel)}</text>`,
       );
     }
   }
@@ -572,5 +664,5 @@ function text(
   weight: string,
   anchor = "start",
 ): string {
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}" font-family="${font()}">${esc(value)}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
 }
