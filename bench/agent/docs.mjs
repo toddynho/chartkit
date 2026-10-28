@@ -29,6 +29,8 @@ const NO_DOCS_HINT = {
     'In Node, call echarts.init(null, null, { renderer: "svg", ssr: true, width, height }) and return chart.renderToSVGString(). The SVG has to include the series marks. Put the numbers in series.data. Code that touches document or window runs in a browser instead.',
   chartjs:
     "render() runs in a browser document. Create a canvas, register every scale and controller you construct, and leave that canvas in the document. A canvas tag or a data URL with no painted pixels does not pass. Put the numbers in the dataset data.",
+  plot:
+    "render() runs in a browser document. Import @observablehq/plot, call Plot.plot, and return the SVG outerHTML. Put rows on the mark data and field names on x and y. Plot needs a document, so this runs in the browser. A hand-written SVG does not pass.",
 };
 
 function readCapped(file, cap) {
@@ -68,7 +70,7 @@ export function officialReference(library) {
 }
 
 export function docsManifest() {
-  const order = ["chartkit", "recharts", "echarts", "chartjs"];
+  const order = ["chartkit", "plot", "chartjs", "recharts", "echarts"];
   return order.map((library) => {
     const doc = officialReference(library);
     return {

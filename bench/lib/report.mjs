@@ -135,15 +135,56 @@ export function renderReport(result) {
   }
   lines.push(fairConditionsSection(result.agent));
   lines.push("");
+  lines.push(tokenMatrixSection());
+  lines.push("");
   lines.push("## Reproduce");
   lines.push("");
   lines.push("```bash");
   lines.push("npm run bench");
   lines.push("```");
   lines.push("");
-  lines.push("Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai` or `anthropic`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` limits a run. `BENCH_DOCS=none` (the default) is the no-docs condition: one paragraph per library. `BENCH_DOCS=official` prepends that library's own doc. A finished run is also written to `bench/results/agent/conditions/`, which is gitignored local scratch and is not the published scoreboard. A failed validate, render, compile, or library-use check is sent back once.");
+  lines.push("Non-LLM only: `npm run bench -- --skip-agent`. The agent section runs when `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `XAI_API_KEY` is set. `BENCH_LLM_PROVIDER` is `openai`, `anthropic`, or `xai`. `BENCH_LLM_MODEL` overrides the default model. `BENCH_AGENT_LOG` checkpoints rows for resume. `BENCH_LIBRARIES` limits a run. `BENCH_DOCS=none` is the no-docs condition: one paragraph per library. `BENCH_DOCS=official` prepends that library's own doc. `npm run bench` still defaults the agent hook to `none`. The published one-model command `npm run bench:agent` and `npm run bench:agent-matrix` default to `official`. A finished one-model run is also written to `bench/results/agent/conditions/`, which is gitignored local scratch and is not the published scoreboard. A failed validate, render, compile, or library-use check is sent back once. See the token matrix section for medians until a working chart.");
   lines.push("");
   return lines.join("\n");
+}
+
+function tokenMatrixSection() {
+  return [
+    "## Token matrix",
+    "",
+    "The homepage “fewer tokens per working chart” claim uses this harness. The round-6 first-try means above stay the historical scoreboard. The homepage and /agents scoreboard publish the with-docs medians from this matrix (Claude, GPT-6, and Grok). A re-run writes bench/results/agent/matrix/summary-official.json and does not overwrite those pages.",
+    "",
+    "Published condition: `BENCH_DOCS=official` (each library's own doc, cut to ChartKit `llms.txt`). `BENCH_DOCS=none` is the optional no-docs condition.",
+    "",
+    "One model:",
+    "",
+    "```bash",
+    "BENCH_LLM_PROVIDER=anthropic BENCH_LLM_MODEL=claude-sonnet-5-5 npm run bench:agent",
+    "```",
+    "",
+    "`BENCH_LLM_PROVIDER` is `openai`, `anthropic`, or `xai`. xAI uses `XAI_API_KEY` and `https://api.x.ai/v1/chat/completions`. OpenAI and Anthropic keep their existing clients. A `gpt-6*` model that Chat Completions rejects is retried on the OpenAI Responses API. Temperature is 0. Max output tokens is 4096. Keys are read from the environment and are not printed.",
+    "",
+    "The registry:",
+    "",
+    "```bash",
+    "npm run bench:agent-matrix",
+    "```",
+    "",
+    "`BENCH_LLM_MATRIX` points at another JSON file. The default registry is `bench/agent/models.json`. Set `BENCH_LLM_PROVIDER` and `BENCH_LLM_MODEL` with the matrix script to re-run one id. Each model writes `bench/results/agent/matrix/<provider>/<model>/<docs>.json` (gitignored). The summary is `summary-<docs>.json` in that directory.",
+    "",
+    "Add a model: one object in `models`. Then re-run. No other code change, unless the provider is new.",
+    "",
+    "On successful supported charts (a drawn chart, or ChartKit `repair()` of that answer):",
+    "",
+    "- median and mean of the sum of output tokens across model calls until pass",
+    "- median model calls until pass",
+    "- pass rate first-try and within-two (honest `meta.unsupported` counts as a pass only when that library cannot draw the type)",
+    "- `costPer100` from `inputPerMillion` and `outputPerMillion` on the registry row (`costPer100 = 100 * (medianInputTokens * inputPerMillion + medianOutputTokens * outputPerMillion) / 1e6`)",
+    "",
+    "ChartKit `repair()` does not add a model call and does not add tokens of its own. If it makes the first answer pass, the runner does not send a second prompt. Failed tasks are DNF: they are listed and left out of the median. The median is never infinity. Correct unsupported answers are declined: they count in the pass rates and are not working charts.",
+    "",
+    "Observable Plot is a code library in this suite, with the same no-docs paragraph length budget and the same official-doc cap. It runs in Playwright. Donut, gauge, kpi, progress-ring, and candlestick are unsupported.",
+  ].join("\n");
 }
 
 function bundleVerdict(rows) {
@@ -231,7 +272,7 @@ function ssrVerdict(rows) {
 }
 
 function agentSection(agent) {
-  const protocol = "A code-library pass must import that library and return a drawn chart, or set `meta.unsupported` when the library cannot draw the chart. Recharts and Chart.js run in Playwright. A Recharts pass needs an SVG with data marks. A Chart.js pass needs painted canvas pixels. ECharts code that touches `document` runs in Playwright; `echarts.init(null, …, { ssr: true })` stays in Node and the SVG must contain marks. The chart type is read from that rendered chart (Chart.js `config.type`, ECharts series type, Recharts `chartName`). `meta.type` is not evidence. Data values come from the rendered chart, not from `meta`. ChartKit values are compared as numbers. Validator errors, render errors, compile errors, and library-use failures are fed back once. The first-try column ignores that repair.";
+  const protocol = "A code-library pass must import that library and return a drawn chart, or set `meta.unsupported` when the library cannot draw the chart. Recharts, Chart.js, and Observable Plot run in Playwright. A Recharts pass needs an SVG with data marks. A Chart.js pass needs painted canvas pixels. Observable Plot must return the SVG from `Plot.plot` (its versioned `plot-` class) and the checker reads the mark that was called. ECharts code that touches `document` runs in Playwright; `echarts.init(null, …, { ssr: true })` stays in Node and the SVG must contain marks. The chart type is read from that rendered chart (Chart.js `config.type`, ECharts series type, Recharts `chartName`, Plot mark name). `meta.type` is not evidence. Data values come from the rendered chart, not from `meta`. ChartKit values are compared as numbers. Validator errors, render errors, compile errors, and library-use failures are fed back once. ChartKit `repair()` can accept the answer with no second model call, and that repair does not count as a call. The first-try column ignores that repair. Homepage token medians come from the token matrix below, not from this first-try table.";
   if (!agent || agent.status !== "ok") {
     return [
       `Fair-scoring protocol on this branch: ${protocol}`,
@@ -388,7 +429,7 @@ function fairConditionsSection(agent) {
   lines.push("");
   lines.push(round6Section());
   lines.push("");
-  lines.push("`no docs` gives every library one paragraph of similar length: how to produce a drawn chart, and where the fields go. The paragraphs are the whole hint. They are not official docs, and ChartKit's paragraph does not add channel shapes the others do not get. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`. A pass requires drawn output. Recharts needs an SVG with data marks (Playwright, `createRoot` and `flushSync`; a detached container counts). Chart.js needs every canvas pixel scanned; a 32 by 32 sample is not enough. The chart type is read from the rendered chart. `meta.type` and `meta.values` are not evidence. ChartKit values are compared as numbers, and ChartKit bars have to sit inside the plot, one rect per row per bar series.");
+  lines.push("`no docs` gives every library one paragraph of similar length: how to produce a drawn chart, and where the fields go. The paragraphs are the whole hint. They are not official docs, and ChartKit's paragraph does not add channel shapes the others do not get. `with docs` prepends that library's own official text, cut so it is no longer than ChartKit `llms.txt`. A pass requires drawn output. Recharts needs an SVG with data marks (Playwright, `createRoot` and `flushSync`; a detached container counts). Chart.js needs every canvas pixel scanned; a 32 by 32 sample is not enough. Observable Plot needs the SVG from `Plot.plot` in Playwright. The chart type is read from the rendered chart. `meta.type` and `meta.values` are not evidence. ChartKit values are compared as numbers, and ChartKit bars have to sit inside the plot, one rect per row per bar series.");
   lines.push("");
   lines.push("| Library | no docs hint | with docs | Bytes | Source |");
   lines.push("|---|---|---|---:|---|");

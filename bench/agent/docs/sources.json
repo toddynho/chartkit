@@ -29,6 +29,16 @@
       "file": "bench/agent/docs/echarts.md",
       "note": "ECharts publishes an llms.txt index. The handbook link on that index is Get Started. This excerpt is that page plus Import ECharts, cut to the ChartKit cap. Apache License 2.0."
     },
+    "plot": {
+      "title": "Observable Plot getting started",
+      "url": "https://observablehq.com/plot/getting-started",
+      "also": [
+        "https://github.com/observablehq/plot/blob/v0.6.17/docs/getting-started.md"
+      ],
+      "llmsTxt": null,
+      "file": "bench/agent/docs/plot.md",
+      "note": "Observable Plot does not publish an llms.txt. This excerpt is the official getting-started page from the Plot docs (ISC) at v0.6.17, retrieved 2026-10-27, cut to the ChartKit cap."
+    },
     "chartjs": {
       "title": "Chart.js getting started: installation and usage",
       "url": "https://www.chartjs.org/docs/latest/getting-started/",

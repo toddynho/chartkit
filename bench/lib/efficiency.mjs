@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { buildSync } from "esbuild";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const LIBRARIES = ["chartkit", "recharts", "echarts", "chartjs"];
+const LIBRARIES = ["chartkit", "plot", "chartjs", "recharts", "echarts"];
 
 function extractJsonObject(text) {
   const fenced = String(text ?? "").match(/```(?:json)?\s*([\s\S]*?)```/i);

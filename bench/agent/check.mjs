@@ -50,12 +50,14 @@ function observedChartTypes(facts) {
 
 /** How prompts and feedback name each library: display name plus the real npm package. "chartjs" is only an internal key. */
 export const LIBRARY_LABEL = {
+  plot: 'Observable Plot (npm package "@observablehq/plot")',
   recharts: 'Recharts (npm package "recharts")',
   echarts: 'ECharts (npm package "echarts")',
   chartjs: 'Chart.js (npm package "chart.js")',
 };
 
 const LIBRARY_PACKAGE = {
+  plot: /^@observablehq\/plot$/,
   recharts: /^recharts$/,
   echarts: /^echarts(?:\/.*)?$/,
   chartjs: /^chart\.js(?:\/.*)?$/,
@@ -132,9 +134,9 @@ export function libraryUse(source, library) {
   return { imports, uses, bindings };
 }
 
-/** Chart.js and Recharts draw in a document. ECharts needs one unless it uses the Node SSR init. */
+/** Chart.js, Recharts, and Observable Plot draw in a document. ECharts needs one unless it uses the Node SSR init. */
 export function needsBrowser(library, source) {
-  if (library === "chartjs" || library === "recharts") return true;
+  if (library === "chartjs" || library === "recharts" || library === "plot") return true;
   if (library !== "echarts") return false;
   if (/\bdocument\b|\bwindow\b|\bHTMLElement\b/.test(source)) return true;
   if (/\.init\(\s*(?:null|undefined)\b/.test(source)) return false;
@@ -176,6 +178,11 @@ export function renderedWithLibrary(library, rendered, facts = {}) {
     return (facts.echartsNodes ?? 0) > 0 && facts.canvasDrawn === true;
   }
   if (library === "chartjs") return facts.canvasDrawn === true;
+  if (library === "plot") {
+    if ((facts.plotMarks ?? 0) <= 0 || !svgHasMarks(text)) return false;
+    if (typeof facts.plotClass === "string" && facts.plotClass && text.includes(facts.plotClass)) return true;
+    return /class="plot-[a-z0-9]+"/.test(text);
+  }
   return false;
 }
 
@@ -551,7 +558,9 @@ export function scoreModule(mod, task, library, context = {}) {
           ? "No Recharts SVG with data marks was found. Recharts 3 renderToStaticMarkup returns an empty recharts-wrapper; mount with createRoot and flushSync and return the container's HTML."
           : library === "chartjs"
             ? "The canvas has no painted pixels. A canvas tag or a data URL of a blank canvas does not pass."
-            : `render() did not return markup produced by ${LIBRARY_LABEL[library] ?? library}.`,
+            : library === "plot"
+              ? "No Observable Plot SVG was found. Call Plot.plot and return that node's outerHTML. A hand-written SVG does not pass."
+              : `render() did not return markup produced by ${LIBRARY_LABEL[library] ?? library}.`,
       };
   }
   return { ok: Object.values(stages).every((stage) => stage.ok), status: "checked", stages };
@@ -692,6 +701,19 @@ export async function renderInBrowser(browser, source) {
           }
         }
         for (const option of globalThis.__ckPlotted ?? []) add(option);
+        const plotMarks = globalThis.__ckPlotMarks ?? [];
+        const plotNames = [];
+        for (const mark of plotMarks) {
+          if (typeof mark?.name === "string") {
+            noteType(mark.name);
+            plotNames.push(mark.name);
+          }
+          if (mark?.data != null) add({ series: [{ data: mark.data }] });
+        }
+        const plotBars = plotNames.some((name) => name === "barY" || name === "barX");
+        const plotLines = plotNames.some((name) => name === "line" || name === "lineY" || name === "lineX");
+        if (plotBars && plotLines) noteType("combo");
+        const plotClass = (globalThis.__ckPlotClass ?? []).find((name) => typeof name === "string" && name) ?? null;
         function canvasHasInk(canvas) {
           if (!canvas || canvas.width < 2 || canvas.height < 2) return false;
           const ctx = canvas.getContext("2d");
@@ -741,6 +763,8 @@ export async function renderInBrowser(browser, source) {
             echartsNodes: qsa("[_echarts_instance_]").length,
             rechartsSurface: surface.length,
             rechartsMarks,
+            plotMarks: plotMarks.length,
+            plotClass,
             plotted,
             chartTypes,
           },

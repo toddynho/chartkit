@@ -2,7 +2,9 @@
  * With-docs agent token eval.
  *
  * One module feeds the homepage "For the agent" bars and the /agents scoreboard.
- * Harness tip: PR #79, commit 12232d7e (agent token matrix).
+ * Harness tip: PR #79, commit 12232d7e (agent token matrix). A re-run writes
+ * `bench/results/agent/matrix/summary-official.json` (median output tokens and
+ * median calls on working charts). These published figures are that run.
  *
  * 42 tasks. Each library's docs are capped to the length of ChartKit llms.txt.
  * Output tokens are summed until a chart is drawn. Did-not-finish runs are
