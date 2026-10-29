@@ -34,8 +34,33 @@ export async function rasterize(svg: string, scale: number): Promise<Uint8Array>
 
 export function forRaster(svg: string, dark: boolean): string {
   let text = resolveVars(svg);
-  text = text.replace(/light-dark\(\s*([^,]+?)\s*,\s*([^)]+?)\s*\)/g, (_match, light: string, night: string) => (dark ? night : light).trim());
+  text = resolveLightDark(text, dark);
   return text.replace(/font-family="[^"]*"/g, 'font-family="Inter, Roboto, sans-serif"');
+}
+
+/** Pick one side of light-dark(). The comma split ignores commas inside rgba(). */
+function resolveLightDark(input: string, dark: boolean): string {
+  const token = "light-dark(";
+  let out = "";
+  for (let i = 0; i < input.length; i++) {
+    if (input.startsWith(token, i)) {
+      const open = i + token.length - 1;
+      const end = matchingParen(input, open);
+      if (end < 0) {
+        out += input[i];
+        continue;
+      }
+      const inside = input.slice(open + 1, end);
+      const comma = splitTop(inside);
+      const light = comma < 0 ? inside : inside.slice(0, comma);
+      const night = comma < 0 ? inside : inside.slice(comma + 1);
+      out += resolveLightDark((dark ? night : light).trim(), dark);
+      i = end;
+      continue;
+    }
+    out += input[i];
+  }
+  return out;
 }
 
 function darkSvg(svg: string): boolean {

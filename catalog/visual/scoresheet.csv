@@ -443,3 +443,447 @@ map-points,soft-dark,Chrome density,3,The legend says Population and never shows
 map-points,soft-dark,Series discrimination,3,"One blue, and the overlaps in Asia merge the bubbles.",2026-10-29T15:43:51Z,round1-vision
 map-points,soft-dark,Light / dark parity,3,"Land flips darker and bubbles go lighter, but the collisions and the off-palette blue remain.",2026-10-29T15:43:51Z,round1-vision
 map-points,soft-dark,Product ship,3,Colliding city labels and an unlabeled size encoding would not ship.,2026-10-29T15:43:51Z,round1-vision
+line,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+line,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+line,soft-light,Chrome density,3,"The y-axis title repeats Revenue, and months skip every other label. The grid is only a 5% hairline.",2026-10-29T18:59:12Z,round2-vision
+line,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+line,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+line,soft-light,Product ship,3,"The area fades into the card, so the baseline is hard to place on a product card.",2026-10-29T18:59:12Z,round2-vision
+line,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+line,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+line,soft-dark,Chrome density,3,"The y-axis title repeats Revenue, and months skip every other label. The grid is only a 5% hairline.",2026-10-29T18:59:12Z,round2-vision
+line,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+line,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+line,soft-dark,Product ship,3,The dark area is a hot blue slab that still fades out before the baseline.,2026-10-29T18:59:12Z,round2-vision
+bar,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+bar,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+bar,soft-light,Chrome density,3,"The y-axis is titled Search, the first series name. The grid is only a 5% hairline.",2026-10-29T18:59:12Z,round2-vision
+bar,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+bar,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+bar,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+bar,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+bar,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+bar,soft-dark,Chrome density,3,"The y-axis is titled Search, the first series name. The grid is only a 5% hairline.",2026-10-29T18:59:12Z,round2-vision
+bar,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+bar,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+bar,soft-dark,Product ship,3,"Blue, green, and orange stacks go neon on the dark card, and the axis is still titled Search.",2026-10-29T18:59:12Z,round2-vision
+bar-list,soft-light,Glance,2,"Bars are a pale blue around #cde1f8 on #f5f5f7 (about 1.2:1), so Gift, Points, and Other disappear.",2026-10-29T18:59:12Z,round2-vision
+bar-list,soft-light,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+bar-list,soft-light,Chrome density,3,"There is no title, and the values sit in a wide empty gutter to the right of the short bars.",2026-10-29T18:59:12Z,round2-vision
+bar-list,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+bar-list,soft-light,Light / dark parity,2,Light bars are a wash and dark bars are a darker navy wash; neither mode shows a solid series blue.,2026-10-29T18:59:12Z,round2-vision
+bar-list,soft-light,Product ship,2,A ranked list whose bars fail 3:1 against the card would not ship.,2026-10-29T18:59:12Z,round2-vision
+bar-list,soft-dark,Glance,2,"Bars are navy around #1a2d43 on #1c1c1e (about 1.2:1), so the short rows vanish.",2026-10-29T18:59:12Z,round2-vision
+bar-list,soft-dark,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+bar-list,soft-dark,Chrome density,3,"There is no title, and the values sit in a wide empty gutter to the right of the short bars.",2026-10-29T18:59:12Z,round2-vision
+bar-list,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+bar-list,soft-dark,Light / dark parity,2,Light bars are a wash and dark bars are a darker navy wash; neither mode shows a solid series blue.,2026-10-29T18:59:12Z,round2-vision
+bar-list,soft-dark,Product ship,2,A ranked list whose bars fail 3:1 against the card would not ship.,2026-10-29T18:59:12Z,round2-vision
+pie,soft-light,Glance,3,"Only percents are labeled, so the share of revenue never names a slice.",2026-10-29T18:59:12Z,round2-vision
+pie,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+pie,soft-light,Chrome density,3,"Leader lines and percents replace a legend, and the corners of the card stay empty.",2026-10-29T18:59:12Z,round2-vision
+pie,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+pie,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+pie,soft-light,Product ship,2,"An unlabeled pie is a demo, not a product card.",2026-10-29T18:59:12Z,round2-vision
+pie,soft-dark,Glance,3,"Only percents are labeled, so the share of revenue never names a slice.",2026-10-29T18:59:12Z,round2-vision
+pie,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+pie,soft-dark,Chrome density,3,"Leader lines and percents replace a legend, and the corners of the card stay empty.",2026-10-29T18:59:12Z,round2-vision
+pie,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+pie,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+pie,soft-dark,Product ship,2,"An unlabeled pie is a demo, not a product card.",2026-10-29T18:59:12Z,round2-vision
+donut,soft-light,Glance,5,,2026-10-29T18:59:12Z,round2-vision
+donut,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+donut,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+donut,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+donut,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+donut,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+donut,soft-dark,Glance,5,,2026-10-29T18:59:12Z,round2-vision
+donut,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+donut,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+donut,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+donut,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+donut,soft-dark,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+stacked-area,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+stacked-area,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+stacked-area,soft-light,Chrome density,3,"The y-axis is titled Product, the first series name. The grid is only a 5% hairline.",2026-10-29T18:59:12Z,round2-vision
+stacked-area,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+stacked-area,soft-light,Light / dark parity,3,"The same bands read as soft gradients in light and as hotter, muddier slabs in dark.",2026-10-29T18:59:12Z,round2-vision
+stacked-area,soft-light,Product ship,3,Gradients fade toward the card and the series edges are hairlines.,2026-10-29T18:59:12Z,round2-vision
+stacked-area,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+stacked-area,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+stacked-area,soft-dark,Chrome density,3,"The y-axis is titled Product, the first series name. The grid is only a 5% hairline.",2026-10-29T18:59:12Z,round2-vision
+stacked-area,soft-dark,Series discrimination,3,The three dark gradients pile into similarly saturated bands.,2026-10-29T18:59:12Z,round2-vision
+stacked-area,soft-dark,Light / dark parity,3,"The same bands read as soft gradients in light and as hotter, muddier slabs in dark.",2026-10-29T18:59:12Z,round2-vision
+stacked-area,soft-dark,Product ship,3,The blue mass goes muddy at the baseline.,2026-10-29T18:59:12Z,round2-vision
+scatter,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+scatter,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+scatter,soft-light,Chrome density,3,"There are no axis titles, so seven dots sit in a large field. The grid is only a hairline.",2026-10-29T18:59:12Z,round2-vision
+scatter,soft-light,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+scatter,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+scatter,soft-light,Product ship,3,"Point size varies and there is no size legend, so the second encoding is a guess.",2026-10-29T18:59:12Z,round2-vision
+scatter,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+scatter,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+scatter,soft-dark,Chrome density,3,"There are no axis titles, so seven dots sit in a large field. The grid is only a hairline.",2026-10-29T18:59:12Z,round2-vision
+scatter,soft-dark,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+scatter,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+scatter,soft-dark,Product ship,3,"Point size varies and there is no size legend, so the second encoding is a guess.",2026-10-29T18:59:12Z,round2-vision
+combo,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+combo,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+combo,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+combo,soft-light,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+combo,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+combo,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+combo,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+combo,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+combo,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+combo,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+combo,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+combo,soft-dark,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+heatmap,soft-light,Glance,3,"Cells sit in a narrow blue from about #18469f to #288eff, so neighboring hours do not separate.",2026-10-29T18:59:12Z,round2-vision
+heatmap,soft-light,Token honesty,3,"Cell fills are baked one-off blues such as #288eff and #18469f, not a Soft series or accent stop.",2026-10-29T18:59:12Z,round2-vision
+heatmap,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+heatmap,soft-light,Series discrimination,3,A single hue ramp has too little step between the low and high ends of 1 to 14.,2026-10-29T18:59:12Z,round2-vision
+heatmap,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+heatmap,soft-light,Product ship,3,A heatmap you cannot read across the scale would get sent back.,2026-10-29T18:59:12Z,round2-vision
+heatmap,soft-dark,Glance,3,"Cells sit in a narrow blue from about #18469f to #288eff, so neighboring hours do not separate.",2026-10-29T18:59:12Z,round2-vision
+heatmap,soft-dark,Token honesty,3,"Cell fills are baked one-off blues such as #288eff and #18469f, not a Soft series or accent stop.",2026-10-29T18:59:12Z,round2-vision
+heatmap,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+heatmap,soft-dark,Series discrimination,3,A single hue ramp has too little step between the low and high ends of 1 to 14.,2026-10-29T18:59:12Z,round2-vision
+heatmap,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+heatmap,soft-dark,Product ship,3,A heatmap you cannot read across the scale would get sent back.,2026-10-29T18:59:12Z,round2-vision
+gauge,soft-light,Glance,3,"The thick value arc, a thinner inner arc, and the needle compete, so 72 is not the only thing you see.",2026-10-29T18:59:12Z,round2-vision
+gauge,soft-light,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+gauge,soft-light,Chrome density,3,Tick labels sit far outside the dial and Capacity is easy to miss under the hub.,2026-10-29T18:59:12Z,round2-vision
+gauge,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+gauge,soft-light,Light / dark parity,3,Dark system green goes neon against #1c1c1e while the light dial stays a deeper green.,2026-10-29T18:59:12Z,round2-vision
+gauge,soft-light,Product ship,3,The double arc reads as two gauges on one card.,2026-10-29T18:59:12Z,round2-vision
+gauge,soft-dark,Glance,3,"The thick value arc, a thinner inner arc, and the needle compete, so 72 is not the only thing you see.",2026-10-29T18:59:12Z,round2-vision
+gauge,soft-dark,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+gauge,soft-dark,Chrome density,3,Tick labels sit far outside the dial and Capacity is easy to miss under the hub.,2026-10-29T18:59:12Z,round2-vision
+gauge,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+gauge,soft-dark,Light / dark parity,3,Dark system green goes neon against #1c1c1e while the light dial stays a deeper green.,2026-10-29T18:59:12Z,round2-vision
+gauge,soft-dark,Product ship,3,The double arc reads as two gauges on one card.,2026-10-29T18:59:12Z,round2-vision
+kpi,soft-light,Glance,5,,2026-10-29T18:59:12Z,round2-vision
+kpi,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+kpi,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+kpi,soft-light,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+kpi,soft-light,Light / dark parity,3,The spark area is a light wash on the white card and a muddy navy on the dark card.,2026-10-29T18:59:12Z,round2-vision
+kpi,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+kpi,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+kpi,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+kpi,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+kpi,soft-dark,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+kpi,soft-dark,Light / dark parity,3,The spark area is a light wash on the white card and a muddy navy on the dark card.,2026-10-29T18:59:12Z,round2-vision
+kpi,soft-dark,Product ship,3,The dark spark fill would not sit next to the crisp 125K on a product card.,2026-10-29T18:59:12Z,round2-vision
+sparkline,soft-light,Glance,5,,2026-10-29T18:59:12Z,round2-vision
+sparkline,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+sparkline,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+sparkline,soft-light,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+sparkline,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+sparkline,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+sparkline,soft-dark,Glance,5,,2026-10-29T18:59:12Z,round2-vision
+sparkline,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+sparkline,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+sparkline,soft-dark,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+sparkline,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+sparkline,soft-dark,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+mini-area,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+mini-area,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+mini-area,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+mini-area,soft-light,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+mini-area,soft-light,Light / dark parity,3,Light fades into the card and dark becomes a glowing blue slab.,2026-10-29T18:59:12Z,round2-vision
+mini-area,soft-light,Product ship,3,"The fill dies at the baseline, so zero is undefined.",2026-10-29T18:59:12Z,round2-vision
+mini-area,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+mini-area,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+mini-area,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+mini-area,soft-dark,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+mini-area,soft-dark,Light / dark parity,3,Light fades into the card and dark becomes a glowing blue slab.,2026-10-29T18:59:12Z,round2-vision
+mini-area,soft-dark,Product ship,3,"The fill dies at the baseline, so zero is undefined.",2026-10-29T18:59:12Z,round2-vision
+progress-ring,soft-light,Glance,5,,2026-10-29T18:59:12Z,round2-vision
+progress-ring,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+progress-ring,soft-light,Chrome density,5,,2026-10-29T18:59:12Z,round2-vision
+progress-ring,soft-light,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+progress-ring,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+progress-ring,soft-light,Product ship,5,,2026-10-29T18:59:12Z,round2-vision
+progress-ring,soft-dark,Glance,5,,2026-10-29T18:59:12Z,round2-vision
+progress-ring,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+progress-ring,soft-dark,Chrome density,5,,2026-10-29T18:59:12Z,round2-vision
+progress-ring,soft-dark,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+progress-ring,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+progress-ring,soft-dark,Product ship,5,,2026-10-29T18:59:12Z,round2-vision
+spike,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+spike,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+spike,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+spike,soft-light,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+spike,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+spike,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+spike,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+spike,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+spike,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+spike,soft-dark,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+spike,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+spike,soft-dark,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+candlestick,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+candlestick,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+candlestick,soft-light,Chrome density,3,"Dates are raw ISO strings, and the volume strip is a washed afterthought under a large gap.",2026-10-29T18:59:12Z,round2-vision
+candlestick,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+candlestick,soft-light,Light / dark parity,3,"Light volume is pastel and dark volume is muddy maroon and green, while the candles go neon.",2026-10-29T18:59:12Z,round2-vision
+candlestick,soft-light,Product ship,3,Volume bars are too pale to compare.,2026-10-29T18:59:12Z,round2-vision
+candlestick,soft-dark,Glance,3,"Volume bars sit on the page color, so the lower panel does not read.",2026-10-29T18:59:12Z,round2-vision
+candlestick,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+candlestick,soft-dark,Chrome density,3,"Dates are raw ISO strings, and the volume strip is a washed afterthought under a large gap.",2026-10-29T18:59:12Z,round2-vision
+candlestick,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+candlestick,soft-dark,Light / dark parity,3,"Light volume is pastel and dark volume is muddy maroon and green, while the candles go neon.",2026-10-29T18:59:12Z,round2-vision
+candlestick,soft-dark,Product ship,2,A candle chart whose volume panel disappears would not ship.,2026-10-29T18:59:12Z,round2-vision
+histogram,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+histogram,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+histogram,soft-light,Chrome density,3,"Bins are separated like bars, the y ticks land on 9, 18, and 27, and there is no unit.",2026-10-29T18:59:12Z,round2-vision
+histogram,soft-light,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+histogram,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+histogram,soft-light,Product ship,3,Gaps between bins and the odd y ticks keep it short of a polished histogram.,2026-10-29T18:59:12Z,round2-vision
+histogram,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+histogram,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+histogram,soft-dark,Chrome density,3,"Bins are separated like bars, the y ticks land on 9, 18, and 27, and there is no unit.",2026-10-29T18:59:12Z,round2-vision
+histogram,soft-dark,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+histogram,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+histogram,soft-dark,Product ship,3,Gaps between bins and the odd y ticks keep it short of a polished histogram.,2026-10-29T18:59:12Z,round2-vision
+boxplot,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+boxplot,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+boxplot,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+boxplot,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+boxplot,soft-light,Light / dark parity,3,Dark fills turn the orange box brown and the red box maroon.,2026-10-29T18:59:12Z,round2-vision
+boxplot,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+boxplot,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+boxplot,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+boxplot,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+boxplot,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+boxplot,soft-dark,Light / dark parity,3,Dark fills turn the orange box brown and the red box maroon.,2026-10-29T18:59:12Z,round2-vision
+boxplot,soft-dark,Product ship,3,Those muddy fills would not ship beside the light pastel boxes.,2026-10-29T18:59:12Z,round2-vision
+radar,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+radar,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+radar,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+radar,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+radar,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+radar,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+radar,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+radar,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+radar,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+radar,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+radar,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+radar,soft-dark,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+funnel,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+funnel,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+funnel,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+funnel,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+funnel,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+funnel,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+funnel,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+funnel,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+funnel,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+funnel,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+funnel,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+funnel,soft-dark,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+treemap,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+treemap,soft-light,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+treemap,soft-light,Chrome density,3,Mirr... is truncated in the smallest glass tile.,2026-10-29T18:59:12Z,round2-vision
+treemap,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+treemap,soft-light,Light / dark parity,3,"Dark mode keeps the same light pastel tiles and black type, so the mosaic never becomes a dark surface.",2026-10-29T18:59:12Z,round2-vision
+treemap,soft-light,Product ship,3,Truncation plus a light-on-dark mosaic would get a revision.,2026-10-29T18:59:12Z,round2-vision
+treemap,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+treemap,soft-dark,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+treemap,soft-dark,Chrome density,3,Mirr... is truncated in the smallest glass tile.,2026-10-29T18:59:12Z,round2-vision
+treemap,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+treemap,soft-dark,Light / dark parity,3,"Dark mode keeps the same light pastel tiles and black type, so the mosaic never becomes a dark surface.",2026-10-29T18:59:12Z,round2-vision
+treemap,soft-dark,Product ship,3,Truncation plus a light-on-dark mosaic would get a revision.,2026-10-29T18:59:12Z,round2-vision
+sunburst,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+sunburst,soft-light,Token honesty,2,"Slice labels are #000000 and the outer ring uses tints such as #4fa3ff, not Soft text or series tokens.",2026-10-29T18:59:12Z,round2-vision
+sunburst,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+sunburst,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+sunburst,soft-light,Light / dark parity,3,Black labels and a black center hole fight the dark card; light is merely black type on blue.,2026-10-29T18:59:12Z,round2-vision
+sunburst,soft-light,Product ship,3,Two Search labels and a parent-only legend leave the rings half explained.,2026-10-29T18:59:12Z,round2-vision
+sunburst,soft-dark,Glance,3,Black type on the blue ring is the wrong ink once the card is dark.,2026-10-29T18:59:12Z,round2-vision
+sunburst,soft-dark,Token honesty,2,"Slice labels are #000000 and the outer ring uses tints such as #4fa3ff, not Soft text or series tokens.",2026-10-29T18:59:12Z,round2-vision
+sunburst,soft-dark,Chrome density,3,The center hole is a black disk rather than the card showing through.,2026-10-29T18:59:12Z,round2-vision
+sunburst,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+sunburst,soft-dark,Light / dark parity,3,Black labels and a black center hole fight the dark card; light is merely black type on blue.,2026-10-29T18:59:12Z,round2-vision
+sunburst,soft-dark,Product ship,3,Two Search labels and a parent-only legend leave the rings half explained.,2026-10-29T18:59:12Z,round2-vision
+sankey,soft-light,Glance,3,"Crossings turn gray-brown, so a path is hard to follow in one second.",2026-10-29T18:59:12Z,round2-vision
+sankey,soft-light,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+sankey,soft-light,Chrome density,3,"Landing, Product, and Blog sit in pills while Ads, Search, Trial, and Paid sit outside the nodes.",2026-10-29T18:59:12Z,round2-vision
+sankey,soft-light,Series discrimination,3,Overlapping links lose the node color.,2026-10-29T18:59:12Z,round2-vision
+sankey,soft-light,Light / dark parity,3,Dark links sink and the crossings go brown while the nodes stay neon.,2026-10-29T18:59:12Z,round2-vision
+sankey,soft-light,Product ship,3,Ads versus Search cannot be traced through the tangle with confidence.,2026-10-29T18:59:12Z,round2-vision
+sankey,soft-dark,Glance,3,"Crossings turn gray-brown, so a path is hard to follow in one second.",2026-10-29T18:59:12Z,round2-vision
+sankey,soft-dark,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+sankey,soft-dark,Chrome density,3,"Landing, Product, and Blog sit in pills while Ads, Search, Trial, and Paid sit outside the nodes.",2026-10-29T18:59:12Z,round2-vision
+sankey,soft-dark,Series discrimination,3,Overlapping links lose the node color.,2026-10-29T18:59:12Z,round2-vision
+sankey,soft-dark,Light / dark parity,3,Dark links sink and the crossings go brown while the nodes stay neon.,2026-10-29T18:59:12Z,round2-vision
+sankey,soft-dark,Product ship,2,The main ribbons disappear into the page.,2026-10-29T18:59:12Z,round2-vision
+bullet,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+bullet,soft-light,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+bullet,soft-light,Chrome density,2,Two rows sit in the top third and the rest of the card is empty.,2026-10-29T18:59:12Z,round2-vision
+bullet,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+bullet,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+bullet,soft-light,Product ship,3,"There is no scale, and the lower two thirds of the card are empty.",2026-10-29T18:59:12Z,round2-vision
+bullet,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+bullet,soft-dark,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+bullet,soft-dark,Chrome density,2,Two rows sit in the top third and the rest of the card is empty.,2026-10-29T18:59:12Z,round2-vision
+bullet,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+bullet,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+bullet,soft-dark,Product ship,3,"There is no scale, and the lower two thirds of the card are empty.",2026-10-29T18:59:12Z,round2-vision
+waterfall,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+waterfall,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+waterfall,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+waterfall,soft-light,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+waterfall,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+waterfall,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+waterfall,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+waterfall,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+waterfall,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+waterfall,soft-dark,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+waterfall,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+waterfall,soft-dark,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+area-range,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+area-range,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+area-range,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+area-range,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+area-range,soft-light,Light / dark parity,3,The forecast band is a clear light blue in light and a navy shape that barely lifts off the dark card.,2026-10-29T18:59:12Z,round2-vision
+area-range,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+area-range,soft-dark,Glance,3,The band edges are hard to see against #1c1c1e.,2026-10-29T18:59:12Z,round2-vision
+area-range,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+area-range,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+area-range,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+area-range,soft-dark,Light / dark parity,3,The forecast band is a clear light blue in light and a navy shape that barely lifts off the dark card.,2026-10-29T18:59:12Z,round2-vision
+area-range,soft-dark,Product ship,3,The dark interval would not ship next to the light one.,2026-10-29T18:59:12Z,round2-vision
+bar-range,soft-light,Glance,3,"Ranges are chunky floating blocks, so the low and high are not obvious.",2026-10-29T18:59:12Z,round2-vision
+bar-range,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+bar-range,soft-light,Chrome density,3,"There are no end labels, and the quarterly ticks leave a sparse frame. The grid is only a hairline.",2026-10-29T18:59:12Z,round2-vision
+bar-range,soft-light,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+bar-range,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+bar-range,soft-light,Product ship,3,"It looks like a rectangle demo, not a temperature range.",2026-10-29T18:59:12Z,round2-vision
+bar-range,soft-dark,Glance,3,"Ranges are chunky floating blocks, so the low and high are not obvious.",2026-10-29T18:59:12Z,round2-vision
+bar-range,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+bar-range,soft-dark,Chrome density,3,"There are no end labels, and the quarterly ticks leave a sparse frame. The grid is only a hairline.",2026-10-29T18:59:12Z,round2-vision
+bar-range,soft-dark,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+bar-range,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+bar-range,soft-dark,Product ship,3,"It looks like a rectangle demo, not a temperature range.",2026-10-29T18:59:12Z,round2-vision
+errorbar,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+errorbar,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+errorbar,soft-light,Chrome density,3,"Three marks, no unit, and a large empty field. The grid is only a hairline.",2026-10-29T18:59:12Z,round2-vision
+errorbar,soft-light,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+errorbar,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+errorbar,soft-light,Product ship,3,"The intervals are clear, but the card is too sparse to drop in without an axis title.",2026-10-29T18:59:12Z,round2-vision
+errorbar,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+errorbar,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+errorbar,soft-dark,Chrome density,3,"Three marks, no unit, and a large empty field. The grid is only a hairline.",2026-10-29T18:59:12Z,round2-vision
+errorbar,soft-dark,Series discrimination,5,,2026-10-29T18:59:12Z,round2-vision
+errorbar,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+errorbar,soft-dark,Product ship,3,"The intervals are clear, but the card is too sparse to drop in without an axis title.",2026-10-29T18:59:12Z,round2-vision
+gantt,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+gantt,soft-light,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+gantt,soft-light,Chrome density,3,"Dependency elbows crowd the bars, and General availability sits on the right edge.",2026-10-29T18:59:12Z,round2-vision
+gantt,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+gantt,soft-light,Light / dark parity,3,Dark remaining-work tails are muddy navy and maroon while the light tails stay pale.,2026-10-29T18:59:12Z,round2-vision
+gantt,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+gantt,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+gantt,soft-dark,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+gantt,soft-dark,Chrome density,3,"Dependency elbows crowd the bars, and General availability sits on the right edge.",2026-10-29T18:59:12Z,round2-vision
+gantt,soft-dark,Series discrimination,3,"Remaining-work tails are muddy navy and maroon, so status is mostly the solid tip.",2026-10-29T18:59:12Z,round2-vision
+gantt,soft-dark,Light / dark parity,3,Dark remaining-work tails are muddy navy and maroon while the light tails stay pale.,2026-10-29T18:59:12Z,round2-vision
+gantt,soft-dark,Product ship,3,"The schedule reads, but the unfinished tails sink toward the dark groups.",2026-10-29T18:59:12Z,round2-vision
+timeline,soft-light,Glance,3,"Event dots read, but the era pills are about 1.2:1 and do not.",2026-10-29T18:59:12Z,round2-vision
+timeline,soft-light,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+timeline,soft-light,Chrome density,2,"The story occupies the top third, First paid plan drops into the year row, and the lower half is blank.",2026-10-29T18:59:12Z,round2-vision
+timeline,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+timeline,soft-light,Light / dark parity,2,"Era capsules are a pale blue wash in light and a navy wash in dark, and neither reads as a band.",2026-10-29T18:59:12Z,round2-vision
+timeline,soft-light,Product ship,3,Colliding labels and ghost eras would not ship.,2026-10-29T18:59:12Z,round2-vision
+timeline,soft-dark,Glance,3,"Event dots read, but the era pills are about 1.2:1 and do not.",2026-10-29T18:59:12Z,round2-vision
+timeline,soft-dark,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+timeline,soft-dark,Chrome density,2,"The story occupies the top third, First paid plan drops into the year row, and the lower half is blank.",2026-10-29T18:59:12Z,round2-vision
+timeline,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+timeline,soft-dark,Light / dark parity,2,"Era capsules are a pale blue wash in light and a navy wash in dark, and neither reads as a band.",2026-10-29T18:59:12Z,round2-vision
+timeline,soft-dark,Product ship,2,The era bands are effectively invisible.,2026-10-29T18:59:12Z,round2-vision
+quadrant,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+quadrant,soft-light,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+quadrant,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+quadrant,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+quadrant,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+quadrant,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+quadrant,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+quadrant,soft-dark,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+quadrant,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+quadrant,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+quadrant,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+quadrant,soft-dark,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+venn,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+venn,soft-light,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+venn,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+venn,soft-light,Series discrimination,3,Overlaps turn brown and olive and drop the parent hues.,2026-10-29T18:59:12Z,round2-vision
+venn,soft-light,Light / dark parity,3,"Dark orange becomes a brown disk and the counts sit on dark pills, while the light mixes stay pastel.",2026-10-29T18:59:12Z,round2-vision
+venn,soft-light,Product ship,3,"The line 3-set areas are approximate, plus the count halos, reads as a demo.",2026-10-29T18:59:12Z,round2-vision
+venn,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+venn,soft-dark,Token honesty,5,,2026-10-29T18:59:12Z,round2-vision
+venn,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+venn,soft-dark,Series discrimination,3,Overlaps turn brown and olive and drop the parent hues.,2026-10-29T18:59:12Z,round2-vision
+venn,soft-dark,Light / dark parity,3,"Dark orange becomes a brown disk and the counts sit on dark pills, while the light mixes stay pastel.",2026-10-29T18:59:12Z,round2-vision
+venn,soft-dark,Product ship,3,"The line 3-set areas are approximate, plus the count halos, reads as a demo.",2026-10-29T18:59:12Z,round2-vision
+journey,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+journey,soft-light,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+journey,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+journey,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+journey,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+journey,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+journey,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+journey,soft-dark,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+journey,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+journey,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+journey,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+journey,soft-dark,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+radial-bar,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+radial-bar,soft-light,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+radial-bar,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+radial-bar,soft-light,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+radial-bar,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+radial-bar,soft-light,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+radial-bar,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+radial-bar,soft-dark,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+radial-bar,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+radial-bar,soft-dark,Series discrimination,4,,2026-10-29T18:59:12Z,round2-vision
+radial-bar,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+radial-bar,soft-dark,Product ship,4,,2026-10-29T18:59:12Z,round2-vision
+rose,soft-light,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+rose,soft-light,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+rose,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+rose,soft-light,Series discrimination,3,"Hale and Orchard are neighboring blues, and 1,800 is cramped in the small purple petal.",2026-10-29T18:59:12Z,round2-vision
+rose,soft-light,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+rose,soft-light,Product ship,3,The cramped petal label and the two blues would get a revision.,2026-10-29T18:59:12Z,round2-vision
+rose,soft-dark,Glance,4,,2026-10-29T18:59:12Z,round2-vision
+rose,soft-dark,Token honesty,4,,2026-10-29T18:59:12Z,round2-vision
+rose,soft-dark,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+rose,soft-dark,Series discrimination,3,"Hale and Orchard are neighboring blues, and 1,800 is cramped in the small purple petal.",2026-10-29T18:59:12Z,round2-vision
+rose,soft-dark,Light / dark parity,4,,2026-10-29T18:59:12Z,round2-vision
+rose,soft-dark,Product ship,3,The cramped petal label and the two blues would get a revision.,2026-10-29T18:59:12Z,round2-vision
+choropleth,soft-light,Glance,3,Many states are near-white and do not separate on the diverging ramp.,2026-10-29T18:59:12Z,round2-vision
+choropleth,soft-light,Token honesty,2,"Ocean, land, and the red-gray-blue ramp are geo one-offs, not Soft series, positive, or negative.",2026-10-29T18:59:12Z,round2-vision
+choropleth,soft-light,Chrome density,4,,2026-10-29T18:59:12Z,round2-vision
+choropleth,soft-light,Series discrimination,3,"Red versus blue is clear, but the middle of the ramp is one pale gray.",2026-10-29T18:59:12Z,round2-vision
+choropleth,soft-light,Light / dark parity,2,The same light ramp is pasted on a navy ocean in dark mode.,2026-10-29T18:59:12Z,round2-vision
+choropleth,soft-light,Product ship,3,Too many states read as empty white.,2026-10-29T18:59:12Z,round2-vision
+choropleth,soft-dark,Glance,3,Many states are near-white and do not separate on the diverging ramp.,2026-10-29T18:59:12Z,round2-vision
+choropleth,soft-dark,Token honesty,2,"Ocean, land, and the red-gray-blue ramp are geo one-offs, not Soft series, positive, or negative.",2026-10-29T18:59:12Z,round2-vision
+choropleth,soft-dark,Chrome density,3,Pale states and the legend midpoint shout on the dark page.,2026-10-29T18:59:12Z,round2-vision
+choropleth,soft-dark,Series discrimination,3,"Red versus blue is clear, but the middle of the ramp is one pale gray.",2026-10-29T18:59:12Z,round2-vision
+choropleth,soft-dark,Light / dark parity,2,The same light ramp is pasted on a navy ocean in dark mode.,2026-10-29T18:59:12Z,round2-vision
+choropleth,soft-dark,Product ship,2,A light-mode map stuck on a dark card would not ship.,2026-10-29T18:59:12Z,round2-vision
+map-points,soft-light,Glance,3,"Beijing, Tokyo, Delhi, Shanghai, and Dhaka labels pile on top of each other.",2026-10-29T18:59:12Z,round2-vision
+map-points,soft-light,Token honesty,2,"Markers are #2b6cb0 and land is beige #efe6d6, not Soft series blue or surface.",2026-10-29T18:59:12Z,round2-vision
+map-points,soft-light,Chrome density,3,The legend says Population and never shows a size key.,2026-10-29T18:59:12Z,round2-vision
+map-points,soft-light,Series discrimination,3,"One blue, and the overlaps in Asia merge the bubbles.",2026-10-29T18:59:12Z,round2-vision
+map-points,soft-light,Light / dark parity,3,"Land flips darker and bubbles go lighter, but the collisions and the off-palette blue remain.",2026-10-29T18:59:12Z,round2-vision
+map-points,soft-light,Product ship,3,Colliding city labels and an unlabeled size encoding would not ship.,2026-10-29T18:59:12Z,round2-vision
+map-points,soft-dark,Glance,3,"Beijing, Tokyo, Delhi, Shanghai, and Dhaka labels pile on top of each other.",2026-10-29T18:59:12Z,round2-vision
+map-points,soft-dark,Token honesty,2,"Markers are #2b6cb0 and land is beige #efe6d6 in light, and the dark bubbles stay that off-palette blue.",2026-10-29T18:59:12Z,round2-vision
+map-points,soft-dark,Chrome density,3,The legend says Population and never shows a size key.,2026-10-29T18:59:12Z,round2-vision
+map-points,soft-dark,Series discrimination,3,"One blue, and the overlaps in Asia merge the bubbles.",2026-10-29T18:59:12Z,round2-vision
+map-points,soft-dark,Light / dark parity,3,"Land flips darker and bubbles go lighter, but the collisions and the off-palette blue remain.",2026-10-29T18:59:12Z,round2-vision
+map-points,soft-dark,Product ship,3,Colliding city labels and an unlabeled size encoding would not ship.,2026-10-29T18:59:12Z,round2-vision

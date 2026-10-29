@@ -929,7 +929,7 @@ describe("attach", () => {
 
     svg.dispatchEvent(new PointerEvent("pointerdown", { clientX: 120, clientY: 100, bubbles: true, button: 0, shiftKey: true }));
     svg.dispatchEvent(new PointerEvent("pointermove", { clientX: 420, clientY: 100, bubbles: true, shiftKey: true }));
-    expect(svg.querySelector("[data-ck-brush]")).toBeTruthy();
+    expect(svg.querySelector("[data-ck-brush]")?.getAttribute("fill")).toBe("rgba(0, 122, 255, 0.16)");
     svg.dispatchEvent(new PointerEvent("pointerup", { clientX: 420, clientY: 100, bubbles: true, button: 0 }));
     expect(ranges.length).toBeGreaterThan(1);
 

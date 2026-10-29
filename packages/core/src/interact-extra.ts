@@ -163,7 +163,7 @@ on(svg, "pointermove", ((event: PointerEvent) => {
         if (!mark) {
           mark = document.createElementNS("http://www.w3.org/2000/svg", "rect");
           mark.setAttribute("data-ck-brush", "");
-          mark.setAttribute("fill", "rgb(0 122 255 / .16)");
+          mark.setAttribute("fill", "rgba(0, 122, 255, 0.16)");
           mark.setAttribute("stroke", "#007aff");
           svg.append(mark);
         }
@@ -245,7 +245,7 @@ function ensureNavCss(): void {
   const style = document.createElement("style");
   style.id = "ck-interact-nav-style";
   style.textContent =
-    ".ck-navigator{position:relative;margin-top:8px;touch-action:none}.ck-navigator svg{display:block;width:100%;background:light-dark(rgb(0 0 0 / 0.04),rgb(255 255 255 / 0.06));border-radius:8px}.ck-nav-shade{position:absolute;top:0;bottom:0;background:light-dark(rgb(255 255 255 / 0.62),rgb(0 0 0 / 0.45));pointer-events:none}.ck-navigator [role=slider]{position:absolute;top:0;bottom:0;box-sizing:border-box;border:0;background:color-mix(in srgb,var(--ck-nav,#007aff) 22%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ck-nav,#007aff) 50%,transparent);border-radius:6px;cursor:ew-resize;touch-action:none}.ck-navigator [role=slider]:focus-visible{outline:2px solid var(--ck-nav,#007aff);outline-offset:2px}.ck-nav-handle{position:absolute;top:18%;bottom:18%;width:4px;border-radius:2px;background:var(--ck-nav,#007aff)}.ck-nav-handle[data-ck-edge=lo]{left:0}.ck-nav-handle[data-ck-edge=hi]{right:0}";
+    ".ck-navigator{position:relative;margin-top:8px;touch-action:none}.ck-navigator svg{display:block;width:100%;background:light-dark(rgba(0, 0, 0, 0.04),rgba(255, 255, 255, 0.06));border-radius:8px}.ck-nav-shade{position:absolute;top:0;bottom:0;background:light-dark(rgba(255, 255, 255, 0.62),rgba(0, 0, 0, 0.45));pointer-events:none}.ck-navigator [role=slider]{position:absolute;top:0;bottom:0;box-sizing:border-box;border:0;background:color-mix(in srgb,var(--ck-nav,#007aff) 22%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ck-nav,#007aff) 50%,transparent);border-radius:6px;cursor:ew-resize;touch-action:none}.ck-navigator [role=slider]:focus-visible{outline:2px solid var(--ck-nav,#007aff);outline-offset:2px}.ck-nav-handle{position:absolute;top:18%;bottom:18%;width:4px;border-radius:2px;background:var(--ck-nav,#007aff)}.ck-nav-handle[data-ck-edge=lo]{left:0}.ck-nav-handle[data-ck-edge=hi]{right:0}";
   document.head.append(style);
 }
 
