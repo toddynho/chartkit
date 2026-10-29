@@ -90,7 +90,9 @@ function build() {
   const harnessLine = gzipOrThrow(row(rows, "chartkit-minimal", "line"));
   const harnessBar = gzipOrThrow(row(rows, "chartkit-minimal", "bar"));
   const harnessDonut = gzipOrThrow(row(rows, "chartkit-minimal", "donut"));
-  const harnessAll = gzipOrThrow(row(rows, "chartkit-all", "line"));
+  const harnessAllRow = rows.find((item) => item.id === "chartkit-all" && item.status === "ok" && item.gzipBytes != null && (item.chart === "all" || item.chart === "line"));
+  if (!harnessAllRow) throw new Error("measured-sizes.json has no chartkit-all gzip");
+  const harnessAll = harnessAllRow.gzipBytes;
   const uplot = row(rows, "uplot", "line");
   const uplotJs = gzipOrThrow(uplot);
   const uplotCss = uplot.cssGzipBytes ?? 0;

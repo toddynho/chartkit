@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import { GALLERY_TYPES } from "../browser/chart-types.mjs";
 import { phase3Matrix } from "../browser/phase3.mjs";
 import { rivalMatrix } from "../browser/rivals.mjs";
+import { bundleMarkdown, bundleSummary } from "../lib/phase4-md.mjs";
 import { buildMatrix } from "./catalog.mjs";
 import { GALLERY_ALIASES } from "./native.mjs";
 import { TREE_NOISE_GZIP, collapseTreeShake, compareGzip } from "./tree.mjs";
@@ -92,4 +96,45 @@ test("identical bundles collapse and a real spread does not", () => {
   assert.equal(uplot.gzipBytes, 1000 + TREE_NOISE_GZIP);
   assert.equal(compareGzip(cells[0], packages), uplot.gzipBytes + uplot.cssGzipBytes);
   assert.equal(compareGzip(cells[2], packages), 5000);
+});
+
+test("bundle summaries are computed from the cells, including a stale summary object", () => {
+  const bundle = {
+    counts: { ok: 99 },
+    summary: {
+      counts: { ok: 1 },
+      chartkitGzipMin: { chart: "progress-ring", gzipBytes: 7188 },
+      chartkitGzipMax: { chart: "combo", gzipBytes: 46457 },
+      rivalSmaller: [{ chart: "line", library: "uPlot", gzip: 24054, chartkitGzip: 42098, label: "not tree-shakeable", reactExternal: null }],
+      notTreeShakeable: [],
+    },
+    packages: [
+      { id: "uplot", library: "uPlot", treeShakeable: false, gzipBytes: 23292, cssGzipBytes: 762 },
+    ],
+    cells: [
+      { id: "chartkit", library: "ChartKit minimal", chart: "progress-ring", status: "ok", gzipBytes: 6673 },
+      { id: "chartkit", library: "ChartKit minimal", chart: "line", status: "ok", gzipBytes: 32110 },
+      { id: "chartkit", library: "ChartKit minimal", chart: "combo", status: "ok", gzipBytes: 38220 },
+      { id: "uplot", library: "uPlot", chart: "line", status: "ok", gzipBytes: null, label: "not tree-shakeable", packageId: "uplot" },
+      { id: "uplot", library: "uPlot", chart: "combo", status: "unsupported" },
+      { id: "chartkit-all", library: "ChartKit all", chart: "all", status: "ok", gzipBytes: 78081 },
+    ],
+  };
+  const summary = bundleSummary(bundle);
+  assert.deepEqual(summary.chartkitGzipMin, { chart: "progress-ring", gzipBytes: 6673 });
+  assert.deepEqual(summary.chartkitGzipMax, { chart: "combo", gzipBytes: 38220 });
+  assert.deepEqual(summary.counts, { ok: 5, unsupported: 1, "license-blocked": 0, error: 0 });
+  assert.deepEqual(summary.rivalSmaller, [
+    { chart: "line", library: "uPlot", gzip: 24054, chartkitGzip: 32110, label: "not tree-shakeable", reactExternal: null },
+  ]);
+  assert.equal(summary.notTreeShakeable[0].gzipBytes, 23292);
+  const markdown = bundleMarkdown(bundle);
+  assert.match(markdown, /largest for \*\*combo\*\* \(38220\)/);
+  assert.match(markdown, /\| line \| 32110 \| uPlot \(full package\) \| 24054 \|/);
+  assert.doesNotMatch(markdown, /46457|42098|7188/);
+});
+
+test("published bundle.json summary matches the cells", () => {
+  const bundle = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../results/bundle.json"), "utf8"));
+  assert.deepEqual(bundle.summary, bundleSummary(bundle));
 });

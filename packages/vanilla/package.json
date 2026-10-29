@@ -1,7 +1,7 @@
 {
   "name": "@chartkitdev/vanilla",
   "version": "0.5.0",
-  "description": "Mount a ChartKit JSON spec into an element. No framework. The line chart is 34,554 B gzip. Evidence: https://chartkit.dev/benchmarks",
+  "description": "Mount a ChartKit JSON spec into an element. No framework. The line chart is 32,110 B gzip (bench/results/bundle.json, ChartKit minimal line gzipBytes). Evidence: https://chartkit.dev/benchmarks",
   "keywords": ["chart", "svg", "vanilla", "chartkit"],
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev",

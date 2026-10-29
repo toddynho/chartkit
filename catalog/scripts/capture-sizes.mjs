@@ -1,10 +1,10 @@
 /**
  * Measure current bundle sizes and write catalog/data/measured-sizes.json.
- * Runs scripts/size.mjs and the bench bundle step. Pages read the file.
+ * Runs scripts/size.mjs and reads bench/results/bundle.json. Pages read the file.
  * Do not type the byte counts into the site.
  */
 import { spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,32 +26,61 @@ function run(command, args, cwd) {
   return result.stdout;
 }
 
-const sizeStdout = run("node", ["scripts/size.mjs"], repoRoot);
+// scripts/size.mjs prints the measurement and exits 1 when a gzip budget is over. The JSON is still the current size, so this file records it. The budget check stays in scripts/size.mjs.
+const sizeRun = spawnSync("node", ["scripts/size.mjs"], { cwd: repoRoot, encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
+const sizeStdout = sizeRun.stdout ?? "";
+if (sizeRun.status !== 0 && !sizeStdout.trim().startsWith("{")) {
+  throw new Error(`node scripts/size.mjs failed\n${sizeRun.stderr}\n${sizeStdout}`);
+}
+if (sizeRun.status !== 0) console.error(sizeRun.stderr);
 const sizeJson = JSON.parse(sizeStdout);
 if (typeof sizeJson.measured?.line !== "number" || typeof sizeJson.measured?.all !== "number") {
   throw new Error("scripts/size.mjs did not report line and all gzip");
 }
 
-run("node", ["run.mjs", "--skip-browser", "--skip-ssr", "--skip-agent"], benchRoot);
-const partial = JSON.parse(readFileSync(join(benchRoot, "results/partial.json"), "utf8"));
-if (!partial.bundle?.rows?.length) throw new Error("bench bundle measurement wrote no rows");
+const bundlePath = join(benchRoot, "results/bundle.json");
+if (!existsSync(bundlePath)) {
+  run("node", ["run.mjs", "--skip-browser", "--skip-ssr", "--skip-agent"], benchRoot);
+}
+const bundle = JSON.parse(readFileSync(bundlePath, "utf8"));
+if (!Array.isArray(bundle.cells) || bundle.cells.length === 0) throw new Error("bench/results/bundle.json has no cells");
 
-const rows = partial.bundle.rows.map((row) => ({
-  id: row.id,
-  library: row.library,
-  chart: row.chart,
-  renderer: row.renderer,
-  react: row.react,
-  status: row.status,
-  gzipBytes: row.gzipBytes ?? null,
-  minBytes: row.minBytes ?? null,
-  brotliBytes: row.brotliBytes ?? null,
-  cssGzipBytes: row.cssGzipBytes ?? null,
-  cssMinBytes: row.cssMinBytes ?? null,
-  reactExternalGzipBytes: row.reactExternal?.gzipBytes ?? null,
-  reactExternalMinBytes: row.reactExternal?.minBytes ?? null,
-  note: row.note ?? null,
-}));
+function resolved(cell) {
+  if (cell.gzipBytes != null || cell.status !== "ok") return cell;
+  const pkg = (bundle.packages ?? []).find((item) => item.id === cell.packageId);
+  if (!pkg) return cell;
+  return {
+    ...cell,
+    minBytes: pkg.minBytes ?? null,
+    gzipBytes: pkg.gzipBytes ?? null,
+    brotliBytes: pkg.brotliBytes ?? null,
+    cssMinBytes: cell.cssMinBytes ?? pkg.cssMinBytes ?? null,
+    cssGzipBytes: cell.cssGzipBytes ?? pkg.cssGzipBytes ?? null,
+    reactExternal: cell.reactExternal ?? pkg.reactExternal ?? null,
+    note: cell.note ?? pkg.note ?? null,
+  };
+}
+
+const rows = bundle.cells.map((cell) => {
+  const source = resolved(cell);
+  return {
+    id: cell.library === "ChartKit minimal" ? "chartkit-minimal" : cell.id,
+    library: cell.library,
+    chart: cell.chart,
+    renderer: cell.renderer ?? null,
+    react: cell.react ?? null,
+    status: cell.status,
+    gzipBytes: source.gzipBytes ?? null,
+    minBytes: source.minBytes ?? null,
+    brotliBytes: source.brotliBytes ?? null,
+    cssGzipBytes: source.cssGzipBytes ?? null,
+    cssMinBytes: source.cssMinBytes ?? null,
+    reactExternalGzipBytes: source.reactExternal?.gzipBytes ?? null,
+    reactExternalMinBytes: source.reactExternal?.minBytes ?? null,
+    note: source.note ?? null,
+    label: cell.label ?? null,
+  };
+});
 
 const coreDiff = spawnSync("git", ["diff", "--quiet", "origin/main", "--", "packages/core"], { cwd: repoRoot });
 const payload = {
@@ -67,10 +96,11 @@ const payload = {
     minBytes: { line: sizeJson.minBytes.line, all: sizeJson.minBytes.all },
   },
   bench: {
-    command: partial.command,
-    measuredAt: partial.machine.measuredAt,
-    method: partial.bundle.method,
-    versions: partial.versions,
+    command: "node bench/run.mjs --skip-browser --skip-ssr --skip-agent",
+    measuredAt: bundle.measuredAt,
+    method: bundle.method,
+    commit: bundle.commit,
+    versions: bundle.versions,
     rows,
   },
 };
@@ -85,8 +115,10 @@ console.log(
       commit: payload.commit,
       sizeScriptLine: payload.sizeScript.measured.line,
       harnessLine: line?.gzipBytes ?? null,
+      sizeScriptStatus: sizeRun.status,
     },
     null,
     2,
   ),
 );
+if (sizeRun.status !== 0) process.exit(sizeRun.status);
