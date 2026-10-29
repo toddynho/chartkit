@@ -40,13 +40,19 @@ npm install @chartkitdev/react
 npm install @chartkitdev/vue
 npm install @chartkitdev/svelte
 npm install @chartkitdev/vanilla
+npm install @chartkitdev/element
+npm install @chartkitdev/markdown
+npm install @chartkitdev/geo
+npm install @chartkitdev/mcp
 ```
 
-`@chartkitdev/element` (`<chart-kit>`) is in this repo and is not on npm yet.
+`@chartkitdev/element` is the `<chart-kit>` element. `@chartkitdev/markdown` turns `chartkit` fences into SVG. `@chartkitdev/mcp` is the stdio server (`npx -y @chartkitdev/mcp`).
 
-`@chartkitdev/geo` is in this repo and is not on npm. Choropleth and point maps are not part of the line or `all` bundles. Each atlas is its own chunk. There is no tile layer.
+`@chartkitdev/geo` is choropleth and point maps. It is not part of the line or `all` bundles. Each atlas is its own chunk. There is no tile layer.
 
-`@derpdaderp/chartkit` remains as a compatibility shim (not published from this branch). See [catalog/migrate.md](catalog/migrate.md).
+`@derpdaderp/chartkit` is a compatibility shim that re-exports `@chartkitdev/react`. It is not the package for a new app. The manual publish workflow can publish it after `@chartkitdev/react`. See [catalog/migrate.md](catalog/migrate.md).
+
+`@chartkitdev/convert` stays private. It turns Chart.js, Recharts, and ECharts configs into a spec for the website, and it is not an install target.
 
 ## JSON spec
 

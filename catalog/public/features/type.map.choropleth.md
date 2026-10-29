@@ -6,11 +6,11 @@ Regions coloured by value
 
 Matrix status: `native`. Verification: `source-review` (strong).
 
-@chartkitdev/geo, unpublished, not in the line or all bundles. No tiles, no pan/zoom, no US counties, no NUTS-2. Small states missing from Natural Earth 110m, including Malta, are points.
+@chartkitdev/geo, not in the line or all bundles. No tiles, no pan/zoom, no US counties, no NUTS-2. Small states missing from Natural Earth 110m, including Malta, are points.
 
 Source: packages/geo/src/render.ts
 
-No spec snippet from core `validate()`. `@chartkitdev/geo` renders this type. The package is unpublished and is not in the line or all bundles. Its own `validate()` reports CK3050–CK3056.
+No spec snippet from core `validate()`. `@chartkitdev/geo` renders this type. Install it with `npm install @chartkitdev/geo`. It is not in the line or all bundles. Its own `validate()` reports CK3050–CK3056.
 
 ## Other libraries
 

@@ -2,13 +2,20 @@
   "name": "@chartkitdev/markdown",
   "version": "0.5.0",
   "description": "remark and rehype plugins that render ChartKit and supported Mermaid fences to SVG.",
-  "keywords": ["chartkit", "markdown", "remark", "rehype", "mermaid"],
+  "keywords": [
+    "chartkit",
+    "markdown",
+    "remark",
+    "rehype",
+    "mermaid"
+  ],
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev",
   "bugs": {
     "url": "https://github.com/toddynho/chartkit/issues"
   },
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -24,7 +31,11 @@
       }
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsup",
     "test": "vitest",
@@ -33,7 +44,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@chartkitdev/core": "*"
+    "@chartkitdev/core": "^0.5.0"
   },
   "devDependencies": {
     "tsup": "^8.0.1",
@@ -43,10 +54,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/toddynho/chartkit",
+    "url": "git+https://github.com/toddynho/chartkit.git",
     "directory": "packages/markdown"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

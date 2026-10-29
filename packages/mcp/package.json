@@ -1,14 +1,21 @@
 {
   "name": "@chartkitdev/mcp",
   "version": "0.5.0",
-  "description": "MCP server for ChartKit. validate, repair, and render a JSON spec, and look up feature support from the published matrix. Not yet published to npm.",
-  "keywords": ["chartkit", "mcp", "modelcontextprotocol", "charts", "svg"],
+  "description": "MCP server for ChartKit. validate, repair, and render a JSON spec, and look up feature support from the published matrix.",
+  "keywords": [
+    "chartkit",
+    "mcp",
+    "modelcontextprotocol",
+    "charts",
+    "svg"
+  ],
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev/docs/mcp",
   "bugs": {
     "url": "https://github.com/toddynho/chartkit/issues"
   },
   "type": "module",
+  "sideEffects": false,
   "bin": {
     "chartkit-mcp": "./dist/cli.js"
   },
@@ -16,11 +23,18 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     }
   },
-  "files": ["dist", "data", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "data",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "bundle-data": "node scripts/bundle-data.mjs",
     "build": "node scripts/bundle-data.mjs && tsup && node scripts/shebang.mjs",
@@ -31,7 +45,7 @@
     "clean": "rm -rf dist data"
   },
   "dependencies": {
-    "@chartkitdev/core": "*",
+    "@chartkitdev/core": "^0.5.0",
     "@modelcontextprotocol/sdk": "^1.32.1",
     "zod": "^3.25.76"
   },
@@ -46,7 +60,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/toddynho/chartkit",
+    "url": "git+https://github.com/toddynho/chartkit.git",
     "directory": "packages/mcp"
   },
   "publishConfig": {

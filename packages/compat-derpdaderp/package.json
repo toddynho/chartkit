@@ -8,6 +8,10 @@
     "url": "https://github.com/toddynho/chartkit/issues"
   },
   "type": "module",
+  "sideEffects": [
+    "./dist/index.js",
+    "./dist/index.cjs"
+  ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -36,7 +40,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@chartkitdev/react": "*"
+    "@chartkitdev/react": "^0.5.0"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
@@ -51,10 +55,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/toddynho/chartkit",
+    "url": "git+https://github.com/toddynho/chartkit.git",
     "directory": "packages/compat-derpdaderp"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

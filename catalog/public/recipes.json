@@ -805,7 +805,7 @@
         "legend.position"
       ],
       "source": "catalog/public/dashboards/wayline.md ## Countries",
-      "note": "encoding.color.range of two or more #rrggbb stops paints the sequential ramp. This map uses #aecbfa, #669df6, #1a73e8. mark.nodata fill uses mark.land instead of a hatch. legend.position bottom draws a horizontal ramp. theme is the string soft. Choropleth renders from @chartkitdev/geo, which is unpublished.",
+      "note": "encoding.color.range of two or more #rrggbb stops paints the sequential ramp. This map uses #aecbfa, #669df6, #1a73e8. mark.nodata fill uses mark.land instead of a hatch. legend.position bottom draws a horizontal ramp. theme is the string soft. Choropleth renders from @chartkitdev/geo (npm install @chartkitdev/geo). It is not in the line or all bundles.",
       "spec": {
         "version": "1",
         "type": "choropleth",

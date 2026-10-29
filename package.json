@@ -21,6 +21,7 @@
     "bench:agent-matrix": "node bench/agent-matrix.mjs",
     "bench:core": "node scripts/bench.mjs",
     "size": "node scripts/size.mjs",
+    "release:check": "node scripts/release-check.mjs",
     "sizes:capture": "node catalog/scripts/capture-sizes.mjs",
     "showcase:check": "node --experimental-strip-types catalog/scripts/showcase-check.mjs",
     "visual:pack": "node --experimental-strip-types catalog/visual/pack.mjs",
@@ -29,7 +30,9 @@
     "clean": "rm -rf packages/*/dist apps/web/dist apps/web/.astro node_modules"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.2",
     "esbuild": "^0.25.0",
+    "publint": "^0.3.12",
     "typescript": "^5.3.3"
   }
 }

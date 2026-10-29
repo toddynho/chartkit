@@ -4,7 +4,7 @@
 ## Rules
 
 - version "1". a11y.alt required. data is rows, not {"values":[...]}. llms-full.txt.
-- Maps: @chartkitdev/geo unpublished. choropleth|map-points. atlas world|us|canada|eu. No tiles.
+- Maps: npm install @chartkitdev/geo. choropleth|map-points. atlas world|us|canada|eu. Not in the line or all bundles. No tiles.
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
 - Chart.js, Recharts, ECharts: https://chartkit.dev/convert
 - Render: https://cloud.chartkit.dev/render marked.

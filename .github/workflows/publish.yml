@@ -1,8 +1,10 @@
 # Manual publish only. Nothing here runs on push or tag.
 # Provenance requires GitHub Actions OIDC (id-token: write) and npm >= 9.
-# Trusted publishing can omit NPM_TOKEN once the npm org grants this repo access.
-# Otherwise set the NPM_TOKEN secret (automation token for the chartkitdev org,
-# plus rights to publish @derpdaderp/chartkit for the shim).
+# Set the NPM_TOKEN secret to an automation token that can publish
+# @chartkitdev/* (the chartkitdev org) and @derpdaderp/chartkit (the shim).
+# Trusted publishing can omit NPM_TOKEN once npm grants this repo access.
+# "all" publishes in dependency order. dry_run packs and contacts the registry
+# without uploading, and skips provenance.
 
 name: Publish
 
@@ -15,12 +17,20 @@ on:
         required: true
         options:
           - "@chartkitdev/core"
+          - "@chartkitdev/geo"
           - "@chartkitdev/react"
           - "@chartkitdev/vue"
           - "@chartkitdev/svelte"
           - "@chartkitdev/vanilla"
+          - "@chartkitdev/element"
+          - "@chartkitdev/markdown"
+          - "@chartkitdev/mcp"
           - "@derpdaderp/chartkit"
           - all
+      dry_run:
+        description: Pack and check the registry upload without publishing
+        type: boolean
+        default: false
 
 jobs:
   publish:
@@ -44,26 +54,36 @@ jobs:
       - name: Test
         run: npm test
 
-      - name: Build libraries
-        run: npm run build:lib
+      - name: Release check
+        run: npm run release:check
 
       - name: Publish selected package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
+          dry="${{ inputs.dry_run }}"
           publish() {
             local name="$1"
-            echo "Publishing ${name} with provenance"
-            npm publish --workspace "${name}" --access public --provenance
+            if [[ "${dry}" == "true" ]]; then
+              echo "Dry run ${name}"
+              npm publish --workspace "${name}" --access public --dry-run
+            else
+              echo "Publishing ${name} with provenance"
+              npm publish --workspace "${name}" --access public --provenance
+            fi
           }
           case "${{ inputs.package }}" in
             all)
               publish "@chartkitdev/core"
+              publish "@chartkitdev/geo"
               publish "@chartkitdev/react"
               publish "@chartkitdev/vue"
               publish "@chartkitdev/svelte"
               publish "@chartkitdev/vanilla"
+              publish "@chartkitdev/element"
+              publish "@chartkitdev/markdown"
+              publish "@chartkitdev/mcp"
               publish "@derpdaderp/chartkit"
               ;;
             *)
