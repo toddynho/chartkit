@@ -1,0 +1,41 @@
+{
+  "version": "1",
+  "id": "soft-gauge",
+  "type": "gauge",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "metric": {
+    "label": "Capacity",
+    "value": 72,
+    "min": 0,
+    "max": 100,
+    "target": 80,
+    "format": "integer",
+    "bands": [
+      {
+        "from": 0,
+        "to": 50,
+        "color": "negative",
+        "label": "Low"
+      },
+      {
+        "from": 50,
+        "to": 100,
+        "color": "positive",
+        "label": "OK"
+      }
+    ]
+  },
+  "a11y": {
+    "alt": "Capacity is 72 out of 100, below the target of 80."
+  }
+}

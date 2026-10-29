@@ -1,0 +1,317 @@
+{
+  "version": "1",
+  "id": "soft-heatmap",
+  "type": "heatmap",
+  "title": "Requests by hour",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "day": "Mon",
+      "hour": "6",
+      "value": 2
+    },
+    {
+      "day": "Mon",
+      "hour": "8",
+      "value": 4
+    },
+    {
+      "day": "Mon",
+      "hour": "10",
+      "value": 7
+    },
+    {
+      "day": "Mon",
+      "hour": "12",
+      "value": 11
+    },
+    {
+      "day": "Mon",
+      "hour": "14",
+      "value": 9
+    },
+    {
+      "day": "Mon",
+      "hour": "16",
+      "value": 6
+    },
+    {
+      "day": "Mon",
+      "hour": "18",
+      "value": 3
+    },
+    {
+      "day": "Mon",
+      "hour": "20",
+      "value": 1
+    },
+    {
+      "day": "Tue",
+      "hour": "6",
+      "value": 11
+    },
+    {
+      "day": "Tue",
+      "hour": "8",
+      "value": 9
+    },
+    {
+      "day": "Tue",
+      "hour": "10",
+      "value": 6
+    },
+    {
+      "day": "Tue",
+      "hour": "12",
+      "value": 3
+    },
+    {
+      "day": "Tue",
+      "hour": "14",
+      "value": 1
+    },
+    {
+      "day": "Tue",
+      "hour": "16",
+      "value": 3
+    },
+    {
+      "day": "Tue",
+      "hour": "18",
+      "value": 6
+    },
+    {
+      "day": "Tue",
+      "hour": "20",
+      "value": 10
+    },
+    {
+      "day": "Wed",
+      "hour": "6",
+      "value": 3
+    },
+    {
+      "day": "Wed",
+      "hour": "8",
+      "value": 1
+    },
+    {
+      "day": "Wed",
+      "hour": "10",
+      "value": 3
+    },
+    {
+      "day": "Wed",
+      "hour": "12",
+      "value": 6
+    },
+    {
+      "day": "Wed",
+      "hour": "14",
+      "value": 10
+    },
+    {
+      "day": "Wed",
+      "hour": "16",
+      "value": 14
+    },
+    {
+      "day": "Wed",
+      "hour": "18",
+      "value": 12
+    },
+    {
+      "day": "Wed",
+      "hour": "20",
+      "value": 8
+    },
+    {
+      "day": "Thu",
+      "hour": "6",
+      "value": 6
+    },
+    {
+      "day": "Thu",
+      "hour": "8",
+      "value": 10
+    },
+    {
+      "day": "Thu",
+      "hour": "10",
+      "value": 14
+    },
+    {
+      "day": "Thu",
+      "hour": "12",
+      "value": 12
+    },
+    {
+      "day": "Thu",
+      "hour": "14",
+      "value": 8
+    },
+    {
+      "day": "Thu",
+      "hour": "16",
+      "value": 4
+    },
+    {
+      "day": "Thu",
+      "hour": "18",
+      "value": 2
+    },
+    {
+      "day": "Thu",
+      "hour": "20",
+      "value": 1
+    },
+    {
+      "day": "Fri",
+      "hour": "6",
+      "value": 12
+    },
+    {
+      "day": "Fri",
+      "hour": "8",
+      "value": 8
+    },
+    {
+      "day": "Fri",
+      "hour": "10",
+      "value": 4
+    },
+    {
+      "day": "Fri",
+      "hour": "12",
+      "value": 2
+    },
+    {
+      "day": "Fri",
+      "hour": "14",
+      "value": 1
+    },
+    {
+      "day": "Fri",
+      "hour": "16",
+      "value": 3
+    },
+    {
+      "day": "Fri",
+      "hour": "18",
+      "value": 5
+    },
+    {
+      "day": "Fri",
+      "hour": "20",
+      "value": 8
+    },
+    {
+      "day": "Sat",
+      "hour": "6",
+      "value": 2
+    },
+    {
+      "day": "Sat",
+      "hour": "8",
+      "value": 1
+    },
+    {
+      "day": "Sat",
+      "hour": "10",
+      "value": 3
+    },
+    {
+      "day": "Sat",
+      "hour": "12",
+      "value": 5
+    },
+    {
+      "day": "Sat",
+      "hour": "14",
+      "value": 8
+    },
+    {
+      "day": "Sat",
+      "hour": "16",
+      "value": 6
+    },
+    {
+      "day": "Sat",
+      "hour": "18",
+      "value": 4
+    },
+    {
+      "day": "Sat",
+      "hour": "20",
+      "value": 2
+    },
+    {
+      "day": "Sun",
+      "hour": "6",
+      "value": 5
+    },
+    {
+      "day": "Sun",
+      "hour": "8",
+      "value": 8
+    },
+    {
+      "day": "Sun",
+      "hour": "10",
+      "value": 6
+    },
+    {
+      "day": "Sun",
+      "hour": "12",
+      "value": 4
+    },
+    {
+      "day": "Sun",
+      "hour": "14",
+      "value": 2
+    },
+    {
+      "day": "Sun",
+      "hour": "16",
+      "value": 1
+    },
+    {
+      "day": "Sun",
+      "hour": "18",
+      "value": 2
+    },
+    {
+      "day": "Sun",
+      "hour": "20",
+      "value": 4
+    }
+  ],
+  "encoding": {
+    "x": {
+      "field": "hour",
+      "title": "Hour"
+    },
+    "y": "day",
+    "color": {
+      "field": "value",
+      "type": "quantitative",
+      "title": "Requests"
+    }
+  },
+  "mark": {
+    "layout": "grid"
+  },
+  "a11y": {
+    "alt": "Weekday middays are the busiest. Early morning and Sunday evening are quiet."
+  }
+}

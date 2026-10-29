@@ -1,0 +1,126 @@
+{
+  "version": "1",
+  "id": "soft-spike",
+  "type": "spike",
+  "title": "Blocked requests",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "time": "00",
+      "count": 1
+    },
+    {
+      "time": "01",
+      "count": 0
+    },
+    {
+      "time": "02",
+      "count": 0
+    },
+    {
+      "time": "03",
+      "count": 2
+    },
+    {
+      "time": "04",
+      "count": 0
+    },
+    {
+      "time": "05",
+      "count": 8
+    },
+    {
+      "time": "06",
+      "count": 1
+    },
+    {
+      "time": "07",
+      "count": 0
+    },
+    {
+      "time": "08",
+      "count": 3
+    },
+    {
+      "time": "09",
+      "count": 14
+    },
+    {
+      "time": "10",
+      "count": 2
+    },
+    {
+      "time": "11",
+      "count": 0
+    },
+    {
+      "time": "12",
+      "count": 1
+    },
+    {
+      "time": "13",
+      "count": 0
+    },
+    {
+      "time": "14",
+      "count": 6
+    },
+    {
+      "time": "15",
+      "count": 1
+    },
+    {
+      "time": "16",
+      "count": 0
+    },
+    {
+      "time": "17",
+      "count": 4
+    },
+    {
+      "time": "18",
+      "count": 0
+    },
+    {
+      "time": "19",
+      "count": 9
+    },
+    {
+      "time": "20",
+      "count": 2
+    },
+    {
+      "time": "21",
+      "count": 1
+    },
+    {
+      "time": "22",
+      "count": 0
+    },
+    {
+      "time": "23",
+      "count": 3
+    }
+  ],
+  "encoding": {
+    "x": "time",
+    "y": "count"
+  },
+  "mark": {
+    "baseline": 0
+  },
+  "legend": false,
+  "a11y": {
+    "alt": "Blocked requests stay near zero, then spike to 14 at 09 and 9 at 19."
+  }
+}

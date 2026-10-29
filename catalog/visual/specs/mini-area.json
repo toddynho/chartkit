@@ -1,0 +1,34 @@
+{
+  "version": "1",
+  "id": "soft-mini-area",
+  "type": "mini-area",
+  "title": "Signups",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    40,
+    55,
+    48,
+    62,
+    70,
+    66,
+    80,
+    92,
+    88,
+    104,
+    110,
+    126
+  ],
+  "a11y": {
+    "alt": "Signups rise from 40 to 126 across the year."
+  }
+}

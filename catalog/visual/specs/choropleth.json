@@ -1,0 +1,242 @@
+{
+  "version": "1",
+  "id": "soft-choropleth",
+  "type": "choropleth",
+  "title": "Population change, 2020–2023",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "id": "AL",
+      "change": 1.9
+    },
+    {
+      "id": "AK",
+      "change": 0.3
+    },
+    {
+      "id": "AZ",
+      "change": 3.8
+    },
+    {
+      "id": "AR",
+      "change": 2
+    },
+    {
+      "id": "CA",
+      "change": -0.5
+    },
+    {
+      "id": "CO",
+      "change": 2.2
+    },
+    {
+      "id": "CT",
+      "change": 0.6
+    },
+    {
+      "id": "DE",
+      "change": 3.7
+    },
+    {
+      "id": "DC",
+      "change": -0.1
+    },
+    {
+      "id": "FL",
+      "change": 4.7
+    },
+    {
+      "id": "GA",
+      "change": 2.9
+    },
+    {
+      "id": "HI",
+      "change": -0.3
+    },
+    {
+      "id": "ID",
+      "change": 6.2
+    },
+    {
+      "id": "IL",
+      "change": -1.2
+    },
+    {
+      "id": "IN",
+      "change": 1.2
+    },
+    {
+      "id": "IA",
+      "change": 0.7
+    },
+    {
+      "id": "KS",
+      "change": 0.4
+    },
+    {
+      "id": "KY",
+      "change": 1
+    },
+    {
+      "id": "LA",
+      "change": -0.7
+    },
+    {
+      "id": "ME",
+      "change": 2.4
+    },
+    {
+      "id": "MD",
+      "change": 0.7
+    },
+    {
+      "id": "MA",
+      "change": 0.3
+    },
+    {
+      "id": "MI",
+      "change": 0
+    },
+    {
+      "id": "MN",
+      "change": 1
+    },
+    {
+      "id": "MS",
+      "change": -0.2
+    },
+    {
+      "id": "MO",
+      "change": 0.8
+    },
+    {
+      "id": "MT",
+      "change": 3.5
+    },
+    {
+      "id": "NE",
+      "change": 1.3
+    },
+    {
+      "id": "NV",
+      "change": 3.1
+    },
+    {
+      "id": "NH",
+      "change": 2
+    },
+    {
+      "id": "NJ",
+      "change": 0.8
+    },
+    {
+      "id": "NM",
+      "change": 0.5
+    },
+    {
+      "id": "NY",
+      "change": -2.1
+    },
+    {
+      "id": "NC",
+      "change": 3.8
+    },
+    {
+      "id": "ND",
+      "change": 1.6
+    },
+    {
+      "id": "OH",
+      "change": 0.2
+    },
+    {
+      "id": "OK",
+      "change": 2
+    },
+    {
+      "id": "OR",
+      "change": 0.5
+    },
+    {
+      "id": "PA",
+      "change": 0.2
+    },
+    {
+      "id": "RI",
+      "change": 0.5
+    },
+    {
+      "id": "SC",
+      "change": 5
+    },
+    {
+      "id": "SD",
+      "change": 3.6
+    },
+    {
+      "id": "TN",
+      "change": 3.1
+    },
+    {
+      "id": "TX",
+      "change": 4.3
+    },
+    {
+      "id": "UT",
+      "change": 4.5
+    },
+    {
+      "id": "VT",
+      "change": 0.6
+    },
+    {
+      "id": "VA",
+      "change": 1.3
+    },
+    {
+      "id": "WA",
+      "change": 1.5
+    },
+    {
+      "id": "WV",
+      "change": -1.3
+    },
+    {
+      "id": "WI",
+      "change": 0.9
+    },
+    {
+      "id": "WY",
+      "change": 1
+    }
+  ],
+  "encoding": {
+    "region": "id",
+    "color": {
+      "field": "change",
+      "format": "%",
+      "title": "Change"
+    }
+  },
+  "mark": {
+    "atlas": "us",
+    "projection": "albersUsa",
+    "scale": "diverging"
+  },
+  "legend": {
+    "position": "bottom"
+  },
+  "a11y": {
+    "alt": "Approximate percent change in population from 2020 to 2023. Idaho, Florida, and Texas grew. New York, West Virginia, and Illinois shrank."
+  }
+}

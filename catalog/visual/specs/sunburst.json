@@ -1,0 +1,48 @@
+{
+  "version": "1",
+  "id": "soft-sunburst",
+  "type": "sunburst",
+  "title": "Traffic by source",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "name": "Organic",
+      "children": [
+        {
+          "name": "Search",
+          "value": 4200
+        },
+        {
+          "name": "Referral",
+          "value": 1800
+        }
+      ]
+    },
+    {
+      "name": "Paid",
+      "children": [
+        {
+          "name": "Search",
+          "value": 2600
+        },
+        {
+          "name": "Social",
+          "value": 900
+        }
+      ]
+    }
+  ],
+  "a11y": {
+    "alt": "Organic search is the largest share of traffic."
+  }
+}

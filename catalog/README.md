@@ -8,6 +8,6 @@ Source files the public site publishes. This is not a web app.
 - `public/benchmarks.json`, `content/benchmarks.md` — benchmark payload and write-up.
 - `public/recipes.json`, `public/showcase/`, `public/dashboards/` — agent-readable copies.
 - `lib/` — spec and dashboard modules the Astro paint scripts import.
-- `visual/` — Soft style scoreboard (rubric, empty pack folders, scoresheet). Not served by `apps/web`. See `visual/README.md`.
+- `visual/` — Soft style scoreboard (rubric, fixed pack, scoresheet). Not served by `apps/web`. See `visual/README.md`.
 
 `apps/web` reads these files at build time and serves them at the same URLs (`/llms.txt`, `/features.json`, `/schema/v1.json` from `packages/core`, and the rest). `visual/` stays off that list.

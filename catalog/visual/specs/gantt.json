@@ -1,0 +1,108 @@
+{
+  "version": "1",
+  "id": "soft-gantt",
+  "type": "gantt",
+  "title": "Northstar launch",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "id": "spec",
+      "task": "Write the spec",
+      "section": "Plan",
+      "start": "2026-03-02",
+      "end": "2026-03-13",
+      "progress": 1,
+      "status": "done",
+      "today": "2026-03-18"
+    },
+    {
+      "id": "design",
+      "task": "Design the UI",
+      "section": "Plan",
+      "start": "2026-03-09",
+      "end": "2026-03-20",
+      "progress": 0.8,
+      "status": "active",
+      "depends": "spec"
+    },
+    {
+      "id": "copy",
+      "task": "Review the copy",
+      "section": "Plan",
+      "start": "2026-03-16",
+      "end": "2026-03-25",
+      "progress": 0.45,
+      "status": "active",
+      "depends": "spec"
+    },
+    {
+      "id": "api",
+      "task": "Build the API",
+      "section": "Build",
+      "start": "2026-03-16",
+      "end": "2026-04-03",
+      "progress": 0.55,
+      "status": "active",
+      "depends": "spec"
+    },
+    {
+      "id": "web",
+      "task": "Build the web app",
+      "section": "Build",
+      "start": "2026-03-23",
+      "end": "2026-04-10",
+      "progress": 0.3,
+      "status": "crit",
+      "depends": "design"
+    },
+    {
+      "id": "billing",
+      "task": "Wire up billing",
+      "section": "Build",
+      "start": "2026-03-30",
+      "end": "2026-04-10",
+      "progress": 0.2,
+      "status": "active",
+      "depends": "api"
+    },
+    {
+      "id": "beta",
+      "task": "Open the beta",
+      "section": "Launch",
+      "start": "2026-04-06",
+      "milestone": true,
+      "status": "crit",
+      "depends": "web"
+    },
+    {
+      "id": "ga",
+      "task": "General availability",
+      "section": "Launch",
+      "start": "2026-04-17",
+      "milestone": true,
+      "depends": "beta, billing"
+    }
+  ],
+  "encoding": {
+    "x": "task",
+    "y": "section",
+    "open": "start",
+    "close": "end",
+    "color": "status",
+    "source": "id",
+    "target": "depends"
+  },
+  "a11y": {
+    "alt": "The Northstar launch is in build. The web app is critical, beta is 6 April, and general availability is 17 April."
+  }
+}

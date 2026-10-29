@@ -1,0 +1,75 @@
+{
+  "version": "1",
+  "id": "soft-combo",
+  "type": "combo",
+  "title": "Revenue and margin",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "month": "Jan",
+      "revenue": 100,
+      "margin": 0.2
+    },
+    {
+      "month": "Feb",
+      "revenue": 140,
+      "margin": 0.24
+    },
+    {
+      "month": "Mar",
+      "revenue": 130,
+      "margin": 0.22
+    },
+    {
+      "month": "Apr",
+      "revenue": 160,
+      "margin": 0.26
+    },
+    {
+      "month": "May",
+      "revenue": 155,
+      "margin": 0.25
+    },
+    {
+      "month": "Jun",
+      "revenue": 172,
+      "margin": 0.28
+    }
+  ],
+  "encoding": {
+    "x": "month",
+    "y": [
+      {
+        "field": "revenue",
+        "title": "Revenue",
+        "mark": "bar"
+      },
+      {
+        "field": "margin",
+        "title": "Margin",
+        "mark": "line",
+        "axis": "y2",
+        "format": "percent"
+      }
+    ]
+  },
+  "axes": {
+    "y2": {
+      "title": "Margin",
+      "format": "percent"
+    }
+  },
+  "a11y": {
+    "alt": "Revenue and margin both finish the half higher than they started."
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "version": "1",
+  "id": "soft-radar",
+  "type": "radar",
+  "title": "Model comparison",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "spoke": "Speed",
+      "car": 7,
+      "bike": 5
+    },
+    {
+      "spoke": "Handling",
+      "car": 6,
+      "bike": 8
+    },
+    {
+      "spoke": "Comfort",
+      "car": 8,
+      "bike": 4
+    },
+    {
+      "spoke": "Safety",
+      "car": 7,
+      "bike": 6
+    },
+    {
+      "spoke": "Range",
+      "car": 5,
+      "bike": 7
+    },
+    {
+      "spoke": "Cost",
+      "car": 3,
+      "bike": 8
+    }
+  ],
+  "encoding": {
+    "x": "spoke",
+    "y": [
+      "car",
+      "bike"
+    ]
+  },
+  "a11y": {
+    "alt": "The car leads on comfort and the bike leads on cost and handling."
+  }
+}

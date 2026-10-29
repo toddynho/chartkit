@@ -1,0 +1,48 @@
+{
+  "version": "1",
+  "id": "soft-donut",
+  "type": "donut",
+  "title": "Sessions by source",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "label": "Search",
+      "value": 42
+    },
+    {
+      "label": "Direct",
+      "value": 28
+    },
+    {
+      "label": "Social",
+      "value": 18
+    },
+    {
+      "label": "Email",
+      "value": 12
+    }
+  ],
+  "encoding": {
+    "x": "label",
+    "y": "value"
+  },
+  "mark": {
+    "innerRadius": 0.6
+  },
+  "legend": {
+    "position": "bottom"
+  },
+  "a11y": {
+    "alt": "Search is the largest traffic source at 42 percent of sessions."
+  }
+}

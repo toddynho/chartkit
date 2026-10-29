@@ -23,6 +23,7 @@
     "size": "node scripts/size.mjs",
     "sizes:capture": "node catalog/scripts/capture-sizes.mjs",
     "showcase:check": "node --experimental-strip-types catalog/scripts/showcase-check.mjs",
+    "visual:pack": "node --experimental-strip-types catalog/visual/pack.mjs",
     "matrix:refresh": "node catalog/scripts/matrix-refresh.mjs",
     "start": "npm run preview --workspace=chartkit-web",
     "clean": "rm -rf packages/*/dist apps/web/dist apps/web/.astro node_modules"
