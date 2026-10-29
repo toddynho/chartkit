@@ -1,13 +1,15 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { execSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { build, stop } from "esbuild";
 import { tasks } from "./agent/tasks.mjs";
 import { measureBrowser } from "./browser/measure.mjs";
-import { measureBundles } from "./bundle/measure.mjs";
+import { bundleOutFile, measureBundles } from "./bundle/measure.mjs";
 import { machineInfo } from "./lib/machine.mjs";
+import { applyPhase4, bundleSummary, ssrSummary } from "./lib/phase4-md.mjs";
 import { renderReport } from "./lib/report.mjs";
-import { measureSsr } from "./ssr/measure.mjs";
+import { measureSsr, ssrOutFile } from "./ssr/measure.mjs";
 
 const benchRoot = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(benchRoot, "..");
@@ -68,6 +70,7 @@ const skip = {
 
 const result = {
   machine: machineInfo(),
+  commit: gitCommit(repoRoot),
   versions,
   command: `node bench/run.mjs${process.argv.slice(2).length ? ` ${process.argv.slice(2).join(" ")}` : ""}`,
 };
@@ -75,10 +78,33 @@ const result = {
 if (!skip.bundle) {
   console.log("bundle");
   result.bundle = await measureBundles();
+  result.bundle.summary = bundleSummary(result.bundle);
+  writeMatrix(bundleOutFile(result.bundle), result.bundle);
+} else {
+  const saved = join(benchRoot, "results/bundle.json");
+  if (existsSync(saved)) {
+    result.bundle = JSON.parse(readFileSync(saved, "utf8"));
+    console.log("loaded bench/results/bundle.json");
+  }
 }
 if (!skip.ssr) {
   console.log("ssr");
   result.ssr = await measureSsr();
+  result.ssr.summary = ssrSummary(result.ssr);
+  writeMatrix(ssrOutFile(result.ssr), result.ssr);
+}
+if (result.bundle && result.ssr && !result.bundle.filtered && !result.ssr.filtered) {
+  const benchmarks = join(repoRoot, "BENCHMARKS.md");
+  const next = applyPhase4(readFileSync(benchmarks, "utf8"), {
+    bundle: result.bundle,
+    ssr: result.ssr,
+    meta: { measuredAt: result.machine.measuredAt, commit: result.commit, node: result.machine.node },
+  });
+  if (!next.includes("Phase 4 measures every gallery type") || !next.includes("bench/results/bundle.json")) {
+    throw new Error("BENCHMARKS.md phase 4 captions did not apply");
+  }
+  writeFileSync(benchmarks, next);
+  console.log("updated BENCHMARKS.md phase 4 captions");
 }
 if (!skip.browser) {
   console.log("browser");
@@ -98,7 +124,7 @@ if (!skip.agent) {
 if (result.browser?.charts) writePaint(result);
 
 if (!result.bundle || !result.browser || !result.ssr) {
-  console.log("Partial run. BENCHMARKS.md is written only when bundle, browser, and ssr all run.");
+  console.log("Partial run. The full generated BENCHMARKS.md is written only when bundle, browser, and ssr all run. Phase 4 captions are updated when both of those finish.");
   mkdirSync(join(benchRoot, "results"), { recursive: true });
   writeFileSync(join(benchRoot, "results/partial.json"), JSON.stringify(result, null, 2));
   console.log(JSON.stringify({ wrote: "bench/results/partial.json", agent: result.agent?.status ?? null }, null, 2));
@@ -110,6 +136,27 @@ if (!result.bundle || !result.browser || !result.ssr) {
   console.log("wrote BENCHMARKS.md and bench/results/latest.json");
 }
 await stop();
+
+function gitCommit(root) {
+  try {
+    return execSync("git rev-parse HEAD", { cwd: root, encoding: "utf8" }).trim();
+  } catch {
+    return null;
+  }
+}
+
+function writeMatrix(name, section) {
+  const payload = {
+    measuredAt: result.machine.measuredAt,
+    commit: result.commit,
+    node: result.machine.node,
+    versions: result.versions,
+    ...section,
+  };
+  mkdirSync(join(benchRoot, "results"), { recursive: true });
+  writeFileSync(join(benchRoot, "results", name), JSON.stringify(payload, null, 2));
+  console.log(`wrote bench/results/${name}`);
+}
 
 function writePaint(result) {
   const browser = result.browser;
