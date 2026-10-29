@@ -9119,19 +9119,19 @@
       "react": "included",
       "group": "visx",
       "status": "ok",
-      "note": null,
+      "note": "Corrected mount: createRoot from react-dom/client plus HeatmapRect. gzipBytes includes React and ReactDOM. The earlier cell bundled HeatmapRect alone (1,621 gzip) and did not import react-dom.",
       "ssr": "visx",
       "ssrNote": null,
       "aliases": [],
       "homepageRow": "heatmap",
-      "minBytes": 3199,
-      "gzipBytes": 1621,
-      "brotliBytes": 1444,
+      "minBytes": 225582,
+      "gzipBytes": 69985,
+      "brotliBytes": 60255,
       "reactExternal": {
-        "minBytes": 2561,
-        "gzipBytes": 1319,
-        "brotliBytes": 1186,
-        "note": "react, react-dom, and jsx-runtime are external. This is the added cost when the app already ships React."
+        "minBytes": 2662,
+        "gzipBytes": 1360,
+        "brotliBytes": 1221,
+        "note": "react, react-dom, react-dom/client, and jsx-runtime are external. This is the chart code when the app already ships React. The previous 1,621 gzip figure did not contain React or ReactDOM, only a few hundred bytes of react/jsx-runtime."
       },
       "treeShakeable": true,
       "label": null
@@ -13542,14 +13542,6 @@
         "chartkitGzip": 42104,
         "label": "not tree-shakeable",
         "reactExternal": null
-      },
-      {
-        "chart": "heatmap",
-        "library": "visx",
-        "gzip": 1319,
-        "chartkitGzip": 14399,
-        "label": null,
-        "reactExternal": 1319
       }
     ],
     "notTreeShakeable": [

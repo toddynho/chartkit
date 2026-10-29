@@ -63,7 +63,7 @@ ChartKit minimal gzip is smallest for **progress-ring** (7188) and largest for *
 
 uPlot (`uplot`) is not tree-shakeable. Full package 23292 gzip. CSS adds 762 gzip as a second response. Per-type cells say not tree-shakeable and do not repeat that number. Plotly.js (`plotly`) is not tree-shakeable. Full package 1477742 gzip. Per-type cells say not tree-shakeable and do not repeat that number. Tremor (`tremor`) is not tree-shakeable. Full package 246834 gzip. Per-type cells say not tree-shakeable and do not repeat that number. AG Charts (`ag-enterprise`) is not tree-shakeable. Full package 692892 gzip. Per-type cells say not tree-shakeable and do not repeat that number. AG Charts (`ag-community`) is not tree-shakeable. Full package 420736 gzip. Per-type cells say not tree-shakeable and do not repeat that number. TradingView Lightweight Charts (`lightweight`) is not tree-shakeable. Full package 53352 gzip. Per-type cells say not tree-shakeable and do not repeat that number. Mermaid (`mermaid`) is not tree-shakeable. Full package 962019 gzip. Per-type cells say not tree-shakeable and do not repeat that number. Vega-Lite (`vegalite`) is not tree-shakeable. Full package 377693 gzip. Per-type cells say not tree-shakeable and do not repeat that number. AntV G2 (`g2`) is not tree-shakeable. Full package 407348 gzip. Per-type cells say not tree-shakeable and do not repeat that number.
 
-A rival is smaller than ChartKit minimal on these cells. React rows use the React-external gzip when that build exists.
+A rival is smaller than ChartKit minimal on these cells. The comparison uses the bundle that was actually produced, including React when that entry imports it. React-external gzip stays on the cell for an app that already ships React.
 
 | Chart | ChartKit gzip | Library | Rival gzip |
 |---|---:|---|---:|
@@ -71,7 +71,8 @@ A rival is smaller than ChartKit minimal on these cells. React rows use the Reac
 | bar | 41750 | uPlot (full package) | 24054 |
 | scatter | 26489 | uPlot (full package) | 24054 |
 | mini-area | 42104 | uPlot (full package) | 24054 |
-| heatmap | 14399 | visx | 1319 |
+
+visx heatmap is 69985 gzip with React and ReactDOM in the bundle, and 1360 gzip with them external. A HeatmapRect-only bundle was 1621 gzip and did not import react-dom.
 
 uPlot's published stylesheet is a second response when that package is the full build. React external is omitted when the bundle does not import React.
 

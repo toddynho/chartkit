@@ -469,13 +469,23 @@ const MUI = {
   "progress-ring": "Gauge",
 };
 
+const VISX_HEAT = `import { createElement } from "react";
+import { createRoot } from "react-dom/client";
+import { HeatmapRect } from "@visx/heatmap";
+export function draw(el, props) {
+  const root = createRoot(el);
+  root.render(createElement(HeatmapRect, props));
+  return root;
+}
+`;
+
 const VISX = {
   line: ["@visx/xychart", ["XYChart", "LineSeries"]],
   bar: ["@visx/xychart", ["XYChart", "BarSeries"]],
   "stacked-area": ["@visx/xychart", ["XYChart", "AreaStack"]],
   "mini-area": ["@visx/xychart", ["XYChart", "AreaSeries"]],
   scatter: ["@visx/xychart", ["XYChart", "GlyphSeries"]],
-  heatmap: ["@visx/heatmap", ["HeatmapRect"]],
+  heatmap: null,
 };
 
 const G2_NATIVE = ["line", "bar", "pie", "donut", "stacked-area", "scatter", "mini-area", "heatmap", "gauge", "boxplot", "sankey", "treemap", "histogram"];
@@ -515,7 +525,9 @@ function phase3Only(id, chart) {
     muix: Object.fromEntries(Object.entries(MUI).map(([type, name]) => [type, meta(named(`@mui/x-charts/${name}`, [name]), { ssr: "mui", react: "included", note: type === "donut" ? "PieChart with innerRadius." : type === "progress-ring" ? "Gauge with startAngle 0 and endAngle 360." : null })])),
     mermaid: Object.fromEntries(["gantt", "journey", "quadrant", "timeline", "venn"].map((type) => [type, same(MERMAID, { ssr: null })])),
     victory: Object.fromEntries(Object.entries(VICTORY).map(([type, name]) => [type, meta(named("victory", type === "stacked-area" ? ["VictoryStack", "VictoryArea"] : type === "donut" ? ["VictoryPie"] : [name]), { ssr: "victory", react: "included", note: type === "donut" ? "VictoryPie with innerRadius." : type === "histogram" ? "VictoryHistogram bins the observations." : type === "stacked-area" ? "VictoryStack and VictoryArea." : null })])),
-    visx: Object.fromEntries(Object.entries(VISX).map(([type, spec]) => [type, meta(named(spec[0], spec[1]), { ssr: "visx", react: "included" })])),
+    visx: Object.fromEntries(Object.entries(VISX).map(([type, spec]) => [type, type === "heatmap"
+      ? meta(VISX_HEAT, { ssr: "visx", react: "included", note: "Mounts with react-dom/client createRoot. HeatmapRect alone only imports react/jsx-runtime, so a bundle that never calls createRoot does not contain React or ReactDOM." })
+      : meta(named(spec[0], spec[1]), { ssr: "visx", react: "included" })])),
     vegalite: Object.fromEntries(Object.entries(VEGA_NATIVE).map(([type, note]) => [type, same(VEGA, { ssr: "vega", note: `${note}. The bundle is vega-lite's compile entry. vega is a peer and is not inside the bundle.` })])),
     g2: Object.fromEntries(G2_NATIVE.map((type) => [type, same(G2, { ssr: null, note: "import { Chart } from @antv/g2. The standard library registers every mark, so this entry is the full package." })])),
   };

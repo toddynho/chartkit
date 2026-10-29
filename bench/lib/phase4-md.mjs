@@ -1,4 +1,4 @@
-import { compareGzip } from "../bundle/tree.mjs";
+import { includedGzip } from "../bundle/tree.mjs";
 
 function countsLine(counts) {
   return ["ok", "unsupported", "license-blocked", "error"]
@@ -19,8 +19,8 @@ export function bundleSummary(bundle) {
     if (cell.id === "chartkit" || cell.id === "chartkit-all" || cell.status !== "ok") continue;
     const ck = ours.get(cell.chart);
     if (!ck) continue;
-    const rival = compareGzip(cell, bundle.packages ?? []);
-    const base = compareGzip(ck, bundle.packages ?? []);
+    const rival = includedGzip(cell, bundle.packages ?? []);
+    const base = includedGzip(ck, bundle.packages ?? []);
     if (rival == null || base == null || rival >= base) continue;
     smaller.push({
       chart: cell.chart,
@@ -92,7 +92,7 @@ export function bundleMarkdown(bundle, meta) {
   if (!summary.rivalSmaller.length) {
     lines.push("No measured rival is smaller than ChartKit minimal on the same chart type.");
   } else {
-    lines.push("A rival is smaller than ChartKit minimal on these cells. React rows use the React-external gzip when that build exists.", "");
+    lines.push("A rival is smaller than ChartKit minimal on these cells. The comparison uses the bundle that was actually produced, including React when that entry imports it. React-external gzip stays on the cell for an app that already ships React.", "");
     lines.push("| Chart | ChartKit gzip | Library | Rival gzip |");
     lines.push("|---|---:|---|---:|");
     for (const row of summary.rivalSmaller) {
@@ -104,6 +104,11 @@ export function bundleMarkdown(bundle, meta) {
   const errors = bundle.cells.filter((cell) => cell.status === "error" || cell.status === "license-blocked");
   if (errors.length) {
     lines.push(errors.map((cell) => `${cell.library} ${cell.chart}: ${cell.status}${cell.error ? ` (${String(cell.error).replace(/\s+/g, " ").slice(0, 180)})` : ""}`).join("; ") + ".");
+    lines.push("");
+  }
+  const heat = (bundle.cells ?? []).find((cell) => cell.id === "visx" && cell.chart === "heatmap" && cell.status === "ok");
+  if (heat?.gzipBytes != null) {
+    lines.push(`visx heatmap is ${heat.gzipBytes} gzip with React and ReactDOM in the bundle, and ${heat.reactExternal?.gzipBytes ?? "—"} gzip with them external. A HeatmapRect-only bundle was 1621 gzip and did not import react-dom.`);
     lines.push("");
   }
   lines.push("uPlot's published stylesheet is a second response when that package is the full build. React external is omitted when the bundle does not import React.");
