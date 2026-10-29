@@ -1,8 +1,10 @@
 ---
 import DocsPage from "../../components/DocsPage.astro";
+import { freeRenderLimit } from "../../data/cloud-facts";
 import { loadCloudDocs } from "../../lib/batch3";
 
 const { snippets } = loadCloudDocs();
+const perMinute = freeRenderLimit();
 const description = "Render a ChartKit spec to SVG or PNG. Free, with a chartkit.dev mark. A key removes the mark.";
 ---
 
@@ -36,7 +38,7 @@ const description = "Render a ChartKit spec to SVG or PNG. Free, with a chartkit
   </ul>
   <h2>Errors and limits</h2>
   <p>
-    A spec that repair cannot draw returns <code>422</code> and an image that lists the CK codes, for <code>GET</code>. <code>POST</code> returns the same codes as JSON. A missing or unreadable spec returns <code>400</code> and an error image. More than 120 renders a minute from one IP returns <code>429</code>. The limit is the same with a key.
+    A spec that repair cannot draw returns <code>422</code> and an image that lists the CK codes, for <code>GET</code>. <code>POST</code> returns the same codes as JSON. A missing or unreadable spec returns <code>400</code> and an error image. More than {perMinute} renders a minute from one IP returns <code>429</code>. The limit is the same with a key.
   </p>
   <h2>Keys</h2>
   <p>

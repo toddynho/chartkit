@@ -209,6 +209,10 @@ export interface BenchmarksPage {
     rows: { points: string; cells: string[] }[];
     losses: string;
   };
+  browserClaim: string;
+  hoverClaim: string;
+  samplingClaim: string;
+  rivalsOmitted: string;
 }
 
 export interface PlaygroundFile {

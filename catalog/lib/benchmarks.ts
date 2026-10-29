@@ -262,3 +262,122 @@ export function assertPublishedMatchesDisplay(): void {
     throw new Error("agent display drifted");
   }
 }
+
+type BrowserDisplay = {
+  shape: string;
+  points: string;
+  ckI: string;
+  upI: string;
+  ckU: string;
+  upU: string;
+};
+
+function pointsShort(points: string): string {
+  if (points === "1,000") return "1k";
+  if (points === "10,000") return "10k";
+  if (points === "100,000") return "100k";
+  if (points === "1,000,000") return "1,000,000";
+  return points;
+}
+
+function shapeShort(shape: string): string {
+  if (shape === "Even") return "even";
+  if (shape === "Jittered") return "jittered";
+  if (shape === "Gapped timestamps") return "gapped";
+  return shape.toLowerCase();
+}
+
+function cellName(row: BrowserDisplay): string {
+  return `${shapeShort(row.shape)} ${pointsShort(row.points)}`;
+}
+
+/** ChartKit vs uPlot, from the published 12-cell table. */
+export function uplotBrowserParagraph(rows: readonly BrowserDisplay[]): string {
+  const n = rows.length;
+  const initialFaster = rows.filter((row) => Number(row.ckI) < Number(row.upI));
+  const initialSlower = rows.filter((row) => Number(row.ckI) > Number(row.upI));
+  const updateFaster = rows.filter((row) => Number(row.ckU) < Number(row.upU));
+  const updateSlower = rows.filter((row) => Number(row.ckU) > Number(row.upU));
+  const million = rows.find((row) => row.shape === "Even" && row.points === "1,000,000");
+  const initial =
+    initialSlower.length === 0 && initialFaster.length === n
+      ? `ChartKit’s initial render is faster than uPlot in all ${n} cells.`
+      : `ChartKit’s initial render is faster than uPlot in ${initialFaster.length} of ${n} cells.`;
+  const initialLoss =
+    initialSlower.length === 0
+      ? ""
+      : ` Slower initial cells: ${initialSlower.map((row) => `${cellName(row)} (${row.ckI} vs ${row.upI})`).join(", ")}.`;
+  const millionText = million ? ` Even 1,000,000 points is ${million.ckI} ms vs ${million.upI} ms.` : "";
+  const slowerList = updateSlower.map((row) => `${cellName(row)} (${row.ckU} vs ${row.upU})`).join(", ");
+  return `${initial}${initialLoss}${millionText} The aligned update is faster in ${updateFaster.length} of ${n} and slower in ${updateSlower.length}. The slower cells are ${slowerList}.`;
+}
+
+export function uplotHeadline(rows: readonly BrowserDisplay[]): { initial: string; update: string } {
+  const n = rows.length;
+  const initialFaster = rows.filter((row) => Number(row.ckI) < Number(row.upI)).length;
+  const updateFaster = rows.filter((row) => Number(row.ckU) < Number(row.upU)).length;
+  const updateSlower = rows.filter((row) => Number(row.ckU) > Number(row.upU)).length;
+  const million = rows.find((row) => row.shape === "Even" && row.points === "1,000,000");
+  const initial =
+    initialFaster === n
+      ? `ChartKit is faster than uPlot in all ${n} cells.${million ? ` Even 1,000,000 points is ${million.ckI} ms vs ${million.upI} ms.` : ""}`
+      : `ChartKit is faster than uPlot on the initial render in ${initialFaster} of ${n} cells.`;
+  return {
+    initial,
+    update: `ChartKit wins ${updateFaster} of ${n} aligned-update cells against uPlot and loses ${updateSlower}. Those losses are marked in the browser table.`,
+  };
+}
+
+export function uplotBrowserLead(rows: readonly BrowserDisplay[]): string {
+  const n = rows.length;
+  const initialFaster = rows.filter((row) => Number(row.ckI) < Number(row.upI)).length;
+  const updateFaster = rows.filter((row) => Number(row.ckU) < Number(row.upU)).length;
+  const updateSlower = rows.filter((row) => Number(row.ckU) > Number(row.upU)).length;
+  const initial =
+    initialFaster === n
+      ? `ChartKit wins every initial cell of the ${n}.`
+      : `ChartKit wins ${initialFaster} of ${n} initial cells.`;
+  return `${initial} The update column is the fair timer. ${updateSlower} of those ${n} cells are losses (${updateFaster} wins), and they are marked in the result column.`;
+}
+
+type HoverDisplay = { lib: string; painted: string };
+type FirstHoverDisplay = { ck: string; uplot: string };
+
+function rangeEnds(values: readonly string[]): { low: string; high: string } {
+  const ranked = [...values].sort((a, b) => Number(a) - Number(b));
+  const low = ranked[0];
+  const high = ranked[ranked.length - 1];
+  if (low == null || high == null) throw new Error("hover range is empty");
+  return { low, high };
+}
+
+export function hoverParagraph(rows: readonly HoverDisplay[], first: readonly FirstHoverDisplay[]): string {
+  const chartkit = rows.find((row) => row.lib === "ChartKit");
+  const uplot = rows.find((row) => row.lib === "uPlot");
+  if (!chartkit || !uplot) throw new Error("hover rows are missing ChartKit or uPlot");
+  const ck = rangeEnds(first.map((row) => row.ck));
+  const up = rangeEnds(first.map((row) => row.uplot));
+  return `Steady hover at 100,000 points is close. ChartKit’s painted median is ${chartkit.painted} ms and uPlot’s is ${uplot.painted} ms. First hover on a fresh chart is not close: uPlot paints in ${up.low} to ${up.high} ms, and ChartKit paints in ${ck.low} to ${ck.high} ms.`;
+}
+
+export function hoverMarkdown(rows: readonly HoverDisplay[], first: readonly FirstHoverDisplay[]): { steady: string; fresh: string } {
+  const chartkit = rows.find((row) => row.lib === "ChartKit");
+  const uplot = rows.find((row) => row.lib === "uPlot");
+  if (!chartkit || !uplot) throw new Error("hover rows are missing ChartKit or uPlot");
+  const ck = rangeEnds(first.map((row) => row.ck));
+  const up = rangeEnds(first.map((row) => row.uplot));
+  return {
+    steady: `Steady hover at 100,000 points. Painted median is the number to cite. ChartKit ${chartkit.painted} ms, uPlot ${uplot.painted} ms.`,
+    fresh: `First hover on a fresh 100,000 point chart, painted median. uPlot is ${up.low}–${up.high} ms. ChartKit is ${ck.low}–${ck.high} ms. That gap is a loss.`,
+  };
+}
+
+export function samplingParagraph(rows: readonly { points: string; initial: string; update: string }[]): string {
+  const million = rows.find((row) => row.points === "1,000,000");
+  if (!million) throw new Error("sampling rows are missing 1,000,000 points");
+  return `These sampling-none times use the same fair update timer. At ${million.points} points that is ${million.initial} ms to draw and ${million.update} ms to update, on that same timer.`;
+}
+
+/** The 12-cell browser table does not time these libraries. */
+export const browserRivalsOmitted =
+  "These 12 cells publish ChartKit and uPlot only. Chart.js, Observable Plot, ECharts, Recharts, and Nivo do not have a millisecond in this table.";

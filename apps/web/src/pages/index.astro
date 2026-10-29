@@ -3,10 +3,12 @@ import "../styles/v2.css";
 import Base from "../layouts/Base.astro";
 import HomeStart from "../components/HomeStart.astro";
 import { SITE } from "../data/site";
+import { chartTypes } from "../data/chart-types";
 import { homeSlides, showcaseSvgs } from "../data/marketing-charts";
 import { scriptJson } from "../lib/spec-text";
 import { proofFigures, speedPlot } from "../data/home-bench";
 import { tokenSection } from "../data/token-eval";
+import { loadIndex } from "../lib/dashboards";
 
 const title = "One spec. Every framework. Built for agents.";
 const lede =
@@ -16,6 +18,7 @@ const shots = showcaseSvgs();
 const proof = proofFigures();
 const bench = speedPlot();
 const tokens = tokenSection();
+const dashboardCount = loadIndex().boards.length;
 
 const icon = (d: string) =>
   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"></path></svg>`;
@@ -24,7 +27,7 @@ const icon = (d: string) =>
 <Base tone="light" title={title} description={lede || SITE.description}>
   <div class="v2">
     <section class="home-hero" aria-labelledby="home-title">
-      <p class="eyebrow eyebrow--blue">ChartKit v1 · MIT</p>
+      <p class="eyebrow eyebrow--blue">ChartKit {SITE.version} · MIT</p>
       <h1 class="v2-h1" id="home-title">
         One spec.<br />Every framework.<br />Built for agents.
       </h1>
@@ -75,7 +78,9 @@ const icon = (d: string) =>
           }
         </div>
       </div>
-      <p class="carousel-caption">{slides.length} chart types · one spec shape · click any to pin it</p>
+      <p class="carousel-caption">
+        {chartTypes.length} chart types · {slides.filter((slide) => slide.geo).length} maps · one spec shape · click any to pin it
+      </p>
     </section>
 
     <HomeStart />
@@ -134,9 +139,9 @@ const icon = (d: string) =>
     <section class="measured" id="measured" aria-labelledby="measured-title">
       <div class="section-head">
         <p class="eyebrow eyebrow--blue">For the user</p>
-        <h2 id="measured-title">Faster on the page</h2>
+        <h2 id="measured-title">Paint time on the page</h2>
         <p>
-          {proof.gzipKb} KB gzipped, and the server draws the chart with no DOM. The plot is two-rAF completion by chart type, the median of five fresh pages at 640×360. It is not the hover-steady line. <a href="/benchmarks">Benchmarks</a> has the full matrix.
+          {proof.gzipLabel} gzipped for the line chart, measured when this page builds (createRenderer of the line, gzip level 9, platform browser). The server draws the chart with no DOM. {bench.claim} The plot is two-rAF completion by chart type, the median of five fresh pages at 640×360. It is not the hover-steady line. <a href="/benchmarks">Benchmarks</a> has the full matrix.
         </p>
       </div>
       <div class="bench-card">
@@ -214,7 +219,7 @@ const icon = (d: string) =>
               <span class="show-tile__icon" style="background:#fff;color:#0a63e6" set:html={icon("M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z")} />
               <span class="show-tile__eye">Dashboards</span>
             </div>
-            <h3>Ten layouts, one page.</h3>
+            <h3>{dashboardCount} layouts, one page.</h3>
             <p>Payments, analytics, traffic, issues. Every panel is a ChartSpec sharing one cursor.</p>
           </div>
           <div class="show-tile__well">
@@ -235,8 +240,10 @@ const icon = (d: string) =>
               <span class="show-tile__icon" style="background:rgba(255,255,255,.18)" set:html={icon("M5 12.5l4.5 4.5L19 7.5")} />
               <span class="show-tile__eye">Agents</span>
             </div>
-            <h3>Valid on the first try.</h3>
-            <p>validate() and repair() fix the safe mistakes in the spec. No second model call.</p>
+            <h3>{proof.noDocsFirst} of {proof.tasks} on the first try.</h3>
+            <p>
+              That is the recorded run with no docs{proof.agentMeasured ? `, ${proof.agentMeasured}` : ""}. <code>repair()</code> takes it to {proof.repairTo} of {proof.tasks} with no model call. With the docs in the prompt, the first try was {proof.officialFirst} of {proof.tasks}.
+            </p>
           </div>
           <div class="show-tile__well">
             <div class="show-tile__panel">

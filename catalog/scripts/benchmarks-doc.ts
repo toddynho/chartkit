@@ -8,13 +8,17 @@ import {
   ROUND,
   agentRows,
   assertPublishedMatchesDisplay,
+  browserRivalsOmitted,
   browserRows,
   firstHoverRows,
   headline,
+  hoverMarkdown,
   hoverRows,
   published,
   samplingRows,
   updateMethod,
+  uplotBrowserLead,
+  uplotHeadline,
 } from "../lib/benchmarks.ts";
 import { paintMatrix } from "../lib/paint-matrix.ts";
 import { bundleMatrix, phase4Headline, ssrMatrix } from "../lib/size-matrix.ts";
@@ -217,8 +221,8 @@ Machine-readable copy: ${doc.urls.json} (schema ${doc.urls.schema}). HTML page: 
 ## Headline
 
 - Line chart: **${headline.lineGzipBytes} bytes** gzip, createRenderer of the line, measured ${headline.sizeMeasured} on \`${headline.sizeCommit}\`. Bar is ${phase4.barBytes.toLocaleString("en-US")}. Mini-area is ${phase4.miniAreaBytes.toLocaleString("en-US")}. \`/all\` is ${phase4.allBytes.toLocaleString("en-US")}. ${headline.bundleLoss} ${headline.lineWins} ${headline.donutWin}
-- Initial render: ChartKit is faster than uPlot in all 12 cells. Even 1,000,000 points is 23.6 ms vs 26.5 ms.
-- Aligned update: ChartKit wins 6 of 12 cells against uPlot and loses 6. Those six are marked in the browser table. It is not a sweep.
+- Initial render: ${uplotHeadline(browserRows).initial}
+- Aligned update: ${uplotHeadline(browserRows).update}
 - Server render, ${phase4.ssrPoints.toLocaleString("en-US")} point line: **${headline.ssrLabel}** median (mean ${published.ssr[0].meanMs} ms).
 - \`repair()\`, no model call, no docs: **${headline.repair}**. That agent run is ${AGENT_MEASURED}, not round 13.
 
@@ -244,23 +248,23 @@ ${bundleBody}
 
 ## Browser, milliseconds, ChartKit mount().update() vs uPlot setData
 
-ChartKit wins every initial cell. The update column is the fair timer. Six of those twelve cells are losses, and they are marked in the result column.
+${uplotBrowserLead(browserRows)}
 
 | X spacing | Points | ChartKit initial | uPlot initial | ChartKit update | uPlot update | Result |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
 ${browser}
 
-In these same 12 cells ChartKit’s initial and aligned update are both faster than Chart.js and Observable Plot. Even 1,000,000 points: Chart.js updates in 189.8 ms and Plot in 1,295.8 ms. ECharts, Recharts, and Nivo are not in the round 13 browser rows, so this file does not give them a browser millisecond.
+${browserRivalsOmitted}
 
 ## Hover
 
-Steady hover at 100,000 points. Painted median is the number to cite. ChartKit 16.5 ms, uPlot 16.2 ms.
+${hoverMarkdown(hoverRows, firstHoverRows).steady}
 
 | Library | Tip ms | Painted median ms | Painted p95 ms |
 | --- | ---: | ---: | ---: |
 ${hover}
 
-First hover on a fresh 100,000 point chart, painted median. uPlot is about 4–5 ms. ChartKit is 15.9–20.8 ms. That gap is a loss.
+${hoverMarkdown(hoverRows, firstHoverRows).fresh}
 
 | After mount | ChartKit painted | ChartKit max | uPlot painted | uPlot max |
 | ---: | ---: | ---: | ---: | ---: |
@@ -290,9 +294,9 @@ Tasks: ${published.tasks}. Model: ${published.model}. Temperature: ${published.t
 | --- | --- | --- | --- | --- | --- |
 ${agents}
 
-ChartKit's no-docs first try plus \`repair()\` is ${published.agents[0].noDocsWithinTwo}/${published.tasks}. Official first try is already ${published.agents[0].officialFirst}/${published.tasks}. The other libraries have no repair step. Nivo and uPlot were not in this eval, so this file does not invent scores for them.
+ChartKit's no-docs first try is ${published.agents[0].noDocsFirst}/${published.tasks}. \`repair()\`, with no model call, takes that output to ${headline.repairTo}. Official first try is ${published.agents[0].officialFirst}/${published.tasks}. The other libraries have no repair step. Nivo and uPlot were not in this eval, so this file does not invent scores for them.
 
-A ChartKit-only rerun with llms.txt cut to 6,329 bytes scored 41/42 on the first try. The miss was combo axis CK3002, which repair() does not patch. The headline uses the full docs file.
+The llms.txt this site serves is ${readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../public/llms.txt")).length.toLocaleString("en-US")} bytes.
 ${canvasMarkdown()}`;
 }
 

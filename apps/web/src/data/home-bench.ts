@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { repoRoot } from "../lib/repo-root";
@@ -12,6 +13,7 @@ type AgentCell = {
 type BenchFile = {
   round: number;
   measured: string;
+  methodology?: { agents?: string };
   headline: {
     lineGzipBytes: number;
     ssrMeanMs: number;
@@ -261,6 +263,66 @@ function solidDot(lib: BenchLib, type: string, scope: string, slot: Extract<Slot
   };
 }
 
+function joinAnd(items: string[]): string {
+  if (items.length <= 1) return items.join("");
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+}
+
+function paintComparison(slots: Record<string, Record<string, Slot>>, metric: "initial" | "update"): { fastest: string[]; slower: string[] } {
+  const fastest: string[] = [];
+  const slower: string[] = [];
+  for (const spec of ROW_DEFS) {
+    if (spec.chartkitOnly) continue;
+    const row = slots[spec.type];
+    const chartkit = row?.ChartKit;
+    if (chartkit?.kind !== "ok") throw new Error(`speed claim is missing ChartKit ${spec.type}`);
+    const rivals = LIBS.flatMap((lib) => {
+      if (lib.name === "ChartKit") return [];
+      const slot = row[lib.name];
+      if (slot?.kind !== "ok") return [];
+      return [{ name: lib.name, ms: slot[metric] }];
+    });
+    if (rivals.length === 0) continue;
+    const best = rivals.reduce((lead, item) => (item.ms < lead.ms ? item : lead));
+    const ours = chartkit[metric];
+    if (ours < best.ms) fastest.push(spec.type);
+    else slower.push(`${spec.type} (${best.name} ${formatMs(best.ms)} ms, ChartKit ${formatMs(ours)} ms)`);
+  }
+  return { fastest, slower };
+}
+
+export function paintClaim(slots: Record<string, Record<string, Slot>>): string {
+  const initial = paintComparison(slots, "initial");
+  const update = paintComparison(slots, "update");
+  const first =
+    initial.fastest.length === 0
+      ? "ChartKit does not have the lowest first paint on a compared row."
+      : `ChartKit has the lowest first paint on ${joinAnd(initial.fastest)}.`;
+  const firstSlower = initial.slower.length === 0 ? "" : ` A lower first paint: ${joinAnd(initial.slower)}.`;
+  const later =
+    update.fastest.length === 0
+      ? " ChartKit does not have the lowest update on a compared row."
+      : ` ChartKit has the lowest update on ${joinAnd(update.fastest)}.`;
+  const laterSlower = update.slower.length === 0 ? "" : ` A lower update: ${joinAnd(update.slower)}.`;
+  return `${first}${firstSlower}${later}${laterSlower} Spike has no other library in this plot.`;
+}
+
+let lineGzip: number | null = null;
+
+function phase4LineBytes(): number {
+  if (lineGzip != null) return lineGzip;
+  const script = join(repoRoot(), "scripts/line-bundle.mjs");
+  const run = spawnSync(process.execPath, [script, "--phase4"], { encoding: "utf8" });
+  if (run.status !== 0) throw new Error(run.stderr || "line gzip measurement failed");
+  const parsed = JSON.parse(run.stdout) as { gzipBytes?: number };
+  if (typeof parsed.gzipBytes !== "number" || !Number.isInteger(parsed.gzipBytes)) {
+    throw new Error("line gzip measurement was not an integer");
+  }
+  lineGzip = parsed.gzipBytes;
+  return lineGzip;
+}
+
 function hollowDot(lib: BenchLib, type: string, reason: string): BenchDot {
   return {
     title: `${lib.name} · ${type} · ${reason}`,
@@ -275,16 +337,25 @@ function hollowDot(lib: BenchLib, type: string, reason: string): BenchDot {
 export function proofFigures() {
   const bench = benchFile();
   const agent = bench.agents.find((row) => row.lib === "ChartKit");
-  const tasks = agent?.officialWithinTwo ?? 42;
+  const note = bench.methodology?.agents ?? "";
+  const tasks = Number(note.match(/(\d+) tasks/)?.[1] ?? agent?.officialWithinTwo);
+  if (!Number.isInteger(tasks)) throw new Error("benchmarks.json is missing the agent task count");
+  const noDocsFirst = agent?.noDocsFirst ?? bench.headline.repairNoDocs.first;
+  const officialFirst = agent?.officialFirst;
+  if (noDocsFirst == null || officialFirst == null) throw new Error("benchmarks.json is missing the ChartKit agent scores");
+  const gzipBytes = phase4LineBytes();
   return {
     round: bench.round,
     measured: bench.measured,
-    first: agent?.officialFirst ?? 42,
+    first: officialFirst,
+    officialFirst,
+    noDocsFirst,
     tasks,
     repairFrom: bench.headline.repairNoDocs.first,
     repairTo: bench.headline.repairNoDocs.afterRepair,
-    gzipKb: (bench.headline.lineGzipBytes / 1000).toFixed(1),
-    gzipBytes: bench.headline.lineGzipBytes,
+    agentMeasured: note.match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? "",
+    gzipLabel: `${(gzipBytes / 1000).toFixed(1)} KB (${gzipBytes.toLocaleString("en-US")} bytes)`,
+    gzipBytes,
     ssrMs: bench.headline.ssrMeanMs,
   };
 }
@@ -295,6 +366,7 @@ export function speedPlot(): {
   ticks: { label: string; left: string }[];
   measuredOn: string;
   commit: string | null;
+  claim: string;
 } {
   const { slots, measuredOn, commit } = paintRows();
   const rows: BenchRow[] = ROW_DEFS.map((spec) => {
@@ -333,5 +405,5 @@ export function speedPlot(): {
     label: ms >= 1000 ? `${ms / 1000}s` : `${ms}ms`,
     left: left(ms),
   }));
-  return { libs: LIBS, rows, ticks, measuredOn, commit };
+  return { libs: LIBS, rows, ticks, measuredOn, commit, claim: paintClaim(slots) };
 }
