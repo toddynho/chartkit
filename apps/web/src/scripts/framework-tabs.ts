@@ -34,8 +34,9 @@ export function mountFrameworks(root: HTMLElement): void {
 
   let saved = document.documentElement.dataset.stack || "react";
   try {
-    const stored = localStorage.getItem("ck-fw");
-    if (stored && root.querySelector(`[data-fw="${stored}"]`)) saved = stored;
+    const stored = localStorage.getItem("chartkit.framework") || localStorage.getItem("ck-fw");
+    const id = stored === "js" ? "vanilla" : stored;
+    if (id && root.querySelector(`[data-fw="${id}"]`)) saved = id;
   } catch {
     /* ignore */
   }

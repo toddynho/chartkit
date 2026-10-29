@@ -1,13 +1,14 @@
 import { mountStackChips } from "./stack-pref";
 
 function restore(button: HTMLButtonElement, previous: string): void {
+  const delay = Number(button.dataset.copiedMs || 2000);
   window.setTimeout(() => {
     if (button.classList.contains("code-copy")) {
       button.classList.remove("is-copied");
       return;
     }
     button.textContent = previous;
-  }, 2000);
+  }, Number.isFinite(delay) ? delay : 2000);
 }
 
 /** Clipboard API, then the older command, so Copy still works when the async API is blocked. */
@@ -83,7 +84,10 @@ export function mountHomeStart(root: ParentNode = document): void {
   });
   root.querySelectorAll<HTMLButtonElement>("[data-copy-prompt]").forEach((button) => {
     button.addEventListener("click", () => {
-      const prompt = root.querySelector<HTMLElement>("[data-agent-prompt]")?.textContent?.trim() ?? "";
+      const prompt =
+        button.dataset.copyText ??
+        root.querySelector<HTMLElement>("[data-agent-prompt]")?.textContent?.trim() ??
+        "";
       void writeClipboard(button, prompt);
     });
   });

@@ -1,16 +1,21 @@
 import { isStackId, type StackId } from "../data/stacks";
 
-const KEY = "ck-fw";
+const KEY = "chartkit.framework";
+const LEGACY_KEY = "ck-fw";
+
+function readStack(): string | null {
+  try {
+    return localStorage.getItem(KEY) || localStorage.getItem(LEGACY_KEY);
+  } catch {
+    return null;
+  }
+}
 
 export function currentStack(): StackId {
   const fromDom = document.documentElement.dataset.stack;
   if (isStackId(fromDom)) return fromDom;
-  try {
-    const saved = localStorage.getItem(KEY);
-    if (isStackId(saved)) return saved;
-  } catch {
-    /* ignore */
-  }
+  const saved = readStack() === "js" ? "vanilla" : readStack();
+  if (isStackId(saved)) return saved;
   return "react";
 }
 
@@ -18,6 +23,7 @@ export function rememberStack(stack: StackId, broadcast = true): void {
   document.documentElement.dataset.stack = stack;
   try {
     localStorage.setItem(KEY, stack);
+    localStorage.setItem(LEGACY_KEY, stack);
   } catch {
     /* ignore */
   }

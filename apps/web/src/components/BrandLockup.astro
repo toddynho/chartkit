@@ -2,12 +2,12 @@
 import logo from "../../public/brand/logo.svg?raw";
 
 interface Props {
-  /** Header mark is 28px so the kit reads a little taller than the 17px word. Footer stays 22. */
-  size?: 28 | 22;
+  /** Header mark is 24px, sitting on the wordmark baseline. Footer stays 22. */
+  size?: 24 | 22;
   tag?: string;
 }
 
-const { size = 28, tag } = Astro.props;
+const { size = 24, tag } = Astro.props;
 const svg = logo.replace("<svg ", '<svg aria-hidden="true" focusable="false" ');
 ---
 

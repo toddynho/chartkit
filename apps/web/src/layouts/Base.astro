@@ -55,11 +55,13 @@ const canonical = new URL(path, Astro.site ?? SITE.url).href;
         } catch (e) {}
         var saved = "";
         try {
-          saved = localStorage.getItem("ck-fw") || "";
+          saved = localStorage.getItem("chartkit.framework") || localStorage.getItem("ck-fw") || "";
         } catch (e) {}
+        if (saved === "js") saved = "vanilla";
         var stack = allowed[query] ? query : allowed[saved] ? saved : "react";
         if (allowed[query]) {
           try {
+            localStorage.setItem("chartkit.framework", query);
             localStorage.setItem("ck-fw", query);
           } catch (e) {}
         }

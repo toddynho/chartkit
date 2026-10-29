@@ -1,11 +1,10 @@
 ---
 import "../styles/v2.css";
 import Base from "../layouts/Base.astro";
+import HomeHero from "../components/HomeHero.astro";
 import HomeStart from "../components/HomeStart.astro";
 import { SITE } from "../data/site";
-import { chartTypes } from "../data/chart-types";
-import { homeSlides, showcaseSvgs } from "../data/marketing-charts";
-import { scriptJson } from "../lib/spec-text";
+import { showcaseSvgs } from "../data/marketing-charts";
 import { proofFigures, speedPlot } from "../data/home-bench";
 import { tokenSection } from "../data/token-eval";
 import { loadIndex } from "../lib/dashboards";
@@ -13,7 +12,6 @@ import { loadIndex } from "../lib/dashboards";
 const title = "One spec. Every framework. Built for agents.";
 const lede =
   "Write a JSON ChartSpec once. Render it in React, Vue, Svelte, vanilla JS, or on the server. Agents write the spec; they never write the chart.";
-const slides = homeSlides();
 const shots = showcaseSvgs();
 const proof = proofFigures();
 const bench = speedPlot();
@@ -26,62 +24,7 @@ const icon = (d: string) =>
 
 <Base tone="light" title={title} description={lede || SITE.description}>
   <div class="v2">
-    <section class="home-hero" aria-labelledby="home-title">
-      <p class="eyebrow eyebrow--blue">ChartKit {SITE.version} · MIT</p>
-      <h1 class="v2-h1" id="home-title">
-        One spec.<br />Every framework.<br />Built for agents.
-      </h1>
-      <p class="v2-lead">{lede}</p>
-      <div class="v2-actions">
-        <a class="btn-lg" href="/docs">Get started</a>
-        <a class="btn-text" href="/cloud">Cloud →</a>
-      </div>
-    </section>
-
-    <section class="carousel-wrap" aria-labelledby="types-title">
-      <h2 class="sr" id="types-title">Chart types</h2>
-      <div class="carousel-card" data-carousel>
-        <div class="carousel-stage">
-          {
-            slides.map((slide, index) => (
-              <div class="carousel-slide" data-slide={index} hidden={index !== 0}>
-                <div class="carousel-spec">
-                  <div class="carousel-spec__bar">
-                    <span>spec.json</span>
-                    <span>{slide.bytes}</span>
-                  </div>
-                  <pre set:html={slide.html} />
-                </div>
-                <div class="carousel-view">
-                  <div class="carousel-view__head">
-                    <h2>{slide.title}</h2>
-                    <span class="carousel-view__type">{slide.label}</span>
-                  </div>
-                  <p class="carousel-view__sub">{slide.subtitle}</p>
-                  <div class="carousel-chart" data-live data-geo={slide.geo ? "1" : undefined}>
-                    <script is:inline type="application/json" set:html={scriptJson(slide.spec)} />
-                    <div class="carousel-chart__host" set:html={slide.svg} />
-                  </div>
-                </div>
-              </div>
-            ))
-          }
-        </div>
-        <div class="carousel-pills" role="tablist" aria-label="Chart type">
-          {
-            slides.map((slide, index) => (
-              <button type="button" class:list={["type-pill", index === 0 && "is-on"]} data-pill role="tab" aria-selected={index === 0 ? "true" : "false"}>
-                <span class="dot" aria-hidden="true" />
-                {slide.label}
-              </button>
-            ))
-          }
-        </div>
-      </div>
-      <p class="carousel-caption">
-        {chartTypes.length} chart types · {slides.filter((slide) => slide.geo).length} maps · one spec shape · click any to pin it
-      </p>
-    </section>
+    <HomeHero />
 
     <HomeStart />
 
@@ -264,7 +207,3 @@ const icon = (d: string) =>
     </section>
   </div>
 </Base>
-
-<script>
-  import "../scripts/home-carousel";
-</script>
