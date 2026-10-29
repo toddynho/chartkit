@@ -136,7 +136,7 @@ const icon = (d: string) =>
         <p class="eyebrow eyebrow--blue">For the user</p>
         <h2 id="measured-title">Faster on the page</h2>
         <p>
-          {proof.gzipKb} KB gzipped, and the server draws the chart with no DOM. The plot is initial paint by chart type, the median of five fresh pages. <a href="/benchmarks">Benchmarks</a> keeps the hover-steady line, a different measurement.
+          {proof.gzipKb} KB gzipped, and the server draws the chart with no DOM. The plot is two-rAF completion by chart type, the median of five fresh pages at 640×360. It is not the hover-steady line. <a href="/benchmarks">Benchmarks</a> has the full matrix.
         </p>
       </div>
       <div class="bench-card">
@@ -157,11 +157,17 @@ const icon = (d: string) =>
                 <div class="bench-row__label">
                   {row.type}
                   {row.note ? <small>{row.note}</small> : null}
+                  {row.aside ? <small>{row.aside}</small> : null}
                   <span class="sr">{row.summary}</span>
                 </div>
                 <div class="bench-track">
-                  {row.dots.map((dot) => (
+                  {row.dots.filter((dot) => dot.solid).map((dot) => (
                     <span class="bench-dot" role="img" aria-label={dot.title} title={dot.title} style={`left:${dot.left};width:${dot.size};height:${dot.size};background:${dot.fill};box-shadow:${dot.ring}`} />
+                  ))}
+                </div>
+                <div class="bench-hollows">
+                  {row.dots.filter((dot) => !dot.solid).map((dot) => (
+                    <span class="bench-dot is-hollow" role="img" aria-label={dot.title} title={dot.title} style={`width:${dot.size};height:${dot.size};border-color:${dot.fill}`} />
                   ))}
                 </div>
               </div>
@@ -175,7 +181,7 @@ const icon = (d: string) =>
           </div>
         </div>
         <p class="bench-note">
-          Milliseconds, log scale; left is faster. Each solid dot is the initial-paint median, two frames at 640×360, measured {bench.measuredOn}{bench.commit ? ` on ${bench.commit}` : ""}. The dot title includes the update median from the same cell. Line is sampling auto at 100,000 points. Area is native stacked-area at 100,000 x positions with four series. Bar is 48 categories, scatter is 100,000 points, donut is 8 slices, and heatmap is 1,200 cells. Libraries without a native type, and cells that errored, are omitted.
+          Milliseconds, log scale; left is faster. A filled dot is an ok cell: two-rAF completion, median of 5 at 640×360, measured {bench.measuredOn}{bench.commit ? ` on ${bench.commit}` : ""}. It is not a hover-steady time. The dot title includes the update median from the same cell. An open circle is a rival with no ok cell, either no native chart or a run that did not finish. It is not a time. Spike is ChartKit only, so that row has no open circle. Line is sampling auto at 100,000 points. Area is native stacked-area at 100,000 x positions with four series. Bar is 48 categories, scatter is 100,000 points, donut is 8 slices, and heatmap is 1,200 cells.
         </p>
       </div>
     </section>

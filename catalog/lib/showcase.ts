@@ -4,7 +4,7 @@ import { fromMermaid } from "@chartkitdev/core/mermaid/phase4";
 import { repair, validate } from "@chartkitdev/core/validate";
 import { validatePhase4 } from "@chartkitdev/core/validate/phase4";
 import { snippetsFor } from "./snippets.ts";
-import { benchSources, benchmarkCharts, timingLosses } from "./showcase-benchmarks.ts";
+import { benchSources, benchmarkCharts } from "./showcase-benchmarks.ts";
 import { bikeCharts, mermaidBoards, repairCases, roasteryCharts, stacks, tide, type ChartSlot, type ShowcaseSpec } from "./showcase-data.ts";
 import { nextBoardMeta } from "./showcase-next.ts";
 import { fifthBoards } from "./showcase-fifth.ts";
@@ -239,9 +239,8 @@ export function boards(): Board[] {
       slug: "benchmarks-drawn",
       number: 16,
       title: "Benchmarks, drawn by ChartKit",
-      lede: "The measured line bundles and the published round of browser timings, drawn as charts. Losses stay on the page.",
+      lede: "The measured line bundles and the published round of browser timings, drawn as charts.",
       charts: benchmarks,
-      losses: timingLosses(),
       sources: benchSources(),
     }),
     ...[

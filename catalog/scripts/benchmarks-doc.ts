@@ -16,6 +16,7 @@ import {
   samplingRows,
   updateMethod,
 } from "../lib/benchmarks.ts";
+import { paintMatrix } from "../lib/paint-matrix.ts";
 
 export const BENCHMARKS_SCHEMA_URL = "https://chartkit.dev/benchmarks.schema.json";
 
@@ -60,18 +61,7 @@ export function benchmarksPayload() {
     firstHoverPainted: published.firstHoverPainted,
     ssrMs: published.ssr,
     agents: published.agents,
-    losses: [
-      `Line bundle: ChartKit ${headline.lineGzipBytes} bytes gzip, uPlot ${headline.uplotJsBytes} bytes of JS. The stylesheet is ${headline.uplotCssBytes} bytes more (${headline.uplotSumBytes} summed).`,
-      "Aligned update, even x, 1,000 points: ChartKit 1.5 ms, uPlot 1.2 ms.",
-      "Aligned update, even x, 10,000 points: ChartKit 1.9 ms, uPlot 1.7 ms.",
-      "Aligned update, jittered x, 1,000 points: ChartKit 1.6 ms, uPlot 1.4 ms.",
-      "Aligned update, gapped timestamps, 1,000 points: ChartKit 1.6 ms, uPlot 1.4 ms.",
-      "Aligned update, gapped timestamps, 10,000 points: ChartKit 1.9 ms, uPlot 1.6 ms.",
-      "Aligned update, gapped timestamps, 100,000 points: ChartKit 3.5 ms, uPlot 3.4 ms.",
-      "Steady hover at 100k, painted median: ChartKit 16.5 ms, uPlot 16.2 ms.",
-      "First hover, painted median: ChartKit 20.8 / 15.9 / 16.5 ms at about 50 / 200 / 500 ms after mount. uPlot 4 / 4.6 / 4.9 ms.",
-      "No-docs agent first try is 21/42. Recharts, ECharts, and Chart.js were 42/42 with no docs. That eval was not re-run for round 13. repair() reaches 42/42.",
-    ],
+    paint: paintMatrix(),
     urls: {
       html: "https://chartkit.dev/benchmarks",
       markdown: "https://chartkit.dev/benchmarks.md",
@@ -95,7 +85,7 @@ export const benchmarksSchema = {
   $id: BENCHMARKS_SCHEMA_URL,
   title: "ChartKit benchmarks",
   type: "object",
-  required: ["round", "measured", "methodology", "bundleGzip", "browserMs", "samplingNoneMs", "ssrMs", "agents", "losses"],
+  required: ["round", "measured", "methodology", "bundleGzip", "browserMs", "samplingNoneMs", "ssrMs", "agents", "paint"],
   additionalProperties: true,
   properties: {
     round: { type: "integer" },
@@ -117,7 +107,16 @@ export const benchmarksSchema = {
     samplingNoneMs: { type: "array" },
     ssrMs: { type: "array" },
     agents: { type: "array" },
-    losses: { type: "array", items: { type: "string" } },
+    paint: {
+      type: "object",
+      required: ["measuredAt", "libraries", "rows", "caption"],
+      properties: {
+        measuredAt: { type: "string" },
+        libraries: { type: "array", items: { type: "string" } },
+        rows: { type: "array" },
+        caption: { type: "string" },
+      },
+    },
   },
 } as const;
 
@@ -152,7 +151,12 @@ export function benchmarksMarkdown(): string {
         : `| ${row.lib} | not in this eval |  |  |  |  |`,
     )
     .join("\n");
-  const losses = doc.losses.map((line) => `- ${line}`).join("\n");
+  const paintHead = ["Chart", "Points", ...doc.paint.libraries].join(" | ");
+  const paintRule = ["---", "---:", ...doc.paint.libraries.map(() => "---:")].join(" | ");
+  const paintBody = doc.paint.rows
+    .map((paintRow) => `| ${paintRow.label} | ${paintRow.pointsLabel} | ${paintRow.cells.map((cell) => cell.text).join(" | ")} |`)
+    .join("\n");
+  const paintNotes = doc.paint.notes.map((line) => line).join(" ");
 
   return `# ChartKit benchmarks, round ${doc.round}
 
@@ -175,13 +179,19 @@ Machine-readable copy: ${doc.urls.json} (schema ${doc.urls.schema}). HTML page: 
 
 - Line chart: **${headline.lineGzipBytes} bytes** gzip, \`scripts/size.mjs\` on \`${headline.sizeCommit}\`, measured ${headline.sizeMeasured}. ${headline.bundleLoss} ${headline.lineWins} The harness minimal line is ${headline.harnessLineBytes} bytes. ${headline.donutWin}
 - Initial render: ChartKit is faster than uPlot in all 12 cells. Even 1,000,000 points is 23.6 ms vs 26.5 ms.
-- Aligned update: ChartKit wins 6 of 12 cells against uPlot and loses the 6 listed below. It is not a sweep.
+- Aligned update: ChartKit wins 6 of 12 cells against uPlot and loses 6. Those six are marked in the browser table. It is not a sweep.
 - Server render: **${headline.ssrLabel}** mean (median ${published.ssr[0].medianMs} ms).
 - \`repair()\`, no model call, no docs: **${headline.repair}**. That agent run is ${AGENT_MEASURED}, not round 13.
 
-## Losses
+## Paint, two-rAF
 
-${losses}
+${doc.paint.caption}
+
+${paintNotes}
+
+| ${paintHead} |
+| ${paintRule} |
+${paintBody}
 
 ## Bundle, gzip -9
 

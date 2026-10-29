@@ -21,19 +21,21 @@ type BenchFile = {
 };
 
 type PaintCell = {
+  chart: string;
   library: string;
-  homepageRow: string;
+  homepageRow: string | null;
   points: number;
   variant: string | null;
-  initialMs: number;
-  updateMs: number;
+  status: string;
+  initialMs: number | null;
+  updateMs: number | null;
 };
 
-type Pair = { initial: number; update: number };
+type Slot = { kind: "ok"; initial: number; update: number } | { kind: "hollow"; reason: string };
 
 export type BenchLib = { name: string; color: string };
 export type BenchDot = { title: string; left: string; size: string; fill: string; ring: string; solid: boolean };
-export type BenchRow = { type: string; measured: boolean; note: string; summary: string; dots: BenchDot[] };
+export type BenchRow = { type: string; measured: boolean; note: string; aside: string; summary: string; dots: BenchDot[] };
 
 const LIBS: BenchLib[] = [
   { name: "ChartKit", color: "#0a63e6" },
@@ -42,24 +44,26 @@ const LIBS: BenchLib[] = [
   { name: "Observable Plot", color: "#b8b9bd" },
   { name: "Recharts", color: "#c6c7ca" },
   { name: "ECharts", color: "#d2d3d6" },
+  { name: "Nivo", color: "#9a9ca1" },
 ];
 
-const ROW_DEFS: { type: string; points: number; note: string; scope: string }[] = [
-  { type: "line", points: 100_000, note: "100k", scope: "100,000 points, sampling auto" },
-  { type: "area", points: 100_000, note: "100k", scope: "stacked area, 100,000 x positions, four series" },
-  { type: "bar", points: 48, note: "48", scope: "48 categories" },
-  { type: "scatter", points: 100_000, note: "100k", scope: "100,000 points" },
-  { type: "donut", points: 8, note: "8", scope: "8 slices" },
-  { type: "heatmap", points: 1200, note: "1200", scope: "1,200 cells" },
+const ROW_DEFS: { type: string; points: number; note: string; scope: string; aside: string; chartkitOnly: boolean }[] = [
+  { type: "line", points: 100_000, note: "100k", scope: "100,000 points, sampling auto", aside: "", chartkitOnly: false },
+  { type: "area", points: 100_000, note: "100k", scope: "stacked area, 100,000 x positions, four series", aside: "", chartkitOnly: false },
+  { type: "bar", points: 48, note: "48", scope: "48 categories", aside: "", chartkitOnly: false },
+  { type: "scatter", points: 100_000, note: "100k", scope: "100,000 points", aside: "", chartkitOnly: false },
+  { type: "donut", points: 8, note: "8", scope: "8 slices", aside: "", chartkitOnly: false },
+  { type: "heatmap", points: 1200, note: "1200", scope: "1,200 cells", aside: "", chartkitOnly: false },
+  { type: "spike", points: 100_000, note: "100k", scope: "100,000 points", aside: "ChartKit only", chartkitOnly: true },
 ];
 
 /**
- * Two-frame paint medians (initial / update), kind "median", BENCH_SAMPLES=5.
- * Measured 2026-10-29T02:07:52.908Z on main tip 749b8ffec2820c61c785c34ae0adb187eeedcf00
- * after #81, #82, and #83. These are post-#82 painters on main tip, not the #81 draft.
- * Line is the 100,000-point sampling-auto cell, the point count this section already shows.
- * Area is native stacked-area. Unsupported and error cells are omitted.
- * Nivo is not in this legend. These are not hover-steady times.
+ * Two-rAF paint medians (initial / update), kind "median", BENCH_SAMPLES=5.
+ * Measured 2026-10-29T02:07:52.908Z on 749b8ffe and published on main in 71f3fe44.
+ * Fallback when bench/results/paint.json is missing or not a 5-sample median.
+ * Line is the 100,000-point sampling-auto cell. Area is native stacked-area.
+ * A rival with no ok cell is an open circle, not a time. Spike is ChartKit only.
+ * These are not hover-steady times.
  */
 const PINNED: Record<string, Record<string, [number, number]>> = {
   line: {
@@ -69,6 +73,7 @@ const PINNED: Record<string, Record<string, [number, number]>> = {
     "Observable Plot": [109.5, 1481],
     Recharts: [1884.3, 1002],
     ECharts: [2491.8, 2739.9],
+    Nivo: [383.2, 980.2],
   },
   area: {
     ChartKit: [45.6, 51.6],
@@ -83,6 +88,7 @@ const PINNED: Record<string, Record<string, [number, number]>> = {
     "Observable Plot": [17.4, 29.6],
     Recharts: [49.8, 19.1],
     ECharts: [34.7, 15.8],
+    Nivo: [55.2, 20.4],
   },
   scatter: {
     ChartKit: [62.4, 40],
@@ -91,17 +97,23 @@ const PINNED: Record<string, Record<string, [number, number]>> = {
     "Observable Plot": [519, 624.9],
     Recharts: [5815.9, 11446.6],
     ECharts: [8827.4, 9060.5],
+    Nivo: [410.6, 339.8],
   },
   donut: {
     ChartKit: [8.8, 33.5],
     "Chart.js": [11.7, 33.5],
     Recharts: [27.7, 17.1],
     ECharts: [25.3, 23.9],
+    Nivo: [23.6, 19.4],
   },
   heatmap: {
     ChartKit: [15.9, 24.1],
     "Observable Plot": [22.9, 22.7],
     ECharts: [49.1, 25.5],
+    Nivo: [426.4, 446.8],
+  },
+  spike: {
+    ChartKit: [56.6, 43.3],
   },
 };
 
@@ -143,16 +155,19 @@ function readPaintCells(): { cells: PaintCell[]; measuredOn: string } | null {
   for (const item of file.charts) {
     if (!item || typeof item !== "object") continue;
     const cell = item as Record<string, unknown>;
-    if (cell.status !== "ok") continue;
-    if (typeof cell.library !== "string" || typeof cell.homepageRow !== "string" || typeof cell.points !== "number") continue;
-    if (typeof cell.initialMs !== "number" || typeof cell.updateMs !== "number") continue;
+    if (typeof cell.chart !== "string" || typeof cell.library !== "string" || typeof cell.points !== "number") continue;
+    if (typeof cell.status !== "string") continue;
+    const ok = cell.status === "ok";
+    if (ok && (typeof cell.initialMs !== "number" || typeof cell.updateMs !== "number")) continue;
     cells.push({
+      chart: cell.chart,
       library: cell.library,
-      homepageRow: cell.homepageRow,
+      homepageRow: typeof cell.homepageRow === "string" ? cell.homepageRow : null,
       points: cell.points,
       variant: typeof cell.variant === "string" ? cell.variant : null,
-      initialMs: cell.initialMs,
-      updateMs: cell.updateMs,
+      status: cell.status,
+      initialMs: ok && typeof cell.initialMs === "number" ? cell.initialMs : null,
+      updateMs: ok && typeof cell.updateMs === "number" ? cell.updateMs : null,
     });
   }
   const measuredOn = typeof file.measuredAt === "string" && /^\d{4}-\d{2}-\d{2}/.test(file.measuredAt)
@@ -161,56 +176,99 @@ function readPaintCells(): { cells: PaintCell[]; measuredOn: string } | null {
   return { cells, measuredOn };
 }
 
-function pairsFromPaint(cells: PaintCell[]): Record<string, Record<string, Pair>> | null {
+function matchesRow(cell: PaintCell, spec: (typeof ROW_DEFS)[number]): boolean {
+  if (cell.points !== spec.points) return false;
+  if (spec.type === "spike") {
+    if (cell.chart !== "spike") return false;
+  } else if (cell.homepageRow !== spec.type) {
+    return false;
+  }
+  if (spec.type === "line") {
+    if (cell.library === "ChartKit") return cell.variant === "sampling-auto";
+    return cell.variant == null;
+  }
+  return cell.variant == null;
+}
+
+function slotFor(cell: PaintCell): Slot {
+  if (cell.status === "ok" && cell.initialMs != null && cell.updateMs != null) {
+    return { kind: "ok", initial: round2(cell.initialMs), update: round2(cell.updateMs) };
+  }
+  if (cell.status === "unsupported") return { kind: "hollow", reason: "no native chart" };
+  if (cell.status === "error" || cell.status === "timeout") return { kind: "hollow", reason: "did not finish" };
+  if (cell.status === "blocked") return { kind: "hollow", reason: "blocked" };
+  return { kind: "hollow", reason: "not measured" };
+}
+
+function slotsFromPaint(cells: PaintCell[]): Record<string, Record<string, Slot>> | null {
   const names = new Set(LIBS.map((lib) => lib.name));
-  const out: Record<string, Record<string, Pair>> = {};
+  const out: Record<string, Record<string, Slot>> = {};
   for (const spec of ROW_DEFS) {
-    const row: Record<string, Pair> = {};
+    const row: Record<string, Slot> = {};
     for (const cell of cells) {
-      if (cell.homepageRow !== spec.type || cell.points !== spec.points || !names.has(cell.library)) continue;
-      if (spec.type === "line") {
-        if (cell.library === "ChartKit" && cell.variant !== "sampling-auto") continue;
-        if (cell.library !== "ChartKit" && cell.variant != null && cell.variant !== "sampling-auto") continue;
-      }
+      if (!matchesRow(cell, spec) || !names.has(cell.library)) continue;
       if (row[cell.library]) continue;
-      row[cell.library] = { initial: round2(cell.initialMs), update: round2(cell.updateMs) };
+      row[cell.library] = slotFor(cell);
     }
-    if (!row.ChartKit) return null;
+    if (row.ChartKit?.kind !== "ok") return null;
+    if (spec.chartkitOnly) {
+      out[spec.type] = { ChartKit: row.ChartKit };
+      continue;
+    }
+    for (const lib of LIBS) {
+      if (!row[lib.name]) row[lib.name] = { kind: "hollow", reason: "not measured" };
+    }
     out[spec.type] = row;
   }
   return out;
 }
 
-function pinnedPairs(): Record<string, Record<string, Pair>> {
-  const out: Record<string, Record<string, Pair>> = {};
+function pinnedSlots(): Record<string, Record<string, Slot>> {
+  const out: Record<string, Record<string, Slot>> = {};
   for (const spec of ROW_DEFS) {
     const source = PINNED[spec.type];
     if (!source?.ChartKit) throw new Error(`pinned paint row is missing ChartKit ${spec.type}`);
-    const row: Record<string, Pair> = {};
+    const row: Record<string, Slot> = {};
     for (const [library, pair] of Object.entries(source)) {
-      row[library] = { initial: pair[0], update: pair[1] };
+      row[library] = { kind: "ok", initial: pair[0], update: pair[1] };
+    }
+    if (!spec.chartkitOnly) {
+      for (const lib of LIBS) {
+        if (!row[lib.name]) row[lib.name] = { kind: "hollow", reason: "not measured" };
+      }
     }
     out[spec.type] = row;
   }
   return out;
 }
 
-function paintRows(): { pairs: Record<string, Record<string, Pair>>; measuredOn: string; commit: string | null } {
+function paintRows(): { slots: Record<string, Record<string, Slot>>; measuredOn: string; commit: string | null } {
   const file = readPaintCells();
-  const fromFile = file ? pairsFromPaint(file.cells) : null;
-  if (file && fromFile) return { pairs: fromFile, measuredOn: file.measuredOn, commit: null };
-  return { pairs: pinnedPairs(), measuredOn: PINNED_ON, commit: PINNED_COMMIT };
+  const fromFile = file ? slotsFromPaint(file.cells) : null;
+  if (file && fromFile) return { slots: fromFile, measuredOn: file.measuredOn, commit: null };
+  return { slots: pinnedSlots(), measuredOn: PINNED_ON, commit: PINNED_COMMIT };
 }
 
-function dot(lib: BenchLib, type: string, scope: string, pair: Pair): BenchDot {
+function solidDot(lib: BenchLib, type: string, scope: string, slot: Extract<Slot, { kind: "ok" }>): BenchDot {
   const us = lib.name === "ChartKit";
   return {
-    title: `${lib.name} · ${type} · ${scope} · ${formatMs(pair.initial)} ms initial, ${formatMs(pair.update)} ms update`,
-    left: left(pair.initial),
+    title: `${lib.name} · ${type} · ${scope} · ${formatMs(slot.initial)} ms initial, ${formatMs(slot.update)} ms update`,
+    left: left(slot.initial),
     size: us ? "14px" : "10px",
     fill: lib.color,
     ring: us ? "0 0 0 3px #cfe0fa" : "none",
     solid: true,
+  };
+}
+
+function hollowDot(lib: BenchLib, type: string, reason: string): BenchDot {
+  return {
+    title: `${lib.name} · ${type} · ${reason}`,
+    left: "",
+    size: "10px",
+    fill: lib.color,
+    ring: "none",
+    solid: false,
   };
 }
 
@@ -238,24 +296,35 @@ export function speedPlot(): {
   measuredOn: string;
   commit: string | null;
 } {
-  const { pairs, measuredOn, commit } = paintRows();
+  const { slots, measuredOn, commit } = paintRows();
   const rows: BenchRow[] = ROW_DEFS.map((spec) => {
-    const row = pairs[spec.type];
-    if (!row?.ChartKit) throw new Error(`speed plot is missing ChartKit ${spec.type}`);
+    const row = slots[spec.type];
+    if (row?.ChartKit?.kind !== "ok") throw new Error(`speed plot is missing ChartKit ${spec.type}`);
     const inOrder = LIBS.flatMap((lib) => {
-      const pair = row[lib.name];
-      return pair ? [dot(lib, spec.type, spec.scope, pair)] : [];
+      const slot = row[lib.name];
+      if (!slot) return [];
+      return [slot.kind === "ok" ? solidDot(lib, spec.type, spec.scope, slot) : hollowDot(lib, spec.type, slot.reason)];
     });
     const dots = [...inOrder.filter((item) => !item.title.startsWith("ChartKit ·")), ...inOrder.filter((item) => item.title.startsWith("ChartKit ·"))];
+    const chartkit = dots.filter((item) => item.title.startsWith("ChartKit ·"));
+    if (chartkit.length !== 1 || !chartkit[0]?.solid) throw new Error(`speed plot ChartKit dot is not solid: ${spec.type}`);
+    if (spec.chartkitOnly && dots.some((item) => !item.solid)) {
+      throw new Error(`speed plot drew a hollow rival on ${spec.type}`);
+    }
     for (const item of dots) {
-      if (!item.solid || item.fill === "#fff") throw new Error(`speed plot left a hollow dot: ${item.title}`);
-      const at = Number(item.left.replace("%", ""));
-      if (!(at >= 0 && at <= 100)) throw new Error(`speed plot dot is off the axis: ${item.title}`);
+      if (item.solid) {
+        if (item.fill === "#fff" || item.left === "") throw new Error(`speed plot left a hollow measured dot: ${item.title}`);
+        const at = Number(item.left.replace("%", ""));
+        if (!(at >= 0 && at <= 100)) throw new Error(`speed plot dot is off the axis: ${item.title}`);
+      } else if (item.left !== "") {
+        throw new Error(`speed plot placed an unmeasured dot on the axis: ${item.title}`);
+      }
     }
     return {
       type: spec.type,
       measured: true,
       note: spec.note,
+      aside: spec.aside,
       summary: inOrder.map((item) => item.title).join(". "),
       dots,
     };

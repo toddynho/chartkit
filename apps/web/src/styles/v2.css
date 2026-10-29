@@ -567,7 +567,7 @@ html[data-stack="vanilla"] .home-card .stack-sample [data-stack-panel="vanilla"]
 .bench-plot { display: flex; flex-direction: column; gap: 6px; }
 .bench-row {
   display: grid;
-  grid-template-columns: 90px minmax(0, 1fr);
+  grid-template-columns: 96px minmax(0, 1fr) 48px;
   gap: 14px;
   align-items: center;
   font-size: 13px;
@@ -588,9 +588,24 @@ html[data-stack="vanilla"] .home-card .stack-sample [data-stack-panel="vanilla"]
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }
+.bench-hollows {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 30px;
+}
+.bench-dot.is-hollow {
+  position: static;
+  transform: none;
+  background: transparent;
+  box-shadow: none;
+  border: 1.5px solid;
+  box-sizing: border-box;
+}
 .bench-axis {
   display: grid;
-  grid-template-columns: 90px minmax(0, 1fr);
+  grid-template-columns: 96px minmax(0, 1fr) 48px;
   gap: 14px;
   margin-top: 8px;
 }

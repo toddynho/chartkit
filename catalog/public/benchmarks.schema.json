@@ -12,7 +12,7 @@
     "samplingNoneMs",
     "ssrMs",
     "agents",
-    "losses"
+    "paint"
   ],
   "additionalProperties": true,
   "properties": {
@@ -58,10 +58,30 @@
     "agents": {
       "type": "array"
     },
-    "losses": {
-      "type": "array",
-      "items": {
-        "type": "string"
+    "paint": {
+      "type": "object",
+      "required": [
+        "measuredAt",
+        "libraries",
+        "rows",
+        "caption"
+      ],
+      "properties": {
+        "measuredAt": {
+          "type": "string"
+        },
+        "libraries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rows": {
+          "type": "array"
+        },
+        "caption": {
+          "type": "string"
+        }
       }
     }
   }

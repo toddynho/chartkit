@@ -1,6 +1,6 @@
 # Benchmarks, drawn by ChartKit
 
-The measured line bundles and the published round of browser timings, drawn as charts. Losses stay on the page.
+The measured line bundles and the published round of browser timings, drawn as charts.
 
 Bundle bytes are from catalog/data/measured-sizes.json, size script measured 2026-10-24 on `236653ac94626ec33ef01d0112f8aa7cf09e0d9f`, bench bundles measured 2026-10-24. Timings are older round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
 
@@ -464,23 +464,6 @@ Painted median from the same round 13 file. uPlot is ahead of ChartKit here.
   }
 }
 ```
-
-## Losses
-
-- **even 1k.** Aligned update: ChartKit 1.5 ms, uPlot 1.2 ms.
-- **even 10k.** Aligned update: ChartKit 1.9 ms, uPlot 1.7 ms.
-- **jittered 1k.** Aligned update: ChartKit 1.6 ms, uPlot 1.4 ms.
-- **gapped 1k.** Aligned update: ChartKit 1.6 ms, uPlot 1.4 ms.
-- **gapped 10k.** Aligned update: ChartKit 1.9 ms, uPlot 1.6 ms.
-- **gapped 100k.** Aligned update: ChartKit 3.5 ms, uPlot 3.4 ms.
-- **Hover 100k.** Painted median: ChartKit 16.5 ms, uPlot 16.2 ms.
-- **10k render.** ChartKit canvas 7.8 ms, ChartKit 7.3 ms.
-- **10k first paint.** ChartKit canvas 21.8 ms, ChartKit 13.1 ms.
-- **100k render.** ChartKit canvas 9.1 ms, ChartKit 8.2 ms.
-- **100k first paint.** ChartKit canvas 20.1 ms, ChartKit 13.1 ms.
-- **1M render.** ChartKit canvas 17.1 ms, ChartKit 16.5 ms.
-- **1M first paint.** ChartKit canvas 27.7 ms, ChartKit 20.8 ms.
-- **1M update.** ChartKit canvas 21.8 ms, ChartKit 20.6 ms.
 
 ## Options used
 

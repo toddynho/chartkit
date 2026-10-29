@@ -2,11 +2,13 @@
 import "../styles/surfaces.css";
 import Base from "../layouts/Base.astro";
 import { loadBenchmarksPage } from "../lib/surfaces";
+import { loadPublishedPaint } from "../data/published-paint";
 
 const page = loadBenchmarksPage();
+const paint = loadPublishedPaint();
 const h = page.headline;
 const description =
-  "Published ChartKit benchmark numbers: bundle size, browser render, server render, sampling, and the agent eval. Losses included.";
+  "Published ChartKit benchmark numbers: two-rAF paint, bundle size, browser render, server render, sampling, and the agent eval.";
 ---
 
 <Base title="Benchmarks" description={description} tone="light">
@@ -26,6 +28,43 @@ const description =
       </p>
     </header>
     <p>{page.updateMethod}</p>
+
+    <h2 id="paint">Paint</h2>
+    <p>{paint.caption}</p>
+    {paint.notes.map((note) => <p>{note}</p>)}
+    <div class="table-wrap">
+      <table class="paint-matrix">
+        <thead>
+          <tr>
+            <th>Chart</th>
+            <th class="num">Points</th>
+            {paint.libraries.map((library) => <th class="num">{library}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {paint.rows.map((row) => (
+            <tr>
+              <td>{row.label}</td>
+              <td class="num">{row.pointsLabel}</td>
+              {row.cells.map((cell) => (
+                <td
+                  class:list={[
+                    "num",
+                    cell.state === "ok" && cell.library === "ChartKit" && "is-us",
+                    cell.state === "dnf" && "is-dnf",
+                    cell.state === "na" && "is-na",
+                    cell.state === "absent" && "is-absent",
+                  ]}
+                  title={cell.title}
+                >
+                  {cell.text}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
 
     <h2>Bundle size</h2>
     <p>
