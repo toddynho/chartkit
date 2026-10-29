@@ -1,3 +1,8 @@
+import { geometries, presets, registerGeometry, registerPreset } from "./feature-hooks";
+import { midnight as midnightBase } from "./themes/midnight-tokens";
+
+export { registerGeometry, registerPreset };
+
 /** Preset fallbacks. Paint uses `var(--ck-*)` first so a host can override every token. */
 
 export interface PresetTokens {
@@ -39,24 +44,6 @@ export interface PresetGeometry {
   pointSize: number;
 }
 
-const midnightSeries = ["#22c55e", "#3b82f6", "#a855f7", "#f59e0b", "#ec4899", "#14b8a6", "#f43f5e", "#8b5cf6"];
-
-/** Opt-in dark card. Unknown preset names still resolve here. */
-export const midnight: PresetTokens = {
-  background: "#0c0c0c",
-  surface: "#1a1a1a",
-  text: "#ffffff",
-  muted: "#8a8a8a",
-  grid: "#1f1f1f",
-  axis: "#262626",
-  track: "#1f1f1f",
-  accent: "#22d3ee",
-  positive: "#4ade80",
-  negative: "#f87171",
-  series: midnightSeries,
-  lines: midnightSeries,
-};
-
 /**
  * Soft, the default when theme is omitted, "auto", or "soft".
  * The plot fill is transparent so a white page and any other page show through.
@@ -87,48 +74,6 @@ export const auto: PresetTokens = {
 /** Same tokens as auto. Named so `theme: "soft"` does not fall through to midnight. */
 export const soft: PresetTokens = auto;
 
-export const refined: PresetTokens = {
-  background: "transparent",
-  surface: ld("#fafafa", "#18181b"),
-  text: ld("#18181b", "#fafafa"),
-  muted: ld("#71717a", "#a1a1aa"),
-  grid: ld("rgb(24 24 27 / 0.05)", "rgb(250 250 250 / 0.06)"),
-  axis: ld("rgb(24 24 27 / 0.16)", "rgb(250 250 250 / 0.16)"),
-  track: ld("rgb(24 24 27 / 0.12)", "rgb(250 250 250 / 0.16)"),
-  accent: ld("#3b82f6", "#60a5fa"),
-  positive: ld("#047857", "#34d399"),
-  negative: ld("#e11d48", "#fb7185"),
-  series: ldList(
-    ["#3b82f6", "#e11d48", "#fbbf24", "#10b981", "#7c3aed", "#22d3ee", "#fb923c", "#ec4899"],
-    ["#60a5fa", "#fb7185", "#fcd34d", "#6ee7b7", "#8b5cf6", "#22d3ee", "#fb923c", "#f472b6"],
-  ),
-  lines: ldList(
-    ["#3b82f6", "#be123c", "#d97706", "#047857", "#7c3aed", "#0891b2", "#c2410c", "#ec4899"],
-    ["#60a5fa", "#fb7185", "#fcd34d", "#6ee7b7", "#8b5cf6", "#22d3ee", "#fb923c", "#f472b6"],
-  ),
-};
-
-export const editorial: PresetTokens = {
-  background: "transparent",
-  surface: ld("#f6f9fc", "#12182b"),
-  text: ld("#0a2540", "#f6f9fc"),
-  muted: ld("#425466", "#adbdcc"),
-  grid: ld("rgb(10 37 64 / 0.06)", "rgb(246 249 252 / 0.07)"),
-  axis: ld("rgb(10 37 64 / 0.18)", "rgb(246 249 252 / 0.18)"),
-  track: ld("rgb(10 37 64 / 0.12)", "rgb(246 249 252 / 0.16)"),
-  accent: ld("#4f46e5", "#c4b5fd"),
-  positive: ld("#047857", "#34d399"),
-  negative: ld("#e11d48", "#fb7185"),
-  series: ldList(
-    ["#4f46e5", "#f97316", "#059669", "#fbbf24", "#e11d48", "#22d3ee", "#a855f7", "#ec4899"],
-    ["#c4b5fd", "#fb923c", "#34d399", "#fcd34d", "#fda4af", "#0891b2", "#818cf8", "#f43f5e"],
-  ),
-  lines: ldList(
-    ["#4f46e5", "#ea580c", "#059669", "#d97706", "#e11d48", "#0891b2", "#7c3aed", "#ec4899"],
-    ["#c4b5fd", "#fb923c", "#34d399", "#fcd34d", "#fda4af", "#0891b2", "#818cf8", "#f43f5e"],
-  ),
-};
-
 const softGeometry: PresetGeometry = {
   strokeWidth: 2,
   compactStroke: 2,
@@ -139,18 +84,8 @@ const softGeometry: PresetGeometry = {
   pointSize: 3,
 };
 
-const geometries = new Map<string, PresetGeometry>([
-  ["auto", softGeometry],
-  ["soft", softGeometry],
-  [
-    "refined",
-    { strokeWidth: 1.75, compactStroke: 1.75, cornerRadius: 4, gap: 0.22, fillOpacity: 0.18, points: "none", pointSize: 3 },
-  ],
-  [
-    "editorial",
-    { strokeWidth: 2.25, compactStroke: 2.25, cornerRadius: 2, gap: 0.18, fillOpacity: 0.28, points: "always", pointSize: 3 },
-  ],
-]);
+registerGeometry("auto", softGeometry);
+registerGeometry("soft", softGeometry);
 
 /** Geometry for midnight and for presets that do not name their own. */
 const legacyGeometry: PresetGeometry = {
@@ -163,33 +98,24 @@ const legacyGeometry: PresetGeometry = {
   pointSize: 3,
 };
 
-const presets = new Map<string, PresetTokens>([
-  ["midnight", midnight],
-  ["auto", auto],
-  ["soft", auto],
-  ["refined", refined],
-  ["editorial", editorial],
-]);
-
-export function registerPreset(name: string, tokens: PresetTokens): PresetTokens {
-  presets.set(name, tokens);
-  return tokens;
-}
+registerPreset("auto", auto);
+registerPreset("soft", soft);
 
 /** Merge a preset onto midnight and register it. Unchanged tokens stay on the base. */
 export function definePreset(name: string, delta: Partial<PresetTokens>): PresetTokens {
   return registerPreset(name, {
-    ...midnight,
+    ...midnightBase,
     ...delta,
-    series: delta.series ?? midnight.series,
+    series: delta.series ?? midnightBase.series,
   });
 }
 
 export function resolvePreset(theme: unknown): PresetTokens {
   const name = presetName(theme);
   const mode = isRecord(theme) && theme.mode === "dark" ? "dark" : isRecord(theme) && theme.mode === "light" ? "light" : "auto";
-  let base = presets.get(name) ?? midnight;
-  if (mode === "dark" && name !== "midnight") base = midnight;
+  const midnight = presets.get("midnight");
+  let base = presets.get(name) ?? midnight ?? auto;
+  if (mode === "dark" && name !== "midnight" && midnight) base = midnight;
   else if (mode === "light" && name === "midnight") base = auto;
   const tokens = themeRecord(theme);
   if (!tokens) return base;
@@ -295,8 +221,10 @@ export function paint(color: string | undefined, preset: PresetTokens, seriesInd
 
 function presetName(theme: unknown): string {
   const name = typeof theme === "string" ? theme : isRecord(theme) && typeof theme.preset === "string" ? theme.preset : null;
-  if (name === null) return "auto";
-  return presets.has(name) ? name : "midnight";
+  if (name === null || name === "auto") return "auto";
+  if (name === "soft") return presets.has("soft") ? "soft" : "auto";
+  if (presets.has(name)) return name;
+  return presets.has("midnight") ? "midnight" : "auto";
 }
 
 function themeRecord(theme: unknown): Record<string, unknown> | undefined {

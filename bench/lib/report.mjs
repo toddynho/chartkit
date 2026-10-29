@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { docsManifest } from "../agent/docs.mjs";
 import { GALLERY_TYPES } from "../browser/chart-types.mjs";
 import { chartkitAfterRepair, currentCheck, currentRepair, efficiencyFromRows, formatMean, loadRecordedRows } from "./efficiency.mjs";
+import { bundleMarkdown, ssrMarkdown } from "./phase4-md.mjs";
 import { recordedAgentSection } from "./recorded-agent.mjs";
 
 function bytes(value) {
@@ -31,26 +32,32 @@ export function renderReport(result) {
   lines.push("");
   lines.push("## What this does and does not claim");
   lines.push("");
-  lines.push("ChartKit's minimal entry is the registry, one chart, and the midnight theme. The `/all` entry is every chart and every theme, without the validator. React libraries are measured twice: React included, and React external for an app that already ships it. ECharts is the modular import (`echarts/core` plus one series), not the full bundle. uPlot's CSS is a second response. Observable Plot and uPlot have no donut, so those cells are unsupported rather than a fake chart.");
+  lines.push(result.bundle?.phase === 4
+    ? "ChartKit's minimal entry is the registry, one gallery chart, and the Soft preset. Midnight, refined, and editorial register from @chartkitdev/core/features and /all. The `/all` entry is every core chart and every theme, measured once, without the validator. Phase 4 measures every gallery type. Rival cells are native charts only. A library that does not tree-shake records one full-package size. React libraries are measured with React included and with React external. ECharts is the modular import. uPlot's CSS is a second response. A missing headless renderer, a missing native chart, and a package that is not on npm are unsupported. A commercial package that will not install or run without a license key is license-blocked."
+    : "ChartKit's minimal entry is the registry, one chart, and the Soft preset. Midnight, refined, and editorial register from @chartkitdev/core/features and /all. The `/all` entry is every chart and every theme, without the validator. React libraries are measured twice: React included, and React external for an app that already ships it. ECharts is the modular import (`echarts/core` plus one series), not the full bundle. uPlot's CSS is a second response. Observable Plot and uPlot have no donut, so those cells are unsupported rather than a fake chart.");
   lines.push("");
   lines.push("The round 13 ChartKit row is SVG. It uses `mark.sampling: \"auto\"` (minmax once a line is longer than twice the plot width). ChartKit sampling none is the same line with `mark.sampling: \"none\"`, measured only at 100,000 and 1,000,000 points. ECharts `sampling` stays off. Every update timer waits for that library's own completion and then the same two animation frames. ECharts completion is the `finished` event, and those two frames come after it. The canvas painter is a later measurement, in the canvas section, and it loses first paint at 10k, 100k, and 1M.");
   lines.push("");
   lines.push("## Bundle size");
   lines.push("");
-  lines.push(result.bundle.method);
-  lines.push("");
-  lines.push("| Library | Chart | Renderer | Status | min | gzip | brotli | gzip, React external |");
-  lines.push("|---|---|---|---|---:|---:|---:|---:|");
-  for (const row of result.bundle.rows) {
-    const gzip = row.status === "ok" ? row.gzipBytes + (row.cssGzipBytes ?? 0) : null;
-    const brotli = row.status === "ok" ? row.brotliBytes + (row.cssBrotliBytes ?? 0) : null;
-    const min = row.status === "ok" ? row.minBytes + (row.cssMinBytes ?? 0) : null;
-    lines.push(`| ${row.library} | ${row.chart} | ${row.renderer} | ${row.status} | ${bytes(min)} | ${bytes(gzip)} | ${bytes(brotli)} | ${bytes(row.reactExternal?.gzipBytes)} |`);
+  if (result.bundle.phase === 4) {
+    lines.push(bundleMarkdown(result.bundle, { measuredAt: result.machine.measuredAt, commit: result.commit, node: result.machine.node }));
+  } else {
+    lines.push(result.bundle.method);
+    lines.push("");
+    lines.push("| Library | Chart | Renderer | Status | min | gzip | brotli | gzip, React external |");
+    lines.push("|---|---|---|---|---:|---:|---:|---:|");
+    for (const row of result.bundle.rows ?? []) {
+      const gzip = row.status === "ok" ? row.gzipBytes + (row.cssGzipBytes ?? 0) : null;
+      const brotli = row.status === "ok" ? row.brotliBytes + (row.cssBrotliBytes ?? 0) : null;
+      const min = row.status === "ok" ? row.minBytes + (row.cssMinBytes ?? 0) : null;
+      lines.push(`| ${row.library} | ${row.chart} | ${row.renderer} | ${row.status} | ${bytes(min)} | ${bytes(gzip)} | ${bytes(brotli)} | ${bytes(row.reactExternal?.gzipBytes)} |`);
+    }
+    lines.push("");
+    lines.push("uPlot gzip and brotli include the published stylesheet added to the JS bytes as two responses. React external is blank when the bundle does not import React.");
+    lines.push("");
+    lines.push(bundleVerdict(result.bundle.rows ?? []));
   }
-  lines.push("");
-  lines.push("uPlot gzip and brotli include the published stylesheet added to the JS bytes as two responses. React external is blank when the bundle does not import React.");
-  lines.push("");
-  lines.push(bundleVerdict(result.bundle.rows));
   lines.push("");
   lines.push("## Browser render");
   lines.push("");
@@ -117,15 +124,19 @@ export function renderReport(result) {
   lines.push("");
   lines.push("## Server render");
   lines.push("");
-  lines.push(result.ssr.method);
-  lines.push("");
-  lines.push("| Library | Renderer | Status | Mean ms | Median ms | Min ms | Error |");
-  lines.push("|---|---|---|---:|---:|---:|---|");
-  for (const row of result.ssr.rows) {
-    lines.push(`| ${row.library} | ${row.renderer} | ${row.status} | ${ms(row.meanMs)} | ${ms(row.medianMs)} | ${ms(row.minMs)} | ${row.error ? row.error.replaceAll("|", "/") : "—"} |`);
+  if (result.ssr.phase === 4) {
+    lines.push(ssrMarkdown(result.ssr, { measuredAt: result.machine.measuredAt, commit: result.commit, node: result.machine.node }));
+  } else {
+    lines.push(result.ssr.method);
+    lines.push("");
+    lines.push("| Library | Renderer | Status | Mean ms | Median ms | Min ms | Error |");
+    lines.push("|---|---|---|---:|---:|---:|---|");
+    for (const row of result.ssr.rows ?? []) {
+      lines.push(`| ${row.library} | ${row.renderer} | ${row.status} | ${ms(row.meanMs)} | ${ms(row.medianMs)} | ${ms(row.minMs)} | ${row.error ? row.error.replaceAll("|", "/") : "—"} |`);
+    }
+    lines.push("");
+    lines.push(ssrVerdict(result.ssr.rows ?? []));
   }
-  lines.push("");
-  lines.push(ssrVerdict(result.ssr.rows));
   lines.push("");
   lines.push("## Agent first-try eval");
   lines.push("");
@@ -159,7 +170,9 @@ function chartPaintLines(browser) {
     lines.push(browser.chartMethod);
     lines.push("");
   }
-  lines.push("Homepage row `area` is native `stacked-area`. `gzipBytes` and `ssrMs` are null until a later phase. A full run writes the same cells to `bench/results/latest.json` under `browser.charts` and to `bench/results/paint.json`. One-sample runs write `bench/results/paint-smoke.json` and are not published medians. Unsupported cells are an honest omit: no native chart of that shape, and no invented time.");
+  lines.push(result.bundle?.phase === 4
+    ? "Homepage row `area` is native `stacked-area`. Paint cells leave `gzipBytes` and `ssrMs` null. Phase 4 writes `bench/results/bundle.json` and `bench/results/ssr.json`. The homepage is not wired from this file. A full run writes the same paint cells to `bench/results/latest.json` under `browser.charts` and to `bench/results/paint.json`. One-sample runs write `bench/results/paint-smoke.json` and are not published medians. Unsupported cells are an honest omit: no native chart of that shape, and no invented time."
+    : "Homepage row `area` is native `stacked-area`. `gzipBytes` and `ssrMs` are null until a later phase. A full run writes the same cells to `bench/results/latest.json` under `browser.charts` and to `bench/results/paint.json`. One-sample runs write `bench/results/paint-smoke.json` and are not published medians. Unsupported cells are an honest omit: no native chart of that shape, and no invented time.");
   lines.push("");
   lines.push("| Chart | Homepage | Library | Variant | Renderer | N | Status | Initial ms | Update ms | gzip | SSR ms | N means |");
   lines.push("|---|---|---|---|---|---:|---|---:|---:|---:|---:|---|");

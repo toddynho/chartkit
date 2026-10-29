@@ -458,7 +458,7 @@ const report = {
     throughput:
       "warmup 50, then performance.now() around validate() from src/validate.ts; examples loop validates every example spec per iteration.",
     perRenderer:
-      "esbuild --bundle --minify of each charts/* module, gzip -9. A chart bundle includes the helpers it imports (midnight theme, svg) and not sibling charts.",
+      "esbuild --bundle --minify of each charts/* module, gzip -9. A chart bundle includes the helpers it imports (Soft preset, svg) and not sibling charts. Midnight, refined, and editorial register from @chartkitdev/core/features.",
   },
   bundle: sizes,
   validate: {

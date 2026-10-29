@@ -8,50 +8,73 @@ Pinned libraries: @chartkitdev/core 0.5.0, uplot 1.6.32, chart.js 4.5.1, rechart
 
 ## What this does and does not claim
 
-ChartKit's minimal entry is the registry, one chart, and the midnight theme. The `/all` entry is every chart and every theme, without the validator. React libraries are measured twice: React included, and React external for an app that already ships it. ECharts is the modular import (`echarts/core` plus one series), not the full bundle. uPlot's CSS is a second response. Observable Plot and uPlot have no donut, so those cells are unsupported rather than a fake chart.
+ChartKit's minimal entry is the registry, one gallery chart, and the Soft preset. Midnight, refined, and editorial register from @chartkitdev/core/features and /all. The `/all` entry is every core chart and every theme, measured once, without the validator. Phase 4 measures every gallery type. Rival cells are native charts only. A library that does not tree-shake records one full-package size. React libraries are measured with React included and with React external. ECharts is the modular import. uPlot's CSS is a second response. A missing headless renderer, a missing native chart, and a package that is not on npm are unsupported. A commercial package that will not install or run without a license key is license-blocked.
 
 The round 13 ChartKit row is SVG. It uses `mark.sampling: "auto"` (minmax once a line is longer than twice the plot width). ChartKit sampling none is the same line with `mark.sampling: "none"`, measured only at 100,000 and 1,000,000 points. ECharts `sampling` stays off. Every update timer waits for that library's own completion and then the same two animation frames. ECharts completion is the `finished` event, and those two frames come after it. The canvas painter is a later measurement, in the canvas section, and it loses first paint at 10k, 100k, and 1M.
 
 ## Bundle size
 
-esbuild --bundle --minify, platform browser, NODE_ENV=production, gzip level 9, brotli quality 11. ChartKit entries bundle packages/core/src. Competitor entries use the pinned package and only the import that chart needs. ECharts uses echarts/core plus one chart, its grid component when the chart has axes, and CanvasRenderer.
+esbuild --bundle --minify, platform browser, NODE_ENV=production, gzip level 9, brotli quality 11. Same config for every entry. ChartKit minimal is createRenderer of one gallery chart from packages/core/src. ChartKit /all is one bundle for every core chart and every theme, without the validator. Rival entries import only the pinned module that chart needs. ECharts uses echarts/core plus one series, its components, and CanvasRenderer. A library is not tree-shakeable when its native entries' gzip sizes differ by at most 512 bytes. That full-package size is recorded once. Those per-type cells are labeled not tree-shakeable and do not repeat the number. A package with one native type keeps the number on the cell. Commercial packages are measured when npm installs them without a license key. Google Charts is not an npm package. Gallery aliases that repair to one chart type are listed on that type and are not a second bundle.
 
-| Library | Chart | Renderer | Status | min | gzip | brotli | gzip, React external |
-|---|---|---|---|---:|---:|---:|---:|
-| ChartKit minimal | line | svg | ok | 116070 | 41221 | 36235 | — |
-| ChartKit minimal | bar | svg | ok | 114187 | 40779 | 35837 | — |
-| ChartKit minimal | donut | svg | ok | 41731 | 15085 | 13622 | — |
-| ChartKit all | line | svg | ok | 209075 | 73514 | 62454 | — |
-| ChartKit all | bar | svg | ok | 209075 | 73514 | 62454 | — |
-| ChartKit all | donut | svg | ok | 209075 | 73514 | 62454 | — |
-| uPlot | line | canvas | ok | 53989 | 24038 | 21524 | — |
-| uPlot | bar | canvas | ok | 54018 | 24047 | 21580 | — |
-| uPlot | donut | canvas | unsupported | — | — | — | — |
-| Chart.js | line | canvas | ok | 139295 | 49374 | 43436 | — |
-| Chart.js | bar | canvas | ok | 134265 | 47530 | 41751 | — |
-| Chart.js | donut | canvas | ok | 132392 | 46922 | 41268 | — |
-| ECharts | line | canvas | ok | 476543 | 162991 | 139071 | — |
-| ECharts | bar | canvas | ok | 471499 | 161020 | 137410 | — |
-| ECharts | donut | canvas | ok | 357668 | 122174 | 104570 | — |
-| Recharts | line | svg | ok | 331253 | 99718 | 84424 | 96213 |
-| Recharts | bar | svg | ok | 328817 | 98811 | 83730 | 95516 |
-| Recharts | donut | svg | ok | 306908 | 93493 | 79824 | 90090 |
-| Nivo | line | svg | ok | 291572 | 100594 | 85196 | 96583 |
-| Nivo | bar | svg | ok | 275347 | 94417 | 79798 | 90441 |
-| Nivo | donut | svg | ok | 233012 | 79913 | 67820 | 75518 |
-| Observable Plot | line | svg | ok | 289324 | 97723 | 79872 | — |
-| Observable Plot | bar | svg | ok | 267789 | 92953 | 76361 | — |
-| Observable Plot | donut | svg | unsupported | — | — | — | — |
+Phase 4 measured **2026-10-29T15:27:37.617Z**, commit `71f3fe44240285d7a3c5047f31d956568c0fa45f`, Node **v22.23.4**.
 
-uPlot gzip and brotli include the published stylesheet added to the JS bytes as two responses. React external is blank when the bundle does not import React.
+Cells: ok 294, unsupported 442, license-blocked 0, error 0. Full rows: `bench/results/bundle.json`.
 
-Minimal line is 41221 gzip. Smaller than: Chart.js 49374 gzip; ECharts 162991 gzip; Recharts React-external 96213 gzip (React included 99718); Nivo React-external 96583 gzip (React included 100594); Observable Plot 97723 gzip. Not smaller than: uPlot 24038 gzip. No number: none.
+ChartKit minimal gzip is smallest for **progress-ring** (7188) and largest for **combo** (46457).
 
-Minimal bar is 40779 gzip. Smaller than: Chart.js 47530 gzip; ECharts 161020 gzip; Recharts React-external 95516 gzip (React included 98811); Nivo React-external 90441 gzip (React included 94417); Observable Plot 92953 gzip. Not smaller than: uPlot 24047 gzip. No number: none.
+| Chart | gzip | brotli | min | Aliases |
+|---|---:|---:|---:|---|
+| line | 42098 | 36919 | 118133 | — |
+| bar | 41750 | 36611 | 116232 | — |
+| pie | 15760 | 14283 | 43870 | — |
+| donut | 15757 | 14256 | 43872 | arc |
+| stacked-area | 42275 | 37111 | 118648 | — |
+| scatter | 26489 | 23642 | 74345 | point, circle, square |
+| combo | 46457 | 40583 | 129659 | — |
+| heatmap | 14399 | 13045 | 39220 | rect, grid-heat, gridheat, grid_heat, grid-heatmap, calendar-heatmap |
+| gauge | 7712 | 6933 | 20240 | — |
+| kpi | 9618 | 8681 | 26658 | — |
+| sparkline | 42101 | 36927 | 118148 | — |
+| mini-area | 42104 | 37000 | 118147 | — |
+| progress-ring | 7188 | 6445 | 20032 | — |
+| spike | 19291 | 17308 | 53179 | rule, tick |
+| candlestick | 18628 | 16779 | 51624 | — |
+| histogram | 18331 | 16514 | 51245 | hist |
+| boxplot | 18310 | 16490 | 51376 | box, box-plot |
+| radar | 8456 | 7600 | 22784 | radar-chart, radar-beta |
+| funnel | 9997 | 9016 | 27237 | funnel-chart |
+| treemap | 15688 | 14150 | 42854 | tree-map, treemap-beta |
+| sankey | 10168 | 9180 | 27633 | sankey-diagram, sankey-beta |
+| bullet | 9327 | 8409 | 25769 | bullet-chart |
+| waterfall | 17978 | 16187 | 50240 | waterfall-chart |
+| area-range | 19934 | 17892 | 55847 | arearange, area_range, range-area, rangearea |
+| bar-range | 17820 | 16047 | 49916 | columnrange, column-range, rangebar, range-bar, floating-bar |
+| errorbar | 18083 | 16243 | 50912 | error-bar, error-bars, errorbars |
+| gantt | 10121 | 9128 | 27654 | — |
+| timeline | 9016 | 8125 | 24016 | — |
+| quadrant | 8776 | 7881 | 24152 | — |
+| venn | 10762 | 9625 | 28692 | — |
+| journey | 8634 | 7757 | 23329 | — |
+| radial-bar | 10693 | 9653 | 29168 | radialBar, polar-bar, polar |
+| rose | 10691 | 9655 | 29150 | polarArea, polar-area, nightingale, rose-chart |
+| sunburst | 12919 | 11662 | 35182 | sun-burst, sunburstchart, sunburst-chart, partition |
+| bar-list | 8458 | 7606 | 23505 | — |
+| /all | 77255 | 65548 | 218810 | one bundle, not per type |
 
-Minimal donut is 15085 gzip. Smaller than: Chart.js 46922 gzip; ECharts 122174 gzip; Recharts React-external 90090 gzip (React included 93493); Nivo React-external 75518 gzip (React included 79913). Not smaller than: none. No number: uPlot (unsupported); Observable Plot (unsupported).
+uPlot (`uplot`) is not tree-shakeable. Full package 23292 gzip. CSS adds 762 gzip as a second response. Per-type cells say not tree-shakeable and do not repeat that number. Plotly.js (`plotly`) is not tree-shakeable. Full package 1477742 gzip. Per-type cells say not tree-shakeable and do not repeat that number. Tremor (`tremor`) is not tree-shakeable. Full package 246834 gzip. Per-type cells say not tree-shakeable and do not repeat that number. AG Charts (`ag-enterprise`) is not tree-shakeable. Full package 692892 gzip. Per-type cells say not tree-shakeable and do not repeat that number. AG Charts (`ag-community`) is not tree-shakeable. Full package 420736 gzip. Per-type cells say not tree-shakeable and do not repeat that number. TradingView Lightweight Charts (`lightweight`) is not tree-shakeable. Full package 53352 gzip. Per-type cells say not tree-shakeable and do not repeat that number. Mermaid (`mermaid`) is not tree-shakeable. Full package 962019 gzip. Per-type cells say not tree-shakeable and do not repeat that number. Vega-Lite (`vegalite`) is not tree-shakeable. Full package 377693 gzip. Per-type cells say not tree-shakeable and do not repeat that number. AntV G2 (`g2`) is not tree-shakeable. Full package 407348 gzip. Per-type cells say not tree-shakeable and do not repeat that number.
 
-ChartKit /all line bundle is 73514 gzip.
+A rival is smaller than ChartKit minimal on these cells. The comparison uses the bundle that was actually produced, including React when that entry imports it. React-external gzip stays on the cell for an app that already ships React.
+
+| Chart | ChartKit gzip | Library | Rival gzip |
+|---|---:|---|---:|
+| line | 42098 | uPlot (full package) | 24054 |
+| bar | 41750 | uPlot (full package) | 24054 |
+| scatter | 26489 | uPlot (full package) | 24054 |
+| mini-area | 42104 | uPlot (full package) | 24054 |
+
+visx heatmap is 69985 gzip with React and ReactDOM in the bundle, and 1360 gzip with them external. A HeatmapRect-only bundle was 1621 gzip and did not import react-dom.
+
+uPlot's published stylesheet is a second response when that package is the full build. React external is omitted when the bundle does not import React.
 
 ## Browser render
 
@@ -106,7 +129,7 @@ At 1000000 points the fastest initial render is uPlot (canvas) at 24.20 ms. Char
 
 Phase 2 paints ChartKit and the libraries already timed on the line sweep: uPlot, Chart.js, ECharts, Recharts, Nivo, and Observable Plot. One cell per gallery type from apps/web/src/data/chart-types.ts. There is no type id area. The homepage row area is native stacked-area (full size, four series). A single filled line stays type line with mark.area true. mini-area is one filled series with the axes off, in the same 640×360 frame. Line cells are projected from the existing line sweep and are not measured again. Every other native cell uses the same point count as the ChartKit cell for that type, and the same data shape. The timer matches the line sweep: build data before the clock, paint, then wait for two animation frames. ECharts also waits for finished. The reported time is the median of BENCH_SAMPLES fresh pages (default 5) at 640×360. ChartKit updates are a second full paint. Marks stay SVG, except a dense scatter, a large heatmap, a long mini-area, and a long candlestick, which use ChartKit's canvas painter (axes stay SVG) because one node per mark, or a path with a command per pixel, cannot paint that N. The timer still waits for two animation frames after that paint. An error SVG (ck-chart-error) fails the sample. A cell is status unsupported, with a reason and no invented time, when that library has no native chart of that shape. Stand-ins are not timed: a pie made from bars, a waterfall made from a transparent helper bar, a histogram made from bars we binned ourselves, a sparkline made by hiding the axes on the line cell, a spike drawn as a bar, Plot.spike (a fixed-pixel vector), the uPlot candlestick demo path, an ECharts custom series, or the ECharts timeline playback control. Nivo cells use the 0.99.0 package for that chart, the same version as the pinned line, bar, and pie. A missing license key is status blocked. gzipBytes and ssrMs stay null until a later phase. Phase 3 adds the rest of the compare matrix and times the eleven gallery types that had no Phase-2 rival ok cell: bar-list, gantt, journey, kpi, progress-ring, quadrant, sparkline, spike, timeline, venn, and waterfall. ChartKit is painted again for those eleven, and for candlestick, so the comparison matches the canvas candlestick painter. Phase-2 rivals stay unsupported on the eleven and are not repainted. BENCH_PHASE=3 skips the line sweep. Candlestick is the extra type: Phase 2 had only ECharts, and a Phase-3 library is timed only when it has a native OHLC series. Pins: highcharts 13.1.1 (credits left on), plotly.js-dist-min 4.1.2, victory 37.3.6, @visx/visx 4.0.0, apexcharts 8.3.1 plus apexcharts/features/waterfall, @tremor/react 3.18.7 (React 18 peer, harness React 19.3.1, nested recharts 2.15.4, Tailwind utilities inlined because the package ships no CSS), vega-lite 6.4.3, ag-charts-community 14.2.0 and ag-charts-enterprise 14.2.0 (no license key, trial watermark when the series is enterprise), @amcharts/amcharts5 5.21.2 (logo left on), Google Charts loader current from https://www.gstatic.com/charts/loader.js, lightweight-charts 5.2.1 (attribution logo left on), @mui/x-charts 9.15.0 with @mui/material 9.5.0, @mui/system 9.5.0, @emotion/react 11.14.0, @emotion/styled 11.14.1, mermaid 11.17.2, @antv/g2 5.4.8. Later paint, bundle, and SSR phases add a cell per library, including commercial compare-matrix rivals (Highcharts, amCharts, ApexCharts community and commercial builds, AG Charts enterprise, MUI X Pro and Premium, and the same class of product). Use the published npm or CDN build a customer would install. Record license and watermark limits on the cell. A missing license key is status blocked with a note, not a silent omission and not a reason to drop the rest of that set. unsupported means that library has no native chart of that type. gzipBytes and ssrMs stay null until those phases fill them.
 
-Homepage row `area` is native `stacked-area`. `gzipBytes` and `ssrMs` are null until a later phase. A full run writes the same cells to `bench/results/latest.json` under `browser.charts` and to `bench/results/paint.json`. One-sample runs write `bench/results/paint-smoke.json` and are not published medians. Unsupported cells are an honest omit: no native chart of that shape, and no invented time.
+Homepage row `area` is native `stacked-area`. Paint cells leave `gzipBytes` and `ssrMs` null. Phase 4 writes `bench/results/bundle.json` and `bench/results/ssr.json`. The homepage is not wired from this file. A full run writes the same cells to `bench/results/latest.json` under `browser.charts` and to `bench/results/paint.json`. One-sample runs write `bench/results/paint-smoke.json` and are not published medians. Unsupported cells are an honest omit: no native chart of that shape, and no invented time.
 
 | Chart | Homepage | Library | Variant | Renderer | N | Status | Initial ms | Update ms | gzip | SSR ms | N means |
 |---|---|---|---|---|---:|---|---:|---:|---:|---:|---|
@@ -618,19 +641,56 @@ The round 13 ChartKit row still downsamples with `mark.sampling: "auto"` (minmax
 
 ## Server render
 
-Same 1,000-point line (x[i] = i) for every library. Success means a chart was produced in Node without a DOM implementation. Timing is mean/median/min of 8 calls after 2 warmup calls.
+Node string or SVG render at the paint-matrix N. Line is 100,000 points. Candlestick is timed at 2,000 and at 100,000. Other types use the paint N (100,000 where the series is dense, smaller for categories and hierarchies). Data is built before the clock. One untimed warmup, then the median of 5. ChartKit calls createRenderer of that chart. ECharts uses init(null, { renderer: svg, ssr: true }) and renderToSVGString. Recharts, Nivo, visx, Victory, MUI X, and Tremor use renderToStaticMarkup. Observable Plot uses linkedom. Vega-Lite compiles the spec and vega View.toSVG runs it. ApexCharts uses apexcharts/ssr renderToString. A library with no headless string path is unsupported. A throw is error. No timing is invented.
 
-| Library | Renderer | Status | Mean ms | Median ms | Min ms | Error |
-|---|---|---|---:|---:|---:|---|
-| ChartKit minimal | svg | ok | 1.48 | 1.53 | 0.72 | — |
-| uPlot | canvas | unsupported | — | — | — | uPlot requires a DOM element. Node has no document. |
-| Chart.js | canvas | unsupported | — | — | — | Chart.js renders to a canvas element. This probe does not load a DOM or node-canvas. |
-| Recharts | svg | unsupported | — | — | — | Recharts renderToStaticMarkup returned 127 characters and no <svg>: <div width="640" height="360" class="recharts-wrapper" style="position:relative;cursor:default;width:640px;height:360px"></div> |
-| ECharts | svg | ok | 6.18 | 6.15 | 4.47 | — |
-| Nivo | svg | ok | 59.00 | 57.61 | 55.25 | — |
-| Observable Plot | svg | unsupported | — | — | — | Cannot read properties of undefined (reading 'documentElement') |
+Phase 4 measured **2026-10-29T15:58:39.954Z**, commit `71f3fe44240285d7a3c5047f31d956568c0fa45f`, Node **v22.23.4**.
 
-Server render succeeded for ChartKit minimal (1.48 ms mean), ECharts (6.18 ms mean), Nivo (59.00 ms mean). No server render without a DOM: uPlot, Chart.js, Recharts, Observable Plot.
+Cells: ok 136, unsupported 616, license-blocked 0, error 4. Median of 5. Full rows: `bench/results/ssr.json`.
+
+| Chart | N | Median ms |
+|---|---:|---:|
+| line | 100000 | 2.63 |
+| bar | 48 | 0.26 |
+| pie | 8 | 0.03 |
+| donut | 8 | 0.03 |
+| stacked-area | 100000 | 17.35 |
+| scatter | 100000 | 83.58 |
+| combo | 48 | 0.30 |
+| heatmap | 1200 | 4.34 |
+| gauge | 1 | 0.07 |
+| kpi | 1 | 0.04 |
+| sparkline | 100000 | 6.83 |
+| mini-area | 100000 | 3.28 |
+| progress-ring | 1 | 0.01 |
+| spike | 100000 | 24.19 |
+| candlestick | 2000 | 5.58 |
+| candlestick | 100000 | 435.69 |
+| histogram | 100000 | 10.54 |
+| boxplot | 100000 | 28.08 |
+| radar | 8 | 0.08 |
+| funnel | 8 | 0.05 |
+| treemap | 48 | 0.78 |
+| sankey | 48 | 0.37 |
+| bullet | 6 | 0.07 |
+| waterfall | 12 | 0.11 |
+| area-range | 100000 | 5.21 |
+| bar-range | 24 | 0.16 |
+| errorbar | 24 | 0.17 |
+| gantt | 24 | 0.27 |
+| timeline | 16 | 0.09 |
+| quadrant | 24 | 0.10 |
+| venn | 3 | 3.06 |
+| journey | 12 | 0.13 |
+| radial-bar | 12 | 0.12 |
+| rose | 12 | 0.06 |
+| sunburst | 48 | 0.58 |
+| bar-list | 20 | 0.07 |
+
+No measured rival is faster than ChartKit at SSR on the same chart and N.
+
+MUI X Charts sparkline n=100000: error (Cannot read properties of undefined (reading 'length')); Victory stacked-area n=100000: error (error: sample exceeded 90000ms); ApexCharts stacked-area n=100000: error (error: sample exceeded 90000ms); ApexCharts area-range n=100000: error (error: sample exceeded 90000ms).
+
+Unsupported means that library has no native chart of that shape, or no headless Node string path. The time is null.
 
 ## Agent first-try eval
 

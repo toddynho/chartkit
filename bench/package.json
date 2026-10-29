@@ -5,7 +5,7 @@
   "description": "Reproducible ChartKit comparisons. Pinned libraries, esbuild minify, gzip -9, brotli q11.",
   "scripts": {
     "bench": "node run.mjs",
-    "test": "node --test --test-force-exit agent/check.test.mjs agent/provider.test.mjs agent/score.test.mjs agent/matrix.test.mjs",
+    "test": "node --test --test-force-exit agent/check.test.mjs agent/provider.test.mjs agent/score.test.mjs agent/matrix.test.mjs browser/chart-types.test.mjs browser/rivals.test.mjs browser/phase3.test.mjs bundle/matrix.test.mjs ssr/matrix.test.mjs",
     "bench:agent": "node agent-only.mjs",
     "bench:agent-matrix": "node agent-matrix.mjs"
   },
@@ -42,12 +42,14 @@
     "esbuild": "0.25.0",
     "highcharts": "13.1.1",
     "lightweight-charts": "5.2.1",
+    "linkedom": "0.18.12",
     "mermaid": "11.17.2",
     "plotly.js-dist-min": "4.1.2",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "recharts": "3.10.1",
     "uplot": "1.6.32",
+    "vega": "6.2.0",
     "vega-lite": "6.4.3",
     "victory": "37.3.6"
   },

@@ -1,6 +1,6 @@
 /**
  * Soft, refined, and editorial token sheets.
- * The same colours are registered in theme.ts (light-dark pairs). This module
+ * The same colours are registered by themes/soft, themes/refined, and themes/editorial. This module
  * stays out of the line bundle: the sheet renderer and the sync test import it.
  * The stylesheet at themes/candidates.css is the optional card and the scheme override.
  *

@@ -72,11 +72,17 @@ const themes = [
   "pearl",
   "latte",
   "brand",
+  "midnight",
+  "soft",
+  "refined",
+  "editorial",
 ];
 
 const entry: Record<string, string> = {
   index: "src/index.ts",
   all: "src/all.ts",
+  features: "src/features.ts",
+  hooks: "src/feature-hooks.ts",
   extra: "src/extra.ts",
   load: "src/load.ts",
   "extra-tip": "src/extra-tip.ts",
@@ -126,6 +132,10 @@ export default defineConfig({
         build.onResolve({ filter: /^\.\/layout$/ }, (args) => {
           if (args.kind !== "dynamic-import") return null;
           return { path: "@chartkitdev/core/layout", external: true };
+        });
+        build.onResolve({ filter: /feature-hooks(\.ts)?$/ }, (args) => {
+          if (args.kind === "entry-point") return null;
+          return { path: "@chartkitdev/core/hooks", external: true };
         });
         build.onResolve({ filter: /^\.\/sampling-run$/ }, (args) => {
           if (args.kind !== "dynamic-import") return null;
