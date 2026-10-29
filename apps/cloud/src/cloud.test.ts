@@ -754,7 +754,7 @@ describe("png", () => {
       <rect x="2" y="2" width="12" height="10" fill="var(--ck-track, ${auto.track})" shape-rendering="crispEdges"/>
     </svg>`;
     const lightBaked = forRaster(lightToken, false);
-    expect(lightBaked).toContain("rgba(0, 0, 0, 0.05)");
+    expect(lightBaked).toContain("rgba(0, 0, 0, 0.16)");
     expect(lightBaked).toContain("rgba(0, 0, 0, 0.10)");
     expect(lightBaked).not.toContain("light-dark(");
     expect(lightBaked).not.toMatch(/(?:rgb|hsl)\(\s*[0-9.]+(?:\s+[0-9.]+){2}/);
@@ -774,7 +774,7 @@ describe("png", () => {
       <rect x="2" y="2" width="20" height="10" fill="var(--ck-track, ${auto.track})" shape-rendering="crispEdges"/>
     </svg>`;
     const darkBaked = forRaster(darkToken, true);
-    expect(darkBaked).toContain("rgba(245, 245, 247, 0.07)");
+    expect(darkBaked).toContain("rgba(245, 245, 247, 0.22)");
     expect(darkBaked).toContain("rgba(245, 245, 247, 0.16)");
     expect(darkBaked).not.toContain("light-dark(");
     const dark = decodePng(await rasterize(darkBaked, 1));

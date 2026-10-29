@@ -53,13 +53,13 @@ function solid(bg: string, text: string, muted: string, dark: boolean): Chrome {
 }
 
 const SOFT: Chrome = {
-  water: "light-dark(#d7ebf6, #10202c)",
-  land: "light-dark(#efe6d6, #2a3338)",
+  water: "light-dark(#e8eef2, #243038)",
+  land: "light-dark(#f5f5f7, #2c2c2e)",
   nodata: "light-dark(#d9d4cb, #3a342c)",
-  border: "light-dark(#7d93a8, #8aa0b4)",
+  border: "light-dark(#8e8e93, #636366)",
   text: "light-dark(#1d1d1f, #f5f5f7)",
   muted: "light-dark(#6e6e73, #98989d)",
-  accent: "light-dark(#2b6cb0, #7eb6ff)",
+  accent: "light-dark(#007aff, #0a84ff)",
   scheme: "",
 };
 

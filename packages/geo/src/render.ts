@@ -1,4 +1,4 @@
-import { formatNumber, hexRange, paintScale, parseFormat, POINT_PALETTE, sizeStops, type PaintScale, type ScaleFormat } from "./color";
+import { formatNumber, hexRange, paintScale, parseFormat, POINT_PALETTE, sizeStops, SOFT_DIVERGING, type PaintScale, type ScaleFormat } from "./color";
 import { directoryIndex, matchRegion, type DirectoryEntry } from "./match";
 import { albersUsa, equalEarth, equirectangular, fitProject, mercator, type Box, type InsetFrame } from "./project";
 import { esc, fieldName, isRecord, mapKind, num, resolveEncoding, resolveMark, round, rowsOf, sizeOf, tooltipColumns, tooltipExtra } from "./spec";
@@ -528,7 +528,7 @@ export async function render(spec: unknown): Promise<string> {
   const hits = spec.type === "choropleth" ? regionHits(rows, regionField, valueField, loaded.atlas, loaded.entries) : new Map<string, Hit>();
   const kind: ColorScaleName = mark.scale === "diverging" || mark.scale === "threshold" ? mark.scale : "sequential";
   const thresholds = Array.isArray(mark.thresholds) ? mark.thresholds.filter((item): item is number => typeof item === "number") : undefined;
-  const choroplethScale = spec.type === "choropleth" && hits.size ? paintScale(kind, [...hits.values()].map((hit) => hit.value), thresholds, colorChannel.format, legendTitle, kind === "sequential" ? colorChannel.range : undefined) : null;
+  const choroplethScale = spec.type === "choropleth" && hits.size ? paintScale(kind, [...hits.values()].map((hit) => hit.value), thresholds, colorChannel.format, legendTitle, kind === "sequential" ? colorChannel.range : undefined, kind === "diverging" && chrome.scheme === "" ? SOFT_DIVERGING : undefined) : null;
   const tips = tooltipColumns(spec);
   const points = dotsOf(rows, encoding, chrome, tips);
   const scale = choroplethScale ?? points.scale;

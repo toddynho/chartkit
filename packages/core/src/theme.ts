@@ -55,7 +55,7 @@ export const auto: PresetTokens = {
   surface: ld("#ffffff", "#2c2c2e"),
   text: ld("#1d1d1f", "#f5f5f7"),
   muted: ld("#6e6e73", "#98989d"),
-  grid: ld("rgba(0, 0, 0, 0.05)", "rgba(245, 245, 247, 0.07)"),
+  grid: ld("rgba(0, 0, 0, 0.16)", "rgba(245, 245, 247, 0.22)"),
   axis: ld("rgba(0, 0, 0, 0.14)", "rgba(245, 245, 247, 0.16)"),
   track: ld("rgba(0, 0, 0, 0.10)", "rgba(245, 245, 247, 0.16)"),
   accent: ld("#007aff", "#0a84ff"),

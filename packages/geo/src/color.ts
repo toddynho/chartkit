@@ -2,6 +2,8 @@ import type { ColorScaleName } from "./types";
 
 const SEQUENTIAL = ["#edf8e9", "#74c476", "#006d2c"];
 const DIVERGING = ["#b2182b", "#f7f7f7", "#2166ac"];
+/** Soft negative, surface, and accent. Dark middle is surface #2c2c2e. */
+export const SOFT_DIVERGING = ["light-dark(#be123c, #ff453a)", "light-dark(#f5f5f7, #2c2c2e)", "light-dark(#007aff, #0a84ff)"];
 const THRESHOLD = ["#f7f7f7", "#c7e9c0", "#74c476", "#238b45", "#00441b"];
 
 function channel(hex: string, index: number): number {
@@ -9,6 +11,19 @@ function channel(hex: string, index: number): number {
 }
 
 function lerp(a: string, b: string, t: number): string {
+  const left = pair(a);
+  const right = pair(b);
+  const light = mixHex(left[0], right[0], t);
+  const dark = mixHex(left[1], right[1], t);
+  return light === dark ? light : `light-dark(${light}, ${dark})`;
+}
+
+function pair(color: string): [string, string] {
+  const match = /^light-dark\(\s*(#[0-9a-fA-F]{6})\s*,\s*(#[0-9a-fA-F]{6})\s*\)$/.exec(color);
+  return match ? [match[1] ?? color, match[2] ?? color] : [color, color];
+}
+
+function mixHex(a: string, b: string, t: number): string {
   const mix = (index: number) => Math.round(channel(a, index) + (channel(b, index) - channel(a, index)) * t);
   const hex = (n: number) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, "0");
   return `#${hex(mix(0))}${hex(mix(1))}${hex(mix(2))}`;
@@ -143,6 +158,7 @@ export function paintScale(
   format: ScaleFormat = {},
   title = "",
   sequential?: readonly string[],
+  diverging?: readonly string[],
 ): PaintScale {
   const finite = values.filter((value) => Number.isFinite(value));
   const dataLo = finite.length ? Math.min(...finite) : 0;
@@ -176,7 +192,7 @@ export function paintScale(
   const lo = nice.lo;
   const hi = nice.hi;
   const custom = kind === "sequential" ? hexRange(sequential) : undefined;
-  const rampStops = kind === "diverging" ? DIVERGING : custom ?? SEQUENTIAL;
+  const rampStops = kind === "diverging" ? (diverging && diverging.length >= 3 ? diverging : DIVERGING) : custom ?? SEQUENTIAL;
   const pivot = kind === "diverging" && lo < 0 && hi > 0 ? 0 : (lo + hi) / 2;
   const span = Math.max(hi - lo, 1e-9);
   const fill = (value: number) => {

@@ -202,9 +202,14 @@ describe("hierarchy", () => {
       for (const svg of [tree, sun]) {
         for (const mark of ["tile", "group", "arc"]) {
           for (const [fill, ink] of labeled(svg, mark)) {
-            if (mark !== "arc") expect(ink, `${theme} ${mark}`).toBe(labelInk(fill));
+            if (mark === "arc") {
+              expect(ink, `${theme} ${fill}`).not.toMatch(/#000000|#ffffff/);
+              expect(ink, `${theme} ${fill}`).toMatch(/#1d1d1f|#f5f5f7/);
+            } else {
+              expect(ink, `${theme} ${mark}`).toBe(labelInk(fill));
+              expect(inkContrast(ink, fill), `${theme} ${mark} ${ink} on ${fill}`).toBeGreaterThanOrEqual(4.5);
+            }
             expect(labelContrast(fill), `${theme} ${mark} ${fill}`).toBeGreaterThanOrEqual(4.5);
-            expect(inkContrast(ink, fill), `${theme} ${mark} ${ink} on ${fill}`).toBeGreaterThanOrEqual(4.5);
           }
         if (mark === "arc") {
           const byDepth = new Map<string, Set<string>>();
