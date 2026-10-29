@@ -2,9 +2,9 @@
 
 Honest, reproducible numbers from `npm run bench`. This file is generated. Do not edit it by hand.
 
-Measured **2026-10-28T00:30:27.624Z**, Node **v22.23.4**, **linux 6.12.94+ x64**, CPU **Intel(R) Xeon(R) Processor**, **4** CPUs.
+Measured **2026-10-29T02:07:52.908Z**, Node **v22.23.4**, **linux 6.12.94+ x64**, CPU **Intel(R) Xeon(R) Processor**, **4** CPUs.
 
-Pinned libraries: @chartkitdev/core 0.5.0, uplot 1.6.32, chart.js 4.5.1, recharts 3.10.1, echarts 6.1.0, @nivo/bar 0.99.0, @nivo/boxplot 0.99.0, @nivo/bullet 0.99.0, @nivo/funnel 0.99.0, @nivo/heatmap 0.99.0, @nivo/line 0.99.0, @nivo/pie 0.99.0, @nivo/radar 0.99.0, @nivo/radial-bar 0.99.0, @nivo/sankey 0.99.0, @nivo/scatterplot 0.99.0, @nivo/stream 0.99.0, @nivo/sunburst 0.99.0, @nivo/treemap 0.99.0, @observablehq/plot 0.6.17, react 19.3.1, react-dom 19.3.1, esbuild 0.25.0, playwright 1.64.1.
+Pinned libraries: @chartkitdev/core 0.5.0, uplot 1.6.32, chart.js 4.5.1, recharts 3.10.1, echarts 6.1.0, @nivo/bar 0.99.0, @nivo/boxplot 0.99.0, @nivo/bullet 0.99.0, @nivo/funnel 0.99.0, @nivo/heatmap 0.99.0, @nivo/line 0.99.0, @nivo/pie 0.99.0, @nivo/radar 0.99.0, @nivo/radial-bar 0.99.0, @nivo/sankey 0.99.0, @nivo/scatterplot 0.99.0, @nivo/stream 0.99.0, @nivo/sunburst 0.99.0, @nivo/treemap 0.99.0, @observablehq/plot 0.6.17, highcharts 13.1.1, plotly.js-dist-min 4.1.2, victory 37.3.6, @visx/visx 4.0.0, apexcharts 8.3.1, @tremor/react 3.18.7, vega-lite 6.4.3, ag-charts-community 14.2.0, ag-charts-enterprise 14.2.0, @amcharts/amcharts5 5.21.2, lightweight-charts 5.2.1, @mui/x-charts 9.15.0, @mui/material 9.5.0, mermaid 11.17.2, @antv/g2 5.4.8, react 19.3.1, react-dom 19.3.1, esbuild 0.25.0, playwright 1.64.1.
 
 ## What this does and does not claim
 
@@ -59,341 +59,523 @@ Playwright Chromium. Each sample is a fresh page. Reported times are the median 
 
 | Library | Renderer | Points | Status | Initial ms | Update ms | Heap after render | Heap delta |
 |---|---|---:|---|---:|---:|---:|---:|
-| ChartKit | svg | 1000 | ok | 11.40 | 30.20 | 4067050 | 1975834 |
-| ChartKit | svg | 10000 | ok | 12.80 | 30.90 | 4266165 | 2174949 |
-| ChartKit | svg | 100000 | ok | 15.00 | 20.40 | 5742022 | 3650806 |
-| ChartKit | svg | 1000000 | ok | 30.00 | 20.40 | 28889985 | 26798765 |
-| ChartKit canvas | canvas | 1000 | ok | 23.20 | 17.30 | 4936490 | 2482557 |
-| ChartKit canvas | canvas | 10000 | ok | 24.80 | 21.90 | 5249174 | 2795241 |
-| ChartKit canvas | canvas | 100000 | ok | 25.50 | 21.80 | 6765738 | 4311805 |
-| ChartKit canvas | canvas | 1000000 | ok | 38.30 | 28.40 | 29867298 | 27413361 |
-| ChartKit sampling none | svg | 100000 | ok | 56.30 | 1202.40 | 20503955 | 18412661 |
-| ChartKit sampling none | svg | 1000000 | ok | 540.20 | 22355.90 | 137785811 | 135694513 |
-| uPlot | canvas | 1000 | ok | 15.80 | 33.20 | 3020761 | 1277444 |
-| uPlot | canvas | 10000 | ok | 16.60 | 33.10 | 3062173 | 1318856 |
-| uPlot | canvas | 100000 | ok | 14.90 | 30.60 | 4944597 | 3201280 |
-| uPlot | canvas | 1000000 | ok | 25.30 | 21.20 | 19412369 | 17669048 |
-| Chart.js | canvas | 1000 | ok | 26.60 | 23.60 | 4661638 | 2298703 |
-| Chart.js | canvas | 10000 | ok | 31.10 | 18.40 | 6584053 | 4221118 |
-| Chart.js | canvas | 100000 | ok | 58.60 | 34.40 | 20051169 | 17688234 |
-| Chart.js | canvas | 1000000 | ok | 359.10 | 192.60 | 154965730 | 152602791 |
-| ECharts | canvas | 1000 | ok | 37.90 | 19.80 | 14410441 | 8456617 |
-| ECharts | canvas | 10000 | ok | 98.30 | 72.30 | 16043958 | 10089402 |
-| ECharts | canvas | 100000 | ok | 2392.40 | 2728.40 | 60711499 | 54756947 |
-| ECharts | canvas | 1000000 | ok | 34611.20 | 35579.00 | 404407213 | 398452641 |
-| Recharts | svg | 1000 | ok | 82.30 | 24.30 | 20641127 | 13562932 |
-| Recharts | svg | 10000 | ok | 267.60 | 127.20 | 37703466 | 30625271 |
-| Recharts | svg | 100000 | ok | 2166.80 | 1084.70 | 165634567 | 158556388 |
-| Recharts | svg | 1000000 | ok | 21302.30 | 12336.20 | 1350685868 | 1343607669 |
-| Nivo | svg | 1000 | ok | 41.50 | 18.80 | 16871630 | 10581690 |
-| Nivo | svg | 10000 | ok | 76.30 | 56.20 | 26194329 | 19904117 |
-| Nivo | svg | 100000 | ok | 372.70 | 946.70 | 131352681 | 125062469 |
+| ChartKit | svg | 1000 | ok | 12.00 | 28.00 | 4083372 | 1973412 |
+| ChartKit | svg | 10000 | ok | 15.30 | 33.10 | 4097815 | 1987855 |
+| ChartKit | svg | 100000 | ok | 14.20 | 30.80 | 5726596 | 3616636 |
+| ChartKit | svg | 1000000 | ok | 24.30 | 23.90 | 28569631 | 26459667 |
+| ChartKit canvas | canvas | 1000 | ok | 21.60 | 24.30 | 5124108 | 2586891 |
+| ChartKit canvas | canvas | 10000 | ok | 22.80 | 23.50 | 5370712 | 2833495 |
+| ChartKit canvas | canvas | 100000 | ok | 22.10 | 18.50 | 7031228 | 4494011 |
+| ChartKit canvas | canvas | 1000000 | ok | 32.90 | 21.10 | 24926108 | 22388887 |
+| ChartKit sampling none | svg | 100000 | ok | 54.00 | 1157.20 | 20247949 | 18137915 |
+| ChartKit sampling none | svg | 1000000 | ok | 466.70 | 21550.20 | 135652465 | 133542427 |
+| uPlot | canvas | 1000 | ok | 14.30 | 33.10 | 3011641 | 1268324 |
+| uPlot | canvas | 10000 | ok | 16.70 | 33.20 | 2392493 | 649176 |
+| uPlot | canvas | 100000 | ok | 14.70 | 30.50 | 4733237 | 2989920 |
+| uPlot | canvas | 1000000 | ok | 24.20 | 23.90 | 19482385 | 17739064 |
+| Chart.js | canvas | 1000 | ok | 26.00 | 25.00 | 4631518 | 2268583 |
+| Chart.js | canvas | 10000 | ok | 31.30 | 17.60 | 6651813 | 4288878 |
+| Chart.js | canvas | 100000 | ok | 58.70 | 33.40 | 20710701 | 18347766 |
+| Chart.js | canvas | 1000000 | ok | 342.80 | 190.60 | 154922926 | 152559987 |
+| ECharts | canvas | 1000 | ok | 39.60 | 13.10 | 14414169 | 8459613 |
+| ECharts | canvas | 10000 | ok | 95.20 | 70.20 | 16027270 | 10073446 |
+| ECharts | canvas | 100000 | ok | 2491.80 | 2739.90 | 60777103 | 54822539 |
+| ECharts | canvas | 1000000 | ok | 40778.90 | 42828.30 | 400441317 | 394486749 |
+| Recharts | svg | 1000 | ok | 69.60 | 25.10 | 20668563 | 13590384 |
+| Recharts | svg | 10000 | ok | 238.40 | 114.20 | 37324566 | 30246371 |
+| Recharts | svg | 100000 | ok | 1884.30 | 1002.00 | 165484523 | 158406328 |
+| Recharts | svg | 1000000 | ok | 20528.00 | 13053.00 | 1366667288 | 1359589089 |
+| Nivo | svg | 1000 | ok | 40.90 | 21.90 | 16870842 | 10580514 |
+| Nivo | svg | 10000 | ok | 80.90 | 52.00 | 24248621 | 17958125 |
+| Nivo | svg | 100000 | ok | 383.20 | 980.20 | 130966509 | 124676297 |
 | Nivo | svg | 1000000 | error | — | — | — | — |
-| Observable Plot | svg | 1000 | ok | 17.90 | 25.10 | 8189522 | 4622157 |
-| Observable Plot | svg | 10000 | ok | 29.80 | 44.40 | 9551606 | 5984853 |
-| Observable Plot | svg | 100000 | ok | 104.40 | 1544.30 | 33656585 | 30089224 |
-| Observable Plot | svg | 1000000 | ok | 911.90 | 25708.70 | 260103846 | 256536477 |
+| Observable Plot | svg | 1000 | ok | 17.70 | 25.70 | 8205654 | 4638289 |
+| Observable Plot | svg | 10000 | ok | 30.00 | 46.40 | 9504450 | 5937085 |
+| Observable Plot | svg | 100000 | ok | 109.50 | 1481.00 | 33632785 | 30065808 |
+| Observable Plot | svg | 1000000 | ok | 823.80 | 26627.70 | 260205662 | 256638293 |
 
-At 1000 points the fastest initial render is ChartKit (svg) at 11.40 ms. ChartKit initial render is 11.40 ms, rank 1 of 8.
+At 1000 points the fastest initial render is ChartKit (svg) at 12.00 ms. ChartKit initial render is 12.00 ms, rank 1 of 8.
 
-At 10000 points the fastest initial render is ChartKit (svg) at 12.80 ms. ChartKit initial render is 12.80 ms, rank 1 of 8.
+At 10000 points the fastest initial render is ChartKit (svg) at 15.30 ms. ChartKit initial render is 15.30 ms, rank 1 of 8.
 
-At 100000 points the fastest initial render is uPlot (canvas) at 14.90 ms. ChartKit initial render is 15.00 ms, rank 2 of 9.
+At 100000 points the fastest initial render is ChartKit (svg) at 14.20 ms. ChartKit initial render is 14.20 ms, rank 1 of 9.
 
-At 1000000 points the fastest initial render is uPlot (canvas) at 25.30 ms. ChartKit initial render is 30.00 ms, rank 2 of 8. Failed or skipped: Nivo error (Maximum call stack size exceeded).
+At 1000000 points the fastest initial render is uPlot (canvas) at 24.20 ms. ChartKit initial render is 24.30 ms, rank 2 of 8. Failed or skipped: Nivo error (Maximum call stack size exceeded).
 
 ### Chart type paint
 
-Phase 2 paints ChartKit and the libraries already timed on the line sweep: uPlot, Chart.js, ECharts, Recharts, Nivo, and Observable Plot. One cell per gallery type from apps/web/src/data/chart-types.ts. There is no type id area. The homepage row area is native stacked-area (full size, four series). A single filled line stays type line with mark.area true. mini-area is one filled series with the axes off, in the same 640×360 frame. Line cells are projected from the existing line sweep and are not measured again. Every other native cell uses the same point count as the ChartKit cell for that type, and the same data shape. The timer matches the line sweep: build data before the clock, paint, then wait for two animation frames. ECharts also waits for finished. The reported time is the median of BENCH_SAMPLES fresh pages (default 5) at 640×360. ChartKit updates are a second full SVG replacement. An error SVG (ck-chart-error) fails the sample. A cell is status unsupported, with a reason and no invented time, when that library has no native chart of that shape. Stand-ins are not timed: a pie made from bars, a waterfall made from a transparent helper bar, a histogram made from bars we binned ourselves, a sparkline made by hiding the axes on the line cell, a spike drawn as a bar, Plot.spike (a fixed-pixel vector), the uPlot candlestick demo path, an ECharts custom series, or the ECharts timeline playback control. Nivo cells use the 0.99.0 package for that chart, the same version as the pinned line, bar, and pie. A missing license key is status blocked. This phase does not add commercial libraries. gzipBytes and ssrMs stay null until a later phase. Later paint, bundle, and SSR phases add a cell per library, including commercial compare-matrix rivals (Highcharts, amCharts, ApexCharts community and commercial builds, AG Charts enterprise, MUI X Pro and Premium, and the same class of product). Use the published npm or CDN build a customer would install. Record license and watermark limits on the cell. A missing license key is status blocked with a note, not a silent omission and not a reason to drop the rest of that set. unsupported means that library has no native chart of that type. gzipBytes and ssrMs stay null until those phases fill them.
+Phase 2 paints ChartKit and the libraries already timed on the line sweep: uPlot, Chart.js, ECharts, Recharts, Nivo, and Observable Plot. One cell per gallery type from apps/web/src/data/chart-types.ts. There is no type id area. The homepage row area is native stacked-area (full size, four series). A single filled line stays type line with mark.area true. mini-area is one filled series with the axes off, in the same 640×360 frame. Line cells are projected from the existing line sweep and are not measured again. Every other native cell uses the same point count as the ChartKit cell for that type, and the same data shape. The timer matches the line sweep: build data before the clock, paint, then wait for two animation frames. ECharts also waits for finished. The reported time is the median of BENCH_SAMPLES fresh pages (default 5) at 640×360. ChartKit updates are a second full paint. Marks stay SVG, except a dense scatter, a large heatmap, a long mini-area, and a long candlestick, which use ChartKit's canvas painter (axes stay SVG) because one node per mark, or a path with a command per pixel, cannot paint that N. The timer still waits for two animation frames after that paint. An error SVG (ck-chart-error) fails the sample. A cell is status unsupported, with a reason and no invented time, when that library has no native chart of that shape. Stand-ins are not timed: a pie made from bars, a waterfall made from a transparent helper bar, a histogram made from bars we binned ourselves, a sparkline made by hiding the axes on the line cell, a spike drawn as a bar, Plot.spike (a fixed-pixel vector), the uPlot candlestick demo path, an ECharts custom series, or the ECharts timeline playback control. Nivo cells use the 0.99.0 package for that chart, the same version as the pinned line, bar, and pie. A missing license key is status blocked. gzipBytes and ssrMs stay null until a later phase. Phase 3 adds the rest of the compare matrix and times the eleven gallery types that had no Phase-2 rival ok cell: bar-list, gantt, journey, kpi, progress-ring, quadrant, sparkline, spike, timeline, venn, and waterfall. ChartKit is painted again for those eleven, and for candlestick, so the comparison matches the canvas candlestick painter. Phase-2 rivals stay unsupported on the eleven and are not repainted. BENCH_PHASE=3 skips the line sweep. Candlestick is the extra type: Phase 2 had only ECharts, and a Phase-3 library is timed only when it has a native OHLC series. Pins: highcharts 13.1.1 (credits left on), plotly.js-dist-min 4.1.2, victory 37.3.6, @visx/visx 4.0.0, apexcharts 8.3.1 plus apexcharts/features/waterfall, @tremor/react 3.18.7 (React 18 peer, harness React 19.3.1, nested recharts 2.15.4, Tailwind utilities inlined because the package ships no CSS), vega-lite 6.4.3, ag-charts-community 14.2.0 and ag-charts-enterprise 14.2.0 (no license key, trial watermark when the series is enterprise), @amcharts/amcharts5 5.21.2 (logo left on), Google Charts loader current from https://www.gstatic.com/charts/loader.js, lightweight-charts 5.2.1 (attribution logo left on), @mui/x-charts 9.15.0 with @mui/material 9.5.0, @mui/system 9.5.0, @emotion/react 11.14.0, @emotion/styled 11.14.1, mermaid 11.17.2, @antv/g2 5.4.8. Later paint, bundle, and SSR phases add a cell per library, including commercial compare-matrix rivals (Highcharts, amCharts, ApexCharts community and commercial builds, AG Charts enterprise, MUI X Pro and Premium, and the same class of product). Use the published npm or CDN build a customer would install. Record license and watermark limits on the cell. A missing license key is status blocked with a note, not a silent omission and not a reason to drop the rest of that set. unsupported means that library has no native chart of that type. gzipBytes and ssrMs stay null until those phases fill them.
 
 Homepage row `area` is native `stacked-area`. `gzipBytes` and `ssrMs` are null until a later phase. A full run writes the same cells to `bench/results/latest.json` under `browser.charts` and to `bench/results/paint.json`. One-sample runs write `bench/results/paint-smoke.json` and are not published medians. Unsupported cells are an honest omit: no native chart of that shape, and no invented time.
 
 | Chart | Homepage | Library | Variant | Renderer | N | Status | Initial ms | Update ms | gzip | SSR ms | N means |
 |---|---|---|---|---|---:|---|---:|---:|---:|---:|---|
-| line | line | Chart.js | — | canvas | 1000 | ok | 26.60 | 23.60 | — | — | points in one series; x[i] = i |
-| line | line | ChartKit | sampling-auto | svg | 1000 | ok | 11.40 | 30.20 | — | — | points in one series; x[i] = i |
-| line | line | ChartKit canvas | canvas | canvas | 1000 | ok | 23.20 | 17.30 | — | — | points in one series; x[i] = i |
-| line | line | ECharts | — | canvas | 1000 | ok | 37.90 | 19.80 | — | — | points in one series; x[i] = i |
-| line | line | Nivo | — | svg | 1000 | ok | 41.50 | 18.80 | — | — | points in one series; x[i] = i |
-| line | line | Observable Plot | — | svg | 1000 | ok | 17.90 | 25.10 | — | — | points in one series; x[i] = i |
-| line | line | Recharts | — | svg | 1000 | ok | 82.30 | 24.30 | — | — | points in one series; x[i] = i |
-| line | line | uPlot | — | canvas | 1000 | ok | 15.80 | 33.20 | — | — | points in one series; x[i] = i |
-| line | line | Chart.js | — | canvas | 10000 | ok | 31.10 | 18.40 | — | — | points in one series; x[i] = i |
-| line | line | ChartKit | sampling-auto | svg | 10000 | ok | 12.80 | 30.90 | — | — | points in one series; x[i] = i |
-| line | line | ChartKit canvas | canvas | canvas | 10000 | ok | 24.80 | 21.90 | — | — | points in one series; x[i] = i |
-| line | line | ECharts | — | canvas | 10000 | ok | 98.30 | 72.30 | — | — | points in one series; x[i] = i |
-| line | line | Nivo | — | svg | 10000 | ok | 76.30 | 56.20 | — | — | points in one series; x[i] = i |
-| line | line | Observable Plot | — | svg | 10000 | ok | 29.80 | 44.40 | — | — | points in one series; x[i] = i |
-| line | line | Recharts | — | svg | 10000 | ok | 267.60 | 127.20 | — | — | points in one series; x[i] = i |
-| line | line | uPlot | — | canvas | 10000 | ok | 16.60 | 33.10 | — | — | points in one series; x[i] = i |
-| line | line | Chart.js | — | canvas | 100000 | ok | 58.60 | 34.40 | — | — | points in one series; x[i] = i |
-| line | line | ChartKit | sampling-auto | svg | 100000 | ok | 15.00 | 20.40 | — | — | points in one series; x[i] = i |
-| line | line | ChartKit canvas | canvas | canvas | 100000 | ok | 25.50 | 21.80 | — | — | points in one series; x[i] = i |
-| line | line | ChartKit sampling none | sampling-none | svg | 100000 | ok | 56.30 | 1202.40 | — | — | points in one series; x[i] = i |
-| line | line | ECharts | — | canvas | 100000 | ok | 2392.40 | 2728.40 | — | — | points in one series; x[i] = i |
-| line | line | Nivo | — | svg | 100000 | ok | 372.70 | 946.70 | — | — | points in one series; x[i] = i |
-| line | line | Observable Plot | — | svg | 100000 | ok | 104.40 | 1544.30 | — | — | points in one series; x[i] = i |
-| line | line | Recharts | — | svg | 100000 | ok | 2166.80 | 1084.70 | — | — | points in one series; x[i] = i |
-| line | line | uPlot | — | canvas | 100000 | ok | 14.90 | 30.60 | — | — | points in one series; x[i] = i |
-| line | line | Chart.js | — | canvas | 1000000 | ok | 359.10 | 192.60 | — | — | points in one series; x[i] = i |
-| line | line | ChartKit | sampling-auto | svg | 1000000 | ok | 30.00 | 20.40 | — | — | points in one series; x[i] = i |
-| line | line | ChartKit canvas | canvas | canvas | 1000000 | ok | 38.30 | 28.40 | — | — | points in one series; x[i] = i |
-| line | line | ChartKit sampling none | sampling-none | svg | 1000000 | ok | 540.20 | 22355.90 | — | — | points in one series; x[i] = i |
-| line | line | ECharts | — | canvas | 1000000 | ok | 34611.20 | 35579.00 | — | — | points in one series; x[i] = i |
+| line | line | Chart.js | — | canvas | 1000 | ok | 26.00 | 25.00 | — | — | points in one series; x[i] = i |
+| line | line | ChartKit | sampling-auto | svg | 1000 | ok | 12.00 | 28.00 | — | — | points in one series; x[i] = i |
+| line | line | ChartKit canvas | canvas | canvas | 1000 | ok | 21.60 | 24.30 | — | — | points in one series; x[i] = i |
+| line | line | ECharts | — | canvas | 1000 | ok | 39.60 | 13.10 | — | — | points in one series; x[i] = i |
+| line | line | Nivo | — | svg | 1000 | ok | 40.90 | 21.90 | — | — | points in one series; x[i] = i |
+| line | line | Observable Plot | — | svg | 1000 | ok | 17.70 | 25.70 | — | — | points in one series; x[i] = i |
+| line | line | Recharts | — | svg | 1000 | ok | 69.60 | 25.10 | — | — | points in one series; x[i] = i |
+| line | line | uPlot | — | canvas | 1000 | ok | 14.30 | 33.10 | — | — | points in one series; x[i] = i |
+| line | line | Chart.js | — | canvas | 10000 | ok | 31.30 | 17.60 | — | — | points in one series; x[i] = i |
+| line | line | ChartKit | sampling-auto | svg | 10000 | ok | 15.30 | 33.10 | — | — | points in one series; x[i] = i |
+| line | line | ChartKit canvas | canvas | canvas | 10000 | ok | 22.80 | 23.50 | — | — | points in one series; x[i] = i |
+| line | line | ECharts | — | canvas | 10000 | ok | 95.20 | 70.20 | — | — | points in one series; x[i] = i |
+| line | line | Nivo | — | svg | 10000 | ok | 80.90 | 52.00 | — | — | points in one series; x[i] = i |
+| line | line | Observable Plot | — | svg | 10000 | ok | 30.00 | 46.40 | — | — | points in one series; x[i] = i |
+| line | line | Recharts | — | svg | 10000 | ok | 238.40 | 114.20 | — | — | points in one series; x[i] = i |
+| line | line | uPlot | — | canvas | 10000 | ok | 16.70 | 33.20 | — | — | points in one series; x[i] = i |
+| line | line | Chart.js | — | canvas | 100000 | ok | 58.70 | 33.40 | — | — | points in one series; x[i] = i |
+| line | line | ChartKit | sampling-auto | svg | 100000 | ok | 14.20 | 30.80 | — | — | points in one series; x[i] = i |
+| line | line | ChartKit canvas | canvas | canvas | 100000 | ok | 22.10 | 18.50 | — | — | points in one series; x[i] = i |
+| line | line | ChartKit sampling none | sampling-none | svg | 100000 | ok | 54.00 | 1157.20 | — | — | points in one series; x[i] = i |
+| line | line | ECharts | — | canvas | 100000 | ok | 2491.80 | 2739.90 | — | — | points in one series; x[i] = i |
+| line | line | Nivo | — | svg | 100000 | ok | 383.20 | 980.20 | — | — | points in one series; x[i] = i |
+| line | line | Observable Plot | — | svg | 100000 | ok | 109.50 | 1481.00 | — | — | points in one series; x[i] = i |
+| line | line | Recharts | — | svg | 100000 | ok | 1884.30 | 1002.00 | — | — | points in one series; x[i] = i |
+| line | line | uPlot | — | canvas | 100000 | ok | 14.70 | 30.50 | — | — | points in one series; x[i] = i |
+| line | line | Chart.js | — | canvas | 1000000 | ok | 342.80 | 190.60 | — | — | points in one series; x[i] = i |
+| line | line | ChartKit | sampling-auto | svg | 1000000 | ok | 24.30 | 23.90 | — | — | points in one series; x[i] = i |
+| line | line | ChartKit canvas | canvas | canvas | 1000000 | ok | 32.90 | 21.10 | — | — | points in one series; x[i] = i |
+| line | line | ChartKit sampling none | sampling-none | svg | 1000000 | ok | 466.70 | 21550.20 | — | — | points in one series; x[i] = i |
+| line | line | ECharts | — | canvas | 1000000 | ok | 40778.90 | 42828.30 | — | — | points in one series; x[i] = i |
 | line | line | Nivo | — | svg | 1000000 | error | — | — | — | — | points in one series; x[i] = i — Projected from the existing line sweep. The type matrix does not paint line a second time. — Maximum call stack size exceeded |
-| line | line | Observable Plot | — | svg | 1000000 | ok | 911.90 | 25708.70 | — | — | points in one series; x[i] = i |
-| line | line | Recharts | — | svg | 1000000 | ok | 21302.30 | 12336.20 | — | — | points in one series; x[i] = i |
-| line | line | uPlot | — | canvas | 1000000 | ok | 25.30 | 21.20 | — | — | points in one series; x[i] = i |
-| bar | bar | Chart.js | — | canvas | 48 | ok | 26.70 | 22.80 | — | — | categories; one series |
-| bar | bar | ChartKit | — | svg | 48 | ok | 16.40 | 33.60 | — | — | categories; one series |
-| bar | bar | ECharts | — | canvas | 48 | ok | 35.00 | 12.20 | — | — | categories; one series |
-| bar | bar | Nivo | — | svg | 48 | ok | 49.10 | 23.50 | — | — | categories; one series |
-| bar | bar | Observable Plot | — | svg | 48 | ok | 16.80 | 31.80 | — | — | categories; one series |
-| bar | bar | Recharts | — | svg | 48 | ok | 51.60 | 23.40 | — | — | categories; one series |
-| bar | bar | uPlot | — | canvas | 48 | ok | 16.60 | 33.30 | — | — | categories; one series |
-| pie | — | Chart.js | — | canvas | 8 | ok | 15.20 | 33.20 | — | — | slices |
-| pie | — | ChartKit | — | svg | 8 | ok | 24.40 | 33.00 | — | — | slices |
-| pie | — | ECharts | — | canvas | 8 | ok | 26.40 | 15.40 | — | — | slices |
-| pie | — | Nivo | — | svg | 8 | ok | 23.30 | 21.70 | — | — | slices |
+| line | line | Observable Plot | — | svg | 1000000 | ok | 823.80 | 26627.70 | — | — | points in one series; x[i] = i |
+| line | line | Recharts | — | svg | 1000000 | ok | 20528.00 | 13053.00 | — | — | points in one series; x[i] = i |
+| line | line | uPlot | — | canvas | 1000000 | ok | 24.20 | 23.90 | — | — | points in one series; x[i] = i |
+| bar | bar | Chart.js | — | canvas | 48 | ok | 26.40 | 21.40 | — | — | categories; one series |
+| bar | bar | ChartKit | — | svg | 48 | ok | 12.10 | 29.80 | — | — | categories; one series |
+| bar | bar | ECharts | — | canvas | 48 | ok | 34.70 | 15.80 | — | — | categories; one series |
+| bar | bar | Nivo | — | svg | 48 | ok | 55.20 | 20.40 | — | — | categories; one series |
+| bar | bar | Observable Plot | — | svg | 48 | ok | 17.40 | 29.60 | — | — | categories; one series |
+| bar | bar | Recharts | — | svg | 48 | ok | 49.80 | 19.10 | — | — | categories; one series |
+| bar | bar | uPlot | — | canvas | 48 | ok | 12.00 | 32.30 | — | — | categories; one series |
+| pie | — | Chart.js | — | canvas | 8 | ok | 14.50 | 33.10 | — | — | slices |
+| pie | — | ChartKit | — | svg | 8 | ok | 7.60 | 33.20 | — | — | slices |
+| pie | — | ECharts | — | canvas | 8 | ok | 25.60 | 18.50 | — | — | slices |
+| pie | — | Nivo | — | svg | 8 | ok | 23.50 | 21.20 | — | — | slices |
 | pie | — | Observable Plot | — | — | 8 | unsupported | — | — | — | — | slices — No pie or donut mark. |
-| pie | — | Recharts | — | svg | 8 | ok | 28.40 | 22.30 | — | — | slices |
+| pie | — | Recharts | — | svg | 8 | ok | 28.50 | 22.50 | — | — | slices |
 | pie | — | uPlot | — | — | 8 | unsupported | — | — | — | — | slices — No pie series. |
-| donut | donut | Chart.js | — | canvas | 8 | ok | 12.30 | 33.50 | — | — | slices |
-| donut | donut | ChartKit | — | svg | 8 | ok | 17.90 | 33.20 | — | — | slices |
-| donut | donut | ECharts | — | canvas | 8 | ok | 26.10 | 15.40 | — | — | slices |
-| donut | donut | Nivo | — | svg | 8 | ok | 23.10 | 15.70 | — | — | slices |
+| donut | donut | Chart.js | — | canvas | 8 | ok | 11.70 | 33.50 | — | — | slices |
+| donut | donut | ChartKit | — | svg | 8 | ok | 8.80 | 33.50 | — | — | slices |
+| donut | donut | ECharts | — | canvas | 8 | ok | 25.30 | 23.90 | — | — | slices |
+| donut | donut | Nivo | — | svg | 8 | ok | 23.60 | 19.40 | — | — | slices |
 | donut | donut | Observable Plot | — | — | 8 | unsupported | — | — | — | — | slices — No pie or donut mark. |
-| donut | donut | Recharts | — | svg | 8 | ok | 28.50 | 19.10 | — | — | slices |
+| donut | donut | Recharts | — | svg | 8 | ok | 27.70 | 17.10 | — | — | slices |
 | donut | donut | uPlot | — | — | 8 | unsupported | — | — | — | — | slices — No donut series. |
-| stacked-area | area | Chart.js | — | canvas | 100000 | ok | 691.40 | 687.40 | — | — | x positions; 4 stacked series |
-| stacked-area | area | ChartKit | — | svg | 100000 | ok | 52.20 | 49.90 | — | — | x positions; 4 stacked series |
-| stacked-area | area | ECharts | — | canvas | 100000 | ok | 18911.80 | 18589.10 | — | — | x positions; 4 stacked series |
+| stacked-area | area | Chart.js | — | canvas | 100000 | ok | 737.40 | 670.00 | — | — | x positions; 4 stacked series |
+| stacked-area | area | ChartKit | — | svg | 100000 | ok | 45.60 | 51.60 | — | — | x positions; 4 stacked series |
+| stacked-area | area | ECharts | — | canvas | 100000 | ok | 18700.40 | 18445.80 | — | — | x positions; 4 stacked series |
 | stacked-area | area | Nivo | — | svg | 100000 | error | — | — | — | — | x positions; 4 stacked series — @nivo/stream with offsetType none, a zero-baseline stack of the four series. Not the wiggle offset. Nivo's stream memo throws Maximum call stack size exceeded at this N. The cell stays in the matrix as status error. — Maximum call stack size exceeded |
-| stacked-area | area | Observable Plot | — | svg | 100000 | ok | 606.10 | 5302.60 | — | — | x positions; 4 stacked series |
+| stacked-area | area | Observable Plot | — | svg | 100000 | ok | 563.30 | 5252.70 | — | — | x positions; 4 stacked series |
 | stacked-area | area | Recharts | — | svg | 100000 | error | — | — | — | — | x positions; 4 stacked series — AreaChart with four Area elements that share stackId. Recharts walks that stacked domain recursively and throws Maximum call stack size exceeded at this N. The cell stays in the matrix as status error. — Maximum call stack size exceeded |
 | stacked-area | area | uPlot | — | — | 100000 | unsupported | — | — | — | — | x positions; 4 stacked series — A series can fill to a baseline, but uPlot has no stack. One filled series is the mini-area cell. |
-| scatter | scatter | Chart.js | — | canvas | 100000 | ok | 273.50 | 248.20 | — | — | points |
-| scatter | scatter | ChartKit | — | svg | 100000 | ok | 3667.30 | 3581.00 | — | — | points |
-| scatter | scatter | ECharts | — | canvas | 100000 | ok | 9044.40 | 9112.00 | — | — | points |
-| scatter | scatter | Nivo | — | canvas | 100000 | ok | 402.80 | 335.30 | — | — | points |
-| scatter | scatter | Observable Plot | — | svg | 100000 | ok | 522.20 | 629.90 | — | — | points |
-| scatter | scatter | Recharts | — | svg | 100000 | ok | 5985.00 | 11852.40 | — | — | points |
-| scatter | scatter | uPlot | — | canvas | 100000 | ok | 128.60 | 111.20 | — | — | points |
-| combo | — | Chart.js | — | canvas | 48 | ok | 28.20 | 20.40 | — | — | categories; one bar series and one line series |
-| combo | — | ChartKit | — | svg | 48 | ok | 13.90 | 26.90 | — | — | categories; one bar series and one line series |
-| combo | — | ECharts | — | canvas | 48 | ok | 39.80 | 15.50 | — | — | categories; one bar series and one line series |
+| scatter | scatter | Chart.js | — | canvas | 100000 | ok | 269.30 | 247.10 | — | — | points |
+| scatter | scatter | ChartKit | — | canvas | 100000 | ok | 62.40 | 40.00 | — | — | points |
+| scatter | scatter | ECharts | — | canvas | 100000 | ok | 8827.40 | 9060.50 | — | — | points |
+| scatter | scatter | Nivo | — | canvas | 100000 | ok | 410.60 | 339.80 | — | — | points |
+| scatter | scatter | Observable Plot | — | svg | 100000 | ok | 519.00 | 624.90 | — | — | points |
+| scatter | scatter | Recharts | — | svg | 100000 | ok | 5815.90 | 11446.60 | — | — | points |
+| scatter | scatter | uPlot | — | canvas | 100000 | ok | 132.00 | 121.10 | — | — | points |
+| combo | — | Chart.js | — | canvas | 48 | ok | 28.50 | 17.00 | — | — | categories; one bar series and one line series |
+| combo | — | ChartKit | — | svg | 48 | ok | 14.20 | 28.10 | — | — | categories; one bar series and one line series |
+| combo | — | ECharts | — | canvas | 48 | ok | 36.90 | 23.90 | — | — | categories; one bar series and one line series |
 | combo | — | Nivo | — | — | 48 | unsupported | — | — | — | — | categories; one bar series and one line series — No combo chart and no second y scale. |
 | combo | — | Observable Plot | — | — | 48 | unsupported | — | — | — | — | categories; one bar series and one line series — No second y scale. A bar and a line on one scale would squash the margin series. |
-| combo | — | Recharts | — | svg | 48 | ok | 56.00 | 22.70 | — | — | categories; one bar series and one line series |
+| combo | — | Recharts | — | svg | 48 | ok | 56.90 | 23.50 | — | — | categories; one bar series and one line series |
 | combo | — | uPlot | — | — | 48 | unsupported | — | — | — | — | categories; one bar series and one line series — No combo and no second scale. A bar and a line on one scale would squash the margin series. |
 | heatmap | heatmap | Chart.js | — | — | 1200 | unsupported | — | — | — | — | grid cells; 40 columns by 30 rows — No heatmap controller. |
-| heatmap | heatmap | ChartKit | — | svg | 1200 | ok | 44.70 | 43.40 | — | — | grid cells; 40 columns by 30 rows |
-| heatmap | heatmap | ECharts | — | canvas | 1200 | ok | 53.20 | 27.00 | — | — | grid cells; 40 columns by 30 rows |
-| heatmap | heatmap | Nivo | — | svg | 1200 | ok | 418.40 | 432.40 | — | — | grid cells; 40 columns by 30 rows |
-| heatmap | heatmap | Observable Plot | — | svg | 1200 | ok | 22.60 | 24.50 | — | — | grid cells; 40 columns by 30 rows |
+| heatmap | heatmap | ChartKit | — | canvas | 1200 | ok | 15.90 | 24.10 | — | — | grid cells; 40 columns by 30 rows |
+| heatmap | heatmap | ECharts | — | canvas | 1200 | ok | 49.10 | 25.50 | — | — | grid cells; 40 columns by 30 rows |
+| heatmap | heatmap | Nivo | — | svg | 1200 | ok | 426.40 | 446.80 | — | — | grid cells; 40 columns by 30 rows |
+| heatmap | heatmap | Observable Plot | — | svg | 1200 | ok | 22.90 | 22.70 | — | — | grid cells; 40 columns by 30 rows |
 | heatmap | heatmap | Recharts | — | — | 1200 | unsupported | — | — | — | — | grid cells; 40 columns by 30 rows — No heatmap chart. |
 | heatmap | heatmap | uPlot | — | — | 1200 | unsupported | — | — | — | — | grid cells; 40 columns by 30 rows — No heatmap series. |
 | gauge | — | Chart.js | — | — | 1 | unsupported | — | — | — | — | one metric — No gauge controller. |
-| gauge | — | ChartKit | — | svg | 1 | ok | 13.00 | 30.10 | — | — | one metric |
-| gauge | — | ECharts | — | canvas | 1 | ok | 26.90 | 20.90 | — | — | one metric |
+| gauge | — | ChartKit | — | svg | 1 | ok | 15.30 | 28.40 | — | — | one metric |
+| gauge | — | ECharts | — | canvas | 1 | ok | 24.90 | 24.90 | — | — | one metric |
 | gauge | — | Nivo | — | — | 1 | unsupported | — | — | — | — | one metric — No gauge package in Nivo 0.99.0. |
 | gauge | — | Observable Plot | — | — | 1 | unsupported | — | — | — | — | one metric — No gauge mark. |
 | gauge | — | Recharts | — | — | 1 | unsupported | — | — | — | — | one metric — No gauge chart. |
 | gauge | — | uPlot | — | — | 1 | unsupported | — | — | — | — | one metric — No gauge series. |
+| kpi | — | AG Charts | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. A gauge is the gauge cell. |
+| kpi | — | amCharts 5 | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. A gauge is the gauge cell. |
+| kpi | — | AntV G2 | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. A gauge is the gauge cell. |
+| kpi | — | ApexCharts | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. A gauge is the gauge cell. |
 | kpi | — | Chart.js | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. The chart is a labeled metric, not a series. |
-| kpi | — | ChartKit | — | svg | 1 | ok | 23.80 | 33.40 | — | — | one metric; sparkline fixed at 24 |
+| kpi | — | ChartKit | — | svg | 1 | ok | 17.70 | 25.90 | — | — | one metric; sparkline fixed at 24 |
 | kpi | — | ECharts | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. The chart is a labeled metric, not a series. |
+| kpi | — | Google Charts | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. A gauge is the gauge cell. |
+| kpi | — | Highcharts | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI series. |
+| kpi | — | Mermaid | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. A gauge is the gauge cell. |
+| kpi | — | MUI X Charts | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. A gauge is the gauge cell. |
 | kpi | — | Nivo | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. The chart is a labeled metric, not a series. |
 | kpi | — | Observable Plot | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. The chart is a labeled metric, not a series. |
+| kpi | — | Plotly.js | — | svg | 1 | ok | 67.90 | 13.20 | — | — | one metric; sparkline fixed at 24 |
 | kpi | — | Recharts | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. The chart is a labeled metric, not a series. |
+| kpi | — | TradingView Lightweight Charts | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. A gauge is the gauge cell. |
+| kpi | — | Tremor | — | svg | 1 | ok | 47.30 | 66.70 | — | — | one metric; sparkline fixed at 24 |
 | kpi | — | uPlot | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. The chart is a labeled metric, not a series. |
+| kpi | — | Vega-Lite | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. A gauge is the gauge cell. |
+| kpi | — | Victory | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. A gauge is the gauge cell. |
+| kpi | — | visx | — | — | 1 | unsupported | — | — | — | — | one metric; sparkline fixed at 24 — No KPI card. A gauge is the gauge cell. |
+| sparkline | — | AG Charts | — | canvas | 100000 | ok | 180.80 | 75.00 | — | — | values in a number array |
+| sparkline | — | amCharts 5 | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. Hiding the axes on a line is the line cell. |
+| sparkline | — | AntV G2 | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. Hiding the axes on a line is the line cell. |
+| sparkline | — | ApexCharts | — | — | 100000 | unsupported | — | — | — | — | values in a number array — chart.sparkline.enabled hides axes on a line or area. That is the line cell. |
 | sparkline | — | Chart.js | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. A line with the axes hidden is the line cell. |
-| sparkline | — | ChartKit | — | svg | 100000 | ok | 20.60 | 19.30 | — | — | values in a number array |
+| sparkline | — | ChartKit | — | svg | 100000 | ok | 18.70 | 15.20 | — | — | values in a number array |
 | sparkline | — | ECharts | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. A line with the axes hidden is the line cell. |
+| sparkline | — | Google Charts | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. Hiding the axes on a line is the line cell. |
+| sparkline | — | Highcharts | — | — | 100000 | unsupported | — | — | — | — | values in a number array — The sparkline demo disables axes on a line. That is the line cell. |
+| sparkline | — | Mermaid | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. Hiding the axes on a line is the line cell. |
+| sparkline | — | MUI X Charts | — | svg | 100000 | ok | 167.70 | 1828.30 | — | — | values in a number array |
 | sparkline | — | Nivo | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. A line with the axes hidden is the line cell. |
 | sparkline | — | Observable Plot | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. A line with the axes hidden is the line cell. |
+| sparkline | — | Plotly.js | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. Hiding the axes on a line is the line cell. |
 | sparkline | — | Recharts | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. A line with the axes hidden is the line cell. |
+| sparkline | — | TradingView Lightweight Charts | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. Hiding the axes on a line is the line cell. |
+| sparkline | — | Tremor | — | svg | 100000 | ok | 182.10 | 1875.60 | — | — | values in a number array |
 | sparkline | — | uPlot | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. A line with the axes hidden is the line cell. |
-| mini-area | — | Chart.js | — | canvas | 100000 | ok | 49.30 | 34.70 | — | — | values in a number array |
-| mini-area | — | ChartKit | — | svg | 100000 | ok | 23.40 | 83.00 | — | — | values in a number array |
-| mini-area | — | ECharts | — | canvas | 100000 | ok | 124.50 | 78.90 | — | — | values in a number array |
-| mini-area | — | Nivo | — | svg | 100000 | ok | 308.90 | 270.30 | — | — | values in a number array |
-| mini-area | — | Observable Plot | — | svg | 100000 | ok | 60.90 | 53.20 | — | — | values in a number array |
-| mini-area | — | Recharts | — | svg | 100000 | ok | 236.10 | 133.90 | — | — | values in a number array |
-| mini-area | — | uPlot | — | canvas | 100000 | ok | 10.60 | 29.10 | — | — | values in a number array |
+| sparkline | — | Vega-Lite | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. Hiding the axes on a line is the line cell. |
+| sparkline | — | Victory | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. Hiding the axes on a line is the line cell. |
+| sparkline | — | visx | — | — | 100000 | unsupported | — | — | — | — | values in a number array — No sparkline chart. Hiding the axes on a line is the line cell. |
+| mini-area | — | Chart.js | — | canvas | 100000 | ok | 47.40 | 28.60 | — | — | values in a number array |
+| mini-area | — | ChartKit | — | canvas | 100000 | ok | 9.50 | 21.40 | — | — | values in a number array |
+| mini-area | — | ECharts | — | canvas | 100000 | ok | 122.40 | 78.80 | — | — | values in a number array |
+| mini-area | — | Nivo | — | svg | 100000 | ok | 310.10 | 270.90 | — | — | values in a number array |
+| mini-area | — | Observable Plot | — | svg | 100000 | ok | 57.80 | 56.20 | — | — | values in a number array |
+| mini-area | — | Recharts | — | svg | 100000 | ok | 233.00 | 132.20 | — | — | values in a number array |
+| mini-area | — | uPlot | — | canvas | 100000 | ok | 10.50 | 21.00 | — | — | values in a number array |
+| progress-ring | — | AG Charts | — | canvas | 1 | ok | 117.90 | 6.70 | — | — | one metric |
+| progress-ring | — | amCharts 5 | — | — | 1 | unsupported | — | — | — | — | one metric — No progress ring. A needle gauge is the gauge cell, and a pie used as a ring is the pie cell. |
+| progress-ring | — | AntV G2 | — | — | 1 | unsupported | — | — | — | — | one metric — gauge is a dial and liquid is a liquid-fill chart. Neither is a progress ring. |
+| progress-ring | — | ApexCharts | — | svg | 1 | ok | 33.60 | 17.60 | — | — | one metric |
 | progress-ring | — | Chart.js | — | — | 1 | unsupported | — | — | — | — | one metric — No progress ring. A gauge drawn as a ring is the gauge cell. |
-| progress-ring | — | ChartKit | — | svg | 1 | ok | 20.90 | 33.20 | — | — | one metric |
+| progress-ring | — | ChartKit | — | svg | 1 | ok | 15.10 | 29.60 | — | — | one metric |
 | progress-ring | — | ECharts | — | — | 1 | unsupported | — | — | — | — | one metric — No progress ring. A gauge drawn as a ring is the gauge cell. |
+| progress-ring | — | Google Charts | — | — | 1 | unsupported | — | — | — | — | one metric — No progress ring. A needle gauge is the gauge cell, and a pie used as a ring is the pie cell. |
+| progress-ring | — | Highcharts | — | svg | 1 | ok | 28.80 | 28.50 | — | — | one metric |
+| progress-ring | — | Mermaid | — | — | 1 | unsupported | — | — | — | — | one metric — No progress ring. A needle gauge is the gauge cell, and a pie used as a ring is the pie cell. |
+| progress-ring | — | MUI X Charts | — | svg | 1 | ok | 22.60 | 22.30 | — | — | one metric |
 | progress-ring | — | Nivo | — | — | 1 | unsupported | — | — | — | — | one metric — No progress ring. A gauge drawn as a ring is the gauge cell. |
 | progress-ring | — | Observable Plot | — | — | 1 | unsupported | — | — | — | — | one metric — No progress ring. A gauge drawn as a ring is the gauge cell. |
+| progress-ring | — | Plotly.js | — | — | 1 | unsupported | — | — | — | — | one metric — indicator mode gauge is a gauge, not a progress ring. |
 | progress-ring | — | Recharts | — | — | 1 | unsupported | — | — | — | — | one metric — No progress ring. A gauge drawn as a ring is the gauge cell. |
+| progress-ring | — | TradingView Lightweight Charts | — | — | 1 | unsupported | — | — | — | — | one metric — No progress ring. A needle gauge is the gauge cell, and a pie used as a ring is the pie cell. |
+| progress-ring | — | Tremor | — | svg | 1 | ok | 45.30 | 66.60 | — | — | one metric |
 | progress-ring | — | uPlot | — | — | 1 | unsupported | — | — | — | — | one metric — No progress ring. A gauge drawn as a ring is the gauge cell. |
+| progress-ring | — | Vega-Lite | — | — | 1 | unsupported | — | — | — | — | one metric — No progress ring. A needle gauge is the gauge cell, and a pie used as a ring is the pie cell. |
+| progress-ring | — | Victory | — | — | 1 | unsupported | — | — | — | — | one metric — VictoryPie is the pie cell. A partial pie is not a progress ring. |
+| progress-ring | — | visx | — | — | 1 | unsupported | — | — | — | — | one metric — No progress ring. A needle gauge is the gauge cell, and a pie used as a ring is the pie cell. |
+| spike | — | AG Charts | — | — | 100000 | unsupported | — | — | — | — | points — No spike series. A thin bar would be the bar cell. A fixed-length vector is not a value-height spike. |
+| spike | — | amCharts 5 | — | — | 100000 | unsupported | — | — | — | — | points — No spike series. A thin bar would be the bar cell. A fixed-length vector is not a value-height spike. |
+| spike | — | AntV G2 | — | — | 100000 | unsupported | — | — | — | — | points — No spike series. A thin bar would be the bar cell. A fixed-length vector is not a value-height spike. |
+| spike | — | ApexCharts | — | — | 100000 | unsupported | — | — | — | — | points — No spike series. A thin bar would be the bar cell. A fixed-length vector is not a value-height spike. |
 | spike | — | Chart.js | — | — | 100000 | unsupported | — | — | — | — | points — No spike chart. A thin bar would be the bar cell. |
-| spike | — | ChartKit | — | svg | 100000 | ok | 67.00 | 57.40 | — | — | points |
+| spike | — | ChartKit | — | svg | 100000 | ok | 56.60 | 43.30 | — | — | points |
 | spike | — | ECharts | — | — | 100000 | unsupported | — | — | — | — | points — No spike chart. A thin bar would be the bar cell. |
+| spike | — | Google Charts | — | — | 100000 | unsupported | — | — | — | — | points — No spike series. A thin bar would be the bar cell. A fixed-length vector is not a value-height spike. |
+| spike | — | Highcharts | — | — | 100000 | unsupported | — | — | — | — | points — No spike series. A thin bar would be the bar cell. A fixed-length vector is not a value-height spike. |
+| spike | — | Mermaid | — | — | 100000 | unsupported | — | — | — | — | points — No spike series. A thin bar would be the bar cell. A fixed-length vector is not a value-height spike. |
+| spike | — | MUI X Charts | — | — | 100000 | unsupported | — | — | — | — | points — No spike series. A thin bar would be the bar cell. A fixed-length vector is not a value-height spike. |
 | spike | — | Nivo | — | — | 100000 | unsupported | — | — | — | — | points — No spike chart. A thin bar would be the bar cell. |
 | spike | — | Observable Plot | — | — | 100000 | unsupported | — | — | — | — | points — Plot.spike is a fixed-pixel vector, not a value-height spike from the baseline. |
+| spike | — | Plotly.js | — | — | 100000 | unsupported | — | — | — | — | points — No spike series. A thin bar would be the bar cell. A fixed-length vector is not a value-height spike. |
 | spike | — | Recharts | — | — | 100000 | unsupported | — | — | — | — | points — No spike chart. A thin bar would be the bar cell. |
+| spike | — | TradingView Lightweight Charts | — | — | 100000 | unsupported | — | — | — | — | points — No spike series. A thin bar would be the bar cell. A fixed-length vector is not a value-height spike. |
+| spike | — | Tremor | — | — | 100000 | unsupported | — | — | — | — | points — No spike series. A thin bar would be the bar cell. A fixed-length vector is not a value-height spike. |
 | spike | — | uPlot | — | — | 100000 | unsupported | — | — | — | — | points — No spike chart. A thin bar would be the bar cell. |
+| spike | — | Vega-Lite | — | — | 100000 | unsupported | — | — | — | — | points — No spike series. A thin bar would be the bar cell. A fixed-length vector is not a value-height spike. |
+| spike | — | Victory | — | — | 100000 | unsupported | — | — | — | — | points — No spike series. A thin bar would be the bar cell. A fixed-length vector is not a value-height spike. |
+| spike | — | visx | — | — | 100000 | unsupported | — | — | — | — | points — No spike series. A thin bar would be the bar cell. A fixed-length vector is not a value-height spike. |
+| candlestick | — | AG Charts | — | canvas | 2000 | ok | 168.20 | 32.60 | — | — | OHLC candles, plus volume |
+| candlestick | — | amCharts 5 | — | canvas | 2000 | ok | 224.90 | 200.50 | — | — | OHLC candles, plus volume |
+| candlestick | — | AntV G2 | — | — | 2000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick series. |
+| candlestick | — | ApexCharts | — | svg | 2000 | ok | 1076.30 | 1025.50 | — | — | OHLC candles, plus volume |
 | candlestick | — | Chart.js | — | — | 2000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick controller. |
-| candlestick | — | ChartKit | — | svg | 2000 | ok | 70.80 | 63.40 | — | — | OHLC candles, plus volume |
-| candlestick | — | ECharts | — | canvas | 2000 | ok | 74.00 | 33.60 | — | — | OHLC candles, plus volume |
+| candlestick | — | ChartKit | — | canvas | 2000 | ok | 23.80 | 18.90 | — | — | OHLC candles, plus volume |
+| candlestick | — | ECharts | — | canvas | 2000 | ok | 71.60 | 42.80 | — | — | OHLC candles, plus volume |
+| candlestick | — | Google Charts | — | svg | 2000 | ok | 339.20 | 284.40 | — | — | OHLC candles, plus volume |
+| candlestick | — | Highcharts | — | svg | 2000 | ok | 130.60 | 108.90 | — | — | OHLC candles, plus volume |
+| candlestick | — | Mermaid | — | — | 2000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick series. |
+| candlestick | — | MUI X Charts | — | — | 2000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick series. |
 | candlestick | — | Nivo | — | — | 2000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick package in Nivo 0.99.0. |
 | candlestick | — | Observable Plot | — | — | 2000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick mark. |
+| candlestick | — | Plotly.js | — | svg | 2000 | ok | 567.50 | 248.70 | — | — | OHLC candles, plus volume |
 | candlestick | — | Recharts | — | — | 2000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick chart. |
+| candlestick | — | TradingView Lightweight Charts | — | canvas | 2000 | ok | 41.70 | 24.30 | — | — | OHLC candles, plus volume |
+| candlestick | — | Tremor | — | — | 2000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick series. |
 | candlestick | — | uPlot | — | — | 2000 | unsupported | — | — | — | — | OHLC candles, plus volume — The candlestick in the uPlot demos is a custom path, not a built-in series. |
+| candlestick | — | Vega-Lite | — | — | 2000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick mark. |
+| candlestick | — | Victory | — | — | 2000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick series. |
+| candlestick | — | visx | — | — | 2000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick series. |
+| candlestick | — | AG Charts | — | canvas | 100000 | ok | 212.00 | 69.90 | — | — | OHLC candles, plus volume |
+| candlestick | — | amCharts 5 | — | canvas | 100000 | ok | 7145.00 | 131435.40 | — | — | OHLC candles, plus volume |
+| candlestick | — | AntV G2 | — | — | 100000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick series. |
+| candlestick | — | ApexCharts | — | svg | 100000 | timeout | — | — | — | — | OHLC candles, plus volume — candlestick chart. y is [open, high, low, close]. Volume is not on this axis. apexcharts 8.3.1. No key. The license is a revenue threshold, not a paint lock. — Timeout 180000ms exceeded |
 | candlestick | — | Chart.js | — | — | 100000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick controller. |
-| candlestick | — | ChartKit | — | svg | 100000 | error | — | — | — | — | OHLC candles, plus volume — No sampling; every candle is drawn. 2,000 is a long series that still builds. 100,000 candles put about 200,000 prices into one Math.max spread, which throws past about 150,000 numbers in V8. That larger cell stays in the matrix so a throw is status error, not a missing row. If a runtime paints it, the timing is real. — page.evaluate: Error: error[CK1006]: render failed: Maximum call stack size exceeded at paint2 (/workspace/bench/.out/browser/chartkit-candlestick.js:2878:15) at timed (/workspace/bench/.out/browser/chartkit-candlestick.js:2845:26) at Object.run (/workspace/bench/.out/browser/chartkit-candlestick.js:2883:12) at eval (eval at evaluate (:370:30), <anonymous>:1:27) at UtilityScript.evaluate (<anonymous>:372:16) at UtilityScript.<anonymous> (<anonymous>:1:44) |
-| candlestick | — | ECharts | — | canvas | 100000 | ok | 2847.30 | 2660.10 | — | — | OHLC candles, plus volume |
+| candlestick | — | ChartKit | — | canvas | 100000 | ok | 181.50 | 153.80 | — | — | OHLC candles, plus volume |
+| candlestick | — | ECharts | — | canvas | 100000 | ok | 2840.80 | 2626.40 | — | — | OHLC candles, plus volume |
+| candlestick | — | Google Charts | — | svg | 100000 | ok | 5314.00 | 10612.30 | — | — | OHLC candles, plus volume |
+| candlestick | — | Highcharts | — | svg | 100000 | ok | 2954.50 | 2913.30 | — | — | OHLC candles, plus volume |
+| candlestick | — | Mermaid | — | — | 100000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick series. |
+| candlestick | — | MUI X Charts | — | — | 100000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick series. |
 | candlestick | — | Nivo | — | — | 100000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick package in Nivo 0.99.0. |
 | candlestick | — | Observable Plot | — | — | 100000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick mark. |
+| candlestick | — | Plotly.js | — | svg | 100000 | ok | 101610.60 | 60983.60 | — | — | OHLC candles, plus volume |
 | candlestick | — | Recharts | — | — | 100000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick chart. |
+| candlestick | — | TradingView Lightweight Charts | — | canvas | 100000 | ok | 281.30 | 155.00 | — | — | OHLC candles, plus volume |
+| candlestick | — | Tremor | — | — | 100000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick series. |
 | candlestick | — | uPlot | — | — | 100000 | unsupported | — | — | — | — | OHLC candles, plus volume — The candlestick in the uPlot demos is a custom path, not a built-in series. |
+| candlestick | — | Vega-Lite | — | — | 100000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick mark. |
+| candlestick | — | Victory | — | — | 100000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick series. |
+| candlestick | — | visx | — | — | 100000 | unsupported | — | — | — | — | OHLC candles, plus volume — No candlestick series. |
 | histogram | — | Chart.js | — | — | 100000 | unsupported | — | — | — | — | observations before binning — No histogram that bins observations. Pre-binned bars would be the bar cell. |
-| histogram | — | ChartKit | — | svg | 100000 | ok | 27.20 | 18.00 | — | — | observations before binning |
+| histogram | — | ChartKit | — | svg | 100000 | ok | 30.80 | 17.30 | — | — | observations before binning |
 | histogram | — | ECharts | — | — | 100000 | unsupported | — | — | — | — | observations before binning — No histogram that bins observations. Pre-binned bars would be the bar cell. |
 | histogram | — | Nivo | — | — | 100000 | unsupported | — | — | — | — | observations before binning — No histogram that bins observations. Pre-binned bars would be the bar cell. |
-| histogram | — | Observable Plot | — | svg | 100000 | ok | 48.00 | 31.50 | — | — | observations before binning |
+| histogram | — | Observable Plot | — | svg | 100000 | ok | 45.70 | 40.10 | — | — | observations before binning |
 | histogram | — | Recharts | — | — | 100000 | unsupported | — | — | — | — | observations before binning — No histogram that bins observations. Pre-binned bars would be the bar cell. |
 | histogram | — | uPlot | — | — | 100000 | unsupported | — | — | — | — | observations before binning — No histogram that bins observations. Pre-binned bars would be the bar cell. |
 | boxplot | — | Chart.js | — | — | 100000 | unsupported | — | — | — | — | observations across 8 categories — No boxplot controller. |
-| boxplot | — | ChartKit | — | svg | 100000 | ok | 53.30 | 44.30 | — | — | observations across 8 categories |
-| boxplot | — | ECharts | — | canvas | 100000 | ok | 74.70 | 49.30 | — | — | observations across 8 categories |
-| boxplot | — | Nivo | — | svg | 100000 | ok | 87.10 | 61.60 | — | — | observations across 8 categories |
-| boxplot | — | Observable Plot | — | svg | 100000 | ok | 226.30 | 187.20 | — | — | observations across 8 categories |
+| boxplot | — | ChartKit | — | svg | 100000 | ok | 56.70 | 40.10 | — | — | observations across 8 categories |
+| boxplot | — | ECharts | — | canvas | 100000 | ok | 70.80 | 53.20 | — | — | observations across 8 categories |
+| boxplot | — | Nivo | — | svg | 100000 | ok | 86.50 | 69.70 | — | — | observations across 8 categories |
+| boxplot | — | Observable Plot | — | svg | 100000 | ok | 222.20 | 184.30 | — | — | observations across 8 categories |
 | boxplot | — | Recharts | — | — | 100000 | unsupported | — | — | — | — | observations across 8 categories — No boxplot chart. |
 | boxplot | — | uPlot | — | — | 100000 | unsupported | — | — | — | — | observations across 8 categories — No boxplot series. |
-| radar | — | Chart.js | — | canvas | 8 | ok | 23.10 | 19.60 | — | — | spokes; 3 series |
-| radar | — | ChartKit | — | svg | 8 | ok | 23.80 | 33.30 | — | — | spokes; 3 series |
-| radar | — | ECharts | — | canvas | 8 | ok | 30.20 | 25.50 | — | — | spokes; 3 series |
-| radar | — | Nivo | — | svg | 8 | ok | 27.60 | 18.80 | — | — | spokes; 3 series |
+| radar | — | Chart.js | — | canvas | 8 | ok | 21.80 | 27.50 | — | — | spokes; 3 series |
+| radar | — | ChartKit | — | svg | 8 | ok | 10.00 | 33.10 | — | — | spokes; 3 series |
+| radar | — | ECharts | — | canvas | 8 | ok | 29.00 | 19.30 | — | — | spokes; 3 series |
+| radar | — | Nivo | — | svg | 8 | ok | 27.10 | 17.40 | — | — | spokes; 3 series |
 | radar | — | Observable Plot | — | — | 8 | unsupported | — | — | — | — | spokes; 3 series — No radar mark. |
-| radar | — | Recharts | — | svg | 8 | ok | 36.20 | 16.60 | — | — | spokes; 3 series |
+| radar | — | Recharts | — | svg | 8 | ok | 36.10 | 16.20 | — | — | spokes; 3 series |
 | radar | — | uPlot | — | — | 8 | unsupported | — | — | — | — | spokes; 3 series — No radar series. |
 | funnel | — | Chart.js | — | — | 8 | unsupported | — | — | — | — | stages — No funnel controller. |
-| funnel | — | ChartKit | — | svg | 8 | ok | 23.00 | 33.10 | — | — | stages |
-| funnel | — | ECharts | — | canvas | 8 | ok | 22.50 | 22.40 | — | — | stages |
-| funnel | — | Nivo | — | svg | 8 | ok | 30.10 | 24.50 | — | — | stages |
+| funnel | — | ChartKit | — | svg | 8 | ok | 15.50 | 27.60 | — | — | stages |
+| funnel | — | ECharts | — | canvas | 8 | ok | 23.50 | 25.90 | — | — | stages |
+| funnel | — | Nivo | — | svg | 8 | ok | 29.90 | 20.00 | — | — | stages |
 | funnel | — | Observable Plot | — | — | 8 | unsupported | — | — | — | — | stages — No funnel mark. |
-| funnel | — | Recharts | — | svg | 8 | ok | 24.30 | 16.70 | — | — | stages |
+| funnel | — | Recharts | — | svg | 8 | ok | 24.30 | 14.20 | — | — | stages |
 | funnel | — | uPlot | — | — | 8 | unsupported | — | — | — | — | stages — No funnel series. |
 | treemap | — | Chart.js | — | — | 48 | unsupported | — | — | — | — | tiles; 6 color groups — No treemap controller. |
-| treemap | — | ChartKit | — | svg | 48 | ok | 22.90 | 33.50 | — | — | tiles; 6 color groups |
-| treemap | — | ECharts | — | canvas | 48 | ok | 34.80 | 948.00 | — | — | tiles; 6 color groups |
-| treemap | — | Nivo | — | svg | 48 | ok | 42.20 | 19.60 | — | — | tiles; 6 color groups |
+| treemap | — | ChartKit | — | svg | 48 | ok | 19.30 | 23.20 | — | — | tiles; 6 color groups |
+| treemap | — | ECharts | — | canvas | 48 | ok | 34.30 | 950.30 | — | — | tiles; 6 color groups |
+| treemap | — | Nivo | — | svg | 48 | ok | 41.60 | 19.50 | — | — | tiles; 6 color groups |
 | treemap | — | Observable Plot | — | — | 48 | unsupported | — | — | — | — | tiles; 6 color groups — The tree mark is a node-link layout, not a treemap. |
-| treemap | — | Recharts | — | svg | 48 | ok | 33.00 | 16.90 | — | — | tiles; 6 color groups |
+| treemap | — | Recharts | — | svg | 48 | ok | 32.70 | 17.30 | — | — | tiles; 6 color groups |
 | treemap | — | uPlot | — | — | 48 | unsupported | — | — | — | — | tiles; 6 color groups — No treemap series. |
 | sankey | — | Chart.js | — | — | 48 | unsupported | — | — | — | — | links across 4 layers — No sankey controller. |
-| sankey | — | ChartKit | — | svg | 48 | ok | 23.90 | 33.30 | — | — | links across 4 layers |
-| sankey | — | ECharts | — | canvas | 48 | ok | 32.40 | 18.50 | — | — | links across 4 layers |
-| sankey | — | Nivo | — | svg | 48 | ok | 44.40 | 18.90 | — | — | links across 4 layers |
+| sankey | — | ChartKit | — | svg | 48 | ok | 17.30 | 24.20 | — | — | links across 4 layers |
+| sankey | — | ECharts | — | canvas | 48 | ok | 31.40 | 20.60 | — | — | links across 4 layers |
+| sankey | — | Nivo | — | svg | 48 | ok | 41.70 | 24.60 | — | — | links across 4 layers |
 | sankey | — | Observable Plot | — | — | 48 | unsupported | — | — | — | — | links across 4 layers — No sankey mark. |
-| sankey | — | Recharts | — | svg | 48 | ok | 26.30 | 17.40 | — | — | links across 4 layers |
+| sankey | — | Recharts | — | svg | 48 | ok | 26.90 | 18.50 | — | — | links across 4 layers |
 | sankey | — | uPlot | — | — | 48 | unsupported | — | — | — | — | links across 4 layers — No sankey series. |
 | bullet | — | Chart.js | — | — | 6 | unsupported | — | — | — | — | rows, each with a target and three ranges — No bullet chart. |
-| bullet | — | ChartKit | — | svg | 6 | ok | 13.50 | 29.30 | — | — | rows, each with a target and three ranges |
+| bullet | — | ChartKit | — | svg | 6 | ok | 15.90 | 28.60 | — | — | rows, each with a target and three ranges |
 | bullet | — | ECharts | — | — | 6 | unsupported | — | — | — | — | rows, each with a target and three ranges — No bullet chart. |
-| bullet | — | Nivo | — | svg | 6 | ok | 43.60 | 15.00 | — | — | rows, each with a target and three ranges |
+| bullet | — | Nivo | — | svg | 6 | ok | 43.20 | 20.40 | — | — | rows, each with a target and three ranges |
 | bullet | — | Observable Plot | — | — | 6 | unsupported | — | — | — | — | rows, each with a target and three ranges — No bullet chart. |
 | bullet | — | Recharts | — | — | 6 | unsupported | — | — | — | — | rows, each with a target and three ranges — No bullet chart. |
 | bullet | — | uPlot | — | — | 6 | unsupported | — | — | — | — | rows, each with a target and three ranges — No bullet chart. |
+| waterfall | — | AG Charts | — | canvas | 12 | ok | 144.20 | 19.50 | — | — | steps, including the opening and closing totals |
+| waterfall | — | amCharts 5 | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — The openValueY column demo is a manual column, not a waterfall series. |
+| waterfall | — | AntV G2 | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — An interval with a manual y1 is not a waterfall mark. |
+| waterfall | — | ApexCharts | — | svg | 12 | ok | 43.60 | 11.90 | — | — | steps, including the opening and closing totals |
 | waterfall | — | Chart.js | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — No waterfall series. A transparent helper bar is not a native waterfall. |
-| waterfall | — | ChartKit | — | svg | 12 | ok | 21.80 | 33.30 | — | — | steps, including the opening and closing totals |
+| waterfall | — | ChartKit | — | svg | 12 | ok | 16.80 | 25.80 | — | — | steps, including the opening and closing totals |
 | waterfall | — | ECharts | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — No waterfall series. A transparent helper bar is not a native waterfall. |
+| waterfall | — | Google Charts | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — The candlestick waterfall trick is not a waterfall chart. |
+| waterfall | — | Highcharts | — | svg | 12 | ok | 33.50 | 24.10 | — | — | steps, including the opening and closing totals |
+| waterfall | — | Mermaid | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — No waterfall series. A transparent helper bar is not a native waterfall. |
+| waterfall | — | MUI X Charts | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — No waterfall series in @mui/x-charts 9.15.0. Composing bars is not this chart. |
 | waterfall | — | Nivo | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — No waterfall series. A transparent helper bar is not a native waterfall. |
 | waterfall | — | Observable Plot | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — No waterfall series. A transparent helper bar is not a native waterfall. |
+| waterfall | — | Plotly.js | — | svg | 12 | ok | 80.30 | 19.20 | — | — | steps, including the opening and closing totals |
 | waterfall | — | Recharts | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — No waterfall series. A transparent helper bar is not a native waterfall. |
+| waterfall | — | TradingView Lightweight Charts | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — No waterfall series. A transparent helper bar is not a native waterfall. |
+| waterfall | — | Tremor | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — No waterfall series. A transparent helper bar is not a native waterfall. |
 | waterfall | — | uPlot | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — No waterfall series. A transparent helper bar is not a native waterfall. |
-| area-range | — | Chart.js | — | canvas | 100000 | ok | 383.80 | 345.40 | — | — | x positions; low, high, and a centre line |
-| area-range | — | ChartKit | — | svg | 100000 | ok | 189.50 | 2781.50 | — | — | x positions; low, high, and a centre line |
+| waterfall | — | Vega-Lite | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — The window-transform recipe is a manual stack, not a waterfall mark. |
+| waterfall | — | Victory | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — No waterfall series. A transparent helper bar is not a native waterfall. |
+| waterfall | — | visx | — | — | 12 | unsupported | — | — | — | — | steps, including the opening and closing totals — No waterfall shape. A bar with a computed baseline is not this chart. |
+| area-range | — | Chart.js | — | canvas | 100000 | ok | 377.50 | 341.40 | — | — | x positions; low, high, and a centre line |
+| area-range | — | ChartKit | — | svg | 100000 | ok | 28.00 | 22.40 | — | — | x positions; low, high, and a centre line |
 | area-range | — | ECharts | — | — | 100000 | unsupported | — | — | — | — | x positions; low, high, and a centre line — No area-range series. A transparent stacked helper is not this chart. |
 | area-range | — | Nivo | — | — | 100000 | unsupported | — | — | — | — | x positions; low, high, and a centre line — No area-range package in Nivo 0.99.0. |
-| area-range | — | Observable Plot | — | svg | 100000 | ok | 228.90 | 4342.80 | — | — | x positions; low, high, and a centre line |
+| area-range | — | Observable Plot | — | svg | 100000 | ok | 230.90 | 4285.10 | — | — | x positions; low, high, and a centre line |
 | area-range | — | Recharts | — | — | 100000 | unsupported | — | — | — | — | x positions; low, high, and a centre line — No band series. ReferenceArea is an annotation, not a series. |
-| area-range | — | uPlot | — | canvas | 100000 | ok | 44.70 | 38.00 | — | — | x positions; low, high, and a centre line |
-| bar-range | — | Chart.js | — | canvas | 24 | ok | 24.10 | 24.90 | — | — | floating bars |
-| bar-range | — | ChartKit | — | svg | 24 | ok | 22.10 | 33.30 | — | — | floating bars |
+| area-range | — | uPlot | — | canvas | 100000 | ok | 45.80 | 34.80 | — | — | x positions; low, high, and a centre line |
+| bar-range | — | Chart.js | — | canvas | 24 | ok | 24.90 | 23.40 | — | — | floating bars |
+| bar-range | — | ChartKit | — | svg | 24 | ok | 18.10 | 24.80 | — | — | floating bars |
 | bar-range | — | ECharts | — | — | 24 | unsupported | — | — | — | — | floating bars — No floating-bar data. A transparent stacked helper is not this chart. |
 | bar-range | — | Nivo | — | — | 24 | unsupported | — | — | — | — | floating bars — No floating-bar chart in Nivo 0.99.0. |
-| bar-range | — | Observable Plot | — | svg | 24 | ok | 15.50 | 32.50 | — | — | floating bars |
-| bar-range | — | Recharts | — | svg | 24 | ok | 47.00 | 20.70 | — | — | floating bars |
-| bar-range | — | uPlot | — | canvas | 24 | ok | 14.90 | 33.30 | — | — | floating bars |
+| bar-range | — | Observable Plot | — | svg | 24 | ok | 15.40 | 25.70 | — | — | floating bars |
+| bar-range | — | Recharts | — | svg | 24 | ok | 47.00 | 21.10 | — | — | floating bars |
+| bar-range | — | uPlot | — | canvas | 24 | ok | 15.30 | 33.40 | — | — | floating bars |
 | errorbar | — | Chart.js | — | — | 24 | unsupported | — | — | — | — | points with low and high whiskers — No error-bar element in chart.js core. |
-| errorbar | — | ChartKit | — | svg | 24 | ok | 21.80 | 33.40 | — | — | points with low and high whiskers |
+| errorbar | — | ChartKit | — | svg | 24 | ok | 17.20 | 22.60 | — | — | points with low and high whiskers |
 | errorbar | — | ECharts | — | — | 24 | unsupported | — | — | — | — | points with low and high whiskers — No error-bar series. A custom series can draw anything and is not this chart. |
 | errorbar | — | Nivo | — | — | 24 | unsupported | — | — | — | — | points with low and high whiskers — No error-bar package in Nivo 0.99.0. |
 | errorbar | — | Observable Plot | — | — | 24 | unsupported | — | — | — | — | points with low and high whiskers — No error-bar mark. |
-| errorbar | — | Recharts | — | svg | 24 | ok | 58.80 | 23.60 | — | — | points with low and high whiskers |
+| errorbar | — | Recharts | — | svg | 24 | ok | 59.10 | 23.70 | — | — | points with low and high whiskers |
 | errorbar | — | uPlot | — | — | 24 | unsupported | — | — | — | — | points with low and high whiskers — No error-bar series. |
+| gantt | — | AG Charts | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt series in ag-charts-community or ag-charts-enterprise 14.2.0. |
+| gantt | — | amCharts 5 | — | canvas | 24 | ok | 237.90 | 105.80 | — | — | tasks, with a dependency chain and one milestone |
+| gantt | — | AntV G2 | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt series. A floating bar is the bar-range cell. |
+| gantt | — | ApexCharts | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt type. rangeBar is the bar-range cell. ApexGantt is a different product. |
 | gantt | — | Chart.js | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt series. A floating bar is the bar-range cell. |
-| gantt | — | ChartKit | — | svg | 24 | ok | 17.00 | 33.10 | — | — | tasks, with a dependency chain and one milestone |
+| gantt | — | ChartKit | — | svg | 24 | ok | 10.60 | 30.30 | — | — | tasks, with a dependency chain and one milestone |
 | gantt | — | ECharts | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt series. A floating bar is the bar-range cell. |
+| gantt | — | Google Charts | — | svg | 24 | ok | 188.70 | 31.50 | — | — | tasks, with a dependency chain and one milestone |
+| gantt | — | Highcharts | — | svg | 24 | ok | 68.90 | 26.60 | — | — | tasks, with a dependency chain and one milestone |
+| gantt | — | Mermaid | — | svg | 24 | ok | 75.30 | 14.70 | — | — | tasks, with a dependency chain and one milestone |
+| gantt | — | MUI X Charts | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt series. A floating bar is the bar-range cell. |
 | gantt | — | Nivo | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt series. A floating bar is the bar-range cell. |
 | gantt | — | Observable Plot | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt series. A floating bar is the bar-range cell. |
+| gantt | — | Plotly.js | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt trace. Shapes on a date axis are not a gantt series. |
 | gantt | — | Recharts | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt series. A floating bar is the bar-range cell. |
+| gantt | — | TradingView Lightweight Charts | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt series. A floating bar is the bar-range cell. |
+| gantt | — | Tremor | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt series. A floating bar is the bar-range cell. |
 | gantt | — | uPlot | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt series. A floating bar is the bar-range cell. |
+| gantt | — | Vega-Lite | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — A bar with x and x2 is the bar-range cell, not a gantt chart. |
+| gantt | — | Victory | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt series. A floating bar is the bar-range cell. |
+| gantt | — | visx | — | — | 24 | unsupported | — | — | — | — | tasks, with a dependency chain and one milestone — No gantt chart. @visx/shape bars are the bar cell. |
+| timeline | — | AG Charts | — | — | 16 | unsupported | — | — | — | — | events and periods — No event timeline. |
+| timeline | — | amCharts 5 | — | — | 16 | unsupported | — | — | — | — | events and periods — The timeline module is a curve, serpentine, or spiral axis, not an event timeline. |
+| timeline | — | AntV G2 | — | — | 16 | unsupported | — | — | — | — | events and periods — No event timeline. |
+| timeline | — | ApexCharts | — | — | 16 | unsupported | — | — | — | — | events and periods — rangeBar is the bar-range cell, not an event timeline. |
 | timeline | — | Chart.js | — | — | 16 | unsupported | — | — | — | — | events and periods — No event timeline. |
-| timeline | — | ChartKit | — | svg | 16 | ok | 9.20 | 33.30 | — | — | events and periods |
+| timeline | — | ChartKit | — | svg | 16 | ok | 10.30 | 29.80 | — | — | events and periods |
 | timeline | — | ECharts | — | — | 16 | unsupported | — | — | — | — | events and periods — The timeline component is a playback control, not an event timeline. |
+| timeline | — | Google Charts | — | svg | 16 | ok | 233.10 | 27.70 | — | — | events and periods |
+| timeline | — | Highcharts | — | svg | 16 | ok | 47.40 | 23.00 | — | — | events and periods |
+| timeline | — | Mermaid | — | svg | 16 | ok | 82.40 | 20.50 | — | — | events and periods |
+| timeline | — | MUI X Charts | — | — | 16 | unsupported | — | — | — | — | events and periods — No event timeline. |
 | timeline | — | Nivo | — | — | 16 | unsupported | — | — | — | — | events and periods — No event timeline. |
 | timeline | — | Observable Plot | — | — | 16 | unsupported | — | — | — | — | events and periods — No event timeline. |
+| timeline | — | Plotly.js | — | — | 16 | unsupported | — | — | — | — | events and periods — No event-timeline trace. |
 | timeline | — | Recharts | — | — | 16 | unsupported | — | — | — | — | events and periods — No event timeline. |
+| timeline | — | TradingView Lightweight Charts | — | — | 16 | unsupported | — | — | — | — | events and periods — No event timeline. |
+| timeline | — | Tremor | — | — | 16 | unsupported | — | — | — | — | events and periods — No event timeline. |
 | timeline | — | uPlot | — | — | 16 | unsupported | — | — | — | — | events and periods — No event timeline. |
+| timeline | — | Vega-Lite | — | — | 16 | unsupported | — | — | — | — | events and periods — No event timeline. |
+| timeline | — | Victory | — | — | 16 | unsupported | — | — | — | — | events and periods — No event timeline. |
+| timeline | — | visx | — | — | 16 | unsupported | — | — | — | — | events and periods — No event timeline. |
+| quadrant | — | AG Charts | — | canvas | 24 | ok | 152.20 | 16.30 | — | — | labeled points on a unit square |
+| quadrant | — | amCharts 5 | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
+| quadrant | — | AntV G2 | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
+| quadrant | — | ApexCharts | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart type. |
 | quadrant | — | Chart.js | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
-| quadrant | — | ChartKit | — | svg | 24 | ok | 9.30 | 33.50 | — | — | labeled points on a unit square |
+| quadrant | — | ChartKit | — | svg | 24 | ok | 9.60 | 33.60 | — | — | labeled points on a unit square |
 | quadrant | — | ECharts | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
+| quadrant | — | Google Charts | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
+| quadrant | — | Highcharts | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
+| quadrant | — | Mermaid | — | svg | 24 | ok | 78.50 | 19.50 | — | — | labeled points on a unit square |
+| quadrant | — | MUI X Charts | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
 | quadrant | — | Nivo | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
 | quadrant | — | Observable Plot | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
+| quadrant | — | Plotly.js | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
 | quadrant | — | Recharts | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
+| quadrant | — | TradingView Lightweight Charts | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
+| quadrant | — | Tremor | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
 | quadrant | — | uPlot | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
+| quadrant | — | Vega-Lite | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
+| quadrant | — | Victory | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
+| quadrant | — | visx | — | — | 24 | unsupported | — | — | — | — | labeled points on a unit square — No quadrant chart. Points with guides are the scatter cell. |
+| venn | — | AG Charts | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
+| venn | — | amCharts 5 | — | canvas | 3 | ok | 38.20 | 44.00 | — | — | sets; the data has 7 region rows |
+| venn | — | AntV G2 | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
+| venn | — | ApexCharts | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
 | venn | — | Chart.js | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
-| venn | — | ChartKit | — | svg | 3 | ok | 10.80 | 31.30 | — | — | sets; the data has 7 region rows |
+| venn | — | ChartKit | — | svg | 3 | ok | 13.20 | 26.90 | — | — | sets; the data has 7 region rows |
 | venn | — | ECharts | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
+| venn | — | Google Charts | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
+| venn | — | Highcharts | — | svg | 3 | ok | 34.10 | 29.10 | — | — | sets; the data has 7 region rows |
+| venn | — | Mermaid | — | svg | 3 | ok | 77.20 | 12.30 | — | — | sets; the data has 7 region rows |
+| venn | — | MUI X Charts | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
 | venn | — | Nivo | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
 | venn | — | Observable Plot | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
+| venn | — | Plotly.js | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn trace. layout.shapes can draw circles and are not this chart. |
 | venn | — | Recharts | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
+| venn | — | TradingView Lightweight Charts | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
+| venn | — | Tremor | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
 | venn | — | uPlot | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
+| venn | — | Vega-Lite | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
+| venn | — | Victory | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
+| venn | — | visx | — | — | 3 | unsupported | — | — | — | — | sets; the data has 7 region rows — No venn chart. |
+| journey | — | AG Charts | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
+| journey | — | amCharts 5 | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
+| journey | — | AntV G2 | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
+| journey | — | ApexCharts | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
 | journey | — | Chart.js | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
-| journey | — | ChartKit | — | svg | 12 | ok | 23.30 | 33.20 | — | — | steps scored 1 to 5 |
+| journey | — | ChartKit | — | svg | 12 | ok | 10.60 | 30.90 | — | — | steps scored 1 to 5 |
 | journey | — | ECharts | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
+| journey | — | Google Charts | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
+| journey | — | Highcharts | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
+| journey | — | Mermaid | — | svg | 12 | ok | 76.20 | 14.40 | — | — | steps scored 1 to 5 |
+| journey | — | MUI X Charts | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
 | journey | — | Nivo | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
 | journey | — | Observable Plot | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
+| journey | — | Plotly.js | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
 | journey | — | Recharts | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
+| journey | — | TradingView Lightweight Charts | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
+| journey | — | Tremor | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
 | journey | — | uPlot | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
+| journey | — | Vega-Lite | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
+| journey | — | Victory | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
+| journey | — | visx | — | — | 12 | unsupported | — | — | — | — | steps scored 1 to 5 — No journey chart. |
 | radial-bar | — | Chart.js | — | — | 12 | unsupported | — | — | — | — | categories around a circle — No radial bar controller. polarArea is the rose cell. |
-| radial-bar | — | ChartKit | — | svg | 12 | ok | 21.70 | 33.30 | — | — | categories around a circle |
-| radial-bar | — | ECharts | — | canvas | 12 | ok | 33.60 | 18.00 | — | — | categories around a circle |
-| radial-bar | — | Nivo | — | svg | 12 | ok | 33.50 | 23.70 | — | — | categories around a circle |
+| radial-bar | — | ChartKit | — | svg | 12 | ok | 15.20 | 27.30 | — | — | categories around a circle |
+| radial-bar | — | ECharts | — | canvas | 12 | ok | 31.10 | 19.20 | — | — | categories around a circle |
+| radial-bar | — | Nivo | — | svg | 12 | ok | 33.40 | 25.40 | — | — | categories around a circle |
 | radial-bar | — | Observable Plot | — | — | 12 | unsupported | — | — | — | — | categories around a circle — No radial bar mark. |
-| radial-bar | — | Recharts | — | svg | 12 | ok | 30.10 | 14.40 | — | — | categories around a circle |
+| radial-bar | — | Recharts | — | svg | 12 | ok | 29.40 | 12.40 | — | — | categories around a circle |
 | radial-bar | — | uPlot | — | — | 12 | unsupported | — | — | — | — | categories around a circle — No polar bar series. |
-| rose | — | Chart.js | — | canvas | 12 | ok | 20.30 | 26.20 | — | — | equal-angle slices |
-| rose | — | ChartKit | — | svg | 12 | ok | 13.80 | 29.70 | — | — | equal-angle slices |
-| rose | — | ECharts | — | canvas | 12 | ok | 27.50 | 16.90 | — | — | equal-angle slices |
+| rose | — | Chart.js | — | canvas | 12 | ok | 20.20 | 28.40 | — | — | equal-angle slices |
+| rose | — | ChartKit | — | svg | 12 | ok | 15.00 | 26.70 | — | — | equal-angle slices |
+| rose | — | ECharts | — | canvas | 12 | ok | 26.40 | 19.30 | — | — | equal-angle slices |
 | rose | — | Nivo | — | — | 12 | unsupported | — | — | — | — | equal-angle slices — No rose or polar-area package in Nivo 0.99.0. |
 | rose | — | Observable Plot | — | — | 12 | unsupported | — | — | — | — | equal-angle slices — No rose or polar-area mark. |
 | rose | — | Recharts | — | — | 12 | unsupported | — | — | — | — | equal-angle slices — No rose or polar-area chart. RadialBar is the radial-bar cell. |
 | rose | — | uPlot | — | — | 12 | unsupported | — | — | — | — | equal-angle slices — No polar area or rose series. |
 | sunburst | — | Chart.js | — | — | 48 | unsupported | — | — | — | — | leaves under 6 branches — No sunburst controller. |
-| sunburst | — | ChartKit | — | svg | 48 | ok | 23.30 | 33.40 | — | — | leaves under 6 branches |
-| sunburst | — | ECharts | — | canvas | 48 | ok | 30.50 | 15.00 | — | — | leaves under 6 branches |
-| sunburst | — | Nivo | — | svg | 48 | ok | 36.60 | 17.30 | — | — | leaves under 6 branches |
+| sunburst | — | ChartKit | — | svg | 48 | ok | 18.20 | 23.20 | — | — | leaves under 6 branches |
+| sunburst | — | ECharts | — | canvas | 48 | ok | 29.50 | 18.40 | — | — | leaves under 6 branches |
+| sunburst | — | Nivo | — | svg | 48 | ok | 35.90 | 13.00 | — | — | leaves under 6 branches |
 | sunburst | — | Observable Plot | — | — | 48 | unsupported | — | — | — | — | leaves under 6 branches — No sunburst mark. |
-| sunburst | — | Recharts | — | svg | 48 | ok | 29.60 | 16.80 | — | — | leaves under 6 branches |
+| sunburst | — | Recharts | — | svg | 48 | ok | 29.50 | 21.30 | — | — | leaves under 6 branches |
 | sunburst | — | uPlot | — | — | 48 | unsupported | — | — | — | — | leaves under 6 branches — No sunburst series. |
+| bar-list | — | AG Charts | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
+| bar-list | — | amCharts 5 | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
+| bar-list | — | AntV G2 | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
+| bar-list | — | ApexCharts | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
 | bar-list | — | Chart.js | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
-| bar-list | — | ChartKit | — | svg | 20 | ok | 14.10 | 29.80 | — | — | ranked rows |
+| bar-list | — | ChartKit | — | svg | 20 | ok | 26.80 | 33.30 | — | — | ranked rows |
 | bar-list | — | ECharts | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
+| bar-list | — | Google Charts | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
+| bar-list | — | Highcharts | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
+| bar-list | — | Mermaid | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
+| bar-list | — | MUI X Charts | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
 | bar-list | — | Nivo | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
 | bar-list | — | Observable Plot | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
+| bar-list | — | Plotly.js | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
 | bar-list | — | Recharts | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
+| bar-list | — | TradingView Lightweight Charts | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
+| bar-list | — | Tremor | — | html | 20 | ok | 46.00 | 66.50 | — | — | ranked rows |
 | bar-list | — | uPlot | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
+| bar-list | — | Vega-Lite | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
+| bar-list | — | Victory | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
+| bar-list | — | visx | — | — | 20 | unsupported | — | — | — | — | ranked rows — No bar-list component. A horizontal bar is the bar cell. |
 
-Chart-type cells that failed: Nivo line n=1000000 error, ChartKit candlestick n=100000 error, Recharts stacked-area n=100000 error, Nivo stacked-area n=100000 error.
-136 cells are unsupported: the library has no native chart of that shape, and the time is null.
+Chart-type cells that failed: Nivo line n=1000000 error, Recharts stacked-area n=100000 error, Nivo stacked-area n=100000 error, ApexCharts candlestick n=100000 timeout.
+276 cells are unsupported: the library has no native chart of that shape, and the time is null.
 
-At 10,000 points the fastest update is Chart.js at 18.40 ms. ChartKit update is 30.90 ms (samples 31.90, 32.50, 26.90, 30.90, 29.70). Those samples sit on the two-frame wait. The sampled SVG replacement is not a separate hotspot in that cell. ChartKit sampling none at 100,000 points is 56.30 ms initial and 1202.40 ms update. At 1,000,000 points with sampling none the status is ok (540.20 ms initial, 22355.90 ms update). ECharts at 100,000 points updates in 2728.40 ms; the shared frames now wait for that canvas to paint, which the old finished-only timer did not.
+At 10,000 points the fastest update is Chart.js at 17.60 ms. ChartKit update is 33.10 ms (samples 33.10, 33.20, 32.60, 33.20, 33.00). Those samples sit on the two-frame wait. The sampled SVG replacement is not a separate hotspot in that cell. ChartKit sampling none at 100,000 points is 54.00 ms initial and 1157.20 ms update. At 1,000,000 points with sampling none the status is ok (466.70 ms initial, 21550.20 ms update). ECharts at 100,000 points updates in 2739.90 ms; the shared frames now wait for that canvas to paint, which the old finished-only timer did not.
 
 ### ChartKit before and after sampling
 
@@ -401,10 +583,10 @@ Before is the single sample from 2026-10-16T15:19:52.560Z, when ChartKit drew ev
 
 | Points | Before initial / update | After initial / update | Before note |
 |---:|---:|---:|---|
-| 1000 | 18.70 / 25.10 | 11.40 / 30.20 | full path |
-| 10000 | 23.60 / 45.50 | 12.80 / 30.90 | full path |
-| 100000 | 123.80 / 1202.30 | 15.00 / 20.40 | full path; update was one sample and slower than the error-SVG 1M row |
-| 1000000 | 260.80 / 239.70 | 30.00 / 20.40 | error SVG, not a chart |
+| 1000 | 18.70 / 25.10 | 12.00 / 28.00 | full path |
+| 10000 | 23.60 / 45.50 | 15.30 / 33.10 | full path |
+| 100000 | 123.80 / 1202.30 | 14.20 / 30.80 | full path; update was one sample and slower than the error-SVG 1M row |
+| 1000000 | 260.80 / 239.70 | 24.30 / 23.90 | error SVG, not a chart |
 
 ### ChartKit before and after the typed-column path
 
@@ -412,10 +594,10 @@ Before is the median of 5 from 2026-10-16T15:40:22.418Z, after sampling was adde
 
 | Points | Before initial / update | After initial / update |
 |---:|---:|---:|
-| 1000 | 21.80 / 31.80 | 11.40 / 30.20 |
-| 10000 | 17.00 / 28.80 | 12.80 / 30.90 |
-| 100000 | 35.10 / 21.10 | 15.00 / 20.40 |
-| 1000000 | 213.90 / 171.30 | 30.00 / 20.40 |
+| 1000 | 21.80 / 31.80 | 12.00 / 28.00 |
+| 10000 | 17.00 / 28.80 | 15.30 / 33.10 |
+| 100000 | 35.10 / 21.10 | 14.20 / 30.80 |
+| 1000000 | 213.90 / 171.30 | 24.30 / 23.90 |
 
 On a cold page, constructing `Intl.NumberFormat` for the tick labels was about 10 ms, and `Array.from` on a 100k Float64 column was about 6 ms. This run keeps those columns in place and formats `en-US` ticks without `Intl`. Replacing `innerHTML` with the sampled SVG measured 0.2 ms, and the next animation frames matched a mutation that did nothing. Writing the path `d` attribute in place matched `innerHTML`. The earlier 10k update gap was partly the timer: ChartKit waited for two animation frames and ECharts waited only for `finished`. This run gives every library the same two frames after its own completion.
 

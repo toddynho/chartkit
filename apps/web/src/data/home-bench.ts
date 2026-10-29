@@ -55,58 +55,58 @@ const ROW_DEFS: { type: string; points: number; note: string; scope: string }[] 
 
 /**
  * Two-frame paint medians (initial / update), kind "median", BENCH_SAMPLES=5.
- * Measured 2026-10-28T00:30:27.624Z on 7b7654a61ba57952e3251a1b2257325ddf2a8d88.
- * Read from bench/results/paint.json on draft PR 81 (not on main). Line is the
- * 100,000-point sampling-auto cell, the point count this section already shows.
+ * Measured 2026-10-29T02:07:52.908Z on main tip 749b8ffec2820c61c785c34ae0adb187eeedcf00
+ * after #81, #82, and #83. These are post-#82 painters on main tip, not the #81 draft.
+ * Line is the 100,000-point sampling-auto cell, the point count this section already shows.
  * Area is native stacked-area. Unsupported and error cells are omitted.
  * Nivo is not in this legend. These are not hover-steady times.
  */
 const PINNED: Record<string, Record<string, [number, number]>> = {
   line: {
-    ChartKit: [15, 20.4],
-    uPlot: [14.9, 30.6],
-    "Chart.js": [58.6, 34.4],
-    "Observable Plot": [104.4, 1544.3],
-    Recharts: [2166.8, 1084.7],
-    ECharts: [2392.4, 2728.4],
+    ChartKit: [14.2, 30.8],
+    uPlot: [14.7, 30.5],
+    "Chart.js": [58.7, 33.4],
+    "Observable Plot": [109.5, 1481],
+    Recharts: [1884.3, 1002],
+    ECharts: [2491.8, 2739.9],
   },
   area: {
-    ChartKit: [52.2, 49.9],
-    "Chart.js": [691.4, 687.4],
-    "Observable Plot": [606.1, 5302.6],
-    ECharts: [18911.8, 18589.1],
+    ChartKit: [45.6, 51.6],
+    "Chart.js": [737.4, 670],
+    "Observable Plot": [563.3, 5252.7],
+    ECharts: [18700.4, 18445.8],
   },
   bar: {
-    ChartKit: [16.4, 33.6],
-    uPlot: [16.6, 33.3],
-    "Chart.js": [26.7, 22.8],
-    "Observable Plot": [16.8, 31.8],
-    Recharts: [51.6, 23.4],
-    ECharts: [35, 12.2],
+    ChartKit: [12.1, 29.8],
+    uPlot: [12, 32.3],
+    "Chart.js": [26.4, 21.4],
+    "Observable Plot": [17.4, 29.6],
+    Recharts: [49.8, 19.1],
+    ECharts: [34.7, 15.8],
   },
   scatter: {
-    ChartKit: [3667.3, 3581],
-    uPlot: [128.6, 111.2],
-    "Chart.js": [273.5, 248.2],
-    "Observable Plot": [522.2, 629.9],
-    Recharts: [5985, 11852.4],
-    ECharts: [9044.4, 9112],
+    ChartKit: [62.4, 40],
+    uPlot: [132, 121.1],
+    "Chart.js": [269.3, 247.1],
+    "Observable Plot": [519, 624.9],
+    Recharts: [5815.9, 11446.6],
+    ECharts: [8827.4, 9060.5],
   },
   donut: {
-    ChartKit: [17.9, 33.2],
-    "Chart.js": [12.3, 33.5],
-    Recharts: [28.5, 19.1],
-    ECharts: [26.1, 15.4],
+    ChartKit: [8.8, 33.5],
+    "Chart.js": [11.7, 33.5],
+    Recharts: [27.7, 17.1],
+    ECharts: [25.3, 23.9],
   },
   heatmap: {
-    ChartKit: [44.7, 43.4],
-    "Observable Plot": [22.6, 24.5],
-    ECharts: [53.2, 27],
+    ChartKit: [15.9, 24.1],
+    "Observable Plot": [22.9, 22.7],
+    ECharts: [49.1, 25.5],
   },
 };
 
-const PINNED_ON = "2026-10-28";
-const PINNED_COMMIT = "7b7654a";
+const PINNED_ON = "2026-10-29";
+const PINNED_COMMIT = "749b8ffe";
 
 const LO = Math.log10(5);
 const HI = Math.log10(50_000);
