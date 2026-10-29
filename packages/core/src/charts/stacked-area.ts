@@ -1,13 +1,18 @@
 import { mountAxes } from "../axis-extra";
 import type { ChartRenderer } from "../render";
-import { renderStackedArea } from "../renderers/cartesian";
+import { mountMarks, mountStacks, renderStackedArea } from "../renderers/cartesian";
 import { mountTotals } from "../totals";
 
-mountAxes();
-mountTotals();
+function render(spec: Record<string, unknown>): string | null {
+  mountAxes();
+  mountTotals();
+  mountStacks();
+  mountMarks();
+  return renderStackedArea(spec);
+}
 
 export const stackedArea: ChartRenderer = {
   name: "stackedArea",
   types: ["stacked-area"],
-  render: renderStackedArea,
+  render,
 };

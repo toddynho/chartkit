@@ -14,6 +14,7 @@ import { CHROME_TOP } from "../chrome";
 import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
 import { layoutPaint } from "../layout-hook";
 import { boxId, brokenScale, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, round, scaleClamp, scalePad, symlogTicks, ticks } from "../svg";
+import { bump, revision, slots } from "../feature-hooks";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
 export interface Headline {
@@ -145,8 +146,6 @@ function renderTyped(
 
 type ColorScaleReader = (channel: unknown, preset: PresetTokens, values: ArrayLike<number>, fallback: boolean) => ColorScale | null;
 
-let colorScaleReader: ColorScaleReader | null = null;
-
 /**
  * Bar and combo mount this. Line, area, and sparkline do not, so a plain line
  * bundle pays for legend layout and not for sequential, diverging, quantize, or threshold.
@@ -154,7 +153,43 @@ let colorScaleReader: ColorScaleReader | null = null;
  * two entries stay in step.
  */
 export function mountColorScale(reader: ColorScaleReader): void {
-  colorScaleReader = reader;
+  slots.colorScale = reader;
+  slots.scale = applyColorScale;
+  bump();
+}
+
+/** Callouts, trends, fits, rules, and weekend bands. Absent from a line-only bundle until this runs. */
+export function mountAnnotations(): void {
+  slots.notes = paintNotes;
+  bump();
+}
+
+/** Colour rules, categorical point colours, and delta-E shifts. A bar ramp does not need this. */
+export function mountColorRules(): void {
+  slots.colors = runColorRules;
+  bump();
+}
+
+/** Headline row and tooltip chrome attributes. The static line entry omits both. */
+export function mountChrome(): void {
+  slots.chromeRead = readChromeOf;
+  slots.chromePaint = headlineSvg;
+  slots.chromeTip = tipAttrs;
+  bump();
+}
+
+/** Stack groups. Bar, stacked-area, and combo call this. A plain line does not. */
+export function mountStacks(): void {
+  slots.stacks = planStacks;
+  slots.stackFold = stackLayers;
+  bump();
+}
+
+/** Series labels and the padding they reserve. Bar and stacked-area call this. */
+export function mountMarks(): void {
+  slots.labels = placeLineLabels;
+  slots.markPad = markPadding;
+  bump();
 }
 
 /** Area is type "line" plus mark.area, so it stays in this entry. */
@@ -450,6 +485,10 @@ function cssText(value: unknown, limit: number): string {
   return text.length > 0 && text.length <= limit ? text : "";
 }
 
+function readChromeOf(spec: Record<string, unknown>): { headline?: Headline; tip?: TipChrome } {
+  return { headline: readHeadline(spec), tip: readTip(spec) };
+}
+
 function readHeadline(spec: Record<string, unknown>): Headline | undefined {
   if (!isRecord(spec.headline)) return;
   const label = cssText(spec.headline.label, 80);
@@ -473,7 +512,7 @@ function readTip(spec: Record<string, unknown>): TipChrome | undefined {
 
 /** Theme, channels, and geometry. Reused when a later spec only replaces `data`. */
 function shellFor(spec: Record<string, unknown>): ChartShell {
-  const stamp = shellStamp(spec);
+  const stamp = `${shellStamp(spec)}|${revision}`;
   const hit = chartShell;
   if (hit && hit.stamp === stamp) return hit;
   const type = spec.type as string;
@@ -492,6 +531,7 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
   const radiusSet = typeof mark.cornerRadius === "number";
   const pointsSet = mark.points === "always" || mark.points === "none" || mark.points === "hover";
   const points = pointsSet ? (mark.points as "none" | "hover" | "always") : geometry.points;
+  const chrome = slots.chromeRead?.(spec);
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : "";
   const idSource = typeof spec.id === "string" ? spec.id : alt || type;
   const orientation = mark.orientation === "horizontal" && type === "bar" ? "horizontal" : "vertical";
@@ -533,8 +573,8 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     radiusEnds: mark.radiusEnds === "all" ? "all" : "outer",
     partial: mark.partial === "dashed" || mark.partial === "dotted" ? mark.partial : "",
     partialOpacity: typeof mark.partialOpacity === "number" ? clamp(mark.partialOpacity, 0, 1) : undefined,
-    headline: readHeadline(spec),
-    tip: readTip(spec),
+    headline: chrome?.headline,
+    tip: chrome?.tip,
     gap: typeof mark.gap === "number" ? mark.gap : geometry.gap,
     labelsOn: mark.labels === true,
     pointShape: glyphOf(mark.pointShape),
@@ -658,10 +698,17 @@ function toModel(
     x = null;
     xTemporal = false;
   }
-  const colorScale = applyPointColors(table, encoding, mark, preset, series, labels, type === "bar" || type === "combo");
-  const ruleLegend = colorScale ? [] : ruleSwatches(series, readRules(mark), preset, baseLabelOf(mark));
-  const swatches = colorScale || ruleLegend.length ? undefined : categorySwatches(spec, series, labels);
-  const planned = planStacks(series, shell.stack);
+  const useScale = type === "bar" || type === "combo";
+  let colorScale: ColorScale | null = null;
+  let ruleLegend: NonNullable<PlotModel["ruleLegend"]> = [];
+  let swatches: { name: string; color: string }[] | undefined;
+  if (slots.colors) {
+    const painted = slots.colors(spec, table, encoding, mark, preset, series, labels, useScale);
+    colorScale = painted.scale;
+    ruleLegend = painted.rules;
+    swatches = painted.swatches;
+  } else if (slots.scale) colorScale = slots.scale(table, encoding, preset, series, useScale);
+  const planned = slots.stacks ? slots.stacks(series, shell.stack) : idleStacks(series);
 
   return {
     ...shell,
@@ -752,7 +799,7 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   if (model.subtitle) {
     parts.push(`<text x="${n(titleX)}" y="${model.title ? 40 : 18}"${titleAnchor} fill="${cssVar("muted", model.preset.muted)}" font-size="12" font-weight="400">${esc(model.subtitle)}</text>`);
   }
-  if (model.headline) parts.push(headlineSvg(model));
+  if (slots.chromePaint && model.headline) parts.push(slots.chromePaint(model));
   if (model.legend && !model.legendBox) parts.push(legend(model, pad.left, model.subtitle ? 54 : model.title ? 36 : CHROME_TOP, plot.right));
 
   const clip = boxId(model.id, plot.left, plot.top, plotW, plotH);
@@ -784,27 +831,7 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   const grid = hooks?.grid(model, plot, horizontal, count, xScale);
   if (grid) parts.push(grid);
 
-  const notes = annotationLayers(model.notes, {
-    plot,
-    taken: seriesLabelBoxes(model, xScale, yScale, y2Scale, horizontal),
-    preset: model.preset,
-    xAt: (value) => locateX(model, xScale, value, count),
-    yAt: (value, axis) => {
-      const numeric = dataNumber(value);
-      if (numeric === null) return null;
-      return (axis === "y2" ? y2Scale : yScale)(numeric);
-    },
-    samples: notesNeedSamples(model.notes)
-      ? model.series.map((series) => ({ name: series.name, axis: series.axis, pts: seriesPoints(model.x, series.values) }))
-      : undefined,
-    labels: model.labels,
-    temporal: model.xTemporal,
-    xNum: model.x,
-    slot: (index) => xScale.band(index),
-    count,
-    flip: horizontal,
-    bands: model.bands,
-  });
+  const notes = slots.notes ? slots.notes(model, plot, xScale, yScale, y2Scale, horizontal, count) : { under: "", over: "" };
   parts.push(`<g clip-path="url(#${clip})">`);
   parts.push(notes.under);
   if (pass === "off") {
@@ -855,7 +882,7 @@ function drawLines(
   const held = bag();
   let late = "";
   if (layers && totalHook && legacyTotals(model)) late += totalHook(model, layers, xScale, yScale, false, held);
-  late += placeLineLabels(model, layers, xScale, yScale, y2Scale, held);
+  if (slots.labels) late += slots.labels(model, layers, xScale, yScale, y2Scale, held);
   if (late) model.late += late;
   return out.join("");
 }
@@ -931,7 +958,7 @@ function drawCombo(
   }
   const held = bag();
   const fill = cssVar("text", model.preset.text);
-  let late = placeLineLabels(model, layers, xScale, yScale, y2Scale, held);
+  let late = slots.labels ? slots.labels(model, layers, xScale, yScale, y2Scale, held) : "";
   for (const lab of labs) late += held.put(lab.text, lab.x, lab.y, lab.anchor, fill);
   if (late) model.late += late;
   return out.join("");
@@ -1162,7 +1189,7 @@ function paintPoints(out: string[], points: (Pt | null)[], model: PlotModel, ser
     const ruled = Boolean(override && override !== series.color);
     const outlined = Boolean(series.ruleHollow?.[at]);
     const hollow = outlined || series.hollow || model.pointHollow;
-    const color = ruled ? override : series.mark === "line" ? strokeOf(series, model) : series.color;
+    const color = ruled && override ? override : series.mark === "line" ? strokeOf(series, model) : series.color;
     const caption = series.ruleLabels?.[at] ?? "";
     const named = colored ? ` data-ck-name="${esc(series.name)}" data-ck-i="${at}"` : indexes ? ` data-ck-i="${indexes[k]}"` : "";
     const rule = caption ? ` data-ck-rule="${esc(caption)}"` : "";
@@ -1481,6 +1508,12 @@ export function stackLayers(series: Series[], mode: "stack" | "percent"): Layers
   };
 }
 
+function idleStacks(series: Series[]): { layers: null; barSlot: number[]; barSlots: number } {
+  const barSlot = new Array<number>(series.length);
+  for (let i = 0; i < series.length; i++) barSlot[i] = 0;
+  return { layers: null, barSlot, barSlots: 1 };
+}
+
 /** Named groups stack with each other. A name used once, or omitted when mark.stack is none, stays raw. */
 export function planStacks(series: Series[], mode: "none" | "stack" | "percent"): { layers: Layers | null; barSlot: number[]; barSlots: number } {
   const count = series.reduce((max, item) => Math.max(max, item.values.length), 0);
@@ -1624,7 +1657,7 @@ function xPosition(
       min = nice[0];
       max = nice[1];
     }
-    const padded = padExtent(min, max, model.xPad, null);
+    const padded = padExtent(min, max, model.xPad ?? null, null);
     min = padded[0];
     max = padded[1];
   }
@@ -2379,6 +2412,24 @@ function svgStyle(model: PlotModel): string {
   return style;
 }
 
+function markPadding(model: PlotModel, horizontal: boolean): { top: number; right: number; bottom: number; left: number; gutter: number } {
+  let top = 0;
+  let right = 0;
+  let bottom = 0;
+  let left = 0;
+  if (wantLabels(model)) {
+    const pos = model.labelAt || "top";
+    if (pos === "top" || pos === "outside" || pos === "") top += 16;
+    if (pos === "bottom") bottom += 14;
+    if (pos === "left") left += 28;
+    if (pos === "right" || (horizontal && (pos === "outside" || pos === ""))) right = Math.max(right, 36);
+    if (horizontal && (model.labelAt === "" || model.labelAt === "right" || model.labelAt === "outside")) {
+      right = Math.max(right, Math.ceil(valueLabelWidth(model) + 16));
+    }
+  }
+  return { top, right, bottom, left, gutter: horizontal && diverges(model) ? 8 : 0 };
+}
+
 function tipAttrs(model: PlotModel): string {
   const tip = model.tip;
   if (!tip) return "";
@@ -2395,12 +2446,13 @@ function openSvg(model: PlotModel): string {
   const described = model.description ? ` aria-describedby="${model.id}-d"` : "";
   const intent = model.intent ? ` data-ck-intent="${esc(model.intent)}"` : "";
   const exported = model.exportMark ? ` data-ck-export="${esc(model.exportMark)}"` : "";
+  const chromeTip = slots.chromeTip ? slots.chromeTip(model) : "";
   const canvas = model.canvas ? ` data-ck-render="canvas"` : "";
   const sceneAttr = capturing() ? ` data-ck-scene="1"` : "";
   const gap = model.stackGap > 0 ? ` data-ck-stack-gap="${n(model.stackGap)}"` : "";
   const partialFade = model.partialOpacity !== undefined ? ` data-ck-partial-opacity="${n(model.partialOpacity)}"` : "";
   const desc = model.description ? `<desc id="${model.id}-d">${esc(model.description)}</desc>` : `<desc>${esc(model.alt)}</desc>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent}${exported}${canvas}${sceneAttr}${gap}${partialFade}${tipAttrs(model)} style="${svgStyle(model)}">` +
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent}${exported}${canvas}${sceneAttr}${gap}${partialFade}${chromeTip} style="${svgStyle(model)}">` +
     `<title>${esc(model.title || model.alt)}</title>${desc}`;
 }
 
@@ -2429,19 +2481,16 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
   let right = 16;
   let top = 14;
   let bottom = 12;
+  const extra = slots.markPad?.(model, horizontal);
+  if (extra) {
+    top += extra.top;
+    right = Math.max(right, extra.right);
+    bottom += extra.bottom;
+    left += extra.left;
+  }
   if (model.title) top += 20;
   if (model.subtitle) top += 18;
   if (model.headline) top += (model.headline.label ? 26 : 0) + 56;
-  if (wantLabels(model)) {
-    const pos = model.labelAt || "top";
-    if (pos === "top" || pos === "outside" || pos === "") top += 16;
-    if (pos === "bottom") bottom += 14;
-    if (pos === "left") left += 28;
-    if (pos === "right" || (horizontal && (pos === "outside" || pos === ""))) right = Math.max(right, 36);
-    if (horizontal && (model.labelAt === "" || model.labelAt === "right" || model.labelAt === "outside")) {
-      right = Math.max(right, Math.ceil(valueLabelWidth(model) + 16));
-    }
-  }
   if (model.stackTotal) {
     if (horizontal) right = Math.max(right, 48);
     else top += 16;
@@ -2460,11 +2509,11 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
   }
   if (model.showX && model.xAxis.labels !== false) {
     const lines = lineCount(model.xAxis, xLabels);
-    const extra = (lines - 1) * 12;
-    if (!horizontal && xEnd) top += 32 + extra;
-    else if (!horizontal) bottom = 32 + extra;
+    const wrapped = (lines - 1) * 12;
+    if (!horizontal && xEnd) top += 32 + wrapped;
+    else if (!horizontal) bottom = 32 + wrapped;
     else if (xEnd) right = Math.max(right, xGap);
-    else left = Math.max(left, xGap + (horizontal && diverges(model) ? 8 : 0));
+    else left = Math.max(left, xGap + (extra?.gutter ?? 0));
   }
   const yTick = model.showY ? outsideLen(model.yAxis) : 0;
   const y2Tick = model.showY2 ? outsideLen(model.y2Axis) : 0;
@@ -2604,8 +2653,8 @@ function domain(model: PlotModel, axis: "y" | "y2"): [number, number] {
         for (const value of model.layers.bottom[s]) consider(value);
       } else considerRaw(model.series[s]);
     }
-  } else if (model.stack !== "none" && axis === "y" && model.series.every((item) => !item.stackId)) {
-    const layers = stackLayers(model.series, model.stack === "percent" ? "percent" : "stack");
+  } else if (slots.stackFold && model.stack !== "none" && axis === "y" && model.series.every((item) => !item.stackId)) {
+    const layers = slots.stackFold(model.series, model.stack === "percent" ? "percent" : "stack");
     for (let s = 0; s < model.series.length; s++) {
       if (model.series[s].axis !== "y") continue;
       for (const value of layers.top[s]) consider(value);
@@ -3438,6 +3487,63 @@ function bottomLegendFoot(model: PlotModel, plot: PlotBox): number {
   return legendSpace(model.legendBox, legendItems(model), Math.max(80, plot.right - plot.left)).band;
 }
 
+function applyColorScale(
+  table: DataTable,
+  encoding: Record<string, unknown>,
+  preset: PresetTokens,
+  series: Series[],
+  useScale: boolean,
+): ColorScale | null {
+  if (!useScale || !slots.colorScale) return null;
+  const colorEnc = readColor(encoding.color);
+  if (!colorEnc?.field) return null;
+  const pivot = seriesFieldName(encoding, table);
+  const column = pivot !== colorEnc.field ? table.columns[colorEnc.field] : undefined;
+  if (!column || isPaintColumn(column)) return null;
+  const numeric: number[] = [];
+  for (let i = 0; i < column.length; i++) {
+    const value = column[i];
+    if (typeof value === "number" && Number.isFinite(value)) numeric.push(value);
+  }
+  if (!numeric.length) return null;
+  const scale = slots.colorScale(encoding.color, preset, numeric, false);
+  if (!scale) return null;
+  let used = false;
+  for (const item of series) {
+    if (column.length !== item.values.length) continue;
+    const colors: string[] = [];
+    let hits = 0;
+    for (let i = 0; i < item.values.length; i++) {
+      const value = column[i];
+      if (typeof value === "number" && Number.isFinite(value)) {
+        hits += 1;
+        colors.push(scale.paint(value));
+      } else colors.push(item.color);
+    }
+    if (hits) {
+      item.colors = colors;
+      used = true;
+    }
+  }
+  return used ? scale : null;
+}
+
+function runColorRules(
+  spec: Record<string, unknown>,
+  table: DataTable,
+  encoding: Record<string, unknown>,
+  mark: Record<string, unknown>,
+  preset: PresetTokens,
+  series: Series[],
+  labels: string[],
+  useScale: boolean,
+): { scale: ColorScale | null; rules: NonNullable<PlotModel["ruleLegend"]>; swatches?: { name: string; color: string }[] } {
+  const scale = applyPointColors(table, encoding, mark, preset, series, labels, useScale);
+  const rules = scale ? [] : ruleSwatches(series, readRules(mark), preset, baseLabelOf(mark));
+  const swatches = scale || rules.length ? undefined : categorySwatches(spec, series, labels);
+  return { scale, rules, swatches };
+}
+
 function applyPointColors(
   table: DataTable,
   encoding: Record<string, unknown>,
@@ -3447,6 +3553,8 @@ function applyPointColors(
   labels: string[],
   useScale: boolean,
 ): ColorScale | null {
+  const scaled = applyColorScale(table, encoding, preset, series, useScale);
+  if (scaled) return scaled;
   const rules = readRules(mark);
   const colorEnc = readColor(encoding.color);
   if (rules.length === 0 && !colorEnc) return null;
@@ -3455,34 +3563,6 @@ function applyPointColors(
   const pivot = seriesFieldName(encoding, table);
   const column = colorField && pivot !== colorField ? table.columns[colorField] : undefined;
   const paintCol = column ? isPaintColumn(column) : false;
-  const numeric: number[] = [];
-  if (column && !paintCol) {
-    for (let i = 0; i < column.length; i++) {
-      const value = column[i];
-      if (typeof value === "number" && Number.isFinite(value)) numeric.push(value);
-    }
-  }
-  const scale = useScale && colorScaleReader && column && !paintCol && numeric.length ? colorScaleReader(encoding.color, preset, numeric, false) : null;
-  if (scale && column) {
-    let used = false;
-    for (const item of series) {
-      if (column.length !== item.values.length) continue;
-      const colors: string[] = [];
-      let hits = 0;
-      for (let i = 0; i < item.values.length; i++) {
-        const value = column[i];
-        if (typeof value === "number" && Number.isFinite(value)) {
-          hits += 1;
-          colors.push(scale.paint(value));
-        } else colors.push(item.color);
-      }
-      if (hits) {
-        item.colors = colors;
-        used = true;
-      }
-    }
-    if (used) return scale;
-  }
   for (const item of series) {
     const count = item.values.length;
     const aligned = column && column.length === count ? column : null;
@@ -3559,6 +3639,38 @@ function axisFormat(spec: Record<string, unknown>, key: "y" | "y2", channels: YC
   const axis = axes && isRecord(axes[key]) ? axes[key] : undefined;
   if (axis && axis.format !== undefined) return axis.format;
   return channels.find((channel) => channel.axis === key && channel.format !== undefined)?.format;
+}
+
+function paintNotes(
+  model: PlotModel,
+  plot: PlotBox,
+  xScale: XScale,
+  yScale: (value: number) => number,
+  y2Scale: (value: number) => number,
+  horizontal: boolean,
+  count: number,
+): { under: string; over: string } {
+  return annotationLayers(model.notes, {
+    plot,
+    taken: seriesLabelBoxes(model, xScale, yScale, y2Scale, horizontal),
+    preset: model.preset,
+    xAt: (value) => locateX(model, xScale, value, count),
+    yAt: (value, axis) => {
+      const numeric = dataNumber(value);
+      if (numeric === null) return null;
+      return (axis === "y2" ? y2Scale : yScale)(numeric);
+    },
+    samples: notesNeedSamples(model.notes)
+      ? model.series.map((series) => ({ name: series.name, axis: series.axis, pts: seriesPoints(model.x, series.values) }))
+      : undefined,
+    labels: model.labels,
+    temporal: model.xTemporal,
+    xNum: model.x,
+    slot: (index) => xScale.band(index),
+    count,
+    flip: horizontal,
+    bands: model.bands,
+  });
 }
 
 function locateX(model: PlotModel, xScale: XScale, value: number | string, count: number): number | null {

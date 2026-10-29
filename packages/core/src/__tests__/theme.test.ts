@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { auto, midnight, paint, resolveGeometry, resolvePreset } from "../theme";
+import { auto, paint, resolveGeometry, resolvePreset } from "../theme";
+import { midnight } from "../themes/midnight";
 import { candidates } from "../themes/candidates";
 import { emerald } from "../themes/emerald";
 import { latte } from "../themes/latte";

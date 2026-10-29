@@ -150,7 +150,7 @@ export function ssrMarkdown(ssr, meta) {
 export function applyPhase4(markdown, { bundle, ssr, meta }) {
   let next = markdown.replace(
     /ChartKit's minimal entry is the registry[\s\S]*?fake chart\./,
-    "ChartKit's minimal entry is the registry, one gallery chart, and the midnight theme. The `/all` entry is every core chart and every theme, measured once, without the validator. Phase 4 measures every gallery type. Rival cells are native charts only. A library that does not tree-shake records one full-package size. React libraries are measured with React included and with React external. ECharts is the modular import. uPlot's CSS is a second response. A missing headless renderer, a missing native chart, and a package that is not on npm are unsupported. A commercial package that will not install or run without a license key is license-blocked.",
+    "ChartKit's minimal entry is the registry, one gallery chart, and the Soft preset. Midnight, refined, and editorial register from @chartkitdev/core/features and /all. The `/all` entry is every core chart and every theme, measured once, without the validator. Phase 4 measures every gallery type. Rival cells are native charts only. A library that does not tree-shake records one full-package size. React libraries are measured with React included and with React external. ECharts is the modular import. uPlot's CSS is a second response. A missing headless renderer, a missing native chart, and a package that is not on npm are unsupported. A commercial package that will not install or run without a license key is license-blocked.",
   );
   next = next.replace(
     /## Bundle size\n\n[\s\S]*?\n## Browser render/,
