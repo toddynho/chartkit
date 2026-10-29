@@ -1,7 +1,7 @@
 ---
 import DocsPage from "../../components/DocsPage.astro";
 
-const description = "ChartKit's MCP server validates, repairs, and renders a spec, and looks up feature support. Install is coming soon.";
+const description = "ChartKit's MCP server validates, repairs, and renders a spec, and looks up feature support.";
 const cursor = `{
   "mcpServers": {
     "chartkit": {
@@ -16,8 +16,8 @@ node packages/mcp/dist/cli.js`;
 
 <DocsPage title="MCP server" description={description} href="/docs/mcp">
   <div class="callout">
-    <strong>Install: coming soon</strong>
-    <code>@chartkitdev/mcp</code> is not on npm yet. Todd publishes it, and only when he says so. The <code>npx @chartkitdev/mcp</code> snippets on this page are the setup for after that publish. They do not install the server today.
+    <strong>Install</strong>
+    <code>npx -y @chartkitdev/mcp</code>
   </div>
   <p>
     The server speaks stdio. <code>validate</code> and <code>repair</code> come from <code>@chartkitdev/core/validate</code>. <code>render</code> uses <code>@chartkitdev/core/extra</code>, which includes every chart type. Those tools do not call the network. <code>render_chart</code> does: it asks ChartKit Cloud for an image URL. <code>lookup_feature</code> reads a build-time copy of <a href="/features.json">features.json</a>, synonyms included. A <code>partial</code> cell is not reported as native. Other libraries come back with ChartKit.

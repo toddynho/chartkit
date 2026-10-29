@@ -2,7 +2,12 @@
 
 MCP server for [ChartKit](https://chartkit.dev). It speaks stdio through the official `@modelcontextprotocol/sdk`.
 
-**This package is not published to npm yet.** Todd publishes it himself, and only when he says so. It is not in the repo's publish workflow. The `npx @chartkitdev/mcp` commands below are the setup to use after that publish. Until then they will not install the server.
+```bash
+npm install @chartkitdev/mcp
+npx -y @chartkitdev/mcp
+```
+
+The manual publish workflow ships this package with the other `@chartkitdev` packages. From a git checkout, before that publish, build `packages/mcp` and run `node packages/mcp/dist/cli.js`.
 
 `validate`, `repair`, `render`, `lookup_feature`, `list_chart_types`, and `get_example` make no network calls. They use `@chartkitdev/core` and a copy of `catalog/public/features.json`, `llms.txt`, the v1 JSON Schema, and the example specs that the build copies into the package. Feature statuses come from that file. This package does not invent them. `render_chart` is the exception: it POSTs the spec to ChartKit Cloud and returns the image URL plus repairs.
 
@@ -45,7 +50,7 @@ Point the client at that `node` command and the `dist/cli.js` path. The process 
 
 ## Cursor
 
-Install: coming soon. After the package is on npm, put this in `.cursor/mcp.json` (project) or the user MCP config:
+Put this in `.cursor/mcp.json` (project) or the user MCP config:
 
 ```json
 {
@@ -58,11 +63,11 @@ Install: coming soon. After the package is on npm, put this in `.cursor/mcp.json
 }
 ```
 
-`npx @chartkitdev/mcp` fails until the publish. Use the checkout command above until then.
+`npx -y @chartkitdev/mcp` runs the published package. Use the checkout command above when you are working from this repo.
 
 ## Claude Desktop
 
-Install: coming soon. After the publish, add the same `mcpServers` entry to `claude_desktop_config.json`:
+Add the same `mcpServers` entry to `claude_desktop_config.json`:
 
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
@@ -79,11 +84,11 @@ Install: coming soon. After the publish, add the same `mcpServers` entry to `cla
 }
 ```
 
-That command does not work until `@chartkitdev/mcp` is published.
+That `npx -y @chartkitdev/mcp` command is the published server.
 
 ## Claude Code
 
-Install: coming soon. After the publish:
+From a terminal:
 
 ```sh
 claude mcp add chartkit -- npx -y @chartkitdev/mcp
@@ -102,7 +107,7 @@ Or commit a project `.mcp.json`:
 }
 ```
 
-`npx -y @chartkitdev/mcp` will not resolve until the package is on npm.
+`npx -y @chartkitdev/mcp` is the published command.
 
 ## Packed size
 

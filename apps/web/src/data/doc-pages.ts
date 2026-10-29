@@ -20,7 +20,11 @@ const install = `npm install @chartkitdev/core
 npm install @chartkitdev/react
 npm install @chartkitdev/vue
 npm install @chartkitdev/svelte
-npm install @chartkitdev/vanilla`;
+npm install @chartkitdev/vanilla
+npm install @chartkitdev/element
+npm install @chartkitdev/markdown
+npm install @chartkitdev/geo
+npm install @chartkitdev/mcp`;
 
 export const docPages: DocPage[] = [
   {
@@ -38,9 +42,16 @@ export const docPages: DocPage[] = [
             { code: "@chartkitdev/element" },
             " (",
             { code: "<chart-kit>" },
-            ") is in this repo and is not on npm yet.",
+            ") is ",
+            { code: "npm install @chartkitdev/element" },
+            ".",
           ],
-          [{ code: "@chartkitdev/geo" }, " is in this repo and is not on npm. There is no tile layer."],
+          [
+            { code: "@chartkitdev/geo" },
+            " is ",
+            { code: "npm install @chartkitdev/geo" },
+            ". It is not part of the line or all bundles. There is no tile layer.",
+          ],
           [
             { code: "@derpdaderp/chartkit" },
             " is a compatibility shim and is not the package to install for a new app.",
@@ -250,7 +261,7 @@ export const docPages: DocPage[] = [
     slug: "agents/mcp",
     title: "MCP",
     description: "The ChartKit MCP server exposes chart tools, including render_chart, to an agent.",
-    lede: "@chartkitdev/mcp is not on npm yet. The server speaks stdio. render_chart is the tool that calls Cloud.",
+    lede: "npx -y @chartkitdev/mcp starts the server. It speaks stdio. render_chart is the tool that calls Cloud.",
     current: "https://chartkit.dev/docs/mcp",
     blocks: [
       {

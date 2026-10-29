@@ -2,6 +2,10 @@
 
 Framework-free ChartKit core. Zero runtime dependencies. The agent interface is a JSON spec. React props are a separate API; see the last section.
 
+```bash
+npm install @chartkitdev/core
+```
+
 - `schema/chartkit.schema.json` — ChartKit spec v1 (`$id`: `https://chartkit.dev/schema/v1.json`), exported as `@chartkitdev/core/schema.json`
 - `validate(spec)` — `@chartkitdev/core/validate`. Structural and data-aware diagnostics (`CK1001`…`CK4004`). The runtime checker uses a stripped schema; codes, pointers, hints, and fixes match the published schema.
 - `render(spec, target?)` — SVG. The package root is a registry. Chart modules are opt-in. An unregistered type returns an error SVG (`CK1010`) and does not throw. An omitted theme renders as Soft.
@@ -509,4 +513,4 @@ Not published yet. See [catalog/migrate.md](../../catalog/migrate.md).
 
 `@chartkitdev/react` exports dashboard components. Props such as `dataKey`, `leftAxis`, and `value` on `GaugeChart` are not spec keys. To render a spec, use `<Chart spec={...} />`.
 
-`@chartkitdev/vue`, `@chartkitdev/svelte`, `@chartkitdev/vanilla`, and `@chartkitdev/element` render this same spec. Vue SSR and SvelteKit include the SVG. `mount(element, spec)` returns `{ update(spec), destroy() }`. `<chart-kit>` reads the same spec from a property, an attribute, or a child JSON script. None of them add spec keys. The element package is not on npm yet.
+`@chartkitdev/vue`, `@chartkitdev/svelte`, `@chartkitdev/vanilla`, and `@chartkitdev/element` render this same spec. Vue SSR and SvelteKit include the SVG. `mount(element, spec)` returns `{ update(spec), destroy() }`. `<chart-kit>` reads the same spec from a property, an attribute, or a child JSON script. None of them add spec keys. Install the element with `npm install @chartkitdev/element`. Maps are `npm install @chartkitdev/geo`, which is not part of this package.

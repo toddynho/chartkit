@@ -61,30 +61,8 @@ A minimal spec:
 
 ## Compatibility shim
 
-`packages/compat-derpdaderp` is the next version of `@derpdaderp/chartkit`. It re-exports `@chartkitdev/react` and logs this once, in development only:
+`packages/compat-derpdaderp` is `@derpdaderp/chartkit`. It re-exports `@chartkitdev/react` and logs this once, in development only:
 
 `This package has moved to @chartkitdev/react.`
 
-Nothing in this repository publishes that shim. Publish stays a manual workflow (`.github/workflows/publish.yml`).
-
-## Owner steps (not done by this change)
-
-These need a human. Do them in order, after the npm org and the GitHub org exist.
-
-1. Create the npm org `chartkitdev` (the scope was unclaimed when this was written; confirm it still is).
-2. Create the GitHub org `chartkitdev` if you want the name reserved. This repo can stay at `toddynho/chartkit` until you move it.
-3. Configure npm trusted publishing (or an `NPM_TOKEN` secret) for this GitHub repository.
-4. Run the **Publish** workflow (`workflow_dispatch`) for `@chartkitdev/core`, then `@chartkitdev/react`, then the shim `@derpdaderp/chartkit`. Provenance is requested (`npm publish --provenance`). The workflow does not run on push.
-5. After the shim is on npm, deprecate the old line. From a machine logged into npm as an owner of `@derpdaderp`:
-
-```bash
-npm deprecate @derpdaderp/chartkit@"<0.5.0" "Moved to @chartkitdev/react. 0.5.0+ is a compatibility shim that re-exports it."
-```
-
-To deprecate every version, including the shim, once you are ready to delete the name:
-
-```bash
-npm deprecate @derpdaderp/chartkit "Moved to @chartkitdev/react"
-```
-
-Do not run either command until the new packages are actually published.
+The publish steps, including that shim (last) and the `npm deprecate` commands, are in [RELEASING.md](../RELEASING.md). The workflow does not run on push.

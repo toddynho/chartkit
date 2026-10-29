@@ -1,25 +1,36 @@
 {
   "name": "@chartkitdev/geo",
   "version": "0.5.0",
-  "private": true,
-  "description": "Choropleth and point maps for ChartKit. Unpublished. Not part of the line or all bundles.",
-  "keywords": ["chartkit", "map", "choropleth", "geo"],
+  "description": "Choropleth and point maps for ChartKit. Not part of the line or all bundles. Each atlas is its own chunk. No tile layer.",
+  "keywords": [
+    "chartkit",
+    "map",
+    "choropleth",
+    "geo"
+  ],
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev",
   "bugs": {
     "url": "https://github.com/toddynho/chartkit/issues"
   },
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsup",
     "test": "vitest",
@@ -35,7 +46,14 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/toddynho/chartkit",
+    "url": "git+https://github.com/toddynho/chartkit.git",
     "directory": "packages/geo"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
