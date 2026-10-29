@@ -1,3 +1,7 @@
+import { editorial } from "./editorial";
+import { midnight } from "./midnight";
+import { refined } from "./refined";
+import { soft } from "./soft";
 import { emerald } from "./emerald";
 import { mono } from "./mono";
 import { slate } from "./slate";
@@ -15,6 +19,11 @@ import { silver } from "./silver";
 import { pearl } from "./pearl";
 import { latte } from "./latte";
 import { registerPreset, type PresetTokens } from "../theme";
+
+registerPreset("midnight", midnight);
+registerPreset("soft", soft);
+registerPreset("refined", refined);
+registerPreset("editorial", editorial);
 
 export const themes: Record<string, PresetTokens> = {
   emerald,
@@ -37,4 +46,4 @@ export const themes: Record<string, PresetTokens> = {
 
 for (const [name, preset] of Object.entries(themes)) registerPreset(name, preset);
 
-export { emerald, mono, slate, arctic, orchid, obsidian, neon, mocha, owl, retro, copper, rose, sunset, silver, pearl, latte };
+export { midnight, soft, refined, editorial, emerald, mono, slate, arctic, orchid, obsidian, neon, mocha, owl, retro, copper, rose, sunset, silver, pearl, latte };

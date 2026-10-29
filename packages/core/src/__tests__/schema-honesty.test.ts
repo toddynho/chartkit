@@ -600,7 +600,14 @@ async function entrySet(ready: Host[]): Promise<EntrySet> {
   for (const [file, name] of ENTRY_FILES) {
     // These six share the cartesian hook. The test file imports extra, which mounts it,
     // so each one needs a fresh module graph. The other entries do not use that hook.
-    if (FRESH_ENTRY.has(file)) vi.resetModules();
+    if (FRESH_ENTRY.has(file)) {
+      // A fresh graph drops hooks that extra mounted. The chart file mounts axes
+      // (and bar mounts stacks, labels, and colour scales). Annotations, colour
+      // rules, headline chrome, and the named presets register from features,
+      // the same module @chartkitdev/core/all imports. The size bench does not.
+      vi.resetModules();
+      await import("../features");
+    }
     const { createRenderer } = await import("../render");
     const { mountLayout } = await import("../layout");
     mountLayout();
@@ -885,6 +892,7 @@ describe("schema honesty", () => {
 
   it("draws shapes, labels, and stack totals on the small chart entry", async () => {
     vi.resetModules();
+    await import("../features");
     const { createRenderer } = await import("../render");
     const { line: lineChart } = await import("../charts/line");
     const drawLine = createRenderer([lineChart]);

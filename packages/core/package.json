@@ -15,6 +15,8 @@
     "./dist/extra.cjs",
     "./dist/mermaid-phase4.js",
     "./dist/mermaid-phase4.cjs",
+    "./dist/features.js",
+    "./dist/features.cjs",
     "./dist/themes/*.js",
     "./dist/themes/*.cjs"
   ],
@@ -80,6 +82,26 @@
       "require": {
         "types": "./dist/load.d.cts",
         "default": "./dist/load.cjs"
+      }
+    },
+    "./hooks": {
+      "import": {
+        "types": "./dist/hooks.d.ts",
+        "default": "./dist/hooks.js"
+      },
+      "require": {
+        "types": "./dist/hooks.d.cts",
+        "default": "./dist/hooks.cjs"
+      }
+    },
+    "./features": {
+      "import": {
+        "types": "./dist/features.d.ts",
+        "default": "./dist/features.js"
+      },
+      "require": {
+        "types": "./dist/features.d.cts",
+        "default": "./dist/features.cjs"
       }
     },
     "./extra-tip": {

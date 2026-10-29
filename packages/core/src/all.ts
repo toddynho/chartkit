@@ -1,3 +1,4 @@
+import { mountFeatures } from "./features";
 import { createRenderer, register, type ChartRenderer } from "./render";
 import { registerPreset } from "./theme";
 import { themes } from "./themes/all";
@@ -23,6 +24,7 @@ import { mountLayout } from "./layout";
 export const charts = [line, bar, donut, pie, stackedArea, scatter, combo, heatmap, gauge, kpi, sparkline, miniArea, progressRing, spike, candlestick] as const;
 
 for (const [name, preset] of Object.entries(themes)) registerPreset(name, preset);
+mountFeatures();
 mountAxes();
 mountLayout();
 register(...charts);
