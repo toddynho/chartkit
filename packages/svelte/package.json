@@ -66,7 +66,8 @@
     "directory": "packages/svelte"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "engines": {
     "node": ">=20"

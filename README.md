@@ -50,7 +50,7 @@ npm install @chartkitdev/mcp
 
 `@chartkitdev/geo` is choropleth and point maps. It is not part of the line or `all` bundles. Each atlas is its own chunk. There is no tile layer.
 
-`@derpdaderp/chartkit` is a compatibility shim that re-exports `@chartkitdev/react`. It is not the package for a new app. The manual publish workflow can publish it after `@chartkitdev/react`. See [catalog/migrate.md](catalog/migrate.md).
+`@derpdaderp/chartkit` is a compatibility shim that re-exports `@chartkitdev/react`. It is not the package for a new app. Publishing is described in [RELEASING.md](RELEASING.md). See [catalog/migrate.md](catalog/migrate.md).
 
 `@chartkitdev/convert` stays private. It turns Chart.js, Recharts, and ECharts configs into a spec for the website, and it is not an install target.
 

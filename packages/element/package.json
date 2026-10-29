@@ -73,7 +73,8 @@
     "directory": "packages/element"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "engines": {
     "node": ">=20"

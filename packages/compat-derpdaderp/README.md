@@ -1,11 +1,19 @@
 # @derpdaderp/chartkit
 
-Compatibility shim for code that still imports `@derpdaderp/chartkit`.
+This package has moved to [@chartkitdev/react](https://www.npmjs.com/package/@chartkitdev/react) and [@chartkitdev/core](https://www.npmjs.com/package/@chartkitdev/core).
 
-It re-exports [`@chartkitdev/react`](https://www.npmjs.com/package/@chartkitdev/react) and, outside production, logs a one-time console notice. New code should depend on `@chartkitdev/react` and `@chartkitdev/core` directly.
+[chartkit.dev](https://chartkit.dev)
+
+Upgrading: [chartkit.dev/docs/migrate](https://chartkit.dev/docs/migrate)
+
+0.5.0 re-exports `@chartkitdev/react` so existing imports keep working. It is last in the publish order. After that version is on npm, deprecate the older releases:
 
 ```bash
-npm install @derpdaderp/chartkit
+npm deprecate @derpdaderp/chartkit@"<0.5.0" "This package has moved to @chartkitdev/react and @chartkitdev/core. https://chartkit.dev/docs/migrate"
 ```
 
-The manual publish workflow ships this package after `@chartkitdev/react`. It is not what a new app installs. See [catalog/migrate.md](../../catalog/migrate.md).
+To deprecate the shim itself once nothing should install this name:
+
+```bash
+npm deprecate @derpdaderp/chartkit "This package has moved to @chartkitdev/react and @chartkitdev/core. https://chartkit.dev/docs/migrate"
+```
