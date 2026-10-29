@@ -119,7 +119,7 @@ export const articleSections: Record<string, DocSection[]> = {
   ],
   "themes-tokens": [
     section("Built in", [
-      'Soft is the default. Omit `theme`, or set `"auto"` or `"soft"`. `refined` and `editorial` are built in. `midnight` is the opt-in dark card. Any other name falls through to midnight until that preset is registered.',
+      'Soft is the default. Omit `theme`, or set `"auto"` or `"soft"`. `@chartkitdev/core/all` is unchanged and already registers the other themes. A minimal `createRenderer([...])` setup needs `import "@chartkitdev/core/features"` for midnight, refined, and editorial, or a direct import from `@chartkitdev/core/themes/<name>`.',
     ]),
     section("Presets", [
       "This site's renderer imports `@chartkitdev/core/all`, which registers emerald, slate, mocha, and the other names in `@chartkitdev/core/themes/all`. A page that only imports one chart still needs that themes entry. Hosts override tokens with `--ck-*`.",
@@ -130,7 +130,7 @@ export const articleSections: Record<string, DocSection[]> = {
       "`@chartkitdev/core/all` is the core set, including line. `@chartkitdev/core/extra` adds histogram through rose and the planning charts. `createRenderer([line])` keeps a page to one chart.",
     ]),
     section("Size", [
-      "The published line-chart figure is 34,554 bytes gzip. uPlot is smaller, and first hover is faster there. Those losses stay in the benchmark table.",
+      "The measured gzip for each chart type is on /benchmarks. uPlot’s full package is smaller than the line, and first hover is faster there. Those losses stay in the benchmark table.",
     ]),
   ],
   options: [

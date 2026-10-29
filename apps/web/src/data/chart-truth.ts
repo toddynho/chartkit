@@ -1,4 +1,25 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { ChartDoc, ChartOption, DocSection } from "./docs-catalog";
+import { repoRoot } from "../lib/repo-root";
+
+let chartkitGzipBytes: Map<string, number> | null = null;
+
+function chartkitGzip(chart: string): string | null {
+  if (!chartkitGzipBytes) {
+    const file = JSON.parse(readFileSync(join(repoRoot(), "bench/results/bundle.json"), "utf8")) as {
+      cells: { library?: string; chart?: string; status?: string; gzipBytes?: number | null }[];
+    };
+    chartkitGzipBytes = new Map();
+    for (const cell of file.cells) {
+      if (cell.library === "ChartKit minimal" && cell.status === "ok" && typeof cell.chart === "string" && typeof cell.gzipBytes === "number") {
+        chartkitGzipBytes.set(cell.chart, cell.gzipBytes);
+      }
+    }
+  }
+  const bytes = chartkitGzipBytes.get(chart);
+  return bytes == null ? null : `${bytes.toLocaleString("en-US")} B`;
+}
 
 type Truth = {
   summary: string;
@@ -311,7 +332,7 @@ export function withTruth(chart: ChartDoc): ChartDoc {
   const facts = [
     { k: "Import", v: item.entry },
     { k: "Bundle", v: item.bundle },
-    ...(chart.type === "line" ? [{ k: "Line gzip", v: "34,554 B" }] : []),
+    ...(chart.type === "line" && chartkitGzip("line") ? [{ k: "Line gzip", v: chartkitGzip("line") as string }] : []),
     ...(chart.type === "area" ? [{ k: "Spec type", v: "line" }] : []),
   ];
   const options =

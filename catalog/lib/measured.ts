@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { MatrixLibrary } from "@/lib/matrix";
+import { lineSizeRows } from "./size-matrix.ts";
 
 export interface MeasuredSizes {
   commit: string;
@@ -44,7 +45,7 @@ interface BenchmarkFile {
   }[];
   hoverSteady100k: { lib: string; paintedMs: number }[];
   firstHoverPainted: { afterMountMs: number; chartkit: number; uplot: number }[];
-  ssrMs: { lib: string; meanMs: number | null; medianMs: number | null; supported: boolean }[];
+  ssrMs: { lib: string; meanMs: number | null; medianMs: number | null; supported: boolean; points?: number }[];
 }
 
 const BENCH_NAME: Record<string, string> = {
@@ -82,27 +83,26 @@ function day(iso: string): string {
 }
 
 export function sizeParagraph(library: MatrixLibrary): string {
-  const measured = measuredSizes();
-  const core = measured.coreMatchesMain ? `core ${measured.coreCommit}, same tree as origin/main` : `core ${measured.coreCommit}`;
+  const line = lineSizeRows();
   const parts = [
-    `ChartKit line gzip is ${bytes(measured.sizeScript.measured.line)} bytes from ${measured.sizeScript.command} on ${measured.commit} (${core}), measured ${day(measured.sizeScript.measuredAt)}. ${measured.sizeScript.method}`,
+    `ChartKit line gzip is ${bytes(line.lineBytes)} bytes, createRenderer of the line, from bench/results/bundle.json on ${line.commit}, measured ${day(line.measuredAt)}.`,
   ];
-  const row = measured.bench.rows.find((item) => item.id === library.id && item.chart === "line" && item.status === "ok");
+  const row = line.rows.find((item) => item.id === library.id && item.chart === "line" && item.status === "ok");
   if (row?.gzipBytes != null) {
     if (row.reactExternalGzipBytes != null) {
       parts.push(
-        `${library.name} line gzip is ${bytes(row.reactExternalGzipBytes)} bytes with React external, and ${bytes(row.gzipBytes)} bytes with React included, from ${measured.bench.command} at ${measured.bench.measuredAt}.`,
+        `${library.name} line gzip is ${bytes(row.reactExternalGzipBytes)} bytes with React external, and ${bytes(row.gzipBytes)} bytes with React included, from bench/results/bundle.json at ${line.measuredAt}.`,
       );
     } else {
-      parts.push(`${library.name} line gzip is ${bytes(row.gzipBytes)} bytes from ${measured.bench.command} at ${measured.bench.measuredAt}.`);
+      parts.push(`${library.name} line gzip is ${bytes(row.gzipBytes)} bytes from bench/results/bundle.json at ${line.measuredAt}.`);
     }
     if (row.cssGzipBytes != null) {
       parts.push(
         `The stylesheet is ${bytes(row.cssGzipBytes)} bytes gzip, a separate response. JS plus stylesheet is ${bytes(row.gzipBytes + row.cssGzipBytes)} bytes as a sum of the two, not one stream.`,
       );
     }
-    const harness = measured.bench.rows.find((item) => item.id === "chartkit-minimal" && item.chart === "line" && item.status === "ok");
-    if (harness?.gzipBytes != null) {
+    const harness = line.rows.find((item) => item.id === "chartkit-minimal" && item.chart === "line" && item.status === "ok");
+    if (harness?.gzipBytes != null && harness.gzipBytes !== line.lineBytes) {
       parts.push(`The bench browser bundle of ChartKit’s line entry on that same run is ${bytes(harness.gzipBytes)} bytes.`);
     }
   } else if (library.bundleGzip && typeof library.bundleGzip.minimalLine === "number") {
@@ -143,8 +143,9 @@ export function perfParagraph(libraryId: string, libraryName: string): string {
       parts.push(`${name} did not produce a chart without a DOM.`);
       if (bench.methodology.ssr.includes(name)) parts.push(bench.methodology.ssr);
     } else if (ssr.meanMs != null) {
+      const points = (ssr.points ?? ssrChartkit.points ?? 0).toLocaleString("en-US");
       parts.push(
-        `Server render of a 1,000 point line: ChartKit ${ssrChartkit.meanMs} ms mean, ${name} ${ssr.meanMs} ms mean (median ${ssr.medianMs}).`,
+        `Server render of a ${points} point line: ChartKit ${ssrChartkit.medianMs} ms median, ${name} ${ssr.medianMs} ms median.`,
       );
     }
   }

@@ -53,7 +53,7 @@ function preset(spec: unknown): boolean {
 }
 
 const matrixLib = await import("../../../catalog/lib/matrix.ts");
-const measured = await import("../../../catalog/lib/measured.ts");
+const { lineSizeRows } = await import("../../../catalog/lib/size-matrix.ts");
 const geoSamples = await import("../../../catalog/lib/geo-samples.ts");
 const { paintScale, render: renderGeo } = await import("@chartkitdev/geo");
 const { headline, published, CORE_COMMIT, MEASURED, ROUND } = await import("../../../catalog/lib/benchmarks.ts");
@@ -66,17 +66,17 @@ const convertLib = await import("@chartkitdev/convert");
 
 function paintCompare(): number {
   const data = matrixLib.matrix();
-  const sizes = measured.measuredSizes();
+  const sizes = lineSizeRows();
   const sizeFacts = {
     commit: sizes.commit,
-    coreCommit: sizes.coreCommit,
-    coreMatchesMain: sizes.coreMatchesMain,
-    command: sizes.sizeScript.command,
-    measuredAt: sizes.sizeScript.measuredAt,
-    lineBytes: sizes.sizeScript.measured.line,
-    benchCommand: sizes.bench.command,
-    benchMeasuredAt: sizes.bench.measuredAt,
-    rows: sizes.bench.rows,
+    coreCommit: sizes.commit,
+    coreMatchesMain: false,
+    command: "bench/results/bundle.json",
+    measuredAt: sizes.measuredAt,
+    lineBytes: sizes.lineBytes,
+    benchCommand: "bench/results/bundle.json",
+    benchMeasuredAt: sizes.measuredAt,
+    rows: sizes.rows,
   };
   const perfFacts = {
     round: ROUND,
@@ -89,6 +89,7 @@ function paintCompare(): number {
       meanMs: row.meanMs,
       medianMs: row.medianMs,
       supported: row.supported,
+      points: row.points,
     })),
     browserMs: published.browser.map((row) => ({
       shape: row.shape,

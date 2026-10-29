@@ -2,11 +2,11 @@
 
 The measured line bundles and the published round of browser timings, drawn as charts.
 
-Bundle bytes are from catalog/data/measured-sizes.json, size script measured 2026-10-24 on `236653ac94626ec33ef01d0112f8aa7cf09e0d9f`, bench bundles measured 2026-10-24. Timings are older round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
+Line gzip is the phase 4 bundle matrix. Browser timings are round 13, measured 2026-10-18 on `d8dcc5a`, from benchmarks.json.
 
 ## Line chart, gzip
 
-Log scale. ChartKit is the size script and is larger than uPlot. The other bars are the bench line, using the React-external gzip when that row has one. uPlot’s CSS is a separate measured file and is not added to its bar.
+Log scale. ChartKit is createRenderer of the line from the phase 4 bundle matrix. React libraries use the React-external gzip when that cell has one. uPlot is the full package plus its stylesheet.
 
 ```json
 {
@@ -17,35 +17,31 @@ Log scale. ChartKit is the size script and is larger than uPlot. The other bars 
   "data": [
     {
       "name": "ChartKit",
-      "bytes": 40979
-    },
-    {
-      "name": "CK bench",
-      "bytes": 41178
+      "bytes": 32110
     },
     {
       "name": "uPlot",
-      "bytes": 23276
+      "bytes": 24054
     },
     {
       "name": "Chart.js",
-      "bytes": 49374
+      "bytes": 49361
     },
     {
-      "name": "Plot",
-      "bytes": 97723
+      "name": "Observable Plot",
+      "bytes": 97695
     },
     {
       "name": "Recharts",
-      "bytes": 96213
+      "bytes": 96168
     },
     {
       "name": "Nivo",
-      "bytes": 96583
+      "bytes": 96550
     },
     {
       "name": "ECharts",
-      "bytes": 162991
+      "bytes": 162948
     }
   ],
   "encoding": {
@@ -89,7 +85,7 @@ Log scale. ChartKit is the size script and is larger than uPlot. The other bars 
     }
   },
   "a11y": {
-    "alt": "uPlot’s line is the smallest bar. ChartKit’s measured line is larger, 40,979 bytes against uPlot’s 23,276. ECharts is the largest on this log scale."
+    "alt": "uPlot’s line is the smallest bar. ChartKit’s createRenderer line is larger, 32,110 bytes against uPlot’s 24,054 (JS plus the 762 byte stylesheet). ECharts is the largest on this log scale."
   }
 }
 ```

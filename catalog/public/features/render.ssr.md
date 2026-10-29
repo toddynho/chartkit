@@ -6,7 +6,7 @@ Render on the server without a browser
 
 Matrix status: `native`. Verification: `dts-grep` (weak).
 
-pure string render; 0.85 ms for 1k-point line (project benchmark)
+pure string render; phase 4 median for a 100,000-point line is on /benchmarks
 
 Source: chartkit:packages/vanilla/src/ssr.ts:5
 

@@ -120,7 +120,7 @@ function markdown(board) {
   if (board.sources) {
     const sources = board.sources;
     lines.push(
-      `Bundle bytes are from catalog/data/measured-sizes.json, size script measured ${sources.sizeMeasured} on \`${sources.sizeCommit}\`, bench bundles measured ${sources.benchMeasured}. Timings are older round ${sources.round}, measured ${sources.roundMeasured} on \`${sources.roundCommit}\`, from benchmarks.json.`,
+      `Line gzip is the phase 4 bundle matrix. Browser timings are round ${sources.round}, measured ${sources.roundMeasured} on \`${sources.roundCommit}\`, from benchmarks.json.`,
       "",
     );
   }

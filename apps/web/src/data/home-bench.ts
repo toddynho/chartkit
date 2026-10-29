@@ -283,7 +283,7 @@ export function proofFigures() {
     tasks,
     repairFrom: bench.headline.repairNoDocs.first,
     repairTo: bench.headline.repairNoDocs.afterRepair,
-    gzipKb: Math.round(bench.headline.lineGzipBytes / 1000),
+    gzipKb: (bench.headline.lineGzipBytes / 1000).toFixed(1),
     gzipBytes: bench.headline.lineGzipBytes,
     ssrMs: bench.headline.ssrMeanMs,
   };

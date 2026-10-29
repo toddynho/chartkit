@@ -69,8 +69,13 @@
         "note": ""
       },
       "bundleGzip": {
-        "minimalLine": 16487,
-        "fullEntry": 56464
+        "minimalLine": 32110,
+        "fullEntry": 78081,
+        "source": "bench/results/bundle.json",
+        "commit": "55fc89dba40a2b607daff539416c1f389cb917f5",
+        "measured": "2026-10-29",
+        "method": "esbuild minify, gzip level 9, createRenderer of the line. fullEntry is /all.",
+        "note": "Phase 4 per-type matrix. The older extract is not this number."
       }
     },
     {
@@ -81107,7 +81112,7 @@
               "loc": "chartkit:packages/vanilla/src/ssr.ts:5"
             }
           ],
-          "note": "pure string render; 0.85 ms for 1k-point line (project benchmark)",
+          "note": "pure string render; the phase 4 median for a 100,000-point line is on /benchmarks",
           "verified": "dts-grep",
           "strength": "weak"
         },

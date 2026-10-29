@@ -23,7 +23,7 @@ export function whenToUseFaqs(facts: WhenToUseFacts): FaqItem[] {
   return [
     {
       question: "When should I use ChartKit?",
-      answer: `When one JSON spec should render in React, Vue, Svelte, vanilla, or on the server, and an agent should validate() and repair() it. The line chart is ${facts.lineGzipBytes} bytes gzip. A 1,000-point line server-renders in ${facts.ssrLabel} mean. With the docs in the prompt, the agent eval was 42/42 on the first try. Round 6, 2026-10-16. Not re-run for round 13.`,
+      answer: `When one JSON spec should render in React, Vue, Svelte, vanilla, or on the server, and an agent should validate() and repair() it. The line chart is ${facts.lineGzipBytes} bytes gzip. A 100,000-point line server-renders in ${facts.ssrLabel} median. With the docs in the prompt, the agent eval was 42/42 on the first try. Round 6, 2026-10-16. Not re-run for round 13.`,
     },
     {
       question: "When should I pick another chart library?",
@@ -32,11 +32,11 @@ export function whenToUseFaqs(facts: WhenToUseFacts): FaqItem[] {
     },
     {
       question: "How large is a ChartKit line chart?",
-      answer: `${facts.lineGzipBytes} bytes gzip, from scripts/size.mjs on ${facts.sizeCommit}, measured ${facts.sizeMeasured}. ${facts.bundleLoss} The harness minimal line is ${facts.harnessLineBytes} bytes. Other libraries, and the donut, are on /benchmarks.`,
+      answer: `${facts.lineGzipBytes} bytes gzip for createRenderer of the line, measured ${facts.sizeMeasured} on ${facts.sizeCommit}. ${facts.bundleLoss} Bar, mini-area, /all, and every other chart are on /benchmarks.`,
     },
     {
       question: "Can ChartKit render without a DOM?",
-      answer: `Yes. Round 13 server-rendered a 1,000-point line in ${facts.ssrLabel} mean and 0.85 ms median. ECharts did it in 6.65 ms mean (median 6.38). Nivo did it in 92.29 ms mean (median 90.89). uPlot, Chart.js, Recharts, and Observable Plot produced no chart without a DOM.`,
+      answer: `Yes. The phase 4 server render of a 100,000-point line is ${facts.ssrLabel} median. Unsupported cells are labeled on /benchmarks. Recharts 3 SSR returns no SVG except sunburst, and Tremor is affected for the same reason. uPlot and Chart.js have no Node SVG path in that run.`,
     },
     {
       question: "How well do coding agents do on the first try?",
@@ -50,7 +50,7 @@ export function whenToUseFaqs(facts: WhenToUseFacts): FaqItem[] {
     {
       question: "How do I reproduce the numbers?",
       answer:
-        "Round 13, measured 2026-10-18, phase 2 d8dcc5a. Median of 5, Playwright Chromium, a 640×360 line. The aligned update starts at the top of a requestAnimationFrame, awaits the library's completion, then reads a MessageChannel after paint. The files are /benchmarks.json and /benchmarks.md.",
+        "Browser rows are round 13, measured 2026-10-18, phase 2 d8dcc5a. Median of 5, Playwright Chromium, a 640×360 line. The aligned update starts at the top of a requestAnimationFrame, awaits the library's completion, then reads a MessageChannel after paint. Bundle size and server render are the phase 4 per-type matrices in /benchmarks.json and /benchmarks.md.",
     },
   ];
 }
@@ -96,9 +96,8 @@ function day(iso: string): string {
 }
 
 export function sizeBrief(measured: SizeFacts, library: SizeLibrary): string {
-  const core = measured.coreMatchesMain ? `core ${measured.coreCommit}, same as origin/main` : `core ${measured.coreCommit}`;
   const parts = [
-    `ChartKit line gzip is ${bytes(measured.lineBytes)} bytes (${measured.command}, ${measured.commit}, ${core}, ${day(measured.measuredAt)}).`,
+    `ChartKit line gzip is ${bytes(measured.lineBytes)} bytes (createRenderer of the line, bench/results/bundle.json, ${measured.commit}, ${day(measured.measuredAt)}).`,
   ];
   const row = measured.rows.find((item) => item.id === library.id && item.chart === "line" && item.status === "ok");
   if (row?.gzipBytes != null) {
@@ -117,7 +116,7 @@ export function sizeBrief(measured: SizeFacts, library: SizeLibrary): string {
       );
     }
     const harness = measured.rows.find((item) => item.id === "chartkit-minimal" && item.chart === "line" && item.status === "ok");
-    if (harness?.gzipBytes != null) {
+    if (harness?.gzipBytes != null && harness.gzipBytes !== measured.lineBytes) {
       parts.push(`ChartKit's harness line on that run is ${bytes(harness.gzipBytes)} bytes.`);
     }
   } else if (library.bundleGzip && typeof library.bundleGzip.minimalLine === "number") {
@@ -150,6 +149,7 @@ interface SsrCell {
   meanMs: number | null;
   medianMs: number | null;
   supported: boolean;
+  points: number;
 }
 
 interface FirstHover {
@@ -198,10 +198,10 @@ export function perfBrief(libraryId: string, libraryName: string, bench: PerfFac
   const ssr = bench.ssrMs.find((row) => row.lib === name);
   if (ssr && ssrChartkit?.supported) {
     if (!ssr.supported) {
-      parts.push(`${name} produced no chart without a DOM.`);
+      parts.push(`${name} is unsupported for that server render.`);
     } else if (ssr.meanMs != null) {
       parts.push(
-        `Server render, 1,000-point line: ChartKit ${ssrChartkit.meanMs} ms mean, ${name} ${ssr.meanMs} ms mean (median ${ssr.medianMs}).`,
+        `Server render, ${ssr.points.toLocaleString("en-US")}-point line: ChartKit ${ssrChartkit.medianMs} ms median, ${name} ${ssr.medianMs} ms median.`,
       );
     }
   }

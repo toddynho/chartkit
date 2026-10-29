@@ -8,7 +8,7 @@ export interface FaqItem {
 export const whenToUseFaqs: FaqItem[] = [
   {
     question: "When should I use ChartKit?",
-    answer: `Use ChartKit when one JSON spec should render SVG in React, Vue, Svelte, or without a framework, and when an agent should validate and repair that spec. The line chart is ${headline.lineGzipBytes} bytes gzip. A 1,000 point line server-renders in ${headline.ssrLabel} mean. With the docs, the agent eval was 42/42 on the first try. That eval was not re-run for round 13.`,
+    answer: `Use ChartKit when one JSON spec should render SVG in React, Vue, Svelte, or without a framework, and when an agent should validate and repair that spec. The line chart is ${headline.lineGzipBytes} bytes gzip. A ${headline.ssrPoints.toLocaleString("en-US")} point line server-renders in ${headline.ssrLabel} median. With the docs, the agent eval was 42/42 on the first try. That eval was not re-run for round 13.`,
   },
   {
     question: "When should I pick another chart library?",
@@ -17,11 +17,11 @@ export const whenToUseFaqs: FaqItem[] = [
   },
   {
     question: "How large is a ChartKit line chart?",
-    answer: `${headline.lineGzipBytes} bytes gzip for the line entry from scripts/size.mjs on ${headline.sizeCommit}, measured ${headline.sizeMeasured}. ${headline.bundleLoss} ${headline.lineWins} The harness minimal line is ${headline.harnessLineBytes} bytes. ${headline.donutWin}`,
+    answer: `${headline.lineGzipBytes} bytes gzip for createRenderer of the line, measured ${headline.sizeMeasured} on ${headline.sizeCommit}. ${headline.bundleLoss} ${headline.lineWins} ${headline.donutWin}`,
   },
   {
     question: "Can ChartKit render without a DOM?",
-    answer: `Yes. Round 13 server-rendered a 1,000 point line in ${headline.ssrLabel} mean and 0.85 ms median. ECharts did it in 6.65 ms mean (median 6.38). Nivo did it in 92.29 ms mean (median 90.89). uPlot, Chart.js, Recharts, and Observable Plot did not produce a chart without a DOM.`,
+    answer: `Yes. The phase 4 server render of a ${headline.ssrPoints.toLocaleString("en-US")} point line is ${headline.ssrLabel} median. Unsupported cells are labeled on /benchmarks. Recharts 3 SSR returns no SVG except sunburst, and Tremor is affected for the same reason.`,
   },
   {
     question: "How well do coding agents do on the first try?",
@@ -35,6 +35,6 @@ export const whenToUseFaqs: FaqItem[] = [
   {
     question: "How do I reproduce the numbers?",
     answer:
-      "The browser, bundle, and server-render figures are round 13, measured 2026-10-18 on phase 2 d8dcc5a. Median of 5, Playwright Chromium, a 640×360 line. The aligned update starts at the top of a requestAnimationFrame, awaits the library’s own completion, and reads time from a MessageChannel after paint. The JSON file is https://chartkit.dev/benchmarks.json and the Markdown file is https://chartkit.dev/benchmarks.md.",
+      "Browser rows are round 13, measured 2026-10-18 on phase 2 d8dcc5a. Median of 5, Playwright Chromium, a 640×360 line. The aligned update starts at the top of a requestAnimationFrame, awaits the library’s own completion, and reads time from a MessageChannel after paint. Bundle size and server render are the phase 4 matrices. The JSON file is https://chartkit.dev/benchmarks.json and the Markdown file is https://chartkit.dev/benchmarks.md.",
   },
 ];

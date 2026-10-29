@@ -3,9 +3,12 @@ import "../styles/surfaces.css";
 import Base from "../layouts/Base.astro";
 import { loadBenchmarksPage } from "../lib/surfaces";
 import { loadPublishedPaint } from "../data/published-paint";
+import { loadPublishedBundle, loadPublishedSsr } from "../data/published-size";
 
 const page = loadBenchmarksPage();
 const paint = loadPublishedPaint();
+const bundle = loadPublishedBundle();
+const ssr = loadPublishedSsr();
 const h = page.headline;
 const description =
   "Published ChartKit benchmark numbers: two-rAF paint, bundle size, browser render, server render, sampling, and the agent eval.";
@@ -66,29 +69,36 @@ const description =
       </table>
     </div>
 
-    <h2>Bundle size</h2>
-    <p>
-      ChartKit’s line entry is {h.lineGzipBytes} bytes gzip ({h.lineGzipLabel}), from <code>scripts/size.mjs</code> on{" "}
-      <code>{h.sizeCommit}</code>, measured {h.sizeMeasured}. {h.bundleLoss} {h.lineWins} The harness minimal line on
-      that run is {h.harnessLineBytes} bytes. {h.donutWin}
-    </p>
-    <div class="ck-frame" role="img" aria-label={page.bundle.alt} set:html={page.bundle.svg} />
-    <p class="board-meta">{page.bundle.caption}</p>
+    <h2 id="bundle">Bundle size</h2>
+    <p>{bundle.caption}</p>
+    {bundle.notes.map((note) => <p>{note}</p>)}
     <div class="table-wrap">
-      <table>
+      <table class="size-matrix">
         <thead>
           <tr>
-            <th>Library</th>
-            <th class="num">gzip bytes</th>
-            <th>Note</th>
+            <th>Chart</th>
+            {bundle.libraries.map((library) => <th class="num">{library}</th>)}
           </tr>
         </thead>
         <tbody>
-          {page.bundleRows.map((row) => (
+          {bundle.rows.map((row) => (
             <tr>
-              <td>{row.lib}</td>
-              <td class="num">{row.gzip}</td>
-              <td>{row.note}</td>
+              <td>{row.label}</td>
+              {row.cells.map((cell) => (
+                <td
+                  class:list={[
+                    "num",
+                    cell.state === "ok" && cell.library === "ChartKit" && cell.text !== "not tree-shakeable" && "is-us",
+                    cell.text === "not tree-shakeable" && "is-frozen",
+                    cell.state === "unsupported" && "is-unsupported",
+                    cell.state === "error" && "is-error",
+                    cell.state === "timeout" && "is-timeout",
+                  ]}
+                  title={cell.title}
+                >
+                  {cell.text}
+                </td>
+              ))}
             </tr>
           ))}
         </tbody>
@@ -259,26 +269,37 @@ const description =
       ms to update, not the old two-frame figure.
     </p>
 
-    <h2>Server render</h2>
-    <div class="ck-frame" role="img" aria-label={page.ssr.alt} set:html={page.ssr.svg} />
-    <p class="board-meta">{page.ssr.caption}</p>
+    <h2 id="ssr">Server render</h2>
+    <p>{ssr.caption}</p>
+    {ssr.notes.map((note) => <p>{note}</p>)}
     <div class="table-wrap">
-      <table>
+      <table class="size-matrix">
         <thead>
           <tr>
-            <th>Library</th>
-            <th class="num">Mean ms</th>
-            <th class="num">Median ms</th>
-            <th>Status</th>
+            <th>Chart</th>
+            <th class="num">Points</th>
+            {ssr.libraries.map((library) => <th class="num">{library}</th>)}
           </tr>
         </thead>
         <tbody>
-          {page.ssrRows.map((row) => (
+          {ssr.rows.map((row) => (
             <tr>
-              <td>{row.lib}</td>
-              <td class="num">{row.mean}</td>
-              <td class="num">{row.median}</td>
-              <td>{row.status}</td>
+              <td>{row.label}</td>
+              <td class="num">{row.pointsLabel}</td>
+              {row.cells.map((cell) => (
+                <td
+                  class:list={[
+                    "num",
+                    cell.state === "ok" && cell.library === "ChartKit" && "is-us",
+                    cell.state === "unsupported" && "is-unsupported",
+                    cell.state === "error" && "is-error",
+                    cell.state === "timeout" && "is-timeout",
+                  ]}
+                  title={cell.title}
+                >
+                  {cell.text}
+                </td>
+              ))}
             </tr>
           ))}
         </tbody>

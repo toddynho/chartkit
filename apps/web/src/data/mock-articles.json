@@ -92,7 +92,7 @@
       {
         "title": "Slim bundle",
         "paragraphs": [
-          "Default `<Chart />` ships every chart. Pass `render` from `createRenderer([line])` when a page only needs one type. Budgets from `size-budget.json`: core line 8.8 KB gzip, core all 20.9 KB gzip (React + framework external).",
+          "Default `<Chart />` ships every chart. Pass `render` from `createRenderer([line])` when a page only needs one type. Budgets from `size-budget.json`: core line 32.1 KB gzip, core all 78.1 KB gzip (React + framework external).",
           "Caveat (product): the slim `createRenderer([line])` path may omit axis extras unless mounted \u2014 titles/ticks can silently no-op. Prefer `core/all` until bundles docs spell the opt-in. Mock notes the honesty gap from PLAN Decision 1."
         ],
         "list": [],
@@ -188,7 +188,7 @@
       {
         "title": "Slim bundle",
         "paragraphs": [
-          "Default `<Chart />` ships every chart. Pass `:render` from `createRenderer([line])` when a page only needs one type. Budgets from `size-budget.json`: Vue adapter 274 B gzip (framework external), core line 8.8 KB, core all 20.9 KB.",
+          "Default `<Chart />` ships every chart. Pass `:render` from `createRenderer([line])` when a page only needs one type. Budgets from `size-budget.json`: Vue adapter 274 B gzip (framework external), core line 32.1 KB, core all 78.1 KB.",
           "Caveat (product): the slim `createRenderer([line])` path may omit axis extras unless mounted \u2014 titles/ticks can silently no-op. Prefer `core/all` until bundles docs spell the opt-in. Mock notes the honesty gap from PLAN Decision 1."
         ],
         "list": [],
@@ -272,7 +272,7 @@
       {
         "title": "Slim bundle",
         "paragraphs": [
-          "Default `<Chart />` ships every chart. Pass `render` from `createRenderer([line])` when a page only needs one type. Budgets from `size-budget.json`: Svelte adapter 446 B gzip (framework external), core line 8.8 KB, core all 20.9 KB.",
+          "Default `<Chart />` ships every chart. Pass `render` from `createRenderer([line])` when a page only needs one type. Budgets from `size-budget.json`: Svelte adapter 446 B gzip (framework external), core line 32.1 KB, core all 78.1 KB.",
           "Caveat (product): the slim `createRenderer([line])` path may omit axis extras unless mounted \u2014 titles/ticks can silently no-op. Prefer `core/all` until bundles docs spell the opt-in. Mock notes the honesty gap from PLAN Decision 1."
         ],
         "list": [],
@@ -313,7 +313,7 @@
         "title": "Install",
         "paragraphs": [
           "Pull the vanilla adapter. It depends on `@chartkitdev/core` (zero runtime deps) and has no framework peers. ESM + CJS builds ship from the package root. Same v1 spec as React, Vue, Svelte, or a bare Node SVG string.",
-          "Size: budgets from `size-budget.json` (framework externalized): vanilla adapter 240 B gzip, core line 8.8 KB, core all 20.9 KB. CDN global bytes are mock-plausible until a published `chartkit.global.js` lands."
+          "Size: budgets from `size-budget.json` (framework externalized): vanilla adapter 240 B gzip, core line 32.1 KB, core all 78.1 KB. CDN global bytes are mock-plausible until a published `chartkit.global.js` lands."
         ],
         "list": [],
         "code": [
@@ -374,7 +374,7 @@
       {
         "title": "Slim bundle",
         "paragraphs": [
-          "Default `mount` / `renderToString` ship every chart via `core/all`. Pass `{ render }` from `createRenderer([line])` when a page only needs one type. Budgets: vanilla 240 B, core line 8.8 KB, core all 20.9 KB gzip.",
+          "Default `mount` / `renderToString` ship every chart via `core/all`. Pass `{ render }` from `createRenderer([line])` when a page only needs one type. Budgets: vanilla 240 B, core line 32.1 KB, core all 78.1 KB gzip.",
           "Caveat (product): the slim `createRenderer([line])` path may omit axis extras unless mounted \u2014 titles/ticks can silently no-op. Prefer `core/all` until bundles docs spell the opt-in. Mock notes the honesty gap from PLAN Decision 1."
         ],
         "list": [],
@@ -1042,8 +1042,8 @@
     "slug": "bundles",
     "group": "Concepts",
     "title": "Bundles",
-    "lede": "Pick an entry that matches the charts and features you need. Budgets below are gzip -9 bytes from `scripts/size-budget.json` (r19). `npm run size` fails when a measured entry grows past its budget. Adapters exclude core and the framework.",
-    "description": "Pick an entry that matches the charts and features you need. Budgets below are gzip -9 bytes from `scripts/size-budget.json` (r19). `npm run size` fails when a measured entry grows",
+    "lede": "Pick an entry that matches the charts and features you need. The line and /all gzip figures below are the phase 4 bench, not an older size-budget ceiling.",
+    "description": "Pick an entry that matches the charts and features you need. The line and /all gzip figures below are the phase 4 bench, not an older size-budget ceiling.",
     "tryIntro": "",
     "sections": [
       {
@@ -1059,11 +1059,11 @@
       {
         "title": "Gzip budgets",
         "paragraphs": [
-          "Exact ceilings from `r19/scripts/size-budget.json`. Method: esbuild `--bundle --minify`, gzip -9. Adapter rows are the adapter only (core + framework external)."
+          "Line and /all are the phase 4 bench (esbuild minify, gzip -9). They are not the older size-budget ceilings."
         ],
         "list": [],
         "code": [
-          "`line 34,554 B // createRenderer([line]) headline all 64,372 B // @chartkitdev/core/all extra 88,723 B // @chartkitdev/core/extra validate 34,425 B interact 17,641 B interactExtra 3,780 B // @chartkitdev/core/interact/extra canvas 57,396 B mermaid 39,758 B global 126,877 B // chartkit.global.js (IIFE) globalAuto 89,096 B globalMermaid 40,376 B vue / svelte 802 / 962 B vanilla / element 1,571 / 1,821 B`"
+          "`line 32,110 B // createRenderer([line]), phase 4 bench/results/bundle.json all 78,081 B // @chartkitdev/core/all, same run. Older size-budget ceilings for extra, validate, interact, canvas, and the adapters are not this measurement.`"
         ]
       },
       {
@@ -1077,8 +1077,8 @@
       {
         "title": "Minimal path: `charts/<type>` + `createRenderer`",
         "paragraphs": [
-          "Smallest client path for one chart type. Import the renderer, then build a `render` function. Line budget: 34,554 B gzip (33.7 KB).",
-          "Does not include: other chart types, `mountLayout()` (facets, concatenation, breakpoints, RTL), the canvas painter, `interact`, phase-3/4 extras, or Mermaid. Themes past what you register yourself are opt-in via `@chartkitdev/core/themes/*`."
+          "Smallest client path for one chart type. Import the renderer, then build a `render` function. The phase 4 line gzip is 32,110 bytes.",
+          "Does not include: other chart types, `mountLayout()` (facets, concatenation, breakpoints, RTL), the canvas painter, `interact`, phase-3/4 extras, or Mermaid. `@chartkitdev/core/all` is unchanged. Annotations, color rules, headlines, tooltip chrome, line labels, and the midnight, refined, and editorial themes need `import \"@chartkitdev/core/features\"`. Themes can also be imported individually from `@chartkitdev/core/themes/<name>`."
         ],
         "list": [],
         "code": [
@@ -1089,7 +1089,7 @@
         "title": "Decision 1 \u2014 axis extras on the minimal path",
         "paragraphs": [
           "From `chartkit-plan/PLAN.md`: PR #16 axis features (`title`, `ticks`, rotation, `position`, `reverse`, `nice`, padding, description, line `legend.values`) only paint when `axis-extra` is mounted. `core/all`, `extra`, and every adapter mount it. `createRenderer([line])` does not. On that path those options produce identical SVG with no warning \u2014 a silent no-op.",
-          "Until N1 lands, prefer `@chartkitdev/core/all` (or an adapter default) when you need axis chrome. Do not assume the 33.7 KB line entry draws every `axes.*` field."
+          "Until N1 lands, prefer `@chartkitdev/core/all` (or an adapter default) when you need axis chrome. Do not assume the 32.1 KB line entry draws every `axes.*` field."
         ],
         "list": [
           "Option (a): mount axis extras on the minimal path too (~+1,176 B measured historically; still under uPlot/visx).",
@@ -1100,7 +1100,7 @@
       {
         "title": "`core/all`",
         "paragraphs": [
-          "Registers core v1 charts (line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi, sparkline, mini-area, progress-ring, spike, candlestick), all theme presets, `mountAxes()`, and `mountLayout()`. Budget: 64,372 B (62.9 KB).",
+          "Registers core v1 charts (line, bar, donut, pie, stacked-area, scatter, combo, heatmap, gauge, kpi, sparkline, mini-area, progress-ring, spike, candlestick), all theme presets, `mountAxes()`, and `mountLayout()`. Phase 4 gzip is 78,081 bytes. This entry is unchanged: it already registers the themes and features a minimal createRenderer setup has to import.",
           "Does not include: phase-3/4 types (histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, area-range, bar-range, errorbar, sunburst) \u2014 those are `extra`. Does not import `interact` (static SVG string stays the same). Does not include the canvas painter or Mermaid."
         ],
         "list": [],

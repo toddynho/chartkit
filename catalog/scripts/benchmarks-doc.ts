@@ -17,6 +17,9 @@ import {
   updateMethod,
 } from "../lib/benchmarks.ts";
 import { paintMatrix } from "../lib/paint-matrix.ts";
+import { bundleMatrix, phase4Headline, ssrMatrix } from "../lib/size-matrix.ts";
+
+const phase4 = phase4Headline();
 
 export const BENCHMARKS_SCHEMA_URL = "https://chartkit.dev/benchmarks.schema.json";
 
@@ -34,15 +37,19 @@ export function benchmarksPayload() {
       updates: updateMethod,
       sampling:
         "mark.sampling defaults to auto and minmax-downsamples a line longer than twice the plot width. 1,000 points stay complete. The samplingNone rows draw every point and use the same aligned update timer.",
-      bundle: "gzip -9. ChartKit’s headline line is scripts/size.mjs. Competitor rows and the harness chartkit-minimal line are the bench harness. uPlot’s JS and stylesheet are gzipped separately and the uPlot row sums those two responses. The JS figure is the loss named in the headline.",
-      ssr: "Mean and median of 8 calls after 2 warmups, a 1,000 point line. supported false means no chart without a DOM. Recharts returned an empty wrapper.",
+      bundle:
+        "Phase 4 per-type gzip from bench/results/bundle.json. esbuild minify, gzip level 9. ChartKit is createRenderer of that chart. /all is one bundle. unsupported and not tree-shakeable are labeled. uPlot’s JS and stylesheet are separate responses.",
+      ssr: "Phase 4 per-type Node render from bench/results/ssr.json. Median of 5 at the paint-matrix N. unsupported, error, and timeout are labeled. A blank cell is not used.",
       agents: `Round 6 is the scoreboard. ${published.model}, temperature ${published.temperature}, ${published.tasks} tasks, one run on ${AGENT_MEASURED}. Not re-run for round ${ROUND}. Official means the library docs were in the prompt. ChartKit docs are llms.txt. repair() is a no-model step on ChartKit's no-docs first try and is not a second model call. Nivo and uPlot were not in the agent eval.`,
     },
     headline: {
       lineGzipBytes: published.bundleGzip.find((row) => row.id === "chartkit-line")?.bytes,
+      barGzipBytes: phase4.barBytes,
+      miniAreaGzipBytes: phase4.miniAreaBytes,
+      allGzipBytes: phase4.allBytes,
       lineGzipCommit: headline.sizeCommit,
       lineGzipMeasured: headline.sizeMeasured,
-      otherFigures: "round 13, measured 2026-10-18 on phase 2 d8dcc5a, except the agent eval and the bundle rows",
+      otherFigures: "browser rows are round 13, measured 2026-10-18 on phase 2 d8dcc5a. Bundle and SSR are the phase 4 matrices.",
       bundleVsUplot: {
         chartkitBytes: published.sizeScriptLineBytes,
         uplotJsBytes: Number(headline.uplotJsBytes.replace(/,/g, "")),
@@ -51,6 +58,8 @@ export function benchmarksPayload() {
         result: published.sizeScriptLineBytes > Number(headline.uplotJsBytes.replace(/,/g, "")) ? "loss" : "not-a-loss",
       },
       ssrMeanMs: published.ssr[0].meanMs,
+      ssrMedianMs: published.ssr[0].medianMs,
+      ssrPoints: published.ssr[0].points,
       repairNoDocs: { first: published.agents[0].noDocsFirst, afterRepair: published.agents[0].noDocsWithinTwo },
     },
     bundleGzip: published.bundleGzip,
@@ -62,6 +71,8 @@ export function benchmarksPayload() {
     ssrMs: published.ssr,
     agents: published.agents,
     paint: paintMatrix(),
+    bundleMatrix: bundleMatrix(),
+    ssrMatrix: ssrMatrix(),
     urls: {
       html: "https://chartkit.dev/benchmarks",
       markdown: "https://chartkit.dev/benchmarks.md",
@@ -85,7 +96,7 @@ export const benchmarksSchema = {
   $id: BENCHMARKS_SCHEMA_URL,
   title: "ChartKit benchmarks",
   type: "object",
-  required: ["round", "measured", "methodology", "bundleGzip", "browserMs", "samplingNoneMs", "ssrMs", "agents", "paint"],
+  required: ["round", "measured", "methodology", "bundleGzip", "browserMs", "samplingNoneMs", "ssrMs", "agents", "paint", "bundleMatrix", "ssrMatrix"],
   additionalProperties: true,
   properties: {
     round: { type: "integer" },
@@ -117,14 +128,39 @@ export const benchmarksSchema = {
         caption: { type: "string" },
       },
     },
+    bundleMatrix: {
+      type: "object",
+      required: ["measuredAt", "libraries", "rows", "counts", "caption"],
+      properties: {
+        measuredAt: { type: "string" },
+        libraries: { type: "array", items: { type: "string" } },
+        rows: { type: "array" },
+        counts: { type: "object" },
+        caption: { type: "string" },
+      },
+    },
+    ssrMatrix: {
+      type: "object",
+      required: ["measuredAt", "libraries", "rows", "counts", "caption"],
+      properties: {
+        measuredAt: { type: "string" },
+        libraries: { type: "array", items: { type: "string" } },
+        rows: { type: "array" },
+        counts: { type: "object" },
+        caption: { type: "string" },
+      },
+    },
   },
 } as const;
 
 export function benchmarksMarkdown(): string {
   const doc = benchmarksPayload();
-  const bundle = doc.bundleGzip
-    .map((row) => `| ${row.lib} | ${row.entry} | ${row.bytes.toLocaleString("en-US")} | ${row.reactExternal ? "React external" : ""} |`)
+  const bundleHead = ["Chart", ...doc.bundleMatrix.libraries].join(" | ");
+  const bundleRule = ["---", ...doc.bundleMatrix.libraries.map(() => "---:")].join(" | ");
+  const bundleBody = doc.bundleMatrix.rows
+    .map((bundleRow) => `| ${bundleRow.label} | ${bundleRow.cells.map((cell) => cell.text).join(" | ")} |`)
     .join("\n");
+  const bundleNotes = doc.bundleMatrix.notes.join(" ");
   const ms = (value: number) => value.toFixed(1);
   const browser = doc.browserMs
     .map(
@@ -141,9 +177,12 @@ export function benchmarksMarkdown(): string {
   const sampling = doc.samplingNoneMs
     .map((row) => `| ${row.points.toLocaleString("en-US")} | ${row.initialMs} | ${row.updateMs} |`)
     .join("\n");
-  const ssr = doc.ssrMs
-    .map((row) => `| ${row.lib} | ${row.supported ? row.meanMs : "—"} | ${row.supported ? row.medianMs : "—"} | ${row.supported ? "yes" : "no chart without a DOM"} |`)
+  const ssrHead = ["Chart", "Points", ...doc.ssrMatrix.libraries].join(" | ");
+  const ssrRule = ["---", "---:", ...doc.ssrMatrix.libraries.map(() => "---:")].join(" | ");
+  const ssrBody = doc.ssrMatrix.rows
+    .map((ssrRow) => `| ${ssrRow.label} | ${ssrRow.pointsLabel} | ${ssrRow.cells.map((cell) => cell.text).join(" | ")} |`)
     .join("\n");
+  const ssrNotes = doc.ssrMatrix.notes.join(" ");
   const agents = doc.agents
     .map((row) =>
       row.inEval
@@ -171,16 +210,16 @@ Machine-readable copy: ${doc.urls.json} (schema ${doc.urls.schema}). HTML page: 
 - Browser: ${doc.methodology.browser}
 - Updates: ${doc.methodology.updates}
 - Sampling: ${doc.methodology.sampling}
-- Bundle: ${doc.methodology.bundle} \`scripts/size.mjs\` line is ${doc.sizeScriptLineBytes.toLocaleString("en-US")} bytes. \`/all\` on that script is ${published.sizeScriptAllBytes.toLocaleString("en-US")} bytes.
+- Bundle: ${doc.methodology.bundle} createRenderer line is ${phase4.lineBytes.toLocaleString("en-US")} bytes gzip. Bar is ${phase4.barBytes.toLocaleString("en-US")}. Mini-area is ${phase4.miniAreaBytes.toLocaleString("en-US")}. \`/all\` is ${phase4.allBytes.toLocaleString("en-US")}.
 - Server render: ${doc.methodology.ssr}
 - Agents: ${doc.methodology.agents}
 
 ## Headline
 
-- Line chart: **${headline.lineGzipBytes} bytes** gzip, \`scripts/size.mjs\` on \`${headline.sizeCommit}\`, measured ${headline.sizeMeasured}. ${headline.bundleLoss} ${headline.lineWins} The harness minimal line is ${headline.harnessLineBytes} bytes. ${headline.donutWin}
+- Line chart: **${headline.lineGzipBytes} bytes** gzip, createRenderer of the line, measured ${headline.sizeMeasured} on \`${headline.sizeCommit}\`. Bar is ${phase4.barBytes.toLocaleString("en-US")}. Mini-area is ${phase4.miniAreaBytes.toLocaleString("en-US")}. \`/all\` is ${phase4.allBytes.toLocaleString("en-US")}. ${headline.bundleLoss} ${headline.lineWins} ${headline.donutWin}
 - Initial render: ChartKit is faster than uPlot in all 12 cells. Even 1,000,000 points is 23.6 ms vs 26.5 ms.
 - Aligned update: ChartKit wins 6 of 12 cells against uPlot and loses 6. Those six are marked in the browser table. It is not a sweep.
-- Server render: **${headline.ssrLabel}** mean (median ${published.ssr[0].medianMs} ms).
+- Server render, ${phase4.ssrPoints.toLocaleString("en-US")} point line: **${headline.ssrLabel}** median (mean ${published.ssr[0].meanMs} ms).
 - \`repair()\`, no model call, no docs: **${headline.repair}**. That agent run is ${AGENT_MEASURED}, not round 13.
 
 ## Paint, two-rAF
@@ -193,11 +232,15 @@ ${paintNotes}
 | ${paintRule} |
 ${paintBody}
 
-## Bundle, gzip -9
+## Bundle, gzip
 
-| Library | Entry | Bytes | Note |
-| --- | --- | ---: | --- |
-${bundle}
+${doc.bundleMatrix.caption}
+
+${bundleNotes}
+
+| ${bundleHead} |
+| ${bundleRule} |
+${bundleBody}
 
 ## Browser, milliseconds, ChartKit mount().update() vs uPlot setData
 
@@ -229,11 +272,15 @@ ${firstHover}
 | ---: | ---: | ---: |
 ${sampling}
 
-## Server render, 1,000 point line
+## Server render
 
-| Library | Mean ms | Median ms | SVG without a DOM |
-| --- | ---: | ---: | --- |
-${ssr}
+${doc.ssrMatrix.caption}
+
+${ssrNotes}
+
+| ${ssrHead} |
+| ${ssrRule} |
+${ssrBody}
 
 ## Agent eval
 

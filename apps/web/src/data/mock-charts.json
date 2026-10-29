@@ -13,7 +13,7 @@
       },
       {
         "k": "Size",
-        "v": "17.1 KB gzip"
+        "v": "33.4 KB gzip"
       },
       {
         "k": "Status",
@@ -83,7 +83,7 @@
       },
       {
         "k": "Size",
-        "v": "16.6 KB gzip"
+        "v": "32.1 KB gzip"
       },
       {
         "k": "Status",
@@ -153,7 +153,7 @@
       },
       {
         "k": "Size",
-        "v": "33.6 KB gzip"
+        "v": "33.7 KB gzip"
       },
       {
         "k": "Status",
@@ -225,7 +225,7 @@
         ],
         "list": [],
         "code": [
-          "`import { createRenderer } from \"@chartkitdev/core\"; import { bar } from \"@chartkitdev/core/charts/bar\"; export const render = createRenderer([bar]); // Adapters default to core/all \u2014 pass `render` to stay minimal. // Measured bar path: 34,373 B gzip (chartkit-minimal, measured-sizes.json).`"
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { bar } from \"@chartkitdev/core/charts/bar\"; export const render = createRenderer([bar]); // Adapters default to core/all \u2014 pass `render` to stay minimal. // Measured bar path: 33,686 B gzip (phase 4 createRenderer bar).`"
         ]
       }
     ]
@@ -244,7 +244,7 @@
       },
       {
         "k": "Size",
-        "v": "13.9 KB gzip"
+        "v": "15.3 KB gzip"
       },
       {
         "k": "Status",
@@ -321,7 +321,7 @@
         ],
         "list": [],
         "code": [
-          "`import { createRenderer } from \"@chartkitdev/core\"; import { donut } from \"@chartkitdev/core/charts/donut\"; export const render = createRenderer([donut]); // Pie: import { pie } from \"@chartkitdev/core/charts/pie\"; // Measured donut path: 14,266 B gzip (chartkit-minimal, measured-sizes.json).`"
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { donut } from \"@chartkitdev/core/charts/donut\"; export const render = createRenderer([donut]); // Pie: import { pie } from \"@chartkitdev/core/charts/pie\"; // Measured donut path: 15,292 B gzip (phase 4 createRenderer donut).`"
         ]
       }
     ]
@@ -340,7 +340,7 @@
       },
       {
         "k": "Size",
-        "v": "in core/all \u00b7 62.9 KB"
+        "v": "in core/all \u00b7 78.1 KB"
       },
       {
         "k": "Status",
@@ -412,7 +412,7 @@
         ],
         "list": [],
         "code": [
-          "`import { createRenderer } from \"@chartkitdev/core\"; import { combo } from \"@chartkitdev/core/charts/combo\"; export const render = createRenderer([combo]); // Combo mounts axes + range-band helpers with the renderer. // No separate measured-sizes \u201ccombo\u201d row \u2014 prefer core/all in hosts (64,372 B gzip).`"
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { combo } from \"@chartkitdev/core/charts/combo\"; export const render = createRenderer([combo]); // Combo mounts axes + range-band helpers with the renderer. // No separate measured-sizes \u201ccombo\u201d row \u2014 prefer core/all in hosts (78,081 B gzip).`"
         ]
       }
     ]
@@ -431,7 +431,7 @@
       },
       {
         "k": "Size",
-        "v": "in core/all \u00b7 62.9 KB"
+        "v": "in core/all \u00b7 78.1 KB"
       },
       {
         "k": "Status",
@@ -498,7 +498,7 @@
         ],
         "list": [],
         "code": [
-          "`import { createRenderer } from \"@chartkitdev/core\"; import { gauge } from \"@chartkitdev/core/charts/gauge\"; export const render = createRenderer([gauge]); // No separate measured-sizes \u201cgauge\u201d row \u2014 prefer core/all in hosts (64,372 B gzip). // progress-ring / kpi reuse $defs/metric with different renderers.`"
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { gauge } from \"@chartkitdev/core/charts/gauge\"; export const render = createRenderer([gauge]); // No separate measured-sizes \u201cgauge\u201d row \u2014 prefer core/all in hosts (78,081 B gzip). // progress-ring / kpi reuse $defs/metric with different renderers.`"
         ]
       }
     ]
@@ -517,7 +517,7 @@
       },
       {
         "k": "Size",
-        "v": "in core/all \u00b7 62.9 KB"
+        "v": "in core/all \u00b7 78.1 KB"
       },
       {
         "k": "Status",
@@ -584,7 +584,7 @@
         ],
         "list": [],
         "code": [
-          "`import { createRenderer } from \"@chartkitdev/core\"; import { heatmap } from \"@chartkitdev/core/charts/heatmap\"; export const render = createRenderer([heatmap]); // No separate measured-sizes \u201cheatmap\u201d row \u2014 prefer core/all in hosts (64,372 B gzip). // encoding.x + encoding.color required; y or mark.layout selects grid vs calendar.`"
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { heatmap } from \"@chartkitdev/core/charts/heatmap\"; export const render = createRenderer([heatmap]); // No separate measured-sizes \u201cheatmap\u201d row \u2014 prefer core/all in hosts (78,081 B gzip). // encoding.x + encoding.color required; y or mark.layout selects grid vs calendar.`"
         ]
       }
     ]
@@ -603,7 +603,7 @@
       },
       {
         "k": "Size",
-        "v": "in core/all \u00b7 62.9 KB"
+        "v": "in core/all \u00b7 78.1 KB"
       },
       {
         "k": "Status",
@@ -665,7 +665,7 @@
         ],
         "list": [],
         "code": [
-          "`import { createRenderer } from \"@chartkitdev/core\"; import { candlestick } from \"@chartkitdev/core/charts/candlestick\"; export const render = createRenderer([candlestick]); // No separate measured-sizes \u201ccandlestick\u201d row \u2014 prefer core/all (64,372 B gzip). // type string is candlestick; docs nav label is Candle.`"
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { candlestick } from \"@chartkitdev/core/charts/candlestick\"; export const render = createRenderer([candlestick]); // No separate measured-sizes \u201ccandlestick\u201d row \u2014 prefer core/all (78,081 B gzip). // type string is candlestick; docs nav label is Candle.`"
         ]
       }
     ]
@@ -684,7 +684,7 @@
       },
       {
         "k": "Size",
-        "v": "in core/all \u00b7 62.9 KB"
+        "v": "in core/all \u00b7 78.1 KB"
       },
       {
         "k": "Status",
@@ -746,7 +746,7 @@
         ],
         "list": [],
         "code": [
-          "`import { createRenderer } from \"@chartkitdev/core\"; import { scatter } from \"@chartkitdev/core/charts/scatter\"; export const render = createRenderer([scatter]); // No separate measured-sizes \u201cscatter\u201d row \u2014 prefer core/all (64,372 B gzip). // encoding.size is the bubble channel; omit it for fixed mark.pointSize dots.`"
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { scatter } from \"@chartkitdev/core/charts/scatter\"; export const render = createRenderer([scatter]); // No separate measured-sizes \u201cscatter\u201d row \u2014 prefer core/all (78,081 B gzip). // encoding.size is the bubble channel; omit it for fixed mark.pointSize dots.`"
         ]
       }
     ]
@@ -765,7 +765,7 @@
       },
       {
         "k": "Size",
-        "v": "in core/all \u00b7 62.9 KB"
+        "v": "in core/all \u00b7 78.1 KB"
       },
       {
         "k": "Status",
@@ -827,7 +827,7 @@
         ],
         "list": [],
         "code": [
-          "`import { createRenderer } from \"@chartkitdev/core\"; import { kpi } from \"@chartkitdev/core/charts/kpi\"; export const render = createRenderer([kpi]); // No separate measured-sizes \u201ckpi\u201d row \u2014 prefer core/all (64,372 B gzip). // Put value/delta under metric; optional data: number[] draws the sparkline.`"
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { kpi } from \"@chartkitdev/core/charts/kpi\"; export const render = createRenderer([kpi]); // No separate measured-sizes \u201ckpi\u201d row \u2014 prefer core/all (78,081 B gzip). // Put value/delta under metric; optional data: number[] draws the sparkline.`"
         ]
       }
     ]
@@ -846,7 +846,7 @@
       },
       {
         "k": "Size",
-        "v": "in core/all \u00b7 62.9 KB"
+        "v": "in core/all \u00b7 78.1 KB"
       },
       {
         "k": "Status",
@@ -908,7 +908,7 @@
         ],
         "list": [],
         "code": [
-          "`import { createRenderer } from \"@chartkitdev/core\"; import { sparkline } from \"@chartkitdev/core/charts/sparkline\"; export const render = createRenderer([sparkline]); // No separate measured-sizes \u201csparkline\u201d row \u2014 prefer core/all (64,372 B gzip). // Default height 32px. For a filled inline chart use type: \"mini-area\".`"
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { sparkline } from \"@chartkitdev/core/charts/sparkline\"; export const render = createRenderer([sparkline]); // No separate measured-sizes \u201csparkline\u201d row \u2014 prefer core/all (78,081 B gzip). // Default height 32px. For a filled inline chart use type: \"mini-area\".`"
         ]
       }
     ]
@@ -927,7 +927,7 @@
       },
       {
         "k": "Size",
-        "v": "in core/all \u00b7 62.9 KB"
+        "v": "in core/all \u00b7 78.1 KB"
       },
       {
         "k": "Status",
@@ -989,7 +989,7 @@
         ],
         "list": [],
         "code": [
-          "`import { createRenderer } from \"@chartkitdev/core\"; import { miniArea } from \"@chartkitdev/core/charts/mini-area\"; export const render = createRenderer([miniArea]); // No separate measured-sizes \u201cmini-area\u201d row \u2014 prefer core/all (64,372 B gzip). // type must be \"mini-area\". For stroke-only inline use type: \"sparkline\".`"
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { miniArea } from \"@chartkitdev/core/charts/mini-area\"; export const render = createRenderer([miniArea]); // No separate measured-sizes \u201cmini-area\u201d row \u2014 prefer core/all (78,081 B gzip). // type must be \"mini-area\". For stroke-only inline use type: \"sparkline\".`"
         ]
       }
     ]
@@ -1008,7 +1008,7 @@
       },
       {
         "k": "Size",
-        "v": "in core/all \u00b7 62.9 KB"
+        "v": "in core/all \u00b7 78.1 KB"
       },
       {
         "k": "Status",
@@ -1070,7 +1070,7 @@
         ],
         "list": [],
         "code": [
-          "`import { createRenderer } from \"@chartkitdev/core\"; import { progressRing } from \"@chartkitdev/core/charts/progress-ring\"; export const render = createRenderer([progressRing]); // No separate measured-sizes \u201cprogress-ring\u201d row \u2014 prefer core/all (64,372 B gzip). // Put value/min/max under metric. For a semicircle with bands use type: \"gauge\".`"
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { progressRing } from \"@chartkitdev/core/charts/progress-ring\"; export const render = createRenderer([progressRing]); // No separate measured-sizes \u201cprogress-ring\u201d row \u2014 prefer core/all (78,081 B gzip). // Put value/min/max under metric. For a semicircle with bands use type: \"gauge\".`"
         ]
       }
     ]
@@ -1089,7 +1089,7 @@
       },
       {
         "k": "Size",
-        "v": "in core/all \u00b7 62.9 KB"
+        "v": "in core/all \u00b7 78.1 KB"
       },
       {
         "k": "Status",
@@ -1141,7 +1141,7 @@
         ],
         "list": [],
         "code": [
-          "`import { createRenderer } from \"@chartkitdev/core\"; import { spike } from \"@chartkitdev/core/charts/spike\"; export const render = createRenderer([spike]); // No separate measured-sizes \u201cspike\u201d row \u2014 prefer core/all (64,372 B gzip). // mark.baseline is spike-only. For thick category bars use type: \"bar\".`"
+          "`import { createRenderer } from \"@chartkitdev/core\"; import { spike } from \"@chartkitdev/core/charts/spike\"; export const render = createRenderer([spike]); // No separate measured-sizes \u201cspike\u201d row \u2014 prefer core/all (78,081 B gzip). // mark.baseline is spike-only. For thick category bars use type: \"bar\".`"
         ]
       }
     ]

@@ -268,16 +268,18 @@
 .counts b { font-variant-numeric: tabular-nums; }
 
 .table-wrap { overflow-x: auto; margin: 0 0 1rem; }
-.paint-matrix { font-size: 12px; border-collapse: separate; }
-.paint-matrix th, .paint-matrix td { white-space: nowrap; font-variant-numeric: tabular-nums; }
-.paint-matrix th:first-child, .paint-matrix td:first-child {
+.paint-matrix, .size-matrix { font-size: 12px; border-collapse: separate; }
+.paint-matrix th, .paint-matrix td, .size-matrix th, .size-matrix td { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.paint-matrix th:first-child, .paint-matrix td:first-child,
+.size-matrix th:first-child, .size-matrix td:first-child {
   position: sticky;
   left: 0;
   background: #fff;
 }
-.paint-matrix .is-us { color: #0a63e6; font-weight: 650; }
-.paint-matrix .is-dnf { color: #9a3412; }
-.paint-matrix .is-na, .paint-matrix .is-absent { color: var(--muted); font-weight: 400; }
+.paint-matrix .is-us, .size-matrix .is-us { color: #0a63e6; font-weight: 650; }
+.paint-matrix .is-dnf, .size-matrix .is-error, .size-matrix .is-timeout { color: #9a3412; }
+.paint-matrix .is-na, .paint-matrix .is-absent,
+.size-matrix .is-unsupported, .size-matrix .is-frozen { color: var(--muted); font-weight: 400; }
 
 .surface table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
 .surface th, .surface td {

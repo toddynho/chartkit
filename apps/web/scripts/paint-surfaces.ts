@@ -374,7 +374,7 @@ function paintHomeStory(): void {
     const note = row.reactExternal ? ", React external" : row.id === "uplot" ? ", JS plus stylesheet" : "";
     return `${row.lib} ${bytesLabel(row.bytes)}${note}`;
   });
-  const sizeCaption = `Gzip bytes, log scale, smaller toward the top. ${sizeBits.join(". ")}. ChartKit is scripts/size.mjs on ${benchmarks.headline.sizeCommit}, measured ${benchmarks.headline.sizeMeasured}. uPlot is smaller. Every other library here is larger.`;
+  const sizeCaption = `Gzip bytes for the line, log scale, smaller toward the top. ${sizeBits.join(". ")}. createRenderer line, measured ${benchmarks.headline.sizeMeasured} on ${benchmarks.headline.sizeCommit}. ${benchmarks.headline.bundleLoss}`;
   const sizeAlt = `Line chart gzip. ${sizeBits.join(". ")}. uPlot is the smallest. ChartKit is next.`;
 
   const hoverRows = [...benchmarks.published.hoverSteady100k].sort((a, b) => a.paintedMs - b.paintedMs);
@@ -393,13 +393,14 @@ function paintHomeStory(): void {
   const hoverAlt = `Steady hover at 100,000 points. ${hoverBits.join(". ")}.`;
 
   const ssrRows = benchmarks.published.ssr.filter(
-    (row): row is (typeof benchmarks.published.ssr)[number] & { meanMs: number } => typeof row.meanMs === "number",
+    (row): row is (typeof benchmarks.published.ssr)[number] & { medianMs: number } => typeof row.medianMs === "number",
   );
-  const ssrSorted = [...ssrRows].sort((a, b) => a.meanMs - b.meanMs);
-  const ssrBits = ssrSorted.map((row) => `${row.lib} ${msLabel(row.meanMs)} ms`);
+  const ssrSorted = [...ssrRows].sort((a, b) => a.medianMs - b.medianMs);
+  const ssrBits = ssrSorted.map((row) => `${row.lib} ${msLabel(row.medianMs)} ms`);
   const ssrMissing = benchmarks.published.ssr.filter((row) => row.supported === false).map((row) => row.lib);
-  const ssrCaption = `Mean of 8 calls after 2 warmups, a 1,000 point line, log scale. ${ssrBits.join(". ")}. ${ssrMissing.join(", ")} did not produce a chart without a DOM.`;
-  const ssrAlt = `Server render of a 1,000 point line. ${ssrBits.join(". ")}. ${ssrMissing.join(", ")} produced no chart without a DOM.`;
+  const ssrPoints = benchmarks.published.ssr[0]?.points?.toLocaleString("en-US") ?? "";
+  const ssrCaption = `Median of 5, a ${ssrPoints} point line, log scale. ${ssrBits.join(". ")}. ${ssrMissing.join(", ")} are unsupported.`;
+  const ssrAlt = `Server render of a ${ssrPoints} point line. ${ssrBits.join(". ")}. ${ssrMissing.join(", ")} are unsupported.`;
 
   const painted = (id: string, title: string, caption: string, spec: Record<string, unknown>) => ({
     id,
@@ -436,9 +437,9 @@ function paintHomeStory(): void {
       ),
       painted(
         "ssr",
-        "Server render, 1,000 points",
+        "Server render, line",
         ssrCaption,
-        comparisonSpec("home-ssr-1k", ssrSorted.map((row) => ({ lib: row.lib, value: row.meanMs })), "Milliseconds", ssrAlt, 640, 280),
+        comparisonSpec("home-ssr-line", ssrSorted.map((row) => ({ lib: row.lib, value: row.medianMs })), "Milliseconds", ssrAlt, 640, 280),
       ),
     ],
   });

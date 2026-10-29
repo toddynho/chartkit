@@ -12,7 +12,9 @@
     "samplingNoneMs",
     "ssrMs",
     "agents",
-    "paint"
+    "paint",
+    "bundleMatrix",
+    "ssrMatrix"
   ],
   "additionalProperties": true,
   "properties": {
@@ -78,6 +80,66 @@
         },
         "rows": {
           "type": "array"
+        },
+        "caption": {
+          "type": "string"
+        }
+      }
+    },
+    "bundleMatrix": {
+      "type": "object",
+      "required": [
+        "measuredAt",
+        "libraries",
+        "rows",
+        "counts",
+        "caption"
+      ],
+      "properties": {
+        "measuredAt": {
+          "type": "string"
+        },
+        "libraries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rows": {
+          "type": "array"
+        },
+        "counts": {
+          "type": "object"
+        },
+        "caption": {
+          "type": "string"
+        }
+      }
+    },
+    "ssrMatrix": {
+      "type": "object",
+      "required": [
+        "measuredAt",
+        "libraries",
+        "rows",
+        "counts",
+        "caption"
+      ],
+      "properties": {
+        "measuredAt": {
+          "type": "string"
+        },
+        "libraries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rows": {
+          "type": "array"
+        },
+        "counts": {
+          "type": "object"
         },
         "caption": {
           "type": "string"

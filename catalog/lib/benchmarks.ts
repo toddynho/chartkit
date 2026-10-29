@@ -3,9 +3,12 @@
  * `d8dcc5a` (PR #10). Medians are the middle of five samples in the jsonl rows.
  * The agent table is Round 6, the current scoreboard in BENCHMARKS.md.
  * That run is 2026-10-16 and was not re-run for round 13.
- * Bundle bytes are read from catalog/data/measured-sizes.json, not from that commit.
+ * Bundle and server-render figures are the phase 4 matrices in bench/results/bundle.json
+ * and bench/results/ssr.json. Browser rows stay round 13.
  */
-import { measuredBundle } from "./bundle-measured.ts";
+import { phase4Headline } from "./size-matrix.ts";
+
+const phase4 = phase4Headline();
 
 export const ROUND = 13;
 export const MEASURED = "2026-10-18";
@@ -16,20 +19,21 @@ export const updateMethod =
   "The aligned update starts at the top of a requestAnimationFrame. The harness awaits the library's own completion, then reads the clock from a MessageChannel task after that frame's style, layout, and paint. GPU and raster time is not in the number. ChartKit is measured through mount(element, spec).update(spec), the same shape as uPlot's setData. The figure is the median of five samples.";
 
 export const headline = {
-  lineGzipLabel: measuredBundle.headline.lineGzipLabel,
-  lineGzipBytes: measuredBundle.headline.lineGzipBytes,
-  nextLib: measuredBundle.headline.nextLib,
-  nextGzipBytes: measuredBundle.headline.nextGzipBytes,
-  uplotJsBytes: measuredBundle.headline.uplotJsBytes,
-  uplotCssBytes: measuredBundle.headline.uplotCssBytes,
-  uplotSumBytes: measuredBundle.headline.uplotSumBytes,
-  sizeCommit: measuredBundle.headline.sizeCommit,
-  sizeMeasured: measuredBundle.headline.sizeMeasured,
-  harnessLineBytes: measuredBundle.headline.harnessLineBytes,
-  bundleLoss: measuredBundle.headline.bundleLoss,
-  lineWins: measuredBundle.headline.lineWins,
-  donutWin: measuredBundle.headline.donutWin,
-  ssrLabel: "0.85 ms",
+  lineGzipLabel: phase4.lineGzipLabel,
+  lineGzipBytes: phase4.lineGzipBytes,
+  nextLib: phase4.nextLib,
+  nextGzipBytes: phase4.nextGzipBytes,
+  uplotJsBytes: phase4.uplotJsBytes,
+  uplotCssBytes: phase4.uplotCssBytes,
+  uplotSumBytes: phase4.uplotSumBytes,
+  sizeCommit: phase4.sizeCommit,
+  sizeMeasured: phase4.sizeMeasured,
+  harnessLineBytes: phase4.harnessLineBytes,
+  bundleLoss: phase4.bundleLoss,
+  lineWins: phase4.lineWins,
+  donutWin: phase4.donutWin,
+  ssrLabel: phase4.ssrLabel,
+  ssrPoints: phase4.ssrPoints,
   repairFrom: "21/42",
   repairTo: "42/42",
   repair: "21/42 → 42/42",
@@ -48,9 +52,9 @@ export const bundleRace: Race = {
   id: "bundle-gzip",
   title: "Line chart, gzip",
   unit: "KB",
-  alt: measuredBundle.alt,
-  caption: measuredBundle.caption,
-  rows: measuredBundle.raceRows,
+  alt: `ChartKit’s createRenderer line is ${phase4.lineGzipLabel} gzip. ${phase4.bundleLoss}`,
+  caption: `createRenderer line, measured ${phase4.sizeMeasured} on ${phase4.sizeCommit}. ${phase4.lineGzipBytes} bytes gzip. ${phase4.bundleLoss}`,
+  rows: phase4.lineRace.map((row) => ({ lib: row.lib, value: Math.round(row.bytes / 100) / 10 })).sort((a, b) => a.value - b.value),
 };
 
 export const initial1k: Race = {
@@ -94,15 +98,13 @@ export const initial1m: Race = {
 
 export const ssrRace: Race = {
   id: "ssr",
-  title: "Server render, 1k line",
+  title: "Server render, line",
   unit: "ms",
-  alt: "ChartKit server-renders a 1,000 point line in 0.85 ms mean. ECharts takes 6.65 ms. Nivo is 92.29 ms and is off this scale. uPlot, Chart.js, Recharts, and Plot did not produce a chart without a DOM.",
-  caption:
-    "Mean of 8 calls after 2 warmups, measured 2026-10-18. ChartKit median is also 0.85 ms. ECharts mean is 6.65 (median 6.38). Nivo mean is 92.29 and is left off the chart.",
-  rows: [
-    { lib: "ChartKit", value: 0.85 },
-    { lib: "ECharts", value: 6.65 },
-  ],
+  alt: `ChartKit server-renders a ${phase4.ssrPoints.toLocaleString("en-US")} point line in ${phase4.ssrLabel} median. The per-type matrix names every unsupported cell.`,
+  caption: `Median of 5 at ${phase4.ssrPoints.toLocaleString("en-US")} points. ${phase4.ssrLabel} for ChartKit. Unsupported cells stay in the matrix and are not drawn as zero.`,
+  rows: phase4.ssrLine
+    .filter((row): row is typeof row & { medianMs: number } => row.medianMs != null)
+    .map((row) => ({ lib: row.lib, value: row.medianMs })),
 };
 
 export function raceSpec(race: Race) {
@@ -155,14 +157,19 @@ export const samplingRows = [
   { points: "1,000,000", initial: "471.8", update: "462.4" },
 ] as const;
 
-export const bundleRows = measuredBundle.bundleRows;
+export const bundleRows = [
+  ...phase4.lineRace.map((row) => ({ lib: row.lib, gzip: row.bytes.toLocaleString("en-US"), note: row.entry })),
+  { lib: "ChartKit bar", gzip: phase4.barBytes.toLocaleString("en-US"), note: "createRenderer bar" },
+  { lib: "ChartKit mini-area", gzip: phase4.miniAreaBytes.toLocaleString("en-US"), note: "createRenderer mini-area" },
+  { lib: "ChartKit /all", gzip: phase4.allBytes.toLocaleString("en-US"), note: "one bundle for every core chart and every theme, without the validator" },
+];
 
-export const ssrRows = [
-  { lib: "ChartKit minimal", mean: "0.85", median: "0.85", status: "SVG, no DOM. Mean of 8 calls after 2 warmups. Min 0.73, max 1.01." },
-  { lib: "ECharts", mean: "6.65", median: "6.38", status: "SVG SSR. Min 5.21, max 9.07." },
-  { lib: "Nivo", mean: "92.29", median: "90.89", status: "SVG. Min 82.62, max 106.27." },
-  { lib: "uPlot, Chart.js, Recharts, Observable Plot", mean: "—", median: "—", status: "No chart without a DOM. Recharts returned an empty wrapper." },
-] as const;
+export const ssrRows = phase4.ssrLine.map((row) => ({
+  lib: row.lib,
+  mean: row.meanMs == null ? "—" : String(row.meanMs),
+  median: row.medianMs == null ? "—" : String(row.medianMs),
+  status: row.supported ? `${row.points.toLocaleString("en-US")} points, median of 5` : "unsupported",
+}));
 
 export const agentRows = [
   { lib: "ChartKit", noFirst: "21 / 42", noTwo: "42 / 42", offFirst: "42 / 42", offTwo: "42 / 42", tokens: "139.3 / 132.4" },
@@ -171,11 +178,17 @@ export const agentRows = [
   { lib: "Chart.js", noFirst: "42 / 42", noTwo: "42 / 42", offFirst: "42 / 42", offTwo: "42 / 42", tokens: "295.0 / 258.4" },
 ] as const;
 
-/** Machine-readable round 13 timings, plus the current bundle measurement. Display strings above must match these values. */
+/** Machine-readable round 13 timings, plus the phase 4 bundle and SSR line cells. Display strings above must match these values. */
 export const published = {
-  bundleGzip: measuredBundle.bundleGzip,
-  sizeScriptLineBytes: measuredBundle.lineBytes,
-  sizeScriptAllBytes: measuredBundle.allBytes,
+  bundleGzip: phase4.lineRace.map((row) => ({
+    id: row.id,
+    lib: row.lib,
+    entry: row.entry,
+    bytes: row.bytes,
+    reactExternal: row.reactExternal,
+  })),
+  sizeScriptLineBytes: phase4.lineBytes,
+  sizeScriptAllBytes: phase4.allBytes,
   browser: [
     { shape: "even", points: 1000, chartkit: { initial: 11.3, update: 1.5 }, uplot: { initial: 12.0, update: 1.2 }, result: "win-initial-loss-update" },
     { shape: "even", points: 10000, chartkit: { initial: 13.2, update: 1.9 }, uplot: { initial: 14.8, update: 1.7 }, result: "win-initial-loss-update" },
@@ -207,15 +220,7 @@ export const published = {
     { afterMountMs: 200, chartkit: 15.9, chartkitMax: 35.9, uplot: 4.6, uplotMax: 8.4 },
     { afterMountMs: 500, chartkit: 16.5, chartkitMax: 29.2, uplot: 4.9, uplotMax: 5 },
   ],
-  ssr: [
-    { lib: "ChartKit", meanMs: 0.85, medianMs: 0.85, supported: true },
-    { lib: "ECharts", meanMs: 6.65, medianMs: 6.38, supported: true },
-    { lib: "Nivo", meanMs: 92.29, medianMs: 90.89, supported: true },
-    { lib: "uPlot", meanMs: null, medianMs: null, supported: false },
-    { lib: "Chart.js", meanMs: null, medianMs: null, supported: false },
-    { lib: "Recharts", meanMs: null, medianMs: null, supported: false },
-    { lib: "Observable Plot", meanMs: null, medianMs: null, supported: false },
-  ],
+  ssr: phase4.ssrLine,
   agents: [
     { lib: "ChartKit", noDocsFirst: 21, noDocsWithinTwo: 42, officialFirst: 42, officialWithinTwo: 42, tokensNoDocs: 139.3, tokensOfficial: 132.4, inEval: true },
     { lib: "Recharts", noDocsFirst: 42, noDocsWithinTwo: 42, officialFirst: 42, officialWithinTwo: 42, tokensNoDocs: 221.9, tokensOfficial: 236.5, inEval: true },
@@ -241,7 +246,7 @@ export function assertPublishedMatchesDisplay(): void {
   if (headline.nextGzipBytes.replace(/,/g, "") !== headline.uplotJsBytes.replace(/,/g, "")) {
     throw new Error("headline uPlot JS gzip drifted");
   }
-  if (headline.ssrLabel !== `${published.ssr[0].meanMs} ms`) {
+  if (published.ssr[0].medianMs == null || headline.ssrLabel !== `${published.ssr[0].medianMs} ms`) {
     throw new Error("headline SSR does not match published.ssr");
   }
   published.browser.forEach((row, index) => {
