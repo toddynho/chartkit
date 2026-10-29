@@ -1,0 +1,30 @@
+{
+  "version": "1",
+  "id": "soft-progress-ring",
+  "type": "progress-ring",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "metric": {
+    "label": "Uptime",
+    "value": 99.2,
+    "min": 0,
+    "max": 100,
+    "format": {
+      "style": "number",
+      "decimals": 1,
+      "suffix": "%"
+    }
+  },
+  "a11y": {
+    "alt": "Uptime is 99.2 percent."
+  }
+}

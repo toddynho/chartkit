@@ -1,0 +1,52 @@
+{
+  "version": "1",
+  "id": "soft-journey",
+  "type": "journey",
+  "title": "Checkout",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "section": "Browse",
+      "step": "Land on the product",
+      "score": 5,
+      "actors": "Shopper"
+    },
+    {
+      "section": "Browse",
+      "step": "Compare two lamps",
+      "score": 4,
+      "actors": "Shopper"
+    },
+    {
+      "section": "Pay",
+      "step": "Enter the card",
+      "score": 2,
+      "actors": "Shopper, Payments"
+    },
+    {
+      "section": "Pay",
+      "step": "Fix a declined card",
+      "score": 1,
+      "actors": "Shopper, Payments, Support"
+    }
+  ],
+  "encoding": {
+    "x": "step",
+    "y": "score",
+    "series": "section",
+    "color": "actors"
+  },
+  "a11y": {
+    "alt": "Checkout is smooth while browsing. Entering the card scores 2, and a declined card scores 1."
+  }
+}

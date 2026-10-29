@@ -1,0 +1,114 @@
+{
+  "version": "1",
+  "id": "soft-candlestick",
+  "type": "candlestick",
+  "title": "Northstar",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "date": "2026-03-02",
+      "open": 101.2,
+      "high": 104,
+      "low": 100.4,
+      "close": 103.1,
+      "volume": 1820
+    },
+    {
+      "date": "2026-03-03",
+      "open": 103.1,
+      "high": 105.6,
+      "low": 102.2,
+      "close": 104.8,
+      "volume": 1640
+    },
+    {
+      "date": "2026-03-04",
+      "open": 104.8,
+      "high": 106.1,
+      "low": 103,
+      "close": 103.6,
+      "volume": 2100
+    },
+    {
+      "date": "2026-03-05",
+      "open": 103.6,
+      "high": 107.4,
+      "low": 103.2,
+      "close": 106.9,
+      "volume": 1980
+    },
+    {
+      "date": "2026-03-06",
+      "open": 106.9,
+      "high": 108.2,
+      "low": 104.5,
+      "close": 105.1,
+      "volume": 2410
+    },
+    {
+      "date": "2026-03-09",
+      "open": 105.1,
+      "high": 105.8,
+      "low": 101.6,
+      "close": 102.4,
+      "volume": 2680
+    },
+    {
+      "date": "2026-03-10",
+      "open": 102.4,
+      "high": 104.9,
+      "low": 101.8,
+      "close": 104.2,
+      "volume": 1760
+    },
+    {
+      "date": "2026-03-11",
+      "open": 104.2,
+      "high": 109,
+      "low": 103.7,
+      "close": 108.4,
+      "volume": 3120
+    },
+    {
+      "date": "2026-03-12",
+      "open": 108.4,
+      "high": 110.2,
+      "low": 107.1,
+      "close": 109.6,
+      "volume": 2240
+    },
+    {
+      "date": "2026-03-13",
+      "open": 109.6,
+      "high": 111,
+      "low": 106.8,
+      "close": 107.5,
+      "volume": 2530
+    }
+  ],
+  "encoding": {
+    "x": {
+      "field": "date",
+      "type": "temporal"
+    },
+    "open": "open",
+    "high": "high",
+    "low": "low",
+    "close": "close",
+    "volume": "volume"
+  },
+  "legend": false,
+  "a11y": {
+    "alt": "The price rises from 101 to a close of 107.5, with a drop on March 9 and a high of 111."
+  }
+}

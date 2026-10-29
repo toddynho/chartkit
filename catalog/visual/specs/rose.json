@@ -1,0 +1,61 @@
+{
+  "version": "1",
+  "id": "soft-rose",
+  "type": "rose",
+  "title": "Saturday audience",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "place": "Hale",
+      "listeners": 4200
+    },
+    {
+      "place": "Mill",
+      "listeners": 3100
+    },
+    {
+      "place": "Quay",
+      "listeners": 5600
+    },
+    {
+      "place": "Ridge",
+      "listeners": 1800
+    },
+    {
+      "place": "Yard",
+      "listeners": 2400
+    },
+    {
+      "place": "Orchard",
+      "listeners": 3900
+    }
+  ],
+  "encoding": {
+    "x": "place",
+    "y": {
+      "field": "listeners",
+      "title": "Listeners"
+    }
+  },
+  "mark": {
+    "padAngle": 1.2,
+    "labels": true
+  },
+  "legend": false,
+  "layout": {
+    "coordinate": "polar"
+  },
+  "a11y": {
+    "alt": "Quay is the largest share of the evening audience."
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "version": "1",
+  "id": "soft-stacked-area",
+  "type": "stacked-area",
+  "title": "Spend by team",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "month": "Jan",
+      "product": 20,
+      "design": 12,
+      "support": 8
+    },
+    {
+      "month": "Feb",
+      "product": 24,
+      "design": 11,
+      "support": 9
+    },
+    {
+      "month": "Mar",
+      "product": 22,
+      "design": 14,
+      "support": 10
+    },
+    {
+      "month": "Apr",
+      "product": 28,
+      "design": 13,
+      "support": 11
+    },
+    {
+      "month": "May",
+      "product": 30,
+      "design": 15,
+      "support": 12
+    },
+    {
+      "month": "Jun",
+      "product": 29,
+      "design": 16,
+      "support": 13
+    }
+  ],
+  "encoding": {
+    "x": "month",
+    "y": [
+      {
+        "field": "product",
+        "title": "Product"
+      },
+      {
+        "field": "design",
+        "title": "Design"
+      },
+      {
+        "field": "support",
+        "title": "Support"
+      }
+    ]
+  },
+  "a11y": {
+    "alt": "Total spend rises from January to June, and product remains the largest share."
+  }
+}

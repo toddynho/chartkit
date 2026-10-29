@@ -1,0 +1,75 @@
+{
+  "version": "1",
+  "id": "soft-scatter",
+  "type": "scatter",
+  "title": "Yield by temperature",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "temp": 14,
+      "yield": 3.1,
+      "plot": 8
+    },
+    {
+      "temp": 16,
+      "yield": 3.8,
+      "plot": 10
+    },
+    {
+      "temp": 18,
+      "yield": 4.1,
+      "plot": 11
+    },
+    {
+      "temp": 21,
+      "yield": 5.2,
+      "plot": 16
+    },
+    {
+      "temp": 23,
+      "yield": 5,
+      "plot": 14
+    },
+    {
+      "temp": 26,
+      "yield": 4.2,
+      "plot": 12
+    },
+    {
+      "temp": 29,
+      "yield": 3.4,
+      "plot": 9
+    }
+  ],
+  "encoding": {
+    "x": {
+      "field": "temp",
+      "title": "Temperature"
+    },
+    "y": {
+      "field": "yield",
+      "title": "Yield"
+    },
+    "size": {
+      "field": "plot",
+      "range": [
+        6,
+        18
+      ]
+    }
+  },
+  "legend": false,
+  "a11y": {
+    "alt": "Yield peaks near 21 degrees and falls off at both cooler and hotter temperatures."
+  }
+}

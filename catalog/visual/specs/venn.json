@@ -1,0 +1,54 @@
+{
+  "version": "1",
+  "id": "soft-venn",
+  "type": "venn",
+  "title": "What customers use together",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "set": "Search",
+      "size": 1280
+    },
+    {
+      "set": "Filters",
+      "size": 860
+    },
+    {
+      "set": "Saved views",
+      "size": 540
+    },
+    {
+      "set": "Search+Filters",
+      "size": 410
+    },
+    {
+      "set": "Search+Saved views",
+      "size": 220
+    },
+    {
+      "set": "Filters+Saved views",
+      "size": 140
+    },
+    {
+      "set": "Search+Filters+Saved views",
+      "size": 90
+    }
+  ],
+  "encoding": {
+    "x": "set",
+    "y": "size"
+  },
+  "a11y": {
+    "alt": "Search, filters, and saved views overlap. 90 customers use all three. Three-set areas are approximate."
+  }
+}

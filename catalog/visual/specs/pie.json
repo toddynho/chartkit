@@ -1,0 +1,52 @@
+{
+  "version": "1",
+  "id": "soft-pie",
+  "type": "pie",
+  "title": "Share of revenue",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "label": "Search",
+      "value": 42
+    },
+    {
+      "label": "Direct",
+      "value": 28
+    },
+    {
+      "label": "Social",
+      "value": 18
+    },
+    {
+      "label": "Email",
+      "value": 8
+    },
+    {
+      "label": "Other ads",
+      "value": 4
+    }
+  ],
+  "encoding": {
+    "x": "label",
+    "y": "value"
+  },
+  "mark": {
+    "labels": true,
+    "labelPosition": "outside",
+    "padAngle": 1.5
+  },
+  "legend": false,
+  "a11y": {
+    "alt": "Search is the largest share of revenue. Other ads is the smallest slice."
+  }
+}

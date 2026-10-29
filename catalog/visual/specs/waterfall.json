@@ -1,0 +1,51 @@
+{
+  "version": "1",
+  "id": "soft-waterfall",
+  "type": "waterfall",
+  "title": "Year to date",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "step": "Open",
+      "amount": 120,
+      "total": true
+    },
+    {
+      "step": "Won",
+      "amount": 48
+    },
+    {
+      "step": "Expand",
+      "amount": 22
+    },
+    {
+      "step": "Lost",
+      "amount": -30
+    },
+    {
+      "step": "Close",
+      "amount": 160,
+      "total": true
+    }
+  ],
+  "encoding": {
+    "x": "step",
+    "y": "amount"
+  },
+  "mark": {
+    "total": "total"
+  },
+  "a11y": {
+    "alt": "The year closes at 160 after two gains and one loss."
+  }
+}

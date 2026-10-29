@@ -1,0 +1,83 @@
+{
+  "version": "1",
+  "id": "soft-bar-list",
+  "type": "bar-list",
+  "title": "Payments by method",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "method": "Card",
+      "amount": 168400
+    },
+    {
+      "method": "Bank",
+      "amount": 64200
+    },
+    {
+      "method": "Wallet",
+      "amount": 28400
+    },
+    {
+      "method": "Wire",
+      "amount": 22100
+    },
+    {
+      "method": "ACH",
+      "amount": 18600
+    },
+    {
+      "method": "Cash",
+      "amount": 9400
+    },
+    {
+      "method": "Check",
+      "amount": 6100
+    },
+    {
+      "method": "Crypto",
+      "amount": 2800
+    },
+    {
+      "method": "Invoice",
+      "amount": 1900
+    },
+    {
+      "method": "Gift",
+      "amount": 1200
+    },
+    {
+      "method": "Points",
+      "amount": 800
+    },
+    {
+      "method": "Other",
+      "amount": 400
+    }
+  ],
+  "encoding": {
+    "x": "method",
+    "y": {
+      "field": "amount",
+      "format": {
+        "style": "compact",
+        "prefix": "$"
+      }
+    }
+  },
+  "mark": {
+    "track": "row"
+  },
+  "a11y": {
+    "alt": "Card is the largest method at 168 thousand dollars. Crypto is the smallest."
+  }
+}

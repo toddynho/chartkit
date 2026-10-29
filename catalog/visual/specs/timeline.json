@@ -1,0 +1,76 @@
+{
+  "version": "1",
+  "id": "soft-timeline",
+  "type": "timeline",
+  "title": "Northstar, 2014 to 2026",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "label": "Founded",
+      "date": "2014-04-02",
+      "kind": "event"
+    },
+    {
+      "label": "First paid plan",
+      "date": "2015-11-01",
+      "kind": "event"
+    },
+    {
+      "label": "Series A",
+      "start": "2016-03-01",
+      "end": "2019-08-01",
+      "kind": "period"
+    },
+    {
+      "label": "London office",
+      "date": "2018-02-14",
+      "kind": "event"
+    },
+    {
+      "label": "Remote years",
+      "start": "2019-09-01",
+      "end": "2022-12-01",
+      "kind": "period"
+    },
+    {
+      "label": "Series B",
+      "date": "2021-06-01",
+      "kind": "event"
+    },
+    {
+      "label": "Public API",
+      "date": "2023-03-20",
+      "kind": "event"
+    },
+    {
+      "label": "Platform",
+      "start": "2024-01-15",
+      "end": "2026-06-01",
+      "kind": "period"
+    },
+    {
+      "label": "ChartKit",
+      "date": "2026-02-02",
+      "kind": "event"
+    }
+  ],
+  "encoding": {
+    "x": "label",
+    "open": "start",
+    "close": "end",
+    "color": "kind"
+  },
+  "a11y": {
+    "alt": "Northstar was founded in 2014, raised a Series A and a Series B, and opened the platform era in 2024."
+  }
+}

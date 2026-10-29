@@ -1,0 +1,97 @@
+{
+  "version": "1",
+  "id": "soft-line",
+  "type": "line",
+  "title": "Revenue",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "month": "Jan",
+      "revenue": 42,
+      "target": 40
+    },
+    {
+      "month": "Feb",
+      "revenue": 46,
+      "target": 43
+    },
+    {
+      "month": "Mar",
+      "revenue": 44,
+      "target": 46
+    },
+    {
+      "month": "Apr",
+      "revenue": 51,
+      "target": 49
+    },
+    {
+      "month": "May",
+      "revenue": 58,
+      "target": 52
+    },
+    {
+      "month": "Jun",
+      "revenue": 55,
+      "target": 55
+    },
+    {
+      "month": "Jul",
+      "revenue": 63,
+      "target": 58
+    },
+    {
+      "month": "Aug",
+      "revenue": 61,
+      "target": 61
+    },
+    {
+      "month": "Sep",
+      "revenue": 70,
+      "target": 64
+    },
+    {
+      "month": "Oct",
+      "revenue": 74,
+      "target": 67
+    },
+    {
+      "month": "Nov",
+      "revenue": 72,
+      "target": 70
+    },
+    {
+      "month": "Dec",
+      "revenue": 81,
+      "target": 73
+    }
+  ],
+  "encoding": {
+    "x": "month",
+    "y": [
+      {
+        "field": "revenue",
+        "title": "Revenue",
+        "area": true
+      },
+      {
+        "field": "target",
+        "title": "Target",
+        "dash": "dashed"
+      }
+    ]
+  },
+  "a11y": {
+    "alt": "Revenue stays near the target and finishes the year above it, at 81 against a target of 73."
+  }
+}

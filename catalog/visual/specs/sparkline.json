@@ -1,0 +1,34 @@
+{
+  "version": "1",
+  "id": "soft-sparkline",
+  "type": "sparkline",
+  "title": "Requests",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    1200,
+    1800,
+    2100,
+    1900,
+    2400,
+    2600,
+    2300,
+    2500,
+    2700,
+    2400,
+    2800,
+    3000
+  ],
+  "a11y": {
+    "alt": "Requests rise from 1,200 to 3,000, with dips in April and August."
+  }
+}

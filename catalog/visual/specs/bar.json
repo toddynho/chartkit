@@ -1,0 +1,78 @@
+{
+  "version": "1",
+  "id": "soft-bar",
+  "type": "bar",
+  "title": "Traffic by channel",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "month": "Jan",
+      "search": 40,
+      "direct": 22,
+      "social": 12
+    },
+    {
+      "month": "Feb",
+      "search": 46,
+      "direct": 20,
+      "social": 16
+    },
+    {
+      "month": "Mar",
+      "search": 44,
+      "direct": 26,
+      "social": 18
+    },
+    {
+      "month": "Apr",
+      "search": 52,
+      "direct": 24,
+      "social": 15
+    },
+    {
+      "month": "May",
+      "search": 48,
+      "direct": 28,
+      "social": 17
+    },
+    {
+      "month": "Jun",
+      "search": 55,
+      "direct": 26,
+      "social": 19
+    }
+  ],
+  "encoding": {
+    "x": "month",
+    "y": [
+      {
+        "field": "search",
+        "title": "Search"
+      },
+      {
+        "field": "direct",
+        "title": "Direct"
+      },
+      {
+        "field": "social",
+        "title": "Social"
+      }
+    ]
+  },
+  "mark": {
+    "stack": "stack"
+  },
+  "a11y": {
+    "alt": "Search is the largest channel in every month. The stack is tallest in June."
+  }
+}

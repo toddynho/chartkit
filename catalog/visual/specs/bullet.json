@@ -1,0 +1,50 @@
+{
+  "version": "1",
+  "id": "soft-bullet",
+  "type": "bullet",
+  "title": "Quota",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "name": "Revenue",
+      "value": 275,
+      "target": 250,
+      "poor": 150,
+      "ok": 225,
+      "good": 300
+    },
+    {
+      "name": "Profit",
+      "value": 22,
+      "target": 27,
+      "poor": 15,
+      "ok": 25,
+      "good": 40
+    }
+  ],
+  "encoding": {
+    "x": "name",
+    "y": "value",
+    "target": "target"
+  },
+  "mark": {
+    "ranges": [
+      "poor",
+      "ok",
+      "good"
+    ]
+  },
+  "a11y": {
+    "alt": "Revenue is past its target. Profit is still short."
+  }
+}

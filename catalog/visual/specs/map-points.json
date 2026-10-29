@@ -1,0 +1,175 @@
+{
+  "version": "1",
+  "id": "soft-map-points",
+  "type": "map-points",
+  "title": "Largest urban areas",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "name": "Tokyo",
+      "lat": 35.7,
+      "lon": 139.7,
+      "pop": 37.4
+    },
+    {
+      "name": "Delhi",
+      "lat": 28.6,
+      "lon": 77.2,
+      "pop": 32.9
+    },
+    {
+      "name": "Shanghai",
+      "lat": 31.2,
+      "lon": 121.5,
+      "pop": 29.2
+    },
+    {
+      "name": "Dhaka",
+      "lat": 23.8,
+      "lon": 90.4,
+      "pop": 23.2
+    },
+    {
+      "name": "São Paulo",
+      "lat": -23.6,
+      "lon": -46.6,
+      "pop": 22.6
+    },
+    {
+      "name": "Cairo",
+      "lat": 30,
+      "lon": 31.2,
+      "pop": 22.2
+    },
+    {
+      "name": "Mexico City",
+      "lat": 19.4,
+      "lon": -99.1,
+      "pop": 22.3
+    },
+    {
+      "name": "Beijing",
+      "lat": 39.9,
+      "lon": 116.4,
+      "pop": 21.3
+    },
+    {
+      "name": "Mumbai",
+      "lat": 19.1,
+      "lon": 72.9,
+      "pop": 21.3
+    },
+    {
+      "name": "Osaka",
+      "lat": 34.7,
+      "lon": 135.5,
+      "pop": 19
+    },
+    {
+      "name": "New York",
+      "lat": 40.7,
+      "lon": -74,
+      "pop": 18.9
+    },
+    {
+      "name": "Karachi",
+      "lat": 24.9,
+      "lon": 67,
+      "pop": 17.6
+    },
+    {
+      "name": "Lagos",
+      "lat": 6.5,
+      "lon": 3.4,
+      "pop": 16.5
+    },
+    {
+      "name": "Istanbul",
+      "lat": 41,
+      "lon": 29,
+      "pop": 16
+    },
+    {
+      "name": "Buenos Aires",
+      "lat": -34.6,
+      "lon": -58.4,
+      "pop": 15.5
+    },
+    {
+      "name": "Kolkata",
+      "lat": 22.6,
+      "lon": 88.4,
+      "pop": 15.3
+    },
+    {
+      "name": "Los Angeles",
+      "lat": 34.1,
+      "lon": -118.2,
+      "pop": 12.5
+    },
+    {
+      "name": "Moscow",
+      "lat": 55.8,
+      "lon": 37.6,
+      "pop": 12.6
+    },
+    {
+      "name": "London",
+      "lat": 51.5,
+      "lon": -0.1,
+      "pop": 9.6
+    },
+    {
+      "name": "Paris",
+      "lat": 48.9,
+      "lon": 2.3,
+      "pop": 11.1
+    },
+    {
+      "name": "Johannesburg",
+      "lat": -26.2,
+      "lon": 28,
+      "pop": 6.1
+    },
+    {
+      "name": "Sydney",
+      "lat": -33.9,
+      "lon": 151.2,
+      "pop": 5.3
+    }
+  ],
+  "encoding": {
+    "latitude": "lat",
+    "longitude": "lon",
+    "size": {
+      "field": "pop",
+      "format": {
+        "suffix": " million"
+      },
+      "title": "Population"
+    },
+    "color": "pop",
+    "label": "name"
+  },
+  "mark": {
+    "atlas": "world",
+    "projection": "equalEarth",
+    "labelCount": 8
+  },
+  "legend": {
+    "position": "bottom"
+  },
+  "a11y": {
+    "alt": "Approximate urban-area population in millions. The largest cities are labelled."
+  }
+}
