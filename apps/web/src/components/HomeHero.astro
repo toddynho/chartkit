@@ -2,7 +2,7 @@
 import type { ChartSpec } from "@chartkitdev/core";
 import { Chart } from "@chartkitdev/astro";
 import { chartIcon, mapIcon } from "../data/chart-icons";
-import { HERO_TYPE_COUNT, heroGroups } from "../data/hero-catalog";
+import { heroGroups } from "../data/hero-catalog";
 import { heroCharts } from "../data/home-hero";
 import { SITE } from "../data/site";
 import { scriptJson } from "../lib/spec-text";
@@ -16,6 +16,7 @@ const charts = heroCharts;
 const first = charts[0];
 if (!first) throw new Error("Homepage hero has no charts");
 const payload = charts.map((chart) => ({
+  id: chart.id,
   title: chart.title,
   subtitle: chart.subtitle,
   motion: chart.motion,
@@ -63,44 +64,25 @@ const payload = charts.map((chart) => ({
         <pre class="hh-spec" data-hero-spec hidden set:html={first.preview} />
       </div>
     </div>
-    <div class="hh-pills" role="tablist" aria-label="Chart type">
-      {
-        charts.map((chart, index) => (
-          <button
-            type="button"
-            class:list={["hh-pill", index === 0 && "is-on"]}
-            data-hero-pill
-            data-hero-id={chart.id}
-            role="tab"
-            aria-selected={index === 0 ? "true" : "false"}
-            id={`hero-pill-${chart.id}`}
-          >
-            <svg viewBox="0 0 24 20" width="14" height="14" fill="none" aria-hidden="true" set:html={chart.icon} />
-            {chart.label}
-          </button>
-        ))
-      }
-      <button type="button" class="hh-pill hh-pill--more" data-hero-all aria-expanded="false" aria-controls="hero-all-types">
-        All {HERO_TYPE_COUNT} types
-      </button>
-    </div>
-    <div class="hh-all" id="hero-all-types" data-hero-catalog hidden>
+    <div class="hh-types" role="tablist" aria-label="Chart type">
       {
         heroGroups.map((group) => (
-          <div class="hh-all__group">
-            <div class="hh-all__label">{group.label}</div>
-            <div class="hh-all__pills">
+          <div class="hh-type-row">
+            <div class="hh-type-kicker">{group.kicker}</div>
+            <div class="hh-type-pills">
               {group.types.map((type) => (
                 <button
                   type="button"
-                  class="hh-pill"
-                  data-hero-pick
+                  class:list={["hh-pill", type.slide === first.id && "is-on"]}
+                  data-hero-pill
                   data-hero-type={type.type}
                   data-hero-slide={type.slide}
                   data-hero-title={type.title}
                   data-hero-sub={type.subtitle}
+                  role="tab"
+                  aria-selected={type.slide === first.id ? "true" : "false"}
                 >
-                  <svg viewBox="0 0 24 20" width="14" height="14" fill="none" aria-hidden="true" set:html={typeIcon(type.type)} />
+                  <svg viewBox="0 0 24 20" width="12" height="12" fill="none" aria-hidden="true" set:html={typeIcon(type.type)} />
                   {type.label}
                 </button>
               ))}

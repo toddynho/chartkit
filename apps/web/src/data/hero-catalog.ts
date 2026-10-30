@@ -26,46 +26,50 @@ export type HeroExtra = {
   spec: Record<string, unknown>;
 };
 
-export const heroGroups: { id: HeroGroupId; label: string; types: HeroTypeMeta[] }[] = [
+export const heroGroups: { id: HeroGroupId; label: string; kicker: string; types: HeroTypeMeta[] }[] = [
   {
     id: "basics",
     label: "Basics",
+    kicker: "Basics",
     types: [
       { type: "line", label: "Line", group: "basics", slide: "line", title: "Latency, p50 vs p95", subtitle: "Milliseconds, rolling 8 weeks" },
       { type: "bar", label: "Bar", group: "basics", slide: "bar", title: "Signups by month", subtitle: "Monthly, 2026" },
       { type: "pie", label: "Pie", group: "basics", slide: "pie", title: "Plan mix", subtitle: "Active accounts" },
       { type: "donut", label: "Donut", group: "basics", slide: "donut", title: "Traffic by source", subtitle: "Last 30 days" },
       { type: "scatter", label: "Scatter", group: "basics", slide: "scatter", title: "Seats vs. renewal rate", subtitle: "Accounts, Q3" },
-      { type: "stacked-area", label: "Stacked area", group: "basics", title: "Plan mix over time", subtitle: "Accounts, thousands" },
+      { type: "stacked-area", label: "Stacked", group: "basics", title: "Plan mix over time", subtitle: "Accounts, thousands" },
     ],
   },
   {
     id: "comparison",
     label: "Comparison",
+    kicker: "Compare",
     types: [
       { type: "combo", label: "Combo", group: "comparison", title: "Revenue and margin", subtitle: "USD and percent" },
       { type: "bullet", label: "Bullet", group: "comparison", title: "Targets", subtitle: "This quarter" },
-      { type: "bar-list", label: "Bar list", group: "comparison", title: "Top pages", subtitle: "Visits, last 7 days" },
-      { type: "radial-bar", label: "Radial bar", group: "comparison", title: "Minutes by desk", subtitle: "Weeknight vs Saturday" },
+      { type: "bar-list", label: "List", group: "comparison", title: "Top pages", subtitle: "Visits, last 7 days" },
+      { type: "radial-bar", label: "Radial", group: "comparison", title: "Minutes by desk", subtitle: "Weeknight vs Saturday" },
       { type: "radar", label: "Radar", group: "comparison", slide: "radar", title: "Team skills", subtitle: "Self-assessed, 6 axes" },
-      { type: "bar-range", label: "Range bar", group: "comparison", title: "Daily temperature", subtitle: "Low to high, °C" },
-      { type: "quadrant", label: "Quadrant", group: "comparison", title: "Where the quarter goes", subtitle: "Effort against impact" },
+      { type: "bar-range", label: "Range", group: "comparison", title: "Daily temperature", subtitle: "Low to high, °C" },
+      { type: "quadrant", label: "Quad", group: "comparison", title: "Where the quarter goes", subtitle: "Effort against impact" },
     ],
   },
   {
     id: "distribution",
     label: "Distribution",
+    kicker: "Distribution",
     types: [
       { type: "histogram", label: "Histogram", group: "distribution", slide: "histogram", title: "Response time distribution", subtitle: "Milliseconds, 14 bins" },
-      { type: "boxplot", label: "Box plot", group: "distribution", title: "Days to close", subtitle: "By region" },
+      { type: "boxplot", label: "Box", group: "distribution", title: "Days to close", subtitle: "By region" },
       { type: "heatmap", label: "Heatmap", group: "distribution", slide: "heatmap", title: "Support volume by hour", subtitle: "Tickets, weekdays" },
-      { type: "errorbar", label: "Error bar", group: "distribution", title: "Lab measurements", subtitle: "Mean and range" },
+      { type: "errorbar", label: "Error", group: "distribution", title: "Lab measurements", subtitle: "Mean and range" },
       { type: "rose", label: "Rose", group: "distribution", title: "Saturday audience", subtitle: "Listeners by place" },
     ],
   },
   {
     id: "flow",
     label: "Flow & hierarchy",
+    kicker: "Flow",
     types: [
       { type: "funnel", label: "Funnel", group: "flow", slide: "funnel", title: "Signup funnel", subtitle: "Last 30 days" },
       { type: "sankey", label: "Sankey", group: "flow", title: "Acquisition flow", subtitle: "Visits, last 30 days" },
@@ -77,13 +81,14 @@ export const heroGroups: { id: HeroGroupId; label: string; types: HeroTypeMeta[]
   {
     id: "time",
     label: "Time",
+    kicker: "Time",
     types: [
-      { type: "candlestick", label: "Candlestick", group: "time", slide: "candle", title: "CK / USD", subtitle: "Daily, 12 sessions" },
-      { type: "sparkline", label: "Sparkline", group: "time", slide: "spark", title: "Service health", subtitle: "Four sparklines, one spec each" },
-      { type: "mini-area", label: "Mini area", group: "time", title: "Signups", subtitle: "Trailing six weeks" },
+      { type: "candlestick", label: "Candle", group: "time", slide: "candle", title: "CK / USD", subtitle: "Daily, 12 sessions" },
+      { type: "sparkline", label: "Spark", group: "time", slide: "spark", title: "Service health", subtitle: "Four sparklines, one spec each" },
+      { type: "mini-area", label: "Mini", group: "time", title: "Signups", subtitle: "Trailing six weeks" },
       { type: "spike", label: "Spike", group: "time", title: "Blocked requests", subtitle: "Five-minute buckets" },
       { type: "waterfall", label: "Waterfall", group: "time", slide: "waterfall", title: "ARR bridge", subtitle: "Q2 → Q3, USD millions" },
-      { type: "area-range", label: "Range area", group: "time", title: "Revenue forecast", subtitle: "Band opens in April" },
+      { type: "area-range", label: "Band", group: "time", title: "Revenue forecast", subtitle: "Band opens in April" },
       { type: "gantt", label: "Gantt", group: "time", title: "Northstar launch", subtitle: "Plan, build, launch" },
       { type: "timeline", label: "Timeline", group: "time", title: "Northstar", subtitle: "2014 to 2026" },
       { type: "journey", label: "Journey", group: "time", title: "Checkout", subtitle: "Score by step" },
@@ -92,18 +97,20 @@ export const heroGroups: { id: HeroGroupId; label: string; types: HeroTypeMeta[]
   {
     id: "geo",
     label: "Geo",
+    kicker: "Geo",
     types: [
       { type: "choropleth", label: "Choropleth", group: "geo", title: "Renewable share", subtitle: "Percent of electricity" },
-      { type: "map-points", label: "Map points", group: "geo", title: "Largest cities", subtitle: "Population, millions" },
+      { type: "map-points", label: "Map", group: "geo", title: "Largest cities", subtitle: "Population, millions" },
     ],
   },
   {
     id: "kpi",
     label: "KPI",
+    kicker: "KPI",
     types: [
       { type: "gauge", label: "Gauge", group: "kpi", slide: "gauge", title: "Quarterly target", subtitle: "Q3 progress" },
       { type: "kpi", label: "KPI", group: "kpi", title: "Revenue", subtitle: "Versus last month" },
-      { type: "progress-ring", label: "Progress ring", group: "kpi", title: "Uptime", subtitle: "Last 30 days" },
+      { type: "progress-ring", label: "Ring", group: "kpi", title: "Uptime", subtitle: "Last 30 days" },
     ],
   },
 ];

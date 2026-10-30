@@ -6,6 +6,7 @@ const INTERVAL_MS = 3200;
 type Motion = "bar" | "hbar" | "line" | "area" | "fade";
 
 type Slide = {
+  id: string;
   title: string;
   subtitle: string;
   motion: Motion;
@@ -35,13 +36,12 @@ if (root && raw) {
   const chartView = root.querySelector<HTMLElement>("[data-hero-chart]");
   const host = root.querySelector<HTMLElement>("[data-hero-host]");
   const pills = [...root.querySelectorAll<HTMLButtonElement>("[data-hero-pill]")];
-  const picks = [...root.querySelectorAll<HTMLButtonElement>("[data-hero-pick]")];
-  const allButton = root.querySelector<HTMLButtonElement>("[data-hero-all]");
-  const catalog = root.querySelector<HTMLElement>("[data-hero-catalog]");
   const viewButtons = [...root.querySelectorAll<HTMLButtonElement>("[data-hero-view]")];
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const pillIds = pills.map((pill) => pill.dataset.heroId ?? "");
-  let index = 0;
+  const rotation = slides
+    .map((slide, index) => ({ slide, index }))
+    .filter(({ slide }) => pills.some((pill) => pill.dataset.heroSlide === slide.id));
+  let rot = 0;
   let pinned = false;
   let generation = 0;
   let mounted: { destroy(): void } | null = null;
@@ -121,19 +121,11 @@ if (root && raw) {
     svg.style.animation = "hh-fade .6s ease-out both";
   }
 
-  function markPills(active: number): void {
-    pills.forEach((pill, i) => {
-      const on = i === active;
+  function mark(match: (pill: HTMLButtonElement) => boolean): void {
+    pills.forEach((pill) => {
+      const on = match(pill);
       pill.classList.toggle("is-on", on);
       pill.setAttribute("aria-selected", on ? "true" : "false");
-    });
-  }
-
-  function markPicks(slideId: string | null, type: string | null): void {
-    picks.forEach((pick) => {
-      const on = type ? pick.dataset.heroType === type : Boolean(slideId) && pick.dataset.heroSlide === slideId;
-      pick.classList.toggle("is-on", on);
-      pick.setAttribute("aria-pressed", on ? "true" : "false");
     });
   }
 
@@ -147,14 +139,12 @@ if (root && raw) {
   function show(next: number): void {
     if (!host || !specView || !title || !sub) return;
     const token = ++generation;
-    index = (next + slides.length) % slides.length;
-    const slide = slides[index];
+    const slide = slides[next];
     if (!slide) return;
     title.textContent = slide.title;
     sub.textContent = slide.subtitle;
     specView.innerHTML = slide.preview;
-    markPills(index);
-    markPicks(pillIds[index] ?? null, null);
+    mark((pill) => pill.dataset.heroSlide === slide.id);
     release();
     host.innerHTML = slide.svg;
     if (!reduce && slide.extra) {
@@ -188,8 +178,7 @@ if (root && raw) {
     pinned = true;
     title.textContent = pick.dataset.heroTitle ?? pick.textContent ?? type;
     sub.textContent = pick.dataset.heroSub ?? "";
-    markPills(-1);
-    markPicks(null, type);
+    mark((pill) => pill === pick);
     release();
     host.setAttribute("aria-busy", "true");
     try {
@@ -212,32 +201,21 @@ if (root && raw) {
     }
   }
 
-  pills.forEach((pill, i) => {
+  pills.forEach((pill) => {
     pill.addEventListener("click", () => {
       pinned = true;
-      show(i);
-    });
-  });
-
-  picks.forEach((pick) => {
-    pick.addEventListener("click", () => {
-      pinned = true;
-      const slide = pick.dataset.heroSlide;
+      const slide = pill.dataset.heroSlide;
       if (slide) {
-        const at = pillIds.indexOf(slide);
-        if (at >= 0) show(at);
+        const at = slides.findIndex((item) => item.id === slide);
+        const turn = rotation.findIndex((item) => item.index === at);
+        if (at >= 0) {
+          if (turn >= 0) rot = turn;
+          show(at);
+        }
         return;
       }
-      void showExtra(pick);
+      void showExtra(pill);
     });
-  });
-
-  allButton?.addEventListener("click", () => {
-    if (!catalog) return;
-    const open = catalog.hasAttribute("hidden");
-    catalog.toggleAttribute("hidden", !open);
-    allButton.setAttribute("aria-expanded", open ? "true" : "false");
-    allButton.classList.toggle("is-on", open);
   });
 
   viewButtons.forEach((button) => {
@@ -253,11 +231,14 @@ if (root && raw) {
     });
   });
 
-  show(0);
+  if (rotation[0]) show(rotation[0].index);
 
-  if (!reduce) {
+  if (!reduce && rotation.length > 1) {
     window.setInterval(() => {
-      if (!pinned && document.visibilityState !== "hidden") show(index + 1);
+      if (pinned || document.visibilityState === "hidden") return;
+      rot = (rot + 1) % rotation.length;
+      const turn = rotation[rot];
+      if (turn) show(turn.index);
     }, INTERVAL_MS);
   }
 }
