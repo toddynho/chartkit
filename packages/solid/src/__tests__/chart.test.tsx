@@ -50,6 +50,8 @@ describe("Solid Chart", () => {
   });
 
   it("hydrates the server SVG in place", () => {
+    // A real Node process, not Vitest. dist/ssr.js imports the built core and vanilla packages,
+    // which test:run builds first. Vitest's source aliases do not apply here.
     const rendered = spawnSync(
       process.execPath,
       [
@@ -61,7 +63,7 @@ describe("Solid Chart", () => {
       ],
       { cwd: process.cwd(), encoding: "utf8" },
     );
-    expect(rendered.status).toBe(0);
+    expect(rendered.status, rendered.stderr || rendered.stdout).toBe(0);
     const root = document.createElement("div");
     root.innerHTML = rendered.stdout;
     document.body.append(root);
