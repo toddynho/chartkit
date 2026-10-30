@@ -3,32 +3,21 @@ import { paintSpec } from "../lib/chartkit";
 /**
  * Schema-valid bar spec shown on the homepage and rendered beside it.
  * Token count is o200k_base from gpt-tokenizer 3.4.0, counted on this exact string
- * (270). Line count is this string. The object parsed from it is what render() draws.
+ * (102). Line count is this string. The object parsed from it is what render() draws.
  */
 export const howSpecText = `{
-  "version": "1",
-  "type": "bar",
-  "data": [
-    { "region": "NA", "revenue": 42 },
-    { "region": "EU", "revenue": 31 },
-    { "region": "UK", "revenue": 24 },
-    { "region": "APAC", "revenue": 27 },
-    { "region": "LATAM", "revenue": 12 },
-    { "region": "MEA", "revenue": 9 },
-    { "region": "ANZ", "revenue": 8 },
-    { "region": "JP", "revenue": 14 }
-  ],
-  "encoding": {
-    "x": "region",
-    "y": { "field": "revenue", "format": { "style": "currency", "currency": "USD", "decimals": 0, "suffix": "M" } }
-  },
-  "sort": { "by": "value", "order": "descending" },
-  "a11y": { "alt": "Q3 revenue by region, in millions of dollars. North America is highest at $42M." },
-  "size": { "width": 520, "height": 220 }
+"version":"1",
+"type":"bar",
+"data":{"columns":{
+"region":["NA","EU","UK","APAC","LATAM","MEA","ANZ","JP"],
+"revenue":[42,31,24,27,12,9,8,14]}},
+"encoding":{"x":"region","y":{"field":"revenue","format":{"style":"currency","suffix":"M"}}},
+"sort":{"order":"descending"},
+"a11y":{"alt":"NA leads Q3."}
 }`;
 
 /** o200k_base tokens of `howSpecText`, gpt-tokenizer 3.4.0. */
-export const howSpecTokens = 270;
+export const howSpecTokens = 102;
 
 export const howSpecLines = howSpecText.split("\n").length;
 
