@@ -1,0 +1,79 @@
+---
+import FrameworkChips from "./FrameworkChips.astro";
+import { howSpecLines, howSpecRender, howSpecText, howSpecTokens } from "../data/home-spec";
+import { stacks } from "../data/stacks";
+import { scriptJson } from "../lib/spec-text";
+
+const { spec, svg } = howSpecRender();
+
+function list(items: string[]): string {
+  if (items.length <= 1) return items.join("");
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+}
+
+const targets = list(stacks.map((stack) => stack.blurb));
+const shown = howSpecText.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+---
+
+<section class="band" aria-labelledby="how-title">
+  <div class="band-head">
+    <div class="band-head__copy">
+      <p class="eyebrow eyebrow--blue">How it works</p>
+      <h2 id="how-title">{howSpecLines} lines of JSON. That's the whole chart.</h2>
+      <p>A ChartSpec is data plus intent. No components, no imperative API. The same spec renders in every framework and on the server.</p>
+    </div>
+    <div class="band-stat">
+      <p class="band-stat__num">1<span>spec</span></p>
+      <p class="band-stat__cap"><strong>Every target.</strong> {targets}.</p>
+    </div>
+  </div>
+  <div class="how-body">
+    <div class="how-spec">
+      <div class="how-spec__bar">
+        <div class="how-spec__name">chartspec.json</div>
+        <div class="tok-pill" title="o200k_base, gpt-tokenizer 3.4.0, counted on this JSON">{howSpecTokens} tok</div>
+      </div>
+      <pre set:html={shown} />
+    </div>
+    <div class="how-arrow" aria-hidden="true">
+      <svg width="40" height="24" viewBox="0 0 40 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 12h34"></path>
+        <path d="M26 3l10 9-10 9"></path>
+      </svg>
+    </div>
+    <div class="how-side">
+      <div class="how-chart">
+        <div class="how-chart__titlebar">
+          <div>
+            <div class="how-chart__title">Revenue by region</div>
+            <div class="how-chart__sub">Q3, $M</div>
+          </div>
+          <div class="how-rendered stack-sample">
+            {
+              stacks.map((stack) => (
+                <div data-stack-panel={stack.id}>Rendered · {stack.chip}</div>
+              ))
+            }
+          </div>
+        </div>
+        <div class="how-plot" data-ck-mount role="img" aria-label="Q3 revenue by region, in millions of dollars. North America is highest at $42M.">
+          <script is:inline type="application/json" set:html={scriptJson(spec)} />
+          <Fragment set:html={svg} />
+        </div>
+      </div>
+      <div class="how-bar">
+        <div class="how-fw">
+          <FrameworkChips />
+        </div>
+        <div class="how-mount stack-sample">
+          {stacks.map((stack) => <div data-stack-panel={stack.id}>{stack.mount}</div>)}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import "../scripts/mount-charts";
+</script>

@@ -6,6 +6,7 @@ const marks: Record<string, string> = {
   vue: "/frameworks/vue.svg",
   svelte: "/frameworks/svelte.svg",
   vanilla: "/frameworks/javascript.svg",
+  element: "/frameworks/element.svg",
 };
 ---
 
@@ -16,7 +17,7 @@ const marks: Record<string, string> = {
         <span class="stack-chip__icon" aria-hidden="true">
           <img src={marks[stack.id]} alt="" width="16" height="16" />
         </span>
-        <span class="stack-chip__label">{stack.id === "vanilla" ? "JS" : stack.label}</span>
+        <span class="stack-chip__label">{stack.chip}</span>
       </button>
     ))
   }

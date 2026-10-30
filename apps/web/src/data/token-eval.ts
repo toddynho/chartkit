@@ -293,3 +293,126 @@ export function tokenScoreboard(): {
     }),
   };
 }
+
+const TOKEN_SCALE = 2000;
+
+export type TokenDot = { left: string; title: string };
+
+export type TokenSpreadRow = {
+  name: string;
+  medianText: string;
+  range: string;
+  minPct: string;
+  spanPct: string;
+  medPct: string;
+  dots: TokenDot[];
+  us: boolean;
+};
+
+export type TokenSpread = {
+  tasks: number;
+  modelCount: number;
+  libraryCount: number;
+  modelWord: string;
+  libraryWord: string;
+  headline: string;
+  ratioLead: string;
+  rows: TokenSpreadRow[];
+  annotation: { left: string; width: string; labelLeft: string; text: string } | null;
+  rangeStat: string;
+  rangeBody: string;
+  calls: string;
+  cheapest: string;
+  cheapestTotal: string;
+  note: string;
+};
+
+function countWord(n: number): string {
+  const words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+  return words[n] ?? String(n);
+}
+
+function pct(value: number): string {
+  return `${((value / TOKEN_SCALE) * 100).toFixed(2)}%`;
+}
+
+/** Per-model medians for the homepage spread. Every dot is a published cell. */
+export function tokenSpread(): TokenSpread {
+  const models = finishedModels();
+  if (models.length === 0) throw new Error("token eval has no finished models");
+  const rows = TOKEN_LIBRARIES.map((name) => {
+    const values = models.map((model) => model.tokens[name]);
+    return {
+      name,
+      values,
+      median: median(values),
+      min: Math.min(...values),
+      max: Math.max(...values),
+    };
+  }).sort((a, b) => a.median - b.median);
+  const chartkit = rows.find((row) => row.name === "ChartKit");
+  const next = rows.find((row) => row.name !== "ChartKit");
+  if (!chartkit || !next || chartkit.median <= 0) throw new Error("token spread is missing ChartKit");
+  const ratios = models.map((model) => nextLibrary(model.tokens).tokens / model.tokens.ChartKit);
+  const times = next.median / chartkit.median;
+  const chartkitValues = chartkit.values;
+  let floor = Number.POSITIVE_INFINITY;
+  let floorWho = "";
+  for (const model of models) {
+    for (const library of TOKEN_LIBRARIES) {
+      if (library === "ChartKit") continue;
+      const value = model.tokens[library];
+      if (value < floor) {
+        floor = value;
+        floorWho = `${library} on ${modelLabel(model)}`;
+      }
+    }
+  }
+  const cheapest = models.filter((model) =>
+    TOKEN_LIBRARIES.every((library) => library === "ChartKit" || model.tokens.ChartKit < model.tokens[library]),
+  ).length;
+  const maxValue = Math.max(...rows.map((row) => row.max));
+  if (maxValue > TOKEN_SCALE) throw new Error(`token spread exceeds the ${TOKEN_SCALE} axis`);
+  const coverage = models.flatMap((model) =>
+    (model.coverage ?? []).map((note) => `${modelLabel(model)}: ${note.text}`),
+  );
+  const headline = times.toFixed(1);
+  const ratioLead = `${formatRatio(Math.min(...ratios))}–${formatRatio(Math.max(...ratios))}×`;
+  const showBracket = rows[0]?.name === "ChartKit";
+  return {
+    tasks: TOKEN_EVAL.tasks,
+    modelCount: models.length,
+    libraryCount: TOKEN_LIBRARIES.length,
+    modelWord: countWord(models.length),
+    libraryWord: countWord(TOKEN_LIBRARIES.length),
+    headline,
+    ratioLead,
+    rows: rows.map((row) => ({
+      name: row.name,
+      medianText: formatTokens(row.median),
+      range: `${formatTokens(row.min)}–${formatTokens(row.max)}`,
+      minPct: pct(row.min),
+      spanPct: pct(row.max - row.min),
+      medPct: pct(row.median),
+      us: row.name === "ChartKit",
+      dots: row.values.map((value, index) => ({
+        left: pct(value),
+        title: `${modelLabel(models[index]!)} · ${row.name} · ${formatTokens(value)}`,
+      })),
+    })),
+    annotation: showBracket
+      ? {
+          left: pct(chartkit.median),
+          width: pct(next.median - chartkit.median),
+          labelLeft: pct(next.median + 30),
+          text: `← ${headline}× fewer than ${next.name}, next best`,
+        }
+      : null,
+    rangeStat: `${formatTokens(Math.min(...chartkitValues))}–${formatTokens(Math.max(...chartkitValues))}`,
+    rangeBody: `ChartKit median tokens, best model to worst. The next lowest median is ${formatTokens(floor)} (${floorWho}).`,
+    calls: TOKEN_EVAL.chartkitCalls.toFixed(1),
+    cheapest: String(cheapest),
+    cheapestTotal: String(models.length),
+    note: `Medians over ${TOKEN_EVAL.tasks} tasks on ${models.length} finished models (${listNames(models.map(modelLabel))}). ${headline}× is ${next.name}'s median divided by ChartKit's (${formatTokens(next.median)} / ${formatTokens(chartkit.median)}). By model, ChartKit uses ${formatRatio(Math.min(...ratios))}–${formatRatio(Math.max(...ratios))}× fewer output tokens than the next library. Docs capped to the length of ChartKit llms.txt; output tokens summed until a chart is drawn; did-not-finish runs excluded from the median. ChartKit median model calls are ${TOKEN_EVAL.chartkitCalls.toFixed(1)}.${coverage.length ? ` ${coverage.join(" ")}` : ""}`,
+  };
+}

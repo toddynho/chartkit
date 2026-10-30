@@ -417,11 +417,13 @@ html[data-stack="react"] .stack-sample [data-stack-panel="react"],
 html[data-stack="vue"] .stack-sample [data-stack-panel="vue"],
 html[data-stack="svelte"] .stack-sample [data-stack-panel="svelte"],
 html[data-stack="vanilla"] .stack-sample [data-stack-panel="vanilla"],
+html[data-stack="element"] .stack-sample [data-stack-panel="element"],
 html:not([data-stack]) .fw-tabs:not(.is-ready) [data-fw-panel="react"],
 html[data-stack="react"] .fw-tabs:not(.is-ready) [data-fw-panel="react"],
 html[data-stack="vue"] .fw-tabs:not(.is-ready) [data-fw-panel="vue"],
 html[data-stack="svelte"] .fw-tabs:not(.is-ready) [data-fw-panel="svelte"],
-html[data-stack="vanilla"] .fw-tabs:not(.is-ready) [data-fw-panel="vanilla"] {
+html[data-stack="vanilla"] .fw-tabs:not(.is-ready) [data-fw-panel="vanilla"],
+html[data-stack="element"] .fw-tabs:not(.is-ready) [data-fw-panel="element"] {
   display: block;
 }
 

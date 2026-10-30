@@ -1,0 +1,66 @@
+---
+import { homePaint } from "../data/home-bench";
+
+const paint = homePaint();
+---
+
+<section class="band" aria-labelledby="paint-title">
+  <div class="band-head">
+    <div class="band-head__copy">
+      <p class="eyebrow eyebrow--blue">For the user</p>
+      <h2 id="paint-title">Paints in milliseconds. Even at 100,000 points.</h2>
+      <p>{paint.lead}</p>
+    </div>
+    <div class="band-stat">
+      <p class="band-stat__num">{paint.stat}<span>ms</span></p>
+      <p class="band-stat__cap"><strong>100,000-point line</strong>, first paint. {paint.statCaption}</p>
+    </div>
+  </div>
+  <div class="proof-card">
+    <div class="proof-card__head">
+      <div>
+        <h3>First paint by chart type</h3>
+        <p>Milliseconds, log scale. Left is faster.</p>
+      </div>
+      <div class="proof-legend paint-legend">
+        {
+          paint.libs.map((lib) => (
+            <span class:list={[lib.us && "is-us"]}>
+              <i style={`background:${lib.color}`}></i>
+              {lib.name}
+            </span>
+          ))
+        }
+      </div>
+    </div>
+    <div>
+      {
+        paint.rows.map((row) => (
+          <div class="paint-row">
+            <div class="paint-name">
+              {row.type}
+              <small>{row.note}</small>
+            </div>
+            <div class="paint-track">
+              <div class="paint-line"></div>
+              {row.dots.map((dot) => (
+                <span class="paint-dot" role="img" aria-label={dot.title} title={dot.title} style={`left:${dot.left};width:${dot.size};height:${dot.size};background:${dot.fill};box-shadow:${dot.ring}`}></span>
+              ))}
+            </div>
+            <div class="paint-ck">{row.ck}<span> ms</span></div>
+          </div>
+        ))
+      }
+    </div>
+    <div class="paint-axis" aria-hidden="true">
+      <div></div>
+      <div class="paint-axis__ticks">
+        {paint.ticks.map((tick) => <span style={`left:${tick.left}`}>{tick.label}</span>)}
+      </div>
+      <div></div>
+    </div>
+    <p class="proof-note">
+      Two-frame first paint, median of five fresh pages at 640×360, measured {paint.measuredOn}. Libraries without a native chart type are omitted from that row. A run that did not finish is omitted too. <a href="/benchmarks">Full benchmark matrix →</a>
+    </p>
+  </div>
+</section>

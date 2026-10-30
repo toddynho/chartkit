@@ -1,6 +1,7 @@
 ---
 import "../styles/v2.css";
 import Base from "../layouts/Base.astro";
+import { agentWrote } from "../data/agent-wrote";
 import { agentSwitchPrompt } from "../data/agent-prompt";
 import { chartkitCloudUrl } from "../data/cloud-url";
 import { proofFigures } from "../data/home-bench";
@@ -8,6 +9,15 @@ import { SITE } from "../data/site";
 import { tokenScoreboard, tokenSection } from "../data/token-eval";
 
 const proof = proofFigures();
+const wrote = agentWrote();
+
+function escapePre(value: string): string {
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
+const wroteCk = escapePre(wrote.chartkit.code);
+const wroteRx = escapePre(wrote.recharts.code);
+const wroteDelta = `${wrote.lineDelta >= 0 ? "+" : ""}${wrote.lineDelta} lines · ${wrote.recharts.calls} ${wrote.recharts.calls === 1 ? "call" : "calls"} · ${wrote.recharts.retries === 0 ? "no retry" : `${wrote.recharts.retries} ${wrote.recharts.retries === 1 ? "retry" : "retries"}`}`;
 const board = tokenScoreboard();
 const tokens = tokenSection();
 const cloudUrl = chartkitCloudUrl();
@@ -93,6 +103,44 @@ const defaults = [
         <div class="dim">&gt; render(spec)</div>
         <div>&lt;svg viewBox="0 0 640 360"&gt;… 4.1 KB · 0 model calls</div>
       </div>
+    </section>
+
+    <section class="wrote" id="wrote" aria-labelledby="wrote-title">
+      <div class="wrote-head">
+        <h2 id="wrote-title">What the agent actually writes</h2>
+        <p class="wrote-lead">
+          Same task, same model. A ChartKit spec is {wrote.chartkit.tokens.toLocaleString("en-US")} output tokens{wrote.chartkit.firstTry ? " and rendered first try" : ""}; the Recharts component is {wrote.recharts.tokens.toLocaleString("en-US")}{wrote.recharts.firstTry ? " and also rendered first try" : ""}.
+        </p>
+      </div>
+      <div class="wrote-grid">
+        <div class="wrote-card wrote-card--dark">
+          <div class="wrote-card__bar">
+            <div class="wrote-kicker">What the agent wrote</div>
+            <div class="tok-pill">{wrote.chartkit.tokens.toLocaleString("en-US")} tok</div>
+          </div>
+          <pre set:html={wroteCk} />
+          <div class="wrote-card__foot">
+            <span class="wrote-dot"></span>
+            {wrote.chartkit.firstTry ? "Rendered first try · ChartKit" : `${wrote.chartkit.calls} calls · ChartKit`}
+          </div>
+        </div>
+        <div class="wrote-card wrote-card--light">
+          <div class="wrote-card__bar">
+            <div class="wrote-kicker" style="color:#8b8d93">Same task, next library</div>
+            <div class="tok-pill tok-pill--muted">{wrote.recharts.tokens.toLocaleString("en-US")} tok</div>
+          </div>
+          <pre set:html={wroteRx} />
+          <div class="wrote-fade">
+            <div class="wrote-card__foot">
+              <span class:list={["wrote-dot", wrote.recharts.retries > 0 && "wrote-dot--wait"]}></span>
+              {wroteDelta}
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="proof-note wrote-note">
+        Recorded answer from the round 6 official-docs run ({wrote.model}, {wrote.measured}), task {wrote.task}. Output tokens are the harness counts for those answers.{wrote.chartkit.firstTry && wrote.recharts.firstTry ? " Both rendered on the first call, so there is no retry to show." : ""} The nine-model matrix does not publish raw transcripts.
+      </p>
     </section>
 
     <section class="agent-block" id="eval" aria-labelledby="eval-title">

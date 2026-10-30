@@ -1,0 +1,55 @@
+---
+import { galleryChartCount } from "../data/docs-catalog";
+import { loadIndex } from "../lib/dashboards";
+
+const layouts = loadIndex().boards.length;
+
+const icon = (d: string) =>
+  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"></path></svg>`;
+
+const cards = [
+  {
+    href: "/cloud",
+    eye: "Cloud",
+    title: "Post a spec. Get the image.",
+    body: "SVG or PNG from one request. Email, READMEs and PDF reports can show a chart with no runtime.",
+    icon: icon("M7 18h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.2 9.5 4.25 4.25 0 0 0 7 18z"),
+  },
+  {
+    href: "/dashboards",
+    eye: "Dashboards",
+    title: `${layouts} layouts, one page.`,
+    body: "Payments, analytics, traffic, issues. Every panel is a ChartSpec sharing one cursor.",
+    icon: icon("M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"),
+  },
+  {
+    href: "/agents",
+    eye: "Agents",
+    title: "Valid on the first try.",
+    body: "validate() and repair() fix the safe mistakes in the spec. repair() does not call a model.",
+    icon: icon("M5 12.5l4.5 4.5L19 7.5"),
+  },
+];
+---
+
+<section class="beyond" aria-labelledby="beyond-title">
+  <div class="beyond-head">
+    <h2 id="beyond-title">Beyond the library</h2>
+    <a href="/gallery">Gallery of all {galleryChartCount} chart types →</a>
+  </div>
+  <div class="beyond-grid">
+    {
+      cards.map((card) => (
+        <a class="beyond-card" href={card.href}>
+          <div class="beyond-card__kicker">
+            <span class="beyond-card__icon" set:html={card.icon} />
+            <span class="beyond-card__eye">{card.eye}</span>
+          </div>
+          <h3>{card.title}</h3>
+          <p>{card.body}</p>
+          <div class="beyond-card__more">Learn more →</div>
+        </a>
+      ))
+    }
+  </div>
+</section>

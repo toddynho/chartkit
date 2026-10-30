@@ -407,3 +407,139 @@ export function speedPlot(): {
   }));
   return { libs: LIBS, rows, ticks, measuredOn, commit, claim: paintClaim(slots) };
 }
+
+const HOME_LIBS: BenchLib[] = [
+  { name: "ChartKit", color: "#0a63e6" },
+  { name: "uPlot", color: "#6f7177" },
+  { name: "Chart.js", color: "#8b8d93" },
+  { name: "Observable Plot", color: "#a4a6ab" },
+  { name: "Recharts", color: "#b8b9bd" },
+  { name: "ECharts", color: "#cbccd0" },
+  { name: "Nivo", color: "#7d7f85" },
+];
+
+const HOME_NOTES: Record<string, string> = {
+  line: "100k points",
+  area: "100k points",
+  bar: "48 categories",
+  scatter: "100k points",
+  donut: "8 slices",
+  heatmap: "1,200 cells",
+  spike: "100k · ChartKit only",
+};
+
+const HOME_LO = Math.log10(5);
+const HOME_HI = Math.log10(30_000);
+
+function homeLeft(ms: number): string {
+  const at = ((Math.log10(ms) - HOME_LO) / (HOME_HI - HOME_LO)) * 100;
+  if (!(at >= 0 && at <= 100)) throw new Error(`paint dot is off the 5 ms–30 s axis: ${ms}`);
+  return `${at}%`;
+}
+
+function formatPaintMs(ms: number): string {
+  const rounded = round2(ms);
+  return rounded.toFixed(2).replace(/0$/, "").replace(/\.0$/, "");
+}
+
+export type HomePaintDot = { title: string; left: string; size: string; fill: string; ring: string };
+export type HomePaintRow = { type: string; note: string; ck: string; dots: HomePaintDot[] };
+
+export function homePaint(): {
+  libs: { name: string; color: string; us: boolean }[];
+  rows: HomePaintRow[];
+  ticks: { label: string; left: string }[];
+  measuredOn: string;
+  stat: string;
+  statCaption: string;
+  lead: string;
+} {
+  const { slots, measuredOn } = paintRows();
+  let wins = 0;
+  let compared = 0;
+  const presentUnder = new Map<string, { rows: number; over: boolean }>();
+  for (const lib of HOME_LIBS) presentUnder.set(lib.name, { rows: 0, over: false });
+  const rows: HomePaintRow[] = ROW_DEFS.map((spec) => {
+    const row = slots[spec.type];
+    const chartkit = row?.ChartKit;
+    if (chartkit?.kind !== "ok") throw new Error(`homepage paint is missing ChartKit ${spec.type}`);
+    const rivals = HOME_LIBS.flatMap((lib) => {
+      if (lib.name === "ChartKit") return [];
+      const slot = row[lib.name];
+      if (slot?.kind !== "ok") return [];
+      return [{ lib, ms: slot.initial }];
+    });
+    if (!spec.chartkitOnly && rivals.length > 0) {
+      compared += 1;
+      const best = rivals.reduce((lead, item) => (item.ms < lead.ms ? item : lead));
+      if (chartkit.initial < best.ms) wins += 1;
+    }
+    const dots: HomePaintDot[] = [];
+    for (const lib of HOME_LIBS) {
+      if (lib.name === "ChartKit") continue;
+      const slot = row[lib.name];
+      if (slot?.kind !== "ok") continue;
+      const state = presentUnder.get(lib.name);
+      if (state) {
+        state.rows += 1;
+        if (slot.initial >= 100) state.over = true;
+      }
+      dots.push({
+        title: `${lib.name} · ${spec.type} · ${formatPaintMs(slot.initial)} ms`,
+        left: homeLeft(slot.initial),
+        size: "10px",
+        fill: lib.color,
+        ring: "none",
+      });
+    }
+    const ckState = presentUnder.get("ChartKit");
+    if (ckState) {
+      ckState.rows += 1;
+      if (chartkit.initial >= 100) ckState.over = true;
+    }
+    dots.push({
+      title: `ChartKit · ${spec.type} · ${formatPaintMs(chartkit.initial)} ms`,
+      left: homeLeft(chartkit.initial),
+      size: "16px",
+      fill: "#0a63e6",
+      ring: "0 0 0 4px #dbe7fb",
+    });
+    const note = HOME_NOTES[spec.type];
+    if (!note) throw new Error(`homepage paint is missing a note for ${spec.type}`);
+    return { type: spec.type, note, ck: formatPaintMs(chartkit.initial), dots };
+  });
+  const line = slots.line?.ChartKit;
+  if (line?.kind !== "ok") throw new Error("homepage paint is missing the line");
+  const lineRivals = HOME_LIBS.flatMap((lib) => {
+    if (lib.name === "ChartKit") return [];
+    const slot = slots.line?.[lib.name];
+    if (slot?.kind !== "ok") return [];
+    return [{ name: lib.name, ms: slot.initial }];
+  });
+  const next = lineRivals.reduce((lead, item) => (item.ms < lead.ms ? item : lead));
+  const rowCount = ROW_DEFS.length;
+  const onlyUnder = [...presentUnder.entries()].filter(([name, state]) => {
+    if (name === "ChartKit") return false;
+    return state.rows === rowCount && !state.over;
+  });
+  const chartkitUnder = presentUnder.get("ChartKit");
+  const chartkitStays = chartkitUnder?.rows === rowCount && chartkitUnder.over === false;
+  const fiveOfSix = wins === 5 && compared === 6;
+  const lead =
+    fiveOfSix && chartkitStays && onlyUnder.length === 0
+      ? "First paint by chart type against six libraries. ChartKit is fastest on five of six, and the only one that stays under 100 ms on every row."
+      : `First paint by chart type against six libraries. ChartKit is fastest on ${wins} of ${compared}.${chartkitStays ? " ChartKit stays under 100 ms on every row." : ""}`;
+  const ticks = [5, 10, 50, 100, 500, 1000, 5000, 20_000].map((ms) => ({
+    label: ms >= 1000 ? `${ms / 1000}s` : `${ms}ms`,
+    left: homeLeft(ms),
+  }));
+  return {
+    libs: HOME_LIBS.map((lib) => ({ name: lib.name, color: lib.color, us: lib.name === "ChartKit" })),
+    rows,
+    ticks,
+    measuredOn,
+    stat: formatPaintMs(line.initial),
+    statCaption: `Next library, ${next.name}: ${formatPaintMs(next.ms)} ms.`,
+    lead,
+  };
+}

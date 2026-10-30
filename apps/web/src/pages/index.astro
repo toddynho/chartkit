@@ -1,209 +1,28 @@
 ---
 import "../styles/v2.css";
 import Base from "../layouts/Base.astro";
+import HomeBeyond from "../components/HomeBeyond.astro";
 import HomeHero from "../components/HomeHero.astro";
+import HomePaint from "../components/HomePaint.astro";
 import HomeStart from "../components/HomeStart.astro";
+import HomeTokens from "../components/HomeTokens.astro";
+import HowItWorks from "../components/HowItWorks.astro";
 import { SITE } from "../data/site";
-import { showcaseSvgs } from "../data/marketing-charts";
-import { proofFigures, speedPlot } from "../data/home-bench";
-import { tokenSection } from "../data/token-eval";
-import { loadIndex } from "../lib/dashboards";
 
 const title = "One spec. Every framework. Built for agents.";
 const lede =
   "Write a JSON ChartSpec once. Render it in React, Vue, Svelte, vanilla JS, or on the server. Agents write the spec; they never write the chart.";
-const shots = showcaseSvgs();
-const proof = proofFigures();
-const bench = speedPlot();
-const tokens = tokenSection();
-const dashboardCount = loadIndex().boards.length;
-
-const icon = (d: string) =>
-  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"></path></svg>`;
 ---
 
 <Base tone="light" title={title} description={lede || SITE.description}>
   <div class="v2">
     <HomeHero />
-
-    <HomeStart />
-
-    <section class="agent-tokens" aria-labelledby="tokens-title">
-      <div class="section-head">
-        <p class="eyebrow eyebrow--blue">For the agent</p>
-        <h2 id="tokens-title">Fewer tokens per chart</h2>
-        <p>If you're building an agent that draws charts, point it here.</p>
-      </div>
-      <div class="stat-grid">
-        {
-          tokens.stats.map((stat) => (
-            <article class:list={["stat-card", stat.ink && "stat-card--ink"]}>
-              <p class:list={["stat-num", stat.range && "stat-num--range"]}>
-                {stat.value}
-                {stat.suffix ? <span>{stat.suffix}</span> : null}
-              </p>
-              <p>
-                {stat.repair ? (
-                  <>
-                    model calls per working chart. <code>repair()</code> does not add a model call.
-                  </>
-                ) : (
-                  stat.body
-                )}
-              </p>
-            </article>
-          ))
-        }
-      </div>
-      <div class="token-card">
-        <div class="token-card__head">
-          <h3>Output tokens per working chart</h3>
-          <p>{tokens.barLabel}</p>
-        </div>
-        <div class="token-rows">
-          {
-            tokens.bars.map((row) => (
-              <div class:list={["token-row", row.first && "is-us"]}>
-                <div class="token-row__name">{row.name}</div>
-                <div class="token-row__track" aria-hidden="true">
-                  <div class="token-row__fill" style={`width:${row.width}`} />
-                </div>
-                <div class="token-row__val">{row.tokens}</div>
-              </div>
-            ))
-          }
-        </div>
-        <p class="token-note">
-          {tokens.noteLead} <a href="/agents#eval">Eval design →</a>
-        </p>
-      </div>
-    </section>
-
-    <section class="measured" id="measured" aria-labelledby="measured-title">
-      <div class="section-head">
-        <p class="eyebrow eyebrow--blue">For the user</p>
-        <h2 id="measured-title">Paint time on the page</h2>
-        <p>
-          {proof.gzipLabel} gzipped for the line chart, measured when this page builds (createRenderer of the line, gzip level 9, platform browser). The server draws the chart with no DOM. {bench.claim} The plot is two-rAF completion by chart type, the median of five fresh pages at 640×360. It is not the hover-steady line. <a href="/benchmarks">Benchmarks</a> has the full matrix.
-        </p>
-      </div>
-      <div class="bench-card">
-        <div class="bench-legend">
-          {
-            bench.libs.map((lib, index) => (
-              <span class:list={[index === 0 && "is-us"]}>
-                <i style={`background:${lib.color}`} />
-                {lib.name}
-              </span>
-            ))
-          }
-        </div>
-        <div class="bench-plot">
-          {
-            bench.rows.map((row) => (
-              <div class:list={["bench-row", !row.measured && "is-pending"]}>
-                <div class="bench-row__label">
-                  {row.type}
-                  {row.note ? <small>{row.note}</small> : null}
-                  {row.aside ? <small>{row.aside}</small> : null}
-                  <span class="sr">{row.summary}</span>
-                </div>
-                <div class="bench-track">
-                  {row.dots.filter((dot) => dot.solid).map((dot) => (
-                    <span class="bench-dot" role="img" aria-label={dot.title} title={dot.title} style={`left:${dot.left};width:${dot.size};height:${dot.size};background:${dot.fill};box-shadow:${dot.ring}`} />
-                  ))}
-                </div>
-                <div class="bench-hollows">
-                  {row.dots.filter((dot) => !dot.solid).map((dot) => (
-                    <span class="bench-dot is-hollow" role="img" aria-label={dot.title} title={dot.title} style={`width:${dot.size};height:${dot.size};border-color:${dot.fill}`} />
-                  ))}
-                </div>
-              </div>
-            ))
-          }
-        </div>
-        <div class="bench-axis">
-          <div></div>
-          <div class="bench-axis__ticks">
-            {bench.ticks.map((tick) => <span style={`left:${tick.left}`}>{tick.label}</span>)}
-          </div>
-        </div>
-        <p class="bench-note">
-          Milliseconds, log scale; left is faster. A filled dot is an ok cell: two-rAF completion, median of 5 at 640×360, measured {bench.measuredOn}{bench.commit ? ` on ${bench.commit}` : ""}. It is not a hover-steady time. The dot title includes the update median from the same cell. An open circle is a rival with no ok cell, either no native chart or a run that did not finish. It is not a time. Spike is ChartKit only, so that row has no open circle. Line is sampling auto at 100,000 points. Area is native stacked-area at 100,000 x positions with four series. Bar is 48 categories, scatter is 100,000 points, donut is 8 slices, and heatmap is 1,200 cells.
-        </p>
-      </div>
-    </section>
-
-    <section class="products" aria-label="Product">
-      <div class="tile-grid">
-        <a class="show-tile" href="/cloud" style="background:#17181a;color:#fff">
-          <div class="show-tile__copy">
-            <div class="show-tile__kicker">
-              <span class="show-tile__icon" style="background:rgba(255,255,255,.12)" set:html={icon("M7 18h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.2 9.5 4.25 4.25 0 0 0 7 18z")} />
-              <span class="show-tile__eye">Cloud</span>
-            </div>
-            <h3>Post a spec. Get the image.</h3>
-            <p>SVG or PNG from one request. Email, READMEs and PDF reports can show a chart with no runtime.</p>
-          </div>
-          <div class="show-tile__well">
-            <div class="show-tile__panel">
-              <div class="panel-meta"><span>POST /render</span><em>200 · image/svg+xml</em></div>
-              <div class="panel-code">{'{ "type": "bar", "data": [ … ] }'}</div>
-              <p class="panel-title">Signups by month</p>
-              <Fragment set:html={shots.cloud} />
-              <p class="wm">chartkit.dev</p>
-            </div>
-            <div class="show-tile__fade" style="background:linear-gradient(180deg,#17181a 0%,transparent 100%)"></div>
-          </div>
-        </a>
-        <a class="show-tile" href="/dashboards" style="background:#eef3fb;color:#17181a">
-          <div class="show-tile__copy">
-            <div class="show-tile__kicker">
-              <span class="show-tile__icon" style="background:#fff;color:#0a63e6" set:html={icon("M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z")} />
-              <span class="show-tile__eye">Dashboards</span>
-            </div>
-            <h3>{dashboardCount} layouts, one page.</h3>
-            <p>Payments, analytics, traffic, issues. Every panel is a ChartSpec sharing one cursor.</p>
-          </div>
-          <div class="show-tile__well">
-            <div class="show-tile__panel">
-              <div class="kpi-grid">
-                <div class="kpi"><span>Revenue</span><strong>$84.2k</strong><Fragment set:html={shots.revenue} /></div>
-                <div class="kpi"><span>Orders</span><strong>1,204</strong><Fragment set:html={shots.orders} /></div>
-                <div class="kpi"><span>Sessions</span><strong>42k</strong><Fragment set:html={shots.sessions} /></div>
-                <div class="kpi"><span>Errors</span><strong>0.2%</strong><Fragment set:html={shots.errors} /></div>
-              </div>
-            </div>
-            <div class="show-tile__fade" style="background:linear-gradient(180deg,#eef3fb 0%,transparent 100%)"></div>
-          </div>
-        </a>
-        <a class="show-tile" href="/agents" style="background:#0a63e6;color:#fff">
-          <div class="show-tile__copy">
-            <div class="show-tile__kicker">
-              <span class="show-tile__icon" style="background:rgba(255,255,255,.18)" set:html={icon("M5 12.5l4.5 4.5L19 7.5")} />
-              <span class="show-tile__eye">Agents</span>
-            </div>
-            <h3>{proof.noDocsFirst} of {proof.tasks} on the first try.</h3>
-            <p>
-              That is the recorded run with no docs{proof.agentMeasured ? `, ${proof.agentMeasured}` : ""}. <code>repair()</code> takes it to {proof.repairTo} of {proof.tasks} with no model call. With the docs in the prompt, the first try was {proof.officialFirst} of {proof.tasks}.
-            </p>
-          </div>
-          <div class="show-tile__well">
-            <div class="show-tile__panel">
-              <div class="log">
-                <div class="dim">&gt; validate(spec)</div>
-                <div class="bad">✕ encoding.y: "signup" not in data</div>
-                <div class="dim">&gt; repair(spec)</div>
-                <div class="ok">✓ encoding.y → "signups"</div>
-                <div class="ok">✓ valid · 0 model calls</div>
-              </div>
-              <p class="panel-title">Signups by month</p>
-              <Fragment set:html={shots.agent} />
-            </div>
-            <div class="show-tile__fade" style="background:linear-gradient(180deg,#0a63e6 0%,transparent 100%)"></div>
-          </div>
-        </a>
-      </div>
-    </section>
+    <HowItWorks />
+    <HomeTokens />
+    <HomePaint />
+  </div>
+  <HomeStart />
+  <div class="v2">
+    <HomeBeyond />
   </div>
 </Base>
