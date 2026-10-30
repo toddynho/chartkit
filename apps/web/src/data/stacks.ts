@@ -1,4 +1,4 @@
-export const stackIds = ["react", "vue", "svelte", "astro", "vanilla", "element"] as const;
+export const stackIds = ["react", "vue", "svelte", "astro", "solid", "qwik", "angular", "vanilla", "element"] as const;
 
 export type StackId = (typeof stackIds)[number];
 
@@ -58,6 +58,35 @@ export const stacks: Stack[] = [
     blurb: "Astro",
     install: "npm install @chartkitdev/core\nnpm install @chartkitdev/astro",
     snippet: '---\nimport { Chart } from "@chartkitdev/astro";\n---\n\n<Chart spec={spec} />',
+  },
+  {
+    id: "solid",
+    label: "Solid",
+    chip: "Solid",
+    mount: "<Chart spec={spec} />",
+    blurb: "Solid",
+    install: "npm install @chartkitdev/core\nnpm install @chartkitdev/solid",
+    snippet: 'import { Chart } from "@chartkitdev/solid";\n\nexport function Panel() {\n  return <Chart spec={spec} />;\n}',
+  },
+  {
+    id: "qwik",
+    label: "Qwik",
+    chip: "Qwik",
+    mount: "<Chart spec={spec} />",
+    blurb: "Qwik",
+    install: "npm install @chartkitdev/core\nnpm install @chartkitdev/qwik",
+    snippet:
+      'import { component$ } from "@builder.io/qwik";\nimport { Chart } from "@chartkitdev/qwik";\n\nexport const Panel = component$(() => {\n  return <Chart spec={spec} />;\n});',
+  },
+  {
+    id: "angular",
+    label: "Angular",
+    chip: "Angular",
+    mount: '<ck-chart [spec]="spec" />',
+    blurb: "Angular",
+    install: "npm install @chartkitdev/core\nnpm install @chartkitdev/angular",
+    snippet:
+      'import { Component } from "@angular/core";\nimport { Chart } from "@chartkitdev/angular";\n\n@Component({\n  standalone: true,\n  imports: [Chart],\n  template: `<ck-chart [spec]="spec" />`,\n})\nexport class Panel {\n  spec = spec;\n}',
   },
   {
     id: "vanilla",

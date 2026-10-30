@@ -86,6 +86,9 @@ const frameworkLang: Record<string, string> = {
   vue: "vue",
   svelte: "svelte",
   astro: "astro",
+  solid: "tsx",
+  qwik: "tsx",
+  angular: "typescript",
   vanilla: "typescript",
   server: "typescript",
 };

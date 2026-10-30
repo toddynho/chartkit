@@ -1,0 +1,91 @@
+{
+  "name": "@chartkitdev/solid",
+  "version": "0.5.0",
+  "description": "Solid component for the ChartKit JSON spec. SSR string output, then hydration with vanilla mount. Evidence: https://chartkit.dev/docs?framework=solid",
+  "keywords": [
+    "chart",
+    "solid",
+    "svg",
+    "ssr",
+    "chartkit"
+  ],
+  "author": "Todd Garland",
+  "homepage": "https://chartkit.dev/docs?framework=solid",
+  "bugs": {
+    "url": "https://github.com/toddynho/chartkit/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "solid": {
+        "types": "./types/index.d.ts",
+        "default": "./src/index.tsx"
+      },
+      "types": "./types/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./ssr": {
+      "types": "./types/ssr.d.ts",
+      "import": "./dist/ssr.js",
+      "default": "./dist/ssr.js"
+    }
+  },
+  "files": [
+    "dist",
+    "types",
+    "src/index.tsx",
+    "src/Chart.tsx",
+    "src/ssr.tsx",
+    "src/check.js",
+    "src/check.d.ts",
+    "src/paint.js",
+    "src/paint.d.ts",
+    "src/render.js",
+    "src/render.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "vitest",
+    "test:run": "npm run build && vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@chartkitdev/core": "^0.5.0",
+    "@chartkitdev/vanilla": "^0.5.0"
+  },
+  "peerDependencies": {
+    "solid-js": ">=1.8.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "babel-preset-solid": "^1.9.16",
+    "esbuild": "^0.25.0",
+    "jsdom": "^27.0.1",
+    "solid-js": "^1.9.18",
+    "typescript": "^5.3.3",
+    "vite": "^7.1.12",
+    "vite-plugin-solid": "^2.11.15",
+    "vitest": "^3.2.4"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toddynho/chartkit.git",
+    "directory": "packages/solid"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

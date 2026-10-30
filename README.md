@@ -40,6 +40,9 @@ npm install @chartkitdev/react
 npm install @chartkitdev/vue
 npm install @chartkitdev/svelte
 npm install @chartkitdev/astro
+npm install @chartkitdev/solid
+npm install @chartkitdev/qwik
+npm install @chartkitdev/angular
 npm install @chartkitdev/vanilla
 npm install @chartkitdev/element
 npm install @chartkitdev/markdown
@@ -133,6 +136,41 @@ import { Chart } from "@chartkitdev/astro";
 ```
 
 The Astro component throws if `validate()` reports errors, so the build fails on a bad spec. `<Chart spec={spec} client />` is the opt-in for tooltips and selection. Astro's `client:*` directives do not apply to `.astro` components, so the opt-in is the prop.
+
+```tsx
+import { Chart } from "@chartkitdev/solid";
+
+export function Panel() {
+  return <Chart spec={spec} />;
+}
+```
+
+`@chartkitdev/solid` validates the spec and includes the SVG in Solid's server HTML. Hydration calls `mount()` from `@chartkitdev/vanilla`. `renderToString` from `@chartkitdev/solid/ssr` is that HTML, with histogram through rose included.
+
+```tsx
+import { component$ } from "@builder.io/qwik";
+import { Chart } from "@chartkitdev/qwik";
+
+export const Panel = component$(() => <Chart spec={spec} />);
+```
+
+`@chartkitdev/qwik` prints static SVG, then calls `mount()` in a visible task. `renderToString` from `@chartkitdev/qwik/ssr` is the SVG string.
+
+```ts
+import { Component } from "@angular/core";
+import { Chart } from "@chartkitdev/angular";
+
+@Component({
+  standalone: true,
+  imports: [Chart],
+  template: `<ck-chart [spec]="spec" />`,
+})
+export class Panel {
+  spec = spec;
+}
+```
+
+`@chartkitdev/angular` is a standalone component. It writes the SVG during SSR, uses OnPush, and calls `mount()` from `afterNextRender` in the browser. `renderToString` from `@chartkitdev/angular/ssr` is the SVG string.
 
 ```js
 import { mount, renderToString } from "@chartkitdev/vanilla";

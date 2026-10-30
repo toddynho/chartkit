@@ -5,6 +5,7 @@ import FieldGrid from "./FieldGrid.astro";
 import PageNav from "./PageNav.astro";
 import Prose from "./Prose.astro";
 import SpecEditor from "./SpecEditor.astro";
+import HostNotes from "./HostNotes.astro";
 import StackSample from "./StackSample.astro";
 
 interface Props {
@@ -37,6 +38,7 @@ const canonical = articleHref(article);
 }
 <SpecEditor spec={articleSpec} />
 {article.slug === "" ? <StackSample heading pill oneLine /> : null}
+{article.slug === "" ? <HostNotes /> : null}
 {
   article.sections.filter((section) => !(article.slug === "" && section.title === "Install")).map((section) => (
     <section>
@@ -78,6 +80,9 @@ const canonical = articleHref(article);
       <li><a href="/docs?framework=vue">Vue</a></li>
       <li><a href="/docs?framework=svelte">Svelte</a></li>
       <li><a href="/docs?framework=astro">Astro</a></li>
+      <li><a href="/docs?framework=solid">Solid</a></li>
+      <li><a href="/docs?framework=qwik">Qwik</a></li>
+      <li><a href="/docs?framework=angular">Angular</a></li>
       <li><a href="/docs?framework=vanilla">Vanilla</a></li>
     </ul>
   ) : null

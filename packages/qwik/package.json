@@ -1,0 +1,79 @@
+{
+  "name": "@chartkitdev/qwik",
+  "version": "0.5.0",
+  "description": "Qwik component for the ChartKit JSON spec. Static SVG, then vanilla mount in a visible task. Evidence: https://chartkit.dev/docs?framework=qwik",
+  "keywords": [
+    "chart",
+    "qwik",
+    "svg",
+    "ssr",
+    "chartkit"
+  ],
+  "author": "Todd Garland",
+  "homepage": "https://chartkit.dev/docs?framework=qwik",
+  "bugs": {
+    "url": "https://github.com/toddynho/chartkit/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./ssr": {
+      "types": "./src/ssr.d.ts",
+      "import": "./src/ssr.js",
+      "default": "./src/ssr.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src/index.d.ts",
+    "src/ssr.js",
+    "src/ssr.d.ts",
+    "src/render.js",
+    "src/render.d.ts",
+    "src/check.js",
+    "src/check.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "vite build --mode lib",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@chartkitdev/core": "^0.5.0",
+    "@chartkitdev/vanilla": "^0.5.0"
+  },
+  "peerDependencies": {
+    "@builder.io/qwik": ">=1.5.0"
+  },
+  "devDependencies": {
+    "@builder.io/qwik": "^1.20.3",
+    "jsdom": "^27.0.1",
+    "typescript": "^5.3.3",
+    "vite": "^7.1.12",
+    "vitest": "^3.2.4"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toddynho/chartkit.git",
+    "directory": "packages/qwik"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

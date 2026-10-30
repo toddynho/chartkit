@@ -160,8 +160,9 @@
 .theme-switch {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   margin: 0 0 14px;
+  max-width: 100%;
 }
 
 .theme-switch button {

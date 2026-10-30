@@ -1,0 +1,86 @@
+{
+  "name": "@chartkitdev/angular",
+  "version": "0.5.0",
+  "description": "Standalone Angular component for the ChartKit JSON spec. SSR SVG and OnPush updates. Evidence: https://chartkit.dev/docs?framework=angular",
+  "keywords": [
+    "chart",
+    "angular",
+    "svg",
+    "ssr",
+    "chartkit"
+  ],
+  "author": "Todd Garland",
+  "homepage": "https://chartkit.dev/docs?framework=angular",
+  "bugs": {
+    "url": "https://github.com/toddynho/chartkit/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/fesm2022/chartkitdev-angular.mjs",
+  "module": "./dist/fesm2022/chartkitdev-angular.mjs",
+  "types": "./dist/types/chartkitdev-angular.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/chartkitdev-angular.d.ts",
+      "import": "./dist/fesm2022/chartkitdev-angular.mjs",
+      "default": "./dist/fesm2022/chartkitdev-angular.mjs"
+    },
+    "./ssr": {
+      "types": "./src/ssr.d.ts",
+      "import": "./src/ssr.js",
+      "default": "./src/ssr.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src/ssr.js",
+    "src/ssr.d.ts",
+    "src/render.js",
+    "src/render.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json",
+    "test": "vitest",
+    "test:run": "npm run build && vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@chartkitdev/core": "^0.5.0",
+    "@chartkitdev/vanilla": "^0.5.0"
+  },
+  "peerDependencies": {
+    "@angular/core": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.2.7",
+    "@angular/common": "^21.2.25",
+    "@angular/compiler": "^21.2.7",
+    "@angular/compiler-cli": "^21.2.7",
+    "@angular/core": "^21.2.7",
+    "@angular/platform-browser": "^21.2.7",
+    "@angular/platform-browser-dynamic": "^21.2.7",
+    "@angular/platform-server": "^21.2.7",
+    "jsdom": "^27.0.1",
+    "ng-packagr": "^21.2.7",
+    "rxjs": "^7.8.2",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4",
+    "zone.js": "^0.16.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toddynho/chartkit.git",
+    "directory": "packages/angular"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

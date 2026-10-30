@@ -7,13 +7,16 @@
     "vue": "@chartkitdev/vue",
     "svelte": "@chartkitdev/svelte",
     "astro": "@chartkitdev/astro",
+    "solid": "@chartkitdev/solid",
+    "qwik": "@chartkitdev/qwik",
+    "angular": "@chartkitdev/angular",
     "vanilla": "@chartkitdev/vanilla",
     "element": "@chartkitdev/element",
     "core": "@chartkitdev/core",
     "compat": "@derpdaderp/chartkit"
   },
   "schema": "https://chartkit.dev/schema/v1.json",
-  "description": "JSON-spec charting library. @chartkitdev/core renders SVG with zero dependencies. Adapters for React, Vue, Svelte, Astro, and vanilla. validate() and repair() are the agent loop. Round 7 evidence, including losses: https://chartkit.dev/benchmarks.json",
+  "description": "JSON-spec charting library. @chartkitdev/core renders SVG with zero dependencies. Adapters for React, Vue, Svelte, Astro, Solid, Qwik, Angular, and vanilla. validate() and repair() are the agent loop. Round 7 evidence, including losses: https://chartkit.dev/benchmarks.json",
   "benchmarks": {
     "json": "https://chartkit.dev/benchmarks.json",
     "markdown": "https://chartkit.dev/benchmarks.md",

@@ -68,7 +68,7 @@ const extras: DocArticle[] = [
         ],
         list: [],
         code: [
-          "npm install @chartkitdev/core\nnpm install @chartkitdev/react\nnpm install @chartkitdev/vue\nnpm install @chartkitdev/svelte\nnpm install @chartkitdev/astro\nnpm install @chartkitdev/vanilla\nnpm install @chartkitdev/element\nnpm install @chartkitdev/markdown\nnpm install @chartkitdev/geo\nnpm install @chartkitdev/mcp",
+          "npm install @chartkitdev/core\nnpm install @chartkitdev/react\nnpm install @chartkitdev/vue\nnpm install @chartkitdev/svelte\nnpm install @chartkitdev/astro\nnpm install @chartkitdev/solid\nnpm install @chartkitdev/qwik\nnpm install @chartkitdev/angular\nnpm install @chartkitdev/vanilla\nnpm install @chartkitdev/element\nnpm install @chartkitdev/markdown\nnpm install @chartkitdev/geo\nnpm install @chartkitdev/mcp",
         ],
       },
       {
@@ -85,7 +85,7 @@ const extras: DocArticle[] = [
     slug: "concepts/adapters",
     group: "Legacy",
     title: "Adapters",
-    lede: "React, Vue, Svelte, Astro, and vanilla DOM take the same spec. Adapters do not add a second chart API.",
+    lede: "React, Vue, Svelte, Astro, Solid, Qwik, Angular, and vanilla DOM take the same spec. Adapters do not add a second chart API.",
     description: "Framework adapters pass one JSON spec through to core.",
     tryIntro: "",
     aliases: [],
@@ -93,9 +93,25 @@ const extras: DocArticle[] = [
     sections: [
       {
         title: "Where to read",
-        paragraphs: ["The framework chip in the docs nav picks React, Vue, Svelte, Astro, or vanilla. /docs/react, /docs/astro, and the other stack URLs open Overview with that chip selected."],
+        paragraphs: [
+          "The framework chip on Overview picks React, Vue, Svelte, Astro, Solid, Qwik, Angular, or JS. /docs/react, /docs/solid, and the other stack URLs open Overview with that chip selected.",
+        ],
         list: [],
         code: [],
+      },
+      {
+        title: "Other hosts",
+        paragraphs: [
+          "Preact aliases react and react-dom to preact/compat, then uses @chartkitdev/react. Next.js App Router and Remix or React Router use that same component. Nuxt uses @chartkitdev/vue. SvelteKit uses @chartkitdev/svelte and already includes the SVG during SSR. htmx and Eleventy print renderToString from @chartkitdev/vanilla. When an htmx swap should take pointers, use <chart-kit> from @chartkitdev/element, or call mount().",
+        ],
+        list: [],
+        code: [
+          'resolve: {\n  alias: {\n    react: "preact/compat",\n    "react-dom": "preact/compat",\n  },\n}',
+          'import { renderToString } from "react-dom/server";\nimport { Chart } from "@chartkitdev/react";\n\nconst html = renderToString(<Chart spec={spec} />);',
+          'import { renderToString } from "@chartkitdev/vue/ssr";\n\nconst html = await renderToString(spec);',
+          '<script>\n  import { Chart } from "@chartkitdev/svelte";\n</script>\n\n<Chart {spec} />',
+          'import { renderToString } from "@chartkitdev/vanilla";\n\nconst svg = renderToString(spec);\neleventyConfig.addShortcode("chart", (spec) => renderToString(spec));',
+        ],
       },
     ],
   },

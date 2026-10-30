@@ -164,13 +164,21 @@
   z-index: 4;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 16px;
+  align-items: flex-start;
+  gap: 12px 16px;
   flex-wrap: wrap;
   margin: 0 0 18px;
   padding: 2px 0 10px;
   background: var(--bg);
 }
+
+.docs-top .stack-chips {
+  flex: 1 1 16rem;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+.host-notes { margin: 4px 0 8px; }
 
 .docs-top .breadcrumb { margin-bottom: 8px; }
 
@@ -189,9 +197,9 @@
   display: inline-flex;
   flex-direction: row;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   min-width: 0;
-  padding: 5px 10px;
+  padding: 4px 8px;
   border: 1px solid transparent;
   border-radius: 9px;
   background: transparent;
@@ -215,6 +223,9 @@ html[data-stack="react"] .stack-chip[data-stack-chip="react"],
 html[data-stack="vue"] .stack-chip[data-stack-chip="vue"],
 html[data-stack="svelte"] .stack-chip[data-stack-chip="svelte"],
 html[data-stack="astro"] .stack-chip[data-stack-chip="astro"],
+html[data-stack="solid"] .stack-chip[data-stack-chip="solid"],
+html[data-stack="qwik"] .stack-chip[data-stack-chip="qwik"],
+html[data-stack="angular"] .stack-chip[data-stack-chip="angular"],
 html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"],
 html[data-stack="element"] .stack-chip[data-stack-chip="element"] {
   color: #1d1d1f;

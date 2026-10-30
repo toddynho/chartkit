@@ -20,7 +20,7 @@ const src = join(root, "packages/core/src");
 const externalFramework = {
   name: "external-framework",
   setup(build) {
-    build.onResolve({ filter: /^(vue|svelte|@chartkitdev\/core|@chartkitdev\/vanilla)(\/|$)/ }, (args) => ({
+    build.onResolve({ filter: /^(vue|svelte|solid-js|@builder\.io\/qwik|@angular\/core|@angular\/common|@angular\/platform-browser|@chartkitdev\/core|@chartkitdev\/vanilla)(\/|$)/ }, (args) => ({
       path: args.path,
       external: true,
     }));
@@ -81,7 +81,7 @@ const externalGeoAtlas = {
   },
 };
 
-async function gzipOf(entry, { external = false, splitExtra = false, plugins = [] } = {}) {
+async function gzipOf(entry, { external = false, splitExtra = false, plugins = [], build: buildOptions = {} } = {}) {
   const outfile = join(tmpdir(), `chartkit-size-${Math.random().toString(36).slice(2)}.mjs`);
   await build({
     entryPoints: [entry],
@@ -92,6 +92,7 @@ async function gzipOf(entry, { external = false, splitExtra = false, plugins = [
     outfile,
     plugins: [externalDynamicEntries, ...(external ? [externalFramework] : []), ...(splitExtra ? [externalInteractExtra] : []), ...plugins],
     logLevel: "silent",
+    ...buildOptions,
   });
   const code = readFileSync(outfile);
   return { minBytes: code.length, gzipBytes: gzipSync(code, { level: 9 }).length, code: code.toString("utf8") };
@@ -173,6 +174,22 @@ const vue = await gzipOf(join(root, "packages/vue/src/Chart.ts"), { external: tr
 const vanilla = await gzipOf(join(root, "packages/vanilla/src/index.ts"), { external: true });
 const element = await gzipOf(join(root, "packages/element/src/index.ts"), { external: true });
 const astroClient = await gzipOf(join(root, "packages/astro/src/client.js"), { external: true });
+const solid = await gzipOf(join(root, "packages/solid/src/Chart.tsx"), {
+  external: true,
+  build: { jsx: "automatic", jsxImportSource: "solid-js" },
+});
+const qwik = await gzipOf(join(root, "packages/qwik/src/client.ts"), { external: true });
+const angular = await gzipOf(join(root, "packages/angular/src/chart.ts"), {
+  external: true,
+  build: {
+    tsconfigRaw: {
+      compilerOptions: {
+        experimentalDecorators: true,
+        useDefineForClassFields: false,
+      },
+    },
+  },
+});
 const svelteCompiled = compile(readFileSync(join(root, "packages/svelte/src/Chart.svelte"), "utf8"), {
   filename: "Chart.svelte",
   generate: "client",
@@ -185,7 +202,7 @@ const vueLine = await gzipLine(join(root, "packages/vue/src/Chart.ts"));
 const vanillaLine = await gzipLine(join(root, "packages/vanilla/src/index.ts"));
 const svelteLine = await gzipLine(svelteEntry);
 const elementLine = await gzipLine(join(root, "packages/element/src/index.ts"));
-for (const [name, built] of [["vue", vue], ["svelte", svelte], ["vanilla", vanilla], ["element", element], ["astro", astroClient]]) {
+for (const [name, built] of [["vue", vue], ["svelte", svelte], ["vanilla", vanilla], ["element", element], ["astro", astroClient], ["solid", solid], ["qwik", qwik], ["angular", angular]]) {
   if (built.code.includes("function bars") || built.code.includes("CK1004")) {
     isolation[`${name}OmitsCore`] = false;
   } else {
@@ -271,6 +288,9 @@ const measured = {
   vanilla: vanilla.gzipBytes,
   element: element.gzipBytes,
   astro: astroClient.gzipBytes,
+  solid: solid.gzipBytes,
+  qwik: qwik.gzipBytes,
+  angular: angular.gzipBytes,
   interact: interact.gzipBytes,
   interactExtra: interactExtra.gzipBytes,
   vueLine: vueLine.gzipBytes,
@@ -294,7 +314,7 @@ const measured = {
 for (const name of extraTypes) measured[name] = chartSizes[name].gzipBytes;
 const budget = JSON.parse(readFileSync(join(root, "scripts/size-budget.json"), "utf8"));
 const failures = [];
-for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "element", "astro", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "elementLine", "extra", "canvas", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst", "bar-list", "radial-bar", "rose", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid", "geo", "geoWorld", "geoUs", "geoCanada", "geoEu"]) {
+for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "element", "astro", "solid", "qwik", "angular", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "elementLine", "extra", "canvas", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst", "bar-list", "radial-bar", "rose", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid", "geo", "geoWorld", "geoUs", "geoCanada", "geoEu"]) {
   if (typeof budget[key] !== "number") failures.push(`${key} budget missing`);
   else if (measured[key] > budget[key]) failures.push(`${key} gzip ${measured[key]} > budget ${budget[key]}`);
 }
@@ -314,6 +334,9 @@ console.log(JSON.stringify({
     vanilla: vanilla.minBytes,
     element: element.minBytes,
     astro: astroClient.minBytes,
+    solid: solid.minBytes,
+    qwik: qwik.minBytes,
+    angular: angular.minBytes,
     interact: interact.minBytes,
     interactExtra: interactExtra.minBytes,
     vueLine: vueLine.minBytes,

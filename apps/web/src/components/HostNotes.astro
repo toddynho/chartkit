@@ -1,0 +1,86 @@
+---
+/**
+ * Notes for hosts that use a package already in the picker.
+ * The visible panel follows the same chartkit.framework / ck-fw chip as the install sample.
+ */
+---
+
+<div class="host-notes">
+  <div data-stack-panel="react">
+    <h2>Same package</h2>
+    <p>
+      Preact uses <code>@chartkitdev/react</code>. Alias <code>react</code> and <code>react-dom</code> to <code>preact/compat</code>, then render <code>Chart</code> as in React.
+    </p>
+    <figure class="code">
+      <figcaption>vite</figcaption>
+      <pre><code>{`resolve: {
+  alias: {
+    react: "preact/compat",
+    "react-dom": "preact/compat",
+  },
+}`}</code></pre>
+    </figure>
+    <p>Next.js App Router and Remix or React Router use that same component. App Router can print the SVG on the server.</p>
+    <figure class="code">
+      <figcaption>tsx</figcaption>
+      <pre><code>{`import { renderToString } from "react-dom/server";
+import { Chart } from "@chartkitdev/react";
+
+const html = renderToString(<Chart spec={spec} />);`}</code></pre>
+    </figure>
+    <figure class="code">
+      <figcaption>tsx</figcaption>
+      <pre><code>{`import { Chart } from "@chartkitdev/react";
+
+export default function Panel() {
+  return <Chart spec={spec} />;
+}`}</code></pre>
+    </figure>
+  </div>
+  <div data-stack-panel="vue">
+    <h2>Nuxt</h2>
+    <p>
+      Nuxt is Vue. <code>@chartkitdev/vue</code> includes the SVG during SSR. <code>renderToString</code> from <code>@chartkitdev/vue/ssr</code> is the HTML string.
+    </p>
+    <figure class="code">
+      <figcaption>vue</figcaption>
+      <pre><code>{`<script setup>
+import { Chart } from "@chartkitdev/vue";
+</script>
+
+<template>
+  <Chart :spec="spec" />
+</template>`}</code></pre>
+    </figure>
+  </div>
+  <div data-stack-panel="svelte">
+    <h2>SvelteKit</h2>
+    <p>SvelteKit SSR includes the SVG. There is no second package.</p>
+    <figure class="code">
+      <figcaption>svelte</figcaption>
+      <pre><code>{`<script>
+  import { Chart } from "@chartkitdev/svelte";
+</script>
+
+<Chart {spec} />`}</code></pre>
+    </figure>
+  </div>
+  <div data-stack-panel="vanilla">
+    <h2>Server HTML</h2>
+    <p>
+      htmx and Eleventy have no component compiler. <code>renderToString</code> from <code>@chartkitdev/vanilla</code> is the SVG. Drop it in the response. When an htmx swap should take pointers, use <code>&lt;chart-kit&gt;</code> from <code>@chartkitdev/element</code>, or call <code>mount()</code>.
+    </p>
+    <figure class="code">
+      <figcaption>js</figcaption>
+      <pre><code>{`import { renderToString } from "@chartkitdev/vanilla";
+
+const svg = renderToString(spec);`}</code></pre>
+    </figure>
+    <figure class="code">
+      <figcaption>js</figcaption>
+      <pre><code>{`import { renderToString } from "@chartkitdev/vanilla";
+
+eleventyConfig.addShortcode("chart", (spec) => renderToString(spec));`}</code></pre>
+    </figure>
+  </div>
+</div>

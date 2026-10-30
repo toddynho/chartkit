@@ -4,10 +4,10 @@
 
 ## Project Overview
 
-**ChartKit** ships `@chartkitdev/core` (framework-free schema, `validate`, and SVG `render`), `@chartkitdev/react` (the existing components plus `<Chart spec={...} />`), and thin spec adapters `@chartkitdev/vue`, `@chartkitdev/svelte`, `@chartkitdev/astro` (`<Chart spec={spec} />`, static SVG, `client` hydrates with vanilla `mount`), `@chartkitdev/vanilla` (`mount(el, spec)` → `{ update, destroy }`), and `@chartkitdev/element` (`<chart-kit>`). `@derpdaderp/chartkit` is a compatibility shim. The spec id is `https://chartkit.dev/schema/v1.json`. It prioritizes:
+**ChartKit** ships `@chartkitdev/core` (framework-free schema, `validate`, and SVG `render`), `@chartkitdev/react` (the existing components plus `<Chart spec={...} />`), and thin spec adapters `@chartkitdev/vue`, `@chartkitdev/svelte`, `@chartkitdev/astro` (`<Chart spec={spec} />`, static SVG, `client` hydrates with vanilla `mount`), `@chartkitdev/solid` (SSR string, then vanilla `mount` on hydrate), `@chartkitdev/qwik` (static SVG, then vanilla `mount` in a visible task), `@chartkitdev/angular` (standalone `<ck-chart>`, OnPush, SSR SVG, `afterNextRender` calls `mount`), `@chartkitdev/vanilla` (`mount(el, spec)` → `{ update, destroy }`), and `@chartkitdev/element` (`<chart-kit>`). `@derpdaderp/chartkit` is a compatibility shim. The spec id is `https://chartkit.dev/schema/v1.json`. It prioritizes:
 
 - **Small core**: `@chartkitdev/core` has zero runtime dependencies. Chart renderers and themes past midnight are opt-in imports. `mark.sampling` defaults to `auto` and downsamples line, area, sparkline, mini-area, stacked-area, combo lines, and spike above twice the plot width (`packages/core/SPEC.md`). `npm run bench` writes the public comparison in `BENCHMARKS.md`. `npm run bench:core` prints core size and validate throughput. `npm run size` fails when the line, all-charts, validate, or adapter bundles grow past their budgets. Adapter budgets exclude core and the framework.
-- **Dependencies**: `@chartkitdev/core` has none. `@chartkitdev/react` depends on the core and peers React 18+. `@chartkitdev/vue` peers Vue 3. `@chartkitdev/svelte` peers Svelte 4 or 5 (the component uses `export let`). `@chartkitdev/astro` depends on the core and on `@chartkitdev/vanilla`, and peers Astro 4+. The default component ships no client script. `@chartkitdev/vanilla` depends only on the core.
+- **Dependencies**: `@chartkitdev/core` has none. `@chartkitdev/react` depends on the core and peers React 18+. `@chartkitdev/vue` peers Vue 3. `@chartkitdev/svelte` peers Svelte 4 or 5 (the component uses `export let`). `@chartkitdev/astro` depends on the core and on `@chartkitdev/vanilla`, and peers Astro 4+. The default component ships no client script. `@chartkitdev/solid` depends on the core and on `@chartkitdev/vanilla`, and peers Solid 1.8+. `@chartkitdev/qwik` depends on the core and on `@chartkitdev/vanilla`, and peers Qwik 1.5+. `@chartkitdev/angular` depends on the core and on `@chartkitdev/vanilla`, and peers Angular 18+. `@chartkitdev/vanilla` depends only on the core.
 - **Beautiful defaults**: 17 curated themes that work out of the box
 - **TypeScript-first**: Full type safety and autocomplete
 
@@ -21,6 +21,9 @@ chartkit/
 │   ├── vue/                  # @chartkitdev/vue — <Chart :spec="..." />
 │   ├── svelte/               # @chartkitdev/svelte — <Chart {spec} />
 │   ├── astro/                # @chartkitdev/astro — <Chart spec={spec} />, client hydrates with vanilla
+│   ├── solid/                # @chartkitdev/solid — <Chart spec={spec} />, SSR string, hydrate with mount
+│   ├── qwik/                 # @chartkitdev/qwik — static SVG, visible task calls mount
+│   ├── angular/              # @chartkitdev/angular — <ck-chart>, OnPush, SSR, afterNextRender calls mount
 │   ├── vanilla/              # @chartkitdev/vanilla — mount(el, spec)
 │   └── compat-derpdaderp/    # @derpdaderp/chartkit shim
 ├── apps/web/                 # Public site (Astro)
