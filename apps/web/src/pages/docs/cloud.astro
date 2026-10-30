@@ -13,7 +13,7 @@ const description = "Render a ChartKit spec to SVG or PNG. Free, with a chartkit
     ChartKit Cloud renders a spec for any agent or app. There is no signup. Free images include a small <code>chartkit.dev</code> mark, linked to <a href="/cloud">/cloud</a>. A valid API key removes the mark. This service draws the mark. <code>@chartkitdev/core</code> does not, and the core bundles do not include it.
   </p>
   <p>
-    Every render runs <code>validate()</code> and <code>repair()</code> first. Response headers carry the JSON Patch, the warning codes, and the error codes. <code>POST</code> also returns them as JSON. <code>render_chart</code> on <code>@chartkitdev/mcp</code> returns the image URL plus those repairs. The package is not published yet. Example URLs on this site use <code>https://cloud.chartkit.dev</code> unless the site build sets <code>PUBLIC_CHARTKIT_CLOUD_URL</code>.
+    Every render runs <code>validate()</code> and <code>repair()</code> first. Response headers carry the JSON Patch, the warning codes, and the error codes. <code>POST</code> also returns them as JSON. <code>render_chart</code> on <code>@chartkitdev/mcp</code> (<code>npx -y @chartkitdev/mcp</code>) returns the image URL plus those repairs. Example URLs on this site use <code>https://cloud.chartkit.dev</code> unless the site build sets <code>PUBLIC_CHARTKIT_CLOUD_URL</code>.
   </p>
   <h2>GET /render</h2>
   <p>

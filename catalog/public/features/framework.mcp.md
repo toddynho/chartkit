@@ -6,7 +6,7 @@ Official Model Context Protocol server or agent tooling
 
 Matrix status: `native`. Verification: `source-review` (strong).
 
-@chartkitdev/mcp in packages/mcp. Not on npm yet. Tools: validate, repair, render (svg), render_chart (Cloud), lookup_feature, list_chart_types, get_example.
+@chartkitdev/mcp (npx -y @chartkitdev/mcp). Tools: validate, repair, render (svg), render_chart (Cloud), lookup_feature, list_chart_types, get_example.
 
 Source: packages/mcp/src/server.ts
 

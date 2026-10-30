@@ -1,6 +1,10 @@
 # @chartkitdev/element
 
-A framework-free `<chart-kit>` element. It draws the same JSON spec as the Vue, Svelte, and vanilla adapters. The package is not on npm yet.
+A framework-free `<chart-kit>` element. It draws the same JSON spec as the Vue, Svelte, and vanilla adapters.
+
+```bash
+npm install @chartkitdev/element
+```
 
 ```html
 <script type="module">

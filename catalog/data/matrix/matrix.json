@@ -25007,7 +25007,7 @@
               "loc": "packages/geo/src/render.ts"
             }
           ],
-          "note": "@chartkitdev/geo, unpublished, not in the line or all bundles. No tiles, no pan/zoom, no US counties, no NUTS-2. Small states missing from Natural Earth 110m, including Malta, are points.",
+          "note": "@chartkitdev/geo, not in the line or all bundles. No tiles, no pan/zoom, no US counties, no NUTS-2. Small states missing from Natural Earth 110m, including Malta, are points.",
           "verified": "source-review",
           "strength": "strong"
         },
@@ -25372,7 +25372,7 @@
               "loc": "packages/geo/src/render.ts"
             }
           ],
-          "note": "@chartkitdev/geo, unpublished, not in the line or all bundles. No tiles, no pan/zoom, no US counties, no NUTS-2. Small states missing from Natural Earth 110m, including Malta, are points.",
+          "note": "@chartkitdev/geo, not in the line or all bundles. No tiles, no pan/zoom, no US counties, no NUTS-2. Small states missing from Natural Earth 110m, including Malta, are points.",
           "verified": "source-review",
           "strength": "strong"
         },
@@ -84870,7 +84870,7 @@
               "loc": "packages/mcp/src/server.ts"
             }
           ],
-          "note": "@chartkitdev/mcp in packages/mcp. Not on npm yet. Tools: validate, repair, render (svg), render_chart (Cloud), lookup_feature, list_chart_types, get_example.",
+          "note": "@chartkitdev/mcp (npx -y @chartkitdev/mcp). Tools: validate, repair, render (svg), render_chart (Cloud), lookup_feature, list_chart_types, get_example.",
           "verified": "source-review",
           "strength": "strong"
         },

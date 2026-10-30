@@ -2,13 +2,19 @@
   "name": "@chartkitdev/vanilla",
   "version": "0.5.0",
   "description": "Mount a ChartKit JSON spec into an element. No framework. The line chart is 34,554 B gzip. Evidence: https://chartkit.dev/benchmarks",
-  "keywords": ["chart", "svg", "vanilla", "chartkit"],
+  "keywords": [
+    "chart",
+    "svg",
+    "vanilla",
+    "chartkit"
+  ],
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev",
   "bugs": {
     "url": "https://github.com/toddynho/chartkit/issues"
   },
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -45,7 +51,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup && node scripts/global.mjs",
@@ -55,7 +63,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@chartkitdev/core": "*"
+    "@chartkitdev/core": "^0.5.0"
   },
   "devDependencies": {
     "jsdom": "^27.0.1",
@@ -66,10 +74,14 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/toddynho/chartkit",
+    "url": "git+https://github.com/toddynho/chartkit.git",
     "directory": "packages/vanilla"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
