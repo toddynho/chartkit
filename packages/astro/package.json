@@ -1,0 +1,68 @@
+{
+  "name": "@chartkitdev/astro",
+  "version": "0.5.0",
+  "description": "Astro component for the ChartKit JSON spec. Validates and renders static SVG at build time. Zero client JS unless client is set. Evidence: https://chartkit.dev/docs/astro",
+  "keywords": [
+    "chart",
+    "astro",
+    "svg",
+    "ssr",
+    "chartkit"
+  ],
+  "author": "Todd Garland",
+  "homepage": "https://chartkit.dev/docs/astro",
+  "bugs": {
+    "url": "https://github.com/toddynho/chartkit/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "astro": "./src/index.js",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    }
+  },
+  "files": [
+    "src/*.js",
+    "src/*.d.ts",
+    "src/*.astro",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node scripts/check.mjs",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "clean": "node -e \"process.exit(0)\""
+  },
+  "dependencies": {
+    "@chartkitdev/core": "^0.5.0",
+    "@chartkitdev/vanilla": "^0.5.0"
+  },
+  "peerDependencies": {
+    "astro": ">=4.0.0"
+  },
+  "devDependencies": {
+    "astro": "^7.4.2",
+    "jsdom": "^27.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^3.2.4"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toddynho/chartkit.git",
+    "directory": "packages/astro"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

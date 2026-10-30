@@ -6,6 +6,7 @@
 @chartkitdev/vue packages/vue node16
 @chartkitdev/svelte packages/svelte esm-only
 @chartkitdev/vanilla packages/vanilla node16
+@chartkitdev/astro packages/astro esm-only
 @chartkitdev/element packages/element node16
 @chartkitdev/markdown packages/markdown node16
 @chartkitdev/mcp packages/mcp esm-only

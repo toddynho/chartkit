@@ -68,7 +68,7 @@ const extras: DocArticle[] = [
         ],
         list: [],
         code: [
-          "npm install @chartkitdev/core\nnpm install @chartkitdev/react\nnpm install @chartkitdev/vue\nnpm install @chartkitdev/svelte\nnpm install @chartkitdev/vanilla\nnpm install @chartkitdev/element\nnpm install @chartkitdev/markdown\nnpm install @chartkitdev/geo\nnpm install @chartkitdev/mcp",
+          "npm install @chartkitdev/core\nnpm install @chartkitdev/react\nnpm install @chartkitdev/vue\nnpm install @chartkitdev/svelte\nnpm install @chartkitdev/astro\nnpm install @chartkitdev/vanilla\nnpm install @chartkitdev/element\nnpm install @chartkitdev/markdown\nnpm install @chartkitdev/geo\nnpm install @chartkitdev/mcp",
         ],
       },
       {
@@ -85,7 +85,7 @@ const extras: DocArticle[] = [
     slug: "concepts/adapters",
     group: "Legacy",
     title: "Adapters",
-    lede: "React, Vue, Svelte, and vanilla DOM take the same spec. Adapters do not add a second chart API.",
+    lede: "React, Vue, Svelte, Astro, and vanilla DOM take the same spec. Adapters do not add a second chart API.",
     description: "Framework adapters pass one JSON spec through to core.",
     tryIntro: "",
     aliases: [],
@@ -93,7 +93,7 @@ const extras: DocArticle[] = [
     sections: [
       {
         title: "Where to read",
-        paragraphs: ["The framework chip in the docs nav picks React, Vue, Svelte, or vanilla. /docs/react and the other stack URLs open Overview with that chip selected."],
+        paragraphs: ["The framework chip in the docs nav picks React, Vue, Svelte, Astro, or vanilla. /docs/react, /docs/astro, and the other stack URLs open Overview with that chip selected."],
         list: [],
         code: [],
       },

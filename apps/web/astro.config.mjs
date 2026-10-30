@@ -55,6 +55,7 @@ export default defineConfig({
     "/docs/react": { status: 307, destination: "/docs?framework=react" },
     "/docs/vue": { status: 307, destination: "/docs?framework=vue" },
     "/docs/svelte": { status: 307, destination: "/docs?framework=svelte" },
+    "/docs/astro": { status: 307, destination: "/docs?framework=astro" },
     "/docs/vanilla": { status: 307, destination: "/docs?framework=vanilla" },
     "/dashboard": { status: 307, destination: "/dashboards" },
     "/pricing": { status: 307, destination: "/cloud#pricing" },

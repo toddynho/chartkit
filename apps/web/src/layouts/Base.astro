@@ -48,7 +48,7 @@ const canonical = new URL(path, Astro.site ?? SITE.url).href;
     <meta property="og:site_name" content={SITE.name} />
     <script is:inline>
       (function () {
-        var allowed = { react: 1, vue: 1, svelte: 1, vanilla: 1, element: 1 };
+        var allowed = { react: 1, vue: 1, svelte: 1, astro: 1, vanilla: 1, element: 1 };
         var query = "";
         try {
           query = new URLSearchParams(location.search).get("framework") || "";
