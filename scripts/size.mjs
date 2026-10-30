@@ -20,7 +20,7 @@ const src = join(root, "packages/core/src");
 const externalFramework = {
   name: "external-framework",
   setup(build) {
-    build.onResolve({ filter: /^(vue|svelte|@chartkitdev\/core)(\/|$)/ }, (args) => ({
+    build.onResolve({ filter: /^(vue|svelte|@chartkitdev\/core|@chartkitdev\/vanilla)(\/|$)/ }, (args) => ({
       path: args.path,
       external: true,
     }));
@@ -172,6 +172,7 @@ async function gzipLine(entry) {
 const vue = await gzipOf(join(root, "packages/vue/src/Chart.ts"), { external: true });
 const vanilla = await gzipOf(join(root, "packages/vanilla/src/index.ts"), { external: true });
 const element = await gzipOf(join(root, "packages/element/src/index.ts"), { external: true });
+const astroClient = await gzipOf(join(root, "packages/astro/src/client.js"), { external: true });
 const svelteCompiled = compile(readFileSync(join(root, "packages/svelte/src/Chart.svelte"), "utf8"), {
   filename: "Chart.svelte",
   generate: "client",
@@ -184,7 +185,7 @@ const vueLine = await gzipLine(join(root, "packages/vue/src/Chart.ts"));
 const vanillaLine = await gzipLine(join(root, "packages/vanilla/src/index.ts"));
 const svelteLine = await gzipLine(svelteEntry);
 const elementLine = await gzipLine(join(root, "packages/element/src/index.ts"));
-for (const [name, built] of [["vue", vue], ["svelte", svelte], ["vanilla", vanilla], ["element", element]]) {
+for (const [name, built] of [["vue", vue], ["svelte", svelte], ["vanilla", vanilla], ["element", element], ["astro", astroClient]]) {
   if (built.code.includes("function bars") || built.code.includes("CK1004")) {
     isolation[`${name}OmitsCore`] = false;
   } else {
@@ -269,6 +270,7 @@ const measured = {
   svelte: svelte.gzipBytes,
   vanilla: vanilla.gzipBytes,
   element: element.gzipBytes,
+  astro: astroClient.gzipBytes,
   interact: interact.gzipBytes,
   interactExtra: interactExtra.gzipBytes,
   vueLine: vueLine.gzipBytes,
@@ -292,7 +294,7 @@ const measured = {
 for (const name of extraTypes) measured[name] = chartSizes[name].gzipBytes;
 const budget = JSON.parse(readFileSync(join(root, "scripts/size-budget.json"), "utf8"));
 const failures = [];
-for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "element", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "elementLine", "extra", "canvas", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst", "bar-list", "radial-bar", "rose", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid", "geo", "geoWorld", "geoUs", "geoCanada", "geoEu"]) {
+for (const key of ["line", "all", "validate", "vue", "svelte", "vanilla", "element", "astro", "interact", "interactExtra", "vueLine", "svelteLine", "vanillaLine", "elementLine", "extra", "canvas", "histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst", "bar-list", "radial-bar", "rose", "mermaid", "vanillaAuto", "markdown", "global", "globalAuto", "globalMermaid", "geo", "geoWorld", "geoUs", "geoCanada", "geoEu"]) {
   if (typeof budget[key] !== "number") failures.push(`${key} budget missing`);
   else if (measured[key] > budget[key]) failures.push(`${key} gzip ${measured[key]} > budget ${budget[key]}`);
 }
@@ -311,6 +313,7 @@ console.log(JSON.stringify({
     svelte: svelte.minBytes,
     vanilla: vanilla.minBytes,
     element: element.minBytes,
+    astro: astroClient.minBytes,
     interact: interact.minBytes,
     interactExtra: interactExtra.minBytes,
     vueLine: vueLine.minBytes,

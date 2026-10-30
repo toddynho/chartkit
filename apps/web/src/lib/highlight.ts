@@ -1,7 +1,7 @@
 import { createHighlighter, type Highlighter, type ThemeRegistrationRaw } from "shiki";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 
-const langs = ["json", "typescript", "tsx", "vue", "svelte", "bash", "css", "html", "javascript"] as const;
+const langs = ["json", "typescript", "tsx", "vue", "svelte", "astro", "bash", "css", "html", "javascript"] as const;
 
 /**
  * Token colors are CSS variables on `html.code-theme` in global.css.
@@ -85,6 +85,7 @@ const frameworkLang: Record<string, string> = {
   react: "tsx",
   vue: "vue",
   svelte: "svelte",
+  astro: "astro",
   vanilla: "typescript",
   server: "typescript",
 };

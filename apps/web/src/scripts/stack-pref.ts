@@ -43,7 +43,7 @@ export function applyInstallBlocks(stack: StackId): void {
     const original = code.dataset.original ?? code.textContent ?? "";
     if (!code.dataset.original) code.dataset.original = original;
     if (!original.startsWith("npm ")) return;
-    const hits = ["react", "vue", "svelte", "vanilla", "element"].filter((id) => original.includes(`@chartkitdev/${id}`));
+    const hits = ["react", "vue", "svelte", "astro", "vanilla", "element"].filter((id) => original.includes(`@chartkitdev/${id}`));
     if (hits.length !== 1) return;
     code.textContent = original.replaceAll(`@chartkitdev/${hits[0]}`, `@chartkitdev/${stack}`);
   });

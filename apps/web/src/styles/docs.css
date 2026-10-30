@@ -214,6 +214,7 @@
 html[data-stack="react"] .stack-chip[data-stack-chip="react"],
 html[data-stack="vue"] .stack-chip[data-stack-chip="vue"],
 html[data-stack="svelte"] .stack-chip[data-stack-chip="svelte"],
+html[data-stack="astro"] .stack-chip[data-stack-chip="astro"],
 html[data-stack="vanilla"] .stack-chip[data-stack-chip="vanilla"],
 html[data-stack="element"] .stack-chip[data-stack-chip="element"] {
   color: #1d1d1f;

@@ -1,4 +1,4 @@
-export const stackIds = ["react", "vue", "svelte", "vanilla", "element"] as const;
+export const stackIds = ["react", "vue", "svelte", "astro", "vanilla", "element"] as const;
 
 export type StackId = (typeof stackIds)[number];
 
@@ -20,7 +20,6 @@ export type Stack = {
  * Adapters you mount a chart with.
  * `@chartkitdev/markdown` is a fence plugin, not an app stack.
  * Server render is `renderToString` on these adapters, not a separate package.
- * There is no Astro adapter package.
  */
 export const stacks: Stack[] = [
   {
@@ -50,6 +49,15 @@ export const stacks: Stack[] = [
     blurb: "Svelte",
     install: "npm install @chartkitdev/core\nnpm install @chartkitdev/svelte",
     snippet: '<script>\n  import { Chart } from "@chartkitdev/svelte";\n</script>\n\n<Chart {spec} />',
+  },
+  {
+    id: "astro",
+    label: "Astro",
+    chip: "Astro",
+    mount: "<Chart spec={spec} />",
+    blurb: "Astro",
+    install: "npm install @chartkitdev/core\nnpm install @chartkitdev/astro",
+    snippet: '---\nimport { Chart } from "@chartkitdev/astro";\n---\n\n<Chart spec={spec} />',
   },
   {
     id: "vanilla",

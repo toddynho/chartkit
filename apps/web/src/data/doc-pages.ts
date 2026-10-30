@@ -20,6 +20,7 @@ const install = `npm install @chartkitdev/core
 npm install @chartkitdev/react
 npm install @chartkitdev/vue
 npm install @chartkitdev/svelte
+npm install @chartkitdev/astro
 npm install @chartkitdev/vanilla
 npm install @chartkitdev/element
 npm install @chartkitdev/markdown
@@ -130,7 +131,7 @@ export const docPages: DocPage[] = [
   {
     slug: "concepts/adapters",
     title: "Adapters",
-    description: "React, Vue, Svelte, vanilla DOM, and a custom element all take the same spec.",
+    description: "React, Vue, Svelte, Astro, vanilla DOM, and a custom element all take the same spec.",
     lede: "None of the adapters add chart logic. Pass a renderer built with createRenderer when a page should ship one chart instead of every chart.",
     current: "https://chartkit.dev/docs",
     blocks: [
@@ -140,6 +141,19 @@ export const docPages: DocPage[] = [
           ["React: ", { code: "Chart" }, " from ", { code: "@chartkitdev/react" }, " takes ", { code: "spec" }, "."],
           ["Vue: the same component, bound as ", { code: ":spec" }, ". SSR uses ", { code: "renderToString" }, " from ", { code: "@chartkitdev/vue/ssr" }, "."],
           ["Svelte: ", { code: "export let spec" }, ", so Svelte 4 and 5 both compile it. SvelteKit SSR includes the SVG."],
+          [
+            "Astro: ",
+            { code: "Chart" },
+            " from ",
+            { code: "@chartkitdev/astro" },
+            " validates the spec and prints static SVG. Set ",
+            { code: "client" },
+            " to hydrate with ",
+            { code: "mount()" },
+            " from ",
+            { code: "@chartkitdev/vanilla" },
+            ".",
+          ],
           [
             "Vanilla: ",
             { code: "mount" },

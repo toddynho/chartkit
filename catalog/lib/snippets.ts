@@ -1,11 +1,12 @@
 import type { Spec } from "./specs";
 
-export type FrameworkId = "react" | "vue" | "svelte" | "vanilla" | "server";
+export type FrameworkId = "react" | "vue" | "svelte" | "astro" | "vanilla" | "server";
 
 export const FRAMEWORKS: { id: FrameworkId; label: string }[] = [
   { id: "react", label: "React" },
   { id: "vue", label: "Vue" },
   { id: "svelte", label: "Svelte" },
+  { id: "astro", label: "Astro" },
   { id: "vanilla", label: "Vanilla" },
   { id: "server", label: "Server" },
 ];
@@ -38,6 +39,14 @@ const spec = ${json};
 </script>
 
 <Chart {spec} />
+`,
+    astro: `---
+import { Chart } from "@chartkitdev/astro";
+
+const spec = ${json};
+---
+
+<Chart spec={spec} />
 `,
     vanilla: `import { mount } from "@chartkitdev/vanilla";
 
@@ -85,6 +94,15 @@ const html = await renderToString(spec);
     install: "npm install @chartkitdev/svelte",
     server: `// SvelteKit: the component renders the SVG during SSR.
 // No extra server entry is required.
+`,
+  },
+  astro: {
+    title: "Astro",
+    lede: "The component validates the spec and prints static SVG at build time. It ships no client script unless client is set, which hydrates with mount() from @chartkitdev/vanilla.",
+    install: "npm install @chartkitdev/astro",
+    server: `import { renderToString } from "@chartkitdev/astro";
+
+const svg = renderToString(spec);
 `,
   },
   vanilla: {

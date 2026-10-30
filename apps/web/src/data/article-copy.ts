@@ -10,10 +10,10 @@ export const articleSections: Record<string, DocSection[]> = {
     section(
       "Install",
       [
-        "Install core, then the adapter for the framework you render in. `@chartkitdev/element`, `@chartkitdev/markdown`, `@chartkitdev/geo`, and `@chartkitdev/mcp` use the same scope.",
+        "Install core, then the adapter for the framework you render in. `@chartkitdev/astro` prints static SVG. `@chartkitdev/element`, `@chartkitdev/markdown`, `@chartkitdev/geo`, and `@chartkitdev/mcp` use the same scope.",
       ],
       [],
-      ["npm install @chartkitdev/core\nnpm install @chartkitdev/react\nnpm install @chartkitdev/element\nnpm install @chartkitdev/geo\nnpm install @chartkitdev/mcp"],
+      ["npm install @chartkitdev/core\nnpm install @chartkitdev/react\nnpm install @chartkitdev/astro\nnpm install @chartkitdev/element\nnpm install @chartkitdev/geo\nnpm install @chartkitdev/mcp"],
     ),
     section(
       "A valid spec",

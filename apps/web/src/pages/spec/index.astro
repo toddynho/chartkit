@@ -4,14 +4,14 @@ import Base from "../../layouts/Base.astro";
 import { loadSpecIndex } from "../../lib/batch3";
 
 const page = loadSpecIndex();
-const description = "JSON spec charts. The same v1 object in React, Vue, Svelte, and vanilla.";
+const description = "JSON spec charts. The same v1 object in React, Vue, Svelte, Astro, and vanilla.";
 ---
 
 <Base title="JSON spec charts" description={description} tone="light">
   <div class="wrap surface prose">
     <h1 id="spec">JSON spec charts</h1>
     <p class="lede">
-      These types use the same v1 spec in React, Vue, Svelte, and vanilla. The chart type goes in <code>type</code>. <code>a11y.alt</code> is required.
+      These types use the same v1 spec in React, Vue, Svelte, Astro, and vanilla. The chart type goes in <code>type</code>. <code>a11y.alt</code> is required.
     </p>
     <ul>
       {

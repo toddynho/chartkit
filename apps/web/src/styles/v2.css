@@ -193,6 +193,7 @@
 html[data-stack="react"] .home-card .stack-chip[data-stack-chip="react"],
 html[data-stack="vue"] .home-card .stack-chip[data-stack-chip="vue"],
 html[data-stack="svelte"] .home-card .stack-chip[data-stack-chip="svelte"],
+html[data-stack="astro"] .home-card .stack-chip[data-stack-chip="astro"],
 html[data-stack="vanilla"] .home-card .stack-chip[data-stack-chip="vanilla"],
 html[data-stack="element"] .home-card .stack-chip[data-stack-chip="element"] {
   background: #fff;
@@ -242,6 +243,7 @@ html:not([data-stack]) .home-card .stack-sample [data-stack-panel="react"],
 html[data-stack="react"] .home-card .stack-sample [data-stack-panel="react"],
 html[data-stack="vue"] .home-card .stack-sample [data-stack-panel="vue"],
 html[data-stack="svelte"] .home-card .stack-sample [data-stack-panel="svelte"],
+html[data-stack="astro"] .home-card .stack-sample [data-stack-panel="astro"],
 html[data-stack="vanilla"] .home-card .stack-sample [data-stack-panel="vanilla"],
 html[data-stack="element"] .home-card .stack-sample [data-stack-panel="element"] {
   display: flex;
@@ -1352,6 +1354,7 @@ html[data-stack="element"] .home-card .stack-sample [data-stack-panel="element"]
 html[data-stack="react"] .gs .stack-chip[data-stack-chip="react"],
 html[data-stack="vue"] .gs .stack-chip[data-stack-chip="vue"],
 html[data-stack="svelte"] .gs .stack-chip[data-stack-chip="svelte"],
+html[data-stack="astro"] .gs .stack-chip[data-stack-chip="astro"],
 html[data-stack="vanilla"] .gs .stack-chip[data-stack-chip="vanilla"],
 html[data-stack="element"] .gs .stack-chip[data-stack-chip="element"] {
   background: #fff;
@@ -1675,6 +1678,7 @@ html[data-stack="element"] .gs .stack-chip[data-stack-chip="element"] {
 html[data-stack="react"] .how-fw .stack-chip[data-stack-chip="react"],
 html[data-stack="vue"] .how-fw .stack-chip[data-stack-chip="vue"],
 html[data-stack="svelte"] .how-fw .stack-chip[data-stack-chip="svelte"],
+html[data-stack="astro"] .how-fw .stack-chip[data-stack-chip="astro"],
 html[data-stack="vanilla"] .how-fw .stack-chip[data-stack-chip="vanilla"],
 html[data-stack="element"] .how-fw .stack-chip[data-stack-chip="element"] {
   background: #fff;

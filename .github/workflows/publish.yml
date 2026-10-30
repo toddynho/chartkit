@@ -22,6 +22,7 @@ on:
           - "@chartkitdev/vue"
           - "@chartkitdev/svelte"
           - "@chartkitdev/vanilla"
+          - "@chartkitdev/astro"
           - "@chartkitdev/element"
           - "@chartkitdev/markdown"
           - "@chartkitdev/mcp"

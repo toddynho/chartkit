@@ -18,6 +18,7 @@
     "check": "ASTRO_TELEMETRY_DISABLED=1 astro check"
   },
   "dependencies": {
+    "@chartkitdev/astro": "^0.5.0",
     "@chartkitdev/convert": "^0.5.0",
     "@chartkitdev/core": "^0.5.0",
     "@chartkitdev/geo": "^0.5.0",

@@ -1,0 +1,36 @@
+---
+import type { ChartSpec } from "@chartkitdev/core";
+import Client from "./Client.astro";
+import { renderToString, type RenderChart } from "./render.js";
+
+interface Props {
+  /** A v1 chart spec. The same object renders in every ChartKit adapter. */
+  spec: ChartSpec;
+  /**
+   * Opt in to pointer interaction.
+   * Default false: the SVG is in the HTML and this component adds no script.
+   * True keeps that SVG, then calls mount() from @chartkitdev/vanilla.
+   */
+  client?: boolean;
+  /** Defaults to core, extra, and bar-list. Pass createRenderer([...]) to draw a subset at build time. */
+  render?: RenderChart;
+  class?: string;
+}
+
+const { spec, client = false, render, class: className } = Astro.props;
+const svg = renderToString(spec, render);
+const specJson = JSON.stringify(spec).replaceAll("<", "\\u003c");
+const wrap = client || Boolean(className);
+---
+
+{
+  wrap ? (
+    <div class:list={["chartkit", className]} data-chartkit={client ? "" : undefined}>
+      {client ? <script is:inline type="application/json" set:html={specJson} /> : null}
+      <Fragment set:html={svg} />
+    </div>
+  ) : (
+    <Fragment set:html={svg} />
+  )
+}
+{client ? <Client /> : null}

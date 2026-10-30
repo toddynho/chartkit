@@ -1,6 +1,6 @@
 # ChartKit
 
-One JSON spec, a framework-free core, and thin adapters for React, Vue, Svelte, plain DOM, and a `<chart-kit>` element. The spec is the agent interface. Component props on the older React charts are a different API and are not keys in the spec.
+One JSON spec, a framework-free core, and thin adapters for React, Vue, Svelte, Astro, plain DOM, and a `<chart-kit>` element. The spec is the agent interface. Component props on the older React charts are a different API and are not keys in the spec.
 
 The line-gzip and first-paint rows cite the bench files named in the table. The other browser rows are round 13, measured 2026-10-18 on phase 2 `d8dcc5a`, including the losses. Method: [chartkit.dev/benchmarks](https://chartkit.dev/benchmarks) and [benchmarks.json](https://chartkit.dev/benchmarks.json).
 
@@ -39,12 +39,15 @@ npm install @chartkitdev/core
 npm install @chartkitdev/react
 npm install @chartkitdev/vue
 npm install @chartkitdev/svelte
+npm install @chartkitdev/astro
 npm install @chartkitdev/vanilla
 npm install @chartkitdev/element
 npm install @chartkitdev/markdown
 npm install @chartkitdev/geo
 npm install @chartkitdev/mcp
 ```
+
+`@chartkitdev/astro` is `<Chart spec={spec} />`. It validates the spec and prints static SVG during the Astro build, with no client script unless `client` is set. That prop hydrates the same SVG with `mount()` from `@chartkitdev/vanilla`.
 
 `@chartkitdev/element` is the `<chart-kit>` element. `@chartkitdev/markdown` turns `chartkit` fences into SVG. `@chartkitdev/mcp` is the stdio server (`npx -y @chartkitdev/mcp`).
 
@@ -120,6 +123,16 @@ Vue SSR (`renderToString` from `@chartkitdev/vue/ssr`, which uses `vue/server-re
 ```
 
 The Svelte component uses `export let`, so Svelte 4 and Svelte 5 both compile it. SvelteKit SSR includes the SVG.
+
+```astro
+---
+import { Chart } from "@chartkitdev/astro";
+---
+
+<Chart spec={spec} />
+```
+
+The Astro component throws if `validate()` reports errors, so the build fails on a bad spec. `<Chart spec={spec} client />` is the opt-in for tooltips and selection. Astro's `client:*` directives do not apply to `.astro` components, so the opt-in is the prop.
 
 ```js
 import { mount, renderToString } from "@chartkitdev/vanilla";

@@ -1,4 +1,6 @@
 ---
+import type { ChartSpec } from "@chartkitdev/core";
+import { Chart } from "@chartkitdev/astro";
 import { heroCharts } from "../data/home-hero";
 import { SITE } from "../data/site";
 import { scriptJson } from "../lib/spec-text";
@@ -22,7 +24,7 @@ const payload = charts.map((chart) => ({
     <p class="eyebrow eyebrow--blue">ChartKit {SITE.version} · MIT</p>
     <h1 id="home-title">One spec.<br />Every framework.<br />Built for agents.</h1>
     <p class="hh-lead">
-      Write a JSON ChartSpec once. Render it in React, Vue, Svelte, vanilla JS, or on the server. Agents write the spec; they never write the chart.
+      Write a JSON ChartSpec once. Render it in React, Vue, Svelte, Astro, vanilla JS, or on the server. Agents write the spec; they never write the chart.
     </p>
     <div class="hh-actions">
       <a class="btn-lg" href="#get-started">Get started</a>
@@ -47,8 +49,9 @@ const payload = charts.map((chart) => ({
             class="hh-chart__host"
             data-hero-host
             style="--ck-accent:#0a63e6;--ck-series-1:#0a63e6;--ck-series-2:#7fb0f5;--ck-series-3:#cfe0fa;--ck-series-4:#17181a;--ck-grid:#dedee2;--ck-axis:#dedee2;--ck-muted:#8b8d93;--ck-text:#17181a;--ck-background:transparent;--ck-positive:#7fb0f5;--ck-negative:#17181a"
-            set:html={first.svg}
-          />
+          >
+            <Chart spec={first.drawn as ChartSpec} />
+          </div>
         </div>
         <pre class="hh-spec" data-hero-spec hidden set:html={first.preview} />
       </div>

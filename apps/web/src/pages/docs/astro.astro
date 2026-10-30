@@ -1,0 +1,78 @@
+---
+import type { ChartSpec } from "@chartkitdev/core";
+import { Chart } from "@chartkitdev/astro";
+import DocsPage from "../../components/DocsPage.astro";
+
+const description = "Astro component that validates a ChartKit spec and prints static SVG. No client JS unless client is set.";
+const spec = {
+  version: "1",
+  type: "line",
+  title: "Baskets",
+  data: [
+    { week: "W1", baskets: 12 },
+    { week: "W2", baskets: 15 },
+    { week: "W3", baskets: 14 },
+    { week: "W4", baskets: 22 },
+  ],
+  encoding: { x: "week", y: "baskets" },
+  size: { width: 640, height: 280 },
+  a11y: { alt: "Baskets rose from 12 in W1 to 22 in W4." },
+} satisfies ChartSpec;
+const snippet = `---
+import { Chart } from "@chartkitdev/astro";
+---
+
+<Chart spec={spec} />`;
+const interactive = `<Chart spec={spec} client />`;
+const server = `import { renderToString } from "@chartkitdev/astro";
+
+const svg = renderToString(spec);`;
+---
+
+<DocsPage
+  title="Astro"
+  description={description}
+  href="/docs/astro"
+  lede="The component validates the spec during the build and prints SVG. The page ships no chart script unless you set client."
+>
+  <div class="callout">
+    <strong>Install</strong>
+    <code>npm install @chartkitdev/core @chartkitdev/astro</code>
+  </div>
+  <p>
+    <code>@chartkitdev/astro</code> is the same role as the React, Vue, and Svelte adapters. It does not add spec keys. The chart below is that component, rendered while this page was built.
+  </p>
+  <div class="astro-chart">
+    <Chart spec={spec} />
+  </div>
+  <h2>Static SVG</h2>
+  <p>
+    <code>&lt;Chart spec={'{spec}'} /&gt;</code> runs <code>validate()</code> (and the phase-4 checks for gantt, timeline, quadrant, venn, and journey) before it draws. Errors throw <code>ChartKitSpecError</code> with the CK codes, so the build fails. Warnings still draw. Histogram through rose, the planning charts, and bar-list are in the server SVG. Maps stay on <code>@chartkitdev/geo</code>.
+  </p>
+  <figure class="code"><figcaption>astro</figcaption><pre><code>{snippet}</code></pre></figure>
+  <h2>Client interaction</h2>
+  <p>
+    Astro's <code>client:*</code> directives apply to React, Vue, and Svelte components, not to an <code>.astro</code> file. The opt-in is the <code>client</code> prop. The same SVG stays in the HTML. A script on that page then calls <code>mount()</code> from <code>@chartkitdev/vanilla</code>, which patches the node instead of shipping a second chart runtime. Leave the prop off and the page does not download that script.
+  </p>
+  <figure class="code"><figcaption>astro</figcaption><pre><code>{interactive}</code></pre></figure>
+  <p>
+    <code>@chartkitdev/vanilla</code> is a dependency of this package. Core charts attach immediately. Histogram through rose load on demand. Pass <code>render</code> from <code>createRenderer</code> when the static SVG should include one chart type. <code>client</code> still hydrates with vanilla's loader.
+  </p>
+  <h2>The string</h2>
+  <p>
+    <code>renderToString</code> is the SVG the component prints, for an endpoint that wants the markup without the component.
+  </p>
+  <figure class="code"><figcaption>js</figcaption><pre><code>{server}</code></pre></figure>
+</DocsPage>
+
+<style>
+  .astro-chart {
+    margin: 8px 0 22px;
+    padding: 12px 0 0;
+  }
+  .astro-chart :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>
