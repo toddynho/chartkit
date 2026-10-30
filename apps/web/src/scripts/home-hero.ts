@@ -15,6 +15,16 @@ type Slide = {
   drawn: ChartSpec;
 };
 
+type ExtraPayload = {
+  type: string;
+  title: string;
+  subtitle: string;
+  motion: Motion;
+  spec: ChartSpec & { title?: string; subtitle?: string };
+  /** Pre-drawn when vanilla mount cannot paint the type (maps and bar list). */
+  svg?: string;
+};
+
 const root = document.querySelector<HTMLElement>("[data-hero]");
 const raw = document.getElementById("hero-charts")?.textContent;
 if (root && raw) {
@@ -25,12 +35,35 @@ if (root && raw) {
   const chartView = root.querySelector<HTMLElement>("[data-hero-chart]");
   const host = root.querySelector<HTMLElement>("[data-hero-host]");
   const pills = [...root.querySelectorAll<HTMLButtonElement>("[data-hero-pill]")];
+  const picks = [...root.querySelectorAll<HTMLButtonElement>("[data-hero-pick]")];
+  const allButton = root.querySelector<HTMLButtonElement>("[data-hero-all]");
+  const catalog = root.querySelector<HTMLElement>("[data-hero-catalog]");
   const viewButtons = [...root.querySelectorAll<HTMLButtonElement>("[data-hero-view]")];
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const pillIds = pills.map((pill) => pill.dataset.heroId ?? "");
   let index = 0;
   let pinned = false;
+  let generation = 0;
   let mounted: { destroy(): void } | null = null;
   let watch: MutationObserver | null = null;
+
+  function previewHtml(spec: unknown): string {
+    const json = JSON.stringify(spec, null, 2);
+    return json
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll(/("(?:\\.|[^"\\])*")(\s*:)/g, '<span class="tok-key">$1</span>$2')
+      .replaceAll(/: ("(?:\\.|[^"\\])*")/g, ': <span class="tok-str">$1</span>')
+      .replaceAll(/: (-?\d+(?:\.\d+)?)/g, ': <span class="tok-num">$1</span>');
+  }
+
+  function drawnOf(spec: ExtraPayload["spec"]): ChartSpec {
+    const copy = { ...spec };
+    delete copy.title;
+    delete copy.subtitle;
+    return copy;
+  }
 
   function animate(motion: Motion): void {
     if (reduce || !host) return;
@@ -88,32 +121,95 @@ if (root && raw) {
     svg.style.animation = "hh-fade .6s ease-out both";
   }
 
+  function markPills(active: number): void {
+    pills.forEach((pill, i) => {
+      const on = i === active;
+      pill.classList.toggle("is-on", on);
+      pill.setAttribute("aria-selected", on ? "true" : "false");
+    });
+  }
+
+  function markPicks(slideId: string | null, type: string | null): void {
+    picks.forEach((pick) => {
+      const on = type ? pick.dataset.heroType === type : Boolean(slideId) && pick.dataset.heroSlide === slideId;
+      pick.classList.toggle("is-on", on);
+      pick.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+
+  function release(): void {
+    watch?.disconnect();
+    watch = null;
+    mounted?.destroy();
+    mounted = null;
+  }
+
   function show(next: number): void {
     if (!host || !specView || !title || !sub) return;
+    const token = ++generation;
     index = (next + slides.length) % slides.length;
     const slide = slides[index];
     if (!slide) return;
     title.textContent = slide.title;
     sub.textContent = slide.subtitle;
     specView.innerHTML = slide.preview;
-    pills.forEach((pill, i) => {
-      const on = i === index;
-      pill.classList.toggle("is-on", on);
-      pill.setAttribute("aria-selected", on ? "true" : "false");
-    });
-    watch?.disconnect();
-    mounted?.destroy();
-    mounted = null;
+    markPills(index);
+    markPicks(pillIds[index] ?? null, null);
+    release();
     host.innerHTML = slide.svg;
     if (!reduce && slide.extra) {
       watch = new MutationObserver(() => {
+        if (token !== generation) return;
         if (host.querySelector("svg")) animate(slide.motion);
       });
       watch.observe(host, { childList: true });
-      window.setTimeout(() => watch?.disconnect(), 4000);
+      window.setTimeout(() => {
+        if (token === generation) watch?.disconnect();
+      }, 4000);
     }
     mounted = mount(host, slide.drawn);
     animate(slide.motion);
+  }
+
+  async function paintExtra(payload: ExtraPayload, token: number): Promise<void> {
+    if (!host) return;
+    if (token !== generation) return;
+    if (payload.svg) {
+      host.innerHTML = payload.svg;
+      return;
+    }
+    mounted = mount(host, drawnOf(payload.spec));
+  }
+
+  async function showExtra(pick: HTMLButtonElement): Promise<void> {
+    if (!host || !specView || !title || !sub) return;
+    const type = pick.dataset.heroType ?? "";
+    const token = ++generation;
+    pinned = true;
+    title.textContent = pick.dataset.heroTitle ?? pick.textContent ?? type;
+    sub.textContent = pick.dataset.heroSub ?? "";
+    markPills(-1);
+    markPicks(null, type);
+    release();
+    host.setAttribute("aria-busy", "true");
+    try {
+      const response = await fetch(`/hero/${type}.json`);
+      if (!response.ok) throw new Error(`${type} spec did not load`);
+      const payload = (await response.json()) as ExtraPayload;
+      if (token !== generation) return;
+      title.textContent = payload.title;
+      sub.textContent = payload.subtitle;
+      specView.innerHTML = previewHtml(payload.spec);
+      await paintExtra(payload, token);
+      if (token !== generation) return;
+      animate(payload.motion);
+    } catch (error) {
+      if (token !== generation || !host) return;
+      const message = error instanceof Error ? error.message : "This chart did not render.";
+      host.innerHTML = `<p class="hh-miss">${message}</p>`;
+    } finally {
+      if (token === generation) host.removeAttribute("aria-busy");
+    }
   }
 
   pills.forEach((pill, i) => {
@@ -123,10 +219,30 @@ if (root && raw) {
     });
   });
 
+  picks.forEach((pick) => {
+    pick.addEventListener("click", () => {
+      pinned = true;
+      const slide = pick.dataset.heroSlide;
+      if (slide) {
+        const at = pillIds.indexOf(slide);
+        if (at >= 0) show(at);
+        return;
+      }
+      void showExtra(pick);
+    });
+  });
+
+  allButton?.addEventListener("click", () => {
+    if (!catalog) return;
+    const open = catalog.hasAttribute("hidden");
+    catalog.toggleAttribute("hidden", !open);
+    allButton.setAttribute("aria-expanded", open ? "true" : "false");
+    allButton.classList.toggle("is-on", open);
+  });
+
   viewButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      const view = button.dataset.heroView;
-      const specOn = view === "spec";
+      const specOn = button.dataset.heroView === "spec";
       if (chartView) chartView.hidden = specOn;
       if (specView) specView.hidden = !specOn;
       viewButtons.forEach((item) => {
