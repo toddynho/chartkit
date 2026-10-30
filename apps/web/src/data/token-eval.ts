@@ -12,8 +12,8 @@
  * not add a model call.
  *
  * Homepage freeze: each bar is the median of that library across the finished
- * models (Claude, GPT-6, and Grok). The ~N× headline rounds the next library's
- * median divided by ChartKit's. Bar widths are value / max, not a chart-type mock.
+ * models (Claude, GPT-6, and Grok). The ~N× headline is the next library's
+ * median divided by ChartKit's, to one decimal. Bar widths are value / max.
  *
  * No cost/100 figure. The harness list prices are stubs, not vendor quotes.
  */
@@ -202,7 +202,7 @@ export function tokenSection(): {
   return {
     tasks: TOKEN_EVAL.tasks,
     barLabel: `median · ${groups.join(", ")} · ${models.length} models`,
-    noteLead: `Median of ${models.length} finished models (${listNames(models.map(modelLabel))}). ${pendingSentence}~${Math.round(times)}× rounds ${next.name}'s median divided by ChartKit's (${formatTokens(next.tokens)} / ${formatTokens(chartkit.tokens)}, ${times.toFixed(1)}×). By model, ChartKit uses ${formatRatio(Math.min(...ratios))}–${formatRatio(Math.max(...ratios))}× fewer output tokens than the next library. ${TOKEN_EVAL.tasks} tasks; docs capped to the length of ChartKit llms.txt; tokens summed until a chart is drawn; did-not-finish runs excluded from the median. ChartKit median model calls are ${TOKEN_EVAL.chartkitCalls.toFixed(1)}.`,
+    noteLead: `Median of ${models.length} finished models (${listNames(models.map(modelLabel))}). ${pendingSentence}~${times.toFixed(1)}× is ${next.name}'s median divided by ChartKit's (${formatTokens(next.tokens)} / ${formatTokens(chartkit.tokens)}). By model, ChartKit uses ${formatRatio(Math.min(...ratios))}–${formatRatio(Math.max(...ratios))}× fewer output tokens than the next library. ${TOKEN_EVAL.tasks} tasks; docs capped to the length of ChartKit llms.txt; tokens summed until a chart is drawn; did-not-finish runs excluded from the median. ChartKit median model calls are ${TOKEN_EVAL.chartkitCalls.toFixed(1)}.`,
     stats: [
       {
         value: `${formatTokens(Math.min(...chartkitValues))}–${formatTokens(Math.max(...chartkitValues))}`,
@@ -212,7 +212,7 @@ export function tokenSection(): {
         range: true,
       },
       {
-        value: `~${Math.round(times)}`,
+        value: `~${times.toFixed(1)}`,
         suffix: "×",
         body: `fewer output tokens than the next library across the ${models.length} finished models (${formatRatio(Math.min(...ratios))}–${formatRatio(Math.max(...ratios))}×)`,
       },

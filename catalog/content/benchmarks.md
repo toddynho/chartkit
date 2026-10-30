@@ -19,7 +19,7 @@ Machine-readable copy: https://chartkit.dev/benchmarks.json (schema https://char
 
 - Line chart: **32,110 bytes** gzip, createRenderer of the line, measured 2026-10-29 on `55fc89d`. Bar is 33,686. Mini-area is 32,114. `/all` is 78,081. That is a loss to uPlot at 23,292 bytes of JS. The stylesheet is 762 bytes more, a separate response, and the two sum to 24,054, still smaller than ChartKit. It is smaller than Chart.js (49,361), Recharts (96,168, React external), Nivo (96,550, React external), Observable Plot (97,695), and ECharts (162,948). The donut is 15,292 bytes and is smaller than Chart.js (46,913), ECharts (122,134), Recharts (90,046, React external), Nivo (75,494, React external), Highcharts (104,204), Plotly.js (1,477,742), Victory (61,082, React external), ApexCharts (169,473), Tremor (246,834), Vega-Lite (377,693), AG Charts (420,736), amCharts 5 (81,711), MUI X Charts (137,377, React external), and AntV G2 (407,348). uPlot, Observable Plot, visx, Google Charts, TradingView Lightweight Charts, and Mermaid have no donut.
 - Initial render: ChartKit is faster than uPlot in all 12 cells. Even 1,000,000 points is 23.6 ms vs 26.5 ms.
-- Aligned update: ChartKit wins 6 of 12 cells against uPlot and loses 6. Those six are marked in the browser table. It is not a sweep.
+- Aligned update: ChartKit wins 6 of 12 aligned-update cells against uPlot and loses 6. Those losses are marked in the browser table.
 - Server render, 100,000 point line: **2.63 ms** median (mean 2.7 ms).
 - `repair()`, no model call, no docs: **21/42 → 42/42**. That agent run is 2026-10-16, not round 13.
 
@@ -115,7 +115,7 @@ This table renders 293 ok, 442 unsupported, 0 error, and 0 timeout cells. The re
 
 ## Browser, milliseconds, ChartKit mount().update() vs uPlot setData
 
-ChartKit wins every initial cell. The update column is the fair timer. Six of those twelve cells are losses, and they are marked in the result column.
+ChartKit wins every initial cell of the 12. The update column is the fair timer. 6 of those 12 cells are losses (6 wins), and they are marked in the result column.
 
 | X spacing | Points | ChartKit initial | uPlot initial | ChartKit update | uPlot update | Result |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -132,7 +132,7 @@ ChartKit wins every initial cell. The update column is the fair timer. Six of th
 | tsgaps | 100,000 | 15.0 | 17.8 | 3.5 | 3.4 | win-initial-loss-update |
 | tsgaps | 1,000,000 | 27.3 | 29.1 | 11.5 | 11.8 | win-initial-win-update |
 
-In these same 12 cells ChartKit’s initial and aligned update are both faster than Chart.js and Observable Plot. Even 1,000,000 points: Chart.js updates in 189.8 ms and Plot in 1,295.8 ms. ECharts, Recharts, and Nivo are not in the round 13 browser rows, so this file does not give them a browser millisecond.
+These 12 cells publish ChartKit and uPlot only. Chart.js, Observable Plot, ECharts, Recharts, and Nivo do not have a millisecond in this table.
 
 ## Hover
 
@@ -147,7 +147,7 @@ Steady hover at 100,000 points. Painted median is the number to cite. ChartKit 1
 | Recharts | 28.2 | 28.9 | 35.1 |
 | ECharts | 20.4 | 2881.4 | 3113.2 |
 
-First hover on a fresh 100,000 point chart, painted median. uPlot is about 4–5 ms. ChartKit is 15.9–20.8 ms. That gap is a loss.
+First hover on a fresh 100,000 point chart, painted median. uPlot is 4–4.9 ms. ChartKit is 15.9–20.8 ms. That gap is a loss.
 
 | After mount | ChartKit painted | ChartKit max | uPlot painted | uPlot max |
 | ---: | ---: | ---: | ---: | ---: |
@@ -220,9 +220,9 @@ Tasks: 42. Model: claude-sonnet-4-5. Temperature: 0.
 | Nivo | not in this eval |  |  |  |  |
 | uPlot | not in this eval |  |  |  |  |
 
-ChartKit's no-docs first try plus `repair()` is 42/42. Official first try is already 42/42. The other libraries have no repair step. Nivo and uPlot were not in this eval, so this file does not invent scores for them.
+ChartKit's no-docs first try is 21/42. `repair()`, with no model call, takes that output to 42/42. Official first try is 42/42. The other libraries have no repair step. Nivo and uPlot were not in this eval, so this file does not invent scores for them.
 
-A ChartKit-only rerun with llms.txt cut to 6,329 bytes scored 41/42 on the first try. The miss was combo axis CK3002, which repair() does not patch. The headline uses the full docs file.
+The llms.txt this site serves is 6,376 bytes.
 
 ## Canvas line, 2026-10-21
 

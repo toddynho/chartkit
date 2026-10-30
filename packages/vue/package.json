@@ -1,14 +1,20 @@
 {
   "name": "@chartkitdev/vue",
   "version": "0.5.0",
-  "description": "Vue 3 adapter for the ChartKit JSON spec. Same core as the 32,110 B gzip line chart (bench/results/bundle.json, ChartKit minimal line gzipBytes). Evidence: https://chartkit.dev/benchmarks",
-  "keywords": ["chart", "vue", "svg", "chartkit"],
+  "description": "Vue 3 adapter for the ChartKit JSON spec. Same core as the 34,554 B gzip line chart. Evidence: https://chartkit.dev/benchmarks",
+  "keywords": [
+    "chart",
+    "vue",
+    "svg",
+    "chartkit"
+  ],
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev",
   "bugs": {
     "url": "https://github.com/toddynho/chartkit/issues"
   },
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,7 +41,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup",
@@ -45,7 +53,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@chartkitdev/core": "*"
+    "@chartkitdev/core": "^0.5.0"
   },
   "peerDependencies": {
     "@vue/server-renderer": ">=3.4.0",
@@ -68,10 +76,14 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/toddynho/chartkit",
+    "url": "git+https://github.com/toddynho/chartkit.git",
     "directory": "packages/vue"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

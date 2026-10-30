@@ -1,0 +1,79 @@
+---
+import { heroCharts } from "../data/home-hero";
+import { SITE } from "../data/site";
+import { scriptJson } from "../lib/spec-text";
+
+const charts = heroCharts;
+const first = charts[0];
+if (!first) throw new Error("Homepage hero has no charts");
+const payload = charts.map((chart) => ({
+  title: chart.title,
+  subtitle: chart.subtitle,
+  motion: chart.motion,
+  extra: chart.extra,
+  preview: chart.preview,
+  svg: chart.svg,
+  drawn: chart.drawn,
+}));
+---
+
+<section class="hh" aria-labelledby="home-title" data-hero>
+  <div class="hh-copy">
+    <p class="eyebrow eyebrow--blue">ChartKit {SITE.version} · MIT</p>
+    <h1 id="home-title">One spec.<br />Every framework.<br />Built for agents.</h1>
+    <p class="hh-lead">
+      Write a JSON ChartSpec once. Render it in React, Vue, Svelte, vanilla JS, or on the server. Agents write the spec; they never write the chart.
+    </p>
+    <div class="hh-actions">
+      <a class="btn-lg" href="#get-started">Get started</a>
+      <a class="btn-text" href="/cloud">Cloud →</a>
+    </div>
+  </div>
+  <div class="hh-side">
+    <div class="hh-panel">
+      <div class="hh-head">
+        <div>
+          <h2 class="hh-title" id="hero-chart-title" data-hero-title>{first.title}</h2>
+          <p class="hh-sub" data-hero-sub>{first.subtitle}</p>
+        </div>
+        <div class="hh-seg" role="group" aria-label="Chart or spec">
+          <button type="button" class="is-on" data-hero-view="chart" aria-pressed="true">Chart</button>
+          <button type="button" data-hero-view="spec" aria-pressed="false">Spec</button>
+        </div>
+      </div>
+      <div class="hh-stage">
+        <div class="hh-chart" data-hero-chart>
+          <div
+            class="hh-chart__host"
+            data-hero-host
+            style="--ck-accent:#0a63e6;--ck-series-1:#0a63e6;--ck-series-2:#7fb0f5;--ck-series-3:#cfe0fa;--ck-series-4:#17181a;--ck-grid:#dedee2;--ck-axis:#dedee2;--ck-muted:#8b8d93;--ck-text:#17181a;--ck-background:transparent;--ck-positive:#7fb0f5;--ck-negative:#17181a"
+            set:html={first.svg}
+          />
+        </div>
+        <pre class="hh-spec" data-hero-spec hidden set:html={first.preview} />
+      </div>
+    </div>
+    <div class="hh-pills" role="tablist" aria-label="Chart type">
+      {
+        charts.map((chart, index) => (
+          <button
+            type="button"
+            class:list={["hh-pill", index === 0 && "is-on"]}
+            data-hero-pill
+            role="tab"
+            aria-selected={index === 0 ? "true" : "false"}
+            id={`hero-pill-${chart.id}`}
+          >
+            <svg viewBox="0 0 24 20" width="14" height="14" fill="none" aria-hidden="true" set:html={chart.icon} />
+            {chart.label}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+  <script id="hero-charts" type="application/json" is:inline set:html={scriptJson(payload)} />
+</section>
+
+<script>
+  import "../scripts/home-hero";
+</script>

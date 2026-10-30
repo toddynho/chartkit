@@ -10,6 +10,7 @@ const fromHero = new Map(heroChartMeta.map((chart) => [chart.type, chart.icon]))
 const extra: Record<string, string> = {
   scatter:
     '<circle cx="6" cy="14" r="1.6" fill="currentColor"/><circle cx="11" cy="8" r="1.6" fill="currentColor"/><circle cx="16" cy="12" r="1.6" fill="currentColor" opacity="0.7"/><circle cx="20" cy="5" r="1.6" fill="currentColor" opacity="0.45"/>',
+  pie: '<circle cx="12" cy="10" r="7" fill="currentColor" opacity="0.28"/><path d="M12 10 L12 3 A7 7 0 0 1 18.6 13.2 Z" fill="currentColor"/>',
   kpi: '<rect x="3" y="3" width="11" height="3.2" rx="0.7" fill="currentColor"/><path d="M3 16 L8 12 L12 13 L17 8 L21 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
   "mini-area":
     '<path d="M3 15 L7 12 L11 13 L15 8 L19 6 L22 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 15 L7 12 L11 13 L15 8 L19 6 L22 5 V17 H3 Z" fill="currentColor" opacity="0.2"/>',

@@ -1,14 +1,24 @@
 {
   "name": "@chartkitdev/element",
   "version": "0.5.0",
-  "description": "Framework-free <chart-kit> custom element for the ChartKit JSON spec. Not yet published to npm.",
-  "keywords": ["chart", "svg", "web-component", "custom-element", "chartkit"],
+  "description": "Framework-free <chart-kit> custom element for the ChartKit JSON spec.",
+  "keywords": [
+    "chart",
+    "svg",
+    "web-component",
+    "custom-element",
+    "chartkit"
+  ],
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev/docs/web-component",
   "bugs": {
     "url": "https://github.com/toddynho/chartkit/issues"
   },
   "type": "module",
+  "sideEffects": [
+    "./dist/index.js",
+    "./dist/index.cjs"
+  ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -34,7 +44,12 @@
       }
     }
   },
-  "files": ["dist", "example", "README.md"],
+  "files": [
+    "dist",
+    "example",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsup",
     "test": "vitest",
@@ -43,7 +58,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@chartkitdev/core": "*"
+    "@chartkitdev/core": "^0.5.0"
   },
   "devDependencies": {
     "jsdom": "^27.0.1",
@@ -54,10 +69,14 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/toddynho/chartkit",
+    "url": "git+https://github.com/toddynho/chartkit.git",
     "directory": "packages/element"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

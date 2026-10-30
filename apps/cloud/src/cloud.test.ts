@@ -9,7 +9,8 @@ import { chartBody, EMBED_PAD_BOTTOM, EMBED_PAD_TOP, EMBED_PAD_X, presentSvg } f
 import { kvCharts, memoryCharts } from "./charts.ts";
 import { kvKeys, memoryKeys } from "./keys.ts";
 import { memoryLimiter } from "./limit.ts";
-import { forRaster } from "./png.ts";
+import { auto } from "../../packages/core/src/theme.ts";
+import { forRaster, rasterize } from "./png.ts";
 import type { StripeConfig } from "./stripe.ts";
 
 const stripe: StripeConfig = { secretKey: "", priceId: "", webhookSecret: "", mode: "payment" };
@@ -746,6 +747,47 @@ function u32(buf: Uint8Array, offset: number): number {
 }
 
 describe("png", () => {
+  it("resolves rgba() inside light-dark() and keeps the grid and track off black", async () => {
+    const lightToken = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+      <rect width="32" height="32" fill="#f5f5f7"/>
+      <line x1="0" y1="16" x2="32" y2="16" stroke="var(--ck-grid, ${auto.grid})" stroke-width="8" shape-rendering="crispEdges"/>
+      <rect x="2" y="2" width="12" height="10" fill="var(--ck-track, ${auto.track})" shape-rendering="crispEdges"/>
+    </svg>`;
+    const lightBaked = forRaster(lightToken, false);
+    expect(lightBaked).toContain("rgba(0, 0, 0, 0.05)");
+    expect(lightBaked).toContain("rgba(0, 0, 0, 0.10)");
+    expect(lightBaked).not.toContain("light-dark(");
+    expect(lightBaked).not.toMatch(/(?:rgb|hsl)\(\s*[0-9.]+(?:\s+[0-9.]+){2}/);
+    const light = decodePng(await rasterize(lightBaked, 1));
+    const card = sample(light, 28, 28);
+    const grid = sample(light, 16, 16);
+    const track = sample(light, 6, 6);
+    expect(card[0]).toBeGreaterThan(240);
+    expect(grid[0]).toBeGreaterThan(180);
+    expect(grid[0]).toBeLessThan(card[0]);
+    expect(track[0]).toBeGreaterThan(180);
+    expect(track[0]).toBeLessThan(card[0]);
+
+    const darkToken = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+      <rect width="32" height="32" fill="#1c1c1e"/>
+      <line x1="0" y1="24" x2="32" y2="24" stroke="var(--ck-grid, ${auto.grid})" stroke-width="8" shape-rendering="crispEdges"/>
+      <rect x="2" y="2" width="20" height="10" fill="var(--ck-track, ${auto.track})" shape-rendering="crispEdges"/>
+    </svg>`;
+    const darkBaked = forRaster(darkToken, true);
+    expect(darkBaked).toContain("rgba(245, 245, 247, 0.07)");
+    expect(darkBaked).toContain("rgba(245, 245, 247, 0.16)");
+    expect(darkBaked).not.toContain("light-dark(");
+    const dark = decodePng(await rasterize(darkBaked, 1));
+    const page = sample(dark, 28, 8);
+    const hair = sample(dark, 16, 24);
+    const band = sample(dark, 8, 6);
+    expect(page[0]).toBeLessThan(40);
+    expect(hair[0]).toBeGreaterThan(page[0]);
+    expect(hair[0]).toBeLessThan(80);
+    expect(band[0]).toBeGreaterThan(page[0] + 8);
+    expect(band[0]).toBeLessThan(120);
+  });
+
   it("resolves CSS fallbacks and returns a PNG", async () => {
     expect(forRaster(`<svg fill="var(--ck-text, light-dark(#111111, #eeeeee))"/>`, true)).toContain("#eeeeee");
     expect(forRaster(`<svg fill="var(--ck-series-1, var(--chart-1, #007aff))" font-family="var(--ck-font-family, Roboto)"/>`, false)).toContain('fill="#007aff"');

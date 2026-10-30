@@ -7,8 +7,9 @@ import Base from "../../layouts/Base.astro";
 import DashboardBoard from "../../components/DashboardBoard.astro";
 import { loadBoard, loadIndex } from "../../lib/dashboards";
 
-const boards = loadIndex().boards.map((card) => loadBoard(card.slug));
-const description = "Ten ChartKit layouts: payments, analytics, traffic, issues, monitors, a portfolio, cycle time, an edge log, activity, and revenue.";
+const cards = loadIndex().boards;
+const boards = cards.map((card) => loadBoard(card.slug));
+const description = `${cards.length} ChartKit layouts: ${cards.map((card) => card.title).join(", ")}.`;
 ---
 
 <Base title="Dashboards" description={description} tone="light">
@@ -16,7 +17,7 @@ const description = "Ten ChartKit layouts: payments, analytics, traffic, issues,
     <header class="hero">
       <p class="kicker">Dashboards</p>
       <h1>Dashboards</h1>
-      <p class="lede">Ten layouts. Hero and KPIs, tabs, a map, a cohort, a ranked list, an issue table.</p>
+      <p class="lede">{cards.length} layouts. Hero and KPIs, tabs, a map, a cohort, a ranked list, an issue table.</p>
     </header>
     {boards.map((board) => <DashboardBoard board={board} embed />)}
   </div>

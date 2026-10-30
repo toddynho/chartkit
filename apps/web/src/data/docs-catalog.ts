@@ -1,3 +1,4 @@
+import { SITE } from "./site";
 import articlesJson from "./mock-articles.json";
 import chartsJson from "./mock-charts.json";
 import { articleSections } from "./article-copy";
@@ -63,11 +64,11 @@ const extras: DocArticle[] = [
       {
         title: "Packages",
         paragraphs: [
-          "Install core, then the adapter for the framework you render in. `@chartkitdev/element` (`<chart-kit>`) and `@chartkitdev/geo` are in this repo and are not on npm yet. `@derpdaderp/chartkit` is a compatibility shim, not the package for a new app.",
+          "Install core, then the adapter for the framework you render in. `@chartkitdev/element` is `<chart-kit>`. `@chartkitdev/geo` is maps and is not part of the line or all bundles. `@derpdaderp/chartkit` is a compatibility shim, not the package for a new app.",
         ],
         list: [],
         code: [
-          "npm install @chartkitdev/core\nnpm install @chartkitdev/react\nnpm install @chartkitdev/vue\nnpm install @chartkitdev/svelte\nnpm install @chartkitdev/vanilla",
+          "npm install @chartkitdev/core\nnpm install @chartkitdev/react\nnpm install @chartkitdev/vue\nnpm install @chartkitdev/svelte\nnpm install @chartkitdev/vanilla\nnpm install @chartkitdev/element\nnpm install @chartkitdev/markdown\nnpm install @chartkitdev/geo\nnpm install @chartkitdev/mcp",
         ],
       },
       {
@@ -101,7 +102,7 @@ const extras: DocArticle[] = [
 ];
 
 const honestLedes: Record<string, string> = {
-  "": "ChartKit v1 is a JSON spec plus @chartkitdev/core. Core has zero dependencies. It validates the spec and renders SVG. Adapters pass that spec through. They do not add chart logic.",
+  "": `ChartKit ${SITE.version} is a JSON spec plus @chartkitdev/core. Core has zero dependencies. It validates the spec and renders SVG. Adapters pass that spec through. They do not add chart logic.`,
   react: "Pass spec to Chart. The same JSON renders in the other adapters. LineChart, KpiCard, and the other dashboard components still exist. Their props are not spec keys.",
   vue: "Vue 3 binds the spec with :spec. Server rendering uses renderToString from @chartkitdev/vue/ssr.",
   svelte: "The component uses export let, so Svelte 4 and Svelte 5 both compile it. SvelteKit SSR includes the SVG.",
@@ -121,7 +122,7 @@ const honestLedes: Record<string, string> = {
   scales: "A scale maps values to position. It lives on encoding, not on the axis. Set it only to override the inferred type.",
   axes: "axes is titles, ticks, format, grid, and side. Domain and scale type stay on encoding.",
   bundles: "@chartkitdev/core/all is the core set. @chartkitdev/core/extra adds histogram through the planning charts. createRenderer keeps a page to the charts you pass.",
-  mcp: "@chartkitdev/mcp is not on npm yet. The server speaks stdio and calls validate, repair, and render in-process. render_chart is the one tool that calls Cloud.",
+  mcp: "npx -y @chartkitdev/mcp starts the server. It speaks stdio and calls validate, repair, and render in-process. render_chart is the one tool that calls Cloud.",
 };
 
 function scrubText(value: string): string {

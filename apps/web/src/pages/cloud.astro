@@ -2,6 +2,8 @@
 import "../styles/v2.css";
 import Base from "../layouts/Base.astro";
 import { highlight } from "../lib/highlight";
+import { kb } from "../lib/line-gzip";
+import { freeRenderLimit } from "../data/cloud-facts";
 import { chartkitCloudUrl } from "../data/cloud-url";
 import { showcaseSvgs } from "../data/marketing-charts";
 
@@ -9,6 +11,8 @@ const proDraft = true;
 const description =
   "ChartKit Cloud returns SVG or PNG from a JSON spec. Free images include a watermark. Pro pricing is not on sale yet.";
 const shots = showcaseSvgs();
+const perMinute = freeRenderLimit();
+const agentFile = `signups-q3.svg · ${kb(new TextEncoder().encode(shots.agent).length)}`;
 const cloudUrl = chartkitCloudUrl();
 const curl = `curl -sG "${cloudUrl}/render" \\
   --data-urlencode 'spec={"version":"1","type":"line","data":[{"q":"Q1","v":40},{"q":"Q2","v":55}],"encoding":{"x":"q","y":"v"},"a11y":{"alt":"Units rose from Q1 to Q2."}}' \\
@@ -113,7 +117,7 @@ const icon = (d: string) =>
                 <div class="bubble">Chart the Q3 signups.</div>
                 <p>Attached the render.</p>
                 <Fragment set:html={shots.agent} />
-                <div class="file-pill">signups-q3.svg · 4.1 KB</div>
+                <div class="file-pill">{agentFile}</div>
               </div>
             </div>
             <div class="show-tile__fade" style="background:linear-gradient(180deg,#0a63e6 0%,transparent 100%)"></div>
@@ -168,7 +172,7 @@ const icon = (d: string) =>
           <div class="price-card__top"><h3>Free</h3><div class="price-card__amt">$0</div></div>
           <ul>
             <li><span class="yes">✓</span>No key needed</li>
-            <li><span class="yes">✓</span>120 renders / min per IP</li>
+            <li><span class="yes">✓</span>{perMinute} renders / min per IP</li>
             <li><span class="yes">✓</span>Same spec, same output as Pro</li>
             <li><span class="no">–</span><span style="color:#55575c">chartkit.dev mark on the image</span></li>
           </ul>

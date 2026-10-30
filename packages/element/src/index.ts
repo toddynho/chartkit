@@ -7,6 +7,10 @@ export type { ChartSpec, ClickDetail, Selection };
 const TAG = "chart-kit";
 const STYLE_ID = "chart-kit-display";
 
+/** Node has no HTMLElement. The class still loads so SSR can import this module; the browser extends the real element. */
+const ElementBase: typeof HTMLElement =
+  typeof HTMLElement === "undefined" ? (class {} as typeof HTMLElement) : HTMLElement;
+
 function px(value: string): number {
   const parsed = Number.parseFloat(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -32,7 +36,7 @@ function isSpec(value: unknown): value is ChartSpec {
  * Histogram through journey load through `@chartkitdev/core/load`.
  * An SVG already in the element is patched in place.
  */
-export class ChartKitElement extends HTMLElement {
+export class ChartKitElement extends ElementBase {
   static get observedAttributes(): string[] {
     return ["spec", "theme"];
   }
@@ -304,6 +308,7 @@ export class ChartKitElement extends HTMLElement {
 }
 
 export function defineChartKit(tag = TAG): typeof ChartKitElement {
+  if (typeof customElements === "undefined") return ChartKitElement;
   if (!customElements.get(tag)) customElements.define(tag, ChartKitElement);
   return ChartKitElement;
 }

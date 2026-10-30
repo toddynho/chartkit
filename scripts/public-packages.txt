@@ -1,0 +1,12 @@
+# name directory attw-profile
+# Publish order. core first. The shim depends on @chartkitdev/react and stays last.
+@chartkitdev/core packages/core node16
+@chartkitdev/geo packages/geo esm-only
+@chartkitdev/react packages/react node16
+@chartkitdev/vue packages/vue node16
+@chartkitdev/svelte packages/svelte esm-only
+@chartkitdev/vanilla packages/vanilla node16
+@chartkitdev/element packages/element node16
+@chartkitdev/markdown packages/markdown node16
+@chartkitdev/mcp packages/mcp esm-only
+@derpdaderp/chartkit packages/compat-derpdaderp node16

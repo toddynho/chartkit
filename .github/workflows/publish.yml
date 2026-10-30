@@ -1,8 +1,8 @@
-# Manual publish only. Nothing here runs on push or tag.
-# Provenance requires GitHub Actions OIDC (id-token: write) and npm >= 9.
-# Trusted publishing can omit NPM_TOKEN once the npm org grants this repo access.
-# Otherwise set the NPM_TOKEN secret (automation token for the chartkitdev org,
-# plus rights to publish @derpdaderp/chartkit for the shim).
+# Manual release only. workflow_dispatch, never push or tag.
+# Steady state uses GitHub OIDC (environment npm). No npm token in that path.
+# Provenance is automatic for OIDC publishes from this public repo.
+# Bootstrap (once) uses the npm environment secret NPM_TOKEN and --provenance.
+# npm stage publish is not workspace-aware, so each package is published from its directory.
 
 name: Publish
 
@@ -10,21 +10,45 @@ on:
   workflow_dispatch:
     inputs:
       package:
-        description: Package to publish
+        description: Package to release
         type: choice
         required: true
+        default: all
         options:
+          - all
           - "@chartkitdev/core"
+          - "@chartkitdev/geo"
           - "@chartkitdev/react"
           - "@chartkitdev/vue"
           - "@chartkitdev/svelte"
           - "@chartkitdev/vanilla"
+          - "@chartkitdev/element"
+          - "@chartkitdev/markdown"
+          - "@chartkitdev/mcp"
           - "@derpdaderp/chartkit"
-          - all
+      mode:
+        description: stage (default), publish (direct), or dry-run
+        type: choice
+        required: true
+        default: stage
+        options:
+          - stage
+          - publish
+          - dry-run
+      bootstrap:
+        description: One-time first release. Uses NPM_TOKEN and npm publish --provenance. Ignores mode except dry-run.
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: npm
     permissions:
       contents: read
       id-token: write
@@ -35,38 +59,100 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Ensure npm 11.15 or newer
+        run: |
+          set -euo pipefail
+          npm install -g "npm@^11.15.0"
+          npm --version
+          node --input-type=module -e "const [major, minor] = process.argv[1].split('.').map(Number); if (major < 11 || (major === 11 && minor < 15)) { console.error('npm ' + process.argv[1] + ' is older than 11.15'); process.exit(1); }" "$(npm --version)"
 
       - name: Install
         run: npm ci
 
-      - name: Test
-        run: npm test
-
       - name: Build libraries
         run: npm run build:lib
 
-      - name: Publish selected package
+      - name: Test
+        run: npm test
+
+      - name: Release check
+        run: npm run release:check
+
+      - name: Stage or publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          RELEASE_PACKAGE: ${{ inputs.package }}
+          RELEASE_MODE: ${{ inputs.mode }}
+          RELEASE_BOOTSTRAP: ${{ inputs.bootstrap }}
+          # Empty unless bootstrap is true, so the secret is not expanded on the OIDC path.
+          NODE_AUTH_TOKEN: ${{ inputs.bootstrap == true && secrets.NPM_TOKEN || '' }}
         run: |
           set -euo pipefail
-          publish() {
-            local name="$1"
-            echo "Publishing ${name} with provenance"
-            npm publish --workspace "${name}" --access public --provenance
+          if [[ "${RELEASE_BOOTSTRAP}" == "true" ]]; then
+            if [[ -z "${NODE_AUTH_TOKEN}" ]]; then
+              echo "bootstrap requires the NPM_TOKEN secret on the npm environment"
+              exit 1
+            fi
+          else
+            unset NODE_AUTH_TOKEN
+          fi
+
+          verb() {
+            if [[ "${RELEASE_MODE}" == "dry-run" ]]; then
+              echo "dry-run"
+            elif [[ "${RELEASE_BOOTSTRAP}" == "true" || "${RELEASE_MODE}" == "publish" ]]; then
+              echo "published"
+            else
+              echo "staged"
+            fi
           }
-          case "${{ inputs.package }}" in
-            all)
-              publish "@chartkitdev/core"
-              publish "@chartkitdev/react"
-              publish "@chartkitdev/vue"
-              publish "@chartkitdev/svelte"
-              publish "@chartkitdev/vanilla"
-              publish "@derpdaderp/chartkit"
-              ;;
-            *)
-              publish "${{ inputs.package }}"
-              ;;
-          esac
+
+          release_one() {
+            local name="$1"
+            local dir="$2"
+            echo "::group::${name}"
+            local -a args
+            if [[ "${RELEASE_BOOTSTRAP}" == "true" ]]; then
+              args=(publish --provenance --access public)
+            elif [[ "${RELEASE_MODE}" == "publish" ]]; then
+              args=(publish --access public)
+            elif [[ "${RELEASE_MODE}" == "dry-run" ]]; then
+              args=(stage publish --access public --dry-run)
+            else
+              args=(stage publish --access public)
+            fi
+            if [[ "${RELEASE_MODE}" == "dry-run" && "${RELEASE_BOOTSTRAP}" == "true" ]]; then
+              args=(publish --provenance --access public --dry-run)
+            fi
+            echo "npm ${args[*]}  (${dir})"
+            # stage publish packs the working directory. It does not understand workspaces.
+            (cd "${dir}" && npm "${args[@]}")
+            echo "::endgroup::"
+          }
+
+          completed=()
+          matched=0
+          trap 'echo "Stopped after: ${completed[*]:-none}"; exit 1' ERR
+          while read -r name dir _profile; do
+            if [[ -z "${name}" || "${name}" == \#* ]]; then
+              continue
+            fi
+            if [[ "${RELEASE_PACKAGE}" != "all" && "${RELEASE_PACKAGE}" != "${name}" ]]; then
+              continue
+            fi
+            matched=1
+            release_one "${name}" "${dir}"
+            completed+=("${name}")
+          done < scripts/public-packages.txt
+          trap - ERR
+
+          if [[ "${matched}" -eq 0 ]]; then
+            echo "No package matched ${RELEASE_PACKAGE}"
+            exit 1
+          fi
+
+          echo "Summary: $(verb) ${#completed[@]} package(s). bootstrap=${RELEASE_BOOTSTRAP} mode=${RELEASE_MODE}"
+          printf '  %s\n' "${completed[@]}"

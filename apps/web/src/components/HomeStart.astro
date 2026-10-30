@@ -1,38 +1,55 @@
 ---
 import FrameworkChips from "./FrameworkChips.astro";
-import StackSample from "./StackSample.astro";
 import { agentSwitchPrompt } from "../data/agent-prompt";
+import { stacks } from "../data/stacks";
+
+const splitAt = agentSwitchPrompt.indexOf("\n\n");
+const lead = splitAt === -1 ? agentSwitchPrompt : agentSwitchPrompt.slice(0, splitAt);
+const body = splitAt === -1 ? "" : agentSwitchPrompt.slice(splitAt + 2);
 ---
 
-<section class="home-cards" id="get-started" aria-label="Get started">
-  <article class="home-card">
-    <header class="home-card__head">
-      <div class="home-card__copy">
-        <h2>Install yourself</h2>
-        <p>Pick a framework.</p>
+<section class="gs" id="get-started" aria-labelledby="get-started-title">
+  <div class="section-head gs-head">
+    <p class="eyebrow eyebrow--blue">Get started</p>
+    <h2 id="get-started-title">Two ways in</h2>
+    <p>Install it yourself in a minute, or hand your agent one prompt and let it do the switch.</p>
+  </div>
+  <div class="gs-grid">
+    <article class="gs-card">
+      <div>
+        <h3>Install yourself</h3>
+        <p>Pick a framework, copy the command.</p>
       </div>
-      <div class="home-card__chips">
-        <FrameworkChips />
+      <FrameworkChips />
+      <div class="gs-code stack-sample">
+        {
+          stacks.map((stack) => (
+            <div data-stack-panel={stack.id}>
+              <p class="gs-npm">
+                <span>npm</span> install @chartkitdev/core @chartkitdev/{stack.id}
+              </p>
+              <pre>{stack.snippet}</pre>
+            </div>
+          ))
+        }
       </div>
-    </header>
-    <StackSample copy oneLine />
-  </article>
-  <article class="home-card">
-    <header class="home-card__head">
-      <div class="home-card__copy">
-        <h2>Tell your agent</h2>
+    </article>
+    <article class="gs-card">
+      <div>
+        <h3>Tell your agent</h3>
         <p>Paste this. The app stays JavaScript.</p>
       </div>
-    </header>
-    <div class="prompt-block">
-      <div class="prompt-block__bar">
-        <span>prompt</span>
-        <button type="button" class="copy-pill" data-copy-prompt>Copy</button>
+      <div class="gs-prompt">
+        <div data-agent-prompt>
+          <p class="gs-prompt__lead">{lead}</p>
+          <p class="gs-prompt__body">{body}</p>
+        </div>
+        <button type="button" class="gs-copy" data-copy-prompt data-copied-ms="1500" data-copy-text={agentSwitchPrompt}>
+          Copy
+        </button>
       </div>
-      <pre data-agent-prompt>{agentSwitchPrompt}</pre>
-      <span class="sr" data-copy-status role="status"></span>
-    </div>
-  </article>
+    </article>
+  </div>
 </section>
 
 <script>

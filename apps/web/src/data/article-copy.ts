@@ -10,10 +10,10 @@ export const articleSections: Record<string, DocSection[]> = {
     section(
       "Install",
       [
-        "Install core, then the adapter for the framework you render in. `@chartkitdev/element`, `@chartkitdev/geo`, and `@chartkitdev/mcp` are in this repo and are not on npm yet.",
+        "Install core, then the adapter for the framework you render in. `@chartkitdev/element`, `@chartkitdev/markdown`, `@chartkitdev/geo`, and `@chartkitdev/mcp` use the same scope.",
       ],
       [],
-      ["npm install @chartkitdev/core\nnpm install @chartkitdev/react"],
+      ["npm install @chartkitdev/core\nnpm install @chartkitdev/react\nnpm install @chartkitdev/element\nnpm install @chartkitdev/geo\nnpm install @chartkitdev/mcp"],
     ),
     section(
       "A valid spec",
@@ -179,8 +179,8 @@ export const articleSections: Record<string, DocSection[]> = {
     ]),
   ],
   mcp: [
-    section("Not on npm", [
-      "`@chartkitdev/mcp` is not published yet. The server speaks stdio and calls `validate`, `repair`, and `render` in-process. `render_chart` is the tool that calls Cloud.",
-    ]),
+    section("Install", [
+      "`npx -y @chartkitdev/mcp` starts the server. It speaks stdio and calls `validate`, `repair`, and `render` in-process. `render_chart` is the tool that calls Cloud.",
+    ], [], ["npx -y @chartkitdev/mcp"]),
   ],
 };

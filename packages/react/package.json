@@ -8,6 +8,7 @@
     "url": "https://github.com/toddynho/chartkit/issues"
   },
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -44,7 +45,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup && node scripts/banner.mjs",
@@ -56,7 +59,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@chartkitdev/core": "*"
+    "@chartkitdev/core": "^0.5.0"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
@@ -97,10 +100,14 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/toddynho/chartkit",
+    "url": "git+https://github.com/toddynho/chartkit.git",
     "directory": "packages/react"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

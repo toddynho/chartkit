@@ -312,6 +312,10 @@ function paintBenchmarks(): void {
       rows,
       losses: losses.join("; "),
     },
+    browserClaim: benchmarks.uplotBrowserParagraph(benchmarks.browserRows),
+    hoverClaim: benchmarks.hoverParagraph(benchmarks.hoverRows, benchmarks.firstHoverRows),
+    samplingClaim: benchmarks.samplingParagraph(benchmarks.samplingRows),
+    rivalsOmitted: benchmarks.browserRivalsOmitted,
   });
 }
 

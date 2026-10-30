@@ -1,21 +1,22 @@
 ---
 import "../styles/v2.css";
 import Base from "../layouts/Base.astro";
+import HomeHero from "../components/HomeHero.astro";
 import HomeStart from "../components/HomeStart.astro";
 import { SITE } from "../data/site";
-import { homeSlides, showcaseSvgs } from "../data/marketing-charts";
-import { scriptJson } from "../lib/spec-text";
+import { showcaseSvgs } from "../data/marketing-charts";
 import { proofFigures, speedPlot } from "../data/home-bench";
 import { tokenSection } from "../data/token-eval";
+import { loadIndex } from "../lib/dashboards";
 
 const title = "One spec. Every framework. Built for agents.";
 const lede =
   "Write a JSON ChartSpec once. Render it in React, Vue, Svelte, vanilla JS, or on the server. Agents write the spec; they never write the chart.";
-const slides = homeSlides();
 const shots = showcaseSvgs();
 const proof = proofFigures();
 const bench = speedPlot();
 const tokens = tokenSection();
+const dashboardCount = loadIndex().boards.length;
 
 const icon = (d: string) =>
   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"></path></svg>`;
@@ -23,60 +24,7 @@ const icon = (d: string) =>
 
 <Base tone="light" title={title} description={lede || SITE.description}>
   <div class="v2">
-    <section class="home-hero" aria-labelledby="home-title">
-      <p class="eyebrow eyebrow--blue">ChartKit v1 · MIT</p>
-      <h1 class="v2-h1" id="home-title">
-        One spec.<br />Every framework.<br />Built for agents.
-      </h1>
-      <p class="v2-lead">{lede}</p>
-      <div class="v2-actions">
-        <a class="btn-lg" href="/docs">Get started</a>
-        <a class="btn-text" href="/cloud">Cloud →</a>
-      </div>
-    </section>
-
-    <section class="carousel-wrap" aria-labelledby="types-title">
-      <h2 class="sr" id="types-title">Chart types</h2>
-      <div class="carousel-card" data-carousel>
-        <div class="carousel-stage">
-          {
-            slides.map((slide, index) => (
-              <div class="carousel-slide" data-slide={index} hidden={index !== 0}>
-                <div class="carousel-spec">
-                  <div class="carousel-spec__bar">
-                    <span>spec.json</span>
-                    <span>{slide.bytes}</span>
-                  </div>
-                  <pre set:html={slide.html} />
-                </div>
-                <div class="carousel-view">
-                  <div class="carousel-view__head">
-                    <h2>{slide.title}</h2>
-                    <span class="carousel-view__type">{slide.label}</span>
-                  </div>
-                  <p class="carousel-view__sub">{slide.subtitle}</p>
-                  <div class="carousel-chart" data-live data-geo={slide.geo ? "1" : undefined}>
-                    <script is:inline type="application/json" set:html={scriptJson(slide.spec)} />
-                    <div class="carousel-chart__host" set:html={slide.svg} />
-                  </div>
-                </div>
-              </div>
-            ))
-          }
-        </div>
-        <div class="carousel-pills" role="tablist" aria-label="Chart type">
-          {
-            slides.map((slide, index) => (
-              <button type="button" class:list={["type-pill", index === 0 && "is-on"]} data-pill role="tab" aria-selected={index === 0 ? "true" : "false"}>
-                <span class="dot" aria-hidden="true" />
-                {slide.label}
-              </button>
-            ))
-          }
-        </div>
-      </div>
-      <p class="carousel-caption">{slides.length} chart types · one spec shape · click any to pin it</p>
-    </section>
+    <HomeHero />
 
     <HomeStart />
 
@@ -134,9 +82,9 @@ const icon = (d: string) =>
     <section class="measured" id="measured" aria-labelledby="measured-title">
       <div class="section-head">
         <p class="eyebrow eyebrow--blue">For the user</p>
-        <h2 id="measured-title">Faster on the page</h2>
+        <h2 id="measured-title">Paint time on the page</h2>
         <p>
-          {proof.gzipKb} KB gzipped, and the server draws the chart with no DOM. The plot is two-rAF completion by chart type, the median of five fresh pages at 640×360. It is not the hover-steady line. <a href="/benchmarks">Benchmarks</a> has the full matrix.
+          {proof.gzipLabel} gzipped for the line chart, measured when this page builds (createRenderer of the line, gzip level 9, platform browser). The server draws the chart with no DOM. {bench.claim} The plot is two-rAF completion by chart type, the median of five fresh pages at 640×360. It is not the hover-steady line. <a href="/benchmarks">Benchmarks</a> has the full matrix.
         </p>
       </div>
       <div class="bench-card">
@@ -214,7 +162,7 @@ const icon = (d: string) =>
               <span class="show-tile__icon" style="background:#fff;color:#0a63e6" set:html={icon("M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z")} />
               <span class="show-tile__eye">Dashboards</span>
             </div>
-            <h3>Ten layouts, one page.</h3>
+            <h3>{dashboardCount} layouts, one page.</h3>
             <p>Payments, analytics, traffic, issues. Every panel is a ChartSpec sharing one cursor.</p>
           </div>
           <div class="show-tile__well">
@@ -235,8 +183,10 @@ const icon = (d: string) =>
               <span class="show-tile__icon" style="background:rgba(255,255,255,.18)" set:html={icon("M5 12.5l4.5 4.5L19 7.5")} />
               <span class="show-tile__eye">Agents</span>
             </div>
-            <h3>Valid on the first try.</h3>
-            <p>validate() and repair() fix the safe mistakes in the spec. No second model call.</p>
+            <h3>{proof.noDocsFirst} of {proof.tasks} on the first try.</h3>
+            <p>
+              That is the recorded run with no docs{proof.agentMeasured ? `, ${proof.agentMeasured}` : ""}. <code>repair()</code> takes it to {proof.repairTo} of {proof.tasks} with no model call. With the docs in the prompt, the first try was {proof.officialFirst} of {proof.tasks}.
+            </p>
           </div>
           <div class="show-tile__well">
             <div class="show-tile__panel">
@@ -257,7 +207,3 @@ const icon = (d: string) =>
     </section>
   </div>
 </Base>
-
-<script>
-  import "../scripts/home-carousel";
-</script>

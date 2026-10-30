@@ -1,15 +1,26 @@
 ---
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import "../styles/surfaces.css";
 import Base from "../layouts/Base.astro";
 import { loadBenchmarksPage } from "../lib/surfaces";
 import { loadPublishedPaint } from "../data/published-paint";
 import { loadPublishedBundle, loadPublishedSsr } from "../data/published-size";
+import { repoRoot } from "../lib/repo-root";
 
 const page = loadBenchmarksPage();
 const paint = loadPublishedPaint();
 const bundle = loadPublishedBundle();
 const ssr = loadPublishedSsr();
 const h = page.headline;
+const llmsBytes = readFileSync(join(repoRoot(), "catalog/public/llms.txt")).length;
+const supp = JSON.parse(readFileSync(join(repoRoot(), "bench/results/agent/sonnet-4-5/supp-llms.json"), "utf8")) as {
+  agent: { passed: number; taskCount: number; attempts: number };
+};
+if (supp.agent.attempts !== supp.agent.taskCount) throw new Error("supplementary llms run is not one attempt per task");
+const chartkit = page.agentRows.find((row) => row.lib === "ChartKit");
+if (!chartkit) throw new Error("benchmarks page is missing the ChartKit agent row");
+const officialTokens = page.agentRows.map((row, index) => `${row.lib} ${page.published.tokensOfficial[index] ?? "—"}`).join(", ");
 const description =
   "Published ChartKit benchmark numbers: two-rAF paint, bundle size, browser render, server render, sampling, and the agent eval.";
 ---
@@ -106,12 +117,7 @@ const description =
     </div>
 
     <h2>Browser render</h2>
-    <p>
-      ChartKit wins the initial render in all 12 cells against uPlot. Even 1,000,000 points is 23.6 ms vs 26.5 ms. The
-      aligned update wins 6 of 12 and loses 6. The losses are in the table, not a footnote: even 1k (1.5 vs 1.2), even
-      10k (1.9 vs 1.7), jittered 1k (1.6 vs 1.4), and gapped timestamps at 1k (1.6 vs 1.4), 10k (1.9 vs 1.6), and 100k
-      (3.5 vs 3.4).
-    </p>
+    <p>{page.browserClaim}</p>
     <div class="grid-2">
       <article class="card">
         <div class="ck-frame" role="img" aria-label={page.initial1k.alt} set:html={page.initial1k.svg} />
@@ -154,11 +160,7 @@ const description =
         </tbody>
       </table>
     </div>
-    <p>
-      In these 12 cells ChartKit is also faster than Chart.js and Observable Plot on both the initial and the aligned
-      update. Even 1,000,000 points: Chart.js updates in 189.8 ms and Plot in 1,295.8 ms. ECharts, Recharts, and Nivo
-      are not in the round 13 browser rows, so this page does not give them a browser millisecond.
-    </p>
+    <p>{page.rivalsOmitted}</p>
 
     <h2>Canvas line</h2>
     <p>
@@ -186,10 +188,7 @@ const description =
     <p>Canvas loses first paint at every size: {page.canvas.losses}.</p>
 
     <h2>Hover</h2>
-    <p>
-      Steady hover at 100,000 points is close. ChartKit’s painted median is 16.5 ms and uPlot’s is 16.2 ms. First hover
-      on a fresh chart is not close: uPlot paints in 4 to 4.9 ms, and ChartKit paints in 15.9 to 20.8 ms.
-    </p>
+    <p>{page.hoverClaim}</p>
     <div class="table-wrap">
       <table>
         <thead>
@@ -264,10 +263,7 @@ const description =
         </tbody>
       </table>
     </div>
-    <p>
-      These sampling-none times use the same fair update timer. At 1,000,000 points that is 471.8 ms to draw and 462.4
-      ms to update, not the old two-frame figure.
-    </p>
+    <p>{page.samplingClaim}</p>
 
     <h2 id="ssr">Server render</h2>
     <p>{ssr.caption}</p>
@@ -310,8 +306,9 @@ const description =
     <p>
       Round 6, recorded in BENCHMARKS.md. Not re-run for round {page.round}. One model, {page.published.model}, temperature{" "}
       {page.published.temperature}, one run on {page.agentMeasured}, {page.published.tasks} tasks. “Official” means the
-      library’s docs were in the prompt. ChartKit’s docs are <a href="/llms.txt">llms.txt</a>. The previous file, the
-      React-only v0 text, scored 18/42 in an earlier run.
+      library’s docs were in the prompt. ChartKit’s docs are <a href="/llms.txt">llms.txt</a>. A supplementary
+      ChartKit-only run the same day, one attempt per task, scored {supp.agent.passed}/{supp.agent.taskCount} with llms.txt
+      in the prompt. That run is not the round 6 scoreboard.
     </p>
     <div class="table-wrap">
       <table>
@@ -340,14 +337,10 @@ const description =
       </table>
     </div>
     <p>
-      ChartKit’s first try with no docs is {h.repairFrom}. Recharts, ECharts, and Chart.js were 42/42 with no docs.{" "}
-      <code>repair()</code>, with no model call, takes that ChartKit output to {h.repairTo}. With the official docs,
-      ChartKit’s first try is already 42/42, at a mean of {page.published.tokensOfficial[0]} output tokens. Recharts
-      with its docs used a mean of {page.published.tokensOfficial[1]}, ECharts {page.published.tokensOfficial[2]}, and
-      Chart.js {page.published.tokensOfficial[3]}. The other libraries have no repair step. Phase 1 grew llms.txt to
-      8,274 bytes, about 1.9 KB more than the competitor excerpts. A ChartKit-only rerun with the file cut to 6,329
-      bytes scored 41/42 on the first try. The miss was a combo axis, CK3002, which <code>repair()</code> does not
-      patch. The headline numbers use the full file. <a href="/agents">How to use the loop</a>.
+      ChartKit’s first try with no docs is {chartkit.noFirst}. <code>repair()</code>, with no model call, takes that
+      output to {h.repairTo}. With the official docs, ChartKit’s first try is {chartkit.offFirst}. Mean first-try output
+      tokens with the docs: {officialTokens}. The other libraries have no repair step. The llms.txt this site serves is{" "}
+      {llmsBytes.toLocaleString("en-US")} bytes. <a href="/agents">How to use the loop</a>.
     </p>
   </div>
 </Base>

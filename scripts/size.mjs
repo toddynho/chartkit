@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
 import { compile } from "svelte/compiler";
 import { stubDynamicCharts } from "./stub-dynamic-charts.mjs";
+import { lineEntrySource, measureLineGzip } from "./line-bundle.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const src = join(root, "packages/core/src");
@@ -96,13 +97,9 @@ async function gzipOf(entry, { external = false, splitExtra = false, plugins = [
   return { minBytes: code.length, gzipBytes: gzipSync(code, { level: 9 }).length, code: code.toString("utf8") };
 }
 
+const line = await measureLineGzip();
 const minimalLine = join(tmpdir(), "chartkit-size-minimal-line.mjs");
-writeFileSync(
-  minimalLine,
-  `import { createRenderer } from ${JSON.stringify(join(src, "render.ts"))};\nimport { line } from ${JSON.stringify(join(src, "charts/line.ts"))};\nexport const render = createRenderer([line]);\n`,
-);
-
-const line = await gzipOf(minimalLine);
+writeFileSync(minimalLine, lineEntrySource(src));
 const all = await gzipOf(join(src, "all.ts"));
 const validate = await gzipOf(join(src, "validate.ts"));
 const interact = await gzipOf(join(src, "interact.ts"), { splitExtra: true });
@@ -141,7 +138,7 @@ const isolation = {
 const lineStub = join(tmpdir(), "chartkit-size-line-stub.mjs");
 writeFileSync(
   lineStub,
-  `import { createRenderer } from ${JSON.stringify(join(src, "render.ts"))};\nimport { line } from ${JSON.stringify(join(src, "charts/line.ts"))};\nexport const render = createRenderer([line]);\nexport function isExtra(type){return /^(histogram|boxplot|radar|funnel|treemap|sankey|bullet|waterfall)$/.test(type);}\nexport function adopt(){}\nexport function open(){return false}\n`,
+  `${lineEntrySource(src)}export function isExtra(type){return /^(histogram|boxplot|radar|funnel|treemap|sankey|bullet|waterfall)$/.test(type);}\nexport function adopt(){}\nexport function open(){return false}\n`,
 );
 
 const withLine = {

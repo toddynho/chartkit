@@ -2,13 +2,19 @@
   "name": "@chartkitdev/svelte",
   "version": "0.5.0",
   "description": "Svelte adapter for the ChartKit JSON spec. Svelte 5 and the Svelte 4 component API. Evidence: https://chartkit.dev/benchmarks",
-  "keywords": ["chart", "svelte", "svg", "chartkit"],
+  "keywords": [
+    "chart",
+    "svelte",
+    "svg",
+    "chartkit"
+  ],
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev",
   "bugs": {
     "url": "https://github.com/toddynho/chartkit/issues"
   },
   "type": "module",
+  "sideEffects": false,
   "svelte": "./src/index.js",
   "types": "./src/index.d.ts",
   "main": "./src/index.js",
@@ -26,7 +32,11 @@
     }
   },
   "files": [
-    "src"
+    "src/*.js",
+    "src/*.d.ts",
+    "src/*.svelte",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "node scripts/check.mjs",
@@ -35,7 +45,7 @@
     "clean": "node -e \"process.exit(0)\""
   },
   "dependencies": {
-    "@chartkitdev/core": "*"
+    "@chartkitdev/core": "^0.5.0"
   },
   "peerDependencies": {
     "svelte": "^4.0.0 || ^5.0.0"
@@ -52,10 +62,14 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/toddynho/chartkit",
+    "url": "git+https://github.com/toddynho/chartkit.git",
     "directory": "packages/svelte"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
