@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { rivalSwatch } from "./rival-colors";
 import { repoRoot } from "../lib/repo-root";
 
 type AgentCell = {
@@ -39,15 +40,8 @@ export type BenchLib = { name: string; color: string };
 export type BenchDot = { title: string; left: string; size: string; fill: string; ring: string; solid: boolean };
 export type BenchRow = { type: string; measured: boolean; note: string; aside: string; summary: string; dots: BenchDot[] };
 
-const LIBS: BenchLib[] = [
-  { name: "ChartKit", color: "#0a63e6" },
-  { name: "uPlot", color: "#8b8d93" },
-  { name: "Chart.js", color: "#a9aaae" },
-  { name: "Observable Plot", color: "#b8b9bd" },
-  { name: "Recharts", color: "#c6c7ca" },
-  { name: "ECharts", color: "#d2d3d6" },
-  { name: "Nivo", color: "#9a9ca1" },
-];
+const LIB_NAMES = ["ChartKit", "uPlot", "Chart.js", "Observable Plot", "Recharts", "ECharts", "Nivo"] as const;
+const LIBS: BenchLib[] = LIB_NAMES.map((name) => ({ name, color: rivalSwatch(name).fill }));
 
 const ROW_DEFS: { type: string; points: number; note: string; scope: string; aside: string; chartkitOnly: boolean }[] = [
   { type: "line", points: 100_000, note: "100k", scope: "100,000 points, sampling auto", aside: "", chartkitOnly: false },
@@ -408,15 +402,7 @@ export function speedPlot(): {
   return { libs: LIBS, rows, ticks, measuredOn, commit, claim: paintClaim(slots) };
 }
 
-const HOME_LIBS: BenchLib[] = [
-  { name: "ChartKit", color: "#0a63e6" },
-  { name: "uPlot", color: "#6f7177" },
-  { name: "Chart.js", color: "#8b8d93" },
-  { name: "Observable Plot", color: "#a4a6ab" },
-  { name: "Recharts", color: "#b8b9bd" },
-  { name: "ECharts", color: "#cbccd0" },
-  { name: "Nivo", color: "#7d7f85" },
-];
+const HOME_LIBS: BenchLib[] = LIBS;
 
 const HOME_NOTES: Record<string, string> = {
   line: "100k points",
@@ -446,7 +432,7 @@ export type HomePaintDot = { title: string; left: string; size: string; fill: st
 export type HomePaintRow = { type: string; note: string; ck: string; dots: HomePaintDot[] };
 
 export function homePaint(): {
-  libs: { name: string; color: string; us: boolean }[];
+  libs: { name: string; color: string; ink: string; us: boolean }[];
   rows: HomePaintRow[];
   ticks: { label: string; left: string }[];
   measuredOn: string;
@@ -534,7 +520,10 @@ export function homePaint(): {
     left: homeLeft(ms),
   }));
   return {
-    libs: HOME_LIBS.map((lib) => ({ name: lib.name, color: lib.color, us: lib.name === "ChartKit" })),
+    libs: HOME_LIBS.map((lib) => {
+      const swatch = rivalSwatch(lib.name);
+      return { name: lib.name, color: swatch.fill, ink: swatch.ink, us: lib.name === "ChartKit" };
+    }),
     rows,
     ticks,
     measuredOn,

@@ -1,4 +1,5 @@
 ---
+import { rivalSwatch } from "../data/rival-colors";
 import { tokenSpread } from "../data/token-eval";
 
 const spread = tokenSpread();
@@ -8,7 +9,7 @@ const spread = tokenSpread();
   <div class="band-head">
     <div class="band-head__copy">
       <p class="eyebrow eyebrow--blue">For the agent</p>
-      <h2 id="tokens-title">Fewer tokens per chart. On every model.</h2>
+      <h2 id="tokens-title"><span>Fewer tokens per chart.</span><span>On every model.</span></h2>
       <p>
         Same {spread.tasks} tasks, {spread.modelWord} models, {spread.libraryWord} libraries. The agent writes a short spec instead of a component, so the median is {spread.calls} model {spread.calls === "1.0" ? "call" : "calls"} with a fraction of the output.
       </p>
@@ -31,16 +32,18 @@ const spread = tokenSpread();
     </div>
     <div>
       {
-        spread.rows.map((row, index) => (
+        spread.rows.map((row, index) => {
+          const swatch = rivalSwatch(row.name);
+          return (
           <div class:list={["tok-row", index === 0 && "is-first", row.us && "is-us"]}>
-            <div class="tok-name" style={`color:${row.us ? "#0a63e6" : "#55575c"};font-weight:${row.us ? 600 : 400}`}>{row.name}</div>
+            <div class="tok-name" style={`color:${swatch.ink};font-weight:${row.us ? 600 : 500}`}>{row.name}</div>
             <div class="tok-track">
               <div class="tok-rail"></div>
-              <div class="tok-band" style={`left:${row.minPct};width:${row.spanPct};background:${row.us ? "rgba(10,99,230,.18)" : "#e2e2de"}`}></div>
+              <div class="tok-band" style={`left:${row.minPct};width:${row.spanPct};background:${swatch.band}`}></div>
               {row.dots.map((dot) => (
-                <span class="tok-dot" title={dot.title} style={`left:${dot.left};background:${row.us ? "#0a63e6" : "#8b8d93"}`}></span>
+                <span class="tok-dot" title={dot.title} style={`left:${dot.left};background:${swatch.fill}`}></span>
               ))}
-              <div class="tok-med" style={`left:${row.medPct};background:${row.us ? "#0a63e6" : "#55575c"}`}></div>
+              <div class="tok-med" style={`left:${row.medPct};background:${swatch.ink}`}></div>
               {row.us && spread.annotation ? (
                 <>
                   <div class="tok-bracket" style={`left:${spread.annotation.left};width:${spread.annotation.width}`}><span></span></div>
@@ -48,12 +51,13 @@ const spread = tokenSpread();
                 </>
               ) : null}
             </div>
-            <div class="tok-val" style={`color:${row.us ? "#0a63e6" : "#55575c"}`}>
+            <div class="tok-val" style={`color:${swatch.ink}`}>
               <strong>{row.medianText}</strong>
               <em>{row.range}</em>
             </div>
           </div>
-        ))
+          );
+        })
       }
     </div>
     <div class="tok-axis" aria-hidden="true">

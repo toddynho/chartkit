@@ -34,7 +34,7 @@ function mark(href: string): "page" | undefined {
       ) : null
     }
     <div class="header-cluster">
-      <nav class="primary" aria-label="Primary">
+      <nav class="primary" id="site-nav" aria-label="Primary">
         {
           links.map((item) => (
             <a href={item.href} aria-current={mark(item.href)}>
@@ -42,8 +42,20 @@ function mark(href: string): "page" | undefined {
             </a>
           ))
         }
+        <a class="nav-menu-star" href={SITE.github}>
+          <span aria-hidden="true">★</span> Star <strong>7</strong>
+        </a>
       </nav>
       <div class="header-end">
+        <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="site-nav" data-nav-toggle>
+          <span class="sr" data-nav-label>Open menu</span>
+          <svg class="nav-toggle__bars" width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M3 6h16M3 11h16M3 16h16"></path>
+          </svg>
+          <svg class="nav-toggle__x" width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M5 5l12 12M17 5L5 17"></path>
+          </svg>
+        </button>
         <a class="star-chip" href={SITE.github} aria-label="Star toddynho/chartkit on GitHub">
           <span aria-hidden="true">★</span> Star <strong>7</strong>
         </a>
@@ -60,6 +72,26 @@ function mark(href: string): "page" | undefined {
 </header>
 
 <script>
+  const header = document.getElementById("site-header");
+  const toggle = document.querySelector<HTMLButtonElement>("[data-nav-toggle]");
+  const navLabel = toggle?.querySelector("[data-nav-label]");
+  const setMenu = (open: boolean) => {
+    header?.classList.toggle("is-open", open);
+    toggle?.setAttribute("aria-expanded", open ? "true" : "false");
+    if (navLabel) navLabel.textContent = open ? "Close menu" : "Open menu";
+  };
+  toggle?.addEventListener("click", () => setMenu(!header?.classList.contains("is-open")));
+  document.getElementById("site-nav")?.addEventListener("click", (event) => {
+    const target = event.target;
+    if (target instanceof Element && target.closest("a")) setMenu(false);
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setMenu(false);
+  });
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 980) setMenu(false);
+  });
+
   const input = document.querySelector<HTMLInputElement>("[data-docs-search]");
   if (input) {
     const filter = () => {

@@ -1,8 +1,18 @@
 ---
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import BrandLockup from "./BrandLockup.astro";
 import { SITE, canonicalPath } from "../data/site";
+import { repoRoot } from "../lib/repo-root";
 
 const docs = canonicalPath(Astro.url.pathname) === "/docs" || canonicalPath(Astro.url.pathname).startsWith("/docs/");
+const license = `${SITE.github}/blob/main/LICENSE`;
+
+const featureFile = JSON.parse(readFileSync(join(repoRoot(), "catalog/public/features.json"), "utf8")) as {
+  libraries: { name: string }[];
+};
+const otherLibraries = featureFile.libraries.filter((library) => library.name !== "ChartKit").length;
+if (otherLibraries < 1) throw new Error("feature matrix has no libraries besides ChartKit");
 
 const columns = [
   {
@@ -40,7 +50,7 @@ const columns = [
     docs ? (
       <p class="legal legal--docs">
         <span class="legal__meta">
-          © ChartKit · MIT · {SITE.version}
+          © ChartKit · <a href={license}>MIT</a> · {SITE.version}
           <span aria-hidden="true"> · </span>
           <a class="legal__credit" href="https://x.com/toddo">built by @toddo</a>
         </span>
@@ -55,7 +65,7 @@ const columns = [
       <>
         <div class="footer-grid">
           <div class="footer-brand">
-            <BrandLockup size={22} />
+            <BrandLockup size={40} layout="stack" />
             <p class="footer-pitch">
               <span>One spec.</span>
               <span>Every framework.</span>
@@ -74,11 +84,14 @@ const columns = [
           }
         </div>
         <p class="legal">
-          <span class="legal__meta">© ChartKit · MIT · {SITE.version}</span>
-          <span class="legal__end">
+          <span class="legal__meta">
+            © ChartKit · <a href={license}>MIT</a> · {SITE.version}
+            <span aria-hidden="true"> · </span>
             <a class="legal__credit" href="https://x.com/toddo">built by @toddo</a>
-            <a href="/compare">Compare ChartKit with 20 libraries →</a>
           </span>
+        </p>
+        <p class="legal-compare">
+          <a href="/compare">Compare ChartKit with {otherLibraries} other libraries →</a>
         </p>
       </>
     )

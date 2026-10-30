@@ -2,16 +2,17 @@
 import logo from "../../public/brand/logo.svg?raw";
 
 interface Props {
-  /** Header mark is 24px, sitting on the wordmark baseline. Footer stays 22. */
-  size?: 24 | 22;
+  /** Header mark. The footer stack passes a larger size. */
+  size?: number;
   tag?: string;
+  layout?: "inline" | "stack";
 }
 
-const { size = 24, tag } = Astro.props;
+const { size = 28, tag, layout = "inline" } = Astro.props;
 const svg = logo.replace("<svg ", '<svg aria-hidden="true" focusable="false" ');
 ---
 
-<a class:list={["brand", size === 22 && "brand--footer"]} href="/" aria-label="ChartKit home">
+<a class:list={["brand", layout === "stack" && "brand--stack"]} href="/" aria-label="ChartKit home">
   <span class="brand__mark" style={`width:${size}px;height:${size}px`} set:html={svg} />
   <span class="brand__word">ChartKit</span>
   {tag ? <span class="brand__tag">{tag}</span> : null}
