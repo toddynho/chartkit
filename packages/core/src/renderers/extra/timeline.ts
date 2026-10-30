@@ -75,7 +75,19 @@ export function renderTimeline(spec: Record<string, unknown>): string | null {
   const plotRight = frame.width - 28;
   const xAt = (time: number) => plotLeft + ((time - min) / (max - min)) * (plotRight - plotLeft);
   const periodTop = frame.title ? 48 : 24;
-  const axisY = periodTop + laneCount * 40 + 36;
+  const baseAxis = periodTop + laneCount * 40 + 36;
+  const placed: { event: (typeof events)[number]; x: number; half: number; side: "above" | "below"; row: number }[] = [];
+  for (const event of events) {
+    const x = xAt(event.startMs as number);
+    const half = Math.max(28, Math.min(96, event.label.length * 3.35));
+    const place = sideFor(placed, x, half);
+    placed.push({ event, x, half, side: place.side, row: place.row });
+  }
+  const belowRows = placed.reduce((max, item) => (item.side === "below" ? Math.max(max, item.row) : max), -1);
+  const baseYear = baseAxis + 64 + Math.max(0, belowRows) * 16;
+  const slack = Math.max(0, frame.height - 22 - baseYear);
+  const axisY = baseAxis + slack * 0.45;
+  const yearY = baseYear + slack;
 
   for (const period of periods) {
     const lane = lanes.get(period.index) ?? 0;
@@ -85,7 +97,7 @@ export function renderTimeline(spec: Record<string, unknown>): string | null {
     const width = Math.max(8, x2 - x1);
     const color = fill(frame, lane);
     const label = `${period.label}: ${formatDay(period.startMs as number)}–${formatDay(period.endMs as number)}`;
-    parts.push(openMark("rect", "period", label, `x="${n(x1)}" y="${n(y)}" width="${n(width)}" height="26" rx="8" fill="${color}" fill-opacity="0.16" stroke="${color}"`));
+    parts.push(openMark("rect", "period", label, `x="${n(x1)}" y="${n(y)}" width="${n(width)}" height="26" rx="8" fill="${color}" fill-opacity="0.72" stroke="${color}"`));
     parts.push("</rect>");
     const inside = fit(period.label, width - 12, 12);
     if (inside && inside.length > 2) parts.push(text(x1 + width / 2, y + 17, inside, cssVar("text", frame.preset.text), 12, "600", "middle"));
@@ -93,24 +105,17 @@ export function renderTimeline(spec: Record<string, unknown>): string | null {
   }
 
   parts.push(`<line x1="${n(plotLeft)}" y1="${n(axisY)}" x2="${n(plotRight)}" y2="${n(axisY)}" stroke="${cssVar("axis", frame.preset.axis)}" stroke-width="1.5" />`);
-  const taken: { x: number; half: number; side: "above" | "below"; row: number }[] = [];
-  for (const event of events) {
-    const x = xAt(event.startMs as number);
-    const half = Math.max(28, Math.min(96, event.label.length * 3.35));
-    const place = sideFor(taken, x, half);
-    taken.push({ x, half, side: place.side, row: place.row });
+  for (const item of placed) {
     const color = cssVar("accent", frame.preset.accent);
-    const label = `${event.label}: ${formatDay(event.startMs as number)}`;
-    parts.push(openMark("circle", "event", label, `cx="${n(x)}" cy="${n(axisY)}" r="6" fill="${color}" stroke="${cssVar("surface", frame.preset.surface)}" stroke-width="2"`));
+    const label = `${item.event.label}: ${formatDay(item.event.startMs as number)}`;
+    parts.push(openMark("circle", "event", label, `cx="${n(item.x)}" cy="${n(axisY)}" r="6" fill="${color}" stroke="${cssVar("surface", frame.preset.surface)}" stroke-width="2"`));
     parts.push("</circle>");
-    const y = place.side === "above" ? axisY - 18 - place.row * 16 : axisY + 28 + place.row * 16;
-    const anchor = x < plotLeft + 70 ? "start" : x > plotRight - 70 ? "end" : "middle";
-    const lx = anchor === "start" ? x - 8 : anchor === "end" ? x + 8 : x;
-    parts.push(text(lx, y, fit(event.label, 150, 12), cssVar("text", frame.preset.text), 12, "600", anchor));
+    const y = item.side === "above" ? axisY - 18 - item.row * 16 : axisY + 22 + item.row * 16;
+    const anchor = item.x < plotLeft + 70 ? "start" : item.x > plotRight - 70 ? "end" : "middle";
+    const lx = anchor === "start" ? item.x - 8 : anchor === "end" ? item.x + 8 : item.x;
+    parts.push(text(lx, y, fit(item.event.label, 150, 12), cssVar("text", frame.preset.text), 12, "600", anchor));
   }
 
-  const belowRows = taken.reduce((max, item) => (item.side === "below" ? Math.max(max, item.row) : max), -1);
-  const yearY = axisY + 64 + Math.max(0, belowRows) * 16;
   for (const tick of yearTicks(min, max)) {
     if (tick < min || tick > max) continue;
     const x = xAt(tick);

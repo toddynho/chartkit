@@ -107,6 +107,9 @@ export function renderGantt(spec: Record<string, unknown>): string | null {
   const top = frame.title ? 52 : 28;
   const xAt = (time: number) => plotLeft + ((time - min) / (max - min || 1)) * (plotRight - plotLeft);
   const withYear = max - min > 340 * DAY;
+  const sections = groups.reduce((count, group) => count + (group.section ? 1 : 0), 0);
+  const room = frame.height - top - 18 - sections * header;
+  const pitch = Math.min(32, Math.max(18, room / Math.max(1, tasks.length)));
 
   parts.push(legend(frame));
   let y = top;
@@ -118,8 +121,8 @@ export function renderGantt(spec: Record<string, unknown>): string | null {
       y += header;
     }
     for (const task of group.tasks) {
-      placed.set(task.index, y + 16);
-      y += 32;
+      placed.set(task.index, y + pitch / 2);
+      y += pitch;
     }
     if (group.section) {
       parts.push(
@@ -247,7 +250,9 @@ function domainOf(tasks: GanttTask[], today: number | null): [number, number] | 
   if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
   if (max <= min) max = min + DAY;
   const pad = Math.max(DAY, (max - min) * 0.04);
-  return [min - pad, max + pad];
+  // Extra tail so a milestone diamond is not cut off at the right edge.
+  const tail = Math.max(DAY, (max - min) * 0.06);
+  return [min - pad, max + pad + tail];
 }
 
 function axisTicks(min: number, max: number): number[] {

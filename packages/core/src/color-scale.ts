@@ -41,7 +41,8 @@ function schemeStops(name: string, preset: PresetTokens, diverging: boolean): st
   if (scheme === "teal") return ["#ccfbf1", "#0d9488", "#134e4a"];
   if (scheme === "orange") return ["#ffedd5", "#ff9500", "#9a3412"];
   if (scheme === "violet") return ["#ede9fe", "#7c3aed", "#4c1d95"];
-  return ["#dbeafe", "#007aff", "#1e3a8a"];
+  // Card to accent. Both modes live in one string so the pack can bake each side.
+  return ["light-dark(#f5f5f7, #2c2c2e)", "light-dark(#007aff, #0a84ff)"];
 }
 
 function hex(color: string): [number, number, number] | null {
@@ -52,12 +53,24 @@ function hex(color: string): [number, number, number] | null {
 }
 
 function mix(a: string, b: string, t: number): string {
+  const left = ldPair(a);
+  const right = ldPair(b);
+  if (left && right) {
+    const light = mix(left[0], right[0], t);
+    const dark = mix(left[1], right[1], t);
+    return light === dark ? light : `light-dark(${light}, ${dark})`;
+  }
   const from = hex(a);
   const to = hex(b);
   if (!from || !to) return t < 0.5 ? a : b;
   const u = Math.min(1, Math.max(0, t));
   const channel = (index: number) => Math.round((from[index] ?? 0) + ((to[index] ?? 0) - (from[index] ?? 0)) * u);
   return `#${[0, 1, 2].map((index) => channel(index).toString(16).padStart(2, "0")).join("")}`;
+}
+
+function ldPair(color: string): [string, string] | null {
+  const match = /^light-dark\(\s*(#[0-9a-fA-F]{6})\s*,\s*(#[0-9a-fA-F]{6})\s*\)$/.exec(color);
+  return match ? [match[1] ?? color, match[2] ?? color] : null;
 }
 
 function luminance(color: string): number {
@@ -152,7 +165,8 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
   const scheme = scale && typeof scale.scheme === "string" ? scale.scheme : "blue";
   const custom = record && Array.isArray(record.range) ? record.range.filter((item): item is string => typeof item === "string" && item.length > 0) : [];
   const schemeColors = schemeStops(scheme, preset, kind === "diverging");
-  const stops = custom.length >= 2 ? custom : clampLow(schemeColors, cardOf(preset));
+  const cardRamp = schemeColors.some((color) => color.includes("light-dark("));
+  const stops = custom.length >= 2 ? custom : cardRamp ? schemeColors : clampLow(schemeColors, cardOf(preset));
   const title =
     record && typeof record.title === "string" && record.title
       ? record.title

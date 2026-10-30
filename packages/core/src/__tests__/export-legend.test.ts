@@ -97,7 +97,9 @@ describe("colour scales", () => {
   it("paints a sequential ramp on a numeric heatmap and a constant stays on opacity", () => {
     const svg = render(heat);
     expect(svg).toContain('data-ck-scale="sequential"');
-    expect(svg).toContain("#1e3a8a");
+    expect(svg).toContain("light-dark(#f5f5f7, #2c2c2e)");
+    expect(svg).toContain("#007aff");
+    expect(svg).not.toContain("#1e3a8a");
     const constant = render({ ...heat, encoding: { x: "month", y: "region", color: { field: "revenue", value: "#c45c26" } } });
     expect(constant).not.toContain('data-ck-scale="sequential"');
     expect(constant).toContain("fill-opacity");
@@ -106,7 +108,9 @@ describe("colour scales", () => {
   it("uses one scheme name with a brighter midnight ramp", () => {
     const soft = render({ ...heat, encoding: { ...heat.encoding, color: { field: "revenue", scale: { type: "sequential", scheme: "blue" } } } });
     const night = render({ ...heat, theme: "midnight", encoding: { ...heat.encoding, color: { field: "revenue", scale: { type: "sequential", scheme: "blue" } } } });
-    expect(soft).toContain("#1e3a8a");
+    expect(soft).toContain("light-dark(#f5f5f7, #2c2c2e)");
+    expect(soft).toContain("#007aff");
+    expect(soft).not.toContain("#1e3a8a");
     expect(night).toContain("#e0f2fe");
     expect(night).not.toContain("#007aff");
   });
@@ -167,9 +171,10 @@ describe("colour scales", () => {
       const color = { field: "revenue", scale: { type: "sequential", scheme } };
       const soft = render({ ...heat, encoding: { x: "month", y: "region", color } });
       const night = render({ ...heat, theme: "midnight", encoding: { x: "month", y: "region", color } });
-      expect(contrast(firstStop(soft), "#f5f5f7")).toBeGreaterThanOrEqual(3);
-      expect(contrast(firstStop(night), "#0c0c0c")).toBeGreaterThanOrEqual(3);
       expect(firstStop(soft)).not.toBe("#dbeafe");
+      if (scheme === "blue") expect(soft).toContain('stop-color="light-dark(#f5f5f7, #2c2c2e)"');
+      else expect(contrast(firstStop(soft), "#f5f5f7")).toBeGreaterThanOrEqual(3);
+      expect(contrast(firstStop(night), "#0c0c0c")).toBeGreaterThanOrEqual(3);
     }
     const diverging = render({
       ...heat,

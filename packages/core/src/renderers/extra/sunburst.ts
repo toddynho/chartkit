@@ -97,7 +97,8 @@ export function renderSunburst(spec: Record<string, unknown>): string | null {
         const large = Math.abs(end - start) > Math.PI ? 1 : 0;
         const sweep = lower ? 0 : 1;
         defs.push(`<path id="${id}" d="M ${n(sx)} ${n(sy)} A ${n(radius)} ${n(radius)} 0 ${large} ${sweep} ${n(ex)} ${n(ey)}" fill="none" />`);
-        const ink = inkByDepth.get(depth) ?? labelInk(paintFill);
+        const raw = inkByDepth.get(depth) ?? labelInk(paintFill);
+        const ink = raw === "#000000" ? "#1d1d1f" : raw === "#ffffff" ? "#f5f5f7" : raw;
         parts.push(
           `<text fill="${ink}" font-size="11" font-weight="650" data-ck-depth="${depth}"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${esc(text)}</textPath></text>`,
         );

@@ -11,9 +11,12 @@ export function renderBullet(spec: Record<string, unknown>): string | null {
   const view = viewOf(spec, "bullet", 640, height);
   if (!view) return null;
   const { frame, parts } = view;
-  const top = frame.title ? 40 : 16;
+  const top = frame.title ? 44 : 20;
+  const bandH = 36;
+  const avail = Math.max(bandH, frame.height - top - 20);
+  const pitch = avail / rows.length;
   rows.forEach((row, index) => {
-    const y = top + index * 64;
+    const y = top + index * pitch + Math.max(0, (pitch - bandH) / 2);
     const max = Math.max(row.scale, row.value, row.target ?? 0, 1);
     const left = 132;
     const width = frame.width - left - 20;

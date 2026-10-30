@@ -387,7 +387,7 @@ describe("render", () => {
     expect(svg).toContain("million");
     expect(svg).not.toContain("linearGradient");
     expect(svg).not.toContain("ck-geo-nodata");
-    expect(svg).toContain("fill:light-dark(#efe6d6, #2a3338)");
+    expect(svg).toContain("fill:light-dark(#f5f5f7, #2c2c2e)");
     const mapEnd = svg.indexOf("</g>");
     expect(svg.lastIndexOf("<circle", mapEnd)).toBeLessThan(svg.indexOf(">Tokyo<"));
 
@@ -463,7 +463,7 @@ describe("render", () => {
   it("keeps scale fills on choropleth regions and land fill on points maps", async () => {
     const softLand = chromeFor("soft").land;
     const midnightLand = chromeFor("midnight").land;
-    expect(softLand).toBe("light-dark(#efe6d6, #2a3338)");
+    expect(softLand).toBe("light-dark(#f5f5f7, #2c2c2e)");
     expect(midnightLand).toBe("#3e5264");
     expect(chromeFor("midnight").water).toBe("#0c0c0c");
 

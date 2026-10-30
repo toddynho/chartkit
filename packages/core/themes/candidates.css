@@ -212,7 +212,7 @@
   --ck-surface: #ffffff;
   --ck-text: #1d1d1f;
   --ck-muted: #6e6e73;
-  --ck-grid: rgba(0, 0, 0, 0.05);
+  --ck-grid: rgba(0, 0, 0, 0.16);
   --ck-axis: rgba(0, 0, 0, 0.14);
   --ck-track: rgba(0, 0, 0, 0.10);
   --ck-accent: #007aff;
@@ -261,7 +261,7 @@
   --ck-surface: #2c2c2e;
   --ck-text: #f5f5f7;
   --ck-muted: #98989d;
-  --ck-grid: rgba(245, 245, 247, 0.07);
+  --ck-grid: rgba(245, 245, 247, 0.22);
   --ck-axis: rgba(245, 245, 247, 0.16);
   --ck-track: rgba(245, 245, 247, 0.16);
   --ck-accent: #0a84ff;

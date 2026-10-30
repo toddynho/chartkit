@@ -47,7 +47,7 @@ export function renderBarList(spec: Record<string, unknown>): string | null {
       const span = Math.max(0, width - 8);
       const filled = Math.max(12, (row.value / max) * span);
       parts.push(
-        `<rect data-ck-track="row" x="0" y="${n(y + 2)}" width="${n(filled)}" height="${rowH - 4}" rx="3" fill="${fill}" fill-opacity="0.16" />` +
+        `<rect data-ck-track="row" x="0" y="${n(y + 2)}" width="${n(filled)}" height="${rowH - 4}" rx="3" fill="${fill}" fill-opacity="0.72" />` +
           `<text x="8" y="${n(y + 18)}" fill="${ink}" font-size="12" font-weight="560">${esc(row.label)}</text>` +
           `<text x="${n(width - 4)}" y="${n(y + 18)}" text-anchor="end" fill="${ink}" font-size="12" font-weight="650">${esc(text)}</text>`,
       );
