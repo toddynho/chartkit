@@ -1,12 +1,15 @@
 import type { Spec } from "./specs";
 
-export type FrameworkId = "react" | "vue" | "svelte" | "astro" | "vanilla" | "server";
+export type FrameworkId = "react" | "vue" | "svelte" | "astro" | "solid" | "qwik" | "angular" | "vanilla" | "server";
 
 export const FRAMEWORKS: { id: FrameworkId; label: string }[] = [
   { id: "react", label: "React" },
   { id: "vue", label: "Vue" },
   { id: "svelte", label: "Svelte" },
   { id: "astro", label: "Astro" },
+  { id: "solid", label: "Solid" },
+  { id: "qwik", label: "Qwik" },
+  { id: "angular", label: "Angular" },
   { id: "vanilla", label: "Vanilla" },
   { id: "server", label: "Server" },
 ];
@@ -47,6 +50,37 @@ const spec = ${json};
 ---
 
 <Chart spec={spec} />
+`,
+    solid: `import { Chart } from "@chartkitdev/solid";
+
+const spec = ${json};
+
+export function Panel() {
+  return <Chart spec={spec} />;
+}
+`,
+    qwik: `import { component$ } from "@builder.io/qwik";
+import { Chart } from "@chartkitdev/qwik";
+
+const spec = ${json};
+
+export const Panel = component$(() => {
+  return <Chart spec={spec} />;
+});
+`,
+    angular: `import { Component } from "@angular/core";
+import { Chart } from "@chartkitdev/angular";
+
+const spec = ${json};
+
+@Component({
+  standalone: true,
+  imports: [Chart],
+  template: \`<ck-chart [spec]="spec" />\`,
+})
+export class Panel {
+  spec = spec;
+}
 `,
     vanilla: `import { mount } from "@chartkitdev/vanilla";
 
@@ -101,6 +135,33 @@ const html = await renderToString(spec);
     lede: "The component validates the spec and prints static SVG at build time. It ships no client script unless client is set, which hydrates with mount() from @chartkitdev/vanilla.",
     install: "npm install @chartkitdev/astro",
     server: `import { renderToString } from "@chartkitdev/astro";
+
+const svg = renderToString(spec);
+`,
+  },
+  solid: {
+    title: "Solid",
+    lede: "The component validates the spec and includes the SVG in Solid SSR. Hydration calls mount() from @chartkitdev/vanilla. renderToString from @chartkitdev/solid/ssr is the component HTML.",
+    install: "npm install @chartkitdev/solid",
+    server: `import { renderToString } from "@chartkitdev/solid/ssr";
+
+const html = renderToString(spec);
+`,
+  },
+  qwik: {
+    title: "Qwik",
+    lede: "The component prints static SVG, then calls mount() from @chartkitdev/vanilla in a visible task. renderToString from @chartkitdev/qwik/ssr is that SVG string.",
+    install: "npm install @chartkitdev/qwik",
+    server: `import { renderToString } from "@chartkitdev/qwik/ssr";
+
+const svg = renderToString(spec);
+`,
+  },
+  angular: {
+    title: "Angular",
+    lede: "The standalone component validates the spec and writes SVG during SSR. OnPush redraws when spec changes. afterNextRender calls mount() in the browser.",
+    install: "npm install @chartkitdev/angular",
+    server: `import { renderToString } from "@chartkitdev/angular/ssr";
 
 const svg = renderToString(spec);
 `,
