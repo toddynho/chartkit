@@ -3,7 +3,7 @@
 .v2 {
   width: min(var(--max), 100%);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--gutter);
 }
 
 .eyebrow {
@@ -1138,7 +1138,7 @@ html[data-stack="element"] .home-card .stack-sample [data-stack-panel="element"]
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
   gap: 64px;
-  align-items: center;
+  align-items: start;
   letter-spacing: 0;
 }
 
@@ -1339,7 +1339,7 @@ html[data-stack="element"] .home-card .stack-sample [data-stack-panel="element"]
   padding: 72px 0 88px;
   letter-spacing: 0;
 }
-.gs-wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+.gs-wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
 .gs-head { margin-bottom: 28px; }
 .gs-head p:last-child { max-width: 480px; }
 .gs-head code {

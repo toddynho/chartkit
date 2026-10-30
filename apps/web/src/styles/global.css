@@ -23,6 +23,7 @@
   --sans: Geist, Helvetica, Arial, sans-serif;
   --mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   --max: 1160px;
+  --gutter: 24px;
   --header: 64px;
   --nav: 13.75rem;
   --radius: 14px;
@@ -181,7 +182,7 @@ code {
 .site-header__inner {
   width: min(var(--max), 100%);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--gutter);
   height: 100%;
   display: flex;
   align-items: center;
@@ -191,7 +192,7 @@ code {
 .site-header--docs .site-header__inner {
   width: 100%;
   max-width: none;
-  padding: 0 24px;
+  padding: 0 var(--gutter);
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
@@ -375,7 +376,7 @@ code {
 .footer-grid {
   width: min(var(--max), 100%);
   margin: 0 auto;
-  padding: 40px 24px 28px;
+  padding: 40px var(--gutter) 28px;
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
   gap: 32px;
@@ -413,7 +414,7 @@ code {
 .legal {
   width: min(var(--max), 100%);
   margin: 0 auto;
-  padding: 0 24px 12px;
+  padding: 0 var(--gutter) 12px;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -434,7 +435,7 @@ code {
 .legal-compare {
   width: min(var(--max), 100%);
   margin: 0 auto;
-  padding: 2px 24px 28px;
+  padding: 2px var(--gutter) 28px;
   font-size: 14px;
   line-height: 1.6;
 }
@@ -504,7 +505,7 @@ html[data-stack="element"] .fw-tabs:not(.is-ready) [data-fw-panel="element"] {
 .wrap {
   width: min(var(--max), 100%);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--gutter);
 }
 
 .hero { padding: 3.2rem 0 2.4rem; }
@@ -987,7 +988,8 @@ pre.shiki {
 }
 
 @media (max-width: 980px) {
-  .site-header__inner { padding: 0 16px; gap: 12px; }
+  :root { --gutter: 20px; }
+  .site-header__inner { padding: 0 var(--gutter); gap: 12px; }
   .header-cluster { gap: 8px; }
   .nav-toggle { display: inline-flex; }
   .star-chip { display: none; }
@@ -1002,7 +1004,7 @@ pre.shiki {
     align-items: stretch;
     gap: 2px;
     margin: 0;
-    padding: 8px 12px 14px;
+    padding: 8px var(--gutter) 14px;
     background: #fff;
     border-bottom: 1px solid var(--line);
     box-shadow: 0 18px 40px rgba(23, 24, 26, 0.08);
