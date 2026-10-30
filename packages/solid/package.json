@@ -53,7 +53,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "vitest",
-    "test:run": "npm run build && vitest run",
+    "test:run": "npm run build --workspace=@chartkitdev/core && npm run build --workspace=@chartkitdev/vanilla && npm run build && vitest run",
     "clean": "rm -rf dist"
   },
   "dependencies": {
