@@ -16,50 +16,50 @@ The round 13 ChartKit row is SVG. It uses `mark.sampling: "auto"` (minmax once a
 
 esbuild --bundle --minify, platform browser, NODE_ENV=production, gzip level 9, brotli quality 11. Same config for every entry. ChartKit minimal is createRenderer of one gallery chart from packages/core/src. ChartKit /all is one bundle for every core chart and every theme, without the validator. Rival entries import only the pinned module that chart needs. ECharts uses echarts/core plus one series, its components, and CanvasRenderer. A library is not tree-shakeable when its native entries' gzip sizes differ by at most 512 bytes. That full-package size is recorded once. Those per-type cells are labeled not tree-shakeable and do not repeat the number. A package with one native type keeps the number on the cell. Commercial packages are measured when npm installs them without a license key. Google Charts is not an npm package. Gallery aliases that repair to one chart type are listed on that type and are not a second bundle.
 
-Phase 4 measured **2026-10-29T15:27:37.617Z**, commit `71f3fe44240285d7a3c5047f31d956568c0fa45f`, Node **v22.23.4**.
+Phase 4 measured **2026-10-29T19:08:35.474Z**, commit `bb7c4b8996562106d7f74ae8d2db98f24f08f547`, Node **v22.23.4**.
 
 Cells: ok 294, unsupported 442, license-blocked 0, error 0. Full rows: `bench/results/bundle.json`.
 
-ChartKit minimal gzip is smallest for **progress-ring** (7188) and largest for **combo** (46457).
+ChartKit minimal gzip is smallest for **progress-ring** (6673) and largest for **combo** (38220).
 
 | Chart | gzip | brotli | min | Aliases |
 |---|---:|---:|---:|---|
-| line | 42098 | 36919 | 118133 | — |
-| bar | 41750 | 36611 | 116232 | — |
-| pie | 15760 | 14283 | 43870 | — |
-| donut | 15757 | 14256 | 43872 | arc |
-| stacked-area | 42275 | 37111 | 118648 | — |
-| scatter | 26489 | 23642 | 74345 | point, circle, square |
-| combo | 46457 | 40583 | 129659 | — |
-| heatmap | 14399 | 13045 | 39220 | rect, grid-heat, gridheat, grid_heat, grid-heatmap, calendar-heatmap |
-| gauge | 7712 | 6933 | 20240 | — |
-| kpi | 9618 | 8681 | 26658 | — |
-| sparkline | 42101 | 36927 | 118148 | — |
-| mini-area | 42104 | 37000 | 118147 | — |
-| progress-ring | 7188 | 6445 | 20032 | — |
-| spike | 19291 | 17308 | 53179 | rule, tick |
-| candlestick | 18628 | 16779 | 51624 | — |
-| histogram | 18331 | 16514 | 51245 | hist |
-| boxplot | 18310 | 16490 | 51376 | box, box-plot |
-| radar | 8456 | 7600 | 22784 | radar-chart, radar-beta |
-| funnel | 9997 | 9016 | 27237 | funnel-chart |
-| treemap | 15688 | 14150 | 42854 | tree-map, treemap-beta |
-| sankey | 10168 | 9180 | 27633 | sankey-diagram, sankey-beta |
-| bullet | 9327 | 8409 | 25769 | bullet-chart |
-| waterfall | 17978 | 16187 | 50240 | waterfall-chart |
-| area-range | 19934 | 17892 | 55847 | arearange, area_range, range-area, rangearea |
-| bar-range | 17820 | 16047 | 49916 | columnrange, column-range, rangebar, range-bar, floating-bar |
-| errorbar | 18083 | 16243 | 50912 | error-bar, error-bars, errorbars |
-| gantt | 10121 | 9128 | 27654 | — |
-| timeline | 9016 | 8125 | 24016 | — |
-| quadrant | 8776 | 7881 | 24152 | — |
-| venn | 10762 | 9625 | 28692 | — |
-| journey | 8634 | 7757 | 23329 | — |
-| radial-bar | 10693 | 9653 | 29168 | radialBar, polar-bar, polar |
-| rose | 10691 | 9655 | 29150 | polarArea, polar-area, nightingale, rose-chart |
-| sunburst | 12919 | 11662 | 35182 | sun-burst, sunburstchart, sunburst-chart, partition |
-| bar-list | 8458 | 7606 | 23505 | — |
-| /all | 77255 | 65548 | 218810 | one bundle, not per type |
+| line | 32110 | 28502 | 89551 | — |
+| bar | 33686 | 29872 | 93172 | — |
+| pie | 15293 | 13879 | 42040 | — |
+| donut | 15292 | 13870 | 42042 | arc |
+| stacked-area | 33423 | 29700 | 93378 | — |
+| scatter | 25987 | 23271 | 72510 | point, circle, square |
+| combo | 38220 | 33834 | 106155 | — |
+| heatmap | 13924 | 12719 | 37390 | rect, grid-heat, gridheat, grid_heat, grid-heatmap, calendar-heatmap |
+| gauge | 7199 | 6547 | 18410 | — |
+| kpi | 9098 | 8305 | 24826 | — |
+| sparkline | 32112 | 28520 | 89566 | — |
+| mini-area | 32114 | 28533 | 89565 | — |
+| progress-ring | 6673 | 6059 | 18201 | — |
+| spike | 18763 | 16892 | 51349 | rule, tick |
+| candlestick | 18104 | 16340 | 49792 | — |
+| histogram | 17808 | 16139 | 49415 | hist |
+| boxplot | 17786 | 16085 | 49546 | box, box-plot |
+| radar | 7945 | 7205 | 20953 | radar-chart, radar-beta |
+| funnel | 9489 | 8658 | 25406 | funnel-chart |
+| treemap | 15197 | 13796 | 41024 | tree-map, treemap-beta |
+| sankey | 9646 | 8800 | 25804 | sankey-diagram, sankey-beta |
+| bullet | 8814 | 8017 | 23937 | bullet-chart |
+| waterfall | 17446 | 15756 | 48410 | waterfall-chart |
+| area-range | 19410 | 17504 | 54015 | arearange, area_range, range-area, rangearea |
+| bar-range | 17292 | 15619 | 48086 | columnrange, column-range, rangebar, range-bar, floating-bar |
+| errorbar | 17558 | 15881 | 49082 | error-bar, error-bars, errorbars |
+| gantt | 9621 | 8740 | 25823 | — |
+| timeline | 8505 | 7735 | 22185 | — |
+| quadrant | 8257 | 7494 | 22326 | — |
+| venn | 10246 | 9236 | 26860 | — |
+| journey | 8124 | 7379 | 21499 | — |
+| radial-bar | 10177 | 9269 | 27338 | radialBar, polar-bar, polar |
+| rose | 10177 | 9238 | 27320 | polarArea, polar-area, nightingale, rose-chart |
+| sunburst | 12397 | 11285 | 33352 | sun-burst, sunburstchart, sunburst-chart, partition |
+| bar-list | 7941 | 7224 | 21674 | — |
+| /all | 78081 | 66200 | 221184 | one bundle, not per type |
 
 uPlot (`uplot`) is not tree-shakeable. Full package 23292 gzip. CSS adds 762 gzip as a second response. Per-type cells say not tree-shakeable and do not repeat that number. Plotly.js (`plotly`) is not tree-shakeable. Full package 1477742 gzip. Per-type cells say not tree-shakeable and do not repeat that number. Tremor (`tremor`) is not tree-shakeable. Full package 246834 gzip. Per-type cells say not tree-shakeable and do not repeat that number. AG Charts (`ag-enterprise`) is not tree-shakeable. Full package 692892 gzip. Per-type cells say not tree-shakeable and do not repeat that number. AG Charts (`ag-community`) is not tree-shakeable. Full package 420736 gzip. Per-type cells say not tree-shakeable and do not repeat that number. TradingView Lightweight Charts (`lightweight`) is not tree-shakeable. Full package 53352 gzip. Per-type cells say not tree-shakeable and do not repeat that number. Mermaid (`mermaid`) is not tree-shakeable. Full package 962019 gzip. Per-type cells say not tree-shakeable and do not repeat that number. Vega-Lite (`vegalite`) is not tree-shakeable. Full package 377693 gzip. Per-type cells say not tree-shakeable and do not repeat that number. AntV G2 (`g2`) is not tree-shakeable. Full package 407348 gzip. Per-type cells say not tree-shakeable and do not repeat that number.
 
@@ -67,10 +67,10 @@ A rival is smaller than ChartKit minimal on these cells. The comparison uses the
 
 | Chart | ChartKit gzip | Library | Rival gzip |
 |---|---:|---|---:|
-| line | 42098 | uPlot (full package) | 24054 |
-| bar | 41750 | uPlot (full package) | 24054 |
-| scatter | 26489 | uPlot (full package) | 24054 |
-| mini-area | 42104 | uPlot (full package) | 24054 |
+| line | 32110 | uPlot (full package) | 24054 |
+| bar | 33686 | uPlot (full package) | 24054 |
+| scatter | 25987 | uPlot (full package) | 24054 |
+| mini-area | 32114 | uPlot (full package) | 24054 |
 
 visx heatmap is 69985 gzip with React and ReactDOM in the bundle, and 1360 gzip with them external. A HeatmapRect-only bundle was 1621 gzip and did not import react-dom.
 

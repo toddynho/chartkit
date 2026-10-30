@@ -10,9 +10,19 @@ function chartkitBundle(bundle) {
   return (bundle.cells ?? []).filter((cell) => cell.library === "ChartKit minimal" && cell.status === "ok" && cell.gzipBytes != null);
 }
 
+function statusCounts(cells) {
+  const counts = { ok: 0, unsupported: 0, "license-blocked": 0, error: 0 };
+  for (const cell of cells ?? []) {
+    if (counts[cell.status] == null) counts[cell.status] = 0;
+    counts[cell.status] += 1;
+  }
+  return counts;
+}
+
+/** Summaries are derived from the cells (and the package rows those cells collapsed into). A stored summary is not an input. */
 export function bundleSummary(bundle) {
   const rows = chartkitBundle(bundle);
-  const sorted = rows.slice().sort((a, b) => a.gzipBytes - b.gzipBytes);
+  const sorted = rows.slice().sort((a, b) => a.gzipBytes - b.gzipBytes || a.chart.localeCompare(b.chart));
   const smaller = [];
   const ours = new Map(rows.map((cell) => [cell.chart, cell]));
   for (const cell of bundle.cells ?? []) {
@@ -32,7 +42,7 @@ export function bundleSummary(bundle) {
     });
   }
   return {
-    counts: bundle.counts,
+    counts: statusCounts(bundle.cells),
     chartkitGzipMin: sorted[0] ? { chart: sorted[0].chart, gzipBytes: sorted[0].gzipBytes } : null,
     chartkitGzipMax: sorted.at(-1) ? { chart: sorted.at(-1).chart, gzipBytes: sorted.at(-1).gzipBytes } : null,
     rivalSmaller: smaller,
@@ -63,14 +73,14 @@ export function ssrSummary(ssr) {
       chartkitMedianMs: ours.medianMs,
     });
   }
-  return { counts: ssr.counts, rivalFaster: faster };
+  return { counts: statusCounts(ssr.cells), rivalFaster: faster };
 }
 
 export function bundleMarkdown(bundle, meta) {
   const lines = [bundle.method, ""];
   if (meta) lines.push(`Phase 4 measured **${meta.measuredAt}**, commit \`${meta.commit}\`, Node **${meta.node}**.`, "");
   lines.push(`Cells: ${countsLine(bundle.counts)}. Full rows: \`bench/results/bundle.json\`.`, "");
-  const summary = bundle.summary ?? bundleSummary(bundle);
+  const summary = bundleSummary(bundle);
   if (summary.chartkitGzipMin && summary.chartkitGzipMax) {
     lines.push(`ChartKit minimal gzip is smallest for **${summary.chartkitGzipMin.chart}** (${summary.chartkitGzipMin.gzipBytes}) and largest for **${summary.chartkitGzipMax.chart}** (${summary.chartkitGzipMax.gzipBytes}).`, "");
   }
@@ -126,7 +136,7 @@ export function ssrMarkdown(ssr, meta) {
     lines.push(`| ${cell.chart} | ${cell.points} | ${median} |`);
   }
   lines.push("");
-  const summary = ssr.summary ?? ssrSummary(ssr);
+  const summary = ssrSummary(ssr);
   if (!summary.rivalFaster.length) {
     lines.push("No measured rival is faster than ChartKit at SSR on the same chart and N.");
   } else {

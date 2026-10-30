@@ -1,7 +1,7 @@
 {
   "name": "@chartkitdev/core",
   "version": "0.5.0",
-  "description": "JSON-spec SVG charts, zero dependencies. Line chart 34,554 B gzip, 0.85 ms server render. validate() and repair() for agents (no-docs 21/42, then 42/42). Update wins 6 of 12 vs uPlot. Losses included: https://chartkit.dev/benchmarks",
+  "description": "JSON-spec SVG charts, zero dependencies. Line chart 32,110 B gzip (bench/results/bundle.json, ChartKit minimal line gzipBytes). 1,000-point line first paint 12 ms median (bench/results/paint.json, initialMs). validate() and repair() for agents (no-docs 21/42, then 42/42). Update wins 6 of 12 vs uPlot. Losses included: https://chartkit.dev/benchmarks",
   "author": "Todd Garland",
   "homepage": "https://chartkit.dev",
   "bugs": {

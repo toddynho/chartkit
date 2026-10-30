@@ -2,12 +2,12 @@
 
 One JSON spec, a framework-free core, and thin adapters for React, Vue, Svelte, plain DOM, and a `<chart-kit>` element. The spec is the agent interface. Component props on the older React charts are a different API and are not keys in the spec.
 
-Round 13, measured 2026-10-18 on phase 2 `d8dcc5a`. These are the harness numbers, including the losses. Method: [chartkit.dev/benchmarks](https://chartkit.dev/benchmarks) and [benchmarks.json](https://chartkit.dev/benchmarks.json).
+The line-gzip and first-paint rows cite the bench files named in the table. The other browser rows are round 13, measured 2026-10-18 on phase 2 `d8dcc5a`, including the losses. Method: [chartkit.dev/benchmarks](https://chartkit.dev/benchmarks) and [benchmarks.json](https://chartkit.dev/benchmarks.json).
 
 | | ChartKit | Next or note |
 | --- | ---: | --- |
-| Line chart, gzip | **34,554 B** | Loss to uPlot at 23,276 B (JS). Stylesheet is 762 B more, summed 24,038. `scripts/size.mjs` on `038cf5d`. Harness minimal line is 34,767 B |
-| Server render, 1k line | **0.85 ms** | ECharts 6.65 ms mean. uPlot, Chart.js, and Recharts produced no chart without a DOM |
+| Line chart, gzip | **32,110 B** | Loss to uPlot. `bench/results/bundle.json` cell library ChartKit minimal, chart `line`, field `gzipBytes`. uPlot `packages` id `uplot` `gzipBytes` is 23,292 and `cssGzipBytes` is 762, summed 24,054 (`summary.rivalSmaller` chart `line`, field `gzip`) |
+| First paint, 1k line | **12 ms** | `bench/results/paint.json` charts, library ChartKit, chart `line`, points 1000, variant `sampling-auto`, field `initialMs`. Median of 5. uPlot’s matching cell `initialMs` is 14.3. The 0.85 ms server-render figure is not in the current bench files. Phase 4 SSR of a 100,000 point line is `bench/results/ssr.json` library ChartKit minimal, chart `line`, points 100000, field `medianMs` 2.63 |
 | Agent, no docs, then repair() | **21/42 → 42/42** | Round 6, 2026-10-16. Not re-run for round 13. Recharts, ECharts, and Chart.js were already 42/42 with no docs |
 | Initial, 12 cells | wins all | Even 1M is 23.6 ms vs uPlot 26.5 ms |
 | Aligned update | wins 6 of 12 | Losses: even 1k 1.5 vs 1.2, even 10k 1.9 vs 1.7, jitter 1k 1.6 vs 1.4, gapped 1k 1.6 vs 1.4, gapped 10k 1.9 vs 1.6, gapped 100k 3.5 vs 3.4 |
@@ -24,7 +24,7 @@ Canvas line, measured 2026-10-21, median of 5, Playwright Chromium, 640×360, sa
 | 100k | 8.2 | 9.1 | 13.1 | 20.1 | 17.6 | 29.0 | 18.1 | 23.0 |
 | 1M | 16.5 | 17.1 | 20.8 | 27.7 | 25.1 | 20.6 | 21.8 | 20.9 |
 
-Canvas losses: render is slower than SVG at 10k (7.8 vs 7.3), 100k (9.1 vs 8.2), and 1M (17.1 vs 16.5). First paint is slower than SVG at those sizes (21.8 vs 13.1, 20.1 vs 13.1, 27.7 vs 20.8) and slower than uPlot (14.5, 17.6, 25.1). The 1M update is slower than SVG (21.8 vs 20.6) and slower than uPlot (21.8 vs 20.9). Canvas wins the 10k and 100k updates against both SVG and uPlot. There is no first-paint crossover, so `auto` stays on SVG at 10k and switches at 100,000 rows, where the update win is large. 1M first paint is 27.7 ms and the update is 21.8 ms. `scripts/size.mjs` line is 34,554 bytes gzip, 539 bytes over main `9c1dbdc` (34,015). Facets, concatenation, breakpoints, and right-to-left layout load with `all` and `extra`, not with `createRenderer([line])`. The typed canvas sampler and the painter stay out of the line bundle. `@chartkitdev/core/all` is 64,372 bytes gzip (main 57,650). The canvas painter is a separate chunk, 57,127 bytes gzip (main 56,817). `interact` is 17,641 (main 16,637). `validate` is 32,206 (main 31,177). extra is 88,495 (main 82,076).
+Canvas losses: render is slower than SVG at 10k (7.8 vs 7.3), 100k (9.1 vs 8.2), and 1M (17.1 vs 16.5). First paint is slower than SVG at those sizes (21.8 vs 13.1, 20.1 vs 13.1, 27.7 vs 20.8) and slower than uPlot (14.5, 17.6, 25.1). The 1M update is slower than SVG (21.8 vs 20.6) and slower than uPlot (21.8 vs 20.9). Canvas wins the 10k and 100k updates against both SVG and uPlot. There is no first-paint crossover, so `auto` stays on SVG at 10k and switches at 100,000 rows, where the update win is large. 1M first paint is 27.7 ms and the update is 21.8 ms. The current line bundle is 32,110 bytes gzip (`bench/results/bundle.json`, library ChartKit minimal, chart `line`, `gzipBytes`). `/all` is 78,081 bytes gzip (library ChartKit all, chart `all`, `gzipBytes`). uPlot’s package is 23,292 bytes gzip and its stylesheet is 762 (`packages` id `uplot`, `gzipBytes` and `cssGzipBytes`).
 
 **[Documentation](https://chartkit.dev)** | **[When to use](https://chartkit.dev/when-to-use)** | **[Benchmarks](https://chartkit.dev/benchmarks)** | **[Schema](https://chartkit.dev/schema/v1.json)** | **[Roadmap](ROADMAP.md)** | **[llms.txt](catalog/public/llms.txt)**
 

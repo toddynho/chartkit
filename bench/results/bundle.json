@@ -1,6 +1,6 @@
 {
-  "measuredAt": "2026-10-29T17:26:58.243Z",
-  "commit": "55fc89dba40a2b607daff539416c1f389cb917f5",
+  "measuredAt": "2026-10-29T19:08:35.474Z",
+  "commit": "bb7c4b8996562106d7f74ae8d2db98f24f08f547",
   "node": "v22.23.4",
   "versions": {
     "@chartkitdev/core": "0.5.0",
@@ -9119,7 +9119,7 @@
       "react": "included",
       "group": "visx",
       "status": "ok",
-      "note": "Corrected mount: createRoot from react-dom/client plus HeatmapRect. gzipBytes includes React and ReactDOM. The earlier cell bundled HeatmapRect alone (1,621 gzip) and did not import react-dom.",
+      "note": "Mounts with react-dom/client createRoot. HeatmapRect alone only imports react/jsx-runtime, so a bundle that never calls createRoot does not contain React or ReactDOM.",
       "ssr": "visx",
       "ssrNote": null,
       "aliases": [],
@@ -9131,7 +9131,7 @@
         "minBytes": 2662,
         "gzipBytes": 1360,
         "brotliBytes": 1221,
-        "note": "react, react-dom, react-dom/client, and jsx-runtime are external. This is the chart code when the app already ships React. The previous 1,621 gzip figure did not contain React or ReactDOM, only a few hundred bytes of react/jsx-runtime."
+        "note": "react, react-dom, and jsx-runtime are external. This is the added cost when the app already ships React."
       },
       "treeShakeable": true,
       "label": null
@@ -13504,18 +13504,18 @@
     },
     "chartkitGzipMin": {
       "chart": "progress-ring",
-      "gzipBytes": 7188
+      "gzipBytes": 6673
     },
     "chartkitGzipMax": {
       "chart": "combo",
-      "gzipBytes": 46457
+      "gzipBytes": 38220
     },
     "rivalSmaller": [
       {
         "chart": "line",
         "library": "uPlot",
         "gzip": 24054,
-        "chartkitGzip": 42098,
+        "chartkitGzip": 32110,
         "label": "not tree-shakeable",
         "reactExternal": null
       },
@@ -13523,7 +13523,7 @@
         "chart": "bar",
         "library": "uPlot",
         "gzip": 24054,
-        "chartkitGzip": 41750,
+        "chartkitGzip": 33686,
         "label": "not tree-shakeable",
         "reactExternal": null
       },
@@ -13531,7 +13531,7 @@
         "chart": "scatter",
         "library": "uPlot",
         "gzip": 24054,
-        "chartkitGzip": 26489,
+        "chartkitGzip": 25987,
         "label": "not tree-shakeable",
         "reactExternal": null
       },
@@ -13539,7 +13539,7 @@
         "chart": "mini-area",
         "library": "uPlot",
         "gzip": 24054,
-        "chartkitGzip": 42104,
+        "chartkitGzip": 32114,
         "label": "not tree-shakeable",
         "reactExternal": null
       }

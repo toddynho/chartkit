@@ -154,7 +154,7 @@ function writeMatrix(name, section) {
     ...section,
   };
   mkdirSync(join(benchRoot, "results"), { recursive: true });
-  writeFileSync(join(benchRoot, "results", name), JSON.stringify(payload, null, 2));
+  writeFileSync(join(benchRoot, "results", name), `${JSON.stringify(payload, null, 2)}\n`);
   console.log(`wrote bench/results/${name}`);
 }
 
@@ -174,7 +174,7 @@ function writePaint(result) {
     charts: browser.charts,
   };
   mkdirSync(join(benchRoot, "results"), { recursive: true });
-  writeFileSync(join(benchRoot, "results", name), JSON.stringify(payload, null, 2));
+  writeFileSync(join(benchRoot, "results", name), `${JSON.stringify(payload, null, 2)}\n`);
   console.log(`wrote bench/results/${name}`);
 }
 

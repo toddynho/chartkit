@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
 import { compress } from "../lib/compress.mjs";
 import { AMBIGUOUS_ALIASES, buildMatrix, bundleMethod } from "./catalog.mjs";
+import { bundleSummary } from "../lib/phase4-md.mjs";
 import { collapseTreeShake } from "./tree.mjs";
 
 const benchRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -137,7 +138,7 @@ export async function measureBundles() {
   }
   const packages = collapseTreeShake(cells);
   const counts = countCells(cells);
-  return {
+  const result = {
     phase: 4,
     method: bundleMethod,
     treeNoiseGzip: 512,
@@ -148,6 +149,8 @@ export async function measureBundles() {
     cells: cells.map(publicCell),
     filtered: Boolean(process.env.BENCH_TYPES || process.env.BENCH_LIBS),
   };
+  result.summary = bundleSummary(result);
+  return result;
 }
 
 export function countCells(cells) {
