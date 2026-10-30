@@ -7,7 +7,7 @@ import Docs from "../../layouts/Docs.astro";
 export function getStaticPaths() {
   return docArticles.flatMap((article) => {
     if (!article.slug || article.slug === "mcp") return [];
-    if (article.slug === "react" || article.slug === "vue" || article.slug === "svelte" || article.slug === "vanilla") {
+    if (article.slug === "react" || article.slug === "vue" || article.slug === "svelte" || article.slug === "astro" || article.slug === "vanilla") {
       return [];
     }
     const paths = [article.slug, ...article.aliases];
