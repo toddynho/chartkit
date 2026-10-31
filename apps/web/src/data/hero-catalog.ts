@@ -1,3 +1,5 @@
+import { applyHeroColor, heroPaints } from "./hero-accent";
+
 /**
  * Every chart type the library actually renders.
  * Schema enum is the core registry. Deferred types (planning charts and maps)
@@ -522,4 +524,11 @@ for (const type of Object.keys(heroExtra)) {
   if (!heroTypes.some((item) => item.type === type && !item.slide)) {
     throw new Error(`hero extra spec ${type} is not an unloaded catalog type`);
   }
+}
+
+const heroPaint = heroPaints(heroTypes.map((type) => type.type));
+for (const [type, extra] of Object.entries(heroExtra)) {
+  const paint = heroPaint.get(type);
+  if (!paint) throw new Error(`hero catalog is missing a color for ${type}`);
+  extra.spec = applyHeroColor(extra.spec, paint);
 }

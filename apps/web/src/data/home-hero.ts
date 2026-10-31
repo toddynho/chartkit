@@ -1,6 +1,8 @@
 import { isExtra } from "@chartkitdev/core/all";
 import { paintSpec } from "../lib/chartkit";
 import { chartIcon } from "./chart-icons";
+import { applyHeroColor, heroPaints } from "./hero-accent";
+import { heroTypes } from "./hero-catalog";
 
 /**
  * Homepage hero carousel.
@@ -59,6 +61,11 @@ function drawOf(spec: Record<string, unknown>): Record<string, unknown> {
   return drawn;
 }
 
+const heroPaint = heroPaints(heroTypes.map((type) => type.type));
+const paintBySlide = new Map(
+  heroTypes.flatMap((type) => (type.slide ? [[type.slide, heroPaint.get(type.type)] as const] : [])),
+);
+
 function chart(
   id: string,
   label: string,
@@ -66,15 +73,17 @@ function chart(
   subtitle: string,
   motion: HeroMotion,
   iconType: string,
-  spec: Record<string, unknown>,
+  body: Record<string, unknown>,
 ): HeroChart {
+  const paint = paintBySlide.get(id);
+  const spec = paint ? applyHeroColor(body, paint) : body;
   const type = String(spec.type ?? "");
   const drawn = drawOf(spec);
-  for (const [name, body] of [
+  for (const [name, part] of [
     ["spec", spec],
     ["render", drawn],
   ] as const) {
-    const result = paintSpec(body);
+    const result = paintSpec(part);
     if (!result.ok || !result.svg.includes("<svg") || result.svg.includes("ck-chart-error")) {
       const detail = result.issues.map((issue) => `${issue.code} ${issue.path} ${issue.message}`).join("; ");
       throw new Error(`Homepage hero ${id} ${name} failed: ${result.footer} ${detail}`);

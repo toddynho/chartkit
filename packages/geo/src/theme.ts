@@ -64,6 +64,10 @@ const SOFT: Chrome = {
 };
 
 export function chromeFor(theme: unknown): Chrome {
+  return applyAccent(chromeOf(theme), theme);
+}
+
+function chromeOf(theme: unknown): Chrome {
   const name = typeof theme === "string" ? theme.toLowerCase() : "soft";
   if (name === "" || name === "soft" || name === "auto" || name === "refined" || name === "editorial") return SOFT;
   const named = NAMED[name];
@@ -76,4 +80,13 @@ export function chromeFor(theme: unknown): Chrome {
     chrome.land = "#3e5264";
   }
   return chrome;
+}
+
+/** Hero maps pass theme.tokens.accent. A string preset is unchanged. */
+function applyAccent(chrome: Chrome, theme: unknown): Chrome {
+  if (!theme || typeof theme !== "object" || !("tokens" in theme)) return chrome;
+  const tokens = (theme as { tokens?: { accent?: unknown } }).tokens;
+  const accent = tokens && typeof tokens.accent === "string" ? tokens.accent : "";
+  if (!/^#[0-9a-fA-F]{6}$/.test(accent)) return chrome;
+  return { ...chrome, accent };
 }
