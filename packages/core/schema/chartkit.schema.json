@@ -2758,9 +2758,13 @@
             "sunset",
             "silver",
             "pearl",
-            "latte"
+            "latte",
+            "tape",
+            "kite",
+            "mustard",
+            "violet"
           ],
-          "description": "Preset name. 'auto' and 'soft' are the Soft default (light-dark, transparent plot). 'refined' and 'editorial' are built in. 'midnight' is opt-in. Other names render as midnight until that preset is imported."
+          "description": "Preset name. 'auto' and 'soft' are the Soft default (light-dark, transparent plot). 'refined' and 'editorial' are built in. 'midnight' is opt-in. tape, kite, mustard, and violet ship with the other named presets and render as midnight until that preset is imported."
         },
         {
           "type": "object",
@@ -2788,10 +2792,14 @@
                 "sunset",
                 "silver",
                 "pearl",
-                "latte"
+                "latte",
+                "tape",
+                "kite",
+                "mustard",
+                "violet"
               ],
               "default": "auto",
-              "description": "Base preset."
+              "description": "Base preset. tape, kite, mustard, and violet need @chartkitdev/core/themes/all or the matching themes entry."
             },
             "mode": {
               "enum": [
@@ -2801,6 +2809,26 @@
               ],
               "default": "auto",
               "description": "Force light or dark, or follow prefers-color-scheme."
+            },
+            "brand": {
+              "description": "Hex colour, or a list of up to eight. Shorthand #rgb and a missing hash are repaired to #rrggbb. render() derives light and dark tokens when @chartkitdev/core/themes/brand is imported. Until then the named preset is used.",
+              "oneOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 32
+                },
+                {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 8,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 32
+                  }
+                }
+              ]
             },
             "tokens": {
               "type": "object",

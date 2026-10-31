@@ -1,0 +1,96 @@
+---
+import "@chartkitdev/core/themes/brand";
+import "../../../styles/surfaces.css";
+import DocsPage from "../../../components/DocsPage.astro";
+import ThemeCharts from "../../../components/ThemeCharts.astro";
+import { measuredSpecs } from "../../../data/measured-charts";
+import { scriptJson } from "../../../lib/spec-text";
+
+const theme = { brand: "#ca8a04" };
+const specs = measuredSpecs(theme);
+const sample = `import { createTheme } from "@chartkitdev/core/themes/brand";
+import { repair } from "@chartkitdev/core/validate";
+
+const theme = createTheme({ brand: "#ca8a04" });
+const spec = { version: "1", type: "bar", theme: { brand: "#ca8a04" } };
+const fixed = repair(spec);`;
+const description = "Pass a hex colour. createTheme returns a light and a dark preset, and theme.brand does the same at render.";
+---
+
+<DocsPage title="From a brand" description={description} href="/docs/themes/from-brand" lede="Hex in, preset out. One brand colour becomes the surfaces, the series, and an up/down pair.">
+  <p>
+    <code>createTheme(&#123; brand &#125;)</code> starts from <code>paletteFromBrand</code>, then refits every colour to the tinted surface. Text has to clear 7:1. Tick labels have to clear 4.5:1. Series marks have to clear 3:1. Pairs that collapse under deuteranopia or protanopia are moved, and the move is listed on <code>adjustments</code>.
+  </p>
+  <p>
+    The spec field is <code>theme.brand</code>. <code>validate</code> and <code>repair</code> turn <code>#rgb</code>, a missing hash, and uppercase into lowercase <code>#rrggbb</code> (CK3085). Import <code>@chartkitdev/core/themes/brand</code> before <code>render</code>. Without that import the chart keeps its named preset. The colour math is not in the line bundle.
+  </p>
+  <figure class="code"><figcaption>ts</figcaption><pre><code>{sample}</code></pre></figure>
+  <div data-brand-live>
+    <div class="brand-controls">
+      <label>
+        Brand hex
+        <input data-brand-hex type="text" value="#ca8a04" spellcheck="false" autocomplete="off" aria-label="Brand hex" />
+      </label>
+      <div class="brand-drop" data-brand-drop>
+        <label>
+          Drawing
+          <input data-brand-file type="file" accept="image/*,.svg" />
+        </label>
+        <p>Drop an SVG or an image. SVG fills are read as text. An image is sampled in the browser at 48px. Node does not decode PNG or JPEG.</p>
+      </div>
+    </div>
+    <p class="meta" data-brand-status></p>
+    <div class="swatches" data-brand-swatches aria-hidden="true"></div>
+    <p class="meta" data-brand-checks></p>
+    <div data-brand-charts>
+      <ThemeCharts theme={theme} />
+    </div>
+  </div>
+  <p>
+    These charts are the published line-bundle gzip bytes and the even-x first-paint times from <code>catalog/public/benchmarks.json</code>. Mustard and Violet are that same function, frozen, for <code>#ca8a04</code> and <code>#6d28d9</code>. A warm brand suggests riso tiles. The suggestion is on <code>textures</code>. The charts stay flat colour.
+  </p>
+  <script id="brand-specs" type="application/json" set:html={scriptJson(specs)} />
+</DocsPage>
+
+<style>
+  .brand-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: stretch;
+    margin: 8px 0 12px;
+  }
+  .brand-controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .brand-controls input[type="text"] {
+    font: 14px/1.4 var(--mono);
+    color: var(--ink);
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 10px;
+    width: 9.5rem;
+  }
+  .brand-drop {
+    flex: 1;
+    min-width: 16rem;
+    border: 1px dashed var(--line-2);
+    border-radius: 14px;
+    background: var(--bg-elev);
+    padding: 12px 14px;
+  }
+  .brand-drop p {
+    margin: 8px 0 0;
+    color: var(--ink-2);
+    font-size: 13px;
+  }
+</style>
+
+<script>
+  import "../../../scripts/brand-live.ts";
+</script>

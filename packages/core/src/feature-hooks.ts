@@ -42,6 +42,18 @@ export const slots: {
 export const presets = new Map<string, PresetTokens>();
 export const geometries = new Map<string, PresetGeometry>();
 
+/**
+ * Set by @chartkitdev/core/themes/brand. Null in the line bundle, so theme.brand
+ * keeps the named preset until that module is imported.
+ */
+export type BrandThemeFn = (brand: readonly string[], mode: "light" | "dark" | "auto") => PresetTokens;
+export let brandTheme: BrandThemeFn | null = null;
+
+export function registerBrandTheme(fn: BrandThemeFn): void {
+  brandTheme = fn;
+  bump();
+}
+
 export function registerPreset(name: string, tokens: PresetTokens): PresetTokens {
   presets.set(name, tokens);
   revision += 1;

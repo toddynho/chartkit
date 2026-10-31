@@ -19,6 +19,7 @@ export type Severity = "error" | "warning";
  * Visual axes use CK3058–CK3071. CK3072 is the y-channel stack group.
  * Polar, radial bar, and rose use CK3073–CK3080.
  * Dashboard gaps use CK3081–CK3084: rings, thresholds, and a volume pane.
+ * CK3085 is a theme.brand colour that is not a hex value.
  */
 export interface Diagnostic {
   code: string;

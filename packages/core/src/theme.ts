@@ -1,4 +1,4 @@
-import { geometries, presets, registerGeometry, registerPreset } from "./feature-hooks";
+import { brandTheme, geometries, presets, registerGeometry, registerPreset } from "./feature-hooks";
 import { midnight as midnightBase } from "./themes/midnight-tokens";
 
 export { registerGeometry, registerPreset };
@@ -117,6 +117,14 @@ export function resolvePreset(theme: unknown): PresetTokens {
   let base = presets.get(name) ?? midnight ?? auto;
   if (mode === "dark" && name !== "midnight" && midnight) base = midnight;
   else if (mode === "light" && name === "midnight") base = auto;
+  const branded = brandOf(theme);
+  if (branded && brandTheme) {
+    try {
+      base = brandTheme(branded, mode);
+    } catch (error) {
+      if (!(error instanceof TypeError)) throw error;
+    }
+  }
   const tokens = themeRecord(theme);
   if (!tokens) return base;
   const next: PresetTokens = { ...base };
@@ -225,6 +233,15 @@ function presetName(theme: unknown): string {
   if (name === "soft") return presets.has("soft") ? "soft" : "auto";
   if (presets.has(name)) return name;
   return presets.has("midnight") ? "midnight" : "auto";
+}
+
+function brandOf(theme: unknown): string[] | undefined {
+  if (!isRecord(theme)) return;
+  const value = theme.brand;
+  if (typeof value === "string" && value.length > 0) return [value];
+  if (!Array.isArray(value)) return;
+  const colors = value.filter((item): item is string => typeof item === "string" && item.length > 0);
+  return colors.length > 0 ? colors : undefined;
 }
 
 function themeRecord(theme: unknown): Record<string, unknown> | undefined {

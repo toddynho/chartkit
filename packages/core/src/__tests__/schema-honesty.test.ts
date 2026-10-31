@@ -9,6 +9,7 @@ import { attach } from "../interact";
 import { MARK_APPLIES } from "../marks";
 import type { ChartRenderer } from "../render";
 import { validate } from "../validate";
+import "../themes/brand";
 
 const schema = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../schema/chartkit.schema.json"), "utf8")) as SchemaNode;
 
@@ -135,6 +136,7 @@ function probes(leaf: Leaf): unknown[] {
   if (leaf.path === "/annotations") return [[{ type: "rule", axis: "y", value: 2500, label: "Goal" }]];
   if (leaf.path === "/transform") return [[{ type: "filter", field: "region", eq: "EU" }]];
   if (leaf.path === "/timezone") return ["America/New_York"];
+  if (leaf.path === "/theme/brand") return ["#ca8a04"];
   const values = [...leaf.enums, ...leaf.consts];
   const out: unknown[] = [];
   const unique = new Set<string>();
@@ -233,6 +235,12 @@ function annotationSeed(path: string): Record<string, unknown> {
 }
 
 function apply(host: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
+  if (path === "/theme/brand") {
+    const spec = structuredClone(host);
+    const theme = isRecord(spec.theme) ? spec.theme : {};
+    spec.theme = { ...theme, brand: value };
+    return spec;
+  }
   if (path === "/data/sampling") {
     const spec = structuredClone(host);
     const data = spec.data;
@@ -607,6 +615,7 @@ async function entrySet(ready: Host[]): Promise<EntrySet> {
       // the same module @chartkitdev/core/all imports. The size bench does not.
       vi.resetModules();
       await import("../features");
+      await import("../themes/brand");
     }
     const { createRenderer } = await import("../render");
     const { mountLayout } = await import("../layout");
@@ -944,6 +953,7 @@ describe("schema honesty", () => {
   });
 
   it("walks every schema property on the full renderer and on each chart entry", async () => {
+    await import("../themes/brand");
     const ready = hosts();
     expect(ready.length).toBeGreaterThan(5);
     const entries = await entrySet(ready);

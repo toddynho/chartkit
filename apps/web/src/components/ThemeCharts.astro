@@ -1,0 +1,25 @@
+---
+import "../styles/surfaces.css";
+import ChartMount from "./ChartMount.astro";
+import { measuredSpecs } from "../data/measured-charts";
+import { renderChart } from "../lib/paint-chart";
+
+interface Props {
+  theme?: unknown;
+}
+
+const { theme } = Astro.props;
+const charts = measuredSpecs(theme).map((spec) => ({
+  spec,
+  svg: renderChart(spec),
+  alt: spec.a11y.alt,
+}));
+---
+
+<div class="look-grid">
+  {
+    charts.map((chart) => (
+      <ChartMount spec={chart.spec} svg={chart.svg} alt={chart.alt} preset />
+    ))
+  }
+</div>

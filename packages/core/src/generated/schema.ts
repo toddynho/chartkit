@@ -638,10 +638,14 @@ export type Theme =
       | "silver"
       | "pearl"
       | "latte"
+      | "tape"
+      | "kite"
+      | "mustard"
+      | "violet"
     )
   | {
       /**
-       * Base preset.
+       * Base preset. tape, kite, mustard, and violet need @chartkitdev/core/themes/all or the matching themes entry.
        */
       preset?:
         | "auto"
@@ -664,11 +668,28 @@ export type Theme =
         | "sunset"
         | "silver"
         | "pearl"
-        | "latte";
+        | "latte"
+        | "tape"
+        | "kite"
+        | "mustard"
+        | "violet";
       /**
        * Force light or dark, or follow prefers-color-scheme.
        */
       mode?: "auto" | "light" | "dark";
+      /**
+       * Hex colour, or a list of up to eight. Shorthand #rgb and a missing hash are repaired to #rrggbb. render() derives light and dark tokens when @chartkitdev/core/themes/brand is imported. Until then the named preset is used.
+       */
+      brand?:
+        | string
+        | [string]
+        | [string, string]
+        | [string, string, string]
+        | [string, string, string, string]
+        | [string, string, string, string, string]
+        | [string, string, string, string, string, string]
+        | [string, string, string, string, string, string, string]
+        | [string, string, string, string, string, string, string, string];
       /**
        * Override individual tokens.
        */

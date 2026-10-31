@@ -1,0 +1,57 @@
+---
+import "@chartkitdev/core/themes/brand";
+import { SAMPLE_MARK, colorsFromSvg, createTheme } from "@chartkitdev/core/themes/brand";
+import "../../../styles/surfaces.css";
+import DocsPage from "../../../components/DocsPage.astro";
+import ThemeCharts from "../../../components/ThemeCharts.astro";
+
+const colors = colorsFromSvg(SAMPLE_MARK);
+const theme = createTheme({ brand: colors });
+const description = "Read the fills in an SVG, or sample a bitmap in the browser, and pass those colours to createTheme.";
+const sample = `import { colorsFromSvg, colorsFromBitmap, createTheme } from "@chartkitdev/core/themes/brand";
+
+const colors = colorsFromSvg(svg);
+const theme = createTheme({ brand: colors });
+
+const fromFile = await colorsFromBitmap(file);`;
+function round1(n: number): string {
+  return (Math.round(n * 10) / 10).toFixed(1);
+}
+const checks = theme.checks;
+const checkText = `This mark resolves to ${colors.join(", ")}. Light text ${round1(checks.lightText)}:1, ticks ${round1(checks.lightMuted)}:1, series min ${round1(checks.lightSeriesMin)}:1. Dark text ${round1(checks.darkText)}:1, ticks ${round1(checks.darkMuted)}:1. Suggested texture: ${theme.textures.id}.`;
+---
+
+<DocsPage title="From a drawing" description={description} href="/docs/themes/from-drawing" lede="Image or sketch in, preset out. The drawing is a source of colours, not a logo lockup.">
+  <p>
+    <code>colorsFromSvg</code> reads hex fills and strokes, skips white and black, and returns up to four colours, most frequent first. Pass that list to <code>createTheme</code>. The lead colour anchors the surfaces. The others keep their hues in the series.
+  </p>
+  <p>
+    A raster is <code>sampleImageData</code> on RGBA pixels, or <code>colorsFromBitmap</code> when the page has a canvas. The bitmap is scaled so the long edge is 48px, then the same sampler runs. Node has no PNG or JPEG decoder in this package, so <code>colorsFromBitmap</code> throws there. Pass pixels you already decoded, or an SVG string.
+  </p>
+  <figure class="code"><figcaption>ts</figcaption><pre><code>{sample}</code></pre></figure>
+  <h2>A three-shape mark</h2>
+  <p>Teal, mustard, and coral. The mark is the input. The charts below are the published bundle and paint numbers, coloured from these fills.</p>
+  <div class="mark" aria-hidden="true"><Fragment set:html={SAMPLE_MARK} /></div>
+  <div class="swatches" aria-hidden="true">
+    {colors.map((color) => <i style={`background:${color}`} title={color} />)}
+  </div>
+  <p class="meta">{checkText}</p>
+  <ThemeCharts theme={{ brand: colors }} />
+</DocsPage>
+
+<style>
+  .mark {
+    width: 72px;
+    height: 72px;
+    margin: 8px 0;
+  }
+  .mark :global(svg) {
+    width: 72px;
+    height: 72px;
+    display: block;
+  }
+</style>
+
+<script>
+  import "../../../scripts/brand-mount.ts";
+</script>

@@ -76,6 +76,10 @@ const themes = [
   "soft",
   "refined",
   "editorial",
+  "tape",
+  "kite",
+  "mustard",
+  "violet",
 ];
 
 const entry: Record<string, string> = {

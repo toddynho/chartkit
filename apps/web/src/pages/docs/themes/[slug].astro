@@ -1,0 +1,35 @@
+---
+import "../../../styles/surfaces.css";
+import DocsPage from "../../../components/DocsPage.astro";
+import ThemeCharts from "../../../components/ThemeCharts.astro";
+import { themePage, themePages } from "../../../data/theme-pages";
+
+export function getStaticPaths() {
+  return themePages.map((page) => ({ params: { slug: page.slug }, props: { slug: page.slug } }));
+}
+
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+const page = themePage(slug);
+if (!page) throw new Error(`Unknown theme page: ${slug}`);
+const href = `/docs/themes/${page.slug}`;
+---
+
+<DocsPage title={page.title} description={page.description} href={href} lede={page.lede}>
+  <p>{page.audience}</p>
+  <p>{page.geometry}</p>
+  <p>{page.type}</p>
+  <p>{page.checks}</p>
+  <h2>Published numbers</h2>
+  <p>
+    The charts use the line-bundle gzip bytes and the even-x first-paint times in <code>catalog/public/benchmarks.json</code>. ChartKit’s line figure is dated in that file. The even-x times are round 13.
+  </p>
+  <ThemeCharts theme={page.theme} />
+</DocsPage>
+
+<script>
+  import "../../../scripts/mount-charts.ts";
+</script>

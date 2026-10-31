@@ -11,6 +11,7 @@ import { CANVAS_AT, CANVAS_TYPES, pointCount, readRender } from "./render-mode";
 import { parseSpecifier } from "./format";
 import { domainEnds } from "./svg";
 import { gapChecks } from "./gaps-checks";
+import { canonicalHex } from "./themes/hex";
 import { polarChecks } from "./polar-checks";
 import { keyedDrillChildren, nearMatches, suggestHint } from "./walker";
 
@@ -66,6 +67,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   const known = type !== undefined && CHART_TYPES.has(type);
 
   if (known && isRecord(spec.mark)) warnUnusedMarks(type, spec.mark, diagnostics);
+  checkBrand(spec, diagnostics);
   gapChecks(spec, diagnostics);
   polarChecks(spec, diagnostics);
   warnGridWeeks(spec, diagnostics);
@@ -1876,6 +1878,38 @@ function xLooksDated(spec: Record<string, unknown>): boolean {
     else if (typeof value === "string" && /\d{4}/.test(value) && Number.isFinite(Date.parse(value))) dated += 1;
   }
   return seen > 0 && dated === seen;
+}
+
+function checkBrand(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  if (!isRecord(spec.theme) || spec.theme.brand === undefined) return;
+  const brand = spec.theme.brand;
+  const items = typeof brand === "string" ? [brand] : Array.isArray(brand) ? brand : null;
+  if (!items) return;
+  items.forEach((item, index) => {
+    if (typeof item !== "string") return;
+    const hex = canonicalHex(item);
+    const path = typeof brand === "string" ? "/theme/brand" : `/theme/brand/${index}`;
+    if (!hex) {
+      diagnostics.push({
+        code: "CK3085",
+        severity: "error",
+        message: "brand colour must be a hex value",
+        path,
+        hint: "theme.brand is #rgb or #rrggbb. Import @chartkitdev/core/themes/brand so render derives the preset.",
+      });
+      return;
+    }
+    if (hex !== item) {
+      diagnostics.push({
+        code: "CK3085",
+        severity: "error",
+        message: "brand colour must be a hex value",
+        path,
+        hint: `${item.trim()} means ${hex}.`,
+        fix: [{ op: "replace", path, value: hex }],
+      });
+    }
+  });
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
