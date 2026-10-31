@@ -1134,7 +1134,7 @@ html[data-stack="element"] .home-card .stack-sample [data-stack-panel="element"]
 .pdf-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
 .hh {
-  padding: 56px 0 64px;
+  padding: 56px 0 48px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
   gap: 64px;
@@ -1331,6 +1331,82 @@ html[data-stack="element"] .home-card .stack-sample [data-stack-panel="element"]
   box-shadow: 0 1px 2px rgba(23, 24, 26, 0.05), 0 10px 28px rgba(23, 24, 26, 0.05);
 }
 
+.hh-catalog { padding: 0 0 88px; }
+
+.hh-catalog__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding-top: 26px;
+  margin-bottom: 14px;
+  border-top: 1px solid #e6e6e2;
+}
+
+.hh-catalog__countline {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  color: #55575c;
+  font-size: 14px;
+}
+
+.hh-catalog__count {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: #0a63e6;
+}
+
+.hh-catalog__head a { color: #55575c; font-size: 14px; text-decoration: none; }
+.hh-catalog__head a:hover { color: #17181a; }
+
+.hh-catalog__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+  gap: 6px;
+}
+
+.hh-catalog__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 4px 11px;
+  border: 1px solid #e6e6e2;
+  border-radius: 10px;
+  background: #fff;
+  color: #17181a;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.15;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), background 0.2s;
+}
+
+.hh-catalog__tile span { text-wrap: balance; }
+
+.hh-catalog__tile svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+  max-width: none;
+  flex: none;
+}
+
+.hh-catalog__tile:hover { transform: translateY(-2px); background: #fafafa; }
+
+.hh-catalog__tile.is-on,
+.hh-catalog__tile.is-on:hover {
+  background: #17181a;
+  border-color: #17181a;
+  color: #fff;
+}
+
 #get-started { scroll-margin-top: 72px; }
 
 .gs {
@@ -1508,6 +1584,8 @@ html[data-stack="element"] .gs .stack-chip[data-stack-chip="element"] {
 @media (prefers-reduced-motion: reduce) {
   .hh-chart svg,
   .hh-chart svg * { animation: none !important; }
+  .hh-catalog__tile { transition: none; }
+  .hh-catalog__tile:hover { transform: none; }
 }
 
 @media (max-width: 860px) {

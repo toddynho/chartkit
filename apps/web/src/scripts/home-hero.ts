@@ -35,12 +35,9 @@ if (root && raw) {
   const specView = root.querySelector<HTMLElement>("[data-hero-spec]");
   const chartView = root.querySelector<HTMLElement>("[data-hero-chart]");
   const host = root.querySelector<HTMLElement>("[data-hero-host]");
-  const pills = [...root.querySelectorAll<HTMLButtonElement>("[data-hero-pill]")];
+  const pills = [...document.querySelectorAll<HTMLButtonElement>("[data-hero-pill]")];
   const viewButtons = [...root.querySelectorAll<HTMLButtonElement>("[data-hero-view]")];
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const rotation = slides
-    .map((slide, index) => ({ slide, index }))
-    .filter(({ slide }) => pills.some((pill) => pill.dataset.heroSlide === slide.id));
   let rot = 0;
   let pinned = false;
   let generation = 0;
@@ -175,7 +172,6 @@ if (root && raw) {
     if (!host || !specView || !title || !sub) return;
     const type = pick.dataset.heroType ?? "";
     const token = ++generation;
-    pinned = true;
     title.textContent = pick.dataset.heroTitle ?? pick.textContent ?? type;
     sub.textContent = pick.dataset.heroSub ?? "";
     mark((pill) => pill === pick);
@@ -201,21 +197,22 @@ if (root && raw) {
     }
   }
 
-  pills.forEach((pill) => {
-    pill.addEventListener("click", () => {
-      pinned = true;
-      const slide = pill.dataset.heroSlide;
-      if (slide) {
-        const at = slides.findIndex((item) => item.id === slide);
-        const turn = rotation.findIndex((item) => item.index === at);
-        if (at >= 0) {
-          if (turn >= 0) rot = turn;
-          show(at);
-        }
-        return;
-      }
-      void showExtra(pill);
-    });
+  function openPill(index: number, fromAuto: boolean): void {
+    const pill = pills[index];
+    if (!pill) return;
+    rot = index;
+    if (!fromAuto) pinned = true;
+    const slide = pill.dataset.heroSlide;
+    if (slide) {
+      const at = slides.findIndex((item) => item.id === slide);
+      if (at >= 0) show(at);
+      return;
+    }
+    void showExtra(pill);
+  }
+
+  pills.forEach((pill, index) => {
+    pill.addEventListener("click", () => openPill(index, false));
   });
 
   viewButtons.forEach((button) => {
@@ -231,14 +228,13 @@ if (root && raw) {
     });
   });
 
-  if (rotation[0]) show(rotation[0].index);
+  if (pills.length > 0) openPill(0, true);
 
-  if (!reduce && rotation.length > 1) {
+  if (!reduce && pills.length > 1) {
     window.setInterval(() => {
       if (pinned || document.visibilityState === "hidden") return;
-      rot = (rot + 1) % rotation.length;
-      const turn = rotation[rot];
-      if (turn) show(turn.index);
+      rot = (rot + 1) % pills.length;
+      openPill(rot, true);
     }, INTERVAL_MS);
   }
 }

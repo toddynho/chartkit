@@ -31,6 +31,22 @@ const extra: Record<string, string> = {
   venn: '<circle cx="9.2" cy="10" r="5.4" fill="currentColor" opacity="0.22" stroke="currentColor" stroke-width="1.3"/><circle cx="14.8" cy="10" r="5.4" fill="currentColor" opacity="0.22" stroke="currentColor" stroke-width="1.3"/>',
   journey:
     '<circle cx="4" cy="14" r="1.7" fill="currentColor"/><circle cx="12" cy="8" r="1.7" fill="currentColor" opacity="0.72"/><circle cx="20" cy="5" r="1.7" fill="currentColor" opacity="0.45"/><path d="M5.6 13.1 L10.4 8.9 M13.6 7.5 L18.4 5.6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>',
+  "stacked-area":
+    '<path d="M2 15 L7 11 L12 12 L17 8 L22 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2 18 L7 15 L12 16 L17 13 L22 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.55"/>',
+  "area-range":
+    '<path d="M2 7 C8 3, 14 9, 22 5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M2 14 C8 10, 14 16, 22 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>',
+  "bar-range":
+    '<path d="M5 15 V7 M12 16 V4 M19 13 V8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>',
+  errorbar:
+    '<path d="M6 4 V16 M3.5 4 H8.5 M3.5 16 H8.5 M16 6 V15 M13.5 6 H18.5 M13.5 15 H18.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="6" cy="10" r="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="16" cy="10.5" r="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/>',
+  "radial-bar":
+    '<path d="M12 4 A8 8 0 0 1 20 12 M12 7 A5 5 0 0 1 17 12 M12 10 A2 2 0 0 1 14 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  rose:
+    '<path d="M12 12 L12 3 A9 9 0 0 1 19.5 8 Z M12 12 L19.5 8 A9 9 0 0 1 16 18 Z M12 12 L16 18 A9 9 0 0 1 6 16 Z" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/>',
+  sunburst:
+    '<circle cx="12" cy="10" r="2.6" fill="none" stroke="currentColor" stroke-width="1.35"/><circle cx="12" cy="10" r="6.4" fill="none" stroke="currentColor" stroke-width="1.35"/><path d="M12 3.6 V16.4 M5.6 10 H18.4" fill="none" stroke="currentColor" stroke-width="1.15"/>',
+  "bar-list":
+    '<path d="M3 5 H18 M3 10 H14 M3 15 H9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
 };
 
 const fallback = '<circle cx="12" cy="10" r="2.1" fill="currentColor"/>';

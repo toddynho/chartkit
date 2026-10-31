@@ -2,7 +2,7 @@
 import type { ChartSpec } from "@chartkitdev/core";
 import { Chart } from "@chartkitdev/astro";
 import { chartIcon, mapIcon } from "../data/chart-icons";
-import { heroGroups } from "../data/hero-catalog";
+import { heroGroups, heroTypes } from "../data/hero-catalog";
 import { heroCharts } from "../data/home-hero";
 import { SITE } from "../data/site";
 import { scriptJson } from "../lib/spec-text";
@@ -13,8 +13,9 @@ function typeIcon(type: string): string {
 }
 
 const charts = heroCharts;
-const first = charts[0];
+const first = charts.find((chart) => chart.id === "line") ?? charts[0];
 if (!first) throw new Error("Homepage hero has no charts");
+const tiles = heroGroups.flatMap((group) => group.types.map((type) => ({ ...type, category: group.kicker })));
 const payload = charts.map((chart) => ({
   id: chart.id,
   title: chart.title,
@@ -65,34 +66,38 @@ const payload = charts.map((chart) => ({
       </div>
     </div>
   </div>
-  <div class="hh-types" role="tablist" aria-label="Chart type">
+  <script id="hero-charts" type="application/json" is:inline set:html={scriptJson(payload)} />
+</section>
+
+<section class="hh-catalog" aria-label="Chart types">
+  <div class="hh-catalog__head">
+    <div class="hh-catalog__countline">
+      <span class="hh-catalog__count">{heroTypes.length}</span>
+      <span>chart types, one spec shape. Click any to render it above.</span>
+    </div>
+    <a href="/gallery">Open the gallery →</a>
+  </div>
+  <div class="hh-catalog__grid" role="tablist" aria-label="Chart type">
     {
-      heroGroups.map((group) => (
-        <div class="hh-type-row">
-          <div class="hh-type-kicker">{group.kicker}</div>
-          <div class="hh-type-pills">
-            {group.types.map((type) => (
-              <button
-                type="button"
-                class:list={["hh-pill", type.slide === first.id && "is-on"]}
-                data-hero-pill
-                data-hero-type={type.type}
-                data-hero-slide={type.slide}
-                data-hero-title={type.title}
-                data-hero-sub={type.subtitle}
-                role="tab"
-                aria-selected={type.slide === first.id ? "true" : "false"}
-              >
-                <svg viewBox="0 0 24 20" width="12" height="12" fill="none" aria-hidden="true" set:html={typeIcon(type.type)} />
-                {type.label}
-              </button>
-            ))}
-          </div>
-        </div>
+      tiles.map((type) => (
+        <button
+          type="button"
+          class:list={["hh-catalog__tile", type.slide === first.id && "is-on"]}
+          data-hero-pill
+          data-hero-type={type.type}
+          data-hero-slide={type.slide}
+          data-hero-title={type.title}
+          data-hero-sub={type.subtitle}
+          role="tab"
+          aria-selected={type.slide === first.id ? "true" : "false"}
+          title={`${type.label} · ${type.category}`}
+        >
+          <svg viewBox="0 0 24 20" width="22" height="22" fill="none" aria-hidden="true" set:html={typeIcon(type.type)} />
+          <span>{type.label}</span>
+        </button>
       ))
     }
   </div>
-  <script id="hero-charts" type="application/json" is:inline set:html={scriptJson(payload)} />
 </section>
 
 <script>
