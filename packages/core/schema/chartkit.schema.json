@@ -142,6 +142,9 @@
     "animation": {
       "$ref": "#/$defs/animation"
     },
+    "motion": {
+      "$ref": "#/$defs/motion"
+    },
     "render": {
       "enum": ["svg", "canvas", "auto"],
       "default": "svg",
@@ -3223,6 +3226,27 @@
         }
       ],
       "description": "Entry/update animation. Always disabled when the user prefers reduced motion."
+    },
+    "motion": {
+      "description": "BETA. The API may change. How an update moves marks from the previous spec. Omitted and \"none\" are off, including every existing spec. \"auto\" is 320ms ease-out (cubic-bezier(0, 0, 0.58, 1)). An object sets duration in milliseconds, clamped to 0–800; 0 is off. Easing stays ease-out. render() and export ignore this field and return the settled SVG, so SSR and PNG/SVG export stay still. prefers-reduced-motion snaps. Morphs stop above 2,000 rows. A sliding window of a canvas line strokes in place and does not morph.",
+      "oneOf": [
+        {
+          "enum": ["auto", "none"]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "duration": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 800,
+              "description": "Milliseconds. Clamped to 0–800. 0 is off. Omitted means 320."
+            }
+          },
+          "description": "BETA. Duration override. The API may change."
+        }
+      ]
     },
     "a11y": {
       "type": "object",

@@ -13,7 +13,7 @@ import { exportList, readColor } from "../frame";
 import { CHROME_TOP } from "../chrome";
 import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
 import { layoutPaint } from "../layout-hook";
-import { boxId, brokenScale, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, round, scaleClamp, scalePad, symlogTicks, ticks } from "../svg";
+import { boxId, brokenScale, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, repeatKey, round, scaleClamp, scalePad, symlogTicks, ticks } from "../svg";
 import { bump, revision, slots } from "../feature-hooks";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
@@ -789,7 +789,7 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
   const paint = layoutPaint();
   textDir = paint ? paint.bidi(Boolean(model.rtl)) : "";
   const parts: string[] = [];
-  parts.push(openSvg(model));
+  parts.push(openSvg(model, yScaleStamp(model, yDomain, yScale, horizontal)));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", model.preset.background)}" />`);
   const titleX = paint ? paint.titleX(Boolean(model.rtl), model.width, pad.left) : pad.left;
   const titleAnchor = paint ? paint.titleAttr(Boolean(model.rtl)) : "";
@@ -821,10 +821,11 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
     for (const tick of yTicks) {
       const pos = yScale(tick);
       const dash = model.yGrid === "dashed" ? ' stroke-dasharray="3 3"' : model.yGrid === "dotted" ? ' stroke-dasharray="1 3"' : "";
+      const gridKey = ` data-ck-key="yg:${esc(numKey(tick))}"`;
       if (horizontal) {
-        parts.push(`<line x1="${n(pos)}" y1="${n(plot.top)}" x2="${n(pos)}" y2="${n(plot.bottom)}" stroke="${cssVar("grid", model.preset.grid)}"${dash} />`);
+        parts.push(`<line x1="${n(pos)}" y1="${n(plot.top)}" x2="${n(pos)}" y2="${n(plot.bottom)}" stroke="${cssVar("grid", model.preset.grid)}"${dash}${gridKey} />`);
       } else {
-        parts.push(`<line x1="${n(plot.left)}" y1="${n(pos)}" x2="${n(plot.right)}" y2="${n(pos)}" stroke="${cssVar("grid", model.preset.grid)}"${dash} />`);
+        parts.push(`<line x1="${n(plot.left)}" y1="${n(pos)}" x2="${n(plot.right)}" y2="${n(pos)}" stroke="${cssVar("grid", model.preset.grid)}"${dash}${gridKey} />`);
       }
     }
   }
@@ -1123,7 +1124,7 @@ function paintAreas(
   const emit = (top: (Pt | null)[], bottom: (Pt | null)[], opacity: string) => {
     for (const [above, below] of pairSegments(top, bottom, model.connectNulls)) {
       if (above.length < 2) continue;
-      out.push(`<path d="${areaPath(above, below, model.curve)}" fill="${fill}" fill-opacity="${opacity}" stroke="none"${extra} />`);
+      out.push(`<path d="${areaPath(above, below, model.curve)}" fill="${fill}" fill-opacity="${opacity}" stroke="none"${extra} data-ck-key="${esc(`a:${series.name}`)}" />`);
     }
   };
   const fade = areaFade(model, series);
@@ -1151,7 +1152,7 @@ function pushStroke(out: string[], d: string, model: PlotModel, series: Series, 
   const stroke = strokeOf(series, model);
   const base = `fill="none" stroke="${stroke}" stroke-linejoin="round" stroke-linecap="round"${dashAttr(dash)}`;
   if (model.glow) out.push(`<path d="${d}" ${base} stroke-width="${n(model.strokeWidth + 2.5)}" filter="url(#${model.id}glow)" pointer-events="none" />`);
-  out.push(`<path d="${d}" ${base} stroke-width="${model.strokePaint}"${extra} />`);
+  out.push(`<path d="${d}" ${base} stroke-width="${model.strokePaint}"${extra}${seriesMotion(model, series)} />`);
 }
 
 function areaMid(model: PlotModel): string {
@@ -1192,17 +1193,19 @@ function paintPoints(out: string[], points: (Pt | null)[], model: PlotModel, ser
     const color = ruled && override ? override : series.mark === "line" ? strokeOf(series, model) : series.color;
     const caption = series.ruleLabels?.[at] ?? "";
     const named = colored ? ` data-ck-name="${esc(series.name)}" data-ck-i="${at}"` : indexes ? ` data-ck-i="${indexes[k]}"` : "";
+    const pointKey = ` data-ck-key="${esc(`p:${series.name}:${catKey(model, at)}`)}"`;
+    const pointValue = typeof series.values[at] === "number" && Number.isFinite(series.values[at]) ? ` data-ck-value="${numKey(series.values[at] as number)}"` : "";
     const rule = caption ? ` data-ck-rule="${esc(caption)}"` : "";
     if (outlined) {
       const hole = cssVar("surface", model.preset.surface);
       const title = caption ? `><title>${esc(caption)}</title></circle>` : " />";
       out.push(
-        `<circle cx="${n(point.x)}" cy="${n(point.y)}" r="${n(radius + 1.25)}" fill="${hole}" stroke="${color}" stroke-width="2"${hidden}${named}${rule}${title}`,
+        `<circle cx="${n(point.x)}" cy="${n(point.y)}" r="${n(radius + 1.25)}" fill="${hole}" stroke="${color}" stroke-width="2"${hidden}${named}${pointKey}${pointValue}${rule}${title}`,
       );
       continue;
     }
     const ring = ruled ? ` stroke="${cssVar("background", model.preset.background)}" stroke-width="2"` : "";
-    out.push(marker(point.x, point.y, radius + (ruled ? 1.25 : 0), shape, color, hollow, hidden + ring + named + rule, caption));
+    out.push(marker(point.x, point.y, radius + (ruled ? 1.25 : 0), shape, color, hollow, hidden + ring + named + pointKey + pointValue + rule, caption));
   }
 }
 
@@ -1263,7 +1266,14 @@ function bars(
     const fill = series.colors?.[i] ?? series.color;
     const caption = series.ruleLabels?.[i] ?? "";
     const fade = series.fillOpacity === undefined ? "" : ` fill-opacity="${n(series.fillOpacity)}"`;
-    const extra = fade + (series.colors ? ` data-ck-name="${esc(series.name)}" data-ck-i="${i}"` : "") + (caption ? ` data-ck-rule="${esc(caption)}"` : "");
+    const raw = series.values[i];
+    const valueAttr = typeof raw === "number" && Number.isFinite(raw) ? ` data-ck-value="${numKey(raw)}"` : "";
+    const orient = horizontal ? ` data-ck-orient="h"` : "";
+    const extra =
+      fade +
+      ` data-ck-key="${esc(`b:${series.name}:${catKey(model, i)}`)}" data-ck-base="${n(a)}"${orient}${valueAttr}` +
+      (series.colors ? ` data-ck-name="${esc(series.name)}" data-ck-i="${i}"` : "") +
+      (caption ? ` data-ck-rule="${esc(caption)}"` : "");
     const outer = !stacked || Boolean(layers?.crest[index]);
     const roundEnds = model.radiusEnds === "all" || (stacked && model.stackGap > 0) ? "all" : "outer";
     const radius = outer || roundEnds === "all" ? model.cornerRadius : 0;
@@ -1686,10 +1696,11 @@ let textDir = "";
 /** Tick and axis-title size. 11 unless theme.tokens.fontSize is set. */
 let labelPx = 11;
 
-function axText(x: number, y: number, anchor: string, body: string, fill: string, family: string, angle = 0, weight = "", rows?: string[] | null): string {
+function axText(x: number, y: number, anchor: string, body: string, fill: string, family: string, angle = 0, weight = "", rows?: string[] | null, key = ""): string {
   const spin = angle ? ` transform="rotate(${n(angle)} ${n(x)} ${n(y)})"` : "";
+  const id = key ? ` data-ck-key="${esc(key)}"` : "";
   const text = rows ? rows.map((row, i) => `<tspan x="${n(x)}" dy="${i ? 12 : 0}">${esc(row)}</tspan>`).join("") : esc(body);
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${labelPx}"${weight}${textDir}${spin}>${text}</text>`;
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${labelPx}"${weight}${textDir}${spin}${id}>${text}</text>`;
 }
 
 function wrapWords(text: string, width: number, lines: number): string[] {
@@ -1912,13 +1923,13 @@ function drawAxes(
   if (model.showY) {
     const side = ySide(model, horizontal);
     out += ruleLine(side, plot, model, model.yAxis, yCross, model.ySpans, yTicks.map(yScale));
-    if (model.yAxis.labels !== false) out += band(yText, yTicks, yScale, model, plot, side, model.yAxis);
+    if (model.yAxis.labels !== false) out += band(yText, yTicks, yScale, model, plot, side, model.yAxis, "y:");
     out += minors(yTicks, yScale, side, spineEdge(side, plot, model.yAxis, yCross), model.yAxis, cssVar("axis", model.preset.axis));
   }
   if (model.showY2) {
     const side = model.y2Axis.end !== false ? 1 : 0;
     out += ruleLine(side, plot, model, model.y2Axis, y2Cross, model.y2Spans, y2Ticks.map(y2Scale));
-    if (model.y2Axis.labels !== false) out += band(y2Text, y2Ticks, y2Scale, model, plot, side, model.y2Axis);
+    if (model.y2Axis.labels !== false) out += band(y2Text, y2Ticks, y2Scale, model, plot, side, model.y2Axis, "y2:");
     out += minors(y2Ticks, y2Scale, side, spineEdge(side, plot, model.y2Axis, y2Cross), model.y2Axis, cssVar("axis", model.preset.axis));
   }
   if (model.showX) {
@@ -1972,6 +1983,7 @@ function band(
   plot: PlotBox,
   side: number,
   axis: AxisBox,
+  idPrefix = "",
 ): string {
   const fill = cssVar("muted", model.preset.muted);
   const family = font();
@@ -1996,7 +2008,7 @@ function band(
       }
     }
     out += tickInk(side, edge, scale(values[i]), axis, ink);
-    out += axText(at[0], at[1], at[2], label, fill, family, angle, "", rows);
+    out += axText(at[0], at[1], at[2], label, fill, family, angle, "", rows, idPrefix ? idPrefix + numKey(values[i] ?? 0) : "");
   }
   return out;
 }
@@ -2035,11 +2047,11 @@ function xBand(model: PlotModel, xScale: XScale, count: number, horizontal: bool
       const right = Boolean(model.xAxis.end);
       const at = xScale.center(i);
       out += tickInk(side, edge, at, model.xAxis, ink);
-      out += axText(right ? plot.right + 8 : plot.left - 6, at + 4, right ? "start" : "end", label, fill, family, 0, "", rows);
+      out += axText(right ? plot.right + 8 : plot.left - 6, at + 4, right ? "start" : "end", label, fill, family, 0, "", rows, `x:${catKey(model, i)}`);
       continue;
     }
     const x = xScale.center(i);
-    const drawn = alongOne(label, x, y, angle, plot, 0, fill, family, seq || keep ? -Infinity : last, rows, model.width);
+    const drawn = alongOne(label, x, y, angle, plot, 0, fill, family, seq || keep ? -Infinity : last, rows, model.width, `x:${catKey(model, i)}`);
     if (!drawn) continue;
     out += tickInk(side, edge, x, model.xAxis, ink);
     out += drawn;
@@ -2164,6 +2176,7 @@ function alongOne(
   last: number,
   rows?: string[] | null,
   viewWidth = 0,
+  key = "",
 ): string {
   if (slack && (x < plot.left - slack || x > plot.right + slack)) return "";
   const text = rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label;
@@ -2184,7 +2197,7 @@ function alongOne(
       anchor = "start";
     }
   }
-  return axText(at, y, anchor, label, fill, family, angle, "", rows);
+  return axText(at, y, anchor, label, fill, family, angle, "", rows, key);
 }
 
 function titleSpin(axis: AxisBox, vertical: boolean, end: boolean): number {
@@ -2317,14 +2330,15 @@ function legend(model: PlotModel, x: number, y: number, maxRight: number): strin
   return legendSeries(model, x, y, maxRight);
 }
 
-function legendIcon(model: PlotModel, series: Series, x: number, y: number): string {
+function legendIcon(model: PlotModel, series: Series, x: number, y: number, key = ""): string {
   const color = legendColor(model, series);
-  if (series.mark === "bar") return `<rect x="${n(x)}" y="${n(y)}" width="10" height="10" rx="2" fill="${color}" />`;
+  const id = key ? ` data-ck-key="${esc(key)}"` : "";
+  if (series.mark === "bar") return `<rect x="${n(x)}" y="${n(y)}" width="10" height="10" rx="2" fill="${color}"${id} />`;
   const shape = markerShape(model, series);
   if (shape && (explicitMark(model, series) || model.dots === "shown")) {
-    return marker(x + 5, y + 5, 4.5, shape, color, series.hollow ?? model.pointHollow);
+    return marker(x + 5, y + 5, 4.5, shape, color, series.hollow ?? model.pointHollow, id);
   }
-  return `<rect x="${n(x)}" y="${n(y)}" width="10" height="10" rx="2" fill="${color}" />`;
+  return `<rect x="${n(x)}" y="${n(y)}" width="10" height="10" rx="2" fill="${color}"${id} />`;
 }
 
 function legendSeries(model: PlotModel, x: number, y: number, maxRight: number): string {
@@ -2338,7 +2352,7 @@ function legendSeries(model: PlotModel, x: number, y: number, maxRight: number):
       cx = x;
       cy += 18;
     }
-    out.push(`${legendIcon(model, series, cx, cy)}<text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12">${esc(name)}</text>`);
+    out.push(`${legendIcon(model, series, cx, cy, `leg:${name}`)}<text x="${n(cx + 16)}" y="${n(cy + 9)}" fill="${cssVar("text", model.preset.text)}" font-size="12" data-ck-key="${esc(`legt:${name}`)}">${esc(name)}</text>`);
     cx += width;
   }
   appendRules(out, model, cx, cy, x, maxRight);
@@ -2441,7 +2455,56 @@ function tipAttrs(model: PlotModel): string {
   return out;
 }
 
-function openSvg(model: PlotModel): string {
+const catCache = new WeakMap<PlotModel, string[]>();
+
+function numKey(value: number): string {
+  if (Object.is(value, -0)) return "0";
+  if (Number.isInteger(value)) return String(value);
+  return String(Math.round(value * 1e6) / 1e6);
+}
+
+function catKey(model: PlotModel, index: number): string {
+  if (!model.labels.length) {
+    const value = model.x?.[index];
+    if (typeof value === "number" && Number.isFinite(value)) return numKey(value);
+    return String(index);
+  }
+  let keys = catCache.get(model);
+  if (!keys) {
+    keys = repeatKey(model.labels);
+    catCache.set(model, keys);
+  }
+  return keys[index] ?? String(index);
+}
+
+/** Linear y domain and the pixels of its ends. Motion reprojects an entering line through this. */
+function yScaleStamp(model: PlotModel, domain: [number, number], scale: (value: number) => number, horizontal: boolean): string {
+  if (horizontal || model.yLog || model.ySym || model.yAxis.breaks?.length) return "";
+  const min = domain[0];
+  const max = domain[1];
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return "";
+  const p0 = scale(min);
+  const p1 = scale(max);
+  if (!Number.isFinite(p0) || !Number.isFinite(p1)) return "";
+  return ` data-ck-yscale="${n(min)},${n(max)},${n(p0)},${n(p1)}"`;
+}
+
+function seriesMotion(model: PlotModel, series: Series): string {
+  let out = ` data-ck-key="${esc(`l:${series.name}`)}"`;
+  const count = series.values.length;
+  if (count < 2 || count > 48) return out;
+  const nums: string[] = [];
+  const ids: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const value = series.values[i];
+    if (typeof value !== "number" || !Number.isFinite(value)) return out;
+    nums.push(numKey(value));
+    ids.push(catKey(model, i));
+  }
+  return `${out} data-ck-samples="${nums.join(" ")}" data-ck-xk="${esc(ids.join("\t"))}"`;
+}
+
+function openSvg(model: PlotModel, scale = ""): string {
   const width = model.responsive ? "100%" : String(model.width);
   const described = model.description ? ` aria-describedby="${model.id}-d"` : "";
   const intent = model.intent ? ` data-ck-intent="${esc(model.intent)}"` : "";
@@ -2452,7 +2515,7 @@ function openSvg(model: PlotModel): string {
   const gap = model.stackGap > 0 ? ` data-ck-stack-gap="${n(model.stackGap)}"` : "";
   const partialFade = model.partialOpacity !== undefined ? ` data-ck-partial-opacity="${n(model.partialOpacity)}"` : "";
   const desc = model.description ? `<desc id="${model.id}-d">${esc(model.description)}</desc>` : `<desc>${esc(model.alt)}</desc>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent}${exported}${canvas}${sceneAttr}${gap}${partialFade}${chromeTip} style="${svgStyle(model)}">` +
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${model.height}" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-label="${esc(model.alt)}"${described} class="ck-chart" data-ck-type="${esc(model.type)}" data-ck-id="${model.id}"${intent}${exported}${canvas}${sceneAttr}${gap}${partialFade}${scale}${chromeTip} style="${svgStyle(model)}">` +
     `<title>${esc(model.title || model.alt)}</title>${desc}`;
 }
 

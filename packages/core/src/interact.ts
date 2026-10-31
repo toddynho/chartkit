@@ -9,6 +9,7 @@ import { formatValue } from "./format";
 import { refreshNavigator, unbindNavigator } from "./nav-hook";
 import { joinSync, syncHide, syncHover, syncRange, type SyncMember } from "./sync-group";
 import { formatInstant, instantOf, namedZone } from "./timezone";
+import { motionMs, playMotion, type MotionFlight } from "./motion";
 import { readTooltip, type TooltipDetail, type TooltipRender } from "./tooltip-slot";
 
 export type { TooltipDetail, TooltipRender };
@@ -21,6 +22,8 @@ export interface InteractSpec {
   tooltip?: unknown;
   interaction?: unknown;
   animation?: unknown;
+  /** BETA. The API may change. `"auto"` eases updates. Omitted and `"none"` stay still. */
+  motion?: unknown;
   legend?: unknown;
   a11y?: unknown;
   locale?: string;
@@ -1018,6 +1021,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   let hi = Math.max(0, n - 1);
   const hidden = new Set<string>();
   let alive = true;
+  let flight: MotionFlight | null = null;
   let breakWatch: ResizeObserver | undefined;
   let focus = 0;
   let hover = buildHoverIndex(0, 0, 1, null);
@@ -1912,9 +1916,40 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     return { ...base, data };
   }
 
+  function stopFlight(snap: boolean): void {
+    const current = flight;
+    flight = null;
+    current?.cancel(snap);
+  }
+
+  function paintHost(markup: string): void {
+    stopFlight(true);
+    const after = () => {
+      if (focusable()) svg.setAttribute("tabindex", "0");
+      dim();
+      paintPick();
+      arm();
+      queueCanvas(host, base);
+      refreshNavigator(host);
+    };
+    const motion = svg.getAttribute("data-ck-render") === "canvas" ? 0 : motionMs(base, n);
+    if (motion > 0 && host instanceof HTMLElement) {
+      flight = playMotion(host, markup, motion, () => {
+        flight = null;
+        patchSvg(host as PatchHost, markup, 0);
+        const nextSvg = host.querySelector("svg");
+        if (nextSvg instanceof SVGSVGElement) svg = nextSvg;
+        after();
+      });
+      return;
+    }
+    patchSvg(host as PatchHost, markup, durationMs(base, n), easeOf(base));
+    after();
+  }
+
   function redraw(markup?: string): void {
+    stopFlight(true);
     const partial = lo > 0 || hi < n - 1 || hidden.size > 0;
-    const ms = durationMs(base, n);
     const nextSpec = partial ? project() : base;
     if (svg.getAttribute("data-ck-scene") === "1" && paintScene(host, nextSpec)) {
       const nextSvg = host.querySelector("svg");
@@ -1927,7 +1962,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
       return;
     }
     const next = partial ? options.render(nextSpec) : markup ?? options.render(base);
-    patchSvg(host as PatchHost, next, ms, easeOf(base));
+    patchSvg(host as PatchHost, next, durationMs(base, n), easeOf(base));
     if (focusable()) svg.setAttribute("tabindex", "0");
     dim();
     paintPick();
@@ -2306,6 +2341,9 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
   arm();
   paintTable();
   fade(svg, durationMs(spec, n), "0", easeOf(spec));
+  on(host, "pointerdown", () => {
+    if (flight) stopFlight(true);
+  }, { capture: true });
   if (picked.points.length || picked.series.length) paintPick();
 
   let pinned = false;
@@ -2628,15 +2666,9 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
         paintTable();
         return;
       }
-      if (lo === 0 && hi === n - 1 && hidden.size === 0 && markup) {
-        patchSvg(host as PatchHost, markup, durationMs(next, n), easeOf(next));
-        if (focusable()) svg.setAttribute("tabindex", "0");
-        dim();
-        paintPick();
-        arm();
+      if (lo === 0 && hi === n - 1 && hidden.size === 0) {
+        paintHost(markup || options.render(base));
         paintTable();
-        queueCanvas(host, next);
-        refreshNavigator(host);
         return;
       }
       redraw(markup);
@@ -2651,6 +2683,7 @@ export function attach(host: Element, spec: InteractSpec, options: AttachOptions
     destroy() {
       if (!alive) return;
       alive = false;
+      stopFlight(false);
       ticket++;
       breakWatch?.disconnect();
       for (const off of offs) off();

@@ -13,6 +13,19 @@ export function esc(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/** Identity for a repeated category. The second Oak is Oak#2. */
+export function repeatKey(labels: string[]): string[] {
+  const seen = new Map<string, number>();
+  const out = new Array<string>(labels.length);
+  for (let i = 0; i < labels.length; i++) {
+    const base = labels[i] ?? "";
+    const count = (seen.get(base) ?? 0) + 1;
+    seen.set(base, count);
+    out[i] = count === 1 ? base : `${base}#${count}`;
+  }
+  return out;
+}
+
 /** Explicit `scale.domain` ends. `null` leaves that end automatic. */
 export function domainEnds(domain: unknown): [number | null, number | null] | undefined {
   if (!Array.isArray(domain)) return;

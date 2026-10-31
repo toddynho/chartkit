@@ -13,7 +13,7 @@ import {
   readFrame,
   readTable,
 } from "../frame";
-import { closeChart, esc, font, isRecord, n, openChart, polar } from "../svg";
+import { closeChart, esc, font, isRecord, n, openChart, polar, repeatKey } from "../svg";
 
 /**
  * Pie and donut share one arc renderer.
@@ -99,6 +99,7 @@ function simpleArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   const sweep = Math.max(1, 360 - pad * slices.length);
   let cursor = 0;
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : kind;
+  const keys = repeatKey(slices.map((slice) => slice.label));
   const parts: string[] = [];
   parts.push(openChart({ width, height, responsive: false, alt, type: kind, id: "ckarc", renderer: kind }));
   parts.push(`<rect width="100%" height="100%" fill="var(--ck-background, transparent)" />`);
@@ -111,7 +112,7 @@ function simpleArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
     const color = sliceFill(i);
     const label = `${slice.label}: ${plainPercent(slice.value, total)}`;
     parts.push(
-      `<path d="${slicePath(cx, cy, outer, inner, start, end)}" fill="${color}" data-ck-name="${esc(slice.label)}" data-ck-i="${i}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`,
+      `<path d="${slicePath(cx, cy, outer, inner, start, end)}" fill="${color}" data-ck-name="${esc(slice.label)}" data-ck-i="${i}" data-ck-key="${esc(`s:${keys[i] ?? slice.label}`)}" data-ck-value="${slice.value}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`,
     );
   }
   if (inner > 8) {
@@ -310,6 +311,7 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   const held = bag();
   let labelSvg = "";
   const pending: Leader[] = [];
+  const sliceIds = repeatKey(arcs.map((arc) => arc.label));
   for (let index = 0; index < arcs.length; index++) {
     const arc = arcs[index];
     if (!arc) continue;
@@ -327,7 +329,7 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
         ? ` stroke="${seamPaint(preset)}" stroke-width="3" stroke-linejoin="round"`
         : "";
     parts.push(
-      `<path d="${path}" fill="${arc.color}" fill-rule="evenodd"${radius} data-ck-name="${esc(arc.label)}" data-ck-i="${index}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`,
+      `<path d="${path}" fill="${arc.color}" fill-rule="evenodd"${radius} data-ck-name="${esc(arc.label)}" data-ck-i="${index}" data-ck-key="${esc(`s:${sliceIds[index] ?? arc.label}`)}" data-ck-value="${arc.value}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`,
     );
     if (!showLabels) continue;
     const body = frame.mark.labelFormat !== undefined

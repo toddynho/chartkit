@@ -26,6 +26,8 @@ export interface PaintProfile {
   rows: number;
   kept: number;
   incremental: boolean;
+  /** A same-length window stroked without rebuilding the SVG chrome. */
+  window?: boolean;
 }
 
 interface Live {
@@ -56,12 +58,18 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+function fieldName(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (isRecord(value) && typeof value.field === "string") return value.field;
+  return "";
+}
+
 function typedLine(spec: Record<string, unknown>): { xs: Float64Array | null; ys: Float64Array } | null {
   const data = spec.data;
   if (!isRecord(data) || !isRecord(data.columns)) return null;
   const encoding = isRecord(spec.encoding) ? spec.encoding : {};
-  const yName = typeof encoding.y === "string" ? encoding.y : "";
-  const xName = typeof encoding.x === "string" ? encoding.x : "";
+  const yName = fieldName(encoding.y);
+  const xName = fieldName(encoding.x);
   const ys = yName ? data.columns[yName] : undefined;
   if (!(ys instanceof Float64Array)) return null;
   const xs = xName ? data.columns[xName] : undefined;
@@ -124,6 +132,41 @@ export function paintSpec(host: Element, spec: unknown): boolean {
       return true;
     }
   }
+  if (
+    live &&
+    cols &&
+    live.frame.plot &&
+    cols.ys.length >= 256 &&
+    cols.ys.length === live.count &&
+    live.frame.marks.length === 1 &&
+    live.frame.marks[0]?.kind === "line" &&
+    windowFits(live.frame, cols.xs, cols.ys)
+  ) {
+    const mark = live.frame.marks[0];
+    if (!mark) return false;
+    const t0 = performance.now();
+    writeWindow(mark, cols.xs, cols.ys, live.frame);
+    const stroked = performance.now();
+    const size = paintedSize.get(live.canvas) ?? authoredSize(live.svg, live.frame);
+    drawFrame(live.svg, live.canvas, live.frame, size.w, size.h);
+    const hit = hitFor(live.frame);
+    if (hit) setDataHit(live.svg, hit);
+    live.ys = cols.ys;
+    live.xs = cols.xs;
+    live.count = cols.ys.length;
+    live.buffer = cols.ys.buffer;
+    profile = {
+      ...live.frame.profile,
+      sample: stroked - t0,
+      dom: 0,
+      paint: performance.now() - stroked,
+      rows: cols.ys.length,
+      kept: cols.ys.length,
+      incremental: false,
+      window: true,
+    };
+    return true;
+  }
   const built = cartesian ? renderCartesianScene(spec, live?.key ?? "") : renderDirectScene(spec, live?.key ?? "");
   if (!built) return false;
   const { frame } = built;
@@ -185,6 +228,44 @@ export function paintSpec(host: Element, spec: unknown): boolean {
 registerScenePainter(paintSpec);
 
 const watchers = new WeakMap<Element, ResizeObserver>();
+
+function windowFits(frame: SceneFrame, xs: Float64Array | null, ys: Float64Array): boolean {
+  const x0 = frame.xMin;
+  const x1 = frame.xMax;
+  const y0 = frame.yMin;
+  const y1 = frame.yMax;
+  if (!(x1 > x0) || !(y1 >= y0)) return false;
+  for (let i = 0; i < ys.length; i++) {
+    const y = ys[i];
+    if (!(y >= y0 && y <= y1)) return false;
+    if (!xs) continue;
+    const x = xs[i];
+    if (!(x >= x0 && x <= x1)) return false;
+  }
+  return true;
+}
+
+/** Stroke a same-length window. The SVG chrome from the first frame stays. */
+function writeWindow(mark: SceneMark, xs: Float64Array | null, ys: Float64Array, frame: SceneFrame): void {
+  const n = ys.length;
+  if (mark.x.length < n) mark.x = new Float64Array(Math.max(n, mark.x.length * 2));
+  if (mark.y.length < n) mark.y = new Float64Array(Math.max(n, mark.y.length * 2));
+  const plot = frame.plot;
+  if (!plot) return;
+  const width = plot.right - plot.left || 1;
+  const span = frame.xMax - frame.xMin || 1;
+  const ySpan = frame.yMax - frame.yMin || 1;
+  const by = (frame.py1 - frame.py0) / ySpan;
+  for (let i = 0; i < n; i++) {
+    const x = xs ? xs[i] : frame.x0 + i * frame.stride;
+    mark.x[i] = plot.left + ((x - frame.xMin) / span) * width;
+    mark.y[i] = frame.py0 + (ys[i] - frame.yMin) * by;
+  }
+  mark.n = n;
+  mark.ys = ys;
+  mark.rows = n;
+  mark.xs = xs;
+}
 
 function writePixels(mark: SceneMark, index: Int32Array, n: number, xs: Float64Array | null, ys: Float64Array, frame: SceneFrame): void {
   if (mark.x.length < n) mark.x = new Float64Array(Math.max(n, mark.x.length * 2));

@@ -1,0 +1,121 @@
+---
+import DocsPage from "../../components/DocsPage.astro";
+import { render } from "@chartkitdev/core/all";
+import { seriesSpecs, sortSpecs, streamSpec, valueSpecs } from "../../data/motion-demo";
+
+const description = "Beta. An update can move marks to the new values. It is off unless the spec says so.";
+const value = valueSpecs();
+const sorted = sortSpecs();
+const series = seriesSpecs();
+const stream = streamSpec(0, false);
+const valueSvg = render(value[0]);
+const sortSvg = render(sorted[0]);
+const seriesSvg = render(series[0]);
+const streamSvg = render(stream);
+---
+
+<DocsPage title="Motion" description={description} href="/docs/motion">
+  <p class="motion-beta"><span class="beta">Beta</span> The motion API may change.</p>
+  <p>
+    A chart update should be readable. When the spec changes, marks move to the new values. The motion is 320ms ease-out, and it is off unless the spec asks for it. The agent sends a new spec to <code>update()</code>. It does not write tweens, keys, or durations per mark.
+  </p>
+  <pre class="motion-code"><code>{`{ "motion": "auto" }
+{ "motion": "none" }
+{ "motion": { "duration": 280 } }`}</code></pre>
+  <p>
+    Omitted and <code>"none"</code> are off, including every spec that already exists. <code>"auto"</code> is 320ms, CSS ease-out. A duration is clamped to 0–800ms, and 0 is off. <code>render()</code> and export ignore <code>motion</code> and return the settled SVG, so server render and PNG or SVG export stay still. <code>prefers-reduced-motion: reduce</code> snaps. Morphs stop above 2,000 rows. A pointer down during the ease snaps to the new spec.
+  </p>
+  <p>
+    Identity comes from the data. Bars, slices, and category labels are keyed by the category. A repeated label becomes <code>Oak</code>, then <code>Oak#2</code>. A line series is keyed by its field. The renderers stamp <code>data-ck-key</code> on the marks. The attribute does not animate.
+  </p>
+  <p>
+    When a bar, slice, or short line keeps its key and its number changes, the chart writes the percent, <code>(next − previous) / |previous|</code>, in an HTML label. The label is not in the SVG, so export does not keep it. One polite summary is announced. Reduced motion skips it.
+  </p>
+  <h2>Value change</h2>
+  <p>Harbor goes from 50 to 56. That is +12%. The other bars stay.</p>
+  <div class="motion-stage" data-motion="value">
+    <Fragment set:html={valueSvg} />
+  </div>
+  <h2>Sort</h2>
+  <p>Each bar keeps its category and slides to the new order. Labels that pass take opposite lanes, so they do not draw through each other.</p>
+  <div class="motion-stage" data-motion="sort">
+    <Fragment set:html={sortSvg} />
+  </div>
+  <h2>Series</h2>
+  <p>Adding rush draws it on. April is 56, above the previous scale. The line appears as the axis makes room, instead of sitting on the top edge. Removing the series fades it. The shared lines and the y ticks move with the new scale.</p>
+  <div class="motion-stage" data-motion="series">
+    <Fragment set:html={seriesSvg} />
+  </div>
+  <h2>Stream</h2>
+  <p>
+    12,000 samples, 18 new ones each frame. The first frame draws the axes. Later frames stroke the polyline on the canvas. This is not the SVG morpher. The line under the chart is this browser.
+  </p>
+  <p>
+    Measured here, headless Chrome, window 1280×900, esbuild minify and gzip level 9, the same method as <code>npm run size</code>. The motion module alone is 4,478 bytes gzip. The minimal line bundle is 32,621 bytes gzip and does not include it. A 12,000-point window painted in 0.20 ms median, and the frame gap was 16.7 ms median.
+  </p>
+  <div class="motion-stage" data-motion="stream">
+    <Fragment set:html={streamSvg} />
+  </div>
+  <p class="motion-readout" data-stream-readout>Measuring the stroke in this browser.</p>
+  <h2>Limits</h2>
+  <ul>
+    <li>Morphs stop above 2,000 rows. Past that, <code>update()</code> snaps.</li>
+    <li>A line whose commands change, a null break, a curve change, or a different vertex count, snaps that series.</li>
+    <li>Color follows series order. Removing a middle series recolors the ones that remain.</li>
+    <li>Canvas charts do not morph marks. A same-length window strokes only while the new samples stay inside the first scale.</li>
+    <li>One curve, ease-out. Duration is the only knob, and it clamps at 800ms.</li>
+  </ul>
+</DocsPage>
+
+<style>
+  .motion-beta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .beta {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #0a63e6;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+  }
+  .motion-code {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid var(--line);
+    overflow: auto;
+  }
+  .motion-code code {
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .motion-stage {
+    position: relative;
+    margin: 8px 0 20px;
+    padding: 8px 8px 4px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+  }
+  .motion-stage :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .motion-readout {
+    margin-top: -8px;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+
+<script>
+  import "../../scripts/motion-demo.ts";
+</script>

@@ -971,6 +971,8 @@ describe("schema honesty", () => {
     for (const leaf of collect()) {
       const only = [...new Set([...leaf.consts, ...leaf.enums].map((value) => JSON.stringify(value)))];
       if (only.length === 1 && leaf.enums.length === 0 && !leaf.types.has("boolean") && !leaf.types.has("number") && !leaf.types.has("integer") && !leaf.types.has("array")) continue;
+      // motion is read by update(), not render(). The still SVG must not change.
+      if (leaf.path === "/motion" || leaf.path.startsWith("/motion/")) continue;
       if (!covered(leaf, ready, entries)) silent.push(leaf.path);
     }
     expect(silent, silent.join("\n")).toEqual([]);

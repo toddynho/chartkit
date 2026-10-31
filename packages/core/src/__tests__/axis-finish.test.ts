@@ -167,8 +167,9 @@ describe("axis finishing", () => {
     };
     const skipped = draw({ ...body, axes: { x: { autoSkip: true }, y: { ticks: 14, autoSkip: true } } });
     const every = draw({ ...body, axes: { x: { autoSkip: false }, y: { ticks: 14, autoSkip: false } } });
-    const xSkip = skipped?.match(/Warehouse/g)?.length ?? 0;
-    const xAll = every?.match(/Warehouse/g)?.length ?? 0;
+    const tickLabels = (svg: string | null) => (svg?.match(/<text\b[^>]*>Warehouse/g) ?? []).length;
+    const xSkip = tickLabels(skipped);
+    const xAll = tickLabels(every);
     expect(xSkip).toBeGreaterThan(0);
     expect(xSkip).toBeLessThan(xAll);
     expect(xAll).toBe(8);

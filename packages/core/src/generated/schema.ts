@@ -105,6 +105,7 @@ export type ChartKitChartSpecV1 = {
   layout?: Layout;
   interaction?: Interaction;
   animation?: Animation;
+  motion?: Motion;
   /**
    * How the marks are drawn. svg is the default and what render() always returns, including on the server, with the marks included. canvas paints line, stacked-area, scatter, bar, heatmap, and candlestick marks from the computed geometry onto a 2D canvas. The client SVG keeps the axes, legend, title, annotations, the aria description, and the data table. Hit-testing reads the data: binary search on x for line, area, and bar, and a grid for scatter. auto uses canvas for those types once the table has 100000 or more rows. Other types stay SVG and warn CK3033. The canvas painter loads on demand and is not part of createRenderer([line]).
    */
@@ -761,6 +762,17 @@ export type Animation =
        * Easing curve.
        */
       easing?: "linear" | "ease-out" | "ease-in-out" | "spring";
+    };
+/**
+ * BETA. The API may change. How an update moves marks from the previous spec. Omitted and "none" are off, including every existing spec. "auto" is 320ms ease-out (cubic-bezier(0, 0, 0.58, 1)). An object sets duration in milliseconds, clamped to 0–800; 0 is off. Easing stays ease-out. render() and export ignore this field and return the settled SVG, so SSR and PNG/SVG export stay still. prefers-reduced-motion snaps. Morphs stop above 2,000 rows. A sliding window of a canvas line strokes in place and does not morph.
+ */
+export type Motion =
+  | ("auto" | "none")
+  | {
+      /**
+       * Milliseconds. Clamped to 0–800. 0 is off. Omitted means 320.
+       */
+      duration?: number;
     };
 
 /**
