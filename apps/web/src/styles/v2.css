@@ -2260,3 +2260,113 @@ html[data-stack="element"] .how-fw .stack-chip[data-stack-chip="element"] {
   .hh-pill { font-size: 13px; padding: 5px 10px 5px 7px; gap: 5px; }
   .hh-pill svg { width: 13px; height: 13px; }
 }
+
+a.quiet-link {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+a.quiet-link:hover { color: var(--ink-2); }
+
+.method {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 72px 0 96px;
+}
+.method h1 {
+  margin: 0;
+  max-width: 14em;
+  font-size: 44px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+.method-lead {
+  margin: 18px 0 0;
+  max-width: 62ch;
+  color: var(--ink-2);
+  font-size: 18px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.method-meta {
+  margin: 22px 0 0;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.method h2 {
+  margin: 48px 0 12px;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.method p,
+.method li {
+  max-width: 68ch;
+  color: var(--ink-2);
+  font-size: 16px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.method p { margin: 0 0 14px; }
+.method code {
+  font-family: var(--mono);
+  font-size: 0.92em;
+  background: #ededeb;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.method a { color: var(--link); }
+.caveat {
+  margin-top: 36px;
+  padding: 28px 28px 8px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.caveat h2 { margin-top: 0; }
+.caveat-lead {
+  margin: 0 0 22px;
+  color: var(--ink);
+  font-size: 16px;
+}
+.caveat-list {
+  display: grid;
+  gap: 18px;
+}
+.caveat-list h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.caveat-list p { margin: 0; font-size: 15px; }
+.method-chart {
+  margin: 8px 0 22px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 8px 8px 16px;
+}
+.method-chart .ck-frame svg { display: block; width: 100%; height: auto; }
+.method-chart figcaption {
+  margin: 4px 12px 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  max-width: 68ch;
+}
+.method-docs {
+  margin: 0 0 16px;
+  padding-left: 1.15rem;
+}
+.method-docs li { margin: 0 0 8px; }
+.method-docs li strong { color: var(--ink); font-weight: 600; }
+@media (max-width: 720px) {
+  .method h1 { font-size: 34px; }
+  .caveat { padding: 22px 18px 4px; }
+}

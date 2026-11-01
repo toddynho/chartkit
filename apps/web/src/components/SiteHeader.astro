@@ -13,6 +13,7 @@ const docsHere = path === "/docs" || path.startsWith("/docs/");
 const dashHere = path === "/dashboard" || path === "/dashboards" || path.startsWith("/dashboards/");
 const onCloud = path === "/cloud";
 const links = variant === "docs" ? docsNavLinks : primaryNav;
+const showRepo = path !== "/methodology/agent-eval";
 
 function mark(href: string): "page" | undefined {
   if (href === "/docs") return docsHere ? "page" : undefined;
@@ -42,9 +43,13 @@ function mark(href: string): "page" | undefined {
             </a>
           ))
         }
-        <a class="nav-menu-star" href={SITE.github}>
-          <span aria-hidden="true">★</span> Star <strong>7</strong>
-        </a>
+        {
+          showRepo ? (
+            <a class="nav-menu-star" href={SITE.github}>
+              <span aria-hidden="true">★</span> Star <strong>7</strong>
+            </a>
+          ) : null
+        }
       </nav>
       <div class="header-end">
         <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="site-nav" data-nav-toggle>
@@ -56,9 +61,13 @@ function mark(href: string): "page" | undefined {
             <path d="M5 5l12 12M17 5L5 17"></path>
           </svg>
         </button>
-        <a class="star-chip" href={SITE.github} aria-label="Star toddynho/chartkit on GitHub">
-          <span aria-hidden="true">★</span> Star <strong>7</strong>
-        </a>
+        {
+          showRepo ? (
+            <a class="star-chip" href={SITE.github} aria-label="Star toddynho/chartkit on GitHub">
+              <span aria-hidden="true">★</span> Star <strong>7</strong>
+            </a>
+          ) : null
+        }
         {
           variant === "docs" ? null : (
             <a class="btn-ink header-cta" href={onCloud ? "/cloud#pricing" : "/docs"}>

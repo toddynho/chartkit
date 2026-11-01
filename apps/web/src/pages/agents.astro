@@ -5,7 +5,6 @@ import { agentWrote } from "../data/agent-wrote";
 import { agentSwitchPrompt } from "../data/agent-prompt";
 import { chartkitCloudUrl } from "../data/cloud-url";
 import { proofFigures } from "../data/home-bench";
-import { SITE } from "../data/site";
 import { tokenScoreboard, tokenSection } from "../data/token-eval";
 
 const proof = proofFigures();
@@ -198,8 +197,7 @@ const defaults = [
           ))
       }
       <p class="token-note">
-        {board.tasks} tasks. Each library's docs are capped to the length of ChartKit <a href="/llms.txt">llms.txt</a>. Output tokens are summed until a chart is drawn. Did-not-finish runs are excluded from the median. ChartKit median model calls are {board.calls}; <code>repair()</code> does not add a model call. Harness tip <a href={`${SITE.github}/pull/${board.pr}`}>PR #{board.pr}</a>, commit <a href={`${SITE.github}/commit/${board.sha}`}>{board.sha}</a>.
-        The homepage bars are the median of these {board.rows.filter((row) => !row.pending).length} finished rows.
+        <a class="quiet-link" href="/methodology/agent-eval">Review test details and methodology →</a>
       </p>
     </section>
 

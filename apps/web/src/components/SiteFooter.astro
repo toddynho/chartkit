@@ -5,7 +5,9 @@ import BrandLockup from "./BrandLockup.astro";
 import { SITE, canonicalPath } from "../data/site";
 import { repoRoot } from "../lib/repo-root";
 
-const docs = canonicalPath(Astro.url.pathname) === "/docs" || canonicalPath(Astro.url.pathname).startsWith("/docs/");
+const path = canonicalPath(Astro.url.pathname);
+const docs = path === "/docs" || path.startsWith("/docs/");
+const showRepo = path !== "/methodology/agent-eval";
 const license = `${SITE.github}/blob/main/LICENSE`;
 
 const featureFile = JSON.parse(readFileSync(join(repoRoot(), "catalog/public/features.json"), "utf8")) as {
@@ -41,6 +43,7 @@ const columns = [
       { href: "/docs/mcp", label: "MCP" },
       { href: "/llms.txt", label: "llms.txt" },
       { href: "/benchmarks", label: "Benchmarks" },
+      { href: "/methodology/agent-eval", label: "Test details" },
     ],
   },
 ];
@@ -51,14 +54,14 @@ const columns = [
     docs ? (
       <p class="legal legal--docs">
         <span class="legal__meta">
-          © ChartKit · <a href={license}>MIT</a> · {SITE.version}
+          © ChartKit · {showRepo ? <a href={license}>MIT</a> : <span>MIT</span>} · {SITE.version}
           <span aria-hidden="true"> · </span>
           <a class="legal__credit" href="https://x.com/toddo">built by @toddo</a>
         </span>
         <span class="legal__end">
-          <a href={SITE.github}>GitHub</a>
+          {showRepo ? <a href={SITE.github}>GitHub</a> : null}
           <a href="/llms.txt">llms.txt</a>
-          <a href={`${SITE.github}/releases`}>Changelog</a>
+          {showRepo ? <a href={`${SITE.github}/releases`}>Changelog</a> : null}
           <a href="/compare">Compare</a>
         </span>
       </p>
@@ -86,7 +89,7 @@ const columns = [
         </div>
         <p class="legal">
           <span class="legal__meta">
-            © ChartKit · <a href={license}>MIT</a> · {SITE.version}
+            © ChartKit · {showRepo ? <a href={license}>MIT</a> : <span>MIT</span>} · {SITE.version}
             <span aria-hidden="true"> · </span>
             <a class="legal__credit" href="https://x.com/toddo">built by @toddo</a>
           </span>
