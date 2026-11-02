@@ -1069,6 +1069,14 @@ html[data-stack="element"] .home-card .stack-sample [data-stack-panel="element"]
 }
 .compare-table th[scope="row"] a { color: var(--ink); font-weight: 500; text-decoration: none; }
 .compare-table th[scope="row"] a:hover { text-decoration: underline; }
+.compare-table thead a.ext {
+  color: var(--link);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
 .clip {
   font-family: var(--mono);
   font-size: 12px;

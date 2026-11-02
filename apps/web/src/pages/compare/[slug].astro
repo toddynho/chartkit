@@ -1,6 +1,7 @@
 ---
 import "../../styles/v2.css";
 import Base from "../../layouts/Base.astro";
+import LibraryLink from "../../components/LibraryLink.astro";
 import { loadCompare, loadCompareIndex } from "../../lib/batch3";
 import { chartkitLineBytes, kb, rivalLineBytes } from "../../lib/line-gzip";
 
@@ -38,9 +39,9 @@ function rankClass(rank: string): string {
     <section class="compare-hero">
       <div>
         <p class="crumb"><a href="/compare">Compare</a> / {library.name}</p>
-        <h1 class="v2-h1 v2-h1--50">ChartKit vs {library.name}</h1>
+        <h1 class="v2-h1 v2-h1--50">ChartKit vs <LibraryLink id={library.id}>{library.name}</LibraryLink></h1>
         <p class="v2-lead v2-lead--left">
-          Feature-by-feature against {library.name} {library.version}, checked {library.dateChecked}. Rank order is native › partial › plugin › manual › none. Unknown is not a win.
+          Feature-by-feature against <LibraryLink id={library.id}>{library.name}</LibraryLink> {library.version}, checked {library.dateChecked}. Rank order is native › partial › plugin › manual › none. Unknown is not a win.
         </p>
         <div class="v2-actions">
           <a class="btn-lg" href={convert}>Convert from {library.name}</a>
@@ -92,7 +93,7 @@ function rankClass(rank: string): string {
           <tr>
             <th>Feature</th>
             <th>ChartKit</th>
-            <th>{library.name}</th>
+            <th><LibraryLink id={library.id}>{library.name}</LibraryLink></th>
             <th>Their option</th>
             <th>Check</th>
             <th>Source</th>

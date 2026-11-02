@@ -107,6 +107,19 @@ button, input, textarea { font: inherit; color: inherit; }
 
 a { color: var(--link); text-decoration: none; }
 
+a.ext { color: var(--link); }
+a.ext:hover { text-decoration: underline; }
+
+.lib-compare {
+  margin-left: 8px;
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.lib-compare:hover { color: var(--ink); text-decoration: underline; }
+
 a:hover { text-decoration: underline; }
 
 :focus-visible {

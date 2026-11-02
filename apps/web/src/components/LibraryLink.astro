@@ -1,0 +1,11 @@
+---
+import { libraryHome } from "../data/library-homes";
+
+interface Props {
+  id: string;
+}
+
+const href = libraryHome(Astro.props.id);
+---
+
+<a class="ext" href={href} target="_blank" rel="noopener noreferrer"><slot /></a>

@@ -1,6 +1,8 @@
 ---
 import "../../styles/surfaces.css";
 import Base from "../../layouts/Base.astro";
+import LibraryLink from "../../components/LibraryLink.astro";
+import { libraryHome } from "../../data/library-homes";
 import { loadCompareIndex } from "../../lib/batch3";
 
 const page = loadCompareIndex();
@@ -19,8 +21,8 @@ const description = "ChartKit against 20 charting libraries. Every feature row i
       overstate what draws. ChartKit was rechecked on {page.chartkitRechecked} against main <code>{page.chartkitCommit}</code>.
       Radar, treemap, sankey, and funnel are native. Tooltip, zoom, and pan are native in the client runtime. The static
       SVG does not paint them. <a href="/features#method">Method</a>. <a href="/features.json">features.json</a>. Timings,
-      losses included, are on <a href="/benchmarks">Benchmarks</a>. The paste converter covers Chart.js,
-      Recharts, and ECharts: <a href="/convert">convert a chart</a>.
+      losses included, are on <a href="/benchmarks">Benchmarks</a>. The paste converter covers <LibraryLink id="chartjs">Chart.js</LibraryLink>,
+      <LibraryLink id="recharts">Recharts</LibraryLink>, and <LibraryLink id="echarts">ECharts</LibraryLink>: <a href="/convert">convert a chart</a>.
     </p>
     <div class="table-wrap">
       <table>
@@ -39,7 +41,8 @@ const description = "ChartKit against 20 charting libraries. Every feature row i
             page.rivals.map(({ library, win, loss, tie, unknown }) => (
               <tr>
                 <th scope="row">
-                  <a href={`/compare/${library.id}`}>{library.name}</a>
+                  <a class="ext" href={libraryHome(library.id)} target="_blank" rel="noopener noreferrer">{library.name}</a>
+                  <a class="lib-compare" href={`/compare/${library.id}`}>compare</a>
                 </th>
                 <td>{library.version}</td>
                 <td class="num win">{win}</td>
