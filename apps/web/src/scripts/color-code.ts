@@ -297,9 +297,19 @@ export function highlightSource(source: string, lang: string): string {
   return highlightScript(source);
 }
 
+function captionLabel(caption: HTMLElement): string {
+  return [...caption.childNodes]
+    .filter((node) => node.nodeType === Node.TEXT_NODE || (node instanceof HTMLElement && node.tagName !== "BUTTON"))
+    .map((node) => node.textContent ?? "")
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function inferLang(code: HTMLElement): string {
-  const caption = code.closest("figure")?.querySelector("figcaption")?.textContent ?? "";
-  if (caption.trim()) return caption;
+  const captionEl = code.closest("figure")?.querySelector("figcaption");
+  const caption = captionEl ? captionLabel(captionEl) : "";
+  if (caption) return caption;
   const text = code.textContent ?? "";
   const trimmed = text.trimStart();
   if (trimmed.startsWith("{") || trimmed.startsWith("[")) return "json";

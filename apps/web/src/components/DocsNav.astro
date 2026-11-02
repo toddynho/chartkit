@@ -1,4 +1,5 @@
 ---
+import FrameworkMenu from "./FrameworkMenu.astro";
 import { activeDocsHref, docsNav } from "../data/docs-catalog";
 import { canonicalPath } from "../data/site";
 
@@ -51,6 +52,7 @@ function selected(href: string): boolean {
         ))
       }
     </div>
+    <FrameworkMenu />
     {
       docsNav.map((group) => (
         <div
@@ -83,9 +85,11 @@ function selected(href: string): boolean {
 </aside>
 
 <script>
+  import { mountFrameworkMenu } from "../scripts/docs-fw-menu";
   import { mountStackChips } from "../scripts/stack-pref";
 
   mountStackChips();
+  mountFrameworkMenu();
 
   const sidebar = document.getElementById("docs-sidebar");
   const sectionTabs = [...(sidebar?.querySelectorAll<HTMLButtonElement>("[data-docs-section]") ?? [])];

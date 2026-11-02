@@ -26,7 +26,6 @@ function pressed(group: ChipGroup, value: string): boolean {
 ---
 
 <div class="rail-stack">
-  <h2 class="rail-title">Try it</h2>
   <div class="docs-try-slot">
     <div
       class="docs-handle"
@@ -34,12 +33,12 @@ function pressed(group: ChipGroup, value: string): boolean {
       role="separator"
       aria-orientation="vertical"
       aria-label="Resize try-it panel"
-      aria-describedby="docs-try-caption"
       aria-controls="docs-response"
       aria-valuemin="280"
       aria-valuemax="9999"
       aria-valuenow="380"
       tabindex="0"
+      title="Drag to resize"
     ></div>
     <div
       class:list={["docs-try", "response", !result.ok && "is-error"]}
@@ -48,6 +47,7 @@ function pressed(group: ChipGroup, value: string): boolean {
       aria-live="polite"
     >
     <div class="response__chrome">
+      <span class="docs-try__name">Try it</span>
       <div class="response__tabs" role="tablist" aria-label="Response view">
         <button type="button" class="response__tab is-on" data-tab="chart" role="tab" aria-selected="true">Chart</button>
         <button type="button" class="response__tab" data-tab="json" role="tab" aria-selected="false">JSON</button>
@@ -112,7 +112,7 @@ function pressed(group: ChipGroup, value: string): boolean {
     }
   </div>
   </div>
-  <p class="docs-try__caption" id="docs-try-caption">Drag the left edge to resize.</p>
+  <p class="docs-try__caption" id="docs-try-caption">Runs <code>validate()</code> then <code>render()</code> in the browser. Does not call Cloud.</p>
 </div>
 
 <script>

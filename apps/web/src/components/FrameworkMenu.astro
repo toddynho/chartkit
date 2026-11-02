@@ -1,0 +1,55 @@
+---
+import { stacks } from "../data/stacks";
+
+const marks: Record<string, string> = {
+  react: "/frameworks/react.svg",
+  vue: "/frameworks/vue.svg",
+  svelte: "/frameworks/svelte.svg",
+  astro: "/frameworks/astro.svg",
+  solid: "/frameworks/solid.svg",
+  qwik: "/frameworks/qwik.svg",
+  angular: "/frameworks/angular.svg",
+  vanilla: "/frameworks/javascript.svg",
+  element: "/frameworks/element.svg",
+};
+---
+
+<div class="docs-fw" data-fw-menu>
+  <div class="docs-fw__label" id="docs-fw-label">Show code for</div>
+  <div class="docs-fw__control">
+    <button
+      type="button"
+      class="docs-fw__button"
+      aria-haspopup="menu"
+      aria-expanded="false"
+      aria-controls="docs-fw-menu"
+      aria-labelledby="docs-fw-label docs-fw-value"
+    >
+      <span class="docs-fw__mark" aria-hidden="true">
+        {stacks.map((stack) => <img src={marks[stack.id]} alt="" width="16" height="16" data-fw-mark={stack.id} />)}
+      </span>
+      <span class="docs-fw__name" id="docs-fw-value">
+        {stacks.map((stack) => <span data-fw-name={stack.id}>{stack.chip}</span>)}
+      </span>
+      <span class="docs-fw__caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="docs-fw__menu" id="docs-fw-menu" role="menu" aria-labelledby="docs-fw-label" hidden>
+      {
+        stacks.map((stack) => (
+          <button
+            type="button"
+            class="docs-fw__item"
+            role="menuitemradio"
+            tabindex="-1"
+            data-stack-chip={stack.id}
+            aria-checked="false"
+          >
+            <img src={marks[stack.id]} alt="" width="14" height="14" />
+            <span>{stack.chip}</span>
+          </button>
+        ))
+      }
+    </div>
+  </div>
+  <p class="docs-fw__help">Snippets across the docs switch to this framework.</p>
+</div>

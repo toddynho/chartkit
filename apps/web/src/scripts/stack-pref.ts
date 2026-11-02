@@ -29,8 +29,12 @@ export function rememberStack(stack: StackId, broadcast = true): void {
   }
   document.querySelectorAll<HTMLButtonElement>("[data-stack-chip]").forEach((button) => {
     const on = button.dataset.stackChip === stack;
-    button.setAttribute("aria-pressed", on ? "true" : "false");
     button.classList.toggle("is-on", on);
+    if (button.getAttribute("role") === "menuitemradio") {
+      button.setAttribute("aria-checked", on ? "true" : "false");
+    } else {
+      button.setAttribute("aria-pressed", on ? "true" : "false");
+    }
   });
   if (broadcast) window.dispatchEvent(new CustomEvent("ck-stack", { detail: stack }));
 }

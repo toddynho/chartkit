@@ -2,7 +2,6 @@
 import "../styles/docs.css";
 import Base from "./Base.astro";
 import DocsNav from "../components/DocsNav.astro";
-import FrameworkChips from "../components/FrameworkChips.astro";
 import Prose from "../components/Prose.astro";
 import { crumbsFor } from "../data/docs-catalog";
 
@@ -11,7 +10,7 @@ interface Props {
   description: string;
   lede?: string;
   href: string;
-  /** Chart-type index: breadcrumb and a compact title, then the gallery grid. */
+  /** Chart-type index: breadcrumb, then the gallery grid. */
   browse?: boolean;
 }
 
@@ -38,23 +37,20 @@ const crumbs = crumbsFor(href);
   <div class="docs-frame">
     <DocsNav />
     <article class:list={["docs-main", browse && "docs-main--browse"]}>
-      <div class="docs-top">
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-          {
-            crumbs.map((crumb, index) => (
-              <>
-                {index > 0 ? <span class="breadcrumb__sep" aria-hidden="true">/</span> : null}
-                {index === crumbs.length - 1 || !crumb.href ? (
-                  <span class={index === crumbs.length - 1 ? "breadcrumb__current" : undefined}>{crumb.label}</span>
-                ) : (
-                  <a href={crumb.href}>{crumb.label}</a>
-                )}
-              </>
-            ))
-          }
-        </nav>
-        {browse ? null : <FrameworkChips />}
-      </div>
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        {
+          crumbs.map((crumb, index) => (
+            <>
+              {index > 0 ? <span class="breadcrumb__sep" aria-hidden="true">/</span> : null}
+              {index === crumbs.length - 1 || !crumb.href ? (
+                <span class={index === crumbs.length - 1 ? "breadcrumb__current" : undefined}>{crumb.label}</span>
+              ) : (
+                <a href={crumb.href}>{crumb.label}</a>
+              )}
+            </>
+          ))
+        }
+      </nav>
       <h1>{title}</h1>
       {!browse && lede ? <p class="lede"><Prose text={lede} /></p> : null}
       <slot />
@@ -69,4 +65,27 @@ const crumbs = crumbsFor(href);
   import { mountDocsSplit } from "../scripts/docs-split";
 
   mountDocsSplit();
+
+  document.querySelectorAll<HTMLElement>(".docs-main figure.code").forEach((figure) => {
+    const caption = figure.querySelector("figcaption");
+    if (!caption || caption.querySelector("button")) return;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "copy-pill";
+    button.textContent = "Copy";
+    button.addEventListener("click", async () => {
+      const text = figure.querySelector("code")?.textContent ?? "";
+      try {
+        await navigator.clipboard.writeText(text.replace(/^\n/, "").replace(/\s+$/, ""));
+        button.textContent = "Copied";
+      } catch {
+        button.textContent = "Copy";
+        return;
+      }
+      window.setTimeout(() => {
+        button.textContent = "Copy";
+      }, 1200);
+    });
+    caption.append(button);
+  });
 </script>
