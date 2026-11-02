@@ -455,8 +455,11 @@ code {
 .legal-compare a:hover { color: #0846a8; text-decoration: underline; }
 
 .legal--docs {
-  width: min(100% - 48px, 1440px);
-  padding: 18px 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 18px 24px;
+  box-sizing: border-box;
 }
 
 @media (max-width: 800px) {
@@ -825,7 +828,13 @@ pre.shiki {
 .tok-kw { color: var(--ck-code-keyword, #79b8f0); }
 .tok-cm { color: var(--ck-code-comment, #9aa296); }
 
-.is-docs .legal { width: min(100% - 48px, 1440px); }
+.is-docs .legal {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 18px 24px;
+  box-sizing: border-box;
+}
 
 .docs-shell {
   width: 100%;

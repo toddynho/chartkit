@@ -467,8 +467,8 @@ html[data-stack="element"] .stack-chip[data-stack-chip="element"] {
 .docs-frame .docs-main {
   min-width: 0;
   width: 100%;
-  max-width: 720px;
-  margin: 0 auto;
+  max-width: 960px;
+  margin: 0;
   padding: 28px 48px 96px;
 }
 
