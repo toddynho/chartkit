@@ -1,11 +1,11 @@
 ---
 import FrameworkMenu from "./FrameworkMenu.astro";
+import SidebarCharts from "./SidebarCharts.astro";
 import { activeDocsHref, docsNav } from "../data/docs-catalog";
 import { canonicalPath } from "../data/site";
 
 const path = canonicalPath(Astro.url.pathname);
 const current = activeDocsHref(path);
-const shortcutCharts = new Set(["/docs/charts/line", "/docs/charts/bar", "/docs/charts/area", "/docs/charts/donut"]);
 
 function sectionFor(): string {
   if (path === "/docs/charts" || path.startsWith("/docs/charts/")) return "Start";
@@ -22,7 +22,6 @@ const openSegment = sectionFor();
 function selected(href: string): boolean {
   if (current === href || path === href) return true;
   if (href === "/docs/migrate" && path.startsWith("/docs/migrate/")) return true;
-  if (href === "/docs/charts" && (path === "/docs/charts" || (path.startsWith("/docs/charts/") && !shortcutCharts.has(path)))) return true;
   return false;
 }
 ---
@@ -66,16 +65,20 @@ function selected(href: string): boolean {
           {group.blocks.map((block) => (
             <div class="side-block">
               {block.label ? <div class="side-section__label">{block.label}</div> : null}
-              <ul class="side-nav">
-                {block.items.map((item) => (
-                  <li>
-                    <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class:list={[selected(item.href) && "is-active"]}>
-                      {item.label}
-                      {item.hint ? <span class="side-hint">{item.hint}</span> : null}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              {block.label === "Charts" ? (
+                <SidebarCharts current={current} />
+              ) : (
+                <ul class="side-nav">
+                  {block.items.map((item) => (
+                    <li>
+                      <a href={item.href} aria-current={selected(item.href) ? "page" : undefined} class:list={[selected(item.href) && "is-active"]}>
+                        {item.label}
+                        {item.hint ? <span class="side-hint">{item.hint}</span> : null}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           ))}
         </div>

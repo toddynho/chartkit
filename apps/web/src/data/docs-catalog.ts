@@ -4,6 +4,7 @@ import chartsJson from "./mock-charts.json";
 import { articleSections } from "./article-copy";
 import { withTruth } from "./chart-truth";
 import { chartTypes } from "./chart-types";
+import { heroTypes } from "./hero-catalog";
 import { docsSpecForType, trySamples, type LiveSpec } from "./live-specs";
 
 export type DocSection = {
@@ -313,6 +314,44 @@ const catalogTypes = new Set(chartDocs.map((chart) => chart.type));
 export const galleryChartCount =
   chartDocs.length + chartTypes.filter((chart) => !catalogTypes.has(chart.type)).length + 3;
 
+export type SidebarChartLink = { type: string; href: string; label: string };
+
+const SIDEBAR_FAMILIES = ["Core", "Statistical", "Planning", "Library", "Geo"] as const;
+
+function sidebarFamily(type: string): (typeof SIDEBAR_FAMILIES)[number] {
+  if (type === "choropleth" || type === "map-points") return "Geo";
+  const family = chartById.get(type)?.family;
+  if (family === "Core" || family === "Statistical" || family === "Planning") return family;
+  return "Library";
+}
+
+function sidebarLabel(type: string, heroLabel: string): string {
+  if (type === "map-points") return "Map points";
+  return chartById.get(type)?.label ?? chartTypes.find((chart) => chart.type === type)?.title ?? heroLabel;
+}
+
+function sidebarHref(type: string): string {
+  if (type === "choropleth" || type === "map-points") return "/docs/charts#maps";
+  return `/docs/charts/${type}`;
+}
+
+/** Chart types in the hero catalog, grouped the way the docs families read. */
+export const sidebarChartGroups: { label: string; items: SidebarChartLink[] }[] = SIDEBAR_FAMILIES.flatMap((label) => {
+  const items = heroTypes
+    .filter((chart) => sidebarFamily(chart.type) === label)
+    .map((chart) => ({ type: chart.type, href: sidebarHref(chart.type), label: sidebarLabel(chart.type, chart.label) }));
+  return items.length ? [{ label, items }] : [];
+});
+
+export const sidebarChartCount = sidebarChartGroups.reduce((total, group) => total + group.items.length, 0);
+
+if (sidebarChartCount !== heroTypes.length) {
+  throw new Error(`Sidebar lists ${sidebarChartCount} chart types; the hero registry has ${heroTypes.length}.`);
+}
+
+/** Rows shown before the fade and the "Show all" control. */
+export const sidebarChartPreview = 5;
+
 function links(items: { slug?: string; href?: string; label: string; hint?: string }[]): NavLink[] {
   return items.map((item) => ({
     href: item.href ?? (item.slug ? `/docs/${item.slug}` : "/docs"),
@@ -340,11 +379,11 @@ export const docsNav: NavGroup[] = [
       {
         label: "Charts",
         items: [
-          { href: "/docs/charts/line", label: "Line" },
-          { href: "/docs/charts/bar", label: "Bar" },
-          { href: "/docs/charts/area", label: "Area" },
-          { href: "/docs/charts/donut", label: "Donut" },
-          { href: "/docs/charts", label: `All ${galleryChartCount} types` },
+          ...sidebarChartGroups.flatMap((group) => group.items).slice(0, sidebarChartPreview).map((item) => ({
+            href: item.href,
+            label: item.label,
+          })),
+          { href: "/docs/charts", label: "All types" },
         ],
       },
       {

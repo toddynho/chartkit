@@ -1,0 +1,116 @@
+---
+import { chartIcon, mapIcon } from "../data/chart-icons";
+import { sidebarChartCount, sidebarChartGroups, sidebarChartPreview } from "../data/docs-catalog";
+
+interface Props {
+  current: string;
+}
+
+const { current } = Astro.props;
+const previewTypes = sidebarChartGroups.flatMap((group) => group.items).slice(0, sidebarChartPreview).map((item) => item.type);
+const chartType = current.startsWith("/docs/charts/") ? current.slice("/docs/charts/".length) : "";
+const startOpen = chartType !== "" && !previewTypes.includes(chartType);
+
+let seen = 0;
+const groups = sidebarChartGroups.map((group, groupIndex) => ({
+  label: group.label,
+  labeled: groupIndex > 0,
+  items: group.items.map((item) => {
+    const index = seen;
+    seen += 1;
+    return { ...item, rest: index >= sidebarChartPreview };
+  }),
+}));
+
+function icon(type: string): string {
+  if (type === "choropleth" || type === "map-points") return mapIcon;
+  return chartIcon(type);
+}
+
+function currentPage(href: string): boolean {
+  return current === href;
+}
+---
+
+<script is:inline define:vars={{ previewTypes }}>
+  (function () {
+    var open = false;
+    try {
+      open = localStorage.getItem("ck-docs-charts-open") === "1";
+    } catch (e) {}
+    var path = location.pathname.replace(/\/$/, "") || "/";
+    var match = path.match(/^\/docs\/charts\/([^/]+)$/);
+    if (match && previewTypes.indexOf(match[1]) === -1) open = true;
+    if (open) document.documentElement.dataset.chartsOpen = "1";
+  })();
+</script>
+
+<div class:list={["side-charts", startOpen && "is-open"]} id="docs-charts">
+  <div class="side-charts__body">
+    {
+      groups.map((group) => (
+        <div class="side-charts__group">
+          {group.labeled ? <div class="side-charts__family">{group.label}</div> : null}
+          <ul class="side-nav">
+            {group.items.map((item) => (
+              <li class:list={[item.rest && "side-charts__rest"]}>
+                <a href={item.href} aria-current={currentPage(item.href) ? "page" : undefined} class:list={[currentPage(item.href) && "is-active"]}>
+                  <svg class="type-icon" viewBox="0 0 24 20" width="16" height="16" aria-hidden="true" set:html={icon(item.type)} />
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+    <div class="side-charts__rest">
+      <ul class="side-nav">
+        <li>
+          <a href="/docs/charts" aria-current={current === "/docs/charts" ? "page" : undefined} class:list={[current === "/docs/charts" && "is-active"]}>
+            All types
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="side-charts__fade" aria-hidden="true"></div>
+  </div>
+  <button
+    type="button"
+    class="side-charts__toggle"
+    id="docs-charts-toggle"
+    data-count={sidebarChartCount}
+    aria-expanded={startOpen ? "true" : "false"}
+    aria-controls="docs-charts"
+  >
+    {startOpen ? "Show fewer" : `Show all ${sidebarChartCount} types`}
+  </button>
+</div>
+
+<script>
+  const root = document.getElementById("docs-charts");
+  const button = document.getElementById("docs-charts-toggle");
+  const count = button?.dataset.count ?? "";
+
+  const openNow = () => document.documentElement.dataset.chartsOpen === "1" || root?.classList.contains("is-open") === true;
+
+  const paint = (open: boolean) => {
+    if (open) document.documentElement.dataset.chartsOpen = "1";
+    else delete document.documentElement.dataset.chartsOpen;
+    root?.classList.toggle("is-open", open);
+    button?.setAttribute("aria-expanded", open ? "true" : "false");
+    if (button) button.textContent = open ? "Show fewer" : `Show all ${count} types`;
+  };
+
+  paint(openNow());
+
+  button?.addEventListener("click", () => {
+    const next = !openNow();
+    paint(next);
+    try {
+      localStorage.setItem("ck-docs-charts-open", next ? "1" : "0");
+    } catch {
+      /* private mode */
+    }
+  });
+</script>

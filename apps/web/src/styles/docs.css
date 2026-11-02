@@ -442,12 +442,70 @@ html[data-stack="element"] .stack-chip[data-stack-chip="element"] {
 
 .type-icon {
   width: 16px;
-  height: 14px;
+  height: 16px;
   flex: 0 0 16px;
-  color: #6e6e73;
+  color: #8b8d93;
+  display: block;
 }
 
-.side-nav a.is-active .type-icon { color: #1d1d1f; }
+.side-nav a:hover .type-icon,
+.side-nav a.is-active .type-icon,
+.side-nav a[aria-current="page"] .type-icon { color: #17181a; }
+
+.side-charts__body { position: relative; }
+
+.side-charts__family {
+  display: none;
+  margin: 10px 0 0;
+  padding: 0 10px 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8b8d93;
+}
+
+.side-charts__rest { display: none; }
+
+html[data-charts-open="1"] .side-charts__rest,
+.side-charts.is-open .side-charts__rest,
+html[data-charts-open="1"] .side-charts__family,
+.side-charts.is-open .side-charts__family { display: block; }
+
+.side-charts__fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44px;
+  background: linear-gradient(to bottom, rgba(245, 245, 247, 0) 0%, rgba(245, 245, 247, 0.2) 42%, #f5f5f7 100%);
+  pointer-events: none;
+}
+
+html[data-charts-open="1"] .side-charts__fade,
+.side-charts.is-open .side-charts__fade { display: none; }
+
+.side-charts__toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #8b8d93;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1;
+  text-align: left;
+  cursor: pointer;
+}
+
+.side-charts__toggle:hover { background: #ebebed; color: #17181a; }
 
 .visually-hidden {
   position: absolute;
