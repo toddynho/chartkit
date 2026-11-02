@@ -94,7 +94,7 @@ const extras: DocArticle[] = [
       {
         title: "Where to read",
         paragraphs: [
-          "The framework chip on Overview picks React, Vue, Svelte, Astro, Solid, Qwik, Angular, or JS. /docs/react, /docs/solid, and the other stack URLs open Overview with that chip selected.",
+          "The Show code for menu picks React, Vue, Svelte, Astro, Solid, Qwik, Angular, or JS. /docs/react, /docs/solid, and the other stack URLs open Overview with that framework selected.",
         ],
         list: [],
         code: [],
