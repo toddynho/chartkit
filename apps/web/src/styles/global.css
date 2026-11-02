@@ -426,7 +426,6 @@ code {
 }
 
 .legal__meta { display: inline; }
-.legal__end { display: flex; align-items: center; gap: 16px; margin-left: auto; }
 .legal a { color: var(--ink-2); text-decoration: underline; text-underline-offset: 2px; }
 .legal__credit { color: var(--ink-2); text-decoration: none; }
 .legal a:hover { color: var(--ink); }
@@ -454,13 +453,18 @@ code {
 
 .legal-compare a:hover { color: #0846a8; text-decoration: underline; }
 
-.legal--docs {
+.site-footer--docs .footer-grid,
+.site-footer--docs .legal,
+.site-footer--docs .legal-compare {
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 18px 24px;
   box-sizing: border-box;
 }
+
+.site-footer--docs .footer-grid { padding: 40px 24px 28px; }
+.site-footer--docs .legal { padding: 0 24px 12px; }
+.site-footer--docs .legal-compare { padding: 2px 24px 28px; }
 
 @media (max-width: 800px) {
   .site-header__inner, .site-header--docs .site-header__inner { display: flex; gap: 12px; }
@@ -827,14 +831,6 @@ pre.shiki {
 .tok-num { color: var(--ck-code-number, #b5cea8); }
 .tok-kw { color: var(--ck-code-keyword, #79b8f0); }
 .tok-cm { color: var(--ck-code-comment, #9aa296); }
-
-.is-docs .legal {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 18px 24px;
-  box-sizing: border-box;
-}
 
 .docs-shell {
   width: 100%;
