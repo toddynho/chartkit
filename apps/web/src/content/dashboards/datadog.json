@@ -1,0 +1,981 @@
+{
+  "order": 5,
+  "id": "datadog",
+  "name": "Datadog-style monitors",
+  "blurb": "Dark ops board: big-number tiles, a gauge, and multi-series latency lines.",
+  "app": "Watchtower",
+  "user": "prod-us-east",
+  "chrome": "topbar",
+  "active": 2,
+  "nav": [
+    "Infrastructure",
+    "APM",
+    "Dashboards",
+    "Monitors",
+    "Logs"
+  ],
+  "title": "API gateway",
+  "sub": "Requests, errors and latency · Past 4 hours",
+  "filters": [
+    "1h",
+    "4h",
+    "1d",
+    "1w"
+  ],
+  "theme": {
+    "bg": "#1b1b22",
+    "chrome": "#15151b",
+    "surface": "#23232b",
+    "border": "#32323d",
+    "text": "#e9e9ee",
+    "muted": "#9a9aa8",
+    "accent": "#8bd17c",
+    "accent2": "#e6c85a",
+    "accent3": "#7c6fe0",
+    "grid": "#2c2c36",
+    "up": "#8bd17c",
+    "down": "#ef6f6c",
+    "radius": 4,
+    "gap": 10,
+    "row": 52,
+    "navActive": "#2a2a35",
+    "labelCase": "uppercase",
+    "labelTrack": ".05em",
+    "dark": true
+  },
+  "panels": [
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "Requests",
+      "data": [
+        30,
+        53,
+        72,
+        74,
+        80,
+        79,
+        60,
+        50,
+        38,
+        17,
+        13,
+        16,
+        15,
+        32,
+        54,
+        64,
+        86,
+        102,
+        100,
+        102,
+        98,
+        77,
+        65,
+        55
+      ],
+      "a11y": {
+        "alt": "Requests per minute trend up across the last four hours."
+      },
+      "summary": {
+        "value": "1.3K/m",
+        "delta": "+18%"
+      },
+      "layout": {
+        "col": 4,
+        "row": 2
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "Errors",
+      "data": [
+        {
+          "v": 25
+        },
+        {
+          "v": 66
+        },
+        {
+          "v": 46
+        },
+        {
+          "v": 75
+        },
+        {
+          "v": 42
+        },
+        {
+          "v": 59
+        },
+        {
+          "v": 61
+        },
+        {
+          "v": 65
+        },
+        {
+          "v": 55
+        },
+        {
+          "v": 45
+        },
+        {
+          "v": 71
+        },
+        {
+          "v": 48
+        },
+        {
+          "v": 60
+        },
+        {
+          "v": 35
+        },
+        {
+          "v": 71
+        },
+        {
+          "v": 56
+        },
+        {
+          "v": 56
+        },
+        {
+          "v": 51
+        },
+        {
+          "v": 62
+        },
+        {
+          "v": 70
+        },
+        {
+          "v": 44
+        },
+        {
+          "v": 63
+        },
+        {
+          "v": 47
+        },
+        {
+          "v": 77
+        }
+      ],
+      "encoding": {
+        "y": {
+          "field": "v",
+          "color": "negative"
+        }
+      },
+      "a11y": {
+        "alt": "Errors fall across the window."
+      },
+      "summary": {
+        "value": "8",
+        "delta": "−22%"
+      },
+      "layout": {
+        "col": 4,
+        "row": 2
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "p95 latency",
+      "data": [
+        25,
+        66,
+        46,
+        75,
+        42,
+        59,
+        61,
+        65,
+        55,
+        45,
+        71,
+        48,
+        60,
+        35,
+        71,
+        56,
+        56,
+        51,
+        62,
+        70,
+        44,
+        63,
+        47,
+        77
+      ],
+      "a11y": {
+        "alt": "p95 latency wobbles and ends slightly higher."
+      },
+      "summary": {
+        "value": "86 ms",
+        "delta": "+4%"
+      },
+      "layout": {
+        "col": 4,
+        "row": 2
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "gauge",
+      "title": "Error budget remaining",
+      "metric": {
+        "label": "Error budget remaining",
+        "value": 64,
+        "min": 0,
+        "max": 100,
+        "format": "percent-raw"
+      },
+      "a11y": {
+        "alt": "Error budget remaining is 64 percent."
+      },
+      "layout": {
+        "col": 4,
+        "row": 4
+      }
+    },
+    {
+      "version": "1",
+      "legend": {
+        "position": "top"
+      },
+      "tooltip": false,
+      "type": "line",
+      "title": "Requests by status",
+      "data": [
+        {
+          "date": "2026-10-31T00:00:00Z",
+          "ok": 30,
+          "warn": 13,
+          "err": 8
+        },
+        {
+          "date": "2026-11-01T01:00:00Z",
+          "ok": 52,
+          "warn": 33,
+          "err": 20
+        },
+        {
+          "date": "2026-11-02T02:00:00Z",
+          "ok": 71,
+          "warn": 23,
+          "err": 14
+        },
+        {
+          "date": "2026-11-03T03:00:00Z",
+          "ok": 72,
+          "warn": 38,
+          "err": 23
+        },
+        {
+          "date": "2026-11-04T04:00:00Z",
+          "ok": 77,
+          "warn": 21,
+          "err": 13
+        },
+        {
+          "date": "2026-11-05T05:00:00Z",
+          "ok": 76,
+          "warn": 30,
+          "err": 18
+        },
+        {
+          "date": "2026-11-06T06:00:00Z",
+          "ok": 56,
+          "warn": 31,
+          "err": 18
+        },
+        {
+          "date": "2026-11-07T07:00:00Z",
+          "ok": 45,
+          "warn": 33,
+          "err": 20
+        },
+        {
+          "date": "2026-11-08T08:00:00Z",
+          "ok": 33,
+          "warn": 28,
+          "err": 17
+        },
+        {
+          "date": "2026-11-09T09:00:00Z",
+          "ok": 11,
+          "warn": 23,
+          "err": 14
+        },
+        {
+          "date": "2026-11-10T10:00:00Z",
+          "ok": 7,
+          "warn": 36,
+          "err": 21
+        },
+        {
+          "date": "2026-11-11T11:00:00Z",
+          "ok": 9,
+          "warn": 24,
+          "err": 14
+        },
+        {
+          "date": "2026-11-12T12:00:00Z",
+          "ok": 7,
+          "warn": 30,
+          "err": 18
+        },
+        {
+          "date": "2026-11-13T13:00:00Z",
+          "ok": 23,
+          "warn": 18,
+          "err": 11
+        },
+        {
+          "date": "2026-11-14T14:00:00Z",
+          "ok": 44,
+          "warn": 36,
+          "err": 21
+        },
+        {
+          "date": "2026-11-15T15:00:00Z",
+          "ok": 54,
+          "warn": 28,
+          "err": 17
+        },
+        {
+          "date": "2026-11-16T16:00:00Z",
+          "ok": 75,
+          "warn": 28,
+          "err": 17
+        },
+        {
+          "date": "2026-11-17T17:00:00Z",
+          "ok": 91,
+          "warn": 26,
+          "err": 15
+        },
+        {
+          "date": "2026-11-18T18:00:00Z",
+          "ok": 88,
+          "warn": 31,
+          "err": 19
+        },
+        {
+          "date": "2026-11-19T19:00:00Z",
+          "ok": 90,
+          "warn": 35,
+          "err": 21
+        },
+        {
+          "date": "2026-11-20T20:00:00Z",
+          "ok": 85,
+          "warn": 22,
+          "err": 13
+        },
+        {
+          "date": "2026-11-21T21:00:00Z",
+          "ok": 63,
+          "warn": 32,
+          "err": 19
+        },
+        {
+          "date": "2026-11-22T22:00:00Z",
+          "ok": 50,
+          "warn": 24,
+          "err": 14
+        },
+        {
+          "date": "2026-11-23T23:00:00Z",
+          "ok": 39,
+          "warn": 39,
+          "err": 23
+        },
+        {
+          "date": "2026-11-24T00:00:00Z",
+          "ok": 20,
+          "warn": 13,
+          "err": 8
+        },
+        {
+          "date": "2026-11-25T01:00:00Z",
+          "ok": 19,
+          "warn": 33,
+          "err": 20
+        },
+        {
+          "date": "2026-11-26T02:00:00Z",
+          "ok": 26,
+          "warn": 23,
+          "err": 14
+        },
+        {
+          "date": "2026-11-27T03:00:00Z",
+          "ok": 28,
+          "warn": 38,
+          "err": 23
+        },
+        {
+          "date": "2026-11-28T04:00:00Z",
+          "ok": 47,
+          "warn": 21,
+          "err": 12
+        },
+        {
+          "date": "2026-11-29T05:00:00Z",
+          "ok": 69,
+          "warn": 30,
+          "err": 18
+        },
+        {
+          "date": "2026-11-30T06:00:00Z",
+          "ok": 78,
+          "warn": 30,
+          "err": 18
+        },
+        {
+          "date": "2026-12-01T07:00:00Z",
+          "ok": 97,
+          "warn": 33,
+          "err": 20
+        },
+        {
+          "date": "2026-12-02T08:00:00Z",
+          "ok": 109,
+          "warn": 27,
+          "err": 16
+        },
+        {
+          "date": "2026-12-03T09:00:00Z",
+          "ok": 102,
+          "warn": 23,
+          "err": 14
+        },
+        {
+          "date": "2026-12-04T10:00:00Z",
+          "ok": 100,
+          "warn": 35,
+          "err": 21
+        },
+        {
+          "date": "2026-12-05T11:00:00Z",
+          "ok": 92,
+          "warn": 25,
+          "err": 15
+        },
+        {
+          "date": "2026-12-06T12:00:00Z",
+          "ok": 68,
+          "warn": 30,
+          "err": 18
+        },
+        {
+          "date": "2026-12-07T13:00:00Z",
+          "ok": 56,
+          "warn": 17,
+          "err": 10
+        },
+        {
+          "date": "2026-12-08T14:00:00Z",
+          "ok": 47,
+          "warn": 36,
+          "err": 21
+        },
+        {
+          "date": "2026-12-09T15:00:00Z",
+          "ok": 31,
+          "warn": 27,
+          "err": 16
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": [
+          {
+            "field": "ok",
+            "title": "2xx"
+          },
+          {
+            "field": "warn",
+            "title": "4xx"
+          },
+          {
+            "field": "err",
+            "title": "5xx"
+          }
+        ]
+      },
+      "mark": {
+        "curve": "monotone",
+        "points": "none"
+      },
+      "axes": {
+        "x": {
+          "ticks": 4,
+          "grid": false
+        },
+        "y": {
+          "grid": true
+        }
+      },
+      "a11y": {
+        "alt": "Requests by status over forty points. 2xx is the top line, then 4xx, then 5xx."
+      },
+      "layout": {
+        "col": 8,
+        "row": 4
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "line",
+      "title": "Error rate",
+      "data": [
+        {
+          "date": "2026-10-20",
+          "rate": 25
+        },
+        {
+          "date": "2026-10-21",
+          "rate": 66
+        },
+        {
+          "date": "2026-10-22",
+          "rate": 46
+        },
+        {
+          "date": "2026-10-23",
+          "rate": 75
+        },
+        {
+          "date": "2026-10-24",
+          "rate": 42
+        },
+        {
+          "date": "2026-10-25",
+          "rate": 59
+        },
+        {
+          "date": "2026-10-26",
+          "rate": 61
+        },
+        {
+          "date": "2026-10-27",
+          "rate": 65
+        },
+        {
+          "date": "2026-10-28",
+          "rate": 55
+        },
+        {
+          "date": "2026-10-29",
+          "rate": 45
+        },
+        {
+          "date": "2026-10-30",
+          "rate": 71
+        },
+        {
+          "date": "2026-10-31",
+          "rate": 48
+        },
+        {
+          "date": "2026-11-01",
+          "rate": 60
+        },
+        {
+          "date": "2026-11-02",
+          "rate": 35
+        },
+        {
+          "date": "2026-11-03",
+          "rate": 71
+        },
+        {
+          "date": "2026-11-04",
+          "rate": 56
+        },
+        {
+          "date": "2026-11-05",
+          "rate": 56
+        },
+        {
+          "date": "2026-11-06",
+          "rate": 51
+        },
+        {
+          "date": "2026-11-07",
+          "rate": 62
+        },
+        {
+          "date": "2026-11-08",
+          "rate": 70
+        },
+        {
+          "date": "2026-11-09",
+          "rate": 44
+        },
+        {
+          "date": "2026-11-10",
+          "rate": 63
+        },
+        {
+          "date": "2026-11-11",
+          "rate": 47
+        },
+        {
+          "date": "2026-11-12",
+          "rate": 77
+        },
+        {
+          "date": "2026-11-13",
+          "rate": 26
+        },
+        {
+          "date": "2026-11-14",
+          "rate": 66
+        },
+        {
+          "date": "2026-11-15",
+          "rate": 45
+        },
+        {
+          "date": "2026-11-16",
+          "rate": 76
+        },
+        {
+          "date": "2026-11-17",
+          "rate": 41
+        },
+        {
+          "date": "2026-11-18",
+          "rate": 60
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": [
+          {
+            "field": "rate",
+            "title": "Error rate"
+          }
+        ]
+      },
+      "mark": {
+        "curve": "monotone",
+        "points": "none"
+      },
+      "axes": {
+        "x": {
+          "ticks": 4,
+          "grid": false
+        },
+        "y": {
+          "grid": true
+        }
+      },
+      "a11y": {
+        "alt": "Error rate fluctuates across thirty days without a lasting climb."
+      },
+      "layout": {
+        "col": 5,
+        "row": 4
+      }
+    },
+    {
+      "version": "1",
+      "legend": {
+        "position": "top"
+      },
+      "tooltip": false,
+      "type": "line",
+      "title": "Latency p50 / p95 / p99",
+      "data": [
+        {
+          "date": "2026-10-01",
+          "p50": 10,
+          "p95": 18,
+          "p99": 25
+        },
+        {
+          "date": "2026-10-02",
+          "p50": 26,
+          "p95": 46,
+          "p99": 66
+        },
+        {
+          "date": "2026-10-03",
+          "p50": 18,
+          "p95": 32,
+          "p99": 46
+        },
+        {
+          "date": "2026-10-04",
+          "p50": 30,
+          "p95": 53,
+          "p99": 75
+        },
+        {
+          "date": "2026-10-05",
+          "p50": 17,
+          "p95": 29,
+          "p99": 42
+        },
+        {
+          "date": "2026-10-06",
+          "p50": 24,
+          "p95": 41,
+          "p99": 59
+        },
+        {
+          "date": "2026-10-07",
+          "p50": 24,
+          "p95": 43,
+          "p99": 61
+        },
+        {
+          "date": "2026-10-08",
+          "p50": 26,
+          "p95": 46,
+          "p99": 65
+        },
+        {
+          "date": "2026-10-09",
+          "p50": 22,
+          "p95": 39,
+          "p99": 55
+        },
+        {
+          "date": "2026-10-10",
+          "p50": 18,
+          "p95": 31,
+          "p99": 45
+        },
+        {
+          "date": "2026-10-11",
+          "p50": 28,
+          "p95": 50,
+          "p99": 71
+        },
+        {
+          "date": "2026-10-12",
+          "p50": 19,
+          "p95": 34,
+          "p99": 48
+        },
+        {
+          "date": "2026-10-13",
+          "p50": 24,
+          "p95": 42,
+          "p99": 60
+        },
+        {
+          "date": "2026-10-14",
+          "p50": 14,
+          "p95": 25,
+          "p99": 35
+        },
+        {
+          "date": "2026-10-15",
+          "p50": 28,
+          "p95": 50,
+          "p99": 71
+        },
+        {
+          "date": "2026-10-16",
+          "p50": 22,
+          "p95": 39,
+          "p99": 56
+        },
+        {
+          "date": "2026-10-17",
+          "p50": 22,
+          "p95": 39,
+          "p99": 56
+        },
+        {
+          "date": "2026-10-18",
+          "p50": 20,
+          "p95": 36,
+          "p99": 51
+        },
+        {
+          "date": "2026-10-19",
+          "p50": 25,
+          "p95": 43,
+          "p99": 62
+        },
+        {
+          "date": "2026-10-20",
+          "p50": 28,
+          "p95": 49,
+          "p99": 70
+        },
+        {
+          "date": "2026-10-21",
+          "p50": 18,
+          "p95": 31,
+          "p99": 44
+        },
+        {
+          "date": "2026-10-22",
+          "p50": 25,
+          "p95": 44,
+          "p99": 63
+        },
+        {
+          "date": "2026-10-23",
+          "p50": 19,
+          "p95": 33,
+          "p99": 47
+        },
+        {
+          "date": "2026-10-24",
+          "p50": 31,
+          "p95": 54,
+          "p99": 77
+        },
+        {
+          "date": "2026-10-25",
+          "p50": 10,
+          "p95": 18,
+          "p99": 26
+        },
+        {
+          "date": "2026-10-26",
+          "p50": 26,
+          "p95": 46,
+          "p99": 66
+        },
+        {
+          "date": "2026-10-27",
+          "p50": 18,
+          "p95": 31,
+          "p99": 45
+        },
+        {
+          "date": "2026-10-28",
+          "p50": 30,
+          "p95": 53,
+          "p99": 76
+        },
+        {
+          "date": "2026-10-29",
+          "p50": 16,
+          "p95": 29,
+          "p99": 41
+        },
+        {
+          "date": "2026-10-30",
+          "p50": 24,
+          "p95": 42,
+          "p99": 60
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": [
+          {
+            "field": "p50",
+            "title": "p50"
+          },
+          {
+            "field": "p95",
+            "title": "p95"
+          },
+          {
+            "field": "p99",
+            "title": "p99"
+          }
+        ]
+      },
+      "mark": {
+        "curve": "monotone",
+        "points": "none"
+      },
+      "axes": {
+        "x": {
+          "ticks": 4,
+          "grid": false
+        },
+        "y": {
+          "grid": true
+        }
+      },
+      "a11y": {
+        "alt": "Latency percentiles stay ordered: p99 above p95 above p50 across thirty days."
+      },
+      "layout": {
+        "col": 7,
+        "row": 4
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar-list",
+      "title": "Top services",
+      "data": [
+        {
+          "name": "render",
+          "value": 612
+        },
+        {
+          "name": "validate",
+          "value": 390
+        },
+        {
+          "name": "repair",
+          "value": 232
+        },
+        {
+          "name": "geo-tiles",
+          "value": 121
+        }
+      ],
+      "encoding": {
+        "x": "name",
+        "y": {
+          "field": "value",
+          "format": {
+            "style": "number",
+            "suffix": " rps",
+            "decimals": 0
+          }
+        }
+      },
+      "a11y": {
+        "alt": "render leads at 612 requests per second, then validate, repair, and geo-tiles."
+      },
+      "layout": {
+        "col": 12,
+        "row": 3
+      }
+    }
+  ]
+}

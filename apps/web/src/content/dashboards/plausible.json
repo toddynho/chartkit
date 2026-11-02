@@ -1,0 +1,486 @@
+{
+  "order": 2,
+  "id": "plausible",
+  "name": "Plausible-style analytics",
+  "blurb": "One big area chart under a KPI strip, with tabbed source breakdowns underneath.",
+  "app": "Simple Stats",
+  "user": "ckit.dev",
+  "chrome": "topbar",
+  "active": 0,
+  "nav": [
+    "Sites",
+    "Goals",
+    "Funnels",
+    "Settings"
+  ],
+  "title": "ckit.dev",
+  "sub": "1.4K current visitors · Last 30 days",
+  "filters": [
+    "Realtime",
+    "Last 30 days",
+    "Year to date"
+  ],
+  "theme": {
+    "bg": "#f9fafb",
+    "chrome": "#fff",
+    "surface": "#fff",
+    "border": "#e5e7eb",
+    "text": "#1f2937",
+    "muted": "#6b7280",
+    "accent": "#6574cd",
+    "accent2": "#a0a9e8",
+    "accent3": "#e3e6f8",
+    "grid": "#f1f2f4",
+    "up": "#16a34a",
+    "down": "#dc2626",
+    "radius": 8,
+    "gap": 16,
+    "row": 52,
+    "navActive": "#f1f2f4"
+  },
+  "panels": [
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "title": "Overview",
+      "a11y": {
+        "alt": "Six site metrics: visitors, visits, pageviews, views per visit, bounce rate, and visit duration."
+      },
+      "layout": {
+        "col": 12,
+        "row": 2,
+        "concat": {
+          "direction": "horizontal",
+          "gap": 8,
+          "views": [
+            {
+              "version": "1",
+              "type": "kpi",
+              "metric": {
+                "label": "Unique visitors",
+                "value": 18400,
+                "format": "compact",
+                "delta": 0.04
+              },
+              "data": [
+                30,
+                54,
+                75,
+                79,
+                87,
+                88,
+                70,
+                61,
+                51,
+                32,
+                30,
+                35
+              ],
+              "legend": false,
+              "tooltip": false,
+              "a11y": {
+                "alt": "Unique visitors are 18.4 thousand, up 4 percent."
+              }
+            },
+            {
+              "version": "1",
+              "type": "kpi",
+              "metric": {
+                "label": "Total visits",
+                "value": 22100,
+                "format": "compact",
+                "delta": 0.06
+              },
+              "data": [
+                25,
+                66,
+                46,
+                75,
+                42,
+                59,
+                61,
+                65,
+                55,
+                45,
+                71,
+                48
+              ],
+              "legend": false,
+              "tooltip": false,
+              "a11y": {
+                "alt": "Total visits are 22.1 thousand, up 6 percent."
+              }
+            },
+            {
+              "version": "1",
+              "type": "kpi",
+              "metric": {
+                "label": "Pageviews",
+                "value": 51200,
+                "format": "compact",
+                "delta": 0.08
+              },
+              "data": [
+                30,
+                54,
+                75,
+                79,
+                87,
+                88,
+                70,
+                61,
+                51,
+                32,
+                30,
+                35
+              ],
+              "legend": false,
+              "tooltip": false,
+              "a11y": {
+                "alt": "Pageviews are 51.2 thousand, up 8 percent."
+              }
+            },
+            {
+              "version": "1",
+              "type": "kpi",
+              "metric": {
+                "label": "Views per visit",
+                "value": 2.3,
+                "format": {
+                  "style": "number",
+                  "decimals": 1
+                },
+                "delta": 0.02
+              },
+              "data": [
+                25,
+                66,
+                46,
+                75,
+                42,
+                59,
+                61,
+                65,
+                55,
+                45,
+                71,
+                48
+              ],
+              "legend": false,
+              "tooltip": false,
+              "a11y": {
+                "alt": "Views per visit are 2.3, up 2 percent."
+              }
+            },
+            {
+              "version": "1",
+              "type": "kpi",
+              "metric": {
+                "label": "Bounce rate",
+                "value": 41,
+                "format": "percent-raw",
+                "delta": -0.03,
+                "goodDirection": "down"
+              },
+              "data": [
+                48,
+                71,
+                45,
+                55,
+                65,
+                61,
+                59,
+                42,
+                75,
+                46,
+                66,
+                25
+              ],
+              "legend": false,
+              "tooltip": false,
+              "a11y": {
+                "alt": "Bounce rate is 41 percent, down 3 percent."
+              }
+            },
+            {
+              "version": "1",
+              "type": "kpi",
+              "metric": {
+                "label": "Visit duration",
+                "value": 144000,
+                "format": "duration-hm",
+                "delta": 0.11
+              },
+              "data": [
+                30,
+                54,
+                75,
+                79,
+                87,
+                88,
+                70,
+                61,
+                51,
+                32,
+                30,
+                35
+              ],
+              "legend": false,
+              "tooltip": false,
+              "a11y": {
+                "alt": "Visit duration is 2 minutes 24 seconds, up 11 percent."
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "line",
+      "title": "Visitors",
+      "data": [
+        {
+          "date": "2026-10-01",
+          "value": 25
+        },
+        {
+          "date": "2026-10-02",
+          "value": 66
+        },
+        {
+          "date": "2026-10-03",
+          "value": 46
+        },
+        {
+          "date": "2026-10-04",
+          "value": 75
+        },
+        {
+          "date": "2026-10-05",
+          "value": 42
+        },
+        {
+          "date": "2026-10-06",
+          "value": 59
+        },
+        {
+          "date": "2026-10-07",
+          "value": 61
+        },
+        {
+          "date": "2026-10-08",
+          "value": 65
+        },
+        {
+          "date": "2026-10-09",
+          "value": 55
+        },
+        {
+          "date": "2026-10-10",
+          "value": 45
+        },
+        {
+          "date": "2026-10-11",
+          "value": 71
+        },
+        {
+          "date": "2026-10-12",
+          "value": 48
+        },
+        {
+          "date": "2026-10-13",
+          "value": 60
+        },
+        {
+          "date": "2026-10-14",
+          "value": 35
+        },
+        {
+          "date": "2026-10-15",
+          "value": 71
+        },
+        {
+          "date": "2026-10-16",
+          "value": 56
+        },
+        {
+          "date": "2026-10-17",
+          "value": 56
+        },
+        {
+          "date": "2026-10-18",
+          "value": 51
+        },
+        {
+          "date": "2026-10-19",
+          "value": 62
+        },
+        {
+          "date": "2026-10-20",
+          "value": 70
+        },
+        {
+          "date": "2026-10-21",
+          "value": 44
+        },
+        {
+          "date": "2026-10-22",
+          "value": 63
+        },
+        {
+          "date": "2026-10-23",
+          "value": 47
+        },
+        {
+          "date": "2026-10-24",
+          "value": 77
+        },
+        {
+          "date": "2026-10-25",
+          "value": 26
+        },
+        {
+          "date": "2026-10-26",
+          "value": 66
+        },
+        {
+          "date": "2026-10-27",
+          "value": 45
+        },
+        {
+          "date": "2026-10-28",
+          "value": 76
+        },
+        {
+          "date": "2026-10-29",
+          "value": 41
+        },
+        {
+          "date": "2026-10-30",
+          "value": 60
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "value",
+          "title": "Visitors"
+        }
+      },
+      "mark": {
+        "curve": "monotone",
+        "points": "none",
+        "area": true
+      },
+      "axes": {
+        "x": {
+          "ticks": 4,
+          "grid": false
+        },
+        "y": {
+          "grid": true
+        }
+      },
+      "a11y": {
+        "alt": "Visitors over the last 30 days rise and fall in a wave, ending higher than they began."
+      },
+      "layout": {
+        "col": 12,
+        "row": 5
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar-list",
+      "title": "Top sources",
+      "data": [
+        {
+          "name": "Direct / none",
+          "value": 7200
+        },
+        {
+          "name": "Google",
+          "value": 5600
+        },
+        {
+          "name": "Hacker News",
+          "value": 3100
+        },
+        {
+          "name": "GitHub",
+          "value": 2000
+        },
+        {
+          "name": "Twitter",
+          "value": 980
+        }
+      ],
+      "encoding": {
+        "x": "name",
+        "y": {
+          "field": "value",
+          "format": "compact"
+        }
+      },
+      "a11y": {
+        "alt": "Direct traffic leads sources at 7.2 thousand, then Google, Hacker News, GitHub, and Twitter."
+      },
+      "layout": {
+        "col": 6,
+        "row": 4
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar-list",
+      "title": "Top pages",
+      "data": [
+        {
+          "name": "/",
+          "value": 12300
+        },
+        {
+          "name": "/docs",
+          "value": 8100
+        },
+        {
+          "name": "/gallery",
+          "value": 4600
+        },
+        {
+          "name": "/dashboards",
+          "value": 3700
+        },
+        {
+          "name": "/compare",
+          "value": 2200
+        }
+      ],
+      "encoding": {
+        "x": "name",
+        "y": {
+          "field": "value",
+          "format": "compact"
+        }
+      },
+      "a11y": {
+        "alt": "The home page leads at 12.3 thousand views, ahead of docs, gallery, dashboards, and compare."
+      },
+      "layout": {
+        "col": 6,
+        "row": 4
+      }
+    }
+  ]
+}

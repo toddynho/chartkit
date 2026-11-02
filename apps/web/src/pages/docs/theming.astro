@@ -130,7 +130,7 @@ const spec = { version: "1", type: "bar", theme: { tokens: { series } } };`;
   </div>
   <h2>Dashboards</h2>
   <p>
-    The <a href="/dashboards">dashboard pages</a> set series, text, grid, positive, and negative on <code>theme.tokens</code>. Each board has a light and a dark token object. Page CSS styles the shell. Fonts are Inter or Roboto. ChartKit is not affiliated with those products. Gaps that still need a spec option are in <code>catalog/dashboards/GAPS.md</code>.
+    The <a href="/dashboards">dashboard pages</a> pass each board’s colors through <code>theme.tokens</code>, so axes, grid, and series follow that board. Page CSS draws the chrome. Names stay in the style of those products. ChartKit is not affiliated with them.
   </p>
   <h2>Presets</h2>
   <p>

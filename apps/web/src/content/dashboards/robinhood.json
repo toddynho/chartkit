@@ -1,0 +1,562 @@
+{
+  "order": 6,
+  "id": "robinhood",
+  "name": "Robinhood-style portfolio",
+  "blurb": "Candlesticks over volume, green-on-black, with holdings as a weighted bar list.",
+  "app": "Fold",
+  "user": "Individual · Margin",
+  "chrome": "topbar",
+  "active": 0,
+  "nav": [
+    "Investing",
+    "Crypto",
+    "Retirement",
+    "Cash"
+  ],
+  "title": "$18,432.10",
+  "sub": "+$1,284.22 (+7.49%) past 3 months",
+  "filters": [
+    "1D",
+    "1W",
+    "1M",
+    "3M",
+    "YTD"
+  ],
+  "theme": {
+    "bg": "#000",
+    "chrome": "#000",
+    "surface": "#0b0b0b",
+    "border": "#1f1f1f",
+    "text": "#f3f3f3",
+    "muted": "#8d8d8d",
+    "accent": "#00c805",
+    "accent2": "#5cd968",
+    "accent3": "#1e4f23",
+    "grid": "#181818",
+    "up": "#00c805",
+    "down": "#ff5000",
+    "radius": 10,
+    "gap": 12,
+    "row": 52,
+    "navActive": "#161616",
+    "h1": 34,
+    "chipR": 999,
+    "dark": true
+  },
+  "panels": [
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "candlestick",
+      "title": "Portfolio",
+      "data": [
+        {
+          "date": "2026-08-01",
+          "open": 20,
+          "close": 11,
+          "low": 7,
+          "high": 25
+        },
+        {
+          "date": "2026-08-02",
+          "open": 26,
+          "close": 23,
+          "low": 19,
+          "high": 31
+        },
+        {
+          "date": "2026-08-03",
+          "open": 32,
+          "close": 35,
+          "low": 28,
+          "high": 40
+        },
+        {
+          "date": "2026-08-04",
+          "open": 26,
+          "close": 35,
+          "low": 22,
+          "high": 40
+        },
+        {
+          "date": "2026-08-05",
+          "open": 32,
+          "close": 23,
+          "low": 19,
+          "high": 37
+        },
+        {
+          "date": "2026-08-06",
+          "open": 38,
+          "close": 35,
+          "low": 31,
+          "high": 43
+        },
+        {
+          "date": "2026-08-07",
+          "open": 32,
+          "close": 35,
+          "low": 28,
+          "high": 40
+        },
+        {
+          "date": "2026-08-08",
+          "open": 38,
+          "close": 47,
+          "low": 34,
+          "high": 52
+        },
+        {
+          "date": "2026-08-09",
+          "open": 44,
+          "close": 35,
+          "low": 31,
+          "high": 49
+        },
+        {
+          "date": "2026-08-10",
+          "open": 38,
+          "close": 35,
+          "low": 31,
+          "high": 43
+        },
+        {
+          "date": "2026-08-11",
+          "open": 44,
+          "close": 47,
+          "low": 40,
+          "high": 52
+        },
+        {
+          "date": "2026-08-12",
+          "open": 50,
+          "close": 59,
+          "low": 46,
+          "high": 64
+        },
+        {
+          "date": "2026-08-13",
+          "open": 44,
+          "close": 35,
+          "low": 31,
+          "high": 49
+        },
+        {
+          "date": "2026-08-14",
+          "open": 50,
+          "close": 47,
+          "low": 43,
+          "high": 55
+        },
+        {
+          "date": "2026-08-15",
+          "open": 56,
+          "close": 59,
+          "low": 52,
+          "high": 64
+        },
+        {
+          "date": "2026-08-16",
+          "open": 50,
+          "close": 59,
+          "low": 46,
+          "high": 64
+        },
+        {
+          "date": "2026-08-17",
+          "open": 56,
+          "close": 47,
+          "low": 43,
+          "high": 61
+        },
+        {
+          "date": "2026-08-18",
+          "open": 62,
+          "close": 59,
+          "low": 55,
+          "high": 67
+        },
+        {
+          "date": "2026-08-19",
+          "open": 56,
+          "close": 59,
+          "low": 52,
+          "high": 64
+        },
+        {
+          "date": "2026-08-20",
+          "open": 62,
+          "close": 71,
+          "low": 58,
+          "high": 76
+        },
+        {
+          "date": "2026-08-21",
+          "open": 68,
+          "close": 59,
+          "low": 55,
+          "high": 73
+        },
+        {
+          "date": "2026-08-22",
+          "open": 62,
+          "close": 59,
+          "low": 55,
+          "high": 67
+        },
+        {
+          "date": "2026-08-23",
+          "open": 68,
+          "close": 71,
+          "low": 64,
+          "high": 76
+        },
+        {
+          "date": "2026-08-24",
+          "open": 74,
+          "close": 83,
+          "low": 70,
+          "high": 88
+        },
+        {
+          "date": "2026-08-25",
+          "open": 68,
+          "close": 59,
+          "low": 55,
+          "high": 73
+        },
+        {
+          "date": "2026-08-26",
+          "open": 74,
+          "close": 71,
+          "low": 67,
+          "high": 79
+        },
+        {
+          "date": "2026-08-27",
+          "open": 80,
+          "close": 83,
+          "low": 76,
+          "high": 88
+        },
+        {
+          "date": "2026-08-28",
+          "open": 74,
+          "close": 83,
+          "low": 70,
+          "high": 88
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "open": "open",
+        "high": "high",
+        "low": "low",
+        "close": "close"
+      },
+      "axes": {
+        "x": {
+          "ticks": 4,
+          "grid": false
+        },
+        "y": {
+          "grid": true
+        }
+      },
+      "a11y": {
+        "alt": "Twenty-eight sessions. Closes drift upward, with down days in orange and up days in green."
+      },
+      "bg": "#000",
+      "layout": {
+        "col": 12,
+        "row": 5
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar",
+      "title": "Volume",
+      "data": [
+        {
+          "bucket": "1",
+          "value": 25
+        },
+        {
+          "bucket": "2",
+          "value": 66
+        },
+        {
+          "bucket": "3",
+          "value": 46
+        },
+        {
+          "bucket": "4",
+          "value": 75
+        },
+        {
+          "bucket": "5",
+          "value": 42
+        },
+        {
+          "bucket": "6",
+          "value": 59
+        },
+        {
+          "bucket": "7",
+          "value": 61
+        },
+        {
+          "bucket": "8",
+          "value": 65
+        },
+        {
+          "bucket": "9",
+          "value": 55
+        },
+        {
+          "bucket": "10",
+          "value": 45
+        },
+        {
+          "bucket": "11",
+          "value": 71
+        },
+        {
+          "bucket": "12",
+          "value": 48
+        },
+        {
+          "bucket": "13",
+          "value": 60
+        },
+        {
+          "bucket": "14",
+          "value": 35
+        },
+        {
+          "bucket": "15",
+          "value": 71
+        },
+        {
+          "bucket": "16",
+          "value": 56
+        },
+        {
+          "bucket": "17",
+          "value": 56
+        },
+        {
+          "bucket": "18",
+          "value": 51
+        },
+        {
+          "bucket": "19",
+          "value": 62
+        },
+        {
+          "bucket": "20",
+          "value": 70
+        },
+        {
+          "bucket": "21",
+          "value": 44
+        },
+        {
+          "bucket": "22",
+          "value": 63
+        },
+        {
+          "bucket": "23",
+          "value": 47
+        },
+        {
+          "bucket": "24",
+          "value": 77
+        },
+        {
+          "bucket": "25",
+          "value": 26
+        },
+        {
+          "bucket": "26",
+          "value": 66
+        },
+        {
+          "bucket": "27",
+          "value": 45
+        },
+        {
+          "bucket": "28",
+          "value": 76
+        }
+      ],
+      "encoding": {
+        "x": "bucket",
+        "y": "value"
+      },
+      "mark": {
+        "gap": 0.08,
+        "cornerRadius": 2
+      },
+      "axes": {
+        "x": {
+          "labels": false,
+          "grid": false
+        },
+        "y": {
+          "grid": false
+        }
+      },
+      "a11y": {
+        "alt": "Volume across the same twenty-eight sessions, higher on a few mid-period days."
+      },
+      "layout": {
+        "col": 12,
+        "row": 2
+      },
+      "bg": "#000"
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "Buying power",
+      "data": [
+        30,
+        54,
+        75,
+        79,
+        87,
+        88,
+        70,
+        61,
+        51,
+        32,
+        30,
+        35
+      ],
+      "a11y": {
+        "alt": "Buying power edges up across twelve sessions."
+      },
+      "summary": {
+        "value": "$4,120"
+      },
+      "layout": {
+        "col": 4,
+        "row": 2
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "Dividends",
+      "data": [
+        25,
+        66,
+        46,
+        75,
+        42,
+        59,
+        61,
+        65,
+        55,
+        45,
+        71,
+        48
+      ],
+      "a11y": {
+        "alt": "Dividends stay small and uneven across twelve sessions."
+      },
+      "summary": {
+        "value": "$2.40"
+      },
+      "layout": {
+        "col": 4,
+        "row": 2
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "Day change",
+      "data": [
+        30,
+        54,
+        75,
+        79,
+        87,
+        88,
+        70,
+        61,
+        51,
+        32,
+        30,
+        35
+      ],
+      "a11y": {
+        "alt": "Day change finishes higher than it started."
+      },
+      "summary": {
+        "value": "+$184",
+        "delta": "+1.0%"
+      },
+      "layout": {
+        "col": 4,
+        "row": 2
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar-list",
+      "title": "Holdings",
+      "data": [
+        {
+          "name": "Broad fund",
+          "value": 8200
+        },
+        {
+          "name": "North index",
+          "value": 6400
+        },
+        {
+          "name": "Cash",
+          "value": 4100
+        },
+        {
+          "name": "Bond sleeve",
+          "value": 770
+        }
+      ],
+      "encoding": {
+        "x": "name",
+        "y": {
+          "field": "value",
+          "format": {
+            "style": "compact",
+            "prefix": "$"
+          }
+        }
+      },
+      "a11y": {
+        "alt": "Broad fund is the largest holding at $8,200, then the north index, cash, and a small bond sleeve."
+      },
+      "layout": {
+        "col": 12,
+        "row": 4
+      }
+    }
+  ]
+}

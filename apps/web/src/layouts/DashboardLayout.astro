@@ -1,0 +1,82 @@
+---
+import "@fontsource/geist/latin-400.css";
+import "@fontsource/geist/latin-500.css";
+import "@fontsource/geist/latin-600.css";
+import "@fontsource/geist/latin-700.css";
+import "@fontsource/geist-mono/latin-400.css";
+import "@fontsource/geist-mono/latin-500.css";
+import "@fontsource/geist-mono/latin-600.css";
+import { ClientRouter } from "astro:transitions";
+import "../styles/dashboard-frame.css";
+import { SITE, canonicalPath } from "../data/site";
+import type { DashTheme } from "../lib/dashboard-spec";
+
+interface Props {
+  name: string;
+  description: string;
+  theme: DashTheme;
+  ogImage: string;
+}
+
+const { name, description, theme, ogImage } = Astro.props;
+const path = canonicalPath(Astro.url.pathname);
+const documentTitle = `${name} · Dashboards · ChartKit`;
+const canonical = new URL(path, Astro.site ?? SITE.url).href;
+const image = new URL(ogImage, Astro.site ?? SITE.url).href;
+const font = theme.font ?? "Geist, Helvetica, Arial, sans-serif";
+const track = theme.labelTrack ?? 0;
+const vars = [
+  `--d-bg:${theme.bg}`,
+  `--d-chrome:${theme.chrome}`,
+  `--d-surface:${theme.surface}`,
+  `--d-border:${theme.border}`,
+  `--d-text:${theme.text}`,
+  `--d-muted:${theme.muted}`,
+  `--d-accent:${theme.accent}`,
+  `--d-up:${theme.up}`,
+  `--d-down:${theme.down}`,
+  `--d-nav:${theme.navActive}`,
+  `--d-radius:${theme.radius}px`,
+  `--d-gap:${theme.gap}px`,
+  `--d-row:${theme.row}px`,
+  `--d-h1:${theme.h1 ?? 24}px`,
+  `--d-chip:${theme.chipR ?? 7}px`,
+  `--d-shadow:${theme.shadow ?? "none"}`,
+  `--d-pad:${theme.pad ?? 28}px`,
+  `--d-track:${track}`,
+  `--d-case:${theme.labelCase ?? "none"}`,
+  `--d-font:${font}`,
+].join(";");
+---
+
+<!doctype html>
+<html lang="en" style={vars}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{documentTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/brand/favicon-light.svg" media="(prefers-color-scheme: light)" />
+    <link rel="icon" type="image/svg+xml" href="/brand/favicon-dark.svg" media="(prefers-color-scheme: dark)" />
+    <meta property="og:title" content={documentTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <script is:inline>
+      (function () {
+        var query = location.search;
+        if (query.indexOf("cover=1") >= 0) document.documentElement.classList.add("is-cover");
+        if (query.indexOf("chrome=0") >= 0) document.documentElement.classList.add("is-bare");
+      })();
+    </script>
+  </head>
+  <body>
+    <slot />
+    <ClientRouter />
+  </body>
+</html>

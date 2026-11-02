@@ -1,0 +1,551 @@
+{
+  "order": 1,
+  "id": "stripe",
+  "name": "Stripe-style payments",
+  "blurb": "Hero metric with a dotted comparison period, a row of sparkline KPIs, and a ranked breakdown.",
+  "app": "Ledger",
+  "user": "acme-corp · live",
+  "chrome": "sidebar",
+  "active": 1,
+  "nav": [
+    "Home",
+    "Payments",
+    "Balances",
+    "Customers",
+    "Products",
+    "Reports",
+    "Developers"
+  ],
+  "title": "Payments",
+  "sub": "Gross volume for 1–21 October, compared to the previous period.",
+  "filters": [
+    "Today",
+    "Last 3 weeks",
+    "Custom"
+  ],
+  "theme": {
+    "bg": "#f6f8fa",
+    "chrome": "#fff",
+    "surface": "#fff",
+    "border": "#e3e8ee",
+    "text": "#1a1f36",
+    "muted": "#697386",
+    "accent": "#635bff",
+    "accent2": "#a5a0ff",
+    "accent3": "#e4e2ff",
+    "grid": "#eef1f5",
+    "up": "#1a7f4b",
+    "down": "#cd3d64",
+    "radius": 8,
+    "gap": 14,
+    "row": 52,
+    "navActive": "#eef1f5",
+    "shadow": "0 1px 2px rgba(26,31,54,.06)"
+  },
+  "panels": [
+    {
+      "version": "1",
+      "legend": {
+        "position": "top"
+      },
+      "tooltip": false,
+      "type": "line",
+      "title": "Gross volume",
+      "data": [
+        {
+          "date": "2026-10-01",
+          "volume": 5400,
+          "previous": 4140
+        },
+        {
+          "date": "2026-10-02",
+          "volume": 9540,
+          "previous": 7560
+        },
+        {
+          "date": "2026-10-03",
+          "volume": 12960,
+          "previous": 10440
+        },
+        {
+          "date": "2026-10-04",
+          "volume": 13320,
+          "previous": 10980
+        },
+        {
+          "date": "2026-10-05",
+          "volume": 14400,
+          "previous": 11880
+        },
+        {
+          "date": "2026-10-06",
+          "volume": 14220,
+          "previous": 11160
+        },
+        {
+          "date": "2026-10-07",
+          "volume": 10800,
+          "previous": 8640
+        },
+        {
+          "date": "2026-10-08",
+          "volume": 9000,
+          "previous": 7380
+        },
+        {
+          "date": "2026-10-09",
+          "volume": 6840,
+          "previous": 5940
+        },
+        {
+          "date": "2026-10-10",
+          "volume": 3060,
+          "previous": 3060
+        },
+        {
+          "date": "2026-10-11",
+          "volume": 2340,
+          "previous": 1800
+        },
+        {
+          "date": "2026-10-12",
+          "volume": 2880,
+          "previous": 2340
+        },
+        {
+          "date": "2026-10-13",
+          "volume": 2700,
+          "previous": 2520
+        },
+        {
+          "date": "2026-10-14",
+          "volume": 5760,
+          "previous": 5040
+        },
+        {
+          "date": "2026-10-15",
+          "volume": 9720,
+          "previous": 8280
+        },
+        {
+          "date": "2026-10-16",
+          "volume": 11520,
+          "previous": 9000
+        },
+        {
+          "date": "2026-10-17",
+          "volume": 15480,
+          "previous": 12240
+        },
+        {
+          "date": "2026-10-18",
+          "volume": 18360,
+          "previous": 14760
+        },
+        {
+          "date": "2026-10-19",
+          "volume": 18000,
+          "previous": 14580
+        },
+        {
+          "date": "2026-10-20",
+          "volume": 18360,
+          "previous": 15120
+        },
+        {
+          "date": "2026-10-21",
+          "volume": 17640,
+          "previous": 13680
+        },
+        {
+          "date": "2026-10-22",
+          "volume": 13860,
+          "previous": 10980
+        },
+        {
+          "date": "2026-10-23",
+          "volume": 11700,
+          "previous": 9540
+        },
+        {
+          "date": "2026-10-24",
+          "volume": 9900,
+          "previous": 8280
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": [
+          {
+            "field": "volume",
+            "title": "This period"
+          },
+          {
+            "field": "previous",
+            "title": "Previous",
+            "dash": "dashed"
+          }
+        ]
+      },
+      "mark": {
+        "curve": "monotone",
+        "points": "none"
+      },
+      "axes": {
+        "x": {
+          "ticks": 4,
+          "grid": false
+        },
+        "y": {
+          "grid": true
+        }
+      },
+      "a11y": {
+        "alt": "Gross volume rises across 1–24 October. The dashed line is the previous period, sitting below the current one."
+      },
+      "summary": {
+        "value": "$261,400",
+        "delta": "+34% vs. $194,900"
+      },
+      "layout": {
+        "col": 12,
+        "row": 5
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "Net volume",
+      "data": [
+        600,
+        1060,
+        1480,
+        1520,
+        1660,
+        1660,
+        1300,
+        1100,
+        900,
+        500,
+        440,
+        520,
+        500,
+        860,
+        1300,
+        1540
+      ],
+      "a11y": {
+        "alt": "Net volume trends up across sixteen days."
+      },
+      "summary": {
+        "value": "$251K",
+        "delta": "+31%"
+      },
+      "layout": {
+        "col": 3,
+        "row": 2
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "New customers",
+      "data": [
+        25,
+        66,
+        46,
+        75,
+        42,
+        59,
+        61,
+        65,
+        55,
+        45,
+        71,
+        48,
+        60,
+        35,
+        71,
+        56
+      ],
+      "a11y": {
+        "alt": "New customers fluctuate and finish higher than they started."
+      },
+      "summary": {
+        "value": "248",
+        "delta": "+12%"
+      },
+      "layout": {
+        "col": 3,
+        "row": 2
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "Successful payments",
+      "data": [
+        30,
+        53,
+        74,
+        76,
+        83,
+        83,
+        65,
+        55,
+        45,
+        25,
+        22,
+        26,
+        25,
+        43,
+        65,
+        77
+      ],
+      "a11y": {
+        "alt": "Successful payments rise across sixteen days."
+      },
+      "summary": {
+        "value": "512",
+        "delta": "+9%"
+      },
+      "layout": {
+        "col": 3,
+        "row": 2
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "Disputes",
+      "data": [
+        {
+          "v": 56
+        },
+        {
+          "v": 71
+        },
+        {
+          "v": 35
+        },
+        {
+          "v": 60
+        },
+        {
+          "v": 48
+        },
+        {
+          "v": 71
+        },
+        {
+          "v": 45
+        },
+        {
+          "v": 55
+        },
+        {
+          "v": 65
+        },
+        {
+          "v": 61
+        },
+        {
+          "v": 59
+        },
+        {
+          "v": 42
+        },
+        {
+          "v": 75
+        },
+        {
+          "v": 46
+        },
+        {
+          "v": 66
+        },
+        {
+          "v": 25
+        }
+      ],
+      "encoding": {
+        "y": {
+          "field": "v",
+          "color": "negative"
+        }
+      },
+      "a11y": {
+        "alt": "Disputes ease across the period."
+      },
+      "summary": {
+        "value": "$8.4K",
+        "delta": "−3%"
+      },
+      "layout": {
+        "col": 3,
+        "row": 2
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar-list",
+      "title": "Payments by method",
+      "data": [
+        {
+          "name": "Card",
+          "value": 148200
+        },
+        {
+          "name": "Bank debit",
+          "value": 84300
+        },
+        {
+          "name": "Wallet",
+          "value": 19400
+        },
+        {
+          "name": "Link",
+          "value": 9500
+        }
+      ],
+      "encoding": {
+        "x": "name",
+        "y": {
+          "field": "value",
+          "format": {
+            "style": "compact",
+            "prefix": "$"
+          }
+        }
+      },
+      "a11y": {
+        "alt": "Card is the largest method at about $148,200, ahead of bank debit, wallet, and Link."
+      },
+      "layout": {
+        "col": 6,
+        "row": 4
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar",
+      "title": "Failed payments",
+      "data": [
+        {
+          "bucket": "1",
+          "value": 25
+        },
+        {
+          "bucket": "2",
+          "value": 66
+        },
+        {
+          "bucket": "3",
+          "value": 46
+        },
+        {
+          "bucket": "4",
+          "value": 75
+        },
+        {
+          "bucket": "5",
+          "value": 42
+        },
+        {
+          "bucket": "6",
+          "value": 59
+        },
+        {
+          "bucket": "7",
+          "value": 61
+        },
+        {
+          "bucket": "8",
+          "value": 65
+        },
+        {
+          "bucket": "9",
+          "value": 55
+        },
+        {
+          "bucket": "10",
+          "value": 45
+        },
+        {
+          "bucket": "11",
+          "value": 71
+        },
+        {
+          "bucket": "12",
+          "value": 48
+        },
+        {
+          "bucket": "13",
+          "value": 60
+        },
+        {
+          "bucket": "14",
+          "value": 35
+        },
+        {
+          "bucket": "15",
+          "value": 71
+        },
+        {
+          "bucket": "16",
+          "value": 56
+        },
+        {
+          "bucket": "17",
+          "value": 56
+        },
+        {
+          "bucket": "18",
+          "value": 51
+        }
+      ],
+      "encoding": {
+        "x": "bucket",
+        "y": {
+          "field": "value",
+          "color": "negative"
+        }
+      },
+      "mark": {
+        "gap": 0.08,
+        "cornerRadius": 2
+      },
+      "axes": {
+        "x": {
+          "labels": false,
+          "grid": false
+        },
+        "y": {
+          "grid": false
+        }
+      },
+      "a11y": {
+        "alt": "Failed payments vary across eighteen buckets, with no single spike dominating."
+      },
+      "layout": {
+        "col": 6,
+        "row": 4
+      }
+    }
+  ]
+}

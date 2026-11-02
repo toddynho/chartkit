@@ -16,9 +16,11 @@ interface Props {
   description: string;
   /** Lock the page to the light marketing palette. Docs stay theme-aware. */
   tone?: "light";
+  /** Dashboards index uses one legal row instead of the column footer. */
+  footer?: "compact";
 }
 
-const { title, description, tone } = Astro.props;
+const { title, description, tone, footer } = Astro.props;
 const path = canonicalPath(Astro.url.pathname);
 const docsPage = path === "/docs" || path.startsWith("/docs/");
 const documentTitle = path === "/" ? `${SITE.name} — ${title}` : `${title} · ${SITE.name}`;
@@ -76,6 +78,6 @@ const canonical = new URL(path, Astro.site ?? SITE.url).href;
     <main id="content">
       <slot />
     </main>
-    <SiteFooter />
+    <SiteFooter compact={footer === "compact"} />
   </body>
 </html>

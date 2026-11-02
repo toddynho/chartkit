@@ -1,0 +1,1057 @@
+{
+  "order": 10,
+  "id": "grafana",
+  "name": "Grafana-style cluster board",
+  "blurb": "Tight panels, orange accent, status gauges and host heatmap on near-black.",
+  "app": "Scope",
+  "user": "k8s-prod · 42 nodes",
+  "chrome": "topbar",
+  "active": 0,
+  "nav": [
+    "Dashboards",
+    "Explore",
+    "Alerting",
+    "Connections"
+  ],
+  "title": "Cluster overview",
+  "sub": "Last 6 hours · refreshed 10s ago",
+  "filters": [
+    "Last 1h",
+    "Last 6h",
+    "Last 24h"
+  ],
+  "theme": {
+    "bg": "#111217",
+    "chrome": "#181b1f",
+    "surface": "#181b1f",
+    "border": "#2c3235",
+    "text": "#d8d9da",
+    "muted": "#8e9297",
+    "accent": "#ff9830",
+    "accent2": "#73bf69",
+    "accent3": "#5794f2",
+    "grid": "#22252b",
+    "up": "#73bf69",
+    "down": "#f2495c",
+    "radius": 2,
+    "gap": 8,
+    "row": 48,
+    "navActive": "#22252b",
+    "labelCase": "none",
+    "dark": true
+  },
+  "panels": [
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "gauge",
+      "title": "CPU",
+      "metric": {
+        "label": "CPU",
+        "value": 72,
+        "min": 0,
+        "max": 100,
+        "format": "percent-raw"
+      },
+      "a11y": {
+        "alt": "Cluster CPU is 72 percent."
+      },
+      "layout": {
+        "col": 3,
+        "row": 3
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "gauge",
+      "title": "Memory",
+      "metric": {
+        "label": "Memory",
+        "value": 58,
+        "min": 0,
+        "max": 100,
+        "format": "percent-raw"
+      },
+      "a11y": {
+        "alt": "Cluster memory is 58 percent."
+      },
+      "layout": {
+        "col": 3,
+        "row": 3
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "Pods running",
+      "data": [
+        30,
+        53,
+        73,
+        75,
+        81,
+        81,
+        62,
+        52,
+        41,
+        20,
+        17,
+        20,
+        19,
+        36,
+        58,
+        69,
+        91,
+        108,
+        106,
+        109
+      ],
+      "a11y": {
+        "alt": "Pods running climb across the window."
+      },
+      "summary": {
+        "value": "1,204",
+        "delta": "+12"
+      },
+      "layout": {
+        "col": 3,
+        "row": 3
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "Restarts (6h)",
+      "data": [
+        {
+          "v": 25
+        },
+        {
+          "v": 66
+        },
+        {
+          "v": 46
+        },
+        {
+          "v": 75
+        },
+        {
+          "v": 42
+        },
+        {
+          "v": 59
+        },
+        {
+          "v": 61
+        },
+        {
+          "v": 65
+        },
+        {
+          "v": 55
+        },
+        {
+          "v": 45
+        },
+        {
+          "v": 71
+        },
+        {
+          "v": 48
+        },
+        {
+          "v": 60
+        },
+        {
+          "v": 35
+        },
+        {
+          "v": 71
+        },
+        {
+          "v": 56
+        },
+        {
+          "v": 56
+        },
+        {
+          "v": 51
+        },
+        {
+          "v": 62
+        },
+        {
+          "v": 70
+        }
+      ],
+      "encoding": {
+        "y": {
+          "field": "v",
+          "color": "negative"
+        }
+      },
+      "a11y": {
+        "alt": "Restarts in the last six hours trend down."
+      },
+      "summary": {
+        "value": "3",
+        "delta": "−5"
+      },
+      "layout": {
+        "col": 3,
+        "row": 3
+      }
+    },
+    {
+      "version": "1",
+      "legend": {
+        "position": "top"
+      },
+      "tooltip": false,
+      "type": "line",
+      "title": "Node CPU usage",
+      "data": [
+        {
+          "date": "2026-10-30T00:00:00Z",
+          "a": 25,
+          "b": 18,
+          "c": 10
+        },
+        {
+          "date": "2026-10-31T01:00:00Z",
+          "a": 66,
+          "b": 31,
+          "c": 26
+        },
+        {
+          "date": "2026-11-01T02:00:00Z",
+          "a": 46,
+          "b": 42,
+          "c": 18
+        },
+        {
+          "date": "2026-11-02T03:00:00Z",
+          "a": 75,
+          "b": 43,
+          "c": 30
+        },
+        {
+          "date": "2026-11-03T04:00:00Z",
+          "a": 42,
+          "b": 46,
+          "c": 17
+        },
+        {
+          "date": "2026-11-04T05:00:00Z",
+          "a": 59,
+          "b": 45,
+          "c": 24
+        },
+        {
+          "date": "2026-11-05T06:00:00Z",
+          "a": 61,
+          "b": 33,
+          "c": 24
+        },
+        {
+          "date": "2026-11-06T07:00:00Z",
+          "a": 65,
+          "b": 26,
+          "c": 26
+        },
+        {
+          "date": "2026-11-07T08:00:00Z",
+          "a": 55,
+          "b": 19,
+          "c": 22
+        },
+        {
+          "date": "2026-11-08T09:00:00Z",
+          "a": 45,
+          "b": 6,
+          "c": 18
+        },
+        {
+          "date": "2026-11-09T10:00:00Z",
+          "a": 71,
+          "b": 3,
+          "c": 28
+        },
+        {
+          "date": "2026-11-10T11:00:00Z",
+          "a": 48,
+          "b": 4,
+          "c": 19
+        },
+        {
+          "date": "2026-11-11T12:00:00Z",
+          "a": 60,
+          "b": 3,
+          "c": 24
+        },
+        {
+          "date": "2026-11-12T13:00:00Z",
+          "a": 35,
+          "b": 13,
+          "c": 14
+        },
+        {
+          "date": "2026-11-13T14:00:00Z",
+          "a": 71,
+          "b": 25,
+          "c": 28
+        },
+        {
+          "date": "2026-11-14T15:00:00Z",
+          "a": 56,
+          "b": 31,
+          "c": 22
+        },
+        {
+          "date": "2026-11-15T16:00:00Z",
+          "a": 56,
+          "b": 43,
+          "c": 22
+        },
+        {
+          "date": "2026-11-16T17:00:00Z",
+          "a": 51,
+          "b": 53,
+          "c": 20
+        },
+        {
+          "date": "2026-11-17T18:00:00Z",
+          "a": 62,
+          "b": 51,
+          "c": 25
+        },
+        {
+          "date": "2026-11-18T19:00:00Z",
+          "a": 70,
+          "b": 52,
+          "c": 28
+        },
+        {
+          "date": "2026-11-19T20:00:00Z",
+          "a": 44,
+          "b": 49,
+          "c": 18
+        },
+        {
+          "date": "2026-11-20T21:00:00Z",
+          "a": 63,
+          "b": 35,
+          "c": 25
+        },
+        {
+          "date": "2026-11-21T22:00:00Z",
+          "a": 47,
+          "b": 28,
+          "c": 19
+        },
+        {
+          "date": "2026-11-22T23:00:00Z",
+          "a": 77,
+          "b": 21,
+          "c": 31
+        },
+        {
+          "date": "2026-11-23T00:00:00Z",
+          "a": 26,
+          "b": 10,
+          "c": 10
+        },
+        {
+          "date": "2026-11-24T01:00:00Z",
+          "a": 66,
+          "b": 9,
+          "c": 26
+        },
+        {
+          "date": "2026-11-25T02:00:00Z",
+          "a": 45,
+          "b": 13,
+          "c": 18
+        },
+        {
+          "date": "2026-11-26T03:00:00Z",
+          "a": 76,
+          "b": 14,
+          "c": 30
+        },
+        {
+          "date": "2026-11-27T04:00:00Z",
+          "a": 41,
+          "b": 25,
+          "c": 16
+        },
+        {
+          "date": "2026-11-28T05:00:00Z",
+          "a": 60,
+          "b": 38,
+          "c": 24
+        },
+        {
+          "date": "2026-11-29T06:00:00Z",
+          "a": 60,
+          "b": 44,
+          "c": 24
+        },
+        {
+          "date": "2026-11-30T07:00:00Z",
+          "a": 66,
+          "b": 55,
+          "c": 26
+        },
+        {
+          "date": "2026-12-01T08:00:00Z",
+          "a": 54,
+          "b": 62,
+          "c": 22
+        },
+        {
+          "date": "2026-12-02T09:00:00Z",
+          "a": 46,
+          "b": 58,
+          "c": 18
+        },
+        {
+          "date": "2026-12-03T10:00:00Z",
+          "a": 70,
+          "b": 56,
+          "c": 28
+        },
+        {
+          "date": "2026-12-04T11:00:00Z",
+          "a": 50,
+          "b": 52,
+          "c": 20
+        },
+        {
+          "date": "2026-12-05T12:00:00Z",
+          "a": 60,
+          "b": 37,
+          "c": 24
+        },
+        {
+          "date": "2026-12-06T13:00:00Z",
+          "a": 33,
+          "b": 30,
+          "c": 13
+        },
+        {
+          "date": "2026-12-07T14:00:00Z",
+          "a": 71,
+          "b": 25,
+          "c": 28
+        },
+        {
+          "date": "2026-12-08T15:00:00Z",
+          "a": 54,
+          "b": 15,
+          "c": 22
+        },
+        {
+          "date": "2026-12-09T16:00:00Z",
+          "a": 56,
+          "b": 17,
+          "c": 22
+        },
+        {
+          "date": "2026-12-10T17:00:00Z",
+          "a": 50,
+          "b": 23,
+          "c": 20
+        },
+        {
+          "date": "2026-12-11T18:00:00Z",
+          "a": 63,
+          "b": 26,
+          "c": 25
+        },
+        {
+          "date": "2026-12-12T19:00:00Z",
+          "a": 69,
+          "b": 38,
+          "c": 28
+        },
+        {
+          "date": "2026-12-13T20:00:00Z",
+          "a": 45,
+          "b": 52,
+          "c": 18
+        },
+        {
+          "date": "2026-12-14T21:00:00Z",
+          "a": 62,
+          "b": 56,
+          "c": 25
+        },
+        {
+          "date": "2026-12-15T22:00:00Z",
+          "a": 49,
+          "b": 65,
+          "c": 20
+        },
+        {
+          "date": "2026-12-16T23:00:00Z",
+          "a": 77,
+          "b": 70,
+          "c": 31
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": [
+          {
+            "field": "a",
+            "title": "az-a"
+          },
+          {
+            "field": "b",
+            "title": "az-b"
+          },
+          {
+            "field": "c",
+            "title": "az-c"
+          }
+        ]
+      },
+      "mark": {
+        "curve": "monotone",
+        "points": "none"
+      },
+      "axes": {
+        "x": {
+          "ticks": 4,
+          "grid": false
+        },
+        "y": {
+          "grid": true
+        }
+      },
+      "a11y": {
+        "alt": "Node CPU for three zones over forty-eight points. az-a runs highest."
+      },
+      "layout": {
+        "col": 8,
+        "row": 4
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "heatmap",
+      "title": "Host heatmap",
+      "data": [
+        {
+          "x": "n1",
+          "y": "az-a",
+          "value": 15
+        },
+        {
+          "x": "n2",
+          "y": "az-a",
+          "value": 65
+        },
+        {
+          "x": "n3",
+          "y": "az-a",
+          "value": 25
+        },
+        {
+          "x": "n4",
+          "y": "az-a",
+          "value": 75
+        },
+        {
+          "x": "n5",
+          "y": "az-a",
+          "value": 35
+        },
+        {
+          "x": "n6",
+          "y": "az-a",
+          "value": 85
+        },
+        {
+          "x": "n7",
+          "y": "az-a",
+          "value": 45
+        },
+        {
+          "x": "n8",
+          "y": "az-a",
+          "value": 95
+        },
+        {
+          "x": "n1",
+          "y": "az-b",
+          "value": 45
+        },
+        {
+          "x": "n2",
+          "y": "az-b",
+          "value": 95
+        },
+        {
+          "x": "n3",
+          "y": "az-b",
+          "value": 55
+        },
+        {
+          "x": "n4",
+          "y": "az-b",
+          "value": 15
+        },
+        {
+          "x": "n5",
+          "y": "az-b",
+          "value": 65
+        },
+        {
+          "x": "n6",
+          "y": "az-b",
+          "value": 25
+        },
+        {
+          "x": "n7",
+          "y": "az-b",
+          "value": 75
+        },
+        {
+          "x": "n8",
+          "y": "az-b",
+          "value": 35
+        },
+        {
+          "x": "n1",
+          "y": "az-c",
+          "value": 75
+        },
+        {
+          "x": "n2",
+          "y": "az-c",
+          "value": 35
+        },
+        {
+          "x": "n3",
+          "y": "az-c",
+          "value": 85
+        },
+        {
+          "x": "n4",
+          "y": "az-c",
+          "value": 45
+        },
+        {
+          "x": "n5",
+          "y": "az-c",
+          "value": 95
+        },
+        {
+          "x": "n6",
+          "y": "az-c",
+          "value": 55
+        },
+        {
+          "x": "n7",
+          "y": "az-c",
+          "value": 15
+        },
+        {
+          "x": "n8",
+          "y": "az-c",
+          "value": 65
+        },
+        {
+          "x": "n1",
+          "y": "az-d",
+          "value": 15
+        },
+        {
+          "x": "n2",
+          "y": "az-d",
+          "value": 65
+        },
+        {
+          "x": "n3",
+          "y": "az-d",
+          "value": 25
+        },
+        {
+          "x": "n4",
+          "y": "az-d",
+          "value": 75
+        },
+        {
+          "x": "n5",
+          "y": "az-d",
+          "value": 35
+        },
+        {
+          "x": "n6",
+          "y": "az-d",
+          "value": 85
+        },
+        {
+          "x": "n7",
+          "y": "az-d",
+          "value": 45
+        },
+        {
+          "x": "n8",
+          "y": "az-d",
+          "value": 95
+        },
+        {
+          "x": "n1",
+          "y": "az-e",
+          "value": 45
+        },
+        {
+          "x": "n2",
+          "y": "az-e",
+          "value": 95
+        },
+        {
+          "x": "n3",
+          "y": "az-e",
+          "value": 55
+        },
+        {
+          "x": "n4",
+          "y": "az-e",
+          "value": 15
+        },
+        {
+          "x": "n5",
+          "y": "az-e",
+          "value": 65
+        },
+        {
+          "x": "n6",
+          "y": "az-e",
+          "value": 25
+        },
+        {
+          "x": "n7",
+          "y": "az-e",
+          "value": 75
+        },
+        {
+          "x": "n8",
+          "y": "az-e",
+          "value": 35
+        }
+      ],
+      "encoding": {
+        "x": "x",
+        "y": "y",
+        "color": {
+          "field": "value",
+          "type": "quantitative"
+        }
+      },
+      "mark": {
+        "layout": "grid",
+        "cornerRadius": 2
+      },
+      "a11y": {
+        "alt": "Host load across five zones and eight nodes. Darker cells are busier hosts."
+      },
+      "layout": {
+        "col": 4,
+        "row": 4
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "line",
+      "title": "Network I/O",
+      "data": [
+        {
+          "date": "2026-10-01",
+          "value": 25
+        },
+        {
+          "date": "2026-10-02",
+          "value": 66
+        },
+        {
+          "date": "2026-10-03",
+          "value": 46
+        },
+        {
+          "date": "2026-10-04",
+          "value": 75
+        },
+        {
+          "date": "2026-10-05",
+          "value": 42
+        },
+        {
+          "date": "2026-10-06",
+          "value": 59
+        },
+        {
+          "date": "2026-10-07",
+          "value": 61
+        },
+        {
+          "date": "2026-10-08",
+          "value": 65
+        },
+        {
+          "date": "2026-10-09",
+          "value": 55
+        },
+        {
+          "date": "2026-10-10",
+          "value": 45
+        },
+        {
+          "date": "2026-10-11",
+          "value": 71
+        },
+        {
+          "date": "2026-10-12",
+          "value": 48
+        },
+        {
+          "date": "2026-10-13",
+          "value": 60
+        },
+        {
+          "date": "2026-10-14",
+          "value": 35
+        },
+        {
+          "date": "2026-10-15",
+          "value": 71
+        },
+        {
+          "date": "2026-10-16",
+          "value": 56
+        },
+        {
+          "date": "2026-10-17",
+          "value": 56
+        },
+        {
+          "date": "2026-10-18",
+          "value": 51
+        },
+        {
+          "date": "2026-10-19",
+          "value": 62
+        },
+        {
+          "date": "2026-10-20",
+          "value": 70
+        },
+        {
+          "date": "2026-10-21",
+          "value": 44
+        },
+        {
+          "date": "2026-10-22",
+          "value": 63
+        },
+        {
+          "date": "2026-10-23",
+          "value": 47
+        },
+        {
+          "date": "2026-10-24",
+          "value": 77
+        },
+        {
+          "date": "2026-10-25",
+          "value": 26
+        },
+        {
+          "date": "2026-10-26",
+          "value": 66
+        },
+        {
+          "date": "2026-10-27",
+          "value": 45
+        },
+        {
+          "date": "2026-10-28",
+          "value": 76
+        },
+        {
+          "date": "2026-10-29",
+          "value": 41
+        },
+        {
+          "date": "2026-10-30",
+          "value": 60
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "value",
+          "title": "Network I/O"
+        }
+      },
+      "mark": {
+        "curve": "monotone",
+        "points": "none",
+        "area": true
+      },
+      "axes": {
+        "x": {
+          "ticks": 4,
+          "grid": false
+        },
+        "y": {
+          "grid": true
+        }
+      },
+      "a11y": {
+        "alt": "Network I/O over thirty days rises and falls, ending above where it started."
+      },
+      "layout": {
+        "col": 6,
+        "row": 3
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar",
+      "title": "Disk pressure by node",
+      "data": [
+        {
+          "bucket": "1",
+          "value": 25
+        },
+        {
+          "bucket": "2",
+          "value": 66
+        },
+        {
+          "bucket": "3",
+          "value": 46
+        },
+        {
+          "bucket": "4",
+          "value": 75
+        },
+        {
+          "bucket": "5",
+          "value": 42
+        },
+        {
+          "bucket": "6",
+          "value": 59
+        },
+        {
+          "bucket": "7",
+          "value": 61
+        },
+        {
+          "bucket": "8",
+          "value": 65
+        },
+        {
+          "bucket": "9",
+          "value": 55
+        },
+        {
+          "bucket": "10",
+          "value": 45
+        },
+        {
+          "bucket": "11",
+          "value": 71
+        },
+        {
+          "bucket": "12",
+          "value": 48
+        },
+        {
+          "bucket": "13",
+          "value": 60
+        },
+        {
+          "bucket": "14",
+          "value": 35
+        },
+        {
+          "bucket": "15",
+          "value": 71
+        },
+        {
+          "bucket": "16",
+          "value": 56
+        },
+        {
+          "bucket": "17",
+          "value": 56
+        },
+        {
+          "bucket": "18",
+          "value": 51
+        },
+        {
+          "bucket": "19",
+          "value": 62
+        },
+        {
+          "bucket": "20",
+          "value": 70
+        },
+        {
+          "bucket": "21",
+          "value": 44
+        }
+      ],
+      "encoding": {
+        "x": "bucket",
+        "y": "value"
+      },
+      "mark": {
+        "gap": 0.08,
+        "cornerRadius": 2
+      },
+      "axes": {
+        "x": {
+          "labels": false,
+          "grid": false
+        },
+        "y": {
+          "grid": false
+        }
+      },
+      "a11y": {
+        "alt": "Disk pressure varies across twenty-one nodes, higher toward the later nodes."
+      },
+      "layout": {
+        "col": 6,
+        "row": 3
+      }
+    }
+  ]
+}

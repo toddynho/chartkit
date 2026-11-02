@@ -1,0 +1,168 @@
+---
+import { drawPanel } from "../../lib/dashboard-render";
+import { layoutOf, panelBackground, panelTitle, summaryOf, type DashTheme } from "../../lib/dashboard-spec";
+
+interface Props {
+  panels: Record<string, unknown>[];
+  theme: DashTheme;
+  slug: string;
+  chrome: "sidebar" | "topbar";
+  app: string;
+  user: string;
+  nav: string[];
+  active: number;
+  title: string;
+  sub: string;
+  filters: string[];
+  activeFilter?: number;
+}
+
+const { panels, theme, slug, chrome, app, user, nav, active, title, sub, filters } = Astro.props;
+const activeFilter = Astro.props.activeFilter ?? 1;
+
+const drawn = await Promise.all(
+  panels.map(async (panel, index) => {
+    const result = await drawPanel(panel, theme, `${slug}-${index}`);
+    if (result.errors.length) {
+      const detail = result.errors.map((error) => `${error.code} ${error.path} ${error.message}`).join("; ");
+      throw new Error(`${slug} panel ${index} failed validate(): ${detail}`);
+    }
+    for (const warning of result.warnings) {
+      console.warn(`${slug} · ${panelTitle(panel)}: ${warning.code} ${warning.path} ${warning.message}`);
+    }
+    const place = layoutOf(panel);
+    const summary = summaryOf(panel);
+    return {
+      svg: result.svg,
+      title: panelTitle(panel),
+      col: place.col,
+      row: place.row,
+      bg: panelBackground(panel, theme),
+      summary,
+      valueSize: place.row >= 5 ? 32 : 24,
+    };
+  }),
+);
+
+function chromeInk(value: string, ink: string): "light" | undefined {
+  if (luminance(value) < 0.4 && luminance(ink) < 0.45) return "light";
+  return undefined;
+}
+
+function luminance(color: string): number {
+  const hex = color.trim().replace("#", "");
+  if (!/^[0-9a-fA-F]{6}$/.test(hex) && !/^[0-9a-fA-F]{3}$/.test(hex)) return 1;
+  const full = hex.length === 3 ? hex.split("").map((part) => part + part).join("") : hex;
+  const channel = (start: number) => {
+    const unit = parseInt(full.slice(start, start + 2), 16) / 255;
+    return unit <= 0.03928 ? unit / 12.92 : ((unit + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4);
+}
+
+const ink = chromeInk(theme.chrome, theme.text);
+---
+
+<div class="dash-page">
+  <div class="dash-shell" data-chrome-ink={ink} data-chrome={chrome}>
+    {
+      chrome === "sidebar" ? (
+        <aside class="dash-side">
+          <div class="dash-brand">
+            <span class="dash-mark" />
+            <span class="dash-app">{app}</span>
+            <span class="dash-k">⌘K</span>
+          </div>
+          <nav class="dash-nav" aria-label={app}>
+            {nav.map((label, index) => (
+              <div class:list={["dash-nav__item", index === active && "is-on"]}>
+                <span class="dash-nav__icon" />
+                <span class="dash-nav__label">{label}</span>
+              </div>
+            ))}
+          </nav>
+          <div class="dash-user">
+            <span class="dash-avatar" />
+            <span>{user}</span>
+          </div>
+        </aside>
+      ) : null
+    }
+    <div class="dash-main">
+      {
+        chrome === "topbar" ? (
+          <header class="dash-top">
+            <div class="dash-brand">
+              <span class="dash-mark" />
+              <span class="dash-app">{app}</span>
+            </div>
+            <nav class="dash-nav" aria-label={app}>
+              {nav.map((label, index) => (
+                <div class:list={["dash-nav__item", index === active && "is-on"]}>
+                  <span class="dash-nav__label">{label}</span>
+                </div>
+              ))}
+            </nav>
+            <div class="dash-search">
+              <span class="dash-search__chip">Search ⌘K</span>
+              <span class="dash-avatar" />
+            </div>
+          </header>
+        ) : null
+      }
+      <div class="dash-body">
+        <div class="dash-head">
+          <div>
+            <h1>{title}</h1>
+            <div class="dash-sub">{sub}</div>
+          </div>
+          <div class="dash-filters">
+            {
+              filters.map((label, index) => (
+                <span class:list={["dash-chip", index === activeFilter && "is-on"]}>{label}</span>
+              ))
+            }
+          </div>
+        </div>
+        <div class="dash-grid">
+          {
+            drawn.map((panel, index) => (
+              <button
+                type="button"
+                class="dash-panel"
+                data-dash-panel={index}
+                style={`--span:${panel.col};--rows:${panel.row};--panel-bg:${panel.bg};--value-size:${panel.valueSize}px`}
+                aria-label={`${panel.title} spec`}
+              >
+                <div class="dash-panel__label">{panel.title}</div>
+                {panel.summary ? (
+                  <div class="dash-summary">
+                    <b>{panel.summary.value}</b>
+                    {panel.summary.delta ? (
+                      <span class={panel.summary.delta.startsWith("+") ? "is-up" : "is-down"}>{panel.summary.delta}</span>
+                    ) : null}
+                  </div>
+                ) : null}
+                <div class="dash-chart" set:html={panel.svg} />
+              </button>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="dash-spacer"></div>
+</div>
+
+<script>
+  import { openDrawer } from "../../lib/dash-ui";
+
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const panel = target.closest("[data-dash-panel]");
+    if (!(panel instanceof HTMLElement)) return;
+    const index = Number(panel.getAttribute("data-dash-panel"));
+    if (Number.isFinite(index)) openDrawer({ kind: "panel", index });
+  });
+</script>

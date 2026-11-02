@@ -466,6 +466,22 @@ code {
 
 .legal-compare a:hover { color: #0846a8; text-decoration: underline; }
 
+.footer-compact {
+  width: min(var(--max), 100%);
+  margin: 0 auto;
+  padding: 28px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: #8b8d93;
+}
+.footer-compact > span { font-family: var(--mono); font-size: 12px; }
+.footer-compact a { color: #55575c; text-decoration: none; }
+.footer-compact a:hover { text-decoration: underline; }
+
 .site-footer--docs .footer-grid,
 .site-footer--docs .legal,
 .site-footer--docs .legal-compare {

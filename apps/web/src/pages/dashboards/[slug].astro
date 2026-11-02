@@ -1,24 +1,71 @@
 ---
-import "@fontsource/roboto/latin-400.css";
-import "@fontsource/roboto/latin-500.css";
-import "@fontsource/roboto/latin-700.css";
-import "../../styles/dashboards.css";
-import Base from "../../layouts/Base.astro";
-import DashboardBoard from "../../components/DashboardBoard.astro";
-import { loadBoard, loadIndex } from "../../lib/dashboards";
+import { getCollection } from "astro:content";
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import DashboardFrame from "../../components/dashboards/DashboardFrame.astro";
+import DashboardBar from "../../components/dashboards/DashboardBar";
+import SpecDrawer from "../../components/dashboards/SpecDrawer";
+import { themeDocument, type DashTheme } from "../../lib/dashboard-spec";
 
-export function getStaticPaths() {
-  return loadIndex().boards.map((board) => ({ params: { slug: board.slug } }));
+export async function getStaticPaths() {
+  const all = (await getCollection("dashboards")).sort((a, b) => a.data.order - b.data.order);
+  return all.map((entry, index) => ({
+    params: { slug: entry.data.id },
+    props: {
+      entry,
+      index,
+      total: all.length,
+      prev: all.at(index - 1) ?? all[all.length - 1],
+      next: all[(index + 1) % all.length],
+      items: all.map((item) => ({
+        id: item.data.id,
+        name: item.data.name,
+        href: `/dashboards/${item.data.id}`,
+        swatch: item.data.theme.bg,
+      })),
+    },
+  }));
 }
 
-const slug = Astro.params.slug;
-if (!slug) throw new Error("Missing dashboard slug");
-const board = loadBoard(slug);
+const { entry, index, prev, next, items } = Astro.props;
+if (!prev || !next) throw new Error("Dashboard order is empty");
+const data = entry.data;
+const theme = data.theme as DashTheme;
+const pageSpec = JSON.stringify(data, null, 2);
+const themeSpec = JSON.stringify(themeDocument(theme, data.id), null, 2);
+const colors = Object.keys(themeDocument(theme, data.id).color as object).length;
+const themeNote = `${colors} colors · ${theme.font ? "custom" : "inherited"} font · radius ${theme.radius}`;
 ---
 
-<Base title={board.title} description={board.lede} tone="light">
-  <link slot="head" rel="alternate" type="text/markdown" href={`/dashboards/${board.slug}.md`} title={`${board.title} markdown`} />
-  <div class="wrap">
-    <DashboardBoard board={board} />
-  </div>
-</Base>
+<DashboardLayout name={data.name} description={data.blurb} theme={theme} ogImage={`/dashboards/og/${data.id}.png`}>
+  <DashboardFrame
+    panels={data.panels}
+    theme={theme}
+    slug={data.id}
+    chrome={data.chrome}
+    app={data.app}
+    user={data.user}
+    nav={data.nav}
+    active={data.active}
+    title={data.title}
+    sub={data.sub}
+    filters={data.filters}
+  />
+  <DashboardBar
+    client:load
+    items={items}
+    index={index}
+    name={data.name}
+    invert={theme.dark === true}
+    prevHref={`/dashboards/${prev.data.id}`}
+    nextHref={`/dashboards/${next.data.id}`}
+    specText={pageSpec}
+  />
+  <SpecDrawer
+    client:idle
+    name={data.name}
+    panels={data.panels}
+    pageSpec={pageSpec}
+    themeSpec={themeSpec}
+    themeNote={themeNote}
+  />
+</DashboardLayout>

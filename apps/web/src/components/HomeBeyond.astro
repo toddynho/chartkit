@@ -1,8 +1,8 @@
 ---
+import { getCollection } from "astro:content";
 import { galleryChartCount } from "../data/docs-catalog";
-import { loadIndex } from "../lib/dashboards";
 
-const layouts = loadIndex().boards.length;
+const layouts = (await getCollection("dashboards")).length;
 
 const icon = (d: string) =>
   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"></path></svg>`;
@@ -18,8 +18,8 @@ const cards = [
   {
     href: "/dashboards",
     eye: "Dashboards",
-    title: `${layouts} layouts, one page.`,
-    body: "Payments, analytics, traffic, issues. Every panel is a ChartSpec sharing one cursor.",
+    title: `${layouts} dashboards, each full screen.`,
+    body: "Payments, analytics, traffic, issues. Every panel is a ChartSpec.",
     icon: icon("M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"),
   },
   {

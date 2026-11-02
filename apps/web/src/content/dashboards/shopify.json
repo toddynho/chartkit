@@ -1,0 +1,493 @@
+{
+  "order": 9,
+  "id": "shopify",
+  "name": "Shopify-style store overview",
+  "blurb": "Merchant home: sales line with comparison, channel donut, and a top-products table.",
+  "app": "Storefront",
+  "user": "Northwind Goods",
+  "chrome": "sidebar",
+  "active": 0,
+  "nav": [
+    "Home",
+    "Orders",
+    "Products",
+    "Customers",
+    "Analytics",
+    "Marketing"
+  ],
+  "title": "Good afternoon, Northwind",
+  "sub": "Here’s what’s happening with your store today.",
+  "filters": [
+    "Today",
+    "Last 7 days",
+    "Last 30 days"
+  ],
+  "theme": {
+    "bg": "#f1f1f1",
+    "chrome": "#1a1a1a",
+    "surface": "#fff",
+    "border": "#e3e3e3",
+    "text": "#303030",
+    "muted": "#616161",
+    "accent": "#008060",
+    "accent2": "#5cb89c",
+    "accent3": "#cfe8df",
+    "grid": "#ededed",
+    "up": "#008060",
+    "down": "#d72c0d",
+    "radius": 12,
+    "gap": 14,
+    "row": 52,
+    "navActive": "rgba(255,255,255,.12)",
+    "shadow": "0 1px 0 rgba(0,0,0,.05)"
+  },
+  "panels": [
+    {
+      "version": "1",
+      "legend": {
+        "position": "top"
+      },
+      "tooltip": false,
+      "type": "line",
+      "title": "Total sales",
+      "data": [
+        {
+          "date": "2026-10-01",
+          "sales": 360,
+          "prior": 252
+        },
+        {
+          "date": "2026-10-02",
+          "sales": 636,
+          "prior": 445
+        },
+        {
+          "date": "2026-10-03",
+          "sales": 864,
+          "prior": 605
+        },
+        {
+          "date": "2026-10-04",
+          "sales": 888,
+          "prior": 622
+        },
+        {
+          "date": "2026-10-05",
+          "sales": 960,
+          "prior": 672
+        },
+        {
+          "date": "2026-10-06",
+          "sales": 948,
+          "prior": 664
+        },
+        {
+          "date": "2026-10-07",
+          "sales": 720,
+          "prior": 504
+        },
+        {
+          "date": "2026-10-08",
+          "sales": 600,
+          "prior": 420
+        },
+        {
+          "date": "2026-10-09",
+          "sales": 456,
+          "prior": 319
+        },
+        {
+          "date": "2026-10-10",
+          "sales": 204,
+          "prior": 143
+        },
+        {
+          "date": "2026-10-11",
+          "sales": 156,
+          "prior": 109
+        },
+        {
+          "date": "2026-10-12",
+          "sales": 192,
+          "prior": 134
+        },
+        {
+          "date": "2026-10-13",
+          "sales": 180,
+          "prior": 126
+        },
+        {
+          "date": "2026-10-14",
+          "sales": 384,
+          "prior": 269
+        },
+        {
+          "date": "2026-10-15",
+          "sales": 648,
+          "prior": 454
+        },
+        {
+          "date": "2026-10-16",
+          "sales": 768,
+          "prior": 538
+        },
+        {
+          "date": "2026-10-17",
+          "sales": 1032,
+          "prior": 722
+        },
+        {
+          "date": "2026-10-18",
+          "sales": 1224,
+          "prior": 857
+        },
+        {
+          "date": "2026-10-19",
+          "sales": 1200,
+          "prior": 840
+        },
+        {
+          "date": "2026-10-20",
+          "sales": 1224,
+          "prior": 857
+        },
+        {
+          "date": "2026-10-21",
+          "sales": 1176,
+          "prior": 823
+        },
+        {
+          "date": "2026-10-22",
+          "sales": 924,
+          "prior": 647
+        },
+        {
+          "date": "2026-10-23",
+          "sales": 780,
+          "prior": 546
+        },
+        {
+          "date": "2026-10-24",
+          "sales": 660,
+          "prior": 462
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": [
+          {
+            "field": "sales",
+            "title": "This period"
+          },
+          {
+            "field": "prior",
+            "title": "Previous",
+            "dash": "dashed"
+          }
+        ]
+      },
+      "mark": {
+        "curve": "monotone",
+        "points": "none"
+      },
+      "axes": {
+        "x": {
+          "ticks": 4,
+          "grid": false
+        },
+        "y": {
+          "grid": true
+        }
+      },
+      "a11y": {
+        "alt": "Total sales rise through October. The dashed line is the previous period, below the current one."
+      },
+      "summary": {
+        "value": "$12,480",
+        "delta": "+21%"
+      },
+      "layout": {
+        "col": 8,
+        "row": 5
+      }
+    },
+    {
+      "version": "1",
+      "legend": {
+        "position": "right",
+        "orient": "vertical"
+      },
+      "tooltip": false,
+      "type": "donut",
+      "title": "Sales by channel",
+      "data": [
+        {
+          "name": "Online store",
+          "value": 62
+        },
+        {
+          "name": "POS",
+          "value": 24
+        },
+        {
+          "name": "Marketplace",
+          "value": 14
+        }
+      ],
+      "encoding": {
+        "x": "name",
+        "y": "value"
+      },
+      "mark": {
+        "innerRadius": 0.62
+      },
+      "a11y": {
+        "alt": "Online store is 62 percent of sales, POS 24 percent, and marketplace 14 percent."
+      },
+      "layout": {
+        "col": 4,
+        "row": 5
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar",
+      "title": "Orders",
+      "data": [
+        {
+          "bucket": "1",
+          "value": 25
+        },
+        {
+          "bucket": "2",
+          "value": 66
+        },
+        {
+          "bucket": "3",
+          "value": 46
+        },
+        {
+          "bucket": "4",
+          "value": 75
+        },
+        {
+          "bucket": "5",
+          "value": 42
+        },
+        {
+          "bucket": "6",
+          "value": 59
+        },
+        {
+          "bucket": "7",
+          "value": 61
+        },
+        {
+          "bucket": "8",
+          "value": 65
+        },
+        {
+          "bucket": "9",
+          "value": 55
+        },
+        {
+          "bucket": "10",
+          "value": 45
+        },
+        {
+          "bucket": "11",
+          "value": 71
+        },
+        {
+          "bucket": "12",
+          "value": 48
+        },
+        {
+          "bucket": "13",
+          "value": 60
+        },
+        {
+          "bucket": "14",
+          "value": 35
+        }
+      ],
+      "encoding": {
+        "x": "bucket",
+        "y": "value"
+      },
+      "mark": {
+        "gap": 0.28,
+        "cornerRadius": 2
+      },
+      "axes": {
+        "x": {
+          "labels": false,
+          "grid": false
+        },
+        "y": {
+          "grid": false
+        }
+      },
+      "a11y": {
+        "alt": "Orders across fourteen days stay in a narrow band."
+      },
+      "summary": {
+        "value": "184",
+        "delta": "+9%"
+      },
+      "layout": {
+        "col": 4,
+        "row": 3
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "Conversion rate",
+      "data": [
+        25,
+        66,
+        46,
+        75,
+        42,
+        59,
+        61,
+        65,
+        55,
+        45,
+        71,
+        48,
+        60,
+        35
+      ],
+      "a11y": {
+        "alt": "Conversion rate drifts up across fourteen days."
+      },
+      "summary": {
+        "value": "2.8%",
+        "delta": "+0.3"
+      },
+      "layout": {
+        "col": 4,
+        "row": 3
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "Returning customers",
+      "data": [
+        {
+          "v": 48
+        },
+        {
+          "v": 29
+        },
+        {
+          "v": 30
+        },
+        {
+          "v": 25
+        },
+        {
+          "v": 28
+        },
+        {
+          "v": 48
+        },
+        {
+          "v": 58
+        },
+        {
+          "v": 67
+        },
+        {
+          "v": 85
+        },
+        {
+          "v": 85
+        },
+        {
+          "v": 77
+        },
+        {
+          "v": 74
+        },
+        {
+          "v": 54
+        },
+        {
+          "v": 30
+        }
+      ],
+      "encoding": {
+        "y": {
+          "field": "v",
+          "color": "negative"
+        }
+      },
+      "a11y": {
+        "alt": "Returning customers ease slightly across fourteen days."
+      },
+      "summary": {
+        "value": "38%",
+        "delta": "−2"
+      },
+      "layout": {
+        "col": 4,
+        "row": 3
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar-list",
+      "title": "Top products",
+      "data": [
+        {
+          "name": "Oak desk organizer",
+          "value": 4240
+        },
+        {
+          "name": "Wool throw",
+          "value": 3840
+        },
+        {
+          "name": "Ceramic mug set",
+          "value": 2710
+        },
+        {
+          "name": "Brass bookends",
+          "value": 1690
+        }
+      ],
+      "encoding": {
+        "x": "name",
+        "y": {
+          "field": "value",
+          "format": {
+            "style": "compact",
+            "prefix": "$"
+          }
+        }
+      },
+      "a11y": {
+        "alt": "Oak desk organizer leads net sales at $4,240, then the wool throw, ceramic mug set, and brass bookends."
+      },
+      "layout": {
+        "col": 12,
+        "row": 4
+      }
+    }
+  ]
+}

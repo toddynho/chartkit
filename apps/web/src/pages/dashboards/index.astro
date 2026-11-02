@@ -1,24 +1,42 @@
 ---
-import "@fontsource/roboto/latin-400.css";
-import "@fontsource/roboto/latin-500.css";
-import "@fontsource/roboto/latin-700.css";
-import "../../styles/dashboards.css";
+import "../../styles/dashboard-index.css";
 import Base from "../../layouts/Base.astro";
-import DashboardBoard from "../../components/DashboardBoard.astro";
-import { loadBoard, loadIndex } from "../../lib/dashboards";
+import { getCollection } from "astro:content";
 
-const cards = loadIndex().boards;
-const boards = cards.map((card) => loadBoard(card.slug));
-const description = `${cards.length} ChartKit layouts: ${cards.map((card) => card.title).join(", ")}.`;
+const boards = (await getCollection("dashboards")).sort((a, b) => a.data.order - b.data.order);
+const description =
+  "Ten dashboards in the style of apps you already use, rebuilt panel by panel from ChartSpec. Not templates to copy — proof the default theme is only a starting point.";
 ---
 
-<Base title="Dashboards" description={description} tone="light">
-  <div class="wrap dash-index">
-    <header class="hero">
-      <p class="kicker">Dashboards</p>
-      <h1>Dashboards</h1>
-      <p class="lede">{cards.length} layouts. Hero and KPIs, tabs, a map, a cohort, a ranked list, an issue table.</p>
-    </header>
-    {boards.map((board) => <DashboardBoard board={board} embed />)}
+<Base title="Dashboards" description={description} tone="light" footer="compact">
+  <div class="dash-index">
+    <section class="dash-hero">
+      <p class="dash-hero__eye">Dashboards · {boards.length} recreations</p>
+      <h1>Any look. Same spec.</h1>
+      <p>
+        Ten dashboards in the style of apps you already use, rebuilt panel by panel from ChartSpec. Not templates to copy — proof the
+        default theme is only a starting point. Open one to see it full-screen.
+      </p>
+    </section>
+    <section class="dash-cards">
+      {
+        boards.map((board) => (
+          <a class="dash-card" href={`/dashboards/${board.data.id}`}>
+            <div class="dash-cover" style={`--cover:${board.data.theme.bg}`}>
+              <img src={`/dashboards/${board.data.id}.png`} alt="" width="1280" height="840" />
+            </div>
+            <div class="dash-card__body">
+              <div class="dash-card__row">
+                <strong>{board.data.name}</strong>
+                <span class="dash-card__meta">
+                  {board.data.panels.length} panels · {board.data.chrome}
+                </span>
+              </div>
+              <p>{board.data.blurb}</p>
+            </div>
+          </a>
+        ))
+      }
+    </section>
   </div>
 </Base>

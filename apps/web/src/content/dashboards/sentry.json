@@ -1,0 +1,434 @@
+{
+  "order": 4,
+  "id": "sentry",
+  "name": "Sentry-style issues",
+  "blurb": "A table where every row carries an inline sparkline, plus stacked event volume.",
+  "app": "Tracer",
+  "user": "chartkit-web · production",
+  "chrome": "sidebar",
+  "active": 1,
+  "nav": [
+    "Projects",
+    "Issues",
+    "Performance",
+    "Releases",
+    "Alerts",
+    "Dashboards",
+    "Settings"
+  ],
+  "title": "Issues",
+  "sub": "Unresolved issues in the last 14 days.",
+  "filters": [
+    "24h",
+    "14d",
+    "90d"
+  ],
+  "theme": {
+    "bg": "#fafaf9",
+    "chrome": "#2b2233",
+    "surface": "#fff",
+    "border": "#e7e1ec",
+    "text": "#2b2233",
+    "muted": "#80708f",
+    "accent": "#6c5fc7",
+    "accent2": "#f2b712",
+    "accent3": "#f55459",
+    "grid": "#f0ecf3",
+    "up": "#2ba185",
+    "down": "#f55459",
+    "radius": 6,
+    "gap": 14,
+    "row": 52,
+    "navActive": "rgba(108,95,199,.14)",
+    "labelCase": "uppercase",
+    "labelTrack": ".06em"
+  },
+  "panels": [
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar-list",
+      "title": "Issue",
+      "data": [
+        {
+          "name": "ChartSpec.encode is undefined",
+          "value": 4201
+        },
+        {
+          "name": "Map tile fetch timeout",
+          "value": 1842
+        },
+        {
+          "name": "Candlestick render: NaN in OHLC",
+          "value": 960
+        },
+        {
+          "name": "Hydration mismatch in <Chart>",
+          "value": 512
+        },
+        {
+          "name": "Theme token missing: accent3",
+          "value": 233
+        },
+        {
+          "name": "WebWorker 400 on repair()",
+          "value": 118
+        }
+      ],
+      "encoding": {
+        "x": "name",
+        "y": {
+          "field": "value",
+          "format": "integer"
+        }
+      },
+      "a11y": {
+        "alt": "Unresolved issues ranked by events. ChartSpec.encode is undefined leads at 4,201 events."
+      },
+      "layout": {
+        "col": 12,
+        "row": 6
+      }
+    },
+    {
+      "version": "1",
+      "legend": {
+        "position": "top"
+      },
+      "tooltip": false,
+      "type": "bar",
+      "title": "Event volume",
+      "data": [
+        {
+          "label": "1",
+          "error": 18,
+          "warning": 10,
+          "info": 6
+        },
+        {
+          "label": "2",
+          "error": 24,
+          "warning": 15,
+          "info": 9
+        },
+        {
+          "label": "3",
+          "error": 30,
+          "warning": 20,
+          "info": 12
+        },
+        {
+          "label": "4",
+          "error": 36,
+          "warning": 10,
+          "info": 15
+        },
+        {
+          "label": "5",
+          "error": 42,
+          "warning": 15,
+          "info": 6
+        },
+        {
+          "label": "6",
+          "error": 18,
+          "warning": 20,
+          "info": 9
+        },
+        {
+          "label": "7",
+          "error": 24,
+          "warning": 10,
+          "info": 12
+        },
+        {
+          "label": "8",
+          "error": 30,
+          "warning": 15,
+          "info": 15
+        },
+        {
+          "label": "9",
+          "error": 36,
+          "warning": 20,
+          "info": 6
+        },
+        {
+          "label": "10",
+          "error": 42,
+          "warning": 10,
+          "info": 9
+        },
+        {
+          "label": "11",
+          "error": 18,
+          "warning": 15,
+          "info": 12
+        },
+        {
+          "label": "12",
+          "error": 24,
+          "warning": 20,
+          "info": 15
+        },
+        {
+          "label": "13",
+          "error": 30,
+          "warning": 10,
+          "info": 6
+        },
+        {
+          "label": "14",
+          "error": 36,
+          "warning": 15,
+          "info": 9
+        },
+        {
+          "label": "15",
+          "error": 42,
+          "warning": 20,
+          "info": 12
+        },
+        {
+          "label": "16",
+          "error": 18,
+          "warning": 10,
+          "info": 15
+        },
+        {
+          "label": "17",
+          "error": 24,
+          "warning": 15,
+          "info": 6
+        },
+        {
+          "label": "18",
+          "error": 30,
+          "warning": 20,
+          "info": 9
+        },
+        {
+          "label": "19",
+          "error": 36,
+          "warning": 10,
+          "info": 12
+        },
+        {
+          "label": "20",
+          "error": 42,
+          "warning": 15,
+          "info": 15
+        },
+        {
+          "label": "21",
+          "error": 18,
+          "warning": 20,
+          "info": 6
+        },
+        {
+          "label": "22",
+          "error": 24,
+          "warning": 10,
+          "info": 9
+        },
+        {
+          "label": "23",
+          "error": 30,
+          "warning": 15,
+          "info": 12
+        },
+        {
+          "label": "24",
+          "error": 36,
+          "warning": 20,
+          "info": 15
+        }
+      ],
+      "encoding": {
+        "x": "label",
+        "y": [
+          {
+            "field": "error",
+            "title": "Error"
+          },
+          {
+            "field": "warning",
+            "title": "Warning"
+          },
+          {
+            "field": "info",
+            "title": "Info"
+          }
+        ]
+      },
+      "mark": {
+        "stack": "stack",
+        "cornerRadius": 1
+      },
+      "axes": {
+        "x": {
+          "labels": false,
+          "grid": false
+        },
+        "y": {
+          "grid": false
+        }
+      },
+      "a11y": {
+        "alt": "Stacked event volume over twenty-four hours. Errors are the largest band, then warnings, then info."
+      },
+      "layout": {
+        "col": 8,
+        "row": 4
+      }
+    },
+    {
+      "version": "1",
+      "legend": {
+        "position": "top"
+      },
+      "tooltip": false,
+      "type": "line",
+      "title": "Response time",
+      "data": [
+        {
+          "date": "2026-10-08",
+          "p95": 25,
+          "p50": 17
+        },
+        {
+          "date": "2026-10-09",
+          "p95": 66,
+          "p50": 29
+        },
+        {
+          "date": "2026-10-10",
+          "p95": 46,
+          "p50": 40
+        },
+        {
+          "date": "2026-10-11",
+          "p95": 75,
+          "p50": 41
+        },
+        {
+          "date": "2026-10-12",
+          "p95": 42,
+          "p50": 45
+        },
+        {
+          "date": "2026-10-13",
+          "p95": 59,
+          "p50": 45
+        },
+        {
+          "date": "2026-10-14",
+          "p95": 61,
+          "p50": 34
+        },
+        {
+          "date": "2026-10-15",
+          "p95": 65,
+          "p50": 29
+        },
+        {
+          "date": "2026-10-16",
+          "p95": 55,
+          "p50": 23
+        },
+        {
+          "date": "2026-10-17",
+          "p95": 45,
+          "p50": 11
+        },
+        {
+          "date": "2026-10-18",
+          "p95": 71,
+          "p50": 9
+        },
+        {
+          "date": "2026-10-19",
+          "p95": 48,
+          "p50": 11
+        },
+        {
+          "date": "2026-10-20",
+          "p95": 60,
+          "p50": 10
+        },
+        {
+          "date": "2026-10-21",
+          "p95": 35,
+          "p50": 20
+        },
+        {
+          "date": "2026-10-22",
+          "p95": 71,
+          "p50": 32
+        },
+        {
+          "date": "2026-10-23",
+          "p95": 56,
+          "p50": 38
+        },
+        {
+          "date": "2026-10-24",
+          "p95": 56,
+          "p50": 50
+        },
+        {
+          "date": "2026-10-25",
+          "p95": 51,
+          "p50": 59
+        },
+        {
+          "date": "2026-10-26",
+          "p95": 62,
+          "p50": 58
+        },
+        {
+          "date": "2026-10-27",
+          "p95": 70,
+          "p50": 60
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": [
+          {
+            "field": "p95",
+            "title": "p95"
+          },
+          {
+            "field": "p50",
+            "title": "p50"
+          }
+        ]
+      },
+      "mark": {
+        "curve": "monotone",
+        "points": "none"
+      },
+      "axes": {
+        "x": {
+          "ticks": 4,
+          "grid": false
+        },
+        "y": {
+          "grid": true
+        }
+      },
+      "a11y": {
+        "alt": "Response time over twenty days. p95 stays above p50 and both move together."
+      },
+      "layout": {
+        "col": 4,
+        "row": 4
+      }
+    }
+  ]
+}

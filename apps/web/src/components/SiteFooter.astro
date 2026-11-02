@@ -5,6 +5,11 @@ import BrandLockup from "./BrandLockup.astro";
 import { SITE, canonicalPath } from "../data/site";
 import { repoRoot } from "../lib/repo-root";
 
+interface Props {
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
 const path = canonicalPath(Astro.url.pathname);
 const docs = path === "/docs" || path.startsWith("/docs/");
 const showRepo = path !== "/methodology/agent-eval";
@@ -49,7 +54,17 @@ const columns = [
 ];
 ---
 
-<footer class:list={["site-footer", docs && "site-footer--docs"]}>
+<footer class:list={["site-footer", docs && "site-footer--docs", compact && "site-footer--compact"]}>
+  {
+    compact ? (
+      <div class="footer-compact">
+        <span>
+          © ChartKit · {showRepo ? <a href={license}>MIT</a> : <span>MIT</span>} · {SITE.version}
+        </span>
+        <a href="/compare">Compare ChartKit with {otherLibraries} other libraries →</a>
+      </div>
+    ) : (
+      <>
   <div class="footer-grid">
     <div class="footer-brand">
       <BrandLockup size={40} layout="stack" />
@@ -80,6 +95,9 @@ const columns = [
   <p class="legal-compare">
     <a href="/compare">Compare ChartKit with {otherLibraries} other libraries →</a>
   </p>
+      </>
+    )
+  }
 </footer>
 
 <script>

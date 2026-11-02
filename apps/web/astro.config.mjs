@@ -1,6 +1,7 @@
 // @ts-check
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import react from "@astrojs/react";
 import { defineConfig } from "astro/config";
 
 /**
@@ -21,6 +22,7 @@ export default defineConfig({
   build: {
     format: "directory",
   },
+  integrations: [react()],
   redirects: {
     "/play": { status: 307, destination: "/examples" },
     // /playground is a page. Old share links are /playground#spec, and a static meta refresh drops the fragment.
@@ -61,6 +63,16 @@ export default defineConfig({
     "/docs/angular": { status: 307, destination: "/docs?framework=angular" },
     "/docs/vanilla": { status: 307, destination: "/docs?framework=vanilla" },
     "/dashboard": { status: 307, destination: "/dashboards" },
+    "/dashboards/ledger": { status: 301, destination: "/dashboards/stripe" },
+    "/dashboards/meter": { status: 301, destination: "/dashboards/plausible" },
+    "/dashboards/wayline": { status: 301, destination: "/dashboards/ga" },
+    "/dashboards/keel": { status: 301, destination: "/dashboards/sentry" },
+    "/dashboards/signal": { status: 301, destination: "/dashboards/datadog" },
+    "/dashboards/folio": { status: 301, destination: "/dashboards/robinhood" },
+    "/dashboards/cycle": { status: 301, destination: "/dashboards/linear" },
+    "/dashboards/edge": { status: 301, destination: "/dashboards/vercel" },
+    "/dashboards/pulse": { status: 301, destination: "/dashboards" },
+    "/dashboards/retain": { status: 301, destination: "/dashboards" },
     "/pricing": { status: 307, destination: "/cloud#pricing" },
   },
   vite: {

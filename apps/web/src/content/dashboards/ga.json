@@ -1,0 +1,671 @@
+{
+  "order": 3,
+  "id": "ga",
+  "name": "Analytics-style traffic report",
+  "blurb": "Dense card grid: realtime counter, geo map, channel table, user cohort heatmap.",
+  "app": "Insights",
+  "user": "All accounts",
+  "chrome": "sidebar",
+  "active": 2,
+  "nav": [
+    "Home",
+    "Realtime",
+    "Reports",
+    "Explore",
+    "Advertising",
+    "Admin"
+  ],
+  "title": "Reports snapshot",
+  "sub": "Acquisition for the last 28 days.",
+  "filters": [
+    "Last 7 days",
+    "Last 28 days",
+    "Compare"
+  ],
+  "theme": {
+    "bg": "#f8f9fa",
+    "chrome": "#fff",
+    "surface": "#fff",
+    "border": "#dadce0",
+    "text": "#202124",
+    "muted": "#5f6368",
+    "accent": "#1a73e8",
+    "accent2": "#8ab4f8",
+    "accent3": "#d2e3fc",
+    "grid": "#eceff1",
+    "up": "#188038",
+    "down": "#d93025",
+    "radius": 8,
+    "gap": 16,
+    "row": 56,
+    "navActive": "#e8f0fe",
+    "mapBg": "#f1f3f4"
+  },
+  "panels": [
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "sparkline",
+      "title": "Users",
+      "data": [
+        30,
+        53,
+        73,
+        75,
+        81,
+        81,
+        62,
+        52,
+        41,
+        20,
+        17,
+        20,
+        19,
+        36,
+        58,
+        69,
+        91,
+        108,
+        106,
+        109
+      ],
+      "a11y": {
+        "alt": "Users trend upward across the last twenty days."
+      },
+      "summary": {
+        "value": "24.8K",
+        "delta": "+9.8%"
+      },
+      "layout": {
+        "col": 3,
+        "row": 3
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar",
+      "title": "Users in last 30 minutes",
+      "data": [
+        {
+          "bucket": "1",
+          "value": 25
+        },
+        {
+          "bucket": "2",
+          "value": 66
+        },
+        {
+          "bucket": "3",
+          "value": 46
+        },
+        {
+          "bucket": "4",
+          "value": 75
+        },
+        {
+          "bucket": "5",
+          "value": 42
+        },
+        {
+          "bucket": "6",
+          "value": 59
+        },
+        {
+          "bucket": "7",
+          "value": 61
+        },
+        {
+          "bucket": "8",
+          "value": 65
+        },
+        {
+          "bucket": "9",
+          "value": 55
+        },
+        {
+          "bucket": "10",
+          "value": 45
+        },
+        {
+          "bucket": "11",
+          "value": 71
+        },
+        {
+          "bucket": "12",
+          "value": 48
+        },
+        {
+          "bucket": "13",
+          "value": 60
+        },
+        {
+          "bucket": "14",
+          "value": 35
+        },
+        {
+          "bucket": "15",
+          "value": 71
+        },
+        {
+          "bucket": "16",
+          "value": 56
+        },
+        {
+          "bucket": "17",
+          "value": 56
+        },
+        {
+          "bucket": "18",
+          "value": 51
+        },
+        {
+          "bucket": "19",
+          "value": 62
+        },
+        {
+          "bucket": "20",
+          "value": 70
+        },
+        {
+          "bucket": "21",
+          "value": 44
+        },
+        {
+          "bucket": "22",
+          "value": 63
+        },
+        {
+          "bucket": "23",
+          "value": 47
+        },
+        {
+          "bucket": "24",
+          "value": 77
+        },
+        {
+          "bucket": "25",
+          "value": 26
+        },
+        {
+          "bucket": "26",
+          "value": 66
+        },
+        {
+          "bucket": "27",
+          "value": 45
+        },
+        {
+          "bucket": "28",
+          "value": 76
+        },
+        {
+          "bucket": "29",
+          "value": 41
+        },
+        {
+          "bucket": "30",
+          "value": 60
+        }
+      ],
+      "encoding": {
+        "x": "bucket",
+        "y": "value"
+      },
+      "mark": {
+        "gap": 0.08,
+        "cornerRadius": 2
+      },
+      "axes": {
+        "x": {
+          "labels": false,
+          "grid": false
+        },
+        "y": {
+          "grid": false
+        }
+      },
+      "a11y": {
+        "alt": "Users in the last thirty minutes vary by minute, with no empty bucket."
+      },
+      "summary": {
+        "value": "142"
+      },
+      "layout": {
+        "col": 3,
+        "row": 3
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar-list",
+      "title": "New users by channel",
+      "data": [
+        {
+          "name": "Organic search",
+          "value": 9800
+        },
+        {
+          "name": "Direct",
+          "value": 6900
+        },
+        {
+          "name": "Referral",
+          "value": 4100
+        },
+        {
+          "name": "Social",
+          "value": 1800
+        }
+      ],
+      "encoding": {
+        "x": "name",
+        "y": {
+          "field": "value",
+          "format": "compact"
+        }
+      },
+      "a11y": {
+        "alt": "Organic search brings the most new users, then direct, referral, and social."
+      },
+      "layout": {
+        "col": 6,
+        "row": 3
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "choropleth",
+      "title": "Users by country",
+      "data": [
+        {
+          "country": "United States",
+          "users": 8200
+        },
+        {
+          "country": "India",
+          "users": 4100
+        },
+        {
+          "country": "Germany",
+          "users": 2800
+        },
+        {
+          "country": "United Kingdom",
+          "users": 2600
+        },
+        {
+          "country": "Brazil",
+          "users": 2100
+        },
+        {
+          "country": "France",
+          "users": 1900
+        },
+        {
+          "country": "Canada",
+          "users": 1700
+        },
+        {
+          "country": "Japan",
+          "users": 1500
+        },
+        {
+          "country": "Australia",
+          "users": 1200
+        },
+        {
+          "country": "Mexico",
+          "users": 1100
+        },
+        {
+          "country": "Indonesia",
+          "users": 980
+        },
+        {
+          "country": "Spain",
+          "users": 940
+        },
+        {
+          "country": "Italy",
+          "users": 880
+        },
+        {
+          "country": "Netherlands",
+          "users": 760
+        },
+        {
+          "country": "Poland",
+          "users": 640
+        },
+        {
+          "country": "Sweden",
+          "users": 520
+        },
+        {
+          "country": "Norway",
+          "users": 310
+        },
+        {
+          "country": "Turkey",
+          "users": 480
+        },
+        {
+          "country": "Argentina",
+          "users": 420
+        },
+        {
+          "country": "South Africa",
+          "users": 390
+        },
+        {
+          "country": "Nigeria",
+          "users": 360
+        },
+        {
+          "country": "Egypt",
+          "users": 280
+        },
+        {
+          "country": "Vietnam",
+          "users": 450
+        },
+        {
+          "country": "Thailand",
+          "users": 240
+        },
+        {
+          "country": "Philippines",
+          "users": 330
+        },
+        {
+          "country": "Pakistan",
+          "users": 290
+        },
+        {
+          "country": "Colombia",
+          "users": 220
+        },
+        {
+          "country": "Chile",
+          "users": 180
+        },
+        {
+          "country": "New Zealand",
+          "users": 160
+        },
+        {
+          "country": "Ireland",
+          "users": 210
+        },
+        {
+          "country": "Portugal",
+          "users": 190
+        },
+        {
+          "country": "Denmark",
+          "users": 170
+        },
+        {
+          "country": "Finland",
+          "users": 150
+        },
+        {
+          "country": "Switzerland",
+          "users": 200
+        },
+        {
+          "country": "Austria",
+          "users": 180
+        },
+        {
+          "country": "Belgium",
+          "users": 160
+        },
+        {
+          "country": "Romania",
+          "users": 140
+        },
+        {
+          "country": "Ukraine",
+          "users": 130
+        },
+        {
+          "country": "Greece",
+          "users": 110
+        },
+        {
+          "country": "Israel",
+          "users": 150
+        },
+        {
+          "country": "Singapore",
+          "users": 190
+        },
+        {
+          "country": "Malaysia",
+          "users": 170
+        },
+        {
+          "country": "Kenya",
+          "users": 120
+        },
+        {
+          "country": "Morocco",
+          "users": 90
+        },
+        {
+          "country": "Peru",
+          "users": 100
+        },
+        {
+          "country": "China",
+          "users": 2400
+        },
+        {
+          "country": "South Korea",
+          "users": 680
+        },
+        {
+          "country": "United Arab Emirates",
+          "users": 140
+        }
+      ],
+      "encoding": {
+        "region": "country",
+        "color": {
+          "field": "users"
+        }
+      },
+      "mark": {
+        "atlas": "world",
+        "projection": "equalEarth",
+        "scale": "sequential"
+      },
+      "a11y": {
+        "alt": "Users by country. The United States is highest, then India, Germany, and the United Kingdom. Countries without a row are unmarked."
+      },
+      "layout": {
+        "col": 6,
+        "row": 5
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar-list",
+      "title": "Sessions by channel",
+      "data": [
+        {
+          "name": "Organic",
+          "value": 10282
+        },
+        {
+          "name": "Direct",
+          "value": 7003
+        },
+        {
+          "name": "Referral",
+          "value": 3928
+        },
+        {
+          "name": "Social",
+          "value": 1214
+        },
+        {
+          "name": "Email",
+          "value": 886
+        }
+      ],
+      "encoding": {
+        "x": "name",
+        "y": {
+          "field": "value",
+          "format": "integer"
+        }
+      },
+      "a11y": {
+        "alt": "Organic sessions lead at 10,282, then direct, referral, social, and email."
+      },
+      "layout": {
+        "col": 3,
+        "row": 5
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "heatmap",
+      "title": "User retention",
+      "data": [
+        {
+          "x": "W0",
+          "y": "Oct 1",
+          "value": 100
+        },
+        {
+          "x": "W1",
+          "y": "Oct 1",
+          "value": 62
+        },
+        {
+          "x": "W2",
+          "y": "Oct 1",
+          "value": 44
+        },
+        {
+          "x": "W3",
+          "y": "Oct 1",
+          "value": 38
+        },
+        {
+          "x": "W4",
+          "y": "Oct 1",
+          "value": 31
+        },
+        {
+          "x": "W5",
+          "y": "Oct 1",
+          "value": 28
+        },
+        {
+          "x": "W0",
+          "y": "Oct 8",
+          "value": 100
+        },
+        {
+          "x": "W1",
+          "y": "Oct 8",
+          "value": 58
+        },
+        {
+          "x": "W2",
+          "y": "Oct 8",
+          "value": 41
+        },
+        {
+          "x": "W3",
+          "y": "Oct 8",
+          "value": 35
+        },
+        {
+          "x": "W4",
+          "y": "Oct 8",
+          "value": 29
+        },
+        {
+          "x": "W0",
+          "y": "Oct 15",
+          "value": 100
+        },
+        {
+          "x": "W1",
+          "y": "Oct 15",
+          "value": 64
+        },
+        {
+          "x": "W2",
+          "y": "Oct 15",
+          "value": 47
+        },
+        {
+          "x": "W3",
+          "y": "Oct 15",
+          "value": 40
+        },
+        {
+          "x": "W0",
+          "y": "Oct 22",
+          "value": 100
+        },
+        {
+          "x": "W1",
+          "y": "Oct 22",
+          "value": 60
+        },
+        {
+          "x": "W2",
+          "y": "Oct 22",
+          "value": 45
+        },
+        {
+          "x": "W0",
+          "y": "Oct 29",
+          "value": 100
+        },
+        {
+          "x": "W1",
+          "y": "Oct 29",
+          "value": 66
+        }
+      ],
+      "encoding": {
+        "x": "x",
+        "y": "y",
+        "color": {
+          "field": "value",
+          "type": "quantitative"
+        }
+      },
+      "mark": {
+        "layout": "grid",
+        "cornerRadius": 2
+      },
+      "a11y": {
+        "alt": "Retention is highest in the first week of each cohort and fades in later weeks. Empty cells are weeks that have not happened yet."
+      },
+      "layout": {
+        "col": 3,
+        "row": 5
+      }
+    }
+  ]
+}

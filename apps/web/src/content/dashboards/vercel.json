@@ -1,0 +1,443 @@
+{
+  "order": 8,
+  "id": "vercel",
+  "name": "Vercel-style analytics",
+  "blurb": "Monochrome. One thick line, hairline grid, and three source tables side by side.",
+  "app": "Deploy",
+  "user": "chartkit-site",
+  "chrome": "topbar",
+  "active": 2,
+  "nav": [
+    "Overview",
+    "Deployments",
+    "Analytics",
+    "Speed Insights",
+    "Logs"
+  ],
+  "title": "Analytics",
+  "sub": "Visitors for 20 September – 31 October",
+  "filters": [
+    "24h",
+    "7d",
+    "30d"
+  ],
+  "theme": {
+    "bg": "#000",
+    "chrome": "#000",
+    "surface": "#0a0a0a",
+    "border": "#262626",
+    "text": "#ededed",
+    "muted": "#a1a1a1",
+    "accent": "#ededed",
+    "accent2": "#737373",
+    "accent3": "#2b2b2b",
+    "grid": "#1a1a1a",
+    "up": "#50e3c2",
+    "down": "#ff4d4f",
+    "radius": 8,
+    "gap": 12,
+    "row": 52,
+    "navActive": "#1a1a1a",
+    "mapBg": "#111",
+    "dark": true
+  },
+  "panels": [
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "title": "Overview",
+      "a11y": {
+        "alt": "Visitors 38.1 thousand, page views 92.4 thousand, bounce rate 36 percent."
+      },
+      "layout": {
+        "col": 12,
+        "row": 2,
+        "concat": {
+          "direction": "horizontal",
+          "gap": 8,
+          "views": [
+            {
+              "version": "1",
+              "type": "kpi",
+              "metric": {
+                "label": "Visitors",
+                "value": 38100,
+                "format": "compact",
+                "delta": 0.12
+              },
+              "data": [
+                25,
+                66,
+                46,
+                75,
+                42,
+                59,
+                61,
+                65,
+                55,
+                45,
+                71,
+                48,
+                60,
+                35,
+                71,
+                56
+              ],
+              "legend": false,
+              "tooltip": false,
+              "a11y": {
+                "alt": "Visitors are 38.1 thousand, up 12 percent."
+              }
+            },
+            {
+              "version": "1",
+              "type": "kpi",
+              "metric": {
+                "label": "Page views",
+                "value": 92400,
+                "format": "compact",
+                "delta": 0.09
+              },
+              "data": [
+                30,
+                53,
+                74,
+                76,
+                83,
+                83,
+                65,
+                55,
+                45,
+                25,
+                22,
+                26,
+                25,
+                43,
+                65,
+                77
+              ],
+              "legend": false,
+              "tooltip": false,
+              "a11y": {
+                "alt": "Page views are 92.4 thousand, up 9 percent."
+              }
+            },
+            {
+              "version": "1",
+              "type": "kpi",
+              "metric": {
+                "label": "Bounce rate",
+                "value": 36,
+                "format": "percent-raw",
+                "delta": -0.04,
+                "goodDirection": "down"
+              },
+              "data": [
+                56,
+                71,
+                35,
+                60,
+                48,
+                71,
+                45,
+                55,
+                65,
+                61,
+                59,
+                42,
+                75,
+                46,
+                66,
+                25
+              ],
+              "legend": false,
+              "tooltip": false,
+              "a11y": {
+                "alt": "Bounce rate is 36 percent, down 4 percent."
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "line",
+      "title": "Visitors",
+      "data": [
+        {
+          "date": "2026-09-20",
+          "visitors": 1000
+        },
+        {
+          "date": "2026-09-21",
+          "visitors": 2640
+        },
+        {
+          "date": "2026-09-22",
+          "visitors": 1840
+        },
+        {
+          "date": "2026-09-23",
+          "visitors": 3000
+        },
+        {
+          "date": "2026-09-24",
+          "visitors": 1680
+        },
+        {
+          "date": "2026-09-25",
+          "visitors": 2360
+        },
+        {
+          "date": "2026-09-26",
+          "visitors": 2440
+        },
+        {
+          "date": "2026-09-27",
+          "visitors": 2600
+        },
+        {
+          "date": "2026-09-28",
+          "visitors": 2200
+        },
+        {
+          "date": "2026-09-29",
+          "visitors": 1800
+        },
+        {
+          "date": "2026-09-30",
+          "visitors": 2840
+        },
+        {
+          "date": "2026-10-01",
+          "visitors": 1920
+        },
+        {
+          "date": "2026-10-02",
+          "visitors": 2400
+        },
+        {
+          "date": "2026-10-03",
+          "visitors": 1400
+        },
+        {
+          "date": "2026-10-04",
+          "visitors": 2840
+        },
+        {
+          "date": "2026-10-05",
+          "visitors": 2240
+        },
+        {
+          "date": "2026-10-06",
+          "visitors": 2240
+        },
+        {
+          "date": "2026-10-07",
+          "visitors": 2040
+        },
+        {
+          "date": "2026-10-08",
+          "visitors": 2480
+        },
+        {
+          "date": "2026-10-09",
+          "visitors": 2800
+        },
+        {
+          "date": "2026-10-10",
+          "visitors": 1760
+        },
+        {
+          "date": "2026-10-11",
+          "visitors": 2520
+        },
+        {
+          "date": "2026-10-12",
+          "visitors": 1880
+        },
+        {
+          "date": "2026-10-13",
+          "visitors": 3080
+        },
+        {
+          "date": "2026-10-14",
+          "visitors": 1040
+        },
+        {
+          "date": "2026-10-15",
+          "visitors": 2640
+        },
+        {
+          "date": "2026-10-16",
+          "visitors": 1800
+        },
+        {
+          "date": "2026-10-17",
+          "visitors": 3040
+        },
+        {
+          "date": "2026-10-18",
+          "visitors": 1640
+        },
+        {
+          "date": "2026-10-19",
+          "visitors": 2400
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": [
+          {
+            "field": "visitors",
+            "title": "Visitors"
+          }
+        ]
+      },
+      "mark": {
+        "curve": "monotone",
+        "points": "none"
+      },
+      "axes": {
+        "x": {
+          "ticks": 4,
+          "grid": false
+        },
+        "y": {
+          "grid": true
+        }
+      },
+      "a11y": {
+        "alt": "Visitors from 20 September through mid October wave upward."
+      },
+      "layout": {
+        "col": 12,
+        "row": 5
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar-list",
+      "title": "Pages",
+      "data": [
+        {
+          "name": "/",
+          "value": 14200
+        },
+        {
+          "name": "/docs",
+          "value": 9800
+        },
+        {
+          "name": "/gallery",
+          "value": 5100
+        },
+        {
+          "name": "/dashboards",
+          "value": 3900
+        }
+      ],
+      "encoding": {
+        "x": "name",
+        "y": {
+          "field": "value",
+          "format": "compact"
+        }
+      },
+      "a11y": {
+        "alt": "Home leads pages at 14.2 thousand visitors, then docs, gallery, and dashboards."
+      },
+      "layout": {
+        "col": 4,
+        "row": 4
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar-list",
+      "title": "Referrers",
+      "data": [
+        {
+          "name": "google.com",
+          "value": 8100
+        },
+        {
+          "name": "news.ycombinator.com",
+          "value": 4400
+        },
+        {
+          "name": "github.com",
+          "value": 3200
+        },
+        {
+          "name": "t.co",
+          "value": 1100
+        }
+      ],
+      "encoding": {
+        "x": "name",
+        "y": {
+          "field": "value",
+          "format": "compact"
+        }
+      },
+      "a11y": {
+        "alt": "google.com is the top referrer, then Hacker News, GitHub, and t.co."
+      },
+      "layout": {
+        "col": 4,
+        "row": 4
+      }
+    },
+    {
+      "version": "1",
+      "legend": false,
+      "tooltip": false,
+      "type": "bar-list",
+      "title": "Countries",
+      "data": [
+        {
+          "name": "United States",
+          "value": 12400
+        },
+        {
+          "name": "Germany",
+          "value": 4000
+        },
+        {
+          "name": "India",
+          "value": 3600
+        },
+        {
+          "name": "United Kingdom",
+          "value": 2900
+        }
+      ],
+      "encoding": {
+        "x": "name",
+        "y": {
+          "field": "value",
+          "format": "compact"
+        }
+      },
+      "a11y": {
+        "alt": "The United States leads countries, then Germany, India, and the United Kingdom."
+      },
+      "layout": {
+        "col": 4,
+        "row": 4
+      }
+    }
+  ]
+}
