@@ -439,12 +439,12 @@ function densify(spec: LiveSpec): void {
     }
     case "timeline": {
       const extra = [
-        { label: "First hire", date: "2014-09-01", kind: "event" },
-        { label: "Seed", date: "2015-02-01", kind: "event" },
-        { label: "EU launch", date: "2017-05-01", kind: "event" },
+        { label: "First hire", date: "2014-09-01", start: "2014-09-01", end: "2014-09-01", kind: "event" },
+        { label: "Seed", date: "2015-02-01", start: "2015-02-01", end: "2015-02-01", kind: "event" },
+        { label: "EU launch", date: "2017-05-01", start: "2017-05-01", end: "2017-05-01", kind: "event" },
         { label: "Mobile app", start: "2018-06-01", end: "2020-01-01", kind: "period" },
-        { label: "SOC 2", date: "2022-04-01", kind: "event" },
-        { label: "Enterprise plan", date: "2024-09-01", kind: "event" },
+        { label: "SOC 2", date: "2022-04-01", start: "2022-04-01", end: "2022-04-01", kind: "event" },
+        { label: "Enterprise plan", date: "2024-09-01", start: "2024-09-01", end: "2024-09-01", kind: "event" },
         { label: "Docs rewrite", start: "2025-06-01", end: "2026-01-15", kind: "period" },
       ];
       spec.data = [...(Array.isArray(spec.data) ? spec.data : []), ...extra];
