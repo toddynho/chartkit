@@ -8,7 +8,10 @@ import {
   writeOption,
   type OptionField,
 } from "@chartkitdev/core/options";
+import type { ChartSpec } from "@chartkitdev/core";
+import { mount } from "@chartkitdev/vanilla";
 import { chartTypes } from "../data/chart-types";
+import { optionEffect } from "../data/option-effect";
 import { chartType, drawChart } from "../lib/paint-chart";
 import { isRecord, pretty } from "../lib/spec-text";
 
@@ -86,6 +89,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     pasteOpen: false,
     copied: false,
     open: new Set<string>(["Essentials"]),
+    unsupported: new Set<string>(),
     dirty: new Set<string>(),
     flash: new Set<string>(),
     hiddenY: [] as unknown[],
@@ -95,6 +99,9 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     valid: "ok" as "ok" | "warn" | "bad",
     warnCount: 0,
   };
+
+  let paintGen = 0;
+  let liveDestroy: (() => void) | null = null;
 
   root.classList.toggle("is-rail-closed", !state.railOpen);
   root.classList.toggle("is-rail-auto", storedRail === null);
@@ -339,6 +346,11 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     return optionCatalog.filter((field) => (!field.appliesTo || field.appliesTo.includes(type)) && !optionBlocked(state.spec, field.path));
   }
 
+  function supportedFields(fields: OptionField[]): OptionField[] {
+    const type = chartType(state.spec);
+    return fields.filter((field) => optionEffect(type, field.path).status !== "not-yet");
+  }
+
   function setCount(fields: OptionField[]): number {
     return fields.filter((field) => readOption(state.spec, field).set).length;
   }
@@ -420,7 +432,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
   function renderTabs(): void {
     const host = root.querySelector("[data-tabs]");
     if (!host) return;
-    const fields = fieldsFor(chartType(state.spec));
+    const fields = supportedFields(fieldsFor(chartType(state.spec)));
     const lines = state.text.split("\n").length;
     const rows = rowsOf(state.good).length;
     const badges = [`${setCount(fields)} set`, `${lines} lines`, `${rows} rows`];
@@ -456,7 +468,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     if (state.tab === "options") panel.append(optionsView());
     else if (state.tab === "spec") panel.append(specView());
     else panel.append(dataView());
-    const fields = fieldsFor(chartType(state.spec));
+    const fields = supportedFields(fieldsFor(chartType(state.spec)));
     const note = root.querySelector("[data-foot-note]");
     const action = root.querySelector("[data-foot-action]");
     if (state.tab === "options") {
@@ -503,7 +515,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     filter.className = "play-setonly";
     if (state.setOnly) filter.classList.add("is-on");
     const fields = fieldsFor(chartType(state.spec));
-    filter.textContent = `Set · ${setCount(fields)}`;
+    filter.textContent = `Set · ${setCount(supportedFields(fields))}`;
     filter.addEventListener("click", () => {
       state.setOnly = !state.setOnly;
       renderPanel();
@@ -522,12 +534,17 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       })),
     ];
     let shown = 0;
+    const typeName = chartType(state.spec);
     for (const section of sections) {
       let items = section.items;
       if (q) items = items.filter((field) => `${field.label} ${field.path} ${field.description}`.toLowerCase().includes(q));
       if (state.setOnly) items = items.filter((field) => readOption(state.spec, field).set);
-      if (!items.length) continue;
-      shown += items.length;
+      const ready = items.filter((field) => optionEffect(typeName, field.path).status !== "not-yet");
+      const later = items.filter((field) => optionEffect(typeName, field.path).status === "not-yet");
+      const reveal = Boolean(q || state.unsupported.has(section.id));
+      const visible = reveal ? [...ready, ...later] : ready;
+      if (!visible.length && !later.length) continue;
+      shown += visible.length;
       const open = Boolean(q || state.setOnly || state.open.has(section.id));
       const box = document.createElement("div");
       box.className = "play-group";
@@ -538,9 +555,9 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       caret.textContent = "▶";
       const title = document.createElement("span");
       title.textContent = section.label;
-      const setHere = items.filter((field) => readOption(state.spec, field).set).length;
+      const setHere = ready.filter((field) => readOption(state.spec, field).set).length;
       const badge = document.createElement("em");
-      badge.textContent = setHere ? `${setHere} set · ${items.length}` : String(items.length);
+      badge.textContent = setHere ? `${setHere} set · ${ready.length}` : String(ready.length || later.length);
       if (setHere) badge.classList.add("is-set");
       head.append(caret, title, badge);
       head.addEventListener("click", () => {
@@ -552,7 +569,19 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       if (open) {
         const body = document.createElement("div");
         body.className = "play-group__body";
-        for (const field of items) body.append(optionRow(field));
+        for (const field of visible) body.append(optionRow(field));
+        if (later.length && !q) {
+          const toggle = document.createElement("button");
+          toggle.type = "button";
+          toggle.className = "play-unsupported";
+          toggle.textContent = reveal ? "Hide unsupported" : `Show unsupported (${later.length})`;
+          toggle.addEventListener("click", () => {
+            if (state.unsupported.has(section.id)) state.unsupported.delete(section.id);
+            else state.unsupported.add(section.id);
+            renderPanel();
+          });
+          body.append(toggle);
+        }
         box.append(body);
       }
       groups.append(box);
@@ -573,9 +602,11 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
 
   function optionRow(field: OptionField): HTMLElement {
     const view = readOption(state.spec, field);
+    const effect = optionEffect(chartType(state.spec), field.path);
     const row = document.createElement("div");
     row.className = "play-opt";
     row.dataset.path = field.path;
+    if (effect.status === "not-yet") row.classList.add("is-unsupported");
     if (view.set) row.classList.add("is-set");
     const dot = document.createElement("span");
     dot.className = "play-opt__dot";
@@ -594,7 +625,26 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       reset.addEventListener("click", () => commit(field, undefined));
       head.append(reset);
     }
-    row.append(dot, head, controlFor(field, view));
+    const control = controlFor(field, view);
+    if (effect.status === "not-yet") {
+      control.inert = true;
+      const nodes = [control, ...control.querySelectorAll("input, button, select, textarea")];
+      for (const node of nodes) {
+        if (node instanceof HTMLInputElement || node instanceof HTMLButtonElement || node instanceof HTMLSelectElement || node instanceof HTMLTextAreaElement) node.disabled = true;
+      }
+    }
+    row.append(dot, head, control);
+    if (effect.status === "not-yet") {
+      const note = document.createElement("div");
+      note.className = "play-opt__note";
+      note.textContent = `Not yet supported for ${chartType(state.spec)}`;
+      row.append(note);
+    } else if (effect.hint) {
+      const note = document.createElement("div");
+      note.className = "play-opt__note";
+      note.textContent = effect.hint;
+      row.append(note);
+    }
     if (field.description) {
       const help = document.createElement("div");
       help.className = "play-opt__help";
@@ -1047,6 +1097,9 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
   }
 
   async function refresh(rebuild = true): Promise<void> {
+    const gen = ++paintGen;
+    liveDestroy?.();
+    liveDestroy = null;
     const started = performance.now();
     const size = SIZES[viewSize()];
     const view = clone(state.good);
@@ -1067,6 +1120,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       state.issues = [{ severity: "error", text: error instanceof Error ? error.message : "Render failed", action: "Review", path: "" }];
     }
     state.renderMs = Math.max(1, Math.round(performance.now() - started));
+    if (gen !== paintGen) return;
     const canvas = root.querySelector("[data-canvas]");
     if (canvas) {
       canvas.replaceChildren();
@@ -1079,9 +1133,34 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       title.textContent = typeof state.good.title === "string" && state.good.title.trim() ? state.good.title : "Untitled";
       const chart = document.createElement("div");
       chart.className = "play-card__chart";
+      chart.dataset.ckLive = "1";
       chart.style.width = `${size.w}px`;
       chart.style.height = `${size.h}px`;
       chart.innerHTML = state.svg;
+      const kind = chartType(view);
+      try {
+        if (kind === "choropleth" || kind === "map-points") {
+          const svg = chart.querySelector("svg");
+          if (svg) {
+            const { attach } = await import("@chartkitdev/geo");
+            if (gen !== paintGen) return;
+            const stop = attach(svg);
+            liveDestroy = stop;
+          }
+        } else if (state.svg.includes("<svg")) {
+          const handle = mount(chart, view as ChartSpec);
+          if (gen !== paintGen) {
+            handle.destroy();
+            return;
+          }
+          liveDestroy = () => {
+            handle.destroy();
+            document.querySelectorAll("[data-ck-extra-tip]").forEach((node) => node.remove());
+          };
+        }
+      } catch {
+        chart.innerHTML = state.svg;
+      }
       const alt = document.createElement("p");
       alt.className = "play-card__alt";
       const code = document.createElement("code");
