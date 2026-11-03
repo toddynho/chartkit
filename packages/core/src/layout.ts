@@ -3,7 +3,7 @@
  * `render()` calls `arrange` before the chart renderer. A spec with none of
  * these returns null and the chart draws unchanged.
  */
-import { readTable } from "./frame";
+import { chartSize, readTable } from "./frame";
 import type { DataTable } from "./data";
 import { installLayout, installPaint, directionOf, type Draw } from "./layout-hook";
 import { ch, esc, font, isRecord, niceDomain, niceNum } from "./svg";
@@ -870,9 +870,9 @@ function rowsOf(table: DataTable): Record<string, unknown>[] {
 }
 
 function sizeOf(spec: Record<string, unknown>, fallbackW: number, fallbackH: number): { w: number; h: number } {
-  const size = isRecord(spec.size) ? spec.size : {};
-  const w = typeof size.width === "number" && size.width > 0 ? size.width : fallbackW;
-  const h = typeof size.height === "number" && size.height > 0 ? size.height : fallbackH;
+  const box = chartSize(spec, { width: fallbackW, height: fallbackH });
+  const w = box.width > 0 ? box.width : fallbackW;
+  const h = box.height > 0 ? box.height : fallbackH;
   return { w: Math.round(w), h: Math.round(h) };
 }
 

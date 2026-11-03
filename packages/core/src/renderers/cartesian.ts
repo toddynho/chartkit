@@ -9,7 +9,7 @@ import { bag, glyphOf, marker, named, nudge, type Bag } from "../glyphs";
 import { canvasWanted } from "../render-mode";
 import { beginFrame, dataSampling, extentAndMinmax, noteDense, noteLinear, notedLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
 import type { ColorScale } from "../color-scale";
-import { exportList, readColor } from "../frame";
+import { chartSize, exportList, readColor } from "../frame";
 import { CHROME_TOP } from "../chrome";
 import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
 import { layoutPaint } from "../layout-hook";
@@ -2530,7 +2530,15 @@ export function widest(labels: string[]): number {
 }
 
 function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabels: string[]): Pad {
-  if (model.type === "sparkline" || model.type === "mini-area") return { top: 2, right: 2, bottom: 2, left: 2 };
+  if (model.type === "sparkline" || model.type === "mini-area") {
+    const inset = model.inset;
+    return {
+      top: typeof inset.t === "number" ? Math.max(2, inset.t) : 2,
+      right: typeof inset.r === "number" ? Math.max(2, inset.r) : 2,
+      bottom: typeof inset.b === "number" ? Math.max(2, inset.b) : 2,
+      left: typeof inset.l === "number" ? Math.max(2, inset.l) : 2,
+    };
+  }
   const horizontal = model.orientation === "horizontal" && model.type === "bar";
   const yEnd = Boolean(model.yAxis.end);
   const xEnd = Boolean(model.xAxis.end);
@@ -3138,13 +3146,8 @@ function axisIncludesZero(model: PlotModel, axis: "y" | "y2"): boolean {
 }
 
 function heightOf(type: string, size: Record<string, unknown>, width: number): number {
-  let height = 240;
-  if (typeof size.height === "number") height = size.height;
-  else if (size.height === "auto" && typeof size.aspectRatio === "number" && size.aspectRatio > 0) height = Math.max(1, Math.round(width / size.aspectRatio));
-  else if (type === "sparkline") height = 32;
-  else if (type === "mini-area") height = 40;
-  if (typeof size.minHeight === "number" && size.minHeight > height) height = size.minHeight;
-  return height;
+  const fallback = type === "sparkline" ? 32 : type === "mini-area" ? 40 : 240;
+  return chartSize({ size }, { width, height: fallback }).height;
 }
 
 function axisVisible(spec: Record<string, unknown>, key: "x" | "y" | "y2"): boolean {

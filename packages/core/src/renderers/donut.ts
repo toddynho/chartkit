@@ -69,6 +69,8 @@ function simpleArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   if (!isRecord(encoding) || typeof encoding.x !== "string" || typeof encoding.y !== "string" || encoding.color != null) return undefined;
   const size = spec.size;
   if (!isRecord(size) || size.width !== 640 || size.height !== 360) return undefined;
+  if (size.padding != null) return undefined;
+  if (typeof size.minHeight === "number" && size.minHeight > 360) return undefined;
   if (!Array.isArray(spec.data) || spec.data.length < 5) return undefined;
   const xKey = encoding.x;
   const yKey = encoding.y;
