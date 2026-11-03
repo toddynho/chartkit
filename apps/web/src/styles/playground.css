@@ -572,6 +572,29 @@ body:has(.play) main {
 
 .play-opt__help { font-size: 11.5px; color: #8b8d93; line-height: 1.4; }
 
+.play-opt__note { font-size: 11.5px; color: #8b8d93; line-height: 1.35; }
+
+.play-opt.is-unsupported { color: #a0a2a7; }
+.play-opt.is-unsupported .play-opt__head strong,
+.play-opt.is-unsupported .play-opt__head a,
+.play-opt.is-unsupported .play-opt__help { color: #a0a2a7; }
+.play-opt.is-unsupported .play-opt__dot { background: #e6e6e2; }
+.play-opt.is-unsupported input,
+.play-opt.is-unsupported select,
+.play-opt.is-unsupported textarea,
+.play-opt.is-unsupported button { color: #a0a2a7; }
+
+.play-unsupported {
+  all: unset;
+  cursor: pointer;
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 500;
+  color: #0a63e6;
+  padding: 2px 0 4px;
+}
+.play-unsupported:hover { text-decoration: underline; }
+
 .play-opt input[type="text"],
 .play-opt input[type="number"],
 .play-opt select,

@@ -12,9 +12,20 @@ export interface TipController {
   destroy(): void;
 }
 
-export function attach(host: EventTarget & { querySelector?(selector: string): Element | null }): TipController {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** Mark tooltips follow `tooltip: false` and `interaction.hover: false`. Callers that only have a painted SVG keep the previous behaviour. */
+export function attach(host: EventTarget & { querySelector?(selector: string): Element | null }, spec?: unknown): TipController {
   if (typeof document === "undefined" || typeof host.addEventListener !== "function" || typeof host.querySelector !== "function") {
     return { destroy() {} };
+  }
+  if (isRecord(spec)) {
+    const tooltip = spec.tooltip;
+    const interaction = spec.interaction;
+    if (tooltip === false || (isRecord(tooltip) && tooltip.show === false)) return { destroy() {} };
+    if (isRecord(interaction) && interaction.hover === false) return { destroy() {} };
   }
   const root = host as unknown as Element;
   // Keep position off the shared `.ck-tip` class. Interact places that card with host-relative coordinates.

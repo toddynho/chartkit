@@ -1320,6 +1320,7 @@ html.is-rail-drag * {
 .opt-ref dt { margin: 0; }
 .opt-ref dd { margin: 0; }
 .opt-ref__meta { display: block; margin-top: 0.2rem; color: var(--muted); font-size: 0.75rem; }
+.opt-ref__gap, .opt-table .not-yet { display: block; margin-top: 0.2rem; color: #8b8d93; font-size: 0.75rem; }
 @media (max-width: 720px) {
   .opt-ref__row { grid-template-columns: 1fr; }
 }

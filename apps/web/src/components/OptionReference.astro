@@ -1,5 +1,6 @@
 ---
 import { OPTION_GROUPS, optionCatalog, type OptionField } from "@chartkitdev/core/options";
+import { notYetLabel } from "../data/option-effect";
 
 function scope(field: OptionField): string {
   if (!field.appliesTo?.length) return "All charts";
@@ -36,6 +37,7 @@ const groups = OPTION_GROUPS.map((group) => ({
                   {" · "}
                   {scope(field)}
                 </span>
+                {notYetLabel(field.path) ? <span class="opt-ref__gap">{notYetLabel(field.path)}</span> : null}
               </dd>
             </div>
           ))}
