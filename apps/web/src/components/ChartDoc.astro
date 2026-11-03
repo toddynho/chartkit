@@ -6,6 +6,7 @@ import {
 import { loadMaps } from "../lib/batch3";
 import { loadExample, loadExamplesIndex } from "../lib/surfaces";
 import { pretty } from "../lib/spec-text";
+import { optionEffect } from "../data/option-effect";
 import PageNav from "./PageNav.astro";
 import Prose from "./Prose.astro";
 import SpecEditor from "./SpecEditor.astro";
@@ -122,6 +123,9 @@ if (chart.type === "choropleth" || chart.type === "map-points") {
             <tr>
               <td>
                 <Prose text={option.path} />
+                {optionEffect(chart.type, option.path.replace(/`/g, "").trim()).status === "not-yet" ? (
+                  <span class="not-yet">Not yet on {chart.type}</span>
+                ) : null}
               </td>
               <td class="muted">
                 <Prose text={option.role} />
