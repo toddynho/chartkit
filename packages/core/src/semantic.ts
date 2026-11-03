@@ -45,6 +45,7 @@ const CHART_TYPES = new Set([
   "sunburst",
   "radial-bar",
   "rose",
+  "strip",
 ]);
 
 const SVG_BUDGET = 5000;
@@ -142,6 +143,17 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   }
   if (isRecord(spec.encoding)) checkEncoding(spec, spec.encoding, view, diagnostics);
   if (type === "candlestick") checkCandles(spec, view, diagnostics);
+  if (type === "strip") stripChecks(spec, view, diagnostics);
+  else if (isRecord(spec.encoding) && spec.encoding.label !== undefined) {
+    diagnostics.push({
+      code: "CK3093",
+      severity: "warning",
+      message: '"encoding.label" has no effect on this chart',
+      path: "/encoding/label",
+      hint: 'encoding.label names a strip point. Remove it or set type to "strip"',
+      fix: [{ op: "remove", path: "/encoding/label" }],
+    });
+  }
   if (type) checkUncertainty(spec, type, view, diagnostics);
   checkHierarchy(spec, diagnostics);
   if (known) warnDesign(spec, type, view, diagnostics);
@@ -221,7 +233,7 @@ function checkEncoding(
   diagnostics: Diagnostic[],
 ): void {
   const channels: Channel[] = [];
-  for (const key of ["x", "series", "color", "size", "open", "high", "low", "close", "volume", "source", "target", "error"] as const) {
+  for (const key of ["x", "series", "color", "size", "label", "open", "high", "low", "close", "volume", "source", "target", "error"] as const) {
     const channel = readChannel(encoding[key], `/encoding/${key}`);
     if (channel?.field) channels.push(channel);
   }
@@ -287,7 +299,7 @@ function checkEncoding(
         });
       }
       const xType = x.type ?? inferType(values);
-      if (spec.type !== "scatter" && spec.type !== "histogram" && (xType === "temporal" || xType === "quantitative") && !isSorted(values, xType)) {
+      if (spec.type !== "scatter" && spec.type !== "histogram" && spec.type !== "strip" && (xType === "temporal" || xType === "quantitative") && !isSorted(values, xType)) {
         const index = firstUnsorted(values, xType);
         diagnostics.push({
           code: "CK2008",
@@ -1589,7 +1601,7 @@ function luminance([r, g, b]: [number, number, number]): number {
   return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
 }
 
-const ANNOTATION_TYPES = new Set(["rule", "band", "text", "trendline", "regression", "marker"]);
+const ANNOTATION_TYPES = new Set(["rule", "band", "text", "trendline", "regression", "marker", "compare"]);
 
 const TYPE_ALIAS: Record<string, string> = {
   trend: "trendline",
@@ -1629,6 +1641,95 @@ const REG_METHOD: Record<string, string> = {
   lm: "linear",
 };
 
+function stripChecks(spec: Record<string, unknown>, table: DataTable, diagnostics: Diagnostic[]): void {
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  if (!encoding) return;
+  const vertical = isRecord(spec.mark) && spec.mark.orientation === "vertical";
+  const groupChannel = vertical ? encoding.x : encoding.y;
+  const valueChannel = vertical ? encoding.y : encoding.x;
+  const groupField = typeof groupChannel === "string" ? groupChannel : isRecord(groupChannel) && typeof groupChannel.field === "string" ? groupChannel.field : "";
+  const valueField = typeof valueChannel === "string" ? valueChannel : isRecord(valueChannel) && typeof valueChannel.field === "string" ? valueChannel.field : "";
+  const groupPath = vertical ? "/encoding/x" : "/encoding/y";
+  const valuePath = vertical ? "/encoding/y" : "/encoding/x";
+  if (!groupField || !valueField) return;
+  const groups = table.columns[groupField];
+  const values = table.columns[valueField];
+  if (!groups || !values) return;
+  if (inferType(values) !== "quantitative") {
+    diagnostics.push({
+      code: "CK3087",
+      severity: "error",
+      message: "strip value field has no numbers",
+      path: valuePath,
+      hint: "the value channel has to be quantitative",
+    });
+  }
+  if (inferType(groups) === "quantitative") {
+    diagnostics.push({
+      code: "CK3086",
+      severity: "warning",
+      message: "strip group field is quantitative and is drawn as categories",
+      path: groupPath,
+      hint: "each distinct number becomes a row. A numeric axis belongs on the value channel",
+    });
+  }
+  const counts = new Map<string, number>();
+  for (let i = 0; i < groups.length; i++) {
+    const name = groups[i];
+    if (name === null || name === undefined || name === "") continue;
+    const key = String(name);
+    counts.set(key, (counts.get(key) ?? 0) + (typeof values[i] === "number" ? 1 : 0));
+  }
+  if (counts.size > 12) {
+    diagnostics.push({
+      code: "CK3088",
+      severity: "warning",
+      message: `strip has ${counts.size} groups`,
+      path: groupPath,
+      hint: "more than 12 groups gets hard to read. boxplot is the chart for many groups",
+    });
+  }
+  const sizes = [...counts.values()];
+  const markNow = isRecord(spec.mark) ? spec.mark : {};
+  const summaryHidden = markNow.summary === "none";
+  const bandHidden = markNow.band === "none" || markNow.band === undefined;
+  if (sizes.length > 0 && sizes.every((count) => count === 1) && !(summaryHidden && bandHidden)) {
+    const mark = { ...markNow, summary: "none", band: "none" };
+    diagnostics.push({
+      code: "CK3090",
+      severity: "warning",
+      message: "every strip group has one point, so the summary and band are hidden",
+      path: "/mark",
+      hint: "this is a dot plot. summary and band need more than one observation",
+      fix: [{ op: isRecord(spec.mark) ? "replace" : "add", path: "/mark", value: mark }],
+    });
+  }
+  const band = isRecord(spec.mark) ? spec.mark.band : undefined;
+  if ((band === "range" || band === "iqr") && sizes.some((count) => count < 3)) {
+    const allShort = sizes.every((count) => count < 3);
+    const mark = isRecord(spec.mark) ? { ...spec.mark, band: "none" } : { band: "none" };
+    diagnostics.push({
+      code: "CK3089",
+      severity: "warning",
+      message: "a strip band needs 3 observations in the group",
+      path: "/mark/band",
+      hint: allShort ? "no group has 3 points, so the band is dropped" : "groups with fewer than 3 points are drawn without a band",
+      ...(allShort ? { fix: [{ op: "replace" as const, path: "/mark", value: mark }] } : {}),
+    });
+  }
+  const highlight = isRecord(spec.mark) && typeof spec.mark.highlight === "string" ? spec.mark.highlight : "";
+  if (highlight && !counts.has(highlight)) {
+    diagnostics.push({
+      code: "CK3091",
+      severity: "warning",
+      message: `highlight ${JSON.stringify(highlight)} is not a group`,
+      path: "/mark/highlight",
+      hint: `groups: ${[...counts.keys()].join(", ") || "(none)"}`,
+      fix: [{ op: "remove", path: "/mark/highlight" }],
+    });
+  }
+}
+
 function checkAnnotations(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
   if (Array.isArray(spec.annotations)) {
     for (let i = 0; i < spec.annotations.length; i++) checkNote(spec.annotations[i], `/annotations/${i}`, spec, diagnostics);
@@ -1660,6 +1761,17 @@ function checkNote(value: unknown, path: string, spec: Record<string, unknown>, 
   if (raw === "trendline" || raw === "regression") checkMethod(value, path, raw, diagnostics);
   if (raw === "band") checkOrder(value.from, value.to, path, diagnostics);
   if (raw === "marker") checkMarker(value, path, diagnostics);
+  if (raw === "compare" && spec.type !== "strip") {
+    const notes = Array.isArray(spec.annotations) ? spec.annotations : [];
+    diagnostics.push({
+      code: "CK3092",
+      severity: "warning",
+      message: "a compare annotation is drawn on a strip",
+      path,
+      hint: 'remove it, or set type to "strip"',
+      fix: [{ op: "remove", path: notes.length === 1 ? "/annotations" : path }],
+    });
+  }
   if ((raw === "trendline" || raw === "regression") && typeof value.series === "string" && value.series) {
     const names = seriesNames(spec);
     if (names.length && !names.includes(value.series)) {

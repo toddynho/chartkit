@@ -2,6 +2,8 @@
 
 Status: awaiting Todd's OK. The implementation on this branch follows this document and can change.
 
+Implementation note: at a 0–2000 domain the nine ChartKit values sit within one dot-diameter, so `mark.jitter: "auto"` stacks that row off the rail. The benchmark spec sets `jitter` to `"none"` so each dot stays on its value, which is what the hand-drawn chart did. `"auto"` remains the default for other strips.
+
 ChartKit already has 37 rendered types (`HERO_TYPE_COUNT` in `apps/web/src/data/hero-catalog.ts`: the schema enum plus gantt, timeline, quadrant, venn, journey, choropleth, and map-points). `strip` makes 38. The spec major stays `"1"`. The package version stays `0.5.0`. The published schema is `packages/core/schema/chartkit.schema.json` (`$id` `https://chartkit.dev/schema/v1.json`), not a separate `schema/v1.json` file.
 
 Options that belong to one type live on `mark`. Root `sort` is already `{ field, by, order }` for row order, and `mark.orientation` / `mark.sort` already exist for bar and for pie. Strip uses those objects instead of new root keys.

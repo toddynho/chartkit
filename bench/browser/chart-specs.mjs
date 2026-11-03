@@ -31,6 +31,7 @@ const ALT = {
   candlestick: "Open, high, low, close, and volume.",
   histogram: "One quantitative field split into bins.",
   boxplot: "Eight groups, each with its own observations.",
+  strip: "Eight groups of dots on one numeric axis.",
   radar: "Three series around shared spokes.",
   funnel: "Stages in order.",
   treemap: "Tiles sized by value and colored by group.",
@@ -99,6 +100,12 @@ export function chartSpec(chart, payload) {
       return spec(chart, alt, {
         data,
         encoding: { x: "group", y: "value" },
+      });
+    case "strip":
+      return spec(chart, alt, {
+        data,
+        encoding: { x: "value", y: "group" },
+        mark: { band: "range", jitter: "none" },
       });
     case "candlestick":
       return spec(chart, alt, {

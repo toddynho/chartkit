@@ -401,6 +401,9 @@ export function chartGeometry(svg, task, spec) {
     if (!/<path\b/.test(svg)) note("expected an arc");
   } else if (type === "kpi") {
     if (!/<text\b/.test(svg)) note("expected a value");
+  } else if (type === "strip") {
+    const points = svg.match(/data-ck-mark="point"/g) ?? [];
+    if (points.length < rows) note(`expected ${rows} points, found ${points.length}`);
   } else {
     note("no drawn-shape check");
   }
@@ -417,7 +420,11 @@ export function checkChartKit(spec, task) {
   };
   if (!validation.ok) return { ok: false, stages };
 
-  const svg = render(spec);
+  let svg = render(spec);
+  if (typeof svg !== "string" || svg.includes("ck-chart-error")) {
+    const extra = fullRender(spec);
+    if (typeof extra === "string" && extra.includes("data-ck-type=") && !extra.includes("ck-chart-error")) svg = extra;
+  }
   const drew = typeof svg === "string" && svg.includes("data-ck-type=") && !svg.includes("ck-chart-error");
   stages.render = { ok: drew };
   stages.marks = drew ? chartGeometry(svg, task, spec) : { ok: false, issues: ["no chart"] };

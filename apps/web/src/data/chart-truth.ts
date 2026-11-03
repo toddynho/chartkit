@@ -192,6 +192,75 @@ const truth: Record<string, Truth> = {
     bundle: "@chartkitdev/core/extra",
     notes: ["encoding.x is the value to bin.", "The renderer ships in @chartkitdev/core/extra, not in the line bundle."],
   },
+  strip: {
+    summary: "Every observation is a dot on one numeric axis, with one row per group. A median tick is the default.",
+    entry: "@chartkitdev/core/charts/strip",
+    bundle: "@chartkitdev/core/extra",
+    notes: [
+      "Horizontal is the default. encoding.y is the group and encoding.x is the value. mark.orientation vertical swaps them.",
+      "mark.summary is median, mean, or none. mark.band is none, range, or iqr. mark.jitter is none, auto, or a pixel distance.",
+      "mark.highlight names one group. That row uses accent. The others use muted. The tick stays ink.",
+      "encoding.label is the point name in the tooltip. It is not drawn on the plot.",
+    ],
+    options: [
+      { path: "`encoding.x` / `encoding.y`", role: "Value and group. Horizontal: x is the value, y is the group.", status: drawn },
+      { path: "`encoding.label`", role: "Point name in the tooltip", status: drawn },
+      { path: "`encoding.color`", role: "Color the dots by a field", status: drawn },
+      { path: "`mark.summary`", role: "median (default), mean, or none", status: drawn },
+      { path: "`mark.band`", role: "none (default), range, or iqr", status: drawn },
+      { path: "`mark.jitter`", role: "auto (default), none, or a pixel distance", status: drawn },
+      { path: "`mark.highlight`", role: "Group drawn in accent", status: drawn },
+      { path: "`mark.sort`", role: "none (default), asc, or desc by the summary", status: drawn },
+      { path: "`mark.orientation`", role: "Omitted is horizontal. vertical swaps the axes.", status: drawn },
+      { path: "`annotations`", role: "compare draws a bracket between two groups", status: drawn },
+    ],
+    extra: [
+      {
+        title: "When to use it",
+        paragraphs: [
+          "A few groups, and you want the distribution rather than one bar per group. The token chart is the reference: five libraries, nine models, a median tick, and a min-to-max band.",
+        ],
+        list: [],
+        code: [],
+      },
+      {
+        title: "When not to",
+        paragraphs: [
+          "Use boxplot once there are many groups. Use scatter when both axes are numeric. Use bar when each group is one aggregate.",
+        ],
+        list: [],
+        code: [],
+      },
+      {
+        title: "One point per group",
+        paragraphs: [
+          "The chart becomes a dot plot. The summary tick and the band are hidden. repair() writes mark.summary and mark.band as none.",
+        ],
+        list: [],
+        code: [
+          '{\n  "version": "1",\n  "type": "strip",\n  "data": [\n    { "region": "North", "ms": 42 },\n    { "region": "South", "ms": 55 },\n    { "region": "East", "ms": 31 }\n  ],\n  "encoding": { "x": "ms", "y": "region" },\n  "a11y": { "alt": "South is slowest at 55 ms." }\n}',
+        ],
+      },
+      {
+        title: "Vertical, with color",
+        paragraphs: [
+          "mark.orientation vertical puts the groups on x. encoding.color splits the dots. A band needs at least three points in the group.",
+        ],
+        list: [],
+        code: [
+          '{\n  "version": "1",\n  "type": "strip",\n  "data": [\n    { "desk": "A", "minutes": 12, "shift": "Weeknight" },\n    { "desk": "A", "minutes": 18, "shift": "Weeknight" },\n    { "desk": "A", "minutes": 28, "shift": "Saturday" },\n    { "desk": "A", "minutes": 40, "shift": "Saturday" },\n    { "desk": "B", "minutes": 14, "shift": "Weeknight" },\n    { "desk": "B", "minutes": 22, "shift": "Weeknight" },\n    { "desk": "B", "minutes": 36, "shift": "Saturday" },\n    { "desk": "B", "minutes": 44, "shift": "Saturday" }\n  ],\n  "encoding": { "x": "desk", "y": "minutes", "color": "shift" },\n  "mark": { "orientation": "vertical", "summary": "mean", "band": "iqr" },\n  "a11y": { "alt": "Saturday runs longer on both desks." }\n}',
+        ],
+      },
+      {
+        title: "Error codes",
+        paragraphs: [
+          "CK3086 warns when the group field is numeric and draws each distinct number as a category. CK3087 is an error when the value field has no numbers. CK3088 warns above 12 groups. CK3089 warns when a band is asked for and a group has fewer than 3 points. CK3090 warns when every group has one point. CK3091 warns when highlight matches nothing. CK3092 warns when a compare annotation is not on a strip. CK3093 warns when encoding.label is set on another type.",
+        ],
+        list: [],
+        code: [],
+      },
+    ],
+  },
   boxplot: {
     summary: "Quartiles, whiskers, a median, and outlier dots for each category.",
     entry: "@chartkitdev/core/charts/boxplot",

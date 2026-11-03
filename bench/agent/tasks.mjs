@@ -62,6 +62,9 @@ export const tasks = [
   task("candle-up", "candlestick", "Candlestick chart for two rising sessions.", [{ date: "2026-01-02", open: 10, high: 12, low: 9, close: 11 }, { date: "2026-01-03", open: 11, high: 14, low: 11, close: 13 }], { x: "date", open: "open", high: "high", low: "low", close: "close", values: [10, 12, 9, 11, 11, 14, 13] }),
   task("candle-down", "candlestick", "Candlestick chart for a session that closed below the open.", [{ date: "2026-01-06", open: 20, high: 21, low: 16, close: 17 }], { x: "date", open: "open", high: "high", low: "low", close: "close", values: [20, 21, 16, 17] }),
   task("candle-flat", "candlestick", "Candlestick chart with a flat third session.", [{ date: "2026-02-01", open: 8, high: 9, low: 7, close: 9 }, { date: "2026-02-02", open: 9, high: 9, low: 8, close: 8 }, { date: "2026-02-03", open: 8, high: 8, low: 8, close: 8 }], { x: "date", open: "open", high: "high", low: "low", close: "close", values: [8, 9, 7, 9, 8, 8] }),
+
+  task("tokens-by-model-strip", "strip", "Strip plot of output tokens by library. Each row is a library and each dot is one model. Show the spread, not a single average.", [{ library: "ChartKit", model: "Luna", tokens: 94 }, { library: "ChartKit", model: "Terra", tokens: 82.5 }, { library: "ChartKit", model: "Sol", tokens: 86.5 }, { library: "Plot", model: "Luna", tokens: 464 }, { library: "Plot", model: "Terra", tokens: 332 }, { library: "Plot", model: "Sol", tokens: 244 }], { x: "tokens", y: "library", values: [94, 82.5, 86.5, 464, 332, 244] }),
+  task("latency-by-region-strip", "strip", "Strip plot of request latency in milliseconds by region. One dot per sample, so the spread in each region stays visible.", [{ region: "North", ms: 42 }, { region: "North", ms: 55 }, { region: "North", ms: 48 }, { region: "South", ms: 70 }, { region: "South", ms: 66 }, { region: "South", ms: 81 }], { x: "ms", y: "region", values: [42, 55, 48, 70, 66, 81] }),
 ];
 
 export const CHART_TYPES = [

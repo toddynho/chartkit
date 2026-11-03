@@ -157,7 +157,7 @@ function probes(leaf: Leaf): unknown[] {
     else push(typeof leaf.maximum === "number" ? Math.min(80, leaf.maximum) : 80);
   }
   const fieldPath =
-    /\/encoding\/(x|y|color|size|series|open|high|low|close|volume|source|target|error)$/.test(leaf.path) ||
+    /\/encoding\/(x|y|color|size|series|label|open|high|low|close|volume|source|target|error)$/.test(leaf.path) ||
     leaf.path.endsWith("/field") ||
     /\/(lo|hi|error)$/.test(leaf.path);
   if (leaf.types.has("string") && values.length === 0) {
@@ -469,6 +469,7 @@ function hosts(): Host[] {
     ["sunburst", { version: "1", type: "sunburst", data: [deepTree], encoding: { x: "name", y: "value" }, a11y: { alt }, size: { width: 420, height: 280 } }],
     ["radial-bar", { version: "1", type: "radial-bar", data: rows, encoding: { x: "month", y: ["revenue", "cost"] }, a11y: { alt }, size: { width: 420, height: 280 } }],
     ["rose", { version: "1", type: "rose", data: rows, encoding: { x: "month", y: "revenue" }, a11y: { alt }, size: { width: 420, height: 280 } }],
+    ["strip", { version: "1", type: "strip", data: [{ g: "B", v: 10, name: "one" }, { g: "B", v: 10, name: "two" }, { g: "B", v: 30, name: "three" }, { g: "A", v: 1, name: "four" }, { g: "A", v: 2, name: "five" }, { g: "A", v: 9, name: "six" }], encoding: { x: "v", y: "g", label: "name" }, a11y: { alt }, size: { width: 420, height: 220 } }],
     [
       "trace",
       {
@@ -599,6 +600,7 @@ const ENTRY_FILES: Array<[string, string]> = [
   ["sunburst", "sunburst"],
   ["radial-bar", "radialBar"],
   ["rose", "rose"],
+  ["strip", "strip"],
 ];
 
 const FRESH_ENTRY = new Set(["line", "bar", "stacked-area", "combo", "sparkline", "mini-area"]);
