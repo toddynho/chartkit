@@ -1,7 +1,7 @@
-import { chooseTicks, lockDomain } from "../../chrome";
+import { chooseTicks, labelStep, lockDomain, minorTickMarks, placedAxisTitles } from "../../chrome";
 import { axisOn, column, fieldOf } from "../../frame";
 import { cssVar, paint } from "../../theme";
-import { ch, hash, isRecord, n } from "../../svg";
+import { ch, hash, isRecord, n, readAxis } from "../../svg";
 import {
   axisLine,
   domainTicks,
@@ -208,15 +208,22 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
     }
   });
   if (axisOn(spec, vertical ? "y" : "x")) {
+    const key = vertical ? "y" : "x";
+    const axis = readAxis(spec, key);
+    const step = labelStep(valueTicks.length, axis.skip, 1);
     const tickInk = cssVar("muted", frame.preset.muted);
-    for (const value of valueTicks) {
+    for (let i = 0; i < valueTicks.length; i += step) {
+      const value = valueTicks[i] ?? 0;
       const pos = at(value);
       const label = fmt(value, frame.locale, shown);
       if (vertical) parts.push(text(box.left - 8, pos + 4, label, tickInk, 11, "400", "end"));
       else parts.push(text(pos, box.bottom + 16, label, tickInk, 11, "400", "middle"));
     }
+    const edge = vertical ? box.left : box.bottom;
+    parts.push(minorTickMarks(axis.minor ?? 0, valueTicks, at, edge, !vertical, vertical ? -3 : 3, cssVar("axis", frame.preset.axis)));
   }
   if (!vertical && axisOn(spec, "x")) parts.push(axisLine(frame, { left: box.left, top: box.top, right: box.right, bottom: box.bottom }));
+  parts.push(placedAxisTitles(frame, spec, box));
   if (colorNames.length && frame.legend !== false) {
     let x = box.left;
     const y = 14;
