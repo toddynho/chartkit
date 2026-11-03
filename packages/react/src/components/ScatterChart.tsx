@@ -269,7 +269,7 @@ export function ScatterChart<T extends Record<string, unknown>>({
                 style={{
                   fontSize: '12px',
                   color: t.textSecondary,
-                  fontFamily: 'JetBrains Mono, monospace',
+                  fontFamily: 'inherit',
                 }}
               >
                 {cat}
@@ -341,7 +341,7 @@ export function ScatterChart<T extends Record<string, unknown>>({
               y={chartHeight + 20}
               textAnchor="middle"
               fill={t.textMuted}
-              style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' }}
+              style={{ fontSize: '10px', fontFamily: 'inherit' }}
             >
               {formatX(tick)}
             </text>
@@ -368,7 +368,7 @@ export function ScatterChart<T extends Record<string, unknown>>({
               textAnchor="end"
               dominantBaseline="middle"
               fill={t.textMuted}
-              style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' }}
+              style={{ fontSize: '10px', fontFamily: 'inherit' }}
             >
               {formatY(tick)}
             </text>

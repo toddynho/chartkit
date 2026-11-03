@@ -13,7 +13,7 @@ import {
   resolveDomain,
 } from "../frame";
 import { readSamplingMode, sampleSeries } from "../sampling";
-import { closeChart, esc, font, linear, n, openChart, readAxis, ticks } from "../svg";
+import { closeChart, esc, font, linear, n, openChart, readAxis, ticks, ch } from "../svg";
 
 /** Thin vertical spikes from mark.baseline (default 0) across x. */
 export function renderSpike(spec: Record<string, unknown>): string | null {
@@ -47,7 +47,7 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
   let left = 12;
   if (showY) {
     let width = 0;
-    for (let i = 0; i < yTickText.length; i++) width = Math.max(width, yTickText[i].length * 6.7);
+    for (let i = 0; i < yTickText.length; i++) width = Math.max(width, ch(yTickText[i].length, 6.7));
     left = Math.max(44, Math.ceil(width + 14));
   }
   if (showY && readAxis(spec, "y").title) left += 16;

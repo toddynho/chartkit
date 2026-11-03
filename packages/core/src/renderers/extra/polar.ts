@@ -1,7 +1,7 @@
 import { headingInset } from "../../chrome";
 import { asNumber, column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
-import { domainEnds, n, polar } from "../../svg";
+import { domainEnds, n, polar, ch } from "../../svg";
 import { fill, fmt, openMark, str, text, valueFormat, viewOf } from "./plot";
 
 /**
@@ -157,7 +157,7 @@ export function renderPolar(spec: Record<string, unknown>, kind: Kind): string |
       const name = clip(item.name, 18);
       parts.push(`<rect x="${n(x)}" y="${n(y - 9)}" width="10" height="10" rx="2" fill="${fill(frame, index)}" />`);
       parts.push(text(x + 14, y, name, ink, 12, "500"));
-      x += 14 + name.length * 7 + 16;
+      x += 14 + ch(name.length, 7) + 16;
     });
   }
   return view.done();

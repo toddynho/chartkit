@@ -16,7 +16,7 @@ import {
 } from "../frame";
 import { activeScene, pushRect, takeMark, type SceneMark } from "../canvas/sink";
 import { canvasWanted } from "../render-mode";
-import { closeChart, esc, font, isRecord, linear, n, openChart, readAxis, ticks } from "../svg";
+import { closeChart, esc, font, isRecord, linear, n, openChart, readAxis, ticks, ch } from "../svg";
 
 /** OHLC candles. A volume pane is drawn when encoding.volume is set. */
 export function renderCandlestick(spec: Record<string, unknown>): string | null {
@@ -70,7 +70,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   let left = 12;
   if (showY) {
     let width = 0;
-    for (let i = 0; i < yTickText.length; i++) width = Math.max(width, yTickText[i].length * 6.7);
+    for (let i = 0; i < yTickText.length; i++) width = Math.max(width, ch(yTickText[i].length, 6.7));
     left = Math.max(56, Math.ceil(width + 16));
   }
   if (showY && readAxis(spec, "y").title) left += 16;

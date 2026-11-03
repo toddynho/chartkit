@@ -3,7 +3,9 @@
  * Cross-origin stylesheets throw SecurityError and are skipped.
  * Remote `@font-face` urls and external `<image href>` values are not embedded:
  * system fonts are referenced by the computed family, and a remote image taints the canvas.
+ * A string has no page font, so inherit is baked to the standalone fallback.
  */
+import { bakeFontFallback } from "./font";
 
 export interface PngOptions {
   /** Device-pixel multiplier. Default 2. */
@@ -14,14 +16,14 @@ export interface PngOptions {
 
 export function toSVG(chart: SVGElement | string): string {
   if (typeof chart === "string") {
-    if (chart.includes("xmlns=")) return chart;
-    return chart.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"');
+    const withNs = chart.includes("xmlns=") ? chart : chart.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"');
+    return bakeFontFallback(withNs);
   }
   const clone = chart.cloneNode(true) as SVGElement;
   if (!clone.getAttribute("xmlns")) clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
   copyFonts(chart, clone);
   embedFaces(clone);
-  return new XMLSerializer().serializeToString(clone);
+  return bakeFontFallback(new XMLSerializer().serializeToString(clone));
 }
 
 function copyFonts(source: SVGElement, clone: SVGElement): void {
@@ -118,7 +120,7 @@ function cell(value: unknown): string {
 }
 
 export function toPNG(chart: SVGElement | string, options: PngOptions = {}): Promise<string> {
-  const svg = typeof chart === "string" ? (chart.includes("xmlns=") ? chart : chart.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"')) : toSVG(chart);
+  const svg = toSVG(chart);
   const scale = options.scale && options.scale > 0 ? options.scale : 2;
   const parsed = new DOMParser().parseFromString(svg, "image/svg+xml");
   const root = parsed.documentElement;

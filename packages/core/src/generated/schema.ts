@@ -747,7 +747,7 @@ export type Theme =
          */
         negative?: string;
         /**
-         * CSS font-family.
+         * CSS font-family. Omitted, or inherit, uses the page font. A list such as Georgia, serif sets --ck-font-family. At most 80 characters. No double quotes, <, >, ;, {, }, or backslash. Invalid values are CK3086.
          */
         fontFamily?: string;
         /**

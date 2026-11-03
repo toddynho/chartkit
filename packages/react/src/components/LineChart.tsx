@@ -473,7 +473,7 @@ export function LineChart<T extends Record<string, unknown>>({
                   style={{
                     fontSize: `${fontSize.label}px`,
                     color: isVisible ? t.text : t.textSecondary,
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                    fontFamily: 'inherit',
                     fontWeight: 500,
                   }}
                 >
@@ -485,7 +485,7 @@ export function LineChart<T extends Record<string, unknown>>({
                       fontSize: `${fontSize.label}px`,
                       color: isVisible ? t.text : t.textMuted,
                       fontWeight: 600,
-                      fontFamily: 'system-ui, -apple-system, sans-serif',
+                      fontFamily: 'inherit',
                     }}
                   >
                     {s.displayValue}
@@ -571,7 +571,7 @@ export function LineChart<T extends Record<string, unknown>>({
               textAnchor="end"
               dominantBaseline="middle"
               fill={t.textMuted}
-              style={{ fontSize: `${fontSize.axis}px`, fontFamily: 'system-ui, -apple-system, sans-serif' }}
+              style={{ fontSize: `${fontSize.axis}px`, fontFamily: 'inherit' }}
             >
               {formatAxisValue(tick, leftUnit, yAxisLeft?.format)}
             </text>
@@ -586,7 +586,7 @@ export function LineChart<T extends Record<string, unknown>>({
               textAnchor="start"
               dominantBaseline="middle"
               fill={t.textMuted}
-              style={{ fontSize: `${fontSize.axis}px`, fontFamily: 'system-ui, -apple-system, sans-serif' }}
+              style={{ fontSize: `${fontSize.axis}px`, fontFamily: 'inherit' }}
             >
               {formatAxisValue(tick, rightUnit, yAxisRight?.format)}
             </text>
@@ -600,7 +600,7 @@ export function LineChart<T extends Record<string, unknown>>({
               y={chartHeight + Math.max(16, Math.round(24 * width / 600))}
               textAnchor="middle"
               fill={t.textMuted}
-              style={{ fontSize: `${fontSize.axis}px`, fontFamily: 'system-ui, -apple-system, sans-serif' }}
+              style={{ fontSize: `${fontSize.axis}px`, fontFamily: 'inherit' }}
             >
               {label}
             </text>
@@ -786,7 +786,7 @@ export function LineChart<T extends Record<string, unknown>>({
                     style={{
                       fontSize: `${fontSize.tooltip}px`,
                       color: t.textSecondary,
-                      fontFamily: 'system-ui, -apple-system, sans-serif',
+                      fontFamily: 'inherit',
                     }}
                   >
                     {s.label}
@@ -796,7 +796,7 @@ export function LineChart<T extends Record<string, unknown>>({
                       fontSize: `${fontSize.tooltip}px`,
                       color: t.text,
                       fontWeight: 600,
-                      fontFamily: 'system-ui, -apple-system, sans-serif',
+                      fontFamily: 'inherit',
                       marginLeft: 'auto',
                     }}
                   >

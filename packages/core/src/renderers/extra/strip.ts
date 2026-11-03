@@ -1,7 +1,7 @@
 import { chooseTicks, lockDomain } from "../../chrome";
 import { axisOn, column, fieldOf } from "../../frame";
 import { cssVar, paint } from "../../theme";
-import { hash, isRecord, n } from "../../svg";
+import { ch, hash, isRecord, n } from "../../svg";
 import {
   axisLine,
   domainTicks,
@@ -224,7 +224,7 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
       const swatch = fill(frame, index);
       parts.push(`<circle cx="${n(x + 4)}" cy="${n(y)}" r="4" fill="${swatch}" />`);
       parts.push(text(x + 12, y + 4, name, cssVar("muted", frame.preset.muted), 11, "400", "start"));
-      x += 12 + name.length * 7 + 16;
+      x += 12 + ch(name.length, 7) + 16;
     });
   }
   return view.done();

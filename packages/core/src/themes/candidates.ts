@@ -45,7 +45,8 @@ export interface CandidateLook {
   dark: LookTokens;
 }
 
-const font = 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif';
+/** Review sheets inherit the page font. Charts do the same unless a spec sets a family. */
+const font = "inherit";
 
 export const candidates: readonly CandidateLook[] = [
   {

@@ -1,6 +1,6 @@
 import type { Frame } from "../../frame";
 import { cssVar } from "../../theme";
-import { clamp, esc, font, n } from "../../svg";
+import { clamp, esc, font, n, ch } from "../../svg";
 import { cells, channel, rowAt, tableOf, textAt } from "./fields";
 import { fill, openMark, text, viewOf } from "./plot";
 
@@ -452,7 +452,7 @@ function placeSetName(
   const len = Math.hypot(dx, dy) || 1;
   const ux = dx / len;
   const uy = dy / len;
-  const halfW = name.length * size * 0.32;
+  const halfW = ch(name.length, size * 0.32);
   const halfH = size * 0.48;
   const reach = circle.r + halfW * Math.abs(ux) + halfH * Math.abs(uy) + 8;
   const x = clamp(circle.x + ux * reach, halfW + 4, frame.width - halfW - 4);

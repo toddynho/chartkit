@@ -352,7 +352,7 @@ export function StackedArea<T extends Record<string, unknown>>({
                 style={{
                   fontSize: `${fontSize.label}px`,
                   color: isVisible ? t.text : t.textSecondary,
-                  fontFamily: 'JetBrains Mono, monospace',
+                  fontFamily: 'inherit',
                   fontWeight: 500,
                 }}
               >
@@ -419,7 +419,7 @@ export function StackedArea<T extends Record<string, unknown>>({
               textAnchor="end"
               dominantBaseline="middle"
               fill={t.textMuted}
-              style={{ fontSize: `${fontSize.axis}px`, fontFamily: 'JetBrains Mono, monospace' }}
+              style={{ fontSize: `${fontSize.axis}px`, fontFamily: 'inherit' }}
             >
               {tick.toFixed(0)} {unit}
             </text>
@@ -433,7 +433,7 @@ export function StackedArea<T extends Record<string, unknown>>({
               y={chartHeight + Math.max(16, Math.round(24 * width / 600))}
               textAnchor="middle"
               fill={t.textMuted}
-              style={{ fontSize: `${fontSize.axis}px`, fontFamily: 'JetBrains Mono, monospace' }}
+              style={{ fontSize: `${fontSize.axis}px`, fontFamily: 'inherit' }}
             >
               {label}
             </text>
@@ -547,7 +547,7 @@ export function StackedArea<T extends Record<string, unknown>>({
                 style={{
                   fontSize: `${fontSize.tooltip}px`,
                   color: t.textSecondary,
-                  fontFamily: 'JetBrains Mono, monospace',
+                  fontFamily: 'inherit',
                 }}
               >
                 {s.label}
@@ -557,7 +557,7 @@ export function StackedArea<T extends Record<string, unknown>>({
                   fontSize: `${fontSize.tooltip}px`,
                   color: t.text,
                   fontWeight: 600,
-                  fontFamily: 'JetBrains Mono, monospace',
+                  fontFamily: 'inherit',
                   marginLeft: 'auto',
                 }}
               >
@@ -580,7 +580,7 @@ export function StackedArea<T extends Record<string, unknown>>({
                 fontSize: `${fontSize.tooltip}px`,
                 fontWeight: 700,
                 color: t.text,
-                fontFamily: 'JetBrains Mono, monospace',
+                fontFamily: 'inherit',
               }}
             >
               {tooltipData.total.toLocaleString()} {unit}

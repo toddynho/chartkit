@@ -10,6 +10,7 @@ import { foreignHierarchy, readHierarchy } from "./hierarchy";
 import { CANVAS_AT, CANVAS_TYPES, pointCount, readRender } from "./render-mode";
 import { parseSpecifier } from "./format";
 import { domainEnds } from "./svg";
+import { fontFamilyCheck } from "./font";
 import { gapChecks } from "./gaps-checks";
 import { canonicalHex } from "./themes/hex";
 import { polarChecks } from "./polar-checks";
@@ -69,6 +70,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
 
   if (known && isRecord(spec.mark)) warnUnusedMarks(type, spec.mark, diagnostics);
   checkBrand(spec, diagnostics);
+  fontFamilyCheck(spec, diagnostics);
   gapChecks(spec, diagnostics);
   polarChecks(spec, diagnostics);
   warnGridWeeks(spec, diagnostics);

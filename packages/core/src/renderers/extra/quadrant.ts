@@ -1,6 +1,6 @@
 import type { Frame } from "../../frame";
 import { cssVar } from "../../theme";
-import { clamp, domainEnds, isRecord, linear, n } from "../../svg";
+import { clamp, domainEnds, isRecord, linear, n, ch } from "../../svg";
 import { cells, channel, rowAt, tableOf, textAt } from "./fields";
 import { fill, fit, openMark, text, viewOf } from "./plot";
 
@@ -112,7 +112,7 @@ export function renderQuadrant(spec: Record<string, unknown>): string | null {
     const label = `${point.name}: ${trim(point.x)}, ${trim(point.y)}`;
     parts.push(openMark("circle", "point", label, `cx="${n(cx)}" cy="${n(cy)}" r="${n(radius)}" fill="${color}" stroke="${cssVar("surface", frame.preset.surface)}" stroke-width="2"`));
     parts.push("</circle>");
-    const labelWidth = Math.min(140, point.name.length * 6.8 + 8);
+    const labelWidth = Math.min(140, ch(point.name.length, 6.8) + 8);
     const nearRight = cx + radius + labelWidth > box.right - 8;
     parts.push(text(cx + (nearRight ? -radius - 6 : radius + 6), cy + 4, fit(point.name, labelWidth, 12), cssVar("text", frame.preset.text), 12, "600", nearRight ? "end" : "start"));
   });

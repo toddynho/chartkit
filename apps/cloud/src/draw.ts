@@ -4,7 +4,7 @@ import { renderBarList } from "@chartkitdev/core/charts/bar-list";
 import { repair, type RepairResult } from "@chartkitdev/core/validate";
 import { repairPhase4 } from "@chartkitdev/core/validate/phase4";
 import { canonical } from "./charts.ts";
-import { rasterize } from "./png.ts";
+import { FONT_FALLBACK, rasterize } from "./png.ts";
 import { presentSvg, themeIsDark } from "./watermark.ts";
 
 const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);
@@ -224,10 +224,10 @@ function errorPicture(result: RepairResult): string {
   const text = shown
     .map(
       (line, index) =>
-        `<text x="24" y="${64 + index * 22}" font-size="14" font-family="Inter, Roboto, sans-serif" fill="#1d1d1f">${escapeXml(line)}</text>`,
+        `<text x="24" y="${64 + index * 22}" font-size="14" font-family="${FONT_FALLBACK}" fill="#1d1d1f">${escapeXml(line)}</text>`,
     )
     .join("");
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="240" viewBox="0 0 640 240" role="img"><title>ChartKit could not draw this spec</title><rect width="640" height="240" fill="#ffffff"/><text x="24" y="36" font-size="16" font-weight="650" font-family="Inter, Roboto, sans-serif" fill="#1d1d1f">ChartKit could not draw this spec</text>${text}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="240" viewBox="0 0 640 240" role="img"><title>ChartKit could not draw this spec</title><rect width="640" height="240" fill="#ffffff"/><text x="24" y="36" font-size="16" font-weight="650" font-family="${FONT_FALLBACK}" fill="#1d1d1f">ChartKit could not draw this spec</text>${text}</svg>`;
 }
 
 function svgSize(svg: string): { width: number; height: number } {

@@ -2,6 +2,7 @@ import type { RepairResult } from "@chartkitdev/core/validate";
 import type { ChartStore, StoredChart } from "./charts.ts";
 import { chartStoreFromEnv } from "./charts.ts";
 import { cacheKey, drawSpec, parseSpec, readFrame, repairSpec, type Frame } from "./draw.ts";
+import { FONT_FALLBACK } from "./png.ts";
 import { keyStoreFromEnv, type KeyStore } from "./keys.ts";
 import { clientIp, memoryLimiter, type RateLimiter } from "./limit.ts";
 import { handleMcp } from "./mcp.ts";
@@ -346,7 +347,7 @@ function limitedResponse(request: Request, limit: number, retryAfter: number): R
   headers.set("cache-control", "no-store");
   if (request.method === "GET") {
     headers.set("content-type", "image/svg+xml; charset=utf-8");
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="120" viewBox="0 0 640 120" role="img"><rect width="640" height="120" fill="#ffffff"/><text x="24" y="48" font-size="16" font-family="Inter, Roboto, sans-serif" fill="#1d1d1f">Too many renders from this IP.</text><text x="24" y="76" font-size="14" font-family="Inter, Roboto, sans-serif" fill="#6e6e73">Try again in ${retryAfter}s. The limit is ${limit} a minute, with or without a key.</text></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="120" viewBox="0 0 640 120" role="img"><rect width="640" height="120" fill="#ffffff"/><text x="24" y="48" font-size="16" font-family="${FONT_FALLBACK}" fill="#1d1d1f">Too many renders from this IP.</text><text x="24" y="76" font-size="14" font-family="${FONT_FALLBACK}" fill="#6e6e73">Try again in ${retryAfter}s. The limit is ${limit} a minute, with or without a key.</text></svg>`;
     return new Response(svg, { status: 429, headers });
   }
   headers.set("content-type", "application/json; charset=utf-8");
@@ -354,7 +355,7 @@ function limitedResponse(request: Request, limit: number, retryAfter: number): R
 }
 
 async function imageError(status: number, title: string, detail: string): Promise<Response> {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="140" viewBox="0 0 640 140" role="img"><title>${escapeHtml(title)}</title><rect width="640" height="140" fill="#ffffff"/><text x="24" y="48" font-size="16" font-family="Inter, Roboto, sans-serif" fill="#1d1d1f">${escapeHtml(title)}</text><text x="24" y="78" font-size="14" font-family="Inter, Roboto, sans-serif" fill="#6e6e73">${escapeHtml(detail)}</text></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="140" viewBox="0 0 640 140" role="img"><title>${escapeHtml(title)}</title><rect width="640" height="140" fill="#ffffff"/><text x="24" y="48" font-size="16" font-family="${FONT_FALLBACK}" fill="#1d1d1f">${escapeHtml(title)}</text><text x="24" y="78" font-size="14" font-family="${FONT_FALLBACK}" fill="#6e6e73">${escapeHtml(detail)}</text></svg>`;
   const headers = cors(new Headers());
   headers.set("content-type", "image/svg+xml; charset=utf-8");
   headers.set("cache-control", "no-store");
@@ -413,7 +414,7 @@ function html(status: number, body: string): Response {
   const headers = cors(new Headers());
   headers.set("content-type", "text/html; charset=utf-8");
   headers.set("cache-control", "no-store");
-  return new Response(`<!doctype html><meta charset="utf-8"><title>ChartKit</title><body style="font-family:Inter,Roboto,sans-serif;margin:40px">${body}</body>`, { status, headers });
+  return new Response(`<!doctype html><meta charset="utf-8"><title>ChartKit</title><body style="font-family:${FONT_FALLBACK};margin:40px">${body}</body>`, { status, headers });
 }
 
 function cors(input: Headers | Response): Headers | Response {

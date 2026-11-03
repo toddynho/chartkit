@@ -1,7 +1,7 @@
 import { CHROME_TOP } from "../../chrome";
 import { column, fieldOf, type Frame } from "../../frame";
 import { cssVar } from "../../theme";
-import { isRecord, n } from "../../svg";
+import { isRecord, n, ch } from "../../svg";
 import { fill, fit, fmt, formatPercent, num, openMark, str, text, valueFormat, viewOf } from "./plot";
 
 /**
@@ -81,7 +81,7 @@ export function renderFunnel(spec: Record<string, unknown>): string | null {
     const marks = items.map(([label, color]) => {
       const bit = `<rect x="${n(x)}" y="${n(y)}" width="10" height="10" rx="2" fill="${color}" />${text(x + 14, y + 9, label, ink, 12, "500")}`;
       if (vertical) y += 18;
-      else x += 14 + label.length * 7 + 16;
+      else x += 14 + ch(label.length, 7) + 16;
       return bit;
     });
     parts.push(`<g data-ck-legend="${pos}">${marks.join("")}</g>`);

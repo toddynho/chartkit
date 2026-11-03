@@ -791,6 +791,10 @@ describe("png", () => {
   it("resolves CSS fallbacks and returns a PNG", async () => {
     expect(forRaster(`<svg fill="var(--ck-text, light-dark(#111111, #eeeeee))"/>`, true)).toContain("#eeeeee");
     expect(forRaster(`<svg fill="var(--ck-series-1, var(--chart-1, #007aff))" font-family="var(--ck-font-family, Roboto)"/>`, false)).toContain('fill="#007aff"');
+    const baked = forRaster(`<svg style="font-family:var(--ck-font-family, inherit)"/>`, false);
+    expect(baked).toContain("font-family:Inter, ui-sans-serif, system-ui, sans-serif");
+    expect(baked).not.toContain("inherit");
+    expect(forRaster(`<svg style="font-family:var(--ck-font-family, inherit);--ck-font-family:Georgia, serif"/>`, false)).toContain("font-family:Georgia, serif");
     const { app } = appFor();
     const response = await app.handle(get(bar, { format: "png", scale: "1" }));
     expect(response.status).toBe(200);

@@ -1183,5 +1183,5 @@ export const TOKENS = [
   ["--ck-positive", "A good delta."],
   ["--ck-negative", "A bad delta."],
   ["--ck-series-1 … n", "Series colors, in order. Leave these unset to use the core palette."],
-  ["--ck-font-family", "Font stack. ui-sans-serif alone falls back to a serif on some systems."],
+  ["--ck-font-family", "Optional family. Unset, the chart inherits the page font. A saved SVG or Cloud PNG uses Inter, then the system sans."],
 ] as const;

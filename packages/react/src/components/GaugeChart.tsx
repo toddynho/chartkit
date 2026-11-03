@@ -237,7 +237,7 @@ export function GaugeChart({
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fill={t.textMuted}
-                  style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' }}
+                  style={{ fontSize: '10px', fontFamily: 'inherit' }}
                 >
                   {format(tick.value)}
                 </text>
@@ -299,7 +299,7 @@ export function GaugeChart({
               style={{
                 fontSize: size * 0.2,
                 fontWeight: 700,
-                fontFamily: 'JetBrains Mono, monospace',
+                fontFamily: 'inherit',
                 color: valueColor,
               }}
             >

@@ -127,7 +127,7 @@ export function Legend({
                   fontSize: '12px',
                   color: isVisible ? t.text : t.textMuted,
                   fontWeight: 600,
-                  fontFamily: 'JetBrains Mono, monospace',
+                  fontFamily: 'inherit',
                 }}
               >
                 {item.value}

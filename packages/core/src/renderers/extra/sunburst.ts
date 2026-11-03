@@ -1,7 +1,7 @@
 import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
 import { labelInk, sharedInk, siblingFill } from "../../ink";
 import { cssVar } from "../../theme";
-import { esc, font, n } from "../../svg";
+import { esc, font, n, ch } from "../../svg";
 import { fill, fit, fmt, valueFormat, viewOf } from "./plot";
 
 function share(part: number, whole: number): string {
@@ -76,7 +76,7 @@ export function renderSunburst(spec: Record<string, unknown>): string | null {
     const name = node.name;
     const radius = (r0 + r1) / 2;
     const arcLen = span * radius;
-    const width = name.length * 11 * 0.56;
+    const width = ch(name.length, 11 * 0.56);
     const text = name && arcLen > width + 10 && thick > 14 && span > 0.08 ? fit(name, arcLen - 8, 11) : "";
     if (text && !emit) {
       const list = labeledByDepth.get(depth) ?? [];

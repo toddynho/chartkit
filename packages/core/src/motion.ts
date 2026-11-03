@@ -596,7 +596,7 @@ function ensureStyle(): void {
   const style = document.createElement("style");
   style.id = "ck-motion-style";
   style.textContent =
-    ".ck-delta{position:absolute;z-index:6;pointer-events:none;transform:translate(-50%,-120%);font:650 12px/1 ui-sans-serif,system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#15803d;white-space:nowrap}.ck-delta[data-down]{color:#be123c}@media (prefers-reduced-motion:reduce){.ck-delta{display:none}}";
+    ".ck-delta{position:absolute;z-index:6;pointer-events:none;transform:translate(-50%,-120%);font:650 12px/1 sans-serif;font-family:var(--ck-font-family, inherit);font-variant-numeric:tabular-nums;color:#15803d;white-space:nowrap}.ck-delta[data-down]{color:#be123c}@media (prefers-reduced-motion:reduce){.ck-delta{display:none}}";
   document.head.append(style);
 }
 

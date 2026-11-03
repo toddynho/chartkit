@@ -1,5 +1,8 @@
 /** Shared SVG primitives. Renderers import this module, not each other. */
 import { capturing } from "./canvas/scene-hook";
+import { fontStyle } from "./font";
+
+export { bakeFontFallback, ch, FONT_FALLBACK, font, fontStyle } from "./font";
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -47,10 +50,6 @@ export function n(value: number): string {
   const f = a % 100;
   const s = r < 0 ? "-" : "";
   return f ? s + w + "." + (f < 10 ? "0" : "") + (f % 10 ? f : f / 10) : s + w;
-}
-
-export function font(): string {
-  return "var(--ck-font-family, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif)";
 }
 
 export function hash(value: string): string {
@@ -437,6 +436,8 @@ export interface ChartOpen {
   exportMark?: string;
   /** Marks will hydrate onto a canvas. Chrome in this SVG stays the accessible picture. */
   canvas?: boolean;
+  /** Spec or preset family. Omitted inherits the page font. */
+  fontFamily?: string;
 }
 
 export function openChart(chart: ChartOpen): string {
@@ -446,9 +447,15 @@ export function openChart(chart: ChartOpen): string {
   const canvas = chart.canvas ? ` data-ck-render="canvas"` : "";
   const scene = capturing() ? ` data-ck-scene="1"` : "";
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}" class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}"${exported}${canvas}${scene} style="font-family:${font()};font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}" class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}"${exported}${canvas}${scene} style="${fontStyle(familyOf(chart))}">` +
     `<title>${esc(chart.title || chart.alt)}</title><desc>${esc(chart.alt)}</desc>`
   );
+}
+
+function familyOf(chart: ChartOpen): string | undefined {
+  if (chart.fontFamily) return chart.fontFamily;
+  const preset = (chart as { preset?: { fontFamily?: string } }).preset;
+  return preset?.fontFamily;
 }
 
 export function closeChart(): string {

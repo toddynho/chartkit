@@ -5,7 +5,7 @@ import { formatValue } from "../format";
 import { asNumber, column, fieldOf, readColor, readFrame, readTable, type Frame } from "../frame";
 import { activeScene, pushRect, takeMark, type SceneFrame, type SceneMark } from "../canvas/sink";
 import { canvasWanted } from "../render-mode";
-import { closeChart, esc, font, hash, n, openChart } from "../svg";
+import { closeChart, esc, font, hash, n, openChart, ch } from "../svg";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const DAY_LABEL_W = 28;
@@ -96,7 +96,7 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
         const label = new Intl.DateTimeFormat(frame.locale, { month: "short", timeZone: "UTC" }).format(date);
         const x = box.ox + DAY_LABEL_W + column * box.pitchX;
         const prev = months[months.length - 1];
-        const crowded = prev ? x < prev.x + prev.label.length * 5.8 + 6 : false;
+        const crowded = prev ? x < prev.x + ch(prev.label.length, 5.8) + 6 : false;
         if (column < weeks && !usedColumn.has(column) && !crowded) {
           usedColumn.add(column);
           months.push({ label, x });
@@ -265,7 +265,7 @@ function renderGrid(spec: Record<string, unknown>): string | null {
   const ramp = colorEnc?.constant ? null : readColorScale(frame.encoding.color, frame.preset, nums, true);
   const radius = typeof frame.mark.cornerRadius === "number" ? frame.mark.cornerRadius : Math.min(frame.geometry.cornerRadius, 6);
   const quiet = emptyMark(frame.id, frame.preset);
-  const yInk = ys.reduce((max, label) => Math.max(max, label.length * 6.8), 0);
+  const yInk = ys.reduce((max, label) => Math.max(max, ch(label.length, 6.8)), 0);
   const left = Math.max(48, Math.ceil(yInk + 16));
   const xLabelBand = 16;
   const top = (frame.title ? 42 : 28) + (frame.subtitle ? 16 : 0) + xLabelBand;

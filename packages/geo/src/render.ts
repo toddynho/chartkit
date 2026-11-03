@@ -215,7 +215,7 @@ function styleBlock(chrome: Chrome, id: string, nodata: "hatch" | "fill" | "off"
   const nodataCss = nodata === "hatch" ? `.ck-geo-nodata{fill:url(#${id}nd)}` : nodata === "fill" ? `.ck-geo-nodata{fill:${chrome.land}}` : "";
   // A stylesheet fill beats the fill attribute. Land belongs on a points map, or on missing choropleth countries when nodata is fill.
   const regionFill = nodata === "off" ? `fill:${chrome.land};` : "";
-  return `<style>.ck-geo-water{fill:${chrome.water}}${nodataCss}.ck-geo-region{${regionFill}stroke:${chrome.border};stroke-width:.6px}.ck-geo-point{stroke:${rim};stroke-width:1.25px;fill-opacity:.82}.ck-geo-region:hover,.ck-geo-region:focus,.ck-geo-point:hover,.ck-geo-point:focus{stroke:${chrome.text};stroke-width:1.6px;outline:none}.ck-geo-graticule{fill:none;stroke:${chrome.border};stroke-width:.4;opacity:.45}.ck-geo-inset{fill:none;stroke:${chrome.border};stroke-width:.75}.ck-geo-leader{fill:none;stroke:${chrome.muted};stroke-width:.8}.ck-geo-label,.ck-geo-title{fill:${chrome.text};font-family:ui-sans-serif,system-ui,sans-serif}.ck-geo-label{font-size:11px}.ck-geo-legend-title{font-weight:650}.ck-geo-title{font-weight:600}.ck-geo-tag{fill:${chrome.text};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif;paint-order:stroke;stroke:${chrome.water};stroke-width:3px;stroke-linejoin:round}.ck-geo-muted{fill:${chrome.muted};font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif}</style>`;
+  return `<style>.ck-geo-water{fill:${chrome.water}}${nodataCss}.ck-geo-region{${regionFill}stroke:${chrome.border};stroke-width:.6px}.ck-geo-point{stroke:${rim};stroke-width:1.25px;fill-opacity:.82}.ck-geo-region:hover,.ck-geo-region:focus,.ck-geo-point:hover,.ck-geo-point:focus{stroke:${chrome.text};stroke-width:1.6px;outline:none}.ck-geo-graticule{fill:none;stroke:${chrome.border};stroke-width:.4;opacity:.45}.ck-geo-inset{fill:none;stroke:${chrome.border};stroke-width:.75}.ck-geo-leader{fill:none;stroke:${chrome.muted};stroke-width:.8}.ck-geo-label,.ck-geo-title{fill:${chrome.text};font-family:var(--ck-font-family, inherit)}.ck-geo-label{font-size:11px}.ck-geo-legend-title{font-weight:650}.ck-geo-title{font-weight:600}.ck-geo-tag{fill:${chrome.text};font-size:11px;font-family:var(--ck-font-family, inherit);paint-order:stroke;stroke:${chrome.water};stroke-width:3px;stroke-linejoin:round}.ck-geo-muted{fill:${chrome.muted};font-size:11px;font-family:var(--ck-font-family, inherit)}</style>`;
 }
 
 function patternDef(chrome: Chrome, id: string): string {
@@ -227,8 +227,19 @@ function shell(spec: Record<string, unknown>, chrome: Chrome, body: string, patt
   const { width, height } = sizeOf(spec);
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : typeof spec.title === "string" ? spec.title : "Map";
   const theme = typeof spec.theme === "string" ? spec.theme : "soft";
-  const scheme = chrome.scheme ? ` style="color-scheme:${chrome.scheme}"` : "";
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="group" aria-label="${esc(alt)}" data-ck-type="${esc(String(spec.type))}" data-ck-theme="${esc(theme)}"${scheme}>${styleBlock(chrome, patternId, nodata)}<title>${esc(alt)}</title><rect class="ck-geo-water" width="100%" height="100%"/>${body}</svg>`;
+  const family = fontFamilyOf(spec.theme);
+  const style = `font-family:var(--ck-font-family, inherit)${family ? `;--ck-font-family:${family}` : ""}${chrome.scheme ? `;color-scheme:${chrome.scheme}` : ""}`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="group" aria-label="${esc(alt)}" data-ck-type="${esc(String(spec.type))}" data-ck-theme="${esc(theme)}" style="${style}">${styleBlock(chrome, patternId, nodata)}<title>${esc(alt)}</title><rect class="ck-geo-water" width="100%" height="100%"/>${body}</svg>`;
+}
+
+/** theme.tokens.fontFamily. Same limits as core CK3086. Invalid values inherit. */
+function fontFamilyOf(theme: unknown): string {
+  if (!isRecord(theme) || !isRecord(theme.tokens)) return "";
+  const value = theme.tokens.fontFamily;
+  if (typeof value !== "string") return "";
+  const text = value.trim();
+  if (!text || text === "inherit" || text.length > 80 || /[<>";{}\\]|[\n\r]/.test(text)) return "";
+  return text;
 }
 
 function projectorFor(name: string, regions: GeoRegion[], box: Box): { project: Projector; point: (lon: number, lat: number) => [number, number]; grid: boolean; frames: InsetFrame[] } {

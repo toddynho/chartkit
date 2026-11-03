@@ -1,7 +1,7 @@
 import { annotationLayers, type NoteSeries, type PlotBox } from "./annotations";
 import type { Frame } from "./frame";
 import { cssVar, paint } from "./theme";
-import { esc, font, isRecord, n, padExtent, pickTicks, readAxis, scalePad } from "./svg";
+import { ch, esc, font, isRecord, n, padExtent, pickTicks, readAxis, scalePad } from "./svg";
 
 export interface PlotRect {
   left: number;
@@ -133,7 +133,7 @@ function footerLegend(spec: Record<string, unknown>, preset: Frame["preset"]): F
 }
 
 function legendItemWidth(name: string): number {
-  return 26 + name.length * 6.6;
+  return 26 + ch(name.length, 6.6);
 }
 
 function legendRows(items: FooterLegend["items"], width: number): FooterLegend["items"][] {

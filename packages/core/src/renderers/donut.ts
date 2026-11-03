@@ -13,7 +13,7 @@ import {
   readFrame,
   readTable,
 } from "../frame";
-import { closeChart, esc, font, isRecord, n, openChart, polar, repeatKey } from "../svg";
+import { closeChart, esc, font, isRecord, n, openChart, polar, repeatKey, ch } from "../svg";
 
 /**
  * Pie and donut share one arc renderer.
@@ -421,7 +421,7 @@ function centreUnit(channel: unknown): string {
 
 /** 12px text is about 6.6px per character. */
 function estimateText(value: string): number {
-  return Math.max(18, Math.ceil(value.length * 6.6));
+  return Math.max(18, Math.ceil(ch(value.length, 6.6)));
 }
 
 function outsideText(value: number, total: number, labelFormat: unknown, valueFormat: unknown, locale: string): string {

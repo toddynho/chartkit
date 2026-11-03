@@ -23,7 +23,7 @@ export function attach(svg: SVGSVGElement, options: { onSelect?: (item: GeoSelec
   const tip = doc.createElement("div");
   tip.setAttribute("data-ck-geo-tip", "");
   tip.style.cssText =
-    "position:fixed;z-index:40;pointer-events:none;padding:6px 8px;border-radius:8px;background:#111;color:#fff;font:12px/1.35 ui-sans-serif,system-ui,sans-serif;transform:translate(-50%,calc(-100% - 8px));display:none;max-width:240px";
+    "position:fixed;z-index:40;pointer-events:none;padding:6px 8px;border-radius:8px;background:#111;color:#fff;font:12px/1.35 sans-serif;font-family:var(--ck-font-family, inherit);transform:translate(-50%,calc(-100% - 8px));display:none;max-width:240px";
   doc.body.appendChild(tip);
 
   const show = (el: Element, x: number, y: number) => {

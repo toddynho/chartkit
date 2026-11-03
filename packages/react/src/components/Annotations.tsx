@@ -178,7 +178,7 @@ function ReferenceLineComponent({
           textAnchor={textAnchor}
           style={{
             fontSize: '10px',
-            fontFamily: 'JetBrains Mono, monospace',
+            fontFamily: 'inherit',
             fontWeight: 500,
           }}
         >
@@ -246,7 +246,7 @@ function ReferenceAreaComponent({
           dominantBaseline="middle"
           style={{
             fontSize: '10px',
-            fontFamily: 'JetBrains Mono, monospace',
+            fontFamily: 'inherit',
             fontWeight: 500,
           }}
         >

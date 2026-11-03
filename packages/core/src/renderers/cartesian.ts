@@ -13,7 +13,7 @@ import { exportList, readColor } from "../frame";
 import { CHROME_TOP } from "../chrome";
 import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
 import { layoutPaint } from "../layout-hook";
-import { boxId, brokenScale, clamp, clipPath, domainEnds, esc, font, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, repeatKey, round, scaleClamp, scalePad, symlogTicks, ticks } from "../svg";
+import { boxId, brokenScale, ch, clamp, clipPath, domainEnds, esc, font, fontStyle, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, repeatKey, round, scaleClamp, scalePad, symlogTicks, ticks } from "../svg";
 import { bump, revision, slots } from "../feature-hooks";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
@@ -1366,7 +1366,7 @@ function queueBarLabel(
   let pos = model.labelAt || (model.stackTotal ? "inside" : horizontal ? "right" : "top");
   if ((pos === "inside" || pos === "center") && Math.min(w, h) < 16) pos = horizontal ? "right" : "top";
   const text = labelText(model, series, value);
-  const textW = Math.max(8, text.length * 6.8);
+  const textW = Math.max(8, ch(text.length, 6.8));
   let lx = x + w / 2;
   let ly = y - 4;
   let anchor = "middle";
@@ -1765,7 +1765,7 @@ function inkWidth(axis: AxisBox, labels: string[]): number {
   for (let i = 0; i < labels.length; i++) {
     const rows = linesOf(axis, labels[i] ?? "");
     const text = rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : labels[i] ?? "";
-    const size = text.length * TICK_PX;
+    const size = ch(text.length, TICK_PX);
     if (size > width) width = size;
   }
   return width;
@@ -2002,7 +2002,7 @@ function band(
         if (Math.abs(last - at[1]) < 13) continue;
         last = at[1];
       } else {
-        const width = ((rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label).length || 1) * 6.4;
+        const width = ch((rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label).length || 1, 6.4);
         if (at[0] - width / 2 < last) continue;
         last = at[0] + width / 2 + 8;
       }
@@ -2033,7 +2033,7 @@ function xBand(model: PlotModel, xScale: XScale, count: number, horizontal: bool
         step,
         (index) => xScale.center(index),
         (model.f & 32) !== 0,
-        keep ? undefined : (index) => (tickLabel(model, index)?.length || 1) * 6.4,
+        keep ? undefined : (index) => ch(tickLabel(model, index)?.length || 1, 6.4),
       );
   let out = "";
   let last = -Infinity;
@@ -2056,7 +2056,7 @@ function xBand(model: PlotModel, xScale: XScale, count: number, horizontal: bool
     out += tickInk(side, edge, x, model.xAxis, ink);
     out += drawn;
     if (!angle && !keep) {
-      const width = ((rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label).length) * 6.4;
+      const width = ch((rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label).length, 6.4);
       if (x - width / 2 >= last) last = x + width / 2 + 8;
     }
   }
@@ -2104,7 +2104,7 @@ function timeLabelsCollide(
   for (let i = 0; i < values.length; i++) {
     const x = at(values[i]);
     if (x < left - 8 || x > right + 8) continue;
-    const half = ((labels[i]?.length || 1) * 6.4) / 2;
+    const half = ch(labels[i]?.length || 1, 6.4) / 2;
     if (x - half < last) return true;
     last = x + half + 8;
   }
@@ -2140,7 +2140,7 @@ function along(
     }
   }
   const endLabel = endAt >= 0 ? labels[endAt] : "";
-  const reserved = endAt >= 0 ? at(values[endAt]) - ((endLabel.length || 1) * 6.4) / 2 : Infinity;
+  const reserved = endAt >= 0 ? at(values[endAt]) - ch(endLabel.length || 1, 6.4) / 2 : Infinity;
   let out = "";
   let last = -Infinity;
   for (let i = 0; i < values.length; i++) {
@@ -2150,14 +2150,14 @@ function along(
     const rows = linesOf(model.xAxis, label);
     if (!angle && !keep && i !== endAt) {
       const text = rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label;
-      if (x + ((text.length || 1) * 6.4) / 2 + 8 > reserved) continue;
+      if (x + ch(text.length || 1, 6.4) / 2 + 8 > reserved) continue;
     }
     const drawn = alongOne(label, x, y, angle, plot, slack, fill, family, keep ? -Infinity : last, rows, model.width);
     if (!drawn) continue;
     out += tickInk(side, edge, x, model.xAxis, ink);
     out += drawn;
     if (!angle && !keep && x >= plot.left - slack && x <= plot.right + slack) {
-      const width = ((rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label).length) * 6.4;
+      const width = ch((rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label).length, 6.4);
       if (x - width / 2 >= last) last = x + width / 2 + 8;
     }
   }
@@ -2181,13 +2181,13 @@ function alongOne(
   if (slack && (x < plot.left - slack || x > plot.right + slack)) return "";
   const text = rows ? rows.reduce((best, row) => (row.length > best.length ? row : best), "") : label;
   const glyphs = text.length || 1;
-  const width = glyphs * 6.4;
+  const width = ch(glyphs, 6.4);
   if (!angle && x - width / 2 < last) return "";
   let anchor = angle < 0 ? "end" : angle > 0 ? "start" : "middle";
   let at = x;
   // 11px tabular digits run wider than the collision estimate. Measure the edge with
   // that wider box so "100,000" is end-anchored before the view box clips it.
-  const edgeWidth = glyphs * 8;
+  const edgeWidth = ch(glyphs, 8);
   if (!angle && viewWidth > 0) {
     if (x + edgeWidth / 2 > viewWidth - 4) {
       at = viewWidth - 4;
@@ -2316,7 +2316,7 @@ function legend(model: PlotModel, x: number, y: number, maxRight: number): strin
     let cy = y;
     const out: string[] = [];
     for (const item of model.swatches) {
-      const width = 26 + item.name.length * 6.6;
+      const width = 26 + ch(item.name.length, 6.6);
       if (cx > x && cx + width > maxRight) {
         cx = x;
         cy += 18;
@@ -2347,7 +2347,7 @@ function legendSeries(model: PlotModel, x: number, y: number, maxRight: number):
   const out: string[] = [];
   for (const series of model.series) {
     const name = legendName(model, series);
-    const width = 26 + name.length * 6.6;
+    const width = 26 + ch(name.length, 6.6);
     if (cx > x && cx + width > maxRight) {
       cx = x;
       cy += 18;
@@ -2361,7 +2361,7 @@ function legendSeries(model: PlotModel, x: number, y: number, maxRight: number):
 
 function appendRules(out: string[], model: PlotModel, cx: number, cy: number, x: number, maxRight: number): void {
   for (const item of ruleItems(model)) {
-    const width = 26 + item.name.length * 6.6;
+    const width = 26 + ch(item.name.length, 6.6);
     if (cx > x && cx + width > maxRight) {
       cx = x;
       cy += 18;
@@ -2375,9 +2375,9 @@ function appendRules(out: string[], model: PlotModel, cx: number, cy: number, x:
   }
 }
 
-/** Inter tabular digits at these sizes run about 0.68em wide. Measured on the $261K headline. */
+/** Tabular digits at these sizes run about 0.68em wide. A wider page font scales this in the browser. */
 function headlineInk(text: string, size: number): number {
-  return Math.ceil(text.length * size * 0.68);
+  return Math.ceil(ch(text.length, size * 0.68));
 }
 
 function headlineSvg(model: PlotModel): string {
@@ -2421,9 +2421,7 @@ function headlineSvg(model: PlotModel): string {
 }
 
 function svgStyle(model: PlotModel): string {
-  let style = `font-family:${font()};font-variant-numeric:tabular-nums;font-feature-settings:'tnum'`;
-  if (model.preset.fontFamily) style += `;--ck-font-family:${model.preset.fontFamily}`;
-  return style;
+  return fontStyle(model.preset.fontFamily);
 }
 
 function markPadding(model: PlotModel, horizontal: boolean): { top: number; right: number; bottom: number; left: number; gutter: number } {
@@ -2525,7 +2523,7 @@ const TICK_PX = 6.7;
 export function widest(labels: string[]): number {
   let width = 0;
   for (let i = 0; i < labels.length; i++) {
-    const size = labels[i].length * TICK_PX;
+    const size = ch(labels[i].length, TICK_PX);
     if (size > width) width = size;
   }
   return width;
@@ -2854,7 +2852,7 @@ function seriesLabelBoxes(
       const text = labelText(model, series, value);
       const x = xScale.center(i) + shift[0];
       const y = scale(plotted) + shift[1];
-      const w = Math.max(8, text.length * 6);
+      const w = Math.max(8, ch(text.length, 6));
       const left = shift[2] === "middle" ? x - w / 2 : shift[2] === "end" ? x - w : x;
       boxes.push({ x: left, y: y - 9, w, h: 11 });
     }
@@ -3288,7 +3286,7 @@ export function legendRows(model: PlotModel, start: number, maxRight: number): n
   const names = model.swatches && model.swatches.length > 1 ? model.swatches.map((item) => item.name) : model.series.map((series) => legendName(model, series));
   if (model.legend) for (const item of model.ruleLegend ?? []) names.push(item.name);
   for (const name of names) {
-    const width = 26 + name.length * 6.6;
+    const width = 26 + ch(name.length, 6.6);
     if (cx > start && cx + width > maxRight) {
       rows += 1;
       cx = start;
@@ -3537,7 +3535,7 @@ function valueLabelWidth(model: PlotModel): number {
     for (let i = 0; i < series.values.length; i++) {
       const value = series.values[i];
       if (typeof value !== "number") continue;
-      const size = labelText(model, series, value).length * 6.8;
+      const size = ch(labelText(model, series, value).length, 6.8);
       if (size > width) width = size;
     }
   }

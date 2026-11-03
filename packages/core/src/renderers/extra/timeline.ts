@@ -1,5 +1,5 @@
 import { cssVar } from "../../theme";
-import { n } from "../../svg";
+import { n, ch } from "../../svg";
 import { channel, cells, rowAt, tableOf, textAt } from "./fields";
 import { fit, fill, openMark, text, viewOf } from "./plot";
 import { DAY, formatDay, formatYear, parseDay, yearTicks } from "./time";
@@ -79,7 +79,7 @@ export function renderTimeline(spec: Record<string, unknown>): string | null {
   const placed: { event: (typeof events)[number]; x: number; half: number; side: "above" | "below"; row: number }[] = [];
   for (const event of events) {
     const x = xAt(event.startMs as number);
-    const half = Math.max(28, Math.min(96, event.label.length * 3.35));
+    const half = Math.max(28, Math.min(96, ch(event.label.length, 3.35)));
     const place = sideFor(placed, x, half);
     placed.push({ event, x, half, side: place.side, row: place.row });
   }
