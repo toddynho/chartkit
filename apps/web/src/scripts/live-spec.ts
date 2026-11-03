@@ -1,6 +1,7 @@
 import { chartType, drawChart } from "../lib/paint-chart";
 import { applyTheme } from "../lib/spec-text";
 import { paintField } from "./color-code";
+import { mountOptionEditor } from "./option-editor";
 
 interface IssueNode {
   code?: string;
@@ -103,7 +104,7 @@ export function mountLiveSpec(root: HTMLElement): void {
       showIssues([]);
       return;
     }
-    const themed = applyTheme(parsed, themeName);
+    const themed = themeName === "spec" ? parsed : applyTheme(parsed, themeName);
     const generation = ++paintGen;
     void paintSvg(themed)
       .then((svg) => {
@@ -116,7 +117,8 @@ export function mountLiveSpec(root: HTMLElement): void {
           keepStatus = false;
           return;
         }
-        statusEl.textContent = themeName === "site" ? "Rendered." : `Rendered with the ${themeName} theme.`;
+        statusEl.textContent =
+          themeName === "site" ? "Rendered." : themeName === "spec" ? "Rendered with the spec theme." : `Rendered with the ${themeName} theme.`;
         showIssues([]);
       })
       .catch((error: unknown) => {
@@ -125,10 +127,41 @@ export function mountLiveSpec(root: HTMLElement): void {
       });
   }
 
+  const optionsRoot = root.querySelector<HTMLElement>("[data-options]");
+  const options = optionsRoot
+    ? mountOptionEditor(optionsRoot, {
+        read: () => specInput.value,
+        write: (text) => {
+          specInput.value = text;
+          syncPaint();
+          window.clearTimeout(timer);
+          timer = window.setTimeout(() => draw(specInput.value, theme), 160);
+        },
+        onTheme: (value) => {
+          if (!themeSelect) return;
+          if (value && typeof value === "object") {
+            themeSelect.value = "spec";
+            theme = "spec";
+            return;
+          }
+          if (typeof value === "string" && [...themeSelect.options].some((option) => option.value === value)) {
+            themeSelect.value = value;
+            theme = value;
+            return;
+          }
+          themeSelect.value = "site";
+          theme = "site";
+        },
+      })
+    : null;
+
   input.addEventListener("input", () => {
     syncPaint();
     window.clearTimeout(timer);
-    timer = window.setTimeout(() => draw(input.value, theme), 160);
+    timer = window.setTimeout(() => {
+      draw(input.value, theme);
+      options?.refresh();
+    }, 160);
   });
   input.addEventListener("scroll", syncPaint);
 
@@ -146,6 +179,7 @@ export function mountLiveSpec(root: HTMLElement): void {
     root.dataset.activeSlug = slug;
     syncPaint();
     draw(specInput.value, theme);
+    options?.refresh(true);
   });
 
   if (mode === "full" && window.location.hash.length > 1) {
@@ -161,6 +195,7 @@ export function mountLiveSpec(root: HTMLElement): void {
       }
       syncPaint();
       draw(input.value, theme);
+      options?.refresh(true);
     } catch {
       statusEl.textContent = "The link hash is not JSON.";
     }
@@ -198,6 +233,7 @@ export function mountLiveSpec(root: HTMLElement): void {
       input.value = JSON.stringify(result.spec, null, 2);
       syncPaint();
       draw(input.value, theme);
+      options?.refresh(true);
       showIssues(issuesOf(result));
       const count = result.applied.length;
       statusEl.textContent = count

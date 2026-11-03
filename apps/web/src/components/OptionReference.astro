@@ -1,0 +1,46 @@
+---
+import { OPTION_GROUPS, optionCatalog, type OptionField } from "@chartkitdev/core/options";
+
+function scope(field: OptionField): string {
+  if (!field.appliesTo?.length) return "All charts";
+  if (field.appliesTo.length > 8) return `${field.appliesTo.slice(0, 8).join(", ")} +${field.appliesTo.length - 8}`;
+  return field.appliesTo.join(", ");
+}
+
+const groups = OPTION_GROUPS.map((group) => ({
+  group,
+  fields: optionCatalog.filter((field) => field.group === group),
+})).filter((group) => group.fields.length > 0);
+---
+
+<section class="opt-ref">
+  <h2>Schema options</h2>
+  <p>
+    {optionCatalog.length} options from the v1 schema. The playground builds its controls from this list. A value equal to the default is left out of the spec until you change it.
+  </p>
+  {
+    groups.map(({ group, fields }) => (
+      <section>
+        <h3>{group}</h3>
+        <dl>
+          {fields.map((field) => (
+            <div class="opt-ref__row" id={field.path}>
+              <dt>
+                <code>{field.path}</code>
+              </dt>
+              <dd>
+                <span>{field.description}</span>
+                <span class="opt-ref__meta">
+                  {field.control}
+                  {field.defaultValue !== undefined ? ` · default ${String(field.defaultValue)}` : ""}
+                  {" · "}
+                  {scope(field)}
+                </span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    ))
+  }
+</section>

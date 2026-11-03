@@ -124,6 +124,16 @@
         "default": "./dist/extra.cjs"
       }
     },
+    "./options": {
+      "import": {
+        "types": "./dist/options.d.ts",
+        "default": "./dist/options.js"
+      },
+      "require": {
+        "types": "./dist/options.d.cts",
+        "default": "./dist/options.cjs"
+      }
+    },
     "./validate": {
       "import": {
         "types": "./dist/validate.d.ts",
@@ -240,6 +250,7 @@
     "typecheck": "tsc --noEmit",
     "generate:types": "node scripts/generate-types.mjs",
     "strip:schema": "node scripts/strip-schema.mjs",
+    "options:catalog": "esbuild scripts/write-option-catalog.ts --bundle --platform=node --format=esm --outfile=/tmp/chartkit-write-option-catalog.mjs && node /tmp/chartkit-write-option-catalog.mjs",
     "clean": "rm -rf dist"
   },
   "devDependencies": {

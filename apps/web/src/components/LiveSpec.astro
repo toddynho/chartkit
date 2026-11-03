@@ -57,45 +57,32 @@ const specId = mode === "full" ? "spec-json" : undefined;
   </div>
   <div class="live-editor__side">
     {
-      mode === "full" && examples.length > 0 ? (
-        <label class="theme-label example-label">
-          Example
-          <select data-example>
-            {
-              [...grouped.entries()].map(([group, items]) => (
-                <optgroup label={group}>
-                  {items.map((item) => (
-                    <option value={item.slug} selected={item.slug === activeSlug}>
-                      {item.title}
-                    </option>
-                  ))}
-                </optgroup>
-              ))
-            }
-          </select>
-        </label>
-      ) : null
-    }
-    <div class="live-pane__head">
-      <label for={specId}>Spec</label>
-      {docsHref && docsLabel ? (
-        <a class="live-docs" href={docsHref}>{docsLabel}</a>
-      ) : mode === "full" ? (
-        <a class="live-docs" data-docs hidden href="/docs">Docs</a>
-      ) : null}
-    </div>
-    <div class="code-field">
-      <pre class="code-field__paint" aria-hidden="true" data-spec-paint></pre>
-      <textarea id={specId} class="code-field__input" data-spec-input spellcheck="false">{text}</textarea>
-    </div>
-    <div class="live-actions">
-      {
-        mode === "full" ? (
-          <>
+      mode === "full" ? (
+        <div class="live-toolbar">
+          {examples.length > 0 ? (
+            <label class="theme-label example-label">
+              Example
+              <select data-example>
+                {
+                  [...grouped.entries()].map(([group, items]) => (
+                    <optgroup label={group}>
+                      {items.map((item) => (
+                        <option value={item.slug} selected={item.slug === activeSlug}>
+                          {item.title}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))
+                }
+              </select>
+            </label>
+          ) : null}
+          <div class="live-actions">
             <label class="theme-label">
               Theme
               <select data-theme>
                 <option value="site">Match site</option>
+                <option value="spec">Spec theme</option>
                 {themes.map((name) => (
                   <option value={name}>{name}</option>
                 ))}
@@ -106,12 +93,27 @@ const specId = mode === "full" ? "spec-json" : undefined;
             <button type="button" data-share>Share</button>
             <button type="button" data-svg>SVG</button>
             <button type="button" data-png>PNG</button>
-          </>
-        ) : (
-          <a data-play href={`/playground#${encodeURIComponent(text)}`}>Open in playground</a>
-        )
-      }
+            <a class="live-docs" data-docs hidden href="/docs">Docs</a>
+          </div>
+        </div>
+      ) : null
+    }
+    {mode === "full" ? <div class="opt-panel" data-options></div> : null}
+    <div class="live-pane__head">
+      <label for={specId}>Spec</label>
+      {docsHref && docsLabel ? (
+        <a class="live-docs" href={docsHref}>{docsLabel}</a>
+      ) : null}
     </div>
+    <div class="code-field">
+      <pre class="code-field__paint" aria-hidden="true" data-spec-paint></pre>
+      <textarea id={specId} class="code-field__input" data-spec-input spellcheck="false">{text}</textarea>
+    </div>
+    {mode === "full" ? null : (
+      <div class="live-actions">
+        <a data-play href={`/playground#${encodeURIComponent(text)}`}>Open in playground</a>
+      </div>
+    )}
     <p class="live-status" data-status role="status">Showing the published spec.</p>
     <ul class="live-issues" data-issues />
   </div>
