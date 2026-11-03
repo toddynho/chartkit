@@ -55,6 +55,9 @@ const SERIES_COLORS = ["#335c84", "#2e9a5c", "#c24b3a", "#8a5cf6", "#0a63e6", "#
 
 const RAIL_KEY = "ck-playground-rail";
 const TAB_KEY = "ck-playground-tab";
+const ZOOM_KEY = "ck-playground-zoom";
+const ZOOM_STEPS = [50, 75, 100, 125, 150, 175, 200];
+const CHEVRON = `<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M10.2 3.2 5.4 8l4.8 4.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 export function mountPlayground(root: HTMLElement, data: PlayData): void {
   const examples = data.examples.filter((item) => item.spec && typeof item.spec === "object");
@@ -76,6 +79,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     size: "card" as SizeName,
     mode: "auto" as ModeName,
     railOpen,
+    zoom: readZoom(),
     search: "",
     setOnly: false,
     exportOpen: false,
@@ -104,6 +108,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
   renderTabs();
   renderPanel();
   renderPreviewChrome();
+  paintZoom();
   void refresh();
 
   function shell(): string {
@@ -129,7 +134,11 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       </div>
       <div class="play-work">
         <nav class="play-rail" aria-label="Examples">
-          <button type="button" class="play-rail__head" data-rail><b>‹</b><span>Examples</span><em data-ex-count></em></button>
+          <div class="play-rail__head">
+            <button type="button" class="play-rail__toggle" data-rail aria-expanded="true" title="Collapse examples" aria-label="Collapse examples">${CHEVRON}</button>
+            <span>Examples</span>
+            <em data-ex-count></em>
+          </div>
           <div class="play-rail__list" data-examples></div>
           <div class="play-rail__foot">More in the <a href="/gallery">gallery →</a></div>
         </nav>
@@ -138,11 +147,16 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
           <div data-panel style="display:flex;flex-direction:column;flex:1;min-height:0"></div>
           <div class="play-foot"><span data-foot-note></span><button type="button" data-foot-action></button></div>
         </aside>
-        <section class="play-preview">
+        <section class="play-preview" tabindex="0">
           <div class="play-preview__bar">
             <span>Preview</span>
             <div class="play-seg" data-sizes></div>
             <div class="play-seg" data-modes></div>
+            <div class="play-zoom" data-zoom>
+              <button type="button" data-zoom-out aria-label="Zoom out">−</button>
+              <button type="button" data-zoom-fit title="Fit">100%</button>
+              <button type="button" data-zoom-in aria-label="Zoom in">+</button>
+            </div>
           </div>
           <div class="play-canvas" data-canvas></div>
           <div class="play-foot">
@@ -160,8 +174,29 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       root.classList.toggle("is-rail-closed", !state.railOpen);
       root.classList.remove("is-rail-auto");
       root.style.setProperty("--rail", state.railOpen ? "220px" : "52px");
-      const icon = host.querySelector("[data-rail] b");
-      if (icon) icon.textContent = state.railOpen ? "‹" : "›";
+      syncRail();
+    });
+    host.querySelector("[data-zoom-out]")?.addEventListener("click", () => stepZoom(-1));
+    host.querySelector("[data-zoom-in]")?.addEventListener("click", () => stepZoom(1));
+    host.querySelector("[data-zoom-fit]")?.addEventListener("click", () => setZoom(100));
+    const preview = host.querySelector<HTMLElement>(".play-preview");
+    preview?.addEventListener("mousedown", (event) => {
+      const target = event.target as HTMLElement;
+      if (target.closest("button, a, input, textarea, select")) return;
+      preview.focus();
+    });
+    preview?.addEventListener("keydown", (event) => {
+      if (!(event.metaKey || event.ctrlKey)) return;
+      if (event.key === "+" || event.key === "=") {
+        event.preventDefault();
+        stepZoom(1);
+      } else if (event.key === "-" || event.key === "_") {
+        event.preventDefault();
+        stepZoom(-1);
+      } else if (event.key === "0") {
+        event.preventDefault();
+        setZoom(100);
+      }
     });
     host.querySelector("[data-share]")?.addEventListener("click", () => void share());
     host.querySelector("[data-export]")?.addEventListener("click", () => {
@@ -308,12 +343,20 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     return fields.filter((field) => readOption(state.spec, field).set).length;
   }
 
+  function syncRail(): void {
+    const button = root.querySelector<HTMLButtonElement>("[data-rail]");
+    if (!button) return;
+    const label = state.railOpen ? "Collapse examples" : "Expand examples";
+    button.setAttribute("aria-expanded", state.railOpen ? "true" : "false");
+    button.title = label;
+    button.setAttribute("aria-label", label);
+  }
+
   function renderRail(): void {
     const list = root.querySelector("[data-examples]");
     const count = root.querySelector("[data-ex-count]");
-    const icon = root.querySelector("[data-rail] b");
     if (count) count.textContent = String(examples.length);
-    if (icon) icon.textContent = state.railOpen ? "‹" : "›";
+    syncRail();
     if (!list) return;
     list.replaceChildren();
     for (const example of examples) {
@@ -329,6 +372,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       copy.className = "play-ex__copy";
       const name = document.createElement("strong");
       name.textContent = example.title;
+      name.title = example.title;
       const meta = document.createElement("span");
       const rows = rowsOf(example.spec).length;
       meta.textContent = `${example.type} · ${rows} row${rows === 1 ? "" : "s"}`;
@@ -1029,6 +1073,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       const card = document.createElement("div");
       card.className = "play-card";
       if (resolvedDark()) card.classList.add("is-dark");
+      card.style.width = `${size.w + 42}px`;
       const title = document.createElement("h2");
       title.className = "play-card__title";
       title.textContent = typeof state.good.title === "string" && state.good.title.trim() ? state.good.title : "Untitled";
@@ -1045,7 +1090,11 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       sentence.textContent = altText(state.good);
       alt.append(code, sentence);
       card.append(title, chart, alt);
-      canvas.append(card);
+      const stage = document.createElement("div");
+      stage.className = "play-stage";
+      stage.append(card);
+      canvas.append(stage);
+      paintZoom();
     }
     const stats = root.querySelector("[data-stats]");
     if (stats) {
@@ -1244,6 +1293,38 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     download(`${filename()}.csv`, toCsv(rowsOf(state.good)), "text/csv");
   }
 
+  function setZoom(next: number): void {
+    const snapped = ZOOM_STEPS.reduce((best, step) => (Math.abs(step - next) < Math.abs(best - next) ? step : best), 100);
+    state.zoom = snapped;
+    localStorage.setItem(ZOOM_KEY, String(snapped));
+    paintZoom();
+  }
+
+  function stepZoom(dir: number): void {
+    const index = ZOOM_STEPS.indexOf(state.zoom);
+    const next = ZOOM_STEPS[Math.min(ZOOM_STEPS.length - 1, Math.max(0, (index < 0 ? ZOOM_STEPS.indexOf(100) : index) + dir))];
+    if (next != null) setZoom(next);
+  }
+
+  function paintZoom(): void {
+    const label = root.querySelector("[data-zoom-fit]");
+    if (label) label.textContent = `${state.zoom}%`;
+    const out = root.querySelector<HTMLButtonElement>("[data-zoom-out]");
+    const inn = root.querySelector<HTMLButtonElement>("[data-zoom-in]");
+    if (out) out.disabled = state.zoom <= ZOOM_STEPS[0];
+    if (inn) inn.disabled = state.zoom >= ZOOM_STEPS[ZOOM_STEPS.length - 1];
+    const card = root.querySelector<HTMLElement>(".play-card");
+    const stage = root.querySelector<HTMLElement>(".play-stage");
+    if (!card || !stage) return;
+    const zoom = state.zoom / 100;
+    card.style.transform = "none";
+    const width = card.offsetWidth;
+    const height = card.offsetHeight;
+    card.style.transform = `scale(${zoom})`;
+    stage.style.width = `${Math.round(width * zoom)}px`;
+    stage.style.height = `${Math.round(height * zoom)}px`;
+  }
+
   async function share(): Promise<void> {
     const payload = { example: state.slug, spec: state.good, size: state.size, mode: state.mode };
     const hash = `#${encodeURIComponent(JSON.stringify(payload))}`;
@@ -1282,6 +1363,11 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
 
 function clone<T>(value: T): T {
   return structuredClone(value);
+}
+
+function readZoom(): number {
+  const raw = Number(localStorage.getItem(ZOOM_KEY));
+  return ZOOM_STEPS.includes(raw) ? raw : 100;
 }
 
 function modeOf(spec: Record<string, unknown>): ModeName {

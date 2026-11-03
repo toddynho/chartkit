@@ -217,7 +217,7 @@ body:has(.play) main {
   min-height: 0;
   display: grid;
   grid-template-columns: var(--rail, 220px) 380px minmax(0, 1fr);
-  transition: grid-template-columns 0.2s;
+  transition: grid-template-columns 180ms ease;
 }
 
 .play-rail,
@@ -245,16 +245,14 @@ body:has(.play) main {
 }
 
 .play-rail__head {
-  all: unset;
   box-sizing: border-box;
-  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   width: 100%;
   height: 44px;
   flex: none;
-  padding: 0 14px;
+  padding: 0 8px 0 6px;
   border-bottom: 1px solid #e6e6e2;
   font-size: 12px;
   font-weight: 600;
@@ -262,7 +260,33 @@ body:has(.play) main {
   white-space: nowrap;
 }
 
-.play-rail__head b { font-size: 13px; width: 16px; text-align: center; font-weight: 600; }
+.play-rail__toggle {
+  all: unset;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #55575c;
+  cursor: pointer;
+}
+
+.play-rail__toggle svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  transition: transform 180ms ease;
+}
+
+.play.is-rail-closed .play-rail__toggle svg { transform: rotate(180deg); }
+
+.play-rail__toggle:hover,
+.play-rail__toggle:focus-visible {
+  background: #ecece9;
+  outline: none;
+}
 
 .play-rail__head em {
   margin-left: auto;
@@ -284,14 +308,18 @@ body:has(.play) main {
 
 .play-ex {
   all: unset;
+  box-sizing: border-box;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px;
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  flex: 0 0 auto;
+  padding: 6px 8px;
   border-radius: 8px;
   border: 1px solid transparent;
-  white-space: nowrap;
   overflow: hidden;
 }
 
@@ -311,17 +339,33 @@ body:has(.play) main {
 
 .play-ex__thumb svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-.play-ex__copy { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.play-ex__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
 .play-ex__copy strong {
+  display: block;
   font-size: 12.5px;
   font-weight: 500;
+  line-height: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .play-ex__copy span {
+  display: block;
   font-family: "Geist Mono", ui-monospace, monospace;
   font-size: 10.5px;
+  line-height: 14px;
   color: #a0a2a7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .play.is-rail-closed .play-ex__copy,
@@ -331,7 +375,7 @@ body:has(.play) main {
 
 .play.is-rail-closed .play-rail__head { padding: 0; justify-content: center; }
 .play.is-rail-closed .play-rail__list { padding: 8px 6px; align-items: center; }
-.play.is-rail-closed .play-ex { padding: 4px; justify-content: center; }
+.play.is-rail-closed .play-ex { width: 40px; padding: 0; justify-content: center; }
 
 .play-rail__foot,
 .play-foot {
@@ -834,6 +878,58 @@ body:has(.play) main {
 .play-preview__bar .play-seg + .play-seg { margin-left: 0; }
 .play-preview__bar .play-seg button { font-size: 12px; border-radius: 5px; }
 
+.play-preview:focus { outline: none; }
+.play-preview:focus-visible { outline: 2px solid #0a63e6; outline-offset: -2px; }
+
+.play-zoom {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: #f1f1ef;
+  border-radius: 8px;
+  padding: 2px;
+  flex: none;
+}
+
+.play-zoom button {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  min-width: 28px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #17181a;
+  line-height: 26px;
+}
+
+.play-zoom button:hover:not(:disabled),
+.play-zoom button:focus-visible {
+  background: #fff;
+  outline: none;
+}
+
+.play-zoom button:disabled { color: #a0a2a7; cursor: default; }
+
+.play-zoom [data-zoom-fit] {
+  min-width: 52px;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.play-stage { position: relative; flex: none; }
+.play-stage .play-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+}
+
 .play-canvas {
   flex: 1;
   min-height: 0;
@@ -934,14 +1030,15 @@ body:has(.play) main {
   .play-rail {
     order: 0;
     flex-direction: row;
-    height: 52px;
+    height: auto;
+    min-height: 56px;
     border-right: 0;
     border-bottom: 1px solid #e6e6e2;
   }
-  .play-rail__head { width: 44px; border-bottom: 0; border-right: 1px solid #e6e6e2; }
+  .play-rail__head { width: 44px; height: auto; align-self: stretch; border-bottom: 0; border-right: 1px solid #e6e6e2; }
   .play-rail__foot { display: none; }
-  .play-rail__list { flex-direction: row; overflow-x: auto; padding: 6px; }
-  .play-ex { flex: none; }
+  .play-rail__list { flex-direction: row; overflow-x: auto; padding: 4px 6px; align-items: center; }
+  .play-ex { width: auto; max-width: 220px; }
   .play-preview { order: 1; height: 440px; flex: none; }
   .play-panel { order: 2; border-right: 0; min-height: 70vh; }
   .play-canvas { padding: 16px; }
