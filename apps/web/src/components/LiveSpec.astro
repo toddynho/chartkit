@@ -46,59 +46,49 @@ const specId = mode === "full" ? "spec-json" : undefined;
   data-mode={mode}
   data-active-slug={activeSlug || undefined}
 >
-  <div class="live-editor__preview">
-    <p class="live-pane__kicker" id={mode === "full" ? "live-preview-label" : undefined}>Preview</p>
-    <div
-      class="ck-frame preview"
-      data-preview
-      aria-labelledby={mode === "full" ? "live-preview-label" : undefined}
-      set:html={svg}
-    />
-  </div>
-  <div class="live-editor__side">
-    {
-      mode === "full" ? (
-        <div class="live-toolbar">
-          {examples.length > 0 ? (
-            <label class="theme-label example-label">
-              Example
-              <select data-example>
-                {
-                  [...grouped.entries()].map(([group, items]) => (
-                    <optgroup label={group}>
-                      {items.map((item) => (
-                        <option value={item.slug} selected={item.slug === activeSlug}>
-                          {item.title}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))
-                }
-              </select>
-            </label>
-          ) : null}
-          <div class="live-actions">
-            <label class="theme-label">
-              Theme
-              <select data-theme>
-                <option value="site">Match site</option>
-                <option value="spec">Spec theme</option>
-                {themes.map((name) => (
-                  <option value={name}>{name}</option>
-                ))}
-              </select>
-            </label>
-            <button type="button" data-validate>Validate</button>
-            <button type="button" class="is-primary" data-repair>Repair</button>
-            <button type="button" data-share>Share</button>
-            <button type="button" data-svg>SVG</button>
-            <button type="button" data-png>PNG</button>
-            <a class="live-docs" data-docs hidden href="/docs">Docs</a>
-          </div>
+  {
+    mode === "full" ? (
+      <div class="live-toolbar">
+        {examples.length > 0 ? (
+          <label class="theme-label example-label">
+            Example
+            <select data-example>
+              {
+                [...grouped.entries()].map(([group, items]) => (
+                  <optgroup label={group}>
+                    {items.map((item) => (
+                      <option value={item.slug} selected={item.slug === activeSlug}>
+                        {item.title}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))
+              }
+            </select>
+          </label>
+        ) : null}
+        <div class="live-actions">
+          <label class="theme-label">
+            Theme
+            <select data-theme>
+              <option value="site">Match site</option>
+              <option value="spec">Spec theme</option>
+              {themes.map((name) => (
+                <option value={name}>{name}</option>
+              ))}
+            </select>
+          </label>
+          <button type="button" data-validate>Validate</button>
+          <button type="button" class="is-primary" data-repair>Repair</button>
+          <button type="button" data-share>Share</button>
+          <button type="button" data-svg>SVG</button>
+          <button type="button" data-png>PNG</button>
+          <a class="live-docs" data-docs hidden href="/docs">Docs</a>
         </div>
-      ) : null
-    }
-    {mode === "full" ? <div class="opt-panel" data-options></div> : null}
+      </div>
+    ) : null
+  }
+  <div class="live-spec-col">
     <div class="live-pane__head">
       <label for={specId}>Spec</label>
       {docsHref && docsLabel ? (
@@ -117,6 +107,22 @@ const specId = mode === "full" ? "spec-json" : undefined;
     <p class="live-status" data-status role="status">Showing the published spec.</p>
     <ul class="live-issues" data-issues />
   </div>
+  {mode === "full" ? <div class="live-split" data-split="spec" role="separator" aria-orientation="vertical" aria-label="Resize spec editor" tabindex="0"></div> : null}
+  <div class="live-editor__preview">
+    <p class="live-pane__kicker" id={mode === "full" ? "live-preview-label" : undefined}>Preview</p>
+    <div
+      class="ck-frame preview"
+      data-preview
+      aria-labelledby={mode === "full" ? "live-preview-label" : undefined}
+      set:html={svg}
+    />
+  </div>
+  {mode === "full" ? <div class="live-split" data-split="opt" role="separator" aria-orientation="vertical" aria-label="Resize options" tabindex="0"></div> : null}
+  {mode === "full" ? (
+    <div class="live-options-col">
+      <div class="opt-panel" data-options></div>
+    </div>
+  ) : null}
   {exampleSpecs ? <script is:inline type="application/json" data-example-specs set:html={scriptJson(exampleSpecs)} /> : null}
 </div>
 

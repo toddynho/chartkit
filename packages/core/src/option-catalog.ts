@@ -11,17 +11,17 @@ import { MARK_APPLIES } from "./marks";
 import catalogJson from "./generated/option-catalog.json";
 
 export const OPTION_GROUPS = [
-  "Chart",
-  "Data mapping",
-  "Marks",
-  "Labels",
+  "Data / Encoding",
+  "Marks & style",
   "Axes",
+  "Labels",
   "Legend",
-  "Colors / theme",
-  "Interaction",
-  "Size",
-  "Accessibility",
+  "Tooltip & interaction",
+  "Colors & theme",
+  "Layout & size",
   "Annotations",
+  "Accessibility",
+  "Advanced",
 ] as const;
 
 export type OptionGroup = (typeof OPTION_GROUPS)[number];
@@ -50,6 +50,8 @@ export interface OptionField {
   defaultValue?: string | number | boolean;
   /** Missing means the option applies to every chart type. */
   appliesTo?: string[];
+  /** Shown before the More expander. Curated from paths the docs examples set. */
+  essential?: boolean;
   docs: string;
 }
 
@@ -98,6 +100,7 @@ const AXIS_TYPES = [
   "area-range",
   "bar-range",
   "errorbar",
+  "strip",
 ];
 
 /** Types that do not paint `legend`. */
@@ -110,10 +113,11 @@ const METRIC_TYPES = ["gauge", "kpi", "progress-ring"];
  * inherit this list, then the path overlay below can narrow it further.
  */
 const CHANNEL_APPLIES: Record<string, readonly string[]> = {
-  x: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "heatmap", "histogram", "boxplot", "radar", "funnel", "treemap", "bullet", "waterfall", "area-range", "bar-range", "errorbar", "sunburst", "radial-bar", "rose", "spike", "candlestick", "bar-list", "gantt", "timeline", "quadrant", "journey"],
-  y: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "boxplot", "radar", "funnel", "treemap", "bullet", "waterfall", "area-range", "bar-range", "errorbar", "radial-bar", "rose", "sankey", "histogram", "spike", "sunburst", "bar-list", "gantt", "quadrant", "journey"],
+  x: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "heatmap", "histogram", "boxplot", "radar", "funnel", "treemap", "bullet", "waterfall", "area-range", "bar-range", "errorbar", "sunburst", "radial-bar", "rose", "spike", "candlestick", "bar-list", "strip", "gantt", "timeline", "quadrant", "journey"],
+  y: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "boxplot", "radar", "funnel", "treemap", "bullet", "waterfall", "area-range", "bar-range", "errorbar", "radial-bar", "rose", "sankey", "histogram", "spike", "sunburst", "bar-list", "strip", "gantt", "quadrant", "journey"],
   series: ["line", "bar", "stacked-area", "scatter", "combo", "heatmap", "radar", "pie", "donut"],
-  color: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "heatmap", "treemap", "sunburst", "funnel", "sankey", "radar", "gantt", "timeline", "quadrant", "choropleth", "map-points"],
+  color: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "heatmap", "treemap", "sunburst", "funnel", "sankey", "radar", "strip", "gantt", "timeline", "quadrant", "choropleth", "map-points"],
+  label: ["strip"],
   size: ["scatter", "quadrant", "map-points"],
   open: ["candlestick", "gantt", "timeline"],
   high: ["candlestick", "area-range", "bar-range", "errorbar"],
@@ -162,6 +166,73 @@ const EXTRA_TYPES = ["gantt", "timeline", "quadrant", "venn", "journey", "chorop
 
 const SKIP = new Set(["version", "$schema", "data"]);
 
+/**
+ * Options the docs examples actually set, plus the one or two knobs those
+ * examples are built around (curve, legend, strip summary). Roughly 3–8 per
+ * section. Everything else stays behind More options.
+ */
+const ESSENTIAL = new Set<string>([
+  "encoding.x",
+  "encoding.y",
+  "encoding.series",
+  "encoding.color",
+  "encoding.size",
+  "encoding.label",
+  "metric.value",
+  "metric.label",
+  "mark.curve",
+  "mark.points",
+  "mark.area",
+  "mark.stack",
+  "mark.orientation",
+  "mark.summary",
+  "mark.band",
+  "mark.jitter",
+  "axes.x",
+  "axes.y",
+  "axes.x.title",
+  "axes.y.title",
+  "axes.y.grid",
+  "axes.y.format",
+  "mark.labels",
+  "mark.labelPosition",
+  "mark.labelFormat",
+  "mark.labelEnds",
+  "axes.x.labels",
+  "axes.y.labels",
+  "legend",
+  "legend.position",
+  "legend.title",
+  "legend.orient",
+  "tooltip",
+  "tooltip.mode",
+  "interaction.hover",
+  "interaction.zoom",
+  "interaction.pan",
+  "interaction.select",
+  "theme",
+  "theme.mode",
+  "theme.brand",
+  "mark.palette",
+  "mark.colorRules",
+  "size.width",
+  "size.height",
+  "size.padding",
+  "layout.direction",
+  "layout.coordinate",
+  "annotations",
+  "a11y.alt",
+  "a11y.description",
+  "a11y.keyboard",
+  "a11y.dataTable",
+  "type",
+  "title",
+  "subtitle",
+  "locale",
+  "render",
+  "transform",
+]);
+
 const CHANNEL_LABEL: Record<string, string> = {
   x: "X field",
   y: "Y field",
@@ -176,6 +247,7 @@ const CHANNEL_LABEL: Record<string, string> = {
   source: "Source field",
   target: "Target field",
   error: "Error field",
+  label: "Label field",
   path: "Path fields",
   id: "Id field",
   parent: "Parent field",
@@ -231,16 +303,17 @@ function groupFor(path: string): OptionGroup {
   const [head, second] = path.split(".");
   if (head === "annotations") return "Annotations";
   if (head === "a11y") return "Accessibility";
-  if (head === "size" || head === "layout") return "Size";
-  if (head === "interaction" || head === "animation" || head === "motion") return "Interaction";
-  if (head === "theme") return "Colors / theme";
+  if (head === "size" || head === "layout") return "Layout & size";
+  if (head === "tooltip" || head === "interaction" || head === "animation" || head === "motion") return "Tooltip & interaction";
+  if (head === "theme") return "Colors & theme";
   if (head === "legend") return "Legend";
+  if (head === "axes" && (second === "x" || second === "y" || second === "y2") && path.endsWith(".labels")) return "Labels";
   if (head === "axes") return "Axes";
-  if (head === "mark" && second && COLOR_MARKS.has(second)) return "Colors / theme";
+  if (head === "mark" && second && COLOR_MARKS.has(second)) return "Colors & theme";
   if (head === "mark" && second && LABEL_MARKS.has(second)) return "Labels";
-  if (head === "mark") return "Marks";
-  if (head === "encoding" || head === "sort" || head === "transform" || head === "metric") return "Data mapping";
-  return "Chart";
+  if (head === "mark") return "Marks & style";
+  if (head === "encoding" || head === "metric") return "Data / Encoding";
+  return "Advanced";
 }
 
 function intersect(current: readonly string[] | undefined, next: readonly string[]): string[] | undefined {
@@ -358,6 +431,7 @@ export function buildOptionCatalog(schema: SchemaNode): OptionField[] {
 
   function push(field: OptionField): void {
     if (field.appliesTo && field.appliesTo.length === 0) return;
+    if (ESSENTIAL.has(field.path)) field.essential = true;
     if (!fields.has(field.path)) fields.set(field.path, field);
   }
 

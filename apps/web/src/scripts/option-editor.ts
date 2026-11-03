@@ -36,25 +36,40 @@ function hexColor(value: unknown): string | null {
 }
 
 export function mountOptionEditor(root: HTMLElement, hooks: EditorHooks): { refresh: (reopen?: boolean) => void } {
+  const bar = document.createElement("div");
+  bar.className = "opt-bar";
   const filter = document.createElement("input");
   filter.className = "opt-filter";
   filter.type = "search";
-  filter.placeholder = "Filter options";
-  filter.setAttribute("aria-label", "Filter options");
+  filter.placeholder = "Search options";
+  filter.setAttribute("aria-label", "Search options");
+  const setOnlyLabel = document.createElement("label");
+  setOnlyLabel.className = "opt-setonly";
+  const setOnlyInput = document.createElement("input");
+  setOnlyInput.type = "checkbox";
+  const setOnlyText = document.createElement("span");
+  setOnlyText.textContent = "Set only";
+  setOnlyLabel.append(setOnlyInput, setOnlyText);
+  bar.append(filter, setOnlyLabel);
   const meta = document.createElement("p");
   meta.className = "opt-meta";
   const body = document.createElement("div");
   body.className = "opt-body";
-  root.replaceChildren(filter, meta, body);
+  root.replaceChildren(bar, meta, body);
 
   let catalog: Catalog | null = null;
   let query = "";
-  const openGroups = new Set<string>();
+  let setOnly = false;
+  const openGroups = new Set<string>(["Data / Encoding"]);
   let primed = false;
   let jsonTimer = 0;
 
   filter.addEventListener("input", () => {
     query = filter.value;
+    renderBody();
+  });
+  setOnlyInput.addEventListener("change", () => {
+    setOnly = setOnlyInput.checked;
     renderBody();
   });
 
@@ -74,6 +89,7 @@ export function mountOptionEditor(root: HTMLElement, hooks: EditorHooks): { refr
     return catalog.optionCatalog.filter((field) => {
       if (field.appliesTo && !field.appliesTo.includes(type)) return false;
       if (catalog?.optionBlocked(spec, field.path)) return false;
+      if (setOnly && !catalog?.readOption(spec, field).set) return false;
       if (!q) return true;
       return field.path.toLowerCase().includes(q) || field.label.toLowerCase().includes(q) || field.description.toLowerCase().includes(q);
     });
@@ -259,16 +275,67 @@ export function mountOptionEditor(root: HTMLElement, hooks: EditorHooks): { refr
     row.append(holder);
   }
 
+  function renderRow(field: OptionField, spec: Record<string, unknown>): HTMLElement {
+    if (!catalog) throw new Error("catalog missing");
+    const state = catalog.readOption(spec, field);
+    const row = document.createElement("div");
+    row.className = "opt-row";
+    row.dataset.path = field.path;
+    if (state.set) row.classList.add("is-set");
+    const copy = document.createElement("div");
+    copy.className = "opt-copy";
+    const head = document.createElement("div");
+    head.className = "opt-head";
+    const label = document.createElement("label");
+    label.className = "opt-label";
+    label.htmlFor = `opt-${field.path.replace(/[^A-Za-z0-9_-]/g, "-")}`;
+    label.textContent = field.label;
+    const actions = document.createElement("span");
+    actions.className = "opt-actions";
+    const flag = document.createElement("span");
+    flag.className = "opt-flag";
+    flag.dataset.flag = "";
+    flag.textContent = state.set ? "Set" : "Default";
+    if (state.set) flag.classList.add("is-on");
+    const reset = document.createElement("button");
+    reset.type = "button";
+    reset.className = "opt-reset";
+    reset.dataset.reset = "";
+    reset.textContent = "Reset";
+    reset.hidden = !state.set;
+    reset.addEventListener("click", () => {
+      commit(field, undefined);
+      renderBody();
+    });
+    const docs = document.createElement("a");
+    docs.className = "opt-docs";
+    docs.href = field.docs;
+    docs.textContent = "Docs";
+    actions.append(flag, reset, docs);
+    head.append(label, actions);
+    const path = document.createElement("code");
+    path.className = "opt-path";
+    path.textContent = field.path;
+    const desc = document.createElement("p");
+    desc.className = "opt-desc";
+    desc.title = field.description;
+    desc.textContent = field.description;
+    copy.append(head, path, desc);
+    row.append(copy);
+    addControl(row, field, spec);
+    return row;
+  }
+
   function renderBody(): void {
     if (!catalog) return;
     const spec = parse();
-      const scroll = body.scrollTop;
+    const scroll = body.scrollTop;
     body.replaceChildren();
     if (!spec) {
       meta.textContent = "Spec is not valid JSON.";
       const note = document.createElement("p");
       note.className = "opt-note";
-      note.textContent = "Fix the spec below and the controls will catch up.";
+      note.textContent = "Fix the spec and the controls will catch up.";
       body.append(note);
       return;
     }
@@ -282,26 +349,26 @@ export function mountOptionEditor(root: HTMLElement, hooks: EditorHooks): { refr
     }
     if (!primed) {
       primed = true;
-      for (const [name, items] of groups) {
-        if (items.some((field) => catalog?.readOption(spec, field).set)) openGroups.add(name);
-      }
-      if (!openGroups.has("Marks") && groups.get("Marks")?.length) openGroups.add("Marks");
-      if (!openGroups.has("Chart") && groups.get("Chart")?.length) openGroups.add("Chart");
+      openGroups.add("Data / Encoding");
     }
+    const searching = query.trim().length > 0;
     const setCount = fields.filter((field) => catalog?.readOption(spec, field).set).length;
     const type = typeof spec.type === "string" ? spec.type : "chart";
-    meta.textContent = query.trim()
+    meta.textContent = searching
       ? `${fields.length} matching · ${setCount} set`
-      : `${fields.length} options for ${type} · ${setCount} set`;
+      : setOnly
+        ? `${fields.length} set on ${type}`
+        : `${fields.length} options for ${type} · ${setCount} set`;
 
     for (const [name, items] of groups) {
       if (!items.length) continue;
       const section = document.createElement("details");
       section.className = "opt-section";
       section.dataset.group = name;
-      section.open = query.trim().length > 0 || openGroups.has(name);
+      const forceOpen = searching || setOnly;
+      section.open = forceOpen || openGroups.has(name);
       section.addEventListener("toggle", () => {
-        if (query.trim()) return;
+        if (forceOpen) return;
         if (section.open) openGroups.add(name);
         else openGroups.delete(name);
       });
@@ -311,63 +378,32 @@ export function mountOptionEditor(root: HTMLElement, hooks: EditorHooks): { refr
       const count = document.createElement("span");
       count.className = "opt-count";
       const setHere = items.filter((field) => catalog?.readOption(spec, field).set).length;
-      count.textContent = setHere ? `${items.length} · ${setHere} set` : String(items.length);
+      count.textContent = `${items.length} · ${setHere} set`;
       summary.append(title, count);
       section.append(summary);
-      for (const field of items) {
-        const state = catalog.readOption(spec, field);
-        const row = document.createElement("div");
-        row.className = "opt-row";
-        row.dataset.path = field.path;
-        if (state.set) row.classList.add("is-set");
-        const copy = document.createElement("div");
-        copy.className = "opt-copy";
-        const head = document.createElement("div");
-        head.className = "opt-head";
-        const label = document.createElement("label");
-        label.className = "opt-label";
-        label.htmlFor = `opt-${field.path.replace(/[^A-Za-z0-9_-]/g, "-")}`;
-        label.textContent = field.label;
-        const actions = document.createElement("span");
-        actions.className = "opt-actions";
-        const flag = document.createElement("span");
-        flag.className = "opt-flag";
-        flag.dataset.flag = "";
-        flag.textContent = state.set ? "Set" : "Default";
-        if (state.set) flag.classList.add("is-on");
-        const reset = document.createElement("button");
-        reset.type = "button";
-        reset.className = "opt-reset";
-        reset.dataset.reset = "";
-        reset.textContent = "Reset";
-        reset.hidden = !state.set;
-        reset.addEventListener("click", () => {
-          commit(field, undefined);
-          renderBody();
-        });
-        const docs = document.createElement("a");
-        docs.className = "opt-docs";
-        docs.href = field.docs;
-        docs.textContent = "Docs";
-        actions.append(flag, reset, docs);
-        head.append(label, actions);
-        const path = document.createElement("code");
-        path.className = "opt-path";
-        path.textContent = field.path;
-        const desc = document.createElement("p");
-        desc.className = "opt-desc";
-        desc.textContent = field.description;
-        copy.append(head, path, desc);
-        row.append(copy);
-        addControl(row, field, spec);
-        section.append(row);
+
+      const lead = items.filter((field) => field.essential);
+      const rest = items.filter((field) => !field.essential);
+      const shown = lead.length ? lead : items;
+      const tucked = lead.length ? rest : [];
+      for (const field of shown) section.append(renderRow(field, spec));
+      if (tucked.length) {
+        const more = document.createElement("details");
+        more.className = "opt-more";
+        const moreSet = tucked.some((field) => catalog?.readOption(spec, field).set);
+        more.open = searching || moreSet;
+        const moreSummary = document.createElement("summary");
+        moreSummary.textContent = `More options · ${tucked.length}`;
+        more.append(moreSummary);
+        for (const field of tucked) more.append(renderRow(field, spec));
+        section.append(more);
       }
       body.append(section);
     }
     if (!fields.length) {
       const note = document.createElement("p");
       note.className = "opt-note";
-      note.textContent = query.trim() ? "No options match that filter." : "No options for this chart type.";
+      note.textContent = searching ? "No options match that search." : setOnly ? "Nothing in the spec is set beyond defaults." : "No options for this chart type.";
       body.append(note);
     }
     body.scrollTop = scroll;

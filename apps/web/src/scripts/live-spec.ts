@@ -289,4 +289,42 @@ export function mountLiveSpec(root: HTMLElement): void {
 
   syncPaint();
   syncDocs(input.value);
+  mountSplits(root);
+}
+
+function mountSplits(root: HTMLElement): void {
+  root.querySelectorAll<HTMLElement>("[data-split]").forEach((handle) => {
+    handle.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      event.preventDefault();
+      const which = handle.dataset.split;
+      const startX = event.clientX;
+      const spec = Number.parseFloat(getComputedStyle(root).getPropertyValue("--spec-w")) || 320;
+      const opt = Number.parseFloat(getComputedStyle(root).getPropertyValue("--opt-w")) || 380;
+      handle.setPointerCapture(event.pointerId);
+      const move = (next: PointerEvent) => {
+        const dx = next.clientX - startX;
+        if (which === "spec") root.style.setProperty("--spec-w", `${Math.min(560, Math.max(240, spec + dx))}px`);
+        else root.style.setProperty("--opt-w", `${Math.min(560, Math.max(300, opt - dx))}px`);
+      };
+      const up = () => {
+        handle.removeEventListener("pointermove", move);
+        handle.removeEventListener("pointerup", up);
+      };
+      handle.addEventListener("pointermove", move);
+      handle.addEventListener("pointerup", up);
+    });
+    handle.addEventListener("keydown", (event) => {
+      const step = event.shiftKey ? 40 : 16;
+      const which = handle.dataset.split;
+      const current = Number.parseFloat(getComputedStyle(root).getPropertyValue(which === "spec" ? "--spec-w" : "--opt-w")) || (which === "spec" ? 320 : 380);
+      if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+        event.preventDefault();
+        const delta = event.key === "ArrowRight" ? step : -step;
+        const next = which === "spec" ? current + delta : current - delta;
+        const clamped = which === "spec" ? Math.min(560, Math.max(240, next)) : Math.min(560, Math.max(300, next));
+        root.style.setProperty(which === "spec" ? "--spec-w" : "--opt-w", `${clamped}px`);
+      }
+    });
+  });
 }
