@@ -1,0 +1,348 @@
+/**
+ * Option-effect audit for the playground catalog.
+ *
+ * For one example of each chart type, write a non-default value for every
+ * option the playground would show and compare the rendered SVG. Interaction
+ * options that do not change the static SVG are hovered through the real
+ * vanilla mount.
+ *
+ *   npm run audit:options
+ *   node scripts/audit-options.mjs --type line
+ */
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import esbuild from "esbuild";
+import { createRequire } from "node:module";
+import { isExtra, render as renderAll } from "@chartkitdev/core/all";
+import { render as renderExtra } from "@chartkitdev/core/extra";
+import { optionBlocked, optionCatalog, readOption, writeOption } from "@chartkitdev/core/options";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const outDir = join(root, "apps/web/audit");
+const onlyType = process.argv.includes("--type") ? process.argv[process.argv.indexOf("--type") + 1] : "";
+
+const INTERACTION = /^(tooltip|interaction\.(hover|select|zoom|pan|brush)|legend\.interactive)/;
+
+function renderSpec(spec) {
+  const type = typeof spec.type === "string" ? spec.type : "";
+  if (type === "choropleth" || type === "map-points") {
+    return { svg: "", error: "geo" };
+  }
+  try {
+    const svg = isExtra(type) ? renderExtra(spec) : renderAll(spec);
+    const error = !svg.includes("<svg") || svg.includes("ck-chart-error");
+    return { svg, error };
+  } catch (error) {
+    return { svg: "", error: error instanceof Error ? error.message : "render threw" };
+  }
+}
+
+function norm(svg) {
+  const ids = new Map();
+  let n = 0;
+  const id = (value) => {
+    if (!ids.has(value)) ids.set(value, `i${n++}`);
+    return ids.get(value);
+  };
+  return svg
+    .replace(/\sdata-ck-id="[^"]*"/g, "")
+    .replace(/\sdata-ck-intent="[^"]*"/g, "")
+    .replace(/\bid="([^"]+)"/g, (_, value) => `id="${id(value)}"`)
+    .replace(/#([A-Za-z_][\w:-]*)/g, (match, value) => (ids.has(value) ? `#${ids.get(value)}` : match))
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function same(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function probeValues(field, spec) {
+  const view = readOption(spec, field);
+  const current = view.value;
+  if (field.control === "json" || view.complex) return [];
+  if (field.control === "boolean" || field.storage === "union-boolean") return [current === true ? false : true];
+  if (field.control === "enum" && field.enumValues?.length) {
+    const text = current == null ? "" : String(current);
+    const rest = field.enumValues.filter((value) => value !== text && value !== String(field.defaultValue ?? ""));
+    const preferred = ["false", "dotted", "currency", "percent", "step", "dark", "horizontal", "top", "end", "nearest", "dashed", "none"];
+    const picks = [];
+    for (const value of preferred) if (rest.includes(value) && !picks.includes(value)) picks.push(value);
+    for (const value of rest) if (!picks.includes(value)) picks.push(value);
+    return picks.slice(0, 4);
+  }
+  if (field.control === "number") {
+    const base = typeof current === "number" ? current : typeof field.defaultValue === "number" ? field.defaultValue : 0;
+    let next = field.coerce === "integer" ? Math.round(base) + 3 : Math.round((base + 1) * 1000) / 1000;
+    if (typeof field.maximum === "number" && next > field.maximum) next = field.minimum ?? 0;
+    const far = typeof field.maximum === "number" ? field.maximum : base > 200 ? Math.round(base / 2) : base + 120;
+    return [...new Set([next, far])];
+  }
+  if (field.control === "color") return [current === "#ff00aa" ? "#00aaff" : "#ff00aa"];
+  if (field.control === "text") {
+    const text = current == null ? "" : String(current);
+    if (field.path === "locale") return ["de-DE", "ja-JP"];
+    if (field.path === "timezone") return ["UTC", "America/New_York"];
+    if (field.path.endsWith("currency")) return ["EUR", "USD"];
+    if (field.path.endsWith("prefix")) return ["~", "$"];
+    if (field.path.endsWith("suffix")) return [" kg", "%"];
+    if (field.path.includes("width") || field.path.includes("height") || field.path.endsWith("size")) return ["800", "240"];
+    return [text === "Probe" ? "Probe two" : "Probe"];
+  }
+  return [current == null || current === "" ? "Probe" : `${current} x`];
+}
+
+function channelValues(spec, channel) {
+  const encoding = spec.encoding && typeof spec.encoding === "object" ? spec.encoding : {};
+  const node = encoding[channel];
+  const field = typeof node === "string" ? node : node && typeof node === "object" && typeof node.field === "string" ? node.field : "";
+  if (!field || !Array.isArray(spec.data)) return [];
+  return spec.data.map((row) => (row && typeof row === "object" ? row[field] : undefined)).filter((value) => value != null);
+}
+
+function quantitative(values) {
+  return values.some((value) => typeof value === "number" || (typeof value === "string" && /\d/.test(value) && !Number.isNaN(Date.parse(value))));
+}
+
+function dataReason(path, spec) {
+  if (path === "id") return "id is a hook, not paint";
+  if (path.startsWith("animation") || path.startsWith("motion")) return "motion runs in the client, not in the static SVG";
+  if (path === "a11y.keyboard" || path === "a11y.dataTable") return "client behavior; the static SVG only records intent";
+  if (path.startsWith("layout.facet")) return "example is not faceted";
+  if (path.startsWith("layout.concat")) return "example is not a concatenation";
+  if (path.startsWith("interaction.drilldown")) return "example has no drilldown";
+  if (path.startsWith("legend")) return "";
+  const encoding = spec.encoding && typeof spec.encoding === "object" ? spec.encoding : {};
+  const y = encoding.y;
+  const yList = Array.isArray(y) ? y : y ? [y] : [];
+  const axis = path.startsWith("encoding.x") || path.startsWith("axes.x") ? "x" : path.startsWith("encoding.y") || path.startsWith("axes.y.") || path === "axes.y" ? "y" : "";
+  if (axis && (path.includes(".format") || path.includes(".scale"))) {
+    const values = channelValues(spec, axis);
+    if (values.length && !quantitative(values)) return `${axis} values are categories, so format and scale do not apply`;
+  }
+  if (path.startsWith("axes.y2") || path.startsWith("encoding.y2")) {
+    const usesY2 = yList.some((item) => item && typeof item === "object" && item.axis === "y2");
+    if (!usesY2) return "example has no series on y2";
+  }
+  if (path === "encoding.series" || path.startsWith("encoding.series.")) {
+    const rows = Array.isArray(spec.data) ? spec.data : [];
+    const keys = rows[0] && typeof rows[0] === "object" ? Object.keys(rows[0]) : [];
+    if (keys.length < 3 && !encoding.series) return "example rows have no spare series column";
+  }
+  if ((path === "mark.stack" || path.startsWith("mark.stack")) && yList.length < 2 && !encoding.series) return "stack needs more than one series";
+  if (path.startsWith("encoding.color") && !encoding.color && yList.length < 2) return "example has no color field";
+  if (path.startsWith("encoding.size") && !encoding.size) return "example has no size field";
+  if (path.startsWith("encoding.open") || path.startsWith("encoding.high") || path.startsWith("encoding.low") || path.startsWith("encoding.close") || path.startsWith("encoding.volume")) {
+    return "example is not an OHLC series";
+  }
+  return "";
+}
+
+function loadExamples() {
+  const dir = join(root, "apps/web/.generated/examples");
+  const byType = new Map();
+  for (const name of readdirSync(dir).sort()) {
+    if (!name.endsWith(".json") || name === "index.json") continue;
+    const file = JSON.parse(readFileSync(join(dir, name), "utf8"));
+    const type = file.spec?.type || file.type;
+    if (!type || byType.has(type)) continue;
+    byType.set(type, { slug: file.slug, title: file.title, type, spec: file.spec });
+  }
+  return [...byType.values()].filter((item) => !onlyType || item.type === onlyType);
+}
+
+function fieldsFor(spec) {
+  const type = spec.type;
+  return optionCatalog.filter((field) => (!field.appliesTo || field.appliesTo.includes(type)) && !optionBlocked(spec, field.path));
+}
+
+const examples = loadExamples();
+const rows = [];
+let probed = 0;
+let effects = 0;
+
+for (const example of examples) {
+  const base = renderSpec(example.spec);
+  const baseNorm = norm(base.svg);
+  const legendField = optionCatalog.find((field) => field.path === "legend");
+  const legendMatters = legendField ? norm(renderSpec(writeOption(example.spec, legendField, false)).svg) !== baseNorm : false;
+  for (const field of fieldsFor(example.spec)) {
+    probed++;
+    const values = probeValues(field, example.spec);
+    if (!values.length) {
+      rows.push({ type: example.type, slug: example.slug, path: field.path, control: field.control, klass: "d", reason: "freeform value, no safe non-default probe", specChanged: false, svgChanged: false });
+      continue;
+    }
+    let next = example.spec;
+    let value = values[0];
+    let specChanged = false;
+    let svgChanged = false;
+    let invalid = false;
+    for (const candidate of values) {
+      const written = writeOption(example.spec, field, candidate);
+      if (same(example.spec, written)) continue;
+      specChanged = true;
+      value = candidate;
+      next = written;
+      const drawn = renderSpec(written);
+      if (drawn.error && !base.error) {
+        invalid = true;
+        continue;
+      }
+      if (!base.error && !drawn.error && norm(drawn.svg) !== baseNorm) {
+        svgChanged = true;
+        break;
+      }
+    }
+    if (!specChanged) {
+      rows.push({ type: example.type, slug: example.slug, path: field.path, control: field.control, klass: "d", reason: "probe did not stick in the spec", specChanged: false, svgChanged: false, probe: value });
+      continue;
+    }
+    if (svgChanged && !INTERACTION.test(field.path)) {
+      effects++;
+      continue;
+    }
+    if (svgChanged && INTERACTION.test(field.path)) effects++;
+    if (invalid && !svgChanged) {
+      rows.push({ type: example.type, slug: example.slug, path: field.path, control: field.control, klass: "d", reason: "probe value makes the spec invalid", specChanged: true, svgChanged: false, probe: value });
+      continue;
+    }
+    const reason = field.path === "legend" || field.path.startsWith("legend.")
+      ? legendMatters ? "" : "example draws no legend"
+      : dataReason(field.path, example.spec);
+    if (reason) {
+      rows.push({ type: example.type, slug: example.slug, path: field.path, control: field.control, klass: "d", reason, specChanged: true, svgChanged: false, probe: value });
+      continue;
+    }
+    if (INTERACTION.test(field.path)) {
+      rows.push({ type: example.type, slug: example.slug, path: field.path, control: field.control, klass: "interaction", reason: "static SVG unchanged", specChanged: true, svgChanged: false, probe: value, spec: next });
+      continue;
+    }
+    rows.push({ type: example.type, slug: example.slug, path: field.path, control: field.control, klass: "b", reason: "spec changed and the rendered SVG did not", specChanged: true, svgChanged: false, probe: value });
+  }
+  process.stdout.write(`\r${example.type}  `);
+}
+process.stdout.write("\n");
+
+const pending = rows.filter((row) => row.klass === "interaction");
+if (pending.length && !process.argv.includes("--skip-hover")) {
+  const require = createRequire(import.meta.url);
+  const playwright = require("playwright");
+  const outfile = join(root, "apps/web/audit/.probe.js");
+  mkdirSync(outDir, { recursive: true });
+  await esbuild.build({
+    entryPoints: [join(root, "scripts/audit-probe.mjs")],
+    bundle: true,
+    format: "iife",
+    platform: "browser",
+    outfile,
+    logLevel: "silent",
+  });
+  const browser = await playwright.chromium.launch({ headless: true });
+  const page = await browser.newPage({ viewport: { width: 900, height: 700 } });
+  await page.setContent(`<!doctype html><html><body><div id="host"></div><script>${readFileSync(outfile, "utf8")}<\/script></body></html>`, { waitUntil: "load" });
+  const bySlug = new Map(examples.map((item) => [item.slug, item]));
+  let done = 0;
+  for (const row of pending) {
+    const example = bySlug.get(row.slug);
+    const baseTip = await hover(page, example.spec);
+    const nextTip = await hover(page, row.spec);
+    const changed = baseTip.present !== nextTip.present || baseTip.cross !== nextTip.cross || (baseTip.present && baseTip.text !== nextTip.text);
+    const togglesTip = row.path === "tooltip" || row.path === "tooltip.show" || row.path === "interaction.hover";
+    if (togglesTip && baseTip.present && nextTip.present && (row.probe === false || row.probe === "false")) {
+      row.klass = "b";
+      row.reason = "mounted chart still shows a tooltip when the option is off";
+    } else if (changed) {
+      row.klass = "ok";
+      row.reason = "hover changed";
+    } else if (togglesTip && !baseTip.present && !nextTip.present) {
+      row.klass = "d";
+      row.reason = "hover did not land on a mark, so the tooltip could not be compared";
+    } else {
+      row.klass = "d";
+      row.reason = baseTip.present ? "hover tooltip did not change for this example" : "this example does not show a hover tooltip to change";
+    }
+    delete row.spec;
+    done++;
+    if (done % 10 === 0) process.stdout.write(`\rhover ${done}/${pending.length}`);
+  }
+  process.stdout.write("\n");
+  await browser.close();
+  try { (await import("node:fs")).unlinkSync(outfile); } catch { /* already gone */ }
+} else {
+  for (const row of pending) delete row.spec;
+}
+
+function counts(list) {
+  const out = { a: 0, b: 0, c: 0, d: 0, interaction: 0 };
+  for (const row of list) if (out[row.klass] != null) out[row.klass]++;
+  return out;
+}
+
+const kept = rows.filter((row) => row.klass === "a" || row.klass === "b" || row.klass === "c" || row.klass === "d");
+const summary = {
+  generated: new Date().toISOString(),
+  examples: examples.map((item) => ({ type: item.type, slug: item.slug, title: item.title })),
+  probed,
+  effects,
+  counts: counts(kept),
+  note: "Class (a) is a playground wiring bug. The preview used to assign a static SVG and never call mount(), so tooltip, crosshair, legend toggle, and hover could not run. That is fixed in the playground by mounting @chartkitdev/vanilla. Rows here are what remains after that mount is used for the hover probe.",
+};
+
+mkdirSync(outDir, { recursive: true });
+writeFileSync(join(outDir, "option-effect.json"), JSON.stringify({ summary, rows: kept }, null, 2));
+
+const byType = new Map();
+for (const row of kept) {
+  if (row.klass === "d" && row.reason.startsWith("freeform")) continue;
+  const list = byType.get(row.type) ?? [];
+  list.push(row);
+  byType.set(row.type, list);
+}
+
+const lines = [];
+lines.push("# Option effect audit");
+lines.push("");
+lines.push(summary.note);
+lines.push("");
+lines.push(`Probed ${probed} option writes across ${examples.length} chart types. ${effects} changed the SVG. Remaining rows are classified below.`);
+lines.push("");
+lines.push(`- (a) playground wiring: ${summary.counts.a}`);
+lines.push(`- (b) core ignores a listed option: ${summary.counts.b}`);
+lines.push(`- (c) catalog scope too wide: ${summary.counts.c}`);
+lines.push(`- (d) no-op for this example: ${summary.counts.d}`);
+lines.push("");
+lines.push("## By chart type");
+lines.push("");
+for (const [type, list] of [...byType.entries()].sort((a, b) => b[1].filter((row) => row.klass !== "d").length - a[1].filter((row) => row.klass !== "d").length)) {
+  const interesting = list.filter((row) => row.klass === "b" || row.klass === "c" || row.klass === "a");
+  if (!interesting.length) continue;
+  lines.push(`### ${type} (${interesting.length})`);
+  lines.push("");
+  for (const row of interesting.slice(0, 12)) lines.push(`- **${row.klass}** \`${row.path}\` — ${row.reason}`);
+  if (interesting.length > 12) lines.push(`- … ${interesting.length - 12} more`);
+  lines.push("");
+}
+lines.push("## Example-only no-ops");
+lines.push("");
+lines.push("These changed the spec and not the picture, and the example data cannot exercise them.");
+lines.push("");
+const dataRows = kept.filter((row) => row.klass === "d" && !row.reason.startsWith("freeform") && !row.reason.startsWith("probe did not"));
+const seen = new Set();
+for (const row of dataRows) {
+  const key = `${row.type}:${row.reason}`;
+  if (seen.has(key)) continue;
+  seen.add(key);
+  lines.push(`- ${row.type}: ${row.reason} (\`${row.path}\`)`);
+}
+writeFileSync(join(outDir, "option-effect.md"), lines.join("\n") + "\n");
+console.log(JSON.stringify(summary, null, 2));
+
+async function hover(page, spec) {
+  await page.evaluate(async (value) => {
+    await window.auditMount(value);
+  }, spec);
+  await page.waitForSelector("#host svg", { timeout: 4000 }).catch(() => {});
+  return page.evaluate(() => window.auditHover());
+}

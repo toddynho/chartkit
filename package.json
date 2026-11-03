@@ -21,6 +21,7 @@
     "bench:agent-matrix": "node bench/agent-matrix.mjs",
     "bench:core": "node scripts/bench.mjs",
     "size": "node scripts/size.mjs",
+    "audit:options": "node scripts/audit-options.mjs",
     "release:check": "node scripts/release-check.mjs",
     "sizes:capture": "node catalog/scripts/capture-sizes.mjs",
     "showcase:check": "node --experimental-strip-types catalog/scripts/showcase-check.mjs",

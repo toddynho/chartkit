@@ -8,6 +8,8 @@ import {
   writeOption,
   type OptionField,
 } from "@chartkitdev/core/options";
+import type { ChartSpec } from "@chartkitdev/core";
+import { mount } from "@chartkitdev/vanilla";
 import { chartTypes } from "../data/chart-types";
 import { chartType, drawChart } from "../lib/paint-chart";
 import { isRecord, pretty } from "../lib/spec-text";
@@ -95,6 +97,9 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     valid: "ok" as "ok" | "warn" | "bad",
     warnCount: 0,
   };
+
+  let paintGen = 0;
+  let liveDestroy: (() => void) | null = null;
 
   root.classList.toggle("is-rail-closed", !state.railOpen);
   root.classList.toggle("is-rail-auto", storedRail === null);
@@ -1047,6 +1052,9 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
   }
 
   async function refresh(rebuild = true): Promise<void> {
+    const gen = ++paintGen;
+    liveDestroy?.();
+    liveDestroy = null;
     const started = performance.now();
     const size = SIZES[viewSize()];
     const view = clone(state.good);
@@ -1067,6 +1075,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       state.issues = [{ severity: "error", text: error instanceof Error ? error.message : "Render failed", action: "Review", path: "" }];
     }
     state.renderMs = Math.max(1, Math.round(performance.now() - started));
+    if (gen !== paintGen) return;
     const canvas = root.querySelector("[data-canvas]");
     if (canvas) {
       canvas.replaceChildren();
@@ -1079,9 +1088,34 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       title.textContent = typeof state.good.title === "string" && state.good.title.trim() ? state.good.title : "Untitled";
       const chart = document.createElement("div");
       chart.className = "play-card__chart";
+      chart.dataset.ckLive = "1";
       chart.style.width = `${size.w}px`;
       chart.style.height = `${size.h}px`;
       chart.innerHTML = state.svg;
+      const kind = chartType(view);
+      try {
+        if (kind === "choropleth" || kind === "map-points") {
+          const svg = chart.querySelector("svg");
+          if (svg) {
+            const { attach } = await import("@chartkitdev/geo");
+            if (gen !== paintGen) return;
+            const stop = attach(svg);
+            liveDestroy = stop;
+          }
+        } else if (state.svg.includes("<svg")) {
+          const handle = mount(chart, view as ChartSpec);
+          if (gen !== paintGen) {
+            handle.destroy();
+            return;
+          }
+          liveDestroy = () => {
+            handle.destroy();
+            document.querySelectorAll("[data-ck-extra-tip]").forEach((node) => node.remove());
+          };
+        }
+      } catch {
+        chart.innerHTML = state.svg;
+      }
       const alt = document.createElement("p");
       alt.className = "play-card__alt";
       const code = document.createElement("code");
