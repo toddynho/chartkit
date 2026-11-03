@@ -37,6 +37,9 @@ const canonical = articleHref(article);
   ) : null
 }
 <SpecEditor spec={articleSpec} />
+<p>
+  <a href="/playground">Open the playground</a> to edit a spec with validate, repair, and export.
+</p>
 {article.slug === "" ? <StackSample heading pill oneLine /> : null}
 {article.slug === "" ? <HostNotes /> : null}
 {

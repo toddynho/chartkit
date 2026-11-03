@@ -1,76 +1,53 @@
 ---
 import "../styles/v2.css";
 import Base from "../layouts/Base.astro";
-import { chartByType, chartTypes } from "../data/chart-types";
-import { chartDocs, chartPage } from "../data/docs-catalog";
+import { chartByType } from "../data/chart-types";
+import { chartPage, galleryChartCount, sidebarChartGroups } from "../data/docs-catalog";
+import { heroTypes } from "../data/hero-catalog";
 import { docsSpecForType } from "../data/live-specs";
 import { galleryThumb } from "../data/marketing-charts";
 import { loadMaps } from "../lib/batch3";
 
-const families = ["Core", "Statistical", "Planning"] as const;
-const inCatalog = new Set(chartDocs.map((chart) => chart.type));
 const maps = loadMaps();
+const heroByType = new Map(heroTypes.map((chart) => [chart.type, chart]));
+const geoSvg: Record<string, string> = {
+  choropleth: maps.world.svg,
+  "map-points": maps.cities.svg,
+};
+const geoSpec: Record<string, Record<string, unknown>> = {
+  choropleth: maps.world.spec as Record<string, unknown>,
+  "map-points": maps.cities.spec as Record<string, unknown>,
+};
 
-function editHref(spec: unknown): string {
-  return `/examples#${encodeURIComponent(JSON.stringify(spec))}`;
+function playHref(spec: unknown): string {
+  return `/playground#${encodeURIComponent(JSON.stringify(spec))}`;
 }
 
 function tile(type: string, title: string) {
-  const summary = chartByType(type)?.summary ?? chartPage(type).lede;
+  const summary = chartByType(type)?.summary ?? heroByType.get(type)?.subtitle ?? chartPage(type).lede;
+  const spec = geoSpec[type] ?? docsSpecForType(type);
   return {
     id: type,
     title,
     summary,
-    svg: galleryThumb(type),
-    href: editHref(docsSpecForType(type)),
+    svg: geoSvg[type] ?? galleryThumb(type),
+    href: `/docs/charts/${type}`,
+    play: playHref(spec),
   };
 }
 
-const groups = [
-  ...families.map((family) => ({
-    id: family.toLowerCase(),
-    family,
-    note: "",
-    charts: chartDocs.filter((chart) => chart.family === family).map((chart) => tile(chart.type, chart.label)),
-  })),
-  {
-    id: "library",
-    family: "Library",
-    note: "",
-    charts: chartTypes.filter((chart) => !inCatalog.has(chart.type)).map((chart) => tile(chart.type, chart.title)),
-  },
-  {
-    id: "maps",
-    family: "Maps",
-    note: "Choropleth and point maps. No tile layer, no pan or zoom. Not part of core.",
-    charts: [
-      {
-        id: "map-world",
-        title: "World choropleth",
-        summary: "Renewable share of electricity. Sequential scale, hatched where a country has no row.",
-        svg: maps.world.svg,
-        href: editHref(maps.world.spec),
-      },
-      {
-        id: "map-us",
-        title: "United States",
-        summary: "Population change, 2020–2023. Red is a loss, blue is a gain.",
-        svg: maps.us.svg,
-        href: editHref(maps.us.spec),
-      },
-      {
-        id: "map-cities",
-        title: "Cities",
-        summary: "Largest urban areas. Bubble area is population, in millions.",
-        svg: maps.cities.svg,
-        href: editHref(maps.cities.spec),
-      },
-    ],
-  },
-];
+const groups = sidebarChartGroups.map((group) => ({
+  id: group.label === "Geo" ? "maps" : group.label.toLowerCase(),
+  family: group.label,
+  note: group.label === "Geo" ? "Choropleth and point maps. No tile layer, no pan or zoom." : "",
+  charts: group.items.map((item) => tile(item.type, item.label)),
+}));
 
 const count = groups.reduce((total, group) => total + group.charts.length, 0);
-const description = `${count} ChartKit charts. Open a card to edit its spec.`;
+if (count !== galleryChartCount) {
+  throw new Error(`Gallery shows ${count} cards; the chart registry has ${galleryChartCount}.`);
+}
+const description = `${count} ChartKit charts. Open a card for the docs.`;
 const filters = [{ id: "all", label: "All", n: count }, ...groups.map((group) => ({ id: group.id, label: group.family, n: group.charts.length }))];
 ---
 
@@ -80,7 +57,7 @@ const filters = [{ id: "all", label: "All", n: count }, ...groups.map((group) =>
       <p class="eyebrow">Gallery · {count} charts</p>
       <h1 class="v2-h1 v2-h1--50">Every chart. One spec shape.</h1>
       <p class="v2-lead">
-        Core, statistical, planning, the rest of the library, and maps from <code>@chartkitdev/geo</code>. Open a card to edit its spec.
+        One card per chart type in the registry. Open a card for the docs, or open the same spec in the playground.
       </p>
       <div class="filter-track" role="tablist" aria-label="Chart groups">
         {
@@ -102,16 +79,19 @@ const filters = [{ id: "all", label: "All", n: count }, ...groups.map((group) =>
           {group.note ? <p class="gallery-note">{group.note}</p> : null}
           <div class="g-grid">
             {group.charts.map((chart) => (
-              <a class="g-card" href={chart.href}>
-                <div class="g-thumb" set:html={chart.svg} />
-                <div class="g-body">
-                  <header>
-                    <h3>{chart.title}</h3>
-                    <span>{chart.id}</span>
-                  </header>
-                  <p>{chart.summary}</p>
-                </div>
-              </a>
+              <article class="g-card">
+                <a class="g-card__open" href={chart.href}>
+                  <div class="g-thumb" set:html={chart.svg} />
+                  <div class="g-body">
+                    <header>
+                      <h3>{chart.title}</h3>
+                      <span>{chart.id}</span>
+                    </header>
+                    <p>{chart.summary}</p>
+                  </div>
+                </a>
+                <a class="g-play" href={chart.play}>Open in playground</a>
+              </article>
             ))}
           </div>
         </section>

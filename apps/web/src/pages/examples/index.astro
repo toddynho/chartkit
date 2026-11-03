@@ -1,61 +1,26 @@
 ---
-import "../../styles/surfaces.css";
 import Base from "../../layouts/Base.astro";
-import LiveSpec from "../../components/LiveSpec.astro";
-import { loadExample, loadExamplesIndex, loadPlayground } from "../../lib/surfaces";
 
-const data = loadExamplesIndex();
-const starter = loadExample(data.examples[0]?.slug ?? "");
-const { themes } = loadPlayground();
-const description = "Edit a ChartKit spec and preview it. Pick an example to load that spec.";
+const description = "The examples editor moved to the playground.";
 ---
 
-<Base title="Examples" description={description} tone="light">
-  <div class="wrap surface example-play">
+<Base title="Playground" description={description} tone="light">
+  <meta slot="head" name="robots" content="noindex" />
+  <script slot="head" is:inline>
+    location.replace("/playground" + location.hash);
+  </script>
+  <div class="wrap surface">
     <header class="hero">
-      <p class="kicker">Examples</p>
-      <h1>Examples</h1>
+      <p class="kicker">Playground</p>
+      <h1>Playground</h1>
       <p class="lede">
-        The preview on the left follows the spec on the right. Validate, repair, share, and SVG or PNG export use
-        <code>@chartkitdev/core</code>, and maps use <code>@chartkitdev/geo</code>. Pick an example to load its spec.
+        The editor is the playground. A shared spec in the link hash opens there.
+        <a id="examples-next" href="/playground">Open the playground</a>.
       </p>
     </header>
-    <LiveSpec
-      spec={starter.spec}
-      svg={starter.svg}
-      mode="full"
-      themes={themes}
-      examples={data.examples}
-      activeSlug={starter.slug}
-    />
-    <section class="section">
-      <h2>Catalog</h2>
-      <p class="lede">Open a card to load that spec into the editor.</p>
-    </section>
-    <nav class="filters" aria-label="Example groups">
-      {data.groups.map((group) => <a href={`#${group.id}`}>{group.label}</a>)}
-    </nav>
-    {
-      data.groups.map((group) => (
-        <section id={group.id} class="section">
-          <h2>{group.label}</h2>
-          <div class="example-grid">
-            {data.examples
-              .filter((example) => example.groupId === group.id)
-              .map((example) => (
-                <a
-                  class:list={["card", example.slug === starter.slug && "is-loaded"]}
-                  href={`/examples/${example.slug}`}
-                >
-                  <div class="cover-frame" role="img" aria-label={example.alt} set:html={example.svg} />
-                  <h3>{example.title}</h3>
-                  <p>{example.blurb}</p>
-                  <span class="edit-spec">{example.slug === starter.slug ? "In the editor" : "Edit spec"}</span>
-                </a>
-              ))}
-          </div>
-        </section>
-      ))
-    }
   </div>
 </Base>
+<script is:inline>
+  const link = document.getElementById("examples-next");
+  if (link) link.setAttribute("href", "/playground" + location.hash);
+</script>

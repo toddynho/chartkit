@@ -941,7 +941,8 @@ html[data-stack="element"] .home-card .stack-sample [data-stack-panel="element"]
   gap: 14px;
 }
 .g-card {
-  display: block;
+  display: flex;
+  flex-direction: column;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -949,6 +950,19 @@ html[data-stack="element"] .home-card .stack-sample [data-stack-panel="element"]
   text-decoration: none;
   color: inherit;
   transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.g-card__open {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  color: inherit;
+  text-decoration: none;
+}
+.g-card__open:hover { color: inherit; text-decoration: none; }
+.g-play {
+  margin: 0 16px 14px;
+  font-size: 12px;
+  font-weight: 600;
 }
 .g-card:hover {
   transform: translateY(-3px);

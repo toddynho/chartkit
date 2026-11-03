@@ -14,7 +14,7 @@ interface Props {
 
 const { spec, svg, alt, preset = false, geo = false, hydrate = true, edit = true } = Astro.props;
 const live = hydrate && !geo;
-const editHref = `/examples#${encodeURIComponent(JSON.stringify(spec))}`;
+const editHref = `/playground#${encodeURIComponent(JSON.stringify(spec))}`;
 ---
 
 <div class="chart-mount">

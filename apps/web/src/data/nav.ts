@@ -3,12 +3,13 @@ export type NavItem = {
   label: string;
 };
 
-/** Marketing header. Examples and Try Cloud stay off the bar. */
+/** Marketing header. Features stay off the bar. Docs is the starting point. */
 export const primaryNav: NavItem[] = [
   { href: "/cloud", label: "Cloud" },
   { href: "/dashboards", label: "Dashboards" },
   { href: "/agents", label: "Agents" },
   { href: "/gallery", label: "Gallery" },
+  { href: "/playground", label: "Playground" },
   { href: "/docs", label: "Docs" },
 ];
 
@@ -17,5 +18,6 @@ export const docsNavLinks: NavItem[] = [
   { href: "/cloud", label: "Cloud" },
   { href: "/agents", label: "Agents" },
   { href: "/gallery", label: "Gallery" },
+  { href: "/playground", label: "Playground" },
   { href: "/docs", label: "Docs" },
 ];

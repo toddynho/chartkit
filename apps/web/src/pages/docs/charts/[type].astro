@@ -1,21 +1,32 @@
 ---
 import ChartDoc from "../../../components/ChartDoc.astro";
 import ResponseRail from "../../../components/ResponseRail.astro";
-import { chartTypes } from "../../../data/chart-types";
-import { chartDocs, chartPage, chipsForChart, specForChart } from "../../../data/docs-catalog";
+import { chartPage, chartPageTypes, chipsForChart, specForChart } from "../../../data/docs-catalog";
 import Docs from "../../../layouts/Docs.astro";
 
 export function getStaticPaths() {
-  const types = [...new Set([...chartTypes.map((chart) => chart.type), ...chartDocs.map((chart) => chart.type)])];
-  return types.map((type) => ({ params: { type } }));
+  return chartPageTypes.map((type) => ({ params: { type } }));
 }
 
 const chart = chartPage(Astro.params.type ?? "");
 const spec = specForChart(chart);
 const href = `/docs/charts/${chart.type}`;
+const geoCopy: Record<string, { title: string; lede: string }> = {
+  choropleth: {
+    title: "Choropleth",
+    lede: "A shaded map from @chartkitdev/geo. No tile layer, and no pan or zoom.",
+  },
+  "map-points": {
+    title: "Map points",
+    lede: "Points on a map from @chartkitdev/geo. No tile layer, and no pan or zoom.",
+  },
+};
+const geo = geoCopy[chart.type];
+const title = geo?.title ?? chart.title;
+const lede = geo?.lede ?? chart.lede;
 ---
 
-<Docs title={chart.title} description={chart.description} lede={chart.lede} href={href}>
+<Docs title={title} description={lede} lede={lede} href={href}>
   <ChartDoc chart={chart} />
-  <ResponseRail slot="rail" spec={spec} chips={chipsForChart(chart.type)} />
+  {geo ? null : <ResponseRail slot="rail" spec={spec} chips={chipsForChart(chart.type)} />}
 </Docs>

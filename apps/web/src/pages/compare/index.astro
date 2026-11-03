@@ -3,13 +3,18 @@ import "../../styles/surfaces.css";
 import Base from "../../layouts/Base.astro";
 import LibraryLink from "../../components/LibraryLink.astro";
 import { libraryHome } from "../../data/library-homes";
-import { loadCompareIndex } from "../../lib/batch3";
+import { loadCompareIndex, loadWhenToUse } from "../../lib/batch3";
+import { scriptJson } from "../../lib/spec-text";
 
 const page = loadCompareIndex();
+const when = loadWhenToUse();
 const description = "ChartKit against 20 charting libraries. Every feature row is in the table, losses next to wins, with verification and source.";
 ---
 
 <Base title="Compare" description={description} tone="light">
+  <Fragment slot="head">
+    <script is:inline type="application/ld+json" set:html={scriptJson(when.jsonLd)} />
+  </Fragment>
   <div class="wrap surface prose">
     <h1>Compare</h1>
     <p class="lede">
@@ -55,5 +60,23 @@ const description = "ChartKit against 20 charting libraries. Every feature row i
         </tbody>
       </table>
     </div>
+    <section id="when-to-use">
+      <h2>When to use ChartKit</h2>
+      <p>
+        Round 13 browser numbers, losses included. Bundle size and server render are the phase 4 matrices. They match <a href="/benchmarks.json">benchmarks.json</a>.
+      </p>
+      {
+        when.faqs.map((item) => (
+          <section>
+            <h3>{item.question}</h3>
+            <p>{item.answer}</p>
+          </section>
+        ))
+      }
+      <p>
+        Pairwise pages: <a href="/compare/recharts">Recharts</a>, <a href="/compare/chartjs">Chart.js</a>,{" "}
+        <a href="/compare/echarts">ECharts</a>, <a href="/compare/nivo">Nivo</a>.
+      </p>
+    </section>
   </div>
 </Base>
