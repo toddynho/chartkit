@@ -1,0 +1,270 @@
+{
+  "$schema": "https://chartkit.dev/schema/v1.json",
+  "version": "1",
+  "type": "strip",
+  "title": "Output tokens per working chart",
+  "data": [
+    {
+      "library": "ChartKit",
+      "model": "Claude Haiku 4.5",
+      "tokens": 133
+    },
+    {
+      "library": "Plot",
+      "model": "Claude Haiku 4.5",
+      "tokens": 711
+    },
+    {
+      "library": "Chart.js",
+      "model": "Claude Haiku 4.5",
+      "tokens": 1193
+    },
+    {
+      "library": "Recharts",
+      "model": "Claude Haiku 4.5",
+      "tokens": 1285
+    },
+    {
+      "library": "ECharts",
+      "model": "Claude Haiku 4.5",
+      "tokens": 882
+    },
+    {
+      "library": "ChartKit",
+      "model": "Claude Sonnet 4.5",
+      "tokens": 124
+    },
+    {
+      "library": "Plot",
+      "model": "Claude Sonnet 4.5",
+      "tokens": 333
+    },
+    {
+      "library": "Chart.js",
+      "model": "Claude Sonnet 4.5",
+      "tokens": 887
+    },
+    {
+      "library": "Recharts",
+      "model": "Claude Sonnet 4.5",
+      "tokens": 1499
+    },
+    {
+      "library": "ECharts",
+      "model": "Claude Sonnet 4.5",
+      "tokens": 544
+    },
+    {
+      "library": "ChartKit",
+      "model": "Claude Opus 4.5",
+      "tokens": 127
+    },
+    {
+      "library": "Plot",
+      "model": "Claude Opus 4.5",
+      "tokens": 356
+    },
+    {
+      "library": "Chart.js",
+      "model": "Claude Opus 4.5",
+      "tokens": 901
+    },
+    {
+      "library": "Recharts",
+      "model": "Claude Opus 4.5",
+      "tokens": 1713
+    },
+    {
+      "library": "ECharts",
+      "model": "Claude Opus 4.5",
+      "tokens": 469
+    },
+    {
+      "library": "ChartKit",
+      "model": "Claude Fable 5",
+      "tokens": 115
+    },
+    {
+      "library": "Plot",
+      "model": "Claude Fable 5",
+      "tokens": 300
+    },
+    {
+      "library": "Chart.js",
+      "model": "Claude Fable 5",
+      "tokens": 656
+    },
+    {
+      "library": "Recharts",
+      "model": "Claude Fable 5",
+      "tokens": 1468
+    },
+    {
+      "library": "ECharts",
+      "model": "Claude Fable 5",
+      "tokens": 379
+    },
+    {
+      "library": "ChartKit",
+      "model": "GPT-5 Luna",
+      "tokens": 94
+    },
+    {
+      "library": "Plot",
+      "model": "GPT-5 Luna",
+      "tokens": 464
+    },
+    {
+      "library": "Chart.js",
+      "model": "GPT-5 Luna",
+      "tokens": 820
+    },
+    {
+      "library": "Recharts",
+      "model": "GPT-5 Luna",
+      "tokens": 874
+    },
+    {
+      "library": "ECharts",
+      "model": "GPT-5 Luna",
+      "tokens": 675
+    },
+    {
+      "library": "ChartKit",
+      "model": "GPT-5.1 Terra",
+      "tokens": 82.5
+    },
+    {
+      "library": "Plot",
+      "model": "GPT-5.1 Terra",
+      "tokens": 332
+    },
+    {
+      "library": "Chart.js",
+      "model": "GPT-5.1 Terra",
+      "tokens": 808
+    },
+    {
+      "library": "Recharts",
+      "model": "GPT-5.1 Terra",
+      "tokens": 1594
+    },
+    {
+      "library": "ECharts",
+      "model": "GPT-5.1 Terra",
+      "tokens": 488
+    },
+    {
+      "library": "ChartKit",
+      "model": "GPT-5.1 Sol",
+      "tokens": 86.5
+    },
+    {
+      "library": "Plot",
+      "model": "GPT-5.1 Sol",
+      "tokens": 244
+    },
+    {
+      "library": "Chart.js",
+      "model": "GPT-5.1 Sol",
+      "tokens": 491
+    },
+    {
+      "library": "Recharts",
+      "model": "GPT-5.1 Sol",
+      "tokens": 1273
+    },
+    {
+      "library": "ECharts",
+      "model": "GPT-5.1 Sol",
+      "tokens": 492
+    },
+    {
+      "library": "ChartKit",
+      "model": "GPT-5 Astra",
+      "tokens": 88
+    },
+    {
+      "library": "Plot",
+      "model": "GPT-5 Astra",
+      "tokens": 266
+    },
+    {
+      "library": "Chart.js",
+      "model": "GPT-5 Astra",
+      "tokens": 492
+    },
+    {
+      "library": "Recharts",
+      "model": "GPT-5 Astra",
+      "tokens": 1358
+    },
+    {
+      "library": "ECharts",
+      "model": "GPT-5 Astra",
+      "tokens": 536
+    },
+    {
+      "library": "ChartKit",
+      "model": "Grok 4",
+      "tokens": 78.5
+    },
+    {
+      "library": "Plot",
+      "model": "Grok 4",
+      "tokens": 166
+    },
+    {
+      "library": "Chart.js",
+      "model": "Grok 4",
+      "tokens": 444.5
+    },
+    {
+      "library": "Recharts",
+      "model": "Grok 4",
+      "tokens": 365
+    },
+    {
+      "library": "ECharts",
+      "model": "Grok 4",
+      "tokens": 284
+    }
+  ],
+  "encoding": {
+    "x": {
+      "field": "tokens",
+      "scale": {
+        "domain": [
+          0,
+          2000
+        ]
+      }
+    },
+    "y": "library",
+    "label": "model"
+  },
+  "mark": {
+    "band": "range",
+    "highlight": "ChartKit",
+    "sort": "asc",
+    "pointSize": 5,
+    "jitter": "none"
+  },
+  "annotations": [
+    {
+      "type": "compare",
+      "from": {
+        "group": "ChartKit",
+        "at": "summary"
+      },
+      "to": {
+        "group": "Plot",
+        "at": "summary"
+      },
+      "label": "← 3.5× fewer than Plot, next best"
+    }
+  ],
+  "a11y": {
+    "alt": "ChartKit's median is 94 tokens, 3.5× below Plot at 332."
+  }
+}

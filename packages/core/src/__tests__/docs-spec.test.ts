@@ -41,6 +41,7 @@ const CHART_TYPES = [
   "bar-range",
   "errorbar",
   "sunburst",
+  "strip",
 ];
 
 const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);

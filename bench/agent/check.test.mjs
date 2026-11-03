@@ -161,6 +161,22 @@ test("extracts JSON from a fenced reply", () => {
   assert.equal(spec.type, "line");
 });
 
+test("strip tasks validate and render offline", () => {
+  for (const id of ["tokens-by-model-strip", "latency-by-region-strip"]) {
+    const task = suite.tasks.find((item) => item.id === id);
+    assert.ok(task, id);
+    const spec = {
+      version: "1",
+      type: "strip",
+      data: task.data,
+      encoding: { x: task.expect.x, y: task.expect.y },
+      a11y: { alt: "Each dot is one observation." },
+    };
+    const result = suite.checkChartKit(spec, task);
+    assert.equal(result.ok, true, JSON.stringify(result.stages));
+  }
+});
+
 test("a valid line spec passes validate, render, type, and fields", () => {
   const task = suite.tasks.find((item) => item.id === "line-revenue");
   const spec = {

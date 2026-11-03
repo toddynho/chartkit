@@ -19,7 +19,7 @@ export type ChartKitChartSpecV1 = {
    */
   version: "1";
   /**
-   * Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. Nested children, encoding.path, or encoding.id with encoding.parent draw nested levels; a flat treemap stays one level. 'sunburst': concentric rings for that same hierarchy. Colour follows the top-level branch. mark.innerRadius is the hole (0.28 when omitted) and mark.depth caps the rings. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar. 'area-range': a band between low and high, with an optional centre line from y. Several bands are a y list of {lo, hi}. 'bar-range': a floating bar from low to high per category. 'errorbar': whiskers on a point or a bar, from low and high or from encoding.error as ± around y. A combo y item with mark range and lo/hi draws that band under the other series. 'bar-list': Ranked rows with no axes. A tinted track runs behind the label and the value sits at the right. Load it from @chartkitdev/core/charts/bar-list. It is not in the line or all bundle. 'radial-bar': category on x, radius on y, bars around a circle. Several y fields group side by side unless mark.stack is stack or percent. 'rose': equal angles, and the radius is the value (a nightingale rose). Both use polar coordinates and load from @chartkitdev/core/charts/<type>. They are not in the line bundle. layout.coordinate polar on bar, pie, or donut repairs onto radial-bar or rose (CK3077).
+   * Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. Nested children, encoding.path, or encoding.id with encoding.parent draw nested levels; a flat treemap stays one level. 'sunburst': concentric rings for that same hierarchy. Colour follows the top-level branch. mark.innerRadius is the hole (0.28 when omitted) and mark.depth caps the rings. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar. 'area-range': a band between low and high, with an optional centre line from y. Several bands are a y list of {lo, hi}. 'bar-range': a floating bar from low to high per category. 'errorbar': whiskers on a point or a bar, from low and high or from encoding.error as ± around y. A combo y item with mark range and lo/hi draws that band under the other series. 'bar-list': Ranked rows with no axes. A tinted track runs behind the label and the value sits at the right. Load it from @chartkitdev/core/charts/bar-list. It is not in the line or all bundle. 'radial-bar': category on x, radius on y, bars around a circle. Several y fields group side by side unless mark.stack is stack or percent. 'rose': equal angles, and the radius is the value (a nightingale rose). Both use polar coordinates and load from @chartkitdev/core/charts/<type>. They are not in the line bundle. layout.coordinate polar on bar, pie, or donut repairs onto radial-bar or rose (CK3077). 'strip': One row per group (a column when mark.orientation is vertical). Each observation is a dot on a shared numeric axis. Omit mark.orientation for horizontal: encoding.y is the group and encoding.x is the value. Vertical swaps those. mark.summary is a median tick unless set to mean or none. mark.band is none, range (min to max), or iqr. mark.jitter is none, auto, or a pixel distance. mark.highlight names one group, drawn in accent. encoding.label is the point name in the tooltip. A compare annotation draws a bracket between two groups. Load it from @chartkitdev/core/charts/strip. It is not in the line or all bundle.
    */
   type:
     | "line"
@@ -51,7 +51,8 @@ export type ChartKitChartSpecV1 = {
     | "sunburst"
     | "bar-list"
     | "radial-bar"
-    | "rose";
+    | "rose"
+    | "strip";
   /**
    * Optional stable id (used for keys, events, test hooks).
    */
@@ -612,6 +613,20 @@ export type Annotation =
        */
       z?: number;
       color?: Color;
+    }
+  | {
+      type: "compare";
+      from: StripEnd;
+      to: StripEnd;
+      /**
+       * Text on the bracket.
+       */
+      label: string;
+      /**
+       * Draw order. Higher paints later. Negative paints under the marks.
+       */
+      z?: number;
+      color?: Color;
     };
 /**
  * Look and feel. A preset name, or an object combining a preset, a light/dark mode and token overrides. Every token is also read from CSS variables --ck-<token> (and --ck-series-N) on the container, so host design systems (e.g. shadcn --chart-1..5) can theme charts with no JS. Default 'auto' is Soft: light-dark colours, transparent plot. Set --ck-background for the optional #f5f5f7 card.
@@ -1044,6 +1059,24 @@ export interface Encoding {
    * Treemap and sunburst: the parent id field. An empty parent is a root. On a treemap with no encoding.id, a legacy parent field still repairs to encoding.color.
    */
   parent?: string;
+  /**
+   * Strip only: field shown with the group and the value in the point tooltip. It is not drawn on the plot. Other chart types warn CK3094.
+   */
+  label?:
+    | FieldName
+    | {
+        field: FieldName;
+        /**
+         * Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.
+         */
+        type?: "quantitative" | "temporal" | "ordinal" | "nominal";
+        /**
+         * Human-readable name used in axes, legend and tooltip. Defaults to the field name.
+         */
+        title?: string;
+        format?: Format;
+        scale?: Scale;
+      };
 }
 /**
  * Detailed format.
@@ -1717,7 +1750,7 @@ export interface Mark {
    */
   track?: "bar" | "row";
   /**
-   * Point radius in px. Applies to: line, stacked-area, combo, scatter, errorbar.
+   * Point radius in px. Applies to: line, stacked-area, combo, scatter, errorbar, strip.
    */
   pointSize?: number;
   /**
@@ -1757,7 +1790,7 @@ export interface Mark {
    */
   stack?: "none" | "stack" | "percent";
   /**
-   * Bar direction. Applies to: bar.
+   * Bar direction. vertical is the bar default. Strip treats an omission as horizontal: categories run down the y axis and the numeric axis is x. Set vertical to swap them. Applies to: bar, strip.
    */
   orientation?: "vertical" | "horizontal";
   /**
@@ -1835,7 +1868,23 @@ export interface Mark {
    */
   padAngle?: number;
   /**
-   * Slice order. none keeps data order and pins an Other bucket last. asc and desc sort by value, including Other. Applies to: donut, pie.
+   * Tick drawn across each group. median is the default. mean is the arithmetic mean. none draws no tick. A strip where every group has one point hides the tick. Applies to: strip.
+   */
+  summary?: "none" | "median" | "mean";
+  /**
+   * Bar behind the dots. none draws none. range runs from the minimum to the maximum. iqr runs from the first quartile to the third. A group with fewer than 3 points draws no band. Applies to: strip.
+   */
+  band?: "none" | "range" | "iqr";
+  /**
+   * Spread dots that share a position. auto offsets a dot only when another dot in the group is within one diameter. none never offsets. A number is the maximum offset in px and moves every dot. The offset is a function of the row, so a server render matches the client. Applies to: strip.
+   */
+  jitter?: ("none" | "auto") | number;
+  /**
+   * Group value to draw in accent. Every other group uses muted. The summary tick stays ink. Applies to: strip.
+   */
+  highlight?: string;
+  /**
+   * Slice order. none keeps data order and pins an Other bucket last. asc and desc sort by value, including Other. On a strip, none keeps the first-seen group order and asc or desc orders groups by the summary (by the median when mark.summary is none). Applies to: donut, pie, strip.
    */
   sort?: "none" | "asc" | "desc";
   /**
@@ -4440,6 +4489,19 @@ export interface AxisBand {
    * Fill opacity, 0–1.
    */
   opacity?: number;
+}
+/**
+ * One end of a strip compare bracket.
+ */
+export interface StripEnd {
+  /**
+   * Group value, the same string the row uses.
+   */
+  group: string;
+  /**
+   * Which statistic the bracket end sits on. summary is the tick that is drawn, or the median when the tick is hidden.
+   */
+  at: "summary" | "min" | "max" | "mean";
 }
 /**
  * Dimensions. Default: fill container width, height by type (line/bar 240px, sparkline 32px, gauge 160px).

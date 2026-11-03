@@ -224,7 +224,7 @@ export function galleryThumb(type: string): string {
   delete spec.subtitle;
   spec.theme = galleryTheme;
   spec.legend = false;
-  if (type === "bar-list") spec.size = { width: 480, height: 200 };
+  if (type === "bar-list" || type === "strip") spec.size = { width: 480, height: type === "strip" ? 240 : 200 };
   else if (type === "sparkline" || type === "mini-area") spec.size = { width: 480, height: 88 };
   else spec.size = { width: 480, height: 200 };
   const result = paintSpec(spec);

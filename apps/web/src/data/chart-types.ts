@@ -26,6 +26,7 @@ export const chartTypes: ChartType[] = [
   { type: "candlestick", title: "Candlestick", summary: "Open, high, low, and close." },
   { type: "histogram", title: "Histogram", summary: "One quantitative field, split into bins." },
   { type: "boxplot", title: "Box plot", summary: "Quartiles, whiskers, a median, and outliers." },
+  { type: "strip", title: "Strip", summary: "Every observation as a dot on a shared numeric axis, one row per group." },
   { type: "radar", title: "Radar", summary: "One polygon per series around shared spokes." },
   { type: "funnel", title: "Funnel", summary: "Stages in order, width from the value." },
   { type: "treemap", title: "Treemap", summary: "Area tiles for a whole." },

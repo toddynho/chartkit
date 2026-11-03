@@ -52,6 +52,7 @@ const charts = [
   "bar-list",
   "radial-bar",
   "rose",
+  "strip",
 ];
 
 const themes = [

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://chartkit.dev/schema/v1.json",
+  "version": "1",
+  "type": "strip",
+  "data": [
+    {
+      "region": "North",
+      "ms": 42
+    },
+    {
+      "region": "South",
+      "ms": 55
+    },
+    {
+      "region": "East",
+      "ms": 31
+    }
+  ],
+  "encoding": {
+    "x": "ms",
+    "y": "region"
+  },
+  "a11y": {
+    "alt": "South is slowest at 55 ms."
+  }
+}

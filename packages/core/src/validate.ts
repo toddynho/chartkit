@@ -106,6 +106,7 @@ export interface RepairResult extends ValidationResult {
 }
 
 const MAX_REPAIR_ROUNDS = 8;
+const STRIP_REPAIR = new Set(["CK3090", "CK3091", "CK3092", "CK3093", "CK3094"]);
 
 /**
  * Apply the validator's safe JSON Patch fixes and revalidate.
@@ -136,6 +137,19 @@ export function repair(spec: unknown, data?: unknown): RepairResult {
     const next = validate(current, data);
     if (!next.ok && sameErrors(result, next)) break;
     result = next;
+  }
+
+  // Strip warnings carry a safe patch. repair() otherwise applies error patches only.
+  if (result.ok) {
+    const ops = result.warnings.filter((warning) => STRIP_REPAIR.has(warning.code)).flatMap((warning) => warning.fix ?? []);
+    let changed = false;
+    for (const op of ops) {
+      if (applyPatch(current, op)) {
+        applied.push(op);
+        changed = true;
+      }
+    }
+    if (changed) result = validate(current, data);
   }
 
   return { spec: current, ...result, applied };
