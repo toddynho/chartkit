@@ -1,37 +1,26 @@
 ---
-import "../styles/surfaces.css";
+import "../styles/playground.css";
 import Base from "../layouts/Base.astro";
-import LiveSpec from "../components/LiveSpec.astro";
-import { loadExample, loadExamplesIndex, loadPlayground } from "../lib/surfaces";
+import { loadExample, loadExamplesIndex } from "../lib/surfaces";
+import { scriptJson } from "../lib/spec-text";
 
 const data = loadExamplesIndex();
-const files = data.examples.map((example) => loadExample(example.slug));
-const starter = files[0];
-if (!starter) throw new Error("Playground has no examples.");
-const { themes } = loadPlayground();
-const exampleSpecs = Object.fromEntries(files.map((file) => [file.slug, file.spec]));
-const description = "Edit a ChartKit spec and preview it. Every option for the chart type is in the panel. Validate, repair, share, and export SVG or PNG.";
+const examples = data.examples.map((card) => {
+  const file = loadExample(card.slug);
+  return { slug: file.slug, title: file.title, type: file.type, svg: file.svg, spec: file.spec };
+});
+if (!examples.length) throw new Error("Playground has no examples.");
+const description = "Edit a ChartKit spec in the playground. Options, JSON, and data stay in sync, and the preview renders with ChartKit.";
 ---
 
 <Base title="Playground" description={description} tone="light">
-  <div class="surface example-play">
-    <header class="hero wrap">
-      <p class="kicker">Playground</p>
-      <h1>Playground</h1>
-      <p class="lede">
-        The spec, the preview, and the options use the width of the window. Search the panel or open a section; the common options are listed first. Validate, repair, share, and SVG or PNG export use
-        <code>@chartkitdev/core</code>, and maps use <code>@chartkitdev/geo</code>. Chart types are listed in the
-        <a href="/gallery">gallery</a>. Worked examples sit on each <a href="/docs">chart’s docs page</a>.
-      </p>
-    </header>
-    <LiveSpec
-      spec={starter.spec}
-      svg={starter.svg}
-      mode="full"
-      themes={themes}
-      examples={data.examples}
-      exampleSpecs={exampleSpecs}
-      activeSlug={starter.slug}
-    />
-  </div>
+  <div class="play" id="play"></div>
+  <script id="play-data" type="application/json" is:inline set:html={scriptJson({ examples })} />
+  <script>
+    import { mountPlayground } from "../scripts/playground";
+
+    const root = document.querySelector<HTMLElement>("#play");
+    const raw = document.querySelector<HTMLScriptElement>("#play-data")?.textContent;
+    if (root && raw) mountPlayground(root, JSON.parse(raw) as { examples: { slug: string; title: string; type: string; svg: string; spec: Record<string, unknown> }[] });
+  </script>
 </Base>
