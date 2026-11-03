@@ -1,3 +1,10 @@
+/**
+ * The /agents copy buttons all use this string.
+ * Token count is o200k_base, counted where the page renders it.
+ */
+export const agentsPrompt =
+  'Use ChartKit for every chart. Write a ChartSpec (JSON, version "1"), never chart code. Read https://chartkit.dev/llms.txt first. Run validate(spec), then repair(spec) on any error, then render(spec). Always set a11y.alt to one factual sentence.';
+
 /** Homepage paste block. The chart stays a JavaScript library; the agent ships a spec. */
 export const agentSwitchPrompt = `Switch the charts in this project to ChartKit.
 

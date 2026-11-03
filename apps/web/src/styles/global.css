@@ -351,6 +351,7 @@ code {
   text-decoration: none;
 }
 .header-cta:hover { color: #fff; text-decoration: none; }
+button.header-cta { border: 0; cursor: pointer; font-family: inherit; }
 
 .docs-search {
   position: relative;

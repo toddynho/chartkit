@@ -1,260 +1,464 @@
 ---
 import "../styles/v2.css";
+import "../styles/agents.css";
+import { validate, repair } from "@chartkitdev/core/validate";
 import Base from "../layouts/Base.astro";
 import { agentWrote } from "../data/agent-wrote";
-import { agentSwitchPrompt } from "../data/agent-prompt";
+import { agentsPrompt } from "../data/agent-prompt";
 import { chartkitCloudUrl } from "../data/cloud-url";
 import { proofFigures } from "../data/home-bench";
-import { tokenScoreboard, tokenSection } from "../data/token-eval";
+import { TOKEN_EVAL, formatEvalDate, tokenScoreboard, tokenSpread } from "../data/token-eval";
+import { paintSpec } from "../lib/chartkit";
+import { kb } from "../lib/line-gzip";
+import { countO200k } from "../lib/o200k";
 
-const proof = proofFigures();
 const wrote = agentWrote();
+const proof = proofFigures();
+const spread = tokenSpread();
+const board = tokenScoreboard();
+const promptTokens = countO200k(agentsPrompt);
+const measured = formatEvalDate(wrote.measured);
 
-function escapePre(value: string): string {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-const wroteCk = escapePre(wrote.chartkit.code);
-const wroteRx = escapePre(wrote.recharts.code);
-const wroteDelta = `${wrote.lineDelta >= 0 ? "+" : ""}${wrote.lineDelta} lines · ${wrote.recharts.calls} ${wrote.recharts.calls === 1 ? "call" : "calls"} · ${wrote.recharts.retries === 0 ? "no retry" : `${wrote.recharts.retries} ${wrote.recharts.retries === 1 ? "retry" : "retries"}`}`;
-const board = tokenScoreboard();
-const tokens = tokenSection();
-const cloudUrl = chartkitCloudUrl();
-const tokenRange = tokens.stats[0]?.value ?? "";
-const tokenTimes = `${tokens.stats[1]?.value ?? ""}${tokens.stats[1]?.suffix ?? ""}`;
-const tokenCalls = tokens.stats[2]?.value ?? "";
-const description = `If you're building an agent that draws charts, point it at ChartKit. Median output tokens are ${tokenRange} by model, ${tokenTimes} fewer than the next library, in ${tokenCalls} model calls.`;
+/** Same JSON as the recorded answer, with data rows paired so the card stays short. */
+function displaySpec(code: string): { text: string; alt: string; title: string; spec: unknown } {
+  const spec = JSON.parse(code) as unknown;
+  if (!isRecord(spec) || !Array.isArray(spec.data)) {
+    return { text: code, alt: "", title: "", spec };
+  }
+  const rows = spec.data.map((row) => JSON.stringify(row).replaceAll('":', '": ').replaceAll(',"', ', "'));
+  const paired: string[] = [];
+  for (let i = 0; i < rows.length; i += 2) {
+    const next = rows[i + 1];
+    paired.push(next ? `    ${rows[i]}, ${next}` : `    ${rows[i]}`);
+  }
+  const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : "";
+  const title = typeof spec.title === "string" ? spec.title : "";
+  const text = `{
+  "version": ${JSON.stringify(spec.version)}, "type": ${JSON.stringify(spec.type)},
+  "data": [
+${paired.join(",\n")}
+  ],
+  "encoding": ${JSON.stringify(spec.encoding)},
+  "a11y": { "alt": ${JSON.stringify(alt)} }
+}`;
+  return { text, alt, title, spec };
+}
+
+const shown = displaySpec(wrote.chartkit.code);
+const painted = paintSpec(shown.spec);
+if (!painted.ok || !painted.svg.includes("<svg")) {
+  throw new Error(`Recorded agent spec did not render: ${painted.footer}`);
+}
+const svgBytes = new TextEncoder().encode(painted.svg).length;
+const svgLabel = `svg · ${kb(svgBytes)}`;
+
+const example = {
+  version: "1",
+  type: "bar",
+  data: [
+    { month: "Jan", signups: 72 },
+    { month: "Feb", signups: 98 },
+  ],
+  encoding: { x: "month", y: "signup" },
+};
+const exampleErrors = validate(example).errors.slice(0, 2);
+const exampleFixed = repair(example);
+const examplePaint = paintSpec(exampleFixed.spec);
+if (!examplePaint.ok || !examplePaint.svg.includes("<svg")) {
+  throw new Error("Example repair did not render");
+}
+const exampleSvg = kb(new TextEncoder().encode(examplePaint.svg).length);
+
+type Patch = { op: string; path: string; value?: unknown };
+const patches = (exampleFixed.applied as Patch[]).slice(0, 4);
+
+const origin = chartkitCloudUrl();
+const schemaUrl = "https://chartkit.dev/schema/v1.json";
+const kit = [
+  {
+    name: "llms.txt",
+    where: "one line in the system prompt",
+    body: "The model fetches it once. Rules, the repair loop, one example spec per chart type.",
+    snippet: "Read https://chartkit.dev/llms.txt before writing any chart.",
+  },
+  {
+    name: "schema/v1.json",
+    where: "OpenAI structured output",
+    body: `The schema is served at ${schemaUrl}. OpenAI structured output inlines that document as json_schema.schema. It does not take a schema URL.`,
+    snippet: `// OpenAI response_format. schema is the document at ${schemaUrl}
+response_format: {
+  type: "json_schema",
+  json_schema: {
+    name: "chartspec",
+    strict: true,
+    schema,
+  },
+}`,
+  },
+  {
+    name: "validate() / repair()",
+    where: "your tool handler",
+    body: "Every error in one pass. repair() applies the safe fixes and does not call a model.",
+    snippet: `import { validate, repair } from "@chartkitdev/core/validate";
+
+const result = validate(spec);
+if (!result.ok) spec = repair(spec).spec;`,
+  },
+  {
+    name: "MCP",
+    where: "claude_desktop_config.json, .cursor/mcp.json",
+    body: "stdio server. validate, repair and render stay local. render_chart calls Cloud.",
+    snippet: `{
+  "mcpServers": {
+    "chartkit": {
+      "command": "npx",
+      "args": ["-y", "@chartkitdev/mcp"]
+    }
+  }
+}`,
+  },
+  {
+    name: "Cloud",
+    where: "when the host cannot draw",
+    body: "POST /render returns JSON, not the file: svg or base64 png, plus url. GET /render returns the file.",
+    snippet: `const res = await fetch("${origin}/render", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ spec, format: "svg" }),
+});
+const body = await res.json(); // body.svg, or base64 body.png; body.url`,
+  },
+];
 
 const steps = [
   {
-    n: "01",
-    tag: "model",
-    title: "Write",
+    n: "01 · model",
+    tag: "1 call",
+    title: "The agent writes a spec",
     body: 'version is "1". data is an array of rows. a11y.alt is one factual sentence. Gauge, kpi and progress-ring put the number in metric.',
     code: "spec.json",
+    ink: true,
   },
   {
-    n: "02",
-    tag: "no model",
-    title: "Validate",
+    n: "02 · local",
+    tag: "0 calls",
+    title: "validate()",
     body: "Checks the schema and the data. Every CK code comes back in one pass: CK1001 is invalid JSON, CK1004 a missing required field.",
     code: "validate(spec)",
+    ink: false,
   },
   {
-    n: "03",
-    tag: "no model",
-    title: "Repair",
-    body: "Returns a spec and the JSON Patch it applied. Never invents data. A missing or unknown type is reported first.",
+    n: "03 · local",
+    tag: "0 calls",
+    title: "repair()",
+    body: "Returns a spec and the JSON Patch it applied. Never invents a data value. A missing or unknown type is reported first.",
     code: "repair(spec)",
+    ink: false,
   },
   {
-    n: "04",
-    tag: "no model",
-    title: "Render",
-    body: "Core charts from @chartkitdev/core/all. Histogram through rose, and the planning charts, come from core/extra. render() does not validate and does not throw.",
+    n: "04 · local or cloud",
+    tag: "0 calls",
+    title: "render()",
+    body: "Core charts come from @chartkitdev/core/all. Histogram through the planning charts come from @chartkitdev/core/extra. render() does not validate and does not throw. No host? POST the spec to Cloud.",
     code: "render(spec)",
+    ink: false,
   },
 ];
 
-const defaults = [
-  { href: "/llms.txt", file: "llms.txt", what: "Load this in the harness. Rules, the repair loop, and one spec per chart type." },
-  { href: "/schema/v1.json", file: "schema/v1.json", what: "JSON Schema for the spec the agent writes." },
-  {
-    href: "/docs/validate",
-    file: "validate() / repair()",
-    what: "Every error in one pass. repair() applies the safe fixes and does not call a model.",
-  },
-  {
-    href: "/docs/mcp",
-    file: "MCP",
-    what: "stdio server. npx -y @chartkitdev/mcp. validate, repair, and render stay local. render_chart calls Cloud.",
-  },
-  {
-    href: "/docs/cloud",
-    file: "Cloud URL",
-    what: `${cloudUrl} — POST /render returns SVG or PNG when the host cannot draw the chart.`,
-  },
-];
+const callsLabel = `${wrote.chartkit.calls} ${wrote.chartkit.calls === 1 ? "call" : "calls"}`;
+const bothFirst = wrote.chartkit.firstTry && wrote.recharts.firstTry;
+const barMax = Math.max(wrote.chartkit.tokens, wrote.recharts.tokens);
+const rawByName = new Map(TOKEN_EVAL.models.map((model) => [model.name, model.tokens]));
+const description = `Point an agent at ChartKit. On the published with-docs run, median output tokens are ${spread.rows[0]?.range ?? ""} by model, ${spread.headline}× fewer than the next library, in ${spread.calls} model calls.`;
 ---
 
 <Base tone="light" title="Agents" description={description}>
-  <div class="v2">
-    <section class="split">
-      <div>
-        <p class="eyebrow">Agents</p>
-        <h1 class="v2-h1 v2-h1--50">If you're building an agent that draws charts, point it here.</h1>
-        <p class="v2-lead v2-lead--left">
-          For developers and product teams who ship agents. Set ChartKit as the default in the harness. The model writes a spec, once.
-        </p>
-        <div class="v2-actions">
-          <a class="btn-lg" href="/llms.txt">Get llms.txt</a>
-          <a class="btn-text" href="#eval">Token scoreboard →</a>
-        </div>
-      </div>
-      <div class="agent-term">
-        <header>agent session</header>
-        <div class="dim">&gt; validate(spec)</div>
-        <div class="bad">✕ CK1004 a11y.alt is required</div>
-        <div class="bad">✕ CK1021 encoding.y "signup" not in data</div>
-        <div class="dim">&gt; repair(spec)</div>
-        <div class="ok">✓ /a11y/alt ← "Signups by month, Jan–Aug"</div>
-        <div class="ok">✓ /encoding/y "signup" → "signups"</div>
-        <div class="dim">&gt; render(spec)</div>
-        <div>&lt;svg viewBox="0 0 640 360"&gt;… 4.1 KB · 0 model calls</div>
-      </div>
-    </section>
+  <div class="v2 agents-page">
+    <p class="sr" data-agent-prompt>{agentsPrompt}</p>
 
-    <section class="wrote" id="wrote" aria-labelledby="wrote-title">
-      <div class="wrote-head">
-        <h2 id="wrote-title">What the agent actually writes</h2>
-        <p class="wrote-lead">
-          Same task, same model. A ChartKit spec is {wrote.chartkit.tokens.toLocaleString("en-US")} output tokens{wrote.chartkit.firstTry ? " and rendered first try" : ""}; the Recharts component is {wrote.recharts.tokens.toLocaleString("en-US")}{wrote.recharts.firstTry ? " and also rendered first try" : ""}.
+    <section class="agents-hero" id="wrote">
+      <div class="agents-copy">
+        <p class="eyebrow eyebrow--blue">Agents</p>
+        <h1>If your agent draws charts, point it here.</h1>
+        <p class="agents-lead">
+          Set ChartKit as the default in your harness. The model writes a spec. Validate, repair and render need no model at all.
         </p>
-      </div>
-      <div class="wrote-grid">
-        <div class="wrote-card wrote-card--dark">
-          <div class="wrote-card__bar">
-            <div class="wrote-kicker">What the agent wrote</div>
-            <div class="tok-pill">{wrote.chartkit.tokens.toLocaleString("en-US")} tok</div>
+        <div class="agents-prompt">
+          <div class="agents-prompt__bar">
+            <span class="agents-prompt__k">The prompt</span>
+            <span class="agents-prompt__tok">{promptTokens} tok</span>
           </div>
-          <pre set:html={wroteCk} />
-          <div class="wrote-card__foot">
-            <span class="wrote-dot"></span>
-            {wrote.chartkit.firstTry ? "Rendered first try · ChartKit" : `${wrote.chartkit.calls} calls · ChartKit`}
-          </div>
+          <div class="agents-prompt__body">{agentsPrompt}</div>
         </div>
-        <div class="wrote-card wrote-card--light">
-          <div class="wrote-card__bar">
-            <div class="wrote-kicker" style="color:#8b8d93">Same task, next library</div>
-            <div class="tok-pill tok-pill--muted">{wrote.recharts.tokens.toLocaleString("en-US")} tok</div>
+        <div class="agents-cta">
+          <button type="button" class="agents-primary" data-copy-prompt data-idle="Copy the prompt" data-done="Copied the prompt ✓">
+            Copy the prompt
+          </button>
+          <a class="btn-text" href="#default">llms.txt, schema, MCP ↓</a>
+        </div>
+        <p class="agents-fine">Works in a system prompt, CLAUDE.md, .cursorrules or an MCP config.</p>
+      </div>
+
+      <div class="agents-result">
+        <div class="agents-result__wrote">
+          <div class="agents-kicker">
+            <span>What the agent wrote</span>
+            <span class="agents-pill" title="Harness output_tokens for this recorded answer">{wrote.chartkit.tokens.toLocaleString("en-US")} tok · {callsLabel}</span>
           </div>
-          <pre set:html={wroteRx} />
-          <div class="wrote-fade">
-            <div class="wrote-card__foot">
-              <span class:list={["wrote-dot", wrote.recharts.retries > 0 && "wrote-dot--wait"]}></span>
-              {wroteDelta}
+          <pre>{shown.text}</pre>
+        </div>
+        <div class="agents-result__drew">
+          <div class="agents-kicker">
+            <span class="agents-kicker__left">
+              <span class="agents-dot"></span>
+              {wrote.chartkit.firstTry ? "What rendered · first try" : "What rendered"}
+            </span>
+            <span class="agents-kicker__meta" title={`${svgBytes.toLocaleString("en-US")} bytes`}>{svgLabel}</span>
+          </div>
+          <div class="agents-drew">
+            <div class="agents-chart">
+              {shown.title ? <div class="agents-chart__title">{shown.title}</div> : null}
+              <div class="agents-chart__svg" set:html={painted.svg} />
+            </div>
+            <div class="agents-alt">
+              <div class="agents-alt__k">a11y.alt</div>
+              {shown.alt}
             </div>
           </div>
         </div>
       </div>
-      <p class="proof-note wrote-note">
-        Recorded answer from the round 6 official-docs run ({wrote.model}, {wrote.measured}), task {wrote.task}. Output tokens are the harness counts for those answers.{wrote.chartkit.firstTry && wrote.recharts.firstTry ? " Both rendered on the first call, so there is no retry to show." : ""} The nine-model matrix does not publish raw transcripts.
-      </p>
     </section>
 
-    <section class="agent-block" id="eval" aria-labelledby="eval-title">
-      <div class="section-intro">
-        <h2 id="eval-title">Output tokens per working chart</h2>
-        <p>Median by model, with docs. ChartKit median calls are {board.calls}.</p>
+    <section class="agents-stats-wrap" id="stats" aria-label="Measured figures">
+      <div class="agents-stats">
+        <article class="agents-stat">
+          <div class="agents-stat__k">Output tokens, this task</div>
+          <div class="agents-stat__v is-blue">
+            <strong>{wrote.chartkit.tokens.toLocaleString("en-US")}</strong>
+            <span>vs {wrote.recharts.tokens.toLocaleString("en-US")}</span>
+          </div>
+          <div class="agents-viz">
+            <div class="agents-bars">
+              <div class="agents-bar">
+                <i style={`width:${((wrote.chartkit.tokens / barMax) * 70).toFixed(1)}%`}></i>
+                <span>ChartKit</span>
+              </div>
+              <div class="agents-bar">
+                <i class="is-other" style={`width:${((wrote.recharts.tokens / barMax) * 70).toFixed(1)}%`}></i>
+                <span>Recharts</span>
+              </div>
+            </div>
+          </div>
+          <p>
+            Round 6, {wrote.model}, {measured}, task {wrote.task}. Harness output tokens for the two recorded answers.{bothFirst ? " Both rendered on the first call." : ""}
+          </p>
+        </article>
+        <article class="agents-stat">
+          <div class="agents-stat__k">First-try validity</div>
+          <div class="agents-stat__v">
+            <strong>{proof.first}</strong>
+            <span>/ {proof.tasks}</span>
+          </div>
+          <div class="agents-viz">
+            <div class="agents-cells" aria-hidden="true">
+              {Array.from({ length: proof.tasks }, (_, index) => <i class:list={[index < proof.first && "is-on"]} />)}
+            </div>
+          </div>
+          <p>Tasks that rendered on the first call with docs in the prompt. Round 6, {wrote.model}, {measured}.</p>
+        </article>
+        <article class="agents-stat">
+          <div class="agents-stat__k">Model calls per chart</div>
+          <div class="agents-stat__v">
+            <strong>{spread.calls}</strong>
+            <span>median</span>
+          </div>
+          <div class="agents-viz">
+            <div class="agents-calls">
+              <b class="is-on">model</b><span>›</span><b>validate</b><span>›</span><b>repair</b><span>›</span><b>render</b>
+            </div>
+          </div>
+          <p>
+            Median on a working chart across {spread.modelWord} models, docs in context. validate, repair and render do not add a model call.
+          </p>
+        </article>
       </div>
-      <div class="compare-table-wrap">
-        <table class="compare-table scoreboard">
-          <caption class="sr">Median output tokens per working chart by model.</caption>
-          <thead>
-            <tr>
-              <th scope="col">Model</th>
-              {
-                board.libraries.map((library) => (
-                  <th class:list={["num", library === "ChartKit" && "us"]} scope="col">
-                    {library}
-                  </th>
-                ))
-              }
-              <th class="num" scope="col">CK vs next</th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              board.rows.map((row) => (
-                <tr class:list={[row.pending && "is-pending"]}>
-                  <th scope="row">{row.name}</th>
-                  {row.cells.map((cell) => (
-                    <td class:list={["num", cell.us && "us"]}>
-                      {cell.text}
-                      {cell.mark ? <sup>{cell.mark}</sup> : null}
-                    </td>
-                  ))}
-                  <td class="num">{row.versus}</td>
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
-      </div>
-      {
-        board.rows
-          .filter((row) => row.notes.length > 0)
-          .map((row) => (
-            <p class="token-note">
-              <strong>{row.name}.</strong>{" "}
-              {row.notes.map((note) => (
-                <>
-                  {note.mark ? <sup>{note.mark}</sup> : null}
-                  {note.text}{" "}
-                </>
-              ))}
-            </p>
-          ))
-      }
-      <p class="token-note">
-        <a class="quiet-link" href="/methodology/agent-eval">Review test details and methodology →</a>
-      </p>
     </section>
 
-    <section class="agent-block" aria-labelledby="default-title">
-      <div class="section-intro">
-        <h2 id="default-title">Make ChartKit the default</h2>
-        <p>Put these in the harness that already ships your agent. The model writes a spec, not chart code.</p>
+    <section class="agents-section" id="tokens" aria-labelledby="tokens-title">
+      <div class="agents-intro">
+        <h2 id="tokens-title">Output tokens per working chart</h2>
+        <p>Median across {spread.tasks} tasks, {spread.modelWord} models, docs in context. Each dot is one model.</p>
       </div>
-      <article class="plain-card defaults">
-        {
-          defaults.map((item) => (
-            <a class="give-row" href={item.href}>
-              <strong>{item.file}</strong>
-              <span>{item.what}</span>
-            </a>
-          ))
-        }
-      </article>
+      <div class="agents-card">
+        <div class="agents-strip">
+          {
+            spread.rows.map((row) => (
+              <div class:list={["agents-strip__row", row.us && "is-us", row.us && "is-first"]}>
+                <div class="agents-strip__name">{row.name}</div>
+                <div class="agents-plot">
+                  <div class="agents-rail"></div>
+                  <div class="agents-band" style={`left:${row.minPct};width:${row.spanPct}`}></div>
+                  {row.dots.map((dot) => <span class="agents-dotplot" title={dot.title} style={`left:${dot.left}`}></span>)}
+                  <div class="agents-med" style={`left:${row.medPct}`}></div>
+                  {row.us && spread.annotation ? (
+                    <>
+                      <div class="agents-bracket" style={`left:${spread.annotation.left};width:${spread.annotation.width}`}><span></span></div>
+                      <div class="agents-anno" style={`left:${spread.annotation.labelLeft}`}>{spread.annotation.text}</div>
+                    </>
+                  ) : null}
+                </div>
+                <div class="agents-strip__val">
+                  <strong>{row.medianText}</strong>
+                  <em>{row.range}</em>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+        <div class="agents-axis" aria-hidden="true">
+          <div></div>
+          <div><span>0</span><span>500</span><span>1,000</span><span>1,500</span><span>2,000 tok</span></div>
+          <div></div>
+        </div>
+        <div class="agents-strip__foot">
+          <p>
+            ChartKit was the cheapest library on {spread.cheapest} of {spread.cheapestTotal} models. Its median model calls on a working chart are {spread.calls}.
+          </p>
+          <button type="button" class="agents-toggle" data-table-toggle aria-expanded="false" aria-controls="token-table">
+            Show all numbers
+          </button>
+        </div>
+        <div class="agents-table-wrap" id="token-table" data-token-table hidden>
+          <table class="agents-table">
+            <caption class="sr">Median output tokens per working chart by model.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Model</th>
+                {board.libraries.map((library) => (
+                  <th class:list={[library === "ChartKit" && "is-us"]} scope="col">{library}</th>
+                ))}
+                <th scope="col">vs next best</th>
+              </tr>
+            </thead>
+            <tbody>
+              {board.rows.map((row) => {
+                const tokens = rawByName.get(row.name);
+                const values = tokens ? board.libraries.map((library) => tokens[library]) : [];
+                const rowMax = values.length ? Math.max(...values) : 0;
+                return (
+                  <tr>
+                    <th scope="row">{row.name}</th>
+                    {row.cells.map((cell, index) => {
+                      const library = board.libraries[index];
+                      const value = tokens && library ? tokens[library] : null;
+                      return (
+                        <td class:list={[cell.us && "is-us", value != null && "has-num"]}>
+                          {value != null && rowMax > 0 ? (
+                            <>
+                              <span class="track"></span>
+                              <span class="bar" style={`width:calc((100% - 20px) * ${value / rowMax})`}></span>
+                            </>
+                          ) : null}
+                          {cell.text}
+                        </td>
+                      );
+                    })}
+                    <td>{row.versus}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p class="agents-note">
+          Docs capped to the length of ChartKit llms.txt; output tokens summed until a chart renders; did-not-finish runs excluded. <a href="/methodology/agent-eval">Full methodology →</a>
+        </p>
+      </div>
     </section>
 
-    <section class="agent-block" aria-labelledby="loop-title">
-      <div class="section-intro">
+    <section class="agents-section" id="loop" aria-labelledby="loop-title">
+      <div class="agents-intro">
         <h2 id="loop-title">The loop</h2>
         <p>Four calls. The model is only in the first one.</p>
       </div>
-      <div class="loop-grid">
-        {
-          steps.map((step) => (
-            <article class="loop-card">
-              <header>
-                <span class="step-n">{step.n}</span>
-                <span class:list={["tag", step.tag === "model" ? "tag--model" : "tag--none"]}>{step.tag}</span>
-              </header>
+      <div class="agents-loop">
+        <div class="agents-steps">
+          {steps.map((step) => (
+            <article class:list={["agents-step", step.ink && "is-ink"]}>
+              <div class="agents-step__top">
+                <span class="agents-step__n">{step.n}</span>
+                <span class="agents-step__tag">{step.tag}</span>
+              </div>
               <h3>{step.title}</h3>
               <p>{step.body}</p>
-              <code class="chip-code">{step.code}</code>
+              <code>{step.code}</code>
             </article>
-          ))
-        }
+          ))}
+        </div>
+        <div class="agents-term">
+          <div class="agents-term__k">example session · not a recorded answer</div>
+          <div class="dim">&gt; validate(spec)</div>
+          {exampleErrors.map((error) => <div class="bad">✕ {error.code} {error.message}</div>)}
+          <div class="dim">&gt; repair(spec)</div>
+          {patches.map((patch) => (
+            <div class="ok">✓ {patch.op} {patch.path}{patch.value !== undefined ? ` ${JSON.stringify(patch.value)}` : ""}</div>
+          ))}
+          <div class="dim">&gt; render(spec)</div>
+          <div>&lt;svg&gt; · {exampleSvg}</div>
+          <p class="agents-term__foot">
+            0 model calls after the first. Without docs in the prompt, repair() took first-try validity from {proof.repairFrom}/{proof.tasks} to {proof.repairTo}/{proof.tasks}.
+          </p>
+        </div>
       </div>
     </section>
 
-    <p class="token-note lab-note">
-      Lab note, separate from this matrix. Round 6 on 2026-10-16 measured first-try validity with one model and has not been re-run. ChartKit with the docs in the prompt was {proof.first}/{proof.tasks}. <code>repair()</code> took a no-docs run from {proof.repairFrom} to {proof.repairTo} with no model call. <a href="/benchmarks#agents">Benchmarks, losses included →</a>
-    </p>
-
-    <section class="cta-band">
-      <div>
-        <h2>Paste this into your agent.</h2>
-        <p>One prompt switches a project to ChartKit. The app stays JavaScript; the agent writes specs, not chart code.</p>
-        <pre class="sr" data-agent-prompt>{agentSwitchPrompt}</pre>
+    <section class="agents-section" id="default" aria-labelledby="default-title">
+      <div class="agents-intro">
+        <h2 id="default-title">Make ChartKit the default</h2>
+        <p>Everything the harness needs, each one copyable.</p>
       </div>
-      <button type="button" class="btn-ink" data-copy-prompt>Copy prompt</button>
+      <div class="agents-kit">
+        {kit.map((row) => (
+          <div class="agents-kit__row">
+            <div>
+              <div class="agents-kit__name">{row.name}</div>
+              <div class="agents-kit__where">{row.where}</div>
+            </div>
+            <p class="agents-kit__body">{row.body}</p>
+            <div class="agents-kit__snip">
+              <pre>{row.snippet}</pre>
+              <button type="button" class="agents-kit__copy" data-copy-kit={row.snippet} data-idle="Copy" data-done="Copied ✓">Copy</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="agents-close-wrap" id="switch">
+      <div class="agents-close">
+        <div>
+          <h2>One paragraph switches your agent to ChartKit.</h2>
+          <p class="agents-close__lead">
+            Drop it in the system prompt, CLAUDE.md, .cursorrules or your MCP config. The app stays JavaScript; the agent writes specs, not chart code.
+          </p>
+          <button type="button" class="agents-close__btn" data-copy-prompt data-idle="Copy prompt" data-done="Copied ✓">Copy prompt</button>
+        </div>
+        <div class="agents-close__panel">
+          <div class="agents-close__bar">
+            <span class="agents-prompt__k">system prompt · addition</span>
+            <span class="agents-prompt__tok">{promptTokens} tok</span>
+          </div>
+          <div class="agents-close__body">{agentsPrompt}</div>
+        </div>
+      </div>
     </section>
   </div>
+  <script>
+    import { mountAgentsPage } from "../scripts/agents-copy";
+    mountAgentsPage();
+  </script>
 </Base>
-
-<script>
-  import "../scripts/home-start";
-</script>

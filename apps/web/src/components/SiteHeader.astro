@@ -12,6 +12,7 @@ const path = canonicalPath(Astro.url.pathname);
 const docsHere = path === "/docs" || path.startsWith("/docs/");
 const dashHere = path === "/dashboard" || path === "/dashboards" || path.startsWith("/dashboards/");
 const onCloud = path === "/cloud";
+const onAgents = path === "/agents";
 const links = variant === "docs" ? docsNavLinks : primaryNav;
 const showRepo = path !== "/methodology/agent-eval";
 
@@ -69,7 +70,11 @@ function mark(href: string): "page" | undefined {
           ) : null
         }
         {
-          variant === "docs" ? null : (
+          variant === "docs" ? null : onAgents ? (
+            <button type="button" class="header-cta" data-copy-prompt data-idle="Copy prompt" data-done="Copied ✓">
+              Copy prompt
+            </button>
+          ) : (
             <a class="btn-ink header-cta" href={onCloud ? "#try" : "/docs"}>
               {onCloud ? "Render a chart" : "Get started"}
             </a>
