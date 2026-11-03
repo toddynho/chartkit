@@ -17,6 +17,7 @@ import { createRequire } from "node:module";
 import { isExtra, render as renderAll } from "@chartkitdev/core/all";
 import { render as renderExtra } from "@chartkitdev/core/extra";
 import { optionBlocked, optionCatalog, readOption, writeOption } from "@chartkitdev/core/options";
+import { writeStatus } from "./audit-status.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = join(root, "apps/web/audit");
@@ -159,6 +160,7 @@ function fieldsFor(spec) {
 
 const examples = loadExamples();
 const rows = [];
+const coverage = {};
 let probed = 0;
 let effects = 0;
 
@@ -167,6 +169,7 @@ for (const example of examples) {
   const baseNorm = norm(base.svg);
   const legendField = optionCatalog.find((field) => field.path === "legend");
   const legendMatters = legendField ? norm(renderSpec(writeOption(example.spec, legendField, false)).svg) !== baseNorm : false;
+  coverage[example.type] = fieldsFor(example.spec).map((field) => field.path);
   for (const field of fieldsFor(example.spec)) {
     probed++;
     const values = probeValues(field, example.spec);
@@ -291,7 +294,9 @@ const summary = {
 };
 
 mkdirSync(outDir, { recursive: true });
-writeFileSync(join(outDir, "option-effect.json"), JSON.stringify({ summary, rows: kept }, null, 2));
+const auditFile = { summary, coverage, rows: kept };
+writeFileSync(join(outDir, "option-effect.json"), JSON.stringify(auditFile, null, 2));
+writeStatus(auditFile);
 
 const byType = new Map();
 for (const row of kept) {
