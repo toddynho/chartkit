@@ -1307,3 +1307,19 @@ html.is-rail-drag * {
   background: #fff;
 }
 .example-preview svg { display: block; width: 100%; height: auto; }
+
+.opt-ref { margin-top: 1.5rem; }
+.opt-ref dl { margin: 0 0 1.25rem; }
+.opt-ref__row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 14rem) minmax(0, 1fr);
+  gap: 0.35rem 1rem;
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--line);
+}
+.opt-ref dt { margin: 0; }
+.opt-ref dd { margin: 0; }
+.opt-ref__meta { display: block; margin-top: 0.2rem; color: var(--muted); font-size: 0.75rem; }
+@media (max-width: 720px) {
+  .opt-ref__row { grid-template-columns: 1fr; }
+}

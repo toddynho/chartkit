@@ -10,7 +10,7 @@ const starter = files[0];
 if (!starter) throw new Error("Playground has no examples.");
 const { themes } = loadPlayground();
 const exampleSpecs = Object.fromEntries(files.map((file) => [file.slug, file.spec]));
-const description = "Edit a ChartKit spec and preview it. Validate, repair, share, and export SVG or PNG.";
+const description = "Edit a ChartKit spec and preview it. Every option for the chart type is in the panel. Validate, repair, share, and export SVG or PNG.";
 ---
 
 <Base title="Playground" description={description} tone="light">
@@ -19,7 +19,7 @@ const description = "Edit a ChartKit spec and preview it. Validate, repair, shar
       <p class="kicker">Playground</p>
       <h1>Playground</h1>
       <p class="lede">
-        The preview on the left follows the spec on the right. Validate, repair, share, and SVG or PNG export use
+        The preview on the left follows the spec. The panel lists every option that chart type supports, and edits stay in sync with the JSON. Validate, repair, share, and SVG or PNG export use
         <code>@chartkitdev/core</code>, and maps use <code>@chartkitdev/geo</code>. Chart types are listed in the
         <a href="/gallery">gallery</a>. Worked examples sit on each <a href="/docs">chart’s docs page</a>.
       </p>
