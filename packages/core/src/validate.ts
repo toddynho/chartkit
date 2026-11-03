@@ -106,7 +106,7 @@ export interface RepairResult extends ValidationResult {
 }
 
 const MAX_REPAIR_ROUNDS = 8;
-const STRIP_REPAIR = new Set(["CK3089", "CK3090", "CK3091", "CK3092", "CK3093"]);
+const STRIP_REPAIR = new Set(["CK3090", "CK3091", "CK3092", "CK3093", "CK3094"]);
 
 /**
  * Apply the validator's safe JSON Patch fixes and revalidate.

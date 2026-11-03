@@ -45,7 +45,7 @@ describe("strip", () => {
     const spec = load("37-strip-dot.json");
     const result = validate(spec);
     expect(result.ok).toBe(true);
-    expect(result.warnings.some((warning) => warning.code === "CK3090")).toBe(true);
+    expect(result.warnings.some((warning) => warning.code === "CK3091")).toBe(true);
     const svg = render(spec) ?? "";
     expect(svg).not.toContain('data-ck-mark="summary"');
     expect(svg).not.toContain('data-ck-mark="band"');
@@ -53,7 +53,7 @@ describe("strip", () => {
     const fixed = repair(spec);
     expect(fixed.applied.some((op) => op.path === "/mark")).toBe(true);
     expect(fixed.spec).toMatchObject({ mark: { summary: "none", band: "none" } });
-    expect(validate(fixed.spec).warnings.some((warning) => warning.code === "CK3090")).toBe(false);
+    expect(validate(fixed.spec).warnings.some((warning) => warning.code === "CK3091")).toBe(false);
   });
 
   it("draws a vertical strip with a color legend and an IQR band", () => {
@@ -78,7 +78,7 @@ describe("strip", () => {
       encoding: { x: "v", y: "g" },
       a11y: { alt: "Two numeric groups." },
     });
-    expect(numeric.warnings.some((warning) => warning.code === "CK3086")).toBe(true);
+    expect(numeric.warnings.some((warning) => warning.code === "CK3087")).toBe(true);
     expect(render(numeric.ok ? {
       version: "1",
       type: "strip",
@@ -101,7 +101,7 @@ describe("strip", () => {
       encoding: { x: "v", y: "g" },
       a11y: { alt: "No numbers." },
     });
-    expect(text.errors.some((error) => error.code === "CK3087")).toBe(true);
+    expect(text.errors.some((error) => error.code === "CK3088")).toBe(true);
 
     const many = Array.from({ length: 13 }, (_, index) => ({ g: `G${index}`, v: index + 1 }));
     const wide = validate({
@@ -111,8 +111,8 @@ describe("strip", () => {
       encoding: { x: "v", y: "g" },
       a11y: { alt: "Thirteen groups." },
     });
-    expect(wide.warnings.some((warning) => warning.code === "CK3088")).toBe(true);
-    expect(wide.warnings.find((warning) => warning.code === "CK3090")).toBeTruthy();
+    expect(wide.warnings.some((warning) => warning.code === "CK3089")).toBe(true);
+    expect(wide.warnings.find((warning) => warning.code === "CK3091")).toBeTruthy();
   });
 
   it("drops a band that no group can draw, and keeps one when some groups can", () => {
@@ -130,14 +130,14 @@ describe("strip", () => {
       a11y: { alt: "Too few for a band." },
     };
     const warned = validate(short);
-    expect(warned.warnings.some((warning) => warning.code === "CK3089")).toBe(true);
+    expect(warned.warnings.some((warning) => warning.code === "CK3090")).toBe(true);
     expect(repair(short).spec).toMatchObject({ mark: { band: "none" } });
     const mixed = {
       ...short,
       data: [...(short.data as object[]), { g: "A", v: 5 }],
     };
     const kept = validate(mixed);
-    expect(kept.warnings.some((warning) => warning.code === "CK3089" && !warning.fix)).toBe(true);
+    expect(kept.warnings.some((warning) => warning.code === "CK3090" && !warning.fix)).toBe(true);
     const svg = render(mixed) ?? "";
     expect(svg.match(/data-ck-mark="band"/g)?.length).toBe(1);
   });
@@ -177,7 +177,7 @@ describe("strip", () => {
       mark: { highlight: "Missing" },
       a11y: { alt: "A has two points." },
     };
-    expect(validate(spec).warnings.some((warning) => warning.code === "CK3091")).toBe(true);
+    expect(validate(spec).warnings.some((warning) => warning.code === "CK3092")).toBe(true);
     expect(repair(spec).spec).toMatchObject({ mark: {} });
     const line = {
       version: "1",
@@ -191,8 +191,8 @@ describe("strip", () => {
       a11y: { alt: "Revenue rose." },
     };
     const checked = validate(line);
-    expect(checked.warnings.some((warning) => warning.code === "CK3092")).toBe(true);
     expect(checked.warnings.some((warning) => warning.code === "CK3093")).toBe(true);
+    expect(checked.warnings.some((warning) => warning.code === "CK3094")).toBe(true);
     const fixed = repair(line);
     expect((fixed.spec as { annotations?: unknown }).annotations).toBeUndefined();
     expect((fixed.spec as { encoding: { label?: string } }).encoding.label).toBeUndefined();

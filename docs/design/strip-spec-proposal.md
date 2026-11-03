@@ -59,36 +59,36 @@ The existing annotation types (`rule`, `band`, `text`, `trendline`, `regression`
 
 ## Decisions
 
-**Numeric group channel.** A strip's group axis is categorical even when the values are numbers (`1`, `2`, `3` are three rows, not a scale). The renderer stringifies each distinct value. `validate()` warns **CK3086** and does not patch. Setting `encoding.y.type` to `"nominal"` is not a useful patch: the walker already warns that an explicit nominal type is ignored because ChartKit infers scale type. Rewriting the rows would invent data.
+**Numeric group channel.** A strip's group axis is categorical even when the values are numbers (`1`, `2`, `3` are three rows, not a scale). The renderer stringifies each distinct value. `validate()` warns **CK3087** and does not patch. Setting `encoding.y.type` to `"nominal"` is not a useful patch: the walker already warns that an explicit nominal type is ignored because ChartKit infers scale type. Rewriting the rows would invent data.
 
-**Value channel that is not numeric.** **CK3087**, an error, no patch.
+**Value channel that is not numeric.** **CK3088**, an error, no patch.
 
-**One point in every group.** The chart is a Cleveland dot plot. The renderer hides the summary tick and the band, including the median default. **CK3090** warns. `repair()` sets `mark.summary` and `mark.band` to `"none"` so the spec matches the picture.
+**One point in every group.** The chart is a Cleveland dot plot. The renderer hides the summary tick and the band, including the median default. **CK3091** warns. `repair()` sets `mark.summary` and `mark.band` to `"none"` so the spec matches the picture.
 
-**Band when a group has fewer than 3 points.** The renderer draws no band on that group. A median tick still draws. **CK3089** warns when `mark.band` is `"range"` or `"iqr"` and any group is short. `repair()` sets `mark.band` to `"none"` only when no group has 3 or more points. Mixed groups keep the option and skip the short bands.
+**Band when a group has fewer than 3 points.** The renderer draws no band on that group. A median tick still draws. **CK3090** warns when `mark.band` is `"range"` or `"iqr"` and any group is short. `repair()` sets `mark.band` to `"none"` only when no group has 3 or more points. Mixed groups keep the option and skip the short bands.
 
-**More than 12 groups.** **CK3088** warns. Nothing is dropped. The hint points at `boxplot`.
+**More than 12 groups.** **CK3089** warns. Nothing is dropped. The hint points at `boxplot`.
 
 **Unsorted x.** **CK2008** (x values are not sorted) does not apply to strip. The value column is not a series. Same exception scatter and histogram already have.
 
 **Unknown fields.** `encoding.label` joins the existing channel list, so a typo is **CK2001** with the current fuzzy suggestion and repair patch.
 
-**Unknown highlight.** **CK3091** warns. `repair()` removes `mark.highlight`.
+**Unknown highlight.** **CK3092** warns. `repair()` removes `mark.highlight`.
 
 ## Error codes
 
-Next free code after CK3085 (`theme.brand`) is CK3086.
+CK3085 is `theme.brand`. CK3086 is reserved for an invalid `fontFamily` on the font-inheritance draft and is not used here. Strip is CK3087–CK3094.
 
 | Code | Severity | When | Repair |
 | --- | --- | --- | --- |
-| CK3086 | warning | The group channel is quantitative. Each distinct number is a category. | None. |
-| CK3087 | error | The value channel has no numeric values. | None. |
-| CK3088 | warning | More than 12 groups. | None. |
-| CK3089 | warning | `mark.band` is `"range"` or `"iqr"` and a group has fewer than 3 points. | Set `mark.band` to `"none"` only when every group is short. |
-| CK3090 | warning | Every group has one point. Summary and band are hidden. | Set `mark.summary` and `mark.band` to `"none"`. |
-| CK3091 | warning | `mark.highlight` matches no group. | Remove `mark.highlight`. |
-| CK3092 | warning | A `compare` annotation is on a chart that is not a strip. | Remove that annotation. |
-| CK3093 | warning | `encoding.label` is set on a type other than strip. | Remove `encoding.label`. |
+| CK3087 | warning | The group channel is quantitative. Each distinct number is a category. | None. |
+| CK3088 | error | The value channel has no numeric values. | None. |
+| CK3089 | warning | More than 12 groups. | None. |
+| CK3090 | warning | `mark.band` is `"range"` or `"iqr"` and a group has fewer than 3 points. | Set `mark.band` to `"none"` only when every group is short. |
+| CK3091 | warning | Every group has one point. Summary and band are hidden. | Set `mark.summary` and `mark.band` to `"none"`. |
+| CK3092 | warning | `mark.highlight` matches no group. | Remove `mark.highlight`. |
+| CK3093 | warning | A `compare` annotation is on a chart that is not a strip. | Remove that annotation. |
+| CK3094 | warning | `encoding.label` is set on a type other than strip. | Remove `encoding.label`. |
 
 Missing `encoding.x` or `encoding.y` stays **CK1003**. A bad enum stays **CK1007**. An unknown field stays **CK2001**.
 
@@ -98,7 +98,7 @@ Add `"strip"` to the root `type` enum, to the `allOf` branch that requires `data
 
 `mark` gains `summary`, `band`, `jitter` (`"none"` | `"auto"` | number 0–40), and `highlight` (string). Descriptions name the default and say they apply to strip. `mark.orientation` and `mark.sort` descriptions gain strip. `mark.pointSize` gains strip.
 
-`encoding` gains `label`, a normal channel. Description: point name for a strip tooltip. Other types warn CK3093.
+`encoding` gains `label`, a normal channel. Description: point name for a strip tooltip. Other types warn CK3094.
 
 `annotation.oneOf` gains the `compare` object above. `from` and `to` are `{ group, at }` with `additionalProperties: false`.
 

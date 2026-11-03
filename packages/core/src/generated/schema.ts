@@ -1060,7 +1060,7 @@ export interface Encoding {
    */
   parent?: string;
   /**
-   * Strip only: field shown with the group and the value in the point tooltip. It is not drawn on the plot. Other chart types warn CK3093.
+   * Strip only: field shown with the group and the value in the point tooltip. It is not drawn on the plot. Other chart types warn CK3094.
    */
   label?:
     | FieldName

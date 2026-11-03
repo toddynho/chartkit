@@ -146,7 +146,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   if (type === "strip") stripChecks(spec, view, diagnostics);
   else if (isRecord(spec.encoding) && spec.encoding.label !== undefined) {
     diagnostics.push({
-      code: "CK3093",
+      code: "CK3094",
       severity: "warning",
       message: '"encoding.label" has no effect on this chart',
       path: "/encoding/label",
@@ -1657,7 +1657,7 @@ function stripChecks(spec: Record<string, unknown>, table: DataTable, diagnostic
   if (!groups || !values) return;
   if (inferType(values) !== "quantitative") {
     diagnostics.push({
-      code: "CK3087",
+      code: "CK3088",
       severity: "error",
       message: "strip value field has no numbers",
       path: valuePath,
@@ -1666,7 +1666,7 @@ function stripChecks(spec: Record<string, unknown>, table: DataTable, diagnostic
   }
   if (inferType(groups) === "quantitative") {
     diagnostics.push({
-      code: "CK3086",
+      code: "CK3087",
       severity: "warning",
       message: "strip group field is quantitative and is drawn as categories",
       path: groupPath,
@@ -1682,7 +1682,7 @@ function stripChecks(spec: Record<string, unknown>, table: DataTable, diagnostic
   }
   if (counts.size > 12) {
     diagnostics.push({
-      code: "CK3088",
+      code: "CK3089",
       severity: "warning",
       message: `strip has ${counts.size} groups`,
       path: groupPath,
@@ -1696,7 +1696,7 @@ function stripChecks(spec: Record<string, unknown>, table: DataTable, diagnostic
   if (sizes.length > 0 && sizes.every((count) => count === 1) && !(summaryHidden && bandHidden)) {
     const mark = { ...markNow, summary: "none", band: "none" };
     diagnostics.push({
-      code: "CK3090",
+      code: "CK3091",
       severity: "warning",
       message: "every strip group has one point, so the summary and band are hidden",
       path: "/mark",
@@ -1709,7 +1709,7 @@ function stripChecks(spec: Record<string, unknown>, table: DataTable, diagnostic
     const allShort = sizes.every((count) => count < 3);
     const mark = isRecord(spec.mark) ? { ...spec.mark, band: "none" } : { band: "none" };
     diagnostics.push({
-      code: "CK3089",
+      code: "CK3090",
       severity: "warning",
       message: "a strip band needs 3 observations in the group",
       path: "/mark/band",
@@ -1720,7 +1720,7 @@ function stripChecks(spec: Record<string, unknown>, table: DataTable, diagnostic
   const highlight = isRecord(spec.mark) && typeof spec.mark.highlight === "string" ? spec.mark.highlight : "";
   if (highlight && !counts.has(highlight)) {
     diagnostics.push({
-      code: "CK3091",
+      code: "CK3092",
       severity: "warning",
       message: `highlight ${JSON.stringify(highlight)} is not a group`,
       path: "/mark/highlight",
@@ -1764,7 +1764,7 @@ function checkNote(value: unknown, path: string, spec: Record<string, unknown>, 
   if (raw === "compare" && spec.type !== "strip") {
     const notes = Array.isArray(spec.annotations) ? spec.annotations : [];
     diagnostics.push({
-      code: "CK3092",
+      code: "CK3093",
       severity: "warning",
       message: "a compare annotation is drawn on a strip",
       path,

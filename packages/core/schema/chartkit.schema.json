@@ -1063,7 +1063,7 @@
         },
         "label": {
           "$ref": "#/$defs/channel",
-          "description": "Strip only: field shown with the group and the value in the point tooltip. It is not drawn on the plot. Other chart types warn CK3093."
+          "description": "Strip only: field shown with the group and the value in the point tooltip. It is not drawn on the plot. Other chart types warn CK3094."
         }
       },
       "description": "Which data fields drive which visual channels. Same names for every chart type: x is the category or time axis, y is the measured value(s). Donut uses x (slice label) and y (slice value), not theta, angle, or label. A y series axis is the string \"y\" or \"y2\". Switching 'type' between line/bar/donut/stacked-area/combo needs no re-encoding."
@@ -2806,7 +2806,7 @@
             },
             "color": { "$ref": "#/$defs/color" }
           },
-          "description": "Strip only: a bracket from one group's summary, min, max, or mean to another's. Other chart types warn CK3092."
+          "description": "Strip only: a bracket from one group's summary, min, max, or mean to another's. Other chart types warn CK3093."
         }
       ],
       "description": "A reference mark drawn on the chart."

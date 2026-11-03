@@ -254,7 +254,7 @@ const truth: Record<string, Truth> = {
       {
         title: "Error codes",
         paragraphs: [
-          "CK3086 warns when the group field is numeric and draws each distinct number as a category. CK3087 is an error when the value field has no numbers. CK3088 warns above 12 groups. CK3089 warns when a band is asked for and a group has fewer than 3 points. CK3090 warns when every group has one point. CK3091 warns when highlight matches nothing. CK3092 warns when a compare annotation is not on a strip. CK3093 warns when encoding.label is set on another type.",
+          "CK3087 warns when the group field is numeric and draws each distinct number as a category. CK3088 is an error when the value field has no numbers. CK3089 warns above 12 groups. CK3090 warns when a band is asked for and a group has fewer than 3 points. CK3091 warns when every group has one point. CK3092 warns when highlight matches nothing. CK3093 warns when a compare annotation is not on a strip. CK3094 warns when encoding.label is set on another type.",
         ],
         list: [],
         code: [],

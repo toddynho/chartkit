@@ -18,7 +18,7 @@ const repoRoot = join(fileURLToPath(new URL(".", import.meta.url)), "../../../..
  * Polar, radial bar, and rose are CK3073–CK3080.
  * Dashboard gaps are CK3081–CK3084.
  * CK3085 is theme.brand.
- * Strip is CK3086–CK3093.
+ * Strip is CK3087–CK3094.
  */
 const FAMILIES = new Set([
   "CK1006",

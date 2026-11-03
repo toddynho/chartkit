@@ -5,6 +5,9 @@ import featureVenn from "../../packages/core/examples/27-venn.json";
 import checkoutJourney from "../../packages/core/examples/28-journey.json";
 import lumenRadial from "../../packages/core/examples/34-radial-bar.json";
 import lumenRose from "../../packages/core/examples/35-rose.json";
+import tokensStrip from "../../packages/core/examples/36-strip.json";
+import regionStrip from "../../packages/core/examples/37-strip-dot.json";
+import desksStrip from "../../packages/core/examples/38-strip-vertical.json";
 
 export interface Spec {
   version: "1";
@@ -859,6 +862,30 @@ export const examples: Example[] = [
       size: { width: 560, height: 280 },
       a11y: { alt: "A stretches higher." },
     },
+  },
+  {
+    slug: "tokens-strip",
+    title: "Tokens by library",
+    group: "Distribution",
+    type: "strip",
+    blurb: "Nine models per library. ChartKit's median is 94, 3.5× below Plot.",
+    spec: { ...(tokensStrip as Spec), id: "tokens-strip" },
+  },
+  {
+    slug: "regions-strip",
+    title: "Latency by region",
+    group: "Distribution",
+    type: "strip",
+    blurb: "One point per region. The summary tick stays off.",
+    spec: { ...(regionStrip as Spec), id: "regions-strip" },
+  },
+  {
+    slug: "desks-strip",
+    title: "Minutes by desk",
+    group: "Distribution",
+    type: "strip",
+    blurb: "Vertical groups, a mean tick, and an IQR band.",
+    spec: { ...(desksStrip as Spec), id: "desks-strip" },
   },
   {
     slug: "model-radar",
