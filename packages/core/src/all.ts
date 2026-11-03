@@ -80,7 +80,7 @@ export function open(el: { innerHTML: string }, spec: { type?: string }, painted
     const { attach } = await import("./extra-tip");
     if (jobs.get(el) !== token) return;
     tips.get(el)?.destroy();
-    tips.set(el, attach(el as never));
+    tips.set(el, attach(el as never, spec));
   });
   return true;
 }
