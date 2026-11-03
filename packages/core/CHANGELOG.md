@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Line chart race, prototype. `@chartkitdev/core/race` exports `createLineRace` and `frame(t)`. `t` runs from 0 to 1 and each call returns one SVG, so playback and export share a frame. It is not a spec `type` and it is not in the line bundle. `exportLineRace` writes an MP4 in browsers that can encode H.264, otherwise WebM. The builder is at `/race` on the site.
 - Presets `tape`, `kite`, `mustard`, and `violet`. Tape and Kite are the named ideas. Mustard (`#ca8a04`) and Violet (`#6d28d9`) freeze the light and dark output of `createTheme`. Import them from `@chartkitdev/core/themes/<name>` or `@chartkitdev/core/themes/all`. They are not in the line bundle.
 - `createTheme({ brand })` and `theme: { brand: "#hex" }` derive a light and a dark preset, then adjust for contrast and for deuteranopia and protanopia. `validate` and `repair` canonicalize the hex (CK3085). The colour math stays in `@chartkitdev/core/themes/brand`, off the line bundle.
 - `colorsFromSvg` reads SVG fills. `sampleImageData` reads pixels. `colorsFromBitmap` samples a browser canvas at 48px. Node does not decode PNG or JPEG.

@@ -438,6 +438,7 @@ export const docsNav: NavGroup[] = [
           { href: "/docs/themes/from-brand", label: "From a brand" },
           { href: "/docs/themes/from-drawing", label: "From a drawing" },
           { href: "/docs/motion", label: "Motion" },
+          { href: "/race", label: "Line chart race" },
           { href: "/docs/mermaid", label: "Mermaid" },
           { href: "/docs/web-component", label: "Web component" },
           { href: "/docs/spec", label: "Spec" },

@@ -1,0 +1,246 @@
+---
+import Base from "../layouts/Base.astro";
+import { createLineRace, podcastMentionsCsv, podcastMentionsRace } from "@chartkitdev/core/race";
+import font400 from "@fontsource/geist/files/geist-latin-400-normal.woff2?url";
+import font700 from "@fontsource/geist/files/geist-latin-700-normal.woff2?url";
+
+const sample = podcastMentionsRace();
+const poster = createLineRace(sample).frame(0.62);
+const csv = podcastMentionsCsv();
+const description = "Paste a time series, preview a line chart race, and export an MP4 in the browser.";
+---
+
+<Base title="Line chart race" description={description}>
+  <div
+    class="wrap race-page"
+    data-race-root
+    data-start="0.62"
+    data-font-400={font400}
+    data-font-700={font700}
+  >
+    <p class="kicker">Prototype</p>
+    <h1>Line chart race</h1>
+    <p class="lede">
+      Paste monthly numbers, play the lines forward, and export a video from this tab. The preview and the file are the same frames: each one is <code>frame(t)</code> for a t between 0 and 1.
+    </p>
+
+    <div class="race-card">
+      <div class="race-stage" data-race-stage set:html={poster}></div>
+      <div class="race-transport">
+        <button type="button" class="btn btn-primary" data-race-play>Play</button>
+        <input type="range" min="0" max="1000" value="620" step="1" data-race-scrub aria-label="Scrub the animation" />
+        <span class="race-time" data-race-time>0:00 / 0:09</span>
+        <label class="race-loop">
+          <input type="checkbox" data-race-loop />
+          Loop
+        </label>
+        <button type="button" class="btn btn-secondary" data-race-export>Export MP4</button>
+      </div>
+      <p class="race-status" data-race-status role="status"></p>
+    </div>
+
+    <div class="race-controls">
+      <div>
+        <label class="race-field">
+          Title
+          <input data-race-title value={sample.title} autocomplete="off" />
+        </label>
+        <label class="race-field">
+          Subtitle
+          <textarea data-race-subtitle rows="2" autocomplete="off">{sample.subtitle ?? ""}</textarea>
+        </label>
+        <label class="race-field">
+          Unit
+          <input data-race-unit value={sample.unit ?? ""} autocomplete="off" />
+        </label>
+        <label class="race-field">
+          Duration, seconds
+          <input data-race-duration type="number" min="2" max="60" step="1" value="9" />
+        </label>
+        <p class="race-note">Colors</p>
+        <div class="race-swatches" data-race-colors></div>
+      </div>
+      <div>
+        <label class="race-field">
+          Data, CSV or JSON
+          <textarea data-race-data spellcheck="false">{csv}</textarea>
+        </label>
+        <div class="race-actions">
+          <label class="btn btn-secondary">
+            Upload
+            <input data-race-file type="file" accept=".csv,.json,text/csv,application/json" hidden />
+          </label>
+          <button type="button" class="btn btn-secondary" data-race-reset>Reset sample</button>
+        </div>
+        <p class="race-error" data-race-error role="alert" hidden></p>
+        <p class="race-note">
+          The first column is the date (<code>YYYY-MM</code> or <code>YYYY-MM-DD</code>). Each other column is a line. The sample is shaped like a lab-mentions promo. The numbers are illustrative, not a measurement. Tip icons are monograms. A series <code>icon</code> can be a base64 <code>data:image</code> URL.
+        </p>
+      </div>
+    </div>
+
+    <h2>From code</h2>
+    <p>
+      The race is not a chart <code>type</code> in the v1 spec. <code>render()</code> draws one settled frame, and <code>motion</code> only morphs two of those in the DOM. A race needs every intermediate frame, including on a server, so it lives on its own entry and stays out of the line bundle.
+    </p>
+    <pre class="race-code"><code>{`import { createLineRace, exportLineRace, mountLineRace, podcastMentionsRace } from "@chartkitdev/core/race";
+
+const race = createLineRace(podcastMentionsRace());
+mountLineRace(document.querySelector("#chart"), race).play();
+race.frame(0.5); // the same SVG a server would return
+const file = await exportLineRace(race); // MP4, or WebM if H.264 is unavailable`}</code></pre>
+    <p class="race-note">
+      Export encodes in this browser. Chromium writes an MP4 through WebCodecs. Firefox and older Safari record WebM in real time. Nothing is uploaded.
+    </p>
+  </div>
+</Base>
+
+<script>
+  import "../scripts/race-builder.ts";
+</script>
+
+<style>
+  .race-page {
+    padding: 2.6rem 0 3.4rem;
+  }
+  .race-page h1 {
+    font-size: clamp(2rem, 4vw, 2.5rem);
+    margin-bottom: 0.55rem;
+  }
+  .race-card {
+    margin-top: 1.35rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 10px 10px 8px;
+  }
+  .race-stage :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .race-transport {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.75rem 0.35rem 0.2rem;
+  }
+  .race-transport input[type="range"] {
+    flex: 1 1 140px;
+    accent-color: var(--accent);
+    min-width: 120px;
+  }
+  .race-time {
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+    min-width: 6.5rem;
+    font-size: 0.92rem;
+  }
+  .race-loop {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--ink-2);
+    font-size: 0.92rem;
+  }
+  .race-status,
+  .race-error,
+  .race-note {
+    color: var(--ink-2);
+    font-size: 0.88rem;
+  }
+  .race-status {
+    min-height: 1.2em;
+    margin: 0.35rem 0.35rem 0.15rem;
+  }
+  .race-error {
+    color: #9f3a2f;
+    margin-top: 0.7rem;
+  }
+  .race-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: 1.4rem 1.6rem;
+    margin-top: 1.5rem;
+  }
+  .race-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.32rem;
+    margin-bottom: 0.75rem;
+    color: var(--ink-2);
+    font-size: 0.86rem;
+  }
+  .race-field input,
+  .race-field textarea {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg-elev);
+    padding: 0.48rem 0.7rem;
+    color: var(--ink);
+  }
+  .race-field textarea {
+    resize: vertical;
+    line-height: 1.45;
+  }
+  .race-field textarea[data-race-subtitle] {
+    min-height: 3.4rem;
+    font-family: inherit;
+  }
+  .race-field textarea[data-race-data] {
+    min-height: 320px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  .race-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .race-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 0.9rem;
+  }
+  .race-swatches label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--ink);
+    font-size: 0.86rem;
+  }
+  .race-swatches input[type="color"] {
+    width: 1.7rem;
+    height: 1.7rem;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .race-code {
+    margin: 0 0 0.8rem;
+    padding: 0.9rem 1rem;
+    overflow: auto;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+  }
+  .race-code code {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.5;
+    background: transparent;
+    padding: 0;
+  }
+  .race-page h2 {
+    margin-top: 2rem;
+  }
+  @media (max-width: 800px) {
+    .race-controls {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
