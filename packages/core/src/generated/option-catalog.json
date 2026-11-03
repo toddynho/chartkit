@@ -2,7 +2,7 @@
   {
     "path": "type",
     "description": "Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal.",
-    "group": "Chart",
+    "group": "Advanced",
     "docs": "/docs/options#type",
     "label": "Type",
     "control": "enum",
@@ -38,6 +38,7 @@
       "bar-list",
       "radial-bar",
       "rose",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -46,12 +47,13 @@
       "choropleth",
       "map-points"
     ],
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "id",
     "description": "Optional stable id (used for keys, events, test hooks).",
-    "group": "Chart",
+    "group": "Advanced",
     "docs": "/docs/options#id",
     "label": "Id",
     "control": "text",
@@ -61,27 +63,29 @@
   {
     "path": "title",
     "description": "Visible chart title; also the accessible name.",
-    "group": "Chart",
+    "group": "Advanced",
     "docs": "/docs/options#title",
     "label": "Title",
     "control": "text",
     "storage": "scalar",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "subtitle",
     "description": "Visible secondary line under the title.",
-    "group": "Chart",
+    "group": "Advanced",
     "docs": "/docs/options#subtitle",
     "label": "Subtitle",
     "control": "text",
     "storage": "scalar",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "headline.label",
     "description": "Small label above the value.",
-    "group": "Chart",
+    "group": "Advanced",
     "docs": "/docs/options#headline.label",
     "label": "Label",
     "control": "text",
@@ -91,7 +95,7 @@
   {
     "path": "headline.value",
     "description": "Primary figure, drawn in the chart.",
-    "group": "Chart",
+    "group": "Advanced",
     "docs": "/docs/options#headline.value",
     "label": "Value",
     "control": "text",
@@ -101,7 +105,7 @@
   {
     "path": "headline.compare",
     "description": "Secondary comparison figure, in the muted colour.",
-    "group": "Chart",
+    "group": "Advanced",
     "docs": "/docs/options#headline.compare",
     "label": "Compare",
     "control": "text",
@@ -111,7 +115,7 @@
   {
     "path": "headline.delta",
     "description": "Change badge, drawn as a pill.",
-    "group": "Chart",
+    "group": "Advanced",
     "docs": "/docs/options#headline.delta",
     "label": "Delta",
     "control": "text",
@@ -121,7 +125,7 @@
   {
     "path": "headline.tone",
     "description": "Pill colour. positive uses the positive token, negative the negative token.",
-    "group": "Chart",
+    "group": "Advanced",
     "docs": "/docs/options#headline.tone",
     "label": "Tone",
     "control": "enum",
@@ -136,7 +140,7 @@
   {
     "path": "encoding.x",
     "description": "Horizontal position: time or category. For donut, the slice category. For heatmap calendar, the date. For bar with mark.orientation 'horizontal', it is still the category (drawn vertically).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x",
     "appliesTo": [
       "line",
@@ -163,6 +167,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -172,12 +177,13 @@
     "control": "text",
     "storage": "union-text",
     "promote": "field",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "encoding.x.type",
     "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.type",
     "appliesTo": [
       "line",
@@ -204,6 +210,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -223,7 +230,7 @@
   {
     "path": "encoding.x.title",
     "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.title",
     "appliesTo": [
       "line",
@@ -250,6 +257,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -263,7 +271,7 @@
   {
     "path": "encoding.x.format",
     "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.format",
     "appliesTo": [
       "line",
@@ -290,6 +298,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -321,7 +330,7 @@
   {
     "path": "encoding.x.format.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.format.decimals",
     "appliesTo": [
       "line",
@@ -348,6 +357,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -364,7 +374,7 @@
   {
     "path": "encoding.x.format.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.format.currency",
     "appliesTo": [
       "line",
@@ -391,6 +401,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -404,7 +415,7 @@
   {
     "path": "encoding.x.format.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.format.prefix",
     "appliesTo": [
       "line",
@@ -431,6 +442,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -444,7 +456,7 @@
   {
     "path": "encoding.x.format.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.format.suffix",
     "appliesTo": [
       "line",
@@ -471,6 +483,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -484,7 +497,7 @@
   {
     "path": "encoding.x.format.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.format.signed",
     "appliesTo": [
       "line",
@@ -511,6 +524,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -524,7 +538,7 @@
   {
     "path": "encoding.x.format.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.format.specifier",
     "appliesTo": [
       "line",
@@ -551,6 +565,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -564,7 +579,7 @@
   {
     "path": "encoding.x.scale.type",
     "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.scale.type",
     "appliesTo": [
       "line",
@@ -591,6 +606,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -613,7 +629,7 @@
   {
     "path": "encoding.x.scale.domain",
     "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.scale.domain",
     "appliesTo": [
       "line",
@@ -640,6 +656,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -652,7 +669,7 @@
   {
     "path": "encoding.x.scale.zero",
     "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.scale.zero",
     "appliesTo": [
       "line",
@@ -679,6 +696,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -692,7 +710,7 @@
   {
     "path": "encoding.x.scale.nice",
     "description": "Round the domain to tidy tick values. Default true.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.scale.nice",
     "appliesTo": [
       "line",
@@ -719,6 +737,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -732,7 +751,7 @@
   {
     "path": "encoding.x.scale.reverse",
     "description": "Flip the direction of the scale.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.scale.reverse",
     "appliesTo": [
       "line",
@@ -759,6 +778,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -772,7 +792,7 @@
   {
     "path": "encoding.x.scale.padding",
     "description": "Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.scale.padding",
     "appliesTo": [
       "line",
@@ -799,6 +819,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -815,7 +836,7 @@
   {
     "path": "encoding.x.scale.padding.min",
     "description": "Fraction of the span added below the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.scale.padding.min",
     "appliesTo": [
       "line",
@@ -842,6 +863,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -858,7 +880,7 @@
   {
     "path": "encoding.x.scale.padding.max",
     "description": "Fraction of the span added above the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.scale.padding.max",
     "appliesTo": [
       "line",
@@ -885,6 +907,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -901,7 +924,7 @@
   {
     "path": "encoding.x.scale.clamp",
     "description": "Draw values outside an explicit scale.domain at the domain edge.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.scale.clamp",
     "appliesTo": [
       "line",
@@ -928,6 +951,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -941,7 +965,7 @@
   {
     "path": "encoding.x.scale.constant",
     "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.x.scale.constant",
     "appliesTo": [
       "line",
@@ -968,6 +992,7 @@
       "spike",
       "candlestick",
       "bar-list",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -983,7 +1008,7 @@
   {
     "path": "encoding.y",
     "description": "Measured value(s). One field, or a list of fields for multi-series 'wide' data (one column per series). For heatmap 'grid' layout, the row category.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y",
     "appliesTo": [
       "line",
@@ -1009,6 +1034,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1018,12 +1044,13 @@
     "storage": "union-text",
     "promote": "field",
     "arrayAlt": true,
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "encoding.y.lo",
     "description": "Lower field of a range band. With hi, the series is a band. On a combo, set mark to range so the band sits under the other series.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.lo",
     "appliesTo": [
       "combo",
@@ -1039,7 +1066,7 @@
   {
     "path": "encoding.y.hi",
     "description": "Upper field of a range band.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.hi",
     "appliesTo": [
       "combo",
@@ -1055,7 +1082,7 @@
   {
     "path": "encoding.y.error",
     "description": "± field around this series. Half-width. Used by error bars when low and high are omitted.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.error",
     "appliesTo": [
       "errorbar"
@@ -1068,7 +1095,7 @@
   {
     "path": "encoding.y.type",
     "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.type",
     "appliesTo": [
       "line",
@@ -1094,6 +1121,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1112,7 +1140,7 @@
   {
     "path": "encoding.y.title",
     "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.title",
     "appliesTo": [
       "line",
@@ -1138,6 +1166,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1150,7 +1179,7 @@
   {
     "path": "encoding.y.format",
     "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.format",
     "appliesTo": [
       "line",
@@ -1176,6 +1205,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1206,7 +1236,7 @@
   {
     "path": "encoding.y.format.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.format.decimals",
     "appliesTo": [
       "line",
@@ -1232,6 +1262,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1247,7 +1278,7 @@
   {
     "path": "encoding.y.format.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.format.currency",
     "appliesTo": [
       "line",
@@ -1273,6 +1304,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1285,7 +1317,7 @@
   {
     "path": "encoding.y.format.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.format.prefix",
     "appliesTo": [
       "line",
@@ -1311,6 +1343,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1323,7 +1356,7 @@
   {
     "path": "encoding.y.format.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.format.suffix",
     "appliesTo": [
       "line",
@@ -1349,6 +1382,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1361,7 +1395,7 @@
   {
     "path": "encoding.y.format.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.format.signed",
     "appliesTo": [
       "line",
@@ -1387,6 +1421,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1399,7 +1434,7 @@
   {
     "path": "encoding.y.format.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.format.specifier",
     "appliesTo": [
       "line",
@@ -1425,6 +1460,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1437,7 +1473,7 @@
   {
     "path": "encoding.y.scale.type",
     "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.scale.type",
     "appliesTo": [
       "line",
@@ -1463,6 +1499,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1484,7 +1521,7 @@
   {
     "path": "encoding.y.scale.domain",
     "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.scale.domain",
     "appliesTo": [
       "line",
@@ -1510,6 +1547,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1521,7 +1559,7 @@
   {
     "path": "encoding.y.scale.zero",
     "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.scale.zero",
     "appliesTo": [
       "line",
@@ -1547,6 +1585,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1559,7 +1598,7 @@
   {
     "path": "encoding.y.scale.nice",
     "description": "Round the domain to tidy tick values. Default true.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.scale.nice",
     "appliesTo": [
       "line",
@@ -1585,6 +1624,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1597,7 +1637,7 @@
   {
     "path": "encoding.y.scale.reverse",
     "description": "Flip the direction of the scale.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.scale.reverse",
     "appliesTo": [
       "line",
@@ -1623,6 +1663,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1635,7 +1676,7 @@
   {
     "path": "encoding.y.scale.padding",
     "description": "Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.scale.padding",
     "appliesTo": [
       "line",
@@ -1661,6 +1702,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1676,7 +1718,7 @@
   {
     "path": "encoding.y.scale.padding.min",
     "description": "Fraction of the span added below the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.scale.padding.min",
     "appliesTo": [
       "line",
@@ -1702,6 +1744,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1717,7 +1760,7 @@
   {
     "path": "encoding.y.scale.padding.max",
     "description": "Fraction of the span added above the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.scale.padding.max",
     "appliesTo": [
       "line",
@@ -1743,6 +1786,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1758,7 +1802,7 @@
   {
     "path": "encoding.y.scale.clamp",
     "description": "Draw values outside an explicit scale.domain at the domain edge.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.scale.clamp",
     "appliesTo": [
       "line",
@@ -1784,6 +1828,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1796,7 +1841,7 @@
   {
     "path": "encoding.y.scale.constant",
     "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.scale.constant",
     "appliesTo": [
       "line",
@@ -1822,6 +1867,7 @@
       "spike",
       "sunburst",
       "bar-list",
+      "strip",
       "gantt",
       "quadrant",
       "journey"
@@ -1836,7 +1882,7 @@
   {
     "path": "encoding.y.mark",
     "description": "Mark for this series. line, bar, and area are for combo. range draws a lo/hi band under the other combo series. A range series sets lo and hi instead of, or as well as, field.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.mark",
     "appliesTo": [
       "combo"
@@ -1855,7 +1901,7 @@
   {
     "path": "encoding.y.axis",
     "description": "Which y axis this series uses. The string \"y\" or \"y2\", not an axis object. 'y2' draws a second axis on the right. Put titles in axes.y.title or axes.y2.title.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.axis",
     "appliesTo": [
       "line",
@@ -1877,7 +1923,7 @@
   {
     "path": "encoding.y.color",
     "description": "A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.color",
     "appliesTo": [
       "line",
@@ -1894,7 +1940,7 @@
   {
     "path": "encoding.y.dash",
     "description": "Line style.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.dash",
     "appliesTo": [
       "line",
@@ -1915,7 +1961,7 @@
   {
     "path": "encoding.y.area",
     "description": "Fill under this line (line/combo).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.area",
     "appliesTo": [
       "line",
@@ -1929,7 +1975,7 @@
   {
     "path": "encoding.y.fillOpacity",
     "description": "Area or bar fill opacity for this series, 0–1. Overrides mark.fillOpacity.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.fillOpacity",
     "appliesTo": [
       "line",
@@ -1948,7 +1994,7 @@
   {
     "path": "encoding.y.pointShape",
     "description": "Marker for this series. Overrides mark.pointShape. Applies to: line, stacked-area, scatter, combo.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.pointShape",
     "appliesTo": [
       "line",
@@ -1972,7 +2018,7 @@
   {
     "path": "encoding.y.pointSize",
     "description": "Marker radius in px for this series. Overrides mark.pointSize.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.pointSize",
     "appliesTo": [
       "line",
@@ -1992,7 +2038,7 @@
   {
     "path": "encoding.y.pointFill",
     "description": "Filled or hollow marker for this series. Overrides mark.pointFill.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.pointFill",
     "appliesTo": [
       "line",
@@ -2012,7 +2058,7 @@
   {
     "path": "encoding.y.stack",
     "description": "Stack group. Series that share this name stack together. A name used once draws that series unstacked. Omit it to follow mark.stack.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.stack",
     "appliesTo": [
       "line",
@@ -2028,7 +2074,7 @@
   {
     "path": "encoding.y.z",
     "description": "Draw order. Higher paints later. Stacked series keep data order.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.y.z",
     "appliesTo": [
       "line",
@@ -2048,7 +2094,7 @@
   {
     "path": "encoding.series",
     "description": "Split 'long' data into series by the values of this field (e.g. region). Alternative to listing several y fields. Do not combine with a y array.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series",
     "appliesTo": [
       "line",
@@ -2065,12 +2111,13 @@
     "control": "text",
     "storage": "union-text",
     "promote": "field",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "encoding.series.type",
     "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.type",
     "appliesTo": [
       "line",
@@ -2097,7 +2144,7 @@
   {
     "path": "encoding.series.title",
     "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.title",
     "appliesTo": [
       "line",
@@ -2118,7 +2165,7 @@
   {
     "path": "encoding.series.format",
     "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.format",
     "appliesTo": [
       "line",
@@ -2157,7 +2204,7 @@
   {
     "path": "encoding.series.format.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.format.decimals",
     "appliesTo": [
       "line",
@@ -2181,7 +2228,7 @@
   {
     "path": "encoding.series.format.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.format.currency",
     "appliesTo": [
       "line",
@@ -2202,7 +2249,7 @@
   {
     "path": "encoding.series.format.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.format.prefix",
     "appliesTo": [
       "line",
@@ -2223,7 +2270,7 @@
   {
     "path": "encoding.series.format.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.format.suffix",
     "appliesTo": [
       "line",
@@ -2244,7 +2291,7 @@
   {
     "path": "encoding.series.format.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.format.signed",
     "appliesTo": [
       "line",
@@ -2265,7 +2312,7 @@
   {
     "path": "encoding.series.format.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.format.specifier",
     "appliesTo": [
       "line",
@@ -2286,7 +2333,7 @@
   {
     "path": "encoding.series.scale.type",
     "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.scale.type",
     "appliesTo": [
       "line",
@@ -2316,7 +2363,7 @@
   {
     "path": "encoding.series.scale.domain",
     "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.scale.domain",
     "appliesTo": [
       "line",
@@ -2336,7 +2383,7 @@
   {
     "path": "encoding.series.scale.zero",
     "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.scale.zero",
     "appliesTo": [
       "line",
@@ -2357,7 +2404,7 @@
   {
     "path": "encoding.series.scale.nice",
     "description": "Round the domain to tidy tick values. Default true.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.scale.nice",
     "appliesTo": [
       "line",
@@ -2378,7 +2425,7 @@
   {
     "path": "encoding.series.scale.reverse",
     "description": "Flip the direction of the scale.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.scale.reverse",
     "appliesTo": [
       "line",
@@ -2399,7 +2446,7 @@
   {
     "path": "encoding.series.scale.padding",
     "description": "Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.scale.padding",
     "appliesTo": [
       "line",
@@ -2423,7 +2470,7 @@
   {
     "path": "encoding.series.scale.padding.min",
     "description": "Fraction of the span added below the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.scale.padding.min",
     "appliesTo": [
       "line",
@@ -2447,7 +2494,7 @@
   {
     "path": "encoding.series.scale.padding.max",
     "description": "Fraction of the span added above the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.scale.padding.max",
     "appliesTo": [
       "line",
@@ -2471,7 +2518,7 @@
   {
     "path": "encoding.series.scale.clamp",
     "description": "Draw values outside an explicit scale.domain at the domain edge.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.scale.clamp",
     "appliesTo": [
       "line",
@@ -2492,7 +2539,7 @@
   {
     "path": "encoding.series.scale.constant",
     "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.series.scale.constant",
     "appliesTo": [
       "line",
@@ -2515,7 +2562,7 @@
   {
     "path": "encoding.color",
     "description": "Color by field or a constant. Heatmap: the value field. Scatter: category field. Defaults to series/theme palette.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color",
     "appliesTo": [
       "line",
@@ -2531,6 +2578,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -2541,12 +2589,13 @@
     "control": "color",
     "storage": "union-text",
     "promote": "field",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "encoding.color.type",
     "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.type",
     "appliesTo": [
       "line",
@@ -2562,6 +2611,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -2582,7 +2632,7 @@
   {
     "path": "encoding.color.title",
     "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.title",
     "appliesTo": [
       "line",
@@ -2598,6 +2648,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -2612,7 +2663,7 @@
   {
     "path": "encoding.color.format",
     "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.format",
     "appliesTo": [
       "line",
@@ -2628,6 +2679,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -2660,7 +2712,7 @@
   {
     "path": "encoding.color.format.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.format.decimals",
     "appliesTo": [
       "line",
@@ -2676,6 +2728,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -2693,7 +2746,7 @@
   {
     "path": "encoding.color.format.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.format.currency",
     "appliesTo": [
       "line",
@@ -2709,6 +2762,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -2723,7 +2777,7 @@
   {
     "path": "encoding.color.format.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.format.prefix",
     "appliesTo": [
       "line",
@@ -2739,6 +2793,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -2753,7 +2808,7 @@
   {
     "path": "encoding.color.format.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.format.suffix",
     "appliesTo": [
       "line",
@@ -2769,6 +2824,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -2783,7 +2839,7 @@
   {
     "path": "encoding.color.format.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.format.signed",
     "appliesTo": [
       "line",
@@ -2799,6 +2855,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -2813,7 +2870,7 @@
   {
     "path": "encoding.color.format.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.format.specifier",
     "appliesTo": [
       "line",
@@ -2829,6 +2886,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -2843,7 +2901,7 @@
   {
     "path": "encoding.color.scale.type",
     "description": "Position types match the shared scale. sequential, diverging, quantize, and threshold are colour-only and are not valid on x or y.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.type",
     "appliesTo": [
       "line",
@@ -2859,6 +2917,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -2885,7 +2944,7 @@
   {
     "path": "encoding.color.scale.domain",
     "description": "Explicit [min, max] for a continuous colour scale.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.domain",
     "appliesTo": [
       "line",
@@ -2901,6 +2960,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -2914,7 +2974,7 @@
   {
     "path": "encoding.color.scale.zero",
     "description": "Force the scale to include zero.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.zero",
     "appliesTo": [
       "line",
@@ -2930,6 +2990,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -2944,7 +3005,7 @@
   {
     "path": "encoding.color.scale.nice",
     "description": "Round the domain to tidy values.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.nice",
     "appliesTo": [
       "line",
@@ -2960,6 +3021,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -2974,7 +3036,7 @@
   {
     "path": "encoding.color.scale.reverse",
     "description": "Flip the direction of the scale.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.reverse",
     "appliesTo": [
       "line",
@@ -2990,6 +3052,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -3004,7 +3067,7 @@
   {
     "path": "encoding.color.scale.midpoint",
     "description": "Diverging midpoint. Default is the middle of the domain.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.midpoint",
     "appliesTo": [
       "line",
@@ -3020,6 +3083,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -3035,7 +3099,7 @@
   {
     "path": "encoding.color.scale.scheme",
     "description": "Named colour-blind-safe ramp. blue is the default. A range of two or more colours replaces it. Midnight uses a brighter ramp of the same name.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.scheme",
     "appliesTo": [
       "line",
@@ -3051,6 +3115,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -3071,7 +3136,7 @@
   {
     "path": "encoding.color.scale.bins",
     "description": "Equal-width bins for quantize. Default 5.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.bins",
     "appliesTo": [
       "line",
@@ -3087,6 +3152,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -3103,7 +3169,7 @@
   {
     "path": "encoding.color.scale.thresholds",
     "description": "Cut points for threshold. Colours are one more than the number of cuts. The legend labels the cuts, for example <6, 6–12, ≥12, not the data ends.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.thresholds",
     "appliesTo": [
       "line",
@@ -3119,6 +3185,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -3132,7 +3199,7 @@
   {
     "path": "encoding.color.range",
     "description": "Colors to use, in order (categorical) or low→high (sequential). Two or more colours replace a named scheme.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.range",
     "appliesTo": [
       "line",
@@ -3148,6 +3215,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -3161,7 +3229,7 @@
   {
     "path": "encoding.color.domain",
     "description": "Category values in the same order as range. A value that is not listed takes the next palette colour.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.domain",
     "appliesTo": [
       "line",
@@ -3177,6 +3245,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -3190,7 +3259,7 @@
   {
     "path": "encoding.color.value",
     "description": "A CSS color ('#22c55e', 'rgb(...)', 'oklch(...)'), a CSS variable ('var(--chart-1)'), or a theme token reference: 'series-1'..'series-12', 'accent', 'positive', 'negative', 'text', 'muted', 'grid'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.value",
     "appliesTo": [
       "line",
@@ -3206,6 +3275,7 @@
       "funnel",
       "sankey",
       "radar",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -3220,7 +3290,7 @@
   {
     "path": "encoding.size",
     "description": "Scatter only: bubble size field.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size",
     "appliesTo": [
       "scatter",
@@ -3231,12 +3301,13 @@
     "control": "text",
     "storage": "union-text",
     "promote": "field",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "encoding.size.type",
     "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.type",
     "appliesTo": [
       "scatter",
@@ -3257,7 +3328,7 @@
   {
     "path": "encoding.size.title",
     "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.title",
     "appliesTo": [
       "scatter",
@@ -3272,7 +3343,7 @@
   {
     "path": "encoding.size.format",
     "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.format",
     "appliesTo": [
       "scatter",
@@ -3305,7 +3376,7 @@
   {
     "path": "encoding.size.format.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.format.decimals",
     "appliesTo": [
       "scatter",
@@ -3323,7 +3394,7 @@
   {
     "path": "encoding.size.format.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.format.currency",
     "appliesTo": [
       "scatter",
@@ -3338,7 +3409,7 @@
   {
     "path": "encoding.size.format.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.format.prefix",
     "appliesTo": [
       "scatter",
@@ -3353,7 +3424,7 @@
   {
     "path": "encoding.size.format.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.format.suffix",
     "appliesTo": [
       "scatter",
@@ -3368,7 +3439,7 @@
   {
     "path": "encoding.size.format.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.format.signed",
     "appliesTo": [
       "scatter",
@@ -3383,7 +3454,7 @@
   {
     "path": "encoding.size.format.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.format.specifier",
     "appliesTo": [
       "scatter",
@@ -3398,7 +3469,7 @@
   {
     "path": "encoding.size.scale.type",
     "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.scale.type",
     "appliesTo": [
       "scatter",
@@ -3422,7 +3493,7 @@
   {
     "path": "encoding.size.scale.domain",
     "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.scale.domain",
     "appliesTo": [
       "scatter",
@@ -3436,7 +3507,7 @@
   {
     "path": "encoding.size.scale.zero",
     "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.scale.zero",
     "appliesTo": [
       "scatter",
@@ -3451,7 +3522,7 @@
   {
     "path": "encoding.size.scale.nice",
     "description": "Round the domain to tidy tick values. Default true.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.scale.nice",
     "appliesTo": [
       "scatter",
@@ -3466,7 +3537,7 @@
   {
     "path": "encoding.size.scale.reverse",
     "description": "Flip the direction of the scale.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.scale.reverse",
     "appliesTo": [
       "scatter",
@@ -3481,7 +3552,7 @@
   {
     "path": "encoding.size.scale.padding",
     "description": "Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.scale.padding",
     "appliesTo": [
       "scatter",
@@ -3499,7 +3570,7 @@
   {
     "path": "encoding.size.scale.padding.min",
     "description": "Fraction of the span added below the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.scale.padding.min",
     "appliesTo": [
       "scatter",
@@ -3517,7 +3588,7 @@
   {
     "path": "encoding.size.scale.padding.max",
     "description": "Fraction of the span added above the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.scale.padding.max",
     "appliesTo": [
       "scatter",
@@ -3535,7 +3606,7 @@
   {
     "path": "encoding.size.scale.clamp",
     "description": "Draw values outside an explicit scale.domain at the domain edge.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.scale.clamp",
     "appliesTo": [
       "scatter",
@@ -3550,7 +3621,7 @@
   {
     "path": "encoding.size.scale.constant",
     "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.scale.constant",
     "appliesTo": [
       "scatter",
@@ -3567,7 +3638,7 @@
   {
     "path": "encoding.size.range",
     "description": "[min, max] point radius in px.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.size.range",
     "appliesTo": [
       "scatter",
@@ -3581,7 +3652,7 @@
   {
     "path": "encoding.open",
     "description": "Candlestick only: opening price field.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open",
     "appliesTo": [
       "candlestick",
@@ -3597,7 +3668,7 @@
   {
     "path": "encoding.open.type",
     "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.type",
     "appliesTo": [
       "candlestick",
@@ -3618,7 +3689,7 @@
   {
     "path": "encoding.open.title",
     "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.title",
     "appliesTo": [
       "candlestick",
@@ -3633,7 +3704,7 @@
   {
     "path": "encoding.open.format",
     "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.format",
     "appliesTo": [
       "candlestick",
@@ -3666,7 +3737,7 @@
   {
     "path": "encoding.open.format.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.format.decimals",
     "appliesTo": [
       "candlestick",
@@ -3684,7 +3755,7 @@
   {
     "path": "encoding.open.format.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.format.currency",
     "appliesTo": [
       "candlestick",
@@ -3699,7 +3770,7 @@
   {
     "path": "encoding.open.format.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.format.prefix",
     "appliesTo": [
       "candlestick",
@@ -3714,7 +3785,7 @@
   {
     "path": "encoding.open.format.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.format.suffix",
     "appliesTo": [
       "candlestick",
@@ -3729,7 +3800,7 @@
   {
     "path": "encoding.open.format.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.format.signed",
     "appliesTo": [
       "candlestick",
@@ -3744,7 +3815,7 @@
   {
     "path": "encoding.open.format.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.format.specifier",
     "appliesTo": [
       "candlestick",
@@ -3759,7 +3830,7 @@
   {
     "path": "encoding.open.scale.type",
     "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.scale.type",
     "appliesTo": [
       "candlestick",
@@ -3783,7 +3854,7 @@
   {
     "path": "encoding.open.scale.domain",
     "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.scale.domain",
     "appliesTo": [
       "candlestick",
@@ -3797,7 +3868,7 @@
   {
     "path": "encoding.open.scale.zero",
     "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.scale.zero",
     "appliesTo": [
       "candlestick",
@@ -3812,7 +3883,7 @@
   {
     "path": "encoding.open.scale.nice",
     "description": "Round the domain to tidy tick values. Default true.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.scale.nice",
     "appliesTo": [
       "candlestick",
@@ -3827,7 +3898,7 @@
   {
     "path": "encoding.open.scale.reverse",
     "description": "Flip the direction of the scale.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.scale.reverse",
     "appliesTo": [
       "candlestick",
@@ -3842,7 +3913,7 @@
   {
     "path": "encoding.open.scale.padding",
     "description": "Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.scale.padding",
     "appliesTo": [
       "candlestick",
@@ -3860,7 +3931,7 @@
   {
     "path": "encoding.open.scale.padding.min",
     "description": "Fraction of the span added below the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.scale.padding.min",
     "appliesTo": [
       "candlestick",
@@ -3878,7 +3949,7 @@
   {
     "path": "encoding.open.scale.padding.max",
     "description": "Fraction of the span added above the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.scale.padding.max",
     "appliesTo": [
       "candlestick",
@@ -3896,7 +3967,7 @@
   {
     "path": "encoding.open.scale.clamp",
     "description": "Draw values outside an explicit scale.domain at the domain edge.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.scale.clamp",
     "appliesTo": [
       "candlestick",
@@ -3911,7 +3982,7 @@
   {
     "path": "encoding.open.scale.constant",
     "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.open.scale.constant",
     "appliesTo": [
       "candlestick",
@@ -3928,7 +3999,7 @@
   {
     "path": "encoding.high",
     "description": "Upper value. Candlestick: the high price. Area range, floating bar, and error bar: the top of the band or whisker.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high",
     "appliesTo": [
       "candlestick",
@@ -3945,7 +4016,7 @@
   {
     "path": "encoding.high.type",
     "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.type",
     "appliesTo": [
       "candlestick",
@@ -3967,7 +4038,7 @@
   {
     "path": "encoding.high.title",
     "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.title",
     "appliesTo": [
       "candlestick",
@@ -3983,7 +4054,7 @@
   {
     "path": "encoding.high.format",
     "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.format",
     "appliesTo": [
       "candlestick",
@@ -4017,7 +4088,7 @@
   {
     "path": "encoding.high.format.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.format.decimals",
     "appliesTo": [
       "candlestick",
@@ -4036,7 +4107,7 @@
   {
     "path": "encoding.high.format.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.format.currency",
     "appliesTo": [
       "candlestick",
@@ -4052,7 +4123,7 @@
   {
     "path": "encoding.high.format.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.format.prefix",
     "appliesTo": [
       "candlestick",
@@ -4068,7 +4139,7 @@
   {
     "path": "encoding.high.format.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.format.suffix",
     "appliesTo": [
       "candlestick",
@@ -4084,7 +4155,7 @@
   {
     "path": "encoding.high.format.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.format.signed",
     "appliesTo": [
       "candlestick",
@@ -4100,7 +4171,7 @@
   {
     "path": "encoding.high.format.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.format.specifier",
     "appliesTo": [
       "candlestick",
@@ -4116,7 +4187,7 @@
   {
     "path": "encoding.high.scale.type",
     "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.scale.type",
     "appliesTo": [
       "candlestick",
@@ -4141,7 +4212,7 @@
   {
     "path": "encoding.high.scale.domain",
     "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.scale.domain",
     "appliesTo": [
       "candlestick",
@@ -4156,7 +4227,7 @@
   {
     "path": "encoding.high.scale.zero",
     "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.scale.zero",
     "appliesTo": [
       "candlestick",
@@ -4172,7 +4243,7 @@
   {
     "path": "encoding.high.scale.nice",
     "description": "Round the domain to tidy tick values. Default true.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.scale.nice",
     "appliesTo": [
       "candlestick",
@@ -4188,7 +4259,7 @@
   {
     "path": "encoding.high.scale.reverse",
     "description": "Flip the direction of the scale.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.scale.reverse",
     "appliesTo": [
       "candlestick",
@@ -4204,7 +4275,7 @@
   {
     "path": "encoding.high.scale.padding",
     "description": "Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.scale.padding",
     "appliesTo": [
       "candlestick",
@@ -4223,7 +4294,7 @@
   {
     "path": "encoding.high.scale.padding.min",
     "description": "Fraction of the span added below the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.scale.padding.min",
     "appliesTo": [
       "candlestick",
@@ -4242,7 +4313,7 @@
   {
     "path": "encoding.high.scale.padding.max",
     "description": "Fraction of the span added above the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.scale.padding.max",
     "appliesTo": [
       "candlestick",
@@ -4261,7 +4332,7 @@
   {
     "path": "encoding.high.scale.clamp",
     "description": "Draw values outside an explicit scale.domain at the domain edge.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.scale.clamp",
     "appliesTo": [
       "candlestick",
@@ -4277,7 +4348,7 @@
   {
     "path": "encoding.high.scale.constant",
     "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.high.scale.constant",
     "appliesTo": [
       "candlestick",
@@ -4295,7 +4366,7 @@
   {
     "path": "encoding.low",
     "description": "Lower value. Candlestick: the low price. Area range, floating bar, and error bar: the bottom of the band or whisker.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low",
     "appliesTo": [
       "candlestick",
@@ -4312,7 +4383,7 @@
   {
     "path": "encoding.low.type",
     "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.type",
     "appliesTo": [
       "candlestick",
@@ -4334,7 +4405,7 @@
   {
     "path": "encoding.low.title",
     "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.title",
     "appliesTo": [
       "candlestick",
@@ -4350,7 +4421,7 @@
   {
     "path": "encoding.low.format",
     "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.format",
     "appliesTo": [
       "candlestick",
@@ -4384,7 +4455,7 @@
   {
     "path": "encoding.low.format.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.format.decimals",
     "appliesTo": [
       "candlestick",
@@ -4403,7 +4474,7 @@
   {
     "path": "encoding.low.format.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.format.currency",
     "appliesTo": [
       "candlestick",
@@ -4419,7 +4490,7 @@
   {
     "path": "encoding.low.format.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.format.prefix",
     "appliesTo": [
       "candlestick",
@@ -4435,7 +4506,7 @@
   {
     "path": "encoding.low.format.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.format.suffix",
     "appliesTo": [
       "candlestick",
@@ -4451,7 +4522,7 @@
   {
     "path": "encoding.low.format.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.format.signed",
     "appliesTo": [
       "candlestick",
@@ -4467,7 +4538,7 @@
   {
     "path": "encoding.low.format.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.format.specifier",
     "appliesTo": [
       "candlestick",
@@ -4483,7 +4554,7 @@
   {
     "path": "encoding.low.scale.type",
     "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.scale.type",
     "appliesTo": [
       "candlestick",
@@ -4508,7 +4579,7 @@
   {
     "path": "encoding.low.scale.domain",
     "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.scale.domain",
     "appliesTo": [
       "candlestick",
@@ -4523,7 +4594,7 @@
   {
     "path": "encoding.low.scale.zero",
     "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.scale.zero",
     "appliesTo": [
       "candlestick",
@@ -4539,7 +4610,7 @@
   {
     "path": "encoding.low.scale.nice",
     "description": "Round the domain to tidy tick values. Default true.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.scale.nice",
     "appliesTo": [
       "candlestick",
@@ -4555,7 +4626,7 @@
   {
     "path": "encoding.low.scale.reverse",
     "description": "Flip the direction of the scale.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.scale.reverse",
     "appliesTo": [
       "candlestick",
@@ -4571,7 +4642,7 @@
   {
     "path": "encoding.low.scale.padding",
     "description": "Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.scale.padding",
     "appliesTo": [
       "candlestick",
@@ -4590,7 +4661,7 @@
   {
     "path": "encoding.low.scale.padding.min",
     "description": "Fraction of the span added below the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.scale.padding.min",
     "appliesTo": [
       "candlestick",
@@ -4609,7 +4680,7 @@
   {
     "path": "encoding.low.scale.padding.max",
     "description": "Fraction of the span added above the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.scale.padding.max",
     "appliesTo": [
       "candlestick",
@@ -4628,7 +4699,7 @@
   {
     "path": "encoding.low.scale.clamp",
     "description": "Draw values outside an explicit scale.domain at the domain edge.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.scale.clamp",
     "appliesTo": [
       "candlestick",
@@ -4644,7 +4715,7 @@
   {
     "path": "encoding.low.scale.constant",
     "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.low.scale.constant",
     "appliesTo": [
       "candlestick",
@@ -4662,7 +4733,7 @@
   {
     "path": "encoding.close",
     "description": "Candlestick only: closing price field.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close",
     "appliesTo": [
       "candlestick",
@@ -4678,7 +4749,7 @@
   {
     "path": "encoding.close.type",
     "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.type",
     "appliesTo": [
       "candlestick",
@@ -4699,7 +4770,7 @@
   {
     "path": "encoding.close.title",
     "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.title",
     "appliesTo": [
       "candlestick",
@@ -4714,7 +4785,7 @@
   {
     "path": "encoding.close.format",
     "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.format",
     "appliesTo": [
       "candlestick",
@@ -4747,7 +4818,7 @@
   {
     "path": "encoding.close.format.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.format.decimals",
     "appliesTo": [
       "candlestick",
@@ -4765,7 +4836,7 @@
   {
     "path": "encoding.close.format.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.format.currency",
     "appliesTo": [
       "candlestick",
@@ -4780,7 +4851,7 @@
   {
     "path": "encoding.close.format.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.format.prefix",
     "appliesTo": [
       "candlestick",
@@ -4795,7 +4866,7 @@
   {
     "path": "encoding.close.format.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.format.suffix",
     "appliesTo": [
       "candlestick",
@@ -4810,7 +4881,7 @@
   {
     "path": "encoding.close.format.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.format.signed",
     "appliesTo": [
       "candlestick",
@@ -4825,7 +4896,7 @@
   {
     "path": "encoding.close.format.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.format.specifier",
     "appliesTo": [
       "candlestick",
@@ -4840,7 +4911,7 @@
   {
     "path": "encoding.close.scale.type",
     "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.scale.type",
     "appliesTo": [
       "candlestick",
@@ -4864,7 +4935,7 @@
   {
     "path": "encoding.close.scale.domain",
     "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.scale.domain",
     "appliesTo": [
       "candlestick",
@@ -4878,7 +4949,7 @@
   {
     "path": "encoding.close.scale.zero",
     "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.scale.zero",
     "appliesTo": [
       "candlestick",
@@ -4893,7 +4964,7 @@
   {
     "path": "encoding.close.scale.nice",
     "description": "Round the domain to tidy tick values. Default true.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.scale.nice",
     "appliesTo": [
       "candlestick",
@@ -4908,7 +4979,7 @@
   {
     "path": "encoding.close.scale.reverse",
     "description": "Flip the direction of the scale.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.scale.reverse",
     "appliesTo": [
       "candlestick",
@@ -4923,7 +4994,7 @@
   {
     "path": "encoding.close.scale.padding",
     "description": "Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.scale.padding",
     "appliesTo": [
       "candlestick",
@@ -4941,7 +5012,7 @@
   {
     "path": "encoding.close.scale.padding.min",
     "description": "Fraction of the span added below the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.scale.padding.min",
     "appliesTo": [
       "candlestick",
@@ -4959,7 +5030,7 @@
   {
     "path": "encoding.close.scale.padding.max",
     "description": "Fraction of the span added above the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.scale.padding.max",
     "appliesTo": [
       "candlestick",
@@ -4977,7 +5048,7 @@
   {
     "path": "encoding.close.scale.clamp",
     "description": "Draw values outside an explicit scale.domain at the domain edge.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.scale.clamp",
     "appliesTo": [
       "candlestick",
@@ -4992,7 +5063,7 @@
   {
     "path": "encoding.close.scale.constant",
     "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.close.scale.constant",
     "appliesTo": [
       "candlestick",
@@ -5009,7 +5080,7 @@
   {
     "path": "encoding.volume",
     "description": "Candlestick only: volume field. When set, bars are drawn under the price plot.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume",
     "appliesTo": [
       "candlestick"
@@ -5023,7 +5094,7 @@
   {
     "path": "encoding.volume.type",
     "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.type",
     "appliesTo": [
       "candlestick"
@@ -5042,7 +5113,7 @@
   {
     "path": "encoding.volume.title",
     "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.title",
     "appliesTo": [
       "candlestick"
@@ -5055,7 +5126,7 @@
   {
     "path": "encoding.volume.format",
     "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.format",
     "appliesTo": [
       "candlestick"
@@ -5086,7 +5157,7 @@
   {
     "path": "encoding.volume.format.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.format.decimals",
     "appliesTo": [
       "candlestick"
@@ -5102,7 +5173,7 @@
   {
     "path": "encoding.volume.format.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.format.currency",
     "appliesTo": [
       "candlestick"
@@ -5115,7 +5186,7 @@
   {
     "path": "encoding.volume.format.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.format.prefix",
     "appliesTo": [
       "candlestick"
@@ -5128,7 +5199,7 @@
   {
     "path": "encoding.volume.format.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.format.suffix",
     "appliesTo": [
       "candlestick"
@@ -5141,7 +5212,7 @@
   {
     "path": "encoding.volume.format.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.format.signed",
     "appliesTo": [
       "candlestick"
@@ -5154,7 +5225,7 @@
   {
     "path": "encoding.volume.format.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.format.specifier",
     "appliesTo": [
       "candlestick"
@@ -5167,7 +5238,7 @@
   {
     "path": "encoding.volume.scale.type",
     "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.scale.type",
     "appliesTo": [
       "candlestick"
@@ -5189,7 +5260,7 @@
   {
     "path": "encoding.volume.scale.domain",
     "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.scale.domain",
     "appliesTo": [
       "candlestick"
@@ -5201,7 +5272,7 @@
   {
     "path": "encoding.volume.scale.zero",
     "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.scale.zero",
     "appliesTo": [
       "candlestick"
@@ -5214,7 +5285,7 @@
   {
     "path": "encoding.volume.scale.nice",
     "description": "Round the domain to tidy tick values. Default true.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.scale.nice",
     "appliesTo": [
       "candlestick"
@@ -5227,7 +5298,7 @@
   {
     "path": "encoding.volume.scale.reverse",
     "description": "Flip the direction of the scale.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.scale.reverse",
     "appliesTo": [
       "candlestick"
@@ -5240,7 +5311,7 @@
   {
     "path": "encoding.volume.scale.padding",
     "description": "Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.scale.padding",
     "appliesTo": [
       "candlestick"
@@ -5256,7 +5327,7 @@
   {
     "path": "encoding.volume.scale.padding.min",
     "description": "Fraction of the span added below the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.scale.padding.min",
     "appliesTo": [
       "candlestick"
@@ -5272,7 +5343,7 @@
   {
     "path": "encoding.volume.scale.padding.max",
     "description": "Fraction of the span added above the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.scale.padding.max",
     "appliesTo": [
       "candlestick"
@@ -5288,7 +5359,7 @@
   {
     "path": "encoding.volume.scale.clamp",
     "description": "Draw values outside an explicit scale.domain at the domain edge.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.scale.clamp",
     "appliesTo": [
       "candlestick"
@@ -5301,7 +5372,7 @@
   {
     "path": "encoding.volume.scale.constant",
     "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.volume.scale.constant",
     "appliesTo": [
       "candlestick"
@@ -5316,7 +5387,7 @@
   {
     "path": "encoding.source",
     "description": "Sankey only: the node the flow leaves.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source",
     "appliesTo": [
       "sankey",
@@ -5331,7 +5402,7 @@
   {
     "path": "encoding.source.type",
     "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.type",
     "appliesTo": [
       "sankey",
@@ -5351,7 +5422,7 @@
   {
     "path": "encoding.source.title",
     "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.title",
     "appliesTo": [
       "sankey",
@@ -5365,7 +5436,7 @@
   {
     "path": "encoding.source.format",
     "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.format",
     "appliesTo": [
       "sankey",
@@ -5397,7 +5468,7 @@
   {
     "path": "encoding.source.format.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.format.decimals",
     "appliesTo": [
       "sankey",
@@ -5414,7 +5485,7 @@
   {
     "path": "encoding.source.format.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.format.currency",
     "appliesTo": [
       "sankey",
@@ -5428,7 +5499,7 @@
   {
     "path": "encoding.source.format.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.format.prefix",
     "appliesTo": [
       "sankey",
@@ -5442,7 +5513,7 @@
   {
     "path": "encoding.source.format.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.format.suffix",
     "appliesTo": [
       "sankey",
@@ -5456,7 +5527,7 @@
   {
     "path": "encoding.source.format.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.format.signed",
     "appliesTo": [
       "sankey",
@@ -5470,7 +5541,7 @@
   {
     "path": "encoding.source.format.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.format.specifier",
     "appliesTo": [
       "sankey",
@@ -5484,7 +5555,7 @@
   {
     "path": "encoding.source.scale.type",
     "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.scale.type",
     "appliesTo": [
       "sankey",
@@ -5507,7 +5578,7 @@
   {
     "path": "encoding.source.scale.domain",
     "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.scale.domain",
     "appliesTo": [
       "sankey",
@@ -5520,7 +5591,7 @@
   {
     "path": "encoding.source.scale.zero",
     "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.scale.zero",
     "appliesTo": [
       "sankey",
@@ -5534,7 +5605,7 @@
   {
     "path": "encoding.source.scale.nice",
     "description": "Round the domain to tidy tick values. Default true.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.scale.nice",
     "appliesTo": [
       "sankey",
@@ -5548,7 +5619,7 @@
   {
     "path": "encoding.source.scale.reverse",
     "description": "Flip the direction of the scale.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.scale.reverse",
     "appliesTo": [
       "sankey",
@@ -5562,7 +5633,7 @@
   {
     "path": "encoding.source.scale.padding",
     "description": "Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.scale.padding",
     "appliesTo": [
       "sankey",
@@ -5579,7 +5650,7 @@
   {
     "path": "encoding.source.scale.padding.min",
     "description": "Fraction of the span added below the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.scale.padding.min",
     "appliesTo": [
       "sankey",
@@ -5596,7 +5667,7 @@
   {
     "path": "encoding.source.scale.padding.max",
     "description": "Fraction of the span added above the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.scale.padding.max",
     "appliesTo": [
       "sankey",
@@ -5613,7 +5684,7 @@
   {
     "path": "encoding.source.scale.clamp",
     "description": "Draw values outside an explicit scale.domain at the domain edge.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.scale.clamp",
     "appliesTo": [
       "sankey",
@@ -5627,7 +5698,7 @@
   {
     "path": "encoding.source.scale.constant",
     "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.source.scale.constant",
     "appliesTo": [
       "sankey",
@@ -5643,7 +5714,7 @@
   {
     "path": "encoding.target",
     "description": "Sankey: the node the flow enters. Bullet: the target value field.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target",
     "appliesTo": [
       "sankey",
@@ -5659,7 +5730,7 @@
   {
     "path": "encoding.target.type",
     "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.type",
     "appliesTo": [
       "sankey",
@@ -5680,7 +5751,7 @@
   {
     "path": "encoding.target.title",
     "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.title",
     "appliesTo": [
       "sankey",
@@ -5695,7 +5766,7 @@
   {
     "path": "encoding.target.format",
     "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.format",
     "appliesTo": [
       "sankey",
@@ -5728,7 +5799,7 @@
   {
     "path": "encoding.target.format.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.format.decimals",
     "appliesTo": [
       "sankey",
@@ -5746,7 +5817,7 @@
   {
     "path": "encoding.target.format.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.format.currency",
     "appliesTo": [
       "sankey",
@@ -5761,7 +5832,7 @@
   {
     "path": "encoding.target.format.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.format.prefix",
     "appliesTo": [
       "sankey",
@@ -5776,7 +5847,7 @@
   {
     "path": "encoding.target.format.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.format.suffix",
     "appliesTo": [
       "sankey",
@@ -5791,7 +5862,7 @@
   {
     "path": "encoding.target.format.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.format.signed",
     "appliesTo": [
       "sankey",
@@ -5806,7 +5877,7 @@
   {
     "path": "encoding.target.format.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.format.specifier",
     "appliesTo": [
       "sankey",
@@ -5821,7 +5892,7 @@
   {
     "path": "encoding.target.scale.type",
     "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.scale.type",
     "appliesTo": [
       "sankey",
@@ -5845,7 +5916,7 @@
   {
     "path": "encoding.target.scale.domain",
     "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.scale.domain",
     "appliesTo": [
       "sankey",
@@ -5859,7 +5930,7 @@
   {
     "path": "encoding.target.scale.zero",
     "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.scale.zero",
     "appliesTo": [
       "sankey",
@@ -5874,7 +5945,7 @@
   {
     "path": "encoding.target.scale.nice",
     "description": "Round the domain to tidy tick values. Default true.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.scale.nice",
     "appliesTo": [
       "sankey",
@@ -5889,7 +5960,7 @@
   {
     "path": "encoding.target.scale.reverse",
     "description": "Flip the direction of the scale.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.scale.reverse",
     "appliesTo": [
       "sankey",
@@ -5904,7 +5975,7 @@
   {
     "path": "encoding.target.scale.padding",
     "description": "Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.scale.padding",
     "appliesTo": [
       "sankey",
@@ -5922,7 +5993,7 @@
   {
     "path": "encoding.target.scale.padding.min",
     "description": "Fraction of the span added below the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.scale.padding.min",
     "appliesTo": [
       "sankey",
@@ -5940,7 +6011,7 @@
   {
     "path": "encoding.target.scale.padding.max",
     "description": "Fraction of the span added above the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.scale.padding.max",
     "appliesTo": [
       "sankey",
@@ -5958,7 +6029,7 @@
   {
     "path": "encoding.target.scale.clamp",
     "description": "Draw values outside an explicit scale.domain at the domain edge.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.scale.clamp",
     "appliesTo": [
       "sankey",
@@ -5973,7 +6044,7 @@
   {
     "path": "encoding.target.scale.constant",
     "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.target.scale.constant",
     "appliesTo": [
       "sankey",
@@ -5990,7 +6061,7 @@
   {
     "path": "encoding.error",
     "description": "Error bar only: symmetric ± around y. The field is the half-width. encoding.low and encoding.high override it.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error",
     "appliesTo": [
       "errorbar"
@@ -6004,7 +6075,7 @@
   {
     "path": "encoding.error.type",
     "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.type",
     "appliesTo": [
       "errorbar"
@@ -6023,7 +6094,7 @@
   {
     "path": "encoding.error.title",
     "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.title",
     "appliesTo": [
       "errorbar"
@@ -6036,7 +6107,7 @@
   {
     "path": "encoding.error.format",
     "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.format",
     "appliesTo": [
       "errorbar"
@@ -6067,7 +6138,7 @@
   {
     "path": "encoding.error.format.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.format.decimals",
     "appliesTo": [
       "errorbar"
@@ -6083,7 +6154,7 @@
   {
     "path": "encoding.error.format.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.format.currency",
     "appliesTo": [
       "errorbar"
@@ -6096,7 +6167,7 @@
   {
     "path": "encoding.error.format.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.format.prefix",
     "appliesTo": [
       "errorbar"
@@ -6109,7 +6180,7 @@
   {
     "path": "encoding.error.format.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.format.suffix",
     "appliesTo": [
       "errorbar"
@@ -6122,7 +6193,7 @@
   {
     "path": "encoding.error.format.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.format.signed",
     "appliesTo": [
       "errorbar"
@@ -6135,7 +6206,7 @@
   {
     "path": "encoding.error.format.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.format.specifier",
     "appliesTo": [
       "errorbar"
@@ -6148,7 +6219,7 @@
   {
     "path": "encoding.error.scale.type",
     "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.scale.type",
     "appliesTo": [
       "errorbar"
@@ -6170,7 +6241,7 @@
   {
     "path": "encoding.error.scale.domain",
     "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.scale.domain",
     "appliesTo": [
       "errorbar"
@@ -6182,7 +6253,7 @@
   {
     "path": "encoding.error.scale.zero",
     "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.scale.zero",
     "appliesTo": [
       "errorbar"
@@ -6195,7 +6266,7 @@
   {
     "path": "encoding.error.scale.nice",
     "description": "Round the domain to tidy tick values. Default true.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.scale.nice",
     "appliesTo": [
       "errorbar"
@@ -6208,7 +6279,7 @@
   {
     "path": "encoding.error.scale.reverse",
     "description": "Flip the direction of the scale.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.scale.reverse",
     "appliesTo": [
       "errorbar"
@@ -6221,7 +6292,7 @@
   {
     "path": "encoding.error.scale.padding",
     "description": "Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.scale.padding",
     "appliesTo": [
       "errorbar"
@@ -6237,7 +6308,7 @@
   {
     "path": "encoding.error.scale.padding.min",
     "description": "Fraction of the span added below the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.scale.padding.min",
     "appliesTo": [
       "errorbar"
@@ -6253,7 +6324,7 @@
   {
     "path": "encoding.error.scale.padding.max",
     "description": "Fraction of the span added above the data.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.scale.padding.max",
     "appliesTo": [
       "errorbar"
@@ -6269,7 +6340,7 @@
   {
     "path": "encoding.error.scale.clamp",
     "description": "Draw values outside an explicit scale.domain at the domain edge.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.scale.clamp",
     "appliesTo": [
       "errorbar"
@@ -6282,7 +6353,7 @@
   {
     "path": "encoding.error.scale.constant",
     "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.error.scale.constant",
     "appliesTo": [
       "errorbar"
@@ -6297,7 +6368,7 @@
   {
     "path": "encoding.path",
     "description": "Treemap and sunburst: field names from the root down to the leaf, for flat rows. A parent with no value is the sum of its leaves.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.path",
     "appliesTo": [
       "treemap",
@@ -6310,7 +6381,7 @@
   {
     "path": "encoding.id",
     "description": "Treemap and sunburst: the node id field. Pair it with encoding.parent.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.id",
     "appliesTo": [
       "treemap",
@@ -6324,7 +6395,7 @@
   {
     "path": "encoding.parent",
     "description": "Treemap and sunburst: the parent id field. An empty parent is a root. On a treemap with no encoding.id, a legacy parent field still repairs to encoding.color.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#encoding.parent",
     "appliesTo": [
       "treemap",
@@ -6336,9 +6407,317 @@
     "slider": false
   },
   {
+    "path": "encoding.label",
+    "description": "Strip only: field shown with the group and the value in the point tooltip. It is not drawn on the plot. Other chart types warn CK3094.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Label field",
+    "control": "text",
+    "storage": "union-text",
+    "promote": "field",
+    "slider": false,
+    "essential": true
+  },
+  {
+    "path": "encoding.label.type",
+    "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.type",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Type",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "quantitative",
+      "temporal",
+      "ordinal",
+      "nominal"
+    ],
+    "slider": false
+  },
+  {
+    "path": "encoding.label.title",
+    "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.title",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Title",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.label.format",
+    "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.format",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Format",
+    "control": "enum",
+    "storage": "union-enum",
+    "promote": "style",
+    "enumValues": [
+      "number",
+      "integer",
+      "compact",
+      "percent",
+      "percent-raw",
+      "currency",
+      "bytes",
+      "duration-ms",
+      "duration-hm",
+      "date",
+      "time",
+      "datetime",
+      "month",
+      "year",
+      "weekday"
+    ],
+    "slider": false
+  },
+  {
+    "path": "encoding.label.format.decimals",
+    "description": "Fixed number of fraction digits.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.format.decimals",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Decimals",
+    "control": "number",
+    "storage": "scalar",
+    "coerce": "integer",
+    "minimum": 0,
+    "maximum": 10,
+    "slider": true
+  },
+  {
+    "path": "encoding.label.format.currency",
+    "description": "ISO 4217 code when style is 'currency'.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.format.currency",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Currency",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.label.format.prefix",
+    "description": "Text placed before the value.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.format.prefix",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Prefix",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.label.format.suffix",
+    "description": "Text placed after the value, e.g. ' req/s'.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.format.suffix",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Suffix",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.label.format.signed",
+    "description": "Always show + for positive numbers (useful for deltas).",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.format.signed",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Signed",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.label.format.specifier",
+    "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.format.specifier",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Specifier",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.label.scale.type",
+    "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.scale.type",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Type",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "linear",
+      "log",
+      "sqrt",
+      "time",
+      "band",
+      "point",
+      "symlog"
+    ],
+    "slider": false
+  },
+  {
+    "path": "encoding.label.scale.domain",
+    "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.scale.domain",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Domain",
+    "control": "json",
+    "storage": "scalar"
+  },
+  {
+    "path": "encoding.label.scale.zero",
+    "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.scale.zero",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Zero",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.label.scale.nice",
+    "description": "Round the domain to tidy tick values. Default true.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.scale.nice",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Nice",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.label.scale.reverse",
+    "description": "Flip the direction of the scale.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.scale.reverse",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Reverse",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.label.scale.padding",
+    "description": "Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.scale.padding",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Padding",
+    "control": "number",
+    "storage": "union-number",
+    "coerce": "number",
+    "minimum": 0,
+    "maximum": 1,
+    "slider": true
+  },
+  {
+    "path": "encoding.label.scale.padding.min",
+    "description": "Fraction of the span added below the data.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.scale.padding.min",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Min",
+    "control": "number",
+    "storage": "scalar",
+    "coerce": "number",
+    "minimum": 0,
+    "maximum": 1,
+    "slider": true
+  },
+  {
+    "path": "encoding.label.scale.padding.max",
+    "description": "Fraction of the span added above the data.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.scale.padding.max",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Max",
+    "control": "number",
+    "storage": "scalar",
+    "coerce": "number",
+    "minimum": 0,
+    "maximum": 1,
+    "slider": true
+  },
+  {
+    "path": "encoding.label.scale.clamp",
+    "description": "Draw values outside an explicit scale.domain at the domain edge.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.scale.clamp",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Clamp",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.label.scale.constant",
+    "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.label.scale.constant",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Constant",
+    "control": "number",
+    "storage": "scalar",
+    "coerce": "number",
+    "minimum": 0,
+    "slider": false
+  },
+  {
     "path": "metric.value",
     "description": "The current value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.value",
     "appliesTo": [
       "gauge",
@@ -6349,12 +6728,13 @@
     "control": "number",
     "storage": "scalar",
     "coerce": "number",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "metric.label",
     "description": "Short visible label, e.g. 'Revenue'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.label",
     "appliesTo": [
       "gauge",
@@ -6364,12 +6744,13 @@
     "label": "Label",
     "control": "text",
     "storage": "scalar",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "metric.min",
     "description": "Lower bound of the scale (gauge, progress-ring).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.min",
     "appliesTo": [
       "gauge",
@@ -6386,7 +6767,7 @@
   {
     "path": "metric.max",
     "description": "Upper bound of the scale (gauge, progress-ring).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.max",
     "appliesTo": [
       "gauge",
@@ -6403,7 +6784,7 @@
   {
     "path": "metric.target",
     "description": "Target marker value (gauge) or comparison value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.target",
     "appliesTo": [
       "gauge",
@@ -6419,7 +6800,7 @@
   {
     "path": "metric.delta",
     "description": "Change vs previous period, as a fraction (0.125 = +12.5%) unless deltaFormat says otherwise (kpi).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.delta",
     "appliesTo": [
       "gauge",
@@ -6435,7 +6816,7 @@
   {
     "path": "metric.deltaFormat",
     "description": "Format for delta. Default 'percent' with signed: true.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.deltaFormat",
     "appliesTo": [
       "gauge",
@@ -6468,7 +6849,7 @@
   {
     "path": "metric.deltaFormat.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.deltaFormat.decimals",
     "appliesTo": [
       "gauge",
@@ -6486,7 +6867,7 @@
   {
     "path": "metric.deltaFormat.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.deltaFormat.currency",
     "appliesTo": [
       "gauge",
@@ -6501,7 +6882,7 @@
   {
     "path": "metric.deltaFormat.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.deltaFormat.prefix",
     "appliesTo": [
       "gauge",
@@ -6516,7 +6897,7 @@
   {
     "path": "metric.deltaFormat.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.deltaFormat.suffix",
     "appliesTo": [
       "gauge",
@@ -6531,7 +6912,7 @@
   {
     "path": "metric.deltaFormat.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.deltaFormat.signed",
     "appliesTo": [
       "gauge",
@@ -6546,7 +6927,7 @@
   {
     "path": "metric.deltaFormat.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.deltaFormat.specifier",
     "appliesTo": [
       "gauge",
@@ -6561,7 +6942,7 @@
   {
     "path": "metric.goodDirection",
     "description": "Which direction of delta is good (sets positive/negative color).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.goodDirection",
     "appliesTo": [
       "gauge",
@@ -6581,7 +6962,7 @@
   {
     "path": "metric.format",
     "description": "Format for value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.format",
     "appliesTo": [
       "gauge",
@@ -6614,7 +6995,7 @@
   {
     "path": "metric.format.decimals",
     "description": "Fixed number of fraction digits.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.format.decimals",
     "appliesTo": [
       "gauge",
@@ -6632,7 +7013,7 @@
   {
     "path": "metric.format.currency",
     "description": "ISO 4217 code when style is 'currency'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.format.currency",
     "appliesTo": [
       "gauge",
@@ -6647,7 +7028,7 @@
   {
     "path": "metric.format.prefix",
     "description": "Text placed before the value.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.format.prefix",
     "appliesTo": [
       "gauge",
@@ -6662,7 +7043,7 @@
   {
     "path": "metric.format.suffix",
     "description": "Text placed after the value, e.g. ' req/s'.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.format.suffix",
     "appliesTo": [
       "gauge",
@@ -6677,7 +7058,7 @@
   {
     "path": "metric.format.signed",
     "description": "Always show + for positive numbers (useful for deltas).",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.format.signed",
     "appliesTo": [
       "gauge",
@@ -6692,7 +7073,7 @@
   {
     "path": "metric.format.specifier",
     "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.format.specifier",
     "appliesTo": [
       "gauge",
@@ -6707,7 +7088,7 @@
   {
     "path": "metric.bands",
     "description": "Colored ranges on the gauge, e.g. good/warn/bad.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.bands",
     "appliesTo": [
       "gauge",
@@ -6721,7 +7102,7 @@
   {
     "path": "metric.thresholds",
     "description": "Colour the kpi surface from the value. The last step at or below metric.value wins. Applies to: kpi.",
-    "group": "Data mapping",
+    "group": "Data / Encoding",
     "docs": "/docs/options#metric.thresholds",
     "appliesTo": [
       "gauge",
@@ -6735,7 +7116,7 @@
   {
     "path": "mark.curve",
     "description": "Line interpolation. monotone is monotone-x and stays inside the data, so a spike does not cross the low point or pass the peak. smooth, spline, and basis repair to monotone. Applies to: line, stacked-area, combo, sparkline, mini-area.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.curve",
     "appliesTo": [
       "line",
@@ -6755,12 +7136,13 @@
       "step-after"
     ],
     "slider": false,
-    "defaultValue": "monotone"
+    "defaultValue": "monotone",
+    "essential": true
   },
   {
     "path": "mark.sampling",
     "description": "Downsample the path when a series is longer than twice the plot width in pixels. 'auto' and 'minmax' keep the minimum and maximum original point in each pixel bucket (spikes stay).",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.sampling",
     "appliesTo": [
       "line",
@@ -6785,7 +7167,7 @@
   {
     "path": "mark.points",
     "description": "Show point markers on lines. Applies to: line, combo.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.points",
     "appliesTo": [
       "line",
@@ -6800,12 +7182,13 @@
       "always"
     ],
     "slider": false,
-    "defaultValue": "hover"
+    "defaultValue": "hover",
+    "essential": true
   },
   {
     "path": "mark.track",
     "description": "Ranked-row track. bar is a short rounded bar. row is a full-height wash behind the label, width proportional to the value, with the count on the right. Applies to: bar-list.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.track",
     "appliesTo": [
       "bar-list"
@@ -6822,15 +7205,16 @@
   },
   {
     "path": "mark.pointSize",
-    "description": "Point radius in px. Applies to: line, stacked-area, combo, scatter, errorbar.",
-    "group": "Marks",
+    "description": "Point radius in px. Applies to: line, stacked-area, combo, scatter, errorbar, strip.",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.pointSize",
     "appliesTo": [
       "line",
       "stacked-area",
       "combo",
       "scatter",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Point Size",
     "control": "number",
@@ -6843,7 +7227,7 @@
   {
     "path": "mark.pointShape",
     "description": "Point marker. circle, square, diamond, triangle, cross, or none. A y series may override it. Applies to: line, stacked-area, scatter, combo. Drawn on createRenderer([line]).",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.pointShape",
     "appliesTo": [
       "line",
@@ -6867,7 +7251,7 @@
   {
     "path": "mark.pointFill",
     "description": "Filled or hollow markers. Applies to: line, stacked-area, scatter, combo.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.pointFill",
     "appliesTo": [
       "line",
@@ -6887,7 +7271,7 @@
   {
     "path": "mark.area",
     "description": "Fill under every line. Applies to: line, sparkline.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.area",
     "appliesTo": [
       "line",
@@ -6896,12 +7280,13 @@
     "label": "Area",
     "control": "boolean",
     "storage": "scalar",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "mark.fillOpacity",
     "description": "Area/bar fill opacity, 0–1. Applies to: line, stacked-area, combo, mini-area, bar.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.fillOpacity",
     "appliesTo": [
       "line",
@@ -6921,7 +7306,7 @@
   {
     "path": "mark.gradient",
     "description": "Fade area fills toward the baseline. Applies to: line, stacked-area, mini-area, sparkline.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.gradient",
     "appliesTo": [
       "line",
@@ -6938,7 +7323,7 @@
   {
     "path": "mark.strokeWidth",
     "description": "Line width in px. Applies to: line, stacked-area, combo, sparkline, mini-area, spike, progress-ring, gauge (arc width).",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.strokeWidth",
     "appliesTo": [
       "line",
@@ -6961,7 +7346,7 @@
   {
     "path": "mark.glow",
     "description": "Soft glow behind the line. A blurred understroke and one filter, emitted only when true, on Soft and on midnight. Applies to: line, sparkline, combo.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.glow",
     "appliesTo": [
       "line",
@@ -6977,7 +7362,7 @@
   {
     "path": "mark.connectNulls",
     "description": "Draw through missing values instead of leaving gaps. Applies to: line, stacked-area, combo, sparkline, mini-area.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.connectNulls",
     "appliesTo": [
       "line",
@@ -6995,7 +7380,7 @@
   {
     "path": "mark.stack",
     "description": "Stacking for multiple series. 'percent' normalises each x to 100%. Applies to: bar, stacked-area (default 'stack'), combo bars, radial-bar, rose. On a polar chart, none groups the sectors and stack or percent runs outward from the hole.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.stack",
     "appliesTo": [
       "bar",
@@ -7012,15 +7397,17 @@
       "stack",
       "percent"
     ],
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "mark.orientation",
-    "description": "Bar direction. Applies to: bar.",
-    "group": "Marks",
+    "description": "Bar direction. vertical is the bar default. Strip treats an omission as horizontal: categories run down the y axis and the numeric axis is x. Set vertical to swap them. Applies to: bar, strip.",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.orientation",
     "appliesTo": [
-      "bar"
+      "bar",
+      "strip"
     ],
     "label": "Orientation",
     "control": "enum",
@@ -7030,12 +7417,13 @@
       "horizontal"
     ],
     "slider": false,
-    "defaultValue": "vertical"
+    "defaultValue": "vertical",
+    "essential": true
   },
   {
     "path": "mark.cornerRadius",
     "description": "Rounded corners in px. Applies to: bar, donut, pie, heatmap, radial-bar, rose. A radial bar rounds the outer end.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.cornerRadius",
     "appliesTo": [
       "bar",
@@ -7062,7 +7450,7 @@
   {
     "path": "mark.gap",
     "description": "Spacing between bars/cells as a 0–1 fraction of the band. Applies to: bar, combo, heatmap, candlestick, radial-bar, rose. On a grouped polar chart it is the share of the category left between series.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.gap",
     "appliesTo": [
       "bar",
@@ -7088,7 +7476,7 @@
   {
     "path": "mark.stackGap",
     "description": "Pixel gap between stacked segments. Applies to: bar, stacked-area, combo.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.stackGap",
     "appliesTo": [
       "bar",
@@ -7106,7 +7494,7 @@
   {
     "path": "mark.radiusEnds",
     "description": "Which bar corners round. outer rounds the end away from the baseline. all rounds every corner. Applies to: bar.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.radiusEnds",
     "appliesTo": [
       "bar"
@@ -7123,7 +7511,7 @@
   {
     "path": "mark.partial",
     "description": "Dash the last segment only. The area still covers the whole series, including that segment. Applies to: line, stacked-area, combo.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.partial",
     "appliesTo": [
       "line",
@@ -7142,7 +7530,7 @@
   {
     "path": "mark.partialOpacity",
     "description": "Fill opacity of the last area segment. The earlier area keeps mark.fillOpacity. Applies to: line, stacked-area, combo.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.partialOpacity",
     "appliesTo": [
       "line",
@@ -7176,7 +7564,8 @@
     "control": "boolean",
     "storage": "scalar",
     "slider": false,
-    "defaultValue": false
+    "defaultValue": false,
+    "essential": true
   },
   {
     "path": "mark.labelPosition",
@@ -7204,7 +7593,8 @@
       "inside",
       "outside"
     ],
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "mark.labelFormat",
@@ -7241,7 +7631,8 @@
       "year",
       "weekday"
     ],
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "mark.labelFormat.decimals",
@@ -7378,7 +7769,8 @@
       "ends",
       "last"
     ],
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "mark.stackTotal",
@@ -7398,7 +7790,7 @@
   {
     "path": "mark.innerRadius",
     "description": "Hole size as a 0–0.95 fraction of the radius. Donut defaults to 0.6. Pie defaults to 0. Sunburst uses 0.28 when this is omitted. Radial-bar defaults to 0.34. Rose defaults to 0. Above 0.85 on a polar chart warns CK3075.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.innerRadius",
     "appliesTo": [
       "donut",
@@ -7419,7 +7811,7 @@
   {
     "path": "mark.depth",
     "description": "How many levels to draw under the root. Deeper nodes fold into that level. Default 8. Applies to: treemap, sunburst.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.depth",
     "appliesTo": [
       "treemap",
@@ -7436,7 +7828,7 @@
   {
     "path": "mark.padAngle",
     "description": "Gap between slices in degrees. Donut defaults to 2. Pie defaults to 0. Radial-bar defaults to 2. Rose defaults to 1.2. Above 8 degrees on a polar chart warns CK3076. Applies to: donut, pie, radial-bar, rose.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.padAngle",
     "appliesTo": [
       "donut",
@@ -7453,13 +7845,88 @@
     "slider": true
   },
   {
+    "path": "mark.summary",
+    "description": "Tick drawn across each group. median is the default. mean is the arithmetic mean. none draws no tick. A strip where every group has one point hides the tick. Applies to: strip.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.summary",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Summary",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "none",
+      "median",
+      "mean"
+    ],
+    "slider": false,
+    "defaultValue": "median",
+    "essential": true
+  },
+  {
+    "path": "mark.band",
+    "description": "Bar behind the dots. none draws none. range runs from the minimum to the maximum. iqr runs from the first quartile to the third. A group with fewer than 3 points draws no band. Applies to: strip.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.band",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Band",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "none",
+      "range",
+      "iqr"
+    ],
+    "slider": false,
+    "defaultValue": "none",
+    "essential": true
+  },
+  {
+    "path": "mark.jitter",
+    "description": "Spread dots that share a position. auto offsets a dot only when another dot in the group is within one diameter. none never offsets. A number is the maximum offset in px and moves every dot.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.jitter",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Jitter",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "none",
+      "auto"
+    ],
+    "minimum": 0,
+    "maximum": 40,
+    "slider": false,
+    "defaultValue": "auto",
+    "essential": true
+  },
+  {
+    "path": "mark.highlight",
+    "description": "Group value to draw in accent. Every other group uses muted. The summary tick stays ink. Applies to: strip.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.highlight",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Highlight",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
     "path": "mark.sort",
-    "description": "Slice order. none keeps data order and pins an Other bucket last. asc and desc sort by value, including Other. Applies to: donut, pie.",
-    "group": "Marks",
+    "description": "Slice order. none keeps data order and pins an Other bucket last. asc and desc sort by value, including Other.",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.sort",
     "appliesTo": [
       "donut",
-      "pie"
+      "pie",
+      "strip"
     ],
     "label": "Sort",
     "control": "enum",
@@ -7475,7 +7942,7 @@
   {
     "path": "mark.other",
     "description": "Group small slices into one Other slice. A number is the fraction. Applies to: donut, pie.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.other",
     "appliesTo": [
       "donut",
@@ -7493,7 +7960,7 @@
   {
     "path": "mark.other.label",
     "description": "Name of the folded slice. Default Other.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.other.label",
     "appliesTo": [
       "donut",
@@ -7507,7 +7974,7 @@
   {
     "path": "mark.offset",
     "description": "Pull slices out from the centre, in px. With mark.explode, only those slices move. Otherwise every slice moves. Applies to: donut, pie.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.offset",
     "appliesTo": [
       "donut",
@@ -7524,7 +7991,7 @@
   {
     "path": "mark.explode",
     "description": "Slice names to offset. Uses mark.offset, or 12px when offset is omitted. Applies to: donut, pie.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.explode",
     "appliesTo": [
       "donut",
@@ -7537,7 +8004,7 @@
   {
     "path": "mark.palette",
     "description": "Series colours for this chart, in order. Overrides the theme palette. Omit it to keep the theme tokens. Applies to: line, bar, scatter, combo, stacked-area, donut, pie.",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#mark.palette",
     "appliesTo": [
       "line",
@@ -7550,12 +8017,13 @@
     ],
     "label": "Palette",
     "control": "json",
-    "storage": "scalar"
+    "storage": "scalar",
+    "essential": true
   },
   {
     "path": "mark.colorRules",
     "description": "Conditional colours. First match wins and overrides the series or category colour. A bar rule's legend swatch is the bar fill. A rule colour within CIE76 delta-E 25 of a series colour in the same theme shifts to a distinct shade.",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#mark.colorRules",
     "appliesTo": [
       "line",
@@ -7567,7 +8035,8 @@
     ],
     "label": "Color Rules",
     "control": "json",
-    "storage": "scalar"
+    "storage": "scalar",
+    "essential": true
   },
   {
     "path": "mark.baseLabel",
@@ -7587,7 +8056,7 @@
   {
     "path": "mark.opacity",
     "description": "Mark opacity 0–1. Applies to: scatter, spike.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.opacity",
     "appliesTo": [
       "scatter",
@@ -7604,7 +8073,7 @@
   {
     "path": "mark.layout",
     "description": "Heatmap layout. Omit it when encoding.y is set: the renderer uses grid. 'calendar' = weeks by weekdays from a date x (also the fallback when y is absent). 'grid' = x by y categories. Applies to: heatmap.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.layout",
     "appliesTo": [
       "heatmap"
@@ -7622,7 +8091,7 @@
   {
     "path": "mark.weeks",
     "description": "Number of weeks shown in calendar layout, ending on the week of the latest day. Ignored on a grid heatmap. Cells stay square, or at most 1.5:1, and cap at 32px. Extra width centres the grid. Unsized calendars stay at 12px.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.weeks",
     "appliesTo": [
       "heatmap"
@@ -7639,7 +8108,7 @@
   {
     "path": "mark.startAngle",
     "description": "Arc start in degrees (0 = top, clockwise). Applies to: gauge, progress-ring, donut, pie, radial-bar, rose. Polar charts start at 0, the top of the circle.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.startAngle",
     "appliesTo": [
       "gauge",
@@ -7660,7 +8129,7 @@
   {
     "path": "mark.endAngle",
     "description": "Arc end in degrees. Applies to: gauge, progress-ring.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.endAngle",
     "appliesTo": [
       "gauge",
@@ -7677,7 +8146,7 @@
   {
     "path": "mark.linecap",
     "description": "Arc end style. Applies to: gauge, progress-ring.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.linecap",
     "appliesTo": [
       "gauge",
@@ -7697,7 +8166,7 @@
   {
     "path": "mark.rings",
     "description": "Concentric activity rings, outer first. Each item is {value, max, color, label}. Applies to: progress-ring.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.rings",
     "appliesTo": [
       "progress-ring"
@@ -7709,7 +8178,7 @@
   {
     "path": "mark.baseline",
     "description": "Value spikes rise from. Applies to: spike.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.baseline",
     "appliesTo": [
       "spike"
@@ -7724,7 +8193,7 @@
   {
     "path": "mark.shape",
     "description": "Funnel geometry. trapezoid is the default: each stage shares its bottom edge with the next stage and the width tapers with the value. bar draws centered rounded bars. Applies to: funnel.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.shape",
     "appliesTo": [
       "funnel"
@@ -7742,7 +8211,7 @@
   {
     "path": "mark.bins",
     "description": "Histogram bin count when mark.bin is count or omitted. Default 8. Applies to: histogram.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.bins",
     "appliesTo": [
       "histogram"
@@ -7758,7 +8227,7 @@
   {
     "path": "mark.bin",
     "description": "Histogram bin rule. count uses mark.bins. width uses mark.binWidth. sturges, sqrt, and fd choose a count from the data. Applies to: histogram.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.bin",
     "appliesTo": [
       "histogram"
@@ -7778,7 +8247,7 @@
   {
     "path": "mark.binWidth",
     "description": "Histogram bin width. Used when mark.bin is width. Applies to: histogram.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.binWidth",
     "appliesTo": [
       "histogram"
@@ -7807,7 +8276,7 @@
   {
     "path": "mark.ranges",
     "description": "Bullet band fields, worst to best. Each value is the upper edge of that band. Applies to: bullet.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.ranges",
     "appliesTo": [
       "bullet"
@@ -7819,7 +8288,7 @@
   {
     "path": "mark.total",
     "description": "Waterfall field that marks an absolute total when the row is true. Default field name total. Applies to: waterfall.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.total",
     "appliesTo": [
       "waterfall"
@@ -7832,7 +8301,7 @@
   {
     "path": "mark.line",
     "description": "Centre line through encoding.y on a range area. Defaults on when y is set. false draws the band only. Applies to: area-range.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.line",
     "appliesTo": [
       "area-range"
@@ -7845,7 +8314,7 @@
   {
     "path": "mark.stroke",
     "description": "Outline a range band. Off by default so a nested interval stays a fill in the line colour. Applies to: area-range.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.stroke",
     "appliesTo": [
       "area-range"
@@ -7859,7 +8328,7 @@
   {
     "path": "mark.strokeDash",
     "description": "Dash the centre line where a band is present, and keep the earlier actuals solid. Both parts use the line colour. Applies to: area-range.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.strokeDash",
     "appliesTo": [
       "area-range"
@@ -7873,7 +8342,7 @@
   {
     "path": "mark.error",
     "description": "Whisker anchor. point draws a marker at y. bar draws a bar from zero to y. Applies to: errorbar.",
-    "group": "Marks",
+    "group": "Marks & style",
     "docs": "/docs/options#mark.error",
     "appliesTo": [
       "errorbar"
@@ -7905,13 +8374,15 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Show",
     "control": "boolean",
     "storage": "union-boolean",
     "slider": false,
-    "defaultValue": true
+    "defaultValue": true,
+    "essential": true
   },
   {
     "path": "axes.x.title",
@@ -7931,12 +8402,14 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Title",
     "control": "text",
     "storage": "scalar",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "axes.x.format",
@@ -7956,7 +8429,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Format",
     "control": "enum",
@@ -7999,7 +8473,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Decimals",
     "control": "number",
@@ -8027,7 +8502,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Currency",
     "control": "text",
@@ -8052,7 +8528,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Prefix",
     "control": "text",
@@ -8077,7 +8554,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Suffix",
     "control": "text",
@@ -8102,7 +8580,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Signed",
     "control": "boolean",
@@ -8127,7 +8606,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Specifier",
     "control": "text",
@@ -8152,7 +8632,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Ticks",
     "control": "json",
@@ -8176,7 +8657,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Grid",
     "control": "enum",
@@ -8193,7 +8675,7 @@
   {
     "path": "axes.x.labels",
     "description": "Show tick labels.",
-    "group": "Axes",
+    "group": "Labels",
     "docs": "/docs/options#axes.x.labels",
     "appliesTo": [
       "line",
@@ -8208,13 +8690,15 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Labels",
     "control": "boolean",
     "storage": "scalar",
     "slider": false,
-    "defaultValue": true
+    "defaultValue": true,
+    "essential": true
   },
   {
     "path": "axes.x.position",
@@ -8234,7 +8718,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Position",
     "control": "enum",
@@ -8265,7 +8750,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Title Position",
     "control": "enum",
@@ -8295,7 +8781,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Title Rotate",
     "control": "number",
@@ -8323,7 +8810,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Auto Skip",
     "control": "boolean",
@@ -8348,7 +8836,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Label Width",
     "control": "number",
@@ -8376,7 +8865,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Label Lines",
     "control": "number",
@@ -8404,7 +8894,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Line",
     "control": "boolean",
@@ -8430,7 +8921,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Color",
     "control": "color",
@@ -8455,7 +8947,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Width",
     "control": "number",
@@ -8483,7 +8976,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Dash",
     "control": "enum",
@@ -8513,7 +9007,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Tick Marks",
     "control": "enum",
@@ -8543,7 +9038,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Tick Length",
     "control": "number",
@@ -8571,7 +9067,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Rotate",
     "control": "number",
@@ -8597,7 +9094,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Offset",
     "control": "number",
@@ -8625,7 +9123,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Crosses",
     "control": "number",
@@ -8651,7 +9150,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Minor Ticks",
     "control": "number",
@@ -8679,7 +9179,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Breaks",
     "control": "json",
@@ -8703,7 +9204,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Bands",
     "control": "json",
@@ -8727,13 +9229,15 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Show",
     "control": "boolean",
     "storage": "union-boolean",
     "slider": false,
-    "defaultValue": true
+    "defaultValue": true,
+    "essential": true
   },
   {
     "path": "axes.y.title",
@@ -8753,12 +9257,14 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Title",
     "control": "text",
     "storage": "scalar",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "axes.y.format",
@@ -8778,7 +9284,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Format",
     "control": "enum",
@@ -8801,7 +9308,8 @@
       "year",
       "weekday"
     ],
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "axes.y.format.decimals",
@@ -8821,7 +9329,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Decimals",
     "control": "number",
@@ -8849,7 +9358,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Currency",
     "control": "text",
@@ -8874,7 +9384,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Prefix",
     "control": "text",
@@ -8899,7 +9410,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Suffix",
     "control": "text",
@@ -8924,7 +9436,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Signed",
     "control": "boolean",
@@ -8949,7 +9462,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Specifier",
     "control": "text",
@@ -8974,7 +9488,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Ticks",
     "control": "json",
@@ -8998,7 +9513,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Grid",
     "control": "enum",
@@ -9010,12 +9526,13 @@
       "solid",
       "dashed",
       "dotted"
-    ]
+    ],
+    "essential": true
   },
   {
     "path": "axes.y.labels",
     "description": "Show tick labels.",
-    "group": "Axes",
+    "group": "Labels",
     "docs": "/docs/options#axes.y.labels",
     "appliesTo": [
       "line",
@@ -9030,13 +9547,15 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Labels",
     "control": "boolean",
     "storage": "scalar",
     "slider": false,
-    "defaultValue": true
+    "defaultValue": true,
+    "essential": true
   },
   {
     "path": "axes.y.position",
@@ -9056,7 +9575,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Position",
     "control": "enum",
@@ -9087,7 +9607,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Title Position",
     "control": "enum",
@@ -9117,7 +9638,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Title Rotate",
     "control": "number",
@@ -9145,7 +9667,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Auto Skip",
     "control": "boolean",
@@ -9170,7 +9693,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Label Width",
     "control": "number",
@@ -9198,7 +9722,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Label Lines",
     "control": "number",
@@ -9226,7 +9751,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Line",
     "control": "boolean",
@@ -9252,7 +9778,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Color",
     "control": "color",
@@ -9277,7 +9804,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Width",
     "control": "number",
@@ -9305,7 +9833,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Dash",
     "control": "enum",
@@ -9335,7 +9864,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Tick Marks",
     "control": "enum",
@@ -9365,7 +9895,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Tick Length",
     "control": "number",
@@ -9393,7 +9924,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Rotate",
     "control": "number",
@@ -9419,7 +9951,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Offset",
     "control": "number",
@@ -9447,7 +9980,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Crosses",
     "control": "number",
@@ -9473,7 +10007,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Minor Ticks",
     "control": "number",
@@ -9501,7 +10036,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Breaks",
     "control": "json",
@@ -9525,7 +10061,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Bands",
     "control": "json",
@@ -9549,7 +10086,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Show",
     "control": "boolean",
@@ -9575,7 +10113,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Title",
     "control": "text",
@@ -9600,7 +10139,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Format",
     "control": "enum",
@@ -9643,7 +10183,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Decimals",
     "control": "number",
@@ -9671,7 +10212,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Currency",
     "control": "text",
@@ -9696,7 +10238,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Prefix",
     "control": "text",
@@ -9721,7 +10264,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Suffix",
     "control": "text",
@@ -9746,7 +10290,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Signed",
     "control": "boolean",
@@ -9771,7 +10316,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Specifier",
     "control": "text",
@@ -9796,7 +10342,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Ticks",
     "control": "json",
@@ -9820,7 +10367,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Grid",
     "control": "enum",
@@ -9837,7 +10385,7 @@
   {
     "path": "axes.y2.labels",
     "description": "Show tick labels.",
-    "group": "Axes",
+    "group": "Labels",
     "docs": "/docs/options#axes.y2.labels",
     "appliesTo": [
       "line",
@@ -9852,7 +10400,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Labels",
     "control": "boolean",
@@ -9878,7 +10427,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Position",
     "control": "enum",
@@ -9909,7 +10459,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Title Position",
     "control": "enum",
@@ -9939,7 +10490,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Title Rotate",
     "control": "number",
@@ -9967,7 +10519,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Auto Skip",
     "control": "boolean",
@@ -9992,7 +10545,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Label Width",
     "control": "number",
@@ -10020,7 +10574,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Label Lines",
     "control": "number",
@@ -10048,7 +10603,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Line",
     "control": "boolean",
@@ -10074,7 +10630,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Color",
     "control": "color",
@@ -10099,7 +10656,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Width",
     "control": "number",
@@ -10127,7 +10685,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Dash",
     "control": "enum",
@@ -10157,7 +10716,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Tick Marks",
     "control": "enum",
@@ -10187,7 +10747,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Tick Length",
     "control": "number",
@@ -10215,7 +10776,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Rotate",
     "control": "number",
@@ -10241,7 +10803,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Offset",
     "control": "number",
@@ -10269,7 +10832,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Crosses",
     "control": "number",
@@ -10295,7 +10859,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Minor Ticks",
     "control": "number",
@@ -10323,7 +10888,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Breaks",
     "control": "json",
@@ -10347,7 +10913,8 @@
       "waterfall",
       "area-range",
       "bar-range",
-      "errorbar"
+      "errorbar",
+      "strip"
     ],
     "label": "Bands",
     "control": "json",
@@ -10384,6 +10951,7 @@
       "sunburst",
       "radial-bar",
       "rose",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -10397,7 +10965,8 @@
     "storage": "union-boolean",
     "promote": "show",
     "slider": false,
-    "defaultValue": true
+    "defaultValue": true,
+    "essential": true
   },
   {
     "path": "legend.position",
@@ -10430,6 +10999,7 @@
       "sunburst",
       "radial-bar",
       "rose",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -10449,7 +11019,8 @@
       "inside"
     ],
     "slider": false,
-    "defaultValue": "top"
+    "defaultValue": "top",
+    "essential": true
   },
   {
     "path": "legend.anchor",
@@ -10482,6 +11053,7 @@
       "sunburst",
       "radial-bar",
       "rose",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -10537,6 +11109,7 @@
       "sunburst",
       "radial-bar",
       "rose",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -10586,6 +11159,7 @@
       "sunburst",
       "radial-bar",
       "rose",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -10601,7 +11175,8 @@
       "horizontal",
       "vertical"
     ],
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "legend.maxRows",
@@ -10634,6 +11209,7 @@
       "sunburst",
       "radial-bar",
       "rose",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -10680,6 +11256,7 @@
       "sunburst",
       "radial-bar",
       "rose",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -10691,7 +11268,8 @@
     "label": "Title",
     "control": "text",
     "storage": "scalar",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "legend.hide",
@@ -10724,6 +11302,7 @@
       "sunburst",
       "radial-bar",
       "rose",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -10767,6 +11346,7 @@
       "sunburst",
       "radial-bar",
       "rose",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -10819,6 +11399,7 @@
       "sunburst",
       "radial-bar",
       "rose",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -10862,6 +11443,7 @@
       "sunburst",
       "radial-bar",
       "rose",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -10907,6 +11489,7 @@
       "sunburst",
       "radial-bar",
       "rose",
+      "strip",
       "gantt",
       "timeline",
       "quadrant",
@@ -10924,19 +11507,20 @@
   {
     "path": "tooltip",
     "description": "Hover tooltip. true/false or settings. Default on for interactive charts.",
-    "group": "Chart",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#tooltip",
     "label": "Show",
     "control": "boolean",
     "storage": "union-boolean",
     "promote": "show",
     "slider": false,
-    "defaultValue": true
+    "defaultValue": true,
+    "essential": true
   },
   {
     "path": "tooltip.mode",
     "description": "'index' shows all series at the hovered x; 'nearest' shows the closest point only.",
-    "group": "Chart",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#tooltip.mode",
     "label": "Mode",
     "control": "enum",
@@ -10946,12 +11530,13 @@
       "nearest"
     ],
     "slider": false,
-    "defaultValue": "index"
+    "defaultValue": "index",
+    "essential": true
   },
   {
     "path": "tooltip.crosshair",
     "description": "Draw a vertical guide line at the hovered x.",
-    "group": "Chart",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#tooltip.crosshair",
     "label": "Crosshair",
     "control": "boolean",
@@ -10962,7 +11547,7 @@
   {
     "path": "tooltip.crosshairLabel",
     "description": "Print the hovered x value on the guide.",
-    "group": "Chart",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#tooltip.crosshairLabel",
     "label": "Crosshair Label",
     "control": "boolean",
@@ -10973,7 +11558,7 @@
   {
     "path": "tooltip.position",
     "description": "Where the card sits. auto tries above, then below, then beside the point.",
-    "group": "Chart",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#tooltip.position",
     "label": "Position",
     "control": "enum",
@@ -10991,7 +11576,7 @@
   {
     "path": "tooltip.background",
     "description": "Tooltip card fill. A CSS colour. The page reads it from the chart.",
-    "group": "Chart",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#tooltip.background",
     "label": "Background",
     "control": "text",
@@ -11001,7 +11586,7 @@
   {
     "path": "tooltip.radius",
     "description": "Tooltip corner radius in px.",
-    "group": "Chart",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#tooltip.radius",
     "label": "Radius",
     "control": "number",
@@ -11014,7 +11599,7 @@
   {
     "path": "tooltip.shadow",
     "description": "Tooltip box-shadow. A CSS shadow value.",
-    "group": "Chart",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#tooltip.shadow",
     "label": "Shadow",
     "control": "text",
@@ -11024,7 +11609,7 @@
   {
     "path": "tooltip.crosshairColor",
     "description": "Crosshair stroke. A CSS colour.",
-    "group": "Chart",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#tooltip.crosshairColor",
     "label": "Crosshair Color",
     "control": "text",
@@ -11034,7 +11619,7 @@
   {
     "path": "tooltip.fields",
     "description": "Fields to show, in this order. Omit to keep the encoded series. Strings are field names.",
-    "group": "Chart",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#tooltip.fields",
     "label": "Fields",
     "control": "json",
@@ -11043,7 +11628,7 @@
   {
     "path": "tooltip.template",
     "description": "Row template. Tokens: {x}, {name}, {value}, {unit}, and data field names. One row per series.",
-    "group": "Chart",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#tooltip.template",
     "label": "Template",
     "control": "text",
@@ -11053,7 +11638,7 @@
   {
     "path": "tooltip.pin",
     "description": "Tap to pin the tooltip. A second tap or Escape clears it. Pointer leave does not.",
-    "group": "Chart",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#tooltip.pin",
     "label": "Pin",
     "control": "boolean",
@@ -11064,7 +11649,7 @@
   {
     "path": "tooltip.hit",
     "description": "Hit radius in pixels. Larger targets help a finger. Pinning uses 18 when hit is omitted.",
-    "group": "Chart",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#tooltip.hit",
     "label": "Hit",
     "control": "number",
@@ -11081,12 +11666,13 @@
     "docs": "/docs/options#annotations",
     "label": "Annotations",
     "control": "json",
-    "storage": "scalar"
+    "storage": "scalar",
+    "essential": true
   },
   {
     "path": "theme",
     "description": "Look and feel. A preset name, or an object combining a preset, a light/dark mode and token overrides. Every token is also read from CSS variables --ck-<token> (and --ck-series-N) on the container, so host design systems (e.g.",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme",
     "label": "Theme",
     "control": "enum",
@@ -11119,12 +11705,13 @@
       "mustard",
       "violet"
     ],
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "theme.mode",
     "description": "Force light or dark, or follow prefers-color-scheme.",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme.mode",
     "label": "Mode",
     "control": "enum",
@@ -11135,23 +11722,25 @@
       "dark"
     ],
     "slider": false,
-    "defaultValue": "auto"
+    "defaultValue": "auto",
+    "essential": true
   },
   {
     "path": "theme.brand",
     "description": "Hex colour, or a list of up to eight. Shorthand #rgb and a missing hash are repaired to #rrggbb. render() derives light and dark tokens when @chartkitdev/core/themes/brand is imported. Until then the named preset is used.",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme.brand",
     "label": "Brand",
     "control": "color",
     "storage": "scalar",
     "arrayAlt": true,
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "theme.tokens.background",
     "description": "Chart background. CSS value or var(--x).",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme.tokens.background",
     "label": "Background",
     "control": "color",
@@ -11161,7 +11750,7 @@
   {
     "path": "theme.tokens.surface",
     "description": "Card/tooltip background. CSS value or var(--x).",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme.tokens.surface",
     "label": "Surface",
     "control": "color",
@@ -11171,7 +11760,7 @@
   {
     "path": "theme.tokens.text",
     "description": "Primary text. CSS value or var(--x).",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme.tokens.text",
     "label": "Text",
     "control": "color",
@@ -11181,7 +11770,7 @@
   {
     "path": "theme.tokens.muted",
     "description": "Secondary text, tick labels. CSS value or var(--x).",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme.tokens.muted",
     "label": "Muted",
     "control": "color",
@@ -11191,7 +11780,7 @@
   {
     "path": "theme.tokens.grid",
     "description": "Grid lines. CSS value or var(--x).",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme.tokens.grid",
     "label": "Grid",
     "control": "color",
@@ -11201,7 +11790,7 @@
   {
     "path": "theme.tokens.axis",
     "description": "Axis lines. CSS value or var(--x).",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme.tokens.axis",
     "label": "Axis",
     "control": "color",
@@ -11211,7 +11800,7 @@
   {
     "path": "theme.tokens.accent",
     "description": "Highlight color (single-series default). CSS value or var(--x).",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme.tokens.accent",
     "label": "Accent",
     "control": "color",
@@ -11221,7 +11810,7 @@
   {
     "path": "theme.tokens.positive",
     "description": "Good/up color (deltas, up candles). CSS value or var(--x).",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme.tokens.positive",
     "label": "Positive",
     "control": "color",
@@ -11231,7 +11820,7 @@
   {
     "path": "theme.tokens.negative",
     "description": "Bad/down color. CSS value or var(--x).",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme.tokens.negative",
     "label": "Negative",
     "control": "color",
@@ -11240,8 +11829,8 @@
   },
   {
     "path": "theme.tokens.fontFamily",
-    "description": "CSS font-family.",
-    "group": "Colors / theme",
+    "description": "CSS font-family. Omitted, or inherit, uses the page font. A list such as Georgia, serif sets --ck-font-family. At most 80 characters. No double quotes, <, >, ;, {, }, or backslash. Invalid values are CK3086.",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme.tokens.fontFamily",
     "label": "Font Family",
     "control": "text",
@@ -11251,7 +11840,7 @@
   {
     "path": "theme.tokens.fontSize",
     "description": "Base font size in px.",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme.tokens.fontSize",
     "label": "Font Size",
     "control": "number",
@@ -11264,7 +11853,7 @@
   {
     "path": "theme.tokens.series",
     "description": "Categorical series palette in order. CSS colors or var(--x). Default: var(--ck-series-1..12) falling back to the preset.",
-    "group": "Colors / theme",
+    "group": "Colors & theme",
     "docs": "/docs/options#theme.tokens.series",
     "label": "Series",
     "control": "json",
@@ -11273,28 +11862,30 @@
   {
     "path": "size.width",
     "description": "Width in px, or 'auto' to fill the container and follow resizes.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#size.width",
     "label": "Width",
     "control": "text",
     "storage": "scalar",
     "coerce": "number-or-string",
-    "defaultValue": "auto"
+    "defaultValue": "auto",
+    "essential": true
   },
   {
     "path": "size.height",
     "description": "Height in px, or 'auto' to derive from width × aspectRatio or the container height.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#size.height",
     "label": "Height",
     "control": "text",
     "storage": "scalar",
-    "coerce": "number-or-string"
+    "coerce": "number-or-string",
+    "essential": true
   },
   {
     "path": "size.aspectRatio",
     "description": "width / height, used when height is 'auto' (e.g. 1.777 for 16:9).",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#size.aspectRatio",
     "label": "Aspect Ratio",
     "control": "number",
@@ -11306,7 +11897,7 @@
   {
     "path": "size.minHeight",
     "description": "Minimum height in px when responsive.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#size.minHeight",
     "label": "Min Height",
     "control": "number",
@@ -11318,19 +11909,20 @@
   {
     "path": "size.padding",
     "description": "Inner padding in px around the plot, a number or per-side object. Default: automatic from axis label sizes.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#size.padding",
     "label": "Padding",
     "control": "number",
     "storage": "union-number",
     "coerce": "number",
     "minimum": 0,
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "size.padding.top",
     "description": "Top padding in px.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#size.padding.top",
     "label": "Top",
     "control": "number",
@@ -11342,7 +11934,7 @@
   {
     "path": "size.padding.right",
     "description": "Right padding in px.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#size.padding.right",
     "label": "Right",
     "control": "number",
@@ -11354,7 +11946,7 @@
   {
     "path": "size.padding.bottom",
     "description": "Bottom padding in px.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#size.padding.bottom",
     "label": "Bottom",
     "control": "number",
@@ -11366,7 +11958,7 @@
   {
     "path": "size.padding.left",
     "description": "Left padding in px.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#size.padding.left",
     "label": "Left",
     "control": "number",
@@ -11378,7 +11970,7 @@
   {
     "path": "layout.direction",
     "description": "rtl mirrors a categorical x axis, moves the y axis to the right, and right-aligns the title. The SVG sets dir=rtl. Default ltr.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#layout.direction",
     "label": "Direction",
     "control": "enum",
@@ -11387,12 +11979,13 @@
       "ltr",
       "rtl"
     ],
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "layout.coordinate",
     "description": "Coordinate system. polar is angle and radius, and it is how radial-bar and rose draw. Setting polar on bar repairs the type to radial-bar. On pie or donut it repairs to rose. On any other type the patch removes it (CK3077).",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#layout.coordinate",
     "label": "Coordinate",
     "control": "enum",
@@ -11401,12 +11994,13 @@
       "cartesian",
       "polar"
     ],
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "layout.facet.field",
     "description": "Column that splits the data. A name that is not a field warns CK3041. Omitting it warns CK3040.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#layout.facet.field",
     "label": "Field",
     "control": "text",
@@ -11416,7 +12010,7 @@
   {
     "path": "layout.facet.columns",
     "description": "Panels across. 1 to 12. Outside that range warns CK3042 and the patch clamps it. Omit to choose from the category count.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#layout.facet.columns",
     "label": "Columns",
     "control": "number",
@@ -11427,7 +12021,7 @@
   {
     "path": "layout.facet.rows",
     "description": "Panels down. 1 to 12. Outside that range warns CK3043 and the patch clamps it.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#layout.facet.rows",
     "label": "Rows",
     "control": "number",
@@ -11438,7 +12032,7 @@
   {
     "path": "layout.facet.wrap",
     "description": "Flow extra categories onto new rows. false keeps the grid and warns CK3049 when categories do not fit.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#layout.facet.wrap",
     "label": "Wrap",
     "control": "boolean",
@@ -11448,7 +12042,7 @@
   {
     "path": "layout.facet.scales",
     "description": "shared (default) locks every panel to one nice y domain that includes the data max. Y labels and the y title sit on the outer column only, and x labels and the x title sit on the bottom row.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#layout.facet.scales",
     "label": "Scales",
     "control": "enum",
@@ -11462,7 +12056,7 @@
   {
     "path": "layout.facet.legend",
     "description": "shared (default) draws one legend under the grid. each repeats the legend in every panel.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#layout.facet.legend",
     "label": "Legend",
     "control": "enum",
@@ -11476,7 +12070,7 @@
   {
     "path": "layout.concat.columns",
     "description": "Wrap views into this many columns, 2 to 4. A view may set span to the number of columns it covers, so one wide chart can sit above two narrower ones. Omit to use direction.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#layout.concat.columns",
     "label": "Columns",
     "control": "number",
@@ -11489,7 +12083,7 @@
   {
     "path": "layout.concat.direction",
     "description": "vertical stacks the views. horizontal places them in a row. Ignored when columns is set.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#layout.concat.direction",
     "label": "Direction",
     "control": "enum",
@@ -11503,7 +12097,7 @@
   {
     "path": "layout.concat.gap",
     "description": "Space between views, in px. Default 16.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#layout.concat.gap",
     "label": "Gap",
     "control": "number",
@@ -11514,7 +12108,7 @@
   {
     "path": "layout.concat.views",
     "description": "Chart specs. A view with no type warns CK3045. An empty list warns CK3044.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#layout.concat.views",
     "label": "Views",
     "control": "json",
@@ -11523,7 +12117,7 @@
   {
     "path": "layout.breakpoints",
     "description": "The first rule whose width matches size.width, or the container width when width is auto, overrides the layout. A non-positive maxWidth warns CK3046. columns or rows without a facet field warns CK3047.",
-    "group": "Size",
+    "group": "Layout & size",
     "docs": "/docs/options#layout.breakpoints",
     "label": "Breakpoints",
     "control": "json",
@@ -11532,18 +12126,19 @@
   {
     "path": "interaction.hover",
     "description": "Highlight hovered marks and drive the tooltip.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#interaction.hover",
     "label": "Hover",
     "control": "boolean",
     "storage": "scalar",
     "slider": false,
-    "defaultValue": true
+    "defaultValue": true,
+    "essential": true
   },
   {
     "path": "interaction.select",
     "description": "Click selection. 'point' or 'series'. Shift, Ctrl, or Meta adds another. Escape or a background click clears. Selected marks use --ck-selected; others use --ck-dim. Emits pointclick or seriesclick, and selectionchange.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#interaction.select",
     "label": "Select",
     "control": "enum",
@@ -11554,12 +12149,13 @@
       "series"
     ],
     "slider": false,
-    "defaultValue": "none"
+    "defaultValue": "none",
+    "essential": true
   },
   {
     "path": "interaction.zoom",
     "description": "Wheel/pinch zoom. Default 'x' for candlestick, otherwise 'none'.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#interaction.zoom",
     "label": "Zoom",
     "control": "enum",
@@ -11569,22 +12165,24 @@
       "x",
       "xy"
     ],
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "interaction.pan",
     "description": "Drag to pan when zoomed.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#interaction.pan",
     "label": "Pan",
     "control": "boolean",
     "storage": "scalar",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "interaction.brush",
     "description": "Drag to select a range, emitted as 'rangechange'.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#interaction.brush",
     "label": "Brush",
     "control": "enum",
@@ -11599,7 +12197,7 @@
   {
     "path": "interaction.initialRange",
     "description": "Initially visible x range [from, to] in data units (zoomable charts).",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#interaction.initialRange",
     "label": "Initial Range",
     "control": "json",
@@ -11608,7 +12206,7 @@
   {
     "path": "interaction.export",
     "description": "Formats offered by the export menu. The SVG records them as data-ck-export. The menu loads only when this list is set. toPNG, toSVG, and toCSV are @chartkitdev/core/export.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#interaction.export",
     "label": "Export",
     "control": "json",
@@ -11617,7 +12215,7 @@
   {
     "path": "interaction.navigator",
     "description": "Overview sparkline and range slider under the chart. true, or an object with height. The slider loads with the interaction extras. The server SVG records data-ck-nav and does not include the control.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#interaction.navigator",
     "appliesTo": [
       "line",
@@ -11639,7 +12237,7 @@
   {
     "path": "interaction.navigator.height",
     "description": "Overview height in px. 28 to 96. A value outside that range warns CK3035 and the patch clamps it.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#interaction.navigator.height",
     "appliesTo": [
       "line",
@@ -11662,7 +12260,7 @@
   {
     "path": "interaction.sync",
     "description": "Group id. Charts with the same id share the crosshair, tooltip, and x window, matched on the x value. An empty string warns CK3036.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#interaction.sync",
     "label": "Sync",
     "control": "text",
@@ -11672,7 +12270,7 @@
   {
     "path": "interaction.drilldown.key",
     "description": "Data field that names the child. Default: encoding.x. A name that is not a field warns CK3039.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#interaction.drilldown.key",
     "label": "Key",
     "control": "text",
@@ -11682,7 +12280,7 @@
   {
     "path": "interaction.drilldown.children",
     "description": "Child specs keyed by category. Each child needs a type. An empty map warns CK3037. A child with no type warns CK3038.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#interaction.drilldown.children",
     "label": "Children",
     "control": "text",
@@ -11692,7 +12290,7 @@
   {
     "path": "animation",
     "description": "Entry/update animation. Always disabled when the user prefers reduced motion.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#animation",
     "label": "On",
     "control": "boolean",
@@ -11703,7 +12301,7 @@
   {
     "path": "animation.duration",
     "description": "Milliseconds.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#animation.duration",
     "label": "Duration",
     "control": "number",
@@ -11717,7 +12315,7 @@
   {
     "path": "animation.easing",
     "description": "Easing curve.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#animation.easing",
     "label": "Easing",
     "control": "enum",
@@ -11734,7 +12332,7 @@
   {
     "path": "motion",
     "description": "BETA. The API may change. How an update moves marks from the previous spec. Omitted and \"none\" are off, including every existing spec. \"auto\" is 320ms ease-out (cubic-bezier(0, 0, 0.58, 1)).",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#motion",
     "label": "Motion",
     "control": "enum",
@@ -11748,7 +12346,7 @@
   {
     "path": "motion.duration",
     "description": "Milliseconds. Clamped to 0–800. 0 is off. Omitted means 320.",
-    "group": "Interaction",
+    "group": "Tooltip & interaction",
     "docs": "/docs/options#motion.duration",
     "label": "Duration",
     "control": "number",
@@ -11761,7 +12359,7 @@
   {
     "path": "render",
     "description": "How the marks are drawn. svg is the default and what render() always returns, including on the server, with the marks included.",
-    "group": "Chart",
+    "group": "Advanced",
     "docs": "/docs/options#render",
     "label": "Render",
     "control": "enum",
@@ -11772,22 +12370,24 @@
       "auto"
     ],
     "slider": false,
-    "defaultValue": "svg"
+    "defaultValue": "svg",
+    "essential": true
   },
   {
     "path": "locale",
     "description": "BCP 47 locale for number/date formatting. Default: the host's locale.",
-    "group": "Chart",
+    "group": "Advanced",
     "docs": "/docs/options#locale",
     "label": "Locale",
     "control": "text",
     "storage": "scalar",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "timezone",
     "description": "IANA time zone for temporal axes, ticks, and tooltips. Omitted means UTC, so a server render and the client label the same instant the same way.",
-    "group": "Chart",
+    "group": "Advanced",
     "docs": "/docs/options#timezone",
     "label": "Timezone",
     "control": "text",
@@ -11797,7 +12397,7 @@
   {
     "path": "sort.field",
     "description": "Field to sort by.",
-    "group": "Data mapping",
+    "group": "Advanced",
     "docs": "/docs/options#sort.field",
     "label": "Field",
     "control": "text",
@@ -11807,7 +12407,7 @@
   {
     "path": "sort.by",
     "description": "Sort by the first y value. Used for bars.",
-    "group": "Data mapping",
+    "group": "Advanced",
     "docs": "/docs/options#sort.by",
     "label": "By",
     "control": "enum",
@@ -11820,7 +12420,7 @@
   {
     "path": "sort.order",
     "description": "Sort direction. Default ascending.",
-    "group": "Data mapping",
+    "group": "Advanced",
     "docs": "/docs/options#sort.order",
     "label": "Order",
     "control": "enum",
@@ -11834,11 +12434,12 @@
   {
     "path": "transform",
     "description": "Row steps applied before sort: filter, a rolling window, or an aggregate.",
-    "group": "Data mapping",
+    "group": "Advanced",
     "docs": "/docs/options#transform",
     "label": "Transform",
     "control": "json",
-    "storage": "scalar"
+    "storage": "scalar",
+    "essential": true
   },
   {
     "path": "a11y.alt",
@@ -11848,7 +12449,8 @@
     "label": "Alt",
     "control": "text",
     "storage": "scalar",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "a11y.description",
@@ -11858,7 +12460,8 @@
     "label": "Description",
     "control": "text",
     "storage": "scalar",
-    "slider": false
+    "slider": false,
+    "essential": true
   },
   {
     "path": "a11y.keyboard",
@@ -11869,7 +12472,8 @@
     "control": "boolean",
     "storage": "scalar",
     "slider": false,
-    "defaultValue": false
+    "defaultValue": false,
+    "essential": true
   },
   {
     "path": "a11y.dataTable",
@@ -11880,6 +12484,7 @@
     "control": "boolean",
     "storage": "scalar",
     "slider": false,
-    "defaultValue": false
+    "defaultValue": false,
+    "essential": true
   }
 ]

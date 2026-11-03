@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { MARK_APPLIES } from "../marks";
 import {
+  OPTION_GROUPS,
   buildOptionCatalog,
   getPath,
   optionCatalog,
@@ -98,6 +99,24 @@ describe("option catalog", () => {
   it("keeps a theme object when the preset changes", () => {
     const themed = writeOption({ ...line, theme: "midnight" }, field("theme.tokens.accent"), "#336699");
     expect(themed.theme).toEqual({ preset: "midnight", tokens: { accent: "#336699" } });
+  });
+
+  it("covers strip and keeps an essential tier in each section", () => {
+    const strip = optionsForType("strip");
+    expect(strip.some((item) => item.path === "mark.summary")).toBe(true);
+    expect(strip.some((item) => item.path === "mark.band")).toBe(true);
+    expect(strip.some((item) => item.path === "encoding.label")).toBe(true);
+    expect(strip.some((item) => item.path === "axes.x.title")).toBe(true);
+    expect(strip.some((item) => item.path === "mark.curve")).toBe(false);
+    for (const group of OPTION_GROUPS) {
+      const essentials = optionCatalog.filter((item) => item.group === group && item.essential);
+      if (group === "Annotations") {
+        expect(essentials.map((item) => item.path)).toEqual(["annotations"]);
+        continue;
+      }
+      expect(essentials.length, group).toBeGreaterThanOrEqual(3);
+      expect(essentials.length, group).toBeLessThanOrEqual(8);
+    }
   });
 
   it("treats an array channel as JSON", () => {
