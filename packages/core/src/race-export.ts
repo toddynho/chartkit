@@ -3,7 +3,16 @@
  * matches the preview. MP4 when WebCodecs can encode H.264; otherwise WebM via
  * MediaRecorder, paced in real time. No server.
  */
-import type { LineRace } from "./race";
+/** Anything `frame(t)` can draw. The race and the odds replay both satisfy it. */
+export interface FrameSequence {
+  frame(t: number): string;
+  duration: number;
+  width: number;
+  height: number;
+  fps: number;
+  /** Painted behind each frame. Defaults to white. */
+  background?: string;
+}
 
 export interface RaceExportOptions {
   fps?: number;
@@ -197,7 +206,7 @@ function injectStyle(svg: string, css: string | undefined): string {
   return `${svg.slice(0, open + 1)}<style>${safe}</style>${svg.slice(open + 1)}`;
 }
 
-function frameCount(race: LineRace, fps: number): number {
+function frameCount(race: FrameSequence, fps: number): number {
   return Math.max(2, Math.round((race.duration / 1000) * fps));
 }
 
@@ -270,7 +279,7 @@ function descriptionBytes(description: AllowSharedBufferSource | undefined): Uin
 async function exportMp4(
   canvas: OffscreenCanvas | HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
-  race: LineRace,
+  race: FrameSequence,
   fps: number,
   bitrate: number,
   codec: string,
@@ -315,7 +324,7 @@ async function exportMp4(
       if (signal?.aborted) throw new DOMException("Export cancelled.", "AbortError");
       if (failed) throw failed;
       const t = i / (count - 1);
-      await paintSvg(ctx, injectStyle(race.frame(t), fontCss), width, height, "#ffffff");
+      await paintSvg(ctx, injectStyle(race.frame(t), fontCss), width, height, race.background || "#ffffff");
       const frame = new Frame(canvas, { timestamp: Math.round(i * step) });
       encoder.encode(frame, { keyFrame: i % fps === 0 });
       frame.close();
@@ -340,7 +349,7 @@ async function exportMp4(
 async function exportWebm(
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
-  race: LineRace,
+  race: FrameSequence,
   fps: number,
   bitrate: number,
   fontCss: string | undefined,
@@ -376,7 +385,7 @@ async function exportWebm(
         recorder.stop();
         throw new DOMException("Export cancelled.", "AbortError");
       }
-      await paintSvg(ctx, injectStyle(race.frame(i / (count - 1)), fontCss), width, height, "#ffffff");
+      await paintSvg(ctx, injectStyle(race.frame(i / (count - 1)), fontCss), width, height, race.background || "#ffffff");
       track?.requestFrame();
       onProgress?.((i + 1) / count);
       await new Promise((resolve) => setTimeout(resolve, Math.round(1000 / fps)));
@@ -388,7 +397,7 @@ async function exportWebm(
   return { blob: new Blob(chunks, { type: mime }), mime, extension: "webm", codec: mime };
 }
 
-export async function exportLineRace(race: LineRace, options?: RaceExportOptions): Promise<RaceExportResult> {
+export async function exportLineRace(race: FrameSequence, options?: RaceExportOptions): Promise<RaceExportResult> {
   if (typeof document === "undefined") throw new Error("exportLineRace runs in the browser.");
   const fps = Math.max(1, Math.min(60, Math.round(options?.fps ?? race.fps ?? 30)));
   const bitrate = options?.bitrate ?? 5_000_000;

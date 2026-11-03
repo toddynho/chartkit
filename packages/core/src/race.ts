@@ -763,7 +763,7 @@ export function createLineRace(options: LineRaceOptions): LineRace {
 
 export function mountLineRace(
   host: HTMLElement,
-  race: LineRace,
+  race: { frame(t: number): string; duration: number },
   options?: { from?: number; loop?: boolean; autoplay?: boolean; onFrame?: (t: number, playing: boolean) => void },
 ): RacePlayer {
   let t = clamp(options?.from ?? 0, 0, 1);

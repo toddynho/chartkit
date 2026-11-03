@@ -67,7 +67,7 @@ const streamSvg = render(stream);
   </ul>
   <h2>Line chart race</h2>
   <p>
-    A race is a different motion. The line draws forward, the time axis grows from a fixed left edge, and the value axis rises with the leader. <code>motion</code> cannot express that. It morphs two finished specs, and <code>render()</code> ignores it. <code>createLineRace()</code> takes the rows, and <code>frame(t)</code> returns the SVG at <code>t</code> from 0 to 1. Playback and export call that same function. The builder is on <a href="/race">the line chart race page</a>.
+    A race is a different motion. The line draws forward, the time axis grows from a fixed left edge, and the value axis rises with the leader. <code>motion</code> cannot express that. It morphs two finished specs, and <code>render()</code> ignores it. <code>createLineRace()</code> takes the rows, and <code>frame(t)</code> returns the SVG at <code>t</code> from 0 to 1. Playback and export call that same function. The builder is on <a href="/race">the line chart race page</a>. Odds replay, <code>createOddsReplay()</code>, holds each price until the next row and exports through the same function. It opens at <a href="/race?type=odds">/race?type=odds</a>.
   </p>
 </DocsPage>
 

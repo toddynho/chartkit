@@ -1,14 +1,22 @@
 import {
   createLineRace,
+  createOddsReplay,
+  electionOddsCsv,
+  electionOddsReplay,
   exportLineRace,
   lineRaceFromCsv,
   lineRaceFromJson,
+  matchOddsCsv,
+  matchOddsReplay,
   mountLineRace,
+  oddsFromCsv,
   podcastMentionsCsv,
   podcastMentionsRace,
-  type LineRace,
+  type FrameSequence,
   type LineRaceOptions,
   type LineRaceSeries,
+  type OddsReplayOptions,
+  type OddsSeries,
   type RacePlayer,
 } from "@chartkitdev/core/race";
 
@@ -30,12 +38,21 @@ if (root) {
   const reset = root.querySelector<HTMLButtonElement>("[data-race-reset]");
   const error = root.querySelector<HTMLElement>("[data-race-error]");
   const swatches = root.querySelector<HTMLElement>("[data-race-colors]");
-  const start = Number(root.dataset.start ?? "0");
+  const pageTitle = root.querySelector<HTMLElement>("[data-page-title]");
+  const pageLede = root.querySelector<HTMLElement>("[data-page-lede]");
+  const hint = root.querySelector<HTMLElement>("[data-race-hint]");
+  const unitWrap = root.querySelector<HTMLElement>("[data-race-unit-wrap]");
+  const oddsTools = root.querySelector<HTMLElement>("[data-odds-tools]");
+  const themeSelect = root.querySelector<HTMLSelectElement>("[data-odds-theme]");
+  const legendBox = root.querySelector<HTMLInputElement>("[data-odds-legend]");
+  let start = Number(root.dataset.start ?? "0");
+  let kind = root.dataset.kind === "odds" ? "odds" : "race";
+  let oddsSample = root.dataset.oddsSample === "election" ? "election" : "match";
 
-  if (stage && play && scrub && time && loop && exportButton && status && title && subtitle && unit && duration && data && file && reset && error && swatches) {
+  if (stage && play && scrub && time && loop && exportButton && status && title && subtitle && unit && duration && data && file && reset && error && swatches && pageTitle && pageLede && hint && unitWrap && oddsTools && themeSelect && legendBox) {
     const colors = new Map<string, string>();
     let swatchKey = "";
-    let chart: LineRace | null = null;
+    let chart: FrameSequence | null = null;
     let player: RacePlayer | null = null;
     let scrubbing = false;
     let timer = 0;
@@ -57,7 +74,7 @@ if (root) {
       return "#333333";
     };
 
-    const paintSwatches = (series: LineRaceSeries[]) => {
+    const paintSwatches = (series: Array<LineRaceSeries | OddsSeries>) => {
       const key = series.map((item) => item.name).join("|");
       if (key === swatchKey) return;
       swatchKey = key;
@@ -76,6 +93,26 @@ if (root) {
         });
         label.append(input, document.createTextNode(seriesItem.name));
         swatches.append(label);
+      }
+    };
+
+    const copyFor = (next: "race" | "odds") => {
+      pageTitle.textContent = next === "odds" ? "Odds replay" : "Line chart race";
+      pageLede.textContent =
+        next === "odds"
+          ? "Step lines hold each price until the next trade. Replay runs the history from the first print to the last, on a percent axis fitted to the series. The sample numbers are illustrative."
+          : "Paste monthly numbers, play the lines forward, and export a video from this tab. The preview and the file are the same frames: each one is frame(t) for a t between 0 and 1.";
+      hint.textContent =
+        next === "odds"
+          ? "The first column is the time (YYYY-MM-DD or an ISO time). Other columns are outcome prices, as percent points or as fractions of 1. Samples are illustrative, not a market. Light and dark are themes, not a venue’s brand."
+          : "The first column is the date (YYYY-MM or YYYY-MM-DD). Each other column is a line. The sample is shaped like a lab-mentions promo. The numbers are illustrative, not a measurement. Tip icons are monograms. A series icon can be a base64 data:image URL.";
+      unitWrap.hidden = next === "odds";
+      oddsTools.hidden = next !== "odds";
+      for (const block of root.querySelectorAll<HTMLElement>("[data-code]")) block.hidden = block.dataset.code !== next;
+      for (const button of root.querySelectorAll<HTMLButtonElement>("[data-kind]")) {
+        const on = button.dataset.kind === next;
+        button.setAttribute("aria-pressed", on ? "true" : "false");
+        button.className = on ? "btn btn-primary" : "btn btn-secondary";
       }
     };
 
@@ -99,11 +136,53 @@ if (root) {
       };
     };
 
-    const mount = (options: LineRaceOptions) => {
+    const readOdds = (): OddsReplayOptions => {
+      const text = data.value.trim();
+      const seconds = Number(duration.value);
+      const theme = themeSelect.value === "dark" ? "dark" : "light";
+      const durationMs = Number.isFinite(seconds) ? Math.round(seconds * 1000) : 8000;
+      const painted = (series: OddsSeries[] | undefined) =>
+        (series ?? []).map((item) => ({ ...item, color: colors.get(item.name) ?? item.color }));
+      if (text.startsWith("{") || text.startsWith("[")) {
+        const parsed = JSON.parse(text) as OddsReplayOptions | Array<Record<string, string | number | null>>;
+        const rows = Array.isArray(parsed) ? parsed : parsed.data;
+        if (!Array.isArray(rows) || rows.length < 2) throw new Error("JSON needs at least two rows.");
+        const x = (!Array.isArray(parsed) && parsed.x) || Object.keys(rows[0] ?? {})[0];
+        if (!x) throw new Error("The rows need a time field.");
+        const named = Array.isArray(parsed) ? undefined : parsed.series;
+        const fields = named?.map((item) => item.field ?? item.name) ?? Object.keys(rows[0] ?? {}).filter((field) => field !== x);
+        return {
+          title: title.value.trim() || (!Array.isArray(parsed) && parsed.title) || "Odds replay",
+          subtitle: subtitle.value.trim(),
+          theme,
+          legend: legendBox.checked,
+          duration: durationMs,
+          x,
+          data: rows,
+          series: painted(
+            fields.map((field) => {
+              const match = named?.find((item) => (item.field ?? item.name) === field);
+              return { name: match?.name || field, field, color: match?.color };
+            }),
+          ),
+        };
+      }
+      const options = oddsFromCsv(text, {
+        title: title.value.trim() || "Odds replay",
+        subtitle: subtitle.value.trim(),
+        theme,
+        legend: legendBox.checked,
+        duration: durationMs,
+        series: [...colors.entries()].map(([name, color]) => ({ name, color })),
+      });
+      return { ...options, series: painted(options.series) };
+    };
+
+    const mount = (next: FrameSequence) => {
       const wasPlaying = player?.playing ?? false;
       const at = player?.t ?? start;
       player?.destroy();
-      chart = createLineRace({ ...options, width: 1280, height: 720 });
+      chart = next;
       live.loop = loop.checked;
       live.from = at;
       live.onFrame = (t, playing) => {
@@ -117,17 +196,19 @@ if (root) {
 
     const apply = () => {
       try {
+        if (kind === "odds") {
+          const options = readOdds();
+          error.hidden = true;
+          error.textContent = "";
+          paintSwatches(options.series ?? []);
+          mount(createOddsReplay({ ...options, width: 1280, height: 720 }));
+          return;
+        }
         const options = readOptions();
         error.hidden = true;
         error.textContent = "";
         paintSwatches(options.series ?? []);
-        mount({
-          ...options,
-          series: (options.series ?? []).map((series) => ({
-            ...series,
-            color: colors.get(series.name) ?? series.color,
-          })),
-        });
+        mount(createLineRace({ ...options, width: 1280, height: 720 }));
       } catch (err) {
         error.hidden = false;
         error.textContent = err instanceof Error ? err.message : "Could not read that table.";
@@ -203,15 +284,80 @@ if (root) {
       apply();
       file.value = "";
     });
-    reset.addEventListener("click", () => {
-      const sample = podcastMentionsRace();
+    const loadOddsSample = (id: "match" | "election") => {
+      const sample = id === "election" ? electionOddsReplay() : matchOddsReplay();
+      oddsSample = id;
       title.value = sample.title;
       subtitle.value = sample.subtitle ?? "";
-      unit.value = sample.unit ?? "";
-      duration.value = "9";
-      data.value = podcastMentionsCsv();
+      duration.value = "8";
+      data.value = id === "election" ? electionOddsCsv() : matchOddsCsv();
+      themeSelect.value = sample.theme === "dark" ? "dark" : "light";
+      legendBox.checked = sample.legend === true;
       swatchKey = "";
       colors.clear();
+    };
+
+    const setKind = (next: "race" | "odds") => {
+      kind = next;
+      player?.destroy();
+      player = null;
+      start = next === "odds" ? 1 : 0.62;
+      scrub.value = String(Math.round(start * 1000));
+      copyFor(next);
+      if (next === "odds") loadOddsSample(oddsSample);
+      else {
+        const sample = podcastMentionsRace();
+        title.value = sample.title;
+        subtitle.value = sample.subtitle ?? "";
+        unit.value = sample.unit ?? "";
+        duration.value = "9";
+        data.value = podcastMentionsCsv();
+        swatchKey = "";
+        colors.clear();
+      }
+      const url = new URL(location.href);
+      if (next === "odds") url.searchParams.set("type", "odds");
+      else url.searchParams.delete("type");
+      history.replaceState(null, "", url);
+      apply();
+    };
+
+    for (const button of root.querySelectorAll<HTMLButtonElement>("button[data-kind]")) {
+      button.addEventListener("click", () => {
+        const next = button.dataset.kind === "odds" ? "odds" : "race";
+        if (next !== kind) setKind(next);
+      });
+    }
+    for (const button of root.querySelectorAll<HTMLButtonElement>("[data-odds-sample]")) {
+      button.addEventListener("click", () => {
+        const id = button.dataset.oddsSample === "election" ? "election" : "match";
+        loadOddsSample(id);
+        const url = new URL(location.href);
+        url.searchParams.set("type", "odds");
+        url.searchParams.set("sample", id);
+        history.replaceState(null, "", url);
+        apply();
+      });
+    }
+    themeSelect.addEventListener("change", () => {
+      colors.clear();
+      swatchKey = "";
+      schedule();
+    });
+    legendBox.addEventListener("change", schedule);
+
+    reset.addEventListener("click", () => {
+      if (kind === "odds") loadOddsSample(oddsSample);
+      else {
+        const sample = podcastMentionsRace();
+        title.value = sample.title;
+        subtitle.value = sample.subtitle ?? "";
+        unit.value = sample.unit ?? "";
+        duration.value = "9";
+        data.value = podcastMentionsCsv();
+        swatchKey = "";
+        colors.clear();
+      }
       apply();
     });
     exportButton.addEventListener("click", async () => {
@@ -237,7 +383,7 @@ if (root) {
         const url = URL.createObjectURL(result.blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `line-chart-race.${result.extension}`;
+        link.download = `${kind === "odds" ? "odds-replay" : "line-chart-race"}.${result.extension}`;
         link.click();
         window.setTimeout(() => URL.revokeObjectURL(url), 4000);
         status.textContent =
@@ -253,6 +399,13 @@ if (root) {
       }
     });
 
-    apply();
+    const params = new URLSearchParams(location.search);
+    if (params.get("type") === "odds") {
+      oddsSample = params.get("sample") === "election" ? "election" : "match";
+      setKind("odds");
+    } else {
+      copyFor(kind);
+      apply();
+    }
   }
 }

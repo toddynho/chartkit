@@ -1,34 +1,62 @@
 ---
 import Base from "../layouts/Base.astro";
-import { createLineRace, podcastMentionsCsv, podcastMentionsRace } from "@chartkitdev/core/race";
+import {
+  createLineRace,
+  createOddsReplay,
+  electionOddsCsv,
+  electionOddsReplay,
+  matchOddsCsv,
+  matchOddsReplay,
+  podcastMentionsCsv,
+  podcastMentionsRace,
+} from "@chartkitdev/core/race";
 import font400 from "@fontsource/geist/files/geist-latin-400-normal.woff2?url";
 import font700 from "@fontsource/geist/files/geist-latin-700-normal.woff2?url";
 
+const odds = Astro.url.searchParams.get("type") === "odds";
+const oddsSample = Astro.url.searchParams.get("sample") === "election" ? electionOddsReplay() : matchOddsReplay();
 const sample = podcastMentionsRace();
-const poster = createLineRace(sample).frame(0.62);
+const poster = odds ? createOddsReplay(oddsSample).frame(1) : createLineRace(sample).frame(0.62);
 const csv = podcastMentionsCsv();
-const description = "Paste a time series, preview a line chart race, and export an MP4 in the browser.";
+const activeTitle = odds ? oddsSample.title : sample.title;
+const activeSubtitle = odds ? (oddsSample.subtitle ?? "") : (sample.subtitle ?? "");
+const activeCsv = odds ? (Astro.url.searchParams.get("sample") === "election" ? electionOddsCsv() : matchOddsCsv()) : csv;
+const activeDuration = odds ? "8" : "9";
+const description = odds
+  ? "Replay a prediction-market style odds chart and export an MP4 in the browser."
+  : "Paste a time series, preview a line chart race, and export an MP4 in the browser.";
+const pageTitle = odds ? "Odds replay" : "Line chart race";
 ---
 
-<Base title="Line chart race" description={description}>
+<Base title={pageTitle} description={description}>
   <div
     class="wrap race-page"
     data-race-root
-    data-start="0.62"
+    data-kind={odds ? "odds" : "race"}
+    data-odds-sample={Astro.url.searchParams.get("sample") === "election" ? "election" : "match"}
+    data-start={odds ? "1" : "0.62"}
     data-font-400={font400}
     data-font-700={font700}
   >
     <p class="kicker">Prototype</p>
-    <h1>Line chart race</h1>
-    <p class="lede">
-      Paste monthly numbers, play the lines forward, and export a video from this tab. The preview and the file are the same frames: each one is <code>frame(t)</code> for a t between 0 and 1.
+    <div class="race-switch" role="group" aria-label="Chart type">
+      <button type="button" class={odds ? "btn btn-secondary" : "btn btn-primary"} data-kind="race" aria-pressed={odds ? "false" : "true"}>Line race</button>
+      <button type="button" class={odds ? "btn btn-primary" : "btn btn-secondary"} data-kind="odds" aria-pressed={odds ? "true" : "false"}>Odds replay</button>
+    </div>
+    <h1 data-page-title>{pageTitle}</h1>
+    <p class="lede" data-page-lede>
+      {
+        odds
+          ? "Step lines hold each price until the next trade. Replay runs the history from the first print to the last, on a percent axis fitted to the series. The sample numbers are illustrative."
+          : "Paste monthly numbers, play the lines forward, and export a video from this tab. The preview and the file are the same frames: each one is frame(t) for a t between 0 and 1."
+      }
     </p>
 
     <div class="race-card">
       <div class="race-stage" data-race-stage set:html={poster}></div>
       <div class="race-transport">
         <button type="button" class="btn btn-primary" data-race-play>Play</button>
-        <input type="range" min="0" max="1000" value="620" step="1" data-race-scrub aria-label="Scrub the animation" />
+        <input type="range" min="0" max="1000" value={odds ? "1000" : "620"} step="1" data-race-scrub aria-label="Scrub the animation" />
         <span class="race-time" data-race-time>0:00 / 0:09</span>
         <label class="race-loop">
           <input type="checkbox" data-race-loop />
@@ -43,19 +71,39 @@ const description = "Paste a time series, preview a line chart race, and export 
       <div>
         <label class="race-field">
           Title
-          <input data-race-title value={sample.title} autocomplete="off" />
+          <input data-race-title value={activeTitle} autocomplete="off" />
         </label>
         <label class="race-field">
           Subtitle
-          <textarea data-race-subtitle rows="2" autocomplete="off">{sample.subtitle ?? ""}</textarea>
+          <textarea data-race-subtitle rows="2" autocomplete="off">{activeSubtitle}</textarea>
         </label>
-        <label class="race-field">
-          Unit
-          <input data-race-unit value={sample.unit ?? ""} autocomplete="off" />
-        </label>
+        <div data-race-unit-wrap hidden={odds}>
+          <label class="race-field">
+            Unit
+            <input data-race-unit value={sample.unit ?? ""} autocomplete="off" />
+          </label>
+        </div>
+        <div data-odds-tools hidden={!odds}>
+          <p class="race-note">Sample</p>
+          <div class="race-actions">
+            <button type="button" class="btn btn-secondary" data-odds-sample="match">Match</button>
+            <button type="button" class="btn btn-secondary" data-odds-sample="election">Election</button>
+          </div>
+          <label class="race-field">
+            Theme
+            <select data-odds-theme>
+              <option value="light" selected={oddsSample.theme !== "dark"}>Light</option>
+              <option value="dark" selected={oddsSample.theme === "dark"}>Dark</option>
+            </select>
+          </label>
+          <label class="race-loop">
+            <input type="checkbox" data-odds-legend checked={oddsSample.legend === true} />
+            Legend
+          </label>
+        </div>
         <label class="race-field">
           Duration, seconds
-          <input data-race-duration type="number" min="2" max="60" step="1" value="9" />
+          <input data-race-duration type="number" min="2" max="60" step="1" value={activeDuration} />
         </label>
         <p class="race-note">Colors</p>
         <div class="race-swatches" data-race-colors></div>
@@ -63,7 +111,7 @@ const description = "Paste a time series, preview a line chart race, and export 
       <div>
         <label class="race-field">
           Data, CSV or JSON
-          <textarea data-race-data spellcheck="false">{csv}</textarea>
+          <textarea data-race-data spellcheck="false">{activeCsv}</textarea>
         </label>
         <div class="race-actions">
           <label class="btn btn-secondary">
@@ -73,22 +121,30 @@ const description = "Paste a time series, preview a line chart race, and export 
           <button type="button" class="btn btn-secondary" data-race-reset>Reset sample</button>
         </div>
         <p class="race-error" data-race-error role="alert" hidden></p>
-        <p class="race-note">
+        <p class="race-note" data-race-hint>
           The first column is the date (<code>YYYY-MM</code> or <code>YYYY-MM-DD</code>). Each other column is a line. The sample is shaped like a lab-mentions promo. The numbers are illustrative, not a measurement. Tip icons are monograms. A series <code>icon</code> can be a base64 <code>data:image</code> URL.
         </p>
       </div>
     </div>
 
     <h2>From code</h2>
-    <p>
+    <p data-code="race" hidden={odds}>
       The race is not a chart <code>type</code> in the v1 spec. <code>render()</code> draws one settled frame, and <code>motion</code> only morphs two of those in the DOM. A race needs every intermediate frame, including on a server, so it lives on its own entry and stays out of the line bundle.
     </p>
-    <pre class="race-code"><code>{`import { createLineRace, exportLineRace, mountLineRace, podcastMentionsRace } from "@chartkitdev/core/race";
+    <pre class="race-code" data-code="race" hidden={odds}><code>{`import { createLineRace, exportLineRace, mountLineRace, podcastMentionsRace } from "@chartkitdev/core/race";
 
 const race = createLineRace(podcastMentionsRace());
 mountLineRace(document.querySelector("#chart"), race).play();
 race.frame(0.5); // the same SVG a server would return
 const file = await exportLineRace(race); // MP4, or WebM if H.264 is unavailable`}</code></pre>
+    <p data-code="odds" hidden={!odds}>
+      An odds replay is the same contract. Each row is a trade. The line holds that price until the next row. <code>scale: "fit"</code> sizes the percent axis to the whole series and keeps it still during the replay. <code>exportLineRace</code> records either chart.
+    </p>
+    <pre class="race-code" data-code="odds" hidden={!odds}><code>{`import { createOddsReplay, exportLineRace, matchOddsReplay } from "@chartkitdev/core/race";
+
+const odds = createOddsReplay(matchOddsReplay());
+odds.frame(t); // one SVG, the same on a server
+await exportLineRace(odds);`}</code></pre>
     <p class="race-note">
       Export encodes in this browser. Chromium writes an MP4 through WebCodecs. Firefox and older Safari record WebM in real time. Nothing is uploaded.
     </p>
@@ -106,6 +162,19 @@ const file = await exportLineRace(race); // MP4, or WebM if H.264 is unavailable
   .race-page h1 {
     font-size: clamp(2rem, 4vw, 2.5rem);
     margin-bottom: 0.55rem;
+  }
+  .race-switch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.15rem 0 0.85rem;
+  }
+  .race-field select {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg-elev);
+    padding: 0.48rem 0.7rem;
+    color: var(--ink);
   }
   .race-card {
     margin-top: 1.35rem;
