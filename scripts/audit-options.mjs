@@ -59,9 +59,21 @@ function same(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-function probeValues(field, spec) {
+function viewHeight(svg) {
+  const match = /viewBox="0 0 [\d.]+ ([\d.]+)"/.exec(svg);
+  return match ? Number(match[1]) : 0;
+}
+
+function probeValues(field, spec, baseSvg = "") {
   const view = readOption(spec, field);
   const current = view.value;
+  if (field.path === "size.aspectRatio") return [2, 0.5];
+  if (field.path === "size.minHeight") {
+    const drawn = viewHeight(baseSvg);
+    const stated = spec.size && typeof spec.size.height === "number" ? spec.size.height : 0;
+    const floor = Math.max(drawn, stated, 32);
+    return [Math.round(floor + 160)];
+  }
   if (field.control === "json" || view.complex) return [];
   if (field.control === "boolean" || field.storage === "union-boolean") return [current === true ? false : true];
   if (field.control === "enum" && field.enumValues?.length) {
@@ -172,7 +184,7 @@ for (const example of examples) {
   coverage[example.type] = fieldsFor(example.spec).map((field) => field.path);
   for (const field of fieldsFor(example.spec)) {
     probed++;
-    const values = probeValues(field, example.spec);
+    const values = probeValues(field, example.spec, base.svg);
     if (!values.length) {
       rows.push({ type: example.type, slug: example.slug, path: field.path, control: field.control, klass: "d", reason: "freeform value, no safe non-default probe", specChanged: false, svgChanged: false });
       continue;
@@ -184,6 +196,11 @@ for (const example of examples) {
     let invalid = false;
     for (const candidate of values) {
       const written = writeOption(example.spec, field, candidate);
+      if (field.path === "size.aspectRatio") {
+        const size = written.size && typeof written.size === "object" ? { ...written.size } : {};
+        size.height = "auto";
+        written.size = size;
+      }
       if (same(example.spec, written)) continue;
       specChanged = true;
       value = candidate;
