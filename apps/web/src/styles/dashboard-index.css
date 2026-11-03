@@ -12,30 +12,30 @@
   text-align: center;
 }
 
-.dash-hero__eye {
-  margin: 0 0 16px;
+.dash-hero p.dash-hero__eye {
+  margin: 0 0 24px;
   font-family: var(--mono);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #0a63e6;
+  color: var(--accent);
 }
 
 .dash-hero h1 {
-  margin: 0 0 16px;
+  margin: 0 0 24px;
   font-size: 50px;
   line-height: 1.05;
   letter-spacing: -0.03em;
   font-weight: 600;
 }
 
-.dash-hero p {
+.dash-hero__lead {
   margin: 0;
   max-width: 560px;
   font-size: 17px;
   line-height: 1.5;
-  color: #55575c;
+  color: var(--ink-2);
   text-wrap: pretty;
 }
 
