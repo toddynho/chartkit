@@ -318,6 +318,24 @@ describe("phase 4 charts", () => {
     ctl.destroy();
     host.remove();
   });
+
+  it("does not show an extra tooltip when tooltip or hover is off", async () => {
+    const { attach } = await import("../extra-tip");
+    const host = document.createElement("div");
+    host.innerHTML = `<svg data-ck-type="gantt"><rect data-ck-mark="bar" aria-label="Write the spec" x="0" y="0" width="40" height="20"/></svg>`;
+    document.body.append(host);
+    const before = document.querySelectorAll("[data-ck-extra-tip]").length;
+    const mark = host.querySelector("[data-ck-mark]");
+    const off = attach(host, { tooltip: false });
+    mark?.dispatchEvent(new PointerEvent("pointermove", { clientX: 20, clientY: 10, bubbles: true }));
+    expect(document.querySelectorAll("[data-ck-extra-tip]").length).toBe(before);
+    off.destroy();
+    const quiet = attach(host, { interaction: { hover: false } });
+    mark?.dispatchEvent(new PointerEvent("pointermove", { clientX: 20, clientY: 10, bubbles: true }));
+    expect(document.querySelectorAll("[data-ck-extra-tip]").length).toBe(before);
+    quiet.destroy();
+    host.remove();
+  });
 });
 
 interface Spot {
