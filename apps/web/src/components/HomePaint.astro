@@ -67,10 +67,9 @@ const rows = paint.rows.map((row) => {
               aria-expanded={row.reveal.length ? "false" : undefined}
               aria-controls={row.reveal.length ? `paint-${row.type}` : undefined}
             >
-              <div class="ckx-row__head">
+              <div class="ckx-label">
                 <span class="ckx-name">{row.type}</span>
                 <span class="ckx-note">{row.note}</span>
-                <span class="ckx-val">{row.ck}<small> ms</small></span>
               </div>
               <div class="ckx-track" aria-hidden="true">
                 <div class="ckx-line"></div>
@@ -85,6 +84,7 @@ const rows = paint.rows.map((row) => {
                   ),
                 )}
               </div>
+              <span class="ckx-val">{row.ck}<small> ms</small></span>
             </div>
             {row.reveal.length > 0 && (
               <div class="ckx-reveal" id={`paint-${row.type}`} hidden>
@@ -99,7 +99,7 @@ const rows = paint.rows.map((row) => {
     </div>
     <div class="ckx-axis" aria-hidden="true">
       {ticks.map((tick) => <span style={`left:${tick.left}`}>{tick.label}</span>)}
-      <span class="ckx-axis__edge">5s+ →</span>
+      <span class="ckx-axis__edge">5s+<i class="ckx-axis__arr"> →</i></span>
     </div>
     <p class="proof-note">
       Two-frame first paint, median of five fresh pages at 640×360, measured {paint.measuredOn}. Libraries without a native chart type are omitted from that row. A run that did not finish is omitted too. Runs slower than 5 s are pinned to the edge with their real time. <a href="/benchmarks">Full benchmark matrix →</a>

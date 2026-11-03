@@ -60,9 +60,9 @@ const ticks = [
               aria-pressed={row.us ? undefined : "false"}
               style={`--c:${swatch.fill};--ink:${swatch.ink};--band:${swatch.band}`}
             >
-              <div class="ckx-row__head">
+              <div class="ckx-label">
                 <span class="ckx-name">{row.name}</span>
-                <span class="ckx-val">{row.medianText}<small> {row.range}</small></span>
+                <span class="ckx-note"><span class="ckx-note__pre">range </span>{row.range}</span>
               </div>
               <div class="ckx-track" aria-hidden="true">
                 <div class="ckx-rail"></div>
@@ -72,6 +72,7 @@ const ticks = [
                 ))}
                 <div class="ckx-med" style={`left:${row.medPct}`}></div>
               </div>
+              <span class="ckx-val">{row.medianText}<small> tok</small></span>
               {row.us && spread.annotation ? (
                 <div class="ckx-anno">
                   <div class="ckx-bracket" style={`left:${spread.annotation.left};width:${spread.annotation.width}`}></div>
