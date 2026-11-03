@@ -102,6 +102,7 @@ const entry: Record<string, string> = {
   "interact-extra": "src/interact-extra.ts",
   export: "src/export.ts",
   "export-menu": "src/export-menu.ts",
+  race: "src/race-index.ts",
   "themes/all": "src/themes/all.ts",
 };
 

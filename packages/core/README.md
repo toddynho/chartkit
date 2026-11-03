@@ -41,6 +41,28 @@ chart.update(nextSpec, render(nextSpec));
 chart.destroy();
 ```
 
+A line chart race is a separate entry, so the line bundle does not include it. `frame(t)` is a pure function of the rows and `t` in `[0, 1]`. The same call is a preview frame and an export frame. `motion` does not do this: it morphs two settled specs in the DOM, and `render()` ignores it.
+
+```ts
+import { createLineRace, exportLineRace, mountLineRace, podcastMentionsRace } from "@chartkitdev/core/race";
+
+const race = createLineRace(podcastMentionsRace());
+const svg = race.frame(0.5);
+const player = mountLineRace(document.querySelector("#chart")!, race);
+player.play();
+const file = await exportLineRace(race);
+```
+
+An odds replay uses the same `frame(t)` contract and the same `exportLineRace`. Prices are steps: a value holds until the next row. The x axis is the full history, so the replay ends on the settled chart. `scale: "fit"` sizes the percent axis to that history and keeps it still. `scale: "unit"` is 0–100. `theme` is `"light"` or `"dark"`.
+
+```ts
+import { createOddsReplay, exportLineRace, matchOddsReplay } from "@chartkitdev/core/race";
+
+const odds = createOddsReplay(matchOddsReplay());
+odds.frame(1);
+await exportLineRace(odds);
+```
+
 `mark.sampling` defaults to `"auto"`: line, area, sparkline, mini-area, stacked-area, combo lines, and spike charts downsample above twice the plot width. Columnar `data.sampling` (`lttb`, `minmax`, or `none`) overrides it. `render` is `svg` (default), `canvas`, or `auto` (canvas from 100,000 rows on line, area, scatter, bar, heatmap, and candlestick). See [SPEC.md](./SPEC.md).
 
 Theme colors are CSS variables (`var(--ck-series-1, …)`, `--ck-text`, `--ck-background`, and the rest) so a host stylesheet wins. An omitted theme, `"auto"`, or `"soft"` is Soft: `light-dark()` colours that follow the page scheme, and a transparent plot so the page shows through. Set `--ck-background: light-dark(#f5f5f7, #1c1c1e)` for the optional Soft card. `"soft"` is that same palette. `"refined"`, `"editorial"`, and `"midnight"` register from `@chartkitdev/core/themes/<name>` or `@chartkitdev/core/features`. `@chartkitdev/core/all` registers them. A name that has not been imported renders as midnight when that preset is registered, and as Soft otherwise. `theme.mode` `"dark"` uses midnight when it is registered. A brand palette stays a separate import: `paletteFromBrand` from `@chartkitdev/core/themes/brand`, passed as `theme.tokens.series`. `mark.palette` overrides the series list for one spec. `mark.colorRules` on line, bar, area, and combo loads with `@chartkitdev/core/features` (scatter, donut, and pie keep their own copy) and recolours a bar, line point, scatter point, or slice when the value matches (`negative`, `positive`, or `lt` / `gt` / `eq`). A rule that paints bars is one square legend entry in that bar colour. Points on a combo line that match the same rule are outlines in that colour, so each colour appears once. A rule colour within CIE76 delta-E 25 of a series colour in the same theme, including a line stroke, shifts to a distinct shade. `mark.baseLabel` renames that series entry, for example Reading: Normal. `encoding.color.domain` maps category values onto `range`.
