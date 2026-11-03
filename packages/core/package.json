@@ -194,6 +194,16 @@
         "default": "./dist/export-menu.cjs"
       }
     },
+    "./race": {
+      "import": {
+        "types": "./dist/race.d.ts",
+        "default": "./dist/race.js"
+      },
+      "require": {
+        "types": "./dist/race.d.cts",
+        "default": "./dist/race.cjs"
+      }
+    },
     "./interact/extra": {
       "import": {
         "types": "./dist/interact-extra.d.ts",

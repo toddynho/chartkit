@@ -80,6 +80,7 @@ const CHART_TYPES = [
   "bar-list",
   "radial-bar",
   "rose",
+  "strip",
 ] as const;
 
 /** Types whose field rules live outside this schema. They stay out of the enum and in the CK1005 list. */
@@ -1090,6 +1091,7 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   if (value === "calendar-heatmap") return { type: "heatmap", kind: "rename", layout: "calendar" };
   if (value === "hist") return { type: "histogram", kind: "rename" };
   if (value === "box" || value === "box-plot") return { type: "boxplot", kind: "rename" };
+  if (value === "stripplot" || value === "strip-plot" || value === "dotplot" || value === "dot-plot" || value === "cleveland") return { type: "strip", kind: "rename" };
   if (value === "radar-chart") return { type: "radar", kind: "rename" };
   if (value === "funnel-chart") return { type: "funnel", kind: "rename" };
   if (value === "tree-map") return { type: "treemap", kind: "rename" };
@@ -1104,6 +1106,9 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   const compact = folded.replace(/ /g, "");
   if (compact === "radialbar" || compact === "radialbars" || compact === "polarbar" || folded === "polar") {
     return { type: "radial-bar", kind: "rename", note: 'Bars around a circle are type "radial-bar". Equal-angle sectors are type "rose".' };
+  }
+  if (compact === "stripplot" || compact === "dotplot" || folded === "dot plot" || folded === "strip plot" || folded === "cleveland") {
+    return { type: "strip", kind: "rename", note: 'A strip, dot strip, or Cleveland dot plot is type "strip".' };
   }
   if (compact === "polararea" || compact === "rosechart" || folded === "nightingale" || folded === "rose chart") {
     return { type: "rose", kind: "rename", note: 'A nightingale rose is type "rose".' };

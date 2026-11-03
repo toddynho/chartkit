@@ -1,26 +1,37 @@
 ---
+import "../styles/surfaces.css";
 import Base from "../layouts/Base.astro";
+import LiveSpec from "../components/LiveSpec.astro";
+import { loadExample, loadExamplesIndex, loadPlayground } from "../lib/surfaces";
 
-const description = "The ChartKit playground is the examples editor. Shared spec links open there.";
+const data = loadExamplesIndex();
+const files = data.examples.map((example) => loadExample(example.slug));
+const starter = files[0];
+if (!starter) throw new Error("Playground has no examples.");
+const { themes } = loadPlayground();
+const exampleSpecs = Object.fromEntries(files.map((file) => [file.slug, file.spec]));
+const description = "Edit a ChartKit spec and preview it. Validate, repair, share, and export SVG or PNG.";
 ---
 
 <Base title="Playground" description={description} tone="light">
-  <meta slot="head" name="robots" content="noindex" />
-  <script slot="head" is:inline>
-    location.replace("/examples" + location.hash);
-  </script>
-  <div class="wrap surface">
+  <div class="wrap surface example-play">
     <header class="hero">
       <p class="kicker">Playground</p>
       <h1>Playground</h1>
       <p class="lede">
-        The editor lives on Examples. A shared spec in the link hash opens there.
-        <a id="playground-next" href="/examples">Open the editor</a>.
+        The preview on the left follows the spec on the right. Validate, repair, share, and SVG or PNG export use
+        <code>@chartkitdev/core</code>, and maps use <code>@chartkitdev/geo</code>. Chart types are listed in the
+        <a href="/gallery">gallery</a>. Worked examples sit on each <a href="/docs">chart’s docs page</a>.
       </p>
     </header>
+    <LiveSpec
+      spec={starter.spec}
+      svg={starter.svg}
+      mode="full"
+      themes={themes}
+      examples={data.examples}
+      exampleSpecs={exampleSpecs}
+      activeSlug={starter.slug}
+    />
   </div>
 </Base>
-<script is:inline>
-  const link = document.getElementById("playground-next");
-  if (link) link.setAttribute("href", "/examples" + location.hash);
-</script>

@@ -40,6 +40,7 @@ export const GALLERY_TYPES = [
   "rose",
   "sunburst",
   "bar-list",
+  "strip",
 ];
 
 export const PAINT_STATUSES = ["ok", "unsupported", "blocked", "error", "timeout", "skipped"];
@@ -407,6 +408,15 @@ export const chartTypeDefs = [
     homepageRow: null,
     nMeaning: "ranked rows",
     why: "On-demand list, not in the line or all bundle. Twenty rows is a long ranking. The module is imported on its own.",
+  },
+  {
+    id: "strip",
+    file: "strip",
+    exportName: "strip",
+    sizes: [48],
+    homepageRow: null,
+    nMeaning: "observations across 8 groups",
+    why: "One dot per observation, eight groups. Not a dense series. The module is imported on its own.",
   },
 ];
 

@@ -21,6 +21,7 @@ export type Severity = "error" | "warning";
  * Dashboard gaps use CK3081–CK3084: rings, thresholds, and a volume pane.
  * CK3085 is a theme.brand colour that is not a hex value.
  * CK3086 is theme.tokens.fontFamily when it is not a CSS font-family.
+ * Strip uses CK3087–CK3094.
  */
 export interface Diagnostic {
   code: string;

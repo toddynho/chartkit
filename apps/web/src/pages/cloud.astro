@@ -2,7 +2,7 @@
 import "../styles/v2.css";
 import "../styles/cloud.css";
 import Base from "../layouts/Base.astro";
-import { HERO_TYPE_COUNT } from "../data/hero-catalog";
+import { galleryChartCount } from "../data/docs-catalog";
 import { freeRenderLimit } from "../data/cloud-facts";
 import { chartkitCloudUrl } from "../data/cloud-url";
 import { chartPreview, paintSpec } from "../lib/chartkit";
@@ -10,7 +10,7 @@ import { cloudPresets, cloudSnippets, renderUrl } from "../lib/cloud-page";
 
 const origin = chartkitCloudUrl();
 const perMinute = freeRenderLimit();
-const typeCount = HERO_TYPE_COUNT;
+const typeCount = galleryChartCount;
 const proDraft = true;
 
 for (const [name, spec] of Object.entries(cloudPresets)) {

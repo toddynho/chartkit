@@ -5,6 +5,7 @@ import { articleSections } from "./article-copy";
 import { withTruth } from "./chart-truth";
 import { chartTypes } from "./chart-types";
 import { heroTypes } from "./hero-catalog";
+import schemaJson from "../../../../packages/core/schema/chartkit.schema.json";
 import { docsSpecForType, trySamples, type LiveSpec } from "./live-specs";
 
 export type DocSection = {
@@ -188,14 +189,16 @@ export function articleBySlug(slug: string): DocArticle | undefined {
   return docArticles.find((article) => article.slug === slug || article.aliases.includes(slug));
 }
 
+/** Canonical doc URL. Alias slugs redirect; they are not pages. */
 export function articleHref(article: DocArticle): string {
+  if (article.slug === "themes" || article.slug === "themes-tokens") return "/docs/theming";
+  if (article.slug === "spec-anatomy") return "/docs/concepts/spec";
   return article.slug ? `/docs/${article.slug}` : "/docs";
 }
 
 /** Nav highlight for a URL, including legacy aliases such as `/docs/agents`. */
 export function activeDocsHref(path: string): string {
-  if (path === "/docs/reference/try") return path;
-  if (path === "/docs/charts" || path.startsWith("/docs/charts/")) return path;
+  if (path.startsWith("/docs/charts/")) return path;
   const slug = path === "/docs" ? "" : path.startsWith("/docs/") ? path.slice("/docs/".length) : null;
   if (slug == null) return path;
   const article = articleBySlug(slug);
@@ -310,9 +313,27 @@ export const articleChips: ChipGroup[] = [
 ];
 
 const catalogTypes = new Set(chartDocs.map((chart) => chart.type));
-/** Core + statistical + planning + library + three maps. Gallery uses the same sum. */
-export const galleryChartCount =
-  chartDocs.length + chartTypes.filter((chart) => !catalogTypes.has(chart.type)).length + 3;
+
+/**
+ * Chart types the library accepts. Schema enum plus the deferred types listed
+ * beside it in packages/core/src/walker.ts (planning charts and the two geo types).
+ * Atlas files (world, US, cities) are examples of those types, not extra types.
+ */
+const DEFERRED_TYPES = ["gantt", "timeline", "quadrant", "venn", "journey", "choropleth", "map-points"] as const;
+const schemaTypes = (schemaJson as { properties: { type: { enum: string[] } } }).properties.type.enum;
+export const registryChartTypes = [...new Set([...schemaTypes, ...DEFERRED_TYPES])];
+
+const heroIds = heroTypes.map((chart) => chart.type).sort();
+const registryIds = [...registryChartTypes].sort();
+if (heroIds.join() !== registryIds.join()) {
+  throw new Error(`Chart registry has ${registryIds.length} types; the hero catalog has ${heroIds.length}.`);
+}
+
+/** One card per registry type. This is the gallery count. */
+export const galleryChartCount = registryChartTypes.length;
+
+/** Docs chart pages: registry types, plus the filled-line note at `/docs/charts/area`. */
+export const chartPageTypes = [...new Set([...chartTypes.map((chart) => chart.type), ...chartDocs.map((chart) => chart.type), ...registryChartTypes])];
 
 export type SidebarChartLink = { type: string; href: string; label: string };
 
@@ -331,7 +352,6 @@ function sidebarLabel(type: string, heroLabel: string): string {
 }
 
 function sidebarHref(type: string): string {
-  if (type === "choropleth" || type === "map-points") return "/docs/charts#maps";
   return `/docs/charts/${type}`;
 }
 
@@ -352,14 +372,6 @@ if (sidebarChartCount !== heroTypes.length) {
 /** Rows shown before the fade and the "Show all" control. */
 export const sidebarChartPreview = 5;
 
-function links(items: { slug?: string; href?: string; label: string; hint?: string }[]): NavLink[] {
-  return items.map((item) => ({
-    href: item.href ?? (item.slug ? `/docs/${item.slug}` : "/docs"),
-    label: item.label,
-    hint: item.hint,
-  }));
-}
-
 const conceptArticles = fromMocks.filter((article) => article.group === "Concepts");
 const specSlugs = new Set(["spec-anatomy", "data", "encoding", "scales", "axes"]);
 
@@ -371,6 +383,8 @@ export const docsNav: NavGroup[] = [
         label: "Start",
         items: [
           { href: "/docs", label: "Overview" },
+          { href: "/playground", label: "Playground" },
+          { href: "/gallery", label: "Gallery" },
           { href: "/docs/markdown", label: "MD fences" },
           { href: "/docs/install", label: "Install notes" },
           { href: "/docs/migrate", label: "Upgrading from v0" },
@@ -383,7 +397,7 @@ export const docsNav: NavGroup[] = [
             href: item.href,
             label: item.label,
           })),
-          { href: "/docs/charts", label: "All types" },
+          { href: "/gallery", label: "Gallery" },
         ],
       },
       {
@@ -391,6 +405,7 @@ export const docsNav: NavGroup[] = [
         items: [
           { href: "/docs/validate", label: "Validate" },
           { href: "/docs/repair", label: "Repair" },
+          { href: "/docs/render", label: "Render" },
           { href: "/docs/llms-txt", label: "llms.txt" },
           { href: "/docs/mcp", label: "MCP" },
         ],
@@ -402,20 +417,19 @@ export const docsNav: NavGroup[] = [
     blocks: [
       {
         label: "Spec",
-        items: links(
-          conceptArticles
-            .filter((article) => specSlugs.has(article.slug))
-            .map((article) => ({ slug: article.slug, label: article.title })),
-        ),
+        items: conceptArticles
+          .filter((article) => specSlugs.has(article.slug))
+          .map((article) => ({ href: articleHref(article), label: article.title })),
       },
       {
         label: "Rendering",
         items: [
-          ...links(
-            conceptArticles
-              .filter((article) => !specSlugs.has(article.slug))
-              .map((article) => ({ slug: article.slug, label: article.title })),
-          ),
+          ...conceptArticles
+            .filter((article) => !specSlugs.has(article.slug) && article.slug !== "themes-tokens")
+            .map((article) => ({ href: articleHref(article), label: article.title })),
+          { href: "/docs/concepts/interaction", label: "Interaction" },
+          { href: "/docs/concepts/layouts", label: "Layouts" },
+          { href: "/docs/concepts/large-data", label: "Large data" },
           { href: "/docs/theming", label: "Theming" },
           { href: "/docs/themes/tape", label: "Tape" },
           { href: "/docs/themes/kite", label: "Kite" },
@@ -424,6 +438,8 @@ export const docsNav: NavGroup[] = [
           { href: "/docs/themes/from-brand", label: "From a brand" },
           { href: "/docs/themes/from-drawing", label: "From a drawing" },
           { href: "/docs/motion", label: "Motion" },
+          { href: "/race", label: "Line chart race" },
+          { href: "/race?type=odds", label: "Odds replay" },
           { href: "/docs/mermaid", label: "Mermaid" },
           { href: "/docs/web-component", label: "Web component" },
           { href: "/docs/spec", label: "Spec" },
@@ -438,15 +454,13 @@ export const docsNav: NavGroup[] = [
       {
         label: "Reference",
         items: [
-          ...links(
-            fromMocks
-              .filter((article) => article.group === "Reference")
-              .map((article) => ({
-                slug: article.slug,
-                label: article.title,
-                hint: article.slug === "errors" ? "CK codes" : undefined,
-              })),
-          ),
+          ...fromMocks
+            .filter((article) => article.group === "Reference" && article.slug !== "themes")
+            .map((article) => ({
+              href: articleHref(article),
+              label: article.title,
+              hint: article.slug === "errors" ? "CK codes" : undefined,
+            })),
           { href: "/schema/v1.json", label: "Schema v1" },
           { href: "/docs/concepts/adapters", label: "Adapters" },
         ],
@@ -476,11 +490,10 @@ export function neighbors(href: string): { prev?: Crumb; next?: Crumb } {
   const chartIndex = chartCrumbs.findIndex((item) => item.href === href);
   if (chartIndex >= 0) {
     return {
-      prev: chartCrumbs[chartIndex - 1] ?? { href: "/docs/charts", label: "All types" },
+      prev: chartCrumbs[chartIndex - 1] ?? { href: "/gallery", label: "Gallery" },
       next: chartCrumbs[chartIndex + 1],
     };
   }
-  if (href === "/docs/charts") return { prev: { href: "/docs/charts/donut", label: "Donut" }, next: chartCrumbs[0] };
   return {};
 }
 
@@ -497,26 +510,13 @@ export function crumbsFor(href: string): Crumb[] {
       return trail;
     }
   }
-  if (canonical === "/docs/charts") {
-    return [
-      { href: "/docs", label: "Docs" },
-      { href: "", label: "Charts" },
-      { href: canonical, label: "All types" },
-    ];
-  }
   if (canonical.startsWith("/docs/charts/")) {
     const chart = chartPage(canonical.slice("/docs/charts/".length));
     return [
       { href: "/docs", label: "Docs" },
-      { href: "/docs/charts", label: "Charts" },
+      { href: "/gallery", label: "Gallery" },
       { href: "", label: chart.family },
       { href: canonical, label: chart.label },
-    ];
-  }
-  if (canonical === "/docs/reference/try") {
-    return [
-      { href: "/docs", label: "Docs" },
-      { href: canonical, label: "Playground" },
     ];
   }
   const slug = canonical === "/docs" ? "" : canonical.startsWith("/docs/") ? canonical.slice("/docs/".length) : "";

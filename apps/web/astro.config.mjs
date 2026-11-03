@@ -24,9 +24,9 @@ export default defineConfig({
   },
   integrations: [react()],
   redirects: {
-    "/play": { status: 307, destination: "/examples" },
-    // /playground is a page. Old share links are /playground#spec, and a static meta refresh drops the fragment.
-    "/demo": { status: 307, destination: "/dashboards" },
+    // Static meta refresh drops a fragment, so /examples is a page that keeps location.hash.
+    "/play": { status: 307, destination: "/playground" },
+    "/demo": { status: 307, destination: "/playground" },
     "/showcase": { status: 307, destination: "/gallery" },
     "/maps": { status: 307, destination: "/gallery#maps" },
     "/getting-started": { status: 307, destination: "/docs" },
@@ -74,6 +74,22 @@ export default defineConfig({
     "/dashboards/pulse": { status: 301, destination: "/dashboards" },
     "/dashboards/retain": { status: 301, destination: "/dashboards" },
     "/pricing": { status: 307, destination: "/cloud#pricing" },
+    "/docs/charts": { status: 307, destination: "/gallery" },
+    "/docs/reference/try": { status: 307, destination: "/playground" },
+    "/docs/reference": { status: 307, destination: "/docs/options" },
+    "/docs/reference/validate": { status: 307, destination: "/docs/validate" },
+    "/docs/agents": { status: 307, destination: "/docs/validate" },
+    "/docs/agents/llms": { status: 307, destination: "/docs/llms-txt" },
+    "/docs/spec-anatomy": { status: 307, destination: "/docs/concepts/spec" },
+    "/docs/themes": { status: 307, destination: "/docs/theming" },
+    "/docs/themes-tokens": { status: 307, destination: "/docs/theming" },
+    "/docs/concepts/themes": { status: 307, destination: "/docs/theming" },
+    "/spec": { status: 307, destination: "/docs/spec" },
+    "/spec/[type]": { status: 307, destination: "/docs/charts/[type]" },
+    "/interaction": { status: 307, destination: "/docs/concepts/interaction" },
+    "/layouts": { status: 307, destination: "/docs/concepts/layouts" },
+    "/large": { status: 307, destination: "/docs/concepts/large-data" },
+    "/when-to-use": { status: 307, destination: "/compare#when-to-use" },
   },
   vite: {
     resolve: {

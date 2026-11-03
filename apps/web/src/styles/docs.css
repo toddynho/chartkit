@@ -1292,3 +1292,18 @@ html.is-rail-drag * {
   .docs-backdrop { display: none; }
   .page-nav { grid-template-columns: 1fr; }
 }
+
+.start-path {
+  margin: 4px 0 28px;
+  padding-left: 1.2rem;
+}
+.start-path li { margin: 0 0 8px; }
+.start-path a { font-weight: 600; }
+.example-preview {
+  margin: 0 0 12px;
+  padding: 12px;
+  border: 1px solid #e6e6e2;
+  border-radius: 12px;
+  background: #fff;
+}
+.example-preview svg { display: block; width: 100%; height: auto; }

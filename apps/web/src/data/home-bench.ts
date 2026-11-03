@@ -428,7 +428,7 @@ function formatPaintMs(ms: number): string {
   return rounded.toFixed(2).replace(/0$/, "").replace(/\.0$/, "");
 }
 
-export type HomePaintDot = { title: string; left: string; size: string; fill: string; ring: string };
+export type HomePaintDot = { title: string; left: string; size: string; fill: string; ring: string; lib: string; ms: number };
 export type HomePaintRow = { type: string; note: string; ck: string; dots: HomePaintDot[] };
 
 export function homePaint(): {
@@ -476,6 +476,8 @@ export function homePaint(): {
         size: "10px",
         fill: lib.color,
         ring: "none",
+        lib: lib.name,
+        ms: slot.initial,
       });
     }
     const ckState = presentUnder.get("ChartKit");
@@ -489,6 +491,8 @@ export function homePaint(): {
       size: "16px",
       fill: "#0a63e6",
       ring: "0 0 0 4px #dbe7fb",
+      lib: "ChartKit",
+      ms: chartkit.initial,
     });
     const note = HOME_NOTES[spec.type];
     if (!note) throw new Error(`homepage paint is missing a note for ${spec.type}`);

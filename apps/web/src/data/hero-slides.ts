@@ -29,7 +29,7 @@ function stageSpec(type: string): LiveSpec {
 /** Share link for the short hero spec, the chart the homepage actually draws. */
 export function heroEditHref(type: string): string {
   const spec = stageSpec(type);
-  return `/examples#${encodeURIComponent(JSON.stringify(spec))}`;
+  return `/playground#${encodeURIComponent(JSON.stringify(spec))}`;
 }
 
 function kpiOf(spec: LiveSpec, label: string): string {

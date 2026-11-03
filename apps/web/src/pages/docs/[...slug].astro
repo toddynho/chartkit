@@ -5,16 +5,15 @@ import { articleChips, articleHref, articleSpec, docArticles, type DocArticle as
 import Docs from "../../layouts/Docs.astro";
 
 export function getStaticPaths() {
+  const retired = new Set(["themes", "themes-tokens"]);
+  const canonicalSlug: Record<string, string> = {
+    "spec-anatomy": "concepts/spec",
+  };
+  const frameworkPages = new Set(["react", "vue", "svelte", "astro", "vanilla"]);
   return docArticles.flatMap((article) => {
-    if (!article.slug || article.slug === "mcp") return [];
-    if (article.slug === "react" || article.slug === "vue" || article.slug === "svelte" || article.slug === "astro" || article.slug === "vanilla") {
-      return [];
-    }
-    const paths = [article.slug, ...article.aliases];
-    return paths.map((slug) => ({
-      params: { slug },
-      props: { article, here: `/docs/${slug}` },
-    }));
+    if (!article.slug || article.slug === "mcp" || retired.has(article.slug) || frameworkPages.has(article.slug)) return [];
+    const slug = canonicalSlug[article.slug] ?? article.slug;
+    return [{ params: { slug }, props: { article, here: `/docs/${slug}` } }];
   });
 }
 

@@ -1,10 +1,31 @@
 ---
 import { homePaint } from "../data/home-bench";
+import { rivalSwatch } from "../data/rival-colors";
 
 const paint = homePaint();
+
+// Clipped log axis, 5 ms to 5 s. Slower runs pin to the right edge with their real value.
+const LO = Math.log10(5);
+const HI = Math.log10(5000);
+const at = (ms: number) => `${Math.min(100, Math.max(0, ((Math.log10(ms) - LO) / (HI - LO)) * 100)).toFixed(2)}%`;
+const fmt = (ms: number) => (ms >= 1000 ? `${(ms / 1000).toFixed(1)} s` : `${ms >= 100 ? Math.round(ms) : ms.toFixed(1)} ms`);
+const ticks = [
+  { label: "10ms", left: at(10) },
+  { label: "100ms", left: at(100) },
+  { label: "1s", left: at(1000) },
+];
+const others = paint.libs.filter((lib) => !lib.us);
+const rows = paint.rows.map((row) => {
+  const dots = row.dots.map((dot) => {
+    const swatch = rivalSwatch(dot.lib);
+    return { ...dot, us: dot.lib === "ChartKit", color: swatch.fill, ink: swatch.ink, pinned: dot.ms > 5000, at: at(dot.ms) };
+  });
+  const reveal = dots.filter((dot) => !dot.us).sort((a, b) => a.ms - b.ms);
+  return { ...row, dots, reveal };
+});
 ---
 
-<section class="band" aria-labelledby="paint-title">
+<section class="band" data-ckx="paint" aria-labelledby="paint-title">
   <div class="band-head">
     <div class="band-head__copy">
       <p class="eyebrow eyebrow--blue">For the user</p>
@@ -16,51 +37,97 @@ const paint = homePaint();
       <p class="band-stat__cap"><strong>100,000-point line</strong>, first paint. {paint.statCaption}</p>
     </div>
   </div>
-  <div class="proof-card">
-    <div class="proof-card__head">
+  <div class="proof-card ckx-card">
+    <div class="ckx-head">
       <div>
         <h3>First paint by chart type</h3>
         <p>Milliseconds, log scale. Left is faster.</p>
       </div>
-      <div class="proof-legend paint-legend">
-        {
-          paint.libs.map((lib) => (
-            <span class:list={[lib.us && "is-us"]} style={`color:${lib.ink}`}>
-              <i style={`background:${lib.color}`}></i>
-              {lib.name}
-            </span>
-          ))
-        }
+      <div class="ckx-key">
+        <span class="ckx-key__us"><i></i>ChartKit</span>
+        <span class="ckx-key__vs">vs</span>
+        <span class="ckx-key__others" tabindex="0" aria-label={`${others.length} other libraries: ${others.map((lib) => lib.name).join(", ")}`}>
+          <span class="ckx-cluster" aria-hidden="true">{others.map((lib) => <i style={`--c:${lib.color}`}></i>)}</span>
+          {others.length} others
+          <span class="ckx-pop" role="tooltip">
+            {others.map((lib) => <span style={`--c:${lib.color};--ink:${lib.ink}`}><i></i>{lib.name}</span>)}
+          </span>
+        </span>
       </div>
     </div>
-    <div>
+    <div class="ckx-rows">
       {
-        paint.rows.map((row) => (
-          <div class="paint-row">
-            <div class="paint-name">
-              {row.type}
-              <small>{row.note}</small>
+        rows.map((row) => (
+          <div class="ckx-row">
+            <div
+              class="ckx-hit"
+              data-ckx-hit
+              tabindex={row.reveal.length ? 0 : undefined}
+              role={row.reveal.length ? "button" : undefined}
+              aria-expanded={row.reveal.length ? "false" : undefined}
+              aria-controls={row.reveal.length ? `paint-${row.type}` : undefined}
+            >
+              <div class="ckx-label">
+                <span class="ckx-name">{row.type}</span>
+                <span class="ckx-note">{row.note}</span>
+              </div>
+              <div class="ckx-track" aria-hidden="true">
+                <div class="ckx-line"></div>
+                {row.dots.map((dot) =>
+                  dot.pinned ? (
+                    <span class="ckx-pin" title={dot.title} style={`--c:${dot.color};--ink:${dot.ink}`}>
+                      <b>{fmt(dot.ms)}</b>
+                      <i></i>
+                    </span>
+                  ) : (
+                    <span class:list={["ckx-dot", dot.us && "is-us"]} title={dot.title} style={`left:${dot.at};--c:${dot.color}`}></span>
+                  ),
+                )}
+              </div>
+              <span class="ckx-val">{row.ck}<small> ms</small></span>
             </div>
-            <div class="paint-track">
-              <div class="paint-line"></div>
-              {row.dots.map((dot) => (
-                <span class="paint-dot" role="img" aria-label={dot.title} title={dot.title} style={`left:${dot.left};width:${dot.size};height:${dot.size};background:${dot.fill};box-shadow:${dot.ring}`}></span>
-              ))}
-            </div>
-            <div class="paint-ck">{row.ck}<span> ms</span></div>
+            {row.reveal.length > 0 && (
+              <div class="ckx-reveal" id={`paint-${row.type}`} hidden>
+                {row.reveal.map((dot) => (
+                  <span style={`--c:${dot.color};--ink:${dot.ink}`}><i></i>{dot.lib} <em>{fmt(dot.ms)}</em></span>
+                ))}
+              </div>
+            )}
           </div>
         ))
       }
     </div>
-    <div class="paint-axis" aria-hidden="true">
-      <div></div>
-      <div class="paint-axis__ticks">
-        {paint.ticks.map((tick) => <span style={`left:${tick.left}`}>{tick.label}</span>)}
-      </div>
-      <div></div>
+    <div class="ckx-axis" aria-hidden="true">
+      {ticks.map((tick) => <span style={`left:${tick.left}`}>{tick.label}</span>)}
+      <span class="ckx-axis__edge">5s+<i class="ckx-axis__arr"> →</i></span>
     </div>
     <p class="proof-note">
-      Two-frame first paint, median of five fresh pages at 640×360, measured {paint.measuredOn}. Libraries without a native chart type are omitted from that row. A run that did not finish is omitted too. <a href="/benchmarks">Full benchmark matrix →</a>
+      Two-frame first paint, median of five fresh pages at 640×360, measured {paint.measuredOn}. Libraries without a native chart type are omitted from that row. A run that did not finish is omitted too. Runs slower than 5 s are pinned to the edge with their real time. <a href="/benchmarks">Full benchmark matrix →</a>
     </p>
   </div>
 </section>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>("[data-ckx='paint']")) {
+    for (const hit of root.querySelectorAll<HTMLElement>("[data-ckx-hit][aria-expanded]")) {
+      if (hit.dataset.ckxBound === "1") continue;
+      hit.dataset.ckxBound = "1";
+      const row = hit.closest<HTMLElement>(".ckx-row");
+      const panelId = hit.getAttribute("aria-controls");
+      const panel = panelId ? root.querySelector<HTMLElement>(`#${panelId}`) : null;
+      const setOpen = (open: boolean) => {
+        hit.setAttribute("aria-expanded", open ? "true" : "false");
+        row?.classList.toggle("is-open", open);
+        if (panel) panel.hidden = !open;
+      };
+      hit.addEventListener("click", () => {
+        setOpen(hit.getAttribute("aria-expanded") !== "true");
+      });
+      hit.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        setOpen(hit.getAttribute("aria-expanded") !== "true");
+      });
+    }
+  }
+</script>

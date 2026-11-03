@@ -1,5 +1,5 @@
 ---
-import { pretty } from "../lib/spec-text";
+import { pretty, scriptJson } from "../lib/spec-text";
 
 interface ExampleChoice {
   slug: string;
@@ -15,6 +15,7 @@ interface Props {
   docsHref?: string;
   docsLabel?: string;
   examples?: ExampleChoice[];
+  exampleSpecs?: Record<string, Record<string, unknown>>;
   activeSlug?: string;
 }
 
@@ -26,6 +27,7 @@ const {
   docsHref,
   docsLabel,
   examples = [],
+  exampleSpecs,
   activeSlug = "",
 } = Astro.props;
 const text = pretty(spec);
@@ -79,7 +81,7 @@ const specId = mode === "full" ? "spec-json" : undefined;
       {docsHref && docsLabel ? (
         <a class="live-docs" href={docsHref}>{docsLabel}</a>
       ) : mode === "full" ? (
-        <a class="live-docs" data-docs hidden href="/docs/charts">Docs</a>
+        <a class="live-docs" data-docs hidden href="/docs">Docs</a>
       ) : null}
     </div>
     <div class="code-field">
@@ -106,13 +108,14 @@ const specId = mode === "full" ? "spec-json" : undefined;
             <button type="button" data-png>PNG</button>
           </>
         ) : (
-          <a data-play href={`/examples#${encodeURIComponent(text)}`}>Edit in Examples</a>
+          <a data-play href={`/playground#${encodeURIComponent(text)}`}>Open in playground</a>
         )
       }
     </div>
     <p class="live-status" data-status role="status">Showing the published spec.</p>
     <ul class="live-issues" data-issues />
   </div>
+  {exampleSpecs ? <script is:inline type="application/json" data-example-specs set:html={scriptJson(exampleSpecs)} /> : null}
 </div>
 
 <script>

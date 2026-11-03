@@ -1,43 +1,19 @@
 ---
-import "../../styles/surfaces.css";
-import Base from "../../layouts/Base.astro";
-import FrameworkTabs from "../../components/FrameworkTabs.astro";
-import LiveSpec from "../../components/LiveSpec.astro";
-import { chartByType } from "../../data/chart-types";
-import { loadExample, loadExamplesIndex, loadPlayground } from "../../lib/surfaces";
+import { chartPageTypes } from "../../data/docs-catalog";
+import { loadExamplesIndex } from "../../lib/surfaces";
 
 export function getStaticPaths() {
-  return loadExamplesIndex().examples.map((example) => ({ params: { slug: example.slug } }));
+  const pages = new Set(chartPageTypes);
+  return loadExamplesIndex().examples.map((example) => {
+    if (!pages.has(example.type)) throw new Error(`Example ${example.slug} type ${example.type} has no docs page.`);
+    return { params: { slug: example.slug }, props: { type: example.type } };
+  });
 }
 
-const catalog = loadExamplesIndex();
-const example = loadExample(Astro.params.slug ?? "");
-const { themes } = loadPlayground();
-const typeTitle = chartByType(example.type)?.title ?? example.type;
----
+interface Props {
+  type: string;
+}
 
-<Base title={example.title} description={example.blurb} tone="light">
-  <div class="wrap surface example-play">
-    <header class="hero">
-      <nav class="crumbs" aria-label="Breadcrumb">
-        <a href="/examples">Examples</a>
-        <span class="crumbs__sep" aria-hidden="true">/</span>
-        <span aria-current="page">{example.title}</span>
-      </nav>
-      <h1>{example.title}</h1>
-      <p class="lede">{example.blurb}</p>
-    </header>
-    <LiveSpec
-      spec={example.spec}
-      svg={example.svg}
-      mode="full"
-      themes={themes}
-      examples={catalog.examples}
-      activeSlug={example.slug}
-      docsHref={`/docs/charts/${example.type}`}
-      docsLabel={`Docs → ${typeTitle}`}
-    />
-    <h2>Same spec</h2>
-    <FrameworkTabs snippets={example.snippets} />
-  </div>
-</Base>
+const { type } = Astro.props;
+return Astro.redirect(`/docs/charts/${type}#example-${Astro.params.slug}`, 301);
+---

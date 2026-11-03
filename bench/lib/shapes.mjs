@@ -105,6 +105,7 @@ export function makeChartData(chart, n, seed = 1) {
       for (let i = 0; i < n; i++) value[i] = next() * 120 + Math.sin(i / 13) * 10;
       return { data: { columns: { value } } };
     }
+    case "strip":
     case "boxplot": {
       const groups = ["N", "E", "S", "W", "C", "NE", "NW", "SE"];
       const group = new Array(n);

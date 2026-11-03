@@ -56,13 +56,23 @@ export function mountLiveSpec(root: HTMLElement): void {
     } catch {
       type = "";
     }
-    if (!type || GEO.has(type)) {
+    if (!type) {
       docs.hidden = true;
       return;
     }
     docs.hidden = false;
     docs.href = `/docs/charts/${type}`;
     docs.textContent = `Docs → ${type}`;
+  }
+
+  function storedExamples(): Record<string, unknown> | null {
+    const node = root.querySelector("[data-example-specs]");
+    if (!node?.textContent) return null;
+    try {
+      return JSON.parse(node.textContent) as Record<string, unknown>;
+    } catch {
+      return null;
+    }
   }
 
   function syncPaint(): void {
@@ -100,7 +110,7 @@ export function mountLiveSpec(root: HTMLElement): void {
         if (generation !== paintGen) return;
         preview.innerHTML = svg;
         preview.classList.toggle("chart-preset", themeName !== "site" && themeName !== "");
-        if (play) play.href = `/examples#${encodeURIComponent(source)}`;
+        if (play) play.href = `/playground#${encodeURIComponent(source)}`;
         syncDocs(source);
         if (keepStatus) {
           keepStatus = false;
@@ -130,9 +140,12 @@ export function mountLiveSpec(root: HTMLElement): void {
   exampleSelect?.addEventListener("change", () => {
     const slug = exampleSelect.value;
     if (!slug) return;
-    const sameExample = slug === root.dataset.activeSlug;
-    if (sameExample && window.location.hash.length <= 1) return;
-    window.location.assign(`/examples/${slug}`);
+    const spec = storedExamples()?.[slug];
+    if (!spec) return;
+    specInput.value = JSON.stringify(spec, null, 2);
+    root.dataset.activeSlug = slug;
+    syncPaint();
+    draw(specInput.value, theme);
   });
 
   if (mode === "full" && window.location.hash.length > 1) {

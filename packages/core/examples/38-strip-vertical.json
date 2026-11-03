@@ -1,0 +1,60 @@
+{
+  "$schema": "https://chartkit.dev/schema/v1.json",
+  "version": "1",
+  "type": "strip",
+  "data": [
+    {
+      "desk": "A",
+      "minutes": 12,
+      "shift": "Weeknight"
+    },
+    {
+      "desk": "A",
+      "minutes": 18,
+      "shift": "Weeknight"
+    },
+    {
+      "desk": "A",
+      "minutes": 28,
+      "shift": "Saturday"
+    },
+    {
+      "desk": "A",
+      "minutes": 40,
+      "shift": "Saturday"
+    },
+    {
+      "desk": "B",
+      "minutes": 14,
+      "shift": "Weeknight"
+    },
+    {
+      "desk": "B",
+      "minutes": 22,
+      "shift": "Weeknight"
+    },
+    {
+      "desk": "B",
+      "minutes": 36,
+      "shift": "Saturday"
+    },
+    {
+      "desk": "B",
+      "minutes": 44,
+      "shift": "Saturday"
+    }
+  ],
+  "encoding": {
+    "x": "desk",
+    "y": "minutes",
+    "color": "shift"
+  },
+  "mark": {
+    "orientation": "vertical",
+    "summary": "mean",
+    "band": "iqr"
+  },
+  "a11y": {
+    "alt": "Saturday runs longer on both desks."
+  }
+}
