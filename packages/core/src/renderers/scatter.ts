@@ -22,7 +22,7 @@ import {
 } from "../frame";
 import { activeScene, lineBuffers, rectBuffers, takeMark, type SceneMark } from "../canvas/sink";
 import { canvasWanted, SCATTER_CANVAS_AT } from "../render-mode";
-import { boxId, clipPath, closeChart, domainEnds, esc, font, isRecord, linear, logNice, logScale, logTicks, n, openChart, padExtent, pickTicks, readAxis, readInset, scaleClamp, scalePad } from "../svg";
+import { boxId, clipPath, closeChart, domainEnds, esc, font, isRecord, linear, logNice, logScale, logTicks, n, openChart, padExtent, pickTicks, readAxis, readInset, scaleClamp, scalePad, ch } from "../svg";
 
 /** Scatter / bubble. encoding.x and encoding.y are quantitative; size and color are optional. */
 export function renderScatter(spec: Record<string, unknown>): string | null {
@@ -101,7 +101,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   if (showY) {
     let label = 0;
     for (let i = 0; i < yTicks.length; i++) {
-      const size = formatAxisValue(yTicks[i], yFormat, frame.locale, yTicks).length * 6.7;
+      const size = ch(formatAxisValue(yTicks[i], yFormat, frame.locale, yTicks).length, 6.7);
       if (size > label) label = size;
     }
     left = Math.max(56, Math.ceil(label + 14));
@@ -190,7 +190,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     const bits: string[] = [];
     for (let index = 0; index < categories.length; index++) {
       const category = categories[index] ?? "";
-      const width = 28 + category.length * 6.6;
+      const width = 28 + ch(category.length, 6.6);
       if (cx > plot.left && cx + width > plot.right) break;
       const color = colorOf(category);
       const swatch = shape === "circle" && !hollow
@@ -224,7 +224,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
         const text = formatValue(point.y, format, frame.locale);
         const x = xScale(point.x) + shift[0];
         const y = yScale(point.y) + shift[1];
-        const w = Math.max(8, text.length * 6);
+        const w = Math.max(8, ch(text.length, 6));
         const left = shift[2] === "middle" ? x - w / 2 : shift[2] === "end" ? x - w : x;
         return { x: left, y: y - 9, w, h: 11 };
       })
@@ -431,7 +431,7 @@ function renderDenseScatter(spec: Record<string, unknown>): string | null | unde
   if (showY) {
     let label = 0;
     for (let i = 0; i < yTicks.length; i++) {
-      const size = formatAxisValue(yTicks[i], yFormat, frame.locale, yTicks).length * 6.7;
+      const size = ch(formatAxisValue(yTicks[i], yFormat, frame.locale, yTicks).length, 6.7);
       if (size > label) label = size;
     }
     left = Math.max(56, Math.ceil(label + 14));

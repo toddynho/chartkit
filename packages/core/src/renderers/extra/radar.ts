@@ -1,6 +1,6 @@
 import { column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
-import { domainEnds, n, polar } from "../../svg";
+import { domainEnds, n, polar, ch } from "../../svg";
 import { asNumber } from "../../frame";
 import { fieldsOf, fill, fit, openMark, str, stroke, text, viewOf } from "./plot";
 
@@ -78,7 +78,7 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
     series.forEach((item, index) => {
       parts.push(`<rect x="${n(x)}" y="${n(y - 9)}" width="10" height="10" rx="2" fill="${fill(frame, index)}" />`);
       parts.push(text(x + 14, y, item.name, cssVar("text", frame.preset.text), 12, "500"));
-      x += 14 + item.name.length * 7 + 16;
+      x += 14 + ch(item.name.length, 7) + 16;
     });
   }
   return view.done();

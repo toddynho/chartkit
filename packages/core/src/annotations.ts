@@ -1,5 +1,5 @@
 import { cssVar, paint, type PresetTokens } from "./theme";
-import { esc, font, isRecord, n } from "./svg";
+import { ch, esc, font, isRecord, n } from "./svg";
 
 export interface PlotBox {
   left: number;
@@ -227,7 +227,7 @@ function shade(
     const x = vertical ? rect.x + 4 : rect.x + 4;
     const y = vertical ? geom.plot.top + 14 : rect.y + 14;
     over.push(label(item.label, x, y, "start", color, kind));
-    boxes.push({ x, y: y - 11, w: item.label.length * 6.3, h: 14 });
+    boxes.push({ x, y: y - 11, w: ch(item.label.length, 6.3), h: 14 });
   }
 }
 
@@ -246,13 +246,13 @@ function rule(item: Record<string, unknown>, geom: AnnotationGeom, over: string[
   if (vertical) {
     const y = where === "start" ? plot.bottom - 4 : where === "center" ? (plot.top + plot.bottom) / 2 : Math.max(14, plot.top - 16);
     over.push(label(item.label, atPx + 4, y, "start", color));
-    boxes.push({ x: atPx + 4, y: y - 11, w: item.label.length * 6.3, h: 14 });
+    boxes.push({ x: atPx + 4, y: y - 11, w: ch(item.label.length, 6.3), h: 14 });
     return;
   }
   const x = where === "start" ? plot.left + 4 : where === "center" ? (plot.left + plot.right) / 2 : plot.right - 4;
   const anchor = where === "start" ? "start" : where === "center" ? "middle" : "end";
   over.push(label(item.label, x, atPx - 4, anchor, color));
-  const w = item.label.length * 6.3;
+  const w = ch(item.label.length, 6.3);
   boxes.push({ x: anchor === "end" ? x - w : anchor === "middle" ? x - w / 2 : x, y: atPx - 16, w, h: 14 });
 }
 
@@ -365,7 +365,7 @@ function callout(item: Record<string, unknown>, geom: AnnotationGeom, over: stri
   if (py === null) return;
   const color = markColor(item.color, geom.preset);
   const text = item.label;
-  const w = Math.min(geom.plot.right - geom.plot.left - 8, Math.max(44, text.length * 6.3 + 16));
+  const w = Math.min(geom.plot.right - geom.plot.left - 8, Math.max(44, ch(text.length, 6.3) + 16));
   const h = 22;
   const dx = typeof item.dx === "number" ? item.dx : null;
   const dy = typeof item.dy === "number" ? item.dy : null;
@@ -480,7 +480,7 @@ function segCross(ax: number, ay: number, bx: number, by: number, cx: number, cy
 }
 
 function placeLineLabel(text: string, x: number, y: number, _axis: "x" | "y" | "y2", geom: AnnotationGeom, color: string, kind: string, over: string[], boxes: Box[]): void {
-  const w = text.length * 6.3;
+  const w = ch(text.length, 6.3);
   const h = 14;
   const point: Box = { x: x - 6, y: y - 6, w: 12, h: 12 };
   const segs = seriesSegments(geom);

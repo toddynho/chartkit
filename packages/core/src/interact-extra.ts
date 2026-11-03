@@ -47,7 +47,7 @@ function ensureTableCss(): void {
   const style = document.createElement("style");
   style.id = "ck-interact-table-style";
   style.textContent =
-    ".ck-table{border-collapse:collapse;font:12px/1.4 ui-sans-serif,system-ui,sans-serif}.ck-table td,.ck-table th{border:1px solid #0002;padding:2px 6px;text-align:right}.ck-table td:first-child,.ck-table th:first-child{text-align:left}";
+    ".ck-table{border-collapse:collapse;font:12px/1.4 sans-serif;font-family:var(--ck-font-family, inherit)}.ck-table td,.ck-table th{border:1px solid #0002;padding:2px 6px;text-align:right}.ck-table td:first-child,.ck-table th:first-child{text-align:left}";
   document.head.append(style);
 }
 

@@ -1,6 +1,6 @@
 import type { Frame } from "../../frame";
 import { cssVar } from "../../theme";
-import { n } from "../../svg";
+import { n, ch } from "../../svg";
 import { cells, channel, rowAt, splitList, tableOf, textAt } from "./fields";
 import { fill, fit, openMark, text, viewOf } from "./plot";
 
@@ -139,7 +139,7 @@ function face(cx: number, cy: number, radius: number, score: number, color: stri
 }
 
 function chipWidth(actor: string): number {
-  return Math.ceil(actor.length * 6.8 + 28);
+  return Math.ceil(ch(actor.length, 6.8) + 28);
 }
 
 function chip(x: number, y: number, width: number, actor: string, color: string, frame: Frame): string {

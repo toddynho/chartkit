@@ -20,6 +20,7 @@ export type Severity = "error" | "warning";
  * Polar, radial bar, and rose use CK3073–CK3080.
  * Dashboard gaps use CK3081–CK3084: rings, thresholds, and a volume pane.
  * CK3085 is a theme.brand colour that is not a hex value.
+ * CK3086 is theme.tokens.fontFamily when it is not a CSS font-family.
  */
 export interface Diagnostic {
   code: string;

@@ -308,7 +308,7 @@ export function DonutChart<T extends Record<string, unknown>>({
                     fontSize: '12px',
                     fontWeight: 600,
                     color: t.text,
-                    fontFamily: 'JetBrains Mono, monospace',
+                    fontFamily: 'inherit',
                   }}
                 >
                   {segment.percentage.toFixed(1)}%
@@ -361,7 +361,7 @@ export function DonutChart<T extends Record<string, unknown>>({
             style={{
               fontSize: '11px',
               color: t.textSecondary,
-              fontFamily: 'JetBrains Mono, monospace',
+              fontFamily: 'inherit',
             }}
           >
             {format(tooltip.segment.value)} ({tooltip.segment.percentage.toFixed(1)}%)

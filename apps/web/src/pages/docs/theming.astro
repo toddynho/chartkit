@@ -13,7 +13,6 @@ const lightCss = `.chart-host {
   --ck-grid: rgb(0 0 0 / 0.06);
   --ck-positive: #047857;
   --ck-negative: #be123c;
-  --ck-font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 .dark .chart-host {
@@ -48,6 +47,9 @@ const spec = { version: "1", type: "bar", theme: { tokens: { series } } };`;
 <DocsPage title="Theming" description={description} href="/docs/theming">
   <p>
     Soft is the default. Omit <code>theme</code>, or set <code>"auto"</code> or <code>"soft"</code>. The plot is transparent and the colours follow the page: <code>light-dark()</code> tracks <code>prefers-color-scheme</code> and an ancestor's <code>color-scheme</code>. The optional card is <code>#f5f5f7</code> in light and <code>#1c1c1e</code> in dark. <code>--ck-*</code> still overrides, and <code>--chart-N</code> is the next fallback.
+  </p>
+  <p>
+    Text inherits the page font. Axis labels, titles, legends, tooltips, data labels, and annotations use the family of the element around the chart. Size and weight stay on the theme. Set <code>theme.tokens.fontFamily</code> to a CSS family list, or <code>--ck-font-family</code> on an ancestor, to override. <code>"inherit"</code> keeps the page font when a preset names one (Tape, Kite, Mustard, and Violet do). A value over 80 characters, or one with a double quote, <code>&lt;</code>, <code>&gt;</code>, <code>;</code>, braces, or a backslash, is <code>CK3086</code> and is not applied. A saved SVG or a Cloud PNG has no page to inherit from, so it uses <code>Inter, ui-sans-serif, system-ui, sans-serif</code>. The first name is where a later Cloud font set will sit.
   </p>
   <p>
     <code>refined</code> and <code>editorial</code> are built-in names. <code>theme: "midnight"</code> is the opt-in dark card. Any other name still falls through to midnight until you import that preset from <code>@chartkitdev/core/themes/all</code>.

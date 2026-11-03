@@ -6,7 +6,7 @@
 import { readTable } from "./frame";
 import type { DataTable } from "./data";
 import { installLayout, installPaint, directionOf, type Draw } from "./layout-hook";
-import { esc, font, isRecord, niceDomain, niceNum } from "./svg";
+import { ch, esc, font, isRecord, niceDomain, niceNum } from "./svg";
 import { cssVar, resolvePreset } from "./theme";
 
 export { directionOf };
@@ -699,7 +699,7 @@ function sharedLegend(names: string[], inks: string[], x: number, y: number, wid
   for (let i = 0; i < names.length; i++) {
     const name = names[i] ?? "";
     const ink = inks[i] || `var(--ck-series-${i + 1}, #007aff)`;
-    const need = 22 + name.length * 6.6;
+    const need = 22 + ch(name.length, 6.6);
     if (cx > x && cx + need > x + width) {
       cx = x;
     }

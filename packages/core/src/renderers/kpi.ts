@@ -1,7 +1,7 @@
 import { cssVar, lineStroke, paint } from "../theme";
 import { formatValue } from "../format";
 import { asNumber, column, fieldOf, readFrame, readMetric, readTable } from "../frame";
-import { closeChart, esc, font, isRecord, n, openChart } from "../svg";
+import { closeChart, esc, font, isRecord, n, openChart, ch } from "../svg";
 
 /** Metric card: label, formatted value, delta, and an optional sparkline from data. */
 export function renderKpi(spec: Record<string, unknown>): string | null {
@@ -42,7 +42,7 @@ export function renderKpi(spec: Record<string, unknown>): string | null {
   parts.push(text(20, valueY, valueText, ink, 28, "700"));
   if (metric.delta !== undefined) {
     const deltaText = `${deltaUp ? "↗" : "↘"} ${formatValue(metric.delta, metric.deltaFormat, frame.locale)}`;
-    const valueWidth = valueText.length * 17;
+    const valueWidth = ch(valueText.length, 17);
     parts.push(text(28 + valueWidth, valueY - 2, deltaText, deltaInk, 14, "600"));
   }
   if (spark && spark.length > 1) {

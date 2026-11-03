@@ -426,7 +426,7 @@ function paintFastMini(host: Element, spec: Record<string, unknown>): boolean {
   const alt = isRecord(spec.a11y) && typeof (spec.a11y as { alt?: unknown }).alt === "string" ? (spec.a11y as { alt: string }).alt : "Mini area";
   const safe = alt.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   host.innerHTML =
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${safe}" class="ck-chart" data-ck-type="mini-area" data-ck-renderer="mini-area" data-ck-render="canvas" style="font-family:var(--ck-font-family, system-ui, sans-serif)">` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${safe}" class="ck-chart" data-ck-type="mini-area" data-ck-renderer="mini-area" data-ck-render="canvas" style="font-family:var(--ck-font-family, inherit)">` +
     `<title>${safe}</title><desc>${safe}</desc><rect width="100%" height="100%" fill="var(--ck-background, transparent)" /></svg>`;
   const canvas = ensureCanvas(host, width, height);
   const ctx = canvas.getContext("2d");

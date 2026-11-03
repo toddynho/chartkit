@@ -9,7 +9,7 @@ export function armExport(svg: SVGElement, readSpec: () => { data?: unknown }, f
   if (!host || formats.length === 0) return () => {};
   const wrap = document.createElement("div");
   wrap.className = "ck-export-menu";
-  wrap.style.cssText = "position:relative;display:flex;justify-content:flex-end;font:12px/1.2 ui-sans-serif,system-ui,sans-serif";
+  wrap.style.cssText = "position:relative;display:flex;justify-content:flex-end;font:12px/1.2 sans-serif;font-family:var(--ck-font-family, inherit)";
   const button = document.createElement("button");
   button.type = "button";
   button.className = "ck-export";

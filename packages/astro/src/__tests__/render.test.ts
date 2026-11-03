@@ -17,6 +17,7 @@ describe("renderToString", () => {
   it("validates and returns a line SVG", () => {
     const svg = renderToString(line);
     expect(svg).toContain("<svg");
+    expect(svg).toContain("font-family:var(--ck-font-family, inherit)");
     expect(svg).toContain('data-ck-type="line"');
     expect(svg).toContain("Units rose from Q1 to Q2.");
     expect(svg).not.toContain("ck-chart-error");

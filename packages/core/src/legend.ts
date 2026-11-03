@@ -1,7 +1,7 @@
 import { marker } from "./glyphs";
 import { cssVar } from "./theme";
 import type { PresetTokens } from "./theme";
-import { esc, font, isRecord, n } from "./svg";
+import { ch, esc, font, isRecord, n } from "./svg";
 
 export type LegendPos = "top" | "right" | "bottom" | "left" | "inside";
 
@@ -79,7 +79,7 @@ function shown(box: LegendBox, items: LegendItem[]): LegendItem[] {
 }
 
 function itemWidth(item: LegendItem): number {
-  return 26 + item.name.length * 6.6 + (item.value ? 8 + item.value.length * 6.6 : 0);
+  return 26 + ch(item.name.length, 6.6) + (item.value ? 8 + ch(item.value.length, 6.6) : 0);
 }
 
 /** Rows of items. Vertical legends are one item per row. */

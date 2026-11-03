@@ -142,7 +142,7 @@ export function ProgressRing({
             style={{
               fontSize: size * 0.2,
               fontWeight: 700,
-              fontFamily: 'JetBrains Mono, monospace',
+              fontFamily: 'inherit',
             }}
           >
             {displayValue}

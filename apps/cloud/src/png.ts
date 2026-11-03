@@ -5,6 +5,14 @@ let wasmSource: InitInput | undefined;
 let fontBytes: Uint8Array[] | undefined;
 
 /**
+ * Family when the SVG is not in a document.
+ * The first name is the face in fonts/Inter-Regular.ttf.
+ * A later font set changes this list and fontBuffers together.
+ * Keep it aligned with FONT_FALLBACK in packages/core/src/font.ts.
+ */
+export const FONT_FALLBACK = "Inter, ui-sans-serif, system-ui, sans-serif";
+
+/**
  * Worker entry calls this with the wasm module and the bundled faces.
  * Node tests leave it unset and read the same files from disk.
  */
@@ -33,9 +41,20 @@ export async function rasterize(svg: string, scale: number): Promise<Uint8Array>
 }
 
 export function forRaster(svg: string, dark: boolean): string {
+  const named = explicitFamily(svg);
   let text = resolveVars(svg);
   text = resolveLightDark(text, dark);
-  return text.replace(/font-family="[^"]*"/g, 'font-family="Inter, Roboto, sans-serif"');
+  const family = named || FONT_FALLBACK;
+  text = text.replace(/font-family:\s*inherit\b/g, `font-family:${family}`);
+  text = text.replace(/font-family="inherit"/g, `font-family="${family}"`);
+  return text;
+}
+
+/** theme.tokens.fontFamily is written as --ck-font-family. inherit is not a face. */
+function explicitFamily(svg: string): string {
+  const match = /--ck-font-family:\s*([^;}"]+)/.exec(svg);
+  const value = match?.[1]?.trim() ?? "";
+  return value && value !== "inherit" ? value : "";
 }
 
 /** Pick one side of light-dark(). The comma split ignores commas inside rgba(). */

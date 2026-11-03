@@ -219,7 +219,7 @@ export function BarChart<T extends Record<string, unknown>>({
                 style={{
                   fontSize: '12px',
                   color: t.textSecondary,
-                  fontFamily: 'JetBrains Mono, monospace',
+                  fontFamily: 'inherit',
                 }}
               >
                 {String(key)}
@@ -352,7 +352,7 @@ export function BarChart<T extends Record<string, unknown>>({
                       fill={t.textSecondary}
                       style={{
                         fontSize: '10px',
-                        fontFamily: 'JetBrains Mono, monospace',
+                        fontFamily: 'inherit',
                       }}
                     >
                       {format(value)}
@@ -378,7 +378,7 @@ export function BarChart<T extends Record<string, unknown>>({
                 fill={t.textMuted}
                 style={{
                   fontSize: '11px',
-                  fontFamily: 'JetBrains Mono, monospace',
+                  fontFamily: 'inherit',
                 }}
               >
                 {category}
@@ -476,7 +476,7 @@ export function BarChart<T extends Record<string, unknown>>({
                 style={{
                   fontSize: '11px',
                   color: t.textSecondary,
-                  fontFamily: 'JetBrains Mono, monospace',
+                  fontFamily: 'inherit',
                 }}
               >
                 {v.key}:
@@ -486,7 +486,7 @@ export function BarChart<T extends Record<string, unknown>>({
                   fontSize: '11px',
                   color: t.text,
                   fontWeight: 600,
-                  fontFamily: 'JetBrains Mono, monospace',
+                  fontFamily: 'inherit',
                   marginLeft: 'auto',
                 }}
               >

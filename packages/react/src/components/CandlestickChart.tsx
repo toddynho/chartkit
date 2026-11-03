@@ -492,7 +492,7 @@ export function CandlestickChart({
               textAnchor="end"
               dominantBaseline="middle"
               fill={t.textMuted}
-              style={{ fontSize: `${fontSize}px`, fontFamily: 'system-ui, -apple-system, sans-serif' }}
+              style={{ fontSize: `${fontSize}px`, fontFamily: 'inherit' }}
             >
               {format(tick)}
             </text>
@@ -612,7 +612,7 @@ export function CandlestickChart({
                 y={0}
                 textAnchor="middle"
                 fill={t.textMuted}
-                style={{ fontSize: `${fontSize}px`, fontFamily: 'system-ui, -apple-system, sans-serif' }}
+                style={{ fontSize: `${fontSize}px`, fontFamily: 'inherit' }}
               >
                 {visibleData[i]?.time}
               </text>

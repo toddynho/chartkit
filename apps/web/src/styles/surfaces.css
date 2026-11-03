@@ -40,7 +40,6 @@
   --ck-accent: var(--accent);
   --ck-positive: #047857;
   --ck-negative: #be123c;
-  --ck-font-family: var(--sans);
 }
 
 .ck-frame.chart-preset {

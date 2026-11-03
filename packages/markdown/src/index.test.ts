@@ -23,6 +23,7 @@ describe("markdown fences", () => {
     remarkChartkit()(tree);
     expect(tree.children[0]).toMatchObject({ type: "html" });
     expect(tree.children[0].value).toContain("<svg");
+    expect(tree.children[0].value).toContain("font-family:var(--ck-font-family, inherit)");
     expect(tree.children[0].value).toContain('data-ck-type="bar"');
     expect(tree.children[0].value).not.toContain("<script");
     expect(tree.children[1].value).toContain('data-ck-type="pie"');

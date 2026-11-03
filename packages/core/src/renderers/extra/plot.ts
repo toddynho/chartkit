@@ -3,7 +3,7 @@ import { formatAxisValue, formatValue } from "../../format";
 import { asNumber, axisOn, channelFormat, column, fieldOf, gridStyle, readFrame, readTable, type Frame } from "../../frame";
 import { cssVar, lineStroke, paint } from "../../theme";
 import { bottomLegendBand, heading } from "../../chrome";
-import { clipPath, closeChart, esc, font, isRecord, linear, n, openChart, readAxis, ticks } from "../../svg";
+import { clipPath, closeChart, esc, font, isRecord, linear, n, openChart, readAxis, ticks, ch } from "../../svg";
 
 export interface View {
   frame: Frame;
@@ -118,7 +118,7 @@ const TICK_PX = 6.7;
 /** Left gutter for 11px tick labels. The label is drawn 8px left of the plot. */
 export function yTickGutter(labels: string[], floor = 52): number {
   let width = 0;
-  for (let i = 0; i < labels.length; i++) width = Math.max(width, labels[i].length * TICK_PX);
+  for (let i = 0; i < labels.length; i++) width = Math.max(width, ch(labels[i].length, TICK_PX));
   return Math.max(floor, Math.ceil(width + 16));
 }
 

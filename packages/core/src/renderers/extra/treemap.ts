@@ -3,7 +3,7 @@ import { asNumber, column, fieldOf } from "../../frame";
 import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
 import { headerFill, labelInk, siblingFill } from "../../ink";
 import { cssVar } from "../../theme";
-import { esc, font, n } from "../../svg";
+import { esc, font, n, ch } from "../../svg";
 import { fill, fit, fmt, num, openMark, str, valueFormat, viewOf } from "./plot";
 
 interface Leaf {
@@ -172,7 +172,7 @@ function edge(frame: { preset: { background: string } }): string {
 }
 
 function fits(value: string, width: number, size: number): boolean {
-  return value.length * size * 0.52 <= width;
+  return ch(value.length, size * 0.52) <= width;
 }
 
 function inkText(x: number, y: number, value: string, fill: string, size: number, weight = "650"): string {

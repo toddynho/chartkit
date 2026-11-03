@@ -290,7 +290,7 @@ export function ComboChart<T extends Record<string, unknown>>({
               style={{
                 fontSize: '12px',
                 color: t.textSecondary,
-                fontFamily: 'JetBrains Mono, monospace',
+                fontFamily: 'inherit',
               }}
             >
               {s.label}
@@ -341,7 +341,7 @@ export function ComboChart<T extends Record<string, unknown>>({
               textAnchor="end"
               dominantBaseline="middle"
               fill={t.textMuted}
-              style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' }}
+              style={{ fontSize: '10px', fontFamily: 'inherit' }}
             >
               {formatYLeft(tick)}
             </text>
@@ -370,7 +370,7 @@ export function ComboChart<T extends Record<string, unknown>>({
                   textAnchor="start"
                   dominantBaseline="middle"
                   fill={t.textMuted}
-                  style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' }}
+                  style={{ fontSize: '10px', fontFamily: 'inherit' }}
                 >
                   {formatYRight(tick)}
                 </text>
@@ -398,7 +398,7 @@ export function ComboChart<T extends Record<string, unknown>>({
               y={chartHeight + 20}
               textAnchor="middle"
               fill={t.textMuted}
-              style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' }}
+              style={{ fontSize: '10px', fontFamily: 'inherit' }}
             >
               {String(d[categoryKey])}
             </text>
@@ -600,7 +600,7 @@ export function ComboChart<T extends Record<string, unknown>>({
                     fontWeight: 600,
                     color: t.text,
                     marginLeft: 'auto',
-                    fontFamily: 'JetBrains Mono, monospace',
+                    fontFamily: 'inherit',
                   }}
                 >
                   {s.value.toLocaleString()}

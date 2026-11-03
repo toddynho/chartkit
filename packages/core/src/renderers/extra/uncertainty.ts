@@ -3,7 +3,7 @@ import { CHROME_TOP, axisTitleMarks, categoryX, chooseTicks, lockDomain, placedN
 import type { DataTable } from "../../data";
 import { fieldOf } from "../../frame";
 import { cssVar, paint } from "../../theme";
-import { esc, font, isRecord, n } from "../../svg";
+import { esc, font, isRecord, n, ch } from "../../svg";
 import { dataSampling, readSamplingMode, samplingThreshold } from "../../sampling";
 import { bandPath, denseBand, denseLine, intervalLabel, nestedOpacity } from "../../range-band";
 import { axisLine, clip, domainTicks, fmt, gapOf, hGrid, num, openMark, plotBox, scaleOf, str, text, valueFormat, viewOf, xLabels, yLabels } from "./plot";
@@ -204,7 +204,7 @@ function legendRow(items: { name: string; color: string; opacity: number }[], x:
   for (const item of items) {
     const soft = item.opacity < 1 ? ` fill-opacity="${n(Math.min(0.85, item.opacity + 0.28))}"` : "";
     out.push(`<rect x="${n(cx)}" y="${n(y)}" width="10" height="10" rx="2" fill="${item.color}"${soft} /><text x="${n(cx + 14)}" y="${n(y + 9)}" fill="${fill}" font-size="12">${esc(item.name)}</text>`);
-    cx += 22 + item.name.length * 6.6;
+    cx += 22 + ch(item.name.length, 6.6);
   }
   return out.join("");
 }

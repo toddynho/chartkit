@@ -1,4 +1,4 @@
-import { esc, font, n } from "./svg";
+import { ch, esc, font, n } from "./svg";
 
 const NAMES = ["circle", "square", "diamond", "triangle", "cross", "none"];
 
@@ -41,7 +41,7 @@ export function bag(): Bag {
   const boxes: number[] = [];
   return {
     put(text, x, y, anchor, fill) {
-      const w = Math.max(8, text.length * 6);
+      const w = Math.max(8, ch(text.length, 6));
       const left = anchor === "middle" ? x - w / 2 : anchor === "end" ? x - w : x;
       const top = y - 9;
       for (let i = 0; i < boxes.length; i += 4) {

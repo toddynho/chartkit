@@ -1,4 +1,5 @@
 import { brandTheme, geometries, presets, registerGeometry, registerPreset } from "./feature-hooks";
+import { readFontFamily } from "./font";
 import { midnight as midnightBase } from "./themes/midnight-tokens";
 
 export { registerGeometry, registerPreset };
@@ -26,7 +27,7 @@ export interface PresetTokens {
    * --ck-series-N does not cover the spec. Unset for theme tokens.
    */
   explicit?: boolean;
-  /** Written onto the chart as --ck-font-family when the spec sets it. */
+  /** Written onto the chart as --ck-font-family. Omitted inherits the page font. */
   fontFamily?: string;
   /** Tick and axis-title size in px. Omitted keeps the 11px default. */
   fontSize?: number;
@@ -135,17 +136,14 @@ export function resolvePreset(theme: unknown): PresetTokens {
   if (Array.isArray(tokens.series)) next.series = tokens.series.filter((item): item is string => typeof item === "string" && item.length > 0);
   if (Array.isArray(tokens.lines)) next.lines = tokens.lines.filter((item): item is string => typeof item === "string" && item.length > 0);
   else if (Array.isArray(tokens.series)) next.lines = next.series;
-  const family = typeFamily(tokens.fontFamily);
-  if (family) next.fontFamily = family;
+  if (tokens.fontFamily !== undefined) {
+    const family = readFontFamily(tokens.fontFamily);
+    if (family.inherit) next.fontFamily = undefined;
+    else if (family.ok) next.fontFamily = family.family;
+  }
   const size = typeSize(tokens.fontSize);
   if (size) next.fontSize = size;
   return next;
-}
-
-function typeFamily(value: unknown): string {
-  if (typeof value !== "string") return "";
-  const text = value.trim().replace(/["<>;]/g, "");
-  return text.length > 0 && text.length <= 80 ? text : "";
 }
 
 function typeSize(value: unknown): number | undefined {

@@ -1,3 +1,5 @@
+import { FONT_FALLBACK } from "./png.ts";
+
 /** Server-only mark. The open-source library does not draw this. */
 
 const MARK = "chartkit.dev";
@@ -55,7 +57,7 @@ export function presentSvg(svg: string, options: { watermark: boolean; dark: boo
   const fill = options.dark ? "#9a9a9a" : "#6e6e73";
   const x = trimNum(x0 + width - 8);
   const y = trimNum(y0 + height + 12);
-  const mark = `<a data-ck-watermark="1" href="${HREF}" target="_blank" rel="noopener"><text x="${x}" y="${y}" text-anchor="end" font-size="10" font-family="Inter, Roboto, sans-serif" fill="${fill}">${MARK}</text></a>`;
+  const mark = `<a data-ck-watermark="1" href="${HREF}" target="_blank" rel="noopener"><text x="${x}" y="${y}" text-anchor="end" font-size="10" font-family="${FONT_FALLBACK}" fill="${fill}">${MARK}</text></a>`;
   const shifted = close + (nextOpen.length - open.length) + (plated.length - updated.length);
   return `${plated.slice(0, shifted)}${mark}${plated.slice(shifted)}`;
 }

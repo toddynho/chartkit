@@ -1,6 +1,6 @@
 import type { PresetTokens } from "./theme";
 import { cssVar } from "./theme";
-import { esc, font, hash, isRecord, n } from "./svg";
+import { ch, esc, font, hash, isRecord, n } from "./svg";
 
 /** Continuous colour. Position scales stay on `$defs/scale`; these types are colour-only. */
 export type ScaleKind = "sequential" | "diverging" | "quantize" | "threshold";
@@ -226,7 +226,7 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
       const hi = formatTick(max);
       if (kind === "threshold" || kind === "quantize") {
         const labels = kind === "threshold" ? swatches.map((_, index) => thresholdLabel(index, cuts)) : quantizeLabels(min, max, swatches.length);
-        const slot = Math.max(36, ...labels.map((label) => Math.ceil(label.length * 6.6 + 12)));
+        const slot = Math.max(36, ...labels.map((label) => Math.ceil(ch(label.length, 6.6) + 12)));
         const cells = swatches
           .map(
             (color, index) =>

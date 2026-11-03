@@ -250,7 +250,7 @@ export function Heatmap({
               x={month.x}
               y={12}
               fill={t.textMuted}
-              style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' }}
+              style={{ fontSize: '10px', fontFamily: 'inherit' }}
             >
               {month.label}
             </text>
@@ -264,7 +264,7 @@ export function Heatmap({
               x={0}
               y={monthLabelHeight + day * (cellSize + cellGap) + cellSize / 2 + 3}
               fill={t.textMuted}
-              style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' }}
+              style={{ fontSize: '10px', fontFamily: 'inherit' }}
             >
               {DAY_LABELS[day].slice(0, 3)}
             </text>
@@ -334,7 +334,7 @@ export function Heatmap({
             style={{
               fontSize: '12px',
               color: t.text,
-              fontFamily: 'JetBrains Mono, monospace',
+              fontFamily: 'inherit',
             }}
           >
             {format(tooltip.cell.value, tooltip.cell.date)}
