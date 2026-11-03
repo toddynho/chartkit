@@ -438,18 +438,69 @@ export interface ChartOpen {
   canvas?: boolean;
   /** Spec or preset family. Omitted inherits the page font. */
   fontFamily?: string;
+  /** Figure drawn above the plot. The plot shifts down by headlineBand. */
+  headline?: Headline;
+}
+
+export interface Headline {
+  label: string;
+  value: string;
+  compare: string;
+  delta: string;
+  tone: "" | "positive" | "negative" | "neutral";
+}
+
+/** Pixels kept above the plot for a headline. */
+export function headlineBand(head: Headline | undefined): number {
+  if (!head) return 0;
+  if (!head.label && !head.value && !head.compare && !head.delta) return 24;
+  return 8 + (head.label ? 16 : 0) + (head.value || head.compare || head.delta ? 22 : 0);
+}
+
+const headlineStack: boolean[] = [];
+
+function toneFill(tone: Headline["tone"]): string {
+  if (tone === "negative") return "var(--ck-negative, #be123c)";
+  if (tone === "neutral") return "var(--ck-muted, #6e6e73)";
+  return "var(--ck-positive, #15803d)";
+}
+
+function headlineMarkup(head: Headline): string {
+  if (!head.label && !head.value && !head.compare && !head.delta) {
+    return `<rect data-ck-headline="1" x="12" y="8" width="12" height="12" rx="6" fill="${toneFill(head.tone)}" />`;
+  }
+  let y = 16;
+  let out = "";
+  if (head.label) {
+    out += `<text data-ck-headline="1" x="12" y="${y}" fill="var(--ck-muted, #6e6e73)" font-size="12" font-weight="500">${esc(head.label)}</text>`;
+    y += 16;
+  }
+  if (head.value || head.compare || head.delta) {
+    const text = "var(--ck-text, #1d1d1f)";
+    if (head.value) out += `<text data-ck-headline="1" x="12" y="${y + 12}" fill="${text}" font-size="18" font-weight="650">${esc(head.value)}</text>`;
+    if (head.compare) out += `<text x="120" y="${y + 12}" fill="var(--ck-muted, #6e6e73)" font-size="12">${esc(head.compare)}</text>`;
+    if (head.delta) out += `<text x="200" y="${y + 12}" fill="${toneFill(head.tone)}" font-size="12" font-weight="650">${esc(head.delta)}</text>`;
+  }
+  return out;
 }
 
 export function openChart(chart: ChartOpen): string {
+  const band = headlineBand(chart.headline);
+  const height = chart.height + band;
   const width = chart.responsive ? "100%" : String(chart.width);
   const label = chart.alt || chart.title || chart.type;
   const exported = chart.exportMark ? ` data-ck-export="${esc(chart.exportMark)}"` : "";
   const canvas = chart.canvas ? ` data-ck-render="canvas"` : "";
   const scene = capturing() ? ` data-ck-scene="1"` : "";
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}" class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}"${exported}${canvas}${scene} style="${fontStyle(familyOf(chart))}">` +
-    `<title>${esc(chart.title || chart.alt)}</title><desc>${esc(chart.alt)}</desc>`
-  );
+  headlineStack.push(band > 0);
+  let svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${n(chart.width)} ${n(height)}" role="img" aria-label="${esc(label)}" class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}"${exported}${canvas}${scene} style="${fontStyle(familyOf(chart))}">` +
+    `<title>${esc(chart.title || chart.alt)}</title><desc>${esc(chart.alt)}</desc>`;
+  if (chart.headline && band) {
+    svg += headlineMarkup(chart.headline);
+    svg += `<g transform="translate(0 ${n(band)})">`;
+  }
+  return svg;
 }
 
 function familyOf(chart: ChartOpen): string | undefined {
@@ -459,7 +510,7 @@ function familyOf(chart: ChartOpen): string | undefined {
 }
 
 export function closeChart(): string {
-  return "</svg>";
+  return headlineStack.pop() ? "</g></svg>" : "</svg>";
 }
 
 export interface AxisRule {
