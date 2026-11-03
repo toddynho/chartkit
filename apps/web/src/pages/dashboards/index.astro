@@ -5,17 +5,16 @@ import { getCollection } from "astro:content";
 
 const boards = (await getCollection("dashboards")).sort((a, b) => a.data.order - b.data.order);
 const description =
-  "Ten dashboards in the style of apps you already use, rebuilt panel by panel from ChartSpec. Not templates to copy — proof the default theme is only a starting point.";
+  "Ten example dashboards in the style of apps you already use, rebuilt panel by panel from ChartSpec. Not templates to copy, just proof that the default ChartKit theme is only a starting point. Click through the examples below.";
 ---
 
 <Base title="Dashboards" description={description} tone="light" footer="compact">
   <div class="dash-index">
     <section class="dash-hero">
-      <p class="dash-hero__eye">Dashboards · {boards.length} recreations</p>
+      <p class="dash-hero__eye">Dashboard Inspiration</p>
       <h1>Any look. Same spec.</h1>
       <p>
-        Ten dashboards in the style of apps you already use, rebuilt panel by panel from ChartSpec. Not templates to copy — proof the
-        default theme is only a starting point. Open one to see it full-screen.
+        Ten example dashboards in the style of apps you already use, rebuilt panel by panel from ChartSpec. Not templates to copy, just proof that the default ChartKit theme is only a starting point. Click through the examples below.
       </p>
     </section>
     <section class="dash-cards">
