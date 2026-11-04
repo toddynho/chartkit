@@ -15,6 +15,7 @@ import { fileURLToPath } from "node:url";
 import esbuild from "esbuild";
 import { createRequire } from "node:module";
 import { isExtra, render as renderAll } from "@chartkitdev/core/all";
+import { renderBarList } from "@chartkitdev/core/charts/bar-list";
 import { render as renderExtra } from "@chartkitdev/core/extra";
 import { optionBlocked, optionCatalog, readOption, writeOption } from "@chartkitdev/core/options";
 import { writeStatus } from "./audit-status.mjs";
@@ -31,7 +32,7 @@ function renderSpec(spec) {
     return { svg: "", error: "geo" };
   }
   try {
-    const svg = isExtra(type) ? renderExtra(spec) : renderAll(spec);
+    const svg = type === "bar-list" ? renderBarList(spec) ?? "" : isExtra(type) ? renderExtra(spec) : renderAll(spec);
     const error = !svg.includes("<svg") || svg.includes("ck-chart-error");
     return { svg, error };
   } catch (error) {
@@ -100,6 +101,7 @@ function probeValues(field, spec, baseSvg = "") {
     if (field.path === "locale") return ["de-DE", "ja-JP"];
     if (field.path === "timezone") return ["UTC", "America/New_York"];
     if (field.path.endsWith("currency")) return ["EUR", "USD"];
+    if (field.path.endsWith("specifier")) return [".0f", "$.0f"];
     if (field.path.endsWith("prefix")) return ["~", "$"];
     if (field.path.endsWith("suffix")) return [" kg", "%"];
     if (field.path.includes("width") || field.path.includes("height") || field.path.endsWith("size")) return ["800", "240"];

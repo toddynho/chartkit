@@ -2,182 +2,145 @@
 
 Class (a) is a playground wiring bug. The preview used to assign a static SVG and never call mount(), so tooltip, crosshair, legend toggle, and hover could not run. That is fixed in the playground by mounting @chartkitdev/vanilla. Rows here are what remains after that mount is used for the hover probe.
 
-Probed 5705 option writes across 33 chart types. 1732 changed the SVG. Remaining rows are classified below.
+Probed 5732 option writes across 34 chart types. 2185 changed the SVG. Remaining rows are classified below.
 
 - (a) playground wiring: 0
-- (b) core ignores a listed option: 1129
+- (b) core ignores a listed option: 696
 - (c) catalog scope too wide: 0
-- (d) no-op for this example: 2300
+- (d) no-op for this example: 2290
 
 ## By chart type
 
-### scatter (88)
+### spike (62)
 
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
 - **b** `encoding.x.type` — spec changed and the rendered SVG did not
-- **b** `encoding.x.title` — spec changed and the rendered SVG did not
-- **b** `encoding.x.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.x.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.x.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.x.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.x.format.signed` — spec changed and the rendered SVG did not
-- … 76 more
-
-### histogram (83)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.x.type` — spec changed and the rendered SVG did not
-- **b** `encoding.x.title` — spec changed and the rendered SVG did not
-- **b** `encoding.x.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.x.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.x.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.x.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.x.format.signed` — spec changed and the rendered SVG did not
-- … 71 more
-
-### spike (82)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.x.type` — spec changed and the rendered SVG did not
-- **b** `encoding.x.title` — spec changed and the rendered SVG did not
 - **b** `encoding.x.format` — spec changed and the rendered SVG did not
 - **b** `encoding.x.format.decimals` — spec changed and the rendered SVG did not
 - **b** `encoding.x.format.currency` — spec changed and the rendered SVG did not
 - **b** `encoding.x.format.prefix` — spec changed and the rendered SVG did not
 - **b** `encoding.x.format.suffix` — spec changed and the rendered SVG did not
-- … 70 more
+- **b** `encoding.x.format.signed` — spec changed and the rendered SVG did not
+- **b** `encoding.x.format.specifier` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.reverse` — spec changed and the rendered SVG did not
+- … 50 more
 
-### errorbar (76)
+### errorbar (56)
 
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.x.title` — spec changed and the rendered SVG did not
 - **b** `encoding.y.lo` — spec changed and the rendered SVG did not
 - **b** `encoding.y.hi` — spec changed and the rendered SVG did not
 - **b** `encoding.y.error` — spec changed and the rendered SVG did not
 - **b** `encoding.y.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.title` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- … 64 more
+- **b** `encoding.y.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.reverse` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.clamp` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.constant` — spec changed and the rendered SVG did not
+- **b** `encoding.y.pointSize` — spec changed and the rendered SVG did not
+- **b** `encoding.error` — spec changed and the rendered SVG did not
+- … 44 more
 
-### strip (75)
+### scatter (55)
 
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.x.title` — spec changed and the rendered SVG did not
-- **b** `encoding.y.title` — spec changed and the rendered SVG did not
+- **b** `encoding.x.type` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.clamp` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.constant` — spec changed and the rendered SVG did not
+- **b** `encoding.y.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.clamp` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.constant` — spec changed and the rendered SVG did not
+- **b** `encoding.y.color` — spec changed and the rendered SVG did not
+- **b** `encoding.y.pointSize` — spec changed and the rendered SVG did not
+- **b** `encoding.y.z` — spec changed and the rendered SVG did not
+- **b** `encoding.series` — spec changed and the rendered SVG did not
+- … 43 more
+
+### strip (53)
+
 - **b** `encoding.color.title` — spec changed and the rendered SVG did not
 - **b** `encoding.color.value` — spec changed and the rendered SVG did not
 - **b** `encoding.label` — spec changed and the rendered SVG did not
 - **b** `encoding.label.type` — spec changed and the rendered SVG did not
 - **b** `encoding.label.title` — spec changed and the rendered SVG did not
-- … 63 more
+- **b** `encoding.label.format` — spec changed and the rendered SVG did not
+- **b** `encoding.label.format.decimals` — spec changed and the rendered SVG did not
+- **b** `encoding.label.format.currency` — spec changed and the rendered SVG did not
+- **b** `encoding.label.format.prefix` — spec changed and the rendered SVG did not
+- **b** `encoding.label.format.suffix` — spec changed and the rendered SVG did not
+- **b** `encoding.label.format.signed` — spec changed and the rendered SVG did not
+- **b** `encoding.label.format.specifier` — spec changed and the rendered SVG did not
+- … 41 more
 
-### waterfall (63)
+### histogram (51)
 
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.x.title` — spec changed and the rendered SVG did not
+- **b** `encoding.x.type` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.reverse` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.padding` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.padding.min` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.padding.max` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.clamp` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.constant` — spec changed and the rendered SVG did not
 - **b** `encoding.y.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.title` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
-- … 51 more
+- **b** `encoding.y.scale.type` — spec changed and the rendered SVG did not
+- … 39 more
 
-### boxplot (60)
+### bar-range (47)
 
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.x.title` — spec changed and the rendered SVG did not
-- **b** `encoding.y.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.title` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
-- … 48 more
-
-### area-range (58)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.x.title` — spec changed and the rendered SVG did not
-- **b** `encoding.y.lo` — spec changed and the rendered SVG did not
-- **b** `encoding.y.hi` — spec changed and the rendered SVG did not
-- **b** `encoding.y.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
-- … 46 more
-
-### bar-range (56)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.x.title` — spec changed and the rendered SVG did not
 - **b** `encoding.y` — spec changed and the rendered SVG did not
 - **b** `encoding.y.lo` — spec changed and the rendered SVG did not
 - **b** `encoding.y.hi` — spec changed and the rendered SVG did not
 - **b** `encoding.y.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.title` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format` — spec changed and the rendered SVG did not
-- … 44 more
-
-### sankey (49)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
-- **b** `encoding.source.type` — spec changed and the rendered SVG did not
-- … 37 more
+- **b** `encoding.y.scale.type` — spec changed and the rendered SVG did not
+- … 35 more
 
-### gantt (44)
+### boxplot (40)
 
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
+- **b** `encoding.y.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.reverse` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.clamp` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.constant` — spec changed and the rendered SVG did not
+- **b** `mark.cornerRadius` — spec changed and the rendered SVG did not
+- **b** `axes.x.grid` — spec changed and the rendered SVG did not
+- **b** `axes.x.labels` — spec changed and the rendered SVG did not
+- **b** `axes.x.position` — spec changed and the rendered SVG did not
+- **b** `axes.x.autoSkip` — spec changed and the rendered SVG did not
+- … 28 more
+
+### area-range (39)
+
+- **b** `encoding.y.lo` — spec changed and the rendered SVG did not
+- **b** `encoding.y.hi` — spec changed and the rendered SVG did not
+- **b** `encoding.y.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.reverse` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.clamp` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.constant` — spec changed and the rendered SVG did not
+- **b** `mark.line` — spec changed and the rendered SVG did not
+- **b** `axes.x.grid` — spec changed and the rendered SVG did not
+- **b** `axes.x.labels` — spec changed and the rendered SVG did not
+- … 27 more
+
+### gantt (38)
+
 - **b** `encoding.color.title` — spec changed and the rendered SVG did not
 - **b** `encoding.color.value` — spec changed and the rendered SVG did not
 - **b** `encoding.source.type` — spec changed and the rendered SVG did not
@@ -185,63 +148,95 @@ Probed 5705 option writes across 33 chart types. 1732 changed the SVG. Remaining
 - **b** `encoding.source.format` — spec changed and the rendered SVG did not
 - **b** `encoding.source.format.decimals` — spec changed and the rendered SVG did not
 - **b** `encoding.source.format.currency` — spec changed and the rendered SVG did not
-- … 32 more
+- **b** `encoding.source.format.prefix` — spec changed and the rendered SVG did not
+- **b** `encoding.source.format.suffix` — spec changed and the rendered SVG did not
+- **b** `encoding.source.format.signed` — spec changed and the rendered SVG did not
+- **b** `encoding.source.format.specifier` — spec changed and the rendered SVG did not
+- **b** `encoding.source.scale.type` — spec changed and the rendered SVG did not
+- … 26 more
 
-### treemap (42)
+### sankey (37)
 
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
-- **b** `encoding.color.type` — spec changed and the rendered SVG did not
-- … 30 more
+- **b** `encoding.source.type` — spec changed and the rendered SVG did not
+- **b** `encoding.source.title` — spec changed and the rendered SVG did not
+- **b** `encoding.source.format` — spec changed and the rendered SVG did not
+- **b** `encoding.source.format.decimals` — spec changed and the rendered SVG did not
+- **b** `encoding.source.format.currency` — spec changed and the rendered SVG did not
+- **b** `encoding.source.format.prefix` — spec changed and the rendered SVG did not
+- **b** `encoding.source.format.suffix` — spec changed and the rendered SVG did not
+- **b** `encoding.source.format.signed` — spec changed and the rendered SVG did not
+- **b** `encoding.source.format.specifier` — spec changed and the rendered SVG did not
+- **b** `encoding.source.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.source.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.source.scale.nice` — spec changed and the rendered SVG did not
+- … 25 more
 
-### candlestick (42)
+### waterfall (37)
 
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.x.title` — spec changed and the rendered SVG did not
+- **b** `encoding.y.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.reverse` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.clamp` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.constant` — spec changed and the rendered SVG did not
+- **b** `mark.cornerRadius` — spec changed and the rendered SVG did not
+- **b** `axes.x.grid` — spec changed and the rendered SVG did not
+- **b** `axes.x.labels` — spec changed and the rendered SVG did not
+- **b** `axes.x.position` — spec changed and the rendered SVG did not
+- **b** `axes.x.autoSkip` — spec changed and the rendered SVG did not
+- … 25 more
+
+### candlestick (29)
+
 - **b** `axes.x.grid` — spec changed and the rendered SVG did not
 - **b** `axes.x.labels` — spec changed and the rendered SVG did not
 - **b** `axes.x.position` — spec changed and the rendered SVG did not
 - **b** `axes.x.labelWidth` — spec changed and the rendered SVG did not
 - **b** `axes.x.labelLines` — spec changed and the rendered SVG did not
 - **b** `axes.x.line` — spec changed and the rendered SVG did not
-- … 30 more
+- **b** `axes.x.line.color` — spec changed and the rendered SVG did not
+- **b** `axes.x.line.width` — spec changed and the rendered SVG did not
+- **b** `axes.x.line.dash` — spec changed and the rendered SVG did not
+- **b** `axes.x.tickMarks` — spec changed and the rendered SVG did not
+- **b** `axes.x.tickLength` — spec changed and the rendered SVG did not
+- **b** `axes.x.rotate` — spec changed and the rendered SVG did not
+- … 17 more
 
-### bullet (40)
+### treemap (22)
 
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
+- **b** `encoding.color.type` — spec changed and the rendered SVG did not
+- **b** `encoding.color.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.decimals` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.currency` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.prefix` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.suffix` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.signed` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.specifier` — spec changed and the rendered SVG did not
+- **b** `encoding.color.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.color.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.color.scale.nice` — spec changed and the rendered SVG did not
+- … 10 more
+
+### bullet (22)
+
 - **b** `encoding.y.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
-- … 28 more
+- **b** `encoding.y.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.reverse` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.padding` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.padding.min` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.padding.max` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.clamp` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.constant` — spec changed and the rendered SVG did not
+- **b** `encoding.target.type` — spec changed and the rendered SVG did not
+- **b** `encoding.target.title` — spec changed and the rendered SVG did not
+- … 10 more
 
-### quadrant (27)
+### quadrant (21)
 
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
 - **b** `encoding.color.title` — spec changed and the rendered SVG did not
 - **b** `encoding.color.value` — spec changed and the rendered SVG did not
 - **b** `encoding.size.type` — spec changed and the rendered SVG did not
@@ -249,243 +244,146 @@ Probed 5705 option writes across 33 chart types. 1732 changed the SVG. Remaining
 - **b** `encoding.size.format` — spec changed and the rendered SVG did not
 - **b** `encoding.size.format.decimals` — spec changed and the rendered SVG did not
 - **b** `encoding.size.format.currency` — spec changed and the rendered SVG did not
-- … 15 more
+- **b** `encoding.size.format.prefix` — spec changed and the rendered SVG did not
+- **b** `encoding.size.format.suffix` — spec changed and the rendered SVG did not
+- **b** `encoding.size.format.signed` — spec changed and the rendered SVG did not
+- **b** `encoding.size.format.specifier` — spec changed and the rendered SVG did not
+- **b** `encoding.size.scale.type` — spec changed and the rendered SVG did not
+- … 9 more
 
-### line (25)
+### rose (13)
 
 - **b** `encoding.y.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.reverse` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.padding` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.padding.min` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.padding.max` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.clamp` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.constant` — spec changed and the rendered SVG did not
+- **b** `mark.cornerRadius` — spec changed and the rendered SVG did not
+- **b** `mark.gap` — spec changed and the rendered SVG did not
+- … 1 more
+
+### line (12)
+
+- **b** `encoding.y.type` — spec changed and the rendered SVG did not
 - **b** `encoding.y.scale.nice` — spec changed and the rendered SVG did not
 - **b** `encoding.y.scale.clamp` — spec changed and the rendered SVG did not
 - **b** `encoding.y.scale.constant` — spec changed and the rendered SVG did not
 - **b** `encoding.y.fillOpacity` — spec changed and the rendered SVG did not
 - **b** `encoding.y.stack` — spec changed and the rendered SVG did not
-- … 13 more
-
-### rose (24)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.y.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
-- … 12 more
-
-### heatmap (23)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.color.type` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.signed` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.specifier` — spec changed and the rendered SVG did not
-- … 11 more
-
-### combo (23)
-
-- **b** `encoding.series` — spec changed and the rendered SVG did not
-- **b** `encoding.series.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color` — spec changed and the rendered SVG did not
-- **b** `encoding.color.title` — spec changed and the rendered SVG did not
+- **b** `encoding.y.z` — spec changed and the rendered SVG did not
 - **b** `mark.sampling` — spec changed and the rendered SVG did not
 - **b** `mark.connectNulls` — spec changed and the rendered SVG did not
+- **b** `mark.baseLabel` — spec changed and the rendered SVG did not
 - **b** `axes.x.autoSkip` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.suffix` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.signed` — spec changed and the rendered SVG did not
-- … 11 more
-
-### radar (20)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.series` — spec changed and the rendered SVG did not
-- **b** `encoding.series.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color` — spec changed and the rendered SVG did not
-- **b** `encoding.color.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color.value` — spec changed and the rendered SVG did not
-- **b** `legend.position` — spec changed and the rendered SVG did not
-- **b** `legend.anchor` — spec changed and the rendered SVG did not
-- … 8 more
-
-### funnel (18)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
-- **b** `mark.labelFormat.decimals` — spec changed and the rendered SVG did not
-- … 6 more
-
-### stacked-area (16)
-
-- **b** `encoding.series` — spec changed and the rendered SVG did not
-- **b** `encoding.series.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color` — spec changed and the rendered SVG did not
-- **b** `encoding.color.title` — spec changed and the rendered SVG did not
-- **b** `mark.sampling` — spec changed and the rendered SVG did not
-- **b** `mark.connectNulls` — spec changed and the rendered SVG did not
-- **b** `axes.x.autoSkip` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.suffix` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.signed` — spec changed and the rendered SVG did not
-- … 4 more
-
-### donut (15)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
-- **b** `mark.other` — spec changed and the rendered SVG did not
-- … 3 more
-
-### radial-bar (14)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `legend.position` — spec changed and the rendered SVG did not
-- **b** `legend.anchor` — spec changed and the rendered SVG did not
-- **b** `legend.align` — spec changed and the rendered SVG did not
-- **b** `legend.orient` — spec changed and the rendered SVG did not
-- **b** `legend.maxRows` — spec changed and the rendered SVG did not
-- **b** `legend.title` — spec changed and the rendered SVG did not
-- **b** `legend.symbol` — spec changed and the rendered SVG did not
-- … 2 more
-
-### bar (13)
-
-- **b** `encoding.series` — spec changed and the rendered SVG did not
-- **b** `encoding.series.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color` — spec changed and the rendered SVG did not
-- **b** `encoding.color.title` — spec changed and the rendered SVG did not
-- **b** `axes.x.autoSkip` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.suffix` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.signed` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.specifier` — spec changed and the rendered SVG did not
 - **b** `axes.y.autoSkip` — spec changed and the rendered SVG did not
-- … 1 more
 
-### gauge (9)
+### heatmap (10)
 
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `metric.format.decimals` — spec changed and the rendered SVG did not
-- **b** `metric.format.currency` — spec changed and the rendered SVG did not
-- **b** `metric.format.specifier` — spec changed and the rendered SVG did not
-- **b** `layout.coordinate` — spec changed and the rendered SVG did not
-
-### timeline (9)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.color` — spec changed and the rendered SVG did not
-- **b** `encoding.color.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color.value` — spec changed and the rendered SVG did not
-- **b** `layout.coordinate` — spec changed and the rendered SVG did not
-
-### venn (9)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `layout.coordinate` — spec changed and the rendered SVG did not
+- **b** `encoding.color.type` — spec changed and the rendered SVG did not
+- **b** `encoding.color.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.color.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.color.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.color.scale.reverse` — spec changed and the rendered SVG did not
+- **b** `encoding.color.scale.midpoint` — spec changed and the rendered SVG did not
+- **b** `encoding.color.scale.bins` — spec changed and the rendered SVG did not
 - **b** `sort.field` — spec changed and the rendered SVG did not
 - **b** `sort.by` — spec changed and the rendered SVG did not
 - **b** `sort.order` — spec changed and the rendered SVG did not
 
-### kpi (8)
+### combo (10)
 
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
+- **b** `encoding.series` — spec changed and the rendered SVG did not
+- **b** `encoding.series.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color` — spec changed and the rendered SVG did not
+- **b** `encoding.color.title` — spec changed and the rendered SVG did not
+- **b** `mark.sampling` — spec changed and the rendered SVG did not
+- **b** `mark.connectNulls` — spec changed and the rendered SVG did not
+- **b** `axes.x.autoSkip` — spec changed and the rendered SVG did not
+- **b** `axes.y.autoSkip` — spec changed and the rendered SVG did not
+- **b** `axes.y2.grid` — spec changed and the rendered SVG did not
+- **b** `axes.y2.autoSkip` — spec changed and the rendered SVG did not
+
+### stacked-area (9)
+
+- **b** `encoding.series` — spec changed and the rendered SVG did not
+- **b** `encoding.series.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color` — spec changed and the rendered SVG did not
+- **b** `encoding.color.title` — spec changed and the rendered SVG did not
+- **b** `mark.sampling` — spec changed and the rendered SVG did not
+- **b** `mark.connectNulls` — spec changed and the rendered SVG did not
+- **b** `axes.x.autoSkip` — spec changed and the rendered SVG did not
+- **b** `axes.y.autoSkip` — spec changed and the rendered SVG did not
+- **b** `locale` — spec changed and the rendered SVG did not
+
+### bar (7)
+
+- **b** `encoding.series` — spec changed and the rendered SVG did not
+- **b** `encoding.series.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color` — spec changed and the rendered SVG did not
+- **b** `encoding.color.title` — spec changed and the rendered SVG did not
+- **b** `axes.x.autoSkip` — spec changed and the rendered SVG did not
+- **b** `axes.y.autoSkip` — spec changed and the rendered SVG did not
+- **b** `layout.coordinate` — spec changed and the rendered SVG did not
+
+### radar (6)
+
+- **b** `encoding.series` — spec changed and the rendered SVG did not
+- **b** `encoding.series.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color` — spec changed and the rendered SVG did not
+- **b** `encoding.color.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color.value` — spec changed and the rendered SVG did not
+- **b** `locale` — spec changed and the rendered SVG did not
+
+### donut (3)
+
+- **b** `mark.other` — spec changed and the rendered SVG did not
+- **b** `mark.other.label` — spec changed and the rendered SVG did not
+- **b** `layout.coordinate` — spec changed and the rendered SVG did not
+
+### timeline (3)
+
+- **b** `encoding.color` — spec changed and the rendered SVG did not
+- **b** `encoding.color.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color.value` — spec changed and the rendered SVG did not
+
+### venn (3)
+
+- **b** `sort.field` — spec changed and the rendered SVG did not
+- **b** `sort.by` — spec changed and the rendered SVG did not
+- **b** `sort.order` — spec changed and the rendered SVG did not
+
+### bar-list (3)
+
+- **b** `theme.tokens.fontSize` — spec changed and the rendered SVG did not
+- **b** `layout.direction` — spec changed and the rendered SVG did not
+- **b** `interaction.sync` — spec changed and the rendered SVG did not
+
+### gauge (2)
+
+- **b** `metric.format.decimals` — spec changed and the rendered SVG did not
 - **b** `metric.format.currency` — spec changed and the rendered SVG did not
-- **b** `metric.format.specifier` — spec changed and the rendered SVG did not
-- **b** `layout.coordinate` — spec changed and the rendered SVG did not
 
-### journey (6)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `layout.coordinate` — spec changed and the rendered SVG did not
-
-### progress-ring (6)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `layout.coordinate` — spec changed and the rendered SVG did not
-
-### sparkline (3)
+### sparkline (2)
 
 - **b** `mark.sampling` — spec changed and the rendered SVG did not
 - **b** `mark.connectNulls` — spec changed and the rendered SVG did not
-- **b** `layout.coordinate` — spec changed and the rendered SVG did not
 
-### mini-area (3)
+### mini-area (2)
 
 - **b** `mark.sampling` — spec changed and the rendered SVG did not
 - **b** `mark.connectNulls` — spec changed and the rendered SVG did not
+
+### kpi (1)
+
+- **b** `metric.format.currency` — spec changed and the rendered SVG did not
+
+### radial-bar (1)
+
 - **b** `layout.coordinate` — spec changed and the rendered SVG did not
 
 ## Example-only no-ops
@@ -511,7 +409,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - donut: example is not a concatenation (`layout.concat.columns`)
 - donut: example has no drilldown (`interaction.drilldown.key`)
 - donut: motion runs in the client, not in the static SVG (`animation`)
-- donut: x values are categories, so timezone does not apply (`timezone`)
 - donut: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - gauge: probe value makes the spec invalid (`type`)
 - gauge: id is a hook, not paint (`id`)
@@ -524,7 +421,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - gauge: example is not a concatenation (`layout.concat.columns`)
 - gauge: example has no drilldown (`interaction.drilldown.key`)
 - gauge: motion runs in the client, not in the static SVG (`animation`)
-- gauge: x values are categories, so timezone does not apply (`timezone`)
 - gauge: example has no column whose order can change (`sort.field`)
 - gauge: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - bar: id is a hook, not paint (`id`)
@@ -545,7 +441,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - histogram: example is not a concatenation (`layout.concat.columns`)
 - histogram: example has no drilldown (`interaction.drilldown.key`)
 - histogram: motion runs in the client, not in the static SVG (`animation`)
-- histogram: x values are categories, so timezone does not apply (`timezone`)
 - histogram: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - journey: id is a hook, not paint (`id`)
 - journey: example draws no legend (`legend`)
@@ -554,7 +449,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - journey: example has no drilldown (`interaction.drilldown.key`)
 - journey: motion runs in the client, not in the static SVG (`animation`)
 - journey: example does not format 1234.5 (`locale`)
-- journey: x values are categories, so timezone does not apply (`timezone`)
 - journey: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - boxplot: id is a hook, not paint (`id`)
 - boxplot: x axis is not numeric, so format and minor ticks do not apply (`axes.x.format`)
@@ -564,7 +458,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - boxplot: example is not a concatenation (`layout.concat.columns`)
 - boxplot: example has no drilldown (`interaction.drilldown.key`)
 - boxplot: motion runs in the client, not in the static SVG (`animation`)
-- boxplot: x values are categories, so timezone does not apply (`timezone`)
 - boxplot: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - timeline: id is a hook, not paint (`id`)
 - timeline: example is not an OHLC series (`encoding.open.type`)
@@ -574,7 +467,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - timeline: example has no drilldown (`interaction.drilldown.key`)
 - timeline: motion runs in the client, not in the static SVG (`animation`)
 - timeline: example has no number to format (`locale`)
-- timeline: x values are categories, so timezone does not apply (`timezone`)
 - timeline: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - strip: id is a hook, not paint (`id`)
 - strip: probe value makes the spec invalid (`encoding.x`)
@@ -586,7 +478,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - strip: example is not a concatenation (`layout.concat.columns`)
 - strip: example has no drilldown (`interaction.drilldown.key`)
 - strip: motion runs in the client, not in the static SVG (`animation`)
-- strip: x values are categories, so timezone does not apply (`timezone`)
 - strip: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - kpi: id is a hook, not paint (`id`)
 - kpi: example has no subtitle (`subtitle`)
@@ -598,7 +489,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - kpi: example is not a concatenation (`layout.concat.columns`)
 - kpi: example has no drilldown (`interaction.drilldown.key`)
 - kpi: motion runs in the client, not in the static SVG (`animation`)
-- kpi: x values are categories, so timezone does not apply (`timezone`)
 - kpi: example has no column whose order can change (`sort.field`)
 - kpi: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - spike: id is a hook, not paint (`id`)
@@ -619,7 +509,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - venn: example has no drilldown (`interaction.drilldown.key`)
 - venn: motion runs in the client, not in the static SVG (`animation`)
 - venn: example does not format 1234.5 (`locale`)
-- venn: x values are categories, so timezone does not apply (`timezone`)
 - venn: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - treemap: id is a hook, not paint (`id`)
 - treemap: probe value makes the spec invalid (`encoding.y`)
@@ -628,7 +517,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - treemap: example is not a concatenation (`layout.concat.columns`)
 - treemap: example has no drilldown (`interaction.drilldown.key`)
 - treemap: motion runs in the client, not in the static SVG (`animation`)
-- treemap: x values are categories, so timezone does not apply (`timezone`)
 - treemap: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - errorbar: id is a hook, not paint (`id`)
 - errorbar: example is not an OHLC series (`encoding.high.type`)
@@ -639,7 +527,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - errorbar: example is not a concatenation (`layout.concat.columns`)
 - errorbar: example has no drilldown (`interaction.drilldown.key`)
 - errorbar: motion runs in the client, not in the static SVG (`animation`)
-- errorbar: x values are categories, so timezone does not apply (`timezone`)
 - errorbar: example has no column whose order can change (`sort.field`)
 - errorbar: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - sparkline: id is a hook, not paint (`id`)
@@ -660,7 +547,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - gantt: example has no drilldown (`interaction.drilldown.key`)
 - gantt: motion runs in the client, not in the static SVG (`animation`)
 - gantt: example does not format 1234.5 (`locale`)
-- gantt: x values are categories, so timezone does not apply (`timezone`)
 - gantt: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - radial-bar: id is a hook, not paint (`id`)
 - radial-bar: probe value makes the spec invalid (`encoding.x`)
@@ -668,7 +554,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - radial-bar: example is not a concatenation (`layout.concat.columns`)
 - radial-bar: example has no drilldown (`interaction.drilldown.key`)
 - radial-bar: motion runs in the client, not in the static SVG (`animation`)
-- radial-bar: x values are categories, so timezone does not apply (`timezone`)
 - radial-bar: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - rose: id is a hook, not paint (`id`)
 - rose: probe value makes the spec invalid (`encoding.x`)
@@ -677,7 +562,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - rose: example is not a concatenation (`layout.concat.columns`)
 - rose: example has no drilldown (`interaction.drilldown.key`)
 - rose: motion runs in the client, not in the static SVG (`animation`)
-- rose: x values are categories, so timezone does not apply (`timezone`)
 - rose: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - sankey: id is a hook, not paint (`id`)
 - sankey: probe value makes the spec invalid (`encoding.y`)
@@ -688,7 +572,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - sankey: example is not a concatenation (`layout.concat.columns`)
 - sankey: example has no drilldown (`interaction.drilldown.key`)
 - sankey: motion runs in the client, not in the static SVG (`animation`)
-- sankey: x values are categories, so timezone does not apply (`timezone`)
 - sankey: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - stacked-area: id is a hook, not paint (`id`)
 - stacked-area: x values are categories, so type, format, and scale do not apply (`encoding.x.format`)
@@ -708,7 +591,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - radar: example is not a concatenation (`layout.concat.columns`)
 - radar: example has no drilldown (`interaction.drilldown.key`)
 - radar: motion runs in the client, not in the static SVG (`animation`)
-- radar: x values are categories, so timezone does not apply (`timezone`)
 - radar: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - combo: id is a hook, not paint (`id`)
 - combo: x values are categories, so type, format, and scale do not apply (`encoding.x.format`)
@@ -720,13 +602,21 @@ These changed the spec and not the picture, and the example data cannot exercise
 - combo: motion runs in the client, not in the static SVG (`animation`)
 - combo: x values are categories, so timezone does not apply (`timezone`)
 - combo: client behavior; the static SVG only records intent (`a11y.keyboard`)
+- bar-list: id is a hook, not paint (`id`)
+- bar-list: example has no subtitle (`subtitle`)
+- bar-list: probe value makes the spec invalid (`encoding.x`)
+- bar-list: example does not paint this token (`theme.tokens.muted`)
+- bar-list: example is not faceted (`layout.facet.field`)
+- bar-list: example is not a concatenation (`layout.concat.columns`)
+- bar-list: example has no drilldown (`interaction.drilldown.key`)
+- bar-list: motion runs in the client, not in the static SVG (`animation`)
+- bar-list: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - quadrant: id is a hook, not paint (`id`)
 - quadrant: example draws no legend (`legend`)
 - quadrant: example is not faceted (`layout.facet.field`)
 - quadrant: example is not a concatenation (`layout.concat.columns`)
 - quadrant: example has no drilldown (`interaction.drilldown.key`)
 - quadrant: motion runs in the client, not in the static SVG (`animation`)
-- quadrant: x values are categories, so timezone does not apply (`timezone`)
 - quadrant: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - waterfall: id is a hook, not paint (`id`)
 - waterfall: probe value makes the spec invalid (`encoding.y`)
@@ -738,7 +628,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - waterfall: example is not a concatenation (`layout.concat.columns`)
 - waterfall: example has no drilldown (`interaction.drilldown.key`)
 - waterfall: motion runs in the client, not in the static SVG (`animation`)
-- waterfall: x values are categories, so timezone does not apply (`timezone`)
 - waterfall: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - line: id is a hook, not paint (`id`)
 - line: x values are categories, so type, format, and scale do not apply (`encoding.x.format`)
@@ -761,7 +650,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - bullet: example is not a concatenation (`layout.concat.columns`)
 - bullet: example has no drilldown (`interaction.drilldown.key`)
 - bullet: motion runs in the client, not in the static SVG (`animation`)
-- bullet: x values are categories, so timezone does not apply (`timezone`)
 - bullet: example has no column whose order can change (`sort.field`)
 - bullet: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - area-range: id is a hook, not paint (`id`)
@@ -794,7 +682,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - funnel: example is not a concatenation (`layout.concat.columns`)
 - funnel: example has no drilldown (`interaction.drilldown.key`)
 - funnel: motion runs in the client, not in the static SVG (`animation`)
-- funnel: x values are categories, so timezone does not apply (`timezone`)
 - funnel: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - progress-ring: probe value makes the spec invalid (`type`)
 - progress-ring: id is a hook, not paint (`id`)
@@ -808,7 +695,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - progress-ring: example is not a concatenation (`layout.concat.columns`)
 - progress-ring: example has no drilldown (`interaction.drilldown.key`)
 - progress-ring: motion runs in the client, not in the static SVG (`animation`)
-- progress-ring: x values are categories, so timezone does not apply (`timezone`)
 - progress-ring: example has no column whose order can change (`sort.field`)
 - progress-ring: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - bar-range: id is a hook, not paint (`id`)
@@ -820,7 +706,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - bar-range: example is not a concatenation (`layout.concat.columns`)
 - bar-range: example has no drilldown (`interaction.drilldown.key`)
 - bar-range: motion runs in the client, not in the static SVG (`animation`)
-- bar-range: x values are categories, so timezone does not apply (`timezone`)
 - bar-range: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - candlestick: id is a hook, not paint (`id`)
 - candlestick: x values are categories, so type, format, and scale do not apply (`encoding.x.type`)
