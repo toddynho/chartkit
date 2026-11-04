@@ -602,6 +602,22 @@ export interface AxisSpec {
   breaks?: AxisGap[];
 }
 
+function encodingTitle(spec: Record<string, unknown>, key: "x" | "y" | "y2"): string | undefined {
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  if (!encoding) return;
+  if (key === "x") {
+    const channel = encoding.x;
+    return isRecord(channel) && typeof channel.title === "string" ? channel.title : undefined;
+  }
+  const raw = encoding.y;
+  const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  for (const item of list) {
+    if (!isRecord(item) || typeof item.title !== "string") continue;
+    if (key === "y2" ? item.axis === "y2" : item.axis !== "y2") return item.title;
+  }
+  return;
+}
+
 function axisRule(value: unknown): AxisRule | undefined {
   if (value === true) return { on: true };
   if (value === false) return { on: false };
@@ -638,12 +654,13 @@ export function readAxis(spec: Record<string, unknown>, key: "x" | "y" | "y2", h
   }
   const at = axis.titlePosition;
   const marks = axis.tickMarks;
+  const titled = typeof axis.title === "string" ? axis.title : encodingTitle(spec, key);
   const offset = typeof axis.offset === "number" && Number.isFinite(axis.offset) ? Math.max(-80, Math.min(80, axis.offset)) : undefined;
   const crosses = typeof axis.crosses === "number" && Number.isFinite(axis.crosses) ? axis.crosses : undefined;
   const minor = typeof axis.minorTicks === "number" && Number.isFinite(axis.minorTicks) ? Math.max(0, Math.min(8, Math.round(axis.minorTicks))) : undefined;
   return {
     on: raw !== false,
-    title: typeof axis.title === "string" ? axis.title : undefined,
+    title: titled,
     count: !ends && typeof ticks === "number" ? Math.max(0, Math.min(50, Math.round(ticks))) : undefined,
     ends,
     values: values && values.length ? values : undefined,
