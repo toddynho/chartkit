@@ -61,7 +61,7 @@ function plainPercent(part: number, total: number): string {
  * which dominate a fresh-page paint of a handful of arcs.
  */
 function simpleArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string | undefined {
-  if (spec.title != null || spec.subtitle != null || spec.theme != null || spec.annotations != null) return undefined;
+  if (spec.title != null || spec.subtitle != null || spec.theme != null || spec.annotations != null || spec.headline != null) return undefined;
   if (isRecord(spec.a11y) && typeof spec.a11y.description === "string" && spec.a11y.description) return undefined;
   if (spec.legend === false || isRecord(spec.legend)) return undefined;
   const mark = spec.mark;
@@ -239,7 +239,11 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   const legendRow = 20;
   const longest = slices.reduce((max, slice) => Math.max(max, slice.label.length), 0);
   const sideWidth = Math.min(240, Math.max(148, 36 + longest * 7 + 48));
-  const legendItems = slices.map((slice) => ({ name: slice.label, color: slice.color }));
+  const legendItems = slices.map((slice) => ({
+    name: slice.label,
+    color: slice.color,
+    value: frame.legendValues ? formatValue(slice.value, valueFormat, frame.locale) : undefined,
+  }));
   const richSpace = legendBox ? legendSpace(legendBox, legendItems, Math.max(80, frame.width - sideWidth)) : null;
   const legendBlock = !showLegend || place === false ? 0 : legendBox && richSpace ? (place === "top" || place === "bottom" ? richSpace.band : 0) : place === "top" || place === "bottom" ? slices.length * legendRow + 8 : 0;
   const sideLegend = !showLegend || place === false ? 0 : legendBox && richSpace ? (place === "left" || place === "right" ? richSpace.side : 0) : place === "right" || place === "left" ? sideWidth : 0;

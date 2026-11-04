@@ -1,3 +1,4 @@
+import { explicitGrid, gridLines, majorTicks, spine, turned } from "../axis-ink";
 import { seriesPoints } from "../annotations";
 import { readTimeScale } from "../time-x";
 import { axisTitleMarks, bottomLegendBand, categoryX, chooseTicks, heading, labelStep, lockDomain, minorTickMarks, placedNotes } from "../chrome";
@@ -14,7 +15,7 @@ import {
   resolveDomain,
 } from "../frame";
 import { readSamplingMode, sampleSeries } from "../sampling";
-import { closeChart, esc, font, linear, n, openChart, readAxis, readAxisFormat, ticks, ch } from "../svg";
+import { closeChart, esc, font, isRecord, linear, n, openChart, readAxis, readAxisFormat, ticks, ch } from "../svg";
 
 /** Thin vertical spikes from mark.baseline (default 0) across x. */
 export function renderSpike(spec: Record<string, unknown>): string | null {
@@ -97,28 +98,56 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
   if (showY) {
     const yAxis = readAxis(spec, "y");
     const step = labelStep(yTicks.length, yAxis.skip, 1);
+    const ink = cssVar("muted", frame.preset.muted);
+    const axisInk = cssVar("axis", frame.preset.axis);
+    const shift = yAxis.offset || 0;
+    const edge = yAxis.end ? plot.right : plot.left;
+    const ys: number[] = [];
     for (let i = 0; i < yTicks.length; i += step) {
-      parts.push(text(plot.left - 8, yScale(yTicks[i] ?? 0) + 4, yTickText[i] ?? "", cssVar("muted", frame.preset.muted), 11, "400", "end"));
+      const y = yScale(yTicks[i] ?? 0) + 4;
+      ys.push(yScale(yTicks[i] ?? 0));
+      const rich = Boolean(yAxis.rotate || yAxis.offset || yAxis.end);
+      if (!rich) parts.push(text(plot.left - 8, y, yTickText[i] ?? "", ink, 11, "400", "end"));
+      else parts.push(turned((yAxis.end ? edge + 8 : edge - 8) + (yAxis.end ? shift : -shift), y, yTickText[i] ?? "", ink, 11, yAxis.end ? "start" : "end", yAxis.rotate));
     }
-    parts.push(minorTickMarks(yAxis.minor ?? 0, yTicks, yScale, plot.left, false, -3, cssVar("axis", frame.preset.axis)));
+    parts.push(minorTickMarks(yAxis.minor ?? 0, yTicks, yScale, edge, false, yAxis.end ? 3 : -3, axisInk));
+    parts.push(majorTicks(yAxis, false, edge, ys, yAxis.end ? 1 : -1, axisInk));
+    if (yAxis.rule) parts.push(spine(edge + (yAxis.end ? shift : -shift), plot.top, edge + (yAxis.end ? shift : -shift), plot.bottom, yAxis.rule, axisInk));
+    const yGrid = explicitGrid(isRecord(spec.axes) && isRecord(spec.axes.y) ? spec.axes.y.grid : undefined);
+    if (yGrid) parts.push(gridLines(true, plot.left, plot.right, yTicks.map((value) => yScale(value)), yGrid, cssVar("grid", frame.preset.grid)));
   }
   if (showX) {
     const xAxis = readAxis(spec, "x");
     const omitted = count > 8 ? Math.ceil(count / 6) : 1;
     const step = labelStep(count, xAxis.skip, omitted);
-    const labelY = frame.height - legendBand - (xAxis.title ? 26 : 12);
+    const labelY = (xAxis.end ? plot.top - 8 : frame.height - legendBand - (xAxis.title ? 26 : 12)) + (xAxis.end ? 0 : xAxis.offset || 0);
     const xs: number[] = [];
+    const ink = cssVar("muted", frame.preset.muted);
+    const axisInk = cssVar("axis", frame.preset.axis);
+    const shownX: number[] = [];
     for (let i = 0; i < count; i++) xs.push(time ? time.at(i, plotWidth, plot.left) : plot.left + slot * i + slot / 2);
     if (time) {
-      for (const tick of time.ticks(frame.locale)) parts.push(text(time.px(tick.t, plotWidth, plot.left), labelY, tick.text, cssVar("muted", frame.preset.muted), 11, "400", "middle"));
+      for (const tick of time.ticks(frame.locale)) {
+        const x = time.px(tick.t, plotWidth, plot.left);
+        shownX.push(x);
+        if (!xAxis.rotate) parts.push(text(x, labelY, tick.text, ink, 11, "400", "middle"));
+        else parts.push(turned(x, labelY, tick.text, ink, 11, "middle", xAxis.rotate));
+      }
     }
     for (let i = 0; i < count && !time; i += step) {
       if (!labels[i]) continue;
-      parts.push(text(xs[i] ?? 0, labelY, labels[i] ?? "", cssVar("muted", frame.preset.muted), 11, "400", "middle"));
+      shownX.push(xs[i] ?? 0);
+      if (!xAxis.rotate) parts.push(text(xs[i] ?? 0, labelY, labels[i] ?? "", ink, 11, "400", "middle"));
+      else parts.push(turned(xs[i] ?? 0, labelY, labels[i] ?? "", ink, 11, "middle", xAxis.rotate));
     }
-    parts.push(minorTickMarks(xAxis.minor ?? 0, xs, (value) => value, plot.bottom, true, 3, cssVar("axis", frame.preset.axis)));
+    const edge = xAxis.end ? plot.top : plot.bottom;
+    parts.push(minorTickMarks(xAxis.minor ?? 0, xs, (value) => value, edge, true, xAxis.end ? -3 : 3, axisInk));
+    parts.push(majorTicks(xAxis, true, edge, shownX, xAxis.end ? -1 : 1, axisInk));
+    if (xAxis.rule || xAxis.offset) parts.push(spine(plot.left, edge + (xAxis.offset || 0), plot.right, edge + (xAxis.offset || 0), xAxis.rule, axisInk));
+    const xGrid = explicitGrid(isRecord(spec.axes) && isRecord(spec.axes.x) ? spec.axes.x.grid : undefined);
+    if (xGrid) parts.push(gridLines(false, plot.top, plot.bottom, xs, xGrid, cssVar("grid", frame.preset.grid)));
   }
-  const xAt = (index: number) => plot.left + slot * index + slot / 2;
+  const xAt = (index: number) => (time ? time.at(index, plotWidth, plot.left) : plot.left + slot * index + slot / 2);
   const notes = placedNotes(spec, frame, plot, categoryX(labels, xAt), (value) => yScale(value), [
     { name: yField ?? "y", axis: "y", pts: seriesPoints(null, values) },
   ], labels);

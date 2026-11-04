@@ -11015,6 +11015,13 @@
     "description": "Coordinate system. polar is angle and radius, and it is how radial-bar and rose draw. Setting polar on bar repairs the type to radial-bar. On pie or donut it repairs to rose. On any other type the patch removes it (CK3077).",
     "group": "Layout & size",
     "docs": "/docs/options#layout.coordinate",
+    "appliesTo": [
+      "bar",
+      "pie",
+      "donut",
+      "radial-bar",
+      "rose"
+    ],
     "label": "Coordinate",
     "control": "enum",
     "storage": "scalar",
@@ -11425,6 +11432,18 @@
     "description": "IANA time zone for temporal axes, ticks, and tooltips. Omitted means UTC, so a server render and the client label the same instant the same way.",
     "group": "Advanced",
     "docs": "/docs/options#timezone",
+    "appliesTo": [
+      "line",
+      "bar",
+      "stacked-area",
+      "scatter",
+      "combo",
+      "sparkline",
+      "mini-area",
+      "spike",
+      "candlestick",
+      "area-range"
+    ],
     "label": "Timezone",
     "control": "text",
     "storage": "scalar",

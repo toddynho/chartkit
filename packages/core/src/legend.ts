@@ -127,6 +127,29 @@ export interface LegendFrame {
   preset: PresetTokens;
 }
 
+/** Formatted suffix when `legend.values` is on. Undefined leaves the name alone. */
+export function legendShownValue(spec: Record<string, unknown>, value: number | undefined): string | undefined {
+  if (!isRecord(spec.legend) || spec.legend.values !== true) return undefined;
+  if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
+  const rounded = Math.round(value * 100) / 100;
+  return String(rounded);
+}
+
+/** Name plus the optional value suffix. */
+export function legendLabel(name: string, value?: string): string {
+  return value ? `${name} ${value}` : name;
+}
+
+/**
+ * Rich legend when the spec sets one, otherwise the chart's existing markup.
+ * Default charts pass a fallback so an omitted legend does not move.
+ */
+export function legendMarkup(spec: Record<string, unknown>, items: LegendItem[], host: LegendFrame, fallback: string): string {
+  const box = readLegend(spec);
+  if (!box || !items.length) return fallback;
+  return paintLegend(box, items, host);
+}
+
 /** Draw a positioned legend. Later pages stay in the SVG with display:none so a click can page them. */
 export function paintLegend(box: LegendBox, items: LegendItem[], frame: LegendFrame): string {
   const plot = frame.plot;

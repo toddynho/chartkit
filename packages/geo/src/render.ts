@@ -372,7 +372,9 @@ function dotsOf(rows: Record<string, unknown>[], encoding: Record<string, unknow
   const numeric = draft.every((dot) => dot.colorRaw == null || num(dot.colorRaw) != null);
   const colorValues = draft.map((dot) => num(dot.colorRaw)).filter((value): value is number => value != null);
   const sameField = !!(sizeField && colorField && sizeField === colorField && numeric);
-  const scale = !sameField && colorField && numeric && colorValues.length ? paintScale("sequential", colorValues, undefined, colorChannel.format, colorChannel.title, colorChannel.range) : null;
+  const asked = isRecord(encoding.color) && isRecord(encoding.color.scale) && typeof encoding.color.scale.type === "string" ? encoding.color.scale.type : "sequential";
+  const kindName = asked === "diverging" || asked === "threshold" ? asked : "sequential";
+  const scale = !sameField && colorField && numeric && colorValues.length ? paintScale(kindName, colorValues, undefined, colorChannel.format, colorChannel.title, colorChannel.range) : null;
   const categories = new Map<string, string>();
   const dots = draft.map((dot) => {
     let color = chrome.accent;

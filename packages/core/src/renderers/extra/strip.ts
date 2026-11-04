@@ -1,4 +1,6 @@
+import { explicitGrid, gridLines, majorTicks, spine, turned } from "../../axis-ink";
 import { chooseTicks, labelStep, lockDomain, minorTickMarks, placedAxisTitles } from "../../chrome";
+import { legendLabel, legendMarkup, legendShownValue } from "../../legend";
 import { axisOn, column, fieldOf } from "../../frame";
 import { cssVar, paint } from "../../theme";
 import { ch, hash, isRecord, n, readAxis } from "../../svg";
@@ -189,12 +191,25 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
       parts.push(bracket(vertical, a, b, y, compare.label, frame.preset.accent));
     }
   }
+  const catKey = vertical ? "x" : "y";
+  const catAxis = readAxis(spec, catKey);
+  const catRich = Boolean(catAxis.rotate || catAxis.offset || catAxis.end);
+  const centers: number[] = [];
   rows.forEach((row, index) => {
     const center = centerOf(index);
+    centers.push(center);
     const ink = highlight && row.name === highlight ? cssVar("accent", frame.preset.accent) : cssVar("text", frame.preset.text);
     const weight = highlight && row.name === highlight ? "600" : "500";
-    if (vertical) parts.push(text(center, box.bottom + 16, row.name, ink, 12, weight, "middle"));
-    else parts.push(text(box.left - 10, center + 4, row.name, ink, 13, weight, "end"));
+    if (!catRich) {
+      if (vertical) parts.push(text(center, box.bottom + 16, row.name, ink, 12, weight, "middle"));
+      else parts.push(text(box.left - 10, center + 4, row.name, ink, 13, weight, "end"));
+    } else if (vertical) {
+      const y = (catAxis.end ? box.top - 8 : box.bottom + 16) + (catAxis.end ? 0 : catAxis.offset || 0);
+      parts.push(turned(center, y, row.name, ink, 12, "middle", catAxis.rotate, weight));
+    } else {
+      const x = (catAxis.end ? box.right + 8 : box.left - 10) + (catAxis.end ? catAxis.offset || 0 : -(catAxis.offset || 0));
+      parts.push(turned(x, center + 4, row.name, ink, 13, catAxis.end ? "start" : "end", catAxis.rotate, weight));
+    }
     if (!vertical) {
       const value = drawSummary ? stat(row, summary) : row.dots[0]?.value;
       if (value !== undefined) {
@@ -207,32 +222,82 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
       }
     }
   });
+  const catEdge = vertical ? (catAxis.end ? box.top : box.bottom) : catAxis.end ? box.right : box.left;
+  const catInk = cssVar("axis", frame.preset.axis);
+  parts.push(majorTicks(catAxis, vertical, catEdge, centers, vertical ? (catAxis.end ? -1 : 1) : catAxis.end ? 1 : -1, catInk));
+  const catAxes = isRecord(spec.axes) ? spec.axes : undefined;
+  const catGrid = explicitGrid(catAxes && isRecord(catAxes[catKey]) ? (catAxes[catKey] as { grid?: unknown }).grid : undefined);
+  if (catGrid) {
+    parts.push(vertical
+      ? gridLines(false, box.top, box.bottom, centers, catGrid, cssVar("grid", frame.preset.grid))
+      : gridLines(true, box.left, box.right, centers, catGrid, cssVar("grid", frame.preset.grid)));
+  }
+  if (catAxis.rule) {
+    parts.push(vertical
+      ? spine(box.left, catEdge, box.right, catEdge, catAxis.rule, catInk)
+      : spine(catEdge, box.top, catEdge, box.bottom, catAxis.rule, catInk));
+  }
   if (axisOn(spec, vertical ? "y" : "x")) {
     const key = vertical ? "y" : "x";
     const axis = readAxis(spec, key);
     const step = labelStep(valueTicks.length, axis.skip, 1);
     const tickInk = cssVar("muted", frame.preset.muted);
+    const axisInk = cssVar("axis", frame.preset.axis);
+    const rich = Boolean(axis.rotate || axis.offset || axis.end || axis.tick || axis.tickLen !== undefined);
+    const shift = axis.offset || 0;
+    const positions: number[] = [];
     for (let i = 0; i < valueTicks.length; i += step) {
       const value = valueTicks[i] ?? 0;
       const pos = at(value);
       const label = fmt(value, frame.locale, shown);
-      if (vertical) parts.push(text(box.left - 8, pos + 4, label, tickInk, 11, "400", "end"));
-      else parts.push(text(pos, box.bottom + 16, label, tickInk, 11, "400", "middle"));
+      positions.push(pos);
+      if (!rich) {
+        if (vertical) parts.push(text(box.left - 8, pos + 4, label, tickInk, 11, "400", "end"));
+        else parts.push(text(pos, box.bottom + 16, label, tickInk, 11, "400", "middle"));
+        continue;
+      }
+      if (vertical) {
+        const x = (axis.end ? box.right + 8 : box.left - 8) + (axis.end ? shift : -shift);
+        parts.push(turned(x, pos + 4, label, tickInk, 11, axis.end ? "start" : "end", axis.rotate));
+      } else {
+        const y = (axis.end ? box.top - 8 : box.bottom + 16 + shift);
+        parts.push(turned(pos, y, label, tickInk, 11, "middle", axis.rotate));
+      }
     }
-    const edge = vertical ? box.left : box.bottom;
-    parts.push(minorTickMarks(axis.minor ?? 0, valueTicks, at, edge, !vertical, vertical ? -3 : 3, cssVar("axis", frame.preset.axis)));
+    const edge = vertical ? (axis.end ? box.right : box.left) : axis.end ? box.top : box.bottom;
+    parts.push(minorTickMarks(axis.minor ?? 0, valueTicks, at, edge, !vertical, vertical ? (axis.end ? 3 : -3) : axis.end ? -3 : 3, axisInk));
+    parts.push(majorTicks(axis, !vertical, edge, positions, vertical ? (axis.end ? 1 : -1) : axis.end ? -1 : 1, axisInk));
+    const axes = isRecord(spec.axes) ? spec.axes : undefined;
+    const grid = explicitGrid(axes && isRecord(axes[key]) ? (axes[key] as { grid?: unknown }).grid : undefined);
+    if (grid) {
+      parts.push(vertical ? gridLines(true, box.left, box.right, valueTicks.map(at), grid, cssVar("grid", frame.preset.grid)) : gridLines(false, box.top, box.bottom, valueTicks.map(at), grid, cssVar("grid", frame.preset.grid)));
+    }
+    if (axis.rule) {
+      parts.push(vertical
+        ? spine(edge, box.top, edge, box.bottom, axis.rule, axisInk)
+        : spine(box.left, edge, box.right, edge, axis.rule, axisInk));
+    }
   }
-  if (!vertical && axisOn(spec, "x")) parts.push(axisLine(frame, { left: box.left, top: box.top, right: box.right, bottom: box.bottom }));
+  if (!vertical && axisOn(spec, "x")) parts.push(axisLine(frame, { left: box.left, top: box.top, right: box.right, bottom: box.bottom }, spec));
   parts.push(placedAxisTitles(frame, spec, box));
   if (colorNames.length && frame.legend !== false) {
+    const lastOf = new Map<string, number>();
+    for (const row of rows) for (const dot of row.dots) if (dot.colorKey) lastOf.set(dot.colorKey, dot.value);
+    const items = colorNames.map((name, index) => ({ name, color: fill(frame, index), value: legendShownValue(spec, lastOf.get(name)) }));
     let x = box.left;
     const y = 14;
-    colorNames.forEach((name, index) => {
-      const swatch = fill(frame, index);
-      parts.push(`<circle cx="${n(x + 4)}" cy="${n(y)}" r="4" fill="${swatch}" />`);
-      parts.push(text(x + 12, y + 4, name, cssVar("muted", frame.preset.muted), 11, "400", "start"));
-      x += 12 + ch(name.length, 7) + 16;
-    });
+    const fallback = colorNames
+      .map((name, index) => {
+        const labelText = legendLabel(name, legendShownValue(spec, lastOf.get(name)));
+        const swatch = `<circle cx="${n(x + 4)}" cy="${n(y)}" r="4" fill="${fill(frame, index)}" />`;
+        const label = text(x + 12, y + 4, labelText, cssVar("muted", frame.preset.muted), 11, "400", "start");
+        x += 12 + ch(labelText.length, 7) + 16;
+        return swatch + label;
+      })
+      .join("");
+    parts.push(
+      legendMarkup(spec, items, { plot: box, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
+    );
   }
   return view.done();
 }
