@@ -1,3 +1,4 @@
+import { formatValue } from "./format";
 import type { PresetTokens } from "./theme";
 import { cssVar } from "./theme";
 import { ch, esc, font, hash, isRecord, n } from "./svg";
@@ -142,8 +143,16 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
   const scale = record && isRecord(record.scale) ? record.scale : undefined;
   const named = scale && typeof scale.type === "string" && KINDS.has(scale.type) ? (scale.type as ScaleKind) : null;
   const quantitative = record?.type === "quantitative";
-  if (!named && !quantitative && !fallback) return null;
-  const kind: ScaleKind = named ?? "sequential";
+  const binsAsked = Boolean(scale && typeof scale.bins === "number" && scale.bins >= 2);
+  const tuned = Boolean(
+    binsAsked ||
+      (record && record.format !== undefined) ||
+      (record && typeof record.title === "string" && record.title) ||
+      (scale && typeof scale.scheme === "string") ||
+      (scale && (scale.zero !== undefined || scale.nice !== undefined || scale.reverse !== undefined || typeof scale.midpoint === "number")),
+  );
+  if (!named && !quantitative && !fallback && !tuned) return null;
+  const kind: ScaleKind = named ?? (binsAsked ? "quantize" : "sequential");
   let min = Infinity;
   let max = -Infinity;
   for (let i = 0; i < values.length; i++) {
@@ -160,7 +169,18 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
   const domain = numbers(scale, "domain");
   if (typeof domain[0] === "number") min = domain[0];
   if (typeof domain[1] === "number") max = domain[1];
+  if (scale?.zero === true) {
+    if (min > 0) min = 0;
+    if (max < 0) max = 0;
+  }
+  if (scale?.nice === true) {
+    const span = Math.abs(max - min) || 1;
+    const step = 10 ** Math.floor(Math.log10(span));
+    min = Math.floor(min / step) * step;
+    max = Math.ceil(max / step) * step;
+  }
   if (!(max > min)) max = min + 1;
+  const reverse = scale?.reverse === true;
   const midpoint = scale && typeof scale.midpoint === "number" ? scale.midpoint : (min + max) / 2;
   const scheme = scale && typeof scale.scheme === "string" ? scale.scheme : "blue";
   const custom = record && Array.isArray(record.range) ? record.range.filter((item): item is string => typeof item === "string" && item.length > 0) : [];
@@ -180,12 +200,14 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
   const cuts = kind === "threshold" ? (edges.length ? edges : [min + (max - min) / 3, min + (2 * (max - min)) / 3]) : [];
 
   const unit = (value: number) => {
+    let t: number;
     if (kind === "diverging") {
-      if (value <= midpoint) return 0.5 * Math.min(1, Math.max(0, (value - min) / (midpoint - min || 1)));
-      return 0.5 + 0.5 * Math.min(1, Math.max(0, (value - midpoint) / (max - midpoint || 1)));
-    }
-    return Math.min(1, Math.max(0, (value - min) / (max - min || 1)));
+      if (value <= midpoint) t = 0.5 * Math.min(1, Math.max(0, (value - min) / (midpoint - min || 1)));
+      else t = 0.5 + 0.5 * Math.min(1, Math.max(0, (value - midpoint) / (max - midpoint || 1)));
+    } else t = Math.min(1, Math.max(0, (value - min) / (max - min || 1)));
+    return reverse ? 1 - t : t;
   };
+  const labelOf = (value: number) => (record && record.format !== undefined ? formatValue(value, withStyle(record.format), "en-US") : formatTick(value));
 
   let paint: (value: number) => string;
   let swatches: string[] = [];
@@ -222,10 +244,10 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
       const heading = title
         ? `<text x="${n(x)}" y="${n(y + 11)}" fill="${fill}" font-size="${size}" font-weight="650" data-ck-scale-title="${esc(title)}">${esc(title)}</text>`
         : "";
-      const lo = formatTick(min);
-      const hi = formatTick(max);
+      const lo = labelOf(min);
+      const hi = labelOf(max);
       if (kind === "threshold" || kind === "quantize") {
-        const labels = kind === "threshold" ? swatches.map((_, index) => thresholdLabel(index, cuts)) : quantizeLabels(min, max, swatches.length);
+        const labels = kind === "threshold" ? swatches.map((_, index) => thresholdLabel(index, cuts, labelOf)) : quantizeLabels(min, max, swatches.length, labelOf);
         const slot = Math.max(36, ...labels.map((label) => Math.ceil(ch(label.length, 6.6) + 12)));
         const cells = swatches
           .map(
@@ -241,8 +263,8 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
         stops.map((color, index) => `<stop offset="${n((index / Math.max(1, stops.length - 1)) * 100)}%" stop-color="${color}" />`).join("") +
         `</linearGradient>`;
       const mid =
-        kind === "diverging"
-          ? `<line x1="${n(x + barW / 2)}" y1="${n(barY + barH)}" x2="${n(x + barW / 2)}" y2="${n(barY + barH + 5)}" stroke="${fill}" stroke-width="1" data-ck-scale="mid" />${tick(formatTick(midpoint), x + barW / 2, "middle")}`
+        kind === "diverging" || (scale && typeof scale.midpoint === "number")
+          ? `<line x1="${n(x + barW / 2)}" y1="${n(barY + barH)}" x2="${n(x + barW / 2)}" y2="${n(barY + barH + 5)}" stroke="${fill}" stroke-width="1" data-ck-scale="mid" />${tick(labelOf(midpoint), x + barW / 2, "middle")}`
           : "";
       return `<g data-ck-scale="${kind}"><defs>${gradient}</defs>${heading}<rect x="${n(x)}" y="${n(barY)}" width="${barW}" height="${barH}" rx="2" fill="url(#${id})" data-ck-scale="gradient" />${tick(lo, x, "start")}${mid}${tick(hi, x + barW, "end")}</g>`;
     },
@@ -303,18 +325,25 @@ function binSwatches(count: number, preset: PresetTokens, coolCount: number): st
 }
 
 /** `<6`, `6–12`, `≥12` — the cuts, not the data ends. */
-function thresholdLabel(index: number, cuts: number[]): string {
+/** A format object with no style still carries decimals, currency, and affixes. */
+function withStyle(format: unknown): unknown {
+  if (!isRecord(format) || typeof format.style === "string" || typeof format.specifier === "string") return format;
+  const style = typeof format.currency === "string" ? "currency" : "number";
+  return { ...format, style };
+}
+
+function thresholdLabel(index: number, cuts: number[], labelOf: (value: number) => string = formatTick): string {
   const last = cuts.length - 1;
-  if (index <= 0) return `<${formatTick(cuts[0] ?? 0)}`;
-  if (index >= cuts.length) return `≥${formatTick(cuts[last] ?? 0)}`;
-  return `${formatTick(cuts[index - 1] ?? 0)}–${formatTick(cuts[index] ?? 0)}`;
+  if (index <= 0) return `<${labelOf(cuts[0] ?? 0)}`;
+  if (index >= cuts.length) return `≥${labelOf(cuts[last] ?? 0)}`;
+  return `${labelOf(cuts[index - 1] ?? 0)}–${labelOf(cuts[index] ?? 0)}`;
 }
 
 /** Every quantize edge, in the same slot size as a threshold label. */
-function quantizeLabels(min: number, max: number, bins: number): string[] {
+function quantizeLabels(min: number, max: number, bins: number, labelOf: (value: number) => string = formatTick): string[] {
   const step = (max - min) / Math.max(1, bins);
   const out: string[] = [];
-  for (let i = 0; i < bins; i++) out.push(`${formatTick(min + step * i)}–${formatTick(min + step * (i + 1))}`);
+  for (let i = 0; i < bins; i++) out.push(`${labelOf(min + step * i)}–${labelOf(min + step * (i + 1))}`);
   return out;
 }
 

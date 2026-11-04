@@ -15,6 +15,7 @@ import { fileURLToPath } from "node:url";
 import esbuild from "esbuild";
 import { createRequire } from "node:module";
 import { isExtra, render as renderAll } from "@chartkitdev/core/all";
+import { renderBarList } from "@chartkitdev/core/charts/bar-list";
 import { render as renderExtra } from "@chartkitdev/core/extra";
 import { optionBlocked, optionCatalog, readOption, writeOption } from "@chartkitdev/core/options";
 import { writeStatus } from "./audit-status.mjs";
@@ -31,7 +32,7 @@ function renderSpec(spec) {
     return { svg: "", error: "geo" };
   }
   try {
-    const svg = isExtra(type) ? renderExtra(spec) : renderAll(spec);
+    const svg = type === "bar-list" ? renderBarList(spec) ?? "" : isExtra(type) ? renderExtra(spec) : renderAll(spec);
     const error = !svg.includes("<svg") || svg.includes("ck-chart-error");
     return { svg, error };
   } catch (error) {
@@ -77,11 +78,12 @@ function probeValues(field, spec, baseSvg = "") {
   if (field.control === "json" || view.complex) return [];
   if (field.path.endsWith(".autoSkip")) return [true, false].filter((value) => value !== current);
   if (field.path === "axes.x.line" || field.path === "axes.y.line" || field.path === "axes.y2.line") return [false, true];
+  if (field.path === "mark.labels") return [false, true];
   if (field.control === "boolean" || field.storage === "union-boolean") return [current === true ? false : true];
   if (field.control === "enum" && field.enumValues?.length) {
     const text = current == null ? "" : String(current);
     const rest = field.enumValues.filter((value) => value !== text && value !== String(field.defaultValue ?? ""));
-    const preferred = ["false", "dotted", "currency", "percent", "step", "dark", "horizontal", "top", "end", "nearest", "dashed", "none"];
+    const preferred = ["diverging", "false", "dotted", "currency", "percent", "step", "dark", "horizontal", "top", "end", "nearest", "dashed", "none"];
     const picks = [];
     for (const value of preferred) if (rest.includes(value) && !picks.includes(value)) picks.push(value);
     for (const value of rest) if (!picks.includes(value)) picks.push(value);
@@ -100,6 +102,7 @@ function probeValues(field, spec, baseSvg = "") {
     if (field.path === "locale") return ["de-DE", "ja-JP"];
     if (field.path === "timezone") return ["UTC", "America/New_York"];
     if (field.path.endsWith("currency")) return ["EUR", "USD"];
+    if (field.path.endsWith("specifier")) return [".0f", "$.0f"];
     if (field.path.endsWith("prefix")) return ["~", "$"];
     if (field.path.endsWith("suffix")) return [" kg", "%"];
     if (field.path.includes("width") || field.path.includes("height") || field.path.endsWith("size")) return ["800", "240"];
@@ -350,6 +353,11 @@ for (const example of examples) {
     let invalid = false;
     for (const candidate of values) {
       const written = writeOption(origin, field, candidate);
+      if (field.path === "mark.labels" && candidate === false) {
+        const mark = written.mark && typeof written.mark === "object" ? { ...written.mark } : {};
+        mark.labels = false;
+        written.mark = mark;
+      }
       if (field.path === "size.aspectRatio") {
         const size = written.size && typeof written.size === "object" ? { ...written.size } : {};
         size.height = "auto";
