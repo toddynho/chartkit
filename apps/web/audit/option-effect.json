@@ -1,6 +1,6 @@
 {
   "summary": {
-    "generated": "2026-11-04T02:23:06.738Z",
+    "generated": "2026-11-04T02:25:15.641Z",
     "examples": [
       {
         "type": "heatmap",
@@ -174,10 +174,10 @@
       }
     ],
     "probed": 5732,
-    "effects": 2206,
+    "effects": 2379,
     "counts": {
       "a": 0,
-      "b": 675,
+      "b": 502,
       "c": 0,
       "d": 2290,
       "interaction": 0
@@ -8732,17 +8732,6 @@
     {
       "type": "histogram",
       "slug": "checkout-histogram",
-      "path": "axes.x.grid",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "true"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
       "path": "axes.x.labels",
       "control": "boolean",
       "klass": "b",
@@ -8750,17 +8739,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": false
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
     },
     {
       "type": "histogram",
@@ -8783,94 +8761,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "histogram",
@@ -8927,17 +8817,6 @@
     {
       "type": "histogram",
       "slug": "checkout-histogram",
-      "path": "axes.y.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
       "path": "axes.y.autoSkip",
       "control": "boolean",
       "klass": "b",
@@ -8967,94 +8846,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.y.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.y.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.y.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.y.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.y.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.y.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.y.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.y.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "histogram",
@@ -10473,17 +10264,6 @@
     {
       "type": "boxplot",
       "slug": "close-boxplot",
-      "path": "axes.x.grid",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "true"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
       "path": "axes.x.labels",
       "control": "boolean",
       "klass": "b",
@@ -10491,17 +10271,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": false
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.x.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
     },
     {
       "type": "boxplot",
@@ -10535,94 +10304,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.x.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.x.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.x.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.x.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.x.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.x.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.x.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.x.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "boxplot",
@@ -10679,17 +10360,6 @@
     {
       "type": "boxplot",
       "slug": "close-boxplot",
-      "path": "axes.y.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
       "path": "axes.y.autoSkip",
       "control": "boolean",
       "klass": "b",
@@ -10719,94 +10389,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.y.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.y.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.y.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.y.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.y.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.y.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.y.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.y.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "boxplot",
@@ -13078,17 +12660,6 @@
     {
       "type": "strip",
       "slug": "desks-strip",
-      "path": "axes.x.grid",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "true"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
       "path": "axes.x.labels",
       "control": "boolean",
       "klass": "b",
@@ -13096,17 +12667,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": false
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.x.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
     },
     {
       "type": "strip",
@@ -13140,94 +12700,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.x.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.x.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.x.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.x.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.x.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.x.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.x.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.x.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "strip",
@@ -13284,17 +12756,6 @@
     {
       "type": "strip",
       "slug": "desks-strip",
-      "path": "axes.y.grid",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "true"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
       "path": "axes.y.labels",
       "control": "boolean",
       "klass": "b",
@@ -13302,17 +12763,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": false
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
     },
     {
       "type": "strip",
@@ -13346,94 +12796,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "strip",
@@ -14938,17 +14300,6 @@
     {
       "type": "spike",
       "slug": "error-spikes",
-      "path": "axes.x.grid",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "true"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
       "path": "axes.x.labels",
       "control": "boolean",
       "klass": "b",
@@ -14956,17 +14307,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": false
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.x.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
     },
     {
       "type": "spike",
@@ -14989,94 +14329,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.x.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.x.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.x.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.x.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.x.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.x.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.x.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.x.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "spike",
@@ -15122,17 +14374,6 @@
     {
       "type": "spike",
       "slug": "error-spikes",
-      "path": "axes.y.grid",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "true"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
       "path": "axes.y.labels",
       "control": "boolean",
       "klass": "b",
@@ -15140,17 +14381,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": false
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
     },
     {
       "type": "spike",
@@ -15184,94 +14414,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "spike",
@@ -17717,17 +16859,6 @@
     {
       "type": "errorbar",
       "slug": "lab-error-bars",
-      "path": "axes.x.grid",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "true"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
       "path": "axes.x.labels",
       "control": "boolean",
       "klass": "b",
@@ -17735,17 +16866,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": false
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.x.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
     },
     {
       "type": "errorbar",
@@ -17779,94 +16899,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.x.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.x.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.x.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.x.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.x.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.x.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.x.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.x.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "errorbar",
@@ -17934,17 +16966,6 @@
     {
       "type": "errorbar",
       "slug": "lab-error-bars",
-      "path": "axes.y.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
       "path": "axes.y.autoSkip",
       "control": "boolean",
       "klass": "b",
@@ -17974,94 +16995,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.y.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.y.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.y.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.y.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.y.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.y.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.y.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.y.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "errorbar",
@@ -26073,17 +25006,6 @@
     {
       "type": "waterfall",
       "slug": "quarter-waterfall",
-      "path": "axes.x.grid",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "true"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
       "path": "axes.x.labels",
       "control": "boolean",
       "klass": "b",
@@ -26091,17 +25013,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": false
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.x.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
     },
     {
       "type": "waterfall",
@@ -26135,94 +25046,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.x.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.x.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.x.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.x.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.x.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.x.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.x.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.x.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "waterfall",
@@ -26279,17 +25102,6 @@
     {
       "type": "waterfall",
       "slug": "quarter-waterfall",
-      "path": "axes.y.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
       "path": "axes.y.autoSkip",
       "control": "boolean",
       "klass": "b",
@@ -26319,94 +25131,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.y.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.y.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.y.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.y.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.y.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.y.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.y.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.y.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "waterfall",
@@ -30007,17 +28731,6 @@
     {
       "type": "area-range",
       "slug": "revenue-forecast",
-      "path": "axes.x.grid",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "true"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
       "path": "axes.x.labels",
       "control": "boolean",
       "klass": "b",
@@ -30025,17 +28738,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": false
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.x.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
     },
     {
       "type": "area-range",
@@ -30069,94 +28771,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.x.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.x.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.x.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.x.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.x.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.x.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.x.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.x.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "area-range",
@@ -30213,17 +28827,6 @@
     {
       "type": "area-range",
       "slug": "revenue-forecast",
-      "path": "axes.y.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
       "path": "axes.y.autoSkip",
       "control": "boolean",
       "klass": "b",
@@ -30253,94 +28856,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.y.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.y.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.y.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.y.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.y.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.y.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.y.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.y.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "area-range",
@@ -33077,17 +31592,6 @@
     {
       "type": "bar-range",
       "slug": "temperature-range",
-      "path": "axes.x.grid",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "true"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
       "path": "axes.x.labels",
       "control": "boolean",
       "klass": "b",
@@ -33095,17 +31599,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": false
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.x.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
     },
     {
       "type": "bar-range",
@@ -33139,94 +31632,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.x.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.x.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.x.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.x.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.x.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.x.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.x.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.x.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "bar-range",
@@ -33294,17 +31699,6 @@
     {
       "type": "bar-range",
       "slug": "temperature-range",
-      "path": "axes.y.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
       "path": "axes.y.autoSkip",
       "control": "boolean",
       "klass": "b",
@@ -33334,94 +31728,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.y.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.y.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.y.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.y.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.y.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.y.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.y.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.y.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "bar-range",
@@ -35186,17 +33492,6 @@
     {
       "type": "candlestick",
       "slug": "week-candles",
-      "path": "axes.x.grid",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "true"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
       "path": "axes.x.labels",
       "control": "boolean",
       "klass": "b",
@@ -35204,17 +33499,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": false
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.x.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
     },
     {
       "type": "candlestick",
@@ -35237,94 +33521,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.x.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.x.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.x.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.x.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.x.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.x.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.x.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.x.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "candlestick",
@@ -35392,17 +33588,6 @@
     {
       "type": "candlestick",
       "slug": "week-candles",
-      "path": "axes.y.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "right"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
       "path": "axes.y.autoSkip",
       "control": "boolean",
       "klass": "b",
@@ -35432,94 +33617,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 6
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.y.line",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.y.line.color",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.y.line.width",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 8
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.y.line.dash",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "solid"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.y.tickMarks",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "outside"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.y.tickLength",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 24
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.y.rotate",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.y.offset",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 80
     },
     {
       "type": "candlestick",

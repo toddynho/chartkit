@@ -90,7 +90,7 @@ export function renderWaterfall(spec: Record<string, unknown>): string | null {
   parts.push("</g>");
   parts.push(notes.over);
   parts.push(axisTitleMarks(frame, spec, box));
-  parts.push(axisLine(frame, box));
+  parts.push(axisLine(frame, box, spec));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
   parts.push(xLabels(frame, spec, names.map((name, index) => ({ x: xAt(index), text: name })), box));
   return view.done();

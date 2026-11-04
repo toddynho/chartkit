@@ -279,7 +279,7 @@ export function renderAreaRange(spec: Record<string, unknown>): string | null {
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
   parts.push(xLabels(frame, spec, xTickLabels(table, xField, count, xAt), box));
-  parts.push(axisLine(frame, box));
+  parts.push(axisLine(frame, box, spec));
   if (legend.length > 1 && !legendBelow) parts.push(legendRow(legend, box.left, frame.title ? (frame.subtitle ? 56 : 40) : frame.subtitle ? 32 : CHROME_TOP, cssVar("text", frame.preset.text)));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
@@ -339,7 +339,7 @@ export function renderBarRange(spec: Record<string, unknown>): string | null {
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
   parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: xAt(index), text: label })), box));
-  parts.push(axisLine(frame, box));
+  parts.push(axisLine(frame, box, spec));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
   parts.push(notes.under);
@@ -406,7 +406,7 @@ export function renderErrorbar(spec: Record<string, unknown>): string | null {
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
   parts.push(xLabels(frame, spec, labels.map((label, index) => ({ x: xAtIndex(index), text: label })), box));
-  parts.push(axisLine(frame, box));
+  parts.push(axisLine(frame, box, spec));
   parts.push(clip(frame, box));
   parts.push(`<g clip-path="url(#${frame.id}-p)">`);
   parts.push(notes.under);

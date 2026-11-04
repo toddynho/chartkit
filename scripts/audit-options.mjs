@@ -77,6 +77,7 @@ function probeValues(field, spec, baseSvg = "") {
   }
   if (field.control === "json" || view.complex) return [];
   if (field.path.endsWith(".autoSkip")) return [true, false].filter((value) => value !== current);
+  if (field.path === "axes.x.line" || field.path === "axes.y.line" || field.path === "axes.y2.line") return [false, true];
   if (field.path === "mark.labels") return [false, true];
   if (field.control === "boolean" || field.storage === "union-boolean") return [current === true ? false : true];
   if (field.control === "enum" && field.enumValues?.length) {
