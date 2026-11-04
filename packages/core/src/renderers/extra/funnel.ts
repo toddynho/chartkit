@@ -38,6 +38,7 @@ export function renderFunnel(spec: Record<string, unknown>): string | null {
   const labelX = pos === "left" ? 8 + legendSide : 16;
   const bars = frame.mark.shape === "bar";
   const shown = valueFormat(frame, spec, frame.encoding.y);
+  const showValues = frame.mark.labels !== false;
   const colorEach = Boolean(legend) || Boolean(fieldOf(frame.encoding.color));
   const widths = stages.map((stage) => funnelSpan(stage[1], max, plotW));
   const mouth = funnelMouth(widths);
@@ -49,7 +50,7 @@ export function renderFunnel(spec: Record<string, unknown>): string | null {
     const pct = formatPercent(conversion, frame.locale);
     const tip = index === 0 ? `${label}: ${valueText} (start)` : `${label}: ${valueText} · ${pct} of previous`;
     const color = colorEach ? fill(frame, index) : fill(frame, 0);
-    const valueLine = index === 0 ? valueText : `${valueText} · ${pct}`;
+    const valueLine = !showValues ? "" : index === 0 ? valueText : `${valueText} · ${pct}`;
     let mid = y0 + band / 2;
     if (bars) {
       const barH = Math.max(22, band * 0.7);
@@ -125,15 +126,15 @@ function pushStageLabel(parts: string[], frame: Frame, x: number, mid: number, b
   const muted = cssVar("muted", frame.preset.muted);
   if (band >= 32) {
     parts.push(text(x, mid - 6, label, ink, 14, "650"));
-    parts.push(text(x, mid + 12, valueLine, muted, 12, "500"));
+    if (valueLine) parts.push(text(x, mid + 12, valueLine, muted, 12, "500"));
     return;
   }
   if (band >= 22) {
     parts.push(text(x, mid - 4, label, ink, 12, "650"));
-    parts.push(text(x, mid + 9, valueLine, muted, 11, "500"));
+    if (valueLine) parts.push(text(x, mid + 9, valueLine, muted, 11, "500"));
     return;
   }
-  parts.push(text(x, mid + 4, fit(`${label}  ${valueLine}`, Math.max(24, plotLeft - x - 8), 11), ink, 11, "600"));
+  parts.push(text(x, mid + 4, fit(valueLine ? `${label}  ${valueLine}` : label, Math.max(24, plotLeft - x - 8), 11), ink, 11, "600"));
 }
 
 /** A legend object or `legend: true`. Omitted stays unlabeled, since each stage already has a caption. */

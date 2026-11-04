@@ -77,6 +77,7 @@ function probeValues(field, spec, baseSvg = "") {
   }
   if (field.control === "json" || view.complex) return [];
   if (field.path.endsWith(".autoSkip")) return [true, false].filter((value) => value !== current);
+  if (field.path === "mark.labels") return [false, true];
   if (field.control === "boolean" || field.storage === "union-boolean") return [current === true ? false : true];
   if (field.control === "enum" && field.enumValues?.length) {
     const text = current == null ? "" : String(current);
@@ -351,6 +352,11 @@ for (const example of examples) {
     let invalid = false;
     for (const candidate of values) {
       const written = writeOption(origin, field, candidate);
+      if (field.path === "mark.labels" && candidate === false) {
+        const mark = written.mark && typeof written.mark === "object" ? { ...written.mark } : {};
+        mark.labels = false;
+        written.mark = mark;
+      }
       if (field.path === "size.aspectRatio") {
         const size = written.size && typeof written.size === "object" ? { ...written.size } : {};
         size.height = "auto";

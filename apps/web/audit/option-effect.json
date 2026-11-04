@@ -1,6 +1,6 @@
 {
   "summary": {
-    "generated": "2026-11-04T02:19:57.774Z",
+    "generated": "2026-11-04T02:21:31.251Z",
     "examples": [
       {
         "type": "heatmap",
@@ -174,10 +174,10 @@
       }
     ],
     "probed": 5732,
-    "effects": 2183,
+    "effects": 2185,
     "counts": {
       "a": 0,
-      "b": 698,
+      "b": 696,
       "c": 0,
       "d": 2290,
       "interaction": 0
@@ -26217,17 +26217,6 @@
     {
       "type": "waterfall",
       "slug": "quarter-waterfall",
-      "path": "mark.labels",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
       "path": "axes.x.format",
       "control": "enum",
       "klass": "d",
@@ -31813,17 +31802,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "#ff00aa"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "mark.labels",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
     },
     {
       "type": "funnel",

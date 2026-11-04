@@ -2,10 +2,10 @@
 
 Class (a) is a playground wiring bug. The preview used to assign a static SVG and never call mount(), so tooltip, crosshair, legend toggle, and hover could not run. That is fixed in the playground by mounting @chartkitdev/vanilla. Rows here are what remains after that mount is used for the hover probe.
 
-Probed 5732 option writes across 34 chart types. 2183 changed the SVG. Remaining rows are classified below.
+Probed 5732 option writes across 34 chart types. 2185 changed the SVG. Remaining rows are classified below.
 
 - (a) playground wiring: 0
-- (b) core ignores a listed option: 698
+- (b) core ignores a listed option: 696
 - (c) catalog scope too wide: 0
 - (d) no-op for this example: 2290
 
@@ -155,22 +155,6 @@ Probed 5732 option writes across 34 chart types. 2183 changed the SVG. Remaining
 - **b** `encoding.source.scale.type` — spec changed and the rendered SVG did not
 - … 26 more
 
-### waterfall (38)
-
-- **b** `encoding.y.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.zero` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.nice` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.reverse` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.clamp` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.constant` — spec changed and the rendered SVG did not
-- **b** `mark.cornerRadius` — spec changed and the rendered SVG did not
-- **b** `mark.labels` — spec changed and the rendered SVG did not
-- **b** `axes.x.grid` — spec changed and the rendered SVG did not
-- **b** `axes.x.labels` — spec changed and the rendered SVG did not
-- **b** `axes.x.position` — spec changed and the rendered SVG did not
-- … 26 more
-
 ### sankey (37)
 
 - **b** `encoding.source.type` — spec changed and the rendered SVG did not
@@ -185,6 +169,22 @@ Probed 5732 option writes across 34 chart types. 2183 changed the SVG. Remaining
 - **b** `encoding.source.scale.type` — spec changed and the rendered SVG did not
 - **b** `encoding.source.scale.zero` — spec changed and the rendered SVG did not
 - **b** `encoding.source.scale.nice` — spec changed and the rendered SVG did not
+- … 25 more
+
+### waterfall (37)
+
+- **b** `encoding.y.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.reverse` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.clamp` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.constant` — spec changed and the rendered SVG did not
+- **b** `mark.cornerRadius` — spec changed and the rendered SVG did not
+- **b** `axes.x.grid` — spec changed and the rendered SVG did not
+- **b** `axes.x.labels` — spec changed and the rendered SVG did not
+- **b** `axes.x.position` — spec changed and the rendered SVG did not
+- **b** `axes.x.autoSkip` — spec changed and the rendered SVG did not
 - … 25 more
 
 ### candlestick (29)
@@ -385,10 +385,6 @@ Probed 5732 option writes across 34 chart types. 2183 changed the SVG. Remaining
 ### radial-bar (1)
 
 - **b** `layout.coordinate` — spec changed and the rendered SVG did not
-
-### funnel (1)
-
-- **b** `mark.labels` — spec changed and the rendered SVG did not
 
 ## Example-only no-ops
 
