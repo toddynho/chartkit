@@ -43,6 +43,7 @@ export const GALLERY_TYPES = [
   "strip",
   "streamgraph",
   "density",
+  "tree",
 ];
 
 export const PAINT_STATUSES = ["ok", "unsupported", "blocked", "error", "timeout", "skipped"];
@@ -437,6 +438,15 @@ export const chartTypeDefs = [
     homepageRow: null,
     nMeaning: "observations in one sample",
     why: "1D Gaussian KDE. Four hundred raw rows. Not in the line bundle.",
+  },
+  {
+    id: "tree",
+    file: "tree",
+    exportName: "tree",
+    sizes: [31],
+    homepageRow: null,
+    nMeaning: "nodes under one root",
+    why: "Tidy tree. Thirty-one nodes. Not in the line bundle.",
   },
 ];
 

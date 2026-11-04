@@ -14,6 +14,8 @@ import weekStream from "../../packages/core/examples/41-streamgraph-time.json";
 import waitDensity from "../../packages/core/examples/42-density.json";
 import deskDensity from "../../packages/core/examples/43-density-groups.json";
 import rugDensity from "../../packages/core/examples/44-density-rug.json";
+import orgTree from "../../packages/core/examples/45-tree.json";
+import clusterTree from "../../packages/core/examples/46-tree-cluster.json";
 
 export interface Spec {
   version: "1";
@@ -356,6 +358,16 @@ export const chartTypes: ChartTypeDoc[] = [
       "encoding.y is a list of fields, or one field with encoding.color or encoding.series.",
       "mark.streamOffset is wiggle, center, zero, or expand. silhouette is center.",
       "The chart loads from @chartkitdev/core/charts/streamgraph. createRenderer([line]) does not include it.",
+    ],
+  },
+  {
+    type: "tree",
+    title: "Tree",
+    summary: "A tidy node-link layout of one hierarchy. Cluster lines the leaves up.",
+    notes: [
+      "encoding.id and encoding.parent, nested children, or encoding.path. One root.",
+      "mark.tree cluster is the dendrogram. mark.orient is LR, RL, TB, or BT.",
+      "The chart loads from @chartkitdev/core/charts/tree. createRenderer([line]) does not include it.",
     ],
   },
   {
@@ -936,6 +948,22 @@ export const examples: Example[] = [
     type: "streamgraph",
     blurb: "A time axis, share baseline, and labels on the streams.",
     spec: { ...(weekStream as Spec), id: "weekly-streamgraph" },
+  },
+  {
+    slug: "org-tree",
+    title: "One hierarchy",
+    group: "Flow",
+    type: "tree",
+    blurb: "Root has two children. A has one child. Dots, not boxes.",
+    spec: { ...(orgTree as Spec), id: "org-tree" },
+  },
+  {
+    slug: "cluster-tree",
+    title: "Leaves line up",
+    group: "Flow",
+    type: "tree",
+    blurb: "A dendrogram. Fruit has two leaves and Veg has one.",
+    spec: { ...(clusterTree as Spec), id: "cluster-tree" },
   },
   {
     slug: "wait-density",

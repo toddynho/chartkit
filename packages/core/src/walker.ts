@@ -83,6 +83,7 @@ const CHART_TYPES = [
   "strip",
   "streamgraph",
   "density",
+  "tree",
 ] as const;
 
 /** Types whose field rules live outside this schema. They stay out of the enum and in the CK1005 list. */
@@ -1095,6 +1096,7 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   if (value === "box" || value === "box-plot") return { type: "boxplot", kind: "rename" };
   if (value === "stripplot" || value === "strip-plot" || value === "dotplot" || value === "dot-plot" || value === "cleveland") return { type: "strip", kind: "rename" };
   if (value === "kde" || value === "density" || value === "kernel-density") return { type: "density", kind: "rename" };
+  if (value === "dendrogram" || value === "treegraph" || value === "tree-graph") return { type: "tree", kind: "rename" };
   if (value === "stream" || value === "stream-graph" || value === "themeriver" || value === "theme-river" || value === "themeRiver") return { type: "streamgraph", kind: "rename" };
   if (value === "radar-chart") return { type: "radar", kind: "rename" };
   if (value === "funnel-chart") return { type: "funnel", kind: "rename" };

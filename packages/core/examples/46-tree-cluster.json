@@ -1,0 +1,16 @@
+{
+  "version": "1",
+  "type": "tree",
+  "title": "Leaves line up",
+  "data": [
+    { "id": "All", "parent": "" },
+    { "id": "Fruit", "parent": "All" },
+    { "id": "Veg", "parent": "All" },
+    { "id": "Apple", "parent": "Fruit" },
+    { "id": "Pear", "parent": "Fruit" },
+    { "id": "Kale", "parent": "Veg" }
+  ],
+  "encoding": { "id": "id", "parent": "parent" },
+  "mark": { "tree": "cluster", "orient": "TB" },
+  "a11y": { "alt": "Leaves line up. Fruit has two. Veg has one." }
+}

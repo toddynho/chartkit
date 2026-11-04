@@ -1,0 +1,42 @@
+{
+  "version": "1",
+  "id": "soft-tree",
+  "type": "tree",
+  "title": "One hierarchy",
+  "theme": {
+    "preset": "soft",
+    "tokens": {
+      "fontFamily": "Inter"
+    }
+  },
+  "locale": "en-US",
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "data": [
+    {
+      "id": "Root",
+      "parent": ""
+    },
+    {
+      "id": "A",
+      "parent": "Root"
+    },
+    {
+      "id": "B",
+      "parent": "Root"
+    },
+    {
+      "id": "A1",
+      "parent": "A"
+    }
+  ],
+  "encoding": {
+    "id": "id",
+    "parent": "parent"
+  },
+  "a11y": {
+    "alt": "Root has two children. A has one child."
+  }
+}

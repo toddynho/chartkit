@@ -93,7 +93,7 @@ Every chart type and major variant. Status native = a first-class type/series/ma
 | **Funnel** <br><sub>`type.funnel` ★</sub> | ● | ⊕ | ● | ● | ● | ● | ● | · | ✎ | ● | ● | ✎ | ✎ | ●ᴱ | ● | · | · | · | ●ᴾ | · | ✎ |
 | **Pyramid** <br><sub>`type.pyramid`</sub> | ◐ | · | · | ◐ | ● | ◐ | · | · | ✎ | ● | · | ✎ | ✎ | ●ᴱ | ● | · | · | · | ? | · | ✎ |
 | **Network / force graph** <br><sub>`type.network`</sub> | · | ⊕ | · | ● | ● | · | ● | · | ● | · | · | ✎ | · | ● | ● | · | · | · | · | · | ● |
-| **Tree / org chart / dendrogram** <br><sub>`type.tree`</sub> | · | ⊕ | ? | ● | ● | · | ● | · | ● | ⊕ | · | ● | · | ●ᴱ | ● | ● | · | · | ? | ? | ● |
+| **Tree / org chart / dendrogram** <br><sub>`type.tree`</sub> | ● | ⊕ | ? | ● | ● | · | ● | · | ● | ⊕ | · | ● | · | ●ᴱ | ● | ● | · | · | ? | ? | ● |
 | **Venn / Euler diagram** <br><sub>`type.venn`</sub> | ● | ⊕ | · | · | ● | ✎ | · | · | ✎ | · | · | ✎ | · | · | ● | · | · | · | · | ● | ✎ |
 | **Word cloud** <br><sub>`type.wordcloud`</sub> | · | ⊕ | · | ⊕ | ● | · | · | · | ● | · | · | ✎ | · | · | ● | · | · | · | · | · | ● |
 | **Histogram** <br><sub>`type.histogram` ★</sub> | ● | ✎ | ✎ | ⊕ | ● | ● | ✎ | ● | ✎ | ◐ | · | ● | ● | ● | ✎ | ● | ✎ | ? | ✎ | ? | ● |

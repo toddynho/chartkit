@@ -12,7 +12,9 @@ export function suggestAlt(spec: unknown): string {
   const metricValue = typeof metric?.value === "number" ? String(metric.value) : "";
 
   let sentence: string;
-  if (type === "streamgraph") {
+  if (type === "tree") {
+    sentence = "Tree of one hierarchy. Dots and links, not boxes.";
+  } else if (type === "streamgraph") {
     const what = yFields.length ? yFields.join(", ") : "the layers";
     sentence = x ? `Streamgraph of ${what} by ${x}. The baseline is not zero.` : `Streamgraph of ${what}. The baseline is not zero.`;
   } else if (title && yFields.length > 0) {
@@ -55,6 +57,7 @@ function chartLabel(type: string): string {
     pie: "Pie chart",
     streamgraph: "Streamgraph",
     density: "Density chart",
+    tree: "Tree",
   };
   return names[type] ?? `${type} chart`;
 }

@@ -25,14 +25,14 @@
       "source-review": "Probe hit in ChartKit source read by hand and found unrelated (strong for \"none\")",
       "pkg-license": "Read from package.json / LICENSE (strong)",
       "dts-grep": "Identifier regex matched in the library's types/sources (weak: shows the name exists, not semantics)",
-      "dts-mechanism": "\"manual\" claim — only the escape hatch was verified to exist (weak)",
+      "dts-mechanism": "\"manual\" claim \u2014 only the escape hatch was verified to exist (weak)",
       "npm": "Plugin package exists on npm (weak: not tested)",
       "doc-cited": "Cited from docs URL, not machine-checked (weak)",
       "dts-absence": "\"none\" claim; the row probe regex matched no identifier/literal in the library corpus (moderate)",
       "unverified": "No machine check passed; status forced to unknown",
       "conflict": "\"none\" claim but the absence probe matched; forced to unknown pending review (see conflicts.md)"
     },
-    "agentRelevance": "1 niche, 2 common, 3 core — how often an agent building a chart would specify it",
+    "agentRelevance": "1 niche, 2 common, 3 core \u2014 how often an agent building a chart would specify it",
     "cellFields": {
       "status": "see statuses",
       "assessed": "author claim when status=unknown",
@@ -217,12 +217,12 @@
         "minimalLine": 1467070,
         "fullEntry": 1467070
       },
-      "verifiedAgainst": "plot-schema.json from plotly.js 4.1.2 (unpkg) — @types/plotly.js 3.0.15 lags"
+      "verifiedAgainst": "plot-schema.json from plotly.js 4.1.2 (unpkg) \u2014 @types/plotly.js 3.0.15 lags"
     },
     {
       "id": "nivo",
       "name": "Nivo",
-      "package": "@nivo/* (core, line, bar, …)",
+      "package": "@nivo/* (core, line, bar, \u2026)",
       "version": "0.99.0",
       "dateChecked": "2026-10-18",
       "docs": "https://nivo.rocks/",
@@ -569,7 +569,7 @@
         "stars": 5862,
         "lastPush": "2026-10-19T00:55:33Z",
         "fetched": "2026-10-19T01:17:26.172Z",
-        "note": "stars are for the whole mui/mui-x monorepo (grid, pickers, charts…)"
+        "note": "stars are for the whole mui/mui-x monorepo (grid, pickers, charts\u2026)"
       },
       "bundleGzip": {
         "minimalLine": 96865,
@@ -642,14 +642,14 @@
       "version": "7.9.0",
       "npmWeekly": 13955013,
       "stars": 113766,
-      "reason": "Primitives baseline (scales, shapes, layouts) — anything is \"manual\"; not scored."
+      "reason": "Primitives baseline (scales, shapes, layouts) \u2014 anything is \"manual\"; not scored."
     },
     {
       "id": "@unovis/ts",
       "name": "Unovis",
       "npmWeekly": 151866,
       "stars": 2856,
-      "reason": "Below the popularity bar (<~160k weekly) — not scored"
+      "reason": "Below the popularity bar (<~160k weekly) \u2014 not scored"
     },
     {
       "id": "react-google-charts",
@@ -661,37 +661,37 @@
       "id": "c3",
       "name": "C3.js",
       "npmWeekly": 83435,
-      "reason": "Below the popularity bar (<~160k weekly) — not scored"
+      "reason": "Below the popularity bar (<~160k weekly) \u2014 not scored"
     },
     {
       "id": "chartist",
       "name": "Chartist",
       "npmWeekly": 67472,
-      "reason": "Below the popularity bar (<~160k weekly) — not scored"
+      "reason": "Below the popularity bar (<~160k weekly) \u2014 not scored"
     },
     {
       "id": "nvd3",
       "name": "NVD3",
       "npmWeekly": 61011,
-      "reason": "Below the popularity bar (<~160k weekly) — not scored"
+      "reason": "Below the popularity bar (<~160k weekly) \u2014 not scored"
     },
     {
       "id": "frappe-charts",
       "name": "Frappe Charts",
       "npmWeekly": 58285,
-      "reason": "Below the popularity bar (<~160k weekly) — not scored"
+      "reason": "Below the popularity bar (<~160k weekly) \u2014 not scored"
     },
     {
       "id": "@carbon/charts",
       "name": "Carbon Charts",
       "npmWeekly": 47565,
-      "reason": "Below the popularity bar (<~160k weekly) — not scored"
+      "reason": "Below the popularity bar (<~160k weekly) \u2014 not scored"
     },
     {
       "id": "billboard.js",
       "name": "billboard.js",
       "npmWeekly": 31927,
-      "reason": "Below the popularity bar (<~160k weekly) — not scored"
+      "reason": "Below the popularity bar (<~160k weekly) \u2014 not scored"
     },
     {
       "id": "react-chartjs-2",
@@ -964,7 +964,7 @@
             {
               "kind": "schema-path",
               "path": "trace.mode",
-              "loc": "plot-schema.json#traces.{indicator,scatter,scatter3d,scattercarpet,scattergeo,scattergl,…}.attributes.mode",
+              "loc": "plot-schema.json#traces.{indicator,scatter,scatter3d,scattercarpet,scattergeo,scattergl,\u2026}.attributes.mode",
               "url": "https://plotly.com/javascript/reference/scatter/#indicator-mode"
             }
           ],
@@ -4355,7 +4355,7 @@
             {
               "kind": "schema-path",
               "path": "trace.orientation=h",
-              "loc": "plot-schema.json#traces.{bar,box,funnel,histogram,sankey,scatter,…}.attributes.orientation",
+              "loc": "plot-schema.json#traces.{bar,box,funnel,histogram,sankey,scatter,\u2026}.attributes.orientation",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-orientation"
             }
           ],
@@ -6996,7 +6996,7 @@
             {
               "kind": "schema-path",
               "path": "trace.mode=markers",
-              "loc": "plot-schema.json#traces.{scatter,scatter3d,scattercarpet,scattergeo,scattergl,scattermap,…}.attributes.mode",
+              "loc": "plot-schema.json#traces.{scatter,scatter3d,scattercarpet,scattergeo,scattergl,scattermap,\u2026}.attributes.mode",
               "url": "https://plotly.com/javascript/reference/scatter/#scatter-mode"
             }
           ],
@@ -7375,7 +7375,7 @@
             {
               "kind": "schema-path",
               "path": "trace.marker.size",
-              "loc": "plot-schema.json#traces.{box,scatter,scatter3d,scattercarpet,scattergeo,scattergl,…}.attributes.marker.size",
+              "loc": "plot-schema.json#traces.{box,scatter,scatter3d,scattercarpet,scattergeo,scattergl,\u2026}.attributes.marker.size",
               "url": "https://plotly.com/javascript/reference/scatter/#box-marker-size"
             }
           ],
@@ -18925,15 +18925,19 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:tree)['\"`]|(?:^|[\\s{,;])\\w*(?:tree)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:tree)"
+            "ChartKitChartSpecV1.type=tree",
+            "mark.tree"
           ],
-          "evidence": [],
-          "note": "probe hit reviewed: match marks.ts:93 is the word \"treemap\"",
-          "verified": "source-review",
-          "strength": "strong"
+          "evidence": [
+            {
+              "kind": "dts-path",
+              "path": "packages/core/src/charts/tree.ts"
+            }
+          ],
+          "note": "Tidy and cluster. Dots, not boxes."
         },
         "chartjs": {
           "status": "plugin",
@@ -21413,7 +21417,7 @@
               "loc": "chartkit:packages/core/src/charts/errorbar.ts:1"
             }
           ],
-          "note": "Whiskers on point or bar marks, from low and high or a ± field.",
+          "note": "Whiskers on point or bar marks, from low and high or a \u00b1 field.",
           "verified": "dts-path",
           "strength": "strong"
         },
@@ -29327,13 +29331,13 @@
             {
               "kind": "schema-path",
               "path": "trace.x",
-              "loc": "plot-schema.json#traces.{bar,box,candlestick,carpet,cone,contour,…}.attributes.x",
+              "loc": "plot-schema.json#traces.{bar,box,candlestick,carpet,cone,contour,\u2026}.attributes.x",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-x"
             },
             {
               "kind": "schema-path",
               "path": "trace.y",
-              "loc": "plot-schema.json#traces.{bar,box,carpet,cone,contour,funnel,…}.attributes.y",
+              "loc": "plot-schema.json#traces.{bar,box,carpet,cone,contour,funnel,\u2026}.attributes.y",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-y"
             }
           ],
@@ -31028,7 +31032,7 @@
             {
               "kind": "schema-path",
               "path": "trace.connectgaps",
-              "loc": "plot-schema.json#traces.{contour,heatmap,scatter,scatter3d,scattercarpet,scattergeo,…}.attributes.connectgaps",
+              "loc": "plot-schema.json#traces.{contour,heatmap,scatter,scatter3d,scattercarpet,scattergeo,\u2026}.attributes.connectgaps",
               "url": "https://plotly.com/javascript/reference/scatter/#contour-connectgaps"
             }
           ],
@@ -33550,7 +33554,7 @@
             {
               "kind": "schema-path",
               "path": "trace.ids",
-              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,carpet,choropleth,…}.attributes.ids",
+              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,carpet,choropleth,\u2026}.attributes.ids",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-ids"
             },
             {
@@ -34325,13 +34329,13 @@
             {
               "kind": "schema-path",
               "path": "trace.marker.color",
-              "loc": "plot-schema.json#traces.{bar,barpolar,box,funnel,histogram,histogram2d,…}.attributes.marker.color",
+              "loc": "plot-schema.json#traces.{bar,barpolar,box,funnel,histogram,histogram2d,\u2026}.attributes.marker.color",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-marker-color"
             },
             {
               "kind": "schema-path",
               "path": "trace.line.color",
-              "loc": "plot-schema.json#traces.{box,contour,contourcarpet,histogram2dcontour,parcats,parcoords,…}.attributes.line.color",
+              "loc": "plot-schema.json#traces.{box,contour,contourcarpet,histogram2dcontour,parcats,parcoords,\u2026}.attributes.line.color",
               "url": "https://plotly.com/javascript/reference/scatter/#box-line-color"
             }
           ],
@@ -34717,7 +34721,7 @@
             {
               "kind": "schema-path",
               "path": "trace.marker.color",
-              "loc": "plot-schema.json#traces.{bar,barpolar,box,funnel,histogram,histogram2d,…}.attributes.marker.color",
+              "loc": "plot-schema.json#traces.{bar,barpolar,box,funnel,histogram,histogram2d,\u2026}.attributes.marker.color",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-marker-color"
             }
           ],
@@ -35090,7 +35094,7 @@
             {
               "kind": "schema-path",
               "path": "trace.marker.colorscale",
-              "loc": "plot-schema.json#traces.{bar,barpolar,funnel,histogram,icicle,quiver,…}.attributes.marker.colorscale",
+              "loc": "plot-schema.json#traces.{bar,barpolar,funnel,histogram,icicle,quiver,\u2026}.attributes.marker.colorscale",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-marker-colorscale"
             }
           ],
@@ -35829,7 +35833,7 @@
             {
               "kind": "schema-path",
               "path": "trace.marker.pattern",
-              "loc": "plot-schema.json#traces.{bar,barpolar,funnelarea,histogram,icicle,pie,…}.attributes.marker.pattern",
+              "loc": "plot-schema.json#traces.{bar,barpolar,funnelarea,histogram,icicle,pie,\u2026}.attributes.marker.pattern",
               "url": "https://plotly.com/javascript/reference/bar/#bar-marker-pattern"
             }
           ],
@@ -36191,7 +36195,7 @@
             {
               "kind": "schema-path",
               "path": "trace.line.width",
-              "loc": "plot-schema.json#traces.{box,candlestick,contour,contourcarpet,histogram2dcontour,ohlc,…}.attributes.line.width",
+              "loc": "plot-schema.json#traces.{box,candlestick,contour,contourcarpet,histogram2dcontour,ohlc,\u2026}.attributes.line.width",
               "url": "https://plotly.com/javascript/reference/scatter/#box-line-width"
             }
           ],
@@ -36554,7 +36558,7 @@
             {
               "kind": "schema-path",
               "path": "trace.line.dash",
-              "loc": "plot-schema.json#traces.{contour,contourcarpet,histogram2dcontour,ohlc,scatter,scatter3d,…}.attributes.line.dash",
+              "loc": "plot-schema.json#traces.{contour,contourcarpet,histogram2dcontour,ohlc,scatter,scatter3d,\u2026}.attributes.line.dash",
               "url": "https://plotly.com/javascript/reference/scatter/#contour-line-dash"
             }
           ],
@@ -36934,7 +36938,7 @@
             {
               "kind": "schema-path",
               "path": "trace.opacity",
-              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,carpet,cone,…}.attributes.opacity",
+              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,carpet,cone,\u2026}.attributes.opacity",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-opacity"
             }
           ],
@@ -37298,7 +37302,7 @@
             {
               "kind": "schema-path",
               "path": "trace.marker.symbol",
-              "loc": "plot-schema.json#traces.{box,scatter,scatter3d,scattercarpet,scattergeo,scattergl,…}.attributes.marker.symbol",
+              "loc": "plot-schema.json#traces.{box,scatter,scatter3d,scattercarpet,scattergeo,scattergl,\u2026}.attributes.marker.symbol",
               "url": "https://plotly.com/javascript/reference/scatter/#box-marker-symbol"
             }
           ],
@@ -37676,7 +37680,7 @@
             {
               "kind": "schema-path",
               "path": "trace.marker.size",
-              "loc": "plot-schema.json#traces.{box,scatter,scatter3d,scattercarpet,scattergeo,scattergl,…}.attributes.marker.size",
+              "loc": "plot-schema.json#traces.{box,scatter,scatter3d,scattercarpet,scattergeo,scattergl,\u2026}.attributes.marker.size",
               "url": "https://plotly.com/javascript/reference/scatter/#box-marker-size"
             }
           ],
@@ -38060,7 +38064,7 @@
             {
               "kind": "schema-path",
               "path": "trace.mode",
-              "loc": "plot-schema.json#traces.{indicator,scatter,scatter3d,scattercarpet,scattergeo,scattergl,…}.attributes.mode",
+              "loc": "plot-schema.json#traces.{indicator,scatter,scatter3d,scattercarpet,scattergeo,scattergl,\u2026}.attributes.mode",
               "url": "https://plotly.com/javascript/reference/scatter/#indicator-mode"
             }
           ],
@@ -45785,7 +45789,7 @@
             {
               "kind": "schema-path",
               "path": "trace.colorscale",
-              "loc": "plot-schema.json#traces.{choropleth,choroplethmap,cone,contour,contourcarpet,densitymap,…}.attributes.colorscale",
+              "loc": "plot-schema.json#traces.{choropleth,choroplethmap,cone,contour,contourcarpet,densitymap,\u2026}.attributes.colorscale",
               "url": "https://plotly.com/javascript/reference/choropleth/#choropleth-colorscale"
             }
           ],
@@ -55933,7 +55937,7 @@
             {
               "kind": "schema-path",
               "path": "trace.colorbar",
-              "loc": "plot-schema.json#traces.{choropleth,choroplethmap,cone,contour,contourcarpet,densitymap,…}.attributes.colorbar",
+              "loc": "plot-schema.json#traces.{choropleth,choroplethmap,cone,contour,contourcarpet,densitymap,\u2026}.attributes.colorbar",
               "url": "https://plotly.com/javascript/reference/choropleth/#choropleth-colorbar"
             }
           ],
@@ -57072,7 +57076,7 @@
             {
               "kind": "schema-path",
               "path": "trace.hovertemplate",
-              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,choropleth,choroplethmap,…}.attributes.hovertemplate",
+              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,choropleth,choroplethmap,\u2026}.attributes.hovertemplate",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-hovertemplate"
             }
           ],
@@ -57451,13 +57455,13 @@
             {
               "kind": "schema-path",
               "path": "trace.customdata",
-              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,carpet,choropleth,…}.attributes.customdata",
+              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,carpet,choropleth,\u2026}.attributes.customdata",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-customdata"
             },
             {
               "kind": "schema-path",
               "path": "trace.hovertemplate",
-              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,choropleth,choroplethmap,…}.attributes.hovertemplate",
+              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,choropleth,choroplethmap,\u2026}.attributes.hovertemplate",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-hovertemplate"
             }
           ],
@@ -62568,13 +62572,13 @@
             {
               "kind": "schema-path",
               "path": "trace.text",
-              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,choropleth,choroplethmap,…}.attributes.text",
+              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,choropleth,choroplethmap,\u2026}.attributes.text",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-text"
             },
             {
               "kind": "schema-path",
               "path": "trace.textposition",
-              "loc": "plot-schema.json#traces.{bar,funnel,funnelarea,histogram,icicle,pie,…}.attributes.textposition",
+              "loc": "plot-schema.json#traces.{bar,funnel,funnelarea,histogram,icicle,pie,\u2026}.attributes.textposition",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-textposition"
             }
           ],
@@ -62943,7 +62947,7 @@
             {
               "kind": "schema-path",
               "path": "trace.textposition",
-              "loc": "plot-schema.json#traces.{bar,funnel,funnelarea,histogram,icicle,pie,…}.attributes.textposition",
+              "loc": "plot-schema.json#traces.{bar,funnel,funnelarea,histogram,icicle,pie,\u2026}.attributes.textposition",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-textposition"
             }
           ],
@@ -63294,7 +63298,7 @@
             {
               "kind": "schema-path",
               "path": "trace.texttemplate",
-              "loc": "plot-schema.json#traces.{bar,contour,funnel,funnelarea,heatmap,histogram,…}.attributes.texttemplate",
+              "loc": "plot-schema.json#traces.{bar,contour,funnel,funnelarea,heatmap,histogram,\u2026}.attributes.texttemplate",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-texttemplate"
             }
           ],
@@ -64005,7 +64009,7 @@
             {
               "kind": "schema-path",
               "path": "trace.textposition",
-              "loc": "plot-schema.json#traces.{bar,funnel,funnelarea,histogram,icicle,pie,…}.attributes.textposition",
+              "loc": "plot-schema.json#traces.{bar,funnel,funnelarea,histogram,icicle,pie,\u2026}.attributes.textposition",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-textposition"
             }
           ],
@@ -64743,7 +64747,7 @@
             {
               "kind": "schema-path",
               "path": "trace.hoverlabel",
-              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,choropleth,choroplethmap,…}.attributes.hoverlabel",
+              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,choropleth,choroplethmap,\u2026}.attributes.hoverlabel",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-hoverlabel"
             }
           ],
@@ -78766,7 +78770,7 @@
             {
               "kind": "schema-path",
               "path": "trace.marker.pattern",
-              "loc": "plot-schema.json#traces.{bar,barpolar,funnelarea,histogram,icicle,pie,…}.attributes.marker.pattern",
+              "loc": "plot-schema.json#traces.{bar,barpolar,funnelarea,histogram,icicle,pie,\u2026}.attributes.marker.pattern",
               "url": "https://plotly.com/javascript/reference/bar/#bar-marker-pattern"
             }
           ],
@@ -94603,7 +94607,7 @@
             {
               "kind": "schema-path",
               "path": "trace.type",
-              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,carpet,choropleth,…}.attributes.type",
+              "loc": "plot-schema.json#traces.{bar,barpolar,box,candlestick,carpet,choropleth,\u2026}.attributes.type",
               "url": "https://plotly.com/javascript/reference/scatter/#bar-type"
             }
           ],
@@ -94946,7 +94950,7 @@
               "loc": "highcharts/package.json"
             }
           ],
-          "note": "Commercial (free for non-commercial) — package.json license = https://www.highcharts.com/license; LICENSE.txt: commercial use under Highsoft Standard License, non-commercial under EULA.",
+          "note": "Commercial (free for non-commercial) \u2014 package.json license = https://www.highcharts.com/license; LICENSE.txt: commercial use under Highsoft Standard License, non-commercial under EULA.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95021,7 +95025,7 @@
               "loc": "apexcharts/package.json"
             }
           ],
-          "note": "Dual: Community (free under $2M revenue) / Commercial — LICENSE.md: free only for orgs under $2M annual revenue/funding; disallows use in competing charting products; OEM licence needed for embedding in platforms used by others.",
+          "note": "Dual: Community (free under $2M revenue) / Commercial \u2014 LICENSE.md: free only for orgs under $2M annual revenue/funding; disallows use in competing charting products; OEM licence needed for embedding in platforms used by others.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95036,7 +95040,7 @@
               "loc": "@tremor/react/package.json"
             }
           ],
-          "note": "Apache-2.0 — npm package repo tremorlabs/tremor-npm last pushed 2025-01-13; Tremor now focuses on copy-paste components (tremorlabs/tremor).",
+          "note": "Apache-2.0 \u2014 npm package repo tremorlabs/tremor-npm last pushed 2025-01-13; Tremor now focuses on copy-paste components (tremorlabs/tremor).",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95081,7 +95085,7 @@
               "loc": "ag-charts-community/package.json"
             }
           ],
-          "note": "MIT (community) + Commercial (enterprise) — ag-charts-enterprise package.json license = \"Commercial\". Cells tagged tier=ent need it.",
+          "note": "MIT (community) + Commercial (enterprise) \u2014 ag-charts-enterprise package.json license = \"Commercial\". Cells tagged tier=ent need it.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95096,7 +95100,7 @@
               "loc": "@amcharts/amcharts5/package.json"
             }
           ],
-          "note": "Linkware (free with branding) / Commercial — LICENSE: free incl. commercial use if the amCharts branding link is not removed; paid licence removes it.",
+          "note": "Linkware (free with branding) / Commercial \u2014 LICENSE: free incl. commercial use if the amCharts branding link is not removed; paid licence removes it.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95105,7 +95109,7 @@
           "tier": null,
           "apiPaths": [],
           "evidence": [],
-          "note": "Proprietary hosted service (not verified from package) — Only @types are on npm; library is loaded from Google's loader. Licence terms not verified from a package file.",
+          "note": "Proprietary hosted service (not verified from package) \u2014 Only @types are on npm; library is loaded from Google's loader. Licence terms not verified from a package file.",
           "verified": "unverified",
           "strength": "unknown"
         },
@@ -95135,7 +95139,7 @@
               "loc": "lightweight-charts/package.json"
             }
           ],
-          "note": "Apache-2.0 + attribution requirement — README: must show TradingView attribution notice and a link to tradingview.com (attributionLogo option satisfies the link).",
+          "note": "Apache-2.0 + attribution requirement \u2014 README: must show TradingView attribution notice and a link to tradingview.com (attributionLogo option satisfies the link).",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95150,7 +95154,7 @@
               "loc": "@mui/x-charts/package.json"
             }
           ],
-          "note": "MIT (community) + Commercial (Pro, Premium) — @mui/x-charts-pro and -premium LICENSE: commercial EULA. Cells tagged tier=pro/premium need it.",
+          "note": "MIT (community) + Commercial (Pro, Premium) \u2014 @mui/x-charts-pro and -premium LICENSE: commercial EULA. Cells tagged tier=pro/premium need it.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95265,7 +95269,7 @@
               "loc": "highcharts/package.json"
             }
           ],
-          "note": "Commercial (free for non-commercial) — package.json license = https://www.highcharts.com/license; LICENSE.txt: commercial use under Highsoft Standard License, non-commercial under EULA.",
+          "note": "Commercial (free for non-commercial) \u2014 package.json license = https://www.highcharts.com/license; LICENSE.txt: commercial use under Highsoft Standard License, non-commercial under EULA.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95340,7 +95344,7 @@
               "loc": "apexcharts/package.json"
             }
           ],
-          "note": "Dual: Community (free under $2M revenue) / Commercial — LICENSE.md: free only for orgs under $2M annual revenue/funding; disallows use in competing charting products; OEM licence needed for embedding in platforms used by others.",
+          "note": "Dual: Community (free under $2M revenue) / Commercial \u2014 LICENSE.md: free only for orgs under $2M annual revenue/funding; disallows use in competing charting products; OEM licence needed for embedding in platforms used by others.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95355,7 +95359,7 @@
               "loc": "@tremor/react/package.json"
             }
           ],
-          "note": "Apache-2.0 — npm package repo tremorlabs/tremor-npm last pushed 2025-01-13; Tremor now focuses on copy-paste components (tremorlabs/tremor).",
+          "note": "Apache-2.0 \u2014 npm package repo tremorlabs/tremor-npm last pushed 2025-01-13; Tremor now focuses on copy-paste components (tremorlabs/tremor).",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95400,7 +95404,7 @@
               "loc": "ag-charts-community/package.json"
             }
           ],
-          "note": "MIT (community) + Commercial (enterprise) — ag-charts-enterprise package.json license = \"Commercial\". Cells tagged tier=ent need it.",
+          "note": "MIT (community) + Commercial (enterprise) \u2014 ag-charts-enterprise package.json license = \"Commercial\". Cells tagged tier=ent need it.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95415,7 +95419,7 @@
               "loc": "@amcharts/amcharts5/package.json"
             }
           ],
-          "note": "Linkware (free with branding) / Commercial — LICENSE: free incl. commercial use if the amCharts branding link is not removed; paid licence removes it.",
+          "note": "Linkware (free with branding) / Commercial \u2014 LICENSE: free incl. commercial use if the amCharts branding link is not removed; paid licence removes it.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95424,7 +95428,7 @@
           "tier": null,
           "apiPaths": [],
           "evidence": [],
-          "note": "Proprietary hosted service (not verified from package) — Only @types are on npm; library is loaded from Google's loader. Licence terms not verified from a package file.",
+          "note": "Proprietary hosted service (not verified from package) \u2014 Only @types are on npm; library is loaded from Google's loader. Licence terms not verified from a package file.",
           "verified": "unverified",
           "strength": "unknown"
         },
@@ -95454,7 +95458,7 @@
               "loc": "lightweight-charts/package.json"
             }
           ],
-          "note": "Apache-2.0 + attribution requirement — README: must show TradingView attribution notice and a link to tradingview.com (attributionLogo option satisfies the link).",
+          "note": "Apache-2.0 + attribution requirement \u2014 README: must show TradingView attribution notice and a link to tradingview.com (attributionLogo option satisfies the link).",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95469,7 +95473,7 @@
               "loc": "@mui/x-charts/package.json"
             }
           ],
-          "note": "MIT (community) + Commercial (Pro, Premium) — @mui/x-charts-pro and -premium LICENSE: commercial EULA. Cells tagged tier=pro/premium need it.",
+          "note": "MIT (community) + Commercial (Pro, Premium) \u2014 @mui/x-charts-pro and -premium LICENSE: commercial EULA. Cells tagged tier=pro/premium need it.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95584,7 +95588,7 @@
               "loc": "highcharts/package.json"
             }
           ],
-          "note": "Commercial (free for non-commercial) — package.json license = https://www.highcharts.com/license; LICENSE.txt: commercial use under Highsoft Standard License, non-commercial under EULA.",
+          "note": "Commercial (free for non-commercial) \u2014 package.json license = https://www.highcharts.com/license; LICENSE.txt: commercial use under Highsoft Standard License, non-commercial under EULA.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95659,7 +95663,7 @@
               "loc": "apexcharts/package.json"
             }
           ],
-          "note": "Dual: Community (free under $2M revenue) / Commercial — LICENSE.md: free only for orgs under $2M annual revenue/funding; disallows use in competing charting products; OEM licence needed for embedding in platforms used by others.",
+          "note": "Dual: Community (free under $2M revenue) / Commercial \u2014 LICENSE.md: free only for orgs under $2M annual revenue/funding; disallows use in competing charting products; OEM licence needed for embedding in platforms used by others.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95674,7 +95678,7 @@
               "loc": "@tremor/react/package.json"
             }
           ],
-          "note": "Apache-2.0 — npm package repo tremorlabs/tremor-npm last pushed 2025-01-13; Tremor now focuses on copy-paste components (tremorlabs/tremor).",
+          "note": "Apache-2.0 \u2014 npm package repo tremorlabs/tremor-npm last pushed 2025-01-13; Tremor now focuses on copy-paste components (tremorlabs/tremor).",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95719,7 +95723,7 @@
               "loc": "ag-charts-community/package.json"
             }
           ],
-          "note": "MIT (community) + Commercial (enterprise) — ag-charts-enterprise package.json license = \"Commercial\". Cells tagged tier=ent need it.",
+          "note": "MIT (community) + Commercial (enterprise) \u2014 ag-charts-enterprise package.json license = \"Commercial\". Cells tagged tier=ent need it.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95734,7 +95738,7 @@
               "loc": "@amcharts/amcharts5/package.json"
             }
           ],
-          "note": "Linkware (free with branding) / Commercial — LICENSE: free incl. commercial use if the amCharts branding link is not removed; paid licence removes it.",
+          "note": "Linkware (free with branding) / Commercial \u2014 LICENSE: free incl. commercial use if the amCharts branding link is not removed; paid licence removes it.",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95743,7 +95747,7 @@
           "tier": null,
           "apiPaths": [],
           "evidence": [],
-          "note": "Proprietary hosted service (not verified from package) — Only @types are on npm; library is loaded from Google's loader. Licence terms not verified from a package file.",
+          "note": "Proprietary hosted service (not verified from package) \u2014 Only @types are on npm; library is loaded from Google's loader. Licence terms not verified from a package file.",
           "verified": "unverified",
           "strength": "unknown"
         },
@@ -95773,7 +95777,7 @@
               "loc": "lightweight-charts/package.json"
             }
           ],
-          "note": "Apache-2.0 + attribution requirement — README: must show TradingView attribution notice and a link to tradingview.com (attributionLogo option satisfies the link).",
+          "note": "Apache-2.0 + attribution requirement \u2014 README: must show TradingView attribution notice and a link to tradingview.com (attributionLogo option satisfies the link).",
           "verified": "pkg-license",
           "strength": "strong"
         },
@@ -95788,7 +95792,7 @@
               "loc": "@mui/x-charts/package.json"
             }
           ],
-          "note": "MIT (community) + Commercial (Pro, Premium) — @mui/x-charts-pro and -premium LICENSE: commercial EULA. Cells tagged tier=pro/premium need it.",
+          "note": "MIT (community) + Commercial (Pro, Premium) \u2014 @mui/x-charts-pro and -premium LICENSE: commercial EULA. Cells tagged tier=pro/premium need it.",
           "verified": "pkg-license",
           "strength": "strong"
         },

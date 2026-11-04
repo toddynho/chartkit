@@ -1,6 +1,7 @@
 import { charts as base } from "./all";
 import { createRenderer, register } from "./render";
-import { attach } from "./extra-tip";
+import { attach, setTreeRenderer } from "./extra-tip";
+import { renderTree } from "./renderers/extra/tree";
 import { histogram } from "./charts/histogram";
 import { boxplot } from "./charts/boxplot";
 import { radar } from "./charts/radar";
@@ -23,17 +24,19 @@ import { rose } from "./charts/rose";
 import { strip } from "./charts/strip";
 import { streamgraph } from "./charts/streamgraph";
 import { density } from "./charts/density";
+import { tree } from "./charts/tree";
 
 /** Phase 3 and phase 4 charts. Importing this module registers them on the shared registry. */
-export const charts = [histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, areaRange, barRange, errorbar, sunburst, radialBar, rose, strip, streamgraph, density] as const;
+export const charts = [histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, areaRange, barRange, errorbar, sunburst, radialBar, rose, strip, streamgraph, density, tree] as const;
 
 register(...charts);
+setTreeRenderer(renderTree);
 
 /**
- * Core charts plus histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, area-range, bar-range, errorbar, sunburst, radial-bar, rose, strip, streamgraph, and density.
+ * Core charts plus histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, area-range, bar-range, errorbar, sunburst, radial-bar, rose, strip, streamgraph, density, and tree.
  * `@chartkitdev/core/all` does not include these, so the line and all bundles stay smaller.
  */
 export const render = createRenderer([...base, ...charts]);
 
 export { attach };
-export { histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, areaRange, barRange, errorbar, sunburst, radialBar, rose, strip, streamgraph, density };
+export { histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, areaRange, barRange, errorbar, sunburst, radialBar, rose, strip, streamgraph, density, tree };

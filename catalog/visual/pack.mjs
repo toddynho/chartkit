@@ -345,6 +345,7 @@ function specs() {
     fromExample("35-rose.json", { legend: false }),
     fromExample("39-streamgraph.json"),
     fromExample("42-density.json"),
+    fromExample("45-tree.json"),
     pack({
       type: "choropleth",
       title: "Population change, 2020–2023",

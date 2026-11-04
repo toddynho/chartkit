@@ -113,6 +113,12 @@ export function makeChartData(chart, n, seed = 1) {
     }
     case "streamgraph":
       return seriesColumns(n, seed, ["a", "b", "c"]);
+    case "tree": {
+      const rows = [{ id: "Root", parent: "" }];
+      const count = Math.max(1, n - 1);
+      for (let i = 0; i < count; i++) rows.push({ id: `N${i}`, parent: i < 2 ? "Root" : `N${Math.floor((i - 2) / 2)}` });
+      return { data: rows };
+    }
     case "strip":
     case "boxplot": {
       const groups = ["N", "E", "S", "W", "C", "NE", "NW", "SE"];

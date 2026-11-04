@@ -7,7 +7,7 @@ import { applyHeroColor, heroPaints } from "./hero-accent";
  * Geo contributes choropleth and map-points only. Atlases are not types.
  */
 
-export const HERO_TYPE_COUNT = 40;
+export const HERO_TYPE_COUNT = 41;
 
 const SIZE = { width: 520, height: 300 };
 
@@ -79,6 +79,7 @@ export const heroGroups: { id: HeroGroupId; label: string; kicker: string; types
       { type: "funnel", label: "Funnel", group: "flow", slide: "funnel", title: "Signup funnel", subtitle: "Last 30 days" },
       { type: "sankey", label: "Sankey", group: "flow", title: "Acquisition flow", subtitle: "Visits, last 30 days" },
       { type: "treemap", label: "Treemap", group: "flow", slide: "treemap", title: "Traffic by source", subtitle: "Share of sessions" },
+      { type: "tree", label: "Tree", group: "flow", title: "One hierarchy", subtitle: "Dots and links, not boxes" },
       { type: "sunburst", label: "Sunburst", group: "flow", title: "Traffic by source", subtitle: "Organic and paid" },
       { type: "venn", label: "Venn", group: "flow", title: "What customers use together", subtitle: "Search, filters, saved views" },
     ],
@@ -303,6 +304,20 @@ export const heroExtra: Record<string, HeroExtra> = {
       ],
       encoding: { x: "year", y: ["fiction", "history", "poetry"] },
     }, "History overtook fiction by 2022. The baseline is not zero."),
+  },
+  tree: {
+    motion: "fade",
+    spec: spec("tree", {
+      title: "One hierarchy",
+      subtitle: "Dots, not boxes",
+      data: [
+        { id: "Root", parent: "" },
+        { id: "A", parent: "Root" },
+        { id: "B", parent: "Root" },
+        { id: "A1", parent: "A" },
+      ],
+      encoding: { id: "id", parent: "parent" },
+    }, "Root has two children. A has one child."),
   },
   density: {
     motion: "fade",
