@@ -182,7 +182,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
 
   const canvas = canvasWanted(spec);
   const parts: string[] = [];
-  parts.push(openChart({ ...frame, renderer: "scatter", canvas }));
+  parts.push(openChart({ ...frame, pad: undefined, renderer: "scatter", canvas }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
   if (frame.title) parts.push(label(plot.left, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
   if (frame.subtitle) parts.push(label(plot.left, frame.title ? 40 : 18, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));
@@ -488,7 +488,7 @@ function renderDenseScatter(spec: Record<string, unknown>): string | null | unde
   const grid = gridStyle(spec);
   const canvas = canvasWanted(spec);
   const parts: string[] = [];
-  parts.push(openChart({ ...frame, renderer: "scatter", canvas }));
+  parts.push(openChart({ ...frame, pad: undefined, renderer: "scatter", canvas }));
   parts.push(`<rect width="100%" height="100%" fill="${cssVar("background", frame.preset.background)}" />`);
   if (frame.title) parts.push(label(plot.left, 22, frame.title, cssVar("text", frame.preset.text), 15, "650"));
   if (frame.subtitle) parts.push(label(plot.left, frame.title ? 40 : 18, frame.subtitle, cssVar("muted", frame.preset.muted), 12, "400"));

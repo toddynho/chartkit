@@ -2,7 +2,7 @@ import { loadTable } from "./data-prep";
 import type { DataTable } from "./data";
 import type { PresetGeometry, PresetTokens } from "./theme";
 import { resolveGeometry, resolvePreset } from "./theme";
-import { hash, isRecord, longDesc, niceDomain, type Headline } from "./svg";
+import { hash, isRecord, longDesc, niceDomain, readInset, type Headline, type Inset } from "./svg";
 
 export type { Headline };
 
@@ -29,14 +29,28 @@ export interface Frame {
   exportMark: string;
   /** a11y.description. openChart exposes it with aria-describedby. */
   description?: string;
+  /** size.padding. Drawn by openChart for every type that uses this frame. */
+  pad: Inset;
   /** Figure above the plot. openChart reserves a band and draws it. */
   headline?: Headline;
 }
 
-export function readFrame(
-  spec: Record<string, unknown>,
-  fallback: { width: number; height: number },
-): Frame {
+export interface ChartSize {
+  width: number;
+  height: number;
+  responsive: boolean;
+  heightFixed: boolean;
+  widthFixed: boolean;
+  pad: Inset;
+}
+
+/**
+ * Width, height, and padding for every chart.
+ * aspectRatio sets the height only when height is `auto`.
+ * minHeight raises the height and never shrinks it.
+ * An explicit height wins over the ratio.
+ */
+export function chartSize(spec: Record<string, unknown>, fallback: { width: number; height: number }): ChartSize {
   const size = isRecord(spec.size) ? spec.size : {};
   const widthFixed = typeof size.width === "number";
   const heightFixed = typeof size.height === "number";
@@ -47,7 +61,15 @@ export function readFrame(
   else if (size.height === "auto" && typeof size.aspectRatio === "number" && size.aspectRatio > 0) {
     height = Math.max(1, Math.round(width / size.aspectRatio));
   }
-  if (typeof size.minHeight === "number") height = Math.max(height, size.minHeight);
+  if (typeof size.minHeight === "number" && size.minHeight > height) height = size.minHeight;
+  return { width, height, responsive, heightFixed, widthFixed, pad: readInset(spec) };
+}
+
+export function readFrame(
+  spec: Record<string, unknown>,
+  fallback: { width: number; height: number },
+): Frame {
+  const box = chartSize(spec, fallback);
   const alt = isRecord(spec.a11y) && typeof spec.a11y.alt === "string" ? spec.a11y.alt : "";
   const type = typeof spec.type === "string" ? spec.type : "chart";
   const idSource = typeof spec.id === "string" ? spec.id : alt || type;
@@ -57,11 +79,12 @@ export function readFrame(
     title: typeof spec.title === "string" ? spec.title : undefined,
     subtitle: typeof spec.subtitle === "string" ? spec.subtitle : undefined,
     locale: typeof spec.locale === "string" ? spec.locale : "en-US",
-    width,
-    height,
-    responsive,
-    heightFixed,
-    widthFixed,
+    width: box.width,
+    height: box.height,
+    responsive: box.responsive,
+    heightFixed: box.heightFixed,
+    widthFixed: box.widthFixed,
+    pad: box.pad,
     preset: resolvePreset(spec.theme),
     geometry: resolveGeometry(spec.theme),
     id: `ck${hash(idSource)}`,

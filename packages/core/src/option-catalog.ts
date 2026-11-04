@@ -137,7 +137,7 @@ const CHANNEL_APPLIES: Record<string, readonly string[]> = {
  * Continuous x. Category bands (bar, pie, waterfall) keep the field and drop
  * type, format, and scale. Strip's x is the numeric axis.
  */
-const X_POSITION = ["line", "stacked-area", "scatter", "combo", "sparkline", "mini-area", "histogram", "strip"];
+const X_POSITION = ["line", "stacked-area", "scatter", "combo", "sparkline", "mini-area", "histogram", "strip", "candlestick", "spike", "area-range"];
 
 /**
  * Numeric y position: an axis or a radius. Slice size, flow, and group
@@ -145,8 +145,19 @@ const X_POSITION = ["line", "stacked-area", "scatter", "combo", "sparkline", "mi
  */
 const Y_POSITION = ["line", "bar", "stacked-area", "combo", "scatter", "spike", "candlestick", "histogram", "boxplot", "waterfall", "area-range", "bar-range", "errorbar", "bullet", "radar", "radial-bar", "rose"];
 
-/** Sequential color. Categorical color stays on the channel field. */
-const COLOR_SCALE = ["heatmap", "choropleth"];
+/**
+ * Quantitative color. Scatter, treemap, and map-points can color by a number
+ * the way heatmap and choropleth do. A category color field stays on the
+ * channel itself.
+ */
+const COLOR_SCALE = ["heatmap", "choropleth", "scatter", "treemap", "map-points"];
+
+/**
+ * Charts that print a y value (slice, tile, stage, flow) even when y is not
+ * a position scale. Format is the printed number. Type and scale stay on
+ * Y_POSITION.
+ */
+const Y_VALUE_FORMAT = [...Y_POSITION, "donut", "pie", "funnel", "treemap", "sunburst", "sankey"];
 
 /** Charts whose SVG references a theme token. Geo bakes colours and is omitted. */
 const PAINTED = [
@@ -214,11 +225,10 @@ const PATH_APPLIES: Record<string, readonly string[]> = {
   "encoding.x.scale": X_POSITION,
   "encoding.x.title": AXIS_TYPES,
   "encoding.y.type": Y_POSITION,
-  "encoding.y.format": Y_POSITION,
+  "encoding.y.format": Y_VALUE_FORMAT,
   "encoding.y.scale": Y_POSITION,
   "encoding.y.title": AXIS_TYPES,
   "encoding.color.type": COLOR_SCALE,
-  "encoding.color.title": COLOR_SCALE,
   "encoding.color.format": COLOR_SCALE,
   "encoding.color.scale": COLOR_SCALE,
   "encoding.color.range": COLOR_SCALE,
@@ -232,7 +242,7 @@ const PATH_APPLIES: Record<string, readonly string[]> = {
   "theme.tokens.text": PAINTED,
   "theme.tokens.muted": PAINTED,
   "theme.tokens.grid": ["line", "bar", "stacked-area", "combo", "scatter", "boxplot", "histogram", "area-range", "bar-range", "errorbar", "waterfall", "strip", "radial-bar", "rose", "radar", "candlestick", "kpi"],
-  "theme.tokens.axis": ["line", "bar", "stacked-area", "combo", "boxplot", "histogram", "strip", "area-range", "bar-range", "errorbar", "waterfall", "spike", "gantt", "journey", "quadrant", "radar", "heatmap", "timeline"],
+  "theme.tokens.axis": ["line", "bar", "stacked-area", "combo", "scatter", "boxplot", "histogram", "strip", "area-range", "bar-range", "errorbar", "waterfall", "spike", "gantt", "journey", "quadrant", "radar", "heatmap", "timeline"],
   "theme.tokens.accent": ["gantt", "quadrant", "strip", "timeline", "waterfall", "gauge", "choropleth", "map-points"],
   "theme.tokens.positive": ["candlestick", "gantt", "journey", "quadrant", "waterfall", "kpi", "line", "bar", "stacked-area", "combo", "sparkline", "mini-area"],
   "theme.tokens.negative": ["candlestick", "gantt", "journey", "quadrant", "waterfall", "kpi", "line", "bar", "stacked-area", "combo", "sparkline", "mini-area"],
