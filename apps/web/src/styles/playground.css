@@ -1066,5 +1066,6 @@ body:has(.play) main {
   .play-panel { order: 2; border-right: 0; min-height: 70vh; }
   .play-canvas { padding: 16px; }
   .play-card { max-width: 100%; }
-  .play-card__chart { width: min(380px, 100%) !important; height: 180px !important; }
+  .play-card__chart { max-width: 100%; height: auto !important; }
+  .play-card__chart svg { width: 100%; height: auto; }
 }
