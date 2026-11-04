@@ -2,7 +2,7 @@ import { loadTable } from "./data-prep";
 import type { DataTable } from "./data";
 import type { PresetGeometry, PresetTokens } from "./theme";
 import { resolveGeometry, resolvePreset } from "./theme";
-import { hash, isRecord, niceDomain, type Headline } from "./svg";
+import { hash, isRecord, longDesc, niceDomain, type Headline } from "./svg";
 
 export type { Headline };
 
@@ -27,6 +27,8 @@ export interface Frame {
   legendValues: boolean;
   /** Comma-joined interaction.export formats, or "". */
   exportMark: string;
+  /** a11y.description. openChart exposes it with aria-describedby. */
+  description?: string;
   /** Figure above the plot. openChart reserves a band and draws it. */
   headline?: Headline;
 }
@@ -68,6 +70,7 @@ export function readFrame(
     legend: legendPlacement(spec),
     legendValues: isRecord(spec.legend) && spec.legend.values === true,
     exportMark: exportList(spec),
+    description: longDesc(spec),
     headline: readHeadline(spec),
   };
 }

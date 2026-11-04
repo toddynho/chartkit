@@ -8,6 +8,7 @@
  * bundle reads the generated catalog, not the chart renderers.
  */
 import { MARK_APPLIES } from "./marks";
+import { CANVAS_TYPES } from "./render-mode";
 import catalogJson from "./generated/option-catalog.json";
 
 export const OPTION_GROUPS = [
@@ -132,6 +133,66 @@ const CHANNEL_APPLIES: Record<string, readonly string[]> = {
   parent: ["treemap", "sunburst"],
 };
 
+/**
+ * Continuous x. Category bands (bar, pie, waterfall) keep the field and drop
+ * type, format, and scale. Strip's x is the numeric axis.
+ */
+const X_POSITION = ["line", "stacked-area", "scatter", "combo", "sparkline", "mini-area", "histogram", "strip"];
+
+/**
+ * Numeric y position: an axis or a radius. Slice size, flow, and group
+ * fields are not a position scale.
+ */
+const Y_POSITION = ["line", "bar", "stacked-area", "combo", "scatter", "spike", "candlestick", "histogram", "boxplot", "waterfall", "area-range", "bar-range", "errorbar", "bullet", "radar", "radial-bar", "rose"];
+
+/** Sequential color. Categorical color stays on the channel field. */
+const COLOR_SCALE = ["heatmap", "choropleth"];
+
+/** Charts whose SVG references a theme token. Geo bakes colours and is omitted. */
+const PAINTED = [
+  "line",
+  "bar",
+  "donut",
+  "pie",
+  "stacked-area",
+  "scatter",
+  "combo",
+  "heatmap",
+  "gauge",
+  "kpi",
+  "sparkline",
+  "mini-area",
+  "progress-ring",
+  "spike",
+  "candlestick",
+  "histogram",
+  "boxplot",
+  "radar",
+  "funnel",
+  "treemap",
+  "sankey",
+  "bullet",
+  "waterfall",
+  "area-range",
+  "bar-range",
+  "errorbar",
+  "sunburst",
+  "bar-list",
+  "radial-bar",
+  "rose",
+  "strip",
+  "gantt",
+  "timeline",
+  "quadrant",
+  "venn",
+  "journey",
+];
+
+function except(drop: readonly string[]): string[] {
+  const skip = new Set(drop);
+  return PAINTED.filter((type) => !skip.has(type));
+}
+
 /** Paths narrower than the section they live in. Descendants inherit the longest matching prefix. */
 const PATH_APPLIES: Record<string, readonly string[]> = {
   "encoding.y.lo": ["area-range", "bar-range", "combo", "errorbar"],
@@ -148,6 +209,34 @@ const PATH_APPLIES: Record<string, readonly string[]> = {
   "encoding.y.fillOpacity": ["line", "combo", "stacked-area", "bar"],
   "encoding.y.color": ["line", "bar", "combo", "stacked-area", "scatter"],
   "encoding.y.z": ["line", "bar", "scatter", "combo", "stacked-area"],
+  "encoding.x.type": X_POSITION,
+  "encoding.x.format": X_POSITION,
+  "encoding.x.scale": X_POSITION,
+  "encoding.x.title": AXIS_TYPES,
+  "encoding.y.type": Y_POSITION,
+  "encoding.y.format": Y_POSITION,
+  "encoding.y.scale": Y_POSITION,
+  "encoding.y.title": AXIS_TYPES,
+  "encoding.color.type": COLOR_SCALE,
+  "encoding.color.title": COLOR_SCALE,
+  "encoding.color.format": COLOR_SCALE,
+  "encoding.color.scale": COLOR_SCALE,
+  "encoding.color.range": COLOR_SCALE,
+  // Series is a category split. Nothing paints a series type, format, or scale.
+  "encoding.series.type": [],
+  "encoding.series.format": [],
+  "encoding.series.scale": [],
+  render: [...CANVAS_TYPES],
+  "theme.tokens.background": except(["kpi", "bar-list"]),
+  "theme.tokens.surface": ["gauge", "kpi", "quadrant", "sankey", "timeline", "venn"],
+  "theme.tokens.text": PAINTED,
+  "theme.tokens.muted": PAINTED,
+  "theme.tokens.grid": ["line", "bar", "stacked-area", "combo", "scatter", "boxplot", "histogram", "area-range", "bar-range", "errorbar", "waterfall", "strip", "radial-bar", "rose", "radar", "candlestick", "kpi"],
+  "theme.tokens.axis": ["line", "bar", "stacked-area", "combo", "boxplot", "histogram", "strip", "area-range", "bar-range", "errorbar", "waterfall", "spike", "gantt", "journey", "quadrant", "radar", "heatmap", "timeline"],
+  "theme.tokens.accent": ["gantt", "quadrant", "strip", "timeline", "waterfall", "gauge", "choropleth", "map-points"],
+  "theme.tokens.positive": ["candlestick", "gantt", "journey", "quadrant", "waterfall", "kpi", "line", "bar", "stacked-area", "combo", "sparkline", "mini-area"],
+  "theme.tokens.negative": ["candlestick", "gantt", "journey", "quadrant", "waterfall", "kpi", "line", "bar", "stacked-area", "combo", "sparkline", "mini-area"],
+  "theme.tokens.series": except(["candlestick", "waterfall", "gauge"]),
   "interaction.navigator": ["line", "bar", "stacked-area", "scatter", "combo", "candlestick", "area-range", "sparkline", "mini-area", "spike"],
   /**
    * Instants on a position axis. Calendar-day charts (heatmap, gantt, timeline)
