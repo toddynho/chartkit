@@ -81,6 +81,7 @@ const CHART_TYPES = [
   "radial-bar",
   "rose",
   "strip",
+  "streamgraph",
 ] as const;
 
 /** Types whose field rules live outside this schema. They stay out of the enum and in the CK1005 list. */
@@ -1092,6 +1093,7 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   if (value === "hist") return { type: "histogram", kind: "rename" };
   if (value === "box" || value === "box-plot") return { type: "boxplot", kind: "rename" };
   if (value === "stripplot" || value === "strip-plot" || value === "dotplot" || value === "dot-plot" || value === "cleveland") return { type: "strip", kind: "rename" };
+  if (value === "stream" || value === "stream-graph" || value === "streamgraph" || value === "themeriver" || value === "theme-river" || value === "themeRiver") return { type: "streamgraph", kind: "rename" };
   if (value === "radar-chart") return { type: "radar", kind: "rename" };
   if (value === "funnel-chart") return { type: "funnel", kind: "rename" };
   if (value === "tree-map") return { type: "treemap", kind: "rename" };
@@ -1106,6 +1108,9 @@ function aliasFor(value: string, root: unknown): Alias | undefined {
   const compact = folded.replace(/ /g, "");
   if (compact === "radialbar" || compact === "radialbars" || compact === "polarbar" || folded === "polar") {
     return { type: "radial-bar", kind: "rename", note: 'Bars around a circle are type "radial-bar". Equal-angle sectors are type "rose".' };
+  }
+  if (compact === "streamgraph" || compact === "themeriver" || folded === "stream graph" || folded === "theme river") {
+    return { type: "streamgraph", kind: "rename", note: 'A streamgraph is type "streamgraph". The baseline is not zero. mark.baseline zero stacks on the axis.' };
   }
   if (compact === "stripplot" || compact === "dotplot" || folded === "dot plot" || folded === "strip plot" || folded === "cleveland") {
     return { type: "strip", kind: "rename", note: 'A strip, dot strip, or Cleveland dot plot is type "strip".' };

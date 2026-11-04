@@ -28,6 +28,7 @@ import sunburst from "../../../../packages/core/examples/33-sunburst.json";
 import sparkline from "../../../../packages/core/examples/12-sparkline.json";
 import spike from "../../../../packages/core/examples/14-spike.json";
 import strip from "../../../../packages/core/examples/36-strip.json";
+import streamgraph from "../../../../packages/core/examples/39-streamgraph.json";
 import stackedArea from "../../../../packages/core/examples/05-stacked-area.json";
 import timeline from "../../../../packages/core/examples/25-timeline.json";
 import treemap from "../../../../packages/core/examples/20-treemap.json";
@@ -68,6 +69,7 @@ const byType: Record<string, LiveSpec> = {
   histogram: dress(histogram),
   boxplot: dress(boxplot),
   strip: dress(strip, { legend: false, size: { width: 640, height: 320 } }),
+  streamgraph: dress(streamgraph),
   radar: dress(radar),
   funnel: dress(funnel),
   treemap: dress(treemap),

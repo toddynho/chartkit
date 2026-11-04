@@ -41,6 +41,7 @@ export const GALLERY_TYPES = [
   "sunburst",
   "bar-list",
   "strip",
+  "streamgraph",
 ];
 
 export const PAINT_STATUSES = ["ok", "unsupported", "blocked", "error", "timeout", "skipped"];
@@ -417,6 +418,15 @@ export const chartTypeDefs = [
     homepageRow: null,
     nMeaning: "observations across 8 groups",
     why: "One dot per observation, eight groups. Not a dense series. The module is imported on its own.",
+  },
+  {
+    id: "streamgraph",
+    file: "streamgraph",
+    exportName: "streamgraph",
+    sizes: [48],
+    homepageRow: null,
+    nMeaning: "columns across 3 layers",
+    why: "Wiggle stream. Forty-eight x positions and three layers. Not in the line bundle.",
   },
 ];
 

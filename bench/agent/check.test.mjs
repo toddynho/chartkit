@@ -161,6 +161,20 @@ test("extracts JSON from a fenced reply", () => {
   assert.equal(spec.type, "line");
 });
 
+test("streamgraph task validates and renders offline", () => {
+  const task = suite.tasks.find((item) => item.id === "copies-by-genre-streamgraph");
+  assert.ok(task);
+  const spec = {
+    version: "1",
+    type: "streamgraph",
+    data: task.data,
+    encoding: { x: task.expect.x, y: task.expect.y },
+    a11y: { alt: "History grew. The baseline is not zero." },
+  };
+  const result = suite.checkChartKit(spec, task);
+  assert.equal(result.ok, true, JSON.stringify(result.stages));
+});
+
 test("strip tasks validate and render offline", () => {
   for (const id of ["tokens-by-model-strip", "latency-by-region-strip"]) {
     const task = suite.tasks.find((item) => item.id === id);

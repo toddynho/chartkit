@@ -53,6 +53,7 @@ const charts = [
   "radial-bar",
   "rose",
   "strip",
+  "streamgraph",
 ];
 
 const themes = [

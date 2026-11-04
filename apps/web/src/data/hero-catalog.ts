@@ -7,7 +7,7 @@ import { applyHeroColor, heroPaints } from "./hero-accent";
  * Geo contributes choropleth and map-points only. Atlases are not types.
  */
 
-export const HERO_TYPE_COUNT = 38;
+export const HERO_TYPE_COUNT = 39;
 
 const SIZE = { width: 520, height: 300 };
 
@@ -40,6 +40,7 @@ export const heroGroups: { id: HeroGroupId; label: string; kicker: string; types
       { type: "donut", label: "Donut", group: "basics", slide: "donut", title: "Traffic by source", subtitle: "Last 30 days" },
       { type: "scatter", label: "Scatter", group: "basics", slide: "scatter", title: "Seats vs. renewal rate", subtitle: "Accounts, Q3" },
       { type: "stacked-area", label: "Stacked", group: "basics", title: "Plan mix over time", subtitle: "Accounts, thousands" },
+      { type: "streamgraph", label: "Stream", group: "basics", title: "Copies by genre", subtitle: "The baseline is not zero" },
     ],
   },
   {
@@ -287,6 +288,20 @@ export const heroExtra: Record<string, HeroExtra> = {
       encoding: { x: { field: "tokens", scale: { domain: [0, 1000] } }, y: "library" },
       mark: { band: "range", highlight: "ChartKit", sort: "asc", pointSize: 5, jitter: "none" },
     }, "ChartKit's median is 94 tokens. Plot's median is 332."),
+  },
+  streamgraph: {
+    motion: "area",
+    spec: spec("streamgraph", {
+      title: "Copies by genre",
+      subtitle: "The baseline is not zero",
+      data: [
+        { year: "2020", fiction: 20, history: 12, poetry: 8 },
+        { year: "2021", fiction: 28, history: 18, poetry: 9 },
+        { year: "2022", fiction: 22, history: 30, poetry: 11 },
+        { year: "2023", fiction: 26, history: 34, poetry: 14 },
+      ],
+      encoding: { x: "year", y: ["fiction", "history", "poetry"] },
+    }, "History overtook fiction by 2022. The baseline is not zero."),
   },
   boxplot: {
     motion: "fade",

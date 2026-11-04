@@ -2,12 +2,12 @@
 
 Class (a) is a playground wiring bug. The preview used to assign a static SVG and never call mount(), so tooltip, crosshair, legend toggle, and hover could not run. That is fixed in the playground by mounting @chartkitdev/vanilla. Rows here are what remains after that mount is used for the hover probe.
 
-Probed 5732 option writes across 34 chart types. 2418 changed the SVG. Remaining rows are classified below.
+Probed 5868 option writes across 34 chart types. 2437 changed the SVG. Remaining rows are classified below.
 
 - (a) playground wiring: 0
-- (b) core ignores a listed option: 493
+- (b) core ignores a listed option: 539
 - (c) catalog scope too wide: 0
-- (d) no-op for this example: 2260
+- (d) no-op for this example: 2330
 
 ## By chart type
 
@@ -26,6 +26,38 @@ Probed 5732 option writes across 34 chart types. 2418 changed the SVG. Remaining
 - **b** `encoding.y.z` — spec changed and the rendered SVG did not
 - **b** `encoding.series` — spec changed and the rendered SVG did not
 - … 43 more
+
+### spike (42)
+
+- **b** `encoding.x.type` — spec changed and the rendered SVG did not
+- **b** `encoding.x.format` — spec changed and the rendered SVG did not
+- **b** `encoding.x.format.decimals` — spec changed and the rendered SVG did not
+- **b** `encoding.x.format.currency` — spec changed and the rendered SVG did not
+- **b** `encoding.x.format.prefix` — spec changed and the rendered SVG did not
+- **b** `encoding.x.format.suffix` — spec changed and the rendered SVG did not
+- **b** `encoding.x.format.signed` — spec changed and the rendered SVG did not
+- **b** `encoding.x.format.specifier` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.reverse` — spec changed and the rendered SVG did not
+- … 30 more
+
+### streamgraph (40)
+
+- **b** `encoding.x.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.padding` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.padding.min` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.padding.max` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.clamp` — spec changed and the rendered SVG did not
+- **b** `encoding.x.scale.constant` — spec changed and the rendered SVG did not
+- **b** `encoding.series` — spec changed and the rendered SVG did not
+- **b** `encoding.series.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color` — spec changed and the rendered SVG did not
+- **b** `encoding.color.title` — spec changed and the rendered SVG did not
+- … 28 more
 
 ### gantt (38)
 
@@ -123,38 +155,6 @@ Probed 5732 option writes across 34 chart types. 2418 changed the SVG. Remaining
 - **b** `encoding.y.scale.type` — spec changed and the rendered SVG did not
 - … 16 more
 
-### spike (24)
-
-- **b** `encoding.x.scale.type` — spec changed and the rendered SVG did not
-- **b** `encoding.x.scale.zero` — spec changed and the rendered SVG did not
-- **b** `encoding.x.scale.nice` — spec changed and the rendered SVG did not
-- **b** `encoding.x.scale.clamp` — spec changed and the rendered SVG did not
-- **b** `encoding.x.scale.constant` — spec changed and the rendered SVG did not
-- **b** `encoding.y.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.zero` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.nice` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.reverse` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.clamp` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.constant` — spec changed and the rendered SVG did not
-- … 12 more
-
-### area-range (24)
-
-- **b** `encoding.x.scale.type` — spec changed and the rendered SVG did not
-- **b** `encoding.x.scale.zero` — spec changed and the rendered SVG did not
-- **b** `encoding.x.scale.nice` — spec changed and the rendered SVG did not
-- **b** `encoding.x.scale.clamp` — spec changed and the rendered SVG did not
-- **b** `encoding.x.scale.constant` — spec changed and the rendered SVG did not
-- **b** `encoding.y.lo` — spec changed and the rendered SVG did not
-- **b** `encoding.y.hi` — spec changed and the rendered SVG did not
-- **b** `encoding.y.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.zero` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.nice` — spec changed and the rendered SVG did not
-- **b** `encoding.y.scale.reverse` — spec changed and the rendered SVG did not
-- … 12 more
-
 ### bullet (22)
 
 - **b** `encoding.y.type` — spec changed and the rendered SVG did not
@@ -203,6 +203,22 @@ Probed 5732 option writes across 34 chart types. 2418 changed the SVG. Remaining
 - **b** `encoding.size.scale.type` — spec changed and the rendered SVG did not
 - … 9 more
 
+### area-range (20)
+
+- **b** `encoding.y.lo` — spec changed and the rendered SVG did not
+- **b** `encoding.y.hi` — spec changed and the rendered SVG did not
+- **b** `encoding.y.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.nice` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.reverse` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.clamp` — spec changed and the rendered SVG did not
+- **b** `encoding.y.scale.constant` — spec changed and the rendered SVG did not
+- **b** `mark.line` — spec changed and the rendered SVG did not
+- **b** `axes.x.labels` — spec changed and the rendered SVG did not
+- **b** `axes.x.autoSkip` — spec changed and the rendered SVG did not
+- … 8 more
+
 ### waterfall (18)
 
 - **b** `encoding.y.type` — spec changed and the rendered SVG did not
@@ -218,22 +234,6 @@ Probed 5732 option writes across 34 chart types. 2418 changed the SVG. Remaining
 - **b** `axes.x.labelWidth` — spec changed and the rendered SVG did not
 - **b** `axes.x.labelLines` — spec changed and the rendered SVG did not
 - … 6 more
-
-### candlestick (15)
-
-- **b** `encoding.x.scale.type` — spec changed and the rendered SVG did not
-- **b** `encoding.x.scale.zero` — spec changed and the rendered SVG did not
-- **b** `encoding.x.scale.nice` — spec changed and the rendered SVG did not
-- **b** `encoding.x.scale.clamp` — spec changed and the rendered SVG did not
-- **b** `encoding.x.scale.constant` — spec changed and the rendered SVG did not
-- **b** `axes.x.labels` — spec changed and the rendered SVG did not
-- **b** `axes.x.autoSkip` — spec changed and the rendered SVG did not
-- **b** `axes.x.labelWidth` — spec changed and the rendered SVG did not
-- **b** `axes.x.labelLines` — spec changed and the rendered SVG did not
-- **b** `axes.x.crosses` — spec changed and the rendered SVG did not
-- **b** `axes.y.labels` — spec changed and the rendered SVG did not
-- **b** `axes.y.autoSkip` — spec changed and the rendered SVG did not
-- … 3 more
 
 ### rose (13)
 
@@ -278,6 +278,19 @@ Probed 5732 option writes across 34 chart types. 2418 changed the SVG. Remaining
 - **b** `axes.y.autoSkip` — spec changed and the rendered SVG did not
 - **b** `axes.y2.grid` — spec changed and the rendered SVG did not
 - **b** `axes.y2.autoSkip` — spec changed and the rendered SVG did not
+
+### candlestick (10)
+
+- **b** `axes.x.labels` — spec changed and the rendered SVG did not
+- **b** `axes.x.labelWidth` — spec changed and the rendered SVG did not
+- **b** `axes.x.labelLines` — spec changed and the rendered SVG did not
+- **b** `axes.x.crosses` — spec changed and the rendered SVG did not
+- **b** `axes.y.labels` — spec changed and the rendered SVG did not
+- **b** `axes.y.autoSkip` — spec changed and the rendered SVG did not
+- **b** `axes.y.labelWidth` — spec changed and the rendered SVG did not
+- **b** `axes.y.labelLines` — spec changed and the rendered SVG did not
+- **b** `axes.y.crosses` — spec changed and the rendered SVG did not
+- **b** `locale` — spec changed and the rendered SVG did not
 
 ### stacked-area (9)
 
@@ -345,12 +358,6 @@ Probed 5732 option writes across 34 chart types. 2418 changed the SVG. Remaining
 - **b** `sort.by` — spec changed and the rendered SVG did not
 - **b** `sort.order` — spec changed and the rendered SVG did not
 
-### bar-list (3)
-
-- **b** `theme.tokens.fontSize` — spec changed and the rendered SVG did not
-- **b** `layout.direction` — spec changed and the rendered SVG did not
-- **b** `interaction.sync` — spec changed and the rendered SVG did not
-
 ### gauge (2)
 
 - **b** `metric.format.decimals` — spec changed and the rendered SVG did not
@@ -388,6 +395,15 @@ These changed the spec and not the picture, and the example data cannot exercise
 - heatmap: example has no drilldown (`interaction.drilldown.key`)
 - heatmap: motion runs in the client, not in the static SVG (`animation`)
 - heatmap: client behavior; the static SVG only records intent (`a11y.keyboard`)
+- streamgraph: id is a hook, not paint (`id`)
+- streamgraph: probe value makes the spec invalid (`encoding.x`)
+- streamgraph: x axis is not numeric, so format and minor ticks do not apply (`axes.x.minorTicks`)
+- streamgraph: example has no series on y2 (`axes.y2`)
+- streamgraph: example is not faceted (`layout.facet.field`)
+- streamgraph: example is not a concatenation (`layout.concat.columns`)
+- streamgraph: example has no drilldown (`interaction.drilldown.key`)
+- streamgraph: motion runs in the client, not in the static SVG (`animation`)
+- streamgraph: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - donut: id is a hook, not paint (`id`)
 - donut: probe value makes the spec invalid (`encoding.y`)
 - donut: example rows have no spare series column (`encoding.series`)
@@ -481,7 +497,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - kpi: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - spike: id is a hook, not paint (`id`)
 - spike: probe value makes the spec invalid (`encoding.y`)
-- spike: x axis is not numeric, so format and minor ticks do not apply (`axes.x.format`)
 - spike: example has no series on y2 (`axes.y2`)
 - spike: example draws no legend (`legend`)
 - spike: example does not paint this token (`theme.tokens.text`)
@@ -489,6 +504,7 @@ These changed the spec and not the picture, and the example data cannot exercise
 - spike: example is not a concatenation (`layout.concat.columns`)
 - spike: example has no drilldown (`interaction.drilldown.key`)
 - spike: motion runs in the client, not in the static SVG (`animation`)
+- spike: x values are categories, so timezone does not apply (`timezone`)
 - spike: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - venn: id is a hook, not paint (`id`)
 - venn: example draws no legend (`legend`)
@@ -590,15 +606,6 @@ These changed the spec and not the picture, and the example data cannot exercise
 - combo: motion runs in the client, not in the static SVG (`animation`)
 - combo: x values are categories, so timezone does not apply (`timezone`)
 - combo: client behavior; the static SVG only records intent (`a11y.keyboard`)
-- bar-list: id is a hook, not paint (`id`)
-- bar-list: example has no subtitle (`subtitle`)
-- bar-list: probe value makes the spec invalid (`encoding.x`)
-- bar-list: example does not paint this token (`theme.tokens.muted`)
-- bar-list: example is not faceted (`layout.facet.field`)
-- bar-list: example is not a concatenation (`layout.concat.columns`)
-- bar-list: example has no drilldown (`interaction.drilldown.key`)
-- bar-list: motion runs in the client, not in the static SVG (`animation`)
-- bar-list: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - quadrant: id is a hook, not paint (`id`)
 - quadrant: example draws no legend (`legend`)
 - quadrant: example is not faceted (`layout.facet.field`)
@@ -641,6 +648,7 @@ These changed the spec and not the picture, and the example data cannot exercise
 - bullet: example has no column whose order can change (`sort.field`)
 - bullet: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - area-range: id is a hook, not paint (`id`)
+- area-range: x values are categories, so type, format, and scale do not apply (`encoding.x.type`)
 - area-range: example is not an OHLC series (`encoding.high.type`)
 - area-range: x axis is not numeric, so format and minor ticks do not apply (`axes.x.format`)
 - area-range: example has no series on y2 (`axes.y2`)
@@ -649,6 +657,7 @@ These changed the spec and not the picture, and the example data cannot exercise
 - area-range: example is not a concatenation (`layout.concat.columns`)
 - area-range: example has no drilldown (`interaction.drilldown.key`)
 - area-range: motion runs in the client, not in the static SVG (`animation`)
+- area-range: x values are categories, so timezone does not apply (`timezone`)
 - area-range: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - mini-area: id is a hook, not paint (`id`)
 - mini-area: example does not paint this token (`theme.tokens.text`)
@@ -694,6 +703,7 @@ These changed the spec and not the picture, and the example data cannot exercise
 - bar-range: motion runs in the client, not in the static SVG (`animation`)
 - bar-range: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - candlestick: id is a hook, not paint (`id`)
+- candlestick: x values are categories, so type, format, and scale do not apply (`encoding.x.type`)
 - candlestick: probe value makes the spec invalid (`encoding.open`)
 - candlestick: example is not an OHLC series (`encoding.open.type`)
 - candlestick: x axis is not numeric, so format and minor ticks do not apply (`axes.x.format`)
@@ -704,6 +714,7 @@ These changed the spec and not the picture, and the example data cannot exercise
 - candlestick: example is not a concatenation (`layout.concat.columns`)
 - candlestick: example has no drilldown (`interaction.drilldown.key`)
 - candlestick: motion runs in the client, not in the static SVG (`animation`)
+- candlestick: x values are categories, so timezone does not apply (`timezone`)
 - candlestick: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - scatter: id is a hook, not paint (`id`)
 - scatter: probe value makes the spec invalid (`encoding.x`)

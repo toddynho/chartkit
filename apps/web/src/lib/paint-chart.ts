@@ -15,7 +15,7 @@ export function chartType(spec: unknown): string {
  */
 export function drawChart(spec: unknown): string {
   const type = chartType(spec);
-  if (type === "bar-list") return renderBarList(spec) ?? "";
+  if (type === "bar-list") return renderBarList(spec as Record<string, unknown>) ?? "";
   return isExtra(type) ? renderExtra(spec) : renderCore(spec);
 }
 

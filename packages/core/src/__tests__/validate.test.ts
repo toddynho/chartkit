@@ -60,6 +60,7 @@ const CHART_TYPES = [
   "radial-bar",
   "rose",
   "strip",
+  "streamgraph",
 ];
 
 const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);

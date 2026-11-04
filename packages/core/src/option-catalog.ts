@@ -102,6 +102,7 @@ const AXIS_TYPES = [
   "bar-range",
   "errorbar",
   "strip",
+  "streamgraph",
 ];
 
 /** Types that do not paint `legend`. */
@@ -114,10 +115,10 @@ const METRIC_TYPES = ["gauge", "kpi", "progress-ring"];
  * inherit this list, then the path overlay below can narrow it further.
  */
 const CHANNEL_APPLIES: Record<string, readonly string[]> = {
-  x: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "heatmap", "histogram", "boxplot", "radar", "funnel", "treemap", "bullet", "waterfall", "area-range", "bar-range", "errorbar", "sunburst", "radial-bar", "rose", "spike", "candlestick", "bar-list", "strip", "gantt", "timeline", "quadrant", "journey"],
-  y: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "boxplot", "radar", "funnel", "treemap", "bullet", "waterfall", "area-range", "bar-range", "errorbar", "radial-bar", "rose", "sankey", "histogram", "spike", "sunburst", "bar-list", "strip", "gantt", "quadrant", "journey"],
-  series: ["line", "bar", "stacked-area", "scatter", "combo", "heatmap", "radar", "pie", "donut"],
-  color: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "heatmap", "treemap", "sunburst", "funnel", "sankey", "radar", "strip", "gantt", "timeline", "quadrant", "choropleth", "map-points"],
+  x: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "heatmap", "histogram", "boxplot", "radar", "funnel", "treemap", "bullet", "waterfall", "area-range", "bar-range", "errorbar", "sunburst", "radial-bar", "rose", "spike", "candlestick", "bar-list", "strip", "streamgraph", "gantt", "timeline", "quadrant", "journey"],
+  y: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "boxplot", "radar", "funnel", "treemap", "bullet", "waterfall", "area-range", "bar-range", "errorbar", "radial-bar", "rose", "sankey", "histogram", "spike", "sunburst", "bar-list", "strip", "streamgraph", "gantt", "quadrant", "journey"],
+  series: ["line", "bar", "stacked-area", "scatter", "combo", "heatmap", "radar", "pie", "donut", "streamgraph"],
+  color: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "heatmap", "treemap", "sunburst", "funnel", "sankey", "radar", "strip", "streamgraph", "gantt", "timeline", "quadrant", "choropleth", "map-points"],
   label: ["strip"],
   size: ["scatter", "quadrant", "map-points"],
   open: ["candlestick", "gantt", "timeline"],
@@ -137,13 +138,13 @@ const CHANNEL_APPLIES: Record<string, readonly string[]> = {
  * Continuous x. Category bands (bar, pie, waterfall) keep the field and drop
  * type, format, and scale. Strip's x is the numeric axis.
  */
-const X_POSITION = ["line", "stacked-area", "scatter", "combo", "sparkline", "mini-area", "histogram", "strip", "candlestick", "spike", "area-range"];
+const X_POSITION = ["line", "stacked-area", "scatter", "combo", "sparkline", "mini-area", "histogram", "strip", "streamgraph", "candlestick", "spike", "area-range"];
 
 /**
  * Numeric y position: an axis or a radius. Slice size, flow, and group
  * fields are not a position scale.
  */
-const Y_POSITION = ["line", "bar", "stacked-area", "combo", "scatter", "spike", "candlestick", "histogram", "boxplot", "waterfall", "area-range", "bar-range", "errorbar", "bullet", "radar", "radial-bar", "rose"];
+const Y_POSITION = ["line", "bar", "stacked-area", "combo", "scatter", "spike", "candlestick", "histogram", "boxplot", "waterfall", "area-range", "bar-range", "errorbar", "bullet", "radar", "radial-bar", "rose", "streamgraph"];
 
 /**
  * Quantitative color. Scatter, treemap, and map-points can color by a number
@@ -192,6 +193,7 @@ const PAINTED = [
   "radial-bar",
   "rose",
   "strip",
+  "streamgraph",
   "gantt",
   "timeline",
   "quadrant",
@@ -241,8 +243,8 @@ const PATH_APPLIES: Record<string, readonly string[]> = {
   "theme.tokens.surface": ["gauge", "kpi", "quadrant", "sankey", "timeline", "venn"],
   "theme.tokens.text": PAINTED,
   "theme.tokens.muted": PAINTED,
-  "theme.tokens.grid": ["line", "bar", "stacked-area", "combo", "scatter", "boxplot", "histogram", "area-range", "bar-range", "errorbar", "waterfall", "strip", "radial-bar", "rose", "radar", "candlestick", "kpi"],
-  "theme.tokens.axis": ["line", "bar", "stacked-area", "combo", "scatter", "boxplot", "histogram", "strip", "area-range", "bar-range", "errorbar", "waterfall", "spike", "gantt", "journey", "quadrant", "radar", "heatmap", "timeline"],
+  "theme.tokens.grid": ["line", "bar", "stacked-area", "combo", "scatter", "boxplot", "histogram", "area-range", "bar-range", "errorbar", "waterfall", "strip", "streamgraph", "radial-bar", "rose", "radar", "candlestick", "kpi"],
+  "theme.tokens.axis": ["line", "bar", "stacked-area", "combo", "scatter", "boxplot", "histogram", "strip", "streamgraph", "area-range", "bar-range", "errorbar", "waterfall", "spike", "gantt", "journey", "quadrant", "radar", "heatmap", "timeline"],
   "theme.tokens.accent": ["gantt", "quadrant", "strip", "timeline", "waterfall", "gauge", "choropleth", "map-points"],
   "theme.tokens.positive": ["candlestick", "gantt", "journey", "quadrant", "waterfall", "kpi", "line", "bar", "stacked-area", "combo", "sparkline", "mini-area"],
   "theme.tokens.negative": ["candlestick", "gantt", "journey", "quadrant", "waterfall", "kpi", "line", "bar", "stacked-area", "combo", "sparkline", "mini-area"],

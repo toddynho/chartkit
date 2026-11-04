@@ -360,6 +360,12 @@ Not published yet. See [catalog/migrate.md](../../catalog/migrate.md).
 {"version":"1","type":"strip","data":[{"g":"A","v":1},{"g":"A","v":4},{"g":"B","v":2},{"g":"B","v":3}],"encoding":{"x":"v","y":"g"},"a11y":{"alt":"A spreads wider."}}
 ```
 
+## streamgraph
+
+```json
+{"version":"1","type":"streamgraph","data":[{"y":"20","a":2,"b":1},{"y":"22","a":2,"b":3}],"encoding":{"x":"y","y":["a","b"]},"a11y":{"alt":"B grew. Baseline is not zero."}}
+```
+
 ## radar
 
 ```json

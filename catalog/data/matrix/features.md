@@ -51,7 +51,7 @@ Every chart type and major variant. Status native = a first-class type/series/ma
 | **Stacked area** <br><sub>`type.area.stacked` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ✎ | ✎ | ● | ? | ● |
 | **100% stacked area** <br><sub>`type.area.percent`</sub> | ● | ✎ | ● | ✎ | ● | ● | ✎ | ✎ | ● | ● | ● | ● | ● | ● | ● | ● | ✎ | ✎ | ● | ? | ● |
 | **Range / band area** <br><sub>`type.area.range` ★</sub> | · | ✎ | ◐ | ✎ | ● | ◐ | ✎ | ● | ● | ● | · | ● | ● | ● | ● | ◐ | ◐ | ✎ | ✎ | · | ● |
-| **Streamgraph** <br><sub>`type.area.stream`</sub> | · | ✎ | ● | ● | ● | ✎ | ● | ✎ | ● | ● | · | ● | ● | ? | ✎ | · | · | · | ● | · | ● |
+| **Streamgraph** <br><sub>`type.area.stream`</sub> | ● | ✎ | ● | ● | ● | ✎ | ● | ✎ | ● | ● | · | ● | ● | ? | ✎ | · | · | · | ● | · | ● |
 | **Column / vertical bar** <br><sub>`type.bar.vertical` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
 | **Horizontal bar** <br><sub>`type.bar.horizontal` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ◐ | ? | ● | ● | ● |
 | **Grouped bar** <br><sub>`type.bar.grouped` ★</sub> | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ◐ | · | ● | ◐ | ● |
