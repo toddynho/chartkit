@@ -2,7 +2,9 @@ import { loadTable } from "./data-prep";
 import type { DataTable } from "./data";
 import type { PresetGeometry, PresetTokens } from "./theme";
 import { resolveGeometry, resolvePreset } from "./theme";
-import { hash, isRecord, longDesc, niceDomain, readInset, type Inset } from "./svg";
+import { hash, isRecord, longDesc, niceDomain, readInset, type Headline, type Inset } from "./svg";
+
+export type { Headline };
 
 export interface Frame {
   type: string;
@@ -29,6 +31,8 @@ export interface Frame {
   description?: string;
   /** size.padding. Drawn by openChart for every type that uses this frame. */
   pad: Inset;
+  /** Figure above the plot. openChart reserves a band and draws it. */
+  headline?: Headline;
 }
 
 export interface ChartSize {
@@ -90,7 +94,25 @@ export function readFrame(
     legendValues: isRecord(spec.legend) && spec.legend.values === true,
     exportMark: exportList(spec),
     description: longDesc(spec),
+    headline: readHeadline(spec),
   };
+}
+
+function cssText(value: unknown, limit: number): string {
+  if (typeof value !== "string") return "";
+  const text = value.trim().replace(/["<>]/g, "");
+  return text.length > 0 && text.length <= limit ? text : "";
+}
+
+export function readHeadline(spec: Record<string, unknown>): Headline | undefined {
+  if (!isRecord(spec.headline)) return;
+  const label = cssText(spec.headline.label, 80);
+  const value = cssText(spec.headline.value, 40);
+  const compare = cssText(spec.headline.compare, 40);
+  const delta = cssText(spec.headline.delta, 24);
+  const tone = spec.headline.tone === "negative" || spec.headline.tone === "neutral" ? spec.headline.tone : spec.headline.tone === "positive" ? "positive" : "";
+  if (!label && !value && !compare && !delta && !tone) return;
+  return { label, value, compare, delta, tone };
 }
 
 /** png,svg,csv from interaction.export. Empty when the menu is off. */
