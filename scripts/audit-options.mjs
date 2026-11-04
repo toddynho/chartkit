@@ -82,7 +82,7 @@ function probeValues(field, spec, baseSvg = "") {
   if (field.control === "enum" && field.enumValues?.length) {
     const text = current == null ? "" : String(current);
     const rest = field.enumValues.filter((value) => value !== text && value !== String(field.defaultValue ?? ""));
-    const preferred = ["false", "dotted", "currency", "percent", "step", "dark", "horizontal", "top", "end", "nearest", "dashed", "none"];
+    const preferred = ["diverging", "false", "dotted", "currency", "percent", "step", "dark", "horizontal", "top", "end", "nearest", "dashed", "none"];
     const picks = [];
     for (const value of preferred) if (rest.includes(value) && !picks.includes(value)) picks.push(value);
     for (const value of rest) if (!picks.includes(value)) picks.push(value);

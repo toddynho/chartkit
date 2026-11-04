@@ -2,10 +2,10 @@
 
 Class (a) is a playground wiring bug. The preview used to assign a static SVG and never call mount(), so tooltip, crosshair, legend toggle, and hover could not run. That is fixed in the playground by mounting @chartkitdev/vanilla. Rows here are what remains after that mount is used for the hover probe.
 
-Probed 5732 option writes across 34 chart types. 2185 changed the SVG. Remaining rows are classified below.
+Probed 5732 option writes across 34 chart types. 2206 changed the SVG. Remaining rows are classified below.
 
 - (a) playground wiring: 0
-- (b) core ignores a listed option: 696
+- (b) core ignores a listed option: 675
 - (c) catalog scope too wide: 0
 - (d) no-op for this example: 2290
 
@@ -203,22 +203,6 @@ Probed 5732 option writes across 34 chart types. 2185 changed the SVG. Remaining
 - **b** `axes.x.rotate` — spec changed and the rendered SVG did not
 - … 17 more
 
-### treemap (22)
-
-- **b** `encoding.color.type` — spec changed and the rendered SVG did not
-- **b** `encoding.color.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.signed` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.specifier` — spec changed and the rendered SVG did not
-- **b** `encoding.color.scale.type` — spec changed and the rendered SVG did not
-- **b** `encoding.color.scale.zero` — spec changed and the rendered SVG did not
-- **b** `encoding.color.scale.nice` — spec changed and the rendered SVG did not
-- … 10 more
-
 ### bullet (22)
 
 - **b** `encoding.y.type` — spec changed and the rendered SVG did not
@@ -282,19 +266,6 @@ Probed 5732 option writes across 34 chart types. 2185 changed the SVG. Remaining
 - **b** `axes.x.autoSkip` — spec changed and the rendered SVG did not
 - **b** `axes.y.autoSkip` — spec changed and the rendered SVG did not
 
-### heatmap (10)
-
-- **b** `encoding.color.type` — spec changed and the rendered SVG did not
-- **b** `encoding.color.scale.type` — spec changed and the rendered SVG did not
-- **b** `encoding.color.scale.zero` — spec changed and the rendered SVG did not
-- **b** `encoding.color.scale.nice` — spec changed and the rendered SVG did not
-- **b** `encoding.color.scale.reverse` — spec changed and the rendered SVG did not
-- **b** `encoding.color.scale.midpoint` — spec changed and the rendered SVG did not
-- **b** `encoding.color.scale.bins` — spec changed and the rendered SVG did not
-- **b** `sort.field` — spec changed and the rendered SVG did not
-- **b** `sort.by` — spec changed and the rendered SVG did not
-- **b** `sort.order` — spec changed and the rendered SVG did not
-
 ### combo (10)
 
 - **b** `encoding.series` — spec changed and the rendered SVG did not
@@ -330,6 +301,15 @@ Probed 5732 option writes across 34 chart types. 2185 changed the SVG. Remaining
 - **b** `axes.y.autoSkip` — spec changed and the rendered SVG did not
 - **b** `layout.coordinate` — spec changed and the rendered SVG did not
 
+### heatmap (6)
+
+- **b** `encoding.color.type` — spec changed and the rendered SVG did not
+- **b** `encoding.color.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.color.scale.nice` — spec changed and the rendered SVG did not
+- **b** `sort.field` — spec changed and the rendered SVG did not
+- **b** `sort.by` — spec changed and the rendered SVG did not
+- **b** `sort.order` — spec changed and the rendered SVG did not
+
 ### radar (6)
 
 - **b** `encoding.series` — spec changed and the rendered SVG did not
@@ -338,6 +318,14 @@ Probed 5732 option writes across 34 chart types. 2185 changed the SVG. Remaining
 - **b** `encoding.color.title` — spec changed and the rendered SVG did not
 - **b** `encoding.color.value` — spec changed and the rendered SVG did not
 - **b** `locale` — spec changed and the rendered SVG did not
+
+### treemap (5)
+
+- **b** `encoding.id` — spec changed and the rendered SVG did not
+- **b** `encoding.parent` — spec changed and the rendered SVG did not
+- **b** `mark.cornerRadius` — spec changed and the rendered SVG did not
+- **b** `mark.gap` — spec changed and the rendered SVG did not
+- **b** `mark.depth` — spec changed and the rendered SVG did not
 
 ### donut (3)
 

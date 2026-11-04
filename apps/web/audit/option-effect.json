@@ -1,6 +1,6 @@
 {
   "summary": {
-    "generated": "2026-11-04T02:21:31.251Z",
+    "generated": "2026-11-04T02:23:06.738Z",
     "examples": [
       {
         "type": "heatmap",
@@ -174,10 +174,10 @@
       }
     ],
     "probed": 5732,
-    "effects": 2185,
+    "effects": 2206,
     "counts": {
       "a": 0,
-      "b": 696,
+      "b": 675,
       "c": 0,
       "d": 2290,
       "interaction": 0
@@ -6056,17 +6056,6 @@
     {
       "type": "heatmap",
       "slug": "activity-calendar",
-      "path": "encoding.color.scale.type",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "time"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
       "path": "encoding.color.scale.domain",
       "control": "json",
       "klass": "d",
@@ -6095,39 +6084,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": true
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.scale.reverse",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.scale.midpoint",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.scale.bins",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "heatmap",
@@ -16582,188 +16538,12 @@
     {
       "type": "treemap",
       "slug": "inventory-treemap",
-      "path": "encoding.color.type",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "nominal"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.format",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "integer"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$.0f"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.scale.type",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "time"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
       "path": "encoding.color.scale.domain",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.scale.zero",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.scale.nice",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.scale.reverse",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.scale.midpoint",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.scale.scheme",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "violet"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.scale.bins",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "treemap",
@@ -16794,17 +16574,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.value",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
     },
     {
       "type": "treemap",
@@ -36845,7 +36614,7 @@
       "reason": "example has no color field",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "time"
+      "probe": "sqrt"
     },
     {
       "type": "scatter",

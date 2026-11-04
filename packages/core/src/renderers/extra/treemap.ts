@@ -4,7 +4,7 @@ import { asNumber, column, fieldOf } from "../../frame";
 import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
 import { headerFill, labelInk, siblingFill } from "../../ink";
 import { cssVar } from "../../theme";
-import { esc, font, n, ch } from "../../svg";
+import { esc, font, isRecord, n, ch } from "../../svg";
 import { fill, fit, fmt, num, openMark, str, valueFormat, viewOf } from "./plot";
 
 interface Leaf {
@@ -39,8 +39,10 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
   const colorField = fieldOf(frame.encoding.color);
   const xs = column(table, xField);
   const groups = column(table, colorField);
+  const constant = isRecord(frame.encoding.color) && typeof frame.encoding.color.value === "string" ? frame.encoding.color.value : "";
   const tones = groups.map((item) => asNumber(item)).filter((item): item is number => item !== null);
-  const ramp = tones.length ? readColorScale(frame.encoding.color, frame.preset, tones, false) : null;
+  const yValues = num(table, yField).filter((item): item is number => item !== null && item > 0);
+  const ramp = readColorScale(frame.encoding.color, frame.preset, tones.length ? tones : yValues, false);
   const colors = new Map<string, string>();
   const leaves: Leaf[] = [];
   num(table, yField).forEach((value, index) => {
@@ -53,7 +55,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
       label: xField ? str(xs[index]) : group,
       value,
       group,
-      fill: scaled || colors.get(group) || fill(frame, 0),
+      fill: constant || scaled || colors.get(group) || fill(frame, 0),
     });
   });
   if (!leaves.length) return null;
