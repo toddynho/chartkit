@@ -1121,6 +1121,27 @@ export const examples: Example[] = [
     blurb: "Equal angles. Quay reaches farthest.",
     spec: lumenRose as Spec,
   },
+  {
+    slug: "payments-bar-list",
+    title: "Payments by method",
+    group: "Rank",
+    type: "bar-list",
+    blurb: "Card is the largest payment method.",
+    spec: {
+      version: "1",
+      id: "payments-bar-list",
+      type: "bar-list",
+      title: "Payments by method",
+      data: [
+        { method: "Card", amount: 168400 },
+        { method: "Bank", amount: 64200 },
+        { method: "Cash", amount: 9400 },
+      ],
+      encoding: { x: "method", y: "amount" },
+      size: { width: 420, height: 140 },
+      a11y: { alt: "Card is the largest payment method." },
+    },
+  },
 ];
 
 export const exampleGroups = Array.from(new Set(examples.map((example) => example.group)));

@@ -1,6 +1,6 @@
 {
   "summary": {
-    "generated": "2026-11-04T01:19:59.457Z",
+    "generated": "2026-11-04T02:19:57.774Z",
     "examples": [
       {
         "type": "heatmap",
@@ -113,6 +113,11 @@
         "title": "Orders and fill rate"
       },
       {
+        "type": "bar-list",
+        "slug": "payments-bar-list",
+        "title": "Payments by method"
+      },
+      {
         "type": "quadrant",
         "slug": "priority-quadrant",
         "title": "Priority quadrant"
@@ -168,13 +173,13 @@
         "title": "Yield by temperature"
       }
     ],
-    "probed": 5705,
-    "effects": 1763,
+    "probed": 5732,
+    "effects": 2183,
     "counts": {
       "a": 0,
-      "b": 1098,
+      "b": 698,
       "c": 0,
-      "d": 2300,
+      "d": 2290,
       "interaction": 0
     },
     "note": "Class (a) is a playground wiring bug. The preview used to assign a static SVG and never call mount(), so tooltip, crosshair, legend toggle, and hover could not run. That is fixed in the playground by mounting @chartkitdev/vanilla. Rows here are what remains after that mount is used for the hover probe."
@@ -265,7 +270,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -294,7 +298,6 @@
       "motion.duration",
       "render",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -422,7 +425,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -503,7 +505,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -531,7 +532,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -953,7 +953,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -981,7 +980,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -1051,7 +1049,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -1079,7 +1076,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -1260,7 +1256,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -1288,7 +1283,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -1401,7 +1395,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -1429,7 +1422,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -1640,7 +1632,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -1668,7 +1659,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -1747,7 +1737,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -1775,7 +1764,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -1975,7 +1963,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -2071,7 +2058,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -2099,7 +2085,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -2201,7 +2186,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -2229,7 +2213,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -2474,7 +2457,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -2502,7 +2484,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -2564,7 +2545,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -2749,7 +2729,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -2777,7 +2756,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -2880,7 +2858,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -3001,7 +2978,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -3120,7 +3096,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -3148,7 +3123,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -3359,7 +3333,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -3465,7 +3438,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -3493,7 +3465,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -3706,7 +3677,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -3737,6 +3707,87 @@
       "motion.duration",
       "locale",
       "timezone",
+      "sort.field",
+      "sort.by",
+      "sort.order",
+      "transform",
+      "a11y.alt",
+      "a11y.description",
+      "a11y.keyboard",
+      "a11y.dataTable"
+    ],
+    "bar-list": [
+      "type",
+      "id",
+      "title",
+      "subtitle",
+      "headline.label",
+      "headline.value",
+      "headline.compare",
+      "headline.delta",
+      "headline.tone",
+      "encoding.x",
+      "encoding.y",
+      "mark.track",
+      "tooltip",
+      "tooltip.mode",
+      "tooltip.crosshair",
+      "tooltip.crosshairLabel",
+      "tooltip.position",
+      "tooltip.background",
+      "tooltip.radius",
+      "tooltip.shadow",
+      "tooltip.crosshairColor",
+      "tooltip.fields",
+      "tooltip.template",
+      "tooltip.pin",
+      "tooltip.hit",
+      "annotations",
+      "theme",
+      "theme.mode",
+      "theme.brand",
+      "theme.tokens.text",
+      "theme.tokens.muted",
+      "theme.tokens.fontFamily",
+      "theme.tokens.fontSize",
+      "theme.tokens.series",
+      "size.width",
+      "size.height",
+      "size.aspectRatio",
+      "size.minHeight",
+      "size.padding",
+      "size.padding.top",
+      "size.padding.right",
+      "size.padding.bottom",
+      "size.padding.left",
+      "layout.direction",
+      "layout.facet.field",
+      "layout.facet.columns",
+      "layout.facet.rows",
+      "layout.facet.wrap",
+      "layout.facet.scales",
+      "layout.facet.legend",
+      "layout.concat.columns",
+      "layout.concat.direction",
+      "layout.concat.gap",
+      "layout.concat.views",
+      "layout.breakpoints",
+      "interaction.hover",
+      "interaction.select",
+      "interaction.zoom",
+      "interaction.pan",
+      "interaction.brush",
+      "interaction.initialRange",
+      "interaction.export",
+      "interaction.sync",
+      "interaction.drilldown.key",
+      "interaction.drilldown.children",
+      "animation",
+      "animation.duration",
+      "animation.easing",
+      "motion",
+      "motion.duration",
+      "locale",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -3833,7 +3884,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -3861,7 +3911,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -4053,7 +4102,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -4081,7 +4129,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -4323,7 +4370,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -4461,7 +4507,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -4489,7 +4534,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -4731,7 +4775,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -4822,7 +4865,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -4940,7 +4982,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -4968,7 +5009,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -5061,7 +5101,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -5089,7 +5128,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -5310,7 +5348,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -5338,7 +5375,6 @@
       "motion",
       "motion.duration",
       "locale",
-      "timezone",
       "sort.field",
       "sort.by",
       "sort.order",
@@ -5616,7 +5652,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -5910,7 +5945,6 @@
       "size.padding.bottom",
       "size.padding.left",
       "layout.direction",
-      "layout.coordinate",
       "layout.facet.field",
       "layout.facet.columns",
       "layout.facet.rows",
@@ -5967,61 +6001,6 @@
     {
       "type": "heatmap",
       "slug": "activity-calendar",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
       "path": "encoding.x",
       "control": "text",
       "klass": "d",
@@ -6073,72 +6052,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "heatmap",
@@ -6420,17 +6333,6 @@
     {
       "type": "heatmap",
       "slug": "activity-calendar",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -6647,17 +6549,6 @@
     {
       "type": "heatmap",
       "slug": "activity-calendar",
-      "path": "timezone",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
       "path": "sort.field",
       "control": "text",
       "klass": "b",
@@ -6734,131 +6625,10 @@
     {
       "type": "donut",
       "slug": "budget-pie",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
       "path": "encoding.y",
       "control": "text",
       "klass": "d",
       "reason": "probe value makes the spec invalid",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "encoding.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "encoding.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "encoding.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "encoding.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "encoding.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "encoding.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": "Probe"
@@ -7249,17 +7019,6 @@
     {
       "type": "donut",
       "slug": "budget-pie",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
       "path": "transform",
       "control": "json",
       "klass": "d",
@@ -7321,61 +7080,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "Probe"
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
     },
     {
       "type": "gauge",
@@ -7463,7 +7167,7 @@
       "reason": "example has no metric.deltaFormat",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "gauge",
@@ -7497,17 +7201,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "USD"
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
-      "path": "metric.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "gauge",
@@ -7570,17 +7263,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "#ff00aa"
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
     },
     {
       "type": "gauge",
@@ -7797,17 +7479,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 800
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
     },
     {
       "type": "gauge",
@@ -8044,7 +7715,7 @@
       "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "bar",
@@ -8097,72 +7768,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "bar",
-      "slug": "channels-bar",
-      "path": "axes.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "bar",
-      "slug": "channels-bar",
-      "path": "axes.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "bar",
-      "slug": "channels-bar",
-      "path": "axes.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "bar",
-      "slug": "channels-bar",
-      "path": "axes.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "bar",
-      "slug": "channels-bar",
-      "path": "axes.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "bar",
-      "slug": "channels-bar",
-      "path": "axes.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "bar",
@@ -8302,7 +7907,7 @@
       "reason": "example has no series on y2",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "bar",
@@ -8899,61 +8504,6 @@
     {
       "type": "histogram",
       "slug": "checkout-histogram",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
       "path": "encoding.x",
       "control": "text",
       "klass": "d",
@@ -8972,83 +8522,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "encoding.x.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "encoding.x.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "encoding.x.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "encoding.x.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "encoding.x.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "encoding.x.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "encoding.x.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "histogram",
@@ -9184,83 +8657,6 @@
     {
       "type": "histogram",
       "slug": "checkout-histogram",
-      "path": "encoding.y.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "encoding.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "encoding.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "encoding.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "encoding.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "encoding.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "encoding.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
       "path": "encoding.y.scale.type",
       "control": "enum",
       "klass": "b",
@@ -9366,72 +8762,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 120
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.x.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "histogram",
@@ -9616,72 +8946,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "axes.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "histogram",
@@ -9964,7 +9228,7 @@
       "reason": "example has no series on y2",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "histogram",
@@ -10346,17 +9610,6 @@
     {
       "type": "histogram",
       "slug": "checkout-histogram",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -10573,17 +9826,6 @@
     {
       "type": "histogram",
       "slug": "checkout-histogram",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
       "path": "sort.field",
       "control": "text",
       "klass": "b",
@@ -10656,61 +9898,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "Probe"
-    },
-    {
-      "type": "journey",
-      "slug": "checkout-journey",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "journey",
-      "slug": "checkout-journey",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "journey",
-      "slug": "checkout-journey",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "journey",
-      "slug": "checkout-journey",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "journey",
-      "slug": "checkout-journey",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
     },
     {
       "type": "journey",
@@ -10871,17 +10058,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "journey",
-      "slug": "checkout-journey",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
     },
     {
       "type": "journey",
@@ -11113,17 +10289,6 @@
     {
       "type": "journey",
       "slug": "checkout-journey",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "journey",
-      "slug": "checkout-journey",
       "path": "transform",
       "control": "json",
       "klass": "d",
@@ -11167,72 +10332,6 @@
     {
       "type": "boxplot",
       "slug": "close-boxplot",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "encoding.x.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
       "path": "encoding.y.type",
       "control": "enum",
       "klass": "b",
@@ -11240,83 +10339,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "encoding.y.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "encoding.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "encoding.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "encoding.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "encoding.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "encoding.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "encoding.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "boxplot",
@@ -11480,7 +10502,7 @@
       "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "boxplot",
@@ -11676,72 +10698,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "axes.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "boxplot",
@@ -12024,7 +10980,7 @@
       "reason": "example has no series on y2",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "boxplot",
@@ -12406,17 +11362,6 @@
     {
       "type": "boxplot",
       "slug": "close-boxplot",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -12633,17 +11578,6 @@
     {
       "type": "boxplot",
       "slug": "close-boxplot",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
       "path": "sort.field",
       "control": "text",
       "klass": "b",
@@ -12716,61 +11650,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "Probe"
-    },
-    {
-      "type": "timeline",
-      "slug": "company-timeline",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "timeline",
-      "slug": "company-timeline",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "timeline",
-      "slug": "company-timeline",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "timeline",
-      "slug": "company-timeline",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "timeline",
-      "slug": "company-timeline",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
     },
     {
       "type": "timeline",
@@ -12912,7 +11791,7 @@
       "reason": "example is not an OHLC series",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "timeline",
@@ -13120,7 +11999,7 @@
       "reason": "example is not an OHLC series",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "timeline",
@@ -13394,17 +12273,6 @@
     {
       "type": "timeline",
       "slug": "company-timeline",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "timeline",
-      "slug": "company-timeline",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -13632,17 +12500,6 @@
     {
       "type": "timeline",
       "slug": "company-timeline",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "timeline",
-      "slug": "company-timeline",
       "path": "transform",
       "control": "json",
       "klass": "d",
@@ -13686,61 +12543,6 @@
     {
       "type": "strip",
       "slug": "desks-strip",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
       "path": "encoding.x",
       "control": "text",
       "klass": "d",
@@ -13759,17 +12561,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "encoding.x.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "strip",
@@ -13846,7 +12637,7 @@
       "reason": "x values are categories, so type, format, and scale do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "strip",
@@ -13956,17 +12747,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 120
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "encoding.y.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "strip",
@@ -14108,7 +12888,7 @@
       "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "strip",
@@ -14327,7 +13107,7 @@
       "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "strip",
@@ -14534,72 +13314,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "axes.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "strip",
@@ -14893,7 +13607,7 @@
       "reason": "example has no series on y2",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "strip",
@@ -15187,17 +13901,6 @@
     {
       "type": "strip",
       "slug": "desks-strip",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -15414,17 +14117,6 @@
     {
       "type": "strip",
       "slug": "desks-strip",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
       "path": "transform",
       "control": "json",
       "klass": "d",
@@ -15479,61 +14171,6 @@
     {
       "type": "kpi",
       "slug": "error-kpi",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
       "path": "metric.min",
       "control": "number",
       "klass": "d",
@@ -15584,17 +14221,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "USD"
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
-      "path": "metric.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "kpi",
@@ -15660,17 +14286,6 @@
     {
       "type": "kpi",
       "slug": "error-kpi",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -15883,17 +14498,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 800
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
     },
     {
       "type": "kpi",
@@ -15974,61 +14578,6 @@
     {
       "type": "spike",
       "slug": "error-spikes",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
       "path": "encoding.x.type",
       "control": "enum",
       "klass": "b",
@@ -16036,17 +14585,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.x.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "spike",
@@ -16123,7 +14661,7 @@
       "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "spike",
@@ -16255,83 +14793,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.y.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "spike",
@@ -16506,7 +14967,7 @@
       "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "spike",
@@ -16691,72 +15152,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "axes.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "spike",
@@ -17050,7 +15445,7 @@
       "reason": "example has no series on y2",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "spike",
@@ -17443,17 +15838,6 @@
     {
       "type": "spike",
       "slug": "error-spikes",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -17724,61 +16108,6 @@
     {
       "type": "venn",
       "slug": "feature-venn",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "venn",
-      "slug": "feature-venn",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "venn",
-      "slug": "feature-venn",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "venn",
-      "slug": "feature-venn",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "venn",
-      "slug": "feature-venn",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "venn",
-      "slug": "feature-venn",
       "path": "legend",
       "control": "boolean",
       "klass": "d",
@@ -17935,17 +16264,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "venn",
-      "slug": "feature-venn",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
     },
     {
       "type": "venn",
@@ -18177,17 +16495,6 @@
     {
       "type": "venn",
       "slug": "feature-venn",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "venn",
-      "slug": "feature-venn",
       "path": "sort.field",
       "control": "text",
       "klass": "b",
@@ -18264,131 +16571,10 @@
     {
       "type": "treemap",
       "slug": "inventory-treemap",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
       "path": "encoding.y",
       "control": "text",
       "klass": "d",
       "reason": "probe value makes the spec invalid",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": "Probe"
@@ -18490,7 +16676,7 @@
       "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "treemap",
@@ -18749,17 +16935,6 @@
     {
       "type": "treemap",
       "slug": "inventory-treemap",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -18976,17 +17151,6 @@
     {
       "type": "treemap",
       "slug": "inventory-treemap",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
       "path": "transform",
       "control": "json",
       "klass": "d",
@@ -19023,72 +17187,6 @@
       "control": "text",
       "klass": "d",
       "reason": "id is a hook, not paint",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "encoding.x.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": "Probe"
@@ -19136,83 +17234,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "encoding.y.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "encoding.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "encoding.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "encoding.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "encoding.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "encoding.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "encoding.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "errorbar",
@@ -19398,7 +17419,7 @@
       "reason": "example is not an OHLC series",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "errorbar",
@@ -19573,7 +17594,7 @@
       "reason": "example is not an OHLC series",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "errorbar",
@@ -19759,7 +17780,7 @@
       "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "errorbar",
@@ -19912,7 +17933,7 @@
       "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "errorbar",
@@ -20119,72 +18140,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "axes.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "errorbar",
@@ -20467,7 +18422,7 @@
       "reason": "example has no series on y2",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "errorbar",
@@ -20849,17 +18804,6 @@
     {
       "type": "errorbar",
       "slug": "lab-error-bars",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -21076,17 +19020,6 @@
     {
       "type": "errorbar",
       "slug": "lab-error-bars",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
       "path": "sort.field",
       "control": "text",
       "klass": "d",
@@ -21255,17 +19188,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "sparkline",
-      "slug": "latency-spark",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
     },
     {
       "type": "sparkline",
@@ -21584,61 +19506,6 @@
     {
       "type": "gantt",
       "slug": "launch-gantt",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "gantt",
-      "slug": "launch-gantt",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "gantt",
-      "slug": "launch-gantt",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "gantt",
-      "slug": "launch-gantt",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "gantt",
-      "slug": "launch-gantt",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "gantt",
-      "slug": "launch-gantt",
       "path": "encoding.color.title",
       "control": "text",
       "klass": "b",
@@ -21765,7 +19632,7 @@
       "reason": "example is not an OHLC series",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "gantt",
@@ -21973,7 +19840,7 @@
       "reason": "example is not an OHLC series",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "gantt",
@@ -22181,7 +20048,7 @@
       "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "gantt",
@@ -22389,7 +20256,7 @@
       "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "gantt",
@@ -22663,17 +20530,6 @@
     {
       "type": "gantt",
       "slug": "launch-gantt",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "gantt",
-      "slug": "launch-gantt",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -22901,17 +20757,6 @@
     {
       "type": "gantt",
       "slug": "launch-gantt",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "gantt",
-      "slug": "launch-gantt",
       "path": "transform",
       "control": "json",
       "klass": "d",
@@ -22951,61 +20796,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "Probe"
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
     },
     {
       "type": "radial-bar",
@@ -23308,17 +21098,6 @@
     {
       "type": "radial-bar",
       "slug": "lumen-radial-bar",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
       "path": "transform",
       "control": "json",
       "klass": "d",
@@ -23362,61 +21141,6 @@
     {
       "type": "rose",
       "slug": "lumen-rose",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
       "path": "encoding.x",
       "control": "text",
       "klass": "d",
@@ -23435,72 +21159,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "encoding.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "encoding.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "encoding.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "encoding.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "encoding.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "encoding.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "rose",
@@ -24023,17 +21681,6 @@
     {
       "type": "rose",
       "slug": "lumen-rose",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
       "path": "transform",
       "control": "json",
       "klass": "d",
@@ -24077,131 +21724,10 @@
     {
       "type": "sankey",
       "slug": "mill-sankey",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
       "path": "encoding.y",
       "control": "text",
       "klass": "d",
       "reason": "probe value makes the spec invalid",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "encoding.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "encoding.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "encoding.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "encoding.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "encoding.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "encoding.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": "Probe"
@@ -24357,7 +21883,7 @@
       "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "sankey",
@@ -24576,7 +22102,7 @@
       "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "sankey",
@@ -24872,17 +22398,6 @@
     {
       "type": "sankey",
       "slug": "mill-sankey",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -25099,17 +22614,6 @@
     {
       "type": "sankey",
       "slug": "mill-sankey",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
       "path": "transform",
       "control": "json",
       "klass": "d",
@@ -25225,7 +22729,7 @@
       "reason": "x values are categories, so type, format, and scale do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "stacked-area",
@@ -25496,7 +23000,7 @@
       "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "stacked-area",
@@ -25549,72 +23053,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "stacked-area",
-      "slug": "mix-area",
-      "path": "axes.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "stacked-area",
-      "slug": "mix-area",
-      "path": "axes.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "stacked-area",
-      "slug": "mix-area",
-      "path": "axes.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "stacked-area",
-      "slug": "mix-area",
-      "path": "axes.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "stacked-area",
-      "slug": "mix-area",
-      "path": "axes.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "stacked-area",
-      "slug": "mix-area",
-      "path": "axes.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "stacked-area",
@@ -25754,7 +23192,7 @@
       "reason": "example has no series on y2",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "stacked-area",
@@ -26070,17 +23508,6 @@
     {
       "type": "stacked-area",
       "slug": "mix-area",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "stacked-area",
-      "slug": "mix-area",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -26358,61 +23785,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "Probe"
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
     },
     {
       "type": "radar",
@@ -26564,17 +23936,6 @@
     {
       "type": "radar",
       "slug": "model-radar",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -26802,17 +24163,6 @@
     {
       "type": "radar",
       "slug": "model-radar",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
       "path": "transform",
       "control": "json",
       "klass": "d",
@@ -26928,7 +24278,7 @@
       "reason": "x values are categories, so type, format, and scale do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "combo",
@@ -27209,7 +24559,7 @@
       "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "combo",
@@ -27266,72 +24616,6 @@
     {
       "type": "combo",
       "slug": "orders-combo",
-      "path": "axes.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "combo",
-      "slug": "orders-combo",
-      "path": "axes.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "combo",
-      "slug": "orders-combo",
-      "path": "axes.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "combo",
-      "slug": "orders-combo",
-      "path": "axes.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "combo",
-      "slug": "orders-combo",
-      "path": "axes.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "combo",
-      "slug": "orders-combo",
-      "path": "axes.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "combo",
-      "slug": "orders-combo",
       "path": "axes.y.ticks",
       "control": "json",
       "klass": "d",
@@ -27380,72 +24664,6 @@
       "specChanged": false,
       "svgChanged": false,
       "probe": true
-    },
-    {
-      "type": "combo",
-      "slug": "orders-combo",
-      "path": "axes.y2.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "combo",
-      "slug": "orders-combo",
-      "path": "axes.y2.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "combo",
-      "slug": "orders-combo",
-      "path": "axes.y2.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "combo",
-      "slug": "orders-combo",
-      "path": "axes.y2.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "combo",
-      "slug": "orders-combo",
-      "path": "axes.y2.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "combo",
-      "slug": "orders-combo",
-      "path": "axes.y2.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "combo",
@@ -27581,17 +24799,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "combo",
-      "slug": "orders-combo",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
     },
     {
       "type": "combo",
@@ -27853,8 +25060,8 @@
       "probe": true
     },
     {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
+      "type": "bar-list",
+      "slug": "payments-bar-list",
       "path": "id",
       "control": "text",
       "klass": "d",
@@ -27864,59 +25071,359 @@
       "probe": "Probe"
     },
     {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
-      "path": "headline.label",
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "subtitle",
       "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
+      "klass": "d",
+      "reason": "example has no subtitle",
       "specChanged": true,
       "svgChanged": false,
       "probe": "Probe"
     },
     {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
-      "path": "headline.value",
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "encoding.x",
       "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
+      "klass": "d",
+      "reason": "probe value makes the spec invalid",
       "specChanged": true,
       "svgChanged": false,
       "probe": "Probe"
     },
     {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
-      "path": "headline.compare",
-      "control": "text",
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "tooltip.fields",
+      "control": "json",
+      "klass": "d",
+      "reason": "freeform value, no safe non-default probe",
+      "specChanged": false,
+      "svgChanged": false
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "annotations",
+      "control": "json",
+      "klass": "d",
+      "reason": "freeform value, no safe non-default probe",
+      "specChanged": false,
+      "svgChanged": false
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "theme.tokens.muted",
+      "control": "color",
+      "klass": "d",
+      "reason": "example does not paint this token",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": "#ff00aa"
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "theme.tokens.fontSize",
+      "control": "number",
       "klass": "b",
       "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": 32
     },
     {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "theme.tokens.series",
+      "control": "json",
+      "klass": "d",
+      "reason": "freeform value, no safe non-default probe",
+      "specChanged": false,
+      "svgChanged": false
     },
     {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
-      "path": "headline.tone",
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "layout.direction",
       "control": "enum",
       "klass": "b",
       "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "neutral"
+      "probe": "rtl"
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "layout.facet.field",
+      "control": "text",
+      "klass": "d",
+      "reason": "example is not faceted",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": "Probe"
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "layout.facet.columns",
+      "control": "number",
+      "klass": "d",
+      "reason": "example is not faceted",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": 120
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "layout.facet.rows",
+      "control": "number",
+      "klass": "d",
+      "reason": "example is not faceted",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": 120
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "layout.facet.wrap",
+      "control": "boolean",
+      "klass": "d",
+      "reason": "example is not faceted",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": true
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "layout.facet.scales",
+      "control": "enum",
+      "klass": "d",
+      "reason": "example is not faceted",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": "independent"
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "layout.facet.legend",
+      "control": "enum",
+      "klass": "d",
+      "reason": "example is not faceted",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": "each"
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "layout.concat.columns",
+      "control": "number",
+      "klass": "d",
+      "reason": "example is not a concatenation",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": 4
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "layout.concat.direction",
+      "control": "enum",
+      "klass": "d",
+      "reason": "example is not a concatenation",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": "vertical"
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "layout.concat.gap",
+      "control": "number",
+      "klass": "d",
+      "reason": "example is not a concatenation",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": 120
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "layout.concat.views",
+      "control": "json",
+      "klass": "d",
+      "reason": "freeform value, no safe non-default probe",
+      "specChanged": false,
+      "svgChanged": false
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "layout.breakpoints",
+      "control": "json",
+      "klass": "d",
+      "reason": "freeform value, no safe non-default probe",
+      "specChanged": false,
+      "svgChanged": false
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "interaction.initialRange",
+      "control": "json",
+      "klass": "d",
+      "reason": "freeform value, no safe non-default probe",
+      "specChanged": false,
+      "svgChanged": false
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "interaction.export",
+      "control": "json",
+      "klass": "d",
+      "reason": "freeform value, no safe non-default probe",
+      "specChanged": false,
+      "svgChanged": false
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "interaction.sync",
+      "control": "text",
+      "klass": "b",
+      "reason": "spec changed and the rendered SVG did not",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": "Probe"
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "interaction.drilldown.key",
+      "control": "text",
+      "klass": "d",
+      "reason": "example has no drilldown",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": "Probe"
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "interaction.drilldown.children",
+      "control": "text",
+      "klass": "d",
+      "reason": "example has no drilldown",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": "Probe"
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "animation",
+      "control": "boolean",
+      "klass": "d",
+      "reason": "motion runs in the client, not in the static SVG",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": true
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "animation.duration",
+      "control": "number",
+      "klass": "d",
+      "reason": "motion runs in the client, not in the static SVG",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": 5000
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "animation.easing",
+      "control": "enum",
+      "klass": "d",
+      "reason": "motion runs in the client, not in the static SVG",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": "spring"
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "motion",
+      "control": "enum",
+      "klass": "d",
+      "reason": "motion runs in the client, not in the static SVG",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": "auto"
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "motion.duration",
+      "control": "number",
+      "klass": "d",
+      "reason": "motion runs in the client, not in the static SVG",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": 800
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "transform",
+      "control": "json",
+      "klass": "d",
+      "reason": "freeform value, no safe non-default probe",
+      "specChanged": false,
+      "svgChanged": false
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "a11y.keyboard",
+      "control": "boolean",
+      "klass": "d",
+      "reason": "client behavior; the static SVG only records intent",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": true
+    },
+    {
+      "type": "bar-list",
+      "slug": "payments-bar-list",
+      "path": "a11y.dataTable",
+      "control": "boolean",
+      "klass": "d",
+      "reason": "client behavior; the static SVG only records intent",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": true
+    },
+    {
+      "type": "quadrant",
+      "slug": "priority-quadrant",
+      "path": "id",
+      "control": "text",
+      "klass": "d",
+      "reason": "id is a hook, not paint",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": "Probe"
     },
     {
       "type": "quadrant",
@@ -28047,7 +25554,7 @@
       "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "quadrant",
@@ -28331,17 +25838,6 @@
     {
       "type": "quadrant",
       "slug": "priority-quadrant",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -28569,17 +26065,6 @@
     {
       "type": "quadrant",
       "slug": "priority-quadrant",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
       "path": "transform",
       "control": "json",
       "klass": "d",
@@ -28623,72 +26108,6 @@
     {
       "type": "waterfall",
       "slug": "quarter-waterfall",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "encoding.x.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
       "path": "encoding.y",
       "control": "text",
       "klass": "d",
@@ -28707,83 +26126,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "encoding.y.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "encoding.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "encoding.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "encoding.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "encoding.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "encoding.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "encoding.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "waterfall",
@@ -28886,72 +26228,6 @@
     {
       "type": "waterfall",
       "slug": "quarter-waterfall",
-      "path": "mark.labelFormat.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "mark.labelFormat.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "mark.labelFormat.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "mark.labelFormat.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "mark.labelFormat.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "mark.labelFormat.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
       "path": "axes.x.format",
       "control": "enum",
       "klass": "d",
@@ -29024,7 +26300,7 @@
       "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "waterfall",
@@ -29220,72 +26496,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "axes.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "waterfall",
@@ -29568,7 +26778,7 @@
       "reason": "example has no series on y2",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "waterfall",
@@ -29951,17 +27161,6 @@
     {
       "type": "waterfall",
       "slug": "quarter-waterfall",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -30178,17 +27377,6 @@
     {
       "type": "waterfall",
       "slug": "quarter-waterfall",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
       "path": "transform",
       "control": "json",
       "klass": "d",
@@ -30304,7 +27492,7 @@
       "reason": "x values are categories, so type, format, and scale do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "line",
@@ -30414,72 +27602,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "line",
-      "slug": "quarterly-units",
-      "path": "encoding.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "line",
-      "slug": "quarterly-units",
-      "path": "encoding.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "line",
-      "slug": "quarterly-units",
-      "path": "encoding.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "line",
-      "slug": "quarterly-units",
-      "path": "encoding.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "line",
-      "slug": "quarterly-units",
-      "path": "encoding.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "line",
-      "slug": "quarterly-units",
-      "path": "encoding.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "line",
@@ -30739,7 +27861,7 @@
       "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "line",
@@ -30792,72 +27914,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "line",
-      "slug": "quarterly-units",
-      "path": "axes.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "line",
-      "slug": "quarterly-units",
-      "path": "axes.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "line",
-      "slug": "quarterly-units",
-      "path": "axes.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "line",
-      "slug": "quarterly-units",
-      "path": "axes.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "line",
-      "slug": "quarterly-units",
-      "path": "axes.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "line",
-      "slug": "quarterly-units",
-      "path": "axes.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "line",
@@ -30997,7 +28053,7 @@
       "reason": "example has no series on y2",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "line",
@@ -31434,17 +28490,6 @@
     {
       "type": "line",
       "slug": "quarterly-units",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "line",
-      "slug": "quarterly-units",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -31715,61 +28760,6 @@
     {
       "type": "bullet",
       "slug": "revenue-bullet",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
       "path": "encoding.y",
       "control": "text",
       "klass": "d",
@@ -31788,72 +28778,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "encoding.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "encoding.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "encoding.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "encoding.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "encoding.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "encoding.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "bullet",
@@ -31979,72 +28903,6 @@
       "type": "bullet",
       "slug": "revenue-bullet",
       "path": "encoding.target.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "encoding.target.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "encoding.target.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "encoding.target.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "encoding.target.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "encoding.target.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "encoding.target.format.specifier",
       "control": "text",
       "klass": "b",
       "reason": "spec changed and the rendered SVG did not",
@@ -32345,17 +29203,6 @@
     {
       "type": "bullet",
       "slug": "revenue-bullet",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -32572,17 +29419,6 @@
     {
       "type": "bullet",
       "slug": "revenue-bullet",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
       "path": "sort.field",
       "control": "text",
       "klass": "d",
@@ -32659,61 +29495,6 @@
     {
       "type": "area-range",
       "slug": "revenue-forecast",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
       "path": "encoding.x.type",
       "control": "enum",
       "klass": "d",
@@ -32721,17 +29502,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.x.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "area-range",
@@ -32808,7 +29578,7 @@
       "reason": "x values are categories, so type, format, and scale do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "area-range",
@@ -32951,72 +29721,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "area-range",
@@ -33191,7 +29895,7 @@
       "reason": "example is not an OHLC series",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "area-range",
@@ -33366,7 +30070,7 @@
       "reason": "example is not an OHLC series",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "area-range",
@@ -33530,7 +30234,7 @@
       "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "area-range",
@@ -33726,72 +30430,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "area-range",
@@ -34074,7 +30712,7 @@
       "reason": "example has no series on y2",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "area-range",
@@ -34452,17 +31090,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
     },
     {
       "type": "area-range",
@@ -34833,17 +31460,6 @@
     {
       "type": "mini-area",
       "slug": "sessions-mini",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "mini-area",
-      "slug": "sessions-mini",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -35158,131 +31774,10 @@
     {
       "type": "funnel",
       "slug": "signup-funnel",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
       "path": "encoding.y",
       "control": "text",
       "klass": "d",
       "reason": "probe value makes the spec invalid",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "encoding.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "encoding.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "encoding.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "encoding.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "encoding.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "encoding.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": "Probe"
@@ -35329,72 +31824,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": true
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "mark.labelFormat.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "mark.labelFormat.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "mark.labelFormat.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "mark.labelFormat.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "mark.labelFormat.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "mark.labelFormat.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "funnel",
@@ -35467,17 +31896,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
     },
     {
       "type": "funnel",
@@ -35698,17 +32116,6 @@
     {
       "type": "funnel",
       "slug": "signup-funnel",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
       "path": "transform",
       "control": "json",
       "klass": "d",
@@ -35770,61 +32177,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "Probe"
-    },
-    {
-      "type": "progress-ring",
-      "slug": "tasks-ring",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "progress-ring",
-      "slug": "tasks-ring",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "progress-ring",
-      "slug": "tasks-ring",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "progress-ring",
-      "slug": "tasks-ring",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "progress-ring",
-      "slug": "tasks-ring",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
     },
     {
       "type": "progress-ring",
@@ -35923,7 +32275,7 @@
       "reason": "example has no metric.deltaFormat",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "progress-ring",
@@ -36129,17 +32481,6 @@
     {
       "type": "progress-ring",
       "slug": "tasks-ring",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "progress-ring",
-      "slug": "tasks-ring",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -36356,17 +32697,6 @@
     {
       "type": "progress-ring",
       "slug": "tasks-ring",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "progress-ring",
-      "slug": "tasks-ring",
       "path": "sort.field",
       "control": "text",
       "klass": "d",
@@ -36443,72 +32773,6 @@
     {
       "type": "bar-range",
       "slug": "temperature-range",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "encoding.x.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
       "path": "encoding.y",
       "control": "text",
       "klass": "b",
@@ -36549,17 +32813,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "encoding.y.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "bar-range",
@@ -36636,7 +32889,7 @@
       "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "bar-range",
@@ -36909,7 +33162,7 @@
       "reason": "example is not an OHLC series",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "bar-range",
@@ -37062,7 +33315,7 @@
       "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "bar-range",
@@ -37269,17 +33522,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "USD"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "axes.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "bar-range",
@@ -37562,7 +33804,7 @@
       "reason": "example has no series on y2",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "bar-range",
@@ -37944,17 +34186,6 @@
     {
       "type": "bar-range",
       "slug": "temperature-range",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -38171,17 +34402,6 @@
     {
       "type": "bar-range",
       "slug": "temperature-range",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
       "path": "transform",
       "control": "json",
       "klass": "d",
@@ -38225,61 +34445,6 @@
     {
       "type": "candlestick",
       "slug": "week-candles",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
       "path": "encoding.x.type",
       "control": "enum",
       "klass": "d",
@@ -38287,17 +34452,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.x.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "candlestick",
@@ -38374,7 +34528,7 @@
       "reason": "x values are categories, so type, format, and scale do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "candlestick",
@@ -38521,72 +34675,6 @@
     {
       "type": "candlestick",
       "slug": "week-candles",
-      "path": "encoding.open.format.decimals",
-      "control": "number",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.open.format.currency",
-      "control": "text",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.open.format.prefix",
-      "control": "text",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.open.format.suffix",
-      "control": "text",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.open.format.signed",
-      "control": "boolean",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.open.format.specifier",
-      "control": "text",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
       "path": "encoding.open.scale.type",
       "control": "enum",
       "klass": "d",
@@ -38686,72 +34774,6 @@
       "type": "candlestick",
       "slug": "week-candles",
       "path": "encoding.high.title",
-      "control": "text",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.high.format.decimals",
-      "control": "number",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.high.format.currency",
-      "control": "text",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.high.format.prefix",
-      "control": "text",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.high.format.suffix",
-      "control": "text",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.high.format.signed",
-      "control": "boolean",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.high.format.specifier",
       "control": "text",
       "klass": "d",
       "reason": "example is not an OHLC series",
@@ -38932,7 +34954,7 @@
       "reason": "example is not an OHLC series",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "candlestick",
@@ -39036,72 +35058,6 @@
       "type": "candlestick",
       "slug": "week-candles",
       "path": "encoding.close.title",
-      "control": "text",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.close.format.decimals",
-      "control": "number",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.close.format.currency",
-      "control": "text",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.close.format.prefix",
-      "control": "text",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.close.format.suffix",
-      "control": "text",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.close.format.signed",
-      "control": "boolean",
-      "klass": "d",
-      "reason": "example is not an OHLC series",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.close.format.specifier",
       "control": "text",
       "klass": "d",
       "reason": "example is not an OHLC series",
@@ -39282,7 +35238,7 @@
       "reason": "example is not an OHLC series",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "candlestick",
@@ -39468,7 +35424,7 @@
       "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "candlestick",
@@ -39664,72 +35620,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "axes.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "candlestick",
@@ -40012,7 +35902,7 @@
       "reason": "example has no series on y2",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "candlestick",
@@ -40395,17 +36285,6 @@
     {
       "type": "candlestick",
       "slug": "week-candles",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
       "path": "layout.facet.field",
       "control": "text",
       "klass": "d",
@@ -40687,61 +36566,6 @@
     {
       "type": "scatter",
       "slug": "yield-scatter",
-      "path": "headline.label",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "headline.value",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "headline.compare",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "headline.delta",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "headline.tone",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "neutral"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
       "path": "encoding.x",
       "control": "text",
       "klass": "d",
@@ -40760,83 +36584,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "nominal"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "encoding.x.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "encoding.x.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "encoding.x.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "encoding.x.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "encoding.x.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "encoding.x.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "encoding.x.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "scatter",
@@ -40906,83 +36653,6 @@
     {
       "type": "scatter",
       "slug": "yield-scatter",
-      "path": "encoding.y.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "encoding.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "encoding.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "encoding.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "encoding.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "encoding.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "encoding.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
       "path": "encoding.y.scale.domain",
       "control": "json",
       "klass": "d",
@@ -41022,17 +36692,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 120
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "encoding.y.axis",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "y2"
     },
     {
       "type": "scatter",
@@ -41197,7 +36856,7 @@
       "reason": "example has no color field",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "scatter",
@@ -41413,7 +37072,7 @@
       "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "scatter",
@@ -41568,72 +37227,6 @@
     {
       "type": "scatter",
       "slug": "yield-scatter",
-      "path": "axes.x.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "axes.x.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "axes.x.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "axes.x.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "axes.x.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "axes.x.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
       "path": "axes.x.ticks",
       "control": "json",
       "klass": "d",
@@ -41781,72 +37374,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "axes.y.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "axes.y.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "axes.y.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "axes.y.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "axes.y.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "axes.y.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
     },
     {
       "type": "scatter",
@@ -42107,7 +37634,7 @@
       "reason": "example has no series on y2",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "Probe"
+      "probe": "$.0f"
     },
     {
       "type": "scatter",
@@ -42518,17 +38045,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "layout.coordinate",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "polar"
     },
     {
       "type": "scatter",

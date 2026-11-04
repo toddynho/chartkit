@@ -61,7 +61,7 @@ function plainPercent(part: number, total: number): string {
  * which dominate a fresh-page paint of a handful of arcs.
  */
 function simpleArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string | undefined {
-  if (spec.title != null || spec.subtitle != null || spec.theme != null || spec.annotations != null) return undefined;
+  if (spec.title != null || spec.subtitle != null || spec.theme != null || spec.annotations != null || spec.headline != null) return undefined;
   if (isRecord(spec.a11y) && typeof spec.a11y.description === "string" && spec.a11y.description) return undefined;
   if (spec.legend === false || isRecord(spec.legend)) return undefined;
   const mark = spec.mark;
