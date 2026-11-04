@@ -1,5 +1,5 @@
 import { seriesPoints } from "../annotations";
-import { axisTitleMarks, bottomLegendBand, categoryX, chooseTicks, heading, lockDomain, placedNotes } from "../chrome";
+import { axisTitleMarks, bottomLegendBand, categoryX, chooseTicks, heading, labelStep, lockDomain, minorTickMarks, placedNotes } from "../chrome";
 import { cssVar, lineStroke, paint } from "../theme";
 import { formatAxisValue, formatValue } from "../format";
 import {
@@ -13,7 +13,7 @@ import {
   resolveDomain,
 } from "../frame";
 import { readSamplingMode, sampleSeries } from "../sampling";
-import { closeChart, esc, font, linear, n, openChart, readAxis, ticks, ch } from "../svg";
+import { closeChart, esc, font, linear, n, openChart, readAxis, readAxisFormat, ticks, ch } from "../svg";
 
 /** Thin vertical spikes from mark.baseline (default 0) across x. */
 export function renderSpike(spec: Record<string, unknown>): string | null {
@@ -42,7 +42,7 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
   let top = 16 + (frame.subtitle ? 18 : 0);
   if (frame.title) top = 32 + (frame.subtitle ? 18 : 0);
   const yTicks = chooseTicks(spec, "y", domain[0], domain[1], ticks(domain[0], domain[1], 4));
-  const yFormat = channelFormat(frame.encoding.y);
+  const yFormat = readAxisFormat(spec, "y") ?? channelFormat(frame.encoding.y);
   const yTickText = yTicks.map((tick) => formatAxisValue(tick, yFormat, frame.locale, yTicks));
   let left = 12;
   if (showY) {
@@ -93,17 +93,25 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
     }
   }
   if (showY) {
-    for (let i = 0; i < yTicks.length; i++) {
-      parts.push(text(plot.left - 8, yScale(yTicks[i]) + 4, yTickText[i] ?? "", cssVar("muted", frame.preset.muted), 11, "400", "end"));
+    const yAxis = readAxis(spec, "y");
+    const step = labelStep(yTicks.length, yAxis.skip, 1);
+    for (let i = 0; i < yTicks.length; i += step) {
+      parts.push(text(plot.left - 8, yScale(yTicks[i] ?? 0) + 4, yTickText[i] ?? "", cssVar("muted", frame.preset.muted), 11, "400", "end"));
     }
+    parts.push(minorTickMarks(yAxis.minor ?? 0, yTicks, yScale, plot.left, false, -3, cssVar("axis", frame.preset.axis)));
   }
   if (showX) {
-    const step = count > 8 ? Math.ceil(count / 6) : 1;
-    const labelY = frame.height - legendBand - (readAxis(spec, "x").title ? 26 : 12);
+    const xAxis = readAxis(spec, "x");
+    const omitted = count > 8 ? Math.ceil(count / 6) : 1;
+    const step = labelStep(count, xAxis.skip, omitted);
+    const labelY = frame.height - legendBand - (xAxis.title ? 26 : 12);
+    const xs: number[] = [];
+    for (let i = 0; i < count; i++) xs.push(plot.left + slot * i + slot / 2);
     for (let i = 0; i < count; i += step) {
       if (!labels[i]) continue;
-      parts.push(text(plot.left + slot * i + slot / 2, labelY, labels[i], cssVar("muted", frame.preset.muted), 11, "400", "middle"));
+      parts.push(text(xs[i] ?? 0, labelY, labels[i] ?? "", cssVar("muted", frame.preset.muted), 11, "400", "middle"));
     }
+    parts.push(minorTickMarks(xAxis.minor ?? 0, xs, (value) => value, plot.bottom, true, 3, cssVar("axis", frame.preset.axis)));
   }
   const xAt = (index: number) => plot.left + slot * index + slot / 2;
   const notes = placedNotes(spec, frame, plot, categoryX(labels, xAt), (value) => yScale(value), [

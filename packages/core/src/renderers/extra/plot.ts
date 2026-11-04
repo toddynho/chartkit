@@ -2,7 +2,7 @@ import type { DataTable } from "../../data";
 import { formatAxisValue, formatValue } from "../../format";
 import { asNumber, axisOn, channelFormat, column, fieldOf, gridStyle, readFrame, readTable, type Frame } from "../../frame";
 import { cssVar, lineStroke, paint } from "../../theme";
-import { bottomLegendBand, heading } from "../../chrome";
+import { bottomLegendBand, heading, labelStep, minorTickMarks } from "../../chrome";
 import { clipPath, closeChart, esc, font, isRecord, linear, n, openChart, readAxis, ticks, ch } from "../../svg";
 
 export interface View {
@@ -168,18 +168,29 @@ export function hGrid(spec: Record<string, unknown>, frame: Frame, box: Box, val
 export function yLabels(frame: Frame, spec: Record<string, unknown>, box: Box, values: number[], yAt: (value: number) => number): string {
   if (!axisOn(spec, "y")) return "";
   const format = axisFormat(spec, frame.encoding.y);
-  return values.map((value) => text(box.left - 8, yAt(value) + 4, formatAxisValue(value, format, frame.locale, values), cssVar("muted", frame.preset.muted), 11, "400", "end")).join("");
+  const axis = readAxis(spec, "y");
+  const step = labelStep(values.length, axis.skip, 1);
+  const ink = cssVar("muted", frame.preset.muted);
+  const labels = values
+    .filter((_, index) => index % step === 0)
+    .map((value) => text(box.left - 8, yAt(value) + 4, formatAxisValue(value, format, frame.locale, values), ink, 11, "400", "end"))
+    .join("");
+  const minors = minorTickMarks(axis.minor ?? 0, values, yAt, box.left, false, -3, cssVar("axis", frame.preset.axis));
+  return labels + minors;
 }
 
-export function xLabels(frame: Frame, spec: Record<string, unknown>, labels: { x: number; text: string }[], plot?: { left: number; right: number }): string {
+export function xLabels(frame: Frame, spec: Record<string, unknown>, labels: { x: number; text: string }[], plot?: { left: number; right: number; bottom?: number }): string {
   if (!axisOn(spec, "x")) return "";
-  const step = labels.length > 8 ? Math.ceil(labels.length / 6) : 1;
+  const axis = readAxis(spec, "x");
+  const omitted = labels.length > 8 ? Math.ceil(labels.length / 6) : 1;
+  const step = labelStep(labels.length, axis.skip, omitted);
   const inner = plot ? Math.max(80, plot.right - plot.left) : Math.max(80, frame.width - 96);
-  const y = frame.height - bottomLegendBand(spec, frame.preset, inner) - (readAxis(spec, "x").title ? 26 : 12);
-  return labels
-    .filter((label, index) => index % step === 0 && label.text)
-    .map((label) => text(label.x, y, fit(label.text, 72, 11), cssVar("muted", frame.preset.muted), 11, "400", "middle"))
-    .join("");
+  const y = frame.height - bottomLegendBand(spec, frame.preset, inner) - (axis.title ? 26 : 12);
+  const shown = labels.filter((label, index) => index % step === 0 && label.text);
+  const textMarks = shown.map((label) => text(label.x, y, fit(label.text, 72, 11), cssVar("muted", frame.preset.muted), 11, "400", "middle")).join("");
+  const edge = plot?.bottom;
+  const minors = edge === undefined ? "" : minorTickMarks(axis.minor ?? 0, shown.map((label) => label.x), (value) => value, edge, true, 3, cssVar("axis", frame.preset.axis));
+  return textMarks + minors;
 }
 
 export function axisLine(frame: Frame, box: Box): string {

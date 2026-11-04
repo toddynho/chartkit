@@ -2,7 +2,7 @@ import { loadTable } from "./data-prep";
 import type { DataTable } from "./data";
 import type { PresetGeometry, PresetTokens } from "./theme";
 import { resolveGeometry, resolvePreset } from "./theme";
-import { hash, isRecord, niceDomain, readInset, type Inset } from "./svg";
+import { hash, isRecord, longDesc, niceDomain, readInset, type Inset } from "./svg";
 
 export interface Frame {
   type: string;
@@ -25,6 +25,8 @@ export interface Frame {
   legendValues: boolean;
   /** Comma-joined interaction.export formats, or "". */
   exportMark: string;
+  /** a11y.description. openChart exposes it with aria-describedby. */
+  description?: string;
   /** size.padding. Drawn by openChart for every type that uses this frame. */
   pad: Inset;
 }
@@ -87,6 +89,7 @@ export function readFrame(
     legend: legendPlacement(spec),
     legendValues: isRecord(spec.legend) && spec.legend.values === true,
     exportMark: exportList(spec),
+    description: longDesc(spec),
   };
 }
 
