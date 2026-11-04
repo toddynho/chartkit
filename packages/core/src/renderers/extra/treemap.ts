@@ -1,4 +1,5 @@
 import { colorLegendHeight, readColorScale, scaleLabel } from "../../color-scale";
+import { legendLabel, legendMarkup, legendShownValue } from "../../legend";
 import { asNumber, column, fieldOf } from "../../frame";
 import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
 import { headerFill, labelInk, siblingFill } from "../../ink";
@@ -93,13 +94,21 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
   if (ramp && frame.legend !== false) {
     parts.push(ramp.legend(12, frame.height - colorLegendHeight, scaleLabel(frame.preset)));
   } else if (frame.legend !== false && colors.size > 1) {
+    const totals = new Map(grouped.map((block) => [block.label, block.value]));
+    const items = [...colors].map(([name, color]) => ({ name, color, value: legendShownValue(spec, totals.get(name)) }));
     let x = 12;
     const y = frame.height - 8;
-    for (const [name, color] of colors) {
-      parts.push(`<rect x="${n(x)}" y="${n(y - 10)}" width="10" height="10" rx="2" fill="${color}" />`);
-      parts.push(`<text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12">${fit(name, 80, 12)}</text>`);
-      x += 14 + Math.min(name.length, 12) * 7 + 14;
-    }
+    const fallback = [...colors]
+      .map(([name, color]) => {
+        const label = fit(legendLabel(name, legendShownValue(spec, totals.get(name))), 80, 12);
+        const mark = `<rect x="${n(x)}" y="${n(y - 10)}" width="10" height="10" rx="2" fill="${color}" /><text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12">${label}</text>`;
+        x += 14 + Math.min(name.length, 12) * 7 + 14;
+        return mark;
+      })
+      .join("");
+    parts.push(
+      legendMarkup(spec, items, { plot: { left: 12, top, right: frame.width - 12, bottom: frame.height - legendH }, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
+    );
   }
   return view.done();
 }
@@ -247,14 +256,25 @@ function renderLevels(spec: Record<string, unknown>): string | null | undefined 
     paintNode(tile, colors[index] ?? fill(frame, index), tile.name, 0, tile.x, tile.y, tile.w, tile.h, total, index, outer.length);
   });
   if (legend) {
+    const items = branches.map((node, index) => ({
+      name: node.name,
+      color: colors[index] ?? fill(frame, index),
+      value: legendShownValue(spec, node.value),
+    }));
     let x = 12;
     const y = frame.height - 8;
-    branches.forEach((node, index) => {
-      const color = colors[index] ?? fill(frame, index);
-      const name = fit(node.name, 88, 12) || node.name;
-      parts.push(`<rect x="${n(x)}" y="${n(y - 10)}" width="10" height="10" rx="2" fill="${color}" /><text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12">${esc(name)}</text>`);
-      x += 14 + Math.min(name.length, 12) * 7 + 14;
-    });
+    const fallback = branches
+      .map((node, index) => {
+        const color = colors[index] ?? fill(frame, index);
+        const name = fit(legendLabel(node.name, legendShownValue(spec, node.value)), 88, 12) || node.name;
+        const mark = `<rect x="${n(x)}" y="${n(y - 10)}" width="10" height="10" rx="2" fill="${color}" /><text x="${n(x + 14)}" y="${n(y)}" fill="${cssVar("text", frame.preset.text)}" font-size="12">${esc(name)}</text>`;
+        x += 14 + Math.min(name.length, 12) * 7 + 14;
+        return mark;
+      })
+      .join("");
+    parts.push(
+      legendMarkup(spec, items, { plot: { left: 12, top, right: frame.width - 12, bottom: frame.height - legendH }, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
+    );
   }
   return view.done();
 }

@@ -2,16 +2,16 @@
 
 Class (a) is a playground wiring bug. The preview used to assign a static SVG and never call mount(), so tooltip, crosshair, legend toggle, and hover could not run. That is fixed in the playground by mounting @chartkitdev/vanilla. Rows here are what remains after that mount is used for the hover probe.
 
-Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining rows are classified below.
+Probed 5705 option writes across 33 chart types. 1763 changed the SVG. Remaining rows are classified below.
 
 - (a) playground wiring: 0
-- (b) core ignores a listed option: 1333
+- (b) core ignores a listed option: 1098
 - (c) catalog scope too wide: 0
 - (d) no-op for this example: 2300
 
 ## By chart type
 
-### histogram (90)
+### scatter (88)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
@@ -25,9 +25,9 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `encoding.x.format.prefix` — spec changed and the rendered SVG did not
 - **b** `encoding.x.format.suffix` — spec changed and the rendered SVG did not
 - **b** `encoding.x.format.signed` — spec changed and the rendered SVG did not
-- … 78 more
+- … 76 more
 
-### scatter (90)
+### histogram (83)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
@@ -41,9 +41,9 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `encoding.x.format.prefix` — spec changed and the rendered SVG did not
 - **b** `encoding.x.format.suffix` — spec changed and the rendered SVG did not
 - **b** `encoding.x.format.signed` — spec changed and the rendered SVG did not
-- … 78 more
+- … 71 more
 
-### spike (89)
+### spike (82)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
@@ -57,9 +57,9 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `encoding.x.format.currency` — spec changed and the rendered SVG did not
 - **b** `encoding.x.format.prefix` — spec changed and the rendered SVG did not
 - **b** `encoding.x.format.suffix` — spec changed and the rendered SVG did not
-- … 77 more
+- … 70 more
 
-### errorbar (83)
+### errorbar (76)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
@@ -73,9 +73,9 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `encoding.y.type` — spec changed and the rendered SVG did not
 - **b** `encoding.y.title` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- … 71 more
+- … 64 more
 
-### strip (82)
+### strip (67)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
@@ -89,41 +89,41 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `encoding.label` — spec changed and the rendered SVG did not
 - **b** `encoding.label.type` — spec changed and the rendered SVG did not
 - **b** `encoding.label.title` — spec changed and the rendered SVG did not
-- … 70 more
-
-### waterfall (71)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.x.title` — spec changed and the rendered SVG did not
-- **b** `encoding.y.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.title` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
-- … 59 more
-
-### boxplot (67)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.x.title` — spec changed and the rendered SVG did not
-- **b** `encoding.y.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.title` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
 - … 55 more
 
-### area-range (65)
+### waterfall (64)
+
+- **b** `headline.label` — spec changed and the rendered SVG did not
+- **b** `headline.value` — spec changed and the rendered SVG did not
+- **b** `headline.compare` — spec changed and the rendered SVG did not
+- **b** `headline.delta` — spec changed and the rendered SVG did not
+- **b** `headline.tone` — spec changed and the rendered SVG did not
+- **b** `encoding.x.title` — spec changed and the rendered SVG did not
+- **b** `encoding.y.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.title` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
+- … 52 more
+
+### boxplot (60)
+
+- **b** `headline.label` — spec changed and the rendered SVG did not
+- **b** `headline.value` — spec changed and the rendered SVG did not
+- **b** `headline.compare` — spec changed and the rendered SVG did not
+- **b** `headline.delta` — spec changed and the rendered SVG did not
+- **b** `headline.tone` — spec changed and the rendered SVG did not
+- **b** `encoding.x.title` — spec changed and the rendered SVG did not
+- **b** `encoding.y.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.title` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
+- … 48 more
+
+### area-range (58)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
@@ -137,9 +137,9 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
-- … 53 more
+- … 46 more
 
-### bar-range (63)
+### bar-range (56)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
@@ -153,9 +153,9 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `encoding.y.type` — spec changed and the rendered SVG did not
 - **b** `encoding.y.title` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format` — spec changed and the rendered SVG did not
-- … 51 more
+- … 44 more
 
-### sankey (56)
+### sankey (49)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
@@ -169,9 +169,9 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
 - **b** `encoding.source.type` — spec changed and the rendered SVG did not
-- … 44 more
+- … 37 more
 
-### gantt (51)
+### gantt (44)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
@@ -185,25 +185,9 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `encoding.source.format` — spec changed and the rendered SVG did not
 - **b** `encoding.source.format.decimals` — spec changed and the rendered SVG did not
 - **b** `encoding.source.format.currency` — spec changed and the rendered SVG did not
-- … 39 more
+- … 32 more
 
-### treemap (49)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
-- **b** `encoding.color.type` — spec changed and the rendered SVG did not
-- … 37 more
-
-### candlestick (49)
+### candlestick (42)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
@@ -217,9 +201,9 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `axes.x.labelWidth` — spec changed and the rendered SVG did not
 - **b** `axes.x.labelLines` — spec changed and the rendered SVG did not
 - **b** `axes.x.line` — spec changed and the rendered SVG did not
-- … 37 more
+- … 30 more
 
-### bullet (47)
+### bullet (40)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
@@ -233,9 +217,25 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
-- … 35 more
+- … 28 more
 
-### quadrant (34)
+### treemap (34)
+
+- **b** `headline.label` — spec changed and the rendered SVG did not
+- **b** `headline.value` — spec changed and the rendered SVG did not
+- **b** `headline.compare` — spec changed and the rendered SVG did not
+- **b** `headline.delta` — spec changed and the rendered SVG did not
+- **b** `headline.tone` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
+- **b** `encoding.color.type` — spec changed and the rendered SVG did not
+- … 22 more
+
+### quadrant (27)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
@@ -249,57 +249,9 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `encoding.size.format` — spec changed and the rendered SVG did not
 - **b** `encoding.size.format.decimals` — spec changed and the rendered SVG did not
 - **b** `encoding.size.format.currency` — spec changed and the rendered SVG did not
-- … 22 more
-
-### rose (31)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.y.type` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
-- **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
-- … 19 more
-
-### heatmap (30)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.color.type` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.signed` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.specifier` — spec changed and the rendered SVG did not
-- … 18 more
-
-### radar (27)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.series` — spec changed and the rendered SVG did not
-- **b** `encoding.series.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color` — spec changed and the rendered SVG did not
-- **b** `encoding.color.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color.value` — spec changed and the rendered SVG did not
-- **b** `legend.position` — spec changed and the rendered SVG did not
-- **b** `legend.anchor` — spec changed and the rendered SVG did not
 - … 15 more
 
-### line (26)
+### line (25)
 
 - **b** `encoding.y.type` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
@@ -313,9 +265,57 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `encoding.y.scale.constant` — spec changed and the rendered SVG did not
 - **b** `encoding.y.fillOpacity` — spec changed and the rendered SVG did not
 - **b** `encoding.y.stack` — spec changed and the rendered SVG did not
-- … 14 more
+- … 13 more
 
-### funnel (26)
+### rose (24)
+
+- **b** `headline.label` — spec changed and the rendered SVG did not
+- **b** `headline.value` — spec changed and the rendered SVG did not
+- **b** `headline.compare` — spec changed and the rendered SVG did not
+- **b** `headline.delta` — spec changed and the rendered SVG did not
+- **b** `headline.tone` — spec changed and the rendered SVG did not
+- **b** `encoding.y.type` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.decimals` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.currency` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.prefix` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.suffix` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
+- **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
+- … 12 more
+
+### heatmap (23)
+
+- **b** `headline.label` — spec changed and the rendered SVG did not
+- **b** `headline.value` — spec changed and the rendered SVG did not
+- **b** `headline.compare` — spec changed and the rendered SVG did not
+- **b** `headline.delta` — spec changed and the rendered SVG did not
+- **b** `headline.tone` — spec changed and the rendered SVG did not
+- **b** `encoding.color.type` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.decimals` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.currency` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.prefix` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.suffix` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.signed` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.specifier` — spec changed and the rendered SVG did not
+- … 11 more
+
+### combo (23)
+
+- **b** `encoding.series` — spec changed and the rendered SVG did not
+- **b** `encoding.series.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color` — spec changed and the rendered SVG did not
+- **b** `encoding.color.title` — spec changed and the rendered SVG did not
+- **b** `mark.sampling` — spec changed and the rendered SVG did not
+- **b** `mark.connectNulls` — spec changed and the rendered SVG did not
+- **b** `axes.x.autoSkip` — spec changed and the rendered SVG did not
+- **b** `axes.y.format.decimals` — spec changed and the rendered SVG did not
+- **b** `axes.y.format.currency` — spec changed and the rendered SVG did not
+- **b** `axes.y.format.prefix` — spec changed and the rendered SVG did not
+- **b** `axes.y.format.suffix` — spec changed and the rendered SVG did not
+- **b** `axes.y.format.signed` — spec changed and the rendered SVG did not
+- … 11 more
+
+### funnel (19)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
@@ -329,9 +329,9 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
 - **b** `mark.labels` — spec changed and the rendered SVG did not
-- … 14 more
+- … 7 more
 
-### combo (24)
+### stacked-area (16)
 
 - **b** `encoding.series` — spec changed and the rendered SVG did not
 - **b** `encoding.series.title` — spec changed and the rendered SVG did not
@@ -345,9 +345,9 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `axes.y.format.prefix` — spec changed and the rendered SVG did not
 - **b** `axes.y.format.suffix` — spec changed and the rendered SVG did not
 - **b** `axes.y.format.signed` — spec changed and the rendered SVG did not
-- … 12 more
+- … 4 more
 
-### donut (22)
+### donut (14)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
@@ -361,105 +361,9 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `encoding.y.format.signed` — spec changed and the rendered SVG did not
 - **b** `encoding.y.format.specifier` — spec changed and the rendered SVG did not
 - **b** `mark.other` — spec changed and the rendered SVG did not
-- … 10 more
+- … 2 more
 
-### radial-bar (21)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `legend.position` — spec changed and the rendered SVG did not
-- **b** `legend.anchor` — spec changed and the rendered SVG did not
-- **b** `legend.align` — spec changed and the rendered SVG did not
-- **b** `legend.orient` — spec changed and the rendered SVG did not
-- **b** `legend.maxRows` — spec changed and the rendered SVG did not
-- **b** `legend.title` — spec changed and the rendered SVG did not
-- **b** `legend.symbol` — spec changed and the rendered SVG did not
-- … 9 more
-
-### stacked-area (17)
-
-- **b** `encoding.series` — spec changed and the rendered SVG did not
-- **b** `encoding.series.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color` — spec changed and the rendered SVG did not
-- **b** `encoding.color.title` — spec changed and the rendered SVG did not
-- **b** `mark.sampling` — spec changed and the rendered SVG did not
-- **b** `mark.connectNulls` — spec changed and the rendered SVG did not
-- **b** `axes.x.autoSkip` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.decimals` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.currency` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.prefix` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.suffix` — spec changed and the rendered SVG did not
-- **b** `axes.y.format.signed` — spec changed and the rendered SVG did not
-- … 5 more
-
-### gauge (16)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `metric.format.decimals` — spec changed and the rendered SVG did not
-- **b** `metric.format.currency` — spec changed and the rendered SVG did not
-- **b** `metric.format.specifier` — spec changed and the rendered SVG did not
-- **b** `theme.brand` — spec changed and the rendered SVG did not
-- **b** `theme.tokens.fontSize` — spec changed and the rendered SVG did not
-- **b** `size.padding` — spec changed and the rendered SVG did not
-- **b** `size.padding.top` — spec changed and the rendered SVG did not
-- … 4 more
-
-### timeline (16)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `encoding.color` — spec changed and the rendered SVG did not
-- **b** `encoding.color.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color.value` — spec changed and the rendered SVG did not
-- **b** `theme.brand` — spec changed and the rendered SVG did not
-- **b** `theme.tokens.fontSize` — spec changed and the rendered SVG did not
-- **b** `size.padding` — spec changed and the rendered SVG did not
-- **b** `size.padding.top` — spec changed and the rendered SVG did not
-- … 4 more
-
-### venn (16)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `theme.brand` — spec changed and the rendered SVG did not
-- **b** `theme.tokens.fontSize` — spec changed and the rendered SVG did not
-- **b** `size.padding` — spec changed and the rendered SVG did not
-- **b** `size.padding.top` — spec changed and the rendered SVG did not
-- **b** `size.padding.right` — spec changed and the rendered SVG did not
-- **b** `size.padding.bottom` — spec changed and the rendered SVG did not
-- **b** `size.padding.left` — spec changed and the rendered SVG did not
-- … 4 more
-
-### kpi (15)
-
-- **b** `headline.label` — spec changed and the rendered SVG did not
-- **b** `headline.value` — spec changed and the rendered SVG did not
-- **b** `headline.compare` — spec changed and the rendered SVG did not
-- **b** `headline.delta` — spec changed and the rendered SVG did not
-- **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `metric.format.currency` — spec changed and the rendered SVG did not
-- **b** `metric.format.specifier` — spec changed and the rendered SVG did not
-- **b** `theme.brand` — spec changed and the rendered SVG did not
-- **b** `theme.tokens.fontSize` — spec changed and the rendered SVG did not
-- **b** `size.padding` — spec changed and the rendered SVG did not
-- **b** `size.padding.top` — spec changed and the rendered SVG did not
-- **b** `size.padding.right` — spec changed and the rendered SVG did not
-- … 3 more
-
-### bar (14)
+### bar (13)
 
 - **b** `encoding.series` — spec changed and the rendered SVG did not
 - **b** `encoding.series.title` — spec changed and the rendered SVG did not
@@ -473,64 +377,107 @@ Probed 5705 option writes across 33 chart types. 1528 changed the SVG. Remaining
 - **b** `axes.y.format.signed` — spec changed and the rendered SVG did not
 - **b** `axes.y.format.specifier` — spec changed and the rendered SVG did not
 - **b** `axes.y.autoSkip` — spec changed and the rendered SVG did not
-- … 2 more
+- … 1 more
 
-### journey (13)
+### radar (12)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
 - **b** `headline.compare` — spec changed and the rendered SVG did not
 - **b** `headline.delta` — spec changed and the rendered SVG did not
 - **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `theme.brand` — spec changed and the rendered SVG did not
-- **b** `theme.tokens.fontSize` — spec changed and the rendered SVG did not
-- **b** `size.padding` — spec changed and the rendered SVG did not
-- **b** `size.padding.top` — spec changed and the rendered SVG did not
-- **b** `size.padding.right` — spec changed and the rendered SVG did not
-- **b** `size.padding.bottom` — spec changed and the rendered SVG did not
-- **b** `size.padding.left` — spec changed and the rendered SVG did not
-- … 1 more
+- **b** `encoding.series` — spec changed and the rendered SVG did not
+- **b** `encoding.series.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color` — spec changed and the rendered SVG did not
+- **b** `encoding.color.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color.value` — spec changed and the rendered SVG did not
+- **b** `layout.coordinate` — spec changed and the rendered SVG did not
+- **b** `locale` — spec changed and the rendered SVG did not
 
-### progress-ring (13)
+### gauge (9)
 
 - **b** `headline.label` — spec changed and the rendered SVG did not
 - **b** `headline.value` — spec changed and the rendered SVG did not
 - **b** `headline.compare` — spec changed and the rendered SVG did not
 - **b** `headline.delta` — spec changed and the rendered SVG did not
 - **b** `headline.tone` — spec changed and the rendered SVG did not
-- **b** `theme.brand` — spec changed and the rendered SVG did not
-- **b** `theme.tokens.fontSize` — spec changed and the rendered SVG did not
-- **b** `size.padding` — spec changed and the rendered SVG did not
-- **b** `size.padding.top` — spec changed and the rendered SVG did not
-- **b** `size.padding.right` — spec changed and the rendered SVG did not
-- **b** `size.padding.bottom` — spec changed and the rendered SVG did not
-- **b** `size.padding.left` — spec changed and the rendered SVG did not
-- … 1 more
-
-### sparkline (10)
-
-- **b** `mark.sampling` — spec changed and the rendered SVG did not
-- **b** `mark.connectNulls` — spec changed and the rendered SVG did not
-- **b** `theme.brand` — spec changed and the rendered SVG did not
-- **b** `theme.tokens.fontSize` — spec changed and the rendered SVG did not
-- **b** `size.padding` — spec changed and the rendered SVG did not
-- **b** `size.padding.top` — spec changed and the rendered SVG did not
-- **b** `size.padding.right` — spec changed and the rendered SVG did not
-- **b** `size.padding.bottom` — spec changed and the rendered SVG did not
-- **b** `size.padding.left` — spec changed and the rendered SVG did not
+- **b** `metric.format.decimals` — spec changed and the rendered SVG did not
+- **b** `metric.format.currency` — spec changed and the rendered SVG did not
+- **b** `metric.format.specifier` — spec changed and the rendered SVG did not
 - **b** `layout.coordinate` — spec changed and the rendered SVG did not
 
-### mini-area (10)
+### timeline (9)
+
+- **b** `headline.label` — spec changed and the rendered SVG did not
+- **b** `headline.value` — spec changed and the rendered SVG did not
+- **b** `headline.compare` — spec changed and the rendered SVG did not
+- **b** `headline.delta` — spec changed and the rendered SVG did not
+- **b** `headline.tone` — spec changed and the rendered SVG did not
+- **b** `encoding.color` — spec changed and the rendered SVG did not
+- **b** `encoding.color.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color.value` — spec changed and the rendered SVG did not
+- **b** `layout.coordinate` — spec changed and the rendered SVG did not
+
+### venn (9)
+
+- **b** `headline.label` — spec changed and the rendered SVG did not
+- **b** `headline.value` — spec changed and the rendered SVG did not
+- **b** `headline.compare` — spec changed and the rendered SVG did not
+- **b** `headline.delta` — spec changed and the rendered SVG did not
+- **b** `headline.tone` — spec changed and the rendered SVG did not
+- **b** `layout.coordinate` — spec changed and the rendered SVG did not
+- **b** `sort.field` — spec changed and the rendered SVG did not
+- **b** `sort.by` — spec changed and the rendered SVG did not
+- **b** `sort.order` — spec changed and the rendered SVG did not
+
+### kpi (8)
+
+- **b** `headline.label` — spec changed and the rendered SVG did not
+- **b** `headline.value` — spec changed and the rendered SVG did not
+- **b** `headline.compare` — spec changed and the rendered SVG did not
+- **b** `headline.delta` — spec changed and the rendered SVG did not
+- **b** `headline.tone` — spec changed and the rendered SVG did not
+- **b** `metric.format.currency` — spec changed and the rendered SVG did not
+- **b** `metric.format.specifier` — spec changed and the rendered SVG did not
+- **b** `layout.coordinate` — spec changed and the rendered SVG did not
+
+### journey (6)
+
+- **b** `headline.label` — spec changed and the rendered SVG did not
+- **b** `headline.value` — spec changed and the rendered SVG did not
+- **b** `headline.compare` — spec changed and the rendered SVG did not
+- **b** `headline.delta` — spec changed and the rendered SVG did not
+- **b** `headline.tone` — spec changed and the rendered SVG did not
+- **b** `layout.coordinate` — spec changed and the rendered SVG did not
+
+### radial-bar (6)
+
+- **b** `headline.label` — spec changed and the rendered SVG did not
+- **b** `headline.value` — spec changed and the rendered SVG did not
+- **b** `headline.compare` — spec changed and the rendered SVG did not
+- **b** `headline.delta` — spec changed and the rendered SVG did not
+- **b** `headline.tone` — spec changed and the rendered SVG did not
+- **b** `layout.coordinate` — spec changed and the rendered SVG did not
+
+### progress-ring (6)
+
+- **b** `headline.label` — spec changed and the rendered SVG did not
+- **b** `headline.value` — spec changed and the rendered SVG did not
+- **b** `headline.compare` — spec changed and the rendered SVG did not
+- **b** `headline.delta` — spec changed and the rendered SVG did not
+- **b** `headline.tone` — spec changed and the rendered SVG did not
+- **b** `layout.coordinate` — spec changed and the rendered SVG did not
+
+### sparkline (3)
 
 - **b** `mark.sampling` — spec changed and the rendered SVG did not
 - **b** `mark.connectNulls` — spec changed and the rendered SVG did not
-- **b** `theme.brand` — spec changed and the rendered SVG did not
-- **b** `theme.tokens.fontSize` — spec changed and the rendered SVG did not
-- **b** `size.padding` — spec changed and the rendered SVG did not
-- **b** `size.padding.top` — spec changed and the rendered SVG did not
-- **b** `size.padding.right` — spec changed and the rendered SVG did not
-- **b** `size.padding.bottom` — spec changed and the rendered SVG did not
-- **b** `size.padding.left` — spec changed and the rendered SVG did not
+- **b** `layout.coordinate` — spec changed and the rendered SVG did not
+
+### mini-area (3)
+
+- **b** `mark.sampling` — spec changed and the rendered SVG did not
+- **b** `mark.connectNulls` — spec changed and the rendered SVG did not
 - **b** `layout.coordinate` — spec changed and the rendered SVG did not
 
 ## Example-only no-ops
