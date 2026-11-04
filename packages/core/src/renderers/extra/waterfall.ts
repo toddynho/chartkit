@@ -57,6 +57,7 @@ export function renderWaterfall(spec: Record<string, unknown>): string | null {
   const band = (box.right - box.left) / steps.length;
   const barW = Math.max(10, band * (1 - gapOf(frame, 0.34)));
   const format = valueFormat(frame, spec, frame.encoding.y);
+  const showValues = frame.mark.labels !== false;
   const names = steps.map((step) => step.name);
   const xAt = (index: number) => box.left + band * index + band / 2;
   const notes = placedNotes(spec, frame, box, categoryX(names, xAt), yAt, [{ name: yField, axis: "y", pts: seriesPoints(null, steps.map((step) => step.end)) }], names);
@@ -84,12 +85,12 @@ export function renderWaterfall(spec: Record<string, unknown>): string | null {
     }
     parts.push(openMark("rect", kind, label, `x="${n(x)}" y="${n(y)}" width="${n(barW)}" height="${n(height)}" rx="4" fill="${color}"`, step.name, index));
     parts.push("</rect>");
-    parts.push(text(x + barW / 2, y - 6, fmt(step.total ? step.end : step.value, frame.locale, format), cssVar("text", frame.preset.text), 11, "600", "middle"));
+    if (showValues) parts.push(text(x + barW / 2, y - 6, fmt(step.total ? step.end : step.value, frame.locale, format), cssVar("text", frame.preset.text), 11, "600", "middle"));
   });
   parts.push("</g>");
   parts.push(notes.over);
   parts.push(axisTitleMarks(frame, spec, box));
-  parts.push(axisLine(frame, box));
+  parts.push(axisLine(frame, box, spec));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
   parts.push(xLabels(frame, spec, names.map((name, index) => ({ x: xAt(index), text: name })), box));
   return view.done();

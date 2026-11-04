@@ -250,6 +250,18 @@ const PATH_APPLIES: Record<string, readonly string[]> = {
   "theme.tokens.negative": ["candlestick", "gantt", "journey", "quadrant", "waterfall", "kpi", "line", "bar", "stacked-area", "combo", "sparkline", "mini-area"],
   "theme.tokens.series": except(["candlestick", "waterfall", "gauge"]),
   "interaction.navigator": ["line", "bar", "stacked-area", "scatter", "combo", "candlestick", "area-range", "sparkline", "mini-area", "spike"],
+  /**
+   * Instants on a position axis. Calendar-day charts (heatmap, gantt, timeline)
+   * keep the civil date and do not shift it into the previous evening.
+   * Metric, part-to-whole, and flow charts have no time axis.
+   */
+  timezone: ["line", "bar", "stacked-area", "scatter", "combo", "sparkline", "mini-area", "spike", "candlestick", "area-range"],
+  /**
+   * Repair-only. polar on bar becomes radial-bar; on pie or donut it becomes rose.
+   * radial-bar and rose are already polar, and cartesian is repaired back to polar.
+   * Every other type drops the value (CK3077). It is not a second paint mode.
+   */
+  "layout.coordinate": ["bar", "pie", "donut", "radial-bar", "rose"],
 };
 
 /** Boolean unions whose omitted value is on or off. Schema defaults win when present. */

@@ -94,7 +94,7 @@ export function renderHistogram(spec: Record<string, unknown>): string | null {
   parts.push("</g>");
   parts.push(notes.over);
   parts.push(axisTitleMarks(frame, spec, box));
-  parts.push(axisLine(frame, box));
+  parts.push(axisLine(frame, box, spec));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
   const edges = yField
     ? bars.map((bar) => ({ x: xAt(bar.x0 + (bar.x1 - bar.x0) / 2), text: bar.label }))
