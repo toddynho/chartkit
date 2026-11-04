@@ -192,6 +192,42 @@ const truth: Record<string, Truth> = {
     bundle: "@chartkitdev/core/extra",
     notes: ["encoding.x is the value to bin.", "The renderer ships in @chartkitdev/core/extra, not in the line bundle."],
   },
+  streamgraph: {
+    summary: "Stacked areas around a moving baseline. The baseline is not zero.",
+    entry: "@chartkitdev/core/charts/streamgraph",
+    bundle: "@chartkitdev/core/extra",
+    notes: [
+      "Wide data uses encoding.y as a list of fields. Long data uses one y field and encoding.color or encoding.series.",
+      "mark.streamOffset is wiggle (the default), center, zero, or expand. silhouette is center.",
+      "mark.order is inside-out on a wiggle, or none, ascending, or descending.",
+      "The y axis is in offset space. The tooltip reports the raw value and its share.",
+    ],
+    options: [
+      { path: "`encoding.x` / `encoding.y`", role: "Position and layer values. y may be a list.", status: drawn },
+      { path: "`encoding.color`", role: "Layer name on long data, or a series color", status: drawn },
+      { path: "`mark.streamOffset`", role: "wiggle (default), center, zero, or expand", status: drawn },
+      { path: "`mark.order`", role: "inside-out, none, ascending, or descending", status: drawn },
+      { path: "`mark.curve`", role: "monotone (default), linear, or step", status: drawn },
+      { path: "`mark.labels`", role: "Series name at the thickest part of the layer", status: drawn },
+      { path: "`legend`", role: "Click and hover use the shared legend", status: drawn },
+    ],
+    extra: [
+      {
+        title: "When to use it",
+        paragraphs: ["A composition over time, when the shape of the change matters more than the total or a reading off zero."],
+        list: [],
+        code: [],
+      },
+      {
+        title: "Error codes",
+        paragraphs: [
+          "CK3095 is an error when a layer value is negative or not a number. CK3096 warns on one series and repair sets mark.streamOffset to zero. CK3097 warns above 12 series. CK3098 removes mark.stack. CK3099 and CK3100 remove streamOffset and order on other chart types. CK3101 removes mark.offset, which is the pie slice pull.",
+        ],
+        list: [],
+        code: [],
+      },
+    ],
+  },
   strip: {
     summary: "Every observation is a dot on one numeric axis, with one row per group. A median tick is the default.",
     entry: "@chartkitdev/core/charts/strip",

@@ -46,8 +46,8 @@ if (root) {
   const themeSelect = root.querySelector<HTMLSelectElement>("[data-odds-theme]");
   const legendBox = root.querySelector<HTMLInputElement>("[data-odds-legend]");
   let start = Number(root.dataset.start ?? "0");
-  let kind = root.dataset.kind === "odds" ? "odds" : "race";
-  let oddsSample = root.dataset.oddsSample === "election" ? "election" : "match";
+  let kind: "race" | "odds" = root.dataset.kind === "odds" ? "odds" : "race";
+  let oddsSample: "match" | "election" = root.dataset.oddsSample === "election" ? "election" : "match";
 
   if (stage && play && scrub && time && loop && exportButton && status && title && subtitle && unit && duration && data && file && reset && error && swatches && pageTitle && pageLede && hint && unitWrap && oddsTools && themeSelect && legendBox) {
     const colors = new Map<string, string>();

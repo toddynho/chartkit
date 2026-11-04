@@ -1,0 +1,13 @@
+{
+  "version": "1",
+  "type": "streamgraph",
+  "title": "Copies by genre",
+  "data": [
+    { "year": "2020", "fiction": 20, "history": 12, "poetry": 8 },
+    { "year": "2021", "fiction": 28, "history": 18, "poetry": 9 },
+    { "year": "2022", "fiction": 22, "history": 30, "poetry": 11 },
+    { "year": "2023", "fiction": 26, "history": 34, "poetry": 14 }
+  ],
+  "encoding": { "x": "year", "y": ["fiction", "history", "poetry"] },
+  "a11y": { "alt": "History overtook fiction by 2022. The baseline is not zero." }
+}

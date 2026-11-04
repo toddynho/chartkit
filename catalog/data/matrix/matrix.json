@@ -3521,20 +3521,19 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:stream)['\"`]|(?:^|[\\s{,;])\\w*(?:stream)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:stream)"
+            "ChartKitChartSpecV1.type=streamgraph",
+            "mark.streamOffset"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:stream)['\"`]|(?:^|[\\s{,;])\\w*(?:stream)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:stream)"
+              "kind": "dts-path",
+              "path": "packages/core/src/charts/streamgraph.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "Wiggle, center (silhouette), zero, and expand."
         },
         "chartjs": {
           "status": "manual",

@@ -8,6 +8,9 @@ import lumenRose from "../../packages/core/examples/35-rose.json";
 import tokensStrip from "../../packages/core/examples/36-strip.json";
 import regionStrip from "../../packages/core/examples/37-strip-dot.json";
 import desksStrip from "../../packages/core/examples/38-strip-vertical.json";
+import genreStream from "../../packages/core/examples/39-streamgraph.json";
+import centerStream from "../../packages/core/examples/40-streamgraph-center.json";
+import weekStream from "../../packages/core/examples/41-streamgraph-time.json";
 
 export interface Spec {
   version: "1";
@@ -340,6 +343,16 @@ export const chartTypes: ChartTypeDoc[] = [
       "encoding.x is the category. encoding.y is the radius.",
       "polarArea, nightingale, and rose-chart repair to rose.",
       "The chart loads from @chartkitdev/core/charts/rose. createRenderer([line]) does not include it.",
+    ],
+  },
+  {
+    type: "streamgraph",
+    title: "Streamgraph",
+    summary: "Stacked areas around a moving baseline. The baseline is not zero.",
+    notes: [
+      "encoding.y is a list of fields, or one field with encoding.color or encoding.series.",
+      "mark.streamOffset is wiggle, center, zero, or expand. silhouette is center.",
+      "The chart loads from @chartkitdev/core/charts/streamgraph. createRenderer([line]) does not include it.",
     ],
   },
 ];
@@ -886,6 +899,30 @@ export const examples: Example[] = [
     type: "strip",
     blurb: "Vertical groups, a mean tick, and an IQR band.",
     spec: { ...(desksStrip as Spec), id: "desks-strip" },
+  },
+  {
+    slug: "copies-streamgraph",
+    title: "Copies by genre",
+    group: "Time",
+    type: "streamgraph",
+    blurb: "History overtook fiction. The baseline is not zero.",
+    spec: { ...(genreStream as Spec), id: "copies-streamgraph" },
+  },
+  {
+    slug: "centered-streamgraph",
+    title: "Centered genres",
+    group: "Time",
+    type: "streamgraph",
+    blurb: "Long data, centered, legend on the right.",
+    spec: { ...(centerStream as Spec), id: "centered-streamgraph" },
+  },
+  {
+    slug: "bands-streamgraph",
+    title: "Weekly share",
+    group: "Time",
+    type: "streamgraph",
+    blurb: "A time axis, share baseline, and labels on the streams.",
+    spec: { ...(weekStream as Spec), id: "weekly-streamgraph" },
   },
   {
     slug: "model-radar",
