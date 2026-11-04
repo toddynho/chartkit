@@ -1,4 +1,5 @@
 import { seriesPoints } from "../../annotations";
+import { readTimeScale } from "../../time-x";
 import { CHROME_TOP, axisTitleMarks, categoryX, chooseTicks, lockDomain, placedNotes } from "../../chrome";
 import type { DataTable } from "../../data";
 import { fieldOf } from "../../frame";
@@ -264,7 +265,8 @@ export function renderAreaRange(spec: Record<string, unknown>): string | null {
   if (legend.length > 1 && !legendBelow) box.top = Math.max(box.top, frame.title ? (frame.subtitle ? 72 : 58) : frame.subtitle ? 52 : 36 + (CHROME_TOP - 14));
   const yAt = scaleOf(y0, y1, box.bottom, box.top);
   const slot = (box.right - box.left) / Math.max(1, count);
-  const xAt = (index: number) => box.left + slot * index + slot / 2;
+  const time = readTimeScale(spec, labelsOf(table, xField));
+  const xAt = (index: number) => (time ? time.at(index, box.right - box.left, box.left) : box.left + slot * index + slot / 2);
   const notes = annotated
     ? placedNotes(spec, frame, box, categoryX(labels, xAt), yAt, [
         {
@@ -278,7 +280,10 @@ export function renderAreaRange(spec: Record<string, unknown>): string | null {
   const decimate = mode !== "none" && count > samplingThreshold(box.right - box.left) && frame.mark.strokeDash !== true;
   parts.push(hGrid(spec, frame, box, yTicks, yAt));
   parts.push(yLabels(frame, spec, box, yTicks, yAt));
-  parts.push(xLabels(frame, spec, xTickLabels(table, xField, count, xAt), box));
+  const xMarks = time
+    ? time.ticks(frame.locale).map((tick) => ({ x: time.px(tick.t, box.right - box.left, box.left), text: tick.text }))
+    : xTickLabels(table, xField, count, xAt);
+  parts.push(xLabels(frame, spec, xMarks, box));
   parts.push(axisLine(frame, box));
   if (legend.length > 1 && !legendBelow) parts.push(legendRow(legend, box.left, frame.title ? (frame.subtitle ? 56 : 40) : frame.subtitle ? 32 : CHROME_TOP, cssVar("text", frame.preset.text)));
   parts.push(clip(frame, box));

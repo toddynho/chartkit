@@ -1,4 +1,5 @@
 import { seriesPoints } from "../annotations";
+import { readTimeScale } from "../time-x";
 import { axisTitleMarks, bottomLegendBand, categoryX, chooseTicks, heading, labelStep, lockDomain, minorTickMarks, placedNotes } from "../chrome";
 import { cssVar, lineStroke, paint } from "../theme";
 import { formatAxisValue, formatValue } from "../format";
@@ -67,9 +68,10 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
     `<line x1="${n(plot.left)}" y1="${n(baseY)}" x2="${n(plot.right)}" y2="${n(baseY)}" stroke="${cssVar("axis", frame.preset.axis)}" stroke-width="1.5" />`,
   );
   const plotWidth = Math.max(1, plot.right - plot.left);
+  const time = readTimeScale(spec, labels);
   const sampled = sampleSeries(readSamplingMode(frame.mark.sampling), null, values, values.length, plotWidth, false);
   const drawSpike = (value: number, index: number, sampledAttr: string) => {
-    const x = plot.left + slot * index + slot / 2;
+    const x = time ? time.at(index, plotWidth, plot.left) : plot.left + slot * index + slot / 2;
     const y = yScale(value);
     const name = labels[index] ? `${labels[index]}: ` : "";
     const label = `${name}${formatValue(value, yFormat, frame.locale)}`;
@@ -106,8 +108,11 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
     const step = labelStep(count, xAxis.skip, omitted);
     const labelY = frame.height - legendBand - (xAxis.title ? 26 : 12);
     const xs: number[] = [];
-    for (let i = 0; i < count; i++) xs.push(plot.left + slot * i + slot / 2);
-    for (let i = 0; i < count; i += step) {
+    for (let i = 0; i < count; i++) xs.push(time ? time.at(i, plotWidth, plot.left) : plot.left + slot * i + slot / 2);
+    if (time) {
+      for (const tick of time.ticks(frame.locale)) parts.push(text(time.px(tick.t, plotWidth, plot.left), labelY, tick.text, cssVar("muted", frame.preset.muted), 11, "400", "middle"));
+    }
+    for (let i = 0; i < count && !time; i += step) {
       if (!labels[i]) continue;
       parts.push(text(xs[i] ?? 0, labelY, labels[i] ?? "", cssVar("muted", frame.preset.muted), 11, "400", "middle"));
     }

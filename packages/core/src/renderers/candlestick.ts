@@ -1,4 +1,5 @@
 import { seriesPoints } from "../annotations";
+import { readTimeScale } from "../time-x";
 import { axisTitleMarks, bottomLegendBand, categoryX, chooseTicks, heading, labelStep, lockDomain, minorTickMarks, placedNotes } from "../chrome";
 import { cssVar } from "../theme";
 import { formatAxisValue, formatValue } from "../format";
@@ -80,6 +81,8 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   const priceBottom = plot.bottom - volumeH - (showVolume ? 8 : 0);
   const yScale = linear(domain[0], domain[1], priceBottom, plot.top);
   const slot = (plot.right - plot.left) / candles.length;
+  const time = readTimeScale(spec, candles.map((candle) => candle.label));
+  const plotWidth = Math.max(1, plot.right - plot.left);
   const gap = typeof frame.mark.gap === "number" ? frame.mark.gap : 0.3;
   const bodyW = Math.max(1, slot * (1 - gap));
   const grid = gridStyle(spec);
@@ -129,7 +132,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   candles.forEach((candle, index) => {
     const rising = candle.close >= candle.open;
     const color = rising ? up : down;
-    const x = plot.left + slot * index + slot / 2;
+    const x = time ? time.at(index, plotWidth, plot.left) : plot.left + slot * index + slot / 2;
     const highY = yScale(candle.high);
     const lowY = yScale(candle.low);
     const openY = yScale(candle.open);
@@ -176,7 +179,10 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
     const omitted = candles.length > 8 ? Math.ceil(candles.length / 6) : 1;
     const step = labelStep(candles.length, xAxis.skip, omitted);
     const labelY = frame.height - legendBand - (xAxis.title ? 26 : 12);
-    for (let i = 0; i < candles.length; i += step) {
+    if (time) {
+      for (const tick of time.ticks(frame.locale)) parts.push(text(time.px(tick.t, plotWidth, plot.left), labelY, tick.text, cssVar("muted", frame.preset.muted), 11, "400", "middle"));
+    }
+    for (let i = 0; i < candles.length && !time; i += step) {
       if (!candles[i]?.label) continue;
       parts.push(text(plot.left + slot * i + slot / 2, labelY, candles[i]?.label ?? "", cssVar("muted", frame.preset.muted), 11, "400", "middle"));
     }
