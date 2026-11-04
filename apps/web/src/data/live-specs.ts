@@ -12,6 +12,7 @@ import gantt from "../../../../packages/core/examples/24-gantt.json";
 import gauge from "../../../../packages/core/examples/09-gauge.json";
 import heatmap from "../../../../packages/core/examples/08-heatmap.json";
 import histogram from "../../../../packages/core/examples/16-histogram.json";
+import density from "../../../../packages/core/examples/39-density.json";
 import journey from "../../../../packages/core/examples/28-journey.json";
 import kpi from "../../../../packages/core/examples/10-kpi.json";
 import line from "../../../../packages/core/examples/01-minimal-line.json";
@@ -66,6 +67,7 @@ const byType: Record<string, LiveSpec> = {
   spike: dress(spike),
   candlestick: dress(candlestick),
   histogram: dress(histogram),
+  density: dress(density),
   boxplot: dress(boxplot),
   strip: dress(strip, { legend: false, size: { width: 640, height: 320 } }),
   radar: dress(radar),

@@ -360,6 +360,12 @@ Not published yet. See [catalog/migrate.md](../../catalog/migrate.md).
 {"version":"1","type":"strip","data":[{"g":"A","v":1},{"g":"A","v":4},{"g":"B","v":2},{"g":"B","v":3}],"encoding":{"x":"v","y":"g"},"a11y":{"alt":"A spreads wider."}}
 ```
 
+## density
+
+```json
+{"version":"1","type":"density","data":[{"wait":12},{"wait":15},{"wait":40}],"encoding":{"x":"wait"},"a11y":{"alt":"Most waits sit near 15, with a tail to 40."}}
+```
+
 ## radar
 
 ```json

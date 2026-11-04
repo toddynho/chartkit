@@ -192,6 +192,16 @@ const truth: Record<string, Truth> = {
     bundle: "@chartkitdev/core/extra",
     notes: ["encoding.x is the value to bin.", "The renderer ships in @chartkitdev/core/extra, not in the line bundle."],
   },
+  density: {
+    summary: "A kernel density curve of encoding.x. The rows stay the raw sample.",
+    entry: "@chartkitdev/core/charts/density",
+    bundle: "@chartkitdev/core/extra",
+    notes: [
+      "mark.bandwidth auto is Scott's rule. A number is the Gaussian width.",
+      "mark.normalize density integrates to 1. count multiplies by the sample size.",
+      "Groups from encoding.color or encoding.series overlay. mark.rug draws the raw points.",
+    ],
+  },
   strip: {
     summary: "Every observation is a dot on one numeric axis, with one row per group. A median tick is the default.",
     entry: "@chartkitdev/core/charts/strip",

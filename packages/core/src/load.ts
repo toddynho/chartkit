@@ -46,6 +46,8 @@ export function load(type: string): Promise<ChartRenderer | undefined> {
       return import("./charts/rose").then((mod) => mod.rose);
     case "strip":
       return import("./charts/strip").then((mod) => mod.strip);
+    case "density":
+      return import("./charts/density").then((mod) => mod.density);
     default:
       return Promise.resolve(undefined);
   }

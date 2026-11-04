@@ -25,6 +25,7 @@ export const chartTypes: ChartType[] = [
   { type: "spike", title: "Spike", summary: "Thin marks for bursts over time." },
   { type: "candlestick", title: "Candlestick", summary: "Open, high, low, and close." },
   { type: "histogram", title: "Histogram", summary: "One quantitative field, split into bins." },
+  { type: "density", title: "Density", summary: "A kernel density curve of one quantitative sample." },
   { type: "boxplot", title: "Box plot", summary: "Quartiles, whiskers, a median, and outliers." },
   { type: "strip", title: "Strip", summary: "Every observation as a dot on a shared numeric axis, one row per group." },
   { type: "radar", title: "Radar", summary: "One polygon per series around shared spokes." },

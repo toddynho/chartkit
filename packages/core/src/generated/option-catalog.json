@@ -39,6 +39,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -168,6 +169,7 @@
       "candlestick",
       "bar-list",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -194,7 +196,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Type",
     "control": "enum",
@@ -226,7 +229,8 @@
       "errorbar",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Title",
     "control": "text",
@@ -247,7 +251,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Format",
     "control": "enum",
@@ -286,7 +291,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Decimals",
     "control": "number",
@@ -310,7 +316,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Currency",
     "control": "text",
@@ -331,7 +338,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Prefix",
     "control": "text",
@@ -352,7 +360,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Suffix",
     "control": "text",
@@ -373,7 +382,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Signed",
     "control": "boolean",
@@ -394,7 +404,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Specifier",
     "control": "text",
@@ -415,7 +426,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Type",
     "control": "enum",
@@ -445,7 +457,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Domain",
     "control": "json",
@@ -465,7 +478,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Zero",
     "control": "boolean",
@@ -486,7 +500,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Nice",
     "control": "boolean",
@@ -507,7 +522,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Reverse",
     "control": "boolean",
@@ -528,7 +544,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Padding",
     "control": "number",
@@ -552,7 +569,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Min",
     "control": "number",
@@ -576,7 +594,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Max",
     "control": "number",
@@ -600,7 +619,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Clamp",
     "control": "boolean",
@@ -621,7 +641,8 @@
       "area-range",
       "spike",
       "candlestick",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Constant",
     "control": "number",
@@ -1560,7 +1581,8 @@
       "heatmap",
       "radar",
       "pie",
-      "donut"
+      "donut",
+      "density"
     ],
     "label": "Series field",
     "control": "text",
@@ -1583,7 +1605,8 @@
       "heatmap",
       "radar",
       "pie",
-      "donut"
+      "donut",
+      "density"
     ],
     "label": "Title",
     "control": "text",
@@ -1610,6 +1633,7 @@
       "sankey",
       "radar",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -1666,6 +1690,7 @@
       "sankey",
       "radar",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -2025,6 +2050,7 @@
       "sankey",
       "radar",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -2055,6 +2081,7 @@
       "sankey",
       "radar",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -6072,7 +6099,8 @@
       "stacked-area",
       "combo",
       "mini-area",
-      "bar"
+      "bar",
+      "density"
     ],
     "label": "Fill Opacity",
     "control": "number",
@@ -6112,7 +6140,8 @@
       "mini-area",
       "spike",
       "progress-ring",
-      "gauge"
+      "gauge",
+      "density"
     ],
     "label": "Stroke Width",
     "control": "number",
@@ -6181,12 +6210,13 @@
   },
   {
     "path": "mark.orientation",
-    "description": "Bar direction. vertical is the bar default. Strip treats an omission as horizontal: categories run down the y axis and the numeric axis is x. Set vertical to swap them. Applies to: bar, strip.",
+    "description": "Bar direction. vertical is the bar default. Strip treats an omission as horizontal: categories run down the y axis and the numeric axis is x. Set vertical to swap them.",
     "group": "Marks & style",
     "docs": "/docs/options#mark.orientation",
     "appliesTo": [
       "bar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Orientation",
     "control": "enum",
@@ -7005,7 +7035,7 @@
   },
   {
     "path": "mark.bins",
-    "description": "Histogram bin count when mark.bin is count or omitted. Default 8. Applies to: histogram.",
+    "description": "Histogram bin count when mark.bin is count or omitted. Default 8. Applies to: histogram. A density warns CK3107 and repair removes it.",
     "group": "Marks & style",
     "docs": "/docs/options#mark.bins",
     "appliesTo": [
@@ -7063,6 +7093,103 @@
       "histogram"
     ],
     "label": "Bin Label",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false,
+    "defaultValue": false
+  },
+  {
+    "path": "mark.bandwidth",
+    "description": "Gaussian kernel width in data units. auto is Scott's rule, 1.06 times the standard deviation times n to the power -1/5. A number must be greater than 0. Other chart types warn CK3111. Applies to: density.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.bandwidth",
+    "appliesTo": [
+      "density"
+    ],
+    "label": "Bandwidth",
+    "control": "text",
+    "storage": "scalar",
+    "coerce": "number-or-string"
+  },
+  {
+    "path": "mark.steps",
+    "description": "Samples along the density curve. Default 64. Other chart types warn CK3112. Applies to: density.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.steps",
+    "appliesTo": [
+      "density"
+    ],
+    "label": "Steps",
+    "control": "number",
+    "storage": "scalar",
+    "coerce": "integer",
+    "minimum": 16,
+    "maximum": 256,
+    "slider": true,
+    "defaultValue": 64
+  },
+  {
+    "path": "mark.extent",
+    "description": "Domain of the density curve. pad extends the sample by 3 bandwidths. data clips to the sample. A pair is the domain. Applies to: density.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.extent",
+    "appliesTo": [
+      "density"
+    ],
+    "label": "Extent",
+    "control": "enum",
+    "storage": "scalar",
+    "arrayAlt": true,
+    "enumValues": [
+      "pad",
+      "data"
+    ],
+    "slider": false
+  },
+  {
+    "path": "mark.normalize",
+    "description": "density integrates to 1. count multiplies by the sample size. Applies to: density.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.normalize",
+    "appliesTo": [
+      "density"
+    ],
+    "label": "Normalize",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "density",
+      "count"
+    ],
+    "slider": false,
+    "defaultValue": "density"
+  },
+  {
+    "path": "mark.dims",
+    "description": "1 is the kernel curve. 2 is not available yet and is CK3109. Applies to: density.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.dims",
+    "appliesTo": [
+      "density"
+    ],
+    "label": "Dims",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "1",
+      "2"
+    ],
+    "slider": false
+  },
+  {
+    "path": "mark.rug",
+    "description": "Draw a tick for each raw sample on the baseline. Applies to: density.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.rug",
+    "appliesTo": [
+      "density"
+    ],
+    "label": "Rug",
     "control": "boolean",
     "storage": "scalar",
     "slider": false,
@@ -7170,7 +7297,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Show",
     "control": "boolean",
@@ -7198,7 +7326,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Title",
     "control": "text",
@@ -7225,7 +7354,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Format",
     "control": "enum",
@@ -7269,7 +7399,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Decimals",
     "control": "number",
@@ -7298,7 +7429,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Currency",
     "control": "text",
@@ -7324,7 +7456,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Prefix",
     "control": "text",
@@ -7350,7 +7483,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Suffix",
     "control": "text",
@@ -7376,7 +7510,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Signed",
     "control": "boolean",
@@ -7402,7 +7537,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Specifier",
     "control": "text",
@@ -7428,7 +7564,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Ticks",
     "control": "json",
@@ -7453,7 +7590,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Grid",
     "control": "enum",
@@ -7486,7 +7624,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Labels",
     "control": "boolean",
@@ -7514,7 +7653,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Position",
     "control": "enum",
@@ -7546,7 +7686,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Title Position",
     "control": "enum",
@@ -7577,7 +7718,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Title Rotate",
     "control": "number",
@@ -7606,7 +7748,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Auto Skip",
     "control": "boolean",
@@ -7632,7 +7775,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Label Width",
     "control": "number",
@@ -7661,7 +7805,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Label Lines",
     "control": "number",
@@ -7690,7 +7835,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Line",
     "control": "boolean",
@@ -7717,7 +7863,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Color",
     "control": "color",
@@ -7743,7 +7890,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Width",
     "control": "number",
@@ -7772,7 +7920,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Dash",
     "control": "enum",
@@ -7803,7 +7952,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Tick Marks",
     "control": "enum",
@@ -7834,7 +7984,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Tick Length",
     "control": "number",
@@ -7863,7 +8014,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Rotate",
     "control": "number",
@@ -7890,7 +8042,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Offset",
     "control": "number",
@@ -7919,7 +8072,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Crosses",
     "control": "number",
@@ -7946,7 +8100,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Minor Ticks",
     "control": "number",
@@ -7975,7 +8130,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Breaks",
     "control": "json",
@@ -8000,7 +8156,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Bands",
     "control": "json",
@@ -8025,7 +8182,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Show",
     "control": "boolean",
@@ -8053,7 +8211,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Title",
     "control": "text",
@@ -8080,7 +8239,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Format",
     "control": "enum",
@@ -8125,7 +8285,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Decimals",
     "control": "number",
@@ -8154,7 +8315,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Currency",
     "control": "text",
@@ -8180,7 +8342,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Prefix",
     "control": "text",
@@ -8206,7 +8369,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Suffix",
     "control": "text",
@@ -8232,7 +8396,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Signed",
     "control": "boolean",
@@ -8258,7 +8423,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Specifier",
     "control": "text",
@@ -8284,7 +8450,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Ticks",
     "control": "json",
@@ -8309,7 +8476,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Grid",
     "control": "enum",
@@ -8343,7 +8511,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Labels",
     "control": "boolean",
@@ -8371,7 +8540,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Position",
     "control": "enum",
@@ -8403,7 +8573,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Title Position",
     "control": "enum",
@@ -8434,7 +8605,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Title Rotate",
     "control": "number",
@@ -8463,7 +8635,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Auto Skip",
     "control": "boolean",
@@ -8489,7 +8662,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Label Width",
     "control": "number",
@@ -8518,7 +8692,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Label Lines",
     "control": "number",
@@ -8547,7 +8722,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Line",
     "control": "boolean",
@@ -8574,7 +8750,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Color",
     "control": "color",
@@ -8600,7 +8777,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Width",
     "control": "number",
@@ -8629,7 +8807,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Dash",
     "control": "enum",
@@ -8660,7 +8839,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Tick Marks",
     "control": "enum",
@@ -8691,7 +8871,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Tick Length",
     "control": "number",
@@ -8720,7 +8901,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Rotate",
     "control": "number",
@@ -8747,7 +8929,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Offset",
     "control": "number",
@@ -8776,7 +8959,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Crosses",
     "control": "number",
@@ -8803,7 +8987,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Minor Ticks",
     "control": "number",
@@ -8832,7 +9017,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Breaks",
     "control": "json",
@@ -8857,7 +9043,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Bands",
     "control": "json",
@@ -8882,7 +9069,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Show",
     "control": "boolean",
@@ -8909,7 +9097,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Title",
     "control": "text",
@@ -8935,7 +9124,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Format",
     "control": "enum",
@@ -8979,7 +9169,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Decimals",
     "control": "number",
@@ -9008,7 +9199,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Currency",
     "control": "text",
@@ -9034,7 +9226,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Prefix",
     "control": "text",
@@ -9060,7 +9253,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Suffix",
     "control": "text",
@@ -9086,7 +9280,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Signed",
     "control": "boolean",
@@ -9112,7 +9307,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Specifier",
     "control": "text",
@@ -9138,7 +9334,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Ticks",
     "control": "json",
@@ -9163,7 +9360,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Grid",
     "control": "enum",
@@ -9196,7 +9394,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Labels",
     "control": "boolean",
@@ -9223,7 +9422,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Position",
     "control": "enum",
@@ -9255,7 +9455,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Title Position",
     "control": "enum",
@@ -9286,7 +9487,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Title Rotate",
     "control": "number",
@@ -9315,7 +9517,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Auto Skip",
     "control": "boolean",
@@ -9341,7 +9544,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Label Width",
     "control": "number",
@@ -9370,7 +9574,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Label Lines",
     "control": "number",
@@ -9399,7 +9604,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Line",
     "control": "boolean",
@@ -9426,7 +9632,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Color",
     "control": "color",
@@ -9452,7 +9659,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Width",
     "control": "number",
@@ -9481,7 +9689,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Dash",
     "control": "enum",
@@ -9512,7 +9721,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Tick Marks",
     "control": "enum",
@@ -9543,7 +9753,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Tick Length",
     "control": "number",
@@ -9572,7 +9783,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Rotate",
     "control": "number",
@@ -9599,7 +9811,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Offset",
     "control": "number",
@@ -9628,7 +9841,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Crosses",
     "control": "number",
@@ -9655,7 +9869,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Minor Ticks",
     "control": "number",
@@ -9684,7 +9899,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Breaks",
     "control": "json",
@@ -9709,7 +9925,8 @@
       "area-range",
       "bar-range",
       "errorbar",
-      "strip"
+      "strip",
+      "density"
     ],
     "label": "Bands",
     "control": "json",
@@ -9747,6 +9964,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -9795,6 +10013,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -9849,6 +10068,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -9905,6 +10125,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -9955,6 +10176,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -10005,6 +10227,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -10052,6 +10275,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -10098,6 +10322,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -10142,6 +10367,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -10195,6 +10421,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -10239,6 +10466,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -10285,6 +10513,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -10567,6 +10796,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -10633,6 +10863,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -10681,6 +10912,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",
@@ -10710,6 +10942,7 @@
       "errorbar",
       "waterfall",
       "strip",
+      "density",
       "radial-bar",
       "rose",
       "radar",
@@ -10735,6 +10968,7 @@
       "boxplot",
       "histogram",
       "strip",
+      "density",
       "area-range",
       "bar-range",
       "errorbar",
@@ -10761,6 +10995,7 @@
       "gantt",
       "quadrant",
       "strip",
+      "density",
       "timeline",
       "waterfall",
       "gauge",
@@ -10877,6 +11112,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "density",
       "gantt",
       "timeline",
       "quadrant",

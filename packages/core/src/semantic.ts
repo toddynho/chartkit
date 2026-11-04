@@ -146,7 +146,9 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   if (isRecord(spec.encoding)) checkEncoding(spec, spec.encoding, view, diagnostics);
   if (type === "candlestick") checkCandles(spec, view, diagnostics);
   if (type === "strip") stripChecks(spec, view, diagnostics);
-  else if (isRecord(spec.encoding) && spec.encoding.label !== undefined) {
+  if (type === "density") densityChecks(spec, view, diagnostics);
+  else densityForeign(spec, diagnostics);
+  if (type !== "strip" && isRecord(spec.encoding) && spec.encoding.label !== undefined) {
     diagnostics.push({
       code: "CK3094",
       severity: "warning",
@@ -1642,6 +1644,107 @@ const REG_METHOD: Record<string, string> = {
   regression: "linear",
   lm: "linear",
 };
+
+function densityForeign(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  const mark = isRecord(spec.mark) ? spec.mark : undefined;
+  if (!mark) return;
+  if (mark.bandwidth !== undefined) {
+    diagnostics.push({
+      code: "CK3111",
+      severity: "warning",
+      message: "mark.bandwidth applies to a density",
+      path: "/mark/bandwidth",
+      hint: 'remove it, or set type to "density"',
+      fix: [{ op: "remove", path: "/mark/bandwidth" }],
+    });
+  }
+  if (mark.steps !== undefined) {
+    diagnostics.push({
+      code: "CK3112",
+      severity: "warning",
+      message: "mark.steps applies to a density",
+      path: "/mark/steps",
+      hint: 'remove it, or set type to "density"',
+      fix: [{ op: "remove", path: "/mark/steps" }],
+    });
+  }
+}
+
+function densityChecks(spec: Record<string, unknown>, table: DataTable, diagnostics: Diagnostic[]): void {
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  const mark = isRecord(spec.mark) ? spec.mark : undefined;
+  if (mark && (mark.dims === 2 || mark.dims === "2")) {
+    diagnostics.push({
+      code: "CK3109",
+      severity: "error",
+      message: "a 2D density is not in this version",
+      path: "/mark/dims",
+      hint: "leave mark.dims unset. The curve is one-dimensional",
+    });
+  }
+  if (mark && typeof mark.bandwidth === "number" && !(mark.bandwidth > 0)) {
+    diagnostics.push({
+      code: "CK3106",
+      severity: "error",
+      message: "mark.bandwidth must be greater than 0",
+      path: "/mark/bandwidth",
+      hint: 'use "auto" or a positive number. auto is Scott\'s rule',
+    });
+  }
+  if (mark && mark.bins !== undefined) {
+    diagnostics.push({
+      code: "CK3107",
+      severity: "warning",
+      message: "mark.bins bins a histogram",
+      path: "/mark/bins",
+      hint: "histogram bins counts. Density smooths the sample",
+      fix: [{ op: "remove", path: "/mark/bins" }],
+    });
+  }
+  if (!encoding) return;
+  const x = typeof encoding.x === "string" ? encoding.x : isRecord(encoding.x) && typeof encoding.x.field === "string" ? encoding.x.field : "";
+  const column = x ? table.columns[x] : undefined;
+  let finite = 0;
+  if (column) {
+    for (const value of column) if (typeof value === "number" && Number.isFinite(value)) finite += 1;
+  }
+  if (finite < 2) {
+    diagnostics.push({
+      code: "CK3105",
+      severity: "error",
+      message: "a density needs at least 2 numbers",
+      path: "/encoding/x",
+      hint: "encoding.x is the raw sample",
+    });
+  }
+  const y = encoding.y;
+  const yField = typeof y === "string" ? y : isRecord(y) && typeof y.field === "string" ? y.field : "";
+  const yCol = yField ? table.columns[yField] : undefined;
+  const yNumeric = yCol ? [...yCol].some((value) => typeof value === "number" && Number.isFinite(value)) : false;
+  if (yNumeric && mark?.dims === undefined) {
+    diagnostics.push({
+      code: "CK3108",
+      severity: "warning",
+      message: "encoding.y is ignored on a 1D density",
+      path: "/encoding/y",
+      hint: "2D density is not in this version. The curve uses encoding.x",
+    });
+  }
+  const seriesField = typeof encoding.series === "string" ? encoding.series : isRecord(encoding.series) && typeof encoding.series.field === "string" ? encoding.series.field : typeof encoding.color === "string" ? encoding.color : isRecord(encoding.color) && typeof encoding.color.field === "string" ? encoding.color.field : "";
+  if (seriesField && table.columns[seriesField]) {
+    const names = new Set<string>();
+    for (const value of table.columns[seriesField]) if (value != null && value !== "") names.add(String(value));
+    if (names.size > 12) {
+      diagnostics.push({
+        code: "CK3110",
+        severity: "warning",
+        message: `density has ${names.size} groups`,
+        path: "/encoding/color",
+        hint: "more than 12 curves overlay into a band. Filter the groups",
+      });
+    }
+  }
+}
 
 function stripChecks(spec: Record<string, unknown>, table: DataTable, diagnostics: Diagnostic[]): void {
   const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;

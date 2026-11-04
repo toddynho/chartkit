@@ -32,6 +32,7 @@ const ALT = {
   histogram: "One quantitative field split into bins.",
   boxplot: "Eight groups, each with its own observations.",
   strip: "Eight groups of dots on one numeric axis.",
+  density: "A kernel curve of one sample.",
   radar: "Three series around shared spokes.",
   funnel: "Stages in order.",
   treemap: "Tiles sized by value and colored by group.",
@@ -101,6 +102,8 @@ export function chartSpec(chart, payload) {
         data,
         encoding: { x: "group", y: "value" },
       });
+    case "density":
+      return spec(chart, alt, { data, encoding: { x: "value" } });
     case "strip":
       return spec(chart, alt, {
         data,

@@ -99,7 +99,7 @@ Every chart type and major variant. Status native = a first-class type/series/ma
 | **Histogram** <br><sub>`type.histogram` ★</sub> | ● | ✎ | ✎ | ⊕ | ● | ● | ✎ | ● | ✎ | ◐ | · | ● | ● | ● | ✎ | ● | ✎ | ? | ✎ | ? | ● |
 | **Box plot** <br><sub>`type.boxplot` ★</sub> | ● | ⊕ | ✎ | ● | ● | ● | ● | ● | ● | ● | · | ● | ● | ●ᴱ | ◐ | ◐ | · | · | ✎ | · | ● |
 | **Violin plot** <br><sub>`type.violin`</sub> | · | ⊕ | · | ✎ | ✎ | ● | · | · | ● | ● | · | ✎ | ✎ | · | · | · | · | · | · | · | ✎ |
-| **Density (KDE)** <br><sub>`type.density`</sub> | · | · | · | · | ◐ | ◐ | · | · | · | ? | · | ● | ● | · | ? | · | · | ? | · | · | ● |
+| **Density (KDE)** <br><sub>`type.density`</sub> | ● | · | · | · | ◐ | ◐ | · | · | · | ? | · | ● | ● | · | ? | · | · | ? | · | · | ● |
 | **Error bars** <br><sub>`type.errorbar` ★</sub> | · | ⊕ | ● | ✎ | ● | ● | · | ● | ✎ | · | · | ● | ● | ●ᴱ | ✎ | ◐ | ◐ | · | · | · | ✎ |
 | **Trend / regression line** <br><sub>`type.regression` ★</sub> | ● | ⊕ | ◐ | ⊕ | ● | · | · | · | · | · | · | ● | ● | ● | ● | ● | · | · | · | · | ✎ |
 | **Candlestick** <br><sub>`type.candlestick` ★</sub> | ● | ⊕ | ✎ | ● | ● | ● | · | ● | ✎ | ● | · | ● | ✎ | ●ᴱ | ● | ● | ✎ | ● | ●ᴾ | · | ✎ |

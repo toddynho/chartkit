@@ -21,9 +21,10 @@ import { sunburst } from "./charts/sunburst";
 import { radialBar } from "./charts/radial-bar";
 import { rose } from "./charts/rose";
 import { strip } from "./charts/strip";
+import { density } from "./charts/density";
 
 /** Phase 3 and phase 4 charts. Importing this module registers them on the shared registry. */
-export const charts = [histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, areaRange, barRange, errorbar, sunburst, radialBar, rose, strip] as const;
+export const charts = [histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, areaRange, barRange, errorbar, sunburst, radialBar, rose, strip, density] as const;
 
 register(...charts);
 
@@ -34,4 +35,4 @@ register(...charts);
 export const render = createRenderer([...base, ...charts]);
 
 export { attach };
-export { histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, areaRange, barRange, errorbar, sunburst, radialBar, rose, strip };
+export { histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, areaRange, barRange, errorbar, sunburst, radialBar, rose, strip, density };

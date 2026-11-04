@@ -41,6 +41,7 @@ export const GALLERY_TYPES = [
   "sunburst",
   "bar-list",
   "strip",
+  "density",
 ];
 
 export const PAINT_STATUSES = ["ok", "unsupported", "blocked", "error", "timeout", "skipped"];
@@ -417,6 +418,15 @@ export const chartTypeDefs = [
     homepageRow: null,
     nMeaning: "observations across 8 groups",
     why: "One dot per observation, eight groups. Not a dense series. The module is imported on its own.",
+  },
+  {
+    id: "density",
+    file: "density",
+    exportName: "density",
+    sizes: [400],
+    homepageRow: null,
+    nMeaning: "observations in one sample",
+    why: "1D Gaussian KDE. Four hundred raw rows. Not in the line bundle.",
   },
 ];
 

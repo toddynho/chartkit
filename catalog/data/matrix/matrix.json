@@ -21064,20 +21064,18 @@
       "agentRelevance": 2,
       "cells": {
         "chartkit": {
-          "status": "none",
+          "status": "native",
           "tier": null,
           "apiPaths": [
-            "~['\"`](?:density)['\"`]|(?:^|[\\s{,;])\\w*(?:density)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:density)"
+            "ChartKitChartSpecV1.type=density"
           ],
           "evidence": [
             {
-              "kind": "dts-absence",
-              "path": "['\"`](?:density)['\"`]|(?:^|[\\s{,;])\\w*(?:density)\\w*\\??\\s*[:(]|(?:class|interface|type|const|function|enum)\\s+\\w*(?:density)"
+              "kind": "dts-path",
+              "path": "packages/core/src/charts/density.ts"
             }
           ],
-          "note": "",
-          "verified": "dts-absence",
-          "strength": "absence"
+          "note": "1D Gaussian KDE."
         },
         "chartjs": {
           "status": "none",

@@ -8,6 +8,9 @@ import lumenRose from "../../packages/core/examples/35-rose.json";
 import tokensStrip from "../../packages/core/examples/36-strip.json";
 import regionStrip from "../../packages/core/examples/37-strip-dot.json";
 import desksStrip from "../../packages/core/examples/38-strip-vertical.json";
+import waitDensity from "../../packages/core/examples/39-density.json";
+import deskDensity from "../../packages/core/examples/40-density-groups.json";
+import rugDensity from "../../packages/core/examples/41-density-rug.json";
 
 export interface Spec {
   version: "1";
@@ -340,6 +343,16 @@ export const chartTypes: ChartTypeDoc[] = [
       "encoding.x is the category. encoding.y is the radius.",
       "polarArea, nightingale, and rose-chart repair to rose.",
       "The chart loads from @chartkitdev/core/charts/rose. createRenderer([line]) does not include it.",
+    ],
+  },
+  {
+    type: "density",
+    title: "Density",
+    summary: "A kernel density curve of a quantitative sample. Groups overlay.",
+    notes: [
+      "encoding.x is the raw sample. There is no density transform.",
+      "mark.bandwidth auto is Scott's rule. mark.steps defaults to 64.",
+      "The chart loads from @chartkitdev/core/charts/density. createRenderer([line]) does not include it.",
     ],
   },
 ];
@@ -886,6 +899,30 @@ export const examples: Example[] = [
     type: "strip",
     blurb: "Vertical groups, a mean tick, and an IQR band.",
     spec: { ...(desksStrip as Spec), id: "desks-strip" },
+  },
+  {
+    slug: "wait-density",
+    title: "Wait time",
+    group: "Distribution",
+    type: "density",
+    blurb: "Most waits sit near 15 minutes, with a tail out to 40.",
+    spec: { ...(waitDensity as Spec), id: "wait-density" },
+  },
+  {
+    slug: "desk-density",
+    title: "Wait by desk",
+    group: "Distribution",
+    type: "density",
+    blurb: "One curve per desk, fixed bandwidth, counts instead of density.",
+    spec: { ...(deskDensity as Spec), id: "desk-density" },
+  },
+  {
+    slug: "rug-density",
+    title: "Vertical waits",
+    group: "Distribution",
+    type: "density",
+    blurb: "The sample runs down the page, with a rug of the raw points.",
+    spec: { ...(rugDensity as Spec), id: "rug-density" },
   },
   {
     slug: "model-radar",

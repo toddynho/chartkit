@@ -65,6 +65,7 @@ export const tasks = [
 
   task("tokens-by-model-strip", "strip", "Strip plot of output tokens by library. Each row is a library and each dot is one model. Show the spread, not a single average.", [{ library: "ChartKit", model: "Luna", tokens: 94 }, { library: "ChartKit", model: "Terra", tokens: 82.5 }, { library: "ChartKit", model: "Sol", tokens: 86.5 }, { library: "Plot", model: "Luna", tokens: 464 }, { library: "Plot", model: "Terra", tokens: 332 }, { library: "Plot", model: "Sol", tokens: 244 }], { x: "tokens", y: "library", values: [94, 82.5, 86.5, 464, 332, 244] }),
   task("latency-by-region-strip", "strip", "Strip plot of request latency in milliseconds by region. One dot per sample, so the spread in each region stays visible.", [{ region: "North", ms: 42 }, { region: "North", ms: 55 }, { region: "North", ms: 48 }, { region: "South", ms: 70 }, { region: "South", ms: 66 }, { region: "South", ms: 81 }], { x: "ms", y: "region", values: [42, 55, 48, 70, 66, 81] }),
+  task("wait-time-density", "density", "Density chart of wait times in minutes. Keep the raw rows. Do not bin them.", [{ wait: 12 }, { wait: 15 }, { wait: 18 }, { wait: 14 }, { wait: 40 }], { x: "wait", values: [12, 15, 18, 14, 40] }),
 ];
 
 export const CHART_TYPES = [
