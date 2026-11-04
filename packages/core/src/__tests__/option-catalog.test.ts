@@ -103,12 +103,17 @@ describe("option catalog", () => {
 
   it("keeps position scales, theme roles, and canvas render on the charts that paint them", () => {
     expect(field("encoding.x.type").appliesTo).toContain("scatter");
+    expect(field("encoding.x.type").appliesTo).toContain("candlestick");
     expect(field("encoding.x.type").appliesTo).not.toContain("bar");
     expect(field("encoding.x.title").appliesTo).toContain("histogram");
     expect(optionsForType("donut").some((item) => item.path === "encoding.x.title")).toBe(false);
-    expect(optionsForType("donut").some((item) => item.path === "encoding.y.format")).toBe(false);
+    expect(optionsForType("donut").some((item) => item.path === "encoding.y.format")).toBe(true);
+    expect(optionsForType("donut").some((item) => item.path === "encoding.y.scale.type")).toBe(false);
+    expect(optionsForType("funnel").some((item) => item.path === "mark.labels")).toBe(true);
     expect(optionsForType("bar").some((item) => item.path === "encoding.y.format")).toBe(true);
-    expect(field("encoding.color.scale.type").appliesTo).toEqual(["heatmap", "choropleth"]);
+    expect(field("encoding.color.scale.type").appliesTo).toEqual(["scatter", "heatmap", "treemap", "choropleth", "map-points"]);
+    expect(optionsForType("scatter").some((item) => item.path === "encoding.color.title")).toBe(true);
+    expect(optionsForType("scatter").some((item) => item.path === "theme.tokens.axis")).toBe(true);
     expect(optionCatalog.some((item) => item.path === "encoding.series.type" || item.path.startsWith("encoding.series.format") || item.path.startsWith("encoding.series.scale"))).toBe(false);
     expect(field("render").appliesTo).toEqual(["line", "stacked-area", "scatter", "bar", "heatmap", "candlestick"]);
     expect(optionsForType("treemap").some((item) => item.path === "render")).toBe(false);
