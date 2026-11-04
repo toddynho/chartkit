@@ -11,6 +11,7 @@ import {
 import type { ChartSpec } from "@chartkitdev/core";
 import { mount } from "@chartkitdev/vanilla";
 import { chartTypes } from "../data/chart-types";
+import { previewSize, readExplicitSize, stripPreviewSize, type PreviewPreset } from "../data/preview-size";
 import { optionEffect } from "../data/option-effect";
 import { chartType, drawChart } from "../lib/paint-chart";
 import { isRecord, pretty } from "../lib/spec-text";
@@ -46,12 +47,6 @@ const QUICK = [
   ["scatter", "Scatter"],
   ["strip", "Strip"],
 ] as const;
-
-const SIZES: Record<SizeName, { w: number; h: number }> = {
-  card: { w: 380, h: 180 },
-  dashboard: { w: 640, h: 240 },
-  full: { w: 980, h: 320 },
-};
 
 const SWATCHES = ["#335c84", "#0a63e6", "#2e9a5c", "#c24b3a", "#8a5cf6", "#17181a"];
 const SERIES_COLORS = ["#335c84", "#2e9a5c", "#c24b3a", "#8a5cf6", "#0a63e6", "#17181a"];
@@ -969,6 +964,13 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     try {
       const parsed = JSON.parse(text) as unknown;
       if (!isRecord(parsed)) throw new Error("Spec must be an object");
+      const typeChanged = chartType(parsed) !== chartType(state.spec);
+      if (typeChanged && !sizeEdited(parsed)) {
+        stripPreviewSize(parsed);
+        text = pretty(parsed);
+        const area = root.querySelector<HTMLTextAreaElement>(".play-specbox textarea");
+        if (area) area.value = text;
+      }
       state.spec = parsed;
       state.good = clone(parsed);
       state.text = text;
@@ -1092,8 +1094,17 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   }
 
-  function viewSize(): SizeName {
+  function viewPreset(): PreviewPreset {
     return window.matchMedia("(max-width: 900px)").matches ? "card" : state.size;
+  }
+
+  const SIZE_FIELDS = ["size.width", "size.height", "size.aspectRatio"];
+
+  function sizeEdited(spec: Record<string, unknown> = state.spec): boolean {
+    if (SIZE_FIELDS.some((path) => state.dirty.has(path))) return true;
+    const current = readExplicitSize(spec);
+    const base = readExplicitSize(state.baseline);
+    return current.width !== base.width || current.height !== base.height || current.aspectRatio !== base.aspectRatio;
   }
 
   async function refresh(rebuild = true): Promise<void> {
@@ -1101,7 +1112,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     liveDestroy?.();
     liveDestroy = null;
     const started = performance.now();
-    const size = SIZES[viewSize()];
+    const size = previewSize(chartType(state.good), viewPreset(), state.good);
     const view = clone(state.good);
     delete view.title;
     delete view.subtitle;
@@ -1111,8 +1122,12 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
         if (view.theme.mode == null) view.theme = { ...view.theme, mode: "dark" };
       } else view.theme = { mode: "dark" };
     }
-    const prev = isRecord(view.size) ? view.size : {};
-    view.size = { ...prev, width: size.w, height: size.h };
+    const prev = isRecord(view.size) ? { ...view.size } : {};
+    prev.width = size.width;
+    if (size.height != null) prev.height = size.height;
+    else delete prev.height;
+    if (size.minHeight != null) prev.minHeight = size.minHeight;
+    view.size = prev;
     try {
       state.svg = await paintSvg(view);
     } catch (error) {
@@ -1127,16 +1142,17 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       const card = document.createElement("div");
       card.className = "play-card";
       if (resolvedDark()) card.classList.add("is-dark");
-      card.style.width = `${size.w + 42}px`;
+      card.style.width = `${size.width + 42}px`;
       const title = document.createElement("h2");
       title.className = "play-card__title";
       title.textContent = typeof state.good.title === "string" && state.good.title.trim() ? state.good.title : "Untitled";
       const chart = document.createElement("div");
       chart.className = "play-card__chart";
       chart.dataset.ckLive = "1";
-      chart.style.width = `${size.w}px`;
-      chart.style.height = `${size.h}px`;
+      chart.style.width = `${size.width}px`;
       chart.innerHTML = state.svg;
+      const paintedHeight = Number(chart.querySelector("svg")?.getAttribute("height"));
+      chart.style.height = `${Number.isFinite(paintedHeight) && paintedHeight > 0 ? paintedHeight : (size.height ?? 240)}px`;
       const kind = chartType(view);
       try {
         if (kind === "choropleth" || kind === "map-points") {
@@ -1176,15 +1192,17 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       paintZoom();
     }
     const stats = root.querySelector("[data-stats]");
+    const drawnHeight = Number(canvas?.querySelector(".play-card__chart svg")?.getAttribute("height"));
+    const shownHeight = Number.isFinite(drawnHeight) && drawnHeight > 0 ? drawnHeight : (size.height ?? 0);
     if (stats) {
       const modeLabel = state.mode === "auto" ? "follows system" : state.mode;
-      stats.textContent = `${size.w} × ${size.h + 70} px · ${modeLabel} · svg · ${state.renderMs} ms`;
+      stats.textContent = `${size.width} × ${shownHeight + 70} px · ${modeLabel} · svg · ${state.renderMs} ms`;
     }
     const svgSize = root.querySelector("[data-svg-size]");
     const pngSize = root.querySelector("[data-png-size]");
     const jsonLines = root.querySelector("[data-json-lines]");
     if (svgSize) svgSize.textContent = `${(new Blob([state.svg]).size / 1024).toFixed(1)} KB`;
-    if (pngSize) pngSize.textContent = `${size.w * 2} px`;
+    if (pngSize) pngSize.textContent = `${size.width * 2} px`;
     if (jsonLines) jsonLines.textContent = `${state.text.split("\n").length} lines`;
     if (rebuild && state.tab === "options") renderPanel();
     renderTabs();
@@ -1287,6 +1305,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
   function setType(type: string): void {
     const spec = clone(state.spec);
     spec.type = type;
+    if (!sizeEdited()) stripPreviewSize(spec);
     state.dirty.add("type");
     state.hiddenY = [];
     setSpec(spec, true);
@@ -1309,6 +1328,10 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
   }
 
   function commit(field: OptionField, value: unknown): void {
+    if (field.path === "type" && typeof value === "string" && value) {
+      setType(value);
+      return;
+    }
     const next = value === undefined ? resetOption(state.spec, field) : writeOption(state.spec, field, value);
     state.dirty.add(field.path);
     state.flash.add(field.path);
@@ -1430,7 +1453,10 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       const snippet = `import { render } from "@chartkitdev/core/all";\n\nconst spec = ${state.text};\n\nrender(spec);\n`;
       await navigator.clipboard?.writeText(snippet);
     } else if (kind === "png") {
-      const blob = await pngBlob(state.svg, SIZES[state.size].w * 2, SIZES[state.size].h * 2);
+      const box = previewSize(chartType(state.good), viewPreset(), state.good);
+      const painted = Number(/height="([\d.]+)"/.exec(state.svg)?.[1]);
+      const height = Number.isFinite(painted) && painted > 0 ? painted : (box.height ?? 240);
+      const blob = await pngBlob(state.svg, box.width * 2, height * 2);
       if (blob) downloadBlob(blob, `${filename()}.png`);
     }
   }
