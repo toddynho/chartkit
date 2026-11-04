@@ -1,6 +1,6 @@
 {
   "summary": {
-    "generated": "2026-11-04T02:25:15.641Z",
+    "generated": "2026-11-04T02:27:45.833Z",
     "examples": [
       {
         "type": "heatmap",
@@ -174,12 +174,12 @@
       }
     ],
     "probed": 5732,
-    "effects": 2379,
+    "effects": 2418,
     "counts": {
       "a": 0,
-      "b": 502,
+      "b": 493,
       "c": 0,
-      "d": 2290,
+      "d": 2260,
       "interaction": 0
     },
     "note": "Class (a) is a playground wiring bug. The preview used to assign a static SVG and never call mount(), so tooltip, crosshair, legend toggle, and hover could not run. That is fixed in the playground by mounting @chartkitdev/vanilla. Rows here are what remains after that mount is used for the hover probe."
@@ -13896,94 +13896,6 @@
     {
       "type": "spike",
       "slug": "error-spikes",
-      "path": "encoding.x.type",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "nominal"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.x.format",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "integer"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.x.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.x.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.x.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.x.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.x.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.x.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$.0f"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
       "path": "encoding.x.scale.type",
       "control": "enum",
       "klass": "b",
@@ -14023,50 +13935,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": true
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.x.scale.reverse",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.x.scale.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 1
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.x.scale.padding.min",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 1
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "encoding.x.scale.padding.max",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 1
     },
     {
       "type": "spike",
@@ -14215,8 +14083,8 @@
       "slug": "error-spikes",
       "path": "axes.x.format",
       "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
+      "klass": "d",
+      "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
       "probe": "integer"
@@ -14226,8 +14094,8 @@
       "slug": "error-spikes",
       "path": "axes.x.format.decimals",
       "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
+      "klass": "d",
+      "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
       "probe": 10
@@ -14237,8 +14105,8 @@
       "slug": "error-spikes",
       "path": "axes.x.format.currency",
       "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
+      "klass": "d",
+      "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
       "probe": "USD"
@@ -14248,8 +14116,8 @@
       "slug": "error-spikes",
       "path": "axes.x.format.prefix",
       "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
+      "klass": "d",
+      "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
       "probe": "$"
@@ -14259,8 +14127,8 @@
       "slug": "error-spikes",
       "path": "axes.x.format.suffix",
       "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
+      "klass": "d",
+      "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
       "probe": "%"
@@ -14270,8 +14138,8 @@
       "slug": "error-spikes",
       "path": "axes.x.format.signed",
       "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
+      "klass": "d",
+      "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
       "probe": true
@@ -14281,8 +14149,8 @@
       "slug": "error-spikes",
       "path": "axes.x.format.specifier",
       "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
+      "klass": "d",
+      "reason": "x axis is not numeric, so format and minor ticks do not apply",
       "specChanged": true,
       "svgChanged": false,
       "probe": "$.0f"
@@ -14307,6 +14175,17 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": false
+    },
+    {
+      "type": "spike",
+      "slug": "error-spikes",
+      "path": "axes.x.autoSkip",
+      "control": "boolean",
+      "klass": "b",
+      "reason": "spec changed and the rendered SVG did not",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": true
     },
     {
       "type": "spike",
@@ -15148,17 +15027,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 800
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
     },
     {
       "type": "spike",
@@ -27977,98 +27845,10 @@
     {
       "type": "area-range",
       "slug": "revenue-forecast",
-      "path": "encoding.x.type",
-      "control": "enum",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "nominal"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.x.format",
-      "control": "enum",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "integer"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.x.format.decimals",
-      "control": "number",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.x.format.currency",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.x.format.prefix",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.x.format.suffix",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.x.format.signed",
-      "control": "boolean",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.x.format.specifier",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$.0f"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
       "path": "encoding.x.scale.type",
       "control": "enum",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
+      "klass": "b",
+      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": "time"
@@ -28088,8 +27868,8 @@
       "slug": "revenue-forecast",
       "path": "encoding.x.scale.zero",
       "control": "boolean",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
+      "klass": "b",
+      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": true
@@ -28099,63 +27879,19 @@
       "slug": "revenue-forecast",
       "path": "encoding.x.scale.nice",
       "control": "boolean",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
+      "klass": "b",
+      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": true
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.x.scale.reverse",
-      "control": "boolean",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.x.scale.padding",
-      "control": "number",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 1
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.x.scale.padding.min",
-      "control": "number",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 1
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "encoding.x.scale.padding.max",
-      "control": "number",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 1
     },
     {
       "type": "area-range",
       "slug": "revenue-forecast",
       "path": "encoding.x.scale.clamp",
       "control": "boolean",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
+      "klass": "b",
+      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": true
@@ -28165,8 +27901,8 @@
       "slug": "revenue-forecast",
       "path": "encoding.x.scale.constant",
       "control": "number",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
+      "klass": "b",
+      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": 120
@@ -28738,17 +28474,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": false
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "axes.x.autoSkip",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
     },
     {
       "type": "area-range",
@@ -29579,17 +29304,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 800
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
     },
     {
       "type": "area-range",
@@ -32498,98 +32212,10 @@
     {
       "type": "candlestick",
       "slug": "week-candles",
-      "path": "encoding.x.type",
-      "control": "enum",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "nominal"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.x.format",
-      "control": "enum",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "integer"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.x.format.decimals",
-      "control": "number",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.x.format.currency",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.x.format.prefix",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.x.format.suffix",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.x.format.signed",
-      "control": "boolean",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.x.format.specifier",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$.0f"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
       "path": "encoding.x.scale.type",
       "control": "enum",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
+      "klass": "b",
+      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": "time"
@@ -32609,8 +32235,8 @@
       "slug": "week-candles",
       "path": "encoding.x.scale.zero",
       "control": "boolean",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
+      "klass": "b",
+      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": true
@@ -32620,63 +32246,19 @@
       "slug": "week-candles",
       "path": "encoding.x.scale.nice",
       "control": "boolean",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
+      "klass": "b",
+      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": true
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.x.scale.reverse",
-      "control": "boolean",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.x.scale.padding",
-      "control": "number",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 1
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.x.scale.padding.min",
-      "control": "number",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 1
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "encoding.x.scale.padding.max",
-      "control": "number",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 1
     },
     {
       "type": "candlestick",
       "slug": "week-candles",
       "path": "encoding.x.scale.clamp",
       "control": "boolean",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
+      "klass": "b",
+      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": true
@@ -32686,8 +32268,8 @@
       "slug": "week-candles",
       "path": "encoding.x.scale.constant",
       "control": "number",
-      "klass": "d",
-      "reason": "x values are categories, so type, format, and scale do not apply",
+      "klass": "b",
+      "reason": "spec changed and the rendered SVG did not",
       "specChanged": true,
       "svgChanged": false,
       "probe": 120
@@ -33499,6 +33081,17 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": false
+    },
+    {
+      "type": "candlestick",
+      "slug": "week-candles",
+      "path": "axes.x.autoSkip",
+      "control": "boolean",
+      "klass": "b",
+      "reason": "spec changed and the rendered SVG did not",
+      "specChanged": true,
+      "svgChanged": false,
+      "probe": true
     },
     {
       "type": "candlestick",
@@ -34341,28 +33934,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": 800
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "locale",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "ja-JP"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "timezone",
-      "control": "text",
-      "klass": "d",
-      "reason": "x values are categories, so timezone does not apply",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "America/New_York"
     },
     {
       "type": "candlestick",

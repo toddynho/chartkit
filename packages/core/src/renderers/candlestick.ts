@@ -1,5 +1,6 @@
 import { explicitGrid, gridLines, majorTicks, spine, turned } from "../axis-ink";
 import { seriesPoints } from "../annotations";
+import { readTimeScale } from "../time-x";
 import { axisTitleMarks, bottomLegendBand, categoryX, chooseTicks, heading, labelStep, lockDomain, minorTickMarks, placedNotes } from "../chrome";
 import { cssVar } from "../theme";
 import { formatAxisValue, formatValue } from "../format";
@@ -81,6 +82,8 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   const priceBottom = plot.bottom - volumeH - (showVolume ? 8 : 0);
   const yScale = linear(domain[0], domain[1], priceBottom, plot.top);
   const slot = (plot.right - plot.left) / candles.length;
+  const time = readTimeScale(spec, candles.map((candle) => candle.label));
+  const plotWidth = Math.max(1, plot.right - plot.left);
   const gap = typeof frame.mark.gap === "number" ? frame.mark.gap : 0.3;
   const bodyW = Math.max(1, slot * (1 - gap));
   const grid = gridStyle(spec);
@@ -130,7 +133,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   candles.forEach((candle, index) => {
     const rising = candle.close >= candle.open;
     const color = rising ? up : down;
-    const x = plot.left + slot * index + slot / 2;
+    const x = time ? time.at(index, plotWidth, plot.left) : plot.left + slot * index + slot / 2;
     const highY = yScale(candle.high);
     const lowY = yScale(candle.low);
     const openY = yScale(candle.open);
@@ -194,8 +197,16 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
     const axisInk = cssVar("axis", frame.preset.axis);
     const xs: number[] = [];
     const shownX: number[] = [];
-    for (let i = 0; i < candles.length; i++) xs.push(plot.left + slot * i + slot / 2);
-    for (let i = 0; i < candles.length; i += step) {
+    for (let i = 0; i < candles.length; i++) xs.push(time ? time.at(i, plotWidth, plot.left) : plot.left + slot * i + slot / 2);
+    if (time) {
+      for (const tick of time.ticks(frame.locale)) {
+        const x = time.px(tick.t, plotWidth, plot.left);
+        shownX.push(x);
+        if (!xAxis.rotate) parts.push(text(x, labelY, tick.text, ink, 11, "400", "middle"));
+        else parts.push(turned(x, labelY, tick.text, ink, 11, "middle", xAxis.rotate));
+      }
+    }
+    for (let i = 0; i < candles.length && !time; i += step) {
       if (!candles[i]?.label) continue;
       shownX.push(xs[i] ?? 0);
       if (!xAxis.rotate) parts.push(text(xs[i] ?? 0, labelY, candles[i]?.label ?? "", ink, 11, "400", "middle"));
@@ -207,7 +218,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
     const xGrid = explicitGrid(isRecord(spec.axes) && isRecord(spec.axes.x) ? spec.axes.x.grid : undefined);
     if (xGrid) parts.push(gridLines(false, plot.top, plot.bottom, xs, xGrid, cssVar("grid", frame.preset.grid)));
   }
-  const xAt = (index: number) => plot.left + slot * index + slot / 2;
+  const xAt = (index: number) => (time ? time.at(index, plotWidth, plot.left) : plot.left + slot * index + slot / 2);
   const notes = spec.annotations
     ? placedNotes(spec, frame, plot, categoryX(candles.map((candle) => candle.label), xAt), (value) => yScale(value), [
         { name: "close", axis: "y", pts: seriesPoints(null, candles.map((candle) => candle.close)) },

@@ -1,5 +1,6 @@
 import { explicitGrid, gridLines, majorTicks, spine, turned } from "../axis-ink";
 import { seriesPoints } from "../annotations";
+import { readTimeScale } from "../time-x";
 import { axisTitleMarks, bottomLegendBand, categoryX, chooseTicks, heading, labelStep, lockDomain, minorTickMarks, placedNotes } from "../chrome";
 import { cssVar, lineStroke, paint } from "../theme";
 import { formatAxisValue, formatValue } from "../format";
@@ -68,9 +69,10 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
     `<line x1="${n(plot.left)}" y1="${n(baseY)}" x2="${n(plot.right)}" y2="${n(baseY)}" stroke="${cssVar("axis", frame.preset.axis)}" stroke-width="1.5" />`,
   );
   const plotWidth = Math.max(1, plot.right - plot.left);
+  const time = readTimeScale(spec, labels);
   const sampled = sampleSeries(readSamplingMode(frame.mark.sampling), null, values, values.length, plotWidth, false);
   const drawSpike = (value: number, index: number, sampledAttr: string) => {
-    const x = plot.left + slot * index + slot / 2;
+    const x = time ? time.at(index, plotWidth, plot.left) : plot.left + slot * index + slot / 2;
     const y = yScale(value);
     const name = labels[index] ? `${labels[index]}: ` : "";
     const label = `${name}${formatValue(value, yFormat, frame.locale)}`;
@@ -120,11 +122,19 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
     const step = labelStep(count, xAxis.skip, omitted);
     const labelY = (xAxis.end ? plot.top - 8 : frame.height - legendBand - (xAxis.title ? 26 : 12)) + (xAxis.end ? 0 : xAxis.offset || 0);
     const xs: number[] = [];
-    for (let i = 0; i < count; i++) xs.push(plot.left + slot * i + slot / 2);
     const ink = cssVar("muted", frame.preset.muted);
     const axisInk = cssVar("axis", frame.preset.axis);
     const shownX: number[] = [];
-    for (let i = 0; i < count; i += step) {
+    for (let i = 0; i < count; i++) xs.push(time ? time.at(i, plotWidth, plot.left) : plot.left + slot * i + slot / 2);
+    if (time) {
+      for (const tick of time.ticks(frame.locale)) {
+        const x = time.px(tick.t, plotWidth, plot.left);
+        shownX.push(x);
+        if (!xAxis.rotate) parts.push(text(x, labelY, tick.text, ink, 11, "400", "middle"));
+        else parts.push(turned(x, labelY, tick.text, ink, 11, "middle", xAxis.rotate));
+      }
+    }
+    for (let i = 0; i < count && !time; i += step) {
       if (!labels[i]) continue;
       shownX.push(xs[i] ?? 0);
       if (!xAxis.rotate) parts.push(text(xs[i] ?? 0, labelY, labels[i] ?? "", ink, 11, "400", "middle"));
@@ -137,7 +147,7 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
     const xGrid = explicitGrid(isRecord(spec.axes) && isRecord(spec.axes.x) ? spec.axes.x.grid : undefined);
     if (xGrid) parts.push(gridLines(false, plot.top, plot.bottom, xs, xGrid, cssVar("grid", frame.preset.grid)));
   }
-  const xAt = (index: number) => plot.left + slot * index + slot / 2;
+  const xAt = (index: number) => (time ? time.at(index, plotWidth, plot.left) : plot.left + slot * index + slot / 2);
   const notes = placedNotes(spec, frame, plot, categoryX(labels, xAt), (value) => yScale(value), [
     { name: yField ?? "y", axis: "y", pts: seriesPoints(null, values) },
   ], labels);
