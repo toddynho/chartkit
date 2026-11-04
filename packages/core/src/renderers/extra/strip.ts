@@ -1,4 +1,5 @@
 import { chooseTicks, labelStep, lockDomain, minorTickMarks, placedAxisTitles } from "../../chrome";
+import { legendLabel, legendMarkup, legendShownValue } from "../../legend";
 import { axisOn, column, fieldOf } from "../../frame";
 import { cssVar, paint } from "../../theme";
 import { ch, hash, isRecord, n, readAxis } from "../../svg";
@@ -225,14 +226,23 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
   if (!vertical && axisOn(spec, "x")) parts.push(axisLine(frame, { left: box.left, top: box.top, right: box.right, bottom: box.bottom }));
   parts.push(placedAxisTitles(frame, spec, box));
   if (colorNames.length && frame.legend !== false) {
+    const lastOf = new Map<string, number>();
+    for (const row of rows) for (const dot of row.dots) if (dot.colorKey) lastOf.set(dot.colorKey, dot.value);
+    const items = colorNames.map((name, index) => ({ name, color: fill(frame, index), value: legendShownValue(spec, lastOf.get(name)) }));
     let x = box.left;
     const y = 14;
-    colorNames.forEach((name, index) => {
-      const swatch = fill(frame, index);
-      parts.push(`<circle cx="${n(x + 4)}" cy="${n(y)}" r="4" fill="${swatch}" />`);
-      parts.push(text(x + 12, y + 4, name, cssVar("muted", frame.preset.muted), 11, "400", "start"));
-      x += 12 + ch(name.length, 7) + 16;
-    });
+    const fallback = colorNames
+      .map((name, index) => {
+        const labelText = legendLabel(name, legendShownValue(spec, lastOf.get(name)));
+        const swatch = `<circle cx="${n(x + 4)}" cy="${n(y)}" r="4" fill="${fill(frame, index)}" />`;
+        const label = text(x + 12, y + 4, labelText, cssVar("muted", frame.preset.muted), 11, "400", "start");
+        x += 12 + ch(labelText.length, 7) + 16;
+        return swatch + label;
+      })
+      .join("");
+    parts.push(
+      legendMarkup(spec, items, { plot: box, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
+    );
   }
   return view.done();
 }

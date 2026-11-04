@@ -2,10 +2,10 @@
 
 Class (a) is a playground wiring bug. The preview used to assign a static SVG and never call mount(), so tooltip, crosshair, legend toggle, and hover could not run. That is fixed in the playground by mounting @chartkitdev/vanilla. Rows here are what remains after that mount is used for the hover probe.
 
-Probed 5732 option writes across 34 chart types. 2150 changed the SVG. Remaining rows are classified below.
+Probed 5732 option writes across 34 chart types. 2183 changed the SVG. Remaining rows are classified below.
 
 - (a) playground wiring: 0
-- (b) core ignores a listed option: 731
+- (b) core ignores a listed option: 698
 - (c) catalog scope too wide: 0
 - (d) no-op for this example: 2290
 
@@ -26,22 +26,6 @@ Probed 5732 option writes across 34 chart types. 2150 changed the SVG. Remaining
 - **b** `encoding.x.scale.nice` — spec changed and the rendered SVG did not
 - **b** `encoding.x.scale.reverse` — spec changed and the rendered SVG did not
 - … 50 more
-
-### strip (61)
-
-- **b** `encoding.color.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color.value` — spec changed and the rendered SVG did not
-- **b** `encoding.label` — spec changed and the rendered SVG did not
-- **b** `encoding.label.type` — spec changed and the rendered SVG did not
-- **b** `encoding.label.title` — spec changed and the rendered SVG did not
-- **b** `encoding.label.format` — spec changed and the rendered SVG did not
-- **b** `encoding.label.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.label.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.label.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.label.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.label.format.signed` — spec changed and the rendered SVG did not
-- **b** `encoding.label.format.specifier` — spec changed and the rendered SVG did not
-- … 49 more
 
 ### errorbar (56)
 
@@ -74,6 +58,22 @@ Probed 5732 option writes across 34 chart types. 2150 changed the SVG. Remaining
 - **b** `encoding.y.z` — spec changed and the rendered SVG did not
 - **b** `encoding.series` — spec changed and the rendered SVG did not
 - … 43 more
+
+### strip (53)
+
+- **b** `encoding.color.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color.value` — spec changed and the rendered SVG did not
+- **b** `encoding.label` — spec changed and the rendered SVG did not
+- **b** `encoding.label.type` — spec changed and the rendered SVG did not
+- **b** `encoding.label.title` — spec changed and the rendered SVG did not
+- **b** `encoding.label.format` — spec changed and the rendered SVG did not
+- **b** `encoding.label.format.decimals` — spec changed and the rendered SVG did not
+- **b** `encoding.label.format.currency` — spec changed and the rendered SVG did not
+- **b** `encoding.label.format.prefix` — spec changed and the rendered SVG did not
+- **b** `encoding.label.format.suffix` — spec changed and the rendered SVG did not
+- **b** `encoding.label.format.signed` — spec changed and the rendered SVG did not
+- **b** `encoding.label.format.specifier` — spec changed and the rendered SVG did not
+- … 41 more
 
 ### histogram (51)
 
@@ -187,22 +187,6 @@ Probed 5732 option writes across 34 chart types. 2150 changed the SVG. Remaining
 - **b** `encoding.source.scale.nice` — spec changed and the rendered SVG did not
 - … 25 more
 
-### treemap (30)
-
-- **b** `encoding.color.type` — spec changed and the rendered SVG did not
-- **b** `encoding.color.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.decimals` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.currency` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.prefix` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.suffix` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.signed` — spec changed and the rendered SVG did not
-- **b** `encoding.color.format.specifier` — spec changed and the rendered SVG did not
-- **b** `encoding.color.scale.type` — spec changed and the rendered SVG did not
-- **b** `encoding.color.scale.zero` — spec changed and the rendered SVG did not
-- **b** `encoding.color.scale.nice` — spec changed and the rendered SVG did not
-- … 18 more
-
 ### candlestick (29)
 
 - **b** `axes.x.grid` — spec changed and the rendered SVG did not
@@ -218,6 +202,22 @@ Probed 5732 option writes across 34 chart types. 2150 changed the SVG. Remaining
 - **b** `axes.x.tickLength` — spec changed and the rendered SVG did not
 - **b** `axes.x.rotate` — spec changed and the rendered SVG did not
 - … 17 more
+
+### treemap (22)
+
+- **b** `encoding.color.type` — spec changed and the rendered SVG did not
+- **b** `encoding.color.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.decimals` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.currency` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.prefix` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.suffix` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.signed` — spec changed and the rendered SVG did not
+- **b** `encoding.color.format.specifier` — spec changed and the rendered SVG did not
+- **b** `encoding.color.scale.type` — spec changed and the rendered SVG did not
+- **b** `encoding.color.scale.zero` — spec changed and the rendered SVG did not
+- **b** `encoding.color.scale.nice` — spec changed and the rendered SVG did not
+- … 10 more
 
 ### bullet (22)
 
@@ -250,22 +250,6 @@ Probed 5732 option writes across 34 chart types. 2150 changed the SVG. Remaining
 - **b** `encoding.size.format.specifier` — spec changed and the rendered SVG did not
 - **b** `encoding.size.scale.type` — spec changed and the rendered SVG did not
 - … 9 more
-
-### radar (14)
-
-- **b** `encoding.series` — spec changed and the rendered SVG did not
-- **b** `encoding.series.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color` — spec changed and the rendered SVG did not
-- **b** `encoding.color.title` — spec changed and the rendered SVG did not
-- **b** `encoding.color.value` — spec changed and the rendered SVG did not
-- **b** `legend.position` — spec changed and the rendered SVG did not
-- **b** `legend.anchor` — spec changed and the rendered SVG did not
-- **b** `legend.align` — spec changed and the rendered SVG did not
-- **b** `legend.orient` — spec changed and the rendered SVG did not
-- **b** `legend.maxRows` — spec changed and the rendered SVG did not
-- **b** `legend.title` — spec changed and the rendered SVG did not
-- **b** `legend.symbol` — spec changed and the rendered SVG did not
-- … 2 more
 
 ### rose (13)
 
@@ -324,18 +308,6 @@ Probed 5732 option writes across 34 chart types. 2150 changed the SVG. Remaining
 - **b** `axes.y2.grid` — spec changed and the rendered SVG did not
 - **b** `axes.y2.autoSkip` — spec changed and the rendered SVG did not
 
-### radial-bar (9)
-
-- **b** `legend.position` — spec changed and the rendered SVG did not
-- **b** `legend.anchor` — spec changed and the rendered SVG did not
-- **b** `legend.align` — spec changed and the rendered SVG did not
-- **b** `legend.orient` — spec changed and the rendered SVG did not
-- **b** `legend.maxRows` — spec changed and the rendered SVG did not
-- **b** `legend.title` — spec changed and the rendered SVG did not
-- **b** `legend.symbol` — spec changed and the rendered SVG did not
-- **b** `legend.values` — spec changed and the rendered SVG did not
-- **b** `layout.coordinate` — spec changed and the rendered SVG did not
-
 ### stacked-area (9)
 
 - **b** `encoding.series` — spec changed and the rendered SVG did not
@@ -358,11 +330,19 @@ Probed 5732 option writes across 34 chart types. 2150 changed the SVG. Remaining
 - **b** `axes.y.autoSkip` — spec changed and the rendered SVG did not
 - **b** `layout.coordinate` — spec changed and the rendered SVG did not
 
-### donut (4)
+### radar (6)
+
+- **b** `encoding.series` — spec changed and the rendered SVG did not
+- **b** `encoding.series.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color` — spec changed and the rendered SVG did not
+- **b** `encoding.color.title` — spec changed and the rendered SVG did not
+- **b** `encoding.color.value` — spec changed and the rendered SVG did not
+- **b** `locale` — spec changed and the rendered SVG did not
+
+### donut (3)
 
 - **b** `mark.other` — spec changed and the rendered SVG did not
 - **b** `mark.other.label` — spec changed and the rendered SVG did not
-- **b** `legend.values` — spec changed and the rendered SVG did not
 - **b** `layout.coordinate` — spec changed and the rendered SVG did not
 
 ### timeline (3)
@@ -401,6 +381,10 @@ Probed 5732 option writes across 34 chart types. 2150 changed the SVG. Remaining
 ### kpi (1)
 
 - **b** `metric.format.currency` — spec changed and the rendered SVG did not
+
+### radial-bar (1)
+
+- **b** `layout.coordinate` — spec changed and the rendered SVG did not
 
 ### funnel (1)
 

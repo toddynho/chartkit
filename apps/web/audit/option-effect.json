@@ -1,6 +1,6 @@
 {
   "summary": {
-    "generated": "2026-11-04T02:17:57.904Z",
+    "generated": "2026-11-04T02:19:57.774Z",
     "examples": [
       {
         "type": "heatmap",
@@ -174,10 +174,10 @@
       }
     ],
     "probed": 5732,
-    "effects": 2150,
+    "effects": 2183,
     "counts": {
       "a": 0,
-      "b": 731,
+      "b": 698,
       "c": 0,
       "d": 2290,
       "interaction": 0
@@ -6747,17 +6747,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "legend.values",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
     },
     {
       "type": "donut",
@@ -13851,72 +13840,6 @@
     {
       "type": "strip",
       "slug": "desks-strip",
-      "path": "legend.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "inside"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "legend.anchor",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "left"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "legend.align",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "center"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "legend.orient",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "vertical"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "legend.maxRows",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "legend.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
       "path": "legend.hide",
       "control": "json",
       "klass": "d",
@@ -13927,34 +13850,12 @@
     {
       "type": "strip",
       "slug": "desks-strip",
-      "path": "legend.symbol",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "triangle"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
       "path": "legend.symbols",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "legend.values",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
     },
     {
       "type": "strip",
@@ -16973,72 +16874,6 @@
     {
       "type": "treemap",
       "slug": "inventory-treemap",
-      "path": "legend.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "inside"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "legend.anchor",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "left"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "legend.align",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "center"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "legend.orient",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "vertical"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "legend.maxRows",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "legend.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
       "path": "legend.hide",
       "control": "json",
       "klass": "d",
@@ -17049,34 +16884,12 @@
     {
       "type": "treemap",
       "slug": "inventory-treemap",
-      "path": "legend.symbol",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "triangle"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
       "path": "legend.symbols",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "legend.values",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
     },
     {
       "type": "treemap",
@@ -21008,72 +20821,6 @@
     {
       "type": "radial-bar",
       "slug": "lumen-radial-bar",
-      "path": "legend.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "inside"
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "legend.anchor",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "left"
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "legend.align",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "center"
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "legend.orient",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "vertical"
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "legend.maxRows",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "legend.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
       "path": "legend.hide",
       "control": "json",
       "klass": "d",
@@ -21084,34 +20831,12 @@
     {
       "type": "radial-bar",
       "slug": "lumen-radial-bar",
-      "path": "legend.symbol",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "triangle"
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
       "path": "legend.symbols",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "legend.values",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
     },
     {
       "type": "radial-bar",
@@ -24150,72 +23875,6 @@
     {
       "type": "radar",
       "slug": "model-radar",
-      "path": "legend.position",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "inside"
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "legend.anchor",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "left"
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "legend.align",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "center"
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "legend.orient",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "vertical"
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "legend.maxRows",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "legend.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
       "path": "legend.hide",
       "control": "json",
       "klass": "d",
@@ -24226,34 +23885,12 @@
     {
       "type": "radar",
       "slug": "model-radar",
-      "path": "legend.symbol",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "triangle"
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
       "path": "legend.symbols",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "legend.values",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
     },
     {
       "type": "radar",
