@@ -28,6 +28,14 @@ describe("bar list", () => {
     expect(render(spec)).toContain("ck-chart-error");
   });
 
+  it("formats the value from encoding.y.format without a style", () => {
+    const svg = renderBarList({
+      ...spec,
+      encoding: { x: "page", y: { field: "visits", format: { currency: "GBP", decimals: 0 } } },
+    });
+    expect(svg).toContain(">£1,840<");
+  });
+
   it("draws a full-row wash when mark.track is row", () => {
     const row = { ...spec, mark: { track: "row" } };
     expect(validate(row).errors).toEqual([]);

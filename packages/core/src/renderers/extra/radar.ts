@@ -1,3 +1,4 @@
+import { legendLabel, legendMarkup, legendShownValue } from "../../legend";
 import { column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
 import { domainEnds, n, polar, ch } from "../../svg";
@@ -73,13 +74,25 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
     for (const point of points) parts.push(`<circle cx="${n(point.x)}" cy="${n(point.y)}" r="3" fill="${color}" />`);
   });
   if (frame.legend !== false && series.length > 1) {
+    const items = series.map((item, index) => ({
+      name: item.name,
+      color: fill(frame, index),
+      value: legendShownValue(spec, item.values.at(-1)),
+    }));
     let x = 16;
     const y = frame.height - 18;
-    series.forEach((item, index) => {
-      parts.push(`<rect x="${n(x)}" y="${n(y - 9)}" width="10" height="10" rx="2" fill="${fill(frame, index)}" />`);
-      parts.push(text(x + 14, y, item.name, cssVar("text", frame.preset.text), 12, "500"));
-      x += 14 + ch(item.name.length, 7) + 16;
-    });
+    const fallback = series
+      .map((item, index) => {
+        const name = legendLabel(item.name, legendShownValue(spec, item.values.at(-1)));
+        const mark = `<rect x="${n(x)}" y="${n(y - 9)}" width="10" height="10" rx="2" fill="${fill(frame, index)}" />`;
+        const label = text(x + 14, y, name, cssVar("text", frame.preset.text), 12, "500");
+        x += 14 + ch(name.length, 7) + 16;
+        return mark + label;
+      })
+      .join("");
+    parts.push(
+      legendMarkup(spec, items, { plot: { left: 16, top: 16, right: frame.width - 16, bottom: frame.height - 28 }, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
+    );
   }
   return view.done();
 }
