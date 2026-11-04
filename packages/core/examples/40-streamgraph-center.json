@@ -1,0 +1,17 @@
+{
+  "version": "1",
+  "type": "streamgraph",
+  "title": "Centered genres",
+  "data": [
+    { "year": "2020", "genre": "Fiction", "copies": 20 },
+    { "year": "2020", "genre": "History", "copies": 12 },
+    { "year": "2021", "genre": "Fiction", "copies": 28 },
+    { "year": "2021", "genre": "History", "copies": 18 },
+    { "year": "2022", "genre": "Fiction", "copies": 22 },
+    { "year": "2022", "genre": "History", "copies": 30 }
+  ],
+  "encoding": { "x": "year", "y": "copies", "color": "genre" },
+  "mark": { "streamOffset": "center", "order": "none" },
+  "legend": { "position": "right" },
+  "a11y": { "alt": "Fiction stays the larger share in 2020. Layers are centered, not stacked on zero." }
+}

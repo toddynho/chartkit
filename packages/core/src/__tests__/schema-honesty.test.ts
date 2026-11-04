@@ -470,6 +470,7 @@ function hosts(): Host[] {
     ["radial-bar", { version: "1", type: "radial-bar", data: rows, encoding: { x: "month", y: ["revenue", "cost"] }, a11y: { alt }, size: { width: 420, height: 280 } }],
     ["rose", { version: "1", type: "rose", data: rows, encoding: { x: "month", y: "revenue" }, a11y: { alt }, size: { width: 420, height: 280 } }],
     ["strip", { version: "1", type: "strip", data: [{ g: "B", v: 10, name: "one" }, { g: "B", v: 10, name: "two" }, { g: "B", v: 30, name: "three" }, { g: "A", v: 1, name: "four" }, { g: "A", v: 2, name: "five" }, { g: "A", v: 9, name: "six" }], encoding: { x: "v", y: "g", label: "name" }, a11y: { alt }, size: { width: 420, height: 220 } }],
+    ["streamgraph", { version: "1", type: "streamgraph", data: [{ year: "2020", fiction: 20, history: null }, { year: "2021", fiction: 28, history: 18 }, { year: "2022", fiction: 22, history: 30 }], encoding: { x: "year", y: ["fiction", "history"] }, a11y: { alt }, size: { width: 420, height: 220 } }],
     [
       "trace",
       {
@@ -601,6 +602,7 @@ const ENTRY_FILES: Array<[string, string]> = [
   ["radial-bar", "radialBar"],
   ["rose", "rose"],
   ["strip", "strip"],
+  ["streamgraph", "streamgraph"],
 ];
 
 const FRESH_ENTRY = new Set(["line", "bar", "stacked-area", "combo", "sparkline", "mini-area"]);

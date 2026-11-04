@@ -1,0 +1,15 @@
+{
+  "version": "1",
+  "type": "streamgraph",
+  "title": "Weekly streams",
+  "data": [
+    { "week": "2024-01-01", "audio": 12, "video": 8 },
+    { "week": "2024-04-01", "audio": 18, "video": 14 },
+    { "week": "2024-07-01", "audio": 16, "video": 22 },
+    { "week": "2024-10-01", "audio": 20, "video": 26 }
+  ],
+  "encoding": { "x": "week", "y": ["audio", "video"] },
+  "mark": { "labels": true, "streamOffset": "expand" },
+  "timezone": "UTC",
+  "a11y": { "alt": "Video's share grows through 2024. The layers are shares, not counts." }
+}

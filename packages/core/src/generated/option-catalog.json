@@ -39,6 +39,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -170,6 +171,7 @@
       "bar-list",
       "strip",
       "density",
+      "streamgraph",
       "gantt",
       "timeline",
       "quadrant",
@@ -197,7 +199,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Type",
     "control": "enum",
@@ -230,7 +233,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Title",
     "control": "text",
@@ -252,7 +256,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Format",
     "control": "enum",
@@ -292,7 +297,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Decimals",
     "control": "number",
@@ -317,7 +323,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Currency",
     "control": "text",
@@ -339,7 +346,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Prefix",
     "control": "text",
@@ -361,7 +369,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Suffix",
     "control": "text",
@@ -383,7 +392,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Signed",
     "control": "boolean",
@@ -405,7 +415,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Specifier",
     "control": "text",
@@ -427,7 +438,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Type",
     "control": "enum",
@@ -458,7 +470,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Domain",
     "control": "json",
@@ -479,7 +492,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Zero",
     "control": "boolean",
@@ -501,7 +515,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Nice",
     "control": "boolean",
@@ -523,7 +538,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Reverse",
     "control": "boolean",
@@ -545,7 +561,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Padding",
     "control": "number",
@@ -570,7 +587,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Min",
     "control": "number",
@@ -595,7 +613,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Max",
     "control": "number",
@@ -620,7 +639,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Clamp",
     "control": "boolean",
@@ -642,7 +662,8 @@
       "spike",
       "candlestick",
       "strip",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Constant",
     "control": "number",
@@ -681,6 +702,7 @@
       "sunburst",
       "bar-list",
       "strip",
+      "streamgraph",
       "gantt",
       "quadrant",
       "journey"
@@ -759,7 +781,8 @@
       "radial-bar",
       "rose",
       "histogram",
-      "spike"
+      "spike",
+      "streamgraph"
     ],
     "label": "Type",
     "control": "enum",
@@ -790,7 +813,8 @@
       "errorbar",
       "histogram",
       "spike",
-      "strip"
+      "strip",
+      "streamgraph"
     ],
     "label": "Title",
     "control": "text",
@@ -824,7 +848,8 @@
       "sankey",
       "histogram",
       "spike",
-      "sunburst"
+      "sunburst",
+      "streamgraph"
     ],
     "label": "Format",
     "control": "enum",
@@ -876,7 +901,8 @@
       "sankey",
       "histogram",
       "spike",
-      "sunburst"
+      "sunburst",
+      "streamgraph"
     ],
     "label": "Decimals",
     "control": "number",
@@ -913,7 +939,8 @@
       "sankey",
       "histogram",
       "spike",
-      "sunburst"
+      "sunburst",
+      "streamgraph"
     ],
     "label": "Currency",
     "control": "text",
@@ -947,7 +974,8 @@
       "sankey",
       "histogram",
       "spike",
-      "sunburst"
+      "sunburst",
+      "streamgraph"
     ],
     "label": "Prefix",
     "control": "text",
@@ -981,7 +1009,8 @@
       "sankey",
       "histogram",
       "spike",
-      "sunburst"
+      "sunburst",
+      "streamgraph"
     ],
     "label": "Suffix",
     "control": "text",
@@ -1015,7 +1044,8 @@
       "sankey",
       "histogram",
       "spike",
-      "sunburst"
+      "sunburst",
+      "streamgraph"
     ],
     "label": "Signed",
     "control": "boolean",
@@ -1049,7 +1079,8 @@
       "sankey",
       "histogram",
       "spike",
-      "sunburst"
+      "sunburst",
+      "streamgraph"
     ],
     "label": "Specifier",
     "control": "text",
@@ -1077,7 +1108,8 @@
       "radial-bar",
       "rose",
       "histogram",
-      "spike"
+      "spike",
+      "streamgraph"
     ],
     "label": "Type",
     "control": "enum",
@@ -1114,7 +1146,8 @@
       "radial-bar",
       "rose",
       "histogram",
-      "spike"
+      "spike",
+      "streamgraph"
     ],
     "label": "Domain",
     "control": "json",
@@ -1141,7 +1174,8 @@
       "radial-bar",
       "rose",
       "histogram",
-      "spike"
+      "spike",
+      "streamgraph"
     ],
     "label": "Zero",
     "control": "boolean",
@@ -1169,7 +1203,8 @@
       "radial-bar",
       "rose",
       "histogram",
-      "spike"
+      "spike",
+      "streamgraph"
     ],
     "label": "Nice",
     "control": "boolean",
@@ -1197,7 +1232,8 @@
       "radial-bar",
       "rose",
       "histogram",
-      "spike"
+      "spike",
+      "streamgraph"
     ],
     "label": "Reverse",
     "control": "boolean",
@@ -1225,7 +1261,8 @@
       "radial-bar",
       "rose",
       "histogram",
-      "spike"
+      "spike",
+      "streamgraph"
     ],
     "label": "Padding",
     "control": "number",
@@ -1256,7 +1293,8 @@
       "radial-bar",
       "rose",
       "histogram",
-      "spike"
+      "spike",
+      "streamgraph"
     ],
     "label": "Min",
     "control": "number",
@@ -1287,7 +1325,8 @@
       "radial-bar",
       "rose",
       "histogram",
-      "spike"
+      "spike",
+      "streamgraph"
     ],
     "label": "Max",
     "control": "number",
@@ -1318,7 +1357,8 @@
       "radial-bar",
       "rose",
       "histogram",
-      "spike"
+      "spike",
+      "streamgraph"
     ],
     "label": "Clamp",
     "control": "boolean",
@@ -1346,7 +1386,8 @@
       "radial-bar",
       "rose",
       "histogram",
-      "spike"
+      "spike",
+      "streamgraph"
     ],
     "label": "Constant",
     "control": "number",
@@ -1582,7 +1623,8 @@
       "radar",
       "pie",
       "donut",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Series field",
     "control": "text",
@@ -1606,7 +1648,8 @@
       "radar",
       "pie",
       "donut",
-      "density"
+      "density",
+      "streamgraph"
     ],
     "label": "Title",
     "control": "text",
@@ -1634,6 +1677,7 @@
       "radar",
       "strip",
       "density",
+      "streamgraph",
       "gantt",
       "timeline",
       "quadrant",
@@ -1691,6 +1735,7 @@
       "radar",
       "strip",
       "density",
+      "streamgraph",
       "gantt",
       "timeline",
       "quadrant",
@@ -2051,6 +2096,7 @@
       "radar",
       "strip",
       "density",
+      "streamgraph",
       "gantt",
       "timeline",
       "quadrant",
@@ -2082,6 +2128,7 @@
       "radar",
       "strip",
       "density",
+      "streamgraph",
       "gantt",
       "timeline",
       "quadrant",
@@ -5921,7 +5968,7 @@
   },
   {
     "path": "mark.curve",
-    "description": "Line interpolation. monotone is monotone-x and stays inside the data, so a spike does not cross the low point or pass the peak. smooth, spline, and basis repair to monotone. Applies to: line, stacked-area, combo, sparkline, mini-area.",
+    "description": "Line interpolation. monotone is monotone-x and stays inside the data, so a spike does not cross the low point or pass the peak. smooth, spline, and basis repair to monotone.",
     "group": "Marks & style",
     "docs": "/docs/options#mark.curve",
     "appliesTo": [
@@ -5929,7 +5976,8 @@
       "stacked-area",
       "combo",
       "sparkline",
-      "mini-area"
+      "mini-area",
+      "streamgraph"
     ],
     "label": "Curve",
     "control": "enum",
@@ -6091,7 +6139,7 @@
   },
   {
     "path": "mark.fillOpacity",
-    "description": "Area/bar fill opacity, 0–1. Applies to: line, stacked-area, combo, mini-area, bar.",
+    "description": "Area/bar fill opacity, 0–1. Applies to: line, stacked-area, combo, mini-area, bar, streamgraph. A streamgraph defaults to 0.22.",
     "group": "Marks & style",
     "docs": "/docs/options#mark.fillOpacity",
     "appliesTo": [
@@ -6100,6 +6148,7 @@
       "combo",
       "mini-area",
       "bar",
+      "streamgraph",
       "density"
     ],
     "label": "Fill Opacity",
@@ -6129,7 +6178,7 @@
   },
   {
     "path": "mark.strokeWidth",
-    "description": "Line width in px. Applies to: line, stacked-area, combo, sparkline, mini-area, spike, progress-ring, gauge (arc width).",
+    "description": "Line width in px. Applies to: line, stacked-area, combo, sparkline, mini-area, spike, progress-ring, gauge (arc width), streamgraph.",
     "group": "Marks & style",
     "docs": "/docs/options#mark.strokeWidth",
     "appliesTo": [
@@ -6141,6 +6190,7 @@
       "spike",
       "progress-ring",
       "gauge",
+      "streamgraph",
       "density"
     ],
     "label": "Stroke Width",
@@ -6169,7 +6219,7 @@
   },
   {
     "path": "mark.connectNulls",
-    "description": "Draw through missing values instead of leaving gaps. Applies to: line, stacked-area, combo, sparkline, mini-area.",
+    "description": "Draw through missing values instead of leaving gaps. Applies to: line, stacked-area, combo, sparkline, mini-area, streamgraph.",
     "group": "Marks & style",
     "docs": "/docs/options#mark.connectNulls",
     "appliesTo": [
@@ -6177,7 +6227,8 @@
       "stacked-area",
       "combo",
       "sparkline",
-      "mini-area"
+      "mini-area",
+      "streamgraph"
     ],
     "label": "Connect Nulls",
     "control": "boolean",
@@ -6207,6 +6258,46 @@
     ],
     "slider": false,
     "essential": true
+  },
+  {
+    "path": "mark.streamOffset",
+    "description": "Streamgraph baseline. wiggle minimizes layer-to-layer movement and is the default. center, also called silhouette, centers each column on zero. zero stacks on the axis. expand draws shares that sum to 1. One series repairs to zero.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.streamOffset",
+    "appliesTo": [
+      "streamgraph"
+    ],
+    "label": "Stream Offset",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "wiggle",
+      "center",
+      "silhouette",
+      "zero",
+      "expand"
+    ],
+    "slider": false,
+    "defaultValue": "wiggle"
+  },
+  {
+    "path": "mark.order",
+    "description": "Streamgraph layer order. Omitted means inside-out when the baseline is wiggle, and first-seen order otherwise. inside-out puts the smallest series in the middle. ascending and descending sort by the series sum.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.order",
+    "appliesTo": [
+      "streamgraph"
+    ],
+    "label": "Order",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "inside-out",
+      "none",
+      "ascending",
+      "descending"
+    ],
+    "slider": false
   },
   {
     "path": "mark.orientation",
@@ -6356,7 +6447,7 @@
   },
   {
     "path": "mark.labels",
-    "description": "Draw value labels on the marks. Applies to: bar, donut, pie, line, stacked-area, scatter, radial-bar, rose. Outside pie and donut labels use leader lines. Overlapping labels are skipped.",
+    "description": "Draw value labels on the marks. Applies to: bar, donut, pie, line, stacked-area, scatter, radial-bar, rose, streamgraph. A streamgraph label is the series name at the thickest part of the layer.",
     "group": "Labels",
     "docs": "/docs/options#mark.labels",
     "appliesTo": [
@@ -6369,7 +6460,8 @@
       "radial-bar",
       "rose",
       "funnel",
-      "waterfall"
+      "waterfall",
+      "streamgraph"
     ],
     "label": "Labels",
     "control": "boolean",
@@ -7298,6 +7390,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Show",
@@ -7327,6 +7420,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Title",
@@ -7355,6 +7449,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Format",
@@ -7400,6 +7495,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Decimals",
@@ -7430,6 +7526,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Currency",
@@ -7457,6 +7554,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Prefix",
@@ -7484,6 +7582,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Suffix",
@@ -7511,6 +7610,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Signed",
@@ -7538,6 +7638,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Specifier",
@@ -7565,6 +7666,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Ticks",
@@ -7591,6 +7693,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Grid",
@@ -7625,6 +7728,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Labels",
@@ -7654,6 +7758,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Position",
@@ -7687,6 +7792,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Title Position",
@@ -7719,6 +7825,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Title Rotate",
@@ -7749,6 +7856,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Auto Skip",
@@ -7776,6 +7884,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Label Width",
@@ -7806,6 +7915,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Label Lines",
@@ -7836,6 +7946,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Line",
@@ -7864,6 +7975,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Color",
@@ -7891,6 +8003,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Width",
@@ -7921,6 +8034,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Dash",
@@ -7953,6 +8067,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Tick Marks",
@@ -7985,6 +8100,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Tick Length",
@@ -8015,6 +8131,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Rotate",
@@ -8043,6 +8160,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Offset",
@@ -8073,6 +8191,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Crosses",
@@ -8101,6 +8220,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Minor Ticks",
@@ -8131,6 +8251,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Breaks",
@@ -8157,6 +8278,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Bands",
@@ -8183,6 +8305,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Show",
@@ -8212,6 +8335,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Title",
@@ -8240,6 +8364,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Format",
@@ -8286,6 +8411,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Decimals",
@@ -8316,6 +8442,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Currency",
@@ -8343,6 +8470,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Prefix",
@@ -8370,6 +8498,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Suffix",
@@ -8397,6 +8526,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Signed",
@@ -8424,6 +8554,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Specifier",
@@ -8451,6 +8582,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Ticks",
@@ -8477,6 +8609,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Grid",
@@ -8512,6 +8645,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Labels",
@@ -8541,6 +8675,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Position",
@@ -8574,6 +8709,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Title Position",
@@ -8606,6 +8742,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Title Rotate",
@@ -8636,6 +8773,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Auto Skip",
@@ -8663,6 +8801,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Label Width",
@@ -8693,6 +8832,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Label Lines",
@@ -8723,6 +8863,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Line",
@@ -8751,6 +8892,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Color",
@@ -8778,6 +8920,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Width",
@@ -8808,6 +8951,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Dash",
@@ -8840,6 +8984,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Tick Marks",
@@ -8872,6 +9017,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Tick Length",
@@ -8902,6 +9048,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Rotate",
@@ -8930,6 +9077,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Offset",
@@ -8960,6 +9108,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Crosses",
@@ -8988,6 +9137,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Minor Ticks",
@@ -9018,6 +9168,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Breaks",
@@ -9044,6 +9195,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Bands",
@@ -9070,6 +9222,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Show",
@@ -9098,6 +9251,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Title",
@@ -9125,6 +9279,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Format",
@@ -9170,6 +9325,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Decimals",
@@ -9200,6 +9356,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Currency",
@@ -9227,6 +9384,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Prefix",
@@ -9254,6 +9412,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Suffix",
@@ -9281,6 +9440,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Signed",
@@ -9308,6 +9468,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Specifier",
@@ -9335,6 +9496,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Ticks",
@@ -9361,6 +9523,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Grid",
@@ -9395,6 +9558,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Labels",
@@ -9423,6 +9587,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Position",
@@ -9456,6 +9621,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Title Position",
@@ -9488,6 +9654,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Title Rotate",
@@ -9518,6 +9685,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Auto Skip",
@@ -9545,6 +9713,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Label Width",
@@ -9575,6 +9744,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Label Lines",
@@ -9605,6 +9775,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Line",
@@ -9633,6 +9804,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Color",
@@ -9660,6 +9832,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Width",
@@ -9690,6 +9863,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Dash",
@@ -9722,6 +9896,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Tick Marks",
@@ -9754,6 +9929,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Tick Length",
@@ -9784,6 +9960,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Rotate",
@@ -9812,6 +9989,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Offset",
@@ -9842,6 +10020,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Crosses",
@@ -9870,6 +10049,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Minor Ticks",
@@ -9900,6 +10080,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Breaks",
@@ -9926,6 +10107,7 @@
       "bar-range",
       "errorbar",
       "strip",
+      "streamgraph",
       "density"
     ],
     "label": "Bands",
@@ -9964,6 +10146,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10013,6 +10196,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10068,6 +10252,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10125,6 +10310,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10176,6 +10362,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10227,6 +10414,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10275,6 +10463,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10322,6 +10511,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10367,6 +10557,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10421,6 +10612,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10466,6 +10658,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10513,6 +10706,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10796,6 +10990,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10863,6 +11058,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10912,6 +11108,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -10943,6 +11140,7 @@
       "waterfall",
       "strip",
       "density",
+      "streamgraph",
       "radial-bar",
       "rose",
       "radar",
@@ -10969,6 +11167,7 @@
       "histogram",
       "strip",
       "density",
+      "streamgraph",
       "area-range",
       "bar-range",
       "errorbar",
@@ -11112,6 +11311,7 @@
       "radial-bar",
       "rose",
       "strip",
+      "streamgraph",
       "density",
       "gantt",
       "timeline",
@@ -11251,6 +11451,13 @@
     "description": "Coordinate system. polar is angle and radius, and it is how radial-bar and rose draw. Setting polar on bar repairs the type to radial-bar. On pie or donut it repairs to rose. On any other type the patch removes it (CK3077).",
     "group": "Layout & size",
     "docs": "/docs/options#layout.coordinate",
+    "appliesTo": [
+      "bar",
+      "pie",
+      "donut",
+      "radial-bar",
+      "rose"
+    ],
     "label": "Coordinate",
     "control": "enum",
     "storage": "scalar",
@@ -11661,6 +11868,18 @@
     "description": "IANA time zone for temporal axes, ticks, and tooltips. Omitted means UTC, so a server render and the client label the same instant the same way.",
     "group": "Advanced",
     "docs": "/docs/options#timezone",
+    "appliesTo": [
+      "line",
+      "bar",
+      "stacked-area",
+      "scatter",
+      "combo",
+      "sparkline",
+      "mini-area",
+      "spike",
+      "candlestick",
+      "area-range"
+    ],
     "label": "Timezone",
     "control": "text",
     "storage": "scalar",

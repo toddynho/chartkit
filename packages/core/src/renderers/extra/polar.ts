@@ -1,4 +1,5 @@
 import { headingInset } from "../../chrome";
+import { legendLabel, legendMarkup, legendShownValue } from "../../legend";
 import { asNumber, column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
 import { domainEnds, n, polar, ch } from "../../svg";
@@ -151,14 +152,25 @@ export function renderPolar(spec: Record<string, unknown>, kind: Kind): string |
   parts.push("</g>");
 
   if (showLegend) {
+    const items = series.map((item, index) => ({
+      name: clip(item.name, 18),
+      color: fill(frame, index),
+      value: legendShownValue(spec, item.values.at(-1)),
+    }));
     let x = 16;
     const y = frame.height - 16;
-    series.forEach((item, index) => {
-      const name = clip(item.name, 18);
-      parts.push(`<rect x="${n(x)}" y="${n(y - 9)}" width="10" height="10" rx="2" fill="${fill(frame, index)}" />`);
-      parts.push(text(x + 14, y, name, ink, 12, "500"));
-      x += 14 + ch(name.length, 7) + 16;
-    });
+    const fallback = series
+      .map((item, index) => {
+        const name = legendLabel(clip(item.name, 18), legendShownValue(spec, item.values.at(-1)));
+        const mark = `<rect x="${n(x)}" y="${n(y - 9)}" width="10" height="10" rx="2" fill="${fill(frame, index)}" />`;
+        const label = text(x + 14, y, name, ink, 12, "500");
+        x += 14 + ch(name.length, 7) + 16;
+        return mark + label;
+      })
+      .join("");
+    parts.push(
+      legendMarkup(spec, items, { plot: { left: 16, top, right: frame.width - 16, bottom }, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
+    );
   }
   return view.done();
 }

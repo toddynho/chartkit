@@ -32,6 +32,7 @@ const ALT = {
   histogram: "One quantitative field split into bins.",
   boxplot: "Eight groups, each with its own observations.",
   strip: "Eight groups of dots on one numeric axis.",
+  streamgraph: "Three layers around a moving baseline.",
   density: "A kernel curve of one sample.",
   radar: "Three series around shared spokes.",
   funnel: "Stages in order.",
@@ -109,6 +110,11 @@ export function chartSpec(chart, payload) {
         data,
         encoding: { x: "value", y: "group" },
         mark: { band: "range", jitter: "none" },
+      });
+    case "streamgraph":
+      return spec(chart, alt, {
+        data,
+        encoding: { x: "x", y: ["a", "b", "c"] },
       });
     case "candlestick":
       return spec(chart, alt, {

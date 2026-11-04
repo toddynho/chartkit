@@ -42,6 +42,7 @@ const CHART_TYPES = [
   "errorbar",
   "sunburst",
   "strip",
+  "streamgraph",
   "density",
 ];
 

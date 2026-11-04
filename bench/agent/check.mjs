@@ -406,6 +406,9 @@ export function chartGeometry(svg, task, spec) {
   } else if (type === "strip") {
     const points = svg.match(/data-ck-mark="point"/g) ?? [];
     if (points.length < rows) note(`expected ${rows} points, found ${points.length}`);
+  } else if (type === "streamgraph") {
+    const areas = svg.match(/data-ck-mark="area"/g) ?? [];
+    if (!areas.length) note("expected a stream layer");
   } else {
     note("no drawn-shape check");
   }

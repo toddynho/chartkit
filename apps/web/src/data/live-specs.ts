@@ -12,7 +12,7 @@ import gantt from "../../../../packages/core/examples/24-gantt.json";
 import gauge from "../../../../packages/core/examples/09-gauge.json";
 import heatmap from "../../../../packages/core/examples/08-heatmap.json";
 import histogram from "../../../../packages/core/examples/16-histogram.json";
-import density from "../../../../packages/core/examples/39-density.json";
+import density from "../../../../packages/core/examples/42-density.json";
 import journey from "../../../../packages/core/examples/28-journey.json";
 import kpi from "../../../../packages/core/examples/10-kpi.json";
 import line from "../../../../packages/core/examples/01-minimal-line.json";
@@ -29,6 +29,7 @@ import sunburst from "../../../../packages/core/examples/33-sunburst.json";
 import sparkline from "../../../../packages/core/examples/12-sparkline.json";
 import spike from "../../../../packages/core/examples/14-spike.json";
 import strip from "../../../../packages/core/examples/36-strip.json";
+import streamgraph from "../../../../packages/core/examples/39-streamgraph.json";
 import stackedArea from "../../../../packages/core/examples/05-stacked-area.json";
 import timeline from "../../../../packages/core/examples/25-timeline.json";
 import treemap from "../../../../packages/core/examples/20-treemap.json";
@@ -70,6 +71,7 @@ const byType: Record<string, LiveSpec> = {
   density: dress(density),
   boxplot: dress(boxplot),
   strip: dress(strip, { legend: false, size: { width: 640, height: 320 } }),
+  streamgraph: dress(streamgraph),
   radar: dress(radar),
   funnel: dress(funnel),
   treemap: dress(treemap),

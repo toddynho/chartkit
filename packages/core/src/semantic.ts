@@ -146,6 +146,8 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   if (isRecord(spec.encoding)) checkEncoding(spec, spec.encoding, view, diagnostics);
   if (type === "candlestick") checkCandles(spec, view, diagnostics);
   if (type === "strip") stripChecks(spec, view, diagnostics);
+  if (type === "streamgraph") streamChecks(spec, view, diagnostics);
+  else streamForeign(spec, diagnostics);
   if (type === "density") densityChecks(spec, view, diagnostics);
   else densityForeign(spec, diagnostics);
   if (type !== "strip" && isRecord(spec.encoding) && spec.encoding.label !== undefined) {
@@ -1645,6 +1647,31 @@ const REG_METHOD: Record<string, string> = {
   lm: "linear",
 };
 
+function streamForeign(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  const mark = isRecord(spec.mark) ? spec.mark : undefined;
+  if (!mark) return;
+  if (mark.streamOffset !== undefined) {
+    diagnostics.push({
+      code: "CK3099",
+      severity: "warning",
+      message: "mark.streamOffset applies to a streamgraph",
+      path: "/mark/streamOffset",
+      hint: 'remove it, or set type to "streamgraph"',
+      fix: [{ op: "remove", path: "/mark/streamOffset" }],
+    });
+  }
+  if (mark.order !== undefined) {
+    diagnostics.push({
+      code: "CK3100",
+      severity: "warning",
+      message: "mark.order applies to a streamgraph",
+      path: "/mark/order",
+      hint: 'remove it, or set type to "streamgraph"',
+      fix: [{ op: "remove", path: "/mark/order" }],
+    });
+  }
+}
+
 function densityForeign(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
   const mark = isRecord(spec.mark) ? spec.mark : undefined;
   if (!mark) return;
@@ -1666,6 +1693,86 @@ function densityForeign(spec: Record<string, unknown>, diagnostics: Diagnostic[]
       path: "/mark/steps",
       hint: 'remove it, or set type to "density"',
       fix: [{ op: "remove", path: "/mark/steps" }],
+    });
+  }
+}
+
+function streamChecks(spec: Record<string, unknown>, table: DataTable, diagnostics: Diagnostic[]): void {
+  const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
+  if (!encoding) return;
+  const y = encoding.y;
+  const fields = Array.isArray(y) ? y.flatMap((item) => (typeof item === "string" ? [item] : isRecord(item) && typeof item.field === "string" ? [item.field] : [])) : typeof y === "string" ? [y] : isRecord(y) && typeof y.field === "string" ? [y.field] : [];
+  if (!fields.length) return;
+  let bad = false;
+  let numeric = 0;
+  for (const field of fields) {
+    const column = table.columns[field];
+    if (!column) {
+      bad = true;
+      continue;
+    }
+    for (const value of column) {
+      if (value == null || value === "") continue;
+      if (typeof value !== "number" || !Number.isFinite(value) || value < 0) bad = true;
+      else numeric += 1;
+    }
+  }
+  if (bad || numeric < 1) {
+    diagnostics.push({
+      code: "CK3095",
+      severity: "error",
+      message: "streamgraph values must be numbers that are zero or greater",
+      path: "/encoding/y",
+      hint: "a negative or a non-numeric value is not drawn. Use stacked area for signed values",
+    });
+  }
+  const seriesField = fields.length === 1 ? (typeof encoding.series === "string" ? encoding.series : isRecord(encoding.series) && typeof encoding.series.field === "string" ? encoding.series.field : typeof encoding.color === "string" ? encoding.color : isRecord(encoding.color) && typeof encoding.color.field === "string" ? encoding.color.field : "") : "";
+  let seriesCount = fields.length;
+  if (seriesField && table.columns[seriesField]) {
+    const names = new Set<string>();
+    for (const value of table.columns[seriesField]) if (value != null && value !== "") names.add(String(value));
+    if (names.size) seriesCount = names.size;
+  }
+  const mark = isRecord(spec.mark) ? spec.mark : undefined;
+  const baseline = mark && typeof mark.streamOffset === "string" ? mark.streamOffset : "";
+  if (seriesCount < 2 && baseline !== "zero") {
+    const next = { ...(mark ?? {}), streamOffset: "zero" };
+    diagnostics.push({
+      code: "CK3096",
+      severity: "warning",
+      message: "a streamgraph with one series is an area on a baseline",
+      path: "/mark/streamOffset",
+      hint: 'set mark.streamOffset to "zero". The baseline is not zero unless you ask for it',
+      fix: [{ op: mark ? "replace" : "add", path: "/mark", value: next }],
+    });
+  }
+  if (seriesCount > 12) {
+    diagnostics.push({
+      code: "CK3097",
+      severity: "warning",
+      message: `streamgraph has ${seriesCount} series`,
+      path: "/encoding/y",
+      hint: "more than 12 series gets hard to read. Filter the layers or move a name into the legend",
+    });
+  }
+  if (mark && mark.stack !== undefined) {
+    diagnostics.push({
+      code: "CK3098",
+      severity: "warning",
+      message: "mark.stack is not a streamgraph control",
+      path: "/mark/stack",
+      hint: "mark.streamOffset is the stack. wiggle, center, zero, or expand",
+      fix: [{ op: "remove", path: "/mark/stack" }],
+    });
+  }
+  if (mark && mark.offset !== undefined) {
+    diagnostics.push({
+      code: "CK3101",
+      severity: "warning",
+      message: "mark.offset pulls a pie slice out",
+      path: "/mark/offset",
+      hint: 'a streamgraph baseline is mark.streamOffset. silhouette is the same as "center"',
+      fix: [{ op: "remove", path: "/mark/offset" }],
     });
   }
 }
@@ -1745,7 +1852,6 @@ function densityChecks(spec: Record<string, unknown>, table: DataTable, diagnost
     }
   }
 }
-
 function stripChecks(spec: Record<string, unknown>, table: DataTable, diagnostics: Diagnostic[]): void {
   const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
   if (!encoding) return;

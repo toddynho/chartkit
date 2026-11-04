@@ -3,6 +3,7 @@ import { formatAxisValue, formatValue } from "../../format";
 import { asNumber, axisOn, channelFormat, column, fieldOf, gridStyle, readFrame, readTable, type Frame } from "../../frame";
 import { cssVar, lineStroke, paint } from "../../theme";
 import { bottomLegendBand, heading, labelStep, minorTickMarks } from "../../chrome";
+import { explicitGrid, gridLines, majorTicks, spine, turned } from "../../axis-ink";
 import { clipPath, closeChart, esc, font, isRecord, linear, n, openChart, readAxis, ticks, ch } from "../../svg";
 
 export interface View {
@@ -171,30 +172,60 @@ export function yLabels(frame: Frame, spec: Record<string, unknown>, box: Box, v
   const axis = readAxis(spec, "y");
   const step = labelStep(values.length, axis.skip, 1);
   const ink = cssVar("muted", frame.preset.muted);
-  const labels = values
-    .filter((_, index) => index % step === 0)
-    .map((value) => text(box.left - 8, yAt(value) + 4, formatAxisValue(value, format, frame.locale, values), ink, 11, "400", "end"))
-    .join("");
-  const minors = minorTickMarks(axis.minor ?? 0, values, yAt, box.left, false, -3, cssVar("axis", frame.preset.axis));
-  return labels + minors;
+  const axisInk = cssVar("axis", frame.preset.axis);
+  const shown = values.filter((_, index) => index % step === 0);
+  const rich = Boolean(axis.rotate || axis.offset || axis.end || axis.tick || axis.tickLen !== undefined || axis.rule);
+  const edge = axis.end ? box.right : box.left;
+  const shift = axis.offset || 0;
+  const labels = rich
+    ? shown
+        .map((value) => {
+          const y = yAt(value) + 4;
+          const x = (axis.end ? edge + 8 : edge - 8) + (axis.end ? shift : -shift);
+          return turned(x, y, formatAxisValue(value, format, frame.locale, values), ink, 11, axis.end ? "start" : "end", axis.rotate);
+        })
+        .join("")
+    : shown.map((value) => text(box.left - 8, yAt(value) + 4, formatAxisValue(value, format, frame.locale, values), ink, 11, "400", "end")).join("");
+  const minors = minorTickMarks(axis.minor ?? 0, values, yAt, edge, false, axis.end ? 3 : -3, axisInk);
+  const ticks = majorTicks(axis, false, edge, shown.map(yAt), axis.end ? 1 : -1, axisInk);
+  const rule = axis.rule ? spine(edge + (axis.end ? shift : -shift), box.top, edge + (axis.end ? shift : -shift), box.bottom, axis.rule, axisInk) : "";
+  return labels + minors + ticks + rule;
 }
 
-export function xLabels(frame: Frame, spec: Record<string, unknown>, labels: { x: number; text: string }[], plot?: { left: number; right: number; bottom?: number }): string {
+export function xLabels(frame: Frame, spec: Record<string, unknown>, labels: { x: number; text: string }[], plot?: { left: number; right: number; top?: number; bottom?: number }): string {
   if (!axisOn(spec, "x")) return "";
   const axis = readAxis(spec, "x");
   const omitted = labels.length > 8 ? Math.ceil(labels.length / 6) : 1;
   const step = labelStep(labels.length, axis.skip, omitted);
   const inner = plot ? Math.max(80, plot.right - plot.left) : Math.max(80, frame.width - 96);
-  const y = frame.height - bottomLegendBand(spec, frame.preset, inner) - (axis.title ? 26 : 12);
+  const baseY = frame.height - bottomLegendBand(spec, frame.preset, inner) - (axis.title ? 26 : 12);
+  const y = axis.end && plot?.top !== undefined ? plot.top - 8 : baseY + (axis.offset || 0);
   const shown = labels.filter((label, index) => index % step === 0 && label.text);
-  const textMarks = shown.map((label) => text(label.x, y, fit(label.text, 72, 11), cssVar("muted", frame.preset.muted), 11, "400", "middle")).join("");
-  const edge = plot?.bottom;
-  const minors = edge === undefined ? "" : minorTickMarks(axis.minor ?? 0, shown.map((label) => label.x), (value) => value, edge, true, 3, cssVar("axis", frame.preset.axis));
-  return textMarks + minors;
+  const ink = cssVar("muted", frame.preset.muted);
+  const textMarks = shown
+    .map((label) => {
+      const lx = label.x + (axis.end ? 0 : axis.offset || 0);
+      if (!axis.rotate) return text(lx, y, fit(label.text, 72, 11), ink, 11, "400", "middle");
+      return turned(lx, y, fit(label.text, 72, 11), ink, 11, "middle", axis.rotate);
+    })
+    .join("");
+  const edge = axis.end && plot?.top !== undefined ? plot.top : plot?.bottom;
+  const axisInk = cssVar("axis", frame.preset.axis);
+  const minors = edge === undefined ? "" : minorTickMarks(axis.minor ?? 0, shown.map((label) => label.x), (value) => value, edge, true, axis.end ? -3 : 3, axisInk);
+  const ticks = edge === undefined ? "" : majorTicks(axis, true, edge, shown.map((label) => label.x), axis.end ? -1 : 1, axisInk);
+  const axes = isRecord(spec.axes) ? spec.axes : undefined;
+  const grid = explicitGrid(axes && isRecord(axes.x) ? axes.x.grid : undefined);
+  const gridMarks = grid && plot?.top !== undefined && plot.bottom !== undefined ? gridLines(false, plot.top, plot.bottom, labels.map((label) => label.x), grid, cssVar("grid", frame.preset.grid)) : "";
+  return textMarks + minors + ticks + gridMarks;
 }
 
-export function axisLine(frame: Frame, box: Box): string {
-  return `<line x1="${n(box.left)}" y1="${n(box.bottom)}" x2="${n(box.right)}" y2="${n(box.bottom)}" stroke="${cssVar("axis", frame.preset.axis)}" />`;
+export function axisLine(frame: Frame, box: Box, spec?: Record<string, unknown>): string {
+  const fallback = `<line x1="${n(box.left)}" y1="${n(box.bottom)}" x2="${n(box.right)}" y2="${n(box.bottom)}" stroke="${cssVar("axis", frame.preset.axis)}" />`;
+  if (!spec) return fallback;
+  const axis = readAxis(spec, "x");
+  if (!axis.rule && !axis.offset) return fallback;
+  if (axis.rule?.on === false) return "";
+  return spine(box.left, box.bottom + (axis.offset || 0), box.right, box.bottom + (axis.offset || 0), axis.rule, cssVar("axis", frame.preset.axis));
 }
 
 export function countTicks(max: number): number[] {

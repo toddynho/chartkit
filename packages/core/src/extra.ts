@@ -21,18 +21,19 @@ import { sunburst } from "./charts/sunburst";
 import { radialBar } from "./charts/radial-bar";
 import { rose } from "./charts/rose";
 import { strip } from "./charts/strip";
+import { streamgraph } from "./charts/streamgraph";
 import { density } from "./charts/density";
 
 /** Phase 3 and phase 4 charts. Importing this module registers them on the shared registry. */
-export const charts = [histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, areaRange, barRange, errorbar, sunburst, radialBar, rose, strip, density] as const;
+export const charts = [histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, areaRange, barRange, errorbar, sunburst, radialBar, rose, strip, streamgraph, density] as const;
 
 register(...charts);
 
 /**
- * Core charts plus histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, area-range, bar-range, errorbar, sunburst, radial-bar, rose, and strip.
+ * Core charts plus histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, area-range, bar-range, errorbar, sunburst, radial-bar, rose, strip, streamgraph, and density.
  * `@chartkitdev/core/all` does not include these, so the line and all bundles stay smaller.
  */
 export const render = createRenderer([...base, ...charts]);
 
 export { attach };
-export { histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, areaRange, barRange, errorbar, sunburst, radialBar, rose, strip, density };
+export { histogram, boxplot, radar, funnel, treemap, sankey, bullet, waterfall, gantt, timeline, quadrant, venn, journey, areaRange, barRange, errorbar, sunburst, radialBar, rose, strip, streamgraph, density };

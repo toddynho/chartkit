@@ -131,6 +131,24 @@ From the feature matrix, ChartKit status `none` or `unknown`, ranked by how many
 
 Circle packing, waffle, vector/wind, and arc diagram tie with parallel coordinates at 3 libraries. They are the next ones if this list is extended.
 
+## Streamgraph scorecard
+
+Full grid: [parity/streamgraph.md](./parity/streamgraph.md). Fourteen features. Partial counts as offered. `mark.streamOffset` is the baseline because `mark.offset` is the pie pull and `mark.baseline` is the spike origin.
+
+| Library | They offer | We match | We exceed | We lack |
+| --- | --- | --- | --- | --- |
+| Highcharts | 9 | 9 | 4 | 0 |
+| ECharts | 8 | 8 | 5 | 0 |
+| Vega-Lite | 9 | 9 | 4 | 0 |
+| Plotly | 0 | 0 | 13 | 0 |
+| Chart.js | 0 | 0 | 13 | 0 |
+| Observable Plot | 11 | 11 | 2 | 0 |
+| Recharts | 12 | 11 | 2 | 1 |
+| Nivo | 14 | 13 | 0 | 1 |
+| amCharts | 0 | 0 | 13 | 0 |
+
+The lack is the signed offset (Recharts and Nivo). Negatives stay an error (CK3095).
+
 ## Density scorecard
 
 Full grid: [parity/density.md](./parity/density.md). Twelve features. ChartKit ships the 1D curve. The lacks are ridgeline, cumulative, and 2D contours.

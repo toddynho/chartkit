@@ -14,6 +14,7 @@ export const chartTypes: ChartType[] = [
   { type: "pie", title: "Pie", summary: "Parts of a whole, with no hole." },
   { type: "donut", title: "Donut", summary: "Parts of a whole. The center shows the total." },
   { type: "stacked-area", title: "Stacked area", summary: "Several series stacked into one shape." },
+  { type: "streamgraph", title: "Streamgraph", summary: "Stacked areas around a moving baseline." },
   { type: "scatter", title: "Scatter", summary: "Two quantitative fields, with an optional size for bubbles." },
   { type: "combo", title: "Combo", summary: "Bars and a line in one spec." },
   { type: "heatmap", title: "Heatmap", summary: "A grid, or a calendar when the x values are dates." },

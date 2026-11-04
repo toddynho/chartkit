@@ -60,6 +60,7 @@ const CHART_TYPES = [
   "radial-bar",
   "rose",
   "strip",
+  "streamgraph",
   "density",
 ];
 

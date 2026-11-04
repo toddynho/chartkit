@@ -107,10 +107,12 @@ export function makeChartData(chart, n, seed = 1) {
     }
     case "density": {
       const value = new Float64Array(n);
-      const next = rng(seed);
-      for (let i = 0; i < n; i++) value[i] = 15 + next() * 8 + (i % 17 === 0 ? 25 : 0);
+      const sample = rng(seed);
+      for (let i = 0; i < n; i++) value[i] = 15 + sample() * 8 + (i % 17 === 0 ? 25 : 0);
       return { data: { columns: { value } } };
     }
+    case "streamgraph":
+      return seriesColumns(n, seed, ["a", "b", "c"]);
     case "strip":
     case "boxplot": {
       const groups = ["N", "E", "S", "W", "C", "NE", "NW", "SE"];

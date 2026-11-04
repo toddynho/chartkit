@@ -8,9 +8,12 @@ import lumenRose from "../../packages/core/examples/35-rose.json";
 import tokensStrip from "../../packages/core/examples/36-strip.json";
 import regionStrip from "../../packages/core/examples/37-strip-dot.json";
 import desksStrip from "../../packages/core/examples/38-strip-vertical.json";
-import waitDensity from "../../packages/core/examples/39-density.json";
-import deskDensity from "../../packages/core/examples/40-density-groups.json";
-import rugDensity from "../../packages/core/examples/41-density-rug.json";
+import genreStream from "../../packages/core/examples/39-streamgraph.json";
+import centerStream from "../../packages/core/examples/40-streamgraph-center.json";
+import weekStream from "../../packages/core/examples/41-streamgraph-time.json";
+import waitDensity from "../../packages/core/examples/42-density.json";
+import deskDensity from "../../packages/core/examples/43-density-groups.json";
+import rugDensity from "../../packages/core/examples/44-density-rug.json";
 
 export interface Spec {
   version: "1";
@@ -343,6 +346,16 @@ export const chartTypes: ChartTypeDoc[] = [
       "encoding.x is the category. encoding.y is the radius.",
       "polarArea, nightingale, and rose-chart repair to rose.",
       "The chart loads from @chartkitdev/core/charts/rose. createRenderer([line]) does not include it.",
+    ],
+  },
+  {
+    type: "streamgraph",
+    title: "Streamgraph",
+    summary: "Stacked areas around a moving baseline. The baseline is not zero.",
+    notes: [
+      "encoding.y is a list of fields, or one field with encoding.color or encoding.series.",
+      "mark.streamOffset is wiggle, center, zero, or expand. silhouette is center.",
+      "The chart loads from @chartkitdev/core/charts/streamgraph. createRenderer([line]) does not include it.",
     ],
   },
   {
@@ -798,14 +811,14 @@ export const examples: Example[] = [
       id: "error-spikes",
       type: "spike",
       data: [
-        { hour: "00", errors: 1 },
-        { hour: "03", errors: 0 },
-        { hour: "06", errors: 2 },
-        { hour: "09", errors: 4 },
-        { hour: "12", errors: 14 },
-        { hour: "15", errors: 3 },
-        { hour: "18", errors: 11 },
-        { hour: "21", errors: 2 },
+        { hour: "2024-05-01T00:00:00Z", errors: 1 },
+        { hour: "2024-05-01T03:00:00Z", errors: 0 },
+        { hour: "2024-05-01T06:00:00Z", errors: 2 },
+        { hour: "2024-05-01T09:00:00Z", errors: 4 },
+        { hour: "2024-05-01T12:00:00Z", errors: 14 },
+        { hour: "2024-05-01T15:00:00Z", errors: 3 },
+        { hour: "2024-05-01T18:00:00Z", errors: 11 },
+        { hour: "2024-05-01T21:00:00Z", errors: 2 },
       ],
       encoding: { x: "hour", y: "errors" },
       size: { width: 560, height: 240 },
@@ -823,11 +836,11 @@ export const examples: Example[] = [
       id: "week-candles",
       type: "candlestick",
       data: [
-        { day: "Mon", open: 101, high: 108, low: 99, close: 106 },
-        { day: "Tue", open: 106, high: 112, low: 104, close: 110 },
-        { day: "Wed", open: 110, high: 111, low: 102, close: 104 },
-        { day: "Thu", open: 104, high: 115, low: 103, close: 113 },
-        { day: "Fri", open: 113, high: 118, low: 111, close: 116 },
+        { day: "2024-06-03T00:00:00Z", open: 101, high: 108, low: 99, close: 106 },
+        { day: "2024-06-04T00:00:00Z", open: 106, high: 112, low: 104, close: 110 },
+        { day: "2024-06-05T00:00:00Z", open: 110, high: 111, low: 102, close: 104 },
+        { day: "2024-06-06T00:00:00Z", open: 104, high: 115, low: 103, close: 113 },
+        { day: "2024-06-07T00:00:00Z", open: 113, high: 118, low: 111, close: 116 },
       ],
       encoding: { x: "day", open: "open", high: "high", low: "low", close: "close" },
       size: { width: 560, height: 300 },
@@ -899,6 +912,30 @@ export const examples: Example[] = [
     type: "strip",
     blurb: "Vertical groups, a mean tick, and an IQR band.",
     spec: { ...(desksStrip as Spec), id: "desks-strip" },
+  },
+  {
+    slug: "copies-streamgraph",
+    title: "Copies by genre",
+    group: "Time",
+    type: "streamgraph",
+    blurb: "History overtook fiction. The baseline is not zero.",
+    spec: { ...(genreStream as Spec), id: "copies-streamgraph" },
+  },
+  {
+    slug: "centered-streamgraph",
+    title: "Centered genres",
+    group: "Time",
+    type: "streamgraph",
+    blurb: "Long data, centered, legend on the right.",
+    spec: { ...(centerStream as Spec), id: "centered-streamgraph" },
+  },
+  {
+    slug: "bands-streamgraph",
+    title: "Weekly share",
+    group: "Time",
+    type: "streamgraph",
+    blurb: "A time axis, share baseline, and labels on the streams.",
+    spec: { ...(weekStream as Spec), id: "weekly-streamgraph" },
   },
   {
     slug: "wait-density",
@@ -1055,11 +1092,11 @@ export const examples: Example[] = [
       type: "area-range",
       title: "Revenue forecast",
       data: [
-        { month: "Jan", revenue: 40, lo: null, hi: null },
-        { month: "Feb", revenue: 55, lo: 46, hi: 66 },
+        { month: "2024-05-01T00:00:00Z", revenue: 40, lo: null, hi: null },
+        { month: "2024-05-01T18:00:00Z", revenue: 55, lo: 46, hi: 66 },
       ],
       encoding: { x: "month", y: "revenue", low: "lo", high: "hi" },
-      annotations: [{ type: "rule", axis: "x", value: "Feb", label: "today" }],
+      annotations: [{ type: "rule", axis: "x", value: "2024-05-01T18:00:00Z", label: "today" }],
       size: { width: 640, height: 320 },
       a11y: { alt: "Revenue is forecast inside a widening band." },
     },
@@ -1157,6 +1194,27 @@ export const examples: Example[] = [
     type: "rose",
     blurb: "Equal angles. Quay reaches farthest.",
     spec: lumenRose as Spec,
+  },
+  {
+    slug: "payments-bar-list",
+    title: "Payments by method",
+    group: "Rank",
+    type: "bar-list",
+    blurb: "Card is the largest payment method.",
+    spec: {
+      version: "1",
+      id: "payments-bar-list",
+      type: "bar-list",
+      title: "Payments by method",
+      data: [
+        { method: "Card", amount: 168400 },
+        { method: "Bank", amount: 64200 },
+        { method: "Cash", amount: 9400 },
+      ],
+      encoding: { x: "method", y: "amount" },
+      size: { width: 420, height: 140 },
+      a11y: { alt: "Card is the largest payment method." },
+    },
   },
 ];
 

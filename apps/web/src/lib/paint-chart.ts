@@ -1,4 +1,5 @@
 import { isExtra, render as renderCore } from "@chartkitdev/core/all";
+import { renderBarList } from "@chartkitdev/core/charts/bar-list";
 import { render as renderExtra } from "@chartkitdev/core/extra";
 
 export function chartType(spec: unknown): string {
@@ -14,6 +15,7 @@ export function chartType(spec: unknown): string {
  */
 export function drawChart(spec: unknown): string {
   const type = chartType(spec);
+  if (type === "bar-list") return renderBarList(spec as Record<string, unknown>) ?? "";
   return isExtra(type) ? renderExtra(spec) : renderCore(spec);
 }
 
