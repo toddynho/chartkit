@@ -45,16 +45,17 @@ function normalize(format: unknown): Fmt {
       return parsed;
     }
   }
-  if (isRecord(format) && typeof format.style === "string") {
-    return {
-      style: format.style,
-      decimals: typeof format.decimals === "number" ? format.decimals : undefined,
-      minimumFractionDigits: typeof format.minimumFractionDigits === "number" ? format.minimumFractionDigits : undefined,
-      currency: typeof format.currency === "string" ? format.currency : undefined,
-      prefix: typeof format.prefix === "string" ? format.prefix : undefined,
-      suffix: typeof format.suffix === "string" ? format.suffix : undefined,
-      signed: format.signed === true,
-    };
+  if (isRecord(format)) {
+    const currency = typeof format.currency === "string" ? format.currency : undefined;
+    const decimals = typeof format.decimals === "number" ? format.decimals : undefined;
+    const minimumFractionDigits = typeof format.minimumFractionDigits === "number" ? format.minimumFractionDigits : undefined;
+    const prefix = typeof format.prefix === "string" ? format.prefix : undefined;
+    const suffix = typeof format.suffix === "string" ? format.suffix : undefined;
+    const signed = format.signed === true;
+    const style = typeof format.style === "string" ? format.style : currency ? "currency" : "";
+    if (style || decimals !== undefined || minimumFractionDigits !== undefined || prefix || suffix || signed) {
+      return { style: style || "number", decimals, minimumFractionDigits, currency, prefix, suffix, signed };
+    }
   }
   return { style: "number" };
 }
