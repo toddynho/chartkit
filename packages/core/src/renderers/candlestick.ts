@@ -1,5 +1,5 @@
 import { seriesPoints } from "../annotations";
-import { axisTitleMarks, bottomLegendBand, categoryX, chooseTicks, heading, lockDomain, placedNotes } from "../chrome";
+import { axisTitleMarks, bottomLegendBand, categoryX, chooseTicks, heading, labelStep, lockDomain, minorTickMarks, placedNotes } from "../chrome";
 import { cssVar } from "../theme";
 import { formatAxisValue, formatValue } from "../format";
 import {
@@ -164,16 +164,21 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   if (canvas && !body) parts.push(`</g>`);
 
   if (showY) {
-    for (let i = 0; i < yTicks.length; i++) {
-      parts.push(text(plot.left - 8, yScale(yTicks[i]) + 4, yTickText[i] ?? "", cssVar("muted", frame.preset.muted), 11, "400", "end"));
+    const yAxis = readAxis(spec, "y");
+    const step = labelStep(yTicks.length, yAxis.skip, 1);
+    for (let i = 0; i < yTicks.length; i += step) {
+      parts.push(text(plot.left - 8, yScale(yTicks[i] ?? 0) + 4, yTickText[i] ?? "", cssVar("muted", frame.preset.muted), 11, "400", "end"));
     }
+    parts.push(minorTickMarks(yAxis.minor ?? 0, yTicks, yScale, plot.left, false, -3, cssVar("axis", frame.preset.axis)));
   }
   if (showX) {
-    const step = candles.length > 8 ? Math.ceil(candles.length / 6) : 1;
-    const labelY = frame.height - legendBand - (readAxis(spec, "x").title ? 26 : 12);
+    const xAxis = readAxis(spec, "x");
+    const omitted = candles.length > 8 ? Math.ceil(candles.length / 6) : 1;
+    const step = labelStep(candles.length, xAxis.skip, omitted);
+    const labelY = frame.height - legendBand - (xAxis.title ? 26 : 12);
     for (let i = 0; i < candles.length; i += step) {
-      if (!candles[i].label) continue;
-      parts.push(text(plot.left + slot * i + slot / 2, labelY, candles[i].label, cssVar("muted", frame.preset.muted), 11, "400", "middle"));
+      if (!candles[i]?.label) continue;
+      parts.push(text(plot.left + slot * i + slot / 2, labelY, candles[i]?.label ?? "", cssVar("muted", frame.preset.muted), 11, "400", "middle"));
     }
   }
   const xAt = (index: number) => plot.left + slot * index + slot / 2;

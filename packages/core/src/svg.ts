@@ -532,6 +532,14 @@ function axisRule(value: unknown): AxisRule | undefined {
   return { on, color, width, dash };
 }
 
+/** `axes.*.format` when set. Callers fall back to the channel format. */
+export function readAxisFormat(spec: Record<string, unknown>, key: "x" | "y" | "y2"): unknown {
+  const axes = isRecord(spec.axes) ? spec.axes : undefined;
+  const node = axes && isRecord(axes[key]) ? axes[key] : undefined;
+  if (node && node.format !== undefined) return node.format;
+  return undefined;
+}
+
 /** Axis box from `axes.x`, `axes.y`, or `axes.y2`. Perpendicular sides map onto that axis. */
 export function readAxis(spec: Record<string, unknown>, key: "x" | "y" | "y2", horizontal = false): AxisSpec {
   const axes = isRecord(spec.axes) ? spec.axes : undefined;

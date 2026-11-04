@@ -101,6 +101,32 @@ describe("option catalog", () => {
     expect(themed.theme).toEqual({ preset: "midnight", tokens: { accent: "#336699" } });
   });
 
+  it("keeps position scales, theme roles, and canvas render on the charts that paint them", () => {
+    expect(field("encoding.x.type").appliesTo).toContain("scatter");
+    expect(field("encoding.x.type").appliesTo).not.toContain("bar");
+    expect(field("encoding.x.title").appliesTo).toContain("histogram");
+    expect(optionsForType("donut").some((item) => item.path === "encoding.x.title")).toBe(false);
+    expect(optionsForType("donut").some((item) => item.path === "encoding.y.format")).toBe(false);
+    expect(optionsForType("bar").some((item) => item.path === "encoding.y.format")).toBe(true);
+    expect(field("encoding.color.scale.type").appliesTo).toEqual(["heatmap", "choropleth"]);
+    expect(optionCatalog.some((item) => item.path === "encoding.series.type" || item.path.startsWith("encoding.series.format") || item.path.startsWith("encoding.series.scale"))).toBe(false);
+    expect(field("render").appliesTo).toEqual(["line", "stacked-area", "scatter", "bar", "heatmap", "candlestick"]);
+    expect(optionsForType("treemap").some((item) => item.path === "render")).toBe(false);
+    expect(field("theme.tokens.fontSize").appliesTo).toBeUndefined();
+    expect(optionsForType("kpi").some((item) => item.path === "theme.tokens.background")).toBe(false);
+    expect(optionsForType("kpi").some((item) => item.path === "theme.tokens.surface")).toBe(true);
+    expect(optionsForType("line").some((item) => item.path === "theme.tokens.text")).toBe(true);
+    expect(optionsForType("sparkline").some((item) => item.path === "theme.tokens.grid")).toBe(false);
+    expect(optionsForType("candlestick").some((item) => item.path === "theme.tokens.series")).toBe(false);
+    expect(optionsForType("candlestick").some((item) => item.path === "theme.tokens.positive")).toBe(true);
+    for (const item of optionCatalog) {
+      if (!item.path.startsWith("mark.")) continue;
+      const key = item.path.split(".")[1] ?? "";
+      expect(MARK_APPLIES[key], item.path).toBeTruthy();
+      expect(item.appliesTo, item.path).toEqual([...(MARK_APPLIES[key] ?? [])]);
+    }
+  });
+
   it("covers strip and keeps an essential tier in each section", () => {
     const strip = optionsForType("strip");
     expect(strip.some((item) => item.path === "mark.summary")).toBe(true);
