@@ -1,4 +1,5 @@
 import { annotationLayers } from "../annotations";
+import { axisTitleAlong, axisTitleSpin, labelStep, minorTickMarks } from "../chrome";
 import { colorLegendHeight, readColorScale, scaleLabel } from "../color-scale";
 import { readRules, resolveColors, withPalette } from "../color";
 import { cssVar, paint } from "../theme";
@@ -22,7 +23,7 @@ import {
 } from "../frame";
 import { activeScene, lineBuffers, rectBuffers, takeMark, type SceneMark } from "../canvas/sink";
 import { canvasWanted, SCATTER_CANVAS_AT } from "../render-mode";
-import { boxId, clipPath, closeChart, domainEnds, esc, font, isRecord, linear, logNice, logScale, logTicks, n, openChart, padExtent, pickTicks, readAxis, readInset, scaleClamp, scalePad, ch } from "../svg";
+import { boxId, clipPath, closeChart, domainEnds, esc, font, isRecord, linear, logNice, logScale, logTicks, n, openChart, padExtent, pickTicks, readAxis, readAxisFormat, readInset, scaleClamp, scalePad, ch } from "../svg";
 
 /** Scatter / bubble. encoding.x and encoding.y are quantitative; size and color are optional. */
 export function renderScatter(spec: Record<string, unknown>): string | null {
@@ -92,8 +93,8 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   const showX = axisOn(spec, "x");
   const showY = axisOn(spec, "y");
   const footer = ramp && frame.legend !== false ? colorLegendHeight : 0;
-  const xFormat = channelFormat(frame.encoding.x);
-  const yFormat = channelFormat(frame.encoding.y);
+  const xFormat = readAxisFormat(spec, "x") ?? channelFormat(frame.encoding.x);
+  const yFormat = readAxisFormat(spec, "y") ?? channelFormat(frame.encoding.y);
   const yAxis = readAxis(spec, "y");
   const xAxis = readAxis(spec, "x");
   const yTicks = pickTicks(yDomain[0], yDomain[1], yAxis.count ?? 5, yAxis.values, yLog);
@@ -324,7 +325,9 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   parts.push(notes.over);
 
   if (showY && yAxis.labels) {
-    for (const tick of yTicks) {
+    const yStep = labelStep(yTicks.length, yAxis.skip, 1);
+    const yShown = yTicks.filter((_, index) => index % yStep === 0);
+    for (const tick of yShown) {
       const y = yScale(tick) + 4;
       parts.push(
         yRight
@@ -332,21 +335,33 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
           : label(plot.left - 8, y, formatAxisValue(tick, yFormat, frame.locale, yTicks), cssVar("muted", frame.preset.muted), 11, "400", "end"),
       );
     }
+    parts.push(minorTickMarks(yAxis.minor ?? 0, yTicks, yScale, yRight ? plot.right : plot.left, false, yRight ? 3 : -3, cssVar("axis", frame.preset.axis)));
   }
   if (showY && yAxis.title) {
     const x = yRight ? frame.width - 12 : 12;
-    parts.push(rotated(x, (plot.top + plot.bottom) / 2, yAxis.title, cssVar("muted", frame.preset.muted), yRight ? 90 : -90));
+    const mid = (plot.top + plot.bottom) / 2;
+    const yPos = axisTitleAlong(yAxis.titleAt, mid, Math.max(plot.bottom - 28, mid), Math.min(plot.top + 28, mid));
+    parts.push(rotated(x, yPos, yAxis.title, cssVar("muted", frame.preset.muted), axisTitleSpin(yAxis.titleSpin, true, yRight)));
   }
   if (showX && xAxis.labels) {
     const angle = xAxis.rotate ?? 0;
-    for (const tick of xTicks) {
+    const xStep = labelStep(xTicks.length, xAxis.skip, 1);
+    const xShown = xTicks.filter((_, index) => index % xStep === 0);
+    for (const tick of xShown) {
       const x = xScale(tick);
       const y = xAxis.end ? plot.top - 18 : plot.bottom + 16;
       parts.push(angle ? rotated(x, y, formatAxisValue(tick, xFormat, frame.locale, xTicks), cssVar("muted", frame.preset.muted), angle) : label(x, y, formatAxisValue(tick, xFormat, frame.locale, xTicks), cssVar("muted", frame.preset.muted), 11, "400", "middle"));
     }
+    const edge = xAxis.end ? plot.top : plot.bottom;
+    parts.push(minorTickMarks(xAxis.minor ?? 0, xTicks, xScale, edge, true, xAxis.end ? -3 : 3, cssVar("axis", frame.preset.axis)));
   }
   if (showX && xAxis.title) {
-    parts.push(label((plot.left + plot.right) / 2, xAxis.end ? plot.top - 40 : frame.height - footer - legendBand - 6, xAxis.title, cssVar("muted", frame.preset.muted), 11, "500", "middle"));
+    const mid = (plot.left + plot.right) / 2;
+    const xPos = axisTitleAlong(xAxis.titleAt, mid, plot.left, plot.right);
+    const y = xAxis.end ? plot.top - 40 : frame.height - footer - legendBand - 6;
+    const angle = axisTitleSpin(xAxis.titleSpin, false, false);
+    const anchor = xAxis.titleAt === "start" ? "start" : xAxis.titleAt === "end" ? "end" : "middle";
+    parts.push(angle ? rotated(xPos, y, xAxis.title, cssVar("muted", frame.preset.muted), angle) : label(xPos, y, xAxis.title, cssVar("muted", frame.preset.muted), 11, "500", anchor));
   }
   if (legendAtBottom && legendBox) {
     const items = categories.map((name) => ({ name: name || " ", color: colorOf(name) }));
@@ -422,8 +437,8 @@ function renderDenseScatter(spec: Record<string, unknown>): string | null | unde
   if (frame.subtitle) top += 18;
   const showX = axisOn(spec, "x");
   const showY = axisOn(spec, "y");
-  const xFormat = channelFormat(frame.encoding.x);
-  const yFormat = channelFormat(frame.encoding.y);
+  const xFormat = readAxisFormat(spec, "x") ?? channelFormat(frame.encoding.x);
+  const yFormat = readAxisFormat(spec, "y") ?? channelFormat(frame.encoding.y);
   const yAxis = readAxis(spec, "y");
   const xAxis = readAxis(spec, "x");
   const yTicks = pickTicks(yDomain[0], yDomain[1], yAxis.count ?? 5, yAxis.values, false);
@@ -529,7 +544,9 @@ function renderDenseScatter(spec: Record<string, unknown>): string | null | unde
   }
   parts.push("</g>");
   if (showY && yAxis.labels) {
-    for (const tick of yTicks) {
+    const yStep = labelStep(yTicks.length, yAxis.skip, 1);
+    const yShown = yTicks.filter((_, index) => index % yStep === 0);
+    for (const tick of yShown) {
       const y = yScale(tick) + 4;
       parts.push(
         yRight
@@ -537,21 +554,33 @@ function renderDenseScatter(spec: Record<string, unknown>): string | null | unde
           : label(plot.left - 8, y, formatAxisValue(tick, yFormat, frame.locale, yTicks), cssVar("muted", frame.preset.muted), 11, "400", "end"),
       );
     }
+    parts.push(minorTickMarks(yAxis.minor ?? 0, yTicks, yScale, yRight ? plot.right : plot.left, false, yRight ? 3 : -3, cssVar("axis", frame.preset.axis)));
   }
   if (showY && yAxis.title) {
     const x = yRight ? frame.width - 12 : 12;
-    parts.push(rotated(x, (plot.top + plot.bottom) / 2, yAxis.title, cssVar("muted", frame.preset.muted), yRight ? 90 : -90));
+    const mid = (plot.top + plot.bottom) / 2;
+    const yPos = axisTitleAlong(yAxis.titleAt, mid, Math.max(plot.bottom - 28, mid), Math.min(plot.top + 28, mid));
+    parts.push(rotated(x, yPos, yAxis.title, cssVar("muted", frame.preset.muted), axisTitleSpin(yAxis.titleSpin, true, yRight)));
   }
   if (showX && xAxis.labels) {
     const angle = xAxis.rotate ?? 0;
-    for (const tick of xTicks) {
+    const xStep = labelStep(xTicks.length, xAxis.skip, 1);
+    const xShown = xTicks.filter((_, index) => index % xStep === 0);
+    for (const tick of xShown) {
       const x = xScale(tick);
       const y = xAxis.end ? plot.top - 18 : plot.bottom + 16;
       parts.push(angle ? rotated(x, y, formatAxisValue(tick, xFormat, frame.locale, xTicks), cssVar("muted", frame.preset.muted), angle) : label(x, y, formatAxisValue(tick, xFormat, frame.locale, xTicks), cssVar("muted", frame.preset.muted), 11, "400", "middle"));
     }
+    const edge = xAxis.end ? plot.top : plot.bottom;
+    parts.push(minorTickMarks(xAxis.minor ?? 0, xTicks, xScale, edge, true, xAxis.end ? -3 : 3, cssVar("axis", frame.preset.axis)));
   }
   if (showX && xAxis.title) {
-    parts.push(label((plot.left + plot.right) / 2, xAxis.end ? plot.top - 40 : frame.height - 6, xAxis.title, cssVar("muted", frame.preset.muted), 11, "500", "middle"));
+    const mid = (plot.left + plot.right) / 2;
+    const xPos = axisTitleAlong(xAxis.titleAt, mid, plot.left, plot.right);
+    const y = xAxis.end ? plot.top - 40 : frame.height - 6;
+    const angle = axisTitleSpin(xAxis.titleSpin, false, false);
+    const anchor = xAxis.titleAt === "start" ? "start" : xAxis.titleAt === "end" ? "end" : "middle";
+    parts.push(angle ? rotated(xPos, y, xAxis.title, cssVar("muted", frame.preset.muted), angle) : label(xPos, y, xAxis.title, cssVar("muted", frame.preset.muted), 11, "500", anchor));
   }
   parts.push(closeChart());
   return parts.join("");

@@ -187,26 +187,92 @@ function bottomLegendMarkup(frame: Frame, legend: FooterLegend, box: PlotRect): 
   return `<g data-ck-legend="bottom" data-ck-legend-align="start" data-ck-legend-orient="horizontal" data-ck-legend-at="0">${parts.join("")}</g>`;
 }
 
-/** Rotated y title and a centred x title. A bottom legend sits under the x title, in its own band. */
-export function axisTitleMarks(frame: Frame, spec: Record<string, unknown>, box: PlotRect): string {
+/** Explicit rotate, or ±90 on a vertical title and 0 on a horizontal one. */
+export function axisTitleSpin(spin: number | undefined, vertical: boolean, end: boolean): number {
+  if (typeof spin === "number") return spin;
+  if (!vertical) return 0;
+  return end ? 90 : -90;
+}
+
+/** `start` and `end` sit inset from the axis ends. Anything else stays centred. */
+export function axisTitleAlong(at: string | undefined, mid: number, start: number, end: number): number {
+  if (at === "start") return start;
+  if (at === "end") return end;
+  return mid;
+}
+
+/**
+ * How many labels to skip. `omitted` is the step already used when autoSkip
+ * is unset, so a chart that already thins crowded categories does not move.
+ * `true` thins any run longer than four. `false` keeps every label.
+ */
+export function labelStep(count: number, skip: boolean | undefined, omitted: number): number {
+  if (skip === false) return 1;
+  if (skip === true) return count > 4 ? Math.ceil(count / 4) : 1;
+  return omitted;
+}
+
+/** Short ticks between major values. `outward` is the pixel step off the spine. */
+export function minorTickMarks(
+  count: number,
+  values: readonly number[],
+  at: (value: number) => number,
+  edge: number,
+  horizontal: boolean,
+  outward: number,
+  stroke: string,
+): string {
+  if (count < 1 || values.length < 2) return "";
+  let marks = "";
+  for (let i = 0; i < values.length - 1; i++) {
+    const from = at(values[i] ?? 0);
+    const to = at(values[i + 1] ?? 0);
+    if (!Number.isFinite(from) || !Number.isFinite(to) || from === to) continue;
+    for (let k = 1; k <= count; k++) {
+      const pos = from + ((to - from) * k) / (count + 1);
+      marks += horizontal
+        ? `<line x1="${n(pos)}" y1="${n(edge)}" x2="${n(pos)}" y2="${n(edge + outward)}" stroke="${stroke}" />`
+        : `<line x1="${n(edge)}" y1="${n(pos)}" x2="${n(edge + outward)}" y2="${n(pos)}" stroke="${stroke}" />`;
+    }
+  }
+  return marks ? `<g data-ck-minor="${count}">${marks}</g>` : "";
+}
+
+/** Y title and x title. No legend, so a chart that has none does not pull that markup. */
+export function placedAxisTitles(frame: Frame, spec: Record<string, unknown>, box: PlotRect, band = 0): string {
   const y = readAxis(spec, "y");
   const x = readAxis(spec, "x");
   const fill = cssVar("muted", frame.preset.muted);
-  const legend = footerLegend(spec, frame.preset);
-  const band = legend ? bottomLegendBand(spec, frame.preset, box.right - box.left) : 0;
   let out = "";
   if (y.on && y.title) {
     const mid = (box.top + box.bottom) / 2;
-    const angle = y.end ? 90 : -90;
+    const lo = Math.min(box.top + 28, mid);
+    const hi = Math.max(box.bottom - 28, mid);
+    const yPos = axisTitleAlong(y.titleAt, mid, hi, lo);
+    const angle = axisTitleSpin(y.titleSpin, true, Boolean(y.end));
     const xPos = y.end ? frame.width - 14 : 14;
-    out += rotated(xPos, mid, y.title, fill, angle);
+    out += rotated(xPos, yPos, y.title, fill, angle);
   }
   if (x.on && x.title) {
     const mid = (box.left + box.right) / 2;
-    out += ink(mid, frame.height - 8 - band, x.title, fill, 11, "500", "middle");
+    const xPos = axisTitleAlong(x.titleAt, mid, box.left, box.right);
+    const angle = axisTitleSpin(x.titleSpin, false, false);
+    const yPos = frame.height - 8 - band;
+    if (angle) out += rotated(xPos, yPos, x.title, fill, angle);
+    else {
+      const anchor = x.titleAt === "start" ? "start" : x.titleAt === "end" ? "end" : "middle";
+      out += ink(xPos, yPos, x.title, fill, 11, "500", anchor);
+    }
   }
-  if (legend && band) out += bottomLegendMarkup(frame, legend, box);
   return out;
+}
+
+/** Rotated y title and a centred x title. A bottom legend sits under the x title, in its own band. */
+export function axisTitleMarks(frame: Frame, spec: Record<string, unknown>, box: PlotRect): string {
+  const legend = footerLegend(spec, frame.preset);
+  const band = legend ? bottomLegendBand(spec, frame.preset, box.right - box.left) : 0;
+  const titles = placedAxisTitles(frame, spec, box, band);
+  return legend && band ? titles + bottomLegendMarkup(frame, legend, box) : titles;
 }
 
 export function categoryX(labels: string[], xAt: (index: number) => number): (value: number | string) => number | null {
