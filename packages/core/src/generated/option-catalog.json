@@ -191,6 +191,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Type",
@@ -241,6 +244,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Format",
@@ -277,6 +283,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Decimals",
@@ -298,6 +307,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Currency",
@@ -316,6 +328,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Prefix",
@@ -334,6 +349,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Suffix",
@@ -352,6 +370,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Signed",
@@ -370,6 +391,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Specifier",
@@ -388,6 +412,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Type",
@@ -415,6 +442,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Domain",
@@ -432,6 +462,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Zero",
@@ -450,6 +483,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Nice",
@@ -468,6 +504,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Reverse",
@@ -486,6 +525,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Padding",
@@ -507,6 +549,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Min",
@@ -528,6 +573,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Max",
@@ -549,6 +597,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Clamp",
@@ -567,6 +618,9 @@
       "scatter",
       "combo",
       "histogram",
+      "area-range",
+      "spike",
+      "candlestick",
       "strip"
     ],
     "label": "Constant",
@@ -730,11 +784,15 @@
     "appliesTo": [
       "line",
       "bar",
+      "donut",
+      "pie",
       "stacked-area",
       "scatter",
       "combo",
       "boxplot",
       "radar",
+      "funnel",
+      "treemap",
       "bullet",
       "waterfall",
       "area-range",
@@ -742,8 +800,10 @@
       "errorbar",
       "radial-bar",
       "rose",
+      "sankey",
       "histogram",
-      "spike"
+      "spike",
+      "sunburst"
     ],
     "label": "Format",
     "control": "enum",
@@ -776,11 +836,15 @@
     "appliesTo": [
       "line",
       "bar",
+      "donut",
+      "pie",
       "stacked-area",
       "scatter",
       "combo",
       "boxplot",
       "radar",
+      "funnel",
+      "treemap",
       "bullet",
       "waterfall",
       "area-range",
@@ -788,8 +852,10 @@
       "errorbar",
       "radial-bar",
       "rose",
+      "sankey",
       "histogram",
-      "spike"
+      "spike",
+      "sunburst"
     ],
     "label": "Decimals",
     "control": "number",
@@ -807,11 +873,15 @@
     "appliesTo": [
       "line",
       "bar",
+      "donut",
+      "pie",
       "stacked-area",
       "scatter",
       "combo",
       "boxplot",
       "radar",
+      "funnel",
+      "treemap",
       "bullet",
       "waterfall",
       "area-range",
@@ -819,8 +889,10 @@
       "errorbar",
       "radial-bar",
       "rose",
+      "sankey",
       "histogram",
-      "spike"
+      "spike",
+      "sunburst"
     ],
     "label": "Currency",
     "control": "text",
@@ -835,11 +907,15 @@
     "appliesTo": [
       "line",
       "bar",
+      "donut",
+      "pie",
       "stacked-area",
       "scatter",
       "combo",
       "boxplot",
       "radar",
+      "funnel",
+      "treemap",
       "bullet",
       "waterfall",
       "area-range",
@@ -847,8 +923,10 @@
       "errorbar",
       "radial-bar",
       "rose",
+      "sankey",
       "histogram",
-      "spike"
+      "spike",
+      "sunburst"
     ],
     "label": "Prefix",
     "control": "text",
@@ -863,11 +941,15 @@
     "appliesTo": [
       "line",
       "bar",
+      "donut",
+      "pie",
       "stacked-area",
       "scatter",
       "combo",
       "boxplot",
       "radar",
+      "funnel",
+      "treemap",
       "bullet",
       "waterfall",
       "area-range",
@@ -875,8 +957,10 @@
       "errorbar",
       "radial-bar",
       "rose",
+      "sankey",
       "histogram",
-      "spike"
+      "spike",
+      "sunburst"
     ],
     "label": "Suffix",
     "control": "text",
@@ -891,11 +975,15 @@
     "appliesTo": [
       "line",
       "bar",
+      "donut",
+      "pie",
       "stacked-area",
       "scatter",
       "combo",
       "boxplot",
       "radar",
+      "funnel",
+      "treemap",
       "bullet",
       "waterfall",
       "area-range",
@@ -903,8 +991,10 @@
       "errorbar",
       "radial-bar",
       "rose",
+      "sankey",
       "histogram",
-      "spike"
+      "spike",
+      "sunburst"
     ],
     "label": "Signed",
     "control": "boolean",
@@ -919,11 +1009,15 @@
     "appliesTo": [
       "line",
       "bar",
+      "donut",
+      "pie",
       "stacked-area",
       "scatter",
       "combo",
       "boxplot",
       "radar",
+      "funnel",
+      "treemap",
       "bullet",
       "waterfall",
       "area-range",
@@ -931,8 +1025,10 @@
       "errorbar",
       "radial-bar",
       "rose",
+      "sankey",
       "histogram",
-      "spike"
+      "spike",
+      "sunburst"
     ],
     "label": "Specifier",
     "control": "text",
@@ -1533,8 +1629,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.type",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Type",
     "control": "enum",
@@ -1553,8 +1652,25 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.title",
     "appliesTo": [
+      "line",
+      "bar",
+      "donut",
+      "pie",
+      "stacked-area",
+      "scatter",
+      "combo",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "sunburst",
+      "funnel",
+      "sankey",
+      "radar",
+      "strip",
+      "gantt",
+      "timeline",
+      "quadrant",
+      "choropleth",
+      "map-points"
     ],
     "label": "Title",
     "control": "text",
@@ -1567,8 +1683,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.format",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Format",
     "control": "enum",
@@ -1599,8 +1718,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.format.decimals",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Decimals",
     "control": "number",
@@ -1616,8 +1738,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.format.currency",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Currency",
     "control": "text",
@@ -1630,8 +1755,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.format.prefix",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Prefix",
     "control": "text",
@@ -1644,8 +1772,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.format.suffix",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Suffix",
     "control": "text",
@@ -1658,8 +1789,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.format.signed",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Signed",
     "control": "boolean",
@@ -1672,8 +1806,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.format.specifier",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Specifier",
     "control": "text",
@@ -1686,8 +1823,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.type",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Type",
     "control": "enum",
@@ -1712,8 +1852,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.domain",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Domain",
     "control": "json",
@@ -1725,8 +1868,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.zero",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Zero",
     "control": "boolean",
@@ -1739,8 +1885,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.nice",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Nice",
     "control": "boolean",
@@ -1753,8 +1902,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.reverse",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Reverse",
     "control": "boolean",
@@ -1767,8 +1919,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.midpoint",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Midpoint",
     "control": "number",
@@ -1782,8 +1937,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.scheme",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Scheme",
     "control": "enum",
@@ -1802,8 +1960,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.bins",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Bins",
     "control": "number",
@@ -1818,8 +1979,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.scale.thresholds",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Thresholds",
     "control": "json",
@@ -1831,8 +1995,11 @@
     "group": "Data / Encoding",
     "docs": "/docs/options#encoding.color.range",
     "appliesTo": [
+      "scatter",
       "heatmap",
-      "choropleth"
+      "treemap",
+      "choropleth",
+      "map-points"
     ],
     "label": "Range",
     "control": "json",
@@ -6170,7 +6337,9 @@
       "stacked-area",
       "scatter",
       "radial-bar",
-      "rose"
+      "rose",
+      "funnel",
+      "waterfall"
     ],
     "label": "Labels",
     "control": "boolean",
@@ -6220,7 +6389,9 @@
       "line",
       "stacked-area",
       "scatter",
-      "combo"
+      "combo",
+      "funnel",
+      "waterfall"
     ],
     "label": "Label Format",
     "control": "enum",
@@ -6258,7 +6429,9 @@
       "line",
       "stacked-area",
       "scatter",
-      "combo"
+      "combo",
+      "funnel",
+      "waterfall"
     ],
     "label": "Decimals",
     "control": "number",
@@ -6280,7 +6453,9 @@
       "line",
       "stacked-area",
       "scatter",
-      "combo"
+      "combo",
+      "funnel",
+      "waterfall"
     ],
     "label": "Currency",
     "control": "text",
@@ -6299,7 +6474,9 @@
       "line",
       "stacked-area",
       "scatter",
-      "combo"
+      "combo",
+      "funnel",
+      "waterfall"
     ],
     "label": "Prefix",
     "control": "text",
@@ -6318,7 +6495,9 @@
       "line",
       "stacked-area",
       "scatter",
-      "combo"
+      "combo",
+      "funnel",
+      "waterfall"
     ],
     "label": "Suffix",
     "control": "text",
@@ -6337,7 +6516,9 @@
       "line",
       "stacked-area",
       "scatter",
-      "combo"
+      "combo",
+      "funnel",
+      "waterfall"
     ],
     "label": "Signed",
     "control": "boolean",
@@ -6356,7 +6537,9 @@
       "line",
       "stacked-area",
       "scatter",
-      "combo"
+      "combo",
+      "funnel",
+      "waterfall"
     ],
     "label": "Specifier",
     "control": "text",
@@ -10548,6 +10731,7 @@
       "bar",
       "stacked-area",
       "combo",
+      "scatter",
       "boxplot",
       "histogram",
       "strip",
