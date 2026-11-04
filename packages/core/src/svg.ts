@@ -438,6 +438,8 @@ export interface ChartOpen {
   canvas?: boolean;
   /** Spec or preset family. Omitted inherits the page font. */
   fontFamily?: string;
+  /** Longer description. Linked with aria-describedby when set. */
+  description?: string;
 }
 
 export function openChart(chart: ChartOpen): string {
@@ -446,9 +448,11 @@ export function openChart(chart: ChartOpen): string {
   const exported = chart.exportMark ? ` data-ck-export="${esc(chart.exportMark)}"` : "";
   const canvas = chart.canvas ? ` data-ck-render="canvas"` : "";
   const scene = capturing() ? ` data-ck-scene="1"` : "";
+  const described = chart.description ? ` aria-describedby="${chart.id}-d"` : "";
+  const desc = chart.description ? `<desc id="${chart.id}-d">${esc(chart.description)}</desc>` : `<desc>${esc(chart.alt)}</desc>`;
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}" class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}"${exported}${canvas}${scene} style="${fontStyle(familyOf(chart))}">` +
-    `<title>${esc(chart.title || chart.alt)}</title><desc>${esc(chart.alt)}</desc>`
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}"${described} class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}"${exported}${canvas}${scene} style="${fontStyle(familyOf(chart))}">` +
+    `<title>${esc(chart.title || chart.alt)}</title>${desc}`
   );
 }
 
@@ -510,6 +514,14 @@ function axisRule(value: unknown): AxisRule | undefined {
   if (value.show === false) return { on: false, color, width, dash };
   const on = value.show === true || color !== undefined || width !== undefined || dash !== undefined;
   return { on, color, width, dash };
+}
+
+/** `axes.*.format` when set. Callers fall back to the channel format. */
+export function readAxisFormat(spec: Record<string, unknown>, key: "x" | "y" | "y2"): unknown {
+  const axes = isRecord(spec.axes) ? spec.axes : undefined;
+  const node = axes && isRecord(axes[key]) ? axes[key] : undefined;
+  if (node && node.format !== undefined) return node.format;
+  return undefined;
 }
 
 /** Axis box from `axes.x`, `axes.y`, or `axes.y2`. Perpendicular sides map onto that axis. */

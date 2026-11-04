@@ -59,10 +59,23 @@ function same(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-function probeValues(field, spec) {
+function viewHeight(svg) {
+  const match = /viewBox="0 0 [\d.]+ ([\d.]+)"/.exec(svg);
+  return match ? Number(match[1]) : 0;
+}
+
+function probeValues(field, spec, baseSvg = "") {
   const view = readOption(spec, field);
   const current = view.value;
+  if (field.path === "size.aspectRatio") return [2, 0.5];
+  if (field.path === "size.minHeight") {
+    const drawn = viewHeight(baseSvg);
+    const stated = spec.size && typeof spec.size.height === "number" ? spec.size.height : 0;
+    const floor = Math.max(drawn, stated, 32);
+    return [Math.round(floor + 160)];
+  }
   if (field.control === "json" || view.complex) return [];
+  if (field.path.endsWith(".autoSkip")) return [true, false].filter((value) => value !== current);
   if (field.control === "boolean" || field.storage === "union-boolean") return [current === true ? false : true];
   if (field.control === "enum" && field.enumValues?.length) {
     const text = current == null ? "" : String(current);
@@ -106,7 +119,124 @@ function quantitative(values) {
   return values.some((value) => typeof value === "number" || (typeof value === "string" && /\d/.test(value) && !Number.isNaN(Date.parse(value))));
 }
 
-function dataReason(path, spec) {
+function numericValues(values) {
+  return values.length > 0 && values.every((value) => typeof value === "number" || (typeof value === "string" && /^-?\d+(\.\d+)?$/.test(value)));
+}
+
+function isTemporal(value) {
+  if (typeof value === "number") return value > 1e11;
+  if (typeof value !== "string") return false;
+  if (/^\d{4}-\d{2}-\d{2}/.test(value)) return true;
+  return /\d{4}/.test(value) && !Number.isNaN(Date.parse(value));
+}
+
+function axisOf(path) {
+  if (path.startsWith("axes.y2") || path.startsWith("encoding.y2")) return "y2";
+  if (path.startsWith("encoding.x") || path.startsWith("axes.x")) return "x";
+  if (path.startsWith("encoding.y") || path.startsWith("axes.y")) return "y";
+  return "";
+}
+
+function axisDrawn(spec, key) {
+  const axes = spec.axes;
+  if (!axes || typeof axes !== "object") return true;
+  const node = axes[key];
+  if (node === false) return false;
+  if (node && typeof node === "object" && node.show === false) return false;
+  return true;
+}
+
+function fieldName(node) {
+  if (typeof node === "string") return node;
+  if (node && typeof node === "object" && typeof node.field === "string") return node.field;
+  if (Array.isArray(node) && node.length) return fieldName(node[0]);
+  return "";
+}
+
+function columnValues(spec, name) {
+  if (!name || !Array.isArray(spec.data)) return [];
+  return spec.data.map((row) => (row && typeof row === "object" ? row[name] : undefined));
+}
+
+function varies(values) {
+  const seen = new Set(values.map((value) => JSON.stringify(value)));
+  return seen.size > 1;
+}
+
+function sortColumn(spec) {
+  const encoding = spec.encoding && typeof spec.encoding === "object" ? spec.encoding : {};
+  const preferred = [fieldName(encoding.y), fieldName(encoding.x)];
+  const row = Array.isArray(spec.data) ? spec.data.find((item) => item && typeof item === "object") : undefined;
+  const keys = row ? Object.keys(row) : [];
+  for (const name of [...preferred, ...keys]) {
+    if (name && varies(columnValues(spec, name))) return name;
+  }
+  return "";
+}
+
+function compareValues(a, b) {
+  if (typeof a === "number" && typeof b === "number") return a - b;
+  return String(a).localeCompare(String(b));
+}
+
+function flippedOrder(values) {
+  let asc = true;
+  let desc = true;
+  for (let i = 1; i < values.length; i++) {
+    const cmp = compareValues(values[i - 1], values[i]);
+    if (cmp > 0) asc = false;
+    if (cmp < 0) desc = false;
+  }
+  if (asc && !desc) return "descending";
+  if (desc && !asc) return "ascending";
+  return "descending";
+}
+
+function withSort(spec, written) {
+  const column = sortColumn(spec);
+  if (!column) return written;
+  const sort = written.sort && typeof written.sort === "object" ? { ...written.sort } : {};
+  sort.field = column;
+  sort.order = flippedOrder(columnValues(spec, column));
+  written.sort = sort;
+  return written;
+}
+
+function withAxisTitle(spec, path) {
+  const axis = axisOf(path) || "x";
+  const axes = spec.axes && typeof spec.axes === "object" ? { ...spec.axes } : {};
+  const node = axes[axis] && typeof axes[axis] === "object" ? { ...axes[axis] } : {};
+  if (typeof node.title !== "string" || node.title === "") node.title = "Axis";
+  axes[axis] = node;
+  return { ...spec, axes };
+}
+
+function seedLocale(spec) {
+  const next = structuredClone(spec);
+  if (next.metric && typeof next.metric === "object" && typeof next.metric.value === "number") {
+    next.metric = { ...next.metric, value: 1234.5 };
+    return next;
+  }
+  if (!Array.isArray(next.data)) return null;
+  const rows = next.data.map((row) => (row && typeof row === "object" ? { ...row } : row));
+  for (const row of rows) {
+    if (!row || typeof row !== "object") continue;
+    for (const key of Object.keys(row)) {
+      if (typeof row[key] === "number") {
+        row[key] = 1234.5;
+        next.data = rows;
+        return next;
+      }
+    }
+  }
+  return null;
+}
+
+function showsGroupedNumber(svg) {
+  return /1[.,\s]?234/.test(svg) || svg.includes("1234.5") || svg.includes("1234,5");
+}
+
+function dataReason(path, spec, baseSvg = "") {
   if (path === "id") return "id is a hook, not paint";
   if (path.startsWith("animation") || path.startsWith("motion")) return "motion runs in the client, not in the static SVG";
   if (path === "a11y.keyboard" || path === "a11y.dataTable") return "client behavior; the static SVG only records intent";
@@ -114,13 +244,36 @@ function dataReason(path, spec) {
   if (path.startsWith("layout.concat")) return "example is not a concatenation";
   if (path.startsWith("interaction.drilldown")) return "example has no drilldown";
   if (path.startsWith("legend")) return "";
+  if (path === "subtitle" && (typeof spec.subtitle !== "string" || spec.subtitle === "")) return "example has no subtitle";
+  if (path.startsWith("metric.")) {
+    const metric = spec.metric;
+    const key = path.slice("metric.".length).split(".")[0];
+    if (!metric || typeof metric !== "object" || metric[key] == null || metric[key] === "") return `example has no metric.${key}`;
+  }
+  if (path.startsWith("sort.") && !sortColumn(spec)) return "example has no column whose order can change";
+  if (path === "locale" && !seedLocale(spec)) return "example has no number to format";
+  const token = /^theme\.tokens\.([A-Za-z0-9]+)/.exec(path);
+  if (token && token[1] !== "fontSize") {
+    const name = token[1];
+    const needle = name === "series" ? "--ck-series-" : name === "fontFamily" ? "--ck-font-family" : `--ck-${name}`;
+    if (!baseSvg.includes(needle)) return "example does not paint this token";
+  }
+  if (path === "timezone" && !channelValues(spec, "x").some(isTemporal)) return "x values are categories, so timezone does not apply";
   const encoding = spec.encoding && typeof spec.encoding === "object" ? spec.encoding : {};
   const y = encoding.y;
   const yList = Array.isArray(y) ? y : y ? [y] : [];
-  const axis = path.startsWith("encoding.x") || path.startsWith("axes.x") ? "x" : path.startsWith("encoding.y") || path.startsWith("axes.y.") || path === "axes.y" ? "y" : "";
-  if (axis && (path.includes(".format") || path.includes(".scale"))) {
-    const values = channelValues(spec, axis);
-    if (values.length && !quantitative(values)) return `${axis} values are categories, so format and scale do not apply`;
+  const axis = axisOf(path);
+  if (axis && path.startsWith("axes.") && !axisDrawn(spec, axis) && (path.includes(".format") || path.endsWith(".autoSkip") || path.endsWith(".minorTicks") || path.endsWith(".titlePosition") || path.endsWith(".titleRotate"))) {
+    return `${axis} axis is not drawn`;
+  }
+  if (axis && path.startsWith("axes.") && (path.includes(".format") || path.endsWith(".autoSkip") || path.endsWith(".minorTicks"))) {
+    const values = channelValues(spec, axis === "y2" ? "y" : axis);
+    // No column means a computed scale (histogram counts). Only a non-numeric column opts out.
+    if (values.length && !numericValues(values)) return `${axis} axis is not numeric, so format, autoSkip, and minor ticks do not apply`;
+  }
+  if (axis && (path.includes(".format") || path.includes(".scale") || path.endsWith(".type"))) {
+    const values = channelValues(spec, axis === "y2" ? "y" : axis);
+    if (values.length && !quantitative(values)) return `${axis} values are categories, so type, format, and scale do not apply`;
   }
   if (path.startsWith("axes.y2") || path.startsWith("encoding.y2")) {
     const usesY2 = yList.some((item) => item && typeof item === "object" && item.axis === "y2");
@@ -172,28 +325,45 @@ for (const example of examples) {
   coverage[example.type] = fieldsFor(example.spec).map((field) => field.path);
   for (const field of fieldsFor(example.spec)) {
     probed++;
-    const values = probeValues(field, example.spec);
+    const values = probeValues(field, example.spec, base.svg);
     if (!values.length) {
       rows.push({ type: example.type, slug: example.slug, path: field.path, control: field.control, klass: "d", reason: "freeform value, no safe non-default probe", specChanged: false, svgChanged: false });
       continue;
     }
-    let next = example.spec;
+    let origin = example.spec;
+    let originNorm = baseNorm;
+    let originError = base.error;
+    const titled = /^axes\.(x|y|y2)\.(titlePosition|titleRotate)$/.test(field.path);
+    if (titled) origin = withAxisTitle(example.spec, field.path);
+    if (field.path === "locale") origin = seedLocale(example.spec) ?? example.spec;
+    if (origin !== example.spec) {
+      const drawn = renderSpec(origin);
+      originNorm = norm(drawn.svg);
+      originError = drawn.error;
+    }
+    let next = origin;
     let value = values[0];
     let specChanged = false;
     let svgChanged = false;
     let invalid = false;
     for (const candidate of values) {
-      const written = writeOption(example.spec, field, candidate);
-      if (same(example.spec, written)) continue;
+      const written = writeOption(origin, field, candidate);
+      if (field.path === "size.aspectRatio") {
+        const size = written.size && typeof written.size === "object" ? { ...written.size } : {};
+        size.height = "auto";
+        written.size = size;
+      }
+      if (field.path.startsWith("sort.")) withSort(example.spec, written);
+      if (same(origin, written)) continue;
       specChanged = true;
       value = candidate;
       next = written;
       const drawn = renderSpec(written);
-      if (drawn.error && !base.error) {
+      if (drawn.error && !originError) {
         invalid = true;
         continue;
       }
-      if (!base.error && !drawn.error && norm(drawn.svg) !== baseNorm) {
+      if (!originError && !drawn.error && norm(drawn.svg) !== originNorm) {
         svgChanged = true;
         break;
       }
@@ -211,9 +381,10 @@ for (const example of examples) {
       rows.push({ type: example.type, slug: example.slug, path: field.path, control: field.control, klass: "d", reason: "probe value makes the spec invalid", specChanged: true, svgChanged: false, probe: value });
       continue;
     }
-    const reason = field.path === "legend" || field.path.startsWith("legend.")
+    let reason = field.path === "legend" || field.path.startsWith("legend.")
       ? legendMatters ? "" : "example draws no legend"
-      : dataReason(field.path, example.spec);
+      : dataReason(field.path, example.spec, base.svg);
+    if (!reason && field.path === "locale" && !showsGroupedNumber(originNorm)) reason = "example does not format 1234.5";
     if (reason) {
       rows.push({ type: example.type, slug: example.slug, path: field.path, control: field.control, klass: "d", reason, specChanged: true, svgChanged: false, probe: value });
       continue;
