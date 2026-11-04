@@ -33,6 +33,13 @@ test("dashboard and full scale only the dimensions the spec did not set", () => 
   assert.ok((locked.height ?? 0) > (card.height ?? 0));
 });
 
+test("streamgraph, density, and tree have stage-sized defaults", () => {
+  assert.deepEqual(previewSize("streamgraph", "card", {}), { width: 720, height: 380 });
+  assert.deepEqual(previewSize("density", "card", {}), { width: 680, height: 380 });
+  assert.deepEqual(previewSize("tree", "card", {}), { width: 720, height: 480 });
+  assert.deepEqual(previewSize("streamgraph", "card", { size: { width: 500, height: 240 } }), { width: 500, height: 240 });
+});
+
 test("gantt leaves height to the renderer and keeps a min height", () => {
   const box = previewSize("gantt", "card", {});
   assert.equal(box.width, 720);
