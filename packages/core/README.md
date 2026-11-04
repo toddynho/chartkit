@@ -366,6 +366,12 @@ Not published yet. See [catalog/migrate.md](../../catalog/migrate.md).
 {"version":"1","type":"streamgraph","data":[{"y":"20","a":2,"b":1},{"y":"22","a":2,"b":3}],"encoding":{"x":"y","y":["a","b"]},"a11y":{"alt":"B grew. Baseline is not zero."}}
 ```
 
+## tree
+
+```json
+{"version":"1","type":"tree","data":[{"id":"R","parent":""},{"id":"A","parent":"R"},{"id":"B","parent":"R"}],"encoding":{"id":"id","parent":"parent"},"a11y":{"alt":"R has two children. Not boxes."}}
+```
+
 ## density
 
 ```json

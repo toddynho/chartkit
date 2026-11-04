@@ -6,7 +6,14 @@
 
 import { readTooltip } from "./tooltip-slot";
 
-const EXTRA = new Set(["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "radial-bar", "rose", "strip", "streamgraph", "density"]);
+const EXTRA = new Set(["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "radial-bar", "rose", "strip", "streamgraph", "density", "tree"]);
+
+let treeRender: ((spec: Record<string, unknown>) => string | null) | null = null;
+
+/** The extra bundle registers the tree painter so a click can collapse without pulling the layout into every adapter. */
+export function setTreeRenderer(render: (spec: Record<string, unknown>) => string | null): void {
+  treeRender = render;
+}
 
 export interface TipController {
   destroy(): void;
@@ -81,7 +88,10 @@ export function attach(host: EventTarget & { querySelector?(selector: string): E
       if (fill) node.setAttribute("fill-opacity", fill);
     });
   };
-  const keys = isRecord(spec) && isRecord(spec.a11y) && spec.a11y.keyboard === true && (root.querySelector("svg")?.getAttribute("data-ck-type") === "streamgraph" || (isRecord(spec) && spec.type === "streamgraph"));
+  const chartType = root.querySelector("svg")?.getAttribute("data-ck-type") ?? (isRecord(spec) && typeof spec.type === "string" ? spec.type : "");
+  const keys = isRecord(spec) && isRecord(spec.a11y) && spec.a11y.keyboard === true && (chartType === "streamgraph" || chartType === "tree");
+  const tree = chartType === "tree";
+  let liveSpec = isRecord(spec) ? spec : null;
   const live = document.createElement("div");
   live.className = "ck-clip";
   live.setAttribute("aria-live", "polite");
@@ -99,22 +109,65 @@ export function attach(host: EventTarget & { querySelector?(selector: string): E
   const onKey = (event: Event) => {
     if (!keys) return;
     const key = (event as KeyboardEvent).key;
-    if (key !== "ArrowLeft" && key !== "ArrowRight" && key !== "ArrowUp" && key !== "ArrowDown") return;
+    if (key !== "ArrowLeft" && key !== "ArrowRight" && key !== "ArrowUp" && key !== "ArrowDown" && key !== "Enter") return;
     event.preventDefault();
     event.stopPropagation();
+    if (chartType === "tree") {
+      const current = document.activeElement instanceof SVGElement ? document.activeElement : null;
+      const id = current?.getAttribute("data-ck-id") ?? "";
+      const nodes = Array.from(root.querySelectorAll<SVGElement>("[data-ck-mark='point']"));
+      const go = (next: SVGElement | undefined) => {
+        next?.focus();
+        const label = next?.getAttribute("aria-label");
+        if (label) live.textContent = label;
+      };
+      if (key === "Enter") {
+        const label = current?.getAttribute("aria-label");
+        if (label) live.textContent = label;
+        return;
+      }
+      if (key === "ArrowDown") go(nodes.find((node) => node.getAttribute("data-ck-parent") === id));
+      else if (key === "ArrowUp") go(nodes.find((node) => node.getAttribute("data-ck-id") === current?.getAttribute("data-ck-parent")));
+      else {
+        const siblings = nodes.filter((node) => node.getAttribute("data-ck-parent") === current?.getAttribute("data-ck-parent"));
+        const index = Math.max(0, siblings.findIndex((node) => node === current));
+        go(siblings[index + (key === "ArrowRight" ? 1 : -1)]);
+      }
+      return;
+    }
     if (key === "ArrowLeft") focusMark("[data-ck-mark='column']", -1);
     else if (key === "ArrowRight") focusMark("[data-ck-mark='column']", 1);
     else if (key === "ArrowUp") focusMark("[data-ck-mark='area']", -1);
-    else focusMark("[data-ck-mark='area']", 1);
+    else if (key === "ArrowDown") focusMark("[data-ck-mark='area']", 1);
+  };
+  const onClick = (event: Event) => {
+    if (!tree || !liveSpec) return;
+    const target = event.target;
+    const node = target instanceof Element ? target.closest("[data-ck-id]") : null;
+    const id = node?.getAttribute("data-ck-id");
+    if (!id) return;
+    const charts = (globalThis as { ChartKitCharts?: { tree?: { render?: (spec: Record<string, unknown>) => string | null } } }).ChartKitCharts;
+    const draw = treeRender ?? charts?.tree?.render;
+    if (!draw) return;
+    const mark = isRecord(liveSpec.mark) ? { ...liveSpec.mark } : {};
+    const collapsed = Array.isArray(mark.collapsed) ? mark.collapsed.map((item) => String(item)) : [];
+    mark.collapsed = collapsed.includes(id) ? collapsed.filter((item) => item !== id) : [...collapsed, id];
+    liveSpec = { ...liveSpec, mark };
+    const svg = draw(liveSpec);
+    const current = root.querySelector("svg");
+    if (!svg || !current) return;
+    current.outerHTML = svg;
   };
   root.addEventListener("pointermove", move);
   root.addEventListener("pointerleave", hide);
   if (keys) root.addEventListener("keydown", onKey, true);
+  if (tree) root.addEventListener("click", onClick);
   return {
     destroy() {
       root.removeEventListener("pointermove", move);
       root.removeEventListener("pointerleave", hide);
       if (keys) root.removeEventListener("keydown", onKey, true);
+      if (tree) root.removeEventListener("click", onClick);
       tip.remove();
       live.remove();
     },

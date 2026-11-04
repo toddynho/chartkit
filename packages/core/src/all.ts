@@ -31,7 +31,7 @@ mountAxes();
 mountLayout();
 register(...charts);
 
-const EXTRA_TYPES = new Set(["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst", "radial-bar", "rose", "strip", "streamgraph", "density"]);
+const EXTRA_TYPES = new Set(["histogram", "boxplot", "radar", "funnel", "treemap", "sankey", "bullet", "waterfall", "gantt", "timeline", "quadrant", "venn", "journey", "area-range", "bar-range", "errorbar", "sunburst", "radial-bar", "rose", "strip", "streamgraph", "density", "tree"]);
 
 /** True for a phase-3 type. Those renderers load from `@chartkitdev/core/charts/<type>`. */
 export function isExtra(type: string): boolean {

@@ -8,7 +8,7 @@ test("gallery types are the chart matrix plus the projected line", () => {
   const ids = chartTypeDefs.map((def) => def.id);
   assert.equal(new Set(ids).size, ids.length);
   assert.deepEqual([...ids, "line"].sort(), [...GALLERY_TYPES].sort());
-  assert.equal(GALLERY_TYPES.length, 38);
+  assert.equal(GALLERY_TYPES.length, 39);
   assert.equal(chartTypeDefs.find((def) => def.id === "stacked-area").homepageRow, "area");
   assert.equal(chartTypeDefs.find((def) => def.id === "donut").homepageRow, "donut");
   assert.equal(chartTypeDefs.some((def) => def.id === "area"), false);

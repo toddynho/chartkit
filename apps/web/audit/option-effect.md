@@ -2,12 +2,12 @@
 
 Class (a) is a playground wiring bug. The preview used to assign a static SVG and never call mount(), so tooltip, crosshair, legend toggle, and hover could not run. That is fixed in the playground by mounting @chartkitdev/vanilla. Rows here are what remains after that mount is used for the hover probe.
 
-Probed 6164 option writes across 36 chart types. 2570 changed the SVG. Remaining rows are classified below.
+Probed 6269 option writes across 37 chart types. 2604 changed the SVG. Remaining rows are classified below.
 
 - (a) playground wiring: 0
-- (b) core ignores a listed option: 594
+- (b) core ignores a listed option: 599
 - (c) catalog scope too wide: 0
-- (d) no-op for this example: 2403
+- (d) no-op for this example: 2452
 
 ## By chart type
 
@@ -351,6 +351,14 @@ Probed 6164 option writes across 36 chart types. 2570 changed the SVG. Remaining
 - **b** `encoding.color.value` — spec changed and the rendered SVG did not
 - **b** `locale` — spec changed and the rendered SVG did not
 
+### tree (5)
+
+- **b** `encoding.y` — spec changed and the rendered SVG did not
+- **b** `mark.depth` — spec changed and the rendered SVG did not
+- **b** `sort.field` — spec changed and the rendered SVG did not
+- **b** `sort.by` — spec changed and the rendered SVG did not
+- **b** `sort.order` — spec changed and the rendered SVG did not
+
 ### treemap (5)
 
 - **b** `encoding.id` — spec changed and the rendered SVG did not
@@ -488,6 +496,16 @@ These changed the spec and not the picture, and the example data cannot exercise
 - boxplot: example has no drilldown (`interaction.drilldown.key`)
 - boxplot: motion runs in the client, not in the static SVG (`animation`)
 - boxplot: client behavior; the static SVG only records intent (`a11y.keyboard`)
+- tree: id is a hook, not paint (`id`)
+- tree: example has no color field (`encoding.color`)
+- tree: probe value makes the spec invalid (`encoding.id`)
+- tree: example draws no legend (`legend`)
+- tree: example is not faceted (`layout.facet.field`)
+- tree: example is not a concatenation (`layout.concat.columns`)
+- tree: example has no drilldown (`interaction.drilldown.key`)
+- tree: motion runs in the client, not in the static SVG (`animation`)
+- tree: example has no number to format (`locale`)
+- tree: client behavior; the static SVG only records intent (`a11y.keyboard`)
 - timeline: id is a hook, not paint (`id`)
 - timeline: example is not an OHLC series (`encoding.open.type`)
 - timeline: example draws no legend (`legend`)

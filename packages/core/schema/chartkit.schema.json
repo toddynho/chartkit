@@ -50,6 +50,7 @@
         "bar-range",
         "errorbar",
         "sunburst",
+        "tree",
         "bar-list",
         "radial-bar",
         "rose",
@@ -60,7 +61,7 @@
       "examples": [
         "line"
       ],
-      "description": "Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. Nested children, encoding.path, or encoding.id with encoding.parent draw nested levels; a flat treemap stays one level. 'sunburst': concentric rings for that same hierarchy. Colour follows the top-level branch. mark.innerRadius is the hole (0.28 when omitted) and mark.depth caps the rings. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar. 'area-range': a band between low and high, with an optional centre line from y. Several bands are a y list of {lo, hi}. 'bar-range': a floating bar from low to high per category. 'errorbar': whiskers on a point or a bar, from low and high or from encoding.error as ± around y. A combo y item with mark range and lo/hi draws that band under the other series. 'bar-list': Ranked rows with no axes. A tinted track runs behind the label and the value sits at the right. Load it from @chartkitdev/core/charts/bar-list. It is not in the line or all bundle. 'radial-bar': category on x, radius on y, bars around a circle. Several y fields group side by side unless mark.stack is stack or percent. 'rose': equal angles, and the radius is the value (a nightingale rose). Both use polar coordinates and load from @chartkitdev/core/charts/<type>. They are not in the line bundle. layout.coordinate polar on bar, pie, or donut repairs onto radial-bar or rose (CK3077). 'strip': One row per group (a column when mark.orientation is vertical). Each observation is a dot on a shared numeric axis. Omit mark.orientation for horizontal: encoding.y is the group and encoding.x is the value. Vertical swaps those. mark.summary is a median tick unless set to mean or none. mark.band is none, range (min to max), or iqr. mark.jitter is none, auto, or a pixel distance. mark.highlight names one group, drawn in accent. encoding.label is the point name in the tooltip. A compare annotation draws a bracket between two groups. Load it from @chartkitdev/core/charts/strip. It is not in the line or all bundle. 'density': A kernel density estimate of encoding.x. Rows stay the raw sample. mark.bandwidth defaults to auto (Scott's rule). mark.steps defaults to 64. Groups overlay. Load it from @chartkitdev/core/charts/density. It is not in the line or all bundle. 'streamgraph': A stacked area around a moving baseline. mark.streamOffset defaults to wiggle (center, silhouette, zero, or expand). mark.order defaults to inside-out when the baseline wiggles. The y axis is in offset space, and the tooltip reports the raw value. Load it from @chartkitdev/core/charts/streamgraph. It is not in the line or all bundle."
+      "description": "Chart type. Put it in type, never in mark (mark is an options object). 'line': Lines over a continuous x (usually time). One or more y fields. Replaces LineChart. 'bar': Bars per category (x). Grouped or stacked; vertical or horizontal. Replaces BarChart. 'donut': Parts of a whole. x = slice category, y = slice value; not theta or angle. Replaces DonutChart. 'pie': The same slices with no hole. mark.startAngle, mark.padAngle, mark.cornerRadius, mark.sort, mark.other, and mark.explode. Outside labels draw leader lines. 'stacked-area': Stacked areas over time; each y field (or each series value) is a layer. Replaces StackedArea. 'scatter': Points by two quantitative fields; optional size (bubble) and color (category). Replaces ScatterChart. 'combo': Mixed bar/line/area series sharing x, with optional second y axis. Each y item sets its own mark. Replaces ComboChart. 'heatmap': Color-encoded cells. encoding.y present and mark.layout omitted means grid (x by y). mark.layout 'calendar' = date x by weekday; 'grid' = x by y matrix. Replaces Heatmap. 'gauge': Single value on a semicircular scale with optional bands and target. Uses metric, not top-level value/min/max. Replaces GaugeChart. 'kpi': Metric card: metric.label, metric.value, metric.delta, optional sparkline from data. Replaces KpiCard. 'sparkline': Tiny axis-less trend line. data may be a plain number array. Replaces Sparkline. 'mini-area': Tiny axis-less filled area. data may be a plain number array. Replaces MiniArea. 'progress-ring': Circular progress for a single value between metric.min and metric.max. Replaces ProgressRing. 'spike': Event/spike chart: thin vertical spikes from a baseline over time. Replaces SpikeChart. 'candlestick': Financial OHLC candles; requires x, open, high, low, close; optional volume. Replaces CandlestickChart. 'histogram': Bins quantitative encoding.x. mark.bins (default 8), mark.binWidth, or mark.bin (count, width, sturges, sqrt, fd). encoding.y, when present, is a pre-binned count. 'boxplot': encoding.x is the category and encoding.y holds the observations. 'radar': encoding.x is the spoke and encoding.y is one field or a list of series. 'funnel': encoding.x is the stage and encoding.y is the value, in data order. 'treemap': encoding.x is the tile, encoding.y is the size, and encoding.color is an optional group. Nested children, encoding.path, or encoding.id with encoding.parent draw nested levels; a flat treemap stays one level. 'sunburst': concentric rings for that same hierarchy. Colour follows the top-level branch. mark.innerRadius is the hole (0.28 when omitted) and mark.depth caps the rings. 'sankey': encoding.source, encoding.target, and encoding.y (the flow). 'bullet': encoding.x is the label, encoding.y the measure, encoding.target the goal. mark.ranges names band fields, worst to best. 'waterfall': encoding.x is the step and encoding.y is the delta. mark.total names a field that marks an absolute total bar. 'area-range': a band between low and high, with an optional centre line from y. Several bands are a y list of {lo, hi}. 'bar-range': a floating bar from low to high per category. 'errorbar': whiskers on a point or a bar, from low and high or from encoding.error as ± around y. A combo y item with mark range and lo/hi draws that band under the other series. 'bar-list': Ranked rows with no axes. A tinted track runs behind the label and the value sits at the right. Load it from @chartkitdev/core/charts/bar-list. It is not in the line or all bundle. 'radial-bar': category on x, radius on y, bars around a circle. Several y fields group side by side unless mark.stack is stack or percent. 'rose': equal angles, and the radius is the value (a nightingale rose). Both use polar coordinates and load from @chartkitdev/core/charts/<type>. They are not in the line bundle. layout.coordinate polar on bar, pie, or donut repairs onto radial-bar or rose (CK3077). 'strip': One row per group (a column when mark.orientation is vertical). Each observation is a dot on a shared numeric axis. Omit mark.orientation for horizontal: encoding.y is the group and encoding.x is the value. Vertical swaps those. mark.summary is a median tick unless set to mean or none. mark.band is none, range (min to max), or iqr. mark.jitter is none, auto, or a pixel distance. mark.highlight names one group, drawn in accent. encoding.label is the point name in the tooltip. A compare annotation draws a bracket between two groups. Load it from @chartkitdev/core/charts/strip. It is not in the line or all bundle. 'density': A kernel density estimate of encoding.x. Rows stay the raw sample. mark.bandwidth defaults to auto (Scott's rule). mark.steps defaults to 64. Groups overlay. Load it from @chartkitdev/core/charts/density. It is not in the line or all bundle. 'streamgraph': A stacked area around a moving baseline. mark.streamOffset defaults to wiggle (center, silhouette, zero, or expand). mark.order defaults to inside-out when the baseline wiggles. The y axis is in offset space, and the tooltip reports the raw value. Load it from @chartkitdev/core/charts/streamgraph. It is not in the line or all bundle. 'tree': A tidy node-link layout of one hierarchy. mark.tree cluster lines the leaves up (a dendrogram). Dots and short labels, not boxes. Load it from @chartkitdev/core/charts/tree. It is not in the line or all bundle."
     },
     "id": {
       "type": "string",
@@ -280,7 +281,8 @@
               "rose",
               "strip",
               "streamgraph",
-              "density"
+              "density",
+              "tree"
             ]
           }
         },
@@ -1321,11 +1323,41 @@
           "default": 0.6,
           "description": "Hole size as a 0–0.95 fraction of the radius. Donut defaults to 0.6. Pie defaults to 0. Sunburst uses 0.28 when this is omitted. Radial-bar defaults to 0.34. Rose defaults to 0. Above 0.85 on a polar chart warns CK3075. Applies to: donut, pie, sunburst, radial-bar, rose."
         },
+        "tree": {
+          "enum": ["tidy", "cluster"],
+          "default": "tidy",
+          "description": "tidy is Reingold–Tilford. cluster lines the leaves up, which is the dendrogram. Applies to: tree."
+        },
+        "orient": {
+          "enum": ["LR", "RL", "TB", "BT"],
+          "default": "LR",
+          "description": "Root on the left, right, top, or bottom. Applies to: tree."
+        },
+        "link": {
+          "enum": ["curve", "step"],
+          "default": "curve",
+          "description": "A smooth link, or a right-angle step. step does not draw a box. Applies to: tree."
+        },
+        "radial": {
+          "type": "boolean",
+          "default": false,
+          "description": "Root at the center and depth as the radius. Applies to: tree."
+        },
+        "colorBy": {
+          "enum": ["branch", "depth"],
+          "default": "branch",
+          "description": "Color dots by the top-level branch or by depth. encoding.color wins when it names a field. Applies to: tree."
+        },
+        "collapsed": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Ids of nodes whose children are hidden. A click in mount() toggles an id. The static SVG uses this list. Applies to: tree."
+        },
         "depth": {
           "type": "integer",
           "minimum": 1,
           "maximum": 12,
-          "description": "How many levels to draw under the root. Deeper nodes fold into that level. Default 8. Applies to: treemap, sunburst."
+          "description": "How many levels to draw under the root. Deeper nodes fold into that level. Default 8. Applies to: treemap, sunburst, tree."
         },
         "padAngle": {
           "type": "number",

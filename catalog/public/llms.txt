@@ -1,9 +1,7 @@
 # ChartKit JSON spec
-> @chartkitdev/core https://chartkit.dev/schema/v1.json
-> @chartkitdev/core/all.
 ## Rules
 
-- version "1". a11y.alt required. data is rows, not {"values":[...]}. llms-full.txt.
+- version "1". a11y.alt required. data is rows, not {"values":[...]}.
 - Maps: npm install @chartkitdev/geo. choropleth|map-points. atlas world|us|canada|eu.
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
 - Options: interaction.navigator, interaction.drilldown, layout.breakpoints, mark.sampling lttb. 100000.
@@ -12,7 +10,6 @@
 - Cookbook: https://chartkit.dev/recipes.json
 - Dashboards: /dashboards/{ledger,meter,wayline,keel,signal,folio,cycle,edge,pulse,retain}.md
 
-pie has no hole.
 ```json
 {"version":"1","type":"line","data":[{"quarter":"Q1","units":40},{"quarter":"Q2","units":55}],"encoding":{"x":"quarter","y":"units"},"a11y":{"alt":"Units rose in Q2."}}
 ```
@@ -71,6 +68,9 @@ pie has no hole.
 {"version":"1","type":"density","data":[{"w":12},{"w":15},{"w":40}],"encoding":{"x":"w"},"a11y":{"alt":"Near 15, tail to 40."}}
 ```
 ```json
+{"version":"1","type":"tree","data":[{"id":"R","parent":""},{"id":"A","parent":"R"},{"id":"B","parent":"R"}],"encoding":{"id":"id","parent":"parent"},"a11y":{"alt":"R has two children. Not boxes."}}
+```
+```json
 {"version":"1","type":"radar","data":[{"x":"S","a":4,"b":2},{"x":"C","a":2,"b":5},{"x":"E","a":3,"b":4}],"encoding":{"x":"x","y":["a","b"]},"a11y":{"alt":"B leads on C."}}
 ```
 ```json
@@ -104,10 +104,10 @@ pie has no hole.
 {"version":"1","type":"gantt","data":[{"id":"a","task":"A","start":"2026-03-02","end":"2026-03-06"}],"a11y":{"alt":"A in March."}}
 ```
 ```json
-{"version":"1","type":"timeline","data":[{"label":"S","date":"2014-06-01"},{"label":"P","start":"2024-01-01","end":"2026-01-01","kind":"period"}],"a11y":{"alt":"Starts in 2014."}}
+{"version":"1","type":"timeline","data":[{"label":"S","date":"2014-06-01"}],"a11y":{"alt":"Starts in 2014."}}
 ```
 ```json
-{"version":"1","type":"quadrant","quadrants":["A","B","C","D"],"data":[{"name":"S","x":0.2,"y":0.8},{"name":"R","x":0.8,"y":0.3}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"S is a win."}}
+{"version":"1","type":"quadrant","quadrants":["A","B","C","D"],"data":[{"name":"S","x":0.2,"y":0.8}],"encoding":{"x":"x","y":"y"},"a11y":{"alt":"S is a win."}}
 ```
 ```json
 {"version":"1","type":"venn","data":[{"set":"A","size":12},{"set":"B","size":8},{"set":"A+B","size":3}],"a11y":{"alt":"A and B overlap."}}

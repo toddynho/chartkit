@@ -35,6 +35,7 @@
       "bar-range",
       "errorbar",
       "sunburst",
+      "tree",
       "bar-list",
       "radial-bar",
       "rose",
@@ -703,6 +704,7 @@
       "bar-list",
       "strip",
       "streamgraph",
+      "tree",
       "gantt",
       "quadrant",
       "journey"
@@ -1678,6 +1680,7 @@
       "strip",
       "density",
       "streamgraph",
+      "tree",
       "gantt",
       "timeline",
       "quadrant",
@@ -1736,6 +1739,7 @@
       "strip",
       "density",
       "streamgraph",
+      "tree",
       "gantt",
       "timeline",
       "quadrant",
@@ -2097,6 +2101,7 @@
       "strip",
       "density",
       "streamgraph",
+      "tree",
       "gantt",
       "timeline",
       "quadrant",
@@ -2129,6 +2134,7 @@
       "strip",
       "density",
       "streamgraph",
+      "tree",
       "gantt",
       "timeline",
       "quadrant",
@@ -5225,7 +5231,8 @@
     "docs": "/docs/options#encoding.path",
     "appliesTo": [
       "treemap",
-      "sunburst"
+      "sunburst",
+      "tree"
     ],
     "label": "Path fields",
     "control": "json",
@@ -5238,7 +5245,8 @@
     "docs": "/docs/options#encoding.id",
     "appliesTo": [
       "treemap",
-      "sunburst"
+      "sunburst",
+      "tree"
     ],
     "label": "Id field",
     "control": "text",
@@ -5252,7 +5260,8 @@
     "docs": "/docs/options#encoding.parent",
     "appliesTo": [
       "treemap",
-      "sunburst"
+      "sunburst",
+      "tree"
     ],
     "label": "Parent field",
     "control": "text",
@@ -6726,13 +6735,114 @@
     "defaultValue": 0.6
   },
   {
+    "path": "mark.tree",
+    "description": "tidy is Reingold–Tilford. cluster lines the leaves up, which is the dendrogram. Applies to: tree.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.tree",
+    "appliesTo": [
+      "tree"
+    ],
+    "label": "Tree",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "tidy",
+      "cluster"
+    ],
+    "slider": false,
+    "defaultValue": "tidy"
+  },
+  {
+    "path": "mark.orient",
+    "description": "Root on the left, right, top, or bottom. Applies to: tree.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.orient",
+    "appliesTo": [
+      "tree"
+    ],
+    "label": "Orient",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "LR",
+      "RL",
+      "TB",
+      "BT"
+    ],
+    "slider": false,
+    "defaultValue": "LR"
+  },
+  {
+    "path": "mark.link",
+    "description": "A smooth link, or a right-angle step. step does not draw a box. Applies to: tree.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.link",
+    "appliesTo": [
+      "tree"
+    ],
+    "label": "Link",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "curve",
+      "step"
+    ],
+    "slider": false,
+    "defaultValue": "curve"
+  },
+  {
+    "path": "mark.radial",
+    "description": "Root at the center and depth as the radius. Applies to: tree.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.radial",
+    "appliesTo": [
+      "tree"
+    ],
+    "label": "Radial",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false,
+    "defaultValue": false
+  },
+  {
+    "path": "mark.colorBy",
+    "description": "Color dots by the top-level branch or by depth. encoding.color wins when it names a field. Applies to: tree.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.colorBy",
+    "appliesTo": [
+      "tree"
+    ],
+    "label": "Color By",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "branch",
+      "depth"
+    ],
+    "slider": false,
+    "defaultValue": "branch"
+  },
+  {
+    "path": "mark.collapsed",
+    "description": "Ids of nodes whose children are hidden. A click in mount() toggles an id. The static SVG uses this list. Applies to: tree.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.collapsed",
+    "appliesTo": [
+      "tree"
+    ],
+    "label": "Collapsed",
+    "control": "json",
+    "storage": "scalar"
+  },
+  {
     "path": "mark.depth",
-    "description": "How many levels to draw under the root. Deeper nodes fold into that level. Default 8. Applies to: treemap, sunburst.",
+    "description": "How many levels to draw under the root. Deeper nodes fold into that level. Default 8. Applies to: treemap, sunburst, tree.",
     "group": "Marks & style",
     "docs": "/docs/options#mark.depth",
     "appliesTo": [
       "treemap",
-      "sunburst"
+      "sunburst",
+      "tree"
     ],
     "label": "Depth",
     "control": "number",
@@ -10143,6 +10253,7 @@
       "bar-range",
       "errorbar",
       "sunburst",
+      "tree",
       "radial-bar",
       "rose",
       "strip",
@@ -10193,6 +10304,7 @@
       "bar-range",
       "errorbar",
       "sunburst",
+      "tree",
       "radial-bar",
       "rose",
       "strip",
@@ -10249,6 +10361,7 @@
       "bar-range",
       "errorbar",
       "sunburst",
+      "tree",
       "radial-bar",
       "rose",
       "strip",
@@ -10307,6 +10420,7 @@
       "bar-range",
       "errorbar",
       "sunburst",
+      "tree",
       "radial-bar",
       "rose",
       "strip",
@@ -10359,6 +10473,7 @@
       "bar-range",
       "errorbar",
       "sunburst",
+      "tree",
       "radial-bar",
       "rose",
       "strip",
@@ -10411,6 +10526,7 @@
       "bar-range",
       "errorbar",
       "sunburst",
+      "tree",
       "radial-bar",
       "rose",
       "strip",
@@ -10460,6 +10576,7 @@
       "bar-range",
       "errorbar",
       "sunburst",
+      "tree",
       "radial-bar",
       "rose",
       "strip",
@@ -10508,6 +10625,7 @@
       "bar-range",
       "errorbar",
       "sunburst",
+      "tree",
       "radial-bar",
       "rose",
       "strip",
@@ -10554,6 +10672,7 @@
       "bar-range",
       "errorbar",
       "sunburst",
+      "tree",
       "radial-bar",
       "rose",
       "strip",
@@ -10609,6 +10728,7 @@
       "bar-range",
       "errorbar",
       "sunburst",
+      "tree",
       "radial-bar",
       "rose",
       "strip",
@@ -10655,6 +10775,7 @@
       "bar-range",
       "errorbar",
       "sunburst",
+      "tree",
       "radial-bar",
       "rose",
       "strip",
@@ -10703,6 +10824,7 @@
       "bar-range",
       "errorbar",
       "sunburst",
+      "tree",
       "radial-bar",
       "rose",
       "strip",
@@ -10992,6 +11114,7 @@
       "strip",
       "streamgraph",
       "density",
+      "tree",
       "gantt",
       "timeline",
       "quadrant",
@@ -11014,7 +11137,8 @@
       "quadrant",
       "sankey",
       "timeline",
-      "venn"
+      "venn",
+      "tree"
     ],
     "label": "Surface",
     "control": "color",
@@ -11060,6 +11184,7 @@
       "strip",
       "streamgraph",
       "density",
+      "tree",
       "gantt",
       "timeline",
       "quadrant",
@@ -11110,6 +11235,7 @@
       "strip",
       "streamgraph",
       "density",
+      "tree",
       "gantt",
       "timeline",
       "quadrant",
@@ -11313,6 +11439,7 @@
       "strip",
       "streamgraph",
       "density",
+      "tree",
       "gantt",
       "timeline",
       "quadrant",

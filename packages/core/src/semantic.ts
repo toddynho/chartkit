@@ -150,6 +150,8 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   else streamForeign(spec, diagnostics);
   if (type === "density") densityChecks(spec, view, diagnostics);
   else densityForeign(spec, diagnostics);
+  if (type === "tree") treeChecks(spec, diagnostics);
+  else treeForeign(spec, diagnostics);
   if (type !== "strip" && isRecord(spec.encoding) && spec.encoding.label !== undefined) {
     diagnostics.push({
       code: "CK3094",
@@ -172,10 +174,14 @@ function flagged(diagnostics: Diagnostic[], item: Diagnostic): void {
 
 function checkHierarchy(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
   const type = typeof spec.type === "string" ? spec.type : "";
-  if (type !== "treemap" && type !== "sunburst") return;
-  const read = readHierarchy(spec);
+  if (type !== "treemap" && type !== "sunburst" && type !== "tree") return;
+  const read = readHierarchy(spec, type === "tree" ? { keepZero: true } : undefined);
   if (!read) return;
-  for (const item of read.issues) flagged(diagnostics, item);
+  const sized = type === "tree" && isRecord(spec.encoding) && spec.encoding.y !== undefined;
+  for (const item of read.issues) {
+    if (item.code === "CK3030" && type === "tree" && !sized) continue;
+    flagged(diagnostics, item);
+  }
 }
 
 function checkTimezone(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
@@ -257,7 +263,7 @@ function checkEncoding(
     if (!channel.field) continue;
     const resolved = resolveField(channel.field, table.fields);
     if (!resolved.match) {
-      if ((spec.type === "treemap" || spec.type === "sunburst") && readHierarchy(spec)) continue;
+      if ((spec.type === "treemap" || spec.type === "sunburst" || spec.type === "tree") && readHierarchy(spec, spec.type === "tree" ? { keepZero: true } : undefined)) continue;
       const suggestion = resolved.caseMatch ?? resolved.suggestions[0];
       const hintParts = [`available fields: ${table.fields.join(", ") || "(none)"}`];
       if (resolved.caseMatch) hintParts.push(`did you mean ${JSON.stringify(resolved.caseMatch)}? (case differs)`);
@@ -1852,6 +1858,134 @@ function densityChecks(spec: Record<string, unknown>, table: DataTable, diagnost
     }
   }
 }
+function treeForeign(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  const mark = isRecord(spec.mark) ? spec.mark : undefined;
+  if (!mark) return;
+  if (mark.tree !== undefined) {
+    diagnostics.push({
+      code: "CK3119",
+      severity: "warning",
+      message: "mark.tree applies to a tree",
+      path: "/mark/tree",
+      hint: 'remove it, or set type to "tree"',
+      fix: [{ op: "remove", path: "/mark/tree" }],
+    });
+  }
+  if (mark.orient !== undefined) {
+    diagnostics.push({
+      code: "CK3120",
+      severity: "warning",
+      message: "mark.orient applies to a tree",
+      path: "/mark/orient",
+      hint: 'remove it, or set type to "tree"',
+      fix: [{ op: "remove", path: "/mark/orient" }],
+    });
+  }
+  if (mark.link !== undefined) {
+    diagnostics.push({
+      code: "CK3121",
+      severity: "warning",
+      message: "mark.link applies to a tree",
+      path: "/mark/link",
+      hint: 'remove it, or set type to "tree"',
+      fix: [{ op: "remove", path: "/mark/link" }],
+    });
+  }
+  if (mark.radial !== undefined) {
+    diagnostics.push({
+      code: "CK3122",
+      severity: "warning",
+      message: "mark.radial applies to a tree",
+      path: "/mark/radial",
+      hint: 'remove it, or set type to "tree"',
+      fix: [{ op: "remove", path: "/mark/radial" }],
+    });
+  }
+  if (mark.colorBy !== undefined) {
+    diagnostics.push({
+      code: "CK3123",
+      severity: "warning",
+      message: "mark.colorBy applies to a tree",
+      path: "/mark/colorBy",
+      hint: 'remove it, or set type to "tree"',
+      fix: [{ op: "remove", path: "/mark/colorBy" }],
+    });
+  }
+  if (mark.collapsed !== undefined) {
+    diagnostics.push({
+      code: "CK3124",
+      severity: "warning",
+      message: "mark.collapsed applies to a tree",
+      path: "/mark/collapsed",
+      hint: 'remove it, or set type to "tree"',
+      fix: [{ op: "remove", path: "/mark/collapsed" }],
+    });
+  }
+}
+
+function treeChecks(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  const read = readHierarchy(spec, { keepZero: true });
+  const root = read?.root;
+  if (root && root.name === "" && root.children.length > 1) {
+    diagnostics.push({
+      code: "CK3115",
+      severity: "error",
+      message: "a tree has one root",
+      path: "/data",
+      hint: "Add a parent row that the roots point at. Repair does not invent that row.",
+    });
+  }
+  const mark = isRecord(spec.mark) ? spec.mark : undefined;
+  if (mark && mark.orientation !== undefined) {
+    const orient = mark.orientation === "vertical" ? "TB" : "LR";
+    const next = { ...mark, orient };
+    delete next.orientation;
+    diagnostics.push({
+      code: "CK3116",
+      severity: "warning",
+      message: "mark.orientation is the bar direction",
+      path: "/mark/orientation",
+      hint: 'A tree uses mark.orient: LR, RL, TB, or BT. horizontal becomes LR and vertical becomes TB.',
+      fix: [{ op: "replace", path: "/mark", value: next }],
+    });
+  }
+  if (mark?.radial === true && root) {
+    let leaves = 0;
+    const count = (node: { children: { children: unknown[] }[] }): void => {
+      if (!node.children.length) leaves += 1;
+      for (const child of node.children) count(child as { children: { children: unknown[] }[] });
+    };
+    count(root);
+    if (leaves > 30) {
+      diagnostics.push({
+        code: "CK3117",
+        severity: "warning",
+        message: `radial tree has ${leaves} leaves`,
+        path: "/mark/radial",
+        hint: "Labels collide past about 30 leaves. The chart still draws.",
+      });
+    }
+  }
+  if (root) {
+    const names: string[] = [];
+    const walk = (node: { name: string; children: { name: string; children: unknown[] }[] }): void => {
+      if (node.name) names.push(node.name);
+      for (const child of node.children) walk(child as { name: string; children: { name: string; children: unknown[] }[] });
+    };
+    walk(root);
+    const mean = names.length ? names.reduce((sum, name) => sum + name.length, 0) / names.length : 0;
+    if (mean > 24) {
+      diagnostics.push({
+        code: "CK3118",
+        severity: "warning",
+        message: "tree labels are long",
+        path: "/data",
+        hint: "This chart draws dots and short labels, not boxes. Give size.height more room.",
+      });
+    }
+  }
+}
+
 function stripChecks(spec: Record<string, unknown>, table: DataTable, diagnostics: Diagnostic[]): void {
   const encoding = isRecord(spec.encoding) ? spec.encoding : undefined;
   if (!encoding) return;

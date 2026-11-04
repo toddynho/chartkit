@@ -15,7 +15,7 @@ export interface HierarchyRead {
   issues: Diagnostic[];
 }
 
-const APPLIES = new Set(["treemap", "sunburst"]);
+const APPLIES = new Set(["treemap", "sunburst", "tree"]);
 
 function quote(value: string): string {
   return JSON.stringify(value);
@@ -88,7 +88,7 @@ function statedOf(node: Record<string, unknown>, valueField: string | undefined)
 }
 
 /** Nested `{name, value, children}`, `encoding.path`, or `encoding.id` plus `encoding.parent`. Null keeps the flat chart. */
-export function readHierarchy(spec: Record<string, unknown>): HierarchyRead | null {
+export function readHierarchy(spec: Record<string, unknown>, options?: { keepZero?: boolean }): HierarchyRead | null {
   const encoding = isRecord(spec.encoding) ? spec.encoding : {};
   const data = spec.data;
   const nested = Array.isArray(data) && data.some((row) => isRecord(row) && Array.isArray(row.children));
@@ -98,16 +98,17 @@ export function readHierarchy(spec: Record<string, unknown>): HierarchyRead | nu
   if (!nested && !path && !(id && parent)) return null;
   const valueField = fieldOf(encoding.y);
   const issues: Diagnostic[] = [];
-  if (nested) return { root: fromNested(data as unknown[], valueField, issues), issues };
+  const keepZero = options?.keepZero === true;
+  if (nested) return { root: fromNested(data as unknown[], valueField, issues, keepZero), issues };
   if (path) return { root: fromPath(data, path, valueField, issues), issues };
   return { root: fromParents(data, id, parent, fieldOf(encoding.x) || id, valueField, issues), issues };
 }
 
-function fromNested(data: unknown[], valueField: string | undefined, issues: Diagnostic[]): HNode {
+function fromNested(data: unknown[], valueField: string | undefined, issues: Diagnostic[], keepZero = false): HNode {
   const children: HNode[] = [];
   data.forEach((row, index) => {
     if (!isRecord(row)) return;
-    const node = walkNested(row, `/data/${index}`, [], valueField, issues);
+    const node = walkNested(row, `/data/${index}`, [], valueField, issues, keepZero);
     if (node) children.push(node);
   });
   return wrap(children);
@@ -119,6 +120,7 @@ function walkNested(
   ancestors: string[],
   valueField: string | undefined,
   issues: Diagnostic[],
+  keepZero = false,
 ): HNode | null {
   const name = labelOf(row, "Node");
   const stated = statedOf(row, valueField);
@@ -128,10 +130,10 @@ function walkNested(
   const children: HNode[] = [];
   raw.forEach((child, index) => {
     if (!isRecord(child)) return;
-    const node = walkNested(child, `${pointer}/children/${index}`, [...ancestors, name], valueField, issues);
+    const node = walkNested(child, `${pointer}/children/${index}`, [...ancestors, name], valueField, issues, keepZero);
     if (node) children.push(node);
   });
-  return finish(name, [...ancestors, name], stated, children, valuePath, issues);
+  return finish(name, [...ancestors, name], stated, children, valuePath, issues, keepZero);
 }
 
 function fromPath(data: unknown, fields: string[], valueField: string | undefined, issues: Diagnostic[]): HNode {
@@ -287,15 +289,16 @@ function finish(
   children: HNode[],
   valuePath: string,
   issues: Diagnostic[],
+  keepZero = false,
 ): HNode | null {
   if (!children.length) {
     const value = stated !== undefined && stated > 0 ? stated : 0;
-    if (value <= 0) return null;
+    if (value <= 0 && !keepZero) return null;
     return { name, value, path, children };
   }
   const sum = children.reduce((total, child) => total + child.value, 0);
   if (stated !== undefined && stated >= 0 && mismatch(stated, sum)) issues.push(summed(name, valuePath, sum));
-  if (sum <= 0) return null;
+  if (sum <= 0 && !keepZero) return null;
   return { name, value: sum, path, children };
 }
 
@@ -333,7 +336,7 @@ export function foreignHierarchy(spec: Record<string, unknown>): Diagnostic[] {
     out.push({
       code: "CK3012",
       severity: "warning",
-      message: "a path applies to treemap and sunburst",
+      message: "a path applies to treemap, sunburst, and tree",
       path: "/encoding/path",
       hint: 'Use type "treemap" or "sunburst".',
     });
@@ -342,9 +345,9 @@ export function foreignHierarchy(spec: Record<string, unknown>): Diagnostic[] {
     out.push({
       code: "CK3012",
       severity: "warning",
-      message: "a parent id applies to treemap and sunburst",
+      message: "a parent id applies to treemap, sunburst, and tree",
       path: typeof encoding.parent === "string" ? "/encoding/parent" : "/encoding/id",
-      hint: 'Set encoding.id and encoding.parent on a treemap or sunburst.',
+      hint: 'Set encoding.id and encoding.parent on a treemap, sunburst, or tree.',
     });
   }
   return out;

@@ -409,6 +409,9 @@ export function chartGeometry(svg, task, spec) {
   } else if (type === "streamgraph") {
     const areas = svg.match(/data-ck-mark="area"/g) ?? [];
     if (!areas.length) note("expected a stream layer");
+  } else if (type === "tree") {
+    if (!svg.includes('data-ck-mark="point"')) note("expected a tree node");
+    if (!svg.includes("data-ck-link=")) note("expected a tree link");
   } else {
     note("no drawn-shape check");
   }

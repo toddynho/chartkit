@@ -117,9 +117,9 @@ const METRIC_TYPES = ["gauge", "kpi", "progress-ring"];
  */
 const CHANNEL_APPLIES: Record<string, readonly string[]> = {
   x: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "heatmap", "histogram", "boxplot", "radar", "funnel", "treemap", "bullet", "waterfall", "area-range", "bar-range", "errorbar", "sunburst", "radial-bar", "rose", "spike", "candlestick", "bar-list", "strip", "density", "streamgraph", "gantt", "timeline", "quadrant", "journey"],
-  y: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "boxplot", "radar", "funnel", "treemap", "bullet", "waterfall", "area-range", "bar-range", "errorbar", "radial-bar", "rose", "sankey", "histogram", "spike", "sunburst", "bar-list", "strip", "streamgraph", "gantt", "quadrant", "journey"],
+  y: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "boxplot", "radar", "funnel", "treemap", "bullet", "waterfall", "area-range", "bar-range", "errorbar", "radial-bar", "rose", "sankey", "histogram", "spike", "sunburst", "bar-list", "strip", "streamgraph", "tree", "gantt", "quadrant", "journey"],
   series: ["line", "bar", "stacked-area", "scatter", "combo", "heatmap", "radar", "pie", "donut", "density", "streamgraph"],
-  color: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "heatmap", "treemap", "sunburst", "funnel", "sankey", "radar", "strip", "density", "streamgraph", "gantt", "timeline", "quadrant", "choropleth", "map-points"],
+  color: ["line", "bar", "donut", "pie", "stacked-area", "scatter", "combo", "heatmap", "treemap", "sunburst", "funnel", "sankey", "radar", "strip", "density", "streamgraph", "tree", "gantt", "timeline", "quadrant", "choropleth", "map-points"],
   label: ["strip"],
   size: ["scatter", "quadrant", "map-points"],
   open: ["candlestick", "gantt", "timeline"],
@@ -130,9 +130,9 @@ const CHANNEL_APPLIES: Record<string, readonly string[]> = {
   source: ["sankey", "gantt"],
   target: ["sankey", "bullet", "gantt"],
   error: ["errorbar"],
-  path: ["treemap", "sunburst"],
-  id: ["treemap", "sunburst"],
-  parent: ["treemap", "sunburst"],
+  path: ["treemap", "sunburst", "tree"],
+  id: ["treemap", "sunburst", "tree"],
+  parent: ["treemap", "sunburst", "tree"],
 };
 
 /**
@@ -196,6 +196,7 @@ const PAINTED = [
   "strip",
   "streamgraph",
   "density",
+  "tree",
   "gantt",
   "timeline",
   "quadrant",
@@ -242,7 +243,7 @@ const PATH_APPLIES: Record<string, readonly string[]> = {
   "encoding.series.scale": [],
   render: [...CANVAS_TYPES],
   "theme.tokens.background": except(["kpi", "bar-list"]),
-  "theme.tokens.surface": ["gauge", "kpi", "quadrant", "sankey", "timeline", "venn"],
+  "theme.tokens.surface": ["gauge", "kpi", "quadrant", "sankey", "timeline", "venn", "tree"],
   "theme.tokens.text": PAINTED,
   "theme.tokens.muted": PAINTED,
   "theme.tokens.grid": ["line", "bar", "stacked-area", "combo", "scatter", "boxplot", "histogram", "area-range", "bar-range", "errorbar", "waterfall", "strip", "density", "streamgraph", "radial-bar", "rose", "radar", "candlestick", "kpi"],

@@ -32,6 +32,7 @@ export const chartTypes: ChartType[] = [
   { type: "radar", title: "Radar", summary: "One polygon per series around shared spokes." },
   { type: "funnel", title: "Funnel", summary: "Stages in order, width from the value." },
   { type: "treemap", title: "Treemap", summary: "Area tiles for a whole." },
+  { type: "tree", title: "Tree", summary: "A tidy node-link layout. Cluster lines the leaves up." },
   { type: "sankey", title: "Sankey", summary: "Flow from a source to a target." },
   { type: "bullet", title: "Bullet", summary: "A value against a target and ranges." },
   { type: "waterfall", title: "Waterfall", summary: "Signed steps between totals." },

@@ -165,6 +165,22 @@ Full grid: [parity/density.md](./parity/density.md). Twelve features. ChartKit s
 | Nivo | 0 | 0 | 9 | 0 |
 | amCharts | 0 | 0 | 9 | 0 |
 
+## Tree scorecard
+
+Full grid: [parity/tree.md](./parity/tree.md). Fifteen features. ChartKit ships the tidy tree and the dendrogram. The lacks are org-chart boxes and node images.
+
+| Library | They offer | We match | We exceed | We lack |
+| --- | --- | --- | --- | --- |
+| Highcharts | 14 | 12 | 1 | 2 |
+| ECharts | 14 | 13 | 0 | 1 |
+| Vega-Lite | 0 | 0 | 13 | 0 |
+| Plotly | 0 | 0 | 13 | 0 |
+| Chart.js | 4 | 4 | 9 | 0 |
+| Observable Plot | 9 | 9 | 4 | 0 |
+| Recharts | 0 | 0 | 13 | 0 |
+| Nivo | 11 | 11 | 2 | 0 |
+| amCharts | 14 | 13 | 0 | 1 |
+
 ## Batch 3, ranked by value
 
 Not started. Order is what users hit on charts we already ship, not new chart types.

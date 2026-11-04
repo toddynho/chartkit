@@ -228,6 +228,16 @@ const truth: Record<string, Truth> = {
       },
     ],
   },
+  tree: {
+    summary: "A tidy node-link layout of one hierarchy. Cluster lines the leaves up.",
+    entry: "@chartkitdev/core/charts/tree",
+    bundle: "@chartkitdev/core/extra",
+    notes: [
+      "mark.tree tidy is Reingold–Tilford. cluster is the dendrogram.",
+      "mark.orient is LR, RL, TB, or BT. mark.radial puts the root at the center.",
+      "Dots and short labels. Org-chart boxes are not this chart.",
+    ],
+  },
   density: {
     summary: "A kernel density curve of encoding.x. The rows stay the raw sample.",
     entry: "@chartkitdev/core/charts/density",

@@ -67,6 +67,7 @@ export const tasks = [
   task("latency-by-region-strip", "strip", "Strip plot of request latency in milliseconds by region. One dot per sample, so the spread in each region stays visible.", [{ region: "North", ms: 42 }, { region: "North", ms: 55 }, { region: "North", ms: 48 }, { region: "South", ms: 70 }, { region: "South", ms: 66 }, { region: "South", ms: 81 }], { x: "ms", y: "region", values: [42, 55, 48, 70, 66, 81] }),
   task("copies-by-genre-streamgraph", "streamgraph", "Streamgraph of copies by genre over three years. Show the composition, not a zero baseline.", [{ year: "2020", fiction: 20, history: 12 }, { year: "2021", fiction: 28, history: 18 }, { year: "2022", fiction: 22, history: 30 }], { x: "year", y: ["fiction", "history"], values: [20, 12, 28, 18, 22, 30] }),
   task("wait-time-density", "density", "Density chart of wait times in minutes. Keep the raw rows. Do not bin them.", [{ wait: 12 }, { wait: 15 }, { wait: 18 }, { wait: 14 }, { wait: 40 }], { x: "wait", values: [12, 15, 18, 14, 40] }),
+  task("org-dot-tree", "tree", "Tree of one reporting line. Dots and links, not boxes.", [{ id: "Root", parent: "" }, { id: "A", parent: "Root" }, { id: "B", parent: "Root" }, { id: "A1", parent: "A" }], { id: "id", parent: "parent", values: [] }),
 ];
 
 export const CHART_TYPES = [

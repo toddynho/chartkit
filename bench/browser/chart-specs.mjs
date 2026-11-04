@@ -34,6 +34,7 @@ const ALT = {
   strip: "Eight groups of dots on one numeric axis.",
   streamgraph: "Three layers around a moving baseline.",
   density: "A kernel curve of one sample.",
+  tree: "One root, dots, and links.",
   radar: "Three series around shared spokes.",
   funnel: "Stages in order.",
   treemap: "Tiles sized by value and colored by group.",
@@ -115,6 +116,11 @@ export function chartSpec(chart, payload) {
       return spec(chart, alt, {
         data,
         encoding: { x: "x", y: ["a", "b", "c"] },
+      });
+    case "tree":
+      return spec(chart, alt, {
+        data,
+        encoding: { id: "id", parent: "parent" },
       });
     case "candlestick":
       return spec(chart, alt, {

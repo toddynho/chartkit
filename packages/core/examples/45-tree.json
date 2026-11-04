@@ -1,0 +1,13 @@
+{
+  "version": "1",
+  "type": "tree",
+  "title": "One hierarchy",
+  "data": [
+    { "id": "Root", "parent": "" },
+    { "id": "A", "parent": "Root" },
+    { "id": "B", "parent": "Root" },
+    { "id": "A1", "parent": "A" }
+  ],
+  "encoding": { "id": "id", "parent": "parent" },
+  "a11y": { "alt": "Root has two children. A has one child." }
+}
