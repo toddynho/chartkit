@@ -1,6 +1,6 @@
 {
   "summary": {
-    "generated": "2026-11-04T00:18:43.150Z",
+    "generated": "2026-11-04T01:46:31.394Z",
     "examples": [
       {
         "type": "heatmap",
@@ -169,10 +169,10 @@
       }
     ],
     "probed": 5705,
-    "effects": 1528,
+    "effects": 1756,
     "counts": {
       "a": 0,
-      "b": 1333,
+      "b": 1105,
       "c": 0,
       "d": 2300,
       "interaction": 0
@@ -6077,61 +6077,6 @@
     {
       "type": "heatmap",
       "slug": "activity-calendar",
-      "path": "encoding.color.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
       "path": "encoding.color.format.specifier",
       "control": "text",
       "klass": "b",
@@ -6139,17 +6084,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "Probe"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.scale.type",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "time"
     },
     {
       "type": "heatmap",
@@ -6182,39 +6116,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": true
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.scale.reverse",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.scale.midpoint",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "encoding.color.scale.bins",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "heatmap",
@@ -6399,17 +6300,6 @@
     {
       "type": "heatmap",
       "slug": "activity-calendar",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
       "path": "theme.tokens.text",
       "control": "color",
       "klass": "d",
@@ -6421,78 +6311,12 @@
     {
       "type": "heatmap",
       "slug": "activity-calendar",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "heatmap",
-      "slug": "activity-calendar",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "heatmap",
@@ -7089,17 +6913,6 @@
     {
       "type": "donut",
       "slug": "budget-pie",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
       "path": "theme.tokens.muted",
       "control": "color",
       "klass": "d",
@@ -7111,78 +6924,12 @@
     {
       "type": "donut",
       "slug": "budget-pie",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "donut",
-      "slug": "budget-pie",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "donut",
@@ -7717,17 +7464,6 @@
     {
       "type": "gauge",
       "slug": "capacity-gauge",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
       "path": "theme.tokens.text",
       "control": "color",
       "klass": "d",
@@ -7746,72 +7482,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "#ff00aa"
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "gauge",
-      "slug": "capacity-gauge",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "gauge",
@@ -8813,17 +8483,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "bar",
-      "slug": "channels-bar",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
     },
     {
       "type": "bar",
@@ -10589,89 +10248,12 @@
     {
       "type": "histogram",
       "slug": "checkout-histogram",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "histogram",
-      "slug": "checkout-histogram",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "histogram",
@@ -11195,89 +10777,12 @@
     {
       "type": "journey",
       "slug": "checkout-journey",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "journey",
-      "slug": "checkout-journey",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "journey",
-      "slug": "checkout-journey",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "journey",
-      "slug": "checkout-journey",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "journey",
-      "slug": "checkout-journey",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "journey",
-      "slug": "checkout-journey",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "journey",
-      "slug": "checkout-journey",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "journey",
-      "slug": "checkout-journey",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "journey",
@@ -12803,89 +12308,12 @@
     {
       "type": "boxplot",
       "slug": "close-boxplot",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "boxplot",
-      "slug": "close-boxplot",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "boxplot",
@@ -13868,89 +13296,12 @@
     {
       "type": "timeline",
       "slug": "company-timeline",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "timeline",
-      "slug": "company-timeline",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "timeline",
-      "slug": "company-timeline",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "timeline",
-      "slug": "company-timeline",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "timeline",
-      "slug": "company-timeline",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "timeline",
-      "slug": "company-timeline",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "timeline",
-      "slug": "company-timeline",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "timeline",
-      "slug": "company-timeline",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "timeline",
@@ -15815,17 +15166,6 @@
     {
       "type": "strip",
       "slug": "desks-strip",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
       "path": "theme.tokens.axis",
       "control": "color",
       "klass": "d",
@@ -15837,78 +15177,12 @@
     {
       "type": "strip",
       "slug": "desks-strip",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "strip",
-      "slug": "desks-strip",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "strip",
@@ -16365,17 +15639,6 @@
     {
       "type": "kpi",
       "slug": "error-kpi",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
       "path": "theme.tokens.negative",
       "control": "color",
       "klass": "d",
@@ -16387,78 +15650,12 @@
     {
       "type": "kpi",
       "slug": "error-kpi",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "kpi",
-      "slug": "error-kpi",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "kpi",
@@ -18225,17 +17422,6 @@
     {
       "type": "spike",
       "slug": "error-spikes",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
       "path": "theme.tokens.text",
       "control": "color",
       "klass": "d",
@@ -18247,78 +17433,12 @@
     {
       "type": "spike",
       "slug": "error-spikes",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "spike",
-      "slug": "error-spikes",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "spike",
@@ -18809,89 +17929,12 @@
     {
       "type": "venn",
       "slug": "feature-venn",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "venn",
-      "slug": "feature-venn",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "venn",
-      "slug": "feature-venn",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "venn",
-      "slug": "feature-venn",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "venn",
-      "slug": "feature-venn",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "venn",
-      "slug": "feature-venn",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "venn",
-      "slug": "feature-venn",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "venn",
-      "slug": "feature-venn",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "venn",
@@ -19353,188 +18396,12 @@
     {
       "type": "treemap",
       "slug": "inventory-treemap",
-      "path": "encoding.color.type",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "nominal"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.title",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.format",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "integer"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.format.decimals",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 10
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.format.currency",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "USD"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.format.prefix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "$"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.format.suffix",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "%"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.format.signed",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.format.specifier",
-      "control": "text",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "Probe"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.scale.type",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "time"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
       "path": "encoding.color.scale.domain",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.scale.zero",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.scale.nice",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.scale.reverse",
-      "control": "boolean",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": true
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.scale.midpoint",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.scale.scheme",
-      "control": "enum",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "violet"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.scale.bins",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "treemap",
@@ -19565,17 +18432,6 @@
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "encoding.color.value",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
     },
     {
       "type": "treemap",
@@ -19773,17 +18629,6 @@
     {
       "type": "treemap",
       "slug": "inventory-treemap",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
       "path": "theme.tokens.muted",
       "control": "color",
       "klass": "d",
@@ -19795,78 +18640,12 @@
     {
       "type": "treemap",
       "slug": "inventory-treemap",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "treemap",
-      "slug": "inventory-treemap",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "treemap",
@@ -21961,89 +20740,12 @@
     {
       "type": "errorbar",
       "slug": "lab-error-bars",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "errorbar",
-      "slug": "lab-error-bars",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "errorbar",
@@ -22404,17 +21106,6 @@
     {
       "type": "sparkline",
       "slug": "latency-spark",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "sparkline",
-      "slug": "latency-spark",
       "path": "theme.tokens.text",
       "control": "color",
       "klass": "d",
@@ -22459,78 +21150,12 @@
     {
       "type": "sparkline",
       "slug": "latency-spark",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "sparkline",
-      "slug": "latency-spark",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "sparkline",
-      "slug": "latency-spark",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "sparkline",
-      "slug": "latency-spark",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "sparkline",
-      "slug": "latency-spark",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "sparkline",
-      "slug": "latency-spark",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "sparkline",
-      "slug": "latency-spark",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "sparkline",
@@ -23929,89 +22554,12 @@
     {
       "type": "gantt",
       "slug": "launch-gantt",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "gantt",
-      "slug": "launch-gantt",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "gantt",
-      "slug": "launch-gantt",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "gantt",
-      "slug": "launch-gantt",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "gantt",
-      "slug": "launch-gantt",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "gantt",
-      "slug": "launch-gantt",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "gantt",
-      "slug": "launch-gantt",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "gantt",
-      "slug": "launch-gantt",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "gantt",
@@ -24512,89 +23060,12 @@
     {
       "type": "radial-bar",
       "slug": "lumen-radial-bar",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "radial-bar",
-      "slug": "lumen-radial-bar",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "radial-bar",
@@ -25304,89 +23775,12 @@
     {
       "type": "rose",
       "slug": "lumen-rose",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "rose",
-      "slug": "lumen-rose",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "rose",
@@ -26446,17 +24840,6 @@
     {
       "type": "sankey",
       "slug": "mill-sankey",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
       "path": "theme.tokens.muted",
       "control": "color",
       "klass": "d",
@@ -26468,78 +24851,12 @@
     {
       "type": "sankey",
       "slug": "mill-sankey",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "sankey",
-      "slug": "mill-sankey",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "sankey",
@@ -27699,17 +26016,6 @@
     {
       "type": "stacked-area",
       "slug": "mix-area",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "stacked-area",
-      "slug": "mix-area",
       "path": "theme.tokens.axis",
       "control": "color",
       "klass": "d",
@@ -28314,17 +26620,6 @@
     {
       "type": "radar",
       "slug": "model-radar",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
       "path": "theme.tokens.muted",
       "control": "color",
       "klass": "d",
@@ -28336,78 +26631,12 @@
     {
       "type": "radar",
       "slug": "model-radar",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "radar",
-      "slug": "model-radar",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "radar",
@@ -29390,17 +27619,6 @@
     {
       "type": "combo",
       "slug": "orders-combo",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "combo",
-      "slug": "orders-combo",
       "path": "theme.tokens.axis",
       "control": "color",
       "klass": "d",
@@ -30180,89 +28398,12 @@
     {
       "type": "quadrant",
       "slug": "priority-quadrant",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "quadrant",
-      "slug": "priority-quadrant",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "quadrant",
@@ -31876,17 +30017,6 @@
     {
       "type": "waterfall",
       "slug": "quarter-waterfall",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
       "path": "theme.tokens.negative",
       "control": "color",
       "klass": "d",
@@ -31894,72 +30024,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "#ff00aa"
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "waterfall",
-      "slug": "quarter-waterfall",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "waterfall",
@@ -33393,17 +31457,6 @@
     {
       "type": "line",
       "slug": "quarterly-units",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "line",
-      "slug": "quarterly-units",
       "path": "theme.tokens.text",
       "control": "color",
       "klass": "d",
@@ -34359,89 +32412,12 @@
     {
       "type": "bullet",
       "slug": "revenue-bullet",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "bullet",
-      "slug": "revenue-bullet",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "bullet",
@@ -36547,89 +34523,12 @@
     {
       "type": "area-range",
       "slug": "revenue-forecast",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "area-range",
-      "slug": "revenue-forecast",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "area-range",
@@ -36957,17 +34856,6 @@
     {
       "type": "mini-area",
       "slug": "sessions-mini",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "mini-area",
-      "slug": "sessions-mini",
       "path": "theme.tokens.text",
       "control": "color",
       "klass": "d",
@@ -37012,78 +34900,12 @@
     {
       "type": "mini-area",
       "slug": "sessions-mini",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "mini-area",
-      "slug": "sessions-mini",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "mini-area",
-      "slug": "sessions-mini",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "mini-area",
-      "slug": "sessions-mini",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "mini-area",
-      "slug": "sessions-mini",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "mini-area",
-      "slug": "sessions-mini",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "mini-area",
-      "slug": "sessions-mini",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "mini-area",
@@ -37716,89 +35538,12 @@
     {
       "type": "funnel",
       "slug": "signup-funnel",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "funnel",
-      "slug": "signup-funnel",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "funnel",
@@ -38451,89 +36196,12 @@
     {
       "type": "progress-ring",
       "slug": "tasks-ring",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "progress-ring",
-      "slug": "tasks-ring",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "progress-ring",
-      "slug": "tasks-ring",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "progress-ring",
-      "slug": "tasks-ring",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "progress-ring",
-      "slug": "tasks-ring",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "progress-ring",
-      "slug": "tasks-ring",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "progress-ring",
-      "slug": "tasks-ring",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "progress-ring",
-      "slug": "tasks-ring",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "progress-ring",
@@ -40343,89 +38011,12 @@
     {
       "type": "bar-range",
       "slug": "temperature-range",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
       "path": "theme.tokens.series",
       "control": "json",
       "klass": "d",
       "reason": "freeform value, no safe non-default probe",
       "specChanged": false,
       "svgChanged": false
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "bar-range",
-      "slug": "temperature-range",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "bar-range",
@@ -42870,17 +40461,6 @@
     {
       "type": "candlestick",
       "slug": "week-candles",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
       "path": "theme.tokens.text",
       "control": "color",
       "klass": "d",
@@ -42888,72 +40468,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "#ff00aa"
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "size.padding",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "size.padding.top",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "size.padding.right",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "size.padding.bottom",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
-    },
-    {
-      "type": "candlestick",
-      "slug": "week-candles",
-      "path": "size.padding.left",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 120
     },
     {
       "type": "candlestick",
@@ -43771,7 +41285,7 @@
       "reason": "example has no color field",
       "specChanged": true,
       "svgChanged": false,
-      "probe": "time"
+      "probe": "sqrt"
     },
     {
       "type": "scatter",
@@ -45053,17 +42567,6 @@
     {
       "type": "scatter",
       "slug": "yield-scatter",
-      "path": "theme.brand",
-      "control": "color",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": "#ff00aa"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
       "path": "theme.tokens.text",
       "control": "color",
       "klass": "d",
@@ -45082,17 +42585,6 @@
       "specChanged": true,
       "svgChanged": false,
       "probe": "#ff00aa"
-    },
-    {
-      "type": "scatter",
-      "slug": "yield-scatter",
-      "path": "theme.tokens.fontSize",
-      "control": "number",
-      "klass": "b",
-      "reason": "spec changed and the rendered SVG did not",
-      "specChanged": true,
-      "svgChanged": false,
-      "probe": 32
     },
     {
       "type": "scatter",
