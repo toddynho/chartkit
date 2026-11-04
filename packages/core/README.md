@@ -366,6 +366,12 @@ Not published yet. See [catalog/migrate.md](../../catalog/migrate.md).
 {"version":"1","type":"streamgraph","data":[{"y":"20","a":2,"b":1},{"y":"22","a":2,"b":3}],"encoding":{"x":"y","y":["a","b"]},"a11y":{"alt":"B grew. Baseline is not zero."}}
 ```
 
+## density
+
+```json
+{"version":"1","type":"density","data":[{"wait":12},{"wait":15},{"wait":40}],"encoding":{"x":"wait"},"a11y":{"alt":"Most waits sit near 15, with a tail to 40."}}
+```
+
 ## radar
 
 ```json

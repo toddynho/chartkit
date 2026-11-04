@@ -1,0 +1,17 @@
+{
+  "version": "1",
+  "type": "density",
+  "title": "Wait time",
+  "data": [
+    { "wait": 12 },
+    { "wait": 15 },
+    { "wait": 18 },
+    { "wait": 14 },
+    { "wait": 16 },
+    { "wait": 40 },
+    { "wait": 13 },
+    { "wait": 17 }
+  ],
+  "encoding": { "x": "wait" },
+  "a11y": { "alt": "Most waits sit near 15 minutes, with a tail out to 40." }
+}

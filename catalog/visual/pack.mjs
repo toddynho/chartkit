@@ -344,6 +344,7 @@ function specs() {
     fromExample("34-radial-bar.json", { legend: { position: "bottom" } }),
     fromExample("35-rose.json", { legend: false }),
     fromExample("39-streamgraph.json"),
+    fromExample("42-density.json"),
     pack({
       type: "choropleth",
       title: "Population change, 2020–2023",

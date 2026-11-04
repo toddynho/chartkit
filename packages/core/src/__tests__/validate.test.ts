@@ -61,6 +61,7 @@ const CHART_TYPES = [
   "rose",
   "strip",
   "streamgraph",
+  "density",
 ];
 
 const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);

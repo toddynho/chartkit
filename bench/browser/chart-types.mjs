@@ -42,6 +42,7 @@ export const GALLERY_TYPES = [
   "bar-list",
   "strip",
   "streamgraph",
+  "density",
 ];
 
 export const PAINT_STATUSES = ["ok", "unsupported", "blocked", "error", "timeout", "skipped"];
@@ -427,6 +428,15 @@ export const chartTypeDefs = [
     homepageRow: null,
     nMeaning: "columns across 3 layers",
     why: "Wiggle stream. Forty-eight x positions and three layers. Not in the line bundle.",
+  },
+  {
+    id: "density",
+    file: "density",
+    exportName: "density",
+    sizes: [400],
+    homepageRow: null,
+    nMeaning: "observations in one sample",
+    why: "1D Gaussian KDE. Four hundred raw rows. Not in the line bundle.",
   },
 ];
 

@@ -54,6 +54,7 @@ const charts = [
   "rose",
   "strip",
   "streamgraph",
+  "density",
 ];
 
 const themes = [

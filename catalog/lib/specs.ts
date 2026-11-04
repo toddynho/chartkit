@@ -11,6 +11,9 @@ import desksStrip from "../../packages/core/examples/38-strip-vertical.json";
 import genreStream from "../../packages/core/examples/39-streamgraph.json";
 import centerStream from "../../packages/core/examples/40-streamgraph-center.json";
 import weekStream from "../../packages/core/examples/41-streamgraph-time.json";
+import waitDensity from "../../packages/core/examples/42-density.json";
+import deskDensity from "../../packages/core/examples/43-density-groups.json";
+import rugDensity from "../../packages/core/examples/44-density-rug.json";
 
 export interface Spec {
   version: "1";
@@ -353,6 +356,16 @@ export const chartTypes: ChartTypeDoc[] = [
       "encoding.y is a list of fields, or one field with encoding.color or encoding.series.",
       "mark.streamOffset is wiggle, center, zero, or expand. silhouette is center.",
       "The chart loads from @chartkitdev/core/charts/streamgraph. createRenderer([line]) does not include it.",
+    ],
+  },
+  {
+    type: "density",
+    title: "Density",
+    summary: "A kernel density curve of a quantitative sample. Groups overlay.",
+    notes: [
+      "encoding.x is the raw sample. There is no density transform.",
+      "mark.bandwidth auto is Scott's rule. mark.steps defaults to 64.",
+      "The chart loads from @chartkitdev/core/charts/density. createRenderer([line]) does not include it.",
     ],
   },
 ];
@@ -923,6 +936,30 @@ export const examples: Example[] = [
     type: "streamgraph",
     blurb: "A time axis, share baseline, and labels on the streams.",
     spec: { ...(weekStream as Spec), id: "weekly-streamgraph" },
+  },
+  {
+    slug: "wait-density",
+    title: "Wait time",
+    group: "Distribution",
+    type: "density",
+    blurb: "Most waits sit near 15 minutes, with a tail out to 40.",
+    spec: { ...(waitDensity as Spec), id: "wait-density" },
+  },
+  {
+    slug: "desk-density",
+    title: "Wait by desk",
+    group: "Distribution",
+    type: "density",
+    blurb: "One curve per desk, fixed bandwidth, counts instead of density.",
+    spec: { ...(deskDensity as Spec), id: "desk-density" },
+  },
+  {
+    slug: "rug-density",
+    title: "Vertical waits",
+    group: "Distribution",
+    type: "density",
+    blurb: "The sample runs down the page, with a rug of the raw points.",
+    spec: { ...(rugDensity as Spec), id: "rug-density" },
   },
   {
     slug: "model-radar",

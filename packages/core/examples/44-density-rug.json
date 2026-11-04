@@ -1,0 +1,15 @@
+{
+  "version": "1",
+  "type": "density",
+  "title": "Vertical waits",
+  "data": [
+    { "wait": 10 },
+    { "wait": 12 },
+    { "wait": 14 },
+    { "wait": 28 },
+    { "wait": 32 }
+  ],
+  "encoding": { "x": "wait" },
+  "mark": { "orientation": "vertical", "rug": true, "extent": "data" },
+  "a11y": { "alt": "Waits bunch near 12 and again near 30. Ticks show the raw sample." }
+}

@@ -43,6 +43,7 @@ const CHART_TYPES = [
   "sunburst",
   "strip",
   "streamgraph",
+  "density",
 ];
 
 const PHASE4 = new Set(["gantt", "timeline", "quadrant", "venn", "journey"]);

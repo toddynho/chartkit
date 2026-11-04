@@ -1,0 +1,16 @@
+{
+  "version": "1",
+  "type": "density",
+  "title": "Wait by desk",
+  "data": [
+    { "wait": 12, "desk": "A" },
+    { "wait": 14, "desk": "A" },
+    { "wait": 16, "desk": "A" },
+    { "wait": 30, "desk": "B" },
+    { "wait": 33, "desk": "B" },
+    { "wait": 36, "desk": "B" }
+  ],
+  "encoding": { "x": "wait", "color": "desk" },
+  "mark": { "bandwidth": 4, "normalize": "count" },
+  "a11y": { "alt": "Desk A clusters near 14 minutes. Desk B clusters near 33." }
+}

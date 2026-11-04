@@ -7,7 +7,7 @@ import { applyHeroColor, heroPaints } from "./hero-accent";
  * Geo contributes choropleth and map-points only. Atlases are not types.
  */
 
-export const HERO_TYPE_COUNT = 39;
+export const HERO_TYPE_COUNT = 40;
 
 const SIZE = { width: 520, height: 300 };
 
@@ -63,6 +63,7 @@ export const heroGroups: { id: HeroGroupId; label: string; kicker: string; types
     kicker: "Distribution",
     types: [
       { type: "histogram", label: "Histogram", group: "distribution", slide: "histogram", title: "Response time distribution", subtitle: "Milliseconds, 14 bins" },
+      { type: "density", label: "Density", group: "distribution", title: "Wait time", subtitle: "Kernel estimate of the sample" },
       { type: "boxplot", label: "Box", group: "distribution", title: "Days to close", subtitle: "By region" },
       { type: "strip", label: "Strip", group: "distribution", title: "Tokens by library", subtitle: "One dot per model" },
       { type: "heatmap", label: "Heatmap", group: "distribution", slide: "heatmap", title: "Support volume by hour", subtitle: "Tickets, weekdays" },
@@ -302,6 +303,15 @@ export const heroExtra: Record<string, HeroExtra> = {
       ],
       encoding: { x: "year", y: ["fiction", "history", "poetry"] },
     }, "History overtook fiction by 2022. The baseline is not zero."),
+  },
+  density: {
+    motion: "fade",
+    spec: spec("density", {
+      title: "Wait time",
+      subtitle: "Kernel estimate",
+      data: [12, 14, 15, 15, 16, 18, 19, 40].map((wait) => ({ wait })),
+      encoding: { x: "wait" },
+    }, "Most waits sit near 15 minutes, with a tail out to 40."),
   },
   boxplot: {
     motion: "fade",

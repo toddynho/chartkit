@@ -401,6 +401,8 @@ export function chartGeometry(svg, task, spec) {
     if (!/<path\b/.test(svg)) note("expected an arc");
   } else if (type === "kpi") {
     if (!/<text\b/.test(svg)) note("expected a value");
+  } else if (type === "density") {
+    if (!svg.includes('data-ck-mark="area"')) note("expected a density curve");
   } else if (type === "strip") {
     const points = svg.match(/data-ck-mark="point"/g) ?? [];
     if (points.length < rows) note(`expected ${rows} points, found ${points.length}`);

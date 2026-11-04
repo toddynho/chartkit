@@ -105,6 +105,12 @@ export function makeChartData(chart, n, seed = 1) {
       for (let i = 0; i < n; i++) value[i] = next() * 120 + Math.sin(i / 13) * 10;
       return { data: { columns: { value } } };
     }
+    case "density": {
+      const value = new Float64Array(n);
+      const sample = rng(seed);
+      for (let i = 0; i < n; i++) value[i] = 15 + sample() * 8 + (i % 17 === 0 ? 25 : 0);
+      return { data: { columns: { value } } };
+    }
     case "streamgraph":
       return seriesColumns(n, seed, ["a", "b", "c"]);
     case "strip":

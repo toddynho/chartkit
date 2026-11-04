@@ -48,6 +48,8 @@ export function load(type: string): Promise<ChartRenderer | undefined> {
       return import("./charts/strip").then((mod) => mod.strip);
     case "streamgraph":
       return import("./charts/streamgraph").then((mod) => mod.streamgraph);
+    case "density":
+      return import("./charts/density").then((mod) => mod.density);
     default:
       return Promise.resolve(undefined);
   }

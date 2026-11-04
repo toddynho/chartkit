@@ -149,6 +149,22 @@ Full grid: [parity/streamgraph.md](./parity/streamgraph.md). Fourteen features. 
 
 The lack is the signed offset (Recharts and Nivo). Negatives stay an error (CK3095).
 
+## Density scorecard
+
+Full grid: [parity/density.md](./parity/density.md). Twelve features. ChartKit ships the 1D curve. The lacks are ridgeline, cumulative, and 2D contours.
+
+| Library | They offer | We match | We exceed | We lack |
+| --- | --- | --- | --- | --- |
+| Highcharts | 2 | 2 | 7 | 0 |
+| ECharts | 0 | 0 | 9 | 0 |
+| Vega-Lite | 11 | 9 | 0 | 2 |
+| Plotly | 8 | 7 | 2 | 1 |
+| Chart.js | 0 | 0 | 9 | 0 |
+| Observable Plot | 8 | 6 | 3 | 2 |
+| Recharts | 0 | 0 | 9 | 0 |
+| Nivo | 0 | 0 | 9 | 0 |
+| amCharts | 0 | 0 | 9 | 0 |
+
 ## Batch 3, ranked by value
 
 Not started. Order is what users hit on charts we already ship, not new chart types.

@@ -54,6 +54,7 @@ function chartLabel(type: string): string {
     area: "Area chart",
     pie: "Pie chart",
     streamgraph: "Streamgraph",
+    density: "Density chart",
   };
   return names[type] ?? `${type} chart`;
 }
