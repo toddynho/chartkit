@@ -10,8 +10,8 @@ import {
 } from "@chartkitdev/core/options";
 import type { ChartSpec } from "@chartkitdev/core";
 import { mount } from "@chartkitdev/vanilla";
-import { chartTypes } from "../data/chart-types";
 import { previewSize, readExplicitSize, stripPreviewSize, type PreviewPreset } from "../data/preview-size";
+import { menuPosition } from "./menu-place";
 import { optionEffect } from "../data/option-effect";
 import { chartType, drawChart } from "../lib/paint-chart";
 import { isRecord, pretty } from "../lib/spec-text";
@@ -39,15 +39,6 @@ interface IssueRow {
   path: string;
 }
 
-const QUICK = [
-  ["line", "Line"],
-  ["stacked-area", "Area"],
-  ["bar", "Bar"],
-  ["donut", "Donut"],
-  ["scatter", "Scatter"],
-  ["strip", "Strip"],
-] as const;
-
 const SWATCHES = ["#335c84", "#0a63e6", "#2e9a5c", "#c24b3a", "#8a5cf6", "#17181a"];
 const SERIES_COLORS = ["#335c84", "#2e9a5c", "#c24b3a", "#8a5cf6", "#0a63e6", "#17181a"];
 
@@ -59,7 +50,6 @@ const CHEVRON = `<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="tr
 
 export function mountPlayground(root: HTMLElement, data: PlayData): void {
   const examples = data.examples.filter((item) => item.spec && typeof item.spec === "object");
-  const types = uniqueTypes(examples);
   const storedRail = localStorage.getItem(RAIL_KEY);
   const narrow = window.matchMedia("(max-width: 1100px)").matches;
   const railOpen = storedRail === null ? !narrow : storedRail === "1";
@@ -67,7 +57,6 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
 
   const state = {
     examples,
-    types,
     slug: examples[0]?.slug ?? "",
     spec: clone(examples[0]?.spec ?? {}),
     baseline: clone(examples[0]?.spec ?? {}),
@@ -80,7 +69,6 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     zoom: readZoom(),
     search: "",
     setOnly: false,
-    exportOpen: false,
     pasteOpen: false,
     copied: false,
     open: new Set<string>(["Essentials"]),
@@ -106,7 +94,6 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
   readHash();
   paintText();
   renderRail();
-  renderTypeSwitch();
   renderTabs();
   renderPanel();
   renderPreviewChrome();
@@ -115,25 +102,6 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
 
   function shell(): string {
     return `
-      <div class="play-toolbar">
-        <div class="play-example"><span>Example</span><strong data-example-name></strong></div>
-        <div class="play-divider"></div>
-        <div class="play-seg" data-types></div>
-        <div class="play-toolbar__end">
-          <button type="button" class="play-status is-ok" data-status><i></i><span>Valid</span></button>
-          <button type="button" class="play-share" data-share>Share</button>
-          <div class="play-export">
-            <button type="button" data-export>Export <span>▾</span></button>
-            <div class="play-menu" data-menu hidden>
-              <button type="button" data-exp="svg">SVG <em data-svg-size></em></button>
-              <button type="button" data-exp="png">PNG · 2× <em data-png-size></em></button>
-              <button type="button" data-exp="json">Spec JSON <em data-json-lines></em></button>
-              <hr />
-              <button type="button" data-exp="embed">Copy embed snippet</button>
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="play-work">
         <nav class="play-rail" aria-label="Examples">
           <div class="play-rail__head">
@@ -154,10 +122,26 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
             <span>Preview</span>
             <div class="play-seg" data-sizes></div>
             <div class="play-seg" data-modes></div>
+            <div class="play-preview__end">
+            <div class="play-preview__actions">
+              <button type="button" class="play-status is-ok" data-status><i></i><span>Valid</span></button>
+              <button type="button" class="play-share" data-share>Share</button>
+              <div class="play-export">
+                <button type="button" data-export popovertarget="play-export-menu" aria-haspopup="menu" aria-expanded="false" aria-controls="play-export-menu">Export <span>▾</span></button>
+                <div class="play-menu" id="play-export-menu" data-menu popover="auto" role="menu" aria-label="Export">
+                  <button type="button" role="menuitem" data-exp="svg">SVG <em data-svg-size></em></button>
+                  <button type="button" role="menuitem" data-exp="png">PNG · 2× <em data-png-size></em></button>
+                  <button type="button" role="menuitem" data-exp="json">Spec JSON <em data-json-lines></em></button>
+                  <hr role="separator" />
+                  <button type="button" role="menuitem" data-exp="embed">Copy embed snippet</button>
+                </div>
+              </div>
+            </div>
             <div class="play-zoom" data-zoom>
               <button type="button" data-zoom-out aria-label="Zoom out">−</button>
               <button type="button" data-zoom-fit title="Fit">100%</button>
               <button type="button" data-zoom-in aria-label="Zoom in">+</button>
+            </div>
             </div>
           </div>
           <div class="play-canvas" data-canvas></div>
@@ -201,19 +185,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       }
     });
     host.querySelector("[data-share]")?.addEventListener("click", () => void share());
-    host.querySelector("[data-export]")?.addEventListener("click", () => {
-      state.exportOpen = !state.exportOpen;
-      const menu = host.querySelector<HTMLElement>("[data-menu]");
-      if (menu) menu.hidden = !state.exportOpen;
-    });
-    host.querySelector("[data-menu]")?.addEventListener("click", (event) => {
-      const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-exp]");
-      if (!button) return;
-      void exportAs(button.dataset.exp ?? "");
-      state.exportOpen = false;
-      const menu = host.querySelector<HTMLElement>("[data-menu]");
-      if (menu) menu.hidden = true;
-    });
+    bindExportMenu(host);
     host.querySelector("[data-status]")?.addEventListener("click", () => {
       host.querySelector<HTMLElement>("[data-issue]")?.focus();
     });
@@ -247,11 +219,6 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     document.addEventListener("keydown", (event) => {
       const target = event.target as HTMLElement | null;
       const typing = target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT");
-      if (event.key === "Escape") {
-        state.exportOpen = false;
-        const menu = host.querySelector<HTMLElement>("[data-menu]");
-        if (menu) menu.hidden = true;
-      }
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setTab("options");
@@ -272,13 +239,54 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     window.matchMedia("(max-width: 900px)").addEventListener("change", () => {
       void refresh(false);
     });
-    document.addEventListener("click", (event) => {
-      if ((event.target as HTMLElement).closest(".play-export")) return;
-      state.exportOpen = false;
-      const menu = host.querySelector<HTMLElement>("[data-menu]");
-      if (menu) menu.hidden = true;
-    });
     return host;
+  }
+
+  function bindExportMenu(host: HTMLElement): void {
+    const button = host.querySelector<HTMLButtonElement>("[data-export]");
+    const menu = host.querySelector<HTMLElement>("[data-menu]");
+    if (!button || !menu) return;
+    const items = () => [...menu.querySelectorAll<HTMLButtonElement>("[role='menuitem']")];
+    const place = () => {
+      const anchor = button.getBoundingClientRect();
+      const box = menu.getBoundingClientRect();
+      const next = menuPosition(anchor, box, { width: window.innerWidth, height: window.innerHeight });
+      menu.style.top = `${next.top}px`;
+      menu.style.left = `${next.left}px`;
+    };
+    menu.addEventListener("toggle", (event) => {
+      const open = (event as Event & { newState?: string }).newState === "open";
+      button.setAttribute("aria-expanded", open ? "true" : "false");
+      if (!open) return;
+      place();
+      items()[0]?.focus();
+    });
+    menu.addEventListener("click", (event) => {
+      const item = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-exp]");
+      if (!item) return;
+      menu.hidePopover();
+      void exportAs(item.dataset.exp ?? "");
+    });
+    menu.addEventListener("keydown", (event) => {
+      const list = items();
+      const index = list.indexOf(document.activeElement as HTMLButtonElement);
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        const step = event.key === "ArrowDown" ? 1 : -1;
+        list[(index + step + list.length) % list.length]?.focus();
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        list[0]?.focus();
+      } else if (event.key === "End") {
+        event.preventDefault();
+        list[list.length - 1]?.focus();
+      } else if (event.key === "Escape") {
+        button.focus();
+      }
+    });
+    window.addEventListener("resize", () => {
+      if (menu.matches(":popover-open")) place();
+    });
   }
 
   function readHash(): void {
@@ -310,10 +318,6 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       state.slug = "";
       state.mode = modeOf(state.spec);
     }
-  }
-
-  function exampleName(): string {
-    return examples.find((item) => item.slug === state.slug)?.title ?? "Shared spec";
   }
 
   function rowsOf(spec: Record<string, unknown>): Record<string, unknown>[] {
@@ -390,40 +394,6 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     }
   }
 
-  function renderTypeSwitch(): void {
-    const host = root.querySelector("[data-types]");
-    if (!host) return;
-    host.replaceChildren();
-    const current = chartType(state.spec);
-    for (const [type, label] of QUICK) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.textContent = label;
-      if (current === type) button.classList.add("is-on");
-      button.addEventListener("click", () => setType(type));
-      host.append(button);
-    }
-    const select = document.createElement("select");
-    select.className = "play-more";
-    const rest = types.filter((type) => !QUICK.some(([id]) => id === type));
-    const placeholder = document.createElement("option");
-    placeholder.value = "";
-    placeholder.textContent = "More";
-    select.append(placeholder);
-    for (const type of rest) {
-      const option = document.createElement("option");
-      option.value = type;
-      option.textContent = chartTypes.find((item) => item.type === type)?.title ?? type;
-      select.append(option);
-    }
-    select.value = rest.includes(current) ? current : "";
-    if (rest.includes(current)) select.classList.add("is-on");
-    select.addEventListener("change", () => {
-      if (select.value) setType(select.value);
-    });
-    host.append(select);
-  }
-
   function renderTabs(): void {
     const host = root.querySelector("[data-tabs]");
     if (!host) return;
@@ -446,8 +416,6 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       button.append(badge);
       host.append(button);
     });
-    const name = root.querySelector("[data-example-name]");
-    if (name) name.textContent = exampleName();
   }
 
   function renderPanel(): void {
@@ -1142,17 +1110,23 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       const card = document.createElement("div");
       card.className = "play-card";
       if (resolvedDark()) card.classList.add("is-dark");
-      card.style.width = `${size.width + 42}px`;
+      const gutter = canvas ? Number.parseFloat(getComputedStyle(canvas).paddingLeft) + Number.parseFloat(getComputedStyle(canvas).paddingRight) : 0;
+      const fitted = canvas ? Math.max(200, canvas.clientWidth - gutter) : size.width + 42;
+      const cardWidth = Math.min(size.width + 42, fitted);
+      const chartWidth = Math.max(120, cardWidth - 42);
+      card.style.width = `${cardWidth}px`;
       const title = document.createElement("h2");
       title.className = "play-card__title";
       title.textContent = typeof state.good.title === "string" && state.good.title.trim() ? state.good.title : "Untitled";
       const chart = document.createElement("div");
       chart.className = "play-card__chart";
       chart.dataset.ckLive = "1";
-      chart.style.width = `${size.width}px`;
+      chart.style.width = `${chartWidth}px`;
       chart.innerHTML = state.svg;
       const paintedHeight = Number(chart.querySelector("svg")?.getAttribute("height"));
-      chart.style.height = `${Number.isFinite(paintedHeight) && paintedHeight > 0 ? paintedHeight : (size.height ?? 240)}px`;
+      const natural = Number.isFinite(paintedHeight) && paintedHeight > 0 ? paintedHeight : (size.height ?? 240);
+      const drawn = size.width > 0 ? Math.max(1, Math.round(natural * (chartWidth / size.width))) : natural;
+      chart.style.height = `${drawn}px`;
       const kind = chartType(view);
       try {
         if (kind === "choropleth" || kind === "map-points") {
@@ -1365,7 +1339,6 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     setSpec(clone(example.spec), true);
     renderPreviewChrome();
     renderRail();
-    renderTypeSwitch();
   }
 
   function setTab(tab: TabName): void {
@@ -1500,12 +1473,6 @@ function specLines(text: string): { line: string; path: string }[] {
     stack.push({ indent, key });
     return { line, path: parent ? `${parent}.${key}` : key };
   });
-}
-
-function uniqueTypes(examples: ExampleSeed[]): string[] {
-  const seen = new Set<string>(chartTypes.map((item) => item.type));
-  for (const example of examples) if (example.type) seen.add(example.type);
-  return [...seen];
 }
 
 function jsonPath(path: string | undefined): string {
