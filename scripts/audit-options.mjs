@@ -266,10 +266,11 @@ function dataReason(path, spec, baseSvg = "") {
   if (axis && path.startsWith("axes.") && !axisDrawn(spec, axis) && (path.includes(".format") || path.endsWith(".autoSkip") || path.endsWith(".minorTicks") || path.endsWith(".titlePosition") || path.endsWith(".titleRotate"))) {
     return `${axis} axis is not drawn`;
   }
-  if (axis && path.startsWith("axes.") && (path.includes(".format") || path.endsWith(".autoSkip") || path.endsWith(".minorTicks"))) {
+  if (axis && path.startsWith("axes.") && (path.includes(".format") || path.endsWith(".minorTicks"))) {
     const values = channelValues(spec, axis === "y2" ? "y" : axis);
     // No column means a computed scale (histogram counts). Only a non-numeric column opts out.
-    if (values.length && !numericValues(values)) return `${axis} axis is not numeric, so format, autoSkip, and minor ticks do not apply`;
+    // autoSkip stays probed on category axes: skipping crowded category labels is a normal axis.
+    if (values.length && !numericValues(values)) return `${axis} axis is not numeric, so format and minor ticks do not apply`;
   }
   if (axis && (path.includes(".format") || path.includes(".scale") || path.endsWith(".type"))) {
     const values = channelValues(spec, axis === "y2" ? "y" : axis);

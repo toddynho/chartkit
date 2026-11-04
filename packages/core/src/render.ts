@@ -99,8 +99,31 @@ function renderWith(map: Map<string, ChartRenderer>, spec: unknown, target?: Ren
     ]);
   }
   svg = stampInteraction(svg, spec);
+  svg = scaleFontSize(svg, spec);
   if (target) target.innerHTML = svg;
   return svg;
+}
+
+/**
+ * theme.tokens.fontSize is the base. Tick labels that a renderer already drew
+ * at that size stay put. Every other font-size scales from the 11px default.
+ * font-family is untouched, so an omitted family still inherits the page.
+ */
+function scaleFontSize(svg: string, spec: unknown): string {
+  if (!isRecord(spec) || !isRecord(spec.theme) || !isRecord(spec.theme.tokens)) return svg;
+  const raw = spec.theme.tokens.fontSize;
+  if (typeof raw !== "number" || !Number.isFinite(raw)) return svg;
+  const px = Math.round(raw);
+  if (px < 6 || px > 32 || px === 11) return svg;
+  const sized = svg.replace(/^(<svg\b[^>]*style=")([^"]*)(")/, (_match, open: string, style: string, close: string) => {
+    if (style.includes("font-size:")) return `${open}${style}${close}`;
+    return `${open}${style};font-size:${px}px${close}`;
+  });
+  return sized.replace(/font-size="(\d+(?:\.\d+)?)"/g, (match, text: string) => {
+    const size = Number(text);
+    if (size === px) return match;
+    return `font-size="${Math.max(6, Math.round((size * px) / 11))}"`;
+  });
 }
 
 /** Records navigator, sync, and drilldown on the SVG. The controls mount on the client. */
