@@ -440,6 +440,39 @@ export interface ChartOpen {
   fontFamily?: string;
   /** Longer description. Linked with aria-describedby when set. */
   description?: string;
+  /** Inner padding. The plot is fitted into the remaining box. */
+  pad?: Inset;
+}
+
+/** Paired with openChart so a nested chart can pad without dropping the parent's box. */
+const padStack: boolean[] = [];
+
+function sidePx(value: number | undefined): number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+/** Fit padding into the chart. A request larger than the box is scaled so a pixel of plot remains. */
+function fitPad(pad: Inset | undefined, width: number, height: number): Inset | null {
+  if (!pad) return null;
+  let l = sidePx(pad.l);
+  let t = sidePx(pad.t);
+  let r = sidePx(pad.r);
+  let b = sidePx(pad.b);
+  if (!(l || t || r || b)) return null;
+  if (l + r >= width) {
+    const room = Math.max(0, width - 1);
+    const sum = l + r || 1;
+    l = Math.round((l / sum) * room);
+    r = room - l;
+  }
+  if (t + b >= height) {
+    const room = Math.max(0, height - 1);
+    const sum = t + b || 1;
+    t = Math.round((t / sum) * room);
+    b = room - t;
+  }
+  if (!(l || t || r || b)) return null;
+  return { l, t, r, b };
 }
 
 export function openChart(chart: ChartOpen): string {
@@ -450,10 +483,19 @@ export function openChart(chart: ChartOpen): string {
   const scene = capturing() ? ` data-ck-scene="1"` : "";
   const described = chart.description ? ` aria-describedby="${chart.id}-d"` : "";
   const desc = chart.description ? `<desc id="${chart.id}-d">${esc(chart.description)}</desc>` : `<desc>${esc(chart.alt)}</desc>`;
-  return (
+  const pad = fitPad(chart.pad, chart.width, chart.height);
+  padStack.push(Boolean(pad));
+  let svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${chart.height}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" role="img" aria-label="${esc(label)}"${described} class="ck-chart" data-ck-type="${esc(chart.type)}" data-ck-renderer="${esc(chart.renderer)}" data-ck-id="${chart.id}"${exported}${canvas}${scene} style="${fontStyle(familyOf(chart))}">` +
-    `<title>${esc(chart.title || chart.alt)}</title>${desc}`
-  );
+    `<title>${esc(chart.title || chart.alt)}</title>${desc}`;
+  if (pad) {
+    const l = pad.l ?? 0;
+    const t = pad.t ?? 0;
+    const iw = Math.max(1, chart.width - l - (pad.r ?? 0));
+    const ih = Math.max(1, chart.height - t - (pad.b ?? 0));
+    svg += `<svg data-ck-pad="1" x="${n(l)}" y="${n(t)}" width="${n(iw)}" height="${n(ih)}" viewBox="0 0 ${n(chart.width)} ${n(chart.height)}" preserveAspectRatio="none">`;
+  }
+  return svg;
 }
 
 function familyOf(chart: ChartOpen): string | undefined {
@@ -463,7 +505,7 @@ function familyOf(chart: ChartOpen): string | undefined {
 }
 
 export function closeChart(): string {
-  return "</svg>";
+  return padStack.pop() ? "</svg></svg>" : "</svg>";
 }
 
 export interface AxisRule {
@@ -585,7 +627,14 @@ export function pickTicks(min: number, max: number, count: number, values?: numb
   return log ? logTicks(min, max) : ticks(min, max, count);
 }
 
-export function readInset(spec: Record<string, unknown>): { t?: number; r?: number; b?: number; l?: number } {
+export interface Inset {
+  t?: number;
+  r?: number;
+  b?: number;
+  l?: number;
+}
+
+export function readInset(spec: Record<string, unknown>): Inset {
   const size = isRecord(spec.size) ? spec.size : undefined;
   const pad = size?.padding;
   if (typeof pad === "number") return { t: pad, r: pad, b: pad, l: pad };
