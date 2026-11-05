@@ -7,6 +7,8 @@ export const mocha = definePreset("mocha", {
   "muted": "#a6adc8",
   "grid": "#313244",
   "axis": "#45475a",
+  "positiveFill": "#00a953",
+  "negativeFill": "#f10056",
   "accent": "#89b4fa",
   "positive": "#a6e3a1",
   "negative": "#f38ba8",

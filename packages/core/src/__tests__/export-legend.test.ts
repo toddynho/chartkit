@@ -97,7 +97,7 @@ describe("colour scales", () => {
   it("paints a sequential ramp on a numeric heatmap and a constant stays on opacity", () => {
     const svg = render(heat);
     expect(svg).toContain('data-ck-scale="sequential"');
-    expect(svg).toContain("light-dark(#f5f5f7, #2c2c2e)");
+    expect(contrast(firstStop(svg), "#ffffff")).toBeGreaterThanOrEqual(3);
     expect(svg).toContain("#007aff");
     expect(svg).not.toContain("#1e3a8a");
     const constant = render({ ...heat, encoding: { x: "month", y: "region", color: { field: "revenue", value: "#c45c26" } } });
@@ -108,7 +108,7 @@ describe("colour scales", () => {
   it("uses one scheme name with a brighter midnight ramp", () => {
     const soft = render({ ...heat, encoding: { ...heat.encoding, color: { field: "revenue", scale: { type: "sequential", scheme: "blue" } } } });
     const night = render({ ...heat, theme: "midnight", encoding: { ...heat.encoding, color: { field: "revenue", scale: { type: "sequential", scheme: "blue" } } } });
-    expect(soft).toContain("light-dark(#f5f5f7, #2c2c2e)");
+    expect(contrast(firstStop(soft), "#ffffff")).toBeGreaterThanOrEqual(3);
     expect(soft).toContain("#007aff");
     expect(soft).not.toContain("#1e3a8a");
     expect(night).toContain("#e0f2fe");
@@ -121,7 +121,7 @@ describe("colour scales", () => {
       encoding: { x: "month", y: "region", color: { field: "revenue", scale: { type: "diverging", midpoint: 18 } } },
     });
     expect(diverging).toContain('data-ck-scale="diverging"');
-    expect(diverging).toContain("#ff9500");
+    expect(contrast(firstStop(diverging), "#ffffff")).toBeGreaterThanOrEqual(3);
     const bins = render({
       ...heat,
       encoding: { x: "month", y: "region", color: { field: "revenue", scale: { type: "quantize", bins: 4 } } },
@@ -172,8 +172,7 @@ describe("colour scales", () => {
       const soft = render({ ...heat, encoding: { x: "month", y: "region", color } });
       const night = render({ ...heat, theme: "midnight", encoding: { x: "month", y: "region", color } });
       expect(firstStop(soft)).not.toBe("#dbeafe");
-      if (scheme === "blue") expect(soft).toContain('stop-color="light-dark(#f5f5f7, #2c2c2e)"');
-      else expect(contrast(firstStop(soft), "#f5f5f7")).toBeGreaterThanOrEqual(3);
+      expect(contrast(firstStop(soft), "#ffffff")).toBeGreaterThanOrEqual(3);
       expect(contrast(firstStop(night), "#0c0c0c")).toBeGreaterThanOrEqual(3);
     }
     const diverging = render({
@@ -274,7 +273,9 @@ function patternFill(svg: string, id: string): string {
 }
 
 function firstStop(svg: string): string {
-  return /<stop offset="0%" stop-color="(#[0-9a-fA-F]{6})"/.exec(svg)?.[1] ?? "";
+  const stop = /<stop offset="0%" stop-color="([^"]+)"/.exec(svg)?.[1] ?? "";
+  const side = /light-dark\(\s*(#[0-9a-fA-F]{6})/.exec(stop);
+  return side?.[1] ?? (/^#[0-9a-fA-F]{6}$/.test(stop) ? stop : "");
 }
 
 function contrast(a: string, b: string): number {

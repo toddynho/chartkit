@@ -18,8 +18,69 @@ export function siblingFill(base: string, depth: number, index: number, count: n
   if (depth <= 0) return base;
   const depthMix = Math.max(48, 78 - (depth - 1) * 12);
   const shift = count <= 1 ? 0 : Math.round((index - (count - 1) / 2) * (18 / Math.max(1, count - 1)));
-  const mix = Math.min(88, Math.max(46, depthMix + shift));
+  return markMix(base, depthMix + shift);
+}
+
+/**
+ * Mix `base` toward the page, but not so far that the tile drops under 3:1
+ * on white or on near-black. Sibling tiles still shift; they just stop at the floor.
+ */
+export function markMix(base: string, amount: number): string {
+  const pair = resolve(base);
+  let mix = Math.max(mixFloor(base), Math.min(100, Math.round(amount)));
+  if (pair) mix = inkSafe(pair.light, [255, 255, 255], mix);
+  if (mix >= 100) return base;
   return `color-mix(in srgb, ${base} ${mix}%, ${LEAF_MIX})`;
+}
+
+/** More of the base until black or white ink clears 4.55:1 on the tile. */
+function inkSafe(base: RGB, into: RGB, amount: number): number {
+  let mix = amount;
+  for (let i = 0; i < 16; i++) {
+    const color = blend(base, into, mix);
+    const ink = Math.max(ratio([29, 29, 31], color), ratio([245, 245, 247], color));
+    if (ink >= 4.55) return mix;
+    mix = Math.min(100, mix + 3);
+  }
+  return mix;
+}
+
+function blend(base: RGB, into: RGB, amount: number): RGB {
+  const p = amount / 100;
+  return [
+    base[0] * p + into[0] * (1 - p),
+    base[1] * p + into[1] * (1 - p),
+    base[2] * p + into[2] * (1 - p),
+  ];
+}
+
+function mixFloor(base: string): number {
+  const pair = resolve(base);
+  if (!pair) return 100;
+  const light = percentUntil(pair.light, [255, 255, 255], [255, 255, 255], 3.5);
+  const dark = percentUntil(pair.dark, [245, 245, 247], [12, 12, 12], 3.5);
+  return Math.max(light, dark);
+}
+
+/** Smallest base percentage whose mix still clears 3:1 on `page`. */
+function percentUntil(base: RGB, into: RGB, page: RGB, min = 3.4): number {
+  if (ratio(base, page) < min) return 100;
+  let lo = 0;
+  let hi = 100;
+  let best = 100;
+  for (let i = 0; i < 12; i++) {
+    const amount = Math.round((lo + hi) / 2);
+    const mixed: RGB = [
+      base[0] * (amount / 100) + into[0] * (1 - amount / 100),
+      base[1] * (amount / 100) + into[1] * (1 - amount / 100),
+      base[2] * (amount / 100) + into[2] * (1 - amount / 100),
+    ];
+    if (ratio(mixed, page) >= min) {
+      best = amount;
+      hi = amount;
+    } else lo = amount;
+  }
+  return best;
 }
 
 /**

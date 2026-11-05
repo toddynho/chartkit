@@ -154,11 +154,11 @@ export function renderPolar(spec: Record<string, unknown>, kind: Kind): string |
       parts.push(openMark("path", kind, label, `d="${path}" fill="${color}"`, item.name, index));
       parts.push("</path>");
       if (labelsOn && r1 - r0 > 16) {
-        const mid = polar(cx, cy, (r0 + r1) / 2, angle + span / 2);
+        const mid = polar(cx, cy, outer + 56, angle + span / 2);
         parts.push(text(mid.x, mid.y + 4, shown, ink, 11, "650", "middle"));
       }
     });
-    const mid = polar(cx, cy, outer + 16, origin + usable / 2);
+    const mid = polar(cx, cy, outer + 36, origin + usable / 2);
     const anchor = mid.x < cx - 10 ? "end" : mid.x > cx + 10 ? "start" : "middle";
     parts.push(text(mid.x, mid.y, clip(category, 16), muted, 12, "560", anchor));
   });

@@ -56,7 +56,7 @@ describe("createTheme", () => {
   it("freezes violet the same way", () => {
     const theme = createTheme({ brand: "#6d28d9" });
     expect(theme.light.series).toEqual(["#694bb5", "#946d11", "#682b68", "#1c5619", "#238197", "#7c504b", "#3c578a", "#646108"]);
-    expect(theme.dark.series).toEqual(["#6b5d9e", "#eec474", "#ad8cac", "#60ae5b", "#5eddfe", "#d5a39c", "#8bb1f7", "#c1bd45"]);
+    expect(theme.dark.series).toEqual(["#7f63d0", "#eec474", "#ad8cac", "#60ae5b", "#5eddfe", "#d5a39c", "#8bb1f7", "#c1bd45"]);
     expect(theme.light.background).toBe("#f7f5fe");
     expect(theme.dark.background).toBe("#1b1827");
     expect(theme.textures.id).toBe("riso");
@@ -65,7 +65,7 @@ describe("createTheme", () => {
     expect(round1(theme.checks.lightSeriesMin)).toBe(4.2);
     expect(round1(theme.checks.darkText)).toBe(15.5);
     expect(round1(theme.checks.darkMuted)).toBe(8.7);
-    expect(round1(theme.checks.darkSeriesMin)).toBe(3.1);
+    expect(round1(theme.checks.darkSeriesMin)).toBe(3.8);
     expect(round3(theme.checks.deutan)).toBe(0.061);
     expect(round3(theme.checks.protan)).toBe(0.058);
     expect(round3(theme.checks.semanticDeutan)).toBe(0.232);

@@ -7,9 +7,9 @@ export const pearl = definePreset("pearl", {
   "muted": "#696c77",
   "grid": "#f0f0f1",
   "axis": "#e5e5e6",
-  "accent": "#4078f2",
-  "positive": "#50a14f",
-  "negative": "#e45649",
+  "accent": "#3a6cda",
+  "positive": "#40813f",
+  "negative": "#c2493e",
   "series": [
     "#50a14f",
     "#4078f2",

@@ -7,9 +7,9 @@ export const sunset = definePreset("sunset", {
   "muted": "#6b7280",
   "grid": "#f3f4f6",
   "axis": "#e5e7eb",
-  "accent": "#f59e0b",
-  "positive": "#10b981",
-  "negative": "#ef4444",
+  "accent": "#9d681c",
+  "positive": "#21865f",
+  "negative": "#d73d3d",
   "series": [
     "#059669",
     "#0284c7",

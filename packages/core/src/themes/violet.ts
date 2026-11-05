@@ -13,7 +13,7 @@ function ldList(light: readonly string[], dark: readonly string[]): string[] {
 }
 
 const lightSeries = ["#694bb5", "#946d11", "#682b68", "#1c5619", "#238197", "#7c504b", "#3c578a", "#646108"];
-const darkSeries = ["#6b5d9e", "#eec474", "#ad8cac", "#60ae5b", "#5eddfe", "#d5a39c", "#8bb1f7", "#c1bd45"];
+const darkSeries = ["#7f63d0", "#eec474", "#ad8cac", "#60ae5b", "#5eddfe", "#d5a39c", "#8bb1f7", "#c1bd45"];
 
 export const violet = definePreset("violet", {
   background: ld("#f7f5fe", "#1b1827"),
@@ -23,7 +23,9 @@ export const violet = definePreset("violet", {
   grid: ld("rgba(41, 39, 50, 0.12)", "rgba(242, 241, 248, 0.16)"),
   axis: ld("rgba(41, 39, 50, 0.38)", "rgba(242, 241, 248, 0.42)"),
   track: ld("rgba(41, 39, 50, 0.1)", "rgba(242, 241, 248, 0.1)"),
-  accent: ld("#694bb5", "#6b5d9e"),
+  positiveFill: ld("#007437", "#00a953"),
+  negativeFill: ld("#c80046", "#ca0547"),
+  accent: ld("#694bb5", "#8a71d8"),
   positive: ld("#1b589e", "#7eb6ff"),
   negative: ld("#a83825", "#f47d67"),
   series: ldList(lightSeries, darkSeries),

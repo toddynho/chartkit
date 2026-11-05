@@ -19,31 +19,54 @@ export interface ColorScale {
 /** Title plus ramp plus tick line. Callers keep this much space under the plot. */
 export const colorLegendHeight = 46;
 
-const MIN_CONTRAST = 3;
+const MIN_CONTRAST = 3.2;
 
 const KINDS = new Set<string>(["sequential", "diverging", "quantize", "threshold"]);
 const SCHEMES = new Set(["blue", "teal", "orange", "violet"]);
 
 function dark(preset: PresetTokens): boolean {
-  return preset.background === "#0c0c0c" || preset.text === "#ffffff";
+  if (preset.background.includes("light-dark(")) return false;
+  if (preset.background === "#0c0c0c" || preset.text === "#ffffff") return true;
+  return Boolean(hex(preset.background)) && luminance(preset.background) < 0.22;
 }
 
-/** Soft ramps stay in the blue/orange family. Midnight uses brighter stops on the same scheme names. */
+const LIGHT_STOPS: Record<string, string[]> = {
+  blue: ["#dbeafe", "#007aff"],
+  teal: ["#ccfbf1", "#0d9488", "#134e4a"],
+  orange: ["#ffedd5", "#ff9500", "#9a3412"],
+  violet: ["#ede9fe", "#7c3aed", "#4c1d95"],
+};
+const NIGHT_STOPS: Record<string, string[]> = {
+  blue: ["#0c4a6e", "#38bdf8", "#e0f2fe"],
+  teal: ["#134e4a", "#2dd4bf", "#ccfbf1"],
+  orange: ["#7c2d12", "#fb923c", "#ffedd5"],
+  violet: ["#4c1d95", "#a78bfa", "#ede9fe"],
+};
+
+/** Soft ramps stay in the blue/orange family. A dark card uses the brighter stops. A light-dark preset carries both. */
 function schemeStops(name: string, preset: PresetTokens, diverging: boolean): string[] {
-  const night = dark(preset);
-  if (diverging) return night ? ["#38bdf8", "#a1a1aa", "#fb923c"] : ["#007aff", "#f5f5f7", "#ff9500"];
-  const scheme = SCHEMES.has(name) ? name : "blue";
-  if (night) {
-    if (scheme === "teal") return ["#134e4a", "#2dd4bf", "#ccfbf1"];
-    if (scheme === "orange") return ["#7c2d12", "#fb923c", "#ffedd5"];
-    if (scheme === "violet") return ["#4c1d95", "#a78bfa", "#ede9fe"];
-    return ["#0c4a6e", "#38bdf8", "#e0f2fe"];
+  if (diverging) {
+    if (dark(preset)) return ["#38bdf8", "#a1a1aa", "#fb923c"];
+    if (preset.background.includes("light-dark(") || !hex(preset.background)) {
+      return ["light-dark(#007aff, #38bdf8)", "light-dark(#767676, #a1a1aa)", "light-dark(#c2410c, #fb923c)"];
+    }
+    return ["#007aff", "#767676", "#c2410c"];
   }
-  if (scheme === "teal") return ["#ccfbf1", "#0d9488", "#134e4a"];
-  if (scheme === "orange") return ["#ffedd5", "#ff9500", "#9a3412"];
-  if (scheme === "violet") return ["#ede9fe", "#7c3aed", "#4c1d95"];
-  // Card to accent. Both modes live in one string so the pack can bake each side.
-  return ["light-dark(#f5f5f7, #2c2c2e)", "light-dark(#007aff, #0a84ff)"];
+  const scheme = SCHEMES.has(name) ? name : "blue";
+  const light = LIGHT_STOPS[scheme] ?? LIGHT_STOPS.blue;
+  const night = NIGHT_STOPS[scheme] ?? NIGHT_STOPS.blue;
+  if (dark(preset)) return night;
+  if (preset.background.includes("light-dark(") || !hex(preset.background)) {
+    const count = Math.max(light.length, night.length);
+    const stops: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const left = light[Math.min(light.length - 1, i)] ?? "#007aff";
+      const right = night[Math.min(night.length - 1, i)] ?? "#38bdf8";
+      stops.push(left.toLowerCase() === right.toLowerCase() ? left : `light-dark(${left}, ${right})`);
+    }
+    return stops;
+  }
+  return light;
 }
 
 function hex(color: string): [number, number, number] | null {
@@ -92,30 +115,51 @@ function contrast(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-/** The card the ramp sits on. Soft's plot is transparent, so the light card is the Soft sheet. */
+/**
+ * The card the ramp sits on. A transparent plot is scored on the harness
+ * pages, white and near-black, which are the stricter pair.
+ */
 function cardOf(preset: PresetTokens): string {
+  if (preset.background.includes("light-dark(")) return preset.background;
   if (dark(preset)) return hex(preset.background) ? preset.background : "#0c0c0c";
-  return hex(preset.background) ? preset.background : "#f5f5f7";
+  return hex(preset.background) ? preset.background : "#ffffff";
+}
+
+/** Each stop, including both sides of light-dark(), clears 3:1 on its card. */
+function tuneStops(stops: string[], card: string): string[] {
+  if (stops.some((color) => ldPair(color))) {
+    const lightCard = ldPair(card)?.[0] ?? (hex(card) ? card : "#ffffff");
+    const darkCard = ldPair(card)?.[1] ?? "#0c0c0c";
+    const light = tuneStops(stops.map((color) => ldPair(color)?.[0] ?? color), lightCard);
+    const dark = tuneStops(stops.map((color) => ldPair(color)?.[1] ?? color), darkCard);
+    return light.map((color, index) => {
+      const other = dark[index] ?? color;
+      return color.toLowerCase() === other.toLowerCase() ? color : `light-dark(${color}, ${other})`;
+    });
+  }
+  return stops.map((color) => nudge(color, card));
 }
 
 /**
- * Move the low end up the ramp until it clears the card, then resample so the
- * ramp stays in order. The high stop does not move. A custom range is left alone.
+ * Move away from the card until the stop clears 3:1. A light card darkens
+ * the stop. A dark card lightens it. The hue stays, because the mix is
+ * only with black or white.
  */
-function clampLow(stops: string[], card: string): string[] {
-  const low = stops[0];
-  if (!low || stops.length < 2 || contrast(low, card) >= MIN_CONTRAST) return stops;
+function nudge(color: string, card: string): string {
+  if (!hex(color) || contrast(color, card) >= MIN_CONTRAST) return color;
+  const toward = luminance(card) >= 0.5 ? "#000000" : "#ffffff";
   let lo = 0;
   let hi = 1;
-  let floor = 1;
-  for (let i = 0; i < 16; i++) {
+  let best = toward;
+  for (let i = 0; i < 18; i++) {
     const t = (lo + hi) / 2;
-    if (contrast(sample(stops, t), card) >= MIN_CONTRAST) {
-      floor = t;
+    const mixed = mix(color, toward, t);
+    if (contrast(mixed, card) >= MIN_CONTRAST) {
+      best = mixed;
       hi = t;
     } else lo = t;
   }
-  return stops.map((_, index) => sample(stops, floor + (1 - floor) * (index / (stops.length - 1))));
+  return contrast(best, card) >= MIN_CONTRAST ? best : toward;
 }
 
 function sample(stops: string[], t: number): string {
@@ -185,8 +229,9 @@ export function readColorScale(channel: unknown, preset: PresetTokens, values: A
   const scheme = scale && typeof scale.scheme === "string" ? scale.scheme : "blue";
   const custom = record && Array.isArray(record.range) ? record.range.filter((item): item is string => typeof item === "string" && item.length > 0) : [];
   const schemeColors = schemeStops(scheme, preset, kind === "diverging");
-  const cardRamp = schemeColors.some((color) => color.includes("light-dark("));
-  const stops = custom.length >= 2 ? custom : cardRamp ? schemeColors : clampLow(schemeColors, cardOf(preset));
+  // A range set on the spec is painted as given. Named schemes are moved
+  // the minimum amount so every stop clears 3:1 on the card.
+  const stops = custom.length >= 2 ? custom : tuneStops(schemeColors, cardOf(preset));
   const title =
     record && typeof record.title === "string" && record.title
       ? record.title

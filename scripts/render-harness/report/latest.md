@@ -1,6 +1,6 @@
 # Chart render sweep
 
-Seed `20261105`. Mode `full`. 34731 cases, 27319 rendered, 77.2s.
+Seed `20261105`. Mode `full`. 34731 cases, 27319 rendered, 70.3s.
 
 ChartKit does not rewrite or shorten labels. An overlap is a layout bug. Spec-set sizes are left as the example wrote them, except when the sweep itself sets `size`.
 
@@ -12,15 +12,15 @@ Compared 27317. Changed 0. Missing baseline 0. Tolerance 8 bits on a 64-bit dHas
 
 ## Timing
 
-Render p50 0.2 ms, p95 2.5 ms, max 1917.8 ms.
+Render p50 0.2 ms, p95 2.0 ms, max 1983.4 ms.
 
 ## Findings by check
 
 | Check | Count |
 | --- | ---: |
-| contrast | 1727 |
-| text-overlap | 216 |
-| text-outside | 189 |
+| contrast | 906 |
+| text-overlap | 227 |
+| text-outside | 221 |
 | mark-outside | 35 |
 | text-clipped | 8 |
 
@@ -29,50 +29,46 @@ Render p50 0.2 ms, p95 2.5 ms, max 1917.8 ms.
 | Type | Count |
 | --- | ---: |
 | combo | 283 |
-| line | 220 |
-| bar | 218 |
-| heatmap | 205 |
-| strip | 165 |
-| rose | 140 |
-| gauge | 118 |
-| treemap | 115 |
-| spike | 82 |
-| timeline | 77 |
-| radar | 68 |
-| journey | 63 |
+| bar | 217 |
+| line | 196 |
+| strip | 140 |
+| spike | 74 |
+| journey | 60 |
 | donut | 57 |
-| kpi | 52 |
-| stacked-area | 48 |
+| heatmap | 47 |
 | pie | 45 |
-| sunburst | 43 |
-| gantt | 32 |
-| waterfall | 22 |
-| radial-bar | 19 |
+| treemap | 40 |
+| rose | 37 |
+| stacked-area | 36 |
+| gantt | 25 |
+| radial-bar | 18 |
+| sunburst | 17 |
+| waterfall | 16 |
 | bar-list | 15 |
-| candlestick | 15 |
-| boxplot | 13 |
-| quadrant | 12 |
+| timeline | 13 |
+| candlestick | 11 |
+| quadrant | 9 |
 | map-points | 8 |
-| mini-area | 8 |
-| sparkline | 8 |
-| streamgraph | 7 |
-| density | 4 |
+| kpi | 7 |
+| streamgraph | 6 |
+| radar | 5 |
+| gauge | 4 |
 | area-range | 3 |
-| sankey | 3 |
 | scatter | 3 |
-| tree | 2 |
+| density | 2 |
 | choropleth | 1 |
+| sankey | 1 |
 | venn | 1 |
 
 ## Root-cause groups
 
 A group is one check failing the same way. Counts are findings, not chart types.
 
-### 1. contrast · label (952)
+### 1. contrast · label (698)
 
-Types: bar, bar-list, combo, donut, gantt, kpi, line, pie, radial-bar, rose, stacked-area, strip, sunburst, timeline, treemap
+Types: bar, bar-list, combo, donut, gantt, line, pie, rose, stacked-area, strip, sunburst, treemap
 
-Options: axes.x.offset, encoding.y.format, encoding.y.format.decimals, encoding.y.format.signed, headline.tone, legend.anchor, legend.position, legend.position×title
+Options: axes.x.offset, headline.tone, legend.anchor, legend.position, legend.position×title, mark.innerRadius, mark.labelColor, mark.labelEnds
 
 - `bar` / `channels-bar` / `mark.labelFormat` = "bytes"
   Label “40 B” is 1.86:1 on #30d158 in dark mode. Minimum is 4.5:1.
@@ -83,24 +79,9 @@ Options: axes.x.offset, encoding.y.format, encoding.y.format.decimals, encoding.
 
 ![contrast · label](examples/01-contrast-label.png)
 
-### 2. contrast · mark (712)
+### 2. text-outside · label (187)
 
-Types: bar, boxplot, candlestick, choropleth, combo, density, donut, gantt, gauge, heatmap, journey, kpi, line, map-points, mini-area, pie, quadrant, radar, sankey, sparkline, spike, stacked-area, streamgraph, strip, sunburst, timeline, tree, treemap, waterfall
-
-Options: encoding.color, encoding.color.scale.bins, encoding.color.scale.reverse, encoding.color.scale.scheme, encoding.color.scale.type, encoding.color.value, encoding.size, encoding.y.color
-
-- `bar` / `03-bar` / `encoding.color.value` = "#111111"
-  Mark #111111 is 1.04:1 on #0c0c0c in dark mode. Minimum for a graphic is 3:1.
-- `bar` / `03-bar` / `encoding.color.value` = "#f5f5f7"
-  Mark #f5f5f7 is 1.09:1 on #ffffff in light mode. Minimum for a graphic is 3:1.
-- `bar` / `03-bar` / `encoding.y.color` = "#111111"
-  Mark #111111 is 1.04:1 on #0c0c0c in dark mode. Minimum for a graphic is 3:1.
-
-![contrast · mark](examples/02-contrast-mark.png)
-
-### 3. text-outside · label (160)
-
-Types: combo, gantt, heatmap, journey, line, radar, scatter, spike, strip
+Types: combo, gantt, heatmap, journey, line, radar, radial-bar, rose, scatter, spike, strip
 
 Options: axes.x.offset, axes.y.offset, axes.y.position, axes.y.titleRotate, axes.y2.titleRotate, encoding.color.scale.type, encoding.x.type, layout.direction
 
@@ -111,7 +92,22 @@ Options: axes.x.offset, axes.y.offset, axes.y.position, axes.y.titleRotate, axes
 - `combo` / `07-combo` / `axes.y2.titleRotate` = 360
   Label “Margin” extends outside the viewBox. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
 
-### 4. text-overlap · label × label (95)
+### 3. contrast · mark (162)
+
+Types: bar, candlestick, choropleth, combo, density, donut, gantt, heatmap, journey, line, map-points, pie, quadrant, stacked-area, streamgraph, strip, timeline, treemap, waterfall
+
+Options: encoding.color, encoding.color.scale.bins, encoding.color.scale.type, encoding.color.value, encoding.size, encoding.y.color, theme.tokens.accent, theme.tokens.negative
+
+- `bar` / `03-bar` / `encoding.color.value` = "#111111"
+  Mark #111111 is 1.04:1 on #0c0c0c in dark mode. Minimum for a graphic is 3:1.
+- `bar` / `03-bar` / `encoding.color.value` = "#f5f5f7"
+  Mark #f5f5f7 is 1.09:1 on #ffffff in light mode. Minimum for a graphic is 3:1.
+- `bar` / `03-bar` / `encoding.y.color` = "#111111"
+  Mark #111111 is 1.04:1 on #0c0c0c in dark mode. Minimum for a graphic is 3:1.
+
+![contrast · mark](examples/02-contrast-mark.png)
+
+### 4. text-overlap · label × label (99)
 
 Types: combo, gauge, line, pie, quadrant, rose, sankey, spike, strip, timeline
 
@@ -163,24 +159,11 @@ Options: axes.x.offset, axes.x.position, mark.labelEnds, mark.labelPosition, mar
 - `line` / `quarterly-units` / `mark.labelPosition` = "bottom"
   Label “40” overlaps Tick label “Q1”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
 
-### 8. contrast · title (28)
+### 8. text-outside · tick (28)
 
-Types: gauge, kpi, rose, treemap
+Types: bar, candlestick, heatmap, radial-bar, rose, spike
 
-Options: metric.delta, theme, theme.tokens.fontSize, theme.tokens.positive
-
-- `gauge` / `09-gauge` / `theme` = "latte"
-  Title “72” is 2.96:1 on #eff1f5 in light mode. Minimum is 3:1.
-- `gauge` / `09-gauge` / `theme` = "sunset"
-  Title “72” is 2.54:1 on #ffffff in light mode. Minimum is 3:1.
-- `gauge` / `capacity-gauge` / `theme` = "latte"
-  Title “72” is 2.96:1 on #eff1f5 in light mode. Minimum is 3:1.
-
-### 9. text-outside · tick (23)
-
-Types: bar, candlestick, heatmap, spike
-
-Options: axes.x.position, encoding.x.type, mark.layout, mark.orientation
+Options: axes.x.position, encoding.x.type, mark.labels, mark.layout, mark.orientation, size.height, title
 
 - `bar` / `signups-bar` / `mark.orientation` = "horizontal"
   Tick label “15.000” extends outside the viewBox. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
@@ -189,7 +172,7 @@ Options: axes.x.position, encoding.x.type, mark.layout, mark.orientation
 - `heatmap` / `activity-calendar` / `mark.layout` = "grid"
   Tick label “2026-03-29” extends outside the viewBox. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
 
-### 10. contrast · legend (20)
+### 9. contrast · legend (20)
 
 Types: combo, line, treemap
 
@@ -202,7 +185,7 @@ Options: legend.anchor, legend.position, legend.position×title, mark.pointSize,
 - `combo` / `orders-combo` / `mark.stack` = "percent"
   Legend item “Orders” is 4.19:1 on #007aff in light mode. Minimum is 4.5:1.
 
-### 11. text-overlap · legend × legend (19)
+### 10. text-overlap · legend × legend (19)
 
 Types: pie, treemap
 
@@ -215,9 +198,9 @@ Options: legend.anchor, legend.position, legend.position×title
 - `pie` / `29-pie` / `legend.position×title` = {"legend.position":"inside","title":""}
   Legend item “4%” overlaps Legend item “Search”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
 
-### 12. contrast · tick (15)
+### 11. contrast · tick (18)
 
-Types: bar, gantt, line, sunburst
+Types: bar, gantt, line, sunburst, timeline
 
 Options: legend.position×title, mark.labelPosition, title
 
@@ -228,7 +211,7 @@ Options: legend.position×title, mark.labelPosition, title
 - `gantt` / `launch-gantt` / ``
   Tick label “Today” is 1.00:1 on #ffffff in light mode. Minimum is 4.5:1.
 
-### 13. text-overlap · label × legend (15)
+### 12. text-overlap · label × legend (16)
 
 Types: area-range, pie, radar, radial-bar, strip, treemap
 
@@ -243,6 +226,19 @@ Options: legend.anchor, legend.position, legend.position×title, size.width, siz
 
 ![text-overlap · label × legend](examples/03-text-overlap-label-legend.png)
 
+### 13. contrast · title (8)
+
+Types: kpi, treemap
+
+Options: metric.delta, theme.tokens.fontSize, theme.tokens.positive
+
+- `kpi` / `10-kpi` / `theme.tokens.positive` = "#111111"
+  Title “↗ +12.5%” is 1.35:1 on #2c2c2e in dark mode. Minimum is 4.5:1.
+- `kpi` / `10-kpi` / `theme.tokens.positive` = "#f5f5f7"
+  Title “↗ +12.5%” is 1.09:1 on #ffffff in light mode. Minimum is 4.5:1.
+- `kpi` / `error-kpi` / `metric.delta` = 0
+  Title “↗ 0%” is 4.09:1 on #2c2c2e in dark mode. Minimum is 4.5:1.
+
 ### 14. text-clipped · tick (8)
 
 Types: waterfall
@@ -256,7 +252,20 @@ Options: axes.x.offset, encoding.y.scale.padding.min, size.width×legend.positio
 - `waterfall` / `23-waterfall` / `size.width×legend.position` = {"size.width":"240","legend.position":"top","size.height":"160"}
   Tick label “22” is clipped by the plot. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
 
-### 15. text-outside · title (6)
+### 15. text-overlap · label × title (7)
+
+Types: pie, radial-bar, rose
+
+Options: size.height, size.width×legend.position
+
+- `pie` / `29-pie` / `size.width×legend.position` = {"size.width":"240","legend.position":"top","size.height":"160"}
+  Title “Share of revenue” overlaps Label “28%”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
+- `radial-bar` / `lumen-radial-bar` / `size.height` = "240"
+  Title “Lumen, minutes by desk” overlaps Label “Ident”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
+- `radial-bar` / `lumen-radial-bar` / `size.width×legend.position` = {"size.width":"240","legend.position":"right","size.height":"160"}
+  Title “Lumen, minutes by desk” overlaps Label “Ident”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
+
+### 16. text-outside · title (6)
 
 Types: bar, line, strip, venn
 
@@ -269,42 +278,29 @@ Options: size.width, size.width×legend.position
 - `strip` / `36-strip` / `size.width` = "240"
   Title “Output tokens per working chart” extends outside the viewBox. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
 
-### 16. text-overlap · label × title (4)
+### 17. text-overlap · tick × title (6)
 
-Types: pie, radial-bar
+Types: radar, rose
 
-Options: size.width×legend.position
-
-- `pie` / `29-pie` / `size.width×legend.position` = {"size.width":"240","legend.position":"top","size.height":"160"}
-  Title “Share of revenue” overlaps Label “28%”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
-- `radial-bar` / `lumen-radial-bar` / `size.width×legend.position` = {"size.width":"240","legend.position":"right","size.height":"160"}
-  Title “Lumen, minutes by desk” overlaps Label “Ident”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
-- `radial-bar` / `lumen-radial-bar` / `size.width×legend.position` = {"size.width":"240","legend.position":"top","size.height":"160"}
-  Title “Lumen, minutes by desk” overlaps Label “Ident”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
-
-### 17. text-overlap · legend × title (3)
-
-Types: donut, radial-bar
-
-Options: legend.anchor, size.width×legend.position
-
-- `donut` / `04-donut` / `legend.anchor` = "center"
-  Title “100” overlaps Legend item “Social”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
-- `donut` / `04-donut` / `legend.anchor` = "center"
-  Title “100” overlaps Legend item “Direct”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
-- `radial-bar` / `lumen-radial-bar` / `size.width×legend.position` = {"size.width":"240","legend.position":"right","size.height":"160"}
-  Title “Lumen, minutes by desk” overlaps Legend item “Music”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
-
-### 18. text-overlap · tick × title (2)
-
-Types: radar
-
-Options: size.width×legend.position
+Options: size.width×legend.position, sort.by, sort.order
 
 - `radar` / `18-radar` / `size.width×legend.position` = {"size.width":"240","legend.position":"right","size.height":"160"}
   Title “Model comparison” overlaps Tick label “Speed”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
 - `radar` / `18-radar` / `size.width×legend.position` = {"size.width":"240","legend.position":"top","size.height":"160"}
   Title “Model comparison” overlaps Tick label “Speed”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
+- `rose` / `lumen-rose` / ``
+  Title “Saturday audience” overlaps Tick label “3,900”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
+
+### 18. text-overlap · legend × title (2)
+
+Types: donut
+
+Options: legend.anchor
+
+- `donut` / `04-donut` / `legend.anchor` = "center"
+  Title “100” overlaps Legend item “Social”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
+- `donut` / `04-donut` / `legend.anchor` = "center"
+  Title “100” overlaps Legend item “Direct”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
 
 ## Recorded, not failed
 
@@ -316,4 +312,4 @@ An option the playground marks “Not yet supported” is listed and not rendere
 
 Vision review is a stub. Call reviewFlagged(findings, reviewer) with a reviewer that implements review({ findings, images }). This sweep does not call a model.
 
-Flagged images: 8.
+Flagged images: 6.

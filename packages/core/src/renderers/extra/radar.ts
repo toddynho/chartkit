@@ -65,14 +65,13 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
   const rings = 4;
   const at = (index: number, value: number) => polar(cx, cy, (radius * Math.max(0, value)) / max, (360 / axes.length) * index);
   const grid = cssVar("grid", frame.preset.grid);
-  const axis = cssVar("axis", frame.preset.axis);
   for (let ring = 1; ring <= rings; ring++) {
     const points = axes.map((_, index) => at(index, (max * ring) / rings));
     parts.push(`<polygon points="${points.map((point) => `${n(point.x)},${n(point.y)}`).join(" ")}" fill="none" stroke="${grid}" />`);
   }
   axes.forEach((name, index) => {
     const end = at(index, max);
-    parts.push(`<line data-ck-mark="spoke" x1="${n(cx)}" y1="${n(cy)}" x2="${n(end.x)}" y2="${n(end.y)}" stroke="${axis}" />`);
+    parts.push(`<line data-ck-mark="spoke" x1="${n(cx)}" y1="${n(cy)}" x2="${n(end.x)}" y2="${n(end.y)}" stroke="${cssVar("muted", frame.preset.muted)}" />`);
     const labelAt = at(index, max * 1.18);
     const anchor = labelAt.x < cx - 8 ? "end" : labelAt.x > cx + 8 ? "start" : "middle";
     parts.push(text(labelAt.x, labelAt.y, fit(name, 80, 12), cssVar("text", frame.preset.text), 12, "500", anchor));

@@ -8,8 +8,10 @@ export const arctic = definePreset("arctic", {
   "grid": "#3b4252",
   "axis": "#4c566a",
   "accent": "#88c0d0",
-  "positive": "#a3be8c",
-  "negative": "#bf616a",
+  "positive": "#acc498",
+  "negative": "#d18c93",
+  "positiveFill": "#049047",
+  "negativeFill": "#e7355e",
   "series": [
     "#88c0d0",
     "#81a1c1",
