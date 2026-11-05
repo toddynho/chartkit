@@ -930,7 +930,7 @@ export const examples: Example[] = [
     title: "Copies by genre",
     group: "Time",
     type: "streamgraph",
-    blurb: "History overtook fiction. The baseline is not zero.",
+    blurb: "History overtook fiction in 2022. Science keeps climbing. The baseline is not zero.",
     spec: { ...(genreStream as Spec), id: "copies-streamgraph" },
   },
   {
@@ -954,7 +954,7 @@ export const examples: Example[] = [
     title: "One hierarchy",
     group: "Flow",
     type: "tree",
-    blurb: "Root has two children. A has one child. Dots, not boxes.",
+    blurb: "Support splits into Inbox, Docs, and Billing. Dots and names, not boxes.",
     spec: { ...(orgTree as Spec), id: "org-tree" },
   },
   {
@@ -962,7 +962,7 @@ export const examples: Example[] = [
     title: "Leaves line up",
     group: "Flow",
     type: "tree",
-    blurb: "A dendrogram. Fruit has two leaves and Veg has one.",
+    blurb: "A dendrogram. Fruit has three leaves and Veg has two, and the leaves line up.",
     spec: { ...(clusterTree as Spec), id: "cluster-tree" },
   },
   {
@@ -970,7 +970,7 @@ export const examples: Example[] = [
     title: "Wait time",
     group: "Distribution",
     type: "density",
-    blurb: "Most waits sit near 15 minutes, with a tail out to 40.",
+    blurb: "Most waits sit near 15 minutes. A smaller bump sits out near 40.",
     spec: { ...(waitDensity as Spec), id: "wait-density" },
   },
   {
@@ -978,7 +978,7 @@ export const examples: Example[] = [
     title: "Wait by desk",
     group: "Distribution",
     type: "density",
-    blurb: "One curve per desk, fixed bandwidth, counts instead of density.",
+    blurb: "Front desk near 14 minutes, back desk near 33. Counts, not a unit density.",
     spec: { ...(deskDensity as Spec), id: "desk-density" },
   },
   {

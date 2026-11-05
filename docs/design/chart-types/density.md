@@ -1,6 +1,6 @@
 # Density spec proposal
 
-Status: design only. Rank 2 in [README.md](./README.md). Recommendation: build the 1D curve. Leave 2D filled density until [contour](./contour.md) shares the grid. Effort S for 1D, M for 2D. Coverage 4 of 9, and two of the four are partial. Matrix id `type.density`, `agentRelevance` 2.
+Status: shipped as a 1D curve. The gallery example is Wait time. 2D filled density waits on [contour](./contour.md). Rank 2 in [README.md](./README.md). Coverage 4 of 9, and two of the four are partial. Matrix id `type.density`, `agentRelevance` 2.
 
 A density chart draws a kernel density estimate: a smooth curve of how a quantitative sample is spread. Use it when the question is the shape of a distribution (one mode or two, where the mass sits, how wide the tail is). Do not use it for counts in bins. That is `histogram`, which ChartKit already draws. Do not use it when the reader needs a median and quartiles. That is `boxplot` or `strip`. A density with a group field is one curve per group, not a violin. Violin outlines are out of v1.
 

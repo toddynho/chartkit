@@ -3,13 +3,11 @@
   "type": "density",
   "title": "Vertical waits",
   "data": [
-    { "wait": 10 },
-    { "wait": 12 },
-    { "wait": 14 },
-    { "wait": 28 },
-    { "wait": 32 }
+    { "wait": 10 }, { "wait": 11 }, { "wait": 12 }, { "wait": 13 }, { "wait": 14 },
+    { "wait": 15 }, { "wait": 16 }, { "wait": 28 }, { "wait": 30 }, { "wait": 32 },
+    { "wait": 34 }, { "wait": 36 }
   ],
   "encoding": { "x": "wait" },
   "mark": { "orientation": "vertical", "rug": true, "extent": "data" },
-  "a11y": { "alt": "Waits bunch near 12 and again near 30. Ticks show the raw sample." }
+  "a11y": { "alt": "Waits bunch near 14 and again near 32. Ticks show the raw sample." }
 }

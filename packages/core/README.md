@@ -362,20 +362,51 @@ Not published yet. See [catalog/migrate.md](../../catalog/migrate.md).
 
 ## streamgraph
 
+The baseline moves. `mark.streamOffset` is `wiggle` unless set to `center`, `zero`, or `expand`. Layer names stay whole.
+
 ```json
-{"version":"1","type":"streamgraph","data":[{"y":"20","a":2,"b":1},{"y":"22","a":2,"b":3}],"encoding":{"x":"y","y":["a","b"]},"a11y":{"alt":"B grew. Baseline is not zero."}}
+{
+  "version": "1",
+  "type": "streamgraph",
+  "data": [
+    { "year": "2020", "fiction": 20, "history": 12 },
+    { "year": "2022", "fiction": 22, "history": 30 }
+  ],
+  "encoding": { "x": "year", "y": ["fiction", "history"] },
+  "a11y": { "alt": "History overtook fiction. The baseline is not zero." }
+}
 ```
 
 ## tree
 
+One parent per node. `mark.tree` `cluster` lines the leaves up. `mark.orient` is `LR`, `RL`, `TB`, or `BT`. Names are not shortened.
+
 ```json
-{"version":"1","type":"tree","data":[{"id":"R","parent":""},{"id":"A","parent":"R"},{"id":"B","parent":"R"}],"encoding":{"id":"id","parent":"parent"},"a11y":{"alt":"R has two children. Not boxes."}}
+{
+  "version": "1",
+  "type": "tree",
+  "data": [
+    { "id": "Support", "parent": "" },
+    { "id": "Inbox", "parent": "Support" },
+    { "id": "Docs", "parent": "Support" }
+  ],
+  "encoding": { "id": "id", "parent": "parent" },
+  "a11y": { "alt": "Support has Inbox and Docs." }
+}
 ```
 
 ## density
 
+The rows are the sample. `mark.bandwidth` `auto` is Scott's rule. `encoding.color` draws one curve per group.
+
 ```json
-{"version":"1","type":"density","data":[{"wait":12},{"wait":15},{"wait":40}],"encoding":{"x":"wait"},"a11y":{"alt":"Most waits sit near 15, with a tail to 40."}}
+{
+  "version": "1",
+  "type": "density",
+  "data": [{ "wait": 12 }, { "wait": 15 }, { "wait": 40 }],
+  "encoding": { "x": "wait" },
+  "a11y": { "alt": "Most waits sit near 15, with a tail to 40." }
+}
 ```
 
 ## radar

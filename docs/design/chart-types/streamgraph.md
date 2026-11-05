@@ -1,6 +1,6 @@
 # Streamgraph spec proposal
 
-Status: design only. Rank 1 in [README.md](./README.md). Recommendation: build. Effort S. Coverage 6 of 9. Matrix id `type.area.stream`, `agentRelevance` 2.
+Status: shipped. The gallery example is Copies by genre. Rank 1 in [README.md](./README.md). Coverage 6 of 9. Matrix id `type.area.stream`, `agentRelevance` 2.
 
 A streamgraph is a stacked area whose baseline moves so the layers sit around a center instead of on zero. Use it for a composition over time when the shape of the change matters more than the total. Do not use it when the reader needs to compare a layer to zero, read a level off the axis, or see negatives. Those are stacked area (`mark.stack: "stack"` or `"percent"`), which ChartKit already draws. A streamgraph with one series is a centered area and should repair toward stacked area.
 

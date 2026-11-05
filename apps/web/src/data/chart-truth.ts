@@ -208,7 +208,7 @@ const truth: Record<string, Truth> = {
       { path: "`mark.streamOffset`", role: "wiggle (default), center, zero, or expand", status: drawn },
       { path: "`mark.order`", role: "inside-out, none, ascending, or descending", status: drawn },
       { path: "`mark.curve`", role: "monotone (default), linear, or step", status: drawn },
-      { path: "`mark.labels`", role: "Series name at the thickest part of the layer", status: drawn },
+      { path: "`mark.labels`", role: "Full series name where the layer is thick enough to hold it. A name that would collide stays on the area.", status: drawn },
       { path: "`legend`", role: "Click and hover use the shared legend", status: drawn },
     ],
     extra: [
@@ -233,9 +233,25 @@ const truth: Record<string, Truth> = {
     entry: "@chartkitdev/core/charts/tree",
     bundle: "@chartkitdev/core/extra",
     notes: [
-      "mark.tree tidy is Reingold–Tilford. cluster is the dendrogram.",
+      "encoding.id and encoding.parent, nested children, or encoding.path. One root.",
+      "mark.tree tidy is Reingold–Tilford. cluster is the dendrogram: every leaf at the same depth.",
       "mark.orient is LR, RL, TB, or BT. mark.radial puts the root at the center.",
-      "Dots and short labels. Org-chart boxes are not this chart.",
+      "Each node keeps its full name. The margin grows to hold it. Org-chart boxes are not this chart.",
+    ],
+    options: [
+      { path: "`encoding.id` / `encoding.parent`", role: "Node and its one parent. An empty parent is the root.", status: drawn },
+      { path: "`mark.tree`", role: "tidy (default) or cluster", status: drawn },
+      { path: "`mark.orient`", role: "LR (default), RL, TB, or BT", status: drawn },
+      { path: "`mark.link`", role: "curve (default) or step", status: drawn },
+      { path: "`mark.radial`", role: "Root at the center. Off by default.", status: drawn },
+    ],
+    extra: [
+      {
+        title: "When to use it",
+        paragraphs: ["Who connects to whom, and each node has one parent. A weighted flow is a sankey. A partition of a quantity is a treemap or a sunburst."],
+        list: [],
+        code: [],
+      },
     ],
   },
   density: {
@@ -243,9 +259,26 @@ const truth: Record<string, Truth> = {
     entry: "@chartkitdev/core/charts/density",
     bundle: "@chartkitdev/core/extra",
     notes: [
+      "The spec does not contain a density transform. The rows are the observations.",
       "mark.bandwidth auto is Scott's rule. A number is the Gaussian width.",
       "mark.normalize density integrates to 1. count multiplies by the sample size.",
       "Groups from encoding.color or encoding.series overlay. mark.rug draws the raw points.",
+    ],
+    options: [
+      { path: "`encoding.x`", role: "The raw sample", status: drawn },
+      { path: "`encoding.color`", role: "One curve per group", status: drawn },
+      { path: "`mark.bandwidth`", role: "auto (Scott's rule) or a number", status: drawn },
+      { path: "`mark.normalize`", role: "density (default) or count", status: drawn },
+      { path: "`mark.rug`", role: "Draw the raw observations under the curve", status: drawn },
+      { path: "`mark.orientation`", role: "horizontal (default) or vertical", status: drawn },
+    ],
+    extra: [
+      {
+        title: "When to use it",
+        paragraphs: ["The shape of a distribution: where the mass sits, and whether there is a second bump. Counts in bins are a histogram. A median and quartiles are a boxplot or a strip."],
+        list: [],
+        code: [],
+      },
     ],
   },
   strip: {
