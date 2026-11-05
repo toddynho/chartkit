@@ -198,6 +198,53 @@ describe("strip", () => {
     expect((fixed.spec as { encoding: { label?: string } }).encoding.label).toBeUndefined();
   });
 
+  it("places a log scale on the midpoint and clamps a point past the domain", () => {
+    const spec = {
+      version: "1",
+      type: "strip",
+      data: [
+        { g: "line", v: 10 },
+        { g: "line", v: 100 },
+        { g: "line", v: 10000 },
+      ],
+      encoding: {
+        x: { field: "v", scale: { type: "log", domain: [10, 1000], clamp: true } },
+        y: "g",
+      },
+      mark: { summary: "none", jitter: "none" },
+      a11y: { alt: "Log scale from 10 to 1000. 10000 is past the edge." },
+      size: { width: 420, height: 160 },
+    };
+    const svg = render(spec) ?? "";
+    const xs = [...svg.matchAll(/cx="([^"]+)"/g)].map((match) => Number(match[1]));
+    expect(xs).toHaveLength(3);
+    const [slow, mid, pinned] = xs;
+    expect(slow).toBeLessThan(mid ?? 0);
+    expect(mid).toBeLessThan(pinned ?? 0);
+    expect(Math.abs((mid ?? 0) - ((slow ?? 0) + (pinned ?? 0)) / 2)).toBeLessThan(1.5);
+    expect(svg).toContain("10000");
+    expect(svg).not.toContain('data-ck-mark="summary"');
+  });
+
+  it("uses the first observation as the end label when the summary is hidden", () => {
+    const spec = {
+      version: "1",
+      type: "strip",
+      data: [
+        { g: "line", v: 14.2, name: "ChartKit" },
+        { g: "line", v: 1884.3, name: "Recharts" },
+      ],
+      encoding: { x: "v", y: "g", label: "name" },
+      mark: { summary: "none", jitter: "none" },
+      a11y: { alt: "ChartKit is 14.2." },
+      size: { width: 420, height: 160 },
+    };
+    const svg = render(spec) ?? "";
+    expect(svg).toContain(">14.2<");
+    expect(svg).toContain("ChartKit, line, 14.2");
+    expect(svg).not.toContain('data-ck-mark="summary"');
+  });
+
   it("paints the same SVG from every adapter, in light and in dark", async () => {
     const spec = load("37-strip-dot.json");
     const core = render(spec) ?? "";

@@ -1,9 +1,9 @@
 import { explicitGrid, gridLines, majorTicks, spine, turned } from "../../axis-ink";
 import { chooseTicks, labelStep, lockDomain, minorTickMarks, placedAxisTitles } from "../../chrome";
 import { legendLabel, legendMarkup, legendShownValue } from "../../legend";
-import { axisOn, column, fieldOf, knownField, numericField, textField } from "../../frame";
+import { axisOn, column, fieldOf, knownField, numericField, scaleTypeOf, textField } from "../../frame";
 import { cssVar, paint } from "../../theme";
-import { ch, hash, isRecord, n, pointRadius, readAxis } from "../../svg";
+import { ch, hash, isRecord, logNice, logScale, logTicks, n, pointRadius, readAxis, scaleClamp } from "../../svg";
 import {
   axisLine,
   domainTicks,
@@ -87,15 +87,27 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
     });
   }
   const flat = rows.flatMap((row) => row.dots.map((dot) => dot.value));
-  let min = Math.min(...flat);
-  let max = Math.max(...flat);
-  if (min === max) max = min + 1;
-  const pad = (max - min) * 0.06;
-  const locked = lockDomain(min - pad, max + pad, [valueChannel]);
-  const domain = domainTicks(locked[0], locked[1]);
-  const v0 = Math.min(locked[0], domain[0] ?? locked[0]);
-  const v1 = Math.max(locked[1], domain[domain.length - 1] ?? locked[1]);
-  const valueTicks = chooseTicks(spec, vertical ? "y" : "x", v0, v1, domainTicks(v0, v1));
+  const valueKey = vertical ? "y" : "x";
+  const valueLog = scaleTypeOf(valueChannel) === "log";
+  const logDomain = valueLog ? logDomainOf(valueChannel, flat) : null;
+  let v0: number;
+  let v1: number;
+  let valueTicks: number[];
+  if (logDomain) {
+    v0 = logDomain[0];
+    v1 = logDomain[1];
+    valueTicks = chooseTicks(spec, valueKey, v0, v1, logTicks(v0, v1));
+  } else {
+    let min = Math.min(...flat);
+    let max = Math.max(...flat);
+    if (min === max) max = min + 1;
+    const pad = (max - min) * 0.06;
+    const locked = lockDomain(min - pad, max + pad, [valueChannel]);
+    const domain = domainTicks(locked[0], locked[1]);
+    v0 = Math.min(locked[0], domain[0] ?? locked[0]);
+    v1 = Math.max(locked[1], domain[domain.length - 1] ?? locked[1]);
+    valueTicks = chooseTicks(spec, valueKey, v0, v1, domainTicks(v0, v1));
+  }
   const shown = valueFormat(frame, spec, valueChannel, vertical ? "y" : "x");
   const radius = pointRadius(frame.mark.pointSize, Math.max(3.5, frame.geometry.pointSize));
   const compare = readCompare(spec);
@@ -104,7 +116,19 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
   const top = frame.title ? 46 : 20;
   const bottom = 40;
   const box = { left, top, right: frame.width - (vertical ? 20 : 156), bottom: frame.height - bottom };
-  const at = vertical ? scaleOf(v0, v1, box.bottom, box.top) : scaleOf(v0, v1, box.left, box.right);
+  const rawAt = valueLog && logDomain
+    ? vertical
+      ? logScale(v0, v1, box.bottom, box.top)
+      : logScale(v0, v1, box.left, box.right)
+    : vertical
+      ? scaleOf(v0, v1, box.bottom, box.top)
+      : scaleOf(v0, v1, box.left, box.right);
+  const clampEnds = scaleClamp(valueChannel) ? [Math.min(v0, v1), Math.max(v0, v1)] : null;
+  const at = (value: number) => {
+    if (!clampEnds) return rawAt(value);
+    const clamped = value < clampEnds[0] ? clampEnds[0] : value > clampEnds[1] ? clampEnds[1] : value;
+    return rawAt(clamped);
+  };
   const extra = compare ? 26 : 0;
   const lane = vertical ? (box.right - box.left - extra) / rows.length : (box.bottom - box.top - extra) / rows.length;
   const centerOf = (index: number) => {
@@ -302,6 +326,19 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
     );
   }
   return view.done();
+}
+
+/** Explicit positive ends, or a nice log domain of the positive values. Null when log cannot be drawn. */
+function logDomainOf(channel: unknown, values: number[]): [number, number] | null {
+  if (isRecord(channel) && isRecord(channel.scale) && Array.isArray(channel.scale.domain)) {
+    const domain = channel.scale.domain;
+    const min = domain[0];
+    const max = domain[1];
+    if (typeof min === "number" && typeof max === "number" && min > 0 && max > min) return [min, max];
+  }
+  const positive = values.filter((value) => value > 0);
+  if (!positive.length) return null;
+  return logNice(Math.min(...positive), Math.max(...positive));
 }
 
 function readColor(value: unknown): { field?: string; constant?: string } {
