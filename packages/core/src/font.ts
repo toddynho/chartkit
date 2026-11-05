@@ -45,36 +45,123 @@ export function fontStyle(family?: string): string {
 /**
  * Width of `count` glyphs at `px` per glyph.
  * Server renders stay on that estimate so SSR is deterministic.
- * In a browser, digits of the page font wider than the estimate scale it up
- * (capped) so a serif does not collide. Narrower fonts keep the estimate.
+ * In a browser, `render()` measures the chart's resolved family once:
+ * the spec or preset family, else `--ck-font-family` on the chart's
+ * container (inherited from an ancestor), else the page font.
+ * Digits wider than the estimate scale it up (capped). Narrower fonts
+ * keep the estimate. `document.fonts.ready` measures that family again
+ * and redraws each mounted chart once when the factor changes.
  */
-let widen = 1;
-let saw = false;
+const factors = new Map<string, number>();
+let active = 1;
+let currentFamily = "";
+let currentFactor = 1;
+let fontsSettled = false;
+let fontsListening = false;
 
-export function ch(count: number, px: number): number {
-  if (!saw && typeof document !== "undefined") {
-    saw = true;
-    try {
-      if (typeof navigator !== "undefined" && /jsdom/i.test(navigator.userAgent)) return count * px * widen;
-      const ctx = document.createElement("canvas").getContext("2d");
-      const family = getComputedStyle(document.documentElement).fontFamily;
-      if (ctx && family) {
-        ctx.font = `11px ${family}`;
-        const width = ctx.measureText("0000000000").width;
-        if (width > 72) widen = Math.min(1.8, width / 67);
-      }
-    } catch {
-      /* keep the estimate */
-    }
-  }
-  return count * px * widen;
+interface FontJob {
+  family: string;
+  used: number;
+  rerun: () => void;
 }
 
-/** Replace the inherit default with a real family. An explicit --ck-font-family is kept. */
-export function bakeFontFallback(svg: string): string {
+const fontJobs = new Map<object, FontJob>();
+
+function jsdom(): boolean {
+  return typeof navigator !== "undefined" && /jsdom/i.test(navigator.userAgent);
+}
+
+function probe(family: string): number {
+  if (typeof document === "undefined" || jsdom() || !family) return 1;
+  try {
+    const ctx = document.createElement("canvas").getContext("2d");
+    if (!ctx) return 1;
+    ctx.font = `11px ${family}`;
+    const width = ctx.measureText("0000000000").width;
+    if (width > 72) return Math.min(1.8, width / 67);
+  } catch {
+    /* keep the estimate */
+  }
+  return 1;
+}
+
+function hostFamily(target: unknown): string {
+  if (typeof document === "undefined" || typeof getComputedStyle !== "function") return "";
+  const node = target && typeof target === "object" && (target as Element).nodeType === 1 ? (target as Element) : document.documentElement;
+  if (!node) return "";
+  const style = getComputedStyle(node);
+  const named = style.getPropertyValue("--ck-font-family").trim();
+  if (named && named !== "inherit") return named;
+  return style.fontFamily.trim();
+}
+
+/** One read of the chart family, before layout. `ch()` does not touch the DOM. */
+export function armFontMeasure(specFamily: string, target: unknown): void {
+  if (typeof document === "undefined" || jsdom()) {
+    active = 1;
+    currentFamily = "";
+    currentFactor = 1;
+    return;
+  }
+  const family = specFamily || hostFamily(target);
+  const key = family || "::estimate";
+  let factor = factors.get(key);
+  if (factor === undefined) {
+    factor = probe(family);
+    factors.set(key, factor);
+  }
+  active = factor;
+  currentFamily = family;
+  currentFactor = factor;
+}
+
+/**
+ * After `document.fonts.ready`, remeasure this chart's family once.
+ * A second layout runs only when the width factor changed, and only once per target.
+ */
+export function noteFontRedraw(target: object, rerun: () => void): void {
+  if (fontsSettled || typeof document === "undefined" || jsdom() || !document.fonts) return;
+  fontJobs.set(target, { family: currentFamily, used: currentFactor, rerun });
+  if (fontsListening) return;
+  fontsListening = true;
+  void document.fonts.ready.then(() => {
+    fontsSettled = true;
+    const pending = [...fontJobs.entries()];
+    fontJobs.clear();
+    const changed = new Set<string>();
+    const seen = new Set<string>();
+    for (const [, job] of pending) {
+      if (seen.has(job.family)) continue;
+      seen.add(job.family);
+      const next = probe(job.family);
+      const key = job.family || "::estimate";
+      const prev = factors.get(key) ?? job.used;
+      factors.set(key, next);
+      if (Math.abs(next - prev) > 0.001) changed.add(job.family);
+    }
+    const ran = new Set<object>();
+    for (const [key, job] of pending) {
+      if (!changed.has(job.family) || ran.has(key)) continue;
+      ran.add(key);
+      job.rerun();
+    }
+  });
+}
+
+export function ch(count: number, px: number): number {
+  return count * px * active;
+}
+
+/**
+ * Replace the inherit default with a real family.
+ * An explicit `--ck-font-family` wins, then `requested` (the theme family),
+ * then the standalone Inter stack.
+ */
+export function bakeFontFallback(svg: string, requested = ""): string {
   const match = /--ck-font-family:([^;}"]+)/.exec(svg);
   const named = match?.[1]?.trim() ?? "";
-  const family = named && named !== "inherit" ? named : FONT_FALLBACK;
+  const ask = requested.trim();
+  const family = named && named !== "inherit" ? named : ask && ask !== "inherit" ? ask : FONT_FALLBACK;
   return svg.split(`font-family:${FONT_INHERIT}`).join(`font-family:${family}`);
 }
 

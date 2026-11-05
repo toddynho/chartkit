@@ -325,6 +325,9 @@ function buildModel(options: LineRaceOptions): Model {
     connectNulls: options.connectNulls !== false,
     scale: options.scale === "follow" ? "follow" : "expand",
     background: hex(options.background, "#ffffff"),
+    // A race frame is a file, not a chart in a page, so inherit has nothing to inherit.
+    // Export embeds a Geist @font-face (see the race builder). The frame has to name
+    // that family or the recorded video falls back to a generic sans. Pass fontFamily to override.
     fontFamily: options.fontFamily?.replace(/[<>"]/g, "") || "Geist, Helvetica, Arial, sans-serif",
     plot: { left: plotLeft, top: plotTop, right: plotRight, bottom: plotBottom },
     titleSize,

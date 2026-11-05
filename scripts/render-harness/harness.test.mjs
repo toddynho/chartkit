@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { join } from "node:path";
 import { novelFindings, readAllowlist } from "./allowlist.mjs";
-import { checkSvg } from "./geometry.mjs";
+import { checkSvg, textBoxes } from "./geometry.mjs";
 import { buildCases } from "./generate.mjs";
 import { loadExamples } from "./examples.mjs";
 import { loadRuntime } from "./load.mjs";
@@ -11,6 +11,23 @@ import { examplesDir } from "./paths.mjs";
 import { isStressValue, sweep } from "./run.mjs";
 
 const overlapSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="200" viewBox="0 0 760 200"><rect width="100%" height="100%" fill="#ffffff"/><rect x="510" y="16" width="8" height="8" fill="#15803d"/><text x="522" y="24" text-anchor="start" fill="#6e6e73" font-size="11">Done</text><text x="522.18" y="22" text-anchor="middle" fill="#6e6e73" font-size="11">Mar 29</text></svg>`;
+
+test("map label boxes use the stylesheet size", () => {
+  const label = (size) =>
+    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="80" viewBox="0 0 200 80"><style>.ck-geo-label{font-size:${size}px}.ck-geo-title{font-weight:600}</style><text class="ck-geo-label" x="10" y="40">AAAA</text><text class="ck-geo-label" x="46" y="40">BBBB</text><text class="ck-geo-title" x="10" y="20" font-size="16">Title</text></svg>`;
+  const small = textBoxes(label(11));
+  const large = textBoxes(label(22));
+  const smallLabel = small.find((item) => item.snippet === "AAAA");
+  const largeLabel = large.find((item) => item.snippet === "AAAA");
+  const title = small.find((item) => item.snippet === "Title");
+  assert.equal(smallLabel.fontSize, 11);
+  assert.equal(largeLabel.fontSize, 22);
+  assert.equal(title.fontSize, 16);
+  assert.equal(title.weight, 400);
+  assert.ok(largeLabel.bbox.w > smallLabel.bbox.w * 1.5);
+  assert.equal(checkSvg(label(11), { type: "choropleth" }).some((item) => item.check === "text-overlap"), false);
+  assert.equal(checkSvg(label(22), { type: "choropleth" }).some((item) => item.check === "text-overlap"), true);
+});
 
 test("legend text overlapping a date label is a layout finding", () => {
   const findings = checkSvg(overlapSvg, { type: "gantt" });
