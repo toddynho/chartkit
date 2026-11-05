@@ -41,6 +41,7 @@ bench/results/agent/conditions/
 bench/results/agent/matrix/
 scripts/.interact-out/
 scripts/design/.out/
+scripts/render-harness/out/
 
 # Misc
 *.tgz
