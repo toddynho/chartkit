@@ -1,7 +1,7 @@
 import { explicitGrid, gridLines, majorTicks, spine, turned } from "../axis-ink";
 import { seriesPoints } from "../annotations";
 import { readTimeScale } from "../time-x";
-import { axisTitleMarks, bottomLegendBand, categoryX, chooseTicks, heading, labelStep, lockDomain, minorTickMarks, placedNotes } from "../chrome";
+import { axisTitleMarks, bottomLegendBand, categoryX, chooseTicks, heading, keepClearTicks, labelStep, lockDomain, minorTickMarks, placedNotes } from "../chrome";
 import { cssVar } from "../theme";
 import { formatAxisValue, formatValue } from "../format";
 import {
@@ -212,11 +212,11 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
     const shownX: number[] = [];
     for (let i = 0; i < candles.length; i++) xs.push(time ? time.at(i, plotWidth, plot.left) : plot.left + slot * i + slot / 2);
     if (time) {
-      for (const tick of time.ticks(frame.locale)) {
-        const x = time.px(tick.t, plotWidth, plot.left);
-        shownX.push(x);
-        if (!xAxis.rotate) parts.push(text(x, labelY, tick.text, ink, 11, "400", "middle", `x:${tick.text}`));
-        else parts.push(turned(x, labelY, tick.text, ink, 11, "middle", xAxis.rotate, "400", `x:${tick.text}`));
+      const marks = keepClearTicks(time.ticks(frame.locale).map((tick) => ({ x: time.px(tick.t, plotWidth, plot.left), text: tick.text })));
+      for (const tick of marks) {
+        shownX.push(tick.x);
+        if (!xAxis.rotate) parts.push(text(tick.x, labelY, tick.text, ink, 11, "400", "middle", `x:${tick.text}`));
+        else parts.push(turned(tick.x, labelY, tick.text, ink, 11, "middle", xAxis.rotate, "400", `x:${tick.text}`));
       }
     }
     for (let i = 0; i < candles.length && !time; i += step) {

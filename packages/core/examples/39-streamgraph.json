@@ -3,11 +3,19 @@
   "type": "streamgraph",
   "title": "Copies by genre",
   "data": [
-    { "year": "2020", "fiction": 20, "history": 12, "poetry": 8 },
-    { "year": "2021", "fiction": 28, "history": 18, "poetry": 9 },
-    { "year": "2022", "fiction": 22, "history": 30, "poetry": 11 },
-    { "year": "2023", "fiction": 26, "history": 34, "poetry": 14 }
+    { "year": "2018", "fiction": 18, "history": 8, "poetry": 6, "science": 4 },
+    { "year": "2019", "fiction": 22, "history": 11, "poetry": 7, "science": 6 },
+    { "year": "2020", "fiction": 26, "history": 14, "poetry": 8, "science": 7 },
+    { "year": "2021", "fiction": 28, "history": 20, "poetry": 9, "science": 10 },
+    { "year": "2022", "fiction": 22, "history": 30, "poetry": 11, "science": 14 },
+    { "year": "2023", "fiction": 20, "history": 34, "poetry": 12, "science": 16 },
+    { "year": "2024", "fiction": 18, "history": 36, "poetry": 13, "science": 18 },
+    { "year": "2025", "fiction": 16, "history": 33, "poetry": 14, "science": 20 }
   ],
-  "encoding": { "x": "year", "y": ["fiction", "history", "poetry"] },
-  "a11y": { "alt": "History overtook fiction by 2022. The baseline is not zero." }
+  "encoding": {
+    "x": { "field": "year", "title": "Year" },
+    "y": ["fiction", "history", "poetry", "science"]
+  },
+  "mark": { "labels": true },
+  "a11y": { "alt": "History overtook fiction in 2022. The baseline is not zero." }
 }

@@ -2,7 +2,7 @@ import type { DataTable } from "../../data";
 import { formatAxisValue, formatValue } from "../../format";
 import { asNumber, axisOn, channelFormat, column, fieldOf, gridStyle, readFrame, readTable, type Frame } from "../../frame";
 import { cssVar, lineStroke, paint } from "../../theme";
-import { bottomLegendBand, heading, labelStep, minorTickMarks } from "../../chrome";
+import { bottomLegendBand, heading, keepClearTicks, labelStep, minorTickMarks } from "../../chrome";
 import { explicitGrid, gridLines, majorTicks, spine, turned } from "../../axis-ink";
 import { clipPath, closeChart, esc, font, isRecord, linear, n, openChart, readAxis, ticks, ch } from "../../svg";
 
@@ -220,7 +220,7 @@ export function xLabels(frame: Frame, spec: Record<string, unknown>, labels: { x
   const baseY = frame.height - bottomLegendBand(spec, frame.preset, inner) - (axis.title ? 26 : 12);
   const shift = axis.offset || 0;
   const y = axis.end && plot?.top !== undefined ? plot.top - 16 - Math.max(0, shift) : (plot?.bottom ?? baseY) + 16 + shift;
-  const shown = labels.filter((label, index) => index % step === 0 && label.text);
+  const shown = keepClearTicks(labels.filter((label, index) => index % step === 0 && label.text));
   const ink = cssVar("muted", frame.preset.muted);
   const textMarks = shown
     .map((label) => {

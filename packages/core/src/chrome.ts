@@ -187,6 +187,24 @@ function bottomLegendMarkup(frame: Frame, legend: FooterLegend, box: PlotRect): 
   return `<g data-ck-legend="bottom" data-ck-legend-align="start" data-ck-legend-orient="horizontal" data-ck-legend-at="0">${parts.join("")}</g>`;
 }
 
+/**
+ * Drop ticks whose labels would sit on each other. Each kept label is the original string.
+ * The estimate is a little wider than the harness glyph so a kept pair stays clear.
+ */
+export function keepClearTicks<T extends { x: number; text: string }>(items: T[], gap = 10): T[] {
+  if (items.length <= 1) return items;
+  const width = (text: string) => Math.max(12, text.length * 7);
+  const kept: T[] = [];
+  let right = -Infinity;
+  for (const item of items) {
+    const left = item.x - width(item.text) / 2;
+    if (kept.length && left < right + gap) continue;
+    kept.push(item);
+    right = item.x + width(item.text) / 2;
+  }
+  return kept;
+}
+
 /** Explicit rotate, or ±90 on a vertical title and 0 on a horizontal one. */
 export function axisTitleSpin(spin: number | undefined, vertical: boolean, end: boolean): number {
   if (typeof spin === "number") return spin;
@@ -311,6 +329,7 @@ export function placedNotes(
     },
     samples,
     labels,
+    xEnd: readAxis(spec, "x").end,
   });
 }
 

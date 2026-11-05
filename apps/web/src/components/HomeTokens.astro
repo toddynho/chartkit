@@ -1,16 +1,12 @@
 ---
+import { Chart } from "@chartkitdev/astro";
+import { homeTokenCharts } from "../data/home-charts";
 import { rivalSwatch } from "../data/rival-colors";
 import { tokenSpread } from "../data/token-eval";
 
 const spread = tokenSpread();
+const charts = homeTokenCharts();
 const others = spread.rows.filter((row) => !row.us).map((row) => ({ name: row.name, ...rivalSwatch(row.name) }));
-const ticks = [
-  { label: "0", left: "0%", edge: "start" },
-  { label: "500", left: "25%", minor: true },
-  { label: "1,000", left: "50%" },
-  { label: "1,500", left: "75%", minor: true },
-  { label: "2,000 tok", left: "100%", edge: "end" },
-];
 ---
 
 <section class="band" data-ckx="tokens" aria-labelledby="tokens-title">
@@ -47,45 +43,14 @@ const ticks = [
         <span class="ckx-key__glyph"><i class="g-tick"></i>median</span>
       </div>
     </div>
-    <div class="ckx-rows">
+    <div class="ckx-charts">
       {
-        spread.rows.map((row) => {
-          const swatch = rivalSwatch(row.name);
-          return (
-            <div
-              class:list={["ckx-row", "ckx-row--tok", row.us && "is-us"]}
-              data-ckx-row={row.us ? undefined : ""}
-              tabindex={row.us ? undefined : 0}
-              role={row.us ? undefined : "button"}
-              aria-pressed={row.us ? undefined : "false"}
-              style={`--c:${swatch.fill};--ink:${swatch.ink};--band:${swatch.band}`}
-            >
-              <div class="ckx-label">
-                <span class="ckx-name">{row.name}</span>
-                <span class="ckx-note"><span class="ckx-note__pre">range </span>{row.range}</span>
-              </div>
-              <div class="ckx-track" aria-hidden="true">
-                <div class="ckx-rail"></div>
-                <div class="ckx-band" style={`left:${row.minPct};width:${row.spanPct}`}></div>
-                {row.dots.map((dot) => (
-                  <span class="ckx-dot ckx-dot--sm" title={dot.title} style={`left:${dot.left}`}></span>
-                ))}
-                <div class="ckx-med" style={`left:${row.medPct}`}></div>
-              </div>
-              <span class="ckx-val">{row.medianText}<small> tok</small></span>
-              {row.us && spread.annotation ? (
-                <div class="ckx-anno">
-                  <div class="ckx-bracket" style={`left:${spread.annotation.left};width:${spread.annotation.width}`}></div>
-                  <span style={`left:${spread.annotation.labelLeft}`}>{spread.annotation.text}</span>
-                </div>
-              ) : null}
-            </div>
-          );
-        })
+        charts.map((chart) => (
+          <div class={`ckx-chart ckx-chart--${chart.size}`} style={`aspect-ratio: ${chart.width} / ${chart.height}`}>
+            <Chart spec={chart.spec} />
+          </div>
+        ))
       }
-    </div>
-    <div class="ckx-axis" aria-hidden="true">
-      {ticks.map((tick) => <span class:list={[tick.minor && "is-minor", tick.edge && `is-${tick.edge}`]} style={`left:${tick.left}`}>{tick.label}</span>)}
     </div>
     <div class="stat-strip">
       <div>
@@ -106,24 +71,3 @@ const ticks = [
     </p>
   </div>
 </section>
-
-<script>
-  for (const root of document.querySelectorAll<HTMLElement>("[data-ckx='tokens']")) {
-    for (const row of root.querySelectorAll<HTMLElement>("[data-ckx-row]")) {
-      if (row.dataset.ckxBound === "1") continue;
-      row.dataset.ckxBound = "1";
-      const setOn = (on: boolean) => {
-        row.setAttribute("aria-pressed", on ? "true" : "false");
-        row.classList.toggle("is-open", on);
-      };
-      row.addEventListener("click", () => {
-        setOn(row.getAttribute("aria-pressed") !== "true");
-      });
-      row.addEventListener("keydown", (event) => {
-        if (event.key !== "Enter" && event.key !== " ") return;
-        event.preventDefault();
-        setOn(row.getAttribute("aria-pressed") !== "true");
-      });
-    }
-  }
-</script>

@@ -1,13 +1,18 @@
 {
   "version": "1",
   "type": "tree",
-  "title": "One hierarchy",
+  "title": "Support org",
   "data": [
-    { "id": "Root", "parent": "" },
-    { "id": "A", "parent": "Root" },
-    { "id": "B", "parent": "Root" },
-    { "id": "A1", "parent": "A" }
+    { "id": "Support", "parent": "" },
+    { "id": "Inbox", "parent": "Support" },
+    { "id": "Docs", "parent": "Support" },
+    { "id": "Billing", "parent": "Support" },
+    { "id": "Triage", "parent": "Inbox" },
+    { "id": "Replies", "parent": "Inbox" },
+    { "id": "Guides", "parent": "Docs" },
+    { "id": "Reference", "parent": "Docs" },
+    { "id": "Invoices", "parent": "Billing" }
   ],
   "encoding": { "id": "id", "parent": "parent" },
-  "a11y": { "alt": "Root has two children. A has one child." }
+  "a11y": { "alt": "Support splits into Inbox, Docs, and Billing. Each of those has its own work." }
 }

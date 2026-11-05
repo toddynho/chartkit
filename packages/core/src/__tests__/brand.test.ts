@@ -81,6 +81,7 @@ describe("candidate looks", () => {
           expect(css).toContain(color);
         }
         for (const color of tokens.lines) expect(contrast(color, tokens.background)).toBeGreaterThanOrEqual(3);
+        for (const color of tokens.series) expect(contrast(color, tokens.background)).toBeGreaterThanOrEqual(3);
         expect(contrast(tokens.positive, tokens.background)).toBeGreaterThanOrEqual(3);
         expect(contrast(tokens.negative, tokens.background)).toBeGreaterThanOrEqual(3);
         expect(contrast(tokens.muted, tokens.background)).toBeGreaterThanOrEqual(4.5);

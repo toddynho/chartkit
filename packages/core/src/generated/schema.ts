@@ -764,6 +764,13 @@ export type Theme =
          * @maxItems 24
          */
         series?: [Color, ...Color[]];
+        /**
+         * Darker series ink, one per series colour, for thin strokes and strip labels. Omitted, labels use the series colour.
+         *
+         * @minItems 1
+         * @maxItems 24
+         */
+        lines?: [Color, ...Color[]];
       };
     };
 /**
@@ -1066,6 +1073,24 @@ export interface Encoding {
    * Strip only: field shown with the group and the value in the point tooltip. It is not drawn on the plot. Other chart types warn CK3094.
    */
   label?:
+    | FieldName
+    | {
+        field: FieldName;
+        /**
+         * Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.
+         */
+        type?: "quantitative" | "temporal" | "ordinal" | "nominal";
+        /**
+         * Human-readable name used in axes, legend and tooltip. Defaults to the field name.
+         */
+        title?: string;
+        format?: Format;
+        scale?: Scale;
+      };
+  /**
+   * Strip only: a second, smaller line under the category label. Every point in the group should carry the same note, such as 100k points. The label and the note stay centred on that group's line. Other chart types warn CK3135.
+   */
+  note?:
     | FieldName
     | {
         field: FieldName;
@@ -1915,9 +1940,71 @@ export interface Mark {
    */
   jitter?: ("none" | "auto") | number;
   /**
-   * Group value to draw in accent. Every other group uses muted. The summary tick stays ink. Applies to: strip.
+   * Group or series value to emphasise. A group name marks that row. A series value, the color field, marks those dots. With mark.emphasis omitted or muted, the other marks use muted. Applies to: strip.
    */
   highlight?: string;
+  /**
+   * How mark.highlight is drawn. muted fades every other mark. ring draws the highlighted dots larger, with a ring, and keeps the other series colours. color paints the highlighted row in accent and keeps the other series colours. Omitted means muted when highlight is set. Applies to: strip.
+   */
+  emphasis?: "muted" | "ring" | "color";
+  /**
+   * Second line under the category label. none draws none. field uses encoding.note. range draws the minimum and maximum and does not repeat them beside the end label. The two lines stay centred on the plotted line. Applies to: strip.
+   */
+  note?: "none" | "field" | "range";
+  /**
+   * Text before the note, such as range followed by a space. Applies to: strip.
+   */
+  notePrefix?: string;
+  /**
+   * A value outside scale.domain is an edge marker with its real value, not a dot past the plot. Needs an explicit domain. Applies to: strip.
+   */
+  pin?: boolean;
+  /**
+   * How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.
+   */
+  pinFormat?:
+    | (
+        | "number"
+        | "integer"
+        | "compact"
+        | "percent"
+        | "percent-raw"
+        | "currency"
+        | "bytes"
+        | "duration-ms"
+        | "duration-hm"
+        | "date"
+        | "time"
+        | "datetime"
+        | "month"
+        | "year"
+        | "weekday"
+      )
+    | FormatObject;
+  /**
+   * Fill of the range band. accent is one wash. series uses that row's colour at low opacity. Applies to: strip.
+   */
+  bandColor?: "accent" | "series";
+  /**
+   * Number at the end of the row. summary is the median, the mean, or the first point when the tick is hidden. highlight is the highlighted series value in that row. Applies to: strip.
+   */
+  value?: "summary" | "highlight";
+  /**
+   * Colour of the end label. text is ink. accent is the brand colour. series uses that row's colour, and a highlighted row stays accent. Applies to: strip.
+   */
+  labelColor?: "text" | "accent" | "series";
+  /**
+   * Smaller unit after the end label, such as ms or tok. It is not part of the tick format. Applies to: strip.
+   */
+  labelSuffix?: string;
+  /**
+   * Tint every other row, starting with the first. The tint sits behind the line. It is not a rule between rows. Applies to: strip.
+   */
+  zebra?: boolean;
+  /**
+   * Right margin for the end label, in px. Omitted, the margin fits the labels. A set value wins over that fit. size.width and size.height are never changed. Applies to: strip.
+   */
+  gutter?: number;
   /**
    * Slice order. none keeps data order and pins an Other bucket last. asc and desc sort by value, including Other. On a strip, none keeps the first-seen group order and asc or desc orders groups by the summary (by the median when mark.summary is none). Applies to: donut, pie, strip.
    */
@@ -3908,6 +3995,10 @@ export interface Axes {
             )
           | FormatObject;
         /**
+         * Label drawn at the high end of the axis, such as 5s+. It does not move the domain. Applies to: strip.
+         */
+        edgeLabel?: string;
+        /**
          * Approximate tick count, the exact tick values, or "ends" for the first and last label only.
          */
         ticks?: number | "ends" | [number, ...number[]];
@@ -4124,6 +4215,10 @@ export interface Axes {
               | "weekday"
             )
           | FormatObject;
+        /**
+         * Label drawn at the high end of the axis, such as 5s+. It does not move the domain. Applies to: strip.
+         */
+        edgeLabel?: string;
         /**
          * Approximate tick count, the exact tick values, or "ends" for the first and last label only.
          */

@@ -119,15 +119,7 @@ function graticule(project: (lon: number, lat: number) => [number, number]): str
 }
 
 function measureText(text: string, size: number): number {
-  let width = 0;
-  for (const ch of text) {
-    if (ch === " ") width += size * 0.33;
-    else if ("MW@#%&".includes(ch)) width += size * 0.86;
-    else if (ch === "m" || ch === "w") width += size * 0.78;
-    else if ("iljtfrI.,'".includes(ch)) width += size * 0.3;
-    else width += size * 0.56;
-  }
-  return width;
+  return Math.ceil(text.length * size * 0.64);
 }
 
 function titleLayout(text: string, width: number, labelPx: number): { size: number; y: number; band: number } {
@@ -146,7 +138,7 @@ function legendSide(spec: Record<string, unknown>): "bottom" | "right" {
 }
 
 function horizontalLegend(scale: PaintScale, x: number, y: number, width: number, id: string): string {
-  const title = scale.title ? `<text class="ck-geo-label ck-geo-legend-title" x="${round(x)}" y="${round(y + 11)}">${esc(scale.title)}</text>` : "";
+  const title = scale.title ? `<text class="ck-geo-label ck-geo-legend-title" font-weight="650" x="${round(x)}" y="${round(y + 11)}">${esc(scale.title)}</text>` : "";
   const barY = y + (scale.title ? 18 : 2);
   if (scale.swatches?.length) {
     const marks = scale.swatches
@@ -176,7 +168,7 @@ function noDataSwatch(x: number, y: number, id: string): string {
 }
 
 function legendMarkup(scale: PaintScale, x: number, y: number, height: number, id: string, nodata: boolean): string {
-  const title = scale.title ? `<text class="ck-geo-label ck-geo-legend-title" x="${round(x)}" y="${round(y + 12)}">${esc(scale.title)}</text>` : "";
+  const title = scale.title ? `<text class="ck-geo-label ck-geo-legend-title" font-weight="650" x="${round(x)}" y="${round(y + 12)}">${esc(scale.title)}</text>` : "";
   const top = y + (scale.title ? 20 : 4);
   const foot = nodata ? 28 : 8;
   if (scale.sizes?.length) {
@@ -448,7 +440,8 @@ function dotsOf(rows: Record<string, unknown>[], encoding: Record<string, unknow
 }
 
 function overlaps(a: { x: number; y: number; w: number; h: number }, b: { x: number; y: number; w: number; h: number }): boolean {
-  return !(a.x + a.w < b.x || b.x + b.w < a.x || a.y + a.h < b.y || b.y + b.h < a.y);
+  const gap = 4;
+  return !(a.x + a.w + gap < b.x || b.x + b.w + gap < a.x || a.y + a.h + gap < b.y || b.y + b.h + gap < a.y);
 }
 
 interface TagSpot {
@@ -514,7 +507,7 @@ function placeTag(
     { dx: 0.7, dy: -1, anchor: "start" as const },
     { dx: -0.7, dy: -1, anchor: "end" as const },
   ];
-  for (const dist of [circle.r + 8, circle.r + 24, circle.r + 42, circle.r + 64]) {
+  for (const dist of [circle.r + 10, circle.r + 28, circle.r + 48, circle.r + 72, circle.r + 96]) {
     for (const dir of dirs) {
       const cx = circle.x + dir.dx * dist;
       const cy = circle.y + dir.dy * dist;

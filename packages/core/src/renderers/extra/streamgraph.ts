@@ -1,4 +1,4 @@
-import { axisTitleMarks, categoryX, chooseTicks, labelStep, lockDomain, placedNotes } from "../../chrome";
+import { categoryX, chooseTicks, keepClearTicks, labelStep, lockDomain, placedAxisTitles, placedNotes } from "../../chrome";
 import type { DataTable } from "../../data";
 import { column, fieldOf, readColor } from "../../frame";
 import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../../legend";
@@ -82,6 +82,9 @@ export function renderStreamgraph(spec: Record<string, unknown>): string | null 
   const draft = plotBox(frame, layoutSpec, { yTicks });
   const space = legend ? legendSpace(legend, items, Math.max(80, draft.right - draft.left)) : null;
   const box = insetLegend(draft, legend, space);
+  const labelInset = tickInset(frame, spec, built);
+  if (box.left < labelInset) box.left = labelInset;
+  if (frame.width - box.right < labelInset) box.right = frame.width - labelInset;
   const yReverse = isRecord(frame.encoding.y) && isRecord(frame.encoding.y.scale) && frame.encoding.y.scale.reverse === true;
   const yAt = scaleOf(y0, y1, yReverse ? box.top : box.bottom, yReverse ? box.bottom : box.top);
   const xReverse = isRecord(frame.encoding.x) && isRecord(frame.encoding.x.scale) && frame.encoding.x.scale.reverse === true;
@@ -121,12 +124,14 @@ export function renderStreamgraph(spec: Record<string, unknown>): string | null 
   parts.push("</g>");
   if (notes.over) parts.push(notes.over);
   parts.push(columns(built, stacked, box, xAt, yAt, frame.locale, expand ? undefined : yFormat));
-  if (showLabels) parts.push(layerLabels(stacked, xAt, yAt, frame, yFormat));
   const titled = withEncodingTitles(spec, frame.encoding);
+  const obstacles = labelObstacles(frame, titled, box, yTicks, yAt, yFormat, legend, items);
+  if (showLabels) parts.push(layerLabels(stacked, xAt, yAt, frame, box, obstacles));
   parts.push(axisLine(frame, box));
   parts.push(yLabels(frame, titled, box, yTicks, yAt, yFormat));
   parts.push(xTickLabels(frame, titled, built, xAt, box));
-  parts.push(axisTitleMarks(frame, { ...layoutSpec, ...titled, legend: false }, box));
+  const bottomBand = legend?.position === "bottom" && space ? space.band : 0;
+  parts.push(placedAxisTitles(frame, { ...layoutSpec, ...titled, legend: false }, box, bottomBand));
   if (legend && items.length) {
     parts.push(paintLegend(legend, items, { plot: box, width: frame.width, height: frame.height, preset: frame.preset }));
   }
@@ -550,7 +555,7 @@ function withEncodingTitles(spec: Record<string, unknown>, encoding: Record<stri
   for (const key of ["x", "y"] as const) {
     const channel = encoding[key];
     const title = isRecord(channel) && typeof channel.title === "string" ? channel.title : "";
-    if (!title) continue;
+    if (!title || axes[key] === false || (isRecord(axes[key]) && axes[key].show === false)) continue;
     const node = isRecord(axes[key]) ? { ...axes[key] } : {};
     if (typeof node.title !== "string" || node.title === "") node.title = title;
     axes[key] = node;
@@ -604,20 +609,32 @@ function xTickLabels(frame: { locale: string; preset: { muted: string }; width: 
   const step = labelStep(labels.length, axis.skip, omitted);
   const y = box.bottom + 16;
   const ink = cssVar("muted", frame.preset.muted);
-  return labels
-    .filter((_, index) => index % step === 0 && _.text)
+  const shown = keepClearTicks(labels.filter((label, index) => index % step === 0 && label.text));
+  return shown
     .map((label) => {
-      const body = text(label.x, y, fitLabel(label.text, 72), ink, 11, "400", "middle");
+      const body = text(label.x, y, label.text, ink, 11, "400", "middle");
       if (!axis.rotate) return body;
       return body.replace("<text ", `<text transform="rotate(${n(axis.rotate)} ${n(label.x)} ${n(y)})" `);
     })
     .join("");
 }
 
-function fitLabel(value: string, width: number): string {
-  const max = Math.max(2, Math.floor(width / 6.2));
-  if (value.length <= max) return value;
-  return `${value.slice(0, max - 1)}…`;
+function tickInset(frame: { locale: string }, spec: Record<string, unknown>, built: Built): number {
+  const zone = zoneOf(spec);
+  const span = built.temporal ? Math.abs((instantOf(built.rawX[built.rawX.length - 1]) ?? 0) - (instantOf(built.rawX[0]) ?? 0)) : 0;
+  const encodedX = isRecord(spec.encoding) && isRecord(spec.encoding.x) ? spec.encoding.x.format : undefined;
+  const xFormat = explicitFormat(spec, "x") ?? encodedX;
+  let widest = 24;
+  for (let index = 0; index < built.labels.length; index++) {
+    const ms = instantOf(built.rawX[index]);
+    const shown = built.temporal && ms !== null
+      ? xFormat !== undefined
+        ? formatValue(ms, xFormat, frame.locale)
+        : formatZoned(ms, span || 1, frame.locale, zone)
+      : built.labels[index];
+    widest = Math.max(widest, (shown || "").length * 7);
+  }
+  return Math.ceil(widest / 2) + 4;
 }
 
 function xGrid(spec: Record<string, unknown>, frame: { preset: { grid: string } }, box: Box, labels: string[], xAt: (index: number) => number): string {
@@ -679,27 +696,72 @@ function layerLabel(layer: Stacked, locale: string, format: unknown): string {
   return `${layer.name}, ${fmt(min, locale, format)} to ${fmt(max, locale, format)}`;
 }
 
-function layerLabels(layers: Stacked[], xAt: (index: number) => number, yAt: (value: number) => number, frame: { preset: { text: string }; locale: string }, format: unknown): string {
-  return layers
-    .map((layer) => {
-      let best = -1;
-      let at = 0;
-      for (let i = 0; i < layer.values.length; i++) {
-        const value = layer.values[i];
-        if (typeof value !== "number") continue;
-        const thick = Math.abs(layer.y1[i] - layer.y0[i]);
-        if (thick > best) {
-          best = thick;
-          at = i;
-        }
-      }
-      if (best < 0) return "";
-      const y = (yAt(layer.y0[at]) + yAt(layer.y1[at])) / 2;
-      const shown = fitLabel(layer.name, Math.abs(yAt(layer.y0[at]) - yAt(layer.y1[at])) * 1.4);
-      if (!shown) return "";
-      return text(xAt(at), y + 4, shown, cssVar("text", frame.preset.text), 11, "600", "middle");
-    })
-    .join("");
+interface Obstacle {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
+/** Tick labels and an inside legend. A layer name that cannot clear them is omitted; the area keeps the full name. */
+function labelObstacles(
+  frame: { locale: string },
+  spec: Record<string, unknown>,
+  box: Box,
+  values: number[],
+  yAt: (value: number) => number,
+  format: unknown,
+  legend: LegendBox | null,
+  items: LegendItem[],
+): Obstacle[] {
+  const taken: Obstacle[] = [];
+  if (axisOnSafe(spec, "y") && readAxis(spec, "y").labels !== false) {
+    for (const value of values) {
+      const label = formatValue(value, format, frame.locale);
+      const wide = Math.max(12, label.length * 7);
+      const y = yAt(value) + 4;
+      taken.push({ left: box.left - 12 - wide, right: box.left - 2, top: y - 12, bottom: y + 3 });
+    }
+  }
+  if (legend?.position === "inside" && items.length) {
+    const space = legendSpace({ ...legend, orient: "vertical" }, items, 140);
+    const blockW = Math.min(space.side, Math.max(72, (box.right - box.left) * 0.46));
+    const anchor = legend.anchor;
+    const left = anchor.endsWith("left") || anchor === "left" ? box.left + 6 : anchor.endsWith("right") || anchor === "right" ? box.right - blockW - 22 : (box.left + box.right - blockW) / 2 - 8;
+    const top = anchor.startsWith("top") || anchor === "top" ? box.top + 6 : anchor.startsWith("bottom") || anchor === "bottom" ? box.bottom - space.band - 22 : (box.top + box.bottom - space.band) / 2 - 8;
+    taken.push({ left, right: left + blockW + 28, top, bottom: top + space.band + 16 });
+  }
+  return taken;
+}
+
+function hits(a: Obstacle, b: Obstacle): boolean {
+  return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+}
+
+function layerLabels(layers: Stacked[], xAt: (index: number) => number, yAt: (value: number) => number, frame: { preset: { text: string } }, box: Box, obstacles: Obstacle[]): string {
+  const taken = obstacles.slice();
+  const parts: string[] = [];
+  for (const layer of layers) {
+    const order = layer.values
+      .map((value, index) => ({ index, thick: typeof value === "number" ? Math.abs(layer.y1[index] - layer.y0[index]) : -1 }))
+      .filter((item) => item.thick >= 0)
+      .sort((a, b) => b.thick - a.thick);
+    const wide = Math.max(12, layer.name.length * 7);
+    const minX = box.left + wide / 2 + 4;
+    const maxX = box.right - wide / 2 - 4;
+    if (maxX <= minX) continue;
+    for (const spot of order) {
+      const x = Math.max(minX, Math.min(maxX, xAt(spot.index)));
+      const y = (yAt(layer.y0[spot.index]) + yAt(layer.y1[spot.index])) / 2 + 4;
+      const rect = { left: x - wide / 2 - 3, right: x + wide / 2 + 3, top: y - 13, bottom: y + 3 };
+      if (rect.top < box.top || rect.bottom > box.bottom) continue;
+      if (taken.some((item) => hits(item, rect))) continue;
+      taken.push(rect);
+      parts.push(text(x, y, layer.name, cssVar("text", frame.preset.text), 11, "600", "middle"));
+      break;
+    }
+  }
+  return parts.join("");
 }
 
 function escapeAttr(value: string): string {

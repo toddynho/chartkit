@@ -34,6 +34,8 @@ export interface AnnotationGeom {
   bands?: { x?: unknown; y?: unknown; y2?: unknown };
   /** Boxes already taken by series labels, so a fit label can step aside. */
   taken?: Box[];
+  /** The x axis is on the top edge, so an end callout shares that band with the ticks. */
+  xEnd?: boolean;
 }
 
 interface Box {
@@ -244,7 +246,8 @@ function rule(item: Record<string, unknown>, geom: AnnotationGeom, over: string[
   const vertical = (axis === "x") !== Boolean(geom.flip);
   const { plot } = geom;
   if (vertical) {
-    const y = where === "start" ? plot.bottom - 4 : where === "center" ? (plot.top + plot.bottom) / 2 : Math.max(14, plot.top - 16);
+    const endOnTop = where !== "start" && where !== "center" && geom.xEnd;
+    const y = where === "start" ? plot.bottom - 4 : where === "center" ? (plot.top + plot.bottom) / 2 : endOnTop ? (plot.top - 34 >= 16 ? plot.top - 34 : plot.top + 18) : Math.max(14, plot.top - 16);
     over.push(label(item.label, atPx + 4, y, "start", cssVar("text", geom.preset.text)));
     boxes.push({ x: atPx + 4, y: y - 11, w: ch(item.label.length, 6.3), h: 14 });
     return;
