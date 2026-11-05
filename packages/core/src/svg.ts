@@ -480,7 +480,7 @@ function headlineMarkup(head: Headline): string {
     y += 16;
   }
   if (head.value || head.compare || head.delta) {
-    const text = "var(--ck-text, #050507)";
+    const text = "var(--ck-text, #1d1d1f)";
     if (head.value) out += `<text data-ck-headline="1" x="12" y="${y + 12}" fill="${text}" font-size="18" font-weight="650">${esc(head.value)}</text>`;
     if (head.compare) out += `<text x="120" y="${y + 12}" fill="var(--ck-muted, #6e6e73)" font-size="12">${esc(head.compare)}</text>`;
     if (head.delta) out += `<text x="200" y="${y + 12}" fill="${toneFill(head.tone)}" font-size="12" font-weight="650">${esc(head.delta)}</text>`;

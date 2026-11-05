@@ -52,7 +52,7 @@ Each rendered SVG is checked in process. A check returns `{ type, example, optio
 | `text-clipped` | Text is cut by the plot clip |
 | `mark-outside` | A mark sits outside the plot or the viewBox and is not clipped |
 | `legend-overlap` | A legend intersects the plot, an axis, or tick labels |
-| `contrast` | Text is under 4.5:1 (3:1 for large or bold) on the light page, the dark page, or the shape it sits on |
+| `contrast` | Text is under 4.5:1, or 3:1 when the text is 18px or larger or bold. A mark or line is under 3:1 on the page (WCAG 1.4.11). |
 | `bad-number` | `NaN`, `Infinity`, or `undefined` in the SVG |
 | `empty-chart` | Data is present and the SVG has no marks |
 | `render-exception` | The renderer threw, or returned `ck-chart-error` |
@@ -68,6 +68,8 @@ Text width uses the renderer’s 6.4px-at-11px estimate, so a gap the layout alr
 - a number at or beyond 10000, including `1000000`, and the size strings `"0"` and `"10000"`
 
 Empty strings, enums, booleans, and ordinary sizes (`240`, `1200`) stay errors. The default example is never stress. Info findings are still listed in `out/findings.json`. The written report and the allowlist omit them.
+
+Body text needs 4.5:1. Text at 18px or larger, or with weight 700, needs 3:1. Marks and lines need 3:1 against the page. A spec-set `theme.tokens` background, surface, text, or muted color, or `theme.brand`, that misses its ratio is informational: the chart keeps the color and `validate` warns with CK4005.
 
 ## Baselines
 

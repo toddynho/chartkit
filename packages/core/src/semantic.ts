@@ -1219,6 +1219,7 @@ function warnDesign(
     });
   }
 
+  warnTokenContrast(spec, diagnostics);
   const contrastIssue = textContrast(spec);
   if (contrastIssue) {
     diagnostics.push({
@@ -1256,6 +1257,35 @@ function paletteSize(spec: Record<string, unknown>): number {
     return theme.tokens.series.length;
   }
   return 8;
+}
+
+/** The chart keeps a spec-set color. The warning says the contrast is short. */
+function warnTokenContrast(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  const theme = spec.theme;
+  if (!isRecord(theme)) return;
+  const tokens = isRecord(theme.tokens) ? theme.tokens : {};
+  const background = typeof tokens.background === "string" ? tokens.background : "#ffffff";
+  const text = typeof tokens.text === "string" ? tokens.text : "#1d1d1f";
+  const pairs: Array<[string, string, string]> = [];
+  if (typeof tokens.text === "string") pairs.push(["text", tokens.text, typeof tokens.background === "string" ? tokens.background : "#ffffff"]);
+  if (typeof tokens.background === "string") pairs.push(["background", text, tokens.background]);
+  if (typeof tokens.surface === "string") pairs.push(["surface", text, tokens.surface]);
+  if (typeof tokens.muted === "string") pairs.push(["muted", tokens.muted, background]);
+  if (typeof theme.brand === "string") pairs.push(["brand", theme.brand, background]);
+  for (let i = 0; i < pairs.length; i++) {
+    const name = pairs[i][0];
+    const fg = pairs[i][1];
+    const bg = pairs[i][2];
+    const ratio = contrast(fg, bg);
+    if (ratio === null || ratio >= 4.5) continue;
+    diagnostics.push({
+      code: "CK4005",
+      severity: "warning",
+      message: "an explicit theme color is under 4.5:1",
+      path: name === "brand" ? "/theme/brand" : `/theme/tokens/${name}`,
+      hint: `render keeps the spec color. Contrast is ${ratio.toFixed(2)}:1`,
+    });
+  }
 }
 
 function textContrast(
