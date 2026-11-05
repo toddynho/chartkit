@@ -89,7 +89,7 @@ function shown(box: LegendBox, items: LegendItem[]): LegendItem[] {
 }
 
 function itemWidth(item: LegendItem): number {
-  return 26 + ch(item.name.length, 6.6) + (item.value ? 8 + ch(item.value.length, 6.6) : 0);
+  return 26 + ch(item.name.length, 7) + (item.value ? 8 + ch(item.value.length, 7) : 0);
 }
 
 /** Rows of items. Vertical legends are one item per row. */
@@ -178,8 +178,9 @@ export function paintLegend(box: LegendBox, items: LegendItem[], frame: LegendFr
     width = Math.max(72, space.side - 8);
   } else if (box.position === "right") {
     const space = legendSpace(laid, items, 120);
-    width = Math.max(72, Math.min(space.side, frame.width - 8));
-    x = Math.max(plot.right + 10, frame.width - width - 4);
+    width = Math.max(72, Math.min(space.side, frame.width - 16));
+    x = Math.max(plot.right + 10, frame.width - width - 8);
+    if (x + width > frame.width - 4) x = Math.max(8, frame.width - width - 8);
     y = plot.top;
   } else {
     const space = legendSpace({ ...laid, orient: "vertical" }, items, 140);
@@ -199,10 +200,8 @@ export function paintLegend(box: LegendBox, items: LegendItem[], frame: LegendFr
   const muted = cssVar("muted", frame.preset.muted);
   const parts: string[] = [];
   const body = y + (box.title ? 16 : 0);
-  if (box.position === "inside") {
-    const blockH = (box.title ? 16 : 0) + Math.max(1, per) * ROW + 6;
-    parts.push(`<rect data-ck-legend-plate="1" x="${n(x - 8)}" y="${n(y - 6)}" width="${n(width + 16)}" height="${n(blockH)}" rx="6" fill="${cssVar("background", frame.preset.background)}" />`);
-  }
+  const blockH = (box.title ? 16 : 0) + Math.max(1, per) * ROW + (pages > 1 ? 16 : 6);
+  parts.push(`<rect data-ck-legend-plate="1" x="${n(x - 6)}" y="${n(y - 4)}" width="${n(width + 12)}" height="${n(blockH)}" rx="6" fill="${cssVar("background", frame.preset.background)}" />`);
   if (box.title) {
     parts.push(`<text x="${n(x)}" y="${n(y + 11)}" fill="${fill}" font-size="11" font-weight="650">${esc(box.title)}</text>`);
   }

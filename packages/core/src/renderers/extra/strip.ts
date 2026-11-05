@@ -200,7 +200,7 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
   rows.forEach((row, index) => {
     const center = centerOf(index);
     centers.push(center);
-    const ink = highlight && row.name === highlight ? cssVar("accent", frame.preset.accent) : cssVar("text", frame.preset.text);
+    const ink = cssVar("text", frame.preset.text);
     const weight = highlight && row.name === highlight ? "600" : "500";
     if (!catRich) {
       if (vertical) parts.push(text(center, box.bottom + 16, row.name, ink, 12, weight, "middle"));
@@ -410,13 +410,14 @@ function valueGrid(vertical: boolean, box: { left: number; top: number; right: n
 
 function bracket(vertical: boolean, a: number, b: number, at: number, label: string, accent: string): string {
   const ink = cssVar("accent", accent);
+  const caption = cssVar("text", "light-dark(#1d1d1f, #f5f5f7)");
   const start = Math.min(a, b);
   const end = Math.max(a, b);
   if (vertical) {
-    return `<g data-ck-mark="compare" aria-label="${escapeAttr(label)}"><line x1="${n(at)}" y1="${n(start)}" x2="${n(at)}" y2="${n(end)}" stroke="${ink}" stroke-dasharray="3 3" /><line x1="${n(at)}" y1="${n(start)}" x2="${n(at + 8)}" y2="${n(start)}" stroke="${ink}" /><line x1="${n(at)}" y1="${n(end)}" x2="${n(at + 8)}" y2="${n(end)}" stroke="${ink}" />${text(at + 12, (start + end) / 2 + 4, label, ink, 11, "500", "start")}</g>`;
+    return `<g data-ck-mark="compare" aria-label="${escapeAttr(label)}"><line x1="${n(at)}" y1="${n(start)}" x2="${n(at)}" y2="${n(end)}" stroke="${ink}" stroke-dasharray="3 3" /><line x1="${n(at)}" y1="${n(start)}" x2="${n(at + 8)}" y2="${n(start)}" stroke="${ink}" /><line x1="${n(at)}" y1="${n(end)}" x2="${n(at + 8)}" y2="${n(end)}" stroke="${ink}" />${text(at + 12, (start + end) / 2 + 4, label, caption, 11, "500", "start")}</g>`;
   }
   const y = at;
-  return `<g data-ck-mark="compare" aria-label="${escapeAttr(label)}"><line x1="${n(start)}" y1="${n(y)}" x2="${n(start)}" y2="${n(y + 10)}" stroke="${ink}" /><line x1="${n(end)}" y1="${n(y)}" x2="${n(end)}" y2="${n(y + 10)}" stroke="${ink}" /><line x1="${n(start)}" y1="${n(y + 10)}" x2="${n(end)}" y2="${n(y + 10)}" stroke="${ink}" stroke-dasharray="3 3" />${text(end + 8, y + 14, label, ink, 11, "500", "start")}</g>`;
+  return `<g data-ck-mark="compare" aria-label="${escapeAttr(label)}"><line x1="${n(start)}" y1="${n(y)}" x2="${n(start)}" y2="${n(y + 10)}" stroke="${ink}" /><line x1="${n(end)}" y1="${n(y)}" x2="${n(end)}" y2="${n(y + 10)}" stroke="${ink}" /><line x1="${n(start)}" y1="${n(y + 10)}" x2="${n(end)}" y2="${n(y + 10)}" stroke="${ink}" stroke-dasharray="3 3" />${text(end + 8, y + 14, label, caption, 11, "500", "start")}</g>`;
 }
 
 function tip(group: string, dot: Dot, locale: string, format: unknown): string {

@@ -245,7 +245,8 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
     color: slice.color,
     value: frame.legendValues ? formatValue(slice.value, valueFormat, frame.locale) : undefined,
   }));
-  const richSpace = legendBox ? legendSpace(legendBox, legendItems, Math.max(80, frame.width - sideWidth)) : null;
+  const legendWidth = place === "left" || place === "right" ? 160 : Math.max(80, frame.width - 16);
+  const richSpace = legendBox ? legendSpace(legendBox, legendItems, legendWidth) : null;
   const legendBlock = !showLegend || place === false ? 0 : legendBox && richSpace ? (place === "top" || place === "bottom" ? richSpace.band : 0) : place === "top" || place === "bottom" ? slices.length * legendRow + 8 : 0;
   const sideLegend = !showLegend || place === false ? 0 : legendBox && richSpace ? (place === "left" || place === "right" ? richSpace.side : 0) : place === "right" || place === "left" ? sideWidth : 0;
 
@@ -397,7 +398,12 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   if (legendBox && showLegend) {
     const host = legendBox.position === "inside"
       ? { left: pieX, top: pieY, right: pieX + size, bottom: pieY + size }
-      : { left: place === "left" ? 8 : pieX, top: place === "top" ? y0 : pieY, right: place === "right" ? width - 8 : pieX + size, bottom: place === "bottom" ? height - 8 : pieY + size };
+      : {
+          left: place === "top" || place === "bottom" ? 8 : pieX,
+          top: place === "top" ? y0 + legendBlock : pieY,
+          right: place === "top" || place === "bottom" ? width - 8 : pieX + size,
+          bottom: place === "bottom" ? height - 8 : pieY + size,
+        };
     parts.push(paintLegend(legendBox, legendItems, { plot: host, width, height, preset: frame.preset }));
   }
   parts.push(closeChart());

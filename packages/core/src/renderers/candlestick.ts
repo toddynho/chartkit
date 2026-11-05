@@ -67,17 +67,29 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   const priceFormat = yAxisFormat ?? channelFormat(frame.encoding.close) ?? channelFormat(frame.encoding.high) ?? channelFormat(frame.encoding.open) ?? "number";
   const yTicks = chooseTicks(spec, "y", domain[0], domain[1], ticks(domain[0], domain[1], 5));
   const yTickText = yTicks.map((tick) => formatAxisValue(tick, priceFormat, frame.locale, yTicks));
+  const yAxisBox = readAxis(spec, "y");
+  const xAxisBox = readAxis(spec, "x");
+  const yShift = showY ? Math.max(0, yAxisBox.offset || 0) : 0;
+  const xShift = showX ? Math.max(0, xAxisBox.offset || 0) : 0;
   let top = 12 + (frame.subtitle ? 18 : 0);
   if (frame.title) top = 36 + (frame.subtitle ? 18 : 0);
-  let left = 12;
+  if (showX && xAxisBox.end) top += 22 + xShift;
+  let yGutter = 12;
   if (showY) {
     let width = 0;
     for (let i = 0; i < yTickText.length; i++) width = Math.max(width, ch(yTickText[i].length, 6.7));
-    left = Math.max(56, Math.ceil(width + 16));
+    yGutter = Math.max(56, Math.ceil(width + 16)) + yShift;
+    if (yAxisBox.title) {
+      const turned = typeof yAxisBox.titleSpin === "number" ? ((yAxisBox.titleSpin % 360) + 360) % 360 : 90;
+      yGutter += turned === 0 || turned === 180 ? Math.ceil(ch(yAxisBox.title.length, 6.6)) + 12 : 16;
+    }
   }
-  if (showY && readAxis(spec, "y").title) left += 16;
-  const legendBand = bottomLegendBand(spec, frame.preset, frame.width - 12 - left);
-  const plot = { left, top, right: frame.width - 12, bottom: frame.height - (showX ? 28 : 12) - (showX && readAxis(spec, "x").title ? 14 : 0) - legendBand };
+  const left = showY && yAxisBox.end ? 12 : yGutter;
+  const right = showY && yAxisBox.end ? yGutter : 12;
+  const legendBand = bottomLegendBand(spec, frame.preset, frame.width - right - left);
+  const xOnTop = showX && xAxisBox.end;
+  const bottomPad = xOnTop ? 12 : (showX ? 28 + xShift : 12) + (showX && !xOnTop && xAxisBox.title ? 14 : 0);
+  const plot = { left, top, right: frame.width - right, bottom: frame.height - bottomPad - legendBand };
   const volumeH = showVolume ? Math.max(28, (plot.bottom - plot.top) * 0.2) : 0;
   const priceBottom = plot.bottom - volumeH - (showVolume ? 8 : 0);
   const yScale = linear(domain[0], domain[1], priceBottom, plot.top);
@@ -179,8 +191,9 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
       const y = yScale(yTicks[i] ?? 0) + 4;
       ys.push(yScale(yTicks[i] ?? 0));
       const rich = Boolean(yAxis.rotate || yAxis.offset || yAxis.end);
-      if (!rich) parts.push(text(plot.left - 8, y, yTickText[i] ?? "", ink, 11, "400", "end"));
-      else parts.push(turned((yAxis.end ? edge + 8 : edge - 8) + (yAxis.end ? shift : -shift), y, yTickText[i] ?? "", ink, 11, yAxis.end ? "start" : "end", yAxis.rotate));
+      const label = yTickText[i] ?? "";
+      if (!rich) parts.push(text(plot.left - 8, y, label, ink, 11, "400", "end", `y:${label}`));
+      else parts.push(turned((yAxis.end ? edge + 8 : edge - 8) + (yAxis.end ? shift : -shift), y, label, ink, 11, yAxis.end ? "start" : "end", yAxis.rotate, "400", `y:${label}`));
     }
     parts.push(minorTickMarks(yAxis.minor ?? 0, yTicks, yScale, edge, false, yAxis.end ? 3 : -3, axisInk));
     parts.push(majorTicks(yAxis, false, edge, ys, yAxis.end ? 1 : -1, axisInk));
@@ -192,7 +205,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
     const xAxis = readAxis(spec, "x");
     const omitted = candles.length > 8 ? Math.ceil(candles.length / 6) : 1;
     const step = labelStep(candles.length, xAxis.skip, omitted);
-    const labelY = (xAxis.end ? plot.top - 8 : frame.height - legendBand - (xAxis.title ? 26 : 12)) + (xAxis.end ? 0 : xAxis.offset || 0);
+    const labelY = xAxis.end ? plot.top - 16 - Math.max(0, xAxis.offset || 0) : plot.bottom + 16 + (xAxis.offset || 0);
     const ink = cssVar("muted", frame.preset.muted);
     const axisInk = cssVar("axis", frame.preset.axis);
     const xs: number[] = [];
@@ -202,15 +215,16 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
       for (const tick of time.ticks(frame.locale)) {
         const x = time.px(tick.t, plotWidth, plot.left);
         shownX.push(x);
-        if (!xAxis.rotate) parts.push(text(x, labelY, tick.text, ink, 11, "400", "middle"));
-        else parts.push(turned(x, labelY, tick.text, ink, 11, "middle", xAxis.rotate));
+        if (!xAxis.rotate) parts.push(text(x, labelY, tick.text, ink, 11, "400", "middle", `x:${tick.text}`));
+        else parts.push(turned(x, labelY, tick.text, ink, 11, "middle", xAxis.rotate, "400", `x:${tick.text}`));
       }
     }
     for (let i = 0; i < candles.length && !time; i += step) {
       if (!candles[i]?.label) continue;
       shownX.push(xs[i] ?? 0);
-      if (!xAxis.rotate) parts.push(text(xs[i] ?? 0, labelY, candles[i]?.label ?? "", ink, 11, "400", "middle"));
-      else parts.push(turned(xs[i] ?? 0, labelY, candles[i]?.label ?? "", ink, 11, "middle", xAxis.rotate));
+      const label = candles[i]?.label ?? "";
+      if (!xAxis.rotate) parts.push(text(xs[i] ?? 0, labelY, label, ink, 11, "400", "middle", `x:${label}`));
+      else parts.push(turned(xs[i] ?? 0, labelY, label, ink, 11, "middle", xAxis.rotate, "400", `x:${label}`));
     }
     const edge = xAxis.end ? plot.top : plot.bottom;
     parts.push(majorTicks(xAxis, true, edge, shownX, xAxis.end ? -1 : 1, axisInk));
@@ -230,6 +244,7 @@ export function renderCandlestick(spec: Record<string, unknown>): string | null 
   return parts.join("");
 }
 
-function text(x: number, y: number, value: string, fill: string, size: number, weight: string, anchor = "start"): string {
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
+function text(x: number, y: number, value: string, fill: string, size: number, weight: string, anchor = "start", key = ""): string {
+  const id = key ? ` data-ck-key="${esc(key)}" direction="ltr" unicode-bidi="isolate"` : "";
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}"${id}>${esc(value)}</text>`;
 }

@@ -1,5 +1,5 @@
 import { colorLegendHeight, readColorScale, scaleLabel } from "../../color-scale";
-import { legendLabel, legendMarkup, legendShownValue } from "../../legend";
+import { legendLabel, legendMarkup, legendShownValue, legendSpace, readLegend, type LegendItem } from "../../legend";
 import { asNumber, column, fieldOf } from "../../frame";
 import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
 import { headerFill, labelInk, siblingFill } from "../../ink";
@@ -24,6 +24,13 @@ interface Tile extends Leaf {
 /** Same heading-to-plot gap as the shared cartesian plot. */
 function plotTop(frame: { title?: string; subtitle?: string }): number {
   return (frame.title ? 40 : 12) + (frame.subtitle ? 18 : 0);
+}
+
+/** A rich top legend sits under the title, so the tiles start below that band. */
+function topBand(spec: Record<string, unknown>, items: LegendItem[], width: number): number {
+  const box = readLegend(spec);
+  if (!box || box.position !== "top") return 0;
+  return legendSpace(box, items, width).band;
 }
 
 /** Squarified tiles. Labels truncate to the tile. Leaves in a group share a series color, in lighter and darker tints. */
@@ -70,7 +77,10 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
     kids,
   }));
   const shown = valueFormat(frame, spec, frame.encoding.y);
-  const outer = squarify(grouped, 10, top, frame.width - 20, frame.height - top - legendH);
+  const legendItems = grouped.map((node) => ({ name: node.label, color: node.fill, value: legendShownValue(spec, node.value) }));
+  const band = legend ? topBand(spec, legendItems, frame.width - 24) : 0;
+  const origin = top + band;
+  const outer = squarify(grouped, 10, origin, frame.width - 20, frame.height - origin - (band ? 12 : legendH));
   for (const block of outer) {
     const inner = block.kids.length > 1
       ? squarify(block.kids, block.x + 3, block.y + 3, Math.max(1, block.w - 6), Math.max(1, block.h - 6))
@@ -109,7 +119,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
       })
       .join("");
     parts.push(
-      legendMarkup(spec, items, { plot: { left: 12, top, right: frame.width - 12, bottom: frame.height - legendH }, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
+      legendMarkup(spec, items, { plot: { left: 12, top: origin, right: frame.width - 12, bottom: frame.height - legendH }, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
     );
   }
   return view.done();
@@ -253,7 +263,10 @@ function renderLevels(spec: Record<string, unknown>): string | null | undefined 
     const inner = squarify(node.children, x + pad, y + header + pad, Math.max(1, w - pad * 2), Math.max(1, h - header - pad * 2));
     inner.forEach((child, childIndex) => paintNode(child, color, branch, depth + 1, child.x, child.y, child.w, child.h, node.value, childIndex, inner.length));
   };
-  const outer = squarify(branches, 10, top, frame.width - 20, frame.height - top - legendH);
+  const levelItems = branches.map((node, index) => ({ name: node.name, color: colors[index] ?? fill(frame, index), value: legendShownValue(spec, node.value) }));
+  const band = legend ? topBand(spec, levelItems, frame.width - 24) : 0;
+  const origin = top + band;
+  const outer = squarify(branches, 10, origin, frame.width - 20, frame.height - origin - (band ? 12 : legendH));
   outer.forEach((tile, index) => {
     paintNode(tile, colors[index] ?? fill(frame, index), tile.name, 0, tile.x, tile.y, tile.w, tile.h, total, index, outer.length);
   });
@@ -275,7 +288,7 @@ function renderLevels(spec: Record<string, unknown>): string | null | undefined 
       })
       .join("");
     parts.push(
-      legendMarkup(spec, items, { plot: { left: 12, top, right: frame.width - 12, bottom: frame.height - legendH }, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
+      legendMarkup(spec, items, { plot: { left: 12, top: origin, right: frame.width - 12, bottom: frame.height - legendH }, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
     );
   }
   return view.done();

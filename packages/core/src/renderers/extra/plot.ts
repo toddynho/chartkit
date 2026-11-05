@@ -24,8 +24,9 @@ export function viewOf(spec: Record<string, unknown>, renderer: string, width: n
   return { frame, spec, table, parts, done: () => (parts.push(closeChart()), parts.join("")) };
 }
 
-export function text(x: number, y: number, value: string, fill: string, size: number, weight = "400", anchor = "start"): string {
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}">${esc(value)}</text>`;
+export function text(x: number, y: number, value: string, fill: string, size: number, weight = "400", anchor = "start", key = ""): string {
+  const id = key ? ` data-ck-key="${esc(key)}" direction="ltr" unicode-bidi="isolate"` : "";
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}"${id}>${esc(value)}</text>`;
 }
 
 /** Opens a mark that can hold a `<title>`, so a static SVG still has a tooltip. */
@@ -123,29 +124,43 @@ export function yTickGutter(labels: string[], floor = 52): number {
   return Math.max(floor, Math.ceil(width + 16));
 }
 
+function titleGutter(title: string | undefined, spin: number | undefined): number {
+  if (!title) return 0;
+  const turned = typeof spin === "number" ? ((spin % 360) + 360) % 360 : 90;
+  if (turned === 0 || turned === 180) return Math.ceil(ch(title.length, 6.6)) + 12;
+  return 16;
+}
+
 export function plotBox(frame: Frame, spec: Record<string, unknown>, opts?: { left?: number; bottom?: number; yTicks?: number[] }): Box {
   const showY = axisOn(spec, "y");
   const showX = axisOn(spec, "x");
-  let left = opts?.left ?? (showY ? 52 : 16);
+  const yAxis = readAxis(spec, "y");
+  const xAxis = readAxis(spec, "x");
+  const yShift = showY ? Math.max(0, yAxis.offset || 0) : 0;
+  const xShift = showX ? Math.max(0, xAxis.offset || 0) : 0;
+  let gutter = opts?.left ?? (showY ? 52 : 16);
   if (showY && opts?.yTicks && opts.left === undefined) {
     const format = axisFormat(spec, frame.encoding.y);
     const labels: string[] = [];
     for (let i = 0; i < opts.yTicks.length; i++) labels.push(formatAxisValue(opts.yTicks[i], format, frame.locale, opts.yTicks));
-    left = yTickGutter(labels);
+    gutter = yTickGutter(labels);
   }
-  const yAxis = readAxis(spec, "y");
-  const xAxis = readAxis(spec, "x");
-  if (showY && yAxis.title && opts?.left === undefined) left += 16;
+  const yTitle = showY && opts?.left === undefined ? titleGutter(yAxis.title, yAxis.titleSpin) : 0;
+  const yEnd = showY && yAxis.end && opts?.left === undefined;
+  const left = gutter + (yEnd ? 0 : yShift + yTitle);
+  const rightPad = yEnd ? gutter + yShift + yTitle : 16;
   let top = frame.title ? 40 : 16;
   if (frame.subtitle) top += 18;
-  let bottom = opts?.bottom ?? (showX ? 32 : 16);
-  if (showX && xAxis.title) bottom += 14;
-  const inner = Math.max(80, frame.width - 16 - left);
+  if (showX && xAxis.end) top += 36 + xShift;
+  let bottom = opts?.bottom ?? (showX && !xAxis.end ? 32 : 16);
+  if (showX && xAxis.title && !xAxis.end) bottom += 14;
+  if (showX && !xAxis.end) bottom += xShift;
+  const inner = Math.max(80, frame.width - rightPad - left);
   bottom += bottomLegendBand(spec, frame.preset, inner);
   return {
     left,
     top,
-    right: frame.width - 16,
+    right: frame.width - rightPad,
     bottom: frame.height - bottom,
   };
 }
@@ -182,10 +197,14 @@ export function yLabels(frame: Frame, spec: Record<string, unknown>, box: Box, v
         .map((value) => {
           const y = yAt(value) + 4;
           const x = (axis.end ? edge + 8 : edge - 8) + (axis.end ? shift : -shift);
-          return turned(x, y, formatAxisValue(value, format, frame.locale, values), ink, 11, axis.end ? "start" : "end", axis.rotate);
+          const label = formatAxisValue(value, format, frame.locale, values);
+          return turned(x, y, label, ink, 11, axis.end ? "start" : "end", axis.rotate, "400", `y:${label}`);
         })
         .join("")
-    : shown.map((value) => text(box.left - 8, yAt(value) + 4, formatAxisValue(value, format, frame.locale, values), ink, 11, "400", "end")).join("");
+    : shown.map((value) => {
+        const label = formatAxisValue(value, format, frame.locale, values);
+        return text(box.left - 8, yAt(value) + 4, label, ink, 11, "400", "end", `y:${label}`);
+      }).join("");
   const minors = minorTickMarks(axis.minor ?? 0, values, yAt, edge, false, axis.end ? 3 : -3, axisInk);
   const ticks = majorTicks(axis, false, edge, shown.map(yAt), axis.end ? 1 : -1, axisInk);
   const rule = axis.rule ? spine(edge + (axis.end ? shift : -shift), box.top, edge + (axis.end ? shift : -shift), box.bottom, axis.rule, axisInk) : "";
@@ -199,14 +218,16 @@ export function xLabels(frame: Frame, spec: Record<string, unknown>, labels: { x
   const step = labelStep(labels.length, axis.skip, omitted);
   const inner = plot ? Math.max(80, plot.right - plot.left) : Math.max(80, frame.width - 96);
   const baseY = frame.height - bottomLegendBand(spec, frame.preset, inner) - (axis.title ? 26 : 12);
-  const y = axis.end && plot?.top !== undefined ? plot.top - 8 : baseY + (axis.offset || 0);
+  const shift = axis.offset || 0;
+  const y = axis.end && plot?.top !== undefined ? plot.top - 16 - Math.max(0, shift) : (plot?.bottom ?? baseY) + 16 + shift;
   const shown = labels.filter((label, index) => index % step === 0 && label.text);
   const ink = cssVar("muted", frame.preset.muted);
   const textMarks = shown
     .map((label) => {
-      const lx = label.x + (axis.end ? 0 : axis.offset || 0);
-      if (!axis.rotate) return text(lx, y, fit(label.text, 72, 11), ink, 11, "400", "middle");
-      return turned(lx, y, fit(label.text, 72, 11), ink, 11, "middle", axis.rotate);
+      const lx = label.x;
+      const drawn = fit(label.text, 72, 11);
+      if (!axis.rotate) return text(lx, y, drawn, ink, 11, "400", "middle", `x:${label.text}`);
+      return turned(lx, y, drawn, ink, 11, "middle", axis.rotate, "400", `x:${label.text}`);
     })
     .join("");
   const edge = axis.end && plot?.top !== undefined ? plot.top : plot?.bottom;

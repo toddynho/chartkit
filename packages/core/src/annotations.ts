@@ -245,13 +245,13 @@ function rule(item: Record<string, unknown>, geom: AnnotationGeom, over: string[
   const { plot } = geom;
   if (vertical) {
     const y = where === "start" ? plot.bottom - 4 : where === "center" ? (plot.top + plot.bottom) / 2 : Math.max(14, plot.top - 16);
-    over.push(label(item.label, atPx + 4, y, "start", color));
+    over.push(label(item.label, atPx + 4, y, "start", cssVar("text", geom.preset.text)));
     boxes.push({ x: atPx + 4, y: y - 11, w: ch(item.label.length, 6.3), h: 14 });
     return;
   }
   const x = where === "start" ? plot.left + 4 : where === "center" ? (plot.left + plot.right) / 2 : plot.right - 4;
   const anchor = where === "start" ? "start" : where === "center" ? "middle" : "end";
-  over.push(label(item.label, x, atPx - 4, anchor, color));
+  over.push(label(item.label, x, atPx - 4, anchor, cssVar("text", geom.preset.text)));
   const w = ch(item.label.length, 6.3);
   boxes.push({ x: anchor === "end" ? x - w : anchor === "middle" ? x - w / 2 : x, y: atPx - 16, w, h: 14 });
 }
