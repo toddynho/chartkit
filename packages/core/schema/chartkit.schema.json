@@ -1072,6 +1072,10 @@
         "label": {
           "$ref": "#/$defs/channel",
           "description": "Strip only: field shown with the group and the value in the point tooltip. It is not drawn on the plot. Other chart types warn CK3094."
+        },
+        "note": {
+          "$ref": "#/$defs/channel",
+          "description": "Strip only: a second, smaller line under the category label. Every point in the group should carry the same note, such as 100k points. The label and the note stay centred on that group's line. Other chart types warn CK3135."
         }
       },
       "description": "Which data fields drive which visual channels. Same names for every chart type: x is the category or time axis, y is the measured value(s). Donut uses x (slice label) and y (slice value), not theta, angle, or label. A y series axis is the string \"y\" or \"y2\". Switching 'type' between line/bar/donut/stacked-area/combo needs no re-encoding."
@@ -1305,7 +1309,7 @@
         },
         "labelFormat": {
           "$ref": "#/$defs/format",
-          "description": "Format preset for data labels. Falls back to the series format, then a plain number. Setting it turns labels on. Applies to: bar, donut, pie, line, stacked-area, scatter, combo."
+          "description": "Format preset for data labels. Falls back to the series format, then a plain number. Setting it turns labels on. On a strip it formats the end label, the note range, and the tooltip, and the axis ticks keep axes format. Applies to: bar, donut, pie, line, stacked-area, scatter, combo, strip."
         },
         "labelEnds": {
           "enum": ["all", "ends", "last"],
@@ -1392,7 +1396,59 @@
         },
         "highlight": {
           "type": "string",
-          "description": "Group value to draw in accent. Every other group uses muted. The summary tick stays ink. Applies to: strip."
+          "description": "Group or series value to emphasise. A group name marks that row. A series value, the color field, marks those dots. With mark.emphasis omitted or muted, the other marks use muted. Applies to: strip."
+        },
+        "emphasis": {
+          "enum": ["muted", "ring", "color"],
+          "description": "How mark.highlight is drawn. muted fades every other mark. ring draws the highlighted dots larger, with a ring, and keeps the other series colours. color paints the highlighted row in accent and keeps the other series colours. Omitted means muted when highlight is set. Applies to: strip."
+        },
+        "note": {
+          "enum": ["none", "field", "range"],
+          "default": "none",
+          "description": "Second line under the category label. none draws none. field uses encoding.note. range draws the minimum and maximum and does not repeat them beside the end label. The two lines stay centred on the plotted line. Applies to: strip."
+        },
+        "notePrefix": {
+          "type": "string",
+          "description": "Text before the note, such as range followed by a space. Applies to: strip."
+        },
+        "pin": {
+          "type": "boolean",
+          "default": false,
+          "description": "A value outside scale.domain is an edge marker with its real value, not a dot past the plot. Needs an explicit domain. Applies to: strip."
+        },
+        "pinFormat": {
+          "$ref": "#/$defs/format",
+          "description": "Format for a pin label. Defaults to mark.labelFormat, then the axis format. duration-ms prints 18.7 s. Applies to: strip."
+        },
+        "bandColor": {
+          "enum": ["accent", "series"],
+          "default": "accent",
+          "description": "Fill of the range band. accent is one wash. series uses that row's colour at low opacity. Applies to: strip."
+        },
+        "value": {
+          "enum": ["summary", "highlight"],
+          "default": "summary",
+          "description": "Number at the end of the row. summary is the median, the mean, or the first point when the tick is hidden. highlight is the highlighted series value in that row. Applies to: strip."
+        },
+        "labelColor": {
+          "enum": ["text", "accent", "series"],
+          "default": "text",
+          "description": "Colour of the end label. text is ink. accent is the brand colour. series uses that row's colour, and a highlighted row stays accent. Applies to: strip."
+        },
+        "labelSuffix": {
+          "type": "string",
+          "description": "Smaller unit after the end label, such as ms or tok. It is not part of the tick format. Applies to: strip."
+        },
+        "zebra": {
+          "type": "boolean",
+          "default": false,
+          "description": "Tint every other row, starting with the first. The tint sits behind the line. It is not a rule between rows. Applies to: strip."
+        },
+        "gutter": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 240,
+          "description": "Right margin for the end label, in px. Omitted, the margin fits the labels. A set value wins over that fit. size.width and size.height are never changed. Applies to: strip."
         },
         "sort": {
           "enum": ["none", "asc", "desc"],
@@ -1809,7 +1865,11 @@
                 },
                 "format": {
                   "$ref": "#/$defs/format",
-                  "description": "Tick label format. Defaults to the channel format."
+                  "description": "Tick label format. Defaults to the channel format. On a strip this formats the ticks only. The row end label uses mark.labelFormat."
+                },
+                "edgeLabel": {
+                  "type": "string",
+                  "description": "Label drawn at the high end of the axis, such as 5s+. It does not move the domain. Applies to: strip."
                 },
                 "ticks": {
                   "oneOf": [
@@ -2001,7 +2061,11 @@
                 },
                 "format": {
                   "$ref": "#/$defs/format",
-                  "description": "Tick label format. Defaults to the channel format."
+                  "description": "Tick label format. Defaults to the channel format. On a strip this formats the ticks only. The row end label uses mark.labelFormat."
+                },
+                "edgeLabel": {
+                  "type": "string",
+                  "description": "Label drawn at the high end of the axis, such as 5s+. It does not move the domain. Applies to: strip."
                 },
                 "ticks": {
                   "oneOf": [
@@ -2184,7 +2248,7 @@
                 },
                 "format": {
                   "$ref": "#/$defs/format",
-                  "description": "Tick label format. Defaults to the channel format."
+                  "description": "Tick label format. Defaults to the channel format. On a strip this formats the ticks only. The row end label uses mark.labelFormat."
                 },
                 "ticks": {
                   "oneOf": [
@@ -3052,6 +3116,15 @@
                     "$ref": "#/$defs/color"
                   },
                   "description": "Categorical series palette in order. CSS colors or var(--x). Default: var(--ck-series-1..12) falling back to the preset."
+                },
+                "lines": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 24,
+                  "items": {
+                    "$ref": "#/$defs/color"
+                  },
+                  "description": "Darker series ink, one per series colour, for thin strokes and strip labels. Omitted, labels use the series colour."
                 }
               },
               "description": "Override individual tokens."
