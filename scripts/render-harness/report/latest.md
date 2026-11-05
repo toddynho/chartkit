@@ -1,6 +1,6 @@
 # Chart render sweep
 
-Seed `20261105`. Mode `full`. 29372 cases, 22046 rendered, 62.7s.
+Seed `20261105`. Mode `full`. 34726 cases, 27314 rendered, 71.8s.
 
 ChartKit does not rewrite or shorten labels. An overlap is a layout bug. Spec-set sizes are left as the example wrote them, except when the sweep itself sets `size`.
 
@@ -8,19 +8,19 @@ ChartKit does not rewrite or shorten labels. An overlap is a layout bug. Spec-se
 
 Wrote the dHash baseline for this mode. Baselines are 64-bit hashes at raster width 96, not PNGs. A full sweep is about twenty thousand renders. Committing every PNG would add tens of megabytes. The hash catches a changed picture and stays small. Flagged renders are written under scripts/render-harness/out/png, and a few display-sized frames are copied into report/examples.
 
-Compared 22044. Changed 0. Missing baseline 0. Tolerance 8 bits on a 64-bit dHash.
+Compared 27312. Changed 0. Missing baseline 0. Tolerance 8 bits on a 64-bit dHash.
 
 ## Timing
 
-Render p50 0.2 ms, p95 2.1 ms, max 1849.1 ms.
+Render p50 0.2 ms, p95 2.4 ms, max 1735.7 ms.
 
 ## Findings by check
 
 | Check | Count |
 | --- | ---: |
-| contrast | 1691 |
-| text-overlap | 236 |
-| text-outside | 171 |
+| contrast | 1727 |
+| text-overlap | 221 |
+| text-outside | 206 |
 | mark-outside | 35 |
 | text-clipped | 8 |
 
@@ -32,10 +32,10 @@ Render p50 0.2 ms, p95 2.1 ms, max 1849.1 ms.
 | line | 220 |
 | bar | 218 |
 | heatmap | 205 |
+| strip | 165 |
 | rose | 140 |
 | gauge | 118 |
 | treemap | 115 |
-| strip | 109 |
 | spike | 82 |
 | timeline | 77 |
 | radar | 68 |
@@ -68,9 +68,9 @@ Render p50 0.2 ms, p95 2.1 ms, max 1849.1 ms.
 
 A group is one check failing the same way. Counts are findings, not chart types.
 
-### 1. contrast · label (916)
+### 1. contrast · label (952)
 
-Types: bar, bar-list, combo, donut, gantt, kpi, line, pie, radial-bar, rose, stacked-area, sunburst, timeline, treemap
+Types: bar, bar-list, combo, donut, gantt, kpi, line, pie, radial-bar, rose, stacked-area, strip, sunburst, timeline, treemap
 
 Options: axes.x.offset, encoding.y.format, encoding.y.format.decimals, encoding.y.format.signed, headline.tone, legend.anchor, legend.position, legend.position×title
 
@@ -98,7 +98,7 @@ Options: encoding.color, encoding.color.scale.bins, encoding.color.scale.reverse
 
 ![contrast · mark](examples/02-contrast-mark.png)
 
-### 3. text-outside · label (141)
+### 3. text-outside · label (176)
 
 Types: combo, gantt, heatmap, journey, line, radar, scatter, spike, streamgraph, strip, tree
 
@@ -111,11 +111,11 @@ Options: axes.x.offset, axes.y, axes.y.offset, axes.y.position, axes.y.titleRota
 - `combo` / `07-combo` / `axes.y2.titleRotate` = 360
   Label “Margin” extends outside the viewBox. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
 
-### 4. text-overlap · label × label (113)
+### 4. text-overlap · label × label (98)
 
 Types: combo, gauge, line, pie, quadrant, rose, sankey, spike, streamgraph, strip, timeline
 
-Options: axes.x.offset, axes.y.position, axes.y2.position, encoding.x.type, layout.direction, mark.endAngle, mark.summary, size.width
+Options: axes.x.offset, axes.y.position, axes.y2.position, encoding.x.type, layout.direction, mark.endAngle, size.width, size.width×legend.position
 
 - `combo` / `07-combo` / `axes.y.position` = "right"
   Label “Revenue” overlaps Label “Margin”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
@@ -310,7 +310,7 @@ Options: legend.anchor, size.width×legend.position
 
 ## Recorded, not failed
 
-Not yet supported: 599 options. Needs data: 2478. Unsampled (JSON, or the type field): 95.
+Not yet supported: 599 options. Needs data: 2478. Unsampled (JSON, or the type field): 136.
 
 An option the playground marks “Not yet supported” is listed and not rendered. A needs-data option is the same: the example cannot exercise it, so a failure there would be the fixture, not the chart.
 

@@ -20,6 +20,15 @@ function load(name: string): Record<string, unknown> {
 }
 
 describe("strip", () => {
+  it("draws a series band colour and an axis edge label", () => {
+    const spec = load("36-strip.json");
+    const colored = render({ ...spec, mark: { ...(spec.mark as object), bandColor: "series" } }) ?? "";
+    expect(colored).not.toBe(render(spec));
+    expect(colored).toContain("var(--ck-series-");
+    const edged = render({ ...spec, axes: { x: { edgeLabel: "5s+" } } }) ?? "";
+    expect(edged).toContain("5s+");
+  });
+
   it("draws the benchmark with a median tick, a range band, and the compare bracket", () => {
     const spec = load("36-strip.json");
     const result = validate(spec);
@@ -196,6 +205,142 @@ describe("strip", () => {
     const fixed = repair(line);
     expect((fixed.spec as { annotations?: unknown }).annotations).toBeUndefined();
     expect((fixed.spec as { encoding: { label?: string } }).encoding.label).toBeUndefined();
+  });
+
+  it("draws a note under the label, a pin past the domain, and a ring on the highlighted series", () => {
+    const spec = {
+      version: "1",
+      type: "strip",
+      data: [
+        { type: "line", library: "ChartKit", ms: 14.2, note: "100k points" },
+        { type: "line", library: "ECharts", ms: 18700.4, note: "100k points" },
+        { type: "bar", library: "ChartKit", ms: 12.1, note: "48 categories" },
+      ],
+      encoding: {
+        x: { field: "ms", scale: { type: "log", domain: [5, 5000] } },
+        y: "type",
+        color: "library",
+        label: "library",
+        note: "note",
+      },
+      mark: {
+        summary: "none",
+        jitter: "none",
+        pointSize: 4.5,
+        highlight: "ChartKit",
+        emphasis: "ring",
+        pin: true,
+        pinFormat: "duration-ms",
+        value: "highlight",
+        labelColor: "accent",
+        labelSuffix: " ms",
+        labelFormat: { specifier: ".1f" },
+        zebra: true,
+        note: "field",
+      },
+      axes: { x: { ticks: [10, 100, 1000], format: "duration-ms", edgeLabel: "5s+", grid: false } },
+      a11y: { alt: "ChartKit line is 14.2 ms. ECharts is pinned at 18.7 s." },
+      size: { width: 640, height: 220 },
+    };
+    const result = validate(spec);
+    expect(result.errors, JSON.stringify(result.errors)).toEqual([]);
+    const svg = render(spec) ?? "";
+    expect(svg).toContain("100k points");
+    expect(svg).toContain("48 categories");
+    expect(svg).toContain('data-ck-note="1"');
+    expect(svg).toContain("18.7 s");
+    expect(svg).toContain('data-ck-mark="pin"');
+    expect(svg).toContain('data-ck-mark="ring"');
+    expect(svg).toContain(">14.2<");
+    expect(svg).toContain(" ms");
+    expect(svg).toContain("10ms");
+    expect(svg).toContain("5s+");
+    expect(svg).toContain('data-ck-zebra="1"');
+    expect(svg.match(/stroke-dasharray="2 4"/g) ?? []).toEqual([]);
+    const noteY = Number(/data-ck-note="1" x="[^"]+" y="([^"]+)"/.exec(svg)?.[1]);
+    const nameY = Number(/text-anchor="end"[^>]*>line</.exec(svg) ? 0 : 0);
+    void nameY;
+    expect(noteY).toBeGreaterThan(0);
+    const lineName = /<text x="([^"]+)" y="([^"]+)" text-anchor="end"[^>]*>line<\/text>/.exec(svg);
+    expect(lineName).toBeTruthy();
+    expect(noteY).toBeGreaterThan(Number(lineName?.[2]));
+  });
+
+  it("warns when a pin, a field note, or emphasis is incomplete", () => {
+    const pin = validate({
+      version: "1",
+      type: "strip",
+      data: [
+        { g: "A", v: 1 },
+        { g: "A", v: 2 },
+      ],
+      encoding: { x: "v", y: "g" },
+      mark: { pin: true, note: "field", emphasis: "ring" },
+      a11y: { alt: "Incomplete strip options." },
+    });
+    expect(pin.warnings.some((warning) => warning.code === "CK3132")).toBe(true);
+    expect(pin.warnings.some((warning) => warning.code === "CK3133")).toBe(true);
+    expect(pin.warnings.some((warning) => warning.code === "CK3134")).toBe(true);
+    const fixed = repair({
+      version: "1",
+      type: "strip",
+      data: [
+        { g: "A", v: 1 },
+        { g: "A", v: 2 },
+      ],
+      encoding: { x: "v", y: "g" },
+      mark: { pin: true, note: "field", emphasis: "ring" },
+      a11y: { alt: "Incomplete strip options." },
+    });
+    expect(fixed.spec).toMatchObject({ mark: { pin: false, note: "none" } });
+    expect((fixed.spec as { mark: { emphasis?: string } }).mark.emphasis).toBeUndefined();
+  });
+
+  it("places a log scale on the midpoint and clamps a point past the domain", () => {
+    const spec = {
+      version: "1",
+      type: "strip",
+      data: [
+        { g: "line", v: 10 },
+        { g: "line", v: 100 },
+        { g: "line", v: 10000 },
+      ],
+      encoding: {
+        x: { field: "v", scale: { type: "log", domain: [10, 1000], clamp: true } },
+        y: "g",
+      },
+      mark: { summary: "none", jitter: "none" },
+      a11y: { alt: "Log scale from 10 to 1000. 10000 is past the edge." },
+      size: { width: 420, height: 160 },
+    };
+    const svg = render(spec) ?? "";
+    const xs = [...svg.matchAll(/cx="([^"]+)"/g)].map((match) => Number(match[1]));
+    expect(xs).toHaveLength(3);
+    const [slow, mid, pinned] = xs;
+    expect(slow).toBeLessThan(mid ?? 0);
+    expect(mid).toBeLessThan(pinned ?? 0);
+    expect(Math.abs((mid ?? 0) - ((slow ?? 0) + (pinned ?? 0)) / 2)).toBeLessThan(1.5);
+    expect(svg).toContain("10000");
+    expect(svg).not.toContain('data-ck-mark="summary"');
+  });
+
+  it("uses the first observation as the end label when the summary is hidden", () => {
+    const spec = {
+      version: "1",
+      type: "strip",
+      data: [
+        { g: "line", v: 14.2, name: "ChartKit" },
+        { g: "line", v: 1884.3, name: "Recharts" },
+      ],
+      encoding: { x: "v", y: "g", label: "name" },
+      mark: { summary: "none", jitter: "none" },
+      a11y: { alt: "ChartKit is 14.2." },
+      size: { width: 420, height: 160 },
+    };
+    const svg = render(spec) ?? "";
+    expect(svg).toContain(">14.2<");
+    expect(svg).toContain("ChartKit, line, 14.2");
+    expect(svg).not.toContain('data-ck-mark="summary"');
   });
 
   it("paints the same SVG from every adapter, in light and in dark", async () => {

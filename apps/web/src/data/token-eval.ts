@@ -521,6 +521,17 @@ function pct(value: number): string {
   return `${((value / TOKEN_SCALE) * 100).toFixed(2)}%`;
 }
 
+/** One cell per finished model and library. Homepage charts read this instead of retyping the matrix. */
+export function tokenObservations(): { library: TokenLibrary; model: string; tokens: number }[] {
+  const out: { library: TokenLibrary; model: string; tokens: number }[] = [];
+  for (const model of finishedModels()) {
+    for (const library of TOKEN_LIBRARIES) {
+      out.push({ library, model: modelLabel(model), tokens: model.tokens[library] });
+    }
+  }
+  return out;
+}
+
 /** Per-model medians for the homepage spread. Every dot is a published cell. */
 export function tokenSpread(): TokenSpread {
   const models = finishedModels();
