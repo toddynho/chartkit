@@ -5577,6 +5577,253 @@
     "slider": false
   },
   {
+    "path": "encoding.note",
+    "description": "Strip only: a second, smaller line under the category label. Every point in the group should carry the same note, such as 100k points. The label and the note stay centred on that group's line. Other chart types warn CK3135.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note",
+    "label": "Note",
+    "control": "text",
+    "storage": "union-text",
+    "promote": "field",
+    "slider": false
+  },
+  {
+    "path": "encoding.note.type",
+    "description": "Measurement type of the field. Inferred from data if omitted: numbers→quantitative, ISO date strings/epoch ms on x→temporal, other strings→nominal.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.type",
+    "label": "Type",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "quantitative",
+      "temporal",
+      "ordinal",
+      "nominal"
+    ],
+    "slider": false
+  },
+  {
+    "path": "encoding.note.title",
+    "description": "Human-readable name used in axes, legend and tooltip. Defaults to the field name.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.title",
+    "label": "Title",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.note.format",
+    "description": "How values are displayed in axes, tooltips and labels. A preset string, or an object for fine control. Formatting uses Intl with the spec 'locale'.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.format",
+    "label": "Format",
+    "control": "enum",
+    "storage": "union-enum",
+    "promote": "style",
+    "enumValues": [
+      "number",
+      "integer",
+      "compact",
+      "percent",
+      "percent-raw",
+      "currency",
+      "bytes",
+      "duration-ms",
+      "duration-hm",
+      "date",
+      "time",
+      "datetime",
+      "month",
+      "year",
+      "weekday"
+    ],
+    "slider": false
+  },
+  {
+    "path": "encoding.note.format.decimals",
+    "description": "Fixed number of fraction digits.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.format.decimals",
+    "label": "Decimals",
+    "control": "number",
+    "storage": "scalar",
+    "coerce": "integer",
+    "minimum": 0,
+    "maximum": 10,
+    "slider": true
+  },
+  {
+    "path": "encoding.note.format.currency",
+    "description": "ISO 4217 code when style is 'currency'.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.format.currency",
+    "label": "Currency",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.note.format.prefix",
+    "description": "Text placed before the value.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.format.prefix",
+    "label": "Prefix",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.note.format.suffix",
+    "description": "Text placed after the value, e.g. ' req/s'.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.format.suffix",
+    "label": "Suffix",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.note.format.signed",
+    "description": "Always show + for positive numbers (useful for deltas).",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.format.signed",
+    "label": "Signed",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.note.format.specifier",
+    "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.format.specifier",
+    "label": "Specifier",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.note.scale.type",
+    "description": "Scale type. Inferred from field type: quantitative→linear, temporal→time, nominal/ordinal→band. symlog is a signed log that passes through zero.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.scale.type",
+    "label": "Type",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "linear",
+      "log",
+      "sqrt",
+      "time",
+      "band",
+      "point",
+      "symlog"
+    ],
+    "slider": false
+  },
+  {
+    "path": "encoding.note.scale.domain",
+    "description": "Explicit [min, max] for continuous scales, or the ordered list of categories for band/point scales. Use null for one side to keep it automatic.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.scale.domain",
+    "label": "Domain",
+    "control": "json",
+    "storage": "scalar"
+  },
+  {
+    "path": "encoding.note.scale.zero",
+    "description": "Force the scale to include zero. Default true for bar/area, false for line/scatter.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.scale.zero",
+    "label": "Zero",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.note.scale.nice",
+    "description": "Round the domain to tidy tick values. Default true.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.scale.nice",
+    "label": "Nice",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.note.scale.reverse",
+    "description": "Flip the direction of the scale.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.scale.reverse",
+    "label": "Reverse",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.note.scale.padding",
+    "description": "Extra room past the data, as a fraction of the span. A number pads both ends. An object pads one end. 0.08 is eight percent. An explicit domain end stays as set.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.scale.padding",
+    "label": "Padding",
+    "control": "number",
+    "storage": "union-number",
+    "coerce": "number",
+    "minimum": 0,
+    "maximum": 1,
+    "slider": true
+  },
+  {
+    "path": "encoding.note.scale.padding.min",
+    "description": "Fraction of the span added below the data.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.scale.padding.min",
+    "label": "Min",
+    "control": "number",
+    "storage": "scalar",
+    "coerce": "number",
+    "minimum": 0,
+    "maximum": 1,
+    "slider": true
+  },
+  {
+    "path": "encoding.note.scale.padding.max",
+    "description": "Fraction of the span added above the data.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.scale.padding.max",
+    "label": "Max",
+    "control": "number",
+    "storage": "scalar",
+    "coerce": "number",
+    "minimum": 0,
+    "maximum": 1,
+    "slider": true
+  },
+  {
+    "path": "encoding.note.scale.clamp",
+    "description": "Draw values outside an explicit scale.domain at the domain edge.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.scale.clamp",
+    "label": "Clamp",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "encoding.note.scale.constant",
+    "description": "Linear half-width of a symlog scale, in data units. Default 1. Ignored unless type is symlog.",
+    "group": "Data / Encoding",
+    "docs": "/docs/options#encoding.note.scale.constant",
+    "label": "Constant",
+    "control": "number",
+    "storage": "scalar",
+    "coerce": "number",
+    "minimum": 0,
+    "slider": false
+  },
+  {
     "path": "metric.value",
     "description": "The current value.",
     "group": "Data / Encoding",
@@ -6510,7 +6757,7 @@
   },
   {
     "path": "mark.labelFormat",
-    "description": "Format preset for data labels. Falls back to the series format, then a plain number. Setting it turns labels on. Applies to: bar, donut, pie, line, stacked-area, scatter, combo.",
+    "description": "Format preset for data labels. Falls back to the series format, then a plain number. Setting it turns labels on. On a strip it formats the end label, the note range, and the tooltip, and the axis ticks keep axes format.",
     "group": "Labels",
     "docs": "/docs/options#mark.labelFormat",
     "appliesTo": [
@@ -6522,7 +6769,8 @@
       "scatter",
       "combo",
       "funnel",
-      "waterfall"
+      "waterfall",
+      "strip"
     ],
     "label": "Label Format",
     "control": "enum",
@@ -6562,7 +6810,8 @@
       "scatter",
       "combo",
       "funnel",
-      "waterfall"
+      "waterfall",
+      "strip"
     ],
     "label": "Decimals",
     "control": "number",
@@ -6586,7 +6835,8 @@
       "scatter",
       "combo",
       "funnel",
-      "waterfall"
+      "waterfall",
+      "strip"
     ],
     "label": "Currency",
     "control": "text",
@@ -6607,7 +6857,8 @@
       "scatter",
       "combo",
       "funnel",
-      "waterfall"
+      "waterfall",
+      "strip"
     ],
     "label": "Prefix",
     "control": "text",
@@ -6628,7 +6879,8 @@
       "scatter",
       "combo",
       "funnel",
-      "waterfall"
+      "waterfall",
+      "strip"
     ],
     "label": "Suffix",
     "control": "text",
@@ -6649,7 +6901,8 @@
       "scatter",
       "combo",
       "funnel",
-      "waterfall"
+      "waterfall",
+      "strip"
     ],
     "label": "Signed",
     "control": "boolean",
@@ -6670,7 +6923,8 @@
       "scatter",
       "combo",
       "funnel",
-      "waterfall"
+      "waterfall",
+      "strip"
     ],
     "label": "Specifier",
     "control": "text",
@@ -6934,7 +7188,7 @@
   },
   {
     "path": "mark.highlight",
-    "description": "Group value to draw in accent. Every other group uses muted. The summary tick stays ink. Applies to: strip.",
+    "description": "Group or series value to emphasise. A group name marks that row. A series value, the color field, marks those dots. With mark.emphasis omitted or muted, the other marks use muted. Applies to: strip.",
     "group": "Marks & style",
     "docs": "/docs/options#mark.highlight",
     "appliesTo": [
@@ -6944,6 +7198,280 @@
     "control": "text",
     "storage": "scalar",
     "slider": false
+  },
+  {
+    "path": "mark.emphasis",
+    "description": "How mark.highlight is drawn. muted fades every other mark. ring draws the highlighted dots larger, with a ring, and keeps the other series colours. color paints the highlighted row in accent and keeps the other series colours.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.emphasis",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Emphasis",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "muted",
+      "ring",
+      "color"
+    ],
+    "slider": false
+  },
+  {
+    "path": "mark.note",
+    "description": "Second line under the category label. none draws none. field uses encoding.note. range draws the minimum and maximum and does not repeat them beside the end label. The two lines stay centred on the plotted line. Applies to: strip.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.note",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Note",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "none",
+      "field",
+      "range"
+    ],
+    "slider": false,
+    "defaultValue": "none"
+  },
+  {
+    "path": "mark.notePrefix",
+    "description": "Text before the note, such as range followed by a space. Applies to: strip.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.notePrefix",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Note Prefix",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "mark.pin",
+    "description": "A value outside scale.domain is an edge marker with its real value, not a dot past the plot. Needs an explicit domain. Applies to: strip.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.pin",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Pin",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false,
+    "defaultValue": false
+  },
+  {
+    "path": "mark.pinFormat",
+    "description": "Format for a pin label. Defaults to mark.labelFormat, then the axis format. duration-ms prints 18.7 s. Applies to: strip.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.pinFormat",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Pin Format",
+    "control": "enum",
+    "storage": "union-enum",
+    "promote": "style",
+    "enumValues": [
+      "number",
+      "integer",
+      "compact",
+      "percent",
+      "percent-raw",
+      "currency",
+      "bytes",
+      "duration-ms",
+      "duration-hm",
+      "date",
+      "time",
+      "datetime",
+      "month",
+      "year",
+      "weekday"
+    ],
+    "slider": false
+  },
+  {
+    "path": "mark.pinFormat.decimals",
+    "description": "Fixed number of fraction digits.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.pinFormat.decimals",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Decimals",
+    "control": "number",
+    "storage": "scalar",
+    "coerce": "integer",
+    "minimum": 0,
+    "maximum": 10,
+    "slider": true
+  },
+  {
+    "path": "mark.pinFormat.currency",
+    "description": "ISO 4217 code when style is 'currency'.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.pinFormat.currency",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Currency",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "mark.pinFormat.prefix",
+    "description": "Text placed before the value.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.pinFormat.prefix",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Prefix",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "mark.pinFormat.suffix",
+    "description": "Text placed after the value, e.g. ' req/s'.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.pinFormat.suffix",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Suffix",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "mark.pinFormat.signed",
+    "description": "Always show + for positive numbers (useful for deltas).",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.pinFormat.signed",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Signed",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "mark.pinFormat.specifier",
+    "description": "d3-style format: .2f, ,.0f, $,.0f, .1%, .2e, +.1f, or s. A string format such as \".2f\" is repaired to this.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.pinFormat.specifier",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Specifier",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "mark.bandColor",
+    "description": "Fill of the range band. accent is one wash. series uses that row's colour at low opacity. Applies to: strip.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.bandColor",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Band Color",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "accent",
+      "series"
+    ],
+    "slider": false,
+    "defaultValue": "accent"
+  },
+  {
+    "path": "mark.value",
+    "description": "Number at the end of the row. summary is the median, the mean, or the first point when the tick is hidden. highlight is the highlighted series value in that row. Applies to: strip.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.value",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Value",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "summary",
+      "highlight"
+    ],
+    "slider": false,
+    "defaultValue": "summary"
+  },
+  {
+    "path": "mark.labelColor",
+    "description": "Colour of the end label. text is ink. accent is the brand colour. series uses that row's colour, and a highlighted row stays accent. Applies to: strip.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.labelColor",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Label Color",
+    "control": "enum",
+    "storage": "scalar",
+    "enumValues": [
+      "text",
+      "accent",
+      "series"
+    ],
+    "slider": false,
+    "defaultValue": "text"
+  },
+  {
+    "path": "mark.labelSuffix",
+    "description": "Smaller unit after the end label, such as ms or tok. It is not part of the tick format. Applies to: strip.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.labelSuffix",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Label Suffix",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "mark.zebra",
+    "description": "Tint every other row, starting with the first. The tint sits behind the line. It is not a rule between rows. Applies to: strip.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.zebra",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Zebra",
+    "control": "boolean",
+    "storage": "scalar",
+    "slider": false,
+    "defaultValue": false
+  },
+  {
+    "path": "mark.gutter",
+    "description": "Right margin for the end label, in px. Omitted, the margin fits the labels. A set value wins over that fit. size.width and size.height are never changed. Applies to: strip.",
+    "group": "Marks & style",
+    "docs": "/docs/options#mark.gutter",
+    "appliesTo": [
+      "strip"
+    ],
+    "label": "Gutter",
+    "control": "number",
+    "storage": "scalar",
+    "coerce": "number",
+    "minimum": 0,
+    "maximum": 240,
+    "slider": true
   },
   {
     "path": "mark.sort",
@@ -7541,7 +8069,7 @@
   },
   {
     "path": "axes.x.format",
-    "description": "Tick label format. Defaults to the channel format.",
+    "description": "Tick label format. Defaults to the channel format. On a strip this formats the ticks only. The row end label uses mark.labelFormat.",
     "group": "Axes",
     "docs": "/docs/options#axes.x.format",
     "appliesTo": [
@@ -7752,6 +8280,34 @@
       "density"
     ],
     "label": "Specifier",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "axes.x.edgeLabel",
+    "description": "Label drawn at the high end of the axis, such as 5s+. It does not move the domain. Applies to: strip.",
+    "group": "Axes",
+    "docs": "/docs/options#axes.x.edgeLabel",
+    "appliesTo": [
+      "line",
+      "bar",
+      "stacked-area",
+      "combo",
+      "scatter",
+      "spike",
+      "candlestick",
+      "histogram",
+      "boxplot",
+      "waterfall",
+      "area-range",
+      "bar-range",
+      "errorbar",
+      "strip",
+      "streamgraph",
+      "density"
+    ],
+    "label": "Edge Label",
     "control": "text",
     "storage": "scalar",
     "slider": false
@@ -8456,7 +9012,7 @@
   },
   {
     "path": "axes.y.format",
-    "description": "Tick label format. Defaults to the channel format.",
+    "description": "Tick label format. Defaults to the channel format. On a strip this formats the ticks only. The row end label uses mark.labelFormat.",
     "group": "Axes",
     "docs": "/docs/options#axes.y.format",
     "appliesTo": [
@@ -8668,6 +9224,34 @@
       "density"
     ],
     "label": "Specifier",
+    "control": "text",
+    "storage": "scalar",
+    "slider": false
+  },
+  {
+    "path": "axes.y.edgeLabel",
+    "description": "Label drawn at the high end of the axis, such as 5s+. It does not move the domain. Applies to: strip.",
+    "group": "Axes",
+    "docs": "/docs/options#axes.y.edgeLabel",
+    "appliesTo": [
+      "line",
+      "bar",
+      "stacked-area",
+      "combo",
+      "scatter",
+      "spike",
+      "candlestick",
+      "histogram",
+      "boxplot",
+      "waterfall",
+      "area-range",
+      "bar-range",
+      "errorbar",
+      "strip",
+      "streamgraph",
+      "density"
+    ],
+    "label": "Edge Label",
     "control": "text",
     "storage": "scalar",
     "slider": false
@@ -9371,7 +9955,7 @@
   },
   {
     "path": "axes.y2.format",
-    "description": "Tick label format. Defaults to the channel format.",
+    "description": "Tick label format. Defaults to the channel format. On a strip this formats the ticks only. The row end label uses mark.labelFormat.",
     "group": "Axes",
     "docs": "/docs/options#axes.y2.format",
     "appliesTo": [
@@ -11449,6 +12033,17 @@
     "label": "Series",
     "control": "json",
     "storage": "scalar"
+  },
+  {
+    "path": "theme.tokens.lines",
+    "description": "Darker series ink, one per series colour, for thin strokes and strip labels. Omitted, labels use the series colour.",
+    "group": "Colors & theme",
+    "docs": "/docs/options#theme.tokens.lines",
+    "label": "Lines",
+    "control": "color",
+    "storage": "scalar",
+    "arrayAlt": true,
+    "slider": false
   },
   {
     "path": "size.width",

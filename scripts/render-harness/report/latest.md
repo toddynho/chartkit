@@ -1,6 +1,6 @@
 # Chart render sweep
 
-Seed `20261105`. Mode `full`. 29372 cases, 22046 rendered, 84.5s.
+Seed `20261105`. Mode `full`. 34726 cases, 27314 rendered, 79.4s.
 
 ChartKit does not rewrite or shorten labels. An overlap is a layout bug. Spec-set sizes are left as the example wrote them, except when the sweep itself sets `size`.
 
@@ -8,19 +8,19 @@ ChartKit does not rewrite or shorten labels. An overlap is a layout bug. Spec-se
 
 Wrote the dHash baseline for this mode. Baselines are 64-bit hashes at raster width 96, not PNGs. A full sweep is about twenty thousand renders. Committing every PNG would add tens of megabytes. The hash catches a changed picture and stays small. Flagged renders are written under scripts/render-harness/out/png, and a few display-sized frames are copied into report/examples.
 
-Compared 22044. Changed 0. Missing baseline 0. Tolerance 8 bits on a 64-bit dHash.
+Compared 27312. Changed 0. Missing baseline 0. Tolerance 8 bits on a 64-bit dHash.
 
 ## Timing
 
-Render p50 0.2 ms, p95 2.3 ms, max 2020.3 ms.
+Render p50 0.2 ms, p95 1.9 ms, max 1757.9 ms.
 
 ## Findings by check
 
 | Check | Count |
 | --- | ---: |
-| contrast | 1883 |
-| text-overlap | 333 |
-| text-outside | 190 |
+| contrast | 1925 |
+| text-overlap | 318 |
+| text-outside | 225 |
 | mark-outside | 35 |
 | text-clipped | 14 |
 
@@ -31,9 +31,9 @@ Render p50 0.2 ms, p95 2.3 ms, max 2020.3 ms.
 | bar | 325 |
 | combo | 299 |
 | heatmap | 205 |
+| strip | 181 |
 | rose | 140 |
 | treemap | 121 |
-| strip | 119 |
 | gauge | 118 |
 | funnel | 109 |
 | line | 88 |
@@ -74,7 +74,7 @@ Render p50 0.2 ms, p95 2.3 ms, max 2020.3 ms.
 
 A group is one check failing the same way. Counts are findings, not chart types.
 
-### 1. contrast · mark (950)
+### 1. contrast · mark (956)
 
 Types: area-range, bar, bar-range, boxplot, bullet, candlestick, choropleth, combo, density, donut, errorbar, funnel, gantt, gauge, heatmap, histogram, journey, kpi, line, map-points, mini-area, pie, progress-ring, quadrant, radar, sankey, scatter, sparkline, spike, stacked-area, streamgraph, strip, sunburst, timeline, tree, treemap, waterfall
 
@@ -89,9 +89,9 @@ Options: encoding.color, encoding.color.scale.bins, encoding.color.scale.reverse
 
 ![contrast · mark](examples/01-contrast-mark.png)
 
-### 2. contrast · label (886)
+### 2. contrast · label (922)
 
-Types: bar, bar-list, combo, donut, gantt, kpi, pie, radial-bar, rose, sunburst, timeline, treemap
+Types: bar, bar-list, combo, donut, gantt, kpi, pie, radial-bar, rose, strip, sunburst, timeline, treemap
 
 Options: encoding.y.format, encoding.y.format.decimals, encoding.y.format.signed, headline.tone, legend.anchor, legend.position, legend.position×title, mark.innerRadius
 
@@ -104,20 +104,7 @@ Options: encoding.y.format, encoding.y.format.decimals, encoding.y.format.signed
 
 ![contrast · label](examples/02-contrast-label.png)
 
-### 3. text-overlap · label × label (180)
-
-Types: choropleth, combo, gauge, line, map-points, pie, quadrant, rose, sankey, spike, streamgraph, strip, sunburst, timeline, venn
-
-Options: axes.x.offset, axes.y.position, axes.y2.position, encoding.color, encoding.size, encoding.x.type, layout.direction, legend.position
-
-- `choropleth` / `us-population` / ``
-  Label “Change” overlaps Label “8%”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
-- `choropleth` / `us-population` / `size.width×legend.position` = {"size.width":"240","legend.position":"right","size.height":"160"}
-  Label “-4%” overlaps Label “-2%”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
-- `choropleth` / `us-population` / `size.width×legend.position` = {"size.width":"240","legend.position":"right","size.height":"160"}
-  Label “4%” overlaps Label “6%”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
-
-### 4. text-outside · label (160)
+### 3. text-outside · label (195)
 
 Types: choropleth, combo, gantt, heatmap, journey, line, map-points, radar, scatter, spike, streamgraph, strip, sunburst, tree, venn
 
@@ -129,6 +116,19 @@ Options: axes.x.offset, axes.y, axes.y.offset, axes.y.position, axes.y.titleRota
   Label “Population change, 2020–2023” extends outside the viewBox. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
 - `choropleth` / `us-population` / `size.width×legend.position` = {"size.width":"240","legend.position":"top","size.height":"160"}
   Label “Population change, 2020–2023” extends outside the viewBox. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
+
+### 4. text-overlap · label × label (165)
+
+Types: choropleth, combo, gauge, line, map-points, pie, quadrant, rose, sankey, spike, streamgraph, strip, sunburst, timeline, venn
+
+Options: axes.x.offset, axes.y.position, axes.y2.position, encoding.color, encoding.size, encoding.x.type, layout.direction, legend.position
+
+- `choropleth` / `us-population` / ``
+  Label “Change” overlaps Label “8%”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
+- `choropleth` / `us-population` / `size.width×legend.position` = {"size.width":"240","legend.position":"right","size.height":"160"}
+  Label “-4%” overlaps Label “-2%”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
+- `choropleth` / `us-population` / `size.width×legend.position` = {"size.width":"240","legend.position":"right","size.height":"160"}
+  Label “4%” overlaps Label “6%”. ChartKit does not rewrite or shorten labels. Overlap is a layout bug. The spec size wins.
 
 ### 5. text-overlap · tick × tick (75)
 
@@ -326,7 +326,7 @@ Types: gantt
 
 ## Recorded, not failed
 
-Not yet supported: 599 options. Needs data: 2478. Unsampled (JSON, or the type field): 95.
+Not yet supported: 599 options. Needs data: 2478. Unsampled (JSON, or the type field): 136.
 
 An option the playground marks “Not yet supported” is listed and not rendered. A needs-data option is the same: the example cannot exercise it, so a failure there would be the fixture, not the chart.
 

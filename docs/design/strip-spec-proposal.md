@@ -190,6 +190,30 @@ A dot plot. Summary and band are hidden by the renderer. `repair()` writes `"non
 - Gallery tile uses the benchmark spec.
 - Eval tasks `tokens-by-model-strip` and `latency-by-region-strip` join `bench/agent/tasks.mjs` for the next round. They are not a paid run. The published 42-task scoreboard is a finished round and stays described as 42.
 
+## Row chrome
+
+These options were added so the homepage can draw the hand-built rows.
+
+| Property | Default | Drawn as |
+| --- | --- | --- |
+| `encoding.note` | omitted | Second line under the category, when every point in the group shares it. |
+| `mark.note` | `"none"` | `"field"` uses `encoding.note`. `"range"` draws min–max under the label and not beside the end value. |
+| `mark.notePrefix` | `""` | Text before that note. |
+| `mark.pin` | `false` | A value outside `scale.domain` is an edge marker plus its real value. |
+| `mark.pinFormat` | the end-label format | `duration-ms` prints `18.7 s`. |
+| `mark.emphasis` | `muted` when highlight is set | `ring` is a larger dot with a halo. `color` paints that row in accent and keeps the other series colours. |
+| `mark.bandColor` | `"accent"` | `"series"` is that row's colour at opacity 0.18. |
+| `mark.value` | `"summary"` | `"highlight"` is the highlighted series value in the row. |
+| `mark.labelFormat` | the axis format | End labels only. Ticks keep `axes` format. |
+| `mark.labelColor` | `"text"` | `"accent"` or `"series"`. A highlighted row stays accent. |
+| `mark.labelSuffix` | omitted | Smaller unit after the end label. |
+| `mark.zebra` | `false` | Tint on every other row, starting with the first. |
+| `mark.gutter` | fitted | Right margin in px. A set value wins. `size` is not changed. |
+| `axes.x.grid` | dashed value grid | `false` removes it. |
+| `axes.x.edgeLabel` | omitted | Text at the high end, such as `5s+`. |
+
+The category name and its note are centred on that group's line. Labels are not shortened.
+
 ## Left for later
 
-Jitter on `scatter`. A jitter seed. Beeswarm. Point shapes. Drawing the `encoding.label` string on the dot. Per-library brand colors on the homepage (the highlight uses accent and muted, which is a calmer chart than today's rival swatches).
+Jitter on `scatter`. A jitter seed. Beeswarm. Point shapes. Drawing the `encoding.label` string on the dot.
