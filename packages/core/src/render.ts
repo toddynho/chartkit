@@ -1,6 +1,7 @@
 import type { Diagnostic } from "./diagnostics";
+import { armFontMeasure, noteFontRedraw } from "./font";
 import { arrangeNow, type Draw } from "./layout-hook";
-import { cssVar } from "./theme";
+import { cssVar, resolvePreset } from "./theme";
 import { esc, font, isRecord } from "./svg";
 
 /** A container element. `HTMLElement` satisfies this; tests can pass a plain object. */
@@ -46,6 +47,8 @@ export function render(spec: unknown, target?: RenderTarget | null): string {
 }
 
 function renderWith(map: Map<string, ChartRenderer>, spec: unknown, target?: RenderTarget | null): string {
+  const family = isRecord(spec) ? resolvePreset(spec.theme).fontFamily ?? "" : "";
+  armFontMeasure(family, target);
   let svg: string;
   try {
     if (!isRecord(spec) || (typeof spec.type !== "string" && !concatReady(spec))) {
@@ -100,7 +103,12 @@ function renderWith(map: Map<string, ChartRenderer>, spec: unknown, target?: Ren
   }
   svg = stampInteraction(svg, spec);
   svg = scaleFontSize(svg, spec);
-  if (target) target.innerHTML = svg;
+  if (target) {
+    target.innerHTML = svg;
+    noteFontRedraw(target, () => {
+      renderWith(map, spec, target);
+    });
+  }
   return svg;
 }
 

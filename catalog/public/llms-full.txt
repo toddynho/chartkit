@@ -61,7 +61,7 @@ Round 1 unlocked the keys below. Copy-paste specs are in https://chartkit.dev/re
 - `encoding.color.range` of two or more `#rrggbb` stops is a choropleth sequential ramp and a heatmap continuous ramp. A one-stop or non-hex range is ignored. The default choropleth ramp stays green.
 - `mark.nodata` `fill` paints missing countries with `mark.land` and does not hatch them. `mark.land` and `mark.water` accept `#rrggbb`.
 - `encoding.y[].fillOpacity` overrides `mark.fillOpacity` for that series.
-- `theme.tokens.fontFamily` is written as `--ck-font-family`. `theme.tokens.fontSize` sets tick and axis-title size.
+- `theme.tokens.fontFamily` defaults to inherit (the page font) and is written as `--ck-font-family` when set. `inherit` clears a preset family. `theme.tokens.fontSize` sets tick and axis-title size.
 - `theme.mode` `dark` starts from the midnight colour base. `light` on the midnight preset starts from the soft colour base. Geometry stays on the named preset.
 - `tooltip.background`, `tooltip.radius`, `tooltip.shadow`, and `tooltip.crosshairColor` are recorded on the chart and read by the tooltip card.
 - `axes.x.ticks`, `axes.y.ticks`, and `axes.y2.ticks` accept `ends`, which labels only the first and last tick. Gross volume sets `axes.x.ticks` to `ends`.

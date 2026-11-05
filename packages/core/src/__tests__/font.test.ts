@@ -81,6 +81,88 @@ describe("font inherit", () => {
     const named = bakeFontFallback(render(lineSpec({ tokens: { fontFamily: "Georgia, serif" } })) ?? "");
     expect(named).toContain("font-family:Georgia, serif");
     expect(named).not.toContain(FONT_INHERIT);
+    const requested = bakeFontFallback(`<svg style="font-family:${FONT_INHERIT}"></svg>`, "Roboto, sans-serif");
+    expect(requested).toContain("font-family:Roboto, sans-serif");
+    expect(requested).not.toContain("inherit");
+    expect(bakeFontFallback(`<svg style="font-family:${FONT_INHERIT};--ck-font-family:Georgia, serif"></svg>`, "Roboto")).toContain("font-family:Georgia, serif");
     expect(toSVG(`<svg style="font-family:${FONT_INHERIT}"></svg>`)).toContain(`font-family:${FONT_FALLBACK}`);
+  });
+
+  it("measures the chart family, including an ancestor variable, and relayouts once fonts load", async () => {
+    const plain = render(lineSpec()) ?? "";
+    let digitWidth = 60;
+    let variable = "";
+    let reads = 0;
+    const seen: string[] = [];
+    const root = { nodeType: 1 };
+    const previous = {
+      document: globalThis.document,
+      getComputedStyle: globalThis.getComputedStyle,
+    };
+    let release: () => void = () => {};
+    const ready = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    globalThis.document = {
+      documentElement: root,
+      createElement: () => ({
+        getContext: () => ({
+          set font(value: string) {
+            seen.push(value);
+          },
+          measureText: () => ({ width: digitWidth }),
+        }),
+      }),
+      fonts: { ready },
+    } as unknown as Document;
+    globalThis.getComputedStyle = (() => {
+      reads += 1;
+      return {
+        fontFamily: "Georgia, serif",
+        getPropertyValue: (name: string) => (name === "--ck-font-family" ? variable : ""),
+      };
+    }) as unknown as typeof getComputedStyle;
+    try {
+      variable = "Georgia, serif";
+      const before = reads;
+      render(lineSpec({ tokens: { fontFamily: "Inter" } }));
+      expect(reads - before).toBe(0);
+      expect(seen.at(-1)).toContain("Inter");
+      expect(seen.at(-1)).not.toContain("Georgia");
+
+      seen.length = 0;
+      variable = "";
+      const pageReads = reads;
+      render(lineSpec());
+      expect(reads - pageReads).toBe(1);
+      expect(seen.at(-1)).toContain("Georgia, serif");
+
+      seen.length = 0;
+      variable = "'Geist Mono', ui-monospace, monospace";
+      const ancestorReads = reads;
+      const ancestor = render(lineSpec()) ?? "";
+      expect(reads - ancestorReads).toBe(1);
+      expect(seen.at(-1)).toContain("Geist Mono");
+      expect(ancestor).toBe(plain);
+
+      const target = { innerHTML: "" };
+      const kpi = {
+        version: "1",
+        type: "kpi",
+        metric: { value: 12, label: "Open", delta: 0.1 },
+        a11y: { alt },
+      };
+      digitWidth = 60;
+      const first = render(kpi, target) ?? "";
+      expect(target.innerHTML).toBe(first);
+      digitWidth = 110;
+      release();
+      await ready;
+      await Promise.resolve();
+      expect(target.innerHTML).not.toBe(first);
+    } finally {
+      globalThis.document = previous.document;
+      globalThis.getComputedStyle = previous.getComputedStyle;
+    }
   });
 });

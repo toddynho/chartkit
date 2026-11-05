@@ -10,7 +10,7 @@ import { kvCharts, memoryCharts } from "./charts.ts";
 import { kvKeys, memoryKeys } from "./keys.ts";
 import { memoryLimiter } from "./limit.ts";
 import { auto } from "../../packages/core/src/theme.ts";
-import { forRaster, rasterize } from "./png.ts";
+import { forRaster, rasterFace, rasterize } from "./png.ts";
 import type { StripeConfig } from "./stripe.ts";
 
 const stripe: StripeConfig = { secretKey: "", priceId: "", webhookSecret: "", mode: "payment" };
@@ -795,6 +795,11 @@ describe("png", () => {
     expect(baked).toContain("font-family:Inter, ui-sans-serif, system-ui, sans-serif");
     expect(baked).not.toContain("inherit");
     expect(forRaster(`<svg style="font-family:var(--ck-font-family, inherit);--ck-font-family:Georgia, serif"/>`, false)).toContain("font-family:Georgia, serif");
+    expect(forRaster(`<svg style="font-family:var(--ck-font-family, inherit)"/>`, false, "Roboto")).toContain("font-family:Roboto");
+    expect(forRaster(`<svg style="font-family:var(--ck-font-family, inherit)"/>`, false, "Nunito, sans-serif")).toContain("font-family:Nunito, sans-serif");
+    expect(rasterFace("Roboto, sans-serif")).toBe("Roboto");
+    expect(rasterFace("Geist, ui-sans-serif, system-ui, sans-serif")).toBe("Inter");
+    expect(rasterFace("'Geist Mono', ui-monospace, monospace")).toBe("Inter");
     const { app } = appFor();
     const response = await app.handle(get(bar, { format: "png", scale: "1" }));
     expect(response.status).toBe(200);
@@ -802,5 +807,25 @@ describe("png", () => {
     const bytes = new Uint8Array(await response.arrayBuffer());
     expect(Buffer.from(bytes.subarray(0, 8)).toString("hex")).toBe("89504e470d0a1a0a");
     expect(response.headers.get("x-chartkit-watermark")).toBe("1");
+  });
+
+  it("bakes inherit out of SVG responses and rasters a known face", async () => {
+    const { app } = appFor();
+    const svg = await (await app.handle(get(bar))).text();
+    expect(svg).not.toContain("font-family:var(--ck-font-family, inherit)");
+    expect(svg).toContain("font-family:Inter, ui-sans-serif, system-ui, sans-serif");
+    const mustard = await (await app.handle(get({ ...bar, theme: { preset: "mustard" } }))).text();
+    expect(mustard).toContain("font-family:Geist, ui-sans-serif, system-ui, sans-serif");
+    expect(mustard).not.toContain("font-family:var(--ck-font-family, inherit)");
+    const cleared = await (await app.handle(get({ ...bar, theme: { preset: "mustard", tokens: { fontFamily: "inherit" } } }))).text();
+    expect(cleared).not.toContain("Geist");
+    expect(cleared).toContain("font-family:Inter, ui-sans-serif, system-ui, sans-serif");
+    const roboto = await (await app.handle(get({ ...bar, theme: { tokens: { fontFamily: "Roboto" } } }))).text();
+    expect(roboto).toContain("font-family:Roboto");
+    const text = (family: string) =>
+      `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="48" viewBox="0 0 160 48"${family ? ` style="--ck-font-family:${family}"` : ""}><text x="4" y="34" font-size="32" font-family="var(--ck-font-family, inherit)">Ag</text></svg>`;
+    const interPng = Buffer.from(await rasterize(text(""), 1));
+    const robotoPng = Buffer.from(await rasterize(text("Roboto"), 1));
+    expect(interPng.equals(robotoPng)).toBe(false);
   });
 });

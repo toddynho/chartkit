@@ -3,6 +3,8 @@ import { render as renderExtra } from "@chartkitdev/core/extra";
 import { renderBarList } from "@chartkitdev/core/charts/bar-list";
 import { repair, type RepairResult } from "@chartkitdev/core/validate";
 import { repairPhase4 } from "@chartkitdev/core/validate/phase4";
+import { bakeFontFallback } from "../../../packages/core/src/font.ts";
+import { resolvePreset } from "../../../packages/core/src/theme.ts";
 import { canonical } from "./charts.ts";
 import { FONT_FALLBACK, rasterize } from "./png.ts";
 import { presentSvg, themeIsDark } from "./watermark.ts";
@@ -53,14 +55,18 @@ export async function drawSpec(input: unknown, frame: Frame): Promise<Drawn> {
   const dark = failed ? false : themeIsDark(frame.theme, drawn);
   const theme = isRecord(result.spec) ? result.spec.theme : undefined;
   const plate = failed ? CLOUD_PLATE : explicitBackground(theme) ?? (dark ? "#0c0c0c" : CLOUD_PLATE);
-  const svg = presentSvg(failed ? errorPicture(result) : drawn, {
-    watermark: failed || frame.watermark,
-    dark,
-    plate,
-  });
+  const family = failed || !isRecord(result.spec) ? "" : resolvePreset(result.spec.theme).fontFamily ?? "";
+  const svg = bakeFontFallback(
+    presentSvg(failed ? errorPicture(result) : drawn, {
+      watermark: failed || frame.watermark,
+      dark,
+      plate,
+    }),
+    family,
+  );
   const size = svgSize(svg);
   if (frame.format === "png") {
-    const png = await rasterize(svg, frame.scale);
+    const png = await rasterize(svg, frame.scale, family);
     return { status: failed ? 422 : 200, svg, body: png, contentType: "image/png", result, width: size.width, height: size.height };
   }
   return {

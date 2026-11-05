@@ -22,15 +22,17 @@ export function installRasterAssets(assets: { wasm: InitInput; fonts: ArrayBuffe
   fontBytes = assets.fonts.map((font) => (font instanceof Uint8Array ? font : new Uint8Array(font)));
 }
 
-export async function rasterize(svg: string, scale: number): Promise<Uint8Array> {
+export async function rasterize(svg: string, scale: number, requested = ""): Promise<Uint8Array> {
   await loadWasm();
   const { Resvg } = await import("@resvg/resvg-wasm");
-  const renderer = new Resvg(forRaster(svg, darkSvg(svg)), {
+  const prepared = forRaster(svg, darkSvg(svg), requested);
+  const face = rasterFace(explicitFamily(svg) || requested || FONT_FALLBACK);
+  const renderer = new Resvg(prepared, {
     fitTo: scale === 1 ? { mode: "original" } : { mode: "zoom", value: scale },
     font: {
       fontBuffers: fontBuffers(),
-      defaultFontFamily: "Inter",
-      sansSerifFamily: "Inter",
+      defaultFontFamily: face,
+      sansSerifFamily: face,
     },
   });
   try {
@@ -40,14 +42,27 @@ export async function rasterize(svg: string, scale: number): Promise<Uint8Array>
   }
 }
 
-export function forRaster(svg: string, dark: boolean): string {
+export function forRaster(svg: string, dark: boolean, requested = ""): string {
   const named = explicitFamily(svg);
+  const ask = requested.trim();
   let text = resolveVars(svg);
   text = resolveLightDark(text, dark);
-  const family = named || FONT_FALLBACK;
+  const family = named || (ask && ask !== "inherit" ? ask : "") || FONT_FALLBACK;
   text = text.replace(/font-family:\s*inherit\b/g, `font-family:${family}`);
   text = text.replace(/font-family="inherit"/g, `font-family="${family}"`);
   return text;
+}
+
+/**
+ * A face resvg can draw. Inter and Roboto are the bundled files.
+ * Anything else, including Geist and Nunito, falls back to Inter.
+ */
+export function rasterFace(family: string): string {
+  for (const part of family.split(",")) {
+    const name = part.trim().replace(/^['"]|['"]$/g, "");
+    if (name === "Inter" || name === "Roboto") return name;
+  }
+  return "Inter";
 }
 
 /** theme.tokens.fontFamily is written as --ck-font-family. inherit is not a face. */

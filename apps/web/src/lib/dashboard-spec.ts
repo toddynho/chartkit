@@ -36,6 +36,12 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
  * Token overrides every panel shares.
  * `track` and `lines` are not spec fields: lines follow `series` at resolve time,
  * and the gauge track comes from the light or midnight preset (`mode`).
+ *
+ * Charts inherit the shell font (`--d-font` on the dashboard layout). All ten
+ * seeds leave `theme.font` unset, so that shell is Geist: stripe, ga, grafana,
+ * linear, plausible, robinhood, sentry, shopify, datadog, and vercel. A seed
+ * that sets `theme.font` changes the shell, and the charts follow it. Writing
+ * Geist onto the spec would block that.
  */
 export function tokensFrom(theme: DashTheme): Record<string, unknown> {
   return {
@@ -49,7 +55,6 @@ export function tokensFrom(theme: DashTheme): Record<string, unknown> {
     positive: theme.up,
     negative: theme.down,
     series: [theme.accent, theme.accent2, theme.accent3, theme.muted],
-    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif",
   };
 }
 

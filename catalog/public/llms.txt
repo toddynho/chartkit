@@ -6,7 +6,7 @@
 - ChartKit accepts Mermaid xychart, pie, sankey, radar and treemap syntax via fromMermaid/toSpec.
 - Options: interaction.navigator, interaction.drilldown, layout.breakpoints, mark.sampling lttb. 100000.
 - Strip dots. Stream off zero. Density rows stay raw.
-- Shell: page CSS owns grid, cards, tabs. Spec owns colour, grid, axes, marks, legends.
+- Shell: page CSS owns grid, cards, tabs, and the font (inherit). Spec owns colour, grid, axes, marks, legends.
 - Cookbook: https://chartkit.dev/recipes.json
 - Dashboards: /dashboards/{ledger,meter,wayline,keel,signal,folio,cycle,edge,pulse,retain}.md
 

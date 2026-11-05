@@ -50,7 +50,7 @@ function at(spec: Record<string, unknown>, key: string): boolean {
 describe("dashboard cookbook", () => {
   it("keeps the shell rule and the recipes pointer inside llms.txt", () => {
     expect(Buffer.byteLength(llms)).toBeLessThanOrEqual(6400);
-    expect(llms).toContain("page CSS owns grid, cards, tabs. Spec owns colour, grid, axes, marks, legends.");
+    expect(llms).toContain("page CSS owns grid, cards, tabs, and the font (inherit). Spec owns colour, grid, axes, marks, legends.");
     expect(llms).toContain("https://chartkit.dev/recipes.json");
     expect(llms).toContain("/dashboards/{ledger,meter,wayline,keel,signal,folio,cycle,edge,pulse,retain}.md");
     expect(llms).not.toContain("PR 53");

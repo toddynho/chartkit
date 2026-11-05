@@ -288,6 +288,7 @@ function parseScene(svg) {
   let background = "";
   let legendInside = false;
   const tagRe = /<!--[\s\S]*?-->|<\/?([A-Za-z][\w:.-]*)\b([^>]*?)(\/?)>/g;
+  const styleRules = [];
   let last = 0;
   let match;
   let textIndex = 0;
@@ -298,6 +299,8 @@ function parseScene(svg) {
       const chunk = decode(svg.slice(last, match.index));
       if (chunk.trim()) owner.chunks.push(chunk);
     }
+    const styleFrame = styleOwner(stack);
+    if (styleFrame && match.index > last) styleFrame.chunks.push(svg.slice(last, match.index));
     last = tagRe.lastIndex;
     if (!match[1]) continue;
     const name = match[1];
@@ -305,7 +308,8 @@ function parseScene(svg) {
     const self = Boolean(match[3]) || match[0].endsWith("/>");
     if (closing) {
       const frame = stack.pop();
-      if (frame?.name === "text") texts.push(finishText(frame, textIndex++));
+      if (frame?.name === "style") styleRules.push(...classFonts(frame.chunks.join("")));
+      if (frame?.name === "text") texts.push(finishText(frame, textIndex++, styleRules));
       continue;
     }
     const at = attrs(match[2] ?? "");
@@ -385,10 +389,59 @@ function textOwner(stack) {
   return null;
 }
 
-function finishText(frame, index) {
+function styleOwner(stack) {
+  for (let i = stack.length - 1; i >= 0; i--) if (stack[i].name === "style") return stack[i];
+  return null;
+}
+
+/** Class rules from a chart stylesheet. Later rules win, same as equal-specificity CSS. */
+function classFonts(css) {
+  const rules = [];
+  const re = /([^{}]+)\{([^{}]*)\}/g;
+  let match;
+  while ((match = re.exec(css))) {
+    const fontSize = /font-size:\s*([0-9.]+)px/i.exec(match[2]);
+    const weight = /font-weight:\s*([0-9]+)/i.exec(match[2]);
+    if (!fontSize && !weight) continue;
+    const selectors = match[1]
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => /^\.[A-Za-z_][\w-]*$/.test(item));
+    if (!selectors.length) continue;
+    rules.push({
+      selectors,
+      fontSize: fontSize ? Number(fontSize[1]) : null,
+      weight: weight ? Number(weight[1]) : null,
+    });
+  }
+  return rules;
+}
+
+function paintedType(at, rules) {
+  let fontSize = at["font-size"] ? num(at["font-size"], 16) : null;
+  const weight = at["font-weight"] ? num(at["font-weight"], 400) : 400;
+  const classes = new Set(String(at.class || "").split(/\s+/).filter(Boolean));
+  if (classes.size && fontSize == null) {
+    for (const rule of rules) {
+      if (rule.fontSize == null) continue;
+      if (!rule.selectors.some((selector) => classes.has(selector.slice(1)))) continue;
+      fontSize = rule.fontSize;
+    }
+  }
+  return { fontSize: fontSize ?? 16, weight };
+}
+
+export function textBoxes(svg) {
+  const scene = parseScene(svg);
+  if (!scene) return [];
+  return scene.texts.map((item) => ({ snippet: item.snippet, fontSize: item.fontSize, weight: item.weight, bbox: item.bbox }));
+}
+
+function finishText(frame, index, rules) {
   const at = frame.attrs;
-  const fontSize = num(at["font-size"], 16);
-  const weight = num(at["font-weight"], 400);
+  const painted = paintedType(at, rules);
+  const fontSize = painted.fontSize;
+  const weight = painted.weight;
   const anchor = at["text-anchor"] || "start";
   const lines = frame.chunks.map((chunk) => chunk.replace(/\s+/g, " ").trim()).filter(Boolean);
   const snippet = lines.join(" ").trim();

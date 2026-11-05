@@ -287,6 +287,8 @@ function build(options: OddsReplayOptions): Model {
     height,
     duration: clamp(Math.round(options.duration ?? 8000), 1000, 120_000),
     fps: clamp(Math.round(options.fps ?? 30), 1, 60),
+    // Same export path as the line race: frames are drawn into a video with an embedded
+    // Geist face. inherit would ignore that @font-face. Pass fontFamily to override.
     fontFamily: options.fontFamily?.replace(/[<>"]/g, "") || "Geist, Helvetica, Arial, sans-serif",
     plot: { left: plotLeft, top: plotTop, right: plotRight, bottom: plotBottom },
     labelW,

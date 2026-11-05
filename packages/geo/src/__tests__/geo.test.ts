@@ -600,4 +600,35 @@ describe("render", () => {
     expect(styleRule(svg, ".ck-geo-region")).not.toMatch(/(?:^|;)fill:/);
     expect(svg).toContain("#1a73e8");
   });
+
+  it("honors preset families, inherit, and theme.tokens.fontSize", async () => {
+    const mustard = await render({ ...world, theme: { preset: "mustard" } });
+    expect(mustard).toContain("--ck-font-family:Geist, ui-sans-serif, system-ui, sans-serif");
+    expect(mustard).toContain('data-ck-theme="mustard"');
+    expect(mustard).toContain(".ck-geo-label{font-size:11px}");
+    const named = await render({ ...world, theme: "mustard" });
+    expect(named).toContain("--ck-font-family:Geist, ui-sans-serif, system-ui, sans-serif");
+    const tape = await render({ ...world, theme: "tape" });
+    expect(tape).toContain("--ck-font-family:'Geist Mono', ui-monospace, monospace");
+    const kite = await render({ ...world, theme: { preset: "kite", tokens: { fontFamily: "Georgia, serif" } } });
+    expect(kite).toContain("--ck-font-family:Georgia, serif");
+    expect(kite).not.toContain("Nunito");
+    const kept = await render({ ...world, theme: { preset: "mustard", tokens: { fontFamily: "x".repeat(81) } } });
+    expect(kept).toContain("Geist, ui-sans-serif");
+    const cleared = await render({ ...world, theme: { preset: "mustard", tokens: { fontFamily: "inherit" } } });
+    expect(cleared).not.toContain("Geist");
+    expect(cleared).not.toContain("--ck-font-family:");
+    expect(cleared).toContain("font-family:var(--ck-font-family, inherit)");
+    const night = await render({ ...world, theme: { preset: "mustard", mode: "dark" } });
+    expect(night).not.toContain("Geist");
+    const big = await render({ ...world, theme: { tokens: { fontSize: 22 } } });
+    expect(big).toContain(".ck-geo-label{font-size:22px}");
+    expect(big).toMatch(/\.ck-geo-tag\{[^}]*font-size:22px/);
+    expect(big).toMatch(/\.ck-geo-muted\{[^}]*font-size:22px/);
+    expect(big).toContain('font-size="32"');
+    const base = await render(world);
+    expect(base).toContain(".ck-geo-label{font-size:11px}");
+    expect(base).toContain('font-size="16"');
+    expect(base).not.toContain("--ck-font-family:");
+  });
 });
