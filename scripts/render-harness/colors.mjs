@@ -6,6 +6,7 @@ export function resolvePaint(input, mode) {
   if (!text || text.startsWith("url(")) return null;
   text = resolveLightDark(text, mode === "dark");
   text = resolveVars(text);
+  text = resolveMix(text);
   return parseColor(text.trim());
 }
 
@@ -87,6 +88,39 @@ function resolveLightDark(input, dark) {
       const light = comma < 0 ? inside : inside.slice(0, comma);
       const night = comma < 0 ? inside : inside.slice(comma + 1);
       out += resolveLightDark((dark ? night : light).trim(), dark);
+      i = end;
+      continue;
+    }
+    out += input[i];
+  }
+  return out;
+}
+
+function resolveMix(input) {
+  const token = "color-mix(in srgb,";
+  let out = "";
+  for (let i = 0; i < input.length; i++) {
+    if (input.startsWith(token, i)) {
+      const open = i + "color-mix".length;
+      const end = matchingParen(input, open);
+      if (end < 0) {
+        out += input[i];
+        continue;
+      }
+      const body = input.slice(open + 1, end).replace(/^\s*in srgb,\s*/, "");
+      const colors = body.split(",").map((part) => part.trim()).filter(Boolean);
+      const amount = Number((colors[0]?.match(/(\d+(?:\.\d+)?)%/) ?? [])[1]);
+      const base = (colors[0] ?? "").replace(/\s+\d+(?:\.\d+)?%$/, "");
+      const into = colors[1] ?? "";
+      const a = parseColor(resolveMix(base));
+      const b = parseColor(resolveMix(into));
+      if (!a || !b || !Number.isFinite(amount)) {
+        out += input[i];
+        continue;
+      }
+      const p = amount / 100;
+      const mix = (left, right) => Math.round(left * p + right * (1 - p));
+      out += `#${[mix(a.r, b.r), mix(a.g, b.g), mix(a.b, b.b)].map((n) => n.toString(16).padStart(2, "0")).join("")}`;
       i = end;
       continue;
     }

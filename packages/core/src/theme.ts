@@ -54,20 +54,20 @@ export interface PresetGeometry {
 export const auto: PresetTokens = {
   background: "transparent",
   surface: ld("#ffffff", "#2c2c2e"),
-  text: ld("#1d1d1f", "#f5f5f7"),
+  text: ld("#050507", "#f5f5f7"),
   muted: ld("#6e6e73", "#98989d"),
   grid: ld("rgba(0, 0, 0, 0.16)", "rgba(245, 245, 247, 0.22)"),
   axis: ld("rgba(0, 0, 0, 0.14)", "rgba(245, 245, 247, 0.16)"),
   track: ld("rgba(0, 0, 0, 0.10)", "rgba(245, 245, 247, 0.16)"),
-  accent: ld("#007aff", "#0a84ff"),
+  accent: ld("#0072ee", "#086ed6"),
   positive: ld("#15803d", "#30d158"),
   negative: ld("#be123c", "#ff453a"),
   series: ldList(
-    ["#007aff", "#34c759", "#ff9500", "#af52de", "#ff2d55", "#32ade6", "#65a30d", "#ff6723"],
-    ["#0a84ff", "#30d158", "#ff9f0a", "#bf5af2", "#ff375f", "#64d2ff", "#a3e635", "#ff6961"],
+    ["#0072ee", "#34c759", "#ff9500", "#af52de", "#ff2d55", "#32ade6", "#65a30d", "#ff6723"],
+    ["#086ed6", "#1d8136", "#9e6206", "#9e4ac8", "#d32d4e", "#397791", "#56791c", "#ba4c46"],
   ),
   lines: ldList(
-    ["#007aff", "#248a3d", "#c93400", "#af52de", "#ff2d55", "#0071a4", "#4d7c0f", "#9a3412"],
+    ["#0072ee", "#248a3d", "#c93400", "#af52de", "#ff2d55", "#0071a4", "#4d7c0f", "#9a3412"],
     ["#0a84ff", "#30d158", "#ff9f0a", "#bf5af2", "#ff375f", "#64d2ff", "#a3e635", "#ff6961"],
   ),
 };

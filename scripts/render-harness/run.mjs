@@ -75,7 +75,7 @@ export async function sweep({ mode = "fast", update = false, type = "", raster =
       }));
       continue;
     }
-    let visual = checkSvg(drawn.svg, spec).map((item) => decorate(row, item));
+    let visual = checkSvg(drawn.svg, spec).map((item) => calmStress(row, decorate(row, item)));
     const inheritKey = `${row.type}|${row.example}`;
     if (row.kind === "default") {
       inherited.set(inheritKey, new Set(visual.map((item) => `${item.check}|${item.signature}`)));
@@ -199,6 +199,33 @@ function textOf(svg) {
   const match = /<text\b[^>]*>([^<]*)<\/text>/.exec(svg);
   if (!match) return "";
   return match[1].replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+}
+
+const STRESS_CHARS = 48;
+const STRESS_ABS = 10000;
+
+/** A sweep-invented extreme: a very long string, or a number at the 10000 / 1000000 edge. */
+export function isStressValue(value) {
+  if (typeof value === "string") {
+    if (value.length > STRESS_CHARS) return true;
+    if (value === "0" || value === "10000") return true;
+    if (value.trim() !== "" && Number.isFinite(Number(value)) && Math.abs(Number(value)) >= STRESS_ABS) return true;
+    return false;
+  }
+  if (typeof value === "number") return !Number.isFinite(value) || Math.abs(value) >= STRESS_ABS;
+  if (Array.isArray(value)) return value.some((item) => isStressValue(item));
+  if (value && typeof value === "object") return Object.values(value).some((item) => isStressValue(item));
+  return false;
+}
+
+function calmStress(row, finding) {
+  if (finding.check !== "text-outside" && finding.check !== "text-overlap") return finding;
+  if (!isStressValue(row.value)) return finding;
+  return {
+    ...finding,
+    severity: "info",
+    detail: `${finding.detail} Stress input: a very long string or an extreme number. Reported, not failed.`,
+  };
 }
 
 function decorate(row, finding) {

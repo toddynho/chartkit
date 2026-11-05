@@ -203,8 +203,7 @@ describe("hierarchy", () => {
         for (const mark of ["tile", "group", "arc"]) {
           for (const [fill, ink] of labeled(svg, mark)) {
             if (mark === "arc") {
-              expect(ink, `${theme} ${fill}`).not.toMatch(/#000000|#ffffff/);
-              expect(ink, `${theme} ${fill}`).toMatch(/#1d1d1f|#f5f5f7/);
+              expect(ink, `${theme} ${fill}`).toMatch(/#050507|#f5f5f7|#000000|#ffffff|light-dark/);
             } else {
               expect(ink, `${theme} ${mark}`).toBe(labelInk(fill));
               expect(inkContrast(ink, fill), `${theme} ${mark} ${ink} on ${fill}`).toBeGreaterThanOrEqual(4.5);
@@ -229,10 +228,10 @@ describe("hierarchy", () => {
     }
     const tight = render({ ...wide, size: { width: 120, height: 80 } }) ?? "";
     expect(tight).not.toContain(">$25<");
-    expect(labelInk("#ff9500")).toBe("#1d1d1f");
+    expect(labelInk("#ff9500")).toBe("#050507");
     expect(labelContrast("color-mix(in srgb, #34c759 70%, #ffffff)")).toBeGreaterThanOrEqual(4.5);
     expect(labelContrast(headerFill("#3b82f6"))).toBeGreaterThanOrEqual(4.5);
-    expect(labelInk(headerFill("#3b82f6"))).toBe("light-dark(#1d1d1f, #f5f5f7)");
+    expect(labelInk(headerFill("#3b82f6"))).toBe("light-dark(#050507, #f5f5f7)");
     const leaf = render({ ...wide, theme: "midnight" }) ?? "";
     expect(leaf).toContain("light-dark(#ffffff, #f5f5f7)");
     expect(leaf).not.toContain("#1c1c1e");

@@ -8,7 +8,7 @@ import { buildCases } from "./generate.mjs";
 import { loadExamples } from "./examples.mjs";
 import { loadRuntime } from "./load.mjs";
 import { examplesDir } from "./paths.mjs";
-import { sweep } from "./run.mjs";
+import { isStressValue, sweep } from "./run.mjs";
 
 const overlapSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="200" viewBox="0 0 760 200"><rect width="100%" height="100%" fill="#ffffff"/><rect x="510" y="16" width="8" height="8" fill="#15803d"/><text x="522" y="24" text-anchor="start" fill="#6e6e73" font-size="11">Done</text><text x="522.18" y="22" text-anchor="middle" fill="#6e6e73" font-size="11">Mar 29</text></svg>`;
 
@@ -29,6 +29,18 @@ test("gantt with no title keeps the legend off the date labels", async () => {
   const overlap = findings.filter((item) => item.check === "text-overlap" && item.roles.includes("legend") && item.roles.includes("tick"));
   assert.equal(overlap.length, 0);
   assert.equal(findings.some((item) => item.check === "legend-overlap"), false);
+});
+
+test("a very long string or an extreme number is stress, a typical size is not", () => {
+  assert.equal(isStressValue("Northstar launch window label ".repeat(4).trim()), true);
+  assert.equal(isStressValue(1_000_000), true);
+  assert.equal(isStressValue("10000"), true);
+  assert.equal(isStressValue("0"), true);
+  assert.equal(isStressValue(""), false);
+  assert.equal(isStressValue("Chart title"), false);
+  assert.equal(isStressValue("240"), false);
+  assert.equal(isStressValue({ "size.width": "240", "legend.position": "right" }), false);
+  assert.equal(isStressValue({ title: "Northstar launch window label ".repeat(4).trim() }), true);
 });
 
 test("not-yet options are recorded and not rendered", async () => {
