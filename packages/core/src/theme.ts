@@ -63,11 +63,11 @@ export const auto: PresetTokens = {
   grid: ld("rgba(0, 0, 0, 0.16)", "rgba(245, 245, 247, 0.22)"),
   axis: ld("rgba(0, 0, 0, 0.14)", "rgba(245, 245, 247, 0.16)"),
   track: ld("rgba(0, 0, 0, 0.10)", "rgba(245, 245, 247, 0.16)"),
-  accent: ld("#007aff", "#0a84ff"),
+  accent: ld("#0071ec", "#0a84ff"),
   positive: ld("#15803d", "#30d158"),
   negative: ld("#be123c", "#ff453a"),
-  positiveFill: "#166534",
-  negativeFill: "#9f1239",
+  positiveFill: "#007437",
+  negativeFill: "#c80046",
   series: ldList(
     ["#007aff", "#2aa148", "#ca7600", "#af52de", "#ff2d55", "#1996d0", "#5f9a0c", "#fc4e00"],
     ["#0a84ff", "#30d158", "#ff9f0a", "#bf5af2", "#ff375f", "#64d2ff", "#a3e635", "#ff6961"],
@@ -114,6 +114,9 @@ export function definePreset(name: string, delta: Partial<PresetTokens>): Preset
     ...midnightBase,
     ...delta,
     series: delta.series ?? midnightBase.series,
+    // A preset that names series and not lines was inheriting midnight's
+    // bright strokes, which miss 3:1 on a light card.
+    lines: delta.lines ?? delta.series ?? midnightBase.lines,
   });
 }
 

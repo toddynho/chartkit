@@ -13,7 +13,7 @@ export const mono = definePreset("mono", {
   "series": [
     "#50e3c2",
     "#0070f3",
-    "#7928ca",
+    "#7140af",
     "#f5a623",
     "#ff0080"
   ]

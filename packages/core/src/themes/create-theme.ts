@@ -179,13 +179,13 @@ function mode(brand: string[], scheme: BrandScheme, adjustments: Adjustment[]): 
   }
   let series = paletteFromBrand(brand, scheme);
   series = series.map((color, index) => {
-    const fitted = fitContrast(color, background, 3.05, light ? "darken" : "lighten");
+    const fitted = fitContrast(color, surface, 3.15, light ? "darken" : "lighten");
     if (fitted.changed) {
       adjustments.push({
         role: `${scheme} series ${index + 1}`,
         from: color,
         to: fitted.hex,
-        reason: `paletteFromBrand cleared 3:1 on ${light ? "white" : "#09090b"}. This surface is ${background}, so the colour was adjusted.`,
+        reason: `paletteFromBrand cleared 3:1 on ${light ? "white" : "#09090b"}. The card is ${surface}, so the colour was adjusted to 3.15:1 there.`,
       });
     }
     return fitted.hex;
@@ -214,7 +214,7 @@ function mode(brand: string[], scheme: BrandScheme, adjustments: Adjustment[]): 
     grid: rgba(text, light ? 0.12 : 0.16),
     axis: rgba(text, light ? 0.38 : 0.42),
     track: rgba(text, 0.1),
-    accent: series[0] ?? pair.positive,
+    accent: fitContrast(series[0] ?? pair.positive, background, 4.5, light ? "darken" : "lighten").hex,
     positive: pair.positive,
     negative: pair.negative,
     neutral: muted,

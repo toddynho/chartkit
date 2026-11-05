@@ -9,8 +9,8 @@ export const latte = definePreset("latte", {
   "negativeFill": "#9f1239",
   "grid": "#e6e9ef",
   "axis": "#ccd0da",
-  "accent": "#1e66f5",
-  "positive": "#40a02b",
+  "accent": "#1d63ef",
+  "positive": "#287c13",
   "negative": "#d20f39",
   "series": [
     "#3e9b2a",

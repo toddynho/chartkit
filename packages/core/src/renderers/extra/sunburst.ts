@@ -73,7 +73,7 @@ export function renderSunburst(spec: Record<string, unknown>): string | null {
     const mid = (a0 + a1) / 2;
     const name = node.name;
     parts.push(
-      `<path d="${drawn}" fill="${paintFill}" stroke="${cssVar("background", frame.preset.background)}" stroke-width="1.25" data-ck-mark="arc" data-ck-name="${esc(branch)}" data-ck-i="${index}" data-ck-depth="${depth}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`,
+      `<path d="${drawn}" fill="${paintFill}" data-ck-mark="arc" data-ck-name="${esc(branch)}" data-ck-i="${index}" data-ck-depth="${depth}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`,
     );
     if (name) pending.push({ name, fill: paintFill, mid, r0, r1, span });
     if (!node.children.length) return;

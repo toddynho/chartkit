@@ -16,7 +16,7 @@ export const refined: PresetTokens = {
   grid: ld("rgba(24, 24, 27, 0.05)", "rgba(250, 250, 250, 0.06)"),
   axis: ld("rgba(24, 24, 27, 0.16)", "rgba(250, 250, 250, 0.16)"),
   track: ld("rgba(24, 24, 27, 0.12)", "rgba(250, 250, 250, 0.16)"),
-  accent: ld("#3b82f6", "#60a5fa"),
+  accent: ld("#3472d7", "#60a5fa"),
   positive: ld("#047857", "#34d399"),
   negative: ld("#e11d48", "#fb7185"),
   series: ldList(

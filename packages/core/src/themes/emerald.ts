@@ -4,7 +4,7 @@ export const emerald = definePreset("emerald", {
   "background": "#0a0a0a",
   "surface": "#171717",
   "text": "#fafafa",
-  "muted": "#7a7a7a",
+  "muted": "#818181",
   "positiveFill": "#0b825a",
   "negativeFill": "#cf3b3b",
   "grid": "#1a1a1a",

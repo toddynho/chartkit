@@ -20,6 +20,8 @@ export const kite = definePreset("kite", {
   grid: ld("rgba(42, 33, 28, 0.10)", "rgba(255, 246, 238, 0.12)"),
   axis: ld("rgba(42, 33, 28, 0.28)", "rgba(255, 246, 238, 0.28)"),
   track: ld("rgba(42, 33, 28, 0.08)", "rgba(255, 246, 238, 0.12)"),
+  positiveFill: ld("#007437", "#00a953"),
+  negativeFill: ld("#c80046", "#f10056"),
   accent: ld("#c43766", "#ff8fb0"),
   positive: ld("#2a5bd0", "#8eb0ff"),
   negative: ld("#c43766", "#ff8fb0"),

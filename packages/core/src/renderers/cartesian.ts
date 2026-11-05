@@ -2418,9 +2418,9 @@ function headlineSvg(model: PlotModel): string {
   const muted = cssVar("muted", model.preset.muted);
   const tone = head.tone === "negative" ? cssVar("negative", model.preset.negative) : head.tone === "neutral" ? muted : cssVar("positive", model.preset.positive);
   const pillFill = head.tone === "negative"
-    ? cssVar("negative-fill", model.preset.negativeFill ?? "#9f1239")
-    : cssVar("positive-fill", model.preset.positiveFill ?? "#166534");
-  const pillInk = "light-dark(#ffffff, #f5f5f7)";
+    ? cssVar("negative-fill", model.preset.negativeFill ?? "#c80046")
+    : cssVar("positive-fill", model.preset.positiveFill ?? "#007437");
+  const pillInk = labelInk(pillFill);
   let y = model.title ? 36 : 16;
   if (model.subtitle) y += 16;
   let out = "";

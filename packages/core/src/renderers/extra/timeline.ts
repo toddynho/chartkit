@@ -1,3 +1,4 @@
+import { labelInk } from "../../ink";
 import { cssVar } from "../../theme";
 import { n, ch } from "../../svg";
 import { channel, cells, rowAt, tableOf, textAt } from "./fields";
@@ -97,10 +98,10 @@ export function renderTimeline(spec: Record<string, unknown>): string | null {
     const width = Math.max(8, x2 - x1);
     const color = fill(frame, lane);
     const label = `${period.label}: ${formatDay(period.startMs as number)}–${formatDay(period.endMs as number)}`;
-    parts.push(openMark("rect", "period", label, `x="${n(x1)}" y="${n(y)}" width="${n(width)}" height="26" rx="8" fill="${color}" fill-opacity="0.72" stroke="${color}"`));
+    parts.push(openMark("rect", "period", label, `x="${n(x1)}" y="${n(y)}" width="${n(width)}" height="26" rx="8" fill="${color}" stroke="${color}"`));
     parts.push("</rect>");
     const inside = fit(period.label, width - 12, 12);
-    if (inside && inside.length > 2) parts.push(text(x1 + width / 2, y + 17, inside, cssVar("text", frame.preset.text), 12, "600", "middle"));
+    if (inside && inside.length > 2) parts.push(text(x1 + width / 2, y + 17, inside, labelInk(color), 12, "600", "middle"));
     else parts.push(text(x1 + 8, y - 4, fit(period.label, width, 11), cssVar("text", frame.preset.text), 11, "600"));
   }
 

@@ -78,7 +78,7 @@ describe("legacy rgba colour syntax", () => {
     }
     expect(line).toContain("rgba(0, 0, 0, 0.16)");
     expect(line).toContain("rgba(245, 245, 247, 0.22)");
-    expect(gauge).toContain("rgba(0, 0, 0, 0.10)");
-    expect(gauge).toContain("rgba(245, 245, 247, 0.16)");
+    expect(gauge).toContain("light-dark(#6e6e73, #98989d)");
+    expect(gauge).not.toContain("rgba(0, 0, 0, 0.10)");
   });
 });

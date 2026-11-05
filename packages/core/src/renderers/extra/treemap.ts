@@ -2,7 +2,7 @@ import { colorLegendHeight, readColorScale, scaleLabel } from "../../color-scale
 import { legendLabel, legendMarkup, legendShownValue, legendSpace, readLegend, type LegendItem } from "../../legend";
 import { asNumber, column, fieldOf } from "../../frame";
 import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
-import { headerFill, labelInk, siblingFill } from "../../ink";
+import { headerFill, labelInk, markMix, siblingFill } from "../../ink";
 import { cssVar } from "../../theme";
 import { esc, font, isRecord, n, ch } from "../../svg";
 import { fill, fit, fmt, num, openMark, str, valueFormat, viewOf } from "./plot";
@@ -129,7 +129,7 @@ export function renderTreemap(spec: Record<string, unknown>): string | null {
 function tint(base: string, index: number, count: number): string {
   if (count <= 1) return base;
   const amount = 62 + Math.round((index / (count - 1)) * 30);
-  return `color-mix(in srgb, ${base} ${amount}%, light-dark(#ffffff, #f5f5f7))`;
+  return markMix(base, amount);
 }
 
 function groupLeaves(leaves: Leaf[]): Map<string, Leaf[]> {

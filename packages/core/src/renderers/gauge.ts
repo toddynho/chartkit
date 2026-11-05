@@ -39,7 +39,7 @@ export function renderGauge(spec: Record<string, unknown>): string | null {
   }
 
   parts.push(
-    `<path data-ck-mark="gauge-track"${targetAttr} d="${arcStroke(cx, cy, radius, trackStart, trackEnd)}" fill="none" stroke="${cssVar("track", frame.preset.track)}" stroke-width="${n(stroke)}" stroke-linecap="${cap}" />`,
+    `<path data-ck-mark="gauge-track"${targetAttr} d="${arcStroke(cx, cy, radius, trackStart, trackEnd)}" fill="none" stroke="${cssVar("track", frame.preset.muted)}" stroke-width="${n(stroke)}" stroke-linecap="${cap}" />`,
   );
 
   const bandStroke = Math.max(2.5, Math.min(4, stroke * 0.16));
@@ -92,7 +92,7 @@ export function renderGauge(spec: Record<string, unknown>): string | null {
     `<line data-ck-mark="gauge-needle" x1="${n(cx)}" y1="${n(cy)}" x2="${n(tip.x)}" y2="${n(tip.y)}" stroke="${valueColor}" stroke-width="${n(Math.max(2, Math.min(3, stroke * 0.12)))}" stroke-linecap="round" />`,
   );
   parts.push(
-    `<circle data-ck-mark="gauge-hub" cx="${n(cx)}" cy="${n(cy)}" r="${n(readout.hubR)}" fill="${cssVar("surface", frame.preset.surface)}" stroke="${valueColor}" stroke-width="2" />`,
+    `<circle data-ck-mark="gauge-hub" cx="${n(cx)}" cy="${n(cy)}" r="${n(readout.hubR)}" fill="${cssVar("muted", frame.preset.muted)}" stroke="${valueColor}" stroke-width="2" />`,
   );
   parts.push(
     text(cx, readout.valueY, valueText, valueColor, readout.valueSize, "650", "middle", "gauge-readout"),
