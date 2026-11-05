@@ -1,6 +1,6 @@
 # Tree / dendrogram spec proposal
 
-Status: design only. Rank 3 in [README.md](./README.md). Recommendation: build the tidy tree and the dendrogram. An org chart (boxes, photos, wrapped text) is later. Effort M. Coverage 5 of 9. Matrix id `type.tree`, `agentRelevance` 2. Recharts is `unknown` and is not in the 5.
+Status: shipped as a tidy tree and a dendrogram. The gallery example is Support org. Boxes and photos are later. Rank 3 in [README.md](./README.md). Coverage 5 of 9. Matrix id `type.tree`, `agentRelevance` 2. Recharts is `unknown` and is not in the 5.
 
 A tree draws nodes and parent links. A tidy tree gives each leaf a slot and lets branches share the gaps (Reingold–Tilford). A dendrogram (`mark.tree: "cluster"`) puts every leaf at the same depth, which is the chart for a clustering. Use a tree when the question is who connects to whom and the data has one parent per node. Do not use it for a weighted flow. That is sankey. Do not use it for a partition of a quantity. That is treemap, sunburst, or [icicle](./icicle.md). Do not use it when a node has two parents. That is [network](./network.md), and v1 of tree rejects it.
 

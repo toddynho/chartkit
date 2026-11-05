@@ -2,8 +2,8 @@ import { limitDepth, readHierarchy, type HNode } from "../../hierarchy";
 import { fieldOf } from "../../frame";
 import { legendSpace, paintLegend, readLegend, type LegendItem } from "../../legend";
 import { cssVar } from "../../theme";
-import { clientIntent, isRecord, n } from "../../svg";
-import { fill, fit, openMark, text, viewOf } from "./plot";
+import { ch, clientIntent, isRecord, n } from "../../svg";
+import { fill, openMark, text, viewOf } from "./plot";
 
 interface LNode {
   name: string;
@@ -57,11 +57,33 @@ export function renderTree(spec: Record<string, unknown>): string | null {
   const top = (frame.title ? 40 : 16) + (frame.subtitle ? 18 : 0);
   const legendBlock = legend ? legendSpace(legend, items, frame.width - 32) : null;
   const legendH = legendBlock?.block ?? 0;
+  const widest = depths.reduce((max, item) => Math.max(max, ch(item.name.length, 7)), 28);
+  const labelBand = 20;
+  let left = 16;
+  let rightPad = 16;
+  let topPad = top;
+  let bottomPad = 16;
+  if (radial) {
+    left = widest / 2 + 10;
+    rightPad = widest / 2 + 10;
+    topPad = top + 8;
+    bottomPad = labelBand;
+  } else if (orient === "LR") rightPad = widest + 18;
+  else if (orient === "RL") left = widest + 18;
+  else if (orient === "TB") {
+    bottomPad = labelBand + 12;
+    left = Math.max(16, widest / 2 + 8);
+    rightPad = Math.max(16, widest / 2 + 8);
+  } else {
+    topPad = top + labelBand;
+    left = Math.max(16, widest / 2 + 8);
+    rightPad = Math.max(16, widest / 2 + 8);
+  }
   const box = {
-    left: orient === "LR" || radial ? 28 : 16,
-    right: frame.width - (orient === "RL" ? 28 : 96),
-    top: top + (legend?.position === "top" ? legendH : 0),
-    bottom: frame.height - 20 - (legend && legend.position !== "top" ? legendH : 0),
+    left,
+    right: frame.width - rightPad,
+    top: topPad + (legend?.position === "top" ? legendH : 0),
+    bottom: frame.height - bottomPad - (legend && legend.position !== "top" ? legendH : 0),
   };
   if (box.right - box.left < 40 || box.bottom - box.top < 40) return null;
 
@@ -112,11 +134,8 @@ export function renderTree(spec: Record<string, unknown>): string | null {
       ),
     );
     parts.push("</circle>");
-    const caption = fit(item.name, radial ? 56 : labelRoom(orient, box, at), 12);
-    if (caption) {
-      const spot = labelAt(at, orient, radial, at.r);
-      parts.push(text(spot.x, spot.y, caption, ink, 12, "400", spot.anchor));
-    }
+    const spot = labelAt(at, orient, radial, at.r);
+    parts.push(text(spot.x, spot.y, item.name, ink, 12, "400", spot.anchor));
   }
   if (legend && items.length > 1) {
     parts.push(paintLegend(legend, items, { plot: { left: box.left, right: box.right, top: box.top, bottom: box.bottom }, width: frame.width, height: frame.height, preset: frame.preset }));
@@ -282,12 +301,6 @@ function radiusScale(nodes: LNode[]): (node: LNode) => number {
     if (!(node.value > 0)) return 5;
     return 4 + ((node.value - min) / (max - min)) * 6;
   };
-}
-
-function labelRoom(orient: Orient, box: { left: number; right: number }, at: { x: number }): number {
-  if (orient === "RL") return Math.max(12, at.x - box.left - 8);
-  if (orient === "TB" || orient === "BT") return 72;
-  return Math.max(12, box.right - at.x + 64);
 }
 
 function labelAt(at: { x: number; y: number }, orient: Orient, radial: boolean, radius: number): { x: number; y: number; anchor: string } {

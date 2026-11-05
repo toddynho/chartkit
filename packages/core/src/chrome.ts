@@ -188,7 +188,7 @@ function bottomLegendMarkup(frame: Frame, legend: FooterLegend, box: PlotRect): 
 }
 
 /**
- * Drop ticks whose labels would sit on each other. Each kept label is unchanged.
+ * Drop ticks whose labels would sit on each other. Each kept label is the original string.
  * The estimate is a little wider than the harness glyph so a kept pair stays clear.
  */
 export function keepClearTicks<T extends { x: number; text: string }>(items: T[], gap = 10): T[] {
