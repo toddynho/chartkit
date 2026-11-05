@@ -52,7 +52,9 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
     color: fill(frame, index),
     value: legendShownValue(spec, item.values.at(-1)),
   }));
-  const legendBand = legendBox?.position === "inside" ? legendSpace({ ...legendBox, position: "top" }, legendItems, frame.width - 32).band + 4 : 0;
+  const topLegend = Boolean(legendBox && (legendBox.position === "top" || legendBox.position === "inside"));
+  const legendBand = topLegend && legendBox ? legendSpace({ ...legendBox, position: "top" }, legendItems, frame.width - 32).band + 4 : 0;
+  const legendTop = (frame.title ? 40 : 12) + legendBand;
   const cx = frame.width / 2;
   let cy = frame.height / 2 + (frame.title ? 8 : 0);
   let radius = Math.min(frame.width, frame.height) * 0.32;
@@ -89,7 +91,7 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
     if (legendBox?.position === "inside") {
       parts.push(
         paintLegend({ ...legendBox, position: "top" }, items, {
-          plot: { left: 16, top: 8, right: frame.width - 16, bottom: frame.height - 28 },
+          plot: { left: 16, top: legendTop, right: frame.width - 16, bottom: frame.height - 28 },
           width: frame.width,
           height: frame.height,
           preset: frame.preset,
@@ -109,7 +111,7 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
       })
       .join("");
     parts.push(
-      legendMarkup(spec, items, { plot: { left: 16, top: 16, right: frame.width - 16, bottom: frame.height - 28 }, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
+      legendMarkup(spec, items, { plot: { left: 16, top: legendTop, right: frame.width - 16, bottom: frame.height - 28 }, width: frame.width, height: frame.height, preset: frame.preset }, fallback),
     );
   }
   return view.done();

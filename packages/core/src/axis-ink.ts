@@ -25,9 +25,10 @@ export function majorTicks(axis: AxisSpec, horizontal: boolean, edge: number, at
 }
 
 /** Same text node as the chart helpers, plus a rotation when the axis asks for one. */
-export function turned(x: number, y: number, value: string, fill: string, size: number, anchor: string, rotate?: number, weight = "400"): string {
+export function turned(x: number, y: number, value: string, fill: string, size: number, anchor: string, rotate?: number, weight = "400", key = ""): string {
   const spin = rotate ? ` transform="rotate(${n(rotate)} ${n(x)} ${n(y)})"` : "";
-  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}"${spin}>${esc(value)}</text>`;
+  const id = key ? ` data-ck-key="${esc(key)}" direction="ltr" unicode-bidi="isolate"` : "";
+  return `<text x="${n(x)}" y="${n(y)}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}"${spin}${id}>${esc(value)}</text>`;
 }
 
 export function explicitGrid(value: unknown): false | "solid" | "dashed" | "dotted" {

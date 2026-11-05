@@ -250,8 +250,15 @@ export function placedAxisTitles(frame: Frame, spec: Record<string, unknown>, bo
     const hi = Math.max(box.bottom - 28, mid);
     const yPos = axisTitleAlong(y.titleAt, mid, hi, lo);
     const angle = axisTitleSpin(y.titleSpin, true, Boolean(y.end));
-    const xPos = y.end ? frame.width - 14 : 14;
-    out += rotated(xPos, yPos, y.title, fill, angle);
+    const turned = ((angle % 360) + 360) % 360;
+    if (turned === 0 || turned === 180) {
+      const wide = Math.ceil(ch(y.title.length, 6.6));
+      const xPos = y.end ? frame.width - 8 - wide : 8;
+      out += ink(xPos, yPos, y.title, fill, 11, "500", "start");
+    } else {
+      const xPos = y.end ? frame.width - 14 : 14;
+      out += rotated(xPos, yPos, y.title, fill, angle);
+    }
   }
   if (x.on && x.title) {
     const mid = (box.left + box.right) / 2;

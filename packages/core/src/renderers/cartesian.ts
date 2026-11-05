@@ -2206,6 +2206,12 @@ function alongOne(
   return axText(at, y, anchor, label, fill, family, angle, "", rows, key);
 }
 
+function flatTitle(angle: number | undefined): boolean {
+  if (typeof angle !== "number") return false;
+  const turned = ((angle % 360) + 360) % 360;
+  return turned === 0 || turned === 180;
+}
+
 function titleSpin(axis: AxisBox, vertical: boolean, end: boolean): number {
   if (typeof axis.titleSpin === "number") return axis.titleSpin;
   if (!vertical) return 0;
@@ -2232,7 +2238,10 @@ function axisTitles(model: PlotModel, plot: PlotBox, horizontal: boolean): strin
     const side = ySide(model, horizontal);
     const vertical = side < 2;
     const angle = titleSpin(model.yAxis, vertical, side === 1);
-    if (vertical) out += axText(side === 0 ? 14 : model.width - 14, titleAlong(model.yAxis.titleAt, midY, hi, lo), "middle", title, fill, family, angle, weight);
+    if (vertical && flatTitle(angle)) {
+      const wide = Math.ceil(ch(title.length, 6.6));
+      out += axText(side === 0 ? 8 : model.width - 8 - wide, titleAlong(model.yAxis.titleAt, midY, hi, lo), "start", title, fill, family, 0, weight);
+    } else if (vertical) out += axText(side === 0 ? 14 : model.width - 14, titleAlong(model.yAxis.titleAt, midY, hi, lo), "middle", title, fill, family, angle, weight);
     else {
       const anchor = model.yAxis.titleAt === "start" ? "start" : model.yAxis.titleAt === "end" ? "end" : "middle";
       const x = titleAlong(model.yAxis.titleAt, midX, plot.left, plot.right);
@@ -2622,10 +2631,12 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
     else left += xTick;
   }
   if (model.showY && model.yAxis.title) {
-    if (!horizontal && yEnd) right += 16;
-    else if (!horizontal) left += 16;
-    else if (yEnd) top += 16;
-    else bottom += 16;
+    const flat = flatTitle(model.yAxis.titleSpin);
+    const extra = flat ? Math.ceil(ch(model.yAxis.title.length, 6.6)) + 12 : 16;
+    if (!horizontal && yEnd) right += extra;
+    else if (!horizontal) left += extra;
+    else if (yEnd) top += extra;
+    else bottom += extra;
   }
   if (model.showX && model.xAxis.title) {
     if (!horizontal && xEnd) top += 22;
@@ -2655,6 +2666,23 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
     top += 12 + legendRows(model, left, model.width - right) * 18;
     // The swatch used to start at y=8. Drop the plot by the same amount the legend moved.
     if (!model.title && !model.subtitle) top += CHROME_TOP - 8;
+  }
+  const outward = (offset: number | undefined) => (typeof offset === "number" && offset > 0 ? offset : 0);
+  if (model.showX) {
+    if (!horizontal && xEnd) top += outward(model.xAxis.offset);
+    else if (!horizontal) bottom += outward(model.xAxis.offset);
+    else if (xEnd) right += outward(model.xAxis.offset);
+    else left += outward(model.xAxis.offset);
+  }
+  if (model.showY) {
+    if (!horizontal && yEnd) right += outward(model.yAxis.offset);
+    else if (!horizontal) left += outward(model.yAxis.offset);
+    else if (yEnd) top += outward(model.yAxis.offset);
+    else bottom += outward(model.yAxis.offset);
+  }
+  if (model.showY2) {
+    if (y2End) right += outward(model.y2Axis.offset);
+    else left += outward(model.y2Axis.offset);
   }
   if (model.colorScale && model.legendOn) bottom += 46;
   const inset = model.inset;

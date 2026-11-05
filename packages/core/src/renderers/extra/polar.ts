@@ -1,5 +1,5 @@
 import { headingInset } from "../../chrome";
-import { legendLabel, legendMarkup, legendShownValue } from "../../legend";
+import { legendLabel, legendMarkup, legendShownValue, legendSpace, readLegend } from "../../legend";
 import { asNumber, column, fieldOf, knownField, numericField } from "../../frame";
 import { cssVar } from "../../theme";
 import { domainEnds, n, polar, ch } from "../../svg";
@@ -82,9 +82,16 @@ export function renderPolar(spec: Record<string, unknown>, kind: Kind): string |
   const mode = stackMode(frame.mark.stack);
   const scaleMax = radiusMax(frame.encoding.y, series, mode);
   const showLegend = frame.legend !== false && series.length > 1;
+  const legendBox = showLegend ? readLegend(spec) : null;
+  const legendItems = series.map((item, index) => ({
+    name: item.name,
+    color: fill(frame, index),
+    value: legendShownValue(spec, item.values.at(-1)),
+  }));
+  const topBand = legendBox?.position === "top" ? legendSpace(legendBox, legendItems, frame.width - 32).band : 0;
   const inset = headingInset(frame);
-  const legendH = showLegend ? 28 : 8;
-  const top = 8 + inset;
+  const legendH = showLegend && !topBand ? 28 : 8;
+  const top = 8 + inset + topBand;
   const bottom = frame.height - legendH;
   const cx = frame.width / 2;
   const cy = top + (bottom - top) / 2;

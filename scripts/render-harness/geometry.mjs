@@ -18,7 +18,7 @@ export function checkSvg(svg, spec) {
   if (svg.includes("ck-chart-error")) return findings;
   const scene = parseScene(svg);
   if (!scene) return findings;
-  const texts = scene.texts.filter((item) => item.snippet.trim());
+  const texts = scene.texts.filter((item) => item.snippet.trim() && !item.hidden);
   classify(texts, scene.swatches);
   findings.push(...overlaps(texts));
   findings.push(...outside(texts, scene));
@@ -277,7 +277,7 @@ function classify(texts, swatches) {
 function parseScene(svg) {
   if (!/<svg\b/i.test(svg)) return null;
   let view = { x: 0, y: 0, w: 640, h: 360 };
-  const stack = [{ name: "#root", matrix: ident(), clip: null, legend: false, legendPos: "", defs: false, clipDef: "", mark: "" }];
+  const stack = [{ name: "#root", matrix: ident(), clip: null, hidden: false, legend: false, legendPos: "", defs: false, clipDef: "", mark: "" }];
   const texts = [];
   const swatches = [];
   const marks = [];
@@ -317,6 +317,7 @@ function parseScene(svg) {
       attrs: at,
       matrix: name === "svg" ? mul(local, svgMatrix(at, view)) : local,
       clip: parent.clip,
+      hidden: parent.hidden || /display\s*:\s*none/.test(at.style || ""),
       legend: parent.legend || at["data-ck-legend"] !== undefined || at["data-ck-legend-row"] !== undefined,
       legendPos: at["data-ck-legend"] || parent.legendPos,
       defs: parent.defs || name === "defs" || name === "clipPath" || name === "title" || name === "desc",
@@ -341,7 +342,7 @@ function parseScene(svg) {
       }
       if (frame.defs) continue;
       if (!background && isBackdrop(box, view)) background = at.fill || background;
-      else if (at.fill && !frame.legend) fills.push({ bbox: box, fill: at.fill, opacity: opacityOf(at) });
+      else if (at.fill && (!frame.legend || at["data-ck-legend-plate"])) fills.push({ bbox: box, fill: at.fill, opacity: opacityOf(at) });
       if (!at["data-ck-mark"] && !frame.mark && !at["data-ck-headline"] && box.w >= 6 && box.w <= 14 && box.h >= 6 && box.h <= 14) swatches.push({ bbox: box });
       if (isMark(at, frame.mark) && !frame.legend) {
         marks.push({ id: markId(at, marks.length), bbox: box, clipped: Boolean(frame.clip) });
@@ -408,6 +409,7 @@ function finishText(frame, index) {
     bbox,
     clip: frame.clip,
     legendGroup: frame.legend,
+    hidden: Boolean(frame.hidden),
     role: "label",
     behind: "",
     onPath: Boolean(frame.onPath),
