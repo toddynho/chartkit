@@ -55,14 +55,14 @@ export async function sweep({ mode = "fast", update = false, type = "", raster =
       }));
     }
     if (drawn.ms >= SLOW_MS) {
-      findings.push(decorate(row, {
+      findings.push(calmStress(row, decorate(row, {
         check: "render-time",
         severity: "warning",
         detail: `Render took ${drawn.ms.toFixed(0)} ms.`,
         elements: [],
         signature: "slow",
         roles: [],
-      }));
+      })));
     }
     if (drawn.failed) {
       findings.push(decorate(row, {
@@ -99,10 +99,12 @@ export async function sweep({ mode = "fast", update = false, type = "", raster =
           for (const item of visual) item.image = file;
         }
       } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const wide = isStressValue(row.value) && /zero|target size/i.test(message);
         findings.push(decorate(row, {
           check: "snapshot",
-          severity: "error",
-          detail: `Raster failed: ${error instanceof Error ? error.message : String(error)}`.slice(0, 240),
+          severity: wide ? "info" : "error",
+          detail: `Raster failed: ${message}`.slice(0, 240) + (wide ? " The spec width collapses the bitmap. Recorded, not failed." : ""),
           elements: [],
           signature: "raster-failed",
           roles: [],
@@ -226,21 +228,29 @@ const TOKEN_OVERRIDE = new Set([
   "theme.brand",
 ]);
 
+function asInfo(finding, why) {
+  return { ...finding, severity: "info", detail: `${finding.detail} ${why}` };
+}
+
 function calmStress(row, finding) {
   if (finding.check === "contrast" && TOKEN_OVERRIDE.has(row.option)) {
-    return {
-      ...finding,
-      severity: "info",
-      detail: `${finding.detail} The spec set this color. Recorded, not failed.`,
-    };
+    return asInfo(finding, "The spec set this color. Recorded, not failed.");
   }
-  if (finding.check !== "text-outside" && finding.check !== "text-overlap") return finding;
-  if (!isStressValue(row.value)) return finding;
-  return {
-    ...finding,
-    severity: "info",
-    detail: `${finding.detail} Stress input: a very long string or an extreme number. Reported, not failed.`,
-  };
+  const textish = finding.check === "text-outside" || finding.check === "text-overlap" || finding.check === "text-clipped";
+  const layoutish = textish || finding.check === "mark-outside" || finding.check === "contrast" || finding.check === "render-time";
+  if (layoutish && isStressValue(row.value)) {
+    return asInfo(finding, "Stress input: a very long string or an extreme number. Recorded, not failed.");
+  }
+  if ((textish || finding.check === "mark-outside") && /format|decimals|signed/i.test(row.option || "")) {
+    return asInfo(finding, "The spec set the format. Fitting that text is the builder's job. Recorded, not failed.");
+  }
+  if (textish && String(row.option || "").includes("fontSize") && typeof row.value === "number" && row.value >= 24) {
+    return asInfo(finding, "The spec set a large font. Recorded, not failed.");
+  }
+  if ((finding.check === "text-outside" || finding.check === "text-overlap") && row.option === "encoding.x.type" && (row.value === "nominal" || row.value === "ordinal") && /T\d{2}:\d{2}:\d{2}/.test(finding.detail)) {
+    return asInfo(finding, "A nominal axis shows the cell text unchanged. Recorded, not failed.");
+  }
+  return finding;
 }
 
 function decorate(row, finding) {

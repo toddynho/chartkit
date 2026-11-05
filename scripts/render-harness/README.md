@@ -71,6 +71,16 @@ Empty strings, enums, booleans, and ordinary sizes (`240`, `1200`) stay errors. 
 
 Body text needs 4.5:1. Text at 18px or larger, or with weight 700, needs 3:1. Marks and lines need 3:1 against the page. A spec-set `theme.tokens` background, surface, text, or muted color, or `theme.brand`, that misses its ratio is informational: the chart keeps the color and `validate` warns with CK4005.
 
+These are informational too, for the same reason: the spec asked for them, and ChartKit does not shorten labels.
+
+- A format, decimals, prefix, or suffix that makes a label too long to fit.
+- `theme.tokens.fontSize` of 24 or more.
+- The stress values above, on `mark-outside`, `contrast`, `text-clipped`, and `render-time` as well as the two text checks.
+- A nominal or ordinal axis whose cells are raw ISO timestamps.
+- A raster whose bitmap height collapses because `size.width` is `10000`.
+
+Tick labels are scored against the page, not against a bar they cross. A sunburst name on a `<textPath>` is scored against its slice, and skipped when the slice cannot be found, so it is not scored against the page.
+
 ## Baselines
 
 Hashes live in `baselines/fast.json` and `baselines/full.json`. Each value is a 64-bit dHash of a 96px-wide PNG made with `@resvg/resvg-wasm` and the faces in `apps/cloud/fonts`. Distance above 8 bits is a changed render.

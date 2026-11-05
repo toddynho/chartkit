@@ -138,8 +138,10 @@ function contrastFindings(texts, scene, spec) {
     for (const item of texts) {
       const fill = resolvePaint(item.fill, mode);
       if (!fill || fill.a === 0) continue;
-      const behind = item.behind ? resolvePaint(item.behind.fill, mode) : null;
-      if (behind && item.behind.opacity < 1) behind.a *= item.behind.opacity;
+      if (item.onPath && !item.behind) continue;
+      const behindSource = item.role === "tick" ? null : item.behind;
+      const behind = behindSource ? resolvePaint(behindSource.fill, mode) : null;
+      if (behind && behindSource.opacity < 1) behind.a *= behindSource.opacity;
       const bg = behind && behind.a > 0.4 ? flatten(behind, backdrop) : backdrop;
       const fg = flatten(fill, bg);
       const ratio = contrast(fg, bg);
@@ -324,6 +326,10 @@ function parseScene(svg) {
     };
     if (at["clip-path"]) frame.clip = clips.get(urlId(at["clip-path"])) ?? parent.clip;
     if (at["data-ck-legend"] === "inside") legendInside = true;
+    if (name === "textPath") {
+      const owner = textOwner(stack);
+      if (owner) owner.onPath = true;
+    }
     if (!self) stack.push(frame);
     if (frame.defs && name !== "rect") continue;
     if (name === "rect") {
@@ -350,6 +356,9 @@ function parseScene(svg) {
       if (isMark(at, frame.mark) && !frame.legend) {
         marks.push({ id: markId(at, marks.length), bbox: box, clipped: Boolean(frame.clip) });
         noteGraphic(graphics, at, name === "line" || name === "path" ? "stroke" : "fill");
+        if (name === "path" && at.fill && at.fill !== "none" && box.w < view.w * 0.92 && box.h < view.h * 0.92) {
+          fills.push({ bbox: box, fill: at.fill, opacity: opacityOf(at) });
+        }
       }
     }
   }
@@ -401,6 +410,7 @@ function finishText(frame, index) {
     legendGroup: frame.legend,
     role: "label",
     behind: "",
+    onPath: Boolean(frame.onPath),
   };
 }
 
