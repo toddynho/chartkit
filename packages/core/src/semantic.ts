@@ -163,6 +163,16 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
       fix: [{ op: "remove", path: "/encoding/label" }],
     });
   }
+  if (type !== "strip" && isRecord(spec.encoding) && spec.encoding.note !== undefined) {
+    diagnostics.push({
+      code: "CK3135",
+      severity: "warning",
+      message: '"encoding.note" has no effect on this chart',
+      path: "/encoding/note",
+      hint: 'encoding.note is the second line under a strip category. Remove it or set type to "strip"',
+      fix: [{ op: "remove", path: "/encoding/note" }],
+    });
+  }
   if (type) checkUncertainty(spec, type, view, diagnostics);
   checkHierarchy(spec, diagnostics);
   if (known) warnDesign(spec, type, view, diagnostics);
@@ -2213,7 +2223,14 @@ function stripChecks(spec: Record<string, unknown>, table: DataTable, diagnostic
     });
   }
   const highlight = isRecord(spec.mark) && typeof spec.mark.highlight === "string" ? spec.mark.highlight : "";
-  if (highlight && !counts.has(highlight)) {
+  const colorField = colorFieldOf(encoding, vertical);
+  const series = new Set<string>();
+  if (colorField && table.columns[colorField]) {
+    for (const value of table.columns[colorField]) {
+      if (value !== null && value !== undefined && value !== "") series.add(String(value));
+    }
+  }
+  if (highlight && !counts.has(highlight) && !series.has(highlight)) {
     diagnostics.push({
       code: "CK3092",
       severity: "warning",
@@ -2223,6 +2240,52 @@ function stripChecks(spec: Record<string, unknown>, table: DataTable, diagnostic
       fix: [{ op: "remove", path: "/mark/highlight" }],
     });
   }
+  const emphasis = isRecord(spec.mark) ? spec.mark.emphasis : undefined;
+  if ((emphasis === "ring" || emphasis === "color" || emphasis === "muted") && !highlight) {
+    diagnostics.push({
+      code: "CK3134",
+      severity: "warning",
+      message: "mark.emphasis needs mark.highlight",
+      path: "/mark/emphasis",
+      hint: "emphasis draws the highlighted group or series. Remove emphasis or set highlight",
+      fix: [{ op: "remove", path: "/mark/emphasis" }],
+    });
+  }
+  const note = isRecord(spec.mark) ? spec.mark.note : undefined;
+  if (note === "field" && encoding.note === undefined) {
+    diagnostics.push({
+      code: "CK3133",
+      severity: "warning",
+      message: "a field note needs encoding.note",
+      path: "/mark/note",
+      hint: "encoding.note is the column drawn under the category. range draws the min and max instead",
+      fix: [{ op: "replace", path: "/mark/note", value: "none" }],
+    });
+  }
+  if (isRecord(spec.mark) && spec.mark.pin === true && !explicitDomain(vertical ? encoding.y : encoding.x)) {
+    diagnostics.push({
+      code: "CK3132",
+      severity: "warning",
+      message: "a pin needs an explicit scale domain",
+      path: "/mark/pin",
+      hint: "set the value scale domain. Values outside it become edge markers",
+      fix: [{ op: "replace", path: "/mark/pin", value: false }],
+    });
+  }
+}
+
+function colorFieldOf(encoding: Record<string, unknown>, vertical: boolean): string {
+  void vertical;
+  const color = encoding.color;
+  if (typeof color === "string") return color;
+  if (isRecord(color) && typeof color.field === "string") return color.field;
+  return "";
+}
+
+function explicitDomain(channel: unknown): boolean {
+  if (!isRecord(channel) || !isRecord(channel.scale) || !Array.isArray(channel.scale.domain)) return false;
+  const domain = channel.scale.domain;
+  return typeof domain[0] === "number" && typeof domain[1] === "number" && domain[1] > domain[0];
 }
 
 function checkAnnotations(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {

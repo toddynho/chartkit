@@ -6,7 +6,6 @@ import { homePaintCharts } from "../data/home-charts";
 const paint = homePaint();
 const charts = homePaintCharts();
 const others = paint.libs.filter((lib) => !lib.us);
-const workloads = paint.rows.map((row) => `${row.type}, ${row.note}`).join("; ");
 ---
 
 <section class="band" data-ckx="paint" aria-labelledby="paint-title">
@@ -49,7 +48,7 @@ const workloads = paint.rows.map((row) => `${row.type}, ${row.note}`).join("; ")
       }
     </div>
     <p class="proof-note">
-      Two-frame first paint, median of five fresh pages at 640×360, measured {paint.measuredOn}. Libraries without a native chart type are omitted from that row. A run that did not finish is omitted too. Runs slower than 5 s sit on the right edge; the tooltip keeps the real time. Workloads: {workloads}. <a href="/benchmarks">Full benchmark matrix →</a>
+      Two-frame first paint, median of five fresh pages at 640×360, measured {paint.measuredOn}. Libraries without a native chart type are omitted from that row. A run that did not finish is omitted too. Runs slower than 5 s are pinned to the edge with their real time. <a href="/benchmarks">Full benchmark matrix →</a>
     </p>
   </div>
 </section>
