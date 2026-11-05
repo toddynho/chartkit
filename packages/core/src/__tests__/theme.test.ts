@@ -16,7 +16,7 @@ describe("theme presets", () => {
     expect(resolvePreset("soft")).toBe(auto);
     expect(resolvePreset({ tokens: { background: "transparent", surface: "transparent" } }).surface).toBe("transparent");
     expect(auto.background).toBe("transparent");
-    expect(auto.series[0]).toContain("light-dark(#007aff,");
+    expect(auto.series[0]).toContain("light-dark(#0072ee,");
     expect(resolveGeometry(undefined).cornerRadius).toBe(8);
     expect(resolveGeometry(undefined).gap).toBe(0.34);
     expect(resolveGeometry(undefined).points).toBe("none");

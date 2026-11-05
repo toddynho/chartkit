@@ -7,7 +7,7 @@ type Node =
   | { kind: "var"; fallback: Node | null };
 
 const INKS: Array<[string, RGB]> = [
-  ["#1d1d1f", [29, 29, 31]],
+  ["#050507", [5, 5, 7]],
   ["#f5f5f7", [245, 245, 247]],
   ["#000000", [0, 0, 0]],
   ["#ffffff", [255, 255, 255]],
@@ -75,11 +75,11 @@ function sharedChoice(backgrounds: RGB[]): string | null {
 /**
  * Text colour for a fill. Uses the colour the SVG actually paints: the
  * fallback inside var(), each side of light-dark(), and color-mix().
- * Prefers #1d1d1f or #f5f5f7 when that clears 4.5:1, otherwise black or white.
+ * Prefers #050507 or #f5f5f7 when that clears 4.5:1, otherwise black or white.
  */
 export function labelInk(fill: string): string {
   const pair = resolve(fill);
-  if (!pair) return "light-dark(#1d1d1f, #f5f5f7)";
+  if (!pair) return "light-dark(#050507, #f5f5f7)";
   const light = choose(pair.light);
   const dark = choose(pair.dark);
   return light === dark ? light : `light-dark(${light}, ${dark})`;

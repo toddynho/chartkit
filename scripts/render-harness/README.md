@@ -62,6 +62,13 @@ Each rendered SVG is checked in process. A check returns `{ type, example, optio
 
 Text width uses the renderer’s 6.4px-at-11px estimate, so a gap the layout already reserved is not an overlap.
 
+`text-outside` and `text-overlap` fail only for realistic inputs at default and typical sizes. A case the sweep invented is informational (`severity: "info"`) and does not enter the allowlist or fail CI:
+
+- a string longer than 48 characters (the fixed long sentence)
+- a number at or beyond 10000, including `1000000`, and the size strings `"0"` and `"10000"`
+
+Empty strings, enums, booleans, and ordinary sizes (`240`, `1200`) stay errors. The default example is never stress. Info findings are still listed in `out/findings.json`. The written report and the allowlist omit them.
+
 ## Baselines
 
 Hashes live in `baselines/fast.json` and `baselines/full.json`. Each value is a 64-bit dHash of a 96px-wide PNG made with `@resvg/resvg-wasm` and the faces in `apps/cloud/fonts`. Distance above 8 bits is a changed render.

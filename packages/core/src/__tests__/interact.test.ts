@@ -346,7 +346,7 @@ describe("attach", () => {
       expect(revenue).not.toContain("transparent");
       expect(row("region")?.textContent).toMatch(/NA|EU/);
       if (theme === "midnight") expect(revenue).toContain("#22c55e");
-      if (theme === "soft") expect(revenue).toContain("#007aff");
+      if (theme === "soft") expect(revenue).toContain("#0072ee");
       if (theme === "refined") expect(revenue).toContain("#3b82f6");
       if (theme === "editorial") expect(revenue).toContain("#4f46e5");
       ctl.destroy();

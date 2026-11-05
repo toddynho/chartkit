@@ -138,7 +138,8 @@ function contrastFindings(texts, scene, spec) {
     for (const item of texts) {
       const fill = resolvePaint(item.fill, mode);
       if (!fill || fill.a === 0) continue;
-      const behind = item.behind ? resolvePaint(item.behind, mode) : null;
+      const behind = item.behind ? resolvePaint(item.behind.fill, mode) : null;
+      if (behind && item.behind.opacity < 1) behind.a *= item.behind.opacity;
       const bg = behind && behind.a > 0.4 ? flatten(behind, backdrop) : backdrop;
       const fg = flatten(fill, bg);
       const ratio = contrast(fg, bg);
@@ -306,7 +307,7 @@ function parseScene(svg) {
       }
       if (frame.defs) continue;
       if (!background && isBackdrop(box, view)) background = at.fill || background;
-      else if (at.fill && !frame.legend) fills.push({ bbox: box, fill: at.fill });
+      else if (at.fill && !frame.legend) fills.push({ bbox: box, fill: at.fill, opacity: opacityOf(at) });
       if (!at["data-ck-mark"] && !frame.mark && !at["data-ck-headline"] && box.w >= 6 && box.w <= 14 && box.h >= 6 && box.h <= 14) swatches.push({ bbox: box });
       if (isMark(at, frame.mark) && !frame.legend) marks.push({ id: markId(at, marks.length), bbox: box, clipped: Boolean(frame.clip) });
     } else if (!frame.defs && (name === "line" || name === "path" || name === "circle" || name === "ellipse" || name === "polygon" || name === "polyline")) {
@@ -322,9 +323,9 @@ function parseScene(svg) {
   for (const item of texts) {
     const cx = item.bbox.x + item.bbox.w / 2;
     const cy = item.bbox.y + item.bbox.h / 2;
-    let behind = "";
+    let behind = null;
     for (const fill of fills) {
-      if (cx >= fill.bbox.x && cx <= fill.bbox.x + fill.bbox.w && cy >= fill.bbox.y && cy <= fill.bbox.y + fill.bbox.h) behind = fill.fill;
+      if (cx >= fill.bbox.x && cx <= fill.bbox.x + fill.bbox.w && cy >= fill.bbox.y && cy <= fill.bbox.y + fill.bbox.h) behind = fill;
     }
     item.behind = behind;
   }
@@ -367,6 +368,11 @@ function finishText(frame, index) {
     role: "label",
     behind: "",
   };
+}
+
+function opacityOf(at) {
+  const value = num(at["fill-opacity"], 1);
+  return value >= 0 && value <= 1 ? value : 1;
 }
 
 function isMark(at, inherited) {
