@@ -1,4 +1,4 @@
-import { asNumber, column, fieldOf, readFrame, readTable } from "../frame";
+import { asNumber, column, fieldOf, knownField, readFrame, readTable } from "../frame";
 import { formatValue } from "../format";
 import { cssVar } from "../theme";
 import { closeChart, esc, font, n, openChart } from "../svg";
@@ -13,8 +13,8 @@ export function renderBarList(spec: Record<string, unknown>): string | null {
   if (!table) return null;
   const frame = readFrame(spec, { width: 420, height: 180 });
   const encoding = frame.encoding;
-  const xField = fieldOf(encoding.x) ?? table.fields[0];
-  const yField = fieldOf(encoding.y) ?? table.fields.find((name) => name !== xField);
+  const xField = knownField(encoding.x, table.fields, []) ?? table.fields[0];
+  const yField = knownField(encoding.y, table.fields, []) ?? table.fields.find((name) => name !== xField);
   if (!xField || !yField) return null;
   const labels = column(table, xField).map((value) => (value == null ? "" : String(value)));
   const values = column(table, yField).map(asNumber);
@@ -47,7 +47,7 @@ export function renderBarList(spec: Record<string, unknown>): string | null {
       const span = Math.max(0, width - 8);
       const filled = Math.max(12, (row.value / max) * span);
       parts.push(
-        `<rect data-ck-track="row" x="0" y="${n(y + 2)}" width="${n(filled)}" height="${rowH - 4}" rx="3" fill="${fill}" fill-opacity="0.72" />` +
+        `<rect data-ck-mark="bar" data-ck-track="row" x="0" y="${n(y + 2)}" width="${n(filled)}" height="${rowH - 4}" rx="3" fill="${fill}" fill-opacity="0.72" />` +
           `<text x="8" y="${n(y + 18)}" fill="${ink}" font-size="12" font-weight="560">${esc(row.label)}</text>` +
           `<text x="${n(width - 4)}" y="${n(y + 18)}" text-anchor="end" fill="${ink}" font-size="12" font-weight="650">${esc(text)}</text>`,
       );
@@ -59,7 +59,7 @@ export function renderBarList(spec: Record<string, unknown>): string | null {
     const filled = Math.max(8, (row.value / max) * span);
     parts.push(
       `<rect data-ck-track="1" x="0" y="${n(trackY)}" width="${n(span)}" height="${trackH}" rx="4" fill="${fill}" fill-opacity="0.14" />` +
-        `<rect data-ck-bar="1" x="0" y="${n(trackY)}" width="${n(filled)}" height="${trackH}" rx="4" fill="${fill}" fill-opacity="0.42" />` +
+        `<rect data-ck-mark="bar" data-ck-bar="1" x="0" y="${n(trackY)}" width="${n(filled)}" height="${trackH}" rx="4" fill="${fill}" fill-opacity="0.42" />` +
         `<text x="8" y="${n(trackY + 12)}" fill="${ink}" font-size="12" font-weight="560">${esc(row.label)}</text>` +
         `<text x="${n(width - 4)}" y="${n(trackY + 12)}" text-anchor="end" fill="${ink}" font-size="12" font-weight="650">${esc(text)}</text>`,
     );

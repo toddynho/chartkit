@@ -104,14 +104,15 @@ export function renderGantt(spec: Record<string, unknown>): string | null {
   const longest = tasks.reduce((best, task) => Math.max(best, task.task.length), 0);
   const plotLeft = Math.min(340, nameX + 16 + Math.min(longest, 28) * 7.2);
   const plotRight = frame.width - 20;
-  const top = frame.title ? 52 : 28;
+  const legend = legendBand(frame);
+  parts.push(legend.markup);
+  const top = Math.max(frame.title ? 52 : 28, legend.bottom + 16);
   const xAt = (time: number) => plotLeft + ((time - min) / (max - min || 1)) * (plotRight - plotLeft);
   const withYear = max - min > 340 * DAY;
   const sections = groups.reduce((count, group) => count + (group.section ? 1 : 0), 0);
   const room = frame.height - top - 18 - sections * header;
   const pitch = Math.min(32, Math.max(18, room / Math.max(1, tasks.length)));
 
-  parts.push(legend(frame));
   let y = top;
   const placed = new Map<number, number>();
   for (const group of groups) {
@@ -202,19 +203,37 @@ export function renderGantt(spec: Record<string, unknown>): string | null {
   return view.done();
 }
 
-function legend(frame: Frame): string {
+/**
+ * Status legend in its own band. It sits beside a short title when both fit,
+ * and on the next row when they do not. Date labels start below `bottom`.
+ */
+function legendBand(frame: Frame): { markup: string; bottom: number } {
   const items = [
     ["Done", cssVar("positive", frame.preset.positive)],
     ["Active", cssVar("accent", frame.preset.accent)],
     ["Critical", cssVar("negative", frame.preset.negative)],
   ] as const;
-  const right = frame.width - 16;
-  return items
-    .map((item, index) => {
-      const x = right - (items.length - index) * 78;
-      return `<rect x="${n(x)}" y="16" width="8" height="8" rx="2" fill="${item[1]}" />${text(x + 12, 24, item[0], cssVar("muted", frame.preset.muted), 11, "500")}`;
-    })
-    .join("");
+  const widths = items.map((item) => 22 + item[0].length * 6.6);
+  const rowH = 18;
+  const titleEnd = frame.title ? 16 + Math.min(frame.title.length * 8.2, Math.max(80, frame.width * 0.55)) : 0;
+  const total = widths.reduce((sum, width) => sum + width, 0);
+  const beside = !frame.title || titleEnd + 16 + total <= frame.width - 8;
+  let x = beside && frame.title ? frame.width - 8 - total : 16;
+  let y = beside ? 8 : frame.title ? 36 : 8;
+  const maxX = frame.width - 8;
+  let bottom = y + rowH;
+  const parts: string[] = [];
+  items.forEach((item, index) => {
+    const width = widths[index] ?? 78;
+    if (x > 16 && x + width > maxX) {
+      x = 16;
+      y += rowH;
+      bottom = y + rowH;
+    }
+    parts.push(`<rect x="${n(x)}" y="${n(y + 4)}" width="8" height="8" rx="2" fill="${item[1]}" />${text(x + 12, y + 12, item[0], cssVar("muted", frame.preset.muted), 11, "500")}`);
+    x += width;
+  });
+  return { markup: parts.join(""), bottom };
 }
 
 function groupTasks(tasks: GanttTask[]): { section: string; tasks: GanttTask[] }[] {

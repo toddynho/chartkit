@@ -306,11 +306,11 @@ function regionMarkup(
       if (region.point && !region.polygons.length) {
         if (!hit) return "";
         const [x, y] = project(region.id, region.point[0], region.point[1]);
-        return `<circle class="${cls}" cx="${round(x)}" cy="${round(y)}" r="3"${tail}</circle>`;
+        return `<circle data-ck-mark="point" class="${cls}" cx="${round(x)}" cy="${round(y)}" r="3"${tail}</circle>`;
       }
       const d = pathFor(region, project);
       if (!d) return "";
-      return `<path class="${cls}" d="${d}" fill-rule="evenodd"${tail}</path>`;
+      return `<path data-ck-mark="region" class="${cls}" d="${d}" fill-rule="evenodd"${tail}</path>`;
     })
     .join("");
 }
@@ -445,7 +445,7 @@ function pointMarkup(dots: Dot[], point: (lon: number, lat: number) => [number, 
     const name = dot.label || `${dot.lat}, ${dot.lon}`;
     const text = [dot.value == null ? name : `${name}, ${dot.value}`, dot.detail].filter(Boolean).join(", ");
     circles.push({ x, y, r: radius, dot });
-    marks += `<circle class="ck-geo-point" cx="${round(x)}" cy="${round(y)}" r="${round(radius)}" fill="${dot.color}" data-ck-i="${dot.index}" data-ck-id="${dot.index}" data-ck-name="${esc(name)}"${dot.value == null ? "" : ` data-ck-value="${dot.value}"`} tabindex="0" aria-label="${esc(text)}"><title>${esc(text)}</title></circle>`;
+    marks += `<circle data-ck-mark="point" class="ck-geo-point" cx="${round(x)}" cy="${round(y)}" r="${round(radius)}" fill="${dot.color}" data-ck-i="${dot.index}" data-ck-id="${dot.index}" data-ck-name="${esc(name)}"${dot.value == null || !Number.isFinite(dot.value) ? "" : ` data-ck-value="${dot.value}"`} tabindex="0" aria-label="${esc(text)}"><title>${esc(text)}</title></circle>`;
   }
   const ranked = [...circles].sort((a, b) => b.r - a.r).slice(0, labelCount);
   const placed: { x: number; y: number; w: number; h: number }[] = [];

@@ -4,7 +4,7 @@ import { isPaintColumn, matchRule, readRules, resolveColors, ruleCaption, ruleMa
 import { loadTable } from "../data-prep";
 import { isTypedArray, type DataTable } from "../data";
 import { formatZoned, zoneOf, zonedTimeTicks } from "../timezone";
-import { formatAxisValue, formatValue } from "../format";
+import { formatAxisValue, formatValue, localeTagOk } from "../format";
 import { bag, glyphOf, marker, named, nudge, type Bag } from "../glyphs";
 import { canvasWanted } from "../render-mode";
 import { beginFrame, dataSampling, extentAndMinmax, noteDense, noteLinear, notedLinear, readSamplingMode, sampleSeries, type SamplingMode } from "../sampling";
@@ -13,7 +13,7 @@ import { chartSize, exportList, readColor } from "../frame";
 import { CHROME_TOP } from "../chrome";
 import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem } from "../legend";
 import { layoutPaint } from "../layout-hook";
-import { boxId, brokenScale, ch, clamp, clipPath, domainEnds, esc, font, fontStyle, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, repeatKey, round, scaleClamp, scalePad, symlogTicks, ticks } from "../svg";
+import { boxId, brokenScale, ch, clamp, clipPath, domainEnds, esc, font, fontStyle, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, pointRadius, repeatKey, round, scaleClamp, scalePad, symlogTicks, ticks } from "../svg";
 import { bump, revision, slots } from "../feature-hooks";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
@@ -521,8 +521,9 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
   const preset = withPalette(resolvePreset(spec.theme), mark);
   const channels = readYChannels(encoding.y);
   const size = isRecord(spec.size) ? spec.size : {};
-  const width = typeof size.width === "number" ? size.width : 640;
   const compact = type === "sparkline" || type === "mini-area";
+  const sized = chartSize({ size }, { width: 640, height: compact ? (type === "sparkline" ? 32 : 40) : 240 });
+  const width = sized.width;
   const geometry = resolveGeometry(spec.theme);
   const opacitySet = typeof mark.fillOpacity === "number";
   const fillOpacity = opacitySet ? (mark.fillOpacity as number) : geometry.fillOpacity;
@@ -548,10 +549,10 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     sampling: readSamplingMode(mark.sampling),
     stack: stackMode(type, mark.stackTotal === true && (type === "bar" || type === "stacked-area") && stackMode(type, mark.stack) === "none" ? "stack" : mark.stack),
     width,
-    height: heightOf(type, size, width),
+    height: sized.height,
     responsive: size.width === undefined || size.width === "auto",
     alt,
-    locale: typeof spec.locale === "string" ? spec.locale : "en-US",
+    locale: typeof spec.locale === "string" && localeTagOk(spec.locale) ? spec.locale.trim() : "en-US",
     zone: zoneOf(spec),
     id: `ck${hash(idSource)}`,
     title: typeof spec.title === "string" ? spec.title : undefined,
@@ -565,7 +566,7 @@ function shellFor(spec: Record<string, unknown>): ChartShell {
     glow: (type === "line" || type === "sparkline" || type === "combo") && mark.glow === true,
     points,
     dots: points === "always" ? "shown" : points === "none" && !pointsSet ? "hidden" : "off",
-    pointSize: typeof mark.pointSize === "number" ? mark.pointSize : geometry.pointSize,
+    pointSize: pointRadius(mark.pointSize, geometry.pointSize),
     connectNulls: mark.connectNulls === true,
     cornerRadius: radiusSet ? (mark.cornerRadius as number) : geometry.cornerRadius,
     radiusVar: !radiusSet,
@@ -654,11 +655,14 @@ function toModel(
 
   const length = table.length;
   let series: Series[];
-  if (yChannels.length === 0 && table.columns.value) {
+  const fallbackName = yChannels.length === 0 || yChannels.every((channel) => !channel.field || !table.columns[channel.field])
+    ? numericColumn(table, shell.xField)
+    : undefined;
+  if (fallbackName && (yChannels.length === 0 || yChannels.every((channel) => !channel.field || !table.columns[channel.field]))) {
     series = [
       {
-        name: "value",
-        values: asNumbers(table.columns.value),
+        name: fallbackName,
+        values: asNumbers(table.columns[fallbackName]),
         color: paint(undefined, preset, 0),
         axis: "y",
         mark: type === "bar" ? "bar" : type === "mini-area" || type === "stacked-area" ? "area" : "line",
@@ -669,7 +673,8 @@ function toModel(
     ];
   } else {
     series = yChannels.map((channel, index) => {
-      const column = channel.field ? table.columns[channel.field] : undefined;
+      const named = channel.field && table.columns[channel.field] ? table.columns[channel.field] : undefined;
+      const column = named;
       const values = column ? asNumbers(column) : new Array<number | null>(length).fill(null);
       const markKind = seriesMark(type, channel.mark, mark.area === true || channel.area === true);
       return {
@@ -800,7 +805,7 @@ function modelToSvg(model: PlotModel, draw: MarkDraw): string {
     parts.push(`<text x="${n(titleX)}" y="${model.title ? 40 : 18}"${titleAnchor} fill="${cssVar("muted", model.preset.muted)}" font-size="12" font-weight="400">${esc(model.subtitle)}</text>`);
   }
   if (slots.chromePaint && model.headline) parts.push(slots.chromePaint(model));
-  if (model.legend && !model.legendBox) parts.push(legend(model, pad.left, model.subtitle ? 54 : model.title ? 36 : CHROME_TOP, plot.right));
+  if (model.legend && !model.legendBox) parts.push(legend(model, pad.left, legendTop(model), plot.right));
 
   const clip = boxId(model.id, plot.left, plot.top, plotW, plotH);
   parts.push(`<defs>${clipPath(clip, plot.left, plot.top, plotW, plotH)}`);
@@ -1892,7 +1897,8 @@ function place(side: number, edge: number, at: number, titled: boolean, height: 
   if (side === 0) return [edge - 6, at + 4, "end"];
   if (side === 1) return [edge + 6, at + 4, "start"];
   if (side === 2) return [at, edge - 18, "middle"];
-  return [at, titled ? edge + 14 : height - 8, "middle"];
+  // Bottom labels follow the plot edge. height-8 sat on a bottom legend.
+  return [at, edge + (titled ? 14 : 16), "middle"];
 }
 
 function ySide(model: PlotModel, horizontal: boolean): number {
@@ -2330,6 +2336,13 @@ function legend(model: PlotModel, x: number, y: number, maxRight: number): strin
   return legendSeries(model, x, y, maxRight);
 }
 
+/** Subtitle-only charts used to keep the legend on the titled row, so it met the plot. */
+function legendTop(model: PlotModel): number {
+  if (model.subtitle) return model.title ? 54 : 36;
+  if (model.title) return 36;
+  return CHROME_TOP;
+}
+
 function legendIcon(model: PlotModel, series: Series, x: number, y: number, key = ""): string {
   const color = legendColor(model, series);
   const id = key ? ` data-ck-key="${esc(key)}"` : "";
@@ -2630,9 +2643,9 @@ function padding(model: PlotModel, yLabels: string[], y2Labels: string[], xLabel
     const space = legendSpace(model.legendBox, legendItems(model), Math.max(80, model.width - left - right));
     const pos = model.legendBox.position;
     if (pos === "top") top += space.band;
-    else if (pos === "bottom") bottom += space.band;
-    else if (pos === "left") left += space.side;
-    else if (pos === "right") right += space.side;
+    else if (pos === "bottom") bottom += space.band + 10;
+    else if (pos === "left") left += space.side + 8;
+    else if (pos === "right") right += space.side + 10;
   } else if (model.legend) {
     top += 12 + legendRows(model, left, model.width - right) * 18;
     // The swatch used to start at y=8. Drop the plot by the same amount the legend moved.
@@ -3145,11 +3158,6 @@ function axisIncludesZero(model: PlotModel, axis: "y" | "y2"): boolean {
   return model.zero && model.series.every((item) => item.axis === axis);
 }
 
-function heightOf(type: string, size: Record<string, unknown>, width: number): number {
-  const fallback = type === "sparkline" ? 32 : type === "mini-area" ? 40 : 240;
-  return chartSize({ size }, { width, height: fallback }).height;
-}
-
 function axisVisible(spec: Record<string, unknown>, key: "x" | "y" | "y2"): boolean {
   const axes = isRecord(spec.axes) ? spec.axes : undefined;
   if (!axes || axes[key] === undefined) return true;
@@ -3203,6 +3211,17 @@ interface YChannel {
   clamp?: boolean;
 }
 
+function numericColumn(table: { fields: readonly string[]; columns: Record<string, ArrayLike<unknown> | undefined> }, skip?: string): string | undefined {
+  for (const name of table.fields) {
+    if (name === skip) continue;
+    const values = table.columns[name];
+    if (!values) continue;
+    const list = Array.isArray(values) ? values : Array.from(values);
+    if (list.some((item) => typeof item === "number" && Number.isFinite(item))) return name;
+  }
+  return undefined;
+}
+
 function readYChannels(y: unknown): YChannel[] {
   const list = Array.isArray(y) ? y : y === undefined ? [] : [y];
   return list.map((item) => {
@@ -3223,7 +3242,7 @@ function readYChannels(y: unknown): YChannel[] {
       z: typeof item.z === "number" && Number.isFinite(item.z) ? item.z : undefined,
       format: item.format,
       pointShape: glyphOf(item.pointShape),
-      pointSize: typeof item.pointSize === "number" ? item.pointSize : undefined,
+      pointSize: typeof item.pointSize === "number" && Number.isFinite(item.pointSize) && item.pointSize >= 1 ? item.pointSize : undefined,
       pointHollow: item.pointFill === "hollow",
       stack: typeof item.stack === "string" && item.stack.length > 0 ? item.stack : undefined,
       fillOpacity: unitOpacity(item.fillOpacity),

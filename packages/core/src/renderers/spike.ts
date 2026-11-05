@@ -77,7 +77,7 @@ export function renderSpike(spec: Record<string, unknown>): string | null {
     const name = labels[index] ? `${labels[index]}: ` : "";
     const label = `${name}${formatValue(value, yFormat, frame.locale)}`;
     parts.push(
-      `<line x1="${n(x)}" y1="${n(baseY)}" x2="${n(x)}" y2="${n(y)}" stroke="${color}" stroke-width="${strokeAttr}" stroke-linecap="round" stroke-opacity="${n(opacity)}" aria-label="${esc(label)}"${sampledAttr}><title>${esc(label)}</title></line>`,
+      `<line data-ck-mark="spike" x1="${n(x)}" y1="${n(baseY)}" x2="${n(x)}" y2="${n(y)}" stroke="${color}" stroke-width="${strokeAttr}" stroke-linecap="round" stroke-opacity="${n(opacity)}" aria-label="${esc(label)}"${sampledAttr}><title>${esc(label)}</title></line>`,
     );
   };
   if (!sampled.reduced) {

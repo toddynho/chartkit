@@ -161,7 +161,7 @@ export function hGrid(spec: Record<string, unknown>, frame: Frame, box: Box, val
   return values
     .map((value) => {
       const y = yAt(value);
-      return `<line x1="${n(box.left)}" y1="${n(y)}" x2="${n(box.right)}" y2="${n(y)}" stroke="${cssVar("grid", frame.preset.grid)}"${dash} />`;
+      return `<line data-ck-grid="1" x1="${n(box.left)}" y1="${n(y)}" x2="${n(box.right)}" y2="${n(y)}" stroke="${cssVar("grid", frame.preset.grid)}"${dash} />`;
     })
     .join("");
 }

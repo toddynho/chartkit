@@ -88,10 +88,11 @@ export function formatNumber(value: number, format: ScaleFormat): string {
   if (!Number.isFinite(value)) return "";
   const cleaned = Object.is(value, -0) ? 0 : value;
   if (format.compact) {
-    const digits = format.decimals ?? 1;
+    const digits = Math.max(0, Math.min(20, Math.round(Number.isFinite(format.decimals ?? 1) ? (format.decimals ?? 1) : 1)));
     return new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: digits }).format(cleaned);
   }
-  const decimals = format.decimals ?? (Number.isInteger(cleaned) ? 0 : Math.abs(cleaned) >= 10 ? 0 : 1);
+  const rawDigits = format.decimals ?? (Number.isInteger(cleaned) ? 0 : Math.abs(cleaned) >= 10 ? 0 : 1);
+  const decimals = Math.max(0, Math.min(20, Math.round(Number.isFinite(rawDigits) ? rawDigits : 0)));
   const text = cleaned.toFixed(decimals).replace(/\.0+$/, "");
   if (format.percent) return `${text}%`;
   return `${text}${format.suffix ?? ""}`;

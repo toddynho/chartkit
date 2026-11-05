@@ -46,7 +46,7 @@ function horizontalGrids(svg: string): string[] {
   return [...svg.matchAll(/<line ([^>]*?)\/>/g)]
     .map((match) => match[1] ?? "")
     .filter((attrs) => {
-      if (attrs.includes("data-ck-") || !attrs.includes("--ck-grid")) return false;
+      if ((attrs.includes("data-ck-") && !attrs.includes("data-ck-grid")) || !attrs.includes("--ck-grid")) return false;
       const y1 = attrs.match(/y1="([^"]+)"/)?.[1];
       const y2 = attrs.match(/y2="([^"]+)"/)?.[1];
       return Boolean(y1 && y1 === y2);

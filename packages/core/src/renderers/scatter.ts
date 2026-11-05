@@ -23,7 +23,7 @@ import {
 } from "../frame";
 import { activeScene, lineBuffers, rectBuffers, takeMark, type SceneMark } from "../canvas/sink";
 import { canvasWanted, SCATTER_CANVAS_AT } from "../render-mode";
-import { boxId, clipPath, closeChart, domainEnds, esc, font, isRecord, linear, logNice, logScale, logTicks, n, openChart, padExtent, pickTicks, readAxis, readAxisFormat, readInset, scaleClamp, scalePad, ch } from "../svg";
+import { boxId, clipPath, closeChart, domainEnds, esc, font, isRecord, linear, logNice, logScale, logTicks, n, openChart, padExtent, pickTicks, pointRadius, readAxis, readAxisFormat, readInset, scaleClamp, scalePad, ch } from "../svg";
 
 /** Scatter / bubble. encoding.x and encoding.y are quantitative; size and color are optional. */
 export function renderScatter(spec: Record<string, unknown>): string | null {
@@ -74,7 +74,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
   const yDomain = yLog ? logDomain(yValues, frame.encoding.y) : padDomain(resolveDomain(yValues, frame.encoding.y, wantsZero(frame.encoding.y, false)), frame.encoding.y);
   const sizes = points.map((point) => point.size).filter((value): value is number => value !== null);
   const sizeDomain: [number, number] = sizes.length ? [Math.min(...sizes), Math.max(...sizes)] : [0, 1];
-  const point = typeof frame.mark.pointSize === "number" ? frame.mark.pointSize : Math.max(6, frame.geometry.pointSize);
+  const point = pointRadius(frame.mark.pointSize, Math.max(6, frame.geometry.pointSize));
   const radius = sizeEnc?.range ?? [point, point];
   const opacity = typeof frame.mark.opacity === "number" ? frame.mark.opacity : ramp ? 1 : 0.75;
   const yMark = isRecord(frame.encoding.y) ? frame.encoding.y : undefined;
@@ -207,7 +207,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     const dash = grid === "dashed" ? ' stroke-dasharray="3 3"' : grid === "dotted" ? ' stroke-dasharray="1 3"' : "";
     for (const tick of yTicks) {
       const y = yScale(tick);
-      parts.push(`<line x1="${n(plot.left)}" y1="${n(y)}" x2="${n(plot.right)}" y2="${n(y)}" stroke="${cssVar("grid", frame.preset.grid)}"${dash} />`);
+      parts.push(`<line data-ck-grid="1" x1="${n(plot.left)}" y1="${n(y)}" x2="${n(plot.right)}" y2="${n(y)}" stroke="${cssVar("grid", frame.preset.grid)}"${dash} />`);
     }
   }
 
@@ -307,7 +307,7 @@ export function renderScatter(spec: Record<string, unknown>): string | null {
     const name = point.category ? `${point.category}, ` : "";
     const text = `${name}${xField ?? "x"} ${formatValue(point.x, xFormat, frame.locale)}, ${yField ?? "y"} ${formatValue(point.y, yFormat, frame.locale)}`;
     const called = point.category || yField || "value";
-    const extra = ` fill-opacity="${n(opacity)}" data-ck-name="${esc(called)}" data-ck-i="${point.index}" aria-label="${esc(text)}"`;
+    const extra = ` fill-opacity="${n(opacity)}" data-ck-mark="point" data-ck-name="${esc(called)}" data-ck-i="${point.index}" aria-label="${esc(text)}"`;
     const drawn = shape === "none" ? "" : marker(cx, cy, r, shape, color, hollow, extra);
     if (drawn) {
       const tag = drawn.startsWith("<rect") ? "rect" : drawn.startsWith("<path") ? "path" : "circle";
@@ -430,7 +430,7 @@ function renderDenseScatter(spec: Record<string, unknown>): string | null | unde
   const preset = withPalette(frame.preset, spec.mark);
   const color = colorEnc?.constant ? paint(colorEnc.constant, preset, 0) : paint(undefined, preset, 0);
   const opacity = typeof frame.mark.opacity === "number" ? frame.mark.opacity : 0.75;
-  const explicitR = typeof frame.mark.pointSize === "number";
+  const explicitR = typeof frame.mark.pointSize === "number" && Number.isFinite(frame.mark.pointSize) && frame.mark.pointSize >= 1;
   const baseR = explicitR ? (frame.mark.pointSize as number) : Math.max(6, frame.geometry.pointSize);
 
   let top = frame.title ? 38 : 16;
@@ -496,7 +496,7 @@ function renderDenseScatter(spec: Record<string, unknown>): string | null | unde
     const dash = grid === "dashed" ? ' stroke-dasharray="3 3"' : grid === "dotted" ? ' stroke-dasharray="1 3"' : "";
     for (const tick of yTicks) {
       const y = yScale(tick);
-      parts.push(`<line x1="${n(plot.left)}" y1="${n(y)}" x2="${n(plot.right)}" y2="${n(y)}" stroke="${cssVar("grid", frame.preset.grid)}"${dash} />`);
+      parts.push(`<line data-ck-grid="1" x1="${n(plot.left)}" y1="${n(y)}" x2="${n(plot.right)}" y2="${n(y)}" stroke="${cssVar("grid", frame.preset.grid)}"${dash} />`);
     }
   }
   const clip = boxId(frame.id, plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top);

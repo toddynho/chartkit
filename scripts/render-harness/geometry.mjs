@@ -106,7 +106,8 @@ function marksOutside(scene) {
 function legendOverlap(texts, scene) {
   const legend = texts.filter((item) => item.role === "legend");
   if (!legend.length) return [];
-  const box = union(legend.map((item) => item.bbox).concat(scene.swatches.map((item) => item.bbox)));
+  const near = scene.swatches.filter((shape) => legend.some((item) => swatchBeside(item, shape)));
+  const box = union(legend.map((item) => item.bbox).concat(near.map((item) => item.bbox)));
   if (!box) return [];
   const inside = scene.legendInside;
   const hits = [];
@@ -179,6 +180,7 @@ function emptyChart(scene, spec) {
   if (!hasData(spec)) return [];
   if (scene.marks.length > 0) return [];
   if (scene.texts.some((item) => item.fontSize >= 18)) return [];
+  if (pointsHidden(spec)) return [];
   return [
     {
       check: "empty-chart",
@@ -189,6 +191,16 @@ function emptyChart(scene, spec) {
       roles: [],
     },
   ];
+}
+
+/** pointShape none asks for no marker. A scatter then has no other mark, which is the spec. */
+function pointsHidden(spec) {
+  if (!spec || typeof spec !== "object") return false;
+  const mark = spec.mark;
+  if (mark && typeof mark === "object" && mark.pointShape === "none") return true;
+  const encoding = spec.encoding;
+  const y = encoding && typeof encoding === "object" ? encoding.y : undefined;
+  return Boolean(y && typeof y === "object" && !Array.isArray(y) && y.pointShape === "none");
 }
 
 function hasData(spec) {
@@ -219,11 +231,7 @@ function classify(texts, swatches) {
       item.role = "title";
       continue;
     }
-    const swatch = swatches.find((shape) => {
-      const gap = item.bbox.x - (shape.bbox.x + shape.bbox.w);
-      const vertically = item.bbox.y < shape.bbox.y + shape.bbox.h + 6 && item.bbox.y + item.bbox.h > shape.bbox.y - 6;
-      return gap >= -4 && gap <= 22 && vertically;
-    });
+    const swatch = swatches.find((shape) => swatchBeside(item, shape));
     if (swatch) {
       item.role = "legend";
       continue;
@@ -239,7 +247,7 @@ function classify(texts, swatches) {
 function parseScene(svg) {
   if (!/<svg\b/i.test(svg)) return null;
   let view = { x: 0, y: 0, w: 640, h: 360 };
-  const stack = [{ name: "#root", matrix: ident(), clip: null, legend: false, legendPos: "", defs: false, clipDef: "" }];
+  const stack = [{ name: "#root", matrix: ident(), clip: null, legend: false, legendPos: "", defs: false, clipDef: "", mark: "" }];
   const texts = [];
   const swatches = [];
   const marks = [];
@@ -282,6 +290,7 @@ function parseScene(svg) {
       legendPos: at["data-ck-legend"] || parent.legendPos,
       defs: parent.defs || name === "defs" || name === "clipPath" || name === "title" || name === "desc",
       clipDef: name === "clipPath" ? at.id || parent.clipDef : parent.clipDef,
+      mark: parent.mark || at["data-ck-mark"] || "",
       chunks: [],
     };
     if (at["clip-path"]) frame.clip = clips.get(urlId(at["clip-path"])) ?? parent.clip;
@@ -298,13 +307,15 @@ function parseScene(svg) {
       if (frame.defs) continue;
       if (!background && isBackdrop(box, view)) background = at.fill || background;
       else if (at.fill && !frame.legend) fills.push({ bbox: box, fill: at.fill });
-      if (box.w >= 6 && box.w <= 14 && box.h >= 6 && box.h <= 14) swatches.push({ bbox: box });
-      if (isMark(at) && !frame.legend) marks.push({ id: markId(at, marks.length), bbox: box, clipped: Boolean(frame.clip) });
+      if (!at["data-ck-mark"] && !frame.mark && !at["data-ck-headline"] && box.w >= 6 && box.w <= 14 && box.h >= 6 && box.h <= 14) swatches.push({ bbox: box });
+      if (isMark(at, frame.mark) && !frame.legend) marks.push({ id: markId(at, marks.length), bbox: box, clipped: Boolean(frame.clip) });
     } else if (!frame.defs && (name === "line" || name === "path" || name === "circle" || name === "ellipse" || name === "polygon" || name === "polyline")) {
       const box = shapeBox(name, at, frame.matrix);
       if (!box) continue;
-      if (name === "line" && (at["data-ck-axis"] || box.w > 40 || box.h > 40)) axes.push(expand(box, 1));
-      if (isMark(at) && !frame.legend) marks.push({ id: markId(at, marks.length), bbox: box, clipped: Boolean(frame.clip) });
+      const grid = at["data-ck-grid"] !== undefined || /^(?:yg|xg):/.test(at["data-ck-key"] || "") || at["data-ck-annotation"] !== undefined;
+      const marked = Boolean(at["data-ck-mark"] || frame.mark);
+      if (name === "line" && !grid && !marked && (at["data-ck-axis"] || box.w > 40 || box.h > 40)) axes.push(expand(box, 1));
+      if (isMark(at, frame.mark) && !frame.legend) marks.push({ id: markId(at, marks.length), bbox: box, clipped: Boolean(frame.clip) });
     }
   }
   const plot = largestClip(clips, view);
@@ -358,10 +369,16 @@ function finishText(frame, index) {
   };
 }
 
-function isMark(at) {
-  if (at["data-ck-mark"]) return true;
+function isMark(at, inherited) {
+  if (at["data-ck-mark"] || inherited) return true;
   const key = at["data-ck-key"] || "";
   return /^(l:|a:|b:|p:)/.test(key);
+}
+
+function swatchBeside(item, shape) {
+  const gap = item.bbox.x - (shape.bbox.x + shape.bbox.w);
+  const vertically = item.bbox.y < shape.bbox.y + shape.bbox.h + 6 && item.bbox.y + item.bbox.h > shape.bbox.y - 6;
+  return gap >= -4 && gap <= 22 && vertically;
 }
 
 function markId(at, index) {

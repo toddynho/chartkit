@@ -1,6 +1,6 @@
 import { seriesPoints } from "../../annotations";
 import { axisTitleMarks, categoryX, chooseTicks, lockDomain, placedNotes } from "../../chrome";
-import { column, fieldOf } from "../../frame";
+import { column, fieldOf, knownField, numericField } from "../../frame";
 import { cssVar } from "../../theme";
 import { n } from "../../svg";
 import {
@@ -30,7 +30,7 @@ export function renderBoxplot(spec: Record<string, unknown>): string | null {
   if (!view) return null;
   const { frame, parts, table } = view;
   const xField = fieldOf(frame.encoding.x);
-  const yField = fieldOf(frame.encoding.y);
+  const yField = knownField(frame.encoding.y, table.fields, ["y", "value"]) ?? numericField(table, [xField ?? ""]);
   if (!yField) return null;
   const groups = new Map<string, number[]>();
   const xs = column(table, xField);

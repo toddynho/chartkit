@@ -1,9 +1,9 @@
 import { explicitGrid, gridLines, majorTicks, spine, turned } from "../../axis-ink";
 import { chooseTicks, labelStep, lockDomain, minorTickMarks, placedAxisTitles } from "../../chrome";
 import { legendLabel, legendMarkup, legendShownValue } from "../../legend";
-import { axisOn, column, fieldOf } from "../../frame";
+import { axisOn, column, fieldOf, knownField, numericField, textField } from "../../frame";
 import { cssVar, paint } from "../../theme";
-import { ch, hash, isRecord, n, readAxis } from "../../svg";
+import { ch, hash, isRecord, n, pointRadius, readAxis } from "../../svg";
 import {
   axisLine,
   domainTicks,
@@ -47,8 +47,10 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
   const vertical = frame.mark.orientation === "vertical";
   const groupChannel = vertical ? frame.encoding.x : frame.encoding.y;
   const valueChannel = vertical ? frame.encoding.y : frame.encoding.x;
-  const groupField = fieldOf(groupChannel);
-  const valueField = fieldOf(valueChannel);
+  let valueField = knownField(valueChannel, table.fields, vertical ? ["y", "value"] : ["x", "value"]);
+  if (!valueField) valueField = numericField(table, []);
+  let groupField = knownField(groupChannel, table.fields, vertical ? ["x", "group"] : ["y", "group"]);
+  if (!groupField || groupField === valueField) groupField = textField(table, [valueField ?? ""]);
   if (!groupField || !valueField) return null;
   const labelField = fieldOf(frame.encoding.label);
   const color = readColor(frame.encoding.color);
@@ -95,7 +97,7 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
   const v1 = Math.max(locked[1], domain[domain.length - 1] ?? locked[1]);
   const valueTicks = chooseTicks(spec, vertical ? "y" : "x", v0, v1, domainTicks(v0, v1));
   const shown = valueFormat(frame, spec, valueChannel, vertical ? "y" : "x");
-  const radius = typeof frame.mark.pointSize === "number" ? frame.mark.pointSize : Math.max(3.5, frame.geometry.pointSize);
+  const radius = pointRadius(frame.mark.pointSize, Math.max(3.5, frame.geometry.pointSize));
   const compare = readCompare(spec);
   const nameWidth = Math.max(...rows.map((row) => row.name.length)) * 7.2;
   const left = vertical ? 56 : Math.max(72, Math.ceil(nameWidth) + 18);
@@ -129,7 +131,7 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
     const along = vertical
       ? `x1="${n(center)}" y1="${n(box.top)}" x2="${n(center)}" y2="${n(box.bottom)}"`
       : `x1="${n(box.left)}" y1="${n(center)}" x2="${n(box.right)}" y2="${n(center)}"`;
-    parts.push(`<line ${along} stroke="${cssVar("grid", frame.preset.grid)}" stroke-width="2" stroke-linecap="round" />`);
+    parts.push(`<line data-ck-grid="1" ${along} stroke="${cssVar("grid", frame.preset.grid)}" stroke-width="2" stroke-linecap="round" />`);
     if (drawBand && row.dots.length >= 3) {
       const ends = bandEnds(row, band);
       parts.push(bandMark(vertical, center, at(ends[0]), at(ends[1]), frame, row.name));
@@ -173,7 +175,7 @@ export function renderStrip(spec: Record<string, unknown>): string | null {
         "circle",
         "point",
         label,
-        `tabindex="0" cx="${n(cx)}" cy="${n(cy)}" r="${n(radius)}" fill="${color}" stroke="${cssVar("background", frame.preset.background)}" stroke-width="1.5" data-ck-group="${escapeAttr(item.row.name)}" data-ck-value="${item.dot.value}"`,
+        `tabindex="0" cx="${n(cx)}" cy="${n(cy)}" r="${n(radius)}" fill="${color}" stroke="${cssVar("background", frame.preset.background)}" stroke-width="1.5" data-ck-group="${escapeAttr(item.row.name)}"${Number.isFinite(item.dot.value) ? ` data-ck-value="${item.dot.value}"` : ""}`,
         item.dot.label || item.row.name,
         ordered.indexOf(item),
       ),
@@ -400,8 +402,8 @@ function valueGrid(vertical: boolean, box: { left: number; top: number; right: n
   return ticks
     .map((value) => {
       const pos = at(value);
-      if (vertical) return `<line x1="${n(box.left)}" y1="${n(pos)}" x2="${n(box.right)}" y2="${n(pos)}" stroke="${cssVar("grid", grid)}" stroke-dasharray="2 4" />`;
-      return `<line x1="${n(pos)}" y1="${n(box.top)}" x2="${n(pos)}" y2="${n(box.bottom)}" stroke="${cssVar("grid", grid)}" stroke-dasharray="2 4" />`;
+      if (vertical) return `<line data-ck-grid="1" x1="${n(box.left)}" y1="${n(pos)}" x2="${n(box.right)}" y2="${n(pos)}" stroke="${cssVar("grid", grid)}" stroke-dasharray="2 4" />`;
+      return `<line data-ck-grid="1" x1="${n(pos)}" y1="${n(box.top)}" x2="${n(pos)}" y2="${n(box.bottom)}" stroke="${cssVar("grid", grid)}" stroke-dasharray="2 4" />`;
     })
     .join("");
 }

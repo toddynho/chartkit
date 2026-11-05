@@ -9,6 +9,7 @@ import {
   channelFormat,
   column,
   fieldOf,
+  knownField,
   readColor,
   readFrame,
   readTable,
@@ -115,7 +116,7 @@ function simpleArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
     const color = sliceFill(i);
     const label = `${slice.label}: ${plainPercent(slice.value, total)}`;
     parts.push(
-      `<path d="${slicePath(cx, cy, outer, inner, start, end)}" fill="${color}" data-ck-name="${esc(slice.label)}" data-ck-i="${i}" data-ck-key="${esc(`s:${keys[i] ?? slice.label}`)}" data-ck-value="${slice.value}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`,
+      `<path d="${slicePath(cx, cy, outer, inner, start, end)}" fill="${color}" data-ck-mark="slice" data-ck-name="${esc(slice.label)}" data-ck-i="${i}" data-ck-key="${esc(`s:${keys[i] ?? slice.label}`)}" data-ck-value="${Number.isFinite(slice.value) ? slice.value : ""}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`,
     );
   }
   if (inner > 8) {
@@ -145,8 +146,8 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
   if (!table) return null;
   const frame = readFrame(spec, { width: 420, height: 280 });
   const preset = withPalette(frame.preset, frame.mark);
-  const labelField = fieldOf(frame.encoding.x);
-  const valueField = fieldOf(frame.encoding.y);
+  const labelField = knownField(frame.encoding.x, table.fields, []) ?? fieldOf(frame.encoding.x);
+  const valueField = knownField(frame.encoding.y, table.fields, ["value", "y"]);
   const labels = column(table, labelField);
   const values = column(table, valueField).map(asNumber);
   const kept: { label: string; value: number; source: number }[] = [];
@@ -336,7 +337,7 @@ function renderArc(spec: Record<string, unknown>, kind: "pie" | "donut"): string
         ? ` stroke="${seamPaint(preset)}" stroke-width="3" stroke-linejoin="round"`
         : "";
     parts.push(
-      `<path d="${path}" fill="${arc.color}" fill-rule="evenodd"${radius} data-ck-name="${esc(arc.label)}" data-ck-i="${index}" data-ck-key="${esc(`s:${sliceIds[index] ?? arc.label}`)}" data-ck-value="${arc.value}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`,
+      `<path d="${path}" fill="${arc.color}" fill-rule="evenodd"${radius} data-ck-mark="slice" data-ck-name="${esc(arc.label)}" data-ck-i="${index}" data-ck-key="${esc(`s:${sliceIds[index] ?? arc.label}`)}" data-ck-value="${Number.isFinite(arc.value) ? arc.value : ""}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`,
     );
     if (!showLabels) continue;
     const body = frame.mark.labelFormat !== undefined

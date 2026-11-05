@@ -21,14 +21,14 @@ test("legend text overlapping a date label is a layout finding", () => {
   assert.equal(legend?.signature, "legend×tick");
 });
 
-test("gantt with no title reports the legend on the date labels", async () => {
+test("gantt with no title keeps the legend off the date labels", async () => {
   const runtime = await loadRuntime();
   const spec = JSON.parse(readFileSync(join(examplesDir, "24-gantt.json"), "utf8"));
   delete spec.title;
   const findings = checkSvg(runtime.render(spec), spec);
   const overlap = findings.filter((item) => item.check === "text-overlap" && item.roles.includes("legend") && item.roles.includes("tick"));
-  assert.ok(overlap.length >= 1);
-  assert.ok(findings.some((item) => item.check === "legend-overlap" && item.signature === "legend×tick"));
+  assert.equal(overlap.length, 0);
+  assert.equal(findings.some((item) => item.check === "legend-overlap"), false);
 });
 
 test("not-yet options are recorded and not rendered", async () => {
@@ -57,6 +57,6 @@ test("fast sweep has no new findings and no changed renders", async () => {
   assert.equal(novel.length, 0, novel.slice(0, 8).map((item) => `${item.type} ${item.option} ${item.check} ${item.detail}`).join("\n"));
   assert.equal(result.snapshot.changed.length, 0);
   assert.equal(result.snapshot.missing.length, 0);
-  const gantt = result.findings.filter((item) => item.type === "gantt" && item.example === "launch-gantt" && item.check === "text-overlap" && item.roles.includes("legend"));
-  assert.ok(gantt.length >= 1, "fast sweep should include the untitled gantt legend overlap");
+  const gantt = result.findings.filter((item) => item.type === "gantt" && item.example === "launch-gantt" && (item.check === "legend-overlap" || (item.check === "text-overlap" && item.roles?.includes("legend") && item.roles?.includes("tick"))));
+  assert.equal(gantt.length, 0);
 });
