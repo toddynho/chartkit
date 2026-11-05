@@ -627,7 +627,7 @@ function xGrid(spec: Record<string, unknown>, frame: { preset: { grid: string } 
   if (grid !== true && grid !== "solid" && grid !== "dashed" && grid !== "dotted") return "";
   const dash = grid === "dashed" ? ' stroke-dasharray="3 3"' : grid === "dotted" ? ' stroke-dasharray="1 3"' : "";
   return labels
-    .map((_, index) => `<line x1="${n(xAt(index))}" y1="${n(box.top)}" x2="${n(xAt(index))}" y2="${n(box.bottom)}" stroke="${cssVar("grid", frame.preset.grid)}"${dash} />`)
+    .map((_, index) => `<line data-ck-grid="1" x1="${n(xAt(index))}" y1="${n(box.top)}" x2="${n(xAt(index))}" y2="${n(box.bottom)}" stroke="${cssVar("grid", frame.preset.grid)}"${dash} />`)
     .join("");
 }
 

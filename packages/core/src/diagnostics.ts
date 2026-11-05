@@ -22,6 +22,7 @@ export type Severity = "error" | "warning";
  * CK3085 is a theme.brand colour that is not a hex value.
  * CK3086 is theme.tokens.fontFamily when it is not a CSS font-family.
  * Strip uses CK3087–CK3094.
+ * Render limits use CK3125–CK3131: decimals, currency, locale, size, calendar weeks, padding, and marker radius.
  */
 export interface Diagnostic {
   code: string;

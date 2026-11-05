@@ -26,7 +26,7 @@ function renderOne(
 ): string {
   const start = typeof frame.mark.startAngle === "number" ? frame.mark.startAngle : 0;
   const end = typeof frame.mark.endAngle === "number" ? frame.mark.endAngle : 360;
-  const stroke = typeof frame.mark.strokeWidth === "number" ? frame.mark.strokeWidth : 8;
+  const stroke = ringStroke(frame.mark.strokeWidth, Math.min(frame.width, frame.height));
   const cap = frame.mark.linecap === "butt" || frame.mark.linecap === "square" ? frame.mark.linecap : "round";
   const span = end - start || 360;
   const ratio = clamp01((metric.value - metric.min) / (metric.max - metric.min || 1));
@@ -47,7 +47,7 @@ function renderOne(
   );
   if (ratio > 0) {
     parts.push(
-      `<path d="${arcStroke(cx, cy, radius, start, start + span * ratio)}" fill="none" stroke="${color}" stroke-width="${n(stroke)}" stroke-linecap="${cap}" />`,
+      `<path data-ck-mark="progress" d="${arcStroke(cx, cy, radius, start, start + span * ratio)}" fill="none" stroke="${color}" stroke-width="${n(stroke)}" stroke-linecap="${cap}" />`,
     );
   }
   parts.push(
@@ -75,7 +75,7 @@ function renderRings(
   const legendH = labeled ? 16 + rings.length * 14 : 0;
   const box = Math.max(48, Math.min(frame.width, frame.height - legendH) - 12);
   const gap = 4;
-  const fitted = typeof frame.mark.strokeWidth === "number" ? frame.mark.strokeWidth : Math.min(16, Math.max(7, (box * 0.34) / rings.length));
+  const fitted = typeof frame.mark.strokeWidth === "number" ? ringStroke(frame.mark.strokeWidth, box) : Math.min(16, Math.max(7, (box * 0.34) / rings.length));
   const stroke = Math.max(4, fitted);
   const outer = box / 2 - stroke / 2;
   const cx = frame.width / 2;
@@ -135,6 +135,13 @@ function readRings(mark: Record<string, unknown>): Ring[] | null {
 
 function shown(ring: { value: number }): string {
   return Number.isInteger(ring.value) ? String(ring.value) : String(Math.round(ring.value * 10) / 10);
+}
+
+/** A stroke wider than the ring erases it. Keep a visible band. */
+function ringStroke(value: unknown, box: number): number {
+  const cap = Math.max(4, box * 0.22);
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) return Math.min(8, cap);
+  return Math.min(value, cap);
 }
 
 function clamp01(value: number): number {

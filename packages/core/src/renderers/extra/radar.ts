@@ -1,4 +1,4 @@
-import { legendLabel, legendMarkup, legendShownValue } from "../../legend";
+import { legendLabel, legendMarkup, legendShownValue, legendSpace, paintLegend, readLegend } from "../../legend";
 import { column, fieldOf } from "../../frame";
 import { cssVar } from "../../theme";
 import { domainEnds, n, polar, ch } from "../../svg";
@@ -46,9 +46,20 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
 
   const capped = spokeMax(frame.encoding.y);
   const max = capped ?? Math.max(1, ...series.flatMap((item) => item.values));
+  const legendBox = frame.legend !== false && series.length > 1 ? readLegend(spec) : null;
+  const legendItems = series.map((item, index) => ({
+    name: item.name,
+    color: fill(frame, index),
+    value: legendShownValue(spec, item.values.at(-1)),
+  }));
+  const legendBand = legendBox?.position === "inside" ? legendSpace({ ...legendBox, position: "top" }, legendItems, frame.width - 32).band + 4 : 0;
   const cx = frame.width / 2;
-  const cy = frame.height / 2 + (frame.title ? 8 : 0);
-  const radius = Math.min(frame.width, frame.height) * 0.32;
+  let cy = frame.height / 2 + (frame.title ? 8 : 0);
+  let radius = Math.min(frame.width, frame.height) * 0.32;
+  if (legendBand > 0) {
+    cy += legendBand / 2;
+    radius = Math.min(radius, (frame.height - legendBand) * 0.32);
+  }
   const rings = 4;
   const at = (index: number, value: number) => polar(cx, cy, (radius * Math.max(0, value)) / max, (360 / axes.length) * index);
   const grid = cssVar("grid", frame.preset.grid);
@@ -74,11 +85,18 @@ export function renderRadar(spec: Record<string, unknown>): string | null {
     for (const point of points) parts.push(`<circle cx="${n(point.x)}" cy="${n(point.y)}" r="3" fill="${color}" />`);
   });
   if (frame.legend !== false && series.length > 1) {
-    const items = series.map((item, index) => ({
-      name: item.name,
-      color: fill(frame, index),
-      value: legendShownValue(spec, item.values.at(-1)),
-    }));
+    const items = legendItems;
+    if (legendBox?.position === "inside") {
+      parts.push(
+        paintLegend({ ...legendBox, position: "top" }, items, {
+          plot: { left: 16, top: 8, right: frame.width - 16, bottom: frame.height - 28 },
+          width: frame.width,
+          height: frame.height,
+          preset: frame.preset,
+        }),
+      );
+      return view.done();
+    }
     let x = 16;
     const y = frame.height - 18;
     const fallback = series

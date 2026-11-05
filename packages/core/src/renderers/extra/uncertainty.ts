@@ -2,9 +2,9 @@ import { seriesPoints } from "../../annotations";
 import { readTimeScale } from "../../time-x";
 import { CHROME_TOP, axisTitleMarks, categoryX, chooseTicks, lockDomain, placedNotes } from "../../chrome";
 import type { DataTable } from "../../data";
-import { fieldOf } from "../../frame";
+import { fieldOf, knownField, numericField } from "../../frame";
 import { cssVar, paint } from "../../theme";
-import { esc, font, isRecord, n, ch } from "../../svg";
+import { esc, font, isRecord, n, pointRadius, ch } from "../../svg";
 import { dataSampling, readSamplingMode, samplingThreshold } from "../../sampling";
 import { bandPath, denseBand, denseLine, intervalLabel, nestedOpacity } from "../../range-band";
 import { axisLine, clip, domainTicks, fmt, gapOf, hGrid, num, openMark, plotBox, scaleOf, str, text, valueFormat, viewOf, xLabels, yLabels } from "./plot";
@@ -107,8 +107,8 @@ function readBands(encoding: Record<string, unknown>, table: DataTable, preset: 
   if (Array.isArray(y)) y.forEach(take);
   else if (y !== undefined) take(y);
   const line = lines[0] ?? null;
-  const low = fieldOf(encoding.low);
-  const high = fieldOf(encoding.high);
+  const low = knownField(encoding.low, table.fields, ["low", "lo", "min"]);
+  const high = knownField(encoding.high, table.fields, ["high", "hi", "max"]);
   if (low && high && bands.length === 0) {
     bands.push({
       name: low && high ? `${low}–${high}` : "range",
@@ -321,11 +321,11 @@ export function renderBarRange(spec: Record<string, unknown>): string | null {
   const view = viewOf(spec, "bar-range", 640, 320);
   if (!view) return null;
   const { frame, parts, table } = view;
-  const low = fieldOf(frame.encoding.low);
-  const high = fieldOf(frame.encoding.high);
+  const low = knownField(frame.encoding.low, table.fields, ["low", "lo", "min"]);
+  const high = knownField(frame.encoding.high, table.fields, ["high", "hi", "max"]);
   const y = frame.encoding.y;
-  const loField = low || (isRecord(y) && typeof y.lo === "string" ? y.lo : undefined);
-  const hiField = high || (isRecord(y) && typeof y.hi === "string" ? y.hi : undefined);
+  const loField = low || (isRecord(y) && typeof y.lo === "string" && table.fields.includes(y.lo) ? y.lo : undefined);
+  const hiField = high || (isRecord(y) && typeof y.hi === "string" && table.fields.includes(y.hi) ? y.hi : undefined);
   if (!loField || !hiField) return null;
   const lo = num(table, loField);
   const hi = num(table, hiField);
@@ -375,11 +375,11 @@ export function renderErrorbar(spec: Record<string, unknown>): string | null {
   const view = viewOf(spec, "errorbar", 640, 320);
   if (!view) return null;
   const { frame, parts, table } = view;
-  const yField = fieldOf(frame.encoding.y);
+  const yField = knownField(frame.encoding.y, table.fields, ["y", "value"]) ?? numericField(table, [fieldOf(frame.encoding.x) ?? ""]);
   if (!yField) return null;
   const y = num(table, yField);
-  const low = fieldOf(frame.encoding.low);
-  const high = fieldOf(frame.encoding.high);
+  const low = knownField(frame.encoding.low, table.fields, ["low", "lo", "min"]);
+  const high = knownField(frame.encoding.high, table.fields, ["high", "hi", "max"]);
   const yObj = frame.encoding.y;
   const errField = fieldOf(frame.encoding.error) || (isRecord(yObj) && typeof yObj.error === "string" ? yObj.error : undefined);
   let lo: (number | null)[];
@@ -404,7 +404,7 @@ export function renderErrorbar(spec: Record<string, unknown>): string | null {
   const xAtIndex = (index: number) => box.left + slot * index + slot / 2;
   const barW = Math.max(8, slot * (1 - gapOf(frame, 0.34)));
   const color = paint(isRecord(frame.encoding.y) && typeof frame.encoding.y.color === "string" ? frame.encoding.y.color : undefined, frame.preset, 0);
-  const radius = typeof frame.mark.pointSize === "number" ? frame.mark.pointSize : 4.5;
+  const radius = pointRadius(frame.mark.pointSize, 4.5);
   const cap = Math.max(8, radius + 3.5);
   const format = valueFormat(frame, spec, frame.encoding.y);
   const notes = placedNotes(spec, frame, box, categoryX(labels, xAtIndex), yAt, [{ name: yField, axis: "y", pts: seriesPoints(null, y) }], labels);

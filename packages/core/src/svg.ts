@@ -707,13 +707,62 @@ export interface Inset {
   l?: number;
 }
 
-export function readInset(spec: Record<string, unknown>): Inset {
+const MIN_PLOT = 48;
+
+function spanOf(value: unknown, fallback: number): number {
+  const n = typeof value === "number" ? value : typeof value === "string" && value.trim() !== "" ? Number(value) : NaN;
+  return Number.isFinite(n) && n >= 1 ? n : fallback;
+}
+
+function chartSpans(spec: Record<string, unknown>): { width: number; height: number } {
+  const size = isRecord(spec.size) ? spec.size : {};
+  return { width: spanOf(size.width, spanOf(spec.width, 640)), height: spanOf(size.height, spanOf(spec.height, 360)) };
+}
+
+function rawInset(spec: Record<string, unknown>): Inset {
   const size = isRecord(spec.size) ? spec.size : undefined;
   const pad = size?.padding;
   if (typeof pad === "number") return { t: pad, r: pad, b: pad, l: pad };
   if (!isRecord(pad)) return {};
   const side = (key: string) => (typeof pad[key] === "number" ? (pad[key] as number) : undefined);
   return { t: side("top"), r: side("right"), b: side("bottom"), l: side("left") };
+}
+
+function fitPair(a: number | undefined, b: number | undefined, room: number): [number | undefined, number | undefined] {
+  const side = (value: number | undefined) => (value !== undefined && Number.isFinite(value) ? Math.max(0, value) : undefined);
+  let left = side(a);
+  let right = side(b);
+  if (left !== undefined && left > room) left = undefined;
+  if (right !== undefined && right > room) right = undefined;
+  if ((left ?? 0) + (right ?? 0) <= room) return [left, right];
+  return [undefined, undefined];
+}
+
+export function readInset(spec: Record<string, unknown>): Inset {
+  const raw = rawInset(spec);
+  const { width, height } = chartSpans(spec);
+  const [t, b] = fitPair(raw.t, raw.b, Math.max(0, height - MIN_PLOT));
+  const [l, r] = fitPair(raw.l, raw.r, Math.max(0, width - MIN_PLOT));
+  return { t, r, b, l };
+}
+
+/** Set when padding would erase the plot. Render keeps at least 48px of plot. */
+export function paddingOverflow(spec: Record<string, unknown>): { path: string; value: Record<string, number> } | null {
+  const raw = rawInset(spec);
+  const fitted = readInset(spec);
+  const names = { t: "top", r: "right", b: "bottom", l: "left" } as const;
+  const value: Record<string, number> = {};
+  let changed = false;
+  for (const key of ["t", "r", "b", "l"] as const) {
+    if (fitted[key] !== undefined) value[names[key]] = fitted[key] as number;
+    if (raw[key] !== fitted[key]) changed = true;
+  }
+  return changed ? { path: "/size/padding", value } : null;
+}
+
+/** A marker radius below 1px draws nothing. Callers fall back to the chart default. */
+export function pointRadius(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 1 ? value : fallback;
 }
 
 /** Client-only options, recorded on the SVG so a static render does not drop them. */

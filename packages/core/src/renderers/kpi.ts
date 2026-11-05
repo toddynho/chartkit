@@ -96,7 +96,7 @@ function sparkPath(
   }));
   const line = pts.map((point, index) => `${index === 0 ? "M" : "L"} ${n(point.x)} ${n(point.y)}`).join(" ");
   const area = `${line} L ${n(pts[pts.length - 1].x)} ${n(y + h)} L ${n(pts[0].x)} ${n(y + h)} Z`;
-  return `<path d="${area}" fill="${color}" fill-opacity="${fillPaint}" stroke="none" /><path d="${line}" fill="none" stroke="${lineStroke(color, stroke, lines)}" stroke-width="${strokeAttr}" stroke-linejoin="round" stroke-linecap="round" />`;
+  return `<path d="${area}" fill="${color}" fill-opacity="${fillPaint}" stroke="none" /><path data-ck-mark="spark" d="${line}" fill="none" stroke="${lineStroke(color, stroke, lines)}" stroke-width="${strokeAttr}" stroke-linejoin="round" stroke-linecap="round" />`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

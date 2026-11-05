@@ -8,8 +8,8 @@ import { namedZone } from "./timezone";
 import { transformIssues } from "./transform";
 import { foreignHierarchy, readHierarchy } from "./hierarchy";
 import { CANVAS_AT, CANVAS_TYPES, pointCount, readRender } from "./render-mode";
-import { parseSpecifier } from "./format";
-import { domainEnds } from "./svg";
+import { currencyCodeOk, localeTagOk, parseSpecifier } from "./format";
+import { domainEnds, paddingOverflow } from "./svg";
 import { fontFamilyCheck } from "./font";
 import { gapChecks } from "./gaps-checks";
 import { canonicalHex } from "./themes/hex";
@@ -74,6 +74,7 @@ export function semanticChecks(spec: unknown, diagnostics: Diagnostic[]): void {
   gapChecks(spec, diagnostics);
   polarChecks(spec, diagnostics);
   warnGridWeeks(spec, diagnostics);
+  warnRenderLimits(spec, diagnostics);
   warnUnbuilt(spec, diagnostics);
   warnVisual(spec, diagnostics);
   checkAnnotations(spec, diagnostics);
@@ -955,6 +956,125 @@ function warnUnbuilt(spec: Record<string, unknown>, diagnostics: Diagnostic[]): 
             ? typeof value === "string"
             : typeof value === "number";
     if (hit) flag(diagnostics, "/" + path, why);
+  }
+}
+
+/**
+ * Values render will not honour. The chart falls back; the diagnostic says so.
+ * Decimals are CK3125. Currency is CK3126. Locale is CK3127.
+ * A non-positive size is CK3128. Calendar weeks are CK3129.
+ * Padding that erases the plot is CK3130. A marker radius below 1 is CK3131.
+ */
+function warnRenderLimits(spec: Record<string, unknown>, diagnostics: Diagnostic[]): void {
+  if (typeof spec.locale === "string" && !localeTagOk(spec.locale)) {
+    diagnostics.push({
+      code: "CK3127",
+      severity: "warning",
+      message: "locale is not a valid language tag",
+      path: "/locale",
+      hint: "render uses en-US",
+      fix: [{ op: "remove", path: "/locale" }],
+    });
+  }
+  const size = isRecord(spec.size) ? spec.size : undefined;
+  if (size) {
+    for (const key of ["width", "height"] as const) {
+      const value = size[key];
+      if (typeof value === "number" && (!Number.isFinite(value) || value < 1)) {
+        diagnostics.push({
+          code: "CK3128",
+          severity: "warning",
+          message: `size.${key} must be at least 1`,
+          path: `/size/${key}`,
+          hint: "render keeps the chart's default size",
+          fix: [{ op: "remove", path: `/size/${key}` }],
+        });
+      }
+    }
+  }
+  if (isRecord(spec.mark) && typeof spec.mark.weeks === "number" && (!Number.isFinite(spec.mark.weeks) || spec.mark.weeks < 1 || spec.mark.weeks > 104)) {
+    const weeks = Number.isFinite(spec.mark.weeks) ? Math.min(104, Math.max(1, Math.round(spec.mark.weeks))) : 52;
+    diagnostics.push({
+      code: "CK3129",
+      severity: "warning",
+      message: "mark.weeks must be from 1 to 104",
+      path: "/mark/weeks",
+      hint: "render uses a week count in that range",
+      fix: [{ op: "replace", path: "/mark/weeks", value: weeks }],
+    });
+  }
+  const padding = paddingOverflow(spec);
+  if (padding) {
+    diagnostics.push({
+      code: "CK3130",
+      severity: "warning",
+      message: "size.padding leaves no room for the plot",
+      path: padding.path,
+      hint: "render keeps a plot of at least 48px",
+      fix: Object.keys(padding.value).length
+        ? [{ op: "replace", path: padding.path, value: padding.value }]
+        : [{ op: "remove", path: padding.path }],
+    });
+  }
+  if (isRecord(spec.mark)) warnPointSize(spec.mark, "/mark", diagnostics);
+  if (isRecord(spec.encoding)) warnPointSize(spec.encoding, "/encoding", diagnostics);
+  for (const root of ["encoding", "axes", "mark", "metric", "tooltip"] as const) {
+    if (isRecord(spec[root])) walkFormat(spec[root], `/${root}`, diagnostics);
+  }
+}
+
+function warnPointSize(node: Record<string, unknown>, path: string, diagnostics: Diagnostic[]): void {
+  if (typeof node.pointSize === "number" && (!Number.isFinite(node.pointSize) || node.pointSize < 1)) {
+    diagnostics.push({
+      code: "CK3131",
+      severity: "warning",
+      message: "pointSize must be at least 1",
+      path: `${path}/pointSize`,
+      hint: "render uses the chart's default marker size",
+      fix: [{ op: "remove", path: `${path}/pointSize` }],
+    });
+  }
+  for (const [key, value] of Object.entries(node)) {
+    if (isRecord(value)) warnPointSize(value, `${path}/${key}`, diagnostics);
+    else if (Array.isArray(value)) {
+      for (let index = 0; index < value.length; index++) {
+        if (isRecord(value[index])) warnPointSize(value[index] as Record<string, unknown>, `${path}/${key}/${index}`, diagnostics);
+      }
+    }
+  }
+}
+
+function walkFormat(node: Record<string, unknown>, path: string, diagnostics: Diagnostic[]): void {
+  if (typeof node.decimals === "number" && (!Number.isFinite(node.decimals) || node.decimals < 0 || node.decimals > 20)) {
+    const digits = Number.isFinite(node.decimals) ? Math.max(0, Math.min(20, Math.round(node.decimals))) : 0;
+    diagnostics.push({
+      code: "CK3125",
+      severity: "warning",
+      message: "format decimals must be from 0 to 20",
+      path: `${path}/decimals`,
+      hint: "render uses a value in that range",
+      fix: [{ op: "replace", path: `${path}/decimals`, value: digits }],
+    });
+  }
+  if (typeof node.currency === "string" && !currencyCodeOk(node.currency)) {
+    diagnostics.push({
+      code: "CK3126",
+      severity: "warning",
+      message: "currency must be a 3-letter ISO code",
+      path: `${path}/currency`,
+      hint: "render uses USD",
+      fix: [{ op: "replace", path: `${path}/currency`, value: "USD" }],
+    });
+  }
+  for (const key of Object.keys(node)) {
+    const child = node[key];
+    if (isRecord(child)) walkFormat(child, `${path}/${key}`, diagnostics);
+    else if (Array.isArray(child)) {
+      for (let index = 0; index < child.length; index++) {
+        const item = child[index];
+        if (isRecord(item)) walkFormat(item, `${path}/${key}/${index}`, diagnostics);
+      }
+    }
   }
 }
 

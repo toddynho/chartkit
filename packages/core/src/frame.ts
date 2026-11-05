@@ -4,6 +4,16 @@ import type { PresetGeometry, PresetTokens } from "./theme";
 import { resolveGeometry, resolvePreset } from "./theme";
 import { hash, isRecord, longDesc, niceDomain, readInset, type Headline, type Inset } from "./svg";
 
+function localeTagOk(locale: string): boolean {
+  const text = locale.trim();
+  if (!text || text.length > 35) return false;
+  try {
+    return Intl.NumberFormat.supportedLocalesOf(text).length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export type { Headline };
 
 export interface Frame {
@@ -50,18 +60,25 @@ export interface ChartSize {
  * minHeight raises the height and never shrinks it.
  * An explicit height wins over the ratio.
  */
+function positiveSize(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value >= 1 ? value : undefined;
+}
+
 export function chartSize(spec: Record<string, unknown>, fallback: { width: number; height: number }): ChartSize {
   const size = isRecord(spec.size) ? spec.size : {};
-  const widthFixed = typeof size.width === "number";
-  const heightFixed = typeof size.height === "number";
-  const width = widthFixed ? (size.width as number) : fallback.width;
+  const widthNum = positiveSize(size.width);
+  const heightNum = positiveSize(size.height);
+  const widthFixed = widthNum !== undefined;
+  const heightFixed = heightNum !== undefined;
+  const width = widthFixed ? widthNum : fallback.width;
   const responsive = size.width === undefined || size.width === "auto";
   let height = fallback.height;
-  if (heightFixed) height = size.height as number;
+  if (heightFixed) height = heightNum;
   else if (size.height === "auto" && typeof size.aspectRatio === "number" && size.aspectRatio > 0) {
     height = Math.max(1, Math.round(width / size.aspectRatio));
   }
-  if (typeof size.minHeight === "number" && size.minHeight > height) height = size.minHeight;
+  const minHeight = positiveSize(size.minHeight);
+  if (minHeight !== undefined && minHeight > height) height = minHeight;
   return { width, height, responsive, heightFixed, widthFixed, pad: readInset(spec) };
 }
 
@@ -78,7 +95,7 @@ export function readFrame(
     alt,
     title: typeof spec.title === "string" ? spec.title : undefined,
     subtitle: typeof spec.subtitle === "string" ? spec.subtitle : undefined,
-    locale: typeof spec.locale === "string" ? spec.locale : "en-US",
+    locale: typeof spec.locale === "string" && localeTagOk(spec.locale) ? spec.locale.trim() : "en-US",
     width: box.width,
     height: box.height,
     responsive: box.responsive,
@@ -186,6 +203,42 @@ export function fieldOf(value: unknown): string | undefined {
   if (typeof value === "string") return value;
   if (Array.isArray(value)) return fieldOf(value[0]);
   if (isRecord(value) && typeof value.field === "string") return value.field;
+  return undefined;
+}
+
+/**
+ * The named field when that column exists.
+ * Otherwise the first fallback column that exists.
+ * A missing or unknown name does not invent NaNs; render keeps a real column.
+ */
+export function knownField(value: unknown, fields: readonly string[], fallbacks: readonly string[] = []): string | undefined {
+  const named = fieldOf(value);
+  if (named && fields.includes(named)) return named;
+  for (const name of fallbacks) if (fields.includes(name)) return name;
+  return undefined;
+}
+
+/** First column that holds a non-empty string, skipping `skip`. */
+export function textField(table: DataTable, skip: readonly string[] = []): string | undefined {
+  for (const name of table.fields) {
+    if (skip.includes(name)) continue;
+    const values = table.columns[name];
+    if (!values) continue;
+    const list = Array.isArray(values) ? values : Array.from(values as ArrayLike<unknown>);
+    if (list.some((item) => typeof item === "string" && item.length > 0)) return name;
+  }
+  return undefined;
+}
+
+/** First column that holds a finite number, skipping `skip`. */
+export function numericField(table: DataTable, skip: readonly string[] = []): string | undefined {
+  for (const name of table.fields) {
+    if (skip.includes(name)) continue;
+    const values = table.columns[name];
+    if (!values) continue;
+    const list = Array.isArray(values) ? values : Array.from(values as ArrayLike<unknown>);
+    if (list.some((item) => typeof item === "number" && Number.isFinite(item))) return name;
+  }
   return undefined;
 }
 

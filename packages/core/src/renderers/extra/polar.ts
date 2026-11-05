@@ -1,6 +1,6 @@
 import { headingInset } from "../../chrome";
 import { legendLabel, legendMarkup, legendShownValue } from "../../legend";
-import { asNumber, column, fieldOf } from "../../frame";
+import { asNumber, column, fieldOf, knownField, numericField } from "../../frame";
 import { cssVar } from "../../theme";
 import { domainEnds, n, polar, ch } from "../../svg";
 import { fill, fmt, openMark, str, text, valueFormat, viewOf } from "./plot";
@@ -24,7 +24,13 @@ export function renderPolar(spec: Record<string, unknown>, kind: Kind): string |
   const { frame, parts, table } = view;
   const xField = fieldOf(frame.encoding.x);
   const yChannels = yList(frame.encoding.y);
-  const yFields = yChannels.map((channel) => fieldOf(channel)).filter((field): field is string => Boolean(field));
+  let yFields = yChannels
+    .map((channel) => knownField(channel, table.fields, ["y", "value"]))
+    .filter((field): field is string => Boolean(field));
+  if (!yFields.length) {
+    const fallback = numericField(table, [xField ?? ""]);
+    if (fallback) yFields = [fallback];
+  }
   const seriesField = fieldOf(frame.encoding.series);
   if (!xField || !yFields.length) return null;
 

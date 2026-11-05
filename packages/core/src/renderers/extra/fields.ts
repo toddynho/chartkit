@@ -8,10 +8,10 @@ export function tableOf(spec: Record<string, unknown>): { table: DataTable; enco
   return { table, encoding: isRecord(spec.encoding) ? spec.encoding : {} };
 }
 
-/** Encoding channel, or a column that is actually present. */
+/** Encoding channel when that column exists, otherwise a column that is present. */
 export function channel(encoding: Record<string, unknown>, key: string, fallback: string, fields: string[]): string | undefined {
   const named = fieldOf(encoding[key]);
-  if (named) return named;
+  if (named && fields.includes(named)) return named;
   return fields.includes(fallback) ? fallback : undefined;
 }
 

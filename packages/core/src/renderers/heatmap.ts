@@ -44,7 +44,8 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
   }
   if (byDay.size === 0) return null;
 
-  const weeks = typeof frame.mark.weeks === "number" ? frame.mark.weeks : 52;
+  const weeksAsked = typeof frame.mark.weeks === "number" && Number.isFinite(frame.mark.weeks) ? Math.round(frame.mark.weeks) : 52;
+  const weeks = Math.min(104, Math.max(1, weeksAsked));
   const end = Math.max(...byDay.keys());
   // Last column is the week of the latest day. Counting back from that Sunday
   // keeps `weeks` columns and still draws the latest day. Snapping an
@@ -113,7 +114,7 @@ function renderCalendar(spec: Record<string, unknown>): string | null {
       const edge = missing ? ` stroke="${quiet.stroke}" stroke-width="1" data-ck-empty="1"` : "";
       if (cellsMark) pushRect(cellsMark, x, y, box.cellW, box.cellH, missing ? quiet.stroke : fill);
       else cells.push(
-        `<rect x="${n(x)}" y="${n(y)}" width="${n(box.cellW)}" height="${n(box.cellH)}" rx="${n(radius)}" fill="${fill}" fill-opacity="${n(opacity)}"${edge} aria-label="${esc(label)}"><title>${esc(label)}</title></rect>`,
+        `<rect x="${n(x)}" y="${n(y)}" width="${n(box.cellW)}" height="${n(box.cellH)}" rx="${n(radius)}" fill="${fill}" fill-opacity="${n(opacity)}"${edge} data-ck-mark="cell" aria-label="${esc(label)}"><title>${esc(label)}</title></rect>`,
       );
     }
   }
@@ -316,7 +317,7 @@ function renderGrid(spec: Record<string, unknown>): string | null {
       const label = `${xs[col] ?? ""}, ${ys[row] ?? ""}: ${missing ? "no value" : formatValue(value, colorFormat, frame.locale)}`;
       const edge = missing ? ` stroke="${quiet.stroke}" stroke-width="1" data-ck-empty="1"` : "";
       parts.push(
-        `<rect x="${n(rx)}" y="${n(ry)}" width="${n(rw)}" height="${n(rh)}" rx="${n(radius)}" fill="${fill}" fill-opacity="${n(opacity)}"${edge} aria-label="${esc(label)}"><title>${esc(label)}</title></rect>`,
+        `<rect x="${n(rx)}" y="${n(ry)}" width="${n(rw)}" height="${n(rh)}" rx="${n(radius)}" fill="${fill}" fill-opacity="${n(opacity)}"${edge} data-ck-mark="cell" aria-label="${esc(label)}"><title>${esc(label)}</title></rect>`,
       );
     }
   }

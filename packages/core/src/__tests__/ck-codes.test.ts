@@ -23,6 +23,7 @@ const repoRoot = join(fileURLToPath(new URL(".", import.meta.url)), "../../../..
  * Streamgraph is CK3095–CK3101. CK3102–CK3104 stay reserved.
  * Density is CK3105–CK3112. CK3113–CK3114 stay reserved.
  * Tree is CK3115–CK3124.
+ * Render limits are CK3125–CK3129.
  */
 const FAMILIES = new Set([
   "CK1006",
@@ -57,6 +58,7 @@ const STRIP = ["CK3087", "CK3088", "CK3089", "CK3090", "CK3091", "CK3092", "CK30
 const STREAM = ["CK3095", "CK3096", "CK3097", "CK3098", "CK3099", "CK3100", "CK3101"];
 const DENSITY = ["CK3105", "CK3106", "CK3107", "CK3108", "CK3109", "CK3110", "CK3111", "CK3112"];
 const TREE = ["CK3115", "CK3116", "CK3117", "CK3118", "CK3119", "CK3120", "CK3121", "CK3122", "CK3123", "CK3124"];
+const LIMITS = ["CK3125", "CK3126", "CK3127", "CK3128", "CK3129", "CK3130", "CK3131"];
 
 function walk(dir: string, out: string[]): void {
   for (const name of readdirSync(dir)) {
@@ -99,7 +101,7 @@ describe("CK codes", () => {
     expect(dupes).toEqual([]);
   });
 
-  it("keeps uncertainty on CK3020–CK3022, time and data on CK3023–CK3026, hierarchy on CK3027–CK3030, canvas on CK3031–CK3033, interaction on CK3034–CK3039, layout on CK3040–CK3049, geo on CK3050–CK3057, visual axes on CK3058–CK3071, stack groups on CK3072, polar on CK3073–CK3080, dashboard gaps on CK3081–CK3084, brand colours on CK3085, font family on CK3086, strip on CK3087–CK3094, streamgraph on CK3095–CK3101, density on CK3105–CK3112, and tree on CK3115–CK3124", () => {
-    for (const code of [...UNCERTAINTY, ...TIME_DATA, ...HIERARCHY, ...CANVAS, ...INTERACTION, ...LAYOUT, ...GEO, ...VISUAL, ...STACK, ...POLAR, ...GAPS, ...BRAND, ...FONT, ...STRIP, ...STREAM, ...DENSITY, ...TREE]) expect(byCode.has(code), code).toBe(true);
+  it("keeps uncertainty on CK3020–CK3022, time and data on CK3023–CK3026, hierarchy on CK3027–CK3030, canvas on CK3031–CK3033, interaction on CK3034–CK3039, layout on CK3040–CK3049, geo on CK3050–CK3057, visual axes on CK3058–CK3071, stack groups on CK3072, polar on CK3073–CK3080, dashboard gaps on CK3081–CK3084, brand colours on CK3085, font family on CK3086, strip on CK3087–CK3094, streamgraph on CK3095–CK3101, density on CK3105–CK3112, and tree on CK3115–CK3124, and render limits on CK3125–CK3131", () => {
+    for (const code of [...UNCERTAINTY, ...TIME_DATA, ...HIERARCHY, ...CANVAS, ...INTERACTION, ...LAYOUT, ...GEO, ...VISUAL, ...STACK, ...POLAR, ...GAPS, ...BRAND, ...FONT, ...STRIP, ...STREAM, ...DENSITY, ...TREE, ...LIMITS]) expect(byCode.has(code), code).toBe(true);
   });
 });

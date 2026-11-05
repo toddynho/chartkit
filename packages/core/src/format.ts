@@ -61,11 +61,15 @@ function normalize(format: unknown): Fmt {
 }
 
 function digits(fmt: Fmt, fallback: number): { minimumFractionDigits?: number; maximumFractionDigits: number } {
-  if (fmt.decimals !== undefined) return { minimumFractionDigits: fmt.decimals, maximumFractionDigits: fmt.decimals };
-  if (fmt.minimumFractionDigits !== undefined) {
-    return { minimumFractionDigits: fmt.minimumFractionDigits, maximumFractionDigits: Math.max(fmt.minimumFractionDigits, fallback) };
+  if (fmt.decimals !== undefined) {
+    const clamped = clampFormatDigits(fmt.decimals);
+    return { minimumFractionDigits: clamped, maximumFractionDigits: clamped };
   }
-  return { maximumFractionDigits: fallback };
+  if (fmt.minimumFractionDigits !== undefined) {
+    const clamped = clampFormatDigits(fmt.minimumFractionDigits);
+    return { minimumFractionDigits: clamped, maximumFractionDigits: Math.max(clamped, clampFormatDigits(fallback)) };
+  }
+  return { maximumFractionDigits: clampFormatDigits(fallback) };
 }
 
 /** Negative zero formats as zero. Intl currency otherwise prints a minus. */
@@ -105,20 +109,85 @@ function formatDurationHm(value: number): string {
 const numberFormats = new Map<string, Intl.NumberFormat>();
 const dateFormats = new Map<string, Intl.DateTimeFormat>();
 
+/** Intl rejects fraction digits outside 0–20. Render clamps; validate reports it. */
+export const FORMAT_DIGIT_MAX = 20;
+
+export function clampFormatDigits(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(FORMAT_DIGIT_MAX, Math.round(value)));
+}
+
+/** True for a tag Intl.NumberFormat will accept. */
+export function localeTagOk(locale: string): boolean {
+  const text = locale.trim();
+  if (!text || text.length > 35) return false;
+  try {
+    return Intl.NumberFormat.supportedLocalesOf(text).length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** True for a 3-letter ISO currency Intl will accept. */
+export function currencyCodeOk(code: string): boolean {
+  const token = code.trim().toUpperCase();
+  if (!/^[A-Z]{3}$/.test(token)) return false;
+  try {
+    new Intl.NumberFormat("en-US", { style: "currency", currency: token });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function safeLocale(locale: string): string {
+  return localeTagOk(locale) ? locale.trim() : "en-US";
+}
+
+function safeCurrency(code: string | undefined): string {
+  if (code && currencyCodeOk(code)) return code.trim().toUpperCase();
+  return "USD";
+}
+
 function numberFormat(locale: string, options: Intl.NumberFormatOptions): Intl.NumberFormat {
-  const key = `${locale}\0${JSON.stringify(options)}`;
+  const place = safeLocale(locale);
+  const digits = { ...options };
+  if (typeof digits.minimumFractionDigits === "number") digits.minimumFractionDigits = clampFormatDigits(digits.minimumFractionDigits);
+  if (typeof digits.maximumFractionDigits === "number") digits.maximumFractionDigits = clampFormatDigits(digits.maximumFractionDigits);
+  if (
+    typeof digits.minimumFractionDigits === "number" &&
+    typeof digits.maximumFractionDigits === "number" &&
+    digits.maximumFractionDigits < digits.minimumFractionDigits
+  ) {
+    digits.maximumFractionDigits = digits.minimumFractionDigits;
+  }
+  const key = `${place}\0${JSON.stringify(digits)}`;
   const hit = numberFormats.get(key);
   if (hit) return hit;
-  const format = new Intl.NumberFormat(locale, options);
+  let format: Intl.NumberFormat;
+  try {
+    format = new Intl.NumberFormat(place, digits);
+  } catch {
+    const plain = { ...digits };
+    delete plain.currency;
+    plain.style = "decimal";
+    format = new Intl.NumberFormat("en-US", plain);
+  }
   numberFormats.set(key, format);
   return format;
 }
 
 function dateFormat(locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
-  const key = `${locale}\0${JSON.stringify(options)}`;
+  const place = safeLocale(locale);
+  const key = `${place}\0${JSON.stringify(options)}`;
   const hit = dateFormats.get(key);
   if (hit) return hit;
-  const format = new Intl.DateTimeFormat(locale, options);
+  let format: Intl.DateTimeFormat;
+  try {
+    format = new Intl.DateTimeFormat(place, options);
+  } catch {
+    format = new Intl.DateTimeFormat("en-US", options);
+  }
   dateFormats.set(key, format);
   return format;
 }
@@ -148,7 +217,7 @@ function body(value: number, fmt: Fmt, locale: string, zone: string): string {
   if (style === "date" || style === "time" || style === "datetime" || style === "month" || style === "year" || style === "weekday") {
     return formatDate(value, style, locale, zone);
   }
-  if (style === "exponent") return value.toExponential(fmt.decimals ?? 0);
+  if (style === "exponent") return value.toExponential(clampFormatDigits(fmt.decimals ?? 0));
   if (style === "integer") {
     return numberFormat(locale, { maximumFractionDigits: 0, useGrouping: fmt.group === false ? false : undefined }).format(value);
   }
@@ -159,7 +228,7 @@ function body(value: number, fmt: Fmt, locale: string, zone: string): string {
   else if (style === "percent" || style === "percent-raw") options.style = "percent";
   else if (style === "currency") {
     options.style = "currency";
-    options.currency = fmt.currency ?? "USD";
+    options.currency = safeCurrency(fmt.currency);
   }
   return numberFormat(locale, options).format(style === "percent-raw" ? value / 100 : value);
 }
@@ -196,6 +265,7 @@ export function formatAxisValue(value: number, format: unknown, locale: string, 
 
 /** Format a number with a spec preset or format object. `zone` is UTC unless the spec set one. */
 export function formatValue(value: number, format: unknown, locale: string, zone = "UTC"): string {
+  if (!Number.isFinite(value)) return "";
   const fmt = normalize(format);
   let text = body(zero(value), fmt, locale, zone);
   if (fmt.signed && value > 0 && !text.startsWith("+")) text = `+${text}`;
