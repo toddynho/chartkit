@@ -293,7 +293,8 @@ function parseScene(svg) {
   let textIndex = 0;
   while ((match = tagRe.exec(svg))) {
     const owner = textOwner(stack);
-    if (owner && match.index > last) {
+    const topFrame = stack[stack.length - 1];
+    if (owner && !topFrame?.defs && match.index > last) {
       const chunk = decode(svg.slice(last, match.index));
       if (chunk.trim()) owner.chunks.push(chunk);
     }
@@ -360,6 +361,9 @@ function parseScene(svg) {
         if (name === "path" && at.fill && at.fill !== "none" && box.w < view.w * 0.92 && box.h < view.h * 0.92) {
           fills.push({ bbox: box, fill: at.fill, opacity: opacityOf(at) });
         }
+      }
+      if (name === "circle" && at.fill && at.fill !== "none" && !frame.legend && !at["data-ck-mark"] && box.w < view.w * 0.92) {
+        fills.push({ bbox: box, fill: at.fill, opacity: opacityOf(at) });
       }
     }
   }

@@ -15,6 +15,7 @@ import { legendSpace, paintLegend, readLegend, type LegendBox, type LegendItem }
 import { layoutPaint } from "../layout-hook";
 import { boxId, brokenScale, ch, clamp, clipPath, domainEnds, esc, font, fontStyle, hash, isRecord, linear, logNice, logScale, logTicks, n, niceDomain, padExtent, pointRadius, repeatKey, round, scaleClamp, scalePad, symlogTicks, ticks } from "../svg";
 import { bump, revision, slots } from "../feature-hooks";
+import { labelInk } from "../ink";
 import { cssVar, lineStroke, paint, resolveGeometry, resolvePreset, type PresetTokens } from "../theme";
 
 export interface Headline {
@@ -917,7 +918,7 @@ function drawBars(
   let late = "";
   if (layers && totalHook && legacyTotals(model)) late += totalHook(model, layers, xScale, yScale, horizontal, held);
   const fill = cssVar("text", model.preset.text);
-  for (const lab of labs) late += held.put(lab.text, lab.x, lab.y, lab.anchor, fill);
+  for (const lab of labs) late += held.put(lab.text, lab.x, lab.y, lab.anchor, lab.ink || fill);
   if (late) model.late += late;
   return out.join("");
 }
@@ -965,7 +966,7 @@ function drawCombo(
   const held = bag();
   const fill = cssVar("text", model.preset.text);
   let late = slots.labels ? slots.labels(model, layers, xScale, yScale, y2Scale, held) : "";
-  for (const lab of labs) late += held.put(lab.text, lab.x, lab.y, lab.anchor, fill);
+  for (const lab of labs) late += held.put(lab.text, lab.x, lab.y, lab.anchor, lab.ink || fill);
   if (late) model.late += late;
   return out.join("");
 }
@@ -1324,6 +1325,7 @@ interface Lab {
   y: number;
   anchor: string;
   text: string;
+  ink?: string;
 }
 
 function wantLabels(model: PlotModel): boolean {
@@ -1408,7 +1410,8 @@ function queueBarLabel(
     ly = y + h / 2 + 3;
     anchor = "start";
   }
-  labs.push({ x: lx, y: ly, anchor, text });
+  const onBar = pos === "inside" || pos === "center" || pos === "bottom" || (horizontal && (pos === "left" || pos === "inside"));
+  labs.push({ x: lx, y: ly, anchor, text, ink: onBar ? labelInk(series.color) : undefined });
 }
 
 function placeLineLabels(
@@ -1421,7 +1424,8 @@ function placeLineLabels(
 ): string {
   if (!wantLabels(model)) return "";
   const pos = model.labelAt || "top";
-  const fill = cssVar("text", model.preset.text);
+  const pageInk = cssVar("text", model.preset.text);
+  const onMark = pos === "center" || pos === "inside";
   let out = "";
   model.series.forEach((series, index) => {
     if (series.mark === "bar") return;
@@ -1434,7 +1438,8 @@ function placeLineLabels(
       if (typeof value !== "number" || !labelIndex(model.labelEnds, i, first, last)) continue;
       const plotted = layerOn(layers, index) ? layers!.top[index]?.[i] : value;
       if (typeof plotted !== "number") continue;
-      out += held.put(labelText(model, series, value), xScale.center(i) + shift[0], scale(plotted) + shift[1], shift[2], fill);
+      const ink = onMark ? labelInk(series.color) : pageInk;
+      out += held.put(labelText(model, series, value), xScale.center(i) + shift[0], scale(plotted) + shift[1], shift[2], ink);
     }
   });
   return out;
@@ -3781,6 +3786,7 @@ function paintNotes(
       : undefined,
     labels: model.labels,
     temporal: model.xTemporal,
+    xEnd: Boolean(model.xAxis.end) && horizontal !== true,
     xNum: model.x,
     slot: (index) => xScale.band(index),
     count,

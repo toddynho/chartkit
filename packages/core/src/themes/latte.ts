@@ -13,10 +13,10 @@ export const latte = definePreset("latte", {
   "positive": "#40a02b",
   "negative": "#d20f39",
   "series": [
-    "#40a02b",
+    "#3e9b2a",
     "#1e66f5",
     "#8839ef",
-    "#df8e1d",
+    "#bf7919",
     "#d20f39"
   ]
 });

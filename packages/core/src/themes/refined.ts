@@ -20,7 +20,7 @@ export const refined: PresetTokens = {
   positive: ld("#047857", "#34d399"),
   negative: ld("#e11d48", "#fb7185"),
   series: ldList(
-    ["#3b82f6", "#e11d48", "#fbbf24", "#10b981", "#7c3aed", "#22d3ee", "#fb923c", "#ec4899"],
+    ["#3b82f6", "#e11d48", "#c08b04", "#0fa875", "#7c3aed", "#0ea2b8", "#ef6e05", "#ec4899"],
     ["#60a5fa", "#fb7185", "#fcd34d", "#6ee7b7", "#8b5cf6", "#22d3ee", "#fb923c", "#f472b6"],
   ),
   lines: ldList(

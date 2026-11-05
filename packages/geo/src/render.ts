@@ -119,15 +119,7 @@ function graticule(project: (lon: number, lat: number) => [number, number]): str
 }
 
 function measureText(text: string, size: number): number {
-  let width = 0;
-  for (const ch of text) {
-    if (ch === " ") width += size * 0.33;
-    else if ("MW@#%&".includes(ch)) width += size * 0.86;
-    else if (ch === "m" || ch === "w") width += size * 0.78;
-    else if ("iljtfrI.,'".includes(ch)) width += size * 0.3;
-    else width += size * 0.56;
-  }
-  return width;
+  return Math.ceil(text.length * size * 0.64);
 }
 
 function titleLayout(text: string, width: number): { size: number; y: number; band: number } {
@@ -143,13 +135,13 @@ function legendSide(spec: Record<string, unknown>): "bottom" | "right" {
 }
 
 function horizontalLegend(scale: PaintScale, x: number, y: number, width: number, id: string): string {
-  const title = scale.title ? `<text class="ck-geo-label ck-geo-legend-title" x="${round(x)}" y="${round(y + 11)}">${esc(scale.title)}</text>` : "";
+  const title = scale.title ? `<text class="ck-geo-label ck-geo-legend-title" font-size="11" font-weight="650" x="${round(x)}" y="${round(y + 11)}">${esc(scale.title)}</text>` : "";
   const barY = y + (scale.title ? 18 : 2);
   if (scale.swatches?.length) {
     const marks = scale.swatches
       .map((swatch, index) => {
         const at = x + index * 88;
-        return `<rect x="${round(at)}" y="${round(barY)}" width="12" height="8" fill="${swatch.color}" rx="2"/><text class="ck-geo-label" x="${round(at + 16)}" y="${round(barY + 8)}">${esc(swatch.label)}</text>`;
+        return `<rect x="${round(at)}" y="${round(barY)}" width="12" height="8" fill="${swatch.color}" rx="2"/><text class="ck-geo-label" font-size="11" x="${round(at + 16)}" y="${round(barY + 8)}">${esc(swatch.label)}</text>`;
       })
       .join("");
     return `${title}${marks}`;
@@ -158,7 +150,7 @@ function horizontalLegend(scale: PaintScale, x: number, y: number, width: number
   const lo = scale.stops[0];
   const hi = scale.stops[scale.stops.length - 1];
   const barW = Math.max(48, width - 4);
-  return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">${stops}</linearGradient></defs>${title}<rect x="${round(x)}" y="${round(barY)}" width="${round(barW)}" height="8" fill="url(#${id})" rx="2"/><text class="ck-geo-label" x="${round(x)}" y="${round(barY + 20)}">${esc(lo?.label ?? "")}</text><text class="ck-geo-label" text-anchor="end" x="${round(x + barW)}" y="${round(barY + 20)}">${esc(hi?.label ?? "")}</text>`;
+  return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">${stops}</linearGradient></defs>${title}<rect x="${round(x)}" y="${round(barY)}" width="${round(barW)}" height="8" fill="url(#${id})" rx="2"/><text class="ck-geo-label" font-size="11" x="${round(x)}" y="${round(barY + 20)}">${esc(lo?.label ?? "")}</text><text class="ck-geo-label" font-size="11" text-anchor="end" x="${round(x + barW)}" y="${round(barY + 20)}">${esc(hi?.label ?? "")}</text>`;
 }
 
 function legendWidth(scale: PaintScale): number {
@@ -169,11 +161,11 @@ function legendWidth(scale: PaintScale): number {
 }
 
 function noDataSwatch(x: number, y: number, id: string): string {
-  return `<rect x="${round(x)}" y="${round(y)}" width="12" height="12" fill="url(#${id}nd)" stroke="currentColor" stroke-opacity="0.35" rx="2"/><text class="ck-geo-label" x="${round(x + 18)}" y="${round(y + 10)}">No data</text>`;
+  return `<rect x="${round(x)}" y="${round(y)}" width="12" height="12" fill="url(#${id}nd)" stroke="currentColor" stroke-opacity="0.35" rx="2"/><text class="ck-geo-label" font-size="11" x="${round(x + 18)}" y="${round(y + 10)}">No data</text>`;
 }
 
 function legendMarkup(scale: PaintScale, x: number, y: number, height: number, id: string, nodata: boolean): string {
-  const title = scale.title ? `<text class="ck-geo-label ck-geo-legend-title" x="${round(x)}" y="${round(y + 12)}">${esc(scale.title)}</text>` : "";
+  const title = scale.title ? `<text class="ck-geo-label ck-geo-legend-title" font-size="11" font-weight="650" x="${round(x)}" y="${round(y + 12)}">${esc(scale.title)}</text>` : "";
   const top = y + (scale.title ? 20 : 4);
   const foot = nodata ? 28 : 8;
   if (scale.sizes?.length) {
@@ -186,7 +178,7 @@ function legendMarkup(scale: PaintScale, x: number, y: number, height: number, i
         const t = sizeHi === sizeLo ? 1 : (stop.value - sizeLo) / (sizeHi - sizeLo);
         const radius = 4.5 + Math.sqrt(Math.max(0, t)) * 8;
         const cy = top + row * index + row * 0.55;
-        return `<circle cx="${round(x + 12)}" cy="${round(cy)}" r="${round(radius)}" fill="${scale.fill(stop.value)}" stroke="${scale.fill(stop.value)}" stroke-width="1"/><text class="ck-geo-label" x="${round(x + 28)}" y="${round(cy + 4)}">${esc(stop.label)}</text>`;
+        return `<circle cx="${round(x + 12)}" cy="${round(cy)}" r="${round(radius)}" fill="${scale.fill(stop.value)}" stroke="${scale.fill(stop.value)}" stroke-width="1"/><text class="ck-geo-label" font-size="11" x="${round(x + 28)}" y="${round(cy + 4)}">${esc(stop.label)}</text>`;
       })
       .join("");
     return `${title}${marks}${nodata ? noDataSwatch(x, y + height - 18, id) : ""}`;
@@ -197,7 +189,7 @@ function legendMarkup(scale: PaintScale, x: number, y: number, height: number, i
     const marks = scale.swatches
       .map((swatch, index) => {
         const at = top + index * row;
-        return `<rect x="${round(x)}" y="${round(at)}" width="12" height="${round(Math.max(8, row - 4))}" fill="${swatch.color}" rx="2"/><text class="ck-geo-label" x="${round(x + 18)}" y="${round(at + 10)}">${esc(swatch.label)}</text>`;
+        return `<rect x="${round(x)}" y="${round(at)}" width="12" height="${round(Math.max(8, row - 4))}" fill="${swatch.color}" rx="2"/><text class="ck-geo-label" font-size="11" x="${round(x + 18)}" y="${round(at + 10)}">${esc(swatch.label)}</text>`;
       })
       .join("");
     return `${title}${marks}${nodata ? noDataSwatch(x, y + height - 18, id) : ""}`;
@@ -205,7 +197,7 @@ function legendMarkup(scale: PaintScale, x: number, y: number, height: number, i
   const bar = Math.max(48, height - (top - y) - foot - 8);
   const stops = scale.stops.map((stop) => `<stop offset="${Math.round(stop.offset * 100)}%" stop-color="${stop.color}"/>`).join("");
   const labels = scale.stops
-    .map((stop) => `<text class="ck-geo-label" x="${round(x + 18)}" y="${round(top + 4 + (1 - stop.offset) * bar)}">${esc(stop.label)}</text>`)
+    .map((stop) => `<text class="ck-geo-label" font-size="11" x="${round(x + 18)}" y="${round(top + 4 + (1 - stop.offset) * bar)}">${esc(stop.label)}</text>`)
     .join("");
   return `<defs><linearGradient id="${id}" x1="0" y1="1" x2="0" y2="0">${stops}</linearGradient></defs>${title}<rect x="${round(x)}" y="${round(top)}" width="12" height="${round(bar)}" fill="url(#${id})" rx="2"/>${labels}${nodata ? noDataSwatch(x, y + height - 18, id) : ""}`;
 }
@@ -418,7 +410,8 @@ function dotsOf(rows: Record<string, unknown>[], encoding: Record<string, unknow
 }
 
 function overlaps(a: { x: number; y: number; w: number; h: number }, b: { x: number; y: number; w: number; h: number }): boolean {
-  return !(a.x + a.w < b.x || b.x + b.w < a.x || a.y + a.h < b.y || b.y + b.h < a.y);
+  const gap = 4;
+  return !(a.x + a.w + gap < b.x || b.x + b.w + gap < a.x || a.y + a.h + gap < b.y || b.y + b.h + gap < a.y);
 }
 
 interface TagSpot {
@@ -459,7 +452,7 @@ function pointMarkup(dots: Dot[], point: (lon: number, lat: number) => [number, 
     if (!spot) continue;
     placed.push(spot.box);
     if (spot.leader) leaders.push(spot.leader);
-    labels.push(`<text class="ck-geo-tag" x="${round(spot.tx)}" y="${round(spot.ty)}" text-anchor="${spot.anchor}">${esc(circle.dot.label)}</text>`);
+    labels.push(`<text class="ck-geo-tag" x="${round(spot.tx)}" y="${round(spot.ty)}" text-anchor="${spot.anchor}" font-size="11">${esc(circle.dot.label)}</text>`);
   }
   return marks + leaders.join("") + labels.join("");
 }
@@ -483,7 +476,7 @@ function placeTag(
     { dx: 0.7, dy: -1, anchor: "start" as const },
     { dx: -0.7, dy: -1, anchor: "end" as const },
   ];
-  for (const dist of [circle.r + 8, circle.r + 24, circle.r + 42, circle.r + 64]) {
+  for (const dist of [circle.r + 10, circle.r + 28, circle.r + 48, circle.r + 72, circle.r + 96]) {
     for (const dir of dirs) {
       const cx = circle.x + dir.dx * dist;
       const cy = circle.y + dir.dy * dist;

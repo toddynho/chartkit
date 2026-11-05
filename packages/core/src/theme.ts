@@ -69,7 +69,7 @@ export const auto: PresetTokens = {
   positiveFill: "#166534",
   negativeFill: "#9f1239",
   series: ldList(
-    ["#007aff", "#34c759", "#ff9500", "#af52de", "#ff2d55", "#32ade6", "#65a30d", "#ff6723"],
+    ["#007aff", "#2aa148", "#ca7600", "#af52de", "#ff2d55", "#1996d0", "#5f9a0c", "#fc4e00"],
     ["#0a84ff", "#30d158", "#ff9f0a", "#bf5af2", "#ff375f", "#64d2ff", "#a3e635", "#ff6961"],
   ),
   lines: ldList(
