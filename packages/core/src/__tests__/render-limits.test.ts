@@ -70,6 +70,15 @@ describe("render limits", () => {
     expect(validate(spec).warnings.some((item) => item.code === "CK3131" && item.path === "/mark/pointSize")).toBe(true);
   });
 
+  it("warns when a theme color is under 4.5:1 and still draws it", () => {
+    const spec = line({ theme: { tokens: { background: "#111111" } } });
+    const svg = render(spec);
+    expect(svg).toContain("#111111");
+    const warned = validate(spec).warnings.find((item) => item.code === "CK4005");
+    expect(warned?.path).toBe("/theme/tokens/background");
+    expect(warned?.fix).toBeUndefined();
+  });
+
   it("draws a line when the y field name is not a column", () => {
     const spec = line({ encoding: { x: "month", y: "not-a-column" } });
     const svg = render(spec);

@@ -2403,6 +2403,10 @@ function headlineSvg(model: PlotModel): string {
   }
   const muted = cssVar("muted", model.preset.muted);
   const tone = head.tone === "negative" ? cssVar("negative", model.preset.negative) : head.tone === "neutral" ? muted : cssVar("positive", model.preset.positive);
+  const pillFill = head.tone === "negative"
+    ? cssVar("negative-fill", model.preset.negativeFill ?? "#9f1239")
+    : cssVar("positive-fill", model.preset.positiveFill ?? "#166534");
+  const pillInk = "light-dark(#ffffff, #f5f5f7)";
   let y = model.title ? 36 : 16;
   if (model.subtitle) y += 16;
   let out = "";
@@ -2427,8 +2431,9 @@ function headlineSvg(model: PlotModel): string {
   if (head.delta) {
     const pillX = edge - deltaW;
     const pillY = baseline - 20;
-    out += `<rect data-ck-delta="1" x="${n(pillX)}" y="${n(pillY)}" width="${n(deltaW)}" height="24" rx="12" fill="${tone}" fill-opacity="0.16" />`;
-    out += `<text x="${n(pillX + deltaW / 2)}" y="${n(pillY + 16)}" text-anchor="middle" fill="${tone}" font-size="${deltaSize}" font-weight="650">${esc(head.delta)}</text>`;
+    const solid = head.tone === "positive" || head.tone === "negative";
+    out += `<rect data-ck-delta="1" x="${n(pillX)}" y="${n(pillY)}" width="${n(deltaW)}" height="24" rx="12" fill="${solid ? pillFill : tone}"${solid ? "" : ' fill-opacity="0.16"'} />`;
+    out += `<text x="${n(pillX + deltaW / 2)}" y="${n(pillY + 16)}" text-anchor="middle" fill="${solid ? pillInk : tone}" font-size="${deltaSize}" font-weight="650">${esc(head.delta)}</text>`;
   }
   return out;
 }

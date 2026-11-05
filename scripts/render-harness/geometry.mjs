@@ -150,13 +150,40 @@ function contrastFindings(texts, scene, spec) {
       hits.push({ item, mode, ratio, min, fg, bg });
     }
   }
+  for (const mode of modes) {
+    const page = parseColor(mode === "dark" ? DARK_PAGE : LIGHT_PAGE);
+    const backdrop = sceneBackground(scene, mode, page);
+    const seen = new Set();
+    for (const graphic of scene.graphics ?? []) {
+      const paint = resolvePaint(graphic.paint, mode);
+      if (!paint || paint.a === 0) continue;
+      const fg = graphic.opacity < 1 ? { ...paint, a: paint.a * graphic.opacity } : paint;
+      const flat = flatten(fg, backdrop);
+      const ratio = contrast(flat, backdrop);
+      if (ratio == null || ratio + 1e-6 >= 3) continue;
+      const key = `${mode}:${hexOf(flat)}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      hits.push({
+        item: { id: graphic.kind, role: "mark", snippet: graphic.kind, fill: graphic.paint, fontSize: 11, weight: 400, bbox: { x: 0, y: 0, w: 0, h: 0 } },
+        mode,
+        ratio,
+        min: 3,
+        fg: flat,
+        bg: backdrop,
+        graphic: true,
+      });
+    }
+  }
   hits.sort((a, b) => a.ratio - b.ratio);
   return hits.slice(0, 6).map((hit) => ({
     check: "contrast",
     severity: "error",
-    detail: `${roleName(hit.item)} “${hit.item.snippet}” is ${hit.ratio.toFixed(2)}:1 on ${hexOf(hit.bg)} in ${hit.mode} mode. Minimum is ${hit.min}:1.`,
+    detail: hit.graphic
+      ? `${hit.item.snippet === "stroke" ? "Line" : "Mark"} ${hexOf(hit.fg)} is ${hit.ratio.toFixed(2)}:1 on ${hexOf(hit.bg)} in ${hit.mode} mode. Minimum for a graphic is 3:1.`
+      : `${roleName(hit.item)} “${hit.item.snippet}” is ${hit.ratio.toFixed(2)}:1 on ${hexOf(hit.bg)} in ${hit.mode} mode. Minimum is ${hit.min}:1.`,
     elements: [element(hit.item)],
-    signature: `${hit.mode}:${hit.item.role}:${clip(hit.item.snippet)}`,
+    signature: hit.graphic ? `graphic:${hit.mode}:${hexOf(hit.fg)}` : `${hit.mode}:${hit.item.role}:${clip(hit.item.snippet)}`,
     roles: [hit.item.role],
     mode: hit.mode,
   }));
@@ -252,6 +279,7 @@ function parseScene(svg) {
   const texts = [];
   const swatches = [];
   const marks = [];
+  const graphics = [];
   const axes = [];
   const fills = [];
   const clips = new Map();
@@ -309,14 +337,20 @@ function parseScene(svg) {
       if (!background && isBackdrop(box, view)) background = at.fill || background;
       else if (at.fill && !frame.legend) fills.push({ bbox: box, fill: at.fill, opacity: opacityOf(at) });
       if (!at["data-ck-mark"] && !frame.mark && !at["data-ck-headline"] && box.w >= 6 && box.w <= 14 && box.h >= 6 && box.h <= 14) swatches.push({ bbox: box });
-      if (isMark(at, frame.mark) && !frame.legend) marks.push({ id: markId(at, marks.length), bbox: box, clipped: Boolean(frame.clip) });
+      if (isMark(at, frame.mark) && !frame.legend) {
+        marks.push({ id: markId(at, marks.length), bbox: box, clipped: Boolean(frame.clip) });
+        noteGraphic(graphics, at, "fill");
+      }
     } else if (!frame.defs && (name === "line" || name === "path" || name === "circle" || name === "ellipse" || name === "polygon" || name === "polyline")) {
       const box = shapeBox(name, at, frame.matrix);
       if (!box) continue;
       const grid = at["data-ck-grid"] !== undefined || /^(?:yg|xg):/.test(at["data-ck-key"] || "") || at["data-ck-annotation"] !== undefined;
       const marked = Boolean(at["data-ck-mark"] || frame.mark);
       if (name === "line" && !grid && !marked && (at["data-ck-axis"] || box.w > 40 || box.h > 40)) axes.push(expand(box, 1));
-      if (isMark(at, frame.mark) && !frame.legend) marks.push({ id: markId(at, marks.length), bbox: box, clipped: Boolean(frame.clip) });
+      if (isMark(at, frame.mark) && !frame.legend) {
+        marks.push({ id: markId(at, marks.length), bbox: box, clipped: Boolean(frame.clip) });
+        noteGraphic(graphics, at, name === "line" || name === "path" ? "stroke" : "fill");
+      }
     }
   }
   const plot = largestClip(clips, view);
@@ -329,7 +363,7 @@ function parseScene(svg) {
     }
     item.behind = behind;
   }
-  return { view, texts, swatches, marks, axes, plot, background, legendInside };
+  return { view, texts, swatches, marks, graphics, axes, plot, background, legendInside };
 }
 
 function textOwner(stack) {
@@ -368,6 +402,14 @@ function finishText(frame, index) {
     role: "label",
     behind: "",
   };
+}
+
+function noteGraphic(graphics, at, kind) {
+  const paint = kind === "stroke" ? at.stroke : at.fill;
+  if (!paint || paint === "none" || paint === "transparent") return;
+  const opacity = kind === "stroke" ? 1 : opacityOf(at);
+  if (opacity < 0.85) return;
+  graphics.push({ paint, opacity, kind });
 }
 
 function opacityOf(at) {

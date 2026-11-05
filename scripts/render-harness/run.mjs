@@ -218,7 +218,22 @@ export function isStressValue(value) {
   return false;
 }
 
+const TOKEN_OVERRIDE = new Set([
+  "theme.tokens.background",
+  "theme.tokens.surface",
+  "theme.tokens.text",
+  "theme.tokens.muted",
+  "theme.brand",
+]);
+
 function calmStress(row, finding) {
+  if (finding.check === "contrast" && TOKEN_OVERRIDE.has(row.option)) {
+    return {
+      ...finding,
+      severity: "info",
+      detail: `${finding.detail} The spec set this color. Recorded, not failed.`,
+    };
+  }
   if (finding.check !== "text-outside" && finding.check !== "text-overlap") return finding;
   if (!isStressValue(row.value)) return finding;
   return {

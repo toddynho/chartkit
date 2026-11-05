@@ -14,6 +14,8 @@ export const midnight: PresetTokens = {
   accent: "#22d3ee",
   positive: "#4ade80",
   negative: "#f87171",
+  positiveFill: "#166534",
+  negativeFill: "#9f1239",
   series: midnightSeries,
   lines: midnightSeries,
 };

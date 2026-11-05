@@ -4,8 +4,8 @@
  * stays out of the line bundle: the sheet renderer and the sync test import it.
  * The stylesheet at themes/candidates.css is the optional card and the scheme override.
  *
- * Series fills are darkened just enough that the text token clears 4.5:1.
- * --ck-line-* stays brighter so a stroke on the page still clears 4.5:1.
+ * Series fills keep their hue. Text that sits on a fill is darkened separately.
+ * A series color used as a graphic is judged at 3:1 against the page.
  * --ck-track is the gauge and progress-ring track.
  */
 
@@ -136,16 +136,16 @@ export const candidates: readonly CandidateLook[] = [
     light: {
       background: "#f5f5f7",
       surface: "#ffffff",
-      text: "#050507",
+      text: "#1d1d1f",
       muted: "#6e6e73",
       grid: "rgba(0, 0, 0, 0.16)",
       axis: "rgba(0, 0, 0, 0.14)",
       track: "rgba(0, 0, 0, 0.10)",
-      accent: "#0072ee",
+      accent: "#007aff",
       positive: "#15803d",
       negative: "#be123c",
-      series: ["#0072ee", "#34c759", "#ff9500", "#af52de", "#ff2d55", "#32ade6", "#65a30d", "#ff6723"],
-      lines: ["#0072ee", "#248a3d", "#c93400", "#af52de", "#ff2d55", "#0071a4", "#4d7c0f", "#9a3412"],
+      series: ["#007aff", "#34c759", "#ff9500", "#af52de", "#ff2d55", "#32ade6", "#65a30d", "#ff6723"],
+      lines: ["#007aff", "#248a3d", "#c93400", "#af52de", "#ff2d55", "#0071a4", "#4d7c0f", "#9a3412"],
       sequential: ["#dcfce7", "#86efac", "#4ade80", "#22c55e", "#15803d", "#14532d"],
       diverging: ["#be123c", "#ff8a9a", "#ffd0d6", "#d2d2d7", "#bbf7d0", "#34c759", "#166534"],
     },
@@ -157,10 +157,10 @@ export const candidates: readonly CandidateLook[] = [
       grid: "rgba(245, 245, 247, 0.22)",
       axis: "rgba(245, 245, 247, 0.16)",
       track: "rgba(245, 245, 247, 0.16)",
-      accent: "#086ed6",
+      accent: "#0a84ff",
       positive: "#30d158",
       negative: "#ff453a",
-      series: ["#086ed6", "#1d8136", "#9e6206", "#9e4ac8", "#d32d4e", "#397791", "#56791c", "#ba4c46"],
+      series: ["#0a84ff", "#30d158", "#ff9f0a", "#bf5af2", "#ff375f", "#64d2ff", "#a3e635", "#ff6961"],
       lines: ["#0a84ff", "#30d158", "#ff9f0a", "#bf5af2", "#ff375f", "#64d2ff", "#a3e635", "#ff6961"],
       sequential: ["#14532d", "#166534", "#22c55e", "#4ade80", "#86efac", "#dcfce7"],
       diverging: ["#ffd0d6", "#ff8a9a", "#9f1239", "#3a3a3c", "#166534", "#30d158", "#bbf7d0"],
