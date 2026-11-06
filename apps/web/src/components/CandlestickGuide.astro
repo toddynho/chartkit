@@ -1,0 +1,136 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestCandlestickSpec } from "../data/teach/candlestick";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/candlestick";
+const spec = specText(smallestCandlestickSpec);
+const play = playgroundHref(smallestCandlestickSpec);
+const volume = `{
+  "encoding": { "volume": "volume" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A candlestick is one session. The body runs from open to close. The wick runs from low to high. A close at or above the open uses the positive color. A lower close uses the negative color.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a candlestick when each mark is a session, not a single number. Northstar is ten days. The body shows whether the day finished up or down, and the wick shows the high and the low. A volume pane sits under the price. CK / USD is twelve sessions on day names, with no volume. A week of prices is five dated sessions. Wednesday is the only day that closed down.
+  </p>
+  <p>
+    A <a href="/docs/charts/line">line</a> through the closes hides the range and the direction of the session. A <a href="/docs/charts/bar">bar</a> of the close, or of the volume, is one length. It does not show open against close.
+  </p>
+  <p>
+    A <a href="/docs/charts/bar-range">range bar</a> is a floating bar from a low to a high. It does not split open from close, and it has no wick. An <a href="/docs/charts/errorbar">error bar</a> is a whisker around a point or a bar: a measurement and a spread, not a session.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Candlestick, range bar, and error bar</h2>
+  <p>
+    <code>type: "candlestick"</code> requires <code>encoding.x</code>, <code>open</code>, <code>high</code>, <code>low</code>, and <code>close</code>. The body is open to close. The wick is low to high. Up and down come from the theme tokens <code>positive</code> and <code>negative</code>.
+  </p>
+  <p>
+    <code>type: "bar-range"</code> uses <code>encoding.low</code> and <code>encoding.high</code>. The bar does not start at zero, and it has no open or close. <code>columnrange</code> and <code>floating-bar</code> repair to bar-range.
+  </p>
+  <p>
+    <code>type: "errorbar"</code> draws whiskers from <code>low</code> and <code>high</code>, or from <code>encoding.error</code> as a margin around <code>y</code>. <code>mark.error</code> is <code>point</code> or <code>bar</code>. That is a summary of a sample, not a price.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one session. Northstar uses <code>date</code>, <code>open</code>, <code>high</code>, <code>low</code>, <code>close</code>, and <code>volume</code>. A week of prices uses <code>day</code> and the four prices. CK / USD uses <code>d</code> for the day name. The field names are yours. The channels are <code>open</code>, <code>high</code>, <code>low</code>, and <code>close</code>.
+  </p>
+  <p>
+    The high has to be at least the larger of open and close. The low has to be at most the smaller. Otherwise validate reports CK3003. A temporal <code>x</code> is formatted from the span, so Northstar reads as dates. A category <code>x</code> uses the labels you pass. CK / USD does that.
+  </p>
+  <p>
+    <code>encoding.volume</code> is optional. When it is set, bars of the same up and down colors sit under the price, at a lower opacity. Omit it and the pane is gone. CK / USD and A week of prices omit it.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest candlestick. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. One session, no volume, so <code>mark</code> can be omitted. The body gap defaults to 0.3 of the band. Wheel zoom defaults to <code>x</code> for this type.
+  </p>
+  <TeachFacts type="candlestick" label="Candlestick packages" spec={spec} />
+  <p>
+    Candlestick ships in <code>@chartkitdev/core/all</code>. <code>createRenderer([candlestick])</code> from <code>@chartkitdev/core/charts/candlestick</code> is the one-chart build. The type string is <code>candlestick</code>.
+  </p>
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    Northstar is the gallery candle: ten sessions, a date axis, and volume. CK / USD is the homepage candle: twelve day names, no volume. A week of prices is the short dated week, with Wednesday as the down day.
+  </p>
+</section>
+
+<TeachConcept id="volume" title="Volume">
+  <p>
+    <code>encoding.volume</code> names the volume field. Set it and a pane opens under the price, about a fifth of the plot. The bars use the session's up or down color. Omit the key, or remove it, and the chart is price only.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.volume</span></figcaption>
+    <pre><code>{volume}</code></pre>
+  </figure>
+  <p>
+    Northstar sets <code>volume</code>. Turning the pane off deletes that key and leaves open, high, low, and close in place. Turning it on puts the example's volume channel back. CK / USD and A week of prices have no volume field, so On has nothing to restore and the control stays off.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a candlestick when the key is omitted. Hovering a session shows open, high, low, and close. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Change those in the playground. Turning the card off and on again puts that object back. An example that omitted <code>tooltip</code> gets the key removed, so the default stays on.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.gap</code> is the space around the body, as a fraction of the band. The default is 0.3. <code>interaction.zoom</code> defaults to <code>x</code> for a candlestick and to <code>none</code> for other types. Up and down colors are <code>theme.tokens.positive</code> and <code>theme.tokens.negative</code>, not a series palette. The candles do not draw a series legend. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/line">Line</a> tracks one number over time. The session range is gone.</li>
+    <li><a href="/docs/charts/bar">Bar</a> is a length from zero, or a stack. It is not open and close.</li>
+    <li><a href="/docs/charts/bar-range">Range bar</a> floats from low to high, with no wick and no open or close.</li>
+    <li><a href="/docs/charts/errorbar">Error bar</a> is a whisker around a point or a bar.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

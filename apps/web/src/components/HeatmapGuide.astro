@@ -1,0 +1,167 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestHeatmapSpec } from "../data/teach/heatmap";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/heatmap";
+const spec = specText(smallestHeatmapSpec);
+const play = playgroundHref(smallestHeatmapSpec);
+const grid = `{
+  "mark": { "layout": "grid" }
+}`;
+const calendar = `{
+  "encoding": { "x": { "field": "date", "type": "temporal" }, "color": "value" },
+  "mark": { "layout": "calendar", "weeks": 12 }
+}`;
+const scheme = `{
+  "encoding": {
+    "color": { "field": "value", "scale": { "scheme": "teal" } }
+  }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A heatmap paints a cell for each row. The position is the category. The color is the number. You read a pattern across the grid, not a length.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a heatmap when the question is which combinations stand out. Requests by hour is a week of hours. The dark cells are the busy ones. Load by service is four services across five weekdays. Jobs on Thursday and Auth on Friday carry the load. Commit calendar is the same idea on dates: twelve weeks, one cell per day.
+  </p>
+  <p>
+    A <a href="/docs/charts/bar">bar</a> ranks one list. The length is the number, and the categories sit on a straight axis. A heatmap of every hour and day would be dozens of bars. The color is the comparison when the matrix is the point.
+  </p>
+  <p>
+    A table is for reading the number in a cell. Load by service looks like a table, and the cells line up in rows and columns, but the fill is the encoding. Use a table when the reader needs the exact figure first. Use a heatmap when they need the pattern. The tooltip still carries the number.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Heatmap, bar, and a table</h2>
+  <p>
+    <code>type: "heatmap"</code> binds the number to <code>encoding.color</code>. <code>encoding.x</code> is the column. <code>encoding.y</code>, when you set it, is the row. Omit <code>y</code> and pass dates, and the chart is a calendar.
+  </p>
+  <p>
+    <code>type: "bar"</code> binds the number to <code>encoding.y</code> and draws a length. A heatmap does not. Putting the calendar's number on <code>y</code> repairs it onto <code>color</code>. On a grid, <code>y</code> stays the row, and a missing <code>color</code> is an error.
+  </p>
+  <p>
+    <code>grid-heatmap</code> repairs to a grid. <code>calendar-heatmap</code> repairs to a calendar. <code>rect</code> repairs to heatmap. The type string is <code>heatmap</code> either way. There is no second chart type for the calendar.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one cell. Requests by hour uses <code>hour</code>, <code>day</code>, and <code>value</code>. Load by service uses <code>day</code>, <code>service</code>, and <code>load</code>. Commit calendar uses <code>date</code> and <code>value</code>, and it does not have a row field.
+  </p>
+  <p>
+    For a grid, set <code>encoding.x</code>, <code>encoding.y</code>, and <code>encoding.color</code>. Omit <code>mark.layout</code> and the <code>y</code> field selects the grid. Set <code>mark.layout</code> to <code>grid</code> when you want that written down. Requests by hour and Load by service both do.
+  </p>
+  <p>
+    For a calendar, point <code>encoding.x</code> at a date and <code>encoding.color</code> at the number. Set <code>mark.layout</code> to <code>calendar</code>. A missing <code>y</code> also selects the calendar, which is why the smallest grid on this page includes <code>y</code>. <code>mark.weeks</code> is how many weeks to show, ending on the week of the latest day. Commit calendar sets 12. The default is 52. On a grid, <code>weeks</code> warns CK3012 and is ignored.
+  </p>
+  <p>
+    A cell with no number is a hatch, not the low end of the ramp, so a gap does not look like a quiet hour. Categories keep the order they first appear in.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest heatmap. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Two cells share a row, so <code>encoding.y</code> makes a grid and <code>mark</code> can be omitted. The ramp is blue until you name a scheme.
+  </p>
+  <TeachFacts type="heatmap" label="Heatmap packages" spec={spec} />
+  <p>
+    Heatmap ships in <code>@chartkitdev/core/all</code>. <code>createRenderer([heatmap])</code> from <code>@chartkitdev/core/charts/heatmap</code> is the one-chart build.
+  </p>
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    Requests by hour is the gallery grid: seven days, eight hours. Load by service is the smaller matrix, services by weekday. Commit calendar is the date layout. The layout is part of the example, because a calendar has no row field and a category grid has no dates. Switching one into the other does not produce the other chart.
+  </p>
+</section>
+
+<section id="layout">
+  <h2>Layout</h2>
+  <p>
+    <code>mark.layout</code> is <code>grid</code> or <code>calendar</code>. It wins when you set it. Otherwise <code>encoding.y</code> means grid, and a missing <code>y</code> means calendar.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.layout grid</span></figcaption>
+    <pre><code>{grid}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>mark.layout calendar</span></figcaption>
+    <pre><code>{calendar}</code></pre>
+  </figure>
+  <p>
+    There is no layout control on this page. Pick the example that matches the table you have. Requests by hour and Load by service are grids. Commit calendar sets <code>calendar</code> and <code>weeks</code>.
+  </p>
+</section>
+
+<TeachConcept id="scheme" title="Scheme">
+  <p>
+    <code>encoding.color.scale.scheme</code> is the ramp. <code>blue</code>, <code>teal</code>, <code>orange</code>, or <code>violet</code>. Omit it and the ramp is blue. The low end is light and the high end is dark on a light page. A dark theme uses a brighter ramp of the same name.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.color.scale.scheme</span></figcaption>
+    <pre><code>{scheme}</code></pre>
+  </figure>
+  <p>
+    The field, the title, and any other scale keys stay. Requests by hour sets <code>title</code> to Requests, and the ramp draws that label. <code>validate()</code> also warns CK3012 on a color title, the note it uses when a title belongs on an axis. The heatmap still paints it on the ramp. Load by service stores the measure as the field name <code>load</code>. Choosing blue again puts that channel back, including a bare field name. A <code>range</code> of two or more colors replaces the named scheme. Set that in the playground.
+  </p>
+  <p>
+    The ramp is drawn under the cells. That strip is the color legend. The <code>legend</code> key is the series legend used by bars and lines. It does not replace this ramp.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a heatmap when the key is omitted. Hovering a cell shows its categories and its value. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Change those in the playground. Turning the card off and on again puts that object back. An example that omitted <code>tooltip</code> gets the key removed, so the default stays on.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.gap</code> is the space between cells, as a fraction of the band. Omit it and a grid uses a small gap. <code>mark.cornerRadius</code> rounds the cells. <code>mark.weeks</code> belongs on a calendar. Sequential is the default scale. Diverging, quantize, threshold, and an explicit domain live on <code>encoding.color.scale</code> in the playground, with the theme presets.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/bar">Bar</a> compares categories by length. One list, not a matrix.</li>
+    <li><a href="/docs/charts/line">Line</a> is a value over one ordered axis. It is not a grid of cells.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />
