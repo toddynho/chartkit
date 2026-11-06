@@ -1,0 +1,18 @@
+---
+import "../styles/teach.css";
+import ChartDemo from "./ChartDemo.astro";
+import Docs from "../layouts/Docs.astro";
+import type { TeachModule } from "../data/teach/types";
+
+interface Props {
+  module: TeachModule;
+}
+
+const { module } = Astro.props;
+const href = `/docs/charts/${module.type}`;
+---
+
+<Docs title={module.title} description={module.description} href={href}>
+  <slot />
+  <ChartDemo slot="rail" type={module.type} />
+</Docs>

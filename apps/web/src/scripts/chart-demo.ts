@@ -1,16 +1,8 @@
 import { attach, type Controller } from "@chartkitdev/core/interact";
 import { paintSpec } from "../lib/chartkit";
 import { withPreviewSize } from "../data/preview-size";
-import {
-  applyDonutAction,
-  donutControlState,
-  donutExamples,
-  formatDonutNumber,
-  playgroundHref,
-  roundDonut,
-  specText,
-  type DonutAction,
-} from "../data/donut-teach";
+import { teachModule } from "../data/teach/registry";
+import { formatNumber, openTeachExample, playgroundHref, roundStep, specText } from "../data/teach/spec";
 
 function buttons(root: ParentNode, selector: string): HTMLButtonElement[] {
   return [...root.querySelectorAll<HTMLButtonElement>(selector)];
@@ -24,51 +16,47 @@ function setPressed(group: HTMLButtonElement[], value: string): void {
   }
 }
 
-/** Wire the donut docs demo. The markup already shows the first example without this script. */
+/** Wire a teaching-page demo. The markup already shows the first example without this script. */
 export function mountChartDemo(): void {
-  const root = document.querySelector<HTMLElement>("[data-chart-demo]");
-  if (!root || root.dataset.ready === "1") return;
-  root.dataset.ready = "1";
+  const found = document.querySelector<HTMLElement>("[data-chart-demo]");
+  if (!found || found.dataset.ready === "1") return;
+  const demo: HTMLElement = found;
+  const module = teachModule(demo.dataset.teachType ?? "");
+  if (!module) return;
+  demo.dataset.ready = "1";
 
-  const chart = root.querySelector<HTMLElement>("[data-demo-chart]");
-  const snippet = root.querySelector<HTMLElement>("[data-demo-snippet]");
-  const play = root.querySelector<HTMLAnchorElement>("[data-demo-play]");
-  const blurb = root.querySelector<HTMLElement>("[data-demo-blurb]");
-  const error = root.querySelector<HTMLElement>("[data-demo-error]");
-  const hole = root.querySelector<HTMLInputElement>('[data-range="innerRadius"]');
-  const gap = root.querySelector<HTMLInputElement>('[data-range="padAngle"]');
-  const holeOut = root.querySelector<HTMLElement>('[data-range-out="innerRadius"]');
-  const gapOut = root.querySelector<HTMLElement>('[data-range-out="padAngle"]');
-  const switcher = root.querySelector<HTMLElement>("[data-ex-switch]");
-  const titleButton = root.querySelector<HTMLButtonElement>("[data-ex-title]");
-  const nameEl = root.querySelector<HTMLElement>("[data-ex-name]");
-  const countEl = root.querySelector<HTMLElement>("[data-ex-count]");
-  const menu = root.querySelector<HTMLElement>("#ex-switch-list");
-  const prev = root.querySelector<HTMLButtonElement>("[data-ex-prev]");
-  const next = root.querySelector<HTMLButtonElement>("[data-ex-next]");
-  const options = buttons(root, "[data-example-id]");
-  const labelButtons = buttons(root, '[data-choice="labels"]');
-  const legendButtons = buttons(root, '[data-choice="legend"]');
-  const tooltipButtons = buttons(root, '[data-choice="tooltip"]');
-  const paletteButtons = buttons(root, '[data-choice="palette"]');
-  const sortButtons = buttons(root, '[data-choice="sort"]');
-  const startButtons = buttons(root, '[data-choice="startAngle"]');
-  if (!chart || !snippet || !play || !hole || !gap) return;
+  const chart = demo.querySelector<HTMLElement>("[data-demo-chart]");
+  const snippet = demo.querySelector<HTMLElement>("[data-demo-snippet]");
+  const play = demo.querySelector<HTMLAnchorElement>("[data-demo-play]");
+  const blurb = demo.querySelector<HTMLElement>("[data-demo-blurb]");
+  const error = demo.querySelector<HTMLElement>("[data-demo-error]");
+  const switcher = demo.querySelector<HTMLElement>("[data-ex-switch]");
+  const titleButton = demo.querySelector<HTMLButtonElement>("[data-ex-title]");
+  const nameEl = demo.querySelector<HTMLElement>("[data-ex-name]");
+  const countEl = demo.querySelector<HTMLElement>("[data-ex-count]");
+  const menu = demo.querySelector<HTMLElement>("#ex-switch-list");
+  const prev = demo.querySelector<HTMLButtonElement>("[data-ex-prev]");
+  const next = demo.querySelector<HTMLButtonElement>("[data-ex-next]");
+  const options = buttons(demo, "[data-example-id]");
+  const ranges = [...demo.querySelectorAll<HTMLInputElement>("[data-range]")];
+  const choiceButtons = buttons(demo, "[data-choice]");
+  if (!chart || !snippet || !play) return;
 
-  const byId = new Map(donutExamples.map((example) => [example.id, example]));
-  let index = Math.max(0, donutExamples.findIndex((example) => example.id === root.dataset.example));
+  const examples = module.examples;
+  const byId = new Map(examples.map((example) => [example.id, example]));
+  let index = Math.max(0, examples.findIndex((example) => example.id === demo.dataset.example));
   let cursor = index;
   let menuOpen = false;
   let tip: Controller | null = null;
-  let current = structuredClone(donutExamples[index]!.spec);
+  let current = openTeachExample(examples[index]!.spec);
 
   function exampleFromUrl(): number {
     const params = new URLSearchParams(window.location.search);
     const query = params.get("example");
-    if (query && byId.has(query)) return donutExamples.findIndex((example) => example.id === query);
+    if (query && byId.has(query)) return examples.findIndex((example) => example.id === query);
     const hash = window.location.hash.replace(/^#/, "");
     const hashed = hash.startsWith("example=") ? hash.slice("example=".length) : hash;
-    if (hashed && byId.has(hashed)) return donutExamples.findIndex((example) => example.id === hashed);
+    if (hashed && byId.has(hashed)) return examples.findIndex((example) => example.id === hashed);
     return -1;
   }
 
@@ -81,7 +69,7 @@ export function mountChartDemo(): void {
   }
 
   function paintMenu(): void {
-    const currentId = donutExamples[index]?.id;
+    const currentId = examples[index]?.id;
     for (const option of options) {
       const on = option.dataset.exampleId === currentId;
       const hot = options[cursor] === option;
@@ -94,14 +82,14 @@ export function mountChartDemo(): void {
 
   function setSteps(): void {
     const atStart = index <= 0;
-    const atEnd = index >= donutExamples.length - 1;
+    const atEnd = index >= examples.length - 1;
     if (prev) prev.setAttribute("aria-disabled", atStart ? "true" : "false");
     if (next) next.setAttribute("aria-disabled", atEnd ? "true" : "false");
-    if (countEl) countEl.textContent = `${index + 1} / ${donutExamples.length}`;
-    const example = donutExamples[index];
+    if (countEl) countEl.textContent = `${index + 1} / ${examples.length}`;
+    const example = examples[index];
     if (nameEl && example) nameEl.textContent = example.title;
     if (blurb && example) blurb.textContent = example.blurb;
-    if (example) root.dataset.example = example.id;
+    if (example) demo.dataset.example = example.id;
     paintMenu();
   }
 
@@ -123,16 +111,16 @@ export function mountChartDemo(): void {
   }
 
   function showExample(nextIndex: number, updateUrl: boolean, focusTitle = false): void {
-    if (nextIndex < 0 || nextIndex >= donutExamples.length) return;
+    if (nextIndex < 0 || nextIndex >= examples.length) return;
     if (nextIndex === index) {
       closeMenu(focusTitle);
       return;
     }
-    const example = donutExamples[nextIndex];
+    const example = examples[nextIndex];
     if (!example) return;
     index = nextIndex;
     cursor = nextIndex;
-    current = structuredClone(example.spec);
+    current = openTeachExample(example.spec);
     setSteps();
     sync();
     draw(true);
@@ -170,51 +158,53 @@ export function mountChartDemo(): void {
   }
 
   function sync(): void {
-    const state = donutControlState(current);
-    hole!.value = String(state.innerRadius);
-    gap!.value = String(state.padAngle);
-    if (holeOut) holeOut.textContent = formatDonutNumber(state.innerRadius);
-    if (gapOut) gapOut.textContent = formatDonutNumber(state.padAngle);
-    setPressed(labelButtons, state.labels);
-    setPressed(legendButtons, state.legend);
-    setPressed(tooltipButtons, state.tooltip);
-    setPressed(paletteButtons, state.palette);
-    setPressed(sortButtons, state.sort);
-    setPressed(startButtons, String(state.startAngle));
+    const state = module!.controlState(current);
+    for (const input of ranges) {
+      const id = input.dataset.range ?? "";
+      const value = state[id];
+      if (typeof value !== "number") continue;
+      input.value = String(value);
+      const out = demo.querySelector<HTMLElement>(`[data-range-out="${id}"]`);
+      if (out) out.textContent = formatNumber(value);
+    }
+    const groups = new Map<string, HTMLButtonElement[]>();
+    for (const button of choiceButtons) {
+      const id = button.dataset.choice ?? "";
+      const group = groups.get(id) ?? [];
+      group.push(button);
+      groups.set(id, group);
+    }
+    for (const [id, group] of groups) {
+      const value = state[id];
+      setPressed(group, value == null ? "" : String(value));
+    }
   }
 
-  function apply(action: DonutAction): void {
-    applyDonutAction(current, action);
+  function applyChoice(id: string, value: string): void {
+    const restore = id === "tooltip" ? examples[index]?.spec.tooltip : undefined;
+    module!.apply(current, { id, value, restore });
     sync();
     draw();
   }
 
-  hole.addEventListener("input", () => {
-    const value = roundDonut(Number(hole.value), 0.01);
-    if (holeOut) holeOut.textContent = formatDonutNumber(value);
-    applyDonutAction(current, { type: "innerRadius", value });
-    draw();
-  });
-  gap.addEventListener("input", () => {
-    const value = roundDonut(Number(gap.value), 0.5);
-    if (gapOut) gapOut.textContent = formatDonutNumber(value);
-    applyDonutAction(current, { type: "padAngle", value });
-    draw();
-  });
+  for (const input of ranges) {
+    input.addEventListener("input", () => {
+      const id = input.dataset.range ?? "";
+      const step = Number(input.step) || 1;
+      const value = roundStep(Number(input.value), step);
+      const out = demo.querySelector<HTMLElement>(`[data-range-out="${id}"]`);
+      if (out) out.textContent = formatNumber(value);
+      module.apply(current, { id, value });
+      draw();
+    });
+  }
 
-  for (const button of [...labelButtons, ...legendButtons, ...tooltipButtons, ...paletteButtons, ...sortButtons, ...startButtons]) {
+  for (const button of choiceButtons) {
     button.addEventListener("click", () => {
-      const choice = button.dataset.choice;
+      const id = button.dataset.choice;
       const value = button.dataset.value;
-      if (!choice || value == null) return;
-      if (choice === "labels" && (value === "off" || value === "inside" || value === "outside")) apply({ type: "labels", value });
-      else if (choice === "legend" && (value === "off" || value === "bottom" || value === "right")) apply({ type: "legend", value });
-      else if (choice === "tooltip" && (value === "off" || value === "on")) {
-        apply({ type: "tooltip", value, restore: donutExamples[index]?.spec.tooltip });
-      }
-      else if (choice === "palette" && (value === "theme" || value === "set")) apply({ type: "palette", value });
-      else if (choice === "sort" && (value === "none" || value === "asc" || value === "desc")) apply({ type: "sort", value });
-      else if (choice === "startAngle") apply({ type: "startAngle", value: Number(value) });
+      if (!id || value == null) return;
+      applyChoice(id, value);
     });
   }
 
@@ -241,7 +231,7 @@ export function mountChartDemo(): void {
   for (const option of options) {
     option.addEventListener("mousedown", (event) => event.preventDefault());
     option.addEventListener("click", () => {
-      const nextIndex = donutExamples.findIndex((example) => example.id === option.dataset.exampleId);
+      const nextIndex = examples.findIndex((example) => example.id === option.dataset.exampleId);
       showExample(nextIndex, true, true);
     });
   }
@@ -257,7 +247,7 @@ export function mountChartDemo(): void {
       event.preventDefault();
       if (!menuOpen) openMenu();
       else {
-        cursor = event.key === "ArrowDown" ? Math.min(donutExamples.length - 1, cursor + 1) : Math.max(0, cursor - 1);
+        cursor = event.key === "ArrowDown" ? Math.min(examples.length - 1, cursor + 1) : Math.max(0, cursor - 1);
         paintMenu();
       }
     } else if ((event.key === "Enter" || event.key === " ") && event.target === titleButton) {
@@ -286,7 +276,7 @@ export function mountChartDemo(): void {
     draw();
   }
 
-  const copy = root.querySelector<HTMLButtonElement>("[data-demo-copy]");
+  const copy = demo.querySelector<HTMLButtonElement>("[data-demo-copy]");
   copy?.addEventListener("click", async () => {
     const text = snippet.textContent ?? "";
     try {

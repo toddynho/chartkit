@@ -1,0 +1,34 @@
+---
+import StackSample from "./StackSample.astro";
+import { chartPage } from "../data/docs-catalog";
+
+interface Props {
+  type: string;
+  label: string;
+  spec: string;
+}
+
+const { type, label, spec } = Astro.props;
+const chart = chartPage(type);
+---
+
+<figure class="code">
+  <figcaption><span>spec.json</span></figcaption>
+  <pre><code>{spec}</code></pre>
+</figure>
+<p>Install core and the adapter for your framework. The menu in the sidebar picks the snippet. <code>spec</code> is the JSON above.</p>
+<div class="facts facts--names" aria-label={label}>
+  {
+    chart.facts.map((fact) => (
+      <span class="fact">
+        <span class="fact__k">{fact.k}</span>
+        <span class="fact__v">{fact.v}</span>
+      </span>
+    ))
+  }
+  <span class="fact">
+    <span class="fact__k">Family</span>
+    <span class="fact__v">{chart.family}</span>
+  </span>
+</div>
+<StackSample />

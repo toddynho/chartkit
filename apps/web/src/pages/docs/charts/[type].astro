@@ -1,14 +1,26 @@
 ---
 import ChartDoc from "../../../components/ChartDoc.astro";
+import DonutGuide from "../../../components/DonutGuide.astro";
+import LineGuide from "../../../components/LineGuide.astro";
+import PieGuide from "../../../components/PieGuide.astro";
 import ResponseRail from "../../../components/ResponseRail.astro";
+import TeachChart from "../../../components/TeachChart.astro";
 import { chartPage, chartPageTypes, chipsForChart, specForChart } from "../../../data/docs-catalog";
+import { teachModule, teachModules } from "../../../data/teach/registry";
 import Docs from "../../../layouts/Docs.astro";
 
-export function getStaticPaths() {
-  return chartPageTypes.filter((type) => type !== "donut").map((type) => ({ params: { type } }));
+const guided = new Set(["donut", "pie", "line"]);
+for (const key of Object.keys(teachModules)) {
+  if (!guided.has(key)) throw new Error(`Add a guide for the ${key} teach module in this page.`);
 }
 
-const chart = chartPage(Astro.params.type ?? "");
+export function getStaticPaths() {
+  return chartPageTypes.map((type) => ({ params: { type } }));
+}
+
+const typeName = Astro.params.type ?? "";
+const module = teachModule(typeName);
+const chart = chartPage(typeName);
 const spec = specForChart(chart);
 const href = `/docs/charts/${chart.type}`;
 const geoCopy: Record<string, { title: string; lede: string }> = {
@@ -26,7 +38,17 @@ const title = geo?.title ?? chart.title;
 const lede = geo?.lede ?? chart.lede;
 ---
 
-<Docs title={title} description={lede} lede={lede} href={href}>
-  <ChartDoc chart={chart} />
-  {geo ? null : <ResponseRail slot="rail" spec={spec} chips={chipsForChart(chart.type)} />}
-</Docs>
+{
+  module ? (
+    <TeachChart module={module}>
+      {module.type === "donut" ? <DonutGuide /> : null}
+      {module.type === "pie" ? <PieGuide /> : null}
+      {module.type === "line" ? <LineGuide /> : null}
+    </TeachChart>
+  ) : (
+    <Docs title={title} description={lede} lede={lede} href={href}>
+      <ChartDoc chart={chart} />
+      {geo ? null : <ResponseRail slot="rail" spec={spec} chips={chipsForChart(chart.type)} />}
+    </Docs>
+  )
+}

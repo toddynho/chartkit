@@ -1,6 +1,7 @@
 /*
-  Donut docs demo inside the shared docs rail.
-  The page itself uses Docs.astro. This file does not change the frame or .docs-main width.
+  Teaching-page demo inside the shared docs rail.
+  Donut, pie, and line use this. The page itself uses Docs.astro.
+  This file does not change the frame or .docs-main width.
 */
 
 .docs-try.chart-demo {
