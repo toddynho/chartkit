@@ -33,6 +33,10 @@ import TreeGuide from "../../../components/TreeGuide.astro";
 import TreemapGuide from "../../../components/TreemapGuide.astro";
 import VennGuide from "../../../components/VennGuide.astro";
 import WaterfallGuide from "../../../components/WaterfallGuide.astro";
+import GaugeGuide from "../../../components/GaugeGuide.astro";
+import KpiGuide from "../../../components/KpiGuide.astro";
+import ProgressRingGuide from "../../../components/ProgressRingGuide.astro";
+import BulletGuide from "../../../components/BulletGuide.astro";
 import { chartPage, chartPageTypes, chipsForChart, specForChart } from "../../../data/docs-catalog";
 import { teachModule, teachModules } from "../../../data/teach/registry";
 import Docs from "../../../layouts/Docs.astro";
@@ -69,6 +73,10 @@ const guided = new Set([
   "heatmap",
   "radar",
   "candlestick",
+  "gauge",
+  "kpi",
+  "progress-ring",
+  "bullet",
 ]);
 for (const key of Object.keys(teachModules)) {
   if (!guided.has(key)) throw new Error(`Add a guide for the ${key} teach module in this page.`);
@@ -132,6 +140,10 @@ const lede = geo?.lede ?? chart.lede;
       {module.type === "heatmap" ? <HeatmapGuide /> : null}
       {module.type === "radar" ? <RadarGuide /> : null}
       {module.type === "candlestick" ? <CandlestickGuide /> : null}
+      {module.type === "gauge" ? <GaugeGuide /> : null}
+      {module.type === "kpi" ? <KpiGuide /> : null}
+      {module.type === "progress-ring" ? <ProgressRingGuide /> : null}
+      {module.type === "bullet" ? <BulletGuide /> : null}
     </TeachChart>
   ) : (
     <Docs title={title} description={lede} lede={lede} href={href}>

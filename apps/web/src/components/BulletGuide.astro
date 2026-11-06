@@ -1,0 +1,151 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestBulletSpec } from "../data/teach/bullet";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/bullet";
+const spec = specText(smallestBulletSpec);
+const play = playgroundHref(smallestBulletSpec);
+const ranges = `{
+  "mark": { "ranges": ["poor", "ok", "good"] }
+}`;
+const target = `{
+  "encoding": { "target": "target" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A bullet is a measure against a target, on a straight track, with qualitative ranges behind it. Each row is one measure. The bar is the value. The line across the track is the target. The bands are the ranges, worst to best.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a bullet when the question is whether a measure has passed its target, and which range it sits in. Quota puts revenue past its target and profit still short. Against the bed marks does the same for three crops.
+  </p>
+  <p>
+    A <a href="/docs/charts/bar">bar</a> compares categories. The bars do not sit on a target, and there are no poor, ok, and good bands behind them. A horizontal bar is still a bar. <code>mark.orientation</code> does not apply here. A <a href="/docs/charts/gauge">gauge</a> is one dial. A bullet is the straight form of a measure against a target: one row per measure, a marker you can see, and range bands. A linear gauge is this chart. <code>bullet-chart</code> repairs to <code>bullet</code>.
+  </p>
+  <p>
+    A handful of rows stays readable. Quota has two. Against the bed marks has three. A long ranking, with no target, is a bar.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Bullet, bar, and gauge</h2>
+  <p>
+    All three can show a value per name. The encoding is what changes.
+  </p>
+  <p>
+    <code>type: "bullet"</code> needs <code>encoding.y</code> for the measure. <code>encoding.x</code> is the row label. <code>encoding.target</code> is the marker field. <code>mark.ranges</code> names the band fields, worst to best. Each number in those fields is the upper edge of that band.
+  </p>
+  <p>
+    <code>type: "bar"</code> uses <code>encoding.x</code> and <code>encoding.y</code> and compares the bars with each other. It has no target channel and no range bands.
+  </p>
+  <p>
+    <code>type: "gauge"</code> stores <code>metric.target</code> on the dial and does not draw it. The bullet draws the target as a line. One gauge is one reading. A bullet can list several.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one measure. Quota uses <code>name</code>, <code>value</code>, <code>target</code>, and the band fields <code>poor</code>, <code>ok</code>, and <code>good</code>. Against the bed marks uses <code>crop</code>, <code>kilos</code>, <code>mark</code>, and <code>thin</code>, <code>fair</code>, <code>full</code>. Café bags against the aim uses one band, <code>wide</code>.
+  </p>
+  <p>
+    Point <code>encoding.x</code> at the label, <code>encoding.y</code> at the measure, and <code>encoding.target</code> at the marker. <code>mark.ranges</code> is the field names, in order from the worst band to the best. The values must be the upper edges, and they are sorted before they are drawn. Omit the list and the row still has three bands, at half, three quarters, and the full scale.
+  </p>
+  <p>
+    A missing measure is skipped. The scale for a row runs at least to the value, the target, and the last band. Rows do not share one axis. Revenue at 275 and profit at 22 each fill their own track.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest bullet. <code>version</code>, <code>type</code>, <code>encoding.y</code>, and <code>a11y.alt</code> are required. One range field and a target are enough. The row label comes from <code>encoding.x</code>.
+  </p>
+  <TeachFacts type="bullet" label="Bullet packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing bullet specs. Quota is the core chart, two measures and three bands. Against the bed marks is three crops, and the size 880 by 240 wins over the preview default. Café bags against the aim is one row and one band, at 640 by 200.
+  </p>
+</section>
+
+<TeachConcept id="ranges" title="Ranges">
+  <p>
+    <code>mark.ranges</code> names the columns that draw the bands, worst first. Quota uses <code>poor</code>, <code>ok</code>, and <code>good</code>. Against the bed marks uses <code>thin</code>, <code>fair</code>, and <code>full</code>. Café bags against the aim uses only <code>wide</code>. Each value is that band's upper edge.
+  </p>
+  <p>
+    Off removes the list. The measure and the target stay, and the track falls back to three even bands. On puts that example's field list back. An example that omitted the list stays on the even bands.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.ranges</span></figcaption>
+    <pre><code>{ranges}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="target" title="Target">
+  <p>
+    <code>encoding.target</code> is the field for the marker. The marker is a line across the band. Quota points it at <code>target</code>. Against the bed marks points it at <code>mark</code>. Café bags against the aim points it at <code>aim</code>.
+  </p>
+  <p>
+    Off removes that channel. The value bar and the ranges stay, and the line goes away. On puts the example's field back. The other encoding channels are left as they were.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.target</span></figcaption>
+    <pre><code>{target}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    Each row already prints its name and its value. The measure and the target marker also carry an SVG title with the value and the target. <code>tooltip</code> is the hover card, the same key as on a bar. Omit it and this control reads on. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> and <code>tooltip.position</code> stay in the playground. Turning the card off and on again puts that object back. An example that omitted <code>tooltip</code> gets the key removed.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    A bullet does not draw a legend. The row names are the labels. There is no orientation key. A qualitative color per band is not a separate option: the bands share the track color and step down in opacity, worst to best. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/bar">Bar</a> compares categories, with no target marker and no range bands.</li>
+    <li><a href="/docs/charts/gauge">Gauge</a> is one reading on a dial. The target is stored, not drawn.</li>
+    <li><a href="/docs/charts/bar-list">Bar list</a> ranks labels. It is not a measure against a target.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

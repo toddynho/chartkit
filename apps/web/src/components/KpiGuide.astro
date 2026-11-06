@@ -1,0 +1,193 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestKpiSpec } from "../data/teach/kpi";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/kpi";
+const spec = specText(smallestKpiSpec);
+const play = playgroundHref(smallestKpiSpec);
+const direction = `{
+  "metric": { "goodDirection": "down" }
+}`;
+const format = `{
+  "metric": { "format": "compact" }
+}`;
+const sparkline = `{
+  "data": [10, 12, 9, 14, 18, 17]
+}`;
+const thresholds = `{
+  "metric": {
+    "thresholds": [
+      { "value": 0, "color": "positive" }
+    ]
+  }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A KPI is a number first. The card prints a label, a formatted value, and a delta. A sparkline can sit under the figure. There is no dial and no scale.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a KPI when the question is the figure, and how it moved. Revenue at 125,000, up 12.5 percent, with a short sparkline, is that chart. Green beans is the same card when a lower bill is the good direction.
+  </p>
+  <p>
+    A <a href="/docs/charts/gauge">gauge</a> puts one reading on a dial, with ticks and a needle. Use it when the position on a scale is the point. A <a href="/docs/charts/progress-ring">progress ring</a> is a share of a maximum. A <a href="/docs/charts/sparkline">sparkline</a> is the trend alone, with no label and no delta. Pass the number array on a KPI when the figure and the trend belong together.
+  </p>
+  <p>
+    One card is one metric. A row of cards is several specs. The chart does not compare categories.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>KPI and gauge</h2>
+  <p>
+    Both take a <code>metric</code> object. The type decides the drawing.
+  </p>
+  <p>
+    <code>type: "kpi"</code> prints <code>metric.value</code> large. <code>metric.delta</code> is the change, as a fraction unless <code>metric.deltaFormat</code> says otherwise. 0.125 is +12.5 percent with the default delta format. The arrow follows the sign.
+  </p>
+  <p>
+    <code>type: "gauge"</code> is the dial. <code>metric.min</code> and <code>metric.max</code> are the scale. A KPI ignores that scale. Do not put <code>value</code> or <code>delta</code> at the top of the spec. They belong under <code>metric</code>.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    <code>metric.value</code> is required. <code>metric.label</code> is the line above it. <code>metric.format</code> is a preset, such as <code>compact</code>, <code>number</code>, or <code>percent</code>, or an object for currency, decimals, and a suffix. Green beans uses a currency object. Churn uses a number with one decimal and a percent suffix.
+  </p>
+  <p>
+    <code>data</code> is an optional list of numbers. Two or more numbers draw a sparkline. The field name is <code>value</code>. You do not set <code>encoding</code> for that line. Omit <code>data</code> and the card is the figure only.
+  </p>
+  <p>
+    <code>metric.goodDirection</code> is <code>up</code> or <code>down</code>. Omit it and up is good: a positive delta uses the positive color, and a negative delta uses the negative color. Down reverses that, which is what you want for a cost or a churn rate.
+  </p>
+  <p>
+    <code>metric.thresholds</code> colors the card surface. Each step is <code>value</code> and <code>color</code>. The last step at or below <code>metric.value</code> wins. A value under every step still uses the first. The label on a step is not drawn.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest KPI. <code>version</code>, <code>type</code>, <code>metric.value</code>, and <code>a11y.alt</code> are required. The delta is optional. There is no sparkline until you pass <code>data</code>. Up is the good direction, and the surface stays the theme surface.
+  </p>
+  <TeachFacts type="kpi" label="KPI packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing KPI specs. Revenue is the core example: compact format, a rising delta, and a sparkline. Green beans is a currency card where down is good. Churn colors the surface from three steps and also treats down as good. A size in the spec wins. Green beans is 420 by 240. Churn is 300 by 96.
+  </p>
+</section>
+
+<TeachConcept id="direction" title="Good when">
+  <p>
+    <code>metric.goodDirection</code> chooses which way of <code>metric.delta</code> is good. Omit it, or leave it unset, and up is good. <code>down</code> paints a falling delta with the positive color and a rising delta with the negative color.
+  </p>
+  <p>
+    Green beans and Churn set <code>down</code>. Revenue omits the key. Up removes the key, so the default stays omitted. Down writes <code>down</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>metric.goodDirection</span></figcaption>
+    <pre><code>{direction}</code></pre>
+  </figure>
+  <p>
+    <code>metric.deltaFormat</code> formats the delta. The default is a signed percent. Change it in the playground.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="format" title="Format">
+  <p>
+    <code>metric.format</code> formats the big number. <code>compact</code>, <code>number</code>, and <code>percent</code> are the presets a first card sets. Revenue uses <code>compact</code>.
+  </p>
+  <p>
+    A currency, a decimal count, or a suffix is an object. Green beans and Churn use objects, so none of the preset buttons start pressed. Choosing a preset writes that string and replaces the object. Switch examples to get the object back. The object itself stays in the playground.
+  </p>
+  <figure class="code">
+    <figcaption><span>metric.format</span></figcaption>
+    <pre><code>{format}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="sparkline" title="Sparkline">
+  <p>
+    <code>data</code> is a list of numbers. The card draws a filled line through them, under the value. Omit it and there is no line. A single number is not enough. The line needs two points.
+  </p>
+  <p>
+    Off removes <code>data</code>. On puts that example's array back. An example that omitted the array stays a number only. This is not <code>type: "sparkline"</code>. The KPI keeps the label, the value, and the delta.
+  </p>
+  <figure class="code">
+    <figcaption><span>data</span></figcaption>
+    <pre><code>{sparkline}</code></pre>
+  </figure>
+  <p>
+    <code>mark.strokeWidth</code> and <code>mark.fillOpacity</code> tune the line. Churn sets both. Change them in the playground. Sampling does not apply to a KPI and warns CK3010.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="thresholds" title="Thresholds">
+  <p>
+    <code>metric.thresholds</code> colors the whole card from the value. Steps are ordered by <code>value</code>. The last step at or below the value wins. Churn is teal under 3, sand from 3, and red from 5, so 2.4 stays on the first step.
+  </p>
+  <p>
+    Off removes the list and the surface returns to the theme. On puts that example's steps back. An example that omitted them gets one step at 0 with the positive color, so the card changes and you can see the key. A bad list, such as two steps with the same value, warns CK3082 and the surface stays plain.
+  </p>
+  <figure class="code">
+    <figcaption><span>metric.thresholds</span></figcaption>
+    <pre><code>{thresholds}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    The card already prints the label, the value, and the delta. <code>tooltip</code> is the hover card, the same key as on a bar. Omit it and this control reads on. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> and <code>tooltip.position</code> stay in the playground. Turning the card off and on again puts that object back. An example that omitted <code>tooltip</code> gets the key removed.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    A KPI does not use a legend. There is one figure. <code>metric.deltaFormat</code> and the sparkline stroke stay in the playground, with the theme presets and the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/gauge">Gauge</a> is a dial for one reading on a scale.</li>
+    <li><a href="/docs/charts/sparkline">Sparkline</a> is the trend alone, for a table cell or a label.</li>
+    <li><a href="/docs/charts/progress-ring">Progress ring</a> is a share of a maximum.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

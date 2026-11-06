@@ -1,0 +1,188 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestProgressRingSpec } from "../data/teach/progress-ring";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/progress-ring";
+const spec = specText(smallestProgressRingSpec);
+const play = playgroundHref(smallestProgressRingSpec);
+const readout = `{
+  "metric": {
+    "format": { "style": "number", "decimals": 1, "suffix": "%" }
+  }
+}`;
+const cap = `{
+  "mark": { "linecap": "butt" }
+}`;
+const sweep = `{
+  "mark": { "startAngle": 0, "endAngle": 270 }
+}`;
+const rings = `{
+  "mark": {
+    "rings": [
+      { "value": 530, "max": 600, "color": "#ff375f", "label": "Move" },
+      { "value": 32, "max": 45, "color": "#30d158", "label": "Exercise" },
+      { "value": 10, "max": 12, "color": "#0a84ff", "label": "Stand" }
+    ]
+  }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A progress ring is one value between a minimum and a maximum, drawn as an arc on a circular track. The center states the share, or the value when you format it. There is no needle and there are no slices.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a progress ring when the question is how far one amount is toward its maximum. Uptime at 99.2 out of 100 is that chart. Checks closed, 7 of 10, is the same chart with a smaller maximum.
+  </p>
+  <p>
+    A <a href="/docs/charts/donut">donut</a> and a <a href="/docs/charts/pie">pie</a> split one total into parts. The angle is the share of the whole. A progress ring is not parts of a whole. The track is the full range, and the arc is one value along it. A <a href="/docs/charts/gauge">gauge</a> is a dial: ticks, a needle, and a sweep that opens at the bottom. A <a href="/docs/charts/kpi">KPI</a> prints the number with a delta and no ring.
+  </p>
+  <p>
+    Several goals on one chart are concentric rings, not extra slices. Activity draws move, exercise, and stand. The first ring is the outside.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Progress ring, donut, and gauge</h2>
+  <p>
+    <code>type: "progress-ring"</code> reads <code>metric.value</code>, <code>metric.min</code>, and <code>metric.max</code>. The arc length is that fraction. Omit <code>metric.format</code> and the center prints the fraction as a percent. Set a format and the center prints the value.
+  </p>
+  <p>
+    <code>type: "donut"</code> and <code>type: "pie"</code> use <code>encoding.x</code> and <code>encoding.y</code>. Each row is a slice. There is no <code>metric</code>. Closing or opening a hole does not turn a ring into a donut.
+  </p>
+  <p>
+    <code>type: "gauge"</code> adds ticks and a needle. Its default sweep is -135° to 135°. A progress ring defaults to a full circle, 0° to 360°, and the default cap is round. <code>metric.bands</code> and <code>metric.target</code> belong on a gauge. They are not how a ring shows a goal.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    The number lives in <code>metric</code>. <code>metric.value</code> is required. <code>metric.min</code> defaults to 0 and <code>metric.max</code> defaults to 100. <code>metric.label</code> is the caption under the center figure.
+  </p>
+  <p>
+    <code>metric.format</code> is a preset or an object. Uptime uses one decimal and a percent suffix, so the center reads 99.2% rather than the share 99%. Checks closed uses zero decimals, so the center reads 7 rather than 70%.
+  </p>
+  <p>
+    <code>mark.rings</code> is a list of <code>value</code>, <code>max</code>, <code>color</code>, and an optional <code>label</code>. The first item is the outer ring. Each ring's length is its own value divided by its own max. Labels are drawn under the rings. With labels, the center caption from <code>metric</code> is not drawn. Activity is that spec. A ring list on another chart type warns CK3010.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest progress ring. <code>version</code>, <code>type</code>, <code>metric.value</code>, and <code>a11y.alt</code> are required. Format, cap, and sweep can be omitted. The center is the share, the cap is round, and the sweep is the full circle.
+  </p>
+  <TeachFacts type="progress-ring" label="Progress ring packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing progress-ring specs. Uptime is the core example, formatted as a percent. Checks closed prints the count, 7 of 10, at 240 by 240. Activity draws three rings at 460 by 320. A size in the spec wins over the preview default.
+  </p>
+</section>
+
+<TeachConcept id="readout" title="Center">
+  <p>
+    Omit <code>metric.format</code> and the center is the share of the range, printed as a percent. That is the smallest ring: 3 of 8 reads as 37.5%. Set a format and the center is the value. Uptime's object keeps the one decimal and the percent suffix. Checks closed keeps the integer 7.
+  </p>
+  <p>
+    Share removes the format. Value puts that example's format back. An example that omitted it gets <code>"number"</code>. Activity's rings carry their own labels, so the center figure stays hidden either way. The key still changes.
+  </p>
+  <figure class="code">
+    <figcaption><span>metric.format</span></figcaption>
+    <pre><code>{readout}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="linecap" title="Cap">
+  <p>
+    <code>mark.linecap</code> is the end of the track and the progress arc. Omit it, or set <code>round</code>, and the ends are round. That is the progress-ring default. A gauge defaults to <code>butt</code> instead. <code>butt</code> is flat. <code>square</code> extends the stroke.
+  </p>
+  <p>
+    Round removes the key, so the default stays omitted. <code>mark.strokeWidth</code> is the thickness in pixels. Omit it and the ring picks a width that fits. Set it in the playground.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.linecap</span></figcaption>
+    <pre><code>{cap}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="span" title="Sweep">
+  <p>
+    <code>mark.startAngle</code> and <code>mark.endAngle</code> are the track, in degrees. 0 is the top. Positive degrees run clockwise. Omit both and the ring is a full circle, 0° to 360°.
+  </p>
+  <p>
+    Open sets 0° to 270°, so a quarter of the track stays empty. The arc still starts at the top. This is still <code>type: "progress-ring"</code>. It does not grow a needle. Any other pair leaves the buttons unpressed.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.endAngle</span></figcaption>
+    <pre><code>{sweep}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="rings" title="Rings">
+  <p>
+    <code>mark.rings</code> replaces the single arc with concentric rings. Each item is one goal. <code>value</code> is the progress. <code>max</code> defaults to 1. <code>color</code> is the stroke. <code>label</code> is drawn under the stack, with the value. The first item is the outside ring.
+  </p>
+  <p>
+    Activity is the example that sets this list: move, exercise, and stand. Uptime and Checks closed are one metric, so they omit <code>mark.rings</code>. The demo does not invent rings on those charts. A single value stays a single ring. Copy the list below, or switch to Activity, when you want more than one goal.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.rings</span></figcaption>
+    <pre><code>{rings}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    The center, or the ring labels, already state the value. <code>tooltip</code> is the hover card, the same key as on a bar. Omit it and this control reads on. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> and <code>tooltip.position</code> stay in the playground. Turning the card off and on again puts that object back. An example that omitted <code>tooltip</code> gets the key removed.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    A progress ring does not use a legend. One ring has a caption. Several rings label themselves. <code>mark.strokeWidth</code> and theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/donut">Donut</a> and <a href="/docs/charts/pie">pie</a> split one total into slices.</li>
+    <li><a href="/docs/charts/gauge">Gauge</a> is a dial, with ticks and a needle.</li>
+    <li><a href="/docs/charts/kpi">KPI</a> leads with the number and a delta.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />
