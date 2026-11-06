@@ -12,6 +12,8 @@ From the repo root, after `npm install`:
 npm run test:render
 npm run test:render:full
 npm run test:render:update
+npm run test:render:claims
+npm run test:render:claims:update
 ```
 
 `test:render` is the fast subset: every example at its spec, plus key options and the curated pairs on the primary example for each type. `npm test` runs that subset.
@@ -19,6 +21,21 @@ npm run test:render:update
 `test:render:full` is the one-at-a-time sweep across every gallery and docs example. `test:render:update` rewrites the allowlist and the full hash baseline, then runs the fast subset once more to refresh `baselines/fast.json`. A few charts draw differently after other charts in the same process, so the fast baseline has to come from a fast run.
 
 `node scripts/render-harness/run.mjs --count` prints the case totals without rendering. `--type gantt` limits a run.
+
+## Paint claims
+
+`npm run test:render:claims` is the option-claim check. It uses this harness: the same `optionCatalog` as the playground and `audit:options`, the same examples, and the same `not-yet` / `needs-data` map. One playground option is changed on one base spec, then the painted SVG has to show that option's effect. A crash check is not enough, and a dHash change is not enough for chrome text.
+
+The claims that have to pass, and are not allowlisted:
+
+- `title`: the exact string is a `<text>` node in the heading, above the plot.
+- `subtitle`: the exact string is a `<text>` node under the title, and the plot clip starts below it.
+
+Other claims ask for a named effect: legend marks appear or move, the donut hole's inner radius changes, `tooltip: false` sets `data-ck-intent` to `tip` while the default does not, or a color, label, geometry, font, or `data-ck-*` hook changes. JSON controls with no discrete probe are recorded as unsampled. Options the playground marks not-yet or needs-data are recorded and not rendered.
+
+`claim-allowlist.json` lists options whose painted claim already fails. CI fails when a run produces a failing path that is not in the file. `subtitle` is rejected if it is added. `npm run test:render:claims:update` rewrites the file from the current failures. `npm test` runs every claim next to the fast render sweep, via `harness.test.mjs`.
+
+`node scripts/render-harness/claims.mjs --path subtitle` checks one option.
 
 The case list is sorted. `SEED` in `paths.mjs` is `20261105`. Nothing in the generator calls `Math.random`. A later sampler should draw from these ids with that seed.
 

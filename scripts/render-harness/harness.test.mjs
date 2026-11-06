@@ -8,6 +8,7 @@ import { buildCases } from "./generate.mjs";
 import { loadExamples } from "./examples.mjs";
 import { loadRuntime } from "./load.mjs";
 import { examplesDir } from "./paths.mjs";
+import { judgeSubtitle, readClaimAllowlist, runClaims } from "./claims.mjs";
 import { isStressValue, sweep } from "./run.mjs";
 
 const overlapSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="200" viewBox="0 0 760 200"><rect width="100%" height="100%" fill="#ffffff"/><rect x="510" y="16" width="8" height="8" fill="#15803d"/><text x="522" y="24" text-anchor="start" fill="#6e6e73" font-size="11">Done</text><text x="522.18" y="22" text-anchor="middle" fill="#6e6e73" font-size="11">Mar 29</text></svg>`;
@@ -77,6 +78,24 @@ test("the case list does not change between builds", async () => {
   const second = buildCases(runtime, examples, { mode: "fast" }).cases.map((row) => row.id);
   assert.deepEqual(first, second);
   assert.equal(new Set(first).size, first.length);
+});
+
+test("a heading that omits the subtitle string fails the paint claim", () => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120"><title>Testing</title><text x="16" y="22">Testing</text><clipPath id="c"><rect x="10" y="48" width="180" height="60"/></clipPath></svg>`;
+  const verdict = judgeSubtitle(svg, { title: "Testing", subtitle: "testing where is this?" }, "testing where is this?");
+  assert.equal(verdict.ok, false);
+  const painted = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120"><text x="16" y="22">Testing</text><text x="16" y="40">testing where is this?</text><clipPath id="c"><rect x="10" y="56" width="180" height="60"/></clipPath></svg>`;
+  const ok = judgeSubtitle(painted, { title: "Testing", subtitle: "testing where is this?" }, "testing where is this?");
+  assert.equal(ok.ok, true);
+});
+
+test("paint claims pass or are allowlisted, and subtitle is not allowlisted", async () => {
+  const result = await runClaims();
+  assert.equal(result.byPath.subtitle?.status, "pass", result.byPath.subtitle?.detail);
+  assert.equal(result.byPath.title?.status, "pass", result.byPath.title?.detail);
+  assert.equal(result.allowlist.has("subtitle"), false);
+  assert.equal(readClaimAllowlist().has("subtitle"), false);
+  assert.equal(result.novel.length, 0, result.novel.slice(0, 12).map((row) => `${row.path} ${row.detail}`).join("\n"));
 });
 
 test("fast sweep has no new findings and no changed renders", async () => {
