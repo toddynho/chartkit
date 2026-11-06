@@ -3,17 +3,35 @@ import BarGuide from "../../../components/BarGuide.astro";
 import ChartDoc from "../../../components/ChartDoc.astro";
 import ComboGuide from "../../../components/ComboGuide.astro";
 import DonutGuide from "../../../components/DonutGuide.astro";
+import FunnelGuide from "../../../components/FunnelGuide.astro";
 import LineGuide from "../../../components/LineGuide.astro";
 import PieGuide from "../../../components/PieGuide.astro";
+import RadialBarGuide from "../../../components/RadialBarGuide.astro";
 import ResponseRail from "../../../components/ResponseRail.astro";
+import RoseGuide from "../../../components/RoseGuide.astro";
 import ScatterGuide from "../../../components/ScatterGuide.astro";
 import StackedAreaGuide from "../../../components/StackedAreaGuide.astro";
+import SunburstGuide from "../../../components/SunburstGuide.astro";
 import TeachChart from "../../../components/TeachChart.astro";
+import TreemapGuide from "../../../components/TreemapGuide.astro";
 import { chartPage, chartPageTypes, chipsForChart, specForChart } from "../../../data/docs-catalog";
 import { teachModule, teachModules } from "../../../data/teach/registry";
 import Docs from "../../../layouts/Docs.astro";
 
-const guided = new Set(["donut", "pie", "line", "bar", "scatter", "combo", "stacked-area"]);
+const guided = new Set([
+  "donut",
+  "pie",
+  "line",
+  "bar",
+  "scatter",
+  "combo",
+  "stacked-area",
+  "funnel",
+  "treemap",
+  "sunburst",
+  "rose",
+  "radial-bar",
+]);
 for (const key of Object.keys(teachModules)) {
   if (!guided.has(key)) throw new Error(`Add a guide for the ${key} teach module in this page.`);
 }
@@ -52,6 +70,11 @@ const lede = geo?.lede ?? chart.lede;
       {module.type === "scatter" ? <ScatterGuide /> : null}
       {module.type === "combo" ? <ComboGuide /> : null}
       {module.type === "stacked-area" ? <StackedAreaGuide /> : null}
+      {module.type === "funnel" ? <FunnelGuide /> : null}
+      {module.type === "treemap" ? <TreemapGuide /> : null}
+      {module.type === "sunburst" ? <SunburstGuide /> : null}
+      {module.type === "rose" ? <RoseGuide /> : null}
+      {module.type === "radial-bar" ? <RadialBarGuide /> : null}
     </TeachChart>
   ) : (
     <Docs title={title} description={lede} lede={lede} href={href}>

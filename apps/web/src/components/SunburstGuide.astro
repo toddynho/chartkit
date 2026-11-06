@@ -1,0 +1,156 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestSunburstSpec } from "../data/teach/sunburst";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/sunburst";
+const spec = specText(smallestSunburstSpec);
+const play = playgroundHref(smallestSunburstSpec);
+const hole = `{
+  "mark": { "innerRadius": 0.42 }
+}`;
+const depth = `{
+  "mark": { "depth": 2 }
+}`;
+const legend = `{
+  "legend": { "position": "bottom" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A sunburst shows a hierarchy as concentric rings. The inner ring is the top branch. Each next ring splits that branch into its children. The angle is the value's share of its parent. Color follows the top branch.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a sunburst when the question is how a total breaks down by level, and you want the levels to read as rings around one hole. Traffic by source is two rings: organic and paid, then the sources under each. The same cellar, in rings is three: orchard, apple, then cask.
+  </p>
+  <p>
+    A <a href="/docs/charts/treemap">treemap</a> is the same tree as tiles. Use it when area, not angle, should carry the value, or when the names are long. A <a href="/docs/charts/pie">pie</a> or a <a href="/docs/charts/donut">donut</a> is one level of parts. A sunburst with the hole closed is still a sunburst. The rings remain. A single disk is <code>type: "pie"</code>.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Sunburst, treemap, pie, and donut</h2>
+  <p>
+    Sunburst and treemap share the hierarchy. Nested <code>children</code>, <code>encoding.path</code>, or <code>encoding.id</code> with <code>encoding.parent</code>. A parent with no value is the sum of its leaves.
+  </p>
+  <p>
+    <code>type: "sunburst"</code> maps each level to a ring. Siblings in a branch shift lightness and keep a gap. <code>type: "treemap"</code> maps each level to nested rectangles. Pie and donut have one ring of slices, and the angle is the whole encoding of the share.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    The usual spec is a tree of nodes. Each node has a name and either <code>children</code> or a number. Traffic by source uses <code>name</code>, <code>children</code>, and <code>value</code>. The same cellar, in rings points <code>encoding.y</code> at <code>value</code> so the number format applies. You can omit <code>encoding</code> when the nodes already use <code>name</code> and <code>value</code>.
+  </p>
+  <p>
+    Flat rows work too. <code>encoding.path</code> is the list of fields from the root down to the leaf. <code>encoding.id</code> and <code>encoding.parent</code> are the other flat form. An empty parent is a root.
+  </p>
+  <p>
+    Color is the top branch. Organic and paid are two colors. Search under organic keeps the organic color, shifted. There is no <code>mark.palette</code> on a sunburst. Setting it warns CK3010.
+  </p>
+  <p>
+    A negative value is an error on that node. Leave a parent's value off and it is the sum of its leaves. A parent value that does not match its children is an error.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest sunburst. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. One branch and two leaves are enough. The hole defaults to 0.28 of the radius, so <code>mark</code> can be omitted.
+  </p>
+  <TeachFacts type="sunburst" label="Sunburst packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing sunburst specs. Traffic by source is two rings and the default hole. The same cellar, in rings and Shed, boat, job are three rings, and each sets its own hole.
+  </p>
+</section>
+
+<TeachConcept id="hole" title="Hole">
+  <p>
+    <code>mark.innerRadius</code> is the hole, as a fraction of the radius, from 0 to 0.95. Omit it and a sunburst uses 0.28. The same cellar, in rings sets 0.42. Shed, boat, job sets 0.4. The hole prints the total when the disk is wide enough to hold it.
+  </p>
+  <p>
+    <code>0</code> closes the hole. The rings stay, and the color still follows the top branch. That is not a pie and not a donut. Those types are a single ring of slices. This control stops at 0.75. A value above 0.85 warns CK3075.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.innerRadius</span></figcaption>
+    <pre><code>{hole}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="levels" title="Levels">
+  <p>
+    <code>mark.depth</code> is how many levels to draw under the root. Deeper nodes fold into that level. Omit it and the cap is 8. <code>1</code> draws the top ring only. <code>2</code> adds the next ring. <code>3</code> reaches the casks and the jobs in the three-ring examples.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.depth</span></figcaption>
+    <pre><code>{depth}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    A sunburst with more than one top branch shows a legend of those branches. Omit <code>legend</code>, or set <code>true</code>, and it sits on top. <code>false</code> hides it. <code>legend.position</code> is <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code>, or <code>inside</code>. The same cellar, in rings and Shed, boat, job set <code>bottom</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a sunburst when the key is omitted. Hovering a slice shows its path, its value, its share of the parent, and its share of the total. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Change those in the playground. Turning the card off and on again puts that object back.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    Slice names are drawn on a ring that can hold them, or just outside it. A name that fits nowhere stays in the tooltip. There is no <code>mark.labels</code> switch, and <code>mark.startAngle</code> does not apply. Both warn CK3010. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/treemap">Treemap</a> is this hierarchy as tiles.</li>
+    <li><a href="/docs/charts/pie">Pie</a> is one level of parts, as a solid disk.</li>
+    <li><a href="/docs/charts/donut">Donut</a> is that disk with a hole. The spec type is <code>donut</code>.</li>
+    <li><a href="/docs/charts/rose">Rose</a> gives every category the same angle and uses the radius for the value. It is not a hierarchy.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

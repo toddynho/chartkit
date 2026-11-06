@@ -1,0 +1,167 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestFunnelSpec } from "../data/teach/funnel";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/funnel";
+const spec = specText(smallestFunnelSpec);
+const play = playgroundHref(smallestFunnelSpec);
+const shape = `{
+  "mark": { "shape": "bar" }
+}`;
+const labels = `{
+  "mark": { "labels": false }
+}`;
+const legend = `{
+  "legend": { "position": "top" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A funnel shows a count moving through stages in order. Each stage is a band. The width comes from the value. The first band sits at the top, and the next stage sits under it.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a funnel when the question is how many people or items remain at each step. Visit, signup, activate, trial, pay is that chart. From pitch to liftoff is the same idea: a queue that narrows.
+  </p>
+  <p>
+    A <a href="/docs/charts/bar">bar</a> compares categories. The categories do not have to be a sequence, and the width is not a drop from the previous bar. A <a href="/docs/charts/waterfall">waterfall</a> is signed steps between totals, including gains. A funnel value is a size at a stage. Negatives are drawn as zero.
+  </p>
+  <p>
+    A handful of stages stays readable. Signup funnel has five. From enquiry to a seat has four. A long list of names, with no order that matters, is a bar.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Funnel, bar, and waterfall</h2>
+  <p>
+    All three can show a value per name. The encoding is what changes.
+  </p>
+  <p>
+    <code>type: "funnel"</code> keeps data order and sets the width from the value. The largest value is the full width. A later stage can be wider than an earlier one when its value is larger. The chart does not sort.
+  </p>
+  <p>
+    <code>type: "bar"</code> is the comparison. <code>mark.orientation</code> can turn those bars horizontal. That key does not apply to a funnel. Setting it warns CK3010.
+  </p>
+  <p>
+    <code>type: "waterfall"</code> draws a delta, and a total row is a full bar. A funnel has no total row. Each stage is its own value.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one stage and one number. Point <code>encoding.x</code> at the stage and <code>encoding.y</code> at the number. Signup funnel uses <code>stage</code> and <code>count</code>. From enquiry to a seat uses <code>stage</code> and <code>people</code>.
+  </p>
+  <p>
+    Rows are drawn from top to bottom in the order you pass them. <code>mark.sort</code> is a pie and donut key. On a funnel it warns CK3010 and the order stays put.
+  </p>
+  <p>
+    A missing number is skipped. A negative number is drawn as zero. The stage name still has a place in the column.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest funnel. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. The body is one tapering shape and the values are labeled, so <code>mark</code> can be omitted.
+  </p>
+  <TeachFacts type="funnel" label="Funnel packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing funnel specs. Signup funnel is the core example, five stages and no legend. From pitch to liftoff names each stage in a legend. From enquiry to a seat sets the trapezoid shape explicitly.
+  </p>
+</section>
+
+<TeachConcept id="shape" title="Shape">
+  <p>
+    <code>mark.shape</code> is the geometry. Omit it, or set <code>trapezoid</code>, and each stage shares its bottom edge with the next stage. The width tapers with the value, so the body reads as one piece.
+  </p>
+  <p>
+    <code>bar</code> draws a centered rounded bar for each stage. The width is still the value. The stages stay in data order, with a gap between bars. This is still <code>type: "funnel"</code>. A comparison chart is <code>type: "bar"</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.shape</span></figcaption>
+    <pre><code>{shape}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="labels" title="Labels">
+  <p>
+    The stage name is always drawn. <code>mark.labels</code> draws the value beside it. Omit the key, or set true, and the number is shown. After the first stage the line also shows that stage as a share of the previous one. <code>false</code> hides the number and the share. The name stays.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.labels</span></figcaption>
+    <pre><code>{labels}</code></pre>
+  </figure>
+  <p>
+    <code>mark.labelFormat</code> formats that number. Change it in the playground. Turning labels off and on again puts the example's format back. An example that omitted <code>mark.labels</code> gets the key removed, so the default stays on.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    A funnel omits the legend. The stage names are already in the column. Set <code>legend</code> to <code>true</code>, or to an object, and the stages are listed again. <code>false</code> hides that list. <code>legend.position</code> is <code>top</code>, <code>right</code>, <code>bottom</code>, or <code>left</code>. When the position is omitted, the list sits on top. From pitch to liftoff and From enquiry to a seat set <code>top</code>.
+  </p>
+  <p>
+    Asking for a legend also gives each stage its own color. With no legend and no <code>encoding.color</code>, the stages share one color.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a funnel when the key is omitted. Hovering a stage shows its name, its value, and, after the first stage, its share of the previous stage. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Change those in the playground. Turning the card off and on again puts that object back.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.gap</code> opens a slit between trapezoid stages, as a fraction of the band. Omit it and the body stays one piece. <code>encoding.color</code> can name a field when you want a color that does not depend on the legend. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/bar">Bar</a> compares categories. The order does not have to be a drop from one step to the next.</li>
+    <li><a href="/docs/charts/waterfall">Waterfall</a> is signed steps between totals.</li>
+    <li><a href="/docs/charts/pie">Pie</a> and <a href="/docs/charts/donut">donut</a> split one total into parts. The parts are not a sequence.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

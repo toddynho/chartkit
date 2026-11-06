@@ -1,0 +1,161 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestRoseSpec } from "../data/teach/rose";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/rose";
+const spec = specText(smallestRoseSpec);
+const play = playgroundHref(smallestRoseSpec);
+const start = `{
+  "mark": { "startAngle": 90 }
+}`;
+const labels = `{
+  "mark": { "labels": true }
+}`;
+const legend = `{
+  "legend": { "position": "bottom" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A rose gives every category the same angle. The radius is the value. A longer sector is a larger number. The angle does not change with the share.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a rose when the categories are a cycle, or a small set you want arranged around a point, and the number should be a length. Saturday audience is six places. Quay reaches farthest because it has the most listeners. Every place still occupies the same wedge.
+  </p>
+  <p>
+    A <a href="/docs/charts/pie">pie</a> encodes the share as the angle. A larger slice is wider, and the radius stays put. A <a href="/docs/charts/donut">donut</a> is that pie with a hole. A <a href="/docs/charts/radial-bar">radial bar</a> also puts categories around a circle, and the length is the radius, but it draws a bar on a track. Several series sit side by side in the category, or stack outward. A rose fills the whole equal angle out to the value.
+  </p>
+  <p>
+    Two categories are a thin chart. Fewer than three warns CK3074. More than about sixteen gets hard to read. A ranked list on a straight axis is a bar.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Rose, pie, and radial bar</h2>
+  <p>
+    <code>type: "rose"</code> keeps the angles equal and maps <code>encoding.y</code> to the radius. <code>polarArea</code>, <code>polar-area</code>, <code>nightingale</code>, and <code>rose-chart</code> repair to rose.
+  </p>
+  <p>
+    <code>type: "pie"</code> maps the value to the angle. <code>type: "donut"</code> does that with a hole. Setting <code>layout.coordinate</code> to <code>polar</code> on a pie or a donut repairs the type to rose. On a bar it repairs the type to radial bar. The coordinate does not turn a rose into a pie.
+  </p>
+  <p>
+    <code>type: "radial-bar"</code> draws a bar whose length is the radius, with a track behind it. The hole defaults to 0.34. A rose starts at the center. <code>mark.innerRadius</code> defaults to 0.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one category and one number. <code>encoding.x</code> is the category. <code>encoding.y</code> is the radius. Saturday audience uses <code>place</code> and <code>listeners</code>. The angles stay equal. You do not pass a share.
+  </p>
+  <p>
+    The categories run clockwise from the start angle, in data order. <code>mark.sort</code> is a pie and donut key. On a rose it warns CK3010 and the order stays put.
+  </p>
+  <p>
+    A negative radius warns CK3073 and is drawn as zero. A list of fields on <code>encoding.y</code> is several series. They share the category's angle unless <code>mark.stack</code> is <code>stack</code> or <code>percent</code>, which runs them outward. Saturday audience is one series.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest rose. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. <code>layout.coordinate</code> is <code>polar</code>, which is how a rose is drawn. The gap defaults to 1.2 degrees and the labels default to off, so <code>mark</code> can be omitted.
+  </p>
+  <TeachFacts type="rose" label="Rose packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    Saturday audience is the rose in the gallery, on the homepage, and in the Lumen desk showcase. The other rose specs in the library are that same chart, trimmed. One example is the set.
+  </p>
+</section>
+
+<TeachConcept id="start" title="Start angle">
+  <p>
+    <code>mark.startAngle</code> is where the first category starts, in degrees. <code>0</code> is the top, and the sectors run clockwise. The value can be from -360 to 360. Omit it and the first category starts at the top.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.startAngle</span></figcaption>
+    <pre><code>{start}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="labels" title="Labels">
+  <p>
+    <code>mark.labels</code> draws the value on a sector tall enough to hold it. Omit it, or set false, and the sectors are unlabeled. The category names stay outside the circle. Set true and the number is drawn. Saturday audience sets true.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.labels</span></figcaption>
+    <pre><code>{labels}</code></pre>
+  </figure>
+  <p>
+    Turning labels off and on again puts the example's label keys back. Saturday audience comes back with <code>mark.labels</code> set to true.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    A rose with one series hides the legend. Saturday audience is one series, so the legend stays hidden even when the key is omitted. A rose with several series shows it. Omit <code>legend</code>, or set <code>true</code>, and that legend sits on top. <code>false</code> hides it. <code>legend.position</code> is <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code>, or <code>inside</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+  <p>
+    The control still writes the key on a one-series rose. The picture waits for a second series.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a rose when the key is omitted. Hovering a sector shows the category and the value. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Change those in the playground. Turning the card off and on again puts that object back.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.padAngle</code> is the gap between sectors, in degrees. A rose defaults to 1.2. Saturday audience sets that same gap. Above 8 degrees warns CK3076. <code>mark.innerRadius</code> opens a hole. The default is 0, at the center. A hole does not change the type to donut. <code>mark.cornerRadius</code> rounds the outer end. <code>mark.stack</code> is how several series share a category. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/pie">Pie</a> encodes the share as the angle. The radius stays put.</li>
+    <li><a href="/docs/charts/donut">Donut</a> is that pie with a hole.</li>
+    <li><a href="/docs/charts/radial-bar">Radial bar</a> draws a bar along the radius, on a track. Several series can sit side by side.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

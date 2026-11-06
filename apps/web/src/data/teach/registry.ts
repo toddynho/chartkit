@@ -1,10 +1,15 @@
 import { barTeach } from "./bar.ts";
 import { comboTeach } from "./combo.ts";
 import { donutTeach } from "./donut.ts";
+import { funnelTeach } from "./funnel.ts";
 import { lineTeach } from "./line.ts";
 import { pieTeach } from "./pie.ts";
+import { radialBarTeach } from "./radial-bar.ts";
+import { roseTeach } from "./rose.ts";
 import { scatterTeach } from "./scatter.ts";
 import { stackedAreaTeach } from "./stacked-area.ts";
+import { sunburstTeach } from "./sunburst.ts";
+import { treemapTeach } from "./treemap.ts";
 import type { TeachModule } from "./types.ts";
 
 /**
@@ -20,6 +25,11 @@ export const teachModules: Record<string, TeachModule> = {
   scatter: scatterTeach,
   combo: comboTeach,
   "stacked-area": stackedAreaTeach,
+  funnel: funnelTeach,
+  treemap: treemapTeach,
+  sunburst: sunburstTeach,
+  rose: roseTeach,
+  "radial-bar": radialBarTeach,
 };
 
 export function teachModule(type: string): TeachModule | undefined {
