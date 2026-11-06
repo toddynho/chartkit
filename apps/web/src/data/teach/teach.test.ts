@@ -13,6 +13,7 @@ import {
   candlestickTeach,
   smallestCandlestickSpec,
 } from "./candlestick.ts";
+import { applyChoroplethAction, choroplethControlState, choroplethExamples, choroplethTeach, smallestChoroplethSpec } from "./choropleth.ts";
 import { applyComboAction, comboControlState, comboExamples, comboTeach, smallestComboSpec } from "./combo.ts";
 import { donutTeach } from "./donut.ts";
 import { applyErrorbarAction, errorbarControlState, errorbarExamples, errorbarTeach, smallestErrorbarSpec } from "./errorbar.ts";
@@ -24,6 +25,7 @@ import { applyJourneyAction, journeyControlState, journeyExamples, journeyTeach,
 import { applyKpiAction, kpiControlState, kpiExamples, kpiTeach, smallestKpiSpec } from "./kpi.ts";
 import { applyLegend, legendChoice } from "./legend.ts";
 import { applyLineAction, lineControlState, lineExamples, lineTeach, smallestLineSpec } from "./line.ts";
+import { applyMapPointsAction, mapPointsControlState, mapPointsExamples, mapPointsTeach, smallestMapPointsSpec } from "./map-points.ts";
 import { applyMiniAreaAction, miniAreaControlState, miniAreaExamples, miniAreaTeach, smallestMiniAreaSpec } from "./mini-area.ts";
 import { applyPieAction, pieControlState, pieExamples, pieTeach, smallestPieSpec } from "./pie.ts";
 import {
@@ -67,7 +69,7 @@ import { applyTreemapAction, smallestTreemapSpec, treemapControlState, treemapEx
 import { applyVennAction, smallestVennSpec, vennControlState, vennExamples, vennTeach } from "./venn.ts";
 import { applyWaterfallAction, smallestWaterfallSpec, waterfallControlState, waterfallExamples, waterfallTeach } from "./waterfall.ts";
 
-test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, the compact charts, and the metric charts", () => {
+test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, the compact charts, the metric charts, and geo", () => {
   assert.deepEqual(Object.keys(teachModules).sort(), [
     "area-range",
     "bar",
@@ -75,6 +77,7 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, the
     "bar-range",
     "bullet",
     "candlestick",
+    "choropleth",
     "combo",
     "donut",
     "errorbar",
@@ -85,6 +88,7 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, the
     "journey",
     "kpi",
     "line",
+    "map-points",
     "mini-area",
     "pie",
     "progress-ring",
@@ -241,6 +245,14 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, the
     ["ranges", "target", "tooltip"],
   );
   assert.equal(bulletTeach.controls.some((control) => control.id === "legend" || control.id === "orientation"), false);
+  assert.deepEqual(
+    choroplethTeach.controls.map((control) => control.id),
+    ["atlas", "scale", "legend", "tooltip"],
+  );
+  assert.deepEqual(
+    mapPointsTeach.controls.map((control) => control.id),
+    ["atlas", "size", "labels", "legend", "tooltip"],
+  );
 });
 
 test("opening an example copies a custom tooltip and does not rewrite it", () => {
@@ -2225,4 +2237,155 @@ test("bullet actions edit ranges, target, and tooltip", () => {
     ["2 measures", "3 crops", "1 band"],
   );
   for (const example of bulletExamples) assert.equal(example.spec.type, "bullet");
+});
+test("choropleth actions edit atlas, scale, legend, and tooltip", () => {
+  assert.equal(smallestChoroplethSpec.type, "choropleth");
+  assert.equal((smallestChoroplethSpec.mark as { atlas: string }).atlas, "world");
+  assert.equal((smallestChoroplethSpec.mark as { scale?: string }).scale, undefined);
+  assert.equal(choroplethControlState(smallestChoroplethSpec).scale, "sequential");
+  assert.equal(choroplethControlState(smallestChoroplethSpec).legend, "right");
+  assert.equal(choroplethControlState(smallestChoroplethSpec).tooltip, "on");
+
+  const renewable = structuredClone(choroplethExamples[0]!.spec);
+  assert.equal(choroplethControlState(renewable).atlas, "world");
+  assert.equal(choroplethControlState(renewable).scale, "sequential");
+  assert.equal(choroplethControlState(renewable).legend, "right");
+  assert.equal(renewable.tooltip, undefined);
+  const untouched = structuredClone(renewable);
+  choroplethControlState(renewable);
+  assert.deepEqual(renewable, untouched);
+  applyChoroplethAction(renewable, { id: "atlas", value: "us" });
+  assert.equal((renewable.mark as { atlas: string }).atlas, "us");
+  assert.equal((renewable.mark as { projection: string }).projection, "albersUsa");
+  assert.equal((renewable.mark as { scale: string }).scale, "sequential");
+  applyChoroplethAction(renewable, { id: "scale", value: "diverging" });
+  assert.equal((renewable.mark as { scale: string }).scale, "diverging");
+  applyChoroplethAction(renewable, { id: "scale", value: "threshold" });
+  assert.equal((renewable.mark as { scale: string }).scale, "threshold");
+  applyChoroplethAction(renewable, { id: "legend", value: "off" });
+  assert.equal((renewable.mark as { legend: boolean }).legend, false);
+  assert.equal(renewable.legend, undefined);
+  assert.equal(choroplethControlState(renewable).legend, "off");
+  applyChoroplethAction(renewable, { id: "legend", value: "bottom" });
+  assert.equal((renewable.mark as { legend?: boolean }).legend, undefined);
+  assert.deepEqual(renewable.legend, { position: "bottom" });
+  const ignored = structuredClone(choroplethExamples[0]!.spec);
+  ignored.legend = false;
+  assert.equal(choroplethControlState(ignored).legend, "right");
+  applyChoroplethAction(renewable, { id: "tooltip", value: "off" });
+  assert.equal(renewable.tooltip, false);
+  applyChoroplethAction(renewable, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in renewable, false);
+  assert.equal((renewable.size as { width: number }).width, 880);
+
+  const population = structuredClone(choroplethExamples[1]!.spec);
+  assert.equal(choroplethControlState(population).atlas, "us");
+  assert.equal(choroplethControlState(population).scale, "diverging");
+  assert.equal(population.tooltip, undefined);
+  const tip = structuredClone(customTip);
+  population.tooltip = structuredClone(tip);
+  const opened = openTeachExample(population);
+  assert.deepEqual(opened.tooltip, population.tooltip);
+  assert.notEqual(opened.tooltip, population.tooltip);
+  applyChoroplethAction(population, { id: "tooltip", value: "off" });
+  assert.equal(population.tooltip, false);
+  applyChoroplethAction(population, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(population.tooltip, tip);
+  applyChoroplethAction(population, { id: "atlas", value: "world" });
+  assert.equal((population.mark as { atlas: string }).atlas, "world");
+  assert.equal((population.mark as { projection: string }).projection, "equalEarth");
+  assert.equal((population.mark as { scale: string }).scale, "diverging");
+  assert.equal((population.size as { height: number }).height, 560);
+
+  assert.deepEqual(
+    choroplethExamples.map((example) => example.title),
+    ["Renewable share of electricity", "Population change, 2020–2023"],
+  );
+  assert.deepEqual(
+    choroplethExamples.map((example) => example.meta),
+    ["85 countries", "51 regions"],
+  );
+  for (const example of choroplethExamples) assert.equal(example.spec.type, "choropleth");
+});
+
+test("map-points actions edit atlas, size, labels, legend, and tooltip", () => {
+  assert.equal(smallestMapPointsSpec.type, "map-points");
+  assert.equal((smallestMapPointsSpec.encoding as { size?: unknown }).size, undefined);
+  assert.equal(mapPointsControlState(smallestMapPointsSpec).size, "off");
+  assert.equal(mapPointsControlState(smallestMapPointsSpec).labels, "on");
+  assert.equal(mapPointsExamples.length, 1);
+
+  const cities = structuredClone(mapPointsExamples[0]!.spec);
+  assert.equal(mapPointsControlState(cities).atlas, "world");
+  assert.equal(mapPointsControlState(cities).size, "on");
+  assert.equal(mapPointsControlState(cities).labels, "on");
+  assert.equal(mapPointsControlState(cities).legend, "right");
+  assert.equal(cities.tooltip, undefined);
+  const untouched = structuredClone(cities);
+  mapPointsControlState(cities);
+  assert.deepEqual(cities, untouched);
+  const originalSize = structuredClone((cities.encoding as { size: unknown }).size);
+  applyMapPointsAction(cities, { id: "size", value: "off" });
+  assert.equal((cities.encoding as { size?: unknown }).size, undefined);
+  assert.equal((cities.encoding as { color: string }).color, "pop");
+  applyMapPointsAction(cities, { id: "size", value: "on", restore: mapPointsExamples[0]!.spec });
+  assert.deepEqual((cities.encoding as { size: unknown }).size, originalSize);
+  applyMapPointsAction(cities, { id: "labels", value: "off" });
+  assert.equal((cities.encoding as { label?: unknown }).label, undefined);
+  assert.equal((cities.mark as { labelCount: number }).labelCount, 18);
+  applyMapPointsAction(cities, { id: "labels", value: "on", restore: mapPointsExamples[0]!.spec });
+  assert.equal((cities.encoding as { label: string }).label, "name");
+  applyMapPointsAction(cities, { id: "atlas", value: "canada" });
+  assert.equal((cities.mark as { atlas: string }).atlas, "canada");
+  assert.equal((cities.mark as { projection: string }).projection, "equalEarth");
+  assert.equal((cities.mark as { labelCount: number }).labelCount, 18);
+  applyMapPointsAction(cities, { id: "legend", value: "off" });
+  assert.equal((cities.mark as { legend: boolean }).legend, false);
+  assert.equal(cities.legend, undefined);
+  applyMapPointsAction(cities, { id: "legend", value: "bottom" });
+  assert.equal((cities.mark as { legend?: boolean }).legend, undefined);
+  assert.deepEqual(cities.legend, { position: "bottom" });
+  applyMapPointsAction(cities, { id: "tooltip", value: "off" });
+  assert.equal(cities.tooltip, false);
+  applyMapPointsAction(cities, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in cities, false);
+  assert.equal((cities.size as { width: number }).width, 880);
+
+  const custom = structuredClone(mapPointsExamples[0]!.spec);
+  const tip = structuredClone(customTip);
+  custom.tooltip = structuredClone(tip);
+  const opened = openTeachExample(custom);
+  assert.deepEqual(opened.tooltip, custom.tooltip);
+  assert.notEqual(opened.tooltip, custom.tooltip);
+  applyMapPointsAction(custom, { id: "tooltip", value: "off" });
+  assert.equal(custom.tooltip, false);
+  applyMapPointsAction(custom, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(custom.tooltip, tip);
+  assert.equal(custom.type, "map-points");
+
+  assert.deepEqual(
+    mapPointsExamples.map((example) => example.title),
+    ["Largest urban areas"],
+  );
+  assert.deepEqual(
+    mapPointsExamples.map((example) => example.meta),
+    ["22 cities"],
+  );
+  for (const example of mapPointsExamples) assert.equal(example.spec.type, "map-points");
+});
+
+test("choropleth and map-points examples paint with their type", async () => {
+  const { render } = await import("@chartkitdev/geo");
+  for (const spec of [smallestChoroplethSpec, ...choroplethExamples.map((example) => example.spec)]) {
+    const svg = await render(spec);
+    assert.equal(svg.includes('data-ck-type="choropleth"'), true);
+    assert.equal(svg.includes("ck-chart-error"), false);
+    assert.equal(svg.includes("Unknown atlas."), false);
+  }
+  for (const spec of [smallestMapPointsSpec, ...mapPointsExamples.map((example) => example.spec)]) {
+    const svg = await render(spec);
+    assert.equal(svg.includes('data-ck-type="map-points"'), true);
+    assert.equal(svg.includes("ck-chart-error"), false);
+    assert.equal(svg.includes("Unknown atlas."), false);
+  }
 });

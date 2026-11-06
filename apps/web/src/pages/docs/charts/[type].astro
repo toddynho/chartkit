@@ -5,6 +5,7 @@ import BarListGuide from "../../../components/BarListGuide.astro";
 import BarRangeGuide from "../../../components/BarRangeGuide.astro";
 import CandlestickGuide from "../../../components/CandlestickGuide.astro";
 import ChartDoc from "../../../components/ChartDoc.astro";
+import ChoroplethGuide from "../../../components/ChoroplethGuide.astro";
 import ComboGuide from "../../../components/ComboGuide.astro";
 import DonutGuide from "../../../components/DonutGuide.astro";
 import ErrorbarGuide from "../../../components/ErrorbarGuide.astro";
@@ -13,6 +14,7 @@ import GanttGuide from "../../../components/GanttGuide.astro";
 import HeatmapGuide from "../../../components/HeatmapGuide.astro";
 import JourneyGuide from "../../../components/JourneyGuide.astro";
 import LineGuide from "../../../components/LineGuide.astro";
+import MapPointsGuide from "../../../components/MapPointsGuide.astro";
 import MiniAreaGuide from "../../../components/MiniAreaGuide.astro";
 import PieGuide from "../../../components/PieGuide.astro";
 import QuadrantGuide from "../../../components/QuadrantGuide.astro";
@@ -77,6 +79,8 @@ const guided = new Set([
   "kpi",
   "progress-ring",
   "bullet",
+  "choropleth",
+  "map-points",
 ]);
 for (const key of Object.keys(teachModules)) {
   if (!guided.has(key)) throw new Error(`Add a guide for the ${key} teach module in this page.`);
@@ -144,6 +148,8 @@ const lede = geo?.lede ?? chart.lede;
       {module.type === "kpi" ? <KpiGuide /> : null}
       {module.type === "progress-ring" ? <ProgressRingGuide /> : null}
       {module.type === "bullet" ? <BulletGuide /> : null}
+      {module.type === "choropleth" ? <ChoroplethGuide /> : null}
+      {module.type === "map-points" ? <MapPointsGuide /> : null}
     </TeachChart>
   ) : (
     <Docs title={title} description={lede} lede={lede} href={href}>

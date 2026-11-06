@@ -33,7 +33,7 @@ export type ChartOption = { path: string; role: string; status: string };
 export type ChartDoc = {
   type: string;
   label: string;
-  family: "Core" | "Statistical" | "Planning" | "Library";
+  family: "Core" | "Statistical" | "Planning" | "Library" | "Geo";
   title: string;
   lede: string;
   description: string;
@@ -209,11 +209,12 @@ export function chartPage(type: string): ChartDoc {
   const known = chartById.get(type);
   if (known) return withTruth(known);
   const fallback = chartTypes.find((chart) => chart.type === type);
+  const geoLabel = type === "choropleth" ? "Choropleth" : type === "map-points" ? "Map points" : "";
   return withTruth({
     type,
-    label: fallback?.title ?? type,
-    family: "Library",
-    title: fallback?.title ?? type,
+    label: geoLabel || fallback?.title || type,
+    family: geoLabel ? "Geo" : "Library",
+    title: geoLabel || fallback?.title || type,
     lede: fallback?.summary ?? "A ChartKit chart type.",
     description: fallback?.summary ?? "A ChartKit chart type.",
     facts: [

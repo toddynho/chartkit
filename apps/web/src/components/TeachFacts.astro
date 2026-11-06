@@ -10,16 +10,32 @@ interface Props {
 
 const { type, label, spec } = Astro.props;
 const chart = chartPage(type);
+const geo = type === "choropleth" || type === "map-points";
+const facts = geo
+  ? [
+      { k: "Import", v: "@chartkitdev/geo" },
+      { k: "Bundle", v: "@chartkitdev/geo" },
+    ]
+  : chart.facts;
+const family = geo ? "Geo" : chart.family;
 ---
 
 <figure class="code">
   <figcaption><span>spec.json</span></figcaption>
   <pre><code>{spec}</code></pre>
 </figure>
-<p>Install core and the adapter for your framework. The menu in the sidebar picks the snippet. <code>spec</code> is the JSON above.</p>
+{
+  geo ? (
+    <p>
+      Install <code>@chartkitdev/geo</code>. Maps are not in <code>@chartkitdev/core</code>, and the framework adapters do not draw them. <code>render</code> from the geo package is async. <code>spec</code> is the JSON above.
+    </p>
+  ) : (
+    <p>Install core and the adapter for your framework. The menu in the sidebar picks the snippet. <code>spec</code> is the JSON above.</p>
+  )
+}
 <div class="facts facts--names" aria-label={label}>
   {
-    chart.facts.map((fact) => (
+    facts.map((fact) => (
       <span class="fact">
         <span class="fact__k">{fact.k}</span>
         <span class="fact__v">{fact.v}</span>
@@ -28,7 +44,7 @@ const chart = chartPage(type);
   }
   <span class="fact">
     <span class="fact__k">Family</span>
-    <span class="fact__v">{chart.family}</span>
+    <span class="fact__v">{family}</span>
   </span>
 </div>
-<StackSample />
+{geo ? null : <StackSample />}

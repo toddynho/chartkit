@@ -1,0 +1,170 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestChoroplethSpec } from "../data/teach/choropleth";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/choropleth";
+const spec = specText(smallestChoroplethSpec);
+const play = playgroundHref(smallestChoroplethSpec);
+const atlas = `{
+  "mark": { "atlas": "us", "projection": "albersUsa" }
+}`;
+const scale = `{
+  "mark": { "scale": "diverging" }
+}`;
+const legend = `{
+  "legend": { "position": "bottom" }
+}`;
+const legendOff = `{
+  "mark": { "legend": false }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A choropleth shades each region by a number. The shape is the place. The color is the value. A country, a state, or another area in the atlas gets a fill from <code>encoding.color</code>.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a choropleth when the question is how a measure varies across places, and each place is a region you can name. Renewable share of electricity is one number per country. Population change, 2020–2023 is one number per state, and the scale diverges around zero.
+  </p>
+  <p>
+    A <a href="/docs/charts/heatmap">heatmap</a> is a grid. The two axes are categories or time, and the cell color is the value. It has no coastline and no atlas. Use a heatmap when the axes are not places.
+  </p>
+  <p>
+    <a href="/docs/charts/map-points">Map points</a> put a mark at a latitude and longitude. Use that chart when the place is a point, not a region you can fill. A <a href="/docs/charts/scatter">scatter</a> is also points, and both axes are quantities. A choropleth has neither axis.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    One row per region. <code>encoding.region</code> is the column of names or codes. The atlas matches those strings: a country name, an ISO code, or a US postal abbreviation. <code>encoding.color</code> is the number that paints the region. A string field name is enough. An object can set <code>field</code>, <code>format</code>, and <code>title</code>.
+  </p>
+  <p>
+    A region with no row is no data. The default paint is a hatch. <code>mark.nodata</code> <code>"fill"</code> paints those regions with the land color instead. Set that in the playground. <code>location</code> is an alias of <code>region</code>.
+  </p>
+  <p>
+    <code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.
+  </p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest choropleth. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Two countries and a world atlas. <code>mark.scale</code> is omitted, so the ramp is sequential. There is no tile layer, and no pan or zoom.
+  </p>
+  <TeachFacts type="choropleth" label="Choropleth packages" spec={spec} />
+  <figure class="code">
+    <figcaption><span>geo</span></figcaption>
+    <pre><code>{`import { render, validate } from "@chartkitdev/geo";
+
+const checked = validate(spec);
+const svg = await render(spec);`}</code></pre>
+  </figure>
+  <p>
+    <code>render</code> from <code>@chartkitdev/core</code> does not draw this type. Core <code>validate()</code> warns CK3057 and leaves the atlas, the region field, and the value field to the geo package. Call <code>validate</code> from <code>@chartkitdev/geo</code>. Its warnings are CK3050 through CK3056, and the SVG still draws.
+  </p>
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches between the two choropleth maps already published for this type. Renewable share of electricity is the world atlas and a sequential scale. Population change, 2020–2023 is the US atlas and a diverging scale. Both keep the size written on the spec.
+  </p>
+</section>
+
+<TeachConcept id="atlas" title="Atlas">
+  <p>
+    <code>mark.atlas</code> is <code>world</code>, <code>us</code>, <code>canada</code>, or <code>eu</code>. Omit it and the map is the world. The US atlas pairs with <code>mark.projection</code> <code>albersUsa</code>, which puts Alaska and Hawaii in insets. World, Canada, and the EU pair with <code>equalEarth</code>. This control writes that pair.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.atlas</span></figcaption>
+    <pre><code>{atlas}</code></pre>
+  </figure>
+  <p>
+    The region keys have to exist in the atlas you pick. Renewable share of electricity uses country codes. Switching that example to <code>us</code> draws the states and hatches them, because those rows are not postal codes. Population change uses postal abbreviations, so the world atlas does not match them.
+  </p>
+  <p>
+    <code>mercator</code>, <code>equirectangular</code>, and <code>fit</code> are projections too. Set those in the playground. Pass <code>mark.geojson</code> or <code>mark.topojson</code> there when the place is not one of the four atlases. There are no US counties and no NUTS-2.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="scale" title="Scale">
+  <p>
+    <code>mark.scale</code> is how the number becomes a color. Omit it, or set <code>sequential</code>, and the ramp runs from low to high in one hue. <code>diverging</code> is for a signed measure with a midpoint. Population change, 2020–2023 uses it: loss and gain sit on opposite sides of zero. <code>threshold</code> bins the values. Omit <code>mark.thresholds</code> and the bins are thirds of the data.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.scale</span></figcaption>
+    <pre><code>{scale}</code></pre>
+  </figure>
+  <p>
+    <code>encoding.color.range</code> replaces the sequential ramp with your own stops. A diverging chart does not take that range. <code>encoding.color.format</code> formats the legend. Renewable share of electricity uses <code>"%"</code>. Set a custom range or explicit thresholds in the playground.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    The color legend is on when the scale has stops. Omit <code>legend</code> and it sits on the right. <code>legend.position</code> <code>"bottom"</code> moves it under the map. <code>"right"</code> is the other side this chart draws. <code>top</code>, <code>left</code>, and <code>inside</code> are not drawn.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>mark.legend false</span></figcaption>
+    <pre><code>{legendOff}</code></pre>
+  </figure>
+  <p>
+    Off writes <code>mark.legend: false</code>. That is the key that hides the legend. <code>legend: false</code> does not. The map still draws the legend on the right.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    On the other charts, omit <code>tooltip</code> and the hover card is on. <code>tooltip: false</code> turns that card off. <code>tooltip: true</code> turns it on. This control writes the same keys, so a spec you carry to those charts behaves the same way.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>@chartkitdev/geo</code> does not read <code>tooltip: false</code> yet. The region title stays in the SVG, and <code>attach()</code> from that package still shows it. Off updates the snippet. It does not remove the title. Turning the control back on deletes an omitted tooltip, or puts a tooltip object back if the example had one. Neither published choropleth sets <code>tooltip.fields</code>. Add extra hover columns in the playground, with <code>tooltip.fields</code> or <code>encoding.tooltip</code>.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.land</code> and <code>mark.water</code> take a <code>#rrggbb</code> color. <code>mark.nodata</code> is <code>hatch</code> unless you set <code>fill</code>. Theme presets live on the playground. Population change, 2020–2023 is the midnight theme because that published spec sets it. This page does not add a theme control.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/map-points">Map points</a> mark latitude and longitude. A choropleth shades regions.</li>
+    <li><a href="/docs/charts/heatmap">Heatmap</a> colors a grid. The axes are not places.</li>
+    <li><a href="/docs/charts/scatter">Scatter</a> plots two quantities. It does not use an atlas.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

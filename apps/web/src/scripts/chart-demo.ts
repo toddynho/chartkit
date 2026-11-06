@@ -48,6 +48,8 @@ export function mountChartDemo(): void {
   let cursor = index;
   let menuOpen = false;
   let tip: Controller | null = null;
+  let geoDetach: (() => void) | null = null;
+  let geoDraw = 0;
   let current = openTeachExample(examples[index]!.spec);
 
   function exampleFromUrl(): number {
@@ -128,11 +130,22 @@ export function mountChartDemo(): void {
     closeMenu(focusTitle);
   }
 
+  function clearTips(): void {
+    tip?.destroy();
+    tip = null;
+    geoDetach?.();
+    geoDetach = null;
+  }
+
   function draw(fade = false): void {
+    const kind = typeof current.type === "string" ? current.type : "";
+    if (kind === "choropleth" || kind === "map-points") {
+      drawGeo(kind, fade);
+      return;
+    }
     const painted = paintSpec(withPreviewSize(current));
     const commit = () => {
-      tip?.destroy();
-      tip = null;
+      clearTips();
       chart!.innerHTML = painted.svg;
       if (error) {
         error.hidden = painted.ok;
@@ -155,6 +168,45 @@ export function mountChartDemo(): void {
     }
     snippet!.textContent = specText(current);
     play!.href = playgroundHref(current);
+  }
+
+  /**
+   * Choropleth and map-points render from @chartkitdev/geo.
+   * Core render draws an error chart for these types.
+   * Hover uses geo attach, which reads the SVG title and does not read tooltip: false.
+   */
+  function drawGeo(kind: string, fade: boolean): void {
+    const seq = ++geoDraw;
+    const specNow = current;
+    snippet!.textContent = specText(specNow);
+    play!.href = playgroundHref(specNow);
+    const commit = (svg: string, ok: boolean, message: string) => {
+      if (seq !== geoDraw) return;
+      clearTips();
+      chart!.innerHTML = svg;
+      if (error) {
+        error.hidden = ok;
+        error.textContent = ok ? "" : message;
+      }
+      chart!.classList.remove("is-swap");
+      const node = chart!.querySelector("svg");
+      if (!(node instanceof SVGSVGElement)) return;
+      void import("@chartkitdev/geo").then((geo) => {
+        if (seq !== geoDraw || !node.isConnected) return;
+        geoDetach = geo.attach(node);
+      });
+    };
+    if (fade) chart!.classList.add("is-swap");
+    void import("@chartkitdev/geo").then(async (geo) => {
+      if (seq !== geoDraw) return;
+      try {
+        const svg = await geo.render(withPreviewSize(specNow));
+        const ok = svg.includes(`data-ck-type="${kind}"`) && !svg.includes("Unknown atlas.") && !svg.includes("Expected type");
+        commit(svg, ok, ok ? "" : "Map did not render.");
+      } catch (err) {
+        commit("", false, err instanceof Error ? err.message : "Map did not render.");
+      }
+    });
   }
 
   function sync(): void {
