@@ -1,0 +1,191 @@
+---
+import { paintSpec } from "../lib/chartkit";
+import { withPreviewSize } from "../data/preview-size";
+import {
+  donutControlState,
+  donutExamples,
+  formatDonutNumber,
+  playgroundHref,
+  smallestDonutSpec,
+  specText,
+} from "../data/donut-teach";
+
+const initial = donutExamples[0];
+if (!initial) throw new Error("Donut demo has no example");
+const several = donutExamples.length > 1;
+
+for (const example of donutExamples) {
+  const painted = paintSpec(withPreviewSize(example.spec));
+  if (!painted.ok || !painted.svg.includes('data-ck-type="donut"')) {
+    const detail = painted.issues.map((issue) => `${issue.code} ${issue.message}`).join("; ");
+    throw new Error(`Donut example ${example.id} did not render. ${detail}`);
+  }
+}
+const rawSmallest = paintSpec(smallestDonutSpec);
+if (!rawSmallest.ok || !rawSmallest.svg.includes('data-ck-type="donut"')) {
+  const detail = rawSmallest.issues.map((issue) => `${issue.code} ${issue.message}`).join("; ");
+  throw new Error(`Smallest donut spec did not render. ${detail}`);
+}
+
+const state = donutControlState(initial.spec);
+const preview = paintSpec(withPreviewSize(initial.spec));
+const snippet = specText(initial.spec);
+const play = playgroundHref(initial.spec);
+
+function on(current: string, value: string): boolean {
+  return current === value;
+}
+---
+
+<div class="rail-stack">
+  <div class="docs-try-slot">
+    <div
+      class="docs-handle"
+      id="docs-handle"
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Resize try-it panel"
+      aria-controls="docs-response"
+      aria-valuemin="280"
+      aria-valuemax="9999"
+      aria-valuenow="380"
+      tabindex="0"
+      title="Drag to resize"
+    ></div>
+    <div class="docs-try chart-demo" id="docs-response" data-chart-demo data-example={initial.id}>
+  <div class="ex-switch" data-ex-switch>
+    <div class="ex-switch__lead">
+      {
+        several ? (
+          <button
+            type="button"
+            class="ex-switch__title"
+            data-ex-title
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-controls="ex-switch-list"
+          >
+            <span class="ex-switch__name" data-ex-name>{initial.title}</span>
+            <span class="ex-switch__chevron" aria-hidden="true">▾</span>
+          </button>
+        ) : (
+          <div class="ex-switch__title ex-switch__title--plain">
+            <span class="ex-switch__name" data-ex-name>{initial.title}</span>
+          </div>
+        )
+      }
+      <p class="ex-switch__desc" data-demo-blurb>{initial.blurb}</p>
+      {
+        several ? (
+          <div class="ex-switch__menu" id="ex-switch-list" role="listbox" aria-label="Examples" hidden>
+            {
+              donutExamples.map((example) => (
+                <button
+                  type="button"
+                  class="ex-switch__option"
+                  role="option"
+                  id={`ex-opt-${example.id}`}
+                  data-example-id={example.id}
+                  aria-selected={example.id === initial.id ? "true" : "false"}
+                >
+                  <span class="ex-switch__option-name">{example.title}</span>
+                  <code>{example.meta}</code>
+                </button>
+              ))
+            }
+          </div>
+        ) : null
+      }
+    </div>
+    {
+      several ? (
+        <div class="ex-switch__steps">
+          <span class="ex-switch__count" data-ex-count>1 / {donutExamples.length}</span>
+          <button type="button" class="ex-switch__step" data-ex-prev aria-label="Previous example" aria-disabled="true">‹</button>
+          <button type="button" class="ex-switch__step" data-ex-next aria-label="Next example">›</button>
+        </div>
+      ) : null
+    }
+  </div>
+  <div class="chart-demo__chart" id="response-chart" data-demo-chart set:html={preview.svg}></div>
+  <p class="chart-demo__error" data-demo-error hidden></p>
+  <figure class="code">
+    <figcaption>
+      <span>spec.json</span>
+      <button type="button" class="copy-pill" data-demo-copy>Copy</button>
+    </figcaption>
+    <pre><code data-demo-snippet>{snippet}</code></pre>
+  </figure>
+  <div class="chart-demo__controls">
+    <div class="chart-demo__control">
+      <div class="chart-demo__label"><span>Hole</span><code>mark.innerRadius</code></div>
+      <label class="chart-demo__range">
+        <input type="range" data-range="innerRadius" min="0.35" max="0.95" step="0.01" value={state.innerRadius} aria-label="mark.innerRadius" />
+        <output data-range-out="innerRadius">{formatDonutNumber(state.innerRadius)}</output>
+      </label>
+    </div>
+    <div class="chart-demo__control">
+      <div class="chart-demo__label"><span>Gap</span><code>mark.padAngle</code></div>
+      <label class="chart-demo__range">
+        <input type="range" data-range="padAngle" min="0" max="10" step="0.5" value={state.padAngle} aria-label="mark.padAngle" />
+        <output data-range-out="padAngle">{formatDonutNumber(state.padAngle)}</output>
+      </label>
+    </div>
+    <div class="chart-demo__control">
+      <div class="chart-demo__label"><span>Labels</span><code>mark.labels</code></div>
+      <div class="chart-demo__choices" role="group" aria-label="mark.labels and mark.labelPosition">
+        <button type="button" class:list={["chart-demo__choice", on(state.labels, "off") && "is-on"]} data-choice="labels" data-value="off" aria-pressed={on(state.labels, "off") ? "true" : "false"}>Off</button>
+        <button type="button" class:list={["chart-demo__choice", on(state.labels, "inside") && "is-on"]} data-choice="labels" data-value="inside" aria-pressed={on(state.labels, "inside") ? "true" : "false"}>Inside</button>
+        <button type="button" class:list={["chart-demo__choice", on(state.labels, "outside") && "is-on"]} data-choice="labels" data-value="outside" aria-pressed={on(state.labels, "outside") ? "true" : "false"}>Outside</button>
+      </div>
+    </div>
+    <div class="chart-demo__control">
+      <div class="chart-demo__label"><span>Legend</span><code>legend</code></div>
+      <div class="chart-demo__choices" role="group" aria-label="legend">
+        <button type="button" class:list={["chart-demo__choice", on(state.legend, "off") && "is-on"]} data-choice="legend" data-value="off" aria-pressed={on(state.legend, "off") ? "true" : "false"}>Off</button>
+        <button type="button" class:list={["chart-demo__choice", on(state.legend, "bottom") && "is-on"]} data-choice="legend" data-value="bottom" aria-pressed={on(state.legend, "bottom") ? "true" : "false"}>Bottom</button>
+        <button type="button" class:list={["chart-demo__choice", on(state.legend, "right") && "is-on"]} data-choice="legend" data-value="right" aria-pressed={on(state.legend, "right") ? "true" : "false"}>Right</button>
+      </div>
+    </div>
+    <div class="chart-demo__control">
+      <div class="chart-demo__label"><span>Tooltip</span><code>tooltip</code></div>
+      <div class="chart-demo__choices" role="group" aria-label="tooltip">
+        <button type="button" class:list={["chart-demo__choice", on(state.tooltip, "off") && "is-on"]} data-choice="tooltip" data-value="off" aria-pressed={on(state.tooltip, "off") ? "true" : "false"}>Off</button>
+        <button type="button" class:list={["chart-demo__choice", on(state.tooltip, "on") && "is-on"]} data-choice="tooltip" data-value="on" aria-pressed={on(state.tooltip, "on") ? "true" : "false"}>On</button>
+      </div>
+    </div>
+    <div class="chart-demo__control">
+      <div class="chart-demo__label"><span>Colours</span><code>mark.palette</code></div>
+      <div class="chart-demo__choices" role="group" aria-label="mark.palette">
+        <button type="button" class:list={["chart-demo__choice", on(state.palette, "theme") && "is-on"]} data-choice="palette" data-value="theme" aria-pressed={on(state.palette, "theme") ? "true" : "false"}>Theme</button>
+        <button type="button" class:list={["chart-demo__choice", on(state.palette, "set") && "is-on"]} data-choice="palette" data-value="set" aria-pressed={on(state.palette, "set") ? "true" : "false"}>Four colours</button>
+      </div>
+    </div>
+    <div class="chart-demo__control">
+      <div class="chart-demo__label"><span>Sort</span><code>mark.sort</code></div>
+      <div class="chart-demo__choices" role="group" aria-label="mark.sort">
+        <button type="button" class:list={["chart-demo__choice", on(state.sort, "none") && "is-on"]} data-choice="sort" data-value="none" aria-pressed={on(state.sort, "none") ? "true" : "false"}>none</button>
+        <button type="button" class:list={["chart-demo__choice", on(state.sort, "asc") && "is-on"]} data-choice="sort" data-value="asc" aria-pressed={on(state.sort, "asc") ? "true" : "false"}>asc</button>
+        <button type="button" class:list={["chart-demo__choice", on(state.sort, "desc") && "is-on"]} data-choice="sort" data-value="desc" aria-pressed={on(state.sort, "desc") ? "true" : "false"}>desc</button>
+      </div>
+    </div>
+    <div class="chart-demo__control">
+      <div class="chart-demo__label"><span>Start</span><code>mark.startAngle</code></div>
+      <div class="chart-demo__choices" role="group" aria-label="mark.startAngle">
+        <button type="button" class:list={["chart-demo__choice", state.startAngle === 0 && "is-on"]} data-choice="startAngle" data-value="0" aria-pressed={state.startAngle === 0 ? "true" : "false"}>0</button>
+        <button type="button" class:list={["chart-demo__choice", state.startAngle === 90 && "is-on"]} data-choice="startAngle" data-value="90" aria-pressed={state.startAngle === 90 ? "true" : "false"}>90</button>
+        <button type="button" class:list={["chart-demo__choice", state.startAngle === 180 && "is-on"]} data-choice="startAngle" data-value="180" aria-pressed={state.startAngle === 180 ? "true" : "false"}>180</button>
+        <button type="button" class:list={["chart-demo__choice", state.startAngle === -90 && "is-on"]} data-choice="startAngle" data-value="-90" aria-pressed={state.startAngle === -90 ? "true" : "false"}>-90</button>
+      </div>
+    </div>
+  </div>
+  <p class="chart-demo__play"><a data-demo-play href={play}>Open in playground</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { mountChartDemo } from "../scripts/chart-demo";
+
+  mountChartDemo();
+</script>

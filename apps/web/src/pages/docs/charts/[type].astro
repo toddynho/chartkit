@@ -5,7 +5,7 @@ import { chartPage, chartPageTypes, chipsForChart, specForChart } from "../../..
 import Docs from "../../../layouts/Docs.astro";
 
 export function getStaticPaths() {
-  return chartPageTypes.map((type) => ({ params: { type } }));
+  return chartPageTypes.filter((type) => type !== "donut").map((type) => ({ params: { type } }));
 }
 
 const chart = chartPage(Astro.params.type ?? "");

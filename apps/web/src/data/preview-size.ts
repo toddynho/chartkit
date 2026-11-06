@@ -2,8 +2,9 @@
  * Playground preview size for each chart type.
  * Card is the default stage. Dashboard and Full scale it.
  * A numeric size.width, size.height, or size.aspectRatio on the spec wins.
- * Docs pages do not use this map: they mount the spec and let each renderer
- * pick its own fallback, then the column CSS scales the SVG.
+ * Chart docs pages mount the spec and let each renderer pick its own fallback,
+ * then the column CSS scales the SVG. The donut teaching page is the exception:
+ * withPreviewSize applies this card default when the spec sets no size.
  */
 
 export type PreviewPreset = "card" | "dashboard" | "full";
@@ -101,6 +102,25 @@ export function previewSize(type: string, preset: PreviewPreset, spec: { size?: 
   const minHeight = explicit.minHeight ?? (explicit.height == null ? base.minHeight : undefined);
   if (height != null && minHeight != null && minHeight > height) height = Math.round(minHeight);
   return minHeight != null ? { width, height, minHeight } : { width, height };
+}
+
+/**
+ * Copy a spec for a docs preview.
+ * A numeric size on the spec wins. Otherwise the card default for that type is written
+ * onto the copy. The caller's spec is left unchanged.
+ */
+export function withPreviewSize(spec: Record<string, unknown>): Record<string, unknown> {
+  const type = typeof spec.type === "string" ? spec.type : "";
+  const box = previewSize(type, "card", spec);
+  const next = structuredClone(spec);
+  const current = next.size;
+  const size: Record<string, unknown> =
+    current && typeof current === "object" && !Array.isArray(current) ? { ...(current as Record<string, unknown>) } : {};
+  size.width = box.width;
+  if (box.height != null) size.height = box.height;
+  if (box.minHeight != null) size.minHeight = box.minHeight;
+  next.size = size;
+  return next;
 }
 
 /** Drop inherited width, height, and aspect so a type change can use the new default. */

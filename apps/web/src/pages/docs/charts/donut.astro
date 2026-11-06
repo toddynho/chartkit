@@ -1,0 +1,14 @@
+---
+import "../../../styles/teach.css";
+import ChartDemo from "../../../components/ChartDemo.astro";
+import DonutGuide from "../../../components/DonutGuide.astro";
+import { donutPageDescription, donutPageTitle } from "../../../data/donut-teach";
+import Docs from "../../../layouts/Docs.astro";
+
+const href = "/docs/charts/donut";
+---
+
+<Docs title={donutPageTitle} description={donutPageDescription} href={href}>
+  <DonutGuide />
+  <ChartDemo slot="rail" />
+</Docs>
