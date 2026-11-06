@@ -1,60 +1,20 @@
 /*
-  Two-column docs page: teaching on the left, a live demo on the right.
-  Only /docs/charts/donut uses this layout.
+  Donut docs demo inside the shared docs rail.
+  The page itself uses Docs.astro. This file does not change the frame or .docs-main width.
 */
 
-.docs-frame.docs-frame--teach {
-  grid-template-columns: 264px minmax(0, 1fr);
+.docs-try.chart-demo {
+  padding: 12px 14px 16px;
 }
 
-.docs-frame .docs-main.docs-main--teach {
-  max-width: none;
-  min-width: 0;
-}
-
-.teach {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 400px);
-  gap: 36px 40px;
-  align-items: start;
-  min-width: 0;
-}
-
-.teach__copy,
-.teach__demo,
-.chart-demo {
-  min-width: 0;
-  max-width: 100%;
-}
-
-.teach__demo {
-  position: sticky;
-  top: calc(var(--header) + 12px);
-  max-height: calc(100vh - var(--header) - 24px);
-  overflow: auto;
-  padding-bottom: 8px;
-}
-
-.docs-frame .docs-main .teach__copy > p,
-.docs-frame .docs-main .teach__copy section > p,
-.docs-frame .docs-main .teach__copy section > ul {
-  margin: 0 0 16px;
-  max-width: 68ch;
-  color: #55575c;
-  font-size: 15px;
-  line-height: 1.65;
-}
-
-.teach__copy section + section { margin-top: 8px; }
-
-.teach__copy .fact__v {
+.facts--names .fact__v {
   max-width: none;
   overflow: visible;
   text-overflow: unset;
   white-space: normal;
 }
 
-.docs-frame .docs-main .teach__copy .concept figure.code { margin-bottom: 16px; }
+.docs-frame .docs-main .concept figure.code { margin-bottom: 16px; }
 
 .chart-demo__examples {
   display: flex;
@@ -81,7 +41,7 @@
 }
 
 .chart-demo__example {
-  flex: 1 1 9.5rem;
+  flex: 1 1 8.5rem;
   padding: 7px 12px;
 }
 
@@ -111,29 +71,21 @@
 }
 
 .chart-demo__blurb {
-  margin: 0 0 12px;
+  margin: 0 0 8px;
   color: #55575c;
   font-size: 13px;
   line-height: 1.45;
 }
 
-.chart-demo__chart {
+.docs-try .chart-demo__chart {
   margin: 0 0 12px;
-  padding: 8px;
-  border: 1px solid #e6e6e2;
-  border-radius: 12px;
-  background: #fff;
-}
-
-.chart-demo__chart svg {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .chart-demo__error {
-  margin: 8px 0 0;
+  margin: 0 0 8px;
   color: #9f1239;
   font-size: 12px;
   line-height: 1.4;
@@ -141,11 +93,54 @@
 
 .chart-demo__error[hidden] { display: none; }
 
-.docs-frame .docs-main .chart-demo figure.code { margin-bottom: 12px; }
+.docs-rail .chart-demo figure.code {
+  margin: 0 0 12px;
+  background: #1b1c1f;
+  border-radius: 12px;
+  padding: 12px 14px;
+  overflow: hidden;
+}
 
-.docs-frame .docs-main .chart-demo figure.code pre {
+.docs-rail .chart-demo figure.code figcaption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 8px;
+  color: #8b8d93;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.docs-rail .chart-demo figure.code pre {
+  margin: 0;
   max-height: 9.5rem;
   overflow: auto;
+  background: transparent;
+  color: #d9dadd;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.docs-rail .chart-demo figure.code code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+}
+
+.docs-rail .chart-demo figure.code .copy-pill {
+  background: #2c2d31;
+  color: #d9dadd;
+  border: 0;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  padding: 2px 9px;
+  cursor: pointer;
 }
 
 .chart-demo__controls { display: grid; gap: 12px; margin: 0 0 12px; }
@@ -198,19 +193,5 @@
 }
 
 @media (max-width: 1100px) {
-  .docs-frame.docs-frame--teach { grid-template-columns: 240px minmax(0, 1fr); }
-  .teach { grid-template-columns: minmax(0, 1fr); }
-  .teach__demo {
-    position: static;
-    top: auto;
-    max-height: none;
-    overflow: visible;
-    order: -1;
-  }
-  .docs-frame .docs-main .chart-demo figure.code pre { max-height: none; }
-}
-
-@media (max-width: 760px) {
-  .docs-frame.docs-frame--teach { grid-template-columns: minmax(0, 1fr); }
-  .docs-frame .docs-main.docs-main--teach { padding: 20px 16px 72px; }
+  .docs-rail .chart-demo figure.code pre { max-height: none; }
 }

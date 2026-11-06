@@ -122,4 +122,19 @@ export function mountChartDemo(): void {
       draw();
     });
   }
+
+  const copy = root.querySelector<HTMLButtonElement>("[data-demo-copy]");
+  copy?.addEventListener("click", async () => {
+    const text = snippet.textContent ?? "";
+    try {
+      await navigator.clipboard.writeText(text.replace(/^\n/, "").replace(/\s+$/, ""));
+      copy.textContent = "Copied";
+    } catch {
+      copy.textContent = "Copy";
+      return;
+    }
+    window.setTimeout(() => {
+      copy.textContent = "Copy";
+    }, 1200);
+  });
 }

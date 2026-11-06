@@ -36,7 +36,22 @@ function on(current: string, value: string): boolean {
 }
 ---
 
-<div class="chart-demo" data-chart-demo data-example={initial.id}>
+<div class="rail-stack">
+  <div class="docs-try-slot">
+    <div
+      class="docs-handle"
+      id="docs-handle"
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Resize try-it panel"
+      aria-controls="docs-response"
+      aria-valuemin="280"
+      aria-valuemax="9999"
+      aria-valuenow="380"
+      tabindex="0"
+      title="Drag to resize"
+    ></div>
+    <div class="docs-try chart-demo" id="docs-response" data-chart-demo data-example={initial.id}>
   <div class="chart-demo__examples" role="group" aria-label="Donut examples">
     {
       donutExamples.map((example) => (
@@ -52,10 +67,13 @@ function on(current: string, value: string): boolean {
     }
   </div>
   <p class="chart-demo__blurb" data-demo-blurb>{initial.blurb}</p>
-  <div class="chart-demo__chart" data-demo-chart set:html={preview.svg}></div>
+  <div class="chart-demo__chart" id="response-chart" data-demo-chart set:html={preview.svg}></div>
   <p class="chart-demo__error" data-demo-error hidden></p>
   <figure class="code">
-    <figcaption><span>spec.json</span></figcaption>
+    <figcaption>
+      <span>spec.json</span>
+      <button type="button" class="copy-pill" data-demo-copy>Copy</button>
+    </figcaption>
     <pre><code data-demo-snippet>{snippet}</code></pre>
   </figure>
   <div class="chart-demo__controls">
@@ -115,6 +133,8 @@ function on(current: string, value: string): boolean {
     </div>
   </div>
   <p class="chart-demo__play"><a data-demo-play href={play}>Open in playground</a></p>
+    </div>
+  </div>
 </div>
 
 <script>
