@@ -55,7 +55,6 @@ import {
   streamgraphExamples,
   streamgraphTeach,
 } from "./streamgraph.ts";
-import { paintSpec } from "../../lib/chartkit.ts";
 import { withPreviewSize } from "../preview-size.ts";
 import { openTeachExample } from "./spec.ts";
 import {
@@ -72,6 +71,81 @@ import { applyTreeAction, smallestTreeSpec, treeControlState, treeExamples, tree
 import { applyTreemapAction, smallestTreemapSpec, treemapControlState, treemapExamples, treemapTeach } from "./treemap.ts";
 import { applyVennAction, smallestVennSpec, vennControlState, vennExamples, vennTeach } from "./venn.ts";
 import { applyWaterfallAction, smallestWaterfallSpec, waterfallControlState, waterfallExamples, waterfallTeach } from "./waterfall.ts";
+
+function assertRecord(value: unknown): asserts value is Record<string, unknown> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) assert.fail("expected an object");
+}
+
+/**
+ * Mark after a control writes it.
+ * `assert.equal(spec.mark, undefined)` narrows that property to undefined, so a later
+ * cast of the same property is a conversion from undefined.
+ */
+function writtenMark(spec: object): Record<string, unknown> {
+  const mark: unknown = Reflect.get(spec, "mark");
+  assertRecord(mark);
+  return mark;
+}
+
+type TeachRuntime = {
+  paintSpec: (spec: unknown) => { ok: boolean; svg: string; issues: { code: string; message: string }[] };
+  render: (spec: unknown) => string;
+  validate: (spec: unknown) => { ok: boolean; errors: { code: string; message: string }[] };
+  renderGeo: (spec: unknown) => Promise<string>;
+};
+
+/**
+ * npm test runs before build:lib, so the published dist entries are not on disk.
+ * Bundle the same source those entries ship.
+ */
+const teachRuntime: TeachRuntime = await loadTeachRuntime();
+const { paintSpec } = teachRuntime;
+
+async function loadTeachRuntime(): Promise<TeachRuntime> {
+  const { build } = await import("esbuild");
+  const { mkdtempSync, writeFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { fileURLToPath, pathToFileURL } = await import("node:url");
+  const root = fileURLToPath(new URL("../../../../../", import.meta.url));
+  const core = join(root, "packages/core/src");
+  const dir = mkdtempSync(join(tmpdir(), "ck-teach-"));
+  const entry = join(dir, "entry.ts");
+  const outfile = join(dir, "runtime.mjs");
+  const chartkit = fileURLToPath(new URL("../../lib/chartkit.ts", import.meta.url));
+  const geo = fileURLToPath(new URL("../../../../../packages/geo/src/index.ts", import.meta.url));
+  writeFileSync(
+    entry,
+    [
+      `export { paintSpec } from ${JSON.stringify(chartkit)};`,
+      `export { render } from ${JSON.stringify(join(core, "extra.ts"))};`,
+      `export { validate } from ${JSON.stringify(join(core, "validate.ts"))};`,
+      `export { render as renderGeo } from ${JSON.stringify(geo)};`,
+      "",
+    ].join("\n"),
+  );
+  await build({
+    entryPoints: [entry],
+    bundle: true,
+    format: "esm",
+    platform: "node",
+    outfile,
+    logLevel: "silent",
+    plugins: [
+      {
+        name: "workspace-source",
+        setup(pluginBuild) {
+          pluginBuild.onResolve({ filter: /^@chartkitdev\/core\// }, (args) => {
+            const sub = args.path.slice("@chartkitdev/core/".length);
+            const alias = sub === "validate/phase4" ? "validate-phase4" : sub;
+            return { path: join(core, alias.endsWith(".ts") ? alias : `${alias}.ts`) };
+          });
+        },
+      },
+    ],
+  });
+  return import(pathToFileURL(outfile).href) as Promise<TeachRuntime>;
+}
 
 test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, the compact charts, the metric charts, and geo", () => {
   assert.deepEqual(Object.keys(teachModules).sort(), [
@@ -1406,7 +1480,7 @@ test("range area actions edit the center line, the forecast dash, and tooltip", 
   applyAreaRangeAction(forecast, { id: "line", value: "on", restore: areaRangeExamples[0]!.spec });
   assert.equal(forecast.mark, undefined);
   applyAreaRangeAction(forecast, { id: "dash", value: "on", restore: areaRangeExamples[0]!.spec });
-  assert.equal((forecast.mark as { strokeDash: boolean }).strokeDash, true);
+  assert.equal(writtenMark(forecast).strokeDash, true);
   applyAreaRangeAction(forecast, { id: "dash", value: "off", restore: areaRangeExamples[0]!.spec });
   assert.equal(forecast.mark, undefined);
   applyAreaRangeAction(forecast, { id: "tooltip", value: "off" });
@@ -2009,7 +2083,7 @@ test("gauge actions edit bands, sweep, cap, and tooltip", () => {
   applyGaugeAction(capacity, { id: "sweep", value: "dial" });
   assert.equal(capacity.mark, undefined);
   applyGaugeAction(capacity, { id: "linecap", value: "round" });
-  assert.equal((capacity.mark as { linecap: string }).linecap, "round");
+  assert.equal(writtenMark(capacity).linecap, "round");
   applyGaugeAction(capacity, { id: "linecap", value: "butt" });
   assert.equal(capacity.mark, undefined);
   applyGaugeAction(capacity, { id: "tooltip", value: "off" });
@@ -2154,8 +2228,8 @@ test("progress ring actions edit the center, the cap, the sweep, and tooltip", (
   applyProgressRingAction(uptime, { id: "linecap", value: "round" });
   assert.equal(uptime.mark, undefined);
   applyProgressRingAction(uptime, { id: "span", value: "open" });
-  assert.equal((uptime.mark as { startAngle: number }).startAngle, 0);
-  assert.equal((uptime.mark as { endAngle: number }).endAngle, 270);
+  assert.equal(writtenMark(uptime).startAngle, 0);
+  assert.equal(writtenMark(uptime).endAngle, 270);
   applyProgressRingAction(uptime, { id: "span", value: "full" });
   assert.equal(uptime.mark, undefined);
   applyProgressRingAction(uptime, { id: "tooltip", value: "off" });
@@ -2215,7 +2289,7 @@ test("bullet actions edit ranges, target, and tooltip", () => {
   assert.equal(quota.mark, undefined);
   assert.equal(bulletControlState(quota).ranges, "off");
   applyBulletAction(quota, { id: "ranges", value: "on", restore: bulletExamples[0]!.spec });
-  assert.deepEqual((quota.mark as { ranges: string[] }).ranges, ["poor", "ok", "good"]);
+  assert.deepEqual(writtenMark(quota).ranges, ["poor", "ok", "good"]);
   applyBulletAction(quota, { id: "target", value: "off" });
   assert.equal((quota.encoding as { target?: unknown }).target, undefined);
   assert.equal((quota.encoding as { y: string }).y, "value");
@@ -2400,15 +2474,15 @@ test("map-points actions edit atlas, size, labels, legend, and tooltip", () => {
 });
 
 test("choropleth and map-points examples paint with their type", async () => {
-  const { render } = await import("@chartkitdev/geo");
+  const { renderGeo } = teachRuntime;
   for (const spec of [smallestChoroplethSpec, ...choroplethExamples.map((example) => example.spec)]) {
-    const svg = await render(spec);
+    const svg = await renderGeo(spec);
     assert.equal(svg.includes('data-ck-type="choropleth"'), true);
     assert.equal(svg.includes("ck-chart-error"), false);
     assert.equal(svg.includes("Unknown atlas."), false);
   }
   for (const spec of [smallestMapPointsSpec, ...mapPointsExamples.map((example) => example.spec)]) {
-    const svg = await render(spec);
+    const svg = await renderGeo(spec);
     assert.equal(svg.includes('data-ck-type="map-points"'), true);
     assert.equal(svg.includes("ck-chart-error"), false);
     assert.equal(svg.includes("Unknown atlas."), false);
@@ -2486,12 +2560,12 @@ test("density actions edit bandwidth, normalize, rug, orientation, legend, and t
   applyDensityAction(wait, { id: "bandwidth", value: "auto" });
   assert.equal(wait.mark, undefined);
   applyDensityAction(wait, { id: "normalize", value: "count" });
-  assert.equal((wait.mark as { normalize: string }).normalize, "count");
+  assert.equal(writtenMark(wait).normalize, "count");
   applyDensityAction(wait, { id: "rug", value: "on" });
-  assert.equal((wait.mark as { rug: boolean; normalize: string }).rug, true);
-  assert.equal((wait.mark as { normalize: string }).normalize, "count");
+  assert.equal(writtenMark(wait).rug, true);
+  assert.equal(writtenMark(wait).normalize, "count");
   applyDensityAction(wait, { id: "orientation", value: "vertical" });
-  assert.equal((wait.mark as { orientation: string }).orientation, "vertical");
+  assert.equal(writtenMark(wait).orientation, "vertical");
   applyDensityAction(wait, { id: "tooltip", value: "off" });
   assert.equal(wait.tooltip, false);
   applyDensityAction(wait, { id: "tooltip", value: "on", restore: undefined });
@@ -2616,7 +2690,7 @@ test("strip actions edit summary, band, orientation, jitter, sort, legend, and t
   assert.equal(stripControlState(regions).summary, "median");
   assert.equal(regions.mark, undefined);
   applyStripAction(regions, { id: "summary", value: "none" });
-  assert.equal((regions.mark as { summary: string }).summary, "none");
+  assert.equal(writtenMark(regions).summary, "none");
 
   const desks = structuredClone(stripExamples[2]!.spec);
   assert.equal(stripControlState(desks).orientation, "vertical");
@@ -2649,10 +2723,7 @@ test("strip actions edit summary, band, orientation, jitter, sort, legend, and t
 });
 
 test("distribution examples and smallest specs paint with the right type", async () => {
-  const { render } = (await import("@chartkitdev/core/extra")) as { render: (spec: unknown) => string };
-  const { validate } = (await import("@chartkitdev/core/validate")) as {
-    validate: (spec: unknown) => { ok: boolean; errors: { code: string; message: string }[] };
-  };
+  const { render, validate } = teachRuntime;
   const cases = [
     ...histogramExamples.map((example) => example.spec),
     smallestHistogramSpec,

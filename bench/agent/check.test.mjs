@@ -874,7 +874,13 @@ function specFor(task) {
       axes: { y2: true },
     };
   }
-  return { ...base, data: task.data, encoding: { x: task.expect.x, y: task.expect.y } };
+  if (task.type === "tree") {
+    return { ...base, data: task.data, encoding: { id: task.expect.id, parent: task.expect.parent } };
+  }
+  // A 1D density encodes the sample on x only. An explicit y: undefined fails the schema.
+  const encoding = { x: task.expect.x };
+  if (task.expect.y !== undefined) encoding.y = task.expect.y;
+  return { ...base, data: task.data, encoding };
 }
 
 after(async () => {

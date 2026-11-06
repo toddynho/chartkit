@@ -105,7 +105,8 @@ export function homeTokenCharts(): HomeStripChart[] {
   const spread = tokenSpread();
   const chartkit = spread.rows.find((row) => row.us);
   const next = spread.rows.find((row) => !row.us);
-  if (!chartkit || !next || !spread.annotation) throw new Error("token chart is missing ChartKit or the compare note");
+  const annotation = spread.annotation;
+  if (!chartkit || !next || !annotation) throw new Error("token chart is missing ChartKit or the compare note");
   const alt = `ChartKit's median is ${chartkit.medianText} tokens, ${spread.headline}× below ${next.name} at ${next.medianText}.`;
   const height = 360;
   const theme = {
@@ -148,7 +149,7 @@ export function homeTokenCharts(): HomeStripChart[] {
           type: "compare",
           from: { group: "ChartKit", at: "summary" },
           to: { group: next.name, at: "summary" },
-          label: spread.annotation.text,
+          label: annotation.text,
         },
       ],
       theme,
