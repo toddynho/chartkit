@@ -301,6 +301,58 @@ describe("shared cartesian chrome", () => {
   });
 });
 
+describe("playground title and subtitle", () => {
+  const rows = [
+    { quarter: "Q1", units: 40 },
+    { quarter: "Q2", units: 55 },
+  ];
+  const base = {
+    version: "1",
+    type: "line",
+    data: rows,
+    encoding: { x: "quarter", y: "units" },
+    a11y: { alt: "Units rose from Q1 to Q2." },
+    size: { width: 680, height: 320 },
+  };
+
+  it("paints the screenshot subtitle under the title, clear of the plot", () => {
+    const svg = render({ ...base, title: "Testing", subtitle: "testing where is this?" }) ?? "";
+    const placed = placedHeading(svg, "Testing", "testing where is this?");
+    expect(placed.subtitle.y).toBeGreaterThan(placed.title.y);
+    expect(placed.subtitle.x).toBe(placed.title.x);
+    expect(plotTop(svg)).toBeGreaterThan(placed.subtitle.y + 3);
+  });
+
+  it("paints a title with no subtitle, and a subtitle with no title", () => {
+    const titleOnly = render({ ...base, title: "Testing" }) ?? "";
+    const title = textNodes(titleOnly).find((node) => node.text === "Testing");
+    expect(title).toBeTruthy();
+    expect(textNodes(titleOnly).some((node) => node.text === "testing where is this?")).toBe(false);
+    expect(plotTop(titleOnly)).toBeGreaterThan((title?.y ?? 0) + 3);
+
+    const subtitleOnly = render({ ...base, subtitle: "testing where is this?" }) ?? "";
+    const subtitle = textNodes(subtitleOnly).find((node) => node.text === "testing where is this?");
+    expect(subtitle).toBeTruthy();
+    expect(textNodes(subtitleOnly).some((node) => node.text === "Testing")).toBe(false);
+    expect(plotTop(subtitleOnly)).toBeGreaterThan((subtitle?.y ?? 0) + 3);
+  });
+});
+
+function placedHeading(svg: string, title: string, subtitle: string): { title: { x: number; y: number }; subtitle: { x: number; y: number } } {
+  const nodes = textNodes(svg);
+  const titleNode = nodes.find((node) => node.text === title);
+  const subtitleNode = nodes.find((node) => node.text === subtitle);
+  expect(titleNode?.text).toBe(title);
+  expect(subtitleNode?.text).toBe(subtitle);
+  return { title: titleNode ?? { x: 0, y: 0 }, subtitle: subtitleNode ?? { x: 0, y: 0 } };
+}
+
+function plotTop(svg: string): number {
+  const clip = svg.match(/<clipPath\b[^>]*>\s*<rect\b([^>]*)\/?>/);
+  const y = clip?.[1]?.match(/\by="([^"]+)"/)?.[1];
+  return Number(y);
+}
+
 function legendGroup(svg: string): string {
   const start = svg.indexOf('<g data-ck-legend="bottom"');
   if (start < 0) return "";

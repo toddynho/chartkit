@@ -11,6 +11,7 @@ import {
 import type { ChartSpec } from "@chartkitdev/core";
 import { mount } from "@chartkitdev/vanilla";
 import { previewSize, readExplicitSize, stripPreviewSize, type PreviewPreset } from "../data/preview-size";
+import { paintsHeading, stageSpec } from "./stage-spec";
 import { menuPosition } from "./menu-place";
 import { optionEffect } from "../data/option-effect";
 import { chartType, drawChart } from "../lib/paint-chart";
@@ -1081,9 +1082,7 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     liveDestroy = null;
     const started = performance.now();
     const size = previewSize(chartType(state.good), viewPreset(), state.good);
-    const view = clone(state.good);
-    delete view.title;
-    delete view.subtitle;
+    const view = stageSpec(state.good);
     if (state.mode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
       if (typeof view.theme === "string") view.theme = { preset: view.theme, mode: "dark" };
       else if (isRecord(view.theme)) {
@@ -1115,9 +1114,6 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       const cardWidth = Math.min(size.width + 42, fitted);
       const chartWidth = Math.max(120, cardWidth - 42);
       card.style.width = `${cardWidth}px`;
-      const title = document.createElement("h2");
-      title.className = "play-card__title";
-      title.textContent = typeof state.good.title === "string" && state.good.title.trim() ? state.good.title : "Untitled";
       const chart = document.createElement("div");
       chart.className = "play-card__chart";
       chart.dataset.ckLive = "1";
@@ -1158,7 +1154,13 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
       const sentence = document.createElement("span");
       sentence.textContent = altText(state.good);
       alt.append(code, sentence);
-      card.append(title, chart, alt);
+      if (!paintsHeading(state.good)) {
+        const title = document.createElement("h2");
+        title.className = "play-card__title";
+        title.textContent = "Untitled";
+        card.append(title);
+      }
+      card.append(chart, alt);
       const stage = document.createElement("div");
       stage.className = "play-stage";
       stage.append(card);

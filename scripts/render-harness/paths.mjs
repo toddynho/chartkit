@@ -9,6 +9,7 @@ export const baselineDir = join(harnessDir, "baselines");
 export const fastBaselinePath = join(baselineDir, "fast.json");
 export const fullBaselinePath = join(baselineDir, "full.json");
 export const allowlistPath = join(harnessDir, "allowlist.json");
+export const claimAllowlistPath = join(harnessDir, "claim-allowlist.json");
 export const reportDir = join(harnessDir, "report");
 export const statusPath = join(repoRoot, "apps/web/src/data/option-effect-status.json");
 export const examplesDir = join(repoRoot, "packages/core/examples");
