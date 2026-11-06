@@ -1,0 +1,187 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestLineSpec } from "../data/teach/line";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/line";
+const spec = specText(smallestLineSpec);
+const play = playgroundHref(smallestLineSpec);
+const curve = `{
+  "mark": { "curve": "linear" }
+}`;
+const step = `{
+  "mark": { "curve": "step" }
+}`;
+const points = `{
+  "mark": { "points": "always" }
+}`;
+const area = `{
+  "mark": { "area": true }
+}`;
+const channelArea = `{
+  "encoding": {
+    "y": [
+      { "field": "revenue", "title": "Revenue", "area": true },
+      { "field": "target", "title": "Target", "dash": "dashed" }
+    ]
+  }
+}`;
+const legend = `{
+  "legend": { "position": "top" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A line shows how a measure changes across an ordered x. Each row is one position on that x. A second measure is a second line in the same chart.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a line for a trend: time, or any categories that have an order. A bar is the chart for comparing totals that do not form a sequence. A pie or a donut is the chart for parts of one total. A sparkline is the small line with no axes, for a table cell or a KPI.
+  </p>
+</section>
+
+<section id="area">
+  <h2>Line and area</h2>
+  <p>
+    There is no <code>type: "area"</code>. A filled line is still <code>type: "line"</code>, with <code>mark.area</code> set to true. <a href="/docs/charts/area">Area</a> is the page for that note.
+  </p>
+  <p>
+    <code>mark.area</code> fills under every series. A single y channel can set <code>area: true</code> and leave the others as lines. Revenue against target fills revenue and draws the target as a dashed line.
+  </p>
+  <p>
+    Several series that add up to one shape are a <a href="/docs/charts/stacked-area">stacked area</a>. That chart has its own type.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one x and one or more numbers. <code>encoding.x</code> is the category or the time. <code>encoding.y</code> is a field name, or a list of channels when the chart has more than one series.
+  </p>
+  <p>
+    Quarterly units is one series, <code>units</code>, across four quarters. Revenue against target is two series, <code>revenue</code> and <code>target</code>, across twelve months. Revenue and cost is two series across six months.
+  </p>
+  <p>
+    A missing number leaves a gap in that series, unless <code>mark.connectNulls</code> is true. <code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.
+  </p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest line. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. The curve, the points, and the fill come from the line defaults, so <code>mark</code> can be omitted. The default curve is monotone. Points show on hover. The area is off.
+  </p>
+  <TeachFacts type="line" label="Line packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing line specs. Quarterly units is one series. Revenue against target is two series, with a fill on revenue only. Deploys, step curve holds each value until the next day. Revenue and cost names the tooltip field. The <a href="/docs/charts/area">area</a> note and <a href="/docs/charts/stacked-area">stacked area</a> are the filled cousins.
+  </p>
+</section>
+
+<TeachConcept id="curve" title="Curve">
+  <p>
+    <code>mark.curve</code> is how the line joins the points. <code>monotone</code> is the default. It stays inside the data, so a spike does not overshoot. <code>linear</code> draws straight segments. <code>step</code> holds the value and then jumps, which is the right curve for a count that changes and then sits still.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.curve</span></figcaption>
+    <pre><code>{curve}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>mark.curve step</span></figcaption>
+    <pre><code>{step}</code></pre>
+  </figure>
+  <p>
+    <code>step-before</code> and <code>step-after</code> place the jump on the other side of the point. Set those in the playground.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="points" title="Points">
+  <p>
+    <code>mark.points</code> is <code>none</code>, <code>hover</code>, or <code>always</code>. The default is <code>hover</code>: the dot appears under the pointer. <code>always</code> draws a dot on every point. <code>none</code> draws the line only. The field is <code>mark.points</code>, not <code>mark.markers</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.points</span></figcaption>
+    <pre><code>{points}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="area-fill" title="Area fill">
+  <p>
+    <code>mark.area</code> fills under every line. Omit it, or set false, and the chart is a line. Set true and the same spec is a filled line. That is the chart at <a href="/docs/charts/area">/docs/charts/area</a>.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.area</span></figcaption>
+    <pre><code>{area}</code></pre>
+  </figure>
+  <p>
+    To fill one series and leave another as a line, set <code>area: true</code> on that y channel. The Area fill control writes <code>mark.area</code> for every series. A mixed spec, such as Revenue against target, leaves both buttons off until you choose one.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.y area</span></figcaption>
+    <pre><code>{channelArea}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    A line with one series hides the legend. A line with several series shows it. Omit <code>legend</code>, or set <code>true</code>, and the legend sits on top. <code>false</code> hides it. <code>legend.position</code> is <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code>, or <code>inside</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a line when the key is omitted. Hovering a point shows the series and the value. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Revenue and cost sets the fields. Change those in the playground. Turning the card off and on again puts that object back.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>axes.x.title</code> and <code>axes.y.title</code> name the axes. <code>mark.sampling</code> downsamples a long line. <code>mark.strokeWidth</code>, <code>mark.pointShape</code>, and <code>mark.labelFormat</code> refine the drawing. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/area">Area</a> is this chart with <code>mark.area</code>. The spec type is still <code>line</code>.</li>
+    <li><a href="/docs/charts/stacked-area">Stacked area</a> adds the series into one shape.</li>
+    <li><a href="/docs/charts/bar">Bar</a> compares categories that are not a trend.</li>
+    <li><a href="/docs/charts/sparkline">Sparkline</a> is a line with no axes.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

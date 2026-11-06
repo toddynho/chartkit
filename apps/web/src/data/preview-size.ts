@@ -3,7 +3,7 @@
  * Card is the default stage. Dashboard and Full scale it.
  * A numeric size.width, size.height, or size.aspectRatio on the spec wins.
  * Chart docs pages mount the spec and let each renderer pick its own fallback,
- * then the column CSS scales the SVG. The donut teaching page is the exception:
+ * then the column CSS scales the SVG. Teaching pages are the exception:
  * withPreviewSize applies this card default when the spec sets no size.
  */
 

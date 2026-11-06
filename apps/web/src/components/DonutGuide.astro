@@ -1,10 +1,9 @@
 ---
 import PageNav from "./PageNav.astro";
-import StackSample from "./StackSample.astro";
-import { chartPage } from "../data/docs-catalog";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
 import { playgroundHref, smallestDonutSpec, specText } from "../data/donut-teach";
 
-const chart = chartPage("donut");
 const href = "/docs/charts/donut";
 const spec = specText(smallestDonutSpec);
 const play = playgroundHref(smallestDonutSpec);
@@ -99,32 +98,12 @@ const titled = `{
   <p>
     This is the smallest donut. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. The hole and the gap come from the donut defaults, so <code>mark</code> can be omitted.
   </p>
-  <figure class="code">
-    <figcaption><span>spec.json</span></figcaption>
-    <pre><code>{spec}</code></pre>
-  </figure>
-  <p>Install core and the adapter for your framework. The menu in the sidebar picks the snippet. <code>spec</code> is the JSON above.</p>
-  <div class="facts facts--names" aria-label="Donut packages">
-    {
-      chart.facts.map((fact) => (
-        <span class="fact">
-          <span class="fact__k">{fact.k}</span>
-          <span class="fact__v">{fact.v}</span>
-        </span>
-      ))
-    }
-    <span class="fact">
-      <span class="fact__k">Family</span>
-      <span class="fact__v">{chart.family}</span>
-    </span>
-  </div>
-  <StackSample />
+  <TeachFacts type="donut" label="Donut packages" spec={spec} />
 </section>
 
 <p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
 
-<section class="concept" id="hole">
-  <h2>Hole</h2>
+<TeachConcept id="hole" title="Hole">
   <p>
     <code>mark.innerRadius</code> is the hole as a fraction of the radius, from 0 to 0.95. A donut defaults to 0.6. The centre total is drawn when the hole is wide enough to hold the number.
   </p>
@@ -132,10 +111,9 @@ const titled = `{
     <figcaption><span>mark.innerRadius</span></figcaption>
     <pre><code>{hole}</code></pre>
   </figure>
-</section>
+</TeachConcept>
 
-<section class="concept" id="gap">
-  <h2>Gap</h2>
+<TeachConcept id="gap" title="Gap">
   <p>
     <code>mark.padAngle</code> is the gap between slices, in degrees, from 0 to 10. A donut defaults to 2. The renderer spends that many degrees on the gap and shares the rest of the circle by value.
   </p>
@@ -143,10 +121,9 @@ const titled = `{
     <figcaption><span>mark.padAngle</span></figcaption>
     <pre><code>{gap}</code></pre>
   </figure>
-</section>
+</TeachConcept>
 
-<section class="concept" id="labels">
-  <h2>Slice labels and the legend</h2>
+<TeachConcept id="labels" title="Slice labels and the legend">
   <p>
     <code>mark.labels</code> draws a value on each slice. It defaults to false. <code>mark.labelPosition</code> sets the place. <code>inside</code> and <code>center</code> sit on the slice. <code>outside</code> draws a leader line. Setting <code>labelPosition</code> turns the labels on. With no <code>mark.labelFormat</code>, the label is the share of the total. Overlapping labels are skipped.
   </p>
@@ -161,10 +138,9 @@ const titled = `{
     <figcaption><span>legend.position</span></figcaption>
     <pre><code>{legend}</code></pre>
   </figure>
-</section>
+</TeachConcept>
 
-<section class="concept" id="colours">
-  <h2>Colours</h2>
+<TeachConcept id="colours" title="Colours">
   <p>
     Omit <code>mark.palette</code> and each slice takes the next theme colour. Set <code>mark.palette</code> to a list of colours, in slice order, to override that list. One to 24 colours. <code>encoding.color</code> can name a field on the row. It is the same channel other charts use.
   </p>
@@ -172,10 +148,9 @@ const titled = `{
     <figcaption><span>mark.palette</span></figcaption>
     <pre><code>{palette}</code></pre>
   </figure>
-</section>
+</TeachConcept>
 
-<section class="concept" id="sort">
-  <h2>Sort</h2>
+<TeachConcept id="sort" title="Sort">
   <p>
     <code>mark.sort</code> orders the slices. <code>none</code> keeps the data order and is the default. <code>asc</code> and <code>desc</code> sort by the number.
   </p>
@@ -183,10 +158,9 @@ const titled = `{
     <figcaption><span>mark.sort</span></figcaption>
     <pre><code>{sort}</code></pre>
   </figure>
-</section>
+</TeachConcept>
 
-<section class="concept" id="start">
-  <h2>Start angle</h2>
+<TeachConcept id="start" title="Start angle">
   <p>
     <code>mark.startAngle</code> is where the first slice starts, in degrees. <code>0</code> is the top, and the slices run clockwise. The value can be from -360 to 360.
   </p>
@@ -194,10 +168,9 @@ const titled = `{
     <figcaption><span>mark.startAngle</span></figcaption>
     <pre><code>{start}</code></pre>
   </figure>
-</section>
+</TeachConcept>
 
-<section class="concept" id="tooltip">
-  <h2>Tooltip</h2>
+<TeachConcept id="tooltip" title="Tooltip">
   <p>
     <code>tooltip</code> is on for a donut when the key is omitted. Hovering a slice shows its name and its value. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
   </p>
@@ -212,7 +185,7 @@ const titled = `{
   <p>
     <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Set those in the playground.
   </p>
-</section>
+</TeachConcept>
 
 <section id="more">
   <h2>The rest of the spec</h2>
