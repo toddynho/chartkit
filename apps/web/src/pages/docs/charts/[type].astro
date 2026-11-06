@@ -1,15 +1,19 @@
 ---
+import BarGuide from "../../../components/BarGuide.astro";
 import ChartDoc from "../../../components/ChartDoc.astro";
+import ComboGuide from "../../../components/ComboGuide.astro";
 import DonutGuide from "../../../components/DonutGuide.astro";
 import LineGuide from "../../../components/LineGuide.astro";
 import PieGuide from "../../../components/PieGuide.astro";
 import ResponseRail from "../../../components/ResponseRail.astro";
+import ScatterGuide from "../../../components/ScatterGuide.astro";
+import StackedAreaGuide from "../../../components/StackedAreaGuide.astro";
 import TeachChart from "../../../components/TeachChart.astro";
 import { chartPage, chartPageTypes, chipsForChart, specForChart } from "../../../data/docs-catalog";
 import { teachModule, teachModules } from "../../../data/teach/registry";
 import Docs from "../../../layouts/Docs.astro";
 
-const guided = new Set(["donut", "pie", "line"]);
+const guided = new Set(["donut", "pie", "line", "bar", "scatter", "combo", "stacked-area"]);
 for (const key of Object.keys(teachModules)) {
   if (!guided.has(key)) throw new Error(`Add a guide for the ${key} teach module in this page.`);
 }
@@ -44,6 +48,10 @@ const lede = geo?.lede ?? chart.lede;
       {module.type === "donut" ? <DonutGuide /> : null}
       {module.type === "pie" ? <PieGuide /> : null}
       {module.type === "line" ? <LineGuide /> : null}
+      {module.type === "bar" ? <BarGuide /> : null}
+      {module.type === "scatter" ? <ScatterGuide /> : null}
+      {module.type === "combo" ? <ComboGuide /> : null}
+      {module.type === "stacked-area" ? <StackedAreaGuide /> : null}
     </TeachChart>
   ) : (
     <Docs title={title} description={lede} lede={lede} href={href}>

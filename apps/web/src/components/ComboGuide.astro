@@ -1,0 +1,172 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestComboSpec } from "../data/teach/combo";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/combo";
+const spec = specText(smallestComboSpec);
+const play = playgroundHref(smallestComboSpec);
+const marks = `{
+  "encoding": {
+    "y": [
+      { "field": "revenue", "title": "Revenue", "mark": "bar" },
+      { "field": "margin", "title": "Margin", "mark": "line", "axis": "y2" }
+    ]
+  }
+}`;
+const area = `{
+  "field": "margin",
+  "mark": "area",
+  "axis": "y2"
+}`;
+const points = `{
+  "mark": { "points": "always" }
+}`;
+const legend = `{
+  "legend": { "position": "bottom" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A combo draws more than one mark on one x. Each series names its mark on <code>encoding.y</code>. A bar and a line in the same spec is the usual chart. The line can move to a second y axis when the units differ.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a combo when two series share an x and should not share a mark. Revenue as bars and margin as a line is that chart. Orders as bars and fill rate as a line is the same idea. If every series is a bar, use a <a href="/docs/charts/bar">bar</a>. If every series is a line, use a <a href="/docs/charts/line">line</a>.
+  </p>
+  <p>
+    Do not use a combo to stack several areas into one shape. That is a <a href="/docs/charts/stacked-area">stacked area</a>. Do not use a combo when the only difference is color. Same mark, several series, is still a bar or a line.
+  </p>
+</section>
+
+<section id="marks">
+  <h2>How series map to marks</h2>
+  <p>
+    <code>encoding.y</code> is a list. Each item is one series. <code>mark</code> on that item is <code>bar</code>, <code>line</code>, <code>area</code>, or <code>range</code>. The chart type stays <code>combo</code>. There is no <code>encoding.bar</code>.
+  </p>
+  <p>
+    Orders and fill rate, Revenue and margin, Jars this month, and Kilometres and pace each put <code>mark: "bar"</code> on the count and <code>mark: "line"</code> on the second series. The bar channels stay bars when you change the line.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.y marks</span></figcaption>
+    <pre><code>{marks}</code></pre>
+  </figure>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one x and one number per series. <code>encoding.x</code> is the category or the time. Wide data, one column per series, is the shape these examples use. Orders and fill rate is <code>orders</code> and <code>rate</code> across five weeks. Jars this month is <code>jars</code> and <code>lids</code> across ten weeks, on the same axis because both are counts.
+  </p>
+  <p>
+    Put the line on <code>axis: "y2"</code> when its units are not the bar's units. Name that axis with <code>axes.y2</code>. A rate or a percent belongs there. Kilometres and pace also reverses the right scale, so a faster week sits higher.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest combo. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Three months. Revenue is a bar. Margin is a line on the right axis, formatted as a percent. <code>axes.y2</code> has to be set when a series uses that axis, or validate reports CK3002. Points show on hover. The legend sits on top when the key is omitted.
+  </p>
+  <TeachFacts type="combo" label="Combo packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing combo specs. Orders and fill rate and Revenue and margin put the line on the right. Jars this month keeps both series on the left, and the tooltip is an index card. Kilometres and pace draws a point on every week.
+  </p>
+</section>
+
+<TeachConcept id="series-mark" title="Series mark">
+  <p>
+    The Series mark control writes <code>mark</code> on every y channel that is not a bar. <code>line</code> draws the path. <code>area</code> fills under it. The bar channels are left alone, so the spec stays a mix.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.y mark</span></figcaption>
+    <pre><code>{area}</code></pre>
+  </figure>
+  <p>
+    <code>range</code> is a band from a low field to a high field. It needs <code>lo</code> and <code>hi</code>. Set that in the playground.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="line-axis" title="Line axis">
+  <p>
+    The Line axis control sets <code>axis</code> on those same channels. Left deletes <code>axis</code>, which means <code>y</code>, the axis the bars use. Right writes <code>axis: "y2"</code>. The other keys on the channel stay, including <code>format</code>, <code>scale</code>, and <code>title</code>.
+  </p>
+  <p>
+    Use the right axis when the line's numbers are not in the bar's units. A percent line on the bar axis will look flat, because 0.2 is nothing next to 100.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="points" title="Points">
+  <p>
+    <code>mark.points</code> is the markers on the combo's lines. It is <code>none</code>, <code>hover</code>, or <code>always</code>. The default is <code>hover</code>. <code>always</code> draws a marker on every point. Kilometres and pace sets that, and also sets a diamond on the pace channel. The diamond stays when you change this control. <code>none</code> draws the line only.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.points</span></figcaption>
+    <pre><code>{points}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    A combo with two series shows a legend. Omit <code>legend</code>, or set <code>true</code>, and it sits on top. <code>false</code> hides it. <code>legend.position</code> is <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code>, or <code>inside</code>. Jars this month and Kilometres and pace put it on the bottom.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a combo when the key is omitted. Hovering a category shows each series. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows, and <code>tooltip.position</code> places the card. Jars this month and Kilometres and pace set an index card. Change those in the playground. Turning the card off and on again puts that object back.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.curve</code> is how the line joins its points. The default is monotone. <code>mark.gap</code> is the bar gap. <code>axes.y2.title</code> and <code>axes.y2.format</code> label the right axis. A per-channel <code>scale</code> can reverse that axis. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/bar">Bar</a> is every series as a bar, grouped or stacked.</li>
+    <li><a href="/docs/charts/line">Line</a> is every series as a line.</li>
+    <li><a href="/docs/charts/stacked-area">Stacked area</a> adds several series into one shape.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

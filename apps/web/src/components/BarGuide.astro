@@ -1,0 +1,182 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestBarSpec } from "../data/teach/bar";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/bar";
+const spec = specText(smallestBarSpec);
+const play = playgroundHref(smallestBarSpec);
+const orientation = `{
+  "mark": { "orientation": "horizontal" }
+}`;
+const stack = `{
+  "mark": { "stack": "stack" }
+}`;
+const percent = `{
+  "mark": { "stack": "percent" }
+}`;
+const series = `{
+  "encoding": { "x": "week", "y": "minutes", "series": "band" }
+}`;
+const labels = `{
+  "mark": { "labels": true }
+}`;
+const legend = `{
+  "legend": { "position": "top" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A bar compares a measure across categories. Each category is one bar. A second measure, or a series field, is another bar in that same category, grouped beside the first or stacked on it.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a bar when the question is which category is larger. The categories do not have to be a sequence. A line is the chart for a trend, where the slope between points is the point. A combo is the chart when one series should stay a bar and another should be a line, often because the units differ. A pie or a donut is the chart for a few parts of one total.
+  </p>
+  <p>
+    A long list of names reads better as horizontal bars. Revenue by region is that chart. Do not use a bar for a ranked list of pages with a value on the right. That is a bar list, a different type.
+  </p>
+</section>
+
+<section id="grouping">
+  <h2>One bar type</h2>
+  <p>
+    Grouped, stacked, and horizontal bars are all <code>type: "bar"</code>. There is no separate stacked-bar type. <code>mark.orientation</code> turns the bars. <code>mark.stack</code> groups them, stacks them, or draws each category as a share of 100%.
+  </p>
+  <p>
+    A time series of parts that add into one shape is a <a href="/docs/charts/stacked-area">stacked area</a>. Bars plus a line in the same spec are a <a href="/docs/charts/combo">combo</a>.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one category and one or more numbers. <code>encoding.x</code> is the category. <code>encoding.y</code> is a field name, or a list of channels when each series is its own column.
+  </p>
+  <p>
+    Signups by month is one series, <code>signups</code>, across five months. Revenue by region is one series, <code>revenue</code>, across four regions. Traffic by channel is three columns, <code>search</code>, <code>direct</code>, and <code>social</code>, listed on <code>encoding.y</code>.
+  </p>
+  <p>
+    Long form uses one value column and a series column. Easy, steady, and hard has a row per week and band. <code>encoding.y</code> is <code>minutes</code>. <code>encoding.series</code> is <code>band</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.series</span></figcaption>
+    <pre><code>{series}</code></pre>
+  </figure>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest bar. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Orientation, stacking, and labels come from the bar defaults, so <code>mark</code> can be omitted. The bars are vertical. One series is not stacked. Labels are off.
+  </p>
+  <TeachFacts type="bar" label="Bar packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing bar specs. Signups by month is one series. Revenue by region is horizontal. Traffic by channel stacks three columns. Easy, steady, and hard stacks a series field, and the tooltip is an index card.
+  </p>
+</section>
+
+<TeachConcept id="orientation" title="Orientation">
+  <p>
+    <code>mark.orientation</code> is <code>vertical</code> or <code>horizontal</code>. Omit it and the bars stand up. <code>horizontal</code> runs the categories down the side and the numbers along the bottom. That is the right direction when the names are long.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.orientation</span></figcaption>
+    <pre><code>{orientation}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="stack" title="Stack">
+  <p>
+    <code>mark.stack</code> is how several series share a category. Omit it, or set <code>none</code>, and the bars sit side by side. That is grouped. <code>stack</code> puts the series in one bar. <code>percent</code> makes each category 100%, so you compare the mix rather than the total.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.stack</span></figcaption>
+    <pre><code>{stack}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>mark.stack percent</span></figcaption>
+    <pre><code>{percent}</code></pre>
+  </figure>
+  <p>
+    One series looks the same grouped or stacked. The key still writes. Traffic by channel and Easy, steady, and hard are the specs where the choice changes the picture.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="labels" title="Labels">
+  <p>
+    <code>mark.labels</code> draws the value on each bar. Omit it, or set false, and the bars are unlabeled. Set true and the number is drawn. A vertical bar puts it above the bar. A horizontal bar puts it at the end.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.labels</span></figcaption>
+    <pre><code>{labels}</code></pre>
+  </figure>
+  <p>
+    <code>mark.labelPosition</code> and <code>mark.labelFormat</code> place and format that number. Setting either one turns labels on. Change those in the playground. Turning labels off and on again puts the example's position and format back.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    A bar with one series hides the legend. A bar with several series shows it. Omit <code>legend</code>, or set <code>true</code>, and the legend sits on top. <code>false</code> hides it. <code>legend.position</code> is <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code>, or <code>inside</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a bar when the key is omitted. Hovering a bar shows the category and the value. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Easy, steady, and hard sets an index card with a crosshair. Change those in the playground. Turning the card off and on again puts that object back.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.cornerRadius</code> rounds the corners. <code>mark.gap</code> is the space between bars, as a fraction of the band. <code>mark.stackTotal</code> labels the total of a stack. <code>axes.x.title</code> and <code>axes.y.title</code> name the axes. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/line">Line</a> is the chart for a trend across ordered categories.</li>
+    <li><a href="/docs/charts/combo">Combo</a> draws bars and a line in one spec.</li>
+    <li><a href="/docs/charts/stacked-area">Stacked area</a> adds series over an ordered x into one shape.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />
