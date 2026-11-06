@@ -5,6 +5,7 @@ import { applyAreaRangeAction, areaRangeControlState, areaRangeExamples, areaRan
 import { applyBarListAction, barListControlState, barListExamples, barListTeach, smallestBarListSpec } from "./bar-list.ts";
 import { applyBarAction, barControlState, barExamples, barTeach, smallestBarSpec } from "./bar.ts";
 import { applyBarRangeAction, barRangeControlState, barRangeExamples, barRangeTeach, smallestBarRangeSpec } from "./bar-range.ts";
+import { applyBulletAction, bulletControlState, bulletExamples, bulletTeach, smallestBulletSpec } from "./bullet.ts";
 import {
   applyCandlestickAction,
   candlestickControlState,
@@ -17,12 +18,21 @@ import { donutTeach } from "./donut.ts";
 import { applyErrorbarAction, errorbarControlState, errorbarExamples, errorbarTeach, smallestErrorbarSpec } from "./errorbar.ts";
 import { applyFunnelAction, funnelControlState, funnelExamples, funnelTeach, smallestFunnelSpec } from "./funnel.ts";
 import { applyGanttAction, ganttControlState, ganttExamples, ganttTeach, smallestGanttSpec } from "./gantt.ts";
+import { applyGaugeAction, gaugeControlState, gaugeExamples, gaugeTeach, smallestGaugeSpec } from "./gauge.ts";
 import { applyHeatmapAction, heatmapControlState, heatmapExamples, heatmapTeach, smallestHeatmapSpec } from "./heatmap.ts";
 import { applyJourneyAction, journeyControlState, journeyExamples, journeyTeach, smallestJourneySpec } from "./journey.ts";
+import { applyKpiAction, kpiControlState, kpiExamples, kpiTeach, smallestKpiSpec } from "./kpi.ts";
 import { applyLegend, legendChoice } from "./legend.ts";
 import { applyLineAction, lineControlState, lineExamples, lineTeach, smallestLineSpec } from "./line.ts";
 import { applyMiniAreaAction, miniAreaControlState, miniAreaExamples, miniAreaTeach, smallestMiniAreaSpec } from "./mini-area.ts";
 import { applyPieAction, pieControlState, pieExamples, pieTeach, smallestPieSpec } from "./pie.ts";
+import {
+  applyProgressRingAction,
+  progressRingControlState,
+  progressRingExamples,
+  progressRingTeach,
+  smallestProgressRingSpec,
+} from "./progress-ring.ts";
 import { applyQuadrantAction, quadrantControlState, quadrantExamples, quadrantTeach, smallestQuadrantSpec } from "./quadrant.ts";
 import { applyRadarAction, radarControlState, radarExamples, radarTeach, smallestRadarSpec } from "./radar.ts";
 import { applyRadialBarAction, radialBarControlState, radialBarExamples, radialBarTeach, smallestRadialBarSpec } from "./radial-bar.ts";
@@ -57,23 +67,27 @@ import { applyTreemapAction, smallestTreemapSpec, treemapControlState, treemapEx
 import { applyVennAction, smallestVennSpec, vennControlState, vennExamples, vennTeach } from "./venn.ts";
 import { applyWaterfallAction, smallestWaterfallSpec, waterfallControlState, waterfallExamples, waterfallTeach } from "./waterfall.ts";
 
-test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, and the compact charts", () => {
+test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, the compact charts, and the metric charts", () => {
   assert.deepEqual(Object.keys(teachModules).sort(), [
     "area-range",
     "bar",
     "bar-list",
     "bar-range",
+    "bullet",
     "candlestick",
     "combo",
     "donut",
     "errorbar",
     "funnel",
     "gantt",
+    "gauge",
     "heatmap",
     "journey",
+    "kpi",
     "line",
     "mini-area",
     "pie",
+    "progress-ring",
     "quadrant",
     "radar",
     "radial-bar",
@@ -207,6 +221,26 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, and
     ["volume", "tooltip"],
   );
   assert.equal(candlestickTeach.controls.some((control) => control.id === "gap" || control.id === "legend"), false);
+  assert.deepEqual(
+    gaugeTeach.controls.map((control) => control.id),
+    ["bands", "sweep", "linecap", "tooltip"],
+  );
+  assert.equal(gaugeTeach.controls.some((control) => control.id === "legend"), false);
+  assert.deepEqual(
+    kpiTeach.controls.map((control) => control.id),
+    ["direction", "format", "sparkline", "thresholds", "tooltip"],
+  );
+  assert.equal(kpiTeach.controls.some((control) => control.id === "legend"), false);
+  assert.deepEqual(
+    progressRingTeach.controls.map((control) => control.id),
+    ["readout", "linecap", "span", "tooltip"],
+  );
+  assert.equal(progressRingTeach.controls.some((control) => control.id === "legend"), false);
+  assert.deepEqual(
+    bulletTeach.controls.map((control) => control.id),
+    ["ranges", "target", "tooltip"],
+  );
+  assert.equal(bulletTeach.controls.some((control) => control.id === "legend" || control.id === "orientation"), false);
 });
 
 test("opening an example copies a custom tooltip and does not rewrite it", () => {
@@ -1906,4 +1940,289 @@ test("candlestick actions edit volume and tooltip", () => {
     ["10 sessions", "12 sessions", "5 sessions"],
   );
   for (const example of candlestickExamples) assert.equal(example.spec.type, "candlestick");
+});
+
+test("gauge actions edit bands, sweep, cap, and tooltip", () => {
+  assert.equal(smallestGaugeSpec.type, "gauge");
+  assert.equal(smallestGaugeSpec.mark, undefined);
+  assert.equal(gaugeControlState(smallestGaugeSpec).bands, "off");
+  assert.equal(gaugeControlState(smallestGaugeSpec).sweep, "dial");
+  assert.equal(gaugeControlState(smallestGaugeSpec).linecap, "butt");
+  assert.equal(teachModule("gauge"), gaugeTeach);
+
+  const capacity = structuredClone(gaugeExamples[0]!.spec);
+  assert.equal(gaugeControlState(capacity).bands, "on");
+  assert.equal(gaugeControlState(capacity).sweep, "dial");
+  assert.equal(gaugeControlState(capacity).linecap, "butt");
+  assert.equal(capacity.tooltip, undefined);
+  const untouched = structuredClone(capacity);
+  gaugeControlState(capacity);
+  assert.deepEqual(capacity, untouched);
+  applyGaugeAction(capacity, { id: "bands", value: "off" });
+  assert.equal((capacity.metric as { bands?: unknown }).bands, undefined);
+  assert.equal(gaugeControlState(capacity).bands, "off");
+  applyGaugeAction(capacity, { id: "bands", value: "on", restore: gaugeExamples[0]!.spec });
+  assert.deepEqual((capacity.metric as { bands: unknown }).bands, (gaugeExamples[0]!.spec.metric as { bands: unknown }).bands);
+  applyGaugeAction(capacity, { id: "sweep", value: "half" });
+  assert.equal((capacity.mark as { startAngle: number }).startAngle, -90);
+  assert.equal((capacity.mark as { endAngle: number }).endAngle, 90);
+  applyGaugeAction(capacity, { id: "sweep", value: "full" });
+  assert.equal((capacity.mark as { startAngle: number }).startAngle, 0);
+  assert.equal((capacity.mark as { endAngle: number }).endAngle, 360);
+  applyGaugeAction(capacity, { id: "sweep", value: "dial" });
+  assert.equal(capacity.mark, undefined);
+  applyGaugeAction(capacity, { id: "linecap", value: "round" });
+  assert.equal((capacity.mark as { linecap: string }).linecap, "round");
+  applyGaugeAction(capacity, { id: "linecap", value: "butt" });
+  assert.equal(capacity.mark, undefined);
+  applyGaugeAction(capacity, { id: "tooltip", value: "off" });
+  assert.equal(capacity.tooltip, false);
+  applyGaugeAction(capacity, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in capacity, false);
+
+  const water = structuredClone(gaugeExamples[2]!.spec);
+  assert.equal(gaugeControlState(water).bands, "off");
+  assert.equal((water.size as { width: number }).width, 420);
+  applyGaugeAction(water, { id: "bands", value: "on", restore: gaugeExamples[2]!.spec });
+  const bands = (water.metric as { bands: { from: number; to: number; label: string }[] }).bands;
+  assert.deepEqual(
+    bands.map((band) => [band.from, band.to, band.label]),
+    [
+      [0, 50, "Low"],
+      [50, 100, "OK"],
+    ],
+  );
+  assert.equal((water.size as { height: number }).height, 280);
+  const tip = structuredClone(customTip);
+  water.tooltip = structuredClone(tip);
+  const opened = openTeachExample(water);
+  assert.deepEqual(opened.tooltip, water.tooltip);
+  assert.notEqual(opened.tooltip, water.tooltip);
+  applyGaugeAction(water, { id: "tooltip", value: "off" });
+  assert.equal(water.tooltip, false);
+  applyGaugeAction(water, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(water.tooltip, tip);
+  assert.equal(water.type, "gauge");
+
+  assert.deepEqual(
+    gaugeExamples.map((example) => example.title),
+    ["Capacity", "Readiness", "Water used"],
+  );
+  assert.deepEqual(
+    gaugeExamples.map((example) => example.meta),
+    ["2 bands", "2 bands", "no bands"],
+  );
+  for (const example of gaugeExamples) assert.equal(example.spec.type, "gauge");
+});
+
+test("kpi actions edit direction, format, sparkline, thresholds, and tooltip", () => {
+  assert.equal(smallestKpiSpec.type, "kpi");
+  assert.equal(smallestKpiSpec.data, undefined);
+  assert.equal(kpiControlState(smallestKpiSpec).direction, "up");
+  assert.equal(kpiControlState(smallestKpiSpec).sparkline, "off");
+  assert.equal(kpiControlState(smallestKpiSpec).thresholds, "off");
+  assert.equal(teachModule("kpi"), kpiTeach);
+
+  const revenue = structuredClone(kpiExamples[0]!.spec);
+  assert.equal(kpiControlState(revenue).direction, "up");
+  assert.equal(kpiControlState(revenue).format, "compact");
+  assert.equal(kpiControlState(revenue).sparkline, "on");
+  assert.equal(kpiControlState(revenue).thresholds, "off");
+  assert.equal(revenue.tooltip, undefined);
+  const untouched = structuredClone(revenue);
+  kpiControlState(revenue);
+  assert.deepEqual(revenue, untouched);
+  applyKpiAction(revenue, { id: "direction", value: "down" });
+  assert.equal((revenue.metric as { goodDirection: string }).goodDirection, "down");
+  applyKpiAction(revenue, { id: "direction", value: "up" });
+  assert.equal((revenue.metric as { goodDirection?: string }).goodDirection, undefined);
+  applyKpiAction(revenue, { id: "format", value: "percent" });
+  assert.equal((revenue.metric as { format: string }).format, "percent");
+  applyKpiAction(revenue, { id: "sparkline", value: "off" });
+  assert.equal(revenue.data, undefined);
+  applyKpiAction(revenue, { id: "sparkline", value: "on", restore: kpiExamples[0]!.spec });
+  assert.deepEqual(revenue.data, kpiExamples[0]!.spec.data);
+  applyKpiAction(revenue, { id: "thresholds", value: "on", restore: kpiExamples[0]!.spec });
+  assert.deepEqual((revenue.metric as { thresholds: unknown }).thresholds, [{ value: 0, color: "positive" }]);
+  applyKpiAction(revenue, { id: "thresholds", value: "off" });
+  assert.equal((revenue.metric as { thresholds?: unknown }).thresholds, undefined);
+  applyKpiAction(revenue, { id: "tooltip", value: "off" });
+  assert.equal(revenue.tooltip, false);
+  applyKpiAction(revenue, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in revenue, false);
+
+  const beans = structuredClone(kpiExamples[1]!.spec);
+  assert.equal(kpiControlState(beans).direction, "down");
+  assert.equal(kpiControlState(beans).format, "other");
+  assert.equal((beans.size as { width: number }).width, 420);
+  applyKpiAction(beans, { id: "format", value: "number" });
+  assert.equal((beans.metric as { format: string }).format, "number");
+  assert.equal((beans.metric as { goodDirection: string }).goodDirection, "down");
+  const tip = structuredClone(customTip);
+  beans.tooltip = structuredClone(tip);
+  const opened = openTeachExample(beans);
+  assert.deepEqual(opened.tooltip, beans.tooltip);
+  assert.notEqual(opened.tooltip, beans.tooltip);
+  applyKpiAction(beans, { id: "tooltip", value: "off" });
+  assert.equal(beans.tooltip, false);
+  applyKpiAction(beans, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(beans.tooltip, tip);
+
+  const churn = structuredClone(kpiExamples[2]!.spec);
+  assert.equal(kpiControlState(churn).thresholds, "on");
+  assert.equal(kpiControlState(churn).direction, "down");
+  const saved = structuredClone((churn.metric as { thresholds: unknown }).thresholds);
+  applyKpiAction(churn, { id: "thresholds", value: "off" });
+  assert.equal((churn.metric as { thresholds?: unknown }).thresholds, undefined);
+  applyKpiAction(churn, { id: "thresholds", value: "on", restore: kpiExamples[2]!.spec });
+  assert.deepEqual((churn.metric as { thresholds: unknown }).thresholds, saved);
+  assert.equal((churn.mark as { strokeWidth: number }).strokeWidth, 1.5);
+  assert.equal((churn.size as { height: number }).height, 96);
+  assert.equal(churn.type, "kpi");
+
+  assert.deepEqual(
+    kpiExamples.map((example) => example.title),
+    ["Revenue", "Green beans", "Churn"],
+  );
+  assert.deepEqual(
+    kpiExamples.map((example) => example.meta),
+    ["sparkline", "down is good", "thresholds"],
+  );
+  for (const example of kpiExamples) assert.equal(example.spec.type, "kpi");
+});
+
+test("progress ring actions edit the center, the cap, the sweep, and tooltip", () => {
+  assert.equal(smallestProgressRingSpec.type, "progress-ring");
+  assert.equal(smallestProgressRingSpec.mark, undefined);
+  assert.equal(progressRingControlState(smallestProgressRingSpec).readout, "share");
+  assert.equal(progressRingControlState(smallestProgressRingSpec).linecap, "round");
+  assert.equal(progressRingControlState(smallestProgressRingSpec).span, "full");
+  assert.equal(teachModule("progress-ring"), progressRingTeach);
+
+  const uptime = structuredClone(progressRingExamples[0]!.spec);
+  assert.equal(progressRingControlState(uptime).readout, "value");
+  assert.equal(progressRingControlState(uptime).linecap, "round");
+  assert.equal(progressRingControlState(uptime).span, "full");
+  assert.equal(uptime.tooltip, undefined);
+  const untouched = structuredClone(uptime);
+  progressRingControlState(uptime);
+  assert.deepEqual(uptime, untouched);
+  const savedFormat = structuredClone((uptime.metric as { format: unknown }).format);
+  applyProgressRingAction(uptime, { id: "readout", value: "share" });
+  assert.equal((uptime.metric as { format?: unknown }).format, undefined);
+  applyProgressRingAction(uptime, { id: "readout", value: "value", restore: progressRingExamples[0]!.spec });
+  assert.deepEqual((uptime.metric as { format: unknown }).format, savedFormat);
+  applyProgressRingAction(uptime, { id: "linecap", value: "butt" });
+  assert.equal((uptime.mark as { linecap: string }).linecap, "butt");
+  applyProgressRingAction(uptime, { id: "linecap", value: "round" });
+  assert.equal(uptime.mark, undefined);
+  applyProgressRingAction(uptime, { id: "span", value: "open" });
+  assert.equal((uptime.mark as { startAngle: number }).startAngle, 0);
+  assert.equal((uptime.mark as { endAngle: number }).endAngle, 270);
+  applyProgressRingAction(uptime, { id: "span", value: "full" });
+  assert.equal(uptime.mark, undefined);
+  applyProgressRingAction(uptime, { id: "tooltip", value: "off" });
+  assert.equal(uptime.tooltip, false);
+  applyProgressRingAction(uptime, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in uptime, false);
+
+  const checks = structuredClone(progressRingExamples[1]!.spec);
+  assert.equal((checks.size as { width: number }).width, 240);
+  const tip = structuredClone(customTip);
+  checks.tooltip = structuredClone(tip);
+  const opened = openTeachExample(checks);
+  assert.deepEqual(opened.tooltip, checks.tooltip);
+  assert.notEqual(opened.tooltip, checks.tooltip);
+  applyProgressRingAction(checks, { id: "tooltip", value: "off" });
+  assert.equal(checks.tooltip, false);
+  applyProgressRingAction(checks, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(checks.tooltip, tip);
+  assert.equal((checks.size as { height: number }).height, 240);
+
+  const activity = structuredClone(progressRingExamples[2]!.spec);
+  assert.equal(progressRingControlState(activity).readout, "share");
+  assert.equal((activity.mark as { rings: unknown[] }).rings.length, 3);
+  applyProgressRingAction(activity, { id: "span", value: "open" });
+  assert.equal((activity.mark as { rings: unknown[] }).rings.length, 3);
+  assert.equal((activity.mark as { endAngle: number }).endAngle, 270);
+  applyProgressRingAction(activity, { id: "readout", value: "value", restore: progressRingExamples[2]!.spec });
+  assert.equal((activity.metric as { format: string }).format, "number");
+  assert.equal(activity.type, "progress-ring");
+
+  assert.deepEqual(
+    progressRingExamples.map((example) => example.title),
+    ["Uptime", "Checks closed", "Activity"],
+  );
+  assert.deepEqual(
+    progressRingExamples.map((example) => example.meta),
+    ["99.2%", "7 of 10", "3 rings"],
+  );
+  for (const example of progressRingExamples) assert.equal(example.spec.type, "progress-ring");
+});
+
+test("bullet actions edit ranges, target, and tooltip", () => {
+  assert.equal(smallestBulletSpec.type, "bullet");
+  assert.deepEqual((smallestBulletSpec.mark as { ranges: string[] }).ranges, ["good"]);
+  assert.equal(bulletControlState(smallestBulletSpec).ranges, "on");
+  assert.equal(bulletControlState(smallestBulletSpec).target, "on");
+  assert.equal(teachModule("bullet"), bulletTeach);
+
+  const quota = structuredClone(bulletExamples[0]!.spec);
+  assert.equal(bulletControlState(quota).ranges, "on");
+  assert.equal(bulletControlState(quota).target, "on");
+  assert.equal(quota.tooltip, undefined);
+  const untouched = structuredClone(quota);
+  bulletControlState(quota);
+  assert.deepEqual(quota, untouched);
+  applyBulletAction(quota, { id: "ranges", value: "off" });
+  assert.equal(quota.mark, undefined);
+  assert.equal(bulletControlState(quota).ranges, "off");
+  applyBulletAction(quota, { id: "ranges", value: "on", restore: bulletExamples[0]!.spec });
+  assert.deepEqual((quota.mark as { ranges: string[] }).ranges, ["poor", "ok", "good"]);
+  applyBulletAction(quota, { id: "target", value: "off" });
+  assert.equal((quota.encoding as { target?: unknown }).target, undefined);
+  assert.equal((quota.encoding as { y: string }).y, "value");
+  assert.equal((quota.encoding as { x: string }).x, "name");
+  applyBulletAction(quota, { id: "target", value: "on", restore: bulletExamples[0]!.spec });
+  assert.equal((quota.encoding as { target: string }).target, "target");
+  applyBulletAction(quota, { id: "tooltip", value: "off" });
+  assert.equal(quota.tooltip, false);
+  applyBulletAction(quota, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in quota, false);
+
+  const beds = structuredClone(bulletExamples[1]!.spec);
+  assert.equal((beds.size as { width: number }).width, 880);
+  applyBulletAction(beds, { id: "target", value: "off" });
+  assert.equal((beds.encoding as { y: string }).y, "kilos");
+  assert.equal((beds.encoding as { target?: unknown }).target, undefined);
+  applyBulletAction(beds, { id: "target", value: "on", restore: bulletExamples[1]!.spec });
+  assert.equal((beds.encoding as { target: string }).target, "mark");
+  assert.equal((beds.size as { height: number }).height, 240);
+  const tip = structuredClone(customTip);
+  beds.tooltip = structuredClone(tip);
+  const opened = openTeachExample(beds);
+  assert.deepEqual(opened.tooltip, beds.tooltip);
+  assert.notEqual(opened.tooltip, beds.tooltip);
+  applyBulletAction(beds, { id: "tooltip", value: "off" });
+  assert.equal(beds.tooltip, false);
+  applyBulletAction(beds, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(beds.tooltip, tip);
+  assert.equal(beds.type, "bullet");
+
+  const cafe = structuredClone(bulletExamples[2]!.spec);
+  assert.deepEqual((cafe.mark as { ranges: string[] }).ranges, ["wide"]);
+  applyBulletAction(cafe, { id: "ranges", value: "off" });
+  applyBulletAction(cafe, { id: "ranges", value: "on", restore: bulletExamples[2]!.spec });
+  assert.deepEqual((cafe.mark as { ranges: string[] }).ranges, ["wide"]);
+  assert.equal((cafe.size as { width: number }).width, 640);
+
+  assert.deepEqual(
+    bulletExamples.map((example) => example.title),
+    ["Quota", "Against the bed marks", "Café bags against the aim"],
+  );
+  assert.deepEqual(
+    bulletExamples.map((example) => example.meta),
+    ["2 measures", "3 crops", "1 band"],
+  );
+  for (const example of bulletExamples) assert.equal(example.spec.type, "bullet");
 });

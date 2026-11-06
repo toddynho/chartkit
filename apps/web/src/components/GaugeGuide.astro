@@ -1,0 +1,178 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestGaugeSpec } from "../data/teach/gauge";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/gauge";
+const spec = specText(smallestGaugeSpec);
+const play = playgroundHref(smallestGaugeSpec);
+const bands = `{
+  "metric": {
+    "bands": [
+      { "from": 0, "to": 50, "color": "negative", "label": "Low" },
+      { "from": 50, "to": 100, "color": "positive", "label": "OK" }
+    ]
+  }
+}`;
+const sweep = `{
+  "mark": { "startAngle": -90, "endAngle": 90 }
+}`;
+const cap = `{
+  "mark": { "linecap": "round" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A gauge is one number on a dial. The arc runs from <code>metric.min</code> to <code>metric.max</code>. Ticks mark that scale. A needle and a filled arc show <code>metric.value</code>. The same number is printed in the center.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a gauge when the question is where one reading sits on a scale. Capacity at 72, with a low band and an OK band, is that chart. Readiness is the same idea: one needle, two bands, a stored target.
+  </p>
+  <p>
+    A <a href="/docs/charts/progress-ring">progress ring</a> is a share of a maximum on a full circle. It has no needle and no ticks. A <a href="/docs/charts/kpi">KPI</a> is the number first: a label, a value, a delta, and an optional sparkline. It is not a dial. A <a href="/docs/charts/bullet">bullet</a> is the straight form of a measure against a target and ranges. One gauge is one reading. Several measures belong on a bullet.
+  </p>
+  <p>
+    The default sweep is three quarters of a circle, open at the bottom. That is the dial. A full circle with a needle is still a gauge. It does not become a progress ring.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Gauge, progress ring, and KPI</h2>
+  <p>
+    All three can show one number. The drawing is what changes.
+  </p>
+  <p>
+    <code>type: "gauge"</code> puts the number on an arc with ticks and a needle. The center prints the formatted value, not a percent of the range. <code>metric.bands</code> paints ranges inside the arc. <code>metric.target</code> is stored on the track as <code>data-ck-target</code>. It is not drawn as a dot or a second needle.
+  </p>
+  <p>
+    <code>type: "progress-ring"</code> draws the share of <code>metric.max</code> on a circular track. The center is that share unless you set <code>metric.format</code>. There is no needle.
+  </p>
+  <p>
+    <code>type: "kpi"</code> prints the number large, with a delta beside it. There is no scale. A sparkline, when you pass <code>data</code>, sits under the figure.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    The number lives in <code>metric</code>, not in <code>data</code> and not at the top of the spec. <code>metric.value</code> is required. <code>metric.min</code> defaults to 0 and <code>metric.max</code> defaults to 100. <code>metric.label</code> is the caption under the readout.
+  </p>
+  <p>
+    <code>metric.format</code> formats the readout and the ticks. Capacity uses <code>integer</code>. An object sets decimals or a suffix. Omit it and the readout is a plain number.
+  </p>
+  <p>
+    <code>metric.target</code> is the goal you want recorded with the chart. Water used sets 80. The needle still points at the value. A drawn target marker is a bullet.
+  </p>
+  <p>
+    <code>metric.bands</code> is a list of <code>from</code>, <code>to</code>, <code>color</code>, and an optional <code>label</code>. The color may be a token such as <code>positive</code> or <code>negative</code>. <code>metric.thresholds</code> is a KPI key. On a gauge it warns CK3083 and does not color the dial.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest gauge. <code>version</code>, <code>type</code>, <code>metric.value</code>, and <code>a11y.alt</code> are required. The sweep, the cap, and the arc width can be omitted. The dial starts at -135° and ends at 135°. The cap is butt.
+  </p>
+  <TeachFacts type="gauge" label="Gauge packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing gauge specs. Capacity is the core example, with a low band and an OK band. Readiness uses the same scale and names the bands Hold and Go. Water used stores a target and sets no bands. A size in the spec wins over the preview default. Readiness is 420 by 250. Water used is 420 by 280.
+  </p>
+</section>
+
+<TeachConcept id="bands" title="Bands">
+  <p>
+    <code>metric.bands</code> paints ranges inside the dial, from the worst side of the scale toward the best. Each band needs <code>from</code> and <code>to</code>. <code>color</code> is a token or a CSS color. <code>label</code> is the name in the band's accessible name.
+  </p>
+  <p>
+    Omit the list and the dial has no inner ranges. Capacity and Readiness set two bands. Water used omits them. Off removes the list. On puts that example's bands back. An example that omitted them gets a low band and an OK band across its own min and max.
+  </p>
+  <figure class="code">
+    <figcaption><span>metric.bands</span></figcaption>
+    <pre><code>{bands}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="sweep" title="Sweep">
+  <p>
+    <code>mark.startAngle</code> and <code>mark.endAngle</code> are the arc, in degrees. 0 is the top. Positive degrees run clockwise. Omit both and the gauge is a dial: -135° to 135°, open at the bottom.
+  </p>
+  <p>
+    Half sets -90° to 90°, the top semicircle. Full sets 0° to 360°. The needle and the ticks follow the same sweep. A full gauge is still <code>type: "gauge"</code>. A progress ring has no needle.
+  </p>
+  <p>
+    Any other pair leaves the buttons unpressed. The demo does not hide a sweep it does not list.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.startAngle</span></figcaption>
+    <pre><code>{sweep}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="linecap" title="Cap">
+  <p>
+    <code>mark.linecap</code> is the end of the track and the value arc. Omit it, or set <code>butt</code>, and the ends are flat. That is the gauge default. <code>round</code> and <code>square</code> extend the stroke past the angle. The needle still sits on the value.
+  </p>
+  <p>
+    <code>mark.strokeWidth</code> is the arc thickness in pixels. Omit it and the dial picks a width that fits. Set it in the playground when the fitted width is wrong.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.linecap</span></figcaption>
+    <pre><code>{cap}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    The dial already prints the number, the caption, and the ticks. <code>tooltip</code> is the hover card, the same key as on a bar. Omit it and this control reads on. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Change those in the playground. Turning the card off and on again puts that object back. An example that omitted <code>tooltip</code> gets the key removed, so the on state stays omitted.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    A gauge does not use a legend. The reading is one number. <code>mark.sampling</code> does not apply and warns CK3010. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/progress-ring">Progress ring</a> is one share of a maximum, on a full circle, with no needle.</li>
+    <li><a href="/docs/charts/kpi">KPI</a> leads with the number, a delta, and an optional sparkline.</li>
+    <li><a href="/docs/charts/bullet">Bullet</a> draws the target and the ranges on a straight track, one row per measure.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />
