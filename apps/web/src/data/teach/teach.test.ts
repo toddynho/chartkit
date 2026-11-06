@@ -4,6 +4,7 @@ import { applyDonutAction, donutControlState, donutExamples } from "../donut-tea
 import { applyAreaRangeAction, areaRangeControlState, areaRangeExamples, areaRangeTeach, smallestAreaRangeSpec } from "./area-range.ts";
 import { applyBarListAction, barListControlState, barListExamples, barListTeach, smallestBarListSpec } from "./bar-list.ts";
 import { applyBarAction, barControlState, barExamples, barTeach, smallestBarSpec } from "./bar.ts";
+import { applyBoxplotAction, boxplotControlState, boxplotExamples, boxplotTeach, smallestBoxplotSpec } from "./boxplot.ts";
 import { applyBarRangeAction, barRangeControlState, barRangeExamples, barRangeTeach, smallestBarRangeSpec } from "./bar-range.ts";
 import { applyBulletAction, bulletControlState, bulletExamples, bulletTeach, smallestBulletSpec } from "./bullet.ts";
 import {
@@ -15,12 +16,14 @@ import {
 } from "./candlestick.ts";
 import { applyChoroplethAction, choroplethControlState, choroplethExamples, choroplethTeach, smallestChoroplethSpec } from "./choropleth.ts";
 import { applyComboAction, comboControlState, comboExamples, comboTeach, smallestComboSpec } from "./combo.ts";
+import { applyDensityAction, densityControlState, densityExamples, densityTeach, smallestDensitySpec } from "./density.ts";
 import { donutTeach } from "./donut.ts";
 import { applyErrorbarAction, errorbarControlState, errorbarExamples, errorbarTeach, smallestErrorbarSpec } from "./errorbar.ts";
 import { applyFunnelAction, funnelControlState, funnelExamples, funnelTeach, smallestFunnelSpec } from "./funnel.ts";
 import { applyGanttAction, ganttControlState, ganttExamples, ganttTeach, smallestGanttSpec } from "./gantt.ts";
 import { applyGaugeAction, gaugeControlState, gaugeExamples, gaugeTeach, smallestGaugeSpec } from "./gauge.ts";
 import { applyHeatmapAction, heatmapControlState, heatmapExamples, heatmapTeach, smallestHeatmapSpec } from "./heatmap.ts";
+import { applyHistogramAction, histogramControlState, histogramExamples, histogramTeach, smallestHistogramSpec } from "./histogram.ts";
 import { applyJourneyAction, journeyControlState, journeyExamples, journeyTeach, smallestJourneySpec } from "./journey.ts";
 import { applyKpiAction, kpiControlState, kpiExamples, kpiTeach, smallestKpiSpec } from "./kpi.ts";
 import { applyLegend, legendChoice } from "./legend.ts";
@@ -43,6 +46,7 @@ import { applyRoseAction, roseControlState, roseExamples, roseTeach, smallestRos
 import { applySankeyAction, sankeyControlState, sankeyExamples, sankeyTeach, smallestSankeySpec } from "./sankey.ts";
 import { applyScatterAction, scatterControlState, scatterExamples, scatterTeach, smallestScatterSpec } from "./scatter.ts";
 import { applySparklineAction, sparklineControlState, sparklineExamples, sparklineTeach, smallestSparklineSpec } from "./sparkline.ts";
+import { applyStripAction, smallestStripSpec, stripControlState, stripExamples, stripTeach } from "./strip.ts";
 import { applySpikeAction, spikeControlState, spikeExamples, spikeTeach, smallestSpikeSpec } from "./spike.ts";
 import {
   applyStreamgraphAction,
@@ -75,16 +79,19 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, the
     "bar",
     "bar-list",
     "bar-range",
+    "boxplot",
     "bullet",
     "candlestick",
     "choropleth",
     "combo",
+    "density",
     "donut",
     "errorbar",
     "funnel",
     "gantt",
     "gauge",
     "heatmap",
+    "histogram",
     "journey",
     "kpi",
     "line",
@@ -102,6 +109,7 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, the
     "spike",
     "stacked-area",
     "streamgraph",
+    "strip",
     "sunburst",
     "timeline",
     "tree",
@@ -110,7 +118,6 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, the
     "waterfall",
   ]);
   assert.equal(teachModule("area"), undefined);
-  assert.equal(teachModule("histogram"), undefined);
   assert.equal(donutTeach.controls.some((control) => control.id === "innerRadius"), true);
   assert.equal(pieTeach.controls.some((control) => control.id === "innerRadius"), false);
   assert.deepEqual(
@@ -252,6 +259,24 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, the
   assert.deepEqual(
     mapPointsTeach.controls.map((control) => control.id),
     ["atlas", "size", "labels", "legend", "tooltip"],
+  );
+  assert.deepEqual(
+    histogramTeach.controls.map((control) => control.id),
+    ["bins", "bin", "tooltip"],
+  );
+  assert.equal(histogramTeach.controls.some((control) => control.id === "legend"), false);
+  assert.deepEqual(
+    densityTeach.controls.map((control) => control.id),
+    ["bandwidth", "normalize", "rug", "orientation", "legend", "tooltip"],
+  );
+  assert.deepEqual(
+    boxplotTeach.controls.map((control) => control.id),
+    ["tooltip"],
+  );
+  assert.equal(boxplotTeach.controls.some((control) => control.id === "orientation" || control.id === "legend"), false);
+  assert.deepEqual(
+    stripTeach.controls.map((control) => control.id),
+    ["summary", "band", "orientation", "jitter", "sort", "legend", "tooltip"],
   );
 });
 
@@ -2387,5 +2412,263 @@ test("choropleth and map-points examples paint with their type", async () => {
     assert.equal(svg.includes('data-ck-type="map-points"'), true);
     assert.equal(svg.includes("ck-chart-error"), false);
     assert.equal(svg.includes("Unknown atlas."), false);
+  }
+});
+
+test("histogram actions edit the bin count, the bin rule, and tooltip", () => {
+  assert.equal(smallestHistogramSpec.type, "histogram");
+  assert.equal(smallestHistogramSpec.mark, undefined);
+  assert.equal(histogramControlState(smallestHistogramSpec).bins, 8);
+  assert.equal(histogramControlState(smallestHistogramSpec).bin, "count");
+
+  const checkout = structuredClone(histogramExamples[0]!.spec);
+  assert.equal(histogramControlState(checkout).bins, 16);
+  assert.equal(histogramControlState(checkout).bin, "count");
+  assert.equal(checkout.tooltip, undefined);
+  const untouched = structuredClone(checkout);
+  histogramControlState(checkout);
+  assert.deepEqual(checkout, untouched);
+  applyHistogramAction(checkout, { id: "bins", value: 12 });
+  assert.equal((checkout.mark as { bins: number }).bins, 12);
+  applyHistogramAction(checkout, { id: "bin", value: "sturges" });
+  assert.equal((checkout.mark as { bin: string; bins: number }).bin, "sturges");
+  assert.equal((checkout.mark as { bins: number }).bins, 12);
+  applyHistogramAction(checkout, { id: "bin", value: "fd" });
+  assert.equal(histogramControlState(checkout).bin, "fd");
+  applyHistogramAction(checkout, { id: "bin", value: "count" });
+  assert.equal((checkout.mark as { bin: string }).bin, "count");
+  applyHistogramAction(checkout, { id: "tooltip", value: "off" });
+  assert.equal(checkout.tooltip, false);
+  assert.equal(histogramControlState(checkout).tooltip, "off");
+  applyHistogramAction(checkout, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in checkout, false);
+
+  const scores = structuredClone(histogramExamples[1]!.spec);
+  assert.equal(histogramControlState(scores).bins, 2);
+  assert.equal((scores.size as { width: number }).width, 560);
+  const tip = structuredClone(customTip);
+  scores.tooltip = structuredClone(tip);
+  const opened = openTeachExample(scores);
+  assert.deepEqual(opened.tooltip, scores.tooltip);
+  assert.notEqual(opened.tooltip, scores.tooltip);
+  applyHistogramAction(scores, { id: "tooltip", value: "off" });
+  assert.equal(scores.tooltip, false);
+  applyHistogramAction(scores, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(scores.tooltip, tip);
+  assert.equal(scores.type, "histogram");
+
+  assert.deepEqual(
+    histogramExamples.map((example) => example.title),
+    ["Checkout time", "Checkout scores", "Response time distribution"],
+  );
+  assert.deepEqual(
+    histogramExamples.map((example) => example.meta),
+    ["16 bins", "2 bins", "14 bins"],
+  );
+  for (const example of histogramExamples) assert.equal(example.spec.type, "histogram");
+});
+
+test("density actions edit bandwidth, normalize, rug, orientation, legend, and tooltip", () => {
+  assert.equal(smallestDensitySpec.type, "density");
+  assert.equal(smallestDensitySpec.mark, undefined);
+  assert.equal(densityControlState(smallestDensitySpec).bandwidth, "auto");
+  assert.equal(densityControlState(smallestDensitySpec).normalize, "density");
+  assert.equal(densityControlState(smallestDensitySpec).rug, "off");
+  assert.equal(densityControlState(smallestDensitySpec).orientation, "horizontal");
+
+  const wait = structuredClone(densityExamples[0]!.spec);
+  assert.equal(wait.tooltip, undefined);
+  const untouched = structuredClone(wait);
+  densityControlState(wait);
+  assert.deepEqual(wait, untouched);
+  applyDensityAction(wait, { id: "bandwidth", value: "3" });
+  assert.equal((wait.mark as { bandwidth: number }).bandwidth, 3);
+  applyDensityAction(wait, { id: "bandwidth", value: "auto" });
+  assert.equal(wait.mark, undefined);
+  applyDensityAction(wait, { id: "normalize", value: "count" });
+  assert.equal((wait.mark as { normalize: string }).normalize, "count");
+  applyDensityAction(wait, { id: "rug", value: "on" });
+  assert.equal((wait.mark as { rug: boolean; normalize: string }).rug, true);
+  assert.equal((wait.mark as { normalize: string }).normalize, "count");
+  applyDensityAction(wait, { id: "orientation", value: "vertical" });
+  assert.equal((wait.mark as { orientation: string }).orientation, "vertical");
+  applyDensityAction(wait, { id: "tooltip", value: "off" });
+  assert.equal(wait.tooltip, false);
+  applyDensityAction(wait, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in wait, false);
+
+  const desks = structuredClone(densityExamples[1]!.spec);
+  assert.equal(densityControlState(desks).bandwidth, "3");
+  assert.equal(densityControlState(desks).normalize, "count");
+  assert.equal(densityControlState(desks).legend, "top");
+  applyDensityAction(desks, { id: "bandwidth", value: "auto" });
+  assert.equal((desks.mark as { bandwidth?: unknown; normalize: string }).bandwidth, undefined);
+  assert.equal((desks.mark as { normalize: string }).normalize, "count");
+  applyDensityAction(desks, { id: "legend", value: "bottom" });
+  assert.deepEqual(desks.legend, { position: "bottom" });
+  const tip = structuredClone(customTip);
+  desks.tooltip = structuredClone(tip);
+  const opened = openTeachExample(desks);
+  assert.deepEqual(opened.tooltip, desks.tooltip);
+  assert.notEqual(opened.tooltip, desks.tooltip);
+  applyDensityAction(desks, { id: "tooltip", value: "off" });
+  assert.equal(desks.tooltip, false);
+  applyDensityAction(desks, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(desks.tooltip, tip);
+
+  const vertical = structuredClone(densityExamples[2]!.spec);
+  assert.equal(densityControlState(vertical).orientation, "vertical");
+  assert.equal(densityControlState(vertical).rug, "on");
+  applyDensityAction(vertical, { id: "rug", value: "off" });
+  assert.equal((vertical.mark as { rug?: unknown }).rug, undefined);
+  assert.equal((vertical.mark as { orientation: string }).orientation, "vertical");
+  assert.equal((vertical.mark as { extent: string }).extent, "data");
+  assert.equal(vertical.type, "density");
+
+  assert.deepEqual(
+    densityExamples.map((example) => example.title),
+    ["Wait time", "Wait by desk", "Vertical waits"],
+  );
+  assert.deepEqual(
+    densityExamples.map((example) => example.meta),
+    ["21 waits", "2 groups", "12 waits"],
+  );
+  for (const example of densityExamples) assert.equal(example.spec.type, "density");
+});
+
+test("boxplot tooltip turns off and restores an omitted tooltip and a custom tooltip", () => {
+  assert.equal(smallestBoxplotSpec.type, "boxplot");
+  assert.equal(smallestBoxplotSpec.mark, undefined);
+
+  const close = structuredClone(boxplotExamples[0]!.spec);
+  assert.equal(close.tooltip, undefined);
+  assert.equal(boxplotControlState(close).tooltip, "on");
+  const untouched = structuredClone(close);
+  boxplotControlState(close);
+  assert.deepEqual(close, untouched);
+  applyBoxplotAction(close, { id: "tooltip", value: "off" });
+  assert.equal(close.tooltip, false);
+  assert.equal(boxplotControlState(close).tooltip, "off");
+  applyBoxplotAction(close, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in close, false);
+  assert.equal(close.mark, undefined);
+
+  const weight = structuredClone(boxplotExamples[1]!.spec);
+  assert.equal((weight.size as { width: number }).width, 560);
+  const tip = structuredClone(customTip);
+  weight.tooltip = structuredClone(tip);
+  const opened = openTeachExample(weight);
+  assert.deepEqual(opened.tooltip, weight.tooltip);
+  assert.notEqual(opened.tooltip, weight.tooltip);
+  applyBoxplotAction(weight, { id: "tooltip", value: "off" });
+  assert.equal(weight.tooltip, false);
+  applyBoxplotAction(weight, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(weight.tooltip, tip);
+  assert.equal(weight.type, "boxplot");
+
+  assert.deepEqual(
+    boxplotExamples.map((example) => example.title),
+    ["Days to close", "Weight by variety"],
+  );
+  assert.deepEqual(
+    boxplotExamples.map((example) => example.meta),
+    ["5 regions", "3 varieties"],
+  );
+  for (const example of boxplotExamples) assert.equal(example.spec.type, "boxplot");
+});
+
+test("strip actions edit summary, band, orientation, jitter, sort, legend, and tooltip", () => {
+  assert.equal(smallestStripSpec.type, "strip");
+  assert.equal(smallestStripSpec.mark, undefined);
+  assert.equal(stripControlState(smallestStripSpec).summary, "median");
+  assert.equal(stripControlState(smallestStripSpec).band, "none");
+  assert.equal(stripControlState(smallestStripSpec).orientation, "horizontal");
+  assert.equal(stripControlState(smallestStripSpec).jitter, "auto");
+  assert.equal(stripControlState(smallestStripSpec).sort, "none");
+
+  const tokens = structuredClone(stripExamples[0]!.spec);
+  assert.equal(stripControlState(tokens).summary, "median");
+  assert.equal(stripControlState(tokens).band, "range");
+  assert.equal(stripControlState(tokens).jitter, "none");
+  assert.equal(stripControlState(tokens).sort, "asc");
+  assert.equal(tokens.tooltip, undefined);
+  const untouched = structuredClone(tokens);
+  stripControlState(tokens);
+  assert.deepEqual(tokens, untouched);
+  applyStripAction(tokens, { id: "summary", value: "mean" });
+  assert.equal((tokens.mark as { summary: string; highlight: string; band: string }).summary, "mean");
+  assert.equal((tokens.mark as { highlight: string }).highlight, "ChartKit");
+  assert.equal((tokens.mark as { band: string }).band, "range");
+  applyStripAction(tokens, { id: "band", value: "iqr" });
+  assert.equal((tokens.mark as { band: string }).band, "iqr");
+  applyStripAction(tokens, { id: "jitter", value: "auto" });
+  assert.equal((tokens.mark as { jitter: string }).jitter, "auto");
+  applyStripAction(tokens, { id: "sort", value: "none" });
+  assert.equal((tokens.mark as { sort: string }).sort, "none");
+  applyStripAction(tokens, { id: "orientation", value: "vertical" });
+  assert.equal((tokens.mark as { orientation: string }).orientation, "vertical");
+  applyStripAction(tokens, { id: "tooltip", value: "off" });
+  assert.equal(tokens.tooltip, false);
+  applyStripAction(tokens, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in tokens, false);
+
+  const regions = structuredClone(stripExamples[1]!.spec);
+  assert.equal(stripControlState(regions).summary, "median");
+  assert.equal(regions.mark, undefined);
+  applyStripAction(regions, { id: "summary", value: "none" });
+  assert.equal((regions.mark as { summary: string }).summary, "none");
+
+  const desks = structuredClone(stripExamples[2]!.spec);
+  assert.equal(stripControlState(desks).orientation, "vertical");
+  assert.equal(stripControlState(desks).summary, "mean");
+  assert.equal(stripControlState(desks).band, "iqr");
+  assert.equal(stripControlState(desks).legend, "top");
+  applyStripAction(desks, { id: "legend", value: "off" });
+  assert.equal(desks.legend, false);
+  assert.equal((desks.mark as { orientation: string }).orientation, "vertical");
+  const tip = structuredClone(customTip);
+  desks.tooltip = structuredClone(tip);
+  const opened = openTeachExample(desks);
+  assert.deepEqual(opened.tooltip, desks.tooltip);
+  assert.notEqual(opened.tooltip, desks.tooltip);
+  applyStripAction(desks, { id: "tooltip", value: "off" });
+  assert.equal(desks.tooltip, false);
+  applyStripAction(desks, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(desks.tooltip, tip);
+  assert.equal(desks.type, "strip");
+
+  assert.deepEqual(
+    stripExamples.map((example) => example.title),
+    ["Tokens by library", "Latency by region", "Minutes by desk"],
+  );
+  assert.deepEqual(
+    stripExamples.map((example) => example.meta),
+    ["5 libraries", "3 regions", "2 desks"],
+  );
+  for (const example of stripExamples) assert.equal(example.spec.type, "strip");
+});
+
+test("distribution examples and smallest specs paint with the right type", async () => {
+  const { render } = (await import("@chartkitdev/core/extra")) as { render: (spec: unknown) => string };
+  const { validate } = (await import("@chartkitdev/core/validate")) as {
+    validate: (spec: unknown) => { ok: boolean; errors: { code: string; message: string }[] };
+  };
+  const cases = [
+    ...histogramExamples.map((example) => example.spec),
+    smallestHistogramSpec,
+    ...densityExamples.map((example) => example.spec),
+    smallestDensitySpec,
+    ...boxplotExamples.map((example) => example.spec),
+    smallestBoxplotSpec,
+    ...stripExamples.map((example) => example.spec),
+    smallestStripSpec,
+  ];
+  for (const spec of cases) {
+    const type = String(spec.type);
+    const checked = validate(spec);
+    assert.equal(checked.ok, true, `${type} ${JSON.stringify(checked.errors)}`);
+    const svg = render(spec);
+    assert.equal(svg.includes("ck-chart-error"), false, type);
+    assert.equal(svg.includes(`data-ck-type="${type}"`), true, type);
   }
 });

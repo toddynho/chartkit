@@ -2,16 +2,19 @@ import { areaRangeTeach } from "./area-range.ts";
 import { barListTeach } from "./bar-list.ts";
 import { barRangeTeach } from "./bar-range.ts";
 import { barTeach } from "./bar.ts";
+import { boxplotTeach } from "./boxplot.ts";
 import { bulletTeach } from "./bullet.ts";
 import { candlestickTeach } from "./candlestick.ts";
 import { choroplethTeach } from "./choropleth.ts";
 import { comboTeach } from "./combo.ts";
+import { densityTeach } from "./density.ts";
 import { donutTeach } from "./donut.ts";
 import { errorbarTeach } from "./errorbar.ts";
 import { funnelTeach } from "./funnel.ts";
 import { ganttTeach } from "./gantt.ts";
 import { gaugeTeach } from "./gauge.ts";
 import { heatmapTeach } from "./heatmap.ts";
+import { histogramTeach } from "./histogram.ts";
 import { journeyTeach } from "./journey.ts";
 import { kpiTeach } from "./kpi.ts";
 import { lineTeach } from "./line.ts";
@@ -29,6 +32,7 @@ import { sparklineTeach } from "./sparkline.ts";
 import { spikeTeach } from "./spike.ts";
 import { stackedAreaTeach } from "./stacked-area.ts";
 import { streamgraphTeach } from "./streamgraph.ts";
+import { stripTeach } from "./strip.ts";
 import { sunburstTeach } from "./sunburst.ts";
 import { timelineTeach } from "./timeline.ts";
 import { treeTeach } from "./tree.ts";
@@ -80,6 +84,10 @@ export const teachModules: Record<string, TeachModule> = {
   bullet: bulletTeach,
   choropleth: choroplethTeach,
   "map-points": mapPointsTeach,
+  histogram: histogramTeach,
+  density: densityTeach,
+  boxplot: boxplotTeach,
+  strip: stripTeach,
 };
 
 export function teachModule(type: string): TeachModule | undefined {

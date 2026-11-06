@@ -1,0 +1,102 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestBoxplotSpec } from "../data/teach/boxplot";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/boxplot";
+const spec = specText(smallestBoxplotSpec);
+const play = playgroundHref(smallestBoxplotSpec);
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A box plot summarizes a quantitative field inside each category. The box runs from the first quartile to the third. A line marks the median. Whiskers run to the last observation inside 1.5 times the interquartile range. Points beyond that fence are outlier dots.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a box plot when you have several groups and the question is the middle, the spread, and the points that sit outside. Days to close compares five regions. South has a short deal and a long one past the whiskers. Weight by variety compares three orchards.
+  </p>
+  <p>
+    A <a href="/docs/charts/strip">strip</a> draws every observation, which is the chart when the groups are few and the dots themselves are the story. A <a href="/docs/charts/bar">bar</a> is one aggregate per category, a total or a mean you already computed. A <a href="/docs/charts/histogram">histogram</a> bins one sample and has no category axis.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one observation. <code>encoding.x</code> is the category. <code>encoding.y</code> is the number. Days to close uses <code>region</code> and <code>days</code>. Weight by variety uses <code>variety</code> and <code>grams</code>.
+  </p>
+  <p>
+    The chart computes the quartiles. You do not pass q1, the median, or q3. Groups keep the order they first appear in the data. Each group takes the next series color. The renderer draws no legend.
+  </p>
+  <p>
+    <code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the comparison. The hover label on each box already lists the min, the quartiles, the median, and the max.
+  </p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest box plot. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Two groups, four observations each, and no <code>mark</code>. The box, the median line, and the whiskers are the chart.
+  </p>
+  <TeachFacts type="boxplot" label="Box plot packages" spec={spec} />
+</section>
+
+<p>The option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing box plot specs. Days to close is five regions of raw deals. South has points outside the whiskers. Weight by variety is fifteen crates in three boxes.
+  </p>
+</section>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a box plot when the key is omitted. Hovering a box shows the category, the whisker ends, the quartiles, and the median. An outlier dot names that point. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card. These examples omit the key. Turning the card off and on again puts that object back when the example had one, and deletes the key when the example omitted it.
+  </p>
+</TeachConcept>
+
+<section id="drawn">
+  <h2>What the chart always draws</h2>
+  <p>
+    The box, the median, the whiskers, and the outlier dots are the type. There is no <code>mark.outliers</code> switch, no <code>mark.median</code> switch, and no <code>mark.orientation</code> on a box plot. A horizontal reading of every point is a <a href="/docs/charts/strip">strip</a>.
+  </p>
+  <p>
+    <code>mark.gap</code> changes the space between boxes, as a fraction of the band. The default gap is wide enough to separate the groups. Set a tighter gap in the playground. Theme presets live there too, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/strip">Strip</a> keeps every dot, with a median tick and an optional band.</li>
+    <li><a href="/docs/charts/bar">Bar</a> compares one number per category.</li>
+    <li><a href="/docs/charts/histogram">Histogram</a> bins one sample, with no groups.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />
