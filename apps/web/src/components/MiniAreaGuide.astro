@@ -1,0 +1,162 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestMiniAreaSpec } from "../data/teach/mini-area";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/mini-area";
+const spec = specText(smallestMiniAreaSpec);
+const play = playgroundHref(smallestMiniAreaSpec);
+const curve = `{
+  "mark": { "curve": "step" }
+}`;
+const gradient = `{
+  "mark": { "gradient": false }
+}`;
+const lineArea = `{
+  "type": "line",
+  "mark": { "area": true }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A mini area is a small filled trend with no axes. The band is the chart. It sits where a sparkline would sit, when the filled shape should read at a glance.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a mini area for one short series inline: signups over six weeks, holds across a week, a spark of volume under a label. The reader is not measuring a point off a grid. They are seeing the shape of the band.
+  </p>
+  <p>
+    A <a href="/docs/charts/sparkline">sparkline</a> is the same small frame as a stroke only. Use it when the line is enough. A mini area always fills. That fill is not a switch on this type.
+  </p>
+  <p>
+    A <a href="/docs/charts/line">line</a> with <code>mark.area</code> is a full chart. It has axes, room for a second series, and a legend when there is more than one line. There is no <code>type: "area"</code>. A filled line is still <code>type: "line"</code>. <a href="/docs/charts/area">Area</a> is the page for that note.
+  </p>
+  <p>
+    Several series that add up to one shape are a <a href="/docs/charts/stacked-area">stacked area</a>. A mini area is one series, with no axes.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Mini area, sparkline, and a filled line</h2>
+  <p>
+    All three can show a measure over an ordered x. The frame is what changes.
+  </p>
+  <p>
+    <code>type: "mini-area"</code> fills one series and hides the axes. A number array is enough. The default height is 40px when <code>size</code> is omitted.
+  </p>
+  <p>
+    <code>type: "sparkline"</code> draws the stroke and leaves the area off. <code>mark.area</code> can turn that fill on, and the chart is still a sparkline.
+  </p>
+  <p>
+    <code>type: "line"</code> with <code>mark.area</code> keeps the axes. Use it when the scale is part of the reading.
+  </p>
+  <figure class="code">
+    <figcaption><span>type line, mark.area</span></figcaption>
+    <pre><code>{lineArea}</code></pre>
+  </figure>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    A plain number array is the usual data. The field name is <code>value</code>. X is the index. Signups is six numbers. Holds this week is seven. Neither needs <code>encoding</code>.
+  </p>
+  <p>
+    Row objects work the same way they do on a sparkline. Point <code>encoding.y</code> at the number. A missing number leaves a gap, unless <code>mark.connectNulls</code> is true. A second series is a stacked area or a line, not a second band in this chart.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest mini area. <code>version</code>, <code>type</code>, <code>data</code>, and <code>a11y.alt</code> are required. The fill is on, so <code>mark</code> can be omitted. The curve is monotone. The band fades toward the baseline. There are no axes and no legend. Omit <code>size</code> and the strip is 40px tall. The docs preview uses a short card. A <code>size</code> in the spec wins over that card. Holds this week sets 640 by 200, so the rail uses that size.
+  </p>
+  <TeachFacts type="mini-area" label="Mini area packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches between two mini areas. Signups is the trailing six weeks, with the default fade. Holds this week turns the fade off, names the tooltip field, and sets a size.
+  </p>
+</section>
+
+<TeachConcept id="curve" title="Curve">
+  <p>
+    <code>mark.curve</code> is how the top edge joins the points. <code>monotone</code> is the default. It stays inside the data. <code>linear</code> draws straight segments. <code>step</code> holds the value and then jumps. The fill follows that edge.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.curve</span></figcaption>
+    <pre><code>{curve}</code></pre>
+  </figure>
+  <p>
+    <code>step-before</code> and <code>step-after</code> place the jump on the other side of the point. Set those in the playground.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="gradient" title="Gradient">
+  <p>
+    <code>mark.gradient</code> fades the band toward the baseline. Omit it, or set true, and the fade is on. <code>false</code> keeps a solid band. Holds this week sets <code>false</code>. The fill itself stays. This control does not turn the chart into a sparkline.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.gradient</span></figcaption>
+    <pre><code>{gradient}</code></pre>
+  </figure>
+  <p>
+    Turning the fade off and on again puts the example's value back. An example that omitted <code>mark.gradient</code> gets the key removed, so the default fade stays on.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on when the key is omitted. Hovering a point shows the value. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card. Holds this week names the value Holds. On a number array the field is <code>value</code>. Change the fields in the playground. Turning the card off and on again puts that object back.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.fillOpacity</code> is the strength of the band, from 0 to 1. <code>mark.strokeWidth</code> is the top edge. <code>mark.sampling</code> downsamples a long series. <code>mark.connectNulls</code> draws through gaps. None of those are needed for a first mini area. A legend is not drawn. <code>mark.points</code> does not apply. Theme presets live on the playground, with the full option list.
+  </p>
+  <p>
+    A <code>title</code> is drawn as text and sits on a short strip, so these examples leave it off.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/sparkline">Sparkline</a> is the stroke without the band.</li>
+    <li><a href="/docs/charts/line">Line</a> keeps the axes. <a href="/docs/charts/area">Area</a> is that line with <code>mark.area</code>.</li>
+    <li><a href="/docs/charts/stacked-area">Stacked area</a> adds several series into one shape.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

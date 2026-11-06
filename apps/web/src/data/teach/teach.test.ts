@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { applyDonutAction, donutControlState, donutExamples } from "../donut-teach.ts";
 import { applyAreaRangeAction, areaRangeControlState, areaRangeExamples, areaRangeTeach, smallestAreaRangeSpec } from "./area-range.ts";
+import { applyBarListAction, barListControlState, barListExamples, barListTeach, smallestBarListSpec } from "./bar-list.ts";
 import { applyBarAction, barControlState, barExamples, barTeach, smallestBarSpec } from "./bar.ts";
 import { applyBarRangeAction, barRangeControlState, barRangeExamples, barRangeTeach, smallestBarRangeSpec } from "./bar-range.ts";
 import { applyComboAction, comboControlState, comboExamples, comboTeach, smallestComboSpec } from "./combo.ts";
@@ -12,6 +13,7 @@ import { applyGanttAction, ganttControlState, ganttExamples, ganttTeach, smalles
 import { applyJourneyAction, journeyControlState, journeyExamples, journeyTeach, smallestJourneySpec } from "./journey.ts";
 import { applyLegend, legendChoice } from "./legend.ts";
 import { applyLineAction, lineControlState, lineExamples, lineTeach, smallestLineSpec } from "./line.ts";
+import { applyMiniAreaAction, miniAreaControlState, miniAreaExamples, miniAreaTeach, smallestMiniAreaSpec } from "./mini-area.ts";
 import { applyPieAction, pieControlState, pieExamples, pieTeach, smallestPieSpec } from "./pie.ts";
 import { applyQuadrantAction, quadrantControlState, quadrantExamples, quadrantTeach, smallestQuadrantSpec } from "./quadrant.ts";
 import { applyRadialBarAction, radialBarControlState, radialBarExamples, radialBarTeach, smallestRadialBarSpec } from "./radial-bar.ts";
@@ -19,6 +21,8 @@ import { teachModule, teachModules } from "./registry.ts";
 import { applyRoseAction, roseControlState, roseExamples, roseTeach, smallestRoseSpec } from "./rose.ts";
 import { applySankeyAction, sankeyControlState, sankeyExamples, sankeyTeach, smallestSankeySpec } from "./sankey.ts";
 import { applyScatterAction, scatterControlState, scatterExamples, scatterTeach, smallestScatterSpec } from "./scatter.ts";
+import { applySparklineAction, sparklineControlState, sparklineExamples, sparklineTeach, smallestSparklineSpec } from "./sparkline.ts";
+import { applySpikeAction, spikeControlState, spikeExamples, spikeTeach, smallestSpikeSpec } from "./spike.ts";
 import {
   applyStreamgraphAction,
   smallestStreamgraphSpec,
@@ -26,6 +30,8 @@ import {
   streamgraphExamples,
   streamgraphTeach,
 } from "./streamgraph.ts";
+import { paintSpec } from "../../lib/chartkit.ts";
+import { withPreviewSize } from "../preview-size.ts";
 import { openTeachExample } from "./spec.ts";
 import {
   applyStackedAreaAction,
@@ -42,10 +48,11 @@ import { applyTreemapAction, smallestTreemapSpec, treemapControlState, treemapEx
 import { applyVennAction, smallestVennSpec, vennControlState, vennExamples, vennTeach } from "./venn.ts";
 import { applyWaterfallAction, smallestWaterfallSpec, waterfallControlState, waterfallExamples, waterfallTeach } from "./waterfall.ts";
 
-test("the kit is donut, pie, line, the cartesian batch, part-to-whole, and flow", () => {
+test("the kit is donut, pie, line, the cartesian batch, part-to-whole, flow, and the compact charts", () => {
   assert.deepEqual(Object.keys(teachModules).sort(), [
     "area-range",
     "bar",
+    "bar-list",
     "bar-range",
     "combo",
     "donut",
@@ -54,12 +61,15 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, and flow"
     "gantt",
     "journey",
     "line",
+    "mini-area",
     "pie",
     "quadrant",
     "radial-bar",
     "rose",
     "sankey",
     "scatter",
+    "sparkline",
+    "spike",
     "stacked-area",
     "streamgraph",
     "sunburst",
@@ -150,6 +160,26 @@ test("the kit is donut, pie, line, the cartesian batch, part-to-whole, and flow"
     ["anchor", "tooltip"],
   );
   assert.equal(errorbarTeach.controls.some((control) => control.id === "legend" || control.id === "pointSize"), false);
+  assert.deepEqual(
+    sparklineTeach.controls.map((control) => control.id),
+    ["curve", "tooltip"],
+  );
+  assert.equal(sparklineTeach.controls.some((control) => control.id === "legend" || control.id === "area" || control.id === "points"), false);
+  assert.deepEqual(
+    miniAreaTeach.controls.map((control) => control.id),
+    ["curve", "gradient", "tooltip"],
+  );
+  assert.equal(miniAreaTeach.controls.some((control) => control.id === "legend" || control.id === "area"), false);
+  assert.deepEqual(
+    spikeTeach.controls.map((control) => control.id),
+    ["baseline", "tooltip"],
+  );
+  assert.equal(spikeTeach.controls.some((control) => control.id === "legend" || control.id === "opacity"), false);
+  assert.deepEqual(
+    barListTeach.controls.map((control) => control.id),
+    ["track", "tooltip"],
+  );
+  assert.equal(barListTeach.controls.some((control) => control.id === "legend" || control.id === "sort" || control.id === "orientation"), false);
 });
 
 test("opening an example copies a custom tooltip and does not rewrite it", () => {
@@ -1428,4 +1458,240 @@ test("error bar actions edit the anchor and tooltip", () => {
     ["3 assays", "6 dishes", "5 days"],
   );
   for (const example of errorbarExamples) assert.equal(example.spec.type, "errorbar");
+});
+
+function assertCompactPaint(type: string, spec: Record<string, unknown>, label: string): void {
+  for (const painted of [paintSpec(spec), paintSpec(withPreviewSize(spec))]) {
+    const detail = painted.issues.map((issue) => `${issue.code} ${issue.message}`).join("; ");
+    assert.equal(painted.ok, true, `${label} ${detail}`);
+    assert.equal(painted.svg.includes(`data-ck-type="${type}"`), true, label);
+    assert.equal(painted.svg.includes("ck-chart-error"), false, label);
+  }
+}
+
+test("sparkline actions edit the curve and the tooltip", () => {
+  assert.equal(smallestSparklineSpec.type, "sparkline");
+  assert.equal(smallestSparklineSpec.mark, undefined);
+  assert.equal(sparklineControlState(smallestSparklineSpec).curve, "monotone");
+  assert.equal(sparklineControlState(smallestSparklineSpec).tooltip, "on");
+  assertCompactPaint("sparkline", smallestSparklineSpec, "smallest sparkline");
+
+  const requests = structuredClone(sparklineExamples[0]!.spec);
+  assert.equal(sparklineControlState(requests).curve, "monotone");
+  assert.equal(requests.tooltip, undefined);
+  const untouched = structuredClone(requests);
+  sparklineControlState(requests);
+  assert.deepEqual(requests, untouched);
+  applySparklineAction(requests, { id: "curve", value: "linear" });
+  assert.equal((requests.mark as { curve: string }).curve, "linear");
+  applySparklineAction(requests, { id: "curve", value: "step" });
+  assert.equal((requests.mark as { curve: string }).curve, "step");
+  applySparklineAction(requests, { id: "tooltip", value: "off" });
+  assert.equal(requests.tooltip, false);
+  assert.equal(sparklineControlState(requests).tooltip, "off");
+  applySparklineAction(requests, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in requests, false);
+  assert.deepEqual(withPreviewSize(sparklineExamples[0]!.spec).size, { width: 280, height: 56 });
+  const locked = withPreviewSize({ ...structuredClone(sparklineExamples[0]!.spec), size: { width: 160, height: 32 } });
+  assert.deepEqual(locked.size, { width: 160, height: 32 });
+
+  const volume = structuredClone(sparklineExamples[1]!.spec);
+  assert.equal(volume.tooltip, false);
+  assert.equal(sparklineControlState(volume).tooltip, "off");
+  applySparklineAction(volume, { id: "tooltip", value: "on", restore: false });
+  assert.equal(volume.tooltip, true);
+
+  const disputes = structuredClone(sparklineExamples[2]!.spec);
+  const original = structuredClone(disputes.tooltip);
+  assert.equal(sparklineControlState(disputes).tooltip, "on");
+  const opened = openTeachExample(disputes);
+  assert.deepEqual(opened.tooltip, disputes.tooltip);
+  assert.notEqual(opened.tooltip, disputes.tooltip);
+  applySparklineAction(disputes, { id: "tooltip", value: "off" });
+  assert.equal(disputes.tooltip, false);
+  applySparklineAction(disputes, { id: "tooltip", value: "on", restore: original });
+  assert.deepEqual(disputes.tooltip, original);
+  assert.equal((disputes.encoding as { y: { field: string } }).y.field, "v");
+
+  assert.deepEqual(
+    sparklineExamples.map((example) => example.title),
+    ["Requests", "Net volume", "Disputes"],
+  );
+  assert.deepEqual(
+    sparklineExamples.map((example) => example.meta),
+    ["12 points", "16 days", "16 days"],
+  );
+  for (const example of sparklineExamples) {
+    assert.equal(example.spec.type, "sparkline");
+    assertCompactPaint("sparkline", example.spec, example.id);
+  }
+});
+
+test("mini area actions edit the curve, the fade, and the tooltip", () => {
+  assert.equal(smallestMiniAreaSpec.type, "mini-area");
+  assert.equal(smallestMiniAreaSpec.mark, undefined);
+  assert.equal(miniAreaControlState(smallestMiniAreaSpec).gradient, "on");
+  assert.equal(miniAreaControlState(smallestMiniAreaSpec).tooltip, "on");
+  assertCompactPaint("mini-area", smallestMiniAreaSpec, "smallest mini area");
+
+  const signups = structuredClone(miniAreaExamples[0]!.spec);
+  assert.equal(miniAreaControlState(signups).curve, "monotone");
+  assert.equal(miniAreaControlState(signups).gradient, "on");
+  assert.equal(signups.tooltip, undefined);
+  const untouched = structuredClone(signups);
+  miniAreaControlState(signups);
+  assert.deepEqual(signups, untouched);
+  applyMiniAreaAction(signups, { id: "curve", value: "linear" });
+  assert.equal((signups.mark as { curve: string }).curve, "linear");
+  applyMiniAreaAction(signups, { id: "gradient", value: "off" });
+  assert.equal((signups.mark as { gradient: boolean }).gradient, false);
+  assert.equal((signups.mark as { curve: string }).curve, "linear");
+  applyMiniAreaAction(signups, { id: "gradient", value: "on", restore: miniAreaExamples[0]!.spec });
+  assert.equal((signups.mark as { gradient?: boolean }).gradient, undefined);
+  applyMiniAreaAction(signups, { id: "tooltip", value: "off" });
+  assert.equal(signups.tooltip, false);
+  applyMiniAreaAction(signups, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in signups, false);
+  assert.deepEqual(withPreviewSize(miniAreaExamples[0]!.spec).size, { width: 280, height: 72 });
+
+  const holds = structuredClone(miniAreaExamples[1]!.spec);
+  const original = structuredClone(holds.tooltip);
+  assert.equal(miniAreaControlState(holds).gradient, "off");
+  assert.equal(miniAreaControlState(holds).tooltip, "on");
+  assert.deepEqual(withPreviewSize(holds).size, { width: 640, height: 200 });
+  applyMiniAreaAction(holds, { id: "gradient", value: "on", restore: miniAreaExamples[1]!.spec });
+  assert.equal((holds.mark as { gradient: boolean }).gradient, false);
+  const opened = openTeachExample(holds);
+  assert.deepEqual(opened.tooltip, holds.tooltip);
+  assert.notEqual(opened.tooltip, holds.tooltip);
+  applyMiniAreaAction(holds, { id: "tooltip", value: "off" });
+  assert.equal(holds.tooltip, false);
+  applyMiniAreaAction(holds, { id: "tooltip", value: "on", restore: original });
+  assert.deepEqual(holds.tooltip, original);
+  assert.equal((holds.size as { width: number }).width, 640);
+
+  assert.deepEqual(
+    miniAreaExamples.map((example) => example.title),
+    ["Signups", "Holds this week"],
+  );
+  assert.deepEqual(
+    miniAreaExamples.map((example) => example.meta),
+    ["6 weeks", "7 days"],
+  );
+  for (const example of miniAreaExamples) {
+    assert.equal(example.spec.type, "mini-area");
+    assertCompactPaint("mini-area", example.spec, example.id);
+  }
+});
+
+test("spike actions edit the baseline and the tooltip", () => {
+  assert.equal(smallestSpikeSpec.type, "spike");
+  assert.equal(smallestSpikeSpec.mark, undefined);
+  assert.equal(spikeControlState(smallestSpikeSpec).baseline, 0);
+  assert.equal(spikeControlState(smallestSpikeSpec).tooltip, "on");
+  assertCompactPaint("spike", smallestSpikeSpec, "smallest spike");
+
+  const blocked = structuredClone(spikeExamples[0]!.spec);
+  assert.equal(spikeControlState(blocked).baseline, 0);
+  assert.equal(blocked.tooltip, undefined);
+  const untouched = structuredClone(blocked);
+  spikeControlState(blocked);
+  assert.deepEqual(blocked, untouched);
+  applySpikeAction(blocked, { id: "baseline", value: 4 });
+  assert.equal((blocked.mark as { baseline: number }).baseline, 4);
+  applySpikeAction(blocked, { id: "tooltip", value: "off" });
+  assert.equal(blocked.tooltip, false);
+  applySpikeAction(blocked, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in blocked, false);
+  assert.equal((blocked.mark as { baseline: number }).baseline, 4);
+  assert.deepEqual(withPreviewSize(spikeExamples[0]!.spec).size, { width: 680, height: 220 });
+
+  const ridge = structuredClone(spikeExamples[1]!.spec);
+  const original = structuredClone(ridge.tooltip);
+  assert.equal(spikeControlState(ridge).baseline, 0);
+  assert.equal(spikeControlState(ridge).tooltip, "on");
+  assert.deepEqual(withPreviewSize(ridge).size, { width: 640, height: 280 });
+  const opened = openTeachExample(ridge);
+  assert.deepEqual(opened.tooltip, ridge.tooltip);
+  assert.notEqual(opened.tooltip, ridge.tooltip);
+  applySpikeAction(ridge, { id: "tooltip", value: "off" });
+  assert.equal(ridge.tooltip, false);
+  applySpikeAction(ridge, { id: "tooltip", value: "on", restore: original });
+  assert.deepEqual(ridge.tooltip, original);
+  assert.equal((ridge.size as { height: number }).height, 280);
+  assert.equal(((ridge.axes as { x: { title: string } }).x).title, "Hour");
+
+  assert.deepEqual(
+    spikeExamples.map((example) => example.title),
+    ["Blocked requests", "Ridge, as spikes"],
+  );
+  assert.deepEqual(
+    spikeExamples.map((example) => example.meta),
+    ["6 buckets", "16 hours"],
+  );
+  for (const example of spikeExamples) {
+    assert.equal(example.spec.type, "spike");
+    assertCompactPaint("spike", example.spec, example.id);
+  }
+});
+
+test("bar list actions edit the track and the tooltip", () => {
+  assert.equal(smallestBarListSpec.type, "bar-list");
+  assert.equal(smallestBarListSpec.mark, undefined);
+  assert.equal(barListControlState(smallestBarListSpec).track, "bar");
+  assert.equal(barListControlState(smallestBarListSpec).tooltip, "on");
+  assertCompactPaint("bar-list", smallestBarListSpec, "smallest bar list");
+
+  const pages = structuredClone(barListExamples[0]!.spec);
+  assert.equal(barListControlState(pages).track, "bar");
+  assert.equal(barListControlState(pages).tooltip, "on");
+  const untouched = structuredClone(pages);
+  barListControlState(pages);
+  assert.deepEqual(pages, untouched);
+  applyBarListAction(pages, { id: "track", value: "row", restore: barListExamples[0]!.spec });
+  assert.equal((pages.mark as { track: string }).track, "row");
+  applyBarListAction(pages, { id: "track", value: "bar", restore: barListExamples[0]!.spec });
+  assert.equal(pages.mark, undefined);
+  const original = structuredClone(barListExamples[0]!.spec.tooltip);
+  const opened = openTeachExample(structuredClone(barListExamples[0]!.spec));
+  assert.deepEqual(opened.tooltip, barListExamples[0]!.spec.tooltip);
+  assert.notEqual(opened.tooltip, barListExamples[0]!.spec.tooltip);
+  applyBarListAction(pages, { id: "tooltip", value: "off" });
+  assert.equal(pages.tooltip, false);
+  applyBarListAction(pages, { id: "tooltip", value: "on", restore: original });
+  assert.deepEqual(pages.tooltip, original);
+  assert.deepEqual(withPreviewSize(barListExamples[0]!.spec).size, { width: 480, minHeight: 160 });
+
+  const payments = structuredClone(barListExamples[1]!.spec);
+  assert.equal(barListControlState(payments).track, "row");
+  assert.equal(payments.tooltip, undefined);
+  applyBarListAction(payments, { id: "track", value: "bar", restore: barListExamples[1]!.spec });
+  assert.equal((payments.mark as { track: string }).track, "bar");
+  applyBarListAction(payments, { id: "track", value: "row", restore: barListExamples[1]!.spec });
+  assert.equal((payments.mark as { track: string }).track, "row");
+  applyBarListAction(payments, { id: "tooltip", value: "off" });
+  assert.equal(payments.tooltip, false);
+  applyBarListAction(payments, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in payments, false);
+  assert.deepEqual(withPreviewSize(barListExamples[1]!.spec).size, { width: 640, height: 360 });
+
+  const services = structuredClone(barListExamples[2]!.spec);
+  assert.equal(services.tooltip, false);
+  assert.equal(barListControlState(services).tooltip, "off");
+  assert.equal(barListControlState(services).track, "bar");
+  applyBarListAction(services, { id: "tooltip", value: "on", restore: false });
+  assert.equal(services.tooltip, true);
+
+  assert.deepEqual(
+    barListExamples.map((example) => example.title),
+    ["Top pages", "Payments by method", "Top services"],
+  );
+  assert.deepEqual(
+    barListExamples.map((example) => example.meta),
+    ["5 pages", "12 methods", "4 services"],
+  );
+  for (const example of barListExamples) {
+    assert.equal(example.spec.type, "bar-list");
+    assertCompactPaint("bar-list", example.spec, example.id);
+  }
 });

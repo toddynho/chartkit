@@ -1,4 +1,5 @@
 import { areaRangeTeach } from "./area-range.ts";
+import { barListTeach } from "./bar-list.ts";
 import { barRangeTeach } from "./bar-range.ts";
 import { barTeach } from "./bar.ts";
 import { comboTeach } from "./combo.ts";
@@ -8,12 +9,15 @@ import { funnelTeach } from "./funnel.ts";
 import { ganttTeach } from "./gantt.ts";
 import { journeyTeach } from "./journey.ts";
 import { lineTeach } from "./line.ts";
+import { miniAreaTeach } from "./mini-area.ts";
 import { pieTeach } from "./pie.ts";
 import { quadrantTeach } from "./quadrant.ts";
 import { radialBarTeach } from "./radial-bar.ts";
 import { roseTeach } from "./rose.ts";
 import { sankeyTeach } from "./sankey.ts";
 import { scatterTeach } from "./scatter.ts";
+import { sparklineTeach } from "./sparkline.ts";
+import { spikeTeach } from "./spike.ts";
 import { stackedAreaTeach } from "./stacked-area.ts";
 import { streamgraphTeach } from "./streamgraph.ts";
 import { sunburstTeach } from "./sunburst.ts";
@@ -54,6 +58,10 @@ export const teachModules: Record<string, TeachModule> = {
   "area-range": areaRangeTeach,
   "bar-range": barRangeTeach,
   errorbar: errorbarTeach,
+  sparkline: sparklineTeach,
+  "mini-area": miniAreaTeach,
+  spike: spikeTeach,
+  "bar-list": barListTeach,
 };
 
 export function teachModule(type: string): TeachModule | undefined {

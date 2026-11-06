@@ -1,6 +1,7 @@
 ---
 import AreaRangeGuide from "../../../components/AreaRangeGuide.astro";
 import BarGuide from "../../../components/BarGuide.astro";
+import BarListGuide from "../../../components/BarListGuide.astro";
 import BarRangeGuide from "../../../components/BarRangeGuide.astro";
 import ChartDoc from "../../../components/ChartDoc.astro";
 import ComboGuide from "../../../components/ComboGuide.astro";
@@ -10,6 +11,7 @@ import FunnelGuide from "../../../components/FunnelGuide.astro";
 import GanttGuide from "../../../components/GanttGuide.astro";
 import JourneyGuide from "../../../components/JourneyGuide.astro";
 import LineGuide from "../../../components/LineGuide.astro";
+import MiniAreaGuide from "../../../components/MiniAreaGuide.astro";
 import PieGuide from "../../../components/PieGuide.astro";
 import QuadrantGuide from "../../../components/QuadrantGuide.astro";
 import RadialBarGuide from "../../../components/RadialBarGuide.astro";
@@ -17,6 +19,8 @@ import ResponseRail from "../../../components/ResponseRail.astro";
 import RoseGuide from "../../../components/RoseGuide.astro";
 import SankeyGuide from "../../../components/SankeyGuide.astro";
 import ScatterGuide from "../../../components/ScatterGuide.astro";
+import SparklineGuide from "../../../components/SparklineGuide.astro";
+import SpikeGuide from "../../../components/SpikeGuide.astro";
 import StackedAreaGuide from "../../../components/StackedAreaGuide.astro";
 import StreamgraphGuide from "../../../components/StreamgraphGuide.astro";
 import SunburstGuide from "../../../components/SunburstGuide.astro";
@@ -55,6 +59,10 @@ const guided = new Set([
   "area-range",
   "bar-range",
   "errorbar",
+  "sparkline",
+  "mini-area",
+  "spike",
+  "bar-list",
 ]);
 for (const key of Object.keys(teachModules)) {
   if (!guided.has(key)) throw new Error(`Add a guide for the ${key} teach module in this page.`);
@@ -111,6 +119,10 @@ const lede = geo?.lede ?? chart.lede;
       {module.type === "area-range" ? <AreaRangeGuide /> : null}
       {module.type === "bar-range" ? <BarRangeGuide /> : null}
       {module.type === "errorbar" ? <ErrorbarGuide /> : null}
+      {module.type === "sparkline" ? <SparklineGuide /> : null}
+      {module.type === "mini-area" ? <MiniAreaGuide /> : null}
+      {module.type === "spike" ? <SpikeGuide /> : null}
+      {module.type === "bar-list" ? <BarListGuide /> : null}
     </TeachChart>
   ) : (
     <Docs title={title} description={lede} lede={lede} href={href}>
