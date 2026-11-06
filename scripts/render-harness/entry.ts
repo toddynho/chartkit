@@ -2,7 +2,11 @@
 export { render } from "../../packages/core/src/extra.ts";
 export { renderBarList } from "../../packages/core/src/charts/bar-list.ts";
 export { render as renderGeo } from "../../packages/geo/src/render.ts";
+export { validate } from "../../packages/core/src/validate.ts";
+export { validatePhase4 } from "../../packages/core/src/validate-phase4.ts";
+export { validate as validateGeo } from "../../packages/geo/src/validate.ts";
 export { optionCatalog, optionBlocked, optionsForType, readOption, writeOption } from "../../packages/core/src/option-catalog.ts";
 export { examples as galleryExamples } from "../../catalog/lib/specs.ts";
 export { worldSpec, usSpec, citySpec } from "../../catalog/lib/geo-samples.ts";
 export { forRaster } from "../../apps/cloud/src/png.ts";
+export { TYPE_FAMILIES, firstSpec, switchChartType } from "../../apps/web/src/data/type-switch.ts";
