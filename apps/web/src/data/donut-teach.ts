@@ -143,6 +143,7 @@ export type DonutAction =
   | { type: "padAngle"; value: number }
   | { type: "labels"; value: "off" | "inside" | "outside" }
   | { type: "legend"; value: "off" | "bottom" | "right" }
+  | { type: "tooltip"; value: "off" | "on"; restore?: unknown }
   | { type: "palette"; value: "theme" | "set" }
   | { type: "sort"; value: "none" | "asc" | "desc" }
   | { type: "startAngle"; value: number };
@@ -152,6 +153,7 @@ export type DonutControlState = {
   padAngle: number;
   labels: "off" | "inside" | "outside";
   legend: "off" | "bottom" | "right" | "other";
+  tooltip: "off" | "on";
   palette: "theme" | "set" | "other";
   sort: "none" | "asc" | "desc";
   startAngle: number | "other";
@@ -194,6 +196,27 @@ export function applyDonutAction(spec: Record<string, unknown>, action: DonutAct
     });
     return;
   }
+  if (action.type === "tooltip") {
+    if (action.value === "off") {
+      spec.tooltip = false;
+      return;
+    }
+    const restore = action.restore;
+    if (isRecord(restore) && restore.show !== false) {
+      spec.tooltip = structuredClone(restore);
+      return;
+    }
+    if (restore === true) {
+      spec.tooltip = true;
+      return;
+    }
+    if (restore === false) {
+      spec.tooltip = true;
+      return;
+    }
+    delete spec.tooltip;
+    return;
+  }
   if (action.type === "palette") {
     editMark(spec, (mark) => {
       if (action.value === "theme") delete mark.palette;
@@ -231,6 +254,9 @@ export function donutControlState(spec: Record<string, unknown>): DonutControlSt
   if (position === "inside" || position === "center") labels = "inside";
   else if (position !== "" || mark.labels === true || mark.labelFormat !== undefined) labels = "outside";
 
+  const tip = spec.tooltip;
+  const tooltipMode: DonutControlState["tooltip"] = tip === false || (isRecord(tip) && tip.show === false) ? "off" : "on";
+
   const legend = spec.legend;
   let legendMode: DonutControlState["legend"] = "bottom";
   if (legend === false) legendMode = "off";
@@ -257,6 +283,7 @@ export function donutControlState(spec: Record<string, unknown>): DonutControlSt
     padAngle: typeof mark.padAngle === "number" ? mark.padAngle : 2,
     labels,
     legend: legendMode,
+    tooltip: tooltipMode,
     palette: paletteMode,
     sort,
     startAngle,

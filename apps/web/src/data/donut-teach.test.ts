@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { DONUT_PALETTE, donutExamples, playgroundHref, smallestDonutSpec } from "./donut-teach.ts";
+import { DONUT_PALETTE, applyDonutAction, donutControlState, donutExamples, playgroundHref, smallestDonutSpec } from "./donut-teach.ts";
 
 function rows(spec: Record<string, unknown>): Record<string, unknown>[] {
   assert.ok(Array.isArray(spec.data));
@@ -42,6 +42,25 @@ test("curated donut examples keep a hole and the original category names", () =>
   assert.deepEqual(labels(donutExamples[2].spec, "kind"), ["Fern", "Ivy", "Sage", "Rue"]);
   assert.deepEqual(labels(donutExamples[3].spec, "kind"), ["Classic", "E-bike"]);
   assert.deepEqual((donutExamples[2].spec.mark as { palette: string[] }).palette, [...DONUT_PALETTE]);
+});
+
+test("tooltip off writes false and on puts a custom tooltip back", () => {
+  const fleet = structuredClone(donutExamples[3].spec);
+  const original = structuredClone(fleet.tooltip);
+  assert.equal(donutControlState(fleet).tooltip, "on");
+  applyDonutAction(fleet, { type: "tooltip", value: "off" });
+  assert.equal(fleet.tooltip, false);
+  assert.equal(donutControlState(fleet).tooltip, "off");
+  applyDonutAction(fleet, { type: "tooltip", value: "on", restore: original });
+  assert.deepEqual(fleet.tooltip, original);
+
+  const sessions = structuredClone(donutExamples[0].spec);
+  assert.equal(sessions.tooltip, undefined);
+  assert.equal(donutControlState(sessions).tooltip, "on");
+  applyDonutAction(sessions, { type: "tooltip", value: "off" });
+  assert.equal(sessions.tooltip, false);
+  applyDonutAction(sessions, { type: "tooltip", value: "on", restore: undefined });
+  assert.equal(sessions.tooltip, undefined);
 });
 
 test("the smallest donut spec is type donut with the core example labels", () => {

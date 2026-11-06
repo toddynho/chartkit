@@ -148,6 +148,13 @@ function on(current: string, value: string): boolean {
       </div>
     </div>
     <div class="chart-demo__control">
+      <div class="chart-demo__label"><span>Tooltip</span><code>tooltip</code></div>
+      <div class="chart-demo__choices" role="group" aria-label="tooltip">
+        <button type="button" class:list={["chart-demo__choice", on(state.tooltip, "off") && "is-on"]} data-choice="tooltip" data-value="off" aria-pressed={on(state.tooltip, "off") ? "true" : "false"}>Off</button>
+        <button type="button" class:list={["chart-demo__choice", on(state.tooltip, "on") && "is-on"]} data-choice="tooltip" data-value="on" aria-pressed={on(state.tooltip, "on") ? "true" : "false"}>On</button>
+      </div>
+    </div>
+    <div class="chart-demo__control">
       <div class="chart-demo__label"><span>Colours</span><code>mark.palette</code></div>
       <div class="chart-demo__choices" role="group" aria-label="mark.palette">
         <button type="button" class:list={["chart-demo__choice", on(state.palette, "theme") && "is-on"]} data-choice="palette" data-value="theme" aria-pressed={on(state.palette, "theme") ? "true" : "false"}>Theme</button>

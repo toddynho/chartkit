@@ -1,3 +1,4 @@
+import { attach, type Controller } from "@chartkitdev/core/interact";
 import { paintSpec } from "../lib/chartkit";
 import { withPreviewSize } from "../data/preview-size";
 import {
@@ -48,6 +49,7 @@ export function mountChartDemo(): void {
   const options = buttons(root, "[data-example-id]");
   const labelButtons = buttons(root, '[data-choice="labels"]');
   const legendButtons = buttons(root, '[data-choice="legend"]');
+  const tooltipButtons = buttons(root, '[data-choice="tooltip"]');
   const paletteButtons = buttons(root, '[data-choice="palette"]');
   const sortButtons = buttons(root, '[data-choice="sort"]');
   const startButtons = buttons(root, '[data-choice="startAngle"]');
@@ -57,6 +59,7 @@ export function mountChartDemo(): void {
   let index = Math.max(0, donutExamples.findIndex((example) => example.id === root.dataset.example));
   let cursor = index;
   let menuOpen = false;
+  let tip: Controller | null = null;
   let current = structuredClone(donutExamples[index]!.spec);
 
   function exampleFromUrl(): number {
@@ -140,10 +143,17 @@ export function mountChartDemo(): void {
   function draw(fade = false): void {
     const painted = paintSpec(withPreviewSize(current));
     const commit = () => {
+      tip?.destroy();
+      tip = null;
       chart!.innerHTML = painted.svg;
       if (error) {
         error.hidden = painted.ok;
         error.textContent = painted.ok ? "" : painted.issues.map((issue) => `${issue.code}: ${issue.message}`).join(" ");
+      }
+      if (chart!.querySelector("svg")) {
+        tip = attach(chart!, withPreviewSize(current) as never, {
+          render: (value) => paintSpec(withPreviewSize(value as Record<string, unknown>)).svg,
+        });
       }
     };
     if (fade) {
@@ -167,6 +177,7 @@ export function mountChartDemo(): void {
     if (gapOut) gapOut.textContent = formatDonutNumber(state.padAngle);
     setPressed(labelButtons, state.labels);
     setPressed(legendButtons, state.legend);
+    setPressed(tooltipButtons, state.tooltip);
     setPressed(paletteButtons, state.palette);
     setPressed(sortButtons, state.sort);
     setPressed(startButtons, String(state.startAngle));
@@ -191,13 +202,16 @@ export function mountChartDemo(): void {
     draw();
   });
 
-  for (const button of [...labelButtons, ...legendButtons, ...paletteButtons, ...sortButtons, ...startButtons]) {
+  for (const button of [...labelButtons, ...legendButtons, ...tooltipButtons, ...paletteButtons, ...sortButtons, ...startButtons]) {
     button.addEventListener("click", () => {
       const choice = button.dataset.choice;
       const value = button.dataset.value;
       if (!choice || value == null) return;
       if (choice === "labels" && (value === "off" || value === "inside" || value === "outside")) apply({ type: "labels", value });
       else if (choice === "legend" && (value === "off" || value === "bottom" || value === "right")) apply({ type: "legend", value });
+      else if (choice === "tooltip" && (value === "off" || value === "on")) {
+        apply({ type: "tooltip", value, restore: donutExamples[index]?.spec.tooltip });
+      }
       else if (choice === "palette" && (value === "theme" || value === "set")) apply({ type: "palette", value });
       else if (choice === "sort" && (value === "none" || value === "asc" || value === "desc")) apply({ type: "sort", value });
       else if (choice === "startAngle") apply({ type: "startAngle", value: Number(value) });
@@ -267,7 +281,10 @@ export function mountChartDemo(): void {
 
   const linked = exampleFromUrl();
   if (linked >= 0 && linked !== index) showExample(linked, false);
-  else setSteps();
+  else {
+    setSteps();
+    draw();
+  }
 
   const copy = root.querySelector<HTMLButtonElement>("[data-demo-copy]");
   copy?.addEventListener("click", async () => {

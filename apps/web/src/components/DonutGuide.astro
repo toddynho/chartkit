@@ -31,6 +31,12 @@ const sort = `{
 const start = `{
   "mark": { "startAngle": 90 }
 }`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
 const titled = `{
   "encoding": {
     "x": "label",
@@ -188,6 +194,24 @@ const titled = `{
     <figcaption><span>mark.startAngle</span></figcaption>
     <pre><code>{start}</code></pre>
   </figure>
+</section>
+
+<section class="concept" id="tooltip">
+  <h2>Tooltip</h2>
+  <p>
+    <code>tooltip</code> is on for a donut when the key is omitted. Hovering a slice shows its name and its value. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Set those in the playground.
+  </p>
 </section>
 
 <section id="more">
