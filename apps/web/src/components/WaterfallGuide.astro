@@ -1,0 +1,138 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestWaterfallSpec } from "../data/teach/waterfall";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/waterfall";
+const spec = specText(smallestWaterfallSpec);
+const play = playgroundHref(smallestWaterfallSpec);
+const total = `{
+  "mark": { "total": "total" }
+}`;
+const labels = `{
+  "mark": { "labels": false }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A waterfall shows how a total changes. Each step is a gain or a loss, floating on the running total. A total row is a bar from zero. A connector joins one step to the next.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a waterfall when the question is what added and what subtracted between two totals. Year to date opens at 120, adds won and expand, subtracts lost, and closes at 160. ARR bridge is the same reading for a recurring total. One voyage, step by step opens a voyage, adds crane and berth, subtracts cloth, and closes.
+  </p>
+  <p>
+    A <a href="/docs/charts/bar">bar</a> compares independent amounts. The bars do not float, and a later bar is not a change from the previous one. A <a href="/docs/charts/funnel">funnel</a> is a size at each stage. It does not draw a gain, and it has no total row.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Waterfall, bar, and funnel</h2>
+  <p>
+    All three can show a number for each name. The encoding is what changes.
+  </p>
+  <p>
+    <code>type: "waterfall"</code> adds each amount to a running total. A positive step rises. A negative step falls. A total row replaces the running total.
+  </p>
+  <p>
+    <code>type: "bar"</code> draws each amount from the baseline. <code>mark.orientation</code> can turn those bars horizontal. That key does not apply to a waterfall.
+  </p>
+  <p>
+    <code>type: "funnel"</code> keeps data order and sets the width from the value. There is no signed step and no connector.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one step. Point <code>encoding.x</code> at the name and <code>encoding.y</code> at the amount. A positive amount is a gain. A negative amount is a loss. The running total starts at zero and adds each delta. Year to date uses <code>step</code> and <code>amount</code>. ARR bridge uses <code>step</code> and <code>delta</code>.
+  </p>
+  <p>
+    A total row is not a delta. Put <code>true</code> in the total field and the bar runs from zero to that amount. The running total then becomes that amount. The field name defaults to <code>total</code>. Year to date and ARR bridge set <code>mark.total</code> to <code>total</code>. If the flag lives in another column, set <code>mark.total</code> to that column's name.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.total</span></figcaption>
+    <pre><code>{total}</code></pre>
+  </figure>
+  <p>
+    A missing number is skipped. <code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.
+  </p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest waterfall. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Open, one gain, close. The total flag uses the default field name, and the amounts are labeled, so <code>mark</code> can be omitted.
+  </p>
+  <TeachFacts type="waterfall" label="Waterfall packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing waterfall specs. Year to date is the core example. ARR bridge is the homepage chart, in millions. One voyage, step by step formats the amount as pounds and names the tooltip.
+  </p>
+</section>
+
+<TeachConcept id="labels" title="Labels">
+  <p>
+    The step name is on the axis. <code>mark.labels</code> draws the number above the bar. Omit the key, or set true, and a delta shows the change. A total shows the level it lands on. <code>false</code> hides the number. The axis name stays.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.labels</span></figcaption>
+    <pre><code>{labels}</code></pre>
+  </figure>
+  <p>
+    <code>mark.labelFormat</code> formats that number. Change it in the playground. Turning labels off and on again puts the example's format back. An example that omitted <code>mark.labels</code> gets the key removed, so the default stays on.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a waterfall when the key is omitted. Hovering a bar shows the step and its amount. A total is labeled as a total. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. One voyage, step by step sets a top card with the amount in pounds. Change those in the playground. Turning the card off and on again puts that object back.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    Connectors are always drawn, as a dashed line from the end of one step to the start of the next. <code>mark.gap</code> is the space between bars, as a fraction of the band. The colors come from the theme: positive for a gain, negative for a loss, and accent for a total. There is no legend. Those colors are not a series. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/bar">Bar</a> compares categories from a shared baseline. The bars do not float.</li>
+    <li><a href="/docs/charts/funnel">Funnel</a> is a size at each stage. It has no signed step and no total row.</li>
+    <li><a href="/docs/charts/line">Line</a> can plot a running total. It does not separate the gains from the losses.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

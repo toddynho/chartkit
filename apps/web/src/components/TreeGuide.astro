@@ -1,0 +1,160 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestTreeSpec } from "../data/teach/tree";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/tree";
+const spec = specText(smallestTreeSpec);
+const play = playgroundHref(smallestTreeSpec);
+const layout = `{
+  "mark": { "tree": "cluster" }
+}`;
+const orient = `{
+  "mark": { "orient": "TB" }
+}`;
+const link = `{
+  "mark": { "link": "step" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A tree draws one hierarchy as nodes and links. Each node is a dot with its name. A link joins a node to its parent. The layout is a tree, not a nested area and not a ring.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a tree when the question is who connects to whom, and each node has one parent. Support org is that chart: Support splits into Inbox, Docs, and Billing, and each of those has its own work. Produce is the same kind of data drawn so the leaves line up.
+  </p>
+  <p>
+    A <a href="/docs/charts/treemap">treemap</a> turns the same hierarchy into tiles. The area is the value. A <a href="/docs/charts/sunburst">sunburst</a> turns it into rings. A <a href="/docs/charts/sankey">sankey</a> is a weighted flow, and a node there can have several parents. This chart rejects a second parent. Boxes and photos are not drawn. The marks are dots and links.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Tree, treemap, and sunburst</h2>
+  <p>
+    All three read a hierarchy. Nested <code>children</code>, <code>encoding.path</code>, or <code>encoding.id</code> with <code>encoding.parent</code>.
+  </p>
+  <p>
+    <code>type: "tree"</code> places a dot for each node and a link to its parent. The gaps are the layout, not the value. <code>mark.tree</code> set to <code>cluster</code> lines the leaves up. That is the dendrogram.
+  </p>
+  <p>
+    <code>type: "treemap"</code> packs the tree into rectangles. <code>type: "sunburst"</code> gives each level a ring. Color on those charts follows the top branch. A tree colors the dots by that branch too, and the name is written beside the dot.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    The short form is id and parent. Point <code>encoding.id</code> at the node and <code>encoding.parent</code> at its parent. An empty parent is the root. Support org and Produce use that. Nested <code>children</code> on the row is the same shape a treemap uses. <code>encoding.path</code> is a flat path. It is legal here.
+  </p>
+  <p>
+    One root. Two roots are an error. Add a parent row that both roots point at. The chart does not invent that row. A cycle and a missing parent are errors too.
+  </p>
+  <p>
+    <code>encoding.y</code> is optional. When it is set, the number is part of the node's label, not a length. The layout does not size the gaps from the value. <code>a11y.alt</code> is required. One sentence, 10 to 500 characters. Name the root and the split that matters.
+  </p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest tree. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. One root, two children, one grandchild. The layout is tidy, the root is on the left, and the links are curves, so <code>mark</code> can be omitted.
+  </p>
+  <TeachFacts type="tree" label="Tree packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches between two published trees. Support org is tidy, root on the left. Produce sets <code>cluster</code> and puts the root on top, so the leaves share one line. The gallery calls that second chart Leaves line up.
+  </p>
+</section>
+
+<TeachConcept id="layout" title="Layout">
+  <p>
+    <code>mark.tree</code> is the algorithm. Omit it, or set <code>tidy</code>, and each leaf gets a slot. Branches share the gaps. That is the chart for an org or a topic tree. Support org uses it.
+  </p>
+  <p>
+    <code>cluster</code> pushes every leaf out to the same depth. The leaves line up. That is the dendrogram, and it is the chart for a clustering. Produce sets it. The type stays <code>tree</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.tree</span></figcaption>
+    <pre><code>{layout}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="orient" title="Direction">
+  <p>
+    <code>mark.orient</code> places the root. <code>LR</code> is the default: root on the left, children to the right. <code>RL</code> puts the root on the right. <code>TB</code> puts it on top, which is the direction an org chart usually wants. <code>BT</code> puts it on the bottom. Produce sets <code>TB</code>.
+  </p>
+  <p>
+    This is not <code>mark.orientation</code>. That key is horizontal or vertical on a bar. On a tree it warns, and repair maps horizontal to <code>LR</code> and vertical to <code>TB</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.orient</span></figcaption>
+    <pre><code>{orient}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="link" title="Links">
+  <p>
+    <code>mark.link</code> is the shape of the parent line. Omit it, or set <code>curve</code>, and the link bends. <code>step</code> is a right angle, which reads more like an org chart. It still draws a dot. It does not draw a box.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.link</span></figcaption>
+    <pre><code>{link}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a tree when the key is omitted. Hovering a node shows its name, its parent, and its depth. When <code>encoding.y</code> is set, the value is in that label too. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Change those in the playground. Turning the card off and on again puts that object back. An example that omitted <code>tooltip</code> gets the key removed, so the default stays on.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.radial</code> puts the root at the center and uses depth as the radius. It stays off until you set true. Labels collide once the leaves get numerous, so it is a playground choice, not the first tree. <code>mark.depth</code> caps how many levels are drawn. Omit it and the chart draws them, up to the default. <code>mark.colorBy</code> can color dots by depth instead of by the top branch.
+  </p>
+  <p>
+    A plain tree has no legend. A legend appears when <code>encoding.color</code> names a field, or when color is by depth. <code>mark.collapsed</code> hides the children of the ids you list. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/treemap">Treemap</a> draws the hierarchy as area. The tile size is the value.</li>
+    <li><a href="/docs/charts/sunburst">Sunburst</a> draws the same hierarchy as rings.</li>
+    <li><a href="/docs/charts/sankey">Sankey</a> is a weighted flow. A node can have more than one parent.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />
