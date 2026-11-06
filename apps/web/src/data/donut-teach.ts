@@ -15,7 +15,10 @@ export const DONUT_PALETTE = ["#0f6e56", "#c45c26", "#1d4e89", "#5b4b8a"] as con
 export type DonutExample = {
   id: string;
   title: string;
+  /** One line under the title. */
   blurb: string;
+  /** Short fact in the example menu. Slice count when that is obvious. */
+  meta: string;
   spec: Record<string, unknown>;
 };
 
@@ -43,6 +46,7 @@ export const donutExamples: DonutExample[] = [
     id: "sessions",
     title: "Sessions by source",
     blurb: "Four slices and a center total.",
+    meta: "4 slices",
     spec: {
       version: "1",
       id: "traffic-donut",
@@ -64,6 +68,7 @@ export const donutExamples: DonutExample[] = [
     id: "sources",
     title: "Eight session sources",
     blurb: "Search is the largest of eight session sources. Other is the smallest slice.",
+    meta: "8 slices",
     spec: {
       version: "1",
       type: "donut",
@@ -88,6 +93,7 @@ export const donutExamples: DonutExample[] = [
     id: "yard",
     title: "What left the yard",
     blurb: "Fern is the largest share of trays that left the yard, then ivy, sage, and rue.",
+    meta: "4 slices",
     spec: {
       version: "1",
       id: "low-fern-mix",
@@ -111,6 +117,7 @@ export const donutExamples: DonutExample[] = [
     id: "fleet",
     title: "Fleet",
     blurb: "Slice labels and legend values.",
+    meta: "2 slices",
     spec: {
       version: "1",
       id: "bike-fleet",

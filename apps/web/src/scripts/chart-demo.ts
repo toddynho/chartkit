@@ -38,7 +38,14 @@ export function mountChartDemo(): void {
   const gap = root.querySelector<HTMLInputElement>('[data-range="padAngle"]');
   const holeOut = root.querySelector<HTMLElement>('[data-range-out="innerRadius"]');
   const gapOut = root.querySelector<HTMLElement>('[data-range-out="padAngle"]');
-  const exampleButtons = buttons(root, "[data-example-id]");
+  const switcher = root.querySelector<HTMLElement>("[data-ex-switch]");
+  const titleButton = root.querySelector<HTMLButtonElement>("[data-ex-title]");
+  const nameEl = root.querySelector<HTMLElement>("[data-ex-name]");
+  const countEl = root.querySelector<HTMLElement>("[data-ex-count]");
+  const menu = root.querySelector<HTMLElement>("#ex-switch-list");
+  const prev = root.querySelector<HTMLButtonElement>("[data-ex-prev]");
+  const next = root.querySelector<HTMLButtonElement>("[data-ex-next]");
+  const options = buttons(root, "[data-example-id]");
   const labelButtons = buttons(root, '[data-choice="labels"]');
   const legendButtons = buttons(root, '[data-choice="legend"]');
   const paletteButtons = buttons(root, '[data-choice="palette"]');
@@ -47,15 +54,106 @@ export function mountChartDemo(): void {
   if (!chart || !snippet || !play || !hole || !gap) return;
 
   const byId = new Map(donutExamples.map((example) => [example.id, example]));
-  const first = byId.get(root.dataset.example ?? "") ?? donutExamples[0];
-  let current = structuredClone(first.spec);
+  let index = Math.max(0, donutExamples.findIndex((example) => example.id === root.dataset.example));
+  let cursor = index;
+  let menuOpen = false;
+  let current = structuredClone(donutExamples[index]!.spec);
 
-  function draw(): void {
+  function exampleFromUrl(): number {
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get("example");
+    if (query && byId.has(query)) return donutExamples.findIndex((example) => example.id === query);
+    const hash = window.location.hash.replace(/^#/, "");
+    const hashed = hash.startsWith("example=") ? hash.slice("example=".length) : hash;
+    if (hashed && byId.has(hashed)) return donutExamples.findIndex((example) => example.id === hashed);
+    return -1;
+  }
+
+  function remember(id: string): void {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("example") === id) return;
+    url.searchParams.set("example", id);
+    const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+    history.replaceState(null, "", nextUrl);
+  }
+
+  function paintMenu(): void {
+    const currentId = donutExamples[index]?.id;
+    for (const option of options) {
+      const on = option.dataset.exampleId === currentId;
+      const hot = options[cursor] === option;
+      option.setAttribute("aria-selected", on ? "true" : "false");
+      option.classList.toggle("is-active", hot);
+    }
+    const hotId = options[cursor]?.id;
+    if (menu && hotId) menu.setAttribute("aria-activedescendant", hotId);
+  }
+
+  function setSteps(): void {
+    const atStart = index <= 0;
+    const atEnd = index >= donutExamples.length - 1;
+    if (prev) prev.setAttribute("aria-disabled", atStart ? "true" : "false");
+    if (next) next.setAttribute("aria-disabled", atEnd ? "true" : "false");
+    if (countEl) countEl.textContent = `${index + 1} / ${donutExamples.length}`;
+    const example = donutExamples[index];
+    if (nameEl && example) nameEl.textContent = example.title;
+    if (blurb && example) blurb.textContent = example.blurb;
+    if (example) root.dataset.example = example.id;
+    paintMenu();
+  }
+
+  function openMenu(): void {
+    if (!menu || !titleButton) return;
+    cursor = index;
+    menuOpen = true;
+    menu.hidden = false;
+    titleButton.setAttribute("aria-expanded", "true");
+    paintMenu();
+  }
+
+  function closeMenu(focusTitle = false): void {
+    if (!menu || !titleButton) return;
+    menuOpen = false;
+    menu.hidden = true;
+    titleButton.setAttribute("aria-expanded", "false");
+    if (focusTitle) titleButton.focus();
+  }
+
+  function showExample(nextIndex: number, updateUrl: boolean, focusTitle = false): void {
+    if (nextIndex < 0 || nextIndex >= donutExamples.length) return;
+    if (nextIndex === index) {
+      closeMenu(focusTitle);
+      return;
+    }
+    const example = donutExamples[nextIndex];
+    if (!example) return;
+    index = nextIndex;
+    cursor = nextIndex;
+    current = structuredClone(example.spec);
+    setSteps();
+    sync();
+    draw(true);
+    if (updateUrl) remember(example.id);
+    closeMenu(focusTitle);
+  }
+
+  function draw(fade = false): void {
     const painted = paintSpec(withPreviewSize(current));
-    chart!.innerHTML = painted.svg;
-    if (error) {
-      error.hidden = painted.ok;
-      error.textContent = painted.ok ? "" : painted.issues.map((issue) => `${issue.code}: ${issue.message}`).join(" ");
+    const commit = () => {
+      chart!.innerHTML = painted.svg;
+      if (error) {
+        error.hidden = painted.ok;
+        error.textContent = painted.ok ? "" : painted.issues.map((issue) => `${issue.code}: ${issue.message}`).join(" ");
+      }
+    };
+    if (fade) {
+      chart!.classList.add("is-swap");
+      commit();
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => chart!.classList.remove("is-swap"));
+      });
+    } else {
+      commit();
     }
     snippet!.textContent = specText(current);
     play!.href = playgroundHref(current);
@@ -106,22 +204,70 @@ export function mountChartDemo(): void {
     });
   }
 
-  for (const button of exampleButtons) {
-    button.addEventListener("click", () => {
-      const example = byId.get(button.dataset.exampleId ?? "");
-      if (!example) return;
-      current = structuredClone(example.spec);
-      root.dataset.example = example.id;
-      if (blurb) blurb.textContent = example.blurb;
-      for (const peer of exampleButtons) {
-        const on = peer === button;
-        peer.classList.toggle("is-on", on);
-        peer.setAttribute("aria-pressed", on ? "true" : "false");
-      }
-      sync();
-      draw();
+  function step(delta: number): void {
+    showExample(index + delta, true);
+  }
+
+  function blocked(button: HTMLButtonElement | null): boolean {
+    return button?.getAttribute("aria-disabled") === "true";
+  }
+
+  prev?.addEventListener("click", () => {
+    if (blocked(prev)) return;
+    step(-1);
+  });
+  next?.addEventListener("click", () => {
+    if (blocked(next)) return;
+    step(1);
+  });
+  titleButton?.addEventListener("click", () => {
+    if (menuOpen) closeMenu(false);
+    else openMenu();
+  });
+  for (const option of options) {
+    option.addEventListener("mousedown", (event) => event.preventDefault());
+    option.addEventListener("click", () => {
+      const nextIndex = donutExamples.findIndex((example) => example.id === option.dataset.exampleId);
+      showExample(nextIndex, true, true);
     });
   }
+  switcher?.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      step(event.key === "ArrowLeft" ? -1 : 1);
+      return;
+    }
+    const inMenu = menu?.contains(event.target as Node) ?? false;
+    if (event.target !== titleButton && !inMenu) return;
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      if (!menuOpen) openMenu();
+      else {
+        cursor = event.key === "ArrowDown" ? Math.min(donutExamples.length - 1, cursor + 1) : Math.max(0, cursor - 1);
+        paintMenu();
+      }
+    } else if ((event.key === "Enter" || event.key === " ") && event.target === titleButton) {
+      event.preventDefault();
+      if (!menuOpen) openMenu();
+      else showExample(cursor, true, true);
+    } else if (event.key === "Escape" && menuOpen) {
+      event.preventDefault();
+      closeMenu(true);
+    }
+  });
+  titleButton?.addEventListener("blur", () => {
+    window.setTimeout(() => {
+      if (!switcher?.contains(document.activeElement)) closeMenu(false);
+    }, 0);
+  });
+  document.addEventListener("click", (event) => {
+    if (!menuOpen || switcher?.contains(event.target as Node)) return;
+    closeMenu(false);
+  });
+
+  const linked = exampleFromUrl();
+  if (linked >= 0 && linked !== index) showExample(linked, false);
+  else setSteps();
 
   const copy = root.querySelector<HTMLButtonElement>("[data-demo-copy]");
   copy?.addEventListener("click", async () => {

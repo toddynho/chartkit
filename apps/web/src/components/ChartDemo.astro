@@ -12,6 +12,7 @@ import {
 
 const initial = donutExamples[0];
 if (!initial) throw new Error("Donut demo has no example");
+const several = donutExamples.length > 1;
 
 for (const example of donutExamples) {
   const painted = paintSpec(withPreviewSize(example.spec));
@@ -52,21 +53,60 @@ function on(current: string, value: string): boolean {
       title="Drag to resize"
     ></div>
     <div class="docs-try chart-demo" id="docs-response" data-chart-demo data-example={initial.id}>
-  <div class="chart-demo__examples" role="group" aria-label="Donut examples">
+  <div class="ex-switch" data-ex-switch>
+    <div class="ex-switch__lead">
+      {
+        several ? (
+          <button
+            type="button"
+            class="ex-switch__title"
+            data-ex-title
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-controls="ex-switch-list"
+          >
+            <span class="ex-switch__name" data-ex-name>{initial.title}</span>
+            <span class="ex-switch__chevron" aria-hidden="true">▾</span>
+          </button>
+        ) : (
+          <div class="ex-switch__title ex-switch__title--plain">
+            <span class="ex-switch__name" data-ex-name>{initial.title}</span>
+          </div>
+        )
+      }
+      <p class="ex-switch__desc" data-demo-blurb>{initial.blurb}</p>
+      {
+        several ? (
+          <div class="ex-switch__menu" id="ex-switch-list" role="listbox" aria-label="Examples" hidden>
+            {
+              donutExamples.map((example) => (
+                <button
+                  type="button"
+                  class="ex-switch__option"
+                  role="option"
+                  id={`ex-opt-${example.id}`}
+                  data-example-id={example.id}
+                  aria-selected={example.id === initial.id ? "true" : "false"}
+                >
+                  <span class="ex-switch__option-name">{example.title}</span>
+                  <code>{example.meta}</code>
+                </button>
+              ))
+            }
+          </div>
+        ) : null
+      }
+    </div>
     {
-      donutExamples.map((example) => (
-        <button
-          type="button"
-          class:list={["chart-demo__example", example.id === initial.id && "is-on"]}
-          data-example-id={example.id}
-          aria-pressed={example.id === initial.id ? "true" : "false"}
-        >
-          {example.title}
-        </button>
-      ))
+      several ? (
+        <div class="ex-switch__steps">
+          <span class="ex-switch__count" data-ex-count>1 / {donutExamples.length}</span>
+          <button type="button" class="ex-switch__step" data-ex-prev aria-label="Previous example" aria-disabled="true">‹</button>
+          <button type="button" class="ex-switch__step" data-ex-next aria-label="Next example">›</button>
+        </div>
+      ) : null
     }
   </div>
-  <p class="chart-demo__blurb" data-demo-blurb>{initial.blurb}</p>
   <div class="chart-demo__chart" id="response-chart" data-demo-chart set:html={preview.svg}></div>
   <p class="chart-demo__error" data-demo-error hidden></p>
   <figure class="code">

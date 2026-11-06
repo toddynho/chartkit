@@ -29,6 +29,14 @@ test("curated donut examples keep a hole and the original category names", () =>
       assert.ok((mark.innerRadius as number) > 0);
     }
   }
+  assert.deepEqual(
+    donutExamples.map((example) => example.title),
+    ["Sessions by source", "Eight session sources", "What left the yard", "Fleet"],
+  );
+  assert.deepEqual(
+    donutExamples.map((example) => example.meta),
+    ["4 slices", "8 slices", "4 slices", "2 slices"],
+  );
   assert.deepEqual(labels(donutExamples[0].spec, "source"), ["Search", "Direct", "Social", "Email"]);
   assert.deepEqual(labels(donutExamples[1].spec, "label"), ["Search", "Direct", "Social", "Email", "Referral", "Affiliates", "Partners", "Other"]);
   assert.deepEqual(labels(donutExamples[2].spec, "kind"), ["Fern", "Ivy", "Sage", "Rue"]);
