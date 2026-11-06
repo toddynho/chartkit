@@ -16,9 +16,13 @@ const coreSource = {
   setup(build) {
     const src = join(repoRoot, "packages/core/src");
     build.onResolve({ filter: /^@chartkitdev\/core$/ }, () => ({ path: join(src, "index.ts") }));
+    const alias = {
+      options: "option-catalog.ts",
+      "validate/phase4": "validate-phase4.ts",
+    };
     build.onResolve({ filter: /^@chartkitdev\/core\// }, (args) => {
       const sub = args.path.slice("@chartkitdev/core/".length);
-      const file = sub.endsWith(".ts") ? sub : `${sub}.ts`;
+      const file = alias[sub] ?? (sub.endsWith(".ts") ? sub : `${sub}.ts`);
       return { path: join(src, file) };
     });
   },

@@ -10,7 +10,8 @@ import {
 } from "@chartkitdev/core/options";
 import type { ChartSpec } from "@chartkitdev/core";
 import { mount } from "@chartkitdev/vanilla";
-import { previewSize, readExplicitSize, stripPreviewSize, type PreviewPreset } from "../data/preview-size";
+import { previewSize, readExplicitSize, type PreviewPreset } from "../data/preview-size";
+import { switchChartType } from "../data/type-switch";
 import { menuPosition } from "./menu-place";
 import { optionEffect } from "../data/option-effect";
 import { chartType, drawChart } from "../lib/paint-chart";
@@ -932,15 +933,19 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
     try {
       const parsed = JSON.parse(text) as unknown;
       if (!isRecord(parsed)) throw new Error("Spec must be an object");
-      const typeChanged = chartType(parsed) !== chartType(state.spec);
-      if (typeChanged && !sizeEdited(parsed)) {
-        stripPreviewSize(parsed);
-        text = pretty(parsed);
-        const area = root.querySelector<HTMLTextAreaElement>(".play-specbox textarea");
-        if (area) area.value = text;
+      const previousType = chartType(state.spec);
+      const nextType = chartType(parsed);
+      let spec = parsed;
+      if (nextType && nextType !== previousType) {
+        spec = switchChartType(parsed, nextType, examples, { keepSize: sizeEdited(parsed), fromType: previousType });
+        if (JSON.stringify(spec) !== JSON.stringify(parsed)) {
+          text = pretty(spec);
+          const area = root.querySelector<HTMLTextAreaElement>(".play-specbox textarea");
+          if (area) area.value = text;
+        }
       }
-      state.spec = parsed;
-      state.good = clone(parsed);
+      state.spec = spec;
+      state.good = clone(spec);
       state.text = text;
       void refresh(false);
       if (state.tab === "options") renderPanel();
@@ -1137,7 +1142,9 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
             const stop = attach(svg);
             liveDestroy = stop;
           }
-        } else if (state.svg.includes("<svg")) {
+        } else if (state.svg.includes("<svg") && kind !== "bar-list") {
+          // The client mount registers core and extra charts. Bar list is painted
+          // by renderBarList and stays as that SVG, the same as the home carousel.
           const handle = mount(chart, view as ChartSpec);
           if (gen !== paintGen) {
             handle.destroy();
@@ -1277,9 +1284,8 @@ export function mountPlayground(root: HTMLElement, data: PlayData): void {
   }
 
   function setType(type: string): void {
-    const spec = clone(state.spec);
-    spec.type = type;
-    if (!sizeEdited()) stripPreviewSize(spec);
+    if (!type || type === chartType(state.spec)) return;
+    const spec = switchChartType(state.spec, type, examples, { keepSize: sizeEdited(), fromType: chartType(state.spec) });
     state.dirty.add("type");
     state.hiddenY = [];
     setSpec(spec, true);
