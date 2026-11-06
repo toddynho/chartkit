@@ -2,6 +2,7 @@
  * Drag the try-it card from the pill on its left edge.
  * panelW is the card width, stored in --try (default 380, clamp 280 … viewport−560).
  * Chart height is --chart-h = round(panelW * 0.6). Below 1100px the rail stacks and this stays idle.
+ * The pill is pinned to the chart pane, so the grip stays with the chart instead of the full card.
  */
 
 const KEY = "ck-docs-rail-width";
@@ -67,6 +68,17 @@ export function mountDocsSplit(): void {
     return next;
   };
 
+  const pinHandle = () => {
+    const chart = card.querySelector<HTMLElement>("#response-chart");
+    const slot = handle.offsetParent;
+    if (!chart || !(slot instanceof HTMLElement)) return;
+    const top = chart.getBoundingClientRect().top - slot.getBoundingClientRect().top;
+    const height = chart.getBoundingClientRect().height;
+    if (height < 24) return;
+    handle.style.setProperty("--docs-handle-top", `${Math.max(0, Math.round(top))}px`);
+    handle.style.setProperty("--docs-handle-span", `${Math.round(height)}px`);
+  };
+
   const layout = () => {
     if (!wide.matches) return;
     if (preferred == null) {
@@ -74,14 +86,22 @@ export function mountDocsSplit(): void {
       root.style.removeProperty("--try");
       root.style.removeProperty("--chart-h");
       paintAria(card.getBoundingClientRect().width);
-      return;
+    } else {
+      apply(preferred);
     }
-    apply(preferred);
+    pinHandle();
   };
 
   layout();
+  window.requestAnimationFrame(pinHandle);
   wide.addEventListener("change", layout);
   window.addEventListener("resize", layout);
+  if ("ResizeObserver" in window) {
+    const observer = new ResizeObserver(() => pinHandle());
+    observer.observe(card);
+    const chart = card.querySelector("#response-chart");
+    if (chart) observer.observe(chart);
+  }
 
   handle.addEventListener("pointerdown", (event) => {
     if (!wide.matches || event.button !== 0) return;

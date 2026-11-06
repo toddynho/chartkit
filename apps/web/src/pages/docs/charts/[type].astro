@@ -9,11 +9,15 @@ import PieGuide from "../../../components/PieGuide.astro";
 import RadialBarGuide from "../../../components/RadialBarGuide.astro";
 import ResponseRail from "../../../components/ResponseRail.astro";
 import RoseGuide from "../../../components/RoseGuide.astro";
+import SankeyGuide from "../../../components/SankeyGuide.astro";
 import ScatterGuide from "../../../components/ScatterGuide.astro";
 import StackedAreaGuide from "../../../components/StackedAreaGuide.astro";
+import StreamgraphGuide from "../../../components/StreamgraphGuide.astro";
 import SunburstGuide from "../../../components/SunburstGuide.astro";
 import TeachChart from "../../../components/TeachChart.astro";
+import TreeGuide from "../../../components/TreeGuide.astro";
 import TreemapGuide from "../../../components/TreemapGuide.astro";
+import WaterfallGuide from "../../../components/WaterfallGuide.astro";
 import { chartPage, chartPageTypes, chipsForChart, specForChart } from "../../../data/docs-catalog";
 import { teachModule, teachModules } from "../../../data/teach/registry";
 import Docs from "../../../layouts/Docs.astro";
@@ -31,6 +35,10 @@ const guided = new Set([
   "sunburst",
   "rose",
   "radial-bar",
+  "sankey",
+  "waterfall",
+  "tree",
+  "streamgraph",
 ]);
 for (const key of Object.keys(teachModules)) {
   if (!guided.has(key)) throw new Error(`Add a guide for the ${key} teach module in this page.`);
@@ -75,6 +83,10 @@ const lede = geo?.lede ?? chart.lede;
       {module.type === "sunburst" ? <SunburstGuide /> : null}
       {module.type === "rose" ? <RoseGuide /> : null}
       {module.type === "radial-bar" ? <RadialBarGuide /> : null}
+      {module.type === "sankey" ? <SankeyGuide /> : null}
+      {module.type === "waterfall" ? <WaterfallGuide /> : null}
+      {module.type === "tree" ? <TreeGuide /> : null}
+      {module.type === "streamgraph" ? <StreamgraphGuide /> : null}
     </TeachChart>
   ) : (
     <Docs title={title} description={lede} lede={lede} href={href}>

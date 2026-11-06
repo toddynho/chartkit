@@ -1021,8 +1021,10 @@ html[data-charts-open="1"] .side-charts__fade,
   position: absolute;
   z-index: 4;
   left: 0;
-  top: 0;
-  bottom: 0;
+  /* Pinned to the chart pane by mountDocsSplit. Until then it spans the rail. */
+  top: var(--docs-handle-top, 0px);
+  height: var(--docs-handle-span, 100%);
+  bottom: auto;
   width: 20px;
   margin: 0;
   padding: 0;
@@ -1096,11 +1098,14 @@ html.is-rail-drag * {
 
 .docs-try #response-chart {
   height: var(--chart-h, calc(var(--try, 380px) * 0.6));
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .docs-try #response-chart svg {
   width: 100%;
-  height: 100%;
+  height: auto;
+  min-height: 100%;
 }
 
 .docs-try__caption {

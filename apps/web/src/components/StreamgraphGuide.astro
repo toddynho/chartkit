@@ -1,0 +1,189 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestStreamgraphSpec } from "../data/teach/streamgraph";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/streamgraph";
+const spec = specText(smallestStreamgraphSpec);
+const play = playgroundHref(smallestStreamgraphSpec);
+const offset = `{
+  "mark": { "streamOffset": "center" }
+}`;
+const zero = `{
+  "mark": { "streamOffset": "zero" }
+}`;
+const order = `{
+  "mark": { "order": "none" }
+}`;
+const curve = `{
+  "mark": { "curve": "linear" }
+}`;
+const filled = `{
+  "type": "line",
+  "mark": { "area": true }
+}`;
+const legend = `{
+  "legend": { "position": "right" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A streamgraph stacks several series into one shape, then moves the baseline so the layers sit around a center instead of on zero. The type is <code>streamgraph</code>. The baseline is not zero unless you ask for it.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a streamgraph when the series are parts of a whole over an ordered x, and the question is how the layers change, not the total against zero. Copies by genre is that chart: history overtakes fiction, and the shape follows the movement. Use <code>center</code> when you want each column centered. Use <code>expand</code> when the question is the share. Weekly streams is a share.
+  </p>
+  <p>
+    Do not use it when the reader needs the total on a baseline. That is a <a href="/docs/charts/stacked-area">stacked area</a>. Do not use it for one series. A single layer repairs toward a zero baseline. A filled line is still a <a href="/docs/charts/line">line</a>.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Streamgraph, stacked area, and a filled line</h2>
+  <p>
+    A <a href="/docs/charts/stacked-area">stacked area</a> anchors the stack to zero. The top edge is the total. <code>mark.stack</code> set to <code>percent</code> turns each x into 100% and still sits on that baseline.
+  </p>
+  <p>
+    A streamgraph's offset is the stack. <code>wiggle</code> is the default. It shifts the baseline so the layers move less from one x to the next. <code>center</code>, also called <code>silhouette</code>, centers each column on zero. <code>zero</code> is the stacked-area baseline, on this type. <code>expand</code> draws shares that sum to 1.
+  </p>
+  <p>
+    A filled line is not either chart. There is no <code>type: "area"</code>. <a href="/docs/charts/area">Area</a> is the note for <code>type: "line"</code> with <code>mark.area</code> set to true. Those fills are not stacked.
+  </p>
+  <figure class="code">
+    <figcaption><span>filled line</span></figcaption>
+    <pre><code>{filled}</code></pre>
+  </figure>
+  <p>
+    <code>mark.stack</code> on a streamgraph warns, and repair removes it. The key is <code>mark.streamOffset</code>.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    The rows match a stacked area. Wide data uses <code>encoding.x</code> and a list of <code>encoding.y</code> fields. Copies by genre lists <code>fiction</code>, <code>history</code>, <code>poetry</code>, and <code>science</code>. Weekly streams lists <code>audio</code> and <code>video</code>. Long data uses one <code>encoding.y</code> field and <code>encoding.color</code>, or <code>encoding.series</code>, for the layer name. Centered genres is long: <code>year</code>, <code>copies</code>, and <code>genre</code>.
+  </p>
+  <p>
+    The numbers are amounts, and they are not negative. A negative is an error. You do not pass shares unless you set <code>expand</code>, which turns each x into a share from the amounts you did pass. <code>a11y.alt</code> is required. One sentence, 10 to 500 characters. Say which layer grew and which shrank. Do not claim the picture shows a total against zero, unless the offset is <code>zero</code>.
+  </p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest streamgraph. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Two genres, three years. The offset is wiggle, the order is inside-out, and the curve is monotone, so <code>mark</code> can be omitted. The baseline is not zero.
+  </p>
+  <TeachFacts type="streamgraph" label="Streamgraph packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing streamgraph specs. Copies by genre is the wiggle chart, with the series name on the layer. Centered genres is long data, centered, with the legend on the right. Weekly streams sets <code>expand</code> on a time axis. The gallery calls that third chart Weekly share.
+  </p>
+</section>
+
+<TeachConcept id="offset" title="Offset">
+  <p>
+    <code>mark.streamOffset</code> is the baseline. Omit it, or set <code>wiggle</code>, and the baseline moves to keep the layers smooth. That is the streamgraph. <code>center</code> centers each column. <code>silhouette</code> is the same picture. The control writes <code>center</code>.
+  </p>
+  <p>
+    <code>zero</code> stacks on the axis. The top edge is the total, which is the stacked-area reading, still as <code>type: "streamgraph"</code>. <code>expand</code> turns each column into shares. Weekly streams sets that. The y axis is then a percent.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.streamOffset</span></figcaption>
+    <pre><code>{offset}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>mark.streamOffset zero</span></figcaption>
+    <pre><code>{zero}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="order" title="Order">
+  <p>
+    <code>mark.order</code> is the layer order. Omit it on a wiggle chart and the order is <code>inside-out</code>: the smallest series sits in the middle, which keeps the shape calm. Omit it on any other offset and the order is the order the fields are listed.
+  </p>
+  <p>
+    <code>none</code> keeps that listed order even on a wiggle chart, so the legend matches the fields you wrote. Centered genres sets it. <code>ascending</code> and <code>descending</code> sort by the series sum.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.order</span></figcaption>
+    <pre><code>{order}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="curve" title="Curve">
+  <p>
+    <code>mark.curve</code> is how the edges join, the same choice as a stacked area. <code>monotone</code> is the default. It stays inside the data, so a spike does not overshoot. <code>linear</code> draws straight segments. <code>step</code> holds the value and then jumps.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.curve</span></figcaption>
+    <pre><code>{curve}</code></pre>
+  </figure>
+  <p>
+    <code>step-before</code> and <code>step-after</code> place the jump on the other side of the point. Set those in the playground.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    A streamgraph with several series shows a legend. Omit <code>legend</code>, or set <code>true</code>, and it sits on top. <code>false</code> hides it. <code>legend.position</code> is <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code>, or <code>inside</code>. Centered genres puts it on the right.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a streamgraph when the key is omitted. Hovering a position shows the layer values. The numbers are the amounts you passed, not the offset coordinate. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows, and <code>tooltip.position</code> places the card. Change those in the playground. Turning the card off and on again puts that object back.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.labels</code> draws the series name at the thickest part of a layer. It is off until you set true. Copies by genre and Weekly streams set it. <code>mark.fillOpacity</code> defaults to 0.22. The stroke stays the series color. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/stacked-area">Stacked area</a> stacks the series on a zero baseline. The top edge is the total.</li>
+    <li><a href="/docs/charts/area">Area</a> is a line with <code>mark.area</code>. The spec type is still <code>line</code>, and the fills are not stacked.</li>
+    <li><a href="/docs/charts/line">Line</a> draws each series on its own. It does not add them.</li>
+    <li><a href="/docs/charts/bar">Bar</a> stacks categories that are not a trend, with <code>mark.stack</code> on <code>type: "bar"</code>.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

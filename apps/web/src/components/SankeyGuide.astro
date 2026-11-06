@@ -1,0 +1,110 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestSankeySpec } from "../data/teach/sankey";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/sankey";
+const spec = specText(smallestSankeySpec);
+const play = playgroundHref(smallestSankeySpec);
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A sankey draws a flow from one node to another. Each row is a link. The width of the ribbon is the amount. Nodes sit in columns, left to right, and a name sits on each node.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a sankey when the question is where an amount goes, and a node can split or join. Acquisition flow sends ads and search through the landing page, the product page, and the blog, then on to trial and paid. Neighbourhood flows is one direction: Lantern feeds three docks.
+  </p>
+  <p>
+    A <a href="/docs/charts/funnel">funnel</a> is stages in one column. The width is how many remain at that step. A sankey is not that drop-off. A node can have several links in and several links out. Where the boats go, and come back also has a return: some boats come back, and those ribbons bow over the columns. A <a href="/docs/charts/bar">bar</a> compares categories. It does not draw a path between them.
+  </p>
+</section>
+
+<section id="siblings">
+  <h2>Sankey and funnel</h2>
+  <p>
+    Both can show a value getting smaller as it moves. The encoding is what changes.
+  </p>
+  <p>
+    <code>type: "sankey"</code> is a graph. <code>encoding.source</code> and <code>encoding.target</code> name the two ends of a link. <code>encoding.y</code> is the width. The chart builds the columns from the links.
+  </p>
+  <p>
+    <code>type: "funnel"</code> is one sequence. Each row is a stage and a size. There is no link to a second node, and a stage does not split. A <a href="/docs/charts/tree">tree</a> is who connects to whom. It is not a weighted flow, and a node there has one parent.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one link. Point <code>encoding.source</code> at the node it leaves and <code>encoding.target</code> at the node it enters. Point <code>encoding.y</code> at the amount. That amount is the ribbon width. Acquisition flow uses <code>from</code>, <code>to</code>, and <code>flow</code>. Neighbourhood flows uses <code>trips</code>. Where the boats go, and come back uses <code>crossings</code>.
+  </p>
+  <p>
+    A link from a node to itself is skipped. A missing amount, or an amount that is not positive, is skipped. A cycle stays in the graph. The return is a ribbon over the columns, not another column. Where the boats go, and come back is that chart.
+  </p>
+  <p><code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.</p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest sankey. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Two links, three nodes. The columns and the ribbon shape come from the graph, so <code>mark</code> can be omitted. The node names are the labels. There is no legend.
+  </p>
+  <TeachFacts type="sankey" label="Sankey packages" spec={spec} />
+</section>
+
+<p>The option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing sankey specs. Acquisition flow is the core example, ten links and no return. Neighbourhood flows is one direction between docks. Where the boats go, and come back draws the return ribbons.
+  </p>
+</section>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a sankey when the key is omitted. Hovering a node shows its name and the flow through it. Hovering a link shows the two ends and the amount. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Change those in the playground. Turning the card off and on again puts that object back. An example that omitted <code>tooltip</code> gets the key removed, so the default stays on.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    Node width, the gap between nodes, and where a column sits are not spec keys. The chart places them. <code>encoding.color</code> does not recolor a node. A legend is not drawn, because the name is already on the node. Theme presets live on the playground, with the full option list. Mermaid sankey syntax converts with <code>fromMermaid</code>.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/funnel">Funnel</a> is stages in order. The width is a size at a step, not a link between nodes.</li>
+    <li><a href="/docs/charts/tree">Tree</a> draws one parent per node. It is not a weighted flow.</li>
+    <li><a href="/docs/charts/bar">Bar</a> compares categories. It does not draw the path between them.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

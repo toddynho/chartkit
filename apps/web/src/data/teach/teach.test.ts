@@ -11,7 +11,15 @@ import { applyPieAction, pieControlState, pieExamples, pieTeach, smallestPieSpec
 import { applyRadialBarAction, radialBarControlState, radialBarExamples, radialBarTeach, smallestRadialBarSpec } from "./radial-bar.ts";
 import { teachModule, teachModules } from "./registry.ts";
 import { applyRoseAction, roseControlState, roseExamples, roseTeach, smallestRoseSpec } from "./rose.ts";
+import { applySankeyAction, sankeyControlState, sankeyExamples, sankeyTeach, smallestSankeySpec } from "./sankey.ts";
 import { applyScatterAction, scatterControlState, scatterExamples, scatterTeach, smallestScatterSpec } from "./scatter.ts";
+import {
+  applyStreamgraphAction,
+  smallestStreamgraphSpec,
+  streamgraphControlState,
+  streamgraphExamples,
+  streamgraphTeach,
+} from "./streamgraph.ts";
 import { openTeachExample } from "./spec.ts";
 import {
   applyStackedAreaAction,
@@ -22,9 +30,11 @@ import {
 } from "./stacked-area.ts";
 import { applySunburstAction, smallestSunburstSpec, sunburstControlState, sunburstExamples, sunburstTeach } from "./sunburst.ts";
 import { applyTooltip } from "./tooltip.ts";
+import { applyTreeAction, smallestTreeSpec, treeControlState, treeExamples, treeTeach } from "./tree.ts";
 import { applyTreemapAction, smallestTreemapSpec, treemapControlState, treemapExamples, treemapTeach } from "./treemap.ts";
+import { applyWaterfallAction, smallestWaterfallSpec, waterfallControlState, waterfallExamples, waterfallTeach } from "./waterfall.ts";
 
-test("the kit is donut, pie, line, the cartesian batch, and part-to-whole", () => {
+test("the kit is donut, pie, line, the cartesian batch, part-to-whole, and flow", () => {
   assert.deepEqual(Object.keys(teachModules).sort(), [
     "bar",
     "combo",
@@ -34,17 +44,17 @@ test("the kit is donut, pie, line, the cartesian batch, and part-to-whole", () =
     "pie",
     "radial-bar",
     "rose",
+    "sankey",
     "scatter",
     "stacked-area",
+    "streamgraph",
     "sunburst",
+    "tree",
     "treemap",
+    "waterfall",
   ]);
   assert.equal(teachModule("area"), undefined);
   assert.equal(teachModule("histogram"), undefined);
-  assert.equal(teachModule("sankey"), undefined);
-  assert.equal(teachModule("streamgraph"), undefined);
-  assert.equal(teachModule("tree"), undefined);
-  assert.equal(teachModule("waterfall"), undefined);
   assert.equal(donutTeach.controls.some((control) => control.id === "innerRadius"), true);
   assert.equal(pieTeach.controls.some((control) => control.id === "innerRadius"), false);
   assert.deepEqual(
@@ -90,6 +100,25 @@ test("the kit is donut, pie, line, the cartesian batch, and part-to-whole", () =
     ["innerRadius", "startAngle", "stack", "labels", "legend", "tooltip"],
   );
   assert.equal(radialBarTeach.controls.some((control) => control.id === "sort"), false);
+  assert.deepEqual(
+    sankeyTeach.controls.map((control) => control.id),
+    ["tooltip"],
+  );
+  assert.deepEqual(
+    waterfallTeach.controls.map((control) => control.id),
+    ["labels", "tooltip"],
+  );
+  assert.equal(waterfallTeach.controls.some((control) => control.id === "legend" || control.id === "orientation"), false);
+  assert.deepEqual(
+    treeTeach.controls.map((control) => control.id),
+    ["layout", "orient", "link", "tooltip"],
+  );
+  assert.equal(treeTeach.controls.some((control) => control.id === "radial" || control.id === "legend"), false);
+  assert.deepEqual(
+    streamgraphTeach.controls.map((control) => control.id),
+    ["offset", "order", "curve", "legend", "tooltip"],
+  );
+  assert.equal(streamgraphTeach.controls.some((control) => control.id === "stack"), false);
 });
 
 test("opening an example copies a custom tooltip and does not rewrite it", () => {
@@ -863,4 +892,228 @@ test("radial bar actions edit the hole, start, stack, labels, legend, and toolti
     ["6 categories", "5 categories"],
   );
   for (const example of radialBarExamples) assert.equal(example.spec.type, "radial-bar");
+});
+
+test("sankey tooltip off restores an omitted tooltip and a custom tooltip", () => {
+  assert.equal(smallestSankeySpec.type, "sankey");
+  assert.equal(smallestSankeySpec.mark, undefined);
+
+  const acquisition = structuredClone(sankeyExamples[0]!.spec);
+  assert.equal(sankeyControlState(acquisition).tooltip, "on");
+  assert.equal(acquisition.tooltip, undefined);
+  const untouched = structuredClone(acquisition);
+  sankeyControlState(acquisition);
+  assert.deepEqual(acquisition, untouched);
+  applySankeyAction(acquisition, { id: "tooltip", value: "off" });
+  assert.equal(acquisition.tooltip, false);
+  assert.equal(sankeyControlState(acquisition).tooltip, "off");
+  applySankeyAction(acquisition, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in acquisition, false);
+  assert.equal(acquisition.type, "sankey");
+
+  const ferry = structuredClone(sankeyExamples[2]!.spec);
+  const tip = structuredClone(customTip);
+  ferry.tooltip = structuredClone(tip);
+  const opened = openTeachExample(ferry);
+  assert.deepEqual(opened.tooltip, ferry.tooltip);
+  assert.notEqual(opened.tooltip, ferry.tooltip);
+  applySankeyAction(ferry, { id: "tooltip", value: "off" });
+  assert.equal(ferry.tooltip, false);
+  applySankeyAction(ferry, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(ferry.tooltip, tip);
+  assert.equal((ferry.size as { width: number }).width, 980);
+
+  assert.deepEqual(
+    sankeyExamples.map((example) => example.title),
+    ["Acquisition flow", "Neighbourhood flows", "Where the boats go, and come back"],
+  );
+  assert.deepEqual(
+    sankeyExamples.map((example) => example.meta),
+    ["10 links", "6 links", "8 links"],
+  );
+  for (const example of sankeyExamples) assert.equal(example.spec.type, "sankey");
+});
+
+test("waterfall actions edit labels and tooltip", () => {
+  assert.equal(smallestWaterfallSpec.type, "waterfall");
+  assert.equal(smallestWaterfallSpec.mark, undefined);
+  assert.equal(waterfallControlState(smallestWaterfallSpec).labels, "on");
+
+  const year = structuredClone(waterfallExamples[0]!.spec);
+  assert.equal(waterfallControlState(year).labels, "on");
+  assert.equal(waterfallControlState(year).tooltip, "on");
+  assert.equal(year.tooltip, undefined);
+  const untouched = structuredClone(year);
+  waterfallControlState(year);
+  assert.deepEqual(year, untouched);
+  applyWaterfallAction(year, { id: "labels", value: "off" });
+  assert.equal((year.mark as { labels: boolean; total: string }).labels, false);
+  assert.equal((year.mark as { total: string }).total, "total");
+  applyWaterfallAction(year, { id: "labels", value: "on", restore: waterfallExamples[0]!.spec });
+  assert.equal((year.mark as { labels?: boolean }).labels, undefined);
+  assert.equal((year.mark as { total: string }).total, "total");
+  applyWaterfallAction(year, { id: "tooltip", value: "off" });
+  assert.equal(year.tooltip, false);
+  applyWaterfallAction(year, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in year, false);
+
+  const voyage = structuredClone(waterfallExamples[2]!.spec);
+  const original = structuredClone(voyage.tooltip);
+  assert.equal(waterfallControlState(voyage).tooltip, "on");
+  assert.equal(waterfallControlState(voyage).labels, "on");
+  const opened = openTeachExample(voyage);
+  assert.deepEqual(opened.tooltip, voyage.tooltip);
+  assert.notEqual(opened.tooltip, voyage.tooltip);
+  applyWaterfallAction(voyage, { id: "tooltip", value: "off" });
+  assert.equal(voyage.tooltip, false);
+  applyWaterfallAction(voyage, { id: "tooltip", value: "on", restore: original });
+  assert.deepEqual(voyage.tooltip, original);
+  assert.equal((voyage.size as { height: number }).height, 380);
+  applyWaterfallAction(voyage, { id: "labels", value: "off" });
+  assert.equal((voyage.mark as { labels: boolean }).labels, false);
+  assert.equal(voyage.type, "waterfall");
+
+  assert.deepEqual(
+    waterfallExamples.map((example) => example.title),
+    ["Year to date", "ARR bridge", "One voyage, step by step"],
+  );
+  assert.deepEqual(
+    waterfallExamples.map((example) => example.meta),
+    ["5 steps", "7 steps", "5 steps"],
+  );
+  for (const example of waterfallExamples) assert.equal(example.spec.type, "waterfall");
+});
+
+test("tree actions edit layout, direction, links, and tooltip", () => {
+  assert.equal(smallestTreeSpec.type, "tree");
+  assert.equal(smallestTreeSpec.mark, undefined);
+  assert.equal(treeControlState(smallestTreeSpec).layout, "tidy");
+  assert.equal(treeControlState(smallestTreeSpec).orient, "LR");
+  assert.equal(treeControlState(smallestTreeSpec).link, "curve");
+
+  const support = structuredClone(treeExamples[0]!.spec);
+  assert.equal(treeControlState(support).layout, "tidy");
+  assert.equal(treeControlState(support).orient, "LR");
+  assert.equal(treeControlState(support).link, "curve");
+  assert.equal(support.tooltip, undefined);
+  const untouched = structuredClone(support);
+  treeControlState(support);
+  assert.deepEqual(support, untouched);
+  applyTreeAction(support, { id: "layout", value: "cluster" });
+  assert.equal((support.mark as { tree: string }).tree, "cluster");
+  applyTreeAction(support, { id: "orient", value: "TB" });
+  assert.equal((support.mark as { orient: string; tree: string }).orient, "TB");
+  assert.equal((support.mark as { tree: string }).tree, "cluster");
+  applyTreeAction(support, { id: "link", value: "step" });
+  assert.equal((support.mark as { link: string }).link, "step");
+  applyTreeAction(support, { id: "tooltip", value: "off" });
+  assert.equal(support.tooltip, false);
+  applyTreeAction(support, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in support, false);
+  assert.equal(support.type, "tree");
+
+  const produce = structuredClone(treeExamples[1]!.spec);
+  assert.equal(treeControlState(produce).layout, "cluster");
+  assert.equal(treeControlState(produce).orient, "TB");
+  assert.equal(treeControlState(produce).link, "curve");
+  applyTreeAction(produce, { id: "layout", value: "tidy" });
+  assert.equal((produce.mark as { tree: string; orient: string }).tree, "tidy");
+  assert.equal((produce.mark as { orient: string }).orient, "TB");
+  applyTreeAction(produce, { id: "orient", value: "LR" });
+  assert.equal((produce.mark as { orient: string }).orient, "LR");
+  const tip = structuredClone(customTip);
+  produce.tooltip = structuredClone(tip);
+  const opened = openTeachExample(produce);
+  assert.deepEqual(opened.tooltip, produce.tooltip);
+  assert.notEqual(opened.tooltip, produce.tooltip);
+  applyTreeAction(produce, { id: "tooltip", value: "off" });
+  assert.equal(produce.tooltip, false);
+  applyTreeAction(produce, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(produce.tooltip, tip);
+
+  assert.deepEqual(
+    treeExamples.map((example) => example.title),
+    ["Support org", "Produce"],
+  );
+  assert.deepEqual(
+    treeExamples.map((example) => example.meta),
+    ["9 nodes", "cluster"],
+  );
+  for (const example of treeExamples) assert.equal(example.spec.type, "tree");
+});
+
+test("streamgraph actions edit offset, order, curve, legend, and tooltip", () => {
+  assert.equal(smallestStreamgraphSpec.type, "streamgraph");
+  assert.equal(smallestStreamgraphSpec.mark, undefined);
+  assert.equal(streamgraphControlState(smallestStreamgraphSpec).offset, "wiggle");
+  assert.equal(streamgraphControlState(smallestStreamgraphSpec).order, "inside-out");
+  assert.equal(streamgraphControlState(smallestStreamgraphSpec).curve, "monotone");
+  assert.equal(streamgraphControlState(smallestStreamgraphSpec).legend, "top");
+
+  const copies = structuredClone(streamgraphExamples[0]!.spec);
+  assert.equal(streamgraphControlState(copies).offset, "wiggle");
+  assert.equal(streamgraphControlState(copies).order, "inside-out");
+  assert.equal(streamgraphControlState(copies).curve, "monotone");
+  assert.equal(streamgraphControlState(copies).legend, "top");
+  assert.equal(copies.tooltip, undefined);
+  const untouched = structuredClone(copies);
+  streamgraphControlState(copies);
+  assert.deepEqual(copies, untouched);
+  applyStreamgraphAction(copies, { id: "offset", value: "zero" });
+  assert.equal((copies.mark as { streamOffset: string; labels: boolean }).streamOffset, "zero");
+  assert.equal((copies.mark as { labels: boolean }).labels, true);
+  assert.equal(streamgraphControlState(copies).order, "none");
+  applyStreamgraphAction(copies, { id: "order", value: "none" });
+  assert.equal((copies.mark as { order: string }).order, "none");
+  applyStreamgraphAction(copies, { id: "curve", value: "step" });
+  assert.equal((copies.mark as { curve: string }).curve, "step");
+  applyStreamgraphAction(copies, { id: "legend", value: "bottom" });
+  assert.deepEqual(copies.legend, { position: "bottom" });
+  applyStreamgraphAction(copies, { id: "tooltip", value: "off" });
+  assert.equal(copies.tooltip, false);
+  applyStreamgraphAction(copies, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in copies, false);
+
+  const centered = structuredClone(streamgraphExamples[1]!.spec);
+  assert.equal(streamgraphControlState(centered).offset, "center");
+  assert.equal(streamgraphControlState(centered).order, "none");
+  assert.equal(streamgraphControlState(centered).legend, "right");
+  applyStreamgraphAction(centered, { id: "offset", value: "wiggle" });
+  assert.equal((centered.mark as { streamOffset: string; order: string }).streamOffset, "wiggle");
+  assert.equal((centered.mark as { order: string }).order, "none");
+  applyStreamgraphAction(centered, { id: "legend", value: "off" });
+  assert.equal(centered.legend, false);
+  const tip = structuredClone(customTip);
+  centered.tooltip = structuredClone(tip);
+  const opened = openTeachExample(centered);
+  assert.deepEqual(opened.tooltip, centered.tooltip);
+  assert.notEqual(opened.tooltip, centered.tooltip);
+  applyStreamgraphAction(centered, { id: "tooltip", value: "off" });
+  assert.equal(centered.tooltip, false);
+  applyStreamgraphAction(centered, { id: "tooltip", value: "on", restore: tip });
+  assert.deepEqual(centered.tooltip, tip);
+  assert.equal(centered.type, "streamgraph");
+
+  const weekly = structuredClone(streamgraphExamples[2]!.spec);
+  assert.equal(streamgraphControlState(weekly).offset, "expand");
+  assert.equal(streamgraphControlState(weekly).order, "none");
+  assert.equal((weekly.mark as { labels: boolean }).labels, true);
+  applyStreamgraphAction(weekly, { id: "offset", value: "center" });
+  assert.equal((weekly.mark as { streamOffset: string }).streamOffset, "center");
+  assert.equal(streamgraphControlState(weekly).order, "none");
+
+  const silhouette = structuredClone(smallestStreamgraphSpec);
+  silhouette.mark = { streamOffset: "silhouette" };
+  assert.equal(streamgraphControlState(silhouette).offset, "center");
+  assert.equal(streamgraphControlState(silhouette).order, "none");
+
+  assert.deepEqual(
+    streamgraphExamples.map((example) => example.title),
+    ["Copies by genre", "Centered genres", "Weekly streams"],
+  );
+  assert.deepEqual(
+    streamgraphExamples.map((example) => example.meta),
+    ["4 series", "2 series", "expand"],
+  );
+  for (const example of streamgraphExamples) assert.equal(example.spec.type, "streamgraph");
 });

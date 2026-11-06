@@ -6,10 +6,14 @@ import { lineTeach } from "./line.ts";
 import { pieTeach } from "./pie.ts";
 import { radialBarTeach } from "./radial-bar.ts";
 import { roseTeach } from "./rose.ts";
+import { sankeyTeach } from "./sankey.ts";
 import { scatterTeach } from "./scatter.ts";
 import { stackedAreaTeach } from "./stacked-area.ts";
+import { streamgraphTeach } from "./streamgraph.ts";
 import { sunburstTeach } from "./sunburst.ts";
+import { treeTeach } from "./tree.ts";
 import { treemapTeach } from "./treemap.ts";
+import { waterfallTeach } from "./waterfall.ts";
 import type { TeachModule } from "./types.ts";
 
 /**
@@ -30,6 +34,10 @@ export const teachModules: Record<string, TeachModule> = {
   sunburst: sunburstTeach,
   rose: roseTeach,
   "radial-bar": radialBarTeach,
+  sankey: sankeyTeach,
+  waterfall: waterfallTeach,
+  tree: treeTeach,
+  streamgraph: streamgraphTeach,
 };
 
 export function teachModule(type: string): TeachModule | undefined {
