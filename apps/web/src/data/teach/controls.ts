@@ -55,6 +55,38 @@ export const AREA_OPTIONS = [
   { value: "on", label: "On" },
 ] as const;
 
+export const ORIENTATION_OPTIONS = [
+  { value: "vertical", label: "Vertical" },
+  { value: "horizontal", label: "Horizontal" },
+] as const;
+
+export const BAR_STACK_OPTIONS = [
+  { value: "none", label: "Grouped" },
+  { value: "stack", label: "Stack" },
+  { value: "percent", label: "Percent" },
+] as const;
+
+export const AREA_STACK_OPTIONS = [
+  { value: "stack", label: "Stack" },
+  { value: "percent", label: "Percent" },
+] as const;
+
+export const POINT_SHAPE_OPTIONS = [
+  { value: "circle", label: "Circle" },
+  { value: "square", label: "Square" },
+  { value: "diamond", label: "Diamond" },
+] as const;
+
+export const SERIES_MARK_OPTIONS = [
+  { value: "line", label: "Line" },
+  { value: "area", label: "Area" },
+] as const;
+
+export const LINE_AXIS_OPTIONS = [
+  { value: "y", label: "Left" },
+  { value: "y2", label: "Right" },
+] as const;
+
 export function choice(
   id: string,
   label: string,

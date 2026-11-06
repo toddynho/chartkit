@@ -36,7 +36,11 @@ export type TeachChoiceControl = {
 
 export type TeachControl = TeachRangeControl | TeachChoiceControl;
 
-/** A control id plus the value the widget sent. `restore` is the example's original tooltip, when the control is tooltip. */
+/**
+ * A control id plus the value the widget sent.
+ * For tooltip, `restore` is the example's original tooltip.
+ * For every other control, `restore` is the original example spec, so a toggle can put a channel or a mark key back.
+ */
 export type TeachAction = {
   id: string;
   value: string | number;

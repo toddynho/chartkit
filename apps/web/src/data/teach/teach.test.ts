@@ -1,23 +1,51 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { applyDonutAction, donutControlState, donutExamples } from "../donut-teach.ts";
+import { applyBarAction, barControlState, barExamples, barTeach, smallestBarSpec } from "./bar.ts";
+import { applyComboAction, comboControlState, comboExamples, comboTeach, smallestComboSpec } from "./combo.ts";
 import { donutTeach } from "./donut.ts";
 import { applyLegend, legendChoice } from "./legend.ts";
 import { applyLineAction, lineControlState, lineExamples, lineTeach, smallestLineSpec } from "./line.ts";
 import { applyPieAction, pieControlState, pieExamples, pieTeach, smallestPieSpec } from "./pie.ts";
 import { teachModule, teachModules } from "./registry.ts";
+import { applyScatterAction, scatterControlState, scatterExamples, scatterTeach, smallestScatterSpec } from "./scatter.ts";
 import { openTeachExample } from "./spec.ts";
+import {
+  applyStackedAreaAction,
+  smallestStackedAreaSpec,
+  stackedAreaControlState,
+  stackedAreaExamples,
+  stackedAreaTeach,
+} from "./stacked-area.ts";
 import { applyTooltip } from "./tooltip.ts";
 
-test("the kit is donut, pie, and line", () => {
-  assert.deepEqual(Object.keys(teachModules).sort(), ["donut", "line", "pie"]);
+test("the kit is donut, pie, line, and the cartesian batch", () => {
+  assert.deepEqual(Object.keys(teachModules).sort(), ["bar", "combo", "donut", "line", "pie", "scatter", "stacked-area"]);
   assert.equal(teachModule("area"), undefined);
-  assert.equal(teachModule("bar"), undefined);
+  assert.equal(teachModule("funnel"), undefined);
+  assert.equal(teachModule("histogram"), undefined);
+  assert.equal(teachModule("streamgraph"), undefined);
   assert.equal(donutTeach.controls.some((control) => control.id === "innerRadius"), true);
   assert.equal(pieTeach.controls.some((control) => control.id === "innerRadius"), false);
   assert.deepEqual(
     lineTeach.controls.map((control) => control.id),
     ["curve", "points", "area", "legend", "tooltip"],
+  );
+  assert.deepEqual(
+    barTeach.controls.map((control) => control.id),
+    ["orientation", "stack", "labels", "legend", "tooltip"],
+  );
+  assert.deepEqual(
+    scatterTeach.controls.map((control) => control.id),
+    ["size", "shape", "legend", "tooltip"],
+  );
+  assert.deepEqual(
+    comboTeach.controls.map((control) => control.id),
+    ["seriesMark", "lineAxis", "points", "legend", "tooltip"],
+  );
+  assert.deepEqual(
+    stackedAreaTeach.controls.map((control) => control.id),
+    ["curve", "stack", "legend", "tooltip"],
   );
 });
 
@@ -175,6 +203,311 @@ test("line actions edit curve, points, area, legend, and tooltip", () => {
     ["4 points", "2 series", "5 points", "2 series"],
   );
   for (const example of lineExamples) assert.equal(example.spec.type, "line");
+});
+
+test("bar actions edit orientation, stack, labels, legend, and tooltip", () => {
+  assert.equal(smallestBarSpec.type, "bar");
+  assert.equal(smallestBarSpec.mark, undefined);
+
+  const signups = structuredClone(barExamples[0]!.spec);
+  assert.equal(barControlState(signups).orientation, "vertical");
+  assert.equal(barControlState(signups).stack, "none");
+  assert.equal(barControlState(signups).labels, "off");
+  assert.equal(barControlState(signups).legend, "off");
+  assert.equal(signups.tooltip, undefined);
+  const untouched = structuredClone(signups);
+  barControlState(signups);
+  assert.deepEqual(signups, untouched);
+  applyBarAction(signups, { id: "orientation", value: "horizontal" });
+  assert.equal((signups.mark as { orientation: string }).orientation, "horizontal");
+  applyBarAction(signups, { id: "stack", value: "stack" });
+  assert.equal((signups.mark as { stack: string }).stack, "stack");
+  applyBarAction(signups, { id: "labels", value: "on" });
+  assert.equal((signups.mark as { labels: boolean }).labels, true);
+  applyBarAction(signups, { id: "tooltip", value: "off" });
+  assert.equal(signups.tooltip, false);
+  applyBarAction(signups, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in signups, false);
+
+  const regions = structuredClone(barExamples[1]!.spec);
+  assert.equal(barControlState(regions).orientation, "horizontal");
+  const labeled = structuredClone(regions);
+  (labeled.mark as { labelPosition: string }).labelPosition = "right";
+  (labeled.mark as { labels: boolean }).labels = true;
+  const labeledOriginal = structuredClone(labeled);
+  applyBarAction(labeled, { id: "labels", value: "off" });
+  assert.equal((labeled.mark as { labels: boolean }).labels, false);
+  assert.equal((labeled.mark as { labelPosition?: string }).labelPosition, undefined);
+  applyBarAction(labeled, { id: "labels", value: "on", restore: labeledOriginal });
+  assert.equal((labeled.mark as { labels: boolean }).labels, true);
+  assert.equal((labeled.mark as { labelPosition: string }).labelPosition, "right");
+
+  const channels = structuredClone(barExamples[2]!.spec);
+  assert.equal(barControlState(channels).stack, "stack");
+  assert.equal(barControlState(channels).legend, "top");
+  applyBarAction(channels, { id: "stack", value: "percent" });
+  assert.equal((channels.mark as { stack: string }).stack, "percent");
+  applyBarAction(channels, { id: "stack", value: "none" });
+  assert.equal((channels.mark as { stack: string }).stack, "none");
+  applyBarAction(channels, { id: "legend", value: "bottom" });
+  assert.deepEqual(channels.legend, { position: "bottom" });
+
+  const effort = structuredClone(barExamples[3]!.spec);
+  const original = structuredClone(effort.tooltip);
+  assert.equal(barControlState(effort).tooltip, "on");
+  assert.equal(barControlState(effort).legend, "bottom");
+  assert.equal((effort.encoding as { series: string }).series, "band");
+  const before = structuredClone(effort);
+  barControlState(effort);
+  assert.deepEqual(effort, before);
+  const opened = openTeachExample(barExamples[3]!.spec);
+  assert.deepEqual(opened.tooltip, barExamples[3]!.spec.tooltip);
+  assert.notEqual(opened.tooltip, barExamples[3]!.spec.tooltip);
+  applyBarAction(effort, { id: "tooltip", value: "off" });
+  assert.equal(effort.tooltip, false);
+  applyBarAction(effort, { id: "tooltip", value: "on", restore: original });
+  assert.deepEqual(effort.tooltip, original);
+  applyBarAction(effort, { id: "legend", value: "right" });
+  assert.deepEqual(effort.legend, { position: "right", interactive: true });
+
+  assert.deepEqual(
+    barExamples.map((example) => example.title),
+    ["Signups by month", "Revenue by region", "Traffic by channel", "Easy, steady, and hard"],
+  );
+  assert.deepEqual(
+    barExamples.map((example) => example.meta),
+    ["5 months", "4 regions", "3 series", "3 series"],
+  );
+  for (const example of barExamples) assert.equal(example.spec.type, "bar");
+});
+
+test("scatter actions edit size, shape, legend, and tooltip", () => {
+  assert.equal(smallestScatterSpec.type, "scatter");
+  assert.equal((smallestScatterSpec.encoding as { size?: unknown }).size, undefined);
+
+  const seats = structuredClone(scatterExamples[0]!.spec);
+  assert.equal(scatterControlState(seats).size, "off");
+  assert.equal(scatterControlState(seats).shape, "circle");
+  assert.equal(scatterControlState(seats).legend, "off");
+  assert.equal(seats.tooltip, undefined);
+  applyScatterAction(seats, { id: "size", value: "on", restore: scatterExamples[0]!.spec });
+  assert.equal((seats.encoding as { size?: unknown }).size, undefined);
+  assert.equal(scatterControlState(seats).size, "off");
+  applyScatterAction(seats, { id: "shape", value: "diamond" });
+  assert.equal((seats.mark as { pointShape: string; pointSize: number }).pointShape, "diamond");
+  assert.equal((seats.mark as { pointSize: number }).pointSize, 5);
+  applyScatterAction(seats, { id: "tooltip", value: "off" });
+  assert.equal(seats.tooltip, false);
+  applyScatterAction(seats, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in seats, false);
+
+  const yieldSpec = structuredClone(scatterExamples[1]!.spec);
+  assert.equal(scatterControlState(yieldSpec).size, "on");
+  assert.deepEqual((yieldSpec.encoding as { size: { field: string; range: number[] } }).size, {
+    field: "plot",
+    range: [5, 16],
+  });
+  const yieldBefore = structuredClone(yieldSpec);
+  scatterControlState(yieldSpec);
+  assert.deepEqual(yieldSpec, yieldBefore);
+  applyScatterAction(yieldSpec, { id: "size", value: "off" });
+  assert.equal((yieldSpec.encoding as { size?: unknown }).size, undefined);
+  assert.equal(scatterControlState(yieldSpec).size, "off");
+  applyScatterAction(yieldSpec, { id: "size", value: "on", restore: scatterExamples[1]!.spec });
+  assert.deepEqual((yieldSpec.encoding as { size: unknown }).size, {
+    field: "plot",
+    range: [5, 16],
+  });
+  assert.equal((yieldSpec.encoding as { x: { title: string } }).x.title, "Temperature");
+
+  const spend = structuredClone(scatterExamples[2]!.spec);
+  applyScatterAction(spend, { id: "size", value: "off" });
+  const spendEncoding = spend.encoding as { x: { scale: { type: string } }; color: string; size?: unknown };
+  assert.equal(spendEncoding.size, undefined);
+  assert.equal(spendEncoding.x.scale.type, "log");
+  assert.equal(spendEncoding.color, "segment");
+
+  const sun = structuredClone(scatterExamples[3]!.spec);
+  const original = structuredClone(sun.tooltip);
+  assert.equal(scatterControlState(sun).shape, "diamond");
+  assert.equal(scatterControlState(sun).legend, "bottom");
+  assert.equal(scatterControlState(sun).tooltip, "on");
+  const opened = openTeachExample(scatterExamples[3]!.spec);
+  assert.deepEqual(opened.tooltip, scatterExamples[3]!.spec.tooltip);
+  assert.notEqual(opened.tooltip, scatterExamples[3]!.spec.tooltip);
+  applyScatterAction(sun, { id: "tooltip", value: "off" });
+  assert.equal(sun.tooltip, false);
+  applyScatterAction(sun, { id: "tooltip", value: "on", restore: original });
+  assert.deepEqual(sun.tooltip, original);
+  applyScatterAction(sun, { id: "shape", value: "square" });
+  assert.equal((sun.mark as { pointShape: string }).pointShape, "square");
+  assert.equal((sun.encoding as { size: { field: string } }).size.field, "grams");
+  applyScatterAction(sun, { id: "legend", value: "right" });
+  assert.deepEqual(sun.legend, { position: "right", interactive: true });
+
+  assert.deepEqual(
+    scatterExamples.map((example) => example.title),
+    ["Seats vs. renewal rate", "Yield by temperature", "Spend vs usage", "Sun hours and sugar"],
+  );
+  assert.deepEqual(
+    scatterExamples.map((example) => example.meta),
+    ["16 points", "7 points", "4 points", "15 points"],
+  );
+  for (const example of scatterExamples) assert.equal(example.spec.type, "scatter");
+});
+
+test("combo actions edit the non-bar series, its axis, points, legend, and tooltip", () => {
+  assert.equal(smallestComboSpec.type, "combo");
+  assert.ok(smallestComboSpec.axes && typeof smallestComboSpec.axes === "object");
+  const smallestY = (smallestComboSpec.encoding as { y: { mark: string }[] }).y;
+  assert.deepEqual(
+    smallestY.map((channel) => channel.mark),
+    ["bar", "line"],
+  );
+
+  const orders = structuredClone(comboExamples[0]!.spec);
+  assert.equal(comboControlState(orders).seriesMark, "line");
+  assert.equal(comboControlState(orders).lineAxis, "y2");
+  assert.equal(comboControlState(orders).points, "hover");
+  assert.equal(comboControlState(orders).legend, "top");
+  assert.equal(orders.tooltip, undefined);
+  applyComboAction(orders, { id: "seriesMark", value: "area" });
+  const areaChannels = (orders.encoding as { y: { mark: string; axis?: string; field: string }[] }).y;
+  assert.equal(areaChannels[0]?.mark, "bar");
+  assert.equal(areaChannels[0]?.field, "orders");
+  assert.equal(areaChannels[1]?.mark, "area");
+  assert.equal(areaChannels[1]?.axis, "y2");
+  applyComboAction(orders, { id: "seriesMark", value: "line" });
+  applyComboAction(orders, { id: "lineAxis", value: "y" });
+  const leftChannels = (orders.encoding as { y: { mark: string; axis?: string }[] }).y;
+  assert.equal(leftChannels[1]?.mark, "line");
+  assert.equal(leftChannels[1]?.axis, undefined);
+  assert.equal(leftChannels[0]?.mark, "bar");
+  applyComboAction(orders, { id: "lineAxis", value: "y2" });
+  assert.equal((orders.encoding as { y: { axis?: string }[] }).y[1]?.axis, "y2");
+  applyComboAction(orders, { id: "points", value: "always" });
+  assert.equal((orders.mark as { points: string }).points, "always");
+  applyComboAction(orders, { id: "tooltip", value: "off" });
+  assert.equal(orders.tooltip, false);
+  applyComboAction(orders, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in orders, false);
+
+  const margin = structuredClone(comboExamples[1]!.spec);
+  applyComboAction(margin, { id: "lineAxis", value: "y" });
+  const marginLine = (margin.encoding as { y: { format?: string; axis?: string; mark: string }[] }).y[1];
+  assert.equal(marginLine?.axis, undefined);
+  assert.equal(marginLine?.format, "percent");
+  assert.equal(marginLine?.mark, "line");
+
+  const jars = structuredClone(comboExamples[2]!.spec);
+  const jarsTip = structuredClone(jars.tooltip);
+  assert.equal(comboControlState(jars).lineAxis, "y");
+  assert.equal(comboControlState(jars).legend, "bottom");
+  assert.equal(comboControlState(jars).tooltip, "on");
+  const jarsBefore = structuredClone(jars);
+  comboControlState(jars);
+  assert.deepEqual(jars, jarsBefore);
+  const opened = openTeachExample(comboExamples[2]!.spec);
+  assert.deepEqual(opened.tooltip, comboExamples[2]!.spec.tooltip);
+  assert.notEqual(opened.tooltip, comboExamples[2]!.spec.tooltip);
+  applyComboAction(jars, { id: "tooltip", value: "off" });
+  assert.equal(jars.tooltip, false);
+  applyComboAction(jars, { id: "tooltip", value: "on", restore: jarsTip });
+  assert.deepEqual(jars.tooltip, jarsTip);
+
+  const pace = structuredClone(comboExamples[3]!.spec);
+  const paceTip = structuredClone(pace.tooltip);
+  assert.equal(comboControlState(pace).points, "always");
+  assert.equal(comboControlState(pace).lineAxis, "y2");
+  applyComboAction(pace, { id: "seriesMark", value: "area" });
+  const paceLine = (pace.encoding as { y: { mark: string; axis?: string; pointShape?: string; scale?: { reverse?: boolean } }[] }).y[1];
+  assert.equal(paceLine?.mark, "area");
+  assert.equal(paceLine?.axis, "y2");
+  assert.equal(paceLine?.pointShape, "diamond");
+  assert.equal(paceLine?.scale?.reverse, true);
+  assert.equal((pace.encoding as { y: { mark: string }[] }).y[0]?.mark, "bar");
+  applyComboAction(pace, { id: "points", value: "none" });
+  assert.equal((pace.mark as { points: string; labelEnds: string }).points, "none");
+  assert.equal((pace.mark as { labelEnds: string }).labelEnds, "ends");
+  applyComboAction(pace, { id: "tooltip", value: "off" });
+  assert.equal(pace.tooltip, false);
+  applyComboAction(pace, { id: "tooltip", value: "on", restore: paceTip });
+  assert.deepEqual(pace.tooltip, paceTip);
+  applyComboAction(pace, { id: "legend", value: "top" });
+  assert.equal((pace.legend as { position: string; interactive: boolean }).position, "top");
+  assert.equal((pace.legend as { interactive: boolean }).interactive, true);
+
+  assert.deepEqual(
+    comboExamples.map((example) => example.title),
+    ["Orders and fill rate", "Revenue and margin", "Jars this month", "Kilometres and pace"],
+  );
+  assert.deepEqual(
+    comboExamples.map((example) => example.meta),
+    ["5 weeks", "6 months", "10 weeks", "16 weeks"],
+  );
+  for (const example of comboExamples) assert.equal(example.spec.type, "combo");
+});
+
+test("stacked area actions edit curve, stack, legend, and tooltip", () => {
+  assert.equal(smallestStackedAreaSpec.type, "stacked-area");
+  assert.equal(smallestStackedAreaSpec.mark, undefined);
+  assert.equal(stackedAreaControlState(smallestStackedAreaSpec).stack, "stack");
+  assert.equal(stackedAreaControlState(smallestStackedAreaSpec).curve, "monotone");
+
+  const spend = structuredClone(stackedAreaExamples[0]!.spec);
+  assert.equal(stackedAreaControlState(spend).stack, "stack");
+  assert.equal(stackedAreaControlState(spend).legend, "top");
+  assert.equal(spend.tooltip, undefined);
+  applyStackedAreaAction(spend, { id: "curve", value: "linear" });
+  assert.equal((spend.mark as { curve: string }).curve, "linear");
+  applyStackedAreaAction(spend, { id: "stack", value: "percent" });
+  assert.equal((spend.mark as { stack: string }).stack, "percent");
+  applyStackedAreaAction(spend, { id: "curve", value: "step" });
+  assert.equal((spend.mark as { curve: string; stack: string }).stack, "percent");
+  applyStackedAreaAction(spend, { id: "tooltip", value: "off" });
+  assert.equal(spend.tooltip, false);
+  applyStackedAreaAction(spend, { id: "tooltip", value: "on", restore: undefined });
+  assert.equal("tooltip" in spend, false);
+
+  const mix = structuredClone(stackedAreaExamples[1]!.spec);
+  assert.equal(stackedAreaControlState(mix).stack, "percent");
+  applyStackedAreaAction(mix, { id: "stack", value: "stack" });
+  assert.equal((mix.mark as { stack: string }).stack, "stack");
+
+  const plans = structuredClone(stackedAreaExamples[2]!.spec);
+  assert.equal(stackedAreaControlState(plans).legend, "off");
+  assert.equal(stackedAreaControlState(plans).stack, "stack");
+  applyStackedAreaAction(plans, { id: "legend", value: "right" });
+  assert.deepEqual(plans.legend, { position: "right" });
+
+  const bikes = structuredClone(stackedAreaExamples[3]!.spec);
+  const original = structuredClone(bikes.tooltip);
+  assert.equal(stackedAreaControlState(bikes).stack, "percent");
+  assert.equal(stackedAreaControlState(bikes).legend, "bottom");
+  assert.equal(stackedAreaControlState(bikes).tooltip, "on");
+  const before = structuredClone(bikes);
+  stackedAreaControlState(bikes);
+  assert.deepEqual(bikes, before);
+  const opened = openTeachExample(stackedAreaExamples[3]!.spec);
+  assert.deepEqual(opened.tooltip, stackedAreaExamples[3]!.spec.tooltip);
+  assert.notEqual(opened.tooltip, stackedAreaExamples[3]!.spec.tooltip);
+  applyStackedAreaAction(bikes, { id: "tooltip", value: "off" });
+  assert.equal(bikes.tooltip, false);
+  applyStackedAreaAction(bikes, { id: "tooltip", value: "on", restore: original });
+  assert.deepEqual(bikes.tooltip, original);
+  applyStackedAreaAction(bikes, { id: "legend", value: "top" });
+  assert.equal((bikes.legend as { position: string; interactive: boolean }).position, "top");
+  assert.equal((bikes.legend as { interactive: boolean }).interactive, true);
+
+  assert.deepEqual(
+    stackedAreaExamples.map((example) => example.title),
+    ["Spend by team", "Channel mix", "Plan mix over time", "Classic and e-bike share"],
+  );
+  assert.deepEqual(
+    stackedAreaExamples.map((example) => example.meta),
+    ["3 series", "3 series", "3 series", "2 series"],
+  );
+  for (const example of stackedAreaExamples) assert.equal(example.spec.type, "stacked-area");
 });
 
 test("legend keeps the other keys and reads the omitted place", () => {

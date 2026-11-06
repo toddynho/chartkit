@@ -181,7 +181,8 @@ export function mountChartDemo(): void {
   }
 
   function applyChoice(id: string, value: string): void {
-    const restore = id === "tooltip" ? examples[index]?.spec.tooltip : undefined;
+    const example = examples[index]?.spec;
+    const restore = id === "tooltip" ? example?.tooltip : example;
     module!.apply(current, { id, value, restore });
     sync();
     draw();

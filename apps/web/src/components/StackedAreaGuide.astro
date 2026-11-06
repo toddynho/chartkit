@@ -1,0 +1,177 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestStackedAreaSpec } from "../data/teach/stacked-area";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/stacked-area";
+const spec = specText(smallestStackedAreaSpec);
+const play = playgroundHref(smallestStackedAreaSpec);
+const curve = `{
+  "mark": { "curve": "linear" }
+}`;
+const step = `{
+  "mark": { "curve": "step" }
+}`;
+const stack = `{
+  "mark": { "stack": "stack" }
+}`;
+const percent = `{
+  "mark": { "stack": "percent" }
+}`;
+const filled = `{
+  "type": "line",
+  "mark": { "area": true }
+}`;
+const legend = `{
+  "legend": { "position": "top" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A stacked area adds several series into one shape across an ordered x. The top of the shape is the total. Each band is one series. The type is <code>stacked-area</code>.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a stacked area when the series are parts of a total and the x has an order, usually time. Spend by team is that chart: product, design, and support add up, and the total rises. Use <code>percent</code> when the question is the mix, not the total. Channel mix and Classic and e-bike share are that reading.
+  </p>
+  <p>
+    Do not use a stacked area for one series. A <a href="/docs/charts/line">line</a> is enough, and a fill under it is still a line. Do not use it when the series should be compared as separate lines. Stacking hides that. Do not use it when the baseline should move to keep the layers smooth. That is a <a href="/docs/charts/streamgraph">streamgraph</a>.
+  </p>
+</section>
+
+<section id="filled-line">
+  <h2>Stacked area, filled line, and streamgraph</h2>
+  <p>
+    A filled line is not this type. There is no <code>type: "area"</code>. <a href="/docs/charts/area">Area</a> is the note for <code>type: "line"</code> with <code>mark.area</code> set to true. That fills each series down to the baseline. The series are not stacked, so they can overlap.
+  </p>
+  <figure class="code">
+    <figcaption><span>filled line</span></figcaption>
+    <pre><code>{filled}</code></pre>
+  </figure>
+  <p>
+    A stacked area stacks by default. <code>mark.stack</code> omitted means <code>stack</code>. The bands sit on each other and the top edge is the sum.
+  </p>
+  <p>
+    A <a href="/docs/charts/streamgraph">streamgraph</a> is also stacked, but the baseline moves. The shape is centered instead of anchored to zero. Use that when the change in the layers matters more than the total.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one x and one number per series. <code>encoding.x</code> is the category or the time. <code>encoding.y</code> is a list of channels. Spend by team lists <code>product</code>, <code>design</code>, and <code>support</code>. Plan mix over time lists <code>free</code>, <code>pro</code>, and <code>team</code>. Classic and e-bike share lists two fields, <code>classic</code> and <code>ebike</code>.
+  </p>
+  <p>
+    The numbers are amounts. ChartKit adds them at each x. You do not pass shares unless you set <code>mark.stack</code> to <code>percent</code>, which turns each x into 100% from the amounts you did pass. <code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.
+  </p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest stacked area. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Three months, free and pro. The curve and the stack come from the defaults, so <code>mark</code> can be omitted. The curve is monotone. The stack is <code>stack</code>, not a share of 100%.
+  </p>
+  <TeachFacts type="stacked-area" label="Stacked area packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing stacked area specs. Spend by team and Plan mix over time add the series. Channel mix and Classic and e-bike share are percent stacks. Classic and e-bike share also names the tooltip.
+  </p>
+</section>
+
+<TeachConcept id="curve" title="Curve">
+  <p>
+    <code>mark.curve</code> is how the edges join. <code>monotone</code> is the default. It stays inside the data, so a spike does not overshoot. <code>linear</code> draws straight segments. <code>step</code> holds the value and then jumps, which is the right curve for a total that changes and then sits still.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.curve</span></figcaption>
+    <pre><code>{curve}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>mark.curve step</span></figcaption>
+    <pre><code>{step}</code></pre>
+  </figure>
+  <p>
+    <code>step-before</code> and <code>step-after</code> place the jump on the other side of the point. Set those in the playground.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="stack" title="Stack">
+  <p>
+    <code>mark.stack</code> is <code>stack</code> or <code>percent</code>. Omit it and the chart stacks the amounts. The top of the shape is the total. <code>percent</code> normalizes each x to 100%, so a growing total does not change the height. Channel mix and Classic and e-bike share set that.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.stack</span></figcaption>
+    <pre><code>{stack}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>mark.stack percent</span></figcaption>
+    <pre><code>{percent}</code></pre>
+  </figure>
+  <p>
+    <code>none</code> draws the series unstacked. That is the filled-line reading, and the page for it is <a href="/docs/charts/area">area</a>, with <code>type: "line"</code>. This control does not offer it.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    A stacked area with several series shows a legend. Omit <code>legend</code>, or set <code>true</code>, and it sits on top. <code>false</code> hides it. <code>legend.position</code> is <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code>, or <code>inside</code>. Plan mix over time hides it. Classic and e-bike share puts it on the bottom.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a stacked area when the key is omitted. Hovering a position shows each series. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows, and <code>tooltip.position</code> places the card. Classic and e-bike share sets an index card with a crosshair. Change those in the playground. Turning the card off and on again puts that object back.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>mark.gradient</code> fades the fill toward the baseline. It is on unless you set false. <code>mark.fillOpacity</code> sets the fill. <code>mark.connectNulls</code> draws through missing values. <code>axes.y.format</code> can be <code>percent</code> on a share chart. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/line">Line</a> draws each series on its own. It does not add them.</li>
+    <li><a href="/docs/charts/area">Area</a> is that line with <code>mark.area</code>. The spec type is still <code>line</code>, and the fills are not stacked.</li>
+    <li><a href="/docs/charts/streamgraph">Streamgraph</a> stacks the series around a moving baseline.</li>
+    <li><a href="/docs/charts/bar">Bar</a> stacks categories that are not a trend, with <code>mark.stack</code> on <code>type: "bar"</code>.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />

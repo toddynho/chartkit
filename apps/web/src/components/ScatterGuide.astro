@@ -1,0 +1,155 @@
+---
+import PageNav from "./PageNav.astro";
+import TeachConcept from "./TeachConcept.astro";
+import TeachFacts from "./TeachFacts.astro";
+import { smallestScatterSpec } from "../data/teach/scatter";
+import { playgroundHref, specText } from "../data/teach/spec";
+
+const href = "/docs/charts/scatter";
+const spec = specText(smallestScatterSpec);
+const play = playgroundHref(smallestScatterSpec);
+const size = `{
+  "encoding": {
+    "size": { "field": "plot", "range": [5, 16] }
+  }
+}`;
+const shape = `{
+  "mark": { "pointShape": "diamond" }
+}`;
+const legend = `{
+  "legend": { "position": "bottom" }
+}`;
+const tooltipOff = `{
+  "tooltip": false
+}`;
+const tooltipOn = `{
+  "tooltip": true
+}`;
+---
+
+<p>
+  A scatter places one point per row from two quantitative fields. <code>encoding.x</code> is the horizontal measure. <code>encoding.y</code> is the vertical measure. A third field on <code>encoding.size</code> turns the same chart into a bubble reading.
+</p>
+
+<section id="when-to-use">
+  <h2>When to use it</h2>
+  <p>
+    Use a scatter when both axes are numbers and the question is the relationship: as one measure grows, what happens to the other. A line is the chart when x is ordered and you want the path between points. A bar is the chart when x is a category and you are comparing totals.
+  </p>
+  <p>
+    Do not use a scatter for parts of a whole. A pie or a donut is that chart. Do not invent a second y for bubble size. Size is its own channel.
+  </p>
+</section>
+
+<section id="bubbles">
+  <h2>Scatter and bubbles</h2>
+  <p>
+    There is no <code>type: "bubble"</code>. A bubble chart is a scatter with <code>encoding.size</code>. Omit size and every point uses one radius, <code>mark.pointSize</code> when it is set. Set size and the radius follows that field.
+  </p>
+  <p>
+    Seats vs. renewal rate has no size channel. Yield by temperature sizes each point by <code>plot</code>. Spend vs usage sizes by <code>customers</code>. Sun hours and sugar sizes by <code>grams</code>.
+  </p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>
+    Each row is one point. <code>encoding.x</code> and <code>encoding.y</code> are quantitative fields. A string field name is enough. An object can set the title and the scale.
+  </p>
+  <p>
+    <code>encoding.color</code> splits the points into categories and gives the legend its entries. Spend vs usage colors by <code>segment</code>. Sun hours and sugar colors by <code>variety</code>. A scatter with no color field is one series.
+  </p>
+  <p>
+    Keep the size range inside the plot. Yield by temperature uses <code>[5, 16]</code>. A range of hundreds of pixels is clipped. <code>a11y.alt</code> is required. One sentence, 10 to 500 characters, with the point of the chart.
+  </p>
+</section>
+
+<section id="spec">
+  <h2>A spec that renders</h2>
+  <p>
+    This is the smallest scatter. <code>version</code>, <code>type</code>, and <code>a11y.alt</code> are required. Four companies, revenue against employees. Size, color, and shape can be omitted. The points are circles of one radius.
+  </p>
+  <TeachFacts type="scatter" label="Scatter packages" spec={spec} />
+</section>
+
+<p>Each option below is a key on the spec. The demo changes that key and updates the chart and the snippet together.</p>
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>
+    The rail switches among existing scatter specs. Seats vs. renewal rate is sixteen points and no size channel. Yield by temperature is seven bubbles. Spend vs usage is four bubbles on log scales. Sun hours and sugar is fifteen crates, colored by variety, and the tooltip names the fields.
+  </p>
+</section>
+
+<TeachConcept id="size" title="Size">
+  <p>
+    <code>encoding.size</code> is the bubble channel. It is an object with <code>field</code> and, usually, <code>range</code>, a pair of radii in pixels. Omit it and the points share one radius. That radius is <code>mark.pointSize</code> when the spec sets it.
+  </p>
+  <figure class="code">
+    <figcaption><span>encoding.size</span></figcaption>
+    <pre><code>{size}</code></pre>
+  </figure>
+  <p>
+    Off removes the channel. On puts this example's size channel back, including its range. Seats vs. renewal rate has no third field, so On leaves the points at one radius.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="shape" title="Point shape">
+  <p>
+    <code>mark.pointShape</code> is the marker. Omit it and the point is a circle. <code>square</code> and <code>diamond</code> are the other shapes a first scatter usually picks. Sun hours and sugar uses diamonds.
+  </p>
+  <figure class="code">
+    <figcaption><span>mark.pointShape</span></figcaption>
+    <pre><code>{shape}</code></pre>
+  </figure>
+  <p>
+    <code>triangle</code>, <code>cross</code>, and <code>none</code> are in the schema. Set those in the playground. A size channel still wins over the shape: the field sets the radius, and the shape sets the outline.
+  </p>
+</TeachConcept>
+
+<TeachConcept id="legend" title="Legend">
+  <p>
+    A scatter with one series hides the legend. A color field with more than one category shows it. Omit <code>legend</code>, or set <code>true</code>, and the legend sits on top. <code>false</code> hides it. <code>legend.position</code> is <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code>, or <code>inside</code>.
+  </p>
+  <figure class="code">
+    <figcaption><span>legend.position</span></figcaption>
+    <pre><code>{legend}</code></pre>
+  </figure>
+</TeachConcept>
+
+<TeachConcept id="tooltip" title="Tooltip">
+  <p>
+    <code>tooltip</code> is on for a scatter when the key is omitted. Hovering a point shows the values. <code>tooltip: false</code> turns the card off. <code>tooltip: true</code> turns it on.
+  </p>
+  <figure class="code">
+    <figcaption><span>tooltip false</span></figcaption>
+    <pre><code>{tooltipOff}</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption><span>tooltip true</span></figcaption>
+    <pre><code>{tooltipOn}</code></pre>
+  </figure>
+  <p>
+    <code>tooltip.fields</code> chooses the rows in the card, and <code>tooltip.position</code> places it. Sun hours and sugar names variety, brix, and grams. Change those in the playground. Turning the card off and on again puts that object back.
+  </p>
+</TeachConcept>
+
+<section id="more">
+  <h2>The rest of the spec</h2>
+  <p>
+    <code>encoding.x.scale.type</code> and <code>encoding.y.scale.type</code> set a log scale when the values span orders of magnitude. Spend vs usage does that. <code>mark.pointSize</code> is the radius when size is omitted. <code>mark.opacity</code> fades overlapping points. Theme presets live on the playground, with the full option list.
+  </p>
+</section>
+
+<section id="related">
+  <h2>Related charts</h2>
+  <ul>
+    <li><a href="/docs/charts/line">Line</a> connects ordered points. A scatter does not.</li>
+    <li><a href="/docs/charts/bar">Bar</a> compares categories, not two quantities.</li>
+  </ul>
+  <p>
+    <a href={play}>Open this spec in the playground</a>. That link opens the spec on this page. The demo link opens the chart you are looking at, including any option you change.
+  </p>
+</section>
+
+<PageNav href={href} />
